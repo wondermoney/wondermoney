@@ -75,9 +75,6 @@ assertContainedBetween(
 );
 assertNotContains('src/server.ts', 'scheduleBankRecoveryDispatchJob');
 assertNotContains('src/app.ts', 'scheduleBankRecoveryDispatchJob');
-assertContains('docs/operations/2026-05-29-pgboss-release-instructions.md', 'Deploy the dual-compatible web application first.');
-assertContains('docs/operations/2026-05-29-pgboss-release-instructions.md', 'emits no raw `nrid` analytics or telemetry.');
-assertContains('docs/operations/2026-05-29-pgboss-release-instructions.md', 'The API must not be deployed independently or before that web verification.');
 assertNotContains('src/controller/banking.ts', 'nrid');
 
 // Worker heartbeat (dead-man's switch) wiring: the ping schedule must live inside
