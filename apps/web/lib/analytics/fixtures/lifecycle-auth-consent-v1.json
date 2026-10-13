@@ -1,0 +1,22 @@
+{
+  "policyVersion": "lifecycle.v1",
+  "scenarios": [
+    { "name": "en_email_grant", "locale": "en", "method": "email", "decision": true, "expectedEmailLanguage": "en" },
+    { "name": "en_email_deny", "locale": "en", "method": "email", "decision": false, "expectedEmailLanguage": "en" },
+    { "name": "pt_email_grant", "locale": "pt", "method": "email", "decision": true, "expectedEmailLanguage": "pt" },
+    { "name": "pt_email_deny", "locale": "pt", "method": "email", "decision": false, "expectedEmailLanguage": "pt" },
+    { "name": "es_email_grant", "locale": "es", "method": "email", "decision": true, "expectedEmailLanguage": "en" },
+    { "name": "es_email_deny", "locale": "es", "method": "email", "decision": false, "expectedEmailLanguage": "en" },
+    { "name": "en_oauth_grant", "locale": "en", "method": "oauth", "decision": true, "expectedEmailLanguage": "en" },
+    { "name": "en_oauth_deny", "locale": "en", "method": "oauth", "decision": false, "expectedEmailLanguage": "en" },
+    { "name": "pt_oauth_grant", "locale": "pt", "method": "oauth", "decision": true, "expectedEmailLanguage": "pt" },
+    { "name": "pt_oauth_replay_deny", "locale": "pt", "method": "oauth-replay", "decision": false, "expectedEmailLanguage": "pt" },
+    { "name": "es_oauth_grant", "locale": "es", "method": "oauth", "decision": true, "expectedEmailLanguage": "en" },
+    { "name": "es_oauth_deny", "locale": "es", "method": "oauth", "decision": false, "expectedEmailLanguage": "en" }
+  ],
+  "failClosed": [
+    { "name": "malformed_decision", "decision": "yes", "policyVersion": "lifecycle.v1" },
+    { "name": "unsupported_policy", "decision": "true", "policyVersion": "signup.v2" },
+    { "name": "missing", "decision": null, "policyVersion": null }
+  ]
+}

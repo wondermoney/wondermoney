@@ -1,0 +1,9 @@
+node_modules/
+.react-email/
+.vercel/
+out/
+dist/
+.types/
+*.tgz
+
+.worktrees/

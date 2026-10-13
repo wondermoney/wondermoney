@@ -1,0 +1,360 @@
+{
+  "onboarding": {
+    "firstRun": {
+      "progress": "Step {current} of {total}",
+      "recommended": "Recommended",
+      "continue": "Continue",
+      "skipStep": "Skip this step",
+      "back": "Back",
+      "welcome": {
+        "headline": "Bring your financial plan together here.",
+        "description": "Bring accounts, budgets, and supported investments together to see what you have, where it goes, and how it changes over time.",
+        "socialProof": "Built for people managing money across banks, budgets, and investments.",
+        "proof": "People stick with financial tools when progress becomes visible: savings, spending, net worth, and goals in one place.",
+        "cta": "Start setup",
+        "proofNote": "Budgeting app users report less money stress and stronger savings habits when they track progress consistently."
+      },
+      "goals": {
+        "headline": "What do you want to improve first?",
+        "description": "We'll shape setup around the financial picture you want to build.",
+        "maxSelected": "Choose up to 2 goals.",
+        "proof": "Written financial goals are easier to follow when they are broken into steps and reviewed regularly.",
+        "cta": "Continue",
+        "options": {
+          "all_in_one": "See everything in one place",
+          "spending": "Understand where my money goes",
+          "budget": "Build a better budget",
+          "investments_net_worth": "Track investments and net worth",
+          "financial_freedom": "Plan for long-term goals",
+          "exploring": "I'm just exploring"
+        },
+        "helpers": {
+          "all_in_one": "Bring accounts, budgets, and supported investments together.",
+          "spending": "See where money goes each month.",
+          "budget": "Turn spending into a simple plan.",
+          "investments_net_worth": "Keep cash, investments, and net worth together.",
+          "financial_freedom": "Stay focused on long-term goals.",
+          "exploring": "Take a quick look around first."
+        },
+        "proofNote": "People with realistic financial goals are more likely to save, and progress checks help turn goals into habits."
+      },
+      "account": {
+        "headline": "Connect one account to see real balances.",
+        "description": "One account is enough to show balances, recent activity, and the starting point for your net worth.",
+        "cta": "Connect bank account",
+        "manualCta": "Add account manually",
+        "trustShort": "Read-only access. WonderMoney cannot move money or make payments.",
+        "trustLong": "You authenticate directly with your bank through Enable Banking. WonderMoney never sees your login details, and you can revoke access anytime.",
+        "personalized": {
+          "all_in_one": "Connect one account first. WonderMoney can start showing your balances and recent activity from there.",
+          "spending": "Connect your account to start seeing recent spending and categories.",
+          "budget": "Start with one account so your budget reflects real spending.",
+          "investments_net_worth": "Connect one account first. It gives WonderMoney the cash side of your net worth.",
+          "financial_freedom": "Start with one account so balances, spending, and investments build a reliable picture.",
+          "exploring": "Start with one account, or add one manually, and see how WonderMoney works."
+        },
+        "skipWarning": {
+          "headline": "Continue without real financial data?",
+          "description": "You can, but WonderMoney will not be able to show your real balances, transactions, spending patterns, or net worth until you add an account.",
+          "primary": "Add an account first",
+          "secondary": "Continue without account",
+          "reassurance": "You can always add one later from Accounts."
+        },
+        "credentialRequired": {
+          "title": "Connecting a bank needs a quick one-time setup",
+          "body": "Before you can link a real bank, add your own Enable Banking key from Settings. You can do that anytime after setup — for now, add an account manually above or skip this step and connect later."
+        }
+      },
+      "connect": {
+        "countryLabel": "Where is your bank?",
+        "listHint": "Choose your bank to connect securely.",
+        "handoffTitle": "Securely connecting to {bank}…",
+        "handoffBody": "You'll authenticate through Enable Banking. WonderMoney never sees your login details.",
+        "handoffSecurity": "Encrypted · read-only access",
+        "continueToBank": "Continue to bank",
+        "handoffError": "We couldn't start the connection. Try again or pick another bank.",
+        "retry": "Try again",
+        "connectErrorBanner": "Connection wasn't completed. Try again or pick another bank.",
+        "manualTitle": "Add an account manually",
+        "manualBody": "No connection needed. Enter a balance to start — you can connect it for automatic updates later.",
+        "manualNameLabel": "Account name",
+        "manualBalanceLabel": "Current balance",
+        "manualSubmit": "Add account",
+        "manualNote": "Manual accounts are included in your net worth but won't update automatically.",
+        "syncing": {
+          "processing": "Connected — pulling in your balances and transactions…",
+          "succeeded": "Your accounts are connected and synced.",
+          "partial": "Connected. Some data is still coming in — we'll keep syncing in the background.",
+          "trouble": "Connected. Finishing the first sync is taking a little longer — we'll keep trying in the background."
+        }
+      },
+      "syncValue": {
+        "connectedHeadline": "Your financial picture is filling in.",
+        "connectedDescription": "Balances, transactions, budgets, and net worth become more useful as real data comes in.",
+        "skippedHeadline": "You can explore, but real data unlocks the value.",
+        "skippedDescription": "Add an account later to unlock real balances, transactions, spending insights, and net worth tracking.",
+        "cards": {
+          "balances": {
+            "title": "Balances",
+            "description": "See your accounts together instead of checking each bank separately."
+          },
+          "transactions": {
+            "title": "Transactions",
+            "description": "Recent transactions help WonderMoney show where your money goes."
+          },
+          "budgets": {
+            "title": "Budgets",
+            "description": "Budgets work better when they are based on real spending."
+          },
+          "netWorth": {
+            "title": "Net worth",
+            "description": "Accounts and portfolios combine into one number: your net worth."
+          }
+        },
+        "proofNote": "Regular net worth tracking gives people a measurable way to see financial progress over time.",
+        "inProgress": {
+          "title": "What's happening right now",
+          "balances": "Reading your account details and current balances.",
+          "transactions": "Pulling in your transaction history — up to 12 months, depending on what your bank shares.",
+          "categories": "Sorting each transaction into a category as it arrives."
+        },
+        "openBankingNote": "16.5 million active open banking connections in the UK by December 2025, up 36% in a year. Connecting a bank this way is now ordinary."
+      },
+      "privacy": {
+        "headline": "Read-only means read-only.",
+        "description": "WonderMoney can show balances and transactions, but it cannot move money, make payments, or see your bank login details.",
+        "bullets": {
+          "readOnly": {
+            "title": "Read-only access",
+            "description": "WonderMoney can view balances and transactions only. It cannot move money, make payments, or initiate transfers."
+          },
+          "bankAuth": {
+            "title": "You sign in with your bank",
+            "description": "Authentication happens through Enable Banking. WonderMoney never sees your bank login details."
+          },
+          "revoke": {
+            "title": "You stay in control",
+            "description": "You can revoke access at any time from your bank or from Accounts in WonderMoney."
+          }
+        }
+      },
+      "budget": {
+        "headline": "Give your money a plan.",
+        "description": "A budget turns your spending into clear categories, limits, and trade-offs. Once transactions are connected, WonderMoney can help keep it updated.",
+        "personalized": "You said budgeting matters to you. This is where WonderMoney helps turn your spending into a monthly plan.",
+        "accountSkipped": "You can create a budget now, but it works best once an account is connected and transactions are available.",
+        "cta": "Create first budget",
+        "reassurance": "You can start simple and adjust later."
+      },
+      "portfolio": {
+        "headline": "Complete your net worth picture.",
+        "description": "Add your investments so WonderMoney can show your cash, spending, and portfolio in one place.",
+        "personalized": "You said tracking investments and net worth matters to you. Add a portfolio to connect that part of your financial life.",
+        "cta": "Create or import portfolio",
+        "reassurance": "You can add holdings manually or import them later."
+      },
+      "completion": {
+        "celebrationHeadline": "Your financial profile has started.",
+        "connectedCelebrationDescription": "Your dashboard will keep getting clearer as balances and recent transactions sync.",
+        "skippedCelebrationDescription": "You can explore now. Add one account when you're ready to unlock real balances, transactions, spending insights, and net worth.",
+        "connectInstead": "Connect an account instead",
+        "cta": "Go to dashboard",
+        "summary": {
+          "goalsSelected": "Goal selected",
+          "goalsSkipped": "Goal skipped",
+          "accountConnected": "Account connected",
+          "accountManual": "Manual account added",
+          "accountSkipped": "Account skipped",
+          "budgetStarted": "Budget started",
+          "budgetSkipped": "Budget skipped",
+          "portfolioStarted": "Portfolio started",
+          "portfolioSkipped": "Portfolio skipped",
+          "netWorthTracked": "Net worth tracked"
+        }
+      },
+      "proof": {
+        "welcome": {
+          "eyebrow": "Why it matters",
+          "title": "A single view for a fragmented financial life.",
+          "quote": "For anyone switching between bank apps just to understand their position."
+        },
+        "goals": {
+          "eyebrow": "Personalized setup",
+          "title": "A few choices help WonderMoney focus on what matters first.",
+          "quote": "For people who want setup to reflect how they actually manage money."
+        },
+        "account": {
+          "eyebrow": "Trust and access",
+          "title": "Real data unlocks the product without giving WonderMoney control of your money.",
+          "quote": "For users who want automation without handing over payment access."
+        },
+        "syncValue": {
+          "eyebrow": "What gets unlocked",
+          "title": "Balances and transactions turn an empty workspace into a useful one.",
+          "quote": "For people who have a spreadsheet they stopped updating."
+        },
+        "budget": {
+          "eyebrow": "Better budgets",
+          "title": "Budgets work better when they start from real spending.",
+          "quote": "For users who want a monthly plan grounded in what actually happens."
+        },
+        "portfolio": {
+          "eyebrow": "Complete the picture",
+          "title": "Investments and cash belong in the same net worth view.",
+          "quote": "For users who want spending, budgets, investments, and net worth to connect."
+        },
+        "completion": {
+          "eyebrow": "Workspace ready",
+          "title": "Each completed step makes the dashboard more useful.",
+          "quote": "For people building one reliable place to understand their money."
+        },
+        "common": {
+          "useCaseLabel": "Use case",
+          "facts": {
+            "european": {
+              "title": "Built for Europe",
+              "description": "WonderMoney is designed around PSD2/Open Banking and European financial workflows."
+            },
+            "connected": {
+              "title": "Accounts, budgets, portfolio",
+              "description": "Your day-to-day spending and long-term wealth live in one workspace."
+            },
+            "readOnly": {
+              "title": "Read-only access",
+              "description": "WonderMoney cannot move money, make payments, or initiate transfers."
+            },
+            "privacy": {
+              "title": "Privacy-first model",
+              "description": "WonderMoney is designed around European privacy requirements, open source, and built without selling user data."
+            },
+            "enableBanking": {
+              "title": "Bank authentication through Enable Banking",
+              "description": "You authenticate with your bank through Enable Banking. WonderMoney never sees your bank login details."
+            },
+            "netWorth": {
+              "title": "Net worth as the north star",
+              "description": "Accounts and investments combine into one number that helps you understand your position."
+            },
+            "realSpending": {
+              "title": "Grounded in real spending",
+              "description": "Transactions make budgets, categories, and insights more accurate from the start."
+            }
+          }
+        }
+      },
+      "proofSources": {
+        "ynab": "Source: YNAB",
+        "cfpb": "Source: CFPB",
+        "finraInvestorGov": "Source: FINRA and Investor.gov",
+        "openBankingLimited": "Source: Open Banking Limited, December 2025"
+      },
+      "preview": {
+        "welcome": {
+          "cashLabel": "Cash tracked",
+          "cashValue": "€8,420",
+          "netWorthLabel": "Net worth",
+          "netWorthValue": "€42,680",
+          "budgetLabel": "Budget used",
+          "budgetValue": "64%"
+        },
+        "goals": {
+          "selectedLabel": "Setup focus",
+          "goalOne": "Understand where money goes each month",
+          "goalTwo": "Track net worth as it changes"
+        },
+        "privacy": {
+          "canView": "View balances and transactions only",
+          "cannotMove": "Cannot move money or make payments",
+          "revoke": "Access can be revoked anytime"
+        },
+        "syncValue": {
+          "balancesLabel": "Balances begin to sync",
+          "balancesValue": "€8,420",
+          "transactionsLabel": "Recent transactions start appearing",
+          "transactionsValue": "18",
+          "netWorthSyncLabel": "Net worth becomes measurable",
+          "netWorthSyncValue": "€42,680",
+          "budgetSyncLabel": "Budget progress",
+          "budgetSyncValue": "64%"
+        },
+        "completion": {
+          "profileStarted": "Financial profile started",
+          "dashboardNext": "Your dashboard gets clearer as real data syncs"
+        },
+        "common": {
+          "previewLabel": "Preview data",
+          "transactionLabel": "Recent transaction",
+          "transactionValue": "€128.40 • Grocery",
+          "portfolioLabel": "Portfolio allocation",
+          "portfolioValue": "52% equities",
+          "deltaValue": "+4.2%",
+          "categories": {
+            "housing": "Housing",
+            "food": "Food & drinks",
+            "transport": "Transport",
+            "other": "Other"
+          }
+        },
+        "account": {
+          "sectionLabel": "Accounts",
+          "currentAccountLabel": "Current account",
+          "currentAccountValue": "€4,820",
+          "savingsLabel": "Savings",
+          "savingsValue": "€12,450",
+          "creditCardLabel": "Credit card",
+          "creditCardValue": "-€1,180",
+          "totalLabel": "Total balance",
+          "totalValue": "€16,090"
+        }
+      },
+      "stepLabels": {
+        "welcome": "Welcome",
+        "goals": "Your goals",
+        "privacy": "Privacy",
+        "account": "Connect",
+        "sync_value": "Your picture",
+        "completion": "Ready"
+      }
+    },
+    "dashboard": {
+      "triggerLabel": "Help",
+      "title": "Welcome to your dashboard",
+      "description": "This is your main dashboard – your future go-to spot for a clear overview of your financial life, all in one place.",
+      "content1": "See your net worth across all accounts at a glance.",
+      "content2": "Track budget health and top spending categories as your data refreshes.",
+      "content3": "Connect a bank account to populate your dashboard with real transactions."
+    },
+    "accounts": {
+      "triggerLabel": "Help",
+      "title": "Welcome to your accounts",
+      "description": "This is your Accounts Overview where you can monitor all your financial accounts in one place.",
+      "content1": "View total balance and all connected accounts with trend indicators.",
+      "content2": "Track inflows, outflows, and savings rate with balance growth over time.",
+      "content3": "Dive into spending categories and individual transaction details."
+    },
+    "transactions": {
+      "triggerLabel": "Help",
+      "title": "Welcome to your transactions",
+      "description": "Track every financial movement across all your connected accounts in one organized view.",
+      "content1": "Every deposit, purchase, and transfer is listed with category and amount.",
+      "content2": "Filter by date, account, or category to find any transaction quickly.",
+      "content3": "Add transactions manually or import them from a bank statement CSV."
+    },
+    "budgets-monthly": {
+      "triggerLabel": "Help",
+      "title": "Welcome to your monthly budget",
+      "description": "Stay on track with your spending goals and easily monitor your progress throughout the month.",
+      "content1": "See spending vs. budget goals for each category at a glance.",
+      "content2": "Spending is auto-updated from your linked bank transactions.",
+      "content3": "Compare this month's progress against your full-year plan."
+    },
+    "budgets-yearly": {
+      "triggerLabel": "Help",
+      "title": "Welcome to your yearly budget",
+      "description": "Take control of your annual financial plan and manage less frequent expenses with confidence.",
+      "content1": "Track your annual income, expenses, and projected savings.",
+      "content2": "Monitor spending progress in each category against the yearly budget.",
+      "content3": "Compare year-to-date performance against your full annual plan."
+    }
+  }
+}

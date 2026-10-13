@@ -1,0 +1,63 @@
+{
+  "household": {
+    "title": "Hogar",
+    "description": "Comparte cuentas, presupuestos y objetivos con tu pareja.",
+    "members": {
+      "heading": "Miembros",
+      "you": "Tú",
+      "roleOwner": "Titular",
+      "roleMember": "Pareja"
+    },
+    "invite": {
+      "heading": "Invita a tu pareja",
+      "description": "Tendrá su propio acceso y verá las finanzas compartidas. Las cuentas que marques como privadas siguen siendo privadas.",
+      "emailLabel": "Email de tu pareja",
+      "emailPlaceholder": "pareja@ejemplo.com",
+      "invalidEmail": "Introduce un email válido",
+      "submit": "Enviar invitación"
+    },
+    "pending": {
+      "heading": "Invitación pendiente",
+      "sentTo": "Invitación enviada a {email}",
+      "expires": "Caduca el {date}",
+      "resend": "Reenviar",
+      "revoke": "Anular"
+    },
+    "actions": {
+      "remove": "Quitar pareja",
+      "leave": "Salir del hogar"
+    },
+    "removeDialog": {
+      "title": "¿Quitar a {name}?",
+      "description": "Perderá el acceso a este hogar de inmediato. Los datos compartidos se quedan contigo y sus conexiones bancarias vinculadas se desconectan.",
+      "confirm": "Quitar pareja"
+    },
+    "leaveDialog": {
+      "title": "¿Salir de este hogar?",
+      "description": "Perderás el acceso a las cuentas, presupuestos y objetivos compartidos, y tus conexiones bancarias se desconectan. Esta acción no se puede deshacer.",
+      "confirm": "Salir del hogar"
+    },
+    "cancel": "Cancelar",
+    "join": {
+      "greetingNamed": "{name} te invitó a su hogar en WonderMoney",
+      "greetingGeneric": "Te han invitado a un hogar en WonderMoney",
+      "subtitle": "Crea tu cuenta para compartir cuentas, presupuestos y objetivos.",
+      "emailLockedHint": "Esta invitación es para {email}",
+      "invalidTitle": "Este enlace de invitación no es válido",
+      "invalidBody": "Puede que ya se haya usado, anulado o caducado. Pídele a tu pareja que te envíe una invitación nueva.",
+      "loggedInTitle": "Ya has iniciado sesión",
+      "loggedInBody": "Las invitaciones de hogar solo se pueden aceptar con una cuenta nueva. Cierra sesión y crea una con el email invitado para unirte.",
+      "logoutAndJoin": "Cerrar sesión y crear cuenta",
+      "backToApp": "Ir a WonderMoney"
+    },
+    "toast": {
+      "inviteSent": "Invitación enviada",
+      "inviteResent": "Invitación reenviada",
+      "inviteRevoked": "Invitación anulada",
+      "memberRemoved": "Pareja eliminada",
+      "left": "Has salido del hogar",
+      "error": "Algo salió mal. Inténtalo de nuevo."
+    },
+    "loadError": "No pudimos cargar tu hogar. Inténtalo de nuevo."
+  }
+}

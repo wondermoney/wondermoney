@@ -1,0 +1,51 @@
+---
+title: Problemas na importação de transações
+description: Corrige erros ao importar transações por ficheiro.
+---
+
+## Sintomas
+
+Usa esta página quando as transações importadas estão em falta, duplicadas ou com valores errados.
+
+Sinais comuns:
+
+- O ficheiro não importa
+- Só algumas linhas aparecem
+- Há transações duplicadas
+- As datas ou montantes ficam trocados
+
+## O que verificar
+
+Confirma:
+
+- Se o ficheiro é compatível
+- Se o período importado é o correto
+- Se há colunas vazias ou inválidas
+- Se o formato de data corresponde ao esperado
+
+## O que tentar
+
+Tenta:
+
+1. Importa um ficheiro mais pequeno.
+2. Revê separadores e cabeçalhos.
+3. Remove linhas problemáticas.
+4. Confirma se a transação já existia antes da importação.
+
+## Transações semelhantes e duplicados
+
+A WonderMoney identifica duplicados através de uma impressão digital da transação, construída a partir de detalhes como a data e o montante. A tolerância desta impressão digital foi reforçada, por isso duas transações semelhantes mas legítimas — por exemplo, duas compras do mesmo montante no mesmo dia — deixam de ser ignoradas como duplicados. Quando é detetado um duplicado real, a entrada original é mantida e a decisão fica registada no registo de auditoria, para que nada seja alterado silenciosamente.
+
+Para saber mais sobre como as transações são associadas e guardadas, vê [Compreender transações](/pt/docs/accounts-transactions/understand-transactions).
+
+## Quando contactar o suporte
+
+Contacta o suporte se o problema persistir depois de validares o ficheiro ou se precisares de ajuda com duplicados em massa.
+
+
+## Páginas relacionadas
+
+- [Resolução de problemas](/pt/docs/troubleshooting/)
+- [Importar transações CSV](/pt/docs/accounts-transactions/import-transactions-csv)
+- [Transações em falta ou duplicadas](/pt/docs/accounts-transactions/missing-duplicate-transactions)
+- [Contactar o suporte](/pt/docs/troubleshooting/contact-support)

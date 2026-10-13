@@ -1,0 +1,17 @@
+{
+  "title": "Configuración, seguridad y privacidad",
+  "pages": [
+    "index",
+    "profile-preferences",
+    "email-preferences",
+    "appearance",
+    "manage-categories",
+    "assistant-settings",
+    "ai-assistant-consent",
+    "change-password",
+    "two-factor-authentication",
+    "read-only-bank-access",
+    "data-privacy",
+    "delete-account"
+  ]
+}

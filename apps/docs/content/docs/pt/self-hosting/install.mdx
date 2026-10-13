@@ -1,0 +1,44 @@
+---
+title: Instalar
+description: Descarrega o WonderMoney, gera a configuração e inicia-o com Docker Compose.
+---
+
+## Descarregar e iniciar
+
+```sh
+git clone --depth 1 https://github.com/wondermoney/wondermoney.git
+cd wondermoney/apps/api/deploy/selfhost
+./generate-env.sh
+docker compose up -d
+```
+
+O `generate-env.sh` escreve um ficheiro `.env` com segredos novos. Corre-o apenas uma vez: se o voltares a correr, os segredos são substituídos, e as sessões existentes e as credenciais bancárias guardadas deixam de funcionar.
+
+No primeiro arranque, a API cria a base de dados e carrega os dados de referência (moedas, categorias e o catálogo de ativos). Isto demora um ou dois minutos. Para acompanhar:
+
+```sh
+docker compose logs -f api
+```
+
+## Criar a tua conta
+
+Abre http://localhost:3000 e regista-te. A primeira conta numa instância nova pode sempre registar-se. Depois disso, o `SIGNUP_MODE` no `.env` decide quem mais se pode registar:
+
+| Valor | Quem se pode registar |
+|---|---|
+| `open` | Qualquer pessoa que consiga aceder à aplicação web |
+| `invite` | Apenas pessoas convidadas para um agregado familiar |
+| `closed` | Ninguém; as contas existentes continuam a funcionar |
+
+## Antes de configurares o email
+
+Enquanto não houver um fornecedor de email configurado, os emails não são enviados. São escritos no registo da API, incluindo as ligações. Para recuperar uma palavra-passe ou aceitar um convite entretanto:
+
+```sh
+docker compose logs api | grep "Email not sent"
+```
+
+## Próximos passos
+
+- [Configurar a tua instância](/pt/docs/self-hosting/configure)
+- [HTTPS e domínios](/pt/docs/self-hosting/https-and-domains), antes de a usares fora da tua rede

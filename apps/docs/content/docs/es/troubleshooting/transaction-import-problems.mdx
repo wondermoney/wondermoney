@@ -1,0 +1,41 @@
+---
+title: Problemas de importación de transacciones
+description: Pasos para diagnosticar problemas de importación de transacciones en WonderMoney.
+---
+
+## Síntomas
+
+- Un archivo de importación es rechazado.
+- La importación termina pero las transacciones no aparecen.
+- Algunas filas se omiten.
+- Las fechas, los importes o las descripciones se ven incorrectos después de la importación.
+
+## Qué comprobar
+
+- Si el formato del archivo coincide con el de la herramienta de importación.
+- Si los encabezados de columna y los separadores son correctos.
+- Si el archivo incluye filas duplicadas o vacías.
+- Si la cuenta y el rango de fechas coinciden con los datos que quieres.
+
+## Qué probar
+
+1. Vuelve a exportar el archivo desde el sistema de origen si es posible.
+2. Elimina las filas duplicadas y las líneas vacías.
+3. Revisa la asignación de columnas antes de confirmar la importación.
+4. Prueba con un archivo más pequeño para aislar el problema.
+
+## Transacciones similares y duplicados
+
+WonderMoney identifica los duplicados mediante una huella de transacción construida a partir de detalles como la fecha y el importe. La tolerancia de la huella se ha reforzado, de modo que dos transacciones que son similares pero legítimas — por ejemplo, dos compras del mismo importe el mismo día — ya no se omiten como duplicados. Cuando se detecta un duplicado real, se conserva la entrada original y la decisión se registra en el registro de auditoría, de modo que nada se sobrescribe en silencio.
+
+Para saber más sobre cómo se comparan y almacenan las transacciones, consulta [Entender las transacciones](/es/docs/accounts-transactions/understand-transactions).
+
+## Cuándo contactar con soporte
+
+Contacta con soporte si el archivo sigue el formato requerido pero la importación sigue fallando, o si la importación crea transacciones incorrectas que no puedes corregir manualmente.
+
+
+## Páginas relacionadas
+
+- [Problemas de conexión bancaria](/es/docs/troubleshooting/bank-connection-problems)
+- [Contactar con soporte](/es/docs/troubleshooting/contact-support)

@@ -1,0 +1,36 @@
+---
+title: Alojamento próprio
+description: Corre o teu próprio servidor WonderMoney com Docker Compose, para ti, para o teu agregado familiar ou para a tua organização.
+---
+
+O WonderMoney é gratuito e de código aberto, e podes corrê-lo no teu próprio servidor. Uma instância própria tem a mesma aplicação que o wonder.money: contas, transações, sincronização bancária, orçamentos, objetivos, créditos, agregados familiares e portefólios. Os teus dados ficam na tua própria base de dados.
+
+O servidor completo é um único ficheiro Docker Compose com quatro contentores: Postgres, a API, um processo de tarefas em segundo plano e a aplicação web. Não é preciso mais nada.
+
+## O que precisas
+
+- Uma máquina com Docker e o plugin Compose, e cerca de 2 GB de memória livre. Chega um VPS pequeno, um servidor em casa ou um NAS que corra Docker.
+- `openssl`, que gera os segredos durante a instalação.
+- Para usar fora da tua rede: um nome de domínio e HTTPS. Consulta [HTTPS e domínios](/pt/docs/self-hosting/https-and-domains).
+
+## Integrações opcionais
+
+A aplicação base precisa apenas do Postgres. Estas funcionalidades ligam-se quando as configuras e ficam ocultas quando não as configuras:
+
+| Funcionalidade | Precisa de |
+|---|---|
+| Emails (recuperação de palavra-passe, convites, alertas) | Um servidor SMTP ou uma conta Resend |
+| Importações CSV e cópias de recibos | Armazenamento compatível com S3, ou o MinIO incluído |
+| Leitura de recibos, categorização inteligente, o assistente | Qualquer endpoint de IA compatível com OpenAI, incluindo um Ollama local |
+| Pesquisa de tickers e cotações em tempo real | Uma chave de API da EODHD |
+| Sincronização bancária | Nada no servidor: cada pessoa adiciona a sua própria chave Enable Banking nas Definições |
+
+Consulta [Configurar a tua instância](/pt/docs/self-hosting/configure).
+
+## Nesta secção
+
+- [Instalar](/pt/docs/self-hosting/install)
+- [Configurar a tua instância](/pt/docs/self-hosting/configure)
+- [HTTPS e domínios](/pt/docs/self-hosting/https-and-domains)
+- [Usar a aplicação móvel com o teu servidor](/pt/docs/self-hosting/mobile-app)
+- [Atualizações e cópias de segurança](/pt/docs/self-hosting/upgrade-and-backup)

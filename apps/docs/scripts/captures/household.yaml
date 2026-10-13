@@ -1,0 +1,117 @@
+# Household — settings tab, members, invites, join (invalid token), privacy,
+# shared context, leave/remove dialogs.
+# what-is-a-household (conceptual) is intentionally not captured.
+# The seeded +sandbox user has no household, so the members/invite pages mostly
+# capture the no-household (empty) state.
+section: household
+user: docs-screens-sandbox
+pages:
+  - slug: index
+    step: overview
+    url: http://localhost:64590/en/settings?tab=household
+
+  - slug: create-a-household
+    step: members
+    url: http://localhost:64590/en/settings?tab=household
+    actions:
+      - type: eval
+        script: "document.querySelector('main')?.scrollTo(0, 400)"
+    note: >-
+      The seeded user has no household; capture whatever the empty / no-
+      household state looks like. If a household exists, click-role "Add
+      member" instead.
+
+  - slug: invite-a-member
+    step: invite-form
+    url: http://localhost:64590/en/settings?tab=household
+    note: >-
+      Corrected: there is no separate invite-trigger button in this build.
+      Verified against components/settings/Household.tsx — when `canInvite`
+      is true, the invite form (t("invite.heading") = "Invite your partner")
+      renders directly inline with no click-to-reveal step; the only button
+      inside it is the submit ("Send invitation" / t("invite.submit")), which
+      must not be clicked (it would actually send an invite). Removed the
+      previous click-role/wait-text "Invite" actions, which matched nothing
+      in any locale (this page was already failing in EN, not just pt/es) —
+      capturing the URL directly now shows the inline invite form.
+
+  - slug: invite-a-member
+    step: pending
+    url: http://localhost:64590/en/settings?tab=household
+    note: >-
+      After generating the invite, the pending state should be visible on the
+      same page (run right after the invite-form capture or the invite is
+      already pending).
+
+  - slug: join-a-household
+    step: invalid
+    url: http://localhost:64590/en/join
+    login: false
+    note: "Invalid-token state — just navigate to /en/join with no token."
+
+  - slug: account-privacy
+    step: privacy-toggle
+    url: http://localhost:64590/en/accounts
+    actions:
+      - type: click-text
+        text: "Test Current Account"
+      - type: wait-load
+        state: networkidle
+      - type: click-text
+        text: "Privacy"
+    note: >-
+      The privacy toggle lives on the account detail page. If the account row
+      label differs, click the first account card instead.
+
+  - slug: shared-context
+    step: shared-accounts
+    url: http://localhost:64590/en/accounts
+    note: >-
+      Default accounts view; shared accounts are visible if the household has
+      them. May render the same as accounts-transactions/index.
+
+  - slug: leave-or-remove
+    step: leave-dialog
+    url: http://localhost:64590/en/settings?tab=household
+    actions:
+      - type: click-role
+        name: "Leave household"
+        locales:
+          pt: "Sair do agregado"
+          es: "Salir del hogar"
+      - type: wait-text
+        text: "Leave household"
+        locales:
+          pt: "Sair do agregado"
+          es: "Salir del hogar"
+    note: >-
+      Verified against components/settings/Household.tsx (t("actions.leave")):
+      the button's full accessible name is "Leave household", not just
+      "Leave" — the previous short fragment only worked in EN by lucky
+      substring match (agent-browser role names are case-insensitive
+      substring by default) and has no pt/es equivalent substring at all
+      ("Sair do agregado" / "Salir del hogar" do not contain "Leave"), so the
+      base value and both locale overrides now use the full phrase. The
+      wait-text anchor reuses the same phrase, which also appears as the
+      dialog's confirm button (t("leaveDialog.confirm")) once open.
+
+  - slug: leave-or-remove
+    step: remove-dialog
+    url: http://localhost:64590/en/settings?tab=household
+    actions:
+      - type: click-role
+        name: "Remove partner"
+        locales:
+          pt: "Remover parceiro"
+          es: "Quitar pareja"
+      - type: wait-text
+        text: "Remove partner"
+        locales:
+          pt: "Remover parceiro"
+          es: "Quitar pareja"
+    note: >-
+      Same fix as leave-dialog above: t("actions.remove") is "Remove
+      partner" in full, not just "Remove" — the pt/es translations ("Remover
+      parceiro" / "Quitar pareja") share no substring with "Remove", so the
+      full phrase is required for the click and the wait-text anchor (which
+      also matches the dialog's confirm button, t("removeDialog.confirm")).

@@ -1,0 +1,51 @@
+---
+title: Compreender transações
+description: Lê, filtra e revê as transações que aparecem na aplicação WonderMoney.
+---
+
+As transações são o registo do dinheiro a entrar ou sair de uma conta. Usa a lista para rever a atividade importada, identificar itens em falta e manter as categorias atualizadas.
+
+## Ciclo de vida da transação
+
+Uma transação percorre um ciclo definido:
+
+- **Pendente.** O banco comunicou o pagamento, mas ainda não o confirmou. Os pagamentos por cartão costumam começar aqui.
+- **Confirmado.** O banco confirmou a transação. Um pagamento pendente é associado automaticamente à versão confirmada, pelo que os dois não ficam muito tempo separados.
+- **Expirado.** Uma transação pendente que o banco nunca confirma dentro do intervalo definido fica marcada como expirada e é removida da lista ativa. Isto evita que registos pendentes antigos fiquem na lista.
+
+O saldo disponível é o saldo atual líquido da atividade pendente, pelo que o dinheiro ainda pendente está refletido no que vês.
+
+## Registo de auditoria
+
+Cada alteração a uma transação — incluindo o tratamento de duplicados e as mudanças de estado — fica registada no registo de auditoria. Se precisares de perceber porque é que uma transação está num determinado estado, o histórico de auditoria tem o registo.
+
+## Antes de começar
+
+Confirma que a conta terminou a primeira sincronização ou que já tens transações manuais disponíveis. Se estiveres a rever um mês de orçamento, confirma primeiro o intervalo de datas.
+
+## Passos
+
+1. Abre a lista de transações de uma conta.
+2. Filtra por data, categoria ou conta, se necessário.
+3. Abre uma transação para rever o valor, o comerciante e as notas.
+4. Atualiza a categoria, a descrição ou o estado recorrente quando for preciso.
+
+## Rever
+
+Procura itens sem categoria, entradas duplicadas e transações que pertençam a um pagamento recorrente. Uma revisão curta todas as semanas mantém o histórico útil para orçamentos e resumos.
+
+## Problemas comuns
+
+- Um pagamento por cartão pendente ainda não foi associado à versão confirmada.
+- Uma transação pendente aparece como expirada porque o banco nunca a confirmou.
+- Os dados importados não incluem um pagamento recente.
+- Foi introduzida duas vezes uma correção manual.
+- O intervalo de datas esconde a transação que procura.
+
+
+## Ligações relacionadas
+
+- [Categorizar transações](/pt/docs/accounts-transactions/categorize-transactions)
+- [Transações em falta ou duplicadas](/pt/docs/accounts-transactions/missing-duplicate-transactions)
+- [Problemas na importação de transações](/pt/docs/troubleshooting/transaction-import-problems)
+- [Pagamentos recorrentes](/pt/docs/accounts-transactions/recurring-payments)

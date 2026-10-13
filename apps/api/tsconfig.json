@@ -1,0 +1,80 @@
+{
+  "compilerOptions": {
+    /* Language and Environment */
+    "target": "ESNext",
+    "lib": ["ESNext"],
+    "useDefineForClassFields": true,
+		"moduleDetection": "force",
+
+    /* Modules */
+    "module": "esnext",
+    "moduleResolution": "Bundler",
+    "resolveJsonModule": true,
+    "rewriteRelativeImportExtensions": true,
+		"resolvePackageJsonExports": true,
+		"resolvePackageJsonImports": true,
+
+    /* Emit */
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "inlineSources": true,
+    "sourceRoot": "/",
+
+    /* Type Checking */
+   	"strict": true,
+		"noImplicitAny": true,
+		"strictNullChecks": true,
+		"strictFunctionTypes": true,
+		"strictBindCallApply": true,
+		"strictPropertyInitialization": false,
+		"noImplicitThis": true,
+		"useUnknownInCatchVariables": true,
+		"alwaysStrict": true,
+		"noUnusedLocals": false,
+		"noUnusedParameters": true,
+		"exactOptionalPropertyTypes": false,
+		"noImplicitReturns": true,
+		"noFallthroughCasesInSwitch": true,
+		"noUncheckedIndexedAccess": true,
+		"noImplicitOverride": true,
+		"noPropertyAccessFromIndexSignature": true,
+		"allowUnusedLabels": false,
+		"allowUnreachableCode": false,
+
+    /* Interop Constraints */
+    "isolatedModules": true,
+		"verbatimModuleSyntax": true,
+		"erasableSyntaxOnly": false,
+		"forceConsistentCasingInFileNames": true,
+
+    /* Completeness */
+		"skipDefaultLibCheck": true,
+		"skipLibCheck": true,
+
+    /* Decorators */
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+
+    /* Path Aliases */
+    "baseUrl": "./src",
+    "paths": {
+      "@entity/*": ["database/entity/*"],
+      "@controller/*": ["controller/*"],
+      "@route/*": ["routes/v1/*"],
+      "@service/*": ["services/*"],
+      "@utils/*": ["utils/*"],
+      "@validators/*": ["validators/*"],
+      "@middleware/*": ["middleware/*"],
+      "@config/*": ["config/*"],
+      "@app/*": ["*"]
+    },
+
+    /* Types */
+    "typeRoots": ["./node_modules/@types", "./src/types"]
+  },
+  "include": ["src/**/*.ts"],
+  "exclude": ["dist", "node_modules", "__tests__", "scripts", "src/database/migrations"]
+}

@@ -1,0 +1,66 @@
+---
+title: Configure your instance
+description: Turn on email, file storage, AI features and market data, and control who can sign up.
+---
+
+All configuration lives in the `.env` file next to `docker-compose.yml`, commented section by section. After editing it, apply the changes with:
+
+```sh
+docker compose up -d
+```
+
+## Email
+
+Set an SMTP server:
+
+```sh
+SMTP_HOST=smtp.example.com
+SMTP_PORT=587
+SMTP_USER=...
+SMTP_PASSWORD=...
+EMAIL_FROM=money@example.com
+```
+
+Or set `RESEND_API_KEY` to use Resend instead. To test without a real provider, start the bundled Mailpit with `docker compose --profile mail up -d`, set `SMTP_HOST=mailpit` and `SMTP_PORT=1025`, and read the mail at http://localhost:8025.
+
+## File storage
+
+CSV imports and receipt copies need S3-compatible storage. To use the bundled MinIO, start it with `docker compose --profile storage up -d` and set:
+
+```sh
+AWS_ACCESS_KEY_ID=choose-a-user
+AWS_SECRET_ACCESS_KEY=choose-a-long-password
+S3_ENDPOINT=http://minio:9000
+S3_PUBLIC_ENDPOINT=http://localhost:9000
+S3_BUCKET=wondermoney
+```
+
+`S3_PUBLIC_ENDPOINT` is the address browsers use to reach the storage. Any S3-compatible service works too, such as Cloudflare R2, Backblaze B2 or AWS S3.
+
+## AI features
+
+Receipt scanning, CSV column mapping, transaction categorisation, the monthly story and the assistant work with any OpenAI-compatible endpoint: OpenAI, OpenRouter, or a model running locally with Ollama, LM Studio or vLLM.
+
+```sh
+AI_BASE_URL=http://host.docker.internal:11434/v1
+AI_MODEL=llama3.1
+```
+
+Set `AI_API_KEY` when the endpoint needs one. To use a different model for one feature, set `AI_MODEL_<FEATURE>`; for example, receipt scanning needs a model that reads images, set with `AI_MODEL_OCR`.
+
+## Market data
+
+Set `EODHD_API_KEY` to turn on ticker search, live prices and the Financial Markets module.
+
+## Bank sync
+
+Bank sync needs no server configuration. Each person adds their own Enable Banking application key under Settings, so bank credentials are never shared between users.
+
+## Your instance
+
+| Setting | What it does |
+|---|---|
+| `INSTANCE_NAME` | Your instance's name |
+| `SIGNUP_MODE` | `open`, `invite` or `closed` (see [Install](/en/docs/self-hosting/install)) |
+| `SUPPORT_EMAIL` | The inbox for the contact form and account alerts; leave empty to turn them off |
+| `NEXT_PUBLIC_TERMS_URL`, `NEXT_PUBLIC_PRIVACY_URL` | Your legal pages, linked from the sign-up page when both are set |

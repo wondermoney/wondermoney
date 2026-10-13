@@ -1,0 +1,90 @@
+---
+title: Connect your first bank account
+description: Register your own free Enable Banking application, then link a real bank account to WonderMoney.
+---
+
+WonderMoney doesn't run its own paid, shared bank-connection service — that model got too expensive to keep offering for free. Instead, bank connections use Enable Banking under a bring-your-own-key (BYOK) model: you register your own free Enable Banking application, and WonderMoney's servers use your own application's credentials — never a WonderMoney-wide one — to link and read your bank data. This keeps bank connections free, both for you and for WonderMoney.
+
+The setup below is one-time. During onboarding you may be prompted to connect a bank as part of the account step; if you haven't set up your own Enable Banking key yet, do that first using the steps here, then come back to connect the bank itself. Once your key is saved, it stays saved — every bank you add afterwards, including from Settings later, uses the same key.
+
+## Before you start
+
+You'll need a few free minutes, the email address you want to use for Enable Banking, and access to your own bank's login to approve a connection later in this flow. There's no technical skill required beyond copying two values — an ID and a key — from Enable Banking into WonderMoney.
+
+## Set up your Enable Banking application
+
+1. Go to `enablebanking.com/sign-in/` and enter your email. Enable Banking sends a one-time magic link — there's no password to create. Click the link to open the Control Panel.
+2. In the Control Panel, go to **Applications** (`enablebanking.com/cp/applications`) and click **Add a new application**.
+3. Set **Environment** to **Production** — see the warning below before you continue.
+4. Give the application a name and description. Any descriptive values work, for example "WonderMoney" with a one-line note that it's for personal use.
+5. Set **Redirect URL** to `https://api.wonder.money/v1/banking/enable-banking/callback`, exactly as written — see the note below.
+6. Fill in **Privacy URL** and **Terms URL** — see the warning below before you submit.
+7. Under key generation, choose **Generate in the browser and export private key**. Enable Banking creates a keypair for you and downloads a `.pem` file automatically — see the warning below about backing it up.
+8. Submit the form to register the application.
+
+<Callout type="warn" title="Choose Production, not Sandbox">
+  Sandbox only ever connects to fake, mock bank data — it can never link your real account, no matter what else is set up correctly. This is the single easiest step in this whole guide to get wrong, and the one most worth double-checking before you submit.
+</Callout>
+
+<Callout type="info" title="The redirect URL is WonderMoney's, not yours">
+  `https://api.wonder.money/v1/banking/enable-banking/callback` is WonderMoney's own backend address. You're registering an application that talks to WonderMoney's servers, so this value is fixed — enter it exactly as shown, not your own domain.
+</Callout>
+
+<Callout type="warn" title="Privacy URL and Terms URL are required for Production — even though the form doesn't say so">
+  Enable Banking's form doesn't mark these fields as required, but for a Production application it silently fails to submit if either is left blank, with no visible error message. Use:
+
+  - Privacy URL: `https://docs.wonder.money/about/privacy-policy`
+  - Terms URL: `https://docs.wonder.money/about/terms-of-service`
+</Callout>
+
+<Callout type="warn" title="Back up the downloaded key immediately">
+  Enable Banking shows and downloads this private key exactly once. It cannot show it to you again. Move the downloaded `.pem` file somewhere safe — a password manager, for example — before doing anything else. If you lose it, the only fix is registering a new application from scratch.
+</Callout>
+
+If you'd rather generate your own keypair yourself and only hand Enable Banking the public certificate, choose **Generate outside the browser and import public certificate** instead and follow Enable Banking's own [API documentation](https://enablebanking.com/docs/api/reference/) for that path.
+
+## Activate your application by linking your own bank account
+
+After you submit, the application's page shows **"Restricted Production, not yet activated"** with two buttons.
+
+<Callout type="warn" title='Click "Activate by linking accounts" — not "Request activation"'>
+  **Activate by linking accounts** is what you want: it walks you through Enable Banking's own consent flow to link one of your own real bank accounts, which activates the application for personal use. Enable Banking's Terms of Service describe this path as intended "solely for evaluation purposes or for the personal use of private individuals," so no business verification is required.
+
+  **Request activation** is the separate business path, which requires KYB (know-your-business) verification. Skip it.
+</Callout>
+
+1. Click **Activate by linking accounts**.
+2. Choose your own bank and sign in, approving access the same way you would for any Open Banking connection.
+3. Once your bank confirms the consent, return to the Control Panel — the application's status updates to reflect that it's activated.
+
+## Add your key to WonderMoney
+
+1. On the application's page, copy the **Application ID** — a UUID shown near the top.
+2. Find the `.pem` file Enable Banking downloaded earlier.
+3. In WonderMoney, open **Settings → Bank Provider**.
+4. Paste the Application ID into **Application ID**, and paste the full contents of the `.pem` file into **Private key**.
+5. Save. WonderMoney tests the credential against Enable Banking before storing it, so a mistyped ID or an incomplete key is rejected immediately rather than failing later.
+
+## What WonderMoney does with your key
+
+Your private key is encrypted at rest (AES-256-GCM) and is never shown back to you after it's saved. WonderMoney uses it only to authenticate your own requests to Enable Banking — it is never shared with anyone else, including other WonderMoney users.
+
+## Connect your first bank
+
+Once your key is saved and active, connecting a bank works the same as any bank connection in WonderMoney: pick your country, choose your bank, sign in and approve access at your bank, then wait for the first sync. See [Connect bank account](/en/docs/accounts-transactions/connect-bank-account) for that part of the flow in detail.
+
+## Common issues
+
+- The application was created with **Sandbox** selected instead of **Production** — it will never find your real bank.
+- The application form didn't submit, because **Privacy URL** or **Terms URL** was left blank.
+- **Request activation** was clicked instead of **Activate by linking accounts**, starting the business verification path by mistake.
+- The downloaded `.pem` file was lost before it was copied into WonderMoney.
+
+For help with any of these, see [Bank connection problems](/en/docs/troubleshooting/bank-connection-problems).
+
+## Related links
+
+- [Connect bank account](/en/docs/accounts-transactions/connect-bank-account)
+- [Manage bank connections](/en/docs/accounts-transactions/manage-bank-connections)
+- [Manual offline account](/en/docs/accounts-transactions/manual-offline-account)
+- [Understand transactions](/en/docs/accounts-transactions/understand-transactions)

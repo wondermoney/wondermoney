@@ -1,0 +1,36 @@
+---
+title: Self-hosting
+description: Run your own WonderMoney server with Docker Compose, for yourself, your household or your organisation.
+---
+
+WonderMoney is free and open source, and you can run it on your own server. A self-hosted instance has the same app as wonder.money: accounts, transactions, bank sync, budgets, goals, loans, households and portfolios. Your data stays in your own database.
+
+The whole server is one Docker Compose file with four containers: Postgres, the API, a background worker and the web app. Nothing else is required.
+
+## What you need
+
+- A machine with Docker and the Compose plugin, and about 2 GB of free memory. A small VPS, a home server or a NAS that runs Docker is enough.
+- `openssl`, which generates the secrets during setup.
+- For use outside your own network: a domain name and HTTPS. See [HTTPS and domains](/en/docs/self-hosting/https-and-domains).
+
+## Optional integrations
+
+The core app needs only Postgres. These features switch on when you configure them, and are hidden when you don't:
+
+| Feature | Needs |
+|---|---|
+| Emails (password resets, invites, alerts) | An SMTP server or a Resend account |
+| CSV imports and receipt copies | S3-compatible storage, or the bundled MinIO |
+| Receipt scanning, smart categorisation, the assistant | Any OpenAI-compatible AI endpoint, including a local Ollama |
+| Ticker search and live prices | An EODHD API key |
+| Bank sync | Nothing on the server: each person adds their own Enable Banking key in Settings |
+
+See [Configure your instance](/en/docs/self-hosting/configure).
+
+## In this section
+
+- [Install](/en/docs/self-hosting/install)
+- [Configure your instance](/en/docs/self-hosting/configure)
+- [HTTPS and domains](/en/docs/self-hosting/https-and-domains)
+- [Use the mobile app with your server](/en/docs/self-hosting/mobile-app)
+- [Updates and backups](/en/docs/self-hosting/upgrade-and-backup)

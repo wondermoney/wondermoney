@@ -1,0 +1,97 @@
+# Local development stack. `version:` is intentionally absent — it is obsolete in
+# Compose v2 and only produces a warning.
+services:
+  api:
+    restart: unless-stopped
+    build:
+      context: ../..
+      dockerfile: apps/api/Dockerfile.local
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      NODE_ENV: development
+      PORT: 3000
+      # Explicit DB_* block. Without it this service silently falls through to
+      # `.env`, which is not guaranteed to point at the compose Postgres — the
+      # `worker` service below would then be talking to a different database than
+      # the API in the same stack.
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USERNAME: wmuser
+      DB_PASSWORD: wmpass
+      DB_DATABASE: wmdb
+      # bossbench pg-boss dashboard, embedded at /v1/admin/jobs (routes/v1/admin.ts).
+      # Defaults match the old standalone `dashboard` service's admin/admin.
+      BOSSBENCH_USER: ${BOSSBENCH_USER:-admin}
+      BOSSBENCH_PASS: ${BOSSBENCH_PASS:-admin}
+    ports:
+      - "3000:3000"
+    volumes:
+      # The repository is mounted over the image's copy so `tsx watch` sees edits; the
+      # installed node_modules stay the image's own.
+      - ../..:/repo
+      - /repo/node_modules
+      - /repo/apps/api/node_modules
+    healthcheck:
+      # /v1/health is the unauthenticated health endpoint. /v1/admin/ping is behind
+      # adminApiRateLimit + adminAuth and can never pass from here.
+      test: ["CMD", "curl", "-f", "http://localhost:3000/v1/health"]
+      interval: 60s
+      timeout: 10s
+      retries: 5
+    networks:
+      - wmnetwork
+
+  worker:
+    restart: unless-stopped
+    build:
+      context: ../..
+      dockerfile: apps/api/Dockerfile.local
+    command: pnpm run worker:dev
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      NODE_ENV: development
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USERNAME: wmuser
+      DB_PASSWORD: wmpass
+      DB_DATABASE: wmdb
+      PGBOSS_SCHEMA: pgboss
+      PGBOSS_MIGRATE: "true"
+    volumes:
+      - ../..:/repo
+      - /repo/node_modules
+      - /repo/apps/api/node_modules
+    networks:
+      - wmnetwork
+
+  postgres:
+    image: postgres:16
+    restart: unless-stopped
+    ports:
+      # 5434, away from the usual 5432/5433, so a local port forward to a remote
+      # Postgres can never be mistaken for this one.
+      - "5434:5432"
+    environment:
+      POSTGRES_USER: wmuser
+      POSTGRES_PASSWORD: wmpass
+      POSTGRES_DB: wmdb
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -h localhost -p 5432 -U wmuser -d wmdb"]
+      interval: 60s
+      timeout: 5s
+      retries: 5
+    networks:
+      - wmnetwork
+
+volumes:
+  postgres_data:
+
+networks:
+  wmnetwork:
+    driver: bridge

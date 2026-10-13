@@ -1,0 +1,224 @@
+---
+title: Glossary
+description: Plain-language definitions for account, budget, portfolio, market, household, security, and privacy terms in WonderMoney.
+---
+
+## Accounts and transactions
+
+### Account
+
+An account is a place where money is held or tracked.
+
+**In WonderMoney:** An account is a place where money lives, such as a bank account or an offline account you add yourself.
+
+**Related:** [Transaction](/en/docs/glossary#transaction), [Read-only access](/en/docs/glossary#read-only-access)
+
+### Transaction
+
+A transaction is a record of money moving in or out.
+
+**In WonderMoney:** A transaction is a money movement that is imported, synced, or entered manually.
+
+**Related:** [Category](/en/docs/glossary#category), [Account](/en/docs/glossary#account)
+
+### Category
+
+A category is a label that groups similar money activity.
+
+**In WonderMoney:** A category is the label used to organise spending and income into clear groups.
+
+**Related:** [Budget](/en/docs/glossary#budget), [Envelope method](/en/docs/glossary#envelope-method)
+
+### Categorization confidence
+
+Categorization confidence is how sure an automatic category assignment is.
+
+**In WonderMoney:** Categorization confidence is a level applied to each auto-categorized transaction, from high to none. High-confidence matches are cleared from the review queue automatically; lower-confidence transactions stay there for you to check.
+
+**Related:** [Category](/en/docs/glossary#category), [Transaction](/en/docs/glossary#transaction)
+
+### Transaction fingerprint
+
+A transaction fingerprint is a value that identifies a transaction for duplicate detection.
+
+**In WonderMoney:** A transaction fingerprint is built from transaction details such as date and amount. It is used to avoid importing the same transaction twice. The tolerance is calibrated so that similar but legitimate transactions are not treated as duplicates.
+
+**Related:** [Transaction](/en/docs/glossary#transaction), [Ghost-pending](/en/docs/glossary#ghost-pending), [Audit log](/en/docs/glossary#audit-log)
+
+### Ghost-pending
+
+A ghost-pending is a pending transaction that never becomes a booked one.
+
+**In WonderMoney:** A ghost-pending is a stored pending transaction that no longer appears in the bank's pending feed. WonderMoney expires it after a grace period instead of leaving it in place, so it does not become a duplicate when the real booked transaction arrives.
+
+**Related:** [Transaction](/en/docs/glossary#transaction), [Transaction fingerprint](/en/docs/glossary#transaction-fingerprint)
+
+### Audit log
+
+An audit log is a record of changes made to data.
+
+**In WonderMoney:** An audit log records events on a transaction, such as creation, edits, categorization, and duplicate decisions. The original entry is preserved so the history stays traceable.
+
+**Related:** [Transaction](/en/docs/glossary#transaction), [Transaction fingerprint](/en/docs/glossary#transaction-fingerprint)
+
+## Budgets
+
+### Budget
+
+A budget is a monthly plan for your money.
+
+**In WonderMoney:** A budget is your monthly plan for how much money you want to assign to different categories.
+
+**Related:** [Monthly target](/en/docs/glossary#monthly-target), [Remaining](/en/docs/glossary#remaining)
+
+### Envelope method
+
+The envelope method splits your budget into separate category limits.
+
+**In WonderMoney:** The envelope method is a budgeting approach where each category gets its own monthly limit.
+
+**Related:** [Budget](/en/docs/glossary#budget), [Category](/en/docs/glossary#category)
+
+### Monthly target
+
+A monthly target is the amount set for one category in a month.
+
+**In WonderMoney:** A monthly target is the amount you want to allow for a category in a single month.
+
+**Related:** [Remaining](/en/docs/glossary#remaining), [Budget](/en/docs/glossary#budget)
+
+### Remaining
+
+Remaining is the amount left in a category after spending is counted.
+
+**In WonderMoney:** Remaining is the amount left after transactions are counted against a category’s target.
+
+**Related:** [Monthly target](/en/docs/glossary#monthly-target), [Transaction](/en/docs/glossary#transaction)
+
+## Goals and loans
+
+### Available to assign
+
+Available to assign is the money you can still put toward a goal.
+
+**In WonderMoney:** Available to assign is what remains after already-assigned amounts are subtracted from your account balances. You cannot assign more than this ceiling to a goal.
+
+**Related:** [Budget](/en/docs/glossary#budget), [Debt pay down](/en/docs/glossary#debt-pay-down)
+
+### Debt pay down
+
+Debt pay down is the goal of reducing what you owe.
+
+**In WonderMoney:** A debt pay down goal groups one or more debts and plans their repayment, using strategies such as avalanche or snowball ordering. Assigning money to the goal tracks progress against the plan.
+
+**Related:** [Available to assign](/en/docs/glossary#available-to-assign), [Budget](/en/docs/glossary#budget)
+
+## Portfolio and investments
+
+### Portfolio
+
+A portfolio is a group of investments you follow together.
+
+**In WonderMoney:** A portfolio is a collection of investments that you track together.
+
+**Related:** [Holding](/en/docs/glossary#holding), [Allocation](/en/docs/glossary#allocation)
+
+### Holding
+
+A holding is one investment inside a portfolio.
+
+**In WonderMoney:** A holding is one investment position inside a portfolio, such as a stock, fund, or ETF.
+
+**Related:** [Portfolio](/en/docs/glossary#portfolio), [Market value](/en/docs/glossary#market-value)
+
+### Allocation
+
+Allocation shows how a portfolio is divided.
+
+**In WonderMoney:** Allocation shows how a portfolio is spread across assets, sectors, or categories.
+
+**Related:** [Portfolio](/en/docs/glossary#portfolio), [Benchmark](/en/docs/glossary#benchmark)
+
+### Market value
+
+Market value is what an investment is worth right now.
+
+**In WonderMoney:** Market value is the current worth of an investment based on the latest price.
+
+**Related:** [Cost basis](/en/docs/glossary#cost-basis), [Return](/en/docs/glossary#return)
+
+### Cost basis
+
+Cost basis is what you paid for an investment.
+
+**In WonderMoney:** Cost basis is the amount you paid to acquire an investment, including the purchase price and any added costs if tracked.
+
+**Related:** [Market value](/en/docs/glossary#market-value), [Return](/en/docs/glossary#return)
+
+### Return
+
+Return is the gain or loss on an investment.
+
+**In WonderMoney:** Return is the gain or loss on an investment compared with what you paid for it.
+
+**Related:** [Cost basis](/en/docs/glossary#cost-basis), [Benchmark](/en/docs/glossary#benchmark)
+
+### Benchmark
+
+A benchmark is a reference used for comparison.
+
+**In WonderMoney:** A benchmark is a reference result you use to compare your portfolio’s performance.
+
+**Related:** [Return](/en/docs/glossary#return), [Allocation](/en/docs/glossary#allocation)
+
+### Dividend
+
+A dividend is money paid to investors from profits.
+
+**In WonderMoney:** A dividend is cash paid by an investment to its holders, usually from company profits.
+
+**Related:** [Holding](/en/docs/glossary#holding), [Return](/en/docs/glossary#return)
+
+### Currency effect
+
+Currency effect is the value change caused by exchange rates.
+
+**In WonderMoney:** Currency effect is the change in value caused by exchange-rate movement when an investment uses another currency.
+
+**Related:** [Market value](/en/docs/glossary#market-value), [Return](/en/docs/glossary#return)
+
+## Security and privacy
+
+### Read-only access
+
+Read-only access lets WonderMoney view data without changing money.
+
+**In WonderMoney:** Read-only access lets WonderMoney view account data without being able to move money.
+
+**Related:** [Account](/en/docs/glossary#account), [Two-factor authentication](/en/docs/glossary#two-factor-authentication)
+
+### Two-factor authentication
+
+Two-factor authentication adds an extra sign-in check.
+
+**In WonderMoney:** Two-factor authentication adds a second check when you sign in, helping protect your account.
+
+**Related:** [Read-only access](/en/docs/glossary#read-only-access), [Account](/en/docs/glossary#account)
+
+## Household
+
+### Household
+
+A household is a group of people who share finances.
+
+**In WonderMoney:** A household lets you share accounts, budgets, and goals with a partner. Each member has their own login, and accounts you mark as private stay private.
+
+**Related:** [Account](/en/docs/glossary#account), [Privacy](/en/docs/glossary#privacy)
+
+### Privacy
+
+Privacy is the ability to keep part of your data visible only to you.
+
+**In WonderMoney:** Privacy is controlled per account within a household. A shared account is visible to all members; a private account is visible only to its owner. The owner can also set privacy on individual recurring series.
+
+**Related:** [Account](/en/docs/glossary#account), [Household](/en/docs/glossary#household)

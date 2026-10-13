@@ -1,0 +1,175 @@
+# Settings, security & privacy — profile, notifications, appearance,
+# categories, assistant (admin-gated), 2FA, change password, delete account,
+# read-only bank access, connections.
+# Pages that need the inner scroll-container expanded prepend the shared eval
+# (the settings shell scrolls inside a `.flex-1.overflow-y-auto` container).
+section: settings-security-privacy
+user: docs-screens-sandbox
+pages:
+  - slug: index
+    step: overview
+    url: http://localhost:64590/en/settings
+
+  - slug: profile-preferences
+    step: profile
+    url: http://localhost:64590/en/settings
+    note: >-
+      The Profile tab is the default; the page is the same as index but cropped
+      differently.
+
+  - slug: email-preferences
+    step: notifications
+    url: http://localhost:64590/en/settings?tab=notifications
+
+  - slug: appearance
+    step: appearance
+    url: http://localhost:64590/en/settings?tab=appearance
+    note: "Light mode is the default."
+
+  - slug: manage-categories
+    step: categories
+    url: http://localhost:64590/en/settings?tab=categories
+    actions:
+      - type: eval
+        script: "document.querySelector('.flex-1.overflow-y-auto')?.style.height = document.querySelector('.flex-1.overflow-y-auto')?.scrollHeight + 'px'"
+
+  - slug: assistant-settings
+    step: assistant
+    url: http://localhost:64590/en/settings?tab=assistant
+    actions:
+      - type: set-local-storage
+        key: "wondermoney.adminModuleVisibility.v1"
+        value: '{"credits":true,"recurring":true,"assistant":true}'
+      - type: open
+        url: http://localhost:64590/en/settings?tab=assistant
+    note: >-
+      Admin gate — the tab is invisible without the localStorage flag. The flag
+      is a per-user toggle that does not persist across sessions, so it is set
+      in the same session that re-opens the tab.
+
+  - slug: ai-assistant-consent
+    step: consent
+    url: http://localhost:64590/en/settings?tab=assistant
+    actions:
+      - type: set-local-storage
+        key: "wondermoney.adminModuleVisibility.v1"
+        value: '{"credits":true,"recurring":true,"assistant":true}'
+      - type: open
+        url: http://localhost:64590/en/settings?tab=assistant
+      - type: click-role
+        name: "Assistant"
+        locales:
+          pt: "Assistente"
+          es: "Asistente"
+      - type: wait-text
+        text: "Enable the assistant"
+        locales:
+          pt: "Ativar o assistente"
+          es: "Activar el asistente"
+    note: >-
+      The consent panel lives in the floating assistant launcher (same
+      "Assistant" accessible name as the settings tab; confirmed against
+      components/assistant/AssistantLauncher.tsx and the assistant.launcher
+      message key — no separate nav item). The wait-text anchor was
+      previously "Consent"/"Allow", neither of which exist in
+      assistant.consent.*; corrected to the actual consent screen title
+      (assistant.consent.title).
+
+  - slug: change-password
+    step: change-password
+    url: http://localhost:64590/en/settings?tab=security
+    actions:
+      - type: eval
+        script: "document.querySelector('.flex-1.overflow-y-auto')?.style.height = document.querySelector('.flex-1.overflow-y-auto')?.scrollHeight + 'px'"
+      - type: wait-text
+        text: "Change password"
+    note: "Do not actually fill or submit."
+
+  - slug: two-factor-authentication
+    step: mfa
+    url: http://localhost:64590/en/settings?tab=security
+    actions:
+      - type: eval
+        script: "document.querySelector('.flex-1.overflow-y-auto')?.style.height = document.querySelector('.flex-1.overflow-y-auto')?.scrollHeight + 'px'"
+      - type: wait-text
+        text: "Two-factor"
+    note: >-
+      For the +sandbox user (no MFA) the "Enable" button is the capture target.
+      Do NOT enroll. Fallback anchor: "Enable".
+
+  - slug: read-only-bank-access
+    step: connect-modal
+    url: http://localhost:64590/en/accounts
+    actions:
+      - type: click-role
+        name: "Add Account"
+        locales:
+          pt: "Adicionar Conta"
+          es: "Añadir cuenta"
+      - type: wait-text
+        text: "Linked"
+        locales:
+          pt: "Ligada"
+          es: "Vinculada"
+      - type: click-role
+        name: "Linked"
+        locales:
+          pt: "Ligada"
+          es: "Vinculada"
+      - type: wait-text
+        text: "read-only"
+        locales:
+          pt: "apenas de leitura"
+          es: "de solo lectura"
+    note: >-
+      The expectation modal that explains read-only access is the capture
+      target (the bank picker surfaces the "EU Open Banking - Read-only
+      connection through GoCardless" copy). Fallback anchor: "expectation".
+
+  - slug: data-privacy
+    step: connections
+    url: http://localhost:64590/en/settings?tab=connections
+    note: "No privacy tab exists; connections is the closest surface."
+
+  - slug: delete-account
+    step: delete-account
+    url: http://localhost:64590/en/settings?tab=security
+    actions:
+      - type: eval
+        script: "document.querySelector('.flex-1.overflow-y-auto')?.style.height = document.querySelector('.flex-1.overflow-y-auto')?.scrollHeight + 'px'"
+      - type: eval
+        script: "document.querySelector('.flex-1.overflow-y-auto')?.scrollTo(0, document.querySelector('.flex-1.overflow-y-auto')?.scrollHeight)"
+      - type: wait-text
+        text: "Delete WonderMoney account"
+        locales:
+          pt: "Eliminar conta da WonderMoney"
+          es: "Eliminar cuenta de WonderMoney"
+    note: >-
+      Do not actually click delete. Corrected trigger/wait text: the real
+      button and section heading is "Delete WonderMoney account"
+      (components/settings/Privacy.tsx, key delete-wondermoney-account) — the
+      previous "Delete account" text does not appear anywhere in this build
+      (that string belongs to the unrelated financial-account delete modal).
+
+  - slug: delete-account
+    step: confirm-dialog
+    url: http://localhost:64590/en/settings?tab=security
+    actions:
+      - type: eval
+        script: "document.querySelector('.flex-1.overflow-y-auto')?.style.height = document.querySelector('.flex-1.overflow-y-auto')?.scrollHeight + 'px'"
+      - type: click-role
+        name: "Delete WonderMoney account"
+        locales:
+          pt: "Eliminar conta da WonderMoney"
+          es: "Eliminar cuenta de WonderMoney"
+      - type: wait-text
+        text: "This removes your access"
+        locales:
+          pt: "Isto remove o seu acesso"
+          es: "Esto elimina tu acceso"
+    note: >-
+      Capture the confirmation dialog open. Do NOT confirm. Corrected trigger
+      name to "Delete WonderMoney account" (see previous page's note) and the
+      wait-text anchor to the dialog description's static opening phrase — the
+      dialog title repeats the same trigger text (no separate "Are you sure" /
+      "Type DELETE" copy exists in this build).

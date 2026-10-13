@@ -1,0 +1,41 @@
+---
+title: Accounts and transactions
+description: Manage bank connections, transactions, recurring items, and imports.
+---
+
+Use this section when you need to connect accounts, review imported data, or correct transaction details.
+
+<DocsImage
+  src="/images/docs/accounts-transactions/index-accounts-overview.png"
+  alt="Accounts overview with the seeded Test Current Account, spending by category, and last transactions."
+  caption="The accounts overview lists your accounts and recent activity in one place."
+  width={1440}
+  height={1131}
+/>
+
+## What this area covers
+
+- Bank connections and sync status
+- Manual offline accounts
+- Transaction review and categorization, with confidence hints in the Review Inbox
+- Missing or duplicate transactions and how duplicates are prevented
+- Recurring payments
+- CSV imports for supported accounts
+
+## How the flow works
+
+WonderMoney keeps accounts, transactions, and recurring items connected to the same account context. A bank connection creates the data source, transactions appear in the review screens, and recurring detection groups repeating activity for follow-up.
+
+Transactions follow a defined lifecycle. A card payment arrives as pending, is matched to its posted version when the bank confirms it, and is marked as expired if it never settles. The available balance is calculated net of pending activity, and every change to a transaction is recorded in an audit log. In the Review Inbox, each suggested category carries a confidence indicator, so you can focus on the items that most need your judgment.
+
+If you are starting from nothing, begin with bank connections or a manual offline account. If your data is already in the app, move directly to transactions or recurring payments.
+
+## Related pages
+
+- [Manage bank connections](/en/docs/accounts-transactions/manage-bank-connections)
+- [Understand transactions](/en/docs/accounts-transactions/understand-transactions)
+- [Categorize transactions](/en/docs/accounts-transactions/categorize-transactions)
+- [Missing or duplicate transactions](/en/docs/accounts-transactions/missing-duplicate-transactions)
+- [Recurring payments](/en/docs/accounts-transactions/recurring-payments)
+- [Connect your first bank account](/en/docs/start-here/connect-first-bank-account)
+- [Bank connection problems](/en/docs/troubleshooting/bank-connection-problems)

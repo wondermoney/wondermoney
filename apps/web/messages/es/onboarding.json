@@ -1,0 +1,360 @@
+{
+  "onboarding": {
+    "firstRun": {
+      "progress": "Paso {current} de {total}",
+      "recommended": "Recomendado",
+      "continue": "Continuar",
+      "skipStep": "Saltar este paso",
+      "back": "Atrás",
+      "welcome": {
+        "headline": "Reúne aquí tu plan financiero.",
+        "description": "Reúne cuentas, presupuestos e inversiones compatibles para ver lo que tienes, a dónde va y cómo cambia con el tiempo.",
+        "socialProof": "Creado para quienes gestionan su dinero entre bancos, presupuestos e inversiones.",
+        "proof": "Las personas siguen usando herramientas financieras cuando el progreso se vuelve visible: ahorro, gasto, patrimonio neto y objetivos en un solo lugar.",
+        "cta": "Empezar configuración",
+        "proofNote": "Los usuarios de apps de presupuesto informan menos estrés financiero y mejores hábitos de ahorro cuando siguen su progreso con constancia."
+      },
+      "goals": {
+        "headline": "¿Qué quieres mejorar primero?",
+        "description": "Elige hasta 2. Adaptaremos la configuración al panorama financiero que quieres construir.",
+        "maxSelected": "Elige hasta 2 objetivos.",
+        "proof": "Los objetivos financieros escritos son más fáciles de seguir cuando se dividen en pasos y se revisan con regularidad.",
+        "cta": "Continuar",
+        "options": {
+          "all_in_one": "Ver todo en un solo lugar",
+          "spending": "Entender a dónde va mi dinero",
+          "budget": "Crear un mejor presupuesto",
+          "investments_net_worth": "Seguir inversiones y patrimonio neto",
+          "financial_freedom": "Planificar libertad financiera a largo plazo",
+          "exploring": "Solo estoy explorando"
+        },
+        "helpers": {
+          "all_in_one": "Reúne cuentas, presupuestos e inversiones compatibles.",
+          "spending": "Ver a dónde va el dinero cada mes.",
+          "budget": "Convertir el gasto en un plan simple.",
+          "investments_net_worth": "Mantener juntos efectivo, inversiones y patrimonio neto.",
+          "financial_freedom": "Mantener el foco en objetivos a largo plazo.",
+          "exploring": "Explora primero cómo funciona."
+        },
+        "proofNote": "Las personas con objetivos financieros realistas tienen más probabilidades de ahorrar, y los controles de progreso ayudan a convertir objetivos en hábitos."
+      },
+      "account": {
+        "headline": "Conecta una cuenta para ver saldos reales.",
+        "description": "Una cuenta basta para mostrar saldos, actividad reciente y el punto de partida de tu patrimonio neto.",
+        "cta": "Conectar cuenta bancaria",
+        "manualCta": "Añadir cuenta manualmente",
+        "trustShort": "Acceso de solo lectura. WonderMoney no puede mover dinero ni realizar pagos.",
+        "trustLong": "Te autenticas directamente con tu banco a través de Enable Banking. WonderMoney nunca ve tus datos de acceso y puedes revocar el acceso en cualquier momento.",
+        "personalized": {
+          "all_in_one": "Conecta primero una cuenta. WonderMoney puede empezar a mostrar tus saldos y actividad reciente a partir de ahí.",
+          "spending": "Conecta tu cuenta para empezar a ver gastos recientes y categorías.",
+          "budget": "Empieza con una cuenta para que tu presupuesto refleje gastos reales.",
+          "investments_net_worth": "Conecta primero una cuenta. Le da a WonderMoney el lado de efectivo de tu patrimonio neto.",
+          "financial_freedom": "Empieza con una cuenta para que saldos, gasto e inversiones creen una visión fiable.",
+          "exploring": "Empieza con una cuenta, o añade una manualmente, y ve cómo funciona WonderMoney."
+        },
+        "skipWarning": {
+          "headline": "¿Continuar sin datos financieros reales?",
+          "description": "Puedes hacerlo, pero WonderMoney no podrá mostrar tus saldos reales, transacciones, patrones de gasto ni patrimonio neto hasta que añadas una cuenta.",
+          "primary": "Añadir una cuenta primero",
+          "secondary": "Continuar sin cuenta",
+          "reassurance": "Siempre puedes añadir una más tarde desde Cuentas."
+        },
+        "credentialRequired": {
+          "title": "Conectar un banco requiere una configuración rápida y única",
+          "body": "Antes de poder conectar un banco real, añade tu propia clave de Enable Banking desde Ajustes. Puedes hacerlo cuando quieras después de terminar la configuración — por ahora, añade una cuenta manualmente arriba o salta este paso y conéctalo más tarde."
+        }
+      },
+      "connect": {
+        "countryLabel": "¿Dónde está tu banco?",
+        "listHint": "Elige tu banco para conectarte de forma segura.",
+        "handoffTitle": "Conectando de forma segura con {bank}…",
+        "handoffBody": "Te autenticarás a través de Enable Banking. WonderMoney nunca ve tus datos de acceso.",
+        "handoffSecurity": "Cifrado · acceso de solo lectura",
+        "continueToBank": "Continuar al banco",
+        "handoffError": "No pudimos iniciar la conexión. Inténtalo de nuevo o elige otro banco.",
+        "retry": "Reintentar",
+        "connectErrorBanner": "La conexión no se completó. Inténtalo de nuevo o elige otro banco.",
+        "manualTitle": "Añadir una cuenta manualmente",
+        "manualBody": "Sin conexión necesaria. Introduce un saldo para empezar — puedes conectarla para actualizaciones automáticas más tarde.",
+        "manualNameLabel": "Nombre de la cuenta",
+        "manualBalanceLabel": "Saldo actual",
+        "manualSubmit": "Añadir cuenta",
+        "manualNote": "Las cuentas manuales se incluyen en tu patrimonio neto, pero no se actualizan automáticamente.",
+        "syncing": {
+          "processing": "Conectado — importando tus saldos y transacciones…",
+          "succeeded": "Tus cuentas están conectadas y sincronizadas.",
+          "partial": "Conectado. Algunos datos aún están llegando — seguiremos sincronizando en segundo plano.",
+          "trouble": "Conectado. La primera sincronización está tardando un poco más — seguiremos intentándolo en segundo plano."
+        }
+      },
+      "syncValue": {
+        "connectedHeadline": "Tu panorama financiero se está completando.",
+        "connectedDescription": "Saldos, transacciones, presupuestos y patrimonio neto son más útiles a medida que llegan datos reales.",
+        "skippedHeadline": "Puedes explorar, pero los datos reales desbloquean el valor.",
+        "skippedDescription": "Añade una cuenta más tarde para desbloquear saldos reales, transacciones, información sobre gasto y seguimiento del patrimonio neto.",
+        "cards": {
+          "balances": {
+            "title": "Saldos",
+            "description": "Ve tus cuentas juntas en lugar de revisar cada banco por separado."
+          },
+          "transactions": {
+            "title": "Transacciones",
+            "description": "Las transacciones recientes ayudan a WonderMoney a mostrar a dónde va tu dinero."
+          },
+          "budgets": {
+            "title": "Presupuestos",
+            "description": "Los presupuestos funcionan mejor cuando se basan en gastos reales."
+          },
+          "netWorth": {
+            "title": "Patrimonio neto",
+            "description": "Cuentas y carteras se combinan en un solo número: tu patrimonio neto."
+          }
+        },
+        "proofNote": "El seguimiento regular del patrimonio neto da a las personas una forma medible de ver el progreso financiero con el tiempo.",
+        "inProgress": {
+          "title": "Qué está pasando ahora",
+          "balances": "Leyendo los datos de tu cuenta y los saldos actuales.",
+          "transactions": "Importando tu historial de transacciones: hasta 12 meses, según lo que comparta tu banco.",
+          "categories": "Asignando una categoría a cada transacción a medida que llega."
+        },
+        "openBankingNote": "16,5 millones de conexiones activas de open banking en el Reino Unido en diciembre de 2025, un 36% más en un año. Conectar el banco así ya es algo habitual."
+      },
+      "privacy": {
+        "headline": "Solo lectura significa solo lectura.",
+        "description": "WonderMoney puede mostrar saldos y transacciones, pero no puede mover dinero, hacer pagos ni ver tus datos de acceso bancario.",
+        "bullets": {
+          "readOnly": {
+            "title": "Acceso de solo lectura",
+            "description": "WonderMoney solo puede ver saldos y transacciones. No puede mover dinero, realizar pagos ni iniciar transferencias."
+          },
+          "bankAuth": {
+            "title": "Te autenticas con tu banco",
+            "description": "La autenticación se realiza a través de Enable Banking. WonderMoney nunca ve tus datos de acceso bancario."
+          },
+          "revoke": {
+            "title": "Tú mantienes el control",
+            "description": "Puedes revocar el acceso en cualquier momento desde tu banco o desde Cuentas en WonderMoney."
+          }
+        }
+      },
+      "budget": {
+        "headline": "Dale un plan a tu dinero.",
+        "description": "Un presupuesto convierte tus gastos en categorías, límites y decisiones claras. En cuanto las transacciones estén conectadas, WonderMoney puede ayudarte a mantenerlo actualizado.",
+        "personalized": "Nos dijiste que el presupuesto es importante para ti. Aquí es donde WonderMoney ayuda a convertir tus gastos en un plan mensual.",
+        "accountSkipped": "Puedes crear un presupuesto ahora, pero funciona mejor una vez que una cuenta esté conectada y haya transacciones disponibles.",
+        "cta": "Crear primer presupuesto",
+        "reassurance": "Puedes empezar simple y ajustar después."
+      },
+      "portfolio": {
+        "headline": "Completa tu visión del patrimonio neto.",
+        "description": "Añade tus inversiones para que WonderMoney pueda mostrar tu efectivo, gastos y cartera en un solo lugar.",
+        "personalized": "Nos dijiste que seguir inversiones y patrimonio neto es importante para ti. Añade una cartera para conectar esa parte de tu vida financiera.",
+        "cta": "Crear o importar cartera",
+        "reassurance": "Puedes añadir posiciones manualmente o importarlas más tarde."
+      },
+      "completion": {
+        "celebrationHeadline": "Tu perfil financiero ha empezado.",
+        "connectedCelebrationDescription": "Tu panel seguirá aclarándose a medida que se sincronicen los saldos y las transacciones recientes.",
+        "skippedCelebrationDescription": "Puedes explorar ahora. Añade una cuenta cuando estés listo para desbloquear saldos reales, transacciones, información sobre gasto y patrimonio neto.",
+        "connectInstead": "Conectar una cuenta en su lugar",
+        "cta": "Ir al panel",
+        "summary": {
+          "goalsSelected": "Objetivo seleccionado",
+          "goalsSkipped": "Objetivo omitido",
+          "accountConnected": "Cuenta conectada",
+          "accountManual": "Cuenta manual añadida",
+          "accountSkipped": "Cuenta omitida",
+          "budgetStarted": "Presupuesto iniciado",
+          "budgetSkipped": "Presupuesto omitido",
+          "portfolioStarted": "Cartera iniciada",
+          "portfolioSkipped": "Cartera omitida",
+          "netWorthTracked": "Patrimonio neto en seguimiento"
+        }
+      },
+      "proof": {
+        "welcome": {
+          "eyebrow": "Por qué importa",
+          "title": "Una vista única para una vida financiera fragmentada.",
+          "quote": "Para quien alterna entre apps bancarias solo para entender su posición."
+        },
+        "goals": {
+          "eyebrow": "Configuración personalizada",
+          "title": "Unas pocas elecciones ayudan a WonderMoney a centrarse primero en lo importante.",
+          "quote": "Para quienes quieren que la configuración refleje cómo gestionan su dinero."
+        },
+        "account": {
+          "eyebrow": "Confianza y acceso",
+          "title": "Los datos reales desbloquean el producto sin dar a WonderMoney control sobre tu dinero.",
+          "quote": "Para quienes quieren automatización sin dar acceso a pagos."
+        },
+        "syncValue": {
+          "eyebrow": "Qué se desbloquea",
+          "title": "Los saldos y transacciones convierten un espacio vacío en uno útil.",
+          "quote": "Para quien tiene una hoja de cálculo que dejó de actualizar."
+        },
+        "budget": {
+          "eyebrow": "Mejores presupuestos",
+          "title": "Los presupuestos funcionan mejor cuando parten del gasto real.",
+          "quote": "Para quienes quieren un plan mensual basado en lo que realmente ocurre."
+        },
+        "portfolio": {
+          "eyebrow": "Completa la imagen",
+          "title": "Las inversiones y el efectivo pertenecen a la misma vista de patrimonio neto.",
+          "quote": "Para quienes quieren conectar gastos, presupuestos, inversiones y patrimonio neto."
+        },
+        "completion": {
+          "eyebrow": "Espacio listo",
+          "title": "Cada paso completado hace que el panel sea más útil.",
+          "quote": "Para quienes construyen un lugar fiable para entender su dinero."
+        },
+        "common": {
+          "useCaseLabel": "Caso de uso",
+          "facts": {
+            "european": {
+              "title": "Creado para Europa",
+              "description": "WonderMoney está diseñado alrededor de PSD2/Open Banking y los flujos financieros europeos."
+            },
+            "connected": {
+              "title": "Cuentas, presupuestos, cartera",
+              "description": "Tu gasto diario y tu patrimonio a largo plazo viven en el mismo espacio."
+            },
+            "readOnly": {
+              "title": "Acceso de solo lectura",
+              "description": "WonderMoney no puede mover dinero, realizar pagos ni iniciar transferencias."
+            },
+            "privacy": {
+              "title": "Modelo centrado en la privacidad",
+              "description": "WonderMoney respeta el RGPD, es de código abierto y no vende datos de usuarios."
+            },
+            "enableBanking": {
+              "title": "Autenticación bancaria a través de Enable Banking",
+              "description": "Te autenticas con tu banco a través de Enable Banking. WonderMoney nunca ve tus datos de acceso bancario."
+            },
+            "netWorth": {
+              "title": "Patrimonio neto como referencia",
+              "description": "Cuentas e inversiones se combinan en un número que te ayuda a entender tu posición."
+            },
+            "realSpending": {
+              "title": "Basado en gasto real",
+              "description": "Las transacciones hacen que presupuestos, categorías e insights sean más precisos desde el inicio."
+            }
+          }
+        }
+      },
+      "proofSources": {
+        "ynab": "Fuente: estadísticas reportadas por usuarios de YNAB",
+        "cfpb": "Fuente: guía del CFPB sobre bienestar financiero",
+        "finraInvestorGov": "Fuente: educación financiera de FINRA e Investor.gov",
+        "openBankingLimited": "Fuente: Open Banking Limited, diciembre de 2025"
+      },
+      "preview": {
+        "welcome": {
+          "cashLabel": "Dinero seguido",
+          "cashValue": "€8.420",
+          "netWorthLabel": "Patrimonio neto",
+          "netWorthValue": "€42.680",
+          "budgetLabel": "Presupuesto usado",
+          "budgetValue": "64%"
+        },
+        "goals": {
+          "selectedLabel": "Foco de la configuración",
+          "goalOne": "Entender adónde va el dinero cada mes",
+          "goalTwo": "Seguir el patrimonio neto a medida que cambia"
+        },
+        "privacy": {
+          "canView": "Ver solo saldos y transacciones",
+          "cannotMove": "No puede mover dinero ni hacer pagos",
+          "revoke": "El acceso puede revocarse en cualquier momento"
+        },
+        "syncValue": {
+          "balancesLabel": "Los saldos empiezan a sincronizarse",
+          "balancesValue": "€8.420",
+          "transactionsLabel": "Las transacciones recientes empiezan a aparecer",
+          "transactionsValue": "18",
+          "netWorthSyncLabel": "El patrimonio neto se vuelve medible",
+          "netWorthSyncValue": "€42.680",
+          "budgetSyncLabel": "Progreso del presupuesto",
+          "budgetSyncValue": "64%"
+        },
+        "completion": {
+          "profileStarted": "Perfil financiero iniciado",
+          "dashboardNext": "Tu panel se vuelve más claro a medida que se sincronizan datos reales"
+        },
+        "common": {
+          "previewLabel": "Datos de vista previa",
+          "transactionLabel": "Transacción reciente",
+          "transactionValue": "€128,40 • Supermercado",
+          "portfolioLabel": "Asignación de cartera",
+          "portfolioValue": "52% acciones",
+          "deltaValue": "+4,2%",
+          "categories": {
+            "housing": "Vivienda",
+            "food": "Comida y bebida",
+            "transport": "Transporte",
+            "other": "Otros"
+          }
+        },
+        "account": {
+          "sectionLabel": "Cuentas",
+          "currentAccountLabel": "Cuenta corriente",
+          "currentAccountValue": "€4.820",
+          "savingsLabel": "Ahorros",
+          "savingsValue": "€12.450",
+          "creditCardLabel": "Tarjeta de crédito",
+          "creditCardValue": "-€1.180",
+          "totalLabel": "Saldo total",
+          "totalValue": "€16.090"
+        }
+      },
+      "stepLabels": {
+        "welcome": "Bienvenido",
+        "goals": "Tus objetivos",
+        "privacy": "Privacidad",
+        "account": "Conectar",
+        "sync_value": "Tu panorama",
+        "completion": "Listo"
+      }
+    },
+    "dashboard": {
+      "triggerLabel": "Ayuda",
+      "title": "Te damos la bienvenida a tu panel",
+      "description": "Este es tu panel principal: tu punto de referencia para ver tu vida financiera de forma clara y completa, todo en un mismo lugar.",
+      "content1": "Consulta tu patrimonio neto en todas tus cuentas de un vistazo.",
+      "content2": "Sigue la salud de tu presupuesto y las categorías con más gasto a medida que se actualizan los datos.",
+      "content3": "Conecta una cuenta bancaria para llenar tu panel con transacciones reales."
+    },
+    "accounts": {
+      "triggerLabel": "Ayuda",
+      "title": "Te damos la bienvenida a tus cuentas",
+      "description": "Este es tu resumen de cuentas, donde puedes controlar todas tus cuentas financieras en un solo lugar.",
+      "content1": "Consulta el saldo total y todas las cuentas conectadas con indicadores de tendencia.",
+      "content2": "Sigue entradas, salidas y tasa de ahorro con la evolución del saldo a lo largo del tiempo.",
+      "content3": "Explora las categorías de gasto y el detalle de cada transacción."
+    },
+    "transactions": {
+      "triggerLabel": "Ayuda",
+      "title": "Te damos la bienvenida a tus transacciones",
+      "description": "Sigue todos los movimientos financieros de tus cuentas conectadas en una vista ordenada.",
+      "content1": "Cada ingreso, compra y transferencia aparece con su categoría y su importe.",
+      "content2": "Filtra por fecha, cuenta o categoría para encontrar cualquier transacción rápidamente.",
+      "content3": "Añade transacciones manualmente o impórtalas desde un CSV bancario."
+    },
+    "budgets-monthly": {
+      "triggerLabel": "Ayuda",
+      "title": "Te damos la bienvenida a tu presupuesto mensual",
+      "description": "Mantente al día con tus objetivos de gasto y controla fácilmente tu progreso durante el mes.",
+      "content1": "Consulta de un vistazo el gasto frente al presupuesto de cada categoría.",
+      "content2": "El gasto se actualiza automáticamente a partir de tus transacciones bancarias vinculadas.",
+      "content3": "Compara el progreso de este mes con tu plan anual completo."
+    },
+    "budgets-yearly": {
+      "triggerLabel": "Ayuda",
+      "title": "Te damos la bienvenida a tu presupuesto anual",
+      "description": "Toma el control de tu plan financiero anual y gestiona los gastos menos frecuentes con confianza.",
+      "content1": "Sigue tus ingresos anuales, tus gastos y el ahorro previsto.",
+      "content2": "Controla el avance del gasto en cada categoría frente al presupuesto anual.",
+      "content3": "Compara el rendimiento acumulado del año con tu plan anual completo."
+    }
+  }
+}

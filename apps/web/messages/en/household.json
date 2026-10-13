@@ -1,0 +1,63 @@
+{
+  "household": {
+    "title": "Household",
+    "description": "Share accounts, budgets, and goals with your partner.",
+    "members": {
+      "heading": "Members",
+      "you": "You",
+      "roleOwner": "Owner",
+      "roleMember": "Partner"
+    },
+    "invite": {
+      "heading": "Invite your partner",
+      "description": "They get their own login and see your shared finances. Accounts you mark as private stay private.",
+      "emailLabel": "Partner's email",
+      "emailPlaceholder": "partner@example.com",
+      "invalidEmail": "Enter a valid email address",
+      "submit": "Send invitation"
+    },
+    "pending": {
+      "heading": "Pending invitation",
+      "sentTo": "Invited {email}",
+      "expires": "Expires {date}",
+      "resend": "Resend",
+      "revoke": "Revoke"
+    },
+    "actions": {
+      "remove": "Remove partner",
+      "leave": "Leave household"
+    },
+    "removeDialog": {
+      "title": "Remove {name}?",
+      "description": "They lose access to this household right away. Shared data stays with you, and their linked bank connections are disconnected.",
+      "confirm": "Remove partner"
+    },
+    "leaveDialog": {
+      "title": "Leave this household?",
+      "description": "You lose access to the shared accounts, budgets, and goals, and your linked bank connections are disconnected. This can't be undone.",
+      "confirm": "Leave household"
+    },
+    "cancel": "Cancel",
+    "join": {
+      "greetingNamed": "{name} invited you to their WonderMoney household",
+      "greetingGeneric": "You've been invited to a WonderMoney household",
+      "subtitle": "Create your account to share accounts, budgets, and goals.",
+      "emailLockedHint": "This invite is for {email}",
+      "invalidTitle": "This invitation link isn't valid",
+      "invalidBody": "It may have already been used, revoked, or expired. Ask your partner to send a fresh invite.",
+      "loggedInTitle": "You're already signed in",
+      "loggedInBody": "Household invites can only be accepted with a new account. Log out and create one with the invited email to join.",
+      "logoutAndJoin": "Log out & create account",
+      "backToApp": "Go to WonderMoney"
+    },
+    "toast": {
+      "inviteSent": "Invitation sent",
+      "inviteResent": "Invitation resent",
+      "inviteRevoked": "Invitation revoked",
+      "memberRemoved": "Partner removed",
+      "left": "You've left the household",
+      "error": "Something went wrong. Please try again."
+    },
+    "loadError": "We couldn't load your household. Please try again."
+  }
+}

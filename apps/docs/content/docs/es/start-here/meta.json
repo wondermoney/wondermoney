@@ -1,0 +1,11 @@
+{
+  "title": "Empezar por aquí",
+  "pages": [
+    "index",
+    "create-account",
+    "sign-in-password-recovery",
+    "multi-factor-authentication",
+    "connect-first-bank-account",
+    "understand-dashboard"
+  ]
+}

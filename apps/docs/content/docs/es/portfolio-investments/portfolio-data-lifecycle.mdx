@@ -1,0 +1,54 @@
+---
+title: Ciclo de vida de los datos de la cartera
+description: Comprende cómo fluyen los datos de la cartera por la importación, la resolución, los precios, las instantáneas y el historial.
+---
+
+Los datos de cartera de WonderMoney pasan por un ciclo de vida por etapas. Algunas partes pueden estar listas antes que otras, por lo que las posiciones, los precios, las instantáneas y el historial pueden no actualizarse al mismo tiempo.
+
+<DocsImage
+  src="/images/docs/es/portfolio-investments/portfolio-data-lifecycle-transactions.png"
+  alt="Portfolio transactions list showing buys, sells, dividends, and withdrawals for the Investment Portfolio."
+  caption="Every imported or manually added transaction feeds the portfolio data lifecycle."
+  width={1440}
+  height={900}
+/>
+
+## Ciclo de vida actual
+
+1. La introducción manual de transacciones o la importación de CSV crea o actualiza las transacciones de cartera.
+2. La resolución de activos relaciona símbolos, ISIN o etiquetas del bróker con un activo financiero.
+3. Las actualizaciones de precio obtienen los precios de mercado actuales cuando existe cobertura.
+4. La actualización de instantáneas reconstruye las instantáneas diarias de la cartera para el periodo afectado.
+5. La disponibilidad del historial refleja si la cartera tiene cobertura suficiente para los gráficos y las métricas.
+
+## Qué deben esperar los usuarios
+
+- Las posiciones pueden aparecer antes de que el historial completo de rentabilidad esté listo.
+- La importación de CSV puede completarse aunque algunas filas necesiten resolución de activos más adelante.
+- Algunos gráficos o métricas pueden mostrar estados parciales o de procesamiento mientras el trabajo en segundo plano termina.
+- La falta de historial no siempre significa un error; también puede significar que la cobertura todavía se está construyendo.
+
+## Vocabulario de estados
+
+Este conjunto de documentación usa el siguiente lenguaje de estados:
+
+- ready: normalmente se puede confiar en esa vista.
+- processing: el trabajo en segundo plano todavía se está poniendo al día.
+- partial: la vista es utilizable, pero está incompleta.
+- needs_action: el usuario debe resolver un problema de importación o de activos.
+- unavailable: reservado en la documentación para un estado futuro o generado por el backend; no des por hecho que esté activo hoy.
+
+## Notas sobre el ciclo de vida de los datos para desarrolladores
+
+- Las transacciones manuales y las importaciones de CSV comparten el mismo objetivo final: transacciones persistidas y vistas de cartera actualizadas.
+- Las filas importadas con activos sin resolver deben notificarse con claridad, no deducirse en silencio.
+- La cobertura de precios históricos es bajo demanda y puede estar incompleta para fechas antiguas.
+- La reconstrucción de instantáneas puede ir por detrás de las actualizaciones de precio, sobre todo después de importaciones con actividad histórica de BUY/SELL.
+- La documentación actual debe evitar prometer una revisión de filas antes de guardar, a menos que exista un flujo de revisión específico.
+
+## Páginas relacionadas
+
+- [Inversiones de cartera](/es/docs/portfolio-investments)
+- [Importar un CSV de cartera](/es/docs/portfolio-investments/import-portfolio-csv)
+- [Añadir transacciones de cartera](/es/docs/portfolio-investments/add-portfolio-transactions)
+- [Métricas de cartera explicadas](/es/docs/portfolio-investments/portfolio-metrics-explained)

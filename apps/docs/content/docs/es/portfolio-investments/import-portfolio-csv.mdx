@@ -1,0 +1,54 @@
+---
+title: Importar cartera por CSV
+description: Importa posiciones y transacciones de cartera desde un archivo CSV.
+---
+
+La importación de CSV es la forma más rápida de cargar datos del bróker en WonderMoney.
+
+## Qué puedes importar
+
+- Posiciones
+- Transacciones
+- Posiciones actuales, cuando tu exportación las incluya
+
+## Cómo importar
+
+1. Exporta los datos desde tu bróker.
+2. Abre la cartera que quieras actualizar.
+3. Sube el archivo CSV.
+4. Espera a que la importación se procese.
+5. Corrige cualquier problema de mapeo o filas sin resolver si se notifican.
+
+<DocsImage
+  src="/images/docs/es/portfolio-investments/import-portfolio-csv-import-modal.png"
+  alt="Import Transactions modal with a drag-and-drop file upload area, portfolio selector, and Analyze file button."
+  caption="The import modal accepts a broker CSV, XLS, or XLSX export for the selected portfolio."
+  width={1440}
+  height={900}
+/>
+
+## Para obtener los mejores resultados
+
+- Usa una exportación reciente del bróker.
+- Mantén una cartera por cuenta del bróker cuando sea posible.
+- Revisa los tickers, las cantidades, las fechas y las monedas de la exportación del bróker antes de subirla.
+- Si algunas filas necesitan resolución de activos, sigue las indicaciones notificadas después de la importación.
+
+## Comportamiento actual
+
+WonderMoney procesa los archivos CSV subidos después de la carga. No existe un paso de revisión de filas antes de guardar.
+
+## Errores comunes
+
+- Subir un tipo de archivo incorrecto.
+- Importar filas duplicadas de una exportación anterior.
+- Dejar la columna de moneda vacía cuando la exportación del bróker incluye varias monedas.
+- Dar por hecho que todos los brókers usan los mismos nombres de columna.
+
+## Páginas relacionadas
+
+- [Inversiones de cartera](/es/docs/portfolio-investments)
+- [Crear una cartera](/es/docs/portfolio-investments/create-portfolio)
+- [Añadir transacciones de cartera](/es/docs/portfolio-investments/add-portfolio-transactions)
+- [Ciclo de vida de los datos de la cartera](/es/docs/portfolio-investments/portfolio-data-lifecycle)
+- [Distribución de posiciones](/es/docs/portfolio-investments/holdings-allocation)

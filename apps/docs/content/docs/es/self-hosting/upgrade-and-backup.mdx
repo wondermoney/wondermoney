@@ -1,0 +1,37 @@
+---
+title: Actualizaciones y copias de seguridad
+description: Mantén tu instancia actualizada, haz copias de seguridad de tus datos y restáuralos.
+---
+
+## Actualizar
+
+```sh
+docker compose pull
+docker compose up -d
+```
+
+La API aplica los cambios en la base de datos al arrancar. Para quedarte en una versión concreta en lugar de la más reciente, define `WM_VERSION` en el `.env`, por ejemplo `WM_VERSION=1.4`.
+
+## Hacer una copia de seguridad
+
+Todo lo importante está en la base de datos Postgres, además del volumen de MinIO si usas el almacenamiento incluido.
+
+```sh
+docker compose exec -T postgres pg_dump -U wondermoney -Fc wondermoney > wondermoney-$(date +%F).dump
+```
+
+Guarda una copia del `.env` con tus copias de seguridad. `CREDENTIAL_ENCRYPTION_KEY_V1` cifra las credenciales bancarias que guardan las personas, y una base de datos restaurada no puede usarlas sin ella. Guarda las copias de seguridad en otro sitio que no sea el propio servidor.
+
+## Restaurar
+
+Detén la aplicación, vuelve a crear la base de datos, carga la copia e inicia de nuevo:
+
+```sh
+docker compose stop api worker web
+docker compose exec -T postgres dropdb -U wondermoney wondermoney
+docker compose exec -T postgres createdb -U wondermoney wondermoney
+docker compose exec -T postgres pg_restore -U wondermoney -d wondermoney < wondermoney-2026-10-01.dump
+docker compose up -d
+```
+
+Si cambiaste `POSTGRES_USER` o `POSTGRES_DB` en el `.env`, usa esos valores en lugar de `wondermoney`.

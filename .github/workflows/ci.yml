@@ -1,0 +1,101 @@
+name: CI
+
+# Runs on every pull request (forks included: no secrets needed) and on the long-lived
+# branches. Turbo runs each task only in the packages that have it.
+on:
+  pull_request:
+  push:
+    branches: [develop, main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  checks:
+    name: Type-check, lint, test and build
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      # The API's tests run in the "API extras" job (with coverage), on a runner of their own:
+      # sharing two vCPUs with every other package's tests pushes some past their timeouts.
+      - run: pnpm turbo run type-check lint
+      - run: pnpm turbo run test --filter='!@wondermoney/api'
+      - name: Build
+        run: pnpm turbo run build
+        env:
+          SKIP_ENV_VALIDATION: '1'
+          NEXT_PUBLIC_SITE_URL: https://docs.wonder.money
+
+  api:
+    name: API extras
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: apps/api
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @wondermoney/shared --filter @wondermoney/react-email run build:lib
+      - name: Check the OpenAPI spec is not stale
+        run: |
+          pnpm run swagger
+          if ! git diff --quiet -- src/generated/swagger.json; then
+            echo "::error::apps/api/src/generated/swagger.json is stale. Run 'pnpm --filter @wondermoney/api swagger' and commit the result."
+            git diff --stat -- src/generated/swagger.json
+            exit 1
+          fi
+      - name: Check worker deployment invariants
+        run: pnpm run test:worker-deployment
+      - name: Tests with coverage thresholds
+        run: pnpm run test:coverage
+      # Reporting-only: known, triaged advisories remain in the production tree.
+      - name: Audit production dependencies
+        continue-on-error: true
+        run: pnpm audit --prod --audit-level high
+
+  mobile:
+    name: Mobile extras
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: apps/mobile
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Validate EAS configuration syntax
+        run: node -e "JSON.parse(require('node:fs').readFileSync('eas.json', 'utf8'))"
+      # Reported, not enforced, for the same reason as Expo Doctor below: Expo's SDK patch
+      # releases make it fail with no change here. Act on it with `npx expo install --fix`.
+      - name: Check Expo dependency compatibility
+        continue-on-error: true
+        run: pnpm exec expo install --check
+      # Reported, not enforced: its SDK patch-version check fails whenever Expo publishes a
+      # patch. Read its output when touching mobile dependencies (it also catches duplicate
+      # native modules).
+      - name: Run Expo Doctor
+        continue-on-error: true
+        run: pnpm dlx expo-doctor@1.20.1

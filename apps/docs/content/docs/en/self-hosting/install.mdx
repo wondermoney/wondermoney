@@ -1,0 +1,44 @@
+---
+title: Install
+description: Download WonderMoney, generate its configuration and start it with Docker Compose.
+---
+
+## Download and start
+
+```sh
+git clone --depth 1 https://github.com/wondermoney/wondermoney.git
+cd wondermoney/apps/api/deploy/selfhost
+./generate-env.sh
+docker compose up -d
+```
+
+`generate-env.sh` writes a `.env` file with fresh secrets. Run it once: running it again would replace the secrets, and existing sessions and stored bank credentials would stop working.
+
+On the first start, the API creates the database and loads the reference data (currencies, categories and the asset catalogue). This takes a minute or two. To follow it:
+
+```sh
+docker compose logs -f api
+```
+
+## Create your account
+
+Open http://localhost:3000 and sign up. The first account on a new instance can always sign up. After that, `SIGNUP_MODE` in `.env` decides who else can:
+
+| Value | Who can sign up |
+|---|---|
+| `open` | Anyone who can reach the web app |
+| `invite` | Only people invited to a household |
+| `closed` | Nobody; existing accounts keep working |
+
+## Before you set up email
+
+Until an email provider is configured, emails are not sent. They are written to the API log, links included. To reset a password or accept an invite in the meantime:
+
+```sh
+docker compose logs api | grep "Email not sent"
+```
+
+## Next steps
+
+- [Configure your instance](/en/docs/self-hosting/configure)
+- [HTTPS and domains](/en/docs/self-hosting/https-and-domains), before you use it outside your own network

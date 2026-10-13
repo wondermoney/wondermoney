@@ -1,0 +1,144 @@
+{
+  "reports": {
+    "title": "Reports",
+    "subtitle": "Understand your money with calm, focused insights.",
+    "filters": {
+      "title": "Filters",
+      "accounts": "Accounts",
+      "categories": "Categories",
+      "merchants": "Merchants",
+      "currency": "Currency",
+      "dateRange": "Date range",
+      "placeholder": {
+        "search": "Search…",
+        "select": "Select…"
+      },
+      "noResults": "No results found.",
+      "selected": "{count, plural, =1 {1 selected} other {# selected}}",
+      "preset": {
+        "thisMonth": "This month",
+        "lastMonth": "Last month",
+        "last3Months": "Last 3 months",
+        "last6Months": "Last 6 months",
+        "last12Months": "Last 12 months",
+        "allTime": "All time"
+      },
+      "includePending": "Include pending transactions",
+      "includeTransfers": "Include transfers",
+      "reset": "Reset filters"
+    },
+    "export": {
+      "csv": "Export CSV",
+      "xlsx": "Export Excel",
+      "xlsxComingSoon": "Excel export is coming soon. Use CSV for now.",
+      "downloading": "Preparing download…",
+      "success": "Download started",
+      "error": "Couldn't generate the export. Try again."
+    },
+    "trend": {
+      "up": "Up",
+      "down": "Down",
+      "flat": "Flat",
+      "vsPriorPeriod": "vs. prior period"
+    },
+    "reports": {
+      "spendingByCategory": {
+        "title": "Spending by category",
+        "subtitle": "Where your money went over the period.",
+        "total": "Total spent",
+        "noData": {
+          "title": "No spending in this period",
+          "description": "Try a wider date range or check that accounts are connected."
+        }
+      },
+      "cashflow": {
+        "title": "Cash flow",
+        "subtitle": "Income vs expenses over time.",
+        "income": "Income",
+        "expenses": "Expenses",
+        "net": "Net",
+        "trailingNetAverage": "Trailing 3-month net average",
+        "partial": {
+          "monthToDate": "Month to date",
+          "partialMonth": "Partial month",
+          "footnoteCurrent": "{month} is still in progress — its figures are month to date.",
+          "footnoteRange": "{month} falls only partly inside the selected period, so its figures cover part of the month."
+        },
+        "noData": {
+          "title": "No cash flow yet",
+          "description": "Once transactions are booked, your monthly cash flow will appear here."
+        }
+      },
+      "sankey": {
+        "title": "Cash flow Sankey",
+        "subtitle": "From income, through categories, into accounts.",
+        "legendIncome": "Income",
+        "legendCategory": "Category",
+        "legendAccount": "Account",
+        "ariaLabel": "Sankey chart showing total cash flow of {total}",
+        "linkTooltip": "{source} → {target}: {value}",
+        "nodeTooltip": "{label}: {value}",
+        "mobileNotice": "This chart is best viewed on a wider screen.",
+        "mobileTableSource": "Source",
+        "mobileTableTarget": "Target",
+        "mobileTableValue": "Value",
+        "noData": {
+          "title": "Not enough activity",
+          "description": "Add more transactions to see your money flow."
+        }
+      },
+      "netWorthHistory": {
+        "title": "Net worth over time",
+        "subtitle": "Your total assets minus liabilities, month by month.",
+        "assets": "Assets",
+        "liabilities": "Liabilities",
+        "netWorth": "Net worth",
+        "noData": {
+          "title": "No history yet",
+          "description": "Net worth will populate as accounts report activity."
+        }
+      },
+      "budgetVsActual": {
+        "title": "Budget vs actual",
+        "subtitle": "How your spending tracked against your budget.",
+        "budgeted": "Budgeted",
+        "actual": "Actual",
+        "variance": "Variance",
+        "percentUsed": "% Used",
+        "overBudget": "Over budget",
+        "setupBudget": "Set up a budget",
+        "category": "Category",
+        "noBudget": {
+          "title": "No budgets set up",
+          "description": "Set up a budget to see how your spending tracks against it."
+        },
+        "noData": {
+          "title": "Nothing to compare",
+          "description": "No spending or budgets in this period yet."
+        }
+      },
+      "portfolioPerformance": {
+        "title": "Portfolio performance",
+        "subtitle": "Per-account balance movement for the period.",
+        "account": "Account",
+        "startBalance": "Start",
+        "endBalance": "End",
+        "return": "Change",
+        "contributions": "Contributions",
+        "startCaveat": "Start balance reflects the first transaction in the period; the change shown may include the effect of that transaction.",
+        "noData": {
+          "title": "No accounts to show",
+          "description": "Connect an account to see its performance here."
+        }
+      }
+    },
+    "common": {
+      "loading": "Loading…",
+      "error": "Something went wrong.",
+      "errorDescription": "We couldn't load the report. Check your connection and try again.",
+      "retry": "Try again",
+      "currencyUnknown": "—",
+      "other": "Other"
+    }
+  }
+}

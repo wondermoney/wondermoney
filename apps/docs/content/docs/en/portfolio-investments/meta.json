@@ -1,0 +1,13 @@
+{
+  "title": "Portfolio & Investments",
+  "pages": [
+    "index",
+    "portfolio-metrics-explained",
+    "create-portfolio",
+    "add-portfolio-transactions",
+    "import-portfolio-csv",
+    "holdings-allocation",
+    "performance-benchmarks",
+    "troubleshoot-portfolio-imports"
+  ]
+}

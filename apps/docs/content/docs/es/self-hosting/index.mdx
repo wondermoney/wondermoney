@@ -1,0 +1,36 @@
+---
+title: Alojamiento propio
+description: Ejecuta tu propio servidor de WonderMoney con Docker Compose, para ti, tu hogar o tu organización.
+---
+
+WonderMoney es gratuito y de código abierto, y puedes ejecutarlo en tu propio servidor. Una instancia propia tiene la misma aplicación que wonder.money: cuentas, transacciones, sincronización bancaria, presupuestos, objetivos, préstamos, hogares y carteras. Tus datos se quedan en tu propia base de datos.
+
+El servidor completo es un único archivo de Docker Compose con cuatro contenedores: Postgres, la API, un proceso de tareas en segundo plano y la aplicación web. No hace falta nada más.
+
+## Qué necesitas
+
+- Una máquina con Docker y el plugin Compose, y unos 2 GB de memoria libre. Basta con un VPS pequeño, un servidor en casa o un NAS que ejecute Docker.
+- `openssl`, que genera los secretos durante la instalación.
+- Para usarla fuera de tu red: un nombre de dominio y HTTPS. Consulta [HTTPS y dominios](/es/docs/self-hosting/https-and-domains).
+
+## Integraciones opcionales
+
+La aplicación base solo necesita Postgres. Estas funciones se activan cuando las configuras y quedan ocultas cuando no:
+
+| Función | Necesita |
+|---|---|
+| Correos (recuperación de contraseña, invitaciones, alertas) | Un servidor SMTP o una cuenta de Resend |
+| Importaciones CSV y copias de recibos | Almacenamiento compatible con S3, o el MinIO incluido |
+| Lectura de recibos, categorización inteligente, el asistente | Cualquier endpoint de IA compatible con OpenAI, incluido un Ollama local |
+| Búsqueda de tickers y cotizaciones en tiempo real | Una clave de API de EODHD |
+| Sincronización bancaria | Nada en el servidor: cada persona añade su propia clave de Enable Banking en la Configuración |
+
+Consulta [Configurar tu instancia](/es/docs/self-hosting/configure).
+
+## En esta sección
+
+- [Instalar](/es/docs/self-hosting/install)
+- [Configurar tu instancia](/es/docs/self-hosting/configure)
+- [HTTPS y dominios](/es/docs/self-hosting/https-and-domains)
+- [Usar la aplicación móvil con tu servidor](/es/docs/self-hosting/mobile-app)
+- [Actualizaciones y copias de seguridad](/es/docs/self-hosting/upgrade-and-backup)

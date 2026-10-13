@@ -1,0 +1,14 @@
+{
+  "title": "Cuentas y transacciones",
+  "pages": [
+    "index",
+    "connect-bank-account",
+    "manual-offline-account",
+    "manage-bank-connections",
+    "understand-transactions",
+    "import-transactions-csv",
+    "categorize-transactions",
+    "recurring-payments",
+    "missing-duplicate-transactions"
+  ]
+}

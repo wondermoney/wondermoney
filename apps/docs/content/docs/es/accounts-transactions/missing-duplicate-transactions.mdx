@@ -1,0 +1,53 @@
+---
+title: Transacciones en falta o duplicadas
+description: Entiende cómo se evitan los duplicados y qué hacer cuando falta una transacción.
+---
+
+WonderMoney evita los duplicados como parte de su flujo normal de transacciones, por lo que la mayoría de los casos de una transacción repetida se resuelven automáticamente. Cuando falta una transacción o sigue apareciendo dos veces, la causa suele ser el momento de la sincronización, un problema de conexión o una entrada manual que se solapa con una importación.
+
+## Cómo se tratan los duplicados
+
+Cada transacción lleva una huella que la identifica. Cuando los datos entrantes coinciden con una huella existente, el duplicado se descarta en lugar de crear una segunda fila. En la rara ocasión en que la coincidencia no es segura, la transacción se conserva y se marca con una pista para que tú decidas.
+
+Cada decisión queda registrada en el registro de auditoría de la transacción, incluidos los duplicados omitidos y los cambios de estado. La tolerancia de la huella es deliberadamente estrecha: dos transacciones legítimas que se parecen — por ejemplo, dos compras idénticas el mismo día — no se tratan como duplicadas, porque una referencia bancaria distinta basta para diferenciarlas.
+
+## Versiones pendiente y confirmada
+
+Un pago con tarjeta pendiente se empareja automáticamente con su versión confirmada cuando el banco lo confirma, así que los dos no deberían permanecer separados. Si el banco nunca confirma un pago pendiente, este caduca después del plazo configurado y aparece como caducado en lugar de quedarse como registro pendiente.
+
+## Antes de empezar
+
+Confirma la cuenta, el intervalo de fechas y los filtros de categoría antes de buscar en profundidad. Si la conexión bancaria está desactualizada, actualízala primero.
+
+## Pasos
+
+1. Comprueba si la transacción está pendiente, confirmada, caducada o si sigue fuera del intervalo de fechas seleccionado.
+2. Revisa si otra cuenta importó el mismo pago.
+3. Compara las entradas manuales con las importadas.
+4. Elimina o fusiona los duplicados cuando el origen esté claro.
+
+<DocsImage
+  src="/images/docs/es/accounts-transactions/missing-duplicate-transactions-review.png"
+  alt="Review transactions page listing uncategorized transactions that need a category."
+  caption="The review queue surfaces transactions that need a category before they affect budgets."
+  width={1440}
+  height={900}
+/>
+
+## Revisión
+
+Después de corregir el problema, vuelve a comprobar la cuenta tras la próxima sincronización. El mismo problema no debería reaparecer si se corrigió el origen.
+
+## Problemas comunes
+
+- Se añadió una entrada manual antes de que llegara la importación bancaria, y una pista sugiere que puede ser un duplicado.
+- Una transacción pendiente aparece como caducada porque el banco nunca la confirmó.
+- El banco omitió una transacción hasta la siguiente actualización.
+- El filtro de fechas incorrecto hizo que la transacción pareciera en falta.
+
+## Enlaces relacionados
+
+- [Entender las transacciones](/es/docs/accounts-transactions/understand-transactions)
+- [Gestionar conexiones bancarias](/es/docs/accounts-transactions/manage-bank-connections)
+- [Problemas con la importación de transacciones](/es/docs/troubleshooting/transaction-import-problems)
+- [Cuenta manual sin conexión](/es/docs/accounts-transactions/manual-offline-account)

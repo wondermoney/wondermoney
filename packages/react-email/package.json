@@ -1,0 +1,54 @@
+{
+  "name": "@wondermoney/react-email",
+  "version": "0.16.0",
+  "private": true,
+  "license": "MIT",
+  "description": "Server-safe WonderMoney financial email renderers",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/wondermoney/react-email.git"
+  },
+  "files": [
+    "dist"
+  ],
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "type": "module",
+  "scripts": {
+    "dev": "email dev --dir emails",
+    "build": "pnpm build:preview",
+    "build:lib": "tsup src/index.ts --format esm --clean && tsc -p tsconfig.build.json && tsx scripts/finalize-types.ts",
+    "build:preview": "email build --dir emails",
+    "export": "tsx scripts/render-handoff.ts",
+    "check:lib": "tsx scripts/test-library.ts",
+    "check:package": "tsx scripts/check-package.ts",
+    "check": "tsc --noEmit && tsx scripts/render-handoff.ts --check && pnpm check:lib",
+    "type-check": "tsc --noEmit",
+    "test": "tsx scripts/render-handoff.ts --check && pnpm check:lib"
+  },
+  "dependencies": {
+    "@react-email/render": "2.1.0",
+    "react": "19.2.3",
+    "react-dom": "19.2.3",
+    "react-email": "6.11.1"
+  },
+  "devDependencies": {
+    "@react-email/ui": "6.11.1",
+    "@types/node": "26.1.1",
+    "@types/react": "19.2.17",
+    "@types/react-dom": "19.2.3",
+    "next": "16.4.0",
+    "tsup": "8.5.1",
+    "tsx": "4.23.15",
+    "typescript": "7.0.2"
+  }
+}

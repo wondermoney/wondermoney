@@ -1,0 +1,112 @@
+"use client";
+
+import Image from "next/image";
+import { useSearchParams } from "next/navigation";
+import { useTranslations } from "next-intl";
+import { usePostHog } from "posthog-js/react";
+import { useState } from "react";
+
+import PortfolioCreateDialog from "@/components/portfolio/PortfolioCreateDialog";
+import PortfolioTable from "@/components/portfolio/PortfolioTable";
+import { Card } from "@/components/ui/card";
+import { Spinner } from "@/components/ui/Spinner";
+import { Heading, Text } from "@/components/ui/Typography";
+import usePortfolios from "@/lib/api/portfolio/usePortfolios";
+
+const Portfolio = () => {
+  const t = useTranslations();
+  const posthog = usePostHog();
+  const searchParams = useSearchParams();
+
+  const { data: portfoliosData, isLoading: isLoadingPortfoliosData } =
+    usePortfolios();
+
+  const [isCreatePortfolioModalOpen, setIsCreatePortfolioModalOpen] = useState(
+    !!searchParams.get("create"),
+  );
+  const openPortfolioCreateModal = () => {
+    setIsCreatePortfolioModalOpen(true);
+    posthog.capture("portfolio_create_modal", { action: "open" });
+  };
+  const closePortfolioCreateModal = () => {
+    setIsCreatePortfolioModalOpen(false);
+    posthog.capture("portfolio_create_modal", { action: "close" });
+  };
+
+  if (isLoadingPortfoliosData) {
+    return <Spinner />;
+  }
+
+  const hasPortfolios =
+    !isLoadingPortfoliosData &&
+    portfoliosData?.portfolios &&
+    portfoliosData.portfolios.length > 0;
+
+  if (!hasPortfolios) {
+    return (
+      <>
+        <div className="grid h-full grid-cols-1 md:grid-cols-2 md:gap-8">
+          <div className="relative flex h-[200px] w-full place-self-center">
+            <Image
+              src="/undraw_blank_canvas.svg"
+              alt={t("welcome")}
+              fill
+              style={{ maxWidth: "400px", margin: "0 auto" }}
+            />
+          </div>
+          <div className="flex flex-col justify-between md:justify-center md:gap-8">
+            <div className="flex flex-col justify-center gap-2">
+              <Heading variant="h2">{t("empty-portfolios")}</Heading>
+              <Text className="text-slate-600">
+                {t("empty-portfolios-description")}
+              </Text>
+            </div>
+            <PortfolioCreateDialog
+              isOpen={isCreatePortfolioModalOpen}
+              setOpen={(open) => {
+                if (!open) {
+                  closePortfolioCreateModal();
+                } else {
+                  openPortfolioCreateModal();
+                }
+              }}
+            />
+          </div>
+        </div>
+      </>
+    );
+  }
+
+  return (
+    <>
+      <div className="flex flex-col gap-4">
+        <div className="flex flex-col justify-center gap-2">
+          <Heading variant="h2">{t("portfolios-overview")}</Heading>
+          <Text variant="smallText" className="text-slate-600">
+            {t("portfolios-overview-description")}
+          </Text>
+        </div>
+        <section className="flex flex-col gap-2">
+          <div className="flex items-center justify-between">
+            <Heading variant="h6">{t("overview")}</Heading>
+            <PortfolioCreateDialog
+              isOpen={isCreatePortfolioModalOpen}
+              setOpen={(open) => {
+                if (!open) {
+                  closePortfolioCreateModal();
+                } else {
+                  openPortfolioCreateModal();
+                }
+              }}
+            />
+          </div>
+          <Card className="border-none">
+            <PortfolioTable portfolios={portfoliosData?.portfolios} />
+          </Card>
+        </section>
+      </div>
+    </>
+  );
+};
+
+export default Portfolio;

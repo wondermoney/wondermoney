@@ -1,0 +1,24 @@
+---
+title: Use the mobile app with your server
+description: Point the WonderMoney app for iOS and Android at your own server.
+---
+
+The WonderMoney app works with any WonderMoney server, not only wonder.money.
+
+## Connect the app
+
+1. Open the app and go to the sign-in screen.
+2. Tap **Use a different server**.
+3. Enter your API address, the `API_URL` from your `.env`, for example `api.money.example.com`.
+4. Tap **Connect**, then sign in with your account on that server.
+
+The app checks the address before saving it. If the server can't be reached, isn't a WonderMoney server or needs a newer version of the app, the app tells you and keeps the previous server.
+
+## Requirements
+
+- The phone must be able to reach the API. In practice that means HTTPS on a public hostname; see [HTTPS and domains](/en/docs/self-hosting/https-and-domains).
+- Features your server hasn't configured, such as receipt scanning or market data, are hidden in the app too.
+
+## Go back to wonder.money
+
+On the sign-in screen, tap **Use the default server**.

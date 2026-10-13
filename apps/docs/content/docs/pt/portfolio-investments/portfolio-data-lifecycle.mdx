@@ -1,0 +1,54 @@
+---
+title: Ciclo de vida dos dados da carteira
+description: Compreende como os dados da carteira passam por importação, resolução, preços, snapshots e histórico.
+---
+
+Os dados da carteira na WonderMoney seguem um ciclo de vida faseado. Algumas partes podem ficar prontas antes de outras, por isso posições, preços, snapshots e histórico podem não ser atualizados ao mesmo tempo.
+
+<DocsImage
+  src="/images/docs/pt/portfolio-investments/portfolio-data-lifecycle-transactions.png"
+  alt="Portfolio transactions list showing buys, sells, dividends, and withdrawals for the Investment Portfolio."
+  caption="Every imported or manually added transaction feeds the portfolio data lifecycle."
+  width={1440}
+  height={900}
+/>
+
+## Ciclo atual
+
+1. Transação manual ou importação CSV cria ou atualiza transações da carteira.
+2. A resolução de ativos associa símbolos, ISINs ou etiquetas do corretor a um ativo financeiro.
+3. A atualização de preços obtém preços de mercado atuais quando existe cobertura.
+4. A atualização de snapshots reconstrói snapshots diários da carteira para o intervalo afetado.
+5. A disponibilidade do histórico reflete se a carteira tem cobertura suficiente para gráficos e métricas.
+
+## O que o utilizador deve esperar
+
+- As posições podem aparecer antes de o histórico de desempenho estar completo.
+- A importação CSV pode terminar com sucesso mesmo que algumas linhas precisem de resolução de ativos mais tarde.
+- Alguns gráficos ou métricas podem mostrar estados parciais ou em processamento enquanto termina o trabalho em segundo plano.
+- Histórico em falta nem sempre significa erro; pode significar que a cobertura ainda está a ser construída.
+
+## Vocabulário de estados
+
+Esta documentação usa a seguinte linguagem de estados:
+
+- ready: a superfície pode, em geral, ser confiada.
+- processing: o trabalho em segundo plano ainda está a recuperar.
+- partial: a superfície é utilizável, mas incompleta.
+- needs_action: o utilizador deve resolver um problema de importação ou de ativo.
+- unavailable: reservado na documentação para um estado futuro ou emitido pelo backend; não assumas que está ativo hoje.
+
+## Notas do ciclo de vida para desenvolvimento
+
+- Transações manuais e importações CSV têm o mesmo objetivo final: transações persistidas e vistas da carteira atualizadas.
+- Linhas importadas com ativos não resolvidos devem ser reportadas de forma clara, sem adivinhação silenciosa.
+- A cobertura histórica de preços é obtida a pedido e pode estar incompleta para datas antigas.
+- A reconstrução de snapshots pode ficar atrás da atualização de preços, especialmente após importações com atividade histórica de BUY/SELL.
+- A documentação atual não deve prometer revisão de linhas antes de guardar, a menos que esse fluxo exista de facto.
+
+## Páginas relacionadas
+
+- [Investimentos de carteira](/pt/docs/portfolio-investments)
+- [Importar um CSV de carteira](/pt/docs/portfolio-investments/import-portfolio-csv)
+- [Adicionar transações de carteira](/pt/docs/portfolio-investments/add-portfolio-transactions)
+- [Métricas da carteira explicadas](/pt/docs/portfolio-investments/portfolio-metrics-explained)

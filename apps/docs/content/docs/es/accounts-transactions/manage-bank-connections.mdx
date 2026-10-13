@@ -1,0 +1,60 @@
+---
+title: Gestionar conexiones bancarias
+description: Revisa, actualiza o elimina los bancos y las cuentas conectados.
+---
+
+Las conexiones bancarias pueden caducar, necesitar una nueva aprobación o dejar de sincronizarse después de que un banco cambie sus requisitos de seguridad. Usa esta página para mantener los datos importados al día y eliminar las fuentes que ya no quieras usar.
+
+## Estado de la conexión
+
+Cada conexión muestra uno de estos pocos estados:
+
+- **Conectada** — la conexión está activa y sus cuentas se han actualizado.
+- **En proceso** — la conexión se está configurando o aún no ha terminado su primera actualización.
+- **Caducada** — la conexión ya no es válida y necesita una nueva aprobación.
+- **Error** — la conexión no se pudo completar.
+
+Solo ves el estado de tus propias conexiones, y el estado se limita a tu cuenta y no al banco o al proveedor en su conjunto.
+
+## Cuando falla una sincronización
+
+Si una sincronización falla, la vista de recuperación explica qué ocurrió y ofrece el siguiente paso relevante, como reintentar la conexión, añadir la cuenta manualmente o importar un extracto. El flujo de recuperación muestra el nombre del banco afectado, para que quede claro qué conexión necesita atención.
+
+Si la lista de bancos no está disponible temporalmente — por ejemplo, durante una interrupción en el proveedor — el selector de bancos muestra un error claro en lugar de fallar, y puedes reintentar.
+
+## Antes de empezar
+
+Comprueba si el problema se limita a una cuenta o afecta a toda la conexión bancaria. Si aparece un aviso de reautenticación, complétalo antes de hacer otros cambios.
+
+## Pasos
+
+1. Abre la lista de bancos conectados.
+2. Revisa el estado de sincronización y la hora de la última actualización.
+3. Vuelve a conectar o a autorizar cualquier conexión que haya caducado.
+4. Elimina una conexión solo si ya no quieres recibir nuevas importaciones de ella. Desvincular es seguro de reintentar: si el primer intento no se completa, repetirlo termina el trabajo.
+
+<DocsImage
+  src="/images/docs/es/accounts-transactions/manage-bank-connections-overview.png"
+  alt="Settings Connections tab showing the bank connections list with an empty state."
+  caption="Bank connections live under Settings — Connections, with sync status per connection."
+  width={1440}
+  height={900}
+/>
+
+## Revisión
+
+Después de actualizar una conexión, confirma que aparecen nuevas transacciones y que los saldos coinciden con lo esperado. Si hay varias cuentas vinculadas al mismo banco, compruébalas una por una.
+
+## Problemas comunes
+
+- El banco cambió su flujo de inicio de sesión o de seguridad.
+- Una cuenta se sincronizó y otra no.
+- Una conexión eliminada sigue apareciendo hasta la siguiente actualización.
+- La conexión bancaria es válida, pero la cuenta estaba oculta o excluida.
+
+## Enlaces relacionados
+
+- [Conectar tu primera cuenta bancaria](/es/docs/start-here/connect-first-bank-account)
+- [Problemas con las conexiones bancarias](/es/docs/troubleshooting/bank-connection-problems)
+- [Entender las transacciones](/es/docs/accounts-transactions/understand-transactions)
+- [Transacciones en falta o duplicadas](/es/docs/accounts-transactions/missing-duplicate-transactions)

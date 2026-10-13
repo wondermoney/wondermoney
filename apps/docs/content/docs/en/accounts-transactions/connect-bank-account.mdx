@@ -1,0 +1,46 @@
+---
+title: Connect bank account
+description: Start a new bank connection and choose the accounts to import.
+---
+
+Use the bank connection flow when you want WonderMoney to import balances and transactions from a supported financial institution through Open Banking. This is the main path for accounts that should sync automatically.
+
+During onboarding, you can connect a bank directly from the account step, so you do not need to visit this flow separately. This page describes the standalone flow, which works the same way.
+
+## Before you start
+
+Confirm that the bank is supported and that you are ready to approve the connection in the bank's own authentication flow.
+
+## Steps
+
+1. Start a new bank connection.
+2. Select the bank and sign in at the provider.
+3. Choose the accounts you want to import.
+4. Finish approval and wait for the first sync.
+
+<DocsImage
+  src="/images/docs/accounts-transactions/connect-bank-account-bank-picker.png"
+  alt="Bank picker modal listing Sandbox Finance first, followed by supported institutions."
+  caption="Sandbox users see the Sandbox Finance institution first in the bank list."
+  width={1440}
+  height={1131}
+/>
+
+## Review
+
+After the connection is created, check the imported balances and transactions for the accounts you selected. If you also use manual accounts, keep them separate from the synced ones.
+
+## Common issues
+
+- The bank requires a second approval step.
+- The wrong accounts were included during selection.
+- The connection created successfully but the sync is still pending.
+- The account already exists as a manual account.
+
+## Related links
+
+- [Connect your first bank account](/en/docs/start-here/connect-first-bank-account)
+- [Bank connection problems](/en/docs/troubleshooting/bank-connection-problems)
+- [Manage bank connections](/en/docs/accounts-transactions/manage-bank-connections)
+- [Data privacy](/en/docs/settings-security-privacy/data-privacy)
+- [Manual offline account](/en/docs/accounts-transactions/manual-offline-account)

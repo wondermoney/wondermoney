@@ -1,0 +1,47 @@
+{
+  "name": "@wondermoney/shared",
+  "version": "9.0.0",
+  "private": true,
+  "license": "MIT",
+  "author": "The WonderMoney contributors",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/wondermoney/shared.git"
+  },
+  "bugs": {
+    "url": "https://github.com/wondermoney/shared/issues"
+  },
+  "homepage": "https://github.com/wondermoney/shared#readme",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "lint": "eslint --ext .js,.ts .",
+    "format": "prettier --ignore-path .gitignore --write \"**/*.+(js|ts|json)\"",
+    "test": "vitest run",
+    "coverage": "vitest run --coverage",
+    "test:ui": "vitest --ui",
+    "build:lib": "tsup index.ts --format cjs,esm && tsc -p tsconfig.build.json"
+  },
+  "dependencies": {
+    "big.js": "^6.2.1",
+    "csv-parse": "^5.5.6",
+    "date-fns": "4.4.0",
+    "eodhd": "^1.0.1",
+    "xlsx": "^0.18.5"
+  },
+  "devDependencies": {
+    "@types/big.js": "^6.2.2",
+    "@types/node": "^20.14.2",
+    "@typescript-eslint/eslint-plugin": "^5.48.2",
+    "@typescript-eslint/parser": "^5.48.2",
+    "@vitest/ui": "^1.6.0",
+    "eslint": "^8.32.0",
+    "eslint-config-prettier": "^8.6.0",
+    "prettier": "^2.8.3",
+    "tsup": "8.5.1",
+    "typescript": "5.9.3",
+    "vitest": "^1.6.0",
+    "vitest-github-actions-reporter": "^0.11.1"
+  }
+}

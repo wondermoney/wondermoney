@@ -1,0 +1,92 @@
+# Start here — docs shell hero + auth pages + first account + dashboard.
+# Section user: docs-screens-sandbox (bank picker needs the +sandbox user).
+section: start-here
+user: docs-screens-sandbox
+pages:
+  - slug: index
+    step: overview
+    url: http://localhost:3100/en/docs/start-here
+    login: false
+    anchor:
+      text: "Start here"
+    actions:
+      - type: eval
+        script: "document.querySelectorAll('figure').forEach(f => { if (f.querySelector('img')) f.remove(); })"
+    note: >-
+      Docs shell hero — docs-new must be running on :3100 (the sandbox does not
+      host the docs site). Start it with `cd docs-new && yarn dev -- -p 3100`
+      before running this section. This is the only page that targets the docs
+      site; everything else targets the product web app. The URL is the
+      start-here section page (matches the recipe §5.1 and the existing
+      capture), not the docs home at /en — the hero shot shows the section list
+      in the sidebar, per the MDX caption. The eval removes the self-referential
+      <DocsImage> (this page embeds its own screenshot), so the full-page height
+      matches the original pre-wiring capture (2880x2742).
+
+  - slug: create-account
+    step: signup-form
+    url: http://localhost:64590/en/auth/signup
+    login: false
+    anchor:
+      text: "Sign up for 14 days of full access"
+    note: "Empty signup form."
+
+  - slug: sign-in-password-recovery
+    step: login
+    url: http://localhost:64590/en/auth/login
+    login: false
+    anchor:
+      text: "Welcome back"
+
+  - slug: sign-in-password-recovery
+    step: forgot-password
+    url: http://localhost:64590/en/auth/forgot
+    login: false
+    anchor:
+      text: "Send reset email"
+
+  - slug: multi-factor-authentication
+    step: otp
+    url: http://localhost:64590/en/auth/mfa
+    user: docs-screens
+    login: true
+    anchor:
+      text: "Multi-factor authentication"
+    note: >-
+      Requires an enrolled TOTP factor. Page-level `user` override uses the
+      primary user (vault `docs-screens`), which has TOTP enrolled; the
+      `+sandbox` user has no MFA and gets redirected to /. Do not submit the OTP.
+
+  - slug: connect-first-bank-account
+    step: bank-picker
+    url: http://localhost:64590/en/accounts
+    anchor:
+      text: "Add Account"
+    actions:
+      - type: click-role
+        name: "Add Account"
+        locales:
+          pt: "Adicionar Conta"
+          es: "Añadir cuenta"
+      - type: wait-text
+        text: "Linked"
+        locales:
+          pt: "Ligada"
+          es: "Vinculada"
+      - type: click-role
+        name: "Linked"
+        locales:
+          pt: "Ligada"
+          es: "Vinculada"
+      - type: wait-text
+        text: "Sandbox Finance"
+    note: >-
+      Requires the +sandbox user; the primary user won't see Sandbox Finance in
+      the list. The capture target is the open bank picker with Sandbox Finance
+      first — do not click the institution (that would start the GoCardless
+      flow). The picker dialog is headed "Add Account" (there is no
+      "Choose your bank" text in this build).
+
+  - slug: understand-dashboard
+    step: overview
+    url: http://localhost:64590/en

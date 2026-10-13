@@ -1,0 +1,10 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "declaration": false,
+    "declarationMap": false,
+    "noImplicitOverride": false
+  },
+  "include": ["src/database/migrations/Migration*.ts"],
+  "exclude": ["dist", "node_modules", "src/database/migrations/__tests__"]
+}

@@ -1,0 +1,37 @@
+---
+title: Importar transacciones desde CSV
+description: Importa el historial de transacciones desde un archivo CSV cuando la sincronización bancaria no esté disponible.
+---
+
+La importación por CSV es útil cuando necesitas traer datos históricos a WonderMoney o cuando no hay una conexión bancaria disponible. Un archivo limpio y una asignación correcta de columnas facilitan la verificación de la importación.
+
+## Antes de empezar
+
+Comprueba que el archivo contiene los campos de fecha, importe y descripción que necesitas. Si es posible, asegúrate de que todas las filas pertenecen a la misma cuenta o divisa.
+
+## Pasos
+
+1. Exporta o prepara el archivo CSV.
+2. Abre el flujo de importación y sube el archivo.
+3. Empareja las columnas con los campos esperados.
+4. Revisa la vista previa antes de completar la importación.
+
+## Revisión
+
+Después de la importación, compara el número de filas y los primeros saldos con el archivo de origen. Si el archivo cubre un periodo largo, comprueba que las fechas se interpretaron correctamente.
+
+Las filas importadas se categorizan con el mismo categorizador determinista que las transacciones sincronizadas, por lo que el motivo que ves en una sugerencia es coherente sin importar cómo llegó la transacción. Cuando categorizas en masa filas importadas, la categoría elegida se escribe en cada transacción y se actualiza la correspondencia del comercio para futuras importaciones.
+
+## Problemas comunes
+
+- El archivo usa un formato de fecha inesperado.
+- Los importes están guardados con el separador decimal incorrecto.
+- Los abonos y los cargos están invertidos.
+- Los mismos datos ya se importaron desde otra fuente.
+
+## Enlaces relacionados
+
+- [Problemas con la importación de transacciones](/es/docs/troubleshooting/transaction-import-problems)
+- [Entender las transacciones](/es/docs/accounts-transactions/understand-transactions)
+- [Categorizar transacciones](/es/docs/accounts-transactions/categorize-transactions)
+- [Cuenta manual sin conexión](/es/docs/accounts-transactions/manual-offline-account)

@@ -1,0 +1,54 @@
+---
+title: Transações em falta ou duplicadas
+description: Percebe como os duplicados são evitados e o que fazer quando uma transação está em falta.
+---
+
+O WonderMoney evita duplicados como parte do processo normal de transações, pelo que a maioria dos casos de uma transação repetida é resolvida automaticamente. Quando uma transação falta ou aparece duas vezes, a causa costuma ser o tempo, uma ligação com problemas ou uma entrada manual que coincide com uma importação.
+
+## Como os duplicados são tratados
+
+Cada transação tem uma impressão digital que a identifica. Quando os dados recebidos coincidem com uma impressão digital existente, o duplicado é descartado em vez de criar uma segunda linha. Na rara ocasião em que a correspondência não é certa, a transação é mantida e marcada com um aviso para que possas decidir.
+
+Todas as decisões ficam registadas no registo de auditoria das transações, incluindo duplicados descartados e mudanças de estado. A tolerância da impressão digital é deliberadamente estreita: duas transações legítimas que parecem semelhantes — por exemplo duas compras idênticas no mesmo dia — não são tratadas como duplicados, porque uma referência bancária distinta é suficiente para os distinguir.
+
+## Versões pendente e confirmada
+
+Um pagamento por cartão pendente é associado automaticamente à versão confirmada quando o banco o confirma, pelo que os dois não devem ficar separados. Se o banco nunca confirmar um pagamento pendente, este expira após o intervalo definido e aparece como expirado, em vez de ficar como um registo pendente.
+
+## Antes de começar
+
+Confirma a conta, o intervalo de datas e os filtros de categoria antes de investigar mais a fundo. Se a ligação bancária estiver desatualizada, atualiza-a primeiro.
+
+## Passos
+
+1. Verifica se a transação está pendente, confirmada, expirada ou ainda fora do intervalo selecionado.
+2. Vê se outra conta importou o mesmo pagamento.
+3. Compara entradas manuais com entradas importadas.
+4. Remove ou une duplicados quando a origem estiver clara.
+
+<DocsImage
+  src="/images/docs/pt/accounts-transactions/missing-duplicate-transactions-review.png"
+  alt="Review transactions page listing uncategorized transactions that need a category."
+  caption="The review queue surfaces transactions that need a category before they affect budgets."
+  width={1440}
+  height={900}
+/>
+
+## Rever
+
+Depois de corrigir, volta a verificar a conta após a próxima sincronização. O mesmo problema não deve reaparecer se a origem tiver sido corrigida.
+
+## Problemas comuns
+
+- Uma entrada manual foi criada antes de chegar a importação bancária e um aviso sugere que pode ser um duplicado.
+- Uma transação pendente aparece como expirada porque o banco nunca a confirmou.
+- O banco omitiu uma transação até à próxima atualização.
+- O filtro de datas errado fez a transação parecer em falta.
+
+
+## Ligações relacionadas
+
+- [Compreender transações](/pt/docs/accounts-transactions/understand-transactions)
+- [Gerir ligações bancárias](/pt/docs/accounts-transactions/manage-bank-connections)
+- [Problemas na importação de transações](/pt/docs/troubleshooting/transaction-import-problems)
+- [Conta offline manual](/pt/docs/accounts-transactions/manual-offline-account)

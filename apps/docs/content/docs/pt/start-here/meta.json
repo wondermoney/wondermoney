@@ -1,0 +1,11 @@
+{
+  "title": "Come\u00e7ar",
+  "pages": [
+    "index",
+    "create-account",
+    "sign-in-password-recovery",
+    "multi-factor-authentication",
+    "connect-first-bank-account",
+    "understand-dashboard"
+  ]
+}

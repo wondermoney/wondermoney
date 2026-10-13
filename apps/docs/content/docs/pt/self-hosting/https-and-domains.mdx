@@ -1,0 +1,37 @@
+---
+title: HTTPS e domínios
+description: Coloca a tua instância atrás de um proxy reverso com HTTPS e os seus próprios domínios.
+---
+
+Antes de usares a tua instância fora da tua rede, serve-a por HTTPS. Dá um nome de domínio à aplicação web e outro à API, e coloca um proxy reverso à frente delas.
+
+## Com o Caddy
+
+O [Caddy](https://caddyserver.com) obtém e renova os certificados automaticamente. Com a aplicação web e a API na mesma máquina:
+
+```
+money.example.com {
+  reverse_proxy localhost:3000
+}
+
+api.money.example.com {
+  reverse_proxy localhost:3001
+}
+```
+
+Qualquer outro proxy reverso funciona da mesma forma, como nginx, Traefik ou um Cloudflare Tunnel.
+
+## Atualizar o `.env`
+
+```sh
+APP_URL=https://money.example.com
+API_URL=https://api.money.example.com
+AUTH_COOKIE_DOMAIN=.example.com
+NEXT_PUBLIC_AUTH_COOKIE_DOMAIN=.example.com
+```
+
+Depois corre novamente `docker compose up -d`. O domínio do cookie permite que a aplicação web leia a sessão que a API cria, porque estão em subdomínios diferentes do mesmo domínio.
+
+## Manter as portas privadas
+
+Quando o proxy corre na mesma máquina, liga as portas publicadas ao localhost para que os contentores só sejam acessíveis através do proxy. No `docker-compose.yml`, usa `127.0.0.1:3000:3000` e `127.0.0.1:3001:3001`.

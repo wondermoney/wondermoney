@@ -1,0 +1,4 @@
+{
+  "title": "Self-hosting",
+  "pages": ["index", "install", "configure", "https-and-domains", "mobile-app", "upgrade-and-backup"]
+}

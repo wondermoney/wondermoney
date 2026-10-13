@@ -1,0 +1,11 @@
+{
+  "title": "Start Here",
+  "pages": [
+    "index",
+    "create-account",
+    "sign-in-password-recovery",
+    "multi-factor-authentication",
+    "connect-first-bank-account",
+    "understand-dashboard"
+  ]
+}

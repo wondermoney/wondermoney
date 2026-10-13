@@ -1,0 +1,367 @@
+/* Hallmark · scope: app · genre: modern-minimal · theme: custom (violet ~290°)
+ * axes: light + dark (paired) / geometric-sans (Geist) / cool (violet ~290°)
+ * vibe: precise, calm, data-forward, trustworthy
+ * nav: N3 side-rail (adapted — app shell, not a marketing page)
+ * system: DESIGN.md at repo root is the locked system; routes share it.
+ *         Genre overrides declined: pure-white paper, zero-chroma neutrals.
+ * source of truth: this file. DESIGN.md § 9 Exports mirrors it — keep in sync.
+ */
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  color-scheme: light;
+  --background: oklch(0.985 0.006 290);
+  --foreground: oklch(0.145 0 0);
+  --card: oklch(0.985 0.006 290);
+  --card-foreground: oklch(0.145 0 0);
+  --popover: oklch(0.985 0.006 290);
+  --popover-foreground: oklch(0.145 0 0);
+  --primary: oklch(0.48 0.17 290);
+  --primary-foreground: oklch(0.986 0.005 235.46);
+  --secondary: oklch(0.97 0.007 290);
+  --secondary-foreground: oklch(0.205 0 0);
+  --muted: oklch(0.97 0.007 290);
+  --muted-foreground: oklch(0.53 0.012 290);
+  --accent: oklch(0.97 0.007 290);
+  --accent-foreground: oklch(0.205 0 0);
+  /* Fills are darkened from the shadcn defaults so their own -foreground pair
+     clears 4.5:1. At L=0.577 the destructive fill measured 4.36:1 against
+     --destructive-foreground and --info measured 4.22:1 — both under the floor,
+     on the label of a real button. Chroma and hue are untouched; only lightness
+     moved, so the reds stay the same reds. */
+  /* 4.85:1 on --destructive-foreground. Keep this comment on its own line:
+     as a trailing comment it pushed the declaration over the print width,
+     prettier wrapped it across three lines, and the sync check's
+     one-declaration-per-line parser then stopped seeing --destructive at
+     all — the token was silently exempt from its own regression test. */
+  --destructive: oklch(0.54 0.245 27.325);
+  --destructive-foreground: oklch(0.971 0.013 17.38);
+  --warning: oklch(0.7 0.15 75);
+  --warning-foreground: oklch(0.27 0.05 75);
+  --info: oklch(0.48 0.2 240); /* 5.64:1 solid, 4.68:1 at /90 hover */
+  --info-foreground: oklch(0.98 0.01 240);
+  /* A --success fill was previously ruled out because no in-gamut green
+     reached 4.5:1 against a *near-white* foreground. That constraint was the
+     problem, not the hue: --warning already solves the same shape by pairing a
+     light fill with dark ink. Success now mirrors it exactly — 6.36:1 light,
+     8.35:1 dark, and every /90 and /80 state clears the floor too. */
+  --success: oklch(0.72 0.16 150);
+  --success-foreground: oklch(0.27 0.05 150);
+  /* Semantic colours legible as TEXT on the page/card background. The fills
+     above are tuned for filled surfaces and are not safe as body text: e.g.
+     --warning measures 2.62:1 on the light canvas. Use these for text/icons,
+     the fills for backgrounds.
+
+     Tuned against a 10% tint of themselves, not against the bare canvas. The
+     app's status cards put this ink on `bg-<token>/5` and `bg-<token>/10`
+     fills and the totals rows put it on `bg-muted/50`; at the previous
+     lightnesses all four passed on the canvas (4.73–5.14) and then failed on
+     their own tint (4.13–4.40). Measured now, the worst case across canvas,
+     self/5, self/10 and muted/50 is 4.63:1. The dark half needs no such
+     nudge — its worst case is already 8.03:1. */
+  --destructive-text: oklch(0.53 0.2 27.325);
+  --warning-text: oklch(0.52 0.115 75);
+  --info-text: oklch(0.51 0.12 240);
+  --success-text: oklch(0.5 0.145 150);
+  /* Modal scrim. Deliberately the same dark value in both themes: an overlay
+     darkens whatever is behind it, so it must not invert with the theme. */
+  --overlay: oklch(0.145 0.012 290);
+  --border: oklch(0.922 0.008 290);
+  /* --input is NOT --border, even though they started life as the same value.
+     A divider is decoration and may stay faint; the outline of a text field,
+     select, textarea, OTP box or switch track is the visible boundary of a
+     user-interface component, which WCAG 1.4.11 holds to 3:1. At the shared
+     0.922 it measured 1.21:1 on the light canvas and 1.31:1 on the dark one,
+     so every form control in the app was drawn in a line you could barely
+     see — and the Switch's unchecked track, which is this same token as a
+     fill, was near-invisible under its own white thumb. Measured now: 3.23:1
+     light and 3.02:1 dark on the canvas, 3.09 / 2.82 on a tinted row. Only
+     the eight files in components/ui that draw controls use this token. */
+  --input: oklch(0.64 0.012 290);
+  --ring: oklch(0.54 0.2 290);
+  /* Chart series. The two halves used to be unrelated shadcn default ramps, so
+     the *same* series changed hue with the theme: --chart-1 was orange in light
+     and blue in dark, --chart-3 the reverse. Any chart with a legend meant
+     something different depending on the theme.
+     Hue is now fixed per slot and only lightness/chroma move between halves.
+     Slot 1 is the brand violet, because it is the colour a single-series chart
+     gets — and a net-worth line is not a categorical value.
+     Validated as a categorical palette in both halves: lightness band, chroma
+     floor, adjacent CVD separation under protanopia and deuteranopia, the
+     normal-vision floor, and >=3:1 against the canvas. Light's worst adjacent
+     pair sits in the 6-8 WARN band (7.2), which is legal because these charts
+     ship legends and direct labels; dark clears the target at 9.5. Re-run
+     before changing any value — the pairs are not independent.
+     Slot order: violet 290 · amber 70 · bluish-green 170 · vermillion 30 ·
+     sky 235. Assign in order and never cycle. */
+  --chart-1: oklch(0.52 0.17 290);
+  --chart-2: oklch(0.62 0.14 70); /* amber 70 */
+  --chart-3: oklch(0.5 0.13 170); /* bluish-green 170 */
+  --chart-4: oklch(0.58 0.19 30); /* vermillion 30 */
+  --chart-5: oklch(0.54 0.13 235); /* sky 235 */
+  /* 0.5rem, down from 0.625rem. DESIGN.md § 9: the reference draws a working
+     instrument, not a marketing page, and its corners are tighter — badges
+     4px, controls 6px, cards 8px. The derived steps below follow from this
+     one value, so nothing else needs touching. */
+  --radius: 0.5rem;
+}
+
+.dark {
+  color-scheme: dark;
+  --background: oklch(0.145 0.012 290);
+  --foreground: oklch(0.985 0 0);
+  --card: oklch(0.145 0.012 290);
+  --card-foreground: oklch(0.985 0 0);
+  --popover: oklch(0.145 0.012 290);
+  --popover-foreground: oklch(0.985 0 0);
+  --primary: oklch(0.69 0.17 290);
+  --primary-foreground: oklch(0.205 0 0);
+  --secondary: oklch(0.269 0.012 290);
+  --secondary-foreground: oklch(0.985 0 0);
+  --muted: oklch(0.269 0.012 290);
+  --muted-foreground: oklch(0.708 0.012 290);
+  --accent: oklch(0.269 0.012 290);
+  --accent-foreground: oklch(0.985 0 0);
+  --destructive: oklch(0.396 0.141 25.723);
+  /* Was oklch(0.637 0.237 25.331) — a red sitting on a red fill, measuring
+     2.63:1. Every destructive button in dark mode (delete account, remove
+     partner, delete budget) was effectively unreadable. This is the same warm
+     near-white the light half uses on the same fill; it measures 9.21:1. */
+  --destructive-foreground: oklch(0.971 0.013 17.38);
+  --warning: oklch(0.82 0.13 80);
+  --warning-foreground: oklch(0.27 0.05 75);
+  --info: oklch(0.65 0.18 245);
+  --info-foreground: oklch(0.15 0.01 240);
+  --success: oklch(0.8 0.14 150);
+  --success-foreground: oklch(0.27 0.05 150);
+  --destructive-text: oklch(0.68 0.19 27.325);
+  --warning-text: oklch(0.8 0.16 75);
+  --info-text: oklch(0.7 0.16 240);
+  --success-text: oklch(0.73 0.2 150);
+  --overlay: oklch(0.145 0.012 290);
+  --border: oklch(0.269 0.012 290);
+  /* See the light half: a control boundary, not a divider. */
+  --input: oklch(0.48 0.012 290);
+  --ring: oklch(0.69 0.17 290);
+  /* Same hue per slot as the light half; only lightness and chroma move. */
+  --chart-1: oklch(0.64 0.16 290);
+  --chart-2: oklch(0.66 0.13 70);
+  --chart-3: oklch(0.62 0.13 170);
+  --chart-4: oklch(0.54 0.19 30);
+  --chart-5: oklch(0.58 0.13 235);
+}
+
+@theme inline {
+  --color-brand-50: var(--color-violet-50);
+  --color-brand-100: var(--color-violet-100);
+  --color-brand-200: var(--color-violet-200);
+  --color-brand-300: var(--color-violet-300);
+  --color-brand-400: var(--color-purple-400);
+  --color-brand-500: var(--color-violet-500);
+  --color-brand-600: var(--color-violet-600);
+  --color-brand-700: var(--color-violet-700);
+  --color-brand-800: var(--color-violet-800);
+  --color-brand-900: var(--color-violet-900);
+  --color-brand-950: var(--color-violet-950);
+  --font-sans: var(--font-geist-sans), "sans-serif";
+  --font-mono: var(--font-geist-mono), "sans-serif";
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-info: var(--info);
+  --color-info-foreground: var(--info-foreground);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-destructive-text: var(--destructive-text);
+  --color-warning-text: var(--warning-text);
+  --color-info-text: var(--info-text);
+  --color-success-text: var(--success-text);
+  --color-overlay: var(--overlay);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+
+  /* Named easings and durations. Motion in this app reports state and nothing
+     else, so the vocabulary is deliberately small: entry decelerates, exit
+     accelerates, and anything that moves both ways uses the symmetric curve.
+     The browser default `ease` is not used — it is the curve you get when
+     nobody chose one. No bounce, no overshoot: an interface handling money
+     should not feel springy. */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in: cubic-bezier(0.7, 0, 0.84, 0);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --duration-micro: 120ms; /* press, hover, focus — feedback, not animation */
+  --duration-short: 200ms; /* panel/accordion state */
+  --duration-long: 320ms; /* overlay entry, the longest anything may take */
+
+  --animate-accordion-down: accordion-down 0.2s ease-out;
+  --animate-accordion-up: accordion-up 0.2s ease-out;
+
+  @keyframes accordion-down {
+    from {
+      height: 0;
+    }
+    to {
+      height: var(--radix-accordion-content-height);
+    }
+  }
+
+  @keyframes accordion-up {
+    from {
+      height: var(--radix-accordion-content-height);
+    }
+    to {
+      height: 0;
+    }
+  }
+}
+
+/* This layer is added by shadcn/ui */
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/* This layer is by next-forge */
+@layer base {
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    @apply border-border;
+  }
+  * {
+    @apply min-w-0;
+  }
+  html {
+    text-rendering: optimizelegibility;
+  }
+  /* `clip`, never `hidden`, on both axes. Both stop a stray wide/tall child from
+     introducing a scrollbar, but `hidden` makes the root a scroll container, which
+     silently breaks every `position: sticky` header and rail in the app — `clip`
+     doesn't establish a scroll container, so sticky positioning is unaffected.
+     The vertical axis needs the same treatment as the horizontal one (RAD-635):
+     the app's real scroll surface is the nested `overflow-y-auto` container in
+     `app/providers.tsx`, but leaving `html`/`body` at the default `overflow-y:
+     visible` lets any off-viewport descendant (e.g. a measurement helper, a
+     portalled element, a stray absolutely-positioned node) make the *document*
+     independently scrollable too. When that happens, a real mouse-wheel/trackpad
+     scroll can land on the document instead of the intended inner container,
+     leaving that container's `scrollTop` at 0 while `window.scrollY` moves — at
+     which point in-viewport content has correct layout rects and computed styles
+     but is not actually painted or hit-testable (`elementFromPoint` returns only
+     `<html>`). `overflow-y: clip` closes off that second, unintended scroll path
+     without touching the sticky-safe `clip` behavior above. */
+  html,
+  body {
+    overflow: clip;
+  }
+  body {
+    @apply min-h-[100dvh];
+  }
+  input::placeholder,
+  textarea::placeholder {
+    @apply text-muted-foreground;
+  }
+  /* Geist Mono is reserved for financial data (§3), so a mono run is always a
+     figure. Tabular figures keep digits aligned down a column, which is the
+     whole reason for setting money in mono in the first place. */
+  .font-mono {
+    font-variant-numeric: tabular-nums;
+  }
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    @apply cursor-pointer;
+  }
+}
+
+/* Reduced motion — the floor, not the whole story.
+   Individual components still annotate `motion-reduce:` where they need a
+   specific fallback; this rule catches everything that doesn't. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    animation-duration: 1ms !important;
+    animation-delay: 0ms !important;
+    transition-duration: 1ms !important;
+    transition-delay: 0ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  /* Loading indicators are the deliberate exception. They report that work is
+     in progress, so freezing one reads as "stuck" rather than as "calm" —
+     which is worse than the motion it removes. Keep them turning, slowly.
+     Radix enter/exit animations are left to the 1ms rule above: they still
+     fire animationend, so nothing gets stranded mounted. */
+  .animate-spin {
+    animation-duration: 1.5s !important;
+  }
+}
+
+/* Typography plugin */
+@utility prose {
+  --tw-prose-body: var(--color-foreground);
+  --tw-prose-headings: var(--color-foreground);
+  --tw-prose-lead: var(--color-muted-foreground);
+  --tw-prose-links: var(--color-primary);
+  --tw-prose-bold: var(--color-foreground);
+  --tw-prose-counters: var(--color-foreground);
+  --tw-prose-bullets: var(--color-muted-foreground);
+  --tw-prose-hr: var(--color-muted-foreground);
+  --tw-prose-quotes: var(--color-muted-foreground);
+  --tw-prose-quote-borders: var(--color-border);
+  --tw-prose-captions: var(--color-muted-foreground);
+  --tw-prose-code: var(--color-foreground);
+  --tw-prose-pre-code: var(--color-foreground);
+  --tw-prose-pre-bg: var(--color-background);
+  --tw-prose-th-borders: var(--color-border);
+  --tw-prose-td-borders: var(--color-border);
+  --tw-prose-invert-body: var(--color-foreground);
+  --tw-prose-invert-headings: var(--color-foreground);
+  --tw-prose-invert-lead: var(--color-muted-foreground);
+  --tw-prose-invert-links: var(--color-primary);
+  --tw-prose-invert-bold: var(--color-foreground);
+  --tw-prose-invert-counters: var(--color-foreground);
+  --tw-prose-invert-bullets: var(--color-foreground);
+  --tw-prose-invert-hr: var(--color-muted-foreground);
+  --tw-prose-invert-quotes: var(--color-muted-foreground);
+  --tw-prose-invert-quote-borders: var(--color-border);
+  --tw-prose-invert-captions: var(--color-muted-foreground);
+  --tw-prose-invert-code: var(--color-foreground);
+  --tw-prose-invert-pre-code: var(--color-foreground);
+  --tw-prose-invert-pre-bg: var(--color-background);
+  --tw-prose-invert-th-borders: var(--color-border);
+  --tw-prose-invert-td-borders: var(--color-border);
+}

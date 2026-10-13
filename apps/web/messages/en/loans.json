@@ -1,0 +1,168 @@
+{
+  "loans": {
+    "page": {
+      "title": "Loans",
+      "description": "Track loans, repayment plans, and balances in one place."
+    },
+    "actions": {
+      "add": "Add loan",
+      "edit": "Edit loan",
+      "delete": "Delete loan",
+      "recordPayment": "Record payment",
+      "linkRepayment": "Link repayment",
+      "unlinkRepayment": "Unlink repayment"
+    },
+    "fields": {
+      "name": "Loan name",
+      "currency": "Currency",
+      "includeInNetWorth": "Include in net worth",
+      "notes": "Notes",
+      "providerName": "Provider",
+      "lender": "Lender",
+      "type": "Loan type",
+      "status": "Status",
+      "principal": "Principal",
+      "originalPrincipal": "Original loan amount",
+      "originalPrincipalHint": "Optional. The amount originally borrowed, if different from the principal above (e.g. when adding a loan you've already been paying off). Used to calculate repayment progress.",
+      "balance": "Balance",
+      "interestRate": "Interest rate",
+      "installment": "Monthly installment",
+      "termMonths": "Term (months)",
+      "startDate": "Start date",
+      "dueDate": "Due date",
+      "linkedAccount": "Linked account",
+      "linkedTransaction": "Linked repayment"
+    },
+    "types": {
+      "personal": "Personal",
+      "mortgage": "Mortgage",
+      "auto": "Auto",
+      "student": "Student",
+      "other": "Other"
+    },
+    "statuses": {
+      "active": "Active",
+      "paid": "Paid",
+      "closed": "Closed",
+      "paused": "Paused",
+      "overdue": "Overdue"
+    },
+    "repayment": {
+      "title": "Repayment linking",
+      "description": "Match repayments to account transactions for accurate balance tracking."
+    },
+    "validation": {
+      "required": "This field is required.",
+      "positiveAmount": "Enter a positive amount.",
+      "validRate": "Enter a valid interest rate.",
+      "originalPrincipalTooLow": "Original loan amount must be at least the principal."
+    },
+    "errors": {
+      "loadFailed": "Unable to load loans.",
+      "loadFailedBody": "We couldn't load the selected loan. Please try again.",
+      "saveFailed": "Unable to save loan.",
+      "deleteFailed": "Unable to delete loan."
+    },
+    "empty": {
+      "title": "No loans yet",
+      "description": "Add your first loan to track balances and repayments.",
+      "noData": "—"
+    },
+    "summary": {
+      "totalOutstanding": "Outstanding debt",
+      "monthlyRepayment": "Monthly repayments",
+      "interestAndFees": "Interest & fees",
+      "netWorthImpact": "Net worth impact",
+      "repaymentsNeedingReview": "Need review",
+      "outstandingPrincipal": "Outstanding principal",
+      "regularPayment": "Regular payment",
+      "annualRate": "Annual rate",
+      "remainingTerm": "Remaining term",
+      "progress": "Repayment progress",
+      "progressLabel": "{value}% repaid"
+    },
+    "detail": {
+      "actions": {
+        "back": "Back to loans",
+        "title": "Loan actions",
+        "adjustBalance": "Add balance adjustment"
+      },
+      "providerUnavailable": "Provider unavailable",
+      "providerUnavailableShort": "Metadata unavailable",
+      "na": "—",
+      "unavailableAccount": "Account unavailable",
+      "months": "{count} months",
+      "description": "Description",
+      "loading": "Loading loan details...",
+      "errors": {
+        "loadFailed": "Unable to load loan.",
+        "loadFailedBody": "We couldn't load the selected loan. Please try again."
+      },
+      "loadFailedBody": "We couldn't load the selected loan. Please try again.",
+      "assumptions": {
+        "title": "Loan assumptions"
+      },
+      "repayments": {
+        "title": "Repayments",
+        "needsReview": "Needs review",
+        "date": "Date",
+        "account": "Account",
+        "description": "Description",
+        "payment": "Payment",
+        "principal": "Principal",
+        "interest": "Interest",
+        "fees": "Fees",
+        "status": "Status",
+        "actions": "Actions",
+        "empty": "No linked repayments yet.",
+        "noCandidates": "No repayment candidates available.",
+        "candidatesTitle": "Link repayments",
+        "candidatesDescription": "Choose a transaction to review and allocate.",
+        "reviewTitle": "Review allocation",
+        "reviewDescription": "Confirm the repayment split before saving.",
+        "linked": "Linked",
+        "candidateConfidence": "Confidence: {value}",
+        "confidenceValue": "{value}%",
+        "confidenceUnavailable": "unavailable",
+        "reasonsUnavailable": "No reasons provided",
+        "high": "high",
+        "medium": "medium",
+        "totalPayment": "Total payment",
+        "saveAllocation": "Save allocation",
+        "editAllocation": "Edit allocation",
+        "removeAssociation": "Remove association",
+        "removeConfirm": "Remove this repayment association?",
+        "editAllocationLabel": "Edit repayment allocation",
+        "removeAssociationLabel": "Remove repayment association"
+      },
+      "amortization": {
+        "title": "Amortization preview",
+        "unavailable": "Amortization preview is unavailable with the current API response."
+      },
+      "adjustment": {
+        "unavailableTitle": "Balance adjustment unavailable",
+        "unavailableDescription": "This action is not wired to an API yet.",
+        "unavailableBody": "The adjustment form is hidden until the API is available."
+      }
+    },
+    "table": {
+      "loan": "Loan",
+      "outstanding": "Outstanding principal",
+      "payment": "Payment",
+      "rate": "Rate",
+      "term": "Remaining term",
+      "progress": "Progress",
+      "progressLabel": "Progress",
+      "status": "Status",
+      "actions": "Actions"
+    },
+    "emptyPreview": {
+      "title": "Preview",
+      "subtitle": "Typical loan tracking view",
+      "sampleName": "Mortgage",
+      "sampleProvider": "Bank",
+      "sampleStatus": "Active",
+      "sampleTerm": "28y 4m"
+    }
+  }
+}

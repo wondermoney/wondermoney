@@ -1,0 +1,55 @@
+---
+title: Importar carteira por CSV
+description: Importa posições e transações de carteira a partir de um ficheiro CSV.
+---
+
+A importação CSV é a forma mais rápida de carregar dados do corretor para o WonderMoney.
+
+## O que é possível importar
+
+- Posições
+- Transações
+- Posições atuais, quando o export as incluir
+
+## Como importar
+
+1. Exporta os dados do corretor.
+2. Abre a carteira que deve ser atualizada.
+3. Carrega o ficheiro CSV.
+4. Aguarda o processamento da importação.
+5. Corrige mapeamentos ou linhas não resolvidas, se forem reportados.
+
+<DocsImage
+  src="/images/docs/pt/portfolio-investments/import-portfolio-csv-import-modal.png"
+  alt="Import Transactions modal with a drag-and-drop file upload area, portfolio selector, and Analyze file button."
+  caption="The import modal accepts a broker CSV, XLS, or XLSX export for the selected portfolio."
+  width={1440}
+  height={900}
+/>
+
+## Melhores resultados
+
+- Usa uma exportação recente do corretor.
+- Mantém uma carteira por conta de corretor, quando possível.
+- Revê tickers, quantidades, datas e moedas no export do corretor antes de carregar.
+- Se algumas linhas precisarem de resolução de ativos, segue as instruções apresentadas após a importação.
+
+## Comportamento atual
+
+A WonderMoney processa os ficheiros CSV carregados após o upload. Não existe uma revisão de linhas antes de guardar.
+
+## Erros comuns
+
+- Carregar o tipo de ficheiro errado.
+- Importar linhas duplicadas de um export antigo.
+- Deixar a coluna da moeda vazia quando o export inclui várias moedas.
+- Assumir que todos os corretores usam os mesmos nomes de colunas.
+
+
+## Páginas relacionadas
+
+- [Investimentos de carteira](/pt/docs/portfolio-investments)
+- [Criar uma carteira](/pt/docs/portfolio-investments/create-portfolio)
+- [Adicionar transações de carteira](/pt/docs/portfolio-investments/add-portfolio-transactions)
+- [Ciclo de vida dos dados da carteira](/pt/docs/portfolio-investments/portfolio-data-lifecycle)
+- [Alocação das posições](/pt/docs/portfolio-investments/holdings-allocation)

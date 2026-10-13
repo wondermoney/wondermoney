@@ -1,0 +1,144 @@
+{
+  "reports": {
+    "title": "Relatórios",
+    "subtitle": "Compreenda o seu dinheiro com informação calma e focada.",
+    "filters": {
+      "title": "Filtros",
+      "accounts": "Contas",
+      "categories": "Categorias",
+      "merchants": "Comerciantes",
+      "currency": "Moeda",
+      "dateRange": "Período",
+      "placeholder": {
+        "search": "Pesquisar…",
+        "select": "Selecionar…"
+      },
+      "noResults": "Sem resultados.",
+      "selected": "{count, plural, =1 {1 selecionado} other {# selecionados}}",
+      "preset": {
+        "thisMonth": "Este mês",
+        "lastMonth": "Mês passado",
+        "last3Months": "Últimos 3 meses",
+        "last6Months": "Últimos 6 meses",
+        "last12Months": "Últimos 12 meses",
+        "allTime": "Todo o período"
+      },
+      "includePending": "Incluir transações pendentes",
+      "includeTransfers": "Incluir transferências",
+      "reset": "Limpar filtros"
+    },
+    "export": {
+      "csv": "Exportar CSV",
+      "xlsx": "Exportar Excel",
+      "xlsxComingSoon": "A exportação para Excel chega em breve. Por agora use CSV.",
+      "downloading": "A preparar a transferência…",
+      "success": "Transferência iniciada",
+      "error": "Não foi possível gerar a exportação. Tente novamente."
+    },
+    "trend": {
+      "up": "Subiu",
+      "down": "Desceu",
+      "flat": "Estável",
+      "vsPriorPeriod": "vs. período anterior"
+    },
+    "reports": {
+      "spendingByCategory": {
+        "title": "Despesa por categoria",
+        "subtitle": "Para onde foi o seu dinheiro no período.",
+        "total": "Total gasto",
+        "noData": {
+          "title": "Sem despesas neste período",
+          "description": "Experimente um período mais alargado ou verifique se as contas estão ligadas."
+        }
+      },
+      "cashflow": {
+        "title": "Fluxo de caixa",
+        "subtitle": "Receitas vs despesas ao longo do tempo.",
+        "income": "Receitas",
+        "expenses": "Despesas",
+        "net": "Saldo",
+        "trailingNetAverage": "Média móvel do saldo (3 meses)",
+        "partial": {
+          "monthToDate": "Acumulado do mês",
+          "partialMonth": "Mês parcial",
+          "footnoteCurrent": "{month} ainda está a decorrer — os valores são o acumulado do mês.",
+          "footnoteRange": "{month} está só em parte dentro do período selecionado, por isso os valores cobrem apenas parte do mês."
+        },
+        "noData": {
+          "title": "Ainda sem fluxo de caixa",
+          "description": "Quando houver transações registadas, o fluxo de caixa mensal aparece aqui."
+        }
+      },
+      "sankey": {
+        "title": "Sankey de fluxo de caixa",
+        "subtitle": "Das receitas, pelas categorias, até às contas.",
+        "legendIncome": "Receitas",
+        "legendCategory": "Categoria",
+        "legendAccount": "Conta",
+        "ariaLabel": "Diagrama de Sankey mostrando fluxo de caixa total de {total}",
+        "linkTooltip": "{source} → {target}: {value}",
+        "nodeTooltip": "{label}: {value}",
+        "mobileNotice": "Este gráfico vê-se melhor num ecrã mais largo.",
+        "mobileTableSource": "Origem",
+        "mobileTableTarget": "Destino",
+        "mobileTableValue": "Valor",
+        "noData": {
+          "title": "Atividade insuficiente",
+          "description": "Adicione mais transações para ver o fluxo do seu dinheiro."
+        }
+      },
+      "netWorthHistory": {
+        "title": "Património ao longo do tempo",
+        "subtitle": "Total de ativos menos passivos, mês a mês.",
+        "assets": "Ativos",
+        "liabilities": "Passivos",
+        "netWorth": "Património líquido",
+        "noData": {
+          "title": "Ainda sem histórico",
+          "description": "O património aparece à medida que as contas reportam atividade."
+        }
+      },
+      "budgetVsActual": {
+        "title": "Orçamento vs realizado",
+        "subtitle": "Como a sua despesa acompanhou o orçamento.",
+        "budgeted": "Orçamentado",
+        "actual": "Realizado",
+        "variance": "Desvio",
+        "percentUsed": "% utilizado",
+        "overBudget": "Acima do orçamento",
+        "setupBudget": "Definir um orçamento",
+        "category": "Categoria",
+        "noBudget": {
+          "title": "Sem orçamentos definidos",
+          "description": "Defina um orçamento para ver como a sua despesa se compara."
+        },
+        "noData": {
+          "title": "Nada para comparar",
+          "description": "Ainda não há despesas nem orçamentos neste período."
+        }
+      },
+      "portfolioPerformance": {
+        "title": "Performance da carteira",
+        "subtitle": "Variação de saldo por conta no período.",
+        "account": "Conta",
+        "startBalance": "Início",
+        "endBalance": "Fim",
+        "return": "Variação",
+        "contributions": "Contribuições",
+        "startCaveat": "O saldo inicial reflete a primeira transação do período; a variação apresentada pode incluir o efeito dessa transação.",
+        "noData": {
+          "title": "Sem contas para mostrar",
+          "description": "Ligue uma conta para ver a sua performance aqui."
+        }
+      }
+    },
+    "common": {
+      "loading": "A carregar…",
+      "error": "Ocorreu um erro.",
+      "errorDescription": "Não foi possível carregar o relatório. Verifique a ligação e tente de novo.",
+      "retry": "Tentar novamente",
+      "currencyUnknown": "—",
+      "other": "Outros"
+    }
+  }
+}

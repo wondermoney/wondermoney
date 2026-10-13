@@ -1,0 +1,224 @@
+---
+title: Glossário
+description: Definições simples de termos de contas, orçamentos, carteiras, agregado familiar, mercados, segurança e privacidade na aplicação WonderMoney.
+---
+
+## Contas e transações
+
+### Conta
+
+Uma conta é um local onde o dinheiro é guardado ou acompanhado.
+
+**Na aplicação WonderMoney:** Uma conta é o local onde o dinheiro fica, como uma conta bancária ou uma conta offline que adicionas manualmente.
+
+**Relacionado:** [Transação](/pt/docs/glossary#transação), [Acesso só de leitura](/pt/docs/glossary#acesso-só-de-leitura)
+
+### Transação
+
+Uma transação é o registo de dinheiro a entrar ou a sair.
+
+**Na aplicação WonderMoney:** Uma transação é uma entrada ou saída de dinheiro que é importada, sincronizada ou introduzida manualmente.
+
+**Relacionado:** [Categoria](/pt/docs/glossary#categoria), [Conta](/pt/docs/glossary#conta)
+
+### Categoria
+
+Uma categoria é uma etiqueta que agrupa transações semelhantes.
+
+**Na aplicação WonderMoney:** Uma categoria é a etiqueta usada para organizar despesas e receitas em grupos claros.
+
+**Relacionado:** [Orçamento](/pt/docs/glossary#orçamento), [Método dos envelopes](/pt/docs/glossary#método-dos-envelopes)
+
+### Confiança da categorização
+
+A confiança da categorização indica o grau de certeza de uma categorização automática.
+
+**Na aplicação WonderMoney:** A confiança da categorização é um nível aplicado a cada transação categorizada automaticamente, de alta a nenhuma. As correspondências de alta confiança são retiradas da fila de revisão automaticamente; as transações de menor confiança ficam para verificação.
+
+**Relacionado:** [Categoria](/pt/docs/glossary#categoria), [Transação](/pt/docs/glossary#transação)
+
+### Impressão digital da transação
+
+A impressão digital da transação é um valor que identifica uma transação para deteção de duplicados.
+
+**Na aplicação WonderMoney:** A impressão digital da transação é construída a partir de detalhes da transação, como a data e o montante. Serve para evitar importar a mesma transação duas vezes. A tolerância está calibrada para que transações semelhantes mas legítimas não sejam tratadas como duplicados.
+
+**Relacionado:** [Transação](/pt/docs/glossary#transação), [Pendente fantasma](/pt/docs/glossary#pendente-fantasma), [Registo de auditoria](/pt/docs/glossary#registo-de-auditoria)
+
+### Pendente fantasma
+
+Um pendente fantasma é uma transação pendente que nunca se torna uma transação registada.
+
+**Na aplicação WonderMoney:** Um pendente fantasma é uma transação pendente guardada que deixou de aparecer na lista de pendentes do banco. A WonderMoney expira-o após um período de tolerância, em vez de o manter, para que não se transforme num duplicado quando a transação registada real chegar.
+
+**Relacionado:** [Transação](/pt/docs/glossary#transação), [Impressão digital da transação](/pt/docs/glossary#impressão-digital-da-transação)
+
+### Registo de auditoria
+
+Um registo de auditoria é um histórico das alterações feitas aos dados.
+
+**Na aplicação WonderMoney:** Um registo de auditoria regista eventos numa transação, como criação, edições, categorização e decisões de duplicados. A entrada original é preservada para que o histórico continue a ser rastreável.
+
+**Relacionado:** [Transação](/pt/docs/glossary#transação), [Impressão digital da transação](/pt/docs/glossary#impressão-digital-da-transação)
+
+## Orçamentos
+
+### Orçamento
+
+Um orçamento é um plano mensal para o teu dinheiro.
+
+**Na aplicação WonderMoney:** Um orçamento é o teu plano mensal para indicar quanto dinheiro queres atribuir a diferentes categorias.
+
+**Relacionado:** [Objetivo mensal](/pt/docs/glossary#objetivo-mensal), [Restante](/pt/docs/glossary#restante)
+
+### Método dos envelopes
+
+O método dos envelopes divide o orçamento por limites de categoria.
+
+**Na aplicação WonderMoney:** O método dos envelopes é uma forma de orçamentação em que cada categoria recebe o seu próprio limite mensal.
+
+**Relacionado:** [Orçamento](/pt/docs/glossary#orçamento), [Categoria](/pt/docs/glossary#categoria)
+
+### Objetivo mensal
+
+Um objetivo mensal é o valor definido para uma categoria num mês.
+
+**Na aplicação WonderMoney:** O objetivo mensal é o valor que queres permitir para uma categoria num único mês.
+
+**Relacionado:** [Restante](/pt/docs/glossary#restante), [Orçamento](/pt/docs/glossary#orçamento)
+
+### Restante
+
+O restante é o valor que sobra numa categoria depois dos gastos.
+
+**Na aplicação WonderMoney:** O restante é o valor que sobra depois de as transações serem contabilizadas no objetivo de uma categoria.
+
+**Relacionado:** [Objetivo mensal](/pt/docs/glossary#objetivo-mensal), [Transação](/pt/docs/glossary#transação)
+
+## Objetivos e empréstimos
+
+### Disponível para atribuir
+
+O disponível para atribuir é o dinheiro que ainda podes destinar a um objetivo.
+
+**Na aplicação WonderMoney:** O disponível para atribuir é o que resta depois de subtrair os valores já atribuídos aos saldos das tuas contas. Não podes atribuir a um objetivo mais do que este limite.
+
+**Relacionado:** [Orçamento](/pt/docs/glossary#orçamento), [Reduzir dívida](/pt/docs/glossary#reduzir-dívida)
+
+### Reduzir dívida
+
+Reduzir dívida é o objetivo de diminuir o que deves.
+
+**Na aplicação WonderMoney:** Um objetivo de redução de dívida agrupa uma ou mais dívidas e planeia o seu pagamento, usando estratégias como avalanche ou bola de neve. Atribuir dinheiro ao objetivo acompanha o progresso do plano.
+
+**Relacionado:** [Disponível para atribuir](/pt/docs/glossary#disponível-para-atribuir), [Orçamento](/pt/docs/glossary#orçamento)
+
+## Carteira e investimentos
+
+### Carteira
+
+Uma carteira é um conjunto de investimentos que acompanhas em conjunto.
+
+**Na aplicação WonderMoney:** Uma carteira é um conjunto de investimentos que acompanhas em conjunto.
+
+**Relacionado:** [Posição](/pt/docs/glossary#posição), [Alocação](/pt/docs/glossary#alocação)
+
+### Posição
+
+Uma posição é um investimento dentro de uma carteira.
+
+**Na aplicação WonderMoney:** Uma posição é um investimento específico dentro de uma carteira, como uma ação, fundo ou ETF.
+
+**Relacionado:** [Carteira](/pt/docs/glossary#carteira), [Valor de mercado](/pt/docs/glossary#valor-de-mercado)
+
+### Alocação
+
+A alocação mostra como a carteira está dividida.
+
+**Na aplicação WonderMoney:** A alocação mostra como uma carteira está distribuída por ativos, setores ou categorias.
+
+**Relacionado:** [Carteira](/pt/docs/glossary#carteira), [Benchmark](/pt/docs/glossary#benchmark)
+
+### Valor de mercado
+
+O valor de mercado é o valor atual de um investimento.
+
+**Na aplicação WonderMoney:** O valor de mercado é o valor atual de um investimento com base no preço mais recente.
+
+**Relacionado:** [Preço de custo](/pt/docs/glossary#preço-de-custo), [Retorno](/pt/docs/glossary#retorno)
+
+### Preço de custo
+
+O preço de custo é o valor pago por um investimento.
+
+**Na aplicação WonderMoney:** O preço de custo é o valor que pagaste para adquirir um investimento, incluindo o preço de compra e quaisquer custos adicionais registados.
+
+**Relacionado:** [Valor de mercado](/pt/docs/glossary#valor-de-mercado), [Retorno](/pt/docs/glossary#retorno)
+
+### Retorno
+
+O retorno é o ganho ou a perda de um investimento.
+
+**Na aplicação WonderMoney:** O retorno é o ganho ou a perda num investimento em comparação com o que pagaste por ele.
+
+**Relacionado:** [Preço de custo](/pt/docs/glossary#preço-de-custo), [Benchmark](/pt/docs/glossary#benchmark)
+
+### Benchmark
+
+Um benchmark é uma referência usada para comparação.
+
+**Na aplicação WonderMoney:** Um benchmark é uma referência usada para comparar o desempenho da tua carteira.
+
+**Relacionado:** [Retorno](/pt/docs/glossary#retorno), [Alocação](/pt/docs/glossary#alocação)
+
+### Dividendo
+
+Um dividendo é dinheiro pago aos investidores a partir dos lucros.
+
+**Na aplicação WonderMoney:** Um dividendo é dinheiro pago por um investimento aos seus titulares, normalmente a partir dos lucros da empresa.
+
+**Relacionado:** [Posição](/pt/docs/glossary#posição), [Retorno](/pt/docs/glossary#retorno)
+
+### Efeito cambial
+
+O efeito cambial é a variação de valor causada pelas taxas de câmbio.
+
+**Na aplicação WonderMoney:** O efeito cambial é a variação de valor causada pela mudança da taxa de câmbio quando um investimento usa outra moeda.
+
+**Relacionado:** [Valor de mercado](/pt/docs/glossary#valor-de-mercado), [Retorno](/pt/docs/glossary#retorno)
+
+## Segurança e privacidade
+
+### Acesso só de leitura
+
+O acesso só de leitura permite ao WonderMoney ver dados sem movimentar dinheiro.
+
+**Na aplicação WonderMoney:** O acesso só de leitura permite ao WonderMoney ver os dados da conta sem poder movimentar dinheiro.
+
+**Relacionado:** [Conta](/pt/docs/glossary#conta), [Autenticação de dois fatores](/pt/docs/glossary#autenticação-de-dois-fatores)
+
+### Autenticação de dois fatores
+
+A autenticação de dois fatores acrescenta uma confirmação extra ao iniciar sessão.
+
+**Na aplicação WonderMoney:** A autenticação de dois fatores acrescenta uma segunda confirmação quando inicias sessão, ajudando a proteger a conta.
+
+**Relacionado:** [Acesso só de leitura](/pt/docs/glossary#acesso-só-de-leitura), [Conta](/pt/docs/glossary#conta)
+
+## Agregado familiar
+
+### Agregado familiar
+
+Um agregado familiar é um grupo de pessoas que partilham finanças.
+
+**Na aplicação WonderMoney:** Um agregado familiar permite partilhar contas, orçamentos e objetivos com o teu parceiro. Cada membro tem o seu próprio acesso e as contas que marcares como privadas permanecem privadas.
+
+**Relacionado:** [Conta](/pt/docs/glossary#conta), [Privacidade](/pt/docs/glossary#privacidade)
+
+### Privacidade
+
+A privacidade é a capacidade de manter parte dos teus dados visível apenas para ti.
+
+**Na aplicação WonderMoney:** A privacidade é controlada por conta dentro de um agregado familiar. Uma conta partilhada é visível para todos os membros; uma conta privada é visível apenas para o seu titular. O titular também pode definir a privacidade em séries recorrentes individuais.
+
+**Relacionado:** [Conta](/pt/docs/glossary#conta), [Agregado familiar](/pt/docs/glossary#agregado-familiar)

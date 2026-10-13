@@ -1,0 +1,194 @@
+{
+  "$comment": [
+    "RAD-577 — the sub-processor list, as one source of truth.",
+    "",
+    "A sub-processor list is a GDPR Article 13/14 disclosure, and the Privacy Policy",
+    "itself promises that 'a current list of sub-processors and their locations is",
+    "maintained in the sub-processor section below'. RAD-573 found that §12 still named",
+    "Financial Modeling Prep months after RAD-449 replaced it with EODHD: a disclosure",
+    "that described processing which was no longer happening, and omitted processing",
+    "that was.",
+    "",
+    "This file exists so that cannot happen quietly again. `scripts/check-sub-processors.mjs`",
+    "asserts every entry here has a heading in all three locale policies and that no",
+    "policy names a processor missing from here. Adding a provider to the stack without",
+    "adding it here, or here without disclosing it, fails the check.",
+    "",
+    "`heading` must match the MDX heading text exactly in each locale.",
+    "`verifiedAt` is when someone last confirmed the entry against the running stack —",
+    "not when the file was edited."
+  ],
+  "verifiedAt": "2026-09-10",
+  "processors": [
+    {
+      "id": "google-analytics",
+      "heading": { "en": "Google Analytics", "pt": "Google Analytics", "es": "Google Analytics" },
+      "purpose": "Web analytics and tag delivery.",
+      "evidence": "web/components/analytics/AnalyticsInit.tsx loads googletagmanager.com/gtm.js; lp depends on astro-gtm.",
+      "personalData": "Usage and device data, IP address.",
+      "location": "United States",
+      "notes": "The loaded product is Google Tag Manager; the heading says Google Analytics. Corrected in the policy body rather than the heading, so existing anchors keep resolving."
+    },
+    {
+      "id": "posthog",
+      "heading": { "en": "PostHog", "pt": "PostHog", "es": "PostHog" },
+      "purpose": "Product analytics and session replay.",
+      "evidence": "web AnalyticsInit.tsx: posthog.init({ api_host: 'https://eu.posthog.com' }), posthog.startSessionRecording() outside development, posthog.identify(user.id, { email }); api depends on posthog-node.",
+      "personalData": "Email address, Supabase user id, usage events, and session recordings of authenticated screens — which contain account balances and transaction descriptions.",
+      "location": "European Union (eu.posthog.com)",
+      "notes": "Session replay was undisclosed. The policy described PostHog as product analytics only, which understates recording the user's screen."
+    },
+    {
+      "id": "sentry",
+      "heading": { "en": "Sentry", "pt": "Sentry", "es": "Sentry" },
+      "purpose": "Error and performance monitoring.",
+      "evidence": "api depends on @sentry/node (SENTRY_DSN); web depends on @sentry/nextjs.",
+      "personalData": "Error context, which can include user identifiers and request metadata.",
+      "location": "United States (org wonder-money, region us.sentry.io)",
+      "notes": "The Sentry org is on the US region, not the EU one. §7's Article 46 transfer basis has to cover this."
+    },
+    {
+      "id": "supabase",
+      "heading": { "en": "Supabase", "pt": "Supabase", "es": "Supabase" },
+      "purpose": "Authentication and identity only.",
+      "evidence": "api depends on @supabase/supabase-js with SUPABASE_JWT_SECRET / SUPABASE_SERVICE_KEY; web depends on @supabase/ssr. The application database is Postgres on the self-hosted VPS (api/CLAUDE.md), not Supabase.",
+      "personalData": "Email address, authentication credentials and MFA state.",
+      "location": "European Union",
+      "notes": "The policy claimed 'personal data, account data, and financial sync state are stored in Supabase's EU-hosted Postgres databases'. That has not been true since the move to the self-hosted stack — financial data lives in the VPS Postgres. RAD-283/RAD-298/RAD-299 will remove Supabase entirely; this entry must be replaced, not just deleted, when better-auth lands."
+    },
+    {
+      "id": "application-hosting",
+      "heading": { "en": "netcup", "pt": "netcup", "es": "netcup" },
+      "purpose": "Hosting for the API, the background worker and the production Postgres database that holds all account and transaction data.",
+      "evidence": "The stack runs as Docker containers on a VPS, with Postgres in a container on the same host. Provider confirmed on the host itself, 2026-08-22: /sys/class/dmi/id/sys_vendor reads 'netcup', and the public address 159.195.156.103 resolves to v2202607383589485341.goodsrv.de, AS197540 netcup GmbH, Nuremberg, Bavaria, DE.",
+      "personalData": "Everything: accounts, transactions, balances, budgets, portfolios, household membership.",
+      "location": "Germany (Nuremberg)",
+      "notes": "Was the single most significant gap. The infrastructure provider hosting the production database is not named anywhere in the repositories, so it had to be read off the machine. Coolify itself is self-hosted software, not a processor; the processor is netcup GmbH, who operate the VPS. Inside the EEA, so no Article 46 transfer safeguard is needed for the primary data store."
+    },
+    {
+      "id": "vercel",
+      "heading": { "en": "Vercel", "pt": "Vercel", "es": "Vercel" },
+      "purpose": "Hosting for the web application, the marketing site and the documentation site.",
+      "evidence": "web is a Next.js app deployed to Vercel; lp depends on @astrojs/vercel.",
+      "personalData": "Request metadata and IP addresses at the edge.",
+      "location": "United States (company), European Union (primary regions)"
+    },
+    {
+      "id": "sanity",
+      "heading": { "en": "Sanity", "pt": "Sanity", "es": "Sanity" },
+      "purpose": "Content management for marketing and editorial content.",
+      "evidence": "lp depends on @sanity/astro, @sanity/client, @sanity/image-url.",
+      "personalData": "None — public editorial content only.",
+      "location": "European Union"
+    },
+    {
+      "id": "resend",
+      "heading": { "en": "Resend", "pt": "Resend", "es": "Resend" },
+      "purpose": "Transactional and lifecycle email.",
+      "evidence": "api depends on resend (RESEND_API_KEY, RESEND_FROM_EMAIL).",
+      "personalData": "Email address and message content, including budget and weekly summary figures.",
+      "location": "United States"
+    },
+    {
+      "id": "eodhd",
+      "heading": { "en": "EODHD", "pt": "EODHD", "es": "EODHD" },
+      "purpose": "Market price lookups for investment holdings.",
+      "evidence": "api services/eodhd.service.ts (EODHD_API_KEY).",
+      "personalData": "None — ticker symbols only.",
+      "location": "European Union",
+      "notes": "Replaced Financial Modeling Prep in RAD-449 (2026-08-05). The policy still named FMP until RAD-573."
+    },
+    {
+      "id": "llm-providers",
+      "heading": { "en": "LLM Models", "pt": "Modelos LLM", "es": "Modelos de Lenguaje (LLM)" },
+      "purpose": "Receipt OCR, CSV column mapping, the assistant, and transaction enrichment.",
+      "evidence": "api depends on @ai-sdk/azure and openai against an Azure AI Foundry resource (AZURE_OPENAI_ENDPOINT, AZURE_AI_FOUNDRY_ENDPOINT).",
+      "personalData": "Transaction descriptions and merchant names; receipt and invoice images; CSV column headers.",
+      "location": "European Union",
+      "notes": "Deliberately not named in the policy — founder decision, 2026-08-21: the section keeps its generic category wording rather than naming Microsoft/Azure. Revisit if a named disclosure is ever required. The generic wording is a choice on record, not an oversight."
+    },
+    {
+      "id": "gocardless",
+      "heading": { "en": "GoCardless, SAS", "pt": "GoCardless, SAS", "es": "GoCardless, SAS" },
+      "purpose": "Licensed Account Information Service Provider for read-only bank account access.",
+      "evidence": "api NORDIGEN_SECRET_ID / NORDIGEN_SECRET_KEY; the requisition and sync flow (src/services/gocardless-requisition.service.ts, src/controller/banking.ts, src/controller/account/sync.ts).",
+      "personalData": "Bank account identifiers, balances and transaction history, on user instruction.",
+      "location": "European Union (France)",
+      "notes": "Still live: existing connections created before the Enable Banking BYOK migration (2026-09) continue to sync through GoCardless, so this entry stays until those connections are fully retired. New connections use the Enable Banking entry below instead."
+    },
+    {
+      "id": "enable-banking",
+      "heading": { "en": "Enable Banking", "pt": "Enable Banking", "es": "Enable Banking" },
+      "purpose": "Registered Account Information Service Provider that new bank connections use under our bring-your-own-key (BYOK) model — each user registers their own free Enable Banking application, and our backend calls Enable Banking's API using that user's own application credentials to link and read their bank account.",
+      "evidence": "api src/services/enable-banking/enable-banking-client.service.ts calls https://api.enablebanking.com; src/controller/enable-banking-credential.ts stores each user's own Application ID and encrypted private key; src/controller/enable-banking-callback.ts and app.ts wire up the /v1/banking/enable-banking/callback route; src/services/enable-banking/enable-banking-jwt.service.ts signs API requests locally with the user's key (the raw private key itself is never sent to Enable Banking).",
+      "personalData": "Bank account identifiers, balances and transaction history, on user instruction, plus the user's own Enable Banking Application ID (used to identify which application is calling). The user's private key is encrypted at rest with AES-256-GCM and is used only to sign requests in our backend — it is not transmitted to Enable Banking.",
+      "location": "Finland (European Union)",
+      "notes": "Enable Banking Oy is a Registered Account Information Service Provider regulated by the Finnish Financial Supervisory Authority (FIN-FSA). Added alongside the BYOK bank-provider rollout (2026-09) that replaces WonderMoney's own shared GoCardless connection for new users; see the GoCardless entry above for the connections still transitioning off it."
+    },
+    {
+      "id": "aws-s3",
+      "heading": { "en": "Amazon Web Services", "pt": "Amazon Web Services", "es": "Amazon Web Services" },
+      "purpose": "Object storage for user-uploaded documents.",
+      "evidence": "api depends on @aws-sdk/client-s3 (AWS_ACCESS_KEY_ID); services/s3.ts pins region 'eu-west-2'. Callers: account/ocr.ts, account/imports.ts, portfolio-import-session.ts, webhooks/stripe.ts.",
+      "personalData": "Uploaded bank statement CSVs, portfolio CSVs, and receipt/invoice images submitted for OCR — the most sensitive documents in the product.",
+      "location": "United Kingdom (eu-west-2, London)",
+      "notes": "Undisclosed, and outside the EEA. The UK holds a European Commission adequacy decision, so an Article 46 safeguard is not required while that stands, but the policy's §7 transfer language and the LLM section's 'primary location of these services will be in Europe' both need to account for it. Moving the bucket to eu-west-1 (Ireland) or eu-central-1 (Frankfurt) would remove the question entirely."
+    },
+    {
+      "id": "moloni",
+      "heading": { "en": "Moloni", "pt": "Moloni", "es": "Moloni" },
+      "purpose": "Portuguese statutory invoicing.",
+      "evidence": "api services/moloni.ts against api.moloni.pt, called from controller/webhooks/stripe.ts. createCostumer sends { name: firstName + lastName, billingId: VAT number, country }.",
+      "personalData": "Full name, VAT/tax identification number, country.",
+      "location": "Portugal",
+      "notes": "Undisclosed. §15 names Stripe as the payment processor but says nothing about who issues the invoice, which is a separate processor receiving directly identifying data."
+    },
+    {
+      "id": "google-recaptcha",
+      "heading": { "en": "Google reCAPTCHA", "pt": "Google reCAPTCHA", "es": "Google reCAPTCHA" },
+      "purpose": "Anti-abuse scoring on signup and lead forms.",
+      "evidence": "web depends on react-google-recaptcha-v3 (components/auth/ReCaptchaProvider.tsx, app/api/recaptcha/route.ts); lp depends on react-google-recaptcha-hook.",
+      "personalData": "IP address, browser and device signals, interaction behaviour — collected before the visitor has an account.",
+      "location": "United States",
+      "notes": "Undisclosed, and it runs on visitors who never register. RAD-331 records it rejecting automated traffic on production signup, so it is live."
+    },
+    {
+      "id": "github",
+      "heading": { "en": "GitHub", "pt": "GitHub", "es": "GitHub" },
+      "purpose": "Source hosting and CI/CD.",
+      "evidence": ".github/workflows in every repository.",
+      "personalData": "None in normal operation — source code and build metadata only.",
+      "location": "United States"
+    },
+    {
+      "id": "stripe",
+      "heading": { "en": "Stripe", "pt": "Stripe", "es": "Stripe" },
+      "purpose": "Subscription billing and payment processing.",
+      "evidence": "api depends on stripe (STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET); web depends on @stripe/stripe-js.",
+      "personalData": "Email address, billing address, tax id, payment card details (collected by Stripe directly).",
+      "location": "United States / Ireland"
+    }
+  ],
+  "outOfScope": [
+    {
+      "id": "hetrixtools",
+      "reason": "Uptime heartbeat only (HETRIX_WORKER_HEARTBEAT_URL). Receives no personal data."
+    },
+    {
+      "id": "infisical",
+      "reason": "Developer secret management. Holds credentials, not customer personal data."
+    },
+    {
+      "id": "tailscale",
+      "reason": "Administrative network access for operators. No customer personal data flows through it."
+    },
+    {
+      "id": "buffer",
+      "reason": "Marketing scheduling. Operates on published content, not customer data."
+    },
+    {
+      "id": "aws-s3-growth",
+      "reason": "wondermoney-growth-content holds public marketing images only. The customer-document buckets are the aws-s3 entry above."
+    }
+  ]
+}

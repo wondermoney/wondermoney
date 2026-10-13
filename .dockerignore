@@ -1,0 +1,17 @@
+# Build context is the repository root (docker build -f apps/<app>/Dockerfile .).
+**/node_modules
+**/.next
+**/dist
+**/.turbo
+**/coverage
+**/*.tsbuildinfo
+**/.env
+**/.env.*
+!**/.env.example
+!**/.env.sample
+.git
+**/.DS_Store
+apps/mobile
+apps/docs
+**/docs
+**/mock

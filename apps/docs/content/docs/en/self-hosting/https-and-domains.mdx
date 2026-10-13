@@ -1,0 +1,37 @@
+---
+title: HTTPS and domains
+description: Put your instance behind a reverse proxy with HTTPS and its own domain names.
+---
+
+Before using your instance outside your own network, serve it over HTTPS. Give the web app and the API a hostname each, and put a reverse proxy in front of them.
+
+## With Caddy
+
+[Caddy](https://caddyserver.com) fetches and renews certificates automatically. With the web app and the API on the same machine:
+
+```
+money.example.com {
+  reverse_proxy localhost:3000
+}
+
+api.money.example.com {
+  reverse_proxy localhost:3001
+}
+```
+
+Any other reverse proxy works the same way, such as nginx, Traefik or a Cloudflare Tunnel.
+
+## Update `.env`
+
+```sh
+APP_URL=https://money.example.com
+API_URL=https://api.money.example.com
+AUTH_COOKIE_DOMAIN=.example.com
+NEXT_PUBLIC_AUTH_COOKIE_DOMAIN=.example.com
+```
+
+Then run `docker compose up -d` again. The cookie domain lets the web app read the sign-in session the API sets, because they are on different subdomains of the same domain.
+
+## Keep the ports private
+
+When the proxy runs on the same machine, bind the published ports to localhost so the containers are only reachable through the proxy. In `docker-compose.yml`, use `127.0.0.1:3000:3000` and `127.0.0.1:3001:3001`.

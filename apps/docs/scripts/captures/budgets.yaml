@@ -1,0 +1,73 @@
+# Budgets — overview, first-run wizard, month detail, overflow menu.
+# envelope-method (conceptual, no app surface) is intentionally not captured.
+section: budgets
+user: docs-screens-sandbox
+pages:
+  - slug: index
+    step: overview
+    url: http://localhost:64590/en/budgets
+
+  - slug: create-first-budget
+    step: household
+    url: http://localhost:64590/en/budgets/wizard/household
+
+  - slug: create-first-budget
+    step: income
+    url: http://localhost:64590/en/budgets/wizard/household
+    actions:
+      - type: click-role
+        name: "Continue"
+        locales:
+          pt: "Continuar"
+          es: "Continuar"
+      - type: wait-text
+        text: "Income"
+        locales:
+          pt: "Rendimento anual"
+          es: "Ingresos anuales"
+    note: >-
+      The income step is reached by stepping through the household step (the
+      wizard is stateful), so this page opens the household step and clicks
+      Continue. If the wizard pre-navigates via URL instead, change the url to
+      http://localhost:64590/en/budgets/wizard/income and drop the actions.
+      The wait-text anchor "Income" only exists in the EN heading text
+      ("household income"/"annual income") — pt uses "rendimento" and es uses
+      "ingresos" throughout, with no "Income" substring anywhere on the page,
+      so the locale overrides target a distinctive substring of
+      total-annual-income instead ("Rendimento anual total" / "Ingresos
+      anuales totales").
+
+  - slug: household-size-dependents
+    step: dependents
+    url: http://localhost:64590/en/budgets/wizard/dependents
+
+  - slug: choose-budget-categories
+    step: categories
+    url: http://localhost:64590/en/budgets/wizard/categories
+
+  - slug: track-monthly-spending
+    step: month-detail
+    url: http://localhost:64590/en/budgets
+    actions:
+      - type: click-text
+        text: "View"
+      - type: wait-text
+        text: "Remaining"
+    note: >-
+      Click the first budget row / its "View" action to open the month detail.
+      If the row label is not "View", click the first budget link instead
+      (click-first `a[href*="/budgets/"]`). If a "Welcome" modal appears, dismiss
+      it with click-role "Got it" / "Close" first.
+
+  - slug: adjust-delete-budget
+    step: overflow-menu
+    url: http://localhost:64590/en/budgets
+    actions:
+      - type: click-text
+        text: "More"
+      - type: wait-text
+        text: "Edit"
+    note: >-
+      The budget row overflow menu is labelled "More" (same pattern as the
+      recurring table). If the label differs, fall back to click-role "More
+      options" or click-ref on the row's kebab button.

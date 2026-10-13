@@ -1,0 +1,63 @@
+{
+  "household": {
+    "title": "Agregado familiar",
+    "description": "Partilhe contas, orçamentos e objetivos com o seu parceiro.",
+    "members": {
+      "heading": "Membros",
+      "you": "Você",
+      "roleOwner": "Titular",
+      "roleMember": "Parceiro"
+    },
+    "invite": {
+      "heading": "Convide o seu parceiro",
+      "description": "Ele terá o seu próprio acesso e vê as finanças partilhadas. As contas que marcar como privadas permanecem privadas.",
+      "emailLabel": "Email do parceiro",
+      "emailPlaceholder": "parceiro@exemplo.com",
+      "invalidEmail": "Introduza um email válido",
+      "submit": "Enviar convite"
+    },
+    "pending": {
+      "heading": "Convite pendente",
+      "sentTo": "Convite enviado para {email}",
+      "expires": "Expira a {date}",
+      "resend": "Reenviar",
+      "revoke": "Anular"
+    },
+    "actions": {
+      "remove": "Remover parceiro",
+      "leave": "Sair do agregado"
+    },
+    "removeDialog": {
+      "title": "Remover {name}?",
+      "description": "Perde o acesso a este agregado de imediato. Os dados partilhados ficam consigo e as ligações bancárias associadas são desligadas.",
+      "confirm": "Remover parceiro"
+    },
+    "leaveDialog": {
+      "title": "Sair deste agregado?",
+      "description": "Perde o acesso às contas, orçamentos e objetivos partilhados, e as suas ligações bancárias são desligadas. Esta ação não pode ser anulada.",
+      "confirm": "Sair do agregado"
+    },
+    "cancel": "Cancelar",
+    "join": {
+      "greetingNamed": "{name} convidou-o para o seu agregado no WonderMoney",
+      "greetingGeneric": "Foi convidado para um agregado no WonderMoney",
+      "subtitle": "Crie a sua conta para partilhar contas, orçamentos e objetivos.",
+      "emailLockedHint": "Este convite é para {email}",
+      "invalidTitle": "Este link de convite não é válido",
+      "invalidBody": "Pode já ter sido usado, anulado ou expirado. Peça ao seu parceiro para enviar um novo convite.",
+      "loggedInTitle": "Já tem sessão iniciada",
+      "loggedInBody": "Os convites de agregado só podem ser aceites com uma conta nova. Termine a sessão e crie uma com o email convidado para entrar.",
+      "logoutAndJoin": "Terminar sessão e criar conta",
+      "backToApp": "Ir para o WonderMoney"
+    },
+    "toast": {
+      "inviteSent": "Convite enviado",
+      "inviteResent": "Convite reenviado",
+      "inviteRevoked": "Convite anulado",
+      "memberRemoved": "Parceiro removido",
+      "left": "Saiu do agregado",
+      "error": "Algo correu mal. Tente novamente."
+    },
+    "loadError": "Não foi possível carregar o seu agregado. Tente novamente."
+  }
+}

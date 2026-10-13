@@ -1,0 +1,125 @@
+# Self-hosted WonderMoney: Postgres, the API, its background worker and the web app.
+#
+#   ./generate-env.sh          # creates .env with fresh secrets (once)
+#   docker compose up -d       # http://localhost:3000
+#
+# Optional extras, by profile:
+#   --profile storage   MinIO for file uploads (CSV imports, receipt copies)
+#   --profile mail      Mailpit, to read outgoing mail at http://localhost:8025
+#
+# See README.md for HTTPS, upgrades and backups.
+
+name: wondermoney
+
+x-api-env: &api-env
+  env_file: .env
+  environment:
+    DB_HOST: postgres
+    DB_PORT: '5432'
+    DB_DATABASE: ${POSTGRES_DB:-wondermoney}
+    DB_USERNAME: ${POSTGRES_USER:-wondermoney}
+    DB_PASSWORD: ${POSTGRES_PASSWORD:?run ./generate-env.sh first}
+    # pg-boss creates and upgrades its own schema; it takes a lock, so both can do it.
+    PGBOSS_MIGRATE: 'true'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-wondermoney}
+      POSTGRES_USER: ${POSTGRES_USER:-wondermoney}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?run ./generate-env.sh first}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U "$${POSTGRES_USER}" -d "$${POSTGRES_DB}"']
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  # Applies database migrations on every start (and, on an empty database, loads the reference
+  # data), then serves the API.
+  api:
+    image: ${WM_IMAGE_REGISTRY:-ghcr.io/wondermoney}/wondermoney-api:${WM_VERSION:-latest}
+    restart: unless-stopped
+    <<: *api-env
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - '${API_PORT:-3001}:3001'
+    healthcheck:
+      test: ['CMD', 'curl', '-fsS', 'http://localhost:3001/v1/health']
+      interval: 15s
+      timeout: 5s
+      start_period: 120s
+      retries: 10
+
+  # Background jobs: bank and price syncs, imports, scheduled emails. The only process that
+  # runs the schedules.
+  worker:
+    image: ${WM_IMAGE_REGISTRY:-ghcr.io/wondermoney}/wondermoney-worker:${WM_VERSION:-latest}
+    restart: unless-stopped
+    <<: *api-env
+    environment:
+      DB_HOST: postgres
+      DB_PORT: '5432'
+      DB_DATABASE: ${POSTGRES_DB:-wondermoney}
+      DB_USERNAME: ${POSTGRES_USER:-wondermoney}
+      DB_PASSWORD: ${POSTGRES_PASSWORD:?run ./generate-env.sh first}
+      PGBOSS_MIGRATE: 'true'
+      PGBOSS_SCHEDULE: 'true'
+    depends_on:
+      api:
+        condition: service_healthy
+
+  web:
+    image: ${WM_IMAGE_REGISTRY:-ghcr.io/wondermoney}/wondermoney-web:${WM_VERSION:-latest}
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      NEXT_PUBLIC_API_URL: ${API_URL:?set API_URL in .env}
+      NEXT_PUBLIC_APP_URL: ${APP_URL:?set APP_URL in .env}
+    depends_on:
+      api:
+        condition: service_healthy
+    ports:
+      - '${WEB_PORT:-3000}:3000'
+
+  minio:
+    profiles: [storage]
+    image: minio/minio:latest
+    restart: unless-stopped
+    command: server /data --console-address :9001
+    environment:
+      MINIO_ROOT_USER: ${AWS_ACCESS_KEY_ID:-wondermoney}
+      MINIO_ROOT_PASSWORD: ${AWS_SECRET_ACCESS_KEY:-change-me-please}
+    volumes:
+      - minio-data:/data
+    ports:
+      - '${MINIO_PORT:-9000}:9000'
+
+  # Creates the bucket once MinIO is up, then exits.
+  minio-init:
+    profiles: [storage]
+    image: minio/mc:latest
+    depends_on: [minio]
+    entrypoint: >
+      sh -c "until mc alias set local http://minio:9000 \"$${MINIO_ROOT_USER}\" \"$${MINIO_ROOT_PASSWORD}\"; do sleep 2; done;
+             mc mb --ignore-existing local/$${S3_BUCKET}"
+    environment:
+      MINIO_ROOT_USER: ${AWS_ACCESS_KEY_ID:-wondermoney}
+      MINIO_ROOT_PASSWORD: ${AWS_SECRET_ACCESS_KEY:-change-me-please}
+      S3_BUCKET: ${S3_BUCKET:-wondermoney}
+
+  mailpit:
+    profiles: [mail]
+    image: axllent/mailpit:latest
+    restart: unless-stopped
+    ports:
+      - '${MAILPIT_PORT:-8025}:8025'
+
+volumes:
+  postgres-data:
+  minio-data:

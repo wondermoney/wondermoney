@@ -1,0 +1,168 @@
+{
+  "loans": {
+    "page": {
+      "title": "Empréstimos",
+      "description": "Acompanhe empréstimos, planos de pagamento e saldos num só lugar."
+    },
+    "actions": {
+      "add": "Adicionar empréstimo",
+      "edit": "Editar empréstimo",
+      "delete": "Eliminar empréstimo",
+      "recordPayment": "Registar pagamento",
+      "linkRepayment": "Associar pagamento",
+      "unlinkRepayment": "Desassociar pagamento"
+    },
+    "fields": {
+      "name": "Nome do empréstimo",
+      "currency": "Moeda",
+      "includeInNetWorth": "Incluir no património líquido",
+      "notes": "Notas",
+      "providerName": "Fornecedor",
+      "lender": "Credor",
+      "type": "Tipo de empréstimo",
+      "status": "Estado",
+      "principal": "Capital",
+      "originalPrincipal": "Valor original do empréstimo",
+      "originalPrincipalHint": "Opcional. O valor originalmente emprestado, se diferente do capital acima (por exemplo, ao adicionar um empréstimo que já está a pagar). Usado para calcular o progresso do pagamento.",
+      "balance": "Saldo",
+      "interestRate": "Taxa de juro",
+      "installment": "Prestação mensal",
+      "termMonths": "Prazo (meses)",
+      "startDate": "Data de início",
+      "dueDate": "Data de vencimento",
+      "linkedAccount": "Conta associada",
+      "linkedTransaction": "Pagamento associado"
+    },
+    "types": {
+      "personal": "Pessoal",
+      "mortgage": "Crédito habitação",
+      "auto": "Automóvel",
+      "student": "Estudantil",
+      "other": "Outro"
+    },
+    "statuses": {
+      "active": "Ativo",
+      "paid": "Pago",
+      "closed": "Encerrado",
+      "paused": "Pausado",
+      "overdue": "Em atraso"
+    },
+    "repayment": {
+      "title": "Associação de pagamentos",
+      "description": "Associe os pagamentos a movimentos da conta para um acompanhamento correto do saldo."
+    },
+    "validation": {
+      "required": "Este campo é obrigatório.",
+      "positiveAmount": "Introduza um valor positivo.",
+      "validRate": "Introduza uma taxa de juro válida.",
+      "originalPrincipalTooLow": "O valor original do empréstimo deve ser, no mínimo, igual ao capital."
+    },
+    "errors": {
+      "loadFailed": "Não foi possível carregar os empréstimos.",
+      "loadFailedBody": "Não foi possível carregar o empréstimo selecionado. Tente novamente.",
+      "saveFailed": "Não foi possível guardar o empréstimo.",
+      "deleteFailed": "Não foi possível eliminar o empréstimo."
+    },
+    "empty": {
+      "title": "Ainda sem empréstimos",
+      "description": "Adicione o primeiro empréstimo para acompanhar saldos e pagamentos.",
+      "noData": "—"
+    },
+    "summary": {
+      "totalOutstanding": "Dívida em aberto",
+      "monthlyRepayment": "Pagamentos mensais",
+      "interestAndFees": "Juros e taxas",
+      "netWorthImpact": "Impacto no património líquido",
+      "repaymentsNeedingReview": "A rever",
+      "outstandingPrincipal": "Capital em aberto",
+      "regularPayment": "Prestação regular",
+      "annualRate": "Taxa anual",
+      "remainingTerm": "Prazo restante",
+      "progress": "Progresso do pagamento",
+      "progressLabel": "{value}% pago"
+    },
+    "detail": {
+      "actions": {
+        "back": "Voltar aos empréstimos",
+        "title": "Ações do empréstimo",
+        "adjustBalance": "Adicionar ajuste de saldo"
+      },
+      "providerUnavailable": "Fornecedor indisponível",
+      "providerUnavailableShort": "Metadados indisponíveis",
+      "na": "—",
+      "unavailableAccount": "Conta indisponível",
+      "months": "{count} meses",
+      "description": "Descrição",
+      "loading": "A carregar detalhes do empréstimo...",
+      "errors": {
+        "loadFailed": "Não foi possível carregar o empréstimo.",
+        "loadFailedBody": "Não foi possível carregar o empréstimo selecionado. Tente novamente."
+      },
+      "loadFailedBody": "Não foi possível carregar o empréstimo selecionado. Tente novamente.",
+      "assumptions": {
+        "title": "Premissas do empréstimo"
+      },
+      "repayments": {
+        "title": "Pagamentos",
+        "needsReview": "A rever",
+        "date": "Data",
+        "account": "Conta",
+        "description": "Descrição",
+        "payment": "Pagamento",
+        "principal": "Capital",
+        "interest": "Juros",
+        "fees": "Taxas",
+        "status": "Estado",
+        "actions": "Ações",
+        "empty": "Ainda não existem pagamentos associados.",
+        "noCandidates": "Não existem candidatos a pagamento.",
+        "candidatesTitle": "Associar pagamentos",
+        "candidatesDescription": "Escolha uma transação para rever e alocar.",
+        "reviewTitle": "Rever alocação",
+        "reviewDescription": "Confirme a repartição do pagamento antes de guardar.",
+        "linked": "Associado",
+        "candidateConfidence": "Confiança: {value}",
+        "confidenceValue": "{value}%",
+        "confidenceUnavailable": "indisponível",
+        "reasonsUnavailable": "Sem razões apresentadas",
+        "high": "alta",
+        "medium": "média",
+        "totalPayment": "Pagamento total",
+        "saveAllocation": "Guardar alocação",
+        "editAllocation": "Editar alocação",
+        "removeAssociation": "Remover associação",
+        "removeConfirm": "Remover esta associação de pagamento?",
+        "editAllocationLabel": "Editar alocação do pagamento",
+        "removeAssociationLabel": "Remover associação do pagamento"
+      },
+      "amortization": {
+        "title": "Pré-visualização de amortização",
+        "unavailable": "A pré-visualização de amortização não está disponível com a resposta atual da API."
+      },
+      "adjustment": {
+        "unavailableTitle": "Ajuste de saldo indisponível",
+        "unavailableDescription": "Esta ação ainda não está ligada a uma API.",
+        "unavailableBody": "O formulário de ajuste fica oculto até a API estar disponível."
+      }
+    },
+    "table": {
+      "loan": "Empréstimo",
+      "outstanding": "Capital em aberto",
+      "payment": "Prestação",
+      "rate": "Taxa",
+      "term": "Prazo restante",
+      "progress": "Progresso",
+      "progressLabel": "Progresso",
+      "status": "Estado",
+      "actions": "Ações"
+    },
+    "emptyPreview": {
+      "title": "Pré-visualização",
+      "subtitle": "Vista típica de empréstimos",
+      "sampleName": "Crédito habitação",
+      "sampleProvider": "Banco",
+      "sampleStatus": "Ativo",
+      "sampleTerm": "28a 4m"
+    }
+  }
+}

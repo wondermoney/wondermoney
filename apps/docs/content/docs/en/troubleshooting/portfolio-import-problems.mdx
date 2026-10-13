@@ -1,0 +1,44 @@
+---
+title: Portfolio Import Problems
+description: Steps to diagnose portfolio import problems in WonderMoney.
+---
+
+An invalid broker file is rejected before any data changes, with a clear error message and retry options.
+
+<DocsImage
+  src="/images/docs/troubleshooting/portfolio-import-problems-error-state.png"
+  alt="Portfolio import dialog showing a file upload error with retry options."
+  width={1440}
+  height={900}
+  caption="An invalid broker file is rejected with a 'could not upload the file' error and retry options."
+/>
+
+## Symptoms
+
+- A portfolio file does not upload.
+- Imported holdings show the wrong quantity or price.
+- Transactions appear incomplete after import.
+- The import reports an unsupported column or date format.
+
+## What to check
+
+- Whether the file uses the expected format.
+- Whether the portfolio date and currency are correct.
+- Whether the file includes split holdings or adjustments that need special handling.
+- Whether the source export is complete.
+
+## What to try
+
+1. Export the file again from the source platform.
+2. Confirm the columns match the import template.
+3. Remove extra rows, notes, or merged cells.
+4. Try importing a smaller sample file first.
+
+## When to contact support
+
+Contact support if the file is valid but the portfolio still imports with the wrong values, or if the import fails on data that appears correct.
+
+
+## Related pages
+
+- [Contact support](/en/docs/troubleshooting/contact-support)

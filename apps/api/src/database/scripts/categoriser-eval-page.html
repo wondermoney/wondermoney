@@ -1,0 +1,311 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Categoriser precision — blind label</title>
+<style>
+  :root { color-scheme: light dark; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; max-width: 720px; margin: 40px auto; padding: 0 20px; line-height: 1.4; }
+  .hidden { display: none !important; }
+  #loadPanel { border: 1px dashed #888; border-radius: 8px; padding: 24px; text-align: center; }
+  #progress { position: sticky; top: 0; background: Canvas; padding: 8px 0; font-size: 13px; opacity: 0.8; border-bottom: 1px solid #8883; margin-bottom: 16px; }
+  .card { border: 1px solid #8885; border-radius: 10px; padding: 20px; }
+  .field { font-size: 11px; opacity: 0.65; text-transform: uppercase; letter-spacing: 0.03em; margin-top: 12px; }
+  .candidate { font-size: 24px; font-weight: 600; margin: 4px 0 0; }
+  .meta { font-size: 16px; margin-top: 2px; }
+  select, button { font-size: 16px; padding: 8px 10px; border-radius: 6px; }
+  .pick-row { display: flex; gap: 8px; align-items: center; margin-top: 16px; flex-wrap: wrap; }
+  .actions { margin-top: 20px; display: flex; gap: 10px; flex-wrap: wrap; }
+  button { cursor: pointer; }
+  button.primary { background: #5637a7; color: white; border: none; }
+  button.secondary { background: transparent; border: 1px solid #8885; }
+  #reveal { margin-top: 20px; padding-top: 16px; border-top: 1px dashed #8885; }
+  #reveal .ai-pick { font-size: 18px; font-weight: 600; }
+  .agree-row { margin-top: 12px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+  #exportBar { position: sticky; bottom: 0; background: Canvas; padding: 12px 0; border-top: 1px solid #8883; margin-top: 20px; display: flex; justify-content: space-between; align-items: center; }
+  label.checkbox { font-size: 14px; display: flex; gap: 6px; align-items: center; }
+  #notice { font-size: 13px; opacity: 0.7; margin-top: 8px; }
+</style>
+</head>
+<body>
+  <h1>Categoriser precision — blind label</h1>
+  <p id="notice">
+    Load a sample JSON from <code>export-categoriser-eval-sample.ts</code>. For each transaction, pick the category
+    you believe is correct <strong>before</strong> the AI's suggestion is revealed. Your first pick is what gets scored —
+    the reveal only lets you flag a genuine mistake in your own answer, not second-guess a plausible one.
+    Progress autosaves to this browser (localStorage) so you can close and resume.
+  </p>
+
+  <div id="loadPanel">
+    <p>Choose a sample JSON file to begin (or resume an in-progress session).</p>
+    <input type="file" id="fileInput" accept="application/json" />
+  </div>
+
+  <div id="workspace" class="hidden">
+    <div id="progress"></div>
+    <div class="card">
+      <div class="field">Merchant / description (what the AI saw)</div>
+      <p class="candidate" id="candidateText"></p>
+      <div class="field">Direction &amp; amount</div>
+      <p class="meta" id="amountMeta"></p>
+      <div class="field">Date</div>
+      <p class="meta" id="dateMeta"></p>
+
+      <div class="pick-row">
+        <label for="pickSelect"><strong>Your category:</strong></label>
+        <select id="pickSelect"></select>
+      </div>
+      <div class="pick-row">
+        <label class="checkbox"><input type="checkbox" id="insufficientCheck" /> Not enough information to categorize this</label>
+      </div>
+
+      <div class="actions">
+        <button class="primary" id="revealBtn">Reveal AI suggestion</button>
+      </div>
+
+      <div id="reveal" class="hidden">
+        <div class="field">AI suggested category (confidence <span id="confidenceValue"></span>)</div>
+        <p class="ai-pick" id="aiPick"></p>
+        <div class="field">AI's own merchant guess / reason code</div>
+        <p class="meta" id="aiMerchantReason"></p>
+
+        <div class="agree-row">
+          <label class="checkbox"><input type="checkbox" id="reviseCheck" /> Actually, my first answer was wrong — let me revise it</label>
+        </div>
+        <div class="pick-row hidden" id="reviseRow">
+          <label for="reviseSelect">Revised category:</label>
+          <select id="reviseSelect"></select>
+        </div>
+
+        <div class="actions">
+          <button class="primary" id="nextBtn">Save &amp; next →</button>
+          <button class="secondary" id="prevBtn">← back</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="exportBar" class="hidden">
+    <span id="exportSummary"></span>
+    <button class="primary" id="exportBtn">Export labels.json</button>
+  </div>
+
+<script>
+(function () {
+  'use strict';
+  var STORAGE_PREFIX = 'categoriser-eval:';
+  var sample = null;       // { categories, rows, generatedAt }
+  var storageKey = null;
+  var labels = {};         // transactionEnrichmentKey -> { coldPick, insufficient, revised, finalPick, labelledAt }
+  var order = [];          // shuffled row order (display only — bucket membership is hidden, so no bias)
+  var cursor = 0;
+
+  var fileInput = document.getElementById('fileInput');
+  var loadPanel = document.getElementById('loadPanel');
+  var workspace = document.getElementById('workspace');
+  var exportBar = document.getElementById('exportBar');
+  var progressEl = document.getElementById('progress');
+  var candidateTextEl = document.getElementById('candidateText');
+  var amountMetaEl = document.getElementById('amountMeta');
+  var dateMetaEl = document.getElementById('dateMeta');
+  var pickSelect = document.getElementById('pickSelect');
+  var insufficientCheck = document.getElementById('insufficientCheck');
+  var revealBtn = document.getElementById('revealBtn');
+  var revealSection = document.getElementById('reveal');
+  var confidenceValueEl = document.getElementById('confidenceValue');
+  var aiPickEl = document.getElementById('aiPick');
+  var aiMerchantReasonEl = document.getElementById('aiMerchantReason');
+  var reviseCheck = document.getElementById('reviseCheck');
+  var reviseRow = document.getElementById('reviseRow');
+  var reviseSelect = document.getElementById('reviseSelect');
+  var nextBtn = document.getElementById('nextBtn');
+  var prevBtn = document.getElementById('prevBtn');
+  var exportBtn = document.getElementById('exportBtn');
+  var exportSummaryEl = document.getElementById('exportSummary');
+
+  fileInput.addEventListener('change', function (event) {
+    var file = event.target.files[0];
+    if (!file) return;
+    var reader = new FileReader();
+    reader.onload = function () {
+      try {
+        sample = JSON.parse(reader.result);
+      } catch (error) {
+        alert('Could not parse that file as JSON: ' + error.message);
+        return;
+      }
+      if (!sample || !Array.isArray(sample.rows) || !Array.isArray(sample.categories)) {
+        alert('That file does not look like a categoriser eval sample (missing rows/categories).');
+        return;
+      }
+      startSession();
+    };
+    reader.readAsText(file);
+  });
+
+  function startSession() {
+    storageKey = STORAGE_PREFIX + (sample.generatedAt || 'session');
+    var saved = localStorage.getItem(storageKey);
+    labels = saved ? JSON.parse(saved) : {};
+    order = shuffledIndices(sample.rows.length);
+    cursor = order.findIndex(function (index) { return !labels[sample.rows[index].transactionEnrichmentKey]; });
+    if (cursor === -1) cursor = 0;
+    loadPanel.classList.add('hidden');
+    workspace.classList.remove('hidden');
+    exportBar.classList.remove('hidden');
+    populateCategoryOptions(pickSelect);
+    populateCategoryOptions(reviseSelect);
+    renderRow();
+  }
+
+  function shuffledIndices(n) {
+    var indices = [];
+    for (var i = 0; i < n; i += 1) indices.push(i);
+    for (var j = indices.length - 1; j > 0; j -= 1) {
+      var k = Math.floor(Math.random() * (j + 1));
+      var tmp = indices[j]; indices[j] = indices[k]; indices[k] = tmp;
+    }
+    return indices;
+  }
+
+  function populateCategoryOptions(select) {
+    select.innerHTML = '';
+    var placeholder = document.createElement('option');
+    placeholder.value = '';
+    placeholder.textContent = '— choose a category —';
+    select.appendChild(placeholder);
+    sample.categories.forEach(function (category) {
+      var option = document.createElement('option');
+      option.value = String(category.categoryKey);
+      option.textContent = category.name;
+      select.appendChild(option);
+    });
+  }
+
+  function currentRow() {
+    return sample.rows[order[cursor]];
+  }
+
+  function renderRow() {
+    if (cursor >= order.length) {
+      candidateTextEl.textContent = 'All rows labelled — export below.';
+      amountMetaEl.textContent = '';
+      dateMetaEl.textContent = '';
+      pickSelect.parentElement.classList.add('hidden');
+      insufficientCheck.parentElement.classList.add('hidden');
+      revealBtn.classList.add('hidden');
+      revealSection.classList.add('hidden');
+      progressEl.textContent = 'Done: ' + Object.keys(labels).length + ' / ' + sample.rows.length + ' labelled.';
+      updateExportSummary();
+      return;
+    }
+    var row = currentRow();
+    var existing = labels[row.transactionEnrichmentKey];
+    progressEl.textContent = 'Row ' + (cursor + 1) + ' of ' + order.length + ' — ' + Object.keys(labels).length + ' labelled so far';
+    candidateTextEl.textContent = row.candidateText || '(no merchant/description text)';
+    var directionLabel = row.direction === 'credit' ? 'Money in' : row.direction === 'debit' ? 'Money out' : 'Direction unknown';
+    var amount = row.settlementAmount !== null ? Math.abs(Number(row.settlementAmount)).toFixed(2) : '?';
+    amountMetaEl.textContent = directionLabel + ' — ' + amount + ' ' + (row.currencyCode || '');
+    dateMetaEl.textContent = row.transactionDate ? new Date(row.transactionDate).toLocaleDateString() : '(no date)';
+    pickSelect.parentElement.classList.remove('hidden');
+    insufficientCheck.parentElement.classList.remove('hidden');
+    revealBtn.classList.remove('hidden');
+    pickSelect.value = existing ? existing.coldPick || '' : '';
+    insufficientCheck.checked = existing ? Boolean(existing.insufficient) : false;
+    if (existing) {
+      showReveal(row, existing);
+    } else {
+      revealSection.classList.add('hidden');
+    }
+  }
+
+  revealBtn.addEventListener('click', function () {
+    var row = currentRow();
+    var coldPick = insufficientCheck.checked ? null : (pickSelect.value || null);
+    if (!insufficientCheck.checked && !coldPick) {
+      alert('Pick a category, or check "not enough information".');
+      return;
+    }
+    var existing = labels[row.transactionEnrichmentKey] || {};
+    existing.coldPick = coldPick;
+    existing.insufficient = insufficientCheck.checked;
+    existing.finalPick = coldPick;
+    existing.revised = false;
+    labels[row.transactionEnrichmentKey] = existing;
+    persist();
+    showReveal(row, existing);
+  });
+
+  function showReveal(row, existing) {
+    revealSection.classList.remove('hidden');
+    confidenceValueEl.textContent = row.confidence !== undefined ? Number(row.confidence).toFixed(2) : '?';
+    aiPickEl.textContent = row.suggestedCategoryName || '(no suggestion)';
+    aiMerchantReasonEl.textContent = (row.merchantSuggestion || '—') + ' · ' + (row.reasonCode || '—');
+    reviseCheck.checked = Boolean(existing.revised);
+    reviseRow.classList.toggle('hidden', !existing.revised);
+    reviseSelect.value = existing.revised ? (existing.finalPick || '') : '';
+  }
+
+  reviseCheck.addEventListener('change', function () {
+    reviseRow.classList.toggle('hidden', !reviseCheck.checked);
+    var row = currentRow();
+    var existing = labels[row.transactionEnrichmentKey];
+    if (!existing) return;
+    existing.revised = reviseCheck.checked;
+    existing.finalPick = reviseCheck.checked ? (reviseSelect.value || null) : existing.coldPick;
+    persist();
+  });
+
+  reviseSelect.addEventListener('change', function () {
+    var row = currentRow();
+    var existing = labels[row.transactionEnrichmentKey];
+    if (!existing || !existing.revised) return;
+    existing.finalPick = reviseSelect.value || null;
+    persist();
+  });
+
+  nextBtn.addEventListener('click', function () {
+    if (revealSection.classList.contains('hidden')) {
+      alert('Reveal the AI suggestion first (click "Reveal AI suggestion" above).');
+      return;
+    }
+    cursor += 1;
+    renderRow();
+  });
+
+  prevBtn.addEventListener('click', function () {
+    if (cursor > 0) cursor -= 1;
+    renderRow();
+  });
+
+  function persist() {
+    localStorage.setItem(storageKey, JSON.stringify(labels));
+    updateExportSummary();
+  }
+
+  function updateExportSummary() {
+    var total = sample ? sample.rows.length : 0;
+    exportSummaryEl.textContent = Object.keys(labels).length + ' / ' + total + ' labelled';
+  }
+
+  exportBtn.addEventListener('click', function () {
+    if (!sample) return;
+    var payload = {
+      exportedAt: new Date().toISOString(),
+      labels: labels,
+      sampleGeneratedAt: sample.generatedAt,
+    };
+    var blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+    var url = URL.createObjectURL(blob);
+    var link = document.createElement('a');
+    link.href = url;
+    link.download = 'categoriser-eval-labels.json';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,51 @@
+---
+title: Transaction Import Problems
+description: Steps to diagnose transaction import problems in WonderMoney.
+---
+
+An unreadable file is rejected with an error message instead of being imported silently, so you can fix the file and try again.
+
+<DocsImage
+  src="/images/docs/troubleshooting/transaction-import-problems-error-state.png"
+  alt="Transaction import dialog showing an error message after a malformed CSV file was uploaded."
+  width={1440}
+  height={1131}
+  caption="An unreadable CSV is rejected with an error message so you can fix the file and retry."
+/>
+
+## Symptoms
+
+- An import file is rejected.
+- The import finishes but transactions do not appear.
+- Some rows are skipped.
+- Dates, amounts, or descriptions look wrong after import.
+
+## What to check
+
+- Whether the file format matches the import tool.
+- Whether the column headers and separators are correct.
+- Whether the file includes duplicate or blank rows.
+- Whether the account and date range match the data you want.
+
+## What to try
+
+1. Re-export the file from the source system if possible.
+2. Remove duplicate rows and empty lines.
+3. Check the column mapping before confirming the import.
+4. Try a smaller file to isolate the problem.
+
+## Similar transactions and duplicates
+
+WonderMoney identifies duplicates using a transaction fingerprint built from transaction details such as date and amount. Fingerprint tolerance has been strengthened, so two transactions that are similar but legitimate — for example, two purchases of the same amount on the same day — are no longer skipped as duplicates. When a true duplicate is detected, the original entry is kept and the decision is recorded in the audit log, so nothing is silently overwritten.
+
+For more on how transactions are matched and stored, see [Understand transactions](/en/docs/accounts-transactions/understand-transactions).
+
+## When to contact support
+
+Contact support if the file follows the required format but imports still fail, or if the import creates incorrect transactions that you cannot correct manually.
+
+
+## Related pages
+
+- [Bank connection problems](/en/docs/troubleshooting/bank-connection-problems)
+- [Contact support](/en/docs/troubleshooting/contact-support)

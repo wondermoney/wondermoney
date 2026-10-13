@@ -1,0 +1,75 @@
+---
+title: Problemas de ligação bancária
+description: Resolve falhas ao ligar uma conta bancária ou ao configurar a tua chave da Enable Banking.
+---
+
+## Sintomas
+
+Esta página ajuda quando a ligação bancária falha, expira ou não mostra dados recentes.
+
+Sinais comuns:
+
+- A ligação não conclui
+- Surge uma mensagem de erro no banco
+- Os saldos não atualizam
+- As transações deixam de sincronizar
+- A chave da Enable Banking não guarda, ou a WonderMoney assinala-a como inválida
+
+## O que verificar
+
+Antes de repetir a ligação, confirma:
+
+- Se tens uma chave da Enable Banking válida guardada em Definições → Fornecedor bancário — sem ela, nenhuma ligação bancária arranca
+- Se o banco está com manutenção
+- Se a autenticação expirou
+- Se a conta correta está a ser ligada
+- Se permitiste o acesso necessário
+
+## O que tentar
+
+Tenta estes passos:
+
+1. Reinicia o processo de ligação.
+2. Volta a autenticar no banco.
+3. Remove a ligação e cria-a novamente.
+4. Verifica se o problema acontece também noutro navegador.
+
+## Problemas com a chave da Enable Banking
+
+A maior parte dos problemas de ligação vem de como a aplicação foi configurada na Enable Banking, não do banco em si. Antes de tentares ligar de novo, verifica isto:
+
+- **A aplicação foi criada com Sandbox em vez de Production.** O Sandbox só liga a dados bancários fictícios, por isso nunca vai conseguir ligar uma conta real. Confirma na página da aplicação no Painel de Controlo da Enable Banking — se mostrar um ambiente Sandbox, regista uma aplicação nova com **Production** selecionado. Vê [Ligar a primeira conta bancária](/pt/docs/start-here/connect-first-bank-account) para a configuração completa.
+- **O formulário da aplicação não submetia.** Numa aplicação Production, a Enable Banking exige um Privacy URL e um Terms URL, mas não os marca como obrigatórios nem mostra qualquer erro quando faltam — o formulário simplesmente não faz nada ao clicar em submeter. Se uma aplicação não guarda, confirma se os dois campos estão preenchidos.
+- **Foi clicado em "Request activation" em vez de "Activate by linking accounts".** O Painel de Controlo da Enable Banking mostra os dois botões depois de a aplicação ser registada. "Request activation" inicia um processo de verificação empresarial (KYB) que não é necessário para uso pessoal e não ativa sozinho uma aplicação pessoal. Usa antes "Activate by linking accounts", que ativa a aplicação ao guiar-te para ligares uma das tuas próprias contas bancárias.
+
+<Callout type="error" title="Perdeste a chave privada descarregada">
+  A Enable Banking mostra a chave privada uma única vez, no momento em que é gerada, e não a consegue voltar a mostrar — nem mesmo através do próprio suporte. Se o ficheiro `.pem` não foi guardado em segurança e já não é possível encontrá-lo, não há forma de o recuperar. A única solução é registar uma aplicação completamente nova no Painel de Controlo e gerar uma chave nova.
+</Callout>
+
+## Incidentes de ligação
+
+Uma ligação bancária pode terminar num estado de incidente em vez de um sucesso ou de uma falha limpos. Os estados mais comuns incluem:
+
+- `bank-disconnected` — o banco cancelou ou terminou a ligação, que precisa de ser restabelecida.
+- `payment-failed` — um passo relacionado com pagamentos da ligação não foi concluído.
+
+Os incidentes são recuperáveis. Falhas do fornecedor, como uma falha da Enable Banking, são tratadas na lista de bancos em vez de aparecerem como erros de servidor, por isso os teus dados existentes não são alterados. Quando um incidente é recuperável, iniciar novamente a ligação reabre o fluxo de ligação com o nome real do banco, e podes concluir os passos de aprovação assim que o fornecedor estiver disponível.
+
+Para o fluxo completo de ligações, vê [Gerir ligações bancárias](/pt/docs/accounts-transactions/manage-bank-connections).
+
+## Quando contactar o suporte
+
+Contacta o suporte se:
+
+- O erro se repetir após várias tentativas
+- A conta correta não aparecer
+- Houver dados em falta após ligação bem-sucedida
+
+
+## Páginas relacionadas
+
+- [Ligar a primeira conta bancária](/pt/docs/start-here/connect-first-bank-account)
+- [Resolução de problemas](/pt/docs/troubleshooting/)
+- [Problemas de início de sessão](/pt/docs/troubleshooting/sign-in-problems)
+- [Problemas de importação de transações](/pt/docs/troubleshooting/transaction-import-problems)
+- [Contactar o suporte](/pt/docs/troubleshooting/contact-support)

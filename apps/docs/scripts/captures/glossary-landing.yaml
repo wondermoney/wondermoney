@@ -1,0 +1,15 @@
+# Glossary landing — the docs shell hero shot is reused from start-here.
+# glossary (pure prose, no app surface) is intentionally not captured.
+section: glossary-landing
+user: docs-screens-sandbox
+pages:
+  - slug: index
+    step: overview
+    url: http://localhost:3100/en
+    login: false
+    actions:
+      - type: reuse
+        from: dogfood-output/docs-screens/start-here/index-overview.png
+    note: >-
+      REUSE the existing start-here/index-overview.png (or copy it) — it is the
+      same docs shell. Don't recapture.

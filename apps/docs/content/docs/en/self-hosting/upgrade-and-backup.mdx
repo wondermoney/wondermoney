@@ -1,0 +1,37 @@
+---
+title: Updates and backups
+description: Keep your instance up to date, back up your data and restore it.
+---
+
+## Update
+
+```sh
+docker compose pull
+docker compose up -d
+```
+
+The API applies any database changes when it starts. To stay on a specific release instead of the latest, set `WM_VERSION` in `.env`, for example `WM_VERSION=1.4`.
+
+## Back up
+
+Everything that matters is in the Postgres database, plus the MinIO volume if you use the bundled storage.
+
+```sh
+docker compose exec -T postgres pg_dump -U wondermoney -Fc wondermoney > wondermoney-$(date +%F).dump
+```
+
+Keep a copy of `.env` with your backups. `CREDENTIAL_ENCRYPTION_KEY_V1` encrypts the bank credentials people store, and a restored database can't use them without it. Store the backups somewhere other than the server itself.
+
+## Restore
+
+Stop the app, recreate the database, load the dump and start again:
+
+```sh
+docker compose stop api worker web
+docker compose exec -T postgres dropdb -U wondermoney wondermoney
+docker compose exec -T postgres createdb -U wondermoney wondermoney
+docker compose exec -T postgres pg_restore -U wondermoney -d wondermoney < wondermoney-2026-10-01.dump
+docker compose up -d
+```
+
+If you changed `POSTGRES_USER` or `POSTGRES_DB` in `.env`, use those values instead of `wondermoney`.

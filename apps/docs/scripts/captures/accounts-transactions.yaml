@@ -1,0 +1,130 @@
+# Accounts & transactions — overview, connect, manual, CSV import, categorize,
+# recurring, review inbox.
+section: accounts-transactions
+user: docs-screens-sandbox
+pages:
+  - slug: index
+    step: accounts-overview
+    url: http://localhost:64590/en/accounts
+    anchor:
+      text: "Accounts overview"
+
+  - slug: connect-bank-account
+    step: bank-picker
+    url: http://localhost:64590/en/accounts
+    anchor:
+      text: "Add Account"
+    actions:
+      - type: click-role
+        name: "Add Account"
+        locales:
+          pt: "Adicionar Conta"
+          es: "Añadir cuenta"
+      - type: wait-text
+        text: "Linked"
+        locales:
+          pt: "Ligada"
+          es: "Vinculada"
+      - type: click-role
+        name: "Linked"
+        locales:
+          pt: "Ligada"
+          es: "Vinculada"
+      - type: wait-text
+        text: "Sandbox Finance"
+    note: >-
+      Same flow as start-here/connect-first-bank-account. Capture the open
+      picker, do not click the institution.
+
+  - slug: manual-offline-account
+    step: add-form
+    url: http://localhost:64590/en/accounts
+    anchor:
+      text: "Add Account"
+    actions:
+      - type: click-role
+        name: "Add Account"
+        locales:
+          pt: "Adicionar Conta"
+          es: "Añadir cuenta"
+      - type: wait-text
+        text: "Linked"
+        locales:
+          pt: "Ligada"
+          es: "Vinculada"
+      - type: click-role
+        name: "Unlinked"
+        locales:
+          pt: "Não ligada"
+          es: "Sin vincular"
+      - type: wait-text
+        text: "Account name"
+    note: >-
+      The dialog's manual option is labelled "Unlinked" in this build (there is
+      no "Manual" label). The wait-text target is the account name field on the
+      manual form; if the field label differs, adjust the wait text.
+
+  - slug: manage-bank-connections
+    step: overview
+    url: http://localhost:64590/en/settings?tab=connections
+
+  - slug: understand-transactions
+    step: list
+    url: http://localhost:64590/en/accounts/transactions
+    anchor:
+      text: "Transactions"
+
+  - slug: import-transactions-csv
+    step: import-modal
+    url: http://localhost:64590/en/accounts/transactions
+    anchor:
+      text: "Transactions"
+    actions:
+      - type: wait-text
+        text: "Import Transactions"
+        locales:
+          pt: "Importar transações"
+          es: "Importar transacciones"
+      - type: click-role
+        name: "Import Transactions"
+        locales:
+          pt: "Importar transações"
+          es: "Importar transacciones"
+      - type: wait-text
+        text: "Import transactions"
+        locales:
+          pt: "Importar transações"
+          es: "Importar transacciones"
+    note: >-
+      The capture target is the open import modal. Fallback anchor text if the
+      heading differs: "Drag".
+
+  - slug: categorize-transactions
+    step: category-picker
+    url: http://localhost:64590/en/accounts/transactions
+    anchor:
+      text: "Transactions"
+    actions:
+      - type: wait-text
+        text: "Edit category"
+      - type: click-first
+        selector: "[role=combobox]"
+      - type: wait-text
+        text: "Category"
+    note: >-
+      The transactions table has one "Edit category" combobox per row, so the
+      semantic locator would be ambiguous — click the first combobox instead.
+
+  - slug: recurring-payments
+    step: detected
+    url: http://localhost:64590/en/accounts/recurring
+    anchor:
+      text: "Needs review"
+    note: >-
+      The seeded user already has detected items in the "Needs review" state.
+      If the page is empty instead, click the "Scan again" button and wait for
+      "Needs review" to appear.
+
+  - slug: missing-duplicate-transactions
+    step: review
+    url: http://localhost:64590/en/accounts/transactions/review

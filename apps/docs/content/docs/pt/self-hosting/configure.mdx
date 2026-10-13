@@ -1,0 +1,66 @@
+---
+title: Configurar a tua instância
+description: Liga o email, o armazenamento de ficheiros, as funcionalidades de IA e os dados de mercado, e controla quem se pode registar.
+---
+
+Toda a configuração está no ficheiro `.env`, ao lado do `docker-compose.yml`, comentada secção a secção. Depois de o editares, aplica as alterações com:
+
+```sh
+docker compose up -d
+```
+
+## Email
+
+Indica um servidor SMTP:
+
+```sh
+SMTP_HOST=smtp.example.com
+SMTP_PORT=587
+SMTP_USER=...
+SMTP_PASSWORD=...
+EMAIL_FROM=money@example.com
+```
+
+Ou define `RESEND_API_KEY` para usar o Resend. Para testar sem um fornecedor real, inicia o Mailpit incluído com `docker compose --profile mail up -d`, define `SMTP_HOST=mailpit` e `SMTP_PORT=1025`, e lê os emails em http://localhost:8025.
+
+## Armazenamento de ficheiros
+
+As importações CSV e as cópias de recibos precisam de armazenamento compatível com S3. Para usar o MinIO incluído, inicia-o com `docker compose --profile storage up -d` e define:
+
+```sh
+AWS_ACCESS_KEY_ID=escolhe-um-utilizador
+AWS_SECRET_ACCESS_KEY=escolhe-uma-palavra-passe-longa
+S3_ENDPOINT=http://minio:9000
+S3_PUBLIC_ENDPOINT=http://localhost:9000
+S3_BUCKET=wondermoney
+```
+
+O `S3_PUBLIC_ENDPOINT` é o endereço que os navegadores usam para chegar ao armazenamento. Qualquer serviço compatível com S3 também funciona, como Cloudflare R2, Backblaze B2 ou AWS S3.
+
+## Funcionalidades de IA
+
+A leitura de recibos, o mapeamento de colunas CSV, a categorização de transações, o resumo mensal e o assistente funcionam com qualquer endpoint compatível com OpenAI: OpenAI, OpenRouter, ou um modelo a correr localmente com Ollama, LM Studio ou vLLM.
+
+```sh
+AI_BASE_URL=http://host.docker.internal:11434/v1
+AI_MODEL=llama3.1
+```
+
+Define `AI_API_KEY` quando o endpoint exigir uma chave. Para usares um modelo diferente numa funcionalidade, define `AI_MODEL_<FUNCIONALIDADE>`; por exemplo, a leitura de recibos precisa de um modelo que leia imagens, definido com `AI_MODEL_OCR`.
+
+## Dados de mercado
+
+Define `EODHD_API_KEY` para ligar a pesquisa de tickers, as cotações em tempo real e o módulo de Mercados Financeiros.
+
+## Sincronização bancária
+
+A sincronização bancária não precisa de configuração no servidor. Cada pessoa adiciona a sua própria chave de aplicação Enable Banking nas Definições, por isso as credenciais bancárias nunca são partilhadas entre utilizadores.
+
+## A tua instância
+
+| Definição | O que faz |
+|---|---|
+| `INSTANCE_NAME` | O nome da tua instância |
+| `SIGNUP_MODE` | `open`, `invite` ou `closed` (consulta [Instalar](/pt/docs/self-hosting/install)) |
+| `SUPPORT_EMAIL` | A caixa de correio do formulário de contacto e dos alertas de conta; deixa vazio para os desligar |
+| `NEXT_PUBLIC_TERMS_URL`, `NEXT_PUBLIC_PRIVACY_URL` | As tuas páginas legais, ligadas a partir da página de registo quando ambas estão definidas |

@@ -1,0 +1,24 @@
+---
+title: Usar a aplicação móvel com o teu servidor
+description: Liga a aplicação WonderMoney para iOS e Android ao teu próprio servidor.
+---
+
+A aplicação WonderMoney funciona com qualquer servidor WonderMoney, não apenas com o wonder.money.
+
+## Ligar a aplicação
+
+1. Abre a aplicação e vai ao ecrã de início de sessão.
+2. Toca em **Usar outro servidor**.
+3. Introduz o endereço da tua API, o `API_URL` do teu `.env`, por exemplo `api.money.example.com`.
+4. Toca em **Ligar** e inicia sessão com a tua conta nesse servidor.
+
+A aplicação verifica o endereço antes de o guardar. Se não conseguir chegar ao servidor, se não for um servidor WonderMoney ou se precisar de uma versão mais recente da aplicação, a aplicação avisa-te e mantém o servidor anterior.
+
+## Requisitos
+
+- O telemóvel tem de conseguir chegar à API. Na prática, isso significa HTTPS num domínio público; consulta [HTTPS e domínios](/pt/docs/self-hosting/https-and-domains).
+- As funcionalidades que o teu servidor não configurou, como a leitura de recibos ou os dados de mercado, também ficam ocultas na aplicação.
+
+## Voltar ao wonder.money
+
+No ecrã de início de sessão, toca em **Usar o servidor predefinido**.

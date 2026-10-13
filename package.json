@@ -1,0 +1,28 @@
+{
+  "name": "wondermoney",
+  "private": true,
+  "license": "AGPL-3.0-only",
+  "description": "WonderMoney: free, open-source, self-hostable personal finance.",
+  "packageManager": "pnpm@12.6.0",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "build": "turbo run build",
+    "build:lib": "turbo run build:lib",
+    "lint": "turbo run lint",
+    "test": "turbo run test",
+    "type-check": "turbo run type-check",
+    "dev:api": "pnpm --filter @wondermoney/api dev",
+    "dev:worker": "pnpm --filter @wondermoney/api worker:dev",
+    "dev:web": "pnpm --filter @wondermoney/web dev",
+    "dev:mobile": "pnpm --filter @wondermoney/mobile start",
+    "dev:docs": "pnpm --filter @wondermoney/docs dev",
+    "prepare": "husky"
+  },
+  "devDependencies": {
+    "husky": "^9.1.7",
+    "lint-staged": "^16.3.2",
+    "turbo": "^2.11.7"
+  }
+}

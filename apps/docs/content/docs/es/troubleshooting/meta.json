@@ -1,0 +1,12 @@
+{
+  "title": "Solución de problemas",
+  "pages": [
+    "index",
+    "sign-in-problems",
+    "bank-connection-problems",
+    "transaction-import-problems",
+    "budget-setup-problems",
+    "portfolio-import-problems",
+    "contact-support"
+  ]
+}

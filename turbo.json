@@ -1,0 +1,44 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "tasks": {
+    "build": {
+      "dependsOn": [
+        "^build:lib",
+        "build:lib"
+      ],
+      "outputs": [
+        "dist/**",
+        ".next/**",
+        "!.next/cache/**",
+        ".react-email/.next/**"
+      ]
+    },
+    "build:lib": {
+      "dependsOn": [
+        "^build:lib"
+      ],
+      "outputs": [
+        "dist/**"
+      ]
+    },
+    "type-check": {
+      "dependsOn": [
+        "^build:lib"
+      ]
+    },
+    "lint": {
+      "dependsOn": [
+        "^build:lib"
+      ]
+    },
+    "test": {
+      "dependsOn": [
+        "^build:lib"
+      ]
+    },
+    "dev": {
+      "cache": false,
+      "persistent": true
+    }
+  }
+}

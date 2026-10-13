@@ -1,0 +1,55 @@
+---
+title: Import Portfolio CSV
+description: Import portfolio holdings and transactions from a CSV file.
+---
+
+CSV import is the fastest way to load broker data into WonderMoney.
+
+## What you can import
+
+- Holdings
+- Transactions
+- Current positions, when your export includes them
+
+## How to import
+
+1. Export data from your broker.
+2. Open the portfolio you want to update.
+3. Upload the CSV file.
+4. Wait for the import to process.
+5. Fix any mapping issues or unresolved rows if they are reported.
+
+<DocsImage
+  src="/images/docs/portfolio-investments/import-portfolio-csv-import-modal.png"
+  alt="Import Transactions modal with a drag-and-drop file upload area, portfolio selector, and Analyze file button."
+  caption="The import modal accepts a broker CSV, XLS, or XLSX export for the selected portfolio."
+  width={1440}
+  height={900}
+/>
+
+## Best results
+
+- Use a fresh export from the broker.
+- Keep one portfolio per broker account when possible.
+- Review tickers, quantities, dates, and currencies in the broker export before uploading.
+- If some rows need asset resolution, follow the reported guidance after import.
+
+## Current behavior
+
+WonderMoney processes uploaded CSV files after upload. There is no pre-save row review step.
+
+## Common mistakes
+
+- Uploading the wrong file type.
+- Importing duplicate rows from an older export.
+- Leaving the currency column empty when the broker export includes multiple currencies.
+- Assuming every broker uses the same column names.
+
+
+## Related pages
+
+- [Portfolio investments](/en/docs/portfolio-investments)
+- [Create a portfolio](/en/docs/portfolio-investments/create-portfolio)
+- [Add portfolio transactions](/en/docs/portfolio-investments/add-portfolio-transactions)
+- [Portfolio data lifecycle](/en/docs/portfolio-investments/portfolio-data-lifecycle)
+- [Holdings allocation](/en/docs/portfolio-investments/holdings-allocation)

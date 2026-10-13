@@ -1,0 +1,61 @@
+---
+title: Gerir ligações bancárias
+description: Revê, atualiza ou remove bancos e contas ligados.
+---
+
+As ligações bancárias podem expirar, exigir nova aprovação ou deixar de sincronizar quando o banco altera os requisitos de segurança. Usa esta página para manter os dados importados atualizados e remover as fontes que já não queres usar.
+
+## Estado da ligação
+
+Cada ligação mostra um de um pequeno conjunto de estados:
+
+- **Ligada** — a ligação está ativa e as contas já foram atualizadas.
+- **Em processamento** — a ligação está a ser criada ou ainda não terminou a primeira atualização.
+- **Expirada** — a ligação deixou de ser válida e precisa de nova aprovação.
+- **Erro** — não foi possível concluir a ligação.
+
+Só vês o estado das tuas próprias ligações e o estado é limitado à tua conta, não ao banco ou ao fornecedor como um todo.
+
+## Quando a sincronização falha
+
+Se uma sincronização falhar, a vista de recuperação explica o que aconteceu e sugere o passo seguinte adequado, como repetir a ligação, adicionar a conta manualmente ou importar um extrato. O fluxo de recuperação mostra o nome do banco afetado, pelo que fica claro qual é a ligação que precisa de atenção.
+
+Se a lista de bancos estiver temporariamente indisponível — por exemplo durante uma falha no fornecedor — o seletor de bancos mostra um erro claro em vez de falhar, e podes tentar novamente.
+
+## Antes de começar
+
+Confirma se o problema afeta apenas uma conta ou toda a ligação bancária. Se aparecer um pedido de autenticação nova, conclui-o antes de fazer outras alterações.
+
+## Passos
+
+1. Abre a lista de bancos ligados.
+2. Revê o estado da sincronização e a última atualização.
+3. Volta a ligar ou autoriza novamente qualquer ligação expirada.
+4. Remove uma ligação apenas se já não quiseres novas importações a partir dela. Remover é seguro de repetir: se a primeira tentativa não terminar, repetir conclui a operação.
+
+<DocsImage
+  src="/images/docs/pt/accounts-transactions/manage-bank-connections-overview.png"
+  alt="Settings Connections tab showing the bank connections list with an empty state."
+  caption="Bank connections live under Settings — Connections, with sync status per connection."
+  width={1440}
+  height={900}
+/>
+
+## Rever
+
+Depois de atualizar uma ligação, confirma se novas transações aparecem e se os saldos correspondem ao esperado. Se houver várias contas ligadas ao mesmo banco, verifica cada uma em separado.
+
+## Problemas comuns
+
+- O banco alterou o início de sessão ou o fluxo de segurança.
+- Uma conta sincronizou e outra não.
+- Uma ligação removida continua visível até à próxima atualização.
+- A ligação é válida, mas a conta foi ocultada ou excluída.
+
+
+## Ligações relacionadas
+
+- [Ligar a primeira conta bancária](/pt/docs/start-here/connect-first-bank-account)
+- [Problemas de ligação bancária](/pt/docs/troubleshooting/bank-connection-problems)
+- [Compreender transações](/pt/docs/accounts-transactions/understand-transactions)
+- [Transações em falta ou duplicadas](/pt/docs/accounts-transactions/missing-duplicate-transactions)

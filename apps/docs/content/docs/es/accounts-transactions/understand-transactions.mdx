@@ -1,0 +1,50 @@
+---
+title: Entender las transacciones
+description: Lee, filtra y revisa las transacciones que aparecen en WonderMoney.
+---
+
+Las transacciones son el registro del dinero que entra o sale de una cuenta. Usa la lista para revisar la actividad importada, detectar elementos en falta y mantener las categorías al día.
+
+## Ciclo de vida de las transacciones
+
+Una transacción pasa por un ciclo de vida definido:
+
+- **Pendiente.** El banco ha comunicado el pago, pero aún no lo ha confirmado. Los pagos con tarjeta suelen empezar aquí.
+- **Confirmada.** El banco ha confirmado la transacción. Un pago pendiente se empareja automáticamente con su versión confirmada, así que los dos no permanecen separados durante mucho tiempo.
+- **Caducada.** Una transacción pendiente que el banco nunca confirma dentro del plazo configurado se marca como caducada y se elimina de la lista activa. Esto evita que los registros pendientes antiguos se queden acumulados.
+
+El saldo disponible es el saldo actual una vez descontada la actividad pendiente, por lo que el dinero que sigue pendiente se refleja en lo que ves.
+
+## Registro de auditoría
+
+Cada cambio en una transacción — incluido el tratamiento de los duplicados y los cambios de estado — queda registrado en un registro de auditoría. Si necesitas entender por qué una transacción está en un estado concreto, el historial de auditoría contiene el registro.
+
+## Antes de empezar
+
+Asegúrate de que la cuenta ha terminado su primera sincronización o de que tiene entradas manuales disponibles. Si estás revisando un mes de presupuesto, confirma primero el intervalo de fechas.
+
+## Pasos
+
+1. Abre la lista de transacciones de una cuenta.
+2. Filtra por fecha, categoría o cuenta si es necesario.
+3. Abre una transacción para revisar el importe, el comercio y las notas.
+4. Actualiza la categoría, la descripción o el estado de recurrencia cuando sea necesario.
+
+## Revisión
+
+Busca elementos sin categoría, entradas duplicadas y transacciones que pertenezcan a un pago recurrente. Una revisión breve cada semana mantiene el historial de la cuenta útil para los presupuestos y los resúmenes.
+
+## Problemas comunes
+
+- Un pago con tarjeta pendiente aún no se ha emparejado con su versión confirmada.
+- Una transacción pendiente aparece como caducada porque el banco nunca la confirmó.
+- A los datos importados les falta un pago reciente.
+- Se introdujo dos veces una corrección manual.
+- El intervalo de fechas oculta la transacción que buscas.
+
+## Enlaces relacionados
+
+- [Categorizar transacciones](/es/docs/accounts-transactions/categorize-transactions)
+- [Transacciones en falta o duplicadas](/es/docs/accounts-transactions/missing-duplicate-transactions)
+- [Problemas con la importación de transacciones](/es/docs/troubleshooting/transaction-import-problems)
+- [Pagos recurrentes](/es/docs/accounts-transactions/recurring-payments)

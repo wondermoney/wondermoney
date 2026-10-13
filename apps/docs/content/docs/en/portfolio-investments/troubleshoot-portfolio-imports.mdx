@@ -1,0 +1,41 @@
+---
+title: Troubleshoot Portfolio Imports
+description: Fix common portfolio CSV import problems.
+---
+
+If an import fails or the numbers do not look right, work through the checks below.
+
+<DocsImage
+  src="/images/docs/portfolio-investments/troubleshoot-portfolio-imports-error.png"
+  alt="Import Transactions modal showing a Could not upload the file error with Retry upload and Discard and start over actions."
+  caption="A rejected file shows a clear error in the import modal, with options to retry or start over."
+  width={1440}
+  height={900}
+/>
+
+## Common issues
+
+- The file is not a CSV export from the broker.
+- Required columns are missing.
+- Tickers or identifiers do not match the asset list.
+- The same rows were imported earlier.
+- Currency or decimal separators do not match the file format.
+
+## What to do
+
+1. Re-export the file from the broker.
+2. Confirm you are importing into the correct portfolio.
+3. Check the preview for duplicates or missing values.
+4. Fix the source file if dates, quantities, or currencies are wrong.
+5. Re-run the import only after the preview looks correct.
+
+## When to contact support
+
+Contact support if the file is valid but the importer still rejects it, or if rows import successfully but the resulting holdings are clearly wrong.
+
+
+## Related pages
+
+- [Portfolio investments](/en/docs/portfolio-investments)
+- [Import a portfolio CSV](/en/docs/portfolio-investments/import-portfolio-csv)
+- [Add portfolio transactions](/en/docs/portfolio-investments/add-portfolio-transactions)

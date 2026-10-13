@@ -1,0 +1,12 @@
+{
+  "title": "Budgets",
+  "pages": [
+    "index",
+    "envelope-method",
+    "create-first-budget",
+    "household-size-dependents",
+    "choose-budget-categories",
+    "track-monthly-spending",
+    "adjust-delete-budget"
+  ]
+}

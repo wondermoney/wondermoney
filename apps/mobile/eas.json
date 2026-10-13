@@ -1,0 +1,60 @@
+{
+  "cli": {
+    "appVersionSource": "remote"
+  },
+  "build": {
+    "base": {
+      "corepack": true
+    },
+    "development": {
+      "extends": "base",
+      "developmentClient": true,
+      "distribution": "internal"
+    },
+    "preview": {
+      "extends": "base",
+      "distribution": "internal",
+      "android": {
+        "buildType": "apk"
+      }
+    },
+    "production": {
+      "extends": "base",
+      "autoIncrement": true,
+      "env": {
+        "EXPO_PUBLIC_APP_ENV": "production",
+        "EXPO_PUBLIC_API_BASE_URL": "https://api.wonder.money",
+        "EXPO_PUBLIC_POSTHOG_KEY": "phc_KlDfjBgreGCfTKJnwwP5W9I2PEGJsboIKFoedyTHGg4"
+      }
+    },
+    "screenshots": {
+      "extends": "base",
+      "distribution": "internal",
+      "environment": "production",
+      "channel": "production",
+      "ios": {
+        "simulator": true
+      },
+      "android": {
+        "buildType": "apk"
+      }
+    }
+  },
+  "submit": {
+    "production": {
+      "ios": {
+        "ascAppId": "6800748899",
+        "appleTeamId": "4ZVMAV8GNL",
+        "ascApiKeyPath": "./secrets/AuthKey_C74H8LNL7H.p8",
+        "ascApiKeyId": "C74H8LNL7H",
+        "ascApiKeyIssuerId": "fe654225-7930-4c27-8cc8-eb120055c292"
+      },
+      "android": {
+        "serviceAccountKeyPath": "./secrets/play-service-account.json",
+        "track": "production",
+        "releaseStatus": "inProgress",
+        "rollout": 0.2
+      }
+    }
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "title": "Goals & Loans",
+  "pages": [
+    "index",
+    "create-fund-goal",
+    "link-accounts-goals",
+    "loans-overview",
+    "add-loan-credit-facility",
+    "track-repayments",
+    "archived-and-restore",
+    "goal-priority"
+  ]
+}

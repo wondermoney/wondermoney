@@ -1,0 +1,219 @@
+# Goals & loans — goal creation (two dialog variants), linked accounts,
+# credit facilities (loan), repayments, archiving, priority.
+# `loans-overview/list` and `track-repayments/*` need an existing credit
+# facility, which the seeded user does not have (see notes). Pages whose URL
+# carries `<creditId>` auto-resolve it from /en/credits when a facility exists.
+section: goals-loans
+user: docs-screens-sandbox
+pages:
+  - slug: index
+    step: overview
+    url: http://localhost:64590/en/goals
+
+  - slug: create-fund-goal
+    step: dialog
+    url: http://localhost:64590/en/goals
+    actions:
+      - type: click-role
+        name: "Create"
+        locales:
+          pt: "Criar objetivo"
+          es: "Crear objetivo"
+      - type: wait-text
+        text: "Save up"
+        locales:
+          pt: "Poupar"
+          es: "Ahorrar"
+    note: >-
+      Save-up variant of the create dialog. Verified against
+      app/[locale]/(full-layout)/goals/goals-client.tsx: the trigger button
+      uses t("goals.create") = "Create goal" (common.json goals namespace),
+      not the generic top-level "create" = "Create" key — the bare "Create"
+      base value works in EN only as a substring match, so the pt/es
+      overrides use the full translated label. Fallback trigger label: "Save
+      up" or "+"; fallback dialog anchor: "Create goal".
+
+  - slug: create-fund-goal
+    step: debt-paydown
+    url: http://localhost:64590/en/goals
+    actions:
+      - type: click-role
+        name: "Create"
+        locales:
+          pt: "Criar objetivo"
+          es: "Crear objetivo"
+      - type: wait-text
+        text: "Create goal"
+        locales:
+          pt: "Criar objetivo"
+          es: "Crear objetivo"
+      - type: click-text
+        text: "Pay off debt"
+        locales:
+          pt: "Pagar dívida"
+          es: "Pagar deuda"
+      - type: wait-text
+        text: "Pay off debt"
+        locales:
+          pt: "Pagar dívida"
+          es: "Pagar deuda"
+    note: >-
+      Debt-paydown variant of the create dialog — two shots of the same dialog
+      (save-up and debt-paydown) feed two different crops. Same t("goals.create")
+      trigger as create-fund-goal/dialog above. "Pay off debt" is
+      common.json goals.type-debt_paydown.
+
+  - slug: link-accounts-goals
+    step: linked
+    url: http://localhost:64590/en/goals
+    actions:
+      - type: click-text
+        text: "Taxes"
+      - type: wait-text
+        text: "Linked account"
+        locales:
+          pt: "Conta associada"
+          es: "Cuenta vinculada"
+    note: >-
+      Navigate to a goal detail that has linked accounts; the seeded user's
+      "Taxes" goal is linked to the Test Current Account. If the goal label
+      differs, click the first goal instead (click-first `a[href*="/goals/"]`).
+      Corrected the wait-text from "Linked accounts" (plural, does not exist
+      in this build — the top-level common.json "linked-accounts" plural key
+      is unused here) to the actual singular heading t("goals.linked-account")
+      = "Linked account" (components/../GoalAccountContext.tsx).
+
+  - slug: link-accounts-goals
+    step: link-account
+    url: http://localhost:64590/en/goals
+    actions:
+      - type: click-text
+        text: "Taxes"
+      - type: wait-text
+        text: "Linked account"
+        locales:
+          pt: "Conta associada"
+          es: "Cuenta vinculada"
+      - type: click-role
+        name: "Link account"
+        locales:
+          pt: "Associar conta"
+          es: "Vincular cuenta"
+      - type: wait-text
+        text: "Link account"
+        locales:
+          pt: "Associar conta"
+          es: "Vincular cuenta"
+    note: >-
+      Capture the open link-account dropdown on the goal detail. The trigger
+      is t("goals.link-account") — note this differs from the top-level
+      common.json "link-account" key ("Ligar conta"/"Vincular cuenta") used
+      elsewhere in the app; the goals-namespaced translation is "Associar
+      conta" (pt) / "Vincular cuenta" (es). Fallback trigger label: "+".
+
+  - slug: loans-overview
+    step: list
+    url: http://localhost:64590/en/credits
+    note: >-
+      Requires a credit facility. The seeded user has none — create one first
+      via the API (`curl -X POST http://localhost:59255/v1/credit` with the
+      session cookie and a body like
+      `{"name":"Test Loan","type":"loan","currencyKey":1,"openingPrincipalBalance":10000,"openingBalanceDate":"2026-08-01"}`),
+      or accept that this capture equals the empty state below. See report.
+
+  - slug: loans-overview
+    step: empty
+    url: http://localhost:64590/en/credits
+    note: "Empty state — the seeded user has no credit facilities."
+
+  - slug: add-loan-credit-facility
+    step: drawer
+    url: http://localhost:64590/en/credits
+    actions:
+      - type: click-role
+        name: "Add loan"
+        locales:
+          pt: "Adicionar crédito"
+          es: "Añadir crédito"
+      - type: wait-text
+        text: "Add loan"
+        locales:
+          pt: "Adicionar crédito"
+          es: "Añadir crédito"
+    note: >-
+      The open drawer is the capture target. Submit will silently fail
+      (RAD-436); do not submit. credits.json actions.add. Fallback trigger
+      label: "Add".
+
+  - slug: track-repayments
+    step: detail
+    url: http://localhost:64590/en/credits/<creditId>
+    note: >-
+      Requires a credit facility (same caveat as loans-overview/list); the
+      placeholder auto-resolves from /en/credits when one exists.
+
+  - slug: track-repayments
+    step: link-repayment
+    url: http://localhost:64590/en/credits/<creditId>
+    actions:
+      - type: click-role
+        name: "Link repayment"
+        locales:
+          pt: "Associar pagamento"
+          es: "Vincular pago"
+      - type: wait-text
+        text: "Link repayments"
+        locales:
+          pt: "Associar pagamentos"
+          es: "Vincular pagos"
+    note: >-
+      Drawer open state. The trigger is credits.json actions.linkRepayment
+      (singular, "Link repayment"); the drawer heading is
+      detail.repayments.candidatesTitle (plural, "Link repayments") — verified
+      these are two distinct real strings, not a typo. Fallback trigger label:
+      "Link"; fallback anchor: "Candidate".
+
+  - slug: archived-and-restore
+    step: archived-list
+    url: http://localhost:64590/en/goals
+    actions:
+      - type: click-text
+        text: "Archived"
+      - type: wait-text
+        text: "Archived"
+    note: "The Archived tab lists archived goals."
+
+  - slug: archived-and-restore
+    step: archive-dialog
+    url: http://localhost:64590/en/goals
+    actions:
+      - type: click-text
+        text: "More"
+      - type: click-text
+        text: "Archive"
+      - type: wait-text
+        text: "Are you sure"
+    note: >-
+      Capture the confirmation dialog. Fallback overflow label: "More options";
+      fallback anchor: "Archive".
+
+  - slug: archived-and-restore
+    step: empty
+    url: http://localhost:64590/en/goals
+    note: >-
+      Empty archived state (no archived goals). Same page as index but cropped
+      differently.
+
+  - slug: goal-priority
+    step: edit-form
+    url: http://localhost:64590/en/goals
+    actions:
+      - type: click-text
+        text: "More"
+      - type: click-text
+        text: "Edit"
+      - type: wait-text
+        text: "Priority"
+    note: >-
+      The priority UI lives in the goal edit form, not on the goal card.
+      Fallback anchor: "Low" / "Medium" / "High".

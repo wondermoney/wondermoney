@@ -1,0 +1,122 @@
+# Portfolio & investments — overview, metrics, create, transactions, import,
+# holdings, performance, troubleshooting, lifecycle.
+# Pages whose URL carries `<portfolioId>` auto-resolve it from the first
+# portfolio card on /en/portfolio (portfolio ids vary per database).
+section: portfolio-investments
+user: docs-screens-sandbox
+pages:
+  - slug: index
+    step: overview
+    url: http://localhost:64590/en/portfolio
+
+  - slug: portfolio-metrics-explained
+    step: metrics
+    url: http://localhost:64590/en/portfolio
+    actions:
+      - type: click-first
+        selector: "a[href*='/en/portfolio/']"
+      - type: wait-text
+        text: "Holdings"
+    note: >-
+      portfolioId varies; click the first portfolio card to reach a detail page
+      (the seeded portfolio is portfolioKey 8 in the DB). Fallback anchor:
+      "Performance".
+
+  - slug: create-portfolio
+    step: dialog
+    url: http://localhost:64590/en/portfolio
+    actions:
+      - type: click-role
+        name: "Create"
+      - type: wait-text
+        text: "Create portfolio"
+        locales:
+          pt: "Criar portefólio"
+          es: "Crear cartera"
+    note: >-
+      NOT a locale issue — verified components/portfolio/PortfolioCreateDialog.tsx:
+      the trigger rendered on this page (showTrigger default) is a bare icon
+      button (`<Button variant="ghost" size="icon"><Plus /></Button>`) with no
+      text and no aria-label, so it has NO accessible name in ANY locale — the
+      click-role --name "Create" lookup is expected to fail the same way in
+      EN, pt, and es (this is one of the ~5 pages that also fails on EN's
+      78/83; no locale override can fix it). Flagging for a follow-up: either
+      add an aria-label (t("create-portfolio")) to that Button in the web repo,
+      or switch this action to click-ref/click-first on a stable selector once
+      one exists. The dialog title itself (t("create-portfolio")) is
+      "Create portfolio" / "Criar portefólio" / "Crear cartera", used above for
+      the wait-text anchor once the dialog can be opened.
+
+  - slug: add-portfolio-transactions
+    step: modal
+    url: http://localhost:64590/en/portfolio/<portfolioId>
+    actions:
+      - type: click-role
+        name: "Add transaction"
+        locales:
+          pt: "Adicionar Transação"
+          es: "Añadir transacción"
+      - type: wait-text
+        text: "Add Transaction"
+        locales:
+          pt: "Adicionar Transação"
+          es: "Añadir transacción"
+    note: >-
+      URL is the portfolio detail (placeholder auto-resolved); click "Add
+      transaction" to open the modal. Verified against app/[locale]/(full-
+      layout)/portfolio/page.tsx and components/portfolio/
+      PortfolioTransactionAddModal.tsx: both the trigger and the modal title
+      use the same root-namespace key t("add-transaction") = "Add Transaction"
+      (title case) — not the dashboard's sentence-case
+      dashboard-add-transaction-action key. Fallback anchor text: "Quantity".
+
+  - slug: import-portfolio-csv
+    step: import-modal
+    url: http://localhost:64590/en/portfolio/<portfolioId>/transactions?import=1
+    note: >-
+      URL forces the import modal open via the ?import=1 query param. If the
+      modal does not auto-open, click-role "Import" first.
+
+  - slug: holdings-allocation
+    step: holdings
+    url: http://localhost:64590/en/portfolio/<portfolioId>/holdings
+
+  - slug: performance-benchmarks
+    step: performance
+    url: http://localhost:64590/en/portfolio/<portfolioId>
+    note: "The performance section renders at the top of the portfolio detail page."
+
+  - slug: troubleshoot-portfolio-imports
+    step: error
+    url: http://localhost:64590/en/portfolio/<portfolioId>/transactions?import=1
+    actions:
+      - type: create-file
+        path: /tmp/malformed.csv
+        content: "foo,bar,baz"
+      - type: upload-file
+        ref: 'input[type="file"]'
+        path: /tmp/malformed.csv
+      - type: click-role
+        name: "Analyze file"
+        locales:
+          pt: "Analisar ficheiro"
+          es: "Analizar archivo"
+      - type: wait-text
+        text: "Could not upload the file"
+        locales:
+          pt: "Não foi possível carregar o ficheiro"
+          es: "No se pudo subir el archivo"
+    note: >-
+      Error-state capture. The malformed CSV is the trigger; the file input is
+      targeted directly so the native file picker is never opened. Corrected
+      the button name from "Analyze" to "Analyze file" (same
+      portfolio-import-upload-analyze key as troubleshooting/
+      portfolio-import-problems — the bare "Analyze" string is not rendered
+      anywhere in this flow).
+
+  - slug: portfolio-data-lifecycle
+    step: transactions
+    url: http://localhost:64590/en/portfolio/<portfolioId>/transactions
+    note: >-
+      This MDX page exists on disk but is not in meta.json — recommend adding it
+      to the nav in a follow-up (the RAD-427 ticket already documents this).

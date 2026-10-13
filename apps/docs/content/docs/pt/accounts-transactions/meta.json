@@ -1,0 +1,14 @@
+{
+  "title": "Contas e transa\u00e7\u00f5es",
+  "pages": [
+    "index",
+    "connect-bank-account",
+    "manual-offline-account",
+    "manage-bank-connections",
+    "understand-transactions",
+    "import-transactions-csv",
+    "categorize-transactions",
+    "recurring-payments",
+    "missing-duplicate-transactions"
+  ]
+}

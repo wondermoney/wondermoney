@@ -1,0 +1,55 @@
+# Financial markets — explorer, ticker quote, watchlist (populated first),
+# screener. market-news (no app surface) is intentionally not captured.
+section: financial-markets
+user: docs-screens-sandbox
+pages:
+  - slug: index
+    step: overview
+    url: http://localhost:64590/en/financial-markets
+    note: >-
+      Redirects to /en/financial-markets/explorer; capture whatever lands.
+
+  - slug: search-stocks-etfs
+    step: ticker-quote
+    url: http://localhost:64590/en/financial-markets/explorer?ticker=AAPL
+
+  - slug: watchlist
+    step: overview
+    url: http://localhost:64590/en/financial-markets/watchlist
+    actions:
+      - type: open
+        url: http://localhost:64590/en/financial-markets/explorer?ticker=AAPL
+      - type: click-role
+        name: "Add to watchlist"
+        locales:
+          pt: "Adicionar à watchlist"
+          es: "Añadir a la watchlist"
+      - type: open
+        url: http://localhost:64590/en/financial-markets/explorer?ticker=GOOGL
+      - type: click-role
+        name: "Add to watchlist"
+        locales:
+          pt: "Adicionar à watchlist"
+          es: "Añadir a la watchlist"
+      - type: open
+        url: http://localhost:64590/en/financial-markets/explorer?ticker=MSFT
+      - type: click-role
+        name: "Add to watchlist"
+        locales:
+          pt: "Adicionar à watchlist"
+          es: "Añadir a la watchlist"
+      - type: open
+        url: http://localhost:64590/en/financial-markets/watchlist
+    note: >-
+      The watchlist starts empty; this page populates it with three tickers via
+      the explorer's star / "Add to watchlist" button before capturing the
+      watchlist itself. If the button is an icon-only star, it may not expose a
+      matching accessible name — adjust the name or use click-ref on the star.
+
+  - slug: screener
+    step: overview
+    url: http://localhost:64590/en/financial-markets/screener
+    note: >-
+      First load may 500 once; reload if needed (run the section again or
+      re-capture this page). The capture target is the populated FMP-backed
+      state with 100+ rows.

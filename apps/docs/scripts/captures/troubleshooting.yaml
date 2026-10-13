@@ -1,0 +1,149 @@
+# Troubleshooting — real error states (toasts auto-dismiss in ~4s, so the
+# screenshot is taken immediately after the wait-text matches).
+# contact-support (static email page) is intentionally not captured.
+section: troubleshooting
+user: docs-screens-sandbox
+pages:
+  - slug: index
+    step: overview
+    url: http://localhost:3100/en/docs/troubleshooting
+    login: false
+    anchor:
+      text: "Troubleshooting"
+    actions:
+      - type: eval
+        script: "document.querySelectorAll('figure').forEach(f => { if (f.querySelector('img')) f.remove(); })"
+    note: >-
+      Same as start-here/index — the docs shell on :3100 (docs-new must be
+      running on :3100). This crop is much taller (the troubleshooting content
+      is long). The eval removes the self-referential <DocsImage> (this page
+      embeds its own screenshot) so the full-page height is stable.
+
+  - slug: sign-in-problems
+    step: error-state
+    url: http://localhost:64590/en/auth/login
+    login: false
+    anchor:
+      text: "Welcome back"
+    note: >-
+      Empty login form. The troubleshooting page documents what to do when
+      you can't sign in; the form itself is the starting point. A wrong-
+      password attempt was previously used to trigger the error toast, but
+      Supabase rate-limits repeated wrong-password attempts within a session
+      (and across runs), making the capture unreliable. The error toast
+      auto-dismisses in ~4s anyway, so the form is the more stable capture
+      target. Fallback if a fresh approach is needed: capture the forgot-
+      password page (already covered by start-here/sign-in-password-recovery-
+      forgot-password.png).
+
+  - slug: bank-connection-problems
+    step: expectation
+    url: http://localhost:64590/en/accounts
+    actions:
+      - type: click-role
+        name: "Add Account"
+        locales:
+          pt: "Adicionar Conta"
+          es: "Añadir cuenta"
+      - type: wait-text
+        text: "Linked"
+        locales:
+          pt: "Ligada"
+          es: "Vinculada"
+      - type: click-role
+        name: "Linked"
+        locales:
+          pt: "Ligada"
+          es: "Vinculada"
+      - type: wait-text
+        text: "read-only"
+        locales:
+          pt: "apenas de leitura"
+          es: "de solo lectura"
+    note: >-
+      Same expectation modal as settings-security-privacy/read-only-bank-access.
+
+  - slug: transaction-import-problems
+    step: error-state
+    url: http://localhost:64590/en/accounts/transactions
+    actions:
+      - type: wait-text
+        text: "Import Transactions"
+        locales:
+          pt: "Importar transações"
+          es: "Importar transacciones"
+      - type: click-role
+        name: "Import Transactions"
+        locales:
+          pt: "Importar transações"
+          es: "Importar transacciones"
+      - type: wait-text
+        text: "Import transactions"
+        locales:
+          pt: "Importar transações"
+          es: "Importar transacciones"
+      - type: wait-text
+        text: "Drag"
+      - type: create-file
+        path: /tmp/malformed.csv
+        content: "foo,bar,baz"
+      - type: upload-file
+        ref: 'input[type="file"]'
+        path: /tmp/malformed.csv
+      - type: click-role
+        name: "Import"
+        locales:
+          pt: "Importar"
+          es: "Importar"
+      - type: wait-text
+        text: "Error"
+        locales:
+          pt: "Erro"
+          es: "Error"
+    note: >-
+      Real error toast — capture immediately after the wait-text matches.
+      Corrected the submit-button name from "Analyze" to "Import": this
+      account-transactions import modal (components/account/
+      AccountTransactionImportModal.tsx) has no "Analyze"/"Analyze file" key
+      anywhere — its footer submit button is always t("import") = "Import".
+      "Analyze file" only exists for the separate portfolio-CSV-import flow
+      (see portfolio-import-problems below). Fallback anchor: "importing".
+
+  - slug: budget-setup-problems
+    step: incomplete
+    url: http://localhost:64590/en/budgets
+    note: "The seeded user has 2 incomplete budgets at 0% — that is the target state."
+
+  - slug: portfolio-import-problems
+    step: error-state
+    url: http://localhost:64590/en/portfolio/<portfolioId>/transactions?import=1
+    actions:
+      - type: wait-text
+        text: "Drag"
+      - type: create-file
+        path: /tmp/malformed.csv
+        content: "foo,bar,baz"
+      - type: upload-file
+        ref: 'input[type="file"]'
+        path: /tmp/malformed.csv
+      - type: click-role
+        name: "Analyze file"
+        locales:
+          pt: "Analisar ficheiro"
+          es: "Analizar archivo"
+      - type: wait-text
+        text: "Could not upload the file"
+        locales:
+          pt: "Não foi possível carregar o ficheiro"
+          es: "No se pudo subir el archivo"
+    note: >-
+      Real error alert with retry options. The placeholder auto-resolves from
+      /en/portfolio. The wait-text "Drag" ensures the import modal is fully
+      rendered before the file upload (the file input isn't in the DOM until
+      then). Corrected the analyze button name from "Analyze" to "Analyze
+      file" (components/portfolio/import-session/PortfolioImportUploadStep.tsx,
+      key portfolio-import-upload-analyze — the bare "Analyze" string does not
+      exist in this build; "Analyze" is only a shortened
+      portfolio-import-step-analyzing label used in the stepper, not the
+      button).
+

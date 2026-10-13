@@ -1,0 +1,38 @@
+---
+title: Importar transações por CSV
+description: Importa o histórico de transações a partir de um ficheiro CSV quando não houver sincronização bancária.
+---
+
+A importação por CSV é útil quando precisas de trazer dados históricos para o WonderMoney ou quando uma ligação bancária não está disponível. Um ficheiro limpo e um mapeamento correto das colunas tornam a importação mais fácil de rever.
+
+## Antes de começar
+
+Confirma que o ficheiro contém os campos de data, valor e descrição de que precisas. Se possível, garante que todas as linhas pertencem à mesma conta ou moeda.
+
+## Passos
+
+1. Exporta ou prepara o ficheiro CSV.
+2. Abre o fluxo de importação e carrega o ficheiro.
+3. Associa as colunas aos campos esperados.
+4. Revê a pré-visualização antes de concluir a importação.
+
+## Rever
+
+Depois da importação, compara o número de linhas e os primeiros saldos com o ficheiro de origem. Se o ficheiro abranger um período longo, confirma que as datas foram interpretadas corretamente.
+
+As linhas importadas são categorizadas com o mesmo categorizador determinista das transações sincronizadas, pelo que o motivo que vês numa sugestão é consistente independentemente de como a transação chegou. Quando categorizas em massa linhas importadas, a categoria escolhida é gravada em cada transação e a associação com o comerciante é atualizada para importações futuras.
+
+## Problemas comuns
+
+- O ficheiro usa um formato de data inesperado.
+- Os valores usam o separador decimal errado.
+- Os débitos e créditos ficaram trocados.
+- Os mesmos dados já foram importados de outra fonte.
+
+
+## Ligações relacionadas
+
+- [Problemas na importação de transações](/pt/docs/troubleshooting/transaction-import-problems)
+- [Compreender transações](/pt/docs/accounts-transactions/understand-transactions)
+- [Categorizar transações](/pt/docs/accounts-transactions/categorize-transactions)
+- [Conta offline manual](/pt/docs/accounts-transactions/manual-offline-account)

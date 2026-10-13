@@ -1,0 +1,62 @@
+---
+title: Problemas de conexión bancaria
+description: Diagnostica problemas al vincular una cuenta bancaria o al configurar tu clave de Enable Banking en WonderMoney.
+---
+
+## Síntomas
+
+- El banco no termina de conectarse.
+- La conexión falla después de que apruebes el acceso en el banco.
+- Las cuentas no aparecen después del paso de conexión.
+- Los enlaces existentes dejan de actualizarse.
+- Tu clave de Enable Banking no se guarda, o WonderMoney la marca como inválida.
+
+## Qué comprobar
+
+- Si tienes guardada una clave de Enable Banking válida en Configuración → Proveedor bancario — sin ella no se puede iniciar ninguna conexión bancaria.
+- Si el banco admite actualmente el método de conexión que usas.
+- Si completaste todos los pasos de aprobación en el banco.
+- Si la cuenta está conectada a la cuenta correcta.
+- Si la conexión caducó o fue revocada.
+
+## Qué probar
+
+1. Inicia la conexión de nuevo desde la página de conexión bancaria.
+2. Inicia sesión en el banco con cuidado y confirma cada pantalla de permisos.
+3. Espera unos minutos y actualiza la lista de cuentas.
+4. Elimina la conexión y vuelve a conectarla si el proceso se queda bloqueado.
+
+## Problemas con la clave de Enable Banking
+
+La mayoría de los problemas de conexión vienen de cómo se configuró la aplicación en Enable Banking, no del banco en sí. Antes de reintentar una conexión, comprueba lo siguiente:
+
+- **La aplicación se creó con Sandbox en lugar de Production.** Sandbox solo se conecta a datos bancarios ficticios, así que nunca podrá vincular una cuenta real. Revisa la página de la aplicación en el Panel de Control de Enable Banking — si muestra un entorno Sandbox, registra una aplicación nueva con **Production** seleccionado. Consulta [Conecta tu primera cuenta bancaria](/es/docs/start-here/connect-first-bank-account) para ver la configuración completa.
+- **El formulario de la aplicación no se enviaba.** Para una aplicación Production, Enable Banking exige una Privacy URL y una Terms URL, pero no las marca como obligatorias ni muestra ningún error cuando faltan — el formulario simplemente no hace nada al pulsar enviar. Si una aplicación no se guarda, comprueba que ambos campos estén rellenados.
+- **Se pulsó "Request activation" en lugar de "Activate by linking accounts".** El Panel de Control de Enable Banking muestra ambos botones después de registrar una aplicación. "Request activation" inicia un proceso de verificación empresarial (KYB) que no hace falta para uso personal y no activa por sí solo una aplicación personal. Usa "Activate by linking accounts" en su lugar, que activa la aplicación guiándote para vincular una de tus propias cuentas bancarias.
+
+<Callout type="error" title="Se perdió la clave privada descargada">
+  Enable Banking muestra la clave privada una sola vez, en el momento en que se genera, y no puede volver a mostrarla — ni siquiera a través de su propio soporte. Si el archivo `.pem` no se guardó a salvo y ya no se puede encontrar, no hay forma de recuperarlo. La única solución es registrar una aplicación completamente nueva en el Panel de Control y generar una clave nueva.
+</Callout>
+
+## Incidentes de conexión
+
+Una conexión bancaria puede terminar en un estado de incidente en lugar de en un éxito o un fallo limpio. Los estados más comunes son:
+
+- `bank-disconnected` — el banco interrumpió o terminó la conexión, y hay que restablecerla.
+- `payment-failed` — un paso de la conexión relacionado con el pago no se completó.
+
+Los incidentes son recuperables. Las caídas del proveedor, como una caída de Enable Banking, se gestionan en la lista de bancos en lugar de aparecer como errores del servidor, de modo que tus datos existentes no cambian. Cuando un incidente es recuperable, iniciar la conexión de nuevo reabre el flujo de conexión con el nombre real del banco, y puedes completar los pasos de aprobación en cuanto el proveedor esté disponible.
+
+Para el flujo de conexión completo, consulta [Gestionar conexiones bancarias](/es/docs/accounts-transactions/manage-bank-connections).
+
+## Cuándo contactar con soporte
+
+Contacta con soporte si el banco aparece como compatible pero la conexión sigue fallando después de reintentarla, o si la cuenta se conecta pero no se sincroniza ningún dato tras una espera razonable.
+
+
+## Páginas relacionadas
+
+- [Conecta tu primera cuenta bancaria](/es/docs/start-here/connect-first-bank-account)
+- [Problemas de inicio de sesión](/es/docs/troubleshooting/sign-in-problems)
+- [Problemas de configuración del presupuesto](/es/docs/troubleshooting/budget-setup-problems)
+- [Contactar con soporte](/es/docs/troubleshooting/contact-support)
