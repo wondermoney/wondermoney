@@ -73,5 +73,8 @@ export default defineConfig({
     globals: true,
     include: ['src/**/*.{test,spec}.{ts,tsx}'],
     setupFiles: ['./vitest.setup.ts'],
+    // Several suites boot the whole app; on a 2-vCPU CI runner with coverage on, that can
+    // exceed vitest's 5s default.
+    testTimeout: 20_000,
   },
 });
