@@ -12,11 +12,6 @@ describe('demo middleware', () => {
     expect(isDemoRequest({ user: { accountType: AppuserAccountType.DEMO } } as Request)).toBe(true);
   });
 
-  it('detects legacy demo email requests', async () => {
-    const { isDemoRequest } = await import('../demo');
-    expect(isDemoRequest({ user: { emailAddress: 'demo@wonder.money' } } as Request)).toBe(true);
-  });
-
   it('detects demo tenant requests', async () => {
     const { isDemoRequest } = await import('../demo');
     expect(isDemoRequest({ tenant: { tenantType: TenantType.DEMO } } as Request)).toBe(true);

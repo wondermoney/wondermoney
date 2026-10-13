@@ -15,7 +15,7 @@ const CONSENT_EXPIRING_WINDOW_DAYS = 14;
 export async function runDataHealthSweep(enqueue: Enqueue, now: Date): Promise<void> {
   const expiresBefore = new Date(now.getTime() + CONSENT_EXPIRING_WINDOW_DAYS * 24 * 3_600_000).toISOString();
   const rows = await DI.em.getConnection().execute<{ appuserKey: number }[]>(
-    `select distinct appuser_key as "appuserKey" from nordigen_requisition where status = 'linked' and expires_at is not null and expires_at <= ? and deleted_at is null and appuser_key is not null`,
+    `select distinct appuser_key as "appuserKey" from enable_banking_connection where status = 'linked' and access_valid_until is not null and access_valid_until <= ? and deleted_at is null and appuser_key is not null`,
     [expiresBefore],
   );
   for (const row of rows) await scheduleLifecycleSteps(DI.em, enqueue, LifecycleCampaign.DATA_HEALTH, row.appuserKey, 'data-health.v1', [{ scheduledFor: now, step: DataHealthSteps.CONSENT_EXPIRING }]);

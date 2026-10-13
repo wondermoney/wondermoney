@@ -2,6 +2,7 @@ import * as Linking from 'expo-linking'
 import { type Href, useRouter } from 'expo-router'
 
 import { useProductRuntime } from '@/components/providers/product-runtime-provider'
+import { useServerSwitch } from '@/components/providers/server-switch-provider'
 import { useProfile } from '@/features/self/use-self-resource'
 import { captureAnalyticsEvent } from '@/lib/telemetry/analytics'
 
@@ -10,6 +11,7 @@ import {
   buildFeedbackMailDestination,
   buildSupportMailDestination,
   externalDestinations,
+  type FeedbackCategory,
   isApprovedExternalDestination,
 } from './link-policy'
 import { MoreScreen } from './more-screen'
@@ -24,6 +26,9 @@ export function MoreRoute() {
   const router = useRouter()
   const { signOut } = useProductRuntime()
   const profile = useProfile()
+  // The changelog, legal pages and support inbox are wonder.money's; a self-hosted server's
+  // users don't see them.
+  const onHostedServer = useServerSwitch()?.usesDefaultServer ?? true
   return (
     <MoreScreen
       appInfo={appInfo}
@@ -42,24 +47,30 @@ export function MoreRoute() {
       onOpenNotifications={() => router.push('/settings/notifications' as unknown as Href)}
       onOpenSecurity={() => router.push('/settings/security' as unknown as Href)}
       onOpenHelp={() => openApprovedExternal(externalDestinations.help)}
-      onOpenWhatsNew={() => openApprovedExternal(externalDestinations.whatsNew)}
-      onOpenPrivacy={() => openApprovedExternal(externalDestinations.privacy)}
-      onOpenTerms={() => openApprovedExternal(externalDestinations.terms)}
-      onOpenSupport={async () => {
-        if (!appInfo) throw new Error('App information unavailable')
-        const destination = buildSupportMailDestination(appInfo)
-        if (!destination) throw new Error('Support destination unavailable')
-        await Linking.openURL(destination)
-      }}
-      onSubmitFeedback={async (input) => {
-        if (!appInfo) throw new Error('App information unavailable')
-        const destination = buildFeedbackMailDestination(appInfo, input)
-        if (!destination) throw new Error('Feedback destination unavailable')
-        await Linking.openURL(destination)
-        // RAD-518 — the category only. `input.message` is the user's own words
-        // and stays in the mail channel it was written for; see link-policy.ts.
-        captureAnalyticsEvent('feedback_submitted', { category: input.category })
-      }}
+      {...(onHostedServer ? hostedOnlyActions(appInfo) : {})}
     />
   )
+}
+
+function hostedOnlyActions(appInfo: ReturnType<typeof getRuntimeAppDisplayInfo>) {
+  return {
+    onOpenWhatsNew: () => openApprovedExternal(externalDestinations.whatsNew),
+    onOpenPrivacy: () => openApprovedExternal(externalDestinations.privacy),
+    onOpenTerms: () => openApprovedExternal(externalDestinations.terms),
+    onOpenSupport: async () => {
+      if (!appInfo) throw new Error('App information unavailable')
+      const destination = buildSupportMailDestination(appInfo)
+      if (!destination) throw new Error('Support destination unavailable')
+      await Linking.openURL(destination)
+    },
+    onSubmitFeedback: async (input: { category: FeedbackCategory; message: string }) => {
+      if (!appInfo) throw new Error('App information unavailable')
+      const destination = buildFeedbackMailDestination(appInfo, input)
+      if (!destination) throw new Error('Feedback destination unavailable')
+      await Linking.openURL(destination)
+      // RAD-518 — the category only. `input.message` is the user's own words
+      // and stays in the mail channel it was written for; see link-policy.ts.
+      captureAnalyticsEvent('feedback_submitted', { category: input.category })
+    },
+  }
 }

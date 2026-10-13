@@ -26,8 +26,8 @@ describe('runDataHealthSweep', () => {
       ['2026-08-11T09:00:00.000Z'],
     );
     const [sql] = execute.mock.calls[0] as [string, unknown[]];
-    expect(sql).toMatch(/expires_at is not null/);
-    expect(sql).toMatch(/expires_at <= \?/);
+    expect(sql).toMatch(/from enable_banking_connection/);
+    expect(sql).toMatch(/access_valid_until <= \?/);
 
     expect(scheduleLifecycleSteps).toHaveBeenCalledTimes(2);
     expect(scheduleLifecycleSteps).toHaveBeenCalledWith(expect.anything(), enqueue, 'data_health', 7, 'data-health.v1', [{ scheduledFor: now, step: 'consent_expiring' }]);

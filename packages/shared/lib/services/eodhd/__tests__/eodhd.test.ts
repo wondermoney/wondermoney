@@ -45,7 +45,7 @@ describe('Eodhd', () => {
 
   it('getEndOfDayPrices delegates to client.eod and returns its result', async () => {
     const eod = vi.fn().mockResolvedValue([{ close: 185.64, date: '2026-01-02' }]);
-    (EODHDClient as unknown as ReturnType<typeof vi.fn>).mockImplementation(() => ({ eod }));
+    (EODHDClient as unknown as ReturnType<typeof vi.fn>).mockImplementation(function () { return { eod }; });
 
     const client = new Eodhd({ apiKey: 'test-key' });
     const result = await client.getEndOfDayPrices('AAPL.US', { from: '2026-01-01' });
@@ -57,7 +57,7 @@ describe('Eodhd', () => {
   it('wraps a thrown EODHDError into EodhdError, preserving code/status/original', async () => {
     const upstream = new EODHDAuthError('bad token', 401);
     const eod = vi.fn().mockRejectedValue(upstream);
-    (EODHDClient as unknown as ReturnType<typeof vi.fn>).mockImplementation(() => ({ eod }));
+    (EODHDClient as unknown as ReturnType<typeof vi.fn>).mockImplementation(function () { return { eod }; });
 
     const client = new Eodhd({ apiKey: 'test-key' });
     await expect(client.getEndOfDayPrices('AAPL.US')).rejects.toMatchObject({
@@ -71,7 +71,7 @@ describe('Eodhd', () => {
   it('carries retryAfter through from an EODHDRateLimitError', async () => {
     const upstream = new EODHDRateLimitError('slow down', 42);
     const search = vi.fn().mockRejectedValue(upstream);
-    (EODHDClient as unknown as ReturnType<typeof vi.fn>).mockImplementation(() => ({ search }));
+    (EODHDClient as unknown as ReturnType<typeof vi.fn>).mockImplementation(function () { return { search }; });
 
     const client = new Eodhd({ apiKey: 'test-key' });
     await expect(client.search('Apple')).rejects.toMatchObject({ retryAfter: 42 });
@@ -82,7 +82,7 @@ describe('Eodhd', () => {
       data: [{ code: 'AAPL.US', exchange: 'US', industry: 'Consumer Electronics', market_capitalization: 2_800_000_000_000, name: 'Apple Inc.', sector: 'Technology' }],
       meta: { limit: 5, offset: 0, total: 1 },
     });
-    (EODHDClient as unknown as ReturnType<typeof vi.fn>).mockImplementation(() => ({ screener }));
+    (EODHDClient as unknown as ReturnType<typeof vi.fn>).mockImplementation(function () { return { screener }; });
 
     const client = new Eodhd({ apiKey: 'test-key' });
     const params = { filters: '[["market_capitalization",">",1000000000]]', limit: 5, sort: 'market_capitalization.desc' };

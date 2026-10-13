@@ -129,7 +129,7 @@
     "cypress": "^15.11.0",
     "eslint": "9.39.4",
     "eslint-config-next": "16.4.0",
-    "eslint-config-prettier": "^9.1.0",
+    "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-simple-import-sort": "^12.1.1",
     "postcss": "8.5.29",
     "prettier": "3.8.3",

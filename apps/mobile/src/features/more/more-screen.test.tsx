@@ -40,6 +40,20 @@ async function renderScreen(overrides: Partial<React.ComponentProps<typeof MoreS
 }
 
 describe('MoreScreen', () => {
+  it('shows only help, not the hosted instance\'s legal pages, changelog or support, on a self-hosted server', async () => {
+    const { view } = await renderScreen({
+      onOpenPrivacy: undefined,
+      onOpenSupport: undefined,
+      onOpenTerms: undefined,
+      onOpenWhatsNew: undefined,
+      onSubmitFeedback: undefined,
+    })
+    expect(view.getByText('Help')).toBeOnTheScreen()
+    for (const label of ['Privacy policy', 'Terms of service', 'Support', "What's new", 'Share feedback']) {
+      expect(view.queryByText(label)).toBeNull()
+    }
+  })
+
   it('opens each functional destination only after its row is pressed', async () => {
     const { view, props } = await renderScreen()
     expect(props.onOpenPrivacy).not.toHaveBeenCalled()

@@ -182,7 +182,7 @@ function getBaseAnalyticsProperties(appUser: Appuser, method: string, extraPrope
 }
 
 function isDemoAccount(appuser: Appuser) {
-  return appuser.accountType === AppuserAccountType.DEMO || appuser.emailAddress.toLowerCase() === 'demo@wonder.money';
+  return appuser.accountType === AppuserAccountType.DEMO;
 }
 
 function sendAuthCallbackSuccess(res: Response, appuserKey: number, method: string, outcome: 'demo' | 'login' | 'signup') {

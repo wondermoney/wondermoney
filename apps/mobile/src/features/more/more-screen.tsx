@@ -16,10 +16,14 @@ export type MoreScreenProps = {
   appInfo: AppDisplayInfo | null
   email?: string | null
   onOpenHelp: () => Promise<void>
-  onOpenWhatsNew: () => Promise<void>
-  onOpenPrivacy: () => Promise<void>
-  onOpenTerms: () => Promise<void>
-  onOpenSupport: () => Promise<void>
+  /**
+   * The hosted instance's changelog, legal pages and support inbox. A self-hosted server has
+   * its own (or none), so the route leaves these out and their rows are not shown.
+   */
+  onOpenWhatsNew?: () => Promise<void>
+  onOpenPrivacy?: () => Promise<void>
+  onOpenTerms?: () => Promise<void>
+  onOpenSupport?: () => Promise<void>
   onOpenProfile: () => void
   onOpenBudgets: () => void
   onOpenLoans: () => void
@@ -33,7 +37,7 @@ export type MoreScreenProps = {
   onOpenNotifications: () => void
   onOpenSecurity: () => void
   onLogout: () => void | Promise<void>
-  onSubmitFeedback: (input: { category: FeedbackCategory; message: string }) => Promise<void>
+  onSubmitFeedback?: (input: { category: FeedbackCategory; message: string }) => Promise<void>
 }
 
 
@@ -67,7 +71,7 @@ export function MoreScreen({
   const [feedbackOpen, setFeedbackOpen] = useState(false)
   const [feedbackPending, setFeedbackPending] = useState(false)
   const [feedbackFailed, setFeedbackFailed] = useState(false)
-  const actions: Record<MoreAction, () => Promise<void>> = {
+  const actions: Partial<Record<MoreAction, () => Promise<void>>> = {
     help: onOpenHelp,
     whatsNew: onOpenWhatsNew,
     privacy: onOpenPrivacy,
@@ -79,12 +83,14 @@ export function MoreScreen({
     if (openingAction) return Promise.resolve()
     setOpeningAction(action)
     setFailedAction(null)
-    return actions[action]()
+    const run = actions[action]
+    if (!run) return Promise.resolve()
+    return run()
       .catch(() => setFailedAction(action))
       .finally(() => setOpeningAction(null))
   }
 
-  const rows: { action: MoreAction; label: string; announcement: string }[] = [
+  const allRows: { action: MoreAction; label: string; announcement: string }[] = [
     {
       action: 'help',
       label: t('more.help'),
@@ -111,6 +117,7 @@ export function MoreScreen({
       announcement: t('more.opensMail'),
     },
   ]
+  const rows = allRows.filter((row) => actions[row.action] !== undefined)
 
   return (
     <SafeAreaView style={[styles.safeArea, { backgroundColor: palette.background }]}>
@@ -198,20 +205,22 @@ export function MoreScreen({
           </View>
 
           <View style={[styles.list, { borderTopColor: palette.border, borderBottomColor: palette.border }]}>
-            <InternalRow
-              label={t('more.feedback.entryPoint')}
-              announcement={t('more.opensInside')}
-              onPress={() => setFeedbackOpen(true)}
-              palette={palette}
-            />
-            {rows.map((row) => (
+            {onSubmitFeedback ? (
+              <InternalRow
+                label={t('more.feedback.entryPoint')}
+                announcement={t('more.opensInside')}
+                onPress={() => setFeedbackOpen(true)}
+                palette={palette}
+              />
+            ) : null}
+            {rows.map((row, index) => (
               <MoreLinkRow
                 key={row.action}
                 label={row.label}
                 announcement={row.announcement}
                 busy={openingAction === row.action}
                 onPress={() => void open(row.action)}
-                separated
+                separated={Boolean(onSubmitFeedback) || index > 0}
                 palette={palette}
               />
             ))}
@@ -278,7 +287,7 @@ export function MoreScreen({
           setFeedbackPending(true)
           setFeedbackFailed(false)
           try {
-            await onSubmitFeedback(input)
+            await onSubmitFeedback?.(input)
             setFeedbackOpen(false)
           } catch {
             setFeedbackFailed(true)

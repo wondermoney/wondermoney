@@ -130,20 +130,6 @@ describe('auth callback', () => {
     expect(res.json).toHaveBeenCalledWith({ appuserKey: 7, method: 'email', outcome: 'demo' });
   });
 
-  it('returns early for legacy demo email existing-user logins without writes or provider calls', async () => {
-    const existingUser = { accountType: AppuserAccountType.REGULAR, appuserKey: 8, emailAddress: 'demo@wonder.money' };
-    mocked.getUserByExternalId.mockResolvedValueOnce(existingUser);
-
-    const res = makeRes();
-
-    await authCallback(makeAuthUser('supabase-id', 'demo@wonder.money', 'session-legacy-demo'), res.res);
-
-    expect(mocked.getOrCreateTenant).not.toHaveBeenCalled();
-    expect(mocked.ensureAppuserTenantLink).not.toHaveBeenCalled();
-    expect(res.status).toHaveBeenCalledWith(200);
-    expect(res.json).toHaveBeenCalledWith({ appuserKey: 8, method: 'email', outcome: 'demo' });
-  });
-
   it('returns early for demo email matches after external-id miss without writes or provider calls', async () => {
     const existingUser = { accountType: AppuserAccountType.DEMO, appuserKey: 9, emailAddress: 'demo@wonder.money' };
     mocked.getUserByExternalId.mockResolvedValueOnce(null);
