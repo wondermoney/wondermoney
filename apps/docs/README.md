@@ -1,7 +1,8 @@
 # WonderMoney documentation site
 
-Next.js 16 and Fumadocs 16 documentation site using React 19 and MDX. It uses
-Yarn `1.22.22`; CI runs on Node 22. The public site is `https://docs.wonder.money`.
+Next.js 16 and Fumadocs 16 documentation site using React 19 and MDX, part of the
+pnpm workspace (Node 26, see the root `.nvmrc`). The public site is
+`https://docs.wonder.money`.
 
 ## Local development
 
@@ -30,5 +31,4 @@ sitemap, Open Graph, and JSON-LD URLs.
 - `lib/source.ts` — shared source loader for docs, search, LLM, and OG surfaces
 - `proxy.ts` — locale gate plus legacy legal and Markdown rewrites
 
-See `AGENTS.md` and `content/docs/AGENTS.md` for active conventions. Deployment
-steps are in `docs/deployment.md`.
+See `AGENTS.md` and `content/docs/AGENTS.md` for active conventions.

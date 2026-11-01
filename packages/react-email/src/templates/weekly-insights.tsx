@@ -1,6 +1,7 @@
 import { Column, Hr, Row, Section, Text } from "react-email";
 
 import { LifecycleEmailLayout } from "../../emails/components/LifecycleEmail";
+import { resolveBrandName } from "../components/Brand";
 import { buildCampaignUrl } from "../../emails/lib/urls";
 import type { TransactionalEmailLanguage, WeeklyBudgetSummary, WeeklyInsightsProps } from "../types";
 import { getWeeklyInsightsPreheader } from "../weekly-insights-preheader";
@@ -20,7 +21,7 @@ const COPY = {
     budgetStatus: { over: "Some categories are over plan", near: "Some categories are close to the set amount", within: "Within the planned amounts" },
     budgetCount: { within: (n: number) => `${n} within plan`, near: (n: number) => `${n} close to set`, over: (n: number) => `${n} over plan` },
     ctaLabel: "View summary",
-    marketingFooterText: "You're receiving this summary because you turned on weekly insights in WonderMoney.",
+    marketingFooterText: (brand: string) => `You're receiving this summary because you turned on weekly insights in ${brand}.`,
     bodyParagraph: "In the full summary you can review the transactions included and see the detail of the categories and budgets shown.",
   },
   pt: {
@@ -34,7 +35,7 @@ const COPY = {
     budgetStatus: { over: "Há categorias acima do valor planeado", near: "Há categorias perto do valor definido", within: "Dentro dos valores planeados" },
     budgetCount: { within: (n: number) => `${n} dentro do planeado`, near: (n: number) => `${n} perto do definido`, over: (n: number) => `${n} acima do planeado` },
     ctaLabel: "Ver resumo",
-    marketingFooterText: "Recebeste este resumo porque ativaste os insights semanais na WonderMoney.",
+    marketingFooterText: (brand: string) => `Recebeste este resumo porque ativaste os insights semanais na ${brand}.`,
     bodyParagraph: "No resumo completo podes rever as transações incluídas e consultar o detalhe das categorias e dos orçamentos apresentados.",
   },
 } as const satisfies Record<TransactionalEmailLanguage, unknown>;
@@ -103,8 +104,10 @@ export default function WeeklyInsights({
   utmMedium = "email",
   utmCampaign = "weekly_insights",
   utmContent = "completed_lisbon_week",
+  brandName,
 }: WeeklyInsightsProps) {
   const t = COPY[language];
+  const brand = resolveBrandName(brandName);
   const preheader = getWeeklyInsightsPreheader(budgetSummary, language);
   const comparisonDetail =
     previousWeekComparisonText?.trim() && previousWeekComparisonValue?.trim()
@@ -153,7 +156,8 @@ export default function WeeklyInsights({
       }
       ctaLabel={t.ctaLabel}
       ctaUrl={trackedCtaUrl}
-      marketingFooterText={t.marketingFooterText}
+      marketingFooterText={t.marketingFooterText(brand)}
+      brandName={brand}
       settingsUrl={settingsUrl}
       privacyUrl={privacyUrl}
       unsubscribeUrl={unsubscribeUrl}

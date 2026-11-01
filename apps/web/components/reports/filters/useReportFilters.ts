@@ -14,7 +14,7 @@ import { useRouter } from "@/i18n/navigation";
 import { resolveViewerTimeZone } from "@/lib/reports/viewer-timezone";
 
 /**
- * Filter envelope matching the RAD-156 API contract.
+ * Filter envelope matching the `/v1/reports/*` API contract.
  *
  * State is persisted in URL search params so reports stay shareable,
  * deep-linkable, and survive reloads. This is the established pattern
@@ -33,7 +33,7 @@ export interface ReportFilters {
   includePending: boolean;
   includeTransfers: boolean;
   /**
-   * RAD-562 — the calendar the API groups report months in.
+   * The calendar the API groups report months in.
    *
    * Not a URL param: it describes the device reading the report, not the
    * report, so it must not travel in a shared link. Absent when the viewer's

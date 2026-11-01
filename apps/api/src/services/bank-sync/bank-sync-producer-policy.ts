@@ -16,11 +16,9 @@ export function canonicalBankSyncDistinctId(value: unknown): string {
 
 /**
  * The treatment mode snapshotted onto an incident when a failure is persisted.
- * Bank recovery is now live for every incident owner — the RAD-178 rollout gate
- * (BANK_RECOVERY_MODE off/internal-allowlist/live + production-env guard) was
- * removed when the owner took bank recovery fully live. Kept as a function (and
- * keeping the `'internal-allowlist'` union member) so historical snapshots and
- * the incident-enrollment call sites stay type-compatible.
+ * Bank recovery is live for every incident owner. Kept as a function (and
+ * keeping the `'internal-allowlist'` union member) so stored snapshots and the
+ * incident-enrollment call sites stay type-compatible.
  */
 export function bankRecoveryTreatmentMode(_distinctId: string, _env: NodeJS.ProcessEnv = process.env): 'internal-allowlist' | 'live' | null {
   return 'live';

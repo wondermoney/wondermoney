@@ -148,6 +148,11 @@ export class S3Service {
       credentials: { accessKeyId: config.accessKeyId, secretAccessKey: config.secretAccessKey },
       forcePathStyle: config.forcePathStyle,
       region: config.region,
+      // Since 3.729 the SDK adds a CRC32 checksum to every PutObject by default. In a presigned
+      // URL that checksum is computed over the empty body at signing time, so the store rejects
+      // the browser's real upload (BadDigest). Send checksums only where an operation needs one.
+      requestChecksumCalculation: 'WHEN_REQUIRED',
+      responseChecksumValidation: 'WHEN_REQUIRED',
       ...(endpoint ? { endpoint } : {}),
     });
   }

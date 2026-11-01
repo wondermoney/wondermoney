@@ -1,5 +1,6 @@
-import { Entity, ManyToOne, PrimaryKey, PrimaryKeyProp, Property } from '@mikro-orm/core';
+import { PrimaryKeyProp } from '@mikro-orm/core';
 import type { Rel } from '@mikro-orm/core';
+import { Entity, ManyToOne, PrimaryKey, Property } from '@mikro-orm/decorators/legacy';
 
 import { FinancialAsset } from './FinancialAsset';
 

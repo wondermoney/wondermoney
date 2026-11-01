@@ -6,7 +6,7 @@ import axios from "axios";
 import { Download } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { usePostHog } from "posthog-js/react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useEffectEvent, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -74,7 +74,7 @@ interface PortfolioTransactionImportModalProps {
   trigger?: React.ReactNode;
 }
 
-export function getPortfolioTransactionImportTriggerMode(
+function getPortfolioTransactionImportTriggerMode(
   trigger: React.ReactNode | undefined,
 ): "default" | "hidden" | "custom" {
   if (trigger === undefined) return "default";
@@ -90,7 +90,7 @@ const formSchema = z.object({
 
 type FormProps = PortfolioImportUploadStepFormValues;
 
-export function getPortfolioTransactionImportSubmitValues(
+function getPortfolioTransactionImportSubmitValues(
   data: Partial<FormProps>,
   fallback: { defaultPortfolioId?: string; files?: File[] },
 ) {
@@ -106,7 +106,7 @@ export function getPortfolioTransactionImportSubmitValues(
   };
 }
 
-export function shouldPollPortfolioImportPreview(
+function shouldPollPortfolioImportPreview(
   status?: string,
   isOpen = true,
 ) {
@@ -117,7 +117,7 @@ export function shouldPollPortfolioImportPreview(
   );
 }
 
-export function shouldEnablePortfolioImportPreviewQuery(input: {
+function shouldEnablePortfolioImportPreviewQuery(input: {
   activeImportSessionId?: number;
   isOpen: boolean;
   pendingFinalizationSessionId?: number;
@@ -134,7 +134,7 @@ export function shouldEnablePortfolioImportPreviewQuery(input: {
   );
 }
 
-export function shouldSuggestPortfolioImportColumnMapping(input: {
+function shouldSuggestPortfolioImportColumnMapping(input: {
   hasSuggestion?: boolean;
   hasWarning?: boolean;
   importSessionId?: number;
@@ -152,17 +152,11 @@ export function shouldSuggestPortfolioImportColumnMapping(input: {
   );
 }
 
-export function hasPortfolioImportColumnMappingWarning(warning?: string) {
+function hasPortfolioImportColumnMappingWarning(warning?: string) {
   return Boolean(warning);
 }
 
-export function shouldResetPortfolioImportSessionOnClose(
-  activeImportSessionId?: number,
-) {
-  return !activeImportSessionId;
-}
-
-export function isPortfolioImportStartupActive(
+function isPortfolioImportStartupActive(
   sessionPhase?: "idle" | "creating" | "uploading" | "parsing",
 ) {
   return (
@@ -217,7 +211,7 @@ function ImportPlaceholder({ step }: { step: string }) {
         <p className="text-muted-foreground max-w-2xl text-sm leading-6">
           {t("portfolio-import-session-placeholder-description")}
         </p>
-        <div className="text-muted-foreground pt-2 text-xs font-medium tracking-[0.14em] uppercase">
+        <div className="text-muted-foreground pt-2 text-xs font-medium">
           {step}
         </div>
       </CardContent>
@@ -259,7 +253,11 @@ const PortfolioTransactionImportModal: React.FC<
     number | undefined
   >();
   const [activeFileName, setActiveFileName] = useState<string | undefined>();
-  const [localCsvColumns, setLocalCsvColumns] = useState<string[]>([]);
+  // Header columns read locally from the selected file, tagged with the file
+  // they came from so a removed or replaced file never shows stale columns.
+  const [localCsv, setLocalCsv] = useState<{ file: File; columns: string[] }>();
+  const localCsvColumns =
+    localCsv && localCsv.file === files[0] ? localCsv.columns : [];
   const [sessionPhase, setSessionPhase] = useState<
     "idle" | "creating" | "uploading" | "parsing"
   >("idle");
@@ -293,15 +291,14 @@ const PortfolioTransactionImportModal: React.FC<
   >();
   const activeRunTokenRef = useRef(0);
   const lastSuggestedImportSessionIdRef = useRef<number | undefined>(undefined);
-  const requestColumnMappingSuggestionRef = useRef<() => Promise<void>>(
-    () => Promise.resolve(),
-  );
-  const invalidatedFinalizationSessionIdRef = useRef<number | undefined>(
-    undefined,
-  );
-  const observedImportingFinalizationSessionIdRef = useRef<number | undefined>(
-    undefined,
-  );
+  // Both are read while rendering (they decide the visible step), so they are
+  // state rather than refs.
+  const [invalidatedFinalizationSessionId, setInvalidatedFinalizationSessionId] =
+    useState<number | undefined>();
+  const [
+    observedImportingFinalizationSessionId,
+    setObservedImportingFinalizationSessionId,
+  ] = useState<number | undefined>();
   const useCreatePortfolioImportSessionMutation =
     useCreatePortfolioImportSession();
   const useConfirmPortfolioImportColumnMappingMutation =
@@ -350,6 +347,17 @@ const PortfolioTransactionImportModal: React.FC<
     refetch: refetchPreview,
   } = previewQuery;
   const previewColumnMapping = preview?.columnMapping;
+
+  // Remember that this finalization passed through "importing", so a later
+  // "partial" status reads as the import's result rather than a pre-import
+  // parse. Adjusted during render rather than in an effect.
+  if (
+    pendingFinalizationSessionId === activeImportSessionId &&
+    preview?.status === "importing" &&
+    observedImportingFinalizationSessionId !== activeImportSessionId
+  ) {
+    setObservedImportingFinalizationSessionId(activeImportSessionId);
+  }
   const availableColumns = getPortfolioImportAvailableColumns({
     localCsvColumns,
     preview,
@@ -368,11 +376,9 @@ const PortfolioTransactionImportModal: React.FC<
       : resolvePortfolioImportVisibleStep({
           isFinalizing:
             pendingFinalizationSessionId === activeImportSessionId ||
-            invalidatedFinalizationSessionIdRef.current ===
-              activeImportSessionId,
+            invalidatedFinalizationSessionId === activeImportSessionId,
           hasObservedImporting:
-            observedImportingFinalizationSessionIdRef.current ===
-            activeImportSessionId,
+            observedImportingFinalizationSessionId === activeImportSessionId,
           status: preview?.status,
           summary: preview?.summary,
         });
@@ -395,10 +401,7 @@ const PortfolioTransactionImportModal: React.FC<
   useEffect(() => {
     const selectedFile = files[0];
 
-    if (!selectedFile) {
-      setLocalCsvColumns([]);
-      return;
-    }
+    if (!selectedFile) return;
 
     let cancelled = false;
 
@@ -407,9 +410,12 @@ const PortfolioTransactionImportModal: React.FC<
         const csvText = await selectedFile.slice(0, 8192).text();
         if (cancelled) return;
 
-        setLocalCsvColumns(extractPortfolioImportCsvColumns(csvText));
+        setLocalCsv({
+          file: selectedFile,
+          columns: extractPortfolioImportCsvColumns(csvText),
+        });
       } catch {
-        if (!cancelled) setLocalCsvColumns([]);
+        if (!cancelled) setLocalCsv({ file: selectedFile, columns: [] });
       }
     })();
 
@@ -421,8 +427,8 @@ const PortfolioTransactionImportModal: React.FC<
   const clearTransientState = () => {
     activeRunTokenRef.current += 1;
     setPendingFinalizationSessionId(undefined);
-    invalidatedFinalizationSessionIdRef.current = undefined;
-    observedImportingFinalizationSessionIdRef.current = undefined;
+    setInvalidatedFinalizationSessionId(undefined);
+    setObservedImportingFinalizationSessionId(undefined);
     setStepRecovery(undefined);
     lastSuggestedImportSessionIdRef.current = undefined;
     setMaxUploadSizeBytes(undefined);
@@ -440,65 +446,126 @@ const PortfolioTransactionImportModal: React.FC<
     });
   };
 
-  const onAnalyze = methods.handleSubmit(
-    async (data) => {
-      const { file, portfolioId, brokerId } = getPortfolioTransactionImportSubmitValues(
-        data,
-        {
-          defaultPortfolioId,
-          files,
-        },
-      );
+  // Call handleSubmit from the event rather than while rendering, so the
+  // submit callback (which touches activeRunTokenRef) is never handed to it
+  // during render.
+  const onAnalyze = (event?: React.BaseSyntheticEvent) =>
+    methods.handleSubmit(
+      async (data) => {
+        const { file, portfolioId, brokerId } = getPortfolioTransactionImportSubmitValues(
+          data,
+          {
+            defaultPortfolioId,
+            files,
+          },
+        );
 
-      if (!file) {
-        showNoFileError();
-        return;
-      }
+        if (!file) {
+          showNoFileError();
+          return;
+        }
 
-      if (!portfolioId) {
-        toast.error(t("toast-import-transactions-error-no-portfolio"), {
-          duration: 9000,
-        });
-        methods.setError("portfolioId", {
-          message: t("toast-import-transactions-error-no-portfolio"),
-        });
-        return;
-      }
+        if (!portfolioId) {
+          toast.error(t("toast-import-transactions-error-no-portfolio"), {
+            duration: 9000,
+          });
+          methods.setError("portfolioId", {
+            message: t("toast-import-transactions-error-no-portfolio"),
+          });
+          return;
+        }
 
-      const retryAnalyze = () => {
-        void onAnalyze();
-      };
+        const retryAnalyze = () => {
+          void onAnalyze();
+        };
 
-      const discardImport = () => {
-        clearTransientState();
-      };
+        const discardImport = () => {
+          clearTransientState();
+        };
 
-      try {
-        const runToken = ++activeRunTokenRef.current;
-        setStepRecovery(undefined);
-        setSessionPhase("creating");
-        setActiveFileName(file.name);
-        capturePortfolioImportFunnelEvent(posthog, PORTFOLIO_IMPORT_FUNNEL_EVENTS.sessionStarted, {
-          outcome: "started",
-          stage: "upload",
-          used_ai_mapping: false,
-        });
-
-        const createResponse =
-          await useCreatePortfolioImportSessionMutation.mutateAsync({
-            portfolioId,
-            brokerId,
+        try {
+          const runToken = ++activeRunTokenRef.current;
+          setStepRecovery(undefined);
+          setSessionPhase("creating");
+          setActiveFileName(file.name);
+          capturePortfolioImportFunnelEvent(posthog, PORTFOLIO_IMPORT_FUNNEL_EVENTS.sessionStarted, {
+            outcome: "started",
+            stage: "upload",
+            used_ai_mapping: false,
           });
 
-        if (activeRunTokenRef.current !== runToken) return;
+          const createResponse =
+            await useCreatePortfolioImportSessionMutation.mutateAsync({
+              portfolioId,
+              brokerId,
+            });
 
-        setMaxUploadSizeBytes(createResponse.data.maxUploadSizeBytes);
+          if (activeRunTokenRef.current !== runToken) return;
 
-        setSessionPhase("uploading");
-        try {
-          await uploadPortfolioImportFile({
-            createResponse: createResponse.data,
-            file,
+          setMaxUploadSizeBytes(createResponse.data.maxUploadSizeBytes);
+
+          setSessionPhase("uploading");
+          try {
+            await uploadPortfolioImportFile({
+              createResponse: createResponse.data,
+              file,
+            });
+          } catch {
+            setSessionPhase("idle");
+            setStepRecovery({
+              descriptionKey: "portfolio-import-upload-error-description",
+              onDiscard: discardImport,
+              onRetry: retryAnalyze,
+              primaryActionKey: "portfolio-import-upload-error-retry",
+              secondaryActionKey: "portfolio-import-upload-error-discard",
+              step: "upload",
+              titleKey: "portfolio-import-upload-error-title",
+            });
+            capturePortfolioImportFunnelEvent(posthog, PORTFOLIO_IMPORT_FUNNEL_EVENTS.uploadFailed, {
+              outcome: "failed",
+              stage: "upload",
+              error_category: "upload",
+            });
+            return;
+          }
+
+          if (activeRunTokenRef.current !== runToken) return;
+
+          setActiveImportSessionId(createResponse.data.importSessionId);
+          setSessionPhase("parsing");
+          try {
+            await useTriggerPortfolioImportSessionParseMutation.mutateAsync({
+              importSessionId: createResponse.data.importSessionId,
+            });
+          } catch {
+            setSessionPhase("idle");
+            setStepRecovery({
+              descriptionKey: "portfolio-import-parse-error-description",
+              onDiscard: discardImport,
+              onRetry: retryAnalyze,
+              primaryActionKey: "portfolio-import-parse-error-retry",
+              secondaryActionKey: "portfolio-import-parse-error-discard",
+              step: "upload",
+              titleKey: "portfolio-import-parse-error-title",
+            });
+            capturePortfolioImportFunnelEvent(posthog, PORTFOLIO_IMPORT_FUNNEL_EVENTS.parseFailed, {
+              outcome: "failed",
+              stage: "parse",
+              error_category: "parse",
+            });
+            return;
+          }
+
+          if (activeRunTokenRef.current !== runToken) return;
+
+          setSessionPhase("idle");
+          capturePortfolioImportFunnelEvent(posthog, PORTFOLIO_IMPORT_FUNNEL_EVENTS.uploadSucceeded, {
+            outcome: "succeeded",
+            stage: "upload",
+          });
+          capturePortfolioImportFunnelEvent(posthog, PORTFOLIO_IMPORT_FUNNEL_EVENTS.parseSucceeded, {
+            outcome: "succeeded",
+            stage: "parse",
           });
         } catch {
           setSessionPhase("idle");
@@ -511,72 +578,15 @@ const PortfolioTransactionImportModal: React.FC<
             step: "upload",
             titleKey: "portfolio-import-upload-error-title",
           });
-          capturePortfolioImportFunnelEvent(posthog, PORTFOLIO_IMPORT_FUNNEL_EVENTS.uploadFailed, {
-            outcome: "failed",
-            stage: "upload",
-            error_category: "upload",
-          });
-          return;
+          toast.error(t("toast-import-transactions-error"), { duration: 9000 });
         }
-
-        if (activeRunTokenRef.current !== runToken) return;
-
-        setActiveImportSessionId(createResponse.data.importSessionId);
-        setSessionPhase("parsing");
-        try {
-          await useTriggerPortfolioImportSessionParseMutation.mutateAsync({
-            importSessionId: createResponse.data.importSessionId,
-          });
-        } catch {
-          setSessionPhase("idle");
-          setStepRecovery({
-            descriptionKey: "portfolio-import-parse-error-description",
-            onDiscard: discardImport,
-            onRetry: retryAnalyze,
-            primaryActionKey: "portfolio-import-parse-error-retry",
-            secondaryActionKey: "portfolio-import-parse-error-discard",
-            step: "upload",
-            titleKey: "portfolio-import-parse-error-title",
-          });
-          capturePortfolioImportFunnelEvent(posthog, PORTFOLIO_IMPORT_FUNNEL_EVENTS.parseFailed, {
-            outcome: "failed",
-            stage: "parse",
-            error_category: "parse",
-          });
-          return;
+      },
+      () => {
+        if (!methods.getValues("portfoliocsv")?.[0]) {
+          showNoFileError();
         }
-
-        if (activeRunTokenRef.current !== runToken) return;
-
-        setSessionPhase("idle");
-        capturePortfolioImportFunnelEvent(posthog, PORTFOLIO_IMPORT_FUNNEL_EVENTS.uploadSucceeded, {
-          outcome: "succeeded",
-          stage: "upload",
-        });
-        capturePortfolioImportFunnelEvent(posthog, PORTFOLIO_IMPORT_FUNNEL_EVENTS.parseSucceeded, {
-          outcome: "succeeded",
-          stage: "parse",
-        });
-      } catch {
-        setSessionPhase("idle");
-        setStepRecovery({
-          descriptionKey: "portfolio-import-upload-error-description",
-          onDiscard: discardImport,
-          onRetry: retryAnalyze,
-          primaryActionKey: "portfolio-import-upload-error-retry",
-          secondaryActionKey: "portfolio-import-upload-error-discard",
-          step: "upload",
-          titleKey: "portfolio-import-upload-error-title",
-        });
-        toast.error(t("toast-import-transactions-error"), { duration: 9000 });
-      }
-    },
-    () => {
-      if (!methods.getValues("portfoliocsv")?.[0]) {
-        showNoFileError();
-      }
-    },
-  );
+      },
+    )(event);
 
   const isSubmitting =
     useCreatePortfolioImportSessionMutation.isPending ||
@@ -646,7 +656,9 @@ const PortfolioTransactionImportModal: React.FC<
       );
     }
   };
-  requestColumnMappingSuggestionRef.current = onRequestColumnMappingSuggestion;
+  const requestColumnMappingSuggestion = useEffectEvent(
+    onRequestColumnMappingSuggestion,
+  );
 
   useEffect(() => {
     if (
@@ -663,7 +675,7 @@ const PortfolioTransactionImportModal: React.FC<
     }
 
     lastSuggestedImportSessionIdRef.current = activeImportSessionId;
-    void requestColumnMappingSuggestionRef.current();
+    void requestColumnMappingSuggestion();
   }, [
     activeImportSessionId,
     isSuggestingPortfolioImportColumnMapping,
@@ -734,15 +746,6 @@ const PortfolioTransactionImportModal: React.FC<
   };
 
   useEffect(() => {
-    if (
-      pendingFinalizationSessionId === activeImportSessionId &&
-      preview?.status === "importing"
-    ) {
-      observedImportingFinalizationSessionIdRef.current = activeImportSessionId;
-    }
-  }, [activeImportSessionId, pendingFinalizationSessionId, preview?.status]);
-
-  useEffect(() => {
     if (pendingFinalizationSessionId !== activeImportSessionId) return;
     if (!preview?.status) return;
 
@@ -754,17 +757,18 @@ const PortfolioTransactionImportModal: React.FC<
     ].includes(preview.status);
     const isFinalPartial =
       preview.status === "partial" &&
-      (observedImportingFinalizationSessionIdRef.current ===
-        activeImportSessionId ||
+      (observedImportingFinalizationSessionId === activeImportSessionId ||
         isPostImportPartialResult(preview.summary));
 
     if (!isFinalStatus && !isFinalPartial) return;
 
-    if (invalidatedFinalizationSessionIdRef.current === activeImportSessionId)
-      return;
+    if (invalidatedFinalizationSessionId === activeImportSessionId) return;
 
-    invalidatedFinalizationSessionIdRef.current = activeImportSessionId;
-    observedImportingFinalizationSessionIdRef.current = undefined;
+    // Responds to the polled server status: marking the session settled and
+    // invalidating its queries happen together, once, so they stay here.
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- see above
+    setInvalidatedFinalizationSessionId(activeImportSessionId);
+    setObservedImportingFinalizationSessionId(undefined);
     setPendingFinalizationSessionId(undefined);
     void Promise.all([
       Promise.resolve(
@@ -775,6 +779,8 @@ const PortfolioTransactionImportModal: React.FC<
     ]);
   }, [
     activeImportSessionId,
+    invalidatedFinalizationSessionId,
+    observedImportingFinalizationSessionId,
     pendingFinalizationSessionId,
     preview?.portfolioId,
     preview?.status,
@@ -792,7 +798,7 @@ const PortfolioTransactionImportModal: React.FC<
     });
 
     setPendingFinalizationSessionId(activeImportSessionId);
-    invalidatedFinalizationSessionIdRef.current = undefined;
+    setInvalidatedFinalizationSessionId(undefined);
     try {
       await refetchPreview();
       capturePortfolioImportFunnelEvent(

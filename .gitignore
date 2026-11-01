@@ -7,3 +7,13 @@ node_modules/
 !.env.example
 !.env.sample
 *.tsbuildinfo
+# sandbox-dev agent skill state (.opencode/skills/sandbox-dev)
+.worktrees/
+.sandboxes/
+.sandbox-dev-claims/
+.opencode/*
+!.opencode/skills/
+opencode.json
+.superpowers/
+.slim/
+.husky/_/

@@ -4,7 +4,7 @@ import type { Breadcrumb, Event } from '@sentry/react-native'
 import { SENTRY_DSN, type ErrorReporterPort } from './error-reporting'
 
 /**
- * RAD-517 — the only module in the app that touches the Sentry SDK.
+ * The only module in the app that touches the Sentry SDK.
  *
  * Every SDK feature that would send more than a stack trace is switched off
  * here, co-located with the client construction the same way
@@ -31,7 +31,7 @@ import { SENTRY_DSN, type ErrorReporterPort } from './error-reporting'
  *   *any* numeric `tracesSampleRate` — including zero — as "tracing enabled" and
  *   installs app-start, native-frames, stall-tracking, user-interaction and
  *   auto-performance integrations. The four `enable*` flags below are what
- *   actually keep this ticket to crash/error reporting.
+ *   actually keep this client to crash/error reporting.
  * - **No `Sentry.setUser`, anywhere.** Not called here and unreachable through
  *   `ErrorReporterPort`; `beforeSend` deletes `event.user` as well, so an
  *   identity would have to survive three separate refusals to ship.
@@ -40,7 +40,7 @@ import { SENTRY_DSN, type ErrorReporterPort } from './error-reporting'
  * mounts `TouchEventBoundary`, which records a breadcrumb per touch containing
  * the touched element's accessibility label — in this app that is routinely a
  * formatted balance or an account name. Its other job is performance profiling,
- * which this ticket does not enable. Uncaught render errors do not need it: the
+ * which this app does not enable. Uncaught render errors do not need it: the
  * default `reactNativeErrorHandlersIntegration` hooks React Native's global
  * `ErrorUtils` handler and unhandled promise rejections, and native crashes are
  * captured by the native SDKs.
@@ -99,7 +99,7 @@ function urlPathOnly(value: unknown): string | undefined {
  */
 function scrubBreadcrumb(breadcrumb: Breadcrumb): Breadcrumb | null {
   // Log statements can contain anything. This app's source has no console.* calls
-  // (confirmed during RAD-193's audit), so this is defense in depth against a
+  // so this is defense in depth against a
   // future one, plus the SDK's own internal logging.
   if (breadcrumb.category === 'console') return null
   if (!httpBreadcrumbCategories.has(breadcrumb.category ?? '')) return breadcrumb
@@ -140,6 +140,8 @@ function scrubBreadcrumb(breadcrumb: Breadcrumb): Breadcrumb | null {
  *   (`request.data`), `cookies`, and every header including `Authorization`.
  *   Rebuilt from an allowlist for the same reason breadcrumbs are.
  * - console breadcrumbs, and the body/headers of HTTP breadcrumbs.
+ *
+ * @public Exported for its unit test.
  */
 export function scrubSentryEvent<E extends Event>(event: E): E {
   const scrubbed: E = { ...event }

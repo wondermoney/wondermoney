@@ -2,12 +2,6 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import api from "../api";
 
-export interface Onboarding {
-  step: number;
-  description: string;
-  done: boolean;
-}
-
 interface OnboardingResponse {}
 
 const updateOnboarding = async (userId: string, stepId: number) => {

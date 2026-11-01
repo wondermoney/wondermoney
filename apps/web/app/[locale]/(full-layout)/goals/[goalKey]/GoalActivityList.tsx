@@ -1,4 +1,5 @@
 import type { UseQueryResult } from "@tanstack/react-query";
+import { TriangleAlert } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 
 import { Card } from "@/components/ui/card";
@@ -60,6 +61,18 @@ export default function GoalActivityList({
             emphasis: index === 0,
             title: t(`goals.goal-activity-${activity.type}`),
             timestamp: formatGoalDate(activity.occurredAt, locale),
+            // #151: the funded transaction was retracted by the bank but the goal still pays
+            // for it. Text plus an icon, never colour alone. There is no reversal action in the
+            // web UI yet, so this only warns.
+            description: activity.transactionExpired ? (
+              <span className="text-warning-text inline-flex items-start gap-1">
+                <TriangleAlert
+                  className="mt-0.5 size-3 shrink-0"
+                  aria-hidden="true"
+                />
+                <span>{t("goals.goal-activity-transaction-expired")}</span>
+              </span>
+            ) : undefined,
             trailing: (() => {
               const amount = formatActivityAmount(
                 activity,

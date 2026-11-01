@@ -12,14 +12,14 @@ import { Big } from 'big.js';
  *   2. MikroORM's `DecimalType.convertToJSValue` returns `+value` whenever the reflected
  *      runtime type is `number`, which it is on every money property.
  *
- * Precision is therefore lost at *hydration*, before any code runs — which is why dotting
- * `big.js` around at call sites did not help: `new Big(0.30000000000000004)` faithfully
+ * Precision is therefore lost at *hydration*, before any code runs — which is why using
+ * `big.js` at individual call sites does not help: `new Big(0.30000000000000004)` faithfully
  * preserves the error it was handed.
  *
- * The fix has two halves. This module is the arithmetic half: every money operation goes
+ * There are two halves. This module is the arithmetic half: every money operation goes
  * through exact decimal arithmetic and rounds once, at the end, to the target column's
- * scale. The storage half is the migration that constrains the previously-unbounded
- * `numeric` columns, so a value that *is* exact can no longer be widened back into noise.
+ * scale. The storage half is the scale-constrained `numeric` columns, so a value that *is*
+ * exact cannot be widened back into noise.
  *
  * ## Rounding mode
  *
@@ -33,7 +33,7 @@ import { Big } from 'big.js';
 Big.RM = Big.roundHalfEven;
 
 /** Scale of the money columns (`numeric(18,4)`). Amounts and balances round to this. */
-export const MONEY_SCALE = 4;
+const MONEY_SCALE = 4;
 
 /** Scale for values presented to a user (and for the 2dp budget/income columns). */
 export const DISPLAY_SCALE = 2;
@@ -81,9 +81,7 @@ export function sumMoney(values: Numeric[], scale: number = MONEY_SCALE): number
 
 /**
  * Convert `amount` between currencies at `rate`, rounding once to the target scale.
- *
- * Every FX site in the codebase previously did a bare `amount * rate` with no rounding
- * step and no shared policy, in four duplicated places.
+ * Every FX site goes through this rather than a bare `amount * rate`.
  */
 export function convertMoney(amount: Numeric, rate: Numeric, scale: number = MONEY_SCALE): number {
   return toNumber(big(amount).times(big(rate)), scale);

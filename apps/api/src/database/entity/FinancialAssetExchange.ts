@@ -1,5 +1,6 @@
-import { Collection, Entity, ManyToMany, ManyToOne, PrimaryKey, Property } from '@mikro-orm/core';
+import { Collection } from '@mikro-orm/core';
 import type { Rel } from '@mikro-orm/core';
+import { Entity, ManyToMany, ManyToOne, PrimaryKey, Property } from '@mikro-orm/decorators/legacy';
 
 import { Currency } from './Currency';
 import { FinancialAssetExchangeAlias } from './FinancialAssetExchangeAlias';

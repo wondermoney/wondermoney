@@ -5,7 +5,7 @@ import { InternalServerError } from '@utils/errors';
 
 import { assertTenantResolved } from '../tenant-scope';
 
-describe('assertTenantResolved (RAD-343 fail-loud tenant guard)', () => {
+describe('assertTenantResolved (fail-loud tenant guard)', () => {
   it('passes when an authenticated request has a resolved tenant', () => {
     const next = vi.fn();
     assertTenantResolved({ path: '/x', tenant: { tenantKey: 2 }, user: { appuserKey: 1 } } as unknown as Request, {} as Response, next);

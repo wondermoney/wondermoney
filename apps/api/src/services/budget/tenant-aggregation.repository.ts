@@ -1,6 +1,8 @@
 import type { EntityManager } from '@mikro-orm/postgresql';
 
 import { DI } from '@app/database/di';
+import { notExpiredTransactionSql } from '@service/transaction/transaction-status';
+import { buildEffectiveAmountSql } from '@utils/account-amounts';
 
 import type { InstantRange } from './aggregation-periods';
 import type { BudgetAllocationRow, TenantAggregationRepository, TransactionAggregationRow } from './aggregation-types';
@@ -66,7 +68,9 @@ export class MikroOrmTenantAggregationRepository implements TenantAggregationRep
          tx."transaction_key" as "transactionKey", tx."transaction_date" as "transactionDate",
          tx."appuser_key" as "appuserKey", tx."tenant_key" as "tenantKey",
          transaction_type."name" as "transactionType",
-         coalesce(tx."edited_settlement_amount", tx."appuser_settlement_amount")::text as "effectiveAmount",
+         -- The user-currency amount: an edit writes its converted value here, while
+         -- edited_settlement_amount is in the account's currency.
+         ${buildEffectiveAmountSql('tx')}::text as "effectiveAmount",
          account."account_key" as "accountKey", account."tenant_key" as "accountTenantKey",
          account."account_owner_appuser_key" as "accountOwnerAppuserKey", account."closed" as "accountClosed",
          (account."deleted_at" is not null) as "accountDeleted",
@@ -92,6 +96,9 @@ export class MikroOrmTenantAggregationRepository implements TenantAggregationRep
        where tx."appuser_key" = ? and tx."tenant_key" = ?
          and tx."transaction_date" >= ? and tx."transaction_date" < ?
          and tx."deleted_at" is null
+         -- An EXPIRED row never settled (a dropped pending, or a rejected/cancelled bank row
+         -- retracted by the sync), so it is no spending. PENDING still counts: it is money committed.
+         and ${notExpiredTransactionSql('tx')}
          and account."tenant_key" = ? and account."account_owner_appuser_key" = ?
          and account."closed" = false and account."deleted_at" is null
        order by tx."transaction_key", assignment."appuser_transaction_category_key", loan."loan_repayment_link_key"`,

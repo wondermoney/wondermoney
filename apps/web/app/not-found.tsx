@@ -7,8 +7,8 @@ import Error from "next/error";
 
 export default function NotFound() {
   return (
-    <html lang="en">
-      <body>
+    <html lang="en" style={{ overflowX: "clip" }}>
+      <body style={{ overflowX: "clip" }}>
         <Error statusCode={404} />
       </body>
     </html>

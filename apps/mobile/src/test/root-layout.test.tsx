@@ -26,7 +26,7 @@ jest.mock('expo-localization', () => ({
 
 const mockPasswordRecoverySentinel = { __sentinel: 'passwordRecovery' } as never
 
-// RAD-517 — this suite runs with EXPO_PUBLIC_APP_ENV=local, an approved capture
+// This suite runs with EXPO_PUBLIC_APP_ENV=local, an approved capture
 // environment, so the root layout really does reach the Sentry client factory.
 // Mocked so the suite never starts the real SDK: no native module lookups, no
 // global ErrorUtils patching, no envelope cache written to disk.
@@ -128,7 +128,7 @@ describe('RootLayout splash and provider integration', () => {
       EXPO_PUBLIC_POSTHOG_KEY: 'phc_test',
     })
 
-    // RAD-517 — crash reporting is installed from the validated environment at the
+    // Crash reporting is installed from the validated environment at the
     // same point in startup as analytics, before any screen mounts.
     expect(mockSentryInit).toHaveBeenCalledTimes(1)
     expect(mockSentryInit.mock.calls[0]?.[0]).toMatchObject({

@@ -1,7 +1,7 @@
 import { Text as RNText, type TextProps as RNTextProps, type TextStyle } from 'react-native'
 
 import { themeTokens } from '@/theme/tokens'
-import { textStyle, textStyles, type TypeRole } from '@/theme/typography'
+import type { TypeRole } from '@/theme/typography'
 import { usePalette } from '@/theme/use-palette'
 
 type Role = TypeRole
@@ -68,11 +68,3 @@ export function Text({ variant = 'body', tone = 'default', align, style, ...rest
     />
   )
 }
-
-/**
- * Re-exported so a screen already importing from here does not need a second
- * import. The scale itself lives in `@/theme/typography` — a `StyleSheet` that
- * only wants the type should not have to pull in a component to get it.
- */
-export { textStyle, textStyles }
-export type { TypeRole }

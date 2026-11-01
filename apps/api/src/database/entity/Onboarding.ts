@@ -1,4 +1,5 @@
-import { Entity, EntityRepositoryType, PrimaryKey, Property, Unique } from '@mikro-orm/core';
+import { EntityRepositoryType } from '@mikro-orm/core';
+import { Entity, PrimaryKey, Property, Unique } from '@mikro-orm/decorators/legacy';
 
 import { OnboardingRepository } from '../repositories/OnboardingRepository';
 

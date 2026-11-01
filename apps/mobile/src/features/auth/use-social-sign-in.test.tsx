@@ -100,7 +100,7 @@ describe('useSocialSignIn', () => {
     ['google', 'sign_in' as const, 'sign_in_completed'],
     ['apple', 'sign_up' as const, 'sign_up_completed'],
     ['google', 'sign_up' as const, 'sign_up_completed'],
-  ])('captures %s in the %s funnel as %s with the provider alone (RAD-518)', async (provider, flow, event) => {
+  ])('captures %s in the %s funnel as %s with the provider alone', async (provider, flow, event) => {
     mockSignInWithIdToken.mockResolvedValue({ status: 'accepted' })
     const hook = await renderSocialSignIn(providers(), flow)
 

@@ -1,20 +1,20 @@
 import type { Bank } from "./useBankList";
 
 /**
- * Ordering for the bank picker (RAD-589).
+ * Ordering for the bank picker.
  *
- * GoCardless returns institutions alphabetically and nothing re-ordered them, so
- * a Portuguese user's first two options were "Abanca" and "Abanca Corporate"
- * while the banks people actually hold accounts with sat several screens down.
- * On the single highest-stakes step in the funnel, that is a scroll most users
- * should never have had to do.
+ * The provider returns institutions alphabetically, so unsorted a Portuguese
+ * user's first two options would be "Abanca" and "Abanca Corporate" while the
+ * banks people actually hold accounts with sit several screens down. On the
+ * single highest-stakes step in the funnel, that is a scroll most users should
+ * never have to do.
  *
  * The priority list is measured, not guessed: it is the institution distribution
  * of every account connected on production as of 2026-08-23, most-connected
  * first — Revolut 45, ActivoBank 29, Santander 17, CGD 14, Millennium 7, BPI 6,
  * Crédito Agrícola 5, Bankinter 5, Montepio 4, Abanca 5, Novo Banco 2.
  *
- * Matching is on a normalised name rather than the GoCardless institution id,
+ * Matching is on a normalised name rather than the provider's institution id,
  * because the ids carry a BIC suffix that changes per corporate entity
  * (`CAIXA_GERAL_DEPOSITOS_CGDIPTPL`) and would silently stop matching.
  */

@@ -8,13 +8,13 @@ import { getRateLimitInfo } from "@/lib/api/rate-limit";
 import { rateLimitCoordinator } from "@/lib/api/rate-limit-coordinator";
 
 /**
- * RAD-567 — the mutation half of the 429 story.
+ * The mutation half of the 429 story.
  *
- * RAD-556 gave *reads* a calm, recoverable state: the query layer detects the
+ * Reads get a calm, recoverable state from the query layer, which detects the
  * 429 and renders "too many requests, retrying in Ns" with a staggered resume.
- * Mutations were out of scope, so a throttled POST/PATCH/DELETE fell through to
- * whatever generic "something went wrong" toast the call site happened to have
- * — the one outcome that is neither the user's fault nor a failure.
+ * Without this, a throttled POST/PATCH/DELETE would fall through to whatever
+ * generic "something went wrong" toast the call site happens to have — for the
+ * one outcome that is neither the user's fault nor a failure.
  *
  * A mutation is not auto-retried (replaying a write is not safe in general), so
  * the copy says when the action is *available* again rather than promising a
@@ -59,4 +59,3 @@ export function useRateLimitToast() {
   );
 }
 
-export default useRateLimitToast;

@@ -111,7 +111,7 @@ const TickerExplorerAutoComplete: React.FC<AutoCompleteProps> = ({
   variant = "default",
 }) => {
   const t = useTranslations();
-  const { autocomplete, autocompleteState, inputRef, panelRef, environmentRef, onItemClick } =
+  const { autocomplete, autocompleteState, inputElement, attachInput, panelRef, environmentRef, onItemClick } =
     useTickerAutocomplete({ selectedTicker, onTickerSelected });
 
   const renderSourceHeader = (sourceId: string) => {
@@ -140,11 +140,11 @@ const TickerExplorerAutoComplete: React.FC<AutoCompleteProps> = ({
       <form
         className="flex"
         ref={environmentRef as React.RefObject<HTMLFormElement>}
-        {...autocomplete.getFormProps({ inputElement: inputRef.current })}
+        {...autocomplete.getFormProps({ inputElement })}
       >
         <Input
-          ref={inputRef}
-          {...autocomplete.getInputProps({ inputElement: inputRef.current })}
+          ref={attachInput}
+          {...autocomplete.getInputProps({ inputElement })}
           onFocus={(e) => e.currentTarget.select()}
         />
       </form>

@@ -1,6 +1,5 @@
 "use client";
 
-import { MoveUpRight } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
@@ -23,7 +22,6 @@ import { buttonVariants } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import DataLoadError from "@/components/ui/DataLoadError";
 import { Link } from "@/components/ui/Link";
-import { hasActiveBankAccountSyncHandoff } from "@/lib/account/bank-account-sync-return-marker";
 import useAccounts, {
   type Account,
   type GetAccountsResponse,
@@ -41,6 +39,7 @@ import usePortfolios, {
 import { RATE_LIMITED_ERROR_CODE } from "@/lib/api/rate-limit";
 import { useUser } from "@/lib/auth/user-context";
 import { getFirstRunState } from "@/lib/onboarding/firstRunOnboarding";
+import { serverSeed } from "@/lib/query/server-seed";
 import { cn } from "@/lib/utils";
 import { isValidFirstNetWorthState } from "@/lib/utils/analytics";
 
@@ -49,6 +48,7 @@ import { DashboardClient } from "./dashboard-client";
 type HomeClientProps =
   | {
       initialDataStatus?: "available";
+      serverRenderedAt: number;
       initialAccountsData: GetAccountsResponse;
       initialPortfoliosData: GetPortfoliosResponse;
       initialBudgetsData: GetBudgetsFullResponse;
@@ -61,6 +61,7 @@ type HomeClientProps =
       initialDataStatus: "unavailable";
       initialErrorStatus?: number;
       initialRetryAfterSeconds?: number;
+      serverRenderedAt?: never;
       initialAccountsData?: never;
       initialPortfoliosData?: never;
       initialBudgetsData?: never;
@@ -114,6 +115,7 @@ function HomeUnavailableState({
 }
 
 function HomeDashboardClient({
+  serverRenderedAt,
   initialAccountsData,
   initialPortfoliosData,
   initialBudgetsData,
@@ -123,27 +125,25 @@ function HomeDashboardClient({
   const t = useTranslations();
   const user = useUser();
 
-  const { data: accountsData } = useAccounts({
-    initialData: initialAccountsData,
-  });
-  const { data: portfoliosData } = usePortfolios({
-    initialData: initialPortfoliosData,
-  });
+  const { data: accountsData } = useAccounts(
+    serverSeed(initialAccountsData, serverRenderedAt),
+  );
+  const { data: portfoliosData } = usePortfolios(
+    serverSeed(initialPortfoliosData, serverRenderedAt),
+  );
   const {
     data: budgetsData,
     isError: isBudgetsError,
     error: budgetsError,
     refetch: refetchBudgets,
-  } = useBudgetsFull({
-    initialData: initialBudgetsData,
-  });
+  } = useBudgetsFull(serverSeed(initialBudgetsData, serverRenderedAt));
   const { data: transactionsData } = useTransactions(
     { includeEmptyAccounts: true, limit: 1 },
-    { initialData: initialTransactionsData },
+    serverSeed(initialTransactionsData, serverRenderedAt),
   );
   const { data: unreviewedTransactionsData } = useTransactions(
     { includeEmptyAccounts: true, limit: 1, unreviewedOnly: true },
-    { initialData: initialUnreviewedTransactionsData },
+    serverSeed(initialUnreviewedTransactionsData, serverRenderedAt),
   );
   const {
     data: netWorthData,
@@ -240,8 +240,7 @@ function HomeDashboardClient({
                   "h-auto p-0",
                 )}
               >
-                {t("view-all")}{" "}
-                <MoveUpRight strokeWidth={2} className="ml-1 size-4" />
+                {t("view-all")}
               </Link>
             ) : undefined
           }

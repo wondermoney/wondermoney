@@ -1,5 +1,8 @@
-import { Collection, Entity, EntityRepositoryType, Enum, Index, LoadStrategy, ManyToOne, OneToMany, PrimaryKey, Property, Unique } from '@mikro-orm/core';
+import { Collection, EntityRepositoryType, LoadStrategy } from '@mikro-orm/core';
 import type { Rel } from '@mikro-orm/core';
+import { Entity, Enum, Index, ManyToOne, OneToMany, PrimaryKey, Property, Unique } from '@mikro-orm/decorators/legacy';
+
+import { EnableBankingReturnTo } from '@app/types/enable-banking-return-to';
 
 import { EnableBankingConnectionRepository } from '../repositories/EnableBankingConnectionRepository';
 
@@ -18,15 +21,13 @@ export enum EnableBankingConnectionStatus {
 }
 
 /**
- * Replaces `NordigenRequisition`'s role for Enable Banking, shaped around its
- * real two-step flow (`POST /auth` → `POST /sessions`). `state` is the
- * correlation value sent on `POST /auth` and echoed back on the callback —
- * the same "reference not id" problem `NordigenRequisition.internalReference`
- * already solves, so it's unique for the same reason.
+ * An Enable Banking bank connection, shaped around its real two-step flow
+ * (`POST /auth` → `POST /sessions`). `state` is the correlation value sent on
+ * `POST /auth` and echoed back on the callback, which looks the connection up
+ * by it — a reference, not the provider's id — so it's unique.
  *
  * `accessValidUntil` is the real provider-returned `access.valid_until`
- * (populated once linked), never a hardcoded offset like the old
- * `NordigenRequisitionRepository.changeToLinked`'s `addDays(now, 90)` — see
+ * (populated once linked), never a hardcoded offset — see
  * `EnableBankingConnectionRepository.changeToLinked`.
  */
 @Entity({ repository: () => EnableBankingConnectionRepository })
@@ -65,6 +66,13 @@ export class EnableBankingConnection extends Base {
 
   @Property({ nullable: true })
   maxConsentValiditySeconds?: number;
+
+  /**
+   * Where the callback sends the browser afterwards. Set once, when the connection is started;
+   * null means the web app.
+   */
+  @Enum({ items: () => EnableBankingReturnTo, nullable: true })
+  returnTo?: EnableBankingReturnTo | null;
 
   @Property({ length: 255, nullable: true })
   sessionId?: string;

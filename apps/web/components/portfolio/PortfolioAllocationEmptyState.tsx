@@ -31,7 +31,7 @@ const PortfolioAllocationEmptyState: React.FC<PortfolioAllocationEmptyStateProps
         {ALLOCATION_PRESETS.map((preset) => (
           <Button
             key={preset.key}
-            variant="outline"
+            variant="secondary"
             size="sm"
             onClick={() => onApplyPreset(preset.targets)}
           >

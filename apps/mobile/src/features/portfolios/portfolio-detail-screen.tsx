@@ -10,6 +10,7 @@ import { formatCurrency, formatPercentagePoints } from '@/lib/formatters/financi
 import { themeTokens } from '@/theme/tokens'
 import { textStyles } from '@/theme/typography'
 
+import { FeeConversionNotice } from './fee-conversion-notice'
 import type { PortfolioDividendIncomeViewModel } from './portfolio-activity-view-model'
 import { PortfolioPerformanceChart, type PortfolioPerformanceChartProps } from './portfolio-performance-chart'
 import { Metric, PortfolioFailure, PortfolioLoading } from './portfolio-screen-parts'
@@ -78,6 +79,7 @@ export function PortfolioDetailScreen({ state, performance, dividendIncome = { s
               <Metric label={t('portfolioDetail.gainLoss')} value={`${money(data.totalGainLoss, data.currency)} · ${percent(data.totalGainLossPercent)}`} palette={palette} tone={tone(data.totalGainLoss)} />
               <Metric label={t('portfolioDetail.ytdReturn')} value={data.periodReturn === null ? t('portfolioDetail.ytdPending') : percent(data.periodReturn)} palette={palette} tone={data.periodReturn === null ? 'muted' : tone(data.periodReturn)} />
             </View>
+            {data.feesLeftOut ? <FeeConversionNotice scope="gains" palette={palette} /> : null}
           </View>
 
           <PortfolioPerformanceChart {...performance} palette={palette} />
@@ -109,7 +111,7 @@ export function PortfolioDetailScreen({ state, performance, dividendIncome = { s
   )
 }
 
-/** RAD-515 — per-portfolio dividend income (total + by-asset breakdown), the same data web shows
+/** Per-portfolio dividend income (total + by-asset breakdown), the same data web shows
  * both aggregate on /portfolio and scoped on the portfolio detail page. Independent of the rest of
  * the page's data: a slow/failed fetch here only affects this section. */
 function DividendIncomeSection({ state, locale, palette }: {
@@ -140,7 +142,7 @@ function HoldingRow({ holding, locale, palette, onPress }: { holding: HoldingVie
   const percent = (value: number | null) => value === null ? t('portfolioDetail.unavailable') : formatPercentagePoints(value, locale, { maximumFractionDigits: 1 })
   const currentValue = money(holding.currentValue)
   const gain = holding.gain === null ? t('portfolioDetail.unavailable') : `${money(holding.gain)} · ${percent(holding.gainPercent)}`
-  const accessibilityLabel = [holding.symbol, holding.name, holding.type, holding.isInvalid ? t('portfolioDetail.needsAttention') : null, `${t('portfolioDetail.quantity')} ${holding.quantity}`, `${t('portfolioDetail.currentValue')} ${currentValue}`, `${t('portfolioDetail.gainLoss')} ${gain}`].filter(Boolean).join(', ')
+  const accessibilityLabel = [holding.symbol, holding.name, holding.type, holding.isInvalid ? t('portfolioDetail.needsAttention') : null, holding.feeConversionIncomplete ? t('portfolioFees.holding') : null, `${t('portfolioDetail.quantity')} ${holding.quantity}`, `${t('portfolioDetail.currentValue')} ${currentValue}`, `${t('portfolioDetail.gainLoss')} ${gain}`].filter(Boolean).join(', ')
   return (
     <Pressable testID={holding.isInvalid ? 'invalid-holding' : 'holding-row'} accessible accessibilityRole="button" accessibilityLabel={accessibilityLabel} onPress={onPress} style={({ pressed }) => [styles.holding, { borderColor: holding.isInvalid ? palette.destructive : palette.border, backgroundColor: palette.card }, pressed && styles.pressed]}>
       <View style={styles.holdingHeader}>
@@ -151,6 +153,7 @@ function HoldingRow({ holding, locale, palette, onPress }: { holding: HoldingVie
         {holding.isInvalid ? <View style={[styles.attention, { borderColor: palette.destructive }]}><View style={[styles.attentionMarker, { backgroundColor: palette.destructive }]} /><Text allowFontScaling style={[styles.attentionText, { color: palette.destructive }]}>{t('portfolioDetail.needsAttention')}</Text></View> : null}
       </View>
       {holding.isInvalid ? <Text allowFontScaling style={[styles.attentionNote, { color: palette.foreground }]}>{t('portfolioDetail.invalidHolding')}</Text> : null}
+      {holding.feeConversionIncomplete ? <FeeConversionNotice scope="holding" palette={palette} compact /> : null}
       <View style={styles.holdingMetrics}>
         <Metric label={t('portfolioDetail.currentValue')} value={currentValue} palette={palette} tone={holding.currentValue === null ? 'muted' : 'default'} />
         <Metric label={t('portfolioDetail.gainLoss')} value={gain} palette={palette} tone={holding.gain === null ? 'muted' : tone(holding.gain)} />

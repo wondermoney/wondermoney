@@ -87,6 +87,7 @@ import {
   Wrench,
   Zap,
 } from "lucide-react";
+import { createElement } from "react";
 
 import type { Category } from "@/lib/api/category/useCategories";
 import { cn } from "@/lib/utils";
@@ -316,6 +317,20 @@ interface CategoryIconProps {
   style?: React.CSSProperties;
 }
 
+/**
+ * The ink for a category icon drawn in its category's colour. The stored
+ * colours are pastel fills (they back chips and chart slices), and a pastel
+ * stroke on the canvas measures well under the 3:1 an icon needs. Mixing it
+ * into the foreground keeps the hue and clears contrast in both themes: dark
+ * ink in light mode, light ink in dark mode.
+ */
+export const categoryIconStyle = (
+  color: string | null | undefined,
+): React.CSSProperties | undefined =>
+  color
+    ? { color: `color-mix(in oklch, ${color} 45%, var(--foreground))` }
+    : undefined;
+
 const CategoryIcon: React.FC<CategoryIconProps> = ({
   category,
   icon,
@@ -324,29 +339,27 @@ const CategoryIcon: React.FC<CategoryIconProps> = ({
   className,
   style,
 }) => {
+  // The lookups return module-level lucide components, so rendering them with
+  // createElement keeps the component identity stable between renders.
   if (category) {
-    const IconComponent = getCategoryIconByCategoryName(category);
-    return (
-      <IconComponent
-        width={width ?? "20px"}
-        height={height ?? "20px"}
-        className={cn("text-foreground/70", className)}
-        strokeWidth={2}
-        style={style}
-      />
-    );
+    return createElement(getCategoryIconByCategoryName(category), {
+      width: width ?? "20px",
+      height: height ?? "20px",
+      className: cn("text-foreground/70", className),
+      strokeWidth: 2,
+      style,
+    });
   }
   if (icon) {
-    const IconComponent = getCategoryIconByIconName(icon);
-    return (
-      <IconComponent
-        width={width ?? "20px"}
-        height={height ?? "20px"}
-        className={cn("text-foreground", className)}
-        strokeWidth={2}
-        style={style}
-      />
-    );
+    return createElement(getCategoryIconByIconName(icon), {
+      width: width ?? "20px",
+      height: height ?? "20px",
+      // No colour class: the icon draws in `currentColor`, so it takes the
+      // ink of the text it sits beside and a caller's `text-*` just works.
+      className,
+      strokeWidth: 2,
+      style,
+    });
   }
   console.error("Category or icon is required");
   return (

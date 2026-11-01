@@ -1,6 +1,5 @@
 import { Stack } from 'expo-router'
 
-import { AuthenticatedRouteBoundary } from '@/components/providers/authenticated-route-boundary'
 import { useProductRuntime } from '@/components/providers/product-runtime-provider'
 import { useInviteDeepLink } from '@/features/auth/use-invite-deep-link'
 import { useRecoveryDeepLink } from '@/features/auth/use-recovery-deep-link'
@@ -9,7 +8,7 @@ import { useFeatureScreenAnalytics } from '@/features/navigation/screen-analytic
 export function RootRouter() {
   useRecoveryDeepLink()
   useInviteDeepLink()
-  // RAD-518 — mounted here, above every guard, so the signed-out and
+  // Mounted here, above every guard, so the signed-out and
   // authenticated trees share one screen-view observer. The gates below
   // `(app)` render null while they resolve, which would silently drop views
   // for any observer placed under them.
@@ -39,4 +38,4 @@ export function RootRouter() {
   )
 }
 
-export { AuthenticatedRouteBoundary }
+

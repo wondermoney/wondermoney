@@ -68,8 +68,6 @@ const { shutdown } = setupGracefulShutdown({
   // Runs on both the clean-drain and timed-out paths, outside the race.
   // account-deletion jobs lazily open better-auth's dedicated pg pool (see
   // account-deletion.service.ts); drain it here too, mirroring server.ts.
-  // Pattern checked by scripts/worker-deployment-regression-checks.ts:
-  // afterClose: closeDatabase,
   afterClose: async () => {
     // Run both pool drains in parallel; account-deletion jobs lazily open
     // better-auth's dedicated pg pool (see account-deletion.service.ts).

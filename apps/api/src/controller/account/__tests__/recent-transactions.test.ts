@@ -71,7 +71,7 @@ describe('getRecentTransactions', () => {
     );
     expect(mocks.find).toHaveBeenCalledExactlyOnceWith(
       expect.anything(),
-      { accountKey: acc, appuserKey: user, deletedAt: undefined },
+      expect.objectContaining({ accountKey: acc, appuserKey: user, deletedAt: undefined }),
       {
         limit: RECENT_TRANSACTIONS_LIMIT,
         orderBy: { transactionDate: QueryOrder.DESC_NULLS_LAST, transactionKey: QueryOrder.DESC },

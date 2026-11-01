@@ -3,7 +3,7 @@ import PostHog from 'posthog-react-native'
 import { POSTHOG_HOST, type AnalyticsClientPort } from './analytics'
 
 /**
- * RAD-518 — the only module in the app that touches the PostHog SDK.
+ * The only module in the app that touches the PostHog SDK.
  *
  * Every SDK feature that can emit an event this app has not enumerated in
  * `docs/telemetry-adr.md` is switched off here, because the ADR allowlists nine

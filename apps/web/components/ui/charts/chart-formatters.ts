@@ -1,16 +1,13 @@
 import { parseISO } from "date-fns";
 
 /**
- * RAD-575 — chart axis and tooltip formatters, in the reader's locale.
+ * Chart axis and tooltip formatters, in the reader's locale.
  *
- * These used to pass `undefined` for locale with a comment saying that
- * "defers to the browser's own locale (matches formatCurrency/formatNumber
- * elsewhere in this codebase)". That was the defect, not the design: `Intl`
- * resolves `undefined` to the *runtime's* locale, which is the browser's on
- * the client and the container's during SSR — neither is the locale in the URL
- * segment. RAD-572 fixed the currency helper it was matching.
+ * Never pass `undefined` for locale: `Intl` resolves it to the *runtime's*
+ * locale, which is the browser's on the client and the container's during
+ * SSR — neither is the locale in the URL segment.
  *
- * Every function now takes the locale explicitly. Components should reach for
+ * Every function takes the locale explicitly. Components should reach for
  * `useChartFormatters()`, which binds it once; these raw forms exist for tests
  * and for anything outside React.
  */

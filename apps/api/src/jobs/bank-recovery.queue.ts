@@ -9,7 +9,7 @@ export const BANK_RECOVERY_QUEUE = 'bank-recovery.send';
 
 const bankRecoveryPayloadSchema = z.object({
   deliveryKey: z.number().int().positive(),
-  incidentId: z.string().uuid(),
+  incidentId: z.uuid(),
   templateVersion: z.string().min(1).max(64).regex(/^[a-z0-9]+(?:[.-][a-z0-9]+)*$/),
 }).strict();
 

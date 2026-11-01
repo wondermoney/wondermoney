@@ -22,11 +22,11 @@ export interface AccountInitialSyncEnqueueResult {
 }
 
 /**
- * Phase 1d: the normalized shape both providers reduce to before the shared allocation/enqueue
+ * The normalized shape both providers reduce to before the shared allocation/enqueue
  * body below (which never branches on provider again). Duck-typed on `enableBankingConnectionKey`
- * presence rather than `instanceof EnableBankingConnection` — the existing GoCardless test suite
+ * presence rather than `instanceof EnableBankingConnection` — the requisition test suite
  * constructs plain `{ nordigenRequisitionKey, requisitionId, appuserKey, tenantKey }` object
- * literals, not real entity instances, and this keeps those working unmodified.
+ * literals, not real entity instances, and this keeps those working.
  * `requisitionIdForAnalytics`/`resourceId` follow the same "provider-agnostic identity field,
  * not renamed" judgment call documented in the two sync services.
  */
@@ -58,7 +58,7 @@ class AccountInitialSyncEnqueueService {
     const existing = await DI.em.findOne(BackgroundOperation, { correlationId, deletedAt: undefined });
     if (existing) return this.reconcileExistingOperation(existing, correlationId, appuserKey);
 
-    // RAD-244: trust only the tenant stored on the requisition. Stop inferring
+    // Trust only the tenant stored on the requisition. Never infer
     // a tenant from a current AppuserTenant membership — a user who ever had
     // a second subscription context could otherwise route a sync to the
     // wrong tenant. The stored tenant is the one that was active when the
@@ -122,7 +122,7 @@ class AccountInitialSyncEnqueueService {
     } catch (error) {
       if (acceptedResult) return acceptedResult;
       // Log the ACTUAL underlying error (queue adapter/send failure). Without this the user only ever sees the generic
-      // `queue_unavailable` redirect and prod logs have no root cause (RAD-372).
+      // `queue_unavailable` redirect and prod logs have no root cause.
       this.safeError('pre-acceptance', 'Failed to enqueue account initial sync', error);
       if (error instanceof AccountInitialSyncQueueError) throw error;
       if (incident) await this.recordPreEnqueueFailure(incidentService, incident.incidentId, 'enqueue-rejected');
@@ -131,7 +131,7 @@ class AccountInitialSyncEnqueueService {
   }
 
   /**
-   * Phase 1d client-construction-analog seam for the enqueue path — the only place this service
+   * Client-construction-analog seam for the enqueue path — the only place this service
    * branches on provider. `enableBankingConnectionKey` presence (not `instanceof`) is the
    * discriminator so plain-object test fixtures keep working — see `NormalizedSyncTarget`'s
    * docblock above.
@@ -149,7 +149,7 @@ class AccountInitialSyncEnqueueService {
       // shouldn't happen since only a `linked` connection reaches this enqueue call).
       const requisitionIdForAnalytics = connection.sessionId ?? connection.state;
       return {
-        appuser: connection.appuserKey as unknown as NormalizedSyncTarget['appuser'],
+        appuser: connection.appuserKey,
         buildJobPayload: (incidentId) => ({ connectionId: requisitionIdForAnalytics, correlationId, enableBankingConnectionKey, incidentId, provider: 'enable_banking' }),
         correlationId,
         requisitionIdForAnalytics,
@@ -195,7 +195,7 @@ class AccountInitialSyncEnqueueService {
       logger.error({ stage, ...errorInfo }, message);
       // Also surface the underlying pg-boss failure in Sentry. Pino logs alone are easy to
       // miss, and the user only ever sees a generic `queue_unavailable` redirect — without
-      // this, a queue outage has no visible, groupable root cause on the dashboard (RAD-372).
+      // this, a queue outage has no visible, groupable root cause on the dashboard.
       if (error !== undefined) {
         Sentry.captureException(error, { extra: { message }, tags: { stage, subsystem: 'account-initial-sync-enqueue' } });
       }

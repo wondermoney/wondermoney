@@ -4,7 +4,7 @@ export const WORKER_HEARTBEAT_QUEUE = 'worker.heartbeat';
 // Every 2 minutes: comfortably inside the HetrixTools monitor's 5-minute timeout
 // + 3-minute grace, so a single missed tick never trips a false DOWN alert.
 export const WORKER_HEARTBEAT_CRON = '*/2 * * * *';
-export const WORKER_HEARTBEAT_SINGLETON_KEY = WORKER_HEARTBEAT_QUEUE;
+const WORKER_HEARTBEAT_SINGLETON_KEY = WORKER_HEARTBEAT_QUEUE;
 
 export const ensureWorkerHeartbeatQueue = (boss: Pick<PgBossLike, 'createQueue'>) =>
   boss.createQueue(WORKER_HEARTBEAT_QUEUE, {

@@ -105,12 +105,10 @@ const CROPS: Record<string, CropBounds> = {
   'settings-security-privacy/delete-account-delete-account.png': { x: 448, y: 1568, width: 2432, height: 608 },
   'settings-security-privacy/delete-account-confirm-dialog.png': { x: 600, y: 640, width: 1680, height: 520 },
   'settings-security-privacy/data-privacy-connections.png': { x: 448, y: 64, width: 2432, height: 1736 },
-  'settings-security-privacy/read-only-bank-access-connect-modal.png': { x: 640, y: 500, width: 1600, height: 820 },
 
   // troubleshooting
   'troubleshooting/index-overview.png': { x: 0, y: 0, width: 2850, height: 3790 },
   'troubleshooting/sign-in-problems-error-state.png': { x: 0, y: 0, width: 2880, height: 1800 },
-  'troubleshooting/bank-connection-problems-expectation.png': { x: 0, y: 0, width: 2880, height: 2262 },
   'troubleshooting/transaction-import-problems-error-state.png': { x: 0, y: 0, width: 2880, height: 2262 },
   'troubleshooting/budget-setup-problems-incomplete.png': { x: 0, y: 0, width: 2880, height: 1800 },
   'troubleshooting/portfolio-import-problems-error-state.png': { x: 0, y: 0, width: 2880, height: 1800 },

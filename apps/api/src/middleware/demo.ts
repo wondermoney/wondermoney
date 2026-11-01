@@ -40,4 +40,3 @@ function blockDemoResponse(res: Response): Response {
   return res.status(StatusCodes.FORBIDDEN).json({ code: DEMO_READ_ONLY_CODE, message: DEMO_READ_ONLY_MESSAGE });
 }
 
-export default blockDemoMutation;

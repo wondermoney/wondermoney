@@ -48,8 +48,3 @@ export const textStyles = Object.freeze(
     }),
   ) as Record<TypeRole, ScaleStyle>,
 )
-
-/** The same thing as a function, for a `TextInput`'s own `style` or a chart label. */
-export function textStyle(role: TypeRole): ScaleStyle {
-  return textStyles[role]
-}

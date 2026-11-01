@@ -1,5 +1,6 @@
-import { Collection, Entity, Enum, Filter, Index, ManyToOne, OneToMany, PrimaryKey, Property, Unique } from '@mikro-orm/core';
+import { Collection } from '@mikro-orm/core';
 import type { Rel } from '@mikro-orm/core';
+import { Entity, Enum, Filter, Index, ManyToOne, OneToMany, PrimaryKey, Property, Unique } from '@mikro-orm/decorators/legacy';
 
 import { HIDDEN_FILTER, hiddenTransactionCond, TENANT_FILTER, transactionTenantCond } from '../filters/tenant-filter';
 
@@ -28,6 +29,7 @@ export enum CategorizationConfidence {
 @Unique({ properties: ['transactionKey', 'internalTransactionId'] })
 @Unique({ properties: ['accountKey', 'nordigenInternalTransactionId'] })
 @Unique({ properties: ['accountKey', 'enableBankingTransactionId'] })
+@Unique({ properties: ['transferCounterpartKey'] })
 export class Transaction extends Base {
   @Index()
   @ManyToOne({ cascade: [], entity: () => Account, fieldName: 'account_key', nullable: true })
@@ -53,6 +55,15 @@ export class Transaction extends Base {
   @ManyToOne({ cascade: [], entity: () => TransactionType, fieldName: 'transaction_type_key', nullable: true })
   transactionTypeKey?: Rel<TransactionType>;
 
+  /**
+   * The other half of an own-account transfer. Set on both rows of a pair, each pointing at
+   * the other, by transfer matching (`services/transaction/transfer-matching.service.ts`), which is
+   * also what types them TRANSFER_IN / TRANSFER_OUT. Null for every row that is not a matched pair,
+   * including a manual transfer nothing matched. Unique: a row belongs to at most one pair.
+   */
+  @ManyToOne({ cascade: [], deleteRule: 'set null', entity: () => Transaction, fieldName: 'transfer_counterpart_key', nullable: true })
+  transferCounterpartKey?: Rel<Transaction>;
+
   // The original transaction value and currency (before any conversion by the bank)
   @Property({ columnType: 'numeric(18,4)', nullable: true })
   originalAmount?: number;
@@ -64,6 +75,11 @@ export class Transaction extends Base {
   @Property({ columnType: 'numeric(18,4)', nullable: true })
   editedSettlementAmount?: number;
 
+  /**
+   * The settlement amount before the user's first amount edit: what the bank charged (refreshed by
+   * every sync of an edited row) or what a manual row was entered with. An edit is bounded by
+   * it, not by the previous edit. Null on a row never edited.
+   */
   @Property({ columnType: 'numeric(18,4)', nullable: true })
   settlementAmount?: number;
 
@@ -72,6 +88,9 @@ export class Transaction extends Base {
 
   @Property({ columnType: 'numeric(18,8)', nullable: true })
   settlementExchangeRate?: number;
+
+  @Property({ columnType: 'numeric(18,4)', nullable: true })
+  uneditedSettlementAmount?: number;
 
   // The transaction value and currency in the user's WonderMoney prefered currency (appuser.currency_key)
   @Property({ columnType: 'numeric(18,8)', nullable: true })
@@ -105,8 +124,8 @@ export class Transaction extends Base {
   @Property({ nullable: true })
   nordigenInternalTransactionId?: string;
 
-  // Enable Banking's replacement for `nordigenInternalTransactionId` (kept
-  // alongside it, not replacing it — Phase 1a is additive-only, see plan §2/§8).
+  // Enable Banking's dedup id. `nordigenInternalTransactionId` stays alongside it: its unique
+  // constraint is the dedup guarantee for rows ingested through the legacy provider.
   @Property({ nullable: true })
   enableBankingTransactionId?: string;
 
@@ -129,11 +148,11 @@ export class Transaction extends Base {
   @Property({ default: false })
   reviewed = false;
 
-  /** RAD-342.2: how confident the categorizer was (or 'high'/user_edit when the user set it). Null = never evaluated. */
+  /** How confident the categorizer was (or 'high'/user_edit when the user set it). Null = never evaluated. */
   @Enum({ items: () => CategorizationConfidence, nullable: true })
   categorizationConfidence?: CategorizationConfidence;
 
-  /** RAD-342.2: the raw categorization reason behind the confidence tier (e.g. 'user_mapping', 'stats_tie', 'user_edit'). */
+  /** The raw categorization reason behind the confidence tier (e.g. 'user_mapping', 'stats_tie', 'user_edit'). */
   @Property({ length: 64, nullable: true })
   categorizationReason?: string;
 

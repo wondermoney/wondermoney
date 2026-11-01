@@ -3,7 +3,6 @@
 import { useLocale, useTranslations } from "next-intl";
 import { useMemo } from "react";
 
-import { Card, CardContent } from "@/components/ui/card";
 import Text from "@/components/ui/Typography/Text";
 import type { HoldingActivitySummary as HoldingActivitySummaryData } from "@/lib/portfolio/holding-detail-summary";
 import { cn } from "@/lib/utils";
@@ -88,48 +87,47 @@ export function HoldingActivitySummary({
         {t("activity")}
       </Text>
 
-      <Card>
-        <CardContent className="space-y-4 p-4">
-          {firstTransactionDate ? (
-            <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground">
+      {/* No Card here: the holding dialog is already the surface, and the
+          figures below carry their own tinted step (No-Nesting rule). */}
+      <div className="space-y-4">
+        {firstTransactionDate ? (
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
+            <span>
+              {t("transactions-since", {
+                count: summary.transactionCount,
+                date: firstTransactionDate,
+              })}
+            </span>
+            {showLastActivity ? (
               <span>
-                {t("transactions-since", {
-                  count: summary.transactionCount,
-                  date: firstTransactionDate,
-                })}
+                {t("last-activity")}: {lastTransactionDate}
               </span>
-              {showLastActivity ? (
-                <span>
-                  · {t("last-activity")}: {lastTransactionDate}
-                </span>
-              ) : null}
-            </div>
-          ) : null}
+            ) : null}
+          </div>
+        ) : null}
 
-          <dl className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-            {items.map((item) => (
-              <div
-                key={item.key}
-                className="rounded-lg bg-muted/30 p-3"
+        <dl className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+          {items.map((item) => (
+            <div
+              key={item.key}
+              className="rounded-lg bg-muted/30 p-3"
+            >
+              <dt className="text-xs font-medium text-muted-foreground">
+                {item.label}
+              </dt>
+              <dd
+                className={cn(
+                  "mt-1 font-mono text-lg font-semibold tabular-nums",
+                  item.isZero && "text-muted-foreground",
+                )}
               >
-                <dt className="text-xs font-medium text-muted-foreground">
-                  {item.label}
-                </dt>
-                <dd
-                  className={cn(
-                    "mt-1 font-mono text-lg font-semibold tabular-nums",
-                    item.isZero && "text-muted-foreground",
-                  )}
-                >
-                  {item.value}
-                </dd>
-              </div>
-            ))}
-          </dl>
-        </CardContent>
-      </Card>
+                {item.value}
+              </dd>
+            </div>
+          ))}
+        </dl>
+      </div>
     </section>
   );
 }
 
-export default HoldingActivitySummary;

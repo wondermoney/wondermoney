@@ -15,10 +15,10 @@ import AccountsEmptyStateV2 from "@/components/account/AccountsEmptyStateV2";
 import AccountsList from "@/components/account/AccountsList";
 import AccountTransactionAddModal from "@/components/account/AccountTransactionAddModal";
 import AccountTransactionImportModal from "@/components/account/AccountTransactionImportModal";
-import BankAccountSyncStatusBanner, {
-  type BankSyncRecoveryState,
-} from "@/components/account/BankAccountSyncStatusBanner";
+import BankAccountSyncStatusBanner from "@/components/account/BankAccountSyncStatusBanner";
+import BankConnectionResultNotice from "@/components/account/BankConnectionResultNotice";
 import MetricsCards from "@/components/account/MetricsCards";
+import { clampSyncedAt } from "@/components/account/sync-time";
 import TransactionsList from "@/components/account/TransactionsList";
 import TimeframeSelect from "@/components/dashboard/TimeframeSelect";
 import { AccountsOnboarding } from "@/components/onboarding/AccountsOnboarding";
@@ -36,6 +36,7 @@ import {
   getAccountsCashflowFromDate,
   getAccountsOverviewCurrencyCode,
 } from "@/lib/account/accounts-overview-state";
+import { useBankConnectionResult } from "@/lib/account/useBankConnectionResult";
 import {
   safelyRunDiagnostic,
   safePostHogCapture,
@@ -46,9 +47,6 @@ import useAccountsCashflow from "@/lib/api/account/useAccountsCashflow";
 import useAccountsMetrics from "@/lib/api/account/useAccountsMetrics";
 import useTransactions from "@/lib/api/account/useTransactions";
 import useTransactionsCategorySpending from "@/lib/api/account/useTransactionsCategorySpending";
-import useBankAccountSyncStatus, {
-  useLegacyBankAccountSyncStatus,
-} from "@/lib/api/banking/useBankAccountSyncStatus";
 import type { GetConfigsResponse } from "@/lib/api/configs/useConfigs";
 import useConfigs from "@/lib/api/configs/useConfigs";
 import { useUser } from "@/lib/auth/user-context";
@@ -57,6 +55,7 @@ import {
   completeFirstRunHandoff,
   getFirstRunStepRoute,
 } from "@/lib/onboarding/firstRunOnboarding";
+import { serverSeed } from "@/lib/query/server-seed";
 import { cn } from "@/lib/utils";
 import {
   ACTIVATION_EVENTS,
@@ -66,6 +65,7 @@ import { getCategoryTranslationKey } from "@/lib/utils/categories";
 import { resolveCategoryColor } from "@/lib/utils/categoryColor";
 import { invalidateAccounts } from "@/lib/utils/queryInvalidation";
 import { useFormatCurrency } from "@/lib/utils/useFormatCurrency";
+import { useHydrated } from "@/lib/utils/useHydrated";
 
 import {
   type AccountsTimeframe,
@@ -83,45 +83,15 @@ const AccountTransactionsChart = dynamic(
 );
 
 interface AccountsClientProps {
+  serverRenderedAt: number;
   initialAccountsData: GetAccountsResponse;
   initialConfigsData: GetConfigsResponse;
 }
 
-const SAFE_BANK_ERROR_CATEGORIES = new Set([
-  "authentication",
-  "cancelled",
-  "consent",
-  "data_validation",
-  "internal",
-  "provider",
-  "queue",
-  "timeout",
-  "unknown",
-]);
-const SAFE_BANK_ERROR_CODES = new Set([
-  "account_phase_failed",
-  "authentication",
-  "cancelled",
-  "consent_expired",
-  "data_validation",
-  "institution_unavailable",
-  "internal",
-  "invalid_requisition",
-  "provider_unavailable",
-  "queue_unavailable",
-  "rate_limited",
-  "timeout",
-  "transaction_phase_failed",
-  "unknown",
-]);
-
 type BankRecoveryEventProperties = {
   locale: string;
   source: "accounts_callback" | "accounts_recovery";
-  state: BankSyncRecoveryState;
-  result?: "pending" | "full_success" | "partial" | "failed";
-  error_category?: string;
-  error_code?: string;
+  state: "callback_error";
   fallback_type?: "bank" | "manual" | "statement";
 };
 
@@ -139,12 +109,10 @@ function safeCaptureBankRecoveryEvent(
   }
 }
 
-const safeErrorValue = (value: string | undefined, allowlist: Set<string>) =>
-  value && allowlist.has(value) ? value : value ? "unknown" : undefined;
-
 // ---------- Main Component ----------
 
 export default function AccountsClient({
+  serverRenderedAt,
   initialAccountsData,
   initialConfigsData,
 }: AccountsClientProps) {
@@ -155,9 +123,13 @@ export default function AccountsClient({
   const posthog = usePostHog();
   const user = useUser();
   const locale = useLocale();
-  const syncIncidentId = searchParams.get("sync");
-  const legacyRequisitionId = syncIncidentId ? null : searchParams.get("nrid");
-  const syncError = searchParams.get("err");
+  // Back from a bank connection this page started.
+  const bankConnection = useBankConnectionResult();
+  // True when this mount is the hydration of server HTML (a hard load), as
+  // opposed to a client-side navigation. Captured once: it describes where
+  // `initialAccountsData` came from, not the current render.
+  const hydrated = useHydrated();
+  const [initialDataIsFromThisRequest] = useState(!hydrated);
 
   // Timeframe management
   const timeframes = [
@@ -181,7 +153,7 @@ export default function AccountsClient({
     isError: isAccountsError,
     isFetching: isAccountsFetching,
     isLoading: isLoadingAccountsData,
-  } = useAccounts({ initialData: initialAccountsData });
+  } = useAccounts(serverSeed(initialAccountsData, serverRenderedAt));
 
   const {
     data: transactionsData,
@@ -200,9 +172,9 @@ export default function AccountsClient({
     isPlaceholderData: isAccountsCashflowPlaceholderData,
   } = useAccountsCashflow({ fromDate: cashflowFromDate });
 
-  const { data: configsData, isLoading: isLoadingConfigs } = useConfigs({
-    initialData: initialConfigsData,
-  });
+  const { data: configsData, isLoading: isLoadingConfigs } = useConfigs(
+    serverSeed(initialConfigsData, serverRenderedAt),
+  );
 
   const isLoadingTransactions = isLoadingTransactionsData || isLoadingConfigs;
 
@@ -215,136 +187,24 @@ export default function AccountsClient({
   const { data: categorySpendingData, isLoading: isLoadingCategorySpending } =
     useTransactionsCategorySpending({ fromDate, toDate, limit: 6 });
 
-  // The incident API is the only authority for terminal bank-sync state.
-  const {
-    data: bankSyncIncident,
-    isError: isBankSyncTransportError,
-    isRefetchError: isBankSyncRefetchError,
-    refetch: refetchBankSyncStatus,
-  } = useBankAccountSyncStatus(syncIncidentId);
-  const { legacyStatus, refetch: refetchLegacyBankSyncStatus } =
-    useLegacyBankAccountSyncStatus(user?.id, legacyRequisitionId);
-
-  const bankSyncStatus: BankSyncRecoveryState = syncError
-    ? "callback_error"
-    : syncIncidentId && (isBankSyncTransportError || isBankSyncRefetchError)
-      ? "transport_unavailable"
-      : syncIncidentId && (!bankSyncIncident || !bankSyncIncident.final)
-        ? "processing"
-        : bankSyncIncident?.final && bankSyncIncident.result === "partial"
-          ? "partial"
-          : bankSyncIncident?.final && bankSyncIncident.result === "failed"
-            ? "failed"
-            : legacyStatus === "full_success"
-              ? "idle"
-              : legacyStatus === "failed"
-                ? "failed"
-                : legacyStatus === "transport_unavailable"
-                  ? "transport_unavailable"
-                  : legacyStatus === "processing"
-                    ? "processing"
-                    : "idle";
-
-  const callbackReference = syncIncidentId
-    ? `sync:${syncIncidentId}`
-    : legacyRequisitionId
-      ? `legacy:${legacyRequisitionId}`
-      : null;
-  const hasAuthoritativeFullSuccess = syncIncidentId
-    ? bankSyncIncident?.final === true &&
-      bankSyncIncident.result === "full_success"
-    : legacyStatus === "full_success";
-
-  const handledSuccessRef = useRef<string | null>(null);
-  const capturedDiagnosticRef = useRef<string | null>(null);
-
+  // The new bank's accounts were created before the redirect back here.
+  const handledSuccessRef = useRef(false);
   useEffect(() => {
-    if (
-      callbackReference &&
-      hasAuthoritativeFullSuccess &&
-      handledSuccessRef.current !== callbackReference
-    ) {
-      handledSuccessRef.current = callbackReference;
+    if (bankConnection !== "success" || handledSuccessRef.current) return;
+    handledSuccessRef.current = true;
+    void invalidateAccounts(queryClient);
+  }, [bankConnection, queryClient]);
 
-      void (async () => {
-        await invalidateAccounts(queryClient);
-
-        if (
-          completeFirstRunHandoff(
-            "account",
-            {
-              accountStep: "connected",
-              currentStep: "sync_value",
-            },
-            user?.id,
-          )
-        ) {
-          safelyRunDiagnostic(() => {
-            captureActivationEvent(
-              posthog,
-              ACTIVATION_EVENTS.firstAccountAdded,
-              {
-                account_count: Math.max(1, accountsData?.accounts?.length ?? 1),
-                account_source: "sync",
-                locale,
-              },
-            );
-            captureActivationEvent(
-              posthog,
-              ACTIVATION_EVENTS.onboardingStepCompleted,
-              { account_source: "sync", step: "account" },
-            );
-          });
-          router.replace(getFirstRunStepRoute("sync_value"));
-          return;
-        }
-
-        router.replace("/accounts");
-      })();
-    }
-  }, [
-    accountsData?.accounts?.length,
-    callbackReference,
-    bankSyncIncident?.final,
-    bankSyncIncident?.result,
-    hasAuthoritativeFullSuccess,
-    legacyStatus,
-    locale,
-    posthog,
-    queryClient,
-    router,
-    syncIncidentId,
-    user?.id,
-  ]);
-
+  const capturedDiagnosticRef = useRef(false);
   useEffect(() => {
-    if (bankSyncStatus === "idle" || bankSyncStatus === "processing") return;
-    const diagnosticKey = `${syncIncidentId ?? "callback"}:${bankSyncStatus}`;
-    if (capturedDiagnosticRef.current === diagnosticKey) return;
-    capturedDiagnosticRef.current = diagnosticKey;
+    if (bankConnection !== "error" || capturedDiagnosticRef.current) return;
+    capturedDiagnosticRef.current = true;
     safeCaptureBankRecoveryEvent(posthog, "bank_sync_recovery_displayed", {
       locale,
       source: "accounts_callback",
-      state: bankSyncStatus,
-      result: bankSyncIncident?.result,
-      error_category: safeErrorValue(
-        bankSyncIncident?.errorCategory,
-        SAFE_BANK_ERROR_CATEGORIES,
-      ),
-      error_code: safeErrorValue(
-        bankSyncIncident?.errorCode,
-        SAFE_BANK_ERROR_CODES,
-      ),
+      state: "callback_error",
     });
-  }, [
-    bankSyncIncident?.errorCategory,
-    bankSyncIncident?.errorCode,
-    bankSyncIncident?.result,
-    bankSyncStatus,
-    locale,
-    posthog,
-    syncIncidentId,
-  ]);
+  }, [bankConnection, locale, posthog]);
 
   // Modal state
   const firstRunMode = searchParams.get("firstRun");
@@ -373,8 +233,7 @@ export default function AccountsClient({
     safeCaptureBankRecoveryEvent(posthog, "bank_sync_recovery_selected", {
       locale,
       source: "accounts_recovery",
-      state: bankSyncStatus,
-      result: bankSyncIncident?.result,
+      state: "callback_error",
       fallback_type: "bank",
     });
     onAddSyncAccountClick();
@@ -394,8 +253,7 @@ export default function AccountsClient({
     safeCaptureBankRecoveryEvent(posthog, "bank_sync_recovery_selected", {
       locale,
       source: "accounts_recovery",
-      state: bankSyncStatus,
-      result: bankSyncIncident?.result,
+      state: "callback_error",
       fallback_type: "manual",
     });
     onAddOfflineAccountClick();
@@ -404,8 +262,7 @@ export default function AccountsClient({
     safeCaptureBankRecoveryEvent(posthog, "bank_sync_recovery_selected", {
       locale,
       source: "accounts_recovery",
-      state: bankSyncStatus,
-      result: bankSyncIncident?.result,
+      state: "callback_error",
       fallback_type: "statement",
     });
     setIsRecoveryCsvImport(true);
@@ -518,12 +375,12 @@ export default function AccountsClient({
     router.replace("/accounts");
   };
 
-  useEffect(() => {
-    if (pendingCsvImport && (accountsData?.accounts?.length ?? 0) > 0) {
-      setPendingCsvImport(false);
-      setIsImportModalOpen(true);
-    }
-  }, [accountsData?.accounts?.length, pendingCsvImport]);
+  // A CSV import waiting on the first account opens as soon as one exists
+  // (adjusted during render rather than in an effect).
+  if (pendingCsvImport && (accountsData?.accounts?.length ?? 0) > 0) {
+    setPendingCsvImport(false);
+    setIsImportModalOpen(true);
+  }
 
   // Loading state
   if (isLoadingAccountsData) {
@@ -535,7 +392,16 @@ export default function AccountsClient({
   // where accounts were created (e.g. during onboarding) but the server
   // component fetch ran before the API had them, while the client-side
   // refetch will return the real accounts.
+  //
+  // Not on a hard load: the server never refetches, so it renders the empty
+  // state, but by the time this boundary hydrates the layout's own accounts
+  // query (FirstRunOnboardingRedirectGate) is already in flight. Showing the
+  // spinner then replaced the server HTML with a hydration error on every
+  // hard load of /accounts with no accounts. Data the server fetched for this
+  // very request cannot be the stale snapshot this guard exists for; that
+  // only happens when a client-side navigation reuses an older payload.
   if (
+    !initialDataIsFromThisRequest &&
     initialAccountsData &&
     (!initialAccountsData.accounts ||
       initialAccountsData.accounts.length === 0) &&
@@ -549,23 +415,20 @@ export default function AccountsClient({
     accountsData?.accounts &&
     accountsData.accounts.length > 0;
 
-  const recoveryBanner = (
-    <BankAccountSyncStatusBanner
-      status={bankSyncStatus}
-      callbackErrorCode={syncError}
-      csvRequiresAccount={!hasAccounts}
-      onRetryBankConnection={onRecoveryRetry}
-      onAddAccountManually={onRecoveryManual}
-      onImportStatement={onRecoveryImport}
-      onRetryStatus={() => {
-        if (syncIncidentId) void refetchBankSyncStatus();
-        else if (legacyRequisitionId) void refetchLegacyBankSyncStatus();
-      }}
-    />
-  );
+  const recoveryBanner =
+    bankConnection === "error" ? (
+      <BankAccountSyncStatusBanner
+        csvRequiresAccount={!hasAccounts}
+        onRetryBankConnection={onRecoveryRetry}
+        onAddAccountManually={onRecoveryManual}
+        onImportStatement={onRecoveryImport}
+      />
+    ) : bankConnection === "success" ? (
+      <BankConnectionResultNotice result="success" />
+    ) : null;
 
   // Empty state — data-forward preview
-  if (!hasAccounts && bankSyncStatus === "idle") {
+  if (!hasAccounts && !recoveryBanner) {
     return <AccountsEmptyStateV2 />;
   }
 
@@ -726,7 +589,7 @@ export default function AccountsClient({
         {accountsFreshness ? (
           <DataProvenance
             className="mt-1.5"
-            updatedAt={accountsFreshness.oldestSyncedAt}
+            updatedAt={clampSyncedAt(accountsFreshness.oldestSyncedAt)}
             isStale={accountsFreshness.isStale}
             errorLabel={
               accountsFreshness.hasError
@@ -793,7 +656,11 @@ export default function AccountsClient({
                       className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg"
                       style={{
                         backgroundColor: `color-mix(in oklch, ${resolveCategoryColor(cat.bgColor, catIndex)} 15%, transparent)`,
-                        color: resolveCategoryColor(cat.bgColor, catIndex),
+                        // The API's category colours are pastels: painted
+                        // straight onto their own 15% tint they measured well
+                        // under 3:1 on the light canvas. Mixing toward the
+                        // foreground keeps the hue and clears 3:1 in both themes.
+                        color: `color-mix(in oklch, ${resolveCategoryColor(cat.bgColor, catIndex)} 45%, var(--foreground))`,
                       }}
                     >
                       <CategoryIcon

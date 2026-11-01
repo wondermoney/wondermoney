@@ -27,7 +27,7 @@ const portfolioColumnMappingTransformationsRequestSchema = z.object({
   thousandsSeparator: z.enum(['.', ',', ' ', 'none']).optional(),
 }).strict().superRefine((value, ctx) => {
   if (value.decimalSeparator && value.thousandsSeparator && value.thousandsSeparator !== 'none' && value.decimalSeparator === value.thousandsSeparator) {
-    ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'decimalSeparator and thousandsSeparator must differ unless thousandsSeparator is none' });
+    ctx.addIssue({ code: 'custom', message: 'decimalSeparator and thousandsSeparator must differ unless thousandsSeparator is none' });
   }
 });
 
@@ -236,9 +236,12 @@ export const getPortfoliosMetricsRequestSchema = z.object({
 });
 
 const periodSchema = z.enum(['1M', '3M', '6M', 'YTD', '1Y', 'ALL']).default('YTD');
+// Opt-in summary additions; see DashboardOptions in portfolio-dashboard.service.ts.
+const dashboardIncludeSchema = z.enum(['feeConversion']).optional();
 
 export const getAggregateDashboardRequestSchema = z.object({
   query: z.object({
+    include: dashboardIncludeSchema,
     period: periodSchema.optional(),
   }),
 });
@@ -248,6 +251,7 @@ export const getPortfolioDashboardRequestSchema = z.object({
     portfolioId: positiveIntId,
   }),
   query: z.object({
+    include: dashboardIncludeSchema,
     period: periodSchema.optional(),
   }),
 });

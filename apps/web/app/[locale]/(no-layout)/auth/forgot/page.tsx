@@ -19,7 +19,7 @@ export default function ForgotPasswordPage() {
             {t("not-a-member")}
             <Link
               href="/auth/signup"
-              className="text-primary hover:text-primary/80 ml-1 font-semibold underline underline-offset-2"
+              className="text-primary ml-1 font-semibold underline underline-offset-2 hover:decoration-2"
             >
               {t("create-account-link")}
             </Link>

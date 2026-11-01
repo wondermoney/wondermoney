@@ -4,10 +4,10 @@ import Axios from "axios";
 import { expect, test, vi } from "vitest";
 
 /**
- * WEB-4Q / RAD-336. The SSR interceptor used to redirect BOTH 401 and 403 to
- * login. A 403 is not a dead session — and redirecting a still-logged-in user to
- * login made middleware bounce them back to the page, which re-fetched, 403'd and
- * redirected again, a hard loop. So the contract these tests pin is narrow and
+ * The SSR interceptor must not redirect a 403 to login. A 403 is not a dead
+ * session — and redirecting a still-logged-in user to login makes middleware
+ * bounce them back to the page, which re-fetches, 403s and redirects again, a
+ * hard loop. So the contract these tests pin is narrow and
  * load-bearing: 401 redirects, 403 does not.
  */
 
@@ -18,7 +18,10 @@ const redirect = vi.hoisted(() => vi.fn((path: string) => {
 
 vi.mock("server-only", () => ({}));
 vi.mock("next/navigation", () => ({ redirect }));
-vi.mock("next/headers", () => ({ cookies: () => Promise.resolve({ toString: () => "" }) }));
+vi.mock("next/headers", () => ({
+  cookies: () => Promise.resolve({ toString: () => "" }),
+  headers: () => Promise.resolve(new Headers()),
+}));
 vi.mock("@sentry/nextjs", () => ({ captureException: vi.fn() }));
 vi.mock("@/lib/auth/server-auth", () => ({
   requireServerAuth: () => Promise.resolve({ session: {}, user: {} }),

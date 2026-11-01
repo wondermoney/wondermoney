@@ -20,7 +20,7 @@ const statAppuser = { appuserKey: 501 } as unknown as Appuser;
 const normalize = (sql: string) => sql.replace(/\s+/g, ' ').trim().toLowerCase();
 
 describe('merchant category stats — atomic & race-safe (API-QB regression)', () => {
-  it('increments via a single INSERT ... ON CONFLICT DO UPDATE scoped per user (RAD-342 G4)', async () => {
+  it('increments via a single INSERT ... ON CONFLICT DO UPDATE scoped per user', async () => {
     const { em, execute } = makeEm();
 
     await incrementMerchantCategoryStat(em, merchant, category, statAppuser);
@@ -31,7 +31,7 @@ describe('merchant category stats — atomic & race-safe (API-QB regression)', (
     expect(normalized).toContain('insert into "transaction_category_stats"');
     // The conflict target MUST match the per-user unique constraint (merchant, category, source,
     // appuser), and the action MUST be an additive increment — this is what makes concurrent edits
-    // safe AND keeps one household member's votes from bleeding into another's (RAD-342 G4).
+    // safe AND keeps one household member's votes from bleeding into another's.
     expect(normalized).toContain(
       'on conflict ("transaction_merchant_key", "category_key", "source", "appuser_key") do update set "count" = "transaction_category_stats"."count" + 1',
     );

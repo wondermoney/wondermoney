@@ -1,3 +1,4 @@
+import assert from 'node:assert';
 import { describe, expect, it } from 'vitest';
 import degiroParser from '../lib/csv/parsers/brokers/degiro';
 import ibkrParser from '../lib/csv/parsers/brokers/ibkr';
@@ -11,6 +12,7 @@ describe('broker parser fixtures', () => {
       ['01-01-2024','10:00','Apple Inc','IE00B4L5Y983','EAM','XAMS','2','100','USD','200','USD','200','','','', '', '', '', 'ext-2'],
     ]);
 
+    assert.ok(buy, 'DEGIRO parser returned no rows');
     expect(buy.financialTransactionType).toBe(FinancialTransactionType.BUY);
     expect(buy.quantity).toBe(2);
     expect(buy.totalPrice).toBe(200);
@@ -22,7 +24,7 @@ describe('broker parser fixtures', () => {
 
   it('preserves current ikbr parser semantics', () => {
     const [row] = ibkrParser([
-      Array.from({ length: 53 }, (_, index) => '') as string[],
+      Array.from({ length: 53 }, () => '') as string[],
     ].map((r) => {
       r[37] = '20240101';
       r[5] = 'AAPL';
@@ -38,6 +40,7 @@ describe('broker parser fixtures', () => {
       return r;
     }) as string[][]);
 
+    assert.ok(row, 'IBKR parser returned no rows');
     expect(row.financialTransactionType).toBe(FinancialTransactionType.BUY);
     expect(row.quantity).toBe(3);
     expect(row.totalPrice).toBe(-30);
@@ -51,6 +54,8 @@ describe('broker parser fixtures', () => {
       ['Deposit','2024-01-01 10:00:00','','','','1','100','USD','1','', '100', '', '', '', 'ext-4', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''],
     ]);
 
+    assert.ok(buy, 'Trading212 parser returned no BUY row');
+    assert.ok(deposit, 'Trading212 parser returned no deposit row');
     expect(buy.financialTransactionType).toBe(FinancialTransactionType.BUY);
     expect(buy.quantity).toBe(2);
     expect(deposit.financialTransactionType).toBe(FinancialTransactionType.DEPOSIT);

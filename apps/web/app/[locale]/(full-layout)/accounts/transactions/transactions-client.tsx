@@ -23,8 +23,10 @@ import type { GetTransactionsResponse } from "@/lib/api/account/useTransactions"
 import { useInfiniteTransactions } from "@/lib/api/account/useTransactions";
 import type { GetConfigsResponse } from "@/lib/api/configs/useConfigs";
 import useConfigs from "@/lib/api/configs/useConfigs";
+import { serverSeed } from "@/lib/query/server-seed";
 
 interface AccountsTransactionsClientProps {
+  serverRenderedAt: number;
   initialAccountsData: GetAccountsResponse;
   initialTransactionsData: GetTransactionsResponse;
   initialConfigsData: GetConfigsResponse;
@@ -32,6 +34,7 @@ interface AccountsTransactionsClientProps {
 }
 
 export default function AccountsTransactionsClient({
+  serverRenderedAt,
   initialAccountsData,
   initialTransactionsData,
   initialConfigsData,
@@ -115,17 +118,16 @@ export default function AccountsTransactionsClient({
     transactionDateRange?.from?.getTime() === defaultDateRange.from.getTime() &&
     transactionDateRange?.to?.getTime() === defaultDateRange.to.getTime();
 
-  const { data: accountsData, isLoading: isLoadingAccountsData } = useAccounts({
-    initialData: initialAccountsData,
-  });
+  const { data: accountsData, isLoading: isLoadingAccountsData } = useAccounts(
+    serverSeed(initialAccountsData, serverRenderedAt),
+  );
 
   /*
-   * RAD-579 — the table's own filters, lifted so they reach the endpoint.
+   * The table's own filters, lifted so they reach the endpoint.
    *
-   * They used to live entirely inside `AccountTransactionsTable` and filter the loaded rows, which
-   * meant filtering a year by one category only filtered whichever page had come back. The table
-   * still owns the filter *UI* and its state; it reports changes up here, and this is what turns
-   * them into a refetch.
+   * Filtering only the loaded rows would mean filtering a year by one category only filtered
+   * whichever page had come back. The table owns the filter *UI* and its state; it reports
+   * changes up here, and this is what turns them into a refetch.
    */
   const [tableFilters, setTableFilters] = useState<{
     accountKeys: string[];
@@ -193,18 +195,20 @@ export default function AccountsTransactionsClient({
       // **default** range — and because the global `staleTime` is 60s, that
       // stale seed counted as fresh, so no fetch fired. Changing the date
       // filter silently did nothing for a minute.
-      // RAD-579: a table filter makes this a different query too, so it must not be seeded
+      // A table filter makes this a different query too, so it must not be seeded
       // with the server's unfiltered payload — the same trap the date range fell into.
-      initialData:
+      ...serverSeed(
         isServerRenderedQuery && !hasTableFilters
           ? initialTransactionsData
           : undefined,
+        serverRenderedAt,
+      ),
     },
   );
 
-  const { data: configsData, isLoading: isLoadingConfigs } = useConfigs({
-    initialData: initialConfigsData,
-  });
+  const { data: configsData, isLoading: isLoadingConfigs } = useConfigs(
+    serverSeed(initialConfigsData, serverRenderedAt),
+  );
 
   const isLoading =
     isLoadingAccountsData || isLoadingTransactions || isLoadingConfigs;

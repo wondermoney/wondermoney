@@ -49,6 +49,13 @@ describe('checkServer', () => {
     await expect(checkServer('https://example.com', { appVersion: '1.0.0', fetchImpl: respond({}, false) })).resolves.toEqual({ status: 'not-wondermoney' })
   })
 
+  it('still recognises a newer server that adds fields, features or a signup mode', async () => {
+    const body = instance({ signupMode: 'waitlist', region: 'eu', features: { ...instance().features, payments: true } })
+    const result = await checkServer('https://money.example.com', { appVersion: '1.0.0', fetchImpl: respond(body) })
+    expect(result).toMatchObject({ status: 'ok', instance: { signupMode: 'unknown' } })
+    expect(result.status === 'ok' && result.instance).not.toHaveProperty('region')
+  })
+
   it('asks for an app update when the server needs a newer version', async () => {
     await expect(checkServer('https://money.example.com', { appVersion: '1.0.0', fetchImpl: respond(instance({ minAppVersion: '1.2.0' })) })).resolves.toEqual({ minAppVersion: '1.2.0', status: 'update-required' })
   })

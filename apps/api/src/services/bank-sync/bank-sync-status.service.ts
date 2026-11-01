@@ -94,12 +94,11 @@ function publicResult(incident: BankSyncIncident, result: BankSyncResult): BankS
 }
 
 /**
- * RAD-339: this validation trips in production for a small number of incidents
- * (Sentry API-VY) and the root cause has not been confidently identified yet —
- * per the money/data-consistency handling policy, the aggregation/write logic in
- * `bank-sync-incident.service.ts` is intentionally left untouched. This only adds
- * structured logging of the offending incident's full persisted state so the next
- * occurrence is debuggable instead of just a bare error message.
+ * This validation trips in production for a small number of incidents and the
+ * root cause has not been confidently identified — the aggregation/write logic in
+ * `bank-sync-incident.service.ts` is intentionally left untouched. Log the
+ * offending incident's full persisted state so the next occurrence is debuggable
+ * instead of just a bare error message.
  */
 function inconsistent(incident: BankSyncIncident, reason: string): never {
   logger.error(

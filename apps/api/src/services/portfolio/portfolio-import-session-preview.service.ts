@@ -70,6 +70,7 @@ export interface PortfolioImportSessionPreviewResponse {
   portfolioId: number;
   rows: {
     duplicate: PortfolioImportPreviewRow[];
+    failed: PortfolioImportPreviewRow[];
     invalid: PortfolioImportPreviewRow[];
     needsAssetReview: PortfolioImportPreviewRow[];
     ready: PortfolioImportPreviewRow[];
@@ -142,7 +143,7 @@ class PortfolioImportSessionPreviewService {
       tenant: input.tenant,
     });
 
-    const [ready, duplicate, invalid, needsAssetReview] = await Promise.all([
+    const [ready, duplicate, invalid, needsAssetReview, failed] = await Promise.all([
       DI.em.find(
         PortfolioImportRow,
         { deletedAt: undefined, portfolioImportSessionKey: session, status: PortfolioImportRowStatus.READY },
@@ -165,6 +166,11 @@ class PortfolioImportSessionPreviewService {
           portfolioImportSessionKey: session,
           status: PortfolioImportRowStatus.NEEDS_ASSET_REVIEW,
         },
+        { limit: input.limit, orderBy: { rowNumber: 'asc' }, populate: ['assetGroupKey', 'financialAssetKey'] },
+      ),
+      DI.em.find(
+        PortfolioImportRow,
+        { deletedAt: undefined, portfolioImportSessionKey: session, status: PortfolioImportRowStatus.FAILED },
         { limit: input.limit, orderBy: { rowNumber: 'asc' }, populate: ['assetGroupKey', 'financialAssetKey'] },
       ),
     ]);
@@ -252,6 +258,7 @@ class PortfolioImportSessionPreviewService {
       portfolioId: session.portfolioKey.portfolioKey,
       rows: {
         duplicate: duplicate.map(mapRow),
+        failed: failed.map(mapRow),
         invalid: invalid.map(mapRow),
         needsAssetReview: needsAssetReview.map(mapRow),
         ready: ready.map(mapRow),

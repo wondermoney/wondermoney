@@ -7,7 +7,30 @@ const TooltipProvider = TooltipPrimitive.Provider;
 
 const Tooltip = TooltipPrimitive.Root;
 
-const TooltipTrigger = TooltipPrimitive.Trigger;
+/**
+ * When the trigger renders its own `<button>` (no `asChild`), it carries the
+ * same instant focus ring as every other control. With `asChild` the child
+ * draws its own ring, so nothing is added.
+ */
+const TooltipTrigger = React.forwardRef<
+  React.ElementRef<typeof TooltipPrimitive.Trigger>,
+  React.ComponentPropsWithoutRef<typeof TooltipPrimitive.Trigger>
+>(({ className, asChild, ...props }, ref) => (
+  <TooltipPrimitive.Trigger
+    ref={ref}
+    asChild={asChild}
+    className={
+      asChild
+        ? className
+        : cn(
+            "ring-offset-background focus-visible:ring-ring rounded-sm focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-hidden",
+            className,
+          )
+    }
+    {...props}
+  />
+));
+TooltipTrigger.displayName = TooltipPrimitive.Trigger.displayName;
 
 const TooltipContent = React.forwardRef<
   React.ElementRef<typeof TooltipPrimitive.Content>,

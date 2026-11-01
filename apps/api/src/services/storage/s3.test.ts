@@ -75,4 +75,11 @@ describe('S3Service', () => {
     const { presignedUrl } = await service.generatePresignedUrlForAccountCsv(7, 'Bank');
     expect(presignedUrl.startsWith('https://files.example.com/wondermoney/account-7-')).toBe(true);
   });
+
+  it('signs upload URLs without a body checksum, so the uploaded file is accepted', async () => {
+    const service = new S3Service(MINIO);
+    const { presignedUrl } = await service.generatePresignedUrlForAccountCsv(7, 'Bank');
+    const params = [...new URL(presignedUrl).searchParams.keys()].map((key) => key.toLowerCase());
+    expect(params.filter((key) => key.includes('checksum'))).toEqual([]);
+  });
 });

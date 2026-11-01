@@ -38,9 +38,9 @@ describe('financial email coordinator', () => {
 
   it('keeps paginating when a duplicate row shrinks the deduplicated page below pageSize', async () => {
     // A join fan-out (plausible for a two-member household) returns the same appuserKey
-    // twice. `continued` used to be computed from the DEDUPED array, so a full page of 3
-    // rows that deduped to 2 read as "no next page" — and every candidate after that
-    // cursor silently never got the email, while the run reported a clean `queued`.
+    // twice. Computing `continued` from the DEDUPED array would read a full page of 3
+    // rows that deduped to 2 as "no next page" — and every candidate after that cursor
+    // would silently never get the email, while the run reported a clean `queued`.
     const page = vi.fn().mockResolvedValue([1, 2, 2]);
     const send = vi.fn().mockResolvedValue('queued');
     const result = await handleFinancialEmailCoordinator(coordinatorJob({ createdOn: new Date('2026-07-18T08:00:00.000Z'), data: {}, id: 'job-fanout' }), 'budget', { boss: { send }, candidates: { page }, pageSize: 3 });

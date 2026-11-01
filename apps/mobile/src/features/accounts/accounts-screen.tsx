@@ -160,7 +160,7 @@ export function AccountsScreen({
 }
 
 /**
- * RAD-193 — extracted and memoized so switching the insights period (which
+ * Memoized so switching the insights period (which
  * re-renders AccountsScreen with a new `state.data.insights`, but the same
  * `state.data.accounts`) doesn't re-run every account row's currency/date
  * formatting.
@@ -175,7 +175,7 @@ const AccountRow = memo(function AccountRow({ account, separated, locale, palett
   const { t } = useTranslation()
   const money = (value: number, currency: string) => formatCurrency(value, { locale, currency })
   const name = account.accountName ?? t('accounts.unnamed')
-  const source = t(`accounts.source.${account.source === 'manual' ? 'manual' : 'openBanking'}`)
+  const source = t(`accounts.source.${account.source === 'open_banking' ? 'openBanking' : account.source}`)
   const original = account.originalBalance !== null
     ? money(account.originalBalance, account.originalCurrencyCode)
     : t('accounts.balanceUnavailable')

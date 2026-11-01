@@ -66,7 +66,7 @@ function makeClient() {
 describe('useCompleteOnboarding', () => {
   beforeEach(() => { mockWrite.mockReset(); mockBlockAccess.mockReset(); captured.mockClear() })
 
-  it('captures onboarding_completed with no properties, and only on success (RAD-518)', async () => {
+  it('captures onboarding_completed with no properties, and only on success', async () => {
     const client = makeClient()
     mockWrite.mockRejectedValueOnce(new ApiError('network'))
     const hook = await renderHook(() => useCompleteOnboarding(), { wrapper: wrap(client) })

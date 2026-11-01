@@ -8,6 +8,8 @@ import Stats, { type StatsItem } from "@/components/ui/Stats";
 import type { DashboardSummary } from "@/lib/api/portfolio/usePortfolioDashboard";
 import { useFormatPercentage } from "@/lib/utils/useFormatPercentage";
 
+import { FeeConversionNotice } from "./FeeConversionNotice";
+
 interface PortfolioDashboardSummaryProps {
   summary: DashboardSummary;
   isAggregate?: boolean;
@@ -128,6 +130,9 @@ const PortfolioDashboardSummary: React.FC<PortfolioDashboardSummaryProps> = ({
       },
       changeType: realizedGainsChangeType,
       changePositiveDirection: "up",
+      notice: summary.feeConversionIncompleteAssetKeys?.length ? (
+        <FeeConversionNotice scope="gains" />
+      ) : undefined,
     },
   ];
 

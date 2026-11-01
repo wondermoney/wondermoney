@@ -16,7 +16,7 @@ import {
 //   - E2E_API_BASE_URL (optional, defaults to http://localhost:3001)
 // The account is created/signed in through better-auth and provisioned via
 // POST /v1/auth/callback; run only against an isolated local/test database.
-const e2eEnabled = Cypress.env("E2E_PORTFOLIO_IMPORT_ENABLED") === "1";
+const e2eEnabled = Cypress.expose("E2E_PORTFOLIO_IMPORT_ENABLED") === "1";
 const importDescribe = e2eEnabled ? describe : describe.skip;
 
 importDescribe("Portfolio broker imports", () => {
@@ -41,8 +41,8 @@ importDescribe("Portfolio broker imports", () => {
       createPortfolio(auth, `E2E ${input.brokerLabel} ${Date.now()}`).then(
         (createdContext) => {
           context = createdContext;
-          importBrokerFile(createdContext, input).then(() => {
-            assertImportedMetrics(createdContext, input);
+          importBrokerFile(createdContext, input).then((importSessionId) => {
+            assertImportedMetrics(createdContext, input, importSessionId);
           });
         },
       );

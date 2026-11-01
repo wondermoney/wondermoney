@@ -5,7 +5,6 @@ export const externalDestinations = {
   whatsNew: 'https://wondermoney.canny.io/changelog',
 } as const
 
-export type ExternalDestinationKind = keyof typeof externalDestinations
 export type ApprovedEnvironment = 'local' | 'staging'
 export type AppDisplayInfo = Readonly<{
   version: string
@@ -47,14 +46,14 @@ const feedbackCategoryLabels: Readonly<Record<FeedbackCategory, string>> = {
 }
 
 /**
- * RAD-500: this widens the approved, non-network support-mail channel with the category
- * and the user's own message.
+ * Builds the non-network support-mail channel with the category and the user's own
+ * message.
  *
- * RAD-518 update — the telemetry ADR (docs/telemetry-adr.md) is now approved and does
- * allow a `feedback_submitted` event, but with `category` as its only property. The
- * message text stays here, in the mail channel it was written for, and never reaches
- * PostHog; unlike web's Feedback.tsx, the event carries no free text. The capture sits
- * at the submit call site (more-route.tsx), not in this pure builder.
+ * The telemetry ADR (docs/telemetry-adr.md) allows a `feedback_submitted` event, but
+ * with `category` as its only property. The message text stays here, in the mail
+ * channel it was written for, and never reaches PostHog; unlike web's Feedback.tsx,
+ * the event carries no free text. The capture sits at the submit call site
+ * (more-route.tsx), not in this pure builder.
  */
 export function buildFeedbackMailDestination(
   info: AppDisplayInfo,

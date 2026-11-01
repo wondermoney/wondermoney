@@ -13,7 +13,7 @@ export interface GetFinancialBrokersResponse {
   brokers: FinancialBroker[];
 }
 
-export async function getFinancialBrokers(
+async function getFinancialBrokers(
   apiClient: AxiosInstance = api,
 ): Promise<GetFinancialBrokersResponse> {
   const { data } = await apiClient.get<GetFinancialBrokersResponse>(

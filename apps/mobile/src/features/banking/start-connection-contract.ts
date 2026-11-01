@@ -3,7 +3,7 @@ import { z } from 'zod'
 import { readEndpoint } from '@/lib/api/runtime-schema'
 
 /**
- * RAD-240 — `GET /v1/banking/bank/:bankId/start` is a GET by HTTP method
+ * `GET /v1/banking/bank/:bankId/start` is a GET by HTTP method
  * (hence `readEndpoint`, not `writeEndpoint`) but is NOT idempotent: each
  * call creates a new pending Enable Banking authorization server-side.
  * Callers must invoke it through a mutation (see use-start-bank-connection),
@@ -23,21 +23,16 @@ export const startBankConnectionResponseSchema = z.object({
   redirectUrl: z.url(),
 })
 
-export type StartBankConnectionResponseDto = z.infer<typeof startBankConnectionResponseSchema>
-
 /**
- * The API redirects the browser back to the existing web app after GoCardless
- * consent completes (no native-app callback exists yet — that is a later,
- * separate ticket). `accounts` matches the API's own default redirect page.
+ * `returnTo=mobile` makes the API's callback redirect to this app's return link
+ * (see bank-connection-return.ts) instead of the web app.
  */
-const BANK_CONNECTION_REDIRECT_PAGE = 'accounts'
-
 export function createStartBankConnectionEndpoint(bankId: string) {
   const trimmed = bankId.trim()
   if (!trimmed) throw new Error('A bank id is required to start a connection.')
   return readEndpoint({
     method: 'GET',
-    path: `/v1/banking/bank/${encodeURIComponent(trimmed)}/start?redirectPage=${encodeURIComponent(BANK_CONNECTION_REDIRECT_PAGE)}`,
+    path: `/v1/banking/bank/${encodeURIComponent(trimmed)}/start?returnTo=mobile`,
     schema: startBankConnectionResponseSchema,
   })
 }

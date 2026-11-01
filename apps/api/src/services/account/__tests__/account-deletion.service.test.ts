@@ -157,7 +157,7 @@ describe('deleteWonderMoneyAccount', () => {
 
     resolveFirstFind([]);
     await expect(result).resolves.toBeUndefined();
-    // RAD-343: owner-deletion teardown adds a Tenant lookup (owned tenants) after the
+    // Owner-deletion teardown adds a Tenant lookup (owned tenants) after the
     // core deletion lookups; no owned tenants in this mock, so no further member finds.
     expect(calls).toEqual(['AppuserTenant', 'NordigenRequisition', 'AssistantConsent', 'SentEmail', 'Tenant']);
   });

@@ -37,7 +37,7 @@ export async function authCallback(req: Request, res: Response) {
     if (existingUserByExternalId) {
       logger.info({ appuserKey: existingUserByExternalId.appuserKey }, 'Existing user logging in');
       if (body.inviteToken) {
-        // Q2 (RAD-343): existing accounts can't accept household invites yet — flag for demand.
+        // Existing accounts can't accept household invites yet — flag for demand.
         notifyExistingUserInviteAttempt(email, existingUserByExternalId.appuserKey);
       }
       const sessionId = getAuthSessionId(authUser);
@@ -84,7 +84,7 @@ export async function authCallback(req: Request, res: Response) {
       );
     }
 
-    // A3 (RAD-343): validate the invite before creating anything, so an invalid/expired
+    // Validate the invite before creating anything, so an invalid/expired
     // token or an email mismatch aborts the signup cleanly.
     const validatedInvite = body.inviteToken ? await validateInviteForSignup(DI.em, body.inviteToken, email) : null;
 
@@ -100,7 +100,7 @@ export async function authCallback(req: Request, res: Response) {
     committedSignupAppuserKey = appUser.appuserKey;
 
     if (validatedInvite) {
-      // Household member (RAD-343 A3): join the owner's tenant as a member, so skip creating a
+      // Household member: join the owner's tenant as a member, so skip creating a
       // tenant of their own.
       provisioningStage = 'household-join';
       await consumeInvite(DI.em, validatedInvite, appUser);

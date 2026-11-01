@@ -77,7 +77,7 @@ test("never returns more ticks than asked for", () => {
   assert.ok(pickDateAxisTicks(dates, 5).length <= 5);
 });
 
-// RAD-645 — a category axis (long free-text names like "Cafe, Restaurants &
+// A category axis (long free-text names like "Cafe, Restaurants &
 // Bars") needs more room than the 96px currency-label cap, or Recharts draws
 // the full string and the SVG's default overflow:hidden clips it raw.
 test("estimateYAxisWidth honours a wider cap for long category labels", () => {

@@ -6,7 +6,7 @@ import { getTransactionEnrichmentAcceptanceRateRequestSchema } from '@validators
 
 import { DI } from '../../app.js';
 
-// RAD-425 Slice 2 exit criteria: "acceptance rate measurable over N shadow suggestions". Cross-tenant
+// Acceptance rate of AI category suggestions over N shadow suggestions. Cross-tenant
 // read (spans every tenant's enrichment rows), hence admin-gated rather than on the user-facing surface.
 export async function getTransactionEnrichmentAcceptanceRate(req: Request, res: Response): Promise<Response> {
   const { query } = await zParse(getTransactionEnrichmentAcceptanceRateRequestSchema, req);

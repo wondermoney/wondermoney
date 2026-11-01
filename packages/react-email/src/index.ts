@@ -16,6 +16,7 @@ import LifecycleNudgeEmail, {
   getLifecycleNudgePreheader,
 } from "./templates/lifecycle-nudge.js";
 import LifecycleCampaignEmail from "./templates/lifecycle-campaign.js";
+import { DEFAULT_BRAND_NAME, resolveBrandName } from "./components/Brand.js";
 import { MetricsPanel, StatusPanel, StepFlow } from "./components/LifecycleVisuals.js";
 import { getLifecycleCopy, type LifecycleLanguage } from "./lifecycle-copy.js";
 import { buildDynamicVisual, type LifecycleDynamicData } from "./lifecycle-dynamic.js";
@@ -39,6 +40,7 @@ import { getWeeklyInsightsPreheader } from "./weekly-insights-preheader.js";
 export type { AccountConnectedEmailProps, BudgetThresholdAlertProps, BudgetThresholdItem, InternalAlertDetail, InternalAlertEmailProps, LifecycleNudgeEmailProps, MonthlyStoryCategoryDelta, MonthlyStoryDataSufficientProps, MonthlyStoryInsufficientDataProps, MonthlyStoryMetric, MonthlyStoryProps, MonthlyStoryRecurringChange, TransactionalEmailLanguage, WeeklyBudgetSummary, WeeklyInsightsProps } from "./types.js";
 export { getWeeklyInsightsPreheader } from "./weekly-insights-preheader.js";
 export { LIFECYCLE_COPY, getLifecycleCopy } from "./lifecycle-copy.js";
+export { DEFAULT_BRAND_NAME, resolveBrandName } from "./components/Brand.js";
 export type { LifecycleLanguage, LifecycleStepCopy } from "./lifecycle-copy.js";
 export type { LifecycleDynamicData } from "./lifecycle-dynamic.js";
 
@@ -144,7 +146,7 @@ export async function renderAccountConnectedEmail(
   const output = await renderElement(createElement(AccountConnectedEmail, props));
 
   return {
-    subject: getAccountConnectedSubject(props.language, props.bankName),
+    subject: getAccountConnectedSubject(props.language, props.bankName, props.brandName),
     preheader: getAccountConnectedPreheader(props.language, props.bankName),
     ...output,
   };
@@ -188,6 +190,8 @@ export async function renderLifecycleEmail(props: {
   settingsUrl?: string;
   /** Real per-user figures for campaigns whose visual needs live data (net worth, spend, dates, prices). */
   data?: LifecycleDynamicData;
+  /** Instance name (the API's `INSTANCE_NAME`); defaults to WonderMoney. */
+  brandName?: string;
 }): Promise<RenderedEmail> {
   assertWebUrl("ctaUrl", props.ctaUrl);
   assertWebUrl("unsubscribeUrl", props.unsubscribeUrl);
@@ -195,7 +199,17 @@ export async function renderLifecycleEmail(props: {
     assertWebUrl("settingsUrl", props.settingsUrl);
   }
 
-  const copy = getLifecycleCopy(props.campaign, props.step, props.language);
+  const brand = resolveBrandName(props.brandName);
+  // The campaign copy names the product as WonderMoney; another instance's copy carries its name.
+  const branded = (text: string) => (brand === DEFAULT_BRAND_NAME ? text : text.replaceAll(DEFAULT_BRAND_NAME, brand));
+  const baseCopy = getLifecycleCopy(props.campaign, props.step, props.language);
+  const copy = {
+    ...baseCopy,
+    body: baseCopy.body.map(branded),
+    heading: branded(baseCopy.heading),
+    preheader: branded(baseCopy.preheader),
+    subject: branded(baseCopy.subject),
+  };
 
   const visual =
     buildDynamicVisual(props.campaign, props.step, props.language, props.data) ??
@@ -219,6 +233,7 @@ export async function renderLifecycleEmail(props: {
       unsubscribeUrl: props.unsubscribeUrl,
       settingsUrl: props.settingsUrl,
       preheader: copy.preheader,
+      brandName: brand,
     }),
   );
 

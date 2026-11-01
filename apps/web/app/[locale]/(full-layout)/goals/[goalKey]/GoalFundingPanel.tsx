@@ -57,10 +57,9 @@ export default function GoalFundingPanel({
       <p className="text-muted-foreground text-sm">
         {t("goals.budget-explainer")}
       </p>
-      {/* The Assign money / Move money out pair used to be repeated here,
-          identical in label and variant to the pair in the header 370px above
-          — two primaries on one screen for the same action. The header owns
-          them; this panel reports the numbers. */}
+      {/* No Assign money / Move money out pair here: the header already has
+          it, and repeating it would put two primaries on one screen for the
+          same action. The header owns them; this panel reports the numbers. */}
     </Card>
   );
 }

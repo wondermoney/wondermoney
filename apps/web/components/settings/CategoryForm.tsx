@@ -88,7 +88,6 @@ const CategoryForm: React.FC<CategoryFormProps> = ({
     handleSubmit,
     formState: { isSubmitting },
     reset,
-    watch,
   } = methods;
 
   // Watch for changes to detect duplicates
@@ -326,7 +325,7 @@ const CategoryForm: React.FC<CategoryFormProps> = ({
                     <CategoryIconPicker
                       selectedIcon={field.value}
                       onIconSelect={field.onChange}
-                      color={watch("color")}
+                      color={watchedColor}
                     />
                   </FormControl>
                   <FormMessage />

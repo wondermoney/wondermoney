@@ -152,4 +152,25 @@ describe('PortfolioImportScreen', () => {
     expect(view.queryByRole('button', { name: 'Confirm asset mappings' })).toBeNull()
     expect(view.getByRole('button', { name: 'Import transactions' })).not.toBeDisabled()
   })
+
+  it('lists each row that failed in a partial import with its reason', async () => {
+    const preview = {
+      ...readyPreview,
+      rows: { ...readyPreview.rows, failed: [
+        { failureReason: 'Insufficient quantity to sell', id: 707, raw: { Symbol: 'AMD' }, rowNumber: 7, status: 'failed' as const },
+        { id: 708, raw: { Symbol: 'X' }, rowNumber: 9, status: 'failed' as const },
+      ] },
+      status: 'partial' as const,
+      summary: { ...readyPreview.summary, failedRows: 2, importedRows: 2 },
+    }
+    const { view } = await renderScreen({ phase: 'succeeded', preview })
+    expect(view.getByText(/Some rows could not be imported/)).toBeOnTheScreen()
+    expect(view.getByLabelText('Row 7: Insufficient quantity to sell')).toBeOnTheScreen()
+    expect(view.getByLabelText('Row 9: No reason was recorded.')).toBeOnTheScreen()
+  })
+
+  it('shows no failed-rows list when the API predates the bucket', async () => {
+    const { view } = await renderScreen({ phase: 'succeeded', preview: { ...readyPreview, status: 'succeeded' as const, summary: { ...readyPreview.summary, importedRows: 3 } } })
+    expect(view.queryByTestId('portfolio-import-failed-row')).not.toBeOnTheScreen()
+  })
 })

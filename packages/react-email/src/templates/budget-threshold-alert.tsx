@@ -1,6 +1,7 @@
 import { Column, Hr, Row, Section, Text } from "react-email";
 
 import { LifecycleEmailLayout } from "../../emails/components/LifecycleEmail";
+import { resolveBrandName } from "../components/Brand";
 import { buildCampaignUrl } from "../../emails/lib/urls";
 import type { BudgetThresholdAlertProps, BudgetThresholdItem, TransactionalEmailLanguage } from "../types";
 
@@ -31,7 +32,7 @@ const COPY = {
     heading: "Categories to review in your budgets",
     intro: (periodLabel: string) => `This is the aggregated summary for ${periodLabel}. It shows the categories that reached 80% or 100% of their set amount.`,
     ctaLabel: "View budgets",
-    marketingFooterText: "You're receiving this summary because you turned on budget alerts in WonderMoney.",
+    marketingFooterText: (brand: string) => `You're receiving this summary because you turned on budget alerts in ${brand}.`,
     bodyParagraphs: [
       "The amounts are based on the transactions currently available. Review the transactions included in each category to confirm the summary matches what you expected.",
       "Categories from different budgets may appear together in this email to avoid several notifications on the same day.",
@@ -61,7 +62,7 @@ const COPY = {
     heading: "Categorias a rever nos teus orçamentos",
     intro: (periodLabel: string) => `Este é o resumo agregado de ${periodLabel}. Mostra as categorias que chegaram a 80% ou 100% do valor definido.`,
     ctaLabel: "Ver orçamentos",
-    marketingFooterText: "Recebeste este resumo porque ativaste os alertas de orçamento na WonderMoney.",
+    marketingFooterText: (brand: string) => `Recebeste este resumo porque ativaste os alertas de orçamento na ${brand}.`,
     bodyParagraphs: [
       "Os valores baseiam-se nas transações atualmente disponíveis. Revê os movimentos incluídos em cada categoria para confirmares se o resumo corresponde ao que esperavas.",
       "Categorias de diferentes orçamentos podem aparecer juntas neste email para evitar várias notificações no mesmo dia.",
@@ -164,11 +165,13 @@ export default function BudgetThresholdAlert({
   utmMedium = "email",
   utmCampaign = "budget_threshold_alert",
   utmContent = "daily_aggregated_thresholds",
+  brandName,
 }: BudgetThresholdAlertProps) {
   if (items.length === 0) {
     throw new Error("BudgetThresholdAlert requires at least one threshold item");
   }
   const t = COPY[language];
+  const brand = resolveBrandName(brandName);
 
   const stateStrength: Record<BudgetThresholdItem["state"], number> = {
     over: 3,
@@ -212,7 +215,8 @@ export default function BudgetThresholdAlert({
       }
       ctaLabel={t.ctaLabel}
       ctaUrl={trackedCtaUrl}
-      marketingFooterText={t.marketingFooterText}
+      marketingFooterText={t.marketingFooterText(brand)}
+      brandName={brand}
       settingsUrl={settingsUrl}
       privacyUrl={privacyUrl}
       unsubscribeUrl={unsubscribeUrl}

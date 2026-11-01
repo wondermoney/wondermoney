@@ -199,7 +199,7 @@ const PortfolioHoldingDetailsModal: React.FC<
                       {t("market-context")}
                     </Text>
                   </div>
-                  <ChevronDown className="text-muted-foreground size-4 shrink-0 transition-transform group-open:rotate-180" />
+                  <ChevronDown className="text-muted-foreground size-4 shrink-0 transition-transform group-open:rotate-180 motion-reduce:transition-none" />
                 </summary>
 
                 <div className="mt-4 space-y-4">

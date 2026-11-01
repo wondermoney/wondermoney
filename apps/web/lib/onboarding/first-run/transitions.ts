@@ -64,16 +64,6 @@ export function shouldShowFirstRunOnboarding(userId?: string): boolean {
   return getFirstRunState(userId).status !== "completed";
 }
 
-export function startFirstRunHandoff(
-  handoff: FirstRunHandoff,
-  userId?: string,
-): FirstRunOnboardingState {
-  return patchFirstRunState(
-    { status: "in_progress", activeHandoff: handoff },
-    userId,
-  );
-}
-
 export function completeFirstRunHandoff(
   handoff: FirstRunHandoff,
   patch: Pick<

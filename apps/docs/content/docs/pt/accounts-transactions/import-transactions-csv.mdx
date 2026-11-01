@@ -3,18 +3,45 @@ title: Importar transações por CSV
 description: Importa o histórico de transações a partir de um ficheiro CSV quando não houver sincronização bancária.
 ---
 
-A importação por CSV é útil quando precisas de trazer dados históricos para o WonderMoney ou quando uma ligação bancária não está disponível. Um ficheiro limpo e um mapeamento correto das colunas tornam a importação mais fácil de rever.
+A importação por CSV traz um extrato bancário para uma conta quando não há ligação ao banco, ou acrescenta o histórico anterior ao início da ligação.
 
 ## Antes de começar
 
-Confirma que o ficheiro contém os campos de data, valor e descrição de que precisas. Se possível, garante que todas as linhas pertencem à mesma conta ou moeda.
+O ficheiro depende da instituição financeira da conta:
+
+- **Millennium BCP, ActivoBank, Bankinter, Banco BPI ou Montepio**: importa o extrato exportado pelo próprio banco (CSV ou Excel), tal como o banco o exportou. A conta tem de ter esse banco como instituição financeira; escolhe-o quando adicionas a conta (**Adicionar Conta** e depois **Não ligada**).
+- **Qualquer outro banco, ou uma conta sem instituição financeira** (como uma criada com **Adicionar uma conta manualmente**): importa um ficheiro CSV no formato genérico abaixo.
+
+Numa instância alojada por ti, as importações também precisam de [armazenamento de ficheiros](/pt/docs/self-hosting/configure#armazenamento-de-ficheiros).
+
+### Formato CSV genérico
+
+A primeira linha tem os nomes das colunas, e o ficheiro tem estas colunas e nenhuma outra:
+
+| Coluna | Obrigatória | O que contém |
+|---|---|---|
+| `date` | Sim | A data, no formato `AAAA-MM-DD`. |
+| `amount` | Sim | Um valor com ponto nas casas decimais, por exemplo `23.40`. Na maioria dos tipos é o tipo que indica se o dinheiro saiu ou entrou, por isso o sinal não importa. Câmbio e Reembolso não têm um sentido próprio: escreve o dinheiro que saiu da conta como valor negativo, por exemplo `-23.40`, e o dinheiro que entrou como valor positivo. |
+| `merchant` | Sim | A quem pagaste, ou quem te pagou. |
+| `internalTransactionId` | Sim | Um ID único para a linha. Uma linha cujo ID já foi importado para esta conta é ignorada, por isso importar o mesmo ficheiro duas vezes não acrescenta nada. |
+| `transactionTypeKey` | Sim | O código do tipo. A janela de importação lista os códigos, como Pagamento ou Pagamento com cartão para dinheiro que sai e Depósito ou Transferência (crédito) para dinheiro que entra. |
+| `description` | Não | Uma nota para a transação. |
+
+A janela de importação mostra estas colunas numa conta genérica e tem um botão **Descarregar modelo** com duas linhas de exemplo que usam os códigos de tipo da tua instância.
+
+```csv
+date,amount,merchant,internalTransactionId,transactionTypeKey,description
+2026-01-15,23.40,Supermercado,exemplo-1,3,Compras da semana
+```
+
+Numa instância nova, o código `3` é normalmente Pagamento; usa os códigos que a tua janela mostra.
 
 ## Passos
 
-1. Exporta ou prepara o ficheiro CSV.
-2. Abre o fluxo de importação e carrega o ficheiro.
-3. Associa as colunas aos campos esperados.
-4. Revê a pré-visualização antes de concluir a importação.
+1. Prepara o ficheiro: num banco suportado, descarrega o extrato em CSV ou Excel (`.xlsx`) e deixa-o tal como o banco o exportou; caso contrário, guarda as transações num CSV no formato genérico.
+2. Abre a conta e escolhe **Importar transações**.
+3. Adiciona o ficheiro (até 5 MB) e escolhe **Importar**.
+4. A importação corre em segundo plano. Uma notificação diz-te quando terminou, ou porque falhou. Se algumas linhas de um ficheiro genérico não puderem ser importadas, a janela diz quantas.
 
 ## Rever
 

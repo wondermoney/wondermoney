@@ -53,12 +53,12 @@ router.post('/operations/:operationId/retry', retryAdminBackgroundOperation);
 
 router.post('/demo-data/refresh', triggerDemoDataRefresh);
 
-// RAD-394: transaction audit-log monitoring reads (cross-tenant, hence admin-gated rather than on
+// Transaction audit-log monitoring reads (cross-tenant, hence admin-gated rather than on
 // the user-facing /v1/transactions/* surface). newest-first, offset-paginated.
 router.get('/transactions/audit/dedup-skipped', listDedupSkippedAudit);
 router.get('/transactions/audit/remediations', listRemediationAudit);
 
-// RAD-425: transaction-enrichment acceptance-rate observability (cross-tenant, admin-gated).
+// Transaction-enrichment acceptance-rate observability (cross-tenant, admin-gated).
 router.get('/enrichment/acceptance-rate', getTransactionEnrichmentAcceptanceRate);
 
 export default router;

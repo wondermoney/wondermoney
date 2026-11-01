@@ -1,6 +1,7 @@
 import { subDays } from 'date-fns';
 import { describe, expect, it, vi } from 'vitest';
 
+import { kyselyDouble } from '@app/__tests__/__helpers__/kysely-double';
 import { DI } from '@app/app';
 import type { Appuser } from '@entity/Appuser';
 
@@ -19,46 +20,14 @@ const portfolioHoldingsServiceMock = vi.hoisted(() => ({
 vi.mock('@app/app', () => ({ DI: { em: {} } }));
 vi.mock('../portfolio-holdings.service', () => ({ default: portfolioHoldingsServiceMock }));
 
-interface MockKnex {
-  (table: string): MockQueryBuilder;
-  raw: (sql: string) => string;
-}
-
-interface MockQueryBuilder {
-  groupBy: (value: string) => MockQueryBuilder;
-  innerJoin: (table: string, left: string, right: string) => MockQueryBuilder;
-  orderBy: (column: string, direction: string) => MockQueryBuilder;
-  raw: (sql: string) => string;
-  select: (...args: string[]) => MockQueryBuilder;
-  then<TResult1 = SnapshotRow[], TResult2 = never>(
-    onfulfilled?: ((value: SnapshotRow[]) => PromiseLike<TResult1> | TResult1) | null,
-    onrejected?: ((reason: unknown) => PromiseLike<TResult2> | TResult2) | null,
-  ): PromiseLike<TResult1 | TResult2>;
-  where: (column: string, operator: string, value: Date) => MockQueryBuilder;
-  whereNull: (column: string) => MockQueryBuilder;
-}
-
 interface SnapshotRow {
   snapshot_date: string;
   total_value: string;
 }
 
-function createMockKnex(rows: SnapshotRow[]): MockKnex {
-  const builder: MockQueryBuilder = {
-    groupBy: vi.fn(() => builder),
-    innerJoin: vi.fn(() => builder),
-    orderBy: vi.fn(() => builder),
-    raw: vi.fn(() => ''),
-    select: vi.fn(() => builder),
-    then: (onfulfilled, onrejected) => Promise.resolve(rows).then(onfulfilled, onrejected),
-    where: vi.fn(() => builder),
-    whereNull: vi.fn(() => builder),
-  };
-
-  const knex = (() => builder) as unknown as MockKnex;
-  knex.raw = vi.fn(() => '');
-
-  return knex;
+/** The database as the snapshot query sees it: these rows, whatever the SQL. */
+function createDatabase(rows: SnapshotRow[]) {
+  return kyselyDouble(() => rows).db;
 }
 
 describe('portfolio metrics calculations', () => {
@@ -139,7 +108,7 @@ describe('portfolio metrics calculations', () => {
   describe('portfolio metrics service insufficient history', () => {
     it('keeps risk metrics unavailable with only two snapshots', async () => {
       const now = new Date();
-      const knex = createMockKnex([
+      const database = createDatabase([
           { snapshot_date: subDays(now, 2).toISOString(), total_value: '100' },
           { snapshot_date: subDays(now, 1).toISOString(), total_value: '110' },
       ]);
@@ -148,7 +117,7 @@ describe('portfolio metrics calculations', () => {
           .fn()
           .mockResolvedValueOnce({ name: 'BUY' })
           .mockResolvedValueOnce({ transactionDate: subDays(now, 5) }),
-        getKnex: vi.fn().mockReturnValue(knex),
+        getKysely: vi.fn().mockReturnValue(database),
       });
       portfolioHoldingsServiceMock.getPortfoliosHoldings.mockResolvedValue([
         { averageBuyPrice: 90, currentValue: 110, financialAssetType: 'Stock', quantity: 1 },
@@ -170,13 +139,13 @@ describe('portfolio metrics calculations', () => {
 
     it('uses the first buy date for annual yield', async () => {
       const now = new Date();
-      const knex = createMockKnex([]);
+      const database = createDatabase([]);
       Object.assign(DI.em, {
         findOne: vi
           .fn()
           .mockResolvedValueOnce({ name: 'BUY' })
           .mockResolvedValueOnce({ transactionDate: subDays(now, 90) }),
-        getKnex: vi.fn().mockReturnValue(knex),
+        getKysely: vi.fn().mockReturnValue(database),
       });
       portfolioHoldingsServiceMock.getPortfoliosHoldings.mockResolvedValue([
         { averageBuyPrice: 90, currentValue: 280.42, financialAssetType: 'Stock', quantity: 1 },
@@ -190,13 +159,13 @@ describe('portfolio metrics calculations', () => {
 
     it('returns null annual yield when the first buy is too recent even if fromDate is earlier', async () => {
       const now = new Date();
-      const knex = createMockKnex([]);
+      const database = createDatabase([]);
       Object.assign(DI.em, {
         findOne: vi
           .fn()
           .mockResolvedValueOnce({ name: 'BUY' })
           .mockResolvedValueOnce({ transactionDate: subDays(now, 5) }),
-        getKnex: vi.fn().mockReturnValue(knex),
+        getKysely: vi.fn().mockReturnValue(database),
       });
       portfolioHoldingsServiceMock.getPortfoliosHoldings.mockResolvedValue([
         { averageBuyPrice: 90, currentValue: 280.42, financialAssetType: 'Stock', quantity: 1 },
@@ -212,13 +181,13 @@ describe('portfolio metrics calculations', () => {
 
     it('returns nullable advanced metrics when there is only one buy and no snapshot history', async () => {
       const now = new Date();
-      const knex = createMockKnex([]);
+      const database = createDatabase([]);
       Object.assign(DI.em, {
         findOne: vi
           .fn()
           .mockResolvedValueOnce({ name: 'BUY' })
           .mockResolvedValueOnce({ transactionDate: subDays(now, 5) }),
-        getKnex: vi.fn().mockReturnValue(knex),
+        getKysely: vi.fn().mockReturnValue(database),
       });
       portfolioHoldingsServiceMock.getPortfoliosHoldings.mockResolvedValue([
         { averageBuyPrice: 90, currentValue: 280.42, financialAssetType: 'Stock', quantity: 1 },

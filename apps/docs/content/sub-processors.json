@@ -85,7 +85,7 @@
       "id": "resend",
       "heading": { "en": "Resend", "pt": "Resend", "es": "Resend" },
       "purpose": "Transactional and lifecycle email.",
-      "evidence": "api depends on resend (RESEND_API_KEY, RESEND_FROM_EMAIL).",
+      "evidence": "api depends on resend (RESEND_API_KEY).",
       "personalData": "Email address and message content, including budget and weekly summary figures.",
       "location": "United States"
     },
@@ -111,10 +111,10 @@
       "id": "gocardless",
       "heading": { "en": "GoCardless, SAS", "pt": "GoCardless, SAS", "es": "GoCardless, SAS" },
       "purpose": "Licensed Account Information Service Provider for read-only bank account access.",
-      "evidence": "api NORDIGEN_SECRET_ID / NORDIGEN_SECRET_KEY; the requisition and sync flow (src/services/gocardless-requisition.service.ts, src/controller/banking.ts, src/controller/account/sync.ts).",
+      "evidence": "No live integration: the api no longer reads NORDIGEN_* variables or calls GoCardless. Data from earlier connections stays (NordigenRequisition, Transaction.nordigenInternalTransactionId).",
       "personalData": "Bank account identifiers, balances and transaction history, on user instruction.",
       "location": "European Union (France)",
-      "notes": "Still live: existing connections created before the Enable Banking BYOK migration (2026-09) continue to sync through GoCardless, so this entry stays until those connections are fully retired. New connections use the Enable Banking entry below instead."
+      "notes": "No longer live: every bank connection now goes through Enable Banking. The entry stays in the policy because bank data was shared with GoCardless for connections made before the Enable Banking BYOK migration (2026-09); whether and when to remove it is a legal decision."
     },
     {
       "id": "enable-banking",
@@ -123,7 +123,7 @@
       "evidence": "api src/services/enable-banking/enable-banking-client.service.ts calls https://api.enablebanking.com; src/controller/enable-banking-credential.ts stores each user's own Application ID and encrypted private key; src/controller/enable-banking-callback.ts and app.ts wire up the /v1/banking/enable-banking/callback route; src/services/enable-banking/enable-banking-jwt.service.ts signs API requests locally with the user's key (the raw private key itself is never sent to Enable Banking).",
       "personalData": "Bank account identifiers, balances and transaction history, on user instruction, plus the user's own Enable Banking Application ID (used to identify which application is calling). The user's private key is encrypted at rest with AES-256-GCM and is used only to sign requests in our backend — it is not transmitted to Enable Banking.",
       "location": "Finland (European Union)",
-      "notes": "Enable Banking Oy is a Registered Account Information Service Provider regulated by the Finnish Financial Supervisory Authority (FIN-FSA). Added alongside the BYOK bank-provider rollout (2026-09) that replaces WonderMoney's own shared GoCardless connection for new users; see the GoCardless entry above for the connections still transitioning off it."
+      "notes": "Enable Banking Oy is a Registered Account Information Service Provider regulated by the Finnish Financial Supervisory Authority (FIN-FSA). Added alongside the BYOK bank-provider rollout (2026-09), which replaced WonderMoney's own shared GoCardless connection; it is now the only bank provider."
     },
     {
       "id": "aws-s3",

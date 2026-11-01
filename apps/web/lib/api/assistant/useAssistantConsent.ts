@@ -8,7 +8,7 @@ export interface AssistantConsentResponse {
   consent: AssistantConsent;
 }
 
-export async function getAssistantConsent(
+async function getAssistantConsent(
   apiClient: AxiosInstance = api,
 ): Promise<AssistantConsent> {
   const { data } = await apiClient.get<AssistantConsentResponse>(

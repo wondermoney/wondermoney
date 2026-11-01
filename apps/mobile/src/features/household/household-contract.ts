@@ -1,54 +1,53 @@
 import { z } from 'zod'
 
-import { readEndpoint, writeEndpoint } from '@/lib/api/runtime-schema'
+import { readEndpoint, tolerantEnum, writeEndpoint } from '@/lib/api/runtime-schema'
 
 /**
  * A tenant is a household: an owner plus, optionally, one invited partner. Mirrors
  * `HouseholdView`/`InviteValidationView` in core/api's household service — see
  * `api/src/services/household/household-invite.service.ts` and
- * `api/src/controller/household.ts`. Mobile's own convention keeps these `.strict()`
- * even where the API's own schema is not, matching markets-contract.ts.
+ * `api/src/controller/household.ts`. Fields the API adds later are stripped, not rejected.
  */
 
 export const HOUSEHOLD_MAX_MEMBERS = 2
 
-export const householdRoleSchema = z.enum(['owner', 'member'])
-export type HouseholdRole = z.infer<typeof householdRoleSchema>
+// A role this build doesn't know reads as 'unknown': never treated as the owner, so owner-only
+// actions stay hidden, and labelled as a member.
+const householdRoleSchema = tolerantEnum(['owner', 'member'], 'unknown')
 
 export const householdMemberSchema = z.object({
   appuserKey: z.number().int().positive(),
   emailAddress: z.string().email(),
   firstName: z.string().nullable().optional(),
   role: householdRoleSchema,
-}).strict()
+})
 export type HouseholdMemberDto = z.infer<typeof householdMemberSchema>
 
 export const pendingHouseholdInviteSchema = z.object({
   email: z.string().email(),
   expiresAt: z.iso.datetime(),
   householdInviteKey: z.number().int().positive(),
-}).strict()
+})
 export type PendingHouseholdInviteDto = z.infer<typeof pendingHouseholdInviteSchema>
 
 export const householdResponseSchema = z.object({
   members: z.array(householdMemberSchema),
   pendingInvite: pendingHouseholdInviteSchema.nullable(),
-}).strict()
+})
 export type HouseholdResponseDto = z.infer<typeof householdResponseSchema>
 
-const householdInviteStatusSchema = z.enum(['accepted', 'expired', 'pending', 'revoked'])
+const householdInviteStatusSchema = tolerantEnum(['accepted', 'expired', 'pending', 'revoked'], 'unknown')
 
 const createdInviteSchema = z.object({
   email: z.string().email(),
   expiresAt: z.iso.datetime(),
   householdInviteKey: z.number().int().positive(),
   status: householdInviteStatusSchema,
-}).strict()
+})
 
 export const inviteMutationResponseSchema = z.object({
   invite: createdInviteSchema,
-}).strict()
-export type InviteMutationResponseDto = z.infer<typeof inviteMutationResponseSchema>
+})
 
 /** Mirrors createHouseholdInviteSchema's body validator in api/src/validators/household.ts. */
 export const inviteEmailSchema = z.string().trim().toLowerCase().email()

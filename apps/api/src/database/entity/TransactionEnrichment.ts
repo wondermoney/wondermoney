@@ -1,5 +1,5 @@
-import { Entity, Enum, Filter, Index, ManyToOne, PrimaryKey, Property } from '@mikro-orm/core';
 import type { Rel } from '@mikro-orm/core';
+import { Entity, Enum, Filter, Index, ManyToOne, PrimaryKey, Property } from '@mikro-orm/decorators/legacy';
 
 import { TENANT_FILTER, tenantScopedCond } from '../filters/tenant-filter';
 
@@ -17,7 +17,7 @@ export enum TransactionEnrichmentStatus {
   SKIPPED = 'skipped',
 }
 
-// RAD-425 Slice 2: whether the user's eventual category choice matched the model's suggestion
+// Whether the user's eventual category choice matched the model's suggestion
 // (`categorySuggestionKey`), stamped once by the closed-loop hook when the user categorizes the
 // transaction. Undefined until then (or forever, if the transaction is never categorized).
 export enum TransactionEnrichmentOutcome {

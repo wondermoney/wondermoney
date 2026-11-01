@@ -1,10 +1,5 @@
 "use client";
 
-import {
-  type ColumnDef,
-  createColumnHelper,
-  type Row,
-} from "@tanstack/react-table";
 import { MoreHorizontal, Pencil, Trash } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { usePostHog } from "posthog-js/react";
@@ -14,6 +9,11 @@ import { Amount } from "@/components/ui/Amount";
 import { Progress } from "@/components/ui/progress";
 import { Table } from "@/components/ui/Table";
 import CellNumeric from "@/components/ui/Table/Cell/CellNumeric";
+import {
+  type ColumnDef,
+  createColumnHelper,
+  type Row,
+} from "@/components/ui/Table/features";
 import { Text } from "@/components/ui/Typography";
 import { useRouter } from "@/i18n/navigation";
 import type { BudgetFull } from "@/lib/api/budget/useBudgetsFull";
@@ -40,8 +40,6 @@ import BudgetEditModal from "./BudgetEditModal";
 interface BudgetsTableProps {
   budgets: BudgetFull[];
 }
-
-const ROW_METADATA_SEPARATOR = " · ";
 
 /**
  * How many budgeted lines a budget actually carries: a leaf category where a
@@ -191,8 +189,8 @@ const BudgetsTable: React.FC<BudgetsTableProps> = memo(({ budgets }) => {
         ? [
             ...parts[index],
             t("budget-row-identifier", { id: String(budget.budgetKey) }),
-          ].join(ROW_METADATA_SEPARATOR)
-        : parts[index].join(ROW_METADATA_SEPARATOR),
+          ]
+        : parts[index],
     );
   }, [budgets, locale, t]);
 
@@ -209,8 +207,12 @@ const BudgetsTable: React.FC<BudgetsTableProps> = memo(({ budgets }) => {
           const { totalSpent, totalBudgeted } = budgetStats[row.index];
           return (
             <CellNumeric className="text-right whitespace-nowrap">
-              <Amount value={totalSpent} currency={row.original.currencyCode} /> /{" "}
-              <Amount value={totalBudgeted} currency={row.original.currencyCode} />
+              <Amount value={totalSpent} currency={row.original.currencyCode} />{" "}
+              /{" "}
+              <Amount
+                value={totalBudgeted}
+                currency={row.original.currencyCode}
+              />
             </CellNumeric>
           );
         },
@@ -268,9 +270,16 @@ const BudgetsTable: React.FC<BudgetsTableProps> = memo(({ budgets }) => {
             <Text
               variant="smallText"
               className="text-muted-foreground block truncate text-xs"
-              title={rowMetadata[row.index]}
+              title={rowMetadata[row.index].join("\n")}
             >
-              {rowMetadata[row.index]}
+              {/* Facts set apart by space, not joined with middle dots
+                  ("A · B · C" is template punctuation); the tooltip lists
+                  them one per line. */}
+              {rowMetadata[row.index].map((fact, index) => (
+                <span key={index} className={index > 0 ? "ml-3" : undefined}>
+                  {fact}
+                </span>
+              ))}
             </Text>
           </div>
         ),

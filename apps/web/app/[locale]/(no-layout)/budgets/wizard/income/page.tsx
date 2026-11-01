@@ -65,19 +65,25 @@ export default function IncomePage() {
     }
   }, [household, dependents, router]);
 
+  // useForm only reads defaultValues on mount; the lazy initializer keeps the
+  // generated id stable instead of calling Date.now() on every render.
+  const [defaultValues] = useState<IncomeData>(
+    () =>
+      income || {
+        incomes: [
+          {
+            id: Date.now().toString(),
+            name: t("salary"),
+            amount: 2000,
+            isRecurrent: true,
+            recurrency: "MONTHLY_14",
+          },
+        ],
+      },
+  );
   const methods = useForm({
     resolver: zodResolver(incomeSchema),
-    defaultValues: income || {
-      incomes: [
-        {
-          id: Date.now().toString(),
-          name: t("salary"),
-          amount: 2000,
-          isRecurrent: true,
-          recurrency: "MONTHLY_14",
-        },
-      ],
-    },
+    defaultValues,
   });
 
   const incomes = useWatch({
@@ -136,7 +142,7 @@ export default function IncomePage() {
 
     setIncome(data);
 
-    // RAD-633: a budget is created right here, on this step, not on the
+    // A budget is created right here, on this step, not on the
     // wizard's final "Finish" — "Continue" on this page *is* the create
     // call. If a budgetKey is already sitting in wizard state, a budget for
     // this pass already exists (most commonly: the user went back to this
@@ -165,7 +171,7 @@ export default function IncomePage() {
       });
       setBudgetId(response.data.budgetKey);
 
-      // RAD-633: a freshly created budget starts with zero linked accounts,
+      // A freshly created budget starts with zero linked accounts,
       // and the backend's "spent" figure per category is a join scoped to
       // exactly those linked accounts — not a date-range check. Left
       // unlinked, every category reads "€0.00 spent" forever, indistinguishable
@@ -215,10 +221,9 @@ export default function IncomePage() {
           >
             {t("what-is-your-total-household-income-description")}
           </Text>
-          {/* Cause before result. The totals used to sit here, above the only
-              control that produces them, set larger and bolder than it — the
-              reader met the answer before the question. The inputs now come
-              first and the derived figures follow, below. */}
+          {/* Cause before result. The inputs come first and the derived
+              figures follow, below, so the reader meets the question before
+              the answer. */}
           <div className="mt-10 flex flex-col gap-4">
             {incomes.map((income, index) => {
               const amountControlId = `income-${index}`;
@@ -324,19 +329,18 @@ export default function IncomePage() {
               );
             })}
           </div>
-          {/* A real <button>, not a clickable <div>. As a div this was outside
-              the tab order entirely, so a keyboard user could not add a second
-              income source at all — and the wizard's previous step asks how
-              many people live in the household. The Button primitive also
-              brings the focus ring, press feedback and disabled handling that
-              the hand-rolled element had none of. The "+" glyph is decorative
-              once the accessible name comes from `aria-label`.
+          {/* A real <button>, not a clickable <div>: a div is outside the tab
+              order entirely, so a keyboard user could not add a second income
+              source at all — and the wizard's previous step asks how many
+              people live in the household. The Button primitive also brings
+              the focus ring, press feedback and disabled handling. The "+"
+              glyph is decorative once the accessible name comes from
+              `aria-label`.
 
-              Geometry, RAD-550: it was `h-6` — 24px, barely half the 44px
-              touch floor. It is now `min-h-11`, and it takes `secondary`
-              rather than a hand-rolled `bg-muted hover:bg-accent`, because
-              those two tokens are byte-identical (§2) so the hover state was
-              literally invisible. `secondary` also carries `border-input`,
+              Geometry: `min-h-11` meets the 44px touch floor, and it takes
+              `secondary` rather than a hand-rolled `bg-muted hover:bg-accent`,
+              because those two tokens are byte-identical (§2) so the hover
+              state would be invisible. `secondary` also carries `border-input`,
               which is the only reason this bar has a boundary at 3:1. */}
           <Button
             type="button"

@@ -177,8 +177,9 @@ import logger from '@utils/logger';
  * Documented here so the numbers below are checkable against the constraint that produced
  * them. Exported and never imported on purpose — it is the *external* fact (Coolify's
  * container stop grace period) that the drain timeouts are derived from, and inlining it
- * into a comment would let the two drift silently. `knip` flags it as unused; that is
- * expected, and it is documentation rather than dead code.
+ * into a comment would let the two drift silently. It is documentation rather than dead code.
+ *
+ * @public
  */
 export const CONTAINER_STOP_GRACE_MS = 10_000;
 /** Inner budget: how long pg-boss may spend draining in-flight handlers. */

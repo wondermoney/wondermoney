@@ -41,7 +41,7 @@ const loadGoogleModule = (): GoogleModule => {
   return loadedModule
 }
 
-export const nativeGooglePort: GooglePort = {
+const nativeGooglePort: GooglePort = {
   configure: (params) => loadGoogleModule().GoogleOneTapSignIn.configure(params),
   checkPlayServices: () => loadGoogleModule().GoogleOneTapSignIn.checkPlayServices(),
   presentExplicitSignIn: () => loadGoogleModule().GoogleOneTapSignIn.presentExplicitSignIn(),
@@ -52,11 +52,12 @@ export const nativeGooglePort: GooglePort = {
  *
  * Always uses the explicit sign-in sheet rather than the silent/restore path, because
  * only an interactive request is guaranteed to mint a token carrying *this* attempt's
- * nonce — a restored, cached token would fail Supabase's nonce check.
+ * nonce — a restored, cached token would fail the API's nonce check.
  *
- * The hashed half of the nonce goes to Google (copied verbatim into the ID token's
- * `nonce` claim); only the raw half travels on to Supabase. Neither the token nor the
- * provider's error text is ever logged.
+ * The hashed half of the nonce goes to Google, which copies it verbatim into the ID token's
+ * `nonce` claim, and the same hashed value goes to the API: its Google verifier compares the
+ * claim exactly (unlike Apple's, it does not hash a raw value first). Neither the token nor
+ * the provider's error text is ever logged.
  */
 export function createGoogleIdentityProvider({
   google = nativeGooglePort,
@@ -76,7 +77,7 @@ export function createGoogleIdentityProvider({
         const response = await google.presentExplicitSignIn()
         if (response.type === 'cancelled') return { status: 'cancelled' }
         return response.type === 'success' && response.data?.idToken
-          ? { status: 'obtained', idToken: response.data.idToken, nonce: nonce.raw }
+          ? { status: 'obtained', idToken: response.data.idToken, nonce: nonce.hashed }
           : { status: 'unavailable' }
       } catch (error) {
         return isCancellationError(error, CANCELLATION_CODES)

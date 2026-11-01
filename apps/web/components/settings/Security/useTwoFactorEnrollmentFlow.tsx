@@ -3,7 +3,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useTranslations } from "next-intl";
 import { QRCodeSVG } from "qrcode.react";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -31,33 +31,25 @@ const passwordFormSchema = z.object({
 });
 type PasswordFormSchemaType = z.infer<typeof passwordFormSchema>;
 
-const otpFormSchema = z.object({
-  pin: z.string().min(6, {
-    message: "Your one-time password must be 6 characters.",
-  }),
-});
-type OtpFormSchemaType = z.infer<typeof otpFormSchema>;
+const makeOtpFormSchema = (lengthError: string) =>
+  z.object({ pin: z.string().min(6, { message: lengthError }) });
+type OtpFormSchemaType = z.infer<ReturnType<typeof makeOtpFormSchema>>;
 
 export type TwoFactorEnrollmentStep = "password" | "setup" | "verify";
 
 export interface UseTwoFactorEnrollmentFlowOptions {
   // Called after a successful `verifyTotp`. Callers decide what "done" means
-  // (close a dialog, clear a server-side flag, etc).
+  // (e.g. close the dialog).
   onEnrolled?: () => void;
 }
 
 // Shared TOTP enrollment flow: enter password -> authClient.twoFactor.enable
-// -> show QR + backup codes -> authClient.twoFactor.verifyTotp. Used by both
-// the settings "Enable 2FA" dialog and the non-dismissible post-migration
-// MFA re-enrollment gate, so the state machine and step markup live here
-// instead of being duplicated across the two callers.
+// -> show QR + backup codes -> authClient.twoFactor.verifyTotp.
 //
 // Enrollment is a 3-step flow because better-auth splits it across two
 // endpoints: `twoFactor.enable({password})` (requires the account password
 // and returns the TOTP URI + backup codes) and `twoFactor.verifyTotp({code})`
-// (confirms the user actually set up their authenticator app). Supabase's
-// `mfa.enroll` didn't need a password and combined enroll+challenge+verify
-// into a single QR-then-code flow.
+// (confirms the user actually set up their authenticator app).
 export function useTwoFactorEnrollmentFlow({
   onEnrolled,
 }: UseTwoFactorEnrollmentFlowOptions = {}) {
@@ -70,6 +62,10 @@ export function useTwoFactorEnrollmentFlow({
     resolver: zodResolver(passwordFormSchema),
     defaultValues: { password: "" },
   });
+  const otpFormSchema = useMemo(
+    () => makeOtpFormSchema(t("otp-length-error")),
+    [t],
+  );
   const otpForm = useForm({
     resolver: zodResolver(otpFormSchema),
     defaultValues: { pin: "" },
@@ -119,16 +115,22 @@ export function useTwoFactorEnrollmentFlow({
   };
 
   const title = t("enable-2fa");
+  // Each step describes what is on screen: the QR code is on the setup step, so the scan
+  // instruction belongs there; the verify step only asks for the code.
   const stepDescription =
     step === "password"
       ? t("enter-password-to-continue")
       : step === "setup"
-        ? t("backup-codes-description")
-        : t("scan-qr-code-using-mfa-app");
+        ? t("scan-qr-code-using-mfa-app")
+        : t("2fa-verify-description");
 
+  // Each footer button has its own key so React mounts a new <button> per step. Reusing the
+  // DOM node would flip Continue (type="button") into the verify form's submit button while
+  // its click is still being handled, and the browser would then submit the empty code.
   const footer =
     step === "password" ? (
       <Button
+        key="password-submit"
         type="submit"
         form="2fa-password-form"
         loading={passwordForm.formState.isSubmitting}
@@ -137,11 +139,12 @@ export function useTwoFactorEnrollmentFlow({
         {t("submit")}
       </Button>
     ) : step === "setup" ? (
-      <Button type="button" onClick={() => setStep("verify")}>
+      <Button key="setup-continue" type="button" onClick={() => setStep("verify")}>
         {t("continue")}
       </Button>
     ) : (
       <Button
+        key="verify-submit"
         type="submit"
         form="2fa-verify-form"
         loading={otpForm.formState.isSubmitting}
@@ -155,7 +158,7 @@ export function useTwoFactorEnrollmentFlow({
     <>
       {step === "password" && (
         <Form {...passwordForm}>
-          <form
+          <form method="post"
             onSubmit={passwordForm.handleSubmit(onSubmitPassword)}
             className="space-y-6"
             id="2fa-password-form"
@@ -191,6 +194,9 @@ export function useTwoFactorEnrollmentFlow({
           {backupCodes && (
             <div className="w-full space-y-2">
               <Text className="font-semibold">{t("backup-codes-title")}</Text>
+              <Text className="text-muted-foreground text-sm">
+                {t("backup-codes-description")}
+              </Text>
               <ul className="grid grid-cols-2 gap-1 rounded border p-3 font-mono text-sm">
                 {backupCodes.map((code) => (
                   <li key={code}>{code}</li>
@@ -211,7 +217,7 @@ export function useTwoFactorEnrollmentFlow({
 
       {step === "verify" && (
         <Form {...otpForm}>
-          <form
+          <form method="post"
             onSubmit={otpForm.handleSubmit(onSubmitOtp)}
             className="w-2/3 space-y-6"
             id="2fa-verify-form"

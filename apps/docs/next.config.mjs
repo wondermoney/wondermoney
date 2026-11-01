@@ -5,6 +5,9 @@ const withMDX = createMDX();
 /** @type {import('next').NextConfig} */
 const config = {
   reactStrictMode: true,
+  // Stop `next dev` writing its managed agent-rules block into AGENTS.md (Next 16.3+); the file
+  // is hand-maintained and points at the bundled docs itself. See next-config-js/agentRules.
+  agentRules: false,
   async redirects() {
     return [
       // RAD-574 — the screener was removed from the product (RAD-570: EODHD

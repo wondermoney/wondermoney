@@ -7,7 +7,6 @@ import {
   Heading,
   Hr,
   Html,
-  Img,
   Link,
   Preview,
   Section,
@@ -16,6 +15,7 @@ import {
   pixelBasedPreset,
 } from "react-email";
 
+import { BrandFooterLine, BrandHeader, resolveBrandName } from "../../src/components/Brand";
 import type { TransactionalEmailLanguage } from "../../src/types";
 
 export interface LifecycleEmailLayoutProps {
@@ -34,24 +34,26 @@ export interface LifecycleEmailLayoutProps {
   unsubscribeUrl?: string;
   settingsUrl?: string;
   privacyUrl?: string;
+  /** Instance name shown in the header, footer and default footer copy; defaults to WonderMoney. */
+  brandName?: string;
 }
 
 const SHELL_COPY = {
   en: {
     greeting: (name?: string) => (name ? `Hi ${name},` : "Hi there,"),
-    marketingFooterDefault: "You're receiving this because you have a WonderMoney account with product communications on.",
+    marketingFooterDefault: (brand: string) => `You're receiving this because you have a ${brand} account with product communications on.`,
     unsubscribe: "Unsubscribe from product updates",
     settings: "Notification settings",
     privacy: "Privacy",
-    transactionalFooter: "This is a billing notice for your WonderMoney account.",
+    transactionalFooter: (brand: string) => `This is a billing notice for your ${brand} account.`,
   },
   pt: {
     greeting: (name?: string) => (name ? `Olá ${name},` : "Olá,"),
-    marketingFooterDefault: "Recebeste este email por teres uma conta WonderMoney e comunicações de produto ativas.",
+    marketingFooterDefault: (brand: string) => `Recebeste este email por teres uma conta ${brand} e comunicações de produto ativas.`,
     unsubscribe: "Cancelar comunicações de produto",
     settings: "Definições de notificações",
     privacy: "Privacidade",
-    transactionalFooter: "Este é um aviso de faturação relativo à tua conta WonderMoney.",
+    transactionalFooter: (brand: string) => `Este é um aviso de faturação relativo à tua conta ${brand}.`,
   },
 } as const satisfies Record<TransactionalEmailLanguage, Record<string, unknown>>;
 
@@ -70,7 +72,9 @@ export function LifecycleEmailLayout({
   unsubscribeUrl = "[[UNSUB_LINK_PT]]",
   settingsUrl,
   privacyUrl,
+  brandName,
 }: LifecycleEmailLayoutProps) {
+  const brand = resolveBrandName(brandName);
   const t = SHELL_COPY[language];
   const greeting = t.greeting(firstName?.trim() ? firstName.trim() : undefined);
 
@@ -94,13 +98,7 @@ export function LifecycleEmailLayout({
         <Body className="m-0 bg-[#f7f8fa] px-[12px] py-[28px] font-sans text-[#111111]">
           <Container className="mx-auto w-full max-w-[600px]">
             <Section className="border-t-[3px] border-solid border-x-0 border-b-0 border-[#7c3aed] bg-white px-[26px] pb-[28px] pt-[22px]">
-              <Img
-                src="https://app.wonder.money/logo.png"
-                width="125"
-                height="46"
-                alt="WonderMoney"
-                className="block h-[46px] w-[125px] object-contain"
-              />
+              <BrandHeader brandName={brand} />
               <Text className="m-0 mt-[24px] font-sans text-[15px] leading-[23px] text-[#374151]">
                 {greeting}
               </Text>
@@ -131,7 +129,7 @@ export function LifecycleEmailLayout({
               {footerMode === "marketing" ? (
                 <>
                   <Text className="m-0 font-sans text-[11px] leading-[18px] text-[#6b7280]">
-                    {marketingFooterText ?? t.marketingFooterDefault}
+                    {marketingFooterText ?? t.marketingFooterDefault(brand)}
                   </Text>
                   <Text className="m-0 mt-[5px] font-sans text-[11px] leading-[18px] text-[#6b7280]">
                     <Link href={unsubscribeUrl} className="text-[#6b7280] underline">
@@ -156,13 +154,11 @@ export function LifecycleEmailLayout({
                 </>
               ) : (
                 <Text className="m-0 font-sans text-[11px] leading-[18px] text-[#6b7280]">
-                  {t.transactionalFooter}
+                  {t.transactionalFooter(brand)}
                 </Text>
               )}
               <Hr className="my-[15px] border-[#e5e7eb]" />
-              <Text className="m-0 font-sans text-[10px] leading-[16px] text-[#9ca3af]">
-                WonderMoney · Radix Catch, Lda. · Portugal
-              </Text>
+              <BrandFooterLine brandName={brand} />
             </Section>
           </Container>
         </Body>

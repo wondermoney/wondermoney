@@ -72,7 +72,7 @@ afterEach(async () => {
   vi.resetModules();
 });
 
-describe('rate-limit families (RAD-547)', () => {
+describe('rate-limit families', () => {
   describe('strict families keep a low ceiling', () => {
     it('blocks the admin API after 5 requests in production', async () => {
       const { adminApiRateLimit } = await loadRateLimitModule(PRODUCTION_ENV);
@@ -160,7 +160,7 @@ describe('rate-limit families (RAD-547)', () => {
   });
 
   describe('keying', () => {
-    it('keys on the verified Supabase subject when there is one', async () => {
+    it('keys on the verified better-auth user when there is one', async () => {
       const { buildRateLimitKey } = await loadRateLimitModule(PRODUCTION_ENV);
       const req = { authUser: { user: { id: 'sub-123' } }, ip: '203.0.113.5' } as unknown as Request;
 
@@ -253,8 +253,8 @@ describe('rate-limit families (RAD-547)', () => {
       expect(resolveFamilyLimit('adminApi')).toBe(5);
     });
 
-    // RAD-567 — the multiplier is a code constant now. An env var of the same name was
-    // never set in any environment, so it only ever added a second source of truth.
+    // The multiplier is a code constant. An env var of the same name would only add a
+    // second source of truth.
     it('ignores a RATE_LIMIT_RELAXED_MULTIPLIER left over in the environment', async () => {
       const { RELAXED_MULTIPLIER } = await loadRateLimitModule({
         ...STAGING_ENV,
@@ -316,11 +316,11 @@ describe('rate-limit families (RAD-547)', () => {
 });
 
 /**
- * RAD-567 — a 429 deliberately bypasses the shared error handler, so before this the only
- * trace of a badly-sized ceiling was a `warn` line. The ceilings were sized from an
+ * A 429 deliberately bypasses the shared error handler, so without this the only
+ * trace of a badly-sized ceiling would be a `warn` line. The ceilings were sized from an
  * estimate rather than measured traffic, so being able to see one bite matters.
  */
-describe('breach observability (RAD-567)', () => {
+describe('breach observability', () => {
   // Reset *before* each case: the suites above this one also produce 429s, and the mock is
   // module-level, so an afterEach here would leave their calls on the counter.
   beforeEach(() => {

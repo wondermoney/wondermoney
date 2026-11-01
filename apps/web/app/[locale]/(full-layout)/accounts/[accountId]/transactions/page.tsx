@@ -5,6 +5,7 @@ import { getAccount } from "@/lib/api/account/useAccount";
 import { getAccountTransactions } from "@/lib/api/account/useAccountTransactions";
 import { getServerApi } from "@/lib/api/api-server";
 import { getConfigs } from "@/lib/api/configs/useConfigs";
+import { serverDataTimestamp } from "@/lib/query/server-seed";
 
 import AccountTransactionsClient from "./account-transactions-client";
 
@@ -27,6 +28,7 @@ export default async function AccountTransactionsPage({
   }
 
   const api = await getServerApi(locale);
+  const serverRenderedAt = serverDataTimestamp();
 
   const defaultDateRange = {
     from: startOfDay(subDays(new Date(), 60)),
@@ -53,6 +55,7 @@ export default async function AccountTransactionsPage({
     <AccountTransactionsClient
       accountId={accountId}
       showUnreviewedOnly={Boolean(showUnreviewedOnly)}
+      serverRenderedAt={serverRenderedAt}
       initialAccountData={accountData}
       initialTransactionsData={transactionsData}
       initialConfigsData={configsData}

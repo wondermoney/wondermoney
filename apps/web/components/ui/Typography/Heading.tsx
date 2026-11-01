@@ -20,6 +20,12 @@ interface HeadingProps
   extends React.HTMLAttributes<HTMLTypographyElement>,
     VariantPropsTypographyWithoutVariant {
   variant: AllowedVariants;
+  /**
+   * The element to render, when the document outline needs a different level
+   * from the look: `variant="h4" as="h2"` is an h2 that reads as a card title.
+   * Defaults to the variant's own element.
+   */
+  as?: "h1" | "h2" | "h3" | "h4" | "h5" | "h6";
 }
 
 const Heading = React.forwardRef<HTMLTypographyElement, HeadingProps>(

@@ -8,6 +8,7 @@ import type { Account } from "@/lib/api/account/useAccounts";
 import { cn } from "@/lib/utils";
 import { getDateFnsLocale } from "@/lib/utils/dateFnsLocale";
 
+import { clampSyncedAt } from "./sync-time";
 /**
  * How fresh is everything on this screen? — DESIGN.md § 9 rule 6.
  *
@@ -61,7 +62,9 @@ export default function AccountsFreshness({
   }
 
   const timestamps = synced
-    .map((account) => account.syncStatus?.lastSyncedAt ?? account.refreshedAt)
+    .map((account) =>
+      clampSyncedAt(account.syncStatus?.lastSyncedAt ?? account.refreshedAt),
+    )
     .filter((value): value is string => Boolean(value))
     .map((value) => Date.parse(value))
     .filter((value) => Number.isFinite(value));

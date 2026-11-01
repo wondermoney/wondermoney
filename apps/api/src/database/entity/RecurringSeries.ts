@@ -1,15 +1,6 @@
-import {
-  Collection,
-  Entity,
-  Enum,
-  Filter,
-  Index,
-  ManyToOne,
-  OneToMany,
-  PrimaryKey,
-  Property,
-} from '@mikro-orm/core';
+import { Collection } from '@mikro-orm/core';
 import type { Rel } from '@mikro-orm/core';
+import { Entity, Enum, Filter, Index, ManyToOne, OneToMany, PrimaryKey, Property } from '@mikro-orm/decorators/legacy';
 
 import { RecurringAmountType, RecurringCadence, RecurringSeriesSource, RecurringSeriesStatus, RecurringSeriesType } from '@service/recurring/recurring-types';
 

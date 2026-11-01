@@ -18,7 +18,7 @@ export interface DividendIncomeResponse {
  * Fetches dividend income data
  * Uses path param for individual portfolio, aggregate endpoint for all
  */
-export async function getDividendIncome(
+async function getDividendIncome(
   portfolioId: number | null,
   apiClient: AxiosInstance = api,
 ): Promise<DividendIncomeResponse> {

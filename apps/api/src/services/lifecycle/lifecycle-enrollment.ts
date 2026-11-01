@@ -12,7 +12,7 @@ export interface ScheduledStep {
 }
 
 /** Records a pending delivery + enqueues its send. Idempotent (upsert + singletonKey). */
-export async function scheduleLifecycleStep(em: EntityManager, enqueue: Enqueue, campaign: LifecycleCampaign, appuserKey: number, step: string, templateVersion: string, scheduledFor: Date): Promise<void> {
+async function scheduleLifecycleStep(em: EntityManager, enqueue: Enqueue, campaign: LifecycleCampaign, appuserKey: number, step: string, templateVersion: string, scheduledFor: Date): Promise<void> {
   await upsertPendingDelivery(em, { appuserKey, campaign, scheduledFor, step, templateVersion });
   await enqueueLifecycleSend({ appuserKey, campaign, step, templateVersion }, { enqueue }, scheduledFor);
 }

@@ -23,7 +23,7 @@ import { useAddToWatchlist, useRemoveFromWatchlist } from './use-watchlist-mutat
 /**
  * Mirrors AccountDetailRoute's exact dynamic-route param convention.
  *
- * RAD-243 (slice 2) — the watchlist membership `GET` and the add/remove
+ * The watchlist membership `GET` and the add/remove
  * mutations are wired here alongside the pre-existing quote query. They are
  * intentionally kept out of `AssetDetailViewState`: a still-loading or
  * errored watchlist query must not block the quote screen from rendering,

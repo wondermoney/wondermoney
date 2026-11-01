@@ -5,7 +5,7 @@ import api from "../api";
 import { goalsQueryKey } from "./keys";
 import type { GetGoalsParams, GetGoalsResponse } from "./types";
 
-export async function getGoals(
+async function getGoals(
   params: GetGoalsParams = {},
   apiClient: AxiosInstance = api,
 ): Promise<GetGoalsResponse> {

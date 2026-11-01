@@ -1,12 +1,15 @@
 import * as Sentry from "@sentry/nextjs";
 import { NextRequest, NextResponse } from "next/server";
 
-import api, { getApiUrl } from "@/lib/api/api";
+import { SIGNUP_COMPLETION_QUERY_PARAMS } from "@/lib/analytics/signup";
+import api from "@/lib/api/api";
+import { getServerApiUrl } from "@/lib/api/server-api-url";
 import {
   buildLocalizedAuthErrorPath,
   buildSafeAuthOrigin,
   resolveAuthLocale,
 } from "@/lib/auth/auth-error-redirect";
+import { getSafeNextPath, withNextParam } from "@/lib/auth/safe-next-path";
 
 type AuthCallbackResponse = {
   outcome?: "demo" | "login" | "signup";
@@ -31,7 +34,7 @@ function shouldMarkAuthCompleteSignup(callbackResult?: AuthCallbackResponse) {
 async function fetchBetterAuthSession(
   cookieHeader: string,
 ): Promise<BetterAuthSession | null> {
-  const response = await fetch(`${getApiUrl()}/api/auth/get-session`, {
+  const response = await fetch(`${getServerApiUrl()}/api/auth/get-session`, {
     headers: { cookie: cookieHeader },
     cache: "no-store",
   });
@@ -77,8 +80,18 @@ async function completeAuth(request: NextRequest) {
   }
 
   const errorUrl = new URL(buildLocalizedAuthErrorPath(locale), safeOrigin);
-  const mfaUrl = new URL(`/${locale}/auth/mfa`, safeOrigin);
-  const successUrl = new URL(`/${locale}`, safeOrigin);
+  // `next` comes from the Google callbackURL LoginForm built. Validate against
+  // the configured origin, never the request's, and never log it.
+  const next = getSafeNextPath(
+    request.nextUrl.searchParams.get("next"),
+    safeOrigin,
+  );
+  const mfaUrl = new URL(withNextParam(`/${locale}/auth/mfa`, next), safeOrigin);
+  const successUrl = new URL(next ?? `/${locale}`, safeOrigin);
+  // Markers on `next` itself would let a crafted link fake a signup event.
+  for (const param of SIGNUP_COMPLETION_QUERY_PARAMS) {
+    successUrl.searchParams.delete(param);
+  }
 
   const cookieHeader = request.headers.get("cookie") ?? "";
 
@@ -106,6 +119,7 @@ async function completeAuth(request: NextRequest) {
       "/v1/auth/callback",
       { locale },
       {
+        baseURL: getServerApiUrl(),
         headers: { Cookie: cookieHeader },
       },
     );

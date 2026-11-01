@@ -7,7 +7,7 @@ import { useInsightQuery } from './use-insight-query'
 import { useProductRuntime } from '@/components/providers/product-runtime-provider'
 
 /**
- * RAD-198 — dashboard insights teaser. Requests exactly the top-1 spending
+ * Dashboard insights teaser. Requests exactly the top-1 spending
  * category for the current month, not the full account-insights bundle
  * (metrics + cashflow + categories) the dedicated Insights screen loads —
  * a dashboard card doesn't need per-account rows or a cashflow series.

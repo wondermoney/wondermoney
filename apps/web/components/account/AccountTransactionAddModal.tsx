@@ -4,12 +4,16 @@ import { useQueryClient } from "@tanstack/react-query";
 import { Plus, Sparkles } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { usePostHog } from "posthog-js/react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { SubmitHandler } from "react-hook-form";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { DrawerDialog } from "@/components/ui/dialog-responsive";
+import {
+  toTransactionRequest,
+  type TransactionFormValues,
+} from "@/lib/account/transaction-form-schema";
 import { Account } from "@/lib/api/account/useAccounts";
 import useConfirmTransactionOcr from "@/lib/api/account/useConfirmTransactionOcr";
 import useCreateTransaction from "@/lib/api/account/useCreateTransaction";
@@ -19,6 +23,7 @@ import { useFeature } from "@/lib/api/instance/useInstance";
 import { useRateLimitToast } from "@/lib/api/useRateLimitToast";
 import { cn } from "@/lib/utils";
 import { invalidateAccounts } from "@/lib/utils/queryInvalidation";
+import { useLocalStorageItem } from "@/lib/utils/useLocalStorageItem";
 
 import AccountTransactionAddForm from "./AccountTransactionAddForm";
 import AccountTransactionOcrContent, {
@@ -32,21 +37,7 @@ interface AccountTransactionAddModalProps {
   trigger?: React.ReactNode;
 }
 
-interface AccountTransactionFormData {
-  transactionDate: Date;
-  transactionTypeId: string;
-  accountId: string;
-  notes?: string;
-  description?: string;
-  originalAmount?: number;
-  originalCurrencyId?: string;
-  exchangeRate?: number;
-  settlementAmount: number;
-  settlementCurrencyId: string;
-  transactionMerchantId?: string;
-  transactionMerchantName: string;
-  categoryId?: string;
-}
+type AccountTransactionFormData = TransactionFormValues;
 
 enum TransactionAddStep {
   MANUAL,
@@ -71,22 +62,14 @@ const AccountTransactionAddModal: React.FC<AccountTransactionAddModalProps> = ({
   );
   const [ocrKey, setOcrKey] = useState<number>();
   const [ocrData, setOcrData] = useState<TransactionOcrData>();
-  const [termsAndConditionsAccept, setTermsAndConditionsAccept] = useState<
-    boolean | undefined
-  >();
+  // The OCR step remembers the user's terms acceptance in localStorage.
+  const storedTermsAccept = useLocalStorageItem("terms_and_conditions_accept");
+  const termsAndConditionsAccept =
+    storedTermsAccept === null ? undefined : Boolean(storedTermsAccept);
 
   const createTransactionMutation = useCreateTransaction();
   const confirmTransactionOcrMutation = useConfirmTransactionOcr();
   const rejectTransactionOcrMutation = useRejectTransactionOcr();
-
-  useEffect(() => {
-    if (!isOpen) return;
-
-    const value = localStorage.getItem("terms_and_conditions_accept");
-    if (value === null) return;
-
-    setTermsAndConditionsAccept(Boolean(value));
-  }, [isOpen]);
 
   const onOcrComplete = (
     transactionOcrImportId: number,
@@ -100,20 +83,7 @@ const AccountTransactionAddModal: React.FC<AccountTransactionAddModalProps> = ({
   const onManualAddSubmit: SubmitHandler<AccountTransactionFormData> = async (
     data,
   ) => {
-    const cleanedUpData: any = { ...data };
-    if (
-      cleanedUpData.transactionMerchantId &&
-      cleanedUpData.transactionMerchantId.startsWith("[NewMerchant]")
-    ) {
-      cleanedUpData.transactionMerchantId = undefined;
-    }
-    if (!!cleanedUpData.transactionMerchantId) {
-      cleanedUpData.transactionMerchantId = Number(
-        cleanedUpData.transactionMerchantId,
-      );
-    }
-
-    await createTransactionMutation.mutateAsync(cleanedUpData, {
+    await createTransactionMutation.mutateAsync(toTransactionRequest(data), {
       onSuccess: async (response) => {
         await invalidateAccounts(queryClient);
         setOpen(false);
@@ -123,7 +93,7 @@ const AccountTransactionAddModal: React.FC<AccountTransactionAddModalProps> = ({
           via: "manual",
         });
         toast.success(t("toast-add-transaction-success"), { duration: 9000 });
-        // RAD-346 warn-and-allow: the transaction was created; just flag a likely duplicate.
+        // Warn-and-allow: the transaction was created; just flag a likely duplicate.
         const possibleDuplicate = (
           response as { data?: { possibleDuplicate?: boolean } } | undefined
         )?.data?.possibleDuplicate;
@@ -155,26 +125,10 @@ const AccountTransactionAddModal: React.FC<AccountTransactionAddModalProps> = ({
       return;
     }
 
-    const cleanedUpData: any = { ...data };
-    if (
-      cleanedUpData.transactionMerchantId &&
-      cleanedUpData.transactionMerchantId.startsWith("[NewMerchant]")
-    ) {
-      cleanedUpData.transactionMerchantId = undefined;
-    }
-    if (!!cleanedUpData.transactionMerchantId) {
-      cleanedUpData.transactionMerchantId = Number(
-        cleanedUpData.transactionMerchantId,
-      );
-    }
-    if (!!cleanedUpData.categoryId) {
-      cleanedUpData.categoryId = Number(cleanedUpData.categoryId);
-    }
-
     await confirmTransactionOcrMutation.mutateAsync(
       {
         transactionOcrImportId: ocrKey,
-        ...cleanedUpData,
+        ...toTransactionRequest(data),
       },
       {
         onSuccess: async () => {
@@ -337,12 +291,12 @@ const AccountTransactionAddModal: React.FC<AccountTransactionAddModalProps> = ({
         // `isOpen`/`setOpen`-controlled call site with no visible button) and
         // wants no trigger rendered at all — distinct from "not passed",
         // which falls back to the default button. `trigger ?? <Button>` alone
-        // can't tell those apart, since `null` is nullish too: it used to be
-        // worked around by passing an empty Fragment, but Radix's
-        // `DialogTrigger asChild` then clones its own props (e.g. `type`)
+        // can't tell those apart, since `null` is nullish too. Passing an
+        // empty Fragment instead doesn't work: Radix's
+        // `DialogTrigger asChild` clones its own props (e.g. `type`)
         // onto that Fragment, which can only accept `key`/`children` and
         // logs "Invalid prop `type` supplied to `React.Fragment`" on every
-        // render (RAD-653). Matches the `trigger !== undefined` pattern in
+        // render. Matches the `trigger !== undefined` pattern in
         // PortfolioTransactionAddModal.
         trigger !== undefined ? (
           (trigger ?? undefined)

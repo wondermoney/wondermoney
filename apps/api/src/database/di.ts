@@ -21,7 +21,7 @@ export async function connectDatabase() {
     DI.orm = await MikroORM.init(mikroOrmConfig);
     DI.em = DI.orm.em;
     types.setTypeParser(types.builtins.NUMERIC, (value: string) => Number.parseFloat(value));
-    const migrations = await DI.orm.migrator.getPendingMigrations();
+    const migrations = await DI.orm.migrator.getPending();
     if (migrations.length > 0) logger.warn({ migrations: migrations.map((migration) => migration.name) }, 'Database has pending migrations');
     else logger.info('Database migrations are up to date');
     return DI.orm;

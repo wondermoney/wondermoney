@@ -17,16 +17,14 @@ const SelectTrigger = React.forwardRef<
   <SelectPrimitive.Trigger
     ref={ref}
     className={cn(
-      // `text-muted-foreground` used to sit on the trigger unconditionally, so
-      // the value the user had *chosen* rendered in placeholder grey across all
-      // 27 call sites — none of which overrode it. Radix marks the empty state
-      // with `data-placeholder`, so the two can finally be told apart: a real
-      // selection is foreground text, only the placeholder is muted.
+      // `text-muted-foreground` must not sit on the trigger unconditionally, or
+      // the value the user *chose* renders in placeholder grey. Radix marks the
+      // empty state with `data-placeholder`, so the two can be told apart: a
+      // real selection is foreground text, only the placeholder is muted.
       //
-      // Focus moved from `focus:` to `focus-visible:` to match every other
-      // primitive. Radix returns focus to the trigger when the menu closes, so
-      // under `focus:` a mouse user was left holding a keyboard ring after
-      // every single selection.
+      // Focus uses `focus-visible:` to match every other primitive. Radix
+      // returns focus to the trigger when the menu closes, so under `focus:` a
+      // mouse user would be left holding a keyboard ring after every selection.
       "border-input bg-background ring-offset-background text-foreground data-[placeholder]:text-muted-foreground focus-visible:ring-ring hover:border-ring/40 aria-[invalid=true]:border-destructive-text aria-[invalid=true]:focus-visible:ring-destructive-text disabled:hover:border-input flex h-10 w-full items-center justify-between rounded-md border px-3 py-2 text-sm transition-[border-color] duration-[var(--duration-micro)] ease-out focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-hidden disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1",
       className,
     )}

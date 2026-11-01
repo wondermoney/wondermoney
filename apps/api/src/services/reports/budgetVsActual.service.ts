@@ -31,7 +31,7 @@ const CATEGORY_POPULATE = [
 export async function getBudgetVsActualReport(input: ReportServiceInput): Promise<BudgetVsActualRow[]> {
   const { filters, tenant, user } = input;
 
-  // Budgets are household-shared (RAD-343): tenant-scoped.
+  // Budgets are household-shared: tenant-scoped.
   const budgets = await DI.em.find(Budget, { deletedAt: undefined, tenantKey: tenant });
   if (budgets.length === 0) return [];
   const budget = budgets[0];
@@ -142,7 +142,7 @@ export function buildBudgetVsActualCsv(rows: BudgetVsActualRow[]): string {
 }
 
 /**
- * RAD-565 — the covered-month set and the budget template rows are joined on
+ * The covered-month set and the budget template rows are joined on
  * this key, so both sides must build it the same way. Zero-padded, which the
  * old `${year}-${month + 1}` form was not.
  *

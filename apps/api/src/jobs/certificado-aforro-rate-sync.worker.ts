@@ -1,8 +1,9 @@
-import type { Knex } from '@mikro-orm/postgresql';
 import * as Sentry from '@sentry/node';
+import type { Kysely } from 'kysely';
 import type { Job } from 'pg-boss';
 
 import { DI } from '@app/database/di';
+import { type SqlDatabase, sqlQuery } from '@app/database/sql';
 import { CertificadoAforroRateSource } from '@entity/CertificadoAforroRatePeriod';
 import OpenAI, { type PromptResponseFormat } from '@service/ai/openai';
 import { CERTIFICADO_AFORRO_SERIES_CONSTANTS } from '@service/portfolio/certificado-aforro-calculation.service';
@@ -10,7 +11,7 @@ import { convertPDFToImage, extractPDFTextLayer } from '@utils/documents';
 import logger from '@utils/logger';
 
 /**
- * Certificados de Aforro monthly base-rate ingestion (RAD-445, Task 5).
+ * Certificados de Aforro monthly base-rate ingestion.
  *
  * === What IGCP actually publishes (verified live against igcp.pt on 2026-08-06) ===
  *
@@ -65,7 +66,7 @@ import logger from '@utils/logger';
  * whole-percentage-point offset error (100bps is 4 × 0.25pp and looks perfectly plausible). It
  * is a guard against misread and wrong-month tables, not against a modelling mistake.
  *
- * === "Target-month" is a row filter, not a property of the table (RAD-445 follow-up) ===
+ * === "Target-month" is a row filter, not a property of the table ===
  *
  * These tables are headed "Taxa de Juro Anual … em vigor no TRIMESTRE CORRENTE de contagem de
  * juros". A cohort's quarterly interest period starts on its own subscription anniversary, so at
@@ -77,12 +78,11 @@ import logger from '@utils/logger';
  *   desde agosto de 2026   4,474% / 3,974%   (Aug  base 3.474% + 1.00pp / + 0.50pp)   8 rows
  *
  * Only the last third may be compared against August's base rate. Feeding a June row to the
- * cross-check implies a 0.741pp premium and fails — which is precisely what happened in
- * production between 2026-08-11 and 2026-08-24 (Sentry API-WC / API-WD): the vision model did not
- * honour the prompt's row filter and kept returning June rows. Note the failure was one-directional
- * — an off-month row can only produce a false REJECT, never a false accept, because none of the
- * off-month gaps (0.241 / 0.382 / 0.741 / 0.882pp) lands near a 0.25pp step. No wrong rate was ever
- * written; the derived rate was simply withheld on most runs.
+ * cross-check implies a 0.741pp premium and fails — which is what a vision model that ignores the
+ * prompt's row filter produces. The failure is one-directional — an off-month row can only produce
+ * a false REJECT, never a false accept, because none of the off-month gaps
+ * (0.241 / 0.382 / 0.741 / 0.882pp) lands near a 0.25pp step. A misread withholds the derived rate;
+ * it never writes a wrong one.
  *
  * === Why the text layer, not vision ===
  *
@@ -130,7 +130,7 @@ const IGCP_ORIGIN = 'https://www.igcp.pt';
 const IGCP_FETCH_TIMEOUT_MS = 30_000;
 const IGCP_PDF_FETCH_TIMEOUT_MS = 60_000;
 
-export const PT_MONTHS = [
+const PT_MONTHS = [
   'janeiro',
   'fevereiro',
   'março',
@@ -155,29 +155,28 @@ const SERIE_F_SYMBOL = 'CA-SERIE-F';
  * title. It shares Série D's base-rate formula (Euribor 3M + 1.00pp, cap 3.50%); only the premium
  * schedule differs (Portaria 268-D/2012 cohorts).
  *
- * RAD-597: the rate itself is the same arithmetic on Série F's published figure that D and E get,
+ * The rate itself is the same arithmetic on Série F's published figure that D and E get,
  * so it is not a guess. What is unverified is narrower — that Série C uses the C/D/E formula at
  * all. Nothing published names C, and C is the only series with no table of its own to cross-check
  * against, so it rides D's gate, which validates D's table rather than C's.
  *
  * Rows are stamped `IGCP_DERIVED_NO_SERIES_CROSSCHECK` so that limitation travels with the data
- * instead of living only in this comment. Measured 2026-08-24: zero holdings reference any
- * CA-SERIE-* asset in prod or staging, so nothing is mispriced today.
+ * instead of living only in this comment.
  */
 const SERIE_C_SYMBOL = 'CA-SERIE-C';
 
 /**
- * Provenance stamped on a rate row (RAD-597).
+ * Provenance stamped on a rate row.
  *
  * Every C/D/E row is arithmetic on Série F's published figure — none of them is
  * literally scraped from its own table — but D and E each have a published table
  * that cross-checks the result. Série C has none, so the claim "C uses the C/D/E
  * formula" is carried by nothing but the shared-formula inference.
  *
- * Stamping every row `IGCP_PDF_SCRAPE` said otherwise: it asserted a C-specific
- * scrape that never happened, and made the one series with no independent
- * confirmation indistinguishable from the two that have it. A reader could not
- * tell which rows to doubt.
+ * Stamping every row `IGCP_PDF_SCRAPE` would say otherwise: it would assert a
+ * C-specific scrape that never happened, and make the one series with no
+ * independent confirmation indistinguishable from the two that have it. A reader
+ * could not tell which rows to doubt.
  */
 const RATE_SOURCE_SCRAPED = CertificadoAforroRateSource.IGCP_PDF_SCRAPE;
 const RATE_SOURCE_C_NO_OWN_CROSSCHECK = CertificadoAforroRateSource.IGCP_DERIVED_NO_SERIES_CROSSCHECK;
@@ -277,7 +276,7 @@ export function buildAnnouncementUrl(targetMonth: Date): string {
 }
 
 /** `Date` -> `YYYY-MM-01`, in UTC, for the `date`-typed `effective_month` column. */
-export function toEffectiveMonth(month: Date): string {
+function toEffectiveMonth(month: Date): string {
   return `${month.getUTCFullYear()}-${String(month.getUTCMonth() + 1).padStart(2, '0')}-01`;
 }
 
@@ -298,7 +297,7 @@ export function buildFallbackPdfUrl(series: CrossCheckedSeries, targetMonth: Dat
  * `null` means "IGCP hasn't published this month yet" (404) — a soft no-op, since the job polls
  * daily. Anything else that isn't a 2xx is a genuine failure worth alerting on.
  */
-export async function fetchAnnouncementPage(targetMonth: Date, fetchImpl: typeof fetch): Promise<null | string> {
+async function fetchAnnouncementPage(targetMonth: Date, fetchImpl: typeof fetch): Promise<null | string> {
   const response = await fetchImpl(buildAnnouncementUrl(targetMonth), { signal: AbortSignal.timeout(IGCP_FETCH_TIMEOUT_MS) });
   if (response.status === 404) return null;
   if (!response.ok) throw new Error(`IGCP announcement page returned ${response.status}`);
@@ -378,22 +377,22 @@ export function extractPdfLink(html: string, series: CrossCheckedSeries): null |
 // ---------------------------------------------------------------------------
 
 /** A series' legal base-rate cap, which doubles as the sanity upper bound for its published figure. */
-export function isSaneRateBps(rateBps: number, maxBps: number): boolean {
+export function tenthBpsToBps(tenthBps: number): number {
+  return Math.round(tenthBps / TENTH_BPS_PER_BPS);
+}
+
+function isSaneRateBps(rateBps: number, maxBps: number): boolean {
   return Number.isFinite(rateBps) && rateBps >= SANITY_MIN_BPS && rateBps <= maxBps;
 }
 
-export function percentToTenthBps(percent: string): null | number {
+function percentToTenthBps(percent: string): null | number {
   const value = Number.parseFloat(percent.replace(',', '.'));
   if (!Number.isFinite(value)) return null;
   return Math.round(value * PERCENT_TO_TENTH_BPS);
 }
 
-export function sanityMaxBpsFor(symbol: string): number {
+function sanityMaxBpsFor(symbol: string): number {
   return CERTIFICADO_AFORRO_SERIES_CONSTANTS[symbol]?.capBps ?? SANITY_MAX_FALLBACK_BPS;
-}
-
-export function tenthBpsToBps(tenthBps: number): number {
-  return Math.round(tenthBps / TENTH_BPS_PER_BPS);
 }
 
 // ---------------------------------------------------------------------------
@@ -428,7 +427,7 @@ const RATE_TABLE_RESPONSE_FORMAT: PromptResponseFormat = {
  * here feeds straight into real money calculations, so a refusal is always cheaper than a wrong
  * number (the caller treats `uncertain` and any unparseable answer alike, as a hard failure).
  */
-export function buildRateTablePrompt(series: CrossCheckedSeries, targetMonth: Date): string {
+function buildRateTablePrompt(series: CrossCheckedSeries, targetMonth: Date): string {
   const monthName = PT_MONTHS[targetMonth.getUTCMonth()];
   const since = `desde ${monthName} de ${targetMonth.getUTCFullYear()}`;
 
@@ -578,12 +577,13 @@ export function crossCheckGrossRates(
  * soft-deleted month can be re-ingested rather than blocking the unique key forever.
  */
 export function buildRateUpsertQuery(
-  knex: Knex,
+  db: Kysely<SqlDatabase>,
   input: { baseRateBps: number; effectiveMonth: string; financialAssetKey: number; source?: string },
   now: Date,
-): Knex.QueryBuilder {
-  return knex('certificado_aforro_rate_period')
-    .insert({
+) {
+  return db
+    .insertInto('certificado_aforro_rate_period')
+    .values({
       base_rate_bps: input.baseRateBps,
       created_at: now,
       effective_month: input.effectiveMonth,
@@ -591,23 +591,27 @@ export function buildRateUpsertQuery(
       source: input.source ?? RATE_SOURCE_SCRAPED,
       updated_at: now,
     })
-    .onConflict(['financial_asset_key', 'effective_month'])
-    .merge({ base_rate_bps: input.baseRateBps, deleted_at: null, source: input.source ?? RATE_SOURCE_SCRAPED, updated_at: now })
-    .where('certificado_aforro_rate_period.source', '!=', 'MANUAL_OVERRIDE');
+    .onConflict((conflict) =>
+      conflict
+        .columns(['financial_asset_key', 'effective_month'])
+        .doUpdateSet({ base_rate_bps: input.baseRateBps, deleted_at: null, source: input.source ?? RATE_SOURCE_SCRAPED, updated_at: now })
+        .where('certificado_aforro_rate_period.source', '!=', 'MANUAL_OVERRIDE'));
 }
 
-export function createKnexRateSyncStore(knex: Knex, now: () => Date = () => new Date()): RateSyncStore {
+function createRateSyncStore(db: Kysely<SqlDatabase>, now: () => Date = () => new Date()): RateSyncStore {
   return {
     findFinancialAssetKey: async (symbol) => {
-      const row = (await knex('financial_asset')
+      const row = await db
+        .selectFrom('financial_asset')
         .select('financial_asset_key')
-        .where('symbol', symbol)
-        .whereNull('deleted_at')
-        .first()) as undefined | { financial_asset_key: number };
-      return row?.financial_asset_key;
+        .where('symbol', '=', symbol)
+        .where('deleted_at', 'is', null)
+        .limit(1)
+        .executeTakeFirst();
+      return row?.financial_asset_key as number | undefined;
     },
     upsertRatePeriod: async (input) => {
-      await buildRateUpsertQuery(knex, input, now());
+      await buildRateUpsertQuery(db, input, now()).execute();
     },
   };
 }
@@ -719,16 +723,14 @@ export const handleCertificadoAforroRateSyncAutoJob = async (
   const ocr =
     deps.ocr ??
     ((input: { images: string[]; prompt: string }) =>
-      // RESOLVED (2026-08-24, was TODO(RAD-445) "never exercised against real Azure"): production
-      // ran this daily from 2026-08-11 and every failure arrived as `cross-check-mismatch` with a
-      // populated `grossRates` array, never as a transport/schema error. So the vision deployment
-      // (AZURE_OPENAI_OCR_DEPLOYMENT, `gpt-5.4-nano`) does accept `json_schema` at `strict: true`,
-      // and it returns schema-conforming bodies. Keep `strict: true`: a non-strict schema would be a
-      // weaker guarantee on money-critical output, and there is now no reason to weaken it.
+      // Verified against production Azure: the vision deployment (AZURE_OPENAI_OCR_DEPLOYMENT,
+      // `gpt-5.4-nano`) accepts `json_schema` at `strict: true` and returns schema-conforming
+      // bodies. Keep `strict: true`: a non-strict schema would be a weaker guarantee on
+      // money-critical output.
       //
-      // What those same runs disproved is the model's *reading*: it would not honour the prompt's
-      // "only rows matching desde <month>" filter and mixed in other quarters' rows. That is why
-      // this call is now only a fall-back for an image-only PDF — see the docblock. It stays
+      // What is unreliable is the model's *reading*: it does not honour the prompt's
+      // "only rows matching desde <month>" filter and mixes in other quarters' rows. That is why
+      // this call is only a fall-back for an image-only PDF — see the docblock. It stays
       // untested by CI (every test injects `deps.ocr`), which is acceptable only because the
       // deterministic path above is the one that actually runs, and that one is covered against the
       // real PDFs in `certificado-aforro-rate-table.test.ts`.
@@ -738,7 +740,7 @@ export const handleCertificadoAforroRateSyncAutoJob = async (
         prompt: input.prompt,
         responseFormat: RATE_TABLE_RESPONSE_FORMAT,
       }));
-  const store = deps.store ?? createKnexRateSyncStore(DI.em.getKnex(), () => now);
+  const store = deps.store ?? createRateSyncStore(sqlQuery(DI.em), () => now);
   const written: string[] = [];
 
   let html: null | string;

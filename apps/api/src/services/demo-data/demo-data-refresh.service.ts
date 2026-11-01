@@ -408,7 +408,7 @@ export class DemoDataRefreshService {
           tenantKey: account.tenantKey,
         },
         // Chronological running balances require date as the primary ordering.
-        // RAD-25: balance recomputation must include hidden transactions so the stored running-balance
+        // Balance recomputation must include hidden transactions so the stored running-balance
         // chain and account.balance stay physically accurate; already account/tenant-scoped.
         // eslint-disable-next-line perfectionist/sort-objects
         { filters: { [HIDDEN_FILTER]: false }, orderBy: { transactionDate: QueryOrder.ASC, externalTransactionId: QueryOrder.ASC } },
@@ -786,4 +786,3 @@ function subUtcDays(date: Date, days: number): Date {
   return addUtcDays(date, -days);
 }
 
-export default new DemoDataRefreshService();

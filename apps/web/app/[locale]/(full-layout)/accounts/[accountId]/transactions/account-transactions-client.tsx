@@ -18,10 +18,12 @@ import type { GetAccountTransactionsResponse } from "@/lib/api/account/useAccoun
 import useAccountTransactions from "@/lib/api/account/useAccountTransactions";
 import type { GetConfigsResponse } from "@/lib/api/configs/useConfigs";
 import useConfigs from "@/lib/api/configs/useConfigs";
+import { serverSeed } from "@/lib/query/server-seed";
 
 interface AccountTransactionsClientProps {
   accountId: number;
   showUnreviewedOnly: boolean;
+  serverRenderedAt: number;
   initialAccountData: GetAccountResponse;
   initialTransactionsData: GetAccountTransactionsResponse;
   initialConfigsData: GetConfigsResponse;
@@ -32,6 +34,7 @@ interface AccountTransactionsClientProps {
 export default function AccountTransactionsClient({
   accountId,
   showUnreviewedOnly,
+  serverRenderedAt,
   initialAccountData,
   initialTransactionsData,
   initialConfigsData,
@@ -43,7 +46,7 @@ export default function AccountTransactionsClient({
 
   const { data: accountsData, isLoading: isLoadingAccountsData } = useAccount(
     accountId,
-    { initialData: initialAccountData },
+    serverSeed(initialAccountData, serverRenderedAt),
   );
   const { data: accountsListData, isLoading: isLoadingAccountsList } =
     useAccounts();
@@ -91,10 +94,11 @@ export default function AccountTransactionsClient({
   };
 
   /*
-   * RAD-579 — the table's type and category filters, lifted so they reach the endpoint.
+   * The table's type and category filters, lifted so they reach the endpoint.
    *
-   * They ran in the browser over the loaded rows, and this endpoint caps at `limit` (default 100),
-   * so filtering one account's year by category filtered whichever 100 rows came back. No account
+   * Filtering in the browser over the loaded rows would be wrong: this endpoint caps at `limit`
+   * (default 100), so filtering one account's year by category would filter whichever 100 rows
+   * came back. No account
    * filter here: the page already scopes to one account and hides that control.
    */
   const [tableFilters, setTableFilters] = useState<{
@@ -138,17 +142,20 @@ export default function AccountTransactionsClient({
       },
       {
         enabled: !!accountId && !Number.isNaN(accountId),
-        // RAD-579: a table filter makes this a different query key, and the server payload
+        // A table filter makes this a different query key, and the server payload
         // describes the *unfiltered* set. Seeding it would count as fresh for the global 60s
         // staleTime, so no fetch would fire and the filter would silently do nothing — the
         // same trap the all-accounts page's date range hit.
-        initialData: hasTableFilters ? undefined : initialTransactionsData,
+        ...serverSeed(
+          hasTableFilters ? undefined : initialTransactionsData,
+          serverRenderedAt,
+        ),
       },
     );
 
-  const { data: configsData, isLoading: isLoadingConfigs } = useConfigs({
-    initialData: initialConfigsData,
-  });
+  const { data: configsData, isLoading: isLoadingConfigs } = useConfigs(
+    serverSeed(initialConfigsData, serverRenderedAt),
+  );
 
   const isLoading =
     isLoadingTransactions ||

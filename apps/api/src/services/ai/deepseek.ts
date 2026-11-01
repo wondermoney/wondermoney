@@ -37,7 +37,7 @@ class DeepSeekClass {
 
     // Azure AI Foundry's model-inference endpoint and any OpenAI-compatible server take the same
     // chat-completions body; only the URL and the auth header differ.
-    const request = route.kind === 'azure-foundry'
+    const request: { headers: Record<string, string>; url: string } = route.kind === 'azure-foundry'
       ? { headers: { 'api-key': route.apiKey }, url: `${route.endpoint}/models/chat/completions?api-version=${route.apiVersion}` }
       : { headers: route.apiKey ? { Authorization: `Bearer ${route.apiKey}` } : {}, url: `${route.baseURL}/chat/completions` };
 

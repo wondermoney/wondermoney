@@ -1,6 +1,7 @@
 import { Column, Hr, Row, Section, Text } from "react-email";
 
 import { LifecycleEmailLayout } from "../../emails/components/LifecycleEmail";
+import { resolveBrandName } from "../components/Brand";
 import { buildCampaignUrl } from "../../emails/lib/urls";
 import { ComparisonBar, DeltaPillRow, MetricsPanel, StatusPanel } from "../components/LifecycleVisuals";
 import type { MonthlyStoryDataSufficientProps, MonthlyStoryInsufficientDataProps, MonthlyStoryProps, TransactionalEmailLanguage } from "../types";
@@ -25,7 +26,7 @@ const COPY = {
     savingsRate: "Savings rate",
     netWorth: "Net worth",
     ctaLabel: "See your reports",
-    marketingFooterText: "You're receiving this because you turned on the monthly money story in WonderMoney.",
+    marketingFooterText: (brand: string) => `You're receiving this because you turned on the monthly money story in ${brand}.`,
     dataContext: "Based on the transactions currently available.",
   },
   pt: {
@@ -45,7 +46,7 @@ const COPY = {
     savingsRate: "Taxa de poupança",
     netWorth: "Património",
     ctaLabel: "Ver os teus relatórios",
-    marketingFooterText: "Recebeste este email porque ativaste a história financeira mensal na WonderMoney.",
+    marketingFooterText: (brand: string) => `Recebeste este email porque ativaste a história financeira mensal na ${brand}.`,
     dataContext: "Com base nas transações atualmente disponíveis.",
   },
 } as const satisfies Record<TransactionalEmailLanguage, unknown>;
@@ -86,6 +87,7 @@ function metricDetail(metric: { detail?: string; formattedBaseline?: string }, p
 
 function SufficientBody({ language, ...props }: MonthlyStoryDataSufficientProps) {
   const t = COPY[language];
+  const brand = resolveBrandName(props.brandName);
   const trackedCtaUrl = buildCampaignUrl({ destinationUrl: props.ctaUrl, nextPath: `/${language}/reports`, utmSource: "mailjet", utmMedium: "email", utmCampaign: "monthly_story", utmContent: "monthly_story" });
   const [incomeBaselineWidth, incomeSubjectWidth] = widthPercent(parseFormattedAmount(props.formattedIncomeBaseline, language), parseFormattedAmount(props.formattedIncomeSubject, language));
   const [spendingBaselineWidth, spendingSubjectWidth] = widthPercent(parseFormattedAmount(props.formattedSpendingBaseline, language), parseFormattedAmount(props.formattedSpendingSubject, language));
@@ -148,7 +150,8 @@ function SufficientBody({ language, ...props }: MonthlyStoryDataSufficientProps)
       }
       ctaLabel={t.ctaLabel}
       ctaUrl={trackedCtaUrl}
-      marketingFooterText={t.marketingFooterText}
+      marketingFooterText={t.marketingFooterText(brand)}
+      brandName={brand}
       settingsUrl={props.settingsUrl}
       privacyUrl={props.privacyUrl}
       unsubscribeUrl={props.unsubscribeUrl}
@@ -160,6 +163,7 @@ function SufficientBody({ language, ...props }: MonthlyStoryDataSufficientProps)
 
 function InsufficientBody({ language, ...props }: MonthlyStoryInsufficientDataProps) {
   const t = COPY[language];
+  const brand = resolveBrandName(props.brandName);
   const trackedCtaUrl = buildCampaignUrl({ destinationUrl: props.ctaUrl, nextPath: `/${language}/reports`, utmSource: "mailjet", utmMedium: "email", utmCampaign: "monthly_story", utmContent: "monthly_story_insufficient" });
   const body = props.reason === "zero_activity" ? t.zeroActivityBody : t.insufficientBody(props.monthsNeeded);
 
@@ -180,7 +184,8 @@ function InsufficientBody({ language, ...props }: MonthlyStoryInsufficientDataPr
       }
       ctaLabel={t.ctaLabel}
       ctaUrl={trackedCtaUrl}
-      marketingFooterText={t.marketingFooterText}
+      marketingFooterText={t.marketingFooterText(brand)}
+      brandName={brand}
       settingsUrl={props.settingsUrl}
       privacyUrl={props.privacyUrl}
       unsubscribeUrl={props.unsubscribeUrl}

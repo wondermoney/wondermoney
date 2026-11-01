@@ -18,7 +18,7 @@ export class EodhdError extends Error {
     public status?: number,
     public original?: Error,
     // EODHD's rate-limit errors carry a retryAfter hint the provider itself
-    // computed (unlike FMP, which never exposes its window) — worth keeping
+    // computed — worth keeping
     // on the wrapper error rather than making callers reach into `original`.
     public retryAfter?: number,
   ) {
@@ -45,7 +45,7 @@ export class Eodhd {
     this.debug = config.debug || false;
 
     this.client = new EODHDClient({ apiToken: apiKey, ...(config.baseUrl ? { baseUrl: config.baseUrl } : {}) });
-    this.debug && console.info('📈 EODHD client initialized');
+    if (this.debug) console.info('📈 EODHD client initialized');
   }
 
   private handleError(error: unknown): EodhdError {

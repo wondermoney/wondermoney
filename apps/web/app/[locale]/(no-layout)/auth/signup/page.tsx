@@ -8,6 +8,7 @@ import { buttonVariants } from "@/components/ui/button";
 import { Link } from "@/components/ui/Link";
 import { Text } from "@/components/ui/Typography";
 import { instanceConfig } from "@/lib/instance";
+import { getInstanceName } from "@/lib/instance-name.server";
 import { cn } from "@/lib/utils";
 import { createMetadata } from "@/lib/utils/metadata";
 
@@ -27,6 +28,7 @@ export async function generateMetadata({
 export default async function SignupPage() {
   const { privacyUrl, termsUrl } = instanceConfig;
   const t = await getTranslations();
+  const instanceName = await getInstanceName();
 
   return (
     <div className="flex min-h-dvh items-center justify-center px-6 py-12">
@@ -34,7 +36,7 @@ export default async function SignupPage() {
         <div>
           <Logo />
           <h1 className="text-foreground mt-8 text-2xl leading-9 font-bold tracking-tight">
-            {t("sign-up-title")}
+            {t("sign-up-title", { instanceName })}
           </h1>
           <p className="text-muted-foreground mt-2 space-x-1 text-sm leading-6">
             <span>{t("sign-up-subtitle")}</span>
@@ -43,7 +45,7 @@ export default async function SignupPage() {
                 loginLink: (chunks) => (
                   <Link
                     href="/auth/login"
-                    className="text-primary hover:text-primary/80 ml-1 font-semibold underline underline-offset-2"
+                    className="text-primary ml-1 font-semibold underline underline-offset-2 hover:decoration-2"
                   >
                     {chunks}
                   </Link>

@@ -1,8 +1,8 @@
 /**
- * RAD-562 — what actually reaches the wire.
+ * What actually reaches the wire.
  *
- * The chart and the CSV export are the two surfaces RAD-555 set out to make
- * agree, and they only agree if both name the same calendar. These checks drive
+ * The chart and the CSV export must agree, and they only agree if both name
+ * the same calendar. These checks drive
  * the real request builders with a stubbed transport and inspect the serialised
  * query string, so "the timezone is sent" is asserted where it matters rather
  * than at the call site.

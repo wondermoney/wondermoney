@@ -10,7 +10,7 @@ import { screenerKey } from './query-keys'
 const DISABLED_FILTERS: ScreenerFilters = { isEtf: false, isActivelyTrading: true, page: 0, limit: 0 }
 
 /**
- * RAD-241 (slice 3) — same read policy as use-quote / use-watchlist: no
+ * Same read policy as use-quote / use-watchlist: no
  * retry, no focus/reconnect refetch, MFA routed through
  * blockAccess. `filters` mirrors use-quote's null-until-ready contract:
  * the screener route only supplies filters once the user has pressed

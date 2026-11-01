@@ -1,5 +1,6 @@
-import { Collection, Entity, Enum, Index, ManyToOne, OneToMany, PrimaryKey, Property, Unique } from '@mikro-orm/core';
+import { Collection } from '@mikro-orm/core';
 import type { Rel } from '@mikro-orm/core';
+import { Entity, Enum, Index, ManyToOne, OneToMany, PrimaryKey, Property, Unique } from '@mikro-orm/decorators/legacy';
 
 import { Appuser } from './Appuser';
 import { Base } from './BaseEntity';

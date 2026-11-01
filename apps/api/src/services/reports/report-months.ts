@@ -1,12 +1,11 @@
 /**
- * RAD-555 — calendar-month bucketing for report aggregations.
+ * Calendar-month bucketing for report aggregations.
  *
  * Report date filters are applied to *instants* (`transactionDate >= fromDate`),
  * but a cash flow row is a *calendar month*. The two only agree when the month
  * is computed in the same calendar the caller used to pick the period.
  *
- * Bucketing in UTC while filtering on instants is the defect RAD-555 reports.
- * A viewer at UTC+1 picking "August" sends `fromDate=2026-07-31T23:00:00Z`, so a
+ * Bucketing in UTC while filtering on instants is wrong. A viewer at UTC+1 picking "August" sends `fromDate=2026-07-31T23:00:00Z`, so a
  * transaction in the first hour of *their* August lands in UTC **July** and the
  * response carries a month outside the selected period holding an hour's worth
  * of money. The mirror case applies at the end of the range.

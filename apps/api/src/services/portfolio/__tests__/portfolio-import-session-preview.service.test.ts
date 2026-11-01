@@ -42,6 +42,7 @@ describe('portfolio import session preview service', () => {
       .mockResolvedValueOnce([])
       .mockResolvedValueOnce([])
       .mockResolvedValueOnce([])
+      .mockResolvedValueOnce([])
       .mockResolvedValueOnce([]);
   }
 
@@ -62,7 +63,7 @@ describe('portfolio import session preview service', () => {
       rows: { duplicate: [], invalid: [], needsAssetReview: [], ready: [] },
       status: PortfolioImportSessionStatus.NEEDS_COLUMN_MAPPING,
     });
-    expect(result.rows).toEqual({ duplicate: [], invalid: [], needsAssetReview: [], ready: [] });
+    expect(result.rows).toEqual({ duplicate: [], failed: [], invalid: [], needsAssetReview: [], ready: [] });
     expect(JSON.stringify(result)).not.toContain('portfolio-import-sessions/');
   });
 
@@ -195,6 +196,7 @@ describe('portfolio import session preview service', () => {
       .mockResolvedValueOnce([{ assetGroupKey: undefined, failureReason: undefined, financialAssetKey: undefined, internalTransactionId: undefined, normalizedJson: undefined, portfolioImportRowKey: 2, rawJson: {}, rowNumber: 3, skipReason: undefined, status: PortfolioImportRowStatus.DUPLICATE }])
       .mockResolvedValueOnce([])
       .mockResolvedValueOnce([{ assetGroupKey: undefined, failureReason: undefined, financialAssetKey: undefined, internalTransactionId: undefined, normalizedJson: {}, portfolioImportRowKey: 4, rawJson: {}, rowNumber: 4, skipReason: undefined, status: PortfolioImportRowStatus.NEEDS_ASSET_REVIEW }])
+      .mockResolvedValueOnce([])
       .mockResolvedValueOnce([]);
 
     const result = await service.getPreview({ appuser, importSessionId: 456, limit: 7, tenant });
@@ -210,6 +212,48 @@ describe('portfolio import session preview service', () => {
     expect(readyRow?.raw).not.toHaveProperty('sym');
   });
 
+  it('returns bounded failed rows from the owned session using the public row mapper', async () => {
+    const failedRow = {
+      assetGroupKey: undefined,
+      failureReason: 'Insufficient quantity to sell',
+      financialAssetKey: undefined,
+      internalTransactionId: undefined,
+      normalizedJson: { quantity: '-6', symbol: 'AMD', tradeDate: '2024-01-24' },
+      portfolioImportRowKey: 707,
+      rawJson: { Quantity: '-6', Symbol: 'AMD', TradeDate: '20240124', TransactionID: 'TEST-TRANSACTIONID-007' },
+      rowNumber: 7,
+      skipReason: undefined,
+      status: PortfolioImportRowStatus.FAILED,
+    };
+    em.find
+      .mockResolvedValueOnce([])
+      .mockResolvedValueOnce([])
+      .mockResolvedValueOnce([])
+      .mockResolvedValueOnce([])
+      .mockResolvedValueOnce([failedRow])
+      .mockResolvedValueOnce([]);
+
+    const result = await service.getPreview({ appuser, importSessionId: 456, limit: 7, tenant });
+
+    expect(result.rows.failed).toEqual([
+      {
+        failureReason: 'Insufficient quantity to sell',
+        id: 707,
+        normalized: { quantity: '-6', symbol: 'AMD', tradeDate: '2024-01-24' },
+        raw: failedRow.rawJson,
+        rowNumber: 7,
+        status: PortfolioImportRowStatus.FAILED,
+      },
+    ]);
+    expect(em.find).toHaveBeenNthCalledWith(
+      5,
+      expect.any(Function),
+      expect.objectContaining({ deletedAt: undefined, portfolioImportSessionKey: session, status: PortfolioImportRowStatus.FAILED }),
+      expect.objectContaining({ limit: 7, orderBy: { rowNumber: 'asc' }, populate: ['assetGroupKey', 'financialAssetKey'] }),
+    );
+    expect(getOwnedSession).toHaveBeenCalledWith({ appuser, importSessionId: 456, tenant });
+  });
+
   it('includes ready rows for ready_to_import sessions and keeps duplicates and invalid rows', async () => {
     getOwnedSession.mockResolvedValueOnce({ ...session, status: PortfolioImportSessionStatus.READY_TO_IMPORT });
     em.find
@@ -217,6 +261,7 @@ describe('portfolio import session preview service', () => {
       .mockResolvedValueOnce([{ assetGroupKey: undefined, failureReason: undefined, financialAssetKey: undefined, internalTransactionId: undefined, normalizedJson: {}, portfolioImportRowKey: 2, rawJson: {}, rowNumber: 2, skipReason: undefined, status: PortfolioImportRowStatus.DUPLICATE }])
       .mockResolvedValueOnce([{ assetGroupKey: undefined, failureReason: 'bad', financialAssetKey: undefined, internalTransactionId: undefined, normalizedJson: {}, portfolioImportRowKey: 3, rawJson: {}, rowNumber: 3, skipReason: undefined, status: PortfolioImportRowStatus.INVALID }])
       .mockResolvedValueOnce([{ assetGroupKey: undefined, failureReason: undefined, financialAssetKey: undefined, internalTransactionId: undefined, normalizedJson: {}, portfolioImportRowKey: 4, rawJson: {}, rowNumber: 4, skipReason: undefined, status: PortfolioImportRowStatus.NEEDS_ASSET_REVIEW }])
+      .mockResolvedValueOnce([])
       .mockResolvedValueOnce([]);
 
     const result = await service.getPreview({ appuser, importSessionId: 456, limit: 10, tenant });
@@ -234,6 +279,7 @@ describe('portfolio import session preview service', () => {
       .mockResolvedValueOnce([{ assetGroupKey: undefined, failureReason: undefined, financialAssetKey: undefined, internalTransactionId: undefined, normalizedJson: {}, portfolioImportRowKey: 2, rawJson: {}, rowNumber: 2, skipReason: undefined, status: PortfolioImportRowStatus.DUPLICATE }])
       .mockResolvedValueOnce([{ assetGroupKey: undefined, failureReason: 'bad', financialAssetKey: undefined, internalTransactionId: undefined, normalizedJson: {}, portfolioImportRowKey: 3, rawJson: {}, rowNumber: 3, skipReason: undefined, status: PortfolioImportRowStatus.INVALID }])
       .mockResolvedValueOnce([])
+      .mockResolvedValueOnce([])
       .mockResolvedValueOnce([]);
 
     const result = await service.getPreview({ appuser, importSessionId: 456, limit: 10, tenant });
@@ -244,6 +290,7 @@ describe('portfolio import session preview service', () => {
 
   it('maps asset groups, candidates, rejection reasons, and sorts by actionability', async () => {
     em.find
+      .mockResolvedValueOnce([])
       .mockResolvedValueOnce([])
       .mockResolvedValueOnce([])
       .mockResolvedValueOnce([])
@@ -277,6 +324,7 @@ describe('portfolio import session preview service', () => {
       .mockResolvedValueOnce([])
       .mockResolvedValueOnce([])
       .mockResolvedValueOnce([])
+      .mockResolvedValueOnce([])
       .mockResolvedValueOnce([
         { brokerAssetName: 'amsterdam group', brokerExchange: 'XAMS', brokerTicker: 'AAA', currency: 'EUR', identityHash: '1', isin: 'NL0000001234', portfolioImportAssetGroupKey: 1, resolutionReason: undefined, selectedAction: undefined, selectedFinancialAssetKey: undefined, status: PortfolioImportAssetGroupStatus.AMBIGUOUS },
         { brokerAssetName: 'xetra group', brokerExchange: 'XETA', brokerTicker: 'BBB', currency: 'EUR', identityHash: '2', isin: 'DE0000005678', portfolioImportAssetGroupKey: 2, resolutionReason: undefined, selectedAction: undefined, selectedFinancialAssetKey: undefined, status: PortfolioImportAssetGroupStatus.AMBIGUOUS },
@@ -302,6 +350,7 @@ describe('portfolio import session preview service', () => {
       .mockResolvedValueOnce([])
       .mockResolvedValueOnce([])
       .mockResolvedValueOnce([])
+      .mockResolvedValueOnce([])
       .mockResolvedValueOnce([
         { brokerAssetName: 'ambiguous group', brokerExchange: 'XAMS', brokerTicker: 'AAA', currency: 'EUR', identityHash: '1', isin: 'NL0000001234', portfolioImportAssetGroupKey: 1, resolutionReason: undefined, selectedAction: undefined, selectedFinancialAssetKey: undefined, status: PortfolioImportAssetGroupStatus.AMBIGUOUS },
       ])
@@ -319,6 +368,7 @@ describe('portfolio import session preview service', () => {
 
   it('sorts groups and candidates deterministically by id ties', async () => {
     em.find
+      .mockResolvedValueOnce([])
       .mockResolvedValueOnce([])
       .mockResolvedValueOnce([])
       .mockResolvedValueOnce([])
@@ -344,7 +394,7 @@ describe('portfolio import session preview service', () => {
 
     const result = await service.getPreview({ appuser, importSessionId: 456, limit: 1, tenant });
 
-    expect(result.rows).toEqual({ duplicate: [], invalid: [], needsAssetReview: [], ready: [] });
+    expect(result.rows).toEqual({ duplicate: [], failed: [], invalid: [], needsAssetReview: [], ready: [] });
     expect(result.assetGroups).toEqual([]);
   });
 });

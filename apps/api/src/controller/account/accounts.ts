@@ -1,4 +1,3 @@
-import type { FilterQuery } from '@mikro-orm/core';
 import { QueryOrder } from '@mikro-orm/core';
 import dotenv from 'dotenv';
 import type { NextFunction, Request, Response } from 'express';
@@ -15,13 +14,13 @@ import { ExchangeRate } from '@entity/ExchangeRate';
 import { Transaction } from '@entity/Transaction';
 import { TransactionStatus } from '@entity/TransactionStatus';
 import { computeAvailableBalance } from '@service/account/account-available-balance.service';
+import { resolveAccountCsvImportFormat } from '@service/account/account-csv-import-format';
 import { computeSyncStatus } from '@service/account/account-sync-status.service';
 import { ERROR_CODE, ForbiddenError, InternalServerError, NotFoundError } from '@utils/errors';
 
 /*
- * RAD-audit: the "not found" branches below used to raise `InternalServerError`. Every one of
- * them is a client supplying an id that does not resolve — ordinary user error, not a server
- * fault — so they paged Sentry and told the caller nothing actionable. They are 404s.
+ * The "not found" branches below are 404s, not 500s: each is a client supplying an id that does
+ * not resolve — ordinary user error, not a server fault, so it must not page Sentry.
  *
  * For the account lookups this is also the right answer for a *cross-tenant* id: the tenant
  * filter makes another household's account invisible, so it returns null and the caller gets
@@ -161,7 +160,8 @@ export async function getAccount(req: Request, res: Response) {
 export async function getAccountFinancialInstitutions(_req: Request, res: Response) {
   const accountFinancialInstitutions = await DI.em.find(
     AccountFinancialInstitution,
-    {},
+    // A soft-deleted institution was merged into another and is not offered.
+    { deletedAt: undefined },
     {
       orderBy: { name: QueryOrder.ASC },
     },
@@ -203,7 +203,7 @@ export async function getAccounts(req: Request, res: Response) {
   return res.json({ accounts: transformedData });
 }
 
-/** RAD-651 — read-only lookup so the web "Add account" form can populate a real type dropdown. */
+/** Read-only lookup so the web "Add account" form can populate a real type dropdown. */
 export async function getAccountTypes(_req: Request, res: Response) {
   const accountTypes = await DI.em.find(
     AccountType,
@@ -236,14 +236,14 @@ export interface PendingSums {
   settlement: number;
 }
 
-/** Context for the per-account stale-sync signal (Phase 1) and available balance (Phase 4). */
+/** Context for the per-account stale-sync signal and available balance. */
 export interface AccountSyncContext {
   now: Date;
   /** requisitionIds that currently have an open (non-terminal, user-visible) sync incident. */
   openIncidentRequisitionIds: Set<string>;
   /** Summed pending amounts per accountKey. Absent → available balance equals current balance. */
   pendingSumsByAccount?: Map<number, PendingSums>;
-  /** The requesting member's appuserKey — drives per-account ownership flags (RAD-343). */
+  /** The requesting member's appuserKey — drives per-account ownership flags. */
   viewerAppuserKey?: number;
 }
 
@@ -272,8 +272,10 @@ export function mapAccountSummary(account: Account, syncContext?: AccountSyncCon
     appuserCurrencyBalance: account.appuserCurrencyBalance ?? null,
     availableBalance: account.balance == null && !pending ? null : computeAvailableBalance(account.balance, [pending?.settlement]),
     balance: account.balance ?? null,
+    // Which file the account's CSV import reads: the bank's statement export, or the generic format.
+    csvImportFormat: resolveAccountCsvImportFormat(institution?.name).format,
     currencyKey: { code: currencyCode },
-    // RAD-343 household: privacy state + who owns the account, for the privacy
+    // Household: privacy state + who owns the account, for the privacy
     // toggle (owner-only) and shared-context surfacing.
     isOwnedByViewer:
       syncContext?.viewerAppuserKey != null &&
@@ -321,7 +323,7 @@ export async function updateAccount(req: Request, res: Response, next: NextFunct
     account.accountName = accountName;
   }
   if (isPrivate !== undefined) {
-    // RAD-343 (C1): only the account owner controls its privacy (hiding it from
+    // Only the account owner controls its privacy (hiding it from
     // other household members). Other members may rename a shared account but not
     // change whether it's private.
     const ownerAppuserKey = (account.accountOwnerAppuserKey as unknown as undefined | { appuserKey: number })?.appuserKey;
@@ -362,7 +364,7 @@ async function loadPendingSumsByAccount(accountKeys: number[]): Promise<Map<numb
     if (!pendingStatus) return sums;
     const pendings = await DI.em.find(
       Transaction,
-      { accountKey: { accountKey: { $in: accountKeys } }, deletedAt: undefined, transactionStatusKey: pendingStatus } as FilterQuery<Transaction>,
+      { accountKey: { accountKey: { $in: accountKeys } }, deletedAt: undefined, transactionStatusKey: pendingStatus },
       { fields: ['accountKey', 'settlementAmount', 'appuserSettlementAmount'] },
     );
     for (const pending of pendings) {

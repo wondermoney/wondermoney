@@ -1,5 +1,5 @@
 /**
- * RAD-575 — percentages in the reader's locale.
+ * Percentages in the reader's locale.
  *
  * `formatPercentage` passes `undefined` for locale, so `Intl` resolves to the
  * runtime's — the browser's in a Client Component, the container's during SSR.
@@ -20,4 +20,13 @@ export const formatPercentageForLocale = (
     minimumFractionDigits: 0,
     maximumFractionDigits: 0,
     ...options,
-  }).format(val);
+  })
+    .formatToParts(val)
+    // A real minus sign (U+2212), the same glyph `<Amount>` prints, rather
+    // than the hyphen-minus Intl returns. Display only: nothing parses this
+    // string back into a number.
+    .map((part) => (part.type === "minusSign" ? TRUE_MINUS : part.value))
+    .join("");
+
+/** U+2212, the typographic minus every rendered figure uses for negatives. */
+export const TRUE_MINUS = "\u2212";

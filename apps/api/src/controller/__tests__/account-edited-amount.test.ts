@@ -10,17 +10,22 @@ import {
   mapCategorySpendingByName,
 } from '../../utils/account-amounts';
 
+/*
+ * An amount edit writes the account-currency value to `editedSettlementAmount` and the
+ * converted value to `appuserSettlementAmount`. User-currency aggregates must read the
+ * latter: a GBP account edited to -40 GBP is -46 in a EUR user's totals, not -40.
+ */
 describe('account edited amount helpers', () => {
-  it('uses edited settlement amount when present', () => {
+  it('counts a foreign-currency edit in the user currency', () => {
     expect(
       getEffectiveAppuserAmount({
-        appuserSettlementAmount: -100,
+        appuserSettlementAmount: -46,
         editedSettlementAmount: -40,
       }),
-    ).toBe(-40);
+    ).toBe(-46);
   });
 
-  it('falls back to appuser settlement amount when edited amount is absent', () => {
+  it('uses the user-currency amount of an unedited transaction', () => {
     expect(
       getEffectiveAppuserAmount({
         appuserSettlementAmount: -100,
@@ -29,52 +34,26 @@ describe('account edited amount helpers', () => {
   });
 
   it('returns only positive effective amounts for inflow calculations', () => {
-    expect(
-      getPositiveEffectiveAppuserAmount({
-        appuserSettlementAmount: 100,
-        editedSettlementAmount: 40,
-      }),
-    ).toBe(40);
-
-    expect(
-      getPositiveEffectiveAppuserAmount({
-        appuserSettlementAmount: -100,
-        editedSettlementAmount: -40,
-      }),
-    ).toBe(0);
+    expect(getPositiveEffectiveAppuserAmount({ appuserSettlementAmount: 46, editedSettlementAmount: 40 })).toBe(46);
+    expect(getPositiveEffectiveAppuserAmount({ appuserSettlementAmount: -46, editedSettlementAmount: -40 })).toBe(0);
   });
 
   it('returns only negative effective amounts for outflow calculations', () => {
-    expect(
-      getNegativeEffectiveAppuserAmount({
-        appuserSettlementAmount: -100,
-        editedSettlementAmount: -40,
-      }),
-    ).toBe(-40);
-
-    expect(
-      getNegativeEffectiveAppuserAmount({
-        appuserSettlementAmount: 100,
-        editedSettlementAmount: 40,
-      }),
-    ).toBe(0);
+    expect(getNegativeEffectiveAppuserAmount({ appuserSettlementAmount: -46, editedSettlementAmount: -40 })).toBe(-46);
+    expect(getNegativeEffectiveAppuserAmount({ appuserSettlementAmount: 46, editedSettlementAmount: 40 })).toBe(0);
   });
 
-  it('builds SQL using edited settlement amount as the first choice', () => {
-    expect(buildEffectiveAmountSql('t')).toBe('COALESCE(t.edited_settlement_amount, t.appuser_settlement_amount)');
+  it('never sums the account-currency edited column in SQL aggregates', () => {
+    expect(buildEffectiveAmountSql('t')).toContain('t.appuser_settlement_amount');
+    expect(buildEffectiveAmountSql('t')).not.toContain('edited_settlement_amount');
+    expect(buildEffectiveSpendingAmountSql('t', 'crl')).not.toContain('edited_settlement_amount');
   });
 
-  it('builds loan-aware spending SQL for budget and spending aggregates', () => {
-    expect(buildEffectiveSpendingAmountSql('t', 'crl')).toBe(
-      'CASE WHEN crl.loan_repayment_link_key IS NULL THEN COALESCE(t.edited_settlement_amount, t.appuser_settlement_amount) ELSE COALESCE(crl.interest_amount, 0) + COALESCE(crl.fee_amount, 0) END',
-    );
-  });
-
-  it('builds category spending totals from the effective amount', () => {
+  it('builds category spending totals in the user currency', () => {
     const categorySpending = mapCategorySpendingByName([
       {
         appuserCurrencyCode: 'EUR',
-        appuserSettlementAmount: -100,
+        appuserSettlementAmount: -46,
         category: {
           bgColor: '#111111',
           categoryKey: 1,
@@ -88,23 +67,13 @@ describe('account edited amount helpers', () => {
       },
     ]);
 
-    expect(categorySpending[0]).toMatchObject({
-      amount: 40,
-      name: 'Food',
-      numTransactions: 1,
-    });
+    expect(categorySpending[0]).toMatchObject({ amount: 46, name: 'Food', numTransactions: 1 });
   });
 
   it('filters out transactions that are no longer expenses after editing', () => {
     const filtered = filterExpenseTransactions([
-      {
-        appuserSettlementAmount: -100,
-        editedSettlementAmount: 20,
-      },
-      {
-        appuserSettlementAmount: -50,
-        editedSettlementAmount: -10,
-      },
+      { appuserSettlementAmount: 20, editedSettlementAmount: 20 },
+      { appuserSettlementAmount: -10, editedSettlementAmount: -10 },
     ]);
 
     expect(filtered).toHaveLength(1);

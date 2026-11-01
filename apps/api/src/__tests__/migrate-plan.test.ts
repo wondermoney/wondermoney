@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { planMigrations, shouldSeedReferenceData } from '@app/migrate';
+import { BASELINE_MIGRATION, planBaseline, planMigrations, shouldSeedReferenceData } from '@app/migrate';
 
 /**
  * The container entrypoint is `node dist/migrate.js && exec node dist/server.js`, so a
@@ -54,26 +54,14 @@ describe('migration hold-back plan', () => {
     expect(planMigrations([{ name: 'Migration_HEAVY.ts' }], { manual }).apply).toBe('none');
   });
 
-  it('holds back the three real maintenance-window migrations', () => {
-    // Uses the module's own default set, so this fails if one is removed from it without
-    // the migration itself being made startup-safe.
-    const plan = planMigrations([
-      { name: 'Migration20260915190000' },
-      { name: 'Migration20260915190100' },
-      { name: 'Migration20260915190200' },
-    ]);
-    expect(plan.apply).toBe('none');
-    expect(plan.held).toHaveLength(3);
-  });
 });
 
 describe('module entrypoint guard', () => {
   it('does not start a migration run merely because the module was imported', async () => {
-    // The regression this pins: `main()` used to be called at module scope, so this very
-    // import opened a `pg` client and tried to take the advisory lock. With no database
-    // reachable it rejected, and whether that surfaced was a race against the test run
-    // finishing — green locally, Unhandled Rejection and exit 1 in CI, with all 350 test
-    // files passing. A failing build with nothing failing in it.
+    // If `main()` ran at module scope, this very import would open a `pg` client and try to
+    // take the advisory lock. With no database reachable it rejects, and whether that surfaces
+    // is a race against the test run finishing — green locally, Unhandled Rejection and exit 1
+    // in CI, with every test file passing. A failing build with nothing failing in it.
     //
     // Importing must be inert. If the guard regresses, the unhandled rejection returns and
     // this file is the one holding the import that causes it.
@@ -94,9 +82,63 @@ describe('module entrypoint guard', () => {
 
 describe('fresh database', () => {
   it('applies every migration, manual ones included, when none has ever run', () => {
-    const pending = [{ name: 'Migration20260101000000' }, { name: 'Migration20260915190000' }, { name: 'Migration20261004120000' }];
-    expect(planMigrations(pending, { freshDatabase: true })).toEqual({ apply: 'all', held: [] });
-    expect(planMigrations(pending).apply).toBe('upTo');
+    const pending = [{ name: 'Migration_A' }, { name: 'Migration_HEAVY' }, { name: 'Migration_C' }];
+    const manual = new Set(['Migration_HEAVY']);
+    expect(planMigrations(pending, { freshDatabase: true, manual })).toEqual({ apply: 'all', held: [] });
+    expect(planMigrations(pending, { manual }).apply).toBe('upTo');
+  });
+});
+
+describe('baseline migration', () => {
+  // The original chain, as recorded on a database that ran all of it.
+  const chainHead = ['Migration20260915190000', 'Migration20260915190100', 'Migration20260915190200', 'Migration20261024100000'];
+  const fullChain = ['Migration20240228172453', 'Migration20240229184026', ...chainHead];
+  // What a WonderMoney 1.0.0 install recorded: the chain up to Migration20261004120000.
+  const release100 = [
+    'Migration20240228172453',
+    'Migration20260915190000',
+    'Migration20260915190100',
+    'Migration20260915190200',
+    'Migration20261004120000',
+  ];
+
+  it('runs the baseline on a database no migration has touched', () => {
+    expect(planBaseline([])).toEqual({ action: 'run' });
+  });
+
+  it('only records the baseline on a database that ran the whole original chain', () => {
+    // Running it there would fail on the first `CREATE TABLE`: the schema is already there.
+    expect(planBaseline(fullChain)).toEqual({ action: 'mark', replay: [] });
+    expect(planBaseline(fullChain.map((name) => `${name}.js`))).toEqual({ action: 'mark', replay: [] });
+  });
+
+  it('upgrades a 1.0.0 install by replaying the chain it never ran, then recording the baseline', () => {
+    // Self-hosters on the published 1.0.0 images have no release that ran the rest of the chain.
+    expect(planBaseline(release100)).toEqual({
+      action: 'mark',
+      replay: ['Migration20261024092755', 'Migration20261024100000'],
+    });
+    expect(planBaseline([...release100, 'Migration20261024092755'])).toEqual({
+      action: 'mark',
+      replay: ['Migration20261024100000'],
+    });
+  });
+
+  it('does nothing once the baseline is recorded', () => {
+    expect(planBaseline([...fullChain, BASELINE_MIGRATION])).toEqual({ action: 'done' });
+    expect(planBaseline([...release100, BASELINE_MIGRATION])).toEqual({ action: 'done' });
+    expect(planBaseline([BASELINE_MIGRATION])).toEqual({ action: 'done' });
+  });
+
+  it('refuses a database that stopped part-way through the original chain', () => {
+    // Marking it would claim a schema it does not have; running the baseline would fail.
+    expect(() => planBaseline(['Migration20240228172453', 'Migration20260101000000'])).toThrow(/part-way/);
+  });
+
+  it('refuses a database that skipped the held-back maintenance-window migrations', () => {
+    const skippedHeld = fullChain.filter((name) => !name.startsWith('Migration2026091519'));
+    expect(() => planBaseline(skippedHeld)).toThrow(/part-way/);
+    expect(() => planBaseline(release100.filter((name) => !name.startsWith('Migration2026091519')))).toThrow(/part-way/);
   });
 });
 

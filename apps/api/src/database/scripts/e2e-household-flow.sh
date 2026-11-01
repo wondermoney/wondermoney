@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# RAD-343 (D1) — end-to-end proof of the household flow against a RUNNING API +
+# End-to-end proof of the household flow against a RUNNING API +
 # real database. Provisions two better-auth identities in-process (see the companion
 # e2e-household-flow.auth.ts helper), mints bearer tokens by signing in against the
 # running API, then drives the whole flow over HTTP and asserts the outcomes, cleaning
@@ -65,7 +65,6 @@ cleanup () {
   auth delete "$PARTNER" >/dev/null 2>&1 || true
   q "delete from household_invite; delete from account where account_name='Owner Secret';
      delete from appuser_tenant where appuser_key in (select appuser_key from appuser where email_address in ('$OWNER','$PARTNER'));
-     delete from subscription where owner_appuser_key in (select appuser_key from appuser where email_address in ('$OWNER','$PARTNER'));
      delete from tenant where owner_appuser_key in (select appuser_key from appuser where email_address in ('$OWNER','$PARTNER'));
      delete from appuser where email_address in ('$OWNER','$PARTNER');" >/dev/null 2>&1 || true
 }

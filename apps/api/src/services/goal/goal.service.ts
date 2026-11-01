@@ -11,9 +11,10 @@ import { GoalTransactionFunding } from '@entity/GoalTransactionFunding';
 import { Loan } from '@entity/Loan';
 import { Tenant } from '@entity/Tenant';
 import { Transaction } from '@entity/Transaction';
+import { EXPIRED_TRANSACTION_STATUS, isExpiredStatusName } from '@service/transaction/transaction-status';
 import { getEffectiveAppuserAmount } from '@utils/account-amounts';
 import { getRef } from '@utils/em-helpers';
-import { BadRequestError, NotFoundError } from '@utils/errors';
+import { BadRequestError, ERROR_CODE, NotFoundError } from '@utils/errors';
 
 import { compareStrategies } from './debt-projection.service';
 import { buildGoalSummary } from './goal-summary.service';
@@ -113,6 +114,9 @@ export class GoalService {
       const goal = await this.findGoal(input.goalKey, input, ['currencyKey'], em, LockMode.PESSIMISTIC_WRITE);
       this.assertGoalIsMutable(goal);
       const transaction = await this.findTransaction(input.transactionKey, input, em, LockMode.PESSIMISTIC_WRITE);
+      // A retracted charge never moved money, so a goal cannot pay for it. PENDING
+      // can: it is committed spending, and its booking replaces it in place.
+      if (isExpiredStatusName(transaction.transactionStatusKey?.name)) throw new BadRequestError('Transaction has expired and cannot be funded from a goal', ERROR_CODE.TRANSACTION_EXPIRED);
       const transactionAmount = new Big(getEffectiveAppuserAmount(transaction));
       if (transactionAmount.gte(0)) throw new BadRequestError('Transaction must be an expense');
 
@@ -181,7 +185,7 @@ export class GoalService {
    * extra budget (the sum of each debt goal's extra payment).
    */
   async getDebtStrategy(input: GoalContext) {
-    // RAD-392: goals sort by priority ascending (0=low first); flip to 'desc' if high-priority-first was the intent.
+    // Goals sort by priority ascending (0=low first); flip to 'desc' if high-priority-first was the intent.
     const goals = await this.em.find(Goal, {
       deletedAt: undefined,
       status: GoalStatus.ACTIVE,
@@ -209,13 +213,24 @@ export class GoalService {
     return { avalanche, debts, extraBudget, snowball };
   }
 
-  async getGoalActivity(input: ActivityPageInput) {
+  /**
+   * A page of the goal's activity. Each entry carries `transactionExpired`: true on a
+   * `spent_from_goal` entry whose transaction has since expired (the bank retracted it) while the
+   * goal still pays for it, i.e. some funding of that transaction from this goal is not reversed.
+   * Such fundings are kept, not unlinked: they are the user's record, and the flag lets a client
+   * warn and offer the reversal.
+   */
+  async getGoalActivity(input: ActivityPageInput): Promise<{ activities: GoalActivity[]; limit: number; offset: number; total: number }> {
     const goal = await this.findGoal(input.goalKey, input, ['currencyKey']);
     const [activities, total] = await this.em.findAndCount(
       GoalActivity,
       { deletedAt: undefined, goalKey: goal, tenantKey: getRef(this.em, Tenant, input.tenantKey) },
       { limit: input.limit, offset: input.offset, orderBy: { occurredAt: 'desc' } },
     );
+    const expiredFundedTransactionKeys = await this.getExpiredFundedTransactionKeys(goal, activities, input);
+    for (const activity of activities) {
+      activity.transactionExpired = activity.type === GoalActivityType.SPENT_FROM_GOAL && !!activity.transactionKey && expiredFundedTransactionKeys.has(activity.transactionKey.transactionKey);
+    }
     return { activities, limit: input.limit, offset: input.offset, total };
   }
 
@@ -240,7 +255,7 @@ export class GoalService {
       deletedAt: undefined,
       tenantKey: getRef(this.em, Tenant, input.tenantKey),
     };
-    // RAD-392: goals sort by priority descending (2=high first) so high-priority goals surface first.
+    // Goals sort by priority descending (2=high first) so high-priority goals surface first.
     const goals = !input.includeArchived
       ? await this.em.find(Goal, { ...where, status: { $ne: GoalStatus.ARCHIVED } }, { orderBy: { priority: 'desc' }, populate: ['accountLinks', 'accountLinks.accountKey', 'currencyKey'] })
       : await this.em.find(Goal, where, { orderBy: { priority: 'desc' }, populate: ['accountLinks', 'accountLinks.accountKey', 'currencyKey'] });
@@ -399,7 +414,9 @@ export class GoalService {
   }
 
   private async findTransaction(transactionKey: number, input: GoalContext, em: EntityManager = this.em, lockMode?: LockMode): Promise<Transaction> {
-    const transaction = await em.findOne(Transaction, { deletedAt: undefined, tenantKey: getRef(em, Tenant, input.tenantKey), transactionKey }, { lockMode });
+    // `select-in` loads the status in its own query: a joined populate would put the row lock on
+    // the nullable side of an outer join, which Postgres rejects.
+    const transaction = await em.findOne(Transaction, { deletedAt: undefined, tenantKey: getRef(em, Tenant, input.tenantKey), transactionKey }, { lockMode, populate: ['transactionStatusKey'], strategy: 'select-in' });
     if (!transaction) throw new NotFoundError('Transaction not found');
     return transaction;
   }
@@ -410,6 +427,20 @@ export class GoalService {
 
   private getFundedTransactionAmount(fundings: GoalTransactionFunding[]): Big {
     return fundings.filter((funding) => !funding.reversedAt).reduce((sum, funding) => sum.plus(funding.amount), new Big(0));
+  }
+
+  /** Transactions on this page that this goal still funds (unreversed) and that have expired. */
+  private async getExpiredFundedTransactionKeys(goal: Goal, activities: GoalActivity[], input: GoalContext): Promise<Set<number>> {
+    const transactionKeys = [...new Set(activities.flatMap((activity) => (activity.type === GoalActivityType.SPENT_FROM_GOAL && activity.transactionKey ? [activity.transactionKey.transactionKey] : [])))];
+    if (transactionKeys.length === 0) return new Set();
+    const fundings = await this.em.find(GoalTransactionFunding, {
+      deletedAt: undefined,
+      goalKey: goal,
+      reversedAt: null,
+      tenantKey: getRef(this.em, Tenant, input.tenantKey),
+      transactionKey: { transactionKey: { $in: transactionKeys }, transactionStatusKey: { name: EXPIRED_TRANSACTION_STATUS } },
+    });
+    return new Set(fundings.map((funding) => funding.transactionKey.transactionKey));
   }
 
   private async getGoalActivities(goal: Goal, input: GoalContext, em: EntityManager = this.em): Promise<GoalActivity[]> {

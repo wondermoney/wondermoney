@@ -1,6 +1,6 @@
 import { z } from 'zod'
 
-import { readEndpoint, writeEndpoint } from '@/lib/api/runtime-schema'
+import { readEndpoint, tolerantEnum, writeEndpoint } from '@/lib/api/runtime-schema'
 
 import { isValidPortfolioId } from './portfolios-contract'
 
@@ -9,16 +9,17 @@ function importSessionPath(importSessionId: number, suffix = ''): string {
   return `/v1/portfolio-import-sessions/${importSessionId}${suffix}`
 }
 
-export const PORTFOLIO_IMPORT_SESSION_STATUSES = [
+const PORTFOLIO_IMPORT_SESSION_STATUSES = [
   'cancelled', 'expired', 'failed', 'importing', 'needs_asset_review', 'needs_column_mapping',
   'parsing', 'partial', 'ready_to_import', 'succeeded', 'uploaded', 'waiting_for_upload',
 ] as const
-export type PortfolioImportSessionStatus = typeof PORTFOLIO_IMPORT_SESSION_STATUSES[number]
-const importSessionStatusSchema = z.enum(PORTFOLIO_IMPORT_SESSION_STATUSES)
+// A status this build doesn't know reads as 'unknown': not in flight and not a success, so the
+// flow ends on the generic processing-failed screen instead of an invalid-response error.
+const importSessionStatusSchema = tolerantEnum(PORTFOLIO_IMPORT_SESSION_STATUSES, 'unknown')
 
 // Mirrors core/api's portfolioColumnMappingRequestSchema exactly (validators/portfolio.ts) so a
 // server-suggested mapping can be relayed straight back into the confirm call unmodified.
-export const portfolioImportColumnMappingSchema = z.object({
+const portfolioImportColumnMappingSchema = z.object({
   assetName: z.string().min(1).optional(),
   brokerExchange: z.string().min(1).optional(),
   currency: z.string().min(1).optional(),
@@ -32,10 +33,9 @@ export const portfolioImportColumnMappingSchema = z.object({
   transactionType: z.string().min(1).optional(),
   unitPrice: z.string().min(1).optional(),
 }).strict()
-export type PortfolioImportColumnMapping = z.infer<typeof portfolioImportColumnMappingSchema>
 
 export const portfolioImportSessionCreateResponseSchema = z.object({
-  broker: z.object({ id: z.number().int().positive(), name: z.string() }).strict().optional(),
+  broker: z.object({ id: z.number().int().positive(), name: z.string() }).optional(),
   correlationId: z.string(),
   expiresAt: z.string().optional(),
   importSessionId: z.number().int().positive(),
@@ -47,8 +47,7 @@ export const portfolioImportSessionCreateResponseSchema = z.object({
   uploadHeaders: z.record(z.string(), z.string()),
   uploadMethod: z.literal('PUT'),
   uploadUrl: z.string(),
-}).strict()
-export type PortfolioImportSessionCreateResponseDto = z.infer<typeof portfolioImportSessionCreateResponseSchema>
+})
 
 export const createPortfolioImportSessionEndpoint = (portfolioId: number) => {
   if (!isValidPortfolioId(portfolioId)) throw new Error('A positive safe portfolio id is required.')
@@ -64,7 +63,7 @@ const parseTriggerResponseSchema = z.object({
   correlationId: z.string(),
   importSessionId: z.number().int().positive(),
   status: z.string(),
-}).strict()
+})
 
 export const createTriggerPortfolioImportParseEndpoint = (importSessionId: number) => writeEndpoint({
   method: 'POST' as const, path: importSessionPath(importSessionId, '/parse'), schema: parseTriggerResponseSchema, successStatuses: [202],
@@ -73,12 +72,14 @@ export const createTriggerPortfolioImportParseEndpoint = (importSessionId: numbe
 const suggestColumnMappingResponseSchema = z.object({
   // Absent (not merely empty) when the server could not suggest a mapping at all
   // (see AUTOMATIC_COLUMN_MAPPING_UNAVAILABLE_WARNING) — JSON drops the undefined key entirely.
-  columnMapping: portfolioImportColumnMappingSchema.optional(),
+  // Relayed back to the confirm call unmodified, so a column the API learns to map later must
+  // survive the round trip: passthrough, not strip.
+  columnMapping: portfolioImportColumnMappingSchema.passthrough().optional(),
   importSessionId: z.number().int().positive(),
   mappingSource: z.string(),
   status: z.string(),
   warning: z.string().optional(),
-}).strict()
+})
 
 export const createSuggestPortfolioImportColumnMappingEndpoint = (importSessionId: number) => writeEndpoint({
   method: 'POST' as const, path: importSessionPath(importSessionId, '/column-mapping/suggest'), schema: suggestColumnMappingResponseSchema, successStatuses: [200],
@@ -92,7 +93,7 @@ const confirmColumnMappingResponseSchema = z.object({
   importSessionId: z.number().int().positive(),
   status: z.string(),
   summary: z.unknown(),
-}).strict()
+})
 
 export const createConfirmPortfolioImportColumnMappingEndpoint = (importSessionId: number) => writeEndpoint({
   method: 'PATCH' as const, path: importSessionPath(importSessionId, '/column-mapping'), schema: confirmColumnMappingResponseSchema, successStatuses: [200],
@@ -102,7 +103,7 @@ const confirmImportResponseSchema = z.object({
   correlationId: z.string(),
   importSessionId: z.number().int().positive(),
   status: z.string(),
-}).strict()
+})
 
 export const createConfirmPortfolioImportSessionEndpoint = (importSessionId: number) => writeEndpoint({
   method: 'POST' as const, path: importSessionPath(importSessionId, '/confirm'), schema: confirmImportResponseSchema, successStatuses: [202],
@@ -118,15 +119,14 @@ const importPreviewRowSchema = z.object({
   raw: z.record(z.string(), z.unknown()),
   rowNumber: z.number().int().nonnegative(),
   skipReason: z.string().optional(),
-  status: z.enum(['duplicate', 'failed', 'imported', 'invalid', 'needs_asset_review', 'ready', 'skipped', 'valid']),
-}).strict()
+  status: tolerantEnum(['duplicate', 'failed', 'imported', 'invalid', 'needs_asset_review', 'ready', 'skipped', 'valid'], 'unknown'),
+})
 
-// RAD-514 — asset-matching review. Mirrors web's reconciliation UI: each ambiguous/unmatched raw
+// Asset-matching review. Mirrors web's reconciliation UI: each ambiguous/unmatched raw
 // asset in the file is grouped once (assetGroupId ties back to importPreviewRowSchema rows above),
 // server-suggested candidates are ranked matches the user can accept with one tap, and any group
 // can otherwise be resolved by searching for a different ticker or skipped outright.
-export const PORTFOLIO_IMPORT_ASSET_GROUP_STATUSES = ['ambiguous', 'matched', 'provider_error', 'unmatched'] as const
-export type PortfolioImportAssetGroupStatus = typeof PORTFOLIO_IMPORT_ASSET_GROUP_STATUSES[number]
+const PORTFOLIO_IMPORT_ASSET_GROUP_STATUSES = ['ambiguous', 'matched', 'provider_error', 'unmatched'] as const
 
 const portfolioImportAssetGroupCandidateSchema = z.object({
   confidence: z.number().min(0).max(1).nullable().optional(),
@@ -134,7 +134,7 @@ const portfolioImportAssetGroupCandidateSchema = z.object({
   financialAssetId: z.number().int().positive(),
   name: z.string().nullable().optional(),
   symbol: z.string().trim().min(1).max(20),
-}).strict()
+})
 
 export const portfolioImportAssetGroupSchema = z.object({
   candidates: z.array(portfolioImportAssetGroupCandidateSchema),
@@ -143,9 +143,9 @@ export const portfolioImportAssetGroupSchema = z.object({
   rawAssetName: z.string().nullable().optional(),
   rawSymbol: z.string().nullable().optional(),
   rowCount: z.number().int().nonnegative(),
-  status: z.enum(PORTFOLIO_IMPORT_ASSET_GROUP_STATUSES),
-}).strict()
-export type PortfolioImportAssetGroupCandidateDto = z.infer<typeof portfolioImportAssetGroupCandidateSchema>
+  // An unknown group status is anything but 'matched', so the group stays in the review list.
+  status: tolerantEnum(PORTFOLIO_IMPORT_ASSET_GROUP_STATUSES, 'unknown'),
+})
 export type PortfolioImportAssetGroupDto = z.infer<typeof portfolioImportAssetGroupSchema>
 
 export const portfolioImportAssetGroupResolutionSchema = z.discriminatedUnion('type', [
@@ -161,12 +161,11 @@ export const portfolioImportAssetGroupMappingWriteSchema = z.object({
     resolution: portfolioImportAssetGroupResolutionSchema,
   }).strict()).min(1),
 }).strict()
-export type PortfolioImportAssetGroupMappingWrite = z.infer<typeof portfolioImportAssetGroupMappingWriteSchema>
 
 const confirmAssetGroupMappingsResponseSchema = z.object({
   importSessionId: z.number().int().positive(),
   status: importSessionStatusSchema,
-}).strict()
+})
 
 export const createConfirmPortfolioImportAssetGroupsEndpoint = (importSessionId: number) => writeEndpoint({
   method: 'PATCH' as const, path: importSessionPath(importSessionId, '/asset-groups'), schema: confirmAssetGroupMappingsResponseSchema, successStatuses: [200],
@@ -174,17 +173,20 @@ export const createConfirmPortfolioImportAssetGroupsEndpoint = (importSessionId:
 
 export const portfolioImportPreviewResponseSchema = z.object({
   assetGroups: z.array(portfolioImportAssetGroupSchema),
-  broker: z.object({ id: z.number().int().positive(), name: z.string() }).strict().optional(),
-  columnMapping: z.object({ confirmed: z.unknown().optional(), suggestion: z.unknown().optional(), warning: z.string().optional() }).strict().optional(),
+  broker: z.object({ id: z.number().int().positive(), name: z.string() }).optional(),
+  columnMapping: z.object({ confirmed: z.unknown().optional(), suggestion: z.unknown().optional(), warning: z.string().optional() }).optional(),
   importSessionId: z.number().int().positive(),
-  limits: z.object({ rowsPerBucket: z.number().int().positive() }).strict(),
+  limits: z.object({ rowsPerBucket: z.number().int().positive() }),
   portfolioId: z.number().int().positive(),
   rows: z.object({
     duplicate: z.array(importPreviewRowSchema),
+    // Rows that failed while a confirmed import ran. Optional so the app still parses a
+    // self-hosted API that predates the bucket.
+    failed: z.array(importPreviewRowSchema).optional(),
     invalid: z.array(importPreviewRowSchema),
     needsAssetReview: z.array(importPreviewRowSchema),
     ready: z.array(importPreviewRowSchema),
-  }).strict(),
+  }),
   status: importSessionStatusSchema,
   summary: z.object({
     assetGroups: z.object({
@@ -193,7 +195,7 @@ export const portfolioImportPreviewResponseSchema = z.object({
       providerErrorGroups: z.number().int().nonnegative(),
       totalGroups: z.number().int().nonnegative(),
       unmatchedGroups: z.number().int().nonnegative(),
-    }).strict().optional(),
+    }).optional(),
     blockingRows: z.number().int().nonnegative(),
     canConfirm: z.boolean(),
     duplicateRows: z.number().int().nonnegative(),
@@ -205,13 +207,12 @@ export const portfolioImportPreviewResponseSchema = z.object({
     needsAssetReviewRows: z.number().int().nonnegative(),
     readyRows: z.number().int().nonnegative(),
     skippedRows: z.number().int().nonnegative(),
-    terminalKind: z.enum(['cancelled', 'duplicate_only', 'expired', 'failed', 'partial_success', 'success']).optional(),
+    terminalKind: tolerantEnum(['cancelled', 'duplicate_only', 'expired', 'failed', 'partial_success', 'success'], 'unknown').optional(),
     totalRows: z.number().int().nonnegative(),
-    unsupportedAssets: z.array(z.object({ skippedRows: z.number().int().nonnegative(), symbol: z.string() }).strict()).optional(),
-  }).strict(),
-}).strict()
+    unsupportedAssets: z.array(z.object({ skippedRows: z.number().int().nonnegative(), symbol: z.string() })).optional(),
+  }),
+})
 export type PortfolioImportPreviewDto = z.infer<typeof portfolioImportPreviewResponseSchema>
-export type PortfolioImportSummary = PortfolioImportPreviewDto['summary']
 
 export const createPortfolioImportPreviewEndpoint = (importSessionId: number) => readEndpoint({
   method: 'GET' as const, path: importSessionPath(importSessionId, '?limit=25'), schema: portfolioImportPreviewResponseSchema,

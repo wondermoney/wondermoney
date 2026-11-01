@@ -13,9 +13,7 @@ const mockBack = jest.fn()
 const mockCanGoBack = jest.fn().mockReturnValue(true)
 const mockRefetch = jest.fn()
 const mockMutate = jest.fn()
-const mockOpenBrowserAsync = jest.fn().mockResolvedValue({ type: 'dismiss' })
-let mockReturnCallback: (() => void) | undefined
-let mockArmed = false
+const mockOpenAuthSessionAsync = jest.fn().mockResolvedValue({ type: 'dismiss' })
 let mockInstitutionsState: {
   data?: unknown
   isAccessTransition: boolean
@@ -29,19 +27,12 @@ jest.mock('expo-router', () => ({
   useRouter: () => ({ replace: mockReplace, back: mockBack, canGoBack: mockCanGoBack }),
 }))
 jest.mock('expo-web-browser', () => ({
-  openBrowserAsync: (...args: unknown[]) => mockOpenBrowserAsync(...args),
-  WebBrowserPresentationStyle: { AUTOMATIC: 'automatic' },
+  openAuthSessionAsync: (...args: unknown[]) => mockOpenAuthSessionAsync(...args),
 }))
 jest.mock('../use-bank-institutions', () => ({ useBankInstitutions: () => ({ ...mockInstitutionsState, refetch: mockRefetch }) }))
 jest.mock('../use-start-bank-connection', () => ({
   useStartBankConnection: () => ({ isPending: mockStartPending, variables: mockStartVariables, mutate: mockMutate }),
   classifyStartBankConnectionFailure: (error: unknown) => (error as { code?: string } | null)?.code ?? 'general',
-}))
-jest.mock('../use-return-from-browser', () => ({
-  useReturnFromBrowser: (armed: boolean, onReturn: () => void) => {
-    mockArmed = armed
-    mockReturnCallback = onReturn
-  },
 }))
 jest.mock('../connect-bank-screen', () => ({
   ConnectBankScreen: (props: {
@@ -67,16 +58,15 @@ jest.mock('../connect-bank-screen', () => ({
 describe('ConnectBankRoute', () => {
   beforeEach(() => {
     mockReplace.mockClear(); mockBack.mockClear(); mockCanGoBack.mockReset().mockReturnValue(true)
-    mockRefetch.mockClear(); mockMutate.mockReset(); mockOpenBrowserAsync.mockClear()
-    mockReturnCallback = undefined; mockArmed = false
+    mockRefetch.mockClear(); mockMutate.mockReset(); mockOpenAuthSessionAsync.mockReset().mockResolvedValue({ type: 'dismiss' })
     mockInstitutionsState = { data: [{ id: '1', name: 'Revolut', logo: 'https://logo' }], isAccessTransition: false, isInitialFailure: false, error: null }
     mockStartPending = false; mockStartVariables = undefined
     captured.mockClear()
   })
 
-  it('captures bank_connection_started with no institution and no consent redirect URL (RAD-518)', async () => {
+  it('captures bank_connection_started with no institution and no consent redirect URL', async () => {
     mockMutate.mockImplementation((_bankId, { onSuccess }: { onSuccess: (value: { redirectUrl: string }) => void }) => {
-      onSuccess({ redirectUrl: 'https://ob.gocardless.com/session/abc' })
+      onSuccess({ redirectUrl: 'https://ob.enablebanking.com/session/abc' })
     })
     const view = await render(<ConnectBankRoute />)
     expect(captured).not.toHaveBeenCalled()
@@ -86,7 +76,7 @@ describe('ConnectBankRoute', () => {
     expect(captured.mock.calls).toEqual([['bank_connection_started']])
     const serialized = JSON.stringify(captured.mock.calls)
     expect(serialized).not.toContain('Revolut')
-    expect(serialized).not.toContain('gocardless')
+    expect(serialized).not.toContain('enablebanking')
   })
 
   it('captures bank_connection_failed with no error text when the requisition never starts', async () => {
@@ -100,35 +90,57 @@ describe('ConnectBankRoute', () => {
     expect(captured.mock.calls).toEqual([['bank_connection_failed']])
   })
 
-  it('starts a connection and opens the returned redirect URL in the in-app browser', async () => {
+  it('opens the consent URL in an auth session that closes on the app return link', async () => {
     mockMutate.mockImplementation((bankId, { onSuccess }: { onSuccess: (value: { redirectUrl: string }) => void }) => {
       expect(bankId).toBe('1')
-      onSuccess({ redirectUrl: 'https://ob.gocardless.com/session/abc' })
+      onSuccess({ redirectUrl: 'https://ob.enablebanking.com/session/abc' })
     })
     const view = await render(<ConnectBankRoute />)
     await fireEvent.press(view.getByRole('button', { name: 'Select' }))
-    expect(mockOpenBrowserAsync).toHaveBeenCalledWith('https://ob.gocardless.com/session/abc', expect.objectContaining({ presentationStyle: 'automatic' }))
+    expect(mockOpenAuthSessionAsync).toHaveBeenCalledWith('https://ob.enablebanking.com/session/abc', 'wondermoney://more/banking')
   })
 
-  it('arms return detection once the browser opens and navigates to connections with a justStarted marker on return', async () => {
+  it.each(['dismiss', 'cancel'])('hands off to the polling connections list when the session ends with %s', async (type) => {
+    mockOpenAuthSessionAsync.mockResolvedValue({ type })
     mockMutate.mockImplementation((_bankId, { onSuccess }: { onSuccess: (value: { redirectUrl: string }) => void }) => {
-      onSuccess({ redirectUrl: 'https://ob.gocardless.com/session/abc' })
+      onSuccess({ redirectUrl: 'https://ob.enablebanking.com/session/abc' })
     })
     const view = await render(<ConnectBankRoute />)
-    await fireEvent.press(view.getByRole('button', { name: 'Select' }))
-    expect(mockArmed).toBe(true)
-    await act(async () => { mockReturnCallback?.() })
-    expect(mockReplace).toHaveBeenCalledWith(expect.objectContaining({ pathname: '/more/banking', params: { justStarted: '1' } }))
+    await act(async () => { await fireEvent.press(view.getByRole('button', { name: 'Select' })) })
+    expect(mockReplace).toHaveBeenCalledWith({ pathname: '/more/banking', params: { justStarted: '1' } })
   })
 
-  it('surfaces a classified error and never arms return detection when starting fails', async () => {
+  it('carries the outcome when the session saw the return link', async () => {
+    mockOpenAuthSessionAsync.mockResolvedValue({
+      type: 'success',
+      url: 'wondermoney://more/banking?enableBankingConnection=error',
+    })
+    mockMutate.mockImplementation((_bankId, { onSuccess }: { onSuccess: (value: { redirectUrl: string }) => void }) => {
+      onSuccess({ redirectUrl: 'https://ob.enablebanking.com/session/abc' })
+    })
+    const view = await render(<ConnectBankRoute />)
+    await act(async () => { await fireEvent.press(view.getByRole('button', { name: 'Select' })) })
+    expect(mockReplace).toHaveBeenCalledWith({ pathname: '/more/banking', params: { justStarted: '1', connection: 'error' } })
+  })
+
+  it('falls back to the connections list when the session cannot open', async () => {
+    mockOpenAuthSessionAsync.mockRejectedValue(new Error('no browser'))
+    mockMutate.mockImplementation((_bankId, { onSuccess }: { onSuccess: (value: { redirectUrl: string }) => void }) => {
+      onSuccess({ redirectUrl: 'https://ob.enablebanking.com/session/abc' })
+    })
+    const view = await render(<ConnectBankRoute />)
+    await act(async () => { await fireEvent.press(view.getByRole('button', { name: 'Select' })) })
+    expect(mockReplace).toHaveBeenCalledWith('/more/banking')
+  })
+
+  it('surfaces a classified error and opens no session when starting fails', async () => {
     mockMutate.mockImplementation((_bankId, { onError }: { onError: (error: unknown) => void }) => {
       onError(new ApiError('mfa-required', 401))
     })
     const view = await render(<ConnectBankRoute />)
     await fireEvent.press(view.getByRole('button', { name: 'Select' }))
     expect(view.getByTestId('startFailure')).toHaveTextContent('mfa-required')
-    expect(mockArmed).toBe(false)
+    expect(mockOpenAuthSessionAsync).not.toHaveBeenCalled()
   })
 
   it('retries the institutions query', async () => {

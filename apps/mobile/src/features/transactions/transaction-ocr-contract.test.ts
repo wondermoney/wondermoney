@@ -20,6 +20,11 @@ describe('transactionOcrScanEndpoint', () => {
     expect(result.success).toBe(true)
   })
 
+  it('strips fields the API adds to a scan response', () => {
+    const scan = { transactionOcrImportId: 5, transactionInfo: { settlementAmount: 12.5, transactionDate: '2026-07-18T10:00:00.000Z', transactionMerchantName: 'Corner shop' } }
+    expect(transactionOcrScanEndpoint.schema.parse({ ...scan, model: 'x', transactionInfo: { ...scan.transactionInfo, confidence: 0.9 } })).toEqual(scan)
+  })
+
   it('accepts a scan response with matched currency and merchant ids', () => {
     const result = transactionOcrScanEndpoint.schema.safeParse({
       transactionOcrImportId: 5,

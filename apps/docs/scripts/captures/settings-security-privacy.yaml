@@ -1,5 +1,5 @@
 # Settings, security & privacy — profile, notifications, appearance,
-# categories, assistant (admin-gated), 2FA, change password, delete account,
+# categories, assistant, 2FA, change password, delete account,
 # read-only bank access, connections.
 # Pages that need the inner scroll-container expanded prepend the shared eval
 # (the settings shell scrolls inside a `.flex-1.overflow-y-auto` container).
@@ -36,26 +36,11 @@ pages:
   - slug: assistant-settings
     step: assistant
     url: http://localhost:64590/en/settings?tab=assistant
-    actions:
-      - type: set-local-storage
-        key: "wondermoney.adminModuleVisibility.v1"
-        value: '{"credits":true,"recurring":true,"assistant":true}'
-      - type: open
-        url: http://localhost:64590/en/settings?tab=assistant
-    note: >-
-      Admin gate — the tab is invisible without the localStorage flag. The flag
-      is a per-user toggle that does not persist across sessions, so it is set
-      in the same session that re-opens the tab.
 
   - slug: ai-assistant-consent
     step: consent
     url: http://localhost:64590/en/settings?tab=assistant
     actions:
-      - type: set-local-storage
-        key: "wondermoney.adminModuleVisibility.v1"
-        value: '{"credits":true,"recurring":true,"assistant":true}'
-      - type: open
-        url: http://localhost:64590/en/settings?tab=assistant
       - type: click-role
         name: "Assistant"
         locales:
@@ -96,35 +81,6 @@ pages:
     note: >-
       For the +sandbox user (no MFA) the "Enable" button is the capture target.
       Do NOT enroll. Fallback anchor: "Enable".
-
-  - slug: read-only-bank-access
-    step: connect-modal
-    url: http://localhost:64590/en/accounts
-    actions:
-      - type: click-role
-        name: "Add Account"
-        locales:
-          pt: "Adicionar Conta"
-          es: "Añadir cuenta"
-      - type: wait-text
-        text: "Linked"
-        locales:
-          pt: "Ligada"
-          es: "Vinculada"
-      - type: click-role
-        name: "Linked"
-        locales:
-          pt: "Ligada"
-          es: "Vinculada"
-      - type: wait-text
-        text: "read-only"
-        locales:
-          pt: "apenas de leitura"
-          es: "de solo lectura"
-    note: >-
-      The expectation modal that explains read-only access is the capture
-      target (the bank picker surfaces the "EU Open Banking - Read-only
-      connection through GoCardless" copy). Fallback anchor: "expectation".
 
   - slug: data-privacy
     step: connections

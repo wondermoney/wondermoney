@@ -3,6 +3,7 @@ import {
   createStartTransactionImportEndpoint,
   createTransactionImportUploadEndpoint,
   isTerminalTransactionImportStatus,
+  readImportRowCounts,
 } from './transaction-import-contract'
 
 describe('isTerminalTransactionImportStatus', () => {
@@ -12,6 +13,45 @@ describe('isTerminalTransactionImportStatus', () => {
 
   it.each(['queued', 'running', 'unknown'])('treats %s as not terminal', (status) => {
     expect(isTerminalTransactionImportStatus(status)).toBe(false)
+  })
+})
+
+describe('transaction import responses', () => {
+  it('strip fields the API adds', () => {
+    expect(createTransactionImportUploadEndpoint(7).schema.parse({ key: 'k', presignedUrl: 'https://s3.example/u', isSupportedBank: true, bankName: 'X' })).toEqual({ key: 'k', presignedUrl: 'https://s3.example/u', isSupportedBank: true })
+    expect(createStartTransactionImportEndpoint(7).schema.parse({ correlationId: 'c', status: 'queued', queuedAt: 'now' })).toEqual({ correlationId: 'c', status: 'queued' })
+    expect(createBackgroundOperationEndpoint('c').schema.parse({ correlationId: 'c', status: 'running', progress: null, startedAt: 'now' })).toEqual({ correlationId: 'c', status: 'running', progress: null })
+  })
+})
+
+describe('the upload response csvImportFormat', () => {
+  const parse = (body: Record<string, unknown>) => createTransactionImportUploadEndpoint(7).schema.parse({ key: 'k', presignedUrl: 'https://s3.example/u', isSupportedBank: false, ...body })
+
+  it.each(['bank', 'generic'] as const)('keeps the known format %s', (format) => {
+    expect(parse({ csvImportFormat: format }).csvImportFormat).toBe(format)
+  })
+
+  it('reads a format this build does not know as unknown instead of failing the response', () => {
+    expect(parse({ csvImportFormat: 'bank_v2' }).csvImportFormat).toBe('unknown')
+  })
+
+  it('accepts a response from an API that does not send the field', () => {
+    expect(parse({}).csvImportFormat).toBeUndefined()
+  })
+})
+
+describe('readImportRowCounts', () => {
+  it('reads the failed and total row counts the worker reports', () => {
+    expect(readImportRowCounts({ imported: 1, failed: 1, totalRows: 2 })).toEqual({ failed: 1, total: 2 })
+  })
+
+  it.each([
+    ['no progress', null],
+    ['missing totals', { failed: 1 }],
+    ['non-numeric counts', { failed: '1', totalRows: '2' }],
+    ['negative counts', { failed: -1, totalRows: 2 }],
+  ])('returns null for %s', (_label, progress) => {
+    expect(readImportRowCounts(progress as Record<string, unknown> | null)).toBeNull()
   })
 })
 

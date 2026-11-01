@@ -6,6 +6,7 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 import { themeTokens, type Palette } from '@/theme/tokens'
 import { textStyles } from '@/theme/typography'
 
+import type { BankConnectionResult } from './bank-connection-return'
 import type { BankConnectionDisconnectFailure } from './use-bank-connection-disconnect-mutation'
 import type { BankConnectionRow } from './connection-status-view-model'
 
@@ -23,6 +24,8 @@ export type ConnectionDisconnectFailureState = Readonly<{ connectionId: number; 
 export type ConnectionsScreenProps = {
   state: ConnectionsScreenState
   justStarted?: boolean
+  /** The outcome the bank connection's callback reported, when the app saw it. */
+  connectionResult?: BankConnectionResult | null
   refreshing?: boolean
   onBack: () => void
   onRetry: () => void | Promise<void>
@@ -34,7 +37,7 @@ export type ConnectionsScreenProps = {
   onImportStatement?: () => void
 }
 
-export function ConnectionsScreen({ state, justStarted, refreshing, onBack, onRetry, onRefresh, onConnectBank, onDisconnect, disconnectingConnectionId, disconnectFailure, onImportStatement }: ConnectionsScreenProps) {
+export function ConnectionsScreen({ state, justStarted, connectionResult, refreshing, onBack, onRetry, onRefresh, onConnectBank, onDisconnect, disconnectingConnectionId, disconnectFailure, onImportStatement }: ConnectionsScreenProps) {
   const { t } = useTranslation()
   const palette = themeTokens.colors[useColorScheme() === 'dark' ? 'dark' : 'light']
   const [focusedAction, setFocusedAction] = useState<null | 'retry' | 'back' | 'connect'>(null)
@@ -99,7 +102,21 @@ export function ConnectionsScreen({ state, justStarted, refreshing, onBack, onRe
             </Pressable>
           ) : null}
 
-          {justStarted ? (
+          {connectionResult ? (
+            <View style={[styles.notice, { borderColor: palette.border, backgroundColor: palette.muted }]}>
+              <Text
+                accessibilityRole={connectionResult === 'error' ? 'alert' : 'text'}
+                accessibilityLiveRegion="polite"
+                allowFontScaling
+                style={[styles.noticeTitle, { color: palette.foreground }]}
+              >
+                {t(`banking.connections.result.${connectionResult}.title`)}
+              </Text>
+              <Text allowFontScaling style={[styles.noticeBody, { color: palette.mutedForeground }]}>
+                {t(`banking.connections.result.${connectionResult}.message`)}
+              </Text>
+            </View>
+          ) : justStarted ? (
             <View style={[styles.notice, { borderColor: palette.border, backgroundColor: palette.muted }]}>
               <Text allowFontScaling style={[styles.noticeTitle, { color: palette.foreground }]}>
                 {t('banking.connections.justStarted.title')}

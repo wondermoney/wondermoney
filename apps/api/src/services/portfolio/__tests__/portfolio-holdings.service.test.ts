@@ -1,8 +1,11 @@
+import type { CompiledQuery } from 'kysely';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { kyselyDouble } from '@app/__tests__/__helpers__/kysely-double';
 import { DI } from '@app/app';
 import { FINANCIAL_TRANSACTION_TYPES } from '@app/constants/financial-transaction-types';
 import type { Appuser } from '@entity/Appuser';
+import logger from '@utils/logger';
 
 vi.mock('@app/app', () => ({ DI: { em: {} } }));
 // vi.hoisted so the mock fn is a plain variable (not a property access), avoiding
@@ -73,41 +76,41 @@ const makeTransactionRow = (overrides: Record<string, unknown> = {}) => ({
   ...overrides,
 });
 
-interface QueryBuilder {
-  _selected: string[];
-  andWhere: () => QueryBuilder;
-  first: () => Promise<unknown>;
-  groupBy: () => QueryBuilder;
-  havingRaw: () => QueryBuilder;
-  innerJoin: () => QueryBuilder;
-  leftJoin: () => QueryBuilder;
-  modify: (fn: (query: QueryBuilder) => void) => QueryBuilder;
-  orderBy: () => QueryBuilder;
-  select: (...args: string[]) => QueryBuilder;
-  sum: () => QueryBuilder;
-  then: (resolve: (value: unknown) => unknown) => Promise<unknown>;
-  where: (...args: unknown[]) => QueryBuilder;
-  whereIn: () => QueryBuilder;
-  whereNull: () => QueryBuilder;
+interface LoggedQuery {
+  /** `alias.column = value` comparisons in the query. */
+  predicates: Record<string, unknown>;
+  sql: string;
 }
 
+function equalityPredicates({ parameters, sql }: CompiledQuery): Record<string, unknown> {
+  const predicates: Record<string, unknown> = {};
+  for (const [, table, column, index] of sql.matchAll(/"(\w+)"\."(\w+)" = \$(\d+)/g)) {
+    predicates[`${table}.${column}`] = parameters[Number(index) - 1];
+  }
+  return predicates;
+}
+
+/** The names of a select's output columns: each item's alias, else its column. */
 function projectRow(row: Record<string, unknown>, selected: string[]) {
   if (selected.length === 0) return row;
 
-  return selected.reduce<Record<string, unknown>>((acc, column) => {
-    const lowerColumn = column.toLowerCase();
-    const aliasIndex = lowerColumn.lastIndexOf(' as ');
-    const key = aliasIndex >= 0 ? column.slice(aliasIndex + 4).trim() : (column.split('.').at(-1) ?? column);
+  return selected.reduce<Record<string, unknown>>((acc, key) => {
     if (key in row) acc[key] = row[key];
     return acc;
   }, {});
 }
 
-const makeKnexMock = ({
+function selectedColumns(sql: string): string[] {
+  const list = /^select (.*?) from /s.exec(sql)?.[1] ?? '';
+  return list.split(/, (?![^(]*\))/).map((item) => /as "(\w+)"$/.exec(item.trim())?.[1] ?? /"(\w+)"$/.exec(item.trim())?.[1] ?? item.trim());
+}
+
+const makeDatabaseMock = ({
   caPremiumRows = [],
   caRateRows = [],
   caTaxExemptRows = [],
   exchangeRateRow,
+  exchangeRateRows = [],
   queryLog,
   rawRows = [],
   splitRows = [],
@@ -116,74 +119,51 @@ const makeKnexMock = ({
   caRateRows?: Record<string, unknown>[];
   caTaxExemptRows?: Record<string, unknown>[];
   exchangeRateRow?: undefined | { rate: string };
-  queryLog?: { table: string; whereCalls: unknown[][] }[];
+  exchangeRateRows?: { date: Date | string; rate: number | string }[];
+  queryLog?: LoggedQuery[];
   rawRows?: unknown[];
   splitRows?: unknown[];
 }) => {
-  return vi.fn(() => {
-    const builder = (table: string) => {
-      const whereCalls: unknown[][] = [];
-      queryLog?.push({ table, whereCalls });
-      const chain: QueryBuilder = {
-        _selected: [],
-        andWhere: () => chain,
-        first: () => Promise.resolve(exchangeRateRow),
-        groupBy: () => chain,
-        havingRaw: () => chain,
-        innerJoin: () => chain,
-        leftJoin: () => chain,
-        modify: (fn) => {
-          fn(chain);
-          return chain;
-        },
-        orderBy: () => chain,
-        select: (...args) => {
-          chain._selected.push(...args);
-          return chain;
-        },
-        sum: () => chain,
-        then: (resolve) => {
-          if (table.includes('financial_asset_stock_adjustment')) return Promise.resolve(resolve(splitRows));
-          if (table.includes('certificado_aforro_rate_period')) return Promise.resolve(resolve(caRateRows));
-          if (table.includes('certificado_aforro_premium_schedule')) return Promise.resolve(resolve(caPremiumRows));
-          if (table.includes('certificado_aforro_subscription_detail')) return Promise.resolve(resolve(caTaxExemptRows));
-          const filteredRows = (rawRows as Record<string, unknown>[]).filter((row) =>
-            whereCalls.every(([column, value]) => {
-              if (column === 'ft.tenant_key') return row['tenant_key'] == null || row['tenant_key'] === value;
-              if (column === 'p.tenant_key') return row['portfolio_tenant_key'] == null || row['portfolio_tenant_key'] === value;
-              if (column === 'ft.portfolio_key') return row['portfolio_key'] == null || row['portfolio_key'] === value;
-              if (column === 'ft.appuser_key') return row['appuser_key'] == null || row['appuser_key'] === value;
-              return true;
-            }),
-          );
-          return Promise.resolve(resolve(filteredRows.map((row) => projectRow(row, chain._selected))));
-        },
-        where: (...args) => {
-          const [condition] = args;
-          if (typeof condition === 'function') condition.call(chain);
-          else whereCalls.push(args);
-          return chain;
-        },
-        whereIn: () => chain,
-        whereNull: () => chain,
-      };
-
-      return chain;
-    };
-
-    const knex = ((table: string) => builder(table)) as typeof builder & {
-      raw: (sql: string) => { rows: unknown[] };
-    };
-
-    knex.raw = vi.fn((sql: string) => ({ rows: sql.includes('financial_transaction') ? rawRows : [] }));
-    return knex;
-  });
+  const respond = (query: CompiledQuery): unknown[] => {
+    const { parameters, sql } = query;
+    const predicates = equalityPredicates(query);
+    queryLog?.push({ predicates, sql });
+    if (sql.includes('from "financial_asset_stock_adjustment"')) return splitRows;
+    if (sql.includes('from "certificado_aforro_rate_period"')) return caRateRows;
+    if (sql.includes('from "certificado_aforro_premium_schedule"')) return caPremiumRows;
+    if (sql.includes('from "certificado_aforro_subscription_detail"')) return caTaxExemptRows;
+    if (sql.includes('from "exchange_rate"')) {
+      // The latest rate per currency pair, for current prices: none in these fixtures.
+      if (!sql.includes(' limit ')) return [];
+      const cutoffIndex = /"date" <= \$(\d+)/.exec(sql)?.[1];
+      // The Savings Certificate EUR rate, or a fee's rate as of its transaction date.
+      if (cutoffIndex === undefined || exchangeRateRows.length === 0) return exchangeRateRow ? [exchangeRateRow] : [];
+      const cutoff = parameters[Number(cutoffIndex) - 1];
+      const cutoffTime = cutoff instanceof Date ? cutoff.getTime() : Number.POSITIVE_INFINITY;
+      const matchingRates = exchangeRateRows
+        .filter((rate) => new Date(rate.date).getTime() <= cutoffTime)
+        .toSorted((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+      return matchingRates.slice(0, 1);
+    }
+    if (!sql.includes('from "financial_transaction" as "ft"')) return [];
+    const filteredRows = (rawRows as Record<string, unknown>[]).filter((row) =>
+      Object.entries(predicates).every(([column, value]) => {
+        if (column === 'ft.tenant_key') return row['tenant_key'] == null || row['tenant_key'] === value;
+        if (column === 'p.tenant_key') return row['portfolio_tenant_key'] == null || row['portfolio_tenant_key'] === value;
+        if (column === 'ft.portfolio_key') return row['portfolio_key'] == null || row['portfolio_key'] === value;
+        if (column === 'ft.appuser_key') return row['appuser_key'] == null || row['appuser_key'] === value;
+        return true;
+      }),
+    );
+    return filteredRows.map((row) => projectRow(row, selectedColumns(sql)));
+  };
+  return vi.fn(() => kyselyDouble(respond).db);
 };
 
 beforeEach(() => {
   vi.clearAllMocks();
   Object.assign(DI.em, {
-    getKnex: makeKnexMock({}),
+    getKysely: makeDatabaseMock({}),
   });
 });
 
@@ -303,6 +283,29 @@ describe('buildSplitAdjustedHoldingBatches', () => {
 
     expect(result[0]!.quantity).toBe(5);
     expect(result[0]!.averageBuyPrice).toBe(25);
+  });
+
+  it('allocates purchase fees proportionally to sold and open FIFO basis', () => {
+    const replay = buildSplitAdjustedHoldingBatches([
+      makeTimelineTransaction({ fee_amount: 2, quantity: 10, transaction_date: new Date('2024-01-01'), transaction_key: 1, unit_settlement_amount: 10 }),
+      makeTimelineTransaction({ fee_amount: 1, financial_transaction_type_key: FINANCIAL_TRANSACTION_TYPES.SELL, quantity: -4, transaction_date: new Date('2024-01-02'), transaction_key: 2, unit_settlement_amount: 15 }),
+    ]);
+    const holding = aggregateBatchesIntoAssets(replay)[0]!;
+
+    expect(holding.quantity).toBe(6);
+    expect(holding.averageBuyPrice).toBeCloseTo(10.2, 8);
+    expect(replay[0]!.remaining_fee_amount).toBeCloseTo(1.2, 8);
+  });
+
+  it('preserves a lot commission total across a stock split', () => {
+    const replay = buildSplitAdjustedHoldingBatches([
+      makeTimelineTransaction({ fee_amount: 4, quantity: 2, transaction_date: new Date('2024-01-01'), transaction_key: 1, unit_settlement_amount: 100 }),
+      makeSplit({ date: new Date('2024-02-01'), denominator: 1, financial_asset_key: 1, numerator: 2 }),
+      makeTimelineTransaction({ fee_amount: 1, financial_transaction_type_key: FINANCIAL_TRANSACTION_TYPES.SELL, quantity: -1, transaction_date: new Date('2024-03-01'), transaction_key: 2, unit_settlement_amount: 60 }),
+    ]);
+
+    expect(aggregateBatchesIntoAssets(replay)[0]!.averageBuyPrice).toBeCloseTo(51, 8);
+    expect(replay[0]!.remaining_fee_amount).toBe(3);
   });
 
   it('handles reverse splits', () => {
@@ -432,9 +435,9 @@ describe('buildSplitAdjustedHoldingBatches', () => {
 
 describe('portfolio holdings service', () => {
   it('applies tenant predicates to aggregate holdings queries', async () => {
-    const queryLog: { table: string; whereCalls: unknown[][] }[] = [];
+    const queryLog: LoggedQuery[] = [];
     Object.assign(DI.em, {
-      getKnex: makeKnexMock({
+      getKysely: makeDatabaseMock({
         queryLog,
         rawRows: [
           makeTransactionRow({ portfolio_tenant_key: 7, tenant_key: 7 }),
@@ -445,16 +448,16 @@ describe('portfolio holdings service', () => {
 
     const result = await portfolioHoldingsService.getPortfoliosHoldings({ appuserKey: 1, currencyKey: { code: 'USD' } } as Appuser, 7);
 
-    const transactionQuery = queryLog.find(({ table }) => table.includes('financial_transaction as ft'));
-    expect(transactionQuery?.whereCalls).toEqual(expect.arrayContaining([['ft.tenant_key', 7], ['p.tenant_key', 7]]));
+    const transactionQuery = queryLog.find(({ sql }) => sql.includes('from "financial_transaction" as "ft"'));
+    expect(transactionQuery?.predicates).toMatchObject({ 'ft.tenant_key': 7, 'p.tenant_key': 7 });
     expect(result).toHaveLength(1);
     expect(result[0]).toMatchObject({ financialAssetKey: 1 });
   });
 
   it('does not return a foreign portfolio when its transaction tenant is stale', async () => {
-    const queryLog: { table: string; whereCalls: unknown[][] }[] = [];
+    const queryLog: LoggedQuery[] = [];
     Object.assign(DI.em, {
-      getKnex: makeKnexMock({
+      getKysely: makeDatabaseMock({
         queryLog,
         rawRows: [makeTransactionRow({ portfolio_key: 99, portfolio_tenant_key: 8, tenant_key: 7 })],
       }),
@@ -466,14 +469,14 @@ describe('portfolio holdings service', () => {
       7,
     );
 
-    const transactionQuery = queryLog.find(({ table }) => table.includes('financial_transaction as ft'));
-    expect(transactionQuery?.whereCalls).toEqual(expect.arrayContaining([['ft.tenant_key', 7], ['p.tenant_key', 7], ['ft.portfolio_key', 99]]));
+    const transactionQuery = queryLog.find(({ sql }) => sql.includes('from "financial_transaction" as "ft"'));
+    expect(transactionQuery?.predicates).toMatchObject({ 'ft.portfolio_key': 99, 'ft.tenant_key': 7, 'p.tenant_key': 7 });
     expect(result).toEqual([]);
   });
 
   it('uses stored split rows when calculating holdings', async () => {
     Object.assign(DI.em, {
-      getKnex: makeKnexMock({
+      getKysely: makeDatabaseMock({
         rawRows: [
           {
             appuser_unit_amount: 65.5,
@@ -510,7 +513,7 @@ describe('portfolio holdings service', () => {
 
   it('surfaces a holding with no financial_asset_type_name as Unclassified instead of dropping it', async () => {
     Object.assign(DI.em, {
-      getKnex: makeKnexMock({
+      getKysely: makeDatabaseMock({
         rawRows: [
           {
             appuser_unit_amount: 100,
@@ -591,7 +594,7 @@ describe('portfolio holdings service', () => {
 
   it('does not mark a split-adjusted full sell as invalid', async () => {
     Object.assign(DI.em, {
-      getKnex: makeKnexMock({
+      getKysely: makeDatabaseMock({
         rawRows: [
           {
             financial_asset_currency_code: 'USD',
@@ -635,7 +638,7 @@ describe('portfolio holdings service', () => {
 
   it('marks an oversell after split as invalid', async () => {
     Object.assign(DI.em, {
-      getKnex: makeKnexMock({
+      getKysely: makeDatabaseMock({
         rawRows: [
           {
             financial_asset_currency_code: 'USD',
@@ -679,7 +682,7 @@ describe('portfolio holdings service', () => {
 
   it('preserves portfolio name and asset currency code from joined rows', async () => {
     Object.assign(DI.em, {
-      getKnex: makeKnexMock({
+      getKysely: makeDatabaseMock({
       rawRows: [
         {
           financial_asset_currency_code: 'EUR',
@@ -729,7 +732,7 @@ describe('portfolio holdings service', () => {
 
   it('computes realized gains cost basis for a full sell after split', async () => {
     Object.assign(DI.em, {
-      getKnex: makeKnexMock({
+      getKysely: makeDatabaseMock({
         rawRows: [
           { appuser_unit_amount: 10, financial_asset_currency_code: 'USD', financial_asset_key: 11, financial_asset_name: 'Apple Inc.', financial_asset_symbol: 'AAPL', financial_asset_type_name: 'Stock', financial_transaction_type_key: FINANCIAL_TRANSACTION_TYPES.BUY, portfolio_key: 7, quantity: 2, settlement_unit_amount: 10, transaction_date: new Date('2024-01-01T00:00:00Z'), transaction_key: 1 },
           { appuser_unit_amount: 0, financial_asset_currency_code: 'USD', financial_asset_key: 11, financial_asset_name: 'Apple Inc.', financial_asset_symbol: 'AAPL', financial_asset_type_name: 'Stock', financial_transaction_type_key: FINANCIAL_TRANSACTION_TYPES.SELL, portfolio_key: 7, quantity: -8, settlement_unit_amount: 0, transaction_date: new Date('2024-02-02T00:00:00Z'), transaction_key: 2 },
@@ -745,7 +748,7 @@ describe('portfolio holdings service', () => {
 
   it('computes realized gains cost basis for a partial sell after split', async () => {
     Object.assign(DI.em, {
-      getKnex: makeKnexMock({
+      getKysely: makeDatabaseMock({
         rawRows: [
           { appuser_unit_amount: 10, financial_asset_currency_code: 'USD', financial_asset_key: 11, financial_asset_name: 'Apple Inc.', financial_asset_symbol: 'AAPL', financial_asset_type_name: 'Stock', financial_transaction_type_key: FINANCIAL_TRANSACTION_TYPES.BUY, portfolio_key: 7, quantity: 2, settlement_unit_amount: 10, transaction_date: new Date('2024-01-01T00:00:00Z'), transaction_key: 1 },
           { appuser_unit_amount: 0, financial_asset_currency_code: 'USD', financial_asset_key: 11, financial_asset_name: 'Apple Inc.', financial_asset_symbol: 'AAPL', financial_asset_type_name: 'Stock', financial_transaction_type_key: FINANCIAL_TRANSACTION_TYPES.SELL, portfolio_key: 7, quantity: -5, settlement_unit_amount: 0, transaction_date: new Date('2024-02-02T00:00:00Z'), transaction_key: 2 },
@@ -761,7 +764,7 @@ describe('portfolio holdings service', () => {
 
   it('falls back to settlement_amount when appuser_settlement_amount is null', async () => {
     Object.assign(DI.em, {
-      getKnex: makeKnexMock({
+      getKysely: makeDatabaseMock({
         rawRows: [
           { appuser_unit_amount: 97, financial_asset_currency_code: 'EUR', financial_asset_key: 1, financial_asset_name: 'AMD', financial_asset_symbol: 'AMD', financial_asset_type_name: 'Stock', financial_transaction_type_key: FINANCIAL_TRANSACTION_TYPES.BUY, portfolio_key: 42, quantity: 5, settlement_unit_amount: 97, transaction_date: new Date('2024-01-01T00:00:00Z'), transaction_key: 1 },
           { appuser_unit_amount: 150, financial_asset_currency_code: 'EUR', financial_asset_key: 2, financial_asset_name: 'Apple Inc.', financial_asset_symbol: 'AAPL', financial_asset_type_name: 'Stock', financial_transaction_type_key: FINANCIAL_TRANSACTION_TYPES.BUY, portfolio_key: 42, quantity: 10, settlement_unit_amount: 150, transaction_date: new Date('2024-01-02T00:00:00Z'), transaction_key: 2 },
@@ -777,7 +780,7 @@ describe('portfolio holdings service', () => {
   });
 
   it('prefers appuser_settlement_amount when both appuser and settlement amounts are present', async () => {
-    const getKnex = makeKnexMock({
+    const getKysely = makeDatabaseMock({
       rawRows: [
         { appuser_unit_amount: 100, financial_asset_currency_code: 'EUR', financial_asset_key: 2, financial_asset_name: 'Apple Inc.', financial_asset_symbol: 'AAPL', financial_asset_type_name: 'Stock', financial_transaction_type_key: FINANCIAL_TRANSACTION_TYPES.BUY, portfolio_key: 42, quantity: 1, settlement_unit_amount: 100, transaction_date: new Date('2024-01-01T00:00:00Z'), transaction_key: 1 },
         { appuser_settlement_amount: 150, financial_asset_currency_code: 'EUR', financial_asset_key: 2, financial_asset_name: 'Apple Inc.', financial_asset_symbol: 'AAPL', financial_asset_type_name: 'Stock', financial_transaction_type_key: FINANCIAL_TRANSACTION_TYPES.SELL, portfolio_key: 42, quantity: -1, settlement_amount: -364, settlement_unit_amount: 364, transaction_date: new Date('2024-01-02T00:00:00Z'), transaction_key: 2 },
@@ -785,16 +788,182 @@ describe('portfolio holdings service', () => {
       splitRows: [],
     });
 
-    Object.assign(DI.em, { getKnex });
+    Object.assign(DI.em, { getKysely });
 
     const result = await portfolioHoldingsService.getRealizedGains(1, 42);
 
     expect(result.totalRealizedGains).toBe(50);
   });
 
+  it('subtracts trade commissions from FIFO basis and realized sale proceeds', async () => {
+    Object.assign(DI.em, {
+      getKysely: makeDatabaseMock({
+        rawRows: [
+          { appuser_currency_code: 'EUR', appuser_unit_amount: 85.25, fee_amount: 1, fee_currency_code: 'EUR', financial_asset_currency_code: 'EUR', financial_asset_key: 1, financial_asset_name: 'ETF', financial_asset_symbol: 'ETF', financial_asset_type_name: 'ETF', financial_transaction_type_key: FINANCIAL_TRANSACTION_TYPES.BUY, portfolio_key: 42, quantity: 12, settlement_currency_code: 'EUR', settlement_unit_amount: 85.25, transaction_date: new Date('2024-01-01T00:00:00Z'), transaction_key: 1 },
+          { appuser_currency_code: 'EUR', appuser_unit_amount: 89.62, fee_amount: 1, fee_currency_code: 'EUR', financial_asset_currency_code: 'EUR', financial_asset_key: 1, financial_asset_name: 'ETF', financial_asset_symbol: 'ETF', financial_asset_type_name: 'ETF', financial_transaction_type_key: FINANCIAL_TRANSACTION_TYPES.BUY, portfolio_key: 42, quantity: 11, settlement_currency_code: 'EUR', settlement_unit_amount: 89.62, transaction_date: new Date('2024-02-01T00:00:00Z'), transaction_key: 2 },
+          { appuser_currency_code: 'EUR', appuser_unit_amount: 93.45, fee_amount: 1, fee_currency_code: 'EUR', financial_asset_currency_code: 'EUR', financial_asset_key: 1, financial_asset_name: 'ETF', financial_asset_symbol: 'ETF', financial_asset_type_name: 'ETF', financial_transaction_type_key: FINANCIAL_TRANSACTION_TYPES.BUY, portfolio_key: 42, quantity: 8, settlement_currency_code: 'EUR', settlement_unit_amount: 93.45, transaction_date: new Date('2024-03-01T00:00:00Z'), transaction_key: 3 },
+          { appuser_currency_code: 'EUR', appuser_settlement_amount: 3444, fee_amount: -3, fee_currency_code: 'EUR', financial_asset_currency_code: 'EUR', financial_asset_key: 1, financial_asset_name: 'ETF', financial_asset_symbol: 'ETF', financial_asset_type_name: 'ETF', financial_transaction_type_key: FINANCIAL_TRANSACTION_TYPES.SELL, portfolio_key: 42, quantity: -28, settlement_amount: -3444, settlement_currency_code: 'EUR', settlement_unit_amount: 123, transaction_date: new Date('2024-04-01T00:00:00Z'), transaction_key: 4 },
+        ],
+        splitRows: [],
+      }),
+    });
+
+    const result = await portfolioHoldingsService.getRealizedGains(1, 42);
+
+    expect(result.totalCostBasisOfSold).toBeCloseTo(2478.695, 8);
+    expect(result.totalRealizedGains).toBeCloseTo(962.305, 8);
+  });
+
+  it('converts settlement-currency fees with each transaction stored FX rate', async () => {
+    const rawRows = [
+      { appuser_currency_code: 'EUR', appuser_currency_exchange_rate: 0.8, appuser_unit_amount: 80, fee_amount: 10, fee_currency_code: 'USD', fee_currency_key: 1, financial_asset_currency_code: 'USD', financial_asset_key: 1, financial_asset_name: 'ETF', financial_asset_symbol: 'ETF', financial_asset_type_name: 'ETF', financial_transaction_type_key: FINANCIAL_TRANSACTION_TYPES.BUY, portfolio_key: 42, quantity: 2, settlement_amount: -200, settlement_currency_code: 'USD', settlement_currency_key: 1, settlement_unit_amount: 100, transaction_date: new Date('2024-01-01T00:00:00Z'), transaction_key: 1 },
+      { appuser_currency_code: 'EUR', appuser_currency_exchange_rate: 0.9, appuser_settlement_amount: 135, fee_amount: -2, fee_currency_code: 'USD', fee_currency_key: 1, financial_asset_currency_code: 'USD', financial_asset_key: 1, financial_asset_name: 'ETF', financial_asset_symbol: 'ETF', financial_asset_type_name: 'ETF', financial_transaction_type_key: FINANCIAL_TRANSACTION_TYPES.SELL, portfolio_key: 42, quantity: -1, settlement_amount: -150, settlement_currency_code: 'USD', settlement_currency_key: 1, settlement_unit_amount: 150, transaction_date: new Date('2024-02-01T00:00:00Z'), transaction_key: 2 },
+    ];
+    Object.assign(DI.em, { getKysely: makeDatabaseMock({ rawRows }) });
+
+    const gains = await portfolioHoldingsService.getRealizedGains(1, 42);
+    const holdings = await portfolioHoldingsService.getPortfolioHoldings({ appuserKey: 1, currencyKey: { code: 'EUR' } } as Appuser, 42);
+
+    expect(gains.totalCostBasisOfSold).toBe(84);
+    expect(gains.totalCostBasisOfSold + gains.totalRealizedGains).toBeCloseTo(133.2, 8);
+    expect(gains.totalRealizedGains).toBeCloseTo(49.2, 8);
+    expect(holdings[0]).toMatchObject({ averageBuyPrice: 84, quantity: 1 });
+  });
+
+  it('uses the latest historical rate on or before the fee transaction date for third-currency fees', async () => {
+    Object.assign(DI.em, {
+      getKysely: makeDatabaseMock({
+        exchangeRateRows: [
+          { date: new Date('2024-01-01T00:00:00Z'), rate: 0.5 },
+          { date: new Date('2024-02-01T00:00:00Z'), rate: 0.99 },
+        ],
+        rawRows: [
+          { appuser_currency_code: 'EUR', appuser_currency_key: 2, appuser_unit_amount: 100, fee_amount: 10, fee_currency_code: 'GBP', fee_currency_key: 3, financial_asset_currency_code: 'USD', financial_asset_key: 1, financial_asset_name: 'ETF', financial_asset_symbol: 'ETF', financial_asset_type_name: 'ETF', financial_transaction_type_key: FINANCIAL_TRANSACTION_TYPES.BUY, portfolio_key: 42, quantity: 1, settlement_currency_code: 'USD', settlement_currency_key: 1, settlement_unit_amount: 100, transaction_date: new Date('2024-01-15T00:00:00Z'), transaction_key: 1 },
+          { appuser_currency_code: 'EUR', appuser_settlement_amount: 200, financial_asset_currency_code: 'USD', financial_asset_key: 1, financial_asset_name: 'ETF', financial_asset_symbol: 'ETF', financial_asset_type_name: 'ETF', financial_transaction_type_key: FINANCIAL_TRANSACTION_TYPES.SELL, portfolio_key: 42, quantity: -1, settlement_amount: -200, settlement_currency_code: 'USD', settlement_currency_key: 1, settlement_unit_amount: 200, transaction_date: new Date('2024-03-01T00:00:00Z'), transaction_key: 2 },
+        ],
+        splitRows: [],
+      }),
+    });
+
+    const result = await portfolioHoldingsService.getRealizedGains(1, 42);
+
+    expect(result.totalCostBasisOfSold).toBe(105);
+    expect(result.totalRealizedGains).toBe(95);
+  });
+
+  it('converts original-currency fees through stored original-to-settlement and settlement-to-user rates', async () => {
+    Object.assign(DI.em, {
+      getKysely: makeDatabaseMock({
+        rawRows: [
+          { appuser_currency_code: 'EUR', appuser_currency_exchange_rate: 0.8, appuser_unit_amount: 80, fee_amount: 1000, fee_currency_code: 'JPY', fee_currency_key: 3, financial_asset_currency_code: 'USD', financial_asset_key: 1, financial_asset_name: 'ETF', financial_asset_symbol: 'ETF', financial_asset_type_name: 'ETF', financial_transaction_type_key: FINANCIAL_TRANSACTION_TYPES.BUY, original_currency_code: 'JPY', portfolio_key: 42, quantity: 1, settlement_currency_code: 'USD', settlement_currency_key: 1, settlement_exchange_rate: 0.01, settlement_unit_amount: 100, transaction_date: new Date('2024-01-15T00:00:00Z'), transaction_key: 1 },
+          { appuser_currency_code: 'EUR', appuser_settlement_amount: 100, financial_asset_currency_code: 'USD', financial_asset_key: 1, financial_asset_name: 'ETF', financial_asset_symbol: 'ETF', financial_asset_type_name: 'ETF', financial_transaction_type_key: FINANCIAL_TRANSACTION_TYPES.SELL, portfolio_key: 42, quantity: -1, settlement_amount: -125, settlement_currency_code: 'USD', settlement_currency_key: 1, settlement_unit_amount: 125, transaction_date: new Date('2024-02-15T00:00:00Z'), transaction_key: 2 },
+        ],
+        splitRows: [],
+      }),
+    });
+
+    const result = await portfolioHoldingsService.getRealizedGains(1, 42);
+
+    expect(result.totalCostBasisOfSold).toBe(88);
+    expect(result.totalRealizedGains).toBe(12);
+  });
+
+  it('keeps zero-valued fees independent of fee currency and FX availability', async () => {
+    Object.assign(DI.em, {
+      getKysely: makeDatabaseMock({
+        rawRows: [
+          { appuser_currency_code: 'EUR', appuser_unit_amount: 100, fee_amount: 0, financial_asset_currency_code: 'USD', financial_asset_key: 1, financial_asset_name: 'ETF', financial_asset_symbol: 'ETF', financial_asset_type_name: 'ETF', financial_transaction_type_key: FINANCIAL_TRANSACTION_TYPES.BUY, portfolio_key: 42, quantity: 1, settlement_currency_code: 'USD', settlement_unit_amount: 100, transaction_date: new Date('2024-01-15T00:00:00Z'), transaction_key: 1 },
+        ],
+        splitRows: [],
+      }),
+    });
+
+    const result = await portfolioHoldingsService.getRealizedGains(1, 42);
+
+    expect(result).toEqual({ totalCostBasisOfSold: 0, totalRealizedGains: 0 });
+  });
+
+  describe('a fee with no usable exchange rate', () => {
+    const unconvertibleBuy = {
+      appuser_currency_code: 'EUR', appuser_currency_key: 2, appuser_unit_amount: 100, fee_amount: 10, financial_asset_currency_code: 'USD', financial_asset_key: 1, financial_asset_name: 'ETF', financial_asset_symbol: 'ETF', financial_asset_type_name: 'ETF', financial_transaction_type_key: FINANCIAL_TRANSACTION_TYPES.BUY, portfolio_key: 42, quantity: 2, settlement_currency_code: 'USD', settlement_currency_key: 1, settlement_unit_amount: 100, transaction_date: new Date('2024-01-15T00:00:00Z'), transaction_key: 1,
+    };
+    const sellOne = { appuser_currency_code: 'EUR', appuser_settlement_amount: 150, financial_asset_currency_code: 'USD', financial_asset_key: 1, financial_asset_name: 'ETF', financial_asset_symbol: 'ETF', financial_asset_type_name: 'ETF', financial_transaction_type_key: FINANCIAL_TRANSACTION_TYPES.SELL, portfolio_key: 42, quantity: -1, settlement_amount: -150, settlement_currency_code: 'USD', settlement_currency_key: 1, settlement_unit_amount: 150, transaction_date: new Date('2024-02-15T00:00:00Z'), transaction_key: 2 };
+    const otherAssetWithEurFee = { appuser_currency_code: 'EUR', appuser_unit_amount: 50, fee_amount: 1, fee_currency_code: 'EUR', financial_asset_currency_code: 'EUR', financial_asset_key: 2, financial_asset_name: 'Other', financial_asset_symbol: 'OTH', financial_asset_type_name: 'ETF', financial_transaction_type_key: FINANCIAL_TRANSACTION_TYPES.BUY, portfolio_key: 42, quantity: 1, settlement_currency_code: 'EUR', settlement_unit_amount: 50, transaction_date: new Date('2024-01-15T00:00:00Z'), transaction_key: 3 };
+
+    it.each([
+      { case: 'a third-currency fee with no historical rate', fields: { fee_currency_code: 'GBP', fee_currency_key: 3 } },
+      { case: 'a settlement-currency fee with no stored rate', fields: { appuser_currency_exchange_rate: null, fee_currency_code: 'USD', fee_currency_key: 1, original_currency_code: 'GBP', settlement_exchange_rate: 0.9 } },
+      { case: 'an original-currency fee with no stored rate', fields: { appuser_currency_exchange_rate: 0.9, fee_currency_code: 'GBP', fee_currency_key: 3, original_currency_code: 'GBP', settlement_exchange_rate: null } },
+      ...[0, -0.5, Number.NaN, Number.POSITIVE_INFINITY, 'invalid'].map((rate) => ({ case: `a stored rate of ${String(rate)}`, fields: { appuser_currency_exchange_rate: rate, fee_currency_code: 'USD', fee_currency_key: 1 } })),
+      { case: 'a fee with no fee currency', fields: { fee_currency_code: undefined } },
+    ])('counts $case as zero, flags only that asset and warns', async ({ fields }) => {
+      Object.assign(DI.em, { getKysely: makeDatabaseMock({ rawRows: [{ ...unconvertibleBuy, ...fields }, sellOne, otherAssetWithEurFee], splitRows: [] }) });
+      getCurrentAssetPricesMock.mockResolvedValue([]);
+      const warn = vi.spyOn(logger, 'warn').mockImplementation(() => undefined);
+
+      const gains = await portfolioHoldingsService.getRealizedGains(1, 42);
+      const holdings = await portfolioHoldingsService.getPortfolioHoldings({ appuserKey: 1, currencyKey: { code: 'EUR' } } as Appuser, 42);
+
+      expect(gains).toEqual({ feeConversionIncompleteAssetKeys: [1], totalCostBasisOfSold: 100, totalRealizedGains: 50 });
+      expect(holdings.find((h) => h.financialAssetKey === 1)).toMatchObject({ averageBuyPrice: 100, feeConversionIncomplete: true, quantity: 1 });
+      const other = holdings.find((h) => h.financialAssetKey === 2);
+      expect(other).toMatchObject({ averageBuyPrice: 51, quantity: 1 });
+      expect(other).not.toHaveProperty('feeConversionIncomplete');
+      expect(warn).toHaveBeenCalled();
+      warn.mockRestore();
+    });
+
+    it('still reports an asset that was fully sold, which has no holding left to carry the flag', async () => {
+      const sellBoth = { ...sellOne, appuser_settlement_amount: 300, quantity: -2, settlement_amount: -300 };
+      Object.assign(DI.em, { getKysely: makeDatabaseMock({ rawRows: [{ ...unconvertibleBuy, fee_currency_code: 'GBP', fee_currency_key: 3 }, sellBoth, otherAssetWithEurFee], splitRows: [] }) });
+      getCurrentAssetPricesMock.mockResolvedValue([]);
+      const warn = vi.spyOn(logger, 'warn').mockImplementation(() => undefined);
+
+      const gains = await portfolioHoldingsService.getRealizedGains(1, 42);
+      const holdings = await portfolioHoldingsService.getPortfolioHoldings({ appuserKey: 1, currencyKey: { code: 'EUR' } } as Appuser, 42);
+
+      expect(gains).toEqual({ feeConversionIncompleteAssetKeys: [1], totalCostBasisOfSold: 200, totalRealizedGains: 100 });
+      expect(holdings.some((h) => h.feeConversionIncomplete)).toBe(false);
+      warn.mockRestore();
+    });
+  });
+
+  it('preserves exact fee allocation across partial sales in public holdings and realized gains', async () => {
+    const rawRows = [
+      { appuser_currency_code: 'USD', appuser_unit_amount: 99.99, fee_amount: 0.01, fee_currency_code: 'USD', fee_currency_key: 1, financial_asset_currency_code: 'USD', financial_asset_key: 1, financial_asset_name: 'ETF', financial_asset_symbol: 'ETF', financial_asset_type_name: 'ETF', financial_transaction_type_key: FINANCIAL_TRANSACTION_TYPES.BUY, portfolio_key: 42, quantity: 2, settlement_currency_code: 'USD', settlement_currency_key: 1, settlement_unit_amount: 99.99, transaction_date: new Date('2024-01-01T00:00:00Z'), transaction_key: 1 },
+      { appuser_currency_code: 'USD', appuser_settlement_amount: 120, fee_amount: 0, fee_currency_code: 'USD', fee_currency_key: 1, financial_asset_currency_code: 'USD', financial_asset_key: 1, financial_asset_name: 'ETF', financial_asset_symbol: 'ETF', financial_asset_type_name: 'ETF', financial_transaction_type_key: FINANCIAL_TRANSACTION_TYPES.SELL, portfolio_key: 42, quantity: -1, settlement_amount: -120, settlement_currency_code: 'USD', settlement_currency_key: 1, settlement_unit_amount: 120, transaction_date: new Date('2024-01-02T00:00:00Z'), transaction_key: 2 },
+    ];
+    Object.assign(DI.em, { getKysely: makeDatabaseMock({ rawRows }) });
+    getCurrentAssetPricesMock.mockResolvedValue([{ financial_asset_key: 1, price: 120 }]);
+
+    const holdings = await portfolioHoldingsService.getPortfolioHoldings({ appuserKey: 1, currencyKey: { code: 'USD' } } as Appuser, 42);
+    const gains = await portfolioHoldingsService.getRealizedGains(1, 42);
+
+    expect(holdings[0]).toMatchObject({ averageBuyPrice: 99.995, currentValue: 120, quantity: 1, unrealizedGains: 20 });
+    expect(gains.totalCostBasisOfSold).toBeCloseTo(99.995, 12);
+    expect(gains.totalRealizedGains).toBeCloseTo(20.005, 12);
+  });
+
+  it('keeps a negative net sale proceeds when the commission exceeds gross proceeds', async () => {
+    Object.assign(DI.em, {
+      getKysely: makeDatabaseMock({
+        rawRows: [
+          { appuser_currency_code: 'EUR', appuser_unit_amount: 10, financial_asset_currency_code: 'EUR', financial_asset_key: 1, financial_asset_name: 'ETF', financial_asset_symbol: 'ETF', financial_asset_type_name: 'ETF', financial_transaction_type_key: FINANCIAL_TRANSACTION_TYPES.BUY, portfolio_key: 42, quantity: 1, settlement_currency_code: 'EUR', settlement_unit_amount: 10, transaction_date: new Date('2024-01-01T00:00:00Z'), transaction_key: 1 },
+          { appuser_currency_code: 'EUR', appuser_settlement_amount: 1, fee_amount: 3, fee_currency_code: 'EUR', financial_asset_currency_code: 'EUR', financial_asset_key: 1, financial_asset_name: 'ETF', financial_asset_symbol: 'ETF', financial_asset_type_name: 'ETF', financial_transaction_type_key: FINANCIAL_TRANSACTION_TYPES.SELL, portfolio_key: 42, quantity: -1, settlement_amount: -1, settlement_currency_code: 'EUR', settlement_unit_amount: 1, transaction_date: new Date('2024-02-01T00:00:00Z'), transaction_key: 2 },
+        ],
+        splitRows: [],
+      }),
+    });
+
+    const result = await portfolioHoldingsService.getRealizedGains(1, 42);
+
+    expect(result.totalCostBasisOfSold).toBe(10);
+    expect(result.totalRealizedGains).toBe(-12);
+  });
+
 });
 
-describe('Savings Certificate holdings integration (RAD-445)', () => {
+describe('Savings Certificate holdings integration', () => {
   const stockRow = {
     financial_asset_currency_code: 'EUR',
     financial_asset_key: 1,
@@ -810,6 +979,8 @@ describe('Savings Certificate holdings integration (RAD-445)', () => {
   };
 
   const savingsCertificateRow = {
+    fee_amount: 25,
+    fee_currency_code: 'EUR',
     financial_asset_currency_code: 'EUR',
     financial_asset_key: 100,
     financial_asset_name: 'Certificado de Aforro — Série F',
@@ -826,7 +997,7 @@ describe('Savings Certificate holdings integration (RAD-445)', () => {
   it('values the Savings Certificate holding via accrual (not price lookup) and recomputes allocation across the combined portfolio', async () => {
     getCurrentAssetPricesMock.mockResolvedValueOnce([{ date: new Date('2024-01-01'), financial_asset_key: 1, price: 150 }]);
     Object.assign(DI.em, {
-      getKnex: makeKnexMock({
+      getKysely: makeDatabaseMock({
         caPremiumRows: caStandardPremiumRows,
         caRateRows: caWideRateRows,
         rawRows: [stockRow, savingsCertificateRow],
@@ -861,7 +1032,7 @@ describe('Savings Certificate holdings integration (RAD-445)', () => {
 
   it('leaves a stock-only portfolio completely unaffected (regression guard)', async () => {
     Object.assign(DI.em, {
-      getKnex: makeKnexMock({
+      getKysely: makeDatabaseMock({
         rawRows: [
           {
             appuser_unit_amount: 65.5,
@@ -896,7 +1067,7 @@ describe('Savings Certificate holdings integration (RAD-445)', () => {
   it('degrades gracefully when a Savings Certificate lot fails valuation (no rate periods): the rest of the portfolio still returns successfully', async () => {
     getCurrentAssetPricesMock.mockResolvedValueOnce([{ date: new Date('2024-01-01'), financial_asset_key: 1, price: 150 }]);
     Object.assign(DI.em, {
-      getKnex: makeKnexMock({
+      getKysely: makeDatabaseMock({
         // No caRateRows at all for financial_asset_key 100 — computeCertificateLotValue throws
         // internally ("no rate period available"); the try/catch in
         // enrichSavingsCertificateHoldings must swallow it rather than letting the whole

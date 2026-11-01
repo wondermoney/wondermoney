@@ -3,7 +3,6 @@
 import { useLocale, useTranslations } from "next-intl";
 import { useMemo } from "react";
 
-import { Card, CardContent } from "@/components/ui/card";
 import Text from "@/components/ui/Typography/Text";
 import type { HoldingPositionSummary } from "@/lib/portfolio/holding-detail-summary";
 import { cn } from "@/lib/utils";
@@ -16,8 +15,7 @@ export function HoldingPositionMetrics({
 }) {
   const t = useTranslations();
   const formatCurrency = useFormatCurrency();
-  // RAD-575 — was a pair of module-level `Intl` instances with an `undefined`
-  // locale, so these followed the runtime rather than the reader.
+  // Formatted in the reader's locale, not the runtime's.
   const locale = useLocale();
   const { formatQuantity, formatPercentPoint } = useMemo(() => {
     const quantity = new Intl.NumberFormat(locale, { maximumFractionDigits: 6 });
@@ -30,7 +28,7 @@ export function HoldingPositionMetrics({
       formatQuantity: (value: number) => quantity.format(value),
     };
   }, [locale]);
-  // RAD-572 — needs the active locale, so it lives inside the component.
+  // Needs the active locale, so it lives inside the component.
   const formatMaybeCurrency = (value: number | null, currency: string) =>
     value === null ? "—" : formatCurrency(value, currency);
   const isCash = summary.type.toLowerCase() === "cash";
@@ -95,29 +93,29 @@ export function HoldingPositionMetrics({
   return (
     <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
       {items.map((item) => (
-        <Card key={item.label}>
-          <CardContent className="space-y-1 p-4">
-            <Text
-              variant="mutedText"
-              className="text-xs tracking-wide uppercase"
-            >
-              {item.label}
+        // A tinted step, not a Card: this sits inside the holding dialog,
+        // which is already the bordered, elevated surface (No-Nesting rule).
+        <div key={item.label} className="bg-muted/30 space-y-1 rounded-lg p-4">
+          <Text
+            variant="mutedText"
+            className="text-xs"
+          >
+            {item.label}
+          </Text>
+          <div
+            className={cn(
+              "font-mono text-lg font-semibold",
+              item.value === "—" && "text-muted-foreground",
+            )}
+          >
+            {item.value}
+          </div>
+          {item.helper ? (
+            <Text variant="mutedText" className="text-xs">
+              {item.helper}
             </Text>
-            <div
-              className={cn(
-                "font-mono text-lg font-semibold",
-                item.value === "—" && "text-muted-foreground",
-              )}
-            >
-              {item.value}
-            </div>
-            {item.helper ? (
-              <Text variant="mutedText" className="text-xs">
-                {item.helper}
-              </Text>
-            ) : null}
-          </CardContent>
-        </Card>
+          ) : null}
+        </div>
       ))}
     </div>
   );

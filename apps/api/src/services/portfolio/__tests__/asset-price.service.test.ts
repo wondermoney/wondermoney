@@ -1,7 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { kyselyDouble } from '@app/__tests__/__helpers__/kysely-double';
+
 const emMocks = vi.hoisted(() => ({
-  getKnex: vi.fn(),
+  getKysely: vi.fn(),
   upsert: vi.fn(),
 }));
 const eodhdMocks = vi.hoisted(() => ({
@@ -187,14 +189,11 @@ describe('getRecentlyPricedAssetKeys', () => {
   });
 
   it('returns the set of asset keys priced within the window', async () => {
-    const where = vi.fn().mockResolvedValue([{ financial_asset_key: 1 }, { financial_asset_key: 4 }]);
-    const distinct = vi.fn().mockReturnValue({ where });
-    const knexFn = vi.fn().mockReturnValue({ distinct });
-    mockedEm.getKnex.mockReturnValue(knexFn);
+    const database = kyselyDouble(() => [{ financial_asset_key: 1 }, { financial_asset_key: 4 }]);
+    mockedEm.getKysely.mockReturnValue(database.db);
 
     await expect(assetPriceService.getRecentlyPricedAssetKeys(2)).resolves.toEqual(new Set([1, 4]));
-    expect(knexFn).toHaveBeenCalledWith('financial_asset_price');
-    expect(distinct).toHaveBeenCalledWith('financial_asset_key');
+    expect(database.queries[0]?.sql).toBe('select distinct "financial_asset_key" from "financial_asset_price" where "date" >= $1');
   });
 });
 
@@ -203,7 +202,7 @@ describe('getBenchmarkHistoricalPrices', () => {
     vi.clearAllMocks();
   });
 
-  it('translates a caret-prefixed FMP-style symbol to the EODHD .INDX suffix and returns chronological points', async () => {
+  it('translates a caret-prefixed index symbol to the EODHD .INDX suffix and returns chronological points', async () => {
     mockedGetEndOfDayPrices.mockResolvedValueOnce([
       { adjusted_close: 101, close: 101, date: '2024-01-02', high: 102, low: 99, open: 100, volume: 1 },
       { adjusted_close: 100, close: 100, date: '2024-01-01', high: 101, low: 98, open: 99, volume: 1 },

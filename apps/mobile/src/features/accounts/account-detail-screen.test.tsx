@@ -19,6 +19,7 @@ const openBanking: AccountDetailData = {
   primaryCurrencyCode: 'EUR',
   refreshedAt: '2026-07-17T10:00:00.000Z',
   source: 'open_banking',
+  csvImportFormat: null,
 }
 
 async function renderScreen(state: React.ComponentProps<typeof AccountDetailScreen>['state']) {

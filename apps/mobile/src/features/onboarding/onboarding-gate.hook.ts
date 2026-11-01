@@ -12,7 +12,7 @@ export type OnboardingGateView = Readonly<{
 }>
 
 /**
- * RAD-226 — pure data hook for the (app) layout gate. Decoupled from the
+ * Pure data hook for the (app) layout gate. Decoupled from the
  * presentational `OnboardingGate` component so it can be tested without
  * rendering. Returns the three flags the root router cares about and, as a
  * side effect, navigates the router to `/onboarding` once when the bootstrap

@@ -21,8 +21,7 @@ export interface HistoricalPriceResponse {
   };
 }
 
-// Strict history DTO the API now returns (RAD-228): a flat { prices, symbol }
-// envelope rather than the old nested { companyHistoricalPrice: { data } }.
+// The API's strict history DTO: a flat { prices, symbol } envelope.
 // Points with a null close can't be plotted, so they're dropped.
 interface HistoricalPriceDto {
   prices: {
@@ -35,7 +34,7 @@ interface HistoricalPriceDto {
   symbol: string;
 }
 
-export async function getTickerHistoryPrice(
+async function getTickerHistoryPrice(
   ticker: string,
   from?: string,
   to?: string,
@@ -81,8 +80,7 @@ export default function useTickerHistoryPrice<R = HistoricalPriceResponse>(
   return useQuery({
     // `from`/`to`/`includeDividends` MUST be part of the key — otherwise
     // changing the chart timeframe (which only changes `from`) reuses the
-    // cached result and never refetches, so 1y/All silently show YTD data
-    // (RAD-362).
+    // cached result and never refetches, so 1y/All silently show YTD data.
     queryKey: ["ticker-historical-price", ticker, from, to, includeDividends],
     queryFn: () => getTickerHistoryPrice(ticker, from, to, includeDividends),
     ...options,

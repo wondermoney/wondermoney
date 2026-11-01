@@ -20,7 +20,7 @@ export function classifyBankConnectionDisconnectFailure(error: unknown): BankCon
 }
 
 /**
- * RAD-501 — disconnect (unsync) a linked bank connection. Mirrors
+ * Disconnect (unsync) a linked bank connection. Mirrors
  * use-account-delete-mutation.ts: no body, invalidate the read collection
  * on commit, route MFA rejections through blockAccess the same
  * way every other write mutation in this app does.

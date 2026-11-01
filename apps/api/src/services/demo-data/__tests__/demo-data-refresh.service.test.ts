@@ -22,7 +22,7 @@ import { PortfolioSnapshot } from '@entity/PortfolioSnapshot';
 import { Transaction } from '@entity/Transaction';
 import { DemoDataRefreshService } from '@service/demo-data/demo-data-refresh.service';
 import portfolioSnapshotService from '@service/portfolio/portfolio-snapshot.service';
-import { calculateAmountBudgeted } from '@utils/budget';
+import { calculateAmountBudgeted, Recurrency } from '@utils/budget';
 
 describe('demo data refresh service', () => {
   const demoAppuser = { appuserKey: 101, currencyKey: { code: 'EUR' } };
@@ -56,7 +56,7 @@ describe('demo data refresh service', () => {
     isDefaultBudgetCategory: true,
     isSystemCategory: true,
     name,
-    recurrency: 'MONTHLY',
+    recurrency: Recurrency.MONTHLY,
   }));
   const firstDemoCategory = demoCategories.at(0);
 

@@ -8,10 +8,10 @@ import { captureAnalyticsEvent } from '@/lib/telemetry/analytics'
 export type SocialSignInFailure = 'unavailable'
 
 /**
- * Which funnel the block was rendered in. Supabase's token exchange is one
+ * Which funnel the block was rendered in. The auth server's token exchange is one
  * operation for both — a first-time Apple/Google user is signed up and signed in
  * by the same call — so the only honest way to tell `sign_up_completed` from
- * `sign_in_completed` (RAD-518) is which screen the user pressed the button on.
+ * `sign_in_completed` is which screen the user pressed the button on.
  */
 export type SocialSignInFlow = 'sign_in' | 'sign_up'
 
@@ -23,8 +23,8 @@ export type SocialSignInFlow = 'sign_in' | 'sign_up'
 const PROVIDER_ORDER: readonly NativeIdentityProviderId[] = ['apple', 'google']
 
 /**
- * Drives native Apple/Google sign-in (RAD-420): asks the provider's SDK for an ID token
- * bound to a single-use nonce, then hands both to Supabase for a direct token exchange.
+ * Drives native Apple/Google sign-in: asks the provider's SDK for an ID token
+ * bound to a single-use nonce, then hands both to the auth server for a direct token exchange.
  * A successful exchange publishes a session, which the product runtime picks up and
  * activates exactly like a password sign-in.
  *
@@ -72,7 +72,7 @@ export function useSocialSignIn(
         setFailure('unavailable')
         return
       }
-      // RAD-518 — the provider name is the whole payload. The ID token, the
+      // The provider name is the whole payload. The ID token, the
       // nonce and anything the provider returned about the person stay here.
       if (flow === 'sign_up') captureAnalyticsEvent('sign_up_completed', { provider })
       else captureAnalyticsEvent('sign_in_completed', { provider })

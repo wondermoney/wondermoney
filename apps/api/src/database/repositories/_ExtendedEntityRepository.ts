@@ -1,15 +1,15 @@
-import { type AnyEntity, EntityManager, EntityRepository } from '@mikro-orm/postgresql';
+import { type AnyEntity, EntityRepository, type SqlEntityManager } from '@mikro-orm/postgresql';
 
 export class ExtendedEntityRepository<T extends object> extends EntityRepository<T> {
   async flush(): Promise<void> {
     return this.em.flush();
   }
 
-  persist(entity: AnyEntity | AnyEntity[]): EntityManager {
+  persist(entity: AnyEntity | AnyEntity[]): SqlEntityManager {
     return this.em.persist(entity);
   }
 
-  remove(entity: AnyEntity): EntityManager {
+  remove(entity: AnyEntity): SqlEntityManager {
     return this.em.remove(entity);
   }
 }

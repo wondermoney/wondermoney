@@ -5,11 +5,11 @@ import http from 'node:http';
  *
  * === Why the `status` hook is not optional in practice ===
  *
- * This endpoint used to answer `{ ok: true }` unconditionally. It consulted nothing —
- * not pg-boss, not the ORM, not any job state — so it proved only that the Node event
- * loop was alive. Coolify's generated health check hits exactly this, which made it
- * actively misleading: a worker whose pg-boss client had failed to start, or whose
- * database was unreachable, reported healthy forever.
+ * Without a `status` hook this endpoint answers `{ ok: true }` unconditionally. It consults
+ * nothing — not pg-boss, not the ORM, not any job state — so it proves only that the Node
+ * event loop is alive. Coolify's generated health check hits exactly this, which makes it
+ * actively misleading: a worker whose pg-boss client failed to start, or whose database is
+ * unreachable, reports healthy forever.
  *
  * A caller that passes `status` gets a real answer: `ok: false` on the payload **and**
  * HTTP 503, so an orchestrator restarts the container instead of leaving it green.
@@ -99,7 +99,7 @@ export function createWorkerHealthServer(options: WorkerHealthOptions = {}) {
   };
 }
 
-export function resolveWorkerHealthPort(env: WorkerHealthPortEnv = process.env as WorkerHealthPortEnv) {
+export function resolveWorkerHealthPort(env: WorkerHealthPortEnv = process.env) {
   if (env.WORKER_HEALTH_PORT) return parsePort('WORKER_HEALTH_PORT', env.WORKER_HEALTH_PORT, 3002);
 
   const appEnv = env.APP_ENV ?? env.DEPLOY_ENV ?? env.NODE_ENV;

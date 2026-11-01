@@ -1,7 +1,9 @@
 "use client";
 
+import { SIGNUP_COMPLETION_QUERY_PARAMS } from "@/lib/analytics/signup";
 import api from "@/lib/api/api";
 import { authClient } from "@/lib/auth/client";
+import { getSafeNextPath } from "@/lib/auth/safe-next-path";
 
 export type AuthCallbackOutcome = "demo" | "login" | "signup";
 
@@ -11,12 +13,14 @@ export type AuthCallbackResponse = {
 };
 
 export type AuthCallbackBody = {
+  /** Household invite token from `/join`; the API links the new user into the owner's tenant. */
+  readonly inviteToken?: string;
   readonly locale?: string;
 };
 
 const DEFAULT_SIGNUP_METHOD = "email";
 
-export function shouldTrackSignupCompletion(
+function shouldTrackSignupCompletion(
   outcome: AuthCallbackOutcome | undefined,
 ): boolean {
   return outcome === undefined || outcome === "signup";
@@ -26,8 +30,16 @@ function buildPostAuthRedirectUrl(
   locale: string,
   signupSource: string,
   callbackResult: AuthCallbackResponse | undefined,
+  next: string | null,
 ): string {
-  const url = new URL(`/${locale}`, window.location.origin);
+  const url = new URL(
+    getSafeNextPath(next, window.location.origin) ?? `/${locale}`,
+    window.location.origin,
+  );
+  // Markers on `next` itself would let a crafted link fake a signup event.
+  for (const param of SIGNUP_COMPLETION_QUERY_PARAMS) {
+    url.searchParams.delete(param);
+  }
 
   if (shouldTrackSignupCompletion(callbackResult?.outcome)) {
     url.searchParams.set("signup_completed", "1");
@@ -53,27 +65,31 @@ function buildPostAuthRedirectUrl(
  * SignupForm, and MfaForm's post-verify step to avoid duplicating the
  * provisioning + redirect logic.
  *
- * On failure, best-effort signs the now-orphaned session out and returns
- * `false` so the caller can show an error instead of navigating away.
+ * `next` is the `?next=` destination the user was originally headed to; it is
+ * re-validated here and falls back to `/{locale}` when missing or unsafe.
+ *
+ * On failure, best-effort signs the now-orphaned session out and returns the
+ * error so the caller can show a message instead of navigating away.
  */
 export async function completeAuthAndRedirect(
   locale: string,
   body: AuthCallbackBody,
   signupSource: string,
-): Promise<boolean> {
+  next: string | null = null,
+): Promise<{ ok: true } | { ok: false; error: unknown }> {
   try {
     const { data } = await api.post<AuthCallbackResponse | undefined>(
       "/v1/auth/callback",
       body,
     );
     window.location.assign(
-      buildPostAuthRedirectUrl(locale, signupSource, data),
+      buildPostAuthRedirectUrl(locale, signupSource, data, next),
     );
-    return true;
-  } catch {
+    return { ok: true };
+  } catch (error) {
     // no-excuse-ok: catch -- best-effort rollback of an orphaned session;
     // the caller surfaces the failure to the user via a toast.
     await authClient.signOut();
-    return false;
+    return { error, ok: false };
   }
 }

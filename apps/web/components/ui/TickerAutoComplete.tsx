@@ -95,7 +95,7 @@ const TickerAutoComplete: React.FC<AutoCompleteProps> = ({
   variant = "default",
 }) => {
   const t = useTranslations();
-  const { autocomplete, autocompleteState, inputRef, panelRef, environmentRef, onItemClick } =
+  const { autocomplete, autocompleteState, inputElement, attachInput, panelRef, environmentRef, onItemClick } =
     useTickerAutocomplete({ selectedTicker, onTickerSelected });
 
   const showNoResults =
@@ -112,8 +112,8 @@ const TickerAutoComplete: React.FC<AutoCompleteProps> = ({
       >
         <div className="relative w-full">
           <Input
-            ref={inputRef}
-            {...autocomplete.getInputProps({ inputElement: inputRef.current })}
+            ref={attachInput}
+            {...autocomplete.getInputProps({ inputElement })}
             {...inputProps}
             className={cn(
               "border-input bg-background ring-offset-background text-muted-foreground focus:ring-ring flex h-10 w-full items-center justify-between rounded-md border px-3 py-2 text-sm focus:ring-2 focus:ring-offset-2 focus:outline-hidden disabled:cursor-not-allowed disabled:opacity-50",

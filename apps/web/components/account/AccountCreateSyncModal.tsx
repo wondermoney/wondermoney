@@ -1,16 +1,20 @@
 "use client";
 
-import { ArrowLeft, ExternalLink, LockKeyhole, ShieldCheck } from "lucide-react";
+import {
+  ArrowLeft,
+  ExternalLink,
+  LockKeyhole,
+  ShieldCheck,
+} from "lucide-react";
 import { useTranslations } from "next-intl";
 import { usePostHog } from "posthog-js/react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useEffectEvent, useRef, useState } from "react";
 
 import { saveBankAccountSyncReturnMarker } from "@/lib/account/bank-account-sync-return-marker";
 import { safelyRunDiagnostic } from "@/lib/analytics/safe-diagnostics";
 import useBankList from "@/lib/api/banking/useBankList";
 import useCreateRequisition from "@/lib/api/banking/useCreateRequisition";
 import useEnableBankingCredential from "@/lib/api/user/useEnableBankingCredential";
-import { isBankConnectionsPaused } from "@/lib/utils/bank-connections-paused";
 import { getCountryCodeClient } from "@/lib/utils/countries";
 import { SUPPORTED_BANK_COUNTRY_CODES } from "@/lib/utils/countries/bank-countries";
 import { countryFlags } from "@/lib/utils/countries/country-flag";
@@ -36,19 +40,12 @@ const AccountAddSyncModal: React.FC<AccountAddSyncModalProps> = ({
 }) => {
   const t = useTranslations();
   const posthog = usePostHog();
-  const bankConnectionsPaused = isBankConnectionsPaused();
-  // Gating order matches AccountCreateModal: paused (unchanged, first priority)
-  // takes precedence over the BYOK credential check, which only runs once
-  // bank-sync isn't already paused globally.
   const { data: enableBankingCredential, isLoading: credentialLoading } =
-    useEnableBankingCredential({ enabled: !bankConnectionsPaused });
+    useEnableBankingCredential();
   const credentialRequired =
-    !bankConnectionsPaused &&
-    !credentialLoading &&
-    enableBankingCredential?.status !== "active";
+    !credentialLoading && enableBankingCredential?.status !== "active";
   const [bankId, setBankId] = useState<string | null>(null);
   const [continueRequested, setContinueRequested] = useState(false);
-  const [redirectStarted, setRedirectStarted] = useState(false);
   const expectationHeadingRef = useRef<HTMLHeadingElement>(null);
   const [country, setCountry] = useState<string>(() => getCountryCodeClient());
   const {
@@ -56,7 +53,12 @@ const AccountAddSyncModal: React.FC<AccountAddSyncModalProps> = ({
     isLoading: bankListLoading,
     isFetching,
   } = useBankList(country, {
-    enabled: !!country && !bankConnectionsPaused && !credentialRequired,
+    // Only once the dialog is open and the credential is confirmed active. While
+    // the credential query was still loading, `credentialRequired` read false, so
+    // a closed dialog on /accounts asked for the bank list and the API answered
+    // 400 "No Enable Banking credential configured" for every user without one.
+    enabled:
+      isOpen && !!country && enableBankingCredential?.status === "active",
     staleTime: Infinity,
   });
 
@@ -65,7 +67,7 @@ const AccountAddSyncModal: React.FC<AccountAddSyncModalProps> = ({
     isError: createRequisitionError,
     isFetching: isFetchingRedirect,
     refetch: retryCreateRequisition,
-  } = useCreateRequisition(bankId!, page, {
+  } = useCreateRequisition(bankId!, {
     enabled: Boolean(bankId) && continueRequested,
     retry: false,
   });
@@ -74,34 +76,29 @@ const AccountAddSyncModal: React.FC<AccountAddSyncModalProps> = ({
     if (bankId && !continueRequested) expectationHeadingRef.current?.focus();
   }, [bankId, continueRequested]);
 
-  useEffect(() => {
-    if (
-      continueRequested &&
-      createRequisitionData?.redirectUrl &&
-      !redirectStarted
-    ) {
-      setRedirectStarted(true);
-      safelyRunDiagnostic(() => {
-        posthog.capture("account_add_sync_before_redirect", {
-          source: page === "accounts" ? "accounts" : "budget",
-          state: "redirecting",
-        });
+  // Once the requisition URL is in hand the browser is leaving for the bank.
+  // The effect runs once per URL; going back or closing clears it.
+  const redirectUrl = continueRequested
+    ? createRequisitionData?.redirectUrl
+    : undefined;
+  const redirectStarted = Boolean(redirectUrl);
+  const leaveForBank = useEffectEvent((url: string) => {
+    safelyRunDiagnostic(() => {
+      posthog.capture("account_add_sync_before_redirect", {
+        source: page === "accounts" ? "accounts" : "budget",
+        state: "redirecting",
       });
-      saveBankAccountSyncReturnMarker(page);
-      window.location.href = createRequisitionData.redirectUrl;
-    }
-  }, [
-    continueRequested,
-    createRequisitionData?.redirectUrl,
-    page,
-    posthog,
-    redirectStarted,
-  ]);
+    });
+    saveBankAccountSyncReturnMarker(page);
+    window.location.href = url;
+  });
+  useEffect(() => {
+    if (redirectUrl) leaveForBank(redirectUrl);
+  }, [redirectUrl]);
 
   const onCloseModal = () => {
     setBankId(null);
     setContinueRequested(false);
-    setRedirectStarted(false);
     setOpen(false);
   };
 
@@ -117,7 +114,6 @@ const AccountAddSyncModal: React.FC<AccountAddSyncModalProps> = ({
   const onBack = () => {
     setBankId(null);
     setContinueRequested(false);
-    setRedirectStarted(false);
   };
 
   const selectedBank = bankListData?.find((bank) => bank.id === bankId);
@@ -135,9 +131,7 @@ const AccountAddSyncModal: React.FC<AccountAddSyncModalProps> = ({
       onOpenChange={(open) => {
         if (!open) onCloseModal();
       }}
-      title={
-        bankId ? t("bank-connection-expectation-title") : t("add-account")
-      }
+      title={bankId ? t("bank-connection-expectation-title") : t("add-account")}
       description={
         bankId
           ? t("bank-connection-expectation-description", {
@@ -226,22 +220,6 @@ const AccountAddSyncModal: React.FC<AccountAddSyncModalProps> = ({
                 </p>
               ) : null}
             </div>
-          </div>
-        ) : bankConnectionsPaused ? (
-          <div
-            aria-disabled="true"
-            className="border-border bg-muted/40 text-muted-foreground flex flex-col items-start gap-3 rounded-lg border p-4"
-          >
-            <p className="text-foreground text-sm font-semibold">
-              {t("bankConnectionsPaused.title")}
-            </p>
-            <p className="text-sm">{t("bankConnectionsPaused.body")}</p>
-            <Link
-              href="/faq"
-              className="text-primary text-sm font-semibold underline underline-offset-2"
-            >
-              {t("bankConnectionsPaused.cta")}
-            </Link>
           </div>
         ) : credentialLoading ? (
           <div className="flex justify-center py-8">

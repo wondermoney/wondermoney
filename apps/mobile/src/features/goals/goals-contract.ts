@@ -1,11 +1,13 @@
 import { z } from 'zod'
 
-import { readEndpoint, writeEndpoint } from '@/lib/api/runtime-schema'
+import { readEndpoint, tolerantEnum, writeEndpoint } from '@/lib/api/runtime-schema'
 
 const finiteNullable = z.number().finite().nullable()
 
-const goalStatusSchema = z.enum(['active', 'archived', 'completed', 'paused'])
-const goalSummaryStatusSchema = z.enum(['behind', 'funded', 'on_track', 'paused'])
+// A status this build doesn't know reads as 'unknown': the goal still lists, shows "status
+// unavailable" and is not editable, instead of the whole goals list failing to load.
+const goalStatusSchema = tolerantEnum(['active', 'archived', 'completed', 'paused'], 'unknown')
+const goalSummaryStatusSchema = tolerantEnum(['behind', 'funded', 'on_track', 'paused'], 'unknown')
 
 const accountLinksSchema = z.array(z.object({
   goalAccountLinkKey: z.number().int().positive(),
@@ -15,7 +17,7 @@ const accountLinksSchema = z.array(z.object({
   }),
 }))
 
-export const goalSummarySchema = z.object({
+const goalSummarySchema = z.object({
   assignedThisMonth: z.number().finite(),
   availableAmount: z.number().finite(),
   fundedHistorically: z.number().finite(),
@@ -43,9 +45,8 @@ export const goalListItemSchema = z.object({
 export const goalsResponseSchema = z.object({ goals: z.array(goalListItemSchema) })
 
 export type GoalListItemDto = z.infer<typeof goalListItemSchema>
-export type GoalsResponseDto = z.infer<typeof goalsResponseSchema>
 
-export const goalDetailSchema = goalListItemSchema.omit({ summary: true }).extend({
+const goalDetailSchema = goalListItemSchema.omit({ summary: true }).extend({
   // Optional entity properties are omitted by JSON serialization when unset.
   monthlyContributionTarget: finiteNullable.optional().transform((value) => value ?? null),
 })
@@ -54,7 +55,8 @@ export const goalDetailResponseSchema = z.object({
   summary: goalSummarySchema,
 })
 
-export const goalActivityTypeSchema = z.enum([
+// An activity type this build doesn't know reads as 'unknown' ("Other activity").
+const goalActivityTypeSchema = tolerantEnum([
   'archived',
   'assigned',
   'completed',
@@ -67,7 +69,7 @@ export const goalActivityTypeSchema = z.enum([
   'resumed',
   'spent_from_goal',
   'transaction_funding_reversed',
-])
+], 'unknown')
 
 const activityCurrencySchema = z.union([
   z.number().int().positive(),
@@ -84,6 +86,9 @@ export const goalActivitySchema = z.object({
   occurredAt: z.iso.datetime(),
   note: z.string().nullable().optional(),
   currencyKey: activityCurrencySchema,
+  // #154: on a spent_from_goal entry whose transaction the bank has since dropped while this goal
+  // still pays for it. Optional: older servers never send it.
+  transactionExpired: z.boolean().optional(),
 }).transform(({ currencyKey, ...activity }) => ({
   ...activity,
   currencyCode: typeof currencyKey === 'object' && currencyKey !== null ? currencyKey.code : undefined,
@@ -96,10 +101,8 @@ export const goalActivityResponseSchema = z.object({
   total: z.number().int().nonnegative(),
 })
 
-export type GoalDetailDto = z.infer<typeof goalDetailSchema>
 export type GoalDetailResponseDto = z.infer<typeof goalDetailResponseSchema>
 export type GoalActivityDto = z.infer<typeof goalActivitySchema>
-export type GoalActivityResponseDto = z.infer<typeof goalActivityResponseSchema>
 
 const positiveMoneySchema = z.number().finite().positive().refine((value) => (
   Math.round(value * 10000) / 10000 === value
@@ -187,7 +190,6 @@ export const goalMetadataWriteSchema = z.object({
 export type GoalMetadataWrite = z.infer<typeof goalMetadataWriteSchema>
 
 export const goalReserveWriteSchema = z.object({ amount: positiveMoneySchema }).strict()
-export type GoalReserveWrite = z.infer<typeof goalReserveWriteSchema>
 
 const escapeRegex = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
 
@@ -212,18 +214,18 @@ export function parseLocalizedGoalMoney(value: string, locale: string): number |
 
 const rawGoalWriteResponseSchema = z.object({
   goal: z.object({ goalKey: z.number().int().positive() }).passthrough(),
-}).strict()
+})
 
 const rawGoalLinkResponseSchema = z.object({
   link: z.object({
     goalAccountLinkKey: z.number().int().positive(),
   }).passthrough(),
-}).strict()
+})
 
 const rawGoalReserveResponseSchema = z.object({
   goal: z.object({ goalKey: z.number().int().positive() }).passthrough(),
   summary: goalSummarySchema,
-}).strict()
+})
 
 export const isValidGoalId = (goalId: number): boolean => Number.isSafeInteger(goalId) && goalId > 0
 
@@ -289,7 +291,7 @@ export function createGoalMoveOutEndpoint(goalId: number) {
   })
 }
 
-export const GOAL_ACTIVITY_PAGE_SIZE = 25
+const GOAL_ACTIVITY_PAGE_SIZE = 25
 
 export function createGoalActivityEndpoint(goalId: number, offset: number) {
   if (!isValidGoalId(goalId)) throw new Error('A positive safe goal id is required.')
@@ -344,13 +346,13 @@ export function createGoalRestoreEndpoint(goalId: number) {
 // shape (lib/api/goals/types.ts): a read-only avalanche/snowball comparison for the tenant's
 // debt-paydown goals, computed server-side. `avalanche`/`snowball` are null when there are fewer
 // than two debts to compare (mirrors DebtStrategySection's own eligibility gate).
-export const debtStrategyDebtSchema = z.object({
+const debtStrategyDebtSchema = z.object({
   id: z.number().int().positive(),
   name: z.string().min(1),
   balance: z.number().finite(),
   minimumPayment: z.number().finite(),
   annualInterestRateBps: z.number().int(),
-}).strict()
+})
 
 export const debtStrategyResultSchema = z.object({
   order: z.array(z.number().int().positive()),
@@ -360,17 +362,16 @@ export const debtStrategyResultSchema = z.object({
     id: z.number().int().positive(),
     months: z.number().int().nonnegative().nullable(),
     totalInterest: z.number().finite(),
-  }).strict()),
-}).strict()
+  })),
+})
 
 export const debtStrategyResponseSchema = z.object({
   debts: z.array(debtStrategyDebtSchema),
   extraBudget: z.number().finite(),
   avalanche: debtStrategyResultSchema.nullable(),
   snowball: debtStrategyResultSchema.nullable(),
-}).strict()
+})
 
-export type DebtStrategyDebtDto = z.infer<typeof debtStrategyDebtSchema>
 export type DebtStrategyResultDto = z.infer<typeof debtStrategyResultSchema>
 export type DebtStrategyResponseDto = z.infer<typeof debtStrategyResponseSchema>
 

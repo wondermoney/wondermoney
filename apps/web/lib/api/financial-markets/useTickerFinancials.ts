@@ -13,8 +13,7 @@ export interface TickerFinancialsResponse {
   companyFinancials: TickerFinancials[];
 }
 
-// Strict financials DTO the API now returns (RAD-228): a { financials } list
-// keyed by `period` rather than the old `{ companyFinancials }` / `calendarYear`.
+// The API's strict financials DTO: a { financials } list keyed by `period`.
 interface FinancialsDto {
   financials: {
     period: string | null;
@@ -23,7 +22,7 @@ interface FinancialsDto {
   }[];
 }
 
-export async function getTickerFinancials(
+async function getTickerFinancials(
   ticker: string,
   apiClient: AxiosInstance = api,
 ): Promise<TickerFinancialsResponse> {

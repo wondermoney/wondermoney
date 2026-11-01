@@ -119,11 +119,23 @@ export function CashflowReport() {
             filename={filename}
             format="blob"
           />
-          <ReportTrendIndicator
-            value={trailingNetAverage}
-            direction="positive-is-up"
-            label={t("trailingNetAverage")}
-          />
+          {/* The indicator names the figure; the figure itself sits beside
+              it. Before, the header read "Trailing 3-month net average" with
+              an arrow and no amount. */}
+          <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+            <ReportTrendIndicator
+              value={trailingNetAverage}
+              direction="positive-is-up"
+              label={t("trailingNetAverage")}
+            />
+            {isPending || error ? null : (
+              <ReportAmount
+                value={trailingNetAverage}
+                currencyKey={currencyKey}
+                className="text-sm font-medium"
+              />
+            )}
+          </div>
         </>
       }
       data-testid="cashflow-report"

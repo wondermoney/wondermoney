@@ -21,21 +21,22 @@ SMTP_PASSWORD=...
 EMAIL_FROM=money@example.com
 ```
 
-Or set `RESEND_API_KEY` to use Resend instead. To test without a real provider, start the bundled Mailpit with `docker compose --profile mail up -d`, set `SMTP_HOST=mailpit` and `SMTP_PORT=1025`, and read the mail at http://localhost:8025.
+Or set `RESEND_API_KEY` to use Resend instead. To test without a real provider, use the bundled Mailpit: add `mail` to `COMPOSE_PROFILES`, set `SMTP_HOST=mailpit` and `SMTP_PORT=1025`, run `docker compose up -d`, and read the mail at http://localhost:8025.
 
 ## File storage
 
-CSV imports and receipt copies need S3-compatible storage. To use the bundled MinIO, start it with `docker compose --profile storage up -d` and set:
+CSV imports and receipt copies need S3-compatible storage. To use the bundled store ([SeaweedFS](https://github.com/seaweedfs/seaweedfs)), set these in `.env` and run `docker compose up -d`:
 
 ```sh
+COMPOSE_PROFILES=storage
 AWS_ACCESS_KEY_ID=choose-a-user
 AWS_SECRET_ACCESS_KEY=choose-a-long-password
-S3_ENDPOINT=http://minio:9000
+S3_ENDPOINT=http://storage:8333
 S3_PUBLIC_ENDPOINT=http://localhost:9000
 S3_BUCKET=wondermoney
 ```
 
-`S3_PUBLIC_ENDPOINT` is the address browsers use to reach the storage. Any S3-compatible service works too, such as Cloudflare R2, Backblaze B2 or AWS S3.
+The two keys become the store's credentials, and it won't start without them. `S3_PUBLIC_ENDPOINT` is the address browsers use to reach the storage; behind a proxy, give it its own HTTPS hostname that forwards to port 9000. Any S3-compatible service works too, such as Cloudflare R2, Backblaze B2 or AWS S3.
 
 ## AI features
 
@@ -56,11 +57,16 @@ Set `EODHD_API_KEY` to turn on ticker search, live prices and the Financial Mark
 
 Bank sync needs no server configuration. Each person adds their own Enable Banking application key under Settings, so bank credentials are never shared between users.
 
+## Google sign-in
+
+Set both `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` (from an OAuth client in Google Cloud, with `<API_URL>/api/auth/callback/google` as its authorised redirect URI) to offer "Continue with Google" on the login and sign-up pages. Without both, the button is hidden.
+
 ## Your instance
 
 | Setting | What it does |
 |---|---|
-| `INSTANCE_NAME` | Your instance's name |
+| `INSTANCE_NAME` | Your instance's name. The web app shows it in browser tab titles, link previews and the sign-in and sign-up pages, and in place of the WonderMoney logo when you change it. Every email uses it in the subject, copy and sign-off, and as the sender's name unless `EMAIL_FROM_NAME` is set; authenticator apps show it as the label. The web app reads it from the API, so set it on the API only; a change shows up in the web app within five minutes |
 | `SIGNUP_MODE` | `open`, `invite` or `closed` (see [Install](/en/docs/self-hosting/install)) |
-| `SUPPORT_EMAIL` | The inbox for the contact form and account alerts; leave empty to turn them off |
+| `SUPPORT_EMAIL` | The inbox for the contact form, account alerts and in-app feedback, and the support address the app shows; leave empty to turn them off and hide the support links. The "Share Feedback" form also needs email configured; without it the form is hidden |
 | `NEXT_PUBLIC_TERMS_URL`, `NEXT_PUBLIC_PRIVACY_URL` | Your legal pages, linked from the sign-up page when both are set |
+| `PRIVACY_POLICY_URL` | Your privacy policy, linked from email footers. `{lang}` is replaced with the recipient's language (`en` or `pt`), for example `https://example.com/{lang}/privacy`. Defaults to the app's privacy settings |

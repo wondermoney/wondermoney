@@ -11,7 +11,7 @@ describe('enqueueFoundationJob', () => {
         correlationId: 'corr-123',
         payload: { source: 'test' },
       },
-      { enqueue } as unknown as Parameters<typeof enqueueFoundationJob>[1],
+      { enqueue },
     );
 
     expect(enqueue.send).toHaveBeenCalledWith(
@@ -23,7 +23,7 @@ describe('enqueueFoundationJob', () => {
 
   it('creates the foundation queue with idempotent options', async () => {
     const boss = { createQueue: vi.fn().mockResolvedValue(undefined) };
-    await ensureFoundationQueue(boss as unknown as Parameters<typeof ensureFoundationQueue>[0]);
+    await ensureFoundationQueue(boss);
     expect(boss.createQueue).toHaveBeenCalledWith('foundation.health-check', FOUNDATION_QUEUE_OPTIONS);
   });
 });

@@ -12,10 +12,10 @@ const IMPORT_MIME_TYPES = ['text/csv', 'text/comma-separated-values', 'applicati
 const BLOCKING_PHASES = new Set(['uploading', 'processing'])
 
 /**
- * RAD-502 — general "Import a statement" entry point, reachable from a
+ * General "Import a statement" entry point, reachable from a
  * failed connection row on the Connections screen. The connection-status
  * DTO deliberately does not expose which account(s) belong to a
- * connection (RAD-246), so this route cannot pre-select one; the user
+ * connection, so this route cannot pre-select one; the user
  * picks from their full account list instead, same as the account picker
  * already used on GoalDetailScreen's AccountContextEditor.
  */

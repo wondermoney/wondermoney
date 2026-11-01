@@ -29,9 +29,8 @@ const disableFormSchema = z.object({
 });
 type DisableFormSchemaType = z.infer<typeof disableFormSchema>;
 
-// better-auth requires the account password to disable 2FA (the old
-// Supabase `mfa.unenroll` call didn't need one). This small dialog collects
-// it — everything else (toasts, enabled/disabled UI) is driven by
+// better-auth requires the account password to disable 2FA. This small
+// dialog collects it — everything else (toasts, enabled/disabled UI) is driven by
 // `authClient.useSession()` below, which better-auth refreshes automatically
 // after any `/two-factor/*` call.
 function TwoFactorAuthDisableDialog() {
@@ -85,6 +84,7 @@ function TwoFactorAuthDisableDialog() {
     >
       <Form {...form}>
         <form
+          method="post"
           onSubmit={form.handleSubmit(onSubmit)}
           className="space-y-6"
           id="2fa-disable-form"
@@ -123,10 +123,7 @@ export default function TwoFactorAuth() {
     <div className="flex flex-col gap-4">
       <div className="flex items-center gap-2">
         <Text>{t("status")}:</Text>
-        <Badge
-          className="uppercase"
-          variant={hasFactor ? "success" : "destructive"}
-        >
+        <Badge variant={hasFactor ? "success" : "destructive"}>
           {hasFactor ? t("enabled") : t("disabled")}
         </Badge>
       </div>

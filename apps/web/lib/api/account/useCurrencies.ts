@@ -13,7 +13,7 @@ export interface GetCurrenciesResponse {
   currencies: Currency[];
 }
 
-export async function getCurrencies(
+async function getCurrencies(
   apiClient: AxiosInstance = api,
 ): Promise<GetCurrenciesResponse> {
   const { data } = await apiClient.get<GetCurrenciesResponse>(

@@ -153,14 +153,14 @@ async function fixture({
 }
 
 describe('native social MFA: real Better Auth HTTP pipeline', () => {
-  it('pins the internal-hook ABI to the installed Better Auth and Expo 1.7.7 plugins', () => {
+  it('pins the internal-hook ABI to the installed Better Auth and Expo 1.7.12 plugins', () => {
     // The guard reaches `internalAdapter.deleteSession`/`createVerificationValue`, the
     // `two_factor` pending cookie shape and `createAuthCookie`; asserting the plugin
     // versions proves which ABI the suite ran against without reading files off disk.
-    expect(twoFactor().version).toBe('1.7.7');
-    expect(jwt().version).toBe('1.7.7');
-    expect(bearer().version).toBe('1.7.7');
-    expect(expo().version).toBe('1.7.7');
+    expect(twoFactor().version).toBe('1.7.12');
+    expect(jwt().version).toBe('1.7.12');
+    expect(bearer().version).toBe('1.7.12');
+    expect(expo().version).toBe('1.7.12');
   });
 
   it('validates explicit Apple configuration without accepting inferred or wildcard audiences', () => {

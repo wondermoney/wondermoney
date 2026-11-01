@@ -1,10 +1,11 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { kyselyDouble } from '@app/__tests__/__helpers__/kysely-double';
 import type { Appuser } from '@entity/Appuser';
 
 const emMocks = vi.hoisted(() => ({
   find: vi.fn(),
-  getKnex: vi.fn(),
+  getKysely: vi.fn(),
   getRepository: vi.fn(),
   populate: vi.fn(),
 }));
@@ -38,15 +39,7 @@ beforeEach(() => {
     getAppuserTenantByAppuser: vi.fn().mockResolvedValue({ tenantKey: { tenantKey: 1 } }),
   });
   emMocks.find.mockResolvedValue([]);
-
-  const queryBuilder: { innerJoin: ReturnType<typeof vi.fn>; select: ReturnType<typeof vi.fn> } = {
-    innerJoin: vi.fn(),
-    select: vi.fn(),
-  };
-  queryBuilder.select.mockReturnValue(queryBuilder);
-  queryBuilder.innerJoin.mockResolvedValue([]);
-  const knex = Object.assign(vi.fn(() => queryBuilder), { raw: vi.fn((value: string) => value) });
-  emMocks.getKnex.mockReturnValue(knex);
+  emMocks.getKysely.mockReturnValue(kyselyDouble().db);
 });
 
 describe('NetWorthService currency relation', () => {

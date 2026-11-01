@@ -2,7 +2,7 @@ import { z } from 'zod';
 
 export const createHouseholdInviteSchema = z.object({
   body: z.object({
-    email: z.string().trim().toLowerCase().email(),
+    email: z.string().trim().toLowerCase().pipe(z.email()),
   }),
 });
 

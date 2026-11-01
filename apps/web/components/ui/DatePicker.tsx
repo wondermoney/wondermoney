@@ -30,7 +30,7 @@ const DatePicker: React.FC<DatePickerProps> = ({
   inModal = false,
 }) => {
   const t = useTranslations();
-  // RAD-575 — the reader's calendar, not the runtime's.
+  // The reader's calendar, not the runtime's.
   const locale = useLocale();
   const [open, setOpen] = useState(false);
 

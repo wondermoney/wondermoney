@@ -11,7 +11,7 @@ export type BudgetHealthData = Readonly<{
 }>
 
 /**
- * RAD-198 — dashboard budget-health card. Picks the budget matching the
+ * Dashboard budget-health card. Picks the budget matching the
  * given date's calendar month (server month is 1-indexed; JS Date isn't).
  * Returns null when there's no budget for the current period — that's a
  * legitimate "nothing to show" state, not an error.

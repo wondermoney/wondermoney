@@ -12,7 +12,6 @@ const validShared: ConfigurationSource = Object.freeze({
   AZURE_AI_FOUNDRY_API_KEY: 'foundry',
   AZURE_AI_FOUNDRY_API_VERSION: '2024-05-01',
   AZURE_AI_FOUNDRY_ENDPOINT: 'https://example.test',
-  AZURE_OPENAI_API_DEPLOYMENT_NAME: 'gpt',
   AZURE_OPENAI_API_KEY: 'azure',
   AZURE_OPENAI_API_VERSION: '2024-05-01',
   AZURE_OPENAI_DEPLOYMENT: 'gpt',
@@ -71,6 +70,11 @@ describe('loadConfiguration', () => {
     expect(() => loadConfiguration('api', rest)).toThrow(ConfigurationError);
   });
 
+  it('reports an unsafe TRUST_PROXY at startup, by name', () => {
+    expect(() => loadConfiguration('api', { ...validApi, TRUST_PROXY: 'true' })).toThrow(/TRUST_PROXY/);
+    expect(() => loadConfiguration('api', { ...validApi, TRUST_PROXY: '1' })).not.toThrow();
+  });
+
   it('parses worker roles with worker-only fields', () => {
     const worker = loadConfiguration('worker', {
       ...validShared,
@@ -86,5 +90,23 @@ describe('loadConfiguration', () => {
 
   it('rejects unknown worker rollout values', () => {
     expect(() => loadConfiguration('worker', { ...validShared, PGBOSS_SCHEDULER_MODE: 'liv', POSTHOG_API_KEY: 'posthog', TRANSACTION_ENRICHMENT_GPT_MODEL_VERSION: 'v1' })).toThrow(ConfigurationError);
+  });
+
+  it('classifies an absent required key as missing and a malformed one as invalid', () => {
+    const { ADMIN_API_KEY: _admin, ...withoutAdmin } = validApi;
+    const error = (() => {
+      try {
+        loadConfiguration('api', { ...withoutAdmin, CREDENTIAL_ENCRYPTION_KEY_V1: 'not-a-key' });
+      } catch (caught) {
+        return caught;
+      }
+      return undefined;
+    })();
+
+    expect(error).toBeInstanceOf(ConfigurationError);
+    expect((error as ConfigurationError).issues).toEqual(expect.arrayContaining([
+      expect.objectContaining({ code: 'missing', path: 'ADMIN_API_KEY' }),
+      expect.objectContaining({ code: 'invalid-value', path: 'CREDENTIAL_ENCRYPTION_KEY_V1' }),
+    ]));
   });
 });

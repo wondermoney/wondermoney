@@ -81,4 +81,4 @@ export const enqueueTransactionEnrichmentGptJob = async (
   );
 };
 
-QUEUE_REGISTRY.set(TRANSACTION_ENRICHMENT_GPT_QUEUE, { ensure: (boss) => ensureTransactionEnrichmentGptQueue(boss as unknown as Pick<PgBossLike, 'createQueue'>), name: TRANSACTION_ENRICHMENT_GPT_QUEUE });
+QUEUE_REGISTRY.set(TRANSACTION_ENRICHMENT_GPT_QUEUE, { ensure: (boss) => ensureTransactionEnrichmentGptQueue(boss), name: TRANSACTION_ENRICHMENT_GPT_QUEUE });

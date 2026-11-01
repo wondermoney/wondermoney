@@ -15,6 +15,11 @@ async function renderScreen(state: TransactionImportPhase, overrides: Partial<Tr
     accounts,
     accountsLoading: false,
     selectedAccountId: null,
+    flow: null,
+    bankName: null,
+    typeCodes: [],
+    templateStatus: 'idle',
+    onShareTemplate: jest.fn(),
     onSelectAccount: jest.fn(),
     onPickFile: jest.fn(),
     onReset: jest.fn(),
@@ -63,7 +68,7 @@ describe('TransactionImportScreen', () => {
   it('shows the succeeded outcome and offers import-another or done', async () => {
     const onReset = jest.fn()
     const onBack = jest.fn()
-    const { view } = await renderScreen({ phase: 'done', outcome: 'succeeded' }, { onReset, onBack })
+    const { view } = await renderScreen({ phase: 'done', outcome: 'succeeded', format: 'bank', rows: null }, { onReset, onBack })
     expect(view.getByText('Import complete. New transactions were added.')).toBeOnTheScreen()
     await fireEvent.press(view.getByRole('button', { name: 'Import another file' }))
     expect(onReset).toHaveBeenCalled()
@@ -72,8 +77,56 @@ describe('TransactionImportScreen', () => {
   })
 
   it.each(['partial', 'needs_action', 'stale', 'failed'] as const)('shows the %s outcome message', async (outcome) => {
-    const { view } = await renderScreen({ phase: 'done', outcome })
+    const { view } = await renderScreen({ phase: 'done', outcome, format: 'bank', rows: null })
     expect(view.getByRole('alert')).toBeOnTheScreen()
+  })
+
+  it('explains the generic columns and shares the template for an account without a supported bank', async () => {
+    const onShareTemplate = jest.fn()
+    const { view } = await renderScreen({ phase: 'idle' }, { selectedAccountId: 7, flow: 'generic', onShareTemplate })
+    for (const column of ['date', 'amount', 'merchant', 'internalTransactionId', 'transactionTypeKey', 'description']) {
+      expect(view.getByText(new RegExp(`^${column}( \\(optional\\))?$`))).toBeOnTheScreen()
+    }
+    expect(view.getByRole('button', { name: 'Choose file' })).not.toBeDisabled()
+    await fireEvent.press(view.getByRole('button', { name: 'Share template' }))
+    expect(onShareTemplate).toHaveBeenCalled()
+  })
+
+  it('lists the type codes on request', async () => {
+    const { view } = await renderScreen({ phase: 'idle' }, { selectedAccountId: 7, flow: 'generic', typeCodes: [{ code: 3, label: 'Payment' }] })
+    expect(view.queryByText('Payment')).not.toBeOnTheScreen()
+    await fireEvent.press(view.getByRole('button', { name: 'Show type codes' }))
+    expect(view.getByText('3')).toBeOnTheScreen()
+    expect(view.getByText('Payment')).toBeOnTheScreen()
+  })
+
+  it('says when the template could not be shared', async () => {
+    const { view } = await renderScreen({ phase: 'idle' }, { selectedAccountId: 7, flow: 'generic', templateStatus: 'error' })
+    expect(view.getByRole('alert')).toBeOnTheScreen()
+  })
+
+  it('asks for the bank\'s own export for an account at a supported bank, without the generic columns', async () => {
+    const { view } = await renderScreen({ phase: 'idle' }, { selectedAccountId: 7, flow: 'bank', bankName: 'Millennium BCP' })
+    expect(view.getByText(/Millennium BCP/)).toBeOnTheScreen()
+    expect(view.queryByTestId('transaction-import-generic-format')).not.toBeOnTheScreen()
+    expect(view.queryByRole('button', { name: 'Share template' })).not.toBeOnTheScreen()
+  })
+
+  it('shows a safe message and no file picker for a format this build does not know', async () => {
+    const { view } = await renderScreen({ phase: 'idle' }, { selectedAccountId: 7, flow: 'unknown' })
+    expect(view.getByRole('alert')).toBeOnTheScreen()
+    expect(view.getByRole('button', { name: 'Choose file' })).toBeDisabled()
+    expect(view.queryByTestId('transaction-import-generic-format')).not.toBeOnTheScreen()
+  })
+
+  it('says how many rows of a partial generic import could not be imported', async () => {
+    const { view } = await renderScreen({ phase: 'done', outcome: 'partial', format: 'generic', rows: { failed: 1, total: 2 } })
+    expect(view.getByText(/^1 of 2 rows couldn't be imported/)).toBeOnTheScreen()
+  })
+
+  it('gives no row count for a bank import', async () => {
+    const { view } = await renderScreen({ phase: 'done', outcome: 'partial', format: 'bank', rows: { failed: 1, total: 2 } })
+    expect(view.queryByText(/rows couldn't be imported/)).not.toBeOnTheScreen()
   })
 
   it('shows a failure reason and retries via onReset', async () => {

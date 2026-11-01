@@ -24,7 +24,7 @@ describe('buildBudgetVsActualCsv', () => {
 });
 
 /**
- * RAD-565 — the covered-month set is built from `fromDate`/`toDate`, which are
+ * The covered-month set is built from `fromDate`/`toDate`, which are
  * *instants*, and joined against `BudgetTemplateCategory.year`/`.month`, which
  * are plain integers. Two ways that went wrong: the set was computed in UTC (so
  * a UTC+1 caller picked up the month before their selection), and the key was
@@ -35,7 +35,7 @@ describe('getBudgetVsActualReport covered months', () => {
 
   const makeInput = (overrides: Partial<ReportFilters> = {}): ReportServiceInput =>
     ({
-      filters: { includePending: false, includeTransfers: false, timezone: REPORT_DEFAULT_TIME_ZONE, ...overrides } as ReportFilters,
+      filters: { includePending: false, includeTransfers: false, timezone: REPORT_DEFAULT_TIME_ZONE, ...overrides },
       tenant: { tenantKey: 113 },
       user: { appuserKey: 71 },
     }) as unknown as ReportServiceInput;

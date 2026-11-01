@@ -60,7 +60,7 @@ export type ProductRuntimeContextValue = Readonly<{
   runtime: ProductRuntime | null
   signInWithPassword: (email: string, password: string) => Promise<SignInOutcome>
   /**
-   * Native Apple/Google sign-in (RAD-420). Same admission rules as password sign-in:
+   * Native Apple/Google sign-in. Same admission rules as password sign-in:
    * refused while a terminal transition is in flight, and it re-arms activation so the
    * session the exchange establishes is picked up. The token and nonce are passed
    * straight through to the auth adapter and never logged.
@@ -90,7 +90,7 @@ export type ProductRuntimeContextValue = Readonly<{
   /** Thin proxy to the injected auth adapter's password-change operation; usable in any route state. */
   changePassword: (email: string, currentPassword: string, newPassword: string) => Promise<ChangePasswordOutcome>
   /**
-   * Public, pre-signup household-invite validation (RAD-499). Calls the raw transport
+   * Public, pre-signup household-invite validation. Calls the raw transport
    * directly — there is no session yet to authenticate an ApiClient with. Usable in any
    * route state, same as the MFA/password proxies above.
    */

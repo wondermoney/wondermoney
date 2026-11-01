@@ -150,7 +150,21 @@ function EditorForm({ row, categories, categoriesUnavailable, palette, pending, 
     if ([expectedAmount, expectedAmountMin, expectedAmountMax].some((value) => value !== null && (!Number.isFinite(value) || value < 0))) { setValidation(t('recurring.validation.amount')); return }
     if (amountType === 'variable' && expectedAmountMin !== null && expectedAmountMax !== null && expectedAmountMin > expectedAmountMax) { setValidation(t('recurring.validation.range')); return }
     setValidation(null)
-    await onSave({ displayName: name, type, cadence, amountType, categoryKey, expectedAmount: amountType === 'fixed' ? expectedAmount : null, expectedAmountMin: amountType === 'variable' ? expectedAmountMin : null, expectedAmountMax: amountType === 'variable' ? expectedAmountMax : null })
+    // A type, cadence or amount type this build doesn't know ('unknown') is left out of the body
+    // rather than sent back, so saving a name or category change never overwrites it. An unknown
+    // amount type also leaves the amounts alone, since we can't tell which of them it uses.
+    await onSave({
+      displayName: name,
+      ...(type === 'unknown' ? {} : { type }),
+      ...(cadence === 'unknown' ? {} : { cadence }),
+      categoryKey,
+      ...(amountType === 'unknown' ? {} : {
+        amountType,
+        expectedAmount: amountType === 'fixed' ? expectedAmount : null,
+        expectedAmountMin: amountType === 'variable' ? expectedAmountMin : null,
+        expectedAmountMax: amountType === 'variable' ? expectedAmountMax : null,
+      }),
+    })
   }
   return <SafeAreaView accessibilityViewIsModal style={[styles.safe, { backgroundColor: palette.background }]}><ScrollView contentContainerStyle={styles.editor}><Text accessibilityRole="header" style={[styles.title, { color: palette.foreground }]}>{t('recurring.editor.title')}</Text><Field label={t('recurring.editor.name')} value={name} onChange={setName} palette={palette} />
     <ChoiceGroup label={t('recurring.editor.type')} values={['bill', 'subscription']} selected={type} setSelected={(value) => setType(value as typeof type)} translate={(value) => t(`recurring.type.${value}`)} palette={palette} />

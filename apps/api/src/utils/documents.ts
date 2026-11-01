@@ -24,14 +24,13 @@ export const convertPDFToImage = async (pdfContents: string): Promise<string[]> 
 export const extractPDFTextLayer = async (pdfContents: Buffer | Uint8Array): Promise<string> => {
   const { getDocument } = await import('pdfjs-dist/legacy/build/pdf.mjs');
 
+  // `data` is transferred and neutered by pdf.js, so hand it a copy — callers reuse their buffer
+  // (the OCR fall-back re-reads the very same bytes). pdf.js 5.7 removed `isEvalSupported` along
+  // with the last `eval` code path, so there is nothing left to switch off.
+  const loadingTask = getDocument({ data: new Uint8Array(pdfContents), useSystemFonts: false });
+
   try {
-    // `data` is transferred and neutered by pdf.js, so hand it a copy — callers reuse their buffer
-    // (the OCR fall-back re-reads the very same bytes).
-    const document = await getDocument({
-      data: new Uint8Array(pdfContents),
-      isEvalSupported: false,
-      useSystemFonts: false,
-    }).promise;
+    const document = await loadingTask.promise;
 
     const pages: string[] = [];
     for (let pageNumber = 1; pageNumber <= document.numPages; pageNumber += 1) {
@@ -40,9 +39,12 @@ export const extractPDFTextLayer = async (pdfContents: Buffer | Uint8Array): Pro
       pages.push(content.items.map((item) => ('str' in item ? item.str : '')).join(''));
     }
 
-    await document.destroy();
     return pages.join('\n');
   } catch {
     return '';
+  } finally {
+    // pdf.js 6 removed `PDFDocumentProxy.destroy()`; the loading task owns the document and its
+    // worker, and destroying it also releases a document that failed to open.
+    await loadingTask.destroy();
   }
 };

@@ -1,7 +1,15 @@
 "use client";
 
 import * as React from "react";
-import { Bar, BarChart, CartesianGrid, Cell, XAxis, YAxis } from "recharts";
+import {
+  Bar,
+  BarChart,
+  type BarShapeProps,
+  CartesianGrid,
+  Rectangle,
+  XAxis,
+  YAxis,
+} from "recharts";
 
 import {
   type ChartConfig,
@@ -26,7 +34,7 @@ import {
 const CATEGORY_AXIS_CHAR_WIDTH = 7.2;
 /** Cap for a category (text-label) Y-axis — wide enough for most category
  * names without eating too much of the plot area; anything longer is
- * ellipsized via `truncateAxisLabel` rather than left to clip raw (RAD-645). */
+ * ellipsized via `truncateAxisLabel` rather than left to clip raw. */
 const CATEGORY_AXIS_MAX_WIDTH = 160;
 
 type Props<TData extends object = object> = {
@@ -102,11 +110,10 @@ export function BarChartBase<TData extends object = object>({
         domain: [yTicks[0], yTicks[yTicks.length - 1]] as [number, number],
       }
     : { domain: yDomain };
-  // `isVertical` puts categories on the Y-axis (horizontal bars) — the flat
-  // 76px gutter sized for short currency ticks left long category names (e.g.
-  // "Cafe, Restaurants & Bars") to overflow the SVG's default clip box and
-  // lose their leading characters ("Uncategorized" → "ncategorized",
-  // RAD-645). Size the gutter from the labels actually being drawn instead,
+  // `isVertical` puts categories on the Y-axis (horizontal bars) — a flat
+  // 76px gutter sized for short currency ticks lets long category names (e.g.
+  // "Cafe, Restaurants & Bars") overflow the SVG's default clip box and lose
+  // their leading characters ("Uncategorized" → "ncategorized"). Size the gutter from the labels actually being drawn instead,
   // with a wider cap than the currency case since these are free-text names.
   const categoryAxisLabels = isVertical
     ? chartData.map(
@@ -146,10 +153,9 @@ export function BarChartBase<TData extends object = object>({
 
             Recharts discovers axes by walking `children` for elements whose
             component type it recognises, and a React fragment is not one of
-            them: with these two wrapped in `<>…</>` the chart rendered with no
-            axes at all. The cashflow card showed one bare red bar on an empty
-            canvas — no month, no amounts, no baseline — and CartesianGrid's
-            fallback generator drew the only lines on it (RAD-615). */}
+            them: with these two wrapped in `<>…</>` the chart renders with no
+            axes at all — one bare bar on an empty canvas, no month, no amounts,
+            no baseline, and only CartesianGrid's fallback lines. */}
         <XAxis
           {...(isVertical ? chartAxisProps : chartXAxisProps)}
           {...(isVertical
@@ -201,18 +207,26 @@ export function BarChartBase<TData extends object = object>({
             radius={radius}
             barSize={barSize}
             isAnimationActive={isAnimationActive}
-          >
-            {getBarColor
-              ? chartData.map((row, index) => (
-                  <Cell
-                    key={`${key}-${index}`}
-                    fill={String(
-                      (row as Record<string, unknown>)[getColorKey(key)],
-                    )}
-                  />
-                ))
-              : null}
-          </Bar>
+            // Per-bar colours go through `shape` rather than the `<Cell>`
+            // children Recharts 3 deprecated (removed in 4.0; see
+            // https://recharts.github.io/en-US/guide/cell/). The colour was
+            // resolved into the row as `__<key>Fill` above, and the default
+            // Rectangle is kept so radius and size are untouched.
+            shape={
+              getBarColor
+                ? (props: BarShapeProps) => (
+                    <Rectangle
+                      {...props}
+                      fill={String(
+                        (props.payload as Record<string, unknown>)[
+                          getColorKey(key)
+                        ],
+                      )}
+                    />
+                  )
+                : undefined
+            }
+          />
         ))}
       </BarChart>
     </ChartContainer>

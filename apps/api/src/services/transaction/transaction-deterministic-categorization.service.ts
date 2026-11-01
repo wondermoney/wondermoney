@@ -63,7 +63,7 @@ class TransactionDeterministicCategorizationService {
     if (category) return this.persistAssignment(em, appuser, transaction, category, 'user_mapping');
     if (mappings.length > 0) return { assigned: false, reason: 'category_invalid' };
 
-    // Stats are scoped to THIS user (RAD-342 G4): in a household, only the requesting member's own
+    // Stats are scoped to THIS user: in a household, only the requesting member's own
     // merchant→category votes may inform their suggestions — never a co-member's. `appuser` is a
     // required, non-null `Appuser` here (enforced by the type + every call site), so the per-user
     // predicate can never be silently stripped by MikroORM into an unscoped, cross-member read.
@@ -77,7 +77,7 @@ class TransactionDeterministicCategorizationService {
     }
     if (defaultStats.length > 1) return { assigned: false, reason: 'stats_tie' };
     if (stats.length === 0) return { assigned: false, reason: 'merchant_no_mapping' };
-    // Recency-weighted winner (RAD-342 G2): a recent correction outweighs a stale pile of votes; a
+    // Recency-weighted winner: a recent correction outweighs a stale pile of votes; a
     // shared top score is still a tie the user should resolve.
     const topStat = pickRecencyWeightedTopStat(stats);
     if (!topStat) return { assigned: false, reason: 'stats_tie' };
@@ -114,7 +114,7 @@ class TransactionDeterministicCategorizationService {
 }
 
 function isEnabled(value: unknown): boolean {
-  // On by default (RAD-342): deterministic categorization runs unless explicitly disabled via
+  // On by default: deterministic categorization runs unless explicitly disabled via
   // TRANSACTION_DETERMINISTIC_CATEGORIZATION_ENABLED=false. No env var is needed to turn it on.
   if (typeof value !== 'string') return true;
   return !['0', 'false', 'no', 'off'].includes(value.trim().toLowerCase());

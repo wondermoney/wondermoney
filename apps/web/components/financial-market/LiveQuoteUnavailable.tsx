@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
 /**
  * The live quote (`price`, `changePercentage`) is not part of the market-data
  * source this product runs on, so those two fields arrive as `null`
- * permanently rather than transiently (RAD-449, decided in RAD-548). Ticker
+ * permanently rather than transiently. Ticker
  * search, price history and the company profile are unaffected and must not
  * inherit any of this treatment.
  *
@@ -17,8 +17,8 @@ import { cn } from "@/lib/utils";
  * is ordinary page content in the quiet register (DESIGN.md §5 "Two semantic
  * registers"), read rather than announced.
  *
- * Provider-neutral on purpose: FMP was decommissioned in favour of EODHD, so
- * nothing here is named after a vendor.
+ * Provider-neutral on purpose: nothing here is named after a vendor, so a
+ * change of market-data provider does not touch it.
  */
 
 // DESIGN.md §9 rule 3 — "Missing is `—`, never `0`, never blank."

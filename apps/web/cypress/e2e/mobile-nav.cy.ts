@@ -4,17 +4,17 @@ describe("Mobile bottom navigation", () => {
   });
 
   it("does not render the bottom nav on the login page", () => {
-    cy.visit("http://localhost:3000/en/auth/login");
+    cy.visit("/en/auth/login");
     cy.get('[data-testid="bottom-nav"]').should("not.exist");
   });
 
   it("does not render the bottom nav on the signup page", () => {
-    cy.visit("http://localhost:3000/en/auth/signup");
+    cy.visit("/en/auth/signup");
     cy.get('[data-testid="bottom-nav"]').should("not.exist");
   });
 
   it("redirects unauthenticated users away from protected pages on mobile", () => {
-    cy.visit("http://localhost:3000/en/accounts");
+    cy.visit("/en/accounts");
 
     cy.url().should("include", "/en/auth/login");
     cy.get('[data-testid="bottom-nav"]').should("not.exist");

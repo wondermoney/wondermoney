@@ -74,7 +74,7 @@ describe('RootRouter', () => {
     expect(view.getByText('reset-password')).toBeOnTheScreen()
   })
 
-  it('observes screen views above every route guard, for the signed-out tree too (RAD-518)', async () => {
+  it('observes screen views above every route guard, for the signed-out tree too', async () => {
     jest.mocked(captureAnalyticsEvent).mockClear()
     mockPathname.mockReturnValue('/sign-up')
     mockUseProductRuntime.mockReturnValue({ routeState: { status: 'signed-out' } })

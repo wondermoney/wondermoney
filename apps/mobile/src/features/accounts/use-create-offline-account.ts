@@ -20,7 +20,7 @@ export type OfflineAccountUnknownGuard = Readonly<{ payload: OfflineAccountPaylo
 export type OfflineAccountCreateOrigin = 'accounts' | 'onboarding'
 
 /**
- * RAD-518 — `first_account_created` is an activation-funnel event, so it must
+ * `first_account_created` is an activation-funnel event, so it must
  * describe the account that takes someone from zero accounts to one, not every
  * account they ever add.
  *
@@ -114,7 +114,7 @@ export function useCreateOfflineAccount(origin: OfflineAccountCreateOrigin = 'ac
         // A confirmed 201 remains success even if the subsequent read cannot refresh.
         // Await the attempt, then let Accounts present its own refresh failure state.
         await refresh?.catch(() => undefined)
-        // RAD-518 — how the account was created, and nothing about the account:
+        // How the account was created, and nothing about the account:
         // no name, institution, currency, balance or identifier.
         if (firstAccount) captureAnalyticsEvent('first_account_created', { method: 'manual' })
       } finally {

@@ -193,3 +193,42 @@ test("overview planned total matches detail child-category total for QA budget v
     1696.69,
   );
 });
+
+test("a parent row plans what its children plan per month, yearly items spread over twelve", () => {
+  const child = (
+    key: number,
+    name: string,
+    amount: number,
+    recurrency: string,
+  ) => ({
+    child_category_name: name,
+    parent_category_name: "TRANSPORTATION",
+    category_amount: 0,
+    category_budgeted_amount: amount,
+    category_recurrency: recurrency,
+    category_icon: "car",
+    category_text_color: "#000000",
+    category_bg_color: "#ffffff",
+    category_is_system_category: true,
+    category_key: key,
+  });
+  const rows = convertBudgetTemplatesIntoRows([
+    // The API's parent amount is the raw sum of its children (400 + 600 + 80 + 120).
+    {
+      ...child(1, "", 1200, ""),
+      child_category_name: null,
+      category_recurrency: null,
+    },
+    child(2, "VEHICLE_MAINTENANCE", 400, "ANNUALLY"),
+    child(3, "VEHICLE_INSURANCE", 600, "ANNUALLY"),
+    child(4, "PUBLIC_TRANSPORT", 80, "MONTHLY"),
+    child(5, "FUEL", 120, "MONTHLY"),
+  ] as Parameters<typeof convertBudgetTemplatesIntoRows>[0]);
+
+  const parent = rows[0]!;
+  assert.equal(Math.round(parent.budgeted * 100) / 100, 283.33);
+  assert.equal(
+    Math.round(getBudgetRowMonthlyBudgetedTotal(rows) * 100) / 100,
+    Math.round(parent.budgeted * 100) / 100,
+  );
+});

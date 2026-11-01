@@ -29,12 +29,9 @@ const shadowConfig = {
 const offConfig = { ...shadowConfig, enabled: false, mode: 'off' as const };
 
 /**
- * RAD-580: `enrichedRows` is shaped the way MikroORM actually returns it.
- *
- * This helper used to type it as `{ transaction_key: number }` and the tests passed it snake_case
- * rows, matching what the service read. Both were wrong the same way, so the suite stayed green
- * while the production pipeline was dead: `qb.execute()` maps to *entity property* names, so the
- * rows come back as `transactionKey` regardless of the column name given to `select()`.
+ * `enrichedRows` is shaped the way MikroORM actually returns it: `qb.execute()` maps to *entity
+ * property* names, so the rows come back as `transactionKey` regardless of the column name given
+ * to `select()`. Snake_case rows here would let a service that reads `transaction_key` pass.
  *
  * Verified against the real database rather than assumed — a query builder mocked to agree with
  * the code it is testing proves nothing about either.
@@ -102,8 +99,8 @@ describe('enqueueTransactionEnrichmentForTenant', () => {
 
     // The enriched transaction keys are fetched (executed), not embedded as a raw QueryBuilder.
     expect(createQueryBuilder).toHaveBeenCalledWith(expect.anything(), 'te');
-    expect(qb.select).toHaveBeenCalledWith('transaction_key');
-    expect(qb.where).toHaveBeenCalledWith({ tenantKey: 7 });
+    expect(qb.select).toHaveBeenCalledWith('transactionKey');
+    expect(qb.where).toHaveBeenCalledWith({ tenantKey: expect.objectContaining({ tenantKey: 7 }) });
     expect(qb.execute).toHaveBeenCalled();
 
     const where = find.mock.calls[0]?.[1] as Record<string, unknown>;
@@ -120,12 +117,9 @@ describe('enqueueTransactionEnrichmentForTenant', () => {
   });
 
   /**
-   * RAD-580 — the bug that killed the pipeline for three days, as a test.
-   *
-   * When the enriched-key rows do not yield numbers, the old code built
+   * When the enriched-key rows do not yield numbers, a naive exclusion builds
    * `$nin: [undefined, undefined, …]`. That is `NOT IN (NULL, NULL, …)` in SQL, which is UNKNOWN
-   * for every row, so the candidate query matched nothing and the producer returned silently.
-   * Measured on production: 200 candidates without the exclusion, 0 with it.
+   * for every row, so the candidate query matches nothing and the producer returns silently.
    *
    * The rule this pins down is the direction of failure. An exclusion list we cannot read must
    * degrade to *no exclusion* — costing a redundant, idempotency-keyed enqueue — and never to an
@@ -186,7 +180,7 @@ describe('enqueueTransactionEnrichmentForTenant', () => {
     await expect(
       enqueueTransactionEnrichmentForTenant(7, 'account-initial-sync', {
         config: shadowConfig,
-        em: { createQueryBuilder, find } as unknown as EnqueueEm,
+        em: { createQueryBuilder, find, getReference: (_entity: unknown, tenantKey: number) => Object.assign(new Tenant(), { tenantKey }) } as unknown as EnqueueEm,
         enqueue: { send: vi.fn(), sendAfter: vi.fn() } as unknown as EnqueuePort,
         logger: logger as unknown as EnqueueLogger,
       }),

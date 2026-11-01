@@ -8,19 +8,6 @@ export enum TransactionStatus {
   BOOKED = 'BOOKED',
 }
 
-export enum TransactionTypes {
-  card_payment = 'CARD_PAYMENT',
-  transfer_out = 'TRANSFER',
-  transfer_in = 'TRANSFER',
-  payment_auto = 'PAYMENT',
-  payment = 'PAYMENT',
-  fees = 'FEES',
-  deposit = 'DEPOSIT',
-  withdrawal = 'ATM',
-  loan = 'LOAN',
-  revert = 'REVERT',
-}
-
 export const SUPPORTED_BANKS_CSV_IMPORT = [
   'montepio',
   'caixa economica montepio geral',

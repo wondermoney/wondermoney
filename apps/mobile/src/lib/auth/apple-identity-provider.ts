@@ -28,7 +28,7 @@ const CANCELLATION_CODES = ['ERR_REQUEST_CANCELED'] as const
  * the optional native module reports unavailable off-platform).
  *
  * The hashed half of the nonce goes to Apple — Apple copies it into the identity
- * token's `nonce` claim untouched — and only the raw half travels on to Supabase.
+ * token's `nonce` claim untouched — and only the raw half travels on to the API.
  * A per-attempt `state` is sent alongside and checked against the value Apple echoes
  * back, so a credential produced by any other request is discarded. The identity token
  * itself is returned to the caller and never logged here.

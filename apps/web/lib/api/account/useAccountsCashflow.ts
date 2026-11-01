@@ -21,7 +21,7 @@ export type GetAccountsCashflowResponse = {
   cashflow: AccountCashflow[];
 };
 
-export async function getAccountsCashflow(
+async function getAccountsCashflow(
   params: GetAccountsCashflowRequest,
   apiClient: AxiosInstance = api,
 ): Promise<GetAccountsCashflowResponse> {

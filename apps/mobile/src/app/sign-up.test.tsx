@@ -67,7 +67,7 @@ describe('SignUpRoute', () => {
     captured.mockClear()
   })
 
-  it('captures sign_up_completed with the channel only, and only on acceptance (RAD-518)', async () => {
+  it('captures sign_up_completed with the channel only, and only on acceptance', async () => {
     mockSignUp.mockResolvedValue({ status: 'accepted' })
     await renderRoute()
     const onSubmit = capturedSignUpProps?.onSubmit as (email: string, password: string) => Promise<string>

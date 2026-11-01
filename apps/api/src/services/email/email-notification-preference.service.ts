@@ -85,7 +85,7 @@ const CATEGORY_PATCH_COLUMN: Record<'accountRecoveryEnabled' | 'budgetAlertsEnab
 };
 const CATEGORY_PATCH_FIELDS = Object.keys(CATEGORY_PATCH_COLUMN) as (keyof typeof CATEGORY_PATCH_COLUMN)[];
 
-const emailSchema = z.string().email();
+const emailSchema = z.email();
 
 export class EmailNotificationPreferenceService {
   private get em(): EntityManager {
@@ -139,9 +139,8 @@ export class EmailNotificationPreferenceService {
       appuserKey: row.appuserKey,
       currencyCode: row.currencyCode,
       deliverySupported: gates.deliverySupported,
-      // The global unsubscribe always wins, even when the per-stream flag is still on
-      // (previously missing here — a real gap where a marketing-opted-out user could
-      // still receive budget/weekly mail).
+      // The global unsubscribe always wins, even when the per-stream flag is still on, so a
+      // marketing-opted-out user never receives budget/weekly mail.
       effectiveEnabled: storedEnabled && gates.deliverySupported && !row.marketingOptOut,
       emailAddress: row.emailAddress,
       firstName: row.firstName,
@@ -195,6 +194,10 @@ export class EmailNotificationPreferenceService {
           [appuserKey],
           'get',
         );
+        // `execute(..., 'get')` resolves to undefined when the user has no preference row yet, but
+        // MikroORM types it as the row. The widening assertion is what lets the `?? null` stand;
+        // dropping it would make no-unnecessary-condition demand the fallback be removed.
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion -- widens to admit the missing row
         return this.toState(lockedAppuser, (preferenceRow as PreferenceCategoryColumns | undefined) ?? null);
       }
 
@@ -230,7 +233,7 @@ export class EmailNotificationPreferenceService {
   private gates(appuser: GateAppuser) {
     const active = appuser.recordActive && !appuser.deletedAt;
     // Financial lifecycle emails are localized for EN and PT (the only supported
-    // languages); delivery is gated to those rather than PT-only (RAD-320).
+    // languages); delivery is gated to those rather than PT-only.
     const localized = [SupportedLanguages.EN, SupportedLanguages.PT].includes(appuser.language);
     return {
       deliverySupported: active && localized && emailSchema.safeParse(appuser.emailAddress).success,

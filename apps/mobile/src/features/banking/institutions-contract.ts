@@ -3,8 +3,8 @@ import { z } from 'zod'
 import { readEndpoint } from '@/lib/api/runtime-schema'
 
 /**
- * RAD-240 — bank institution picker source list. `GET /v1/banking/bank`
- * forwards GoCardless institution data close to verbatim, so unlike the
+ * Bank institution picker source list. `GET /v1/banking/bank`
+ * forwards the provider's institution data close to verbatim, so unlike the
  * connections DTO (our own allowlisted shape) this schema stays permissive
  * on unknown upstream fields — only the fields the picker actually renders
  * (id, name, logo) are validated.
@@ -18,7 +18,6 @@ export const bankInstitutionSchema = z.object({
 export const bankInstitutionsResponseSchema = z.array(bankInstitutionSchema)
 
 export type BankInstitutionDto = z.infer<typeof bankInstitutionSchema>
-export type BankInstitutionsResponseDto = z.infer<typeof bankInstitutionsResponseSchema>
 
 export function createBankInstitutionsEndpoint(countryCode?: string) {
   const query = countryCode ? `?country=${encodeURIComponent(countryCode)}` : ''

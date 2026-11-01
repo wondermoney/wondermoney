@@ -1,10 +1,10 @@
-import { csv } from '@wondermoney/shared';
 import dotenv from 'dotenv';
 import type { NextFunction, Request, Response } from 'express';
 
 import { Account } from '@entity/Account';
 import { authedContext } from '@middleware/authed-context';
 import AccountCsvImportEnqueueService from '@service/account/account-csv-import-enqueue.service';
+import { resolveAccountCsvImportFormat } from '@service/account/account-csv-import-format';
 import { validateCsvObjectKey } from '@service/account/csv-upload-boundary.service';
 import s3Service from '@service/storage/s3';
 import { BadRequestError, NotFoundError } from '@utils/errors';
@@ -28,16 +28,12 @@ export async function getS3PresignedUrlForCsvUpload(req: Request, res: Response,
     next(new NotFoundError('Account not found'));
     return;
   }
-  // We are not checking if the bank is supported, because we want to allow all banks to import the CSV
-  // so that we can add support for new banks later.
-  const bankName = account.accountFinancialInstitutionKey?.name;
-  if (!bankName) {
-    next(new BadRequestError('Bank not found'));
-    return;
-  }
-  const { key, presignedUrl } = await s3Service.generatePresignedUrlForAccountCsv(accountId, bankName);
-  const isSupportedBank = csv.SUPPORTED_BANKS_CSV_IMPORT.includes(bankName.toLowerCase() as csv.SupportedBanks);
-  return res.json({ isSupportedBank, key, presignedUrl });
+  // Every account can import: one at a supported bank reads that bank's statement export, any other
+  // (unsupported bank, or a manual account with no institution) reads the generic CSV format.
+  const institutionName = account.accountFinancialInstitutionKey?.name;
+  const importFormat = resolveAccountCsvImportFormat(institutionName);
+  const { key, presignedUrl } = await s3Service.generatePresignedUrlForAccountCsv(accountId, institutionName || 'generic');
+  return res.json({ csvImportFormat: importFormat.format, isSupportedBank: importFormat.format === 'bank', key, presignedUrl });
 }
 
 export async function startAccountCsvImport(req: Request, res: Response, next: NextFunction) {
@@ -60,8 +56,8 @@ export async function startAccountCsvImport(req: Request, res: Response, next: N
     next(new BadRequestError('Invalid CSV object key'));
     return;
   }
-  const effectiveBankName = account.accountFinancialInstitutionKey?.name;
-  const supportedBankName = effectiveBankName && csv.SUPPORTED_BANKS_CSV_IMPORT.includes(effectiveBankName.toLowerCase() as csv.SupportedBanks) ? effectiveBankName : undefined;
+  const importFormat = resolveAccountCsvImportFormat(account.accountFinancialInstitutionKey?.name);
+  const supportedBankName = importFormat.format === 'bank' ? importFormat.bankName : undefined;
   const service = new AccountCsvImportEnqueueService();
   const operation = await service.enqueue({ accountKey: normalizedAccountId, bankName: supportedBankName, bucket: s3Service.getAccountCsvBucketName(), correlationId, key }, { enqueue: req.enqueue });
   return res.status(202).json({ correlationId: operation.correlationId, status: (operation as { status?: string }).status ?? 'queued' });

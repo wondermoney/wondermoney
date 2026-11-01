@@ -1,11 +1,8 @@
 /**
  * Certificados de Aforro reference data — loyalty-premium schedules and published monthly
- * base-rate history (RAD-445).
+ * base-rate history.
  *
- * This is the single source of truth for both provisioning paths: the fresh-DB seeder
- * (`seeders/CertificadoAforroReferenceSeeder.ts`) and the idempotent staging/prod rollout
- * script (`scripts/insert-certificado-aforro-lookups.ts`) read these same constants, so the two
- * environments cannot drift apart.
+ * Read by `seeders/CertificadoAforroReferenceSeeder.ts`, which provisions these rows.
  *
  * ─────────────────────────────────────────────────────────────────────────────────────────────
  * WHY ONLY SÉRIES E AND F

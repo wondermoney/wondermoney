@@ -1,8 +1,8 @@
 import type { Request, Response } from 'express';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { EnableBankingConnection } from '@entity/EnableBankingConnection';
-import { NordigenRequisition } from '@entity/NordigenRequisition';
+import { EnableBankingConnection, EnableBankingConnectionStatus } from '@entity/EnableBankingConnection';
+import { NordigenRequisition, NordigenRequisitionStatus } from '@entity/NordigenRequisition';
 
 // The controller imports `../app.js` (DI), which transitively pulls env-throwing modules.
 // Most tests here only exercise pure `__testOnly` helpers, so stub the app
@@ -36,52 +36,52 @@ const baseAccount = (overrides: Partial<{ deletedAt: Date | null; institutionDis
   transactionsRefreshedAt: overrides.transactionsRefreshedAt ?? null,
 });
 
-const baseReq = (overrides: Partial<{ expiresAt: Date | null; status: 'created' | 'error' | 'expired' | 'linked' }> = {}): RequisitionInput => ({
+const baseReq = (overrides: Partial<{ expiresAt: Date | null; status: NordigenRequisitionStatus }> = {}): RequisitionInput => ({
   accounts: { getItems: () => [] as BankingAccount[] },
   expiresAt: overrides.expiresAt ?? null,
-  status: (overrides.status ?? 'linked') as RequisitionInput['status'],
+  status: overrides.status ?? NordigenRequisitionStatus.LN,
 });
 
-describe('RAD-246 status matrix', () => {
+describe('status matrix', () => {
   beforeEach(() => vi.useRealTimers());
 
   it('created -> processing', () => {
-    expect(computeStatus(baseReq({ status: 'created' }), [])).toBe('processing');
+    expect(computeStatus(baseReq({ status: NordigenRequisitionStatus.CR }), [])).toBe('processing');
   });
 
   it('error -> error', () => {
-    expect(computeStatus(baseReq({ status: 'error' }), [])).toBe('error');
+    expect(computeStatus(baseReq({ status: NordigenRequisitionStatus.ER }), [])).toBe('error');
   });
 
   it('expired -> expired', () => {
-    expect(computeStatus(baseReq({ status: 'expired' }), [])).toBe('expired');
+    expect(computeStatus(baseReq({ status: NordigenRequisitionStatus.EX }), [])).toBe('expired');
   });
 
   it('linked with no expiresAt -> error', () => {
-    expect(computeStatus(baseReq({ expiresAt: null, status: 'linked' }), [])).toBe('error');
+    expect(computeStatus(baseReq({ expiresAt: null, status: NordigenRequisitionStatus.LN }), [])).toBe('error');
   });
 
   it('linked with invalid expiresAt -> error', () => {
-    expect(computeStatus(baseReq({ expiresAt: new Date('not-a-date'), status: 'linked' }), [])).toBe('error');
+    expect(computeStatus(baseReq({ expiresAt: new Date('not-a-date'), status: NordigenRequisitionStatus.LN }), [])).toBe('error');
   });
 
   it('linked with past expiresAt -> expired (no write)', () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date('2026-07-31T12:00:00.000Z'));
-    expect(computeStatus(baseReq({ expiresAt: new Date('2026-07-30T12:00:00.000Z'), status: 'linked' }), [])).toBe('expired');
+    expect(computeStatus(baseReq({ expiresAt: new Date('2026-07-30T12:00:00.000Z'), status: NordigenRequisitionStatus.LN }), [])).toBe('expired');
   });
 
   it('linked with future expiresAt but no active accounts -> processing', () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date('2026-07-31T12:00:00.000Z'));
-    expect(computeStatus(baseReq({ expiresAt: new Date('2026-08-30T12:00:00.000Z'), status: 'linked' }), [])).toBe('processing');
+    expect(computeStatus(baseReq({ expiresAt: new Date('2026-08-30T12:00:00.000Z'), status: NordigenRequisitionStatus.LN }), [])).toBe('processing');
   });
 
   it('linked with future expiresAt and an unrefreshed account -> processing', () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date('2026-07-31T12:00:00.000Z'));
     const accounts = [baseAccount({ refreshedAt: null, transactionsRefreshedAt: null })];
-    expect(computeStatus(baseReq({ expiresAt: new Date('2026-08-30T12:00:00.000Z'), status: 'linked' }), accounts)).toBe('processing');
+    expect(computeStatus(baseReq({ expiresAt: new Date('2026-08-30T12:00:00.000Z'), status: NordigenRequisitionStatus.LN }), accounts)).toBe('processing');
   });
 
   it('linked with future expiresAt and all accounts refreshed -> connected', () => {
@@ -91,7 +91,7 @@ describe('RAD-246 status matrix', () => {
       baseAccount({ refreshedAt: new Date('2026-07-30T10:00:00.000Z') }),
       baseAccount({ refreshedAt: null, transactionsRefreshedAt: new Date('2026-07-30T11:00:00.000Z') }),
     ];
-    expect(computeStatus(baseReq({ expiresAt: new Date('2026-08-30T12:00:00.000Z'), status: 'linked' }), accounts)).toBe('connected');
+    expect(computeStatus(baseReq({ expiresAt: new Date('2026-08-30T12:00:00.000Z'), status: NordigenRequisitionStatus.LN }), accounts)).toBe('connected');
   });
 
   it('linked with a soft-deleted account treats that account as unready', () => {
@@ -105,7 +105,7 @@ describe('RAD-246 status matrix', () => {
   });
 });
 
-describe('RAD-246 institution name resolution', () => {
+describe('institution name resolution', () => {
   it('returns null when no account has a financial institution', () => {
     expect(resolveInstitutionName([baseAccount(), baseAccount()])).toBeNull();
   });
@@ -130,7 +130,7 @@ describe('RAD-246 institution name resolution', () => {
   });
 });
 
-describe('RAD-246 freshness', () => {
+describe('freshness', () => {
   it('returns null when no active account is refreshed', () => {
     expect(computeFreshnessAsOf([baseAccount(), baseAccount()])).toBeNull();
   });
@@ -159,11 +159,11 @@ describe('RAD-246 freshness', () => {
   });
 });
 
-describe('RAD-246 DTO mapping (forbidden identifiers are never present)', () => {
+describe('DTO mapping (forbidden identifiers are never present)', () => {
   it('produces a fixed shape with no entity/provider fields', () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date('2026-07-31T12:00:00.000Z'));
-    const req = baseReq({ expiresAt: new Date('2026-08-30T12:00:00.000Z'), status: 'linked' });
+    const req = baseReq({ expiresAt: new Date('2026-08-30T12:00:00.000Z'), status: NordigenRequisitionStatus.LN });
     const accounts = [
       baseAccount({
         institutionDisplayName: 'Real Bank',
@@ -191,57 +191,57 @@ describe('RAD-246 DTO mapping (forbidden identifiers are never present)', () => 
   });
 });
 
-const baseEnableBankingConnection = (overrides: Partial<{ accessValidUntil: Date | null; aspspName: null | string; status: 'authorized' | 'created' | 'error' | 'expired' | 'linked' }> = {}): EnableBankingInput => ({
+const baseEnableBankingConnection = (overrides: Partial<{ accessValidUntil: Date | null; aspspName: null | string; status: EnableBankingConnectionStatus }> = {}): EnableBankingInput => ({
   accessValidUntil: overrides.accessValidUntil ?? null,
   accounts: { getItems: () => [] as BankingAccount[] },
   aspspName: 'aspspName' in overrides ? overrides.aspspName ?? null : 'Test Bank',
-  status: (overrides.status ?? 'linked') as EnableBankingInput['status'],
+  status: overrides.status ?? EnableBankingConnectionStatus.LINKED,
 });
 
-describe('RAD-246 Enable Banking status matrix', () => {
+describe('Enable Banking status matrix', () => {
   beforeEach(() => vi.useRealTimers());
 
   it('created -> processing (no exact vocabulary match; same value as GoCardless CR)', () => {
-    expect(computeEnableBankingStatus(baseEnableBankingConnection({ status: 'created' }), [])).toBe('processing');
+    expect(computeEnableBankingStatus(baseEnableBankingConnection({ status: EnableBankingConnectionStatus.CREATED }), [])).toBe('processing');
   });
 
   it('authorized -> processing (no exact vocabulary match; still pre-session)', () => {
-    expect(computeEnableBankingStatus(baseEnableBankingConnection({ status: 'authorized' }), [])).toBe('processing');
+    expect(computeEnableBankingStatus(baseEnableBankingConnection({ status: EnableBankingConnectionStatus.AUTHORIZED }), [])).toBe('processing');
   });
 
   it('error -> error', () => {
-    expect(computeEnableBankingStatus(baseEnableBankingConnection({ status: 'error' }), [])).toBe('error');
+    expect(computeEnableBankingStatus(baseEnableBankingConnection({ status: EnableBankingConnectionStatus.ERROR }), [])).toBe('error');
   });
 
   it('expired -> expired', () => {
-    expect(computeEnableBankingStatus(baseEnableBankingConnection({ status: 'expired' }), [])).toBe('expired');
+    expect(computeEnableBankingStatus(baseEnableBankingConnection({ status: EnableBankingConnectionStatus.EXPIRED }), [])).toBe('expired');
   });
 
   it('linked with no accessValidUntil -> error', () => {
-    expect(computeEnableBankingStatus(baseEnableBankingConnection({ accessValidUntil: null, status: 'linked' }), [])).toBe('error');
+    expect(computeEnableBankingStatus(baseEnableBankingConnection({ accessValidUntil: null, status: EnableBankingConnectionStatus.LINKED }), [])).toBe('error');
   });
 
   it('linked with past accessValidUntil -> expired', () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date('2026-07-31T12:00:00.000Z'));
-    expect(computeEnableBankingStatus(baseEnableBankingConnection({ accessValidUntil: new Date('2026-07-30T12:00:00.000Z'), status: 'linked' }), [])).toBe('expired');
+    expect(computeEnableBankingStatus(baseEnableBankingConnection({ accessValidUntil: new Date('2026-07-30T12:00:00.000Z'), status: EnableBankingConnectionStatus.LINKED }), [])).toBe('expired');
   });
 
   it('linked with future accessValidUntil but no active accounts -> processing', () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date('2026-07-31T12:00:00.000Z'));
-    expect(computeEnableBankingStatus(baseEnableBankingConnection({ accessValidUntil: new Date('2026-08-30T12:00:00.000Z'), status: 'linked' }), [])).toBe('processing');
+    expect(computeEnableBankingStatus(baseEnableBankingConnection({ accessValidUntil: new Date('2026-08-30T12:00:00.000Z'), status: EnableBankingConnectionStatus.LINKED }), [])).toBe('processing');
   });
 
   it('linked with future accessValidUntil and all accounts refreshed -> connected', () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date('2026-07-31T12:00:00.000Z'));
     const accounts = [baseAccount({ refreshedAt: new Date('2026-07-30T10:00:00.000Z') })];
-    expect(computeEnableBankingStatus(baseEnableBankingConnection({ accessValidUntil: new Date('2026-08-30T12:00:00.000Z'), status: 'linked' }), accounts)).toBe('connected');
+    expect(computeEnableBankingStatus(baseEnableBankingConnection({ accessValidUntil: new Date('2026-08-30T12:00:00.000Z'), status: EnableBankingConnectionStatus.LINKED }), accounts)).toBe('connected');
   });
 });
 
-describe('RAD-246 Enable Banking DTO mapping', () => {
+describe('Enable Banking DTO mapping', () => {
   it('maps aspspName onto institutionName and accessValidUntil onto expiresAt', () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date('2026-07-31T12:00:00.000Z'));
@@ -249,7 +249,7 @@ describe('RAD-246 Enable Banking DTO mapping', () => {
     const connection = baseEnableBankingConnection({
       accessValidUntil: new Date('2026-08-30T12:00:00.000Z'),
       aspspName: 'Real Bank',
-      status: 'linked',
+      status: EnableBankingConnectionStatus.LINKED,
     });
     const dto = mapEnableBankingConnection({ ...connection, accounts: { getItems: () => accounts } });
     expect(Object.keys(dto).sort()).toEqual(['accessType', 'dataFreshAsOf', 'expiresAt', 'institutionName', 'provider', 'status']);
@@ -267,7 +267,7 @@ describe('RAD-246 Enable Banking DTO mapping', () => {
   });
 
   it('returns null expiresAt when accessValidUntil is not yet set', () => {
-    const dto = mapEnableBankingConnection(baseEnableBankingConnection({ accessValidUntil: null, status: 'created' }));
+    const dto = mapEnableBankingConnection(baseEnableBankingConnection({ accessValidUntil: null, status: EnableBankingConnectionStatus.CREATED }));
     expect(dto.expiresAt).toBeNull();
     expect(dto.status).toBe('processing');
   });
@@ -294,7 +294,7 @@ describe('getBankConnections', () => {
     const requisition: RequisitionInput = {
       accounts: { getItems: () => [] },
       expiresAt: new Date('2026-08-30T12:00:00.000Z'),
-      status: 'linked' as RequisitionInput['status'],
+      status: NordigenRequisitionStatus.LN,
     };
     mockFind({ nordigenRequisitions: [requisition] });
     const json = vi.fn();
@@ -309,7 +309,7 @@ describe('getBankConnections', () => {
       accessValidUntil: new Date('2026-08-30T12:00:00.000Z'),
       accounts: { getItems: () => [] },
       aspspName: 'Enable Bank',
-      status: 'linked' as EnableBankingInput['status'],
+      status: EnableBankingConnectionStatus.LINKED,
     };
     mockFind({ enableBankingConnections: [connection] });
     const json = vi.fn();
@@ -334,13 +334,13 @@ describe('getBankConnections', () => {
     const requisition: RequisitionInput = {
       accounts: { getItems: () => [] },
       expiresAt: new Date('2026-08-30T12:00:00.000Z'),
-      status: 'linked' as RequisitionInput['status'],
+      status: NordigenRequisitionStatus.LN,
     };
     const connection: EnableBankingInput = {
       accessValidUntil: new Date('2026-08-30T12:00:00.000Z'),
       accounts: { getItems: () => [] },
       aspspName: 'Enable Bank',
-      status: 'linked' as EnableBankingInput['status'],
+      status: EnableBankingConnectionStatus.LINKED,
     };
     mockFind({ enableBankingConnections: [connection], nordigenRequisitions: [requisition] });
     const json = vi.fn();

@@ -63,7 +63,7 @@ const createFormSchema = (t: (key: string) => string) =>
   z.object({
     portfolioId: z.string().min(1, t("invalid-portfolio")),
     transactionDate: z.date(),
-    financialTransactionTypeId: z.string(),
+    financialTransactionTypeId: z.string().min(1, t("invalid-type")),
     brokerId: z.string().optional(),
     assetKind: z.enum(["ticker", "certificado-aforro"]).default("ticker"),
     assetSymbol: z.string(),
@@ -85,30 +85,20 @@ type FormProps = z.infer<FormSchema>;
 export type FormInput = z.input<FormSchema>;
 type FormOutput = z.output<FormSchema>;
 
-export function getPortfolioTransactionAddDefaultValues(
+function getPortfolioTransactionAddDefaultValues(
   defaultPortfolioId?: string,
   now = new Date(),
 ): Partial<FormInput> {
   return {
     portfolioId: defaultPortfolioId ?? "",
     transactionDate: now,
+    // An empty string, not undefined: the Radix Select is controlled from the
+    // first render, so picking a type does not flip it uncontrolled->controlled.
+    financialTransactionTypeId: "",
     assetKind: "ticker",
     hasFees: false,
     addOriginalCurrency: false,
     settlementCurrencyId: "151",
-  };
-}
-
-export function createPortfolioTransactionImportHandler(
-  closeModal: () => void,
-  onImportTransactions: () => void,
-  delayMs = 200,
-) {
-  return () => {
-    closeModal();
-    globalThis.setTimeout(() => {
-      onImportTransactions();
-    }, delayMs);
   };
 }
 
@@ -207,6 +197,10 @@ const PortfolioTransactionAddModal: React.FC<
   const [enableOriginalCurrency, setEnableOriginalCurrency] = useState(false);
 
   const assetKind = useWatch({ control, name: "assetKind" });
+  const [settlementCurrencyId, feeCurrencyId, originalCurrencyId] = useWatch({
+    control,
+    name: ["settlementCurrencyId", "feeCurrencyId", "originalCurrencyId"],
+  });
 
   // Reset the shared assetSymbol/taxExempt fields whenever the asset kind
   // toggles, so switching modes never submits a stale value left over from
@@ -289,11 +283,11 @@ const PortfolioTransactionAddModal: React.FC<
           // every portfolio-detail/dashboard/holdings/metrics/net-worth key
           // via the shared getPortfolioTransactionMutationInvalidationKeys()
           // list (both onSuccess handlers run on every mutation). Repeating
-          // a second, hand-picked list here just doubled the number of
+          // a second, hand-picked list here would double the number of
           // simultaneous refetches fired on save for no extra coverage —
           // an ad hoc query-key array this file's own conventions warn
-          // against (see lib/api/AGENTS.md) and, per RAD-636, a real
-          // contributor to totals staying stale after a buy.
+          // against (see lib/api/AGENTS.md), and one that can leave totals
+          // stale after a buy.
         },
         onError: (error) => {
           if (notifyIfRateLimited(error)) return;
@@ -524,7 +518,11 @@ const PortfolioTransactionAddModal: React.FC<
                     {isLoadingConfigs ? (
                       <Spinner />
                     ) : configsData ? (
-                      <Select {...field}>
+                      <Select
+                        value={field.value ?? ""}
+                        onValueChange={field.onChange}
+                        disabled={field.disabled}
+                      >
                         <SelectTrigger className="w-full">
                           <SelectValue placeholder={t("broker")} />
                         </SelectTrigger>
@@ -629,7 +627,7 @@ const PortfolioTransactionAddModal: React.FC<
                             triggerClassName={CURRENCY_TRIGGER_CLASS}
                             field={{
                               value:
-                                methods.watch("settlementCurrencyId") ?? "",
+                                settlementCurrencyId ?? "",
                             }}
                             onSelect={(opt) => {
                               methods.setValue(
@@ -693,7 +691,7 @@ const PortfolioTransactionAddModal: React.FC<
                           <ComboBoxForm
                             triggerClassName={CURRENCY_TRIGGER_CLASS}
                             field={{
-                              value: methods.watch("feeCurrencyId") ?? "",
+                              value: feeCurrencyId ?? "",
                             }}
                             onSelect={(opt) => {
                               methods.setValue(
@@ -757,7 +755,7 @@ const PortfolioTransactionAddModal: React.FC<
                           <ComboBoxForm
                             triggerClassName={CURRENCY_TRIGGER_CLASS}
                             field={{
-                              value: methods.watch("originalCurrencyId") ?? "",
+                              value: originalCurrencyId ?? "",
                             }}
                             onSelect={(opt) => {
                               methods.setValue(

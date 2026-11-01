@@ -48,10 +48,9 @@ const options: LoggerOptions = {
 };
 
 // pino writes to stdout by default (and to the pino-pretty transport above when
-// SHOULD_PRETTY_LOGS is set). This used to be wrapped in a single-element
-// `pino.multistream([{ stream: process.stdout }])` "for Azure/Docker logs" — Azure
-// is gone (the app runs on the Coolify VPS), and a one-element multistream is a
-// no-op with extra overhead that also silently disables the transport.
+// SHOULD_PRETTY_LOGS is set). Don't wrap it in a single-element
+// `pino.multistream([{ stream: process.stdout }])`: that is a no-op with extra
+// overhead that also silently disables the transport.
 const logger = pino(options);
 
 export default logger;

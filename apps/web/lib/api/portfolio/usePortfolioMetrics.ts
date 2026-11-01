@@ -40,7 +40,7 @@ export interface PortfolioMetricsResponse {
   };
 }
 
-export async function getPortfolioMetrics(
+async function getPortfolioMetrics(
   fromDate?: string,
   apiClient: AxiosInstance = api,
 ): Promise<PortfolioMetricsResponse> {

@@ -1,9 +1,6 @@
-import type { UseQueryResult } from '@tanstack/react-query'
 import { useEffect, useRef } from 'react'
 
 import { ApiError } from '@/lib/api/errors'
-
-export type PortfolioQueryResult = UseQueryResult<unknown, Error>
 
 export function usePortfolioAccessErrors(
   errors: readonly unknown[],

@@ -4,15 +4,20 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useParams, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { usePostHog } from "posthog-js/react";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect } from "react";
 import { useGoogleReCaptcha } from "react-google-recaptcha-v3";
 import { type SubmitHandler, useForm } from "react-hook-form";
 import { toast } from "sonner";
 
 import type { RecaptchaVerifyResponse } from "@/app/api/recaptcha/route";
+import { useConfirmedFeature } from "@/lib/api/instance/useInstance";
 import { resolveAuthLocale } from "@/lib/auth/auth-error-redirect";
 import { authClient } from "@/lib/auth/client";
 import { completeAuthAndRedirect } from "@/lib/auth/complete-auth";
+import {
+  getSignupCallbackErrorKey,
+  getSignupProviderErrorKey,
+} from "@/lib/auth/signup-error";
 import {
   captureSignupFunnelEvent,
   getSignupFailureCategory,
@@ -20,17 +25,21 @@ import {
 } from "@/lib/utils/analytics";
 import { SENTRY_CLIENT_ENABLED } from "@/lib/utils/sentry-enabled";
 import { getCallbackURL } from "@/lib/utils/url";
+import { useHydrated } from "@/lib/utils/useHydrated";
 
 import {
   canBypassRecaptchaClientFailure,
   deriveNameFromEmail,
+  isRecaptchaConfigured,
   type SignupFormSchema,
   signupFormSchema,
 } from "./signup-form-contract";
 import { SignupFormView } from "./SignupFormView";
 
 interface SignupFormProps {
+  /** Household invite: rides through signup so the API links the new user into the owner's tenant. */
   inviteToken?: string;
+  /** When set, the email is fixed to the invited address and the field is locked. */
   lockedEmail?: string;
 }
 
@@ -42,7 +51,8 @@ export default function SignupForm({
   const form = useForm<SignupFormSchema>({
     resolver: zodResolver(signupFormSchema),
     defaultValues: {
-      email: "",
+      email: lockedEmail || "",
+      inviteToken: inviteToken || undefined,
       password: "",
     },
   });
@@ -52,10 +62,11 @@ export default function SignupForm({
   );
   const { executeRecaptcha } = useGoogleReCaptcha();
   const posthog = usePostHog();
-  const [hydrated, setHydrated] = useState(false);
+  const hydrated = useHydrated();
+  // Without Google credentials on the API the sign-in call fails with PROVIDER_NOT_FOUND.
+  const googleSignIn = useConfirmedFeature((features) => features.googleSignIn);
 
   useEffect(() => {
-    setHydrated(true);
     captureSignupFunnelEvent(posthog, SIGNUP_FUNNEL_EVENTS.started, {
       locale,
       method: "email",
@@ -67,6 +78,10 @@ export default function SignupForm({
 
   const verifyRecaptcha =
     useCallback(async (): Promise<RecaptchaVerifyResponse> => {
+      if (!isRecaptchaConfigured()) {
+        return { success: true, action: "not_configured" };
+      }
+
       if (!executeRecaptcha) {
         if (canBypassRecaptchaClientFailure()) {
           return { success: true, action: "non_production_bypass" };
@@ -124,7 +139,7 @@ export default function SignupForm({
           })
           .catch(() => {});
       }
-      toast.error(t("toast-signup-error"));
+      toast.error(t("toast-signup-recaptcha-error"), { duration: 9000 });
       return;
     }
 
@@ -143,23 +158,29 @@ export default function SignupForm({
         locale,
         method: "email",
       });
-      toast.error(t("toast-signup-error"));
+      toast.error(t(getSignupProviderErrorKey(error)));
       return;
     }
 
     const completed = await completeAuthAndRedirect(
       locale,
-      { locale },
+      { inviteToken: values.inviteToken || undefined, locale },
       "signup_form",
     );
 
-    if (!completed) {
+    if (!completed.ok) {
       captureSignupFunnelEvent(posthog, SIGNUP_FUNNEL_EVENTS.submitFailed, {
         failure_category: getSignupFailureCategory("app_callback"),
         locale,
         method: "email",
       });
-      toast.error(t("toast-signup-error"));
+      toast.error(
+        t(
+          getSignupCallbackErrorKey(completed.error, {
+            hasInvite: Boolean(values.inviteToken),
+          }),
+        ),
+      );
     }
   };
 
@@ -176,7 +197,9 @@ export default function SignupForm({
   return (
     <SignupFormView
       form={form}
+      hideGoogle={Boolean(inviteToken) || !googleSignIn}
       hydrated={hydrated}
+      lockedEmail={lockedEmail}
       onGoogleSignup={signUpWithGoogle}
       onSubmit={onSubmit}
     />

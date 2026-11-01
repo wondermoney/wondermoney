@@ -2,24 +2,17 @@
 
 import dynamic from "next/dynamic";
 
-import { useAdminModuleVisibility } from "@/lib/admin/useAdminModuleVisibility";
-import { useUser } from "@/lib/auth/user-context";
+import { useFeature } from "@/lib/api/instance/useInstance";
 
 const AssistantLauncher = dynamic(
   () => import("@/components/assistant/AssistantLauncher"),
   { ssr: false },
 );
 
-// NOTE: MfaReenrollmentGate is mounted globally in app/providers.tsx, not
-// here — this overlay tree only covers (full-layout) routes, but the gate
-// must block every authenticated route (e.g. (no-layout)/onboarding, which
-// FirstRunOnboardingRedirectGate redirects fresh sessions to). See RAD-294.
 export default function FullLayoutClientOverlays() {
-  const user = useUser();
-  const { isModuleVisible } = useAdminModuleVisibility(
-    user?.email,
-    user?.email_confirmed_at,
-  );
+  // The assistant is available to every account; it is hidden only when this
+  // server has no assistant model configured (`/v1/instance` features).
+  const assistantAvailable = useFeature((features) => features.ai.assistant);
 
-  return isModuleVisible("assistant") ? <AssistantLauncher /> : null;
+  return assistantAvailable ? <AssistantLauncher /> : null;
 }

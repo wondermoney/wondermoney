@@ -105,9 +105,9 @@ function TransactionsContent({
   const [customFromDraft, setCustomFromDraft] = useState('')
   const [customToDraft, setCustomToDraft] = useState('')
   const [customRangeError, setCustomRangeError] = useState<string | null>(null)
-  // The two filter panels below used to sit permanently between the title and
-  // the first transaction — roughly a screenful of controls before any data.
-  // They collapse behind one chip, which carries a count so an active filter
+  // The two filter panels below would otherwise sit permanently between the
+  // title and the first transaction — roughly a screenful of controls before
+  // any data. They collapse behind one chip, which carries a count so an active filter
   // is never hidden.
   const [filtersOpen, setFiltersOpen] = useState(false)
   const [visibleCount, setVisibleCount] = useState(50)
@@ -450,7 +450,7 @@ type TransactionRowProps = Readonly<{
 }>
 
 /**
- * RAD-193 — extracted and memoized so an unrelated state change elsewhere on
+ * Extracted and memoized so an unrelated state change elsewhere on
  * the screen (typing in a filter field, toggling another row) doesn't force
  * every visible transaction row to re-run its date/currency formatting.
  */

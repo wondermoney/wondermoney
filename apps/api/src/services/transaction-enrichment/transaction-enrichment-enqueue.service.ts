@@ -39,7 +39,7 @@ interface EnqueueTransactionEnrichmentDeps {
 type EnrichmentSource = 'account-initial-sync' | 'manual-transaction' | 'transaction-import';
 
 /**
- * Best-effort producer for the DeepSeek transaction-enrichment pipeline (RAD-414).
+ * Best-effort producer for the DeepSeek transaction-enrichment pipeline.
  *
  * Called after transaction ingestion (bank sync / CSV import) to enqueue eligible transactions for
  * async, post-sync, non-critical enrichment. Strictly fail-open: it never throws to the caller and
@@ -68,27 +68,23 @@ export async function enqueueTransactionEnrichmentForTenant(
     // Exclude transactions that already have an enrichment row. Shadow mode never changes
     // categorizationConfidence, so enriched rows stay in the NONE/LOW pool forever; without this
     // exclusion (plus a deterministic ORDER BY) a tenant with >LIMIT low-confidence txns would keep
-    // re-fetching the same enriched page and the tail would never be reached (RAD-414 H2). We fetch
+    // re-fetching the same enriched page and the tail would never be reached. We fetch
     // the already-enriched transaction keys as a bounded array and pass them to `$nin` — a
     // QueryBuilder object can't be embedded directly into `em.find`'s where (it stringifies to
     // '[object Object]' and produces invalid SQL).
     const enrichedRows = await em
       .createQueryBuilder(TransactionEnrichment, 'te')
-      .select('transaction_key')
-      .where({ tenantKey })
+      .select('transactionKey')
+      .where({ tenantKey: getRef(em, Tenant, tenantKey) })
       .execute<{ transactionKey: number }[]>();
 
-    // RAD-580: `execute()` maps rows to *entity property* names, so these come back as
-    // `transactionKey` even though `select()` was given the column name. This read
-    // `row.transaction_key` and got `undefined` for every row — which still had `length > 0`, so
-    // the `$nin` below was applied as `transaction_key NOT IN (NULL, NULL, …)`. That is UNKNOWN for
-    // every row in SQL, so the candidate query matched nothing and the producer returned silently.
+    // `execute()` maps rows to *entity property* names, so these come back as `transactionKey`,
+    // not as the `transaction_key` column. Reading `row.transaction_key` would give
+    // `undefined` for every row, and `$nin` would become `transaction_key NOT IN (NULL, NULL, …)`,
+    // which is UNKNOWN for every row in SQL: the candidate query would match nothing and a tenant
+    // would starve silently from its first enrichment row on.
     //
-    // A tenant was fine until it acquired its first enrichment row and permanently starved after.
-    // Measured on production 2026-08-22: 200 candidates without the exclusion, 0 with the broken
-    // one, 200 with this fix.
-    //
-    // The `filter` is the durable half. If this shape ever changes again, an empty exclusion list
+    // The `filter` guards that. If this shape ever changes, an empty exclusion list
     // costs a redundant enqueue — idempotency-keyed, so harmless — instead of switching the feature
     // off. Fail toward doing the work, not toward silence.
     const enrichedTransactionKeys = enrichedRows
@@ -113,17 +109,16 @@ export async function enqueueTransactionEnrichmentForTenant(
       } as FilterQuery<Transaction>,
       { limit: CANDIDATE_BATCH_LIMIT, orderBy: { transactionKey: 'ASC' } },
     );
-    // RAD-584: drop withdrawals and transfers before the model ever sees them.
+    // Drop withdrawals and transfers before the model ever sees them.
     // A bank branch name resolves to a merchant, so `LEV ATM 3170 BPI Braga`
     // satisfies the transactionMerchantKey filter above and looks like an
     // ordinary card purchase to the query — which is how the model came to
     // categorise cash withdrawals as FUEL.
     const candidates = selected.filter((transaction) => !isUncategorisableByDescription(transaction));
     const skippedUncategorisable = selected.length - candidates.length;
-    // RAD-580: say so. Both early returns above and this one used to be silent, which made a
-    // pipeline that had stopped producing indistinguishable from one with nothing to do — the
-    // reason nobody noticed for three days. `enqueued: 0` in the logs is the signal; its absence
-    // now means the producer never ran, which is a different and equally useful fact.
+    // Say so. A silent return makes a pipeline that has stopped producing indistinguishable from
+    // one with nothing to do. `enqueued: 0` in the logs is the signal; its absence means the
+    // producer never ran, which is a different and equally useful fact.
     log.info(
       {
         candidates: candidates.length,

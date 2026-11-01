@@ -22,7 +22,7 @@ export interface TopMoversResponse {
  * Fetches top movers (gainers and losers)
  * Uses path param for individual portfolio, aggregate endpoint for all
  */
-export async function getPortfolioTopMovers(
+async function getPortfolioTopMovers(
   portfolioId: number | null,
   period: Period = "YTD",
   limit: number = 5,

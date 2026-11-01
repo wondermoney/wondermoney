@@ -1,11 +1,11 @@
 import clients from './google-oauth-clients.json'
 
 /**
- * Public OAuth client identifiers for the `wondermoney` Google Cloud project (RAD-420).
+ * Public OAuth client identifiers for the `wondermoney` Google Cloud project.
  *
  * These are client *identifiers*, not secrets: they ship inside the binary (the iOS URL
  * scheme lands verbatim in Info.plist) and Google documents them as public. The client
- * secret lives only in the Supabase dashboard and never here.
+ * secret lives only in the API's server configuration and never here.
  *
  * They live in JSON, not TypeScript, for one reason: `app.config.ts` needs the same
  * values for the native config plugin, and Expo's config loader transpiles only
@@ -13,7 +13,7 @@ import clients from './google-oauth-clients.json'
  * JSON natively. One file, so the native scheme and the runtime client ID cannot drift.
  */
 export const googleOAuthClients: Readonly<{
-  /** Server-side client Supabase validates ID tokens against; Android's server client ID. */
+  /** Server-side client the API validates ID tokens against; Android's server client ID. */
   webClientId: string
   /** `GIDConfiguration.clientID` for the native iOS flow. */
   iosClientId: string

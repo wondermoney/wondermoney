@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 
 import { getServerApi } from "@/lib/api/api-server";
 import { getPortfolioTransactions } from "@/lib/api/portfolio/usePortfolioTransactions";
+import { serverDataTimestamp } from "@/lib/query/server-seed";
 
 import PortfolioTransactionsClient from "./portfolio-transactions-client";
 
@@ -25,6 +26,7 @@ export default async function PortfolioTransactionsPage({
   }
 
   const api = await getServerApi(locale);
+  const serverRenderedAt = serverDataTimestamp();
 
   const defaultDateRange = {
     from: startOfDay(subDays(new Date(), 60)),
@@ -47,6 +49,7 @@ export default async function PortfolioTransactionsPage({
   return (
     <PortfolioTransactionsClient
       portfolioId={portfolioId}
+      serverRenderedAt={serverRenderedAt}
       initialPortfolioTransactionsData={portfolioTransactionsData}
       hasAnyTransactions={
         (anyPortfolioTransactionsData.transactions?.length ?? 0) > 0

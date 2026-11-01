@@ -7,7 +7,19 @@ import { SqlHighlighter } from '@mikro-orm/sql-highlighter';
 
 import { type ConfigurationSource, loadConfiguration } from '@app/config/configuration';
 
+import { NamingStrategy } from './database/naming-strategy.js';
 import { ExtendedEntityRepository } from './database/repositories/_ExtendedEntityRepository.js';
+
+/**
+ * The committed schema snapshot `migration:create` / `migration:check` diff entities against.
+ *
+ * MikroORM names the snapshot after the connected database (`.snapshot-<dbName>.json`) unless
+ * this is set, so the same command against a database with a different name read and wrote a
+ * different, stale file. Pinning the name keeps one snapshot regardless of `DB_DATABASE`.
+ * Applying migrations must not rewrite it: the package `migrate:*` scripts set
+ * `MIKRO_ORM_MIGRATIONS_SNAPSHOT=false` (CI checks the snapshot survives a fresh migrate).
+ */
+const MIGRATION_SNAPSHOT_NAME = '.snapshot-wmdb';
 
 /**
  * Build a MikroORM options object from a pre-validated configuration source.
@@ -18,7 +30,7 @@ import { ExtendedEntityRepository } from './database/repositories/_ExtendedEntit
  */
 export function createMikroOrmOptions(
   config: ReturnType<typeof loadConfiguration<'migration' | 'orm-cli'>>,
-): Options<PostgreSqlDriver> {
+): Partial<Options<PostgreSqlDriver>> {
   const { database, runtime } = config;
   if (!database.connectionString && (!database.host || !database.port || !database.database || !database.username)) {
     throw new Error('MikroORM configuration is missing connection details');
@@ -31,13 +43,14 @@ export function createMikroOrmOptions(
     min: 2,
   } as const;
 
-  const base: Options<PostgreSqlDriver> = {
+  const base: Partial<Options<PostgreSqlDriver>> = {
     dbName: database.database ?? undefined,
     driver: PostgreSqlDriver,
     entityRepository: () => ExtendedEntityRepository,
     extensions: [Migrator, SeedManager],
     host: database.host ?? undefined,
     metadataProvider: TsMorphMetadataProvider,
+    namingStrategy: NamingStrategy,
     password: database.password ?? undefined,
     pool: { ...pool },
     port: database.port ?? undefined,
@@ -55,6 +68,7 @@ export function createMikroOrmOptions(
         emit: 'js',
         path: './dist/database/migrations',
         pathTs: './src/database/migrations',
+        snapshotName: MIGRATION_SNAPSHOT_NAME,
       },
       seeder: {
         defaultSeeder: 'DatabaseSeeder',
@@ -71,7 +85,7 @@ export function createMikroOrmOptions(
       entities: ['./dist/database/entity'],
       entitiesTs: ['./src/database/entity'],
       highlighter: new SqlHighlighter(),
-      migrations: { allOrNothing: false, pathTs: './src/database/migrations' },
+      migrations: { allOrNothing: false, pathTs: './src/database/migrations', snapshotName: MIGRATION_SNAPSHOT_NAME },
       preferTs: true,
       seeder: { defaultSeeder: 'DatabaseSeeder', pathTs: './src/database/seeders' },
     };
@@ -90,8 +104,8 @@ export function createMikroOrmOptions(
  * options with `Object.entries`, so a get-only proxy over `{}` enumerates as empty and MikroORM
  * boots with no connection config at all (the staging deploy crash-loop this replaced).
  */
-let resolvedOptions: Options<PostgreSqlDriver> | undefined;
-function resolveOptions(): Options<PostgreSqlDriver> {
+let resolvedOptions: Partial<Options<PostgreSqlDriver>> | undefined;
+function resolveOptions(): Partial<Options<PostgreSqlDriver>> {
   if (!resolvedOptions) {
     const source: ConfigurationSource = Object.freeze({ ...(process.env as Record<string, string | undefined>) });
     resolvedOptions = createMikroOrmOptions(loadConfiguration('orm-cli', source));
@@ -99,7 +113,7 @@ function resolveOptions(): Options<PostgreSqlDriver> {
   return resolvedOptions;
 }
 
-const mikroOrmOptions: Options<PostgreSqlDriver> = new Proxy({} as Options<PostgreSqlDriver>, {
+const mikroOrmOptions: Partial<Options<PostgreSqlDriver>> = new Proxy({}, {
   defineProperty: (_target, prop, descriptor) => Reflect.defineProperty(resolveOptions(), prop, descriptor),
   deleteProperty: (_target, prop) => Reflect.deleteProperty(resolveOptions(), prop),
   get: (_target, prop): unknown => Reflect.get(resolveOptions(), prop),

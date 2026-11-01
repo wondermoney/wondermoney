@@ -1,3 +1,4 @@
+import { parse as parseCsv } from 'csv-parse/sync';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { PortfolioColumnMappingTransformations } from '../portfolio-csv-column-mapping.schema';
@@ -65,7 +66,7 @@ describe('portfolio csv column mapping confirmation service', () => {
     mocked.getLimitedCsvObjectText.mockResolvedValue('csv');
     mocked.parseCsvRows.mockReturnValue([]);
     const { default: service } = await import('../portfolio-csv-column-mapping.service');
-    await expect(service.confirmColumnMapping({ ...input, columnMapping: { currency: 'Currency', quantity: 'Qty', transactionDate: 'Date' } as unknown as ConfirmPortfolioColumnMappingInput['columnMapping'] })).rejects.toThrow('Missing required mapping fields');
+    await expect(service.confirmColumnMapping({ ...input, columnMapping: { currency: 'Currency', quantity: 'Qty', transactionDate: 'Date' } })).rejects.toThrow('Missing required mapping fields');
     expect(mocked.persist).not.toHaveBeenCalled();
     expect(mocked.saveConfirmedSpec).not.toHaveBeenCalled();
   });
@@ -109,6 +110,73 @@ describe('portfolio csv column mapping confirmation service', () => {
     expect(mocked.parseCsvRows).toHaveBeenCalledWith('csv');
     expect(mocked.parseRawCsvRowsForLayout).not.toHaveBeenCalled();
     expect(mocked.applyPortfolioCsvLayout).not.toHaveBeenCalled();
+  });
+
+  it('normalizes a complete synthetic IBKR statement before asset resolution', async () => {
+    const csv = [
+      'AssetClass,SubCategory,Symbol,Description,ISIN,ListingExchange,CurrencyPrimary,TradeDate,Quantity,TradePrice,IBCommission,TransactionID,Buy/Sell',
+      'STK,ETF,SPYL,SPDR S&P 500 UCITS ETF ACC,IE000XZSV718,AEB,EUR,20240102,2.5,100,0.1,SYN-SPY-BUY-1,BUY',
+      'STK,ETF,SPYL,SPDR S&P 500 UCITS ETF ACC,IE000XZSV718,AEB,EUR,20240103,1.25,120,0.1,SYN-SPY-BUY-2,BUY',
+      'STK,ETF,SPYL,SPDR S&P 500 UCITS ETF ACC,IE000XZSV718,AEB,EUR,20240104,-3,150,0.2,SYN-SPY-SELL-1,SELL',
+      'STK,COMMON,AMD,ADVANCED MICRO DEVICES,US0079031078,NASDAQ,USD,20240102,0.25,100,0.05,SYN-AMD-BUY-1,BUY',
+      'STK,COMMON,AMD,ADVANCED MICRO DEVICES,US0079031078,NASDAQ,USD,20240103,0.25,120,0.05,SYN-AMD-BUY-2,BUY',
+      'CASH,,EUR.USD,EUR.USD,,,USD,20240104,1,1.08,0,SYN-FX-1,SELL',
+    ].join('\n');
+    const syntheticMapping = {
+      columnMapping: {
+        assetName: 'Description',
+        brokerExchange: 'ListingExchange',
+        currency: 'CurrencyPrimary',
+        externalTransactionId: 'TransactionID',
+        feeAmount: 'IBCommission',
+        isin: 'ISIN',
+        quantity: 'Quantity',
+        ticker: 'Symbol',
+        transactionDate: 'TradeDate',
+        transactionType: 'Buy/Sell',
+        unitPrice: 'TradePrice',
+      },
+      derivedValues: {},
+      fixedValues: {},
+      layout: { dataStartRowIndex: 1, headerRowIndex: 0 },
+      transformations: {
+        dateFormat: 'yyyyMMdd',
+        decimalSeparator: '.',
+        thousandsSeparator: 'none',
+      },
+    } satisfies {
+      columnMapping: ConfirmPortfolioColumnMappingInput['columnMapping'];
+      derivedValues: ConfirmPortfolioColumnMappingInput['derivedValues'];
+      fixedValues: ConfirmPortfolioColumnMappingInput['fixedValues'];
+      layout: ConfirmPortfolioColumnMappingInput['layout'];
+      transformations: ConfirmPortfolioColumnMappingInput['transformations'];
+    };
+    mocked.getOwnedSession.mockResolvedValue(session());
+    mocked.getLimitedCsvObjectText.mockResolvedValue(csv);
+    mocked.parseCsvRows.mockReturnValue(parseCsv<Record<string, string>>(csv, { bom: true, columns: true, skip_empty_lines: true }));
+    mocked.find.mockResolvedValue([]);
+    mocked.findOne.mockResolvedValue(null);
+    const { default: service } = await import('../portfolio-csv-column-mapping.service');
+
+    const result = await service.confirmColumnMapping({
+      ...input,
+      columnMapping: syntheticMapping.columnMapping,
+      derivedValues: syntheticMapping.derivedValues,
+      fixedValues: syntheticMapping.fixedValues,
+      layout: syntheticMapping.layout,
+      transformations: syntheticMapping.transformations,
+    });
+
+    expect(result).toMatchObject({ invalidRows: 0, totalRows: 6 });
+    const persistedRows = mocked.persist.mock.calls[0]?.[0] as { normalizedJson?: Record<string, unknown>; rowNumber: number; status: string }[];
+    expect(persistedRows).toHaveLength(7); // session plus all six normalized rows
+    const fxRow = persistedRows.find((row) => row.rowNumber === 6);
+    expect(fxRow).toMatchObject({
+      normalizedJson: { assetSymbol: 'EUR.USD', date: '2024-01-04T00:00:00.000Z', quantity: 1, settlementCurrencyCode: 'USD', transactionType: 'SELL', unitPrice: 1.08 },
+      status: 'ready',
+    });
+    expect(persistedRows.filter((row) => row.rowNumber > 0 && row.status === 'invalid')).toHaveLength(0);
+    expect(mocked.resolveImportSessionAssets).toHaveBeenCalledTimes(1);
   });
 
   it('rejects invalid confirmed layout with a client error', async () => {
@@ -271,7 +339,7 @@ describe('portfolio csv column mapping confirmation service', () => {
     mocked.findOne.mockResolvedValue(null);
 
     const { default: service } = await import('../portfolio-csv-column-mapping.service');
-    await service.confirmColumnMapping({ ...input, columnMapping: { ...input.columnMapping, externalTransactionId: undefined } as unknown as ConfirmPortfolioColumnMappingInput['columnMapping'], transformations: { dateFormat: 'dd/MM/yyyy', decimalSeparator: ',', negativeAmountMeansBuy: true, thousandsSeparator: '.' } as PortfolioColumnMappingTransformations });
+    await service.confirmColumnMapping({ ...input, columnMapping: { ...input.columnMapping, externalTransactionId: undefined }, transformations: { dateFormat: 'dd/MM/yyyy', decimalSeparator: ',', negativeAmountMeansBuy: true, thousandsSeparator: '.' } });
     expect(mocked.persist).toHaveBeenCalledWith(expect.arrayContaining([expect.objectContaining({ normalizedJson: expect.objectContaining({ date: '2025-12-31T00:00:00.000Z', quantity: 1234.56, totalAmount: 12345.67 }) })]));
   });
 
@@ -283,7 +351,7 @@ describe('portfolio csv column mapping confirmation service', () => {
     mocked.findOne.mockResolvedValue(null);
 
     const { default: service } = await import('../portfolio-csv-column-mapping.service');
-    await expect(service.confirmColumnMapping({ ...input, columnMapping: { ...input.columnMapping, externalTransactionId: undefined } as unknown as ConfirmPortfolioColumnMappingInput['columnMapping'], transformations: { dateFormat: 'dd-MM-yyyy', decimalSeparator: ',', negativeAmountMeansBuy: true, thousandsSeparator: '.' } as PortfolioColumnMappingTransformations })).resolves.toMatchObject({ invalidRows: 0, readyRows: 2, status: 'ready_to_import', totalRows: 2 });
+    await expect(service.confirmColumnMapping({ ...input, columnMapping: { ...input.columnMapping, externalTransactionId: undefined }, transformations: { dateFormat: 'dd-MM-yyyy', decimalSeparator: ',', negativeAmountMeansBuy: true, thousandsSeparator: '.' } })).resolves.toMatchObject({ invalidRows: 0, readyRows: 2, status: 'ready_to_import', totalRows: 2 });
     expect(mocked.persist).toHaveBeenCalledWith(expect.arrayContaining([expect.objectContaining({ normalizedJson: expect.objectContaining({ date: '2025-08-15T00:00:00.000Z' }) })]));
     expect(mocked.persist).toHaveBeenCalledWith(expect.arrayContaining([expect.objectContaining({ normalizedJson: expect.objectContaining({ date: '2025-03-31T00:00:00.000Z' }) })]));
   });
@@ -296,7 +364,7 @@ describe('portfolio csv column mapping confirmation service', () => {
     mocked.findOne.mockResolvedValue(null);
 
     const { default: service } = await import('../portfolio-csv-column-mapping.service');
-    await expect(service.confirmColumnMapping({ ...input, columnMapping: { ...input.columnMapping, externalTransactionId: undefined } as unknown as ConfirmPortfolioColumnMappingInput['columnMapping'], transformations: { dateFormat: 'DD-MM-YYYY', decimalSeparator: ',', negativeAmountMeansBuy: true, thousandsSeparator: '.' } as PortfolioColumnMappingTransformations })).resolves.toMatchObject({ readyRows: 1, status: 'ready_to_import' });
+    await expect(service.confirmColumnMapping({ ...input, columnMapping: { ...input.columnMapping, externalTransactionId: undefined }, transformations: { dateFormat: 'DD-MM-YYYY', decimalSeparator: ',', negativeAmountMeansBuy: true, thousandsSeparator: '.' } })).resolves.toMatchObject({ readyRows: 1, status: 'ready_to_import' });
     expect(mocked.persist).toHaveBeenCalledWith(expect.arrayContaining([expect.objectContaining({ normalizedJson: expect.objectContaining({ date: '2026-06-12T00:00:00.000Z' }) })]));
   });
 
@@ -308,7 +376,7 @@ describe('portfolio csv column mapping confirmation service', () => {
     mocked.findOne.mockResolvedValue(null);
 
     const { default: service } = await import('../portfolio-csv-column-mapping.service');
-    await expect(service.confirmColumnMapping({ ...input, columnMapping: { ...input.columnMapping, externalTransactionId: undefined } as unknown as ConfirmPortfolioColumnMappingInput['columnMapping'], transformations: { dateFormat: 'yyyy-MM-dd', decimalSeparator: '.', negativeAmountMeansBuy: true, thousandsSeparator: 'none' } as PortfolioColumnMappingTransformations })).resolves.toMatchObject({ invalidRows: 0, readyRows: 3, status: 'ready_to_import', totalRows: 3 });
+    await expect(service.confirmColumnMapping({ ...input, columnMapping: { ...input.columnMapping, externalTransactionId: undefined }, transformations: { dateFormat: 'yyyy-MM-dd', decimalSeparator: '.', negativeAmountMeansBuy: true, thousandsSeparator: 'none' } })).resolves.toMatchObject({ invalidRows: 0, readyRows: 3, status: 'ready_to_import', totalRows: 3 });
     expect((mocked.persist.mock.calls[0]![0] as { columnMappingJson?: { confirmed?: { transformations?: { dateFormat?: string } } } }[])[0]!.columnMappingJson?.confirmed?.transformations?.dateFormat).toBe('dd/MM/yyyy');
     expect(mocked.persist).toHaveBeenCalledWith(expect.arrayContaining([expect.objectContaining({ normalizedJson: expect.objectContaining({ date: '2026-06-12T00:00:00.000Z' }) })]));
     expect(mocked.persist).toHaveBeenCalledWith(expect.arrayContaining([expect.objectContaining({ normalizedJson: expect.objectContaining({ date: '2025-08-15T00:00:00.000Z' }) })]));
@@ -323,7 +391,7 @@ describe('portfolio csv column mapping confirmation service', () => {
     mocked.findOne.mockResolvedValue(null);
 
     const { default: service } = await import('../portfolio-csv-column-mapping.service');
-    await expect(service.confirmColumnMapping({ ...input, columnMapping: { ...input.columnMapping, externalTransactionId: undefined } as unknown as ConfirmPortfolioColumnMappingInput['columnMapping'], transformations: { dateFormat: 'MM/dd/yyyy', decimalSeparator: '.', negativeAmountMeansBuy: true, thousandsSeparator: 'none' } as PortfolioColumnMappingTransformations })).resolves.toMatchObject({ invalidRows: 0, readyRows: 2, status: 'ready_to_import' });
+    await expect(service.confirmColumnMapping({ ...input, columnMapping: { ...input.columnMapping, externalTransactionId: undefined }, transformations: { dateFormat: 'MM/dd/yyyy', decimalSeparator: '.', negativeAmountMeansBuy: true, thousandsSeparator: 'none' } })).resolves.toMatchObject({ invalidRows: 0, readyRows: 2, status: 'ready_to_import' });
     expect((mocked.persist.mock.calls[0]![0] as { columnMappingJson?: { confirmed?: { transformations?: { dateFormat?: string } } } }[])[0]!.columnMappingJson?.confirmed?.transformations?.dateFormat).toBe('MM/dd/yyyy');
     expect(mocked.persist).toHaveBeenCalledWith(expect.arrayContaining([expect.objectContaining({ normalizedJson: expect.objectContaining({ date: '2025-04-05T00:00:00.000Z' }) })]));
     expect(mocked.persist).toHaveBeenCalledWith(expect.arrayContaining([expect.objectContaining({ normalizedJson: expect.objectContaining({ date: '2025-06-07T00:00:00.000Z' }) })]));
@@ -337,7 +405,7 @@ describe('portfolio csv column mapping confirmation service', () => {
     mocked.findOne.mockResolvedValue(null);
 
     const { default: service } = await import('../portfolio-csv-column-mapping.service');
-    await expect(service.confirmColumnMapping({ ...input, columnMapping: { ...input.columnMapping, externalTransactionId: undefined } as unknown as ConfirmPortfolioColumnMappingInput['columnMapping'], transformations: { dateFormat: 'bad-format', decimalSeparator: '.', negativeAmountMeansBuy: true, thousandsSeparator: 'none' } as PortfolioColumnMappingTransformations })).resolves.toMatchObject({ invalidRows: 0, readyRows: 2, status: 'ready_to_import' });
+    await expect(service.confirmColumnMapping({ ...input, columnMapping: { ...input.columnMapping, externalTransactionId: undefined }, transformations: { dateFormat: 'bad-format', decimalSeparator: '.', negativeAmountMeansBuy: true, thousandsSeparator: 'none' } })).resolves.toMatchObject({ invalidRows: 0, readyRows: 2, status: 'ready_to_import' });
     expect((mocked.persist.mock.calls[0]![0] as { columnMappingJson?: { confirmed?: { transformations?: { dateFormat?: string } } } }[])[0]!.columnMappingJson?.confirmed?.transformations?.dateFormat).toBe('dd/MM/yyyy');
   });
 
@@ -349,7 +417,7 @@ describe('portfolio csv column mapping confirmation service', () => {
     mocked.findOne.mockResolvedValue(null);
 
     const { default: service } = await import('../portfolio-csv-column-mapping.service');
-    await service.confirmColumnMapping({ ...input, columnMapping: { assetName: 'Asset', quantity: 'Qty', totalAmount: 'Total', transactionDate: 'Date' } as unknown as ConfirmPortfolioColumnMappingInput['columnMapping'], fixedValues: { currency: 'EUR' } as unknown as ConfirmPortfolioColumnMappingInput['fixedValues'], transformations });
+    await service.confirmColumnMapping({ ...input, columnMapping: { assetName: 'Asset', quantity: 'Qty', totalAmount: 'Total', transactionDate: 'Date' }, fixedValues: { currency: 'EUR' } as unknown as ConfirmPortfolioColumnMappingInput['fixedValues'], transformations });
     expect(mocked.persist).toHaveBeenCalledWith(expect.arrayContaining([expect.objectContaining({ normalizedJson: expect.objectContaining({ settlementCurrencyCode: 'EUR' }) })]));
   });
 
@@ -361,7 +429,7 @@ describe('portfolio csv column mapping confirmation service', () => {
     mocked.findOne.mockResolvedValue(null);
 
     const { default: service } = await import('../portfolio-csv-column-mapping.service');
-    await service.confirmColumnMapping({ ...input, columnMapping: { assetName: 'Asset', currency: 'Currency', quantity: 'Qty', totalAmount: 'Total', transactionDate: 'Date' } as unknown as ConfirmPortfolioColumnMappingInput['columnMapping'], fixedValues: { transactionType: 'BUY' } as unknown as ConfirmPortfolioColumnMappingInput['fixedValues'], transformations });
+    await service.confirmColumnMapping({ ...input, columnMapping: { assetName: 'Asset', currency: 'Currency', quantity: 'Qty', totalAmount: 'Total', transactionDate: 'Date' }, fixedValues: { transactionType: 'BUY' } as unknown as ConfirmPortfolioColumnMappingInput['fixedValues'], transformations });
     expect(mocked.persist).toHaveBeenCalledWith(expect.arrayContaining([expect.objectContaining({ normalizedJson: expect.objectContaining({ transactionType: 'BUY' }) })]));
   });
 
@@ -373,7 +441,7 @@ describe('portfolio csv column mapping confirmation service', () => {
     mocked.findOne.mockResolvedValue(null);
 
     const { default: service } = await import('../portfolio-csv-column-mapping.service');
-    await service.confirmColumnMapping({ ...input, columnMapping: { assetName: 'Asset', currency: 'Currency', quantity: 'Qty', totalAmount: 'Total', transactionDate: 'Date' } as unknown as ConfirmPortfolioColumnMappingInput['columnMapping'], derivedValues: { transactionType: 'totalAmountSign' } as unknown as ConfirmPortfolioColumnMappingInput['derivedValues'], transformations });
+    await service.confirmColumnMapping({ ...input, columnMapping: { assetName: 'Asset', currency: 'Currency', quantity: 'Qty', totalAmount: 'Total', transactionDate: 'Date' }, derivedValues: { transactionType: 'totalAmountSign' } as unknown as ConfirmPortfolioColumnMappingInput['derivedValues'], transformations });
     expect(mocked.persist).toHaveBeenCalledWith(expect.arrayContaining([expect.objectContaining({ normalizedJson: expect.objectContaining({ transactionType: 'BUY' }) })]));
   });
 
@@ -385,7 +453,7 @@ describe('portfolio csv column mapping confirmation service', () => {
     mocked.findOne.mockResolvedValue(null);
 
     const { default: service } = await import('../portfolio-csv-column-mapping.service');
-    await service.confirmColumnMapping({ ...input, columnMapping: { ...input.columnMapping, externalTransactionId: undefined } as unknown as ConfirmPortfolioColumnMappingInput['columnMapping'], transformations: { dateFormat: 'yyyyMMdd', decimalSeparator: ',', negativeAmountMeansBuy: true, thousandsSeparator: '.' } as PortfolioColumnMappingTransformations });
+    await service.confirmColumnMapping({ ...input, columnMapping: { ...input.columnMapping, externalTransactionId: undefined }, transformations: { dateFormat: 'yyyyMMdd', decimalSeparator: ',', negativeAmountMeansBuy: true, thousandsSeparator: '.' } });
     expect(mocked.persist).toHaveBeenCalledWith(expect.arrayContaining([expect.objectContaining({ normalizedJson: expect.objectContaining({ date: '2025-01-31T00:00:00.000Z' }) })]));
   });
 
@@ -397,7 +465,7 @@ describe('portfolio csv column mapping confirmation service', () => {
     mocked.findOne.mockResolvedValue(null);
 
     const { default: service } = await import('../portfolio-csv-column-mapping.service');
-    await service.confirmColumnMapping({ ...input, columnMapping: { ...input.columnMapping, externalTransactionId: undefined } as unknown as ConfirmPortfolioColumnMappingInput['columnMapping'], transformations: { dateFormat: 'yyyy-MM-dd', decimalSeparator: ',', negativeAmountMeansBuy: true, thousandsSeparator: '.' } as PortfolioColumnMappingTransformations });
+    await service.confirmColumnMapping({ ...input, columnMapping: { ...input.columnMapping, externalTransactionId: undefined }, transformations: { dateFormat: 'yyyy-MM-dd', decimalSeparator: ',', negativeAmountMeansBuy: true, thousandsSeparator: '.' } });
     expect(mocked.persist).toHaveBeenCalledWith(expect.arrayContaining([expect.objectContaining({ normalizedJson: expect.objectContaining({ unitPrice: 617.28 }) })]));
   });
 
@@ -409,7 +477,7 @@ describe('portfolio csv column mapping confirmation service', () => {
     mocked.findOne.mockResolvedValue(null);
 
     const { default: service } = await import('../portfolio-csv-column-mapping.service');
-    await service.confirmColumnMapping({ ...input, columnMapping: { assetName: 'Asset', currency: 'Currency', quantity: 'Qty', totalAmount: 'Total', transactionDate: 'Date', unitPrice: 'UnitPrice' } as unknown as ConfirmPortfolioColumnMappingInput['columnMapping'], transformations });
+    await service.confirmColumnMapping({ ...input, columnMapping: { assetName: 'Asset', currency: 'Currency', quantity: 'Qty', totalAmount: 'Total', transactionDate: 'Date', unitPrice: 'UnitPrice' }, transformations });
     expect(mocked.persist).toHaveBeenCalledWith(expect.arrayContaining([expect.objectContaining({ normalizedJson: expect.objectContaining({ unitPrice: 10 }) })]));
   });
 
@@ -421,7 +489,7 @@ describe('portfolio csv column mapping confirmation service', () => {
     mocked.findOne.mockResolvedValue(null);
 
     const { default: service } = await import('../portfolio-csv-column-mapping.service');
-    await expect(service.confirmColumnMapping({ ...input, columnMapping: { ...input.columnMapping, externalTransactionId: undefined } as unknown as ConfirmPortfolioColumnMappingInput['columnMapping'] })).resolves.toMatchObject({ invalidRows: 3 });
+    await expect(service.confirmColumnMapping({ ...input, columnMapping: { ...input.columnMapping, externalTransactionId: undefined } })).resolves.toMatchObject({ invalidRows: 3 });
     expect(mocked.persist).toHaveBeenCalledWith(expect.arrayContaining([expect.objectContaining({ status: 'invalid' })]));
   });
 
@@ -448,7 +516,7 @@ describe('portfolio csv column mapping confirmation service', () => {
     mocked.findOne.mockResolvedValue(null);
 
     const { default: service } = await import('../portfolio-csv-column-mapping.service');
-    await expect(service.confirmColumnMapping({ ...input, columnMapping: { ...input.columnMapping, externalTransactionId: undefined } as unknown as ConfirmPortfolioColumnMappingInput['columnMapping'], transformations: { dateFormat: 'dd/MM/yyyy', decimalSeparator: ',', negativeAmountMeansBuy: true, thousandsSeparator: '.' } as PortfolioColumnMappingTransformations })).resolves.toMatchObject({ invalidRows: 1 });
+    await expect(service.confirmColumnMapping({ ...input, columnMapping: { ...input.columnMapping, externalTransactionId: undefined }, transformations: { dateFormat: 'dd/MM/yyyy', decimalSeparator: ',', negativeAmountMeansBuy: true, thousandsSeparator: '.' } })).resolves.toMatchObject({ invalidRows: 1 });
     expect(mocked.sentryCaptureMessage).toHaveBeenCalledTimes(1);
   });
 
@@ -460,7 +528,7 @@ describe('portfolio csv column mapping confirmation service', () => {
     mocked.findOne.mockResolvedValue(null);
 
     const { default: service } = await import('../portfolio-csv-column-mapping.service');
-    await expect(service.confirmColumnMapping({ ...input, columnMapping: { ...input.columnMapping, externalTransactionId: undefined } as unknown as ConfirmPortfolioColumnMappingInput['columnMapping'], transformations: { decimalSeparator: ',', negativeAmountMeansBuy: true, thousandsSeparator: '.' } as PortfolioColumnMappingTransformations })).resolves.toMatchObject({ invalidRows: 1 });
+    await expect(service.confirmColumnMapping({ ...input, columnMapping: { ...input.columnMapping, externalTransactionId: undefined }, transformations: { decimalSeparator: ',', negativeAmountMeansBuy: true, thousandsSeparator: '.' } })).resolves.toMatchObject({ invalidRows: 1 });
   });
 
   it('marks invalid rows and partial session', async () => {
@@ -471,7 +539,7 @@ describe('portfolio csv column mapping confirmation service', () => {
     mocked.findOne.mockResolvedValue(null);
 
     const { default: service } = await import('../portfolio-csv-column-mapping.service');
-    await expect(service.confirmColumnMapping({ ...input, columnMapping: { ...input.columnMapping, externalTransactionId: undefined } as unknown as ConfirmPortfolioColumnMappingInput['columnMapping'] })).resolves.toMatchObject({ invalidRows: 1, status: 'partial' });
+    await expect(service.confirmColumnMapping({ ...input, columnMapping: { ...input.columnMapping, externalTransactionId: undefined } })).resolves.toMatchObject({ invalidRows: 1, status: 'partial' });
     expect(mocked.persist).toHaveBeenCalledWith(expect.arrayContaining([expect.objectContaining({ failureReason: expect.any(String), status: 'invalid' })]));
   });
 
@@ -483,7 +551,7 @@ describe('portfolio csv column mapping confirmation service', () => {
     mocked.findOne.mockResolvedValue(null);
 
     const { default: service } = await import('../portfolio-csv-column-mapping.service');
-    await service.confirmColumnMapping({ ...input, columnMapping: { ...input.columnMapping, externalTransactionId: undefined } as unknown as ConfirmPortfolioColumnMappingInput['columnMapping'] });
+    await service.confirmColumnMapping({ ...input, columnMapping: { ...input.columnMapping, externalTransactionId: undefined } });
 
     expect(mocked.recordSpecFailureByKey).toHaveBeenCalledWith({ contentHash: 'confirmed-hash', parserSpecKey: 77 });
   });
@@ -520,7 +588,7 @@ describe('portfolio csv column mapping confirmation service', () => {
     mocked.findOne.mockResolvedValue(null);
 
     const { default: service } = await import('../portfolio-csv-column-mapping.service');
-    await service.confirmColumnMapping({ ...input, columnMapping: { ...input.columnMapping, externalTransactionId: undefined } as unknown as ConfirmPortfolioColumnMappingInput['columnMapping'], transformations: { dateFormat: 'yyyy-MM-dd', decimalSeparator: ',', quantitySignIndicatesDirection: true, thousandsSeparator: '.' } as PortfolioColumnMappingTransformations });
+    await service.confirmColumnMapping({ ...input, columnMapping: { ...input.columnMapping, externalTransactionId: undefined }, transformations: { dateFormat: 'yyyy-MM-dd', decimalSeparator: ',', quantitySignIndicatesDirection: true, thousandsSeparator: '.' } });
     expect(mocked.persist).toHaveBeenCalledWith(expect.arrayContaining([expect.objectContaining({ normalizedJson: expect.objectContaining({ quantity: 2, transactionType: 'SELL' }) })]));
   });
 
@@ -535,7 +603,7 @@ describe('portfolio csv column mapping confirmation service', () => {
     mocked.findOne.mockResolvedValue(null);
 
     const { default: service } = await import('../portfolio-csv-column-mapping.service');
-    await service.confirmColumnMapping({ ...input, columnMapping: { ...input.columnMapping, transactionType: 'Type' } as unknown as ConfirmPortfolioColumnMappingInput['columnMapping'], transformations: { dateFormat: 'yyyy-MM-dd', decimalSeparator: '.', thousandsSeparator: 'none' } as PortfolioColumnMappingTransformations });
+    await service.confirmColumnMapping({ ...input, columnMapping: { ...input.columnMapping, transactionType: 'Type' }, transformations: { dateFormat: 'yyyy-MM-dd', decimalSeparator: '.', thousandsSeparator: 'none' } });
 
     const rows = ((mocked.persist.mock.calls[0]?.[0] as undefined | { normalizedJson?: Record<string, unknown> }[]) ?? []).slice(1);
     expect(rows.map((row) => row.normalizedJson)).toEqual([
@@ -555,7 +623,7 @@ describe('portfolio csv column mapping confirmation service', () => {
     mocked.findOne.mockResolvedValue(null);
 
     const { default: service } = await import('../portfolio-csv-column-mapping.service');
-    await service.confirmColumnMapping({ ...input, derivedValues: { transactionType: 'quantitySign' } as unknown as ConfirmPortfolioColumnMappingInput['derivedValues'], transformations: { dateFormat: 'yyyy-MM-dd', decimalSeparator: '.', thousandsSeparator: 'none' } as PortfolioColumnMappingTransformations });
+    await service.confirmColumnMapping({ ...input, derivedValues: { transactionType: 'quantitySign' } as unknown as ConfirmPortfolioColumnMappingInput['derivedValues'], transformations: { dateFormat: 'yyyy-MM-dd', decimalSeparator: '.', thousandsSeparator: 'none' } });
 
     const rows = ((mocked.persist.mock.calls[0]?.[0] as undefined | { normalizedJson?: Record<string, unknown> }[]) ?? []).slice(1);
     expect(rows.map((row) => row.normalizedJson)).toEqual([
@@ -572,13 +640,13 @@ describe('portfolio csv column mapping confirmation service', () => {
 
     mocked.getOwnedSession.mockResolvedValueOnce(session());
     mocked.parseCsvRows.mockReturnValueOnce([{ Asset: 'ACME', Currency: 'EUR', Date: '2025-01-01', Qty: '-6', Total: '60', Type: 'Sell' }]);
-    await service.confirmColumnMapping({ ...input, columnMapping: { ...input.columnMapping, externalTransactionId: undefined, transactionType: 'Type' } as unknown as ConfirmPortfolioColumnMappingInput['columnMapping'], transformations: { dateFormat: 'yyyy-MM-dd', decimalSeparator: '.', thousandsSeparator: 'none' } as PortfolioColumnMappingTransformations });
+    await service.confirmColumnMapping({ ...input, columnMapping: { ...input.columnMapping, externalTransactionId: undefined, transactionType: 'Type' }, transformations: { dateFormat: 'yyyy-MM-dd', decimalSeparator: '.', thousandsSeparator: 'none' } });
     const explicitRow = (mocked.persist.mock.calls[0]?.[0] as undefined | { internalTransactionId?: string; normalizedJson?: Record<string, unknown> }[])?.[1];
     if (!explicitRow) throw new Error('Expected explicit SELL row');
 
     mocked.getOwnedSession.mockResolvedValueOnce(session());
     mocked.parseCsvRows.mockReturnValueOnce([{ Asset: 'ACME', Currency: 'EUR', Date: '2025-01-01', Qty: '-6', Total: '60' }]);
-    await service.confirmColumnMapping({ ...input, columnMapping: { ...input.columnMapping, externalTransactionId: undefined } as unknown as ConfirmPortfolioColumnMappingInput['columnMapping'], transformations: { dateFormat: 'yyyy-MM-dd', decimalSeparator: '.', quantitySignIndicatesDirection: true, thousandsSeparator: 'none' } as PortfolioColumnMappingTransformations });
+    await service.confirmColumnMapping({ ...input, columnMapping: { ...input.columnMapping, externalTransactionId: undefined }, transformations: { dateFormat: 'yyyy-MM-dd', decimalSeparator: '.', quantitySignIndicatesDirection: true, thousandsSeparator: 'none' } });
     const derivedRow = (mocked.persist.mock.calls[3]?.[0] as undefined | { internalTransactionId?: string; normalizedJson?: Record<string, unknown> }[])?.[1];
     if (!derivedRow) throw new Error('Expected sign-derived SELL row');
 
@@ -601,7 +669,7 @@ describe('portfolio csv column mapping confirmation service', () => {
     mocked.persist.mockImplementation(() => ({ flush: vi.fn().mockResolvedValue(undefined) }));
     mocked.getOwnedSession.mockResolvedValue(session());
     mocked.parseCsvRows.mockReturnValue([{ Asset: 'ACME', Currency: 'EUR', Date: '2025-01-01', Qty: '2', Total: '20' }]);
-    await service.confirmColumnMapping({ ...input, columnMapping: { ...input.columnMapping, externalTransactionId: undefined } as unknown as ConfirmPortfolioColumnMappingInput['columnMapping'] });
+    await service.confirmColumnMapping({ ...input, columnMapping: { ...input.columnMapping, externalTransactionId: undefined } });
     const rowHashId = (mocked.persist.mock.calls[0]![0] as { internalTransactionId: string }[])[1]!.internalTransactionId;
     expect(extId).toMatch(/^portfolio-import:external:/);
     expect(rowHashId).toMatch(/^portfolio-import:row-hash:/);
@@ -616,7 +684,7 @@ describe('portfolio csv column mapping confirmation service', () => {
     mocked.findOne.mockResolvedValue(null);
 
     const { default: service } = await import('../portfolio-csv-column-mapping.service');
-    await service.confirmColumnMapping({ ...input, columnMapping: { ...input.columnMapping, externalTransactionId: undefined } as unknown as ConfirmPortfolioColumnMappingInput['columnMapping'] });
+    await service.confirmColumnMapping({ ...input, columnMapping: { ...input.columnMapping, externalTransactionId: undefined } });
     expect(existing[0]!.deletedAt).toBeInstanceOf(Date);
     expect(mocked.persist).not.toHaveBeenCalledWith(expect.objectContaining({ transactionKey: expect.anything() }));
   });
@@ -649,7 +717,7 @@ describe('portfolio csv column mapping confirmation service', () => {
 
     mocked.getOwnedSession.mockResolvedValue(session({ portfolioImportSessionKey: 12 }));
     mocked.parseCsvRows.mockReturnValue([{ Asset: 'ACME', Currency: 'EUR', Date: '2025-01-01', Qty: 'bad', Total: '20' }]);
-    await service.confirmColumnMapping({ ...input, columnMapping: { ...input.columnMapping, externalTransactionId: undefined } as unknown as ConfirmPortfolioColumnMappingInput['columnMapping'], importSessionId: 12 });
+    await service.confirmColumnMapping({ ...input, columnMapping: { ...input.columnMapping, externalTransactionId: undefined }, importSessionId: 12 });
     expect(mocked.resolveImportSessionAssets).not.toHaveBeenCalled();
   });
 

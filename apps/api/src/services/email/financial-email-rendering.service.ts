@@ -1,6 +1,7 @@
 import { renderBudgetThresholdAlert, renderMonthlyStory, renderWeeklyInsights } from '@wondermoney/react-email';
 import type { BudgetThresholdItem } from '@wondermoney/react-email';
 
+import { instanceName } from '@config/instance-name';
 import { SupportedLanguages } from '@entity/Appuser';
 import type { BudgetThresholdFact, MonthlyStoryFacts, WeeklyInsightFacts } from '@service/budget/aggregation-types';
 import type { RenderedEmailInput, RenderedEmailOutcome } from '@service/email/email';
@@ -69,6 +70,7 @@ export class FinancialEmailRenderingService {
     const locale = intlLocale(input.language);
     const unsubscribeUrl = this.unsubscribeUrl(input.appuserKey);
     const rendered = await this.budgetRenderer({
+      brandName: instanceName(),
       ctaUrl: `${frontendUrl}/${lang}/budgets`,
       firstName: input.firstName,
       items: input.facts.map((fact): BudgetThresholdItem => {
@@ -105,6 +107,7 @@ export class FinancialEmailRenderingService {
     // mirroring renderBudget/BudgetThresholdAlert, which never fires an "on track" alert either.
     const budgetPressureCopy = input.facts.budgetPressure === 'over' || input.facts.budgetPressure === 'near' ? COPY[input.language].budgetPressure[input.facts.budgetPressure] : undefined;
     const rendered = await this.monthlyStoryRenderer({
+      brandName: instanceName(),
       budgetPressureDetail: budgetPressureCopy?.detail,
       budgetPressureStatus: budgetPressureCopy?.status,
       categoryDeltas: input.facts.categoryDeltas.map((delta) => ({
@@ -149,6 +152,7 @@ export class FinancialEmailRenderingService {
     const unsubscribeUrl = this.unsubscribeUrl(input.appuserKey);
     const previousWeekComparison = formatPreviousWeekComparison(input.facts, input.language);
     const rendered = await this.weeklyRenderer({
+      brandName: instanceName(),
       budgetSummary: input.facts.activeBudgetStatus ? { status: input.facts.activeBudgetStatus } : undefined,
       ctaUrl: `${frontendUrl}/${lang}`,
       dataContext: COPY[input.language].dataContext,
@@ -184,6 +188,7 @@ export class FinancialEmailRenderingService {
     const locale = intlLocale(input.language);
     const unsubscribeUrl = this.unsubscribeUrl(input.appuserKey);
     const rendered = await this.monthlyStoryRenderer({
+      brandName: instanceName(),
       ctaUrl: `${frontendUrl}/${lang}/reports`,
       firstName: input.firstName,
       formattedIncomeSubject: input.incomeSubject != null && input.currencyCode ? formatMoney(input.incomeSubject, input.currencyCode, locale) : undefined,
@@ -207,7 +212,7 @@ export class FinancialEmailRenderingService {
   }
 }
 
-export function formatMoney(value: string, currencyCode: string, locale = 'pt-PT') {
+function formatMoney(value: string, currencyCode: string, locale = 'pt-PT') {
   return new Intl.NumberFormat(locale, { currency: currencyCode, currencyDisplay: 'symbol', style: 'currency' }).format(value as unknown as number);
 }
 

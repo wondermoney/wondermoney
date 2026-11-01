@@ -1,7 +1,9 @@
-import type { FilterQuery } from '@mikro-orm/core';
+
+import { sql } from 'kysely';
 
 import { FINANCIAL_TRANSACTION_TYPES } from '@app/constants/financial-transaction-types';
 import { DI } from '@app/database/di';
+import { sqlQuery } from '@app/database/sql';
 import { PortfolioImportSession, PortfolioImportSessionStatus } from '@entity/PortfolioImportSession';
 import type { Enqueue } from '@service/queue/enqueue';
 import s3Service from '@service/storage/s3';
@@ -50,7 +52,7 @@ class PortfolioImportMaintenanceService {
       ],
       deletedAt: undefined,
       status: { $nin: [PortfolioImportSessionStatus.CANCELLED, PortfolioImportSessionStatus.EXPIRED, PortfolioImportSessionStatus.FAILED, PortfolioImportSessionStatus.SUCCEEDED] },
-    } as FilterQuery<PortfolioImportSession>);
+    });
     const staleObjects = stale as StaleSessionLike[];
     for (const session of staleObjects) {
       session.status = PortfolioImportSessionStatus.EXPIRED;
@@ -86,26 +88,20 @@ class PortfolioImportMaintenanceService {
   }
 
   private async getPortfolioBuyAssets(portfolioId: number, em: typeof DI.em): Promise<BuyAssetRow[]> {
-    const result = await em.getKnex().raw(
-      `
+    const { rows } = await sql<BuyAssetRow>`
         SELECT
           ft.financial_asset_key,
           fa.symbol,
           MIN(ft.transaction_date) AS earliest_buy_date
         FROM financial_transaction ft
         INNER JOIN financial_asset fa ON fa.financial_asset_key = ft.financial_asset_key
-        WHERE ft.portfolio_key = ?
+        WHERE ft.portfolio_key = ${portfolioId}
           AND ft.deleted_at IS NULL
-          AND ft.financial_transaction_type_key = ?
+          AND ft.financial_transaction_type_key = ${FINANCIAL_TRANSACTION_TYPES.BUY}
         GROUP BY ft.financial_asset_key, fa.symbol
         ORDER BY ft.financial_asset_key
-      `,
-      [portfolioId, FINANCIAL_TRANSACTION_TYPES.BUY],
-    );
-
-    if (Array.isArray(result)) return result as BuyAssetRow[];
-    const rows = (result as { rows?: BuyAssetRow[] }).rows;
-    return rows ?? [];
+      `.execute(sqlQuery(em));
+    return rows;
   }
 }
 

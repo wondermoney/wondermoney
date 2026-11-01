@@ -24,7 +24,7 @@ describe('buildNetWorthHistoryCsv', () => {
 });
 
 /**
- * RAD-565 — `fromDate` arrives as an instant (clients serialise through
+ * `fromDate` arrives as an instant (clients serialise through
  * `toISOString()`), but a history point is a floating `YYYY-MM-DD` calendar
  * month. Reading the instant's month in UTC let a point from the month *before*
  * the selected period clear the filter.
@@ -32,7 +32,7 @@ describe('buildNetWorthHistoryCsv', () => {
 describe('getNetWorthHistoryReport period filtering', () => {
   const makeInput = (overrides: Partial<ReportFilters> = {}): ReportServiceInput =>
     ({
-      filters: { includePending: false, includeTransfers: false, timezone: REPORT_DEFAULT_TIME_ZONE, ...overrides } as ReportFilters,
+      filters: { includePending: false, includeTransfers: false, timezone: REPORT_DEFAULT_TIME_ZONE, ...overrides },
       tenant: { tenantKey: 113 },
       user: { appuserKey: 71 },
     }) as unknown as ReportServiceInput;
@@ -49,7 +49,7 @@ describe('getNetWorthHistoryReport period filtering', () => {
 
   it('drops the previous month when a UTC+1 caller selects August', async () => {
     // Lisbon local midnight on 1 August 2026 is 31 July 23:00 UTC. Read in UTC
-    // that is July, so the July point used to survive a filter for August.
+    // that is July, so the July point would survive a filter for August.
     givenPoints('2026-07-01', '2026-08-01');
 
     const rows = await getNetWorthHistoryReport(makeInput({ fromDate: '2026-07-31T23:00:00.000Z', timezone: 'Europe/Lisbon' }));

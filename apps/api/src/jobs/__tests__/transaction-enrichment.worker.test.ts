@@ -58,8 +58,8 @@ function enrichmentRow(overrides: Record<string, unknown> = {}) {
 
 /**
  * The category the model suggested, resolved by the worker before it applies
- * anything so it can refuse to write the uninformative system `OTHER`
- * (RAD-584). Defaults to an ordinary, applicable category.
+ * anything so it can refuse to write the uninformative system `OTHER`.
+ * Defaults to an ordinary, applicable category.
  */
 function suggestedCategory(overrides: Record<string, unknown> = {}) {
   return { categoryKey: 12, isSystemCategory: true, name: 'GROCERIES', ...overrides };
@@ -237,9 +237,8 @@ describe('handleTransactionEnrichmentGptJob', () => {
     expect(transaction.categorizationConfidence).toBe(CategorizationConfidence.NONE);
   });
 
-  // RAD-584: `OTHER` was 45% of every suggestion the model has made and 89 of
-  // them were applied. It conveys nothing and marks the transaction categorised,
-  // so it drops off the needs-attention surfaces. Never write it.
+  // `OTHER` is the model's most common suggestion by far. It conveys nothing and marks
+  // the transaction categorised, so it drops off the needs-attention surfaces. Never write it.
   it('never applies the OTHER system category, even above the write threshold', async () => {
     const row = enrichmentRow();
     const transaction = transactionRow();
@@ -349,7 +348,7 @@ describe('handleTransactionEnrichmentGptJob', () => {
     expect(logged).not.toContain('ACME STORE');
   });
 
-  describe('candidate category personalization (RAD-425 Slice 2)', () => {
+  describe('candidate category personalization', () => {
     it("ranks candidates by the user's own correction-vote counts when enough personal history exists", async () => {
       const row = enrichmentRow();
       const transaction = transactionRow();

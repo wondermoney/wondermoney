@@ -55,7 +55,7 @@ const invalidHolding = {
 describe('portfolio endpoint contracts', () => {
   it('uses the five exact read paths and fixed YTD query', () => {
     expect(createPortfolioEndpoint(7).path).toBe('/v1/portfolio/7')
-    expect(createPortfolioDashboardEndpoint(7).path).toBe('/v1/portfolio/7/dashboard?period=YTD')
+    expect(createPortfolioDashboardEndpoint(7).path).toBe('/v1/portfolio/7/dashboard?period=YTD&include=feeConversion')
     expect(createPortfolioHoldingsEndpoint(7).path).toBe('/v1/portfolio/7/holdings')
     expect(createPortfolioDividendIncomeEndpoint(7).path).toBe('/v1/portfolio/7/dividend-income')
     expect(() => createPortfolioDividendIncomeEndpoint(0)).toThrow()
@@ -64,7 +64,7 @@ describe('portfolio endpoint contracts', () => {
     expect(parsePortfolioId(['7'])).toBeNull()
   })
 
-  it('keeps create and settings to strict, non-destructive contracts', () => {
+  it('keeps create and settings writes strict and non-destructive', () => {
     expect(portfolioCurrenciesEndpoint).toMatchObject({ method: 'GET', path: '/v1/account/currencies' })
     expect(createPortfolioWriteEndpoint).toMatchObject({ method: 'POST', path: '/v1/portfolio', successStatuses: [201] })
     expect(createPortfolioSettingsEndpoint(7)).toMatchObject({ method: 'PUT', path: '/v1/portfolio/7', successStatuses: [200] })
@@ -73,7 +73,7 @@ describe('portfolio endpoint contracts', () => {
     expect(portfolioCreateWriteSchema.safeParse({ name: 'x'.repeat(256), currencyId: 151 }).success).toBe(false)
     expect(portfolioCreateWriteSchema.safeParse({ name: 'Fund', currencyId: 0 }).success).toBe(false)
     expect(portfolioCurrenciesResponseSchema.safeParse({ currencies: [{ currencyKey: 151, code: 'EUR', description: 'Euro' }] }).success).toBe(true)
-    expect(portfolioCurrenciesResponseSchema.safeParse({ currencies: [{ currencyKey: 151, code: 'EUR', description: 'Euro', broker: true }] }).success).toBe(false)
+    expect(portfolioCurrenciesResponseSchema.parse({ currencies: [{ currencyKey: 151, code: 'EUR', description: 'Euro', broker: true }] })).toEqual({ currencies: [{ currencyKey: 151, code: 'EUR', description: 'Euro' }] })
     expect(portfolioSettingsWriteSchema.parse({ name: '  Renamed ', description: null })).toEqual({ name: 'Renamed', description: null })
     expect(portfolioSettingsWriteSchema.parse({ benchmarkSymbol: '  SPY  ' })).toEqual({ benchmarkSymbol: 'SPY' })
     expect(portfolioSettingsWriteSchema.parse({ excluded: true })).toEqual({ excluded: true })
@@ -97,7 +97,7 @@ describe('portfolio endpoint contracts', () => {
     expect(() => createPortfolioPerformanceEndpoint(0, 'YTD')).toThrow()
   })
 
-  it('parses a full performance response and rejects unrecognized fields', () => {
+  it('parses a full performance response and strips fields the API adds', () => {
     const response = {
       dataPoints: [{ date: '2026-07-01', value: 1000 }],
       normalizedDataPoints: [{ date: '2026-07-01', value: 0 }],
@@ -112,7 +112,9 @@ describe('portfolio endpoint contracts', () => {
     }
     expect(portfolioPerformanceResponseSchema.parse(response)).toEqual(response)
     expect(portfolioPerformanceResponseSchema.safeParse({ dataPoints: [], minDataPointsForComparison: 2, period: 'YTD' }).success).toBe(true)
-    expect(portfolioPerformanceResponseSchema.safeParse({ ...response, extra: true }).success).toBe(false)
+    expect(portfolioPerformanceResponseSchema.parse({ ...response, extra: true })).toEqual(response)
+    const unknownStatuses = portfolioPerformanceResponseSchema.parse({ ...response, benchmarkStatus: 'rebasing', portfolioHistoryStatus: 'backfilling' })
+    expect(unknownStatuses).toMatchObject({ benchmarkStatus: 'unknown', portfolioHistoryStatus: null })
     expect(portfolioPerformanceResponseSchema.safeParse({ ...response, dataPoints: [{ date: '2026/07/01', value: 1000 }] }).success).toBe(false)
   })
 
@@ -130,10 +132,28 @@ describe('portfolio endpoint contracts', () => {
     expect(portfolioHoldingsResponseSchema.safeParse({ holdings: [{ ...invalidHolding, unrealizedGains: 0 }] }).success).toBe(false)
   })
 
-  it('rejects unknown fields and ratio-shaped period labels', () => {
+  it('keeps parsing holdings when the API adds fields or an invalid reason this build does not know', () => {
+    const parsed = portfolioHoldingsResponseSchema.parse({ holdings: [{ ...invalidHolding, invalidReason: 'MISSING_PRICE', sector: 'Tech' }] }).holdings[0]
+    expect(parsed).toMatchObject({ isInvalid: true, invalidReason: 'MISSING_PRICE' })
+    expect(parsed).not.toHaveProperty('sector')
+  })
+
+  it('reads an activity item type this build does not know as a transaction row', () => {
+    const parsed = portfolioActivityResponseSchema.parse({ transactions: [{ itemType: 'CORPORATE_ACTION', transactionKey: 9, transactionDate: '2026-07-18T00:00:00.000Z', extra: 1 }] }).transactions[0]
+    expect(parsed).toMatchObject({ itemType: 'TRANSACTION', transactionKey: 9 })
+    expect(parsed).not.toHaveProperty('extra')
+  })
+
+  it('accepts a holding flagged for a fee that could not be converted', () => {
+    const flagged = { ...invalidHolding, feeConversionIncomplete: true }
+    expect(portfolioHoldingsResponseSchema.parse({ holdings: [flagged] }).holdings[0]?.feeConversionIncomplete).toBe(true)
+    expect(portfolioHoldingsResponseSchema.parse({ holdings: [invalidHolding] }).holdings[0]?.feeConversionIncomplete).toBeUndefined()
+  })
+
+  it('strips fields the API adds and rejects ratio-shaped period labels', () => {
     const summary = { assetCount: 1, currency: 'EUR', lastUpdated: '2026-07-19T10:00:00.000Z', periodLabel: 'YTD', periodReturn: 12.4, portfolioCount: 1, realizedGains: 0, totalGainLoss: 4, totalGainLossPercent: 2, totalValue: 204, unrealizedGains: 4 }
     expect(aggregateDashboardResponseSchema.safeParse({ portfolios: [], summary }).success).toBe(true)
-    expect(aggregateDashboardResponseSchema.safeParse({ portfolios: [], summary: { ...summary, extra: true } }).success).toBe(false)
+    expect(aggregateDashboardResponseSchema.parse({ portfolios: [], summary: { ...summary, extra: true } }).summary).toEqual(summary)
     expect(aggregateDashboardResponseSchema.safeParse({ portfolios: [], summary: { ...summary, periodLabel: 'ALL' } }).success).toBe(false)
   })
 
@@ -187,7 +207,7 @@ describe('portfolio endpoint contracts', () => {
     expect(parsePortfolioActivityFilters(['2026-07-01T00:00:00.000Z'], undefined)).toBeNull()
   })
 
-  it('keeps stable analytics contracts strict and nullable risk explicit', () => {
+  it('keeps analytics contracts tolerant of additions and nullable risk explicit', () => {
     const allocation = portfolioAllocationResponseSchema.parse({
       byType: [{ percentage: 12.5, type: 'Stock', value: 100 }],
       byAssetClass: [{ percentage: 12.5, type: 'Equities', value: 100 }],
@@ -200,7 +220,10 @@ describe('portfolio endpoint contracts', () => {
     expect(portfolioDividendIncomeResponseSchema.parse({ byAsset: [{ financialAssetKey: 8, symbol: 'AAPL', totalDividends: 4 }], totalDividends: 4 }).totalDividends).toBe(4)
     const response = { metrics: { annualYield: null, assetAllocation: {}, currentValue: 100, maxDrawdown: null, readiness: { allocation: { status: 'ready' }, holdings: { status: 'ready' }, performance: { status: 'insufficient_history' }, riskMetrics: { status: 'insufficient_history' } }, riskLevel: null, sharpeRatio: null, totalReturn: 0, volatility: null } }
     expect(portfolioMetricsResponseSchema.parse(response).metrics.riskLevel).toBeNull()
-    expect(portfolioMetricsResponseSchema.safeParse({ ...response, metrics: { ...response.metrics, extra: true } }).success).toBe(false)
+    expect(portfolioMetricsResponseSchema.parse({ ...response, metrics: { ...response.metrics, extra: true } })).toEqual(response)
+    const unknown = portfolioMetricsResponseSchema.parse({ metrics: { ...response.metrics, riskLevel: 'Extreme', readiness: { allocation: { status: 'stale' }, holdings: { status: 'ready' }, performance: { status: 'backfilling' }, riskMetrics: { status: 'backfilling' } } } }).metrics
+    expect(unknown.riskLevel).toBeNull()
+    expect(unknown.readiness).toEqual({ allocation: { status: 'unknown' }, holdings: { status: 'ready' }, performance: { status: 'insufficient_history' }, riskMetrics: { status: 'insufficient_history' } })
   })
 
   it('pins the transaction DELETE to a bodiless 204 contract and rejects invalid ids', () => {

@@ -6,6 +6,7 @@ import { RecurringSeries } from '@entity/RecurringSeries';
 import type { InstantRange } from '@service/budget/aggregation-periods';
 import type { MonthlyStoryRecurringChange } from '@service/budget/aggregation-types';
 import { RecurringSeriesStatus } from '@service/recurring/recurring-types';
+import { NOT_EXPIRED_TRANSACTION } from '@service/transaction/transaction-status';
 
 // A change is only worth surfacing to the user if it clears both thresholds: a purely
 // relative move (e.g. EUR 0.50 -> EUR 1.00) can be 100% but still noise, and a purely
@@ -49,9 +50,11 @@ export async function computeMonthlyRecurringChanges(
 
   const changes: MonthlyStoryRecurringChange[] = [];
   for (const item of series) {
+    // An occurrence whose transaction later EXPIRED (a retracted charge) never happened, so
+    // it is neither this month's amount nor the previous one. Occurrences with no transaction stay.
     const occurrences = await em.find(
       RecurringOccurrence,
-      { deletedAt: null, recurringSeriesKey: item } as FilterQuery<RecurringOccurrence>,
+      { $or: [{ transactionKey: null }, { transactionKey: NOT_EXPIRED_TRANSACTION }], deletedAt: null, recurringSeriesKey: item },
       { orderBy: { occurrenceDate: 'asc' } },
     );
 

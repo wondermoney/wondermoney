@@ -2,6 +2,7 @@ import { randomUUID } from 'node:crypto';
 
 import type { EntityManager } from '@mikro-orm/core';
 
+import { instanceName } from '@config/instance-name';
 import { Appuser } from '@entity/Appuser';
 import { AppuserTenant, HouseholdRole } from '@entity/AppuserTenant';
 import { HouseholdInvite, HouseholdInviteStatus } from '@entity/HouseholdInvite';
@@ -9,7 +10,7 @@ import { Tenant } from '@entity/Tenant';
 import { sendRenderedEmail } from '@service/email/email';
 import { supportInbox } from '@service/email/email-transport';
 import { FRONTEND_URL } from '@utils/constants';
-import { BadRequestError, ConflictError, NotFoundError } from '@utils/errors';
+import { BadRequestError, ConflictError, ERROR_CODE, NotFoundError } from '@utils/errors';
 import { fireAndForget } from '@utils/fire-and-forget';
 import logger from '@utils/logger';
 
@@ -107,7 +108,7 @@ export async function getInviteForValidation(em: EntityManager, token: string): 
     { deletedAt: undefined, token },
     { populate: ['inviterAppuserKey'] },
   );
-  if (!invite || invite.status !== HouseholdInviteStatus.PENDING) {
+  if (invite?.status !== HouseholdInviteStatus.PENDING) {
     throw new BadRequestError('This invitation is invalid or has already been used.');
   }
   if (invite.expiresAt.getTime() <= Date.now()) {
@@ -160,11 +161,12 @@ function sendInviteEmail(email: string, inviter: Appuser, token: string): void {
   // The subject is plain text (no markup), so it carries the raw label; the HTML body and every
   // attribute value are escaped. The link is built from FRONTEND_URL + a generated hex token,
   // so it carries no caller-controlled input, but it is escaped for uniformity.
-  const subject = `${label} invited you to their WonderMoney household`;
-  const html = `<p>${escapeHtml(label)} invited you to share their household on WonderMoney — both partners, real-time shared finances.</p>`
+  const brand = instanceName();
+  const subject = `${label} invited you to their ${brand} household`;
+  const html = `<p>${escapeHtml(label)} invited you to share their household on ${escapeHtml(brand)} — both partners, real-time shared finances.</p>`
     + `<p><a href="${escapeHtml(link)}">Accept the invitation</a></p>`
     + `<p>This link expires in 7 days. If you weren't expecting this, you can ignore this email.</p>`;
-  const text = `${label} invited you to share their WonderMoney household.\n\nAccept: ${link}\n\nThis link expires in 7 days.`;
+  const text = `${label} invited you to share their ${brand} household.\n\nAccept: ${link}\n\nThis link expires in 7 days.`;
   fireAndForget(sendRenderedEmail({ headers: {}, html, subject, text, to: { email } }), { email, scope: 'household-invite' });
 }
 
@@ -174,17 +176,25 @@ function sendInviteEmail(email: string, inviter: Appuser, token: string): void {
  * Expired tokens are lazily marked EXPIRED.
  */
 export async function validateInviteForSignup(em: EntityManager, token: string, signupEmail: string): Promise<HouseholdInvite> {
+  // Each refusal carries its own code so the signup page can say what went wrong; the status
+  // stays 400, which is all a client from before the codes looked at.
   const invite = await em.getRepository(HouseholdInvite).getByToken(token);
-  if (!invite || invite.status !== HouseholdInviteStatus.PENDING) {
-    throw new BadRequestError('This invitation is invalid or has already been used.');
+  if (invite?.status === HouseholdInviteStatus.ACCEPTED) {
+    throw new BadRequestError('This invitation has already been used.', ERROR_CODE.INVITE_ALREADY_USED);
+  }
+  if (invite?.status === HouseholdInviteStatus.EXPIRED) {
+    throw new BadRequestError('This invitation has expired.', ERROR_CODE.INVITE_EXPIRED);
+  }
+  if (invite?.status !== HouseholdInviteStatus.PENDING) {
+    throw new BadRequestError('This invitation is invalid or has been revoked.', ERROR_CODE.INVITE_INVALID);
   }
   if (invite.expiresAt.getTime() <= Date.now()) {
     invite.status = HouseholdInviteStatus.EXPIRED;
     await em.persist(invite).flush();
-    throw new BadRequestError('This invitation has expired.');
+    throw new BadRequestError('This invitation has expired.', ERROR_CODE.INVITE_EXPIRED);
   }
   if (normalizeEmail(invite.emailAddress) !== normalizeEmail(signupEmail)) {
-    throw new BadRequestError('This invitation was sent to a different email address.');
+    throw new BadRequestError('This invitation was sent to a different email address.', ERROR_CODE.INVITE_EMAIL_MISMATCH);
   }
   return invite;
 }
@@ -193,14 +203,13 @@ export async function validateInviteForSignup(em: EntityManager, token: string, 
 /**
  * Consume a validated invite: claim it, then create the membership.
  *
- * RAD-audit: this was check-then-act. `validateInviteForSignup` confirms the invite is
- * PENDING ~44 lines earlier in `controller/auth.ts`, and this function then created the
- * membership and set ACCEPTED with no transaction, no conditional update and no rowcount
- * check. Two concurrent `/join` submissions of the same token — a double-click, or a client
- * retry — both passed validation and both created a membership, producing a three-member
- * household capped at two. Nothing backstopped it: no constraint counts seats.
+ * `validateInviteForSignup` confirms the invite is PENDING earlier in `controller/auth.ts`, but
+ * that check alone is check-then-act: two concurrent `/join` submissions of the same token — a
+ * double-click, or a client retry — would both pass validation and both create a membership,
+ * producing a three-member household capped at two. Nothing else backstops it: no constraint
+ * counts seats.
  *
- * The invite is now claimed by a conditional UPDATE whose rowcount is the authority — the
+ * So the invite is claimed by a conditional UPDATE whose rowcount is the authority — the
  * same single-writer pattern used for the lifecycle email claims. The claim and the
  * membership insert share one transaction, so a failure to create the membership releases
  * the invite rather than burning it.
@@ -217,14 +226,14 @@ export async function consumeInvite(em: EntityManager, invite: HouseholdInvite, 
       { acceptedAt: new Date(), status: HouseholdInviteStatus.ACCEPTED },
     );
     if (claimed !== 1) {
-      throw new ConflictError('This invite has already been used.');
+      throw new ConflictError('This invite has already been used.', ERROR_CODE.INVITE_ALREADY_USED);
     }
 
     // Re-check the seat cap inside the transaction. The pre-signup check in
     // `createHouseholdInvite` counts pending invites, but seats can also be taken by a
     // membership created since — so the authoritative check belongs here, next to the write.
     if (await seatsTaken(tx, tenant) >= HOUSEHOLD_MAX_MEMBERS) {
-      throw new ConflictError('This household is already full.');
+      throw new ConflictError('This household is already full.', ERROR_CODE.HOUSEHOLD_FULL);
     }
 
     await tx.getRepository(AppuserTenant).createAppuserTenant(newMember, tenant, HouseholdRole.MEMBER);
@@ -243,7 +252,7 @@ export function notifyExistingUserInviteAttempt(email: string, existingAppuserKe
     logger.info({ existingAppuserKey }, 'Existing user tried to accept a household invite; SUPPORT_EMAIL is not set, so no alert was emailed');
     return;
   }
-  const html = `<p>An existing WonderMoney user tried to accept a household invite (not yet supported).</p>`
+  const html = `<p>An existing ${escapeHtml(instanceName())} user tried to accept a household invite (not yet supported).</p>`
     + `<p>Email: ${escapeHtml(email)} · appuserKey: ${existingAppuserKey}</p>`;
   fireAndForget(
     sendRenderedEmail({

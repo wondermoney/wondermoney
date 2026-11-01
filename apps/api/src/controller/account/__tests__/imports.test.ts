@@ -90,6 +90,46 @@ describe('account CSV import authorization', () => {
     expect(status).toHaveBeenCalledWith(202);
   });
 
+  it('presigns a manual account with no financial institution for the generic CSV format', async () => {
+    mocks.findOne.mockResolvedValueOnce({ accountFinancialInstitutionKey: null });
+    mocks.generatePresignedUrlForAccountCsv.mockResolvedValueOnce({ key: 'account-41-generic-id.csv', presignedUrl: 'https://example.test/upload' });
+    const json = vi.fn();
+    const next = vi.fn();
+
+    await getS3PresignedUrlForCsvUpload(makeRequest(), { json } as unknown as Response, next);
+
+    expect(next).not.toHaveBeenCalled();
+    expect(json).toHaveBeenCalledWith({ csvImportFormat: 'generic', isSupportedBank: false, key: 'account-41-generic-id.csv', presignedUrl: 'https://example.test/upload' });
+  });
+
+  it('presigns a supported bank account for its statement export', async () => {
+    mocks.findOne.mockResolvedValueOnce({ accountFinancialInstitutionKey: { name: 'Millennium BCP' } });
+    mocks.generatePresignedUrlForAccountCsv.mockResolvedValueOnce({ key: 'account-41-Millennium BCP-id.csv', presignedUrl: 'https://example.test/upload' });
+    const json = vi.fn();
+
+    await getS3PresignedUrlForCsvUpload(makeRequest(), { json } as unknown as Response, vi.fn());
+
+    expect(json).toHaveBeenCalledWith(expect.objectContaining({ csvImportFormat: 'bank', isSupportedBank: true }));
+  });
+
+  it.each([
+    ['no financial institution', null],
+    ['an unsupported bank', { name: '1822direkt' }],
+  ])('starts a generic CSV import for an account with %s', async (_kind, institution) => {
+    mocks.findOne.mockResolvedValueOnce({ accountFinancialInstitutionKey: institution });
+    mocks.enqueue.mockResolvedValueOnce({ correlationId: 'csv-2', status: 'queued' });
+    const json = vi.fn();
+    const status = vi.fn(() => ({ json }));
+    const next = vi.fn();
+
+    await startAccountCsvImport(makeRequest({ body: { key: 'account-41-generic-id.csv' } }), { status } as unknown as Response, next);
+
+    expect(next).not.toHaveBeenCalled();
+    expect(mocks.enqueue).toHaveBeenCalledWith(expect.objectContaining({ accountKey: 41, bankName: undefined, key: 'account-41-generic-id.csv' }), expect.anything());
+    expect(status).toHaveBeenCalledWith(202);
+    expect(json).toHaveBeenCalledWith({ correlationId: 'csv-2', status: 'queued' });
+  });
+
   it.each([
     ['partner/shared', 51],
     ['foreign-tenant', 52],

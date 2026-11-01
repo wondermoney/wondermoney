@@ -1,10 +1,11 @@
 "use client";
 
 import { Plus } from "lucide-react";
-import { useLocale, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
 
 import { Button } from "@/components/ui/button";
 import { PreviewBadge } from "@/components/ui/PreviewBadge";
+import { useFormatCurrency } from "@/lib/utils/useFormatCurrency";
 
 // These were pre-formatted strings ("2,400") with no currency, so the preview
 // showed bare numbers where the real product shows €2,400.00. Numbers now,
@@ -39,13 +40,11 @@ export default function GoalsEmptyState({
   onCreateGoal: () => void;
 }) {
   const t = useTranslations();
-  const locale = useLocale();
+  const formatCurrency = useFormatCurrency();
 
-  const fmt = (value: number) =>
-    `\u20ac${value.toLocaleString(locale, {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    })}`;
+  // The euro sign was glued on in front, so /pt read "€2.400,00" instead of
+  // "2400,00 €". The locale decides where the symbol goes.
+  const fmt = (value: number) => formatCurrency(value, "EUR");
 
   return (
     <div className="flex max-w-2xl flex-col gap-6">
@@ -61,7 +60,7 @@ export default function GoalsEmptyState({
         </p>
       </div>
 
-      <div className="border-border bg-card rounded-xl border p-4 shadow-sm sm:p-5">
+      <div className="border-border bg-card rounded-lg border p-4 sm:p-5">
         <div className="mb-4 flex items-center justify-between gap-3">
           <h3 className="text-foreground text-sm font-medium">
             {t("goals.title")}

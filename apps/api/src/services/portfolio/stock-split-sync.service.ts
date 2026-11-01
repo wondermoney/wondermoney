@@ -2,6 +2,7 @@ import { type RequiredEntityData, UniqueConstraintViolationException } from '@mi
 
 import { DI } from '@app/app';
 import { FINANCIAL_TRANSACTION_TYPES } from '@app/constants/financial-transaction-types';
+import { sqlQuery } from '@app/database/sql';
 import { FinancialAsset } from '@entity/FinancialAsset';
 import { FINANCIAL_ASSET_STOCK_ADJUSTMENT_TYPES } from '@entity/FinancialAssetStockAdjustment';
 import { FinancialAssetStockAdjustment } from '@entity/FinancialAssetStockAdjustment';
@@ -99,18 +100,18 @@ function parseSplitRatio(split: string): null | { denominator: number; numerator
 
 async function refreshAffectedPortfolioSnapshots(assetKey: number, earliestInsertedSplitDate: Date, em: typeof DI.em): Promise<void> {
   try {
-    const knex = em.getKnex();
-    const affectedRows = (await knex('financial_transaction')
-      .select('financial_transaction.portfolio_key')
-      .min('financial_transaction.transaction_date as earliest_transaction_date')
+    const affectedRows = (await sqlQuery(em)
+      .selectFrom('financial_transaction')
       .innerJoin('portfolio', 'portfolio.portfolio_key', 'financial_transaction.portfolio_key')
-      .where('financial_transaction.financial_asset_key', assetKey)
-      .whereIn('financial_transaction.financial_transaction_type_key', [FINANCIAL_TRANSACTION_TYPES.BUY, FINANCIAL_TRANSACTION_TYPES.SELL])
-      .whereNotNull('financial_transaction.portfolio_key')
-      .whereNotNull('financial_transaction.transaction_date')
-      .whereNull('financial_transaction.deleted_at')
-      .whereNull('portfolio.deleted_at')
-      .groupBy('financial_transaction.portfolio_key')) as { earliest_transaction_date: Date | string; portfolio_key: number }[];
+      .select((eb) => ['financial_transaction.portfolio_key', eb.fn.min('financial_transaction.transaction_date').as('earliest_transaction_date')])
+      .where('financial_transaction.financial_asset_key', '=', assetKey)
+      .where('financial_transaction.financial_transaction_type_key', 'in', [FINANCIAL_TRANSACTION_TYPES.BUY, FINANCIAL_TRANSACTION_TYPES.SELL])
+      .where('financial_transaction.portfolio_key', 'is not', null)
+      .where('financial_transaction.transaction_date', 'is not', null)
+      .where('financial_transaction.deleted_at', 'is', null)
+      .where('portfolio.deleted_at', 'is', null)
+      .groupBy('financial_transaction.portfolio_key')
+      .execute()) as { earliest_transaction_date: Date | string; portfolio_key: number }[];
 
     for (const row of affectedRows) {
       const replayFromDate = minDate(parseDate(row.earliest_transaction_date), earliestInsertedSplitDate);
@@ -196,4 +197,3 @@ async function syncStockSplits(financialAsset: FinancialAsset): Promise<{ insert
   return { inserted };
 }
 
-export default { syncStockSplitsForAsset, syncStockSplitsForSymbol };

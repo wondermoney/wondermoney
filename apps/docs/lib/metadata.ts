@@ -31,7 +31,7 @@ export function homePath(locale: Locale): string {
   return `/${locale}`;
 }
 
-export function languageAlternates(pathForLocale: (locale: Locale) => string) {
+function languageAlternates(pathForLocale: (locale: Locale) => string) {
   return Object.fromEntries(locales.map((locale) => [locale, absoluteUrl(pathForLocale(locale))]));
 }
 

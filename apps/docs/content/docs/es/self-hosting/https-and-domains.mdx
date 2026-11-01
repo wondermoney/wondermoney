@@ -28,10 +28,25 @@ APP_URL=https://money.example.com
 API_URL=https://api.money.example.com
 AUTH_COOKIE_DOMAIN=.example.com
 NEXT_PUBLIC_AUTH_COOKIE_DOMAIN=.example.com
+TRUST_PROXY=1
 ```
 
 Después vuelve a ejecutar `docker compose up -d`. El dominio de la cookie permite que la aplicación web lea la sesión que crea la API, porque están en subdominios distintos del mismo dominio.
 
+## Indicar a la API que hay un proxy
+
+La API limita cuántas veces cada visitante puede intentar iniciar sesión, y distingue a los visitantes por su dirección IP. Detrás de un proxy, todas las peticiones llegan desde la dirección del proxy, y la dirección del visitante viene en la cabecera `X-Forwarded-For`. `TRUST_PROXY` indica en cuántos proxies puede confiar la API:
+
+| Configuración | `TRUST_PROXY` |
+|---|---|
+| Sin proxy: los navegadores se conectan directamente al puerto de la API | déjalo vacío |
+| Un proxy inverso (Caddy, nginx, Traefik, un Cloudflare Tunnel) | `1` |
+| El proxy de Cloudflare delante de tu propio proxy inverso | `2` |
+
+En lugar de un número, también puedes indicar las direcciones de los proxies, en una lista separada por comas de direcciones IP o rangos (por ejemplo `172.16.0.0/12`).
+
+Déjalo vacío cuando no hay proxy: si no, cualquiera puede escribir su propio `X-Forwarded-For` y saltarse los límites. Defínelo cuando hay uno: si no, todos comparten la dirección del proxy, y una persona que repite una contraseña incorrecta puede impedir que los demás inicien sesión durante un rato.
+
 ## Mantener los puertos privados
 
-Cuando el proxy se ejecuta en la misma máquina, vincula los puertos publicados a localhost para que los contenedores solo sean accesibles a través del proxy. En el `docker-compose.yml`, usa `127.0.0.1:3000:3000` y `127.0.0.1:3001:3001`.
+Cuando el proxy se ejecuta en la misma máquina, define `BIND_ADDRESS=127.0.0.1` en `.env` y ejecuta `docker compose up -d`. Los puertos publicados (la aplicación web, la API y, si los usas, el almacenamiento y Mailpit) pasan a escuchar solo en localhost, y solo son accesibles a través del proxy.

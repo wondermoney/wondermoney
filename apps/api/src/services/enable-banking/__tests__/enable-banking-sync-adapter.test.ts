@@ -138,7 +138,7 @@ describe('createEnableBankingSyncAdapter', () => {
     });
   });
 
-  describe('transactions (flat status: BOOK|PEND → booked/pending split; field renames)', () => {
+  describe('transactions (flat status → booked/pending split; field renames)', () => {
     it('splits booked and pending, renames fields, maps credit/debit indicator, and joins remittance_information', async () => {
       const raw = {
         transactions: [
@@ -168,7 +168,7 @@ describe('createEnableBankingSyncAdapter', () => {
 
       const result = await adapter.account('acc-1').getTransactions({ dateFrom: '2026-01-01', dateTo: '2026-01-31' });
 
-      expect(result.transactions?.booked).toEqual([{
+      expect(result.transactions?.booked).toEqual([expect.objectContaining({
         bookingDate: '2026-01-01',
         creditDebitIndicator: 'credit',
         creditorName: 'Acme Corp',
@@ -178,18 +178,46 @@ describe('createEnableBankingSyncAdapter', () => {
         transactionAmount: { amount: '100.00', currency: 'EUR' },
         transactionId: 'tx-1',
         valueDate: '2026-01-01',
-      }]);
-      expect(result.transactions?.pending).toEqual([{
+      })]);
+      expect(result.transactions?.pending).toEqual([expect.objectContaining({
         bookingDate: '2026-01-02',
         creditDebitIndicator: 'debit',
         creditorName: undefined,
         debtorName: undefined,
         entryReference: 'entry-2',
         remittanceInformationUnstructured: undefined,
-        transactionAmount: { amount: '15.50', currency: 'EUR' },
+        transactionAmount: { amount: '-15.50', currency: 'EUR' },
         transactionId: undefined,
         valueDate: undefined,
-      }]);
+      })]);
+    });
+
+    // Enable Banking's `transaction_amount.amount` carries no sign; `credit_debit_indicator`
+    // (CRDT | DBIT) is the direction. The sync stores outflows negative, as every aggregate expects.
+    it.each([
+      ['DBIT', '12.50', '-12.50', 'debit'],
+      ['DBTR', '3', '-3', 'debit'],
+      ['CRDT', '100.00', '100.00', 'credit'],
+      // The indicator wins over any sign a bank might send, so a value is never negated twice.
+      ['DBIT', '-12.50', '-12.50', 'debit'],
+      ['CRDT', '-5.00', '5.00', 'credit'],
+    ])('signs a %s amount of %s as %s', async (indicator, amount, signed, direction) => {
+      const raw = { transactions: [{ credit_debit_indicator: indicator, status: 'BOOK', transaction_amount: { amount, currency: 'EUR' }, transaction_id: 'tx-1' }] };
+      const adapter = createEnableBankingSyncAdapter(connection, { client: client({ transactionPages: [raw] }) as unknown as EnableBankingClient, em: em([]) as unknown as AdapterEm });
+
+      const [row] = (await adapter.account('acc-1').getTransactions({})).transactions?.booked ?? [];
+
+      expect(row?.transactionAmount).toEqual({ amount: signed, currency: 'EUR' });
+      expect(row?.creditDebitIndicator).toBe(direction);
+    });
+
+    it('leaves the amount as sent when the direction is unknown', async () => {
+      const raw = { transactions: [{ status: 'BOOK', transaction_amount: { amount: '7.00', currency: 'EUR' }, transaction_id: 'tx-1' }] };
+      const adapter = createEnableBankingSyncAdapter(connection, { client: client({ transactionPages: [raw] }) as unknown as EnableBankingClient, em: em([]) as unknown as AdapterEm });
+
+      const [row] = (await adapter.account('acc-1').getTransactions({})).transactions?.booked ?? [];
+
+      expect(row?.transactionAmount?.amount).toBe('7.00');
     });
 
     it('exhausts continuation_key pagination internally and returns one complete, already-split result', async () => {
@@ -216,6 +244,47 @@ describe('createEnableBankingSyncAdapter', () => {
       const adapter = createEnableBankingSyncAdapter(connection, { client: infiniteClient as unknown as EnableBankingClient, em: testEm as unknown as AdapterEm });
 
       await expect(adapter.account('acc-1').getTransactions({})).rejects.toThrow(/did not terminate/);
+    });
+
+    // Enable Banking's TransactionStatus (https://enablebanking.com/docs/api/reference/#transactionstatus):
+    // BOOK | CNCL | HOLD | OTHR | PDNG | RJCT | SCHD. Only BOOK has settled; RJCT/CNCL never will.
+    describe('status (TransactionStatus)', () => {
+      const rowWith = (status: string | undefined) => ({ credit_debit_indicator: 'DBIT', status, transaction_amount: { amount: '4.20', currency: 'EUR' }, transaction_id: `tx-${status ?? 'none'}` });
+      async function classify(status: string | undefined) {
+        const adapter = createEnableBankingSyncAdapter(connection, { client: client({ transactionPages: [{ transactions: [rowWith(status)] }] }) as unknown as EnableBankingClient, em: em([]) as unknown as AdapterEm });
+        const { transactions } = await adapter.account('acc-1').getTransactions({});
+        if (transactions?.booked?.length) return 'booked';
+        if (transactions?.pending?.length) return 'pending';
+        if (transactions?.voided?.length) return 'voided';
+        return 'dropped';
+      }
+
+      it.each([
+        ['BOOK', 'booked'],
+        ['PDNG', 'pending'],
+        ['PEND', 'pending'],
+        ['HOLD', 'pending'],
+        ['SCHD', 'pending'],
+        ['OTHR', 'pending'],
+        [undefined, 'pending'],
+        ['RJCT', 'voided'],
+        ['CNCL', 'voided'],
+      ])('treats a %s row as %s', async (status, expected) => {
+        expect(await classify(status)).toBe(expected);
+      });
+
+      it('keeps the provider status on a voided row so the sync can say why it retracted it', async () => {
+        const adapter = createEnableBankingSyncAdapter(connection, { client: client({ transactionPages: [{ transactions: [rowWith('RJCT')] }] }) as unknown as EnableBankingClient, em: em([]) as unknown as AdapterEm });
+        const { transactions } = await adapter.account('acc-1').getTransactions({});
+        expect(transactions?.voided?.[0]).toMatchObject({ providerStatus: 'RJCT', transactionAmount: { amount: '-4.20', currency: 'EUR' }, transactionId: 'tx-RJCT' });
+      });
+
+      it('passes transaction_date through for a pending row that has no booking or value date yet', async () => {
+        const raw = { transactions: [{ credit_debit_indicator: 'DBIT', status: 'PDNG', transaction_amount: { amount: '4.20', currency: 'EUR' }, transaction_date: '2026-03-05', transaction_id: 'tx-1' }] };
+        const adapter = createEnableBankingSyncAdapter(connection, { client: client({ transactionPages: [raw] }) as unknown as EnableBankingClient, em: em([]) as unknown as AdapterEm });
+        const { transactions } = await adapter.account('acc-1').getTransactions({});
+        expect(transactions?.pending?.[0]?.transactionDate).toBe('2026-03-05');
+      });
     });
 
     it('produces a stable transactionId identity for dedup (Enable Banking transaction_id passthrough)', async () => {

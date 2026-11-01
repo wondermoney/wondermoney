@@ -141,10 +141,9 @@ describe('SegmentedControl', () => {
 
     const style = (name: string) => StyleSheet.flatten(view.getByLabelText(name).props.style)
     expect(style('Month').backgroundColor).toBe(palette.primaryWash)
-    // The app previously drew every segment with its own border, which is how
-    // a screen ends up with a row of separate boxes instead of one control —
-    // now there's one shared border around the track (see the `tablist`
-    // element), not a per-segment border color.
+    // A border on every segment makes a row of separate boxes instead of one
+    // control, so there's one shared border around the track (see the
+    // `tablist` element), not a per-segment border color.
     expect(style('30 days').backgroundColor).toBe('transparent')
   })
 

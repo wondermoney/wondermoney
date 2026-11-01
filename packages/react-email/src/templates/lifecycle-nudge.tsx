@@ -7,7 +7,6 @@ import {
   Heading,
   Hr,
   Html,
-  Img,
   Link,
   Preview,
   Section,
@@ -16,15 +15,17 @@ import {
   pixelBasedPreset,
 } from "react-email";
 
+import { BrandFooterLine, BrandHeader, resolveBrandName } from "../components/Brand.js";
+
 import { StepFlow } from "../components/LifecycleVisuals.js";
 import type { LifecycleNudgeEmailProps, TransactionalEmailLanguage } from "../types";
 
 export type { LifecycleNudgeEmailProps } from "../types";
 
 const FOOTER = {
-  en: { note: "You're receiving this as part of your WonderMoney account.", unsubscribe: "Unsubscribe", settings: "Notification settings" },
-  pt: { note: "Recebes este email por teres uma conta WonderMoney.", unsubscribe: "Cancelar subscrição", settings: "Definições de notificações" },
-} as const satisfies Record<TransactionalEmailLanguage, Record<string, string>>;
+  en: { note: (brand: string) => `You're receiving this as part of your ${brand} account.`, unsubscribe: "Unsubscribe", settings: "Notification settings" },
+  pt: { note: (brand: string) => `Recebes este email por teres uma conta ${brand}.`, unsubscribe: "Cancelar subscrição", settings: "Definições de notificações" },
+} as const satisfies Record<TransactionalEmailLanguage, Record<string, unknown>>;
 
 function greetingFor(language: TransactionalEmailLanguage, firstName?: string): string {
   const name = firstName?.trim();
@@ -46,8 +47,10 @@ export default function LifecycleNudgeEmail({
   unsubscribeUrl,
   settingsUrl,
   footerNote,
+  brandName,
 }: LifecycleNudgeEmailProps) {
   const t = FOOTER[language];
+  const brand = resolveBrandName(brandName);
 
   return (
     <Html lang={language}>
@@ -62,13 +65,7 @@ export default function LifecycleNudgeEmail({
         <Body className="m-0 bg-[#f7f8fa] px-[12px] py-[28px] font-sans text-[#111111]">
           <Container className="mx-auto w-full max-w-[600px]">
             <Section className="border-t-[3px] border-solid border-x-0 border-b-0 border-[#7c3aed] bg-white px-[26px] pb-[28px] pt-[22px]">
-              <Img
-                src="https://app.wonder.money/logo.png"
-                width="125"
-                height="46"
-                alt="WonderMoney"
-                className="block h-[46px] w-[125px] object-contain"
-              />
+              <BrandHeader brandName={brand} />
               <Text className="m-0 mt-[24px] font-sans text-[15px] leading-[23px] text-[#374151]">
                 {greetingFor(language, firstName)}
               </Text>
@@ -100,7 +97,7 @@ export default function LifecycleNudgeEmail({
             </Section>
 
             <Section className="px-[20px] pb-[8px] pt-[20px] text-center">
-              <Text className="m-0 font-sans text-[11px] leading-[18px] text-[#6b7280]">{footerNote ?? t.note}</Text>
+              <Text className="m-0 font-sans text-[11px] leading-[18px] text-[#6b7280]">{footerNote ?? t.note(brand)}</Text>
               <Text className="m-0 mt-[5px] font-sans text-[11px] leading-[18px] text-[#6b7280]">
                 <Link href={unsubscribeUrl} className="text-[#6b7280] underline">{t.unsubscribe}</Link>
                 {settingsUrl ? (
@@ -111,9 +108,7 @@ export default function LifecycleNudgeEmail({
                 ) : null}
               </Text>
               <Hr className="my-[15px] border-[#e5e7eb]" />
-              <Text className="m-0 font-sans text-[10px] leading-[16px] text-[#9ca3af]">
-                WonderMoney · Radix Catch, Lda. · Portugal
-              </Text>
+              <BrandFooterLine brandName={brand} />
             </Section>
           </Container>
         </Body>

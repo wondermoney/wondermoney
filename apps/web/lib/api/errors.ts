@@ -3,12 +3,11 @@
  *
  * ## Why this exists
  *
- * Every error the API returns now carries `{ code, message }`. `message` is prose for
+ * Every error the API returns carries `{ code, message }`. `message` is prose for
  * humans and logs; `code` is the stable contract. The distinction is not academic — a
  * 403 covers both "the demo account is read-only" and "only the household owner can do
- * that", and without a code the only way to tell them apart was to read the English
- * sentence. That is how WEB-4Q stayed misdiagnosed for a month as a "session/token race":
- * the reason was in the body all along, but nothing could branch on it.
+ * that", and without a code the only way to tell them apart is to read the English
+ * sentence.
  *
  * Match on `code`. Never on `message` — it is translated, reworded, and not a contract.
  */
@@ -21,13 +20,18 @@ export const API_ERROR_CODE = {
   CONFLICT: "conflict",
   DEMO_READ_ONLY: "demo_read_only",
   FORBIDDEN: "forbidden",
+  HOUSEHOLD_FULL: "household_full",
   HOUSEHOLD_OWNER_REQUIRED: "household_owner_required",
   INTERNAL_ERROR: "internal_error",
+  INVITE_ALREADY_USED: "invite_already_used",
+  INVITE_EMAIL_MISMATCH: "invite_email_mismatch",
+  INVITE_EXPIRED: "invite_expired",
+  INVITE_INVALID: "invite_invalid",
   NOT_FOUND: "not_found",
   /**
    * Grandfathered SCREAMING_CASE, deliberately unlike its neighbours.
-   * `lib/api/rate-limit.ts` has branched on this literal since RAD-547 and the API
-   * keeps emitting it for that reason; normalising it needs a coordinated release.
+   * `lib/api/rate-limit.ts` branches on this literal and the API keeps emitting
+   * it for that reason; normalising it needs a coordinated release.
    */
   RATE_LIMITED: "RATE_LIMITED",
   UNAUTHORIZED: "unauthorized",

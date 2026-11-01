@@ -1,4 +1,7 @@
+import type { Big as BigType } from 'big.js';
+
 import { FINANCIAL_TRANSACTION_TYPES } from '@app/constants/financial-transaction-types';
+import { big } from '@utils/money';
 
 export interface CertificadoAforroHoldingDetail {
   currentRateBps: number;
@@ -17,6 +20,7 @@ export interface CertificadoAforroLotDetail {
 }
 
 export interface HoldingBatch {
+  fee_amount?: number;
   financial_asset_currency_code?: string;
   financial_asset_esg_score?: number | string;
   financial_asset_key: number;
@@ -28,6 +32,7 @@ export interface HoldingBatch {
   portfolio_key: number;
   quantity: number;
   remaining_batch: null | number;
+  remaining_fee_amount?: number;
   transaction_date: Date;
   transaction_key: number;
   unit_appuser_amount?: null | number;
@@ -46,8 +51,9 @@ export type HoldingTimelineItem = HoldingTransactionTimelineItem | StockSplitTim
 export interface HoldingTransactionTimelineItem
   extends Omit<
     HoldingBatch,
-    'financial_transaction_type_key' | 'quantity' | 'remaining_batch' | 'unit_appuser_amount' | 'unit_settlement_amount'
+    'fee_amount' | 'financial_transaction_type_key' | 'quantity' | 'remaining_batch' | 'unit_appuser_amount' | 'unit_settlement_amount'
   > {
+  fee_amount?: null | NumericInput;
   financial_transaction_type_key: NumericInput;
   itemType: 'TRANSACTION';
   quantity: NumericInput;
@@ -71,11 +77,13 @@ export interface PortfolioAsset {
 
 export interface PortfolioHolding extends PortfolioAsset {
   allocation: null | number;
-  /** Populated only for Savings Certificate holdings — per-lot accrual detail for the web accrual panel (RAD-445). */
+  /** Populated only for Savings Certificate holdings — per-lot accrual detail for the web accrual panel. */
   certificadoAforroDetail?: CertificadoAforroHoldingDetail;
   currency: string;
   currentPrice: null | number;
   currentValue: null | number;
+  /** Set only when a fee of this asset had no usable exchange rate and was counted as zero. */
+  feeConversionIncomplete?: boolean;
   invalidReason?: 'NEGATIVE_UNITS';
   isInvalid?: boolean;
   relatedTransactionKeys?: number[];
@@ -106,7 +114,7 @@ export function getPortfolioAssetInvalidKey(portfolioKey: number, financialAsset
  * Recomputes `allocation` across a combined set of holdings (e.g. price-enriched assets plus
  * separately-valued Savings Certificate holdings — see `certificado-aforro-holdings.service.ts`).
  * Must run on the full combined array: computing allocation on a subset understates the total
- * and overstates every other holding's share (RAD-445).
+ * and overstates every other holding's share.
  */
 export function recomputeAllocation(holdings: PortfolioHolding[]): PortfolioHolding[] {
   const total = holdings.reduce((acc, holding) => acc + (holding.currentValue ?? 0), 0);
@@ -118,6 +126,7 @@ export function recomputeAllocation(holdings: PortfolioHolding[]): PortfolioHold
 
 function toHoldingBatch(transaction: HoldingTransactionTimelineItem, quantity: number): HoldingBatch {
   return {
+    fee_amount: transaction.fee_amount == null ? 0 : Math.abs(Number(transaction.fee_amount)),
     financial_asset_currency_code: transaction.financial_asset_currency_code,
     financial_asset_esg_score: transaction.financial_asset_esg_score,
     financial_asset_key: transaction.financial_asset_key,
@@ -129,6 +138,7 @@ function toHoldingBatch(transaction: HoldingTransactionTimelineItem, quantity: n
     portfolio_key: transaction.portfolio_key,
     quantity,
     remaining_batch: quantity,
+    remaining_fee_amount: transaction.fee_amount == null ? 0 : Math.abs(Number(transaction.fee_amount)),
     transaction_date: transaction.transaction_date,
     transaction_key: transaction.transaction_key,
     unit_appuser_amount: transaction.unit_appuser_amount == null ? transaction.unit_appuser_amount : Number(transaction.unit_appuser_amount),
@@ -142,23 +152,24 @@ function toHoldingBatch(transaction: HoldingTransactionTimelineItem, quantity: n
  * Calculates weighted average buy price from remaining FIFO lots.
  */
 export function aggregateBatchesIntoAssets(batches: HoldingBatch[]): PortfolioAsset[] {
+  const totalBasisByAsset = new Map<number, BigType>();
   return batches
     .filter((t) => t.remaining_batch != null && t.remaining_batch > 0) // Only lots with remaining quantity
     .reduce<PortfolioAsset[]>((acc, cur) => {
       const existingAssetKey = acc.find((x) => x.financialAssetKey === cur.financial_asset_key);
       const unitAmount = cur.unit_appuser_amount ?? cur.unit_settlement_amount;
+      const remainingBatch = cur.remaining_batch ?? 0;
+      const totalBasis = big(unitAmount).times(big(remainingBatch)).plus(big(cur.remaining_fee_amount ?? 0));
       if (existingAssetKey) {
-        const remainingBatch = cur.remaining_batch ?? 0;
         const newQuantity = existingAssetKey.quantity + remainingBatch;
-        const newPrice =
-          (existingAssetKey.averageBuyPrice * existingAssetKey.quantity +
-            unitAmount * remainingBatch) /
-          newQuantity;
-        existingAssetKey.averageBuyPrice = newPrice;
+        const combinedBasis = (totalBasisByAsset.get(cur.financial_asset_key) ?? big(0)).plus(totalBasis);
+        totalBasisByAsset.set(cur.financial_asset_key, combinedBasis);
+        existingAssetKey.averageBuyPrice = Number(combinedBasis.div(big(newQuantity)).toString());
         existingAssetKey.quantity = newQuantity;
       } else {
+        totalBasisByAsset.set(cur.financial_asset_key, totalBasis);
         acc.push({
-          averageBuyPrice: unitAmount,
+          averageBuyPrice: Number(totalBasis.div(big(remainingBatch || 1)).toString()),
           financialAssetCurrencyCode: cur.financial_asset_currency_code,
           financialAssetEsgScore: cur.financial_asset_esg_score,
           financialAssetKey: cur.financial_asset_key,
@@ -180,7 +191,7 @@ export function buildSplitAdjustedHoldingBatches(items: HoldingTimelineItem[]): 
 export function replayHoldingTimeline(items: HoldingTimelineItem[]): HoldingReplayResult {
   const allBatches: HoldingBatch[] = [];
   const oversoldByPortfolioAsset = new Map<string, number>();
-  const realizedCostBasisByPortfolioAsset = new Map<string, number>();
+  const realizedCostBasisBigByPortfolioAsset = new Map<string, BigType>();
   const sorted = [...items].sort((a, b) => {
     const dateKeyA = toDateKey('date' in a ? a.date : a.transaction_date);
     const dateKeyB = toDateKey('date' in b ? b.date : b.transaction_date);
@@ -245,7 +256,15 @@ export function replayHoldingTimeline(items: HoldingTimelineItem[]): HoldingRepl
       const consumed = Math.min(available, sellRemaining);
       const batchUnitAmount = batch.unit_appuser_amount ?? batch.unit_settlement_amount;
       batch.remaining_batch = available - consumed;
-      realizedCostBasisByPortfolioAsset.set(assetKey, (realizedCostBasisByPortfolioAsset.get(assetKey) ?? 0) + consumed * batchUnitAmount);
+      const feeRemaining = batch.remaining_fee_amount ?? 0;
+      const feeAllocated = consumed === available
+        ? big(feeRemaining)
+        : big(feeRemaining).times(big(consumed)).div(big(available));
+      batch.remaining_fee_amount = Number(big(feeRemaining).minus(feeAllocated).toString());
+      const realizedCostBasis = (realizedCostBasisBigByPortfolioAsset.get(assetKey) ?? big(0))
+        .plus(big(consumed).times(big(batchUnitAmount)))
+        .plus(feeAllocated);
+      realizedCostBasisBigByPortfolioAsset.set(assetKey, realizedCostBasis);
       sellRemaining -= consumed;
     }
     if (sellRemaining > 1e-9) {
@@ -257,7 +276,9 @@ export function replayHoldingTimeline(items: HoldingTimelineItem[]): HoldingRepl
     allBatches,
     openBatches: allBatches.filter((batch) => batch.remaining_batch != null && batch.remaining_batch > 0),
     oversoldByPortfolioAsset,
-    realizedCostBasisByPortfolioAsset,
+    realizedCostBasisByPortfolioAsset: new Map(
+      [...realizedCostBasisBigByPortfolioAsset].map(([key, value]) => [key, Number(value.toString())]),
+    ),
   };
 }
 

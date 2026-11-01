@@ -46,7 +46,7 @@ export const completeOnboardingStepSchema = z.object({
 
 /**
  * `GET /v1/user/:userId/requisition/:requisitionId` resolves the owner from `req.user`, never
- * from `:userId` — but `:requisitionId` used to reach the query unvalidated. Bounding it to the
+ * from `:userId`, and `:requisitionId` must not reach the query unvalidated. Bounding it to the
  * provider's id charset keeps an unbounded/typed-wrong value out of the ORM.
  */
 export const getRequisitionRequestSchema = z.object({

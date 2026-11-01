@@ -6,6 +6,7 @@ import { getServerApi } from "@/lib/api/api-server";
 import { getBudgetsFull } from "@/lib/api/budget/useBudgetsFull";
 import { getPortfolios } from "@/lib/api/portfolio/usePortfolios";
 import { getRateLimitInfo } from "@/lib/api/rate-limit";
+import { serverDataTimestamp } from "@/lib/query/server-seed";
 
 import { HomeClient } from "./home-client";
 
@@ -16,15 +17,11 @@ export default async function Home({
 }) {
   const { locale } = await params;
   const api = await getServerApi(locale);
+  const serverRenderedAt = serverDataTimestamp();
 
+  let data;
   try {
-    const [
-      accountsData,
-      portfoliosData,
-      budgetsData,
-      transactionsData,
-      unreviewedTransactionsData,
-    ] = await Promise.all([
+    data = await Promise.all([
       getAccounts(api),
       getPortfolios(api),
       getBudgetsFull(api),
@@ -34,16 +31,6 @@ export default async function Home({
         api,
       ),
     ]);
-
-    return (
-      <HomeClient
-        initialAccountsData={accountsData}
-        initialPortfoliosData={portfoliosData}
-        initialBudgetsData={budgetsData}
-        initialTransactionsData={transactionsData}
-        initialUnreviewedTransactionsData={unreviewedTransactionsData}
-      />
-    );
   } catch (error) {
     const rateLimit = getRateLimitInfo(error);
 
@@ -74,4 +61,23 @@ export default async function Home({
 
     throw error;
   }
+
+  const [
+    accountsData,
+    portfoliosData,
+    budgetsData,
+    transactionsData,
+    unreviewedTransactionsData,
+  ] = data;
+
+  return (
+    <HomeClient
+      serverRenderedAt={serverRenderedAt}
+      initialAccountsData={accountsData}
+      initialPortfoliosData={portfoliosData}
+      initialBudgetsData={budgetsData}
+      initialTransactionsData={transactionsData}
+      initialUnreviewedTransactionsData={unreviewedTransactionsData}
+    />
+  );
 }

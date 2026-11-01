@@ -57,26 +57,25 @@ export function RateLimitedState({
     autoRetry: willAutoRetry,
   });
 
-  // Read inside the announcement timer rather than depended on, so the live
-  // region is written once with the window it was given and never rewritten as
-  // the number falls.
-  const secondsRef = React.useRef(secondsRemaining);
-  secondsRef.current = secondsRemaining;
-
   const [announcement, setAnnouncement] = React.useState("");
+  // Reads the latest seconds when it fires rather than depending on them, so
+  // the live region is written once with the window it was given and never
+  // rewritten as the number falls.
+  const announce = React.useEffectEvent(() => {
+    setAnnouncement(
+      t(
+        willAutoRetry
+          ? "rate-limited-announcement"
+          : "rate-limited-announcement-wait",
+        { seconds: secondsRemaining },
+      ),
+    );
+  });
+
   React.useEffect(() => {
     // Commit the live region empty first, then fill it, so the change is what
     // gets announced. One announcement, then silence while the number ticks.
-    const timer = window.setTimeout(() => {
-      setAnnouncement(
-        t(
-          willAutoRetry
-            ? "rate-limited-announcement"
-            : "rate-limited-announcement-wait",
-          { seconds: secondsRef.current },
-        ),
-      );
-    }, 120);
+    const timer = window.setTimeout(() => announce(), 120);
 
     return () => window.clearTimeout(timer);
   }, [t, willAutoRetry]);

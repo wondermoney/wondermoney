@@ -1,13 +1,3 @@
-export function createPortfolioImportNavigationHandoff(
-  setAddTransactionOpen: (open: boolean) => void,
-  navigate: (href: string) => void,
-  href: string,
-) {
-  return () => {
-    setAddTransactionOpen(false);
-    navigate(href);
-  };
-}
 
 export function createPortfolioImportHandoff(
   setAddTransactionOpen: (open: boolean) => void,

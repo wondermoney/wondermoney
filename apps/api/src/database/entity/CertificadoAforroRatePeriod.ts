@@ -1,5 +1,5 @@
-import { Entity, Enum, ManyToOne, PrimaryKey, Property, Unique } from '@mikro-orm/core';
 import type { Rel } from '@mikro-orm/core';
+import { Entity, Enum, ManyToOne, PrimaryKey, Property, Unique } from '@mikro-orm/decorators/legacy';
 
 import { Base } from './BaseEntity';
 import { FinancialAsset } from './FinancialAsset';
@@ -11,14 +11,14 @@ import { FinancialAsset } from './FinancialAsset';
  */
 export enum CertificadoAforroRateSource {
   /**
-   * Série C only (RAD-597). Every C/D/E rate is arithmetic on Série F's published
+   * Série C only. Every C/D/E rate is arithmetic on Série F's published
    * figure, but D and E each have a published table that cross-checks the result
    * and C has none — nothing IGCP publishes names Série C at all. So C rides D's
    * gate, which validates D's table rather than C's, and the claim that C uses
    * the C/D/E formula rests on the shared-formula inference alone.
    *
    * Labelling it keeps that limitation attached to the data. Stamping these rows
-   * IGCP_PDF_SCRAPE asserted a C-specific scrape that never happened and made the
+   * IGCP_PDF_SCRAPE would assert a C-specific scrape that never happened and make the
    * one unconfirmed series indistinguishable from the two that are confirmed.
    */
   IGCP_DERIVED_NO_SERIES_CROSSCHECK = 'IGCP_DERIVED_NO_SERIES_CROSSCHECK',
@@ -27,8 +27,8 @@ export enum CertificadoAforroRateSource {
 }
 
 /**
- * Monthly base-rate history for a Certificado de Aforro series (RAD-445). One row per
- * (financialAssetKey, effectiveMonth) — the calculation engine (Task 2) reads these to
+ * Monthly base-rate history for a Certificado de Aforro series. One row per
+ * (financialAssetKey, effectiveMonth) — the calculation engine reads these to
  * compound the base rate over a subscription's holding period.
  */
 @Entity({ tableName: 'certificado_aforro_rate_period' })

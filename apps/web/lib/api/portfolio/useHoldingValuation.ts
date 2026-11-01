@@ -16,7 +16,7 @@ export interface HoldingValuationResponse {
   valuation: ValuationMetrics | null;
 }
 
-export async function getHoldingValuation(
+async function getHoldingValuation(
   symbol: string,
   apiClient: AxiosInstance = api,
 ): Promise<HoldingValuationResponse> {

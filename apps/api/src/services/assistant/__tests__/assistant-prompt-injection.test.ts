@@ -39,7 +39,7 @@ describe('assistant prompt injection defenses', () => {
   });
 
   it('does not expose forbidden broad tools', () => {
-    const tools = AssistantToolsService.createTools({ appuserKey: 1, consentVersion: 1, conversationId: 'conversation-1', tenantKey: 2 });
+    const tools = AssistantToolsService.createTools({ appuserKey: 1, consentVersion: 1, conversationId: 'conversation-1', currency: 'EUR', tenantKey: 2 });
 
     expect(Object.keys(tools)).not.toEqual(expect.arrayContaining(['get_all_transactions', 'query_database']));
   });

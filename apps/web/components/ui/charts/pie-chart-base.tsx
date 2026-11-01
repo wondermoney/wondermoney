@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Cell, Pie, PieChart } from "recharts";
+import { Pie, PieChart } from "recharts";
 
 import {
   type ChartConfig,
@@ -25,6 +25,8 @@ type Props = {
   >["formatter"];
   innerRadius?: number;
   outerRadius?: number;
+  /** Disable Recharts entrance animations for users who prefer reduced motion. */
+  isAnimationActive?: boolean;
 };
 
 export function PieChartBase({
@@ -37,7 +39,25 @@ export function PieChartBase({
   tooltipFormatter,
   innerRadius = 58,
   outerRadius = 92,
+  isAnimationActive = true,
 }: Props) {
+  // Each slice's colour rides on its data entry as `fill` (Recharts 3
+  // deprecated `<Cell>`; see https://recharts.github.io/en-US/guide/cell/).
+  // Recharts reads an entry's `fill` for the sector, its tooltip payload and
+  // its legend swatch alike, so all three stay on the category's config
+  // colour. The config colour wins over any `fill` already on the entry, as
+  // the `<Cell>` it replaces did.
+  const coloredData = React.useMemo(
+    () =>
+      data.map((item, index) => {
+        const key = String(
+          (item as Record<string, unknown>)[nameKey] ?? index,
+        );
+        return { ...item, fill: `var(--color-${key})` };
+      }),
+    [data, nameKey],
+  );
+
   return (
     <ChartContainer
       config={config}
@@ -51,20 +71,13 @@ export function PieChartBase({
           <ChartLegend content={<ChartLegendContent nameKey={nameKey} />} />
         ) : null}
         <Pie
-          data={data}
+          data={coloredData}
           dataKey={valueKey}
           nameKey={nameKey}
           innerRadius={innerRadius}
           outerRadius={outerRadius}
-        >
-          {data.map((item, index) => {
-            const key = String(
-              (item as Record<string, unknown>)[nameKey] ?? index,
-            );
-
-            return <Cell key={key} fill={`var(--color-${key})`} />;
-          })}
-        </Pie>
+          isAnimationActive={isAnimationActive}
+        />
       </PieChart>
     </ChartContainer>
   );

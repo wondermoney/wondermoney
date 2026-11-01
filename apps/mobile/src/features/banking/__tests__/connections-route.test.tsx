@@ -26,7 +26,7 @@ const mockBack = jest.fn()
 const mockCanGoBack = jest.fn().mockReturnValue(true)
 const mockRefetch = jest.fn()
 const mockMutateAsync = jest.fn()
-let mockParams: { justStarted?: string } = {}
+let mockParams: { justStarted?: string; connection?: string } = {}
 let mockIsPending = false
 let mockVariables: number | undefined
 
@@ -56,6 +56,7 @@ jest.mock('../use-bank-connection-disconnect-mutation', () => ({
 jest.mock('../connections-screen', () => ({
   ConnectionsScreen: (props: {
     justStarted: boolean
+    connectionResult: string | null
     onConnectBank: () => void
     onBack: () => void
     onRefresh: () => void
@@ -68,6 +69,7 @@ jest.mock('../connections-screen', () => ({
     return (
       <>
         <Native.Text testID="justStarted">{String(props.justStarted)}</Native.Text>
+        <Native.Text testID="connectionResult">{String(props.connectionResult)}</Native.Text>
         <Native.Text testID="disconnecting">{String(props.disconnectingConnectionId)}</Native.Text>
         <Native.Text testID="disconnectFailure">{props.disconnectFailure ? `${props.disconnectFailure.connectionId}:${props.disconnectFailure.failure}` : 'none'}</Native.Text>
         <Native.Pressable accessibilityRole="button" accessibilityLabel="ConnectBank" onPress={props.onConnectBank}><Native.Text>Connect</Native.Text></Native.Pressable>
@@ -87,7 +89,7 @@ describe('ConnectionsRoute', () => {
     mockConnections = []; captured.mockClear()
   })
 
-  describe('bank connection outcomes (RAD-518)', () => {
+  describe('bank connection outcomes', () => {
     it('captures nothing for a list that already contains settled connections when the screen opens', async () => {
       mockConnections = [connection('connected'), connection('error')]
 
@@ -156,6 +158,16 @@ describe('ConnectionsRoute', () => {
     mockParams = { justStarted: '1' }
     const view = await render(<ConnectionsRoute />)
     expect(view.getByTestId('justStarted')).toHaveTextContent('true')
+  })
+
+  it('passes on a known connection outcome and drops anything else', async () => {
+    mockParams = { justStarted: '1', connection: 'success' }
+    const view = await render(<ConnectionsRoute />)
+    expect(view.getByTestId('connectionResult')).toHaveTextContent('success')
+
+    mockParams = { justStarted: '1', connection: 'https://evil.example' }
+    const other = await render(<ConnectionsRoute />)
+    expect(other.getByTestId('connectionResult')).toHaveTextContent('null')
   })
 
   it('does not surface justStarted without the marker', async () => {

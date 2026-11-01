@@ -48,7 +48,7 @@ vi.mock('@utils/logger', () => ({
 vi.mock('@validators/parser', () => ({ zParse: mocked.zParse }));
 
 import { AppuserAccountType } from '@entity/Appuser';
-import { BadRequestError } from '@utils/errors';
+import { BadRequestError, ConflictError, ERROR_CODE } from '@utils/errors';
 
 import { authCallback } from '../auth';
 
@@ -177,5 +177,19 @@ describe('auth callback signup', () => {
     expect(error.status).toBe(400);
     expect(mocked.recordSignup).not.toHaveBeenCalled();
     expect(mocked.consumeInvite).not.toHaveBeenCalled();
+  });
+
+  it('reports a household that filled up during signup by its own code, not as a server error', async () => {
+    const error = new ConflictError('This household is already full.', ERROR_CODE.HOUSEHOLD_FULL);
+    mocked.zParse.mockResolvedValueOnce({ body: { inviteToken: 'invite-token', locale: 'en' } });
+    mocked.validateInviteForSignup.mockResolvedValueOnce({ householdInviteKey: 17, tenantKey: { tenantKey: 99 } });
+    mocked.consumeInvite.mockRejectedValueOnce(error);
+    mocked.isAppError.mockReturnValue(true);
+
+    await expect(authCallback(
+      { authUser: { user: { email: appuser.emailAddress, id: externalUserId } } } as Parameters<typeof authCallback>[0],
+      makeResponse(),
+    )).rejects.toMatchObject({ code: ERROR_CODE.HOUSEHOLD_FULL, status: 409 });
+    expect(mocked.getOrCreateTenant).not.toHaveBeenCalled();
   });
 });

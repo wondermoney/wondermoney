@@ -3,6 +3,7 @@ import { isAfter } from 'date-fns';
 
 import { FINANCIAL_TRANSACTION_TYPES } from '@app/constants/financial-transaction-types';
 import { DI } from '@app/database/di';
+import { anyOf, toDate as parseDatabaseDate, sqlQuery } from '@app/database/sql';
 import { Appuser } from '@entity/Appuser';
 import { Currency } from '@entity/Currency';
 import { ExchangeRate } from '@entity/ExchangeRate';
@@ -11,13 +12,41 @@ import { FinancialAssetStockAdjustment } from '@entity/FinancialAssetStockAdjust
 import { FinancialTransaction } from '@entity/FinancialTransaction';
 import { Portfolio } from '@entity/Portfolio';
 import { PortfolioSnapshot } from '@entity/PortfolioSnapshot';
+import { convertAtLatestRate } from '@service/currency/exchange-rate';
+import logger from '@utils/logger';
 import { big, roundDisplay } from '@utils/money';
 
 /**
  * Service for managing portfolio snapshots (daily value records)
  */
 class PortfolioSnapshotService {
+  /** Rebuilds a portfolio's daily snapshots from `fromDate` (default: its first trade) to `toDate` (default: today). */
   async backfillSnapshotsForPortfolio(portfolioId: number, fromDate?: Date, toDate?: Date): Promise<void> {
+    const plan = await this.computeSnapshotsForPortfolio(portfolioId, fromDate, toDate);
+    if (!plan) return;
+    const { endDate, snapshots, startDate } = plan;
+
+    await DI.em.transactional(async (em) => {
+      await em.nativeDelete(PortfolioSnapshot, {
+        portfolioKey: { portfolioKey: portfolioId },
+        snapshotDate: { $gte: startDate, $lte: endDate },
+      });
+
+      for (const snapshot of snapshots) {
+        em.persist(snapshot);
+      }
+
+      await em.flush();
+    });
+  }
+
+  /**
+   * The daily snapshots a backfill would write, without writing them: every day from `fromDate`
+   * (default: the first trade) to `toDate` (default: today) with a positive value. Reads stored
+   * prices and exchange rates only; it never calls the market-data provider. Null when the range
+   * is empty.
+   */
+  async computeSnapshotsForPortfolio(portfolioId: number, fromDate?: Date, toDate?: Date): Promise<null | { endDate: Date; snapshots: PortfolioSnapshot[]; startDate: Date }> {
     const portfolio = await this.getPortfolio(portfolioId);
     const today = startOfUtcDay(new Date());
     const endDate = startOfUtcDay(toDate ?? today);
@@ -30,7 +59,7 @@ class PortfolioSnapshotService {
       },
       {
         orderBy: { transactionDate: 'asc' },
-        populate: ['financialAssetKey.currencyKey', 'financialTransactionTypeKey', 'settlementCurrencyKey'],
+        populate: ['financialAssetKey.currencyKey', 'financialAssetKey.financialAssetTypeKey', 'financialTransactionTypeKey', 'settlementCurrencyKey', 'feeCurrencyKey'],
       },
     );
 
@@ -63,7 +92,7 @@ class PortfolioSnapshotService {
       ? startOfUtcDay(buySellTransactions[0].transactionDate)
       : null;
     const startDate = startOfUtcDay(fromDate ?? earliestTransactionDate ?? today);
-    if (isAfter(startDate, endDate)) return;
+    if (isAfter(startDate, endDate)) return null;
 
     const snapshotsToPersist: PortfolioSnapshot[] = [];
     if (buySellTransactions.length) {
@@ -90,7 +119,7 @@ class PortfolioSnapshotService {
       const portfolioToAppuserRates = sameCurrency
         ? new Map<string, number>()
         : await getExchangeRates(portfolio.currencyKey, portfolio.portfolioOwnerAppuserKey.currencyKey);
-      const holdings = new Map<number, { assetCurrency?: Currency; lots: { quantity: number; totalCost: number }[] }>();
+      const holdings = new Map<number, { assetCurrency?: Currency; lots: { quantity: number; totalCost: BigType }[] }>();
       const assetToPortfolioRatesByCurrency = new Map<number, Map<string, number>>();
       const priceCursors = new Map<number, number>();
       const latestPrices = new Map<number, number>();
@@ -130,25 +159,48 @@ class PortfolioSnapshotService {
           if (!assetKey || !typeName) continue;
           const holding = holdings.get(assetKey) ?? { assetCurrency: tx.financialAssetKey.currencyKey, lots: [] };
           if (typeName === 'BUY') {
-            const rawCost = Math.abs(tx.settlementAmount);
-            let lotCost = rawCost;
+            // Settlement first: a lot with no settlement rate is skipped, as it was before fees
+            // counted, rather than failing the whole backfill on its fee.
+            let settlementCost = big(Math.abs(tx.settlementAmount));
             const settlementCurrency = tx.settlementCurrencyKey as Currency | undefined;
             if (settlementCurrency && settlementCurrency.currencyKey !== portfolio.currencyKey.currencyKey) {
               const rates = await getExchangeRates(settlementCurrency, portfolio.currencyKey);
               const rate = this.getCarryForwardRate(rates, tx.transactionDate);
               if (rate == null) continue;
-              lotCost = rawCost * rate;
+              settlementCost = settlementCost.times(big(rate));
             }
-            holding.lots.push({ quantity: tx.quantity, totalCost: lotCost });
+            const isSavingsCertificate = tx.financialAssetKey.financialAssetTypeKey?.name === 'Savings Certificate';
+            const feeAmount = isSavingsCertificate ? 0 : Math.abs(tx.feeAmount ?? 0);
+            let feeCost = big(0);
+            if (feeAmount > 0) {
+              // A fee we cannot convert counts as zero, as in holdings: one bad fee must not
+              // abort the backfill (or the transaction edit that triggers it).
+              const feeCurrency = tx.feeCurrencyKey;
+              if (feeCurrency?.currencyKey === portfolio.currencyKey.currencyKey) feeCost = big(feeAmount);
+              else {
+                const rate = feeCurrency ? this.getCarryForwardRate(await getExchangeRates(feeCurrency, portfolio.currencyKey), tx.transactionDate) : undefined;
+                if (isValidFeeExchangeRate(rate)) feeCost = big(feeAmount).times(big(rate));
+                else {
+                  logger.warn(
+                    { feeCurrency: feeCurrency?.code ?? null, portfolioId, transactionKey: tx.transactionKey },
+                    'Portfolio fee left out of snapshot cost basis: it cannot be converted to the portfolio currency',
+                  );
+                }
+              }
+            }
+            holding.lots.push({ quantity: tx.quantity, totalCost: settlementCost.plus(feeCost) });
           } else if (typeName === 'SELL' && holding.lots.length > 0) {
             let sellQuantity = Math.abs(tx.quantity);
             while (sellQuantity > 0 && holding.lots.length > 0) {
               const lot = holding.lots[0];
               if (!lot) break;
               const consumed = Math.min(sellQuantity, lot.quantity);
-              const lotCostPerShare = lot.totalCost / lot.quantity;
-              lot.quantity -= consumed;
-              lot.totalCost -= lotCostPerShare * consumed;
+              const available = lot.quantity;
+              const lotCostPerShare = lot.totalCost.div(big(lot.quantity));
+              lot.quantity = available - consumed;
+              lot.totalCost = consumed === available
+                ? big(0)
+                : lot.totalCost.minus(lotCostPerShare.times(big(consumed)));
               sellQuantity -= consumed;
               if (lot.quantity <= 0) holding.lots.shift();
             }
@@ -156,13 +208,13 @@ class PortfolioSnapshotService {
           holdings.set(assetKey, holding);
         }
 
-        // RAD-audit: was float accumulation of a three-way multiply per holding, then
-        // `Math.round(x*100)/100` four times over. Exact throughout; rounded once on write.
+        // Exact decimal arithmetic throughout (no float accumulation of the per-holding
+        // multiply); rounded once on write.
         let totalValue = big(0);
         let costBasis = big(0);
         for (const [assetKey, holding] of holdings) {
           const quantity = holding.lots.reduce((sum, lot) => sum + lot.quantity, 0);
-          const costBasisForAsset = holding.lots.reduce<BigType>((sum, lot) => sum.plus(big(lot.totalCost)), big(0));
+          const costBasisForAsset = holding.lots.reduce<BigType>((sum, lot) => sum.plus(lot.totalCost), big(0));
           if (quantity <= 0) continue;
           const prices = pricesByAsset.get(assetKey);
           if (!prices?.length) continue;
@@ -214,18 +266,7 @@ class PortfolioSnapshotService {
       }
     }
 
-    await DI.em.transactional(async (em) => {
-      await em.nativeDelete(PortfolioSnapshot, {
-        portfolioKey: { portfolioKey: portfolioId },
-        snapshotDate: { $gte: startDate, $lte: endDate },
-      });
-
-      for (const snapshot of snapshotsToPersist) {
-        em.persist(snapshot);
-      }
-
-      await em.flush();
-    });
+    return { endDate, snapshots: snapshotsToPersist, startDate };
   }
 
   private getCarryForwardRate(exchangeRates: Map<string, number>, date: Date): null | number {
@@ -274,17 +315,18 @@ class PortfolioSnapshotService {
   private async loadHistoricalPrices(assetKeys: number[], toDate: Date) {
     if (!assetKeys.length) return new Map<number, { date: Date; price: number }[]>();
 
-    const knex = DI.em.getKnex();
-    const prices = (await knex('financial_asset_price')
+    const prices = (await sqlQuery(DI.em)
+      .selectFrom('financial_asset_price')
       .select(['financial_asset_key', 'date', 'price'])
-      .whereIn('financial_asset_key', assetKeys)
+      .where(anyOf('financial_asset_key', assetKeys))
       .where('date', '<=', toDate)
-      .orderBy('date', 'asc')) as { date: Date; financial_asset_key: number; price: number }[];
+      .orderBy('date', 'asc')
+      .execute()) as { date: Date | string; financial_asset_key: number; price: number }[];
 
     return prices.reduce((map, price) => {
       const assetKey = price.financial_asset_key;
       const bucket = map.get(assetKey) ?? [];
-      bucket.push({ date: price.date, price: price.price });
+      bucket.push({ date: parseDatabaseDate(price.date), price: price.price });
       map.set(assetKey, bucket);
       return map;
     }, new Map<number, { date: Date; price: number }[]>());
@@ -294,16 +336,17 @@ class PortfolioSnapshotService {
    * Ensure all assets in a portfolio have fresh prices
    */
   private async ensureFreshPricesForPortfolio(portfolioId: number): Promise<void> {
-    const knex = DI.em.getKnex();
-
     // Get distinct assets in this portfolio
-    const assets = (await knex('financial_transaction')
-      .distinct('financial_asset_key')
-      .where('portfolio_key', portfolioId)
-      .whereIn('financial_transaction_type_key', [
+    const assets = (await sqlQuery(DI.em)
+      .selectFrom('financial_transaction')
+      .select('financial_asset_key')
+      .distinct()
+      .where('portfolio_key', '=', portfolioId)
+      .where('financial_transaction_type_key', 'in', [
         FINANCIAL_TRANSACTION_TYPES.BUY,
         FINANCIAL_TRANSACTION_TYPES.SELL,
-      ])) as { financial_asset_key: number }[];
+      ])
+      .execute()) as { financial_asset_key: number }[];
 
     // Fetch fresh prices for each asset
     for (const { financial_asset_key } of assets) {
@@ -332,29 +375,6 @@ class PortfolioSnapshotService {
   }
 
   /**
-   * Look up exchange rate and convert a value to the user's currency.
-   * Returns null if currencies match or no exchange rate is found.
-   */
-  private async convertToAppuserCurrency(
-    value: number,
-    fromCurrency: Currency,
-    toCurrency: Currency,
-    date: Date,
-  ): Promise<null | number> {
-    if (fromCurrency.currencyKey === toCurrency.currencyKey) {
-      return value; // Same currency, no conversion needed
-    }
-
-    const exchangeRate = await DI.em.findOne(ExchangeRate, {
-      date,
-      fromCurrency,
-      toCurrency,
-    });
-
-    return exchangeRate ? value * exchangeRate.rate : null;
-  }
-
-  /**
    * Update or create snapshot for a portfolio for today's date
    */
   async updateSnapshotForToday(portfolioId: number): Promise<PortfolioSnapshot> {
@@ -374,27 +394,19 @@ class PortfolioSnapshotService {
     // Ensure fresh prices
     await this.ensureFreshPricesForPortfolio(portfolioId);
 
-    // Calculate metrics using FIFO holdings
-    const { costBasis, totalValue } = await this.calculatePortfolioMetrics(
+    // Calculate metrics using FIFO holdings. Holdings are valued in the owner's currency, so
+    // these are the user-currency figures; the portfolio-currency ones are converted from them.
+    // Converting them again, portfolio to owner, counted a foreign-currency portfolio twice, and
+    // an exact-date rate lookup valued it at nothing on days without a rate.
+    const { costBasis: appuserCurrencyCostBasis, totalValue: appuserCurrencyTotalValue } = await this.calculatePortfolioMetrics(
       portfolio.portfolioOwnerAppuserKey,
       portfolioId,
     );
 
-    // Convert to user's currency
     const appuserCurrency = portfolio.portfolioOwnerAppuserKey.currencyKey;
     const portfolioCurrency = portfolio.currencyKey;
-    const appuserCurrencyTotalValue = await this.convertToAppuserCurrency(
-      totalValue,
-      portfolioCurrency,
-      appuserCurrency,
-      today,
-    );
-    const appuserCurrencyCostBasis = await this.convertToAppuserCurrency(
-      costBasis,
-      portfolioCurrency,
-      appuserCurrency,
-      today,
-    );
+    const totalValue = await convertAtLatestRate(DI.em, appuserCurrencyTotalValue, appuserCurrency, portfolioCurrency, today);
+    const costBasis = await convertAtLatestRate(DI.em, appuserCurrencyCostBasis, appuserCurrency, portfolioCurrency, today);
 
     // Find existing snapshot for today or create new one
     let snapshot = await DI.em.findOne(PortfolioSnapshot, {
@@ -404,21 +416,21 @@ class PortfolioSnapshotService {
 
     if (snapshot) {
       // Update existing snapshot
-      snapshot.totalValue = totalValue;
-      snapshot.costBasis = costBasis;
-      snapshot.appuserCurrencyTotalValue = appuserCurrencyTotalValue ?? undefined;
-      snapshot.appuserCurrencyCostBasis = appuserCurrencyCostBasis ?? undefined;
+      snapshot.totalValue = totalValue ?? undefined;
+      snapshot.costBasis = costBasis ?? undefined;
+      snapshot.appuserCurrencyTotalValue = appuserCurrencyTotalValue;
+      snapshot.appuserCurrencyCostBasis = appuserCurrencyCostBasis;
       snapshot.appuserCurrencyKey = appuserCurrency;
     } else {
       // Create new snapshot
       snapshot = new PortfolioSnapshot();
       snapshot.portfolioKey = portfolio;
       snapshot.snapshotDate = today;
-      snapshot.totalValue = totalValue;
-      snapshot.costBasis = costBasis;
+      snapshot.totalValue = totalValue ?? undefined;
+      snapshot.costBasis = costBasis ?? undefined;
       snapshot.currencyKey = portfolio.currencyKey;
-      snapshot.appuserCurrencyTotalValue = appuserCurrencyTotalValue ?? undefined;
-      snapshot.appuserCurrencyCostBasis = appuserCurrencyCostBasis ?? undefined;
+      snapshot.appuserCurrencyTotalValue = appuserCurrencyTotalValue;
+      snapshot.appuserCurrencyCostBasis = appuserCurrencyCostBasis;
       snapshot.appuserCurrencyKey = appuserCurrency;
       DI.em.persist(snapshot);
     }
@@ -445,6 +457,10 @@ class PortfolioSnapshotService {
 function addUtcDays(date: Date | string, days: number): Date {
   const utcDate = startOfUtcDay(date);
   return new Date(Date.UTC(utcDate.getUTCFullYear(), utcDate.getUTCMonth(), utcDate.getUTCDate() + days));
+}
+
+function isValidFeeExchangeRate(rate: unknown): rate is number {
+  return typeof rate === 'number' && Number.isFinite(rate) && rate > 0;
 }
 
 function startOfUtcDay(date: Date | string): Date {

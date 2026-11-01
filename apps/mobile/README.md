@@ -5,7 +5,7 @@ WonderMoney's mobile application is an Expo SDK 57 app using React Native
 
 ## Requirements
 
-- Node.js 24 (the repository's `.nvmrc`)
+- Node.js 24 (`apps/mobile/.nvmrc`; Expo has not stated Node 26 support for SDK 57)
 - pnpm: run `pnpm install` at the repository root, which installs every app
 
 By default the app talks to the hosted API. Point it at a local or self-hosted one with

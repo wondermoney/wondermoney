@@ -1,4 +1,7 @@
+import { sql } from 'kysely';
+
 import { DI } from '@app/database/di';
+import { anyOf, sqlQuery } from '@app/database/sql';
 import { Account } from '@entity/Account';
 import { Appuser } from '@entity/Appuser';
 import { AppuserTenant } from '@entity/AppuserTenant';
@@ -9,6 +12,7 @@ import { Portfolio } from '@entity/Portfolio';
 import { PortfolioSnapshot } from '@entity/PortfolioSnapshot';
 import { Transaction } from '@entity/Transaction';
 import { calculateOutstandingPrincipalWithAdjustments } from '@service/loan/loan-calculation.service';
+import { excludeExpired, notExpiredTransactionSql } from '@service/transaction/transaction-status';
 import { addMoney, sumMoney } from '@utils/money';
 
 export interface NetWorthHistoryAccountLike {
@@ -161,32 +165,27 @@ export class NetWorthService {
       { populate: ['currencyKey'] },
     );
 
-    const knex = DI.em.getKnex();
-    // RAD-audit: this previously had no WHERE clause at all — it aggregated and returned
-    // EVERY tenant's latest portfolio balance into request memory on every call, contained
-    // only by the `balanceMap.get` below. Both the outer read and the MAX() subquery are now
-    // scoped to this tenant's own portfolios, and both skip soft-deleted snapshots (a deleted
+    // Raw SQL bypasses the tenant filter, so both the outer read and the MAX() subquery are
+    // explicitly scoped to this tenant's own portfolios (unscoped, this would read EVERY tenant's
+    // latest portfolio balance into request memory), and both skip soft-deleted snapshots (a deleted
     // snapshot could otherwise win MAX(snapshot_date) and become the reported balance).
     const portfolioKeys = portfolios.map((portfolio) => portfolio.portfolioKey);
-    const latestSnapshots = portfolioKeys.length === 0 ? [] : await knex('portfolio_snapshot as ps')
-      .select('ps.portfolio_key', knex.raw('ps.appuser_currency_total_value as balance'))
+    const latestSnapshots = portfolioKeys.length === 0 ? [] : await sqlQuery(DI.em)
+      .selectFrom('portfolio_snapshot as ps')
       .innerJoin(
-        knex.raw(
-          `(SELECT portfolio_key, MAX(snapshot_date) as max_date FROM portfolio_snapshot
-             WHERE deleted_at IS NULL AND portfolio_key = ANY(?) GROUP BY portfolio_key) as latest`,
-          [portfolioKeys],
-        ),
-        function () {
-          this.on('ps.portfolio_key', 'latest.portfolio_key').andOn('ps.snapshot_date', 'latest.max_date');
-        },
+        sql<{ max_date: unknown; portfolio_key: unknown }>`(SELECT portfolio_key, MAX(snapshot_date) as max_date FROM portfolio_snapshot
+             WHERE deleted_at IS NULL AND portfolio_key = ANY(${portfolioKeys}) GROUP BY portfolio_key)`.as('latest'),
+        (join) => join.onRef('ps.portfolio_key', '=', 'latest.portfolio_key').onRef('ps.snapshot_date', '=', 'latest.max_date'),
       )
-      .whereNull('ps.deleted_at')
-      .whereIn('ps.portfolio_key', portfolioKeys);
+      .select(['ps.portfolio_key', sql<null | number | string>`ps.appuser_currency_total_value`.as('balance')])
+      .where('ps.deleted_at', 'is', null)
+      .where(anyOf('ps.portfolio_key', portfolioKeys))
+      .execute();
 
     const balanceMap = new Map<number, number>();
     for (const row of latestSnapshots) {
       if (row.balance == null) continue;
-      balanceMap.set(row.portfolio_key, Number(row.balance) || 0);
+      balanceMap.set(row.portfolio_key as number, Number(row.balance) || 0);
     }
 
     return portfolios.map((portfolio) => {
@@ -204,19 +203,6 @@ export class NetWorthService {
     return currencyCode;
   }
 
-}
-
-export async function buildHistoryPointDates(input: { accounts: Account[]; appuser: Appuser; basePoints: Date[]; tenantKey: AppuserTenant['tenantKey']; toDate: Date }): Promise<Date[]> {
-  if (input.accounts.length === 0) return mergeHistoryPointDates(input.basePoints, []);
-
-  const transactionDates = await DI.em.find(Transaction, {
-    accountKey: { $in: input.accounts },
-    appuserCurrencyBalance: { $ne: null },
-    deletedAt: undefined,
-    tenantKey: input.tenantKey,
-    transactionDate: { $gte: startOfUtcDay(addUtcMonths(input.toDate, -5)), $lt: nextUtcDay(input.toDate) },
-  }, { fields: ['transactionDate'] });
-  return mergeHistoryPointDates(input.basePoints, transactionDates.map((transaction) => transaction.transactionDate).filter((date): date is Date => date != null));
 }
 
 export function buildMonthlyHistoryPointDates(months: number, toDate: Date): Date[] {
@@ -326,6 +312,20 @@ export function resolvePortfolioHistoryTotal(portfolios: { snapshots: NetWorthHi
 
 function addUtcMonths(date: Date, months: number) { return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth() + months, 1)); }
 
+async function buildHistoryPointDates(input: { accounts: Account[]; appuser: Appuser; basePoints: Date[]; tenantKey: AppuserTenant['tenantKey']; toDate: Date }): Promise<Date[]> {
+  if (input.accounts.length === 0) return mergeHistoryPointDates(input.basePoints, []);
+
+  // An EXPIRED row never moved money: a balance left on one is no balance, and its date is no point.
+  const transactionDates = await DI.em.find(Transaction, excludeExpired({
+    accountKey: { $in: input.accounts },
+    appuserCurrencyBalance: { $ne: null },
+    deletedAt: undefined,
+    tenantKey: input.tenantKey,
+    transactionDate: { $gte: startOfUtcDay(addUtcMonths(input.toDate, -5)), $lt: nextUtcDay(input.toDate) },
+  }), { fields: ['transactionDate'] });
+  return mergeHistoryPointDates(input.basePoints, transactionDates.map((transaction) => transaction.transactionDate).filter((date): date is Date => date != null));
+}
+
 function buildNetWorthSummary(input: {
   accounts: NetWorthInputRow[];
   currencyCode: string;
@@ -357,20 +357,18 @@ function buildNetWorthSummary(input: {
 /**
  * Per-(point, account) closing balance for every history point, in ONE query.
  *
- * RAD-audit: `calculateAccountsHistoryTotal` previously ran, per point date, an unbounded
- * fully-hydrated `find(Transaction)` of every row before that date — purely to pick the
- * newest row per account. `buildHistoryPointDates` expands the point list with every
- * distinct transaction date in the last six months, so an active user produces ~170 points;
- * the result was ~170 unbounded scans issued concurrently against a default pool of 10,
- * hydrating millions of objects into one identity map.
+ * `buildHistoryPointDates` expands the point list with every distinct transaction date in the
+ * last six months, so an active user produces ~170 points. An unbounded, fully-hydrated
+ * `find(Transaction)` per point — purely to pick the newest row per account — would be ~170
+ * unbounded scans issued concurrently against a default pool of 10, hydrating millions of
+ * objects into one identity map.
  *
  * A `LEFT JOIN LATERAL ... LIMIT 1` per (point, account) pair asks the database for exactly
  * the row the code actually wanted. It is served by `transaction_account_date_active_idx`
  * (`account_key, transaction_date DESC, transaction_key DESC` WHERE `deleted_at IS NULL`).
  *
  * Returns `Map<pointDateMs, Map<accountKey, balance>>`. A missing inner entry means the
- * account had no balance-carrying row at that point, which the caller treats as incomplete
- * — the same meaning the previous per-point code gave it.
+ * account had no balance-carrying row at that point, which the caller treats as incomplete.
  */
 /** `tenantKey` arrives as either a loaded entity reference or a bare number. */
 async function calculateAccountsHistoryTotal(accounts: Account[], _appuser: Appuser, tenantKey: AppuserTenant['tenantKey'], pointDate: Date, isCurrentPoint: boolean, prefetched?: Map<number, Map<number, number>>): Promise<[null | number, boolean]> {
@@ -390,7 +388,7 @@ async function calculateAccountsHistoryTotal(accounts: Account[], _appuser: Appu
     return [sumMoney(balances), true];
   }
 
-  const transactions = await DI.em.find(Transaction, { accountKey: { $in: relevantAccounts }, deletedAt: undefined, tenantKey, transactionDate: { $lt: nextUtcDay(pointDate) } }, { orderBy: { transactionDate: 'DESC', transactionKey: 'DESC' } });
+  const transactions = await DI.em.find(Transaction, excludeExpired({ accountKey: { $in: relevantAccounts }, deletedAt: undefined, tenantKey, transactionDate: { $lt: nextUtcDay(pointDate) } }), { orderBy: { transactionDate: 'DESC', transactionKey: 'DESC' } });
   const byAccount = new Map<number, Transaction>();
   for (const transaction of transactions) {
     const accountKey = transaction.accountKey?.accountKey;
@@ -456,38 +454,31 @@ async function prefetchAccountBalancesByPoint(
   for (const pointDate of pointDates) byPoint.set(pointDate.getTime(), new Map());
   if (accounts.length === 0 || pointDates.length === 0) return byPoint;
 
-  const knex = DI.em.getKnex();
   const accountKeys = accounts.map((account) => account.accountKey);
   const pointIsoDates = pointDates.map((pointDate) => nextUtcDay(pointDate).toISOString());
 
-  const rows = await knex
-    .select(
-      knex.raw('p.point_date as point_date'),
-      knex.raw('a.account_key as account_key'),
-      knex.raw('latest.appuser_currency_balance as balance'),
-    )
-    .from(knex.raw('unnest(?::timestamptz[]) as p(point_date)', [pointIsoDates]))
-    .crossJoin(knex.raw('unnest(?::int[]) as a(account_key)', [accountKeys]))
-    .joinRaw(
-      `left join lateral (
+  const { rows } = await sql<{ account_key: number; balance: null | number | string; point_date: Date | string }>`
+    select p.point_date as point_date, a.account_key as account_key, latest.appuser_currency_balance as balance
+    from unnest(${pointIsoDates}::timestamptz[]) as p(point_date)
+    cross join unnest(${accountKeys}::int[]) as a(account_key)
+    left join lateral (
          select t."appuser_currency_balance"
          from "transaction" t
          where t."account_key" = a.account_key
-           and t."tenant_key" = ?
+           and t."tenant_key" = ${resolveTenantKeyNumber(tenantKey)}
            and t."deleted_at" is null
            and t."appuser_currency_balance" is not null
+           and ${sql.raw(notExpiredTransactionSql('t'))}
            and t."transaction_date" < p.point_date
          order by t."transaction_date" desc, t."transaction_key" desc
          limit 1
-       ) latest on true`,
-      [resolveTenantKeyNumber(tenantKey)],
-    );
+       ) latest on true`.execute(sqlQuery(DI.em));
 
   // `p.point_date` is the exclusive upper bound (next UTC day); map it back to the point.
   const boundToPoint = new Map<number, number>();
   for (const pointDate of pointDates) boundToPoint.set(nextUtcDay(pointDate).getTime(), pointDate.getTime());
 
-  for (const row of rows as { account_key: number; balance: null | number | string; point_date: Date | string }[]) {
+  for (const row of rows) {
     if (row.balance == null) continue;
     const boundMs = new Date(row.point_date).getTime();
     const pointMs = boundToPoint.get(boundMs);

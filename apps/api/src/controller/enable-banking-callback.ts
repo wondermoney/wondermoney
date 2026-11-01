@@ -1,7 +1,6 @@
 import type { Request, Response } from 'express';
 
 import { zParse } from '@app/validators/parser';
-import { BANK_SYNC_PROVIDER_DISABLED } from '@config/env';
 import { EnableBankingConnection } from '@entity/EnableBankingConnection';
 import accountInitialSyncEnqueueService, { AccountInitialSyncQueueError } from '@service/account/account-initial-sync-enqueue.service';
 import { createEnableBankingClient } from '@service/enable-banking/enable-banking-client.service';
@@ -22,25 +21,16 @@ import { DI } from '../app';
  * safety here comes entirely from validating `state` server-side against our own DB
  * (the correlation value `startBankConnection` generated and persisted), not from
  * auth middleware — see the route registration in `app.ts` for why this is mounted
- * unauthenticated, mirroring the existing GoCardless `bankConnectionCallback`.
+ * unauthenticated.
  *
  * Always ends in an HTTP redirect to a fixed, hardcoded/env-derived WonderMoney URL
  * (`ENABLE_BANKING_CALLBACK_REDIRECT_URL`) — never a JSON response, and never a
- * redirect target built from any part of the incoming request. `code`/`state`/`error`
+ * redirect target built from any part of the incoming request. Whether that is the web
+ * app or the mobile app comes only from the connection row (`returnTo`, stored by
+ * `startBankConnection`). `code`/`state`/`error`
  * are only ever used to look up and mutate our own `EnableBankingConnection` row.
  */
 export async function enableBankingCallback(req: Request, res: Response) {
-  // Belt-and-braces alongside `getBankList`/`startBankConnection`'s own gate: while
-  // `startBankConnection` is disabled no `EnableBankingConnection` row can exist for
-  // `findByState` to match anyway, but checking here too means the flag closes this
-  // whole surface outright, with no dependency on that indirect argument staying true.
-  // Never a thrown error here (this route only ever redirects, never returns JSON).
-  if (BANK_SYNC_PROVIDER_DISABLED) {
-    logger.warn({}, 'Enable Banking callback reached while bank connections are disabled');
-    res.redirect(ENABLE_BANKING_CALLBACK_REDIRECT_URL({ status: 'error' }));
-    return;
-  }
-
   const {
     query: { code, error, state },
   } = await zParse(enableBankingCallbackRequestSchema, req);
@@ -67,7 +57,7 @@ export async function enableBankingCallback(req: Request, res: Response) {
       { enableBankingConnectionKey: connection.enableBankingConnectionKey, error },
       'Enable Banking callback returned a provider error',
     );
-    res.redirect(ENABLE_BANKING_CALLBACK_REDIRECT_URL({ status: 'error' }));
+    res.redirect(ENABLE_BANKING_CALLBACK_REDIRECT_URL({ returnTo: connection.returnTo, status: 'error' }));
     return;
   }
 
@@ -77,7 +67,7 @@ export async function enableBankingCallback(req: Request, res: Response) {
       { enableBankingConnectionKey: connection.enableBankingConnectionKey },
       'Enable Banking callback missing both code and error',
     );
-    res.redirect(ENABLE_BANKING_CALLBACK_REDIRECT_URL({ status: 'error' }));
+    res.redirect(ENABLE_BANKING_CALLBACK_REDIRECT_URL({ returnTo: connection.returnTo, status: 'error' }));
     return;
   }
 
@@ -91,7 +81,7 @@ export async function enableBankingCallback(req: Request, res: Response) {
     const session = await client.exchangeSession(code);
     sessionAccounts = session.accounts;
 
-    // Real, provider-returned values only — never recomputed/hardcoded (plan §2/§3).
+    // Real, provider-returned values only — never recomputed/hardcoded.
     // `maxConsentValiditySeconds` is carried forward from the real per-bank
     // `GET /aspsps` lookup `startBankConnection` already made; Enable Banking's
     // session-exchange response doesn't repeat it.
@@ -108,19 +98,17 @@ export async function enableBankingCallback(req: Request, res: Response) {
       { enableBankingConnectionKey: connection.enableBankingConnectionKey, providerResponse },
       'Enable Banking session exchange failed',
     );
-    res.redirect(ENABLE_BANKING_CALLBACK_REDIRECT_URL({ status: 'error' }));
+    res.redirect(ENABLE_BANKING_CALLBACK_REDIRECT_URL({ returnTo: connection.returnTo, status: 'error' }));
     return;
   }
 
-  // Phase 1d: the bank connection itself has already succeeded above (status is `linked` and
+  // The bank connection itself has already succeeded above (status is `linked` and
   // committed) — everything from here on is "kick off the first sync," which is best-effort with
   // respect to *this redirect*. A failure here must not turn a genuinely-linked bank connection
   // into an `error` redirect: the user's consent is real and WonderMoney's own polling/enqueue
-  // machinery can be retried independently of the provider round-trip that just succeeded. This
-  // mirrors `sendBankConnectedConfirmation` in the GoCardless `bankConnectionCallback` being
-  // best-effort/non-blocking, but goes one step further since GoCardless's equivalent enqueue
-  // failure *does* still change the redirect (it has a `sync` query param the frontend polls;
-  // Enable Banking's redirect helper doesn't carry one yet, see `ENABLE_BANKING_CALLBACK_REDIRECT_URL`).
+  // machinery can be retried independently of the provider round-trip that just succeeded. (The
+  // redirect carries no `sync` query param for the frontend to poll, see
+  // `ENABLE_BANKING_CALLBACK_REDIRECT_URL`.)
   try {
     const accountResult = await createInitialEnableBankingAccounts(DI.em, connection, sessionAccounts);
     if (accountResult.accountsCreated > 0) {
@@ -144,5 +132,5 @@ export async function enableBankingCallback(req: Request, res: Response) {
     );
   }
 
-  res.redirect(ENABLE_BANKING_CALLBACK_REDIRECT_URL({ status: 'success' }));
+  res.redirect(ENABLE_BANKING_CALLBACK_REDIRECT_URL({ returnTo: connection.returnTo, status: 'success' }));
 }

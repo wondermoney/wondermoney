@@ -7,9 +7,9 @@ import { themeTokens } from '@/theme/tokens'
 import { textStyles } from '@/theme/typography'
 
 /**
- * The app previously had no error boundary anywhere in its tree: an uncaught
- * render-time throw unmounted everything with no fallback UI and no signal,
- * appearing as a blank/frozen screen. This is the last line of defense — it
+ * Without an error boundary, an uncaught render-time throw unmounts everything
+ * with no fallback UI and no signal, appearing as a blank/frozen screen. This
+ * is the last line of defense — it
  * always renders *something* and always reports through the existing
  * `captureError` boundary, whether or not Sentry is active for this build.
  *
@@ -19,8 +19,8 @@ import { textStyles } from '@/theme/typography'
  * threw, rendering it here throws again.
  *
  * Static token values are a different matter and are used: they are frozen
- * data, they cannot throw, and without them this screen was light-only and
- * ignored the theme entirely.
+ * data, they cannot throw, and without them this screen would be light-only
+ * and ignore the theme entirely.
  */
 type State = { error: Error | null }
 

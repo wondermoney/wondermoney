@@ -31,22 +31,22 @@ class AccountCsvCategorizationService {
     const mapped = await this.pickUniqueCategory(em, mappings.map((item: AppuserMerchantCategory) => item.categoryKey), appuser);
     if (mapped) return this.persist(em, appuser, transaction, mapped, 'user_mapping');
     // Mappings exist but none resolved to a unique valid category — that's `category_invalid`, not an
-    // ambiguous *merchant-name* match (`merchant_ambiguous`). Matches the deterministic categorizer's vocab (RAD-413).
+    // ambiguous *merchant-name* match (`merchant_ambiguous`). Matches the deterministic categorizer's vocab.
     if (mappings.length > 0) return { assigned: false, reason: 'category_invalid' };
 
-    // Stats scoped to THIS user (RAD-342 G4) — a household co-member's votes must not leak in. Fail
+    // Stats scoped to THIS user — a household co-member's votes must not leak in. Fail
     // closed if the user is absent (MikroORM would strip an `undefined` where-value and widen the
     // read to every member's votes).
     if (!isPresentAppuserKey(appuser)) return { assigned: false, reason: 'merchant_no_mapping' };
     const stats = await em.find(TransactionCategoryStats, { appuserKey: appuser, deletedAt: undefined, transactionMerchantKey: merchant });
     if (stats.length === 0) return { assigned: false, reason: 'merchant_no_mapping' };
-    // Recency-weighted winner (RAD-342 G2) — matches the deterministic categorizer so synced and
+    // Recency-weighted winner — matches the deterministic categorizer so synced and
     // imported transactions resolve identically.
     const top = pickRecencyWeightedTopStat(stats) ?? undefined;
     if (!top) return { assigned: false, reason: 'stats_tie' };
     const category = await this.pickUniqueCategory(em, [top.categoryKey], appuser);
     // A unique top stat was found but its category didn't resolve to a valid one — that's
-    // `category_invalid`, not a tie (a genuine tie is the `!top` case above). Matches the deterministic vocab (RAD-413).
+    // `category_invalid`, not a tie (a genuine tie is the `!top` case above). Matches the deterministic vocab.
     if (!category) return { assigned: false, reason: 'category_invalid' };
     return this.persist(em, appuser, transaction, category, 'stats_top_count');
   }
@@ -74,7 +74,7 @@ class AccountCsvCategorizationService {
 }
 
 // `appuser` arrives here typed `unknown`, so guard at runtime before it scopes the per-user stats
-// read (RAD-342 G4) — a missing key would otherwise be stripped by MikroORM into an unscoped,
+// read — a missing key would otherwise be stripped by MikroORM into an unscoped,
 // cross-member query.
 function isPresentAppuserKey(appuser: unknown): boolean {
   return typeof appuser === 'object' && appuser !== null && 'appuserKey' in appuser && (appuser as { appuserKey?: unknown }).appuserKey != null;

@@ -75,9 +75,9 @@ describe('BankRecoveryService', () => {
     expect(await h.service.claim(3, 'job-3', 60_000)).toBeNull();
   });
 
-  // The RAD-178 rollout gate was removed: a claim always records LIVE as the
-  // authorizing mode, regardless of the retired BANK_RECOVERY_MODE flag, the app
-  // env, or the delivery's historical enrollment treatment.
+  // Bank recovery has no rollout gate: a claim always records LIVE as the
+  // authorizing mode, whatever BANK_RECOVERY_MODE, the app env, or the
+  // delivery's enrollment treatment say.
   it.each([
     ['production live env', { APP_ENV: 'production', BANK_RECOVERY_MODE: 'live' }],
     ['staging with the flag off', { APP_ENV: 'staging', BANK_RECOVERY_MODE: 'off' }],

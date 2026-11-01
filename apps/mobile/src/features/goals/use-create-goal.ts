@@ -10,7 +10,7 @@ import { goalCreateUnknownKey, goalsKey } from './query-keys'
 export type GoalCreateFailure = 'validation' | 'demo' | 'access' | 'mfa' | 'request' | 'cancelled' | 'unknown' | 'general'
 export type GoalCreateUnknownGate = Readonly<{ payload: Readonly<GoalCreateWrite> }>
 
-export class GoalCreateBlockedError extends Error {
+class GoalCreateBlockedError extends Error {
   constructor() {
     super('Goal creation is blocked after an unknown outcome for this session.')
     this.name = 'GoalCreateBlockedError'

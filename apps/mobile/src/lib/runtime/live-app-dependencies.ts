@@ -16,7 +16,7 @@ import type { ErrorReportingConfig } from '@/lib/telemetry/error-reporting'
 import type { AppStatePort } from '../auth/session-lifecycle'
 
 /** The Expo URL scheme better-auth uses for OAuth/recovery deep links. */
-export const AUTH_SCHEME = 'wondermoney'
+const AUTH_SCHEME = 'wondermoney'
 
 export type LiveAppDependencies = Readonly<{
   auth: AppAuthAdapter

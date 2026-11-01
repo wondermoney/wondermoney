@@ -9,7 +9,7 @@ import { Button } from "../ui/button";
 
 interface BankListProps {
   // `logo` is nullable per the Enable Banking contract — not every institution
-  // Enable Banking returns has one, unlike GoCardless which always did.
+  // Enable Banking returns has one.
   bankList: { id: string; logo: string | null; name: string }[];
   onClick: (id: string) => void;
 }

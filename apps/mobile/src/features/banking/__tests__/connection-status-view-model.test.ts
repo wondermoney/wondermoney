@@ -43,7 +43,7 @@ describe('mapBankConnections', () => {
     expect(mapBankConnections([])).toEqual([])
   })
 
-  it('normalizes an undefined connectionId to null (RAD-501: server has not shipped the field yet)', () => {
+  it('normalizes an undefined connectionId to null when the server omits the field', () => {
     const [row] = mapBankConnections([dto()])
     expect(row!.connectionId).toBeNull()
   })

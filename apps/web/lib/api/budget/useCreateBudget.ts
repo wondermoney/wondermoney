@@ -15,10 +15,6 @@ export interface BudgetCreateRequest {
   incomes: Income[];
 }
 
-export interface BudgetCreateResponse {
-  budgetKey: number;
-}
-
 const useCreateBudget = () => {
   return useMutation({
     mutationFn: ({

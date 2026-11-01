@@ -1,11 +1,11 @@
-import { Entity, ManyToOne, PrimaryKey, Property, Unique } from '@mikro-orm/core';
 import type { Rel } from '@mikro-orm/core';
+import { Entity, ManyToOne, PrimaryKey, Property, Unique } from '@mikro-orm/decorators/legacy';
 
 import { Base } from './BaseEntity';
 import { Tenant } from './Tenant';
 
 /**
- * Per-tenant, per-day reservation counter for the DeepSeek transaction-enrichment pipeline (RAD-414).
+ * Per-tenant, per-day reservation counter for the DeepSeek transaction-enrichment pipeline.
  *
  * One row per (tenant, UTC calendar day). `reservedCount` is incremented atomically before every
  * model call via `reserveTransactionEnrichmentBudget`; the unique (tenant_key, day) constraint is

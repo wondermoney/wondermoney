@@ -8,7 +8,7 @@ import { createFinancialsEndpoint, isValidSymbol } from './markets-contract'
 import { financialsKey } from './query-keys'
 
 /**
- * RAD-512 — periodic income statement. `staleTime` mirrors the API's own `/financials` cache
+ * Periodic income statement. `staleTime` mirrors the API's own `/financials` cache
  * window (3 days, see routes/v1/financial-markets.ts) — this data changes on a quarterly
  * reporting cadence, not intraday.
  */

@@ -28,10 +28,25 @@ APP_URL=https://money.example.com
 API_URL=https://api.money.example.com
 AUTH_COOKIE_DOMAIN=.example.com
 NEXT_PUBLIC_AUTH_COOKIE_DOMAIN=.example.com
+TRUST_PROXY=1
 ```
 
 Then run `docker compose up -d` again. The cookie domain lets the web app read the sign-in session the API sets, because they are on different subdomains of the same domain.
 
+## Tell the API about the proxy
+
+The API limits how often each visitor can try to sign in, and tells visitors apart by their IP address. Behind a proxy, every request arrives from the proxy's address, and the visitor's own address comes in the `X-Forwarded-For` header. `TRUST_PROXY` says how many proxies the API can believe:
+
+| Setup | `TRUST_PROXY` |
+|---|---|
+| No proxy: browsers connect straight to the API port | leave it empty |
+| One reverse proxy (Caddy, nginx, Traefik, a Cloudflare Tunnel) | `1` |
+| Cloudflare's proxy in front of your own reverse proxy | `2` |
+
+You can also give the proxies' addresses instead of a count, as a comma-separated list of IP addresses or ranges (for example `172.16.0.0/12`).
+
+Leave it empty when there is no proxy: otherwise anyone can write their own `X-Forwarded-For` and get round the limits. Set it when there is one: otherwise everyone shares the proxy's address, and one person retrying a wrong password can lock everyone else out of signing in for a while.
+
 ## Keep the ports private
 
-When the proxy runs on the same machine, bind the published ports to localhost so the containers are only reachable through the proxy. In `docker-compose.yml`, use `127.0.0.1:3000:3000` and `127.0.0.1:3001:3001`.
+When the proxy runs on the same machine, set `BIND_ADDRESS=127.0.0.1` in `.env` and run `docker compose up -d`. The published ports (the web app, the API, and the optional storage and Mailpit) then listen on localhost only, so they are reachable only through the proxy.

@@ -49,12 +49,7 @@ const parseUnitInterval = (name: string, value: string | undefined, fallback: nu
 /**
  * Enrichments a single tenant may cost us per day.
  *
- * Raised from 200 to 600 on 2026-08-22. Two reasons, both concrete rather than aspirational:
- * RAD-580 left a 3,634-row backlog that drains at this rate, and the original 200 was never chosen
- * from data — RAD-425 Slice 3 was meant to set it from observed shadow cost and that step was
- * skipped when write mode shipped early (RAD-444).
- *
- * Still a runway safeguard, not a throughput dial: DeepSeek-V4-Flash is the cheapest model in the
+ * A runway safeguard, not a throughput dial: DeepSeek-V4-Flash is the cheapest model in the
  * stack precisely so this number can be generous. `TRANSACTION_ENRICHMENT_GPT_DAILY_TENANT_BUDGET`
  * overrides it without a redeploy if spend needs pulling back in a hurry.
  */
@@ -84,7 +79,7 @@ const JOB_RETRY_LIMIT = 3;
  */
 const PROMPT_VERSION = 'transaction-enrichment-v1';
 
-// On by default (RAD-414) wherever a model provider is configured (see `services/ai/ai-provider.ts`):
+// On by default wherever a model provider is configured (see `services/ai/ai-provider.ts`):
 // the pipeline enriches uncategorized transactions and applies the model's suggestion (`write`) with
 // no further env var. A server with no provider has it off, so nothing is enqueued only to fail.
 // `TRANSACTION_ENRICHMENT_GPT_ENABLED` remains a single emergency kill switch (set it to `false` to

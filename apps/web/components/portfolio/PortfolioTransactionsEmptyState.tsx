@@ -78,7 +78,7 @@ const PortfolioTransactionsEmptyState: React.FC<
       <div className="overflow-hidden rounded-xl border border-dashed border-border bg-muted/20">
         <div className="flex flex-col gap-3 border-b border-border/70 px-4 py-3 sm:flex-row sm:items-start sm:justify-between">
           <div className="space-y-1">
-            <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+            <p className="text-xs font-medium text-muted-foreground">
               {t("portfolio-transactions-empty-preview-label")}
             </p>
             <div>
@@ -123,7 +123,7 @@ const PortfolioTransactionsEmptyState: React.FC<
                   <td className="px-4 py-3">
                     <span
                       className={cn(
-                        "inline-block rounded border px-1.5 py-0.5 text-[10px] font-medium",
+                        "inline-block rounded border px-1.5 py-0.5 text-[11px] font-medium",
                         typeBadge[tx.type] ?? "",
                       )}
                     >

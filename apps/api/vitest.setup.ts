@@ -16,9 +16,10 @@ import { vi } from 'vitest';
 //     throw; with the real key already loaded it instead performed a *live, billable* HTTP call
 //     to the EODHD market-data provider.
 //
-// `DOTENV_CONFIG_PATH` only affects the `dotenv/config` preload entrypoint, not programmatic
-// `dotenv.config()` calls, so it is not sufficient on its own. Mock the module instead: every
-// call site uses the default export, and a no-op `config()` returns dotenv's own success shape.
+// dotenv 18 also reads `DOTENV_CONFIG_PATH` in programmatic `dotenv.config()` calls, so pointing
+// it at /dev/null is a second line of defence; it would not cover a call that passes its own
+// `path`. Mock the module as well: every call site uses the default export, and a no-op
+// `config()` returns dotenv's own success shape. The mock mirrors dotenv 18's exports.
 process.env['DOTENV_CONFIG_PATH'] = '/dev/null';
 
 vi.mock('dotenv', () => {
@@ -26,7 +27,6 @@ vi.mock('dotenv', () => {
   const api = {
     config: () => result,
     configDotenv: () => result,
-    decrypt: (src: string) => src,
     parse: () => ({}) as Record<string, string>,
     populate: () => undefined,
   };

@@ -13,7 +13,7 @@ export interface GetAccountTypesResponse {
   accountTypes: AccountType[];
 }
 
-export async function getAccountTypes(
+async function getAccountTypes(
   apiClient: AxiosInstance = api,
 ): Promise<GetAccountTypesResponse> {
   const { data } = await apiClient.get<GetAccountTypesResponse>(

@@ -32,7 +32,10 @@ export default function LoansTable({
       },
       {
         accessorKey: "outstandingPrincipal",
-        header: t("table.outstanding"),
+        // A figure column's head sits over its figures, on the right.
+        header: () => (
+          <div className="text-right">{t("table.outstanding")}</div>
+        ),
         cell: ({ row }: { row: { original: LoanListItem } }) => (
           <div className="text-right">
             <Amount

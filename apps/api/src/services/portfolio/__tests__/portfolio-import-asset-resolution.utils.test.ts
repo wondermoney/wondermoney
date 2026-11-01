@@ -7,7 +7,7 @@ import {
 } from '../portfolio-import-asset-resolution.utils';
 
 describe('portfolio import asset resolution utils', () => {
-  it('extracts identity from RAD-86 normalizedJson shape', () => {
+  it('extracts identity from the normalizedJson shape', () => {
     expect(
       extractPortfolioImportAssetIdentity({
         assetName: '  iShares   Core MSCI   World UCITS ETF  ',

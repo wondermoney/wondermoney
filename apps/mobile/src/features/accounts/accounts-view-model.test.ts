@@ -30,6 +30,7 @@ describe('accounts view model', () => {
       primaryCurrencyCode: 'GBP',
       refreshedAt: '2026-07-17T12:00:00.000Z',
       source: 'manual',
+      csvImportFormat: null,
     })
     expect('logoUrl' in result).toBe(false)
   })

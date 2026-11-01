@@ -7,10 +7,8 @@ const MUTATING_METHODS = new Set(['DELETE', 'PATCH', 'POST', 'PUT']);
 const EXEMPT_PATH_PREFIXES = ['/v1/admin', '/v1/internal'];
 // better-auth's session cookie is `better-auth.session_token`, optionally carrying a
 // `__Secure-`/`__Host-` prefix (https) and `.0`/`.1` chunk suffixes when the value is
-// large — so match on the stable core name to cover every variant. The legacy Supabase
-// cookie (`sb-<ref>-auth-token`) is kept only for the migration overlap window (RAD-283).
+// large — so match on the stable core name to cover every variant.
 const BETTER_AUTH_SESSION_COOKIE = 'better-auth.session_token';
-const LEGACY_SUPABASE_COOKIE_PREFIX = 'sb-';
 // Any local port, not just the fixed list above — see isCsrfOriginAllowed().
 const LOCALHOST_ORIGIN_PATTERN = /^http:\/\/localhost:\d+$/;
 
@@ -44,7 +42,7 @@ export function getCsrfAllowedOrigins(env: NodeJS.ProcessEnv = process.env) {
  * CSRF_ALLOWED_ORIGINS override configured, any `http://localhost:<port>`
  * origin is accepted. A dev/QA session running the web app on a
  * non-default port (e.g. because the default port is already taken) would
- * otherwise get a hard 401 on every signup/login callback — see RAD-629.
+ * otherwise get a hard 401 on every signup/login callback.
  * The explicit env-var override, when set, remains authoritative and is
  * never widened.
  */
@@ -65,11 +63,7 @@ function hasCookieAuth(req: Request) {
   const cookies = req.cookies as unknown;
   if (!cookies || typeof cookies !== 'object') return false;
 
-  return Object.keys(cookies).some(
-    (cookieName) =>
-      cookieName.includes(BETTER_AUTH_SESSION_COOKIE) ||
-      (cookieName.startsWith(LEGACY_SUPABASE_COOKIE_PREFIX) && cookieName.includes('-auth-token')),
-  );
+  return Object.keys(cookies).some((cookieName) => cookieName.includes(BETTER_AUTH_SESSION_COOKIE));
 }
 
 function isExemptPath(path: string) {

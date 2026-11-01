@@ -1,5 +1,6 @@
 import { z } from 'zod';
 
+import { EnableBankingReturnTo } from '@app/types/enable-banking-return-to';
 import { canonicalUuidV4, positiveIntId } from '@validators/shared';
 
 export const startBankConnectionRequestSchema = z.object({
@@ -7,16 +8,10 @@ export const startBankConnectionRequestSchema = z.object({
     bankId: z.string(),
   }),
   query: z.object({
+    /** Ignored. Sent by older mobile builds. */
     redirectPage: z.string().optional().default('accounts'),
-  }),
-});
-
-export const bankConnectionCallbackRequestSchema = z.object({
-  query: z.object({
-    details: z.string().optional(),
-    error: z.string().optional(),
-    redirectPage: z.string().optional().default('accounts'),
-    ref: z.string(),
+    /** The client to send the browser back to after consent; anything else means the web app. */
+    returnTo: z.enum(EnableBankingReturnTo).optional().catch(undefined),
   }),
 });
 

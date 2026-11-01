@@ -28,7 +28,7 @@ export default function AccountsCashflowChart({
 
   // Bars carry magnitude, so the scale has to include zero: left to itself
   // Recharts framed a single -€120 month as -122…-118 and the bar filled the
-  // whole canvas with no baseline to read it against (RAD-615).
+  // whole canvas with no baseline to read it against.
   const values = chartData.map((item) => item.amount);
   const yTicks = niceTicks(
     Math.min(0, ...values),

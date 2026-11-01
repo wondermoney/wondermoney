@@ -42,14 +42,14 @@ describe('AssistantToolsService', () => {
   });
 
   it('creates exactly the policy-approved tool map', () => {
-    const tools = AssistantToolsService.createTools({ appuserKey: 1, consentVersion: 1, conversationId: 'conversation-1', tenantKey: 2 });
+    const tools = AssistantToolsService.createTools({ appuserKey: 1, consentVersion: 1, conversationId: 'conversation-1', currency: 'EUR', tenantKey: 2 });
     expect(Object.keys(tools)).toEqual([...DEFAULT_ALLOWED_TOOLS]);
   });
 
   it('creates only configured known tools when allowlist is restricted', () => {
     process.env['ASSISTANT_ALLOWED_TOOLS'] = 'get_cashflow_summary,get_all_transactions';
 
-    const tools = AssistantToolsService.createTools({ appuserKey: 1, consentVersion: 1, conversationId: 'conversation-1', tenantKey: 2 });
+    const tools = AssistantToolsService.createTools({ appuserKey: 1, consentVersion: 1, conversationId: 'conversation-1', currency: 'EUR', tenantKey: 2 });
 
     expect(Object.keys(tools)).toEqual(['get_cashflow_summary']);
   });
@@ -61,17 +61,17 @@ describe('AssistantToolsService', () => {
   it('returns privacy-minimizing deterministic output without context identifiers', async () => {
     mocked.em.find.mockResolvedValueOnce([]);
 
-    const tools = AssistantToolsService.createTools({ appuserKey: 1, consentVersion: 1, conversationId: 'conversation-secret', tenantKey: 2 });
+    const tools = AssistantToolsService.createTools({ appuserKey: 1, consentVersion: 1, conversationId: 'conversation-secret', currency: 'EUR', tenantKey: 2 });
     const result = await (tools.get_cashflow_summary as unknown as CashflowTool).execute({ period: 'current_month' }, {});
 
     expect(JSON.stringify(result)).not.toContain('conversation-secret');
-    expect(result).toEqual({ data: { inflow: 0, net: 0, outflow: 0 }, dataUsed: { granularity: 'month', period: 'current_month', recordCount: 0, source: 'database' } });
+    expect(result).toEqual({ data: { currency: 'EUR', inflow: 0, net: 0, outflow: 0 }, dataUsed: { granularity: 'month', period: 'current_month', recordCount: 0, source: 'database' } });
   });
 
   it('logs tool execution with safe summary metadata', async () => {
     mocked.em.find.mockResolvedValueOnce([]);
 
-    const tools = AssistantToolsService.createTools({ appuserKey: 99, consentVersion: 7, conversationId: 'conversation-7', tenantKey: 42 });
+    const tools = AssistantToolsService.createTools({ appuserKey: 99, consentVersion: 7, conversationId: 'conversation-7', currency: 'EUR', tenantKey: 42 });
     await (tools.get_cashflow_summary as unknown as CashflowTool).execute({ period: 'current_month' }, {});
 
     expect(mocked.log).toHaveBeenCalledWith(mocked.em, expect.objectContaining({
@@ -96,7 +96,7 @@ describe('AssistantToolsService', () => {
   it('keeps filtered tools unavailable', () => {
     process.env['ASSISTANT_ALLOWED_TOOLS'] = 'get_cashflow_summary';
 
-    const tools = AssistantToolsService.createTools({ appuserKey: 1, consentVersion: 1, conversationId: 'conversation-1', tenantKey: 2 });
+    const tools = AssistantToolsService.createTools({ appuserKey: 1, consentVersion: 1, conversationId: 'conversation-1', currency: 'EUR', tenantKey: 2 });
 
     expect(tools).not.toHaveProperty('query_database');
   });

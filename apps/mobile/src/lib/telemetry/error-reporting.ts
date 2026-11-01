@@ -1,17 +1,17 @@
 /**
- * RAD-517 — crash/error reporting boundary, bound by `docs/telemetry-adr-sentry.md`.
+ * Crash/error reporting boundary, bound by `docs/telemetry-adr-sentry.md`.
  *
  * The ADR is the spec, not a guideline. Its central rule is that a call site has
  * nowhere to put anything: `captureError` takes one argument and it is the error
  * itself. There is no second parameter, so `captureError(error, { extra: {
  * accountId } })` — the exact leak the ADR names — does not compile. That is the
- * same technique RAD-518 used for PostHog (an event allowlist as a type rather
+ * same technique `analytics.ts` uses for PostHog (an event allowlist as a type rather
  * than a convention), applied to the one shape Sentry's own API leaves open.
  *
  * Deliberately absent: `setUser`, `setTag`, `setContext`, `setExtra`,
  * `addBreadcrumb`, and any way to reach the Sentry scope. The ADR leaves user
  * identification unapproved and custom context unapproved, so this boundary
- * exposes no surface that could carry an email, a Supabase user ID, a device
+ * exposes no surface that could carry an email, a user ID, a device
  * identifier, an account/portfolio ID, an amount, or user-authored text.
  *
  * This module never imports the Sentry SDK; the vendor client is injected as an
@@ -63,12 +63,9 @@ export type ErrorReportingConfig = Readonly<{ environment: string }>
  * approved environment paired with a real client yields the disabled reporter,
  * which is inert: no queue, no offline cache, no network, no global handlers.
  *
- * The gate is literally RAD-518's, imported rather than re-implemented. Two
- * allowlists that have to be kept in step is exactly the "second gating
- * mechanism" this ticket rules out: when the approved-environment set changes it
- * has to change for both vendors at once, including the day `env.ts` grows a
- * `production` branch, which that function already refuses without anyone having
- * to remember to come back here.
+ * The gate is the analytics one, imported rather than re-implemented, so there
+ * are never two allowlists to keep in step: when the approved-environment set
+ * changes it changes for both vendors at once.
  */
 export function createErrorReporting(
   input: Readonly<{ environment: string; client: ErrorReporterPort | null }>,

@@ -13,13 +13,29 @@ describe('recurring API contracts', () => {
   })
   it.each([
     ['number account relation', { ...recurringItemFixture, accountKey: 2 }],
-    ['currency symbol', { ...recurringItemFixture, currency: { currencyKey: 1, code: 'EUR', symbol: '€' } }],
     ['invalid currency code', { ...recurringItemFixture, currency: { currencyKey: 1, code: 'eur' } }],
     ['non-finite money', { ...recurringItemFixture, expectedAmount: Infinity }],
-    ['unknown enum', { ...recurringItemFixture, cadence: 'daily' }],
+    ['non-string enum', { ...recurringItemFixture, cadence: 7 }],
     ['invalid date', { ...recurringItemFixture, lastSeenAt: 'yesterday' }],
   ])('rejects %s', (_name, item) => {
     expect(recurringItemsResponseSchema.safeParse({ items: [item] }).success).toBe(false)
+  })
+  it('keeps parsing when the API adds fields or enum values', () => {
+    const [item] = recurringItemsResponseSchema.parse({ items: [{
+      ...recurringItemFixture,
+      currency: { currencyKey: 1, code: 'EUR', symbol: '€' },
+      cadence: 'daily',
+      type: 'membership',
+      status: 'snoozed',
+      source: 'imported',
+      amountType: 'tiered',
+      newField: true,
+    }] }).items
+    expect(item).toMatchObject({ cadence: 'unknown', type: 'unknown', status: 'unknown', source: 'unknown', amountType: 'unknown' })
+    expect(item!.currency).toEqual({ currencyKey: 1, code: 'EUR' })
+    expect(item).not.toHaveProperty('newField')
+    expect(recurringSummarySchema.parse({ ...recurringSummaryFixture, annualTotal: 1 })).not.toHaveProperty('annualTotal')
+    expect(recurringDetectionResponseSchema.parse({ created: 0, updated: 0, skipped: 0, extra: 1 })).toEqual({ created: 0, updated: 0, skipped: 0 })
   })
   it('rejects wrapped, partial, and non-finite summaries', () => {
     expect(recurringSummarySchema.safeParse({ summary: recurringSummaryFixture }).success).toBe(false)
@@ -44,7 +60,6 @@ describe('recurring API contracts', () => {
       { created: 0.5, updated: 0, skipped: 0 },
       { created: Number.POSITIVE_INFINITY, updated: 0, skipped: 0 },
       { created: Number.MAX_SAFE_INTEGER + 1, updated: 0, skipped: 0 },
-      { created: 0, updated: 0, skipped: 0, extra: 1 },
       { created: 0, updated: 0 },
     ]) expect(recurringDetectionResponseSchema.safeParse(response).success).toBe(false)
   })

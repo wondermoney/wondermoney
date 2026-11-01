@@ -1,5 +1,5 @@
-import { Entity, Enum, Filter, Index, ManyToOne, PrimaryKey, Property } from '@mikro-orm/core';
 import type { Rel } from '@mikro-orm/core';
+import { Entity, Enum, Filter, Index, ManyToOne, PrimaryKey, Property } from '@mikro-orm/decorators/legacy';
 
 import { TENANT_FILTER, tenantScopedCond } from '../filters/tenant-filter';
 
@@ -75,6 +75,14 @@ export class GoalActivity extends Base {
 
   @ManyToOne({ cascade: [], entity: () => Transaction, fieldName: 'transaction_key', nullable: true })
   transactionKey?: Rel<Transaction>;
+
+  /**
+   * Read-time flag, not a column: set by the activity feed on a `spent_from_goal` entry whose
+   * transaction has since expired while the goal still funds it. See
+   * `GoalService.getGoalActivity`.
+   */
+  @Property({ persist: false })
+  transactionExpired?: boolean;
 
   @Enum(() => GoalActivityType)
   type!: GoalActivityType;

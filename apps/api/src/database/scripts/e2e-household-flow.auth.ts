@@ -1,5 +1,5 @@
 /**
- * RAD-343 (D1) — better-auth identity/token helper for `e2e-household-flow.sh`.
+ * better-auth identity/token helper for `e2e-household-flow.sh`.
  *
  * The household e2e proof used to provision users through the Supabase admin API and
  * exchange passwords for Supabase access tokens. Post better-auth there is no such
@@ -58,7 +58,8 @@ async function main(): Promise<void> {
     const baseUrl = process.env['API_URL'] ?? 'http://localhost:3001';
     const response = await fetch(`${baseUrl}/api/auth/sign-in/email`, {
       body: JSON.stringify({ email, password }),
-      headers: { 'Content-Type': 'application/json' },
+      // better-auth refuses a fetch-initiated sign-in without an Origin; the web app's is trusted.
+      headers: { 'Content-Type': 'application/json', Origin: process.env['APP_URL'] ?? 'http://localhost:3000' },
       method: 'POST',
     });
     if (!response.ok) return fail(`sign-in failed with HTTP ${response.status}`);

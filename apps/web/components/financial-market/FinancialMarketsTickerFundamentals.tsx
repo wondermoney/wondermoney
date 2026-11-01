@@ -16,7 +16,6 @@ import { useFormatCurrency } from "@/lib/utils/useFormatCurrency";
 import { useFormatNumber } from "@/lib/utils/useFormatNumber";
 import { useFormatPercentage } from "@/lib/utils/useFormatPercentage";
 
-import appendSign from "../../lib/utils/appendSign";
 
 interface FinancialMarketsTickerFundamentalsProps {
   ticker: string;
@@ -25,7 +24,7 @@ interface FinancialMarketsTickerFundamentalsProps {
 // The provider occasionally returns a non-empty but unparseable `nextEarningsDate`.
 // A bare `Intl.DateTimeFormat().format(new Date(bad))` throws `RangeError: Invalid time
 // value` mid-render — which, unguarded, takes down the whole fundamentals card. Guard the
-// parse and fall back to "-" so a bad date degrades gracefully instead of throwing (RAD-367).
+// parse and fall back to "-" so a bad date degrades gracefully instead of throwing.
 function formatEarningsDate(
   value: string | null | undefined,
   locale: string,
@@ -33,7 +32,7 @@ function formatEarningsDate(
   if (!value) return "-";
   const date = new Date(`${value}T00:00:00`);
   if (Number.isNaN(date.getTime())) return "-";
-  // RAD-575 — locale is passed in rather than left `undefined`, which resolved
+  // Locale is passed in rather than left `undefined`, which would resolve
   // to the runtime's rather than the reader's.
   return new Intl.DateTimeFormat(locale, {
     year: "numeric",
@@ -79,7 +78,7 @@ const FinancialMarketsTickerFundamentals: React.FC<
   } = useTickerInfo(ticker);
   // Fundamentals sit behind a market-data tier this plan does not have, so this
   // panel falls back to the statistics a year of end-of-day prices can answer
-  // on its own rather than rendering an empty box (RAD-609).
+  // on its own rather than rendering an empty box.
   const isFundamentalsNotCovered = isMarketDataNotCovered(fundamentalsError);
   const { statistics, isLoading: isLoadingStatistics } = useTickerPriceStatistics(
     ticker,
@@ -142,12 +141,14 @@ const FinancialMarketsTickerFundamentals: React.FC<
                 <span
                   className={getDeltaClassName(statistics.yearChangePercentage)}
                 >
-                  {appendSign(
-                    statistics.yearChangePercentage.toFixed(2),
-                    true,
-                    true,
-                  )}{" "}
-                  %
+                  {formatPercentage(
+                    statistics.yearChangePercentage / 100,
+                    {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                    signDisplay: "exceptZero",
+                  },
+                  )}
                 </span>
               ) : (
                 "-"
@@ -190,8 +191,8 @@ const FinancialMarketsTickerFundamentals: React.FC<
           label={t("market-cap")}
           value={quote.marketCap != null ? formatNumber(quote.marketCap) : "-"}
         />
-        {/* This used to interpolate JSX into a template literal, so it rendered
-            the markup as text: `$<Amount value={quote.yearLow} .../>`. */}
+        {/* A ReactNode, not JSX interpolated into a template literal, which
+            would render the markup as text: `$<Amount value={quote.yearLow} .../>`. */}
         <MetricRow
           label={t("52-week-range")}
           value={

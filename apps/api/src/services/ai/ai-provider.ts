@@ -49,9 +49,7 @@ export function resolveAiRoute(feature: AiFeature, env: Env = process.env): AiRo
 
 function azureDeployment(feature: AiFeature, env: Env): null | string {
   if (feature === 'ocr') return read(env, 'AZURE_OPENAI_OCR_DEPLOYMENT');
-  // Every environment provisions the assistant deployment as AZURE_OPENAI_API_DEPLOYMENT_NAME;
-  // AZURE_OPENAI_DEPLOYMENT is the older name (RAD-622).
-  if (feature === 'assistant') return read(env, 'AZURE_OPENAI_DEPLOYMENT') ?? read(env, 'AZURE_OPENAI_API_DEPLOYMENT_NAME');
+  if (feature === 'assistant') return read(env, 'AZURE_OPENAI_DEPLOYMENT');
   return null;
 }
 

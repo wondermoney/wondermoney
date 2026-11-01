@@ -3,6 +3,7 @@
 import NumberFlow, { Format } from "@number-flow/react";
 import { TrendingDown, TrendingUp } from "lucide-react";
 import { useTranslations } from "next-intl";
+import type { ReactNode } from "react";
 
 import { cn } from "@/lib/utils";
 
@@ -14,6 +15,8 @@ export type StatsItem = {
   changeValue?: string;
   changePositiveDirection?: "up" | "down";
   helperText?: string;
+  /** A caveat about how the value was computed, rendered under it. */
+  notice?: ReactNode;
   unavailableValueLabel?: string;
 };
 
@@ -89,7 +92,15 @@ export default function Stats({ stats }: StatsProps) {
                       format={item.formatOptions}
                     />
                   ) : (
-                    <span className="text-muted-foreground">
+                    <span
+                      className={cn(
+                        "text-muted-foreground",
+                        // A sentence ("Needs more history") is language, not
+                        // a figure: body face, body size, normal weight.
+                        item.unavailableValueLabel &&
+                          "font-sans text-sm font-normal tracking-normal whitespace-normal",
+                      )}
+                    >
                       {/* An em-dash by default, not "N/A" — § 9 rule 3.
                           Callers with something more useful to say (why it is
                           unavailable) still pass their own label. */}
@@ -102,6 +113,7 @@ export default function Stats({ stats }: StatsProps) {
                     {item.helperText}
                   </p>
                 ) : null}
+                {item.notice ?? null}
               </dd>
             </div>
           );

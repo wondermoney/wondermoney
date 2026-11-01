@@ -8,7 +8,7 @@ import { createCompleteOnboardingEndpoint, type OnboardingStateDto } from './onb
 import { onboardingBootstrapKey } from './query-keys'
 
 /**
- * RAD-226 — generation-safe idempotent completion mutation. The server is
+ * Generation-safe idempotent completion mutation. The server is
  * authoritative: a repeated call with the current version is a no-op success
  * and never double-records. `commit(parsed)` runs only while the session
  * generation is current, so a stale response from a retired session can
@@ -43,7 +43,7 @@ export function useCompleteOnboarding() {
       // state, but that gate and `runtime` becoming non-null are not the same
       // render (see use-offline-account-options.ts) — this throw is a
       // defensive invariant on the mutation call itself, not a render-time
-      // one, so it no longer takes the whole app down on that transient frame.
+      // one, so it cannot take the whole app down on that transient frame.
       if (!runtime) throw new Error('useCompleteOnboarding requires an authenticated runtime')
       const commit = (parsed: unknown) => {
         const onboarding = (parsed as { onboarding: OnboardingStateDto } | undefined)?.onboarding
@@ -55,7 +55,7 @@ export function useCompleteOnboarding() {
         { body: input, commit },
       )
     },
-    // RAD-518 — every terminal onboarding path (skip, connect-bank, create-account)
+    // Every terminal onboarding path (skip, connect-bank, create-account)
     // funnels through this one mutation, so the activation event is captured here
     // rather than repeated at three call sites. The server is idempotent, but a
     // repeated call is still a real completion request from a real user, which is

@@ -8,31 +8,14 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import type {
-  PortfolioImportPreviewRow,
-  PortfolioImportSessionPreviewResponse,
-} from "@/lib/api/portfolio/importSessionTypes";
+import type { PortfolioImportSessionPreviewResponse } from "@/lib/api/portfolio/importSessionTypes";
 
+import { PortfolioImportRowDetailList } from "./PortfolioImportRowDetailList";
 import { PortfolioImportStatusBadge } from "./PortfolioImportStatusBadge";
 import { PortfolioImportUnsupportedAssetsAlert } from "./PortfolioImportUnsupportedAssetsAlert";
 
 interface PortfolioImportPreviewStepProps {
   preview?: PortfolioImportSessionPreviewResponse;
-}
-
-function formatRowReason(
-  row: PortfolioImportPreviewRow,
-  t: ReturnType<typeof useTranslations>,
-) {
-  return (
-    row.skipReason ??
-    row.failureReason ??
-    (row.internalTransactionId
-      ? t("portfolio-import-row-existing-transaction", {
-          value: row.internalTransactionId,
-        })
-      : undefined)
-  );
 }
 
 function SummaryMetric({ label, value }: { label: string; value: number }) {
@@ -44,46 +27,6 @@ function SummaryMetric({ label, value }: { label: string; value: number }) {
   );
 }
 
-function RowDetailList({
-  rows,
-  emptyLabel,
-  t,
-}: {
-  emptyLabel: string;
-  rows: PortfolioImportPreviewRow[];
-  t: ReturnType<typeof useTranslations>;
-}) {
-  return rows.length ? (
-    <ul className="grid gap-2">
-      {rows.map((row) => {
-        const rowReason = formatRowReason(row, t);
-
-        return (
-          <li key={row.id} className="flex items-start justify-between gap-3">
-            <div className="min-w-0">
-              <div className="font-mono text-sm tabular-nums text-foreground">
-                {row.rowNumber}
-              </div>
-              {rowReason ? (
-                <div className="text-muted-foreground text-sm leading-5">
-                  {rowReason}
-                </div>
-              ) : null}
-            </div>
-            <div className="text-muted-foreground shrink-0 font-mono text-xs tabular-nums">
-              {row.assetGroupId ? `#${row.assetGroupId}` : "—"}
-            </div>
-          </li>
-        );
-      })}
-    </ul>
-  ) : (
-    <div className="text-muted-foreground rounded-lg border border-dashed px-3 py-4 text-sm">
-      {emptyLabel}
-    </div>
-  );
-}
-
 export function PortfolioImportPreviewStep({
   preview,
 }: PortfolioImportPreviewStepProps) {
@@ -91,6 +34,10 @@ export function PortfolioImportPreviewStep({
   const summary = preview?.summary;
   const status = preview?.status ?? "waiting_for_upload";
   const skippedRows = summary?.userSkippedRows ?? summary?.skippedRows ?? 0;
+  // Only a confirmed import produces failed rows, so the group stays hidden
+  // until there is one rather than sitting empty on every preview.
+  const failedRows = preview?.rows.failed ?? [];
+  const failedCount = summary?.failedRows ?? failedRows.length;
 
   return (
     <section className="flex flex-col gap-3">
@@ -126,9 +73,9 @@ export function PortfolioImportPreviewStep({
       </div>
 
       <div className="flex flex-wrap gap-3 text-xs text-muted-foreground">
-        <span>{t("portfolio-import-ledger-total")} · {summary?.totalRows ?? 0}</span>
-        <span>{t("portfolio-import-ledger-duplicates")} · {summary?.duplicateRows ?? 0}</span>
-        <span>{t("portfolio-import-ledger-invalid")} · {summary?.invalidRows ?? 0}</span>
+        <span className="inline-flex gap-1.5">{t("portfolio-import-ledger-total")} <span className="text-foreground font-mono tabular-nums">{summary?.totalRows ?? 0}</span></span>
+        <span className="inline-flex gap-1.5">{t("portfolio-import-ledger-duplicates")} <span className="text-foreground font-mono tabular-nums">{summary?.duplicateRows ?? 0}</span></span>
+        <span className="inline-flex gap-1.5">{t("portfolio-import-ledger-invalid")} <span className="text-foreground font-mono tabular-nums">{summary?.invalidRows ?? 0}</span></span>
       </div>
 
       <PortfolioImportUnsupportedAssetsAlert
@@ -146,10 +93,9 @@ export function PortfolioImportPreviewStep({
             </span>
           </AccordionTrigger>
           <AccordionContent>
-            <RowDetailList
+            <PortfolioImportRowDetailList
               emptyLabel={t("portfolio-import-details-empty")}
               rows={preview?.rows.needsAssetReview ?? []}
-              t={t}
             />
           </AccordionContent>
         </AccordionItem>
@@ -164,10 +110,9 @@ export function PortfolioImportPreviewStep({
             </span>
           </AccordionTrigger>
           <AccordionContent>
-            <RowDetailList
+            <PortfolioImportRowDetailList
               emptyLabel={t("portfolio-import-details-empty")}
               rows={preview?.rows.duplicate ?? []}
-              t={t}
             />
           </AccordionContent>
         </AccordionItem>
@@ -182,13 +127,31 @@ export function PortfolioImportPreviewStep({
             </span>
           </AccordionTrigger>
           <AccordionContent>
-            <RowDetailList
+            <PortfolioImportRowDetailList
               emptyLabel={t("portfolio-import-details-empty")}
               rows={preview?.rows.invalid ?? []}
-              t={t}
             />
           </AccordionContent>
         </AccordionItem>
+
+        {failedRows.length > 0 || failedCount > 0 ? (
+          <AccordionItem value="failed">
+            <AccordionTrigger className="py-3 text-sm no-underline hover:no-underline">
+              <span className="flex min-w-0 flex-1 items-center justify-between gap-3 text-left">
+                <span>{t("portfolio-import-details-failed")}</span>
+                <span className="text-muted-foreground font-mono text-xs tabular-nums">
+                  {failedCount}
+                </span>
+              </span>
+            </AccordionTrigger>
+            <AccordionContent>
+              <PortfolioImportRowDetailList
+                emptyLabel={t("portfolio-import-details-empty")}
+                rows={failedRows}
+              />
+            </AccordionContent>
+          </AccordionItem>
+        ) : null}
       </Accordion>
     </section>
   );

@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/ban-ts-comment, @eslint-community/eslint-comments/disable-enable-pair */
-// @ts-nocheck
 /**
  * Standalone script to create a test user with realistic data across all features:
  * - Bank account + transactions
@@ -39,6 +37,7 @@ import { TransactionStatus } from '@entity/TransactionStatus';
 import { TransactionType } from '@entity/TransactionType';
 import { normalizeMerchantName } from '@service/transaction/merchant-normalization';
 import { calculateAmountBudgeted, Recurrency } from '@utils/budget';
+import { getRef } from '@utils/em-helpers';
 
 import config from '../../mikro-orm.config';
 import { createUser } from '../utils/better-auth-user';
@@ -444,7 +443,7 @@ async function main() {
     for (const symbol of Object.keys(assets)) {
       const prices = await emSnap.find(
         FinancialAssetPrice,
-        { financialAssetKey: assets[symbol]!.financialAssetKey },
+        { financialAssetKey: assets[symbol]! },
         { orderBy: { date: 'ASC' } },
       );
       pricesBySymbol[symbol] = prices.map((p) => ({ date: p.date, price: p.price }));
@@ -476,8 +475,7 @@ async function main() {
           const assetSymbol = ft.financialAssetKey?.symbol;
 
           if (assetSymbol && !assetSymbol.startsWith('CURRENCY_') && (typeName === 'BUY' || typeName === 'SELL')) {
-            if (!(assetSymbol in holdings)) holdings[assetSymbol] = { quantity: 0, totalCost: 0 };
-            const h = holdings[assetSymbol];
+            const h = (holdings[assetSymbol] ??= { quantity: 0, totalCost: 0 });
             h.quantity += ft.quantity;
             if (typeName === 'BUY') {
               h.totalCost += Math.abs(ft.settlementAmount);
@@ -517,8 +515,8 @@ async function main() {
 
         if (totalValue > 0) {
           const snapshot = new PortfolioSnapshot();
-          snapshot.portfolioKey = emSnap.getReference(Portfolio, portfolio.portfolioKey);
-          snapshot.currencyKey = emSnap.getReference(Currency, eurCurrency.currencyKey);
+          snapshot.portfolioKey = getRef(emSnap, Portfolio, portfolio.portfolioKey);
+          snapshot.currencyKey = getRef(emSnap, Currency, eurCurrency.currencyKey);
           snapshot.snapshotDate = snapshotDate;
           snapshot.totalValue = Math.round(totalValue * 100) / 100;
           snapshot.costBasis = Math.round(costBasis * 100) / 100;

@@ -3,7 +3,7 @@
 import { useTranslations } from "next-intl";
 import type { ReactNode } from "react";
 import { useEffect, useMemo, useState } from "react";
-import { type Control, Controller, useForm } from "react-hook-form";
+import { type Control, Controller, useForm, useWatch } from "react-hook-form";
 
 import {
   Accordion,
@@ -395,7 +395,10 @@ function MappingFieldRow({
               }}
             />
 
-            <div className="hidden justify-center text-muted-foreground text-xs font-medium uppercase tracking-[0.18em] sm:flex">
+            <div
+              aria-hidden="true"
+              className="hidden justify-center text-muted-foreground text-xs font-medium sm:flex"
+            >
               →
             </div>
 
@@ -457,7 +460,10 @@ export function PortfolioImportColumnMappingStep({
 
   const form = useForm<PortfolioImportColumnMappingFormValues>({ defaultValues });
   const hasEmptyOptions = availableColumns.length === 0;
-  const watchedColumnMapping = form.watch("columnMapping");
+  const watchedColumnMapping = useWatch({
+    control: form.control,
+    name: "columnMapping",
+  });
 
   const splitWatchedValues = useMemo(
     () => splitColumnMappingSources(watchedColumnMapping),
@@ -577,9 +583,9 @@ export function PortfolioImportColumnMappingStep({
 
       {attentionFields.length > 0 ? (
         <div>
-          <div className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] gap-2 border-b pb-2 text-[11px] font-medium uppercase tracking-[0.16em] text-muted-foreground">
+          <div className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] gap-2 border-b pb-2 text-xs font-medium text-muted-foreground">
             <div>{t("portfolio-import-column-source")}</div>
-            <div className="text-center">→</div>
+            <div aria-hidden="true" className="text-center">→</div>
             <div>{t("portfolio-import-column-target")}</div>
           </div>
 

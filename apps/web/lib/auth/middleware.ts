@@ -3,11 +3,12 @@ import { type NextRequest, NextResponse } from "next/server";
 
 import { routing } from "@/i18n/routing";
 
-import { getBetterAuthCookiePrefix } from "./cookie-prefix";
-
-const BETTER_AUTH_COOKIE_PREFIX = getBetterAuthCookiePrefix(
-  process.env.NEXT_PUBLIC_API_URL,
-);
+import { getSafeNextPath } from "./safe-next-path";
+import {
+  BETTER_AUTH_COOKIE_PREFIX,
+  expireBetterAuthCookies,
+  isSessionExpiredLogin,
+} from "./stale-session";
 
 /**
  * Optimistic, UX-only session gate. better-auth's session cookie is opaque
@@ -34,9 +35,19 @@ export async function updateSession(
     return response;
   }
 
-  const isLoggedIn = Boolean(
+  const hasSessionCookie = Boolean(
     getSessionCookie(request, { cookiePrefix: BETTER_AUTH_COOKIE_PREFIX }),
   );
+
+  // The authoritative server check rejected this cookie and sent the browser
+  // here. Expire it and show the login page; treating it as signed in
+  // would bounce straight back into the app and loop.
+  if (hasSessionCookie && isSessionExpiredLogin(url, pathAfterLocale)) {
+    expireBetterAuthCookies(request, response);
+    return response;
+  }
+
+  const isLoggedIn = hasSessionCookie;
 
   const isAuthRoute =
     pathAfterLocale === "/auth" || pathAfterLocale.startsWith("/auth/");
@@ -62,21 +73,20 @@ export async function updateSession(
       );
   };
 
-  const buildRedirect = (pathname: string) => {
-    const redirectUrl = url.clone();
-    redirectUrl.pathname = pathname;
-    const redirectResponse = NextResponse.redirect(redirectUrl);
-    copyResponseCookies(redirectResponse);
-    return redirectResponse;
-  };
-
   // Redirect if user is logged in and trying to access the login/signup page
   if (
     isLoggedIn &&
     (pathAfterLocale.startsWith("/auth/login") ||
       pathAfterLocale.startsWith("/auth/signup"))
   ) {
-    return buildRedirect(`/${locale}`);
+    // Already signed in (e.g. a second tab): honour a safe `next` instead of
+    // dropping the user on the home page.
+    const next = getSafeNextPath(url.searchParams.get("next"), url.origin);
+    const signedInResponse = NextResponse.redirect(
+      new URL(next ?? `/${locale}`, url.origin),
+    );
+    copyResponseCookies(signedInResponse);
+    return signedInResponse;
   }
 
   // Redirect if user is not logged in and trying to access a protected page
@@ -86,9 +96,20 @@ export async function updateSession(
     !isJoinRoute &&
     !isFaqRoute
   ) {
+    // Only `next` rides on the login URL: the page's own query string goes
+    // inside it, so /en/accounts?tab=x comes back with its tab. Readers
+    // validate it with getSafeNextPath before redirecting anywhere.
     const loginRedirectUrl = url.clone();
     loginRedirectUrl.pathname = `/${locale}/auth/login`;
-    loginRedirectUrl.searchParams.set("next", url.pathname);
+    loginRedirectUrl.search = "";
+    loginRedirectUrl.hash = "";
+    const isLandingPage = pathAfterLocale === "/" || pathAfterLocale === "";
+    if (!isLandingPage) {
+      loginRedirectUrl.searchParams.set(
+        "next",
+        `/${locale}${pathAfterLocale}${url.search}`,
+      );
+    }
     const redirectResponse = NextResponse.redirect(loginRedirectUrl);
     copyResponseCookies(redirectResponse);
     return redirectResponse;

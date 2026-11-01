@@ -7,7 +7,6 @@ import { getAuthSession } from '@service/auth/better-auth';
 import { UnauthorizedError } from '@utils/errors';
 import logger from '@utils/logger';
 
-import { getBearerToken } from './auth-helpers';
 
 
 interface ApiKeyMatch {
@@ -256,4 +255,4 @@ function serviceAuth(req: Request, _res: Response, next: NextFunction) {
   }
 }
 
-export { adminAuth, getBearerToken, optionalAuth, requireAuth, requireBearerAuth, serviceAuth };
+export { adminAuth, optionalAuth, requireAuth, requireBearerAuth, serviceAuth };

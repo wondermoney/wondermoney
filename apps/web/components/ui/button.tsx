@@ -19,10 +19,9 @@ const buttonVariants = cva(
   // `shrink-0`; fixing the primitive covers all of them and stops it recurring.
   // Deliberately not adding shadcn's `[&_svg]:size-4` — call sites here pick
   // their own sizes (size-3.5 / size-4) and that would override them.
-  // `gap-2` belongs on the primitive, not on call sites. Roughly half of them
-  // remembered it and half did not, so some buttons rendered their icon flush
-  // against the label while others spaced theirs (RAD-606). A call site that wants a different gap still wins
-  // through `cn`, and a lone icon has nothing to gap against.
+  // `gap-2` belongs on the primitive, not on call sites, so every button spaces
+  // its icon from its label the same way. A call site that wants a different
+  // gap still wins through `cn`, and a lone icon has nothing to gap against.
   "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-[color,background-color,border-color,transform] duration-[var(--duration-micro)] ease-out focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50 motion-reduce:transition-none motion-reduce:active:scale-100 [&_svg]:shrink-0",
   {
     variants: {
@@ -129,11 +128,11 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         ref={ref}
         type={type ?? "button"}
         {...props}
-        // After the spread on purpose. A loading button used to stay clickable
-        // — the spinner was decoration over a live control, so any form could
-        // be submitted twice while its first submit was still in flight.
-        // `loading` now wins over an explicit `disabled={false}`, which is the
-        // whole point: a caller cannot re-enable a busy button by accident.
+        // After the spread on purpose. A loading button must not stay
+        // clickable, or a form could be submitted twice while its first submit
+        // is still in flight. `loading` wins over an explicit
+        // `disabled={false}`, which is the whole point: a caller cannot
+        // re-enable a busy button by accident.
         // `aria-busy` says *why* it is unavailable; a disabled control with no
         // explanation just reads as broken.
         disabled={loading || props.disabled}

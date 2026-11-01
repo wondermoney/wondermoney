@@ -7,6 +7,10 @@ describe('report merchants contract', () => {
     expect(transactionMerchantsResponseSchema.parse(fixture)).toEqual(fixture)
   })
 
+  it('strips fields the API adds', () => {
+    expect(transactionMerchantsResponseSchema.parse({ transactionMerchants: [{ transactionMerchantKey: 1, name: 'Amazon', logo: null }], total: 1 })).toEqual({ transactionMerchants: [{ transactionMerchantKey: 1, name: 'Amazon' }] })
+  })
+
   it('rejects a merchant missing required fields', () => {
     expect(transactionMerchantsResponseSchema.safeParse({ transactionMerchants: [{ name: 'Amazon' }] }).success).toBe(false)
   })

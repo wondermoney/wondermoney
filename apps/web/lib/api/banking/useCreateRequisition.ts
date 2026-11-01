@@ -9,29 +9,24 @@ export interface GetCreateRequisitionResponse {
 
 export async function getCreateRequisition(
   bankId: string,
-  page?: string,
   apiClient: AxiosInstance = api,
 ): Promise<GetCreateRequisitionResponse> {
-  const queryParams = page
-    ? `?${new URLSearchParams({ redirectPage: page }).toString()}`
-    : "";
   const { data } = await apiClient.get<GetCreateRequisitionResponse>(
-    `/v1/banking/bank/${bankId}/start${queryParams}`,
+    `/v1/banking/bank/${bankId}/start`,
   );
   return data;
 }
 
 export default function useCreateRequisition<R = GetCreateRequisitionResponse>(
   bankId: string,
-  page?: string,
   options?: Omit<
     UseQueryOptions<GetCreateRequisitionResponse, Error, R>,
     "queryKey" | "queryFn"
   >,
 ) {
   return useQuery({
-    queryKey: ["createRequisition", bankId, page],
-    queryFn: () => getCreateRequisition(bankId, page),
+    queryKey: ["createRequisition", bankId],
+    queryFn: () => getCreateRequisition(bankId),
     ...options,
   });
 }

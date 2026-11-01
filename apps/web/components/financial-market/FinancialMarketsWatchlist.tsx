@@ -15,8 +15,8 @@ import useWatchlist, {
   useToggleWatchlist,
 } from "@/lib/api/financial-markets/useWatchlist";
 import { cn } from "@/lib/utils";
-import appendSign from "@/lib/utils/appendSign";
 import { useFormatCurrency } from "@/lib/utils/useFormatCurrency";
+import { useFormatPercentage } from "@/lib/utils/useFormatPercentage";
 
 import {
   LiveQuoteUnavailableLabel,
@@ -28,6 +28,13 @@ function WatchlistRow({ symbol }: { symbol: string }) {
   const toggleWatchlist = useToggleWatchlist();
   const { data, isLoading, isError } = useTickerQuote(symbol);
   const formatCurrency = useFormatCurrency();
+  const formatPercentage = useFormatPercentage();
+  const formatDayChange = (value: number) =>
+    formatPercentage(value / 100, {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+      signDisplay: "exceptZero",
+    });
 
   return (
     <div className="border-border flex items-center justify-between gap-3 border-b py-3 last:border-b-0">
@@ -53,8 +60,8 @@ function WatchlistRow({ symbol }: { symbol: string }) {
           {t("market-data-unavailable")}
         </Text>
       ) : data.price === null && data.changePercentage === null ? (
-        /* The market-data source we run on carries no live quote (RAD-449),
-           and that is the steady state rather than an outage (RAD-548). Say so
+        /* The market-data source we run on carries no live quote,
+           and that is the steady state rather than an outage. Say so
            in the row itself, calmly, instead of printing a quote of zero — and
            without a spinner or a retry for something that will not recover. */
         <LiveQuoteUnavailableLabel />
@@ -75,23 +82,21 @@ function WatchlistRow({ symbol }: { symbol: string }) {
               className="flex items-center justify-end gap-1 font-mono text-xs tabular-nums"
             >
               {/* Visible period label so the % isn't ambiguous about its
-                  timeframe (RAD-361). */}
-              <span className="text-muted-foreground text-[10px] font-medium tracking-wide">
+                  timeframe. */}
+              <span className="text-muted-foreground text-[11px] font-medium">
                 {t("period-1d")}
               </span>
               <span
-                aria-label={`${t("change-day")}: ${appendSign(
-                  data.changePercentage.toFixed(2),
-                  true,
-                  true,
-                )}%`}
+                aria-label={`${t("change-day")}: ${formatDayChange(
+                  data.changePercentage,
+                )}`}
                 className={cn({
                   "text-success-text": data.changePercentage > 0,
                   "text-destructive-text": data.changePercentage < 0,
                   "text-muted-foreground": data.changePercentage === 0,
                 })}
               >
-                {appendSign(data.changePercentage.toFixed(2), true, true)}%
+                {formatDayChange(data.changePercentage)}
               </span>
             </div>
           ) : null}

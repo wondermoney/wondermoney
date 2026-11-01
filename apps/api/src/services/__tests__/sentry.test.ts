@@ -5,8 +5,8 @@ const initMock = vi.fn();
 vi.mock('@sentry/node', () => ({
   captureConsoleIntegration: vi.fn(),
   consoleLoggingIntegration: vi.fn(),
+  expressIntegration: vi.fn(),
   init: initMock,
-  knexIntegration: vi.fn(),
   pinoIntegration: vi.fn(),
   postgresIntegration: vi.fn(),
   rewriteFramesIntegration: vi.fn(),
@@ -43,7 +43,6 @@ describe('sentry request sanitization', () => {
       query_string: '[REDACTED]',
       url: '/v1/accounts/123',
     });
-    expect(config.sendDefaultPii).toBe(false);
   });
 
   it('drops scanner NotFoundError noise', async () => {

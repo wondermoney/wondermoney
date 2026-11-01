@@ -39,7 +39,7 @@ import logger from '@utils/logger';
 /** Seconds a `created`/`retry` job may wait before the queue counts as stalled. */
 const DEFAULT_BACKLOG_AGE_SECONDS = 1_800;
 
-export const QUEUE_BACKLOG_AGE_SECONDS: Readonly<Record<string, number>> = {
+const QUEUE_BACKLOG_AGE_SECONDS: Readonly<Record<string, number>> = {
   // Once-a-minute drain of an outbox table. A 10-minute-old row means the tick died.
   'analytics.outbox': 600,
   // A 365-day provider pull per job, one slot, fanned out per requisition.

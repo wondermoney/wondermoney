@@ -25,7 +25,7 @@ import { formatGoalCurrency } from "@/lib/goals/format";
 import { Input } from "../ui/input";
 
 const schema = z.object({
-  amount: z.coerce.number(),
+  amount: z.coerce.number<number>(),
 });
 
 type FormValues = z.infer<typeof schema>;
@@ -47,7 +47,7 @@ export default function AssignMoneyDialog({
   const availableQuery = useAvailableToAssign({ enabled: isOpen });
   const availableToAssign = availableQuery.data?.availableToAssign ?? 0;
   const amountSchema = z.coerce
-    .number()
+    .number<number>()
     .gt(0, { message: t("goals.amount-must-be-positive") })
     .max(availableToAssign, {
       message: t("goals.assign-money-insufficient", {

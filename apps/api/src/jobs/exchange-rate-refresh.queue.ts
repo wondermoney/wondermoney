@@ -1,6 +1,6 @@
 export const EXCHANGE_RATE_REFRESH_QUEUE = 'exchange-rate.refresh';
 export const EXCHANGE_RATE_REFRESH_CRON = '30 17 * * 1-5';
-export const EXCHANGE_RATE_REFRESH_SINGLETON_KEY = 'exchange-rate.refresh';
+const EXCHANGE_RATE_REFRESH_SINGLETON_KEY = 'exchange-rate.refresh';
 
 // `retryLimit` was 0, so a single ECB blip lost the whole weekday's rates until the next
 // run — and multi-currency balances drift silently in the meantime. The insert is

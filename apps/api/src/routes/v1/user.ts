@@ -4,7 +4,6 @@ import { getEmailNotificationPreferences, patchEmailNotificationPreferences } fr
 import { deleteEnableBankingCredential, getEnableBankingCredential, saveEnableBankingCredential } from '@controller/enable-banking-credential';
 import { completeOnboarding, getOnboardingBootstrap } from '@controller/onboarding';
 import {
-  completeMfaReenrollment,
   completeOnboardingStep,
   deleteCurrentUserAccount,
   getCurrentUserProfile,
@@ -34,6 +33,5 @@ router.get('/:userId/requisitions', getRequisitions);
 router.get('/:userId/requisition/:requisitionId', getRequisition);
 router.get('/:userId/onboarding', getOnboarding);
 router.post('/:userId/onboarding/:step/complete', completeOnboardingStep);
-router.post('/:userId/mfa-reenrollment/complete', completeMfaReenrollment);
 
 export default router;

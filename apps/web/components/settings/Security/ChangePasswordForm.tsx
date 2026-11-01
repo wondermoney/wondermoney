@@ -52,9 +52,7 @@ export default function ChangePasswordForm({ className }: Props) {
     if (!user || !user.email) return;
 
     // better-auth's `changePassword` verifies the current password and
-    // rotates the credential in one call, replacing the old
-    // signInWithPassword-then-updateUser two-step (which relied on Supabase
-    // re-authenticating as a side effect). Revoking other sessions on
+    // rotates the credential in one call. Revoking other sessions on
     // change is the safer default when a password is updated.
     const { error } = await authClient.changePassword({
       currentPassword: values.currentPassword,
@@ -81,7 +79,7 @@ export default function ChangePasswordForm({ className }: Props) {
 
   return (
     <Form {...form}>
-      <form
+      <form method="post"
         className={cn("space-y-6", className)}
         onSubmit={form.handleSubmit(onSubmit)}
       >

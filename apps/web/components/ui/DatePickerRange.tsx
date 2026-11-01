@@ -8,8 +8,8 @@ import {
   subMonths,
 } from "date-fns";
 import { Calendar as CalendarIcon } from "lucide-react";
-import { useLocale,useTranslations } from "next-intl";
-import { DateRange, type SelectRangeEventHandler } from "react-day-picker";
+import { useLocale, useTranslations } from "next-intl";
+import type { DateRange, OnSelectHandler } from "react-day-picker";
 
 import { Calendar } from "@/components/ui/Calendar";
 import { cn } from "@/lib/utils";
@@ -19,7 +19,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "./popover";
 
 interface DatePickerWithRangeProps {
   value?: DateRange;
-  onSelect: SelectRangeEventHandler;
+  onSelect: OnSelectHandler<DateRange | undefined>;
 }
 
 const DatePickerWithRange: React.FC<DatePickerWithRangeProps> = ({
@@ -27,7 +27,7 @@ const DatePickerWithRange: React.FC<DatePickerWithRangeProps> = ({
   onSelect,
 }) => {
   const t = useTranslations();
-  // RAD-575 — the reader's calendar, not the runtime's.
+  // The reader's calendar, not the runtime's.
   const locale = useLocale();
   const formatDate = (date: Date) =>
     new Intl.DateTimeFormat(locale, { dateStyle: "medium" }).format(date);
@@ -90,13 +90,13 @@ const DatePickerWithRange: React.FC<DatePickerWithRangeProps> = ({
         <Button
           id="date"
           variant="secondary"
-          // `sm`, matching the page actions above it. The toolbar used to mix
-          // two heights — 36px for Import/Add and 40px here and on Filters —
-          // with 12px and 16px of padding, so four controls in one header sat
-          // at two sizes.
+          // `sm`, matching the page actions above it (Import/Add, Filters), so
+          // every control in the toolbar sits at one height.
           size="sm"
           className={cn(
-            "w-[270px] justify-start text-left font-normal",
+            // Grows with the label: "27 de ago. de 2026 – 26 de out. de 2026" ran
+            // past a fixed 270px in Portuguese.
+            "w-auto max-w-full min-w-[270px] justify-start text-left font-normal",
             !value && "text-muted-foreground",
           )}
         >
@@ -104,7 +104,7 @@ const DatePickerWithRange: React.FC<DatePickerWithRangeProps> = ({
           {value?.from ? (
             value.to ? (
               <>
-                {formatDate(value.from)} - {formatDate(value.to)}
+                {formatDate(value.from)} – {formatDate(value.to)}
               </>
             ) : (
               formatDate(value.from)
@@ -145,7 +145,7 @@ const DatePickerWithRange: React.FC<DatePickerWithRangeProps> = ({
             ))}
           </div>
           <Calendar
-            initialFocus
+            autoFocus
             mode="range"
             defaultMonth={value?.from}
             selected={value}

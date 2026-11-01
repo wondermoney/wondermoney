@@ -7,7 +7,7 @@ export type MfaChallengeFailure = 'invalid-code' | 'unavailable'
 /**
  * Drives the inline TOTP step-up shown on the `mfa-required` access-blocked screen:
  * finds the user's verified factor, challenges it, verifies the typed code, and — only
- * once Supabase confirms the code — resumes the runtime back to `authenticated`. The
+ * once the auth server confirms the code — resumes the runtime back to `authenticated`. The
  * code is never logged.
  */
 export function useMfaChallenge() {

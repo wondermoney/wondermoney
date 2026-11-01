@@ -5,6 +5,7 @@ const mocked = vi.hoisted(() => ({
   findOne: vi.fn(),
   flush: vi.fn(),
   persist: vi.fn().mockReturnThis(),
+  populate: vi.fn(),
   streamChat: vi.fn(),
 }));
 
@@ -19,6 +20,7 @@ vi.mock('@app/app', () => ({
       findOne: mocked.findOne,
       flush: mocked.flush,
       persist: mocked.persist,
+      populate: mocked.populate,
     },
   },
 }));
@@ -36,6 +38,7 @@ vi.mock('@entity/AssistantAuditLog', () => ({
 
 vi.mock('@entity/Appuser', () => ({
   Appuser: {},
+  SupportedLanguages: { EN: 'EN', PT: 'PT' },
 }));
 
 vi.mock('@entity/Tenant', () => ({
@@ -172,7 +175,7 @@ describe('assistant controller', () => {
   });
 
   it('streams chat when assistant is enabled', async () => {
-    const user = { appuserKey: 7, emailAddress: 'someone@example.com' };
+    const user = { appuserKey: 7, currencyKey: { code: 'EUR' }, emailAddress: 'someone@example.com', language: 'EN' };
     const tenant = { tenantKey: 9 };
     const messages = [{ parts: [{ text: 'Hello', type: 'text' }], role: 'user' }];
     mocked.findOne.mockResolvedValueOnce({ tenantKey: tenant }).mockResolvedValueOnce({ assistantEnabled: true, consentVersion: 4 });
@@ -194,9 +197,32 @@ describe('assistant controller', () => {
     }));
   });
 
-  // The assistant used to be restricted to verified @wonder.money addresses.
-  // That gate is gone: any account reaches the module, and the only thing that
-  // stops a chat is the person's own consent record.
+  it('formats the chat in the base currency and the locale the client is showing', async () => {
+    const user = { appuserKey: 7, currencyKey: { code: 'EUR' }, emailAddress: 'someone@example.com', language: 'EN' };
+    mocked.findOne.mockResolvedValueOnce({ tenantKey: { tenantKey: 9 } }).mockResolvedValueOnce({ assistantEnabled: true, consentVersion: 4 });
+
+    await chatWithAssistant(
+      Object.assign(mockReq({ body: { locale: 'pt', messages: [{ parts: [{ text: 'Olá', type: 'text' }], role: 'user' }] } }), { user }),
+      mockRes(),
+    );
+
+    expect(mocked.streamChat).toHaveBeenCalledWith(expect.objectContaining({ currency: 'EUR', locale: 'pt' }));
+  });
+
+  it('falls back to the account language when the client sends no locale', async () => {
+    const user = { appuserKey: 7, currencyKey: { code: 'EUR' }, emailAddress: 'someone@example.com', language: 'PT' };
+    mocked.findOne.mockResolvedValueOnce({ tenantKey: { tenantKey: 9 } }).mockResolvedValueOnce({ assistantEnabled: true, consentVersion: 4 });
+
+    await chatWithAssistant(
+      Object.assign(mockReq({ body: { messages: [{ parts: [{ text: 'Olá', type: 'text' }], role: 'user' }] } }), { user }),
+      mockRes(),
+    );
+
+    expect(mocked.streamChat).toHaveBeenCalledWith(expect.objectContaining({ currency: 'EUR', locale: 'pt' }));
+  });
+
+  // Any account reaches the assistant: the only thing that stops a chat is the
+  // person's own consent record.
   it('serves the assistant to an account on any email domain', async () => {
     const user = { appuserKey: 7, emailAddress: 'someone@example.com' };
     const tenant = { tenantKey: 9 };

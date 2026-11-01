@@ -62,12 +62,11 @@ export const FIRST_RUN_EVENTS = {
   stepViewed: "first_run_onboarding_step_viewed",
   goalsSelected: "first_run_goals_selected",
   accountConnectClicked: "first_run_account_connect_clicked",
-  // RAD-600. Everything between picking a bank and the server-side sync used to
-  // be unmeasured on this path: the Accounts-page flow emits
-  // `account_add_sync_modal` / `account_add_sync_before_redirect` /
-  // `first_account_added`, and first-run emitted none of them. When first-run
-  // became the dominant route for new users the whole activation funnel went
-  // dark, which is the one funnel that matters most here.
+  // Everything between picking a bank and the server-side sync on this path.
+  // The Accounts-page flow emits `account_add_sync_modal` /
+  // `account_add_sync_before_redirect` / `first_account_added`; first-run is
+  // the dominant route for new users, so without these the activation funnel
+  // goes dark.
   accountRequisitionCreated: "first_run_account_requisition_created",
   accountRequisitionFailed: "first_run_account_requisition_failed",
   accountBeforeRedirect: "first_run_account_before_redirect",

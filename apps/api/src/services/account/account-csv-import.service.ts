@@ -6,6 +6,7 @@ import { Account } from '@entity/Account';
 import { Currency } from '@entity/Currency';
 import { ExchangeRate } from '@entity/ExchangeRate';
 import { Transaction } from '@entity/Transaction';
+import { TransactionAuditActorType } from '@entity/TransactionAuditLog';
 import { TransactionMerchant } from '@entity/TransactionMerchant';
 import { TransactionStatus } from '@entity/TransactionStatus';
 import { TransactionType } from '@entity/TransactionType';
@@ -17,6 +18,9 @@ import { triggerRecurringDetectionAfterTransactionIngestion } from '@service/rec
 import { enqueueTransactionEnrichmentForTenant } from '@service/transaction-enrichment/transaction-enrichment-enqueue.service';
 import { applyCategorizationOutcome } from '@service/transaction/categorization-confidence';
 import { transactionCreationService } from '@service/transaction/transaction-creation.service';
+import { transactionTypeForSignedAmount } from '@service/transaction/transaction-direction';
+import { reconcileTransfers } from '@service/transaction/transfer-matching.service';
+import logger from '@utils/logger';
 
 export interface AccountCsvImportResult { failed: number; failures: { reason: string; row: number; }[]; imported: number; skipped: number; skippedRows: { reason: string; row: number; }[]; totalRows: number; }
 
@@ -25,10 +29,9 @@ interface BankCsvRow { descriptionDirty?: string; internalTransactionId: string;
 
 const REQUIRED_FIELDS: (keyof AccountCsvRow)[] = ['date', 'amount', 'merchant', 'internalTransactionId', 'transactionTypeKey'];
 const MAX_INVALID_ROWS = 100;
-const OUTGOING_TRANSACTION_TYPES = new Set(['atm', 'card_payment', 'fee', 'fees', 'loan', 'payment', 'transfer_out']);
 
 const accountCsvRowSchema = z.object({
-  amount: z.coerce.number().finite(),
+  amount: z.coerce.number(),
   currencyKey: z.string().trim().optional().transform((value) => (value ? toPositiveInt(value) : undefined)),
   date: z.string().trim().refine((value) => isValidDate(value), 'Invalid date').transform((value) => new Date(value)),
   description: z.string().trim().max(500).optional(),
@@ -40,12 +43,12 @@ const accountCsvRowSchema = z.object({
 const bankCsvRowSchema = z.object({
   descriptionDirty: z.string().trim().max(500).optional(),
   internalTransactionId: z.string().trim().min(1).max(255),
-  settlementAmount: z.preprocess((value) => toFiniteNumber(normalizeNumberInput(value) as number | string | { toString: () => string }), z.number().finite()),
+  settlementAmount: z.preprocess((value) => toFiniteNumber(normalizeNumberInput(value) as number | string | { toString: () => string }), z.number()),
   settlementCurrency: z.string().trim().length(3).transform((value) => value.toUpperCase()),
   transactionDate: z.union([z.string(), z.date()]).transform((value) => toDate(value)),
   transactionMerchant: z.string().trim().min(1).max(255),
   transactionType: z.string().trim().min(1).max(50),
-}).passthrough();
+}).loose();
 
 export default class AccountCsvImportService {
   async importAccountCsv(input: { accountKey: number; bankName?: string; bucket: string; key: string }, deps: { em?: typeof DI.em; enqueue?: Enqueue; getObjectBuffer?: (bucket: string, key: string) => Promise<Buffer>; getObjectSize?: (bucket: string, key: string) => Promise<number | undefined>; getObjectText?: (bucket: string, key: string) => Promise<string>; transactionCreationService?: typeof transactionCreationService; } = {}): Promise<AccountCsvImportResult> {
@@ -60,6 +63,7 @@ export default class AccountCsvImportService {
     const csvText = await getLimitedCsvObjectText({ bucket: input.bucket, key: input.key }, { getObjectSize: deps.getObjectSize, getObjectText: deps.getObjectText });
     const rows = parseCsvRows<AccountCsvRow>(csvText);
     const result: AccountCsvImportResult = { failed: 0, failures: [], imported: 0, skipped: 0, skippedRows: [], totalRows: 0 };
+    const importedDates: Date[] = [];
     for (const [i, row] of rows.entries()) {
       result.totalRows += 1;
       const missing = REQUIRED_FIELDS.filter((field) => !row[field]);
@@ -73,10 +77,14 @@ export default class AccountCsvImportService {
         const validated = accountCsvRowSchema.parse(row);
         const duplicate = await em.findOne(Transaction, { accountKey: account, nordigenInternalTransactionId: validated.internalTransactionId });
         if (duplicate) { result.skipped += 1; result.skippedRows.push({ reason: 'Duplicate internalTransactionId', row: i + 2 }); continue; }
-        await transactionCreationServiceImpl.createTransaction({ accountId: account.accountKey, appuserKey: (account.accountOwnerAppuserKey as { appuserKey: number }).appuserKey, description: validated.description, nordigenInternalTransactionId: validated.internalTransactionId, settlementAmount: Math.abs(validated.amount), settlementCurrencyId: validated.currencyKey || (account.currencyKey as { currencyKey: number }).currencyKey, transactionDate: validated.date, transactionMerchantName: validated.merchant, transactionTypeId: validated.transactionTypeKey });
+        // The file's amount goes through signed: the creation service lets a directional type decide
+        // the sign (`signTransactionAmount`), and keeps this sign for EXCHANGE and REVERT, which have none.
+        await transactionCreationServiceImpl.createTransaction({ accountId: account.accountKey, appuserKey: (account.accountOwnerAppuserKey as { appuserKey: number }).appuserKey, description: validated.description, nordigenInternalTransactionId: validated.internalTransactionId, settlementAmount: validated.amount, settlementCurrencyId: validated.currencyKey || (account.currencyKey as { currencyKey: number }).currencyKey, transactionDate: validated.date, transactionMerchantName: validated.merchant, transactionTypeId: validated.transactionTypeKey });
         result.imported += 1;
+        importedDates.push(validated.date);
       } catch (error) { result.failed += 1; result.failures.push({ reason: error instanceof Error ? error.message : 'import failed', row: i + 2 }); if (result.failed >= MAX_INVALID_ROWS) break; }
     }
+    await matchTransfersAfterImport(em, account, importedDates);
     return result;
   }
 
@@ -84,16 +92,11 @@ export default class AccountCsvImportService {
     const existing = await em.findOne(TransactionMerchant, { name: merchantName });
     if (existing) return existing;
 
-    if (typeof (em as { upsert?: unknown }).upsert === 'function') {
-      const upserted = await (em as typeof DI.em & { upsert: (entity: typeof TransactionMerchant, data: { name: string }) => Promise<TransactionMerchant> }).upsert(TransactionMerchant, { name: merchantName });
-      return upserted;
-    }
-
-    const knex = em.getKnex();
-    await knex.insert({ name: merchantName }).into('transaction_merchant').onConflict('name').ignore();
-    const merchant = await em.findOne(TransactionMerchant, { name: merchantName });
-    if (merchant) return merchant;
-    throw new Error(`TransactionMerchant not found: ${merchantName}`);
+    // Through the ORM, not upsert or a raw insert: those skip the entity defaults and send no
+    // created_at, which violates its NOT NULL and aborts the whole import transaction.
+    const merchant = em.create(TransactionMerchant, { name: merchantName }, { partial: true });
+    await em.persist(merchant).flush();
+    return merchant;
   }
 
   private async getAppuserSettlementAmount(em: typeof DI.em, appuserCurrency: Currency, settlementCurrency: Currency, transactionDate: Date, settlementAmount: number) {
@@ -119,12 +122,14 @@ export default class AccountCsvImportService {
           const validated = bankCsvRowSchema.parse(row);
           const duplicate = await em.findOne(Transaction, { $or: [{ internalTransactionId: validated.internalTransactionId }, { nordigenInternalTransactionId: validated.internalTransactionId }], accountKey: input.account });
           if (duplicate) { result.skipped += 1; result.skippedRows.push({ reason: 'Duplicate internalTransactionId', row: i + 1 }); continue; }
-          const transactionType = await em.findOne(TransactionType, { name: resolveTransactionTypeName(validated.transactionType, validated.settlementAmount) });
+          // The bank file states the direction in the amount's sign; the type guessed from the
+          // description is only a label, so it is made to agree with the sign rather than the reverse.
+          const signedAmount = validated.settlementAmount;
+          const transactionType = await em.findOne(TransactionType, { name: transactionTypeForSignedAmount(resolveTransactionTypeName(validated.transactionType), signedAmount) });
           if (!transactionType) throw new Error(`TransactionType not found: ${row.transactionType}`);
           const currency = await em.findOne(Currency, { code: validated.settlementCurrency });
           if (!currency) throw new Error(`Currency not found: ${row.settlementCurrency}`);
           const merchant = await this.findOrCreateMerchant(em, validated.transactionMerchant);
-          const signedAmount = signAmount(validated.settlementAmount, transactionType.name);
           const sameCurrency = currency.currencyKey === appuserCurrency.currencyKey;
           const appuserSettlementAmount = sameCurrency ? signedAmount : await this.getAppuserSettlementAmount(em, appuserCurrency, currency, validated.transactionDate, signedAmount);
           const originalAmountValue = validated['originalAmount'];
@@ -170,11 +175,13 @@ export default class AccountCsvImportService {
         }
       }
     };
-    const transactional = Reflect.get(input.em as object, 'transactional') as unknown;
-    if (typeof transactional === 'function') await (transactional as (fn: typeof runInTransaction) => Promise<void>)(runInTransaction); else await runInTransaction(input.em);
+    const transactional = Reflect.get(input.em, 'transactional') as unknown;
+    // Called on the EntityManager: `transactional` reads its own context, so a detached call throws.
+    if (typeof transactional === 'function') await (transactional as (fn: typeof runInTransaction) => Promise<void>).call(input.em, runInTransaction); else await runInTransaction(input.em);
+    await matchTransfersAfterImport(input.em, input.account, importedTransactions.flatMap((transaction) => (transaction.transactionDate ? [transaction.transactionDate] : [])));
     const accountTenant = input.account as { tenantKey?: { tenantKey: number } };
     if (result.imported > 0 && accountTenant.tenantKey) await triggerRecurringDetectionAfterTransactionIngestion(accountTenant.tenantKey.tenantKey, 'transaction-import');
-    // RAD-414: best-effort, fail-open shadow enrichment enqueue. Dormant by default; never blocks import.
+    // Best-effort, fail-open shadow enrichment enqueue. Dormant by default; never blocks import.
     if (result.imported > 0 && accountTenant.tenantKey) await enqueueTransactionEnrichmentForTenant(accountTenant.tenantKey.tenantKey, 'transaction-import', { enqueue: input.enqueue });
     return result;
   }
@@ -190,22 +197,33 @@ function isValidDate(value: string) {
   return !Number.isNaN(new Date(value).getTime());
 }
 
+/**
+ * Pair the imported rows that are one half of a transfer between two of the household's own
+ * accounts, from the earliest imported date on, as bank sync does after each sync. On its own forked
+ * EM in one transaction, so a failure rolls back whole. Best-effort: matching never fails an import
+ * whose rows are already stored; the next import or sync matches again.
+ */
+async function matchTransfersAfterImport(em: typeof DI.em, account: Account, importedDates: Date[]) {
+  const tenantKey = (account as { tenantKey?: { tenantKey: number } }).tenantKey?.tenantKey;
+  if (tenantKey === undefined || importedDates.length === 0) return;
+  const from = new Date(importedDates.reduce((earliest, date) => Math.min(earliest, date.getTime()), Infinity));
+  try {
+    const matched = await em.fork().transactional((tx) => reconcileTransfers(tx, { actorType: TransactionAuditActorType.SYSTEM, apply: true, from, source: 'transfer-matching', tenantKey }));
+    if (matched.rowsChanged > 0) logger.info({ ...matched, tenantKey }, 'Matched own-account transfers');
+  } catch (error) {
+    logger.warn({ error: error instanceof Error ? error.message : String(error), tenantKey }, 'Transfer matching failed');
+  }
+}
+
 function normalizeNumberInput(value: unknown) {
   if (typeof value === 'number' || typeof value === 'string') return value;
   if (value && typeof value === 'object' && 'toString' in value) return value.toString();
   return value;
 }
 
-function resolveTransactionTypeName(type: string, amount: number) {
+function resolveTransactionTypeName(type: string) {
   if (type === 'FEES') return 'FEE';
-  if (type === 'TRANSFER') return amount >= 0 ? 'TRANSFER_IN' : 'TRANSFER_OUT';
   return type;
-}
-
-function signAmount(amount: number, typeName: string) {
-  const normalized = typeName.toLowerCase();
-  const abs = Math.abs(amount);
-  return OUTGOING_TRANSACTION_TYPES.has(normalized) ? -abs : abs;
 }
 
 function toDate(value: Date | string) {

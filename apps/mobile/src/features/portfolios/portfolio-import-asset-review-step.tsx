@@ -18,7 +18,7 @@ export type PortfolioImportAssetReviewStepProps = Readonly<{
 }>
 
 /**
- * RAD-514 — the asset-matching reconciliation step web calls PortfolioImportAssetReviewStep: one
+ * The asset-matching reconciliation step web calls PortfolioImportAssetReviewStep: one
  * card per ambiguous/unmatched/provider-error group. Resolutions are held locally until every group
  * has one, then submitted as a single "confirm asset mappings" batch — nothing is sent to the
  * server until the user explicitly confirms.

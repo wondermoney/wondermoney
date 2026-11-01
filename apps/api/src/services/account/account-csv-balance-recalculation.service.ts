@@ -132,8 +132,8 @@ class AccountCsvBalanceRecalculationService {
  * The chain's total order — `(transactionDate, transactionKey)`, matching
  * `balance-chain.service.ts` and the reverse of the order the transactions list renders.
  *
- * RAD-564: this used to break date ties on `settlementAmount` first, so same-date rows were given
- * balances in amount order but displayed in key order — a third ordering, disagreeing with both the
+ * Date ties are not broken on `settlementAmount`: same-date rows would then be given balances in
+ * amount order but displayed in key order — a third ordering, disagreeing with both the
  * manual-creation path and the read path. Not-yet-persisted imports have no `transactionKey` yet and
  * still sort last within their date, which is where the INSERT will put them.
  */

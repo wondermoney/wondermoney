@@ -1,4 +1,5 @@
-import { Collection, Entity, ManyToMany, PrimaryKey, Property, Unique } from '@mikro-orm/core';
+import { Collection } from '@mikro-orm/core';
+import { Entity, ManyToMany, PrimaryKey, Property, Unique } from '@mikro-orm/decorators/legacy';
 
 import { FinancialAssetExchange } from './FinancialAssetExchange';
 

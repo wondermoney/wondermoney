@@ -38,7 +38,7 @@ describe('CERTIFICADO_AFORRO_SERIES_CONSTANTS', () => {
     expect(CERTIFICADO_AFORRO_SERIES_CONSTANTS['CA-SERIE-F']).toEqual({ capBps: 250, floorBps: 0, termYears: 15, valuationMode: 'accrual' });
   });
 
-  it('marks Séries A/B (perpetual, legacy, RAD-446) as static valuation, with meaningless cap/floor/term', () => {
+  it('marks Séries A/B (perpetual, legacy) as static valuation, with meaningless cap/floor/term', () => {
     expect(CERTIFICADO_AFORRO_SERIES_CONSTANTS['CA-SERIE-A']).toEqual({ capBps: 0, floorBps: 0, termYears: 0, valuationMode: 'static' });
     expect(CERTIFICADO_AFORRO_SERIES_CONSTANTS['CA-SERIE-B']).toEqual({ capBps: 0, floorBps: 0, termYears: 0, valuationMode: 'static' });
   });

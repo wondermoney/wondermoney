@@ -41,7 +41,6 @@ export default function FirstRunPrivacyStep() {
     <FirstRunCentered>
       <div className="space-y-7">
         <FirstRunStepIntro
-          kicker={t("stepLabels.privacy")}
           headline={t("privacy.headline")}
           sub={t("privacy.description")}
         />

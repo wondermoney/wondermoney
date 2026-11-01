@@ -1,6 +1,6 @@
 "use client";
 
-import { Table } from "@tanstack/react-table";
+import type { RowData } from "@tanstack/react-table";
 import { SlidersHorizontal } from "lucide-react";
 import { useTranslations } from "next-intl";
 
@@ -12,12 +12,13 @@ import {
   DropdownMenuGroup,
   DropdownMenuTrigger,
 } from "../dropdown-menu";
+import type { Table } from "./features";
 
-interface DataTableViewOptionsProps<TData> {
+interface DataTableViewOptionsProps<TData extends RowData> {
   table: Table<TData>;
 }
 
-export function ColumnToggle<TData>({
+export function ColumnToggle<TData extends RowData>({
   table,
 }: DataTableViewOptionsProps<TData>) {
   const t = useTranslations();

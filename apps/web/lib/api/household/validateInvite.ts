@@ -1,3 +1,5 @@
+import { getServerApiUrl } from "@/lib/api/server-api-url";
+
 /**
  * Server-side, pre-signup validation for the /join page. Hits the public API
  * endpoint (no auth) keyed only by the invite token, so we can greet the
@@ -10,14 +12,13 @@ export interface InviteValidation {
   inviterName: null | string;
 }
 
-const apiBaseUrl = () => process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
 
 export async function validateInvite(
   token: string,
 ): Promise<InviteValidation | null> {
   try {
     const res = await fetch(
-      `${apiBaseUrl()}/v1/household/invites/validate?token=${encodeURIComponent(token)}`,
+      `${getServerApiUrl()}/v1/household/invites/validate?token=${encodeURIComponent(token)}`,
       { cache: "no-store" },
     );
     if (!res.ok) return null;

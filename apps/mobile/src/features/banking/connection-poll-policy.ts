@@ -1,6 +1,6 @@
 /**
- * RAD-240 — mobile has no push/webhook signal for when a GoCardless
- * requisition finishes syncing, so while any connection reads `processing`
+ * Mobile has no push/webhook signal for when a bank connection
+ * finishes syncing, so while any connection reads `processing`
  * we poll `GET /v1/banking/connections` on a fixed interval. Bounded: once a
  * connection has read `processing` for longer than the timeout, polling
  * stops and the screen falls back to the manual pull-to-refresh affordance

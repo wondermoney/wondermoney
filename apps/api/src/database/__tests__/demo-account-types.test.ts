@@ -4,7 +4,6 @@ import { describe, expect, it, vi } from 'vitest';
 import { Appuser, AppuserAccountType } from '@entity/Appuser';
 import { Tenant, TenantType } from '@entity/Tenant';
 
-import { getDemoTenant } from '../scripts/demo-account-types.helpers';
 import { AppuserSeeder } from '../seeders/AppuserSeeder';
 import { demoPersona } from '../seeders/demo/demo-fixtures';
 import { TenantSeeder } from '../seeders/TenantSeeder';
@@ -113,55 +112,5 @@ describe('demo account metadata', () => {
         expect.objectContaining({ ownerAppuserKey: emptyAppuser, tenantType: TenantType.REGULAR }),
       ]),
     );
-  });
-
-  it('finds demo tenant via appuser-tenant link before legacy fallbacks', async () => {
-    const linkedTenant = Object.assign(new Tenant(), {
-      name: 'Sofia',
-      ownerAppuserKey: { appuserKey: 2 },
-      tenantKey: 22,
-      tenantType: TenantType.REGULAR,
-    });
-    const demoAppuser = { appuserKey: 2 } as Appuser;
-    const appuserTenant = { appuserKey: demoAppuser, tenantKey: linkedTenant };
-
-    const em = {
-      find: vi.fn().mockResolvedValueOnce([appuserTenant]).mockResolvedValueOnce([]),
-    } as unknown as EntityManager;
-
-    await expect(getDemoTenant(em, demoAppuser)).resolves.toBe(linkedTenant);
-  });
-
-  it('fails when the demo appuser has multiple active links', async () => {
-    const demoAppuser = { appuserKey: 2 } as Appuser;
-    const em = {
-      find: vi.fn().mockResolvedValue([
-        {
-          appuserKey: demoAppuser,
-          tenantKey: Object.assign(new Tenant(), { ownerAppuserKey: demoAppuser, tenantKey: 22 }),
-        },
-        {
-          appuserKey: demoAppuser,
-          tenantKey: Object.assign(new Tenant(), { ownerAppuserKey: demoAppuser, tenantKey: 23 }),
-        },
-      ]),
-    } as unknown as EntityManager;
-
-    await expect(getDemoTenant(em, demoAppuser)).rejects.toThrow(/single active demo appuser-tenant link/);
-  });
-
-  it('fails when the fallback owner lookup is ambiguous', async () => {
-    const demoAppuser = { appuserKey: 2 } as Appuser;
-    const em = {
-      find: vi
-        .fn()
-        .mockResolvedValueOnce([])
-        .mockResolvedValueOnce([
-          Object.assign(new Tenant(), { ownerAppuserKey: demoAppuser, tenantKey: 22 }),
-          Object.assign(new Tenant(), { ownerAppuserKey: demoAppuser, tenantKey: 23 }),
-        ]),
-    } as unknown as EntityManager;
-
-    await expect(getDemoTenant(em, demoAppuser)).rejects.toThrow(/single tenant owned by the demo appuser/);
   });
 });

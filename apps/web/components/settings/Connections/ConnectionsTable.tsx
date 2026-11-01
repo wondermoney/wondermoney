@@ -1,6 +1,5 @@
 "use client";
 
-import { ColumnDef, createColumnHelper } from "@tanstack/react-table";
 import { intlFormatDistance } from "date-fns";
 import { Loader2, RefreshCw, RefreshCwOff } from "lucide-react";
 import Image from "next/image";
@@ -9,6 +8,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 
 import { Table } from "@/components/ui/Table";
+import { ColumnDef, createColumnHelper } from "@/components/ui/Table/features";
 import { Text } from "@/components/ui/Typography";
 import { saveBankAccountSyncReturnMarker } from "@/lib/account/bank-account-sync-return-marker";
 import useBankList from "@/lib/api/banking/useBankList";
@@ -123,7 +123,7 @@ const ConnectionsTable: React.FC<ConnectionsTableProps> = ({ data }) => {
   const {
     data: reconnectRequisitionData,
     isError: isReconnectRequisitionError,
-  } = useCreateRequisition(reconnectBankId ?? "", "accounts", {
+  } = useCreateRequisition(reconnectBankId ?? "", {
     enabled: !!reconnectBankId,
     retry: false,
   });
@@ -143,6 +143,9 @@ const ConnectionsTable: React.FC<ConnectionsTableProps> = ({ data }) => {
       bankListLoadedWithoutMatch
     ) {
       toast.error(t("reconnect-error"));
+      // Responds to a failed query: the toast is a side effect, and clearing
+      // the target with it keeps the error from being reported twice.
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- see above
       setReconnectTarget(null);
     }
   }, [
@@ -269,7 +272,7 @@ const ConnectionsTable: React.FC<ConnectionsTableProps> = ({ data }) => {
               >
                 {isReconnectingThisRow ? (
                   <Loader2
-                    className="size-4 animate-spin"
+                    className="size-4 animate-spin motion-reduce:animate-none"
                     aria-hidden="true"
                   />
                 ) : (

@@ -24,30 +24,35 @@ const AnimatedCollapsible = ({
     ) : null;
   }
 
+  // grid-template-rows 0fr -> 1fr opens to the content's natural size without
+  // animating `height` (the Hallmark Floor bans height, width, top and left).
+  // The inner wrapper's `min-h-0` lets the 0fr track actually collapse.
   return (
     <AnimatePresence initial={false}>
       {open && (
         <motion.div
-          initial={{ height: 0, opacity: 0 }}
+          initial={{ gridTemplateRows: "0fr", opacity: 0 }}
           animate={{
-            height: "auto",
+            gridTemplateRows: "1fr",
             opacity: 1,
             transition: {
-              height: { duration: 0.3, ease: "easeInOut" },
-              opacity: { duration: 0.2, delay: 0.05 },
+              gridTemplateRows: { duration: 0.2, ease: [0.16, 1, 0.3, 1] },
+              opacity: { duration: 0.12 },
             },
           }}
           exit={{
-            height: 0,
+            gridTemplateRows: "0fr",
             opacity: 0,
             transition: {
-              height: { duration: 0.3, ease: "easeInOut" },
-              opacity: { duration: 0.2 },
+              gridTemplateRows: { duration: 0.2, ease: [0.65, 0, 0.35, 1] },
+              opacity: { duration: 0.12 },
             },
           }}
-          className={cn("overflow-hidden", className)}
+          className={cn("grid", className)}
         >
-          {children}
+          <div className="min-h-0 overflow-hidden">
+            {children}
+          </div>
         </motion.div>
       )}
     </AnimatePresence>

@@ -52,7 +52,7 @@ describe('portfolio import session service', () => {
   });
 
   it('persists broker context when broker belongs to tenant', async () => {
-    em.findOne.mockResolvedValueOnce(portfolio).mockResolvedValueOnce({ financialBrokerKey: 77, name: 'Broker' } as FinancialBroker);
+    em.findOne.mockResolvedValueOnce(portfolio).mockResolvedValueOnce({ financialBrokerKey: 77, name: 'Broker' });
 
     const result = await service.createSession({ appuser, brokerId: 77, correlationId: 'portfolio.csv-import-session:12:abc', portfolioId: 12, s3Bucket: 'portfolios-csv-dev', s3Key: 'import-sessions/12/abc.csv', tenant });
 

@@ -17,7 +17,7 @@ describe('provisionAppUser', () => {
     await expect(provisionAppUser(clientWith(write), 'en')).resolves.toBe('failed')
   })
 
-  it('includes the invite token in the body when provided (RAD-499)', async () => {
+  it('includes the invite token in the body when provided', async () => {
     const write = jest.fn().mockImplementation(async (_endpoint, opts) => { opts.commit({}); return {} })
     const result = await provisionAppUser(clientWith(write), 'en', 'invite-tok-1')
     expect(write).toHaveBeenCalledWith(authCallbackEndpoint, expect.objectContaining({

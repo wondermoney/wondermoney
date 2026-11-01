@@ -14,11 +14,11 @@
  */
 
 /** `#000`, `#000000`, `#00000000` and whitespace variants — the API's "unset". */
-export const isPlaceholderCategoryColor = (value?: string | null) =>
+const isPlaceholderCategoryColor = (value?: string | null) =>
   !value || /^#0{3,8}$/i.test(value.trim());
 
 /** The five categorical chart slots, in fixed order. Never cycled beyond five. */
-export const categoryRampColor = (index: number) =>
+const categoryRampColor = (index: number) =>
   `var(--chart-${(index % 5) + 1})`;
 
 /**

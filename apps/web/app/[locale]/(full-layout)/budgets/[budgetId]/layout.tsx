@@ -1,6 +1,6 @@
 "use client";
 import { useQueryClient } from "@tanstack/react-query";
-import { useParams, useSearchParams } from "next/navigation";
+import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { usePostHog } from "posthog-js/react";
 import { ReactNode, useEffect, useRef, useState } from "react";
@@ -8,9 +8,7 @@ import { toast } from "sonner";
 
 import AccountAddOfflineModal from "@/components/account/AccountCreateOfflineModal";
 import AccountAddSyncModal from "@/components/account/AccountCreateSyncModal";
-import BankAccountSyncStatusBanner, {
-  type BankSyncRecoveryState,
-} from "@/components/account/BankAccountSyncStatusBanner";
+import BankAccountSyncStatusBanner from "@/components/account/BankAccountSyncStatusBanner";
 import BudgetAccountSelectModal from "@/components/budget/BudgetAccountSelectModal";
 import { BudgetsMonthlyViewOnboarding } from "@/components/onboarding/BudgetsMonthlyViewOnboarding";
 import { BudgetsYearlyViewOnboarding } from "@/components/onboarding/BudgetsYearlyViewOnboarding";
@@ -18,19 +16,12 @@ import { Spinner } from "@/components/ui/Spinner";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Heading, Text } from "@/components/ui/Typography";
 import { usePathname, useRouter } from "@/i18n/navigation";
-import {
-  clearBankAccountSyncReturnMarker,
-  hasActiveBankAccountSyncReturnMarker,
-} from "@/lib/account/bank-account-sync-return-marker";
+import { useBankConnectionResult } from "@/lib/account/useBankConnectionResult";
 import { safePostHogCapture } from "@/lib/analytics/safe-diagnostics";
 import useAccounts from "@/lib/api/account/useAccounts";
-import useBankAccountSyncStatus, {
-  useLegacyBankAccountSyncStatus,
-} from "@/lib/api/banking/useBankAccountSyncStatus";
 import useBudget from "@/lib/api/budget/useBudget";
 import useBudgetAccounts from "@/lib/api/budget/useBudgetAccounts";
 import useEditBudgetTemplateAccounts from "@/lib/api/budget/useEditBudgetTemplateAccounts";
-import { useUser } from "@/lib/auth/user-context";
 import { invalidateAccounts } from "@/lib/utils/queryInvalidation";
 
 export default function BudgetLayout({ children }: { children: ReactNode }) {
@@ -43,16 +34,13 @@ export default function BudgetLayout({ children }: { children: ReactNode }) {
     year: string;
     month?: string;
   }>();
-  const searchParams = useSearchParams();
 
   const budgetKey = Number(params.budgetId);
   const year = Number(params.year);
   const month = params.month ? Number(params.month) : new Date().getMonth() + 1;
 
-  // Account sync linking parameters after redirect
-  const syncIncidentId = searchParams.get("sync");
-  const legacyRequisitionId = syncIncidentId ? null : searchParams.get("nrid");
-  const syncError = searchParams.get("err");
+  // Back from a bank connection this budget started.
+  const bankConnection = useBankConnectionResult();
 
   const [selectedMonth, setSelectedMonth] = useState(month);
   const [accountSelectModalIsOpen, setAccountSelectModalIsOpen] =
@@ -62,10 +50,12 @@ export default function BudgetLayout({ children }: { children: ReactNode }) {
   const [accountAddSyncModalIsOpen, setAccountAddSyncModalIsOpen] =
     useState(false);
 
-  useEffect(() => {
-    if (!params.month) return;
-    setSelectedMonth(Number(params.month));
-  }, [params.month]);
+  // Follow the month in the URL (adjusted during render, not in an effect).
+  const [prevParamsMonth, setPrevParamsMonth] = useState(params.month);
+  if (params.month !== prevParamsMonth) {
+    setPrevParamsMonth(params.month);
+    if (params.month) setSelectedMonth(Number(params.month));
+  }
 
   const { data: budgetData, isLoading: isLoadingBudget } = useBudget(
     budgetKey,
@@ -77,92 +67,24 @@ export default function BudgetLayout({ children }: { children: ReactNode }) {
     useBudgetAccounts(budgetKey, { enabled: !!budgetKey });
 
   const queryClient = useQueryClient();
-  const user = useUser();
   const editBudgetAccountsMutation = useEditBudgetTemplateAccounts();
 
-  const {
-    data: bankSyncIncident,
-    isError: isBankSyncTransportError,
-    isRefetchError: isBankSyncRefetchError,
-    isLoading: isLoadingRequisitionData,
-    refetch: refetchBankSyncStatus,
-  } = useBankAccountSyncStatus(syncIncidentId);
-  const {
-    legacyStatus,
-    isLoading: isLoadingLegacyStatus,
-    refetch: refetchLegacyBankSyncStatus,
-  } = useLegacyBankAccountSyncStatus(user?.id, legacyRequisitionId);
+  const handledSuccessRef = useRef(false);
 
-  const bankSyncStatus: BankSyncRecoveryState = syncError
-    ? "callback_error"
-    : syncIncidentId &&
-        (isBankSyncTransportError || isBankSyncRefetchError)
-      ? "transport_unavailable"
-      : syncIncidentId && (!bankSyncIncident || !bankSyncIncident.final)
-        ? "processing"
-        : bankSyncIncident?.final && bankSyncIncident.result === "partial"
-          ? "partial"
-          : bankSyncIncident?.final && bankSyncIncident.result === "failed"
-            ? "failed"
-            : legacyStatus === "full_success"
-              ? "idle"
-              : legacyStatus === "failed"
-                ? "failed"
-                : legacyStatus === "transport_unavailable"
-                  ? "transport_unavailable"
-                  : legacyStatus === "processing"
-                    ? "processing"
-                    : "idle";
-
-  const callbackReference = syncIncidentId
-    ? `sync:${syncIncidentId}`
-    : legacyRequisitionId
-      ? `legacy:${legacyRequisitionId}`
-      : null;
-  const hasAuthoritativeFullSuccess = syncIncidentId
-    ? bankSyncIncident?.final === true &&
-      bankSyncIncident.result === "full_success"
-    : legacyStatus === "full_success";
-
-  const handledSuccessRef = useRef<string | null>(null);
-
+  // A new bank's accounts exist once the connection succeeded; offer to add
+  // them to this budget.
   useEffect(() => {
-    if (
-      callbackReference &&
-      hasAuthoritativeFullSuccess &&
-      handledSuccessRef.current !== callbackReference
-    ) {
-      handledSuccessRef.current = callbackReference;
+    if (bankConnection !== "success" || handledSuccessRef.current) return;
+    handledSuccessRef.current = true;
 
-      void (async () => {
-        const wasStartedFromThisPage = hasActiveBankAccountSyncReturnMarker(
-          pathname,
-        );
-        await invalidateAccounts(queryClient);
-        router.replace(pathname);
-        clearBankAccountSyncReturnMarker();
-
-        // The authoritative callback is sufficient. Session storage only adds
-        // diagnostic context and must never gate the account-selection handoff.
-        setAccountSelectModalIsOpen(true);
-        safePostHogCapture(posthog, "account_add_sync_success", {
-          source: "budget_callback",
-          return_marker_available: wasStartedFromThisPage,
-        });
-      })();
-    }
-  }, [
-    bankSyncIncident?.final,
-    bankSyncIncident?.result,
-    callbackReference,
-    hasAuthoritativeFullSuccess,
-    legacyStatus,
-    pathname,
-    posthog,
-    queryClient,
-    router,
-    syncIncidentId,
-  ]);
+    void (async () => {
+      await invalidateAccounts(queryClient);
+      setAccountSelectModalIsOpen(true);
+      safePostHogCapture(posthog, "account_add_sync_success", {
+        source: "budget_callback",
+      });
+    })();
+  }, [bankConnection, posthog, queryClient]);
 
   const navigateToYearView = () => {
     router.push(`/budgets/${budgetKey}/${year}`, undefined);
@@ -189,8 +111,8 @@ export default function BudgetLayout({ children }: { children: ReactNode }) {
             }),
             // The yearly view's "year to date" totals come from a third,
             // separately-keyed query (object param, not the positional
-            // budgetKey/year pair above) that was previously never
-            // invalidated here, leaving it stale until a hard reload.
+            // budgetKey/year pair above); without invalidating it here it
+            // stays stale until a hard reload.
             queryClient.invalidateQueries({
               queryKey: ["budget-template-year-until-month"],
             }),
@@ -247,32 +169,17 @@ export default function BudgetLayout({ children }: { children: ReactNode }) {
     safePostHogCapture(posthog, "account_add_sync_modal", { action: "close" });
   };
 
-  // It's loaded if there is a requisition and all accounts in that requisition
-  // are loaded, which triggered a refresh of the accounts state
-  const isLoadingRequisitionAccounts =
-    bankSyncStatus === "processing" ||
-    (bankSyncIncident?.final === true &&
-      bankSyncIncident.result === "full_success" &&
-      isLoadingAccountsData);
-
   return (
     <>
-      <div className="my-2">
-        <BankAccountSyncStatusBanner
-          status={bankSyncStatus}
-          callbackErrorCode={syncError}
-          onRetryBankConnection={onAddSyncAccountClick}
-          onAddAccountManually={onAddOfflineAccountClick}
-          onRetryStatus={() => {
-            if (syncIncidentId) void refetchBankSyncStatus();
-            else if (legacyRequisitionId) void refetchLegacyBankSyncStatus();
-          }}
-        />
-      </div>
-      {!budgetData ||
-      isLoadingBudget ||
-      isLoadingRequisitionData ||
-      isLoadingLegacyStatus ? (
+      {bankConnection === "error" ? (
+        <div className="my-2">
+          <BankAccountSyncStatusBanner
+            onRetryBankConnection={onAddSyncAccountClick}
+            onAddAccountManually={onAddOfflineAccountClick}
+          />
+        </div>
+      ) : null}
+      {!budgetData || isLoadingBudget ? (
         <Spinner />
       ) : (
         <div className="flex flex-col gap-2">
@@ -294,7 +201,7 @@ export default function BudgetLayout({ children }: { children: ReactNode }) {
             </div>
             <BudgetAccountSelectModal
               isOpen={accountSelectModalIsOpen}
-              isLoadingRequisition={isLoadingRequisitionAccounts}
+              isLoadingRequisition={isLoadingAccountsData}
               accounts={accountsData?.accounts}
               budgetAccounts={budgetAccounts?.accounts}
               setOpen={setAccountSelectModalIsOpen}

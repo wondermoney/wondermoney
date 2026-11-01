@@ -107,8 +107,3 @@ export const invalidateRequisitions = (qc: QueryClient) => {
   qc.invalidateQueries({ queryKey: ["requisitions"] });
   qc.invalidateQueries({ queryKey: ["requisition"] });
 };
-
-export const invalidateUser = (qc: QueryClient) => {
-  qc.invalidateQueries({ queryKey: ["user"] });
-  qc.invalidateQueries({ queryKey: ["onboarding"] });
-};

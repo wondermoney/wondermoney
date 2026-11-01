@@ -63,7 +63,7 @@ class PortfolioImportAssetMappingService {
         if (!group) throw new NotFoundError('Asset group not found');
         if (decision.action === 'use_candidate') {
           const candidate = await em.findOne(PortfolioImportAssetCandidate, { deletedAt: undefined, portfolioImportAssetCandidateKey: decision.candidateId, portfolioImportAssetGroupKey: group });
-          const candidateGroupKey = candidate && candidate.portfolioImportAssetGroupKey.portfolioImportAssetGroupKey;
+          const candidateGroupKey = candidate?.portfolioImportAssetGroupKey.portfolioImportAssetGroupKey;
           if (!candidate || candidateGroupKey !== group.portfolioImportAssetGroupKey) throw new BadRequestError('Asset candidate not found for group');
           if (!candidate.symbol) throw new BadRequestError('Candidate symbol is required');
           plannedActions.push({ candidateSymbol: candidate.symbol, decision, group });

@@ -1,12 +1,12 @@
 /**
- * RAD-562 — the calendar the reports API should bucket the viewer's months in.
+ * The calendar the reports API should bucket the viewer's months in.
  *
  * `GET /v1/reports/*` accepts an optional `timezone` filter (IANA name) and
- * groups months in it (RAD-555). When the filter is absent the API assumes
+ * groups months in it. When the filter is absent the API assumes
  * `Europe/Lisbon`, which is right for a Lisbon reader and an hour out for a
  * Madrid one: picking August there sends `2026-07-31T22:00:00.000Z`, which is
  * still July in Lisbon, so the response carries an out-of-period July row
- * holding an hour's worth of money. The chart hid that; the CSV export did not.
+ * holding an hour's worth of money. The chart hides that; the CSV export does not.
  *
  * So the client states its calendar instead of letting the API guess.
  *

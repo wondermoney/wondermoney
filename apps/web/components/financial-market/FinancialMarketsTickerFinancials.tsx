@@ -40,7 +40,7 @@ const FinancialMarketsTickerFinancials: React.FC<
   }
 
   // Not an outage: this capability is outside the current market-data plan and
-  // the API says so with a 404 (RAD-449/RAD-609).
+  // the API says so with a 404.
   if (isMarketDataNotCovered(error)) {
     return <MarketDataNotCovered title={t("financials")} />;
   }

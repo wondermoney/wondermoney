@@ -124,6 +124,7 @@ test("supports finalized detail payloads", async () => {
   assert.deepEqual(response.account, {
     ...finalizedAccount,
     appuserCurrencyAvailableBalance: null,
+    csvImportFormat: "generic",
     availableBalance: null,
     syncStatus: null,
   });

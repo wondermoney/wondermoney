@@ -5,7 +5,7 @@ import { initMobileI18n } from '@/lib/i18n'
 
 import { ManualTransactionScreen, type ManualTransactionScreenProps } from './manual-transaction-screen'
 
-const account = { accountId: 7, accountName: 'Everyday', institutionDisplayName: null, isOwnedByViewer: true, isPrivate: false, originalBalance: 100, convertedBalance: 100, originalCurrencyCode: 'EUR', primaryCurrencyCode: 'EUR', refreshedAt: null, source: 'manual' as const }
+const account = { accountId: 7, accountName: 'Everyday', institutionDisplayName: null, isOwnedByViewer: true, isPrivate: false, originalBalance: 100, convertedBalance: 100, originalCurrencyCode: 'EUR', primaryCurrencyCode: 'EUR', refreshedAt: null, source: 'manual' as const, csvImportFormat: null }
 const baseProps: ManualTransactionScreenProps = {
   accounts: [account],
   categories: [{ id: 4, name: 'Food', system: true, color: null, glyph: '□', children: [] }],

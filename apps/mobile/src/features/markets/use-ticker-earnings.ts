@@ -8,7 +8,7 @@ import { createEarningsEndpoint, isValidSymbol } from './markets-contract'
 import { earningsKey } from './query-keys'
 
 /**
- * RAD-513 — past + scheduled earnings. `staleTime` mirrors the API's own `/earnings` cache
+ * Past + scheduled earnings. `staleTime` mirrors the API's own `/earnings` cache
  * window (3 days, see routes/v1/financial-markets.ts) — same quarterly cadence as financials.
  */
 const EARNINGS_STALE_TIME_MS = 3 * 24 * 60 * 60 * 1000

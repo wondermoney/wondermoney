@@ -31,9 +31,9 @@ function monthlyRate(annualInterestRateBps: number): number {
 }
 
 function round2(value: number): number {
-  // RAD-audit: was `Math.round((value + Number.EPSILON) * 100) / 100`. The EPSILON term is
-  // cargo-cult — it fixes nothing at realistic money magnitudes — and Math.round is
-  // asymmetric for negatives. Delegates to the shared half-even helper.
+  // Not `Math.round((value + Number.EPSILON) * 100) / 100`: the EPSILON term fixes nothing at
+  // realistic money magnitudes, and Math.round is asymmetric for negatives. Delegates to the
+  // shared half-even helper.
   return roundDisplay(value);
 }
 

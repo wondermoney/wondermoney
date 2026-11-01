@@ -2,8 +2,10 @@ import { randomUUID } from 'node:crypto';
 
 import { format } from 'date-fns';
 import type { Request, Response } from 'express';
+import { sql } from 'kysely';
 import { pick } from 'lodash-es';
 
+import { anyOf, sqlQuery } from '@app/database/sql';
 import { enqueuePortfolioSnapshotManualJob } from '@app/jobs/portfolio-snapshot.queue';
 import { zParse } from '@app/validators/parser';
 import {
@@ -258,32 +260,28 @@ export async function getPortfolios(req: Request, res: Response) {
   );
 
   // Get latest snapshot balance per portfolio in a single query.
-  // RAD-audit: this previously had no WHERE clause — see the identical note in
-  // `net-worth.service.ts#getPortfolioRows`. Scoped to the caller's own (already
-  // tenant-filtered) portfolios, and soft-deleted snapshots excluded.
-  const knex = DI.em.getKnex();
+  // Raw SQL bypasses the ORM filters (see `net-worth.service.ts#getPortfolioRows`), so
+  // scope to the caller's own (already tenant-filtered) portfolios, and exclude
+  // soft-deleted snapshots.
   const portfolioKeys = portfolios.map((portfolio) => portfolio.portfolioKey);
-  const latestSnapshots = portfolioKeys.length === 0 ? [] : await knex('portfolio_snapshot as ps')
-    .select(
-      'ps.portfolio_key',
-      knex.raw('COALESCE(ps.appuser_currency_total_value, ps.total_value) as balance'),
-    )
+  const latestSnapshots = portfolioKeys.length === 0 ? [] : await sqlQuery(DI.em)
+    .selectFrom('portfolio_snapshot as ps')
     .innerJoin(
-      knex.raw(
-        `(SELECT portfolio_key, MAX(snapshot_date) as max_date FROM portfolio_snapshot
-           WHERE deleted_at IS NULL AND portfolio_key = ANY(?) GROUP BY portfolio_key) as latest`,
-        [portfolioKeys],
-      ),
-      function () {
-        this.on('ps.portfolio_key', 'latest.portfolio_key').andOn('ps.snapshot_date', 'latest.max_date');
-      },
+      sql<{ max_date: unknown; portfolio_key: unknown }>`(SELECT portfolio_key, MAX(snapshot_date) as max_date FROM portfolio_snapshot
+           WHERE deleted_at IS NULL AND portfolio_key = ANY(${portfolioKeys}) GROUP BY portfolio_key)`.as('latest'),
+      (join) => join.onRef('ps.portfolio_key', '=', 'latest.portfolio_key').onRef('ps.snapshot_date', '=', 'latest.max_date'),
     )
-    .whereNull('ps.deleted_at')
-    .whereIn('ps.portfolio_key', portfolioKeys);
+    .select([
+      'ps.portfolio_key',
+      sql<null | number>`COALESCE(ps.appuser_currency_total_value, ps.total_value)`.as('balance'),
+    ])
+    .where('ps.deleted_at', 'is', null)
+    .where(anyOf('ps.portfolio_key', portfolioKeys))
+    .execute();
 
   const balanceMap = new Map<number, number>();
   for (const row of latestSnapshots) {
-    balanceMap.set(row.portfolio_key, Number(row.balance) || 0);
+    balanceMap.set(row.portfolio_key as number, Number(row.balance) || 0);
   }
 
   const transformedData = portfolios.map((t) => ({
@@ -428,9 +426,11 @@ export async function updatePortfolioTransaction(req: Request, res: Response) {
 export async function getAggregateDashboard(req: Request, res: Response) {
   const { tenant, user } = authedContext(req);
   const {
-    query: { period },
+    query: { include, period },
   } = await zParse(getAggregateDashboardRequestSchema, req);
-  const dashboard = await portfolioDashboardService.getAggregateDashboard(user, period || 'YTD', tenant.tenantKey);
+  const dashboard = await portfolioDashboardService.getAggregateDashboard(user, period || 'YTD', tenant.tenantKey, {
+    includeFeeConversion: include === 'feeConversion',
+  });
   return res.json(dashboard);
 }
 
@@ -463,7 +463,7 @@ export async function getTopMovers(req: Request, res: Response) {
 export async function getHoldingAnalystData(req: Request, _res: Response) {
   await zParse(getHoldingMarketDataRequestSchema, req);
   // Not covered by the current EODHD plan tier (Fundamentals-gated, same as
-  // financial-markets.ts's getFundamentals/getEarnings). See RAD-449.
+  // financial-markets.ts's getFundamentals/getEarnings).
   throw new NotFoundError('Analyst data is temporarily unavailable');
 }
 
@@ -492,15 +492,14 @@ export async function getPortfolioCalendar(req: Request, res: Response) {
   const toStr = format(to, 'yyyy-MM-dd');
 
   // Earnings calendar is Fundamentals-tier, not covered by the current EODHD
-  // plan (see RAD-449) — always empty rather than calling a provider.
+  // plan — always empty rather than calling a provider.
   const earnings: unknown[] = [];
 
   // Unlike earnings, EODHD's /div endpoint DOES return forward-looking
   // (declared-but-not-yet-ex) dividend dates — verified live on 2026-08-05
   // against AAPL/MSFT/JNJ/KO/PG.US: e.g. AAPL's 2026-08-10 ex-dividend row
   // carried declarationDate 2026-07-30, five days before "today". So this
-  // half of the endpoint migrates to EODHD rather than being stubbed to [].
-  // See RAD-449 task 16.
+  // half of the endpoint calls EODHD rather than being stubbed to [].
   const dividendResults = await Promise.all(
     symbols.map(async (s) => {
       try {
@@ -509,7 +508,7 @@ export async function getPortfolioCalendar(req: Request, res: Response) {
         // position (TS2749; see financial-markets.ts). eodhd.getDividends()'s
         // own return type is unaffected and correctly infers this shape.
         const rows = await eodhd.getDividends(s, { from: fromStr, to: toStr });
-        // EODHD's rows don't carry a `symbol` field (unlike FMP's), so tag
+        // EODHD's rows don't carry a `symbol` field, so tag
         // each row with the symbol it was queried for before merging.
         return rows.map((row) => ({ ...row, symbol: s }));
       } catch {
@@ -535,9 +534,11 @@ export async function getPortfolioDashboard(req: Request, res: Response) {
   const { tenant, user } = authedContext(req);
   const {
     params: { portfolioId },
-    query: { period },
+    query: { include, period },
   } = await zParse(getPortfolioDashboardRequestSchema, req);
-  const dashboard = await portfolioDashboardService.getPortfolioDashboard(user, portfolioId, period || 'YTD', tenant.tenantKey);
+  const dashboard = await portfolioDashboardService.getPortfolioDashboard(user, portfolioId, period || 'YTD', tenant.tenantKey, {
+    includeFeeConversion: include === 'feeConversion',
+  });
   return res.json(dashboard);
 }
 

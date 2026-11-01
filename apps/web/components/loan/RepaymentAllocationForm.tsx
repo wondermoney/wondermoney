@@ -29,10 +29,10 @@ import useUpdateLoanRepayment from "@/lib/api/loan/useUpdateLoanRepayment";
 
 const schema = z
   .object({
-    total: z.coerce.number().min(0),
-    principal: z.coerce.number().min(0),
-    interest: z.coerce.number().min(0),
-    fees: z.coerce.number().min(0),
+    total: z.coerce.number<number>().min(0),
+    principal: z.coerce.number<number>().min(0),
+    interest: z.coerce.number<number>().min(0),
+    fees: z.coerce.number<number>().min(0),
   })
   .refine(
     (v) => Math.abs(v.total - (v.principal + v.interest + v.fees)) < 0.01,

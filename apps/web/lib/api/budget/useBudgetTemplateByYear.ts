@@ -1,4 +1,3 @@
-import { useQuery, type UseQueryOptions } from "@tanstack/react-query";
 import type { AxiosInstance } from "axios";
 
 import api from "../api";
@@ -21,20 +20,4 @@ export async function getBudgetTemplateByYear(
     `/v1/budget/${params.budgetKey}/${params.year}`,
   );
   return data;
-}
-
-export default function useBudgetTemplateByYear<
-  R = GetBudgetTemplateByYearResponse,
->(
-  params: GetBudgetTemplateByYearRequest,
-  options?: Omit<
-    UseQueryOptions<GetBudgetTemplateByYearResponse, Error, R>,
-    "queryKey" | "queryFn"
-  >,
-) {
-  return useQuery({
-    queryKey: ["budget-template-year", params.budgetKey, params.year],
-    queryFn: () => getBudgetTemplateByYear(params),
-    ...options,
-  });
 }

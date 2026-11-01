@@ -57,7 +57,7 @@ export default function RepaymentCandidateList({
               </div>
               <div className="text-muted-foreground text-xs">
                 {candidate.reasons?.length
-                  ? candidate.reasons.join(" · ")
+                  ? candidate.reasons.join("; ")
                   : t("detail.repayments.reasonsUnavailable")}
               </div>
             </div>

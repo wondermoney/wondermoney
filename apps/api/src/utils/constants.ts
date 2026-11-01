@@ -1,6 +1,7 @@
 import { template } from 'lodash-es';
 
-import { APP_ENV, IS_PROD as ENV_IS_PROD, IS_DEV, IS_STAGING } from '@config/env';
+import { EnableBankingReturnTo } from '@app/types/enable-banking-return-to';
+import { APP_ENV, IS_PROD as ENV_IS_PROD } from '@config/env';
 import { defaultBrowserOrigins, resolveAppUrl, resolveInstanceUrls } from '@config/instance-urls';
 
 type EmailNotSentTemplate = (payload: { normalizedEmail: string }) => string;
@@ -56,7 +57,7 @@ export const ERROR = {
 };
 
 export const IS_PROD = ENV_IS_PROD;
-export { IS_DEV, IS_STAGING };
+
 export function getAllowedOrigins(env: string | undefined = APP_ENV, explicitOrigins?: string) {
   if (explicitOrigins?.trim()) return parseOrigins(explicitOrigins);
 
@@ -80,7 +81,7 @@ const LOCALHOST_ORIGIN_PATTERN = /^http:\/\/localhost:\d+$/;
  * no explicit CORS_ALLOWED_ORIGINS override configured, any
  * `http://localhost:<port>` origin is accepted. A dev/QA session running
  * the web app on a non-default port would otherwise be silently locked out
- * of every authenticated request — see RAD-629. The explicit env-var
+ * of every authenticated request. The explicit env-var
  * override, when set, remains authoritative and is never widened.
  */
 export function isCorsOriginAllowed(origin: string, env: string | undefined = APP_ENV, explicitOrigins: string | undefined = process.env['CORS_ALLOWED_ORIGINS']) {
@@ -115,8 +116,8 @@ function parseOrigins(value: string | undefined) {
     .filter(Boolean) ?? [];
 }
 
-export const CORS_ALLOWED_ORIGINS = getCorsAllowedOrigins();
-export const ALLOWED_ORIGINS = CORS_ALLOWED_ORIGINS;
+const CORS_ALLOWED_ORIGINS = getCorsAllowedOrigins();
+const ALLOWED_ORIGINS = CORS_ALLOWED_ORIGINS;
 
 /**
  * Native app URL scheme(s) allowed as better-auth OAuth callback targets.
@@ -133,7 +134,7 @@ export const ALLOWED_ORIGINS = CORS_ALLOWED_ORIGINS;
  * native origin for Expo cookie requests; this grants all paths/hosts under that custom
  * scheme server-side. Keep it out of browser CORS; do not add wildcard browser origins.
  */
-export const NATIVE_APP_SCHEME_ORIGINS = ['wondermoney://'] as const;
+const NATIVE_APP_SCHEME_ORIGINS = ['wondermoney://'] as const;
 
 /**
  * Origins better-auth trusts for CSRF/redirect validation: browser HTTP origins plus the
@@ -169,18 +170,32 @@ export const GITHUB_SHA = '##REPLACE_GITHUB_COMMIT_SHA_HERE##';
  */
 export const ENABLE_BANKING_CALLBACK_URL = `${BACKEND_URL}/v1/banking/enable-banking/callback`;
 
+/** The mobile app's URL scheme (`scheme` in `apps/mobile/app.config.ts`). */
+export const MOBILE_APP_SCHEME = 'wondermoney';
+
 /**
  * Where the end user's browser lands after the Enable Banking callback handler runs.
- * Deliberately built only from the hardcoded/env-derived `FRONTEND_URL` plus a fixed
- * status literal — never from any part of the incoming callback request (`state`,
- * `code`, `error` are only ever used to look up our own DB row, never interpolated
- * into a redirect target) — so this can't become an open redirect.
+ * Deliberately built only from the hardcoded/env-derived `FRONTEND_URL` or the fixed
+ * mobile scheme, plus a fixed status literal — never from any part of the incoming
+ * callback request (`state`, `code`, `error` are only ever used to look up our own DB
+ * row, never interpolated into a redirect target) — so this can't become an open redirect.
+ * `returnTo` is the value stored on that row when the connection was started.
  *
- * Lands on the existing Settings → "Bank Provider" tab (`?tab=bank-provider`,
+ * The web app lands on the existing Settings → "Bank Provider" tab (`?tab=bank-provider`,
  * `components/settings/BankProvider/EnableBankingKeySettings.tsx`), the natural place
- * a user who just went through the connect-a-bank flow should land back on.
+ * a user who just went through the connect-a-bank flow should land back on. The mobile
+ * app lands on its bank connections screen, whose auth session closes on that URL.
  */
-export const ENABLE_BANKING_CALLBACK_REDIRECT_URL = ({ status }: { status: 'error' | 'success' }) => {
+export const ENABLE_BANKING_CALLBACK_REDIRECT_URL = ({
+  returnTo,
+  status,
+}: {
+  returnTo?: EnableBankingReturnTo | null;
+  status: 'error' | 'success';
+}) => {
+  if (returnTo === EnableBankingReturnTo.MOBILE) {
+    return `${MOBILE_APP_SCHEME}://more/banking?enableBankingConnection=${status}`;
+  }
   const url = new URL('/settings', FRONTEND_URL);
   url.searchParams.set('tab', 'bank-provider');
   url.searchParams.set('enableBankingConnection', status);

@@ -1,16 +1,6 @@
-import {
-  Collection,
-  Entity,
-  EntityRepositoryType,
-  Enum,
-  Index,
-  ManyToMany,
-  ManyToOne,
-  PrimaryKey,
-  Property,
-  Unique,
-} from '@mikro-orm/core';
+import { Collection, EntityRepositoryType } from '@mikro-orm/core';
 import type { Rel } from '@mikro-orm/core';
+import { Entity, Enum, Index, ManyToMany, ManyToOne, PrimaryKey, Property, Unique } from '@mikro-orm/decorators/legacy';
 
 import { AppuserRepository } from '../repositories/AppuserRepository';
 
@@ -98,10 +88,4 @@ export class Appuser extends Base {
 
   @Property()
   recordActive = true;
-
-  // RAD-289/RAD-294: set true for users migrated from Supabase who had >=1 verified MFA factor
-  // (their TOTP secret is NOT migrated, so better-auth's own `twoFactorEnabled` stays false).
-  // Web reads this to prompt MFA re-enrollment on first post-migration login.
-  @Property()
-  requiresMfaReenrollment = false;
 }

@@ -40,7 +40,7 @@ export default function DataHealthReconnectReminder({
       unsubscribeUrl={unsubscribeUrl}
     >
       <p className="m-0">Voltar a ligar demora menos de um minuto e sincroniza de novo os teus saldos e movimentos, para a tua visão completa se manter fiável.</p>
-      <p className="m-0 mt-[10px]">A ligação continua só de leitura através de Open Banking regulado (GoCardless). O WonderMoney só lê os teus dados para os manter atualizados, e nunca pode mexer no teu dinheiro nem vender os teus dados.</p>
+      <p className="m-0 mt-[10px]">A ligação continua só de leitura através de Open Banking, com a tua própria chave da Enable Banking. O WonderMoney só lê os teus dados para os manter atualizados, e nunca pode mexer no teu dinheiro nem vender os teus dados.</p>
     </LifecycleEmailLayout>
   );
 }

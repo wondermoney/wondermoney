@@ -1,6 +1,6 @@
 import { z } from 'zod'
 
-import { readEndpoint, writeEndpoint } from '@/lib/api/runtime-schema'
+import { readEndpoint, tolerantEnum, writeEndpoint } from '@/lib/api/runtime-schema'
 
 const currencyCodeSchema = z.string().regex(/^[A-Z]{3}$/)
 const finite = z.number().finite()
@@ -12,22 +12,25 @@ const nullableText = z.string().nullable().optional()
 const nullablePositiveId = z.number().int().positive().nullable().optional()
 const positiveSafeId = z.number().int().positive().max(Number.MAX_SAFE_INTEGER)
 
-export const portfolioSummarySchema = z.object({
+const portfolioSummarySchema = z.object({
   appuserCurrencyCode: currencyCodeSchema,
   balance: finite,
-  currencyKey: z.object({ code: currencyCodeSchema }).strict(),
+  currencyKey: z.object({ code: currencyCodeSchema }),
   description: z.string().nullable().optional(),
   name: z.string(),
   portfolioKey: z.number().int().positive(),
-}).strict()
+})
 
 export const portfoliosResponseSchema = z.object({
   portfolios: z.array(portfolioSummarySchema),
-}).strict()
+})
 
-export const dashboardSummarySchema = z.object({
+const dashboardSummarySchema = z.object({
   assetCount: z.number().int().nonnegative(),
   currency: currencyCodeSchema,
+  // Assets with a trade fee the API could not convert (counted as zero). Sent only when the
+  // request asks with include=feeConversion and the list is non-empty; covers fully sold assets.
+  feeConversionIncompleteAssetKeys: z.array(z.number().int().positive()).optional(),
   lastUpdated: z.iso.datetime(),
   periodLabel: z.literal('YTD'),
   periodReturn: finiteNullable,
@@ -37,47 +40,47 @@ export const dashboardSummarySchema = z.object({
   totalGainLossPercent: finite,
   totalValue: finite,
   unrealizedGains: finite,
-}).strict()
+})
 
-export const portfolioBreakdownSchema = z.object({
+const portfolioBreakdownSchema = z.object({
   currency: currencyCodeSchema,
   gainPercent: finite,
   name: z.string(),
   portfolioKey: z.number().int().positive(),
   value: finite,
   weight: finite,
-}).strict()
+})
 
 export const aggregateDashboardResponseSchema = z.object({
   portfolios: z.array(portfolioBreakdownSchema),
   summary: dashboardSummarySchema.extend({
     portfolioCount: z.number().int().nonnegative(),
-  }).strict(),
-}).strict()
+  }),
+})
 
-export const portfolioMetadataSchema = z.object({
+const portfolioMetadataSchema = z.object({
   benchmarkSymbol: z.string().nullable().optional(),
-  currencyKey: z.object({ code: currencyCodeSchema }).strict(),
+  currencyKey: z.object({ code: currencyCodeSchema }),
   description: z.string().nullable().optional(),
   excluded: z.boolean().optional(),
   favored: z.boolean().optional(),
   name: z.string(),
   portfolioKey: z.number().int().positive(),
   targetAllocation: z.record(z.string(), finite).nullable().optional(),
-}).strict()
+})
 
-export const portfolioResponseSchema = z.object({ portfolio: portfolioMetadataSchema }).strict()
+export const portfolioResponseSchema = z.object({ portfolio: portfolioMetadataSchema })
 
-const performerSchema = z.object({ change: finite, ticker: z.string() }).strict()
+const performerSchema = z.object({ change: finite, ticker: z.string() })
 export const individualDashboardResponseSchema = z.object({
   quickStats: z.object({
     bestPerformer: performerSchema.nullable(),
-    biggestPosition: z.object({ ticker: z.string(), weight: finite }).strict().nullable(),
+    biggestPosition: z.object({ ticker: z.string(), weight: finite }).nullable(),
     holdingsCount: z.number().int().nonnegative(),
     worstPerformer: performerSchema.nullable(),
-  }).strict(),
-  summary: dashboardSummarySchema.omit({ portfolioCount: true }).strict(),
-}).strict()
+  }),
+  summary: dashboardSummarySchema.omit({ portfolioCount: true }),
+})
 
 const holdingBase = z.object({
   allocation: finiteNullable,
@@ -85,6 +88,9 @@ const holdingBase = z.object({
   currency: currencyCodeSchema,
   currentPrice: finiteNullable,
   currentValue: finiteNullable,
+  // Sent only when a fee of this asset had no usable exchange rate and was counted as zero;
+  // optional so older APIs still parse.
+  feeConversionIncomplete: z.boolean().optional(),
   financialAssetCurrencyCode: currencyCodeSchema.nullable().optional(),
   financialAssetEsgScore: z.union([finite, z.string()]).nullable().optional(),
   financialAssetKey: z.number().int().positive(),
@@ -103,44 +109,45 @@ const validHoldingSchema = holdingBase.extend({
   invalidReason: z.never().optional(),
   isInvalid: z.literal(false).optional(),
   relatedTransactionKeys: z.never().optional(),
-}).strict()
+})
 
 const invalidHoldingSchema = holdingBase.extend({
   allocation: z.null(),
   currentPrice: z.null(),
   currentValue: z.null(),
-  invalidReason: z.literal('NEGATIVE_UNITS'),
+  // Only isInvalid drives the UI; a reason this build doesn't know (today: 'NEGATIVE_UNITS') must
+  // not fail the whole holdings list.
+  invalidReason: z.string().min(1),
   isInvalid: z.literal(true),
   relatedTransactionKeys: z.array(z.number().int().positive()),
   unrealizedGains: z.null(),
   unrealizedGainsPercentage: z.null(),
-}).strict()
+})
 
-export const portfolioHoldingSchema = z.union([invalidHoldingSchema, validHoldingSchema])
+const portfolioHoldingSchema = z.union([invalidHoldingSchema, validHoldingSchema])
 export const portfolioHoldingsResponseSchema = z.object({
   holdings: z.array(portfolioHoldingSchema),
-}).strict()
+})
 
 export type PortfoliosResponseDto = z.infer<typeof portfoliosResponseSchema>
 export type AggregateDashboardResponseDto = z.infer<typeof aggregateDashboardResponseSchema>
 export type PortfolioResponseDto = z.infer<typeof portfolioResponseSchema>
 export type IndividualDashboardResponseDto = z.infer<typeof individualDashboardResponseSchema>
 export type PortfolioHoldingsResponseDto = z.infer<typeof portfolioHoldingsResponseSchema>
-export type PortfolioHoldingDto = z.infer<typeof portfolioHoldingSchema>
 
 export const portfolioCurrencySchema = z.object({
   currencyKey: positiveSafeId,
   code: currencyCodeSchema,
   description: z.string().trim().min(1).max(255),
-}).strict()
-export const portfolioCurrenciesResponseSchema = z.object({ currencies: z.array(portfolioCurrencySchema) }).strict()
+})
+export const portfolioCurrenciesResponseSchema = z.object({ currencies: z.array(portfolioCurrencySchema) })
 export const portfolioCreateWriteSchema = z.object({
   name: z.string().trim().min(1).max(255),
   currencyId: positiveSafeId,
 }).strict()
-export const portfolioCreateResponseSchema = z.object({
+const portfolioCreateResponseSchema = z.object({
   portfolio: z.object({ portfolioKey: positiveSafeId }).passthrough(),
-}).strict().transform(({ portfolio }) => ({ portfolioId: portfolio.portfolioKey }))
+}).transform(({ portfolio }) => ({ portfolioId: portfolio.portfolioKey }))
 // Fixed by the server's asset_class table (core/api's asset-class-rollup seed); target allocation keys
 // outside this set are rejected server-side, so the write contract enumerates them explicitly.
 export const PORTFOLIO_TARGET_ASSET_CLASSES = ['Equities', 'Fixed Income', 'Cash & Equivalents', 'Alternatives', 'Crypto'] as const
@@ -154,7 +161,7 @@ export const PORTFOLIO_TARGET_ASSET_CLASS_I18N_KEYS: Readonly<Record<PortfolioTa
   'Crypto': 'crypto',
 }
 
-export const portfolioTargetAllocationWriteSchema = z.record(z.string(), finite.min(0))
+const portfolioTargetAllocationWriteSchema = z.record(z.string(), finite.min(0))
   .refine((value) => Object.keys(value).every((key) => targetAssetClassSet.has(key)), 'Unknown asset class.')
   .refine((value) => Object.keys(value).length > 0, 'At least one asset class is required.')
   .nullable()
@@ -195,7 +202,7 @@ export const portfolioSettingsWriteSchema = z.object({
   || value.favored !== undefined
   || value.targetAllocation !== undefined
 ), 'At least one changed field is required.')
-export const portfolioSettingsResponseSchema = z.object({ portfolio: portfolioMetadataSchema }).strict()
+export const portfolioSettingsResponseSchema = z.object({ portfolio: portfolioMetadataSchema })
 
 export type PortfolioCurrencyDto = z.infer<typeof portfolioCurrencySchema>
 export type PortfolioCreateWrite = z.infer<typeof portfolioCreateWriteSchema>
@@ -204,7 +211,7 @@ export type PortfolioSettingsWrite = z.infer<typeof portfolioSettingsWriteSchema
 const transactionCurrencySchema = z.object({
   code: currencyCodeSchema.nullable().optional(),
   currencyKey: nullablePositiveId,
-}).strict().nullable().optional()
+}).nullable().optional()
 
 const transactionAssetSchema = z.object({
   esgScore: z.union([finite, decimalString]).nullable().optional(),
@@ -212,17 +219,17 @@ const transactionAssetSchema = z.object({
   logoUrl: nullableText,
   name: nullableText,
   symbol: nullableText,
-}).strict().nullable().optional()
+}).nullable().optional()
 
 const transactionPortfolioSchema = z.object({
   name: nullableText,
   portfolioKey: nullablePositiveId,
-}).strict().nullable().optional()
+}).nullable().optional()
 
 const transactionTypeSchema = z.object({
   financialTransactionTypeKey: nullablePositiveId,
   name: nullableText,
-}).strict().nullable().optional()
+}).nullable().optional()
 
 const normalPortfolioTransactionWireSchema = z.object({
   appuserCurrencyExchangeRate: nullableDecimal,
@@ -232,9 +239,12 @@ const normalPortfolioTransactionWireSchema = z.object({
   feeCurrencyKey: transactionCurrencySchema,
   financialAssetExchangeKey: z.unknown().nullable().optional(),
   financialAssetKey: transactionAssetSchema,
-  financialBrokerKey: z.object({ financialBrokerKey: nullablePositiveId, name: nullableText }).strict().nullable().optional(),
+  financialBrokerKey: z.object({ financialBrokerKey: nullablePositiveId, name: nullableText }).nullable().optional(),
   financialTransactionTypeKey: transactionTypeSchema,
-  itemType: z.literal('TRANSACTION').optional(),
+  // Any item type other than a stock split, including one this build doesn't know, renders as a
+  // transaction row (every field here is optional). A malformed stock split must still fail
+  // rather than slip through as a transaction.
+  itemType: z.string().refine((value) => value !== 'STOCK_SPLIT').optional(),
   notes: nullableText,
   originalAmount: nullableDecimal,
   originalCurrencyKey: transactionCurrencySchema,
@@ -247,7 +257,7 @@ const normalPortfolioTransactionWireSchema = z.object({
   settlementUnitAmount: nullableDecimal,
   transactionDate: z.iso.datetime().nullable().optional(),
   transactionKey: nullablePositiveId,
-}).strict().transform((row) => ({ ...row, itemType: 'TRANSACTION' as const }))
+}).transform((row) => ({ ...row, itemType: 'TRANSACTION' as const }))
 
 const stockSplitWireSchema = z.object({
   denominator: finite.positive().nullish(),
@@ -258,27 +268,27 @@ const stockSplitWireSchema = z.object({
     logoUrl: nullableText,
     name: nullableText,
     symbol: nullableText,
-  }).strict(),
+  }),
   id: z.string().min(1),
   itemType: z.literal('STOCK_SPLIT'),
   numerator: finite.positive().nullish(),
-  portfolioKey: z.object({ name: nullableText, portfolioKey: z.number().int().positive() }).strict(),
+  portfolioKey: z.object({ name: nullableText, portfolioKey: z.number().int().positive() }),
   splitRatio: finite.positive().nullish(),
   transactionDate: z.iso.datetime(),
-}).strict()
+})
 
 export const portfolioActivityResponseSchema = z.object({
   transactions: z.array(z.union([stockSplitWireSchema, normalPortfolioTransactionWireSchema])),
-}).strict()
+})
 
-const allocationItemSchema = z.object({ percentage: finite, type: z.string(), value: finite }).strict()
+const allocationItemSchema = z.object({ percentage: finite, type: z.string(), value: finite })
 const assetClassDriftSchema = z.object({
   assetClass: z.string(),
   currentPct: finite,
   targetPct: finite,
   driftPts: finite,
-}).strict()
-const unclassifiedHoldingSchema = z.object({ name: z.string(), value: finite }).strict()
+})
+const unclassifiedHoldingSchema = z.object({ name: z.string(), value: finite })
 export const portfolioAllocationResponseSchema = z.object({
   byAsset: z.array(allocationItemSchema).optional(),
   byAssetClass: z.array(allocationItemSchema),
@@ -287,12 +297,13 @@ export const portfolioAllocationResponseSchema = z.object({
   driftRows: z.array(assetClassDriftSchema).optional(),
   guidanceText: z.string().nullable().optional(),
   unclassifiedHoldings: z.array(unclassifiedHoldingSchema),
-}).strict()
+})
 export const portfolioDividendIncomeResponseSchema = z.object({
-  byAsset: z.array(z.object({ financialAssetKey: z.number().int().positive(), symbol: z.string(), totalDividends: finite }).strict()),
+  byAsset: z.array(z.object({ financialAssetKey: z.number().int().positive(), symbol: z.string(), totalDividends: finite })),
   totalDividends: finite,
-}).strict()
-const historyStatusSchema = z.enum(['empty', 'insufficient_history', 'ready'])
+})
+// Values this build doesn't know read as "not ready yet", which the screens already handle.
+const historyStatusSchema = tolerantEnum(['empty', 'insufficient_history', 'ready'], 'insufficient_history')
 export const portfolioMetricsResponseSchema = z.object({
   metrics: z.object({
     annualYield: finiteNullable,
@@ -300,17 +311,18 @@ export const portfolioMetricsResponseSchema = z.object({
     currentValue: finite,
     maxDrawdown: finiteNullable,
     readiness: z.object({
-      allocation: z.object({ status: z.literal('ready') }).strict(),
-      holdings: z.object({ status: z.literal('ready') }).strict(),
-      performance: z.object({ status: historyStatusSchema }).strict(),
-      riskMetrics: z.object({ status: z.enum(['insufficient_history', 'ready']) }).strict(),
-    }).strict(),
-    riskLevel: z.enum(['High', 'Low', 'Medium']).nullable(),
+      allocation: z.object({ status: tolerantEnum(['ready'], 'unknown') }),
+      holdings: z.object({ status: tolerantEnum(['ready'], 'unknown') }),
+      performance: z.object({ status: historyStatusSchema }),
+      riskMetrics: z.object({ status: tolerantEnum(['insufficient_history', 'ready'], 'insufficient_history') }),
+    }),
+    // A risk level this build doesn't know reads as null ("unavailable").
+    riskLevel: tolerantEnum(['High', 'Low', 'Medium'], null).nullable(),
     sharpeRatio: finiteNullable,
     totalReturn: finite,
     volatility: finiteNullable,
-  }).strict(),
-}).strict()
+  }),
+})
 
 export type PortfolioActivityDto = z.infer<typeof portfolioActivityResponseSchema>
 export type PortfolioActivityItemDto = PortfolioActivityDto['transactions'][number]
@@ -327,8 +339,11 @@ export const portfolioCurrenciesEndpoint = readEndpoint({
 export const createPortfolioWriteEndpoint = writeEndpoint({
   method: 'POST', path: '/v1/portfolio', schema: portfolioCreateResponseSchema, successStatuses: [201],
 })
+// The API sends opt-in dashboard fields only when asked. Older builds shipped strict schemas
+// that rejected unknown fields, so this keeps them parsing the summary.
+const DASHBOARD_INCLUDE = 'include=feeConversion'
 export const aggregatePortfolioDashboardEndpoint = readEndpoint({
-  method: 'GET', path: '/v1/portfolio/dashboard?period=YTD', schema: aggregateDashboardResponseSchema,
+  method: 'GET', path: `/v1/portfolio/dashboard?period=YTD&${DASHBOARD_INCLUDE}`, schema: aggregateDashboardResponseSchema,
 })
 export const portfolioAllocationEndpoint = readEndpoint({ method: 'GET', path: '/v1/portfolio/allocation', schema: portfolioAllocationResponseSchema })
 export const portfolioDividendIncomeEndpoint = readEndpoint({ method: 'GET', path: '/v1/portfolio/dividend-income', schema: portfolioDividendIncomeResponseSchema })
@@ -357,7 +372,7 @@ export function parsePortfolioActivityFilters(fromDate: unknown, toDate: unknown
   return result.data
 }
 
-export function portfolioActivityPath(portfolioId: number | null, filters: PortfolioActivityFilters = {}): string {
+function portfolioActivityPath(portfolioId: number | null, filters: PortfolioActivityFilters = {}): string {
   if (portfolioId !== null && !isValidPortfolioId(portfolioId)) throw new Error('A positive safe portfolio id is required.')
   if (filters.fromDate && filters.toDate && filters.fromDate > filters.toDate) throw new Error('The from date must not be after the to date.')
   const params = new URLSearchParams({ limit: '50' })
@@ -381,13 +396,13 @@ export const createPortfolioSettingsEndpoint = (id: number) => writeEndpoint({
 })
 export const createPortfolioDashboardEndpoint = (id: number) => readEndpoint({
   method: 'GET' as const,
-  path: `${portfolioPath(id, '/dashboard')}?period=YTD`,
+  path: `${portfolioPath(id, '/dashboard')}?period=YTD&${DASHBOARD_INCLUDE}`,
   schema: individualDashboardResponseSchema,
 })
 export const createPortfolioHoldingsEndpoint = (id: number) => readEndpoint({
   method: 'GET' as const, path: portfolioPath(id, '/holdings'), schema: portfolioHoldingsResponseSchema,
 })
-// RAD-515 — same response shape as the aggregate portfolioDividendIncomeEndpoint above, scoped to
+// Same response shape as the aggregate portfolioDividendIncomeEndpoint above, scoped to
 // one portfolio via the same /v1/portfolio/{id}/... path family as holdings/dashboard/activity.
 export const createPortfolioDividendIncomeEndpoint = (id: number) => readEndpoint({
   method: 'GET' as const, path: portfolioPath(id, '/dividend-income'), schema: portfolioDividendIncomeResponseSchema,
@@ -456,7 +471,7 @@ export const createEditPortfolioTransactionEndpoint = (portfolioId: number, tran
   })
 }
 
-// RAD-516 — manual transaction creation. Web's PortfolioTransactionAddModal also collects a
+// Manual transaction creation. Web's PortfolioTransactionAddModal also collects a
 // broker, an optional fee, and an optional original currency/amount; mobile scopes those out the
 // same way the edit form already does (see the comment above), since unlike an edit, a create
 // still needs an asset, a type, and a settlement currency to exist at all. Web explicitly excludes
@@ -504,7 +519,7 @@ export function freezePortfolioTransactionCreate(draft: PortfolioTransactionCrea
 
 export const createPortfolioTransactionResponseSchema = z.object({
   transaction: z.object({ transactionKey: positiveSafeId }).passthrough(),
-}).strict().transform(({ transaction }) => ({ transactionId: transaction.transactionKey }))
+}).transform(({ transaction }) => ({ transactionId: transaction.transactionKey }))
 
 export const createCreatePortfolioTransactionEndpoint = (portfolioId: number) => writeEndpoint({
   method: 'POST' as const, path: portfolioPath(portfolioId, '/transaction'), schema: createPortfolioTransactionResponseSchema, successStatuses: [201],
@@ -513,11 +528,11 @@ export const createCreatePortfolioTransactionEndpoint = (portfolioId: number) =>
 export const portfolioTransactionTypeSchema = z.object({
   financialTransactionTypeKey: positiveSafeId,
   name: z.string().trim().min(1).max(50),
-}).strict()
+})
 export type PortfolioTransactionTypeDto = z.infer<typeof portfolioTransactionTypeSchema>
 export const portfolioTransactionTypesResponseSchema = z.object({
   transactionTypes: z.array(portfolioTransactionTypeSchema),
-}).strict()
+})
 export const portfolioTransactionTypesEndpoint = readEndpoint({
   method: 'GET', path: '/v1/portfolio/transaction-types', schema: portfolioTransactionTypesResponseSchema,
 })
@@ -531,8 +546,8 @@ export function isManuallyCreatableTransactionType(name: string): boolean {
 export const PORTFOLIO_PERFORMANCE_PERIODS = ['1M', '3M', '6M', 'YTD', '1Y', 'ALL'] as const
 export type PortfolioPerformancePeriod = typeof PORTFOLIO_PERFORMANCE_PERIODS[number]
 
-const performancePointSchema = z.object({ date: dateOnly, value: finite }).strict()
-const performanceReadinessSchema = z.object({ status: z.string(), note: z.string().nullable().optional() }).strict()
+const performancePointSchema = z.object({ date: dateOnly, value: finite })
+const performanceReadinessSchema = z.object({ status: z.string(), note: z.string().nullable().optional() })
 
 export const portfolioPerformanceResponseSchema = z.object({
   dataPoints: z.array(performancePointSchema),
@@ -540,15 +555,16 @@ export const portfolioPerformanceResponseSchema = z.object({
   benchmarkDataPoints: z.array(performancePointSchema).optional(),
   normalizedBenchmarkDataPoints: z.array(performancePointSchema).optional(),
   benchmarkSymbol: z.string().optional(),
-  benchmarkStatus: z.enum(['waiting_for_portfolio_history', 'missing_benchmark_data', 'ready']).optional(),
-  portfolioHistoryStatus: z.enum(['empty', 'insufficient_history', 'ready']).optional(),
+  benchmarkStatus: tolerantEnum(['waiting_for_portfolio_history', 'missing_benchmark_data', 'ready'], 'unknown').optional(),
+  // A status this build doesn't know reads as null, which the view model treats like an absent one.
+  portfolioHistoryStatus: tolerantEnum(['empty', 'insufficient_history', 'ready'], null).optional(),
   minDataPointsForComparison: z.number().int().nonnegative(),
   period: z.string(),
   readiness: z.object({
     performance: performanceReadinessSchema.optional(),
     benchmark: performanceReadinessSchema.optional(),
-  }).strict().optional(),
-}).strict()
+  }).optional(),
+})
 export type PortfolioPerformanceResponseDto = z.infer<typeof portfolioPerformanceResponseSchema>
 export type PortfolioPerformancePoint = z.infer<typeof performancePointSchema>
 

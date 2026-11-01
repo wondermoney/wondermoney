@@ -3,7 +3,7 @@ import { createGoogleIdentityProvider } from './google-identity-provider'
 import type { NativeIdentityProviders } from './native-identity'
 
 /**
- * The providers the app actually ships (RAD-420). Constructing them is side-effect
+ * The providers the app actually ships. Constructing them is side-effect
  * free — neither adapter touches its native SDK until `isAvailable`/`requestIdentity`
  * is called.
  */

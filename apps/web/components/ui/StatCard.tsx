@@ -52,9 +52,9 @@ export interface StatCardProps {
   /**
    * How the figure is arrived at, behind a help icon beside the label.
    *
-   * Deliberately icon-only: the budget wizard rendered "How this is
-   * calculated" as visible text next to "Monthly income", and the pair wrapped
-   * to two lines each inside a tile 200px wide (RAD-619). The sentence is worth
+   * Deliberately icon-only: "How this is calculated" as visible text next to
+   * "Monthly income" wraps the pair to two lines each inside a tile 200px
+   * wide. The sentence is worth
    * having, just not competing with the label for the same row.
    */
   help?: {
@@ -98,8 +98,8 @@ export function StatCard({
 
   return (
     <div
-      // Tighter on a phone: three of these stacked at desktop padding spent
-      // more of a 390px screen on frame than on figures (RAD-620).
+      // Tighter on a phone: three of these stacked at desktop padding spend
+      // more of a 390px screen on frame than on figures.
       className={cn("bg-card p-3 sm:p-4", className)}
     >
       <div className="flex items-center justify-between gap-2">

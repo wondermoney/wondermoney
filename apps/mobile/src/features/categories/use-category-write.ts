@@ -25,7 +25,7 @@ export type CategoryWriteFailure = 'validation' | 'demo' | 'access' | 'mfa' | 'n
 export const categoryWriteUnknownKey = (epochId: number) => ['category-write-unknown', epochId] as const
 export const categoryWriteDemoKey = (epochId: number) => ['category-write-demo-locked', epochId] as const
 
-export class CategoryWriteBlockedError extends Error {
+class CategoryWriteBlockedError extends Error {
   constructor(message = 'Category writes are blocked after an unknown outcome for this session.') {
     super(message)
     this.name = 'CategoryWriteBlockedError'

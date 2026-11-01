@@ -9,7 +9,7 @@ import type { AuthContext, AuthedSession, AuthedUser } from '../better-auth';
  * The real module fails fast at import when `BETTER_AUTH_SECRET` / the `DB_*` env is
  * absent (by design for prod/staging), builds a live pg `Pool`, and pulls in
  * `@service/email`. None of that is available or wanted in the unit-test harness, so any
- * test that (even transitively) imports the app, server, or worker used to crash at
+ * test that (even transitively) imports the app, server, or worker would crash at
  * import. This inert double stands in for the whole public surface with no side effects.
  *
  * Registered globally by `src/test/setup.ts`. Individual tests may still override it with

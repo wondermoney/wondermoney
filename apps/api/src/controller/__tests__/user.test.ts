@@ -206,8 +206,7 @@ describe('user controller', () => {
 
       await getRequisitions(buildReq(), { json } as unknown as Response);
 
-      // Pure spread + `provider: 'GoCardless'` — byte-for-byte the same shape/values
-      // this endpoint returned before the Enable Banking widening.
+      // Pure spread + `provider: 'GoCardless'` — the legacy items keep their exact shape/values.
       expect(json).toHaveBeenCalledWith({ requisitions: [{ ...requisition, provider: 'GoCardless' }] });
       // Only the AccountFinancialInstitution lookup is skipped when there are no
       // Enable Banking connections to resolve institution info for.

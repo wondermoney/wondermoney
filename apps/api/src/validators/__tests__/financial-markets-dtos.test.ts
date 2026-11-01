@@ -16,7 +16,7 @@ import {
 
 const SOURCE = { asOf: null, provider: 'eodhd' } as const
 
-describe('financial-markets stable DTO schemas (RAD-228)', () => {
+describe('financial-markets stable DTO schemas', () => {
   it('search: accepts a valid result, rejects unknown fields, accepts an empty list', () => {
     expect(
       searchTickerResponseSchema.safeParse({
@@ -33,7 +33,7 @@ describe('financial-markets stable DTO schemas (RAD-228)', () => {
     expect(searchTickerResponseSchema.safeParse({ results: [], source: SOURCE }).success).toBe(true)
   })
 
-  it('quote: requires the documented nulls and rejects FMP passthrough fields', () => {
+  it('quote: requires the documented nulls and rejects raw provider passthrough fields', () => {
     expect(
       quoteResponseSchema.safeParse({
         change: 1.5,
@@ -60,13 +60,13 @@ describe('financial-markets stable DTO schemas (RAD-228)', () => {
         symbol: 'AAPL',
         timestamp: '2026-07-31T12:00:00.000Z',
         volume: 1000,
-        // Forbidden passthrough field from the raw FMP shape.
+        // Forbidden passthrough field from the raw provider shape.
         changesPercentage: 0.79,
       }).success,
     ).toBe(false)
   })
 
-  it('company: rejects FMP passthrough fields but accepts the documented DTO', () => {
+  it('company: rejects raw provider passthrough fields but accepts the documented DTO', () => {
     expect(
       companyInformationResponseSchema.safeParse({
         beta: 1.2,
@@ -123,7 +123,7 @@ describe('financial-markets stable DTO schemas (RAD-228)', () => {
         sector: 'Technology',
         symbol: 'AAPL',
         website: 'https://apple.com',
-        // Forbidden FMP keys must not leak through.
+        // Forbidden provider keys must not leak through.
         cik: '0000320193',
         isin: 'US0378331005',
       }).success,
@@ -159,7 +159,7 @@ describe('financial-markets stable DTO schemas (RAD-228)', () => {
     ).toBe(true)
   })
 
-  it('earnings: keeps the four DTO fields and rejects raw FMP keys', () => {
+  it('earnings: keeps the four DTO fields and rejects raw provider keys', () => {
     expect(
       earningsResponseSchema.safeParse({
         earnings: [
@@ -242,7 +242,7 @@ describe('financial-markets stable DTO schemas (RAD-228)', () => {
     ).toBe(true)
   })
 
-  it('news: accepts the documented item, rejects raw FMP passthrough and a non-https url', () => {
+  it('news: accepts the documented item, rejects raw provider passthrough and a non-https url', () => {
     expect(
       newsResponseSchema.safeParse({
         hasMore: true,
@@ -284,7 +284,7 @@ describe('financial-markets stable DTO schemas (RAD-228)', () => {
         symbol: 'AAPL',
       }).success,
     ).toBe(false)
-    // Raw FMP news keys (e.g. `text`) must not leak through the strict item schema.
+    // Raw provider news keys (e.g. `text`) must not leak through the strict item schema.
     expect(
       newsResponseSchema.safeParse({
         hasMore: false,

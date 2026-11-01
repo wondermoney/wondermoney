@@ -1,8 +1,8 @@
 import type { PgBossLike } from '@service/queue/pgboss-client';
 
 export const BANK_RECOVERY_DISPATCH_QUEUE = 'bank-recovery.dispatch';
-export const BANK_RECOVERY_DISPATCH_CRON = '*/5 * * * *';
-export const BANK_RECOVERY_DISPATCH_SINGLETON_KEY = BANK_RECOVERY_DISPATCH_QUEUE;
+const BANK_RECOVERY_DISPATCH_CRON = '*/5 * * * *';
+const BANK_RECOVERY_DISPATCH_SINGLETON_KEY = BANK_RECOVERY_DISPATCH_QUEUE;
 
 export const ensureBankRecoveryDispatchQueue = (boss: Pick<PgBossLike, 'createQueue'>) =>
   boss.createQueue(BANK_RECOVERY_DISPATCH_QUEUE, { expireInSeconds: 600, policy: 'exclusive' });
@@ -12,7 +12,9 @@ export const ensureBankRecoveryDispatchQueue = (boss: Pick<PgBossLike, 'createQu
  * feature ships fail-closed, enabled "only through an approved release manifest". The
  * worker for this queue *is* registered (`jobs/worker.ts`), so the dispatch path is live
  * — only the schedule that feeds it is withheld. Deleting this would mean rebuilding it
- * to turn the feature on, so it stays. Flagged as unused by `knip`; that is expected.
+ * to turn the feature on, so it stays.
+ *
+ * @public
  */
 export const scheduleBankRecoveryDispatchJob = (boss: Pick<PgBossLike, 'schedule'>) =>
   boss.schedule(BANK_RECOVERY_DISPATCH_QUEUE, BANK_RECOVERY_DISPATCH_CRON, {}, {

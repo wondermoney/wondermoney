@@ -28,7 +28,6 @@ export default function FirstRunWelcomeStep() {
       copy={
         <div className="space-y-7">
           <FirstRunStepIntro
-            kicker={t("stepLabels.welcome")}
             headline={t("welcome.headline")}
             sub={t("welcome.description")}
           />

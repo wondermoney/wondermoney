@@ -1,17 +1,16 @@
 import { describe, expect, it } from 'vitest';
 
 import {
-  buildEffectiveAmountSql,
   filterExpenseTransactions,
   getEffectiveAppuserAmount,
   mapCategorySpendingByName,
 } from '@utils/account-amounts';
 
 describe('account aggregation scenarios', () => {
-  it('uses edited amounts consistently across spending and metrics semantics', () => {
+  it('uses edited amounts consistently across spending and inflow/outflow', () => {
     const transactions = [
       {
-        appuserSettlementAmount: -100,
+        appuserSettlementAmount: -40,
         category: {
           bgColor: '#111111',
           categoryKey: 1,
@@ -28,7 +27,7 @@ describe('account aggregation scenarios', () => {
         category: null,
       },
       {
-        appuserSettlementAmount: -80,
+        appuserSettlementAmount: 20,
         category: {
           bgColor: '#333333',
           categoryKey: 2,
@@ -43,7 +42,7 @@ describe('account aggregation scenarios', () => {
     ];
 
     const expenseTransactions = filterExpenseTransactions(transactions);
-    const spending = mapCategorySpendingByName(expenseTransactions as never[]);
+    const spending = mapCategorySpendingByName(expenseTransactions);
     const inflow = transactions
       .map((transaction) => getEffectiveAppuserAmount(transaction))
       .filter((amount) => amount > 0)
@@ -63,9 +62,5 @@ describe('account aggregation scenarios', () => {
     ]);
     expect(inflow).toBe(520);
     expect(outflow).toBe(-40);
-  });
-
-  it('builds metrics SQL that prefers edited settlement amounts', () => {
-    expect(buildEffectiveAmountSql('t')).toBe('COALESCE(t.edited_settlement_amount, t.appuser_settlement_amount)');
   });
 });

@@ -44,9 +44,9 @@ describe('reportFiltersSchema date range', () => {
 });
 
 /**
- * RAD-555 — the `timezone` filter is the calendar a report groups periods in.
- * It is additive: existing callers send nothing and get the assumed default,
- * echoed back so the response says which calendar produced it.
+ * The `timezone` filter is the calendar a report groups periods in. It is
+ * optional: a caller that sends nothing gets the assumed default, echoed back
+ * so the response says which calendar produced it.
  */
 describe('reportFiltersSchema timezone', () => {
   it('defaults to the assumed report calendar when omitted', () => {

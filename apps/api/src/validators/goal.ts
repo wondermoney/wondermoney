@@ -92,11 +92,11 @@ const goalBodySchema = z.object({
 export const createGoalRequestSchema = z.object({
   body: goalBodySchema.superRefine((body, ctx) => {
     if (body.type === 'debt_paydown') {
-      if (body.currentBalance == null) ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'currentBalance is required for debt paydown goals', path: ['currentBalance'] });
-      if (body.annualInterestRatePercent == null) ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'annualInterestRatePercent is required for debt paydown goals', path: ['annualInterestRatePercent'] });
-      if (body.minimumPayment == null) ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'minimumPayment is required for debt paydown goals', path: ['minimumPayment'] });
+      if (body.currentBalance == null) ctx.addIssue({ code: 'custom', message: 'currentBalance is required for debt paydown goals', path: ['currentBalance'] });
+      if (body.annualInterestRatePercent == null) ctx.addIssue({ code: 'custom', message: 'annualInterestRatePercent is required for debt paydown goals', path: ['annualInterestRatePercent'] });
+      if (body.minimumPayment == null) ctx.addIssue({ code: 'custom', message: 'minimumPayment is required for debt paydown goals', path: ['minimumPayment'] });
     } else if (body.targetAmount == null) {
-      ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'targetAmount is required', path: ['targetAmount'] });
+      ctx.addIssue({ code: 'custom', message: 'targetAmount is required', path: ['targetAmount'] });
     }
   }),
 });

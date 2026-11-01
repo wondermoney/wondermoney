@@ -59,7 +59,7 @@ export const LIFECYCLE_COPY: Record<
         body: [
           "One of your bank connections is about to expire. Under European Open Banking rules, banks ask you to renew access periodically, and yours is nearing that point.",
           "Renewing takes about a minute and keeps your balances and transactions flowing into WonderMoney without a gap, so your complete picture stays up to date. Nothing else changes.",
-          "This access stays read-only through regulated Open Banking (GoCardless). WonderMoney reads your accounts to keep your picture current, and can never move your money or sell your data.",
+          "This access stays read-only through Open Banking, using your own Enable Banking key. WonderMoney reads your accounts to keep your picture current, and can never move your money or sell your data.",
         ],
         status: {
           label: "Bank connection",
@@ -75,7 +75,7 @@ export const LIFECYCLE_COPY: Record<
         body: [
           "Uma das tuas ligações bancárias está prestes a expirar. Segundo as regras europeias de Open Banking, os bancos pedem-te para renovar o acesso periodicamente, e a tua está a aproximar-se desse momento.",
           "Renovar demora cerca de um minuto e mantém os teus saldos e movimentos a chegar ao WonderMoney sem falhas, para a tua visão completa se manter atualizada. Não muda mais nada.",
-          "Este acesso continua só de leitura através de Open Banking regulado (GoCardless). O WonderMoney lê as tuas contas para manter a tua visão atualizada, e nunca pode mexer no teu dinheiro nem vender os teus dados.",
+          "Este acesso continua só de leitura através de Open Banking, com a tua própria chave da Enable Banking. O WonderMoney lê as tuas contas para manter a tua visão atualizada, e nunca pode mexer no teu dinheiro nem vender os teus dados.",
         ],
         status: {
           label: "Ligação bancária",
@@ -93,7 +93,7 @@ export const LIFECYCLE_COPY: Record<
         body: [
           "One of your bank connections has stopped updating, so the accounts behind it are no longer refreshing in WonderMoney.",
           "Reconnecting takes less than a minute and brings your balances and transactions back in sync, keeping your complete picture accurate.",
-          "The connection stays read-only through regulated Open Banking (GoCardless). WonderMoney only reads your data to keep it current, and can never move your money or sell your data.",
+          "The connection stays read-only through Open Banking, using your own Enable Banking key. WonderMoney only reads your data to keep it current, and can never move your money or sell your data.",
         ],
         status: {
           label: "Bank connection",
@@ -109,7 +109,7 @@ export const LIFECYCLE_COPY: Record<
         body: [
           "Uma das tuas ligações bancárias deixou de atualizar, por isso as contas associadas já não estão a ser atualizadas no WonderMoney.",
           "Voltar a ligar demora menos de um minuto e sincroniza de novo os teus saldos e movimentos, para a tua visão completa se manter fiável.",
-          "A ligação continua só de leitura através de Open Banking regulado (GoCardless). O WonderMoney só lê os teus dados para os manter atualizados, e nunca pode mexer no teu dinheiro nem vender os teus dados.",
+          "A ligação continua só de leitura através de Open Banking, com a tua própria chave da Enable Banking. O WonderMoney só lê os teus dados para os manter atualizados, e nunca pode mexer no teu dinheiro nem vender os teus dados.",
         ],
         status: {
           label: "Ligação bancária",
@@ -127,7 +127,7 @@ export const LIFECYCLE_COPY: Record<
         body: [
           "This is a last reminder that one of your bank connections is still disconnected. While it stays that way, those balances and transactions keep going stale and your picture stays incomplete.",
           "A quick reconnect restores the feed and gets your numbers accurate again. It takes about a minute, and everything else stays exactly as you left it.",
-          "The connection remains read-only through regulated Open Banking (GoCardless). WonderMoney reads your accounts to keep your picture current, and can never move your money or sell your data.",
+          "The connection remains read-only through Open Banking, using your own Enable Banking key. WonderMoney reads your accounts to keep your picture current, and can never move your money or sell your data.",
         ],
         status: {
           label: "Bank connection",
@@ -143,7 +143,7 @@ export const LIFECYCLE_COPY: Record<
         body: [
           "Este é um último aviso de que uma das tuas ligações bancárias continua desligada. Enquanto assim ficar, esses saldos e movimentos vão ficando desatualizados e a tua visão fica incompleta.",
           "Uma reativação rápida repõe a ligação e volta a deixar os teus números certos. Demora cerca de um minuto e tudo o resto fica exatamente como o deixaste.",
-          "A ligação mantém-se só de leitura através de Open Banking regulado (GoCardless). O WonderMoney lê as tuas contas para manter a tua visão atualizada, e nunca pode mexer no teu dinheiro nem vender os teus dados.",
+          "A ligação mantém-se só de leitura através de Open Banking, com a tua própria chave da Enable Banking. O WonderMoney lê as tuas contas para manter a tua visão atualizada, e nunca pode mexer no teu dinheiro nem vender os teus dados.",
         ],
         status: {
           label: "Ligação bancária",

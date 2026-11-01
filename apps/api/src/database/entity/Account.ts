@@ -1,5 +1,5 @@
-import { Entity, Filter, Index, ManyToOne, PrimaryKey, Property, Unique } from '@mikro-orm/core';
 import type { Rel } from '@mikro-orm/core';
+import { Entity, Filter, Index, ManyToOne, PrimaryKey, Property, Unique } from '@mikro-orm/decorators/legacy';
 
 import { accountTenantCond, TENANT_FILTER } from '../filters/tenant-filter';
 
@@ -66,15 +66,15 @@ export class Account extends Base {
   holderName?: string;
 
   /**
-   * Per-account privacy within a household (RAD-343). Accounts are shared with the
+   * Per-account privacy within a household. Accounts are shared with the
    * household by default; when `true`, the account and its transactions are visible
    * only to the owner and hidden from other members everywhere (lists + aggregates).
    */
   @Property({ default: false })
   isPrivate = false;
 
-  // Enable Banking's replacement for `nordigenRequisitionKey` (kept alongside it,
-  // not replacing it — Phase 1a is additive-only, see plan §2/§8).
+  // Enable Banking connection. `nordigenRequisitionKey` stays alongside it for accounts linked
+  // through the legacy provider.
   @ManyToOne({ cascade: [], entity: () => EnableBankingConnection, fieldName: 'enable_banking_connection_key', nullable: true })
   enableBankingConnectionKey?: Rel<EnableBankingConnection>;
 
@@ -85,7 +85,7 @@ export class Account extends Base {
   refreshedAt?: Date;
 
   /**
-   * Last time the account's *transactions* were successfully synced (RAD-346, Phase 1).
+   * Last time the account's *transactions* were successfully synced.
    * Distinct from `refreshedAt` (account-level sync): a transaction refresh that creates no
    * new accounts would not advance `refreshedAt`, so staleness is derived from this instead.
    */

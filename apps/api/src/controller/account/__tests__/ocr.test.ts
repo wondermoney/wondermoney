@@ -131,8 +131,8 @@ describe('confirmTransactionOCRImportAndCreateTransaction', () => {
     transactionTypeId: 2,
   };
 
-  // RAD-412: the validated `categoryIds` field used to be silently dropped, so OCR imports were always uncategorized.
-  it('passes the chosen category (categoryIds[0]) through to createTransaction (RAD-412)', async () => {
+  // The validated `categoryIds` field must reach createTransaction, or OCR imports are always uncategorized.
+  it('passes the chosen category (categoryIds[0]) through to createTransaction', async () => {
     mocks.findOne
       .mockResolvedValueOnce({ transactionOCRImportKey: 5 }) // TransactionOCRImport lookup
       .mockResolvedValueOnce({ accountKey: 3 }); // Account lookup
@@ -154,7 +154,7 @@ describe('confirmTransactionOCRImportAndCreateTransaction', () => {
     expect(sendStatus).toHaveBeenCalledWith(201);
   });
 
-  it('passes categoryId undefined when no category is chosen (RAD-412)', async () => {
+  it('passes categoryId undefined when no category is chosen', async () => {
     mocks.findOne
       .mockResolvedValueOnce({ transactionOCRImportKey: 5 })
       .mockResolvedValueOnce({ accountKey: 3 });

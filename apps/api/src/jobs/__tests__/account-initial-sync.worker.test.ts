@@ -136,9 +136,9 @@ describe('account initial sync producer contract worker', () => {
   });
 });
 
-// Phase 1d: the Enable Banking variant of the same worker — `provider === 'enable_banking'` is the
-// only branch; everything below it (incident/background-operation/recovery machinery) is the exact
-// same code the GoCardless tests above exercise.
+// The Enable Banking variant of the same worker — `provider === 'enable_banking'` is the only
+// branch; everything below it (incident/background-operation/recovery machinery) is the exact
+// same code the tests above exercise.
 describe('account initial sync producer contract worker — Enable Banking', () => {
   const ebCorrelationId = 'account.initial-sync:5';
   const ebPayload = { connectionId: 'session-1', correlationId: ebCorrelationId, enableBankingConnectionKey: '5', incidentId, provider: 'enable_banking' as const };
@@ -154,7 +154,7 @@ describe('account initial sync producer contract worker — Enable Banking', () 
     expect(h.transactions.syncTransactionsForRequisition).toHaveBeenCalledWith({ correlationId: ebCorrelationId, enableBankingConnectionKey: 5, fetchWindowDays: 365, queueJobId: 'eb-job-1' }, { enqueue });
   });
 
-  it('rejects an Enable Banking payload missing incidentId rather than falling into GoCardless legacy reconciliation', async () => {
+  it('rejects an Enable Banking payload missing incidentId rather than falling into legacy reconciliation', async () => {
     const h = harness();
     await expect(handleAccountInitialSyncJob(job({ ...ebPayload, incidentId: '' }, 'eb-job-2'), { accountInitialSyncAccountService: h.account, accountInitialSyncTransactionService: h.transactions, backgroundOperationService: h.background, bankSyncIncidentService: h.incident })).rejects.toThrow(/missing incidentId/);
     expect(h.incident.completeOrAllocateLegacyIncident).not.toHaveBeenCalled();
@@ -167,7 +167,7 @@ describe('account initial sync producer contract worker — Enable Banking', () 
     expect(h.background.claimJobStart).not.toHaveBeenCalled();
   });
 
-  it('propagates a failed account phase and finalizes as failed, same as the GoCardless path', async () => {
+  it('propagates a failed account phase and finalizes as failed, same as the requisition path', async () => {
     const h = harness();
     // eslint-disable-next-line @typescript-eslint/unbound-method
     vi.mocked(h.account.syncAccountsForRequisition).mockResolvedValueOnce(accountsResult('failed'));

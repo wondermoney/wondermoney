@@ -1,6 +1,5 @@
 "use client";
 
-import { ArrowUpRight } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 
 import { Button } from "@/components/ui/button";
@@ -31,7 +30,7 @@ function formatAmount(
 function getNeededThisMonth(goal: Goal) {
   // Show what's still outstanding this month (shortfall), not the static
   // monthly target — a fully funded goal should read 0, matching the goal
-  // detail page's "Short by" stat (RAD-382).
+  // detail page's "Short by" stat.
   return goal.summary?.monthlyShortfall ?? null;
 }
 
@@ -91,7 +90,7 @@ export default function DashboardGoalsCard() {
         <div className="space-y-4">
           <div className="grid gap-3 sm:grid-cols-2">
             <div>
-              <p className="text-muted-foreground text-xs tracking-wide uppercase">
+              <p className="text-muted-foreground text-xs">
                 {t("goals.dashboard-active")}
               </p>
               <p className="text-foreground mt-1 font-mono text-xl font-semibold tabular-nums">
@@ -99,7 +98,7 @@ export default function DashboardGoalsCard() {
               </p>
             </div>
             <div>
-              <p className="text-muted-foreground text-xs tracking-wide uppercase">
+              <p className="text-muted-foreground text-xs">
                 {t("goals.dashboard-monthly-needed")}
               </p>
               <p className="text-foreground mt-1 font-mono text-xl font-semibold tabular-nums">
@@ -135,10 +134,9 @@ export default function DashboardGoalsCard() {
 
           <Link
             href="/goals"
-            className="text-foreground inline-flex w-fit text-sm font-medium underline-offset-4 hover:underline"
+            className="text-foreground focus-visible:ring-ring inline-flex w-fit rounded-sm text-sm font-medium underline-offset-4 hover:underline focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-hidden"
           >
             {t("goals.view-dashboard")}
-            <ArrowUpRight className="ml-1 size-4" />
           </Link>
         </div>
       </Card>

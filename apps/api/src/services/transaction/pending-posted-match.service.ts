@@ -1,6 +1,6 @@
 import { roundMoney } from '@utils/money';
 /**
- * Pending→posted matching (RAD-346, Phase 4).
+ * Pending→posted matching.
  *
  * When a booked transaction arrives, it may be the settled form of an earlier PENDING row on the
  * same account — usually with a different provider id and date, sometimes a slightly different

@@ -1,9 +1,9 @@
-import { knex as knexFactory } from '@mikro-orm/postgresql';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const sentry = vi.hoisted(() => ({ captureException: vi.fn(), captureMessage: vi.fn() }));
 vi.mock('@sentry/node', () => sentry);
 
+import { kyselyDouble } from '@app/__tests__/__helpers__/kysely-double';
 import {
   CERTIFICADO_AFORRO_RATE_SYNC_CRON,
   CERTIFICADO_AFORRO_RATE_SYNC_QUEUE,
@@ -110,7 +110,7 @@ function makeHarness(
       convertPdfToImage: () => Promise.resolve(['base64-png']),
       fetch: fetchImpl as unknown as typeof fetch,
       now: NOW,
-      ocr: ocr as unknown as NonNullable<CertificadoAforroRateSyncDeps['ocr']>,
+      ocr,
       store,
     },
     ocr,
@@ -249,43 +249,46 @@ describe('D/E cross-check', () => {
 });
 
 describe('rate upsert SQL', () => {
+  const { db } = kyselyDouble();
+
   it('never overwrites a MANUAL_OVERRIDE row', () => {
-    const knex = knexFactory({ client: 'pg' });
-    const sql = buildRateUpsertQuery(
-      knex,
+    const query = buildRateUpsertQuery(
+      db,
       { baseRateBps: 247, effectiveMonth: '2026-08-01', financialAssetKey: 42 },
       new Date(Date.UTC(2026, 7, 6)),
-    ).toQuery();
+    ).compile();
 
-    expect(sql).toContain('on conflict ("financial_asset_key", "effective_month") do update');
-    expect(sql).toContain(`where "certificado_aforro_rate_period"."source" != 'MANUAL_OVERRIDE'`);
-    expect(sql).toContain(`"base_rate_bps" = 247`);
+    expect(query.sql).toContain('on conflict ("financial_asset_key", "effective_month") do update');
+    expect(query.sql).toMatch(/where "certificado_aforro_rate_period"\."source" != \$(\d+)$/);
+    const [, overrideParameter] = /!= \$(\d+)$/.exec(query.sql) ?? [];
+    expect(query.parameters[Number(overrideParameter) - 1]).toBe('MANUAL_OVERRIDE');
+    expect(query.sql).toMatch(/"base_rate_bps" = \$(\d+)/);
+    const [, rateParameter] = /"base_rate_bps" = \$(\d+)/.exec(query.sql) ?? [];
+    expect(query.parameters[Number(rateParameter) - 1]).toBe(247);
   });
 
   it('defaults the provenance to a real scrape', () => {
-    const knex = knexFactory({ client: 'pg' });
-    const sql = buildRateUpsertQuery(
-      knex,
+    const query = buildRateUpsertQuery(
+      db,
       { baseRateBps: 247, effectiveMonth: '2026-08-01', financialAssetKey: 42 },
       new Date(Date.UTC(2026, 7, 6)),
-    ).toQuery();
+    ).compile();
 
-    expect(sql).toContain(`'IGCP_PDF_SCRAPE'`);
+    expect(query.parameters).toContain('IGCP_PDF_SCRAPE');
   });
 
-  it('carries a caller-supplied provenance onto both insert and update (RAD-597)', () => {
+  it('carries a caller-supplied provenance onto both insert and update', () => {
     // The merge matters as much as the insert: a Série C row written before the
     // label existed keeps its old, false `IGCP_PDF_SCRAPE` for as long as the
     // update does not touch the column.
-    const knex = knexFactory({ client: 'pg' });
-    const sql = buildRateUpsertQuery(
-      knex,
+    const query = buildRateUpsertQuery(
+      db,
       { baseRateBps: 347, effectiveMonth: '2026-08-01', financialAssetKey: 43, source: 'IGCP_DERIVED_NO_SERIES_CROSSCHECK' },
       new Date(Date.UTC(2026, 7, 6)),
-    ).toQuery();
+    ).compile();
 
-    expect(sql).not.toContain(`'IGCP_PDF_SCRAPE'`);
-    expect(sql.match(/IGCP_DERIVED_NO_SERIES_CROSSCHECK/gu)?.length).toBe(2);
+    expect(query.parameters).not.toContain('IGCP_PDF_SCRAPE');
+    expect(query.parameters.filter((parameter) => parameter === 'IGCP_DERIVED_NO_SERIES_CROSSCHECK')).toHaveLength(2);
   });
 });
 
@@ -298,7 +301,7 @@ describe('handleCertificadoAforroRateSyncAutoJob', () => {
     expect(result.outcome).toBe('completed');
     expect(result.written).toEqual(['CA-SERIE-F', 'CA-SERIE-D', 'CA-SERIE-E', 'CA-SERIE-C']);
 
-    // RAD-597: Série C is the only series with no published table to check
+    // Série C is the only series with no published table to check
     // against, so its rows say so. F/D/E are cross-checked and stay unlabelled.
     const calls = upsert.mock.calls.map((c) => c[0] as { financialAssetKey: number; source?: string });
     const sourced = calls.filter((c) => c.source !== undefined);

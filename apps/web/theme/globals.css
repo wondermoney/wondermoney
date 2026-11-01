@@ -1,10 +1,14 @@
-/* Hallmark · scope: app · genre: modern-minimal · theme: custom (violet ~290°)
- * axes: light + dark (paired) / geometric-sans (Geist) / cool (violet ~290°)
- * vibe: precise, calm, data-forward, trustworthy
- * nav: N3 side-rail (adapted — app shell, not a marketing page)
- * system: DESIGN.md at repo root is the locked system; routes share it.
- *         Genre overrides declined: pure-white paper, zero-chroma neutrals.
- * source of truth: this file. DESIGN.md § 9 Exports mirrors it — keep in sync.
+/* Hallmark · checked: 2026-10-25 · genre: modern-minimal (inferred) · shape: app screen
+ * floor: 2 FAIL left, both on the record below: 19 (the missing-value glyph) and 34 on app/ (a linter context artefact; the root error documents clip inline) · fixed: 10a, 48, 34, 26a, 54, 67, 63, 19, 4, 40, F2, F16 · structural: printed in the handoff, not rebuilt
+ * built: the project · redesign: polish · scope: app · system: DESIGN.md (locked) · v2.0.0
+ * Hallmark · dismissed 19 · the em dash in components/ui/Amount.tsx is the missing-value glyph DESIGN.md names for an empty figure, not prose punctuation
+ * Hallmark · dismissed 64 · TailwindIndicator renders only in development and prints breakpoint names, never customer-facing
+ *
+ * Prior record, kept: theme custom (violet ~290°); axes light + dark (paired) / geometric-sans (Geist) / cool;
+ * vibe precise, calm, data-forward, trustworthy; nav: N3 side-rail adapted for the app shell.
+ * DESIGN.md is the locked system; routes share it. Genre overrides declined: pure-white paper, zero-chroma neutrals.
+ * Source of truth for tokens: this file. DESIGN.md mirrors it; keep in sync.
+ * Dark tokens sit on :root[data-theme="dark"]; next-themes sets that attribute alongside the `.dark` class the `dark:` variant reads.
  */
 @import "tailwindcss";
 @import "tw-animate-css";
@@ -43,10 +47,9 @@
   --warning-foreground: oklch(0.27 0.05 75);
   --info: oklch(0.48 0.2 240); /* 5.64:1 solid, 4.68:1 at /90 hover */
   --info-foreground: oklch(0.98 0.01 240);
-  /* A --success fill was previously ruled out because no in-gamut green
-     reached 4.5:1 against a *near-white* foreground. That constraint was the
-     problem, not the hue: --warning already solves the same shape by pairing a
-     light fill with dark ink. Success now mirrors it exactly — 6.36:1 light,
+  /* No in-gamut green reaches 4.5:1 against a *near-white* foreground, so
+     --success pairs a light fill with dark ink, the way --warning does. Success
+     mirrors it exactly — 6.36:1 light,
      8.35:1 dark, and every /90 and /80 state clears the floor too. */
   --success: oklch(0.72 0.16 150);
   --success-foreground: oklch(0.27 0.05 150);
@@ -82,11 +85,9 @@
      the eight files in components/ui that draw controls use this token. */
   --input: oklch(0.64 0.012 290);
   --ring: oklch(0.54 0.2 290);
-  /* Chart series. The two halves used to be unrelated shadcn default ramps, so
-     the *same* series changed hue with the theme: --chart-1 was orange in light
-     and blue in dark, --chart-3 the reverse. Any chart with a legend meant
-     something different depending on the theme.
-     Hue is now fixed per slot and only lightness/chroma move between halves.
+  /* Chart series. Hue is fixed per slot and only lightness/chroma move between
+     halves, so the *same* series keeps its hue across themes and a chart's
+     legend means the same thing in light and dark.
      Slot 1 is the brand violet, because it is the colour a single-series chart
      gets — and a net-worth line is not a categorical value.
      Validated as a categorical palette in both halves: lightness band, chroma
@@ -109,7 +110,7 @@
   --radius: 0.5rem;
 }
 
-.dark {
+:root[data-theme="dark"] {
   color-scheme: dark;
   --background: oklch(0.145 0.012 290);
   --foreground: oklch(0.985 0 0);
@@ -221,24 +222,30 @@
   --duration-short: 200ms; /* panel/accordion state */
   --duration-long: 320ms; /* overlay entry, the longest anything may take */
 
-  --animate-accordion-down: accordion-down 0.2s ease-out;
-  --animate-accordion-up: accordion-up 0.2s ease-out;
+  /* Accordions open by animating grid-template-rows from 0fr to 1fr (the
+     content's inner wrapper is `min-h-0 overflow-hidden`), never `height`:
+     the Floor bans height animation, and the grid track interpolates to the
+     content's natural size without Radix's measured height variable. The
+     global reduced-motion rule below collapses the duration to 1ms, so the
+     state still changes and animationend still fires for Radix Presence. */
+  --animate-accordion-down: accordion-down var(--duration-short) var(--ease-out);
+  --animate-accordion-up: accordion-up var(--duration-short) var(--ease-in-out);
 
   @keyframes accordion-down {
     from {
-      height: 0;
+      grid-template-rows: 0fr;
     }
     to {
-      height: var(--radix-accordion-content-height);
+      grid-template-rows: 1fr;
     }
   }
 
   @keyframes accordion-up {
     from {
-      height: var(--radix-accordion-content-height);
+      grid-template-rows: 1fr;
     }
     to {
-      height: 0;
+      grid-template-rows: 0fr;
     }
   }
 }
@@ -246,7 +253,16 @@
 /* This layer is added by shadcn/ui */
 @layer base {
   * {
-    @apply border-border outline-ring/50;
+    @apply border-border outline-ring;
+  }
+  /* Every focusable element gets a visible, instant ring, including the links
+     and native controls that set none of their own. At /50 the browser's
+     default outline measured under 3:1 on the canvas. Components that draw
+     their own `focus-visible:ring-*` turn this off with `outline-hidden`, a
+     utility, which wins over this base layer. */
+  :focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
   }
   body {
     @apply bg-background text-foreground;
@@ -271,7 +287,7 @@
      introducing a scrollbar, but `hidden` makes the root a scroll container, which
      silently breaks every `position: sticky` header and rail in the app — `clip`
      doesn't establish a scroll container, so sticky positioning is unaffected.
-     The vertical axis needs the same treatment as the horizontal one (RAD-635):
+     The vertical axis needs the same treatment as the horizontal one:
      the app's real scroll surface is the nested `overflow-y-auto` container in
      `app/providers.tsx`, but leaving `html`/`body` at the default `overflow-y:
      visible` lets any off-viewport descendant (e.g. a measurement helper, a
@@ -283,10 +299,6 @@
      but is not actually painted or hit-testable (`elementFromPoint` returns only
      `<html>`). `overflow-y: clip` closes off that second, unintended scroll path
      without touching the sticky-safe `clip` behavior above. */
-  html,
-  body {
-    overflow: clip;
-  }
   body {
     @apply min-h-[100dvh];
   }
@@ -304,6 +316,25 @@
   [role="button"]:not(:disabled) {
     @apply cursor-pointer;
   }
+}
+
+html,
+body {
+  /* See the long note above: `clip`, never `hidden`, on both axes of html and
+     body. Declared outside the layers so no utility can reopen a document
+     scroll. */
+  overflow-x: clip;
+  overflow-y: clip;
+}
+
+/* Browser surfaces in the palette: selection, caret and scrollbars. */
+::selection {
+  background-color: color-mix(in oklch, var(--primary) 22%, transparent);
+  color: var(--foreground);
+}
+html {
+  caret-color: var(--primary);
+  scrollbar-color: var(--input) transparent;
 }
 
 /* Reduced motion — the floor, not the whole story.

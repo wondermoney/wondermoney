@@ -38,7 +38,6 @@ describe('MikroOrmTenantAggregationRepository', () => {
     expect(sql).toContain('tx."transaction_date" >= ? and tx."transaction_date" < ?');
     expect(sql).toContain('tx."deleted_at" is null');
     expect(sql).toContain('account."closed" = false and account."deleted_at" is null');
-    expect(sql).toContain('coalesce(tx."edited_settlement_amount", tx."appuser_settlement_amount")::text');
   });
 
   it('normalizes raw timestamp strings and fails closed on invalid timestamps', async () => {

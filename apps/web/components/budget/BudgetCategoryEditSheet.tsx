@@ -2,19 +2,21 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQueryClient } from "@tanstack/react-query";
-import { Edit2 } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { usePostHog } from "posthog-js/react";
-import { useState } from "react";
-import { SubmitHandler, useForm } from "react-hook-form";
+import { SubmitHandler, useForm, useWatch } from "react-hook-form";
 import { toast } from "sonner";
 import * as z from "zod";
 
 import { Amount } from "@/components/ui/Amount";
 import Text from "@/components/ui/Typography/Text";
+import { useRouter } from "@/i18n/navigation";
 import useEditBudgetCategory from "@/lib/api/budget/useEditBudgetCategory";
 import { isDemoReadOnlyError } from "@/lib/api/errors";
-import { SupportedCurrencyCodes } from "@/lib/utils/currencySymbol";
+import {
+  getCurrencySymbol,
+  SupportedCurrencyCodes,
+} from "@/lib/utils/currencySymbol";
 import { parseLocaleNumber, zLocaleNumber } from "@/lib/utils/number";
 import {
   convertMonthlyAmountToAnuallizedMonthlyAmount,
@@ -26,7 +28,6 @@ import { useFormatCurrency } from "@/lib/utils/useFormatCurrency";
 
 import { Button } from "../ui/button";
 import { Checkbox } from "../ui/checkbox";
-import { DropdownMenuItem } from "../ui/dropdown-menu";
 import {
   Form,
   FormControl,
@@ -53,7 +54,6 @@ import {
   SheetFooter,
   SheetHeader,
   SheetTitle,
-  SheetTrigger,
 } from "../ui/sheet";
 import { BudgetRow } from "./BudgetTable";
 
@@ -71,6 +71,10 @@ type Props = {
   month: number;
   category: BudgetRow;
   currency: SupportedCurrencyCodes;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  /** Where focus goes when the sheet closes; the sheet has no trigger of its own. */
+  onCloseAutoFocus?: (event: Event) => void;
 };
 
 const createFormSchema = (t: ReturnType<typeof useTranslations>) =>
@@ -78,7 +82,7 @@ const createFormSchema = (t: ReturnType<typeof useTranslations>) =>
     budgeted: zLocaleNumber.pipe(
       z.number().positive(t("budget-amount-positive")),
     ),
-    recurrency: z.nativeEnum(Recurrency).optional(),
+    recurrency: z.enum(Recurrency).optional(),
     applyToFollowingMonths: z.boolean().optional().default(true),
   });
 
@@ -90,8 +94,12 @@ export function BudgetCategoryEditSheet({
   month,
   category,
   currency,
+  open,
+  onOpenChange,
+  onCloseAutoFocus,
 }: Props) {
   const t = useTranslations();
+  const locale = useLocale();
   const posthog = usePostHog();
   const formSchema = createFormSchema(t);
   const form = useForm({
@@ -113,12 +121,11 @@ export function BudgetCategoryEditSheet({
     formState: { isSubmitting },
   } = form;
 
-  const [isOpen, setIsOpen] = useState(false);
-
-  const recurrency = form.watch("recurrency");
+  const recurrency = useWatch({ control: form.control, name: "recurrency" });
 
   const editBudgetCategoryMutation = useEditBudgetCategory();
   const queryClient = useQueryClient();
+  const router = useRouter();
   const formatCurrency = useFormatCurrency();
 
   const onSubmit: SubmitHandler<FormSchema> = async (values) => {
@@ -146,8 +153,11 @@ export function BudgetCategoryEditSheet({
           queryKey: ["budget-template-year", budgetKey, year],
         }),
       ]);
+      // The month page renders its rows from Server Component props, which
+      // invalidating the client cache never reaches.
+      router.refresh();
       reset();
-      setIsOpen(false);
+      onOpenChange(false);
       toast.success(t("budget-category-updated"));
     } catch (error) {
       if (isDemoReadOnlyError(error)) {
@@ -163,20 +173,8 @@ export function BudgetCategoryEditSheet({
   };
 
   return (
-    <Sheet open={isOpen} onOpenChange={setIsOpen}>
-      <SheetTrigger asChild>
-        <DropdownMenuItem
-          className="flex w-full flex-row justify-between"
-          onSelect={(e) => e.preventDefault()}
-          onClick={(e) => {
-            e.stopPropagation();
-          }}
-        >
-          {t("edit")}
-          <Edit2 className="text-foreground size-4" />
-        </DropdownMenuItem>
-      </SheetTrigger>
-      <SheetContent>
+    <Sheet open={open} onOpenChange={onOpenChange}>
+      <SheetContent onCloseAutoFocus={onCloseAutoFocus}>
         <SheetHeader>
           <SheetTitle>{t("edit-budget-category")}</SheetTitle>
           <SheetDescription>
@@ -236,7 +234,7 @@ export function BudgetCategoryEditSheet({
                         placeholder={t("amount")}
                         startAdornment={
                           <Text variant="mutedText" className="px-4">
-                            €
+                            {getCurrencySymbol(currency, locale)}
                           </Text>
                         }
                         {...field}

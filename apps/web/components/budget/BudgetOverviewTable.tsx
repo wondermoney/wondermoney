@@ -1,13 +1,18 @@
 "use client";
 
-import { type ColumnDef, createColumnHelper, Row } from "@tanstack/react-table";
 import { useTranslations } from "next-intl";
 import { CSSProperties } from "react";
 
 import { Amount } from "@/components/ui/Amount";
 import { Table } from "@/components/ui/Table";
+import {
+  type ColumnDef,
+  createColumnHelper,
+  Row,
+} from "@/components/ui/Table/features";
 import { Text } from "@/components/ui/Typography";
 import { cn } from "@/lib/utils";
+import { useFormatPercentage } from "@/lib/utils/useFormatPercentage";
 
 import { SupportedCurrencyCodes } from "../../lib/utils/currencySymbol";
 import CellNumeric from "../ui/Table/Cell/CellNumeric";
@@ -30,6 +35,7 @@ const BudgetOverviewTable: React.FC<BudgetOverviewTableProps> = ({
   currency,
 }) => {
   const t = useTranslations();
+  const formatPercentage = useFormatPercentage();
 
   const columnHelper = createColumnHelper<OverviewRow>();
   // https://github.com/TanStack/table/issues/4382#issuecomment-1801830220
@@ -54,9 +60,7 @@ const BudgetOverviewTable: React.FC<BudgetOverviewTableProps> = ({
     }),
     columnHelper.accessor("spent", {
       header: () => (
-        <div className="text-right whitespace-nowrap">
-          {t("spent")} - {t("total")} ({t("in-percentage")})
-        </div>
+        <div className="text-right whitespace-nowrap">{t("spent")}</div>
       ),
       cell: ({ getValue }) => (
         <CellNumeric>
@@ -66,9 +70,7 @@ const BudgetOverviewTable: React.FC<BudgetOverviewTableProps> = ({
     }),
     columnHelper.accessor("budgeted", {
       header: () => (
-        <div className="text-right whitespace-nowrap">
-          {t("budgeted")} - {t("total")} ({t("in-percentage")})
-        </div>
+        <div className="text-right whitespace-nowrap">{t("budgeted")}</div>
       ),
       cell: ({ getValue }) => (
         <CellNumeric>
@@ -78,14 +80,19 @@ const BudgetOverviewTable: React.FC<BudgetOverviewTableProps> = ({
     }),
     columnHelper.accessor("remaining", {
       header: () => (
-        <div className="text-right whitespace-nowrap">
-          {t("remaining")} - {t("total")} ({t("in-percentage")})
+        // Was "Spent - Total (in %)" on all three columns: a hyphen-joined
+        // label fragment, and only this column carries a percentage. The
+        // rows are already totals (Month, Year), so "Total" said nothing.
+        // Same two-line head as the category table's remaining column.
+        <div className="flex flex-col items-end">
+          <div className="whitespace-nowrap">{t("remaining")}</div>
+          <div className="text-xs">({t("in-percentage")})</div>
         </div>
       ),
       cell: ({ row, getValue }) => (
         <CellNumeric>
-          <Amount value={getValue()} currency={currency} />{" "}
-          ({(row.original.remainingPercentage * 100).toFixed(0)}%)
+          <Amount value={getValue()} currency={currency} /> (
+          {formatPercentage(row.original.remainingPercentage)})
         </CellNumeric>
       ),
     }),

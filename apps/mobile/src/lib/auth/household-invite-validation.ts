@@ -12,7 +12,7 @@ export const inviteValidationSchema = z.object({
   email: z.string(),
   expiresAt: z.iso.datetime(),
   inviterName: z.string().nullable(),
-}).strict()
+})
 
 export type InviteValidationDto = z.infer<typeof inviteValidationSchema>
 

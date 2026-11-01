@@ -8,7 +8,7 @@ import { textStyles } from '@/theme/typography'
 export type Palette = (typeof themeTokens.colors)[keyof typeof themeTokens.colors]
 
 /**
- * RAD-238 (slice 1) — shared between markets-search-screen and
+ * Shared between markets-search-screen and
  * asset-detail-screen, mirroring self-screen-parts' convention of a
  * per-feature parts file rather than pulling shared chrome in from an
  * unrelated feature (e.g. portfolios).

@@ -38,7 +38,7 @@ export const watchlistSymbolParamSchema = z.object({
 });
 
 const isoDateSchema = z.string().regex(/^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/);
-// FMP's own history for a single symbol rarely exceeds a few decades; this bounds an
+// A single symbol's price history rarely exceeds a few decades; this bounds an
 // omitted-range request (and the O(1) dividend-merge cost) to a sane worst case.
 const MAX_HISTORICAL_PRICE_RANGE_DAYS = 20 * 365;
 
@@ -85,8 +85,8 @@ export const getNewsRequestSchema = z.object({
     ticker: tickerSymbolSchema,
   }),
   query: z.object({
-    // FMP's stock-news feed has no offset param, only `limit` — so real pagination
-    // means fetching a bounded window and slicing it in the controller.
+    // Pagination fetches a bounded window from the provider and slices it in the
+    // controller, rather than passing an offset through.
     limit: boundedLimit({ defaultValue: 20, max: 50 }).optional().default(20),
     page: z.coerce.number().int().min(0).default(0),
   }),

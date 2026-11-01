@@ -2,7 +2,7 @@
 // https://nextjs.org/docs/api-reference/next.config.js/introduction
 // https://docs.sentry.io/platforms/javascript/guides/nextjs/
 
-import type { SentryBuildOptions } from "@sentry/nextjs";
+import type { SentryBuildOptions } from "@sentry/nextjs/config";
 import { NextConfig } from "next";
 import createNextIntlPlugin from "next-intl/plugin";
 import path from "path";
@@ -16,25 +16,41 @@ const withBundleAnalyzer = require("@next/bundle-analyzer")({
 
 const withNextIntl = createNextIntlPlugin();
 
-const publicEnv: NextConfig["env"] = { PKG_VERSION: version };
+/**
+ * The version shown in the app. package.json carries the release version, changed by hand in a
+ * normal PR when cutting a release (nothing commits version bumps); the build
+ * appends the commit it was built from, so staging and production builds are told apart without
+ * committing anything. The SHA comes from GitHub Actions, Vercel's own git builds, or the
+ * GIT_COMMIT_SHA build argument of the self-hosting image.
+ */
+function buildVersion(): string {
+  const sha = (
+    process.env.GIT_COMMIT_SHA ||
+    process.env.VERCEL_GIT_COMMIT_SHA ||
+    process.env.GITHUB_SHA ||
+    ""
+  ).trim();
+  return /^[0-9a-f]{7,40}$/i.test(sha) ? `${version}+${sha.slice(0, 7)}` : version;
+}
+
+const publicEnv: NextConfig["env"] = { PKG_VERSION: buildVersion() };
 
 const nextConfig: NextConfig = {
   // The self-hosting image (Dockerfile) builds a standalone server; Vercel builds as before.
   ...(process.env.NEXT_OUTPUT === "standalone" ? { output: "standalone" as const } : {}),
   poweredByHeader: false,
+  // Next 16.3+ makes `next dev` write a managed "agent rules" block into AGENTS.md whenever it
+  // detects a coding agent, and rewrite it whenever the installed version words it differently,
+  // so the file kept showing up as modified. AGENTS.md is hand-maintained here and already
+  // points at the bundled docs, so the generation is off (documented: next-config-js/agentRules).
+  agentRules: false,
   images: {
     // Intentional: Vercel image optimization is cost-prohibitive for the current
     // WonderMoney image usage, so the app relies on upstream/CDN image sizing.
     unoptimized: true,
-    // The only entries here were GoCardless/Nordigen bank-logo CDN hosts
-    // (cdn.nordigen.com, cdn-logos.gocardless.com, and a scoped
-    // storage.googleapis.com/gc-prd-institution_icons-production/** pattern).
-    // GoCardless is no longer used for new bank connections (Enable Banking,
-    // BYOK — see plan §8), no code path constructs image URLs against those
-    // hosts anymore, and `unoptimized: true` above means next/image never
-    // enforces `remotePatterns` in the first place (the hostname check lives
-    // in the default loader, which `unoptimized` skips entirely). Removed as
-    // dead config rather than left to bit-rot further.
+    // Empty on purpose: `unoptimized: true` above means next/image never
+    // enforces `remotePatterns` (the hostname check lives in the default
+    // loader, which `unoptimized` skips entirely).
     remotePatterns: [],
   },
   reactStrictMode: true,
@@ -97,10 +113,8 @@ const sentryWebpackPluginOptions: SentryBuildOptions = {
     deleteSourcemapsAfterUpload: true,
   },
   widenClientFileUpload: true,
-  webpack: {
-    reactComponentAnnotation: {
-      enabled: true,
-    },
+  reactComponentAnnotation: {
+    enabled: true,
   },
 };
 
@@ -110,7 +124,7 @@ const baseConfig = [withBundleAnalyzer, withNextIntl].reduce(
 );
 
 const withSentryConfig = (...args: any[]) =>
-  require("@sentry/nextjs").withSentryConfig(...args);
+  require("@sentry/nextjs/config").withSentryConfig(...args);
 
 module.exports = isSentryConfigEnabled()
   ? withSentryConfig(baseConfig, sentryWebpackPluginOptions)

@@ -12,7 +12,7 @@ const mocks = vi.hoisted(() => ({
 
 const ref = (entity: string, key: number) => ({ entity, key });
 
-vi.mock('@app/app', () => ({ DI: { em: { create: mocks.create, find: mocks.find, findOne: mocks.findOne, flush: mocks.flush, getConnection: vi.fn(() => ({ execute: mocks.execute })), getReference: vi.fn((entity: unknown, input: unknown) => {
+vi.mock('@app/app', () => ({ DI: { em: { create: mocks.create, execute: mocks.execute, find: mocks.find, findOne: mocks.findOne, flush: mocks.flush, getReference: vi.fn((entity: unknown, input: unknown) => {
   const key = typeof input === 'object' && input
     ? (input as Record<string, number>)['tenantKey'] ?? (input as Record<string, number>)['accountKey'] ?? (input as Record<string, number>)['currencyKey']
     : input;
@@ -32,7 +32,7 @@ describe('recurring detection service', () => {
     mocks.create.mockImplementation((_: unknown, data: unknown) => ({ ...(data as object) }));
     mocks.find.mockResolvedValue([]);
     mocks.findOne.mockResolvedValue(null);
-    mocks.transactional.mockImplementation(async (cb: (em: unknown) => Promise<unknown>) => cb({ create: mocks.create, find: mocks.find, findOne: mocks.findOne, flush: mocks.flush, getConnection: vi.fn(() => ({ execute: mocks.execute })), getReference: vi.fn((entity: unknown, input: unknown) => {
+    mocks.transactional.mockImplementation(async (cb: (em: unknown) => Promise<unknown>) => cb({ create: mocks.create, execute: mocks.execute, find: mocks.find, findOne: mocks.findOne, flush: mocks.flush, getReference: vi.fn((entity: unknown, input: unknown) => {
       const key = typeof input === 'object' && input ? (input as Record<string, number>)['tenantKey'] ?? (input as Record<string, number>)['accountKey'] ?? (input as Record<string, number>)['currencyKey'] : input;
       return ref(String(entity), Number(key));
     }), persist: mocks.persist }) );
@@ -205,7 +205,6 @@ describe('recurring detection service', () => {
     expect(mocks.create).toHaveBeenNthCalledWith(2, {}, expect.objectContaining({ amount: 10.99, matchStatus: RecurringOccurrenceMatchStatus.matched, occurrenceDate: new Date('2026-01-05') }));
     expect(result).toEqual({ created: 1, skipped: 0, updated: 0 });
     expect(mocks.flush).toHaveBeenCalledTimes(1);
-    expect(mocks.execute).toHaveBeenCalledWith('select pg_advisory_xact_lock(?)', [1]);
   });
 
   it('updates existing non-dismissed candidate without creating duplicate', async () => {

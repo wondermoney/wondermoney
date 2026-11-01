@@ -65,16 +65,3 @@ export function hasUserDecisionForAssetReviewGroup(
 
   return Boolean(decision.skipReason.trim());
 }
-
-export function getPreferredSelectedCandidateId(
-  group: PortfolioImportAssetGroupPreview,
-  decision?: PortfolioImportAssetGroupDecision,
-) {
-  return decision?.action === "use_candidate" ? decision.candidateId : undefined;
-}
-
-export function getPreferredSelectedSkipReason(
-  decision?: PortfolioImportAssetGroupDecision,
-) {
-  return decision?.action === "skip_group" ? decision.skipReason : undefined;
-}

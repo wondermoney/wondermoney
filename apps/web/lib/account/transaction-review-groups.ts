@@ -13,7 +13,7 @@ export interface TransactionReviewGroup {
   totalSettlementAmount: number;
 }
 
-export function hasTransactionCategory(transaction: Transaction): boolean {
+function hasTransactionCategory(transaction: Transaction): boolean {
   return transaction.appuserTransactionCategories.length > 0;
 }
 

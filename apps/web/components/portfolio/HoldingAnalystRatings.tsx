@@ -75,13 +75,13 @@ const HoldingAnalystRatings: React.FC<HoldingAnalystRatingsProps> = ({
 
   return (
     <div className="flex flex-col gap-3">
-      <Text as="h4" className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+      <Text as="h4" className="text-xs font-medium text-muted-foreground">
         {t("market-research")}
       </Text>
 
       {hasPriceTarget && data.priceTarget ? (
         isQuoteCurrencyUnavailable ? (
-          <div className="rounded-lg border border-dashed p-4 text-center">
+          <div className="bg-muted/40 rounded-lg p-4 text-center">
             <Text variant="smallText" className="text-muted-foreground">
               {t("market-data-unavailable")}
             </Text>
@@ -92,24 +92,24 @@ const HoldingAnalystRatings: React.FC<HoldingAnalystRatingsProps> = ({
           </div>
         ) : (
           <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
-            <div className="rounded-lg border border-border/60 bg-muted/15 p-3">
-              <Text className="text-[11px] uppercase tracking-wide text-muted-foreground">
+            <div className="rounded-lg bg-muted/40 p-3">
+              <Text className="text-xs text-muted-foreground">
                 {t("target-low")}
               </Text>
               <Text className="font-mono text-base font-semibold text-foreground">
                 <Amount value={data.priceTarget.targetLow} currency={quoteCurrency!} />
               </Text>
             </div>
-            <div className="rounded-lg border border-border/60 bg-muted/15 p-3">
-              <Text className="text-[11px] uppercase tracking-wide text-muted-foreground">
+            <div className="rounded-lg bg-muted/40 p-3">
+              <Text className="text-xs text-muted-foreground">
                 {t("consensus-target")}
               </Text>
               <Text className="font-mono text-base font-semibold text-foreground">
                 <Amount value={data.priceTarget.targetConsensus} currency={quoteCurrency!} />
               </Text>
             </div>
-            <div className="rounded-lg border border-border/60 bg-muted/15 p-3">
-              <Text className="text-[11px] uppercase tracking-wide text-muted-foreground">
+            <div className="rounded-lg bg-muted/40 p-3">
+              <Text className="text-xs text-muted-foreground">
                 {t("target-high")}
               </Text>
               <Text className="font-mono text-base font-semibold text-foreground">
@@ -126,11 +126,11 @@ const HoldingAnalystRatings: React.FC<HoldingAnalystRatingsProps> = ({
             <div
               key={item.label}
               className={cn(
-                "rounded-lg border border-border/60 bg-muted/15 p-2 text-center",
+                "rounded-lg bg-muted/40 p-2 text-center",
                 item.value === 0 && "opacity-70",
               )}
             >
-              <Text className="text-[10px] uppercase tracking-wide text-muted-foreground">
+              <Text className="text-xs text-muted-foreground">
                 {item.label}
               </Text>
               <Text className="mt-1 font-mono text-base font-semibold text-foreground">

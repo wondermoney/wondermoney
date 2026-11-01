@@ -1,4 +1,4 @@
-import { Property } from '@mikro-orm/core';
+import { Property } from '@mikro-orm/decorators/legacy';
 
 export abstract class Base {
   @Property({ columnType: 'timestamptz', onCreate: () => new Date() })

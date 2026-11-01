@@ -109,7 +109,7 @@ describe('unlinkRequisition (Enable Banking connection)', () => {
     expect(sendStatus).not.toHaveBeenCalled();
   });
 
-  it('fails closed when the request is missing a resolved tenant (RAD-244)', async () => {
+  it('fails closed when the request is missing a resolved tenant', async () => {
     const req = { user: { appuserKey: 42 } };
     const next = vi.fn();
     const sendStatus = vi.fn();

@@ -20,10 +20,10 @@ describe('account csv balance recalculation service', () => {
     expect(service.planBankBalances(account, [], [first, second])).toMatchObject({ accountBalance: 100, items: [{ balance: 80, imported: true }, { balance: 100, imported: true }] });
   });
 
-  // RAD-564: same-date rows are chained in `transactionKey` order — the same total order the
-  // transactions list renders and `balance-chain.service.ts` accumulates over. It used to break
-  // date ties on `settlementAmount`, so same-date rows were balanced in one order and displayed in
-  // another. Rows not yet persisted have no key and keep their input order at the end of the date.
+  // Same-date rows are chained in `transactionKey` order — the same total order the
+  // transactions list renders and `balance-chain.service.ts` accumulates over, so same-date rows
+  // are balanced in the order they are displayed. Rows not yet persisted have no key and keep their
+  // input order at the end of the date.
   it('sorts same-date rows by transaction key, not by settlement amount', () => {
     const account = { balance: 100, createdAt: new Date('2025-01-01') } as unknown as PlanAccount;
     const laterKey = { settlementAmount: 10, transactionDate: new Date('2025-01-01'), transactionKey: 2 } as unknown as PlanTransaction;

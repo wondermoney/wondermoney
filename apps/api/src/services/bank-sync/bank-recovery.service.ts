@@ -265,10 +265,8 @@ export class BankRecoveryService {
 
   private currentAuthorizedMode(externalUserId: string | undefined): BankRecoveryTreatmentMode | null {
     // Bank recovery is live with no gating: any delivery whose incident owner has a
-    // resolvable external identity is authorized. The RAD-178 rollout gate
-    // (BANK_RECOVERY_MODE off/internal-allowlist/live + production-env guard) was
-    // removed when the owner took bank recovery fully live. `externalUserId` is
-    // still required because downstream identity matching depends on it.
+    // resolvable external identity is authorized. `externalUserId` is required
+    // because downstream identity matching depends on it.
     if (!externalUserId) return null;
     return BankRecoveryTreatmentMode.LIVE;
   }

@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useProductRuntime } from '@/components/providers/product-runtime-provider'
 
 import { OnboardingScreen } from './onboarding-screen'
-import { classifyCompleteOnboardingFailure, useCompleteOnboarding } from './use-complete-onboarding'
+import { useCompleteOnboarding } from './use-complete-onboarding'
 import { useOnboardingBootstrap } from './use-onboarding-bootstrap'
 import { mapOnboardingState } from './onboarding-view-model'
 
@@ -25,7 +25,7 @@ export function OnboardingRoute() {
   // across re-entry and after a stale completion.
   const shouldLeave = state.status === 'loaded' && (!state.view.required || state.view.completed)
 
-  // RAD-602 — in an effect, not in the render body. `router.back()` and
+  // In an effect, not in the render body. `router.back()` and
   // `router.replace()` write to the router store, so calling them while this
   // component renders schedules a state update on another component mid-render
   // and React throws every time the route is entered by a user who does not
@@ -75,7 +75,7 @@ export function OnboardingRoute() {
         // creates the account first and only then completes onboarding, so a
         // user who backs out mid-flow is left in the same required state.
         //
-        // RAD-193 — pushed as an explicit query string rather than the
+        // Pushed as an explicit query string rather than the
         // object form ({ pathname, params }). Reproduced in production
         // builds: object-form params were not reaching this screen at all
         // (useLocalSearchParams saw an empty {}), landing on the invalid-
@@ -90,7 +90,7 @@ export function OnboardingRoute() {
   )
 }
 
-export { classifyCompleteOnboardingFailure }
+
 
 function resolveViewState(bootstrap: ReturnType<typeof useOnboardingBootstrap>) {
   if (bootstrap.isAccessTransition) return { status: 'access-transition' as const }

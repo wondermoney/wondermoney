@@ -32,7 +32,7 @@ const apiMessage = (error: unknown): string | undefined =>
 function Shell({ children }: { children: React.ReactNode }) {
   const t = useTranslations("bankProvider");
   return (
-    <div className="divide-y divide-border">
+    <div className="divide-border divide-y">
       <div className="grid max-w-7xl grid-cols-1 gap-x-8 gap-y-10 px-4 py-16 sm:px-6 md:grid-cols-3 lg:px-8">
         <div>
           <Heading variant="h2">{t("title")}</Heading>
@@ -40,7 +40,7 @@ function Shell({ children }: { children: React.ReactNode }) {
             {t("description")}
           </Text>
         </div>
-        <div className="space-y-6 rounded bg-card p-4 md:col-span-2">
+        <div className="bg-card space-y-6 rounded p-4 md:col-span-2">
           {children}
         </div>
       </div>
@@ -118,10 +118,7 @@ export default function EnableBankingKeySettings() {
     <Shell>
       <div className="flex items-center gap-2">
         <Text>{t("statusLabel")}:</Text>
-        <Badge
-          className="uppercase"
-          variant={status ? badgeVariantForStatus(status) : "muted"}
-        >
+        <Badge variant={status ? badgeVariantForStatus(status) : "muted"}>
           {statusLabel}
         </Badge>
       </div>

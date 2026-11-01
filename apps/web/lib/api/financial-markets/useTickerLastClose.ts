@@ -20,10 +20,9 @@ export interface TickerLastClose {
 /**
  * Last close and day-over-day move, derived from the price history.
  *
- * The market-data source carries no live quote (RAD-449), so the header used to
- * render two bare em dashes above a chart that plots closes right up to
- * yesterday — the figure was there, just not on the endpoint the header asked
- * (RAD-608). This reads the tail of the history instead. It is explicitly *not*
+ * The market-data source carries no live quote, but the history plots closes
+ * right up to yesterday, so the header reads the tail of the history instead of
+ * showing two bare em dashes. It is explicitly *not*
  * a quote: callers must label what it is and when it is from.
  */
 export default function useTickerLastClose(

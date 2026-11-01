@@ -6,7 +6,7 @@
  * moved to the new module this file can be deleted.
  *
  * Canonical home for the derived environment booleans (`APP_ENV`, `IS_PROD`, `SHOULD_*`,
- * ...) that used to live in the former `src/utils/env.ts`. They read the frozen
+ * ...). They read the frozen
  * `process.env` snapshot directly; the entrypoint (server.ts / worker.ts / script
  * entrypoints) loads dotenv exactly once before delegating here.
  */
@@ -18,6 +18,7 @@ import {
   ConfigurationError,
   loadConfiguration,
 } from './configuration';
+import { parseTrustProxy, type TrustProxySetting } from './trust-proxy';
 
 export type ApiEnv = Readonly<Record<string, string>>;
 
@@ -69,7 +70,7 @@ export function loadEnv(options: { role: AppRole; source?: NodeJS.ProcessEnv }):
     }
     throw error;
   }
-  return flat as AppEnv;
+  return flat;
 }
 
 function flatten(raw: NodeJS.ProcessEnv | undefined): Readonly<Record<string, string>> {
@@ -115,7 +116,8 @@ export const SHOULD_DEBUG_SQL = IS_DEV;
 export const SHOULD_ENABLE_SENTRY = Boolean(process.env['SENTRY_DSN']) && IS_PRODUCTION_LIKE;
 export const SHOULD_INTERCEPT_EMAILS = !IS_PRODUCTION_LIKE && !process.env['EMAIL_DELIVERY_MODE'];
 
-export const BANK_SYNC_PROVIDER_DISABLED = process.env['BANK_SYNC_PROVIDER_DISABLED'] === 'true';
+/** Proxies allowed to report the client address. See `config/trust-proxy.ts`. */
+export const TRUST_PROXY: TrustProxySetting = parseTrustProxy(process.env['TRUST_PROXY']);
 
 // Re-export bootConfiguration so the worker entrypoint can switch to it incrementally
 // without changing the rest of its file.

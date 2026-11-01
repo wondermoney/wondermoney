@@ -99,7 +99,11 @@ describe('account csv import service', () => {
   });
 
   it('parses supported bank CSV files when bankName is provided', async () => {
-    const transactionalMock = vi.fn(async (fn: (em: ImportEm) => Promise<void>) => fn(em as unknown as ImportEm));
+    // Like MikroORM's EntityManager, `transactional` needs its own `this`.
+    const transactionalMock = vi.fn(async function (this: unknown, fn: (em: ImportEm) => Promise<void>) {
+      if (this !== em) throw new TypeError("Cannot read properties of undefined (reading 'getContext')");
+      return fn(em as unknown as ImportEm);
+    });
     const em = { create: vi.fn(), find: vi.fn().mockResolvedValue([]), findOne: vi.fn((entity, criteria) => {
       if (entity.name === 'Account') return Promise.resolve({ accountKey: 1, accountOwnerAppuserKey: { appuserKey: 9 }, currencyKey: { currencyKey: 2 }, tenantKey: { tenantKey: 1 } });
       if (entity.name === 'TransactionStatus' && criteria) return Promise.resolve({ name: 'BOOKED', transactionStatusKey: 1 });
@@ -244,28 +248,27 @@ describe('account csv import service', () => {
     expect(em.findOne).toHaveBeenCalledWith(expect.any(Function), expect.objectContaining({ date: { $lte: new Date('2025-01-01') }, fromCurrency: { code: 'EUR', currencyKey: 3 }, toCurrency: { code: 'USD', currencyKey: 5 } }), expect.objectContaining({ orderBy: { date: 'DESC', toCurrency: 'ASC' } }));
   });
 
-  it('reselects an existing merchant after insert-ignore on conflict', async () => {
-    const merchant = { name: 'Shop' };
-    const onConflictIgnore = vi.fn().mockResolvedValue(undefined);
-    const into = vi.fn().mockReturnValue({ onConflict: vi.fn().mockReturnValue({ ignore: onConflictIgnore }) });
-    let merchantLookups = 0;
+  it('creates a merchant it has not seen before and links it to the imported row', async () => {
     const findOne = vi.fn((entity, criteria) => {
       if (entity.name === 'Account') return Promise.resolve({ accountKey: 1, accountOwnerAppuserKey: { appuserKey: 9 }, currencyKey: { currencyKey: 2 }, tenantKey: { tenantKey: 1 } });
       if (entity.name === 'TransactionStatus' && criteria) return Promise.resolve({ name: 'BOOKED', transactionStatusKey: 1 });
-      if (entity.name === 'TransactionMerchant') return merchantLookups++ === 0 ? Promise.resolve(null) : Promise.resolve(merchant);
+      if (entity.name === 'TransactionMerchant') return Promise.resolve(null);
       if (entity.name === 'TransactionType' && criteria) return Promise.resolve({ name: 'CARD_PAYMENT', transactionTypeKey: 4 });
       if (entity.name === 'Currency' && criteria) return Promise.resolve({ currencyKey: 3 });
       if (entity.name === 'Transaction' && criteria) return Promise.resolve(null);
       return Promise.resolve(null);
     });
-    const em = { create: vi.fn((_: unknown, value: unknown) => value), find: vi.fn().mockResolvedValue([]), findOne, flush: vi.fn().mockResolvedValue(undefined), getKnex: vi.fn(() => ({ insert: vi.fn().mockReturnValue({ into }) })), persist: vi.fn(function () { return em; }) };
+    const persisted: unknown[] = [];
+    const em = { create: vi.fn((entity: { name: string }, value: object) => ({ entity: entity.name, ...value })), find: vi.fn().mockResolvedValue([]), findOne, flush: vi.fn().mockResolvedValue(undefined), persist: vi.fn(function (entity: unknown) { persisted.push(entity); return em; }) };
     parseExcelMock.mockResolvedValueOnce([['raw-bank-row']]);
     getBankParserMock.mockReturnValueOnce(() => [{ internalTransactionId: 'bank-int-1', settlementAmount: '-10.50', settlementCurrency: 'EUR', transactionDate: new Date('2025-01-01'), transactionMerchant: 'Shop', transactionType: 'CARD_PAYMENT' }]);
+    balancePlanMock.mockImplementationOnce(() => ({ accountBalance: 0, items: [] }));
     const svc = new AccountCsvImportService();
 
-    await expect(svc.importAccountCsv({ accountKey: 1, bankName: 'bcp', bucket: 'b', key: 'k' }, withSafeCsvDeps({ em: em as unknown as ImportEm, getObjectBuffer: vi.fn().mockResolvedValue(Buffer.from('raw,csv')) }))).resolves.toMatchObject({ imported: 1 });
-    expect(em.findOne).toHaveBeenCalledWith(expect.any(Function), { name: 'Shop' });
-    expect(onConflictIgnore).toHaveBeenCalled();
+    await expect(svc.importAccountCsv({ accountKey: 1, bankName: 'bcp', bucket: 'b', key: 'k' }, withSafeCsvDeps({ em: em as unknown as ImportEm, getObjectBuffer: vi.fn().mockResolvedValue(Buffer.from('raw,csv')) }))).resolves.toMatchObject({ failed: 0, imported: 1 });
+    expect(persisted).toContainEqual({ entity: 'TransactionMerchant', name: 'Shop' });
+    const [, , importedTransactions] = balancePlanMock.mock.calls.at(-1) ?? [];
+    expect(importedTransactions[0]).toEqual(expect.objectContaining({ transactionMerchantKey: { entity: 'TransactionMerchant', name: 'Shop' } }));
   });
 
   it('falls back to oldest exchange rate and signed settlement amount when no historical rate exists', async () => {

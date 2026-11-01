@@ -51,6 +51,7 @@ try {
   assert.equal(packResult.length, 1);
   const packedFiles = packResult[0].files.map(({ path }) => path).sort();
   assert.deepEqual(packedFiles, [
+    "LICENSE",
     "README.md",
     "dist/index.d.ts",
     "dist/index.js",

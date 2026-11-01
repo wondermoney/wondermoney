@@ -27,7 +27,7 @@ describe('useStartBankConnection', () => {
     let result: unknown
     await act(async () => { result = await hook.result.current.mutateAsync('REVOLUT_REVOGB21') })
     expect(mockRead).toHaveBeenCalledTimes(1)
-    expect(mockRead.mock.calls[0][0]).toMatchObject({ method: 'GET', path: '/v1/banking/bank/REVOLUT_REVOGB21/start?redirectPage=accounts' })
+    expect(mockRead.mock.calls[0][0]).toMatchObject({ method: 'GET', path: '/v1/banking/bank/REVOLUT_REVOGB21/start?returnTo=mobile' })
     expect(result).toEqual({ redirectUrl: 'https://ob.gocardless.com/session/abc' })
     await hook.unmount(); client.clear()
   })

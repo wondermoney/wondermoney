@@ -14,7 +14,7 @@ import {
 } from "./chart-formatters";
 
 /**
- * RAD-575 — the chart formatters bound to the active locale.
+ * The chart formatters bound to the active locale.
  *
  * Returned from one `useMemo` rather than five `useCallback`s because these are
  * almost always passed straight into a chart's `xFormatter` / `yFormatter`

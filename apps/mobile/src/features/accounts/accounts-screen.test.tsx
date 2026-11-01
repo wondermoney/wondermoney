@@ -5,13 +5,15 @@ import { StyleSheet } from 'react-native'
 import { formatCurrency } from '@/lib/formatters/financial'
 import { initMobileI18n } from '@/lib/i18n'
 
+import { accountsResponseSchema } from './accounts-contract'
 import { AccountsScreen, type AccountsData } from './accounts-screen'
+import { mapAccounts } from './accounts-view-model'
 
 const data: AccountsData = {
   accounts: [
-    { accountId: 1, accountName: 'Current account', institutionDisplayName: 'Bank One', isOwnedByViewer: true, isPrivate: false, source: 'open_banking', originalBalance: 0, originalCurrencyCode: 'EUR', primaryCurrencyCode: 'EUR', convertedBalance: 0, refreshedAt: '2026-07-17T10:00:00Z' },
-    { accountId: 2, accountName: null, institutionDisplayName: null, isOwnedByViewer: true, isPrivate: false, source: 'manual', originalBalance: null, originalCurrencyCode: 'EUR', primaryCurrencyCode: 'EUR', convertedBalance: null, refreshedAt: null },
-    { accountId: 3, accountName: 'Yen savings', institutionDisplayName: 'Bank Two', isOwnedByViewer: false, isPrivate: false, source: 'open_banking', originalBalance: 1200, originalCurrencyCode: 'JPY', primaryCurrencyCode: 'EUR', convertedBalance: 7.2, refreshedAt: 'invalid' },
+    { accountId: 1, accountName: 'Current account', institutionDisplayName: 'Bank One', isOwnedByViewer: true, isPrivate: false, source: 'open_banking', csvImportFormat: null, originalBalance: 0, originalCurrencyCode: 'EUR', primaryCurrencyCode: 'EUR', convertedBalance: 0, refreshedAt: '2026-07-17T10:00:00Z' },
+    { accountId: 2, accountName: null, institutionDisplayName: null, isOwnedByViewer: true, isPrivate: false, source: 'manual', csvImportFormat: null, originalBalance: null, originalCurrencyCode: 'EUR', primaryCurrencyCode: 'EUR', convertedBalance: null, refreshedAt: null },
+    { accountId: 3, accountName: 'Yen savings', institutionDisplayName: 'Bank Two', isOwnedByViewer: false, isPrivate: false, source: 'open_banking', csvImportFormat: null, originalBalance: 1200, originalCurrencyCode: 'JPY', primaryCurrencyCode: 'EUR', convertedBalance: 7.2, refreshedAt: 'invalid' },
   ],
 }
 
@@ -120,5 +122,18 @@ describe('AccountsScreen', () => {
   it('uses pull-to-refresh instead of a persistent refresh button', async () => {
     const { view } = await renderScreen({ status: 'loaded', data, refreshing: true })
     expect(view.queryByRole('button', { name: 'Refresh' })).not.toBeOnTheScreen()
+  })
+})
+
+describe('AccountsScreen with values this build does not know', () => {
+  it('renders an account whose source is new to this build', async () => {
+    const response = accountsResponseSchema.parse({ accounts: [{
+      accountFinancialInstitutionKey: null, accountKey: 4, accountName: 'Imported account', accountOwnerAppuserKey: { currencyKey: { code: 'EUR' } },
+      appuserCurrencyBalance: 10, balance: 10, currencyKey: { code: 'EUR' }, isOwnedByViewer: true, isPrivate: false,
+      refreshedAt: null, source: 'csv_import', syncState: 'idle',
+    }] })
+    const { view } = await renderScreen({ status: 'loaded', data: { accounts: mapAccounts(response) } })
+    expect(view.getByText('Imported account')).toBeOnTheScreen()
+    expect(view.getByText(/Other source/)).toBeOnTheScreen()
   })
 })

@@ -7,10 +7,9 @@ const rootDir = path.dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig({
   oxc: {
-    // The four render checks in `scripts/` are `.tsx`. The root tsconfig sets
-    // `jsx: "preserve"` because Next compiles the app, so the transform has to
-    // be named here instead of inherited. This replaces the old
-    // `tsx --tsconfig scripts/tsconfig.render.json` invocations.
+    // The root tsconfig sets `jsx: "preserve"` because Next compiles the app,
+    // so the transform for `.test.tsx` files has to be named here instead of
+    // inherited.
     jsx: "automatic",
   },
   resolve: {
@@ -20,11 +19,7 @@ export default defineConfig({
     ],
   },
   test: {
-    // Every check the repo owns, in one run:
-    //  - `*.test.ts(x)` anywhere outside node_modules / cypress (node:test files
-    //    converted to Vitest), and
-    //  - `scripts/regression-checks.test.ts`, which enumerates and wraps every
-    //    `scripts/*-checks.*` side-effecting script.
+    // Every `*.test.ts(x)` outside node_modules / cypress, in one run.
     include: ["**/*.test.{ts,tsx}"],
     exclude: [
       "**/node_modules/**",
@@ -36,14 +31,6 @@ export default defineConfig({
       // Locally that surfaced as 160 files / 78 failures instead of 84 / 0; CI
       // never saw it because a fresh clone has no `.slim`.
       "**/.slim/**",
-      // Driven as a child process by scripts/auth-mfa-regression-checks.ts,
-      // which needs Node's --experimental-test-module-mocks. The decision to
-      // leave them on node:test, and the guard on the spawn they depend on,
-      // are in the NODE_TEST_HOLDOUTS block of scripts/regression-checks.test.ts
-      // (RAD-568). Matched by suffix rather than an exact path so a copy of the
-      // repo elsewhere cannot slip past it.
-      "**/scripts/auth-callback-propagation-route.test.ts",
-      "**/scripts/auth-complete-propagation-route.test.ts",
     ],
     env: {
       // Mirrors the inline env the old `test:*` scripts exported. Several
@@ -53,6 +40,9 @@ export default defineConfig({
       NEXT_PUBLIC_TAWK_WIDGET_ID: "test",
       NODE_ENV: "test",
     },
+    // theme/contrast.test.ts reads the colour tokens via `globals.css?raw`;
+    // vitest stubs every other stylesheet to an empty string.
+    css: { include: [/theme\/globals\.css/] },
     environment: "node",
     globals: true,
     server: {
@@ -64,7 +54,7 @@ export default defineConfig({
       },
     },
     root: rootDir,
-    // The check scripts read source with paths relative to process.cwd().
+    // Some tests resolve fixture paths relative to process.cwd().
     // vitest.setup.ts pins that to the project root inside every worker.
     setupFiles: ["./vitest.setup.ts"],
   },

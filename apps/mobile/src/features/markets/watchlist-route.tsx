@@ -29,7 +29,7 @@ function resolveWatchlistState(
 }
 
 /**
- * RAD-243 (slice 2) — the watchlist symbols and their quotes are two
+ * The watchlist symbols and their quotes are two
  * independent request shapes: one list `GET`, then N parallel quote `GET`s
  * fetched with `useQueries` (this repo's first use of it), reusing
  * use-quote's exact query-key shape and read policy so the cache is shared

@@ -28,7 +28,7 @@ export async function resendHouseholdInvite(
 
 type HouseholdCache = Pick<QueryClient, "invalidateQueries">;
 
-export function getResendHouseholdInviteMutationOptions(
+function getResendHouseholdInviteMutationOptions(
   queryClient: HouseholdCache,
   apiClient: HouseholdResendClient = api,
 ): UseMutationOptions<CreateHouseholdInviteResponse, HouseholdApiError, number> {

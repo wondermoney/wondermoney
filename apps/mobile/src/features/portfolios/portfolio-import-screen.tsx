@@ -9,6 +9,7 @@ import { textStyles } from '@/theme/typography'
 
 import { PortfolioImportAssetReviewStep } from './portfolio-import-asset-review-step'
 import { PortfolioButton, type PortfolioPalette } from './portfolio-form-parts'
+import type { PortfolioImportPreviewDto } from './portfolio-import-contract'
 import type { PortfolioImportAssetGroupMapping, PortfolioImportPhase } from './use-portfolio-import'
 
 export type PortfolioImportScreenProps = Readonly<{
@@ -76,8 +77,9 @@ export function PortfolioImportScreen({ state, onPickFile, onConfirm, onReset, o
           {state.phase === 'succeeded' ? (
             <View style={styles.form}>
               <Text accessibilityRole="alert" style={[styles.success, { color: palette.foreground }]}>
-                {t('portfolioImport.succeeded', { count: state.preview.summary.importedRows || state.preview.summary.readyRows })}
+                {t(state.preview.status === 'partial' ? 'portfolioImport.partial' : 'portfolioImport.succeeded', { count: state.preview.summary.importedRows || state.preview.summary.readyRows })}
               </Text>
+              <FailedRows rows={state.preview.rows.failed ?? []} palette={palette} />
               <PortfolioButton label={t('portfolioImport.done')} onPress={onBack} palette={palette} />
             </View>
           ) : null}
@@ -109,6 +111,26 @@ function ImportSummary({ summary, palette }: { summary: { readyRows: number; dup
   )
 }
 
+function FailedRows({ rows, palette }: { rows: PortfolioImportPreviewDto['rows']['duplicate']; palette: PortfolioPalette }) {
+  const { t } = useTranslation()
+  if (rows.length === 0) return null
+  return (
+    <View style={[styles.card, { borderColor: palette.border, backgroundColor: palette.muted }]}>
+      <Text accessibilityRole="header" style={[styles.sectionTitle, { color: palette.foreground }]}>{t('portfolioImport.failedRowsTitle')}</Text>
+      {rows.map((row) => {
+        const label = t('portfolioImport.failedRow', { row: row.rowNumber })
+        const reason = row.failureReason ?? t('portfolioImport.failedRowNoReason')
+        return (
+          <View key={row.id} accessible accessibilityLabel={`${label}: ${reason}`} testID="portfolio-import-failed-row" style={styles.failedRow}>
+            <Text style={[styles.failedRowNumber, { color: palette.foreground }]}>{label}</Text>
+            <Text style={[styles.helper, { color: palette.mutedForeground }]}>{reason}</Text>
+          </View>
+        )
+      })}
+    </View>
+  )
+}
+
 function SummaryRow({ label, value, palette }: { label: string; value: number; palette: PortfolioPalette }) {
   return (
     <View accessible accessibilityLabel={`${label}: ${value}`} style={styles.summaryRow}>
@@ -130,6 +152,8 @@ const styles = StyleSheet.create({
   sectionTitle: { ...textStyles.section },
   summaryRow: { flexDirection: 'row', justifyContent: 'space-between' },
   summaryValue: { ...textStyles.amount },
+  failedRow: { gap: themeTokens.spacing[1] },
+  failedRowNumber: { ...textStyles.bodyStrong },
   alert: { ...textStyles.body },
   success: { ...textStyles.action },
   actions: { flexDirection: 'row', flexWrap: 'wrap', gap: themeTokens.spacing[3] },

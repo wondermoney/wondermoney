@@ -88,7 +88,6 @@ Recorded rather than quietly carried.
 
 | Location | Debt | Exit condition |
 | --- | --- | --- |
-| `src/constants/theme.ts` | A second, competing token source left by the Expo scaffold (`Colors`, `Fonts`, `Spacing`), plus the scaffold components that read it (`themed-text`, `themed-view`, `hint-row`, `web-badge`, `animated-icon`, `external-link`, `collapsible`). None has a real consumer. | Delete the lot. Left in place only because deleting production files was out of scope for the design-system port. |
 | Default category color | `#2563EB` in `category-manage-screen.tsx` — an arbitrary blue not in the palette. | It's a *data* default: changing it changes what gets persisted for new categories. Worth changing to `chart5`, deliberately, as its own task. |
 | Google brand marks | `#4285F4` / `#EA4335` / `#FBBC05` / `#34A853` in `social-sign-in-buttons.tsx`. | Not debt. Google's brand guidelines require exact values; tokenizing them would be wrong. |
 | Category colors | User-chosen hex, stored server-side, rendered as-is. | Not debt — user data. The ink on top is chosen by luminance at render, from the two halves' `foreground` values. |

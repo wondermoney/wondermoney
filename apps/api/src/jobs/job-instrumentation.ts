@@ -58,7 +58,7 @@ const retryCountOf = (job: InstrumentedJob): number | undefined => {
  * Captures a handler failure to Sentry with queue/job correlation context.
  * Never throws: telemetry must not be able to change a job's outcome.
  */
-export function captureJobFailure(queue: string, job: InstrumentedJob, error: unknown): void {
+function captureJobFailure(queue: string, job: InstrumentedJob, error: unknown): void {
   try {
     const record = asRecord(job.data) ?? {};
     const retryCount = retryCountOf(job);

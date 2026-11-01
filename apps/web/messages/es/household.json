@@ -39,8 +39,8 @@
     },
     "cancel": "Cancelar",
     "join": {
-      "greetingNamed": "{name} te invitó a su hogar en WonderMoney",
-      "greetingGeneric": "Te han invitado a un hogar en WonderMoney",
+      "greetingNamed": "{name} te invitó a su hogar en {instanceName}",
+      "greetingGeneric": "Te han invitado a un hogar en {instanceName}",
       "subtitle": "Crea tu cuenta para compartir cuentas, presupuestos y objetivos.",
       "emailLockedHint": "Esta invitación es para {email}",
       "invalidTitle": "Este enlace de invitación no es válido",
@@ -48,7 +48,7 @@
       "loggedInTitle": "Ya has iniciado sesión",
       "loggedInBody": "Las invitaciones de hogar solo se pueden aceptar con una cuenta nueva. Cierra sesión y crea una con el email invitado para unirte.",
       "logoutAndJoin": "Cerrar sesión y crear cuenta",
-      "backToApp": "Ir a WonderMoney"
+      "backToApp": "Ir a {instanceName}"
     },
     "toast": {
       "inviteSent": "Invitación enviada",

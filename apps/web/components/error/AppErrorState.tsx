@@ -4,11 +4,13 @@ import { Home, RotateCcw } from "lucide-react";
 import { useTranslations } from "next-intl";
 import * as React from "react";
 
+import { useInstanceName } from "@/components/instance/InstanceNameProvider";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Link } from "@/components/ui/Link";
 import { RateLimitedState } from "@/components/ui/RateLimitedState";
 import { Heading, Text } from "@/components/ui/Typography";
+import { useSupportEmail } from "@/lib/api/instance/useInstance";
 import {
   type AppErrorCategory,
   classifyAppError,
@@ -75,6 +77,8 @@ export function AppErrorState({
   className,
 }: AppErrorStateProps) {
   const t = useTranslations();
+  const instanceName = useInstanceName();
+  const supportEmail = useSupportEmail();
   const titleId = React.useId();
   const descriptionId = React.useId();
   const category = classifyAppError(error);
@@ -97,8 +101,11 @@ export function AppErrorState({
         <RateLimitedState
           error={error}
           onRetry={reset}
-          title={t(copy.title)}
-          description={t(copy.description, { section: sectionLabel })}
+          title={t(copy.title, { instanceName })}
+          description={t(copy.description, {
+            instanceName,
+            section: sectionLabel,
+          })}
           className="w-full max-w-2xl shadow-none sm:p-8"
         />
       </div>
@@ -120,19 +127,21 @@ export function AppErrorState({
       >
         <CardContent className="space-y-6 p-6 sm:p-8">
           <div className="space-y-3">
-            <Text
-              as="p"
-              variant="smallText"
-              className="border-border bg-background text-muted-foreground inline-flex w-fit rounded-md border px-2.5 py-1 font-mono"
-            >
-              {status !== undefined
-                ? t("app-error-status-label", { status })
-                : t("app-error-status-unknown")}
-            </Text>
+            {/* The status code is a fact worth keeping; a bare "Error" with no
+                code is only a label for the heading below, so it is left out. */}
+            {status !== undefined ? (
+              <Text as="p" variant="mutedText">
+                {t("app-error-status-label", { status })}
+              </Text>
+            ) : null}
 
             <div className="space-y-2">
-              <Heading variant="h1" id={titleId}>
-                {t(copy.title)}
+              <Heading
+                variant="h1"
+                id={titleId}
+                className="text-3xl font-semibold lg:text-3xl"
+              >
+                {t(copy.title, { instanceName })}
               </Heading>
               <Text
                 as="p"
@@ -140,7 +149,7 @@ export function AppErrorState({
                 className="max-w-prose"
                 id={descriptionId}
               >
-                {t(copy.description, { section: sectionLabel })}
+                {t(copy.description, { instanceName, section: sectionLabel })}
               </Text>
               <Text as="p" variant="mutedText" className="max-w-prose">
                 {t(copy.nextStep)}
@@ -169,7 +178,7 @@ export function AppErrorState({
             </Button>
           </div>
 
-          {showSupportLink && (
+          {showSupportLink && supportEmail && (
             <Text
               as="p"
               variant="smallText"
@@ -177,7 +186,7 @@ export function AppErrorState({
             >
               <a
                 className="text-primary inline-flex items-center gap-2 underline-offset-4 hover:underline"
-                href={`mailto:${t("support-email")}`}
+                href={`mailto:${supportEmail}`}
               >
                 {t("contact-support")}
               </a>

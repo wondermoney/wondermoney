@@ -51,13 +51,9 @@ function pendingInvite() {
 }
 
 function response() {
-  const res = { json: vi.fn(), sendStatus: vi.fn(), status: vi.fn() };
-  res.status.mockReturnValue(res);
-  return res as unknown as Response & {
-    json: ReturnType<typeof vi.fn>;
-    sendStatus: ReturnType<typeof vi.fn>;
-    status: ReturnType<typeof vi.fn>;
-  };
+  const mocks = { json: vi.fn(), sendStatus: vi.fn(), status: vi.fn() };
+  mocks.status.mockReturnValue(mocks);
+  return { mocks, res: mocks as unknown as Response };
 }
 
 describe('household controller', () => {
@@ -70,7 +66,7 @@ describe('household controller', () => {
   describe('authenticated household mutations', () => {
     it('creates an invite with the authenticated household context and omits the token', async () => {
       const invite = pendingInvite();
-      const res = response();
+      const { mocks, res } = response();
       mocked.zParse.mockResolvedValueOnce({ body: { email: 'partner@example.com' } });
       mocked.createHouseholdInvite.mockResolvedValueOnce(invite);
 
@@ -78,8 +74,8 @@ describe('household controller', () => {
 
       expect(mocked.authedContext).toHaveBeenCalledWith(request);
       expect(mocked.createHouseholdInvite).toHaveBeenCalledWith(expect.anything(), user, tenant, 'partner@example.com');
-      expect(res.status).toHaveBeenCalledWith(StatusCodes.CREATED);
-      expect(res.json).toHaveBeenCalledWith({
+      expect(mocks.status).toHaveBeenCalledWith(StatusCodes.CREATED);
+      expect(mocks.json).toHaveBeenCalledWith({
         invite: {
           email: invite.emailAddress,
           expiresAt: invite.expiresAt,
@@ -87,7 +83,7 @@ describe('household controller', () => {
           status: invite.status,
         },
       });
-      expect(res.json.mock.calls[0]?.[0]).not.toHaveProperty('invite.token');
+      expect(mocks.json.mock.calls[0]?.[0]).not.toHaveProperty('invite.token');
     });
 
     it('returns the household view for an authenticated member', async () => {
@@ -95,36 +91,36 @@ describe('household controller', () => {
         members: [{ appuserKey: 1, emailAddress: user.emailAddress, firstName: 'Owner', role: 'owner' }],
         pendingInvite: { email: 'partner@example.com', expiresAt: new Date('2026-10-05T00:00:00.000Z'), householdInviteKey: 21 },
       };
-      const res = response();
+      const { mocks, res } = response();
       mocked.getHousehold.mockResolvedValueOnce(household);
 
       await getHouseholdController(request, res);
 
       expect(mocked.getHousehold).toHaveBeenCalledWith(expect.anything(), tenant);
-      expect(res.json).toHaveBeenCalledWith(household);
+      expect(mocks.json).toHaveBeenCalledWith(household);
     });
 
     it('removes a member using the authenticated requester and validated path id', async () => {
-      const res = response();
+      const { mocks, res } = response();
       mocked.zParse.mockResolvedValueOnce({ params: { appuserKey: 2 } });
 
       await removeMemberController(request, res);
 
       expect(mocked.leaveOrRemoveMember).toHaveBeenCalledWith(expect.anything(), tenant, user, 2);
-      expect(res.sendStatus).toHaveBeenCalledWith(StatusCodes.OK);
+      expect(mocks.sendStatus).toHaveBeenCalledWith(StatusCodes.OK);
     });
 
     it('resends an invite with the authenticated household context and omits the token', async () => {
       const invite = pendingInvite();
-      const res = response();
+      const { mocks, res } = response();
       mocked.zParse.mockResolvedValueOnce({ params: { inviteId: 21 } });
       mocked.resendHouseholdInvite.mockResolvedValueOnce(invite);
 
       await resendInviteController(request, res);
 
       expect(mocked.resendHouseholdInvite).toHaveBeenCalledWith(expect.anything(), user, tenant, 21);
-      expect(res.status).toHaveBeenCalledWith(StatusCodes.OK);
-      expect(res.json).toHaveBeenCalledWith({
+      expect(mocks.status).toHaveBeenCalledWith(StatusCodes.OK);
+      expect(mocks.json).toHaveBeenCalledWith({
         invite: {
           email: invite.emailAddress,
           expiresAt: invite.expiresAt,
@@ -132,17 +128,17 @@ describe('household controller', () => {
           status: invite.status,
         },
       });
-      expect(res.json.mock.calls[0]?.[0]).not.toHaveProperty('invite.token');
+      expect(mocks.json.mock.calls[0]?.[0]).not.toHaveProperty('invite.token');
     });
 
     it('revokes an invite with the authenticated household context', async () => {
-      const res = response();
+      const { mocks, res } = response();
       mocked.zParse.mockResolvedValueOnce({ params: { inviteId: 21 } });
 
       await revokeInviteController(request, res);
 
       expect(mocked.revokeHouseholdInvite).toHaveBeenCalledWith(expect.anything(), tenant, 21);
-      expect(res.sendStatus).toHaveBeenCalledWith(StatusCodes.OK);
+      expect(mocks.sendStatus).toHaveBeenCalledWith(StatusCodes.OK);
     });
   });
 
@@ -153,7 +149,7 @@ describe('household controller', () => {
         expiresAt: new Date('2026-10-05T00:00:00.000Z'),
         inviterName: 'Owner',
       };
-      const res = response();
+      const { mocks, res } = response();
       const publicRequest = { query: { token: 'sensitive-token' } } as unknown as Request;
       mocked.zParse.mockResolvedValueOnce({ query: { token: 'sensitive-token' } });
       mocked.getInviteForValidation.mockResolvedValueOnce(preview);
@@ -162,43 +158,43 @@ describe('household controller', () => {
 
       expect(mocked.authedContext).not.toHaveBeenCalled();
       expect(mocked.getInviteForValidation).toHaveBeenCalledWith(expect.anything(), 'sensitive-token');
-      expect(res.json).toHaveBeenCalledWith(preview);
-      expect(res.json.mock.calls[0]?.[0]).not.toHaveProperty('token');
+      expect(mocks.json).toHaveBeenCalledWith(preview);
+      expect(mocks.json.mock.calls[0]?.[0]).not.toHaveProperty('token');
     });
   });
 
   describe('service error propagation', () => {
     it('propagates a conflict from invite creation with its HTTP status', async () => {
       const error = new ConflictError('This household is full.');
-      const res = response();
+      const { mocks, res } = response();
       mocked.createHouseholdInvite.mockRejectedValueOnce(error);
 
       await expect(createInviteController(request, res)).rejects.toBe(error);
       expect(error.status).toBe(StatusCodes.CONFLICT);
-      expect(res.status).not.toHaveBeenCalled();
-      expect(res.json).not.toHaveBeenCalled();
+      expect(mocks.status).not.toHaveBeenCalled();
+      expect(mocks.json).not.toHaveBeenCalled();
     });
 
     it('propagates a missing-member error with its HTTP status', async () => {
       const error = new NotFoundError('Household member not found');
-      const res = response();
+      const { mocks, res } = response();
       mocked.zParse.mockResolvedValueOnce({ params: { appuserKey: 2 } });
       mocked.leaveOrRemoveMember.mockRejectedValueOnce(error);
 
       await expect(removeMemberController(request, res)).rejects.toBe(error);
       expect(error.status).toBe(StatusCodes.NOT_FOUND);
-      expect(res.sendStatus).not.toHaveBeenCalled();
+      expect(mocks.sendStatus).not.toHaveBeenCalled();
     });
 
     it('propagates an invalid public token error with its HTTP status', async () => {
       const error = new BadRequestError('This invitation is invalid or has already been used.');
-      const res = response();
+      const { mocks, res } = response();
       mocked.zParse.mockResolvedValueOnce({ query: { token: 'invalid-token' } });
       mocked.getInviteForValidation.mockRejectedValueOnce(error);
 
       await expect(validateInviteController({ query: {} } as unknown as Request, res)).rejects.toBe(error);
       expect(error.status).toBe(StatusCodes.BAD_REQUEST);
-      expect(res.json).not.toHaveBeenCalled();
+      expect(mocks.json).not.toHaveBeenCalled();
     });
   });
 });

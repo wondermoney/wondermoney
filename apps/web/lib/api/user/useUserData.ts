@@ -12,10 +12,9 @@ export interface UserDataResponse {
   firstName: string;
   lastName: string | null;
   twofactorEnabled: boolean;
-  requiresMfaReenrollment?: boolean;
 }
 
-export async function getUserData(
+async function getUserData(
   userId: string,
   apiClient: AxiosInstance = api,
 ): Promise<UserDataResponse> {

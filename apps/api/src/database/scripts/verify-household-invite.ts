@@ -1,5 +1,5 @@
 /**
- * RAD-343 (B1 + A3) — end-to-end proof of the household invite lifecycle against a
+ * End-to-end proof of the household invite lifecycle against a
  * schema-only disposable DB. Seeds an owner + tenant, then exercises the service:
  * create invite → seat cap → validate (email match/mismatch) → consume (member joins).
  *
@@ -54,20 +54,18 @@ async function main() {
   try {
     const cur = (await one(`insert into currency (code, num, decimal_digits, is_active) values ('THH','888',2,true) returning currency_key`))['currency_key']!;
     const ts = (await one(`insert into tenant_status (description) values ('Active') returning tenant_status_key`))['tenant_status_key']!;
-    const mkUser = async (email: string, ref: string, ext: string) =>
-      (await one(`insert into appuser (created_at, updated_at, email_address, referral_code, currency_key, external_user_id, first_name) values (now(),now(),?,?,?,?,?) returning appuser_key`, [email, ref, cur, ext, ref]))['appuser_key']!;
+    const mkUser = async (email: string, firstName: string, ext: string) =>
+      (await one(`insert into appuser (created_at, updated_at, email_address, currency_key, external_user_id, first_name) values (now(),now(),?,?,?,?) returning appuser_key`, [email, cur, ext, firstName]))['appuser_key']!;
     const ownerKey = await mkUser('owner@hh.test', 'hhOwner', 'hhExtOwner');
-    const memberKey = await mkUser('partner@hh.test', 'hhMember', 'hhExtMember');
+    await mkUser('existing@hh.test', 'hhExisting', 'hhExtExisting');
     const tenantKey = (await one(`insert into tenant (created_at, updated_at, owner_appuser_key, tenant_status_key) values (now(),now(),?,?) returning tenant_key`, [ownerKey, ts]))['tenant_key']!;
     await conn.execute(`insert into appuser_tenant (created_at, updated_at, appuser_key, tenant_key, role) values (now(),now(),?,?,'owner')`, [ownerKey, tenantKey]);
 
     const owner = await em.findOneOrFail(Appuser, { appuserKey: ownerKey });
-    const member = await em.findOneOrFail(Appuser, { appuserKey: memberKey });
     const tenant = await em.findOneOrFail(Tenant, { tenantKey });
 
-    // 0. RAD-430 — inviting an email that already has an account is rejected before sending.
-    // `member` (created above) already exists, so inviting its email must fail up front.
-    await expectThrows(() => createHouseholdInvite(em, owner, tenant, 'partner@hh.test'), 'invite rejected — email already belongs to an existing account');
+    // 0. Inviting an email that already has an account is rejected before sending.
+    await expectThrows(() => createHouseholdInvite(em, owner, tenant, 'existing@hh.test'), 'invite rejected — email already belongs to an existing account');
 
     // 1. Owner creates an invite.
     const invite = await createHouseholdInvite(em, owner, tenant, 'Partner@HH.test');
@@ -95,7 +93,9 @@ async function main() {
     );
     await expectThrows(() => getInviteForValidation(em, 'nope-token'), 'public validation rejects an unknown token');
 
-    // 5. Consume: the member joins the owner's tenant as a MEMBER; invite marked accepted.
+    // 5. Consume: the invitee signs up, then joins the owner's tenant as a MEMBER; invite marked accepted.
+    const memberKey = await mkUser('partner@hh.test', 'hhMember', 'hhExtMember');
+    const member = await em.findOneOrFail(Appuser, { appuserKey: memberKey });
     const joinedTenant = await consumeInvite(em, validated, member);
     assert(joinedTenant.tenantKey === tenantKey, 'consume returns the owner tenant');
     em.clear();

@@ -23,10 +23,9 @@ describe('portfolio snapshot auto job', () => {
   beforeEach(() => { vi.clearAllMocks(); });
 
   it('pages with a cursor instead of loading every portfolio', async () => {
-    // The sweep used to be `em.find(Portfolio, {...})` with no limit and no cursor, then a
-    // serial loop inside one 900s job at `retryLimit: 0` — so past some portfolio count
-    // the job expired mid-run and every portfolio after that point permanently lost that
-    // day's snapshot (snapshots are date-keyed; tomorrow does not backfill).
+    // An unbounded `em.find(Portfolio, {...})` followed by a serial loop inside one job would,
+    // past some portfolio count, expire mid-run, and every portfolio after that point would
+    // permanently lose that day's snapshot (snapshots are date-keyed; tomorrow does not backfill).
     findMock.mockResolvedValue(portfolios([11, 12]));
     const snapshots = { backfillSnapshotsForPortfolio: vi.fn(), updateSnapshotForToday: vi.fn().mockResolvedValue(undefined) };
 

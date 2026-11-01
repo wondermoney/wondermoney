@@ -27,7 +27,7 @@ const CardHeader = React.forwardRef<
 CardHeader.displayName = "CardHeader";
 
 /**
- * RAD-566 — deliberately a `<div>`, not a heading.
+ * Deliberately a `<div>`, not a heading.
  *
  * A card is a container, not a document section. Most cards in this app hold a
  * figure, a control or a summary that the surrounding section already named, so

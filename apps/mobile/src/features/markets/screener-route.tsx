@@ -6,7 +6,7 @@ import { mapScreenerResults } from './markets-view-model'
 import { ScreenerScreen, type ScreenerFilterFormValues, type ScreenerScreenState } from './screener-screen'
 import { useScreener } from './use-screener'
 
-export const SCREENER_PAGE_SIZE = 25
+const SCREENER_PAGE_SIZE = 25
 
 const emptyForm: ScreenerFilterFormValues = {
   isEtf: false,
@@ -73,7 +73,7 @@ function resolveScreenerState(
 }
 
 /**
- * RAD-241 (slice 3) — filters are staged in `form` (fully controlled, fires
+ * Filters are staged in `form` (fully controlled, fires
  * no request) and only become live in `applied` once "Apply filters" is
  * pressed: an explicit submit rather than markets-search's debounce, since
  * the screener has several fields adjusted together and a heavier query

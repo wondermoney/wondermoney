@@ -1,8 +1,8 @@
 /**
- * RAD-552 — cash flow chart series assembly.
+ * Cash flow chart series assembly.
  *
  * `GET /v1/reports/cashflow` returns one row per month that actually has
- * transactions. Two things fall out of that which the chart used to render as
+ * transactions. Two things fall out of that which the chart must not render as
  * if they were facts:
  *
  * 1. **Out-of-period months.** The date filter is applied to instants, while the
@@ -27,10 +27,10 @@
  * the selected range cuts into — are flagged `isPartial` so the UI can say so
  * rather than presenting a month-to-date figure as a month.
  *
- * ## Why the out-of-period drop survives RAD-555/RAD-562
+ * ## Why the out-of-period drop is still needed
  *
- * The API now buckets in the calendar the request names (RAD-555) and the client
- * names the viewer's (RAD-562), so in the normal case (1) can no longer happen
+ * The API buckets in the calendar the request names and the client names the
+ * viewer's, so in the normal case (1) cannot happen
  * and the drop is inert. It is kept because the client is allowed not to know:
  * when `Intl` cannot name a zone the `timezone` filter is deliberately omitted
  * and the API falls back to `Europe/Lisbon`, which is exactly the calendar

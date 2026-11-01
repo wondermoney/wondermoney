@@ -88,26 +88,18 @@ describe('markets ticker search contract', () => {
     ).toBe(false)
   })
 
-  it('rejects extra fields on a result (strict)', () => {
-    expect(
-      tickerSearchResponseSchema.safeParse({
-        ...searchResponse,
-        results: [{ ...searchResult, marketCap: 1_000_000 }],
-      }).success,
-    ).toBe(false)
+  it('strips fields the API adds, on a result and at the top level', () => {
+    const parsed = tickerSearchResponseSchema.parse({
+      ...searchResponse,
+      results: [{ ...searchResult, marketCap: 1_000_000 }],
+      generatedAt: 'now',
+    })
+    expect(parsed).toEqual(searchResponse)
   })
 
-  it('rejects an unknown source provider', () => {
-    expect(
-      tickerSearchResponseSchema.safeParse({
-        ...searchResponse,
-        source: { asOf: null, provider: 'iex' },
-      }).success,
-    ).toBe(false)
-  })
-
-  it('rejects extra top-level fields (strict)', () => {
-    expect(tickerSearchResponseSchema.safeParse({ ...searchResponse, generatedAt: 'now' }).success).toBe(false)
+  it('accepts a different market-data provider (not rendered)', () => {
+    expect(tickerSearchResponseSchema.parse({ ...searchResponse, source: { asOf: null, provider: 'iex' } }).source.provider).toBe('iex')
+    expect(tickerSearchResponseSchema.safeParse({ ...searchResponse, source: { asOf: null, provider: '' } }).success).toBe(false)
   })
 })
 
@@ -147,12 +139,13 @@ describe('markets quote contract', () => {
     },
   )
 
-  it('rejects an unknown market state', () => {
-    expect(quoteResponseSchema.safeParse({ ...quote, marketState: 'suspended' }).success).toBe(false)
+  it('reads a market state this build does not know as unknown', () => {
+    expect(quoteResponseSchema.parse({ ...quote, marketState: 'suspended' }).marketState).toBe('unknown')
+    expect(quoteResponseSchema.safeParse({ ...quote, marketState: 3 }).success).toBe(false)
   })
 
-  it('rejects extra fields (strict)', () => {
-    expect(quoteResponseSchema.safeParse({ ...quote, high52Week: 240 }).success).toBe(false)
+  it('strips fields the API adds', () => {
+    expect(quoteResponseSchema.parse({ ...quote, high52Week: 240 })).toEqual(quote)
   })
 
   it('rejects a missing symbol', () => {
@@ -178,8 +171,8 @@ describe('markets watchlist contract', () => {
     expect(watchlistResponseSchema.safeParse({ symbols: [''] }).success).toBe(false)
   })
 
-  it('rejects extra top-level fields (strict)', () => {
-    expect(watchlistResponseSchema.safeParse({ symbols: [], generatedAt: 'now' }).success).toBe(false)
+  it('strips fields the API adds', () => {
+    expect(watchlistResponseSchema.parse({ symbols: [], generatedAt: 'now' })).toEqual({ symbols: [] })
   })
 
   it('pins the exact add endpoint, uppercasing and encoding the symbol path segment', () => {
@@ -306,17 +299,12 @@ describe('markets screener contract', () => {
     expect(screenerResponseSchema.parse({ ...screenerResponse, results: [] }).results).toEqual([])
   })
 
-  it('rejects extra fields on a result (strict)', () => {
-    expect(
-      screenerResponseSchema.safeParse({
-        ...screenerResponse,
-        results: [{ ...screenerEntry, exchange: 'NASDAQ' }],
-      }).success,
-    ).toBe(false)
-  })
-
-  it('rejects extra top-level fields (strict)', () => {
-    expect(screenerResponseSchema.safeParse({ ...screenerResponse, total: 100 }).success).toBe(false)
+  it('strips fields the API adds, on a result and at the top level', () => {
+    expect(screenerResponseSchema.parse({
+      ...screenerResponse,
+      results: [{ ...screenerEntry, exchange: 'NASDAQ' }],
+      total: 100,
+    })).toEqual(screenerResponse)
   })
 
   it('rejects a missing hasMore, page, or pageSize', () => {
@@ -369,9 +357,8 @@ describe('company information', () => {
     expect(companyInformationResponseSchema.parse({ companyInformation: null })).toEqual({ companyInformation: null })
   })
 
-  it('rejects extra fields (strict)', () => {
-    expect(companyInformationResponseSchema.safeParse({ companyInformation: companyInfo, extra: true }).success).toBe(false)
-    expect(companyInformationResponseSchema.safeParse({ companyInformation: { ...companyInfo, extra: true } }).success).toBe(false)
+  it('strips fields the API adds', () => {
+    expect(companyInformationResponseSchema.parse({ companyInformation: { ...companyInfo, extra: true }, extra: true })).toEqual({ companyInformation: companyInfo })
   })
 })
 
@@ -458,8 +445,8 @@ describe('ticker fundamentals contract', () => {
     expect(fundamentalsResponseSchema.safeParse({ ...fundamentals, nextEarningsDate: '2026/09/15' }).success).toBe(false)
   })
 
-  it('rejects extra top-level fields (strict)', () => {
-    expect(fundamentalsResponseSchema.safeParse({ ...fundamentals, high52Week: 240 }).success).toBe(false)
+  it('strips fields the API adds', () => {
+    expect(fundamentalsResponseSchema.parse({ ...fundamentals, high52Week: 240 })).toEqual(fundamentals)
   })
 
   it('rejects a missing symbol', () => {
@@ -496,17 +483,12 @@ describe('ticker financials contract', () => {
     expect(financialsResponseSchema.parse({ ...financials, financials: [] }).financials).toEqual([])
   })
 
-  it('rejects extra fields on an entry (strict)', () => {
-    expect(
-      financialsResponseSchema.safeParse({
-        ...financials,
-        financials: [{ ...financials.financials[0], ebitda: 1 }],
-      }).success,
-    ).toBe(false)
-  })
-
-  it('rejects extra top-level fields (strict)', () => {
-    expect(financialsResponseSchema.safeParse({ ...financials, generatedAt: 'now' }).success).toBe(false)
+  it('strips fields the API adds, on an entry and at the top level', () => {
+    expect(financialsResponseSchema.parse({
+      ...financials,
+      financials: [{ ...financials.financials[0], ebitda: 1 }],
+      generatedAt: 'now',
+    })).toEqual(financials)
   })
 })
 
@@ -545,16 +527,11 @@ describe('ticker earnings contract', () => {
     expect(earningsResponseSchema.parse({ ...earnings, earnings: [] }).earnings).toEqual([])
   })
 
-  it('rejects extra fields on an entry (strict)', () => {
-    expect(
-      earningsResponseSchema.safeParse({
-        ...earnings,
-        earnings: [{ ...earnings.earnings[0], surprisePercent: 2.5 }],
-      }).success,
-    ).toBe(false)
-  })
-
-  it('rejects extra top-level fields (strict)', () => {
-    expect(earningsResponseSchema.safeParse({ ...earnings, generatedAt: 'now' }).success).toBe(false)
+  it('strips fields the API adds, on an entry and at the top level', () => {
+    expect(earningsResponseSchema.parse({
+      ...earnings,
+      earnings: [{ ...earnings.earnings[0], surprisePercent: 2.5 }],
+      generatedAt: 'now',
+    })).toEqual(earnings)
   })
 })

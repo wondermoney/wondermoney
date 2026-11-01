@@ -5,7 +5,7 @@ import { PortfolioImportSession } from '@entity/PortfolioImportSession';
 
 describe('portfolio import session persistence mapping', () => {
   it('maps s3 fields to snake_case columns', () => {
-    const meta = MetadataStorage.getMetadataFromDecorator(PortfolioImportSession) as { properties: Record<string, { fieldName?: string }> };
+    const meta = Object.values(MetadataStorage.getMetadata()).find((candidate) => candidate.class === PortfolioImportSession) as { properties: Record<string, { fieldName?: string }> };
     const s3BucketProp = meta.properties['s3Bucket'] as { fieldName?: string };
     const s3KeyProp = meta.properties['s3Key'] as { fieldName?: string };
 

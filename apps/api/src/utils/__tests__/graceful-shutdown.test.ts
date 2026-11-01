@@ -39,10 +39,9 @@ describe('setupGracefulShutdown', () => {
   });
 
   it('still runs afterClose when close() times out', async () => {
-    // This is the F-06 regression. Both budgets used to be 30s, so a full pg-boss drain
-    // rejected the outer race, `closeDatabase()` — which lived inside the raced promise's
-    // `finally` — was abandoned, and the process exited 1 with its Postgres connections
-    // left to the server to clean up.
+    // With equal budgets, a full pg-boss drain would reject the outer race, `closeDatabase()`
+    // inside the raced promise's `finally` would be abandoned, and the process would exit 1
+    // with its Postgres connections left to the server to clean up.
     const afterClose = vi.fn().mockResolvedValue(undefined);
     const { exit, shutdown } = harness({ afterClose, close: never, timeoutMs: 20 });
 

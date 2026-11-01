@@ -3,7 +3,7 @@ export const ACCOUNT_AUTO_SYNC_CRON = '0 */4 * * *';
 export const ACCOUNT_AUTO_SYNC_REQUISITION_QUEUE = 'account.auto-sync.requisition';
 export const ACCOUNT_AUTO_SYNC_REQUISITION_OPERATION_TYPE = 'account.auto-sync.requisition';
 // retryLimit + retryBackoff give us automatic retries with exponential backoff
-// for transient failures (GoCardless 429s, network blips). retryDelay is the
+// for transient failures (provider 429s, network blips). retryDelay is the
 // base delay in seconds; pg-boss applies an exponential curve when retryBackoff is true.
 const ACCOUNT_AUTO_SYNC_MAX_RETRIES = 3;
 const ACCOUNT_AUTO_SYNC_RETRY_OPTIONS = {
@@ -15,24 +15,22 @@ const ACCOUNT_AUTO_SYNC_RETRY_OPTIONS = {
   retryDelay: 60,
   retryLimit: ACCOUNT_AUTO_SYNC_MAX_RETRIES,
 } as const;
-export const ACCOUNT_AUTO_SYNC_QUEUE_OPTIONS = {
+const ACCOUNT_AUTO_SYNC_QUEUE_OPTIONS = {
   policy: 'exclusive',
   ...ACCOUNT_AUTO_SYNC_RETRY_OPTIONS,
 } as const;
 
 /**
- * Phase 1e: widened to a discriminated union, mirroring `AccountInitialSyncJobPayload`'s exact
- * Phase 1d treatment in `jobs/account-initial-sync.queue.ts` (see that file's docblock for the
- * full rationale). The GoCardless variant intentionally carries no `provider` field at all — its
- * wire shape is byte-for-byte unchanged from before this phase — so `account-auto-sync.worker.ts`
- * treats "not `enable_banking`" as the GoCardless default, and any already-in-flight (pre-deploy)
- * GoCardless job still deserializes and dispatches exactly as before.
+ * A discriminated union on `provider`, like `AccountInitialSyncJobPayload` in
+ * `jobs/account-initial-sync.queue.ts`. The legacy-requisition variant carries no `provider` field
+ * at all; it stays in the type so `account-auto-sync.worker.ts` can recognise such a payload and
+ * reject it rather than coerce it.
  */
 export type AccountAutoSyncRequisitionJobPayload = AccountAutoSyncRequisitionJobPayloadEnableBanking | AccountAutoSyncRequisitionJobPayloadGoCardless;
 
 export interface AccountAutoSyncRequisitionJobPayloadEnableBanking {
   // Included (unlike the initial-sync payload) because this job's handler needs to resolve the
-  // owning appuser's *current* `EnableBankingCredential` before syncing (Phase 1e §3) — the
+  // owning appuser's *current* `EnableBankingCredential` before syncing — the
   // connection itself doesn't carry that identity in a way the worker can cheaply re-derive
   // without an extra DB round trip per job.
   appuserKey: number;

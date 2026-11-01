@@ -3,19 +3,18 @@ import "server-only";
 import * as Sentry from "@sentry/nextjs";
 import Axios, { type AxiosInstance } from "axios";
 import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
 
-import { buildLocalizedLoginPath } from "@/lib/auth/auth-error-redirect";
+import { redirectToLogin } from "@/lib/auth/login-redirect";
 import { requireServerAuth } from "@/lib/auth/server-auth";
 
-import { getApiUrl } from "./api";
 import { getApiErrorCode } from "./errors";
 import { attachRateLimitInfo } from "./rate-limit";
+import { getServerApiUrl } from "./server-api-url";
 
 /**
- * The API's typed errors serialise their reason into the response body, but the
- * SSR layer never read it — so a 403 arrived as a bare status code and got
- * misattributed to an auth race for a month (WEB-4Q / RAD-336). Returns
+ * The API's typed errors serialise their reason into the response body; read it
+ * so an SSR 403 carries its reason instead of a bare status code that is easy to
+ * misattribute to an auth race. Returns
  * undefined rather than guessing when the body isn't the expected shape.
  */
 function extractApiErrorMessage(error: unknown): string | undefined {
@@ -48,7 +47,7 @@ export async function getServerApi(locale: string): Promise<AxiosInstance> {
   // request via the forwarded cookie below, not a bearer token — better-auth
   // sessions are cookie-based, so there's no access token to attach here.
   await requireServerAuth(locale);
-  const apiUrl = getApiUrl();
+  const apiUrl = getServerApiUrl();
 
   const api = Axios.create({
     baseURL: apiUrl,
@@ -75,14 +74,13 @@ export async function getServerApi(locale: string): Promise<AxiosInstance> {
         // nothing to retry with — redirect to login (the browser client's
         // getSession() revalidation covers the interactive path).
         if (status === 401) {
-          redirect(buildLocalizedLoginPath(locale));
+          await redirectToLogin(locale);
         }
 
         // A 403 is NOT an auth problem, and must not redirect to login. The
         // session is valid (`requireServerAuth` already confirmed it); the
         // request is forbidden for another reason, e.g. a household-owner-only
-        // route. Redirecting to login once turned a 403 (WEB-4Q) into
-        // a lockout: middleware bounces a logged-in user off /auth/login back
+        // route. Redirecting to login turns a 403 into a lockout: middleware bounces a logged-in user off /auth/login back
         // to the page, which 403s and redirects again until the browser gives
         // up with ERR_TOO_MANY_REDIRECTS. Let it propagate instead.
         if (status === 403) {
@@ -101,8 +99,7 @@ export async function getServerApi(locale: string): Promise<AxiosInstance> {
               url: error.config?.url,
               method: error.config?.method,
               locale,
-              // The reason was the one thing never captured, which is why WEB-4Q
-              // sat misdiagnosed for a month.
+              // The reason, so a 403 can be diagnosed without guessing.
               apiMessage: extractApiErrorMessage(error),
             },
           });

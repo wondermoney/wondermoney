@@ -13,7 +13,7 @@ export interface UpdateAssistantConsentResponse {
   consent: AssistantConsent;
 }
 
-export async function updateAssistantConsent(
+async function updateAssistantConsent(
   input: UpdateAssistantConsentInput,
   apiClient: AxiosInstance = api,
 ): Promise<AssistantConsent> {

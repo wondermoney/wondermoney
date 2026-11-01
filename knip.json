@@ -1,0 +1,139 @@
+{
+  "$schema": "https://unpkg.com/knip@6/schema.json",
+  "ignoreExportsUsedInFile": {
+    "interface": true,
+    "type": true
+  },
+  "tags": [
+    "-lintignore"
+  ],
+  "workspaces": {
+    ".": {
+      "entry": [],
+      "project": [],
+      "ignoreBinaries": [
+        "cypress",
+        "expo"
+      ]
+    },
+    "apps/api": {
+      "entry": [
+        "src/mikro-orm.config.ts",
+        "src/database/scripts/*.ts",
+        "src/database/seeders/**/*.ts",
+        "src/database/migrations/**/*.ts",
+        "scripts/*.{ts,mjs}",
+        "src/__tests__/__helpers__/generate-entity-metadata.ts"
+      ],
+      "project": [
+        "src/**/*.ts",
+        "scripts/**/*.{ts,mjs}"
+      ],
+      "ignore": [
+        "src/database/entity/**",
+        "src/database/filters/soft-delete-filter.ts",
+        "src/test/setup.ts"
+      ],
+      "ignoreDependencies": [
+        "pino-pretty",
+        "prettier",
+        "@types/express-serve-static-core",
+        "vite"
+      ],
+      "ignoreBinaries": [
+        "infisical"
+      ]
+    },
+    "apps/web": {
+      "entry": [
+        "scripts/*.{ts,mjs}",
+        "i18n.ts",
+        "sentry.*.config.ts",
+        "cypress/**/*.{ts,js}",
+        "**/*.test.{ts,tsx}"
+      ],
+      "project": [
+        "**/*.{ts,tsx,js,mjs,css}"
+      ],
+      "ignore": [],
+      "ignoreDependencies": [
+        "server-only",
+        "vite",
+        "csv-parse"
+      ],
+      "ignoreBinaries": [
+        "infisical",
+        "cross-env"
+      ]
+    },
+    "apps/mobile": {
+      "entry": [
+        "src/app/**/*.{ts,tsx}",
+        "scripts/*.js",
+        "**/*.test.{ts,tsx}"
+      ],
+      "project": [
+        "**/*.{ts,tsx,js}"
+      ],
+      "ignore": [],
+      "ignoreDependencies": [
+        "@expo/ui",
+        "expo-glass-effect",
+        "@emnapi/core",
+        "@emnapi/runtime",
+        "@emnapi/wasi-threads"
+      ],
+      "ignoreUnresolved": [
+        "babel-jest"
+      ]
+    },
+    "apps/docs": {
+      "entry": [
+        "scripts/*.{ts,mjs}",
+        "app/**/page.mdx"
+      ],
+      "project": [
+        "**/*.{ts,tsx,js,mjs,mdx,css}"
+      ],
+      "ignore": [],
+      "ignoreDependencies": [
+        "tsx",
+        "js-yaml"
+      ]
+    },
+    "packages/shared": {
+      "entry": [
+        "index.ts"
+      ],
+      "project": [
+        "**/*.ts"
+      ],
+      "ignore": []
+    },
+    "packages/react-email": {
+      "entry": [
+        "src/index.ts",
+        "emails/**/*.tsx",
+        "scripts/*.ts"
+      ],
+      "project": [
+        "**/*.{ts,tsx}"
+      ],
+      "ignore": [],
+      "ignoreDependencies": [
+        "next"
+      ]
+    }
+  },
+  "ignoreIssues": {
+    "apps/web/components/ui/**": [
+      "exports",
+      "types",
+      "duplicates"
+    ],
+    "apps/api/src/__tests__/**": [
+      "exports",
+      "types"
+    ]
+  }
+}

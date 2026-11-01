@@ -170,12 +170,12 @@ function safeStringify(value: unknown): string | undefined {
  * length-capped, so it can ride along on a Sentry event.
  *
  * Without it an Axios rejection reaches Sentry as `AxiosError: Request failed
- * with status code 409` and nothing else — which is how API-W6 accumulated 573
- * identical, undiagnosable events. The reason the call failed is in
+ * with status code 409` and nothing else, so every such event looks identical and
+ * is undiagnosable. The reason the call failed is in
  * `response.data`, and interpolating the error into a string throws it away.
  *
  * The body goes through `redactSensitiveData` (blanks `iban` / `account*` /
- * `email` / `token` at any depth) because GoCardless error payloads can echo
+ * `email` / `token` at any depth) because provider error payloads can echo
  * back the account details of the request that failed.
  *
  * Returns `undefined` when there is nothing useful to attach, so callers can

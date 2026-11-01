@@ -10,6 +10,11 @@ import {
 } from "@/lib/auth/auth-error-redirect";
 import { clearBetterAuthCookies } from "@/lib/auth/clear-client-auth";
 import { authClient } from "@/lib/auth/client";
+import {
+  getQueryRetryDelayMs,
+  shouldRetryQuery,
+} from "@/lib/query/retry-policy";
+import { preferNewerServerData } from "@/lib/query/server-seed";
 import { SENTRY_CLIENT_ENABLED } from "@/lib/utils/sentry-enabled";
 
 let consecutive401Count = 0;
@@ -69,6 +74,11 @@ function makeQueryClient() {
   const queryCache = new QueryCache({
     onError(error) {
       console.log("[QueryCache] onError triggered", error);
+
+      // A 429 says nothing about the session, so it must not count towards
+      // the consecutive-401 forced logout, and it is not an app error.
+      if (getRateLimitInfo(error) !== null) return;
+
       if (error instanceof AxiosError) {
         console.log(
           "[QueryCache] AxiosError detected, status:",
@@ -90,6 +100,8 @@ function makeQueryClient() {
     },
     onSuccess() {
       consecutive401Count = 0;
+      // Something got through, so the shared rate-limit window is over.
+      rateLimitCoordinator.noteRecovered();
     },
   });
 
@@ -97,17 +109,16 @@ function makeQueryClient() {
     defaultOptions: {
       queries: {
         staleTime: 60 * 1000,
-        retry: (failureCount, error) => {
-          if (error instanceof AxiosError && error.response?.status === 401) {
-            return false;
-          }
-          return failureCount < 2;
-        },
+        retry: shouldRetryQuery,
+        retryDelay: (failureCount, error) =>
+          getQueryRetryDelayMs(failureCount, error),
         refetchOnWindowFocus: false,
       },
     },
     queryCache,
   });
+  // Server-rendered `initialData` replaces an older cached entry on mount.
+  preferNewerServerData(queryClient);
 
   return queryClient;
 }

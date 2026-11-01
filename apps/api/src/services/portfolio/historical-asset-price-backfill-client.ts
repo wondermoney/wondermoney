@@ -29,15 +29,6 @@ interface HistoricalAssetPriceBackfillTriggerOptions {
 /**
  * Triggers the historical price backfill over pg-boss.
  *
- * There used to be `lambda` and `http` runners here, selected by
- * `HISTORICAL_ASSET_PRICE_BACKFILL_RUNNER`, which POSTed the request to
- * `HISTORICAL_ASSET_PRICE_BACKFILL_URL` instead of enqueuing it. Both are gone, because the
- * host that variable pointed at does not exist: `wm-asset-prices-historical-{production,staging}
- * .wonder.money` resolve on no nameserver — checked against Cloudflare and Google, with
- * `api.wonder.money` as a control. Neither environment selected those runners either
- * (prod-worker's value was empty, staging's was `pgboss`, and both mean pg-boss), so the
- * branches were unreachable *and* pointed nowhere.
- *
  * The worker that drains this queue is `jobs/historical-asset-price-backfill.worker.ts` and is
  * unaffected.
  */

@@ -1,6 +1,5 @@
 "use client";
 
-import { type ColumnDef, createColumnHelper } from "@tanstack/react-table";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import React, { useMemo } from "react";
@@ -9,10 +8,12 @@ import { Amount } from "@/components/ui/Amount";
 import { Progress } from "@/components/ui/progress";
 import { Table } from "@/components/ui/Table";
 import CellNumeric from "@/components/ui/Table/Cell/CellNumeric";
+import { type ColumnDef, createColumnHelper } from "@/components/ui/Table/features";
 import type { PortfolioBreakdownItem } from "@/lib/api/portfolio/usePortfolioDashboard";
 import { cn } from "@/lib/utils";
 import { getDeltaClassName } from "@/lib/utils/formatCurrency";
 import { useFormatCurrency } from "@/lib/utils/useFormatCurrency";
+import { useFormatPercentage } from "@/lib/utils/useFormatPercentage";
 
 interface PortfolioBreakdownProps {
   portfolios: PortfolioBreakdownItem[];
@@ -25,6 +26,7 @@ const PortfolioBreakdown: React.FC<PortfolioBreakdownProps> = ({
   portfolios,
 }) => {
   const t = useTranslations();
+  const formatPercentage = useFormatPercentage();
   const formatCurrency = useFormatCurrency();
   const router = useRouter();
 
@@ -57,7 +59,7 @@ const PortfolioBreakdown: React.FC<PortfolioBreakdownProps> = ({
           <div className="flex items-center gap-2">
             <Progress value={info.getValue()} className="w-[80px]" />
             <span className="text-foreground font-mono text-sm font-medium">
-              {info.getValue().toFixed(1)}%
+              {formatPercentage(info.getValue() / 100, { minimumFractionDigits: 1, maximumFractionDigits: 1 })}
             </span>
           </div>
         ),
@@ -70,14 +72,17 @@ const PortfolioBreakdown: React.FC<PortfolioBreakdownProps> = ({
             <CellNumeric
               className={cn("text-right font-medium", getFinancialColor(value))}
             >
-              {value > 0 ? "+" : ""}
-              {value.toFixed(1)}%
+              {formatPercentage(value / 100, {
+                minimumFractionDigits: 1,
+                maximumFractionDigits: 1,
+                signDisplay: "exceptZero",
+              })}
             </CellNumeric>
           );
         },
       }),
     ],
-    [columnHelper, t],
+    [columnHelper, formatPercentage, t],
   );
 
   const handleRowClick = (row: any) => {

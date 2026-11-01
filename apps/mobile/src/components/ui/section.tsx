@@ -45,12 +45,6 @@ export function Section({
   )
 }
 
-/** A hairline rule. Depth in this system is border-first. */
-export function Divider({ style }: { style?: StyleProp<ViewStyle> }) {
-  const palette = usePalette()
-  return <View accessible={false} style={[{ height: StyleSheet.hairlineWidth * 2, backgroundColor: palette.border }, style]} />
-}
-
 /**
  * The empty state: a realistic, data-forward preview of what will be here,
  * plus the one action that fills it.

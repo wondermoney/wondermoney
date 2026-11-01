@@ -33,9 +33,10 @@ describe('household read contract', () => {
     expect(householdMemberSchema.parse(member)).toEqual(member)
   })
 
-  it('rejects an unknown role or extra fields (.strict())', () => {
-    expect(householdMemberSchema.safeParse({ ...owner, role: 'admin' }).success).toBe(false)
-    expect(householdMemberSchema.safeParse({ ...owner, extra: true }).success).toBe(false)
+  it('reads a role this build does not know as unknown (never the owner) and strips added fields', () => {
+    expect(householdMemberSchema.parse({ ...owner, role: 'admin' }).role).toBe('unknown')
+    expect(householdMemberSchema.parse({ ...owner, extra: true })).toEqual(owner)
+    expect(householdMemberSchema.safeParse({ ...owner, role: undefined }).success).toBe(false)
   })
 
   it('allows firstName to be omitted or null', () => {
@@ -53,7 +54,7 @@ describe('household read contract', () => {
     expect(householdResponseSchema.parse({ members: [owner, member], pendingInvite: null }).pendingInvite).toBeNull()
   })
 
-  it('rejects an invite missing a required field (.strict())', () => {
+  it('rejects an invite missing a required field', () => {
     expect(pendingHouseholdInviteSchema.safeParse({ email: 'a@b.co', expiresAt: '2026-01-08T00:00:00.000Z' }).success).toBe(false)
   })
 })

@@ -4,8 +4,8 @@ export interface EnableBankingInstitutionRef {
 }
 
 /**
- * Enable Banking identifies an institution by `{name, country}`, not an opaque id
- * (unlike GoCardless). The frontend bank picker still needs a single stable string to
+ * Enable Banking identifies an institution by `{name, country}`, not an opaque id.
+ * The frontend bank picker still needs a single stable string to
  * carry from `getBankList` to `startBankConnection`, so this synthesizes one rather
  * than exposing raw `name`/`country` as separate request fields.
  *
@@ -34,13 +34,13 @@ export function decodeEnableBankingInstitutionId(id: string): EnableBankingInsti
 }
 
 /**
- * A distinct, human-legible id for `AccountFinancialInstitution.id` (Phase 1d), separate from
+ * A distinct, human-legible id for `AccountFinancialInstitution.id`, separate from
  * `encodeEnableBankingInstitutionId`'s base64url bank-picker id above (which round-trips through
  * the frontend and is opaque by design). This one only needs to be **stable** and **never collide
- * with a legacy GoCardless opaque institution id** — GoCardless ids look like
+ * with a legacy-provider opaque institution id** — those ids look like
  * `SANDBOXFINANCE_SFIN0000` or `REVOLUT_REVOGB21` (bank code + BIC-ish suffix, no colons), so a
  * `enable_banking:{country}:{slug}` prefix can't collide with one in practice. The
- * `(provider, id)` composite unique constraint (Phase 1a migration) is the actual backstop; this
+ * `(provider, id)` composite unique constraint is the actual backstop; this
  * is just defense in depth plus a readable id for debugging/logs.
  */
 export function buildEnableBankingInstitutionRecordId({ country, name }: EnableBankingInstitutionRef): string {

@@ -22,7 +22,7 @@ const mocked = vi.hoisted(() => ({
     s3Key: 'portfolio-import-sessions/1/456/token.csv',
     status: 'waiting_for_upload',
     summaryJson: undefined as Record<string, unknown> | undefined,
-  } as MockSession,
+  },
   transactional: vi.fn((callback: (em: { flush: typeof mocked.flush; persist: typeof mocked.persist; }) => unknown) => Promise.resolve(callback({ flush: mocked.flush, persist: mocked.persist }))),
 }));
 

@@ -8,6 +8,7 @@ export type GoalEffectiveStatus =
   | 'completed'
   | 'archived'
   | 'progress-unavailable'
+  | 'unknown'
 
 export type GoalListItemViewModel = Readonly<{
   goalId: number

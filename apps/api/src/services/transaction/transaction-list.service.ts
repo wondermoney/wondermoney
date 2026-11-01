@@ -35,10 +35,10 @@ export interface TransactionRecurringSeriesDto {
 /**
  * One page of the transaction list — the single implementation behind both
  * `GET /v1/account/transaction` and `GET /v1/account/:accountId/transaction`, so the two cannot
- * disagree about what a filter, a cursor or the total means (RAD-579).
+ * disagree about what a filter, a cursor or the total means.
  *
  * Rows are ordered `(transactionDate DESC, transactionKey DESC)` — the balance chain's order
- * (RAD-564) and exactly `transaction_tenant_date_key_idx`, so keyset paging costs the same at any
+ * and exactly `transaction_tenant_date_key_idx`, so keyset paging costs the same at any
  * depth. Each row carries its loan-repayment split and recurring-series membership.
  *
  * Offline accounts with no transaction on the first page get a synthetic "Initial balance" row
@@ -199,7 +199,7 @@ function summarizeLoanRepayments(links: LoanRepaymentLink[]) {
  * "Initial balance" rows for offline (non-bank-linked) accounts with no transaction on this page.
  *
  * They are not transactions, but the client renders and counts them, so the filters have to treat
- * them the way the browser-side predicates used to (RAD-579):
+ * them the way the client would:
  *
  *   type      — no `transactionTypeKey`, so any type filter excludes them.
  *   category  — no categories, so a named-category filter excludes them but `__uncategorized__`
@@ -222,7 +222,7 @@ async function loadRecurringSeries(transactions: Transaction[], tenantKey: numbe
       deletedAt: undefined,
       recurringSeriesKey: { deletedAt: undefined, tenantKey: { tenantKey } },
       transactionKey: { transactionKey: { $in: transactions.map((transaction) => transaction.transactionKey) } },
-    } as FilterQuery<RecurringOccurrence>,
+    },
     { populate: ['recurringSeriesKey'] },
   );
   for (const occurrence of occurrences) {
@@ -291,5 +291,5 @@ function decodeTransactionCursor(cursor: string | undefined): FilterQuery<Transa
   const at = new Date(time);
   return {
     $or: [{ transactionDate: { $lt: at } }, { transactionDate: at, transactionKey: { $lt: key } }],
-  } as FilterQuery<Transaction>;
+  };
 }

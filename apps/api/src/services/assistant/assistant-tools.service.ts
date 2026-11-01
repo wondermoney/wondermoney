@@ -11,6 +11,8 @@ import { BudgetTemplateCategory } from '@entity/BudgetTemplateCategory';
 import { Tenant } from '@entity/Tenant';
 import { Transaction } from '@entity/Transaction';
 import { resolveAiRoute } from '@service/ai/ai-provider';
+import { excludeExpired } from '@service/transaction/transaction-status';
+import { getEffectiveAppuserAmount } from '@utils/account-amounts';
 import { getRef } from '@utils/em-helpers';
 
 import { AssistantAuditService } from './assistant-audit.service';
@@ -28,9 +30,16 @@ type TransactionLike = Pick<Transaction, 'appuserSettlementAmount' | 'editedSett
 // eslint-disable-next-line @typescript-eslint/no-extraneous-class
 export class AssistantToolsService {
   static createTools(context: AssistantToolContext) {
+    /*
+     * Every amount below is a bare number, and a bare number reads as dollars to the model
+     *. So each result names its ISO 4217 currency: aggregates are summed from the
+     * user-currency columns (`appuserSettlementAmount`) and so are in the base currency, a
+     * budget is in its own currency, and per-account figures carry the account's.
+     */
+    const { currency } = context;
     const tools = {
-      compare_budget_periods: createTool('compare_budget_periods', 'Read-only comparison of budget periods.', context, z.object({ period: periodSchema.optional() }), () => Promise.resolve({ data: { comparison: [] as { period: string }[] }, dataUsed: { granularity: 'summary', period: 'current', source: 'stub' } })),
-      get_account_balance_summary: createTool('get_account_balance_summary', 'Read-only, privacy-minimizing summary of account balances.', context, z.object({ period: periodSchema.optional() }), () => Promise.resolve({ data: { accounts: [] as { balance: number; name: string }[] }, dataUsed: { granularity: 'summary', period: 'current', source: 'stub' } })),
+      compare_budget_periods: createTool('compare_budget_periods', 'Read-only comparison of budget periods.', context, z.object({ period: periodSchema.optional() }), () => Promise.resolve({ data: { comparison: [] as { period: string }[], currency }, dataUsed: { granularity: 'summary', period: 'current', source: 'stub' } })),
+      get_account_balance_summary: createTool('get_account_balance_summary', 'Read-only, privacy-minimizing summary of account balances.', context, z.object({ period: periodSchema.optional() }), () => Promise.resolve({ data: { accounts: [] as { balance: number; currency: string; name: string }[], currency }, dataUsed: { granularity: 'summary', period: 'current', source: 'stub' } })),
       get_budget_status: createTool('get_budget_status', 'Read-only, privacy-minimizing budget status summary.', context, z.object({ period: periodSchema.default('current_month') }), async ({ period }: { period: PeriodInput }) => {
         const resolved = AssistantPeriodService.resolve(period);
         const tenantMembership = await DI.em.findOne(AppuserTenant, {
@@ -40,11 +49,11 @@ export class AssistantToolsService {
           tenantKey: tenantRef(context.tenantKey),
         });
         if (!tenantMembership) {
-          return { data: { budgeted: 0, remaining: 0, spent: 0, status: 'no_tenant_access' }, dataUsed: { granularity: 'budget_status', period: resolved.key, recordCount: 0, source: 'database' } };
+          return { data: { budgeted: 0, currency, remaining: 0, spent: 0, status: 'no_tenant_access' }, dataUsed: { granularity: 'budget_status', period: resolved.key, recordCount: 0, source: 'database' } };
         }
-        const budget = await DI.em.findOne(Budget, { deletedAt: undefined });
+        const budget = await DI.em.findOne(Budget, { deletedAt: undefined }, { populate: ['currencyKey'] });
         if (!budget) {
-          return { data: { budgeted: 0, remaining: 0, spent: 0, status: 'no_budget' }, dataUsed: { granularity: 'budget_status', period: resolved.key, recordCount: 0, source: 'database' } };
+          return { data: { budgeted: 0, currency, remaining: 0, spent: 0, status: 'no_budget' }, dataUsed: { granularity: 'budget_status', period: resolved.key, recordCount: 0, source: 'database' } };
         }
         const budgetRows = await DI.em.find(BudgetTemplateCategory, {
           $or: getPeriodMonths(resolved),
@@ -58,13 +67,13 @@ export class AssistantToolsService {
             appuserKey: appuserRef(context.appuserKey),
             categoryKey: { $in: budgetCategories, deletedAt: undefined },
             deletedAt: undefined,
-            transactionKey: {
+            transactionKey: excludeExpired({
               accountKey: { closed: false, deletedAt: undefined },
               appuserKey: appuserRef(context.appuserKey),
               deletedAt: undefined,
               tenantKey: tenantRef(context.tenantKey),
               transactionDate: { $gte: resolved.start, $lte: resolved.end },
-            },
+            }),
           }, { populate: ['transactionKey', 'transactionKey.transactionTypeKey'] })
           : [];
         const spent = categoryLinks.reduce((sum, link) => {
@@ -74,7 +83,7 @@ export class AssistantToolsService {
           return amount < 0 ? sum + Math.abs(amount) : sum;
         }, 0);
         const remaining = budgeted - spent;
-        return { data: { budgeted, remaining, spent, status: budgetRows.length ? 'active' : 'empty' }, dataUsed: { granularity: 'budget_status', period: resolved.key, recordCount: budgetRows.length, source: 'database' } };
+        return { data: { budgeted, currency: budget.currencyKey.code, remaining, spent, status: budgetRows.length ? 'active' : 'empty' }, dataUsed: { granularity: 'budget_status', period: resolved.key, recordCount: budgetRows.length, source: 'database' } };
       }),
       get_cashflow_summary: createTool('get_cashflow_summary', 'Read-only, privacy-minimizing cashflow summary.', context, z.object({ period: periodSchema.default('current_month') }), async ({ period }: { period: PeriodInput }) => {
         const resolved = AssistantPeriodService.resolve(period);
@@ -89,27 +98,27 @@ export class AssistantToolsService {
           },
           { inflow: 0, net: 0, outflow: 0 },
         );
-        return { data: totals, dataUsed: { granularity: resolved.granularity, period: resolved.key, recordCount: transactions.length, source: 'database' } };
+        return { data: { currency, ...totals }, dataUsed: { granularity: resolved.granularity, period: resolved.key, recordCount: transactions.length, source: 'database' } };
       }),
-      get_goal_progress_summary: createTool('get_goal_progress_summary', 'Read-only goal progress summary.', context, z.object({ period: periodSchema.optional() }), () => Promise.resolve({ data: { goals: [] as { progress: number }[] }, dataUsed: { granularity: 'summary', period: 'current', source: 'stub' } })),
-      get_large_transactions_summary: createTool('get_large_transactions_summary', 'Read-only summary of large transactions.', context, z.object({ period: periodSchema.optional() }), () => Promise.resolve({ data: { transactions: [] as { amount: number }[] }, dataUsed: { granularity: 'summary', period: 'current', source: 'stub' } })),
-      get_net_worth_summary: createTool('get_net_worth_summary', 'Read-only, privacy-minimizing summary of current net worth.', context, z.object({ period: periodSchema.optional() }), () => Promise.resolve({ data: { netWorth: null }, dataUsed: { granularity: 'summary', period: 'current', source: 'stub' } })),
-      get_portfolio_income_summary: createTool('get_portfolio_income_summary', 'Read-only portfolio income summary.', context, z.object({ period: periodSchema.optional() }), () => Promise.resolve({ data: { income: null }, dataUsed: { granularity: 'summary', period: 'current', source: 'stub' } })),
-      get_portfolio_summary: createTool('get_portfolio_summary', 'Read-only portfolio summary.', context, z.object({ period: periodSchema.optional() }), () => Promise.resolve({ data: { portfolioValue: null }, dataUsed: { granularity: 'summary', period: 'current', source: 'stub' } })),
-      get_recurring_payments_summary: createTool('get_recurring_payments_summary', 'Read-only recurring payments summary.', context, z.object({ period: periodSchema.optional() }), () => Promise.resolve({ data: { recurringPayments: [] as { amount: number }[] }, dataUsed: { granularity: 'summary', period: 'current', source: 'stub' } })),
+      get_goal_progress_summary: createTool('get_goal_progress_summary', 'Read-only goal progress summary.', context, z.object({ period: periodSchema.optional() }), () => Promise.resolve({ data: { currency, goals: [] as { progress: number }[] }, dataUsed: { granularity: 'summary', period: 'current', source: 'stub' } })),
+      get_large_transactions_summary: createTool('get_large_transactions_summary', 'Read-only summary of large transactions.', context, z.object({ period: periodSchema.optional() }), () => Promise.resolve({ data: { currency, transactions: [] as { amount: number }[] }, dataUsed: { granularity: 'summary', period: 'current', source: 'stub' } })),
+      get_net_worth_summary: createTool('get_net_worth_summary', 'Read-only, privacy-minimizing summary of current net worth.', context, z.object({ period: periodSchema.optional() }), () => Promise.resolve({ data: { currency, netWorth: null }, dataUsed: { granularity: 'summary', period: 'current', source: 'stub' } })),
+      get_portfolio_income_summary: createTool('get_portfolio_income_summary', 'Read-only portfolio income summary.', context, z.object({ period: periodSchema.optional() }), () => Promise.resolve({ data: { currency, income: null }, dataUsed: { granularity: 'summary', period: 'current', source: 'stub' } })),
+      get_portfolio_summary: createTool('get_portfolio_summary', 'Read-only portfolio summary.', context, z.object({ period: periodSchema.optional() }), () => Promise.resolve({ data: { currency, portfolioValue: null }, dataUsed: { granularity: 'summary', period: 'current', source: 'stub' } })),
+      get_recurring_payments_summary: createTool('get_recurring_payments_summary', 'Read-only recurring payments summary.', context, z.object({ period: periodSchema.optional() }), () => Promise.resolve({ data: { currency, recurringPayments: [] as { amount: number }[] }, dataUsed: { granularity: 'summary', period: 'current', source: 'stub' } })),
       get_spending_by_category: createTool('get_spending_by_category', 'Read-only, privacy-minimizing spending breakdown by category.', context, z.object({ period: periodSchema.default('current_month') }), async ({ period }: { period: PeriodInput }) => {
         const resolved = AssistantPeriodService.resolve(period);
         const categoryLinks = await DI.em.find(AppuserTransactionCategory, {
           appuserKey: appuserRef(context.appuserKey),
           categoryKey: { deletedAt: undefined },
           deletedAt: undefined,
-          transactionKey: {
+          transactionKey: excludeExpired({
             accountKey: { closed: false, deletedAt: undefined },
             appuserKey: appuserRef(context.appuserKey),
             deletedAt: undefined,
             tenantKey: tenantRef(context.tenantKey),
             transactionDate: { $gte: resolved.start, $lte: resolved.end },
-          },
+          }),
         }, { populate: ['categoryKey', 'transactionKey', 'transactionKey.transactionTypeKey'] });
         const totalsByCategory = new Map<string, number>();
         for (const link of categoryLinks) {
@@ -123,9 +132,9 @@ export class AssistantToolsService {
         const categories = Array.from(totalsByCategory.entries())
           .map(([category, amount]) => ({ amount, category }))
           .sort((a, b) => b.amount - a.amount);
-        return { data: { categories }, dataUsed: { granularity: 'category_totals', period: resolved.key, recordCount: categoryLinks.length, source: 'database' } };
+        return { data: { categories, currency }, dataUsed: { granularity: 'category_totals', period: resolved.key, recordCount: categoryLinks.length, source: 'database' } };
       }),
-      get_spending_trend: createTool('get_spending_trend', 'Read-only spending trend summary.', context, z.object({ period: periodSchema.optional() }), () => Promise.resolve({ data: { trend: [] as number[] }, dataUsed: { granularity: 'summary', period: 'current', source: 'stub' } })),
+      get_spending_trend: createTool('get_spending_trend', 'Read-only spending trend summary.', context, z.object({ period: periodSchema.optional() }), () => Promise.resolve({ data: { currency, trend: [] as number[] }, dataUsed: { granularity: 'summary', period: 'current', source: 'stub' } })),
     };
 
     return Object.fromEntries(
@@ -165,7 +174,7 @@ function assistantAuditModel(): { model: string | undefined; provider: string } 
   return { model: route.kind === 'azure-openai' ? route.model ?? undefined : undefined, provider: 'azure' };
 }
 
-function createTool<TInputSchema extends z.ZodTypeAny, TData>(toolName: ToolName, description: string, context: AssistantToolContext, inputSchema: TInputSchema, execute: (input: z.infer<TInputSchema>) => Promise<AssistantToolResult<TData>>) {
+function createTool<TInput, TData>(toolName: ToolName, description: string, context: AssistantToolContext, inputSchema: z.ZodType<TInput>, execute: (input: TInput) => Promise<AssistantToolResult<TData>>) {
   return tool({
     description,
     execute: async (input) => {
@@ -195,16 +204,17 @@ function createTool<TInputSchema extends z.ZodTypeAny, TData>(toolName: ToolName
 }
 
 async function findScopedTransactions(context: AssistantToolContext, period: ReturnType<typeof AssistantPeriodService.resolve>) {
-  return DI.em.find(Transaction, {
+  // EXPIRED rows never moved money; PENDING still counts, as it always has here.
+  return DI.em.find(Transaction, excludeExpired({
     accountKey: { closed: false, deletedAt: undefined },
     deletedAt: undefined,
     tenantKey: tenantRef(context.tenantKey),
     transactionDate: { $gte: period.start, $lte: period.end },
-  }, { populate: ['transactionTypeKey'] });
+  }), { populate: ['transactionTypeKey'] });
 }
 
 function getEffectiveAmount(transaction: TransactionLike): number {
-  return toNumber(transaction.editedSettlementAmount ?? transaction.appuserSettlementAmount);
+  return toNumber(getEffectiveAppuserAmount(transaction));
 }
 
 function getPeriodMonths(period: ReturnType<typeof AssistantPeriodService.resolve>) {

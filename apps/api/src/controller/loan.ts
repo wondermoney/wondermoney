@@ -11,6 +11,7 @@ import { LoanAdjustment } from '@entity/LoanAdjustment';
 import { LoanRepaymentLink } from '@entity/LoanRepaymentLink';
 import { Tenant } from '@entity/Tenant';
 import { Transaction } from '@entity/Transaction';
+import { convertAtLatestRate } from '@service/currency/exchange-rate';
 import {
   calculateLoanProgress,
   calculateNextPaymentDate,
@@ -21,7 +22,9 @@ import {
 } from '@service/loan/loan-calculation.service';
 import { scoreLoanRepaymentCandidate } from '@service/loan/loan-repayment-matching.service';
 import { LoanAllocationSource, LoanPaymentFrequency, LoanRateType, LoanStatus } from '@service/loan/loan-types';
+import { excludeExpired } from '@service/transaction/transaction-status';
 import { BadRequestError, ConflictError } from '@utils/errors';
+import { big, roundDisplay } from '@utils/money';
 import {
   createLoanSchema,
   deleteLoanRepaymentSchema,
@@ -143,33 +146,33 @@ export async function getLoan(req: Request, res: Response) {
 export async function getLoanOverview(req: Request, res: Response) {
   const { appuser, tenant } = await getLoanRequestContext(req);
   const loans = await DI.em.find(Loan, { deletedAt: undefined, ownerAppuserKey: appuser, tenantKey: tenant }, { populate: ['currencyKey'] });
+  await DI.em.populate(appuser, ['currencyKey']);
+  const userCurrency = appuser.currencyKey;
   const enriched = await Promise.all(loans.map(enrichLoan));
-  const overviewLoans = enriched as { includeInNetWorth: boolean; outstandingPrincipal?: number; regularPaymentAmount?: number }[];
-  const totalOutstandingDebt = overviewLoans.reduce((sum, loan) => sum + (loan.outstandingPrincipal ?? 0), 0);
-  const monthlyRepaymentTotal = overviewLoans.reduce((sum, loan) => sum + (loan.regularPaymentAmount ?? 0), 0);
-  const netWorthImpact = -overviewLoans
-    .filter((loan) => loan.includeInNetWorth)
-    .reduce((sum, loan) => sum + (loan.outstandingPrincipal ?? 0), 0);
+  // Totals are in the user's currency. A loan in another currency is converted at the latest
+  // rate on or before today; one with no such rate is left out of every total and counted.
+  const today = new Date();
+  const converted = await Promise.all(
+    loans.map(async (loan, index) => {
+      const { outstandingPrincipal } = enriched[index] as { outstandingPrincipal?: number };
+      const convert = (value: number) => convertAtLatestRate(DI.em, value, loan.currencyKey, userCurrency, today);
+      const [principal, payment] = await Promise.all([convert(outstandingPrincipal ?? 0), convert(loan.regularPaymentAmount ?? 0)]);
+      return principal == null || payment == null ? null : { includeInNetWorth: loan.includeInNetWorth, outstandingPrincipal: principal, regularPaymentAmount: payment };
+    }),
+  );
+  const totals = converted.filter((loan) => loan !== null);
+  const sum = (rows: typeof totals, field: 'outstandingPrincipal' | 'regularPaymentAmount') => roundDisplay(rows.reduce((total, row) => total.plus(big(row[field])), big(0)));
   return res.json({
     overview: {
+      currency: userCurrency.code,
       interestFeesThisMonth: 0,
-      monthlyRepaymentTotal,
-      netWorthImpact,
+      monthlyRepaymentTotal: sum(totals, 'regularPaymentAmount'),
+      netWorthImpact: -sum(totals.filter((loan) => loan.includeInNetWorth), 'outstandingPrincipal'),
       repaymentsNeedingReviewCount: 0,
-      totalOutstandingDebt,
+      totalOutstandingDebt: sum(totals, 'outstandingPrincipal'),
+      unconvertedLoanCount: converted.length - totals.length,
     },
   });
-}
-
-export async function getLoanRequestContext(req: Request): Promise<{ appuser: Appuser; tenant: Tenant }> {
-  if (!req.user) {
-    throw new BadRequestError('User not found');
-  }
-  const appuserTenant = await DI.em.getRepository(AppuserTenant).getAppuserTenantByAppuser(req.user);
-  if (!appuserTenant) {
-    throw new BadRequestError("User doesn't have AppuserTenant");
-  }
-  return { appuser: req.user, tenant: appuserTenant.tenantKey };
 }
 
 export async function getLoanSummary(req: Request, res: Response) {
@@ -220,14 +223,15 @@ export async function listLoanRepaymentCandidates(req: Request, res: Response) {
   const { appuser, tenant } = await getLoanRequestContext(req);
   const loan = await loadOwnedLoan(loanId, appuser, tenant);
   if (!loan) return res.sendStatus(404);
-  const candidates = await DI.em.find(Transaction, {
+  // A rejected or cancelled payment (EXPIRED) repaid nothing, so it is no candidate.
+  const candidates = await DI.em.find(Transaction, excludeExpired({
     deletedAt: undefined,
     settlementAmount: { $lt: 0 },
     tenantKey: tenant,
     ...(query.accountKey ? { accountKey: query.accountKey } : {}),
     ...(query.amount ? { settlementAmount: -Math.abs(query.amount) } : {}),
     ...(query.endDate || query.startDate ? { transactionDate: { ...(query.startDate ? { $gte: query.startDate } : {}), ...(query.endDate ? { $lte: query.endDate } : {}) } } : {}),
-  } as FilterQuery<Transaction>, { orderBy: { transactionDate: QueryOrder.DESC }, populate: ['transactionMerchantKey'] });
+  } as FilterQuery<Transaction>), { orderBy: { transactionDate: QueryOrder.DESC }, populate: ['transactionMerchantKey'] });
 
   const repayments = await DI.em.find(LoanRepaymentLink, { deletedAt: undefined, loanKey: loan });
   const outstandingPrincipal = calculateOutstandingPrincipalWithAdjustments({
@@ -322,7 +326,7 @@ export async function updateLoanRepayment(req: Request, res: Response) {
   };
   const validation = validateRepaymentAllocation(mergedAllocation);
   if (!validation.valid) throw new BadRequestError(validation.reason);
-  assertAllocationWithinTransactionAmount(mergedAllocation.totalPaymentAmount, repayment.transactionKey as Transaction);
+  assertAllocationWithinTransactionAmount(mergedAllocation.totalPaymentAmount, repayment.transactionKey);
   const otherRepayments = await DI.em.find(LoanRepaymentLink, { deletedAt: undefined, loanKey: loan, loanRepaymentLinkKey: { $ne: repayment.loanRepaymentLinkKey } });
   const outstandingPrincipal = calculateOutstandingPrincipalWithAdjustments({
     adjustments: [],
@@ -333,7 +337,7 @@ export async function updateLoanRepayment(req: Request, res: Response) {
   DI.em.assign(repayment, body);
   repayment.linkedByAppuserKey = appuser;
   await DI.em.persist(repayment).flush();
-  return res.json({ repayment: serializeRepayment(repayment, repayment.transactionKey as Transaction) });
+  return res.json({ repayment: serializeRepayment(repayment, repayment.transactionKey) });
 }
 
 export function validateMergedLoanUpdate(
@@ -430,12 +434,24 @@ async function enrichLoan(loan: Loan) {
   });
 }
 
+async function getLoanRequestContext(req: Request): Promise<{ appuser: Appuser; tenant: Tenant }> {
+  if (!req.user) {
+    throw new BadRequestError('User not found');
+  }
+  const appuserTenant = await DI.em.getRepository(AppuserTenant).getAppuserTenantByAppuser(req.user);
+  if (!appuserTenant) {
+    throw new BadRequestError("User doesn't have AppuserTenant");
+  }
+  return { appuser: req.user, tenant: appuserTenant.tenantKey };
+}
+
 async function loadOwnedLoan(loanId: number, appuser: Appuser, tenant: Tenant) {
   return DI.em.findOne(Loan, { deletedAt: undefined, loanKey: loanId, ownerAppuserKey: appuser, tenantKey: tenant }, { populate: ['currencyKey'] });
 }
 
 async function loadOwnedOutflowTransaction(transactionKey: number, tenant: Tenant) {
-  return DI.em.findOne(Transaction, { deletedAt: undefined, settlementAmount: { $lt: 0 }, tenantKey: tenant, transactionKey }, { populate: ['transactionMerchantKey'] });
+  // An EXPIRED payment never happened, so it cannot be linked as a repayment.
+  return DI.em.findOne(Transaction, excludeExpired({ deletedAt: undefined, settlementAmount: { $lt: 0 }, tenantKey: tenant, transactionKey }), { populate: ['transactionMerchantKey'] });
 }
 
 function serializeRepayment(repayment: LoanRepaymentLink, transaction: Transaction) {

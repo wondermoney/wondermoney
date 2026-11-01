@@ -5,7 +5,7 @@ import api from "../api";
 export interface AccountEditRequest {
   accountKey: string | number;
   accountName: string;
-  // Only the account owner may set this (RAD-343 C2); omit it otherwise so the
+  // Only the account owner may set this; omit it otherwise so the
   // API's owner-guard isn't tripped when a member merely renames a shared account.
   isPrivate?: boolean;
 }

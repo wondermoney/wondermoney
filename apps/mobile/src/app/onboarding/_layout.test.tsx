@@ -28,12 +28,11 @@ describe('OnboardingLayout', () => {
     mockScreenNames.length = 0
   })
 
-  // RAD-193 regression: this was the only route group in the app without an
-  // explicit layout. Without one, Expo Router had no declared initial route
+  // Without an explicit layout, Expo Router has no declared initial route
   // for the implicit stack behind root-router.tsx's bare
-  // `Stack.Screen name="onboarding"` entry — reproduced in production as
-  // every sign-in landing on create-account (which sorts before index
-  // alphabetically) with no params, instead of the onboarding journey.
+  // `Stack.Screen name="onboarding"` entry, and every sign-in lands on
+  // create-account (which sorts before index alphabetically) with no params,
+  // instead of the onboarding journey.
   it('declares index before create-account so it is unambiguously the initial route', async () => {
     await render(<OnboardingLayout />)
     expect(mockScreenNames).toEqual(['index', 'create-account'])

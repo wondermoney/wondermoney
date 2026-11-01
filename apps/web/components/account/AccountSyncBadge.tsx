@@ -8,9 +8,10 @@ import type { SyncStatus } from "@/lib/api/account/useAccounts";
 import { cn } from "@/lib/utils";
 import { getDateFnsLocale } from "@/lib/utils/dateFnsLocale";
 
+import { clampSyncedAt } from "./sync-time";
 /**
- * Sync freshness signal for an open-banking account (RAD-346). Surfaces staleness so a missing
- * charge no longer "looks exactly like a quiet spending day": fresh is quiet, stale/very_stale nudge
+ * Sync freshness signal for an open-banking account. Surfaces staleness so a missing
+ * charge does not "look exactly like a quiet spending day": fresh is quiet, stale/very_stale nudge
  * with a relative time, and an open incident shows a clear "Reconnect needed".
  */
 export default function AccountSyncBadge({
@@ -27,7 +28,9 @@ export default function AccountSyncBadge({
 
   // Fall back to the legacy refreshedAt-only display when no structured status is present.
   const staleness = syncStatus?.staleness ?? "fresh";
-  const lastSyncedAt = syncStatus?.lastSyncedAt ?? refreshedAt;
+  const lastSyncedAt = clampSyncedAt(
+    syncStatus?.lastSyncedAt ?? refreshedAt,
+  );
 
   if (staleness === "error") {
     return (

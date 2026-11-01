@@ -138,7 +138,7 @@ export class TenantFinancialAggregationService {
   }
 
   /**
-   * Monthly Money Story (RAD-164): income/spending vs. a 3-month trailing average,
+   * Monthly Money Story: income/spending vs. a 3-month trailing average,
    * category deltas ranked by absolute € delta, savings rate. Net worth and recurring
    * changes are NOT computed here — net worth needs the appuser-scoped NetWorthService
    * (fetched by the caller, see FinancialEmailUserWorkerService) and recurring changes
@@ -441,4 +441,3 @@ function uniqueFacts<T extends { budgetTemplateCategoryKey: number }>(facts: T[]
   return [...new Map(facts.map((fact) => [fact.budgetTemplateCategoryKey, fact])).values()];
 }
 
-export const tenantFinancialAggregationService = new TenantFinancialAggregationService();

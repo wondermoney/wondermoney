@@ -17,8 +17,7 @@ const ENABLE_BANKING_REQUEST_TIMEOUT_MS = 15_000;
 
 /**
  * Enable Banking identifies a bank by `{name, country}`, not an opaque id
- * (see `AccountFinancialInstitution`'s `provider`-discriminated key in the
- * Phase 1a schema). Response shape is intentionally loose beyond the fields
+ * (see `AccountFinancialInstitution`'s `provider`-discriminated key). Response shape is intentionally loose beyond the fields
  * this codebase actually reads today (`maximum_consent_validity` for the
  * real per-bank consent length) — see the API reference for the full shape.
  */
@@ -164,8 +163,7 @@ export function createEnableBankingClient({ applicationId, privateKeyPem }: Crea
 /**
  * Runs one Enable Banking HTTP call, mapping a non-2xx response (or a
  * transport-level failure) to this app's typed errors instead of letting a raw
- * `AxiosError` escape — mirrors the pattern in `controller/banking.ts`'s
- * GoCardless call sites and `eodhd.service.ts`'s `handleEodhdError`.
+ * `AxiosError` escape — mirrors `eodhd.service.ts`'s `handleEodhdError`.
  */
 async function request<T = unknown>(operation: string, call: () => Promise<{ data: T }>): Promise<{ data: T }> {
   try {

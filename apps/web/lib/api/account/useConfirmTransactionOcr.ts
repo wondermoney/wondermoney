@@ -8,7 +8,7 @@ type OcrConfirmationAmount = number | string;
 export interface ConfirmTransactionOcrRequest
   extends Omit<
     CreateTransactionRequest,
-    "categoryId" | "exchangeRate" | "originalAmount" | "settlementAmount"
+    "exchangeRate" | "originalAmount" | "settlementAmount"
   > {
   exchangeRate?: OcrConfirmationAmount;
   originalAmount?: OcrConfirmationAmount;
@@ -26,8 +26,14 @@ type ConfirmTransactionOcrPayload = Omit<
 const stringifyAmount = (value: OcrConfirmationAmount | undefined) =>
   value === undefined ? undefined : String(value);
 
+/**
+ * The body of PUT /v1/account/transaction/ocr/:id/confirm. Amounts go as
+ * strings (the API validates them as strings) and the category as the
+ * one-element `categoryIds` list the endpoint reads.
+ */
 export const buildConfirmTransactionOcrPayload = ({
   accountId,
+  categoryId,
   description,
   exchangeRate,
   notes,
@@ -41,6 +47,7 @@ export const buildConfirmTransactionOcrPayload = ({
   transactionTypeId,
 }: ConfirmTransactionOcrPayload) => ({
   accountId,
+  categoryIds: categoryId ? [categoryId] : undefined,
   description,
   exchangeRate: stringifyAmount(exchangeRate),
   notes,

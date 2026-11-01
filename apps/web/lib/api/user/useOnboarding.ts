@@ -13,7 +13,7 @@ export interface OnboardingResponse {
   onboarding: Onboarding[];
 }
 
-export async function getOnboarding(
+async function getOnboarding(
   userId: string,
   apiClient: AxiosInstance = api,
 ): Promise<OnboardingResponse> {

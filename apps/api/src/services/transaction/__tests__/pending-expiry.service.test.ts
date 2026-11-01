@@ -85,6 +85,21 @@ describe('logDryRunExpirations', () => {
     expect(auditSpy.mock.calls[0]?.[1]).toMatchObject({ eventType: TransactionAuditEventType.PENDING_EXPIRED, transactionKey: 5 });
   });
 
+  it('keeps an Enable Banking pending that is still in the feed under its enableBankingTransactionId', async () => {
+    vi.spyOn(TransactionAuditService, 'log').mockResolvedValue(null);
+    const stored = { appuserKey: { appuserKey: 9 }, enableBankingTransactionId: 'enable_banking:abc', tenantKey: { tenantKey: 3 }, transactionDate: daysAgo(20), transactionKey: 6 };
+    const em = { find: vi.fn().mockResolvedValue([stored]) };
+
+    const keys = await logDryRunExpirations(em as unknown as EntityManager, {
+      account: { accountKey: 5 } as unknown as Account,
+      now: NOW,
+      pendingStatus: {} as unknown as TransactionStatus,
+      seenIdentities: new Set(['enable_banking:abc']),
+    });
+
+    expect(keys).toEqual([]);
+  });
+
   it('never throws and returns [] when the pending lookup fails', async () => {
     const em = { find: vi.fn().mockRejectedValue(new Error('db down')) };
     await expect(

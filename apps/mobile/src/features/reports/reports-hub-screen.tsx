@@ -36,9 +36,8 @@ export type ReportsHubScreenProps = {
 
 /**
  * All six reports composed inline on one scrolling page, matching web's
- * `/reports` — mobile used to link each one out to its own full screen
- * (RAD audit), which made the two platforms feel like different apps for a
- * surface that's otherwise identical. One shared date-range/filter bar
+ * `/reports`, so the two platforms feel like the same app for a surface
+ * that's otherwise identical. One shared date-range/filter bar
  * controls every section, same as web's single `ReportFiltersBar`; each
  * section still tracks its own load/error/export state independently,
  * since each is backed by a different endpoint.

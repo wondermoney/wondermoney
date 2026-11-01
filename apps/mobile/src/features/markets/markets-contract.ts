@@ -1,18 +1,19 @@
 import { z } from 'zod'
 
-import { readEndpoint, writeEndpoint } from '@/lib/api/runtime-schema'
+import { readEndpoint, tolerantEnum, writeEndpoint } from '@/lib/api/runtime-schema'
 
 /**
- * RAD-238 (slice 1) — ticker search + quote. Both response schemas are
- * `.strict()` on the API side, so the mobile-side schemas mirror that:
- * any field outside the allowlist is a contract violation, and every
- * nullable value stays an explicit null rather than an inferred one.
+ * Ticker search + quote. Every nullable value stays an
+ * explicit null rather than an inferred one. Fields the API adds later are
+ * stripped, not rejected (see `tolerantEnum` in runtime-schema.ts), so a
+ * shipped build keeps working after an additive API change.
  */
 
-export const marketSourceSchema = z.object({
+const marketSourceSchema = z.object({
   asOf: z.iso.datetime().nullable(),
-  provider: z.literal('eodhd'),
-}).strict()
+  // Not rendered. A change of market-data provider must not break the markets screens.
+  provider: z.string().min(1),
+})
 
 export const tickerSearchResultSchema = z.object({
   currency: z.string().nullable(),
@@ -20,15 +21,14 @@ export const tickerSearchResultSchema = z.object({
   name: z.string().nullable(),
   symbol: z.string().trim().min(1).max(20),
   type: z.string().nullable(),
-}).strict()
+})
 
 export const tickerSearchResponseSchema = z.object({
   results: z.array(tickerSearchResultSchema),
   source: marketSourceSchema,
-}).strict()
+})
 
 export type TickerSearchResultDto = z.infer<typeof tickerSearchResultSchema>
-export type TickerSearchResponseDto = z.infer<typeof tickerSearchResponseSchema>
 
 export function createSearchTickersEndpoint(searchTerm: string) {
   return readEndpoint({
@@ -38,8 +38,7 @@ export function createSearchTickersEndpoint(searchTerm: string) {
   })
 }
 
-export const marketStateSchema = z
-  .enum(['closed', 'open', 'pre-market', 'after-hours', 'unknown'])
+const marketStateSchema = tolerantEnum(['closed', 'open', 'pre-market', 'after-hours', 'unknown'], 'unknown')
   .nullable()
 
 export const quoteResponseSchema = z.object({
@@ -53,9 +52,8 @@ export const quoteResponseSchema = z.object({
   symbol: z.string(),
   timestamp: z.iso.datetime().nullable(),
   volume: z.number().nullable(),
-}).strict()
+})
 
-export type MarketState = z.infer<typeof marketStateSchema>
 export type QuoteResponseDto = z.infer<typeof quoteResponseSchema>
 
 export function createQuoteEndpoint(symbol: string) {
@@ -71,7 +69,7 @@ export function createQuoteEndpoint(symbol: string) {
  * neither field, both requiring the Fundamentals tier the API doesn't have (see
  * getQuote in core/api's financial-markets controller). `/info` sources name/currency/country/
  * exchange from a different, unrestricted EODHD call (`eodhd.search()`), so those four fields are
- * real today; the rest (price, sector, description, etc.) stay null pending RAD-449.
+ * real today; the rest (price, sector, description, etc.) stay null.
  */
 export const companyInformationSchema = z.object({
   beta: z.number().nullable(),
@@ -89,14 +87,13 @@ export const companyInformationSchema = z.object({
   sector: z.string().nullable(),
   symbol: z.string().trim().min(1).max(20),
   website: z.string().nullable(),
-}).strict()
+})
 
 export const companyInformationResponseSchema = z.object({
   companyInformation: companyInformationSchema.nullable(),
-}).strict()
+})
 
 export type CompanyInformationDto = z.infer<typeof companyInformationSchema>
-export type CompanyInformationResponseDto = z.infer<typeof companyInformationResponseSchema>
 
 export function createCompanyInfoEndpoint(symbol: string) {
   return readEndpoint({
@@ -107,7 +104,7 @@ export function createCompanyInfoEndpoint(symbol: string) {
 }
 
 const isoDatePattern = /^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/
-export const isoDateOnlySchema = z.string().regex(isoDatePattern)
+const isoDateOnlySchema = z.string().regex(isoDatePattern)
 
 export const historicalPricePointSchema = z.object({
   adjClose: z.number().nullable(),
@@ -117,16 +114,15 @@ export const historicalPricePointSchema = z.object({
   low: z.number().nullable(),
   open: z.number().nullable(),
   volume: z.number().nullable(),
-}).strict()
+})
 
 export const historicalPriceResponseSchema = z.object({
   prices: z.array(historicalPricePointSchema),
   source: marketSourceSchema,
   symbol: z.string(),
-}).strict()
+})
 
 export type HistoricalPricePointDto = z.infer<typeof historicalPricePointSchema>
-export type HistoricalPriceResponseDto = z.infer<typeof historicalPriceResponseSchema>
 
 export const HISTORICAL_PRICE_PERIODS = ['1M', '3M', '1Y', 'YTD', 'ALL'] as const
 export type HistoricalPricePeriod = typeof HISTORICAL_PRICE_PERIODS[number]
@@ -161,9 +157,7 @@ export function createHistoricalPriceEndpoint(symbol: string, period: Historical
 }
 
 /**
- * RAD-243 (slice 2) — tenant-owned watchlist. `GET` has no `.strict()` schema
- * on the API side, but the mobile schema stays strict anyway, consistent with
- * the rest of this feature. The add/remove writes are `204 No Content`,
+ * Tenant-owned watchlist. The add/remove writes are `204 No Content`,
  * mirroring account-deletion-contract's `z.undefined()` / `successStatuses`
  * pattern. The API uppercases symbols on write, so the request path is
  * uppercased here too, keeping a lowercase-typed symbol comparable against
@@ -171,9 +165,7 @@ export function createHistoricalPriceEndpoint(symbol: string, period: Historical
  */
 export const watchlistResponseSchema = z.object({
   symbols: z.array(z.string().trim().min(1).max(20)),
-}).strict()
-
-export type WatchlistResponseDto = z.infer<typeof watchlistResponseSchema>
+})
 
 export function createWatchlistEndpoint() {
   return readEndpoint({
@@ -202,13 +194,13 @@ export function createRemoveFromWatchlistEndpoint(symbol: string) {
 }
 
 /**
- * RAD-511 — key-metrics TTM. Every field mirrors the API's own
+ * Key-metrics TTM. Every field mirrors the API's own
  * `fundamentalsResponseSchema` (financial-markets-dtos.ts) exactly, including
  * field order and the explicit-null convention: the provider (EODHD)
  * currently has no plan tier covering this endpoint, so it 404s for every
  * ticker today (see the API's `getFundamentals` controller), but the
- * contract and caching window are already real — same shape RAD-449 will
- * eventually backfill with live data.
+ * contract and caching window are already real — the same shape live data
+ * will fill.
  */
 export const fundamentalsResponseSchema = z.object({
   avgVolume: z.number().nullable(),
@@ -226,7 +218,7 @@ export const fundamentalsResponseSchema = z.object({
   roe: z.number().nullable(),
   source: marketSourceSchema,
   symbol: z.string().trim().min(1).max(20),
-}).strict()
+})
 
 export type FundamentalsResponseDto = z.infer<typeof fundamentalsResponseSchema>
 
@@ -238,23 +230,22 @@ export function createFundamentalsEndpoint(symbol: string) {
   })
 }
 
-/** RAD-512 — periodic income statement, same 404-until-RAD-449 caveat as fundamentals above. */
+/** Periodic income statement, same 404 caveat as fundamentals above. */
 export const financialsEntrySchema = z.object({
   grossProfit: z.number().nullable(),
   netIncome: z.number().nullable(),
   operatingIncome: z.number().nullable(),
   period: z.string().nullable(),
   revenue: z.number().nullable(),
-}).strict()
+})
 
 export const financialsResponseSchema = z.object({
   financials: z.array(financialsEntrySchema),
   source: marketSourceSchema,
   symbol: z.string().trim().min(1).max(20),
-}).strict()
+})
 
 export type FinancialsEntryDto = z.infer<typeof financialsEntrySchema>
-export type FinancialsResponseDto = z.infer<typeof financialsResponseSchema>
 
 export function createFinancialsEndpoint(symbol: string) {
   return readEndpoint({
@@ -264,23 +255,22 @@ export function createFinancialsEndpoint(symbol: string) {
   })
 }
 
-/** RAD-513 — past + scheduled earnings, same 404-until-RAD-449 caveat as fundamentals above. */
+/** Past + scheduled earnings, same 404 caveat as fundamentals above. */
 export const earningsEntrySchema = z.object({
   date: isoDateOnlySchema.nullable(),
   eps: z.number().nullable(),
   epsEstimated: z.number().nullable(),
   revenue: z.number().nullable(),
   revenueEstimated: z.number().nullable(),
-}).strict()
+})
 
 export const earningsResponseSchema = z.object({
   earnings: z.array(earningsEntrySchema),
   source: marketSourceSchema,
   symbol: z.string().trim().min(1).max(20),
-}).strict()
+})
 
 export type EarningsEntryDto = z.infer<typeof earningsEntrySchema>
-export type EarningsResponseDto = z.infer<typeof earningsResponseSchema>
 
 export function createEarningsEndpoint(symbol: string) {
   return readEndpoint({
@@ -291,7 +281,7 @@ export function createEarningsEndpoint(symbol: string) {
 }
 
 /**
- * RAD-241 (slice 3) — paginated screener. Deliberately scoped to numeric
+ * Paginated screener. Deliberately scoped to numeric
  * min/max filters (price, market cap) plus the isEtf/isActivelyTrading
  * toggles, per this ticket's own acceptance criteria ("numeric min/max, ETF
  * and active-trading filters ship first"). Sector/country/exchange are
@@ -314,7 +304,7 @@ export const screenerEntrySchema = z.object({
   sector: z.string().nullable(),
   symbol: z.string().trim().min(1).max(20),
   volume: z.number().nullable(),
-}).strict()
+})
 
 export const screenerResponseSchema = z.object({
   hasMore: z.boolean(),
@@ -322,7 +312,7 @@ export const screenerResponseSchema = z.object({
   pageSize: z.number().int().positive(),
   results: z.array(screenerEntrySchema),
   source: marketSourceSchema,
-}).strict()
+})
 
 export type ScreenerEntryDto = z.infer<typeof screenerEntrySchema>
 export type ScreenerResponseDto = z.infer<typeof screenerResponseSchema>

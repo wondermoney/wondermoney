@@ -47,13 +47,10 @@ export default function ReportsPage() {
           <div className="flex flex-col gap-4">
             <ReportFiltersBar />
 
-            {/* Flagship Sankey — full width, prime real estate */}
-            <section aria-labelledby="reports-sankey-title">
-              <span id="reports-sankey-title" className="sr-only">
-                {t("reports.sankey.title")}
-              </span>
-              <SankeyReport />
-            </section>
+            {/* Flagship Sankey — full width. Each report card is its own
+                labelled region with a visible h2 (ReportCard), so no
+                sr-only label wraps it here. */}
+            <SankeyReport />
 
             {/* Cash flow + spending breakdown side by side */}
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -62,12 +59,7 @@ export default function ReportsPage() {
             </div>
 
             {/* Net worth over time — full width for the trend */}
-            <section aria-labelledby="reports-net-worth-title">
-              <span id="reports-net-worth-title" className="sr-only">
-                {t("reports.netWorthHistory.title")}
-              </span>
-              <NetWorthHistoryReport />
-            </section>
+            <NetWorthHistoryReport />
 
             {/* Budget vs actual + portfolio performance side by side */}
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">

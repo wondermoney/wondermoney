@@ -1,10 +1,10 @@
 import type { Request } from 'express';
-import { type AnyZodObject, z, ZodError } from 'zod';
+import { z, ZodError } from 'zod';
 import { fromZodError } from 'zod-validation-error';
 
 import { BadRequestError, InternalServerError } from '@utils/errors';
 
-export async function zParse<T extends AnyZodObject>(schema: T, req: Request): Promise<z.infer<T>> {
+export async function zParse<T extends z.ZodType>(schema: T, req: Request): Promise<z.output<T>> {
   try {
     return await schema.parseAsync(req);
   } catch (error) {

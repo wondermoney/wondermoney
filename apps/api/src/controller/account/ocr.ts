@@ -72,8 +72,8 @@ export async function confirmTransactionOCRImportAndCreateTransaction(req: Reque
     const transaction = await transactionCreationService.createTransaction({
       accountId,
       appuserKey: user.appuserKey,
-      // RAD-412: honour the user's chosen category (the transaction model is one-category-per-transaction, so the
-      // first id wins). Previously `categoryIds` was validated but silently dropped, leaving OCR imports uncategorized.
+      // Honour the user's chosen category (the transaction model is one-category-per-transaction, so the
+      // first id wins).
       categoryId: categoryIds?.[0],
       description,
       exchangeRate,

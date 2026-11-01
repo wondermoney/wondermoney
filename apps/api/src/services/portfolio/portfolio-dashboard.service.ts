@@ -1,7 +1,9 @@
 import { QueryOrder } from '@mikro-orm/core';
 import { format } from 'date-fns';
+import { sql } from 'kysely';
 
 import { DI } from '@app/app';
+import { anyOf, sqlQuery, toDate } from '@app/database/sql';
 import type { Appuser } from '@entity/Appuser';
 import { Portfolio } from '@entity/Portfolio';
 import { PortfolioSnapshot } from '@entity/PortfolioSnapshot';
@@ -34,11 +36,21 @@ interface AllocationResponse {
   unclassifiedHoldings: UnclassifiedHolding[];
 }
 
+/**
+ * Opt-in response additions. Released mobile builds parse the dashboard summary with a strict
+ * schema that rejects unknown keys, so a new summary field is only sent to clients that ask.
+ */
+export interface DashboardOptions {
+  includeFeeConversion?: boolean;
+}
+
 type BenchmarkStatus = 'missing_benchmark_data' | 'ready' | 'waiting_for_portfolio_history';
 
 interface DashboardSummary {
   assetCount: number;
   currency: string;
+  /** Only when the client asked for it (`include=feeConversion`) and at least one fee was left out. */
+  feeConversionIncompleteAssetKeys?: number[];
   lastUpdated: string;
   periodLabel: string;
   periodReturn: null | number;
@@ -118,6 +130,10 @@ interface UnclassifiedHolding {
 }
 
 const MIN_TOP_MOVERS_HOLDINGS = 2;
+
+function feeConversionSummary(assetKeys: number[] | undefined, options: DashboardOptions): Pick<DashboardSummary, 'feeConversionIncompleteAssetKeys'> {
+  return options.includeFeeConversion && assetKeys?.length ? { feeConversionIncompleteAssetKeys: assetKeys } : {};
+}
 const MIN_PERFORMANCE_DATA_POINTS = 2;
 const DEFAULT_BENCHMARK_SYMBOL = 'SPY';
 
@@ -174,7 +190,7 @@ export class PortfolioDashboardService {
   /**
    * Get aggregate dashboard data for all portfolios
    */
-  async getAggregateDashboard(appuser: Appuser, period: Period = 'YTD', tenantKey?: number): Promise<AggregateDashboardResponse> {
+  async getAggregateDashboard(appuser: Appuser, period: Period = 'YTD', tenantKey?: number, options: DashboardOptions = {}): Promise<AggregateDashboardResponse> {
     // Get all portfolios
     const portfolios = await DI.em.find(
       Portfolio,
@@ -189,7 +205,7 @@ export class PortfolioDashboardService {
     // Calculate totals
     const validHoldings = filterValidHoldings(holdings);
     const pricedHoldings = validHoldings.filter((h): h is typeof h & { currentValue: number } => h.currentValue != null);
-    const { totalCostBasisOfSold, totalRealizedGains } = await portfolioHoldingsService.getRealizedGains(appuser.appuserKey, undefined, tenantKey);
+    const { feeConversionIncompleteAssetKeys, totalCostBasisOfSold, totalRealizedGains } = await portfolioHoldingsService.getRealizedGains(appuser.appuserKey, undefined, tenantKey);
     const totalValue = pricedHoldings.reduce((sum, h) => sum + h.currentValue, 0);
     const costBasis = calculateCostBasis(validHoldings);
     const unrealizedGains = validHoldings.reduce((sum, h) => sum + (h.unrealizedGains || 0), 0);
@@ -231,6 +247,7 @@ export class PortfolioDashboardService {
       summary: {
         assetCount: uniqueAssets.size,
         currency: appuser.currencyKey.code || 'EUR',
+        ...feeConversionSummary(feeConversionIncompleteAssetKeys, options),
         lastUpdated: new Date().toISOString(),
         periodLabel: period,
         periodReturn,
@@ -252,6 +269,7 @@ export class PortfolioDashboardService {
     portfolioId: number,
     period: Period = 'YTD',
     tenantKey?: number,
+    options: DashboardOptions = {},
   ): Promise<IndividualDashboardResponse> {
     // Get portfolio
     const portfolio = await DI.em.findOne(
@@ -270,7 +288,7 @@ export class PortfolioDashboardService {
 
     // Calculate totals
     const validHoldings = filterValidHoldings(holdings);
-    const { totalCostBasisOfSold, totalRealizedGains } = await portfolioHoldingsService.getRealizedGains(appuser.appuserKey, portfolioId, tenantKey);
+    const { feeConversionIncompleteAssetKeys, totalCostBasisOfSold, totalRealizedGains } = await portfolioHoldingsService.getRealizedGains(appuser.appuserKey, portfolioId, tenantKey);
     const totalValue = validHoldings.reduce((sum, h) => sum + (h.currentValue || 0), 0);
     const costBasis = calculateCostBasis(validHoldings);
     const unrealizedGains = validHoldings.reduce((sum, h) => sum + (h.unrealizedGains || 0), 0);
@@ -319,6 +337,7 @@ export class PortfolioDashboardService {
       summary: {
         assetCount: validHoldings.length,
         currency: appuser.currencyKey.code || 'EUR',
+        ...feeConversionSummary(feeConversionIncompleteAssetKeys, options),
         lastUpdated: new Date().toISOString(),
         periodLabel: period,
         periodReturn,
@@ -354,9 +373,9 @@ export class PortfolioDashboardService {
   /**
    * Start-of-period price for MANY assets in one query.
    *
-   * RAD-audit: this was one `ORDER BY date DESC LIMIT 1` per holding, issued via
-   * `Promise.all` — so ~300 holdings meant ~300 concurrent queries against a connection
-   * pool whose default max is 10. `DISTINCT ON` asks for exactly the same rows once, and is
+   * One `ORDER BY date DESC LIMIT 1` per holding, issued via `Promise.all`, would mean ~300
+   * concurrent queries for ~300 holdings against a connection pool whose default max is 10.
+   * `DISTINCT ON` asks for exactly the same rows once, and is
    * served by `financial_asset_price_asset_date_desc_idx`.
    */
   private async getHoldingStartPrices(financialAssetKeys: number[], periodStartDate: Date): Promise<Map<number, number>> {
@@ -364,13 +383,15 @@ export class PortfolioDashboardService {
     const uniqueKeys = [...new Set(financialAssetKeys)];
     if (uniqueKeys.length === 0) return prices;
 
-    const knex = DI.em.getKnex();
-    const rows = await knex
-      .select(knex.raw('distinct on (financial_asset_key) financial_asset_key, price'))
-      .from('financial_asset_price')
-      .whereIn('financial_asset_key', uniqueKeys)
-      .andWhere('date', '<=', periodStartDate)
-      .orderByRaw('financial_asset_key, date desc');
+    const rows = await sqlQuery(DI.em)
+      .selectFrom('financial_asset_price')
+      .distinctOn('financial_asset_key')
+      .select(['financial_asset_key', 'price'])
+      .where(anyOf('financial_asset_key', uniqueKeys))
+      .where('date', '<=', periodStartDate)
+      .orderBy('financial_asset_key')
+      .orderBy('date', 'desc')
+      .execute();
 
     for (const row of rows as { financial_asset_key: number; price: null | number | string }[]) {
       if (row.price == null) continue;
@@ -487,7 +508,7 @@ export class PortfolioDashboardService {
         },
       };
     } else {
-      // Aggregate - need to sum across all portfolios for each date (complex query - use knex)
+      // Aggregate - need to sum across all portfolios for each date (complex query - use raw SQL)
       const portfolios = await DI.em.find(Portfolio, {
         deletedAt: undefined,
         portfolioOwnerAppuserKey: appuser,
@@ -515,27 +536,24 @@ export class PortfolioDashboardService {
         };
       }
 
-      const knex = DI.em.getKnex();
-      const snapshotQuery = knex('portfolio_snapshot as ps')
-        .select(knex.raw('ps.snapshot_date, SUM(COALESCE(ps.appuser_currency_total_value, ps.total_value)) as total_value'))
+      const snapshotQuery = sqlQuery(DI.em)
+        .selectFrom('portfolio_snapshot as ps')
         .innerJoin('portfolio as p', 'ps.portfolio_key', 'p.portfolio_key')
-        .whereIn('ps.portfolio_key', portfolioIds)
+        .select(['ps.snapshot_date', sql<string>`SUM(COALESCE(ps.appuser_currency_total_value, ps.total_value))`.as('total_value')])
+        .where(anyOf('ps.portfolio_key', portfolioIds))
         .where('ps.snapshot_date', '>=', periodStartDate)
-        .whereNull('p.deleted_at');
-
-      // Raw SQL bypasses MikroORM's tenant filter; preserve the explicit household scope.
-      if (tenantKey != null) {
-        snapshotQuery.where('p.tenant_key', tenantKey);
-      }
+        .where('p.deleted_at', 'is', null)
+        // Raw SQL bypasses MikroORM's tenant filter; preserve the explicit household scope.
+        .$if(tenantKey != null, (query) => query.where('p.tenant_key', '=', tenantKey));
 
       const [aggregatedSnapshotsRaw, benchmarkPrices] = await Promise.all([
-        snapshotQuery.groupBy('ps.snapshot_date').orderBy('ps.snapshot_date', 'asc'),
+        snapshotQuery.groupBy('ps.snapshot_date').orderBy('ps.snapshot_date', 'asc').execute(),
         benchmarkPromise,
       ]);
-      const aggregatedSnapshots = aggregatedSnapshotsRaw as unknown as { snapshot_date: string; total_value: string }[];
+      const aggregatedSnapshots = aggregatedSnapshotsRaw as { snapshot_date: Date | string; total_value: string }[];
 
       const dataPoints: PerformanceDataPoint[] = aggregatedSnapshots.map((s) => ({
-        date: format(new Date(s.snapshot_date), 'yyyy-MM-dd'),
+        date: format(toDate(s.snapshot_date), 'yyyy-MM-dd'),
         value: s.total_value ? Number(s.total_value) : 0,
       }));
       const portfolioHistoryStatus = getPortfolioHistoryStatus(dataPoints);
@@ -602,12 +620,13 @@ export class PortfolioDashboardService {
     let bySector: AllocationItem[] = [];
 
     if (assetKeys.length > 0) {
-      const knex = DI.em.getKnex();
-      const sectorRows = await knex('financial_asset as fa')
-        .select('fa.financial_asset_key', knex.raw("COALESCE(fas.name, 'Other') as sector_name"))
+      const sectorRows = await sqlQuery(DI.em)
+        .selectFrom('financial_asset as fa')
         .leftJoin('financial_asset_company as fac', 'fa.financial_asset_company_key', 'fac.financial_asset_company_key')
         .leftJoin('financial_asset_sector as fas', 'fac.financial_asset_sector_key', 'fas.financial_asset_sector_key')
-        .whereIn('fa.financial_asset_key', assetKeys) as { financial_asset_key: number; sector_name: string }[];
+        .select(['fa.financial_asset_key', sql<string>`COALESCE(fas.name, 'Other')`.as('sector_name')])
+        .where(anyOf('fa.financial_asset_key', assetKeys))
+        .execute() as { financial_asset_key: number; sector_name: string }[];
 
       const sectorMap = new Map<number, string>();
       for (const row of sectorRows) {
@@ -635,16 +654,17 @@ export class PortfolioDashboardService {
     const unclassifiedHoldings: UnclassifiedHolding[] = [];
 
     if (assetKeys.length > 0) {
-      const knex = DI.em.getKnex();
-      const assetClassRows = (await knex('financial_asset as fa')
-        .select(
-          'fa.financial_asset_key',
-          'fa.name as asset_name',
-          knex.raw("COALESCE(ac.name, 'Unclassified') as asset_class_name"),
-        )
+      const assetClassRows = (await sqlQuery(DI.em)
+        .selectFrom('financial_asset as fa')
         .leftJoin('financial_asset_type as fat', 'fa.financial_asset_type_key', 'fat.financial_asset_type_key')
         .leftJoin('asset_class as ac', 'fat.asset_class_key', 'ac.asset_class_key')
-        .whereIn('fa.financial_asset_key', assetKeys)) as { asset_class_name: string; asset_name: string; financial_asset_key: number }[];
+        .select([
+          'fa.financial_asset_key',
+          'fa.name as asset_name',
+          sql<string>`COALESCE(ac.name, 'Unclassified')`.as('asset_class_name'),
+        ])
+        .where(anyOf('fa.financial_asset_key', assetKeys))
+        .execute()) as { asset_class_name: string; asset_name: string; financial_asset_key: number }[];
 
       const assetClassMap = new Map<number, string>();
       for (const row of assetClassRows) {

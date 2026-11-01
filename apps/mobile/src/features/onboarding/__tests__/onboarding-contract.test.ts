@@ -30,10 +30,20 @@ describe('onboarding contract', () => {
     expect(parsed.onboarding.steps.map((s) => s.key)).toEqual(['net_worth_value', 'read_only_bank_access', 'privacy'])
   })
 
-  it('rejects extra fields on the state (strict) and unknown step keys beyond the min length', () => {
-    expect(
-      onboardingStateSchema.safeParse({ ...baseState, legacyStepIds: [1, 2, 3] }).success,
-    ).toBe(false)
+  it('strips fields the API adds and drops supported actions this build cannot route to', () => {
+    const parsed = onboardingStateSchema.parse({
+      ...baseState,
+      legacyStepIds: [1, 2, 3],
+      steps: [{ done: false, key: 'privacy', estimatedMinutes: 2 }],
+      supportedActions: ['connect_bank', 'import_csv', 'skip'],
+    })
+    expect(parsed).not.toHaveProperty('legacyStepIds')
+    expect(parsed.steps).toEqual([{ done: false, key: 'privacy' }])
+    expect(parsed.supportedActions).toEqual(['connect_bank', 'skip'])
+    expect(onboardingStateSchema.safeParse({ ...baseState, supportedActions: [1] }).success).toBe(false)
+  })
+
+  it('rejects an empty step key', () => {
     expect(onboardingStepSchema.safeParse({ done: false, key: '' }).success).toBe(false)
   })
 

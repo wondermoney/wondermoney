@@ -1,7 +1,7 @@
 /**
  * Rate-limit (HTTP 429) detection and `Retry-After` parsing.
  *
- * The API (RAD-547) answers a throttled request with:
+ * The API answers a throttled request with:
  *   - `Retry-After: <seconds>`
  *   - draft-7 `RateLimit` / `RateLimit-Policy` headers
  *   - body `{ code: "RATE_LIMITED", family, message, retryAfter }`
@@ -155,7 +155,7 @@ function asRecord(value: unknown): Record<string, unknown> | undefined {
  * body `retryAfter` → `Retry-After` seconds → `Retry-After` HTTP-date →
  * draft-7 `RateLimit: reset=` → `RateLimit-Reset` → default.
  */
-export function resolveRetryAfterSeconds(
+function resolveRetryAfterSeconds(
   response: ResponseLike | undefined,
   nowMs: number,
 ): { seconds: number; known: boolean } {

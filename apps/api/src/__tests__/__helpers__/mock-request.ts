@@ -23,7 +23,7 @@ export interface MockResponseOptions {
 import { vi } from 'vitest';
 
 export function mockNext(): NextFunction {
-  return vi.fn() as unknown as NextFunction;
+  return vi.fn();
 }
 
 export function mockReq(opts: MockRequestOptions = {}): Request {

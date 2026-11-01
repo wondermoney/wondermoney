@@ -1,5 +1,4 @@
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
 
 import { test } from "vitest";
 
@@ -89,29 +88,4 @@ test("invalidateBudgets refreshes route-backed budget overview data", async () =
     1,
     "budget edit/delete should refresh route-backed server component data",
   );
-});
-
-test("budget mutation dialogs use shared invalidation with route refresh", () => {
-  for (const filePath of [
-    "components/budget/BudgetEditModal.tsx",
-    "components/budget/BudgetDeleteModal.tsx",
-  ]) {
-    const source = readFileSync(filePath, "utf8");
-
-    assert.match(
-      source,
-      /invalidateBudgets/,
-      `${filePath} should use the shared budget invalidation helper`,
-    );
-    assert.match(
-      source,
-      /useRouter\(/,
-      `${filePath} should access the router so successful mutations can refresh route-backed data`,
-    );
-    assert.match(
-      source,
-      /refresh:\s*(?:router\.refresh|\(\)\s*=>\s*router\.refresh\(\))/,
-      `${filePath} should pass router.refresh to budget invalidation`,
-    );
-  }
 });

@@ -23,7 +23,7 @@ export interface HoldingAnalystResponse {
   recommendations: AnalystRecommendation[];
 }
 
-export async function getHoldingAnalyst(
+async function getHoldingAnalyst(
   symbol: string,
   apiClient: AxiosInstance = api,
 ): Promise<HoldingAnalystResponse> {

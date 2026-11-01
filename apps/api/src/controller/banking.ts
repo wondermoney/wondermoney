@@ -9,7 +9,6 @@ import {
   unlinkRequisitionRequestSchema,
 } from '@app/validators/banking';
 import { zParse } from '@app/validators/parser';
-import { BANK_SYNC_PROVIDER_DISABLED } from '@config/env';
 import { EnableBankingConnection } from '@entity/EnableBankingConnection';
 import { authedUser } from '@middleware/authed-context';
 import { BankSyncStatusService } from '@service/bank-sync/bank-sync-status.service';
@@ -17,15 +16,12 @@ import { createEnableBankingClient } from '@service/enable-banking/enable-bankin
 import { enableBankingCredentialService } from '@service/enable-banking/enable-banking-credential.service';
 import { ENABLE_BANKING_CALLBACK_URL } from '@utils/constants';
 import { decodeEnableBankingInstitutionId, encodeEnableBankingInstitutionId } from '@utils/enable-banking-institution-id';
-import { BadRequestError, InternalServerError, NotFoundError, ServiceUnavailableError } from '@utils/errors';
+import { BadRequestError, InternalServerError, NotFoundError } from '@utils/errors';
 
 import { DI } from '../app';
 
 export async function getBankList(req: Request, res: Response) {
   const user = authedUser(req);
-  if (BANK_SYNC_PROVIDER_DISABLED) {
-    throw new ServiceUnavailableError('Bank connections are paused while we move to a new model');
-  }
   const {
     query: { country },
   } = await zParse(bankListByCountryRequestSchema, req);
@@ -40,10 +36,10 @@ export async function getBankList(req: Request, res: Response) {
   const client = createEnableBankingClient(credential);
   // Any provider failure here is already one of this app's typed errors (see
   // `enable-banking-client.service.ts`'s `request()` helper) — propagate as-is
-  // rather than re-wrapping, per plan §3.
+  // rather than re-wrapping.
   const institutions = await client.listInstitutions({ country });
 
-  // Enable Banking has no opaque institution id (unlike GoCardless) — it identifies a
+  // Enable Banking has no opaque institution id — it identifies a
   // bank by `{name, country}`, so synthesize a stable one for the frontend to hand
   // back on `startBankConnection`. See @utils/enable-banking-institution-id.
   return res.json(
@@ -65,14 +61,12 @@ export async function getBankSyncStatus(req: Request, res: Response) {
 
 export async function startBankConnection(req: Request, res: Response) {
   const user = authedUser(req);
-  if (BANK_SYNC_PROVIDER_DISABLED) {
-    throw new ServiceUnavailableError('Bank connections are paused while we move to a new model');
-  }
   const {
     params: { bankId },
+    query: { returnTo },
   } = await zParse(startBankConnectionRequestSchema, req);
-  // Fail closed if the request is missing the resolved tenant context. RAD-244
-  // requires the new connection to dual-write the tenant that the user is
+  // Fail closed if the request is missing the resolved tenant context. The
+  // new connection must dual-write the tenant that the user is
   // operating in, so the controller must never reach the repository without one.
   if (!req.tenant || !Number.isInteger(req.tenant.tenantKey) || req.tenant.tenantKey <= 0) {
     throw new InternalServerError('Authenticated tenant is required to start a bank connection');
@@ -93,7 +87,7 @@ export async function startBankConnection(req: Request, res: Response) {
   const credential = enableBankingCredentialService.decryptCredentialEntity(credentialEntity);
   const client = createEnableBankingClient(credential);
 
-  // `maximum_consent_validity` varies per bank and is never hardcoded (plan §3) — look
+  // `maximum_consent_validity` varies per bank and is never hardcoded — look
   // it up fresh, server-side, rather than trusting a client-supplied value from the
   // earlier `getBankList` response.
   const institutions = await client.listInstitutions({ country: institutionRef.country });
@@ -107,8 +101,7 @@ export async function startBankConnection(req: Request, res: Response) {
   }
   const validUntil = new Date(Date.now() + maxConsentValiditySeconds * 1000).toISOString();
 
-  // The correlation value Enable Banking's callback echoes back — same "reference not
-  // id" problem `NordigenRequisition.internalReference` already solved.
+  // The correlation value Enable Banking's callback echoes back.
   const state = randomUUID();
 
   const authorization = await client.startAuthorization({
@@ -121,19 +114,18 @@ export async function startBankConnection(req: Request, res: Response) {
 
   await DI.em
     .getRepository(EnableBankingConnection)
-    .createConnection(user, req.tenant, credentialEntity, state, institutionRef.name, institutionRef.country, maxConsentValiditySeconds);
+    .createConnection(user, req.tenant, credentialEntity, state, institutionRef.name, institutionRef.country, maxConsentValiditySeconds, returnTo ?? null);
 
   return res.json({ redirectUrl: authorization.url });
 }
 
 /**
- * Unlink a bank connection. The route/param name (`requisitionId`) is unchanged from
- * the GoCardless-era route to keep the same URL contract, but it now resolves an
- * `EnableBankingConnection` by its `enableBankingConnectionKey`.
+ * Unlink a bank connection. The route/param name (`requisitionId`) is a legacy name
+ * kept for the URL contract; it resolves an `EnableBankingConnection` by its
+ * `enableBankingConnectionKey`.
  *
  * Soft-delete only — Enable Banking has no documented session/consent-revocation
- * endpoint (unlike GoCardless's `DELETE /requisitions/{id}`, plan §10 open risk #1),
- * so this stops WonderMoney's own polling/sync but may leave the bank-side consent
+ * endpoint, so this stops WonderMoney's own polling/sync but may leave the bank-side consent
  * live until its natural expiry.
  */
 export async function unlinkRequisition(req: Request, res: Response, next: NextFunction) {
@@ -145,7 +137,7 @@ export async function unlinkRequisition(req: Request, res: Response, next: NextF
     throw new InternalServerError('Authenticated tenant is required to unlink a requisition');
   }
 
-  // Owner + tenant + active predicate (RAD-244). A connection created in a
+  // Owner + tenant + active predicate. A connection created in a
   // different tenant context (legacy or cross-tenant account) is not visible
   // here even if the appuserKey matches.
   const connection = await DI.em.findOne(EnableBankingConnection, {

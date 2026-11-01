@@ -6,18 +6,18 @@ import type { ReportFilters } from '@validators/reports';
 /**
  * Default lookback applied when a report request supplies no `fromDate`.
  * 24 months covers year-over-year comparison, which is the widest view any report
- * offers, while bounding what was previously an unbounded full-history scan.
+ * offers, while bounding what would otherwise be an unbounded full-history scan.
  */
-export const REPORT_DEFAULT_WINDOW_MONTHS = 24;
+const REPORT_DEFAULT_WINDOW_MONTHS = 24;
 
 /**
- * RAD-156 — shared transaction scoping for report aggregations.
+ * Shared transaction scoping for report aggregations.
  *
- * Raw QueryBuilder/knex execution bypasses MikroORM's global tenant filter, and
+ * Raw QueryBuilder/Kysely execution bypasses MikroORM's global tenant filter, and
  * even `em.find` only engages it once a tenant context is stamped on the EM. To
  * keep reports safe regardless of the query surface, every report builds its
  * where condition through here: explicit tenant scope + per-account privacy
- * carve-out (a private account's transactions are owner-only, RAD-343) +
+ * carve-out (a private account's transactions are owner-only) +
  * soft-delete + status/transfer defaults.
  */
 
@@ -52,10 +52,10 @@ export function buildTransactionWhere(filters: ReportFilters, tenant: Tenant, us
     where['transactionTypeKey'] = { name: { $nin: [...EXCLUDED_TRANSACTION_TYPES] } };
   }
 
-  // RAD-audit: `fromDate`/`toDate` are optional on all twelve report routes, and a
-  // predicate was only added when one was supplied — so an unparameterised request loaded
-  // the tenant's ENTIRE transaction history (Sankey does so with a four-level populate).
-  // A window is now always applied: the caller's if given, otherwise a bounded default.
+  // `fromDate`/`toDate` are optional on all twelve report routes; without a default, an
+  // unparameterised request would load the tenant's ENTIRE transaction history (Sankey does
+  // so with a four-level populate). A window is always applied: the caller's if given,
+  // otherwise a bounded default.
   // This is enforced here, in the shared builder, rather than per-route so no report can
   // opt out of it by construction.
   const dateCondition: { $gte?: Date; $lte?: Date } = {};

@@ -1,13 +1,13 @@
 /**
- * RAD-342 G2 — recency-weighted selection over `TransactionCategoryStats`.
+ * Recency-weighted selection over `TransactionCategoryStats`.
  *
- * The stats fallback (used only when a user has no explicit per-user merchant mapping) used to pick
- * the winner on raw vote `count`, so a large pile of *stale* votes for one category would beat a
- * user's more *recent* intent for another. This weights each row's count by an exponential decay on
+ * The stats fallback (used only when a user has no explicit per-user merchant mapping) must not
+ * pick the winner on raw vote `count`, or a large pile of *stale* votes for one category would beat
+ * a user's more *recent* intent for another. This weights each row's count by an exponential decay on
  * how long ago it was last touched (`updatedAt`, which the vote upsert bumps on every increment), so
  * recent corrections outweigh old ones while a clear count majority still wins when recency is equal.
  *
- * Deliberately modest: post-G1, an explicitly-categorized merchant already has a per-user mapping
+ * Deliberately modest: an explicitly-categorized merchant already has a per-user mapping
  * that takes priority over stats, so this only sharpens the residual fallback — it never overrides a
  * mapping.
  */

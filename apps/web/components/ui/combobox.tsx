@@ -2,7 +2,7 @@
 
 import { Check, ChevronsUpDown } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { forwardRef, useEffect, useState } from "react";
+import { forwardRef, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -70,8 +70,20 @@ export function ComboBox({
   const [open, setOpen] = useState(false);
   const isDesktop = useMediaQuery("(min-width: 768px)");
   const [selected, setSelected] = useState<Option | null>(() => {
-    return options?.find((o) => o.value === defaultValue) ?? null;
+    return (
+      options?.find((o) => o.value === value) ??
+      options?.find((o) => o.value === defaultValue) ??
+      null
+    );
   });
+  // Follow the controlled value when it (or the options) change, adjusting
+  // during render rather than in an effect.
+  const [syncedFrom, setSyncedFrom] = useState({ value, options });
+  if (syncedFrom.value !== value || syncedFrom.options !== options) {
+    setSyncedFrom({ value, options });
+    const option = options?.find((o) => o.value === value);
+    if (option) setSelected(option);
+  }
   const isLoadingOptions = !options || options.length === 0;
   const t = useTranslations();
   const computedPlaceholder = placeholder ?? t("select-option");
@@ -83,12 +95,6 @@ export function ComboBox({
     }
     onSelect(option);
   };
-
-  useEffect(() => {
-    const option = options?.find((o) => o.value === value) ?? null;
-    if (!option) return;
-    setSelected(option);
-  }, [value, options]);
 
   if (isDesktop) {
     return (
@@ -188,6 +194,7 @@ export const ComboBoxForm = forwardRef<HTMLButtonElement, WithFormFieldProps>(
     const [open, setOpen] = useState(false);
     const isDesktop = useMediaQuery("(min-width: 768px)");
     const isLoadingOptions = !options || options.length === 0;
+    const t = useTranslations();
     const _onSelect = (option: Option | null) => {
       onSelect?.(option);
       setOpen(false);
@@ -213,13 +220,13 @@ export const ComboBoxForm = forwardRef<HTMLButtonElement, WithFormFieldProps>(
                 {isLoadingOptions ? (
                   <>
                     <Spinner />
-                    <>Loading...</>
+                    <>{t("loading")}</>
                   </>
                 ) : field.value ? (
                   // Short label in the trigger, full label in the list — a
                   // currency chip inside a money field has room for "EUR", not
-                  // for "EUR (Euro)" (RAD-616). Matches ComboBox, which already
-                  // preferred shortLabel here.
+                  // for "EUR (Euro)". Matches ComboBox, which also prefers
+                  // shortLabel here.
                   <span className="truncate">
                     {(() => {
                       const selected = options.find(
@@ -271,7 +278,7 @@ export const ComboBoxForm = forwardRef<HTMLButtonElement, WithFormFieldProps>(
             {isLoadingOptions ? (
               <>
                 <Spinner />
-                <>Loading...</>
+                <>{t("loading")}</>
               </>
             ) : field.value ? (
               <span className="truncate">

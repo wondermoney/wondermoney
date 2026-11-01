@@ -104,7 +104,7 @@ export default function Welcome() {
               account row, which left the column looking unfinished next to the
               copy and showed a total of nothing. */}
           <div className="border-border border-b px-4 py-4">
-            <p className="text-muted-foreground text-xs font-medium tracking-[0.18em] uppercase">
+            <p className="text-muted-foreground text-xs font-medium">
               {t("total-balance")}
             </p>
             <div className="mt-1.5 flex flex-wrap items-baseline gap-x-2 gap-y-1">

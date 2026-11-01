@@ -250,7 +250,7 @@ export default function Assistant() {
 
                     <dl className="mt-4 grid gap-3 text-sm">
                       <div className="space-y-1">
-                        <dt className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
+                        <dt className="text-muted-foreground text-xs font-medium">
                           {t("assistant.settings.auditLogConversationId")}
                         </dt>
                         <dd className="text-foreground font-mono text-xs">
@@ -259,7 +259,7 @@ export default function Assistant() {
                       </div>
 
                       <div className="space-y-1">
-                        <dt className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
+                        <dt className="text-muted-foreground text-xs font-medium">
                           {t("assistant.settings.auditLogMetadata")}
                         </dt>
                         <dd className="bg-muted/50 text-foreground rounded-md p-3 font-mono text-xs whitespace-pre-wrap">

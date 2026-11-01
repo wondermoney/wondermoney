@@ -1,5 +1,5 @@
 /**
- * Account-level pending→posted reconciliation planner (RAD-346, Phase 4).
+ * Account-level pending→posted reconciliation planner.
  *
  * Given the booked rows arriving in a sync and the account's currently-stored PENDING rows, decide
  * which pending each booked row would promote. Each pending can be claimed at most once, so two
@@ -12,6 +12,7 @@
  */
 import type { EntityManager } from '@mikro-orm/core';
 
+import { HIDDEN_FILTER } from '@app/database/filters/tenant-filter';
 import type { Account } from '@entity/Account';
 import type { AppuserTenant } from '@entity/AppuserTenant';
 import { Transaction } from '@entity/Transaction';
@@ -23,7 +24,7 @@ import { findPromotablePendingMatch, type MatchableTransaction, type MatchOption
 import { TransactionAuditService } from './transaction-audit.service';
 
 /** Feature flag for pending→posted reconciliation. `apply` (default/live) · `dry_run` · `off` (kill switch). */
-export const PENDING_RECONCILIATION_FLAG = 'TRANSACTION_PENDING_RECONCILIATION';
+const PENDING_RECONCILIATION_FLAG = 'TRANSACTION_PENDING_RECONCILIATION';
 
 export interface PlannedPromotion {
   /** Index into the booked-rows array that would be promoted. */
@@ -80,7 +81,8 @@ export async function logDryRunPromotions(
     const pendings = await em.find(
       Transaction,
       { accountKey: params.account, deletedAt: undefined, transactionStatusKey: params.pendingStatus },
-      { populate: ['settlementCurrencyKey'] },
+      // Hidden pendings too, as the live path (`applyPromotions`) reads them.
+      { filters: { [HIDDEN_FILTER]: false }, populate: ['settlementCurrencyKey'] },
     );
     if (pendings.length === 0) return [];
 
@@ -109,7 +111,7 @@ export async function logDryRunPromotions(
       });
     }
 
-    if (plan.length > 0) logger.info({ accountKey: params.account.accountKey, promotions: plan.length }, 'RAD-346 pending reconciliation (dry-run): intended promotions logged');
+    if (plan.length > 0) logger.info({ accountKey: params.account.accountKey, promotions: plan.length }, 'Pending reconciliation (dry-run): intended promotions logged');
     return plan;
   } catch (error) {
     logger.warn({ error: error instanceof Error ? error.message : 'unknown' }, 'Pending reconciliation dry-run failed');

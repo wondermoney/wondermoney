@@ -1,5 +1,5 @@
 /**
- * Available balance (RAD-346, Phase 4 companion).
+ * Available balance.
  *
  * `balance` is the settled/current balance (pending rows never enter the stored running ledger —
  * putting unsettled amounts into historical per-row balances would corrupt them). "Available" is

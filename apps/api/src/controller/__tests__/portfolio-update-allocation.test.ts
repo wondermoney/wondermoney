@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import type { AnyZodObject } from 'zod';
+import type { ZodType } from 'zod';
 
 const mocked = vi.hoisted(() => ({
   find: vi.fn(),
@@ -8,7 +8,7 @@ const mocked = vi.hoisted(() => ({
 }));
 
 vi.mock('@app/validators/parser', () => ({
-  zParse: vi.fn(((_schema: AnyZodObject, req: unknown) => Promise.resolve(req)) as Parameters<typeof vi.fn>[0]),
+  zParse: vi.fn(((_schema: ZodType, req: unknown) => Promise.resolve(req)) as Parameters<typeof vi.fn>[0]),
 }));
 
 vi.mock('../../app.js', () => ({

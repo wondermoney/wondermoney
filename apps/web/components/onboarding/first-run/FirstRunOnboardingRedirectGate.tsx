@@ -3,6 +3,7 @@
 import { type ReactNode, useEffect } from "react";
 
 import { usePathname, useRouter } from "@/i18n/navigation";
+import { ENABLE_BANKING_CONNECTION_PARAM } from "@/lib/account/bank-account-sync-return-marker";
 import useAccounts from "@/lib/api/account/useAccounts";
 import { useOnboardingBootstrap } from "@/lib/api/user/useCompleteVersionedOnboarding";
 import { useUser } from "@/lib/auth/user-context";
@@ -36,21 +37,18 @@ export default function FirstRunOnboardingRedirectGate({
   const router = useRouter();
   const { data: accountsData, isFetched } = useAccounts();
 
-  // RAD-333. `localStorage` cannot decide this. It is empty on a new browser, a
-  // second device, a private window and after clearing site data, so
-  // `shouldShowFirstRunOnboarding` returned true for people who had finished
-  // months ago. The previous guard tried to compensate by checking whether the
-  // user had any accounts, but read that from a query that had not resolved
-  // yet: on first mount `isFetched` is false, so the escape hatch was skipped
-  // and control fell straight through to the redirect. Once it landed on an
-  // onboarding route the `isOnboardingPath` bail-out meant it never recovered,
-  // even after the accounts arrived. A fully-onboarded account with data
-  // replayed all six steps — reproduced 2026-08-23.
+  // `localStorage` cannot decide this. It is empty on a new browser, a second
+  // device, a private window and after clearing site data, so
+  // `shouldShowFirstRunOnboarding` returns true for people who finished months
+  // ago. Checking whether the user has any accounts doesn't help either while
+  // that query is unresolved: on first mount `isFetched` is false, and once
+  // the redirect lands on an onboarding route the `isOnboardingPath` bail-out
+  // means it never recovers, even after the accounts arrive.
   //
-  // The server has always known the answer (`completed` / `required` from
-  // `GET /v1/user/me/onboarding`); nothing was asking it. Now it is the
-  // authority, `localStorage` is only a fast path to avoid a flash, and no
-  // redirect fires off an unresolved query.
+  // The server knows the answer (`completed` / `required` from
+  // `GET /v1/user/me/onboarding`), so it is the authority, `localStorage` is
+  // only a fast path to avoid a flash, and no redirect fires off an
+  // unresolved query.
   const needsFirstRunLocally = Boolean(
     user?.id && shouldShowFirstRunOnboarding(user.id),
   );
@@ -59,6 +57,18 @@ export default function FirstRunOnboardingRedirectGate({
 
   useEffect(() => {
     if (!user?.id) return;
+
+    // Back from the bank on Settings: `BankConnectionReturn` is about to send
+    // the user to where they started. A connection made mid-onboarding has
+    // already created accounts, which would otherwise mark the first run
+    // complete before the user reaches its sync step.
+    if (
+      new URLSearchParams(window.location.search).has(
+        ENABLE_BANKING_CONNECTION_PARAM,
+      )
+    ) {
+      return;
+    }
 
     // localStorage says onboarding is done — nothing to guard, and no request.
     if (!needsFirstRunLocally) return;

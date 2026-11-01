@@ -45,7 +45,7 @@ function encodeChannel(linear: number): string {
   return byte.toString(16).padStart(2, '0')
 }
 
-export function hexToRgb(hex: string): Rgb {
+function hexToRgb(hex: string): Rgb {
   const value = hex.replace('#', '')
   return {
     r: parseInt(value.slice(0, 2), 16) / 255,
@@ -54,7 +54,7 @@ export function hexToRgb(hex: string): Rgb {
   }
 }
 
-export function relativeLuminance(hex: string): number {
+function relativeLuminance(hex: string): number {
   const { r, g, b } = hexToRgb(hex)
   const linearise = (channel: number) => (channel <= 0.04045 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4)
   return 0.2126 * linearise(r) + 0.7152 * linearise(g) + 0.0722 * linearise(b)

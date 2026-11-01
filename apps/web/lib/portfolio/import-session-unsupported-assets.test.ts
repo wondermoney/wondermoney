@@ -1,31 +1,35 @@
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
-import { join } from "node:path";
 
 import { createTranslator } from "next-intl";
 import { test } from "vitest";
 
+import enMessages from "../../messages/en/common.json";
+import esMessages from "../../messages/es/common.json";
+import ptMessages from "../../messages/pt/common.json";
 import { getPortfolioImportUnsupportedAssetWarnings } from "./import-session-unsupported-assets";
 
-test("formats a safe unsupported asset symbol and localized skipped count", () => {
-  const messages = JSON.parse(
-    readFileSync(join(process.cwd(), "messages/en/common.json"), "utf8"),
-  ) as Record<string, string>;
-  const t = createTranslator({ locale: "en", messages });
-  const [warning] = getPortfolioImportUnsupportedAssetWarnings([
-    { symbol: "EUR.USD", skippedRows: 46 },
-  ]);
-
-  assert.ok(warning);
-  assert.deepEqual(warning, { symbol: "EUR.USD", skippedRows: 46 });
-  assert.equal(
-    t("portfolio-import-unsupported-asset-warning", {
-      count: warning?.skippedRows,
-      symbol: warning?.symbol,
-    }),
-    "EUR.USD is not supported yet. 46 transactions will be skipped.",
+test("keeps a safe unsupported asset symbol and its skipped count", () => {
+  assert.deepEqual(
+    getPortfolioImportUnsupportedAssetWarnings([{ symbol: "EUR.USD", skippedRows: 46 }]),
+    [{ symbol: "EUR.USD", skippedRows: 46 }],
   );
 });
+
+for (const [locale, messages] of [["en", enMessages], ["pt", ptMessages], ["es", esMessages]] as const) {
+  test(`the warning names the asset and how many rows it skips (${locale})`, () => {
+    const t = createTranslator({ locale, messages });
+    const [warning] = getPortfolioImportUnsupportedAssetWarnings([{ symbol: "EUR.USD", skippedRows: 46 }]);
+    assert.ok(warning);
+
+    const text = t("portfolio-import-unsupported-asset-warning", {
+      count: warning.skippedRows,
+      symbol: warning.symbol,
+    });
+
+    assert.match(text, /EUR\.USD/);
+    assert.match(text, /46/);
+  });
+}
 
 test("does not expose unsafe provider detail as an asset symbol", () => {
   assert.deepEqual(
@@ -34,23 +38,4 @@ test("does not expose unsafe provider detail as an asset symbol", () => {
     ]),
     [],
   );
-});
-
-test("shows the structured unsupported asset alert in decision and terminal steps", () => {
-  for (const fileName of [
-    "PortfolioImportConfirmStep.tsx",
-    "PortfolioImportPreviewStep.tsx",
-    "PortfolioImportTerminalStep.tsx",
-  ]) {
-    const source = readFileSync(
-      join(
-        process.cwd(),
-        "components/portfolio/import-session",
-        fileName,
-      ),
-      "utf8",
-    );
-
-    assert.equal(source.includes("PortfolioImportUnsupportedAssetsAlert"), true);
-  }
 });

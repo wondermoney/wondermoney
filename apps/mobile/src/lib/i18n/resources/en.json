@@ -222,7 +222,8 @@
     "unnamed": "Unnamed account",
     "source": {
       "manual": "Manual",
-      "openBanking": "Open Banking"
+      "openBanking": "Open Banking",
+      "unknown": "Other source"
     },
     "balanceUnavailable": "Balance unavailable",
     "convertedBalance": "Converted balance",
@@ -476,7 +477,8 @@
     "cancel": "Cancel",
     "recurringType": {
       "subscription": "Subscription",
-      "bill": "Bill"
+      "bill": "Bill",
+      "unknown": "Recurring"
     },
     "error": {
       "title": "Could not load transactions",
@@ -596,10 +598,33 @@
     "action": "Import transactions",
     "back": "Back",
     "title": "Import transactions",
-    "helper": "Upload a bank statement (CSV, XLS, or XLSX) to add transactions to an account.",
+    "helper": "Add transactions to an account from a file.",
     "account": "Account",
     "accountsLoading": "Loading accounts",
     "noAccounts": "No accounts are available to import into",
+    "bankFormat": "Upload the statement exactly as {{bank}} exported it, as CSV or Excel.",
+    "yourBank": "your bank",
+    "legacyFormat": "Upload a bank statement (CSV, XLS, or XLSX).",
+    "unknownFormat": "This version of the app can't import into this account. Update the app, or import on the web.",
+    "generic": {
+      "intro": "We can't read this account's bank statements directly, so the file needs to be a CSV with these columns, named in the first row, and no others.",
+      "optional": "optional",
+      "columns": {
+        "date": "The date, as YYYY-MM-DD.",
+        "amount": "An amount with a dot for decimals, such as 23.40. For most types the type says whether the money left or arrived. Currency exchange and Reversal have no direction: write money out as negative (-23.40) and money in as positive.",
+        "merchant": "Who you paid, or who paid you.",
+        "internalTransactionId": "A unique ID for the row. A row whose ID was already imported into this account is skipped.",
+        "transactionTypeKey": "The type's code, from the list of type codes.",
+        "description": "A note for the transaction."
+      },
+      "template": "Share template",
+      "templateSharing": "Preparing template…",
+      "templateFailed": "Could not share the template on this device.",
+      "typeCodes": "Type codes",
+      "showTypeCodes": "Show type codes",
+      "hideTypeCodes": "Hide type codes",
+      "rowsFailed": "{{failed}} of {{total}} rows couldn't be imported. Check their columns, dates, amounts and type codes against the format."
+    },
     "chooseFile": "Choose file",
     "phases": {
       "uploading": "Uploading file…",
@@ -624,7 +649,9 @@
       "network": "Check your connection and try again.",
       "upload-failed": "Could not upload the file. Check your connection and try again.",
       "unsupported-bank": "This bank format is not supported yet.",
-      "general": "Could not complete the import. Check your connection and try again."
+      "general": "Could not complete the import. Check your connection and try again.",
+      "unknown-format": "This version of the app can't import into this account. Update the app, or import on the web.",
+      "csv-only": "This account imports a CSV file in the format shown. Choose a .csv file."
     }
   },
   "transactionOcr": {
@@ -779,21 +806,24 @@
     "notIncluded": "Not included in the monthly summary",
     "type": {
       "bill": "Bill",
-      "subscription": "Subscription"
+      "subscription": "Subscription",
+      "unknown": "Other recurring payment"
     },
     "cadence": {
       "weekly": "Weekly",
       "biweekly": "Every two weeks",
       "monthly": "Monthly",
       "quarterly": "Quarterly",
-      "yearly": "Yearly"
+      "yearly": "Yearly",
+      "unknown": "Schedule unavailable"
     },
     "status": {
       "candidate": "Candidate",
       "confirmed": "Confirmed",
       "dismissed": "Dismissed",
       "paused": "Paused",
-      "ended": "Ended"
+      "ended": "Ended",
+      "unknown": "Status unavailable"
     },
     "error": {
       "title": "Could not load recurring activity",
@@ -1051,7 +1081,8 @@
     "nextPaymentValue": "Next payment {{date}}",
     "paymentDayValue": "Usually paid on day {{day}}",
     "frequency": {
-      "MONTHLY": "monthly"
+      "MONTHLY": "monthly",
+      "UNKNOWN": "on an unknown schedule"
     },
     "type": {
       "AUTO_LOAN": "Auto loan",
@@ -1063,7 +1094,8 @@
     "status": {
       "ACTIVE": "Active",
       "CLOSED": "Closed",
-      "PAID_OFF": "Paid off"
+      "PAID_OFF": "Paid off",
+      "UNKNOWN": "Status unavailable"
     }
   },
   "loanDetail": {
@@ -1089,7 +1121,8 @@
     "progressValue": "{{value}} repaid against {{basis}}",
     "progressBasis": {
       "OPENING_BALANCE": "opening principal",
-      "ORIGINAL_PRINCIPAL": "original principal"
+      "ORIGINAL_PRINCIPAL": "original principal",
+      "UNKNOWN": "an unknown basis"
     },
     "rateType": {
       "FIXED": "Fixed rate",
@@ -1135,7 +1168,8 @@
     "confidence": {
       "HIGH": "High-confidence candidate",
       "MEDIUM": "Medium-confidence candidate",
-      "LOW": "Low-confidence candidate"
+      "LOW": "Low-confidence candidate",
+      "UNKNOWN": "Candidate confidence unavailable"
     },
     "outstandingContext": "Current outstanding principal {{amount}}",
     "transactionAmountUnknownCurrency": "Recorded transaction amount {{amount}} · currency unavailable",
@@ -1649,7 +1683,8 @@
       "paused": "Paused",
       "completed": "Completed",
       "archived": "Archived",
-      "progress-unavailable": "Progress unavailable"
+      "progress-unavailable": "Progress unavailable",
+      "unknown": "Status unavailable"
     },
     "debtStrategy": {
       "linkLabel": "Debt payoff strategy",
@@ -1862,8 +1897,10 @@
       "paused": "Paused",
       "resumed": "Resumed",
       "spent_from_goal": "Applied to spending",
-      "transaction_funding_reversed": "Allocation restored"
-    }
+      "transaction_funding_reversed": "Allocation restored",
+      "unknown": "Other activity"
+    },
+    "transactionExpired": "Transaction expired — dropped by the bank. This goal still covers it."
   },
   "portfolios": {
     "title": "Portfolio",
@@ -2542,7 +2579,8 @@
         "processing": "Processing",
         "connected": "Connected",
         "error": "Error",
-        "expired": "Consent expired"
+        "expired": "Consent expired",
+        "unknown": "Status unavailable"
       },
       "error": {
         "title": "Could not load bank connections",
@@ -2553,6 +2591,16 @@
         "message": "The connection status received could not be verified. Try again to load a fresh copy."
       },
       "connectCta": "Connect a bank",
+      "result": {
+        "success": {
+          "title": "Bank connected",
+          "message": "Your accounts are importing and will appear here shortly."
+        },
+        "error": {
+          "title": "Connection wasn't completed",
+          "message": "Your bank didn't finish the connection. Try connecting again."
+        }
+      },
       "justStarted": {
         "title": "Almost there",
         "message": "Finish connecting in your browser, then come back here — we'll show your connection status once it's ready."
@@ -2827,6 +2875,11 @@
     "confirm": "Import transactions",
     "succeeded_one": "{{count}} transaction imported.",
     "succeeded_other": "{{count}} transactions imported.",
+    "partial_one": "{{count}} transaction imported. Some rows could not be imported.",
+    "partial_other": "{{count}} transactions imported. Some rows could not be imported.",
+    "failedRowsTitle": "Rows that failed to import",
+    "failedRow": "Row {{row}}",
+    "failedRowNoReason": "No reason was recorded.",
     "done": "Done",
     "tryAgain": "Try again",
     "failures": {
@@ -2861,6 +2914,11 @@
       "submit": "Confirm asset mappings",
       "submitting": "Confirming…"
     }
+  },
+  "portfolioFees": {
+    "holdingLabel": "Fees left out",
+    "holding": "Some fees on this holding couldn't be converted to your currency, so they were left out of its cost and gain.",
+    "gains": "Some trade fees couldn't be converted to your currency, so they were left out of these gains."
   },
   "portfolioTickerSearch": {
     "placeholder": "e.g. AAPL",

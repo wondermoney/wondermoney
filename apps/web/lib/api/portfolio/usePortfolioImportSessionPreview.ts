@@ -13,7 +13,7 @@ export const portfolioImportSessionPreviewQueryKey = (
   limit = 25,
 ) => ["portfolio-import-session-preview", importSessionId, limit] as const;
 
-export async function getPortfolioImportSessionPreview(
+async function getPortfolioImportSessionPreview(
   importSessionId: string | number,
   limit = 25,
 ) {

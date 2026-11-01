@@ -9,7 +9,7 @@ import { tickerSearchKey } from './query-keys'
 import { useDebouncedValue } from './use-debounced-value'
 
 /**
- * RAD-238 (slice 1) — 300ms feels responsive without firing a request on
+ * 300ms feels responsive without firing a request on
  * every keystroke; short enough that users don't perceive a delay, long
  * enough to collapse a burst of keystrokes into one request.
  */

@@ -17,11 +17,11 @@ type SyncDeps = NonNullable<Parameters<typeof service.syncAccountsForRequisition
 // service's structural `em` type at the boundary.
 const asEm = (emMock: object): Em => emMock as Em;
 
-// RAD-564: `account.balance` is the anchor the whole running-balance chain is rebuilt from, so which
+// `account.balance` is the anchor the whole running-balance chain is rebuilt from, so which
 // of the provider's balance types it comes from has to be deterministic. Taking whichever entry came
-// first let it flip between a booked balance and one including pending authorisations, shifting
-// every row on the account with no transaction to explain it.
-describe('provider balance selection (RAD-564)', () => {
+// first would let it flip between a booked balance and one including pending authorisations,
+// shifting every row on the account with no transaction to explain it.
+describe('provider balance selection', () => {
   it('prefers closingBooked over an available balance regardless of array order', () => {
     expect(selectProviderBalanceAmount({ balances: [
       { balanceAmount: { amount: '150.00' }, balanceType: 'interimAvailable' },
@@ -246,7 +246,7 @@ describe('account initial sync account service', () => {
     expect(result.accountsFetched).toBe(0);
   });
 
-  it('logs the real per-account error instead of swallowing it (RAD-519)', async () => {
+  it('logs the real per-account error instead of swallowing it', async () => {
     const em = createEm();
     const warn = vi.fn();
     await service.syncAccountsForRequisition({ enableBankingConnectionKey: 1 }, { em: asEm(em), enableBankingSyncAdapterFactory: () => Promise.resolve(client({ accounts: ['acc-1', 'acc-2'], fail: 'acc-2' })), logger: { error: vi.fn(), info: vi.fn(), warn } });
@@ -256,7 +256,7 @@ describe('account initial sync account service', () => {
     );
   });
 
-  it('reports the real per-account error to Sentry instead of swallowing it (RAD-519)', async () => {
+  it('reports the real per-account error to Sentry instead of swallowing it', async () => {
     const em = createEm();
     await service.syncAccountsForRequisition({ enableBankingConnectionKey: 1 }, { em: asEm(em), enableBankingSyncAdapterFactory: () => Promise.resolve(client({ accounts: ['acc-1', 'acc-2'], fail: 'acc-2' })) });
     expect(sentry.captureException).toHaveBeenCalledWith(
@@ -330,7 +330,7 @@ describe('account initial sync account service', () => {
     });
   });
 
-  it('reports the requisition-level institution id even when every account fails (RAD-519)', async () => {
+  it('reports the requisition-level institution id even when every account fails', async () => {
     const em = createEm();
     const bankSyncFactory = () => Promise.resolve<Client>({
       account: () => ({
@@ -345,7 +345,7 @@ describe('account initial sync account service', () => {
     expect(result.institutionIds).toEqual(['bank-1']);
   });
 
-  it('reports the requisition-level institution id when the requisition has no accounts (RAD-519)', async () => {
+  it('reports the requisition-level institution id when the requisition has no accounts', async () => {
     const em = createEm();
     const bankSyncFactory = () => Promise.resolve<Client>({
       account: () => ({ getBalances: () => Promise.resolve({ balances: [] }), getDetails: () => Promise.resolve({}), getMetadata: () => Promise.resolve({ institution_id: 'bank-1' }) }),
@@ -356,7 +356,7 @@ describe('account initial sync account service', () => {
     expect(result.institutionIds).toEqual(['bank-1']);
   });
 
-  it('reports zero accounts from a linked requisition to Sentry instead of failing silently (RAD-519)', async () => {
+  it('reports zero accounts from a linked requisition to Sentry instead of failing silently', async () => {
     const em = createEm();
     const warn = vi.fn();
     const bankSyncFactory = () => Promise.resolve<Client>({
@@ -376,20 +376,20 @@ describe('account initial sync account service', () => {
 });
 
 /**
- * RAD-631: sandbox GoCardless bank-link duplicated the account and every synced transaction.
- * Root cause — GoCardless issues a fresh external accountId per requisition/session even for what
- * is really the same real-world bank account, so a duplicate consent flow for the same institution
+ * A provider can issue a fresh external accountId per requisition/session even for what is really
+ * the same real-world bank account, so a duplicate consent flow for the same institution
  * (double-click on "Connect", a stale redirect retried, a second requisition triggered while the
  * first was still in flight) is a fully valid, independently-linked EnableBankingConnection whose
- * accountId-keyed account lookup never matches the first — creating a second Account row, which
- * then ran its own full transaction sync and duplicated every transaction too.
+ * accountId-keyed account lookup never matches the first. Without a fallback that creates a
+ * second Account row, which then runs its own full transaction sync and duplicates every
+ * transaction too.
  *
  * These tests exercise `syncAccountsForRequisition` twice against a shared, stateful fake `em` —
  * once per simulated requisition/session — to prove the second call collapses onto the account the
  * first call created (via the IBAN+institution+owner fallback lookup) instead of creating a second
  * one.
  */
-describe('RAD-631: duplicate-requisition account dedup', () => {
+describe('duplicate-requisition account dedup', () => {
   function matchesWhere(row: Record<string, unknown>, where: Record<string, unknown>): boolean {
     for (const [key, val] of Object.entries(where)) {
       if (key === 'deletedAt') {
@@ -469,9 +469,9 @@ describe('RAD-631: duplicate-requisition account dedup', () => {
 
     // Session 2: a duplicate consent flow for the same institution/user (double-click "Connect", a
     // stale redirect retried, a second requisition started while the first was still in flight).
-    // GoCardless issues a brand-new external accountId, but the sandbox's canned test data carries
-    // the identical IBAN. Before RAD-631 this created a second Account row and re-ran the full
-    // transaction sync against it. It must now collapse onto the existing account instead.
+    // The provider issues a brand-new external accountId, but the account carries the identical
+    // IBAN. It must collapse onto the existing account instead of creating a second Account row and
+    // re-running the full transaction sync against it.
     const second = await service.syncAccountsForRequisition(
       { enableBankingConnectionKey: 2 },
       { em: asEm(em), enableBankingSyncAdapterFactory: () => Promise.resolve(sandboxClient('sandbox-acc-session-2')) },
@@ -506,10 +506,10 @@ describe('RAD-631: duplicate-requisition account dedup', () => {
   });
 });
 
-// Phase 1d: the Enable Banking path through the same widened `syncAccountsForRequisition`.
+// The Enable Banking path through the same `syncAccountsForRequisition`.
 // `enableBankingSyncAdapterFactory` stands in for `createEnableBankingSyncAdapter` so these tests
 // never touch real Enable Banking credentials/HTTP — only the client-construction seam differs
-// from the GoCardless tests above; the reconciliation/institution/balance logic they exercise is
+// from the requisition tests above; the reconciliation/institution/balance logic they exercise is
 // identical code.
 describe('account initial sync account service — Enable Banking', () => {
   const linkedConnection = () => ({ appuserKey: { appuserKey: 9 }, aspspCountry: 'PT', aspspName: 'Test Bank', enableBankingConnectionKey: 5, sessionId: 'session-1', status: 'linked' });

@@ -5,20 +5,28 @@ import { useTranslations } from "next-intl";
 
 import { Alert, AlertDescription } from "@/components/ui/Alert";
 import { Link } from "@/components/ui/Link";
+import { instanceConfig } from "@/lib/instance";
 import { useDismissibleActivation } from "@/lib/utils/useDismissibleActivation";
 
 /**
  * Announces the BYOK pivot on every route, logged in or out. Dismissal is
  * sticky for the same window `useDismissibleActivation` already gives
  * SetupChecklistCard — see that hook for the storage/expiry mechanics.
+ *
+ * The news is the hosted service's, so it shows only where the deploy turns it
+ * on (`NEXT_PUBLIC_SHOW_PIVOT_BANNER`); a self-hosted instance never sees it.
  */
-export default function PivotBanner() {
+export default function PivotBanner({
+  enabled = instanceConfig.showPivotBanner,
+}: {
+  enabled?: boolean;
+}) {
   const t = useTranslations("pivotBanner");
   const { isDismissed, dismiss } = useDismissibleActivation(
     "pivot-announcement",
   );
 
-  if (isDismissed) return null;
+  if (!enabled || isDismissed) return null;
 
   return (
     <Alert

@@ -1,4 +1,4 @@
-import type { NextFunction, Request, Response } from 'express';
+import type { Request, Response } from 'express';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { TransactionAuditEventType } from '@entity/TransactionAuditLog';
@@ -29,7 +29,7 @@ const baseReq = () => ({
   user: { appuserKey: 7 },
 }) as unknown as Request;
 
-describe('createTransaction dedup telemetry (RAD-394)', () => {
+describe('createTransaction dedup telemetry', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mocks.createTransaction.mockResolvedValue({ tenantKey: { tenantKey: 113 }, transactionKey: 42 });
@@ -39,7 +39,7 @@ describe('createTransaction dedup telemetry (RAD-394)', () => {
     mocks.findManualDuplicate.mockResolvedValue({ existing: { transactionKey: 99 }, matchedOn: 'internalTransactionId' });
     const res = makeRes();
 
-    await createTransaction(baseReq(), res, vi.fn() as unknown as NextFunction);
+    await createTransaction(baseReq(), res, vi.fn());
 
     expect(mocks.createTransaction).toHaveBeenCalledOnce();
     expect(mocks.log).toHaveBeenCalledWith({}, expect.objectContaining({
@@ -59,7 +59,7 @@ describe('createTransaction dedup telemetry (RAD-394)', () => {
     mocks.findManualDuplicate.mockResolvedValue(null);
     const res = makeRes();
 
-    await createTransaction(baseReq(), res, vi.fn() as unknown as NextFunction);
+    await createTransaction(baseReq(), res, vi.fn());
 
     expect(mocks.createTransaction).toHaveBeenCalledOnce();
     expect(mocks.log).not.toHaveBeenCalled();

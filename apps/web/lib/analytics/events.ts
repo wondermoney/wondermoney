@@ -11,58 +11,6 @@ export const RETENTION_GROWTH_EVENTS = {
   weeklyDigestClicked: "weekly_digest_clicked",
 } as const;
 
-export type RetentionGrowthEventName =
-  (typeof RETENTION_GROWTH_EVENTS)[keyof typeof RETENTION_GROWTH_EVENTS];
-
-/**
- * Engagement events fired from core product surfaces. Captured at every
- * occurrence (no dedupe). Property shapes are documented inline at the
- * call site — see the analytics dashboards for what's expected.
- */
-export const ENGAGEMENT_EVENTS = {
-  // Banking transactions
-  transactionAdded: "transaction_added",
-  transactionCategorized: "transaction_categorized",
-  transactionCategoryEdited: "transaction_category_edited",
-  transactionViewed: "transaction_viewed",
-  firstTransactionViewed: "first_transaction_viewed",
-  // Accounts
-  accountViewed: "account_viewed",
-  accountAddedManual: "account_added_manual",
-  // Budgets
-  budgetViewed: "budget_viewed",
-  budgetCreated: "budget_created",
-  budgetEdited: "budget_edited",
-  budgetDeleted: "budget_deleted",
-  // Portfolio
-  portfolioCreated: "portfolio_created",
-  portfolioTransactionAdded: "portfolio_transaction_added",
-  portfolioTransactionsFiltered: "portfolio_transactions_filtered",
-  portfolioTransactionsImported: "portfolio_transactions_imported",
-  portfolioHoldingViewed: "portfolio_holding_viewed",
-  // Reports / insights
-  reportViewed: "report_viewed",
-  insightViewed: "insight_viewed",
-  // Search
-  searchUsed: "search_used",
-  // Feature interest
-  featureInterestExpressed: "feature_interest_expressed",
-} as const;
-
-export type EngagementEventName =
-  (typeof ENGAGEMENT_EVENTS)[keyof typeof ENGAGEMENT_EVENTS];
-
-/**
- * Lifecycle / messaging events. Notification surfaces.
- */
-export const LIFECYCLE_EVENTS = {
-  notificationReceived: "notification_received",
-  notificationOpened: "notification_opened",
-} as const;
-
-export type LifecycleEventName =
-  (typeof LIFECYCLE_EVENTS)[keyof typeof LIFECYCLE_EVENTS];
-
 export const ACTIVATION_EVENTS = {
   signupSubmitClicked: "signup_submit_clicked",
   signupSubmitSucceeded: "signup_submit_succeeded",

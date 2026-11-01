@@ -30,10 +30,10 @@
  *      "hidden in the UI does not mean the money did not move". Filtering them out silently
  *      changes every stored running balance.
  *   2. **Account resurrection.** `account-initial-sync-account.service.ts:191` searches for
- *      `deletedAt: { $ne: null }` to revive a previously-deleted account instead of
+ *      `deletedAt: { $ne: null }` to revive a soft-deleted account instead of
  *      re-inserting it into a unique violation. Under a default-on filter that predicate
  *      ANDs with `deleted_at IS NULL`, always returns empty, and every re-sync of a
- *      previously-deleted account fails on the unique constraint.
+ *      soft-deleted account fails on the unique constraint.
  *
  * Both are handled below. The blocker is the ones that are *not* yet enumerated.
  *
@@ -45,7 +45,7 @@
  *      `withDeleted` below, which is greppable and self-documenting.
  *   3. Only then flip that entity's filter to `default: true`.
  *
- * Note this does **not** cover raw SQL / knex paths — those bypass ORM filters entirely and
+ * Note this does **not** cover raw SQL / Kysely paths — those bypass ORM filters entirely and
  * still need explicit `deleted_at` predicates, which is exactly how the budget and metrics
  * bugs happened.
  */

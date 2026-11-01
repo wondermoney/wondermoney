@@ -3,13 +3,14 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { mockRes } from '@app/__tests__/__helpers__/mock-request';
 
 const mocked = vi.hoisted(() => ({
+  auditLog: vi.fn(),
   convertToModelMessages: vi.fn(),
   createAzure: vi.fn(),
   createOpenAI: vi.fn(),
-  onFinish: vi.fn(),
   pipeUIMessageStreamToResponse: vi.fn(),
   streamText: vi.fn(),
   tools: vi.fn(),
+  toUIMessageStream: vi.fn(),
 }));
 
 vi.mock('@app/app', () => ({
@@ -26,14 +27,16 @@ vi.mock('@ai-sdk/openai', () => ({
 
 vi.mock('ai', () => ({
   convertToModelMessages: mocked.convertToModelMessages,
-  stepCountIs: vi.fn((count: number) => ({ count, type: 'stepCountIs' })),
+  isStepCount: vi.fn((count: number) => ({ count, type: 'isStepCount' })),
+  pipeUIMessageStreamToResponse: mocked.pipeUIMessageStreamToResponse,
   streamText: mocked.streamText,
   tool: vi.fn(),
+  toUIMessageStream: mocked.toUIMessageStream,
 }));
 
 vi.mock('../assistant-audit.service', () => ({
   AssistantAuditService: {
-    log: mocked.onFinish,
+    log: mocked.auditLog,
   },
 }));
 
@@ -46,15 +49,17 @@ vi.mock('../assistant-tools.service', () => ({
 import {
   ASSISTANT_SYSTEM_PROMPT,
   AssistantService,
+  buildAssistantInstructions,
   normalizeAssistantMessages,
 } from '../assistant.service';
 
 describe('AssistantService', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mocked.toUIMessageStream.mockReturnValue('ui-stream');
+    mocked.pipeUIMessageStreamToResponse.mockResolvedValue(undefined);
     delete process.env['AZURE_OPENAI_API_KEY'];
     delete process.env['AZURE_OPENAI_API_VERSION'];
-    delete process.env['AZURE_OPENAI_API_DEPLOYMENT_NAME'];
     delete process.env['AZURE_OPENAI_DEPLOYMENT'];
     delete process.env['AZURE_OPENAI_ENDPOINT'];
     delete process.env['AI_API_KEY'];
@@ -69,6 +74,8 @@ describe('AssistantService', () => {
         appuserKey: 1,
         consent: null,
         conversationId: 'conversation-1',
+        currency: 'EUR',
+        locale: 'pt',
         messages: [],
         req: {},
         res: mockRes(),
@@ -88,6 +95,8 @@ describe('AssistantService', () => {
         appuserKey: 1,
         consent: { assistantEnabled: false, consentVersion: 3 },
         conversationId: 'conversation-1',
+        currency: 'EUR',
+        locale: 'pt',
         messages: [],
         req: {},
         res: mockRes(),
@@ -107,6 +116,8 @@ describe('AssistantService', () => {
         appuserKey: 1,
         consent: { assistantEnabled: true, consentVersion: 3 },
         conversationId: 'conversation-1',
+        currency: 'EUR',
+        locale: 'pt',
         messages: [],
         req: {},
         res: mockRes(),
@@ -131,6 +142,8 @@ describe('AssistantService', () => {
         appuserKey: 1,
         consent: { assistantEnabled: true, consentVersion: 3 },
         conversationId: 'conversation-1',
+        currency: 'EUR',
+        locale: 'pt',
         messages: [{ parts: [{ text: 'Hello', type: 'text' }], role: 'user' }],
         req: {},
         res: mockRes(),
@@ -142,6 +155,22 @@ describe('AssistantService', () => {
     });
 
     expect(mocked.streamText).not.toHaveBeenCalled();
+  });
+
+  /*
+   * Without the user's currency and locale the model defaulted to dollars:
+   * a EUR cashflow came back as "$1,234.56".
+   */
+  it('gives the model the base currency and the locale to format amounts in', () => {
+    const portuguese = buildAssistantInstructions({ currency: 'EUR', locale: 'pt' });
+    const english = buildAssistantInstructions({ currency: 'GBP', locale: 'en' });
+
+    expect(portuguese.startsWith(ASSISTANT_SYSTEM_PROMPT)).toBe(true);
+    expect(portuguese).toContain('EUR');
+    expect(portuguese).toContain('pt-PT');
+    expect(portuguese).toContain(new Intl.NumberFormat('pt-PT', { currency: 'EUR', style: 'currency' }).format(1234.56));
+    expect(english).toContain('GBP');
+    expect(english).toContain(new Intl.NumberFormat('en', { currency: 'GBP', style: 'currency' }).format(1234.56));
   });
 
   it('normalizes content-only messages into UI message parts', () => {
@@ -164,7 +193,7 @@ describe('AssistantService', () => {
     /*
      * The provider is callable *and* carries a `.chat` factory. The service
      * must use `.chat`: calling the provider directly builds a Responses API
-     * model, which Azure answers with 404 on these deployments (RAD-622).
+     * model, which Azure answers with 404 on these deployments.
      */
     const azureProvider = Object.assign(
       vi.fn(() => ({ model: 'azure-responses-model' })),
@@ -173,7 +202,7 @@ describe('AssistantService', () => {
     mocked.createAzure.mockReturnValue(azureProvider);
     mocked.convertToModelMessages.mockResolvedValueOnce([{ content: 'Hello', role: 'user' }]);
     mocked.tools.mockReturnValue({ tool_a: vi.fn() });
-    mocked.streamText.mockReturnValue({ pipeUIMessageStreamToResponse: mocked.pipeUIMessageStreamToResponse });
+    mocked.streamText.mockReturnValue({ stream: 'model-stream' });
 
     const req = {};
     const res = mockRes();
@@ -182,6 +211,8 @@ describe('AssistantService', () => {
       appuserKey: 11,
       consent: { assistantEnabled: true, consentVersion: 7 },
       conversationId: 'conversation-1',
+      currency: 'EUR',
+      locale: 'pt',
       messages: [{ content: 'Hello', role: 'user' }],
       req,
       res,
@@ -197,19 +228,45 @@ describe('AssistantService', () => {
     expect(azureProvider.chat).toHaveBeenCalledWith('gpt-5.4-mini');
     expect(azureProvider).not.toHaveBeenCalled();
     expect(mocked.convertToModelMessages).toHaveBeenCalledWith([{ id: expect.any(String), parts: [{ text: 'Hello', type: 'text' }], role: 'user' }]);
-    expect(mocked.tools).toHaveBeenCalledWith({ appuserKey: 11, consentVersion: 7, conversationId: 'conversation-1', tenantKey: 22 });
+    expect(mocked.tools).toHaveBeenCalledWith({ appuserKey: 11, consentVersion: 7, conversationId: 'conversation-1', currency: 'EUR', tenantKey: 22 });
     expect(mocked.streamText).toHaveBeenCalledWith(expect.objectContaining({
+      instructions: buildAssistantInstructions({ currency: 'EUR', locale: 'pt' }),
       messages: [{ content: 'Hello', role: 'user' }],
       model: { model: 'azure-model' },
-      stopWhen: { count: 5, type: 'stepCountIs' },
-      system: ASSISTANT_SYSTEM_PROMPT,
+      stopWhen: { count: 5, type: 'isStepCount' },
       tools: { tool_a: expect.any(Function) },
     }));
     // The response handler carries an onError mapper so a mid-stream provider
-    // failure reaches the client as one stable sentence (RAD-622).
-    expect(mocked.pipeUIMessageStreamToResponse).toHaveBeenCalledWith(res, {
+    // failure reaches the client as one stable sentence.
+    expect(mocked.toUIMessageStream).toHaveBeenCalledWith(expect.objectContaining({
       onError: expect.any(Function),
-    });
+      stream: 'model-stream',
+    }));
+    expect(mocked.pipeUIMessageStreamToResponse).toHaveBeenCalledWith({ response: res, stream: 'ui-stream' });
+    const uiOptions = mocked.toUIMessageStream.mock.calls[0]?.[0] as { onError: (error: unknown) => string };
+    expect(uiOptions.onError(new Error('getaddrinfo ENOTFOUND secret-resource.openai.azure.com'))).not.toContain('secret-resource');
+  });
+
+  it('settles instead of rejecting when the response stream fails after the 200 went out', async () => {
+    process.env['AI_BASE_URL'] = 'http://localhost:11434/v1';
+    process.env['AI_MODEL_ASSISTANT'] = 'llama3.1';
+    mocked.createOpenAI.mockReturnValue(Object.assign(vi.fn(), { chat: vi.fn(() => ({ model: 'compatible-model' })) }));
+    mocked.convertToModelMessages.mockResolvedValueOnce([{ content: 'Hello', role: 'user' }]);
+    mocked.tools.mockReturnValue({});
+    mocked.streamText.mockReturnValue({ stream: 'model-stream' });
+    mocked.pipeUIMessageStreamToResponse.mockRejectedValueOnce(new Error('socket hang up'));
+
+    await expect(AssistantService.streamChat({
+      appuserKey: 11,
+      consent: { assistantEnabled: true, consentVersion: 7 },
+      conversationId: 'conversation-1',
+      currency: 'EUR',
+      locale: 'pt',
+      messages: [{ content: 'Hello', role: 'user' }],
+      req: {},
+      res: mockRes(),
+      tenantKey: 22,
+    })).resolves.toBeUndefined();
   });
 
   it('streams chat from an OpenAI-compatible endpoint when Azure is not configured', async () => {
@@ -219,12 +276,14 @@ describe('AssistantService', () => {
     mocked.createOpenAI.mockReturnValue(provider);
     mocked.convertToModelMessages.mockResolvedValueOnce([{ content: 'Hello', role: 'user' }]);
     mocked.tools.mockReturnValue({});
-    mocked.streamText.mockReturnValue({ pipeUIMessageStreamToResponse: mocked.pipeUIMessageStreamToResponse });
+    mocked.streamText.mockReturnValue({ stream: 'model-stream' });
 
     await AssistantService.streamChat({
       appuserKey: 11,
       consent: { assistantEnabled: true, consentVersion: 7 },
       conversationId: 'conversation-1',
+      currency: 'EUR',
+      locale: 'pt',
       messages: [{ content: 'Hello', role: 'user' }],
       req: {},
       res: mockRes(),
@@ -235,7 +294,10 @@ describe('AssistantService', () => {
     expect(mocked.createOpenAI).toHaveBeenCalledWith({ apiKey: 'not-needed', baseURL: 'http://localhost:11434/v1', name: 'openai-compatible' });
     // Chat completions, which every compatible server speaks; the default would be the Responses API.
     expect(provider.chat).toHaveBeenCalledWith('llama3.1');
-    expect(mocked.streamText).toHaveBeenCalledWith(expect.objectContaining({ model: { model: 'compatible-model' } }));
+    expect(mocked.streamText).toHaveBeenCalledWith(expect.objectContaining({
+      instructions: buildAssistantInstructions({ currency: 'EUR', locale: 'pt' }),
+      model: { model: 'compatible-model' },
+    }));
   });
 
   it('logs response completion with safe metadata', async () => {
@@ -248,12 +310,14 @@ describe('AssistantService', () => {
     );
     mocked.convertToModelMessages.mockResolvedValueOnce([{ content: 'Hello', role: 'user' }]);
     mocked.tools.mockReturnValue({ tool_a: vi.fn() });
-    mocked.streamText.mockReturnValue({ pipeUIMessageStreamToResponse: mocked.pipeUIMessageStreamToResponse });
+    mocked.streamText.mockReturnValue({ stream: 'model-stream' });
 
     await AssistantService.streamChat({
       appuserKey: 11,
       consent: { assistantEnabled: true, consentVersion: 7 },
       conversationId: 'conversation-1',
+      currency: 'EUR',
+      locale: 'pt',
       messages: [{ content: 'Hello', role: 'user' }],
       req: {},
       res: mockRes(),
@@ -261,9 +325,9 @@ describe('AssistantService', () => {
     });
 
     const options = mocked.streamText.mock.calls[0]?.[0] as Record<string, unknown>;
-    await (options['onFinish'] as (event: { totalUsage: Record<string, unknown> }) => Promise<void> | void)({ totalUsage: { inputTokens: 12, outputTokens: 34, totalTokens: 46 } });
+    await (options['onEnd'] as (event: { usage: Record<string, unknown> }) => Promise<void> | void)({ usage: { inputTokens: 12, outputTokens: 34, totalTokens: 46 } });
 
-    expect(mocked.onFinish).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({
+    expect(mocked.auditLog).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({
       appuserKey: 11,
       consentVersion: 7,
       conversationId: 'conversation-1',

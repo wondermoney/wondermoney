@@ -17,11 +17,10 @@ interface BgDeps { attachQueueJob?: (correlationId: string, queueJobId: string) 
 const OPERATION_TYPE = 'portfolio.snapshot';
 
 /**
- * Portfolios snapshotted per job. The sweep used to load every portfolio in the
- * system into memory and process them serially inside one 900 s pg-boss job, with
- * `retryLimit: 0` — so past some portfolio count the job expired mid-run and every
- * portfolio after that point silently lost that day's snapshot. Snapshots are
- * date-keyed, so tomorrow's run does not backfill: the gap is permanent.
+ * Portfolios snapshotted per job. A single job processing every portfolio serially
+ * would, past some portfolio count, expire mid-run, and every portfolio after that
+ * point would silently lose that day's snapshot. Snapshots are date-keyed, so
+ * tomorrow's run does not backfill: the gap is permanent.
  */
 const PAGE_SIZE = 200;
 /**

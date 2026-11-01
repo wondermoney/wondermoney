@@ -23,7 +23,7 @@ export interface TransactionAuditLogInput {
 }
 
 /**
- * Filters for the ops/monitoring audit-log reads (RAD-394). `limit`/`offset` are always present
+ * Filters for the ops/monitoring audit-log reads. `limit`/`offset` are always present
  * (the validator defaults them); every other field narrows the result set when supplied.
  */
 export interface TransactionAuditQueryInput {
@@ -47,7 +47,7 @@ interface LogOptions {
 }
 
 /**
- * Append-only audit trail writer for transaction changes (RAD-346, Phase 0).
+ * Append-only audit trail writer for transaction changes.
  *
  * Modeled on `AssistantAuditService`: writes are best-effort and never throw — a failed audit
  * write must not break the user-facing mutation. Pass `{ flush: false }` when calling inside an
@@ -90,10 +90,10 @@ export class TransactionAuditService {
   }
 
   /**
-   * Ops/monitoring read: recent DEDUP_SKIPPED rows, newest first. RAD-394 — surfaces how often
+   * Ops/monitoring read: recent DEDUP_SKIPPED rows, newest first. Surfaces how often
    * sync silently skipped an incoming row. Each row's `changes.matchedOn` tells you which identity
    * branch matched; the `internalTransactionId` branch on a row with a different bank id is the
-   * false-positive-skip case RAD-393 tracks. Group client-side (or use the documented SQL) for the
+   * false-positive-skip case. Group client-side (or use the documented SQL) for the
    * matched-on breakdown.
    */
   static async listDedupSkipped(em: EntityManager, query: TransactionAuditQueryInput): Promise<TransactionAuditLog[]> {
@@ -105,8 +105,8 @@ export class TransactionAuditService {
   }
 
   /**
-   * Ops/monitoring read: recent SYSTEM_REMEDIATION rows, newest first. RAD-394 — the audit trail for
-   * operator-driven soft-deletes (e.g. the RAD-346 Phase 3 dedup backfill). Pass `source` to scope
+   * Ops/monitoring read: recent SYSTEM_REMEDIATION rows, newest first: the audit trail for
+   * operator-driven soft-deletes (e.g. a dedup backfill). Pass `source` to scope
    * to a single remediation run/plan.
    */
   static async listRemediations(em: EntityManager, query: TransactionAuditQueryInput): Promise<TransactionAuditLog[]> {
@@ -130,7 +130,7 @@ function buildAuditWhere(eventType: TransactionAuditEventType, query: Transactio
   if (query.appuserKey !== undefined) where['appuserKey'] = query.appuserKey;
   if (query.tenantKey !== undefined) where['tenantKey'] = query.tenantKey;
   if (query.source !== undefined) where['source'] = query.source;
-  return where as FilterQuery<TransactionAuditLog>;
+  return where;
 }
 
 /**
@@ -139,16 +139,19 @@ function buildAuditWhere(eventType: TransactionAuditEventType, query: Transactio
  */
 const ALLOWED_CHANGE_FIELDS = new Set([
   'appuserCurrencyBalance',
+  'appuserSettlementAmount',
   'balance',
   'categoryKey',
   'description',
   'editedSettlementAmount',
   'flaggedAgainstTransactionKey',
+  'incomingEnableBankingTransactionId',
   'incomingExternalTransactionId',
   'incomingInternalTransactionId',
   'incomingNordigenInternalTransactionId',
   'matchedOn',
   'notes',
+  'originalAmount',
   'plan',
   'reason',
   'reviewed',
@@ -156,6 +159,8 @@ const ALLOWED_CHANGE_FIELDS = new Set([
   'transactionDate',
   'transactionMerchantKey',
   'transactionStatusKey',
+  'transactionTypeKey',
+  'transferCounterpartKey',
 ]);
 
 function sanitizeChanges(changes: TransactionAuditLogInput['changes']): TransactionAuditLogInput['changes'] {

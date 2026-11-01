@@ -8,6 +8,8 @@ export type GoalActivityViewModel = Readonly<{
   currencyCode: string
   occurredAt: string
   note: string | null
+  /** The funded transaction was dropped by the bank, but this goal still pays for it (#154). */
+  transactionExpired: boolean
 }>
 
 export type GoalDetailViewModel = Readonly<{
@@ -89,5 +91,6 @@ export function mapGoalActivities(
     currencyCode: activity.currencyCode ?? fallbackCurrencyCode,
     occurredAt: activity.occurredAt,
     note: activity.note ?? null,
+    transactionExpired: activity.transactionExpired === true,
   }))
 }

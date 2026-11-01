@@ -25,14 +25,9 @@
     "allowJs": true,
     "jsx": "react-jsx",
     "noEmit": true,
-    "baseUrl": ".",
     "paths": {
       "@/*": [
         "./*"
-      ],
-      "@api/*": [
-        "../api/src/*",
-        "../../../api/src/*"
       ]
     }
   },

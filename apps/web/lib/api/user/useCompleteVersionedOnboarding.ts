@@ -4,15 +4,14 @@ import type { AxiosInstance } from "axios";
 import api from "../api";
 
 /**
- * RAD-226 server-authoritative versioned onboarding bootstrap/completion
- * contract (`GET /v1/user/me/onboarding`, `POST /v1/user/me/onboarding/complete`).
- * This is distinct from the legacy numeric-step endpoints in `useOnboarding.ts` /
+ * Server-authoritative versioned onboarding bootstrap/completion contract
+ * (`GET /v1/user/me/onboarding`, `POST /v1/user/me/onboarding/complete`).
+ * This is distinct from the numeric-step endpoints in `useOnboarding.ts` /
  * `useUpdateOnboarding.ts`.
  *
- * The web first-run onboarding wizard (`lib/onboarding/first-run/*`) previously
- * only recorded completion in localStorage, so `appuser.onboardingCompletedAt`
- * was never persisted server-side for web users. This hook lets the wizard
- * report completion to the server too: fetch the server's current content
+ * The web first-run onboarding wizard (`lib/onboarding/first-run/*`) reports
+ * completion to the server through this hook, so `appuser.onboardingCompletedAt`
+ * is persisted rather than living only in localStorage: fetch the server's current content
  * version, then complete with that exact version (the endpoint rejects a
  * stale/future version with 400; repeating the same version is an idempotent
  * no-op).
@@ -29,7 +28,7 @@ export interface OnboardingBootstrapResponse {
   };
 }
 
-export async function getOnboardingBootstrap(
+async function getOnboardingBootstrap(
   apiClient: AxiosInstance = api,
 ): Promise<OnboardingBootstrapResponse> {
   const { data } = await apiClient.get<OnboardingBootstrapResponse>(
@@ -38,7 +37,7 @@ export async function getOnboardingBootstrap(
   return data;
 }
 
-export async function completeVersionedOnboarding(
+async function completeVersionedOnboarding(
   apiClient: AxiosInstance = api,
 ) {
   const bootstrap = await getOnboardingBootstrap(apiClient);
@@ -52,10 +51,10 @@ export async function completeVersionedOnboarding(
 /**
  * Server-authoritative answer to "does this user still owe the wizard?".
  *
- * RAD-333: the first-run redirect gate used to decide this from `localStorage`,
- * which is empty on any new browser, device or private window — so a
- * fully-onboarded user was sent back through all six steps. This is the only
- * source of truth; `localStorage` is a fast path, not the authority.
+ * The first-run redirect gate must not decide this from `localStorage`, which is
+ * empty on any new browser, device or private window — a fully-onboarded user
+ * would be sent back through all six steps. This is the only source of truth;
+ * `localStorage` is a fast path, not the authority.
  */
 export function useOnboardingBootstrap(enabled: boolean) {
   return useQuery({

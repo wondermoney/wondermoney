@@ -1,10 +1,38 @@
 import { ChevronDown, ChevronLeft, ChevronRight } from "lucide-react";
+import { useLocale } from "next-intl";
 import * as React from "react";
-import { DayPicker, type DropdownProps } from "react-day-picker";
+import {
+  DayPicker,
+  type DayPickerLocale,
+  type DropdownProps,
+} from "react-day-picker";
+import { enUS } from "react-day-picker/locale/en-US";
+import { es } from "react-day-picker/locale/es";
+import { pt } from "react-day-picker/locale/pt";
 
 import { cn } from "@/lib/utils";
 
 export type CalendarProps = React.ComponentProps<typeof DayPicker>;
+
+/*
+ * The reader's calendar: month and weekday names, the first day of the week
+ * and the screen-reader labels all follow the app's next-intl locale. `pt` is
+ * European Portuguese, as in `lib/utils/dateFnsLocale.ts`. These are
+ * DayPicker's own locales (date-fns plus translated grid labels), so the
+ * aria-labels on the days and the navigation are localised too.
+ */
+const dayPickerLocale = (locale: string): DayPickerLocale => {
+  switch (locale) {
+    case "pt":
+    case "pt-PT":
+      return pt;
+    case "es":
+    case "es-ES":
+      return es;
+    default:
+      return enUS;
+  }
+};
 
 function Calendar({
   className,
@@ -12,11 +40,17 @@ function Calendar({
   showOutsideDays = true,
   ...props
 }: CalendarProps) {
+  const appLocale = useLocale();
   const defaultStartMonth = props.startMonth ?? new Date(2000, 0, 1);
   const defaultEndMonth = props.endMonth ?? new Date(2100, 11, 31);
   return (
     <DayPicker
       showOutsideDays={showOutsideDays}
+      locale={dayPickerLocale(appLocale)}
+      // date-fns' `pt` starts the week on Sunday; Portugal starts it on Monday.
+      weekStartsOn={
+        props.weekStartsOn ?? (appLocale.startsWith("pt") ? 1 : undefined)
+      }
       captionLayout="dropdown"
       navLayout="after"
       startMonth={defaultStartMonth}
@@ -69,8 +103,6 @@ function Calendar({
       components={{
         Dropdown: ({
           className: dropdownClassName,
-          classNames: _classNames,
-          components: _components,
           options,
           ...selectProps
         }: DropdownProps) => (

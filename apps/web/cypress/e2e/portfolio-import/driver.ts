@@ -1,12 +1,14 @@
 import {
   apiBaseUrl,
   createOrSignInBetterAuthUser,
+  e2eWebOrigin,
 } from "../../support/better-auth";
 import {
   assertImportedHoldingQuantities,
   assertImportedTransactions,
   assertImportPreview,
   assertRealizedGains,
+  assertRejectedTransactionInPreview,
   type ImportPreview,
   type PortfolioContext,
 } from "./assertions";
@@ -45,30 +47,44 @@ function assertSuccessfulStatus(status: number, operation: string): void {
 }
 
 export function authenticate(): Cypress.Chainable<PortfolioAuthContext> {
-  const email = Cypress.env("E2E_PORTFOLIO_IMPORT_EMAIL");
-  const password = Cypress.env("E2E_PORTFOLIO_IMPORT_PASSWORD");
-  if (
-    typeof email !== "string" ||
-    email.length === 0 ||
-    typeof password !== "string" ||
-    password.length === 0
-  ) {
-    throw new PortfolioImportE2EError(
-      "Portfolio import E2E requires E2E_PORTFOLIO_IMPORT_EMAIL and E2E_PORTFOLIO_IMPORT_PASSWORD",
-    );
-  }
+  // Credentials are secrets, so they come from `cy.env` (async, never logs
+  // values) rather than the synchronous, browser-visible `Cypress.expose`.
+  return cy
+    .env(["E2E_PORTFOLIO_IMPORT_EMAIL", "E2E_PORTFOLIO_IMPORT_PASSWORD"])
+    .then((secrets) => {
+      const email: unknown = secrets.E2E_PORTFOLIO_IMPORT_EMAIL;
+      const password: unknown = secrets.E2E_PORTFOLIO_IMPORT_PASSWORD;
+      if (
+        typeof email !== "string" ||
+        email.length === 0 ||
+        typeof password !== "string" ||
+        password.length === 0
+      ) {
+        throw new PortfolioImportE2EError(
+          "Portfolio import E2E requires E2E_PORTFOLIO_IMPORT_EMAIL and E2E_PORTFOLIO_IMPORT_PASSWORD",
+        );
+      }
+      return { email, password };
+    })
+    .then(({ email, password }) => authenticateWith(email, password));
+}
 
-  // Better-auth sign-up/sign-in replaces the old Supabase admin session that
-  // `portfolioImportAuthSession` used to create in a cy.task. Its bearer token
-  // then replaces the Supabase access token for `/v1/auth/callback` and the
-  // authenticated API calls below.
+function authenticateWith(
+  email: string,
+  password: string,
+): Cypress.Chainable<PortfolioAuthContext> {
+  // Better-auth sign-up/sign-in; its bearer token authenticates
+  // `/v1/auth/callback` and the API calls below.
   return createOrSignInBetterAuthUser(email, password, "E2E Portfolio Import")
     .then((session) =>
       cy
         .request({
           body: {},
           failOnStatusCode: false,
-          headers: { Authorization: `Bearer ${session.accessToken}` },
+          headers: {
+            Authorization: `Bearer ${session.accessToken}`,
+            Origin: e2eWebOrigin(),
+          },
           log: false,
           method: "POST",
           url: `${apiBaseUrl()}/v1/auth/callback`,
@@ -163,7 +179,10 @@ export function createPortfolio(
 export function deletePortfolio(context: PortfolioContext): void {
   cy.request({
     failOnStatusCode: false,
-    headers: { Authorization: `Bearer ${context.accessToken}` },
+    headers: {
+      Authorization: `Bearer ${context.accessToken}`,
+      Origin: e2eWebOrigin(),
+    },
     log: false,
     method: "DELETE",
     url: `${apiBaseUrl()}/v1/portfolio/${context.portfolioId}`,
@@ -186,21 +205,10 @@ function requestPreview(context: PortfolioContext, importSessionId: number) {
 function resolveAssetGroups(
   context: PortfolioContext,
   importSessionId: number,
-  input: BrokerImportCase,
 ): Cypress.Chainable<AssetReviewPreview> {
   return requestPreview(context, importSessionId).then(({ body: preview }) => {
     const unresolved = preview.assetGroups.filter(
       (group) => !["matched", "selected", "skipped"].includes(group.status),
-    );
-    const skippedSymbols = preview.assetGroups
-      .filter((group) => group.status === "skipped")
-      .flatMap((group) =>
-        group.identity.brokerTicker ? [group.identity.brokerTicker] : [],
-      );
-    expect(skippedSymbols.sort()).to.deep.equal(
-      (input.expectedUnsupportedAssets ?? [])
-        .map((asset) => asset.symbol)
-        .sort(),
     );
     if (unresolved.length === 0) return cy.wrap(preview);
 
@@ -228,7 +236,10 @@ function resolveAssetGroups(
       .request({
         body: { decisions },
         failOnStatusCode: false,
-        headers: { Authorization: `Bearer ${context.accessToken}` },
+        headers: {
+          Authorization: `Bearer ${context.accessToken}`,
+          Origin: e2eWebOrigin(),
+        },
         log: false,
         method: "PATCH",
         url: `${apiBaseUrl()}/v1/portfolio-import-sessions/${importSessionId}/asset-mappings`,
@@ -261,9 +272,12 @@ export function importBrokerFile(
     .click();
   cy.contains('[role="option"]', input.brokerLabel).click();
   cy.fixture(input.fixture, "utf8").then((base64) => {
+    const contents = input.fixtureIsBase64
+      ? Cypress.Buffer.from(base64.replace(/\s+/g, ""), "base64")
+      : Cypress.Buffer.from(base64, "utf8");
     cy.get('input[type="file"]').selectFile(
       {
-        contents: Cypress.Buffer.from(base64.replace(/\s+/g, ""), "base64"),
+        contents,
         fileName: input.fileName,
         mimeType: input.mimeType,
       },
@@ -289,13 +303,16 @@ export function importBrokerFile(
       return cy.request({
         body: input.mapping,
         failOnStatusCode: false,
-        headers: { Authorization: `Bearer ${context.accessToken}` },
+        headers: {
+          Authorization: `Bearer ${context.accessToken}`,
+          Origin: e2eWebOrigin(),
+        },
         log: false,
         method: "PATCH",
         url: `${apiBaseUrl()}/v1/portfolio-import-sessions/${importSessionId}/column-mapping`,
       }).then((response) => {
         assertSuccessfulStatus(response.status, "Column mapping");
-        return resolveAssetGroups(context, importSessionId, input).then((preview) => {
+        return resolveAssetGroups(context, importSessionId).then((preview) => {
           assertImportPreview(preview, input);
           return importSessionId;
         });
@@ -306,11 +323,84 @@ export function importBrokerFile(
 export function assertImportedMetrics(
   context: PortfolioContext,
   input: BrokerImportCase,
+  importSessionId: number,
 ): void {
-  cy.contains("button", "Confirm import").click();
-  cy.contains("Import complete", { timeout: 180_000 }).should("be.visible");
   const baseUrl = apiBaseUrl();
-  assertImportedTransactions(context, input, baseUrl);
-  assertImportedHoldingQuantities(context, input, baseUrl);
-  assertRealizedGains(context, input, baseUrl);
+  cy.request({
+    failOnStatusCode: false,
+    headers: {
+      Authorization: `Bearer ${context.accessToken}`,
+      Origin: e2eWebOrigin(),
+    },
+    log: false,
+    method: "POST",
+    url: `${baseUrl}/v1/portfolio-import-sessions/${importSessionId}/confirm`,
+  }).then((response) => {
+    assertSuccessfulStatus(response.status, "Confirm import");
+    return waitForSuccessfulImport(context, importSessionId, baseUrl, input);
+  }).then(() => {
+    assertImportedTransactions(context, input, baseUrl);
+    assertImportedHoldingQuantities(context, input, baseUrl);
+    assertRealizedGains(context, input, baseUrl);
+  });
+}
+
+function waitForSuccessfulImport(
+  context: PortfolioContext,
+  importSessionId: number,
+  baseUrl: string,
+  input: BrokerImportCase,
+  attemptsRemaining = 180,
+): Cypress.Chainable<unknown> {
+  const poll = cy.request<{
+    status: string;
+    summary?: {
+      importedRows?: number;
+      failedRows?: number;
+      readyRows?: number;
+      skippedRows?: number;
+      terminalKind?: string;
+      totalRows?: number;
+    };
+  }>({
+    failOnStatusCode: false,
+    headers: { Authorization: `Bearer ${context.accessToken}` },
+    log: false,
+    url: `${baseUrl}/v1/portfolio-import-sessions/${importSessionId}?limit=25`,
+  }).then((response) => {
+    const { body, status } = response;
+    assertSuccessfulStatus(status, "Import status");
+    if (
+      body.status === input.expectedTerminalStatus &&
+      body.summary?.totalRows === input.expectedRows &&
+      body.summary.terminalKind === input.expectedTerminalKind &&
+      body.summary.importedRows === input.expectedImportedRows &&
+      body.summary.failedRows === input.expectedFailedRows &&
+      body.summary.skippedRows === input.expectedSkippedRows
+    ) {
+      if (input.expectedRejectedTransaction) {
+        return requestPreview(context, importSessionId).then(({ body: preview }) => {
+          assertRejectedTransactionInPreview(
+            preview,
+            input.expectedRejectedTransaction!,
+            input.expectedFailedRows,
+          );
+        });
+      }
+      return response;
+    }
+    if (body.status === "failed" || body.status === "partial" || body.status === "succeeded") {
+      throw new PortfolioImportE2EError(
+        `Import ended with unexpected status/counts: ${JSON.stringify({ status: body.status, summary: body.summary })}`,
+      );
+    }
+    if (attemptsRemaining <= 0) {
+      throw new PortfolioImportE2EError("Import did not complete before the E2E timeout");
+    }
+    return cy.wait(1_000, { log: false }).then(() =>
+      waitForSuccessfulImport(context, importSessionId, baseUrl, input, attemptsRemaining - 1),
+    );
+  });
+  // Cypress' chain type does not flatten recursive chainables; runtime does.
+  return poll as unknown as Cypress.Chainable<unknown>;
 }

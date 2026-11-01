@@ -40,12 +40,12 @@ function NetWorthList({ rows, currencyCode, totalBalance }: NetWorthListProps) {
   const [expandedRows, setExpandedRows] = useState<Record<string, boolean>>({});
 
   // A share of net worth is only meaningful against a pool of the same sign.
-  // This used to be `Math.abs(balance) / Math.abs(totalBalance)` — a double
-  // absolute — so an account that *reduced* net worth reported a positive
-  // share of it, and the column did not add up: two accounts of -121.61 and
-  // 11,250.00 against a net worth of 11,128.39 read "1.1% of total" and
-  // "101.1% of total". Assets are now measured against total assets and debts
-  // against total debts, so each pool sums to 100% and neither can exceed it.
+  // A double absolute (`Math.abs(balance) / Math.abs(totalBalance)`) would give
+  // an account that *reduced* net worth a positive share of it, and the column
+  // would not add up: two accounts of -121.61 and 11,250.00 against a net worth
+  // of 11,128.39 would read "1.1% of total" and "101.1% of total". Assets are
+  // measured against total assets and debts against total debts, so each pool
+  // sums to 100% and neither can exceed it.
   const { totalAssets, totalDebts } = useMemo(() => {
     let assets = 0;
     let debts = 0;

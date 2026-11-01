@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react'
 
 import { captureAnalyticsEvent } from '@/lib/telemetry/analytics'
 
+import { parseBankConnectionResultParam } from './bank-connection-return'
 import {
   isFirstBankConnection,
   resolveConnectionOutcomes,
@@ -33,13 +34,13 @@ function resolveViewState(query: ReturnType<typeof useBankConnections>) {
 
 export function ConnectionsRoute() {
   const router = useRouter()
-  const params = useLocalSearchParams<{ justStarted?: string }>()
+  const params = useLocalSearchParams<{ justStarted?: string; connection?: string }>()
   const query = useBankConnections()
   const state = resolveViewState(query)
   const disconnectMutation = useBankConnectionDisconnectMutation()
   const [disconnectFailure, setDisconnectFailure] = useState<ConnectionDisconnectFailureState | null>(null)
 
-  // RAD-518 — this screen's polling is the app's only view of a consent flow
+  // This screen's polling is the app's only view of a consent flow
   // settling, so the terminal funnel steps are captured from the transition
   // between two of its own observations. See connection-outcome-policy.ts.
   const observedTally = useRef<ConnectionTally | null>(null)
@@ -62,6 +63,7 @@ export function ConnectionsRoute() {
     <ConnectionsScreen
       state={state}
       justStarted={params.justStarted === '1'}
+      connectionResult={parseBankConnectionResultParam(params.connection)}
       refreshing={Boolean(query.isRefreshing)}
       onBack={() => {
         if (router.canGoBack()) router.back()

@@ -6,6 +6,7 @@ import React from "react";
 import { Spinner } from "@/components/ui/Spinner";
 import { Text } from "@/components/ui/Typography";
 import useHoldingValuation from "@/lib/api/portfolio/useHoldingValuation";
+import { useFormatPercentage } from "@/lib/utils/useFormatPercentage";
 
 interface HoldingValuationMetricsProps {
   symbol: string;
@@ -15,6 +16,7 @@ const HoldingValuationMetrics: React.FC<HoldingValuationMetricsProps> = ({
   symbol,
 }) => {
   const t = useTranslations();
+  const formatPercentage = useFormatPercentage();
   const { data, isLoading } = useHoldingValuation(symbol);
 
   if (isLoading) {
@@ -42,22 +44,25 @@ const HoldingValuationMetrics: React.FC<HoldingValuationMetricsProps> = ({
 
   return (
     <div className="flex flex-col gap-3">
-      <Text as="h4" className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+      <Text as="h4" className="text-xs font-medium text-muted-foreground">
         {t("market-valuation")}
       </Text>
       <dl className="grid grid-cols-2 gap-2 sm:grid-cols-3">
         {metrics.map((metric) => (
           <div
             key={metric.label}
-            className="overflow-hidden rounded-lg border border-border/60 bg-muted/15 p-3"
+            className="overflow-hidden rounded-lg bg-muted/40 p-3"
           >
-            <dt className="truncate text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+            <dt className="truncate text-xs text-muted-foreground">
               {metric.label}
             </dt>
             <dd className="mt-1 font-mono text-base font-semibold text-foreground">
               {metric.value != null
                 ? metric.isPercent
-                  ? `${metric.value.toFixed(2)}%`
+                  ? formatPercentage(metric.value / 100, {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2,
+                    })
                   : metric.value.toFixed(2)
                 : "—"}
             </dd>

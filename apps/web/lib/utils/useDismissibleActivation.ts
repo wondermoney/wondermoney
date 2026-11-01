@@ -1,41 +1,47 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, useSyncExternalStore } from "react";
 
 const DEFAULT_DISMISSAL_DURATION_MS = 14 * 24 * 60 * 60 * 1000;
 
+function readRaw(storageKey: string) {
+  try {
+    return window.localStorage.getItem(storageKey);
+  } catch {
+    return null;
+  }
+}
+
+function isStillDismissed(rawValue: string | null) {
+  if (!rawValue) return false;
+  const dismissedUntil = Number(rawValue);
+  return Number.isFinite(dismissedUntil) && dismissedUntil > Date.now();
+}
+
+function subscribe(onChange: () => void) {
+  window.addEventListener("storage", onChange);
+  return () => window.removeEventListener("storage", onChange);
+}
+
 export function useDismissibleActivation(key: string, durationMs = DEFAULT_DISMISSAL_DURATION_MS) {
   const storageKey = `wm:${key}:dismissedUntil`;
-  const [isDismissed, setIsDismissed] = useState(false);
+  const storedDismissed = useSyncExternalStore(
+    subscribe,
+    () => isStillDismissed(readRaw(storageKey)),
+    () => false,
+  );
+  // Dismissal still applies locally when storage is blocked.
+  const [dismissedKey, setDismissedKey] = useState<string | null>(null);
 
+  // Drop an expired or malformed entry.
   useEffect(() => {
-    let rawValue: string | null = null;
-
+    const rawValue = readRaw(storageKey);
+    if (!rawValue || isStillDismissed(rawValue)) return;
     try {
-      rawValue = window.localStorage.getItem(storageKey);
+      window.localStorage.removeItem(storageKey);
     } catch {
-      setIsDismissed(false);
-      return;
+      // Ignore blocked storage and fall back to not dismissed.
     }
-
-    if (!rawValue) {
-      setIsDismissed(false);
-      return;
-    }
-
-    const dismissedUntil = Number(rawValue);
-
-    if (!Number.isFinite(dismissedUntil) || dismissedUntil <= Date.now()) {
-      try {
-        window.localStorage.removeItem(storageKey);
-      } catch {
-        // Ignore blocked storage and fall back to not dismissed.
-      }
-      setIsDismissed(false);
-      return;
-    }
-
-    setIsDismissed(true);
   }, [storageKey]);
 
   const dismiss = useCallback(() => {
@@ -45,8 +51,8 @@ export function useDismissibleActivation(key: string, durationMs = DEFAULT_DISMI
     } catch {
       // Ignore blocked storage and still dismiss locally.
     }
-    setIsDismissed(true);
+    setDismissedKey(storageKey);
   }, [durationMs, storageKey]);
 
-  return { isDismissed, dismiss };
+  return { isDismissed: storedDismissed || dismissedKey === storageKey, dismiss };
 }

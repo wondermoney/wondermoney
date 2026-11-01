@@ -1,7 +1,11 @@
 "use client";
 
-import { type ColumnDef, createColumnHelper, Row } from "@tanstack/react-table";
-import { ChevronDown, ChevronRight, Ellipsis, Trash } from "lucide-react";
+import {
+  ChevronDown,
+  ChevronRight,
+  Ellipsis,
+  TriangleAlert,
+} from "lucide-react";
 import { useTranslations } from "next-intl";
 import React, { CSSProperties, useCallback, useMemo, useState } from "react";
 import { toast } from "sonner";
@@ -9,6 +13,11 @@ import { toast } from "sonner";
 import { Amount } from "@/components/ui/Amount";
 import CategoryIcon from "@/components/ui/CategoryIcon";
 import { Table } from "@/components/ui/Table";
+import {
+  type ColumnDef,
+  createColumnHelper,
+  Row,
+} from "@/components/ui/Table/features";
 import { Text } from "@/components/ui/Typography";
 import { Budget } from "@/lib/api/budget/useBudgets";
 import useDeleteBudgetCategory from "@/lib/api/budget/useDeleteBudgetCategory";
@@ -25,17 +34,11 @@ import { useBreakpoint } from "@/lib/utils/useTailwindBreakpoints";
 import { getCategoryTranslationKey } from "../../lib/utils/categories";
 import { SupportedCurrencyCodes } from "../../lib/utils/currencySymbol";
 import { Button } from "../ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "../ui/dropdown-menu";
 import CellNumeric from "../ui/Table/Cell/CellNumeric";
 import TableCellDefault from "../ui/Table/Cell/TableCellDefault";
-import { BudgetCategoryEditSheet } from "./BudgetCategoryEditSheet";
+import { BudgetCategoryActionsMenu } from "./BudgetCategoryActionsMenu";
 
-export type { BudgetRow, BudgetSubRow } from "@/lib/budget/rows";
+export type { BudgetRow } from "@/lib/budget/rows";
 
 function MobileBudgetCategoriesList({
   data,
@@ -89,9 +92,15 @@ function MobileBudgetCategoriesList({
                 <div className="flex items-center gap-2">
                   <div
                     className="flex size-9 shrink-0 items-center justify-center rounded-md"
-                    style={{ backgroundColor: parentRow.bgColor }}
+                    style={{
+                      backgroundColor: parentRow.bgColor,
+                      color: parentRow.textColor,
+                    }}
                   >
-                    <CategoryIcon icon={parentRow.icon} />
+                    <CategoryIcon
+                      icon={parentRow.icon}
+                      className="text-current"
+                    />
                   </div>
                   <Text className="min-w-0 truncate font-medium">
                     {parentRow.isSystemCategory
@@ -102,8 +111,7 @@ function MobileBudgetCategoriesList({
               </div>
               {/* `Text` renders inline elements (`<span>`, `<small>`), so a
                   label stacked over a value only stacks if the container makes
-                  it — without this the row read "€0.00Monthly remaining"
-                  (RAD-619). */}
+                  it — without this the row reads "€0.00Monthly remaining". */}
               <div className="flex shrink-0 flex-col items-end text-right">
                 <Text className="font-mono text-sm font-semibold whitespace-nowrap">
                   <Amount value={parentRemaining} currency={currency} />
@@ -132,7 +140,10 @@ function MobileBudgetCategoriesList({
                     : t("annual-planned")}
                 </Text>
                 <Text className="font-mono text-sm whitespace-nowrap">
-                  <Amount value={normalizedParentBudgetedValue} currency={currency} />
+                  <Amount
+                    value={normalizedParentBudgetedValue}
+                    currency={currency}
+                  />
                 </Text>
               </div>
             </div>
@@ -180,9 +191,15 @@ function MobileBudgetCategoriesList({
                           <div className="flex items-center gap-2">
                             <div
                               className="flex size-9 shrink-0 items-center justify-center rounded-md"
-                              style={{ backgroundColor: row.bgColor }}
+                              style={{
+                                backgroundColor: row.bgColor,
+                                color: row.textColor,
+                              }}
                             >
-                              <CategoryIcon icon={row.icon} />
+                              <CategoryIcon
+                                icon={row.icon}
+                                className="text-current"
+                              />
                             </div>
                             <Text className="min-w-0 truncate font-medium">
                               {row.isSystemCategory
@@ -197,7 +214,10 @@ function MobileBudgetCategoriesList({
                                 : t("annual-planned")}
                               :{" "}
                               <span className="text-foreground font-mono">
-                                <Amount value={normalizedBudgetedValue} currency={currency} />
+                                <Amount
+                                  value={normalizedBudgetedValue}
+                                  currency={currency}
+                                />
                               </span>
                             </span>
                             <span className="truncate">
@@ -230,8 +250,8 @@ function MobileBudgetCategoriesList({
                         </div>
 
                         {!noActions && (
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
+                          <BudgetCategoryActionsMenu
+                            trigger={
                               <Button
                                 variant="ghost"
                                 size="sm"
@@ -240,30 +260,20 @@ function MobileBudgetCategoriesList({
                               >
                                 <Ellipsis className="size-4" />
                               </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <BudgetCategoryEditSheet
-                                category={row as any}
-                                budgetKey={budgetKey}
-                                year={year}
-                                month={month}
-                                currency={currency}
-                              />
-                              <DropdownMenuItem
-                                onClick={() =>
-                                  onDeleteRow({
-                                    id: `${parentIndex}.${childIndex}`,
-                                    original: row,
-                                  } as Row<BudgetRow>)
-                                }
-                              >
-                                <div className="text-destructive-text flex w-full items-center justify-between gap-3">
-                                  <span>{t("delete")}</span>
-                                  <Trash className="text-destructive-text size-4" />
-                                </div>
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
+                            }
+                            align="end"
+                            category={row as any}
+                            budgetKey={budgetKey}
+                            year={year}
+                            month={month}
+                            currency={currency}
+                            onDelete={() =>
+                              onDeleteRow({
+                                id: `${parentIndex}.${childIndex}`,
+                                original: row,
+                              } as Row<BudgetRow>)
+                            }
+                          />
                         )}
                       </div>
 
@@ -333,9 +343,12 @@ const BudgetTable: React.FC<BudgetTableProps> = React.memo(
     const [loadingDeleteSet, setLoadingDeleteSet] = useState<Set<string>>(
       new Set(),
     );
-    React.useEffect(() => {
+    // Take the new budget when the prop changes (adjusted during render).
+    const [prevBudget, setPrevBudget] = useState(budget);
+    if (budget !== prevBudget) {
+      setPrevBudget(budget);
       setData(budget);
-    }, [budget]);
+    }
 
     const deleteBudgetCategoryMutation = useDeleteBudgetCategory();
 
@@ -455,9 +468,13 @@ const BudgetTable: React.FC<BudgetTableProps> = React.memo(
                   className="flex size-10 items-center justify-center rounded-md"
                   style={{
                     backgroundColor: row.original.bgColor,
+                    color: row.original.textColor,
                   }}
                 >
-                  <CategoryIcon icon={row.original.icon} />
+                  <CategoryIcon
+                    icon={row.original.icon}
+                    className="text-current"
+                  />
                 </div>
                 <Text
                   className={cn(
@@ -517,7 +534,13 @@ const BudgetTable: React.FC<BudgetTableProps> = React.memo(
             ),
           cell: ({ row, getValue }) => (
             <CellNumeric>
-              <Amount value={convertMonthlyAmountToAnuallizedMonthlyAmount( getValue(), row.original.recurrency, )} currency={currency} />
+              <Amount
+                value={convertMonthlyAmountToAnuallizedMonthlyAmount(
+                  getValue(),
+                  row.original.recurrency,
+                )}
+                currency={currency}
+              />
             </CellNumeric>
           ),
         }),
@@ -538,7 +561,12 @@ const BudgetTable: React.FC<BudgetTableProps> = React.memo(
             footerData && (
               <div className="flex h-14 items-center justify-end">
                 <CellNumeric>
-                  {footerData.totalPercentage.toFixed(2)}%
+                  {/* Locale-aware, like every other percentage in the
+                      table: `toFixed` printed `53.17%` to pt and es too. */}
+                  {formatPercentage(footerData.totalPercentage / 100, {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                  })}
                 </CellNumeric>
               </div>
             ),
@@ -569,6 +597,19 @@ const BudgetTable: React.FC<BudgetTableProps> = React.memo(
                       <Amount> sets its own text colour, so an outer
                       getThresholdClassName would be overridden and overspend
                       would silently render as ordinary foreground ink. */}
+                  {/* Overspend was red ink and a sign alone. The warning
+                      glyph is the visible non-colour cue, the sr-only word
+                      the audible one (DESIGN.md: colour never carries
+                      meaning by itself). */}
+                  {remaining < 0 ? (
+                    <>
+                      <TriangleAlert
+                        className="text-destructive-text mr-1 inline size-3.5 align-[-0.125em]"
+                        aria-hidden="true"
+                      />
+                      <span className="sr-only">{t("over-budget")}</span>
+                    </>
+                  ) : null}
                   <Amount
                     value={remaining}
                     currency={currency}
@@ -594,26 +635,23 @@ const BudgetTable: React.FC<BudgetTableProps> = React.memo(
                 size: 65,
                 cell: ({ row }) =>
                   row.depth > 0 && (
-                    <DropdownMenu>
-                      <DropdownMenuTrigger>
-                        <Ellipsis className="text-foreground size-4" />
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent>
-                        <BudgetCategoryEditSheet
-                          category={row.original}
-                          budgetKey={budgetKey}
-                          year={year}
-                          month={month}
-                          currency={currency}
-                        />
-                        <DropdownMenuItem onClick={() => onDeleteRow(row)}>
-                          <div className="text-destructive-text flex w-full flex-row justify-between">
-                            {t("delete")}
-                            <Trash className="text-destructive-text size-4" />
-                          </div>
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
+                    <BudgetCategoryActionsMenu
+                      trigger={
+                        <button
+                          type="button"
+                          aria-label={t("actions")}
+                          className="hover:bg-muted focus-visible:ring-ring -m-2 inline-flex size-8 items-center justify-center rounded-md focus-visible:ring-2 focus-visible:outline-none"
+                        >
+                          <Ellipsis className="text-foreground size-4" />
+                        </button>
+                      }
+                      category={row.original}
+                      budgetKey={budgetKey}
+                      year={year}
+                      month={month}
+                      currency={currency}
+                      onDelete={() => onDeleteRow(row)}
+                    />
                   ),
               }),
             ]

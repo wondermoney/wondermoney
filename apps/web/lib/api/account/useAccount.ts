@@ -8,7 +8,6 @@ import {
 } from "./useAccounts";
 
 export type AccountSummary = CanonicalAccountSummary;
-export type Account = AccountSummary;
 
 export interface GetAccountResponse {
   account: AccountSummary;

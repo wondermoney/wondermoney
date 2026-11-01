@@ -1,5 +1,5 @@
 /**
- * Inputs the AI categoriser must never be asked about (RAD-584).
+ * Inputs the AI categoriser must never be asked about.
  *
  * A cash withdrawal and a person-to-person transfer carry no information about
  * what the money was spent on — the category is unknowable from the description

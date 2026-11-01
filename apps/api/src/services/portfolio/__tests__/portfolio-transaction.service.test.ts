@@ -35,6 +35,8 @@ import portfolioTransactionService from '../portfolio-transaction.service';
 
 interface TimelineTransaction {
   deletedAt?: Date | null;
+  feeAmount?: number;
+  feeCurrencyKey?: Currency;
   financialAssetKey?: FinancialAsset;
   financialTransactionTypeKey?: FinancialTransactionType;
   portfolioKey?: Portfolio;
@@ -56,7 +58,7 @@ describe('portfolio transaction service', () => {
     financialAssetTypeKey: { name: 'Savings Certificate' },
     symbol: 'CA-SERIE-F',
   } as FinancialAsset;
-  // Static-valuation series (RAD-446): perpetual, legacy, no accrual/tax-exempt concept.
+  // Static-valuation series: perpetual, legacy, no accrual/tax-exempt concept.
   const staticSavingsCertificateAsset = {
     financialAssetKey: 21,
     financialAssetTypeKey: { name: 'Savings Certificate' },
@@ -207,6 +209,36 @@ describe('portfolio transaction service', () => {
     );
   });
 
+  it('keeps a fee entered without a fee currency, in the settlement currency', async () => {
+    const { persistMock } = setupEntityManager();
+
+    await createTransaction(appuser, {
+      assetSymbol: 'AAPL',
+      feeAmount: 2.5,
+      financialTransactionTypeId: buyType.financialTransactionTypeKey,
+      portfolioId: portfolio.portfolioKey,
+      quantity: 2,
+      settlementCurrencyId: currency.currencyKey,
+      transactionDate: new Date('2026-05-20T12:34:56Z'),
+      unitPrice: 100,
+    });
+
+    const persisted = (persistMock.mock.calls as unknown[][]).map(([entity]) => entity).find((entity) => entity instanceof FinancialTransaction);
+    expect(persisted).toMatchObject({ feeAmount: 2.5, feeCurrencyKey: currency });
+  });
+
+  it('never leaves an edited transaction with a fee but no fee currency', async () => {
+    const addedFee = transaction({ transactionDate: new Date('2026-05-18T00:00:00Z') });
+    setupEntityManager({ transactionForUpdate: addedFee });
+    await updateTransaction(appuser, portfolio.portfolioKey, 99, { feeAmount: 3 });
+    expect(addedFee).toMatchObject({ feeAmount: 3, feeCurrencyKey: currency });
+
+    const clearedCurrency = transaction({ feeAmount: 3, feeCurrencyKey: { code: 'USD', currencyKey: 2 } as Currency, transactionDate: new Date('2026-05-18T00:00:00Z') });
+    setupEntityManager({ transactionForUpdate: clearedCurrency });
+    await updateTransaction(appuser, portfolio.portfolioKey, 99, { feeCurrencyId: null });
+    expect(clearedCurrency).toMatchObject({ feeAmount: 3, feeCurrencyKey: currency });
+  });
+
   it('requires enqueue before persisting a maintenance-enabled transaction', async () => {
     const { persistMock } = setupEntityManager();
 
@@ -238,8 +270,8 @@ describe('portfolio transaction service', () => {
     const firstId = (firstPersist.mock.calls[0]?.[0] as FinancialTransaction).internalTransactionId;
 
     const { persistMock: secondPersist } = setupEntityManager();
-    // Two different tenants entering the same symbol/amount/timestamp used to collide on a
-    // DB-global unique constraint (RAD-603) because the key had no tenant/portfolio component.
+    // Two different tenants entering the same symbol/amount/timestamp must not collide on the
+    // DB-global unique constraint, so the key carries a tenant/portfolio component.
     await createTransaction(appuser, identicalInputs);
     const secondId = (secondPersist.mock.calls[0]?.[0] as FinancialTransaction).internalTransactionId;
 
@@ -269,7 +301,7 @@ describe('portfolio transaction service', () => {
     const { flushMock } = setupEntityManager();
     assetPriceServiceMock.ensureRecentAssetPrice.mockRejectedValueOnce(new Error('provider unavailable'));
 
-    // The transaction itself already committed by this point (RAD-603) — a maintenance
+    // The transaction itself already committed by this point — a maintenance
     // hiccup must not report the write as failed and invite a retry that then hits the
     // unique constraint on a transaction that was never actually missing.
     await expect(
@@ -1203,7 +1235,7 @@ describe('portfolio transaction service', () => {
     const { findMock } = setupEntityManager({
       findRows: [transaction({ financialAssetKey: asset, portfolioKey: portfolio, transactionDate: new Date('2026-01-01T00:00:00Z') })],
       splitRows: [
-        { date: new Date('2026-01-03T00:00:00Z'), denominator: 1, financialAssetKey: asset, financialAssetStockAdjustmentKey: 1, numerator: 2, splitRatio: 2 } as FinancialAssetStockAdjustment,
+        { date: new Date('2026-01-03T00:00:00Z'), denominator: 1, financialAssetKey: asset, financialAssetStockAdjustmentKey: 1, numerator: 2, splitRatio: 2 },
       ],
     });
 

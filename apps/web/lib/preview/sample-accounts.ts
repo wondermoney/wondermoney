@@ -1,10 +1,9 @@
 /**
  * The one fictional account set used by every "here's what you'll get" preview.
  *
- * Home and Accounts each carried their own invented dataset, so the same session
- * showed a total balance of €15,250 on one screen and €10,430 on the next — two
- * different fictional people, one product (RAD-589). Every preview surface reads
- * from here so they cannot drift apart again.
+ * Every preview surface reads from here so they cannot drift apart: separate
+ * invented datasets would show one total balance on Home and another on
+ * Accounts in the same session — two different fictional people, one product.
  *
  * The institutions are the ones WonderMoney users actually connect (measured on
  * production 2026-08-23: Revolut, ActivoBank and BPI are all in the top six), so

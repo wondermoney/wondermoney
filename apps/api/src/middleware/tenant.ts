@@ -36,7 +36,7 @@ export async function resolveTenantForRequest(req: Request, _res: Response, next
     if (!req.tenant) {
       await getTenantForRequest(req);
     }
-    // RAD-343 (A2): stamp the tenant context onto the request EM so the global
+    // Stamp the tenant context onto the request EM so the global
     // tenant filter engages (scope-when-present). Without this the filter is a no-op.
     if (req.tenant && req.user) {
       setTenantContext(DI.em, { appuserKey: req.user.appuserKey, tenantKey: req.tenant.tenantKey });

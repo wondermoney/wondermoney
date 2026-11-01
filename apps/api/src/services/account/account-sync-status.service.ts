@@ -1,5 +1,5 @@
 /**
- * Stale-sync warning (RAD-346, Phase 1).
+ * Stale-sync warning.
  *
  * Derives a user-facing freshness signal for an account from its last successful
  * transaction sync and whether it currently has an open (non-terminal, user-visible)

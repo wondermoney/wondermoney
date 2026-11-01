@@ -68,7 +68,7 @@ const FinancialMarketsTickerEarnings: React.FC<
   }
 
   // Not an outage: this capability is outside the current market-data plan and
-  // the API says so with a 404 (RAD-449/RAD-609).
+  // the API says so with a 404.
   if (isMarketDataNotCovered(error)) {
     return <MarketDataNotCovered title={t("earnings")} />;
   }
@@ -115,7 +115,7 @@ const FinancialMarketsTickerEarnings: React.FC<
     };
 
     return (
-      <div className="border-border/50 bg-background min-w-[10rem] rounded-lg border px-3 py-2 text-xs shadow-xl">
+      <div className="border-border/50 bg-background min-w-[10rem] rounded-lg border px-3 py-2 text-xs shadow-lg">
         <div className="mb-2 font-medium">{String(label)}</div>
         <div className="grid gap-1.5">
           <div className="flex items-center justify-between gap-4">

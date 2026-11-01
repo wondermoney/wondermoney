@@ -8,7 +8,6 @@ import {
 } from '../bank-recovery.queue';
 
 type EnqueueDeps = Parameters<typeof enqueueBankRecoveryAfter>[1];
-type EnsureQueueBoss = Parameters<typeof ensureBankRecoveryQueue>[0];
 
 const payload = {
   deliveryKey: 7,
@@ -19,7 +18,7 @@ const payload = {
 describe('bank recovery queue', () => {
   it('bounds retries and retention so a failing recovery send cannot retry forever', async () => {
     const createQueue = vi.fn().mockResolvedValue(undefined);
-    await ensureBankRecoveryQueue({ createQueue } as unknown as EnsureQueueBoss);
+    await ensureBankRecoveryQueue({ createQueue });
     // objectContaining, not an exact literal: the values below are the operational bound that
     // matters (a bounded, backed-off retry budget and a finite retention window). Additional
     // options — a dead-letter target, an expiry — are orthogonal and must not fail this test.

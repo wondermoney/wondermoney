@@ -18,7 +18,7 @@ describe('manual account contracts', () => {
     expect(createOfflineAccountEndpoint.schema.safeParse({ accountId: 12 }).success).toBe(false)
   })
 
-  it('strictly validates currency and optional institution fields', () => {
+  it('validates currency and optional institution fields and strips added ones', () => {
     const currencies = { currencies: [{ currencyKey: 151, code: 'EUR', description: 'Euro' }] }
     const institutions = { accountFinancialInstitutions: [{ accountFinancialInstitutionKey: 8, displayName: 'Bank', logoUrl: 'https://example.test/logo.png' }, { accountFinancialInstitutionKey: 9 }] }
     expect(accountCurrenciesResponseSchema.parse(currencies)).toEqual(currencies)
@@ -27,8 +27,9 @@ describe('manual account contracts', () => {
       { currencies: [{ currencyKey: 0, code: 'EUR', description: 'Euro' }] },
       { currencies: [{ currencyKey: 1, code: 'eur', description: 'Euro' }] },
       { currencies: [{ currencyKey: 1, code: 'EUR', description: '' }] },
-      { currencies: [{ currencyKey: 1, code: 'EUR', description: 'Euro', symbol: '€' }] },
     ]) expect(accountCurrenciesResponseSchema.safeParse(value).success).toBe(false)
+    expect(accountCurrenciesResponseSchema.parse({ currencies: [{ currencyKey: 151, code: 'EUR', description: 'Euro', symbol: '€' }] })).toEqual(currencies)
+    expect(accountFinancialInstitutionsResponseSchema.parse({ accountFinancialInstitutions: [{ accountFinancialInstitutionKey: 9, country: 'PT' }] })).toEqual({ accountFinancialInstitutions: [{ accountFinancialInstitutionKey: 9 }] })
     expect(accountFinancialInstitutionsResponseSchema.safeParse({ accountFinancialInstitutions: [{ accountFinancialInstitutionKey: -1 }] }).success).toBe(false)
     expect(accountFinancialInstitutionsResponseSchema.safeParse({ accountFinancialInstitutions: [{ accountFinancialInstitutionKey: 1, logoUrl: 'not-a-url' }] }).success).toBe(false)
   })

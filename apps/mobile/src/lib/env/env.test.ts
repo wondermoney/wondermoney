@@ -146,7 +146,7 @@ describe('parseEnv', () => {
 
   it('does not read leftover Supabase variables', () => {
     // A stale EXPO_PUBLIC_SUPABASE_* pair must not affect parsing either way;
-    // the schema no longer recognizes it.
+    // the schema does not recognize it.
     expect(parseEnv({
       ...valid,
       EXPO_PUBLIC_SUPABASE_URL: 'https://cnxkjplvlwphhbtrvzai.supabase.co',

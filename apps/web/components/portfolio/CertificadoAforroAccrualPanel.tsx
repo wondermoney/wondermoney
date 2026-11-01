@@ -32,7 +32,7 @@ export function CertificadoAforroAccrualPanel({
   holding,
 }: CertificadoAforroAccrualPanelProps) {
   const formatPercentage = useFormatPercentage();
-  // RAD-575 — inside the component because it needs the active locale. See the
+  // Inside the component because it needs the active locale. See the
   // note above on why bps must become a fraction before `style: "percent"`.
   const formatBpsAsPercentage = (bps: number) =>
     formatPercentage(bps / 10000, { maximumFractionDigits: 2 });
@@ -181,4 +181,3 @@ export function CertificadoAforroAccrualPanel({
   );
 }
 
-export default CertificadoAforroAccrualPanel;

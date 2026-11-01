@@ -5,7 +5,7 @@ import api from "../api";
 import { goalActivityQueryKey } from "./keys";
 import type { GetGoalActivityResponse, GoalActivityParams } from "./types";
 
-export async function getGoalActivity(
+async function getGoalActivity(
   goalKey: number,
   params?: GoalActivityParams,
   apiClient: AxiosInstance = api,

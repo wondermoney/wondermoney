@@ -92,7 +92,7 @@ export function PortfolioImportSessionShell({
       </div>
 
       {footer ? (
-        <div className="bg-background/95 supports-[backdrop-filter]:bg-background/80 sticky bottom-0 z-10 -mx-4 border-t px-4 py-4 backdrop-blur sm:-mx-6 sm:px-6">
+        <div className="bg-background sticky bottom-0 z-10 -mx-4 border-t px-4 py-4 sm:-mx-6 sm:px-6">
           {footer}
         </div>
       ) : null}

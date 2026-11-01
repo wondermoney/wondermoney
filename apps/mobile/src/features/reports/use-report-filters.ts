@@ -17,7 +17,7 @@ const EMPTY_FIELDS: ReportFilterFields = {
 }
 
 /**
- * Mobile-local equivalent of web's URL-persisted useReportFilters (RAD-156) — mobile routes
+ * Mobile-local equivalent of web's URL-persisted useReportFilters — mobile routes
  * aren't a shareable/bookmarkable surface the same way, so filter state lives in the screen
  * instead of the URL.
  */

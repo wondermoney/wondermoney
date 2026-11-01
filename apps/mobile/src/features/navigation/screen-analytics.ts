@@ -4,7 +4,7 @@ import { useEffect, useRef } from 'react'
 import { captureAnalyticsEvent, type FeatureScreen } from '@/lib/telemetry/analytics'
 
 /**
- * RAD-518 — `feature_screen_viewed`, the one engagement signal the telemetry ADR
+ * `feature_screen_viewed`, the one engagement signal the telemetry ADR
  * approves, wired once at the root instead of a `useEffect` in seventy screen
  * files.
  *

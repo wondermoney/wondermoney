@@ -6,6 +6,7 @@ import {
   BookOpen,
   CalendarClock,
   FlaskConical,
+  HandCoins,
   HelpCircleIcon,
   Landmark,
   Lightbulb,
@@ -20,7 +21,7 @@ import { usePostHog } from "posthog-js/react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 import { useRouter } from "@/i18n/navigation";
-import { useAdminModuleVisibility } from "@/lib/admin/useAdminModuleVisibility";
+import { useFeature } from "@/lib/api/instance/useInstance";
 import { authClient } from "@/lib/auth/client";
 import { useUser } from "@/lib/auth/user-context";
 import { instanceConfig } from "@/lib/instance";
@@ -43,10 +44,7 @@ export default function BottomNavMoreSheet({ open, onOpenChange }: Props) {
   const router = useRouter();
   const queryClient = useQueryClient();
   const posthog = usePostHog();
-  const { isModuleVisible } = useAdminModuleVisibility(
-    user?.email,
-    user?.email_confirmed_at,
-  );
+  const marketDataAvailable = useFeature((features) => features.marketData);
 
   const userInitials = user?.email?.split("@")[0].slice(0, 2).toUpperCase();
   const userTrimmedEmail = user?.email?.split("@")[0];
@@ -95,28 +93,22 @@ export default function BottomNavMoreSheet({ open, onOpenChange }: Props) {
         <Separator />
 
         <ul className="py-2" aria-label={t("navigation.accounts")}>
-          {mobileMoreAccountsItems
-            .filter(
-              (item) =>
-                item.id !== "accounts.recurring" ||
-                isModuleVisible("recurring"),
-            )
-            .map((item) => {
-              const Icon = accountItemIcons[item.id];
-              return (
-                <li key={item.id}>
-                  <Link
-                    href={item.href}
-                    onClick={close}
-                    className={itemClass}
-                    data-testid={`more-sheet-${item.id}`}
-                  >
-                    <Icon className="size-5 shrink-0" strokeWidth={1.5} />
-                    {t(item.labelKey)}
-                  </Link>
-                </li>
-              );
-            })}
+          {mobileMoreAccountsItems.map((item) => {
+            const Icon = accountItemIcons[item.id];
+            return (
+              <li key={item.id}>
+                <Link
+                  href={item.href}
+                  onClick={close}
+                  className={itemClass}
+                  data-testid={`more-sheet-${item.id}`}
+                >
+                  <Icon className="size-5 shrink-0" strokeWidth={1.5} />
+                  {t(item.labelKey)}
+                </Link>
+              </li>
+            );
+          })}
         </ul>
 
         <Separator />
@@ -155,8 +147,8 @@ export default function BottomNavMoreSheet({ open, onOpenChange }: Props) {
           </li>
         </ul>
 
-        {/* Admin-only modules */}
-        {isModuleVisible("financialMarkets") && (
+        {/* Hidden only when this server has no market-data provider */}
+        {marketDataAvailable && (
           <>
             <Separator />
             <ul className="py-2">
@@ -176,14 +168,23 @@ export default function BottomNavMoreSheet({ open, onOpenChange }: Props) {
 
         <Separator />
         <ul className="py-2">
-          {isModuleVisible("goals") && (
-            <li>
-              <Link href="/goals" onClick={close} className={itemClass}>
-                <Target className="size-5 shrink-0" strokeWidth={1.5} />
-                {t("navigation.goals")}
-              </Link>
-            </li>
-          )}
+          <li>
+            <Link
+              href="/loans"
+              onClick={close}
+              className={itemClass}
+              data-testid="more-sheet-loans"
+            >
+              <HandCoins className="size-5 shrink-0" strokeWidth={1.5} />
+              {t("navigation.loans")}
+            </Link>
+          </li>
+          <li>
+            <Link href="/goals" onClick={close} className={itemClass}>
+              <Target className="size-5 shrink-0" strokeWidth={1.5} />
+              {t("navigation.goals")}
+            </Link>
+          </li>
           <li>
             <Link href="/reports" onClick={close} className={itemClass}>
               <BookOpen className="size-5 shrink-0" strokeWidth={1.5} />
@@ -193,17 +194,16 @@ export default function BottomNavMoreSheet({ open, onOpenChange }: Props) {
         </ul>
 
         {/* Demo mode badge */}
-        {instanceConfig.demoEmail !== null && user?.email === instanceConfig.demoEmail && (
-          <>
-            <Separator />
-            <div className="mx-6 my-3 flex items-center justify-center gap-2 rounded bg-violet-100 py-2 shadow-xs">
-              <FlaskConical className="size-5 text-violet-700 dark:text-violet-300" />
-              <Text className="text-violet-700 dark:text-violet-300">
-                {t("demo-mode")}
-              </Text>
-            </div>
-          </>
-        )}
+        {instanceConfig.demoEmail !== null &&
+          user?.email === instanceConfig.demoEmail && (
+            <>
+              <Separator />
+              <div className="bg-primary/10 mx-6 my-3 flex items-center justify-center gap-2 rounded py-2">
+                <FlaskConical className="text-primary size-5" />
+                <Text className="text-primary">{t("demo-mode")}</Text>
+              </div>
+            </>
+          )}
 
         <Separator />
 

@@ -13,17 +13,11 @@ export const i18n = defineI18n({
   parser: 'dir',
 });
 
-export const localeLabels: Record<Locale, string> = {
-  en: 'English',
-  pt: 'Português',
-  es: 'Español',
-};
-
 export function isLocale(value: string): value is Locale {
   return locales.includes(value as Locale);
 }
 
-export const translations = i18n
+const translations = i18n
   .translations()
   .extend(uiTranslations())
   .add('ui', {

@@ -9,7 +9,7 @@ import { createBankInstitutionsEndpoint } from './institutions-contract'
 import { bankInstitutionsKey } from './query-keys'
 
 /**
- * RAD-240 — read-only institution picker source. Genuinely idempotent GET
+ * Read-only institution picker source. Genuinely idempotent GET
  * (unlike start-bank-connection), so this is a plain cached useQuery, same
  * shape as use-bank-connections: no retry, no focus/reconnect refetch,
  * MFA routed through blockAccess.

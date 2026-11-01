@@ -1,7 +1,9 @@
 import { addDays, subYears } from 'date-fns';
+import { sql } from 'kysely';
 
 import { DI } from '@app/app';
 import { FINANCIAL_TRANSACTION_TYPES } from '@app/constants/financial-transaction-types';
+import { sqlQuery, toDate } from '@app/database/sql';
 import type { Appuser } from '@entity/Appuser';
 import { Portfolio } from '@entity/Portfolio';
 import { NotFoundError } from '@utils/errors';
@@ -35,21 +37,20 @@ class PortfolioHistoryStatusService {
 
     if (!portfolio) throw new NotFoundError('Portfolio not found');
 
-    const knex = DI.em.getKnex();
-    const buyRows = (await knex('financial_transaction as ft')
-      .select(
+    const db = sqlQuery(DI.em);
+    const buyRows = (await db
+      .selectFrom('financial_transaction as ft')
+      .select([
         'ft.financial_asset_key',
-        knex.raw('MIN(ft.transaction_date) as earliest_buy_date'),
-        knex.raw('MAX(ft.created_at) as latest_created_at'),
-      )
-      .where(function () {
-        if (tenantKey == null) this.where('ft.appuser_key', appuser.appuserKey);
-        else this.where('ft.tenant_key', tenantKey);
-      })
-      .where('ft.portfolio_key', portfolioId)
-      .where('ft.deleted_at', null)
-      .where('ft.financial_transaction_type_key', FINANCIAL_TRANSACTION_TYPES.BUY)
-      .groupBy('ft.financial_asset_key')) as BuyRangeRow[];
+        sql<Date | string>`MIN(ft.transaction_date)`.as('earliest_buy_date'),
+        sql<Date | string>`MAX(ft.created_at)`.as('latest_created_at'),
+      ])
+      .where((eb) => (tenantKey == null ? eb('ft.appuser_key', '=', appuser.appuserKey) : eb('ft.tenant_key', '=', tenantKey)))
+      .where('ft.portfolio_key', '=', portfolioId)
+      .where('ft.deleted_at', 'is', null)
+      .where('ft.financial_transaction_type_key', '=', FINANCIAL_TRANSACTION_TYPES.BUY)
+      .groupBy('ft.financial_asset_key')
+      .execute()) as BuyRangeRow[];
 
     const assetsTotal = buyRows.length;
     const today = startOfUTCDay(new Date());
@@ -67,12 +68,14 @@ class PortfolioHistoryStatusService {
     for (const row of buyRows) {
       const earliestBuyDate = normalizeDate(row.earliest_buy_date);
       const requiredFrom = getNextBusinessDayOnOrAfter(earliestBuyDate > tenYearsAgo ? startOfUTCDay(earliestBuyDate) : tenYearsAgo);
-      const prices = (await knex('financial_asset_price')
-        .select('financial_asset_key', 'date')
-        .where('financial_asset_key', row.financial_asset_key)
+      const prices = (await db
+        .selectFrom('financial_asset_price')
+        .select(['financial_asset_key', 'date'])
+        .where('financial_asset_key', '=', row.financial_asset_key)
         .where('date', '>=', requiredFrom)
         .where('date', '<=', latestExpectedDate)
-        .orderBy('date', 'asc')) as PriceRow[];
+        .orderBy('date', 'asc')
+        .execute()) as PriceRow[];
       if (isPriceCoverageSufficient(requiredFrom, latestExpectedDate, prices.map((price) => normalizeDate(price.date)))) {
         assetsReady += 1;
       } else {
@@ -83,12 +86,14 @@ class PortfolioHistoryStatusService {
       }
     }
 
-    const snapshots = (await knex('portfolio_snapshot')
-      .select(
-        knex.raw('MIN(snapshot_date) as earliest_snapshot_date'),
-        knex.raw('MAX(snapshot_date) as latest_snapshot_date'),
-      )
-      .where('portfolio_key', portfolioId)) as SnapshotRangeRow[];
+    const snapshots = (await db
+      .selectFrom('portfolio_snapshot')
+      .select([
+        sql<Date | null | string>`MIN(snapshot_date)`.as('earliest_snapshot_date'),
+        sql<Date | null | string>`MAX(snapshot_date)`.as('latest_snapshot_date'),
+      ])
+      .where('portfolio_key', '=', portfolioId)
+      .execute()) as SnapshotRangeRow[];
 
     const earliestSnapshotDate = normalizeNullableDate(snapshots[0]?.earliest_snapshot_date ?? null);
     const latestSnapshotDate = normalizeNullableDate(snapshots[0]?.latest_snapshot_date ?? null);
@@ -180,7 +185,7 @@ function isWeekendUTC(date: Date): boolean {
 }
 
 function normalizeDate(value: Date | string): Date {
-  return value instanceof Date ? value : new Date(value);
+  return toDate(value);
 }
 
 function normalizeNullableDate(value: Date | null | string): Date | null {

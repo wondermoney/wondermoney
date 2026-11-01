@@ -14,7 +14,7 @@ import {
  * Same shape as `useFormatCurrency` / `useFormatNumber`: the hook exists so a
  * component never has to reach for `useLocale()` itself and never has the
  * option of passing `undefined`, which resolves to the *runtime's* locale —
- * the browser's on the client, the container's during SSR (RAD-575).
+ * the browser's on the client, the container's during SSR.
  */
 export function useFormatShortDate() {
   const locale = useLocale();
@@ -26,4 +26,3 @@ export function useFormatShortDate() {
   );
 }
 
-export default useFormatShortDate;

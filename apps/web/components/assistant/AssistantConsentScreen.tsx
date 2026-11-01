@@ -27,13 +27,10 @@ export default function AssistantConsentScreen({
     >
       <div className="space-y-6">
         <div className="flex items-center gap-3">
-          <div className="bg-primary/10 text-primary flex size-11 items-center justify-center rounded-2xl border border-primary/15">
+          <div className="bg-primary/10 text-primary flex size-11 items-center justify-center rounded-lg border border-primary/15">
             <ShieldCheck className="size-5" />
           </div>
           <div className="space-y-1">
-            <p className="text-muted-foreground text-xs font-medium uppercase tracking-[0.18em]">
-              {t("consent.eyebrow")}
-            </p>
             <h2 className="text-xl leading-tight font-semibold tracking-tight md:text-2xl">
               {t("consent.title")}
             </h2>
@@ -45,7 +42,7 @@ export default function AssistantConsentScreen({
         </p>
 
         <div className="grid gap-3 text-sm md:grid-cols-2">
-          <div className="rounded-2xl border border-border/70 bg-background p-4 shadow-sm">
+          <div className="rounded-lg border border-border bg-background p-4">
             <div className="mb-2 flex items-center gap-2 font-medium">
               <Lock className="text-muted-foreground size-4" />
               <span>{t("consent.readOnly")}</span>
@@ -55,7 +52,7 @@ export default function AssistantConsentScreen({
             </p>
           </div>
 
-          <div className="rounded-2xl border border-border/70 bg-background p-4 shadow-sm">
+          <div className="rounded-lg border border-border bg-background p-4">
             <div className="mb-2 flex items-center gap-2 font-medium">
               <ShieldCheck className="text-muted-foreground size-4" />
               <span>{t("consent.azure")}</span>
@@ -65,7 +62,7 @@ export default function AssistantConsentScreen({
             </p>
           </div>
 
-          <div className="rounded-2xl border border-border/70 bg-background p-4 shadow-sm">
+          <div className="rounded-lg border border-border bg-background p-4">
             <div className="mb-2 flex items-center gap-2 font-medium">
               <Lock className="text-muted-foreground size-4" />
               <span>{t("consent.temporary")}</span>
@@ -75,7 +72,7 @@ export default function AssistantConsentScreen({
             </p>
           </div>
 
-          <div className="rounded-2xl border border-border/70 bg-background p-4 shadow-sm">
+          <div className="rounded-lg border border-border bg-background p-4">
             <div className="mb-2 flex items-center gap-2 font-medium">
               <Lock className="text-muted-foreground size-4" />
               <span>{t("consent.tools")}</span>

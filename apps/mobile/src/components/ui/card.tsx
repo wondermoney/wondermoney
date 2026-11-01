@@ -5,7 +5,7 @@ import { Text } from '@/components/ui/text'
 import { themeTokens, type Palette } from '@/theme/tokens'
 import { usePalette } from '@/theme/use-palette'
 
-export function Card({
+function Card({
   children,
   style,
   /** 16px on a data card; 24px for a standalone unit. */

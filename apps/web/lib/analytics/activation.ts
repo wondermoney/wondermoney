@@ -63,7 +63,7 @@ export function captureActivationEvent(
   client?.capture(eventName, sanitizeActivationProperties(properties));
 }
 
-export function getActivationDedupeKey(
+function getActivationDedupeKey(
   eventName: ActivationEventName,
   context: ActivationDedupeContext = {},
 ): string | undefined {

@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import type { AnyZodObject } from 'zod';
+import type { ZodType } from 'zod';
 
 const mocked = vi.hoisted(() => ({
   attachQueueJob: vi.fn().mockResolvedValue(true),
@@ -13,52 +13,34 @@ const mocked = vi.hoisted(() => ({
   getEodhdDividends: vi.fn(),
   getPortfolioCsvBucketName: vi.fn().mockReturnValue('portfolios-csv-dev'),
   getPortfoliosHoldings: vi.fn(),
-  innerJoin: vi.fn(),
   markNeedsAction: vi.fn().mockResolvedValue(true),
   persist: vi.fn().mockReturnThis(),
   presignedUrl: vi.fn(),
-  raw: vi.fn((value: unknown) => value),
   reviewPresignedUrl: vi.fn(),
-  select: vi.fn(),
   send: vi.fn().mockResolvedValue('job-1'),
-  whereIn: vi.fn(),
-  whereNull: vi.fn(),
+  snapshotRows: vi.fn((): unknown[] => []),
 }));
 const requestEnqueue = { send: mocked.send, sendAfter: vi.fn() };
 
 vi.mock('@app/validators/parser', () => ({
-  zParse: vi.fn(((_schema: AnyZodObject, req: unknown) => Promise.resolve(req)) as unknown as Parameters<typeof vi.fn>[0]),
+  zParse: vi.fn((_schema: ZodType, req: unknown) => Promise.resolve(req)),
 }));
 
-vi.mock('../../app.js', () => ({
-  DI: {
-    em: {
-      find: mocked.find,
-      findOne: mocked.findOne,
-      flush: mocked.flush,
-      getKnex: () => {
-        const queryBuilder = {
-          innerJoin: mocked.innerJoin,
-          select: mocked.select,
-          whereIn: mocked.whereIn,
-          whereNull: mocked.whereNull,
-        };
-        mocked.innerJoin.mockReturnValue(queryBuilder);
-        mocked.select.mockReturnValue(queryBuilder);
-        mocked.whereNull.mockReturnValue(queryBuilder);
-        // `whereIn` terminates the snapshot-balance chain, so it is the thenable the
-        // controller awaits (see getPortfolios in controller/portfolio.ts).
-        mocked.whereIn.mockReturnValue(queryBuilder);
-        const knex = vi.fn(() => queryBuilder) as unknown as ((table: string) => typeof queryBuilder) & {
-          raw: typeof mocked.raw;
-        };
-        knex.raw = mocked.raw;
-        return knex;
+vi.mock('../../app.js', async () => {
+  const { kyselyDouble } = await import('@app/__tests__/__helpers__/kysely-double');
+  return {
+    DI: {
+      em: {
+        find: mocked.find,
+        findOne: mocked.findOne,
+        flush: mocked.flush,
+        // The latest-snapshot balances `getPortfolios` reads with hand-written SQL.
+        getKysely: () => kyselyDouble(() => mocked.snapshotRows()).db,
+        persist: mocked.persist,
       },
-      persist: mocked.persist,
     },
-  },
-}));
+  };
+});
 
 vi.mock('@service/market-data/eodhd.service', () => ({
   default: {
@@ -98,15 +80,11 @@ describe('portfolio controller scenarios', () => {
     mocked.findOne.mockReset();
     mocked.flush.mockReset().mockResolvedValue(undefined);
     mocked.persist.mockReset().mockReturnThis();
-    mocked.innerJoin.mockReset();
-    mocked.whereIn.mockReset();
-    mocked.whereNull.mockReset();
+    mocked.snapshotRows.mockReset().mockReturnValue([]);
     mocked.enqueue.mockReset().mockResolvedValue({ correlationId: 'cid', status: 'queued' });
     mocked.attachQueueJob.mockReset().mockResolvedValue(true);
     mocked.getPortfolioCsvBucketName.mockReset().mockReturnValue('portfolios-csv-dev');
     mocked.presignedUrl.mockReset();
-    mocked.raw.mockReset();
-    mocked.select.mockReset();
     mocked.createQueuedOperation.mockReset().mockResolvedValue({ correlationId: 'cid' });
     mocked.createImportSession.mockReset();
     mocked.finish.mockReset().mockResolvedValue(true);
@@ -114,7 +92,7 @@ describe('portfolio controller scenarios', () => {
     mocked.markNeedsAction.mockReset().mockResolvedValue(true);
     mocked.reviewPresignedUrl.mockReset();
     mocked.getPortfoliosHoldings.mockReset();
-    vi.mocked(zParse).mockReset().mockImplementation(((_schema: AnyZodObject, req: unknown) => Promise.resolve(req)) as unknown as typeof zParse);
+    vi.mocked(zParse).mockReset().mockImplementation((_schema: ZodType, req: unknown) => Promise.resolve(req));
   });
 
   it('creates a review import session and returns isolated upload URL', async () => {
@@ -278,7 +256,7 @@ describe('portfolio controller scenarios', () => {
     expect(mocked.attachQueueJob).not.toHaveBeenCalled();
   });
 
-  it('stubs earnings to [] (RAD-449: Fundamentals-tier, not covered) and returns EODHD-backed dividends filtered to the forward window', async () => {
+  it('stubs earnings to [] (Fundamentals-tier, not covered) and returns EODHD-backed dividends filtered to the forward window', async () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date('2026-07-15T12:00:00.000Z'));
     vi.mocked(zParse).mockResolvedValueOnce({});
@@ -354,9 +332,9 @@ describe('portfolio controller scenarios', () => {
         portfolioKey: 1,
       },
     ]);
-    mocked.whereIn.mockReturnValueOnce(Promise.resolve([
+    mocked.snapshotRows.mockReturnValueOnce([
       { balance: '106', portfolio_key: 1 },
-    ]));
+    ]);
 
     const json = vi.fn();
     await getPortfolios(
@@ -384,7 +362,7 @@ describe('portfolio controller scenarios', () => {
     vi.useRealTimers();
   });
 
-  it('populates currencyKey so a single portfolio response carries a real currency code (RAD-530)', async () => {
+  it('populates currencyKey so a single portfolio response carries a real currency code', async () => {
     mocked.findOne.mockResolvedValueOnce({
       currencyKey: { code: 'USD' },
       description: 'US brokerage',
@@ -463,7 +441,7 @@ describe('portfolio controller scenarios', () => {
     await expect(rebuildPortfolioSnapshot({ enqueue: requestEnqueue, params: { portfolioId: '1' }, user: { appuserKey: 1 } } as unknown as Parameters<typeof rebuildPortfolioSnapshot>[0], mockRes({ json: vi.fn(), status: vi.fn() }))).rejects.toThrow('Portfolio not found');
   });
 
-  describe('getHoldingAnalystData (RAD-449: stubbed, not covered by EODHD plan)', () => {
+  describe('getHoldingAnalystData (stubbed, not covered by the EODHD plan)', () => {
     it('throws NotFoundError', async () => {
       vi.mocked(zParse).mockResolvedValueOnce({ params: { symbol: 'AAPL' } });
 
@@ -481,7 +459,7 @@ describe('portfolio controller scenarios', () => {
     });
   });
 
-  describe('getHoldingValuation (RAD-449: stubbed, not covered by EODHD plan)', () => {
+  describe('getHoldingValuation (stubbed, not covered by the EODHD plan)', () => {
     it('throws NotFoundError', async () => {
       vi.mocked(zParse).mockResolvedValueOnce({ params: { symbol: 'AAPL' } });
 

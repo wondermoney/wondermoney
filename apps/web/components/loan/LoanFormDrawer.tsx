@@ -92,20 +92,20 @@ function buildBaseSchema(t: (key: string) => string) {
       "OTHER",
     ]),
     providerName: z.string().optional(),
-    currencyKey: z.coerce.number().int().positive(),
-    openingPrincipalBalance: z.coerce.number().min(0),
+    currencyKey: z.coerce.number<number>().int().positive(),
+    openingPrincipalBalance: z.coerce.number<number>().min(0),
     openingBalanceDate: z.string().min(1, t("validation.required")),
     // Amount originally borrowed at origination — distinct from, and
     // optionally greater than or equal to, openingPrincipalBalance (the
     // balance as of openingBalanceDate). See the cross-field check below.
-    originalPrincipal: z.coerce.number().min(0).optional(),
-    regularPaymentAmount: z.coerce.number().positive().optional(),
+    originalPrincipal: z.coerce.number<number>().min(0).optional(),
+    regularPaymentAmount: z.coerce.number<number>().positive().optional(),
     // Entered as a percentage (e.g. 3.5 for 3.5%); converted to the
     // basis-points integer the API expects (`annualInterestRateBps`) on
     // submit — see `submit()`.
-    interestRatePercent: z.coerce.number().min(0).max(100).optional(),
-    paymentDayOfMonth: z.coerce.number().min(1).max(31).optional(),
-    termMonths: z.coerce.number().int().positive().optional(),
+    interestRatePercent: z.coerce.number<number>().min(0).max(100).optional(),
+    paymentDayOfMonth: z.coerce.number<number>().min(1).max(31).optional(),
+    termMonths: z.coerce.number<number>().int().positive().optional(),
     includeInNetWorth: z.boolean(),
     notes: z.string().optional(),
   });
@@ -164,7 +164,7 @@ export default function LoanFormDrawer({
           data.originalPrincipal < data.openingPrincipalBalance
         ) {
           ctx.addIssue({
-            code: z.ZodIssueCode.custom,
+            code: "custom",
             message: t("validation.originalPrincipalTooLow"),
             path: ["originalPrincipal"],
           });

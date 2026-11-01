@@ -14,13 +14,10 @@ interface ReportAmountProps {
 /**
  * Money on a report surface.
  *
- * This used to call `formatCurrencyForLocale` and render the result as one
- * atomic string, which is exactly what DESIGN.md § 9 rule 1 argues against:
- * `€11,250.00` has no seam, so the currency token — identical on every row —
- * competes with the magnitude the eye is actually comparing.
- *
- * It now delegates to `<Amount>`, which splits through `formatToParts` and sets
- * the symbol in muted ink. Reports keep their own component because of the
+ * Delegates to `<Amount>`, which splits through `formatToParts` and sets the
+ * symbol in muted ink. One atomic string (DESIGN.md § 9 rule 1 argues against
+ * it) has no seam: in `€11,250.00` the currency token — identical on every row —
+ * competes with the magnitude the eye is actually comparing. Reports keep their own component because of the
  * `currencyKey` contract below, not because they format differently.
  */
 export function ReportAmount({

@@ -1,12 +1,14 @@
 "use client";
 
-import { type ColumnDef, createColumnHelper } from "@tanstack/react-table";
 import { useTranslations } from "next-intl";
 import { useMemo } from "react";
 
 import { Amount } from "@/components/ui/Amount";
-import CategoryIcon from "@/components/ui/CategoryIcon";
+import CategoryIcon, {
+  categoryIconStyle,
+} from "@/components/ui/CategoryIcon";
 import { Table } from "@/components/ui/Table";
+import { type ColumnDef, createColumnHelper } from "@/components/ui/Table/features";
 import { Text } from "@/components/ui/Typography";
 import type { CategoriesSpending } from "@/lib/api/account/useTransactionsCategorySpending";
 import { useFormatCurrency } from "@/lib/utils/useFormatCurrency";
@@ -37,7 +39,7 @@ function MobileCategoriesSpendingList({
   return (
     // Shell-less on purpose: the border, background and radius belong to the
     // card the caller wraps this in, so the two "last week" panels on the
-    // dashboard cannot drift apart again (RAD-618).
+    // dashboard cannot drift apart.
     <div className="divide-border divide-y md:hidden">
       {categoriesSpending.map((category) => {
         const progress = totalAmount > 0 ? category.amount / totalAmount : 0;
@@ -49,10 +51,7 @@ function MobileCategoriesSpendingList({
                 <CategoryIcon
                   icon={category.icon}
                   category={!category.icon ? category.name : undefined}
-                  style={{
-                    color: category.bgColor,
-                    filter: "brightness(0.8)",
-                  }}
+                  style={categoryIconStyle(category.bgColor)}
                 />
                 <Text
                   variant="smallText"
@@ -70,7 +69,7 @@ function MobileCategoriesSpendingList({
 
             <div className="mt-3 grid grid-cols-2 gap-3 text-sm">
               <div>
-                <p className="text-muted-foreground text-xs tracking-wide uppercase">
+                <p className="text-muted-foreground text-xs">
                   {t("num-transactions")}
                 </p>
                 <CellNumeric className="mt-1 justify-start">
@@ -79,7 +78,7 @@ function MobileCategoriesSpendingList({
               </div>
 
               <div>
-                <p className="text-muted-foreground text-xs tracking-wide uppercase">
+                <p className="text-muted-foreground text-xs">
                   {t("distribution")}
                 </p>
                 <div className="mt-1 flex items-center gap-2">
@@ -122,10 +121,7 @@ const CategoriesSpendingTable: React.FC<CategoriesSpendingTableProps> = ({
           <CategoryIcon
             icon={row.original.icon}
             category={!row.original.icon ? row.original.name : undefined}
-            style={{
-              color: row.original.bgColor,
-              filter: "brightness(0.8)",
-            }}
+            style={categoryIconStyle(row.original.bgColor)}
           />
           <TableCellDefault
             value={

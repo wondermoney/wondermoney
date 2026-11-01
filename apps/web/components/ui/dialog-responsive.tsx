@@ -89,19 +89,19 @@ export function DrawerDialog({
             </Button>
           </DialogTrigger>
         ) : null}
-        {/* `max-h-[85dvh] overflow-y-auto` is RAD-332: without a height bound on
-            the content itself, a tall form pushed its own footer past the bottom
-            of the viewport and the submit button was unreachable. The viewport
-            wrapper in dialog.tsx was already there when RAD-332 was filed, so it
-            is not a substitute — keep both.
+        {/* `max-h-[85dvh] overflow-y-auto`: without a height bound on the
+            content itself, a tall form pushes its own footer past the bottom of
+            the viewport and the submit button is unreachable. The viewport
+            wrapper in dialog.tsx does not prevent that on its own, so it is not
+            a substitute — keep both.
 
             The cost is that this makes DialogContent a scroll container, and a
             popover rendered inside it would be constrained/clipped by it. That
             is paid for by portalling instead: every searchable-select popover
             renders at body level (see components/ui/combobox*.tsx and
             components/CategoryComboBoxForm.tsx), so nothing that can open over
-            this dialog lives inside this scroll container.
-            scripts/searchable-select-regression-checks.ts holds both ends. */}
+            this dialog lives inside this scroll container; the lint config
+            rejects `portalled={false}`. */}
         <DialogContent
           className={cn("max-h-[85dvh] overflow-y-auto", contentClassName)}
           {...dialogContentProps}

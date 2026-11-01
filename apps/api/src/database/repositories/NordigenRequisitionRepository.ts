@@ -25,7 +25,7 @@ export class NordigenRequisitionRepository extends ExtendedEntityRepository<Nord
   /**
    * Find the newest linked requisition for a given (appuser, tenant) pair.
    * Scoping by tenant prevents cross-tenant access if a user has ever
-   * been active in more than one subscription context (RAD-244).
+   * been active in more than one tenant.
    */
   public getNewerLinkedRequistion = (appuser: Appuser, tenant: Tenant) => {
     if (!Number.isInteger(tenant.tenantKey) || tenant.tenantKey <= 0) {

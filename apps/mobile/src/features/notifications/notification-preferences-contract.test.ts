@@ -30,6 +30,11 @@ describe('notification preferences contract', () => {
     expect(notificationPreferencesSchema.safeParse({ ...valid, growth: { effectiveEnabled: false, storedEnabled: false } }).success).toBe(true)
   })
 
+  it('strips preference categories and fields the API adds', () => {
+    const parsed = notificationPreferencesSchema.parse({ ...valid, productUpdates: { effectiveEnabled: true, storedEnabled: true }, growth: { ...valid.growth, lockedByAdmin: false } })
+    expect(parsed).toEqual(valid)
+  })
+
   it('rejects a non-boolean marketing opt-out', () => {
     expect(notificationPreferencesSchema.safeParse({ ...valid, marketingOptOut: 'no' }).success).toBe(false)
   })

@@ -22,7 +22,7 @@ const payload = { name: 'Cash', currentBalance: 25.5, currencyId: 151, financial
 describe('manual account creation safety', () => {
   beforeEach(() => { mockWrite.mockReset(); mockBlockAccess.mockReset(); captured.mockClear() })
 
-  describe('first_account_created (RAD-518)', () => {
+  describe('first_account_created', () => {
     const succeed = () => mockWrite.mockImplementation(async (_endpoint, options) => { options.commit(undefined); return undefined })
 
     it('reports the account that took an onboarding user from zero to one, with the method alone', async () => {

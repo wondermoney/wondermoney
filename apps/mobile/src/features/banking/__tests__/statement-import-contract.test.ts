@@ -20,12 +20,17 @@ describe('statement-import contract', () => {
     expect(statementImportSessionCreateResponseSchema.parse(session)).toEqual(session)
   })
 
-  it('rejects an unknown status', () => {
-    expect(statementImportSessionCreateResponseSchema.safeParse({ ...session, status: 'bogus' }).success).toBe(false)
+  it('reads a status this build does not know as unknown, and rejects a missing or non-string one', () => {
+    expect(statementImportSessionCreateResponseSchema.parse({ ...session, status: 'scanning' }).status).toBe('unknown')
+    expect(statementImportSessionCreateResponseSchema.safeParse({ ...session, status: 7 }).success).toBe(false)
+    const { status: _status, ...withoutStatus } = session
+    expect(statementImportSessionCreateResponseSchema.safeParse(withoutStatus).success).toBe(false)
   })
 
-  it('rejects extra fields (strict)', () => {
-    expect(statementImportSessionCreateResponseSchema.safeParse({ ...session, extra: 1 }).success).toBe(false)
+  it('strips fields the API adds instead of rejecting the response', () => {
+    expect(statementImportSessionCreateResponseSchema.parse({ ...session, extra: 1 })).toEqual(session)
+    const summary = { duplicateRows: 0, failedRows: 0, importedRows: 3, totalRows: 3 }
+    expect(statementImportSummarySchema.parse({ ...summary, skippedRows: 0 })).toEqual(summary)
   })
 
   it('exposes the create-session write endpoint nested under the account', () => {

@@ -290,11 +290,11 @@ describe('GoalService', () => {
     const result = await service.getGoal({ appuserKey: 11, goalKey: 1, tenantKey: 22 });
 
     expect(result.goal).toMatchObject({ accountLinks: [{ accountKey: { accountKey: 9, accountName: 'Main Checking' }, goalAccountLinkKey: 77 }], currencyCode: 'EUR', goalKey: 1 });
-    // RAD-379: description must be present in the serialized GET response.
+    // Description must be present in the serialized GET response.
     expect(result.goal.description).toBe('6 months of expenses');
   });
 
-  it('serializes a null description when a goal has none (RAD-379)', async () => {
+  it('serializes a null description when a goal has none', async () => {
     const { GoalService } = await import('../goal.service');
     const service = new GoalService(emManager);
     const goal = Object.assign(new Goal(), { currencyKey: { code: 'EUR' }, goalKey: 1, name: 'Trip', status: GoalStatus.ACTIVE, targetAmount: 1000 });

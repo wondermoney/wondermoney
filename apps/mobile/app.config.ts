@@ -68,7 +68,7 @@ const config: ExpoConfig = {
     // Registers the reversed iOS client ID as a URL scheme so Google's SDK can hand the
     // sign-in result back to the app. Android needs no scheme (Credential Manager).
     ['react-native-nitro-google-signin', { iosUrlScheme: googleOAuthClients.iosUrlScheme }],
-    // RAD-517 source-map upload. This plugin does nothing at runtime: during prebuild it
+    // Sentry source-map upload. This plugin does nothing at runtime: during prebuild it
     // writes ios/android `sentry.properties` from the values below and injects the upload
     // step into each native build (an Xcode "Upload Debug Symbols" phase, `sentry.gradle`
     // on Android), so a release build ships symbolicated stack traces. The org and project
@@ -77,7 +77,7 @@ const config: ExpoConfig = {
     // while events land in another, which silently costs you symbolication.
     // The auth token is deliberately not passed here — the plugin would write it into the
     // app package. It is read from SENTRY_AUTH_TOKEN, which must exist as an EAS secret
-    // before the first production build (see docs/release.md).
+    // before the first production build.
     [
       '@sentry/react-native/expo',
       {

@@ -14,12 +14,9 @@ export interface PortfolioSnapshotAutoJobPayload {
 }
 
 /**
- * `expireInSeconds` is explicit because the 900 s default was silently wrong: the
- * sweep used to load *every* portfolio and snapshot them serially, so pg-boss
- * expired the job mid-run and — at `retryLimit: 0` — simply failed it, leaving
- * every portfolio after the cut-off with no snapshot for that date, permanently.
- * The handler now pages, so one job is bounded by `PORTFOLIO_SNAPSHOT_PAGE_SIZE`
- * portfolios, and 20 minutes is generous for that page.
+ * `expireInSeconds` is explicit rather than pg-boss's 900 s default. The handler
+ * pages, so one job is bounded by `PORTFOLIO_SNAPSHOT_PAGE_SIZE` portfolios, and
+ * 20 minutes is generous for that page.
  */
 export const ensurePortfolioSnapshotAutoQueue = (boss: { createQueue: (queue: string, options?: Record<string, unknown>) => Promise<unknown> }) =>
   boss.createQueue(PORTFOLIO_SNAPSHOT_AUTO_QUEUE, { expireInSeconds: 1_200, policy: 'exclusive', retryLimit: 0 });

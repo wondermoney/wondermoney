@@ -2,7 +2,7 @@ import type { PgBossLike } from '@service/queue/pgboss-client';
 
 export const ANALYTICS_OUTBOX_QUEUE = 'analytics.outbox';
 export const ANALYTICS_OUTBOX_CRON = '* * * * *';
-export const ANALYTICS_OUTBOX_SINGLETON_KEY = ANALYTICS_OUTBOX_QUEUE;
+const ANALYTICS_OUTBOX_SINGLETON_KEY = ANALYTICS_OUTBOX_QUEUE;
 
 export const ensureAnalyticsOutboxQueue = (boss: Pick<PgBossLike, 'createQueue'>) =>
   boss.createQueue(ANALYTICS_OUTBOX_QUEUE, {

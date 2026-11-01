@@ -96,18 +96,5 @@ export class CategorySeeder extends Seeder {
     ctxCategoryEntities.push(incomeCategory);
 
     ctx['categories'] = ctxCategoryEntities;
-
-    // Demo user's own category: only when the demo data set is being seeded.
-    if (ctx['_DEMO_appuser']) {
-      // @ts-expect-error - missing properties
-      ctx._DEMO_category = em.create(Category, {
-        appuserKey: ctx['_DEMO_appuser'],
-        bgColor: '#fecdd3',
-        icon: 'question',
-        isSystemCategory: false,
-        name: 'MyCustomCategory',
-        textColor: '#111827',
-      });
-    }
   }
 }

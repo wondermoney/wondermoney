@@ -1,6 +1,6 @@
 import { z } from 'zod'
 
-import { readEndpoint, writeEndpoint } from '@/lib/api/runtime-schema'
+import { readEndpoint, tolerantEnum, writeEndpoint } from '@/lib/api/runtime-schema'
 
 const id = z.number().int().positive().safe()
 const nonBlankString = z.string().refine((value) => value.trim().length > 0)
@@ -11,12 +11,11 @@ const category = z.object({
   bgColor: z.string(),
   icon: z.string().nullable().optional(),
   isSystemCategory: z.boolean(),
-}).strict()
+})
 
-export const categoryItemSchema = category
 export const categoriesResponseSchema = z.object({
-  categories: z.array(category.extend({ childCategory: z.array(category.strict()) }).strict()),
-}).strict()
+  categories: z.array(category.extend({ childCategory: z.array(category) })),
+})
 
 export type CategoryDto = z.infer<typeof category>
 export type CategoriesResponse = z.infer<typeof categoriesResponseSchema>
@@ -29,8 +28,8 @@ export const CATEGORY_ICONS = [
 ] as const
 
 export const categoryIconSchema = z.enum(CATEGORY_ICONS)
-export const categoryColorSchema = z.string().regex(/^#[0-9A-F]{6}$/)
-export const categoryNameSchema = z.string().trim().min(1).max(255)
+const categoryColorSchema = z.string().regex(/^#[0-9A-F]{6}$/)
+const categoryNameSchema = z.string().trim().min(1).max(255)
 const categoryParentKeySchema = z.string().regex(/^[1-9]\d*$/).refine((value) => Number.isSafeInteger(Number(value)))
 
 export const categoryCreateWriteSchema = z.object({
@@ -53,12 +52,11 @@ const categoryWriteResponseSchema = z.object({
   category: z.object({
     categoryKey: id,
     name: nonBlankString,
-    icon: categoryIconSchema.nullable(),
+    // An icon this build can't draw reads as null; the form keeps showing the icon the user picked.
+    icon: tolerantEnum(CATEGORY_ICONS, null).nullable(),
     bgColor: categoryColorSchema,
-  }).strict(),
-}).strict()
-
-export type CategoryWriteResponse = z.infer<typeof categoryWriteResponseSchema>
+  }),
+})
 
 export const createCategoryEndpoint = writeEndpoint({
   method: 'POST',

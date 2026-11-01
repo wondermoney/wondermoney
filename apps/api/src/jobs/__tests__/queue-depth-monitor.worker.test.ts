@@ -38,7 +38,7 @@ describe('queue depth monitor', () => {
   });
 
   it('raises one Sentry event for a queue whose oldest waiting job is past its threshold', async () => {
-    // The F-01/F-02 scenario: a queue with a hung handler keeps accepting jobs and
+    // A queue with a hung handler keeps accepting jobs and
     // stops draining. Nothing else in the system notices.
     const summary = await run([
       { count: 42, name: 'account.initial-sync', oldest_created_on: secondsAgo(9_000), state: 'created' },
@@ -92,8 +92,8 @@ describe('queue depth monitor', () => {
   });
 
   it('rejects a schema name that is not a bare identifier', () => {
-    expect(() => resolvePgBossSchema({ PGBOSS_SCHEMA: 'pgboss"; drop table job; --' } as NodeJS.ProcessEnv)).toThrow('Invalid PGBOSS_SCHEMA');
-    expect(resolvePgBossSchema({} as NodeJS.ProcessEnv)).toBe('pgboss');
+    expect(() => resolvePgBossSchema({ PGBOSS_SCHEMA: 'pgboss"; drop table job; --' })).toThrow('Invalid PGBOSS_SCHEMA');
+    expect(resolvePgBossSchema({})).toBe('pgboss');
   });
 
   it('never lets a Sentry failure take the monitor down', async () => {

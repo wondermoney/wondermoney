@@ -80,7 +80,7 @@ function describePort(port: number) {
 
     const lines = output.split("\n").slice(1);
     const owners = lines.map((line) => line.split(/\s+/)[0]).filter(Boolean);
-    warn(`port ${port} is already listening (owners: ${owners.join(", ") || "unknown"}). Stop the existing process or choose a different port.`);
+    warn(`port ${port} is already listening (owners: ${owners.join(", ") || "unknown"}). Choose a different port if you do not own the listener.`);
   } catch (error) {
     const err = error as NodeJS.ErrnoException & {
       status?: number;
@@ -121,13 +121,13 @@ function checkEnvVars() {
 }
 
 function main() {
-  info(`RAD-152 worktree E2E preflight in ${repoRoot}`);
+  info(`Worktree E2E preflight in ${repoRoot}`);
   checkExists(packageJsonPath, "package.json");
   checkExists(nextConfigPath, "next.config.ts");
   checkExists(cypressConfigPath, "cypress.config.ts");
   inspectNodeModules();
-  describePort(3000);
-  describePort(3001);
+  describePort(Number(process.env.E2E_WEB_PORT ?? 3000));
+  describePort(Number(process.env.E2E_API_PORT ?? 3001));
   checkEnvVars();
 
   assert.ok(true, "preflight completed");

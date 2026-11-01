@@ -8,7 +8,7 @@ import { portfolioDividendIncomeKey } from './query-keys'
 import { conservativePortfolioQueryOptions, isAccessError, isInvalidResponse, isRateLimited, usePortfolioAccessErrors } from './query-state'
 
 /**
- * RAD-515 — per-portfolio dividend income, kept as its own independent query (same pattern as
+ * Per-portfolio dividend income, kept as its own independent query (same pattern as
  * usePortfolioPerformance alongside usePortfolioDetail) rather than folded into the detail hook:
  * dividend income is supplementary, so a slow or failed fetch here must never block the rest of
  * the detail page from rendering.

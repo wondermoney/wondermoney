@@ -2,6 +2,7 @@ import { QueryOrder, raw } from '@mikro-orm/core';
 import type { Request, Response } from 'express';
 
 import { Transaction } from '@entity/Transaction';
+import { excludeExpired } from '@service/transaction/transaction-status';
 import { getAccountsCashflowRequestSchema } from '@validators/account';
 import { zParse } from '@validators/parser';
 
@@ -21,9 +22,10 @@ export async function getAccountsCashflow(req: Request, res: Response) {
       raw(`DATE_TRUNC('month', t.transaction_date) as date`),
       raw('ROUND(CAST(SUM(t.appuser_settlement_amount) as numeric), 2) as amount'),
     ])
-    // RAD-343: QueryBuilder.execute() bypasses the tenant filter, so scope explicitly
+    // QueryBuilder.execute() bypasses the tenant filter, so scope explicitly
     // by tenant + per-account privacy (a private account's transactions are owner-only).
-    .where({
+    // EXPIRED rows never moved money; PENDING still counts.
+    .where(excludeExpired({
       accountKey: {
         $or: [{ isPrivate: false }, { accountOwnerAppuserKey: req.user }],
         deletedAt: undefined,
@@ -31,7 +33,7 @@ export async function getAccountsCashflow(req: Request, res: Response) {
       deletedAt: undefined,
       hidden: false,
       tenantKey: req.tenant,
-    })
+    }))
     .andWhere(fromDate ? { transactionDate: { $gte: fromDate } } : {})
     .groupBy(raw(`DATE_TRUNC('month', t.transaction_date)`))
     .orderBy({

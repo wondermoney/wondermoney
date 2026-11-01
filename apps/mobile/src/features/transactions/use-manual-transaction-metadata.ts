@@ -9,8 +9,8 @@ import {
 } from './manual-transaction-contract'
 
 export const transactionTypesKey = (epochId: number) => ['transaction-create', epochId, 'types'] as const
-export const settlementCurrenciesKey = (epochId: number) => ['transaction-create', epochId, 'currencies'] as const
-export const transactionMerchantsKey = (epochId: number, search: string) => ['transaction-create', epochId, 'merchants', search.trim(), 20] as const
+const settlementCurrenciesKey = (epochId: number) => ['transaction-create', epochId, 'currencies'] as const
+const transactionMerchantsKey = (epochId: number, search: string) => ['transaction-create', epochId, 'merchants', search.trim(), 20] as const
 
 const queryOptions = { retry: false, refetchOnReconnect: false, refetchOnWindowFocus: false } as const
 

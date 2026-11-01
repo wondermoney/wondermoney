@@ -3,11 +3,8 @@
  *
  * ## Why this exists
  *
- * Configuration used to be spread across ~67 files in four syntactic styles, behind **19
- * separate `dotenv.config()` calls**. Of ~105 keys read in production code, only
- * one secret failed fast when missing. Every other secret was non-null-asserted,
- * defaulted to `''`, or thrown lazily from deep inside a request handler. Three consequences
- * documented in earlier audits:
+ * Without one validated entry point, secrets end up non-null-asserted, defaulted to `''`, or
+ * thrown lazily from deep inside a request handler. Three consequences this module prevents:
  *
  *   1. **Missing secrets stay hidden.** `EODHD_API_KEY` is only consulted on the first
  *      market-data call. On `prod-worker`, whose only consumers are two scheduled price
@@ -38,6 +35,7 @@ import dotenv from 'dotenv';
 import { z } from 'zod';
 
 import { defaultBrowserOrigins, resolveAppUrl } from './instance-urls';
+import { parseTrustProxy, TrustProxyError } from './trust-proxy';
 
 export interface ConfigurationIssue {
   readonly code: 'conflict' | 'invalid-format' | 'invalid-value' | 'missing' | 'role-invariant';
@@ -64,22 +62,22 @@ export class ConfigurationError extends Error {
 
 // -- Reusable primitives ---------------------------------------------------
 
-const nonEmpty = (description: string) => z.string().trim().min(1, description);
+const nonEmpty = (description: string) => z.string({ error: description }).trim().min(1, description);
 
-const base64Key = (bytes: number, description: string) => z.string().trim()
+const base64Key = (bytes: number, description: string) => z.string({ error: description }).trim()
   .refine((value) => {
     if (!/^[a-z0-9+/]+={0,2}$/i.test(value)) return false;
     return Buffer.from(value, 'base64').length === bytes;
   }, `${description} (must be base64 decoding to exactly ${bytes} bytes; generate with \`openssl rand -base64 ${bytes}\`)`);
 
-const httpUrl = (description: string) => z.string().trim().url(description)
+const httpUrl = (description: string) => z.string().trim().pipe(z.url(description))
   .refine((v) => v.startsWith('http://') || v.startsWith('https://'), `${description} (must be http or https)`);
 
 const positiveInt = (description: string) => z.string().trim()
   .refine((v) => /^\d+$/.test(v) && Number(v) > 0, `${description} (must be a positive integer)`);
 
 const boolFlag = (description: string) => z.enum(['1', '0', 'true', 'false', 'on', 'off', 'yes', 'no'], {
-  errorMap: () => ({ message: `${description} (must be one of 1/0/true/false/on/off/yes/no)` }),
+  error: `${description} (must be one of 1/0/true/false/on/off/yes/no)`,
 });
 
 // -- Runtime and shared schema --------------------------------------------
@@ -100,6 +98,14 @@ const runtimeSchema = z.object({
   PRIVACY_POLICY_URL: z.string().trim().optional(),
   PUBLIC_DIAGNOSTICS_ENABLED: boolFlag('Public diagnostics flag').optional(),
   SIGNUP_MODE: z.enum(['open', 'invite', 'closed']).optional(),
+  TRUST_PROXY: z.string().trim().superRefine((value, ctx) => {
+    try {
+      parseTrustProxy(value);
+    } catch (error) {
+      if (!(error instanceof TrustProxyError)) throw error;
+      ctx.addIssue({ code: z.ZodIssueCode.custom, message: error.message });
+    }
+  }).optional(),
   WORKER_HEALTH_PORT: positiveInt('Worker health port').optional(),
 });
 
@@ -152,7 +158,6 @@ const sharedSchema = z.object({
   AZURE_AI_FOUNDRY_API_KEY: z.string().trim().optional(),
   AZURE_AI_FOUNDRY_API_VERSION: z.string().trim().optional(),
   AZURE_AI_FOUNDRY_ENDPOINT: httpUrl('Azure AI Foundry endpoint').optional(),
-  AZURE_OPENAI_API_DEPLOYMENT_NAME: z.string().trim().optional(),
   AZURE_OPENAI_API_KEY: z.string().trim().optional(),
   AZURE_OPENAI_API_VERSION: z.string().trim().optional(),
   AZURE_OPENAI_DEPLOYMENT: z.string().trim().optional(),
@@ -169,17 +174,19 @@ const sharedSchema = z.object({
 
   // Email: Resend, SMTP or (unset) the log driver — see services/email/email-transport.ts.
   EMAIL_DRIVER: z.enum(['log', 'resend', 'smtp']).optional(),
-  EMAIL_FROM: z.string().trim().email('Email sender must be a valid address').optional(),
+  EMAIL_FROM: z.string().trim().pipe(z.email('Email sender must be a valid address')).optional(),
   EMAIL_FROM_NAME: z.string().trim().optional(),
   RESEND_API_KEY: z.string().trim().optional(),
-  RESEND_FROM_EMAIL: z.string().trim().email('Resend from-address must be a valid email').optional(),
+  // Deprecated aliases of EMAIL_FROM / EMAIL_FROM_NAME, still read as fallbacks by
+  // `emailSender` because the hosted instance sets them. Remove once it is renamed.
+  RESEND_FROM_EMAIL: z.string().trim().pipe(z.email('Resend from-address must be a valid email')).optional(),
   RESEND_FROM_NAME: z.string().trim().optional(),
   SMTP_HOST: z.string().trim().optional(),
   SMTP_PASSWORD: z.string().optional(),
   SMTP_PORT: positiveInt('SMTP port').optional(),
   SMTP_SECURE: boolFlag('SMTP implicit-TLS flag').optional(),
   SMTP_USER: z.string().trim().optional(),
-  SUPPORT_EMAIL: z.string().trim().email('Support inbox must be a valid address').optional(),
+  SUPPORT_EMAIL: z.string().trim().pipe(z.email('Support inbox must be a valid address')).optional(),
 });
 
 const apiSchema = sharedSchema.extend({
@@ -191,8 +198,7 @@ const apiSchema = sharedSchema.extend({
 
 const workerSchema = sharedSchema.extend({
   ENABLE_PGBOSS_DEMO_DATA_REFRESH: boolFlag('Demo-data refresh flag (worker only)').optional(),
-  ENABLE_PGBOSS_HEARTBEAT: boolFlag('Worker heartbeat flag').optional(),
-  PGBOSS_HEARTBEAT_URL: z.string().trim().optional(),
+  HETRIX_WORKER_HEARTBEAT_URL: z.string().trim().optional(),
   PGBOSS_QUEUE_DEPTH_MONITOR_ENABLED: boolFlag('Queue depth monitor flag').optional(),
   POSTHOG_API_KEY: z.string().trim().optional(),
   POSTHOG_HOST: httpUrl('PostHog host').optional(),
@@ -281,7 +287,6 @@ function buildIntegrations(parsed: z.infer<typeof sharedSchema>) {
       apiKey: parsed.AZURE_OPENAI_API_KEY,
       apiVersion: parsed.AZURE_OPENAI_API_VERSION,
       deployment: parsed.AZURE_OPENAI_DEPLOYMENT,
-      deploymentName: parsed.AZURE_OPENAI_API_DEPLOYMENT_NAME,
       endpoint: parsed.AZURE_OPENAI_ENDPOINT,
       ocrDeployment: parsed.AZURE_OPENAI_OCR_DEPLOYMENT,
     },
@@ -290,8 +295,6 @@ function buildIntegrations(parsed: z.infer<typeof sharedSchema>) {
     eodhdApiKey: parsed.EODHD_API_KEY,
     resend: {
       apiKey: parsed.RESEND_API_KEY,
-      fromEmail: parsed.RESEND_FROM_EMAIL,
-      fromName: parsed.RESEND_FROM_NAME,
     },
     s3: {
       accessKeyId: parsed.AWS_ACCESS_KEY_ID,
@@ -349,13 +352,13 @@ function parseAppEnvironment(value: string | undefined): 'development' | 'produc
   return 'development';
 }
 
-function parseIssues(error: z.ZodError): ConfigurationIssue[] {
+function parseIssues(error: z.ZodError, source: ConfigurationSource): ConfigurationIssue[] {
   return error.issues.map((issue) => {
     const path = issue.path.length > 0 ? issue.path.join('.') : '(root)';
-    let code: ConfigurationIssue['code'] = 'invalid-value';
-    if (issue.code === 'invalid_type' && issue.message.toLowerCase().includes('required')) {
-      code = 'missing';
-    }
+    // Zod 4 does not say "Required" for an absent key (and issues carry no `input` unless
+    // `reportInput` is on), so "missing" is decided from the source itself.
+    const absent = issue.path.length === 1 && source[String(issue.path[0])] === undefined;
+    const code: ConfigurationIssue['code'] = issue.code === 'invalid_type' && absent ? 'missing' : 'invalid-value';
     return { code, message: issue.message, path };
   });
 }
@@ -472,13 +475,13 @@ function parseOrigins(value: string): readonly string[] {
 function parseRole<R extends ConfigurationRole>(role: R, source: ConfigurationSource): ConfigurationByRole[R] {
   const runtimeParsed = runtimeSchema.safeParse(source);
   if (!runtimeParsed.success) {
-    throw new ConfigurationError(role, parseIssues(runtimeParsed.error));
+    throw new ConfigurationError(role, parseIssues(runtimeParsed.error, source));
   }
   const runtime = buildRuntime(runtimeParsed.data);
 
   if (role === 'api') {
     const parsed = apiSchema.safeParse(source);
-    if (!parsed.success) throw new ConfigurationError(role, parseIssues(parsed.error));
+    if (!parsed.success) throw new ConfigurationError(role, parseIssues(parsed.error, source));
     const db = buildDatabase(parsed.data);
     const issues = requireDbOrThrow(db, role);
     if (issues.length > 0) throw new ConfigurationError(role, issues);
@@ -505,7 +508,7 @@ function parseRole<R extends ConfigurationRole>(role: R, source: ConfigurationSo
 
   if (role === 'worker') {
     const parsed = workerSchema.safeParse(source);
-    if (!parsed.success) throw new ConfigurationError(role, parseIssues(parsed.error));
+    if (!parsed.success) throw new ConfigurationError(role, parseIssues(parsed.error, source));
     const db = buildDatabase(parsed.data);
     const issues = requireDbOrThrow(db, role);
     if (issues.length > 0) throw new ConfigurationError(role, issues);
@@ -520,8 +523,8 @@ function parseRole<R extends ConfigurationRole>(role: R, source: ConfigurationSo
           gptModelVersion: parsed.data.TRANSACTION_ENRICHMENT_GPT_MODEL_VERSION ?? null,
           schedulerMode: runtimeParsed.data.PGBOSS_SCHEDULER_MODE ?? null,
         },
-        heartbeatEnabled: bool(parsed.data.ENABLE_PGBOSS_HEARTBEAT),
-        heartbeatUrl: parsed.data.PGBOSS_HEARTBEAT_URL ?? null,
+        heartbeatEnabled: Boolean(parsed.data.HETRIX_WORKER_HEARTBEAT_URL),
+        heartbeatUrl: parsed.data.HETRIX_WORKER_HEARTBEAT_URL ?? null,
         queueDepthMonitorEnabled: bool(parsed.data.PGBOSS_QUEUE_DEPTH_MONITOR_ENABLED),
         superviseTimeoutMs: runtimeParsed.data.PGBOSS_SUPERVISE_TIMEOUT_MS ? Number(runtimeParsed.data.PGBOSS_SUPERVISE_TIMEOUT_MS) : null,
       },
@@ -534,7 +537,7 @@ function parseRole<R extends ConfigurationRole>(role: R, source: ConfigurationSo
 
   if (role === 'migration' || role === 'orm-cli') {
     const parsed = (role === 'migration' ? migrationSchema : ormCliSchema).safeParse(source);
-    if (!parsed.success) throw new ConfigurationError(role, parseIssues(parsed.error));
+    if (!parsed.success) throw new ConfigurationError(role, parseIssues(parsed.error, source));
     const db = buildDatabase(parsed.data);
     const issues = requireDbOrThrow(db, role);
     if (issues.length > 0) throw new ConfigurationError(role, issues);
@@ -548,7 +551,7 @@ function parseRole<R extends ConfigurationRole>(role: R, source: ConfigurationSo
 
   if (role === 'operation:local-db-guard') {
     const parsed = localDbGuardSchema.safeParse(source);
-    if (!parsed.success) throw new ConfigurationError(role, parseIssues(parsed.error));
+    if (!parsed.success) throw new ConfigurationError(role, parseIssues(parsed.error, source));
     const db = buildDatabase(parsed.data);
     const config: LocalDbGuardConfiguration = {
       allowRemoteWrite: bool(parsed.data.ALLOW_REMOTE_WRITE),
@@ -560,7 +563,7 @@ function parseRole<R extends ConfigurationRole>(role: R, source: ConfigurationSo
 
   if (role === 'operation:recovery') {
     const parsed = recoverySchema.safeParse(source);
-    if (!parsed.success) throw new ConfigurationError(role, parseIssues(parsed.error));
+    if (!parsed.success) throw new ConfigurationError(role, parseIssues(parsed.error, source));
     const db = buildDatabase(parsed.data);
     const issues = requireDbOrThrow(db, role);
     if (issues.length > 0) throw new ConfigurationError(role, issues);
@@ -576,7 +579,7 @@ function parseRole<R extends ConfigurationRole>(role: R, source: ConfigurationSo
 
   if (role === 'operation:portfolio-import-smoke') {
     const parsed = portfolioImportSmokeSchema.safeParse(source);
-    if (!parsed.success) throw new ConfigurationError(role, parseIssues(parsed.error));
+    if (!parsed.success) throw new ConfigurationError(role, parseIssues(parsed.error, source));
     const db = buildDatabase(parsed.data);
     const issues = requireDbOrThrow(db, role);
     if (issues.length > 0) throw new ConfigurationError(role, issues);
@@ -626,8 +629,9 @@ function withoutEmptyValues(source: ConfigurationSource): ConfigurationSource {
  * fails fast without demanding unrelated API secrets.
  */
 export function loadAuthConfiguration(source: ConfigurationSource): ReturnType<typeof buildAuth> {
-  const parsed = authSchema.safeParse(withoutEmptyValues(source));
-  if (!parsed.success) throw new ConfigurationError('api', parseIssues(parsed.error));
+  const cleaned = withoutEmptyValues(source);
+  const parsed = authSchema.safeParse(cleaned);
+  if (!parsed.success) throw new ConfigurationError('api', parseIssues(parsed.error, cleaned));
   return freeze(buildAuth(parsed.data));
 }
 

@@ -1,7 +1,9 @@
 import { UniqueConstraintViolationException } from '@mikro-orm/core';
 import type { NextFunction, Request, Response } from 'express';
+import { sql } from 'kysely';
 import { pick } from 'lodash-es';
 
+import { sqlQuery } from '@app/database/sql';
 import { zParse } from '@app/validators/parser';
 import { completeOnboardingStepSchema, getRequisitionRequestSchema, updateUserDataRequestSchema } from '@app/validators/user';
 import { AccountFinancialInstitution, AccountFinancialInstitutionProvider } from '@entity/AccountFinancialInstitution';
@@ -36,7 +38,6 @@ export function getUserAccountInformation(req: Request, res: Response) {
     'firstName',
     'lastName',
     'twofactorEnabled',
-    'requiresMfaReenrollment',
   ]);
   return res.json(userDataToSend);
 }
@@ -52,25 +53,6 @@ export function getCurrentUserProfile(req: Request, res: Response) {
       mfaEnabled: req.authUser?.user.twoFactorEnabled ?? false,
     },
   });
-}
-
-/**
- * @description Clear the legacy MFA re-enrollment flag (RAD-294).
- *
- * Plan B: legacy Supabase identities are not being migrated, so no user is flagged
- * `requiresMfaReenrollment` anymore — in practice this endpoint is now a no-op. It is
- * deliberately kept (with its `Appuser` field) as a compatibility endpoint for web;
- * dropping both is a separate schema cleanup.
- */
-export async function completeMfaReenrollment(req: Request, res: Response, next: NextFunction) {
-  const user = await DI.em.getRepository(Appuser).getUserById(authedUser(req).appuserKey);
-  if (!user) {
-    next(new BadRequestError(ERROR.AUTH.INVALID_USER));
-    return;
-  }
-  user.requiresMfaReenrollment = false;
-  await DI.em.persist(user).flush();
-  return res.sendStatus(200);
 }
 
 /**
@@ -129,18 +111,13 @@ export async function updateData(req: Request, res: Response, next: NextFunction
 /**
  * @description Get user requisitions
  *
- * Widened (Phase 1c gap-close) to also surface the user's `EnableBankingConnection`
- * rows in the same array, alongside the untouched GoCardless `NordigenRequisition`
- * query below — the same "widen, discriminate on property presence, never change
- * GoCardless behavior" pattern used by `account-auto-sync-scheduler.service.ts` and
- * `account-initial-sync-enqueue.service.ts`. The GoCardless query/mapping is
- * byte-for-byte unchanged from before this widening; nothing is removed or renamed
- * from its response items, only new array elements are added for the other provider.
+ * Returns the user's `EnableBankingConnection` rows in the same array as their legacy
+ * GoCardless `NordigenRequisition` rows, discriminated by `provider`.
  *
  * Enable Banking's real provider-returned `accessValidUntil` is mapped onto the same
- * `expiresAt` field the GoCardless items already carry (rather than a second,
+ * `expiresAt` field the GoCardless items carry (rather than a second,
  * differently-named expiry field) so the frontend can render "expires in N days"
- * uniformly regardless of provider (plan §5).
+ * uniformly regardless of provider.
  *
  * @param {Request} req Express request object derived from http.incomingMessage
  * @param {Response} res Express response object
@@ -155,10 +132,8 @@ export async function getRequisitions(req: Request, res: Response) {
       { populate: ['accounts'] },
     ),
     // Deliberately scoped to `deletedAt: undefined` (unlike the GoCardless query above,
-    // which has no such filter — a pre-existing GoCardless behavior left untouched, see
-    // docblock). `unlinkRequisition` soft-deletes `EnableBankingConnection` rows, and
-    // showing an unlinked connection back in this list would be a real, avoidable
-    // regression for the feature this widening exists to ship.
+    // which has no such filter). `unlinkRequisition` soft-deletes `EnableBankingConnection`
+    // rows, and an unlinked connection must not show back up in this list.
     DI.em.find(
       EnableBankingConnection,
       {
@@ -244,20 +219,19 @@ export async function completeOnboardingStep(req: Request, res: Response, next: 
 
 export async function getOnboarding(req: Request, res: Response) {
   const user = authedUser(req);
-  const knex = DI.em.getConnection().getKnex();
-  const onboarding = (await knex
+  const onboarding = (await sqlQuery(DI.em)
+    .selectFrom('onboarding')
+    .leftJoin('appuser_onboarding', (join) =>
+      join
+        .onRef('appuser_onboarding.onboarding_key', '=', 'onboarding.onboarding_key')
+        .on('appuser_onboarding.appuser_key', '=', user.appuserKey))
     .select([
       'onboarding.step',
       'onboarding.description',
-      knex.raw('case when appuser_onboarding.onboarding_key is null then false else true end as "done"'),
+      sql<boolean>`case when appuser_onboarding.onboarding_key is null then false else true end`.as('done'),
     ])
-    .from('onboarding')
-    .leftJoin('appuser_onboarding', (joinBuilder) => {
-      return joinBuilder
-        .on('appuser_onboarding.onboarding_key', '=', 'onboarding.onboarding_key')
-        .andOn('appuser_onboarding.appuser_key', '=', knex.raw('?', [user.appuserKey]));
-    })
-    .orderBy('onboarding.step', 'asc')) as {
+    .orderBy('onboarding.step', 'asc')
+    .execute()) as {
     done: boolean;
     step: number;
   }[];

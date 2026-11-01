@@ -62,7 +62,7 @@
         },
         "credentialRequired": {
           "title": "Ligar um banco exige uma configuração rápida e única",
-          "body": "Antes de ligar um banco real, adicione a sua própria chave Enable Banking nas Definições. Pode fazê-lo quando quiser, depois de concluir a configuração inicial — por agora, adicione uma conta manualmente acima ou salte este passo e ligue mais tarde."
+          "body": "Antes de ligar um banco real, adicione a sua própria chave Enable Banking nas Definições. Pode fazê-lo quando quiser, depois de concluir a configuração inicial. Por agora, adicione uma conta manualmente acima ou salte este passo e ligue mais tarde."
         }
       },
       "connect": {
@@ -76,16 +76,15 @@
         "retry": "Tentar novamente",
         "connectErrorBanner": "A ligação não foi concluída. Tente novamente ou escolha outro banco.",
         "manualTitle": "Adicionar uma conta manualmente",
-        "manualBody": "Sem ligação necessária. Introduza um saldo para começar — pode ligá-la para atualizações automáticas mais tarde.",
+        "manualBody": "Sem ligação necessária. Introduza um saldo para começar. Pode ligá-la para atualizações automáticas mais tarde.",
         "manualNameLabel": "Nome da conta",
         "manualBalanceLabel": "Saldo atual",
         "manualSubmit": "Adicionar conta",
         "manualNote": "As contas manuais entram no seu património líquido, mas não atualizam automaticamente.",
         "syncing": {
-          "processing": "Ligado — a importar os seus saldos e transações…",
+          "processing": "Ligado. A importar os seus saldos e transações…",
           "succeeded": "As suas contas estão ligadas e sincronizadas.",
-          "partial": "Ligado. Alguns dados ainda estão a chegar — continuamos a sincronizar em segundo plano.",
-          "trouble": "Ligado. A primeira sincronização está a demorar um pouco mais — continuamos a tentar em segundo plano."
+          "trouble": "Ligado. A primeira sincronização está a demorar um pouco mais. Continuamos a tentar em segundo plano."
         }
       },
       "syncValue": {
@@ -115,7 +114,7 @@
         "inProgress": {
           "title": "O que está a acontecer agora",
           "balances": "A ler os dados da conta e os saldos atuais.",
-          "transactions": "A importar o histórico de transações — até 12 meses, consoante o que o seu banco disponibilizar.",
+          "transactions": "A importar o histórico de transações: até 12 meses, consoante o que o seu banco disponibilizar.",
           "categories": "A atribuir uma categoria a cada transação à medida que chega."
         },
         "openBankingNote": "16,5 milhões de ligações ativas de open banking no Reino Unido em dezembro de 2025, mais 36% num ano. Ligar o banco desta forma já é prática comum."
@@ -319,7 +318,7 @@
     "dashboard": {
       "triggerLabel": "Ajuda",
       "title": "Bem-vindo ao seu painel",
-      "description": "Este é o seu painel principal – o seu futuro ponto de referência para obter uma visão clara da sua vida financeira, tudo num só lugar.",
+      "description": "Este é o seu painel principal: o seu futuro ponto de referência para obter uma visão clara da sua vida financeira, tudo num só lugar.",
       "content1": "Veja o seu património líquido em todas as contas num relance.",
       "content2": "Acompanhe a saúde do orçamento e as principais categorias de despesa à medida que os dados forem atualizados.",
       "content3": "Ligue uma conta bancária para preencher o painel com movimentos reais."

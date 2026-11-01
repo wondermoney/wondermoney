@@ -2,7 +2,7 @@
 
 import { Check, Circle, SkipForward } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -116,9 +116,15 @@ export function PortfolioImportAssetGroupCard({
     [group.candidates, group.recommendedCandidateId],
   );
 
-  useEffect(() => {
+  // Collapse the alternatives again when the card shows a different group or
+  // recommendation (adjusted during render rather than in an effect).
+  const alternativesKey = `${group.id}:${group.recommendedCandidateId}`;
+  const [shownAlternativesKey, setShownAlternativesKey] =
+    useState(alternativesKey);
+  if (alternativesKey !== shownAlternativesKey) {
+    setShownAlternativesKey(alternativesKey);
     setShowAlternatives(false);
-  }, [group.id, group.recommendedCandidateId]);
+  }
 
   const shouldShowAlternatives =
     !recommendedCandidate ||
@@ -314,7 +320,6 @@ export function PortfolioImportAssetGroupCard({
             </CardTitle>
             <div className="text-muted-foreground flex flex-wrap items-center gap-2 text-xs">
               <span className="font-mono tabular-nums">#{group.id}</span>
-              <span>·</span>
               <span className="font-mono tabular-nums">
                 {affectedRows.length}
               </span>
@@ -326,8 +331,8 @@ export function PortfolioImportAssetGroupCard({
         </div>
 
         {reviewReason ? (
-          <div className="bg-muted/20 text-muted-foreground rounded-lg border px-3 py-2 text-sm">
-            <div className="text-muted-foreground text-[11px] font-medium tracking-[0.14em] uppercase">
+          <div className="bg-muted/30 text-muted-foreground rounded-lg px-3 py-2 text-sm">
+            <div className="text-muted-foreground text-xs font-medium">
               {t("portfolio-import-review-reason")}
             </div>
             <div className="text-foreground mt-1 leading-6">
@@ -354,9 +359,9 @@ export function PortfolioImportAssetGroupCard({
           ].map(([label, value]) => (
             <div
               key={label}
-              className="bg-background/60 rounded-lg border px-3 py-2"
+              className="bg-muted/30 rounded-lg px-3 py-2"
             >
-              <dt className="text-muted-foreground text-[11px] font-medium tracking-[0.14em] uppercase">
+              <dt className="text-muted-foreground text-xs font-medium">
                 {label}
               </dt>
               <dd

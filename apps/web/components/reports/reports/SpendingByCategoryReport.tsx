@@ -72,8 +72,8 @@ export function SpendingByCategoryReport() {
   // The API sends `row.name` as the raw category name (the system-category
   // enum key, e.g. `CAFE_RESTAURANTS_BARS`, not a display string). Mirrors
   // BudgetVsActualReport's lookup so this chart shows the same names as the
-  // category picker/budget pages instead of inventing a second mapping
-  // (RAD-645) — keyed off `categoryKey` rather than guessing from the name
+  // category picker/budget pages instead of inventing a second mapping —
+  // keyed off `categoryKey` rather than guessing from the name
   // itself, so a user-defined category that happens to share a system
   // category's name is never mistranslated.
   const categoryByKey = useMemo(

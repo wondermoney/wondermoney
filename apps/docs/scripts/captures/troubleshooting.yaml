@@ -36,33 +36,6 @@ pages:
       password page (already covered by start-here/sign-in-password-recovery-
       forgot-password.png).
 
-  - slug: bank-connection-problems
-    step: expectation
-    url: http://localhost:64590/en/accounts
-    actions:
-      - type: click-role
-        name: "Add Account"
-        locales:
-          pt: "Adicionar Conta"
-          es: "Añadir cuenta"
-      - type: wait-text
-        text: "Linked"
-        locales:
-          pt: "Ligada"
-          es: "Vinculada"
-      - type: click-role
-        name: "Linked"
-        locales:
-          pt: "Ligada"
-          es: "Vinculada"
-      - type: wait-text
-        text: "read-only"
-        locales:
-          pt: "apenas de leitura"
-          es: "de solo lectura"
-    note: >-
-      Same expectation modal as settings-security-privacy/read-only-bank-access.
-
   - slug: transaction-import-problems
     step: error-state
     url: http://localhost:64590/en/accounts/transactions

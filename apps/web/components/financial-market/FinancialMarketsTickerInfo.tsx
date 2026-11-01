@@ -10,8 +10,8 @@ import useTickerLastClose from "@/lib/api/financial-markets/useTickerLastClose";
 import { cn } from "@/lib/utils";
 import { getDeltaClassName } from "@/lib/utils/formatCurrency";
 import { useFormatCurrency } from "@/lib/utils/useFormatCurrency";
+import { useFormatPercentage } from "@/lib/utils/useFormatPercentage";
 
-import appendSign from "../../lib/utils/appendSign";
 import { Card } from "../ui/card";
 import {
   LiveQuoteUnavailableNote,
@@ -23,9 +23,8 @@ interface CompanyInformationProps {
   compact?: boolean;
   /**
    * Rendered at the right edge of the header. The explorer's watchlist toggle
-   * used to sit outside this card, floating beside it and drifting with the
-   * company name's length (RAD-610); it belongs to the instrument, so it is
-   * laid out with it.
+   * belongs to the instrument, so it is laid out with it rather than floating
+   * beside the card and drifting with the company name's length.
    */
   action?: React.ReactNode;
 }
@@ -43,6 +42,7 @@ const CompanyInformation: React.FC<CompanyInformationProps> = ({
   action,
 }) => {
   const t = useTranslations();
+  const formatPercentage = useFormatPercentage();
   const formatter = useFormatter();
 
   const { data, isLoading, isError } = useCompanyInfo(ticker!, {
@@ -72,15 +72,15 @@ const CompanyInformation: React.FC<CompanyInformationProps> = ({
   const companyName = data.companyInformation.companyName;
   const symbol = data.companyInformation.symbol;
   // Price and changePercentage are null because the market-data source we run
-  // on carries no live quote (RAD-449) — Intl.NumberFormat silently formats
+  // on carries no live quote — Intl.NumberFormat silently formats
   // null as "0.00", which would otherwise show a confidently wrong price
   // instead of an honest "unavailable" state. This is the steady state, not an
-  // outage (RAD-548), so it gets a calm local treatment and nothing more.
+  // outage, so it gets a calm local treatment and nothing more.
   //
   // The one figure that *is* available is the last close from the price
   // history, which the chart on this same page already plots. Falling back to
   // it beats two bare dashes as long as the label says what it is and when it
-  // is from (RAD-608) — a close is not a quote, and this must never be dressed
+  // is from — a close is not a quote, and this must never be dressed
   // up as one.
   const changePercentage =
     data.companyInformation.changePercentage ?? lastClose?.changePercentage;
@@ -92,7 +92,11 @@ const CompanyInformation: React.FC<CompanyInformationProps> = ({
   const change =
     changePercentage === null || changePercentage === undefined
       ? null
-      : appendSign(changePercentage.toFixed(2), true, true);
+      : formatPercentage(changePercentage / 100, {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+          signDisplay: "exceptZero",
+        });
   const isQuoteUnavailable = price === null || change === null;
   // Shown whenever the figures above came from the history rather than from a
   // quote, in place of the "no live price" note.
@@ -151,7 +155,7 @@ const CompanyInformation: React.FC<CompanyInformationProps> = ({
               <div className="border-border/60 bg-background/40 rounded-md border px-3 py-2">
                 <Text
                   variant="smallText"
-                  className="text-muted-foreground text-[10px] tracking-wide uppercase"
+                  className="text-muted-foreground text-xs"
                 >
                   {t("price")}
                 </Text>
@@ -162,7 +166,7 @@ const CompanyInformation: React.FC<CompanyInformationProps> = ({
               <div className="border-border/60 bg-background/40 rounded-md border px-3 py-2">
                 <Text
                   variant="smallText"
-                  className="text-muted-foreground text-[10px] tracking-wide uppercase"
+                  className="text-muted-foreground text-xs"
                 >
                   {t("change-day")}
                 </Text>
@@ -172,11 +176,7 @@ const CompanyInformation: React.FC<CompanyInformationProps> = ({
                     getDeltaClassName(changePercentage ?? 0),
                   )}
                 >
-                  {change === null ? (
-                    <LiveQuoteUnavailableValue />
-                  ) : (
-                    `${change} %`
-                  )}
+                  {change === null ? <LiveQuoteUnavailableValue /> : change}
                 </Text>
               </div>
             </div>
@@ -235,7 +235,7 @@ const CompanyInformation: React.FC<CompanyInformationProps> = ({
               getDeltaClassName(changePercentage ?? 0),
             )}
           >
-            {change === null ? <LiveQuoteUnavailableValue /> : `${change} %`}
+            {change === null ? <LiveQuoteUnavailableValue /> : change}
           </Text>
         </div>
         {data.companyInformation.industry && (

@@ -12,7 +12,7 @@ cd wondermoney/apps/api/deploy/selfhost
 docker compose up -d
 ```
 
-O `generate-env.sh` escreve um ficheiro `.env` com segredos novos. Corre-o apenas uma vez: se o voltares a correr, os segredos são substituídos, e as sessões existentes e as credenciais bancárias guardadas deixam de funcionar.
+O `generate-env.sh` escreve um ficheiro `.env` com segredos novos. Corre apenas uma vez: se o `.env` já existir, para sem lhe mexer, porque segredos novos terminariam as sessões existentes e tornariam ilegíveis as credenciais bancárias guardadas. Guarda o `.env` em segurança, com as tuas cópias de segurança.
 
 No primeiro arranque, a API cria a base de dados e carrega os dados de referência (moedas, categorias e o catálogo de ativos). Isto demora um ou dois minutos. Para acompanhar:
 

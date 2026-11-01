@@ -45,7 +45,6 @@ describe('demo seeders', () => {
         { code: 'EUR', currencyKey: 1 },
         { code: 'USD', currencyKey: 2 },
       ],
-      nordigenRequisitions: [{ nordigenRequisitionKey: 1 }],
     };
 
     await new AccountSeeder().run(em, ctx);

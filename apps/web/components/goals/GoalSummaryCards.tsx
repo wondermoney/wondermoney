@@ -32,7 +32,7 @@ export default function GoalSummaryCards({ goals }: { goals: Goal[] }) {
     (goal) => goal.status === "active" || goal.status === "paused",
   ).length;
   // FUNDED is a currency amount — the money actually assigned across goals —
-  // not a count of completed goals (RAD-383). Sum each goal's
+  // not a count of completed goals. Sum each goal's
   // summary.fundedHistorically, mirroring the TARGET total above.
   const fundedTotal = goals.reduce(
     (sum, goal) => sum + (goal.summary?.fundedHistorically ?? 0),

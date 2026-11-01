@@ -67,6 +67,21 @@ describe('reports contract', () => {
     expect(budgetVsActualResponseSchema.parse(budgetVsActualFixture)).toEqual(budgetVsActualFixture)
   })
 
+  it('strips fields the API adds and reads a sankey node kind this build does not know as unknown', () => {
+    expect(budgetVsActualResponseSchema.parse({
+      ...budgetVsActualFixture,
+      data: [{ ...budgetVsActualFixture.data[0], forecast: 1 }],
+      currency: 'EUR',
+    })).toEqual(budgetVsActualFixture)
+    const sankey = createSankeyEndpoint(baseFilters).schema.parse({
+      data: { nodes: [{ id: 'n1', label: 'Savings', kind: 'savings', depth: 2 }], links: [{ source: 'n1', target: 'n1', value: 1, color: 'red' }] },
+      generatedAt: '2026-08-11T00:00:00.000Z',
+      filters: {},
+    })
+    expect(sankey.data.nodes[0]).toEqual({ id: 'n1', label: 'Savings', kind: 'unknown' })
+    expect(sankey.data.links[0]).toEqual({ source: 'n1', target: 'n1', value: 1 })
+  })
+
   it('rejects a row missing required numeric fields', () => {
     expect(budgetVsActualResponseSchema.safeParse({
       ...budgetVsActualFixture,

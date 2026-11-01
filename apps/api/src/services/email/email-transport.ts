@@ -2,6 +2,7 @@ import { randomUUID } from 'node:crypto';
 
 import nodemailer, { type Transporter } from 'nodemailer';
 
+import { instanceName } from '@config/instance-name';
 import logger from '@utils/logger';
 
 /**
@@ -46,11 +47,17 @@ export function resolveEmailDriver(env: Env = process.env): EmailDriver {
   return 'log';
 }
 
-/** The product's sender. `EMAIL_FROM`/`EMAIL_FROM_NAME`, falling back to the Resend-era names. */
-export function emailSender(env: Env = process.env): { email: string; name?: string } {
+/**
+ * The product's sender: `EMAIL_FROM`/`EMAIL_FROM_NAME`. The name defaults to the instance's own
+ * (`INSTANCE_NAME`), so a self-hosted instance's mail does not arrive from "WonderMoney".
+ *
+ * `RESEND_FROM_EMAIL`/`RESEND_FROM_NAME` are deprecated aliases, read only as fallbacks because
+ * the hosted instance still sets them. Drop them once its environment uses the canonical names.
+ */
+export function emailSender(env: Env = process.env): { email: string; name: string } {
   const email = read(env, 'EMAIL_FROM') ?? read(env, 'RESEND_FROM_EMAIL') ?? 'wondermoney@localhost';
-  const name = read(env, 'EMAIL_FROM_NAME') ?? read(env, 'RESEND_FROM_NAME') ?? undefined;
-  return name ? { email, name } : { email };
+  const name = read(env, 'EMAIL_FROM_NAME') ?? read(env, 'RESEND_FROM_NAME') ?? instanceName(env);
+  return { email, name };
 }
 
 /**
@@ -60,6 +67,15 @@ export function emailSender(env: Env = process.env): { email: string; name?: str
  */
 export function supportInbox(env: Env = process.env): null | string {
   return read(env, 'SUPPORT_EMAIL');
+}
+
+/**
+ * Where in-app feedback is delivered: `SUPPORT_EMAIL`, but only when an email provider is
+ * configured. With the `log` driver the message would only reach the API log, which nobody is
+ * told to read, so the feedback form is not offered at all.
+ */
+export function feedbackInbox(env: Env = process.env): null | string {
+  return resolveEmailDriver(env) === 'log' ? null : supportInbox(env);
 }
 
 /** Sends through the `log` or `smtp` driver. Resend has its own path in `services/email.ts`. */

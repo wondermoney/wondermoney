@@ -44,10 +44,10 @@ function MonthlyBudgetTablePreview() {
               className="grid grid-cols-4 items-center gap-2 px-4 py-2.5"
             >
               <span className="text-sm">{cat.name}</span>
-              {/* RAD-575 — was `€{n.toLocaleString()}`: a hardcoded symbol in
-                  front of a runtime-locale number, so it prefixed the euro even
-                  in pt/es where it suffixes. <Amount> renders the parts in the
-                  order the locale returns them. */}
+              {/* Not `€{n.toLocaleString()}`: a hardcoded symbol in front of a
+                  runtime-locale number prefixes the euro even in pt/es where it
+                  suffixes. <Amount> renders the parts in the order the locale
+                  returns them. */}
               <Amount
                 value={cat.budgeted}
                 className="text-muted-foreground block text-right font-mono text-xs"
@@ -98,12 +98,11 @@ function MonthlyMetricsPreview() {
         ))}
       </div>
       <div className="border-border bg-card rounded-lg border p-4">
-        <div className="flex items-center gap-2">
-          <div className="bg-success h-2 w-2 animate-pulse rounded-full" />
-          <p className="text-muted-foreground text-xs">
-            Auto-updated from your linked accounts
-          </p>
-        </div>
+        {/* No pulsing green dot: it claimed a live state this preview does
+            not have. */}
+        <p className="text-muted-foreground text-xs">
+          Auto-updated from your linked accounts
+        </p>
       </div>
     </div>
   );

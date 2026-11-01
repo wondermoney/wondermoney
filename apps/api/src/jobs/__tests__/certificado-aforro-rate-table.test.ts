@@ -22,10 +22,9 @@ const FIXTURES = path.join(path.dirname(fileURLToPath(import.meta.url)), 'fixtur
  * The real files IGCP linked from the August-2026 announcement page, downloaded 2026-08-24 from
  * `https://www.igcp.pt/sites/default/files/2026-07/Taxa_Anual_<D|E>%2BPP.pdf`.
  *
- * These are committed deliberately. The vision-OCR path they replace was never exercised by CI —
- * every test injected `deps.ocr` — which is exactly why a systematic misread of these tables ran
- * unnoticed in production for two weeks (API-WC / API-WD). Parsing the genuine bytes is the only
- * assertion that would have caught it.
+ * These are committed deliberately. The vision-OCR fall-back is not exercised by CI — every test
+ * injects `deps.ocr` — so a systematic misread of these tables would go unnoticed. Parsing the
+ * genuine bytes is the only assertion that catches it.
  */
 const FIXTURE_PDF: Record<'D' | 'E', string> = {
   D: path.join(FIXTURES, 'igcp-taxa-anual-D-agosto-2026.pdf'),
@@ -59,7 +58,7 @@ describe('IGCP rate-table text layer', () => {
 
 describe('parseGrossRatesFromTableText', () => {
   /**
-   * The bug behind API-WC/API-WD. Each table lists every cohort's rate for *its own* current
+   * Each table lists every cohort's rate for *its own* current
    * quarterly interest period, and those quarters start in three different months. Only the
    * rows whose quarter began in the target month may be compared against that month's base rate.
    */
@@ -173,7 +172,7 @@ describe('readSeriesGrossRatesTenthBps', () => {
 });
 
 /**
- * The regression test for API-WC / API-WD. Everything below is real: IGCP's August-2026
+ * Everything below is real: IGCP's August-2026
  * announcement markup and the two PDFs it linked. Nothing about the rate tables is mocked, so a
  * future change that reintroduces cross-quarter row mixing fails here rather than in production.
  */

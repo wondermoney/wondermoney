@@ -4,8 +4,9 @@ import { StyleSheet } from 'react-native'
 
 import { initMobileI18n } from '@/lib/i18n'
 
+import { goalsResponseSchema } from './goals-contract'
 import { GoalsScreen, type GoalsData } from './goals-screen'
-import { mapGoalListItem } from './goals-view-model'
+import { mapGoalListItem, mapGoals } from './goals-view-model'
 import { goalFixture } from './test-fixtures'
 
 const data: GoalsData = {
@@ -258,5 +259,15 @@ describe('GoalsScreen', () => {
     const { view, viewDebtStrategy } = await renderScreen({ status: 'loaded', data })
     fireEvent.press(view.getByRole('button', { name: 'Debt payoff strategy' }))
     expect(viewDebtStrategy).toHaveBeenCalled()
+  })
+})
+
+describe('GoalsScreen with values this build does not know', () => {
+  it('renders a goal whose status is new to this build alongside known goals', async () => {
+    const response = goalsResponseSchema.parse({ goals: [{ ...goalFixture, goalKey: 9, name: 'Frozen goal', status: 'frozen', extra: true }, goalFixture] })
+    const { view } = await renderScreen({ status: 'loaded', data: { goals: mapGoals(response) } })
+    expect(view.getByText('Frozen goal')).toBeOnTheScreen()
+    expect(view.getByText('Status unavailable')).toBeOnTheScreen()
+    expect(view.getByText(goalFixture.name)).toBeOnTheScreen()
   })
 })

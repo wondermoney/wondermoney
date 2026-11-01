@@ -39,8 +39,8 @@
     },
     "cancel": "Cancelar",
     "join": {
-      "greetingNamed": "{name} convidou-o para o seu agregado no WonderMoney",
-      "greetingGeneric": "Foi convidado para um agregado no WonderMoney",
+      "greetingNamed": "{name} convidou-o para o seu agregado em {instanceName}",
+      "greetingGeneric": "Foi convidado para um agregado em {instanceName}",
       "subtitle": "Crie a sua conta para partilhar contas, orçamentos e objetivos.",
       "emailLockedHint": "Este convite é para {email}",
       "invalidTitle": "Este link de convite não é válido",
@@ -48,7 +48,7 @@
       "loggedInTitle": "Já tem sessão iniciada",
       "loggedInBody": "Os convites de agregado só podem ser aceites com uma conta nova. Termine a sessão e crie uma com o email convidado para entrar.",
       "logoutAndJoin": "Terminar sessão e criar conta",
-      "backToApp": "Ir para o WonderMoney"
+      "backToApp": "Ir para {instanceName}"
     },
     "toast": {
       "inviteSent": "Convite enviado",

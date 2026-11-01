@@ -19,5 +19,3 @@ export const authClient = createAuthClient({
   cookiePrefix: getBetterAuthCookiePrefix(API_URL),
   plugins: [twoFactorClient()],
 });
-
-export const { signIn, signOut, signUp, useSession } = authClient;

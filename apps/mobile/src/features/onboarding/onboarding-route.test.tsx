@@ -88,12 +88,11 @@ describe('OnboardingRoute — leaving a journey the user no longer needs', () =>
     expect(mockReplace).not.toHaveBeenCalled()
   })
 
-  // RAD-602 regression. The redirect used to run in the render body and then
-  // fall through to render the journey anyway, so a user who did not need
-  // onboarding got a frame of it while navigating away. This is the assertion
-  // that actually fails against the old code.
+  // If the redirect ran in the render body and fell through to render the
+  // journey, a user who did not need onboarding would get a frame of it while
+  // navigating away. This assertion catches that.
   //
-  // The error React logged for that ("cannot update a component while
+  // The error React logs for that ("cannot update a component while
   // rendering a different component") cannot be reproduced here: the router is
   // mocked with plain jest.fn()s, so calling `replace` updates no real state
   // and React has nothing to complain about. That half only shows against the
@@ -124,11 +123,11 @@ describe('OnboardingRoute — create-account navigation', () => {
     capturedOnCreateAccount = undefined
   })
 
-  // RAD-193 regression: router.push({ pathname, params }) (the object form)
-  // reproducibly failed to deliver `version` to the create-account screen in
-  // production builds — useLocalSearchParams saw an empty {} there, landing
-  // on the invalid-version fallback on every single sign-in. This asserts
-  // the query-string form actually used instead.
+  // router.push({ pathname, params }) (the object form) fails to deliver
+  // `version` to the create-account screen in production builds —
+  // useLocalSearchParams sees an empty {} there, landing on the
+  // invalid-version fallback on every sign-in. This asserts the query-string
+  // form used instead.
   it('pushes create-account as an explicit query string carrying the loaded version', async () => {
     await render(<OnboardingRoute />)
     expect(capturedOnCreateAccount).toBeDefined()

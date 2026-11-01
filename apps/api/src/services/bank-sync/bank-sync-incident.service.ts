@@ -36,6 +36,27 @@ import { getRef } from '@utils/em-helpers';
 
 const ELIGIBILITY_DELAY_MS = 60 * 60 * 1000;
 
+// The analytics contract's string unions and the persistence enums spell the same values. These
+// tables make the compiler prove that, where an `as` would let the two drift apart unnoticed.
+const INCIDENT_ENVIRONMENT = {
+  development: IncidentEnvironment.DEVELOPMENT,
+  production: IncidentEnvironment.PRODUCTION,
+  staging: IncidentEnvironment.STAGING,
+} as const satisfies Record<BankSyncEnvironment, IncidentEnvironment>;
+const INCIDENT_FLOW = {
+  'initial-add': BankSyncFlow.INITIAL_ADD,
+  'scheduled-refresh': BankSyncFlow.SCHEDULED_REFRESH,
+} as const satisfies Record<ContractFlow, BankSyncFlow>;
+const INCIDENT_PRODUCER = {
+  'pgboss-initial': BankSyncProducer.INITIAL,
+  'pgboss-scheduled': BankSyncProducer.SCHEDULED,
+} as const satisfies Record<ContractProducer, BankSyncProducer>;
+const ATTEMPT_RESULT = {
+  failed: BankSyncAttemptResult.FAILED,
+  full_success: BankSyncAttemptResult.FULL_SUCCESS,
+  partial: BankSyncAttemptResult.PARTIAL,
+} as const satisfies Record<BankSyncContractResult, BankSyncAttemptResult>;
+
 export interface AllocateBankSyncIncidentInput {
   appuserKey: number;
   correlationId: string;
@@ -130,10 +151,10 @@ export class BankSyncIncidentService {
         throw new Error('Legacy bank sync incident cannot be completed safely');
       }
       incident.distinctId ??= input.distinctId;
-      incident.environment ??= input.environment as IncidentEnvironment;
-      incident.flow ??= input.flow as BankSyncFlow;
+      incident.environment ??= INCIDENT_ENVIRONMENT[input.environment];
+      incident.flow ??= INCIDENT_FLOW[input.flow];
       incident.institutionId ??= input.institutionId;
-      incident.producer ??= input.producer as BankSyncProducer;
+      incident.producer ??= INCIDENT_PRODUCER[input.producer];
       incident.requisitionId ??= input.requisitionId;
       await reconcileTask14Fields(em, incident, input.userVisible, false);
       assertIncidentIdentity(incident, input);
@@ -169,12 +190,12 @@ export class BankSyncIncidentService {
           correlationId: input.correlationId,
           createdAt: timestamp,
           distinctId: input.distinctId,
-          environment: input.environment as IncidentEnvironment,
+          environment: INCIDENT_ENVIRONMENT[input.environment],
           finality: BankSyncFinality.NON_TERMINAL,
-          flow: input.flow as BankSyncFlow,
+          flow: INCIDENT_FLOW[input.flow],
           incidentId: randomUUID(),
           institutionId: input.institutionId,
-          producer: input.producer as BankSyncProducer,
+          producer: INCIDENT_PRODUCER[input.producer],
           requisitionId: input.requisitionId,
           result: BankSyncResult.PENDING,
           rolloutMode: BankSyncRolloutMode.OFF,
@@ -276,9 +297,9 @@ export class BankSyncIncidentService {
       attempt.final = event.final;
       attempt.institutionId = event.institution_id;
       attempt.requisitionContext = event.requisition_context;
-      attempt.result = input.result as BankSyncAttemptResult;
-      // RAD-519: institution is discovered mid-sync (the requisition/account response), never known
-      // at allocation time, so the incident row itself never got it — backfill it here, first value wins.
+      attempt.result = ATTEMPT_RESULT[input.result];
+      // The institution is discovered mid-sync (the requisition/account response), never known at
+      // allocation time, so the incident row starts without it — backfill it here, first value wins.
       incident.institutionId ??= event.institution_id;
 
       incident.attempts = Math.max(incident.attempts, input.attempt);
@@ -385,7 +406,7 @@ function optionalEventValueMatches(persisted: unknown, event: unknown): boolean 
   return persisted === event || (persisted === null && event === undefined);
 }
 
-// RAD-519: institution is backfilled onto the incident well after allocation (see finalizeAttempt),
+// The institution is backfilled onto the incident well after allocation (see finalizeAttempt),
 // but no allocation/reconcile caller ever states an institutionId opinion — so an input of `undefined`
 // must never conflict with an institution the system already learned. A caller that DOES state a real,
 // differing institutionId is still a genuine identity conflict.
@@ -427,7 +448,7 @@ function assertLegacyKnownIdentity(incident: BankSyncIncident, input: AllocateBa
     || (incident.producer != null && incident.producer !== input.producer)
     || (incident.requisitionId != null && incident.requisitionId !== input.requisitionId)
     // Legacy rows may predate institution tracking entirely (unset) or have it backfilled later by
-    // finalizeAttempt (RAD-519) while callers still never state an institutionId opinion — only a
+    // finalizeAttempt while callers never state an institutionId opinion — only a
     // real, differing value on both sides is a genuine conflict here.
     || (incident.institutionId != null && input.institutionId != null && incident.institutionId !== input.institutionId)
     || (incident.userVisible != null && incident.userVisible !== input.userVisible)) {

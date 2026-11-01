@@ -29,17 +29,16 @@ function fakeRes() {
   return { json, res: { json } as unknown as Response };
 }
 
-describe('financial-markets controller (RAD-228 stable DTOs)', () => {
+describe('financial-markets controller (stable DTOs)', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
   describe('getCompanyInformation', () => {
-    // This endpoint migrated its data-fetch logic to EODHD search (RAD-449);
-    // the Fundamentals-tier fields (beta, ceo, description, etc.) are not
+    // This endpoint fetches from EODHD search; the Fundamentals-tier fields (beta, ceo, description, etc.) are not
     // available from search results and are always null — a deliberate
     // degradation, not a bug. price/changePercentage come from a separate
-    // real-time quote call (RAD-649, see the dedicated tests below) — here
+    // real-time quote call (see the dedicated tests below) — here
     // getQuote is unmocked, so that call throws and both fields fall back to
     // null, same as their eventual "quote unavailable" behavior in prod.
     it('returns a reduced company-information DTO sourced from an exact EODHD symbol match', async () => {
@@ -110,14 +109,12 @@ describe('financial-markets controller (RAD-228 stable DTOs)', () => {
       expect(json).toHaveBeenCalledWith({ companyInformation: null });
     });
 
-    // RAD-649 — Explorer (this endpoint) and Watchlist (getQuote below) used
-    // to derive "current price" from two different EODHD calls: this
-    // endpoint hardcoded price/changePercentage to null (wrongly assuming
-    // they were Fundamentals-gated like beta/ceo/description), so the
-    // frontend fell back to a last-close figure from historical EOD data
-    // while the watchlist showed a genuine real-time quote. This endpoint
-    // must now source price/changePercentage from the same real-time quote
-    // call getQuote uses, so both surfaces agree.
+    // Explorer (this endpoint) and Watchlist (getQuote below) must derive
+    // "current price" from the same call. price/changePercentage are not
+    // Fundamentals-gated like beta/ceo/description, so this endpoint sources
+    // them from the same real-time quote call getQuote uses, rather than
+    // leaving them null and letting the frontend fall back to a last-close
+    // figure from historical EOD data.
     it('populates price and changePercentage from the same real-time quote getQuote uses', async () => {
       const { getCompanyInformation } = await import('../financial-markets');
       eodhdMocks.search.mockResolvedValue([
@@ -159,7 +156,7 @@ describe('financial-markets controller (RAD-228 stable DTOs)', () => {
       expect(payload.companyInformation['changePercentage']).toBeNull();
     });
 
-    // The actual RAD-649 regression: given the identical underlying EODHD
+    // Given the identical underlying EODHD
     // real-time quote payload, the price-fetch path behind Explorer
     // (getCompanyInformation) and the one behind Watchlist (getQuote) must
     // agree on price and changePercentage. This asserts consistency between
@@ -193,7 +190,7 @@ describe('financial-markets controller (RAD-228 stable DTOs)', () => {
     });
   });
 
-  describe('getFinancials (RAD-449: stubbed, not covered by EODHD plan)', () => {
+  describe('getFinancials (stubbed, not covered by the EODHD plan)', () => {
     it('throws NotFoundError without calling any provider', async () => {
       const { getFinancials } = await import('../financial-markets');
       const { res } = fakeRes();
@@ -216,7 +213,7 @@ describe('financial-markets controller (RAD-228 stable DTOs)', () => {
   });
 
   describe('getQuote', () => {
-    // This endpoint migrated its data-fetch logic to EODHD (RAD-449).
+    // This endpoint fetches from EODHD.
     const EODHD_SOURCE = { asOf: null, provider: 'eodhd' } as const;
 
     it('returns a quote DTO from EODHD realTime data', async () => {
@@ -263,7 +260,7 @@ describe('financial-markets controller (RAD-228 stable DTOs)', () => {
     });
   });
 
-  describe('getFundamentals (RAD-449: stubbed, not covered by EODHD plan)', () => {
+  describe('getFundamentals (stubbed, not covered by the EODHD plan)', () => {
     it('throws NotFoundError without calling any provider', async () => {
       const { getFundamentals } = await import('../financial-markets');
       const { res } = fakeRes();
@@ -286,7 +283,7 @@ describe('financial-markets controller (RAD-228 stable DTOs)', () => {
   });
 
   describe('getHistoricalPrice', () => {
-    // This endpoint migrated its data-fetch logic to EODHD (RAD-449).
+    // This endpoint fetches from EODHD.
     const EODHD_SOURCE = { asOf: null, provider: 'eodhd' } as const;
 
     it('merges dividends into price history by date and projects to the stable DTO', async () => {
@@ -296,8 +293,8 @@ describe('financial-markets controller (RAD-228 stable DTOs)', () => {
         { close: 110, date: '2026-01-02' },
       ]);
       // EODHD's getDividends returns the per-share dividend cash amount in
-      // `value` (not an adjusted-close price like FMP's getDividendAdjusted
-      // was). The controller merges that value in by date.
+      // `value` (not an adjusted-close price). The controller merges that
+      // value in by date.
       eodhdMocks.getDividends.mockResolvedValue([{ date: '2026-01-02', value: 0.5 }]);
       const { json, res } = fakeRes();
       const req = {
@@ -375,7 +372,7 @@ describe('financial-markets controller (RAD-228 stable DTOs)', () => {
   });
 
   describe('searchTicker', () => {
-    // This endpoint migrated its data-fetch logic to EODHD (RAD-449).
+    // This endpoint fetches from EODHD.
     const EODHD_SOURCE = { asOf: null, provider: 'eodhd' } as const;
 
     it('returns an empty list with the source metadata for a blank search term', async () => {
@@ -467,7 +464,7 @@ describe('financial-markets controller (RAD-228 stable DTOs)', () => {
     });
   });
 
-  describe('getEarnings (RAD-449: stubbed, not covered by EODHD plan)', () => {
+  describe('getEarnings (stubbed, not covered by the EODHD plan)', () => {
     it('throws NotFoundError without calling any provider', async () => {
       const { getEarnings } = await import('../financial-markets');
       const { res } = fakeRes();
@@ -489,7 +486,7 @@ describe('financial-markets controller (RAD-228 stable DTOs)', () => {
     });
   });
 
-  describe('getNews (RAD-449: stubbed, not covered by EODHD plan)', () => {
+  describe('getNews (stubbed, not covered by the EODHD plan)', () => {
     it('throws NotFoundError without calling any provider', async () => {
       const { getNews } = await import('../financial-markets');
       const { res } = fakeRes();
@@ -512,7 +509,7 @@ describe('financial-markets controller (RAD-228 stable DTOs)', () => {
   });
 
   describe('getHistoricalDividend', () => {
-    // This endpoint migrated its data-fetch logic to EODHD (RAD-449).
+    // This endpoint fetches from EODHD.
     const EODHD_SOURCE = { asOf: null, provider: 'eodhd' } as const;
 
     it('projects dividend rows and drops entries whose date is unparseable', async () => {

@@ -1,8 +1,6 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { motion } from "motion/react";
-import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import React, { useEffect } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
@@ -20,6 +18,7 @@ import {
 import { Slider } from "@/components/ui/slider";
 import { Heading } from "@/components/ui/Typography";
 import Text from "@/components/ui/Typography/Text";
+import { useRouter } from "@/i18n/navigation";
 
 import {
   buildDependentsSchema,
@@ -72,11 +71,12 @@ export default function DependentsPage() {
 
   return (
     <div>
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-      >
+      {/* The entrance is CSS, not motion/react: a self-running animation
+          that leaves the step visible with scripting off or before hydration;
+          `motion-safe:` drops it for anyone who asked for reduced motion.
+          motion/react rendered every block at opacity 0 into the HTML and
+          animated regardless of that setting. */}
+      <div className="motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-5 motion-safe:fill-mode-both motion-safe:duration-500">
         <Heading
           variant="h2"
           className="text-center"
@@ -84,24 +84,15 @@ export default function DependentsPage() {
         >
           {t("how-many-dependents-do-you-have")}
         </Heading>
-      </motion.div>
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.2 }}
-      >
+      </div>
+      <div className="motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-5 motion-safe:fill-mode-both motion-safe:delay-200 motion-safe:duration-500">
         <Text
           variant="mutedText"
           className="text-muted-foreground mx-auto mt-2 w-full max-w-md text-center"
         >
           {t("want-a-budget-that-truly-fits-your-life")}
         </Text>
-      </motion.div>
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.4 }}
-      ></motion.div>
+      </div>
       <Form {...methods}>
         <FormContent
           className="flex w-full flex-col gap-8"

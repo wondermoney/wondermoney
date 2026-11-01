@@ -7,13 +7,13 @@ import { z } from 'zod';
 
 /**
  * Stratified sample for a blind precision re-measurement of the transaction-enrichment
- * categoriser (RAD-444/RAD-584). Pulls already-enriched transactions, bucketed by the
+ * categoriser. Pulls already-enriched transactions, bucketed by the
  * confidence the model reported, so a human can label each one *before* seeing the
  * model's suggestion (see the companion labelling page and score-categoriser-eval.ts).
  *
  * Read-only: does not write to the database. Excludes internal/team accounts
  * (@wonder.money, +sandbox) and demo accounts, matching the standard exclusion used
- * across growth/ops queries (docs/operations/daily_prompt.md).
+ * across growth/ops queries.
  */
 const BUCKETS = [
   { max: 0.65, min: 0.6 },

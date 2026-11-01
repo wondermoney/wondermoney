@@ -6,7 +6,7 @@ import { z } from 'zod';
 /**
  * Scores a blind-labelled sample (see export-categoriser-eval-sample.ts and
  * categoriser-eval-page.html) into a precision-by-confidence-bucket table, in the
- * same shape as the original RAD-444 evaluation: precision on inputs the labeller
+ * same shape as the original evaluation: precision on inputs the labeller
  * judged as actually derivable (i.e. excluding rows they marked "not enough
  * information"), bucketed by the model's reported confidence.
  *
@@ -21,21 +21,21 @@ const sampleRowSchema = z.object({
   suggestedCategoryKey: z.number(),
   suggestedCategoryName: z.string(),
   transactionEnrichmentKey: z.number(),
-}).passthrough();
+}).loose();
 
 const sampleSchema = z.object({
   categories: z.array(z.object({ categoryKey: z.number(), name: z.string() })),
   rows: z.array(sampleRowSchema),
-}).passthrough();
+}).loose();
 
 const labelEntrySchema = z.object({
   coldPick: z.string().nullable(),
   finalPick: z.string().nullable(),
   insufficient: z.boolean(),
   revised: z.boolean(),
-}).passthrough();
+}).loose();
 
-const labelsFileSchema = z.object({ labels: z.record(z.string(), labelEntrySchema) }).passthrough();
+const labelsFileSchema = z.object({ labels: z.record(z.string(), labelEntrySchema) }).loose();
 
 export class CategoriserEvalScoreArgumentError extends Error {
   override readonly name = 'CategoriserEvalScoreArgumentError';

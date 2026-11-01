@@ -123,7 +123,7 @@ async function createHarness(initialSession = session('a'), options: HarnessOpti
 }
 
 describe('ProductRuntimeProvider integration', () => {
-  it('orders logout through child cleanup, query purge, and then Supabase sign-out', async () => {
+  it('orders logout through child cleanup, query purge, and then auth sign-out', async () => {
     const events: string[] = []
     const realScope = createSessionOperationScope()
     const operationScope = {
@@ -200,7 +200,7 @@ describe('ProductRuntimeProvider integration', () => {
   })
 
   it.each(['mfa-required'] as const)(
-    'purges financial state before entering %s without signing out Supabase',
+    'purges financial state before entering %s without signing out of the auth session',
     async (reason) => {
       const events: string[] = []
       const queryClient = new QueryClient()
@@ -807,7 +807,7 @@ describe('ProductRuntimeProvider MFA', () => {
   })
 })
 
-describe('ProductRuntimeProvider household invites (RAD-499)', () => {
+describe('ProductRuntimeProvider household invites', () => {
   it('threads a pending invite token into provisioning and clears it afterward', async () => {
     ;(provisionAppUser as jest.Mock).mockReset().mockResolvedValue('provisioned')
     setPendingInviteToken('invite-tok-1')

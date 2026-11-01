@@ -4,7 +4,7 @@ import { CATEGORY_STATS_RECENCY_HALF_LIFE_DAYS, pickRecencyWeightedTopStat } fro
 
 const daysAgo = (now: Date, days: number): Date => new Date(now.getTime() - days * 24 * 60 * 60 * 1000);
 
-describe('pickRecencyWeightedTopStat (RAD-342 G2)', () => {
+describe('pickRecencyWeightedTopStat', () => {
   const now = new Date('2026-08-02T00:00:00.000Z');
 
   it('returns null for an empty list', () => {

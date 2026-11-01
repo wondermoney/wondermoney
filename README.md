@@ -26,8 +26,8 @@ when configured and are hidden when not; the core app needs only Postgres.
 
 ## Develop
 
-Requirements: Node 24 (`.nvmrc`), pnpm via [corepack](https://nodejs.org/api/corepack.html)
-(`corepack enable`), and Docker for the local database.
+Requirements: Node 26 (`.nvmrc`), pnpm via [corepack](https://github.com/nodejs/corepack)
+(`npm install -g corepack && corepack enable`; Node 26 no longer bundles it), and Docker for the local database.
 
 ```bash
 pnpm install

@@ -26,7 +26,7 @@ vi.mock('../../app.js', () => ({
   },
 }));
 
-// RAD-561 — the facet counts reach the same EntityManager through
+// The facet counts reach the same EntityManager through
 // `@app/database/di`, which `app.js` re-exports. Both specifiers resolve to the
 // one DI object at runtime, but a module mock is keyed on the specifier.
 vi.mock('@app/database/di', () => ({
@@ -78,7 +78,7 @@ describe('account controller scenarios', () => {
       .mockResolvedValueOnce([
         {
           appuserCurrencyKey: { code: 'EUR' },
-          appuserSettlementAmount: -100,
+          appuserSettlementAmount: -40,
           appuserTransactionCategories: collection([
             {
               categoryKey: {
@@ -97,7 +97,7 @@ describe('account controller scenarios', () => {
         },
         {
           appuserCurrencyKey: { code: 'EUR' },
-          appuserSettlementAmount: -80,
+          appuserSettlementAmount: 20,
           appuserTransactionCategories: collection([
             {
               categoryKey: {
@@ -292,6 +292,7 @@ describe('account controller scenarios', () => {
     await getS3PresignedUrlForCsvUpload(Object.assign(mockReq({ params: { accountId: '1' } }), { tenant: { tenantKey: 7 }, user: { appuserKey: 1 } }), mockRes({ json }), next);
 
     expect(json).toHaveBeenCalledWith({
+      csvImportFormat: 'generic',
       isSupportedBank: false,
       key: 'account-1-NORD_LB__Demo_Bank-upload-id.csv',
       presignedUrl: 'https://example.com/account.csv',

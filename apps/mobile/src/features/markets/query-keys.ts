@@ -27,7 +27,7 @@ export const earningsKey = (epochId: number, symbol: string) =>
   [...marketsRootKey(epochId), 'earnings', symbol] as const
 
 /**
- * RAD-241 (slice 3) — every filter plus page and limit are folded into the
+ * Every filter plus page and limit are folded into the
  * key (rather than fetched via `useInfiniteQuery`, which would key only by
  * filters): the screener hook fetches one page at a time, like `useQuote`
  * fetches one symbol, so each page needs its own cache entry.

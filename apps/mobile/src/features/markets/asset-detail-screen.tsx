@@ -28,7 +28,7 @@ export type AssetDetailViewState =
   | { status: 'refresh-error'; data: QuoteViewModel }
 
 /**
- * RAD-243 (slice 2) — orthogonal to `AssetDetailViewState` on purpose: the
+ * Orthogonal to `AssetDetailViewState` on purpose: the
  * watchlist membership `GET` and the quote `GET` are independent requests,
  * so a still-loading or errored watchlist query must never force the whole
  * screen into a loading/error state. 'unknown' hides the toggle rather than

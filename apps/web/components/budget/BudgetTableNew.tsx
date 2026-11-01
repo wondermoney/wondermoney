@@ -1,6 +1,5 @@
 "use client";
 
-import { type ColumnDef, createColumnHelper, Row } from "@tanstack/react-table";
 import { ChevronDown, ChevronRight, Trash } from "lucide-react";
 import { useTranslations } from "next-intl";
 import {
@@ -17,6 +16,11 @@ import { Amount } from "@/components/ui/Amount";
 import CategoryIcon from "@/components/ui/CategoryIcon";
 import { Table } from "@/components/ui/Table";
 import TableCellEditable from "@/components/ui/Table/Cell/TableCellEditable";
+import {
+  type ColumnDef,
+  createColumnHelper,
+  Row,
+} from "@/components/ui/Table/features";
 import { Text } from "@/components/ui/Typography";
 import { Budget } from "@/lib/api/budget/useBudgets";
 import useEditBudgetCategory from "@/lib/api/budget/useEditBudgetCategory";
@@ -99,9 +103,15 @@ function MobileBudgetEditorList({
                 <div className="flex items-center gap-2">
                   <div
                     className="flex size-9 shrink-0 items-center justify-center rounded-md"
-                    style={{ backgroundColor: parentRow.bgColor }}
+                    style={{
+                      backgroundColor: parentRow.bgColor,
+                      color: parentRow.textColor,
+                    }}
                   >
-                    <CategoryIcon icon={parentRow.icon} />
+                    <CategoryIcon
+                      icon={parentRow.icon}
+                      className="text-current"
+                    />
                   </div>
                   <Text className="min-w-0 truncate font-medium">
                     {parentRow.isSystemCategory
@@ -172,9 +182,15 @@ function MobileBudgetEditorList({
                           <div className="flex items-center gap-2">
                             <div
                               className="flex size-9 shrink-0 items-center justify-center rounded-md"
-                              style={{ backgroundColor: row.bgColor }}
+                              style={{
+                                backgroundColor: row.bgColor,
+                                color: row.textColor,
+                              }}
                             >
-                              <CategoryIcon icon={row.icon} />
+                              <CategoryIcon
+                                icon={row.icon}
+                                className="text-current"
+                              />
                             </div>
                             <Text className="min-w-0 truncate font-medium">
                               {row.isSystemCategory
@@ -220,7 +236,10 @@ function MobileBudgetEditorList({
                             <div className="flex items-center justify-between gap-3">
                               <span className="truncate">{t("annually")}</span>
                               <span className="text-foreground font-mono">
-                                <Amount value={row.budgeted * 12} currency={currency} />
+                                <Amount
+                                  value={row.budgeted * 12}
+                                  currency={currency}
+                                />
                               </span>
                             </div>
                             <div className="flex items-center justify-between gap-3">
@@ -295,9 +314,15 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
   const [loadingDeleteSet, setLoadingDeleteSet] = useState<Set<string>>(
     new Set(),
   );
+  // Take the new budget when the prop changes (adjusted during render); the
+  // ref the handlers read is updated once that render commits.
+  const [prevBudget, setPrevBudget] = useState(budget);
+  if (budget !== prevBudget) {
+    setPrevBudget(budget);
+    setData(budget);
+  }
   useEffect(() => {
     dataRef.current = budget;
-    setData(budget);
   }, [budget]);
 
   const {
@@ -587,9 +612,13 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
                 className="flex size-10 items-center justify-center rounded-md"
                 style={{
                   backgroundColor: row.original.bgColor,
+                  color: row.original.textColor,
                 }}
               >
-                <CategoryIcon icon={row.original.icon} />
+                <CategoryIcon
+                  icon={row.original.icon}
+                  className="text-current"
+                />
               </div>
               <Text
                 className={cn(
@@ -711,7 +740,10 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
                   row.depth === 0 ? "font-semibold" : "font-normal",
                 )}
               >
-                <Amount value={row.original.budgeted * 12} currency={currency} />
+                <Amount
+                  value={row.original.budgeted * 12}
+                  currency={currency}
+                />
               </Text>
             </CellNumeric>
           );

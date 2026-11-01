@@ -19,8 +19,8 @@ export type PortfolioTickerSearchFieldProps = Readonly<{
 /**
  * Shared ticker-search widget: wraps markets' useTickerSearch (the only ticker search already
  * shipped on mobile) in a self-contained text field + results list so both the CSV-import asset
- * review step (RAD-514) and manual transaction creation (RAD-516) can search for a security
- * without each building its own autocomplete.
+ * review step and manual transaction creation can search for a security without each building
+ * its own autocomplete.
  */
 export function PortfolioTickerSearchField({ label, palette, onSelect, disabled = false }: PortfolioTickerSearchFieldProps) {
   const { t } = useTranslation()

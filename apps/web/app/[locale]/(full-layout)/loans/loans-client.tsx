@@ -36,10 +36,10 @@ export default function LoansClient() {
     overviewData?.overview.totalOutstandingAmount ??
     overviewData?.overview.totalOutstandingDebt ??
     0;
-  const monthlyRepaymentTotal = loans.reduce(
-    (sum, c) => sum + (c.regularPaymentAmount || 0),
-    0,
-  );
+  // The API totals in the user's currency, converting loans held in another one (#200).
+  const monthlyRepaymentTotal =
+    overviewData?.overview.monthlyRepaymentTotal ??
+    loans.reduce((sum, c) => sum + (c.regularPaymentAmount || 0), 0);
   const netWorthImpact = netWorthData
     ? -(netWorthData.netWorth.liabilitiesTotal ?? 0)
     : null;
@@ -134,6 +134,7 @@ export default function LoansClient() {
       </div>
       <LoansSummaryCards
         currencyCode={
+          overviewData?.overview.currency ??
           netWorthData?.netWorth.currencyCode ??
           loans[0]?.currency.code ??
           "EUR"

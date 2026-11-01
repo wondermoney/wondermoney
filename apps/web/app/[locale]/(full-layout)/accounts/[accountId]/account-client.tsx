@@ -22,6 +22,7 @@ import { DateRange } from "react-day-picker";
 import AccountTransactionAddModal from "@/components/account/AccountTransactionAddModal";
 import AccountTransactionImportModal from "@/components/account/AccountTransactionImportModal";
 import AccountTransactionsTable from "@/components/account/AccountTransactionsTable";
+import { clampSyncedAt } from "@/components/account/sync-time";
 import { Amount } from "@/components/ui/Amount";
 import { Button } from "@/components/ui/button";
 import { DataProvenance } from "@/components/ui/DataProvenance";
@@ -33,11 +34,13 @@ import useAccount from "@/lib/api/account/useAccount";
 import type { AccountMetrics } from "@/lib/api/account/useAccountMetrics";
 import type { GetAccountMetricsResponse } from "@/lib/api/account/useAccountMetrics";
 import useAccountMetrics from "@/lib/api/account/useAccountMetrics";
+import type { GetAccountsResponse } from "@/lib/api/account/useAccounts";
 import useAccounts from "@/lib/api/account/useAccounts";
 import type { GetAccountTransactionsResponse } from "@/lib/api/account/useAccountTransactions";
 import useAccountTransactions from "@/lib/api/account/useAccountTransactions";
 import type { GetConfigsResponse } from "@/lib/api/configs/useConfigs";
 import useConfigs from "@/lib/api/configs/useConfigs";
+import { serverSeed } from "@/lib/query/server-seed";
 import { cn } from "@/lib/utils";
 import { useFormatCurrency } from "@/lib/utils/useFormatCurrency";
 import { useFormatPercentage } from "@/lib/utils/useFormatPercentage";
@@ -206,7 +209,9 @@ function MetricsCards({
 
 interface AccountClientProps {
   accountId: number;
+  serverRenderedAt: number;
   initialAccountData: GetAccountResponse;
+  initialAccountsData: GetAccountsResponse;
   initialTransactionsData: GetAccountTransactionsResponse;
   initialConfigsData: GetConfigsResponse;
   initialAccountMetricsData: GetAccountMetricsResponse;
@@ -214,7 +219,9 @@ interface AccountClientProps {
 
 export default function AccountClient({
   accountId,
+  serverRenderedAt,
   initialAccountData,
+  initialAccountsData,
   initialTransactionsData,
   initialConfigsData,
   initialAccountMetricsData,
@@ -225,10 +232,10 @@ export default function AccountClient({
 
   const { data: accountsData, isLoading: isLoadingAccountsData } = useAccount(
     accountId,
-    { initialData: initialAccountData },
+    serverSeed(initialAccountData, serverRenderedAt),
   );
   const { data: accountsListData, isLoading: isLoadingAccountsList } =
-    useAccounts();
+    useAccounts(serverSeed(initialAccountsData, serverRenderedAt));
 
   const {
     data: transactionsData,
@@ -238,7 +245,7 @@ export default function AccountClient({
     { accountId },
     {
       enabled: !!accountId && !Number.isNaN(accountId),
-      initialData: initialTransactionsData,
+      ...serverSeed(initialTransactionsData, serverRenderedAt),
     },
   );
 
@@ -247,9 +254,9 @@ export default function AccountClient({
     [transactionsData?.transactions],
   );
 
-  const { data: configsData, isLoading: isLoadingConfigs } = useConfigs({
-    initialData: initialConfigsData,
-  });
+  const { data: configsData, isLoading: isLoadingConfigs } = useConfigs(
+    serverSeed(initialConfigsData, serverRenderedAt),
+  );
 
   const isLoading = isLoadingTransactionsData || isLoadingConfigs;
 
@@ -259,7 +266,7 @@ export default function AccountClient({
     isPlaceholderData: isAccountMetricsPlaceholderData,
   } = useAccountMetrics(accountId, {
     enabled: !!accountId && !Number.isNaN(accountId),
-    initialData: initialAccountMetricsData,
+    ...serverSeed(initialAccountMetricsData, serverRenderedAt),
   });
 
   // Table stuff
@@ -355,7 +362,9 @@ export default function AccountClient({
         secondaryCurrency={account.currencyKey.code}
         provenance={
           <DataProvenance
-            updatedAt={account.syncStatus?.lastSyncedAt ?? account.refreshedAt}
+            updatedAt={clampSyncedAt(
+              account.syncStatus?.lastSyncedAt ?? account.refreshedAt,
+            )}
             isStale={
               account.syncStatus?.staleness === "stale" ||
               account.syncStatus?.staleness === "very_stale"

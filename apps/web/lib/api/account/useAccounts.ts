@@ -26,16 +26,23 @@ export interface Account {
   accountOwnerAppuserKey: { currencyKey: { code: string } };
   refreshedAt: string | null;
   source: "manual" | "open_banking";
-  // RAD-343 household
+  /**
+   * Which file the account's CSV import reads: its bank's statement export ("bank"), or the
+   * generic CSV format, for any other bank or an account without one ("generic").
+   */
+  csvImportFormat: AccountCsvImportFormat;
+  // Household sharing and per-account privacy
   isPrivate: boolean;
   isOwnedByViewer: boolean;
   ownerFirstName: string | null;
-  /** Current balance net of pending transactions (RAD-346). Null when unknown. */
+  /** Current balance net of pending transactions. Null when unknown. */
   availableBalance: number | null;
   appuserCurrencyAvailableBalance: number | null;
-  /** Sync freshness signal for open-banking accounts (RAD-346). Null for manual/unknown. */
+  /** Sync freshness signal for open-banking accounts. Null for manual/unknown. */
   syncStatus: SyncStatus | null;
 }
+
+export type AccountCsvImportFormat = "bank" | "generic";
 
 export interface GetAccountsResponse {
   accounts: Account[];
@@ -54,6 +61,7 @@ export interface AccountWire {
   accountOwnerAppuserKey: { currencyKey: { code: string } };
   refreshedAt?: string | null;
   source?: string | null;
+  csvImportFormat?: string | null;
   isPrivate?: boolean;
   isOwnedByViewer?: boolean;
   ownerFirstName?: string | null;
@@ -195,7 +203,9 @@ function normalizeAccount(account: unknown): Account {
     refreshedAt,
     // Transitional compatibility for payloads deployed before `source` existed.
     source,
-    // RAD-343 household — default off for payloads deployed before these existed.
+    // Lenient: a missing or unknown value reads as the generic format.
+    csvImportFormat: account.csvImportFormat === "bank" ? "bank" : "generic",
+    // Household fields default off for payloads deployed before these existed.
     isPrivate: account.isPrivate === true,
     isOwnedByViewer: account.isOwnedByViewer === true,
     ownerFirstName: normalizeNullableString(account.ownerFirstName),

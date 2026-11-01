@@ -37,7 +37,7 @@ export interface GetTransactionsCategorySpendingRequest {
  * @param params - Query parameters for filtering category spending
  * @param apiClient - Optional Axios instance. Defaults to client-side API.
  */
-export async function getTransactionsCategorySpending(
+async function getTransactionsCategorySpending(
   params: GetTransactionsCategorySpendingRequest = {},
   apiClient: AxiosInstance = api,
 ): Promise<GetTransactionsCategorySpendingResponse> {

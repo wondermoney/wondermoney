@@ -9,30 +9,30 @@ const currencyCode = z.string().regex(/^[A-Z]{3}$/)
 export const transactionTypeSchema = z.object({
   transactionTypeKey: positiveId,
   name: z.string().trim().min(1).max(100),
-}).strict()
+})
 
 export const transactionTypesResponseSchema = z.object({
   transactionTypes: z.array(transactionTypeSchema),
-}).strict()
+})
 
 export const settlementCurrencySchema = z.object({
   currencyKey: positiveId,
   code: currencyCode,
   description: z.string().max(255).nullish(),
-}).strict()
+})
 
 export const settlementCurrenciesResponseSchema = z.object({
   currencies: z.array(settlementCurrencySchema),
-}).strict()
+})
 
 export const transactionMerchantSchema = z.object({
   transactionMerchantKey: positiveId,
   name: boundedName,
-}).strict()
+})
 
 export const transactionMerchantsResponseSchema = z.object({
   transactionMerchants: z.array(transactionMerchantSchema),
-}).strict()
+})
 
 export type TransactionTypeDto = z.infer<typeof transactionTypeSchema>
 export type SettlementCurrencyDto = z.infer<typeof settlementCurrencySchema>

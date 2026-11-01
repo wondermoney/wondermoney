@@ -12,7 +12,7 @@ export const generateMetadata = async ({
   const t = await getTranslations({ locale, namespace: "navigation" });
 
   return {
-    ...createMetadata({ title: t("login"), description: t("login") }),
+    ...(await createMetadata({ title: t("login"), description: t("login") })),
     // The changelog claim return path can contain an opaque token.
     referrer: "no-referrer",
   };

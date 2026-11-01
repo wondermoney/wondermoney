@@ -5,7 +5,7 @@ import api from "../api";
 import { availableToAssignQueryKey } from "./keys";
 import type { GetAvailableToAssignResponse } from "./types";
 
-export async function getAvailableToAssign(
+async function getAvailableToAssign(
   apiClient: AxiosInstance = api,
 ): Promise<GetAvailableToAssignResponse> {
   const { data } = await apiClient.get<GetAvailableToAssignResponse>(

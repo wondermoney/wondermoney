@@ -2,7 +2,7 @@
  * Mirrors web's AVAILABLE_SECTORS/AVAILABLE_INDUSTRIES/AVAILABLE_COUNTRIES/AVAILABLE_EXCHANGES
  * (core/web/store/financial-markets/screener.ts) exactly — these are the server's own accepted
  * filter vocabulary, not a server-provided canonical-list endpoint (none exists). Whether EODHD's
- * taxonomy fully matches every value here is an open question tracked separately (RAD-459); web
+ * taxonomy fully matches every value here is an open question; web
  * ships this same list today with the same uncertainty, so mobile matches web rather than block on
  * that verification.
  */

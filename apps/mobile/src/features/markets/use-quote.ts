@@ -8,7 +8,7 @@ import { createQuoteEndpoint, isValidSymbol } from './markets-contract'
 import { quoteKey } from './query-keys'
 
 /**
- * RAD-238 (slice 1) — same read policy as use-account: no retry, no
+ * Same read policy as use-account: no retry, no
  * focus/reconnect refetch, MFA routed through blockAccess.
  * `symbol` mirrors accountId's null-until-parsed contract: the route
  * validates the param via parseSymbol before this hook ever sees it.

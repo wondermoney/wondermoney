@@ -65,6 +65,9 @@ const { handleAccountCsvImportJobMock } = vi.hoisted(() => ({
 const { recoverOnceMock } = vi.hoisted(() => ({
   recoverOnceMock: vi.fn().mockResolvedValue({ needsAction: 0, processed: 0, reenqueued: 0, skipped: 0 }),
 }));
+// Every handler built by `instrumentedBatch`, so a test can tell an instrumented consumer
+// from one registered raw (whose failures would never reach Sentry).
+const { instrumentedHandlers } = vi.hoisted(() => ({ instrumentedHandlers: new WeakSet<object>() }));
 const getWorkHandler = (queue: string) => {
   const call = workMock.mock.calls.find(([name]) => name === queue);
   if (!call) return undefined;
@@ -81,6 +84,17 @@ vi.mock('@utils/logger', async () => {
   return { default: pino({ level: 'silent' }) };
 });
 vi.mock('@service/sentry', () => ({}));
+vi.mock('@app/jobs/job-instrumentation', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@app/jobs/job-instrumentation')>();
+  return {
+    ...actual,
+    instrumentedBatch: ((...args: Parameters<typeof actual.instrumentedBatch>) => {
+      const handler = actual.instrumentedBatch(...args);
+      instrumentedHandlers.add(handler);
+      return handler;
+    }) as typeof actual.instrumentedBatch,
+  };
+});
 
 vi.mock('@service/operations/background-operation.service', () => ({
   default: { claimJobStart: claimJobStartMock, finishJob: finishJobMock },
@@ -121,7 +135,8 @@ import {
   DEMO_DATA_REFRESH_SINGLETON_KEY,
 } from '@app/jobs/demo-data-refresh.queue';
 import { enqueueFoundationJob } from '@app/jobs/queue';
-import { createWorker } from '@app/jobs/worker';
+import { QUEUE_DEPTH_MONITOR_QUEUE } from '@app/jobs/queue-depth-monitor.queue';
+import { CONTAINER_STOP_GRACE_MS, createWorker, WORKER_SHUTDOWN_TIMEOUT_MS } from '@app/jobs/worker';
 
 describe('worker startup bootstrap', () => {
   it('captures startup failures in sentry before exiting', async () => {
@@ -551,9 +566,8 @@ describe('createWorker', () => {
   });
 
   it('scheduler owner registers both financial crons, in Lisbon time', async () => {
-    // Budget and weekly used to sit behind ENABLE_BUDGET_EMAIL_* / ENABLE_WEEKLY_EMAIL_*,
-    // which no environment ever set, so neither had run since the feature landed. They ship
-    // unconditionally now; the guard against mailing anyone is in the candidate query, not here.
+    // Budget and weekly ship unconditionally, behind no env flag; the guard against mailing
+    // anyone is in the candidate query, not here.
     vi.stubEnv('PGBOSS_SCHEDULE', 'true');
     const worker = createWorker({ backgroundOperationService: backgroundOperationServiceMock(), createBoss: vi.fn(() => createBossMock()), logger: { error: vi.fn(), info: vi.fn(), warn: vi.fn() } });
     await worker.start();
@@ -575,10 +589,9 @@ describe('createWorker', () => {
   });
 
   it('still tears down the Monthly Money Story cron while shipping its queues', async () => {
-    // Monthly Story never had a flag. Its queues and consumers ship everywhere, but the
-    // scheduler owner actively unschedules its cron — marketing lifecycle mail is paused for
-    // the free/BYOK pivot, and simply not calling schedule() would leave a previously
-    // registered schedule firing forever.
+    // Monthly Story's queues and consumers ship everywhere, but the scheduler owner actively
+    // unschedules its cron — marketing lifecycle mail is paused, and simply not calling
+    // schedule() would leave an already-registered schedule firing forever.
     vi.stubEnv('PGBOSS_SCHEDULE', 'true');
     const worker = createWorker({ backgroundOperationService: backgroundOperationServiceMock(), createBoss: vi.fn(() => createBossMock()), logger: { error: vi.fn(), info: vi.fn(), warn: vi.fn() } });
     await worker.start();
@@ -640,7 +653,7 @@ describe('createWorker', () => {
   it('enqueues foundation jobs with correlation data', async () => {
     await enqueueFoundationJob(
       { correlationId: 'corr-123', payload: { action: 'ping' } },
-      { enqueue: { send: sendMock, sendAfter: sendAfterMock } } as unknown as Parameters<typeof enqueueFoundationJob>[1],
+      { enqueue: { send: sendMock, sendAfter: sendAfterMock } },
     );
 
     expect(sendMock).toHaveBeenCalledWith(
@@ -648,6 +661,54 @@ describe('createWorker', () => {
       { action: 'ping', correlationId: 'corr-123' },
       { singletonKey: 'corr-123' },
     );
+  });
+
+  it('routes every consumer through the Sentry-instrumented wrapper', async () => {
+    // pg-boss swallows a rejecting handler (`boss.on('error')` never sees it), so a consumer
+    // registered without the wrapper is a queue that can fail every job with no alert.
+    vi.stubEnv('PGBOSS_SCHEDULE', 'true');
+    const worker = createWorker({ backgroundOperationService: backgroundOperationServiceMock(), createBoss: vi.fn(() => createBossMock()), logger: { error: vi.fn(), info: vi.fn(), warn: vi.fn() } });
+    await worker.start();
+
+    const unwrapped = callNames(workMock.mock.calls).filter((queue) => !instrumentedHandlers.has(getWorkHandler(queue) as object));
+    expect(workMock).toHaveBeenCalled();
+    expect(unwrapped).toEqual([]);
+  });
+
+  it('consumes every dead-letter queue it points a queue at', async () => {
+    // A dead-letter target with no consumer parks exhausted jobs silently until retention
+    // deletes them.
+    const worker = createWorker({ backgroundOperationService: backgroundOperationServiceMock(), createBoss: vi.fn(() => createBossMock()), logger: { error: vi.fn(), info: vi.fn(), warn: vi.fn() } });
+    await worker.start();
+
+    const deadLetterTargets = (createQueueMock.mock.calls as [string, undefined | { deadLetter?: string }][])
+      .map(([, options]) => options?.deadLetter)
+      .filter((target): target is string => Boolean(target));
+    expect(deadLetterTargets).toContain('transaction.enrichment.gpt.dlq');
+    expect(callNames(workMock.mock.calls)).toEqual(expect.arrayContaining([...new Set(deadLetterTargets)]));
+  });
+
+  it('the scheduler owner schedules the queue-depth monitor, and every worker consumes it', async () => {
+    // The monitor is the only check that notices an event-driven queue which stopped draining.
+    vi.stubEnv('PGBOSS_SCHEDULE', 'true');
+    const worker = createWorker({ backgroundOperationService: backgroundOperationServiceMock(), createBoss: vi.fn(() => createBossMock()), logger: { error: vi.fn(), info: vi.fn(), warn: vi.fn() } });
+    await worker.start();
+
+    expect(callNames(createQueueMock.mock.calls)).toContain(QUEUE_DEPTH_MONITOR_QUEUE);
+    expect(callNames(scheduleMock.mock.calls)).toContain(QUEUE_DEPTH_MONITOR_QUEUE);
+    expect(callNames(workMock.mock.calls)).toContain(QUEUE_DEPTH_MONITOR_QUEUE);
+  });
+
+  it('drains pg-boss inside the shutdown budget, which fits inside the container stop grace period', async () => {
+    // Equal budgets let a full drain lose the outer race and skip closing the database; a
+    // budget past the grace period means the container is SIGKILLed mid-drain.
+    const worker = createWorker({ createBoss: vi.fn(() => createBossMock()), logger: { error: vi.fn(), info: vi.fn(), warn: vi.fn() } });
+
+    await worker.stop();
+
+    const [{ timeout }] = stopMock.mock.calls[0] as [{ timeout: number }];
+    expect(timeout).toBeLessThan(WORKER_SHUTDOWN_TIMEOUT_MS);
+    expect(WORKER_SHUTDOWN_TIMEOUT_MS).toBeLessThan(CONTAINER_STOP_GRACE_MS);
   });
 
   it('stops the boss gracefully on shutdown', async () => {

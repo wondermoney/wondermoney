@@ -1,10 +1,9 @@
 import type { EntityManager } from '@mikro-orm/postgresql';
 
 import type { Appuser } from '@entity/Appuser';
-import { AppuserTransactionCategory } from '@entity/AppuserTransactionCategory';
+import { AppuserTransactionCategory, Source } from '@entity/AppuserTransactionCategory';
 import type { Category } from '@entity/Category';
 import type { Transaction } from '@entity/Transaction';
-import { Source } from '@entity/TransactionCategoryStats';
 import { stampTransactionEnrichmentOutcome } from '@service/transaction-enrichment/transaction-enrichment-outcome.service';
 import { markUserCategorized } from '@service/transaction/categorization-confidence';
 import { decrementMerchantCategoryStat, incrementMerchantCategoryStat, learnAppuserMerchantCategory } from '@service/transaction/merchant-category-stats.service';
@@ -24,9 +23,9 @@ export interface UserCategorizationInput {
  *
  * - the category assignment (`AppuserTransactionCategory`) is moved, or created if there was none;
  * - categorization confidence is stamped `high` / `user_edit` (`reviewed` is the caller's call);
- * - an outstanding AI suggestion is marked accepted or overridden (RAD-425);
+ * - an outstanding AI suggestion is marked accepted or overridden;
  * - the actor's merchant→category vote moves from the old category to the new one, and the
- *   per-user merchant mapping is learned (RAD-342) — only where the transaction has a merchant.
+ *   per-user merchant mapping is learned — only where the transaction has a merchant.
  *
  * Returns each transaction's previous category (`undefined` when it had none) by `transactionKey`,
  * so callers can write their audit entries.

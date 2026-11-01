@@ -13,11 +13,11 @@ import { cn } from "@/lib/utils";
 /**
  * Shown when a panel's data could not be loaded.
  *
- * This exists because the dashboard previously rendered its *onboarding empty
- * state* whenever a query failed — `Boolean(data?.transactions?.length)` is
- * false for "request failed" exactly as it is for "you have none". Someone with
- * 54 transactions was told to add their first one, which is worse than an error
- * because it reads as authoritative.
+ * This exists so a failed query is not mistaken for an empty one —
+ * `Boolean(data?.transactions?.length)` is false for "request failed" exactly
+ * as it is for "you have none". Showing the onboarding empty state to someone
+ * with 54 transactions tells them to add their first one, which is worse than
+ * an error because it reads as authoritative.
  *
  * Panels should distinguish the two: empty state only when the query succeeded
  * and returned nothing; this when it failed.

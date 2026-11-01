@@ -12,7 +12,6 @@ import { Toaster } from "sonner";
 
 import { AnalyticsInit } from "@/components/analytics/AnalyticsInit";
 import { SignupCompletionTracker } from "@/components/analytics/SignupCompletionTracker";
-import MfaReenrollmentGate from "@/components/settings/Security/MfaReenrollmentGate";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { getToastOptions } from "@/components/ui/sonner-options";
 import { AuthUserProvider } from "@/lib/auth/user-context";
@@ -34,13 +33,10 @@ export function Providers(props: { children: React.ReactNode }) {
         <AuthUserProvider>
           <AnalyticsInit />
           <SignupCompletionTracker analyticsEnabled={isAnalyticsEnabled()} />
-          {/* Global, non-dismissible: covers every authenticated route (not
-              just (full-layout)) so a flagged user can't reach onboarding,
-              wizards, etc. without re-enrolling. Self-hides on anonymous
-              routes since useUserData is gated on a logged-in user. */}
-          <MfaReenrollmentGate />
           <ThemeProvider
-            attribute="class"
+            // The class feeds Tailwind's `dark:` variant; the data attribute
+            // selects the dark token block in theme/globals.css.
+            attribute={["class", "data-theme"]}
             defaultTheme="light"
             // defaultTheme="system"
             // enableSystem

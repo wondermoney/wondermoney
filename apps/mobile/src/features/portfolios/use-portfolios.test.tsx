@@ -34,7 +34,7 @@ describe('portfolio query hooks', () => {
     const hook = await renderHook(() => usePortfolios(), { wrapper })
     await waitFor(() => expect(hook.result.current.data).toBeDefined())
     expect(mockRead).toHaveBeenCalledTimes(2)
-    expect(mockRead.mock.calls.map(([endpoint]) => endpoint.path).sort()).toEqual(['/v1/portfolio', '/v1/portfolio/dashboard?period=YTD'])
+    expect(mockRead.mock.calls.map(([endpoint]) => endpoint.path).sort()).toEqual(['/v1/portfolio', '/v1/portfolio/dashboard?period=YTD&include=feeConversion'])
     for (const query of client.getQueryCache().getAll()) expect(query.options).toMatchObject({ refetchOnMount: false, refetchOnReconnect: false, refetchOnWindowFocus: false, staleTime: Infinity })
     await hook.rerender({})
     expect(mockRead).toHaveBeenCalledTimes(2)
@@ -48,7 +48,7 @@ describe('portfolio query hooks', () => {
     const metadataReady = new Promise<void>((resolve) => { releaseMetadata = resolve })
     mockRead.mockImplementation((endpoint) => endpoint.path.endsWith('/portfolio/3')
       ? metadataReady.then(() => metadata)
-      : Promise.resolve(endpoint.path.endsWith('/dashboard?period=YTD') ? individual : holdings))
+      : Promise.resolve(endpoint.path.endsWith('/dashboard?period=YTD&include=feeConversion') ? individual : holdings))
     const { client, wrapper } = setup()
     const hook = await renderHook(() => usePortfolioDetail(3), { wrapper })
     expect(mockRead).toHaveBeenCalledTimes(1)
@@ -66,7 +66,7 @@ describe('portfolio query hooks', () => {
   it('retries metadata and fetches gated dashboard and holdings after the initial metadata failure', async () => {
     mockRead.mockImplementationOnce(() => Promise.reject(new Error('metadata unavailable')))
     mockRead.mockImplementation((endpoint) => Promise.resolve(
-      endpoint.path.endsWith('/dashboard?period=YTD') ? individual : endpoint.path.endsWith('/holdings') ? holdings : metadata,
+      endpoint.path.endsWith('/dashboard?period=YTD&include=feeConversion') ? individual : endpoint.path.endsWith('/holdings') ? holdings : metadata,
     ))
     const { client, wrapper } = setup()
     const hook = await renderHook(() => usePortfolioDetail(3), { wrapper })

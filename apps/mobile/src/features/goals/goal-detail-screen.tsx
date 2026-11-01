@@ -425,12 +425,15 @@ function ActivityRow({ activity, locale, palette }: { activity: GoalActivityView
   const { t } = useTranslation()
   const date = new Intl.DateTimeFormat(locale, { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(activity.occurredAt))
   const amount = activity.amount === null ? null : formatCurrency(activity.amount, { locale, currency: activity.currencyCode })
+  // Said in words, not colour alone. There is no reversal action in the app yet, so this only warns.
+  const expiredWarning = activity.transactionExpired ? t('goalDetail.transactionExpired') : null
   return (
-    <View testID="goal-activity-row" accessible accessibilityLabel={[t(`goalDetail.activityType.${activity.type}`), date, amount, activity.note].filter(Boolean).join(', ')} style={[styles.activityRow, { borderBottomColor: palette.border }]}>
+    <View testID="goal-activity-row" accessible accessibilityLabel={[t(`goalDetail.activityType.${activity.type}`), date, amount, activity.note, expiredWarning].filter(Boolean).join(', ')} style={[styles.activityRow, { borderBottomColor: palette.border }]}>
       <View style={styles.activityIdentity}>
         <Text allowFontScaling style={[styles.activityType, { color: palette.foreground }]}>{t(`goalDetail.activityType.${activity.type}`)}</Text>
         <Text allowFontScaling style={[styles.note, { color: palette.mutedForeground }]}>{date}</Text>
         {activity.note ? <Text allowFontScaling style={[styles.note, { color: palette.mutedForeground }]}>{activity.note}</Text> : null}
+        {expiredWarning ? <Text allowFontScaling style={[styles.note, { color: palette.warningText }]}>{expiredWarning}</Text> : null}
       </View>
       {amount ? <Text allowFontScaling style={[styles.activityAmount, { color: palette.foreground }]}>{amount}</Text> : null}
     </View>

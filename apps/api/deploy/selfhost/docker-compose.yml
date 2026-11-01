@@ -3,9 +3,12 @@
 #   ./generate-env.sh          # creates .env with fresh secrets (once)
 #   docker compose up -d       # http://localhost:3000
 #
-# Optional extras, by profile:
-#   --profile storage   MinIO for file uploads (CSV imports, receipt copies)
-#   --profile mail      Mailpit, to read outgoing mail at http://localhost:8025
+# Optional extras, by profile (set COMPOSE_PROFILES in .env so every command includes them):
+#   storage   SeaweedFS, an S3-compatible store for file uploads (CSV imports, receipt copies)
+#   mail      Mailpit, to read outgoing mail at http://localhost:8025
+#
+# Set BIND_ADDRESS=127.0.0.1 in .env to publish the ports on this machine only, e.g. behind a
+# reverse proxy on the same host.
 #
 # See README.md for HTTPS, upgrades and backups.
 
@@ -48,7 +51,7 @@ services:
       postgres:
         condition: service_healthy
     ports:
-      - '${API_PORT:-3001}:3001'
+      - '${BIND_ADDRESS:+${BIND_ADDRESS}:}${API_PORT:-3001}:3001'
     healthcheck:
       test: ['CMD', 'curl', '-fsS', 'http://localhost:3001/v1/health']
       interval: 15s
@@ -74,52 +77,79 @@ services:
       api:
         condition: service_healthy
 
+  # Only the settings the web app reads: it never sees the database password or the API's
+  # secrets.
   web:
     image: ${WM_IMAGE_REGISTRY:-ghcr.io/wondermoney}/wondermoney-web:${WM_VERSION:-latest}
     restart: unless-stopped
-    env_file: .env
     environment:
+      # What browsers use.
       NEXT_PUBLIC_API_URL: ${API_URL:?set API_URL in .env}
       NEXT_PUBLIC_APP_URL: ${APP_URL:?set APP_URL in .env}
+      # What the web server uses for its own requests (localhost would be the web container).
+      API_INTERNAL_URL: http://api:3001
+      NEXT_PUBLIC_AUTH_COOKIE_DOMAIN: ${NEXT_PUBLIC_AUTH_COOKIE_DOMAIN:-}
+      NEXT_PUBLIC_TERMS_URL: ${NEXT_PUBLIC_TERMS_URL:-}
+      NEXT_PUBLIC_PRIVACY_URL: ${NEXT_PUBLIC_PRIVACY_URL:-}
+      NEXT_PUBLIC_DOCS_URL: ${NEXT_PUBLIC_DOCS_URL:-}
+      NEXT_PUBLIC_RECAPTCHA_SITE_KEY: ${NEXT_PUBLIC_RECAPTCHA_SITE_KEY:-}
+      RECAPTCHA_SECRET_KEY: ${RECAPTCHA_SECRET_KEY:-}
     depends_on:
       api:
         condition: service_healthy
     ports:
-      - '${WEB_PORT:-3000}:3000'
+      - '${BIND_ADDRESS:+${BIND_ADDRESS}:}${WEB_PORT:-3000}:3000'
 
-  minio:
+  # S3-compatible storage. AWS_ACCESS_KEY_ID / AWS_SECRET_ACCESS_KEY in .env are its only
+  # credentials; it refuses to start without them rather than serve files to anyone.
+  storage:
     profiles: [storage]
-    image: minio/minio:latest
+    image: chrislusf/seaweedfs:4.48
     restart: unless-stopped
-    command: server /data --console-address :9001
+    entrypoint: ['/bin/sh', '-c']
+    command:
+      - >-
+        [ -n "$${AWS_ACCESS_KEY_ID}" ] && [ -n "$${AWS_SECRET_ACCESS_KEY}" ]
+        || { echo "Set AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY in .env first." >&2; exit 1; };
+        exec weed server -dir=/data -s3 -s3.port=8333
     environment:
-      MINIO_ROOT_USER: ${AWS_ACCESS_KEY_ID:-wondermoney}
-      MINIO_ROOT_PASSWORD: ${AWS_SECRET_ACCESS_KEY:-change-me-please}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID:-}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:-}
     volumes:
-      - minio-data:/data
+      - storage-data:/data
     ports:
-      - '${MINIO_PORT:-9000}:9000'
+      - '${BIND_ADDRESS:+${BIND_ADDRESS}:}${S3_PORT:-9000}:8333'
+    # The S3 gateway's own health endpoint: it answers once the gateway is serving.
+    healthcheck:
+      test: ['CMD', 'curl', '-fsS', '-o', '/dev/null', 'http://localhost:8333/healthz']
+      interval: 10s
+      timeout: 5s
+      start_period: 30s
+      retries: 10
 
-  # Creates the bucket once MinIO is up, then exits.
-  minio-init:
+  # Creates the bucket once the store is healthy, then exits.
+  storage-init:
     profiles: [storage]
-    image: minio/mc:latest
-    depends_on: [minio]
-    entrypoint: >
-      sh -c "until mc alias set local http://minio:9000 \"$${MINIO_ROOT_USER}\" \"$${MINIO_ROOT_PASSWORD}\"; do sleep 2; done;
-             mc mb --ignore-existing local/$${S3_BUCKET}"
+    image: chrislusf/seaweedfs:4.48
+    depends_on:
+      storage:
+        condition: service_healthy
+    entrypoint: ['/bin/sh', '-c']
+    command:
+      - >-
+        until echo s3.bucket.list | weed shell -master=storage:9333 > /tmp/buckets 2>/dev/null; do sleep 2; done;
+        if grep -qw "$${S3_BUCKET}" /tmp/buckets; then echo "bucket $${S3_BUCKET} exists";
+        else echo "s3.bucket.create -name $${S3_BUCKET}" | weed shell -master=storage:9333; fi
     environment:
-      MINIO_ROOT_USER: ${AWS_ACCESS_KEY_ID:-wondermoney}
-      MINIO_ROOT_PASSWORD: ${AWS_SECRET_ACCESS_KEY:-change-me-please}
       S3_BUCKET: ${S3_BUCKET:-wondermoney}
 
   mailpit:
     profiles: [mail]
-    image: axllent/mailpit:latest
+    image: axllent/mailpit:v1.27
     restart: unless-stopped
     ports:
-      - '${MAILPIT_PORT:-8025}:8025'
+      - '${BIND_ADDRESS:+${BIND_ADDRESS}:}${MAILPIT_PORT:-8025}:8025'
 
 volumes:
   postgres-data:
-  minio-data:
+  storage-data:

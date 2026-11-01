@@ -24,15 +24,15 @@ type IncomeAmountEditButtonProps = {
 /**
  * The amount on a budget-wizard income row.
  *
- * It was a `readOnly` `<Input>` with an `onClick` handler (RAD-558). That is
- * focusable, so it looked reachable, but an input does nothing on Enter or
- * Space — the edit dialog behind it was mouse-only, and editing is the only way
- * to correct a mistyped amount on this step. A screen reader announced it as an
+ * Not a `readOnly` `<Input>` with an `onClick` handler: that is focusable, so
+ * it looks reachable, but an input does nothing on Enter or Space — the edit
+ * dialog behind it would be mouse-only, and editing is the only way to correct
+ * a mistyped amount on this step. A screen reader would announce it as an
  * editable text field that refuses to be edited, with nothing saying that
  * activating it opens a dialog.
  *
- * It is a real `<button>` now, through the Button primitive as RAD-549 did for
- * the add-income control, so it inherits the standard focus ring, press
+ * It is a real `<button>`, through the Button primitive like the add-income
+ * control, so it inherits the standard focus ring, press
  * feedback and disabled handling. `variant="input"` is the primitive's
  * form-control surface — the same one the comboboxes and the date picker render
  * through — so at rest it is the field it replaces, border and all.
@@ -54,7 +54,7 @@ export function IncomeAmountEditButton({
       onClick={onClick}
       className={cn(
         // `h-auto min-h-11` rather than the primitive's `h-10`: 44px is this
-        // step's touch floor, set by RAD-550 on the add-income control beneath
+        // step's touch floor, matching the add-income control beneath
         // these rows. `justify-start` and `px-0` undo the primitive's centred,
         // padded label so the glyph and the figure sit where the field put them.
         "h-auto min-h-11 justify-start gap-0 px-0 py-2 text-sm font-normal",

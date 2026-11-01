@@ -4,12 +4,10 @@ import { CategorizationConfidence } from '@entity/Transaction';
 import { buildTransactionWhere } from '@service/transaction/transaction-total.service';
 
 /**
- * RAD-579 — the filters that moved out of the browser and into the endpoint.
- *
- * Account, type and category used to be applied client-side over the rows already loaded, so
- * filtering a year by one category filtered whichever page came back. These assert the `where` the
- * server builds instead; the *counts* they produce were verified against real data rather than
- * inferred from the shape.
+ * Account, type and category filters are applied by the endpoint, not client-side over the rows
+ * already loaded — otherwise filtering a year by one category would filter whichever page came
+ * back. These assert the `where` the server builds; the *counts* they produce were verified
+ * against real data rather than inferred from the shape.
  */
 describe('buildTransactionWhere', () => {
   it('applies no filter clauses when nothing is selected', () => {

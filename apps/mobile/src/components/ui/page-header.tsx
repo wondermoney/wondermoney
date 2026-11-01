@@ -89,9 +89,8 @@ export type PageHeaderProps = {
 /**
  * A screen is titled `Accounts` and nothing else.
  *
- * One treatment — 20/600 — matching the web half exactly. The app previously
- * carried five different page-title sizes; the fix was standardising down to
- * the majority, not growing them all to match a screenshot.
+ * One treatment — 20/600 — matching the web half exactly, so every screen
+ * title has the same size.
  */
 export function PageHeader({ title, provenance, instruction, helpText, action, testID }: PageHeaderProps) {
   return (

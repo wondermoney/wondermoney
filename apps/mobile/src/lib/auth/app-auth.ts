@@ -16,10 +16,10 @@ export type AuthSession = Readonly<{
 }>
 
 /**
- * The small application-owned auth interface (replacing the Supabase SDK
- * surface). `mfa-pending` is the state between a credentials sign-in that
- * returned `twoFactorRedirect` and a successful TOTP step-up; better-auth does
- * not issue a session until the second factor is verified.
+ * The small application-owned auth interface. `mfa-pending` is the state
+ * between a credentials sign-in that returned `twoFactorRedirect` and a
+ * successful TOTP step-up; better-auth does not issue a session until the
+ * second factor is verified.
  */
 export type AppAuthState =
   | { status: 'loading' }
@@ -100,7 +100,7 @@ export type AppAuthAdapter = AuthSessionPort<AuthSession>
     getState: () => Promise<AppAuthState>
     signInWithPassword: (email: string, password: string) => Promise<SignInOutcome>
     /**
-     * Native Sign in with Apple / Google (RAD-420). Exchanges a provider ID token
+     * Native Sign in with Apple / Google. Exchanges a provider ID token
      * for a better-auth session through `signIn.social({ idToken })` — no browser
      * redirect. `nonce` is the value the verifier compares against the token's
      * `nonce` claim (the same SHA-256 digest the provider embedded); neither value

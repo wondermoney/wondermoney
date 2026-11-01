@@ -1,7 +1,7 @@
 import type { CompanyInformationDto, EarningsEntryDto, FinancialsEntryDto, FundamentalsResponseDto, HistoricalPricePointDto, QuoteResponseDto, ScreenerEntryDto, TickerSearchResultDto } from './markets-contract'
 
 /**
- * RAD-238 (slice 1) — projection-only view models, mirroring
+ * Projection-only view models, mirroring
  * institutions-view-model's convention: same fields the contract returns,
  * nothing added or renamed.
  */
@@ -68,12 +68,12 @@ export function formatDateOnly(value: string | null, locale: string, unavailable
   return new Intl.DateTimeFormat(locale, { year: 'numeric', month: 'short', day: 'numeric' }).format(date)
 }
 
-/** RAD-511 — projection-only view model, same convention as QuoteViewModel: nothing added or renamed. */
+/** Projection-only view model, same convention as QuoteViewModel: nothing added or renamed. */
 export type FundamentalsViewModel = Readonly<FundamentalsResponseDto>
 
 export const mapFundamentals = (dto: FundamentalsResponseDto): FundamentalsViewModel => ({ ...dto })
 
-/** RAD-512 — last 5 reporting periods, reversed then sliced, mirroring the web client's selector. */
+/** Last 5 reporting periods, reversed then sliced, mirroring the web client's selector. */
 export type FinancialsChartPoint = Readonly<{
   period: string
   revenue: number | null
@@ -89,7 +89,7 @@ export function mapFinancialsChart(entries: readonly FinancialsEntryDto[]): read
 }
 
 /**
- * RAD-513 — last 6 quarters, reversed then sliced, mirroring the web client's selector. The
+ * Last 6 quarters, reversed then sliced, mirroring the web client's selector. The
  * earnings `date` is the report date, which typically lands one quarter after the quarter it
  * covers, so the label shifts back 3 months before reading the quarter/year — same rule as the
  * web client's `subQuarters(date, 1)`, reimplemented without a date-fns dependency (mobile has
@@ -120,7 +120,7 @@ export function mapEarningsChart(entries: readonly EarningsEntryDto[]): readonly
 }
 
 /**
- * RAD-243 (slice 2) — one row per watchlisted symbol, decoupled from
+ * One row per watchlisted symbol, decoupled from
  * react-query's `UseQueryResult` shape so this stays a plain, pure mapper.
  * A missing or still-pending quote result never hides the symbol: the row
  * stays present in a 'loading' or 'error' state so one bad per-symbol quote
@@ -151,7 +151,7 @@ export function buildWatchlistRows(
 }
 
 /**
- * RAD-241 (slice 3) — this slice only filters and renders sector, price,
+ * The screener only filters and renders sector, price,
  * and market cap, so the row only carries those fields: beta, dividend
  * yield, PE ratio, volume, country, and industry stay unused here even
  * though the contract (and the API response) still carries them.

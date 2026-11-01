@@ -1,5 +1,5 @@
-import { Entity, Index, ManyToOne, PrimaryKey, Property } from '@mikro-orm/core';
 import type { Rel } from '@mikro-orm/core';
+import { Entity, Index, ManyToOne, PrimaryKey, Property } from '@mikro-orm/decorators/legacy';
 
 import { Base } from './BaseEntity';
 import { Currency } from './Currency';

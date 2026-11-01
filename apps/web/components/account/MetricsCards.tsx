@@ -57,7 +57,7 @@ export default function MetricsCards({
         currency={userCurrency}
         comparisonValue={netSavingsPast}
         comparisonLabel={t("vs-previous-period")}
-        helper={`${formatPercentage(savingsRate)} · ${t("net-savings")}`}
+        helper={t("net-savings-rate", { rate: formatPercentage(savingsRate) })}
       />
     </StatCardGrid>
   );

@@ -24,11 +24,10 @@ const AVERAGE_VOLUME_SESSIONS = 30;
 /**
  * The statistics a year of end-of-day prices can answer on its own.
  *
- * Fundamentals are gated behind a higher market-data tier (RAD-449), so the
- * fundamentals panel had nothing to render and showed an empty dashed box next
- * to two more of them (RAD-609). Half of what that panel promised — 52-week
- * range, average volume — is derivable from the EOD series the plan does
- * include, so it is computed here rather than left blank.
+ * Fundamentals are gated behind a higher market-data tier, so the fundamentals
+ * panel has nothing from the provider to render. Half of what that panel
+ * promises — 52-week range, average volume — is derivable from the EOD series
+ * the plan does include, so it is computed here rather than left blank.
  */
 export default function useTickerPriceStatistics(
   ticker: string | null,

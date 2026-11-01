@@ -1,5 +1,5 @@
 /**
- * The consent gate for generic lifecycle sends (RAD-593).
+ * The consent gate for generic lifecycle sends.
  *
  * `handleLifecycleSendJob` reached Resend without consulting any consent signal
  * at all — not `deletedAt`, not `recordActive`, not `marketingOptOut`, not the

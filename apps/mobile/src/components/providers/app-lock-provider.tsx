@@ -28,7 +28,7 @@ export function useAppLock() {
 
 /**
  * Gates the authenticated app behind a device biometric/passcode prompt, independent of the
- * Supabase session itself (see secure-session-storage.ts — the session is deliberately never
+ * auth session itself (see secure-session-storage.ts — the session is deliberately never
  * biometric-protected). Re-locks whenever the app leaves the foreground while enabled, including
  * the very first load: `locked` starts false only until the persisted preference finishes loading.
  *

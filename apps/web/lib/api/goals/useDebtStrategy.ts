@@ -5,7 +5,7 @@ import api from "../api";
 import { debtStrategyQueryKey } from "./keys";
 import type { DebtStrategyResponse } from "./types";
 
-export async function getDebtStrategy(
+async function getDebtStrategy(
   apiClient: AxiosInstance = api,
 ): Promise<DebtStrategyResponse> {
   const { data } = await apiClient.get<DebtStrategyResponse>(

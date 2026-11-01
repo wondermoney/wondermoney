@@ -144,7 +144,9 @@ export function usePortfolioImport(portfolioId: number, options: UsePortfolioImp
     try {
       await runtime.apiClient.write(createConfirmPortfolioImportSessionEndpoint(importSessionId), { commit: () => undefined })
       const final = await pollUntil(importSessionId, (preview) => !CONFIRM_IN_FLIGHT_STATUSES.has(preview.status))
-      if (final.status === 'succeeded') {
+      // `partial` committed some rows and failed others; the rows that failed ride along in
+      // `rows.failed` for the result screen, and the imported ones must still refresh the portfolio.
+      if (final.status === 'succeeded' || final.status === 'partial') {
         void queryClient.invalidateQueries({ predicate: (query) => isPortfolioContentQueryForEpoch(query.queryKey, runtime.epochId) })
         setState({ phase: 'succeeded', preview: final })
       } else {
@@ -156,7 +158,7 @@ export function usePortfolioImport(portfolioId: number, options: UsePortfolioImp
   }, [fail, pollUntil, queryClient, runtime, state])
 
   /**
-   * RAD-514 — submits every group's resolution (a server-suggested candidate accepted as-is, a
+   * Submits every group's resolution (a server-suggested candidate accepted as-is, a
    * different ticker searched and picked by hand, or an explicit skip) in one batch, then refetches
    * the preview so summary.canConfirm reflects the now-resolved groups. Only callable from the
    * review phase; a stale/absent session id or an empty batch is a no-op rather than a request.

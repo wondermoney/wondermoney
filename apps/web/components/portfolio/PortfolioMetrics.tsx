@@ -1,6 +1,6 @@
 "use client";
 
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import React from "react";
 
 import { LearningTip } from "@/components/ui/learning-tip";
@@ -9,7 +9,10 @@ import type {
   PortfolioMetricsReadiness,
 } from "@/lib/api/portfolio/usePortfolioMetrics";
 import { cn } from "@/lib/utils";
-import { getDeltaClassName } from "@/lib/utils/formatCurrency";
+import {
+  getDeltaClassName,
+  normalizeFinancialLocale,
+} from "@/lib/utils/formatCurrency";
 import { useFormatPercentage } from "@/lib/utils/useFormatPercentage";
 
 interface PortfolioMetricsProps {
@@ -79,6 +82,16 @@ function MetricCard({
 const PortfolioMetrics: React.FC<PortfolioMetricsProps> = ({ metrics }) => {
   const t = useTranslations();
   const formatPercentage = useFormatPercentage();
+  const locale = useLocale();
+  const formatRatio = (value: number) =>
+    new Intl.NumberFormat(normalizeFinancialLocale(locale) ?? locale, {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(value);
+  const oneDecimalPercent = {
+    minimumFractionDigits: 1,
+    maximumFractionDigits: 1,
+  };
 
   const annualYieldUnavailable = isMetricUnavailable(metrics.annualYield);
   const volatilityUnavailable = isMetricUnavailable(metrics.volatility);
@@ -163,8 +176,11 @@ const PortfolioMetrics: React.FC<PortfolioMetricsProps> = ({ metrics }) => {
           >
             {annualYieldUnavailable
               ? unavailableCopy.annualYield
-              : formatPercentage((metrics.annualYield as number) / 100, {
+              : // Coloured as a delta, so it carries its sign too: colour
+                // alone never says gain or loss.
+                formatPercentage((metrics.annualYield as number) / 100, {
                   maximumFractionDigits: 1,
+                  signDisplay: "exceptZero",
                 })}
           </div>
         </MetricCard>
@@ -180,7 +196,10 @@ const PortfolioMetrics: React.FC<PortfolioMetricsProps> = ({ metrics }) => {
           >
             {volatilityUnavailable
               ? unavailableCopy.volatility
-              : `${(metrics.volatility as number).toFixed(1)}%`}
+              : formatPercentage(
+                  (metrics.volatility as number) / 100,
+                  oneDecimalPercent,
+                )}
           </div>
         </MetricCard>
 
@@ -195,7 +214,7 @@ const PortfolioMetrics: React.FC<PortfolioMetricsProps> = ({ metrics }) => {
           >
             {sharpeUnavailable
               ? unavailableCopy.sharpeRatio
-              : (metrics.sharpeRatio as number).toFixed(2)}
+              : formatRatio(metrics.sharpeRatio as number)}
           </div>
         </MetricCard>
 
@@ -214,9 +233,10 @@ const PortfolioMetrics: React.FC<PortfolioMetricsProps> = ({ metrics }) => {
           >
             {maxDrawdownUnavailable
               ? unavailableCopy.maxDrawdown
-              : (metrics.maxDrawdown as number) === 0
-                ? "0.0%"
-                : `-${Math.abs(metrics.maxDrawdown as number).toFixed(1)}%`}
+              : formatPercentage(
+                  -Math.abs(metrics.maxDrawdown as number) / 100,
+                  { ...oneDecimalPercent, signDisplay: "exceptZero" },
+                )}
           </div>
         </MetricCard>
 

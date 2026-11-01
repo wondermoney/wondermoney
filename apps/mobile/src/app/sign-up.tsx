@@ -68,7 +68,7 @@ export default function SignUpRoute() {
       onSubmit={async (email, password) => {
         if (invite.status === 'valid') setPendingInviteToken(invite.token)
         const outcome = await signUp(email, password)
-        // RAD-518 — the channel only. Never the address, and never whether an
+        // The channel only. Never the address, and never whether an
         // invite was involved, which would leak household membership.
         if (outcome.status === 'accepted') captureAnalyticsEvent('sign_up_completed', { provider: 'email' })
         return outcome.status

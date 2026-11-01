@@ -35,7 +35,7 @@ export interface AllocationResponse {
  * Fetches allocation breakdown data
  * Uses path param for individual portfolio, aggregate endpoint for all
  */
-export async function getPortfolioAllocation(
+async function getPortfolioAllocation(
   portfolioId: number | null,
   apiClient: AxiosInstance = api,
 ): Promise<AllocationResponse> {

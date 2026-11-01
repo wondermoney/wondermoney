@@ -10,7 +10,7 @@ const FOUNDRY = {
 
 describe('transaction enrichment config', () => {
   it('runs in write mode out of the box once a model provider is configured', () => {
-    // RAD-414: the pipeline enriches and applies suggestions by default. Anything that
+    // The pipeline enriches and applies suggestions by default. Anything that
     // silently turned that off would look identical to the feature simply not working.
     const config = buildTransactionEnrichmentConfig(FOUNDRY);
     expect(config.enabled).toBe(true);

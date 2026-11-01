@@ -19,12 +19,12 @@ interface PortfolioEmptyStateProps {
 
 // Sample tickers, not API holdings, so they use the system's own chart ramp
 // rather than raw hex — the chart tokens hold their hue across both theme
-// halves, matching BudgetsEmptyState's category chips. The ticker tile fills
-// its swatch with white text, and the raw chart tokens don't have the
-// contrast for that (chart-2 measures 3.19:1 in dark mode against white,
-// same invisible-glyph failure class as the dark-mode ticker logos fixed
-// elsewhere this audit) — darkening 20% toward black clears 4.5:1 on every
-// slot in both themes while keeping each holding's hue identifiable.
+// halves, matching BudgetsEmptyState's category chips. The ticker tile sets
+// its initials in the page background colour, and the raw chart tokens don't
+// have the contrast for that (chart-2 measures 3.19:1 in dark mode). Mixing
+// 20% toward the foreground token darkens the swatch in light mode and
+// lightens it in dark mode, so it clears 4.5:1 against the background-coloured
+// glyphs in both themes with no literal black or white.
 const sampleHoldings = [
   {
     ticker: "AAPL",
@@ -32,7 +32,7 @@ const sampleHoldings = [
     allocation: 35,
     change: "+2.4%",
     positive: true,
-    color: "color-mix(in oklch, var(--chart-1) 80%, black)",
+    color: "color-mix(in oklch, var(--chart-1) 80%, var(--foreground))",
   },
   {
     ticker: "MSFT",
@@ -40,7 +40,7 @@ const sampleHoldings = [
     allocation: 28,
     change: "+1.8%",
     positive: true,
-    color: "color-mix(in oklch, var(--chart-2) 80%, black)",
+    color: "color-mix(in oklch, var(--chart-2) 80%, var(--foreground))",
   },
   {
     ticker: "VWCE",
@@ -48,7 +48,7 @@ const sampleHoldings = [
     allocation: 22,
     change: "-0.3%",
     positive: false,
-    color: "color-mix(in oklch, var(--chart-3) 80%, black)",
+    color: "color-mix(in oklch, var(--chart-3) 80%, var(--foreground))",
   },
   {
     ticker: "GOOGL",
@@ -56,7 +56,7 @@ const sampleHoldings = [
     allocation: 15,
     change: "+3.1%",
     positive: true,
-    color: "color-mix(in oklch, var(--chart-4) 80%, black)",
+    color: "color-mix(in oklch, var(--chart-4) 80%, var(--foreground))",
   },
 ];
 
@@ -167,7 +167,7 @@ const PortfolioEmptyState: React.FC<PortfolioEmptyStateProps> = ({
                   >
                     <div className="flex items-center gap-3">
                       <div
-                        className="flex h-8 w-8 items-center justify-center rounded-md text-xs font-bold text-white"
+                        className="text-background flex h-8 w-8 items-center justify-center rounded-md text-xs font-bold"
                         style={{ backgroundColor: holding.color }}
                       >
                         {holding.ticker.slice(0, 2)}

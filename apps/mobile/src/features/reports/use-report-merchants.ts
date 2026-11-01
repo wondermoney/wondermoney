@@ -4,7 +4,7 @@ import { useProductRuntime } from '@/components/providers/product-runtime-provid
 
 import { transactionMerchantsEndpoint } from './report-merchants-contract'
 
-export const reportMerchantsKey = (epochId: number) => ['reports', epochId, 'merchants'] as const
+const reportMerchantsKey = (epochId: number) => ['reports', epochId, 'merchants'] as const
 
 export function useReportMerchants() {
   const { runtime } = useProductRuntime()

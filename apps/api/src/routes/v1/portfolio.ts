@@ -36,9 +36,8 @@ import {
 import { marketDataRateLimit } from '@middleware/rate-limit';
 
 const router = express.Router();
-// RAD-547 — this used to be 60 requests / 15 min, the tightest limit in the API: a single
-// portfolio page load costs six to eight of these, so eight page views exhausted it. It now
-// shares the `marketData` family ceiling and keys on the verified Supabase subject.
+// A single portfolio page load costs six to eight of these requests, so this shares the
+// `marketData` family ceiling and keys on the verified better-auth user.
 const marketDataLimiter = marketDataRateLimit();
 
 // Aggregate dashboard endpoints (must be before :portfolioId to avoid conflicts)
@@ -61,7 +60,7 @@ router.get('/calendar', marketDataLimiter, getPortfolioCalendar);
 // Dividend income (aggregate)
 router.get('/dividend-income', getDividendIncome);
 
-// Holding-level market-data endpoints (analyst/valuation stubbed — RAD-449, not covered by the EODHD plan)
+// Holding-level market-data endpoints (analyst/valuation stubbed — not covered by the EODHD plan)
 router.get('/holding/:symbol/analyst', marketDataLimiter, getHoldingAnalystData);
 router.get('/holding/:symbol/valuation', marketDataLimiter, getHoldingValuation);
 

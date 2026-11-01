@@ -1,17 +1,17 @@
 import { z } from 'zod'
 
-import { readEndpoint } from '@/lib/api/runtime-schema'
+import { readEndpoint, tolerantEnum } from '@/lib/api/runtime-schema'
 
 /**
- * RAD-220 — the five-field least-privilege recent-transaction item served by
- * `GET /v1/account/:accountId/recent-transactions`. Strict: any extra/sensitive field
- * (ids, dirty descriptions, review state, logos) is a contract violation. Nulls are
- * explicit and never inferred.
+ * The five-field least-privilege recent-transaction item served by
+ * `GET /v1/account/:accountId/recent-transactions`. Fields outside these five are stripped,
+ * so nothing extra reaches the view model. Nulls are explicit and never inferred. An entry
+ * type this build doesn't know reads as 'unknown' and renders as an ordinary transaction row.
  */
-export const recentTransactionEntryTypeSchema = z.enum([
+const recentTransactionEntryTypeSchema = tolerantEnum([
   'persisted_transaction',
   'synthetic_initial_balance',
-])
+], 'unknown')
 
 export const recentTransactionSchema = z
   .object({
@@ -21,15 +21,12 @@ export const recentTransactionSchema = z
     amount: z.number().finite().nullable(),
     currencyCode: z.string().regex(/^[A-Z]{3}$/).nullable(),
   })
-  .strict()
 
 export const recentTransactionsResponseSchema = z.object({
   transactions: z.array(recentTransactionSchema),
 })
 
-export type RecentTransactionEntryType = z.infer<typeof recentTransactionEntryTypeSchema>
 export type RecentTransactionDto = z.infer<typeof recentTransactionSchema>
-export type RecentTransactionsResponseDto = z.infer<typeof recentTransactionsResponseSchema>
 
 export function createRecentTransactionsEndpoint(accountId: number) {
   return readEndpoint({

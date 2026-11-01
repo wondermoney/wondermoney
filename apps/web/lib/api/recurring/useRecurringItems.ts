@@ -74,7 +74,7 @@ export async function getRecurringItems(
   return data;
 }
 
-export const recurringItemsQueryKey = ["recurring-items"] as const;
+const recurringItemsQueryKey = ["recurring-items"] as const;
 
 export default function useRecurringItems<R = GetRecurringItemsResponse>(
   options?: Omit<

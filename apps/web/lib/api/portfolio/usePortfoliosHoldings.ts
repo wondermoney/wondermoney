@@ -20,6 +20,8 @@ export interface PortfolioHolding {
   unrealizedGainsPercentage: number | null;
   isInvalid?: boolean;
   invalidReason?: string | null;
+  /** Present (true) only when a fee of this asset had no usable exchange rate and was counted as zero. */
+  feeConversionIncomplete?: boolean;
   /**
    * Present only for Savings Certificate (Certificado de Aforro) holdings.
    * `currentRateBps`/`premiumTierBps` come from a single representative lot
@@ -44,7 +46,7 @@ export interface GetPortfoliosHoldingsResponse {
   holdings: PortfolioHolding[];
 }
 
-export async function getPortfoliosHoldings(
+async function getPortfoliosHoldings(
   apiClient: AxiosInstance = api,
 ): Promise<GetPortfoliosHoldingsResponse> {
   const { data } = await apiClient.get<GetPortfoliosHoldingsResponse>(

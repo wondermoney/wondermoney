@@ -1,7 +1,9 @@
 import { QueryOrder } from '@mikro-orm/core';
 import { differenceInDays } from 'date-fns';
+import { sql } from 'kysely';
 
 import { DI } from '@app/app';
+import { sqlQuery } from '@app/database/sql';
 import type { Appuser } from '@entity/Appuser';
 import { FinancialTransaction } from '@entity/FinancialTransaction';
 import { FinancialTransactionType } from '@entity/FinancialTransactionType';
@@ -132,26 +134,18 @@ class PortfolioMetricsService {
     fromDate?: Date,
     tenantKey?: number,
   ): Promise<{ totalValue: number }[]> {
-    const knex = DI.em.getKnex();
-
-    const query = knex('portfolio_snapshot as ps')
-      .select(knex.raw('ps.snapshot_date, SUM(COALESCE(ps.appuser_currency_total_value, ps.total_value)) as total_value'))
+    const rows = (await sqlQuery(DI.em)
+      .selectFrom('portfolio_snapshot as ps')
       .innerJoin('portfolio as p', 'ps.portfolio_key', 'p.portfolio_key')
-      // RAD-343: household scope when a tenant is supplied (raw SQL bypasses the filter);
+      .select(['ps.snapshot_date', sql<string>`SUM(COALESCE(ps.appuser_currency_total_value, ps.total_value))`.as('total_value')])
+      // Household scope when a tenant is supplied (raw SQL bypasses the filter);
       // else appuser scope (worker path).
-      .where(function () {
-        if (tenantKey == null) this.where('p.portfolio_owner_appuser_key', appuser.appuserKey);
-        else this.where('p.tenant_key', tenantKey);
-      })
-      .whereNull('p.deleted_at')
+      .where((eb) => (tenantKey == null ? eb('p.portfolio_owner_appuser_key', '=', appuser.appuserKey) : eb('p.tenant_key', '=', tenantKey)))
+      .where('p.deleted_at', 'is', null)
+      .$if(Boolean(fromDate), (query) => query.where('ps.snapshot_date', '>=', fromDate))
       .groupBy('ps.snapshot_date')
-      .orderBy('ps.snapshot_date', 'asc');
-
-    if (fromDate) {
-      query.where('ps.snapshot_date', '>=', fromDate);
-    }
-
-    const rows = (await query) as { snapshot_date: Date; total_value: string }[];
+      .orderBy('ps.snapshot_date', 'asc')
+      .execute()) as { snapshot_date: Date | string; total_value: string }[];
     return rows.map((r) => ({ totalValue: Number(r.total_value) }));
   }
 

@@ -6,7 +6,7 @@ import { useCallback } from "react";
 import { normalizeFinancialLocale } from "@/lib/utils/formatCurrency";
 import { formatNumberForLocale } from "@/lib/utils/formatNumber";
 
-/** RAD-575 — `formatNumber` bound to the active locale. See `useFormatPercentage`. */
+/** `formatNumber` bound to the active locale. See `useFormatPercentage`. */
 export function useFormatNumber() {
   const locale = useLocale();
 
@@ -17,4 +17,3 @@ export function useFormatNumber() {
   );
 }
 
-export default useFormatNumber;

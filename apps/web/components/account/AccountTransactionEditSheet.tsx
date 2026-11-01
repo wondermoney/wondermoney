@@ -5,7 +5,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import { usePostHog } from "posthog-js/react";
 import { useMemo } from "react";
-import { SubmitHandler, useForm } from "react-hook-form";
+import { SubmitHandler, useForm, useWatch } from "react-hook-form";
 import { toast } from "sonner";
 import * as z from "zod";
 
@@ -84,7 +84,10 @@ export function AccountTransactionEditSheet({
     reset,
     formState: { isSubmitting },
   } = form;
-  const watchedAmount = form.watch("updatedAmount");
+  const watchedAmount = useWatch({
+    control: form.control,
+    name: "updatedAmount",
+  });
 
   const transactionAmount = useMemo(
     () =>

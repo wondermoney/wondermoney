@@ -1,8 +1,7 @@
 /**
- * RAD-343 (A2) — end-to-end proof that the tenant filter isolates household data.
+ * End-to-end proof that the tenant filter isolates household data.
  *
- * Runs against a SCHEMA-ONLY disposable database (no seeding needed, so it sidesteps
- * RAD-408). It seeds two tenants via raw SQL, then queries through the ORM with the
+ * Runs against a SCHEMA-ONLY disposable database (no seeding needed). It seeds two tenants via raw SQL, then queries through the ORM with the
  * tenant filter engaged and asserts isolation + privacy + nullable-global + system
  * pass-through. Exits non-zero on any failed assertion.
  *
@@ -43,11 +42,11 @@ async function main() {
     const cur = (await one(`insert into currency (code, num, decimal_digits, is_active) values ('TCX','899',2,true) returning currency_key`))['currency_key']!;
     const ts = (await one(`insert into tenant_status (description) values ('Active') returning tenant_status_key`))['tenant_status_key']!;
 
-    const mkUser = async (email: string, ref: string, ext: string) =>
-      (await one(`insert into appuser (created_at, updated_at, email_address, referral_code, currency_key, external_user_id) values (now(),now(),?,?,?,?) returning appuser_key`, [email, ref, cur, ext]))['appuser_key']!;
-    const userA = await mkUser('a2-a@test', 'a2refA', 'a2extA');
-    const userM = await mkUser('a2-m@test', 'a2refM', 'a2extM');
-    const userB = await mkUser('a2-b@test', 'a2refB', 'a2extB');
+    const mkUser = async (email: string, ext: string) =>
+      (await one(`insert into appuser (created_at, updated_at, email_address, currency_key, external_user_id) values (now(),now(),?,?,?) returning appuser_key`, [email, cur, ext]))['appuser_key']!;
+    const userA = await mkUser('a2-a@test', 'a2extA');
+    const userM = await mkUser('a2-m@test', 'a2extM');
+    const userB = await mkUser('a2-b@test', 'a2extB');
 
     const mkTenant = async (owner: number) =>
       (await one(`insert into tenant (created_at, updated_at, owner_appuser_key, tenant_status_key) values (now(),now(),?,?) returning tenant_key`, [owner, ts]))['tenant_key']!;
@@ -81,8 +80,8 @@ async function main() {
     const templateA = (
       await one(
         `insert into budget_template_category
-          (created_at, updated_at, budget_key, category_key, amount_budgeted, year, month, recurrency)
-         values (now(),now(),?,?,?,?,?,?) returning budget_template_category_key`,
+          (budget_key, category_key, amount_budgeted, year, month, recurrency)
+         values (?,?,?,?,?,?) returning budget_template_category_key`,
         [budgetA, catA, 100, new Date().getFullYear(), 1, 'MONTHLY'],
       )
     )['budget_template_category_key']!;
@@ -213,7 +212,7 @@ async function main() {
       );
     }
 
-    // 7. RecurringSeries privacy carve-out via the linked account (RAD-343 C1) — the
+    // 7. RecurringSeries privacy carve-out via the linked account — the
     // tenant-wide recurring detection must not leak a private account's recurring spend.
     {
       const asMember = orm.em.fork();

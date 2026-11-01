@@ -2,27 +2,25 @@ import type { FilterQuery } from '@mikro-orm/core';
 import type { EntityManager } from '@mikro-orm/core';
 import { generateInternalTransactionId } from '@wondermoney/shared';
 
+import { HIDDEN_FILTER } from '@app/database/filters/tenant-filter';
 import { Account } from '@entity/Account';
 import { Transaction } from '@entity/Transaction';
 
 /**
- * Centralized transaction dedup (RAD-346, Phase 2).
+ * Centralized transaction dedup.
  *
- * Historically only the GoCardless sync path did an existence check before insert (an inline
- * `$or` over provider ids + the generated fingerprint). The manual, CSV and portfolio ingest
- * paths did none. This service is the single place that decides "have we already ingested this
+ * This service is the single place that decides "have we already ingested this
  * exact transaction on this account?" so every path can call it consistently.
  *
  * Identity is deterministic only: provider ids first, then the generated `internalTransactionId`
  * fingerprint (date+amount). Fuzzy matching (amount±tolerance, date window, merchant) is NOT done
- * here — that belongs to the pending→posted bridge (Phase 4) and the manual "possible duplicate"
+ * here — that belongs to the pending→posted bridge and the manual "possible duplicate"
  * hint, never to silent auto-merge of two booked rows.
  */
 export interface DedupCriteria {
   accountKey: Account | number;
-  // Enable Banking's replacement identity for `nordigenInternalTransactionId` (Phase 1d, plan
-  // §2/§3) — kept as a separate optional field rather than unifying with the Nordigen one, same
-  // rationale as the underlying `Transaction` columns: a provider-swap seam, not a rename.
+  // Enable Banking's provider identity — kept as a separate optional field rather than unified
+  // with the legacy `nordigenInternalTransactionId`, same as the underlying `Transaction` columns.
   enableBankingTransactionId?: null | string;
   externalTransactionId?: null | string;
   internalTransactionId?: null | string;
@@ -31,6 +29,13 @@ export interface DedupCriteria {
 
 type FindOneCapableEm = Pick<EntityManager, 'findOne'>;
 
+/**
+ * `includeHidden`: also match rows the user hid. The bank sync needs this: a hidden row is
+ * still the stored copy of that transaction, and the unique provider-id constraints cover it, so a
+ * lookup that cannot see it would either fail to refresh it or store the transaction a second time.
+ */
+export interface DedupLookupOptions { includeHidden?: boolean }
+
 type IdentityTerm = { enableBankingTransactionId: string } | { externalTransactionId: string } | { internalTransactionId: string } | { nordigenInternalTransactionId: string };
 
 /**
@@ -38,26 +43,26 @@ type IdentityTerm = { enableBankingTransactionId: string } | { externalTransacti
  * account, or null. Returns null without querying when no identity criteria are supplied — there
  * is nothing to dedup on, and an unscoped `$or: []` would match the whole account.
  */
-export async function findExistingTransaction(em: FindOneCapableEm, criteria: DedupCriteria): Promise<null | Transaction> {
+export async function findExistingTransaction(em: FindOneCapableEm, criteria: DedupCriteria, options: DedupLookupOptions = {}): Promise<null | Transaction> {
   const hasProviderId = Boolean(criteria.externalTransactionId || criteria.nordigenInternalTransactionId || criteria.enableBankingTransactionId);
   const orTerms = [
     criteria.externalTransactionId ? { externalTransactionId: criteria.externalTransactionId } : undefined,
     criteria.nordigenInternalTransactionId ? { nordigenInternalTransactionId: criteria.nordigenInternalTransactionId } : undefined,
     criteria.enableBankingTransactionId ? { enableBankingTransactionId: criteria.enableBankingTransactionId } : undefined,
-    // RAD-393: the synthetic date+amount `internalTransactionId` fingerprint is a fallback identity
+    // The synthetic date+amount `internalTransactionId` fingerprint is a fallback identity
     // ONLY for rows with no provider id (manual/CSV). When a bank id is present it is authoritative —
     // a fingerprint collision must never skip a row that a distinct provider id proves is a separate
-    // transaction (the class-A false-positive-skip / data-loss case). See
-    // docs/plans/2026-08-01-rad-393-fingerprint-tolerance-design.md.
+    // transaction (a false-positive skip is data loss).
     !hasProviderId && criteria.internalTransactionId ? { internalTransactionId: criteria.internalTransactionId } : undefined,
   ].filter((term): term is IdentityTerm => term !== undefined);
 
   if (orTerms.length === 0) return null;
 
-  return em.findOne(Transaction, { $or: orTerms, accountKey: criteria.accountKey, deletedAt: undefined } as FilterQuery<Transaction>);
+  const where = { $or: orTerms, accountKey: criteria.accountKey, deletedAt: undefined } as FilterQuery<Transaction>;
+  return options.includeHidden ? em.findOne(Transaction, where, { filters: { [HIDDEN_FILTER]: false } }) : em.findOne(Transaction, where);
 }
 
-/** Which identity branch of the `findExistingTransaction` $or matched. RAD-394 telemetry. */
+/** Which identity branch of the `findExistingTransaction` $or matched, for dedup telemetry. */
 export interface ExistingTransactionMatch {
   existing: Transaction;
   matchedOn: MatchedOn;
@@ -80,11 +85,10 @@ function matchedBranch(existing: Transaction, criteria: DedupCriteria): MatchedO
 }
 
 /**
- * Same result as `findExistingTransaction` but reports which identity branch matched. RAD-394:
- * lets the caller emit a `DEDUP_SKIPPED` audit row with the `matchedOn` field, so we can
+ * Same result as `findExistingTransaction` but reports which identity branch matched. Lets
+ * the caller emit a `DEDUP_SKIPPED` audit row with the `matchedOn` field, so we can
  * measure the rate of false-positive skips caused by the synthetic `internalTransactionId`
- * fingerprint colliding with distinct real transactions (the design issue called out in
- * RAD-393). Use the fast `findExistingTransaction` when you don't need the matched-on
+ * fingerprint colliding with distinct real transactions. Use the fast `findExistingTransaction` when you don't need the matched-on
  * provenance.
  *
  * Cost: a single `$or` lookup — it delegates to `findExistingTransaction` and derives the matched
@@ -93,14 +97,15 @@ function matchedBranch(existing: Transaction, criteria: DedupCriteria): MatchedO
 export async function findExistingTransactionWithProvenance(
   em: FindOneCapableEm,
   criteria: DedupCriteria,
+  options: DedupLookupOptions = {},
 ): Promise<ExistingTransactionMatch | null> {
-  const existing = await findExistingTransaction(em, criteria);
+  const existing = await findExistingTransaction(em, criteria, options);
   if (!existing) return null;
   return { existing, matchedOn: matchedBranch(existing, criteria) };
 }
 
 /** Feature flag gating application-level dedup detection at ingest. Live by default; set to `off` to disable. */
-export const TRANSACTION_DEDUP_FLAG = 'TRANSACTION_DEDUP_ENABLED';
+const TRANSACTION_DEDUP_FLAG = 'TRANSACTION_DEDUP_ENABLED';
 
 interface ManualDedupInput {
   accountKey: Account | number;
@@ -116,7 +121,7 @@ function isDedupEnabled(): boolean {
 
 /**
  * Warn-and-allow duplicate detection for user-entered (manual/CSV) transactions, reporting which
- * identity branch matched (RAD-394). Manual entries carry no provider id, so the only identity is
+ * identity branch matched. Manual entries carry no provider id, so the only identity is
  * the date+amount fingerprint — which legitimately collides (two identical coffees the same day).
  * The caller still creates the transaction and only *hints* at a possible duplicate; we never block.
  * Returns null (without querying) when the dedup flag is disabled.

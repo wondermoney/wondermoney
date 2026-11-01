@@ -20,9 +20,8 @@ import { OnboardingCarousel } from "./OnboardingCarousel";
 function BalanceOverviewPreview() {
   const t = useTranslations();
 
-  // Shares the one preview fixture with Home and Accounts (RAD-589). This tour
-  // carried a fourth hand-written copy of the mock data — a different fictional
-  // person again, with "Total balance" hardcoded in English.
+  // Shares the one preview fixture with Home and Accounts, so every preview
+  // describes the same fictional person.
   return (
     <div className="divide-border border-border bg-card divide-y rounded-lg border">
       <div className="p-4">

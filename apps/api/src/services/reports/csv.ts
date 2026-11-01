@@ -1,7 +1,7 @@
 import type { Response } from 'express';
 
 /**
- * RAD-156 — shared report CSV formatting.
+ * Shared report CSV formatting.
  *
  * CSV contract: UTF-8 BOM, RFC 4180 escaping (quotes doubled, fields with
  * commas/quotes/newlines wrapped in quotes), numbers as 2-decimal fixed-point

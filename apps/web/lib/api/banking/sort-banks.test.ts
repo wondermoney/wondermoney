@@ -15,7 +15,7 @@ const names = (banks: ReturnType<typeof sortBanksForCountry>) =>
   banks.map((b) => b.name);
 
 test("PT: the banks people actually use come before the alphabetical tail", () => {
-  // The order GoCardless returns, which is what shipped: Abanca first.
+  // Alphabetical, as the provider returns it: Abanca first.
   const fromProvider = [
     bank("Abanca"),
     bank("Abanca Corporate"),

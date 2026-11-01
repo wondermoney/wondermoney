@@ -8,10 +8,10 @@ import { cn } from "@/lib/utils";
 
 /**
  * Fundamentals, financials, earnings and news are gated behind a higher tier of
- * the market-data plan, so the API answers 404 for them by design (RAD-449) —
+ * the market-data plan, so the API answers 404 for them by design —
  * permanently, not transiently. Three identical dashed boxes reading "Market
- * data unavailable" made that look like an outage on a page whose chart and
- * profile were working fine (RAD-609).
+ * data unavailable" would make that look like an outage on a page whose chart
+ * and profile are working fine.
  *
  * Like the quote-unavailable state this is ordinary content, not an incident:
  * no alert role, no spinner, no retry, no semantic colour. The panel keeps its

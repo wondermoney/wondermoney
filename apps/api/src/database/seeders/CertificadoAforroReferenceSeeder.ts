@@ -10,15 +10,13 @@ import { FinancialAsset } from '@entity/FinancialAsset';
 import { Seeder } from '@mikro-orm/seeder';
 
 /**
- * Seeds the reference data a Certificado de Aforro holding needs in order to be valued at all
- * (RAD-445): each in-scope series' loyalty-premium brackets and its published monthly base-rate
+ * Seeds the reference data a Certificado de Aforro holding needs in order to be valued at all:
+ * each in-scope series' loyalty-premium brackets and its published monthly base-rate
  * history. Without these rows every Savings Certificate lot throws inside the accrual engine and
  * is dropped from the portfolio, so this is not optional colour — it is the difference between the
  * feature working and silently showing nothing.
  *
- * Fresh/dev DBs get it from here (it must run after `FinancialAssetSeeder`, which creates the
- * `CA-SERIE-*` rows this joins to). Already-provisioned staging/prod get the identical data from
- * `database/scripts/insert-certificado-aforro-lookups.ts`, which reads the same two constants.
+ * It must run after `FinancialAssetSeeder`, which creates the `CA-SERIE-*` rows this joins to.
  *
  * Only Séries E and F are covered — see the reference-data module for why C and D are deliberately
  * left unprovisioned.

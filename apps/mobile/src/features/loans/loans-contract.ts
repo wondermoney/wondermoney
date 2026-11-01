@@ -1,6 +1,6 @@
 import { z } from 'zod'
 
-import { readEndpoint, writeEndpoint } from '@/lib/api/runtime-schema'
+import { readEndpoint, tolerantEnum, writeEndpoint } from '@/lib/api/runtime-schema'
 
 const positiveSafeId = z.number().int().positive().max(Number.MAX_SAFE_INTEGER)
 const finiteMoney = z.number().finite()
@@ -10,11 +10,17 @@ const optionalNullableString = z.string().nullable().optional()
 const date = z.union([z.iso.date(), z.iso.datetime()])
 const optionalNullableDate = date.nullable().optional()
 
-export const loanTypeSchema = z.enum(['AUTO_LOAN', 'MORTGAGE', 'OTHER', 'PERSONAL_LOAN', 'STUDENT_LOAN'])
-export const loanStatusSchema = z.enum(['ACTIVE', 'CLOSED', 'PAID_OFF'])
-export const loanPaymentFrequencySchema = z.enum(['MONTHLY'])
-export const loanRateTypeSchema = z.enum(['FIXED', 'UNKNOWN'])
-export const loanAllocationSourceSchema = z.enum(['AMORTIZATION_ESTIMATE', 'AUTO_MATCHED', 'MANUAL'])
+const LOAN_TYPES = ['AUTO_LOAN', 'MORTGAGE', 'OTHER', 'PERSONAL_LOAN', 'STUDENT_LOAN'] as const
+// Write side: the request bodies only ever carry a type this build knows.
+export const loanTypeSchema = z.enum(LOAN_TYPES)
+// Read side: values this build doesn't know fall back instead of failing the whole loan list. A new
+// loan type reads as 'OTHER' (the edit form only sends `type` when the user changes it, so the
+// fallback is never written back); the rest read as 'UNKNOWN' and render as "unavailable".
+const loanTypeResponseSchema = tolerantEnum(LOAN_TYPES, 'OTHER')
+const loanStatusSchema = tolerantEnum(['ACTIVE', 'CLOSED', 'PAID_OFF'], 'UNKNOWN')
+const loanPaymentFrequencySchema = tolerantEnum(['MONTHLY'], 'UNKNOWN')
+const loanRateTypeSchema = tolerantEnum(['FIXED', 'UNKNOWN'], 'UNKNOWN')
+const loanAllocationSourceSchema = tolerantEnum(['AMORTIZATION_ESTIMATE', 'AUTO_MATCHED', 'MANUAL'], 'UNKNOWN')
 
 export const loanSchema = z.object({
   annualInterestRateBps: z.number().int().min(0).max(10_000).nullable().optional(),
@@ -22,7 +28,7 @@ export const loanSchema = z.object({
   currency: z.object({
     code: z.string().regex(/^[A-Z]{3}$/),
     currencyKey: positiveSafeId,
-  }).strict(),
+  }),
   includeInNetWorth: z.boolean(),
   maturityDate: optionalNullableDate,
   name: z.string().min(1),
@@ -34,7 +40,7 @@ export const loanSchema = z.object({
   outstandingPrincipal: finiteMoney,
   paymentDayOfMonth: z.number().int().min(1).max(31).nullable().optional(),
   paymentFrequency: loanPaymentFrequencySchema,
-  progressBasis: z.enum(['OPENING_BALANCE', 'ORIGINAL_PRINCIPAL']),
+  progressBasis: tolerantEnum(['OPENING_BALANCE', 'ORIGINAL_PRINCIPAL'], 'UNKNOWN'),
   progressPercentage: z.number().finite(),
   providerName: optionalNullableString,
   rateType: loanRateTypeSchema,
@@ -42,11 +48,11 @@ export const loanSchema = z.object({
   remainingTermMonthsEstimated: z.number().int().finite().nullable(),
   status: loanStatusSchema,
   termMonths: z.number().int().positive().max(Number.MAX_SAFE_INTEGER).nullable().optional(),
-  type: loanTypeSchema,
-}).strict()
+  type: loanTypeResponseSchema,
+})
 
-export const loansResponseSchema = z.object({ loans: z.array(loanSchema) }).strict()
-export const loanResponseSchema = z.object({ loan: loanSchema }).strict()
+export const loansResponseSchema = z.object({ loans: z.array(loanSchema) })
+export const loanResponseSchema = z.object({ loan: loanSchema })
 
 // Fields the API's PATCH /v1/loan/:id also accepts (baseLoanSchema.partial()) but that
 // mobile deliberately does not expose for editing an existing loan: currencyKey (changing
@@ -87,13 +93,13 @@ export const loanCreateWriteSchema = loanEditableFieldsSchema
 
 export type LoanCreateWrite = z.input<typeof loanCreateWriteSchema>
 
-export const loanRepaymentTransactionSchema = z.object({
+const loanRepaymentTransactionSchema = z.object({
   description: optionalNullableString,
   merchantName: optionalNullableString,
   settlementAmount: optionalNullableMoney,
   transactionDate: z.iso.datetime().nullable().optional(),
   transactionKey: positiveSafeId,
-}).strict()
+})
 
 export const loanRepaymentSchema = z.object({
   allocationSource: loanAllocationSourceSchema,
@@ -106,9 +112,9 @@ export const loanRepaymentSchema = z.object({
   principalAmount: finiteMoney,
   totalPaymentAmount: finiteMoney,
   transaction: loanRepaymentTransactionSchema,
-}).strict()
+})
 
-export const loanRepaymentsResponseSchema = z.object({ repayments: z.array(loanRepaymentSchema) }).strict()
+export const loanRepaymentsResponseSchema = z.object({ repayments: z.array(loanRepaymentSchema) })
 
 export const loanRepaymentAllocationSchema = z.object({
   feeAmount: z.number().finite().nonnegative(),
@@ -129,7 +135,7 @@ const suggestedAllocationSchema = z.object({
   totalPaymentAmount: z.number().finite().positive(),
   needsReview: z.boolean(),
   negativeAmortization: z.boolean(),
-}).strict().superRefine((value, context) => {
+}).superRefine((value, context) => {
   const componentTotal = +(value.principalAmount + value.interestAmount + value.feeAmount).toFixed(2)
   if (Math.abs(componentTotal - value.totalPaymentAmount) > 0.01) context.addIssue({ code: 'custom', message: 'Suggested allocation does not reconcile.', path: ['totalPaymentAmount'] })
 })
@@ -137,16 +143,16 @@ const suggestedAllocationSchema = z.object({
 export const loanRepaymentCandidateSchema = z.object({
   amount: z.number().finite().positive(),
   candidateScore: z.number().finite(),
-  confidence: z.enum(['HIGH', 'LOW', 'MEDIUM']),
+  confidence: tolerantEnum(['HIGH', 'LOW', 'MEDIUM'], 'UNKNOWN'),
   outstandingPrincipal: z.number().finite(),
   reasons: z.array(z.string()),
   suggestedAllocation: suggestedAllocationSchema,
   transaction: loanRepaymentTransactionSchema,
-}).strict()
+})
 
 export const loanRepaymentCandidatesResponseSchema = z.object({
   candidates: z.array(loanRepaymentCandidateSchema),
-}).strict()
+})
 
 // Mutation responses include these relation fields because the current controller serializes
 // the newly persisted entity as well as the stable repayment fields used by the app.
@@ -166,8 +172,8 @@ export const loanRepaymentMutationResponseSchema = z.object({
     totalPaymentAmount: finiteMoney,
     transaction: loanRepaymentTransactionSchema,
     transactionKey: z.unknown(),
-  }).strict(),
-}).strict()
+  }),
+})
 
 export type LoanType = z.infer<typeof loanTypeSchema>
 export type LoanDto = z.infer<typeof loanSchema>

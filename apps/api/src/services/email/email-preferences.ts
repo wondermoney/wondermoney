@@ -2,8 +2,7 @@
  * Single source of truth for the email consent taxonomy: which optional
  * category each sender belongs to, which `EmailNotificationPreference` column
  * gates that category, and the shared send-time gate every optional sender
- * must consult (`canSendOptionalEmail`). See
- * `docs/superpowers/specs/2026-07-25-email-preference-center-design.md`.
+ * must consult (`canSendOptionalEmail`).
  */
 
 /** Every optional (toggle-able) email category. Transactional emails have no category — they always send. */

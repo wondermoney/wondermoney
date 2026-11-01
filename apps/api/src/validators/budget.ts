@@ -5,7 +5,7 @@ import { Recurrency } from '@utils/budget';
 // Matches the existing income-amount ceiling below (createBudgetRequestSchema.incomes[].amount) so
 // every budget-domain money field shares one sanity cap. Generous enough for any real household
 // budget while still rejecting fat-finger/edge-case entries (e.g. 99999999) that would otherwise
-// propagate through Total Budgeted, Budget Remaining, utilization %, and Net Worth History (RAD-637).
+// propagate through Total Budgeted, Budget Remaining, utilization %, and Net Worth History.
 const MAX_BUDGET_CATEGORY_AMOUNT = 999999999;
 const budgetCategoryAmountErrorMessage = `Amount must be ${MAX_BUDGET_CATEGORY_AMOUNT.toLocaleString('en-US')} or less`;
 
@@ -42,7 +42,7 @@ export const createBudgetRequestSchema = z.object({
             amount: z.number().nonnegative().max(MAX_BUDGET_CATEGORY_AMOUNT, { message: budgetCategoryAmountErrorMessage }),
             isRecurrent: z.boolean(),
             name: z.string().min(1).max(100),
-            recurrency: z.nativeEnum(Recurrency).optional(),
+            recurrency: z.enum(Recurrency).optional(),
           })
           .refine((data) => {
             // If isRecurrent is true, recurrency should be defined
@@ -50,11 +50,7 @@ export const createBudgetRequestSchema = z.object({
               return data.recurrency !== undefined;
             }
             return true;
-          })
-          .transform((data) => ({
-            ...data,
-            recurrency: data.recurrency?.toUpperCase() as Recurrency,
-          })),
+          }),
       )
       .optional(),
   }),
@@ -106,7 +102,7 @@ export const updateBudgetCategoryAmountRequestSchema = z.object({
   body: z.object({
     amount: z.coerce.number().positive().max(MAX_BUDGET_CATEGORY_AMOUNT, { message: budgetCategoryAmountErrorMessage }).optional(),
     applyToFollowingMonths: z.boolean().optional().default(true),
-    recurrency: z.nativeEnum(Recurrency).optional(),
+    recurrency: z.enum(Recurrency).optional(),
   }),
   params: z.object({
     budgetKey: z.coerce.number().positive(),
@@ -129,7 +125,7 @@ export const addBudgetCategoryRequestSchema = z.object({
   body: z.object({
     amountBudgeted: z.number().positive().max(MAX_BUDGET_CATEGORY_AMOUNT, { message: budgetCategoryAmountErrorMessage }),
     categoryKey: z.number().positive(),
-    recurrency: z.nativeEnum(Recurrency).optional(),
+    recurrency: z.enum(Recurrency).optional(),
   }),
   params: z.object({
     budgetKey: z.coerce.number().positive(),

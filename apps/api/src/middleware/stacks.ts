@@ -10,14 +10,9 @@ import { getUser } from '@middleware/user';
 /**
  * Named middleware stacks for the authorization model.
  *
- * RAD-audit: this was fourteen verbatim copies of the same seven-element array, in the
- * highest-churn file in the repo (46 commits/6 months). The drift that predicts was already
- * measurable — five of twenty-six mounts deviated, and `/v1/operations` had silently lost
- * tenant scoping entirely, making it the only authed data mount where the fail-loud
- * `assertTenantResolved` invariant did not hold.
- *
- * Expressing the stacks once means a deviation is now a visible, deliberate choice at the
- * call site rather than a diff nobody reads.
+ * Copy-pasted middleware arrays drift: a mount can silently lose tenant scoping, and with it
+ * the fail-loud `assertTenantResolved` invariant. Expressing the stacks once means a deviation
+ * is a visible, deliberate choice at the call site rather than a diff nobody reads.
  *
  * `authedTenant` — authenticated, tenant resolved and asserted, demo writes blocked.
  */

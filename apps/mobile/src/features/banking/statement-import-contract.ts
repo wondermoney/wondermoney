@@ -1,18 +1,12 @@
 import { z } from 'zod'
 
 import { isValidAccountId } from '@/features/accounts/accounts-contract'
-import { readEndpoint, writeEndpoint } from '@/lib/api/runtime-schema'
+import { readEndpoint, tolerantEnum, writeEndpoint } from '@/lib/api/runtime-schema'
 
 /**
- * RAD-502 — CSV/statement import as a bank-sync failure fallback. Web's
+ * CSV/statement import as a bank-sync failure fallback. Web's
  * `BankAccountSyncStatusBanner.tsx` offers `onImportStatement` alongside
- * retry/add-manually when a GoCardless sync fails; RAD-503 (a separate,
- * still-Backlog ticket under RAD-196) owns the full per-account transaction
- * CSV/XLS/XLSX import surface (`AccountTransactionImportModal.tsx`:
- * presigned-URL upload -> background-job import -> bank-format detection ->
- * status polling). Neither web component could be read directly (missing
- * from the local web-bak snapshot), so this endpoint set is modeled on the
- * only presigned-upload state machine already proven in this codebase —
+ * retry/add-manually when a bank sync fails. This endpoint set is modeled on
  * the portfolio broker-import session (portfolio-import-contract.ts) —
  * scoped per account instead of per portfolio, and deliberately simpler:
  * a bank statement has a fixed date/description/amount shape the server
@@ -23,8 +17,9 @@ import { readEndpoint, writeEndpoint } from '@/lib/api/runtime-schema'
 const STATEMENT_IMPORT_STATUSES = [
   'cancelled', 'expired', 'failed', 'importing', 'parsing', 'partial', 'succeeded', 'uploaded', 'waiting_for_upload',
 ] as const
-export type StatementImportStatus = typeof STATEMENT_IMPORT_STATUSES[number]
-const statementImportStatusSchema = z.enum(STATEMENT_IMPORT_STATUSES)
+// A status this build doesn't know reads as 'unknown': not in flight and not a success, so polling
+// stops on the generic failure screen instead of an invalid-response error.
+const statementImportStatusSchema = tolerantEnum(STATEMENT_IMPORT_STATUSES, 'unknown')
 
 function importSessionPath(importSessionId: number, suffix = ''): string {
   if (!Number.isSafeInteger(importSessionId) || importSessionId <= 0) throw new Error('A positive safe import session id is required.')
@@ -38,8 +33,7 @@ export const statementImportSessionCreateResponseSchema = z.object({
   uploadHeaders: z.record(z.string(), z.string()),
   uploadMethod: z.literal('PUT'),
   uploadUrl: z.string(),
-}).strict()
-export type StatementImportSessionCreateResponseDto = z.infer<typeof statementImportSessionCreateResponseSchema>
+})
 
 export function createStatementImportSessionEndpoint(accountId: number) {
   if (!isValidAccountId(accountId)) throw new Error('A positive safe account id is required.')
@@ -54,7 +48,7 @@ export function createStatementImportSessionEndpoint(accountId: number) {
 const triggerStatementImportResponseSchema = z.object({
   importSessionId: z.number().int().positive(),
   status: statementImportStatusSchema,
-}).strict()
+})
 
 export function createTriggerStatementImportEndpoint(importSessionId: number) {
   return writeEndpoint({
@@ -70,7 +64,7 @@ export const statementImportSummarySchema = z.object({
   failedRows: z.number().int().nonnegative(),
   importedRows: z.number().int().nonnegative(),
   totalRows: z.number().int().nonnegative(),
-}).strict()
+})
 export type StatementImportSummary = z.infer<typeof statementImportSummarySchema>
 
 const statementImportStatusResponseSchema = z.object({
@@ -78,7 +72,7 @@ const statementImportStatusResponseSchema = z.object({
   status: statementImportStatusSchema,
   // Absent while parsing/importing is still in flight; present once terminal.
   summary: statementImportSummarySchema.optional(),
-}).strict()
+})
 export type StatementImportStatusDto = z.infer<typeof statementImportStatusResponseSchema>
 
 export function createStatementImportStatusEndpoint(importSessionId: number) {

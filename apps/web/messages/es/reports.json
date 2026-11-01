@@ -29,8 +29,6 @@
     },
     "export": {
       "csv": "Exportar CSV",
-      "xlsx": "Exportar Excel",
-      "xlsxComingSoon": "La exportación a Excel llegará pronto. Por ahora usa CSV.",
       "downloading": "Preparando la descarga…",
       "success": "Descarga iniciada",
       "error": "No se pudo generar la exportación. Inténtalo de nuevo."

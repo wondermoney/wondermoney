@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { positiveIntId, validDate } from '@validators/shared';
 
 /**
- * Shared query shape for the admin audit-log reads (RAD-394): a `since` lower bound, offset
+ * Shared query shape for the admin audit-log reads: a `since` lower bound, offset
  * pagination (default 50, max 200), and optional tenant/appuser scoping. `.strip()` drops unknown
  * params rather than rejecting the request.
  */

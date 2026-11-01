@@ -18,16 +18,16 @@ describe('startBankConnectionResponseSchema', () => {
 })
 
 describe('createStartBankConnectionEndpoint', () => {
-  it('targets GET /v1/banking/bank/:bankId/start with an encoded bank id and the web redirect page', () => {
+  it('targets GET /v1/banking/bank/:bankId/start with an encoded bank id, asking to return to the app', () => {
     const endpoint = createStartBankConnectionEndpoint('REVOLUT_REVOGB21')
     expect(endpoint.method).toBe('GET')
-    expect(endpoint.path).toBe('/v1/banking/bank/REVOLUT_REVOGB21/start?redirectPage=accounts')
+    expect(endpoint.path).toBe('/v1/banking/bank/REVOLUT_REVOGB21/start?returnTo=mobile')
     expect(endpoint.schema).toBe(startBankConnectionResponseSchema)
   })
 
   it('encodes a bank id that needs escaping', () => {
     const endpoint = createStartBankConnectionEndpoint('bank id/with slash')
-    expect(endpoint.path).toBe('/v1/banking/bank/bank%20id%2Fwith%20slash/start?redirectPage=accounts')
+    expect(endpoint.path).toBe('/v1/banking/bank/bank%20id%2Fwith%20slash/start?returnTo=mobile')
   })
 
   it('rejects a blank bank id rather than building a malformed path', () => {

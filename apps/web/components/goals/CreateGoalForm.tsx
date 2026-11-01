@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { usePostHog } from "posthog-js/react";
 import { useMemo } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
 
@@ -120,7 +120,7 @@ export default function CreateGoalForm({
           parseGoalMoney(values.currentBalance) <= 0
         )
           ctx.addIssue({
-            code: z.ZodIssueCode.custom,
+            code: "custom",
             message: t("goals.amount-must-be-positive"),
             path: ["currentBalance"],
           });
@@ -132,7 +132,7 @@ export default function CreateGoalForm({
           rate > 1000
         )
           ctx.addIssue({
-            code: z.ZodIssueCode.custom,
+            code: "custom",
             message: t("goals.debt-interest-invalid"),
             path: ["interestRate"],
           });
@@ -141,7 +141,7 @@ export default function CreateGoalForm({
           parseGoalMoney(values.minimumPayment) <= 0
         )
           ctx.addIssue({
-            code: z.ZodIssueCode.custom,
+            code: "custom",
             message: t("goals.amount-must-be-positive"),
             path: ["minimumPayment"],
           });
@@ -150,7 +150,7 @@ export default function CreateGoalForm({
         parseGoalMoney(values.targetAmount) <= 0
       ) {
         ctx.addIssue({
-          code: z.ZodIssueCode.custom,
+          code: "custom",
           message: t("goals.amount-must-be-positive"),
           path: ["targetAmount"],
         });
@@ -175,7 +175,7 @@ export default function CreateGoalForm({
     resolver: zodResolver(schema),
   });
 
-  const goalType = form.watch("type");
+  const goalType = useWatch({ control: form.control, name: "type" });
   const isDebt = goalType === "debt_paydown";
 
   const setGoalType = (next: GoalType) => {
@@ -183,7 +183,7 @@ export default function CreateGoalForm({
     form.clearErrors();
   };
 
-  const priority = form.watch("priority");
+  const priority = useWatch({ control: form.control, name: "priority" });
 
   const setPriority = (next: GoalPriority) => {
     form.setValue("priority", next, {

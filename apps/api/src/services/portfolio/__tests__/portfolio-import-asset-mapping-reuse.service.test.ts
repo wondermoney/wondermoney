@@ -41,17 +41,17 @@ describe('portfolio import asset mapping reuse service', () => {
 
   it('finds active mapping for same tenant, broker, and identity hash', async () => {
     const asset = { deletedAt: undefined, financialAssetKey: 100, isActivelyTrading: true, symbol: 'VWCE' } as FinancialAsset;
-    em.findOne.mockResolvedValueOnce({ deletedAt: undefined, financialAssetKey: asset, financialBrokerKey: broker, identityHash, tenantKey: tenant } as PortfolioImportAssetMapping);
+    em.findOne.mockResolvedValueOnce({ deletedAt: undefined, financialAssetKey: asset, financialBrokerKey: broker, identityHash, tenantKey: tenant });
 
     await expect(service.findReusableAsset({ financialBroker: broker, identity, identityHash, tenant })).resolves.toBe(asset);
     expect(em.findOne).toHaveBeenCalledWith(PortfolioImportAssetMapping, expect.objectContaining({ deletedAt: undefined, financialBrokerKey: broker, identityHash, tenantKey: tenant }), expect.objectContaining({ populate: ['financialAssetKey'] }));
   });
 
   it('does not reuse deleted or inactive mapped assets', async () => {
-    em.findOne.mockResolvedValueOnce({ deletedAt: undefined, financialAssetKey: { deletedAt: new Date(), financialAssetKey: 100, isActivelyTrading: true } as FinancialAsset, financialBrokerKey: broker, identityHash, tenantKey: tenant } as PortfolioImportAssetMapping);
+    em.findOne.mockResolvedValueOnce({ deletedAt: undefined, financialAssetKey: { deletedAt: new Date(), financialAssetKey: 100, isActivelyTrading: true } as FinancialAsset, financialBrokerKey: broker, identityHash, tenantKey: tenant });
     await expect(service.findReusableAsset({ financialBroker: broker, identity, identityHash, tenant })).resolves.toBeUndefined();
 
-    em.findOne.mockResolvedValueOnce({ deletedAt: undefined, financialAssetKey: { deletedAt: undefined, financialAssetKey: 101, isActivelyTrading: false } as FinancialAsset, financialBrokerKey: broker, identityHash, tenantKey: tenant } as PortfolioImportAssetMapping);
+    em.findOne.mockResolvedValueOnce({ deletedAt: undefined, financialAssetKey: { deletedAt: undefined, financialAssetKey: 101, isActivelyTrading: false } as FinancialAsset, financialBrokerKey: broker, identityHash, tenantKey: tenant });
     await expect(service.findReusableAsset({ financialBroker: broker, identity, identityHash, tenant })).resolves.toBeUndefined();
   });
 
@@ -71,8 +71,8 @@ describe('portfolio import asset mapping reuse service', () => {
   it('creates new mapping for selected asset and is idempotent on repeated save', async () => {
     const asset = { financialAssetKey: 100, isActivelyTrading: true } as FinancialAsset;
     em.findOne.mockResolvedValueOnce(null);
-    em.findOne.mockResolvedValueOnce({ deletedAt: undefined, financialAssetKey: asset, financialBrokerKey: broker, identityHash, tenantKey: tenant } as PortfolioImportAssetMapping);
-    em.findOne.mockResolvedValue({ deletedAt: undefined, financialAssetKey: asset, financialBrokerKey: broker, identityHash, tenantKey: tenant } as PortfolioImportAssetMapping);
+    em.findOne.mockResolvedValueOnce({ deletedAt: undefined, financialAssetKey: asset, financialBrokerKey: broker, identityHash, tenantKey: tenant });
+    em.findOne.mockResolvedValue({ deletedAt: undefined, financialAssetKey: asset, financialBrokerKey: broker, identityHash, tenantKey: tenant });
 
     const first = await service.saveReusableMapping({ financialAsset: asset, financialBroker: broker, identity, identityHash, tenant });
     const second = await service.saveReusableMapping({ financialAsset: asset, financialBroker: broker, identity, identityHash, tenant });
@@ -85,7 +85,7 @@ describe('portfolio import asset mapping reuse service', () => {
   it('conflicting active mapping throws ConflictError', async () => {
     const assetA = { financialAssetKey: 100, isActivelyTrading: true } as FinancialAsset;
     const assetB = { financialAssetKey: 200, isActivelyTrading: true } as FinancialAsset;
-    em.findOne.mockResolvedValueOnce({ deletedAt: undefined, financialAssetKey: assetA, financialBrokerKey: broker, identityHash, tenantKey: tenant } as PortfolioImportAssetMapping);
+    em.findOne.mockResolvedValueOnce({ deletedAt: undefined, financialAssetKey: assetA, financialBrokerKey: broker, identityHash, tenantKey: tenant });
 
     await expect(service.saveReusableMapping({ financialAsset: assetB, financialBroker: broker, identity, identityHash, tenant })).rejects.toBeInstanceOf(ConflictError);
   });

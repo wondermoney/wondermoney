@@ -3,9 +3,9 @@ import { describe, expect, it } from 'vitest';
 import { aiCapabilities, resolveAiRoute } from '../ai-provider';
 
 const AZURE_OPENAI = {
-  AZURE_OPENAI_API_DEPLOYMENT_NAME: 'assistant-deployment',
   AZURE_OPENAI_API_KEY: 'azure-key',
   AZURE_OPENAI_API_VERSION: '2024-08-01-preview',
+  AZURE_OPENAI_DEPLOYMENT: 'assistant-deployment',
   AZURE_OPENAI_ENDPOINT: 'https://example.openai.azure.com',
   AZURE_OPENAI_OCR_DEPLOYMENT: 'ocr-deployment',
 };

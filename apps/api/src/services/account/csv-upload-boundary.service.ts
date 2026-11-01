@@ -85,10 +85,6 @@ export function assertCsvTextLimits(csvText: string, limits: Partial<CsvUploadLi
   if (headerColumns !== undefined && headerColumns > resolvedLimits.maxColumns) throw new Error(`CSV exceeds max column count of ${resolvedLimits.maxColumns}`);
 }
 
-export function assertValidCsvObjectKey(input: CsvObjectKeyValidationInput, message = 'Invalid CSV object key') {
-  if (!validateCsvObjectKey(input)) throw new BadRequestError(message);
-}
-
 export function buildCsvObjectKey({ maxLength, name, prefix, uniqueId }: CsvObjectKeyBuildInput) {
   const suffix = `-${uniqueId}.csv`;
   const availableNameLength = maxLength - prefix.length - suffix.length;
@@ -144,4 +140,8 @@ export function validateCsvObjectKey({ key, maxLength, prefix }: CsvObjectKeyVal
     && key.startsWith(prefix)
     && key.endsWith('.csv')
     && !UNSAFE_CSV_OBJECT_KEY_PATTERN.test(key);
+}
+
+function assertValidCsvObjectKey(input: CsvObjectKeyValidationInput, message = 'Invalid CSV object key') {
+  if (!validateCsvObjectKey(input)) throw new BadRequestError(message);
 }

@@ -7,7 +7,14 @@ import {
 } from "@algolia/autocomplete-core";
 import type { Hit } from "@algolia/client-search";
 import { useTranslations } from "next-intl";
-import { useEffect, useMemo, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useId,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 
 import { getTickerSearch } from "@/lib/api/financial-markets/useTickerSearch";
 
@@ -24,7 +31,7 @@ function debouncePromise(fn: (...args: unknown[]) => unknown, time: number) {
 }
 
 // Debounce the actual search request (not just the source list) so a burst of
-// keystrokes issues a single API call instead of one per character (RAD-365).
+// keystrokes issues a single API call instead of one per character.
 const debouncedSearch = debouncePromise(
   (query: unknown) => getTickerSearch(String(query)),
   200,
@@ -42,7 +49,7 @@ export type TickerAutocompleteHit = Hit<TickerAutocompleteItem>;
 // The search response has no per-listing unique ID (no ISIN/MIC) — a symbol
 // alone is not unique because the same ticker (e.g. "MSFT") can appear once
 // per exchange it's listed on. Compose symbol + exchange for a React `key`
-// that's unique per result row instead of colliding across listings (RAD-640).
+// that's unique per result row instead of colliding across listings.
 export function getTickerAutocompleteItemKey(
   item: TickerAutocompleteItem,
 ): string {
@@ -66,6 +73,15 @@ export function useTickerAutocomplete({
 }: UseTickerAutocompleteOptions) {
   const t = useTranslations();
   const inputRef = useRef<HTMLInputElement>(null);
+  // autocomplete-core's getInputProps/getFormProps take the input element
+  // while rendering, so it is mirrored into state rather than read off the ref.
+  const [inputElement, setInputElement] = useState<HTMLInputElement | null>(
+    null,
+  );
+  const attachInput = useCallback((element: HTMLInputElement | null) => {
+    inputRef.current = element;
+    setInputElement(element);
+  }, []);
   const panelRef = useRef<HTMLDivElement>(null);
   const environmentRef = useRef<HTMLElement>(null);
   // Keep the latest selection callback in a ref so the autocomplete instance
@@ -76,6 +92,11 @@ export function useTickerAutocomplete({
   }, [onTickerSelected]);
   const [autocompleteState, setAutocompleteState] =
     useState<AutocompleteState<TickerAutocompleteHit>>();
+  // Without an explicit id, autocomplete-core names its elements from a
+  // module-level counter. The server's counter keeps climbing across requests
+  // while the browser's starts at 0, so the input's id and aria attributes
+  // never matched on hydration. React's useId is the same on both sides.
+  const autocompleteId = useId();
 
   const autocomplete = useMemo(
     () =>
@@ -85,6 +106,7 @@ export function useTickerAutocomplete({
         React.MouseEvent,
         React.KeyboardEvent
       >({
+        id: autocompleteId,
         placeholder: t("explorer-search-placeholder"),
         debug: false,
         openOnFocus: true,
@@ -99,7 +121,7 @@ export function useTickerAutocomplete({
                 // `openOnFocus` triggers this with an empty query as soon as
                 // the input is focused (before the user types anything). The
                 // API rejects an empty/whitespace-only searchTerm with a 400,
-                // so skip the request entirely in that case (RAD-340).
+                // so skip the request entirely in that case.
                 const trimmedQuery = query.trim();
                 if (!trimmedQuery) {
                   return Promise.resolve([]);
@@ -110,7 +132,7 @@ export function useTickerAutocomplete({
               },
               // Selecting an option with the keyboard (ArrowDown + Enter) goes
               // through the source's onSelect. Without it, only mouse clicks
-              // selected a ticker and Enter silently did nothing (RAD-359).
+              // select a ticker and Enter silently does nothing.
               onSelect({ item, setQuery, setIsOpen }) {
                 setQuery(item.symbol);
                 setIsOpen(false);
@@ -120,7 +142,7 @@ export function useTickerAutocomplete({
           ] as AutocompleteSource<TickerAutocompleteHit>[];
         },
       }),
-    [t],
+    [autocompleteId, t],
   );
 
   const onItemClick = (ticker: string) => {
@@ -169,7 +191,8 @@ export function useTickerAutocomplete({
   return {
     autocomplete,
     autocompleteState,
-    inputRef,
+    inputElement,
+    attachInput,
     panelRef,
     environmentRef,
     onItemClick,

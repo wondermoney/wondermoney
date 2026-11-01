@@ -3,7 +3,6 @@ import { describe, expect, it, vi } from 'vitest';
 import { AnalyticsOutbox } from '@entity/AnalyticsOutbox';
 import { recordAnalyticsOutboxEvent } from '@service/analytics/analytics-outbox.service';
 
-type OutboxEm = Parameters<typeof recordAnalyticsOutboxEvent>[0];
 
 const EXTERNAL_USER_ID = '1f8fab82-1cc1-427b-9f51-5b9fe416bd88';
 
@@ -17,8 +16,8 @@ describe('analytics outbox producer', () => {
       properties: { $insert_id: 'untrusted', appuser_key: '42' },
     };
 
-    await recordAnalyticsOutboxEvent({ upsert } as unknown as OutboxEm, input);
-    await recordAnalyticsOutboxEvent({ upsert } as unknown as OutboxEm, input);
+    await recordAnalyticsOutboxEvent({ upsert }, input);
+    await recordAnalyticsOutboxEvent({ upsert }, input);
 
     expect(upsert).toHaveBeenCalledTimes(2);
     for (const [entity, data, options] of upsert.mock.calls) {
@@ -42,7 +41,7 @@ describe('analytics outbox producer', () => {
   ])('rejects a non-canonical external identity: %s', async (distinctId) => {
     const upsert = vi.fn();
 
-    await expect(recordAnalyticsOutboxEvent({ upsert } as unknown as OutboxEm, {
+    await expect(recordAnalyticsOutboxEvent({ upsert }, {
       distinctId,
       eventId: 'login.v1:session-1',
       eventName: 'login',
@@ -60,7 +59,7 @@ describe('analytics outbox producer', () => {
   ])('rejects sensitive analytics properties', async (properties) => {
     const upsert = vi.fn();
 
-    await expect(recordAnalyticsOutboxEvent({ upsert } as unknown as OutboxEm, {
+    await expect(recordAnalyticsOutboxEvent({ upsert }, {
       distinctId: EXTERNAL_USER_ID,
       eventId: 'login.v1:session-1',
       eventName: 'login',

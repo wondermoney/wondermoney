@@ -17,6 +17,7 @@ import { triggerRecurringDetectionAfterTransactionIngestion } from '@service/rec
 import { accumulateChain, loadChainRows, SETTLED_TRANSACTION_STATUSES } from '@service/transaction/balance-chain.service';
 import { findAssignableCategory } from '@service/transaction/household-category';
 import { TransactionAuditService } from '@service/transaction/transaction-audit.service';
+import { signTransactionAmount } from '@service/transaction/transaction-direction';
 import { transactionMerchantService } from '@service/transaction/transaction-merchant.service';
 import { applyUserCategorization } from '@service/transaction/user-categorization.service';
 import { InternalServerError, NotFoundError } from '@utils/errors';
@@ -80,7 +81,7 @@ class TransactionCreationService {
       // Phase 4: Handle merchant
       await this.setMerchant(prepared.transaction, data, prepared.appUserTenant);
 
-      // Phase 5: Resolve the category if provided. RAD-546: only *resolve* it here — writing the
+      // Phase 5: Resolve the category if provided. Only *resolve* it here — writing the
       // AppuserTransactionCategory link cascade-persists the still-unbalanced transaction, so the
       // link has to wait until phase 9, after the balance chain has been computed and stored.
       // Resolving up-front keeps the "unknown category never creates a transaction" behaviour.
@@ -100,12 +101,15 @@ class TransactionCreationService {
         await applyUserCategorization(DI.em, { actor: prepared.appuser, category, transactions: [prepared.transaction] });
       }
 
-      // RAD-346: record the creation in the audit trail (best-effort; never blocks the create).
+      // Record the creation in the audit trail (best-effort; never blocks the create). The type is
+      // the user's choice, including a generic CSV row's, which carries a file id like a synced row:
+      // transfer matching reads this entry as a user-set type and never re-types the row.
       await TransactionAuditService.log(DI.em, {
         accountKey: data.accountId,
         actorAppuserKey: data.appuserKey,
         actorType: TransactionAuditActorType.USER,
         appuserKey: data.appuserKey,
+        changes: { transactionTypeKey: { from: null, to: prepared.transactionType.name } },
         eventType: TransactionAuditEventType.CREATED,
         source: 'manual-transaction',
         tenantKey: getTenantKeyValue(prepared.transaction.tenantKey),
@@ -188,20 +192,15 @@ class TransactionCreationService {
   }
 
   /**
-   * Phase 3: Set currencies and calculate amounts with proper sign
+   * Phase 3: Set currencies and calculate amounts, signed by the transaction type's direction
    */
   private async setCurrencyAndAmounts(
     transaction: Transaction,
     data: TransactionData,
     prepared: PreparedTransaction,
   ): Promise<void> {
-    const transactionType = prepared.transactionType;
+    const transactionTypeName = prepared.transactionType.name;
     const appuser = prepared.appuser;
-
-    // Determine sign based on transaction type
-    const isOutgoingTransaction = ['atm', 'card_payment', 'fee', 'fees', 'loan', 'payment', 'transfer_out'].includes(
-      transactionType.name.toLowerCase(),
-    );
 
     // Handle original amount and currency
     if (data.originalAmount && data.originalCurrencyId) {
@@ -210,7 +209,7 @@ class TransactionCreationService {
         throw new InternalServerError(`Currency not found: ${data.originalCurrencyId}`);
       }
 
-      transaction.originalAmount = isOutgoingTransaction ? -data.originalAmount : data.originalAmount;
+      transaction.originalAmount = signTransactionAmount(data.originalAmount, transactionTypeName);
       transaction.originalCurrencyKey = originalCurrency;
     }
 
@@ -222,7 +221,8 @@ class TransactionCreationService {
       throw new InternalServerError(`Currency not found: ${data.settlementCurrencyId}`);
     }
 
-    transaction.settlementAmount = isOutgoingTransaction ? -data.settlementAmount : data.settlementAmount;
+    // The type sets the direction; a caller-signed amount must not be negated a second time.
+    transaction.settlementAmount = signTransactionAmount(data.settlementAmount, transactionTypeName);
     transaction.settlementCurrencyKey = transactionCurrency;
 
     // Calculate appuser currency amount
@@ -296,7 +296,7 @@ class TransactionCreationService {
    * The chain is a single total order — `(transactionDate, transactionKey)`, the same order the
    * transactions list endpoint renders — over which `balance` accumulates from the account's
    * opening balance. A new transaction therefore takes the balance of whatever precedes it, adds
-   * its own amount, and every later transaction is re-accumulated from there (RAD-546). Insertion
+   * its own amount, and every later transaction is re-accumulated from there. Insertion
    * order is irrelevant: only the position in that total order matters.
    */
   private async calculateAndSetBalance(transaction: Transaction, account: Account): Promise<void> {
@@ -326,16 +326,16 @@ class TransactionCreationService {
       Transaction,
       {
         accountKey: account,
-        // RAD-564: same membership as the rest of the chain — settled rows only, so a PENDING row
+        // Same membership as the rest of the chain — settled rows only, so a PENDING row
         // with no stored balance can never be picked as a predecessor and read as zero.
         transactionDate: { $lte: transaction.transactionDate },
         transactionStatusKey: { name: { $in: [...SETTLED_TRANSACTION_STATUSES] } },
       },
       {
-        // RAD-25: the chain is physical, so hidden rows count here too.
+        // The chain is physical, so hidden rows count here too.
         filters: { [HIDDEN_FILTER]: false },
-        // RAD-546: `transactionKey` breaks date ties deterministically and in the same direction as
-        // the transactions list. Ordering by date alone let Postgres pick any same-date row.
+        // `transactionKey` breaks date ties deterministically and in the same direction as the
+        // transactions list. Ordering by date alone would let Postgres pick any same-date row.
         orderBy: { transactionDate: QueryOrder.DESC, transactionKey: QueryOrder.DESC },
       },
     );
@@ -374,7 +374,7 @@ class TransactionCreationService {
     logger.debug('Handling empty account scenario');
 
     // First transaction on the account: the manually entered balance is the opening balance and the
-    // transaction is applied on top of it, whether it is back-dated or not (RAD-529, RAD-546).
+    // transaction is applied on top of it, whether it is back-dated or not.
     return {
       appuserCurrencyBalance: account.appuserCurrencyBalance ?? 0,
       balance: account.balance ?? 0,
@@ -385,8 +385,8 @@ class TransactionCreationService {
    * Recalculate balances for all transactions after the new transaction
    */
   private async recalculateFutureBalances(transaction: Transaction, account: Account): Promise<void> {
-    // RAD-564: membership, order and the accumulation arithmetic all come from the shared chain
-    // service now, so this path and bank sync cannot drift apart again. Manual accounts hold only
+    // Membership, order and the accumulation arithmetic all come from the shared chain service,
+    // so this path and bank sync cannot drift apart. Manual accounts hold only
     // BOOKED rows, so restricting the chain to settled rows changes nothing here.
     const futureTransactions = await loadChainRows(DI.em, account, {
       transactionDate: { $gt: transaction.transactionDate },

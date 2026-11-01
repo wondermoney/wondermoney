@@ -34,6 +34,13 @@ describe('transactions endpoint contracts', () => {
     expect(result.transactions[1]?.transactionKey).toBe(-42)
   })
 
+  it('keeps the list parsing when the API adds fields or recurring values this build does not know', () => {
+    const recurringSeries = { recurringSeriesKey: 4, displayName: 'Gym', type: 'membership', amountType: 'tiered', status: 'snoozed', cadence: 'monthly' }
+    const [row] = aggregateTransactionsResponseSchema.parse({ transactions: [{ ...transactionFixture, recurringSeries, sentiment: 'positive' }] }).transactions
+    expect(row!.recurringSeries).toEqual({ recurringSeriesKey: 4, displayName: 'Gym', type: 'unknown', amountType: 'unknown', status: 'unknown' })
+    expect(row).not.toHaveProperty('sentiment')
+  })
+
   it('accepts explicit null financial and account context on aggregate rows', () => {
     const result = aggregateTransactionsResponseSchema.parse({ transactions: [
       nullishTransactionFixture,

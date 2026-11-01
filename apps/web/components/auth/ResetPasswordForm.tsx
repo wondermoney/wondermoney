@@ -3,13 +3,14 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
 
 import { useRouter } from "@/i18n/navigation";
 import { authClient } from "@/lib/auth/client";
+import { INVALID_RESET_LINK_REDIRECT } from "@/lib/auth/reset-link";
 
 import { Button } from "../ui/button";
 import {
@@ -44,21 +45,22 @@ export default function ResetPasswordForm() {
     resolver: zodResolver(formSchema),
     defaultValues: { password: "", confirmPassword: "" },
   });
-  const [resetToken, setResetToken] = useState<string | null>(null);
+  // better-auth's reset-password email link redirects here with either
+  // `?token=<valid>` or `?error=INVALID_TOKEN` (see
+  // requestPasswordResetCallback in better-auth's password routes).
+  const linkError = searchParams.get("error");
+  const token = searchParams.get("token");
+  const resetToken = linkError || !token ? null : token;
 
+  // The reason travels in the URL and the forgot-password page shows it
+  // inline. A toast fired here never appeared: on a fresh load from the email
+  // link this effect runs before the app's Toaster has subscribed, so sonner
+  // dropped it, and the redirect then took the page away. `replace` so Back
+  // does not return to a link that will only bounce again.
   useEffect(() => {
-    // better-auth's reset-password email link redirects here with either
-    // `?token=<valid>` or `?error=INVALID_TOKEN` (see
-    // requestPasswordResetCallback in better-auth's password routes).
-    const linkError = searchParams.get("error");
-    const token = searchParams.get("token");
-    if (linkError || !token) {
-      toast.error(t("toast-reset-pw-error"));
-      router.push("/auth/forgot");
-      return;
-    }
-    setResetToken(token);
-  }, [router, searchParams, t]);
+    if (resetToken) return;
+    router.replace(INVALID_RESET_LINK_REDIRECT);
+  }, [resetToken, router]);
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     form.clearErrors();
@@ -83,7 +85,7 @@ export default function ResetPasswordForm() {
   return (
     <div className="mt-10">
       <Form {...form}>
-        <form className="space-y-6" onSubmit={form.handleSubmit(onSubmit)}>
+        <form method="post" className="space-y-6" onSubmit={form.handleSubmit(onSubmit)}>
           <FormField
             control={form.control}
             name="password"

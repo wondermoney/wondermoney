@@ -3,6 +3,7 @@ import type { Request, Response } from 'express';
 
 import { Account } from '@entity/Account';
 import { Transaction } from '@entity/Transaction';
+import { excludeExpired } from '@service/transaction/transaction-status';
 import { InternalServerError, NotFoundError } from '@utils/errors';
 import { getRecentTransactionsRequestSchema } from '@validators/account';
 import { zParse } from '@validators/parser';
@@ -10,7 +11,7 @@ import { zParse } from '@validators/parser';
 import { DI } from '../../app.js';
 
 /**
- * RAD-217 — least-privilege recent-transactions summary for the mobile account
+ * Least-privilege recent-transactions summary for the mobile account
  * detail. Returns at most the five newest entries for one authorized account with an
  * explicit five-field shape and NO ids, dirty descriptions, review state, logos, or
  * editable metadata. The legacy transaction endpoint remains for the web editor and
@@ -65,11 +66,12 @@ export async function getRecentTransactions(req: Request, res: Response) {
 
   const transactions = await DI.em.find(
     Transaction,
-    {
+    // A retracted (EXPIRED) row never moved money, so it is not recent activity.
+    excludeExpired({
       accountKey: account,
       appuserKey: req.user,
       deletedAt: undefined,
-    },
+    }),
     {
       limit: RECENT_TRANSACTIONS_LIMIT,
       orderBy: { transactionDate: QueryOrder.DESC_NULLS_LAST, transactionKey: QueryOrder.DESC },

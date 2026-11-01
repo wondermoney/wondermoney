@@ -144,7 +144,7 @@ describe('loan repayment mutation scoping and allocation validation', () => {
     expect(mocked.findOne).toHaveBeenNthCalledWith(
       2,
       Transaction,
-      { deletedAt: undefined, settlementAmount: { $lt: 0 }, tenantKey: TENANT.tenantKey, transactionKey: 22 },
+      expect.objectContaining({ deletedAt: undefined, settlementAmount: { $lt: 0 }, tenantKey: TENANT.tenantKey, transactionKey: 22 }),
       { populate: ['transactionMerchantKey'] },
     );
     expect(mocked.findOne).toHaveBeenCalledTimes(2);

@@ -4,27 +4,20 @@ import { DI } from '@app/database/di';
 import { HIDDEN_FILTER } from '@app/database/filters/tenant-filter';
 import { CategorizationConfidence, Transaction } from '@entity/Transaction';
 
+import { excludeExpired } from './transaction-status';
+
 /**
  * The result count for `GET /v1/account/transaction`.
  *
- * The endpoint used to return `{ transactions }` and nothing else: no total, no
- * pagination metadata. Everything the table knew, it knew because every row was
- * already in the browser, which is why the footer could honestly say
- * "12 of 22 results" for the loaded set but not "12 of 8,623".
+ * The table pages rows, so the total has to come from the server: the browser
+ * only knows the loaded set ("12 of 22"), not the real one ("12 of 8,623").
  *
- * ## What happened to the facet counts (RAD-561 → RAD-576/RAD-578)
+ * ## No facet counts
  *
- * RAD-561 also returned per-value counts for `confidence`, `reviewed` and
- * `hidden`, so a filter chip could say how many rows it matched before you
- * clicked it. Eight extra `em.count` calls per request. Nothing ever consumed
- * them: `GetTransactionsResponse` typed the field and that was the end of it.
- *
- * They are gone rather than optimised. RAD-578 was originally going to collapse
- * the nine queries into a grouped one — its own premise was that
- * `QueryBuilder.applyFilters()` makes that safe, which is true — but a cheaper
- * way to run a query is worth nothing when the answer is discarded. If filter
- * chips ever do want counts, bring them back deliberately, as one grouped query
- * through `applyFilters`, and read them on the same day.
+ * There are no per-value counts for `confidence`, `reviewed` or `hidden`: they
+ * would cost extra `em.count` calls per request and nothing consumes them. If
+ * filter chips ever do want counts, add them as one grouped query through
+ * `QueryBuilder.applyFilters()`, together with the code that reads them.
  *
  * ## Why counted per request and not cached
  *
@@ -37,15 +30,15 @@ import { CategorizationConfidence, Transaction } from '@entity/Transaction';
 
 /** Filters the endpoint accepts, already parsed. */
 export interface TransactionFilterInput {
-  /** RAD-579 — account keys the table is scoped to. Empty/absent means every account. */
+  /** Account keys the table is scoped to. Empty/absent means every account. */
   accountKeys?: number[];
-  /** RAD-579 — category keys, plus whether uncategorized transactions are wanted too. */
+  /** Category keys, plus whether uncategorized transactions are wanted too. */
   categoryKeys?: { includeUncategorized: boolean; keys: number[] };
   confidence?: CategorizationConfidence;
   fromDate?: Date;
   includeHidden?: boolean;
   toDate?: Date;
-  /** RAD-579 — `TransactionType.name` values, e.g. `credit` / `debit`. */
+  /** `TransactionType.name` values, e.g. `credit` / `debit`. */
   transactionTypes?: string[];
   unreviewedOnly?: boolean;
 }
@@ -53,7 +46,9 @@ export interface TransactionFilterInput {
 export function buildTransactionWhere(filters: TransactionFilterInput): FilterQuery<Transaction> {
   const { accountKeys, categoryKeys, confidence, fromDate, toDate, transactionTypes, unreviewedOnly } = filters;
 
-  return {
+  // The table carries no status, so an EXPIRED row would read as money that moved and land
+  // in the review inbox: it is neither listed nor counted. Pending and status-less rows stay.
+  return excludeExpired({
     accountKey: {
       deletedAt: undefined,
       ...(accountKeys && accountKeys.length > 0 ? { accountKey: { $in: accountKeys } } : {}),
@@ -73,7 +68,7 @@ export function buildTransactionWhere(filters: TransactionFilterInput): FilterQu
           },
         }
       : {}),
-  } as FilterQuery<Transaction>;
+  });
 }
 
 /**

@@ -20,6 +20,7 @@ export interface HoldingPositionSummary {
   portfolioWeight: number | null;
   isInvalid?: boolean;
   invalidReason?: string | null;
+  feeConversionIncomplete: boolean;
 }
 
 export interface HoldingActivitySummary {
@@ -78,6 +79,7 @@ export function buildHoldingPositionSummary(
     portfolioWeight: holding.allocation,
     isInvalid: holding.isInvalid,
     invalidReason: holding.invalidReason,
+    feeConversionIncomplete: holding.feeConversionIncomplete === true,
   };
 }
 

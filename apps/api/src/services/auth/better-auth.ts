@@ -12,6 +12,8 @@ import { Pool } from 'pg';
 
 import { ConfigurationError, loadAuthConfiguration } from '@config/configuration';
 import { IS_PROD, IS_PRODUCTION_LIKE } from '@config/env';
+import { instanceName } from '@config/instance-name';
+import { BETTER_AUTH_IP_ADDRESS_OPTIONS } from '@middleware/client-ip';
 import { configuredAppleOptions } from '@service/auth/apple-options';
 import { resolveAuthCookiePrefix } from '@service/auth/cookie-prefix';
 import { isSignupAllowed, type SignupPolicyDeps } from '@service/auth/signup-policy';
@@ -41,7 +43,7 @@ if (IS_PRODUCTION_LIKE && !authConfig.betterAuthSecret) {
  * stays confined to `public`, so the two migration tools never collide. This
  * mirrors the existing pg-boss pattern (its own `pgboss` schema on the same DB).
  */
-export const BETTER_AUTH_SCHEMA = 'better_auth';
+const BETTER_AUTH_SCHEMA = 'better_auth';
 
 /**
  * Build a dedicated pg Pool for better-auth from the same `DB_*` env the app and
@@ -67,7 +69,7 @@ const buildBetterAuthPool = (env: NodeJS.ProcessEnv = process.env): Pool => {
   return new Pool({ connectionString, options: `-c search_path=${BETTER_AUTH_SCHEMA}` });
 };
 
-export const betterAuthPool = buildBetterAuthPool();
+const betterAuthPool = buildBetterAuthPool();
 
 /** Drain better-auth's dedicated pg pool on graceful shutdown (see server.ts). */
 export const closeBetterAuthPool = async (): Promise<void> => {
@@ -77,7 +79,7 @@ export const closeBetterAuthPool = async (): Promise<void> => {
 const googleClientId = authConfig.googleClientId;
 const googleClientSecret = authConfig.googleClientSecret;
 
-// Apple Sign-in (mobile cutover). better-auth 1.7.7 (the version this lockfile
+// Apple Sign-in (mobile cutover). better-auth 1.7.12 (the version this lockfile
 // resolves) ships a built-in `apple` social provider in
 // `@better-auth/core/dist/social-providers/apple.mjs`, re-exported from
 // `better-auth/social-providers`; the provider id is literally "apple". It accepts
@@ -150,8 +152,11 @@ const auth = betterAuth({
     // SameSite=Lax is sufficient because app/api are same-site subdomains; `secure`
     // is derived from the https baseURL in staging/prod.
     defaultCookieAttributes: { sameSite: 'lax' },
+    // The client address Express resolved from TRUST_PROXY, stamped by `configureClientIp`
+    //. Without it the sign-in limiter falls back to one bucket shared by everyone.
+    ipAddress: BETTER_AUTH_IP_ADDRESS_OPTIONS,
   },
-  appName: 'WonderMoney',
+  appName: instanceName(),
   basePath: '/api/auth',
   // Defaults to the API's own address (API_URL): better-auth lives inside the API.
   baseURL: authConfig.betterAuthUrl ?? BACKEND_URL,
@@ -190,7 +195,8 @@ const auth = betterAuth({
   // twoFactorOAuthGuard extends 2FA enforcement to Google/OAuth sign-in (better-auth
   // only gates credential sign-ins by default — see that module + the 2FA docs).
   plugins: [
-    twoFactor({ issuer: 'WonderMoney', twoFactorCookieMaxAge: TWO_FACTOR_COOKIE_MAX_AGE_SECONDS }),
+    // The label authenticator apps show next to the code.
+    twoFactor({ issuer: instanceName(), twoFactorCookieMaxAge: TWO_FACTOR_COOKIE_MAX_AGE_SECONDS }),
     twoFactorOAuthGuard(),
     jwt(),
     bearer(),

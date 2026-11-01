@@ -2,10 +2,7 @@
  * Shared better-auth session helpers for the Cypress specs.
  *
  * better-auth runs inside the `api` service and its native endpoints live at
- * `<api>/api/auth/*`. The specs used to authenticate against Supabase (admin
- * API for the portfolio lane, `/auth/v1/token` for the others) and store a
- * Supabase session in the browser. Both are gone: a better-auth email/password
- * user is created/signed in through `/api/auth/sign-up/email` and
+ * `<api>/api/auth/*`. A better-auth email/password user is created/signed in through `/api/auth/sign-up/email` and
  * `/api/auth/sign-in/email`, and the opaque session token is read back as a
  * bearer credential.
  *
@@ -32,7 +29,7 @@ type BetterAuthResponseBody = {
 
 /** API origin; overridable with `E2E_API_BASE_URL` (defaults to local dev). */
 export function apiBaseUrl(): string {
-  const configured = Cypress.env("E2E_API_BASE_URL");
+  const configured = Cypress.expose("E2E_API_BASE_URL");
   return typeof configured === "string" && configured.length > 0
     ? configured
     : "http://localhost:3001";
@@ -40,6 +37,11 @@ export function apiBaseUrl(): string {
 
 function betterAuthApiUrl(): string {
   return `${apiBaseUrl()}/api/auth`;
+}
+
+/** The browser origin allowed by the local API's CSRF guard. */
+export function e2eWebOrigin(): string {
+  return new URL(Cypress.config("baseUrl") ?? "http://localhost:3000").origin;
 }
 
 function readToken(
@@ -84,6 +86,7 @@ export function createOrSignInBetterAuthUser(
     .request<BetterAuthResponseBody>({
       body: { email, name, password },
       failOnStatusCode: false,
+      headers: { Origin: e2eWebOrigin() },
       log: false,
       method: "POST",
       url: `${betterAuthApiUrl()}/sign-up/email`,
@@ -99,6 +102,7 @@ export function createOrSignInBetterAuthUser(
         .request<BetterAuthResponseBody>({
           body: { email, password },
           failOnStatusCode: false,
+          headers: { Origin: e2eWebOrigin() },
           log: false,
           method: "POST",
           url: `${betterAuthApiUrl()}/sign-in/email`,

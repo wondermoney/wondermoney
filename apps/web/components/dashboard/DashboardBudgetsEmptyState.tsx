@@ -37,11 +37,11 @@ const diagonalPatternStyle = {
     "repeating-linear-gradient(135deg, transparent 0, transparent 10px, color-mix(in oklch, var(--border) 78%, transparent) 10px, color-mix(in oklch, var(--border) 78%, transparent) 11px)",
 };
 
-export function DashboardBudgetsEmptyState() {
+function DashboardBudgetsEmptyState() {
   const locale = useLocale();
   const t = useTranslations();
   const formatCurrency = useFormatCurrency();
-  // RAD-572 — lives inside the component because it needs the active locale,
+  // Lives inside the component because it needs the active locale,
   // which only a hook can reach.
   const formatPreviewCurrency = (value: number) =>
     formatCurrency(value, "EUR", {
@@ -139,9 +139,9 @@ export function DashboardBudgetsEmptyState() {
 
         <div className="border-border/70 bg-muted/20 h-full space-y-4 rounded-lg border p-4">
           <div className="space-y-2">
-            {/* RAD-566 — this renders inside the budgets section, under its
-                SectionHeader h2, so the level is h3. `variant="h6"` mapped
-                straight to an <h6> tag and skipped three levels; the size is
+            {/* This renders inside the budgets section, under its
+                SectionHeader h2, so the level is h3. Not `variant="h6"`: that
+                maps straight to an <h6> tag and skips three levels; the size is
                 kept as utility classes, which is how the sibling dashboard
                 cards write their headings. */}
             <h3 className="text-foreground scroll-m-20 text-base font-semibold tracking-tight">

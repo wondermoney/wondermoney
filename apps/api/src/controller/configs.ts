@@ -92,7 +92,7 @@ function getStaticConfigs(): Promise<StaticConfigs> {
     DI.em.find(Currency, { isActive: true }, { disableIdentityMap: true, fields: ['currencyKey', 'code', 'description'], orderBy: { code: QueryOrder.ASC } }),
     DI.em.find(
       AccountFinancialInstitution,
-      {},
+      { deletedAt: undefined },
       { disableIdentityMap: true, fields: ['accountFinancialInstitutionKey', 'displayName', 'logoUrl', 'name'], orderBy: { name: QueryOrder.ASC } },
     ),
     DI.em.find(FinancialBroker, {}, { disableIdentityMap: true, fields: ['financialBrokerKey', 'name', 'displayName'] }),

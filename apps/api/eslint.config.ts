@@ -12,7 +12,6 @@ import tseslint from 'typescript-eslint';
  *
  * Keep this list short and justified. "I need to assert on the text of a source/migration/config
  * file" is never a reason to be added here — that is the exact pattern the rule exists to stop.
- * The two grandfathered schema-lock entries below should shrink, not grow.
  */
 const FS_IN_TESTS_ALLOWLIST = [
   // Reads .env.sample to assert it documents every variable the schema requires. Validation
@@ -21,19 +20,6 @@ const FS_IN_TESTS_ALLOWLIST = [
   'src/config/__tests__/env.test.ts',
   // Real PDF fixtures for the IGCP certificado-aforro rate-table parser.
   'src/jobs/__tests__/certificado-aforro-rate-table.test.ts',
-  // Writes to a temp dir to exercise a script whose job is producing a CSV file on disk
-  // (including the PII-redaction assertion on the emitted file).
-  'src/database/scripts/__tests__/export-growth-recovery-segments.test.ts',
-  // Binary fixture for the attribution-envelope wire format.
-  'src/services/__tests__/attribution-envelope.service.test.ts',
-  // Grandfathered: reads app.ts to assert the authed-mount middleware chain
-  // (requireAuth → getUser → resolveTenantForRequest → assertTenantResolved → blockDemoMutation).
-  // The invariant is load-bearing; the mechanism is not. Replace with a mounted-app test.
-  'src/routes/v1/__tests__/demo-guard-route-coverage.test.ts',
-  // Grandfathered: reads the MikroORM snapshot as a schema lock over growth/trial tables.
-  'src/services/__tests__/growth-data-model.test.ts',
-  'src/services/__tests__/trial-lifecycle.service.test.ts',
-  // The migration script reads/writes from a tempdir to test the file-import dry-run path.
 ];
 
 export default defineConfig(

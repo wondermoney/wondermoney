@@ -270,6 +270,19 @@ describe('GoalDetailScreen', () => {
     expect(view.queryByRole('button', { name: /save|link|unlink|assign|move|archive/i })).not.toBeOnTheScreen()
   })
 
+  it('warns, in words and to screen readers, on a funding whose transaction the bank dropped', async () => {
+    const activities = mapGoalActivities([
+      { goalActivityKey: 7, type: 'spent_from_goal', amount: 20, occurredAt: '2026-07-19T10:00:00.000Z', currencyCode: 'EUR', transactionExpired: true },
+      { goalActivityKey: 8, type: 'spent_from_goal', amount: 30, occurredAt: '2026-07-18T10:00:00.000Z', currencyCode: 'EUR' },
+    ], 'EUR')
+    const { view } = await renderScreen({ status: 'loaded', data: { ...data, activities }, activityStatus: 'loaded', hasMore: false })
+    const warning = 'Transaction expired — dropped by the bank. This goal still covers it.'
+    expect(view.getAllByText(warning)).toHaveLength(1)
+    const [expired, standing] = view.getAllByTestId('goal-activity-row')
+    expect(expired.props.accessibilityLabel).toContain(warning)
+    expect(standing.props.accessibilityLabel).not.toContain(warning)
+  })
+
   it('keeps paused goals editable', async () => {
     const pausedGoal = mapGoalDetail({ goal: { ...goal, status: 'paused' }, summary: { ...summary, status: 'paused' } })
     const { view } = await renderScreen({ status: 'loaded', data: { ...data, goal: pausedGoal }, activityStatus: 'loaded', hasMore: false })

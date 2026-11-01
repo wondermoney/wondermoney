@@ -95,10 +95,10 @@ test("getCategoryDisplayName passes a user-defined category name through unchang
   assert.equal(getCategoryDisplayName(t, "My side hustle"), "My side hustle");
 });
 
-// RAD-665: the category picker's cmdk search only ever indexed the raw
-// untranslated `category.name` enum (e.g. "STREAMING_SERVICES"), so a user
-// searching the label they can actually see, or a common real-world synonym
-// for it, found nothing. `getCategorySearchKeywords` is the exact list wired
+// The category picker's cmdk search must index more than the raw untranslated
+// `category.name` enum (e.g. "STREAMING_SERVICES"), or a user searching the
+// label they can actually see, or a common real-world synonym for it, finds
+// nothing. `getCategorySearchKeywords` is the exact list wired
 // into `CommandItem`'s `keywords` prop in CategorySelect.tsx.
 
 test("getCategorySearchKeywords includes the translated label alongside the raw name", () => {

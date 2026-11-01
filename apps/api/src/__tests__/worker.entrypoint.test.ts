@@ -13,8 +13,16 @@ const errorMock = vi.fn();
 const setupGracefulShutdownMock = vi.fn();
 const sentryCaptureExceptionMock = vi.fn();
 const sentryCloseMock = vi.fn().mockResolvedValue(undefined);
+const isRunningMock = vi.fn(() => true);
+const dbExecuteMock = vi.fn().mockResolvedValue([]);
+const { loadOrder } = vi.hoisted(() => ({ loadOrder: [] as string[] }));
 
-vi.mock('@service/sentry', () => ({}));
+// Sentry's instrumentation is initialised when `@service/sentry` loads, so the factory
+// running is the observable outcome of "error reporting is on in the worker process".
+vi.mock('@service/sentry', () => {
+  loadOrder.push('sentry');
+  return {};
+});
 
 vi.mock('@sentry/node', () => ({
   captureException: sentryCaptureExceptionMock,
@@ -28,10 +36,14 @@ vi.mock('@utils/logger', () => ({
 vi.mock('@app/database/di', () => ({
   closeDatabase: closeMock,
   connectDatabase: connectMock,
+  DI: { orm: { em: { getConnection: () => ({ execute: dbExecuteMock }) } } },
 }));
 
 vi.mock('@app/jobs/worker', () => ({
-  createWorker: vi.fn(() => ({ start: startMock, stop: stopMock })),
+  createWorker: vi.fn(() => {
+    loadOrder.push('createWorker');
+    return { isRunning: isRunningMock, start: startMock, stop: stopMock };
+  }),
   // Consumed by src/worker.ts's graceful-shutdown wiring; must be re-exported by the mock.
   WORKER_SHUTDOWN_TIMEOUT_MS: 12_000,
 }));
@@ -112,5 +124,31 @@ describe('worker entrypoint shutdown', () => {
     // what guarantees the connection pool is released even when draining the worker throws.
     await afterClose();
     expect(closeMock).toHaveBeenCalled();
+  });
+
+  it('initialises error reporting before the worker is created', async () => {
+    vi.resetModules();
+    vi.spyOn(process, 'exit').mockImplementation((() => undefined) as unknown as typeof process.exit);
+
+    await import('@app/worker');
+
+    // The mocked module is evaluated once per file, so the first entry is the first load.
+    expect(loadOrder[0]).toBe('sentry');
+    expect(loadOrder).toContain('createWorker');
+  });
+
+  it('reports unhealthy on /health until the worker has registered its queues', async () => {
+    vi.resetModules();
+    vi.spyOn(process, 'exit').mockImplementation((() => undefined) as unknown as typeof process.exit);
+    await import('@app/worker');
+    await new Promise((resolve) => setImmediate(resolve));
+
+    const [{ status }] = startWorkerHealthServerMock.mock.calls[0] as [{ status: () => Promise<{ ok: boolean; pgBoss: boolean }> }];
+
+    isRunningMock.mockReturnValue(false);
+    await expect(status()).resolves.toMatchObject({ ok: false, pgBoss: false });
+
+    isRunningMock.mockReturnValue(true);
+    await expect(status()).resolves.toMatchObject({ ok: true, pgBoss: true });
   });
 });

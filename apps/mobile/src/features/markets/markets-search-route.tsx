@@ -20,7 +20,7 @@ function resolveViewState(query: string, search: ReturnType<typeof useTickerSear
 }
 
 /**
- * RAD-238 (slice 1) — the raw query text is owned here (not inside
+ * The raw query text is owned here (not inside
  * useTickerSearch) so the search input can stay fully controlled while the
  * hook debounces internally. Mirrors ConnectBankRoute's back-navigation
  * fallback: prefer router.back(), fall back to the More hub.

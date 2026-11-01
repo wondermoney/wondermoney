@@ -11,6 +11,8 @@ vi.mock('../portfolio-snapshot.service', () => ({
   default: portfolioSnapshotService,
 }));
 
+import { kyselyDouble } from '@app/__tests__/__helpers__/kysely-double';
+
 import service from '../portfolio-import-maintenance.service';
 
 type ExpireDeps = NonNullable<Parameters<typeof service.expireStaleSessions>[0]>;
@@ -25,13 +27,11 @@ describe('portfolio import maintenance service', () => {
   });
 
   it('triggers historical backfill with earliest buy date for each portfolio asset', async () => {
-    const raw = vi.fn().mockResolvedValue({
-      rows: [
+    const rows = [
         { earliest_buy_date: new Date('2019-11-21T09:05:00.000Z'), financial_asset_key: 7, symbol: 'IWDA.AS' },
         { earliest_buy_date: '2024-01-01T00:00:00.000Z', financial_asset_key: 2, symbol: 'AAPL' },
-      ],
-    });
-    const em = { getKnex: () => ({ raw }) };
+      ];
+    const em = { getKysely: () => kyselyDouble(() => rows).db };
 
     await service.triggerPostImportMaintenance({ earliestTransactionDate: new Date('2026-01-02T00:00:00.000Z'), portfolioId: 34 }, { em: em as unknown as MaintenanceEm, enqueue });
 
@@ -46,18 +46,16 @@ describe('portfolio import maintenance service', () => {
   });
 
   it('propagates historical backfill enqueue failures so imports can record maintenance errors', async () => {
-    const raw = vi.fn().mockResolvedValue({
-      rows: [{ earliest_buy_date: new Date('2019-11-21T09:05:00.000Z'), financial_asset_key: 7, symbol: 'IWDA.AS' }],
-    });
-    const em = { getKnex: () => ({ raw }) };
+    const rows = [{ earliest_buy_date: new Date('2019-11-21T09:05:00.000Z'), financial_asset_key: 7, symbol: 'IWDA.AS' }];
+    const em = { getKysely: () => kyselyDouble(() => rows).db };
     historicalBackfillClient.trigger.mockRejectedValueOnce(new Error('pgboss unavailable'));
 
     await expect(service.triggerPostImportMaintenance({ portfolioId: 34 }, { em: em as unknown as MaintenanceEm, enqueue })).rejects.toThrow('pgboss unavailable');
   });
 
   it('rebuilds snapshots directly when imported rows do not add buy assets', async () => {
-    const raw = vi.fn().mockResolvedValue({ rows: [] });
-    const em = { getKnex: () => ({ raw }) };
+    const rows: unknown[] = [];
+    const em = { getKysely: () => kyselyDouble(() => rows).db };
     const earliestTransactionDate = new Date('2026-01-02T00:00:00.000Z');
 
     await service.triggerPostImportMaintenance({ earliestTransactionDate, portfolioId: 35 }, { em: em as unknown as MaintenanceEm, enqueue });

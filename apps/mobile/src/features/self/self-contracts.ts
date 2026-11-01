@@ -12,7 +12,6 @@ export const profileSchema = z.object({
 export const profileResponseSchema = z.object({ profile: profileSchema })
 
 export type ProfileDto = z.infer<typeof profileSchema>
-export type ProfileResponseDto = z.infer<typeof profileResponseSchema>
 
 export const profileEndpoint = readEndpoint({
   method: 'GET',

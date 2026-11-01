@@ -1,7 +1,6 @@
 "use client";
 
 import { Pencil } from "lucide-react";
-import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { usePostHog } from "posthog-js/react";
 import React, {
@@ -12,8 +11,11 @@ import React, {
   useState,
 } from "react";
 
-import CategoryIcon from "@/components/ui/CategoryIcon";
+import CategoryIcon, {
+  categoryIconStyle,
+} from "@/components/ui/CategoryIcon";
 import { Text } from "@/components/ui/Typography";
+import { useRouter } from "@/i18n/navigation";
 import type { Category } from "@/lib/api/category/useCategories";
 import {
   getCategorySearchKeywords,
@@ -38,17 +40,17 @@ import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 /**
  * One structure for every state of this cell.
  *
- * The category column used to sit at three different left edges: plain
- * "Not applicable" text at the cell edge, "Edit category" indented by the
- * trigger button's `px-3`, and a chosen category indented again by its icon
- * and gap. Three states, three alignments, down one column.
+ * Without a shared structure the category column would sit at three different
+ * left edges: plain "Not applicable" text at the cell edge, "Edit category"
+ * indented by the trigger button's `px-3`, and a chosen category indented
+ * again by its icon and gap. Three states, three alignments, down one column.
  *
  * The slot is reserved whether or not there is an icon to put in it, so the
  * label lands in the same place in all three cases. `CATEGORY_CELL_INSET`
  * cancels the button padding so the slot starts where plain cell text starts —
  * the non-button branch in the transactions table uses the same value.
  */
-export const CATEGORY_CELL_INSET = "-ml-3";
+const CATEGORY_CELL_INSET = "-ml-3";
 
 export function CategoryCellContent({
   icon,
@@ -67,7 +69,7 @@ export function CategoryCellContent({
     <span className="flex min-w-0 items-center gap-2">
       <span
         className="flex size-4 shrink-0 items-center justify-center"
-        style={iconColor ? { color: iconColor } : undefined}
+        style={categoryIconStyle(iconColor)}
         aria-hidden={icon ? undefined : true}
       >
         {icon}
@@ -121,6 +123,8 @@ const CategorySelect: React.FC<CategorySelectProps> = React.memo(
       [posthog],
     );
 
+    const [value, setValue] = useState<string | undefined>(initialValue);
+
     const onSelectInternalHandler = useCallback(
       (option: string) => {
         setValue(option);
@@ -130,7 +134,6 @@ const CategorySelect: React.FC<CategorySelectProps> = React.memo(
       [onChange],
     );
 
-    const [value, setValue] = useState<string | undefined>(initialValue);
     // Memoize expensive flatMap operation to prevent recalculation on every render
     const selectedCategory = useMemo(
       () =>
@@ -144,7 +147,7 @@ const CategorySelect: React.FC<CategorySelectProps> = React.memo(
     const renderCategoryItem = useCallback(
       (category: Category) => {
         // The label actually shown to the user — search must match this,
-        // not just the raw untranslated `category.name` enum (RAD-665).
+        // not just the raw untranslated `category.name` enum.
         const label = category.isSystemCategory
           ? t(getCategoryTranslationKey(category.name))
           : category.name;
@@ -159,10 +162,7 @@ const CategorySelect: React.FC<CategorySelectProps> = React.memo(
           >
             <CategoryIcon
               icon={category.icon}
-              style={{
-                color: category.bgColor,
-                filter: "brightness(0.8)",
-              }}
+              style={categoryIconStyle(category.bgColor)}
             />
             <Text variant="smallText">{label}</Text>
           </CommandItem>

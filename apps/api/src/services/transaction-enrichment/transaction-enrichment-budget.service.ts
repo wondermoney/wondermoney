@@ -1,7 +1,7 @@
 import type { EntityManager } from '@mikro-orm/postgresql';
 
 /**
- * Atomically reserve one unit of the per-tenant, per-day transaction-enrichment budget (RAD-414).
+ * Atomically reserve one unit of the per-tenant, per-day transaction-enrichment budget.
  *
  * A single `INSERT ... ON CONFLICT DO UPDATE ... WHERE reserved_count < :limit RETURNING` makes the
  * check-and-increment race-safe under concurrent workers:

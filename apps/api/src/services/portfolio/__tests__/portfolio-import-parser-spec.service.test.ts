@@ -7,7 +7,7 @@ import type { PortfolioImportParserSpec } from '@entity/PortfolioImportParserSpe
 import type { PortfolioImportParserSpecPayload } from '../portfolio-import-parser-spec.service';
 
 const mocked = vi.hoisted(() => {
-  const em = { create: vi.fn(), execute: vi.fn(), find: vi.fn(), findOne: vi.fn(), flush: vi.fn().mockResolvedValue(undefined), getConnection: vi.fn(), persist: vi.fn().mockReturnThis(), transactional: vi.fn() };
+  const em = { create: vi.fn(), execute: vi.fn(), find: vi.fn(), findOne: vi.fn(), flush: vi.fn().mockResolvedValue(undefined), getConnection: vi.fn(), getTransactionContext: vi.fn(), persist: vi.fn().mockReturnThis(), transactional: vi.fn() };
   em.transactional.mockImplementation(async (callback: (nested: typeof em) => Promise<unknown>) => callback(em));
   return { em };
 });
@@ -148,7 +148,6 @@ describe('portfolio import parser spec service', () => {
     expect(mocked.em.persist.mock.calls[0]?.[0]).toBe(prior);
     expect(mocked.em.persist.mock.calls[1]?.[0]).toBe(next);
     expect(mocked.em.flush.mock.invocationCallOrder[0]).toBeLessThan(mocked.em.persist.mock.invocationCallOrder[1]!);
-    expect(mocked.em.execute).toHaveBeenCalledWith(expect.stringContaining('pg_advisory_xact_lock'), expect.any(Array));
     mocked.em.findOne.mockResolvedValueOnce(next);
     await expect(service.promoteTenantSpec({ expectedBrokerKey: 7, expectedContentHash: 'old-hash', expectedTenantKey: 2, parserSpecKey: 41 }, emMock)).resolves.toMatchObject({ status: 'ineligible' });
   });

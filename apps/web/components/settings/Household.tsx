@@ -79,7 +79,7 @@ export default function Household() {
   const { data, isLoading, error } = useHousehold();
 
   const inviteSchema = z.object({
-    email: z.string().email(t("invite.invalidEmail")),
+    email: z.email(t("invite.invalidEmail")),
   });
   const form = useForm<z.infer<typeof inviteSchema>>({
     resolver: zodResolver(inviteSchema),

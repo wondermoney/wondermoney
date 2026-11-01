@@ -29,7 +29,7 @@ export default function SignInRoute() {
           blockAccess('mfa-required')
           return 'mfa-pending'
         }
-        // RAD-518 — the channel only, never the address that was typed.
+        // The channel only, never the address that was typed.
         if (outcome.status === 'accepted') captureAnalyticsEvent('sign_in_completed', { provider: 'email' })
         return outcome.status
       }}

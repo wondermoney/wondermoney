@@ -20,7 +20,7 @@ export const monthlyEquivalent = (amount: number, isRecurrent: boolean, recurren
   amount * (isRecurrent ? occurrences[recurrency] : 1) / 12
 )
 
-export const toCreateIncome = (income: EditableIncome): BudgetCreateIncome => {
+const toCreateIncome = (income: EditableIncome): BudgetCreateIncome => {
   const amount = monthlyEquivalent(Number(income.amount), income.isRecurrent, income.recurrency)
   return income.isRecurrent
     ? { name: income.name.trim(), amount, isRecurrent: true, recurrency: income.recurrency }

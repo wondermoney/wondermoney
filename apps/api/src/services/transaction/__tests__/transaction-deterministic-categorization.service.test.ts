@@ -91,7 +91,7 @@ describe('transaction deterministic categorization service', () => {
     expect(await service.categorizeTransactionDeterministically({ appuser, transaction }, { em: em({ categories: [category], merchants: [{ name: 'Acme Store' }], stats: [{ categoryKey: category, count: 2, default: false, source: 'user' }, { categoryKey: { categoryKey: 11 }, count: 2, default: false, source: 'user' }] }) })).toMatchObject({ reason: 'stats_tie' });
   });
 
-  it('prefers a recent low-count stat over a stale high-count one (RAD-342 G2 recency weighting)', async () => {
+  it('prefers a recent low-count stat over a stale high-count one (recency weighting)', async () => {
     process.env['TRANSACTION_DETERMINISTIC_CATEGORIZATION_ENABLED'] = 'true';
     const nowMs = Date.now();
     const recentCat = { categoryKey: 10, isSystemCategory: true };
@@ -133,7 +133,7 @@ describe('transaction deterministic categorization service', () => {
     expect(emMock.find).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ deletedAt: undefined, tenantKey: transaction.tenantKey }));
   });
 
-  it('scopes the stats fallback to the requesting user (RAD-342 G4 — no cross-member contamination)', async () => {
+  it('scopes the stats fallback to the requesting user (no cross-member contamination)', async () => {
     process.env['TRANSACTION_DETERMINISTIC_CATEGORIZATION_ENABLED'] = 'true';
     const overrides = { categories: [category], merchants: [{ name: 'Acme Store' }], stats: [{ categoryKey: category, count: 1, default: true, source: 'user' }] };
     await service.categorizeTransactionDeterministically({ appuser, transaction }, { em: em(overrides) });

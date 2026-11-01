@@ -1,15 +1,6 @@
-import {
-  Collection,
-  Entity,
-  EntityRepositoryType,
-  Enum,
-  Filter,
-  ManyToOne,
-  OneToMany,
-  PrimaryKey,
-  Property,
-} from '@mikro-orm/core';
+import { Collection, EntityRepositoryType } from '@mikro-orm/core';
 import type { Rel } from '@mikro-orm/core';
+import { Entity, Enum, Filter, ManyToOne, OneToMany, PrimaryKey, Property } from '@mikro-orm/decorators/legacy';
 
 import { Recurrency } from '@utils/budget';
 
@@ -49,11 +40,11 @@ export class Category extends Base {
   @Property({ length: 255 })
   name: string;
 
-  @ManyToOne(() => Category, { nullable: true })
+  @ManyToOne(() => Category, { nullable: true, updateRule: 'cascade' })
   parentCategory?: Rel<Category>;
 
   /**
-   * Household tenant that owns this category (RAD-343). Nullable on purpose: system
+   * Household tenant that owns this category. Nullable on purpose: system
    * categories (`isSystemCategory`, no owner) are global and shared across all tenants,
    * so they carry no tenant. Only user-created categories are tenant-scoped.
    */

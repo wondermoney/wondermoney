@@ -32,9 +32,16 @@ const MIN_WIDTH = 320;
 const MIN_TOUCH_SIZE = 44;
 const MIN_LABELED_NODE_HEIGHT = 18;
 
-function formatCurrency(value: number, locale: string, currencyKey: string): string {
+function formatCurrency(
+  value: number,
+  locale: string,
+  currencyKey: string,
+): string {
   try {
-    return new Intl.NumberFormat(locale, { style: "currency", currency: currencyKey }).format(value);
+    return new Intl.NumberFormat(locale, {
+      style: "currency",
+      currency: currencyKey,
+    }).format(value);
   } catch {
     return value.toLocaleString(locale);
   }
@@ -97,10 +104,18 @@ function nodeLabelMaxChars(kind: SankeyNodeKind, columnWidth: number): number {
   switch (kind) {
     case "income":
     case "account":
-      return Math.max(0, Math.floor((columnWidth - NODE_WIDTH - LABEL_MARGIN) / CHAR_WIDTH_ESTIMATE));
+      return Math.max(
+        0,
+        Math.floor(
+          (columnWidth - NODE_WIDTH - LABEL_MARGIN) / CHAR_WIDTH_ESTIMATE,
+        ),
+      );
     case "expense":
     default:
-      return Math.max(0, Math.floor((columnWidth - LABEL_MARGIN * 2) / CHAR_WIDTH_ESTIMATE));
+      return Math.max(
+        0,
+        Math.floor((columnWidth - LABEL_MARGIN * 2) / CHAR_WIDTH_ESTIMATE),
+      );
   }
 }
 
@@ -165,7 +180,9 @@ export function SankeyChart({
   const containerRef = React.useRef<HTMLDivElement>(null);
   const width = useContainerWidth(containerRef);
   const [hoveredNodeId, setHoveredNodeId] = React.useState<string | null>(null);
-  const [hoveredLinkIndex, setHoveredLinkIndex] = React.useState<number | null>(null);
+  const [hoveredLinkIndex, setHoveredLinkIndex] = React.useState<number | null>(
+    null,
+  );
   const [tooltip, setTooltip] = React.useState<{
     x: number;
     y: number;
@@ -184,7 +201,6 @@ export function SankeyChart({
   );
 
   const columnWidth = width / layout.columns;
-  const gradientPrefix = React.useId().replace(/:/g, "");
 
   const handleLinkEnter = (
     event: React.MouseEvent,
@@ -201,7 +217,11 @@ export function SankeyChart({
     });
   };
 
-  const handleNodeEnter = (event: React.MouseEvent, node: SankeyNode, value: number) => {
+  const handleNodeEnter = (
+    event: React.MouseEvent,
+    node: SankeyNode,
+    value: number,
+  ) => {
     setHoveredNodeId(node.id);
     setTooltip({
       x: event.clientX,
@@ -211,7 +231,9 @@ export function SankeyChart({
   };
 
   const handleMouseMove = (event: React.MouseEvent) => {
-    setTooltip((prev) => (prev ? { ...prev, x: event.clientX, y: event.clientY } : null));
+    setTooltip((prev) =>
+      prev ? { ...prev, x: event.clientX, y: event.clientY } : null,
+    );
   };
 
   const handleLeave = () => {
@@ -237,11 +259,13 @@ export function SankeyChart({
   }, [layout.nodes]);
 
   const sortedLinks = React.useMemo(() => {
-    return [...layout.links].map((link, index) => ({ link, index })).sort((a, b) => {
-      const columnDiff = a.link.source.x0 - b.link.source.x0;
-      if (columnDiff !== 0) return columnDiff;
-      return a.link.source.y0 - b.link.source.y0;
-    });
+    return [...layout.links]
+      .map((link, index) => ({ link, index }))
+      .sort((a, b) => {
+        const columnDiff = a.link.source.x0 - b.link.source.x0;
+        if (columnDiff !== 0) return columnDiff;
+        return a.link.source.y0 - b.link.source.y0;
+      });
   }, [layout.links]);
 
   return (
@@ -250,35 +274,21 @@ export function SankeyChart({
       <div className="hidden sm:block">
         <svg
           role="img"
-          aria-label={t("ariaLabel", { total: formatCurrency(layout.totalValue, locale, currencyKey) })}
+          aria-label={t("ariaLabel", {
+            total: formatCurrency(layout.totalValue, locale, currencyKey),
+          })}
           viewBox={`0 0 ${width} ${height}`}
           className="h-auto w-full"
           onMouseMove={handleMouseMove}
           onMouseLeave={handleLeave}
         >
-          <defs>
-            {layout.nodes.map((node) => (
-              <linearGradient
-                key={`gradient-${node.id}`}
-                id={`sankey-gradient-${gradientPrefix}-${node.id}`}
-                x1="0"
-                y1="0"
-                x2="1"
-                y2="0"
-              >
-                <stop offset="0%" stopColor={node.color} stopOpacity={0.9} />
-                <stop offset="50%" stopColor={node.color} stopOpacity={0.5} />
-                <stop offset="100%" stopColor={node.color} stopOpacity={0.15} />
-              </linearGradient>
-            ))}
-          </defs>
-
           {/* Links */}
           <g>
             {sortedLinks.map(({ link, index }) => {
               const isHovered = hoveredLinkIndex === index;
               const isConnected =
-                hoveredNodeId === link.source.id || hoveredNodeId === link.target.id;
+                hoveredNodeId === link.source.id ||
+                hoveredNodeId === link.target.id;
               const isDimmed =
                 hoveredLinkIndex !== null
                   ? !isHovered
@@ -291,13 +301,24 @@ export function SankeyChart({
                   <path
                     d={link.path}
                     fill="none"
-                    stroke={`url(#sankey-gradient-${gradientPrefix}-${link.source.id})`}
+                    // One flat tint of the source colour. The band used to
+                    // fade along a 0.9 to 0.15 gradient, a gradient in a data
+                    // mark that made equal flows look unequal by position.
+                    stroke={link.source.color}
                     strokeWidth={link.width}
-                    strokeOpacity={isDimmed ? 0.3 : 1}
-                    className="motion-safe:transition-opacity motion-safe:duration-100 motion-safe:ease-out motion-reduce:transition-none"
+                    strokeOpacity={isDimmed ? 0.12 : 0.45}
+                    // A focused band turns the ring violet; the outline would
+                    // only draw the band's bounding box.
+                    className="focus-visible:stroke-ring focus-visible:outline-none motion-safe:transition-opacity motion-safe:duration-100 motion-safe:ease-out motion-reduce:transition-none"
                     tabIndex={0}
                     onMouseEnter={(event) =>
-                      handleLinkEnter(event, index, link.source, link.target, link.value)
+                      handleLinkEnter(
+                        event,
+                        index,
+                        link.source,
+                        link.target,
+                        link.value,
+                      )
                     }
                     onMouseLeave={handleLeave}
                     onFocus={() => setHoveredLinkIndex(index)}
@@ -312,12 +333,27 @@ export function SankeyChart({
                     strokeWidth={Math.max(44, link.width)}
                     tabIndex={-1}
                     onMouseEnter={(event) =>
-                      handleLinkEnter(event, index, link.source, link.target, link.value)
+                      handleLinkEnter(
+                        event,
+                        index,
+                        link.source,
+                        link.target,
+                        link.value,
+                      )
                     }
                     onMouseLeave={handleLeave}
                     style={{ cursor: "pointer" }}
                   />
-                  <title>{renderLinkTooltip(t, link.source, link.target, link.value, locale, currencyKey)}</title>
+                  <title>
+                    {renderLinkTooltip(
+                      t,
+                      link.source,
+                      link.target,
+                      link.value,
+                      locale,
+                      currencyKey,
+                    )}
+                  </title>
                 </g>
               );
             })}
@@ -331,7 +367,8 @@ export function SankeyChart({
               const displayLabel = truncateLabel(node.label, maxChars);
               const isHovered = hoveredNodeId === node.id;
               const isConnected = layout.links.some(
-                (link) => link.source.id === node.id || link.target.id === node.id,
+                (link) =>
+                  link.source.id === node.id || link.target.id === node.id,
               );
               const isDimmed =
                 hoveredLinkIndex !== null
@@ -351,8 +388,14 @@ export function SankeyChart({
                     rx={4}
                     fill="transparent"
                     tabIndex={0}
-                    className="focus-visible:stroke-2 focus-visible:stroke-ring"
-                    onMouseEnter={(event) => handleNodeEnter(event, node, nodeTotalValues.get(node.id) ?? 0)}
+                    className="focus-visible:stroke-ring focus-visible:stroke-2"
+                    onMouseEnter={(event) =>
+                      handleNodeEnter(
+                        event,
+                        node,
+                        nodeTotalValues.get(node.id) ?? 0,
+                      )
+                    }
                     onMouseLeave={handleLeave}
                     onFocus={() => setHoveredNodeId(node.id)}
                     onBlur={() => setHoveredNodeId(null)}
@@ -366,10 +409,18 @@ export function SankeyChart({
                     rx={4}
                     fill={node.color}
                     fillOpacity={isDimmed ? 0.3 : 1}
-                    className="motion-safe:transition-opacity motion-safe:duration-100 motion-safe:ease-out motion-reduce:transition-none pointer-events-none"
+                    className="pointer-events-none motion-safe:transition-opacity motion-safe:duration-100 motion-safe:ease-out motion-reduce:transition-none"
                     style={{ cursor: "pointer" }}
                   />
-                  <title>{renderNodeTooltip(t, node, nodeTotalValues.get(node.id) ?? 0, locale, currencyKey)}</title>
+                  <title>
+                    {renderNodeTooltip(
+                      t,
+                      node,
+                      nodeTotalValues.get(node.id) ?? 0,
+                      locale,
+                      currencyKey,
+                    )}
+                  </title>
                   {/* A category's node height is proportional to its flow
                       value, so a small-spend category (a few € against a
                       total in the thousands) can get a rect just a few px
@@ -384,7 +435,10 @@ export function SankeyChart({
                       y={label.y}
                       textAnchor={label.textAnchor}
                       dominantBaseline={label.dominantBaseline}
-                      className="fill-muted-foreground text-[11px] font-sans"
+                      // Foreground, not muted: these labels sit on coloured
+                      // flow bands as often as on the canvas, and muted ink
+                      // fell under 4.5:1 on the pale bands (Gifts on lime).
+                      className="fill-foreground font-sans text-[11px]"
                       // Labels can sit over a link's colored flow band, not
                       // just the canvas — a plain muted-foreground fill
                       // disappears against a similarly light/dark band. A
@@ -410,7 +464,7 @@ export function SankeyChart({
 
         {tooltip && (
           <div
-            className="bg-background border-border/50 pointer-events-none fixed z-50 rounded-lg border px-2.5 py-1.5 text-xs shadow-xl"
+            className="bg-popover border-border pointer-events-none fixed z-50 rounded-lg border px-2.5 py-1.5 text-xs shadow-lg"
             style={{
               left: tooltip.x + 12,
               top: tooltip.y - 12,
@@ -424,7 +478,9 @@ export function SankeyChart({
       {/* Mobile fallback */}
       <div className="block sm:hidden">
         <p className="text-muted-foreground text-sm">{t("mobileNotice")}</p>
-        <div className="mt-3 overflow-hidden rounded-lg border">
+        {/* No border of its own: the table already sits inside the report
+            card, and a bordered box inside it was a card in a card. */}
+        <div className="mt-3">
           <table className="w-full text-sm">
             <thead>
               <tr className="bg-muted">

@@ -1,6 +1,6 @@
 "use client";
 
-import { Table } from "@tanstack/react-table";
+import type { ReactTable, RowData } from "@tanstack/react-table";
 import {
   ChevronLeftIcon,
   ChevronRightIcon,
@@ -20,14 +20,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../Select";
+import type { DataTableFeatures } from "./features";
 
-interface DataTablePaginationProps<TData> {
-  table: Table<TData>;
+interface DataTablePaginationProps<TData extends RowData> {
+  table: ReactTable<DataTableFeatures, TData>;
   rowSelection?: boolean;
   pageParamName?: string;
   pageSizeParamName?: string;
   /**
-   * RAD-576 — rows the *server* matched, before its own `limit`.
+   * Rows the *server* matched, before its own `limit`.
    *
    * Pass this whenever the data source knows it (the transactions endpoint
    * returns `total`), so the footer says "8,623 results" rather than counting
@@ -42,7 +43,7 @@ interface DataTablePaginationProps<TData> {
   serverTotal?: number;
 }
 
-export function Pagination<TData>({
+export function Pagination<TData extends RowData>({
   table,
   rowSelection = false,
   pageParamName = "page",
@@ -108,11 +109,10 @@ export function Pagination<TData>({
 
   return (
     <div className="flex w-full items-center justify-between gap-6 px-2">
-      {/* The result count is unconditional, and leads. It used to appear only
-          when row selection was enabled, and then said "0 of 22 row(s)
-          selected" — leading with a selection count of zero rather than with
-          how many rows you are actually looking at. § 9 rules 6 and 7: a data
-          surface says what it is showing, and says so when filtered. */}
+      {/* The result count is unconditional, and leads — not a selection count
+          like "0 of 22 row(s) selected", which says nothing about how many
+          rows you are actually looking at. § 9 rules 6 and 7: a data surface
+          says what it is showing, and says so when filtered. */}
       <div className="text-muted-foreground flex-1 text-sm">
         {filteredCount === loadedCount
           ? t("results-count", { count: totalCount })
@@ -135,14 +135,14 @@ export function Pagination<TData>({
           {t("rows-per-page")}
         </p>
         <Select
-          value={`${table.getState().pagination.pageSize}`}
+          value={`${table.state.pagination.pageSize}`}
           onValueChange={(value) => {
             handlePageSizeChange(Number(value));
           }}
         >
           <SelectTrigger className="h-8">
             <SelectValue>
-              {table.getState().pagination.pageSize.toString()}
+              {table.state.pagination.pageSize.toString()}
             </SelectValue>
           </SelectTrigger>
           <SelectContent>
@@ -162,7 +162,7 @@ export function Pagination<TData>({
       </div>
       <div className="text-muted-foreground flex w-[100px] items-center justify-center text-sm">
         {t("page-x-of-y", {
-          current: table.getState().pagination.pageIndex + 1,
+          current: table.state.pagination.pageIndex + 1,
           total: table.getPageCount() || 1,
         })}
       </div>
@@ -179,9 +179,7 @@ export function Pagination<TData>({
         <Button
           variant="secondary"
           className="size-8 p-0"
-          onClick={() =>
-            handlePageChange(table.getState().pagination.pageIndex - 1)
-          }
+          onClick={() => handlePageChange(table.state.pagination.pageIndex - 1)}
           disabled={!table.getCanPreviousPage()}
         >
           <span className="sr-only">{t("go-to-previous-page")}</span>
@@ -190,9 +188,7 @@ export function Pagination<TData>({
         <Button
           variant="secondary"
           className="size-8 p-0"
-          onClick={() =>
-            handlePageChange(table.getState().pagination.pageIndex + 1)
-          }
+          onClick={() => handlePageChange(table.state.pagination.pageIndex + 1)}
           disabled={!table.getCanNextPage()}
         >
           <span className="sr-only">{t("go-to-next-page")}</span>

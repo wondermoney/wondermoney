@@ -10,12 +10,7 @@ import service from '../account-auto-sync-scheduler.service';
 type EnqueueBg = NonNullable<EnqueueInput['backgroundOperationService']>;
 type EnqueueBoss = NonNullable<EnqueueInput['boss']>;
 type EnqueueInput = NonNullable<Parameters<typeof service.enqueueDueAccountSyncs>[0]>;
-// Phase 1e: `enqueueDueAccountSyncs` now runs a second `em.find` query for Enable Banking
-// connections (see the scheduler's own docblock for why this is two parallel queries rather
-// than one unioned query). Defaulting the mock to `[]` means every pre-existing GoCardless-only
-// test below — which only ever arranges a single `mockResolvedValueOnce` for the nordigen
-// query — transparently gets an empty Enable Banking result for its second `em.find` call
-// without needing its own arrangement touched.
+// Defaulting the mock to `[]` gives any `em.find` call a test does not arrange an empty result.
 beforeEach(() => { em.find.mockReset().mockResolvedValue([]); sendMock.mockReset(); incidentService.allocateIncident.mockReset().mockResolvedValue({ incidentId: 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb' }); });
 const backgroundOperationService = () => ({ attachQueueJob: vi.fn().mockResolvedValue(true), createQueuedOperation: vi.fn().mockResolvedValue({}), markNeedsAction: vi.fn().mockResolvedValue(true), resetRetryableQueueing: vi.fn().mockResolvedValue(true) });
 describe('account auto sync scheduler service', () => {
@@ -165,7 +160,7 @@ describe('account auto sync scheduler service', () => {
     vi.unstubAllEnvs();
   });
 
-  describe('Enable Banking connections (Phase 1e)', () => {
+  describe('Enable Banking connections', () => {
     it('enqueues a due Enable Banking connection with a real, future accessValidUntil', async () => {
       const connection = { appuserKey: { appuserKey: 9, externalUserId: 'dddddddd-dddd-4ddd-8ddd-dddddddddddd' }, enableBankingConnectionKey: 20, sessionId: 'session-20', state: 'state-20' };
       em.find.mockResolvedValueOnce([{ accountKey: 1, enableBankingConnectionKey: connection, refreshedAt: null }]);
@@ -192,7 +187,7 @@ describe('account auto sync scheduler service', () => {
       const result = await service.enqueueDueAccountSyncs({ backgroundOperationService: backgroundOperationService() as unknown as EnqueueBg, now: new Date('2026-01-01T00:00:00Z') });
 
       expect(result.total).toBe(2);
-      // Mirrors the existing "ignores expired connections" GoCardless test above: the actual
+      // Mirrors the "ignores expired connections" test above: the actual
       // exclusion of an expired connection happens at the database level (`$gt: now` in the real
       // query), which a mocked `em.find` can't itself enforce — so this asserts the query
       // criteria that makes the database do it, reading the connection's own real

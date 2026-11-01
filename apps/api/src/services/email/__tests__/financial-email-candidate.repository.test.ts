@@ -24,8 +24,8 @@ describe('financial email candidate repository', () => {
     const repository = new FinancialEmailCandidateRepository({ getConnection: () => ({ execute }) } as unknown as EntityManager);
     await repository.page('weekly', 0, 5_000);
     expect(execute.mock.calls[0]?.[0]).toContain('coalesce(preference."weekly_insights_enabled", true) = true');
-    // No language gate: the renderer ships EN and PT, and the PT-only clause that used to
-    // live here excluded 297 of 310 eligible production users.
+    // No language gate: the renderer ships EN and PT, so a PT-only clause would exclude most
+    // eligible users.
     expect(execute.mock.calls[0]?.[0]).not.toContain('language');
     expect(execute.mock.calls[0]?.[1]).toEqual([0, 500]);
   });
@@ -44,8 +44,8 @@ describe('financial email candidate repository', () => {
   });
 
   it('excludes tenants holding an account stranded by the provider migration', () => {
-    // These emails state a tenant's own figures. An account left behind by the
-    // GoCardless→Enable Banking migration still has a balance but receives no new
+    // These emails state a tenant's own figures. An account left on a legacy requisition (a
+    // bank provider that no longer syncs) still has a balance but receives no new
     // transactions, so any total computed over it is silently short — and a confident wrong
     // number is worse than no email.
     //

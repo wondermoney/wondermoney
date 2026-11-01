@@ -17,7 +17,7 @@ export type PortfolioImportAssetGroupCardProps = Readonly<{
 }>
 
 /**
- * RAD-514 — one ambiguous/unmatched asset group from a CSV import: the raw name/symbol the file
+ * One ambiguous/unmatched asset group from a CSV import: the raw name/symbol the file
  * carried, any server-suggested candidates (accept one with a tap), a ticker search to map it to a
  * different security, or a skip. Resolution is held by the parent review step and only sent to the
  * server when the whole batch is submitted.

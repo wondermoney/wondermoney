@@ -36,20 +36,20 @@ const bankSyncEventSchema = z.object({
 }).strict().superRefine((event, context) => {
   const expectedFlow = event.producer === 'pgboss-initial' ? 'initial-add' : 'scheduled-refresh';
   if (event.flow !== expectedFlow) {
-    context.addIssue({ code: z.ZodIssueCode.custom, message: 'Bank sync producer does not match flow' });
+    context.addIssue({ code: 'custom', message: 'Bank sync producer does not match flow' });
   }
   if (event.result === 'full_success' && !event.final) {
-    context.addIssue({ code: z.ZodIssueCode.custom, message: 'Full success must be final' });
+    context.addIssue({ code: 'custom', message: 'Full success must be final' });
   }
   if (event.result !== 'full_success' && (!event.error_category || !event.error_code)) {
-    context.addIssue({ code: z.ZodIssueCode.custom, message: 'Failed and partial bank syncs require normalized error dimensions' });
+    context.addIssue({ code: 'custom', message: 'Failed and partial bank syncs require normalized error dimensions' });
   }
   if (event.result === 'full_success' && (event.error_category || event.error_code)) {
-    context.addIssue({ code: z.ZodIssueCode.custom, message: 'Successful bank syncs cannot contain error dimensions' });
+    context.addIssue({ code: 'custom', message: 'Successful bank syncs cannot contain error dimensions' });
   }
   const expectedId = deterministicBankSyncEventId(event);
   if (event.event_id !== expectedId) {
-    context.addIssue({ code: z.ZodIssueCode.custom, message: 'Bank sync event id is not deterministic' });
+    context.addIssue({ code: 'custom', message: 'Bank sync event id is not deterministic' });
   }
 });
 

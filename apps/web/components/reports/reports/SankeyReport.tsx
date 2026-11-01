@@ -30,8 +30,7 @@ export function SankeyReport() {
   // The API sends income/expense node labels as the raw category name
   // (`CAFE_RESTAURANTS_BARS` for system categories) — the same shape
   // `CategorySelect` translates for the category picker. Account nodes carry
-  // real account names, not category keys, so they pass through untouched
-  // (RAD-645).
+  // real account names, not category keys, so they pass through untouched.
   const localizedData = useMemo(() => {
     if (!data?.data) return undefined;
     return {

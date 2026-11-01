@@ -28,13 +28,13 @@ export function resolveAppUrl(env: Env, appEnv: AppEnvironment): string {
 }
 
 /** The API's address (`API_URL`, else `BETTER_AUTH_URL`). */
-export function resolveApiUrl(env: Env, appEnv: AppEnvironment): string {
-  const apiUrl = read(env, 'API_URL') ?? read(env, 'BETTER_AUTH_URL');
-  return appEnv === 'development' ? apiUrl ?? 'http://localhost:3001' : required(apiUrl, 'API_URL', appEnv);
-}
-
 export function resolveInstanceUrls(env: Env, appEnv: AppEnvironment): { apiUrl: string; appUrl: string } {
   return { apiUrl: resolveApiUrl(env, appEnv), appUrl: resolveAppUrl(env, appEnv) };
+}
+
+function resolveApiUrl(env: Env, appEnv: AppEnvironment): string {
+  const apiUrl = read(env, 'API_URL') ?? read(env, 'BETTER_AUTH_URL');
+  return appEnv === 'development' ? apiUrl ?? 'http://localhost:3001' : required(apiUrl, 'API_URL', appEnv);
 }
 
 /** Browser origins allowed by default: the app, plus the local dev servers outside production. */

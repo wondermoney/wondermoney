@@ -7,18 +7,12 @@ import logger from './logger';
  *
  * ## Why this exists
  *
- * The error body used to be `{ message: string }` and nothing else, so a client could see
- * *that* a request failed but not *why* — only an English sentence written for a human.
- * This has already cost a month-long production incident: an unlabelled 403 was
- * misdiagnosed as a session/token race (WEB-4Q, 274 events). The SSR layer redirected it to
- * login, middleware bounced the still-logged-in user back to the dashboard, which re-fetched
- * and 403'd again — `ERR_TOO_MANY_REDIRECTS` — and the affected users were locked out of the
- * app entirely. The reason was the one thing never captured, which is why it sat
- * misdiagnosed for a month.
- *
- * Three call sites had already hand-rolled a code — `demo_read_only`, `RATE_LIMITED`,
- * `assistant_not_enabled` — each bypassing the shared handler with its own casing. The
- * requirement was clear; the mechanism was missing.
+ * With only `{ message: string }`, a client can see *that* a request failed but not *why* —
+ * only an English sentence written for a human. An unlabelled 403 is easy to misread as a
+ * session/token problem: the SSR layer redirects it to login, middleware bounces the
+ * still-logged-in user back to the dashboard, which re-fetches and 403s again —
+ * `ERR_TOO_MANY_REDIRECTS` — and the user is locked out of the app entirely. A stable code
+ * is what lets a client tell those cases apart.
  *
  * ## Contract
  *
@@ -68,6 +62,18 @@ export const ERROR_CODE = {
   BANK_CREDENTIAL_INVALID: 'bank_credential_invalid',
   /** Route is household-owner-only and the caller is a member. */
   HOUSEHOLD_OWNER_REQUIRED: 'household_owner_required',
+  /** Joining a household: it already has its two members (409). */
+  HOUSEHOLD_FULL: 'household_full',
+  /** Household invite (signup): accepted already, by this person or someone else (400/409). */
+  INVITE_ALREADY_USED: 'invite_already_used',
+  /** Household invite (signup): the invite went to a different email address (400). */
+  INVITE_EMAIL_MISMATCH: 'invite_email_mismatch',
+  /** Household invite (signup): past its 7-day lifetime (400). */
+  INVITE_EXPIRED: 'invite_expired',
+  /** Household invite (signup): unknown token or revoked by the owner (400). */
+  INVITE_INVALID: 'invite_invalid',
+  /** The transaction is EXPIRED (the bank retracted it): no money moved, so it cannot be funded. */
+  TRANSACTION_EXPIRED: 'transaction_expired',
 } as const;
 
 export type ErrorCode = typeof ERROR_CODE[keyof typeof ERROR_CODE];
@@ -176,10 +182,9 @@ export class UnauthorizedError extends ApplicationError {
 }
 
 /**
- * Phase 1e (`account-auto-sync.worker.ts`): the appuser's own Enable Banking BYOK application
+ * Raised by `account-auto-sync.worker.ts` when the appuser's own Enable Banking BYOK application
  * credential (`EnableBankingCredential`) is missing, inactive, or fails to decrypt when a
- * scheduled sync job goes to use it. Unlike GoCardless's single shared, ops-managed credential,
- * this is a per-user secret only the user themselves can fix (re-paste Application ID/private key
+ * scheduled sync job goes to use it. This is a per-user secret only the user themselves can fix (re-paste Application ID/private key
  * in Settings) — retrying the same scheduled job on a backoff can never succeed on its own, so
  * `isPermanentBankSyncError` treats this as permanent rather than a transient provider outage.
  * Extends `UnauthorizedError` since a bad/expired credential is, semantically, an auth failure

@@ -129,7 +129,7 @@ export function Metric({ label, value, palette, tone = 'default' }: {
   )
 }
 
-export const sharedStyles = StyleSheet.create({
+const sharedStyles = StyleSheet.create({
   safeArea: { flex: 1 },
   action: { minWidth: themeTokens.touchTarget.minimum, minHeight: themeTokens.touchTarget.minimum, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderRadius: themeTokens.radius.md, paddingHorizontal: themeTokens.spacing[4] },
   actionLabel: { ...textStyles.action },

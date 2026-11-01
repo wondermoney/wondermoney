@@ -91,6 +91,35 @@ describe('usePortfolioImport', () => {
     await hook.unmount(); client.clear()
   })
 
+  it('treats a partial import as done, keeping the rows that failed and refreshing the portfolio', async () => {
+    const partialPreview = {
+      ...readyPreview,
+      rows: { ...readyPreview.rows, failed: [{ failureReason: 'Insufficient quantity to sell', id: 707, raw: { Symbol: 'AMD' }, rowNumber: 7, status: 'failed' as const }] },
+      status: 'partial',
+    }
+    mockWrite
+      .mockResolvedValueOnce(session)
+      .mockResolvedValueOnce(parseTrigger)
+      .mockResolvedValueOnce(suggestion)
+      .mockResolvedValueOnce(confirmMapping)
+      .mockResolvedValueOnce(confirmImport)
+    mockUpload.mockResolvedValue(undefined)
+    mockRead
+      .mockResolvedValueOnce(needsMapping)
+      .mockResolvedValueOnce(readyPreview)
+      .mockResolvedValueOnce(partialPreview)
+
+    const { client, wrapper } = setup()
+    const invalidate = jest.spyOn(client, 'invalidateQueries')
+    const hook = await renderHook(() => usePortfolioImport(7, noWait), { wrapper })
+    await act(async () => { await hook.result.current.start(file) })
+    await act(async () => { await hook.result.current.confirm() })
+
+    expect(hook.result.current.state).toEqual({ phase: 'succeeded', preview: partialPreview })
+    expect(invalidate).toHaveBeenCalledWith(expect.objectContaining({ predicate: expect.any(Function) }))
+    await hook.unmount(); client.clear()
+  })
+
   it('never calls confirm without a reviewed session', async () => {
     const { client, wrapper } = setup()
     const hook = await renderHook(() => usePortfolioImport(7, noWait), { wrapper })

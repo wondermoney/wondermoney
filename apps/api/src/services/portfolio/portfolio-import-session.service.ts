@@ -8,7 +8,7 @@ import { PortfolioImportRow, PortfolioImportRowStatus } from '@entity/PortfolioI
 import { PortfolioImportSession, PortfolioImportSessionStatus } from '@entity/PortfolioImportSession';
 import { NotFoundError } from '@utils/errors';
 
-export const PORTFOLIO_IMPORT_SESSION_TTL_MS = 7 * 24 * 60 * 60 * 1000;
+const PORTFOLIO_IMPORT_SESSION_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 
 export interface CreateDraftPortfolioImportRowsInput {
   appuser: Appuser;
@@ -141,7 +141,7 @@ class PortfolioImportSessionService {
         portfolioImportSessionKey: input.importSessionId,
       }, { lockMode: LockMode.PESSIMISTIC_WRITE });
 
-      if (!session || session.status !== input.expectedStatus) return false;
+      if (session?.status !== input.expectedStatus) return false;
 
       const message = input.error instanceof Error ? input.error.message : 'Worker failed';
       session.status = PortfolioImportSessionStatus.FAILED;

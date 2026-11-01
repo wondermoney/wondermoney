@@ -8,7 +8,7 @@ import { Seeder } from '@mikro-orm/seeder';
 import { createSeedRandom, randomInt } from '../utils/seed';
 import stockList from './stock_list_clean.json' with { type: 'json' };
 
-// RAD-445/RAD-446: the in-scope Certificados de Aforro series (Portuguese savings certificates).
+// The in-scope Certificados de Aforro series (Portuguese savings certificates).
 const CERTIFICADO_AFORRO_SERIES = [
   { name: 'Certificado de Aforro — Série A', symbol: 'CA-SERIE-A' },
   { name: 'Certificado de Aforro — Série B', symbol: 'CA-SERIE-B' },
@@ -39,10 +39,8 @@ export class FinancialAssetSeeder extends Seeder {
         financialAssetTypeKey: ctx.financialAssetTypes.find(
           (type) => type.name.toLowerCase() === stock.type.toLowerCase(),
         )?.financialAssetTypeKey,
-        // RAD-audit: was `https://financialmodelingprep.com/image-stock/...`. FMP was
-        // decommissioned by RAD-449, so every seeded asset carried a dead CDN URL and
-        // rendered a broken image. EODHD exposes no equivalent logo endpoint, so seed
-        // no logo rather than a URL that is known not to resolve.
+        // EODHD exposes no logo endpoint, so seed no logo rather than a URL that is
+        // known not to resolve (it would render a broken image).
         logoUrl: undefined,
         name: stock.name,
         symbol: stock.symbol,
@@ -63,7 +61,7 @@ export class FinancialAssetSeeder extends Seeder {
       ),
     );
 
-    // Create the 6 in-scope Certificado de Aforro series (RAD-445/RAD-446), one FinancialAsset
+    // Create the 6 in-scope Certificado de Aforro series, one FinancialAsset
     // row per series, all denominated in EUR.
     const eurCurrency = ctx.currencies.find((currency) => currency.code === 'EUR');
     const savingsCertificateType = ctx.financialAssetTypes.find(

@@ -2,23 +2,22 @@ import type { ReactNode } from "react";
 
 import { cn } from "@/lib/utils";
 
-/** Eyebrow + headline + supporting copy, shared by every first-run step. */
+/**
+ * Headline + supporting copy, shared by every first-run step. There is no
+ * kicker above the headline: it repeated the step name the progress line
+ * already shows, as tracked capitals.
+ */
 export function FirstRunStepIntro({
-  kicker,
   headline,
   sub,
   className,
 }: {
-  kicker: string;
   headline: string;
   sub?: string;
   className?: string;
 }) {
   return (
     <div className={cn("space-y-2.5", className)}>
-      <p className="text-muted-foreground text-xs font-semibold tracking-[0.12em] uppercase">
-        {kicker}
-      </p>
       <h1 className="text-foreground max-w-xl text-2xl font-semibold tracking-tight text-balance sm:text-3xl">
         {headline}
       </h1>

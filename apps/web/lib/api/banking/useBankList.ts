@@ -13,7 +13,7 @@ export interface Bank {
 
 export type GetBankListResponse = Array<Bank>;
 
-export async function getBankList(
+async function getBankList(
   country: string,
   apiClient: AxiosInstance = api,
 ): Promise<GetBankListResponse> {

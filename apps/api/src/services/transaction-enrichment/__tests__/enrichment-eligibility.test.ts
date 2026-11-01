@@ -3,8 +3,8 @@ import { describe, expect, it } from 'vitest';
 import { isUncategorisableByDescription } from '../enrichment-eligibility';
 
 /**
- * Every string below is a real production description from the RAD-444
- * evaluation sample. The excluded ones are transactions the model had already
+ * Every string below is a real production description from the
+ * categoriser evaluation sample. The excluded ones are transactions the model had already
  * been asked about and answered wrongly with high confidence.
  */
 describe('isUncategorisableByDescription', () => {

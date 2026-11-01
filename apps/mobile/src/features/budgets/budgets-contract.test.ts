@@ -16,12 +16,25 @@ describe('budgets contracts', () => {
     ['lowercase currency', { ...budgetFixture, currencyCode: 'eur' }],
     ['nonfinite money', { ...budgetFixture, categories: [{ ...parentRow, category_amount: Infinity }] }],
     ['missing parent name', { ...budgetFixture, categories: [{ ...parentRow, parent_category_name: undefined }] }],
-    ['bad recurrence', { ...budgetFixture, categories: [{ ...childRow, category_recurrency: 'WEEKLY' }] }],
+    ['non-string recurrence', { ...budgetFixture, categories: [{ ...childRow, category_recurrency: 12 }] }],
     ['parent recurrence', { ...budgetFixture, categories: [{ ...parentRow, category_recurrency: 'MONTHLY' }] }],
-    ['unexpected budget field', { ...budgetFixture, hidden: true }],
-    ['unexpected category field', { ...budgetFixture, categories: [{ ...parentRow, hidden: true }] }],
   ])('rejects %s', (_label, candidate) => {
     expect(budgetsResponseSchema.safeParse({ budgets: [candidate] }).success).toBe(false)
+  })
+
+  it('keeps parsing when the API adds fields or a recurrence this build does not know', () => {
+    const parsed = budgetsResponseSchema.parse({ budgets: [{
+      ...budgetFixture,
+      hidden: true,
+      categories: [{ ...parentRow, hidden: true }, { ...childRow, category_recurrency: 'WEEKLY' }],
+      incomes: [{ ...budgetFixture.incomes[0], recurrency: 'WEEKLY' }],
+    }] })
+    const [budget] = parsed.budgets
+    expect(budget).not.toHaveProperty('hidden')
+    expect(budget!.categories[0]).not.toHaveProperty('hidden')
+    // The same "recurrence unavailable" state a legacy category already has.
+    expect(budget!.categories[1]!.category_recurrency).toBeNull()
+    expect(budget!.incomes[0]!.recurrency).toBeNull()
   })
 
   it('requires strict navigation flags for month detail', () => {
@@ -42,7 +55,7 @@ describe('budgets contracts', () => {
     expect(createBudgetMetadataEndpoint(7).schema.safeParse({}).success).toBe(false)
     expect(budgetDetailResponseSchema.parse({ budget: { budgetKey: 7, name: 'Plan', description: null } })).toEqual({ budget: { budgetKey: 7, name: 'Plan', description: null } })
     expect(budgetDetailResponseSchema.safeParse({ budget: { budgetKey: 7, name: 'Plan' } }).success).toBe(true)
-    expect(budgetDetailResponseSchema.safeParse({ budget: { budgetKey: 7, name: 'Plan', accounts: [] } }).success).toBe(false)
+    expect(budgetDetailResponseSchema.parse({ budget: { budgetKey: 7, name: 'Plan', accounts: [] } })).toEqual({ budget: { budgetKey: 7, name: 'Plan' } })
     expect(budgetMetadataWriteSchema.safeParse({ name: '', extra: true }).success).toBe(false)
     expect(budgetMetadataWriteSchema.safeParse({ name: 'n'.repeat(100), description: 'd'.repeat(500) }).success).toBe(true)
     expect(budgetMetadataWriteSchema.safeParse({ name: 'n'.repeat(101), description: '' }).success).toBe(false)
@@ -82,7 +95,7 @@ describe('budgets contracts', () => {
       { ...valid, incomes: [{ name: 'Salary', amount: 1, isRecurrent: true }] },
       { ...valid, extra: true },
     ]) expect(budgetCreateWriteSchema.safeParse(body).success).toBe(false)
-    expect(budgetCreateResponseSchema.safeParse({ budgetKey: 7, extra: true }).success).toBe(false)
+    expect(budgetCreateResponseSchema.parse({ budgetKey: 7, extra: true })).toEqual({ budgetKey: 7 })
   })
 
   it('pins strict existing-category POST and undefined 201 body parsing', () => {
@@ -137,7 +150,7 @@ describe('budgets contracts', () => {
     const { month: _month, ...yearFixture } = budgetFixture
     const parsed = budgetYearResponseSchema.parse({ budget: { ...yearFixture, categories: [parentRow], accounts: [] } })
     expect(parsed.budget).not.toHaveProperty('month')
-    expect(budgetYearResponseSchema.safeParse({ budget: { ...budgetFixture, categories: [parentRow], accounts: [] } }).success).toBe(false)
+    expect(budgetYearResponseSchema.parse({ budget: { ...budgetFixture, categories: [parentRow], accounts: [] } }).budget).not.toHaveProperty('month')
   })
 
   it('pins the strict account-keys write body', () => {

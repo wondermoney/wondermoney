@@ -22,7 +22,7 @@ export interface PortfolioSpecColumnReference {
 }
 
 const columnReferenceSchema = z.object({ normalizedHeader: z.string().min(1).max(255), occurrence: z.number().int().min(0).optional() }).strict();
-const columnsSchema = z.record(z.enum(portfolioColumnMappingFields), columnReferenceSchema);
+const columnsSchema = z.partialRecord(z.enum(portfolioColumnMappingFields), columnReferenceSchema);
 const fixedValueOriginsSchema = z.object({ currency: z.literal('embedded_header').optional() }).strict();
 export const portfolioImportParserSpecPayloadSchema = z.object({
   columns: columnsSchema,
@@ -34,6 +34,9 @@ export const portfolioImportParserSpecPayloadSchema = z.object({
   transformations: portfolioColumnMappingTransformationsSchema,
 }).strict();
 export type PortfolioImportParserSpecPayload = z.infer<typeof portfolioImportParserSpecPayloadSchema>;
+
+interface PromoteTenantSpecInput { expectedBrokerKey: number; expectedContentHash: string; expectedTenantKey: number; parserSpecKey: number }
+interface PromoteTenantSpecResult { globalParserSpecKey?: number; status: 'conflict' | 'ineligible' | 'promoted' }
 
 class PortfolioImportParserSpecService {
   async findActiveSpecForShape(input: { appuser: Appuser; broker?: { financialBrokerKey: number }; headers: string[]; layout: PortfolioCsvLayout; tenant: { tenantKey: number } }): Promise<PortfolioImportParserSpec | undefined> {
@@ -69,49 +72,13 @@ class PortfolioImportParserSpecService {
     return undefined;
   }
 
-  async promoteTenantSpec(input: { expectedBrokerKey: number; expectedContentHash: string; expectedTenantKey: number; parserSpecKey: number }, em: EntityManager = DI.em): Promise<{ globalParserSpecKey?: number; status: 'conflict' | 'ineligible' | 'promoted' }> {
-    const candidate = await em.findOne(PortfolioImportParserSpec, { deletedAt: undefined, portfolioImportParserSpecKey: input.parserSpecKey, scope: PortfolioImportParserSpecScope.TENANT, status: PortfolioImportParserSpecStatus.ACTIVE }, { populate: ['financialBrokerKey', 'tenantKey'] });
-    if (!candidate?.financialBrokerKey || candidate.financialBrokerKey.financialBrokerKey !== input.expectedBrokerKey || candidate.tenantKey?.tenantKey !== input.expectedTenantKey || candidate.contentHash !== input.expectedContentHash) return { status: 'ineligible' };
-    const payload = parsePortfolioImportParserSpecPayload(candidate.specJson);
-    if (!isSafeForGlobalPromotion(payload)) return { status: 'ineligible' };
-    const contentHash = hashPortfolioImportParserSpecPayload(payload);
-    if (contentHash !== input.expectedContentHash) return { status: 'ineligible' };
-    await em.getConnection().execute('select pg_advisory_xact_lock(hashtext(?))', [`portfolio-parser:${candidate.financialBrokerKey.financialBrokerKey}:${candidate.shapeHash}`]);
-    const existing = await em.findOne(PortfolioImportParserSpec, { deletedAt: undefined, engineVersion: PORTFOLIO_IMPORT_SPEC_ENGINE_VERSION, financialBrokerKey: candidate.financialBrokerKey, schemaVersion: PORTFOLIO_IMPORT_SPEC_SCHEMA_VERSION, scope: PortfolioImportParserSpecScope.GLOBAL, shapeHash: candidate.shapeHash, status: PortfolioImportParserSpecStatus.ACTIVE });
-    if (existing) {
-      if (existing.contentHash !== contentHash) {
-        logger.warn({ brokerId: candidate.financialBrokerKey.financialBrokerKey, candidateParserSpecKey: candidate.portfolioImportParserSpecKey, globalParserSpecKey: existing.portfolioImportParserSpecKey, shapeHash: candidate.shapeHash }, 'Portfolio import parser spec global promotion conflict');
-        return { globalParserSpecKey: existing.portfolioImportParserSpecKey, status: 'conflict' };
-      }
-      if (candidate.promotedAt) return { globalParserSpecKey: existing.portfolioImportParserSpecKey, status: 'promoted' };
-      existing.successCount += 1;
-      existing.lastSucceededAt = new Date();
-      candidate.promotedAt ??= new Date();
-      await em.persist([existing, candidate]).flush();
-      return { globalParserSpecKey: existing.portfolioImportParserSpecKey, status: 'promoted' };
-    }
-    const global = Object.assign(new PortfolioImportParserSpec(), {
-      contentHash,
-      engineVersion: PORTFOLIO_IMPORT_SPEC_ENGINE_VERSION,
-      failureCount: 0,
-      financialBrokerKey: candidate.financialBrokerKey,
-      fingerprintAlgorithm: candidate.fingerprintAlgorithm,
-      headerOrderHash: candidate.headerOrderHash,
-      headerSetHash: candidate.headerSetHash,
-      normalizedHeadersJson: uniqueMappedHeaders(payload),
-      promotedAt: new Date(),
-      schemaVersion: PORTFOLIO_IMPORT_SPEC_SCHEMA_VERSION,
-      scope: PortfolioImportParserSpecScope.GLOBAL,
-      shapeHash: candidate.shapeHash,
-      source: candidate.source,
-      specJson: payload,
-      specVersion: candidate.specVersion,
-      status: PortfolioImportParserSpecStatus.ACTIVE,
-      successCount: 1,
-    });
-    candidate.promotedAt ??= new Date();
-    await em.persist([global, candidate]).flush();
-    return { globalParserSpecKey: global.portfolioImportParserSpecKey, status: 'promoted' };
+  /**
+   * Runs in a transaction of its own (a savepoint when the caller already has one), because the
+   * advisory lock below is transaction-scoped: taken on the transaction's connection, it is held
+   * until commit, so concurrent promotions of one broker layout queue instead of racing to insert.
+   */
+  async promoteTenantSpec(input: PromoteTenantSpecInput, em: EntityManager = DI.em): Promise<PromoteTenantSpecResult> {
+    return em.transactional((txEm) => this.promoteTenantSpecInTransaction(input, txEm));
   }
 
   async recordSpecFailure(spec: PortfolioImportParserSpec, options: { kind: 'runtime' | 'structural' } = { kind: 'structural' }): Promise<void> {
@@ -150,7 +117,7 @@ class PortfolioImportParserSpecService {
     const contentHash = hashPortfolioImportParserSpecPayload(payload);
     const broker = input.broker ? ({ financialBrokerKey: input.broker.financialBrokerKey } as FinancialBroker) : undefined;
     return DI.em.transactional(async (em) => {
-      await em.getConnection().execute('select pg_advisory_xact_lock(hashtext(?))', [`portfolio-parser-candidate:${input.tenant.tenantKey}:${input.broker?.financialBrokerKey ?? 0}:${fingerprint.shapeHash}`]);
+      await lockUntilCommit(em, `portfolio-parser-candidate:${input.tenant.tenantKey}:${input.broker?.financialBrokerKey ?? 0}:${fingerprint.shapeHash}`);
       const existing = await em.findOne(PortfolioImportParserSpec, { deletedAt: undefined, engineVersion: PORTFOLIO_IMPORT_SPEC_ENGINE_VERSION, financialBrokerKey: broker ?? null, schemaVersion: PORTFOLIO_IMPORT_SPEC_SCHEMA_VERSION, scope: PortfolioImportParserSpecScope.TENANT, shapeHash: fingerprint.shapeHash, status: PortfolioImportParserSpecStatus.ACTIVE, tenantKey: { tenantKey: input.tenant.tenantKey } });
       if (existing?.contentHash === contentHash) return existing;
       if (existing) {
@@ -182,6 +149,51 @@ class PortfolioImportParserSpecService {
       await em.persist(spec).flush();
       return spec;
     });
+  }
+
+  private async promoteTenantSpecInTransaction(input: PromoteTenantSpecInput, em: EntityManager): Promise<PromoteTenantSpecResult> {
+    const candidate = await em.findOne(PortfolioImportParserSpec, { deletedAt: undefined, portfolioImportParserSpecKey: input.parserSpecKey, scope: PortfolioImportParserSpecScope.TENANT, status: PortfolioImportParserSpecStatus.ACTIVE }, { populate: ['financialBrokerKey', 'tenantKey'] });
+    if (candidate?.financialBrokerKey?.financialBrokerKey !== input.expectedBrokerKey || candidate.tenantKey?.tenantKey !== input.expectedTenantKey || candidate.contentHash !== input.expectedContentHash) return { status: 'ineligible' };
+    const payload = parsePortfolioImportParserSpecPayload(candidate.specJson);
+    if (!isSafeForGlobalPromotion(payload)) return { status: 'ineligible' };
+    const contentHash = hashPortfolioImportParserSpecPayload(payload);
+    if (contentHash !== input.expectedContentHash) return { status: 'ineligible' };
+    await lockUntilCommit(em, `portfolio-parser:${candidate.financialBrokerKey.financialBrokerKey}:${candidate.shapeHash}`);
+    const existing = await em.findOne(PortfolioImportParserSpec, { deletedAt: undefined, engineVersion: PORTFOLIO_IMPORT_SPEC_ENGINE_VERSION, financialBrokerKey: candidate.financialBrokerKey, schemaVersion: PORTFOLIO_IMPORT_SPEC_SCHEMA_VERSION, scope: PortfolioImportParserSpecScope.GLOBAL, shapeHash: candidate.shapeHash, status: PortfolioImportParserSpecStatus.ACTIVE });
+    if (existing) {
+      if (existing.contentHash !== contentHash) {
+        logger.warn({ brokerId: candidate.financialBrokerKey.financialBrokerKey, candidateParserSpecKey: candidate.portfolioImportParserSpecKey, globalParserSpecKey: existing.portfolioImportParserSpecKey, shapeHash: candidate.shapeHash }, 'Portfolio import parser spec global promotion conflict');
+        return { globalParserSpecKey: existing.portfolioImportParserSpecKey, status: 'conflict' };
+      }
+      if (candidate.promotedAt) return { globalParserSpecKey: existing.portfolioImportParserSpecKey, status: 'promoted' };
+      existing.successCount += 1;
+      existing.lastSucceededAt = new Date();
+      candidate.promotedAt ??= new Date();
+      await em.persist([existing, candidate]).flush();
+      return { globalParserSpecKey: existing.portfolioImportParserSpecKey, status: 'promoted' };
+    }
+    const global = Object.assign(new PortfolioImportParserSpec(), {
+      contentHash,
+      engineVersion: PORTFOLIO_IMPORT_SPEC_ENGINE_VERSION,
+      failureCount: 0,
+      financialBrokerKey: candidate.financialBrokerKey,
+      fingerprintAlgorithm: candidate.fingerprintAlgorithm,
+      headerOrderHash: candidate.headerOrderHash,
+      headerSetHash: candidate.headerSetHash,
+      normalizedHeadersJson: uniqueMappedHeaders(payload),
+      promotedAt: new Date(),
+      schemaVersion: PORTFOLIO_IMPORT_SPEC_SCHEMA_VERSION,
+      scope: PortfolioImportParserSpecScope.GLOBAL,
+      shapeHash: candidate.shapeHash,
+      source: candidate.source,
+      specJson: payload,
+      specVersion: candidate.specVersion,
+      status: PortfolioImportParserSpecStatus.ACTIVE,
+      successCount: 1,
+    });
+    candidate.promotedAt ??= new Date();
+    await em.persist([global, candidate]).flush();
+    return { globalParserSpecKey: global.portfolioImportParserSpecKey, status: 'promoted' };
   }
 }
 
@@ -265,6 +277,15 @@ function isSafeForGlobalPromotion(payload: PortfolioImportParserSpecPayload) {
 }
 
 function isSafeGlobalString(value: string) { return !value.includes('@') && !/\d{8,}/.test(value) && value.length <= 80 && !/[a-z0-9]{40,}/i.test(value); }
+
+/**
+ * Take a transaction-scoped advisory lock on `em`'s open transaction, so it is held until that
+ * transaction commits. Without the transaction context the query goes to another pooled
+ * connection in autocommit and the lock is released as soon as it is granted.
+ */
+async function lockUntilCommit(em: EntityManager, key: string) {
+  await em.getConnection().execute('select pg_advisory_xact_lock(hashtext(?))', [key], 'run', em.getTransactionContext());
+}
 
 function mappedHeaderEmbedsCurrency(header: string, currency: string) { return new RegExp(`(?:^|[^A-Z])${currency}(?:$|[^A-Z])`, 'i').test(header); }
 

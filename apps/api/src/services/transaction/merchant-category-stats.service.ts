@@ -17,7 +17,7 @@ import logger from '@utils/logger';
  * `created_at`/`updated_at` are supplied explicitly because the column is NOT NULL with no DB
  * default; `default` and the serial PK fall through to their DB defaults.
  *
- * Stats are scoped **per user** (`appuser_key`, RAD-342 G4): a tenant is now a household of up to
+ * Stats are scoped **per user** (`appuser_key`): a tenant is a household of up to
  * two members, and each member's votes must stay their own — otherwise one member's bulk
  * categorization would silently steer the other's suggestions. The conflict target therefore
  * includes `appuser_key`, matching the per-user unique constraint.
@@ -41,8 +41,8 @@ export async function incrementMerchantCategoryStat(
 
 /**
  * Atomically lower the vote count for a (merchant, category, source, appuser) row. No-op when the
- * row does not exist — this mirrors the previous "only decrement if the stats exist" behaviour
- * without a separate read, and is safe against concurrent edits. Per-user scoped (RAD-342 G4).
+ * row does not exist — "only decrement if the stats exist" without a separate read, and safe
+ * against concurrent edits. Per-user scoped.
  */
 export async function decrementMerchantCategoryStat(
   em: EntityManager,
@@ -60,7 +60,7 @@ export async function decrementMerchantCategoryStat(
 }
 
 /**
- * Learn the per-user merchant→category mapping from an explicit user categorization (RAD-342.1).
+ * Learn the per-user merchant→category mapping from an explicit user categorization.
  *
  * Maintains exactly ONE active `AppuserMerchantCategory` per (appuser, merchant) — the categorizer's
  * `pickUniqueValidCategory` treats >1 active mapping as ambiguous and ignores the signal, so this is

@@ -10,8 +10,8 @@ const TRANSACTION_STATUS_NAMES = ['PENDING', 'BOOKED', 'EXPIRED'] as const;
 export class TransactionStatusSeeder extends Seeder {
   async run(em: EntityManager, ctx: Dictionary): Promise<void> {
     // Idempotent: skip rows that already exist so this seeder is safe to re-run
-    // against DBs that already have bootstrap rows (e.g. from a prior migration
-    // that inserted `EXPIRED` directly). See RAD-408.
+    // against DBs that already have bootstrap rows (e.g. from a migration that
+    // inserted `EXPIRED` directly).
     const ctxTransactionStatuses = await Promise.all(
       TRANSACTION_STATUS_NAMES.map(async (name) => {
         const existing = await em.findOne(TransactionStatus, { name });

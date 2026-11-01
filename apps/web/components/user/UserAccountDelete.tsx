@@ -3,8 +3,9 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import { usePostHog } from "posthog-js/react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
+import { useInstanceName } from "@/components/instance/InstanceNameProvider";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "@/i18n/navigation";
 import useDeleteUserAccount from "@/lib/api/user/useDeleteUserAccount";
@@ -30,6 +31,7 @@ export default function UserAccountDelete({
   closeModal,
 }: UserAccountDeleteProps) {
   const t = useTranslations();
+  const instanceName = useInstanceName();
   const router = useRouter();
   const queryClient = useQueryClient();
   const posthog = usePostHog();
@@ -39,11 +41,12 @@ export default function UserAccountDelete({
   const isDeleting =
     isProcessingDeletion || deleteUserAccountMutation.isPending;
 
-  useEffect(() => {
-    if (isOpen) {
-      setHasDeletionError(false);
-    }
-  }, [isOpen]);
+  // Clear a previous failure each time the dialog opens.
+  const [wasOpen, setWasOpen] = useState(isOpen);
+  if (isOpen !== wasOpen) {
+    setWasOpen(isOpen);
+    if (isOpen) setHasDeletionError(false);
+  }
 
   const onDeleteClickHandler = async () => {
     setIsProcessingDeletion(true);
@@ -92,15 +95,15 @@ export default function UserAccountDelete({
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>
-            {t("delete-wondermoney-account-confirm")}
+            {t("delete-wondermoney-account-confirm", { instanceName })}
           </AlertDialogTitle>
           <AlertDialogDescription>
             <span className="block">
-              {t("delete-wondermoney-account-description")}
+              {t("delete-wondermoney-account-description", { instanceName })}
             </span>
             {hasDeletionError && (
               <span className="text-destructive-text mt-3 block">
-                {t("delete-wondermoney-account-error")}
+                {t("delete-wondermoney-account-error", { instanceName })}
               </span>
             )}
           </AlertDialogDescription>
@@ -120,7 +123,7 @@ export default function UserAccountDelete({
           >
             {isDeleting
               ? t("deleting-account")
-              : t("delete-wondermoney-account-confirm")}
+              : t("delete-wondermoney-account-confirm", { instanceName })}
           </Button>
         </AlertDialogFooter>
       </AlertDialogContent>

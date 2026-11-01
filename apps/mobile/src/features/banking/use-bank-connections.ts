@@ -9,16 +9,16 @@ import { createBankConnectionsEndpoint, type BankConnectionsResponseDto } from '
 import { bankConnectionsKey } from './query-keys'
 
 /**
- * RAD-231/RAD-240 — read-only bank connection status loader. Mirrors the
+ * Read-only bank connection status loader. Mirrors the
  * read pattern of use-self-resource / use-net-worth-history: no retry, no
  * focus/reconnect refetch, MFA routed through blockAccess.
  * Invalid-response and 404 suppress the data so the screen can render a
- * safe "could not load" state instead of a stale answer. The DTO is a fixed
- * allowlist; the strict zod schema on the endpoint contract catches any
- * drift server-side.
+ * safe "could not load" state instead of a stale answer. The endpoint
+ * contract validates the fields the screen uses and strips the rest, so an
+ * additive API change doesn't fail the list.
  *
- * RAD-240 adds bounded polling: mobile has no push/webhook signal for when
- * a just-started GoCardless requisition finishes syncing, so while any
+ * Bounded polling: mobile has no push/webhook signal for when
+ * a just-started bank connection finishes syncing, so while any
  * connection reads `processing` this refetches on a fixed interval (see
  * connection-poll-policy.ts) instead of leaving the user staring at a
  * stale status with only a manual pull-to-refresh.

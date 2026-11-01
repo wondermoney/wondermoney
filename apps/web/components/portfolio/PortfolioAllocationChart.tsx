@@ -1,5 +1,6 @@
 "use client";
 
+import { useReducedMotion } from "motion/react";
 import { useTranslations } from "next-intl";
 import React, { useMemo, useState } from "react";
 
@@ -11,6 +12,7 @@ import usePortfolioAllocation from "@/lib/api/portfolio/usePortfolioAllocation";
 import type { SupportedCurrencyCodes } from "@/lib/utils/currencySymbol";
 import { formatCurrencyForLocale } from "@/lib/utils/formatCurrency";
 import { useFormatCurrency } from "@/lib/utils/useFormatCurrency";
+import { useFormatPercentage } from "@/lib/utils/useFormatPercentage";
 
 interface PortfolioAllocationChartProps {
   portfolioId: number | null;
@@ -19,7 +21,7 @@ interface PortfolioAllocationChartProps {
 }
 
 /**
- * RAD-572 — takes the locale explicitly rather than letting `Intl` fall back to
+ * Takes the locale explicitly rather than letting `Intl` fall back to
  * the runtime's. Exported for the chart's own test, which is why it is a plain
  * function and not the hook.
  */
@@ -56,6 +58,8 @@ const PortfolioAllocationChart: React.FC<PortfolioAllocationChartProps> = ({
   showSectorToggle = false,
 }) => {
   const t = useTranslations();
+  const formatPercentage = useFormatPercentage();
+  const shouldReduceMotion = useReducedMotion();
   const formatCurrency = useFormatCurrency();
   const [viewMode, setViewMode] = useState<"type" | "sector" | "asset">("type");
 
@@ -118,7 +122,8 @@ const PortfolioAllocationChart: React.FC<PortfolioAllocationChartProps> = ({
         <div className="mb-3 flex gap-1">
           <Button
             size="xs"
-            variant={viewMode === "type" ? "default" : "outline"}
+            variant={viewMode === "type" ? "default" : "secondary"}
+            aria-pressed={viewMode === "type"}
             onClick={() => setViewMode("type")}
             className="h-6 text-xs"
           >
@@ -127,7 +132,8 @@ const PortfolioAllocationChart: React.FC<PortfolioAllocationChartProps> = ({
           {allocationData?.bySector && (
             <Button
               size="xs"
-              variant={viewMode === "sector" ? "default" : "outline"}
+              variant={viewMode === "sector" ? "default" : "secondary"}
+              aria-pressed={viewMode === "sector"}
               onClick={() => setViewMode("sector")}
               className="h-6 text-xs"
             >
@@ -137,7 +143,8 @@ const PortfolioAllocationChart: React.FC<PortfolioAllocationChartProps> = ({
           {allocationData?.byAsset && (
             <Button
               size="xs"
-              variant={viewMode === "asset" ? "default" : "outline"}
+              variant={viewMode === "asset" ? "default" : "secondary"}
+              aria-pressed={viewMode === "asset"}
               onClick={() => setViewMode("asset")}
               className="h-6 text-xs"
             >
@@ -170,6 +177,7 @@ const PortfolioAllocationChart: React.FC<PortfolioAllocationChartProps> = ({
               nameKey="chartKey"
               valueKey="value"
               showLegend={false}
+              isAnimationActive={!shouldReduceMotion}
               className="mx-auto h-70 md:h-80"
               tooltipFormatter={(value, name, item) => (
                 <div className="flex w-full items-start justify-between gap-3">
@@ -187,7 +195,10 @@ const PortfolioAllocationChart: React.FC<PortfolioAllocationChartProps> = ({
                     </span>
                   </div>
                   <span className="text-muted-foreground font-mono font-medium tabular-nums">
-                    {Number(value).toFixed(1)}%
+                    {formatPercentage(Number(value) / 100, {
+                      minimumFractionDigits: 1,
+                      maximumFractionDigits: 1,
+                    })}
                   </span>
                 </div>
               )}
@@ -207,7 +218,10 @@ const PortfolioAllocationChart: React.FC<PortfolioAllocationChartProps> = ({
                   <span className="text-foreground text-sm">{item.label}</span>
                 </div>
                 <span className="text-foreground font-mono text-sm font-medium">
-                  {item.value.toFixed(1)}%
+                  {formatPercentage(item.value / 100, {
+                    minimumFractionDigits: 1,
+                    maximumFractionDigits: 1,
+                  })}
                 </span>
               </div>
             ))}

@@ -12,8 +12,7 @@ export interface TransactionEnrichmentAcceptanceRate {
 }
 
 /**
- * Acceptance rate over the most recently closed-loop-stamped enrichment suggestions (RAD-425 Slice 2
- * exit criteria: "acceptance rate measurable over N shadow suggestions"). Samples the most recent
+ * Acceptance rate over the most recently closed-loop-stamped enrichment suggestions. Samples the most recent
  * `limit` rows with a stamped `outcome` — both SHADOW (would-have-suggested) and COMPLETED
  * (applied write-mode) rows carry an outcome once a user categorizes the transaction. `null` rate
  * means no outcomes have been stamped yet, distinct from a real 0% rate.

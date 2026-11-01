@@ -4,7 +4,7 @@ const PRODUCTION_RECAPTCHA_HOSTS = new Set([
   "www.wonder.money",
 ]);
 
-export function isProductionRecaptchaRuntime({
+function isProductionRecaptchaRuntime({
   appUrl,
   vercelEnv,
 }: {

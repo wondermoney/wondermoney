@@ -123,6 +123,11 @@ export interface GoalActivity {
   occurredAt: Date | string;
   sourceKey?: null | number;
   sourceType?: null | string;
+  /**
+   * Set by the API (#154) on a `spent_from_goal` entry whose transaction has since expired (the
+   * bank retracted it) while this goal still funds it. Absent from older servers.
+   */
+  transactionExpired?: boolean;
   transactionKey?: EntityRef | null | number;
   type: GoalActivityType;
 }
@@ -134,12 +139,6 @@ export interface GoalTransactionFunding {
   goalTransactionFundingKey: number;
   reversedAt?: null | string;
   transactionKey?: EntityRef | number;
-}
-
-export interface GoalAccountLink {
-  accountKey: EntityRef | number;
-  goalAccountLinkKey: number;
-  goalKey: Goal | GoalKey;
 }
 
 export interface GetGoalsParams {
@@ -219,16 +218,8 @@ export interface FundGoalTransactionResponse {
   funding: GoalTransactionFunding;
 }
 
-export interface DeleteGoalFundTransactionRequest {
-  fundingKey: number;
-}
-
 export interface GoalAccountRequest {
   accountKey: number;
-}
-
-export interface GoalAccountResponse {
-  link: GoalAccountLink;
 }
 
 export interface GoalActivityParams {

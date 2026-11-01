@@ -1,11 +1,11 @@
-import { Entity, OneToOne, Property } from '@mikro-orm/core';
 import type { Rel } from '@mikro-orm/core';
+import { Entity, OneToOne, Property } from '@mikro-orm/decorators/legacy';
 
 import { FinancialTransaction } from './FinancialTransaction';
 
 /**
- * Certificado de Aforro-specific detail for a subscription `FinancialTransaction`
- * (RAD-445). Shares its primary key with the parent transaction (`transaction_key`) —
+ * Certificado de Aforro-specific detail for a subscription `FinancialTransaction`.
+ * Shares its primary key with the parent transaction (`transaction_key`) —
  * a true 1:1 extension table, not a surrogate-keyed side table — since exactly one
  * detail row exists per subscription transaction and it never outlives its parent.
  * Deliberately does NOT extend `Base`: it has no independent lifecycle (no

@@ -18,14 +18,25 @@ interface TransactionAmountLike {
   editedSettlementAmount?: null | number;
 }
 
+/*
+ * The user-currency amount of a transaction. An amount edit writes the account-currency value to
+ * `editedSettlementAmount` and the converted value to `appuserSettlementAmount`, so aggregates in
+ * the user's currency read the latter; preferring the edited column would sum a GBP edit as if
+ * it were EUR.
+ */
 export function buildEffectiveAmountSql(alias: string): string {
-  return `COALESCE(${alias}.edited_settlement_amount, ${alias}.appuser_settlement_amount)`;
+  return `${alias}.appuser_settlement_amount`;
 }
 
+/*
+ * The signed user-currency amount a transaction contributes to spending (negative is money out).
+ * A loan repayment contributes only its interest and fees, which are money out too; its principal
+ * is a transfer to the loan, and must not net against expenses as a positive amount.
+ */
 export function buildEffectiveSpendingAmountSql(transactionAlias: string, repaymentLinkAlias?: string): string {
   if (!repaymentLinkAlias) return buildEffectiveAmountSql(transactionAlias);
 
-  return `CASE WHEN ${repaymentLinkAlias}.loan_repayment_link_key IS NULL THEN ${buildEffectiveAmountSql(transactionAlias)} ELSE COALESCE(${repaymentLinkAlias}.interest_amount, 0) + COALESCE(${repaymentLinkAlias}.fee_amount, 0) END`;
+  return `CASE WHEN ${repaymentLinkAlias}.loan_repayment_link_key IS NULL THEN ${buildEffectiveAmountSql(transactionAlias)} ELSE -(COALESCE(${repaymentLinkAlias}.interest_amount, 0) + COALESCE(${repaymentLinkAlias}.fee_amount, 0)) END`;
 }
 
 export function filterExpenseTransactions<T extends TransactionAmountLike>(transactions: T[]): T[] {
@@ -33,7 +44,7 @@ export function filterExpenseTransactions<T extends TransactionAmountLike>(trans
 }
 
 export function getEffectiveAppuserAmount(transaction: TransactionAmountLike): number {
-  return transaction.editedSettlementAmount ?? transaction.appuserSettlementAmount ?? 0;
+  return transaction.appuserSettlementAmount ?? 0;
 }
 
 export function getNegativeEffectiveAppuserAmount(transaction: TransactionAmountLike): number {

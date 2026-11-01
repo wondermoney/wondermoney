@@ -4,6 +4,7 @@ import { I18nextProvider } from 'react-i18next'
 import { initMobileI18n } from '@/lib/i18n'
 
 import { LoanDetailScreen } from './loan-detail-screen'
+import { loansResponseSchema } from './loans-contract'
 import { LoansScreen } from './loans-screen'
 import { mapLoan, mapLoans, mapRepayments } from './loans-view-model'
 import { loanFixture, repaymentFixture } from './test-fixtures'
@@ -27,8 +28,7 @@ describe('loan screens', () => {
   it('shows truthful empty, stale, invalid, and loading states', async () => {
     const empty = await renderScreen(<LoansScreen state={{ status: 'loaded', loans: [] }} onOpenLoan={jest.fn()} onRefresh={jest.fn()} onBack={jest.fn()} onCreateLoan={jest.fn()} />)
     expect(empty.getByText('No loans')).toBeOnTheScreen()
-    // Matches web's data-forward preview — see DESIGN_HISTORY.md's Known
-    // Cross-Platform Gaps. This screen used to show no preview at all.
+    // Matches web's data-forward preview: an empty list still shows an example loan.
     expect(empty.getByText('Mortgage')).toBeOnTheScreen()
     expect(empty.getByText('Remaining term')).toBeOnTheScreen()
     expect(empty.getByText('28y 4m')).toBeOnTheScreen()
@@ -70,5 +70,14 @@ describe('loan screens', () => {
     const view = await renderScreen(<LoanDetailScreen state={{ status: 'invalid-id' }} onBack={jest.fn()} onRefresh={jest.fn()} />)
     expect(view.queryByRole('button', { name: 'Retry' })).not.toBeOnTheScreen()
     expect(view.getByRole('button', { name: 'Back to loans' })).toBeOnTheScreen()
+  })
+})
+
+describe('loan screens with values this build does not know', () => {
+  it('renders a loan whose type, status and frequency are new to this build', async () => {
+    const response = loansResponseSchema.parse({ loans: [{ ...loanFixture, type: 'CREDIT_LINE', status: 'IN_ARREARS', paymentFrequency: 'WEEKLY', regularPaymentAmount: 100, extra: true }] })
+    const view = await renderScreen(<LoansScreen state={{ status: 'loaded', loans: mapLoans(response) }} onOpenLoan={jest.fn()} onRefresh={jest.fn()} onBack={jest.fn()} onCreateLoan={jest.fn()} />)
+    expect(view.getByText('Other · Status unavailable')).toBeOnTheScreen()
+    expect(view.getByText(/on an unknown schedule/)).toBeOnTheScreen()
   })
 })

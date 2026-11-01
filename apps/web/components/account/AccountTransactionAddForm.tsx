@@ -4,8 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { ChevronRight } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
+import { useForm, useWatch } from "react-hook-form";
 
 import {
   Collapsible,
@@ -29,6 +28,10 @@ import { Label } from "@/components/ui/Label";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { Text } from "@/components/ui/Typography";
+import {
+  createTransactionFormSchema,
+  type TransactionFormValues,
+} from "@/lib/account/transaction-form-schema";
 import { createNewMerchantSelection } from "@/lib/account/transaction-merchant";
 import useAccounts, { Account } from "@/lib/api/account/useAccounts";
 import { TransactionOCRInfo } from "@/lib/api/account/useCreateTransactionOcr";
@@ -41,71 +44,13 @@ import {
   useAmountPlaceholder,
 } from "@/lib/utils/currency-field";
 import { getCurrencySymbol } from "@/lib/utils/currencySymbol";
-import { zLocaleNumber } from "@/lib/utils/number";
 
 import { CategoryComboBoxForm } from "../CategoryComboBoxForm";
-
-const createFormSchema = (t: (key: string) => string) =>
-  z
-    .object({
-      transactionDate: z.date().default(new Date()),
-      transactionTypeId: z.string().min(1, t("invalid-transaction-type")),
-      accountId: z.string().min(1, t("invalid-account")),
-      notes: z.string().optional(),
-      description: z.string(),
-      // RAD-634: the API contract is a positive magnitude plus a separate
-      // transactionTypeId for direction, but a YNAB/Monarch-style user
-      // naturally types an expense as e.g. "-127.53". Normalize the sign
-      // instead of rejecting it — the type field already conveys direction.
-      originalAmount: zLocaleNumber
-        .transform((val) => Math.abs(val))
-        .pipe(z.number().min(0))
-        .optional()
-        .transform((val) => (val === 0 ? undefined : val)),
-      originalCurrencyId: z.string().optional(),
-      exchangeRate: zLocaleNumber
-        .pipe(z.number().min(0))
-        .optional()
-        .transform((val) => (val === 0 ? undefined : val)),
-      settlementAmount: zLocaleNumber
-        .transform((val) => Math.abs(val))
-        .pipe(z.number().min(0, t("invalid-value"))),
-      settlementCurrencyId: z.string().min(1, t("invalid-value")),
-      transactionMerchantId: z.string(),
-      transactionMerchantName: z.string().trim(),
-      categoryId: z.string().optional(),
-    })
-    .refine(
-      (data) => {
-        if (data.originalAmount && !data.originalCurrencyId) {
-          return false;
-        }
-        if (!data.originalAmount && data.originalCurrencyId) {
-          return false;
-        }
-        return true;
-      },
-      {
-        message: t("invalid-original-amount-currency-pair"),
-        path: ["originalAmount"],
-      },
-    )
-    .refine(
-      (data) => {
-        return !!(data.transactionMerchantId || data.transactionMerchantName);
-      },
-      {
-        message: t("invalid-transaction-merchant-required"),
-        path: ["transactionMerchantId", "transactionMerchantName"],
-      },
-    );
-
-type FormSchema = z.infer<ReturnType<typeof createFormSchema>>;
 
 interface AccountTransactionAddFormProps {
   accounts: Account[];
   ocrData?: TransactionOCRInfo;
-  onSubmit: (data: FormSchema) => void;
+  onSubmit: (data: TransactionFormValues) => void;
 }
 
 const AccountTransactionAddForm: React.FC<AccountTransactionAddFormProps> = ({
@@ -115,7 +60,7 @@ const AccountTransactionAddForm: React.FC<AccountTransactionAddFormProps> = ({
 }) => {
   const t = useTranslations();
   const amountPlaceholder = useAmountPlaceholder();
-  const formSchema = useMemo(() => createFormSchema(t), [t]);
+  const formSchema = useMemo(() => createTransactionFormSchema(t), [t]);
   const defaultAccountId =
     accounts.length === 1 ? accounts[0].accountKey.toString() : "";
   const autoSelectedAccountIdRef = useRef<string | undefined>(
@@ -141,6 +86,7 @@ const AccountTransactionAddForm: React.FC<AccountTransactionAddFormProps> = ({
           ? `[NewMerchant]-${ocrData.transactionMerchantName}`
           : undefined,
       transactionMerchantName: ocrData?.transactionMerchantName ?? "",
+      hasOriginalAmount: false,
       originalAmount: undefined,
       originalCurrencyId: undefined,
       exchangeRate: undefined,
@@ -150,28 +96,35 @@ const AccountTransactionAddForm: React.FC<AccountTransactionAddFormProps> = ({
     },
   });
 
-  const { control, register, handleSubmit, setValue, getValues, watch } = form;
+  const { control, register, handleSubmit, setValue, getValues } = form;
 
   useEffect(() => {
     register("settlementCurrencyId");
     register("originalCurrencyId");
   }, [register]);
 
-  const selectedAccount = watch("accountId");
-  const selectedCurrency = watch(
-    "settlementCurrencyId",
-    ocrData?.settlementCurrencyId
+  const selectedAccount = useWatch({ control, name: "accountId" });
+  const watchedSettlementCurrency = useWatch({
+    control,
+    name: "settlementCurrencyId",
+  });
+  const selectedCurrency =
+    watchedSettlementCurrency === undefined && ocrData?.settlementCurrencyId
       ? String(ocrData.settlementCurrencyId)
-      : undefined,
-  );
-  const selectedOriginalCurrency = watch("originalCurrencyId");
+      : watchedSettlementCurrency;
+  const selectedOriginalCurrency = useWatch({
+    control,
+    name: "originalCurrencyId",
+  });
+  const isOriginalAmountChecked = useWatch({
+    control,
+    name: "hasOriginalAmount",
+  });
 
   const [isOtherDetailsOpen, setIsOtherDetailsOpen] = useState(false);
   const [newMerchantNames, setNewMerchantNames] = useState<string[]>([]);
   const [merchantSearch, setMerchantSearch] = useState("");
   const [debouncedMerchantSearch, setDebouncedMerchantSearch] = useState("");
-  const [isOriginalAmountChecked, setIsOriginalAmountChecked] =
-    useState<boolean>(false);
 
   useEffect(() => {
     const timeout = window.setTimeout(() => {
@@ -482,7 +435,7 @@ const AccountTransactionAddForm: React.FC<AccountTransactionAddFormProps> = ({
               <ChevronRight
                 className={cn(
                   isOtherDetailsOpen ? "rotate-90" : "",
-                  "text-foreground mr-2 inline-block h-5 w-5 shrink-0 transform transition-transform",
+                  "text-foreground mr-2 inline-block h-5 w-5 shrink-0 transform transition-transform motion-reduce:transition-none",
                 )}
                 aria-hidden="true"
               />
@@ -491,18 +444,22 @@ const AccountTransactionAddForm: React.FC<AccountTransactionAddFormProps> = ({
           </CollapsibleTrigger>
           <CollapsibleContent asChild className="px-2 pt-2">
             <div className="mb-1 flex flex-col gap-4">
-              <div className="flex flex-row items-center gap-2">
-                <Switch
-                  id="original-amount"
-                  onCheckedChange={(checked) =>
-                    setIsOriginalAmountChecked(checked)
-                  }
-                  defaultChecked={isOriginalAmountChecked}
-                />
-                <Label htmlFor="original-amount">
-                  {t("original-currency-amount")}
-                </Label>
-              </div>
+              <FormField
+                control={form.control}
+                name="hasOriginalAmount"
+                render={({ field }) => (
+                  <div className="flex flex-row items-center gap-2">
+                    <Switch
+                      id="original-amount"
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
+                    <Label htmlFor="original-amount">
+                      {t("original-currency-amount")}
+                    </Label>
+                  </div>
+                )}
+              />
               {isOriginalAmountChecked && (
                 <FormField
                   control={form.control}

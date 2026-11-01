@@ -1,5 +1,6 @@
 "use client";
 
+import { useReducedMotion } from "motion/react";
 import { useTranslations } from "next-intl";
 import { useMemo } from "react";
 
@@ -25,6 +26,7 @@ interface BudgetPieChartProps {
 const BudgetPieChart = ({ data, currency = "EUR" }: BudgetPieChartProps) => {
   const t = useTranslations();
   const formatCurrency = useFormatCurrency();
+  const shouldReduceMotion = useReducedMotion();
 
   // Calculate total budget for percentage calculation
   const totalBudget = data.reduce((sum, row) => sum + row.budgeted, 0);
@@ -74,6 +76,7 @@ const BudgetPieChart = ({ data, currency = "EUR" }: BudgetPieChartProps) => {
           config={chartConfig}
           nameKey="chartKey"
           valueKey="value"
+          isAnimationActive={!shouldReduceMotion}
           className="mx-auto h-[280px] md:h-[320px]"
           tooltipFormatter={(value, name, item) => (
             <div className="flex w-full items-start justify-between gap-3">

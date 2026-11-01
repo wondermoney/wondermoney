@@ -95,15 +95,15 @@ const FinancialMarketsTickerPrice: React.FC<
 
   // Recharts anchors an area chart at zero unless told otherwise, and a share
   // price is nowhere near zero: AAPL over the year to date sits between about
-  // 250 and 350, so nine tenths of the plot was empty and the whole year's
-  // movement was squeezed into the top strip. A price series answers
+  // 250 and 350, so nine tenths of the plot would be empty and the whole year's
+  // movement squeezed into the top strip. A price series answers
   // "change over time", not "how big", and the fill here is already a gradient
   // that fades to 5% rather than a solid block reading as magnitude — so a
   // padded data window is the honest frame, not a truncated one.
   //
   // The window is expressed as rounded ticks rather than as the padded extremes
-  // themselves, which is what made the axis read 239.15 / 269.15 / 299.15 /
-  // 347.56 — even steps and then a jump (RAD-611).
+  // themselves, which would make the axis read 239.15 / 269.15 / 299.15 /
+  // 347.56 — even steps and then a jump.
   const yTicks = useMemo<number[] | undefined>(() => {
     const values = (data ?? [])
       .map((point: { close: number }) => point.close)
@@ -147,8 +147,7 @@ const FinancialMarketsTickerPrice: React.FC<
         compact={compact}
       />
       {/* One height, not a contradictory `h-[400px] min-h-[500px]` pair where
-          the min silently won and the chart ate 500px of a data-dense page
-          (RAD-621). */}
+          the min silently wins and the chart eats 500px of a data-dense page. */}
       <div
         className={
           compact

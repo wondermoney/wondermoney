@@ -56,6 +56,7 @@ import { convertRecurrencyIntoMonthsInYear } from "@/lib/utils/recurrency";
 import { useFormatCurrency } from "@/lib/utils/useFormatCurrency";
 import { useFormatPercentage } from "@/lib/utils/useFormatPercentage";
 
+import { useRequireWizardBudget } from "../hooks/useRequireWizardBudget";
 import { useBudgetWizardStore } from "../store";
 
 // Code-split heavy chart component
@@ -93,12 +94,7 @@ export default function CategoriesPage() {
   const [isApplyingStarterProfile, setIsApplyingStarterProfile] =
     useState(false);
 
-  // Redirect if no budget id
-  useEffect(() => {
-    if (!budgetId) {
-      router.replace("/budgets/wizard");
-    }
-  }, [budgetId, router]);
+  const leaveWizard = useRequireWizardBudget(budgetId, router);
 
   const { data: budgetData, isLoading: isLoadingBudget } = useBudget(
     budgetId!,
@@ -180,13 +176,14 @@ export default function CategoriesPage() {
     return tableRows;
   }, [budgetTemplateData]);
 
-  const [budgetRows, setBudgetRows] = useState<BudgetRow[] | null>(null);
-
-  useEffect(() => {
-    if (data) {
-      setBudgetRows(data);
-    }
-  }, [data]);
+  const [budgetRows, setBudgetRows] = useState<BudgetRow[] | null>(data);
+  // Reset the editable rows when the template data changes (adjusted during
+  // render rather than in an effect).
+  const [prevData, setPrevData] = useState(data);
+  if (data !== prevData) {
+    setPrevData(data);
+    if (data) setBudgetRows(data);
+  }
 
   const currentBudgetRows = budgetRows ?? data;
 
@@ -259,9 +256,9 @@ export default function CategoriesPage() {
   };
 
   // Money still sitting unallocated is an ordinary state, not an achievement.
-  // The positive branch used to paint the whole card `bg-success-text/5` with
-  // green ink, which made an under-allocated budget — the state a first-time
-  // wizard user is *always* in — read as a win, and spent the register §5
+  // Painting the positive branch `bg-success-text/5` with green ink would make
+  // an under-allocated budget — the state a first-time wizard user is
+  // *always* in — read as a win, and spend the register §5
   // reserves for positive money movement on a figure that has not moved
   // anywhere yet. Positive and zero share the plain tile and ordinary ink.
   //
@@ -283,13 +280,11 @@ export default function CategoriesPage() {
     );
   };
 
-  // RAD-659: selecting a profile card used to eagerly write the suggested
-  // amounts straight into `budgetRows` here, so the category table and
-  // top-line totals already showed the suggested values by the time the
-  // user reached the "Apply suggestions" button below. Clicking it then
-  // visibly did nothing — the change had already happened silently on
-  // selection, even though the click is what actually persists it. Picking
-  // a profile now only records the selection so `selectedStarterSuggestions`
+  // Selecting a profile card must not write the suggested amounts into
+  // `budgetRows`: the table and totals would already show them by the time
+  // the user reached "Apply suggestions" below, so clicking it would visibly
+  // do nothing even though the click is what persists it. Picking
+  // a profile only records the selection so `selectedStarterSuggestions`
   // can render the preview card; the budget table itself is left untouched
   // until Apply actually applies (and saves) it.
   const onStarterProfileSelect = (profileKey: BudgetStarterProfileKey) => {
@@ -387,7 +382,7 @@ export default function CategoriesPage() {
   );
 
   const onBudgetComplete = () => {
-    // RAD-633: this wizard's store isn't route-scoped or persisted — it's a
+    // This wizard's store isn't route-scoped or persisted — it's a
     // module-level Zustand store that otherwise keeps household/dependents/
     // income/budgetId around after this "Finish". A later visit that lands
     // back on an earlier step (browser Back, a stale tab) would then find a
@@ -395,6 +390,7 @@ export default function CategoriesPage() {
     // in-progress, resuming/duplicating it instead of starting clean.
     // Capture the id the redirect below needs before clearing state.
     const completedBudgetId = budgetId;
+    leaveWizard();
     resetWizard();
 
     const handled = completeFirstRunHandoff(
@@ -448,8 +444,7 @@ export default function CategoriesPage() {
 
         <div className="mx-auto flex min-h-64 max-w-5xl flex-col gap-8">
           {/* Budget Summary Cards — the shared StatCard grid the rest of the
-              app uses. These were three bespoke cards whose label and help text
-              fought for one row and wrapped to two lines each (RAD-619). */}
+              app uses. */}
           <StatCardGrid>
             <StatCard
               icon={DollarSign}
@@ -685,9 +680,13 @@ export default function CategoriesPage() {
                           className="flex size-10 items-center justify-center rounded-md"
                           style={{
                             backgroundColor: category.bgColor,
+                            color: category.textColor,
                           }}
                         >
-                          <CategoryIcon icon={category.icon} />
+                          <CategoryIcon
+                            icon={category.icon}
+                            className="text-current"
+                          />
                         </div>
                         <Text className="font-medium">
                           {category.isSystemCategory

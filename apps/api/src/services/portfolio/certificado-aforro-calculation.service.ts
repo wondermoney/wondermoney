@@ -3,7 +3,7 @@ import { addQuarters, differenceInCalendarQuarters, isAfter, isBefore, isSameMon
 import logger from '@utils/logger';
 
 /**
- * Certificados de Aforro accrual engine (RAD-445).
+ * Certificados de Aforro accrual engine.
  *
  * Pure, dependency-free money math: given a lot's principal, subscription date, the
  * series' published monthly base rates and its loyalty-premium brackets, compute the
@@ -25,7 +25,7 @@ export interface CertificateSeriesConstants {
   termYears: number;
   /**
    * `'accrual'` series compute their value from the quarterly rate/premium formula below.
-   * `'static'` series (Séries A/B, RAD-446) are perpetual and have no published formula — their
+   * `'static'` series (Séries A/B) are perpetual and have no published formula — their
    * value is whatever the user last declared via a BUY/SELL transaction, so the holdings service
    * skips this whole engine for them and sums `remaining_batch` directly.
    */
@@ -38,7 +38,7 @@ export interface CertificateSeriesConstants {
  * risk: "Formula accuracy is the whole point of this feature").
  */
 export const CERTIFICADO_AFORRO_SERIES_CONSTANTS: Record<string, CertificateSeriesConstants> = {
-  // Séries A/B (RAD-446): perpetual, closed to new subscriptions, no published rate formula —
+  // Séries A/B: perpetual, closed to new subscriptions, no published rate formula —
   // capBps/floorBps/termYears are meaningless here and never read (the holdings service branches
   // on valuationMode before this engine is ever invoked for them).
   'CA-SERIE-A': { capBps: 0, floorBps: 0, termYears: 0, valuationMode: 'static' },

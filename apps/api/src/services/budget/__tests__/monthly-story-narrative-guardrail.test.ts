@@ -106,11 +106,9 @@ describe('guardrailPasses', () => {
     expect(guardrailPasses(['O teu património aumentou 1234.56 € este mês.'], ['O teu património aumentou 1.234,56 € este mês.'])).toBe(true);
   });
 
-  it('fails a full 1-cent difference at the EPSILON boundary (fix-round: EPSILON tightened from 0.01 to 0.005)', () => {
-    // This test previously locked in the opposite (and flagged-as-concerning) behavior: at the
-    // brief's original EPSILON of 0.01, a currency amount altered by exactly one cent (the
-    // smallest unit currency actually carries) silently passed the guardrail. After tightening
-    // EPSILON to 0.005 per fix-round review, a full 1-cent alteration is now correctly caught.
+  it('fails a full 1-cent difference at the EPSILON boundary', () => {
+    // A currency amount altered by exactly one cent (the smallest unit currency actually carries)
+    // must not pass the guardrail; with EPSILON at 0.005 a full 1-cent alteration is caught.
     expect(guardrailPasses(['420,00 €'], ['420,01 €'])).toBe(false);
   });
 

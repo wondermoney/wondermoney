@@ -65,7 +65,7 @@ export default function GoalsBudgetSection() {
 
         <div className="hidden overflow-x-auto md:block">
           <table className="w-full caption-bottom text-sm">
-            <thead className="text-muted-foreground border-b text-left text-xs tracking-wide uppercase">
+            <thead className="text-muted-foreground border-b text-left text-xs">
               <tr>
                 <th className="py-3 pr-4 font-medium">{t("goals.goal")}</th>
                 <th className="py-3 pr-4 text-right font-medium">

@@ -34,9 +34,9 @@ const TableCellDate: React.FC<TableCellDefaultProps> = ({
   className,
   alwaysShowYear = false,
 }) => {
-  // RAD-575: the locale comes from the URL segment, not the runtime. This
-  // called `toLocaleDateString(undefined, …)`, which resolves to the browser's
-  // locale on the client and the container's during SSR.
+  // The locale comes from the URL segment, not the runtime:
+  // `toLocaleDateString(undefined, …)` would resolve to the browser's locale
+  // on the client and the container's during SSR.
   const formatShortDate = useFormatShortDate();
   const locale = useLocale();
   const date = value instanceof Date ? value : new Date(value);

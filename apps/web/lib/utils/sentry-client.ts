@@ -1,6 +1,7 @@
 import * as Sentry from "@sentry/nextjs";
 
 import { instanceConfig } from "@/lib/instance";
+import { SENTRY_DATA_COLLECTION } from "@/lib/utils/sentry-data-collection";
 
 const WKWEBVIEW_BRIDGE_NOISE =
   "undefined is not an object (evaluating 'window.webkit.messageHandlers')";
@@ -37,18 +38,21 @@ export function initClientSentry() {
   Sentry.init({
     dsn: instanceConfig.sentryDsn ?? undefined,
 
-    sendDefaultPii: true,
+    dataCollection: SENTRY_DATA_COLLECTION,
     tracesSampleRate: 0.8,
     debug: false,
+    // Replays only around an error, never of whole sessions.
     replaysOnErrorSampleRate: 1.0,
-    replaysSessionSampleRate: 0.2,
+    replaysSessionSampleRate: 0,
     beforeSend(event) {
       // iOS WKWebView bridge noise from third-party/injected code; do not broaden.
       return isKnownWKWebViewBridgeNoise(event) ? null : event;
     },
     integrations: [
       Sentry.replayIntegration({
-        maskAllText: false,
+        // Screens show balances and transactions: text and inputs never leave the browser.
+        maskAllText: true,
+        maskAllInputs: true,
         blockAllMedia: true,
       }),
     ],

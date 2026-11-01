@@ -38,7 +38,7 @@ export interface GetNetWorthResponse {
   netWorth: NetWorth;
 }
 
-export async function getNetWorth(
+async function getNetWorth(
   apiClient: AxiosInstance = api,
 ): Promise<GetNetWorthResponse> {
   const { data } = await apiClient.get<RawNetWorthSummary>("/v1/net-worth");
@@ -51,7 +51,7 @@ export async function getNetWorth(
       rows: data.rows.map((row) => ({
         amount: row.balance,
         currencyCode: data.currencyCode,
-        // RAD-630: loans are always a liability regardless of sign, but an
+        // Loans are always a liability regardless of sign, but an
         // offline account (no type field yet, see AccountCreateOfflineModal)
         // can only represent debt — a credit card or loan balance — by being
         // entered as negative. Flag it here too so it gets the same
@@ -106,7 +106,7 @@ export interface NetWorthHistoryResponse {
 
 export type NetWorthHistoryGranularity = NetWorthHistoryResponse["granularity"];
 
-export async function getNetWorthHistory(
+async function getNetWorthHistory(
   months = 6,
   granularity: NetWorthHistoryGranularity = "monthly",
   apiClient: AxiosInstance = api,

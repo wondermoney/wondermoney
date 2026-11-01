@@ -223,9 +223,8 @@ export const themeTokens = {
       amountSmall: { fontFamily: dataFontFamily, fontSize: 13, lineHeight: 18, letterSpacing: 0, fontWeight: '400' },
     },
     /**
-     * Legacy role names, retuned onto the scale above. Keeping the names meant
-     * the ~138 files already reading `roles.*` picked up the new scale without
-     * being touched; new code uses `scale` directly.
+     * Older role names, retuned onto the scale above so code reading `roles.*`
+     * picks up the scale too; new code uses `scale` directly.
      *
      * @deprecated use `typography.scale`
      */
@@ -288,7 +287,7 @@ export const themeTokens = {
  * The OKLCH source of every colour above, as `L C H`, per half. This is what
  * `design-system-sync.test.ts` converts and compares, and what you edit when a
  * value needs to change. Mirrors `web/theme/globals.css` exactly (the source of
- * truth there; `web/DESIGN.md` no longer carries a machine-checked export block).
+ * truth).
  */
 export const colorSources = {
   light: {
@@ -367,8 +366,5 @@ export const colorSources = {
   },
 } as const
 
-export type ThemeTokens = typeof themeTokens
 export type ColorScheme = keyof typeof themeTokens.colors
 export type Palette = (typeof themeTokens.colors)[ColorScheme]
-/** The semantic colour names — the aliases above are excluded on purpose. */
-export type ColorToken = keyof typeof lightColors

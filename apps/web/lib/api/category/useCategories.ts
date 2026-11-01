@@ -25,7 +25,7 @@ export interface GetCategoriesResponse {
   categories: Category[];
 }
 
-export async function getCategories(
+async function getCategories(
   apiClient: AxiosInstance = api,
 ): Promise<GetCategoriesResponse> {
   const { data } = await apiClient.get<GetCategoriesResponse>("/v1/category");

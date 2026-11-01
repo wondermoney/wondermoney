@@ -7,7 +7,7 @@ export type CategorizationReason = 'ai_suggested' | 'user_edit' | DeterministicC
 export type CategorizableTransaction = Pick<Transaction, 'categorizationConfidence' | 'categorizationReason' | 'reviewed'>;
 
 /**
- * RAD-342.2 — the single source of truth mapping a categorization reason to a confidence tier.
+ * The single source of truth mapping a categorization reason to a confidence tier.
  * Returns null for "no-op" reasons (the categorizer didn't actually evaluate a signal), meaning
  * the caller should leave the transaction's existing confidence untouched.
  */

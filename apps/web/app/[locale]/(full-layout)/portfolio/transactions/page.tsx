@@ -3,6 +3,7 @@ import { endOfDay, startOfDay, subDays } from "date-fns";
 import { getServerApi } from "@/lib/api/api-server";
 import { getPortfolios } from "@/lib/api/portfolio/usePortfolios";
 import { getPortfoliosTransactions } from "@/lib/api/portfolio/usePortfoliosTransactions";
+import { serverDataTimestamp } from "@/lib/query/server-seed";
 
 import PortfolioTransactionsClient from "./portfolio-transactions-client";
 
@@ -13,6 +14,7 @@ export default async function PortfolioTransactionsPage({
 }) {
   const { locale } = await params;
   const api = await getServerApi(locale);
+  const serverRenderedAt = serverDataTimestamp();
 
   const defaultDateRange = {
     from: startOfDay(subDays(new Date(), 60)),
@@ -37,6 +39,7 @@ export default async function PortfolioTransactionsPage({
 
   return (
     <PortfolioTransactionsClient
+      serverRenderedAt={serverRenderedAt}
       initialPortfoliosData={portfoliosData}
       initialPortfoliosTransactionsData={portfoliosTransactionsData}
       hasAnyTransactions={

@@ -1,3 +1,4 @@
+import { StatusCodes } from 'http-status-codes';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { mockEm } from '@app/__tests__/__helpers__/mock-em';
@@ -99,7 +100,7 @@ describe('EmailNotificationPreferenceService', () => {
     await expect(service.getFreshWorkerEligibility(7, 'budgetAlerts')).resolves.toMatchObject({ deliverySupported: false, effectiveEnabled: false, storedEnabled: true });
   });
 
-  it.each([SupportedLanguages.EN, SupportedLanguages.PT])('supports delivery (and returns the language) for %s locale (RAD-320)', async (language) => {
+  it.each([SupportedLanguages.EN, SupportedLanguages.PT])('supports delivery (and returns the language) for %s locale', async (language) => {
     execute.mockResolvedValue(freshRow({ budgetAlertsEnabled: true, language }));
     await expect(service.getFreshWorkerEligibility(7, 'budgetAlerts')).resolves.toMatchObject({ deliverySupported: true, effectiveEnabled: true, language, storedEnabled: true });
   });
@@ -154,7 +155,7 @@ describe('EmailNotificationPreferenceService', () => {
   });
 
   it('rejects an empty patch', async () => {
-    await expect(service.patchForAppuser(7, {})).rejects.toMatchObject({ message: EMAIL_NOTIFICATION_PREFERENCE_ERROR.EMPTY_PATCH, status: 400 } satisfies Partial<BadRequestError>);
+    await expect(service.patchForAppuser(7, {})).rejects.toMatchObject({ message: EMAIL_NOTIFICATION_PREFERENCE_ERROR.EMPTY_PATCH, status: StatusCodes.BAD_REQUEST } satisfies Partial<BadRequestError>);
     expect(execute).not.toHaveBeenCalled();
   });
 
@@ -214,7 +215,7 @@ describe('EmailNotificationPreferenceService', () => {
     ['deleted', { deletedAt: new Date() }],
   ])('rejects enabling for %s when delivery is unsupported', async (_label, changes) => {
     execute.mockResolvedValue(Object.assign(eligibleUser(), changes));
-    await expect(service.patchForAppuser(7, { weeklyInsightsEnabled: true })).rejects.toMatchObject({ message: EMAIL_NOTIFICATION_PREFERENCE_ERROR.DELIVERY_UNSUPPORTED, status: 400 } satisfies Partial<BadRequestError>);
+    await expect(service.patchForAppuser(7, { weeklyInsightsEnabled: true })).rejects.toMatchObject({ message: EMAIL_NOTIFICATION_PREFERENCE_ERROR.DELIVERY_UNSUPPORTED, status: StatusCodes.BAD_REQUEST } satisfies Partial<BadRequestError>);
     expect(execute.mock.calls.some(([sql]) => String(sql).startsWith('insert into'))).toBe(false);
   });
 

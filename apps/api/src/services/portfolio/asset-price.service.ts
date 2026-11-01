@@ -1,6 +1,8 @@
 import { subDays } from 'date-fns';
+import { sql } from 'kysely';
 
 import { DI } from '@app/database/di';
+import { sqlQuery, toDate } from '@app/database/sql';
 import { FinancialAsset } from '@entity/FinancialAsset';
 import { FinancialAssetPrice } from '@entity/FinancialAssetPrice';
 
@@ -23,26 +25,24 @@ class AssetPriceService {
       price: number;
     }[]
   > {
-    const knex = DI.em.getKnex();
-    return (await knex
-      .with('latest_prices', (qb) => {
-        qb.select(['financial_asset_key', knex.raw('MAX(date) as date')])
-          .from('financial_asset_price')
-          .groupBy('financial_asset_key');
-      })
+    const prices = await sqlQuery(DI.em)
+      .with('latest_prices', (db) =>
+        db
+          .selectFrom('financial_asset_price')
+          .select(['financial_asset_key', sql<Date | string>`MAX(date)`.as('date')])
+          .groupBy('financial_asset_key'))
+      .selectFrom('financial_asset_price')
+      .innerJoin('latest_prices', (join) =>
+        join
+          .onRef('financial_asset_price.financial_asset_key', '=', 'latest_prices.financial_asset_key')
+          .onRef('financial_asset_price.date', '=', 'latest_prices.date'))
       .select(['latest_prices.financial_asset_key', 'latest_prices.date', 'financial_asset_price.price'])
-      .from('financial_asset_price')
-      .innerJoin('latest_prices', function () {
-        this.on('financial_asset_price.financial_asset_key', '=', 'latest_prices.financial_asset_key').andOn(
-          'financial_asset_price.date',
-          '=',
-          'latest_prices.date',
-        );
-      })) as {
-      date: Date;
-      financial_asset_key: number;
-      price: number;
-    }[];
+      .execute();
+    return prices.map((row) => ({
+      date: toDate(row.date),
+      financial_asset_key: row.financial_asset_key as number,
+      price: row.price as number,
+    }));
   }
 
   /**
@@ -67,11 +67,13 @@ class AssetPriceService {
    * @param days - Freshness window in days (default: 1)
    */
   async getRecentlyPricedAssetKeys(days = 1): Promise<Set<number>> {
-    const knex = DI.em.getKnex();
-    const rows = (await knex('financial_asset_price')
-      .distinct('financial_asset_key')
-      .where('date', '>=', subDays(new Date(), days))) as { financial_asset_key: number }[];
-    return new Set(rows.map((row) => row.financial_asset_key));
+    const rows = await sqlQuery(DI.em)
+      .selectFrom('financial_asset_price')
+      .select('financial_asset_key')
+      .distinct()
+      .where('date', '>=', subDays(new Date(), days))
+      .execute();
+    return new Set(rows.map((row) => row.financial_asset_key as number));
   }
 
   /**
@@ -133,23 +135,20 @@ class AssetPriceService {
       quantity: number;
     }[]
   > {
-    const knex = DI.em.getKnex();
-    return (await knex
+    const rows = await sqlQuery(DI.em)
+      .selectFrom('financial_asset_price as fap')
+      .innerJoin('financial_transaction as ft', 'fap.financial_asset_key', 'ft.financial_asset_key')
       .select(['fap.financial_asset_key', 'fap.date', 'fap.price', 'ft.quantity'])
-      .from('financial_asset_price as fap')
-      .join('financial_transaction as ft', 'fap.financial_asset_key', 'ft.financial_asset_key')
-      .where('ft.appuser_key', appuserKey)
-      .modify((qb) => {
-        if (fromDate) {
-          qb.where('fap.date', '>=', fromDate);
-        }
-      })
-      .orderBy('fap.date', 'asc')) as {
-      date: Date;
-      financial_asset_key: number;
-      price: number;
-      quantity: number;
-    }[];
+      .where('ft.appuser_key', '=', appuserKey)
+      .$if(Boolean(fromDate), (query) => query.where('fap.date', '>=', fromDate))
+      .orderBy('fap.date', 'asc')
+      .execute();
+    return rows.map((row) => ({
+      date: toDate(row.date as Date | string),
+      financial_asset_key: row.financial_asset_key as number,
+      price: row.price as number,
+      quantity: row.quantity as number,
+    }));
   }
   /**
    * Fetch historical prices for an index/benchmark from EODHD
@@ -165,9 +164,8 @@ class AssetPriceService {
   ): Promise<{ date: string; value: number }[]> {
     try {
       // EODHD indices use a `.INDX` suffix (e.g. GSPC.INDX for the S&P 500) rather
-      // than FMP's caret prefix (^GSPC) — callers of this method pass FMP-style
-      // symbols today; translate at the boundary rather than pushing this
-      // knowledge up into every caller.
+      // than the caret prefix (^GSPC) callers of this method pass; translate at the
+      // boundary rather than pushing this knowledge up into every caller.
       const eodhdSymbol = symbol.startsWith('^') ? `${symbol.slice(1)}.INDX` : symbol;
       const rows = await this.eodhd.getEndOfDayPrices(eodhdSymbol, { from, to });
       return rows

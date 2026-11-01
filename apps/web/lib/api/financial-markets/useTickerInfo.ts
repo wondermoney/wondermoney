@@ -6,8 +6,7 @@ import type { SupportedCurrencyCodes } from "@/lib/utils/currencySymbol";
 import api from "../api";
 
 // Only the profile + price-snapshot fields the info card / fundamentals block
-// render. The API's strict info DTO (RAD-228) dropped the long tail of raw FMP
-// fields this UI never used (cik, isin, dcf, ipoDate, …).
+// render; the API's strict info DTO carries nothing else.
 export interface CompanyInformation {
   symbol: string;
   companyName: string;
@@ -15,9 +14,8 @@ export interface CompanyInformation {
   industry: string;
   image: string;
   beta: number | null;
-  // Nullable on purpose. The provider's current plan returns no live quote
-  // (RAD-449), so these arrive as null and the info card is written to show
-  // "—" for them. Typing them as `number` is what forced the `?? 0` below.
+  // Nullable on purpose. The provider's current plan returns no live quote,
+  // so these arrive as null and the info card is written to show "—" for them.
   price: number | null;
   changePercentage: number | null;
 }
@@ -47,7 +45,7 @@ interface CompanyInfoApiResponse {
 // rejects an empty src, and this asset already ships as the search fallback.
 const FALLBACK_LOGO = "/chart-candlestick.svg";
 
-export async function getCompanyInfo(
+async function getCompanyInfo(
   ticker: string,
   apiClient: AxiosInstance = api,
 ): Promise<CompanyInformationResponse> {
@@ -68,13 +66,11 @@ export async function getCompanyInfo(
           industry: info.industry ?? "",
           image: info.image ?? FALLBACK_LOGO,
           beta: info.beta,
-          // Was `info.price ?? 0` / `info.changePercentage ?? 0`. The API
-          // returns null for both while the provider has no live quote, and
-          // coercing that to zero here made the info card's own `=== null`
-          // guard — written for exactly this case — impossible to reach. Apple
-          // rendered as "Price US$0.00 · Change (day) 0 %" next to a chart
-          // showing $330. A missing quote is not a quote of zero; pass the
-          // null through and let the card say "—".
+          // The API returns null for both while the provider has no live
+          // quote. Never coerce to zero: that would make the info card's own
+          // `=== null` guard unreachable and render "Price US$0.00" next to a
+          // chart showing $330. A missing quote is not a quote of zero; pass
+          // the null through and let the card say "—".
           price: info.price,
           changePercentage: info.changePercentage,
         }

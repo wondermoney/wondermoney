@@ -2,6 +2,7 @@ import * as Sentry from '@sentry/node';
 import { addQuarters } from 'date-fns';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { kyselyDouble } from '@app/__tests__/__helpers__/kysely-double';
 import { DI } from '@app/app';
 import logger from '@utils/logger';
 
@@ -31,36 +32,21 @@ const makeBatch = (overrides: Partial<HoldingBatch> = {}): HoldingBatch => ({
   ...overrides,
 });
 
-interface KnexMockData {
+interface DatabaseMockData {
   exchangeRateRow?: undefined | { rate: string };
   premiumRows?: Record<string, unknown>[];
   rateRows?: Record<string, unknown>[];
   taxExemptRows?: Record<string, unknown>[];
 }
 
-function makeKnexMock({ exchangeRateRow, premiumRows = [], rateRows = [], taxExemptRows = [] }: KnexMockData) {
-  return vi.fn(() => {
-    const builder = (table: string) => {
-      const chain = {
-        andWhere: () => chain,
-        first: () => Promise.resolve(exchangeRateRow),
-        innerJoin: () => chain,
-        orderBy: () => chain,
-        select: () => chain,
-        then: (resolve: (value: unknown) => unknown) => {
-          if (table.includes('certificado_aforro_rate_period')) return Promise.resolve(resolve(rateRows));
-          if (table.includes('certificado_aforro_premium_schedule')) return Promise.resolve(resolve(premiumRows));
-          if (table.includes('certificado_aforro_subscription_detail')) return Promise.resolve(resolve(taxExemptRows));
-          return Promise.resolve(resolve([]));
-        },
-        where: () => chain,
-        whereIn: () => chain,
-        whereNull: () => chain,
-      };
-      return chain;
-    };
-    return (table: string) => builder(table);
-  });
+function makeDatabaseMock({ exchangeRateRow, premiumRows = [], rateRows = [], taxExemptRows = [] }: DatabaseMockData) {
+  return vi.fn(() => kyselyDouble(({ sql }) => {
+    if (sql.includes('from "certificado_aforro_rate_period"')) return rateRows;
+    if (sql.includes('from "certificado_aforro_premium_schedule"')) return premiumRows;
+    if (sql.includes('from "certificado_aforro_subscription_detail"')) return taxExemptRows;
+    if (sql.includes('from "exchange_rate"')) return exchangeRateRow ? [exchangeRateRow] : [];
+    return [];
+  }).db);
 }
 
 // A standard-cohort premium schedule with a single bracket applying from year 1 onward, so
@@ -68,10 +54,10 @@ function makeKnexMock({ exchangeRateRow, premiumRows = [], rateRows = [], taxExe
 const standardPremiumRows = [{ cohort_start_date: null, financial_asset_key: 100, premium_bps: 25, year_from: 1, year_to: null }];
 // A wide rate-period history so any quarter start in this suite resolves without needing fallback.
 const wideRateRows = [
-  { base_rate_bps: 250, effective_month: new Date('2024-01-01'), financial_asset_key: 100 },
-  { base_rate_bps: 250, effective_month: new Date('2024-04-01'), financial_asset_key: 100 },
-  { base_rate_bps: 250, effective_month: new Date('2024-07-01'), financial_asset_key: 100 },
-  { base_rate_bps: 250, effective_month: new Date('2024-10-01'), financial_asset_key: 100 },
+  { base_rate_bps: 250, effective_month: '2024-01-01', financial_asset_key: 100 },
+  { base_rate_bps: 250, effective_month: '2024-04-01', financial_asset_key: 100 },
+  { base_rate_bps: 250, effective_month: '2024-07-01', financial_asset_key: 100 },
+  { base_rate_bps: 250, effective_month: '2024-10-01', financial_asset_key: 100 },
 ];
 
 beforeEach(() => {
@@ -87,7 +73,7 @@ describe('isSavingsCertificateBatch', () => {
 
 describe('enrichSavingsCertificateHoldings', () => {
   it('returns no holdings when there are no open batches', async () => {
-    Object.assign(DI.em, { getKnex: makeKnexMock({}) });
+    Object.assign(DI.em, { getKysely: makeDatabaseMock({}) });
 
     const result = await enrichSavingsCertificateHoldings([], 'EUR');
 
@@ -96,7 +82,7 @@ describe('enrichSavingsCertificateHoldings', () => {
 
   it('sums multiple lots of the same series with different subscription dates and taxExempt values into one holding', async () => {
     Object.assign(DI.em, {
-      getKnex: makeKnexMock({
+      getKysely: makeDatabaseMock({
         premiumRows: standardPremiumRows,
         rateRows: wideRateRows,
         taxExemptRows: [{ tax_exempt: true, transaction_key: 1 }],
@@ -122,7 +108,7 @@ describe('enrichSavingsCertificateHoldings', () => {
   });
 
   it('skips a lot with no matching series constants, warns, and does not throw', async () => {
-    Object.assign(DI.em, { getKnex: makeKnexMock({ premiumRows: standardPremiumRows, rateRows: wideRateRows }) });
+    Object.assign(DI.em, { getKysely: makeDatabaseMock({ premiumRows: standardPremiumRows, rateRows: wideRateRows }) });
 
     const batches = [makeBatch({ financial_asset_key: 999, financial_asset_symbol: 'CA-SERIE-UNKNOWN' })];
 
@@ -137,7 +123,7 @@ describe('enrichSavingsCertificateHoldings', () => {
 
   it('skips a lot that fails valuation (empty rate periods) without throwing, and other assets still value', async () => {
     Object.assign(DI.em, {
-      getKnex: makeKnexMock({
+      getKysely: makeDatabaseMock({
         // No rate periods at all for financial_asset_key 100 (Série F) or 200 (Série C) — a real
         // implementation would branch by asset key, but this suite deliberately supplies the SAME
         // (empty) rate rows for both assets in this test, then relies on 200 succeeding because it
@@ -149,7 +135,7 @@ describe('enrichSavingsCertificateHoldings', () => {
         rateRows: [
           // Only Série C (asset 200) has published rate periods; Série F (asset 100) has none,
           // so its lot must throw inside computeCertificateLotValue (no rate period at all).
-          { base_rate_bps: 350, effective_month: new Date('2024-01-01'), financial_asset_key: 200 },
+          { base_rate_bps: 350, effective_month: '2024-01-01', financial_asset_key: 200 },
         ],
         taxExemptRows: [],
       }),
@@ -183,7 +169,7 @@ describe('enrichSavingsCertificateHoldings', () => {
 
   it('skips only the failing lot within a holding that has a mix of valid and invalid lots', async () => {
     Object.assign(DI.em, {
-      getKnex: makeKnexMock({
+      getKysely: makeDatabaseMock({
         // Cohort only covers subscriptions from 2020 onward — a lot subscribed in 2015 will fail
         // resolvePremiumBrackets (no applicable cohort), the 2024 lot succeeds.
         premiumRows: [{ cohort_start_date: '2020-01-01', financial_asset_key: 100, premium_bps: 25, year_from: 1, year_to: null }],
@@ -214,7 +200,7 @@ describe('enrichSavingsCertificateHoldings', () => {
   it('alerts Sentry (not just the log) when EVERY lot of a holding fails to value, tagging the series', async () => {
     Object.assign(DI.em, {
       // No premium schedule and no rate periods at all — exactly the Séries C/D provisioning gap.
-      getKnex: makeKnexMock({ premiumRows: [], rateRows: [] }),
+      getKysely: makeDatabaseMock({ premiumRows: [], rateRows: [] }),
     });
 
     const batches = [
@@ -240,7 +226,7 @@ describe('enrichSavingsCertificateHoldings', () => {
 
   it('does not alert Sentry when at least one lot of the holding valued successfully', async () => {
     Object.assign(DI.em, {
-      getKnex: makeKnexMock({
+      getKysely: makeDatabaseMock({
         premiumRows: [{ cohort_start_date: '2020-01-01', financial_asset_key: 100, premium_bps: 25, year_from: 1, year_to: null }],
         rateRows: wideRateRows,
       }),
@@ -266,9 +252,9 @@ describe('enrichSavingsCertificateHoldings', () => {
 
     it('reports a real current rate for a brand-new lot with zero completed quarters', async () => {
       Object.assign(DI.em, {
-        getKnex: makeKnexMock({
+        getKysely: makeDatabaseMock({
           premiumRows: tieredPremiumRows,
-          rateRows: [{ base_rate_bps: 200, effective_month: new Date('2024-01-01'), financial_asset_key: 100 }],
+          rateRows: [{ base_rate_bps: 200, effective_month: '2024-01-01', financial_asset_key: 100 }],
         }),
       });
 
@@ -289,11 +275,11 @@ describe('enrichSavingsCertificateHoldings', () => {
 
     it('moves to the next premium tier on the anniversary, not a quarter later', async () => {
       Object.assign(DI.em, {
-        getKnex: makeKnexMock({
+        getKysely: makeDatabaseMock({
           premiumRows: tieredPremiumRows,
           rateRows: [
             ...wideRateRows.map((row) => ({ ...row, base_rate_bps: 200 })),
-            { base_rate_bps: 200, effective_month: new Date('2025-01-01'), financial_asset_key: 100 },
+            { base_rate_bps: 200, effective_month: '2025-01-01', financial_asset_key: 100 },
           ],
         }),
       });
@@ -313,7 +299,7 @@ describe('enrichSavingsCertificateHoldings', () => {
 
   it('converts accrued value using the EUR exchange rate when the portfolio currency is not EUR', async () => {
     Object.assign(DI.em, {
-      getKnex: makeKnexMock({
+      getKysely: makeDatabaseMock({
         exchangeRateRow: { rate: '1.1' },
         premiumRows: standardPremiumRows,
         rateRows: wideRateRows,
@@ -329,7 +315,7 @@ describe('enrichSavingsCertificateHoldings', () => {
     expect(result[0]!.currentValue).toBeGreaterThan(1100);
   });
 
-  describe('static valuation mode (Séries A/B, RAD-446)', () => {
+  describe('static valuation mode (Séries A/B)', () => {
     const makeStaticBatch = (overrides: Partial<HoldingBatch> = {}): HoldingBatch =>
       makeBatch({
         financial_asset_key: 300,
@@ -343,7 +329,7 @@ describe('enrichSavingsCertificateHoldings', () => {
       // If the service tried to read them for this asset it would find nothing and still work by
       // accident; the real assertion is that computeCertificateLotValue/resolvePremiumBrackets are
       // never reached at all (proven below by there being no accrual detail and an exact value).
-      Object.assign(DI.em, { getKnex: makeKnexMock({}) });
+      Object.assign(DI.em, { getKysely: makeDatabaseMock({}) });
 
       const batches = [makeStaticBatch({ remaining_batch: 2500, transaction_date: new Date('2010-01-01'), transaction_key: 1 })];
 
@@ -362,7 +348,7 @@ describe('enrichSavingsCertificateHoldings', () => {
     });
 
     it('sums multiple CA-SERIE-A/B lots — a top-up BUY followed by a partial SELL — into one static holding', async () => {
-      Object.assign(DI.em, { getKnex: makeKnexMock({}) });
+      Object.assign(DI.em, { getKysely: makeDatabaseMock({}) });
 
       // remaining_batch already reflects FIFO consumption from the SELL, exactly as the accrual
       // path's lots do: an initial BUY of 1000, a top-up BUY of 500 (remaining_batch 1500 after
@@ -383,7 +369,7 @@ describe('enrichSavingsCertificateHoldings', () => {
     });
 
     it('converts and rounds a static holding into the portfolio currency', async () => {
-      Object.assign(DI.em, { getKnex: makeKnexMock({ exchangeRateRow: { rate: '1.1' } }) });
+      Object.assign(DI.em, { getKysely: makeDatabaseMock({ exchangeRateRow: { rate: '1.1' } }) });
 
       const batches = [makeStaticBatch({ remaining_batch: 1000, transaction_date: new Date('2010-01-01'), transaction_key: 1 })];
 
@@ -396,7 +382,7 @@ describe('enrichSavingsCertificateHoldings', () => {
 
     it('leaves an accrual-mode series (CA-SERIE-F) in the same run completely unaffected by a static-mode holding', async () => {
       Object.assign(DI.em, {
-        getKnex: makeKnexMock({
+        getKysely: makeDatabaseMock({
           premiumRows: standardPremiumRows,
           rateRows: wideRateRows,
           taxExemptRows: [{ tax_exempt: false, transaction_key: 2 }],
@@ -427,12 +413,12 @@ describe('enrichSavingsCertificateHoldings', () => {
 
   it('converts and rounds quantity and every lots[] money field (accruedValue/principal) into the portfolio currency, not just the aggregate currentValue', async () => {
     Object.assign(DI.em, {
-      getKnex: makeKnexMock({
+      getKysely: makeDatabaseMock({
         exchangeRateRow: { rate: '1.1' },
         premiumRows: standardPremiumRows,
         // A single rate period so the lot accrues exactly one quarter of interest at a known
         // rate, keeping the expected converted+rounded figures easy to hand-verify.
-        rateRows: [{ base_rate_bps: 250, effective_month: new Date('2024-01-01'), financial_asset_key: 100 }],
+        rateRows: [{ base_rate_bps: 250, effective_month: '2024-01-01', financial_asset_key: 100 }],
         taxExemptRows: [{ tax_exempt: true, transaction_key: 1 }],
       }),
     });

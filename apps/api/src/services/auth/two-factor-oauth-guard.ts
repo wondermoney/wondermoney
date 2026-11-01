@@ -12,7 +12,7 @@ export const TWO_FACTOR_COOKIE_MAX_AGE_SECONDS = 60 * 5;
 
 // Internal cookie name the twoFactor plugin uses for its pending-verification state
 // (dist/plugins/two-factor/constant.mjs). NOT a public export — pinned to
-// better-auth 1.7.7 (the version this lockfile resolves). If a future version renames
+// better-auth 1.7.12 (the version this lockfile resolves). If a future version renames
 // it, this guard fails CLOSED (the OAuth sign-in for a 2FA user is blocked, not
 // bypassed), which the version-pin test below is meant to catch on upgrade.
 const TWO_FACTOR_PENDING_COOKIE = 'two_factor';

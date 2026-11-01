@@ -3,25 +3,22 @@ import { z } from 'zod';
 import { isSupportedTimeZone, REPORT_DEFAULT_TIME_ZONE } from '@service/reports/report-months';
 
 /**
- * RAD-156 — Reports filter envelope shared by every /v1/reports endpoint.
+ * Reports filter envelope shared by every /v1/reports endpoint.
  *
  * Express query parsing yields a plain string for single-value params and an
  * array for repeated params, so the array filters accept both and normalize.
  *
- * RAD-555 — `timezone` is the calendar a report groups its periods in. It is
+ * `timezone` is the calendar a report groups its periods in. It is
  * additive and optional: a caller that omits it gets `REPORT_DEFAULT_TIME_ZONE`,
  * which is echoed back in the response `filters` so the answer says which
  * calendar it was computed in.
  */
 const optionalStringArray = z
   .union([z.array(z.string()), z.string()])
-  .optional()
-  .transform((value) => {
-    if (value === undefined) return undefined;
-    return (Array.isArray(value) ? value : value.split(','))
-      .map((item) => item.trim())
-      .filter((item) => item.length > 0);
-  });
+  .transform((value) => (Array.isArray(value) ? value : value.split(','))
+    .map((item) => item.trim())
+    .filter((item) => item.length > 0))
+  .optional();
 
 /**
  * Upper bound on `fromDate`..`toDate`, mirroring `getHistoricalPriceRequestSchema`'s
@@ -37,7 +34,7 @@ export const reportFiltersSchema = z.object({
   accountKeys: optionalStringArray,
   categoryKeys: optionalStringArray,
   currencyKey: z.string().optional(),
-  fromDate: z.string().datetime({ offset: true }).optional(),
+  fromDate: z.iso.datetime({ offset: true }).optional(),
   includePending: z.coerce.boolean().optional().default(false),
   includeTransfers: z.coerce.boolean().optional().default(false),
   merchantKeys: optionalStringArray,
@@ -46,7 +43,7 @@ export const reportFiltersSchema = z.object({
     .refine(isSupportedTimeZone, { message: 'timezone must be a valid IANA time zone name, e.g. Europe/Lisbon' })
     .optional()
     .default(REPORT_DEFAULT_TIME_ZONE),
-  toDate: z.string().datetime({ offset: true }).optional(),
+  toDate: z.iso.datetime({ offset: true }).optional(),
 })
   // Applied to the object above rather than to a separate wrapper so that tightening any field
   // (e.g. making `fromDate`/`toDate` mandatory) stays a one-line edit inside the same literal.

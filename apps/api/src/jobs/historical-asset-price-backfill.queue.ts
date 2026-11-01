@@ -5,8 +5,8 @@ export const HISTORICAL_ASSET_PRICE_BACKFILL_QUEUE = 'asset-price.historical-bac
 export const HISTORICAL_ASSET_PRICE_BACKFILL_OPERATION_TYPE = 'asset-price.historical-backfill';
 
 /**
- * `policy` used to be unset, which means pg-boss's `standard` — no concurrency
- * constraint at all. Every other queue in this system declares one. `singleton`
+ * An unset `policy` means pg-boss's `standard` — no concurrency constraint at
+ * all. Every queue in this system declares one. `singleton`
  * caps the queue at one *active* job, which is the shape this work actually has:
  * a bulk provider fetch that should not run twice over the same portfolio, and
  * that already runs one-at-a-time under `batchSize: 1` on a single worker — the

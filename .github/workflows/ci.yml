@@ -31,10 +31,12 @@ jobs:
       - run: pnpm install --frozen-lockfile
       # The API's tests run in the "API extras" job (with coverage), on a runner of their own:
       # sharing two vCPUs with every other package's tests pushes some past their timeouts.
-      - run: pnpm turbo run type-check lint
+      # Two at a time on two vCPUs: the API's type-check and typed lint each need up to 4 GB.
+      - run: pnpm turbo run type-check lint --concurrency=2
       - run: pnpm turbo run test --filter='!@wondermoney/api'
+      # One at a time: the Next.js builds and the API compile don't fit in memory together.
       - name: Build
-        run: pnpm turbo run build
+        run: pnpm turbo run build --concurrency=1
         env:
           SKIP_ENV_VALIDATION: '1'
           NEXT_PUBLIC_SITE_URL: https://docs.wonder.money
@@ -46,6 +48,18 @@ jobs:
     defaults:
       run:
         working-directory: apps/api
+    # Disposable database for the migration snapshot check below, and the server on which
+    # tests of concurrent sessions create (and drop) their own throwaway database.
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: ci
+          POSTGRES_DB: wmdb
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready --health-interval 5s --health-timeout 5s --health-retries 10
     steps:
       - uses: actions/checkout@v7
       - uses: pnpm/action-setup@v6
@@ -63,14 +77,78 @@ jobs:
             git diff --stat -- src/generated/swagger.json
             exit 1
           fi
-      - name: Check worker deployment invariants
-        run: pnpm run test:worker-deployment
+      # Applies the whole chain to an empty database, then checks that applying did not touch
+      # the committed snapshot and that the snapshot matches the entities (a hand-written
+      # migration whose entity change was not reflected in the snapshot fails here).
+      - name: Check migrations apply cleanly and the snapshot is current
+        env:
+          DB_HOST: localhost
+          DB_PORT: '5432'
+          DB_DATABASE: wmdb
+          DB_USERNAME: postgres
+          DB_PASSWORD: ci
+          CREDENTIAL_ENCRYPTION_KEY_V1: AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=
+          EMAIL_OPT_OUT_SIGNING_SECRET: ci-only
+        run: |
+          pnpm run migrate:dev
+          if [ -n "$(git status --porcelain -- src/database/migrations)" ]; then
+            echo "::error::Applying migrations changed src/database/migrations. Migration apply must not write the snapshot."
+            git status --short -- src/database/migrations
+            exit 1
+          fi
+          if ! pnpm run migrate:dev:check; then
+            echo "::error::src/database/migrations/.snapshot-wmdb.json does not match the entities. Regenerate it with 'pnpm --filter @wondermoney/api migrate:dev:create' against a local database migrated to the head of the chain, and commit it with the migration."
+            exit 1
+          fi
       - name: Tests with coverage thresholds
+        env:
+          # Lets the tests that need several real sessions (pg-test-db.ts) run; skipped elsewhere.
+          TEST_POSTGRES_URL: postgres://postgres:ci@localhost:5432/wmdb
         run: pnpm run test:coverage
       # Reporting-only: known, triaged advisories remain in the production tree.
       - name: Audit production dependencies
         continue-on-error: true
         run: pnpm audit --prod --audit-level high
+
+  # Browser smoke tests: the Cypress specs that need only the web dev server (anonymous
+  # redirects, login page, mobile navigation). No API or database is started; the
+  # portfolio-import lane stays pending here because it needs the disposable local stack
+  # described in apps/web/docs/qa/worktree-e2e.md. Roughly 3-5 runner minutes per run, most
+  # of it the install and the first webpack compile.
+  web-e2e:
+    name: Web E2E smoke
+    runs-on: ${{ github.repository == 'wondermoney/wondermoney-internal' && 'blacksmith-2vcpu-ubuntu-2404' || 'ubuntu-latest' }}
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: apps/web
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      # `cypress: false` in allowBuilds keeps the binary out of every install, so fetch it
+      # here only, cached per lockfile.
+      - uses: actions/cache@v6
+        with:
+          path: ~/.cache/Cypress
+          key: cypress-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
+      - run: pnpm exec cypress install
+      - name: Run Cypress headless
+        run: pnpm e2e:headless
+        env:
+          NEXT_PUBLIC_API_URL: http://localhost:3001
+          NEXT_TELEMETRY_DISABLED: '1'
+      - name: Upload failure screenshots
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: cypress-screenshots
+          path: apps/web/cypress/screenshots
+          if-no-files-found: ignore
 
   mobile:
     name: Mobile extras
@@ -82,9 +160,10 @@ jobs:
     steps:
       - uses: actions/checkout@v7
       - uses: pnpm/action-setup@v6
+      # Expo tooling stays on Node 24 until Expo states Node 26 support (#43).
       - uses: actions/setup-node@v7
         with:
-          node-version-file: .nvmrc
+          node-version-file: apps/mobile/.nvmrc
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - name: Validate EAS configuration syntax

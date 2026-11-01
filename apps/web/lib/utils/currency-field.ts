@@ -10,9 +10,9 @@ import { normalizeFinancialLocale } from "@/lib/utils/formatCurrency";
  * Options for the currency picker that sits inside a money field.
  *
  * The trigger carries the code alone — "EUR" — while the list keeps the full
- * "EUR (Euro)". Rendering the long form in the trigger is what made the unit
- * price field unreadable: the label, the chevron and the amount fought over a
- * few dozen pixels and the currency clipped (RAD-616).
+ * "EUR (Euro)". Rendering the long form in the trigger makes the unit price
+ * field unreadable: the label, the chevron and the amount fight over a few
+ * dozen pixels and the currency clips.
  */
 export function buildCurrencyOptions(currencies: Currency[] | undefined) {
   return currencies?.map((currency) => ({
@@ -25,15 +25,12 @@ export function buildCurrencyOptions(currencies: Currency[] | undefined) {
 
 /**
  * The currency picker rendered as an inset chip rather than a full-height
- * block. Its hover fill used to run to the very edge of the field and paint
- * over the wrapper's rounded border, so the control looked broken on hover
- * (RAD-617); an inset chip with its own radius cannot reach the border.
+ * block. A full-height hover fill would run to the very edge of the field and
+ * paint over the wrapper's rounded border, so the control would look broken on
+ * hover; an inset chip with its own radius cannot reach the border.
  */
 export const CURRENCY_TRIGGER_CLASS =
   "h-8 min-w-0 rounded-md border-none px-2 font-mono text-sm";
-
-/** Matching inset for the adornment slot the chip sits in. */
-export const CURRENCY_ADORNMENT_CLASS = "pl-1";
 
 /**
  * The empty-state hint for a money input, in the reader's number format.

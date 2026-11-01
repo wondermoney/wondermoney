@@ -32,7 +32,7 @@ describe('portfolio import session endpoints', () => {
     }
     expect(portfolioImportSessionCreateResponseSchema.parse(response)).toEqual(response)
     expect(portfolioImportSessionCreateResponseSchema.safeParse({ ...response, uploadMethod: 'POST' }).success).toBe(false)
-    expect(portfolioImportSessionCreateResponseSchema.safeParse({ ...response, extra: true }).success).toBe(false)
+    expect(portfolioImportSessionCreateResponseSchema.parse({ ...response, extra: true })).toEqual(response)
   })
 
   it('requires a non-empty column mapping to submit', () => {
@@ -55,7 +55,61 @@ describe('portfolio import session endpoints', () => {
       },
     }
     expect(portfolioImportPreviewResponseSchema.parse(response)).toEqual(response)
-    expect(portfolioImportPreviewResponseSchema.safeParse({ ...response, status: 'not-a-real-status' }).success).toBe(false)
+    expect(portfolioImportPreviewResponseSchema.safeParse({ ...response, status: 42 }).success).toBe(false)
+  })
+
+  it('keeps parsing a preview when the API adds fields or statuses this build does not know', () => {
+    const row = { id: 1, raw: { Date: '2026-07-01' }, rowNumber: 1, status: 'quarantined', extra: true }
+    const parsed = portfolioImportPreviewResponseSchema.parse({
+      assetGroups: [{ candidates: [{ financialAssetId: 9, symbol: 'AAPL', score: 3 }], id: 1, rowCount: 1, status: 'pending_provider' }],
+      importSessionId: 41,
+      limits: { rowsPerBucket: 25, maxRows: 1000 },
+      portfolioId: 7,
+      rows: { duplicate: [], invalid: [], needsAssetReview: [], ready: [row], quarantined: [] },
+      status: 'awaiting_approval',
+      summary: {
+        blockingRows: 0, canConfirm: true, duplicateRows: 0, failedRows: 0, importableRows: 1, importedRows: 0,
+        invalidRows: 0, needsAssetReviewRows: 0, readyRows: 1, skippedRows: 0, totalRows: 1,
+        terminalKind: 'rolled_back', quarantinedRows: 0,
+      },
+      newTopLevel: {},
+    })
+    expect(parsed.status).toBe('unknown')
+    expect(parsed.rows.ready[0]).toEqual({ id: 1, raw: { Date: '2026-07-01' }, rowNumber: 1, status: 'unknown' })
+    expect(parsed.assetGroups[0]).toMatchObject({ status: 'unknown', candidates: [{ financialAssetId: 9, symbol: 'AAPL' }] })
+    expect(parsed.summary.terminalKind).toBe('unknown')
+    expect(parsed).not.toHaveProperty('newTopLevel')
+  })
+
+  it('relays a suggested column mapping back unmodified, including columns this build does not know', () => {
+    const suggestion = createSuggestPortfolioImportColumnMappingEndpoint(41).schema.parse({
+      columnMapping: { transactionDate: 'Date', settlementCurrency: 'Ccy' },
+      importSessionId: 41,
+      mappingSource: 'ai',
+      status: 'needs_column_mapping',
+      confidence: 0.9,
+    })
+    expect(suggestion.columnMapping).toEqual({ transactionDate: 'Date', settlementCurrency: 'Ccy' })
+    expect(suggestion).not.toHaveProperty('confidence')
+  })
+
+  it('parses failed rows from a finalized import, and a response from an API without the failed bucket', () => {
+    const failedRow = { failureReason: 'Insufficient quantity to sell', id: 7, raw: { Symbol: 'AMD' }, rowNumber: 7, status: 'failed' as const }
+    const response = {
+      assetGroups: [],
+      importSessionId: 41,
+      limits: { rowsPerBucket: 25 },
+      portfolioId: 7,
+      rows: { duplicate: [], failed: [failedRow], invalid: [], needsAssetReview: [], ready: [] },
+      status: 'partial' as const,
+      summary: {
+        blockingRows: 0, canConfirm: false, duplicateRows: 0, failedRows: 1, importableRows: 0, importedRows: 2,
+        invalidRows: 0, needsAssetReviewRows: 0, readyRows: 0, skippedRows: 0, totalRows: 3,
+      },
+    }
+    expect(portfolioImportPreviewResponseSchema.parse(response).rows.failed).toEqual([failedRow])
+    const { failed: _omitted, ...rowsWithoutFailed } = response.rows
+    expect(portfolioImportPreviewResponseSchema.safeParse({ ...response, rows: rowsWithoutFailed }).success).toBe(true)
   })
 
   it('parses a full preview response with structured asset groups', () => {

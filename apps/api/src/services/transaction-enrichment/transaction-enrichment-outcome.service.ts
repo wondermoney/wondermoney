@@ -9,7 +9,7 @@ interface StampTransactionEnrichmentOutcomeDeps {
 }
 
 /**
- * Close the loop on an AI enrichment suggestion (RAD-425 Slice 2): when a user sets a transaction's
+ * Close the loop on an AI enrichment suggestion: when a user sets a transaction's
  * category — whether accepting an applied `write`-mode suggestion, correcting one, or categorizing a
  * transaction that only got a `shadow` suggestion — stamp whether it matched the model's
  * `categorySuggestionKey`. Feeds the acceptance-rate metric. Stamps at most once per enrichment row

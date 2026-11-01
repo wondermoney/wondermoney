@@ -8,7 +8,7 @@ import { createAddToWatchlistEndpoint, createRemoveFromWatchlistEndpoint } from 
 import { watchlistKey } from './query-keys'
 
 /**
- * RAD-243 (slice 2) — add/remove are both idempotent server-side (adding an
+ * Add/remove are both idempotent server-side (adding an
  * already-watchlisted symbol, or removing an absent one, is a no-op, not an
  * error), so neither mutation builds a client-side "is it already there"
  * guard: the caller may always dispatch the intended action and let the

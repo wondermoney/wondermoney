@@ -35,10 +35,10 @@ export interface Account {
   nordigenRequisitionKey: number;
 }
 
-// Fields common to both providers. `expiresAt` is the one deliberately
-// shared field name: for GoCardless it's always been the requisition's own
-// expiry, and for Enable Banking the API maps its real `access.valid_until`
-// into this same key so callers can read `.expiresAt` uniformly without
+// Fields common to both requisition shapes. `expiresAt` is the one
+// deliberately shared field name: for legacy requisitions it's the
+// requisition's own expiry, and for Enable Banking the API maps its real
+// `access.valid_until` into this same key so callers can read `.expiresAt` uniformly without
 // branching on `provider` first.
 interface RequisitionBase {
   createdAt: string; // date
@@ -83,8 +83,7 @@ export interface RequisitionsResponse {
 /**
  * Both provider variants have their own primary key column
  * (`nordigenRequisitionKey` / `enableBankingConnectionKey`) rather than a
- * unified one — see plan §2/§8: unifying columns was judged riskier than the
- * provider swap itself. This is the one place that needs to know both names.
+ * unified one. This is the one place that needs to know both names.
  */
 export function getRequisitionKey(requisition: Requisition): number {
   return requisition.provider === "GoCardless"

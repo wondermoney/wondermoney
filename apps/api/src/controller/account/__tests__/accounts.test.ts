@@ -38,7 +38,7 @@ const makeResponse = () => ({ json: vi.fn() }) as unknown as Response;
 type AccountFixtureOverrides = Partial<
   Omit<Account, 'accountFinancialInstitutionKey' | 'accountOwnerAppuserKey' | 'currencyKey' | 'nordigenRequisitionKey' | 'tenantKey'>
 > & {
-  accountFinancialInstitutionKey?: null | { displayName?: null | string; logoUrl?: null | string };
+  accountFinancialInstitutionKey?: null | { displayName?: null | string; logoUrl?: null | string; name?: string };
   accountOwnerAppuserKey?: null | { appuserKey?: number; currencyKey?: { code?: string }; firstName?: string };
   currencyKey?: null | { code?: string };
   nordigenRequisitionKey?: null | { nordigenRequisitionKey?: number; requisitionId?: string };
@@ -142,6 +142,7 @@ describe('getAccount', () => {
         appuserCurrencyBalance: null,
         availableBalance: 0,
         balance: 0,
+        csvImportFormat: 'generic',
         currencyKey: { code: 'GBP' },
         isOwnedByViewer: false,
         isPrivate: false,
@@ -300,6 +301,7 @@ describe('getAccounts', () => {
           appuserCurrencyBalance: 0,
           availableBalance: 0,
           balance: 0,
+          csvImportFormat: 'generic',
           currencyKey: { code: 'EUR' },
           isOwnedByViewer: false,
           isPrivate: false,
@@ -317,6 +319,7 @@ describe('getAccounts', () => {
           appuserCurrencyBalance: null,
           availableBalance: null,
           balance: null,
+          csvImportFormat: 'generic',
           currencyKey: { code: 'EUR' },
           isOwnedByViewer: false,
           isPrivate: false,
@@ -420,7 +423,7 @@ describe('mapAccountSummary', () => {
     expect(() => mapAccountSummary(value)).toThrow(/currency relation is unavailable/i);
   });
 
-  // RAD-343 (C2): the DTO exposes privacy + ownership so the web can gate the
+  // The DTO exposes privacy + ownership so the web can gate the
   // owner-only privacy toggle and surface shared context.
   it('exposes isPrivate, isOwnedByViewer, and ownerFirstName', () => {
     const owned = account({
@@ -443,7 +446,17 @@ describe('mapAccountSummary', () => {
   });
 });
 
-describe('updateAccount privacy (RAD-343 C1)', () => {
+describe('mapAccountSummary csvImportFormat', () => {
+  it.each([
+    ['a supported bank', { displayName: 'Millennium BCP', name: 'Millennium BCP' }, 'bank'],
+    ['an unsupported bank', { displayName: '1822direkt', name: '1822direkt' }, 'generic'],
+    ['no financial institution', null, 'generic'],
+  ] as const)('tells the web which file %s imports', (_kind, institution, expected) => {
+    expect(mapAccountSummary(account({ accountFinancialInstitutionKey: institution })).csvImportFormat).toBe(expected);
+  });
+});
+
+describe('updateAccount privacy', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mocks.persist.mockReturnValue({ flush: vi.fn() });
@@ -482,9 +495,9 @@ describe('updateAccount privacy (RAD-343 C1)', () => {
   });
 });
 
-// RAD-651 — offline accounts had no way to record a type (checking/savings/credit/etc). These
-// tests cover the new optional `accountTypeId` request field and its wiring into `accountTypeKey`.
-describe('createOfflineAccount accountTypeId (RAD-651)', () => {
+// Offline accounts record a type (checking/savings/credit/etc). These tests cover the optional
+// `accountTypeId` request field and its wiring into `accountTypeKey`.
+describe('createOfflineAccount accountTypeId', () => {
   const currency = { currencyKey: 1 };
   const appuser = { appuserKey: 7, currencyKey: currency };
   const appUserTenant = { appuserKey: { appuserKey: 7 }, tenantKey: { tenantKey: 11 } };
@@ -550,16 +563,15 @@ describe('createOfflineAccount accountTypeId (RAD-651)', () => {
       next,
     );
 
-    // RAD-audit: was InternalServerError. An unknown accountTypeId is the client sending a
-    // bad id — 404, not a server fault that pages Sentry. The property under test
-    // (fails closed, persists nothing) is unchanged.
+    // An unknown accountTypeId is the client sending a bad id — 404, not a server fault
+    // that pages Sentry. It fails closed and persists nothing.
     expect(next).toHaveBeenCalledWith(expect.any(NotFoundError));
     expect(sendStatus).not.toHaveBeenCalled();
     expect(mocks.persist).not.toHaveBeenCalled();
   });
 });
 
-describe('getAccountTypes (RAD-651)', () => {
+describe('getAccountTypes', () => {
   beforeEach(() => vi.clearAllMocks());
 
   it('lists account types ordered by description, exposing only key and description', async () => {

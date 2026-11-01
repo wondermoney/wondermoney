@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import { createOfflineAccountRequestSchema, getTransactionMerchantsRequestSchema, transactionOCRModelOutputSchema } from '../account';
 
-describe('createOfflineAccountRequestSchema (RAD-651)', () => {
+describe('createOfflineAccountRequestSchema', () => {
   const baseBody = { currencyId: 1, currentBalance: 100, name: 'Cash' };
 
   it('accepts a request without accountTypeId, leaving it undefined', () => {
@@ -90,6 +90,39 @@ describe('transaction OCR model output schema', () => {
       transactionDate: '2026-06-04T12:00:00.000Z',
       transactionMerchantName: 'Coffee Shop',
     });
+  });
+
+  it('accepts the date-only transaction date a receipt prints, keeping its calendar day in every time zone', () => {
+    const parsed = transactionOCRModelOutputSchema.parse({
+      settlementAmount: 8.7,
+      settlementCurrency: 'EUR',
+      transactionDate: '2026-10-14',
+      transactionMerchantName: 'CAFE LISBOA',
+    });
+
+    expect(parsed.transactionDate).toBe('2026-10-14T12:00:00.000Z');
+  });
+
+  it('accepts a transaction date and time printed without a time zone', () => {
+    const parsed = transactionOCRModelOutputSchema.parse({
+      settlementAmount: 8.7,
+      settlementCurrency: 'EUR',
+      transactionDate: '2026-10-14T13:05:00',
+      transactionMerchantName: 'CAFE LISBOA',
+    });
+
+    expect(parsed.transactionDate.slice(0, 10)).toBe('2026-10-14');
+  });
+
+  it('rejects an impossible calendar date', () => {
+    expect(() =>
+      transactionOCRModelOutputSchema.parse({
+        settlementAmount: 8.7,
+        settlementCurrency: 'EUR',
+        transactionDate: '2026-02-31',
+        transactionMerchantName: 'CAFE LISBOA',
+      }),
+    ).toThrow();
   });
 
   it('rejects malformed OCR output', () => {

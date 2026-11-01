@@ -74,10 +74,10 @@ describe('goals contract', () => {
     ['nonfinite contribution', { ...goalFixture, monthlyContributionTarget: Infinity }],
     ['missing name', { ...goalFixture, name: undefined }],
     ['fractional priority', { ...goalFixture, priority: 1.2 }],
-    ['bad lifecycle', { ...goalFixture, status: 'deleted' }],
+    ['non-string lifecycle', { ...goalFixture, status: 3 }],
     ['nonfinite summary', { ...goalFixture, summary: { ...goalFixture.summary, availableAmount: NaN } }],
     ['missing summary field', { ...goalFixture, summary: { ...goalFixture.summary, spentAmount: undefined } }],
-    ['bad summary status', { ...goalFixture, summary: { ...goalFixture.summary, status: 'complete' } }],
+    ['missing summary status', { ...goalFixture, summary: { ...goalFixture.summary, status: undefined } }],
     ['missing target', { ...goalFixture, targetAmount: undefined }],
     ['nonfinite target', { ...goalFixture, targetAmount: Infinity }],
     ['missing date', { ...goalFixture, targetDate: undefined }],
@@ -85,6 +85,17 @@ describe('goals contract', () => {
   ])('rejects %s', (_label, candidate) => {
     const response = 'goals' in candidate ? candidate : { goals: [candidate] }
     expect(goalsResponseSchema.safeParse(response).success).toBe(false)
+  })
+
+  it('reads a status this build does not know as unknown and strips added fields', () => {
+    const parsed = goalsResponseSchema.parse({ goals: [
+      { ...goalFixture, status: 'deleted', summary: { ...goalFixture.summary, status: 'complete', forecast: 1 }, colour: 'red' },
+      goalFixture,
+    ] })
+    expect(parsed.goals[0]).toMatchObject({ status: 'unknown', summary: { status: 'unknown' } })
+    expect(parsed.goals[0]).not.toHaveProperty('colour')
+    expect(parsed.goals[0]!.summary).not.toHaveProperty('forecast')
+    expect(parsed.goals[1]!.status).toBe(goalFixture.status)
   })
 
   it('uses the endpoint-specific item schema', () => {
@@ -235,6 +246,12 @@ describe('goals contract', () => {
     expect(parsed).toMatchObject({ goal: { goalKey: 3 }, summary: { status: 'behind' } })
   })
 
+  it('carries the expired-transaction flag on a funding entry', () => {
+    const entry = { goalActivityKey: 5, type: 'spent_from_goal', amount: 20, occurredAt: '2026-07-19T10:00:00.000Z' }
+    const parsed = goalActivityResponseSchema.parse({ activities: [{ ...entry, transactionExpired: true }, entry], limit: 25, offset: 0, total: 2 })
+    expect(parsed.activities.map((activity) => activity.transactionExpired)).toEqual([true, undefined])
+  })
+
   it('keeps only safe raw activity fields and normalizes the populated currency code', () => {
     const parsed = goalActivityResponseSchema.parse({
       activities: [{
@@ -266,12 +283,17 @@ describe('goals contract', () => {
 
   it.each([
     ['unsafe activity id', { goalActivityKey: 0, type: 'assigned', occurredAt: '2026-07-19T10:00:00.000Z' }],
-    ['unknown type', { goalActivityKey: 1, type: 'transferred', occurredAt: '2026-07-19T10:00:00.000Z' }],
+    ['missing type', { goalActivityKey: 1, occurredAt: '2026-07-19T10:00:00.000Z' }],
     ['nonfinite amount', { goalActivityKey: 1, type: 'assigned', amount: Infinity, occurredAt: '2026-07-19T10:00:00.000Z' }],
     ['invalid date', { goalActivityKey: 1, type: 'assigned', occurredAt: '19 July' }],
     ['lowercase currency', { goalActivityKey: 1, type: 'assigned', occurredAt: '2026-07-19T10:00:00.000Z', currencyKey: { code: 'eur' } }],
   ])('rejects %s in activity', (_label, activity) => {
     expect(goalActivityResponseSchema.safeParse({ activities: [activity], limit: 25, offset: 0, total: 1 }).success).toBe(false)
+  })
+
+  it('reads an activity type this build does not know as unknown', () => {
+    const parsed = goalActivityResponseSchema.parse({ activities: [{ goalActivityKey: 1, type: 'transferred', occurredAt: '2026-07-19T10:00:00.000Z' }], limit: 25, offset: 0, total: 1 })
+    expect(parsed.activities[0]!.type).toBe('unknown')
   })
 })
 
@@ -295,8 +317,10 @@ describe('debt strategy contract', () => {
     ['non-finite balance', { ...debtStrategyFixture, debts: [{ ...debtStrategyFixture.debts[0], balance: Infinity }] }],
     ['unsafe debt id', { ...debtStrategyFixture, debts: [{ ...debtStrategyFixture.debts[0], id: 0 }] }],
     ['fractional strategy months', { ...debtStrategyFixture, avalanche: { ...debtStrategyFixture.avalanche, months: 1.5 } }],
-    ['extra unknown field', { ...debtStrategyFixture, unexpected: true }],
   ])('rejects %s', (_label, response) => {
     expect(debtStrategyResponseSchema.safeParse(response).success).toBe(false)
+  })
+  it('strips fields the API adds', () => {
+    expect(debtStrategyResponseSchema.parse({ ...debtStrategyFixture, unexpected: true })).toEqual(debtStrategyFixture)
   })
 })

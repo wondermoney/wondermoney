@@ -107,7 +107,7 @@ export const demoTransactionPatterns = [
     maxValue: 20,
     merchant: 'Mb Way Tiago',
     minValue: 10,
-    type: 'TRANSFER_IN',
+    type: 'DEPOSIT',
   },
   {
     category: 'HOBBIES_AND_LEISURE',
@@ -187,6 +187,6 @@ export const demoTransactionPatterns = [
     maxValue: 2000,
     merchant: 'Acme Consulting',
     minValue: 2000,
-    type: 'TRANSFER_IN',
+    type: 'DEPOSIT',
   },
 ] as const;

@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 
 import { getServerApi } from "@/lib/api/api-server";
 import { getPortfolio } from "@/lib/api/portfolio/usePortfolio";
+import { serverDataTimestamp } from "@/lib/query/server-seed";
 
 import PortfolioClient from "./portfolio-client";
 
@@ -18,12 +19,14 @@ export default async function PortfolioPage({ params }: PortfolioPageProps) {
   }
 
   const api = await getServerApi(locale);
+  const serverRenderedAt = serverDataTimestamp();
 
   const portfolioData = await getPortfolio(portfolioId, api);
 
   return (
     <PortfolioClient
       portfolioId={portfolioId}
+      serverRenderedAt={serverRenderedAt}
       initialPortfolioData={portfolioData}
     />
   );

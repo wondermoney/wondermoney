@@ -14,7 +14,7 @@ La API aplica los cambios en la base de datos al arrancar. Para quedarte en una 
 
 ## Hacer una copia de seguridad
 
-Todo lo importante está en la base de datos Postgres, además del volumen de MinIO si usas el almacenamiento incluido.
+Todo lo importante está en la base de datos Postgres, además del volumen `storage-data` si usas el almacenamiento incluido.
 
 ```sh
 docker compose exec -T postgres pg_dump -U wondermoney -Fc wondermoney > wondermoney-$(date +%F).dump

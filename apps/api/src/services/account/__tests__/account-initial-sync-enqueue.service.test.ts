@@ -155,7 +155,7 @@ describe('account initial sync enqueue service', () => {
     expect(em.findOne).toHaveBeenCalledTimes(1);
   });
 
-  it('fails closed when the connection has no stored tenant (RAD-244)', async () => {
+  it('fails closed when the connection has no stored tenant', async () => {
     // No tenant on the requisition — a legacy or cross-tenant work item must
     // never reach pg-boss. The service should reject before the queue is touched.
     em.findOne.mockReset();
@@ -343,9 +343,9 @@ describe('account initial sync enqueue service', () => {
   });
 });
 
-// Phase 1d: enqueueing from an EnableBankingConnection instead of a NordigenRequisition. Discriminated
-// on `enableBankingConnectionKey` presence (duck-typed, see `normalizeSyncTarget`'s docblock) — every
-// other line of the allocation/enqueue body is the exact same code the GoCardless tests above exercise.
+// Enqueueing from an EnableBankingConnection instead of a NordigenRequisition. Discriminated on
+// `enableBankingConnectionKey` presence (duck-typed, see `normalizeSyncTarget`'s docblock) — every
+// other line of the allocation/enqueue body is the exact same code the requisition tests above exercise.
 describe('account initial sync enqueue service — Enable Banking', () => {
   beforeEach(() => {
     vi.resetAllMocks();

@@ -9,13 +9,6 @@ export interface CategoryEditRequest {
   color?: string;
 }
 
-export interface CategoryEditResponse {
-  categoryKey: number;
-  name: string;
-  icon?: string;
-  color?: string;
-}
-
 const useEditCategory = () => {
   return useMutation({
     mutationFn: ({ categoryKey, name, icon, color }: CategoryEditRequest) =>

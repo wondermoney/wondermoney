@@ -9,7 +9,7 @@ import { InternalServerError } from '@utils/errors';
 import logger from '@utils/logger';
 
 /**
- * Phase 1d: the shape of one entry in Enable Banking's `POST /sessions` response `accounts[]`
+ * The shape of one entry in Enable Banking's `POST /sessions` response `accounts[]`
  * array (confirmed against https://enablebanking.com/docs/api/reference/) — the ONLY place Enable
  * Banking hands back full account identity (IBAN, holder name, currency, and `uid`, the id used
  * for every later `/accounts/{uid}/...` call). There is no separate "list accounts" or "account
@@ -41,21 +41,19 @@ interface EntityManagerLike {
 const DUPLICATE_ERROR_CODES = new Set(['23505']);
 
 /**
- * Persists `Account` rows from a freshly-linked `EnableBankingConnection`'s session accounts —
- * the Enable Banking equivalent of `controller/account/sync.ts`'s `createInitialAccounts`
- * (GoCardless), adapted for two structural differences:
+ * Persists `Account` rows from a freshly-linked `EnableBankingConnection`'s session accounts.
+ * Two things shape it:
  *
  * 1. This runs from `enableBankingCallback`, an **unauthenticated** provider redirect with no
  *    `req.user`/`req.tenant` — identity comes from `connection.appuserKey`/`.tenantKey` (the
- *    values `startBankConnection` captured at link-start time, RAD-244-style) instead.
+ *    values `startBankConnection` captured at link-start time) instead.
  * 2. Enable Banking's session account (`uid`/`account_id.iban`/`name`/`currency`) carries no
  *    balance and no institution id of its own — the institution is the connection's own
  *    `aspspName`/`aspspCountry` (one connection == one bank), and balances are fetched later by
  *    the initial-sync job this function's caller enqueues, not here.
  *
  * Best-effort per account: a single account with an unresolvable currency is skipped (logged),
- * not fatal to the whole batch — unlike GoCardless's `createInitialAccounts`, which can `next()`
- * a request-scoped error, this has no HTTP response to fail; skipping and letting the rest of the
+ * not fatal to the whole batch: there is no HTTP response to fail, and letting the rest of the
  * bank's accounts link is strictly better than aborting all of them over one bad row.
  */
 export async function createInitialEnableBankingAccounts(
@@ -105,9 +103,8 @@ export async function createInitialEnableBankingAccounts(
       continue;
     }
 
-    // Same soft-delete-revival + accountId/owner keying as `createInitialAccounts` (GoCardless);
-    // no IBAN-fallback dedup here (unlike `account-initial-sync-account.service.ts`'s RAD-631
-    // fix) — that fix exists for *re-sync* collapsing a second requisition onto the same
+    // Soft-delete revival + accountId/owner keying. No IBAN-fallback dedup here (unlike
+    // `account-initial-sync-account.service.ts`) — that dedup exists for *re-sync* collapsing a second requisition onto the same
     // real-world account, which cannot happen at first-link time, since this only ever runs once
     // per connection immediately after `changeToLinked`.
     const existingDeleted = await em.findOne(Account, { accountId, accountOwnerAppuserKey: connection.appuserKey, deletedAt: { $ne: null } });

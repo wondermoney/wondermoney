@@ -1,10 +1,10 @@
 import type { BankConnectionRow } from './connection-status-view-model'
 
 /**
- * RAD-518 — deriving the bank-connection funnel's terminal steps from the only
+ * Derives the bank-connection funnel's terminal steps from the only
  * evidence this app actually has.
  *
- * There is no app-scheme callback from GoCardless consent (see
+ * There is no app-scheme callback from bank consent (see
  * `start-connection-contract.ts`) and no push signal, so "the connection
  * finished" is never handed to us — it is observed, by the connections list
  * polling a `processing` row until it settles (`use-bank-connections.ts`). This

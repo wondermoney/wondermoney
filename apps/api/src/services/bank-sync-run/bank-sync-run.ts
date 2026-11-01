@@ -158,16 +158,13 @@ export interface RunBankSyncPhasesResult {
 /**
  * Run the account and transaction phases for a bank-sync run.
  *
- * Behaviour mirrors the prior inline flow in each worker:
+ * Behaviour:
  *  - optional `prePhase` (credential precheck)
  *  - account phase
  *  - transaction phase only if account succeeded
  *  - either phase `failed` returns immediately
  *  - `partial` collapses: any partial anywhere returns `partial`
  *  - both full success returns `full_success`
- *
- * The combined `status` matches what the workers used to compute inline so
- * downstream finalize callers can stay unchanged.
  */
 export async function runBankSyncPhases(input: RunBankSyncPhasesInput): Promise<RunBankSyncPhasesResult> {
   await input.prePhase?.();

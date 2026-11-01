@@ -3,7 +3,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useTranslations } from "next-intl";
 import { useEffect, useMemo } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
 
@@ -124,26 +124,26 @@ export default function GoalEditDialog({
       if (isDebt) {
         if (parseGoalMoney(values.currentBalance) <= 0)
           ctx.addIssue({
-            code: z.ZodIssueCode.custom,
+            code: "custom",
             message: t("invalid-amount"),
             path: ["currentBalance"],
           });
         const rate = Number(values.interestRate);
         if (!Number.isFinite(rate) || rate < 0 || rate > 1000)
           ctx.addIssue({
-            code: z.ZodIssueCode.custom,
+            code: "custom",
             message: t("goals.debt-interest-invalid"),
             path: ["interestRate"],
           });
         if (parseGoalMoney(values.minimumPayment) <= 0)
           ctx.addIssue({
-            code: z.ZodIssueCode.custom,
+            code: "custom",
             message: t("invalid-amount"),
             path: ["minimumPayment"],
           });
       } else if (parseGoalMoney(values.targetAmount) <= 0) {
         ctx.addIssue({
-          code: z.ZodIssueCode.custom,
+          code: "custom",
           message: t("invalid-amount"),
           path: ["targetAmount"],
         });
@@ -160,7 +160,7 @@ export default function GoalEditDialog({
     form.reset(buildDefaults(goal));
   }, [form, goal, isOpen]);
 
-  const priority = form.watch("priority");
+  const priority = useWatch({ control: form.control, name: "priority" });
 
   const setPriority = (next: GoalPriority) => {
     form.setValue("priority", next, {

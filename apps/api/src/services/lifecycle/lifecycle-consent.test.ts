@@ -45,7 +45,7 @@ describe('lifecycleEmailCategory', () => {
   });
 
   it('fails toward suppression for an unmapped campaign', () => {
-    expect(lifecycleEmailCategory('something_new' as LifecycleCampaign, 'x')).toBe(EmailCategory.GROWTH);
+    expect(lifecycleEmailCategory('something_new' as unknown as LifecycleCampaign, 'x')).toBe(EmailCategory.GROWTH);
   });
 });
 

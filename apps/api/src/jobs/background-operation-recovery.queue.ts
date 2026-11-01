@@ -2,7 +2,7 @@ import type { PgBossLike } from '@service/queue/pgboss-client';
 
 export const BACKGROUND_OPERATION_RECOVERY_QUEUE = 'background-operation.recovery';
 export const BACKGROUND_OPERATION_RECOVERY_CRON = '*/15 * * * *';
-export const BACKGROUND_OPERATION_RECOVERY_SINGLETON_KEY = BACKGROUND_OPERATION_RECOVERY_QUEUE;
+const BACKGROUND_OPERATION_RECOVERY_SINGLETON_KEY = BACKGROUND_OPERATION_RECOVERY_QUEUE;
 
 export const ensureBackgroundOperationRecoveryQueue = (boss: Pick<PgBossLike, 'createQueue'>) =>
   boss.createQueue(BACKGROUND_OPERATION_RECOVERY_QUEUE, {

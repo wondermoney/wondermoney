@@ -2,6 +2,12 @@
 
 import { useTranslations } from "next-intl";
 
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
 import type { PortfolioImportSessionPreviewResponse } from "@/lib/api/portfolio/importSessionTypes";
 import {
@@ -10,6 +16,7 @@ import {
   isDuplicateOnlyResult,
 } from "@/lib/portfolio/import-session-flow";
 
+import { PortfolioImportRowDetailList } from "./PortfolioImportRowDetailList";
 import { PortfolioImportStatusBadge } from "./PortfolioImportStatusBadge";
 import { PortfolioImportUnsupportedAssetsAlert } from "./PortfolioImportUnsupportedAssetsAlert";
 
@@ -34,6 +41,28 @@ export function PortfolioImportTerminalStep({
   const failureReason = getPortfolioImportTerminalFailureReason(preview);
   const skippedRows = summary?.userSkippedRows ?? summary?.skippedRows ?? 0;
 
+  const failedRows = preview?.rows.failed ?? [];
+  const failedRowDetails = failedRows.length ? (
+    <Accordion type="single" collapsible className="w-full text-left">
+      <AccordionItem value="failed">
+        <AccordionTrigger className="py-3 text-sm no-underline hover:no-underline">
+          <span className="flex min-w-0 flex-1 items-center justify-between gap-3 text-left">
+            <span>{t("portfolio-import-details-failed")}</span>
+            <span className="text-muted-foreground font-mono text-xs tabular-nums">
+              {summary?.failedRows ?? failedRows.length}
+            </span>
+          </span>
+        </AccordionTrigger>
+        <AccordionContent>
+          <PortfolioImportRowDetailList
+            emptyLabel={t("portfolio-import-details-empty")}
+            rows={failedRows}
+          />
+        </AccordionContent>
+      </AccordionItem>
+    </Accordion>
+  ) : null;
+
   const isFailedTerminalStatus =
     status === "failed" || status === "cancelled" || status === "expired";
   const hasVisibleCounts =
@@ -54,6 +83,8 @@ export function PortfolioImportTerminalStep({
             </p>
           ) : null}
         </div>
+
+        {failedRowDetails}
 
         <div className="flex justify-center">
           <Button type="button" variant="secondary" onClick={onChooseAnotherFile ?? onClose}>
@@ -93,18 +124,21 @@ export function PortfolioImportTerminalStep({
       {!isFailedTerminalStatus && hasVisibleCounts ? (
         <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
           {summary?.importedRows ? (
-            <span>
-              {t("portfolio-import-ledger-imported")} · {summary.importedRows}
+            <span className="inline-flex gap-1.5">
+              {t("portfolio-import-ledger-imported")}
+              <span className="text-foreground font-mono tabular-nums">{summary.importedRows}</span>
             </span>
           ) : null}
           {skippedRows > 0 ? (
-            <span>
-              {t("portfolio-import-ledger-skipped")} · {skippedRows}
+            <span className="inline-flex gap-1.5">
+              {t("portfolio-import-ledger-skipped")}
+              <span className="text-foreground font-mono tabular-nums">{skippedRows}</span>
             </span>
           ) : null}
           {summary?.failedRows ? (
-            <span>
-              {t("portfolio-import-ledger-failed")} · {summary.failedRows}
+            <span className="inline-flex gap-1.5">
+              {t("portfolio-import-ledger-failed")}
+              <span className="text-foreground font-mono tabular-nums">{summary.failedRows}</span>
             </span>
           ) : null}
         </div>
@@ -113,6 +147,8 @@ export function PortfolioImportTerminalStep({
       <PortfolioImportUnsupportedAssetsAlert
         unsupportedAssets={summary?.unsupportedAssets}
       />
+
+      {failedRowDetails}
 
       <div className="flex justify-end">
         <Button type="button" variant="secondary" onClick={onClose}>

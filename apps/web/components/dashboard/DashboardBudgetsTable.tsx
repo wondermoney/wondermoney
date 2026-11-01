@@ -1,11 +1,11 @@
 "use client";
 
-import { type ColumnDef, createColumnHelper } from "@tanstack/react-table";
 import { useTranslations } from "next-intl";
 import { useMemo } from "react";
 
 import { Amount } from "@/components/ui/Amount";
 import { Table } from "@/components/ui/Table";
+import { type ColumnDef, createColumnHelper } from "@/components/ui/Table/features";
 import { Text } from "@/components/ui/Typography";
 import type { BudgetFull } from "@/lib/api/budget/useBudgetsFull";
 import { cn } from "@/lib/utils";
@@ -170,10 +170,10 @@ const DashboardBudgetsTable: React.FC<DashboardBudgetsTableProps> = ({
       cell: ({ row }) => {
         const { progress, totalBudgeted, totalSpent } = row.original;
 
-        // RAD-551, ported by RAD-569. At 0% this was an empty grey track with
-        // `0%` floated off to its right — a full-width hairline sitting between
-        // the name and the figures, which is the shape this system uses for a
-        // divider. It measured nothing, so it says what it knows in words.
+        // At 0% a bar would be an empty grey track with `0%` floated off to
+        // its right — a full-width hairline sitting between the name and the
+        // figures, which is the shape this system uses for a divider. It
+        // would measure nothing, so it says what it knows in words.
         if (totalBudgeted <= 0) {
           return (
             <Text

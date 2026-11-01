@@ -10,6 +10,7 @@ import {
   getThresholdClassName,
   normalizeFinancialLocale,
 } from "@/lib/utils/formatCurrency";
+import { TRUE_MINUS } from "@/lib/utils/formatPercentage";
 
 /**
  * The one way to render money.
@@ -109,7 +110,11 @@ export function Amount({
   return (
     <span className={cn(TONE_CLASS[tone](value), className)}>
       {parts.map((part, index) =>
-        part.type === "currency" ? (
+        part.type === "minusSign" ? (
+          // U+2212, not the hyphen-minus Intl returns: a minus sign is as wide
+          // as a plus and sits on the figure's centre line.
+          TRUE_MINUS
+        ) : part.type === "currency" ? (
           <span key={index} className="text-muted-foreground">
             {part.value}
           </span>

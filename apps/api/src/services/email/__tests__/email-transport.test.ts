@@ -42,6 +42,11 @@ describe('emailSender and supportInbox', () => {
     expect(emailSender({}).email).toMatch(/@/);
   });
 
+  it('sends as the instance when no sender name is set', () => {
+    expect(emailSender({ EMAIL_FROM: 'a@example.com', INSTANCE_NAME: 'Casa Finance' })).toEqual({ email: 'a@example.com', name: 'Casa Finance' });
+    expect(emailSender({ EMAIL_FROM: 'a@example.com', EMAIL_FROM_NAME: 'Home Finance', INSTANCE_NAME: 'Casa Finance' }).name).toBe('Home Finance');
+  });
+
   it('has no team inbox unless one is configured', () => {
     expect(supportInbox({})).toBeNull();
     expect(supportInbox({ SUPPORT_EMAIL: 'help@example.com' })).toBe('help@example.com');

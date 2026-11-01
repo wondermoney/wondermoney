@@ -4,12 +4,11 @@ const NUMBER_PATTERN = /\d+(?:[.,]\d+)*/g;
 // monthly-story-narrative-skeleton.ts, which always emits 2 decimal places) and percentages
 // carry at most a couple of decimal digits. EPSILON exists only to absorb floating-point /
 // LLM-formatting noise (e.g. an extra trailing decimal digit), not genuine value differences.
-// Originally specified as 0.01 in the task brief, but that equals the smallest unit either value
-// type actually carries (a full cent, or a full percentage-point-hundredth) — meaning a genuinely
-// altered figure that happened to be off by exactly that unit would silently pass. Tightened to
-// 0.005 (half that unit) per fix-round review: still clears the brief's own stated noise case
-// (0.001) with 5x margin, while a full 1-cent/1-hundredth-point alteration now correctly fails
-// the guardrail closed. See the "epsilon boundary" fix-round note in task-14-report.md.
+// 0.01 would equal the smallest unit either value type actually carries (a full cent, or a full
+// percentage-point-hundredth) — meaning a genuinely altered figure that happened to be off by
+// exactly that unit would silently pass. 0.005 (half that unit) still clears 0.001 rounding
+// noise with 5x margin, while a full 1-cent/1-hundredth-point alteration fails the guardrail
+// closed.
 const EPSILON = 0.005;
 
 /**

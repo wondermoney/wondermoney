@@ -21,7 +21,7 @@ export function classifyStartBankConnectionFailure(error: unknown): StartBankCon
 }
 
 /**
- * RAD-240 — starts an Enable Banking authorization. The underlying call is a
+ * Starts an Enable Banking authorization. The underlying call is a
  * GET (`GET /v1/banking/bank/:bankId/start`) but it is a mutation in every
  * way that matters: it creates a new pending authorization server-side each
  * call, so it is dispatched through useMutation (no caching, no retry, no

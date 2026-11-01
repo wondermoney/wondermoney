@@ -3,10 +3,10 @@ import { routing } from "@/i18n/routing";
 /**
  * Removes a leading locale segment from a path.
  *
- * RAD-591: `next` is stored already localised (`/en/settings`, straight off the
+ * `next` is stored already localised (`/en/settings`, straight off the
  * query string), but the final navigation goes through next-intl's router from
  * `@/i18n/navigation`, which *prepends* the active locale. The two combined
- * produced `/en/en/settings` — a 404 — for anyone logging in with a `next`
+ * would produce `/en/en/settings` — a 404 — for anyone logging in with a `next`
  * destination: a session-expiry re-login, an email deep link, a shared
  * household URL.
  *

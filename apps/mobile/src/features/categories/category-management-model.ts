@@ -2,7 +2,7 @@ import type { CategoriesResponse, CategoryCreateWrite, CategoryDto, CategoryEdit
 
 export type VisibleCategory = Readonly<CategoryDto & { root: boolean }>
 
-export function flattenCategories(response: CategoriesResponse): VisibleCategory[] {
+function flattenCategories(response: CategoriesResponse): VisibleCategory[] {
   return response.categories.flatMap((root) => [
     { ...root, root: true },
     ...root.childCategory.map((child) => ({ ...child, root: false })),

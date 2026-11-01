@@ -28,11 +28,18 @@ export default function FirstRunGoalsStep() {
   const t = useTranslations("onboarding.firstRun");
   const user = useUser();
   const setFooter = useFirstRunOnboardingFooter();
-  const [selectedGoals, setSelectedGoals] = useState<FirstRunGoal[]>([]);
-
-  useEffect(() => {
-    if (user?.id) setSelectedGoals(getFirstRunState(user.id).selectedGoals);
-  }, [user?.id]);
+  // Load the saved goals for the signed-in user. The route shell only renders
+  // this step on the client, after it has initialised the first-run state, so
+  // reading it here is safe; a change of user reloads it during render.
+  const userId = user?.id;
+  const [selectedGoals, setSelectedGoals] = useState<FirstRunGoal[]>(() =>
+    userId ? getFirstRunState(userId).selectedGoals : [],
+  );
+  const [goalsLoadedFor, setGoalsLoadedFor] = useState(userId);
+  if (userId !== goalsLoadedFor) {
+    setGoalsLoadedFor(userId);
+    if (userId) setSelectedGoals(getFirstRunState(userId).selectedGoals);
+  }
 
   useEffect(() => {
     setFooter(<FirstRunGoalsFooter selectedGoals={selectedGoals} />);
@@ -44,7 +51,6 @@ export default function FirstRunGoalsStep() {
     <FirstRunCentered>
       <div className="space-y-7">
         <FirstRunStepIntro
-          kicker={t("stepLabels.goals")}
           headline={t("goals.headline")}
           sub={t("goals.description")}
         />
@@ -96,7 +102,10 @@ function FirstRunGoalsFooter({
       step: "goals",
     });
     if (user?.id) {
-      patchFirstRunState({ selectedGoals: [], currentStep: "privacy" }, user.id);
+      patchFirstRunState(
+        { selectedGoals: [], currentStep: "privacy" },
+        user.id,
+      );
     }
     router.push(getFirstRunStepRoute("privacy"));
   };

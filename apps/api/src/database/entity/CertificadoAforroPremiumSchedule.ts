@@ -1,12 +1,12 @@
-import { Entity, Index, ManyToOne, PrimaryKey, Property } from '@mikro-orm/core';
 import type { Rel } from '@mikro-orm/core';
+import { Entity, Index, ManyToOne, PrimaryKey, Property } from '@mikro-orm/decorators/legacy';
 
 import { Base } from './BaseEntity';
 import { FinancialAsset } from './FinancialAsset';
 
 /**
- * Cohort-based loyalty-premium bracket schedule for a Certificado de Aforro series
- * (RAD-445). A series can have multiple cohorts (e.g. Série C's 2009/2012/2014/2015
+ * Cohort-based loyalty-premium bracket schedule for a Certificado de Aforro series.
+ * A series can have multiple cohorts (e.g. Série C's 2009/2012/2014/2015
  * variants), each with its own year-bracketed premium-bps table; `cohortStartDate` is
  * null for series with a single, cohort-independent schedule (e.g. Séries E/F).
  */

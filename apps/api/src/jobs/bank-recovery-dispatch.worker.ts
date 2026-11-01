@@ -56,7 +56,7 @@ export async function dispatchDueBankRecovery(
     scanned: 0,
     skipped: 0,
   };
-  // Bank recovery is live with no gating (RAD-178 rollout gate removed): the
+  // Bank recovery has no rollout gate: the
   // dispatcher always drains due deliveries. Any that should be suppressed are
   // filtered downstream at claim/authorization time in BankRecoveryService.
   const deliveries = await service.listDuePending(DISPATCH_LIMIT);

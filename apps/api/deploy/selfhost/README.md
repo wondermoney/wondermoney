@@ -11,7 +11,7 @@ Requirements: Docker with the Compose plugin, `openssl`, and about 2 GB of RAM.
 ```sh
 git clone --depth 1 https://github.com/wondermoney/wondermoney.git
 cd wondermoney/apps/api/deploy/selfhost
-./generate-env.sh        # writes .env with fresh secrets
+./generate-env.sh        # writes .env with fresh secrets (refuses to overwrite an existing one)
 docker compose up -d
 ```
 
@@ -40,14 +40,19 @@ Everything lives in `.env`; it is commented section by section. After editing it
 | You want | Set |
 |---|---|
 | Email | `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD`, `EMAIL_FROM` (or `RESEND_API_KEY`) |
-| CSV imports and receipt copies | an S3-compatible bucket, or `--profile storage` for the bundled MinIO |
+| CSV imports and receipt copies | an S3-compatible bucket, or the bundled store: `COMPOSE_PROFILES=storage` plus the values in `.env`'s file storage section |
 | Receipt scanning, smart categorisation, CSV column mapping, the assistant | `AI_BASE_URL`, `AI_MODEL` (any OpenAI-compatible endpoint, including Ollama) |
 | Ticker search and live prices | `EODHD_API_KEY` |
-| A contact form | `SUPPORT_EMAIL` (and optionally reCAPTCHA keys) |
+| A contact form and a support address in the app | `SUPPORT_EMAIL` (and optionally reCAPTCHA keys) |
+| The in-app "Share Feedback" form, emailed to you | `SUPPORT_EMAIL` plus email (SMTP or Resend) |
+| "Continue with Google" | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` |
 | Bank sync | nothing on the server: each user adds their own Enable Banking key in Settings |
 
-To read outgoing mail without a real provider, start Mailpit with `--profile mail` and set
+To read outgoing mail without a real provider, add `mail` to `COMPOSE_PROFILES` and set
 `SMTP_HOST=mailpit`, `SMTP_PORT=1025`; mail appears at http://localhost:8025.
+
+`COMPOSE_PROFILES` (e.g. `storage,mail`) switches on the optional services for every
+`docker compose` command, so `up`, `pull` and `down` all include them.
 
 ### The mobile app
 
@@ -77,11 +82,18 @@ APP_URL=https://money.example.com
 API_URL=https://api.money.example.com
 AUTH_COOKIE_DOMAIN=.example.com
 NEXT_PUBLIC_AUTH_COOKIE_DOMAIN=.example.com
+TRUST_PROXY=1
 ```
 
 The cookie domain lets the web app read the sign-in session the API sets, because they are
-on different subdomains. Bind the published ports to localhost (`127.0.0.1:3000:3000`) if the
-proxy runs on the same machine.
+on different subdomains. With the proxy on the same machine, also set `BIND_ADDRESS=127.0.0.1`
+so the plain-HTTP ports (and the optional storage and Mailpit) are reachable only through it.
+
+`TRUST_PROXY` is how many proxies sit in front of the API: `1` for one reverse proxy (Caddy,
+nginx, Traefik, a Cloudflare Tunnel), `2` with Cloudflare's proxy in front of yours, or a
+comma-separated list of the proxies' addresses. The API uses it to tell visitors apart for its
+sign-in limits. Leave it empty when browsers reach the API port directly; set to anything else
+there, it would let a visitor fake their address in `X-Forwarded-For`.
 
 ## Upgrade
 
@@ -95,7 +107,8 @@ The API applies any new database migrations when it starts. To stay on a release
 
 ## Back up
 
-Everything that matters is the Postgres database, plus the MinIO volume if you use it.
+Everything that matters is the Postgres database, plus the `storage-data` volume if you use the
+bundled store.
 
 ```sh
 # Back up

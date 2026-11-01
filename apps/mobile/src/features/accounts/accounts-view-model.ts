@@ -1,4 +1,4 @@
-import type { AccountSource, AccountSummaryDto, AccountsResponseDto } from './accounts-contract'
+import type { AccountSource, AccountSummaryDto, AccountsResponseDto, CsvImportFormat } from './accounts-contract'
 
 export type AccountSummaryViewModel = Readonly<{
   accountId: number
@@ -12,6 +12,8 @@ export type AccountSummaryViewModel = Readonly<{
   primaryCurrencyCode: string
   refreshedAt: string | null
   source: AccountSource
+  /** `null` when the API doesn't report it (before #182). */
+  csvImportFormat: CsvImportFormat | null
 }>
 
 export const mapAccountSummary = (dto: AccountSummaryDto): AccountSummaryViewModel => ({
@@ -26,6 +28,7 @@ export const mapAccountSummary = (dto: AccountSummaryDto): AccountSummaryViewMod
   primaryCurrencyCode: dto.accountOwnerAppuserKey.currencyKey.code,
   refreshedAt: dto.refreshedAt,
   source: dto.source,
+  csvImportFormat: dto.csvImportFormat ?? null,
 })
 
 export const mapAccounts = (dto: AccountsResponseDto): readonly AccountSummaryViewModel[] => (

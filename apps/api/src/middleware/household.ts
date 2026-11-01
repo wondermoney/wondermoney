@@ -3,7 +3,7 @@ import type { NextFunction, Request, Response } from 'express';
 import { ERROR_CODE, ForbiddenError, UnauthorizedError } from '@utils/errors';
 
 /**
- * RAD-343 (B1) — owner-only guard for household management (invite/revoke/resend).
+ * Owner-only guard for household management (invite/revoke/resend).
  * Place after resolveTenantForRequest. Members can view the household (GET) but only
  * the tenant owner may manage invites.
  */

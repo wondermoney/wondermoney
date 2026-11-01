@@ -24,8 +24,8 @@ import { startBankConnection } from '../banking';
 const credentialEntity = { enableBankingCredentialKey: 7 };
 const decryptedCredential = { applicationId: 'app-1', privateKeyPem: 'pem' };
 
-const createReq = (bankId: string, tenant: null | { tenantKey: number } = { tenantKey: 113 }) =>
-  Object.assign(mockReq({ params: { bankId } }), { tenant: tenant ?? undefined, user: { appuserKey: 1 } });
+const createReq = (bankId: string, tenant: null | { tenantKey: number } = { tenantKey: 113 }, query: Record<string, string> = {}) =>
+  Object.assign(mockReq({ params: { bankId }, query }), { tenant: tenant ?? undefined, user: { appuserKey: 1 } });
 const createRes = () => mockRes();
 
 describe('startBankConnection (Enable Banking)', () => {
@@ -39,7 +39,7 @@ describe('startBankConnection (Enable Banking)', () => {
     startAuthorization.mockReset().mockResolvedValue({ authorizationId: 'auth-1', psuIdHash: 'hash', url: 'https://bank.example/consent' });
   });
 
-  it('fails closed when the request is missing a resolved tenant (RAD-244)', async () => {
+  it('fails closed when the request is missing a resolved tenant', async () => {
     const bankId = encodeEnableBankingInstitutionId({ country: 'PT', name: 'Bank A' });
     const res = createRes();
 
@@ -115,6 +115,7 @@ describe('startBankConnection (Enable Banking)', () => {
       'Bank B',
       'PT',
       15_552_000,
+      null,
     );
     vi.useRealTimers();
   });
@@ -137,6 +138,7 @@ describe('startBankConnection (Enable Banking)', () => {
       'Bank A',
       'PT',
       7_776_000,
+      null,
     );
     expect(res.json).toHaveBeenCalledWith({ redirectUrl: 'https://bank.example/consent' });
   });
@@ -151,5 +153,29 @@ describe('startBankConnection (Enable Banking)', () => {
     const [firstState] = startAuthorization.mock.calls[0] as [{ state: string }];
     const [secondState] = startAuthorization.mock.calls[1] as [{ state: string }];
     expect(firstState.state).not.toBe(secondState.state);
+  });
+
+  describe('which client the callback returns to', () => {
+    const bankId = encodeEnableBankingInstitutionId({ country: 'PT', name: 'Bank A' });
+    const storedReturnTo = (): unknown => createConnection.mock.calls[0]?.[7];
+
+    beforeEach(() => {
+      listInstitutions.mockResolvedValue([{ country: 'PT', maximum_consent_validity: 7_776_000, name: 'Bank A' }]);
+    });
+
+    it('stores mobile for a connection the mobile app starts', async () => {
+      await startBankConnection(createReq(bankId, undefined, { returnTo: 'mobile' }), createRes());
+      expect(storedReturnTo()).toBe('mobile');
+    });
+
+    it('stores nothing (the web app) when no client is named, as older mobile builds do', async () => {
+      await startBankConnection(createReq(bankId, undefined, { redirectPage: 'accounts' }), createRes());
+      expect(storedReturnTo()).toBeNull();
+    });
+
+    it('treats an unknown client as the web app', async () => {
+      await startBankConnection(createReq(bankId, undefined, { returnTo: 'https://evil.example' }), createRes());
+      expect(storedReturnTo()).toBeNull();
+    });
   });
 });

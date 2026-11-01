@@ -28,10 +28,25 @@ APP_URL=https://money.example.com
 API_URL=https://api.money.example.com
 AUTH_COOKIE_DOMAIN=.example.com
 NEXT_PUBLIC_AUTH_COOKIE_DOMAIN=.example.com
+TRUST_PROXY=1
 ```
 
 Depois corre novamente `docker compose up -d`. O domínio do cookie permite que a aplicação web leia a sessão que a API cria, porque estão em subdomínios diferentes do mesmo domínio.
 
+## Dizer à API que há um proxy
+
+A API limita quantas vezes cada visitante pode tentar iniciar sessão, e distingue os visitantes pelo endereço IP. Atrás de um proxy, todos os pedidos chegam do endereço do proxy, e o endereço do visitante vem no cabeçalho `X-Forwarded-For`. O `TRUST_PROXY` diz em quantos proxies a API pode confiar:
+
+| Configuração | `TRUST_PROXY` |
+|---|---|
+| Sem proxy: os navegadores ligam-se diretamente à porta da API | deixa vazio |
+| Um proxy reverso (Caddy, nginx, Traefik, um Cloudflare Tunnel) | `1` |
+| O proxy da Cloudflare à frente do teu próprio proxy reverso | `2` |
+
+Em vez de um número, também podes indicar os endereços dos proxies, numa lista separada por vírgulas de endereços IP ou intervalos (por exemplo `172.16.0.0/12`).
+
+Deixa-o vazio quando não há proxy: caso contrário, qualquer pessoa pode escrever o seu próprio `X-Forwarded-For` e contornar os limites. Define-o quando há um: caso contrário, todos partilham o endereço do proxy, e uma pessoa a repetir uma palavra-passe errada pode impedir todos os outros de iniciar sessão durante algum tempo.
+
 ## Manter as portas privadas
 
-Quando o proxy corre na mesma máquina, liga as portas publicadas ao localhost para que os contentores só sejam acessíveis através do proxy. No `docker-compose.yml`, usa `127.0.0.1:3000:3000` e `127.0.0.1:3001:3001`.
+Quando o proxy corre na mesma máquina, define `BIND_ADDRESS=127.0.0.1` no `.env` e corre `docker compose up -d`. As portas publicadas (a aplicação web, a API e, se os usares, o armazenamento e o Mailpit) passam a escutar só no localhost, e só são acessíveis através do proxy.

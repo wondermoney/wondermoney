@@ -80,6 +80,16 @@ export const convertBudgetTemplatesIntoRows = (
         };
         parentRow.subRows.push(childRow);
       }
+
+      // The API's parent amount is the raw sum of its children, so a yearly
+      // €600 counted as €600 a month. Plan what the children plan per month,
+      // the same figure the footer total adds up.
+      if (parentRow.subRows.length > 0) {
+        parentRow.budgeted = calculateParentBudgetedFromSubRows(
+          parentRow.subRows,
+        );
+        parentRow.recurrency = undefined;
+      }
     }
   }
 

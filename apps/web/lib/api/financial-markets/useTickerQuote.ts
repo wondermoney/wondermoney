@@ -3,16 +3,15 @@ import type { AxiosInstance } from "axios";
 
 import api from "../api";
 
-// The API now returns a strict, flat quote DTO (RAD-228). We surface only the
-// fields the watchlist renders.
+// The API returns a strict, flat quote DTO. We surface only the fields the
+// watchlist renders.
 //
-// The numeric fields stay nullable all the way to the UI. They used to be
-// coerced with `?? 0` so the row's `.toFixed()` and comparisons stayed total,
-// but the market-data source we run on carries no live quote (RAD-449), so
-// every watchlist row rendered "US$0.00 / +0.00%" — a quote of zero, which is
-// a measurement, rather than the absence of one. Same defect class already
-// fixed in `useTickerInfo`; DESIGN_HISTORY.md rule 3 makes it a standing rule
-// ("any `?? 0` on a value destined for display is a bug").
+// The numeric fields stay nullable all the way to the UI. The market-data
+// source carries no live quote, so coercing with `?? 0` would render every
+// watchlist row as "US$0.00 / +0.00%" — a quote of zero, which is a
+// measurement, rather than the absence of one. Same rule as `useTickerInfo`;
+// DESIGN_HISTORY.md rule 3 makes it a standing rule ("any `?? 0` on a value
+// destined for display is a bug").
 export interface TickerQuoteResponse {
   symbol: string;
   name: string | null;

@@ -1,11 +1,5 @@
 "use client";
 import { useQueryClient } from "@tanstack/react-query";
-import {
-  type ColumnDef,
-  createColumnHelper,
-  type Row,
-  type Table as TableType,
-} from "@tanstack/react-table";
 import { Filter, Info, MoreHorizontal, Pencil, X } from "lucide-react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
@@ -22,6 +16,12 @@ import { toast } from "sonner";
 
 import DatePickerRange from "@/components/ui/DatePickerRange";
 import { Table } from "@/components/ui/Table";
+import {
+  type ColumnDef,
+  createColumnHelper,
+  type Row,
+  type Table as TableType,
+} from "@/components/ui/Table/features";
 import { useRouter } from "@/i18n/navigation";
 import useEditTransaction from "@/lib/api/account/useEditTransaction";
 import type { Transaction } from "@/lib/api/account/useTransactions";
@@ -93,20 +93,20 @@ interface AccountTransactionTableProps {
   footerActions?: React.ReactNode;
   sticky?: boolean;
   /**
-   * RAD-576 — `total` from the transactions endpoint: rows matching the filters
+   * `total` from the transactions endpoint: rows matching the filters
    * the *server* applied, before its `limit`.
    *
-   * The footer counted the rows it was holding, so a 500-row page of an 8,623
-   * row range said "500 results". Trustworthy only when the server applied every
+   * Counting the rows the footer holds would make a 500-row page of an 8,623
+   * row range say "500 results". Trustworthy only when the server applied every
    * active filter — see `onServerFiltersChange`.
    */
   serverTotal?: number;
   /**
-   * RAD-579 — opt into server-side filtering.
+   * Opt into server-side filtering.
    *
-   * Account, type, category and needs-review were filtered here, in the browser, over the rows
-   * already loaded. Filtering a year by one category filtered whichever page came back — silently,
-   * with no way for the user to tell "nothing matched" from "not in this page".
+   * Filtering account, type, category and needs-review here, in the browser, over the rows
+   * already loaded means filtering a year by one category filters whichever page came back —
+   * silently, with no way for the user to tell "nothing matched" from "not in this page".
    *
    * Supplying this callback means the parent forwards these to `useTransactions`, so the table
    * stops filtering them locally and lets the refetch do it. Omit it and the table keeps filtering
@@ -203,7 +203,7 @@ const AccountTransactionsTable: React.FC<AccountTransactionTableProps> =
       const [needsReviewFilter, setNeedsReviewFilter] = useState(false);
 
       /*
-       * RAD-579 — when the parent forwards filters to the endpoint, the rows arriving here are
+       * When the parent forwards filters to the endpoint, the rows arriving here are
        * already filtered across the whole range. Re-applying the same predicates would be
        * harmless but pointless; skipping them is what makes `serverTotal` describe the list.
        */
@@ -332,10 +332,9 @@ const AccountTransactionsTable: React.FC<AccountTransactionTableProps> =
       /*
        * The row being inspected. § 9 InspectorDrawer.
        *
-       * Opening a transaction used to mean nothing at all — the row carried a
-       * ⋯ menu with a single Edit item, and everything else the row knew
-       * (balance after, settlement currency, notes, review state, its audit
-       * trail) had nowhere to be shown. The drawer opens over the list, so
+       * The drawer is where everything the row knows (balance after,
+       * settlement currency, notes, review state, its audit trail) is
+       * shown. It opens over the list, so
        * the table keeps its scroll position, its filters and its page.
        */
       const [inspectedTransaction, setInspectedTransaction] =
@@ -597,7 +596,7 @@ const AccountTransactionsTable: React.FC<AccountTransactionTableProps> =
               /*
                * § 9 rule 10 — one row, several facts, no wrapping.
                *
-               * Date and account used to be two more equal columns. They are now
+               * Date and account are not columns of their own but
                * a muted second line beneath the description: the eye scans a
                * tight primary column and picks up the supporting facts only when
                * it stops. Category and amount stay as their own columns because
@@ -608,7 +607,7 @@ const AccountTransactionsTable: React.FC<AccountTransactionTableProps> =
                   <div className="flex min-w-0 flex-col gap-0.5">
                     <div className="flex min-w-0 items-center gap-2">
                       {/* § 9 rule 3: an absent description is an em-dash, not
-                          an empty cell. Returning null here used to blank the
+                          an empty cell. Returning null here would blank the
                           whole row, taking the account and date with it. */}
                       <span
                         className={cn(
@@ -627,7 +626,7 @@ const AccountTransactionsTable: React.FC<AccountTransactionTableProps> =
                       {recurringLabel && recurringStatusLabel ? (
                         <Badge
                           variant="secondary"
-                          className="text-muted-foreground h-5 shrink-0 rounded-full px-2 text-[10px] font-medium tracking-wide uppercase"
+                          className="text-muted-foreground h-5 shrink-0 rounded-full px-2 text-xs font-medium"
                         >
                           {recurringLabel} · {recurringStatusLabel}
                         </Badge>
@@ -652,8 +651,11 @@ const AccountTransactionsTable: React.FC<AccountTransactionTableProps> =
                   </div>
                   <TooltipProvider>
                     <Tooltip>
-                      <TooltipTrigger>
-                        <Info className="size-4" />
+                      <TooltipTrigger
+                        aria-label={t("original-description")}
+                        className="text-muted-foreground hover:text-foreground focus-visible:ring-ring rounded-sm transition-colors focus-visible:ring-2 focus-visible:outline-none"
+                      >
+                        <Info className="size-4" aria-hidden="true" />
                       </TooltipTrigger>
                       <TooltipContent>
                         {info.row.original.descriptionDirty}
@@ -753,8 +755,11 @@ const AccountTransactionsTable: React.FC<AccountTransactionTableProps> =
                   <div className="flex items-center gap-2">
                     {info.row.original.editedSettlementAmount && (
                       <Tooltip>
-                        <TooltipTrigger>
-                          <Info className="size-4" />
+                        <TooltipTrigger
+                          aria-label={t("original-amount")}
+                          className="text-muted-foreground hover:text-foreground focus-visible:ring-ring rounded-sm transition-colors focus-visible:ring-2 focus-visible:outline-none"
+                        >
+                          <Info className="size-4" aria-hidden="true" />
                         </TooltipTrigger>
                         <TooltipContent>
                           {t("original-amount")}:{" "}
@@ -768,8 +773,14 @@ const AccountTransactionsTable: React.FC<AccountTransactionTableProps> =
                   </div>
                 </TooltipProvider>
                 {info.row.original.loanRepayment ? (
-                  <span className="text-muted-foreground max-w-56 text-right font-mono text-xs">
-                    {t("linked-loan-repayment-context", {
+                  // The cell is nowrap and right-aligned, so this sentence ran
+                  // left across the Balance column. It wraps inside its own
+                  // width now, in the body face, with only the figures in mono.
+                  <span className="text-muted-foreground max-w-56 text-right font-sans text-xs whitespace-normal">
+                    {t.rich("linked-loan-repayment-context", {
+                      figure: (chunks) => (
+                        <span className="font-mono whitespace-nowrap">{chunks}</span>
+                      ),
                       loanName: info.row.original.loanRepayment.loanName,
                       expense: formatCurrency(
                         info.row.original.loanRepayment.spendingAmount,
@@ -1006,14 +1017,11 @@ const AccountTransactionsTable: React.FC<AccountTransactionTableProps> =
       ]);
 
       /*
-       * RAD-579 — the server's count, trusted whenever the server applied the filters.
+       * The server's count, trusted whenever the server applied the filters: then the total
+       * describes exactly the list underneath it.
        *
-       * RAD-576 had to withhold this the moment any filter was active, because the endpoint knew
-       * nothing about account, type or category and pairing its honest 8,623 with a
-       * browser-narrowed eight rows would have read as "8 of 8,623". Now that those filters are
-       * server-side, the total describes exactly the list underneath it.
-       *
-       * Still withheld in browser-filtering mode, where the old mismatch is still real.
+       * Withheld in browser-filtering mode with any filter active: pairing the endpoint's
+       * unfiltered 8,623 with a browser-narrowed eight rows would read as "8 of 8,623".
        */
       const serverTotalForFooter = filtersAppliedByServer
         ? serverTotal

@@ -15,14 +15,17 @@ import type { GetTransactionsResponse } from "@/lib/api/account/useTransactions"
 import useTransactions from "@/lib/api/account/useTransactions";
 import type { GetConfigsResponse } from "@/lib/api/configs/useConfigs";
 import useConfigs from "@/lib/api/configs/useConfigs";
+import { serverSeed } from "@/lib/query/server-seed";
 
 interface ReviewTransactionsClientProps {
+  serverRenderedAt: number;
   initialAccountsData: GetAccountsResponse;
   initialTransactionsData: GetTransactionsResponse;
   initialConfigsData: GetConfigsResponse;
 }
 
 export default function ReviewTransactionsClient({
+  serverRenderedAt,
   initialAccountsData,
   initialTransactionsData,
   initialConfigsData,
@@ -53,22 +56,22 @@ export default function ReviewTransactionsClient({
     posthog.capture("account_add_offline_modal", { action: "close" });
   };
 
-  const { data: accountsData, isLoading: isLoadingAccountsData } = useAccounts({
-    initialData: initialAccountsData,
-  });
+  const { data: accountsData, isLoading: isLoadingAccountsData } = useAccounts(
+    serverSeed(initialAccountsData, serverRenderedAt),
+  );
 
   const { data: transactionsData, isLoading: isLoadingTransactions } =
     useTransactions(
       { unreviewedOnly: true },
       {
         enabled: accountsData?.accounts && accountsData.accounts.length > 0,
-        initialData: initialTransactionsData,
+        ...serverSeed(initialTransactionsData, serverRenderedAt),
       },
     );
 
-  const { data: configsData, isLoading: isLoadingConfigs } = useConfigs({
-    initialData: initialConfigsData,
-  });
+  const { data: configsData, isLoading: isLoadingConfigs } = useConfigs(
+    serverSeed(initialConfigsData, serverRenderedAt),
+  );
 
   const isLoading =
     isLoadingAccountsData || isLoadingTransactions || isLoadingConfigs;

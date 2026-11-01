@@ -7,13 +7,14 @@ import {
   Heading,
   Hr,
   Html,
-  Img,
   Preview,
   Section,
   Tailwind,
   Text,
   pixelBasedPreset,
 } from "react-email";
+
+import { BrandFooterLine, BrandHeader, resolveBrandName } from "../../src/components/Brand";
 
 export type TransactionalEmailLanguage = "en" | "pt";
 
@@ -28,6 +29,8 @@ export interface TransactionalEmailLayoutProps {
   ctaUrl?: string;
   /** Localized single-line explanation of why the recipient got this email. */
   footerNote: string;
+  /** Instance name shown in the header and footer; defaults to WonderMoney. */
+  brandName?: string;
 }
 
 function greetingFor(language: TransactionalEmailLanguage, firstName?: string): string {
@@ -51,7 +54,9 @@ export function TransactionalEmailLayout({
   ctaLabel,
   ctaUrl,
   footerNote,
+  brandName,
 }: TransactionalEmailLayoutProps) {
+  const brand = resolveBrandName(brandName);
   return (
     <Html lang={language}>
       <Head />
@@ -72,13 +77,7 @@ export function TransactionalEmailLayout({
         <Body className="m-0 bg-[#f7f8fa] px-[12px] py-[28px] font-sans text-[#111111]">
           <Container className="mx-auto w-full max-w-[600px]">
             <Section className="border-t-[3px] border-solid border-x-0 border-b-0 border-[#7c3aed] bg-white px-[26px] pb-[28px] pt-[22px]">
-              <Img
-                src="https://app.wonder.money/logo.png"
-                width="125"
-                height="46"
-                alt="WonderMoney"
-                className="block h-[46px] w-[125px] object-contain"
-              />
+              <BrandHeader brandName={brand} />
               <Text className="m-0 mt-[24px] font-sans text-[15px] leading-[23px] text-[#374151]">
                 {greetingFor(language, firstName)}
               </Text>
@@ -108,9 +107,7 @@ export function TransactionalEmailLayout({
                 {footerNote}
               </Text>
               <Hr className="my-[15px] border-[#e5e7eb]" />
-              <Text className="m-0 font-sans text-[10px] leading-[16px] text-[#9ca3af]">
-                WonderMoney · Radix Catch, Lda. · Portugal
-              </Text>
+              <BrandFooterLine brandName={brand} />
             </Section>
           </Container>
         </Body>

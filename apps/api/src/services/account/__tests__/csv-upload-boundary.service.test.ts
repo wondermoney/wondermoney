@@ -125,4 +125,17 @@ describe('csv upload boundary service', () => {
 
     expect(rows).toEqual([{ amount: '10', description: 'Shop, Inc.' }]);
   });
+
+  it('parses a bank export: header row as keys, trimmed cells, quoted newlines, blank lines skipped', () => {
+    const csv = 'date , amount,description\r\n2026-01-02, -12.50 ,"Coffee\nshop"\r\n\r\n2026-01-03,100,"Salary, ACME"\r\n';
+
+    expect(parseCsvRows<Record<string, string>>(csv)).toEqual([
+      { amount: '-12.50', date: '2026-01-02', description: 'Coffee\nshop' },
+      { amount: '100', date: '2026-01-03', description: 'Salary, ACME' },
+    ]);
+  });
+
+  it('rejects a row whose column count does not match the header', () => {
+    expect(() => parseCsvRows('a,b\n1,2,3')).toThrow();
+  });
 });

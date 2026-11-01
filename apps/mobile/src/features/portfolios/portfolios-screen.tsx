@@ -9,6 +9,7 @@ import { formatCurrency, formatPercentagePoints } from '@/lib/formatters/financi
 import { themeTokens } from '@/theme/tokens'
 import { textStyles } from '@/theme/typography'
 
+import { FeeConversionNotice } from './fee-conversion-notice'
 import { Metric, PortfolioFailure, PortfolioLoading } from './portfolio-screen-parts'
 import { PortfolioAnalyticsPanel, type PortfolioAnalyticsState } from './portfolio-analytics-panel'
 import type { PortfolioOverviewViewModel } from './portfolios-view-model'
@@ -105,6 +106,7 @@ export function PortfoliosScreen({ state, analyticsState, onEnableAnalytics, onR
                   <Metric label={t('portfolios.gainLoss')} value={`${money(data.totalGainLoss, data.currency)} · ${percent(data.totalGainLossPercent)}`} palette={palette} tone={tone(data.totalGainLoss)} />
                   <Metric label={t('portfolios.ytdReturn')} value={periodReturn} palette={palette} tone={data.periodReturn === null ? 'muted' : tone(data.periodReturn)} />
                 </View>
+                {data.feesLeftOut ? <FeeConversionNotice scope="gains" palette={palette} /> : null}
               </View>
               <View style={styles.counts}>
                 <Metric label={t('portfolios.portfolioCount')} value={String(data.portfolioCount)} palette={palette} />

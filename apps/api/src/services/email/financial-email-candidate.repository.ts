@@ -25,14 +25,12 @@ export class FinancialEmailCandidateRepository {
     //
     // The `not exists` clause is the important one. Every stream here reports on a tenant's
     // own numbers — "you have spent X against budget Y", "here is your week". A tenant with
-    // an account stranded by the GoCardless→Enable Banking migration has a *frozen* ledger:
-    // the account still exists and still has a balance, but no transaction has arrived since
-    // the provider went away, so any total computed over it is quietly wrong. Mailing that
+    // an account stranded on a legacy requisition (a bank provider that no longer syncs) has a
+    // *frozen* ledger: the account still exists and still has a balance, but no transaction
+    // arrives any more, so any total computed over it is quietly wrong. Mailing that
     // user a confident figure is worse than mailing them nothing, because it looks correct.
     //
-    // As of this writing, of 195 live production accounts 134 are in exactly that state
-    // across 64 tenants, and not one of them has refreshed in the last seven days. The
-    // condition is deliberately "the tenant has *any* such account" rather than "all of
+    // The condition is deliberately "the tenant has *any* such account" rather than "all of
     // them": one stranded account is enough to make a household-wide total incomplete.
     //
     // This is written as a raw predicate because the surrounding query already is; it

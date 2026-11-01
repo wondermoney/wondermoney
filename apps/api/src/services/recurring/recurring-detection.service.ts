@@ -1,4 +1,5 @@
 import type { FilterQuery, RequiredEntityData } from '@mikro-orm/core';
+import type { EntityManager } from '@mikro-orm/postgresql';
 
 import { DI } from '@app/app';
 import { Account } from '@entity/Account';
@@ -7,6 +8,7 @@ import { RecurringOccurrence } from '@entity/RecurringOccurrence';
 import { RecurringSeries } from '@entity/RecurringSeries';
 import { Tenant } from '@entity/Tenant';
 import { Transaction } from '@entity/Transaction';
+import { excludeExpired } from '@service/transaction/transaction-status';
 
 import { classifyAmountType, detectCadence, inferRecurringSeriesType, normalizeRecurringMerchant, scoreRecurringCandidate } from './recurring-detection.utils';
 import { RecurringAmountType, RecurringCadence, RecurringOccurrenceMatchStatus, RecurringSeriesSource, RecurringSeriesStatus, RecurringSeriesType } from './recurring-types';
@@ -178,24 +180,26 @@ export async function detectRecurringCandidatesForTenant(tenantKey: number, opti
   return DI.em.transactional(async (em) => {
     await acquireRecurringDetectionLock(tenantKey, em);
     const referenceDate = options.referenceDate ?? new Date();
-    // RAD-audit: this was an unbounded whole-tenant scan with four populates, executed
-    // synchronously inside `em.transactional` while holding the advisory lock — on the
+    // Bounded by a lookback window: an unbounded whole-tenant scan with four populates would
+    // run synchronously inside `em.transactional` while holding the advisory lock — on the
     // request path of every transaction write. Recurrence is inferred from cadence over
     // recent history, so a lookback window loses no signal: a series whose last occurrence
     // predates the window is not "recurring" in any useful sense, and `next_expected_at`
     // is driven by the recent occurrences anyway.
     const lookbackStart = new Date(referenceDate);
     lookbackStart.setMonth(lookbackStart.getMonth() - RECURRING_DETECTION_LOOKBACK_MONTHS);
-    const transactions = await em.find(Transaction, {
+    // An EXPIRED charge never happened, so it is no occurrence. A PENDING one is: its
+    // booking replaces it in place.
+    const transactions = await em.find(Transaction, excludeExpired({
       deletedAt: null,
       tenantKey: getTenantRef(tenantKey, em),
       transactionDate: { $gte: lookbackStart },
-    }, {
+    }), {
       orderBy: { transactionDate: 'asc' },
       populate: ['transactionMerchantKey', 'accountKey', 'settlementCurrencyKey', 'appuserCurrencyKey'],
     });
     const transactionByKey = new Map(transactions.map((transaction) => [transaction.transactionKey, transaction]));
-    const candidates = buildRecurringCandidatesFromTransactions(transactions as TransactionLike[], { referenceDate });
+    const candidates = buildRecurringCandidatesFromTransactions(transactions, { referenceDate });
     let created = 0;
     let updated = 0;
     let skipped = 0;
@@ -299,7 +303,7 @@ export async function detectRecurringCandidatesForTenant(tenantKey: number, opti
       em.persist(series);
     }
 
-    await em.getConnection().execute(
+    await em.execute(
       'update "tenant" set "recurring_detection_last_run_at" = ? where "tenant_key" = ?',
       [referenceDate, tenantKey],
     );
@@ -308,8 +312,14 @@ export async function detectRecurringCandidatesForTenant(tenantKey: number, opti
   });
 }
 
-async function acquireRecurringDetectionLock(tenantKey: number, em = DI.em) {
-  await em.getConnection().execute('select pg_advisory_xact_lock(?)', [tenantKey]);
+/*
+ * Serialises detection runs for one household until the run's transaction ends. `em.execute`
+ * runs on the transaction's own connection; `em.getConnection().execute()` took the lock on a
+ * separate pooled connection in autocommit, where it was released the moment it was granted, so
+ * two overlapping runs each created the same series.
+ */
+async function acquireRecurringDetectionLock(tenantKey: number, em: EntityManager) {
+  await em.execute('select pg_advisory_xact_lock(?)', [tenantKey]);
 }
 
 function addMonths(date: Date, months: number): Date {

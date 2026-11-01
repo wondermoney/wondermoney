@@ -1,7 +1,7 @@
 import { z } from 'zod'
 
 import type { RawReadEndpoint } from '../../lib/api/client'
-import { readEndpoint } from '../../lib/api/runtime-schema'
+import { readEndpoint, tolerantEnum } from '../../lib/api/runtime-schema'
 
 /**
  * Mirrors web's ReportFilters (components/reports/filters/useReportFilters.ts) and the API's
@@ -59,9 +59,9 @@ export const spendingByCategoryRowSchema = z.object({
   totalAmount: z.number().finite(),
   transactionCount: z.number().int().nonnegative(),
   percentOfTotal: z.number().finite(),
-}).strict()
+})
 
-export const spendingByCategoryResponseSchema = reportResponseSchema(z.array(spendingByCategoryRowSchema))
+const spendingByCategoryResponseSchema = reportResponseSchema(z.array(spendingByCategoryRowSchema))
 export type SpendingByCategoryRow = z.infer<typeof spendingByCategoryRowSchema>
 
 export const cashflowPointSchema = z.object({
@@ -69,31 +69,32 @@ export const cashflowPointSchema = z.object({
   income: z.number().finite(),
   expenses: z.number().finite(),
   net: z.number().finite(),
-}).strict()
+})
 
-export const cashflowResponseSchema = reportResponseSchema(z.array(cashflowPointSchema))
+const cashflowResponseSchema = reportResponseSchema(z.array(cashflowPointSchema))
 export type CashflowPoint = z.infer<typeof cashflowPointSchema>
 
-export const sankeyNodeSchema = z.object({
+const sankeyNodeSchema = z.object({
   id: z.string(),
   label: z.string(),
-  kind: z.enum(['income', 'expense', 'account']),
+  // Only 'income' changes how a node is used; a kind this build doesn't know reads as 'unknown'.
+  kind: tolerantEnum(['income', 'expense', 'account'], 'unknown'),
   color: z.string().optional(),
   value: z.number().finite().optional(),
-}).strict()
+})
 
-export const sankeyLinkSchema = z.object({
+const sankeyLinkSchema = z.object({
   source: z.string(),
   target: z.string(),
   value: z.number().finite(),
-}).strict()
+})
 
 export const sankeyDataSchema = z.object({
   nodes: z.array(sankeyNodeSchema),
   links: z.array(sankeyLinkSchema),
-}).strict()
+})
 
-export const sankeyResponseSchema = reportResponseSchema(sankeyDataSchema)
+const sankeyResponseSchema = reportResponseSchema(sankeyDataSchema)
 export type SankeyData = z.infer<typeof sankeyDataSchema>
 
 export const reportNetWorthPointSchema = z.object({
@@ -102,10 +103,10 @@ export const reportNetWorthPointSchema = z.object({
   breakdown: z.object({
     assets: z.number().finite(),
     liabilities: z.number().finite(),
-  }).strict(),
-}).strict()
+  }),
+})
 
-export const netWorthHistoryReportResponseSchema = reportResponseSchema(z.array(reportNetWorthPointSchema))
+const netWorthHistoryReportResponseSchema = reportResponseSchema(z.array(reportNetWorthPointSchema))
 export type ReportNetWorthPoint = z.infer<typeof reportNetWorthPointSchema>
 
 export const budgetVsActualRowSchema = z.object({
@@ -116,7 +117,7 @@ export const budgetVsActualRowSchema = z.object({
   actual: z.number().finite(),
   variance: z.number().finite(),
   percentUsed: z.number().finite(),
-}).strict()
+})
 
 export const budgetVsActualResponseSchema = reportResponseSchema(z.array(budgetVsActualRowSchema))
 export type BudgetVsActualRow = z.infer<typeof budgetVsActualRowSchema>
@@ -129,9 +130,9 @@ export const portfolioPerformanceReportRowSchema = z.object({
   endBalance: z.number().finite(),
   return: z.number().finite(),
   contributions: z.number().finite(),
-}).strict()
+})
 
-export const portfolioPerformanceReportResponseSchema = reportResponseSchema(z.array(portfolioPerformanceReportRowSchema))
+const portfolioPerformanceReportResponseSchema = reportResponseSchema(z.array(portfolioPerformanceReportRowSchema))
 export type PortfolioPerformanceReportRow = z.infer<typeof portfolioPerformanceReportRowSchema>
 
 export function createSpendingByCategoryEndpoint(filters: ReportFilters) {

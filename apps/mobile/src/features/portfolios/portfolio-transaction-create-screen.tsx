@@ -66,7 +66,7 @@ export type PortfolioTransactionCreateScreenProps = Readonly<{
 }>
 
 /**
- * RAD-516 — manual BUY/SELL transaction entry. Mirrors web's PortfolioTransactionAddModal field
+ * Manual BUY/SELL transaction entry. Mirrors web's PortfolioTransactionAddModal field
  * set minus broker/fee/original-currency (mobile-scoped, same rationale as the edit form), and
  * deliberately never offers DIVIDEND as a type — the screen only ever receives the already-filtered
  * transactionTypes list from its route.

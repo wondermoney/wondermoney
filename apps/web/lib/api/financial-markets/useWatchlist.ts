@@ -12,12 +12,12 @@ interface WatchlistResponse {
   symbols: string[];
 }
 
-export const WATCHLIST_QUERY_KEY = ["financial-markets", "watchlist"] as const;
+const WATCHLIST_QUERY_KEY = ["financial-markets", "watchlist"] as const;
 
 // The pre-server watchlist lived only in this localStorage key (Zustand persist).
 const LEGACY_WATCHLIST_STORAGE_KEY = "wondermoney.financialMarketsWatchlist.v1";
 
-export async function getWatchlist(): Promise<string[]> {
+async function getWatchlist(): Promise<string[]> {
   const { data } = await api.get<WatchlistResponse>(
     "/v1/financial-markets/watchlist",
   );
@@ -71,7 +71,7 @@ export function useToggleWatchlist() {
 let localWatchlistMigrationStarted = false;
 
 // One-time import of the pre-server (localStorage-only) watchlist so existing
-// users don't lose the symbols they had before the server-backed store (RAD-363).
+// users don't lose the symbols they had before the server-backed store.
 function useMigrateLocalWatchlist() {
   const queryClient = useQueryClient();
   useEffect(() => {

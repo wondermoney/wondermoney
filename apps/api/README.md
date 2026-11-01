@@ -12,7 +12,7 @@ This README is for working on the code.
 
 ## Requirements
 
-- Node 24 (the repository's `.nvmrc`; the API runs on 22.19+) and pnpm
+- Node 26 (the repository's `.nvmrc`; the images run Node 26 too) and pnpm
 - Docker, for the local Postgres
 
 ## Quick start

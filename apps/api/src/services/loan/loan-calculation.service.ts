@@ -110,9 +110,9 @@ export function estimateRepaymentAllocation(input: {
   principalAmount: number;
   totalPaymentAmount: number;
 } {
-  // RAD-audit: interest is money charged to a user and principal is the residual, so it
-  // absorbs every upstream rounding error. Both were three float ops then a string round.
-  // Computed exactly and rounded once, at display scale (the loan columns are 2dp).
+  // Interest is money charged to a user and principal is the residual, so it absorbs every
+  // upstream rounding error. Computed exactly and rounded once, at display scale (the loan
+  // columns are 2dp).
   const interestAmount = roundDisplay(
     big(input.outstandingPrincipal).times(big(input.annualInterestRateBps).div(10_000)).div(12),
   );
@@ -136,9 +136,8 @@ export function validateRepaymentAllocation(input: {
   principalAmount: number;
   totalPaymentAmount: number;
 }): { reason: 'ALLOCATION_TOTAL_MISMATCH'; valid: false; } | { valid: true } {
-  // RAD-audit: the previous `<= 0.01` tolerance existed to absorb float noise from the
-  // allocation above. With exact arithmetic the parts sum to the whole exactly, so this is
-  // now a real equality check rather than a fudge factor.
+  // With exact arithmetic in the allocation above the parts sum to the whole exactly, so this
+  // is a real equality check rather than a float-noise tolerance.
   const total = sumMoney([input.principalAmount, input.interestAmount, input.feeAmount], DISPLAY_SCALE);
   return moneyEquals(total, input.totalPaymentAmount, DISPLAY_SCALE)
     ? { valid: true }

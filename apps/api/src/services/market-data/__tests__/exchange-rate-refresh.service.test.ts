@@ -1,8 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-const em = vi.hoisted(() => ({ find: vi.fn(), getKnex: vi.fn() }));
+const em = vi.hoisted(() => ({ find: vi.fn(), getKysely: vi.fn() }));
 vi.mock('@app/database/di', () => ({ DI: { em } }));
 
+import { kyselyDouble } from '@app/__tests__/__helpers__/kysely-double';
 import service from '@service/market-data/exchange-rate-refresh.service';
 
 beforeEach(() => { vi.clearAllMocks(); });
@@ -14,18 +15,14 @@ const ecbXml = `<Cube>
   </Cube>
 </Cube>`;
 
-function createKnexMock(firstResult: unknown, returningResult: unknown = [{ exchange_rate_key: 1 }]) {
-  const returning = vi.fn().mockResolvedValue(returningResult);
-  const insertFn = vi.fn().mockReturnValue({ onConflict: vi.fn().mockReturnValue({ ignore: vi.fn().mockReturnValue({ returning }) }) });
-  const knex = Object.assign(vi.fn(() => ({ insert: insertFn })), {
-    select: vi.fn(() => ({ from: vi.fn(() => ({ orderBy: vi.fn(() => ({ limit: vi.fn(() => ({ first: vi.fn().mockResolvedValue(firstResult) })) })) })) })),
-  });
-  return knex;
+/** The latest stored rate row (`undefined`: none yet), and the keys an insert returns. */
+function createDatabase(latestRow: unknown, returningResult: unknown[] = [{ exchange_rate_key: 1 }]) {
+  return kyselyDouble((query) => (query.sql.startsWith('insert') ? returningResult : latestRow === undefined ? [] : [latestRow])).db;
 }
 
 describe('exchange rate refresh service', () => {
   it('chooses full history when there is no prior data', async () => {
-    em.getKnex.mockReturnValue(createKnexMock(undefined));
+    em.getKysely.mockReturnValue(createDatabase(undefined));
     em.find.mockResolvedValue([{ code: 'EUR', currencyKey: 1 }, { code: 'USD', currencyKey: 2 }, { code: 'GBP', currencyKey: 3 }]);
     const fetchMock = vi.fn().mockResolvedValue({ ok: true, text: () => Promise.resolve(ecbXml) });
     vi.stubGlobal('fetch', fetchMock);
@@ -40,7 +37,8 @@ describe('exchange rate refresh service', () => {
   });
 
   it('chooses daily when the last update is recent', async () => {
-    em.getKnex.mockReturnValue(createKnexMock({ date: new Date() }));
+    // Postgres sends a timestamptz as text; MikroORM's pool does not parse it into a Date.
+    em.getKysely.mockReturnValue(createDatabase({ date: new Date().toISOString().replace('T', ' ').replace('Z', '+00') }));
     em.find.mockResolvedValue([{ code: 'EUR', currencyKey: 1 }, { code: 'USD', currencyKey: 2 }, { code: 'GBP', currencyKey: 3 }]);
     const fetchMock = vi.fn().mockResolvedValue({ ok: true, text: () => Promise.resolve(ecbXml) });
     vi.stubGlobal('fetch', fetchMock);
@@ -65,15 +63,18 @@ describe('exchange rate refresh service', () => {
   });
 
   it('batches inserts with conflict ignore', async () => {
-    em.getKnex.mockReturnValue(createKnexMock(undefined));
+    const database = kyselyDouble((query) => (query.sql.startsWith('insert') ? [{ exchange_rate_key: 1 }] : []));
+    em.getKysely.mockReturnValue(database.db);
     em.find.mockResolvedValue([{ code: 'EUR', currencyKey: 1 }, { code: 'USD', currencyKey: 2 }, { code: 'GBP', currencyKey: 3 }]);
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, text: () => Promise.resolve(ecbXml) }));
 
     await expect(service.refreshExchangeRates()).resolves.toMatchObject({ inserted: 1 });
+    const insert = database.queries.find((query) => query.sql.startsWith('insert'));
+    expect(insert?.sql).toContain('on conflict ("from_currency_key", "to_currency_key", "date") do nothing');
   });
 
   it('parses single-quoted ECB xml and inserts rows', async () => {
-    em.getKnex.mockReturnValue(createKnexMock(undefined, [{ exchange_rate_key: 1 }, { exchange_rate_key: 2 }, { exchange_rate_key: 3 }, { exchange_rate_key: 4 }]));
+    em.getKysely.mockReturnValue(createDatabase(undefined, [{ exchange_rate_key: 1 }, { exchange_rate_key: 2 }, { exchange_rate_key: 3 }, { exchange_rate_key: 4 }]));
     em.find.mockResolvedValue([{ code: 'EUR', currencyKey: 1 }, { code: 'USD', currencyKey: 2 }, { code: 'GBP', currencyKey: 3 }]);
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, text: () => Promise.resolve(ecbXml) }));
 
@@ -83,7 +84,7 @@ describe('exchange rate refresh service', () => {
   });
 
   it('fails when a non-empty ECB response yields no rows', async () => {
-    em.getKnex.mockReturnValue(createKnexMock(undefined));
+    em.getKysely.mockReturnValue(createDatabase(undefined));
     em.find.mockResolvedValue([{ code: 'EUR', currencyKey: 1 }]);
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, text: () => Promise.resolve('<Cube><Cube time="2026-06-04"><Cube currency="USD" rate="1.1640"/></Cube></Cube>') }));
 

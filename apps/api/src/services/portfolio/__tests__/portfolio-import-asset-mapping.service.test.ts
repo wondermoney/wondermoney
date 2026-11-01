@@ -261,7 +261,7 @@ describe('portfolio import asset mapping service', () => {
 
   it('recomputes session summary and keeps unrelated metadata', async () => {
     const { state } = setup();
-    state.session.summaryJson = { assetResolutionError: 'err', columnMappingWarning: 'warn', customMeta: { hello: 'world' }, parseCorrelationId: 'corr-1' } as unknown as PortfolioImportSession['summaryJson'];
+    state.session.summaryJson = { assetResolutionError: 'err', columnMappingWarning: 'warn', customMeta: { hello: 'world' }, parseCorrelationId: 'corr-1' };
 
     const result = await service.confirmAssetMappings({ appuser, decisions: [{ action: 'skip_group', groupId: 101 }], importSessionId: 10, tenant });
 
@@ -384,7 +384,7 @@ describe('portfolio import asset mapping service', () => {
 
   it('preserves unrelated summary metadata and does not persist transactions', async () => {
     const { persisted, state } = setup();
-    state.session.summaryJson = { keepMe: true, nested: { preserved: true }, unrelated: { x: 1 } } as unknown as PortfolioImportSession['summaryJson'];
+    state.session.summaryJson = { keepMe: true, nested: { preserved: true }, unrelated: { x: 1 } };
     await service.confirmAssetMappings({ appuser, decisions: [{ action: 'skip_group', groupId: 101 }], importSessionId: 10, tenant });
     expect(state.session.summaryJson).toMatchObject({ keepMe: true, unrelated: { x: 1 } });
     expect(persisted.some((value) => typeof value === 'object' && value !== null && 'financialTransactionKey' in value)).toBe(false);

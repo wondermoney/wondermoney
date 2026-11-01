@@ -2,7 +2,7 @@
 // @ts-nocheck
 import type { Dictionary, EntityManager } from '@mikro-orm/core';
 import { Seeder } from '@mikro-orm/seeder';
-import { addYears } from 'date-fns';
+import { subHours } from 'date-fns';
 
 import { Account } from '@entity/Account';
 
@@ -12,6 +12,10 @@ import { getSeedNow } from '../utils/seed';
 export class AccountSeeder extends Seeder {
   async run(em: EntityManager, ctx: Dictionary): Promise<void> {
     const seedNow = getSeedNow();
+    // A recent, realistic last sync, shown as "Balances updated ...". These accounts have no bank
+    // connection, so the sync scheduler (which only selects accounts with a linked Enable Banking
+    // connection) never picks them up, whatever this says.
+    const syncedAt = subHours(seedNow, 2);
     const ctxAccounts = [];
     ctxAccounts.push(
       em.create(Account, {
@@ -24,8 +28,8 @@ export class AccountSeeder extends Seeder {
         balance: demoAccounts.current.balance,
         currencyKey: ctx.currencies.find((c) => c.code === demoAccounts.current.currency)?.currencyKey,
         holderName: demoAccounts.current.holderName,
-        nordigenRequisitionKey: ctx.nordigenRequisitions[0],
-        refreshedAt: addYears(seedNow, 20), // to avoid refreshing
+        refreshedAt: syncedAt,
+        transactionsRefreshedAt: syncedAt,
         tenantKey: ctx._DEMO_tenant,
       }),
     );
@@ -40,8 +44,8 @@ export class AccountSeeder extends Seeder {
         balance: demoAccounts.usd.balance,
         currencyKey: ctx.currencies.find((c) => c.code === demoAccounts.usd.currency)?.currencyKey,
         holderName: demoAccounts.usd.holderName,
-        nordigenRequisitionKey: ctx.nordigenRequisitions[0],
-        refreshedAt: addYears(seedNow, 20), // to avoid refreshing
+        refreshedAt: syncedAt,
+        transactionsRefreshedAt: syncedAt,
         tenantKey: ctx._DEMO_tenant,
       }),
     );
@@ -56,8 +60,8 @@ export class AccountSeeder extends Seeder {
         balance: demoAccounts.savings.balance,
         currencyKey: ctx.currencies.find((c) => c.code === demoAccounts.savings.currency)?.currencyKey,
         holderName: demoAccounts.savings.holderName,
-        nordigenRequisitionKey: ctx.nordigenRequisitions[0],
-        refreshedAt: addYears(seedNow, 20),
+        refreshedAt: syncedAt,
+        transactionsRefreshedAt: syncedAt,
         tenantKey: ctx._DEMO_tenant,
       }),
     );
@@ -72,8 +76,8 @@ export class AccountSeeder extends Seeder {
         balance: 1832.97,
         currencyKey: ctx.currencies.find((c) => c.code === 'EUR')?.currencyKey,
         holderName: 'Admin User',
-        nordigenRequisitionKey: ctx.nordigenRequisitions[1],
-        refreshedAt: addYears(seedNow, 20), // to avoid refreshing
+        refreshedAt: syncedAt,
+        transactionsRefreshedAt: syncedAt,
         tenantKey: ctx._ADMIN_tenant,
       }),
     );
@@ -88,8 +92,8 @@ export class AccountSeeder extends Seeder {
         balance: 835.42,
         currencyKey: ctx.currencies.find((c) => c.code === 'USD')?.currencyKey,
         holderName: 'Admin User',
-        nordigenRequisitionKey: ctx.nordigenRequisitions[1],
-        refreshedAt: addYears(seedNow, 20), // to avoid refreshing
+        refreshedAt: syncedAt,
+        transactionsRefreshedAt: syncedAt,
         tenantKey: ctx._ADMIN_tenant,
       }),
     );

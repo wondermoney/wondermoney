@@ -1,7 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -28,12 +28,16 @@ const PortfolioSettingsModal: React.FC<PortfolioSettingsModalProps> = ({
   const [name, setName] = useState(portfolio.name);
   const [description, setDescription] = useState(portfolio.description ?? "");
 
-  useEffect(() => {
+  // Reload the fields from the portfolio when the modal opens (or the
+  // portfolio changes while open), adjusting during render.
+  const [syncedFrom, setSyncedFrom] = useState({ isOpen, portfolio });
+  if (syncedFrom.isOpen !== isOpen || syncedFrom.portfolio !== portfolio) {
+    setSyncedFrom({ isOpen, portfolio });
     if (isOpen) {
       setName(portfolio.name);
       setDescription(portfolio.description ?? "");
     }
-  }, [isOpen, portfolio]);
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

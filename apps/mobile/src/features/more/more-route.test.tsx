@@ -80,7 +80,7 @@ describe('MoreRoute', () => {
     expect(destination).toContain(encodeURIComponent('The app crashed on launch'))
   })
 
-  it('captures feedback_submitted with the category alone, never the message (RAD-518)', async () => {
+  it('captures feedback_submitted with the category alone, never the message', async () => {
     const i18n = await initMobileI18n('en')
     const view = await render(<I18nextProvider i18n={i18n}><MoreRoute /></I18nextProvider>)
     await fireEvent.press(view.getByRole('button', { name: 'Share feedback, opens in the app' }))

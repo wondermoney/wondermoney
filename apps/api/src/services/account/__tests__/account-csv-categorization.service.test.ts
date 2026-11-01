@@ -34,7 +34,7 @@ describe('account csv categorization service', () => {
     await expect(service.categorizeTransaction(em as unknown as CategorizeEm, { appuserKey: 7 }, { descriptionDirty: 'Cafe' } as unknown as CategorizeTransaction)).resolves.toEqual({ assigned: true, reason: 'stats_top_count' });
   });
 
-  it('scopes the stats fallback to the requesting user (RAD-342 G4)', async () => {
+  it('scopes the stats fallback to the requesting user', async () => {
     const category = { categoryKey: 2 };
     const merchant = { name: 'Cafe' };
     const appuser = { appuserKey: 7 };
@@ -45,13 +45,13 @@ describe('account csv categorization service', () => {
       persist: vi.fn().mockReturnThis(),
     };
 
-    await service.categorizeTransaction(em as unknown as CategorizeEm, appuser, { descriptionDirty: 'Cafe' } as unknown as CategorizeTransaction);
+    await service.categorizeTransaction(em, appuser, { descriptionDirty: 'Cafe' } as unknown as CategorizeTransaction);
 
     const statsCall = em.find.mock.calls.find((call) => (call[0] as { name?: string }).name === 'TransactionCategoryStats');
     expect(statsCall?.[1]).toMatchObject({ appuserKey: appuser });
   });
 
-  it('prefers a recent low-count stat over a stale high-count one (RAD-342 G2)', async () => {
+  it('prefers a recent low-count stat over a stale high-count one', async () => {
     const merchant = { name: 'Cafe' };
     const recent = { categoryKey: { categoryKey: 2 }, count: 3, updatedAt: new Date() };
     const stale = { categoryKey: { categoryKey: 1 }, count: 10, updatedAt: new Date(Date.now() - 365 * 24 * 60 * 60 * 1000) };
@@ -93,7 +93,7 @@ describe('account csv categorization service', () => {
     expect(em.persist).not.toHaveBeenCalled();
   });
 
-  it('returns category_invalid when mappings resolve to distinct/invalid categories (RAD-413)', async () => {
+  it('returns category_invalid when mappings resolve to distinct/invalid categories', async () => {
     const merchant = { name: 'Multi' };
     const em = {
       find: vi.fn().mockResolvedValue([{ categoryKey: { categoryKey: 1 } }, { categoryKey: { categoryKey: 2 } }]),
@@ -135,7 +135,7 @@ describe('account csv categorization service', () => {
     expect(em.persist).not.toHaveBeenCalled();
   });
 
-  it('returns category_invalid when the unique top stat category cannot be resolved (RAD-413)', async () => {
+  it('returns category_invalid when the unique top stat category cannot be resolved', async () => {
     const merchant = { name: 'Unresolved' };
     const em = {
       find: vi.fn().mockImplementation((entity) => Promise.resolve(entity.name === 'AppuserMerchantCategory' ? [] : [{ categoryKey: { categoryKey: 1 }, count: 3 }])),

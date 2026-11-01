@@ -11,16 +11,16 @@ export type SegmentOption<T extends string> = { value: T; label: string }
  *
  * The selected segment is one of the seven places the accent may appear. It
  * carries a `primaryWash` fill plus `primary` ink, and the unselected segments
- * carry neither: this is the whole reason the control reads at a glance. The
- * app previously drew *every* segment with a `primary` border, which is how a
- * screen ends up with eight accent elements and no answer to "which one is on".
+ * carry neither: this is the whole reason the control reads at a glance.
+ * Giving *every* segment a `primary` border is how a screen ends up with eight
+ * accent elements and no answer to "which one is on".
  *
  * `accessibilityState.selected` does the announcing, so colour is not carrying
  * the state alone.
  *
- * One shared border around the whole track, not one border per segment — the
- * app previously drew a border on every individual segment, so three or more
- * options read as a row of separate boxes rather than one control (the
+ * One shared border around the whole track, not one border per segment — with
+ * a border on every individual segment, three or more options read as a row of
+ * separate boxes rather than one control (the
  * No-Nesting / box-stacking rule in `DESIGN.md`). The selected segment's inner
  * background wash is the only per-segment visual; unselected segments are
  * borderless and transparent.

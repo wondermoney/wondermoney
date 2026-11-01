@@ -35,6 +35,8 @@ import {
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 
+import { cn } from "@/lib/utils";
+
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
@@ -151,7 +153,7 @@ interface CategoryIconPickerProps {
 const CategoryIconPicker: React.FC<CategoryIconPickerProps> = ({
   selectedIcon,
   onIconSelect,
-  color = "#000000",
+  color = "currentColor",
   compact = false,
 }) => {
   const t = useTranslations();
@@ -213,17 +215,20 @@ const CategoryIconPicker: React.FC<CategoryIconPickerProps> = ({
                   key={name}
                   variant="input"
                   size="sm"
-                  className="h-10 w-10 p-0"
+                  // The selected icon was drawn white on the transparent
+                  // `input` surface, so it vanished the moment it was picked.
+                  className={cn(
+                    "h-10 w-10 p-0",
+                    selectedIcon === name && "border-primary bg-accent",
+                  )}
+                  aria-pressed={selectedIcon === name}
                   onClick={() => {
                     onIconSelect(name);
                     setIsOpen(false);
                   }}
                   title={name}
                 >
-                  <IconComponent
-                    className="size-4"
-                    style={{ color: selectedIcon === name ? "white" : color }}
-                  />
+                  <IconComponent className="size-4" style={{ color }} />
                 </Button>
               ))}
             </div>

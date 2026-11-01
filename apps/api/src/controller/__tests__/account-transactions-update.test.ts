@@ -71,7 +71,7 @@ describe('account transaction update regressions', () => {
       deletedAt: undefined,
     });
     expect(json).toHaveBeenCalledWith(expect.objectContaining({ transaction: expect.any(Object) }));
-    // RAD-342.2: an explicit user categorization is always stamped high/user_edit confidence.
+    // An explicit user categorization is always stamped high/user_edit confidence.
     expect(transaction).toMatchObject({ categorizationConfidence: 'high', categorizationReason: 'user_edit' });
   });
 
@@ -99,7 +99,7 @@ describe('account transaction update regressions', () => {
       expect.objectContaining({ filters: { hidden: false } }),
     );
     expect(sendStatus).toHaveBeenCalledWith(200);
-    // RAD-271: the reviewed flag is written with a single bulk UPDATE, not one persist/flush per row.
+    // The reviewed flag is written with a single bulk UPDATE, not one persist/flush per row.
     expect(mocked.nativeUpdate).toHaveBeenCalledTimes(1);
     expect(mocked.nativeUpdate).toHaveBeenCalledWith(
       expect.anything(),
@@ -152,11 +152,10 @@ describe('account transaction update regressions', () => {
     expect(mocked.execute).not.toHaveBeenCalled();
   });
 
-  // RAD-267: bulk category assignment used to unconditionally write a TransactionCategoryStats row keyed by
-  // transaction.transactionMerchantKey, which is nullable on Transaction. Categorizing a transaction with no
-  // resolved merchant produced a `transactionMerchantKey` FK that was null/undefined, and MikroORM's
-  // EntityValidator threw on flush ("Value for TransactionCategoryStats.transactionMerchantKey is required").
-  it('categorizes a transaction with no resolved merchant without writing merchant category stats (RAD-267)', async () => {
+  // TransactionCategoryStats is keyed by transaction.transactionMerchantKey, which is nullable on Transaction.
+  // Writing a stat for a transaction with no resolved merchant would make MikroORM's EntityValidator throw
+  // on flush ("Value for TransactionCategoryStats.transactionMerchantKey is required").
+  it('categorizes a transaction with no resolved merchant without writing merchant category stats', async () => {
     mocked.findOne
       .mockResolvedValueOnce({ appuserKey: 1, onboarding: {} }) // Appuser lookup
       .mockResolvedValueOnce({ categoryKey: 27, isSystemCategory: false, tenantKey: { tenantKey: 7 } }); // Category lookup
@@ -185,14 +184,14 @@ describe('account transaction update regressions', () => {
       deletedAt: undefined,
     });
     // No TransactionCategoryStats lookup/creation should have been attempted for a merchant-less transaction.
-    // (3rd findOne is the RAD-425 closed-loop enrichment-outcome lookup, which always runs on a category set.)
+    // (3rd findOne is the closed-loop enrichment-outcome lookup, which always runs on a category set.)
     expect(mocked.findOne).toHaveBeenCalledTimes(3);
     expect(mocked.persist.mock.calls.some(([entity]) => entity instanceof TransactionCategoryStats)).toBe(false);
   });
 
-  // API-QB: the merchant→category vote is now written with a single atomic INSERT ... ON CONFLICT
-  // DO UPDATE (via em.execute) instead of a check-then-insert (findOne → new TransactionCategoryStats
-  // → persist), which used to race on the unique constraint under concurrent/double-submitted edits.
+  // The merchant→category vote is written with a single atomic INSERT ... ON CONFLICT DO UPDATE
+  // (via em.execute) rather than a check-then-insert, which would race on the unique constraint
+  // under concurrent/double-submitted edits.
   it('records merchant category stats via an atomic upsert in bulk updates when a merchant is resolved', async () => {
     const merchant = { transactionMerchantKey: 5 };
     mocked.findOne
@@ -225,12 +224,12 @@ describe('account transaction update regressions', () => {
     // No entity-level create of a TransactionCategoryStats — the write is a raw atomic upsert.
     const persistedEntities: unknown[] = mocked.persist.mock.calls.map(([entity]: unknown[]) => entity);
     expect(persistedEntities.some((entity) => entity instanceof TransactionCategoryStats)).toBe(false);
-    // RAD-411: the actual category assignment IS now persisted (an AppuserTransactionCategory), not just the stat.
+    // The actual category assignment IS persisted (an AppuserTransactionCategory), not just the stat.
     expect(persistedEntities.some((entity) => entity instanceof AppuserTransactionCategory)).toBe(true);
     // Three atomic upserts via em.execute: the merchant stat (call 0), plus the per-user mapping learn (retire + upsert).
     expect(mocked.execute).toHaveBeenCalledTimes(3);
     const [statsSql, statsParams] = mocked.execute.mock.calls[0] as [string, unknown[]];
-    // RAD-342 G4: the vote is scoped per user — conflict target and params carry appuser_key.
+    // The vote is scoped per user — conflict target and params carry appuser_key.
     expect(statsSql.toLowerCase()).toContain('on conflict ("transaction_merchant_key", "category_key", "source", "appuser_key")');
     expect(statsParams).toEqual([5, 27, 1, Source.USER]); // [merchantKey, categoryKey, appuserKey, source]
     const learnUpsert = (mocked.execute.mock.calls as [string, unknown[]][]).find(([sql]) =>
@@ -240,9 +239,9 @@ describe('account transaction update regressions', () => {
     expect(learnUpsert![1]).toEqual([1, 5, 27]); // [appuserKey, merchantKey, categoryKey]
   });
 
-  // RAD-411: bulk categorize used to move the stat counters + write a CATEGORIZED audit row but never persist
-  // the AppuserTransactionCategory, so the displayed category never changed. These two guard the actual assignment.
-  it('persists a new AppuserTransactionCategory in bulk when the transaction had no category (RAD-411)', async () => {
+  // Bulk categorize must persist the AppuserTransactionCategory, not just move the stat counters and write a
+  // CATEGORIZED audit row, or the displayed category never changes. These two guard the actual assignment.
+  it('persists a new AppuserTransactionCategory in bulk when the transaction had no category', async () => {
     mocked.findOne
       .mockResolvedValueOnce({ appuserKey: 1, onboarding: {} }) // Appuser lookup
       .mockResolvedValueOnce({ categoryKey: 27 }); // Category lookup
@@ -265,11 +264,11 @@ describe('account transaction update regressions', () => {
     expect(assignment).toBeDefined();
     expect(assignment!.categoryKey).toEqual({ categoryKey: 27 });
     expect(assignment!.source).toBe(Source.USER);
-    // RAD-342.2: bulk categorization is an explicit user action — stamp high/user_edit confidence.
+    // Bulk categorization is an explicit user action — stamp high/user_edit confidence.
     expect(transaction).toMatchObject({ categorizationConfidence: 'high', categorizationReason: 'user_edit' });
   });
 
-  it('updates the existing AppuserTransactionCategory in bulk when the transaction already had a category (RAD-411)', async () => {
+  it('updates the existing AppuserTransactionCategory in bulk when the transaction already had a category', async () => {
     const existingAssignment = { categoryKey: { categoryKey: 26 } };
     mocked.findOne
       .mockResolvedValueOnce({ appuserKey: 1, onboarding: {} }) // Appuser lookup
@@ -291,11 +290,11 @@ describe('account transaction update regressions', () => {
     // The existing row's category is mutated to the new one (not a second assignment created).
     expect(existingAssignment.categoryKey).toEqual({ categoryKey: 27 });
     expect(mocked.persist).toHaveBeenCalledWith(existingAssignment);
-    // RAD-342.2: bulk categorization is an explicit user action — stamp high/user_edit confidence.
+    // Bulk categorization is an explicit user action — stamp high/user_edit confidence.
     expect(transaction).toMatchObject({ categorizationConfidence: 'high', categorizationReason: 'user_edit' });
   });
 
-  it('sets hidden independently of reviewed in the bulk nativeUpdate payload (RAD-25)', async () => {
+  it('sets hidden independently of reviewed in the bulk nativeUpdate payload', async () => {
     mocked.findOne.mockResolvedValueOnce({ appuserKey: 1, onboarding: {} });
     mocked.find.mockResolvedValueOnce([
       { appuserTransactionCategories: { getItems: () => [] }, hidden: false, reviewed: true, transactionKey: 1, transactionMerchantKey: null },
@@ -313,8 +312,8 @@ describe('account transaction update regressions', () => {
 
     expect(next).not.toHaveBeenCalled();
     expect(sendStatus).toHaveBeenCalledWith(200);
-    // RAD-25: hiding must not silently reset `reviewed` when the caller only intends to change `hidden` —
-    // the old unconditional `{ reviewed: !!reviewed || !!category }` payload would have reset it to false here.
+    // Hiding must not silently reset `reviewed` when the caller only intends to change `hidden` —
+    // an unconditional `{ reviewed: !!reviewed || !!category }` payload would reset it to false here.
     expect(mocked.nativeUpdate).toHaveBeenCalledWith(
       expect.anything(),
       expect.objectContaining({ transactionKey: { $in: [1] } }),
@@ -322,7 +321,7 @@ describe('account transaction update regressions', () => {
     );
   });
 
-  it('disables the hidden filter when loading transactions for a bulk update, so already-hidden rows can be unhidden (RAD-25)', async () => {
+  it('disables the hidden filter when loading transactions for a bulk update, so already-hidden rows can be unhidden', async () => {
     mocked.findOne.mockResolvedValueOnce({ appuserKey: 1, onboarding: {} });
     mocked.find.mockResolvedValueOnce([
       { appuserTransactionCategories: { getItems: () => [] }, hidden: true, reviewed: false, transactionKey: 1, transactionMerchantKey: null },
@@ -342,7 +341,7 @@ describe('account transaction update regressions', () => {
     );
   });
 
-  it('closes the loop: stamps the AI enrichment outcome when a user recategorizes a transaction (RAD-425)', async () => {
+  it('closes the loop: stamps the AI enrichment outcome when a user recategorizes a transaction', async () => {
     const transaction = {
       appuserCurrencyKey: { code: 'EUR' },
       appuserTransactionCategories: { getItems: () => [{ categoryKey: { categoryKey: 12 } }] },

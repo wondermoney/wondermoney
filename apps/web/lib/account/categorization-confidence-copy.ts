@@ -6,7 +6,7 @@ export interface ReviewHint {
 }
 
 /**
- * RAD-342.3 — map a transaction's categorization confidence to a review-inbox "why" hint.
+ * Map a transaction's categorization confidence to a review-inbox "why" hint.
  * Returns null when there's nothing useful to say (high is auto-cleared from review; missing
  * confidence = pre-G3a / not evaluated). The component translates `messageKey`.
  */

@@ -3,10 +3,10 @@ import { describe, expect, it } from 'vitest';
 import { sanitizeProviderResponse } from '@utils/error-sanitizer';
 
 /**
- * RAD-595. The reason this helper exists: an Axios rejection reaches Sentry as
- * "AxiosError: Request failed with status code 409" and nothing else, which is
- * how API-W6 accumulated 573 identical, undiagnosable events. The reason the
- * call failed lives in `response.data`.
+ * The reason this helper exists: an Axios rejection reaches Sentry as
+ * "AxiosError: Request failed with status code 409" and nothing else, so every
+ * such event looks identical and is undiagnosable. The reason the call failed
+ * lives in `response.data`.
  *
  * It is attached to Sentry events on the bank-connection path, so the thing it
  * must never do is leak account details out of a provider payload that echoed
@@ -23,7 +23,7 @@ describe('sanitizeProviderResponse', () => {
   });
 
   it('redacts account identifiers the provider echoes back', () => {
-    // GoCardless error payloads can quote the request that failed, which on this
+    // Provider error payloads can quote the request that failed, which on this
     // path carries bank account details.
     const result = sanitizeProviderResponse(axiosLike(400, { detail: 'bad request', iban: 'PT50000201231234567890154' }));
     expect(result?.body).not.toContain('PT50000201231234567890154');

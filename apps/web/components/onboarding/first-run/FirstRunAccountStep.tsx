@@ -1,10 +1,9 @@
 "use client";
 
 import { KeyRound, Link as LinkIcon, ShieldCheck } from "lucide-react";
-import { useSearchParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { usePostHog } from "posthog-js/react";
-import { useEffect, useState } from "react";
+import { useEffect, useEffectEvent, useState } from "react";
 
 import BankList from "@/components/account/BankList";
 import { Button } from "@/components/ui/button";
@@ -15,6 +14,7 @@ import { Link } from "@/components/ui/Link";
 import { Spinner } from "@/components/ui/Spinner";
 import { useRouter } from "@/i18n/navigation";
 import { saveBankAccountSyncReturnMarker } from "@/lib/account/bank-account-sync-return-marker";
+import { useBankConnectionResult } from "@/lib/account/useBankConnectionResult";
 import useCreateOfflineAccount from "@/lib/api/account/useCreateOfflineAccount";
 import useBankList from "@/lib/api/banking/useBankList";
 import useCreateRequisition from "@/lib/api/banking/useCreateRequisition";
@@ -31,7 +31,6 @@ import {
   ACTIVATION_EVENTS,
   captureActivationEvent,
 } from "@/lib/utils/analytics";
-import { isBankConnectionsPaused } from "@/lib/utils/bank-connections-paused";
 import { getCountryCodeClient } from "@/lib/utils/countries";
 import { SUPPORTED_BANK_COUNTRY_CODES } from "@/lib/utils/countries/bank-countries";
 import { countryFlags } from "@/lib/utils/countries/country-flag";
@@ -53,72 +52,60 @@ export default function FirstRunAccountStep() {
   const user = useUser();
   const posthog = usePostHog();
   const setFooter = useFirstRunOnboardingFooter();
-  const searchParams = useSearchParams();
   const state = getFirstRunState(user?.id);
 
   const [mode, setMode] = useState<Mode>("list");
   const [bankId, setBankId] = useState<string | null>(null);
-  const [redirectStarted, setRedirectStarted] = useState(false);
   const [skipDialogOpen, setSkipDialogOpen] = useState(false);
   const [country, setCountry] = useState<string>(
     () => getCountryCodeClient() || "PT",
   );
-  const returnedError = searchParams.get("connectError");
+  // Sent back here by the Settings landing when the bank connection failed.
+  const returnedError = useBankConnectionResult() === "error";
 
-  const bankConnectionsPaused = isBankConnectionsPaused();
-  // Gating order matches AccountCreateModal/AccountAddSyncModal: paused
-  // (unchanged, first priority) takes precedence over the BYOK credential
-  // check, which only runs once bank-sync isn't already paused globally.
   const { data: enableBankingCredential, isLoading: credentialLoading } =
-    useEnableBankingCredential({ enabled: !bankConnectionsPaused });
+    useEnableBankingCredential();
   const credentialRequired =
-    !bankConnectionsPaused &&
-    !credentialLoading &&
-    enableBankingCredential?.status !== "active";
+    !credentialLoading && enableBankingCredential?.status !== "active";
 
   const countryOptions = Object.values(countryFlags)
     .filter((c) => SUPPORTED_BANK_COUNTRY_CODES.includes(c.code))
     .map((c) => ({ label: `${c.emoji} ${c.name}`, value: c.code }));
 
   const { data: banks = [], isLoading: banksLoading } = useBankList(country, {
-    enabled: !!country && !bankConnectionsPaused && !credentialRequired,
+    enabled: !!country && !credentialRequired,
     staleTime: Infinity,
   });
-  const redirectPage = buildOnboardingConnectRedirectPage(locale);
+  const returnPage = buildOnboardingConnectRedirectPage(locale);
   const {
     data: requisition,
     isError: requisitionError,
     refetch: retryRequisition,
-  } = useCreateRequisition(bankId!, redirectPage, {
+  } = useCreateRequisition(bankId!, {
     enabled: Boolean(bankId) && mode === "handoff",
     retry: false,
   });
 
-  // Once the requisition redirect URL is ready, leave for the bank.
+  // Once the requisition redirect URL is ready, leave for the bank. The
+  // effect runs once per URL; going back to the list clears it.
+  const redirectUrl = mode === "handoff" ? requisition?.redirectUrl : undefined;
+  const leaveForBank = useEffectEvent((url: string) => {
+    // The last thing we can observe before the user leaves for the
+    // bank. Without it, "picked a bank" and "came back" have nothing between
+    // them, so a requisition that never produced a redirect is invisible.
+    posthog?.capture(FIRST_RUN_EVENTS.accountBeforeRedirect, {
+      bank_id: bankId,
+    });
+    saveBankAccountSyncReturnMarker(returnPage);
+    window.location.href = url;
+  });
   useEffect(() => {
-    if (mode === "handoff" && requisition?.redirectUrl && !redirectStarted) {
-      setRedirectStarted(true);
-      // RAD-600: the last thing we can observe before the user leaves for the
-      // bank. Without it, "picked a bank" and "came back" had nothing between
-      // them, so a requisition that never produced a redirect was invisible.
-      posthog?.capture(FIRST_RUN_EVENTS.accountBeforeRedirect, {
-        bank_id: bankId,
-      });
-      saveBankAccountSyncReturnMarker(redirectPage);
-      window.location.href = requisition.redirectUrl;
-    }
-  }, [
-    mode,
-    requisition?.redirectUrl,
-    redirectStarted,
-    redirectPage,
-    posthog,
-    bankId,
-  ]);
+    if (redirectUrl) leaveForBank(redirectUrl);
+  }, [redirectUrl]);
 
-  // RAD-600: a requisition either materialises or fails, and the failure has a
-  // retry button — so a user could sit here retrying forever and produce no
-  // telemetry at all. Both outcomes are now recorded.
+  // A requisition either materialises or fails, and the failure has a
+  // retry button — so without these a user could sit here retrying forever
+  // and produce no telemetry at all. Both outcomes are recorded.
   useEffect(() => {
     if (mode !== "handoff" || !requisition?.redirectUrl) return;
     posthog?.capture(FIRST_RUN_EVENTS.accountRequisitionCreated, {
@@ -133,13 +120,12 @@ export default function FirstRunAccountStep() {
     });
   }, [mode, requisitionError, posthog, bankId]);
 
-  // RAD-600: bounced back from the sync step by a hard connect failure. This is
-  // the one first-run outcome that already had a visible banner and no event.
+  // Back from the bank without a connection. The banner alone leaves no
+  // event, so record it.
   useEffect(() => {
     if (!returnedError) return;
     posthog?.capture(FIRST_RUN_EVENTS.accountConnectReturned, {
-      error: returnedError,
-      outcome: "error_not_linked",
+      outcome: "error",
     });
   }, [returnedError, posthog]);
 
@@ -173,7 +159,6 @@ export default function FirstRunAccountStep() {
         onBack={() => {
           setMode("list");
           setBankId(null);
-          setRedirectStarted(false);
         }}
         t={t}
       />
@@ -231,13 +216,17 @@ export default function FirstRunAccountStep() {
         copy={
           <div className="space-y-6">
             <FirstRunStepIntro
-              kicker={t("stepLabels.account")}
               headline={t("account.headline")}
               sub={t("account.description")}
             />
 
             {returnedError ? (
-              <div className="border-destructive/40 bg-destructive/10 text-destructive rounded-lg border p-3 text-sm">
+              // Quiet register (DESIGN.md): `-text` ink, no tint. The fill
+              // token as text on its own 10% wash sat under 4.5:1.
+              <div
+                role="alert"
+                className="border-destructive-text/30 text-destructive-text rounded-lg border p-3 text-sm"
+              >
                 {t("connect.connectErrorBanner")}
               </div>
             ) : null}
@@ -265,31 +254,13 @@ export default function FirstRunAccountStep() {
 
             <div className="flex items-center gap-3">
               <div className="border-border h-px flex-1 border-t" />
-              <span className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
+              <span className="text-muted-foreground text-xs">
                 {tCommon("or")}
               </span>
               <div className="border-border h-px flex-1 border-t" />
             </div>
 
-            {bankConnectionsPaused ? (
-              <div className="border-border bg-muted/40 text-muted-foreground flex items-start gap-3 rounded-md border p-3">
-                <FirstRunIconTile icon={LinkIcon} tone="slate" size="sm" />
-                <div className="min-w-0 flex-1 space-y-1">
-                  <p className="text-foreground text-sm font-medium">
-                    {tCommon("bankConnectionsPaused.title")}
-                  </p>
-                  <p className="text-muted-foreground text-[13px] leading-5">
-                    {tCommon("bankConnectionsPaused.body")}
-                  </p>
-                  <Link
-                    href="/faq"
-                    className="text-primary text-xs font-semibold underline underline-offset-2"
-                  >
-                    {tCommon("bankConnectionsPaused.cta")}
-                  </Link>
-                </div>
-              </div>
-            ) : credentialLoading ? (
+            {credentialLoading ? (
               <div className="flex justify-center py-8">
                 <Spinner />
               </div>
@@ -478,22 +449,27 @@ function ManualPanel({
   return (
     <div className="mx-auto max-w-md space-y-6">
       <FirstRunStepIntro
-        kicker={t("stepLabels.account")}
         headline={t("connect.manualTitle")}
         sub={t("connect.manualBody")}
       />
       <div className="space-y-4">
         <div className="space-y-1.5">
-          <Label>{t("connect.manualNameLabel")}</Label>
+          <Label htmlFor="fr-manual-account-name">
+            {t("connect.manualNameLabel")}
+          </Label>
           <Input
+            id="fr-manual-account-name"
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder={tCommon("account-name")}
           />
         </div>
         <div className="space-y-1.5">
-          <Label>{t("connect.manualBalanceLabel")}</Label>
+          <Label htmlFor="fr-manual-account-balance">
+            {t("connect.manualBalanceLabel")}
+          </Label>
           <Input
+            id="fr-manual-account-balance"
             value={balance}
             onChange={(e) => setBalance(e.target.value)}
             inputMode="decimal"

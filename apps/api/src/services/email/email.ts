@@ -5,6 +5,7 @@ import dotenv from 'dotenv';
 import { type CreateEmailOptions, type CreateEmailRequestOptions, type CreateEmailResponse, type CreateEmailResponseSuccess, Resend } from 'resend';
 
 import { SHOULD_INTERCEPT_EMAILS } from '@config/env';
+import { instanceName } from '@config/instance-name';
 import { SupportedLanguages } from '@entity/Appuser';
 import { emailGlobalOptOutService, GLOBAL_EMAIL_OPT_OUT_CATEGORY } from '@service/email/email-global-opt-out.service';
 import { type EmailOutcome, emailSender, resolveEmailDriver, sendWithTransport, supportInbox } from '@service/email/email-transport';
@@ -44,8 +45,7 @@ const getResend = () => {
 const formatAddress = (email: string, name?: string) => (name ? `${name} <${email}>` : email);
 
 /**
- * Default wall-clock budget for one Resend send. Applies to `sendRenderedEmail`, which
- * previously had none at all.
+ * Default wall-clock budget for one Resend send. Applies to `sendRenderedEmail`.
  */
 const DEFAULT_SEND_TIMEOUT_MS = 20_000;
 
@@ -59,9 +59,9 @@ export interface RenderedEmailInput {
   /** Overrides {@link DEFAULT_SEND_TIMEOUT_MS}. */
   timeoutMs?: number;
   /**
-   * Overrides the default `RESEND_FROM_EMAIL` sender. Only for mail that is
-   * genuinely from a person rather than from the product — the RAD-583 founder
-   * outreach asks for a reply and would read as marketing if it arrived from
+   * Overrides the default sender (`EMAIL_FROM`). Only for mail that is
+   * genuinely from a person rather than from the product — founder outreach
+   * asks for a reply and would read as marketing if it arrived from
    * `hello@`. Must be an address on an already-verified Resend domain.
    */
   from?: { email: string; name?: string };
@@ -76,20 +76,7 @@ export interface RenderedEmailInput {
 
 export type RenderedEmailOutcome = EmailOutcome;
 
-/**
- * Resend's published `CreateEmailRequestOptions` type has no `signal`, but its client does
- * `fetchRequest(path, { method, body, ...options, headers })` and hands that object
- * straight to `fetch` — so a signal passed here really does reach the socket. Verified
- * against the SDK's compiled `post()`/`fetchRequest()`, not inferred from the types.
- *
- * On abort, `fetchRequest`'s catch-all returns `statusCode: null`, which
- * `classifyRenderedOutcome` already maps to `unknown` — i.e. "we cannot know whether this
- * was delivered". That is the correct classification for a cancelled send, and the
- * delivery state machines treat it as terminal rather than retrying it.
- */
 type LANGUAGE = keyof typeof SupportedLanguages;
-
-type SendRequestOptions = CreateEmailRequestOptions & { signal?: AbortSignal };
 
 export function isEmailInterceptionEnabled() {
   return SHOULD_INTERCEPT_EMAILS;
@@ -116,7 +103,10 @@ export async function sendRenderedEmail(input: RenderedEmailInput): Promise<Rend
   // that sends email runs at `batchSize: 1`, so one hung send freezes that queue outright.
   // The signal is forwarded to the SDK (rather than raced against it) so aborting actually
   // tears the socket down — a deadline that leaves the request in flight produces the
-  // worst possible outcome: recorded as timed out, delivered anyway.
+  // worst possible outcome: recorded as timed out, delivered anyway. The SDK passes the
+  // options straight to `fetch`; on abort it returns `statusCode: null`, which
+  // `classifyRenderedOutcome` maps to `unknown` ("we cannot know whether this was delivered"),
+  // and the delivery state machines treat that as terminal rather than retrying it.
   const abort = AbortSignal.timeout(input.timeoutMs ?? DEFAULT_SEND_TIMEOUT_MS);
   const result = await getResend().emails.send({
     ...(input.attachments?.length ? { attachments: input.attachments.map((a) => ({ content: a.content, contentType: a.contentType, filename: a.filename })) } : {}),
@@ -127,7 +117,7 @@ export async function sendRenderedEmail(input: RenderedEmailInput): Promise<Rend
     subject: input.subject,
     text: input.text,
     to: formatAddress(input.to.email, input.to.name),
-  }, { ...(input.idempotencyKey ? { idempotencyKey: input.idempotencyKey } : {}), signal: abort } satisfies SendRequestOptions as CreateEmailRequestOptions);
+  }, { ...(input.idempotencyKey ? { idempotencyKey: input.idempotencyKey } : {}), signal: abort } satisfies CreateEmailRequestOptions);
   return classifyRenderedOutcome(result);
 }
 
@@ -159,7 +149,7 @@ function validateRenderedInput(input: RenderedEmailInput) {
  * Renders an internal/ops alert with the branded `internal-alert` template and sends it to a
  * WonderMoney team inbox (info@/alerts@/support@) via `sendRenderedEmail` (interception, provider
  * send, headers all handled there). These recipients are the team, not users, so the template is
- * English-only by design — no localization (RAD-326).
+ * English-only by design — no localization.
  */
 export interface BankRecoveryEmailInput {
   /** Display name of the bank the interrupted attempt was with, if known. */
@@ -204,6 +194,8 @@ export interface BankRecoveryEmailProviderSeam {
   send?: (payload: CreateEmailOptions, options?: CreateEmailRequestOptions) => Promise<CreateEmailResponse>;
 }
 
+export type FeedbackType = 'bug' | 'feature_request' | 'other';
+
 interface AccountDeletedData {
   appuserKey: number;
   deletedAt: Date;
@@ -213,19 +205,30 @@ interface AccountDeletedData {
 interface AccountSyncData {
   bankName: string;
 }
+interface FeedbackEmailData {
+  email: string;
+  message: string;
+  name?: string;
+  page?: string;
+  type: FeedbackType;
+}
 
 interface SignupData {
   userEmail: string;
 }
+
 interface SupportEmailData {
   email: string;
   message: string;
   name: string;
 }
 
+const FEEDBACK_TYPE_LABELS: Record<FeedbackType, string> = { bug: 'Bug', feature_request: 'Feature request', other: 'Other' };
+
 /** Sends a team alert to `SUPPORT_EMAIL`; without one there is nobody to send it to, so it is logged. */
 async function sendInternalAlert(
   props: { details?: { label: string; value: string }[]; intro?: string; subject: string; title: string; variant?: 'info' | 'warning' },
+  options: { replyTo?: { email: string; name?: string } } = {},
 ): Promise<RenderedEmailOutcome> {
   const inbox = supportInbox();
   if (!inbox) {
@@ -233,14 +236,14 @@ async function sendInternalAlert(
     return { type: 'intercepted' };
   }
   const rendered = await renderInternalAlertEmail(props);
-  return sendRenderedEmail({ headers: {}, html: rendered.html, subject: rendered.subject, text: rendered.text, to: { email: inbox } });
+  return sendRenderedEmail({ headers: {}, html: rendered.html, ...(options.replyTo ? { replyTo: options.replyTo } : {}), subject: rendered.subject, text: rendered.text, to: { email: inbox } });
 }
 
 const BANK_RECOVERY_COPY = {
   EN: {
     body: [
-      "Your bank connection didn't finish, so your accounts may be out of date in WonderMoney.",
-      "Reopen WonderMoney and retry the connection from the app. It only takes a moment. If it still doesn't work, just reply and we'll help.",
+      (brand: string) => `Your bank connection didn't finish, so your accounts may be out of date in ${brand}.`,
+      (brand: string) => `Reopen ${brand} and retry the connection from the app. It only takes a moment. If it still doesn't work, just reply and we'll help.`,
     ],
     cta: 'Retry the connection',
     heading: "Let's finish connecting your bank",
@@ -253,8 +256,8 @@ const BANK_RECOVERY_COPY = {
   },
   PT: {
     body: [
-      'A sua ligação bancária não ficou concluída, por isso as suas contas podem não estar atualizadas na WonderMoney.',
-      'Volte a abrir a WonderMoney e tente novamente a ligação a partir da aplicação. Demora só um momento. Se continuar a falhar, responda a este email e ajudamos.',
+      (brand: string) => `A sua ligação bancária não ficou concluída, por isso as suas contas podem não estar atualizadas na ${brand}.`,
+      (brand: string) => `Volte a abrir a ${brand} e tente novamente a ligação a partir da aplicação. Demora só um momento. Se continuar a falhar, responda a este email e ajudamos.`,
     ],
     cta: 'Tentar novamente',
     heading: 'Vamos concluir a ligação ao seu banco',
@@ -279,7 +282,7 @@ export function sendAccountDeletedEmail(data: AccountDeletedData) {
         { label: 'Appuser key', value: String(data.appuserKey) },
         { label: 'Deleted at', value: data.deletedAt.toISOString() },
       ],
-      subject: 'Wonder.money - Account deleted',
+      subject: `${instanceName()} - Account deleted`,
       title: 'Account deleted',
       variant: 'info',
     },
@@ -293,6 +296,7 @@ export async function sendAccountSyncEmail(to: { email: string; name?: string },
   const lang = toRenderLang(language);
   const rendered = await renderAccountConnectedEmail({
     bankName: data.bankName,
+    brandName: instanceName(),
     dashboardUrl: `${appBase()}/${lang}/accounts`,
     firstName: to.name ?? undefined,
     language: lang,
@@ -302,19 +306,20 @@ export async function sendAccountSyncEmail(to: { email: string; name?: string },
 
 export function sendPasswordResetEmail(to: { email: string; name?: string }, resetUrl: string) {
   const name = to.name ?? to.email.split('@')[0] ?? '';
+  const brand = instanceName();
   return sendRenderedEmail({
     headers: {},
-    html: `<p>Hi ${escapeHtml(name)},</p><p>We received a request to reset your Wonder.money password. Click the link below to choose a new one:</p><p><a href="${escapeHtml(resetUrl)}">${escapeHtml(resetUrl)}</a></p><p>If you didn't request this, you can safely ignore this email — your password won't change.</p><p>— The Wonder.money team</p>`,
-    subject: 'Reset your Wonder.money password',
+    html: `<p>Hi ${escapeHtml(name)},</p><p>We received a request to reset your ${escapeHtml(brand)} password. Click the link below to choose a new one:</p><p><a href="${escapeHtml(resetUrl)}">${escapeHtml(resetUrl)}</a></p><p>If you didn't request this, you can safely ignore this email — your password won't change.</p><p>— The ${escapeHtml(brand)} team</p>`,
+    subject: `Reset your ${brand} password`,
     text: `Hi ${name},
 
-We received a request to reset your Wonder.money password. Click the link below to choose a new one:
+We received a request to reset your ${brand} password. Click the link below to choose a new one:
 
 ${resetUrl}
 
 If you didn't request this, you can safely ignore this email — your password won't change.
 
-— The Wonder.money team`,
+— The ${brand} team`,
     to,
   });
 }
@@ -325,19 +330,20 @@ If you didn't request this, you can safely ignore this email — your password w
  */
 export function sendEmailVerificationEmail(to: { email: string; name?: string }, verificationUrl: string) {
   const name = to.name ?? to.email.split('@')[0] ?? '';
+  const brand = instanceName();
   return sendRenderedEmail({
     headers: {},
-    html: `<p>Hi ${escapeHtml(name)},</p><p>Welcome to Wonder.money! Please confirm your email address by clicking the link below:</p><p><a href="${escapeHtml(verificationUrl)}">${escapeHtml(verificationUrl)}</a></p><p>If you didn't create a Wonder.money account, you can safely ignore this email.</p><p>— The Wonder.money team</p>`,
-    subject: 'Verify your Wonder.money email',
+    html: `<p>Hi ${escapeHtml(name)},</p><p>Welcome to ${escapeHtml(brand)}! Please confirm your email address by clicking the link below:</p><p><a href="${escapeHtml(verificationUrl)}">${escapeHtml(verificationUrl)}</a></p><p>If you didn't create a ${escapeHtml(brand)} account, you can safely ignore this email.</p><p>— The ${escapeHtml(brand)} team</p>`,
+    subject: `Verify your ${brand} email`,
     text: `Hi ${name},
 
-Welcome to Wonder.money! Please confirm your email address by clicking the link below:
+Welcome to ${brand}! Please confirm your email address by clicking the link below:
 
 ${verificationUrl}
 
-If you didn't create a Wonder.money account, you can safely ignore this email.
+If you didn't create a ${brand} account, you can safely ignore this email.
 
-— The Wonder.money team`,
+— The ${brand} team`,
     to,
   });
 }
@@ -365,10 +371,12 @@ export async function sendBankRecoveryEmail(
   }
 
   const copy = BANK_RECOVERY_COPY[input.language];
+  const brand = instanceName();
   let rendered;
   try {
     rendered = await renderLifecycleNudgeEmail({
-      body: [...copy.body],
+      body: copy.body.map((paragraph) => paragraph(brand)),
+      brandName: brand,
       ctaLabel: copy.cta,
       ctaUrl: input.recoveryUrl,
       heading: copy.heading,
@@ -412,12 +420,11 @@ export async function sendBankRecoveryEmail(
 
   let result: CreateEmailResponse;
   try {
-    // The signal is FORWARDED, not merely checked at entry. The caller's 20 s deadline
-    // used to be a `Promise.race` whose loser kept running: the delivery was recorded
-    // `provider_timeout` while the HTTP request was still in flight and could still
-    // deliver — which, combined with a non-atomic status write, is how a "timed out"
-    // email gets sent twice.
-    result = await send(payload, { idempotencyKey: `${input.incidentId}:${input.templateVersion}`, ...(input.signal ? { signal: input.signal } : {}) } satisfies SendRequestOptions as CreateEmailRequestOptions);
+    // The signal is FORWARDED, not merely checked at entry. A `Promise.race` deadline leaves its
+    // loser running: the delivery would be recorded `provider_timeout` while the HTTP request was
+    // still in flight and could still deliver — which, combined with a non-atomic status write, is
+    // how a "timed out" email gets sent twice.
+    result = await send(payload, { idempotencyKey: `${input.incidentId}:${input.templateVersion}`, ...(input.signal ? { signal: input.signal } : {}) } satisfies CreateEmailRequestOptions);
   } catch {
     return { code: 'provider_unknown', status: 'ambiguous' };
   }
@@ -426,7 +433,7 @@ export async function sendBankRecoveryEmail(
 
 /** Maps a non-Resend transport outcome onto the bank-recovery delivery states. */
 export function sendSignupEmail(data: SignupData, language: LANGUAGE) {
-  const subject = language === 'PT' ? 'Wonder.money - INTERNAL Registo de Utilizador' : 'Wonder.money - INTERNAL User Signup';
+  const subject = language === 'PT' ? `${instanceName()} - INTERNAL Registo de Utilizador` : `${instanceName()} - INTERNAL User Signup`;
   return sendInternalAlert(
     { details: [{ label: 'Email', value: data.userEmail }], subject, title: 'New user signup', variant: 'info' },
   );
@@ -440,10 +447,30 @@ export function sendSupportEmail(data: SupportEmailData) {
         { label: 'Email', value: data.email },
       ],
       intro: data.message,
-      subject: 'Wonder.money - Support',
+      subject: `${instanceName()} - Support`,
       title: 'Support request',
       variant: 'info',
     },
+  );
+}
+
+/** In-app feedback from a signed-in user, to `SUPPORT_EMAIL`. Replies go to the user. */
+export function sendFeedbackEmail(data: FeedbackEmailData) {
+  const typeLabel = FEEDBACK_TYPE_LABELS[data.type];
+  return sendInternalAlert(
+    {
+      details: [
+        { label: 'Type', value: typeLabel },
+        ...(data.name ? [{ label: 'Name', value: data.name }] : []),
+        { label: 'Email', value: data.email },
+        ...(data.page ? [{ label: 'Page', value: data.page }] : []),
+      ],
+      intro: data.message,
+      subject: `${instanceName()} - Feedback (${typeLabel})`,
+      title: 'Feedback',
+      variant: 'info',
+    },
+    { replyTo: { email: data.email, ...(data.name ? { name: data.name } : {}) } },
   );
 }
 
@@ -495,6 +522,7 @@ async function sendTransactionalNudge(
   const unsubscribeUrl = accountOptOutUrl(input.appuserKey);
   const rendered = await renderLifecycleNudgeEmail({
     body: copy.body,
+    brandName: instanceName(),
     ctaLabel: copy.ctaLabel,
     ctaUrl: links.ctaUrl,
     ...(input.firstName ? { firstName: input.firstName } : {}),
@@ -515,34 +543,34 @@ async function sendTransactionalNudge(
 }
 
 /* Task 2 — Welcome / onboarding (trigger: signup). CTA → app home. */
-const WELCOME_COPY: Record<'EN' | 'PT', TransactionalNudgeCopy> = {
+const welcomeCopy = (brand: string): Record<'EN' | 'PT', TransactionalNudgeCopy> => ({
   EN: {
     body: [
       'Thanks for signing up — your account is ready to go.',
-      'WonderMoney brings your accounts, budgets and investments together in one place. Connect your first account to watch everything come to life.',
+      `${brand} brings your accounts, budgets and investments together in one place. Connect your first account to watch everything come to life.`,
       'Any questions? Just reply to this email — a real person reads it.',
     ],
-    ctaLabel: 'Open WonderMoney',
-    heading: 'Welcome to WonderMoney',
+    ctaLabel: `Open ${brand}`,
+    heading: `Welcome to ${brand}`,
     preheader: 'Your account is ready — here is how to get started.',
-    subject: 'Welcome to WonderMoney 🎉',
+    subject: `Welcome to ${brand} 🎉`,
   },
   PT: {
     body: [
       'Obrigado por te registares — a tua conta está pronta.',
-      'A WonderMoney reúne as tuas contas, orçamentos e investimentos num só lugar. Liga a tua primeira conta para veres tudo a ganhar vida.',
+      `A ${brand} reúne as tuas contas, orçamentos e investimentos num só lugar. Liga a tua primeira conta para veres tudo a ganhar vida.`,
       'Alguma dúvida? Responde a este email — é uma pessoa a sério que o lê.',
     ],
-    ctaLabel: 'Abrir a WonderMoney',
-    heading: 'Bem-vindo à WonderMoney',
+    ctaLabel: `Abrir a ${brand}`,
+    heading: `Bem-vindo à ${brand}`,
     preheader: 'A tua conta está pronta — começa por aqui.',
-    subject: 'Bem-vindo à WonderMoney 🎉',
+    subject: `Bem-vindo à ${brand} 🎉`,
   },
-};
+});
 
 export function sendWelcomeEmail(input: TransactionalUserEmailInput) {
   const lang = toRenderLang(input.language);
-  return sendTransactionalNudge(input, WELCOME_COPY[input.language], {
+  return sendTransactionalNudge(input, welcomeCopy(instanceName())[input.language], {
     ctaUrl: `${appBase()}/${lang}`,
     settingsUrl: `${appBase()}/${lang}/settings`,
   });

@@ -9,10 +9,9 @@ import { DI } from '../app.js';
 import { CURRENT_ONBOARDING_VERSION, ONBOARDING_REQUIRED_FOR_USERS_CREATED_FROM } from '../onboarding-version.js';
 
 /**
- * RAD-226 — server-authoritative versioned onboarding bootstrap and idempotent
- * completion mutation. The versioned DTO replaces the legacy numeric-step
- * `getOnboarding` / `completeOnboardingStep` endpoints. Users who already
- * existed when RAD-601 shipped are protected from re-onboarding: they resolve
+ * Server-authoritative versioned onboarding bootstrap and idempotent
+ * completion mutation. Users who already existed before
+ * ONBOARDING_REQUIRED_FOR_USERS_CREATED_FROM are protected from re-onboarding: they resolve
  * to `required:false, completed:true, completedVersion:0` forever. Users
  * created after that cutoff resolve to `required:true,
  * completed:false` until they call the completion mutation with the current
@@ -73,11 +72,11 @@ function computeState(appuser: Appuser): OnboardingStateDto {
   if (hasCurrentVersionCompletion(appuser)) {
     return buildState({ completed: true, completedVersion: CURRENT_ONBOARDING_VERSION, required: false });
   }
-  // RAD-601 — anyone who already existed when the cutoff shipped is treated as
-  // v0 and protected forever, even after future content bumps. This used to key
-  // off the presence of an `appuser_onboarding` row, but `createUser` gives
-  // every new account one at registration, so the check matched everybody and
-  // the journey was unreachable. See ONBOARDING_REQUIRED_FOR_USERS_CREATED_FROM.
+  // Anyone who already existed when the cutoff shipped is treated as v0 and
+  // protected forever, even after future content bumps. This keys off the
+  // creation date, not the presence of an `appuser_onboarding` row: `createUser`
+  // gives every new account one at registration, so that check would match
+  // everybody. See ONBOARDING_REQUIRED_FOR_USERS_CREATED_FROM.
   if (appuser.createdAt < ONBOARDING_REQUIRED_FOR_USERS_CREATED_FROM) {
     return buildState({ completed: true, completedVersion: 0, required: false });
   }

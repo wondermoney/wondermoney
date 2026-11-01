@@ -8,7 +8,7 @@ export interface GetBudgetResponse {
   budget: Budget;
 }
 
-export async function getBudget(
+async function getBudget(
   budgetKey: number,
   apiClient: AxiosInstance = api,
 ): Promise<GetBudgetResponse> {

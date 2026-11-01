@@ -31,6 +31,7 @@ export const INVALID_EMAIL_OPT_OUT_TOKEN = 'INVALID_EMAIL_OPT_OUT_TOKEN';
 export const GLOBAL_EMAIL_OPT_OUT_CATEGORY = 'all';
 export type EmailOptOutTokenCategory = EmailCategory | typeof GLOBAL_EMAIL_OPT_OUT_CATEGORY;
 const TOKEN_CATEGORY_VALUES: ReadonlySet<string> = new Set<string>([GLOBAL_EMAIL_OPT_OUT_CATEGORY, ...Object.values(EmailCategory)]);
+const isTokenCategory = (value: string): value is EmailOptOutTokenCategory => TOKEN_CATEGORY_VALUES.has(value);
 
 interface OptOutServiceOptions {
   em?: EntityManager;
@@ -107,8 +108,8 @@ export class EmailGlobalOptOutService {
         if (cat !== undefined) throw new Error('invalid');
         return { exp, sub, v };
       }
-      if (typeof cat !== 'string' || !TOKEN_CATEGORY_VALUES.has(cat)) throw new Error('invalid');
-      return { cat: cat as EmailOptOutTokenCategory, exp, sub, v };
+      if (typeof cat !== 'string' || !isTokenCategory(cat)) throw new Error('invalid');
+      return { cat, exp, sub, v };
     } catch {
       throw new BadRequestError(INVALID_EMAIL_OPT_OUT_TOKEN);
     }

@@ -5,9 +5,9 @@ import { test } from "vitest";
 import { formatPortfolioAllocationValue } from "../PortfolioAllocationChart";
 
 /**
- * RAD-572 — this used to assert `"€1,234.56"` for a call that passed no locale,
- * which pinned the defect rather than the behaviour: `Intl` was falling back to
- * whatever locale the runtime happened to have, and on CI that was English.
+ * Always pass a locale: without one `Intl` falls back to whatever locale the
+ * runtime happens to have (English on CI), which would pin the runtime rather
+ * than the behaviour.
  */
 test("portfolio allocation values format in the locale they are given", () => {
   const en = formatPortfolioAllocationValue(1234.56, "EUR", "en");

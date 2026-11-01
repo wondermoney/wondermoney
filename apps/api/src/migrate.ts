@@ -4,7 +4,7 @@ import { MikroORM } from '@mikro-orm/core';
 import type { PostgreSqlDriver } from '@mikro-orm/postgresql';
 import { Client } from 'pg';
 
-import { ReferenceDataSeeder } from './database/seeders/ReferenceDataSeeder.js';
+import { hasReferenceData, ReferenceDataSeeder } from './database/seeders/ReferenceDataSeeder.js';
 import config from './mikro-orm.config.js';
 
 /**
@@ -23,34 +23,106 @@ const MIGRATION_LOCK_KEY = 'wondermoney:migrations';
  * Migrations that must NOT be applied automatically on container startup.
  *
  * The container entrypoint is `node dist/migrate.js && exec node dist/server.js`, so every
- * pending migration runs before the API can serve — and a failure exits non-zero, which means
- * the server never starts and the deploy never completes.
- *
- * That is the right default for ordinary additive DDL. It is wrong for migrations that take a
- * heavy lock or run long:
- *
- *   - `Migration20260915190000` rewrites `transaction` and `financial_transaction` under
- *     ACCESS EXCLUSIVE, and deliberately sets `lock_timeout = '5s'` so it fails fast rather
- *     than queueing behind live traffic and then blocking it. On a busy database that lock is
- *     not available in five seconds, so it fails — and takes the whole deploy with it.
- *   - `Migration20260915190100` / `...190200` build indexes `CONCURRENTLY`. Those are online
- *     by design, but on a large table they take minutes, and every second of that is a second
- *     the API is not serving.
- *
- * Each of these documents "apply in a maintenance window" in its own docblock. This list is
- * what actually enforces it: the runner applies everything up to the first entry here, then
- * stops and reports, letting the server start on the older-but-consistent schema.
+ * pending migration runs before the API can serve, and a failure means the server never starts.
+ * That is right for ordinary additive DDL and wrong for a migration that takes a heavy lock or
+ * runs long (rewriting a large table, building an index `CONCURRENTLY`). List those here: the
+ * runner applies everything up to the first entry, then stops and reports, letting the server
+ * start on the older-but-consistent schema.
  *
  * Apply them deliberately with `pnpm migrate:manual` (or `migrate:manual:prd`), which runs the
- * same runner with `APPLY_MANUAL_MIGRATIONS=true`.
- *
- * To add one: put the class name here in the same commit that adds the migration.
+ * same runner with `APPLY_MANUAL_MIGRATIONS=true`. Add the class name here in the same commit
+ * that adds the migration.
  */
-const MANUAL_MIGRATIONS = new Set([
+const MANUAL_MIGRATIONS = new Set<string>([]);
+
+/** Creates the whole schema. It replaced the original chain of 128 migrations. */
+export const BASELINE_MIGRATION = 'Migration20261025000000';
+
+/**
+ * The original chain's last migration and the three it held back for a maintenance window. A
+ * database that recorded all four already has the schema the baseline creates.
+ */
+const ORIGINAL_CHAIN_HEAD = [
   'Migration20260915190000',
   'Migration20260915190100',
   'Migration20260915190200',
-]);
+  'Migration20261024100000',
+];
+
+/**
+ * Where the chain ended in WonderMoney 1.0.0, the first self-hosting release: its last migration
+ * and the three held back on hosted (a self-hosted API applies them on start). Every 1.0.0
+ * install recorded all four.
+ */
+const RELEASE_1_0_0_HEAD = [
+  'Migration20260915190000',
+  'Migration20260915190100',
+  'Migration20260915190200',
+  'Migration20261004120000',
+];
+
+/**
+ * The original chain's migrations that came after 1.0.0, so no published image ever ran them. The
+ * baseline already contains them; on a 1.0.0 database they are replayed (in order, in one
+ * transaction) before the baseline is recorded. Each statement tolerates a column or constraint
+ * that already exists.
+ */
+const CHAIN_AFTER_1_0_0: readonly { name: string; sql: readonly string[] }[] = [
+  {
+    // #194: the other row of a matched own-account transfer.
+    name: 'Migration20261024092755',
+    sql: [
+      'alter table "transaction" add column if not exists "transfer_counterpart_key" int null',
+      `do $$ begin
+        if not exists (select 1 from pg_constraint where conname = 'transaction_transfer_counterpart_key_foreign') then
+          alter table "transaction" add constraint "transaction_transfer_counterpart_key_foreign"
+            foreign key ("transfer_counterpart_key") references "transaction" ("transaction_key") on delete set null;
+        end if;
+        if not exists (select 1 from pg_constraint where conname = 'transaction_transfer_counterpart_key_unique') then
+          alter table "transaction" add constraint "transaction_transfer_counterpart_key_unique" unique ("transfer_counterpart_key");
+        end if;
+      end $$`,
+    ],
+  },
+  {
+    // #196: the settlement amount a transaction had before its first edit.
+    name: 'Migration20261024100000',
+    sql: ['alter table "transaction" add column if not exists "unedited_settlement_amount" numeric(18,4) null'],
+  },
+];
+
+const migrationName = (name: string) => name.replace(/\.[jt]s$/, '');
+
+export type BaselinePlan =
+  /** The baseline is recorded already. */
+  | { action: 'done' }
+  /** An empty database: the baseline runs like any other migration. */
+  | { action: 'run' }
+  /**
+   * The database has the baseline's schema except for `replay`, the post-1.0.0 chain migrations it
+   * never ran: apply those, then record the baseline without running it.
+   */
+  | { action: 'mark'; replay: string[] };
+
+/**
+ * What to do about the baseline, given the migrations a database has recorded: run it (an empty
+ * database), only record it (a database that ran the whole original chain, or 1.0.0's part of it
+ * plus the replayed rest), or nothing (already recorded). Any other database stopped part-way
+ * through the original chain and is refused.
+ */
+export function planBaseline(executed: readonly string[]): BaselinePlan {
+  const names = new Set(executed.map(migrationName));
+  if (names.has(BASELINE_MIGRATION)) return { action: 'done' };
+  if (names.size === 0) return { action: 'run' };
+  if (ORIGINAL_CHAIN_HEAD.every((name) => names.has(name))) return { action: 'mark', replay: [] };
+  if (RELEASE_1_0_0_HEAD.every((name) => names.has(name))) {
+    return { action: 'mark', replay: CHAIN_AFTER_1_0_0.map(({ name }) => name).filter((name) => !names.has(name)) };
+  }
+  throw new Error(
+    `This database stopped part-way through the migrations ${BASELINE_MIGRATION} replaced. `
+    + 'Start WonderMoney 1.0.0 on it once (it applies the rest of that chain), then upgrade.',
+  );
+}
 
 /**
  * The lock is taken on a dedicated `pg` client rather than through the ORM.
@@ -102,7 +174,7 @@ export function planMigrations(
   options: { applyManual?: boolean; freshDatabase?: boolean; manual?: ReadonlySet<string> } = {},
 ): MigrationPlan {
   const manual = options.manual ?? MANUAL_MIGRATIONS;
-  const name = (migration: { name: string }) => migration.name.replace(/\.[jt]s$/, '');
+  const name = (migration: { name: string }) => migrationName(migration.name);
 
   // A maintenance window protects live traffic and data; an empty database has neither, so a
   // fresh install gets the whole schema at once.
@@ -122,9 +194,9 @@ export function planMigrations(
  * `SEED_REFERENCE_DATA=false`. An existing database is never re-seeded, so this cannot duplicate
  * or overwrite anything.
  */
-export function shouldSeedReferenceData(hasReferenceData: boolean, env: NodeJS.ProcessEnv = process.env): boolean {
+export function shouldSeedReferenceData(referenceDataPresent: boolean, env: NodeJS.ProcessEnv = process.env): boolean {
   if (env['SEED_REFERENCE_DATA']?.trim().toLowerCase() === 'false') return false;
-  return !hasReferenceData;
+  return !referenceDataPresent;
 }
 
 async function main() {
@@ -137,10 +209,23 @@ async function main() {
     const orm = await MikroORM.init<PostgreSqlDriver>(config);
     try {
       const migrator = orm.migrator;
-      const pending = await migrator.getPendingMigrations();
+      const executed = await migrator.getExecuted();
+      const baseline = planBaseline(executed.map((migration) => migration.name));
+      if (baseline.action === 'mark') {
+        await orm.em.transactional(async (em) => {
+          for (const { name, sql: statements } of CHAIN_AFTER_1_0_0.filter(({ name }) => baseline.replay.includes(name))) {
+            for (const sql of statements) await em.execute(sql);
+            await em.execute('insert into mikro_orm_migrations (name, executed_at) values (?, now())', [name]);
+            console.log(`[migrate] applied ${name} (from the chain ${BASELINE_MIGRATION} replaced)`);
+          }
+          await em.execute('insert into mikro_orm_migrations (name, executed_at) values (?, now())', [BASELINE_MIGRATION]);
+        });
+        console.log(`[migrate] recorded ${BASELINE_MIGRATION} as applied: this database ran the migrations it replaced`);
+      }
+
+      const pending = await migrator.getPending();
       console.log(`[migrate] ${pending.length} pending migration(s)`);
 
-      const executed = await migrator.getExecutedMigrations();
       const plan = planMigrations(pending, {
         applyManual: process.env['APPLY_MANUAL_MIGRATIONS'] === 'true',
         freshDatabase: executed.length === 0,
@@ -152,10 +237,7 @@ async function main() {
           console.log(`[migrate] applied ${migration.name}`);
         }
       }
-      const [{ present } = { present: true }] = await orm.em.getConnection().execute<{ present: boolean }[]>(
-        'select exists(select 1 from currency) as present',
-      );
-      if (shouldSeedReferenceData(present)) {
+      if (shouldSeedReferenceData(await hasReferenceData(orm.em))) {
         console.log('[migrate] empty database: loading reference data');
         await orm.seeder.seed(ReferenceDataSeeder);
         console.log('[migrate] reference data loaded');

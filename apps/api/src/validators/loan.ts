@@ -19,13 +19,13 @@ const baseLoanSchema = z.object({
   openingPrincipalBalance: finiteAmount.refine((value) => value > 0),
   originalPrincipal: finiteAmount.optional(),
   paymentDayOfMonth: z.coerce.number().int().min(1).max(31).refine(Number.isSafeInteger).optional(),
-  paymentFrequency: z.nativeEnum(LoanPaymentFrequency).optional(),
+  paymentFrequency: z.enum(LoanPaymentFrequency).optional(),
   providerName: z.string().max(255).optional(),
-  rateType: z.nativeEnum(LoanRateType).optional(),
+  rateType: z.enum(LoanRateType).optional(),
   regularPaymentAmount: finiteAmount.refine((value) => value > 0).optional(),
-  status: z.nativeEnum(LoanStatus).optional(),
+  status: z.enum(LoanStatus).optional(),
   termMonths: z.coerce.number().int().positive().refine(Number.isSafeInteger).optional(),
-  type: z.nativeEnum(LoanType),
+  type: z.enum(LoanType),
 });
 
 export const createLoanSchema = z.object({
@@ -35,10 +35,10 @@ export const createLoanSchema = z.object({
     })
     .superRefine((data, ctx) => {
       if (data.originalPrincipal != null && data.originalPrincipal < data.openingPrincipalBalance) {
-        ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'originalPrincipal must be greater than or equal to openingPrincipalBalance', path: ['originalPrincipal'] });
+        ctx.addIssue({ code: 'custom', message: 'originalPrincipal must be greater than or equal to openingPrincipalBalance', path: ['originalPrincipal'] });
       }
       if (data.maturityDate && data.maturityDate <= data.openingBalanceDate) {
-        ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'maturityDate must be after openingBalanceDate', path: ['maturityDate'] });
+        ctx.addIssue({ code: 'custom', message: 'maturityDate must be after openingBalanceDate', path: ['maturityDate'] });
       }
     }),
 });
@@ -48,10 +48,10 @@ export const updateLoanSchema = z.object({
     .partial()
     .superRefine((data, ctx) => {
       if (data.originalPrincipal != null && data.openingPrincipalBalance != null && data.originalPrincipal < data.openingPrincipalBalance) {
-        ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'originalPrincipal must be greater than or equal to openingPrincipalBalance', path: ['originalPrincipal'] });
+        ctx.addIssue({ code: 'custom', message: 'originalPrincipal must be greater than or equal to openingPrincipalBalance', path: ['originalPrincipal'] });
       }
       if (data.maturityDate && data.openingBalanceDate && data.maturityDate <= data.openingBalanceDate) {
-        ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'maturityDate must be after openingBalanceDate', path: ['maturityDate'] });
+        ctx.addIssue({ code: 'custom', message: 'maturityDate must be after openingBalanceDate', path: ['maturityDate'] });
       }
     }),
   params: z.object({
@@ -89,7 +89,7 @@ export const linkLoanRepaymentSchema = z.object({
   body: repaymentAllocationSchema.superRefine((data, ctx) => {
     const validation = validateRepaymentAllocation(data);
     if (!validation.valid) {
-      ctx.addIssue({ code: z.ZodIssueCode.custom, message: validation.reason, path: ['totalPaymentAmount'] });
+      ctx.addIssue({ code: 'custom', message: validation.reason, path: ['totalPaymentAmount'] });
     }
   }),
   params: z.object({
@@ -110,7 +110,7 @@ export const updateLoanRepaymentSchema = z.object({
       totalPaymentAmount: data.totalPaymentAmount,
     });
     if (!validation.valid) {
-      ctx.addIssue({ code: z.ZodIssueCode.custom, message: validation.reason, path: ['totalPaymentAmount'] });
+      ctx.addIssue({ code: 'custom', message: validation.reason, path: ['totalPaymentAmount'] });
     }
   }),
   params: z.object({

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import type { SafeParseReturnType } from 'zod';
+import type { ZodSafeParseResult } from 'zod';
 
 import {
   addBudgetCategoryRequestSchema,
@@ -9,15 +9,15 @@ import {
 
 // Pulls the first error message for a given field out of a failed safeParse result, without
 // wrapping `expect` calls in a conditional (forbidden by vitest/no-conditional-expect).
-function firstErrorMessage(result: SafeParseReturnType<unknown, unknown>, fieldName: string): string | undefined {
+function firstErrorMessage(result: ZodSafeParseResult<unknown>, fieldName: string): string | undefined {
   return result.success ? undefined : result.error.issues.find((issue) => issue.path.includes(fieldName))?.message;
 }
 
-// RAD-637: budget category amounts had no upper bound, so an edge-case entry like 99999999 was
-// accepted and propagated through Total Budgeted, Budget Remaining, utilization %, and Net Worth
-// History. These tests pin the sanity ceiling (999,999,999, matching the pre-existing income-amount
-// cap in createBudgetRequestSchema) at the validator boundary.
-describe('budget validators — category amount upper bound (RAD-637)', () => {
+// Without an upper bound, an edge-case budget category amount like 99999999 would propagate
+// through Total Budgeted, Budget Remaining, utilization %, and Net Worth History. These tests pin
+// the sanity ceiling (999,999,999, matching the income-amount cap in createBudgetRequestSchema) at
+// the validator boundary.
+describe('budget validators — category amount upper bound', () => {
   describe('addBudgetCategoryRequestSchema', () => {
     it('rejects an amount over the ceiling with a clear error message', () => {
       const result = addBudgetCategoryRequestSchema.safeParse({

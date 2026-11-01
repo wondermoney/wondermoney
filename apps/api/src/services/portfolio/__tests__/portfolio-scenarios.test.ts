@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { kyselyDouble } from '@app/__tests__/__helpers__/kysely-double';
 import { DI } from '@app/database/di';
 
 import {
@@ -13,32 +14,14 @@ vi.mock('../asset-price.service', () => ({ default: { ensureRecentAssetPrice: vi
 
 const portfolioSnapshotDeleteMock = vi.hoisted(() => vi.fn().mockResolvedValue(undefined));
 
-interface KnexBuilderMock {
-  orderBy: () => KnexBuilderMock;
-  select: () => KnexBuilderMock;
-  then: (resolve: (value: unknown) => unknown) => Promise<unknown>;
-  where: () => KnexBuilderMock;
-  whereIn: () => KnexBuilderMock;
-}
-
 type TransactionCallback = (em: typeof DI.em) => Promise<void> | void;
 
 const runTransaction = (fn: TransactionCallback) => Promise.resolve(fn(DI.em));
 const getPersistMock = () => (DI.em as unknown as { persist: ReturnType<typeof vi.fn> }).persist;
 
-function makeKnexMock(rows: unknown[]) {
-  return vi.fn(() => {
-    const builder: KnexBuilderMock = {
-      orderBy: () => builder,
-      select: () => builder,
-      then: (resolve: (value: unknown) => unknown) => Promise.resolve(resolve(rows)),
-      where: () => builder,
-      whereIn: () => builder,
-    };
-
-    const query = (() => builder) as unknown as ((table: string) => KnexBuilderMock) & KnexBuilderMock;
-    return query;
-  });
+/** `getKysely` for a database that answers every query with `rows`. */
+function makeDatabaseMock(rows: unknown[]) {
+  return vi.fn(() => kyselyDouble(() => rows).db);
 }
 
 describe('portfolio aggregation scenarios', () => {
@@ -46,7 +29,7 @@ describe('portfolio aggregation scenarios', () => {
     vi.useRealTimers();
     vi.clearAllMocks();
     Object.assign(DI.em, {
-      getKnex: makeKnexMock([]),
+      getKysely: makeDatabaseMock([]),
       nativeDelete: portfolioSnapshotDeleteMock,
       transactional: vi.fn(runTransaction),
     });
@@ -179,8 +162,8 @@ describe('portfolio aggregation scenarios', () => {
         return null;
       }),
       flush: vi.fn(),
-      getKnex: makeKnexMock([
-        { date: '2024-01-02', financial_asset_key: 11, price: 100 },
+      getKysely: makeDatabaseMock([
+        { date: '2024-01-02 00:00:00+00', financial_asset_key: 11, price: 100 },
         { date: '2024-01-03', financial_asset_key: 11, price: 110 },
         { date: '2024-01-04', financial_asset_key: 11, price: 120 },
       ]),
@@ -209,6 +192,345 @@ describe('portfolio aggregation scenarios', () => {
         totalValue: 240,
       }),
     );
+  });
+
+  it('backfills fee-inclusive FIFO cost basis before and after a partial sale', async () => {
+    vi.setSystemTime(new Date('2024-01-04T12:00:00Z'));
+
+    const { default: portfolioSnapshotService } = await import('../portfolio-snapshot.service');
+    const currency = { code: 'USD', currencyKey: 1 };
+    Object.assign((await import('@app/database/di')).DI.em, {
+      find: vi.fn((entity): unknown[] => {
+        if (entity?.name === 'FinancialTransaction') {
+          return [
+            {
+              feeAmount: 2,
+              feeCurrencyKey: currency,
+              financialAssetKey: { currencyKey: currency, financialAssetKey: 11, financialAssetTypeKey: { name: 'Stock' } },
+              financialTransactionTypeKey: { name: 'BUY' },
+              quantity: 10,
+              settlementAmount: 100,
+              settlementCurrencyKey: currency,
+              transactionDate: new Date('2024-01-02T10:00:00Z'),
+              transactionKey: 1,
+            },
+            {
+              feeAmount: -1,
+              feeCurrencyKey: currency,
+              financialAssetKey: { currencyKey: currency, financialAssetKey: 11, financialAssetTypeKey: { name: 'Stock' } },
+              financialTransactionTypeKey: { name: 'SELL' },
+              quantity: -4,
+              settlementAmount: -60,
+              settlementCurrencyKey: currency,
+              transactionDate: new Date('2024-01-03T10:00:00Z'),
+              transactionKey: 2,
+            },
+          ];
+        }
+        if (entity?.name === 'FinancialAssetPrice') {
+          return [
+            { date: new Date('2024-01-02T00:00:00Z'), financialAssetKey: { financialAssetKey: 11 }, price: 20 },
+            { date: new Date('2024-01-03T00:00:00Z'), financialAssetKey: { financialAssetKey: 11 }, price: 20 },
+            { date: new Date('2024-01-04T00:00:00Z'), financialAssetKey: { financialAssetKey: 11 }, price: 20 },
+          ];
+        }
+        return [];
+      }),
+      findOne: vi.fn((entity): null | Record<string, unknown> => {
+        if (entity?.name === 'Portfolio') {
+          return {
+            currencyKey: currency,
+            portfolioKey: 1,
+            portfolioOwnerAppuserKey: { appuserKey: 1, currencyKey: currency },
+          };
+        }
+        return null;
+      }),
+      flush: vi.fn(),
+      getKysely: makeDatabaseMock([
+        { date: '2024-01-02', financial_asset_key: 11, price: 20 },
+        { date: '2024-01-03', financial_asset_key: 11, price: 20 },
+        { date: '2024-01-04', financial_asset_key: 11, price: 20 },
+      ]),
+      persist: vi.fn().mockReturnThis(),
+    });
+
+    await portfolioSnapshotService.backfillSnapshotsForPortfolio(1);
+
+    const snapshots = getPersistMock().mock.calls.map(([snapshot]) => snapshot as { costBasis: number; snapshotDate: Date });
+    expect(snapshots.map(({ costBasis }) => costBasis)).toEqual([102, 61.2, 61.2]);
+  });
+
+  it('skips a lot with no settlement rate even when its fee is in that currency, as before fees counted', async () => {
+    vi.setSystemTime(new Date('2024-01-03T12:00:00Z'));
+
+    const { default: portfolioSnapshotService } = await import('../portfolio-snapshot.service');
+    const usd = { code: 'USD', currencyKey: 1 };
+    const eur = { code: 'EUR', currencyKey: 2 };
+    Object.assign((await import('@app/database/di')).DI.em, {
+      find: vi.fn((entity): unknown[] => {
+        if (entity?.name === 'FinancialTransaction') {
+          return [
+            {
+              feeAmount: 1,
+              feeCurrencyKey: eur,
+              financialAssetKey: { currencyKey: usd, financialAssetKey: 11, financialAssetTypeKey: { name: 'Stock' } },
+              financialTransactionTypeKey: { name: 'BUY' },
+              quantity: 5,
+              settlementAmount: 50,
+              settlementCurrencyKey: eur,
+              transactionDate: new Date('2024-01-02T09:00:00Z'),
+              transactionKey: 1,
+            },
+            {
+              feeAmount: 2,
+              feeCurrencyKey: usd,
+              financialAssetKey: { currencyKey: usd, financialAssetKey: 11, financialAssetTypeKey: { name: 'Stock' } },
+              financialTransactionTypeKey: { name: 'BUY' },
+              quantity: 10,
+              settlementAmount: 100,
+              settlementCurrencyKey: usd,
+              transactionDate: new Date('2024-01-02T10:00:00Z'),
+              transactionKey: 2,
+            },
+          ];
+        }
+        if (entity?.name === 'FinancialAssetPrice') {
+          return [
+            { date: new Date('2024-01-02T00:00:00Z'), financialAssetKey: { financialAssetKey: 11 }, price: 20 },
+            { date: new Date('2024-01-03T00:00:00Z'), financialAssetKey: { financialAssetKey: 11 }, price: 20 },
+          ];
+        }
+        return [];
+      }),
+      findOne: vi.fn((entity): null | Record<string, unknown> => {
+        if (entity?.name === 'Portfolio') {
+          return { currencyKey: usd, portfolioKey: 1, portfolioOwnerAppuserKey: { appuserKey: 1, currencyKey: usd } };
+        }
+        return null;
+      }),
+      flush: vi.fn(),
+      getKysely: makeDatabaseMock([
+        { date: '2024-01-02', financial_asset_key: 11, price: 20 },
+        { date: '2024-01-03', financial_asset_key: 11, price: 20 },
+      ]),
+      persist: vi.fn().mockReturnThis(),
+    });
+
+    await portfolioSnapshotService.backfillSnapshotsForPortfolio(1);
+
+    const snapshots = getPersistMock().mock.calls.map(([snapshot]) => snapshot as { costBasis: number });
+    expect(snapshots.map(({ costBasis }) => costBasis)).toEqual([102, 102]);
+  });
+
+  it.each([
+    { case: 'a fee currency with no rate', fee: { feeAmount: 2, feeCurrencyKey: { code: 'GBP', currencyKey: 3 } } },
+    { case: 'no fee currency', fee: { feeAmount: 2, feeCurrencyKey: undefined } },
+  ])('counts a buy fee with $case as zero in snapshot cost basis instead of failing', async ({ fee }) => {
+    vi.setSystemTime(new Date('2024-01-03T12:00:00Z'));
+
+    const { default: portfolioSnapshotService } = await import('../portfolio-snapshot.service');
+    const usd = { code: 'USD', currencyKey: 1 };
+    Object.assign((await import('@app/database/di')).DI.em, {
+      find: vi.fn((entity): unknown[] => {
+        if (entity?.name === 'FinancialTransaction') {
+          return [{
+            ...fee,
+            financialAssetKey: { currencyKey: usd, financialAssetKey: 11, financialAssetTypeKey: { name: 'Stock' } },
+            financialTransactionTypeKey: { name: 'BUY' },
+            quantity: 10,
+            settlementAmount: 100,
+            settlementCurrencyKey: usd,
+            transactionDate: new Date('2024-01-02T10:00:00Z'),
+            transactionKey: 1,
+          }];
+        }
+        if (entity?.name === 'FinancialAssetPrice') {
+          return [
+            { date: new Date('2024-01-02T00:00:00Z'), financialAssetKey: { financialAssetKey: 11 }, price: 20 },
+            { date: new Date('2024-01-03T00:00:00Z'), financialAssetKey: { financialAssetKey: 11 }, price: 20 },
+          ];
+        }
+        return [];
+      }),
+      findOne: vi.fn((entity): null | Record<string, unknown> => (entity?.name === 'Portfolio'
+        ? { currencyKey: usd, portfolioKey: 1, portfolioOwnerAppuserKey: { appuserKey: 1, currencyKey: usd } }
+        : null)),
+      flush: vi.fn(),
+      getKysely: makeDatabaseMock([
+        { date: '2024-01-02', financial_asset_key: 11, price: 20 },
+        { date: '2024-01-03', financial_asset_key: 11, price: 20 },
+      ]),
+      persist: vi.fn().mockReturnThis(),
+    });
+
+    await portfolioSnapshotService.backfillSnapshotsForPortfolio(1);
+
+    const snapshots = getPersistMock().mock.calls.map(([snapshot]) => snapshot as { costBasis: number });
+    expect(snapshots.map(({ costBasis }) => costBasis)).toEqual([100, 100]);
+  });
+
+  it('keeps sub-cent remaining purchase fees in partial-sale snapshot cost basis', async () => {
+    vi.setSystemTime(new Date('2024-01-03T12:00:00Z'));
+
+    const { default: portfolioSnapshotService } = await import('../portfolio-snapshot.service');
+    const currency = { code: 'EUR', currencyKey: 1 };
+    Object.assign((await import('@app/database/di')).DI.em, {
+      find: vi.fn((entity): unknown[] => {
+        if (entity?.name === 'FinancialTransaction') {
+          return [
+            {
+              feeAmount: 0.01,
+              feeCurrencyKey: currency,
+              financialAssetKey: { currencyKey: currency, financialAssetKey: 11, financialAssetTypeKey: { name: 'Stock' } },
+              financialTransactionTypeKey: { name: 'BUY' },
+              quantity: 2,
+              settlementAmount: 199.98,
+              settlementCurrencyKey: currency,
+              transactionDate: new Date('2024-01-01T10:00:00Z'),
+              transactionKey: 1,
+            },
+            {
+              feeAmount: 0,
+              feeCurrencyKey: currency,
+              financialAssetKey: { currencyKey: currency, financialAssetKey: 11, financialAssetTypeKey: { name: 'Stock' } },
+              financialTransactionTypeKey: { name: 'SELL' },
+              quantity: -1,
+              settlementAmount: -120,
+              settlementCurrencyKey: currency,
+              transactionDate: new Date('2024-01-02T10:00:00Z'),
+              transactionKey: 2,
+            },
+          ];
+        }
+        return [];
+      }),
+      findOne: vi.fn((entity): null | Record<string, unknown> => {
+        if (entity?.name === 'Portfolio') {
+          return { currencyKey: currency, portfolioKey: 1, portfolioOwnerAppuserKey: { appuserKey: 1, currencyKey: currency } };
+        }
+        return null;
+      }),
+      flush: vi.fn(),
+      getKysely: makeDatabaseMock([
+        { date: '2024-01-01', financial_asset_key: 11, price: 99.99 },
+        { date: '2024-01-02', financial_asset_key: 11, price: 120 },
+        { date: '2024-01-03', financial_asset_key: 11, price: 120 },
+      ]),
+      persist: vi.fn().mockReturnThis(),
+    });
+
+    await portfolioSnapshotService.backfillSnapshotsForPortfolio(1);
+
+    const snapshots = getPersistMock().mock.calls.map(([snapshot]) => snapshot as { costBasis: number; totalValue: number });
+    expect(snapshots[0]).toMatchObject({ costBasis: 199.99, totalValue: 199.98 });
+    expect(snapshots[1]).toMatchObject({ costBasis: 100, totalValue: 120 });
+    expect(snapshots[2]).toMatchObject({ costBasis: 100, totalValue: 120 });
+  });
+
+  it.each([0, -0.5, Number.NaN, Number.POSITIVE_INFINITY])('counts a fee with an invalid historical FX rate (%s) as zero during snapshot backfill', async (rate) => {
+    vi.setSystemTime(new Date('2024-01-02T12:00:00Z'));
+
+    const { default: portfolioSnapshotService } = await import('../portfolio-snapshot.service');
+    const usd = { code: 'USD', currencyKey: 1 };
+    const eur = { code: 'EUR', currencyKey: 2 };
+    Object.assign((await import('@app/database/di')).DI.em, {
+      find: vi.fn((entity): unknown[] => {
+        if (entity?.name === 'FinancialTransaction') {
+          return [{
+            feeAmount: 1,
+            feeCurrencyKey: usd,
+            financialAssetKey: { currencyKey: eur, financialAssetKey: 11, financialAssetTypeKey: { name: 'Stock' } },
+            financialTransactionTypeKey: { name: 'BUY' },
+            quantity: 1,
+            settlementAmount: 100,
+            settlementCurrencyKey: eur,
+            transactionDate: new Date('2024-01-02T10:00:00Z'),
+            transactionKey: 1,
+          }];
+        }
+        if (entity?.name === 'ExchangeRate') return [{ date: new Date('2024-01-02T00:00:00Z'), fromCurrency: usd, rate, toCurrency: eur }];
+        return [];
+      }),
+      findOne: vi.fn((entity): null | Record<string, unknown> => entity?.name === 'Portfolio'
+        ? { currencyKey: eur, portfolioKey: 1, portfolioOwnerAppuserKey: { appuserKey: 1, currencyKey: eur } }
+        : null),
+      flush: vi.fn(),
+      getKysely: makeDatabaseMock([{ date: '2024-01-02 00:00:00+00', financial_asset_key: 11, price: 100 }]),
+      persist: vi.fn().mockReturnThis(),
+    });
+
+    await portfolioSnapshotService.backfillSnapshotsForPortfolio(1);
+
+    const snapshots = getPersistMock().mock.calls.map(([snapshot]) => snapshot as { costBasis: number });
+    expect(snapshots.map(({ costBasis }) => costBasis)).toEqual([100]);
+  });
+
+  it('values snapshot purchase fees in portfolio currency using acquisition-date FX', async () => {
+    vi.setSystemTime(new Date('2024-01-02T12:00:00Z'));
+
+    const { default: portfolioSnapshotService } = await import('../portfolio-snapshot.service');
+    const usd = { code: 'USD', currencyKey: 1 };
+    const eur = { code: 'EUR', currencyKey: 2 };
+    const gbp = { code: 'GBP', currencyKey: 3 };
+    Object.assign((await import('@app/database/di')).DI.em, {
+      find: vi.fn((entity, where): unknown[] => {
+        if (entity?.name === 'FinancialTransaction') {
+          return [
+            {
+              feeAmount: 10,
+              feeCurrencyKey: usd,
+              financialAssetKey: { currencyKey: usd, financialAssetKey: 11, financialAssetTypeKey: { name: 'Stock' } },
+              financialTransactionTypeKey: { name: 'BUY' },
+              quantity: 2,
+              settlementAmount: 200,
+              settlementCurrencyKey: usd,
+              transactionDate: new Date('2024-01-02T10:00:00Z'),
+              transactionKey: 1,
+            },
+          ];
+        }
+        if (entity?.name === 'ExchangeRate') {
+          const query = where as { date?: { $lte?: Date }; fromCurrency?: { currencyKey?: number }; toCurrency?: { currencyKey?: number } };
+          const rows = [
+            { date: new Date('2024-02-01T00:00:00Z'), fromCurrency: usd, rate: 0.99, toCurrency: gbp },
+            { date: new Date('2024-01-02T00:00:00Z'), fromCurrency: usd, rate: 0.7, toCurrency: gbp },
+            { date: new Date('2024-02-01T00:00:00Z'), fromCurrency: gbp, rate: 0.95, toCurrency: eur },
+            { date: new Date('2024-01-02T00:00:00Z'), fromCurrency: gbp, rate: 0.8, toCurrency: eur },
+          ];
+          return rows
+            .filter((row) => row.fromCurrency.currencyKey === query.fromCurrency?.currencyKey)
+            .filter((row) => row.toCurrency.currencyKey === query.toCurrency?.currencyKey)
+            .filter((row) => query.date?.$lte == null || row.date <= query.date.$lte)
+            .toSorted((a, b) => b.date.getTime() - a.date.getTime());
+        }
+        if (entity?.name === 'FinancialAssetPrice') {
+          return [{ date: new Date('2024-01-02T00:00:00Z'), financialAssetKey: { financialAssetKey: 11 }, price: 100 }];
+        }
+        return [];
+      }),
+      findOne: vi.fn((entity): null | Record<string, unknown> => {
+        if (entity?.name === 'Portfolio') {
+          return {
+            currencyKey: gbp,
+            portfolioKey: 1,
+            portfolioOwnerAppuserKey: { appuserKey: 1, currencyKey: eur },
+          };
+        }
+        return null;
+      }),
+      flush: vi.fn(),
+      getKysely: makeDatabaseMock([{ date: '2024-01-02 00:00:00+00', financial_asset_key: 11, price: 100 }]),
+      persist: vi.fn().mockReturnThis(),
+    });
+
+    await portfolioSnapshotService.backfillSnapshotsForPortfolio(1);
+
+    expect(getPersistMock().mock.calls[0]?.[0]).toEqual(expect.objectContaining({
+      appuserCurrencyCostBasis: 117.6,
+      costBasis: 147,
+      snapshotDate: new Date('2024-01-02T00:00:00.000Z'),
+    }));
   });
 
   it('backfills snapshots with split-adjusted holdings and unchanged cost basis', async () => {
@@ -263,7 +585,7 @@ describe('portfolio aggregation scenarios', () => {
         return null;
       }),
       flush: vi.fn(),
-      getKnex: makeKnexMock([
+      getKysely: makeDatabaseMock([
         { date: new Date('2024-01-02T00:00:00Z'), financial_asset_key: 11, price: 100 },
         { date: new Date('2024-01-03T00:00:00Z'), financial_asset_key: 11, price: 10 },
         { date: new Date('2024-01-04T00:00:00Z'), financial_asset_key: 11, price: 10 },
@@ -319,7 +641,7 @@ describe('portfolio aggregation scenarios', () => {
         return null;
       }),
       flush: vi.fn(),
-      getKnex: makeKnexMock([{ date: new Date('2024-01-02T00:00:00Z'), financial_asset_key: 11, price: 100 }]),
+      getKysely: makeDatabaseMock([{ date: new Date('2024-01-02T00:00:00Z'), financial_asset_key: 11, price: 100 }]),
       persist: vi.fn().mockReturnThis(),
     });
 
@@ -387,7 +709,7 @@ describe('portfolio aggregation scenarios', () => {
         return null;
       }),
       flush: vi.fn(),
-      getKnex: makeKnexMock([{ date: new Date('2024-01-02T00:00:00Z'), financial_asset_key: 11, price: 100 }]),
+      getKysely: makeDatabaseMock([{ date: new Date('2024-01-02T00:00:00Z'), financial_asset_key: 11, price: 100 }]),
       nativeDelete: vi.fn().mockResolvedValue(undefined),
       persist: vi.fn().mockReturnThis(),
       transactional: vi.fn(runTransaction),
@@ -435,7 +757,7 @@ describe('portfolio aggregation scenarios', () => {
         return null;
       }),
       flush: vi.fn(),
-      getKnex: makeKnexMock([{ date: new Date('2024-01-02T00:00:00Z'), financial_asset_key: 11, price: 100 }]),
+      getKysely: makeDatabaseMock([{ date: new Date('2024-01-02T00:00:00Z'), financial_asset_key: 11, price: 100 }]),
       nativeDelete: vi.fn().mockResolvedValue(undefined),
       persist: vi.fn().mockReturnThis(),
       transactional: vi.fn(runTransaction),
@@ -471,7 +793,7 @@ describe('portfolio aggregation scenarios', () => {
         return null;
       }),
       flush: vi.fn(),
-      getKnex: makeKnexMock([]),
+      getKysely: makeDatabaseMock([]),
       nativeDelete: portfolioSnapshotDeleteMock,
       persist: vi.fn().mockReturnThis(),
       transactional: vi.fn(runTransaction),
@@ -530,7 +852,7 @@ describe('portfolio aggregation scenarios', () => {
         return null;
       }),
       flush: vi.fn(),
-      getKnex: makeKnexMock([{ date: new Date('2024-01-03T00:00:00Z'), financial_asset_key: 11, price: 120 }]),
+      getKysely: makeDatabaseMock([{ date: new Date('2024-01-03T00:00:00Z'), financial_asset_key: 11, price: 120 }]),
       nativeDelete: vi.fn().mockResolvedValue(undefined),
       persist: vi.fn().mockReturnThis(),
       transactional: vi.fn(runTransaction),
@@ -587,7 +909,7 @@ describe('portfolio aggregation scenarios', () => {
         return null;
       }),
       flush: vi.fn(),
-      getKnex: makeKnexMock([{ date: new Date('2024-01-02T00:00:00Z'), financial_asset_key: 11, price: 100 }]),
+      getKysely: makeDatabaseMock([{ date: new Date('2024-01-02T00:00:00Z'), financial_asset_key: 11, price: 100 }]),
       nativeDelete: vi.fn().mockResolvedValue(undefined),
       persist: vi.fn().mockReturnThis(),
       transactional: vi.fn(runTransaction),

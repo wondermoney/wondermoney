@@ -45,7 +45,7 @@ export async function upsertPendingDelivery(em: EntityManager, args: UpsertDeliv
 export const LIFECYCLE_MAX_PROVIDER_ATTEMPTS = 2;
 
 /** How long a claim is considered live before the stale sweep may take it over. */
-export const LIFECYCLE_CLAIM_LEASE_MS = 5 * 60_000;
+const LIFECYCLE_CLAIM_LEASE_MS = 5 * 60_000;
 
 export interface LifecycleClaim {
   claimToken: string;
@@ -56,10 +56,10 @@ export interface LifecycleClaim {
  * Takes an exclusive, attempt-consuming claim on a PENDING delivery before the provider
  * is called.
  *
- * === The bug this closes ===
+ * === Why claim first ===
  *
- * The send path used to be read status → call Resend → write status, with no lock, no
- * transaction and no conditional update. `policy: 'exclusive'` + a `singletonKey` stop
+ * A send path of read status → call Resend → write status, with no lock, no
+ * transaction and no conditional update, double-sends. `policy: 'exclusive'` + a `singletonKey` stop
  * two jobs running *concurrently*, but the window that matters is sequential: the job
  * crashes, times out, or throws on an ambiguous provider outcome **after** Resend
  * accepted the mail and **before** the status write commits. pg-boss then retries, the
@@ -68,7 +68,7 @@ export interface LifecycleClaim {
  * Claiming first inverts that. The attempt is consumed and the status moved off PENDING
  * *before* anything leaves the process, so a retry after a successful send finds a
  * non-PENDING row and returns without sending. This is the same shape as
- * `services/bank-recovery.service.ts`, which already does it correctly.
+ * `services/bank-recovery.service.ts`.
  *
  * Returns `null` when the row is not claimable (already claimed, already resolved, or
  * out of attempts) — the caller must treat that as "do not send".
@@ -83,7 +83,7 @@ export async function claimPendingDelivery(
   return em.transactional(async (transactional) => {
     const delivery = await transactional.findOne(
       LifecycleDelivery,
-      { lifecycleDeliveryKey: deliveryKey } as FilterQuery<LifecycleDelivery>,
+      { lifecycleDeliveryKey: deliveryKey },
       { lockMode: LockMode.PESSIMISTIC_WRITE },
     );
     if (!delivery) return null;
@@ -124,7 +124,7 @@ export function releaseClaim(d: LifecycleDelivery, outcomeCode: string): void {
 }
 
 /** Terminal failure: the provider rejected the send and retrying it cannot help. Caller flushes. */
-export function markFailed(d: LifecycleDelivery, outcomeCode: string): void {
+function markFailed(d: LifecycleDelivery, outcomeCode: string): void {
   d.status = LifecycleDeliveryStatus.FAILED;
   d.outcomeCode = outcomeCode;
   d.sentAt = undefined;
@@ -137,7 +137,7 @@ export function markFailed(d: LifecycleDelivery, outcomeCode: string): void {
  * resolves it from `provider_message_id`/Resend rather than the system guessing and
  * risking a second copy. Caller flushes.
  */
-export function markNeedsReconciliation(d: LifecycleDelivery, outcomeCode: string): void {
+function markNeedsReconciliation(d: LifecycleDelivery, outcomeCode: string): void {
   d.status = LifecycleDeliveryStatus.NEEDS_RECONCILIATION;
   d.outcomeCode = outcomeCode;
   d.completedAt = new Date();
@@ -152,7 +152,7 @@ export function markNeedsReconciliation(d: LifecycleDelivery, outcomeCode: strin
 export async function reconcileStaleClaims(em: EntityManager, now: Date = new Date(), limit = 200): Promise<number> {
   const stale = await em.find(
     LifecycleDelivery,
-    { claimExpiresAt: { $lte: now }, status: LifecycleDeliveryStatus.CLAIMED } as FilterQuery<LifecycleDelivery>,
+    { claimExpiresAt: { $lte: now }, status: LifecycleDeliveryStatus.CLAIMED },
     { limit, orderBy: { lifecycleDeliveryKey: 'asc' } },
   );
   for (const delivery of stale) markNeedsReconciliation(delivery, 'stale_claim');

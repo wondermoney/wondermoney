@@ -5,33 +5,28 @@ import { createRequire } from 'module';
 
 import { RequestContext } from '@mikro-orm/postgresql';
 import { EntityManager, MikroORM } from '@mikro-orm/postgresql';
-import * as Sentry from '@sentry/node';
 import compression from 'compression';
 import cookieParser from 'cookie-parser';
 import cors, { type CorsOptions } from 'cors';
-import express, {
-  type ErrorRequestHandler,
-  type Express,
-  type NextFunction,
-  type Request,
-  type Response,
-} from 'express';
+import express, { type Express, type NextFunction } from 'express';
 import helmet from 'helmet';
 import { StatusCodes } from 'http-status-codes';
 import { isEmpty, isString } from 'lodash-es';
 import swaggerUi from 'swagger-ui-express';
-import { ZodError } from 'zod';
 
 import { connectDatabase, DI } from '@app/database/di';
-import { APP_ENV, IS_PRODUCTION_LIKE, NODE_ENV } from '@config/env';
+import { APP_ENV, IS_PRODUCTION_LIKE, NODE_ENV, TRUST_PROXY } from '@config/env';
 import { enableBankingCallback } from '@controller/enable-banking-callback';
 import { validateInviteController } from '@controller/household';
 import { adminAuth, optionalAuth } from '@middleware/auth';
+import { configureClientIp } from '@middleware/client-ip';
 import { csrfOriginProtection } from '@middleware/csrf-origin';
+import { errorHandler } from '@middleware/error-handler';
 import {
   adminApiRateLimit,
   assistantRateLimit,
   authExchangeRateLimit,
+  feedbackRateLimit,
   globalBackstopRateLimit,
   importSessionRateLimit,
   inviteLookupRateLimit,
@@ -51,6 +46,7 @@ import bankingRoutes from '@route/banking';
 import budgetRoutes from '@route/budget';
 import categoryRoutes from '@route/category';
 import configsRoutes from '@route/configs';
+import feedbackRoutes from '@route/feedback';
 import financialMarketsRoutes from '@route/financial-markets';
 import goalRoutes from '@route/goal';
 import healthRoutes from '@route/health';
@@ -66,9 +62,8 @@ import reportsRoutes from '@route/reports';
 import supportRoutes from '@route/support';
 import userRoutes from '@route/user';
 import { authHandler } from '@service/auth/better-auth';
-import { ERROR, GITHUB_SHA, isCorsOriginAllowed } from '@utils/constants';
-import { sanitizeRequestForLogging } from '@utils/error-sanitizer';
-import { ERROR_CODE, NotFoundError, statusToErrorCode } from '@utils/errors';
+import { GITHUB_SHA, isCorsOriginAllowed } from '@utils/constants';
+import { NotFoundError } from '@utils/errors';
 import logger from '@utils/logger';
 import httpLogger from '@utils/logger-http';
 
@@ -85,7 +80,7 @@ if (isEmpty(NODE_ENV) || !isString(NODE_ENV)) {
   throw new Error('You need to set a NODE_ENV in the .env file');
 }
 
-export { connectDatabase, DI };
+export { DI };
 
 
 
@@ -132,12 +127,15 @@ export default class Application {
         }),
       );
       this.host.use(httpLogger);
-      this.host.set('trust proxy', 1);
+      // `TRUST_PROXY` says which proxies may report the client address (default: none,
+      // so a directly published port ignores X-Forwarded-For). The resolved address is handed
+      // to better-auth too, so its sign-in limiter keys per client like the limiters below.
+      configureClientIp(this.host, TRUST_PROXY);
 
-      // RAD-547 — rate limiting is scoped per route family in `@middleware/rate-limit`.
+      // Rate limiting is scoped per route family in `@middleware/rate-limit`.
       // This app-level limiter is only the crude per-IP backstop; the per-family budgets are
       // attached at each mount below, and the authenticated ones sit *after* `requireAuth` so
-      // they can key on the verified Supabase subject instead of the source address.
+      // they can key on the verified better-auth user instead of the source address.
       this.host.use(globalBackstopRateLimit());
       this.host.use(compression());
 
@@ -155,9 +153,8 @@ export default class Application {
 
       // better-auth runs embedded in `api`. Mount its handler BEFORE express.json
       // (it reads the raw request body itself — express.json would consume it and
-      // hang sign-in) and BEFORE csrfOriginProtection (it runs its own origin check;
-      // cross-subdomain trustedOrigins config lands in RAD-285). Express 5 requires
-      // the named wildcard (`*splat`) rather than a bare `*`.
+      // hang sign-in) and BEFORE csrfOriginProtection (it runs its own origin check).
+      // Express 5 requires the named wildcard (`*splat`) rather than a bare `*`.
       this.host.all('/api/auth/*splat', authHandler);
 
       this.host.use((_req, _res, next) => {
@@ -181,13 +178,13 @@ export default class Application {
       // (`enableBankingCallback`), not from auth middleware.
       this.host.get('/v1/banking/enable-banking/callback', publicReadRateLimit(), enableBankingCallback);
       // Public, pre-signup: the /join page validates an invite token before the invitee has an account.
-      // The invite token is a guessable secret, so this keeps a strict per-IP budget (RAD-547).
+      // The invite token is a guessable secret, so this keeps a strict per-IP budget.
       this.host.get('/v1/household/invites/validate', inviteLookupRateLimit(), validateInviteController);
 
       this.host.use('/v1/account', ...authedTenant(), accountRoutes);
       this.host.use('/v1/admin', adminApiRateLimit(), adminAuth, adminRoutes);
       this.host.use('/v1/health', healthRoutes);
-      // Credential surface: strict, per-IP, and never relaxed outside production (RAD-547).
+      // Credential surface: strict, per-IP, and never relaxed outside production.
       this.host.use('/v1/auth', authExchangeRateLimit(), optionalAuth, getUserOptional, authRoutes);
       this.host.use('/v1/banking', ...authedTenant(), bankingRoutes);
       this.host.use('/v1/budget', ...authedTenant(), budgetRoutes);
@@ -204,6 +201,7 @@ export default class Application {
       this.host.use('/v1/category', ...authedTenant(), categoryRoutes);
       this.host.use('/v1/loan', ...authedTenant(), loanRoutes);
       this.host.use('/v1/configs', ...authedTenant(), configsRoutes);
+      this.host.use('/v1/feedback', ...authedTenant(feedbackRateLimit), feedbackRoutes);
       this.host.use('/v1/goals', ...authedTenant(), goalRoutes);
       this.host.use('/v1/household', ...authedTenant(), householdRoutes);
       this.host.use('/v1/financial-markets', ...authedTenant(), financialMarketsRoutes);
@@ -220,87 +218,13 @@ export default class Application {
       this.host.use('/v1/support', supportRateLimit(), supportRoutes);
       this.host.use('/v1/user', ...authedTenant(), userRoutes);
 
-      Sentry.setupExpressErrorHandler(this.host);
-
       this.host.use((req, res, next: NextFunction) => {
         if (req.get('User-Agent') === 'AlwaysOn' && req.path === '/') return res.sendStatus(StatusCodes.OK);
         next(new NotFoundError());
         return;
       });
 
-      interface ErrorRequest extends ErrorRequestHandler {
-        /** Stable machine-readable reason — see `ERROR_CODE` in `utils/errors.ts`. */
-        code?: string;
-        message?: string;
-        retryAfter?: number;
-        status?: number;
-      }
-      this.host.use((err: ErrorRequest, req: Request, res: Response, next: NextFunction) => {
-        if (res.headersSent) {
-          next(err);
-          return;
-        }
-        // Expected client errors (4xx) — validation, auth, not-found — are normal outcomes,
-        // not server bugs, and otherwise flood Sentry. Log them, but only report genuine
-        // server failures (5xx) and uncaught errors (no status) to Sentry.
-        const errorStatus = err instanceof ZodError ? 422 : (err.status ?? 500);
-        // A feature this server does not have configured is a deployment choice, not a fault.
-        const isFeatureDisabled = err.code === ERROR_CODE.FEATURE_DISABLED;
-        if (errorStatus >= 500 && !isFeatureDisabled) {
-          Sentry.captureException(err, {
-            extra: {
-              request: sanitizeRequestForLogging(req.path, {
-                body: req.body,
-                cookies: req.cookies,
-                data: req.body,
-                headers: req.headers,
-                query: req.query,
-              }),
-            },
-          });
-        }
-        logger.error(
-          {
-            error: err,
-            request: {
-              ...sanitizeRequestForLogging(req.path, {
-                body: req.body,
-                cookies: req.cookies,
-                data: req.body,
-                headers: req.headers,
-                query: req.query,
-              }),
-              method: req.method,
-              params: req.params,
-              url: req.path,
-              user: req.user?.appuserKey,
-            },
-            timestamp: new Date().toISOString(),
-          },
-          '🚨  Something went wrong',
-        );
-        if (err instanceof ZodError) {
-          logger.warn({ error: err, validationErrors: err.errors }, 'Validation error');
-          return res.status(422).json({ code: ERROR_CODE.VALIDATION_FAILED, message: err.message });
-        }
-        const status = err.status || 500;
-        // Surface a rate-limit backoff hint to the client when the error carries one.
-        if (typeof err.retryAfter === 'number' && Number.isFinite(err.retryAfter)) {
-          res.setHeader('Retry-After', String(Math.ceil(err.retryAfter)));
-        }
-        // `code` is the stable, machine-readable reason. It is emitted in every environment
-        // and for every status — including 5xx, where the message is deliberately withheld —
-        // because a client branching on the reason must not have to parse English prose.
-        // See `ERROR_CODE` in `utils/errors.ts` for why this exists.
-        const code: string = typeof err.code === 'string' ? err.code : statusToErrorCode(status);
-
-        // In production/staging: hide details for 5xx, show message for 4xx
-        if (APP_ENV === 'production' || APP_ENV === 'staging') {
-          const message = status >= 500 ? ERROR.SERVER : err.message || ERROR.SERVER;
-          return res.status(status).json({ code, message });
-        }
-        return res.status(status).json({ code, message: err.message || ERROR.SERVER });
-      });
+      this.host.use(errorHandler);
 
       if (withServer) {
         const { PORT } = process.env;
@@ -314,12 +238,10 @@ export default class Application {
         });
       }
     } catch (error) {
-      // RAD-audit: this used to log and then `return Promise.resolve()`, so a failure to
-      // register routes, bind the port or configure CORS produced one log line and a
-      // *successfully started* process serving a partially-wired app. It also used
-      // `JSON.stringify(error)`, which serialises an Error to `{}` — so the log line was
-      // usually content-free. Fail loudly instead: the process manager restarting is a far
-      // better outcome than silently serving a broken app.
+      // Fail loudly: swallowing a failure to register routes, bind the port or configure CORS
+      // would leave a *successfully started* process serving a partially-wired app. The process
+      // manager restarting is a far better outcome. Log the Error itself, not
+      // `JSON.stringify(error)`, which serialises an Error to `{}`.
       logger.error({ error }, '🚨 Could not start server');
       throw error;
     }

@@ -1,7 +1,7 @@
 import { z } from 'zod'
 
 /**
- * RAD-228 — stable DTOs for the Financial Markets module.
+ * Stable DTOs for the Financial Markets module.
  *
  * These endpoints project the provider's response into a strict,
  * mobile-safe allowlist per endpoint — the DTO is the *only* thing the
@@ -18,13 +18,13 @@ import { z } from 'zod'
 const symbolSchema = z.string().trim().min(1).max(20)
 const isoDateSchema = z.string().regex(/^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/)
 const nullableIsoDateSchema = isoDateSchema.nullable()
-const nullableIsoDateTimeSchema = z.string().datetime({ offset: true }).nullable()
-const nullableNumberSchema = z.number().finite().nullable()
+const nullableIsoDateTimeSchema = z.iso.datetime({ offset: true }).nullable()
+const nullableNumberSchema = z.number().nullable()
 const nullableStringSchema = z.string().nullable()
-const finiteNumberSchema = z.number().finite()
+const finiteNumberSchema = z.number()
 // Logo / media URLs are only ever surfaced to the client as https — an http or
 // otherwise malformed provider URL is coerced to null upstream, never rendered.
-const nullableHttpsUrlSchema = z.string().url().startsWith('https://').nullable()
+const nullableHttpsUrlSchema = z.url().startsWith('https://').nullable()
 
 /** Provider metadata. Always present so the mobile UI can show "as of when". */
 const sourceMetadataSchema = z
@@ -35,7 +35,7 @@ const sourceMetadataSchema = z
   .strict()
 
 /** `GET /v1/financial-markets/ticker/search` — debounced search box. */
-export const searchTickerResultSchema = z
+const searchTickerResultSchema = z
   .object({
     currency: nullableStringSchema,
     exchange: nullableStringSchema,
@@ -96,7 +96,7 @@ export const companyInformationResponseSchema = z
   .strict()
 
 /** `GET /v1/financial-markets/ticker/:ticker/historical-price` — OHLC history. */
-export const historicalPricePointSchema = z
+const historicalPricePointSchema = z
   .object({
     adjClose: nullableNumberSchema,
     close: nullableNumberSchema,
@@ -117,7 +117,7 @@ export const historicalPriceResponseSchema = z
   .strict()
 
 /** `GET /v1/financial-markets/ticker/:ticker/historical-dividend` — dividend history. */
-export const historicalDividendPointSchema = z
+const historicalDividendPointSchema = z
   .object({
     adjAmount: nullableNumberSchema,
     amount: nullableNumberSchema,
@@ -134,7 +134,7 @@ export const historicalDividendResponseSchema = z
   .strict()
 
 /** `GET /v1/financial-markets/ticker/:ticker/earnings` — past + scheduled earnings. */
-export const earningsEntrySchema = z
+const earningsEntrySchema = z
   .object({
     date: nullableIsoDateSchema,
     eps: nullableNumberSchema,
@@ -153,7 +153,7 @@ export const earningsResponseSchema = z
   .strict()
 
 /** `GET /v1/financial-markets/ticker/:ticker/financials` — periodic income statement. */
-export const financialsEntrySchema = z
+const financialsEntrySchema = z
   .object({
     grossProfit: nullableNumberSchema,
     netIncome: nullableNumberSchema,
@@ -196,17 +196,17 @@ export const fundamentalsResponseSchema = z
 /**
  * `GET /v1/financial-markets/ticker/:ticker/news` — symbol-scoped stock news.
  *
- * FMP's news rows carry provider-authored `title`/`text` that can contain HTML
+ * News rows carry provider-authored `title`/`text` that can contain HTML
  * and run arbitrarily long, plus `image`/`url` that may be http or malformed.
  * The controller strips those to bounded plain text and coerces the URLs to
  * https-or-null before they reach this schema; the max-length bounds are shared
  * with the controller so the projection and the contract can't drift.
  */
-export const NEWS_SITE_MAX_LENGTH = 200
+const NEWS_SITE_MAX_LENGTH = 200
 export const NEWS_SUMMARY_MAX_LENGTH = 1000
 export const NEWS_TITLE_MAX_LENGTH = 300
 
-export const newsItemSchema = z
+const newsItemSchema = z
   .object({
     image: nullableHttpsUrlSchema,
     publishedAt: nullableIsoDateTimeSchema,
@@ -220,8 +220,8 @@ export const newsItemSchema = z
 
 export const newsResponseSchema = z
   .object({
-    // FMP's stock-news feed takes only a `limit` (no offset), so we fetch a
-    // bounded window and slice it here.
+    // The controller fetches a bounded window from the provider and slices it into
+    // pages here.
     hasMore: z.boolean(),
     news: z.array(newsItemSchema),
     page: z.number().int().min(0),
@@ -232,18 +232,7 @@ export const newsResponseSchema = z
   .strict()
 
 export type CompanyInformationResponseDto = z.infer<typeof companyInformationResponseSchema>
-export type EarningsEntryDto = z.infer<typeof earningsEntrySchema>
-export type EarningsResponseDto = z.infer<typeof earningsResponseSchema>
-export type FinancialsEntryDto = z.infer<typeof financialsEntrySchema>
-export type FinancialsResponseDto = z.infer<typeof financialsResponseSchema>
-export type FundamentalsResponseDto = z.infer<typeof fundamentalsResponseSchema>
-export type HistoricalDividendPointDto = z.infer<typeof historicalDividendPointSchema>
 export type HistoricalDividendResponseDto = z.infer<typeof historicalDividendResponseSchema>
-export type HistoricalPricePointDto = z.infer<typeof historicalPricePointSchema>
 export type HistoricalPriceResponseDto = z.infer<typeof historicalPriceResponseSchema>
-export type NewsItemDto = z.infer<typeof newsItemSchema>
-export type NewsResponseDto = z.infer<typeof newsResponseSchema>
 export type QuoteResponseDto = z.infer<typeof quoteResponseSchema>
 export type SearchTickerResponseDto = z.infer<typeof searchTickerResponseSchema>
-export type SearchTickerResultDto = z.infer<typeof searchTickerResultSchema>
-export type SourceMetadataDto = z.infer<typeof sourceMetadataSchema>

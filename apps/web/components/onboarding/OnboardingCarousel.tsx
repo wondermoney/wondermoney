@@ -34,19 +34,29 @@ export function OnboardingCarousel({
   completeLabel,
 }: OnboardingCarouselProps) {
   const [api, setApi] = React.useState<CarouselApi>();
-  const [current, setCurrent] = React.useState(0);
-  const [count, setCount] = React.useState(0);
-
-  React.useEffect(() => {
-    if (!api) return;
-
-    setCount(api.scrollSnapList().length);
-    setCurrent(api.selectedScrollSnap());
-
-    api.on("select", () => {
-      setCurrent(api.selectedScrollSnap());
-    });
-  }, [api]);
+  // Read the slide position straight from Embla, re-reading when it moves.
+  const subscribe = React.useCallback(
+    (onChange: () => void) => {
+      if (!api) return () => {};
+      api.on("select", onChange);
+      api.on("reInit", onChange);
+      return () => {
+        api.off("select", onChange);
+        api.off("reInit", onChange);
+      };
+    },
+    [api],
+  );
+  const current = React.useSyncExternalStore(
+    subscribe,
+    () => api?.selectedScrollSnap() ?? 0,
+    () => 0,
+  );
+  const count = React.useSyncExternalStore(
+    subscribe,
+    () => api?.scrollSnapList().length ?? 0,
+    () => 0,
+  );
 
   const isLastSlide = current === count - 1;
 

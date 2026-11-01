@@ -1,5 +1,5 @@
-import { Entity, Index, ManyToOne, PrimaryKey, Property, Unique } from '@mikro-orm/core';
 import type { Rel } from '@mikro-orm/core';
+import { Entity, Index, ManyToOne, PrimaryKey, Property, Unique } from '@mikro-orm/decorators/legacy';
 
 import { Appuser } from './Appuser';
 import { Base } from './BaseEntity';
@@ -8,7 +8,7 @@ import { Base } from './BaseEntity';
 @Index({ properties: ['emailType', 'sentAt'] })
 @Unique({ properties: ['appuser', 'emailType'] })
 export class SentEmail extends Base {
-  @ManyToOne(() => Appuser, { nullable: false })
+  @ManyToOne(() => Appuser, { nullable: false, updateRule: 'cascade' })
   appuser!: Rel<Appuser>;
 
   @Property({ default: 0 })

@@ -10,7 +10,7 @@ import { onboardingBootstrapKey } from './query-keys'
 const unauthenticatedEpochId = -1 as AuthEpochId
 
 /**
- * RAD-226 — server-authoritative onboarding bootstrap loader. Read with
+ * Server-authoritative onboarding bootstrap loader. Read with
  * `retry:false` and no focus/reconnect refetch: the bootstrap changes only
  * when the user completes the journey, so background revalidation is noise.
  * Entitlement / MFA errors route through `blockAccess`; invalid-response and

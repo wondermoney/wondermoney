@@ -1,5 +1,5 @@
-import { Check, Entity, Enum, Index, ManyToOne, PrimaryKey, Property, Unique } from '@mikro-orm/core';
 import type { Rel } from '@mikro-orm/core';
+import { Check, Entity, Enum, Index, ManyToOne, PrimaryKey, Property, Unique } from '@mikro-orm/decorators/legacy';
 
 import { SupportedLanguages } from './Appuser';
 import { BankSyncIncident } from './BankSyncIncident';

@@ -11,7 +11,7 @@ export interface GetLoanRepaymentCandidatesResponse {
   candidates: LoanRepaymentCandidate[];
 }
 
-export async function getLoanRepaymentCandidates(
+async function getLoanRepaymentCandidates(
   loanId: number | string,
   filters: LoanRepaymentCandidatesFilters = {},
   apiClient: AxiosInstance = api,

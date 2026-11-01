@@ -1,4 +1,4 @@
-/** The identity providers offered natively on device (RAD-420). */
+/** The identity providers offered natively on device. */
 export type NativeIdentityProviderId = 'apple' | 'google'
 
 /**

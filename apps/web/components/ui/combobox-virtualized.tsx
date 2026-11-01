@@ -53,6 +53,10 @@ const VirtualizedCommand = ({
     [inputValue, options],
   );
 
+  // TanStack Virtual returns a mutable instance whose getVirtualItems() changes
+  // without a new reference, so the React Compiler skips this component. The
+  // library offers no compiler-compatible API; keep it out of memoisation.
+  // eslint-disable-next-line react-hooks/incompatible-library
   const virtualizer = useVirtualizer({
     count: filteredOptions.length,
     getScrollElement: () => parentRef.current,

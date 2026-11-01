@@ -49,7 +49,7 @@ describe('SignInRoute', () => {
     mockSignInWithPassword.mockReset()
   })
 
-  it('captures sign_in_completed with the channel only once the session is accepted (RAD-518)', async () => {
+  it('captures sign_in_completed with the channel only once the session is accepted', async () => {
     mockSignInWithPassword.mockResolvedValue({ status: 'accepted' })
     const view = await renderRoute()
 

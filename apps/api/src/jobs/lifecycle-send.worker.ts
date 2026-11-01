@@ -5,6 +5,7 @@ import { renderLifecycleEmail } from '@wondermoney/react-email';
 
 import { DI } from '@app/database/di';
 import { parseLifecycleSendPayload } from '@app/jobs/lifecycle-send.queue';
+import { instanceName } from '@config/instance-name';
 import { Appuser, SupportedLanguages } from '@entity/Appuser';
 import { EmailNotificationPreference } from '@entity/EmailNotificationPreference';
 import { LifecycleDelivery } from '@entity/LifecycleDelivery';
@@ -57,10 +58,9 @@ export async function handleLifecycleSendJob(job: { data: unknown; id?: string }
     logger.info({ campaign: payload.campaign, outcome, reason, step: payload.step }, 'lifecycle email outcome');
   };
 
-  // RAD-593: consent before anything else. This path used to reach Resend
-  // without reading deletedAt, recordActive, marketingOptOut or the per-category
-  // preference flags — 15 of 177 production sends went to soft-deleted accounts.
-  // Loaded here rather than further down because there is no point costing a
+  // Consent before anything else: deletedAt, recordActive, marketingOptOut and the
+  // per-category preference flags all gate the send, so a soft-deleted or opted-out
+  // account is never mailed. Loaded here rather than further down because there is no point costing a
   // frequency-window query for someone we must not mail.
   const appuser = await DI.em.findOne(Appuser, { appuserKey: payload.appuserKey });
   const prefs = await DI.em.findOne(EmailNotificationPreference, { appuserKey: payload.appuserKey, deletedAt: null } as FilterQuery<EmailNotificationPreference>);
@@ -122,6 +122,7 @@ export async function handleLifecycleSendJob(job: { data: unknown; id?: string }
     try {
       const data = await def.buildData?.(DI.em, appuser, payload.step, language);
       const rendered = await renderLifecycleEmail({
+        brandName: instanceName(),
         campaign: payload.campaign,
         ctaUrl: withCampaignTracking(appUrl, payload.campaign, payload.step),
         data,

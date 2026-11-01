@@ -25,10 +25,10 @@ import { periodTrend } from "@/lib/reports/period-trend";
 import { formatCurrencyForLocale } from "@/lib/utils/formatCurrency";
 
 /**
- * RAD-565 — the API writes this label as `Date.UTC(year, month, 1)`: a floating
- * calendar month, deliberately not a zoned instant (see
+ * The API writes this label as `Date.UTC(year, month, 1)`: a floating calendar
+ * month, deliberately not a zoned instant (see
  * `api/src/services/reports/report-months.ts`). Reading it in the browser's zone
- * shifted every row a month back for viewers west of UTC. Same rule as
+ * would shift every row a month back for viewers west of UTC. Same rule as
  * `utcOrdinal` in `lib/reports/cashflow-series.ts`.
  */
 function formatMonthLabel(isoDate: string, locale: string): string {

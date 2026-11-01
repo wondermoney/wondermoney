@@ -9,14 +9,17 @@ import PortfolioTransactionAddModal from "@/components/portfolio/PortfolioTransa
 import { Spinner } from "@/components/ui/Spinner";
 import type { GetPortfolioHoldingsResponse } from "@/lib/api/portfolio/usePortfolioHoldings";
 import usePortfolioHoldings from "@/lib/api/portfolio/usePortfolioHoldings";
+import { serverSeed } from "@/lib/query/server-seed";
 
 interface PortfolioHoldingsClientProps {
   portfolioId: string;
+  serverRenderedAt: number;
   initialPortfolioHoldingsData: GetPortfolioHoldingsResponse;
 }
 
 export default function PortfolioHoldingsClient({
   portfolioId,
+  serverRenderedAt,
   initialPortfolioHoldingsData,
 }: PortfolioHoldingsClientProps) {
   const t = useTranslations();
@@ -26,7 +29,7 @@ export default function PortfolioHoldingsClient({
     data: portfoliosHoldingsData,
     isLoading: isLoadingPortfoliosHoldings,
   } = usePortfolioHoldings(portfolioId, {
-    initialData: initialPortfolioHoldingsData,
+    ...serverSeed(initialPortfolioHoldingsData, serverRenderedAt),
   });
 
   if (isLoadingPortfoliosHoldings) {

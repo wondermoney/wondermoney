@@ -12,6 +12,17 @@ export const SIGNUP_FUNNEL_EVENTS = {
   completed: "signup_completed",
 } as const;
 
+/**
+ * Query params the post-auth redirect adds on a real signup and
+ * SignupCompletionTracker consumes. Stripped from any `?next=` destination
+ * first, so a crafted link cannot fake a signup event.
+ */
+export const SIGNUP_COMPLETION_QUERY_PARAMS = [
+  "signup_completed",
+  "signup_method",
+  "signup_source",
+] as const;
+
 export type SignupFunnelEventName =
   (typeof SIGNUP_FUNNEL_EVENTS)[keyof typeof SIGNUP_FUNNEL_EVENTS];
 

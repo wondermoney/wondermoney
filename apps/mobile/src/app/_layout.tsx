@@ -45,7 +45,7 @@ const environment = {
 const createDependencies = () => createLiveAppDependencies(environment, appStatePort, globalThis.fetch, readSavedServerUrl())
 const liveDependencies = createDependencies()
 
-// RAD-518 — one install, from the validated public environment, before any
+// One install, from the validated public environment, before any
 // screen mounts. An unavailable/invalid environment leaves the boundary in its
 // inert state and never constructs a PostHog client; so does any environment
 // the telemetry ADR has not approved for capture (see analytics.ts).
@@ -57,7 +57,7 @@ initAnalytics({
   createClient: createPostHogAnalyticsClient,
 })
 
-// RAD-517 — same shape, same gate, same point in startup as analytics above:
+// Same shape, same gate, same point in startup as analytics above:
 // validated environment → config → init, before any screen mounts. An
 // unavailable/invalid environment, or one the Sentry telemetry ADR has not
 // approved, never reaches `Sentry.init` at all — so no global error handlers are

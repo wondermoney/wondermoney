@@ -6,7 +6,7 @@ import { initMobileI18n } from '@/lib/i18n'
 import { TransactionOcrScreen, type TransactionOcrScreenProps } from './transaction-ocr-screen'
 import type { TransactionOcrPhase } from './use-transaction-ocr'
 
-const accounts = [{ accountId: 7, accountName: 'Daily account', institutionDisplayName: null, isOwnedByViewer: true, isPrivate: false, originalBalance: 100, convertedBalance: 100, originalCurrencyCode: 'EUR', primaryCurrencyCode: 'EUR', refreshedAt: null, source: 'manual' as const }]
+const accounts = [{ accountId: 7, accountName: 'Daily account', institutionDisplayName: null, isOwnedByViewer: true, isPrivate: false, originalBalance: 100, convertedBalance: 100, originalCurrencyCode: 'EUR', primaryCurrencyCode: 'EUR', refreshedAt: null, source: 'manual' as const, csvImportFormat: null }]
 const types = [{ transactionTypeKey: 3, name: 'card_payment' }]
 const currencies = [{ currencyKey: 2, code: 'EUR', description: null }]
 

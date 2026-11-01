@@ -2,7 +2,7 @@ import { isAxiosError } from "axios";
 
 /**
  * The API answers 404 for the capabilities the current market-data plan does
- * not include — fundamentals, financials, earnings and news (RAD-449). That is
+ * not include — fundamentals, financials, earnings and news. That is
  * a permanent product limitation, not a failure, and the UI has to tell the two
  * apart: a 404 explains itself, anything else is an error state.
  */

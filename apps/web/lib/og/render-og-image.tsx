@@ -3,8 +3,10 @@ import path from "node:path";
 
 import { ImageResponse } from "next/og";
 
-export const OG_IMAGE_WIDTH = 1200;
-export const OG_IMAGE_HEIGHT = 630;
+import { DEFAULT_INSTANCE_NAME, isDefaultInstanceName } from "@/lib/instance-name";
+
+const OG_IMAGE_WIDTH = 1200;
+const OG_IMAGE_HEIGHT = 630;
 
 const COLORS = {
   accent: "#7C3AED",
@@ -42,9 +44,16 @@ export type OgImageContent = {
   accent?: string;
   eyebrow?: string;
   headline: string;
+  /** A renamed instance gets its name in place of the WonderMoney wordmark. */
+  instanceName?: string;
 };
 
-export async function buildOgImageResponse({ accent, eyebrow, headline }: OgImageContent) {
+export async function buildOgImageResponse({
+  accent,
+  eyebrow,
+  headline,
+  instanceName = DEFAULT_INSTANCE_NAME,
+}: OgImageContent) {
   const assets = await loadAssets();
 
   return new ImageResponse(
@@ -61,8 +70,14 @@ export async function buildOgImageResponse({ accent, eyebrow, headline }: OgImag
           width: OG_IMAGE_WIDTH,
         }}
       >
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img alt="" height={90} src={assets.logoDataUri} width={245} />
+        {isDefaultInstanceName(instanceName) ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img alt="" height={90} src={assets.logoDataUri} width={245} />
+        ) : (
+          <div style={{ color: COLORS.accent, display: "flex", fontSize: 56, fontWeight: 700 }}>
+            {instanceName}
+          </div>
+        )}
         <div style={{ display: "flex", flexDirection: "column" }}>
           {eyebrow ? (
             <div

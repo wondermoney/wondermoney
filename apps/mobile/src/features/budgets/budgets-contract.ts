@@ -1,9 +1,9 @@
 import { z } from 'zod'
 
-import { readEndpoint, writeEndpoint } from '@/lib/api/runtime-schema'
+import { readEndpoint, tolerantEnum, writeEndpoint } from '@/lib/api/runtime-schema'
 
-export const MIN_BUDGET_YEAR = 2000
-export const MAX_BUDGET_YEAR = 2200
+const MIN_BUDGET_YEAR = 2000
+const MAX_BUDGET_YEAR = 2200
 
 const positiveSafeIdSchema = z.number().int().positive().max(Number.MAX_SAFE_INTEGER)
 const moneySchema = z.number().finite()
@@ -34,19 +34,19 @@ export const budgetCreateWriteSchema = z.object({
 
 export const budgetCreateResponseSchema = z.object({
   budgetKey: positiveSafeIdSchema,
-}).strict()
+})
 
 export type BudgetCreateWrite = z.input<typeof budgetCreateWriteSchema>
 export type BudgetCreateIncome = z.input<typeof budgetCreateIncomeSchema>
 
 const budgetInventoryItemSchema = z.object({
   budgetKey: positiveSafeIdSchema,
-  budgetTemplates: z.array(z.object({ budgetTemplateCategoryKey: positiveSafeIdSchema }).strict()),
+  budgetTemplates: z.array(z.object({ budgetTemplateCategoryKey: positiveSafeIdSchema })),
   description: z.string().nullable().optional(),
   name: z.string(),
-}).strict()
+})
 
-export const budgetInventoryResponseSchema = z.object({ budgets: z.array(budgetInventoryItemSchema) }).strict()
+export const budgetInventoryResponseSchema = z.object({ budgets: z.array(budgetInventoryItemSchema) })
 export type BudgetInventoryResponseDto = z.infer<typeof budgetInventoryResponseSchema>
 
 export const budgetAddCategoryWriteSchema = z.object({
@@ -71,25 +71,29 @@ export const budgetCategoryWriteSchema = z.object({
 
 export type BudgetCategoryWrite = z.input<typeof budgetCategoryWriteSchema>
 
-export const budgetDetailSchema = z.object({
+const budgetDetailSchema = z.object({
   budgetKey: positiveSafeIdSchema,
   description: z.string().max(500).nullable().optional(),
   name: z.string().min(1).max(100),
-}).strict()
+})
 
 export const budgetDetailResponseSchema = z.object({
   budget: budgetDetailSchema,
-}).strict()
+})
 
-export type BudgetDetailResponseDto = z.infer<typeof budgetDetailResponseSchema>
-
-export const budgetRecurrenceSchema = z.enum([
+const BUDGET_RECURRENCES = [
   'MONTHLY_14',
   'MONTHLY',
   'QUARTERLY',
   'BI_ANNUALLY',
   'ANNUALLY',
-])
+] as const
+
+export const budgetRecurrenceSchema = z.enum(BUDGET_RECURRENCES)
+
+// Read side: a recurrence this build doesn't know reads as null, the same "recurrence unavailable"
+// state legacy categories already have, instead of failing the whole budget.
+const budgetRecurrenceResponseSchema = tolerantEnum(BUDGET_RECURRENCES, null)
 
 const budgetCategoryRowFields = {
   category_amount: moneySchema,
@@ -107,26 +111,26 @@ export const budgetCategoryRowSchema = z.union([
     ...budgetCategoryRowFields,
     category_recurrency: z.null(),
     child_category_name: z.null(),
-  }).strict(),
+  }),
   z.object({
     ...budgetCategoryRowFields,
-    category_recurrency: budgetRecurrenceSchema.nullable(),
+    category_recurrency: budgetRecurrenceResponseSchema.nullable(),
     child_category_name: z.string(),
-  }).strict(),
+  }),
 ])
 
-export const budgetAccountSchema = z.object({
+const budgetAccountSchema = z.object({
   accountKey: positiveSafeIdSchema,
   accountName: z.string().nullable(),
-}).strict()
+})
 
 // MikroORM serializes relation metadata alongside these documented income fields.
 // This is the only deliberately open object in the budgets response boundary.
-export const budgetIncomeSchema = z.object({
+const budgetIncomeSchema = z.object({
   amount: moneySchema,
   budgetTemplateIncomeKey: positiveSafeIdSchema.optional(),
   name: z.string(),
-  recurrency: budgetRecurrenceSchema,
+  recurrency: budgetRecurrenceResponseSchema,
 }).passthrough()
 
 export const budgetSchema = z.object({
@@ -139,17 +143,17 @@ export const budgetSchema = z.object({
   month: monthSchema,
   name: z.string(),
   year: yearSchema,
-}).strict()
+})
 
 export const budgetsResponseSchema = z.object({
   budgets: z.array(budgetSchema),
-}).strict()
+})
 
 export const budgetMonthResponseSchema = z.object({
   budget: budgetSchema,
   hasNextMonth: z.boolean(),
   hasPreviousMonth: z.boolean(),
-}).strict()
+})
 
 // The year and year-until-month endpoints return the same shape as a month, minus `month` — the
 // categories are pre-aggregated (summed) across whichever months are in scope.
@@ -162,17 +166,15 @@ export const budgetYearSchema = z.object({
   incomes: z.array(budgetIncomeSchema),
   name: z.string(),
   year: yearSchema,
-}).strict()
+})
 
 export const budgetYearResponseSchema = z.object({
   budget: budgetYearSchema,
-}).strict()
+})
 
 export type BudgetDto = z.infer<typeof budgetSchema>
 export type BudgetYearDto = z.infer<typeof budgetYearSchema>
 export type BudgetCategoryRowDto = z.infer<typeof budgetCategoryRowSchema>
-export type BudgetMonthResponseDto = z.infer<typeof budgetMonthResponseSchema>
-export type BudgetYearResponseDto = z.infer<typeof budgetYearResponseSchema>
 export type BudgetRecurrence = z.infer<typeof budgetRecurrenceSchema>
 
 export const budgetsEndpoint = readEndpoint({
@@ -325,16 +327,14 @@ export function createRemoveBudgetCategoryEndpoint(budgetId: number, categoryId:
 
 // MikroORM serializes relation metadata alongside these documented account fields, same pattern
 // as budgetIncomeSchema above — this is the only other deliberately open object in this boundary.
-export const budgetLinkedAccountSchema = z.object({
+const budgetLinkedAccountSchema = z.object({
   accountKey: positiveSafeIdSchema,
   accountName: z.string().max(255).nullable().optional(),
 }).passthrough()
 
 export const budgetAccountsResponseSchema = z.object({
   accounts: z.array(budgetLinkedAccountSchema),
-}).strict()
-
-export type BudgetLinkedAccountDto = z.infer<typeof budgetLinkedAccountSchema>
+})
 
 export const budgetAccountsWriteSchema = z.object({
   accountKeys: z.array(positiveSafeIdSchema),

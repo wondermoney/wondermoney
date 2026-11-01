@@ -47,6 +47,8 @@ const PortfolioCalendar: React.FC<PortfolioCalendarProps> = ({ holdings }) => {
   const t = useTranslations();
   const locale = useLocale();
   const { data, isLoading } = usePortfolioCalendar();
+  const earnings = data?.earnings;
+  const dividends = data?.dividends;
 
   const logoMap = useMemo(() => {
     if (!holdings) return new Map<string, string>();
@@ -58,22 +60,22 @@ const PortfolioCalendar: React.FC<PortfolioCalendarProps> = ({ holdings }) => {
   }, [holdings]);
 
   const upcomingEarnings = useMemo(() => {
-    if (!data?.earnings) return [];
+    if (!earnings) return [];
     const now = new Date().toISOString().split("T")[0];
-    return data.earnings
+    return earnings
       .filter((e) => e.date >= now)
       .sort((a, b) => a.date.localeCompare(b.date))
       .slice(0, 10);
-  }, [data?.earnings]);
+  }, [earnings]);
 
   const upcomingDividends = useMemo(() => {
-    if (!data?.dividends) return [];
+    if (!dividends) return [];
     const now = new Date().toISOString().split("T")[0];
-    return data.dividends
+    return dividends
       .filter((e) => e.date >= now)
       .sort((a, b) => a.date.localeCompare(b.date))
       .slice(0, 10);
-  }, [data?.dividends]);
+  }, [dividends]);
 
   const hasData = upcomingEarnings.length > 0 || upcomingDividends.length > 0;
 

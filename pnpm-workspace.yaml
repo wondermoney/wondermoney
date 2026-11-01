@@ -27,13 +27,22 @@ overrides:
 
   react-native-worklets: 0.10.1
   react-native-reanimated: 4.5.1
-  # The API's copy of @better-auth/expo (its server plugin) gets Expo peers installed for it;
-  # keep them on the app's versions so the hoisted tree holds one copy. Bump with the Expo SDK.
-  '@better-auth/expo>expo-constants': ~57.0.21
-  '@better-auth/expo>expo-linking': ~57.0.12
+  # better-auth's and @better-auth/expo's optional next/expo peers are dropped by .pnpmfile.cjs,
+  # so they no longer resolve into the API's closure (#100).
   # React Native 0.86's renderer needs exactly this React; every app shares it.
   react: 19.2.3
   react-dom: 19.2.3
+  # One copy of each Radix internal that keeps module-level state (the layer stack, the
+  # focus-trap stack and its branch registry, the focus-guard count). Radix pins these
+  # exactly per component, so web's older Select/DropdownMenu/AlertDialog and its newer
+  # Dialog/Popover asked for different versions; the hoisted layout then gave Dialog and
+  # Popover private copies each. A Dialog could not see a Popover inside it, so its focus
+  # trap pulled focus out of every combobox search box (#64), and a DropdownMenu that
+  # opened a Dialog left `pointer-events: none` on <body> after both closed (#65).
+  # Bump these together with the @radix-ui packages in apps/web and fumadocs-ui.
+  '@radix-ui/react-dismissable-layer': 1.2.1
+  '@radix-ui/react-focus-guards': 1.2.0
+  '@radix-ui/react-focus-scope': 1.3.1
 
 # Hoisted, like the Yarn 1 and npm layouts these apps were built on: Expo's circular peer
 # dependencies make the isolated layout install several copies of expo and react-native.

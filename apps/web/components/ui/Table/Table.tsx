@@ -1,24 +1,18 @@
 "use client";
 
 import {
-  type ColumnDef,
+  type ColumnVisibilityState,
   type ExpandedState,
   flexRender,
-  getCoreRowModel,
-  getExpandedRowModel,
-  getPaginationRowModel,
-  getSortedRowModel,
-  type Row,
   type RowData,
   type RowSelectionState,
   type SortingState,
-  type Table as TableType,
+  type TableFeatures,
   type TableMeta,
-  useReactTable,
-  type VisibilityState,
+  useTable,
 } from "@tanstack/react-table";
 import { useTranslations } from "next-intl";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { cn } from "@/lib/utils";
 
@@ -40,9 +34,19 @@ import {
   TableRow,
 } from ".";
 import TableEmptyState from "./EmptyState";
+import {
+  type ColumnDef,
+  type DataTableFeatures,
+  dataTableFeatures,
+  type Row,
+  type Table as TableType,
+} from "./features";
 
 declare module "@tanstack/react-table" {
-  interface TableMeta<TData extends RowData> {
+  interface TableMeta<
+    in out TFeatures extends TableFeatures,
+    in out TData extends RowData,
+  > {
     updateData?: (row: Row<TData>, columnId: string, value: string) => void;
     getRowStyles?: (row: Row<TData>) => React.CSSProperties;
     getRowClasses?: (row: Row<TData>) => Record<string, boolean>;
@@ -50,23 +54,8 @@ declare module "@tanstack/react-table" {
   }
 }
 
-function useSkipper() {
-  const shouldSkipRef = useRef(true);
-  const shouldSkip = shouldSkipRef.current;
-
-  const skip = useCallback(() => {
-    shouldSkipRef.current = false;
-  }, []);
-
-  useEffect(() => {
-    shouldSkipRef.current = true;
-  });
-
-  return [shouldSkip, skip] as const;
-}
-
-interface DataTableProps<TData, TValue> {
-  columns: ColumnDef<TData, TValue>[];
+interface DataTableProps<TData extends RowData> {
+  columns: ColumnDef<TData>[];
   data: TData[];
   withSorting?: boolean;
   withExpandableRows?: boolean;
@@ -80,15 +69,15 @@ interface DataTableProps<TData, TValue> {
   debugTable?: boolean;
   onRowClick?: (row: Row<TData>) => void;
   onRowSelectionChange?: (rows: Row<TData>[]) => void;
-  meta?: TableMeta<TData>;
+  meta?: TableMeta<DataTableFeatures, TData>;
   sticky?: boolean;
   footerActions?: React.ReactNode;
   tableRef?: React.RefObject<TableType<TData> | null>;
-  /** RAD-576 — rows the server matched before its own `limit`. See `Pagination`. */
+  /** Rows the server matched before its own `limit`. See `Pagination`. */
   serverTotal?: number;
 }
 
-export function Table<TData, TValue>({
+export function Table<TData extends RowData>({
   columns,
   data,
   withSorting = false,
@@ -108,7 +97,7 @@ export function Table<TData, TValue>({
   footerActions,
   tableRef,
   serverTotal,
-}: DataTableProps<TData, TValue>) {
+}: DataTableProps<TData>) {
   const t = useTranslations();
   const affordanceLabel =
     scrollAffordanceLabel ?? t("scroll-horizontally-hint");
@@ -117,10 +106,11 @@ export function Table<TData, TValue>({
   const [expanded, setExpanded] = useState<ExpandedState>(
     defaultExpanded === true ? true : {},
   );
-  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
+  const [columnVisibility, setColumnVisibility] =
+    useState<ColumnVisibilityState>({});
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
-  const [autoResetPageIndex, skipAutoResetPageIndex] = useSkipper();
-  const table = useReactTable({
+  const table = useTable({
+    features: dataTableFeatures,
     data,
     columns,
     state: {
@@ -129,26 +119,26 @@ export function Table<TData, TValue>({
       columnVisibility: withColumnVisibility ? columnVisibility : {},
       rowSelection: withSelectRow || withMultiSelectRow ? rowSelection : {},
     },
-    getCoreRowModel: getCoreRowModel(),
     onExpandedChange: withExpandableRows ? setExpanded : undefined,
     onSortingChange: withSorting ? setSorting : undefined,
     onColumnVisibilityChange: setColumnVisibility,
     enableRowSelection: withSelectRow,
     enableMultiRowSelection: withMultiSelectRow,
     onRowSelectionChange: setRowSelection,
-    // @ts-ignore
-    getSubRows: (row) => row.subRows,
-    getSortedRowModel: withSorting ? getSortedRowModel() : undefined,
-    getPaginationRowModel: withPagination ? getPaginationRowModel() : undefined,
-    getExpandedRowModel: withExpandableRows ? getExpandedRowModel() : undefined,
+    getSubRows: (row) => (row as { subRows?: TData[] }).subRows,
+    // v8 left out a row model to switch its stage off; v9 registers every row
+    // model once in `dataTableFeatures`, so a table without pagination says so
+    // here and keeps every row on one page.
+    manualPagination: !withPagination,
     debugTable,
-    autoResetPageIndex,
+    // Data changes reset to the first page.
+    autoResetPageIndex: true,
     meta,
   });
 
-  if (tableRef) {
-    tableRef.current = table;
-  }
+  useEffect(() => {
+    if (tableRef) tableRef.current = table;
+  }, [tableRef, table]);
 
   const hasFooter =
     table
@@ -159,12 +149,20 @@ export function Table<TData, TValue>({
       .flat()
       .filter(Boolean).length > 0;
 
+  // v9 hands back a new table instance on every render, so this effect runs on
+  // every render too. Report only when the selected ids change, as v8's stable
+  // instance did: a parent that stores the rows in state would otherwise
+  // re-render, be re-told the same selection, and loop until React gives up.
+  const reportedSelection = useRef<string | null>(null);
   useEffect(() => {
     if ((withSelectRow || withMultiSelectRow) && onRowSelectionChange) {
-      const selectedRows = Object.keys(rowSelection)
-        .filter((key) => rowSelection[key])
-        .map((key) => table.getRow(key));
-      onRowSelectionChange(selectedRows);
+      const selectedIds = Object.keys(rowSelection).filter(
+        (key) => rowSelection[key],
+      );
+      const signature = selectedIds.join("\u0000");
+      if (reportedSelection.current === signature) return;
+      reportedSelection.current = signature;
+      onRowSelectionChange(selectedIds.map((key) => table.getRow(key)));
     }
   }, [
     rowSelection,

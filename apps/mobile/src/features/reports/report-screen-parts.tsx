@@ -1,49 +1,13 @@
 import { useTranslation } from 'react-i18next'
 import { Pressable, StyleSheet, Text, View } from 'react-native'
-import { SafeAreaView } from 'react-native-safe-area-context'
 
 import { Button } from '@/components/ui/button'
-import { PageHeader } from '@/components/ui/page-header'
-import { BackControl } from '@/components/ui/back-control'
 import { themeTokens } from '@/theme/tokens'
 import { textStyles } from '@/theme/typography'
 
 import { REPORT_DATE_PRESETS, type ReportDatePreset } from './report-date-presets'
 
 export type Palette = (typeof themeTokens.colors)[keyof typeof themeTokens.colors]
-
-export function ReportHeader({ title, helper, backLabel, onBack, palette }: { title: string; helper: string; backLabel: string; onBack: () => void; palette: Palette }) {
-  return (
-    <View style={styles.header}>
-      <BackControl fallback="/reports" onPress={onBack} color={palette.primary} />
-      <PageHeader palette={palette} title={title} />
-    </View>
-  )
-}
-
-export function ReportLoading({ label, palette }: { label: string; palette: Palette }) {
-  return (
-    <SafeAreaView style={[styles.safeArea, { backgroundColor: palette.background }]}>
-      <ReportSectionLoading label={label} palette={palette} />
-    </SafeAreaView>
-  )
-}
-
-export function ReportFailure({ title, message, onRetry, onBack, palette }: { title: string; message: string; onRetry: () => void | Promise<void>; onBack: () => void; palette: Palette }) {
-  const { t } = useTranslation()
-  return (
-    <SafeAreaView style={[styles.safeArea, { backgroundColor: palette.background }]}>
-      <View style={styles.failure}>
-        <Text accessibilityRole="header" allowFontScaling style={[styles.failureTitle, { color: palette.foreground }]}>{title}</Text>
-        <Text allowFontScaling style={[styles.body, { color: palette.mutedForeground }]}>{message}</Text>
-        <View style={styles.failureActions}>
-          <Button label={t('common.retry')} onPress={onRetry} palette={palette} variant="primary" />
-          <BackControl fallback="/reports" onPress={onBack} color={palette.primary} />
-        </View>
-      </View>
-    </SafeAreaView>
-  )
-}
 
 /**
  * A single report's title + helper, used both by the standalone screen's

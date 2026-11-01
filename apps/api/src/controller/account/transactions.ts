@@ -1,9 +1,11 @@
 import { LockMode, QueryOrder } from '@mikro-orm/core';
 import { startOfMonth } from 'date-fns';
 import type { NextFunction, Request, Response } from 'express';
+import { sql } from 'kysely';
 import { orderBy, pick } from 'lodash-es';
 
 import { HIDDEN_FILTER } from '@app/database/filters/tenant-filter';
+import { sqlQuery } from '@app/database/sql';
 import { Account } from '@entity/Account';
 import { Appuser } from '@entity/Appuser';
 import { Category } from '@entity/Category';
@@ -22,6 +24,7 @@ import { TransactionAuditService } from '@service/transaction/transaction-audit.
 import { transactionCreationService } from '@service/transaction/transaction-creation.service';
 import { findManualDuplicate } from '@service/transaction/transaction-dedup.service';
 import { listTransactions } from '@service/transaction/transaction-list.service';
+import { excludeExpired } from '@service/transaction/transaction-status';
 import { applyUserCategorization } from '@service/transaction/user-categorization.service';
 import { filterExpenseTransactions, getEffectiveAppuserAmount } from '@utils/account-amounts';
 import { BadRequestError, InternalServerError, NotFoundError, UnauthorizedError } from '@utils/errors';
@@ -87,7 +90,7 @@ export async function createTransaction(req: Request, res: Response, next: NextF
   const authenticatedUser = authedUser(req);
 
   try {
-    // RAD-346 Phase 2: warn-and-allow duplicate hint (flag-gated, additive). Never blocks the create.
+    // Warn-and-allow duplicate hint (flag-gated, additive). Never blocks the create.
     const duplicateMatch = await findManualDuplicate(DI.em, {
       accountKey: accountId,
       amount: originalAmount ?? settlementAmount,
@@ -109,8 +112,8 @@ export async function createTransaction(req: Request, res: Response, next: NextF
       transactionTypeId,
     });
     if (duplicateMatch) {
-      // RAD-394: record that the fingerprint flagged a possible duplicate but we still created the
-      // row. Distinct from the sync path's DEDUP_SKIPPED (which skips the create) so RAD-393 can tell
+      // Record that the fingerprint flagged a possible duplicate but we still created the
+      // row. Distinct from the sync path's DEDUP_SKIPPED (which skips the create) so audits can tell
       // legitimate manual collisions apart from data-losing skips. Best-effort; never blocks.
       await TransactionAuditService.log(DI.em, {
         accountKey: accountId,
@@ -171,17 +174,17 @@ export async function getCategorySpending(req: Request, res: Response, _next: Ne
   }
   const transactions = await DI.em.find(
     Transaction,
-    {
+    // EXPIRED rows never moved money; PENDING still counts.
+    excludeExpired({
       accountKey: { $in: accounts },
-      // RAD-audit: this read omitted `deletedAt` entirely, so deleted transactions
-      // were counted into per-category spending.
+      // Explicit, so deleted transactions are never counted into per-category spending.
       deletedAt: undefined,
       tenantKey: tenant,
       transactionDate: {
         $gte: fromDate ?? startOfMonth(new Date()),
         ...(toDate && { $lte: toDate }),
       },
-    },
+    }),
     {
       populate: [
         'appuserTransactionCategories.categoryKey',
@@ -202,101 +205,38 @@ export async function getCategorySpending(req: Request, res: Response, _next: Ne
     else loanRepaymentLinkMap.set(transactionKey, [link]);
   }
   const expenseTransactions = filterExpenseTransactions(transactions);
-  // NOTE: we can improve performance by using a Map instead of an object
-  // const categorySpending = new Map<[category: string], CategorySpending[string]>();
-  // also consider moving to SQL query instead.
+  // Keyed by top-level category name. Every expense adds to its top-level entry, whether it sits
+  // on that category directly or on one of its children.
   const categorySpending: CategorySpending = {};
+  type CategoryDisplay = Pick<Category, 'bgColor' | 'categoryKey' | 'icon' | 'isSystemCategory' | 'textColor'>;
+  const display = (category: CategoryDisplay, currency: string | undefined) => ({
+    bgColor: category.bgColor,
+    categoryKey: category.categoryKey,
+    currency,
+    icon: category.icon,
+    isSystemCategory: category.isSystemCategory,
+    textColor: category.textColor,
+  });
+  const uncategorized: CategoryDisplay = { bgColor: '#000000', categoryKey: -1, icon: undefined, isSystemCategory: true, textColor: '#FFFFFF' };
   for (const transaction of expenseTransactions) {
-    const amount = calculateEffectiveSpendingAmount({
+    const amount = Math.abs(calculateEffectiveSpendingAmount({
       loanRepaymentLinks: loanRepaymentLinkMap.get(transaction.transactionKey) ?? [],
       transactionAmount: getEffectiveAppuserAmount(transaction),
-    });
+    }));
+    const currency = transaction.appuserCurrencyKey?.code;
     const trxCategory = transaction.appuserTransactionCategories.getItems()[0]?.categoryKey;
-    if (!trxCategory) {
-      // This transaction has no category, so we add it to the Uncategorized category
-      if ('Uncategorized' in categorySpending) {
-        categorySpending['Uncategorized'].amount += Math.abs(amount);
-        categorySpending['Uncategorized'].numTransactions += 1;
-      } else {
-        categorySpending['Uncategorized'] = {
-          amount: Math.abs(amount),
-          bgColor: '#000000',
-          categoryKey: -1,
-          childCategories: {},
-          currency: transaction.appuserCurrencyKey?.code,
-          isSystemCategory: true,
-          numTransactions: 1,
-          textColor: '#FFFFFF',
-        };
-      }
-      continue;
-    }
-    const parentCategory = trxCategory.parentCategory;
-    if (!parentCategory) {
-      // This is a parent category (the transaction category doesnt have a parent category)
-      categorySpending[trxCategory.name] = {
-        amount: Math.abs(amount),
-        bgColor: trxCategory.bgColor,
-        categoryKey: trxCategory.categoryKey,
-        childCategories: {},
-        currency: transaction.appuserCurrencyKey?.code,
-        icon: trxCategory.icon,
-        isSystemCategory: trxCategory.isSystemCategory,
-        numTransactions: 1,
-        textColor: trxCategory.textColor,
-      };
-    } else {
-      // This is a child category (the transaction category has a parent category)
-      if (parentCategory.name in categorySpending) {
-        // The parent category is already in the categorySpending object
-        const parentSpending = categorySpending[parentCategory.name];
-        if (!parentSpending) continue; // TypeScript type guard
-        parentSpending.amount += Math.abs(amount);
-        parentSpending.numTransactions += 1;
-        if (trxCategory.name in parentSpending.childCategories) {
-          // The child category is already in the categorySpending object
-          const childSpending = parentSpending.childCategories[trxCategory.name];
-          if (!childSpending) continue; // TypeScript type guard
-          childSpending.amount += Math.abs(amount);
-          childSpending.numTransactions += 1;
-        } else {
-          // The child category is not in the categorySpending object
-          parentSpending.childCategories[trxCategory.name] = {
-            amount: Math.abs(amount),
-            bgColor: trxCategory.bgColor,
-            categoryKey: trxCategory.categoryKey,
-            currency: transaction.appuserCurrencyKey?.code,
-            icon: trxCategory.icon,
-            isSystemCategory: trxCategory.isSystemCategory,
-            numTransactions: 1,
-            textColor: trxCategory.textColor,
-          };
-        }
-      } else {
-        // The parent category is not in the categorySpending object
-        categorySpending[parentCategory.name] = {
-          amount: Math.abs(amount),
-          bgColor: parentCategory.bgColor,
-          categoryKey: parentCategory.categoryKey,
-          childCategories: {
-            [trxCategory.name]: {
-              amount: Math.abs(amount),
-              bgColor: trxCategory.bgColor,
-              categoryKey: trxCategory.categoryKey,
-              currency: transaction.appuserCurrencyKey?.code,
-              icon: trxCategory.icon,
-              isSystemCategory: trxCategory.isSystemCategory,
-              numTransactions: 1,
-              textColor: trxCategory.textColor,
-            },
-          },
-          currency: transaction.appuserCurrencyKey?.code,
-          icon: parentCategory.icon,
-          isSystemCategory: parentCategory.isSystemCategory,
-          numTransactions: 1,
-          textColor: parentCategory.textColor,
-        };
-      }
+    const parentCategory = trxCategory?.parentCategory ?? undefined;
+    const topLevel = parentCategory ?? trxCategory;
+    const topLevelName = topLevel?.name ?? 'Uncategorized';
+
+    const entry = (categorySpending[topLevelName] ??= { ...display(topLevel ?? uncategorized, currency), amount: 0, childCategories: {}, numTransactions: 0 });
+    entry.amount += amount;
+    entry.numTransactions += 1;
+
+    if (parentCategory && trxCategory) {
+      const child = (entry.childCategories[trxCategory.name] ??= { ...display(trxCategory, currency), amount: 0, numTransactions: 0 });
+      child.amount += amount;
+      child.numTransactions += 1;
     }
   }
 
@@ -325,7 +265,7 @@ export async function getTransactionHistory(req: Request, res: Response, next: N
     return;
   }
   // Ownership + tenant scope check before exposing any history.
-  // RAD-25: an explicitly-requested transaction (already id/tenant-scoped) must be loadable even
+  // An explicitly-requested transaction (already id/tenant-scoped) must be loadable even
   // when hidden — a revealed transaction's audit history must not 404. Disable only the hidden filter.
   const transaction = await DI.em.findOne(
     Transaction,
@@ -355,13 +295,16 @@ export async function getTransactionMerchants(req: Request, res: Response) {
   const {
     query: { limit, search },
   } = await zParse(getTransactionMerchantsRequestSchema, req);
+  const { appuserKey, tenantKey } = authedContext(req);
   const normalizedSearch = search ? normalizeMerchantName(search) : undefined;
+  const privateMerchantKeys = await findMerchantsSeenOnlyOnOthersPrivateAccounts(tenantKey, appuserKey);
 
   const transactionMerchants = await DI.em.find(
     TransactionMerchant,
     {
       deletedAt: undefined,
       ...(normalizedSearch ? { normalizedName: { $like: `%${normalizedSearch}%` } } : {}),
+      ...(privateMerchantKeys.length > 0 ? { transactionMerchantKey: { $nin: privateMerchantKeys } } : {}),
       tenantKey: req.tenant,
     },
     {
@@ -407,7 +350,7 @@ export async function updateTransaction(req: Request, res: Response, next: NextF
     body: { categoryKey, updatedAmount },
     params: { transactionId },
   } = await zParse(updateTransactionRequestSchema, req);
-  // RAD-218: authorize before any database access — a missing user or unresolved tenant must never
+  // Authorize before any database access — a missing user or unresolved tenant must never
   // reach the data layer, and every lookup below is scoped by both owner and tenant.
   const { tenant, user } = authedContext(req);
   const transaction = await DI.em.findOne(
@@ -418,7 +361,7 @@ export async function updateTransaction(req: Request, res: Response, next: NextF
       transactionKey: transactionId,
     },
     {
-      // RAD-25: a revealed hidden transaction (already id/tenant-scoped) must be editable — e.g.
+      // A revealed hidden transaction (already id/tenant-scoped) must be editable — e.g.
       // re-categorizing it — without a false not-found. Disable only the hidden filter.
       filters: { [HIDDEN_FILTER]: false },
       populate: ['accountKey', 'appuserTransactionCategories.categoryKey', 'settlementCurrencyKey', 'appuserCurrencyKey'],
@@ -447,17 +390,16 @@ export async function updateTransaction(req: Request, res: Response, next: NextF
       transactionKey: transaction.transactionKey,
     });
   }
-  if (updatedAmount) {
-    // Validation
-    if (
-      transaction.settlementAmount !== undefined &&
-      ((transaction.settlementAmount > 0 && updatedAmount > transaction.settlementAmount) ||
-        (transaction.settlementAmount < 0 && updatedAmount < transaction.settlementAmount))
-    ) {
+  // `!== undefined`, not truthiness: an edit to 0 is an edit.
+  if (updatedAmount !== undefined) {
+    // An edit may not exceed, in the same direction, the amount before any edit: what the bank
+    // charged, or what a manual row was entered with. Not the previous edit, or a user who edited
+    // -100 to -10 could never correct it to -90.
+    if (exceedsUneditedAmount(transaction, updatedAmount)) {
       next(new BadRequestError('Amount cannot be greater than the original amount'));
       return;
     }
-    // RAD-218: run the edit and its running-balance propagation atomically, under a pessimistic
+    // Run the edit and its running-balance propagation atomically, under a pessimistic
     // write lock on the edited transaction and its account, with every query scoped to this owner,
     // tenant, and account. This prevents partial failures and guarantees balances on other accounts
     // or tenants can never be selected or mutated.
@@ -470,7 +412,7 @@ export async function updateTransaction(req: Request, res: Response, next: NextF
           transactionKey: transactionId,
         },
         {
-          // RAD-25: same id/tenant-scoped row as the load above; must lock it even when hidden.
+          // Same id/tenant-scoped row as the load above; must lock it even when hidden.
           filters: { [HIDDEN_FILTER]: false },
           lockMode: LockMode.PESSIMISTIC_WRITE,
           populate: ['accountKey', 'settlementCurrencyKey', 'appuserCurrencyKey'],
@@ -503,6 +445,12 @@ export async function updateTransaction(req: Request, res: Response, next: NextF
       // Edit Amount. The chain helper accumulates using each row's stored `settlementAmount` /
       // `appuserSettlementAmount`, so we update the anchor row in place before asking the helper to
       // recompute the suffix — keeping the Big-decimal arithmetic in the one module that owns it.
+      // The pre-edit amounts: the chain needs them to open on an account's oldest row.
+      const previous = {
+        appuserSettlementAmount: lockedTransaction.appuserSettlementAmount,
+        settlementAmount: lockedTransaction.settlementAmount,
+      };
+      lockedTransaction.uneditedSettlementAmount ??= lockedTransaction.settlementAmount;
       lockedTransaction.editedSettlementAmount = updatedAmount;
       const shouldConvertAmount = lockedTransaction.settlementCurrencyKey!.code !== lockedTransaction.appuserCurrencyKey!.code;
       if (shouldConvertAmount) {
@@ -530,18 +478,18 @@ export async function updateTransaction(req: Request, res: Response, next: NextF
       // `editedSettlementAmount` is just a flag for callers that care to distinguish edited rows).
       lockedTransaction.settlementAmount = updatedAmount;
 
-      // RAD-564: same chain helper as bank sync, anchored on the edited row so rows before it are
+      // Same chain helper as bank sync, anchored on the edited row so rows before it are
       // untouched. The helper returns the new tail so we can update account.balance.
       const { tail } = await recalculateChainFromAccountBalance(
         em,
         account,
-        { transactionKey: lockedTransaction.transactionKey },
+        { previous, transactionKey: lockedTransaction.transactionKey },
       );
       account.balance = tail.balance;
       account.appuserCurrencyBalance = tail.appuserCurrencyBalance;
       em.persist(account);
 
-      // RAD-346: record the money edit atomically with the balance changes (flush:false → commits with this tx).
+      // Record the money edit atomically with the balance changes (flush:false → commits with this tx).
       await TransactionAuditService.log(
         em,
         {
@@ -553,6 +501,7 @@ export async function updateTransaction(req: Request, res: Response, next: NextF
             appuserCurrencyBalance: { from: auditBefore.appuserCurrencyBalance, to: lockedTransaction.appuserCurrencyBalance },
             balance: { from: auditBefore.balance, to: lockedTransaction.balance },
             editedSettlementAmount: { from: auditBefore.editedSettlementAmount, to: lockedTransaction.editedSettlementAmount },
+            settlementAmount: { from: previous.settlementAmount ?? null, to: lockedTransaction.settlementAmount },
           },
           eventType: TransactionAuditEventType.USER_EDIT,
           source: 'transaction-amount-edit',
@@ -612,7 +561,7 @@ export async function updateTransactions(req: Request, res: Response, next: Next
       transactionKey: { $in: transactionIds },
     },
     {
-      // RAD-25: this endpoint operates on explicit, already-authorized transactionIds — it must be
+      // This endpoint operates on explicit, already-authorized transactionIds — it must be
       // able to load an already-hidden transaction (e.g. to unhide it), not just visible ones.
       filters: { [HIDDEN_FILTER]: false },
       populate: ['appuserTransactionCategories.categoryKey', 'transactionMerchantKey'],
@@ -630,23 +579,22 @@ export async function updateTransactions(req: Request, res: Response, next: Next
       return;
     }
   }
-  // RAD-411: bulk categorize persists the assignment and learns the merchant mapping exactly like the
+  // Bulk categorize persists the assignment and learns the merchant mapping exactly like the
   // single-transaction path — both go through applyUserCategorization, which also hands back each
   // transaction's *original* category so the audit `from` recorded below stays correct.
   const originalCategoryByTransaction = category
     ? await applyUserCategorization(DI.em, { actor: authenticatedUser, category, transactions })
     : new Map<number, Category | undefined>();
 
-  // RAD-271: the `reviewed` flag is uniform across every selected transaction, so collapse what used to be
-  // one `UPDATE ... WHERE transaction_key = :id` (each in its own BEGIN/COMMIT — a classic N+1) into a single
-  // bulk UPDATE. The WHERE mirrors the load above exactly (same tenant + soft-delete + id scope), so this does
+  // The `reviewed` flag is uniform across every selected transaction, so this is a single bulk UPDATE
+  // rather than one per transaction. The WHERE mirrors the load above exactly (same tenant + soft-delete + id scope), so this does
   // not widen access beyond the authenticated household's transactions.
   // nativeUpdate bypasses the tenant filter, so scope explicitly by tenant (the ids were
-  // already validated against the household via the filtered load above). RAD-343.
+  // already validated against the household via the filtered load above).
   const shouldSetReviewed = !!reviewed || !!category;
-  // RAD-25: only include the fields the caller actually intends to change. `hidden` is bidirectional
+  // Only include the fields the caller actually intends to change. `hidden` is bidirectional
   // (true/false), unlike `reviewed` which this endpoint only ever sets to true — building this
-  // unconditionally (as before) would silently reset `reviewed` to false on a hidden-only call.
+  // unconditionally would silently reset `reviewed` to false on a hidden-only call.
   const transactionUpdate: { hidden?: boolean; reviewed?: boolean } = {};
   if (shouldSetReviewed) transactionUpdate.reviewed = true;
   if (hidden !== undefined) transactionUpdate.hidden = hidden;
@@ -662,7 +610,7 @@ export async function updateTransactions(req: Request, res: Response, next: Next
     );
   }
 
-  // RAD-346: best-effort audit of the bulk review/category/hidden change (one row per transaction).
+  // Best-effort audit of the bulk review/category/hidden change (one row per transaction).
   const tenantKeyForAudit = tenant.tenantKey;
   for (const transaction of transactions) {
     const changes: Record<string, { from: unknown; to: unknown }> = {};
@@ -690,4 +638,34 @@ export async function updateTransactions(req: Request, res: Response, next: Next
   }
 
   return res.sendStatus(200);
+}
+
+/** The amount before any user edit bounds an edit: same sign, no larger in magnitude. */
+function exceedsUneditedAmount(transaction: Pick<Transaction, 'settlementAmount' | 'uneditedSettlementAmount'>, updatedAmount: number): boolean {
+  const unedited = transaction.uneditedSettlementAmount ?? transaction.settlementAmount;
+  if (unedited == null) return false;
+  return (unedited > 0 && updatedAmount > unedited) || (unedited < 0 && updatedAmount < unedited);
+}
+
+/**
+ * Merchants the household knows only from transactions on another member's private accounts.
+ *
+ * Merchants are a household-wide list, but a merchant that appears nowhere except on a private
+ * account is part of that account's transactions (the privacy carve-out), so the other member
+ * must not see it. A transaction is visible on exactly the terms of the Transaction tenant filter:
+ * no account, a shared account, or the viewer's own account. Raw SQL, so it carries the tenant
+ * predicate itself.
+ */
+async function findMerchantsSeenOnlyOnOthersPrivateAccounts(tenantKey: number, viewerAppuserKey: number): Promise<number[]> {
+  const rows = await sqlQuery(DI.em)
+    .selectFrom('transaction as t')
+    .leftJoin('account as a', 'a.account_key', 't.account_key')
+    .select('t.transaction_merchant_key as merchantKey')
+    .where('t.tenant_key', '=', tenantKey)
+    .where('t.deleted_at', 'is', null)
+    .where('t.transaction_merchant_key', 'is not', null)
+    .groupBy('t.transaction_merchant_key')
+    .having(sql<boolean>`bool_and(coalesce(a.is_private and a.account_owner_appuser_key <> ${viewerAppuserKey}, false))`)
+    .execute();
+  return rows.map((row) => row.merchantKey as number);
 }

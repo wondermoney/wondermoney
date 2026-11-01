@@ -11,17 +11,16 @@ type SidebarNavGroupProps = {
 /**
  * A labelled block of navigation links in the desktop rail.
  *
- * The label used to be an `<h2>`. The shell renders before page content, so on
- * every authenticated route that `<h2>` was the first heading in the document
- * and a screen reader's heading list opened inside the navigation instead of
- * on the page title (RAD-557). A nav group is a landmark's internal structure,
- * not a section of the document, so it no longer takes a heading level: the
+ * The label is not a heading. The shell renders before page content, so on
+ * every authenticated route an `<h2>` here would be the first heading in the
+ * document and a screen reader's heading list would open inside the navigation
+ * instead of on the page title. A nav group is a landmark's internal structure,
+ * not a section of the document, so it takes no heading level: the
  * label is plain text and names its own list through `aria-labelledby`, which
  * is what makes the group announce as "Day-to-day, list, 3 items".
  *
- * Presentational on purpose — it renders no headings, and
- * `scripts/sidebar-heading-outline-regression-checks.tsx` asserts that against
- * the real markup.
+ * Presentational on purpose — it renders no headings
+ * (`heading-outline.test.tsx` renders it and checks).
  */
 export function SidebarNavGroup({ id, label, children }: SidebarNavGroupProps) {
   const labelId = `sidebar-nav-group-${id}`;
@@ -30,7 +29,7 @@ export function SidebarNavGroup({ id, label, children }: SidebarNavGroupProps) {
     <div className="mt-5">
       <div
         id={labelId}
-        className="text-muted-foreground px-2 pb-1 text-[0.6875rem] font-semibold tracking-wider uppercase"
+        className="text-muted-foreground px-2 pb-1 text-xs font-medium"
       >
         {label}
       </div>

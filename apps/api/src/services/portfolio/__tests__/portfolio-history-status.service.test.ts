@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from 'vitest';
 
 vi.mock('@app/app', () => ({ DI: { em: {} } }));
 
+import { kyselyDouble } from '@app/__tests__/__helpers__/kysely-double';
 import { DI } from '@app/app';
 import type { Appuser } from '@entity/Appuser';
 
@@ -9,30 +10,18 @@ import service from '../portfolio-history-status.service';
 
 const appuser = { appuserKey: 1 } as Appuser;
 
-function createBuilder(result: unknown) {
-  return {
-    groupBy: vi.fn().mockReturnThis(),
-    orderBy: vi.fn().mockReturnThis(),
-    raw: vi.fn(),
-    select: vi.fn().mockReturnThis(),
-    then: (resolve: (value: unknown) => void) => Promise.resolve(result).then(resolve),
-    where: vi.fn().mockReturnThis(),
-    whereIn: vi.fn().mockReturnThis(),
-  };
-}
-
 function setup({ buyRows = [], portfolio = { portfolioKey: 1 }, priceRows = [], snapshotRows = [{ earliest_snapshot_date: null, latest_snapshot_date: null }] }:
   { buyRows?: unknown[]; portfolio?: unknown; priceRows?: unknown[]; snapshotRows?: unknown[] }) {
   const findOne = vi.fn().mockResolvedValue(portfolio);
-  const knex = Object.assign(vi.fn((table: string) => {
-    if (table === 'financial_transaction as ft') return createBuilder(buyRows);
-    if (table === 'financial_asset_price') return createBuilder(priceRows);
-    if (table === 'portfolio_snapshot') return createBuilder(snapshotRows);
-    return createBuilder([]);
-  }), { raw: vi.fn((sql: string) => sql) });
+  const database = kyselyDouble(({ sql }) => {
+    if (sql.includes('from "financial_transaction" as "ft"')) return buyRows;
+    if (sql.includes('from "financial_asset_price"')) return priceRows;
+    if (sql.includes('from "portfolio_snapshot"')) return snapshotRows;
+    return [];
+  });
 
-  Object.assign(DI.em, { findOne, getKnex: vi.fn().mockReturnValue(knex) });
-  return { findOne, knex };
+  Object.assign(DI.em, { findOne, getKysely: vi.fn().mockReturnValue(database.db) });
+  return { database, findOne };
 }
 
 describe('portfolio history status service', () => {
@@ -447,7 +436,7 @@ describe('portfolio history status service', () => {
 
   it('verifies the portfolio exists and is active (tenant filter scopes to household)', async () => {
     const findOne = vi.fn().mockResolvedValue(null);
-    Object.assign(DI.em, { findOne, getKnex: vi.fn() });
+    Object.assign(DI.em, { findOne, getKysely: vi.fn() });
 
     await expect(service.getPortfolioHistoryStatus(appuser, 1)).rejects.toThrow('Portfolio not found');
     expect(findOne).toHaveBeenCalledWith(expect.anything(), { deletedAt: undefined, portfolioKey: 1 });

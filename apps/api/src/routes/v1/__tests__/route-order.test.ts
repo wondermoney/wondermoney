@@ -32,7 +32,7 @@ const { controllerStub } = vi.hoisted(() => {
 
   return {
     controllerStub: () =>
-      new Proxy({} as Record<string, unknown>, {
+      new Proxy<Record<string, unknown>>({}, {
         get: (target, property) => {
           if (typeof property !== 'string' || RESERVED_MODULE_KEYS.has(property)) return undefined;
           target[property] ??= (req: express.Request, res: express.Response) =>

@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { toast } from "sonner";
 
@@ -15,6 +14,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { buttonVariants } from "@/components/ui/button";
+import { useRouter } from "@/i18n/navigation";
 import { isDemoReadOnlyError } from "@/lib/api/errors";
 import useDeleteGoal from "@/lib/api/goals/useDeleteGoal";
 import { formatGoalCurrency } from "@/lib/goals/format";

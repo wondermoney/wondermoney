@@ -7,11 +7,9 @@ import { IS_PROD } from '@config/env';
 import { ERROR_CODE } from '@utils/errors';
 import logger from '@utils/logger';
 
-// RAD-547 — until this module existed, one 150-request / 15-minute in-memory bucket was
-// shared by every endpoint on the API. Because the bucket was global, ordinary product
-// reads (a budget page fans out into a double-digit number of requests on first paint)
-// competed for the same allowance as credential endpoints, and the only way to clear the
-// counter was to restart the process.
+// One bucket shared by every endpoint would make ordinary product reads (a budget page
+// fans out into a double-digit number of requests on first paint) compete for the same
+// allowance as credential endpoints.
 //
 // The model here is: one *named family* per class of traffic, each with its own store, its
 // own ceiling and its own key scope. Two rules govern the numbers:
@@ -31,11 +29,9 @@ const HOUR_MS = 60 * MINUTE_MS;
  * Outside production, relaxable families are multiplied so that a manual QA sweep over
  * every authenticated route cannot trip them.
  *
- * RAD-567 — this is a **code constant, not configuration**. It was briefly readable from
- * `RATE_LIMIT_RELAXED_MULTIPLIER` so it could be tuned per environment without a deploy,
- * but the variable was never set anywhere: every environment ran on this default, and the
- * only thing the indirection bought was a second place for the value to disagree with
- * itself. Production ignores it outright, so there was never a knob worth turning.
+ * This is a **code constant, not configuration**. Production ignores it outright, so there
+ * is no knob worth turning per environment, and an env var would only be a second place for
+ * the value to disagree with itself.
  *
  * The decision is made **once, at module load, from the server-side environment only**
  * (`APP_ENV`/`DEPLOY_ENV`/`NODE_ENV` via `@config/env`). No request header, query parameter
@@ -70,7 +66,7 @@ interface RateLimitFamily {
 export const RATE_LIMIT_FAMILIES = {
   /**
    * `/v1/admin` and the gated Swagger UI. Unauthenticated scanners hammer these constantly
-   * and every rejection used to become a Sentry event (see the original comment in app.ts).
+   * and every rejection would otherwise become a Sentry event.
    * Five attempts per quarter hour per IP against an `x-api-key` compare — never relaxed.
    */
   adminApi: { limit: 5, relaxable: false, scope: 'ip', windowMs: QUARTER_HOUR_MS },
@@ -89,6 +85,9 @@ export const RATE_LIMIT_FAMILIES = {
    * and unaffected by the non-production multiplier.
    */
   authExchange: { limit: 30, relaxable: false, scope: 'ip', windowMs: QUARTER_HOUR_MS },
+
+  /** `/v1/feedback` — each request sends an email to the operator's inbox. */
+  feedback: { limit: 10, relaxable: false, scope: 'identity', windowMs: HOUR_MS },
 
   /**
    * Crude per-IP backstop in front of everything, including the auth middleware itself, so
@@ -185,7 +184,7 @@ export function createRateLimiter({ family, skip }: CreateRateLimiterOptions): R
 }
 
 /**
- * RAD-567 — making a mis-sized family visible.
+ * Making a mis-sized family visible.
  *
  * The ceilings were sized from an estimate of how many requests a page costs, not from
  * measured traffic. A single 429 is not an incident and must not page, so the handler
@@ -300,7 +299,7 @@ export function createMethodScopedRateLimiter(read: RateLimitFamilyName, write: 
 
 /**
  * Coolify's Docker healthcheck hits `GET /v1/health` every ~5s. A 429 there marks the
- * container unhealthy after a redeploy (RAD-305), so it never counts against any family.
+ * container unhealthy after a redeploy, so it never counts against any family.
  */
 export const isHealthCheckPath = (req: Request): boolean =>
   req.path === '/v1/health' || req.path.startsWith('/v1/health/');
@@ -328,6 +327,9 @@ export const inviteLookupRateLimit = (): RequestHandler => createRateLimiter({ f
 
 /** `/v1/marketing` — public opt-out and lead endpoints. */
 export const publicMarketingRateLimit = (): RequestHandler => createRateLimiter({ family: 'publicMarketing' });
+
+/** `/v1/feedback` — sends email. */
+export const feedbackRateLimit = (): RequestHandler => createRateLimiter({ family: 'feedback' });
 
 /** `/v1/support` — sends email. */
 export const supportRateLimit = (): RequestHandler => createRateLimiter({ family: 'support' });

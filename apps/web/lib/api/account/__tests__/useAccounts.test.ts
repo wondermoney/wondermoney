@@ -29,6 +29,7 @@ test("normalizes omitted legacy fields and derives source when omitted", () => {
     appuserCurrencyBalance: null,
     refreshedAt: null,
     source: "manual",
+    csvImportFormat: "generic",
     isPrivate: false,
     isOwnedByViewer: false,
     ownerFirstName: null,
@@ -213,4 +214,19 @@ test("rejects present noncanonical sources instead of inferring", () => {
       /^Error: Invalid accounts response$/,
     );
   }
+});
+
+test("keeps the account's CSV import format, reading anything unknown as generic", () => {
+  const response = normalizeAccountsResponse({
+    accounts: [
+      { ...requiredAccountFields(1), csvImportFormat: "bank" },
+      { ...requiredAccountFields(2), csvImportFormat: "generic" },
+      { ...requiredAccountFields(3), csvImportFormat: "something-new" },
+    ],
+  });
+
+  assert.deepEqual(
+    response.accounts.map((account) => account.csvImportFormat),
+    ["bank", "generic", "generic"],
+  );
 });

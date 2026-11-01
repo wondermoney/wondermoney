@@ -5,22 +5,19 @@ import type { BankConnectionDto, ConnectionStatus } from './connection-status-co
  * nothing is added. The view-model layer is the only place we are allowed
  * to project a DTO into a render shape.
  *
- * RAD-501 — `connectionId` is normalized to `null` whenever the contract's
- * optional/nullable field is absent. Confirmed (see connection-status-contract.ts)
- * that the real API never sends this field at all, so it is always `null` in
- * practice today — this keeps the screen's "can this row be disconnected?"
- * check a single `!== null` comparison instead of juggling `null | undefined`.
- *
- * `provider` widened to `'GoCardless' | 'EnableBanking'` to match the
- * contract now that Enable Banking connections appear in this list too.
+ * `connectionId` is normalized to `null` whenever the contract's
+ * optional/nullable field is absent. The real API never sends this field
+ * (see connection-status-contract.ts), so it is always `null` in practice —
+ * this keeps the screen's "can this row be disconnected?" check a single
+ * `!== null` comparison instead of juggling `null | undefined`.
  */
 export type BankConnectionRow = Readonly<{
-  accessType: 'open_banking'
+  accessType: BankConnectionDto['accessType']
   connectionId: null | number
   dataFreshAsOf: null | string
   expiresAt: null | string
   institutionName: null | string
-  provider: 'EnableBanking' | 'GoCardless'
+  provider: BankConnectionDto['provider']
   status: ConnectionStatus
 }>
 

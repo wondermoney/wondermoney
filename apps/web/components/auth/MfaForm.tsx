@@ -3,6 +3,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
+import { useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -22,22 +23,23 @@ import {
 } from "../ui/Form";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "../ui/input-otp";
 
-const formSchema = z.object({
-  pin: z
-    .string()
-    .min(6, { message: "Your one-time password must be 6 characters." }),
-});
+const makeFormSchema = (lengthError: string) =>
+  z.object({ pin: z.string().min(6, { message: lengthError }) });
 
 export default function MfaForm() {
   const t = useTranslations();
   const params = useParams();
   const locale = typeof params.locale === "string" ? params.locale : "en";
+  const formSchema = useMemo(
+    () => makeFormSchema(t("otp-length-error")),
+    [t],
+  );
   const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: { pin: "" },
   });
 
-  const onSubmit = async (values: z.infer<typeof formSchema>) => {
+  const onSubmit = async (values: z.infer<ReturnType<typeof makeFormSchema>>) => {
     form.clearErrors();
 
     const { error } = await authClient.twoFactor.verifyTotp({
@@ -53,12 +55,15 @@ export default function MfaForm() {
     // A full session now exists — run the same provisioning + redirect as
     // LoginForm's non-2FA path (provisioning is deliberately deferred until
     // after the 2FA challenge, per better-auth's session semantics).
+    // `next` rides on this page's own query string (LoginForm and the
+    // /auth/complete route put it there); completeAuthAndRedirect re-validates it.
     const completed = await completeAuthAndRedirect(
       locale,
       {},
       "auth_complete",
+      new URLSearchParams(window.location.search).get("next"),
     );
-    if (!completed) {
+    if (!completed.ok) {
       toast.error(t("toast-mfa-error"));
     }
   };
@@ -66,7 +71,7 @@ export default function MfaForm() {
   return (
     <div className="mt-10">
       <Form {...form}>
-        <form className="space-y-6" onSubmit={form.handleSubmit(onSubmit)}>
+        <form method="post" className="space-y-6" onSubmit={form.handleSubmit(onSubmit)}>
           <FormField
             control={form.control}
             name="pin"

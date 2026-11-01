@@ -1,6 +1,7 @@
 import { subDays } from 'date-fns';
 
 import { DI } from '@app/database/di';
+import { sqlQuery } from '@app/database/sql';
 import { FinancialAssetPrice } from '@entity/FinancialAssetPrice';
 import eodhdClient from '@service/market-data/eodhd.service';
 
@@ -57,7 +58,7 @@ class HistoricalAssetPriceBackfillService {
         const rows = fetched.map((row) => ({ date: fromYmd(row.date), price: row.close })).filter((row) => { const ymd = toYmd(row.date); if (existingDates.has(ymd)) return false; existingDates.add(ymd); return true; });
         result.skipped += fetched.length - rows.length; result.inserted += rows.length;
         if (rows.length) {
-          await em.getKnex().insert(rows.map((row) => ({ date: row.date, financial_asset_key: financialAssetKey, price: row.price, volume: 0 }))).into('financial_asset_price').onConflict(['financial_asset_key', 'date']).ignore();
+          await sqlQuery(em).insertInto('financial_asset_price').values(rows.map((row) => ({ date: row.date, financial_asset_key: financialAssetKey, price: row.price, volume: 0 }))).onConflict((conflict) => conflict.columns(['financial_asset_key', 'date']).doNothing()).execute();
           hasSuccessfulBackfillAttempt = true;
           earliestBackfillDate = minDate(earliestBackfillDate, fromDate);
         }

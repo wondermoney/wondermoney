@@ -8,10 +8,9 @@ import { buildTransactionWhere, type ReportServiceInput, transactionMatchesCateg
 import { getMonthKey, getMonthStartIso, resolveReportTimeZone } from './report-months';
 
 /**
- * RAD-156 — monthly cash flow.
+ * Monthly cash flow.
  *
- * RAD-555 — two contract points worth stating, because both surfaces depend on
- * them and they used to disagree:
+ * Two contract points worth stating, because both surfaces depend on them:
  *
  * 1. **Months are bucketed in the caller's calendar** (the `timezone` filter,
  *    defaulting to `REPORT_DEFAULT_TIME_ZONE`), not in UTC, so the month a row
@@ -21,7 +20,7 @@ import { getMonthKey, getMonthStartIso, resolveReportTimeZone } from './report-m
  *    Absence means "nothing to say"; a present row netting to `0` is a measured
  *    zero. Emitting explicit empty months would collapse that distinction, and
  *    the shipped web chart (`web/lib/reports/cashflow-series.ts`) reads exactly
- *    this rule to draw gaps rather than fake €0 measurements (RAD-552).
+ *    this rule to draw gaps rather than fake €0 measurements.
  *
  * The CSV export is rendered from the same rows the JSON response returns
  * ({@link getCashflowCsv} wraps {@link getCashflowReport}), so the two surfaces
@@ -55,7 +54,7 @@ export function buildCashflowCsv(rows: CashflowRow[]): string {
  * The CSV export, rendered from the rows the JSON response returns.
  *
  * The only CSV entry point: the controller cannot assemble its own rows, so the
- * export and the chart are the same numbers by construction (RAD-555).
+ * export and the chart are the same numbers by construction.
  */
 export async function getCashflowCsv(input: ReportServiceInput): Promise<string> {
   return buildCashflowCsv(await getCashflowReport(input));
@@ -79,7 +78,7 @@ export async function getCashflowReport(input: ReportServiceInput): Promise<Cash
     const monthKey = getMonthKey(transaction.transactionDate, timeZone);
     const current = monthlyTotals.get(monthKey);
     const next = current ?? { expenses: 0, income: 0 };
-    // RAD-audit: monthly report totals were a float accumulation.
+    // Money arithmetic, not float accumulation, for the monthly totals.
     if (amount > 0) next.income = addMoney(next.income, amount);
     else next.expenses = addMoney(next.expenses, Math.abs(amount));
     monthlyTotals.set(monthKey, next);

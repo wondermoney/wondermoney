@@ -5,6 +5,7 @@
 import * as Sentry from "@sentry/nextjs";
 
 import { instanceConfig } from "@/lib/instance";
+import { SENTRY_DATA_COLLECTION } from "@/lib/utils/sentry-data-collection";
 import { SENTRY_SERVER_ENABLED } from "@/lib/utils/sentry-enabled";
 
 Sentry.init({
@@ -18,7 +19,6 @@ Sentry.init({
 
   enabled: SENTRY_SERVER_ENABLED,
 
-  // Adds request headers and IP for users
-  sendDefaultPii: true,
-  enableLogs: true,
+  // What an event may carry: see lib/utils/sentry-data-collection.ts (issue #38).
+  dataCollection: SENTRY_DATA_COLLECTION,
 });

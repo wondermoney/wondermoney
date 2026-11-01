@@ -56,7 +56,7 @@ export function AnalyticsInit() {
 
     // Pass the email trait so PostHog persons are attributable and the
     // "filter out internal and test users" cohort can distinguish real users
-    // from internal accounts (RAD-175). user.id is the better-auth user id,
+    // from internal accounts. user.id is the better-auth user id,
     // i.e. the same distinctId the server-side analytics outbox uses, so this
     // enriches the same person rather than creating a new one.
     if (user?.id) posthog.identify(user.id, { email: user.email });

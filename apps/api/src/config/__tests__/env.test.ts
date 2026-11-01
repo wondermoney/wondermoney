@@ -15,7 +15,6 @@ function validEnv(overrides: NodeJS.ProcessEnv = {}): NodeJS.ProcessEnv {
     AZURE_AI_FOUNDRY_API_KEY: 'foundry-key',
     AZURE_AI_FOUNDRY_API_VERSION: '2026-01-01',
     AZURE_AI_FOUNDRY_ENDPOINT: 'https://example.services.ai.azure.com',
-    AZURE_OPENAI_API_DEPLOYMENT_NAME: 'gpt-deployment',
     AZURE_OPENAI_API_KEY: 'azure-key',
     AZURE_OPENAI_API_VERSION: '2026-01-01',
     AZURE_OPENAI_DEPLOYMENT: 'gpt-deployment',

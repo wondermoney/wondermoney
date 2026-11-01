@@ -14,7 +14,7 @@ describe('processSupportEmail', () => {
   beforeEach(() => {
     vi.stubGlobal('fetch', mocked.fetch);
     mocked.fetch.mockReset();
-    mocked.sendSupportEmail.mockReset().mockResolvedValue({ type: 'accepted' });
+    mocked.sendSupportEmail.mockReset().mockResolvedValue({ providerMessageIds: ['id'], type: 'accepted' });
     vi.stubEnv('SUPPORT_EMAIL', 'help@example.com');
   });
 
@@ -53,6 +53,19 @@ describe('processSupportEmail', () => {
     expect(mocked.fetch).not.toHaveBeenCalled();
     expect(mocked.sendSupportEmail).toHaveBeenCalled();
     expect(sendStatus).toHaveBeenCalledWith(200);
+  });
+
+  it.each([
+    ['rejected by the provider', { retryable: false, type: 'rejected' }],
+    ['of unknown fate', { type: 'unknown' }],
+    ['intercepted', { type: 'intercepted' }],
+  ])('fails with 502, instead of answering success, when the email is %s', async (_label, outcome) => {
+    vi.stubEnv('RECAPTCHA_SECRET_KEY', '');
+    mocked.sendSupportEmail.mockResolvedValue(outcome);
+    const sendStatus = vi.fn();
+
+    await expect(processSupportEmail(request(undefined), mockRes({ sendStatus }))).rejects.toMatchObject({ status: 502 });
+    expect(sendStatus).not.toHaveBeenCalled();
   });
 
   it('reports the form as disabled when there is no team inbox to deliver to', async () => {

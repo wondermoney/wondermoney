@@ -7,7 +7,7 @@
 #
 # Signup is intentionally NOT part of this script: production's signup form
 # is gated by an invisible reCAPTCHA that reliably rejects automated browser
-# traffic (see RAD-331). Create a test account by hand once, then reuse it
+# traffic. Create a test account by hand once, then reuse it
 # via WM_EMAIL/WM_PASSWORD below.
 #
 # Usage:
@@ -29,8 +29,8 @@
 #   - `agent-browser find text ... click` reliably triggers this app's Radix
 #     dismissable-layer "click outside" handler and closes whatever modal/
 #     popover is open, even when the clicked text is inside the modal. This
-#     is probably the same root cause as RAD-329 (selecting a transaction
-#     Category closes the whole Add Transaction modal). This script never
+#     is probably also why selecting a transaction Category with the mouse
+#     closes the whole Add Transaction modal. This script never
 #     uses `find text ... click`; it uses `find role button` for real
 #     buttons, and keyboard Arrow/Enter navigation (which does NOT trigger
 #     the dismiss bug) for listbox options.
@@ -168,7 +168,7 @@ ab wait 300
 ab find placeholder "00.00" fill "1.23"
 
 # Category: also a listbox, also fine via keyboard nav (unlike a mouse
-# click, which reproduces RAD-329 and closes the whole modal).
+# click, which closes the whole modal).
 ab find label "Category" click
 ab wait 300
 ab press ArrowDown

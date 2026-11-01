@@ -86,7 +86,7 @@ export async function createBudget(req: Request, res: Response, next: NextFuncti
     body: { dependentsNum, houseHoldSize, incomes },
   } = await zParse(createBudgetRequestSchema, req);
 
-  // Budgets are household-shared (RAD-343): scope to the user's tenant.
+  // Budgets are household-shared: scope to the user's tenant.
   const appuserTenant = await DI.em.getRepository(AppuserTenant).getAppuserTenantByAppuser(user);
   if (!appuserTenant) {
     next(new NotFoundError('Tenant not found')); return;
@@ -167,10 +167,12 @@ export async function deleteBudget(req: Request, res: Response) {
   const {
     params: { budgetKey },
   } = await zParse(deleteBudgetRequestSchema, req);
-  const budget = await DI.em.findOneOrFail(Budget, {
+  // A budget of another household is filtered out, so it reads as missing: 404, not a 500.
+  const budget = await DI.em.findOne(Budget, {
     budgetKey,
     deletedAt: undefined,
   });
+  if (!budget) throw new NotFoundError('Budget not found');
   budget.deletedAt = new Date();
   await DI.em.persist(budget).flush();
   return res.sendStatus(StatusCodes.OK);
@@ -207,10 +209,12 @@ export async function editBudget(req: Request, res: Response) {
     body: { description, name },
     params: { budgetKey },
   } = await zParse(updateBudgetRequestSchema, req);
-  const budget = await DI.em.findOneOrFail(Budget, {
+  // A budget of another household is filtered out, so it reads as missing: 404, not a 500.
+  const budget = await DI.em.findOne(Budget, {
     budgetKey,
     deletedAt: undefined,
   });
+  if (!budget) throw new NotFoundError('Budget not found');
   budget.name = name;
   budget.description = description;
   await DI.em.persist(budget).flush();
@@ -757,7 +761,7 @@ export async function updateBudgetTemplateAccounts(req: Request, res: Response, 
     next(new NotFoundError('Budget not found')); return;
   }
 
-  const budgetTemplateCategory = await DI.em.findOneOrFail(
+  const budgetTemplateCategory = await DI.em.findOne(
     BudgetTemplateCategory,
     {
       budgetKey: budget,
@@ -765,6 +769,9 @@ export async function updateBudgetTemplateAccounts(req: Request, res: Response, 
     },
     { populate: ['accounts'] },
   );
+  if (!budgetTemplateCategory) {
+    next(new NotFoundError('Budget template category not found')); return;
+  }
   const currentBudgetTemplateCategoryAccounts = budgetTemplateCategory.accounts.getItems();
   const accountsToRemove = currentBudgetTemplateCategoryAccounts.filter(
     (account) => !accountKeys.includes(account.accountKey),

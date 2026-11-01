@@ -6,6 +6,7 @@ import React from "react";
 import { Card } from "@/components/ui/card";
 import type { AssetClassDrift } from "@/lib/api/portfolio/usePortfolioAllocation";
 import { cn } from "@/lib/utils";
+import { useFormatPercentage } from "@/lib/utils/useFormatPercentage";
 
 interface PortfolioTargetAllocationProps {
   driftRows: AssetClassDrift[] | undefined;
@@ -15,6 +16,7 @@ const PortfolioTargetAllocation: React.FC<PortfolioTargetAllocationProps> = ({
   driftRows,
 }) => {
   const t = useTranslations();
+  const formatPercentage = useFormatPercentage();
 
   if (!driftRows?.length) {
     return null;
@@ -34,8 +36,18 @@ const PortfolioTargetAllocation: React.FC<PortfolioTargetAllocationProps> = ({
         {driftRows.map((row) => (
           <div key={row.assetClass} className="grid grid-cols-4 gap-2 text-sm">
             <span className="font-medium">{row.assetClass}</span>
-            <span className="text-right">{row.currentPct.toFixed(1)}%</span>
-            <span className="text-right">{row.targetPct.toFixed(1)}%</span>
+            <span className="text-right">
+              {formatPercentage(row.currentPct / 100, {
+                minimumFractionDigits: 1,
+                maximumFractionDigits: 1,
+              })}
+            </span>
+            <span className="text-right">
+              {formatPercentage(row.targetPct / 100, {
+                minimumFractionDigits: 1,
+                maximumFractionDigits: 1,
+              })}
+            </span>
             <span
               className={cn(
                 "text-right font-medium",
@@ -46,8 +58,11 @@ const PortfolioTargetAllocation: React.FC<PortfolioTargetAllocationProps> = ({
                     : "text-warning-text",
               )}
             >
-              {row.driftPts > 0 ? "+" : ""}
-              {row.driftPts.toFixed(1)}%
+              {formatPercentage(row.driftPts / 100, {
+                minimumFractionDigits: 1,
+                maximumFractionDigits: 1,
+                signDisplay: "exceptZero",
+              })}
               {Math.abs(row.driftPts) > 5
                 ? ` (${row.driftPts > 0 ? t("allocation-overweight") : t("allocation-underweight")})`
                 : Math.abs(row.driftPts) <= 2

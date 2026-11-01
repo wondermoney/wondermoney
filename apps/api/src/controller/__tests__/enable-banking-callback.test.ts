@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const changeToError = vi.hoisted(() => vi.fn().mockResolvedValue(undefined));
 const changeToLinked = vi.hoisted(() => vi.fn().mockResolvedValue(undefined));
@@ -36,7 +36,10 @@ import { mockReq, mockRes } from '../../__tests__/__helpers__/mock-request';
 import { enableBankingCallback } from '../enable-banking-callback';
 
 const createReq = (query: Record<string, string | undefined>) => mockReq({ query });
-const createRes = () => Object.assign(mockRes(), { redirect: vi.fn() });
+const createRes = () => {
+  const redirect = vi.fn();
+  return { redirect, res: Object.assign(mockRes(), { redirect }) };
+};
 const credentialEntity = { enableBankingCredentialKey: 7 };
 
 describe('enableBankingCallback', () => {
@@ -55,34 +58,34 @@ describe('enableBankingCallback', () => {
 
   it('redirects to the safe error destination without crashing when state matches no connection (unknown/expired/consumed)', async () => {
     findByState.mockResolvedValueOnce(null);
-    const res = createRes();
+    const { redirect, res } = createRes();
 
     await enableBankingCallback(createReq({ code: 'code-123', state: 'unknown-state' }), res);
 
-    expect(res.redirect).toHaveBeenCalledWith(ENABLE_BANKING_CALLBACK_REDIRECT_URL({ status: 'error' }));
+    expect(redirect).toHaveBeenCalledWith(ENABLE_BANKING_CALLBACK_REDIRECT_URL({ status: 'error' }));
     expect(changeToError).not.toHaveBeenCalled();
     expect(changeToLinked).not.toHaveBeenCalled();
     expect(exchangeSession).not.toHaveBeenCalled();
   });
 
   it('redirects to the safe error destination when state is missing entirely', async () => {
-    const res = createRes();
+    const { redirect, res } = createRes();
 
     await enableBankingCallback(createReq({ code: 'code-123' }), res);
 
-    expect(res.redirect).toHaveBeenCalledWith(ENABLE_BANKING_CALLBACK_REDIRECT_URL({ status: 'error' }));
+    expect(redirect).toHaveBeenCalledWith(ENABLE_BANKING_CALLBACK_REDIRECT_URL({ status: 'error' }));
     expect(findByState).not.toHaveBeenCalled();
   });
 
   it('marks the connection as error and redirects to the error destination when Enable Banking reports an error', async () => {
     const connection = { enableBankingConnectionKey: 42, enableBankingCredentialKey: credentialEntity, maxConsentValiditySeconds: 7_776_000 };
     findByState.mockResolvedValueOnce(connection);
-    const res = createRes();
+    const { redirect, res } = createRes();
 
     await enableBankingCallback(createReq({ error: 'access_denied', state: 'state-1' }), res);
 
     expect(changeToError).toHaveBeenCalledWith(connection);
-    expect(res.redirect).toHaveBeenCalledWith(ENABLE_BANKING_CALLBACK_REDIRECT_URL({ status: 'error' }));
+    expect(redirect).toHaveBeenCalledWith(ENABLE_BANKING_CALLBACK_REDIRECT_URL({ status: 'error' }));
     expect(exchangeSession).not.toHaveBeenCalled();
   });
 
@@ -94,20 +97,20 @@ describe('enableBankingCallback', () => {
       accounts: [{ id: 'acc-1' }],
       sessionId: 'session-abc',
     });
-    const res = createRes();
+    const { redirect, res } = createRes();
 
     await enableBankingCallback(createReq({ code: 'code-123', state: 'state-1' }), res);
 
     expect(decryptCredentialEntity).toHaveBeenCalledWith(credentialEntity);
     expect(exchangeSession).toHaveBeenCalledWith('code-123');
     expect(changeToLinked).toHaveBeenCalledWith(connection, 'session-abc', new Date('2027-06-01T00:00:00.000Z'), 7_776_000);
-    expect(res.redirect).toHaveBeenCalledWith(ENABLE_BANKING_CALLBACK_REDIRECT_URL({ status: 'success' }));
+    expect(redirect).toHaveBeenCalledWith(ENABLE_BANKING_CALLBACK_REDIRECT_URL({ status: 'success' }));
   });
 
-  // Phase 1d: after a successful link, the callback persists Account rows from the session's
-  // accounts[] and enqueues the initial sync — this is the trigger that makes the whole Phase 1d
+  // After a successful link, the callback persists Account rows from the session's
+  // accounts[] and enqueues the initial sync — this is the trigger that makes the
   // sync-adapter/wiring reachable end-to-end.
-  describe('Phase 1d: initial-sync trigger after linking', () => {
+  describe('initial-sync trigger after linking', () => {
     const connection = { enableBankingConnectionKey: 42, enableBankingCredentialKey: credentialEntity, maxConsentValiditySeconds: 7_776_000 };
 
     it('persists accounts from session.accounts and enqueues the initial sync job', async () => {
@@ -118,39 +121,39 @@ describe('enableBankingCallback', () => {
         accounts: [{ currency: 'EUR', uid: 'acc-1' }],
         sessionId: 'session-abc',
       });
-      const res = createRes();
+      const { redirect, res } = createRes();
 
       await enableBankingCallback(Object.assign(createReq({ code: 'code-123', state: 'state-1' }), { enqueue: requestEnqueue }), res);
 
       expect(createInitialEnableBankingAccounts).toHaveBeenCalledWith(em, connection, [{ currency: 'EUR', uid: 'acc-1' }]);
       expect(enqueue).toHaveBeenCalledWith(connection, { enqueue: requestEnqueue });
-      expect(res.redirect).toHaveBeenCalledWith(ENABLE_BANKING_CALLBACK_REDIRECT_URL({ status: 'success' }));
+      expect(redirect).toHaveBeenCalledWith(ENABLE_BANKING_CALLBACK_REDIRECT_URL({ status: 'success' }));
     });
 
     it('skips enqueueing when zero accounts were created, but still redirects to success', async () => {
       findByState.mockResolvedValueOnce(connection);
       exchangeSession.mockResolvedValueOnce({ access: { validUntil: '2027-06-01T00:00:00.000Z' }, accounts: [], sessionId: 'session-abc' });
       createInitialEnableBankingAccounts.mockResolvedValueOnce({ accounts: [], accountsCreated: 0, accountsSkipped: 0, skippedReasons: [] });
-      const res = createRes();
+      const { redirect, res } = createRes();
 
       await enableBankingCallback(createReq({ code: 'code-123', state: 'state-1' }), res);
 
       expect(enqueue).not.toHaveBeenCalled();
       expect(logger.warn).toHaveBeenCalledWith(expect.objectContaining({ enableBankingConnectionKey: 42 }), expect.stringMatching(/zero accounts/));
-      expect(res.redirect).toHaveBeenCalledWith(ENABLE_BANKING_CALLBACK_REDIRECT_URL({ status: 'success' }));
+      expect(redirect).toHaveBeenCalledWith(ENABLE_BANKING_CALLBACK_REDIRECT_URL({ status: 'success' }));
     });
 
     it('still redirects to success and logs a warning when account creation throws — the bank link itself already succeeded', async () => {
       findByState.mockResolvedValueOnce(connection);
       exchangeSession.mockResolvedValueOnce({ access: { validUntil: '2027-06-01T00:00:00.000Z' }, accounts: [{ uid: 'acc-1' }], sessionId: 'session-abc' });
       createInitialEnableBankingAccounts.mockRejectedValueOnce(new Error('db unavailable'));
-      const res = createRes();
+      const { redirect, res } = createRes();
 
       await enableBankingCallback(createReq({ code: 'code-123', state: 'state-1' }), res);
 
       expect(enqueue).not.toHaveBeenCalled();
       expect(logger.warn).toHaveBeenCalledWith(expect.objectContaining({ enableBankingConnectionKey: 42, errorMessage: 'db unavailable' }), expect.stringMatching(/account creation or initial-sync enqueue failed/));
-      expect(res.redirect).toHaveBeenCalledWith(ENABLE_BANKING_CALLBACK_REDIRECT_URL({ status: 'success' }));
+      expect(redirect).toHaveBeenCalledWith(ENABLE_BANKING_CALLBACK_REDIRECT_URL({ status: 'success' }));
       expect(changeToError).not.toHaveBeenCalled();
     });
 
@@ -158,12 +161,12 @@ describe('enableBankingCallback', () => {
       findByState.mockResolvedValueOnce(connection);
       exchangeSession.mockResolvedValueOnce({ access: { validUntil: '2027-06-01T00:00:00.000Z' }, accounts: [{ uid: 'acc-1' }], sessionId: 'session-abc' });
       enqueue.mockRejectedValueOnce(new AccountInitialSyncQueueError('queue down', false, 'incident-1'));
-      const res = createRes();
+      const { redirect, res } = createRes();
 
       await enableBankingCallback(createReq({ code: 'code-123', state: 'state-1' }), res);
 
       expect(logger.warn).toHaveBeenCalledWith(expect.objectContaining({ queueAccepted: false }), expect.stringMatching(/account creation or initial-sync enqueue failed/));
-      expect(res.redirect).toHaveBeenCalledWith(ENABLE_BANKING_CALLBACK_REDIRECT_URL({ status: 'success' }));
+      expect(redirect).toHaveBeenCalledWith(ENABLE_BANKING_CALLBACK_REDIRECT_URL({ status: 'success' }));
     });
   });
 
@@ -171,24 +174,24 @@ describe('enableBankingCallback', () => {
     const connection = { enableBankingConnectionKey: 42, enableBankingCredentialKey: credentialEntity, maxConsentValiditySeconds: 7_776_000 };
     findByState.mockResolvedValueOnce(connection);
     exchangeSession.mockRejectedValueOnce(new Error('Enable Banking credential is invalid or expired'));
-    const res = createRes();
+    const { redirect, res } = createRes();
 
     await enableBankingCallback(createReq({ code: 'code-123', state: 'state-1' }), res);
 
     expect(changeToError).toHaveBeenCalledWith(connection);
     expect(changeToLinked).not.toHaveBeenCalled();
-    expect(res.redirect).toHaveBeenCalledWith(ENABLE_BANKING_CALLBACK_REDIRECT_URL({ status: 'error' }));
+    expect(redirect).toHaveBeenCalledWith(ENABLE_BANKING_CALLBACK_REDIRECT_URL({ status: 'error' }));
   });
 
   it('marks the connection as error and redirects to error when neither code nor error is present', async () => {
     const connection = { enableBankingConnectionKey: 42, enableBankingCredentialKey: credentialEntity, maxConsentValiditySeconds: 7_776_000 };
     findByState.mockResolvedValueOnce(connection);
-    const res = createRes();
+    const { redirect, res } = createRes();
 
     await enableBankingCallback(createReq({ state: 'state-1' }), res);
 
     expect(changeToError).toHaveBeenCalledWith(connection);
-    expect(res.redirect).toHaveBeenCalledWith(ENABLE_BANKING_CALLBACK_REDIRECT_URL({ status: 'error' }));
+    expect(redirect).toHaveBeenCalledWith(ENABLE_BANKING_CALLBACK_REDIRECT_URL({ status: 'error' }));
   });
 
   // Security-critical: the redirect destination must be a hardcoded/env-configured
@@ -198,7 +201,7 @@ describe('enableBankingCallback', () => {
   describe('redirect destination is never influenced by request input (open-redirect safety)', () => {
     it('ignores an attempted open-redirect payload in state (falls through to the safe unknown-state error redirect)', async () => {
       findByState.mockResolvedValueOnce(null);
-      const res = createRes();
+      const { redirect, res } = createRes();
 
       await enableBankingCallback(
         createReq({ code: 'code-123', state: 'https://evil.example/phish' }),
@@ -206,22 +209,22 @@ describe('enableBankingCallback', () => {
       );
 
       expect(findByState).toHaveBeenCalledWith('https://evil.example/phish');
-      expect(res.redirect).toHaveBeenCalledExactlyOnceWith(ENABLE_BANKING_CALLBACK_REDIRECT_URL({ status: 'error' }));
-      const redirectTarget = String(res.redirect.mock.calls[0]![0]);
+      expect(redirect).toHaveBeenCalledExactlyOnceWith(ENABLE_BANKING_CALLBACK_REDIRECT_URL({ status: 'error' }));
+      const redirectTarget = String(redirect.mock.calls[0]![0]);
       expect(redirectTarget.startsWith('https://evil.example')).toBe(false);
     });
 
     it('ignores an attempted open-redirect payload in the error param on a matched connection', async () => {
       const connection = { enableBankingConnectionKey: 42, enableBankingCredentialKey: credentialEntity, maxConsentValiditySeconds: 7_776_000 };
       findByState.mockResolvedValueOnce(connection);
-      const res = createRes();
+      const { redirect, res } = createRes();
 
       await enableBankingCallback(
         createReq({ error: 'https://evil.example/phish', state: 'state-1' }),
         res,
       );
 
-      const redirectTarget = String(res.redirect.mock.calls[0]![0]);
+      const redirectTarget = String(redirect.mock.calls[0]![0]);
       expect(redirectTarget).toBe(ENABLE_BANKING_CALLBACK_REDIRECT_URL({ status: 'error' }));
       expect(redirectTarget.startsWith('https://evil.example')).toBe(false);
     });
@@ -234,7 +237,7 @@ describe('enableBankingCallback', () => {
         accounts: [],
         sessionId: 'session-abc',
       });
-      const res = createRes();
+      const { redirect, res } = createRes();
 
       await enableBankingCallback(
         createReq({ code: 'https://evil.example/phish', state: 'state-1' }),
@@ -242,7 +245,7 @@ describe('enableBankingCallback', () => {
       );
 
       expect(exchangeSession).toHaveBeenCalledWith('https://evil.example/phish');
-      const redirectTarget = String(res.redirect.mock.calls[0]![0]);
+      const redirectTarget = String(redirect.mock.calls[0]![0]);
       expect(redirectTarget).toBe(ENABLE_BANKING_CALLBACK_REDIRECT_URL({ status: 'success' }));
       expect(redirectTarget.startsWith('https://evil.example')).toBe(false);
     });
@@ -258,25 +261,85 @@ describe('enableBankingCallback', () => {
     });
   });
 
-  // Phase 0's kill-switch must gate every code path this Phase 1c task adds, including
-  // this brand-new unauthenticated route — not just the two existing controllers.
-  describe('BANK_SYNC_PROVIDER_DISABLED gate', () => {
-    afterEach(() => {
-      vi.doUnmock('@config/env');
-      vi.resetModules();
+  describe('where the browser is sent back to', () => {
+    const MOBILE_SUCCESS = 'wondermoney://more/banking?enableBankingConnection=success';
+    const MOBILE_ERROR = 'wondermoney://more/banking?enableBankingConnection=error';
+    const linkedSession = { access: { validUntil: '2027-06-01T00:00:00.000Z' }, accounts: [{ id: 'acc-1' }], sessionId: 'session-abc' };
+    const connectionFrom = (returnTo: null | string | undefined) => ({
+      enableBankingConnectionKey: 42,
+      enableBankingCredentialKey: credentialEntity,
+      maxConsentValiditySeconds: 7_776_000,
+      returnTo,
     });
 
-    it('redirects to the safe error destination and never touches the DB when the flag is set', async () => {
-      vi.resetModules();
-      vi.doMock('@config/env', async (importOriginal) => ({ ...(await importOriginal<object>()), BANK_SYNC_PROVIDER_DISABLED: true }));
-      const { enableBankingCallback: gatedCallback } = await import('../enable-banking-callback');
-      const res = createRes();
+    it('sends a connection started from the mobile app back into the app with the outcome', async () => {
+      findByState.mockResolvedValueOnce(connectionFrom('mobile'));
+      exchangeSession.mockResolvedValueOnce(linkedSession);
+      const { redirect, res } = createRes();
 
-      await gatedCallback(createReq({ code: 'code-123', state: 'state-1' }), res);
+      await enableBankingCallback(createReq({ code: 'code-123', state: 'state-1' }), res);
 
-      expect(res.redirect).toHaveBeenCalledWith(ENABLE_BANKING_CALLBACK_REDIRECT_URL({ status: 'error' }));
-      expect(findByState).not.toHaveBeenCalled();
-      expect(exchangeSession).not.toHaveBeenCalled();
+      expect(redirect).toHaveBeenCalledWith(MOBILE_SUCCESS);
+    });
+
+    it('sends a failed mobile connection back into the app with the error outcome', async () => {
+      findByState.mockResolvedValueOnce(connectionFrom('mobile'));
+      const { redirect, res } = createRes();
+
+      await enableBankingCallback(createReq({ error: 'access_denied', state: 'state-1' }), res);
+
+      expect(redirect).toHaveBeenCalledWith(MOBILE_ERROR);
+    });
+
+    it('sends a mobile connection back into the app when the session exchange fails', async () => {
+      findByState.mockResolvedValueOnce(connectionFrom('mobile'));
+      exchangeSession.mockRejectedValueOnce(new Error('provider down'));
+      const { redirect, res } = createRes();
+
+      await enableBankingCallback(createReq({ code: 'code-123', state: 'state-1' }), res);
+
+      expect(redirect).toHaveBeenCalledWith(MOBILE_ERROR);
+    });
+
+    it.each([null, undefined])('sends a connection with no stored client (%s) to web Settings', async (returnTo) => {
+      findByState.mockResolvedValueOnce(connectionFrom(returnTo));
+      exchangeSession.mockResolvedValueOnce(linkedSession);
+      const { redirect, res } = createRes();
+
+      await enableBankingCallback(createReq({ code: 'code-123', state: 'state-1' }), res);
+
+      expect(redirect).toHaveBeenCalledWith(ENABLE_BANKING_CALLBACK_REDIRECT_URL({ status: 'success' }));
+    });
+
+    it('cannot be switched to the app by a forged query param on a web connection', async () => {
+      findByState.mockResolvedValueOnce(connectionFrom(null));
+      exchangeSession.mockResolvedValueOnce(linkedSession);
+      const { redirect, res } = createRes();
+
+      await enableBankingCallback(createReq({ code: 'code-123', returnTo: 'mobile', state: 'state-1' }), res);
+
+      const target = redirect.mock.calls[0]?.[0] as string;
+      expect(target).toBe(ENABLE_BANKING_CALLBACK_REDIRECT_URL({ status: 'success' }));
+      expect(target.startsWith('wondermoney:')).toBe(false);
+    });
+
+    it('cannot be switched to the app by a forged query param when the state is unknown', async () => {
+      findByState.mockResolvedValueOnce(null);
+      const { redirect, res } = createRes();
+
+      await enableBankingCallback(createReq({ code: 'code-123', returnTo: 'mobile', state: 'unknown' }), res);
+
+      expect(redirect).toHaveBeenCalledWith(ENABLE_BANKING_CALLBACK_REDIRECT_URL({ status: 'error' }));
+    });
+
+    it('cannot be switched to web by a forged query param on a mobile connection', async () => {
+      findByState.mockResolvedValueOnce(connectionFrom('mobile'));
+      exchangeSession.mockResolvedValueOnce(linkedSession);
+      const { redirect, res } = createRes();
+
+      await enableBankingCallback(createReq({ code: 'code-123', returnTo: 'web', state: 'state-1' }), res);
+
+      expect(redirect).toHaveBeenCalledWith(MOBILE_SUCCESS);
     });
   });
 });

@@ -13,6 +13,8 @@ export type BudgetThresholdItem =
   | (BudgetThresholdItemBase & { state: "over"; threshold: 100 });
 
 export interface BudgetThresholdAlertProps {
+  /** Instance name (the API's `INSTANCE_NAME`) printed in the copy, header and footer; defaults to WonderMoney. */
+  brandName?: string;
   /** Copy language; defaults to `'pt'` for backward compatibility. */
   language?: TransactionalEmailLanguage;
   firstName?: string;
@@ -36,6 +38,8 @@ export interface WeeklyBudgetSummary {
 }
 
 export interface WeeklyInsightsProps {
+  /** Instance name (the API's `INSTANCE_NAME`) printed in the copy, header and footer; defaults to WonderMoney. */
+  brandName?: string;
   /** Copy language; defaults to `'pt'` for backward compatibility. */
   language?: TransactionalEmailLanguage;
   firstName?: string;
@@ -81,6 +85,8 @@ export interface MonthlyStoryMetric {
 }
 
 export interface MonthlyStoryDataSufficientProps {
+  /** Instance name (the API's `INSTANCE_NAME`) printed in the copy, header and footer; defaults to WonderMoney. */
+  brandName?: string;
   budgetPressureDetail?: string;
   budgetPressureStatus?: string;
   categoryDeltas: MonthlyStoryCategoryDelta[];
@@ -103,6 +109,8 @@ export interface MonthlyStoryDataSufficientProps {
 }
 
 export interface MonthlyStoryInsufficientDataProps {
+  /** Instance name (the API's `INSTANCE_NAME`) printed in the copy, header and footer; defaults to WonderMoney. */
+  brandName?: string;
   ctaUrl: string;
   firstName?: string;
   formattedIncomeSubject?: string;
@@ -124,6 +132,8 @@ export type TransactionalEmailLanguage = "en" | "pt";
 
 /** "New bank connected" confirmation sent after an account sync links a bank. Transactional. */
 export interface AccountConnectedEmailProps {
+  /** Instance name (the API's `INSTANCE_NAME`) printed in the copy, header and footer; defaults to WonderMoney. */
+  brandName?: string;
   language: TransactionalEmailLanguage;
   firstName?: string;
   /** Display name of the bank that was connected. */
@@ -159,6 +169,8 @@ export interface InternalAlertEmailProps {
  * Carries a one-click unsubscribe footer.
  */
 export interface LifecycleNudgeEmailProps {
+  /** Instance name (the API's `INSTANCE_NAME`) printed in the copy, header and footer; defaults to WonderMoney. */
+  brandName?: string;
   language: TransactionalEmailLanguage;
   /** Email subject; echoed back by the renderer. */
   subject: string;

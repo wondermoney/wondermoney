@@ -180,7 +180,7 @@ const PortfolioPerformanceChart: React.FC<PortfolioPerformanceChartProps> = ({
     if (!Number.isFinite(value)) return null;
 
     return (
-      <div className="border-border/50 bg-background min-w-[9rem] rounded-lg border px-3 py-2 text-xs shadow-xl">
+      <div className="border-border/50 bg-background min-w-[9rem] rounded-lg border px-3 py-2 text-xs shadow-lg">
         <div className="mb-2 font-medium">
           {formatChartDate(label as string | number | Date)}
         </div>

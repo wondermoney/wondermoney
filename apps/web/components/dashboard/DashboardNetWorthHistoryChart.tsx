@@ -42,9 +42,9 @@ export default function DashboardNetWorthHistoryChart({
   }, [completePoints]);
 
   // Rounded, evenly spaced ticks rather than the padded extremes — the padded
-  // window put the labels on arbitrary values, and the axis gutter is sized
-  // from the labels themselves so the plot no longer starts far to the right
-  // (RAD-613). Same helper the explorer's price axis uses.
+  // window puts the labels on arbitrary values, and the axis gutter is sized
+  // from the labels themselves so the plot does not start far to the right.
+  // Same helper the explorer's price axis uses.
   const yTicks = useMemo<number[]>(() => {
     const values = completePoints.map((point) => point.totalNetWorth ?? 0);
 

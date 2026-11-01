@@ -1,7 +1,6 @@
 "use client";
 
 import { subWeeks } from "date-fns";
-import { MoveUpRight } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 
@@ -206,7 +205,9 @@ export function DashboardClient({
         <>
           <section className="flex flex-col gap-2">
             <div className="flex items-center justify-between">
-              <Heading variant="h6">{t("last-week-top-categories")}</Heading>
+              <h2 className="text-foreground text-sm font-medium">
+                {t("last-week-top-categories")}
+              </h2>
               {hasCategorySpendingRows ? (
                 <Link
                   href="/accounts/transactions"
@@ -215,14 +216,13 @@ export function DashboardClient({
                     "h-auto p-0",
                   )}
                 >
-                  {t("view-all")}{" "}
-                  <MoveUpRight strokeWidth={2} className="ml-1 size-4" />
+                  {t("view-all")}
                 </Link>
               ) : null}
             </div>
             {hasCategorySpendingRows ? (
               /* Same shell as the transactions panel below — one card, one
-                 border, one radius (RAD-618). */
+                 border, one radius. */
               <Card className="overflow-hidden">
                 <CategoriesSpendingTable
                   categoriesSpending={categorySpendingRows}
@@ -251,7 +251,9 @@ export function DashboardClient({
 
           <section className="flex flex-col gap-2">
             <div className="flex items-center justify-between">
-              <Heading variant="h6">{t("last-week-transactions")}</Heading>
+              <h2 className="text-foreground text-sm font-medium">
+                {t("last-week-transactions")}
+              </h2>
               <Link
                 href="/accounts/transactions"
                 className={cn(
@@ -259,8 +261,7 @@ export function DashboardClient({
                   "h-auto p-0",
                 )}
               >
-                {t("view-all")}{" "}
-                <MoveUpRight strokeWidth={2} className="ml-1 size-4" />
+                {t("view-all")}
               </Link>
             </div>
             <Card className="overflow-hidden">

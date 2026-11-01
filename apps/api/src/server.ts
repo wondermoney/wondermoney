@@ -7,9 +7,9 @@ import Application from './app';
 import { closeDatabase } from './database/di';
 
 const startServer = async () => {
-  // Fail fast, loudly, and with every problem listed at once. Previously a missing required
-  // secret degraded silently — e.g. a missing auth secret could produce an API that booted
-  // cleanly, served traffic, and failed to validate credentials correctly.
+  // Fail fast, loudly, and with every problem listed at once. Otherwise a missing required
+  // secret degrades silently — e.g. a missing auth secret could produce an API that boots
+  // cleanly, serves traffic, and fails to validate credentials correctly.
   assertEnv('api');
 
   const application = new Application();

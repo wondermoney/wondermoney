@@ -4,7 +4,7 @@ import { InternalServerError } from '@utils/errors';
 import logger from '@utils/logger';
 
 /**
- * RAD-343 (A2) — fail-loud tenant-scope guard.
+ * Fail-loud tenant-scope guard.
  *
  * Place on authed DATA routes, AFTER `resolveTenantForRequest`. The tenant filter
  * only engages once a tenant context is stamped onto the request EM; if an

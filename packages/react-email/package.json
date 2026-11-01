@@ -36,18 +36,18 @@
     "test": "tsx scripts/render-handoff.ts --check && pnpm check:lib"
   },
   "dependencies": {
-    "@react-email/render": "2.1.0",
+    "@react-email/render": "2.1.1",
     "react": "19.2.3",
-    "react-dom": "19.2.3",
-    "react-email": "6.11.1"
+    "react-dom": "19.2.3"
   },
   "devDependencies": {
-    "@react-email/ui": "6.11.1",
-    "@types/node": "26.1.1",
+    "@react-email/ui": "6.11.3",
+    "@types/node": "26.6.6",
     "@types/react": "19.2.17",
     "@types/react-dom": "19.2.3",
-    "next": "16.4.0",
-    "tsup": "8.5.1",
+    "next": "16.4.2",
+    "react-email": "6.11.3",
+    "tsup": "9.0.0",
     "tsx": "4.23.15",
     "typescript": "7.0.2"
   }

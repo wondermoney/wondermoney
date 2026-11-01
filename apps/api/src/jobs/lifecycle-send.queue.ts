@@ -10,7 +10,7 @@ export const LIFECYCLE_SEND_QUEUE = 'lifecycle.send';
 
 const payloadSchema = z.object({
   appuserKey: z.number().int().positive(),
-  campaign: z.nativeEnum(LifecycleCampaign),
+  campaign: z.enum(LifecycleCampaign),
   step: z.string().min(1).max(64),
   templateVersion: z.string().min(1).max(64).regex(/^[a-z0-9]+(?:[.-][a-z0-9]+)*$/),
 }).strict();

@@ -5,10 +5,8 @@ import type { BudgetAllocationRow, BudgetSuppressionReason, SuppressedBudget } f
 /**
  * Pure eligibility seam for Budget Allocation rows.
  *
- * The aggregation service used to validate allocation rows inside its own implementation, in
- * three places that subtly diverged (the weekly/monthly pressure filter was row-by-row rather
- * than whole-Budget). This module pulls the rule into one place so every aggregation method
- * consumes the same suppression set:
+ * The rule lives in one place so every aggregation method consumes the same suppression set
+ * (validating per method lets them diverge, e.g. a row-by-row rather than whole-Budget filter):
  *
  *   - A Budget with any row linked to a foreign tenant is omitted from every aggregation.
  *   - The suppression reason precedence is load-bearing; do not reorder.

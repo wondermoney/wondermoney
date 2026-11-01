@@ -1,5 +1,5 @@
 /**
- * Reports API contract types (RAD-156).
+ * Reports API contract types.
  *
  * Mirrors the shared filter envelope, response envelope, and row shapes of the
  * `/v1/reports/*` endpoints. All amounts are raw numbers in the appuser
@@ -24,7 +24,7 @@ export interface ReportFilters {
   includePending?: boolean;
   includeTransfers?: boolean;
   /**
-   * RAD-555/RAD-562 — IANA name of the calendar report periods are grouped in.
+   * IANA name of the calendar report periods are grouped in.
    *
    * The API validates it and answers 400 on a name `Intl` cannot resolve, so
    * only send one you know is good; omitting it selects the API's documented

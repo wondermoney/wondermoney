@@ -40,8 +40,7 @@ function toStatusDto(credential: EnableBankingCredential): EnableBankingCredenti
  * Owns reads/writes of the user's own Enable Banking BYOK application
  * registration (`EnableBankingCredential`). Per the entity's docblock this is
  * "one active row per user" resolved at the application level (latest
- * `createdAt`, no DB unique constraint) — mirrors
- * `NordigenRequisitionRepository`'s "current record" pattern. Key material
+ * `createdAt`, no DB unique constraint). Key material
  * only ever leaves this service decrypted, in-process, for the caller's
  * immediate use (e.g. signing a JWT) — never persisted or logged plaintext.
  */
@@ -89,7 +88,7 @@ export class EnableBankingCredentialService {
     return this.findActiveCredential(appuserKey);
   }
 
-  /** Decrypted credential for provider calls (e.g. Phase 1d sync). Only ever returns an `active` credential. */
+  /** Decrypted credential for provider calls (e.g. the sync). Only ever returns an `active` credential. */
   async getDecryptedCredential(appuserKey: number): Promise<DecryptedEnableBankingCredential | null> {
     const credential = await this.findActiveCredential(appuserKey);
     if (!credential) return null;

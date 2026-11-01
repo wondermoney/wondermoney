@@ -24,7 +24,7 @@ export interface AssetPriceRefreshResult {
 }
 
 // Defaults keep a single run comfortably inside pg-boss's job expiration window so it can
-// never be killed mid-flight (which is what previously spawned the recovery re-dispatch storm).
+// never be killed mid-flight (which would spawn a recovery re-dispatch storm).
 const DEFAULTS = {
   concurrency: 8,
   failuresCap: 50,

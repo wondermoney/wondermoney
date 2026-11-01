@@ -1,5 +1,6 @@
-import { Collection, Entity, Filter, ManyToOne, OneToMany, PrimaryKey, Property } from '@mikro-orm/core';
+import { Collection } from '@mikro-orm/core';
 import type { Rel } from '@mikro-orm/core';
+import { Entity, Filter, ManyToOne, OneToMany, PrimaryKey, Property } from '@mikro-orm/decorators/legacy';
 
 import { TENANT_FILTER, tenantScopedCond } from '../filters/tenant-filter';
 
@@ -40,7 +41,7 @@ export class Budget extends Base {
   @Property({ default: 0 })
   numDependents!: number;
 
-  // Household tenant that owns this budget (RAD-343). Budgets are shared household-wide.
+  // Household tenant that owns this budget. Budgets are shared household-wide.
   @ManyToOne({ cascade: [], entity: () => Tenant, fieldName: 'tenant_key' })
   tenantKey!: Rel<Tenant>;
 }

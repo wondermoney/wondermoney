@@ -59,21 +59,21 @@
     "emitDecoratorMetadata": true,
 
     /* Path Aliases */
-    "baseUrl": "./src",
     "paths": {
-      "@entity/*": ["database/entity/*"],
-      "@controller/*": ["controller/*"],
-      "@route/*": ["routes/v1/*"],
-      "@service/*": ["services/*"],
-      "@utils/*": ["utils/*"],
-      "@validators/*": ["validators/*"],
-      "@middleware/*": ["middleware/*"],
-      "@config/*": ["config/*"],
-      "@app/*": ["*"]
+      "@entity/*": ["./src/database/entity/*"],
+      "@controller/*": ["./src/controller/*"],
+      "@route/*": ["./src/routes/v1/*"],
+      "@service/*": ["./src/services/*"],
+      "@utils/*": ["./src/utils/*"],
+      "@validators/*": ["./src/validators/*"],
+      "@middleware/*": ["./src/middleware/*"],
+      "@config/*": ["./src/config/*"],
+      "@app/*": ["./src/*"]
     },
 
     /* Types */
-    "typeRoots": ["./node_modules/@types", "./src/types"]
+    "typeRoots": ["./node_modules/@types", "./src/types"],
+    "types": ["node"]
   },
   "include": ["src/**/*.ts"],
   "exclude": ["dist", "node_modules", "__tests__", "scripts", "src/database/migrations"]

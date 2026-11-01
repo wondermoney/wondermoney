@@ -6,7 +6,7 @@ import { Appuser, SupportedLanguages } from '@entity/Appuser';
 import { ERROR } from '@utils/constants';
 
 const SIGNUP_EVENT_ID_PREFIX = 'signup.v1:';
-const externalUserIdSchema = z.string().uuid().brand<'ExternalUserId'>();
+const externalUserIdSchema = z.guid().brand<'ExternalUserId'>();
 
 export type SignupRecordInput = Readonly<{
   email: string;

@@ -36,6 +36,12 @@ describe('validateHouseholdInviteToken', () => {
     })
   })
 
+  it('returns valid when the API adds fields to the invite, dropping them', async () => {
+    const invite = { email: 'partner@example.com', expiresAt: '2024-01-08T00:00:00.000Z', inviterName: 'Alex' }
+    const request = jest.fn().mockResolvedValue({ status: 200, body: { ...invite, householdName: 'Casa' } })
+    await expect(validateHouseholdInviteToken(transportWith(request), 'tok-1')).resolves.toEqual({ status: 'valid', invite })
+  })
+
   it('returns unavailable when the 200 body fails schema validation', async () => {
     const request = jest.fn().mockResolvedValue({ status: 200, body: { email: 'x' } })
     const result = await validateHouseholdInviteToken(transportWith(request), 'tok-1')

@@ -22,7 +22,7 @@ replace() {
 replace "https://wm-runtime-next-public-api-url.invalid" "${NEXT_PUBLIC_API_URL%/}"
 replace "https://wm-runtime-next-public-app-url.invalid" "${NEXT_PUBLIC_APP_URL%/}"
 
-for name in NEXT_PUBLIC_ADMIN_EMAIL_DOMAIN NEXT_PUBLIC_AUTH_COOKIE_DOMAIN NEXT_PUBLIC_DEMO_EMAIL \
+for name in NEXT_PUBLIC_AUTH_COOKIE_DOMAIN NEXT_PUBLIC_DEMO_EMAIL \
   NEXT_PUBLIC_DOCS_URL NEXT_PUBLIC_POSTHOG_KEY NEXT_PUBLIC_PRIVACY_URL NEXT_PUBLIC_RECAPTCHA_SITE_KEY \
   NEXT_PUBLIC_SENTRY_DSN NEXT_PUBLIC_TERMS_URL; do
   eval "value=\${$name:-}"

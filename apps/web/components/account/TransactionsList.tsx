@@ -56,11 +56,11 @@ export default function TransactionsList({
                   <span>{formatTxDate(tx.transactionDate)}</span>
                   {category && (
                     <>
-                      <span>·</span>
+                      <span aria-hidden="true" className="bg-border h-3 w-px shrink-0" />
                       <span>{t(getCategoryTranslationKey(category.name))}</span>
                     </>
                   )}
-                  <span>·</span>
+                  <span aria-hidden="true" className="bg-border h-3 w-px shrink-0" />
                   <span className="min-w-0 truncate">
                     {tx.accountKey.accountName}
                   </span>

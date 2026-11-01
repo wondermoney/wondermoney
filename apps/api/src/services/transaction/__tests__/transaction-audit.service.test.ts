@@ -53,6 +53,18 @@ describe('TransactionAuditService.log', () => {
     expect(row!.changes).toEqual({ balance: { from: 10, to: 5 } });
   });
 
+  it('keeps every amount column a sign repair changes', async () => {
+    const { em } = makeEm();
+    const changes = {
+      appuserSettlementAmount: { from: 15, to: -15 },
+      editedSettlementAmount: { from: 10, to: -10 },
+      originalAmount: { from: 12.5, to: -12.5 },
+      settlementAmount: { from: 12.5, to: -12.5 },
+    };
+    const row = await TransactionAuditService.log(em as unknown as EntityManager, { ...baseInput, changes, eventType: TransactionAuditEventType.SYSTEM_EDIT });
+    expect(row?.changes).toEqual(changes);
+  });
+
   it('omits account/actor references when not supplied', async () => {
     const { em, getReference } = makeEm();
     const row = await TransactionAuditService.log(em as unknown as EntityManager, baseInput);

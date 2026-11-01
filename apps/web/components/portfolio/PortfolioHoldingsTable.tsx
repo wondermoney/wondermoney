@@ -1,10 +1,5 @@
 "use client";
 
-import {
-  type ColumnDef,
-  createColumnHelper,
-  type Row,
-} from "@tanstack/react-table";
 import { AlertTriangle, CoinsIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { usePostHog } from "posthog-js/react";
@@ -13,31 +8,27 @@ import React, { useCallback, useMemo, useState } from "react";
 import { Amount } from "@/components/ui/Amount";
 import { Table } from "@/components/ui/Table";
 import TableCellDefault from "@/components/ui/Table/Cell/TableCellDefault";
+import {
+  type ColumnDef,
+  createColumnHelper,
+  type Row,
+} from "@/components/ui/Table/features";
 import { PortfolioHolding } from "@/lib/api/portfolio/usePortfoliosHoldings";
 import { cn } from "@/lib/utils";
 import { getDeltaClassName } from "@/lib/utils/formatCurrency";
 import { useFormatCurrency } from "@/lib/utils/useFormatCurrency";
+import { useFormatPercentage } from "@/lib/utils/useFormatPercentage";
 
 import { FinancialAssetLogo } from "../FinancialAssetLogo";
 import { Badge } from "../ui/badge";
 import { Progress } from "../ui/progress";
 import CellNumeric from "../ui/Table/Cell/CellNumeric";
+import { FeeConversionMarker } from "./FeeConversionNotice";
 import PortfolioHoldingDetailsModal from "./PortfolioHoldingDetailsModal";
 
 // Gains are a delta against cost, so they keep their colour — but through
 // the shared helper rather than a third private copy of the same ternary.
 const getFinancialColor = getDeltaClassName;
-
-const getAssetTypeBadgeColor = (type: string) => {
-  if (type === "stock") return "orange";
-  if (type === "etf" || type === "mutual fund") return "green";
-  if (type === "crypto") return "purple";
-  if (type === "bond") return "yellow";
-  if (type === "loan") return "pink";
-  if (type === "derivative") return "brown";
-  if (type === "cash") return "blue";
-  return "gray";
-};
 
 interface PortfolioHoldingsTableProps {
   transactions: PortfolioHolding[];
@@ -47,6 +38,7 @@ interface PortfolioHoldingsTableProps {
 const PortfolioHoldingsTable: React.FC<PortfolioHoldingsTableProps> =
   React.memo(({ transactions, portfolioId }) => {
     const t = useTranslations();
+    const formatPercentage = useFormatPercentage();
     const formatCurrency = useFormatCurrency();
     const posthog = usePostHog();
 
@@ -112,11 +104,10 @@ const PortfolioHoldingsTable: React.FC<PortfolioHoldingsTableProps> =
         columnHelper.accessor("financialAssetType", {
           header: t("type"),
           cell: (info) => (
-            <Badge
-              color={
-                getAssetTypeBadgeColor(info.getValue().toLowerCase()) as any
-              }
-            >
+            // Badge has no colour prop, so the old per-type `color` fell
+            // through to the DOM and every type rendered as a violet fill.
+            // Asset type is a category, not status or an action: neutral.
+            <Badge variant="outline">
               {t(info.getValue() as any)}
             </Badge>
           ),
@@ -157,6 +148,9 @@ const PortfolioHoldingsTable: React.FC<PortfolioHoldingsTableProps> =
                   {t("invalid-quantity")}
                 </button>
               )}
+              {info.row.original.feeConversionIncomplete ? (
+                <FeeConversionMarker />
+              ) : null}
             </div>
           ),
         }),
@@ -171,7 +165,7 @@ const PortfolioHoldingsTable: React.FC<PortfolioHoldingsTableProps> =
                     className="w-[100px]"
                   />
                   <span className="text-foreground font-mono text-sm font-semibold">
-                    {Number(info.getValue()).toFixed(1)}%
+                    {formatPercentage(Number(info.getValue()) / 100, { minimumFractionDigits: 1, maximumFractionDigits: 1 })}
                   </span>
                 </>
               ) : (
@@ -272,8 +266,13 @@ const PortfolioHoldingsTable: React.FC<PortfolioHoldingsTableProps> =
                 <Amount value={gains} currency={info.row.original.currency} />
                 {gainsPercent != null && (
                   <span className="ml-1 text-xs">
-                    ({gainsPercent > 0 ? "+" : ""}
-                    {gainsPercent.toFixed(1)}%)
+                    (
+                    {formatPercentage(gainsPercent / 100, {
+                      minimumFractionDigits: 1,
+                      maximumFractionDigits: 1,
+                      signDisplay: "exceptZero",
+                    })}
+                    )
                   </span>
                 )}
               </CellNumeric>
@@ -281,7 +280,7 @@ const PortfolioHoldingsTable: React.FC<PortfolioHoldingsTableProps> =
           },
         }),
       ],
-      [columnHelper, formatCurrency, t, onRowClick],
+      [columnHelper, formatCurrency, formatPercentage, t, onRowClick],
     );
 
     return (

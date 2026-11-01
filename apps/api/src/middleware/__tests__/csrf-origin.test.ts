@@ -1,4 +1,4 @@
-import type { NextFunction, Request, Response } from 'express';
+import type { Request, Response } from 'express';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { csrfOriginProtection, getCsrfAllowedOrigins, isCsrfOriginAllowed } from '@middleware/csrf-origin';
@@ -36,7 +36,7 @@ function createResponse(): Response {
 }
 
 function runCsrfOriginProtection(req: Request, next: ReturnType<typeof createNext>) {
-  csrfOriginProtection(req, createResponse(), next as unknown as NextFunction);
+  csrfOriginProtection(req, createResponse(), next);
 }
 
 describe('csrfOriginProtection', () => {
@@ -105,7 +105,6 @@ describe('csrfOriginProtection', () => {
   it.each([
     ['__Secure- prefixed https cookie', '__Secure-better-auth.session_token'],
     ['chunked session cookie', 'better-auth.session_token.0'],
-    ['legacy Supabase cookie', 'sb-test-auth-token'],
   ])('checks origin for %s', (_label, cookieName) => {
     const req = createReq({
       cookies: { [cookieName]: 'present' },
@@ -225,7 +224,7 @@ describe('csrfOriginProtection', () => {
     ]);
   });
 
-  it('accepts a non-default localhost dev port (RAD-629)', () => {
+  it('accepts a non-default localhost dev port', () => {
     expect(isCsrfOriginAllowed('http://localhost:3021', {})).toBe(true);
     expect(isCsrfOriginAllowed('http://localhost:9999', { APP_ENV: 'development' })).toBe(true);
   });

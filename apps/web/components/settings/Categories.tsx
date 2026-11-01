@@ -43,10 +43,11 @@ const UserCategoriesTable: React.FC = () => {
     setEditingCategory(null);
   };
 
+  const categories = data?.categories;
   const allCategoriesFlattened = useMemo(() => {
-    if (!data?.categories) return [];
+    if (!categories) return [];
 
-    return data.categories.flatMap((c) => [
+    return categories.flatMap((c) => [
       {
         name: c.name,
         categoryKey: c.categoryKey,
@@ -64,7 +65,7 @@ const UserCategoriesTable: React.FC = () => {
         isSystemCategory: subCategory.isSystemCategory,
       })),
     ]);
-  }, [data?.categories]);
+  }, [categories]);
 
   if (isLoading || !data) {
     return <Spinner />;

@@ -36,9 +36,9 @@ function resolveSync<T>(callback: () => T): Promise<T> {
   }
 }
 
-// Only Enable Banking operations are retryable. Historical `nordigen-requisition:` operations
-// fall through the resourceId match below and are rejected: the GoCardless sync path no longer
-// exists, and the two key spaces index different tables, so a legacy payload must never be
+// Only Enable Banking operations are retryable. Legacy `nordigen-requisition:` operations
+// fall through the resourceId match below and are rejected: there is no requisition sync path,
+// and the two key spaces index different tables, so a legacy payload must never be
 // coerced onto an Enable Banking connection.
 const buildAccountInitialSyncPayload: RetrySpec['buildPayload'] = async (operation) => {
   if (!operation.resourceId) throw new ConflictError('Operation resource is malformed');
@@ -47,7 +47,7 @@ const buildAccountInitialSyncPayload: RetrySpec['buildPayload'] = async (operati
 
   const enableBankingConnectionKey = Number(match[1]);
   const connection = await DI.em.findOne(EnableBankingConnection, { deletedAt: undefined, enableBankingConnectionKey }, { populate: ['appuserKey'] });
-  if (!connection || connection.status !== EnableBankingConnectionStatus.LINKED) throw new ConflictError('Operation connection not found');
+  if (connection?.status !== EnableBankingConnectionStatus.LINKED) throw new ConflictError('Operation connection not found');
   const owner = connection.appuserKey as undefined | { appuserKey?: number; externalUserId?: string };
   if (!Number.isSafeInteger(owner?.appuserKey)) throw new ConflictError('Operation connection owner not found');
   const connectionId = connection.sessionId ?? connection.state;
@@ -112,4 +112,3 @@ const specs: Record<BackgroundOperationRetryType, RetrySpec> = {
 
 export const getBackgroundOperationRetrySpec = (operationType: string) => (operationType in specs ? specs[operationType as BackgroundOperationRetryType] : null);
 
-export default specs;

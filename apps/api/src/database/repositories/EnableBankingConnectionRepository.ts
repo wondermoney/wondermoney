@@ -23,11 +23,9 @@ export class EnableBankingConnectionRepository extends ExtendedEntityRepository<
 
   /**
    * Persists the *real* provider-returned `access.valid_until` and
-   * `maximum_consent_validity` (read per-bank from `GET /aspsps`, RAD plan §2)
-   * rather than a hardcoded offset — unlike
-   * `NordigenRequisitionRepository.changeToLinked`'s `addDays(now, 90)`, both
-   * values here are required parameters the caller must obtain from Enable
-   * Banking's own response, never computed locally.
+   * `maximum_consent_validity` (read per-bank from `GET /aspsps`) rather than a
+   * hardcoded offset: both values here are required parameters the caller must
+   * obtain from Enable Banking's own response, never computed locally.
    */
   public changeToLinked = async (
     connection: EnableBankingConnection,
@@ -45,8 +43,7 @@ export class EnableBankingConnectionRepository extends ExtendedEntityRepository<
 
   /**
    * Dual-write the resolved tenant alongside the owner when creating a new
-   * connection, mirroring `NordigenRequisitionRepository.createRequisition`
-   * (RAD-244): the tenant is sourced from the active subscription context
+   * connection: the tenant is sourced from the active tenant context
    * (`req.tenant`), never from a membership lookup, so household
    * account-sharing keeps working even though the *credential* itself is
    * personal (BYOK, one Enable Banking application per user).
@@ -59,6 +56,7 @@ export class EnableBankingConnectionRepository extends ExtendedEntityRepository<
     aspspName: EnableBankingConnection['aspspName'],
     aspspCountry: EnableBankingConnection['aspspCountry'],
     maxConsentValiditySeconds?: EnableBankingConnection['maxConsentValiditySeconds'],
+    returnTo: EnableBankingConnection['returnTo'] = null,
   ) => {
     if (!Number.isInteger(tenant.tenantKey) || tenant.tenantKey <= 0) {
       throw new Error('Connection tenant is required and must be a persisted Tenant');
@@ -71,6 +69,7 @@ export class EnableBankingConnectionRepository extends ExtendedEntityRepository<
     connection.aspspName = aspspName;
     connection.aspspCountry = aspspCountry;
     connection.maxConsentValiditySeconds = maxConsentValiditySeconds;
+    connection.returnTo = returnTo;
     connection.status = EnableBankingConnectionStatus.CREATED;
     await this.persist(connection).flush();
     return connection;
@@ -93,7 +92,7 @@ export class EnableBankingConnectionRepository extends ExtendedEntityRepository<
   /**
    * Find the newest linked connection for a given (appuser, tenant) pair.
    * Scoping by tenant prevents cross-tenant access if a user has ever been
-   * active in more than one subscription context (RAD-244).
+   * active in more than one tenant.
    */
   public getNewerLinkedConnection = (appuser: Appuser, tenant: Tenant) => {
     if (!Number.isInteger(tenant.tenantKey) || tenant.tenantKey <= 0) {

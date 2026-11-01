@@ -13,7 +13,7 @@ export interface UserCategorizationRow {
 }
 
 /**
- * RAD-342.1 backfill: reduce a user's categorization history to one mapping per (appuser, merchant),
+ * Backfill: reduce a user's categorization history to one mapping per (appuser, merchant),
  * choosing the most-recent categorization (latest `updatedAt`, ties broken by higher assignment key
  * for determinism). Callers must pass only `source='user'`, non-deleted rows with a resolved merchant.
  */

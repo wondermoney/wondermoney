@@ -55,11 +55,6 @@ export interface Transaction {
   categorizationReason?: string | null;
 }
 
-export enum TransactionType {
-  CREDIT = "credit",
-  DEBIT = "debit",
-}
-
 export interface GetTransactionsResponse {
   transactions: Transaction[];
   /**
@@ -88,7 +83,7 @@ export interface GetTransactionsResponse {
 }
 
 /** The client's sentinel for "transactions with no category at all". Matches the API's value. */
-export const UNCATEGORIZED_FILTER_VALUE = "__uncategorized__";
+const UNCATEGORIZED_FILTER_VALUE = "__uncategorized__";
 
 export interface GetTransactionRequest {
   unreviewedOnly?: boolean;
@@ -98,8 +93,8 @@ export interface GetTransactionRequest {
   includeEmptyAccounts?: boolean;
   includeHidden?: boolean;
   /**
-   * RAD-579 — filters that used to run in the browser over the loaded page only, so filtering a
-   * year by one category filtered whichever rows happened to come back. Sent to the endpoint now.
+   * Filters applied by the endpoint, not in the browser over the loaded page (which would filter
+   * only whichever rows happened to come back).
    *
    * Serialised comma-separated; `categoryKeys` may include {@link UNCATEGORIZED_FILTER_VALUE},
    * which the API unions with the named keys rather than treating as a key.
@@ -128,7 +123,7 @@ export async function getTransactions(
   params: GetTransactionRequest = {},
   apiClient: AxiosInstance = api,
 ): Promise<GetTransactionsResponse> {
-  // RAD-579 — an empty array means "no filter", not "match nothing", so it is dropped rather than
+  // An empty array means "no filter", not "match nothing", so it is dropped rather than
   // sent as an empty value the API would have to guess at.
   const list = (values?: string[]) =>
     values && values.length > 0 ? values.join(",") : undefined;
@@ -167,7 +162,11 @@ export async function getTransactions(
  */
 export function useInfiniteTransactions(
   params: GetTransactionRequest = {},
-  options?: { enabled?: boolean; initialData?: GetTransactionsResponse },
+  options?: {
+    enabled?: boolean;
+    initialData?: GetTransactionsResponse;
+    initialDataUpdatedAt?: () => number;
+  },
 ) {
   const query = useInfiniteQuery({
     queryKey: ["accounts-transactions-infinite", params],
@@ -183,6 +182,7 @@ export function useInfiniteTransactions(
     initialData: options?.initialData
       ? { pageParams: [undefined], pages: [options.initialData] }
       : undefined,
+    initialDataUpdatedAt: options?.initialDataUpdatedAt,
   });
 
   const pages = query.data?.pages;

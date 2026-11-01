@@ -37,7 +37,7 @@ describe('user middleware', () => {
         recordActive: true,
       });
       expect((req as { user?: unknown }).user).toBe(appUser);
-      expect(mocked.setUser).toHaveBeenCalledWith({ email: appUser.emailAddress, id: '1' });
+      expect(mocked.setUser).toHaveBeenCalledWith({ id: '1' });
       expect(next).toHaveBeenCalledWith();
     });
 

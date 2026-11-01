@@ -48,6 +48,10 @@ export interface LoanOverview {
   netWorthImpact: number;
   repaymentsNeedingReviewCount: number;
   interestFeesThisMonth: number;
+  /** The user's currency, which every total above is in. */
+  currency?: string;
+  /** Loans in another currency with no exchange rate, left out of the totals. */
+  unconvertedLoanCount?: number;
   totalOutstandingAmount?: number;
   totalInterestAmount?: number;
   overdueLoansCount?: number;

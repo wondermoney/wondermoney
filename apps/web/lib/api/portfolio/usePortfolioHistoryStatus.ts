@@ -119,7 +119,7 @@ export function getPortfolioHistoryStatusPollInterval(
   };
 }
 
-export async function getPortfolioHistoryStatus(
+async function getPortfolioHistoryStatus(
   portfolioId: number,
   apiClient: AxiosInstance = api,
 ): Promise<PortfolioHistoryStatusResponse> {

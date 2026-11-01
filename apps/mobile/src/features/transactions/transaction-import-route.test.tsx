@@ -1,4 +1,5 @@
-import { fireEvent, render } from '@testing-library/react-native'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { fireEvent, render, waitFor } from '@testing-library/react-native'
 import { I18nextProvider } from 'react-i18next'
 
 import { initMobileI18n } from '@/lib/i18n'
@@ -11,6 +12,8 @@ const mockAddListener = jest.fn((_event: string, _handler: (event: { preventDefa
 const mockGetDocumentAsync = jest.fn()
 const mockStart = jest.fn()
 const mockReset = jest.fn()
+const mockRead = jest.fn()
+const mockShareCsv = jest.fn()
 let mockParams: Record<string, string | string[] | undefined> = {}
 let mockUseAccounts: () => unknown = () => ({ data: undefined, isLoading: true })
 let mockImportState: { state: { phase: string; outcome?: string; reason?: string }; start: typeof mockStart; reset: typeof mockReset } = {
@@ -21,10 +24,13 @@ jest.mock('expo-router', () => ({ useLocalSearchParams: () => mockParams, useRou
 jest.mock('expo-document-picker', () => ({ getDocumentAsync: (...args: unknown[]) => mockGetDocumentAsync(...args) }))
 jest.mock('@/features/accounts/use-accounts', () => ({ useAccounts: () => mockUseAccounts() }))
 jest.mock('./use-transaction-import', () => ({ useTransactionImport: () => mockImportState }))
+jest.mock('@/components/providers/product-runtime-provider', () => ({ useProductRuntime: () => ({ runtime: { epochId: 9, apiClient: { read: mockRead } } }) }))
+jest.mock('@/features/reports/report-csv-export', () => ({ shareReportCsv: (...args: unknown[]) => mockShareCsv(...args) }))
 
 async function renderRoute() {
   const i18n = await initMobileI18n('en')
-  return render(<I18nextProvider i18n={i18n}><TransactionImportRoute /></I18nextProvider>)
+  const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+  return render(<QueryClientProvider client={client}><I18nextProvider i18n={i18n}><TransactionImportRoute /></I18nextProvider></QueryClientProvider>)
 }
 
 const accountsData = {
@@ -37,7 +43,7 @@ const accountsData = {
 describe('TransactionImportRoute', () => {
   beforeEach(() => {
     mockPush.mockReset(); mockReplace.mockReset(); mockAddListener.mockReset().mockReturnValue(jest.fn())
-    mockGetDocumentAsync.mockReset(); mockStart.mockReset(); mockReset.mockReset()
+    mockGetDocumentAsync.mockReset(); mockStart.mockReset(); mockReset.mockReset(); mockRead.mockReset(); mockShareCsv.mockReset()
     mockParams = {}
     mockUseAccounts = () => ({ data: accountsData, isLoading: false })
     mockImportState = { state: { phase: 'idle' }, start: mockStart, reset: mockReset }
@@ -70,6 +76,33 @@ describe('TransactionImportRoute', () => {
     const view = await renderRoute()
     await fireEvent.press(view.getByRole('button', { name: 'Choose file' }))
     expect(mockStart).not.toHaveBeenCalled()
+  })
+
+  it('offers a generic account the CSV-only picker and shares a template with the instance\'s type codes', async () => {
+    mockParams = { accountId: '7' }
+    mockUseAccounts = () => ({ data: { accounts: [{ ...accountsData.accounts[0], csvImportFormat: 'generic' as const }] }, isLoading: false })
+    mockRead.mockResolvedValue({ transactionTypes: [{ transactionTypeKey: 3, name: 'PAYMENT' }] })
+    mockShareCsv.mockResolvedValue(undefined)
+    mockGetDocumentAsync.mockResolvedValue({ canceled: false, assets: [{ uri: 'file:///a.csv', name: 'a.csv' }] })
+    const view = await renderRoute()
+
+    await waitFor(() => expect(mockRead).toHaveBeenCalledWith(expect.objectContaining({ path: '/v1/account/transaction-types' })))
+    await fireEvent.press(view.getByRole('button', { name: 'Share template' }))
+    expect(mockShareCsv).toHaveBeenCalledWith(expect.stringContaining('date,amount,merchant,internalTransactionId,transactionTypeKey,description'), 'transactions-template.csv')
+
+    await fireEvent.press(view.getByRole('button', { name: 'Choose file' }))
+    const pickerTypes = mockGetDocumentAsync.mock.calls[0]?.[0].type as string[]
+    expect(pickerTypes).toContain('text/csv')
+    expect(pickerTypes).not.toContain('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    expect(mockStart).toHaveBeenCalledWith(7, { uri: 'file:///a.csv', name: 'a.csv' })
+  })
+
+  it('does not open the picker for an account whose format this build does not know', async () => {
+    mockParams = { accountId: '7' }
+    mockUseAccounts = () => ({ data: { accounts: [{ ...accountsData.accounts[0], csvImportFormat: 'unknown' as const }] }, isLoading: false })
+    const view = await renderRoute()
+    expect(view.getByRole('button', { name: 'Choose file' })).toBeDisabled()
+    expect(mockGetDocumentAsync).not.toHaveBeenCalled()
   })
 
   it('navigates back to accounts on back and done', async () => {

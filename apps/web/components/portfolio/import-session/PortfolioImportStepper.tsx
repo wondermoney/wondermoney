@@ -42,7 +42,7 @@ export function PortfolioImportStepper({
               <div className="flex min-w-0 items-center gap-2 px-1 py-0.5">
                 <span
                   className={cn(
-                    "flex size-5 shrink-0 items-center justify-center rounded-full border text-[10px] font-medium tabular-nums transition-colors",
+                    "flex size-5 shrink-0 items-center justify-center rounded-full border text-[11px] font-medium tabular-nums transition-colors",
                     isActive &&
                       "border-primary bg-primary text-primary-foreground",
                     isComplete &&

@@ -1,6 +1,6 @@
 "use client";
 
-import type { Column } from "@tanstack/react-table";
+import type { RowData } from "@tanstack/react-table";
 import {
   ArrowDownIcon,
   ArrowUpDownIcon,
@@ -19,14 +19,17 @@ import {
 import { cn } from "@/lib/utils";
 
 import { Button } from "../button";
+import type { Column } from "./features";
 
-interface DataTableColumnHeaderProps<TData, TValue>
-  extends React.HTMLAttributes<HTMLDivElement> {
+interface DataTableColumnHeaderProps<
+  TData extends RowData,
+  TValue,
+> extends React.HTMLAttributes<HTMLDivElement> {
   column: Column<TData, TValue>;
   title: string;
 }
 
-export function ColumnHeader<TData, TValue>({
+export function ColumnHeader<TData extends RowData, TValue>({
   column,
   title,
   className,

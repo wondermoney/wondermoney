@@ -1,6 +1,5 @@
 import { DI } from '@app/database/di';
 import { ACCOUNT_AUTO_SYNC_REQUISITION_OPERATION_TYPE, type AccountAutoSyncRequisitionJobPayload, buildAccountAutoSyncRequisitionCorrelationId, enqueueAccountAutoSyncRequisitionJob } from '@app/jobs/account-auto-sync.queue';
-import { BANK_SYNC_PROVIDER_DISABLED } from '@config/env';
 import { Account } from '@entity/Account';
 import type { Appuser } from '@entity/Appuser';
 import { EnableBankingConnectionStatus } from '@entity/EnableBankingConnection';
@@ -20,12 +19,12 @@ const parsePositiveInteger = (name: string, value: string | undefined, fallback:
 };
 
 /**
- * Phase 1e: one normalized entry per distinct connection (either a `NordigenRequisition` or an
- * `EnableBankingConnection`), built by the two per-provider loops below. Everything from this
+ * One normalized entry per distinct connection (either a `NordigenRequisition` or an
+ * `EnableBankingConnection`), built by the loop below. Everything from this
  * point on (`requisitions` slicing, incident allocation, queued-operation bookkeeping, job
  * enqueue) reads only these generic fields and never branches on provider again — the same
  * "normalize once, branch never again downstream" seam `account-initial-sync-enqueue.service.ts`
- * uses for its `NormalizedSyncTarget` (Phase 1d).
+ * uses for its `NormalizedSyncTarget`.
  */
 interface EligibleSyncTarget {
   appuserKey?: unknown;
@@ -39,13 +38,6 @@ interface EligibleSyncTarget {
 
 export default {
   async enqueueDueAccountSyncs(input: { backgroundOperationService?: { attachQueueJob: (correlationId: string, queueJobId: string) => Promise<boolean>; createQueuedOperation: (input: Record<string, unknown>, transaction?: unknown) => Promise<unknown>; findByCorrelation?: (correlationId: string) => Promise<null | { queueJobId?: null | string; retryable?: boolean; status: string }>; markNeedsAction?: (correlationId: string, errorCode: string, stage?: string) => Promise<unknown>; resetRetryableQueueing?: (correlationId: string, transaction?: unknown) => Promise<boolean> }; bankSyncIncidentService?: BankSyncIncidentService; boss?: { send: (queue: string, data: Record<string, unknown>, options?: Record<string, unknown>) => Promise<unknown> }; limit?: number; maxEnqueued?: number; now?: Date; scheduleRunId?: string; send?: (queue: string, data: Record<string, unknown>, options?: Record<string, unknown>) => Promise<unknown>; staleHours?: number } = {}) {
-    // Phase 0 kill-switch: the shared GoCardless credential is being cancelled, so skip the
-    // sweep entirely rather than let it enqueue jobs against a dead provider. Bail before the
-    // Account/requisition query even runs — nothing is queried, nothing is enqueued. This also
-    // gates the Enable Banking sweep added in Phase 1e, per the same flag.
-    if (BANK_SYNC_PROVIDER_DISABLED) {
-      return { enqueued: 0, failed: 0, failures: [], rateLimited: 0, skipped: 0, total: 0 };
-    }
     const now = input.now ?? new Date();
     const staleHours = input.staleHours ?? 20;
     const limit = input.limit ?? 100;
@@ -54,17 +46,7 @@ export default {
       : assertPositiveInteger('maxEnqueued', input.maxEnqueued);
     const staleBefore = new Date(now.getTime() - staleHours * 60 * 60 * 1000);
     const staleOr = [{ refreshedAt: null }, { refreshedAt: { $lte: staleBefore } }];
-    // GoCardless query — byte-for-byte unchanged from pre-Phase-1e. Left as its own `em.find`
-    // call (rather than folded into a single `$or`'d query) because a nullable-FK `$or` across
-    // two entirely different relations (`nordigenRequisitionKey` / `enableBankingConnectionKey`)
-    // can't express "match either relation's own nested conditions" as one MikroORM criteria
-    // object without an outer `$or` that would swallow this literal `nordigenRequisitionKey: {...}`
-    // shape one level down — which would silently stop matching real rows (a to-one relation
-    // filter effectively requires the FK to be populated) while also being invisible to a
-    // simple `toHaveBeenCalledWith(expect.objectContaining({ nordigenRequisitionKey: ... }))`
-    // assertion. Two parallel queries, unioned in application code below, keep both providers'
-    // filters simple, correct, and independently testable.
-    // Gated on the connection's real provider-returned `accessValidUntil` (Phase 1a).
+    // Gated on the connection's real provider-returned `accessValidUntil`.
     const enableBankingAccounts = await DI.em.find(Account, {
       $or: staleOr,
       closed: false,

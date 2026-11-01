@@ -56,7 +56,7 @@ class OpenAIClass {
 
   /**
    * Vision prompt with a caller-supplied prompt/schema, for one-off OCR jobs that aren't receipts
-   * (e.g. the Certificados de Aforro rate-table scrape, RAD-445). Same deployment and call shape
+   * (e.g. the Certificados de Aforro rate-table scrape). Same deployment and call shape
    * as `processReceipt` — only the prompt and response schema differ.
    */
   public async promptWithImages(input: {

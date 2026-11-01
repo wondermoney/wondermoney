@@ -11,25 +11,27 @@ describe('categories read contract', () => {
   })
 
   it.each([
-    ['extra envelope field', { categories: [], extra: true }],
-    ['extra category field', { categories: [{ ...item, childCategory: [], owner: 2 }] }],
     ['non-safe id', { categories: [{ ...item, categoryKey: Number.MAX_SAFE_INTEGER + 1, childCategory: [] }] }],
     ['missing children', { categories: [item] }],
   ])('rejects %s', (_label, value) => expect(() => categoriesResponseSchema.parse(value)).toThrow())
+
+  it('strips fields the API adds instead of rejecting the list', () => {
+    const parsed = categoriesResponseSchema.parse({ categories: [{ ...item, owner: 2, childCategory: [{ ...item, categoryKey: 2, owner: 2 }] }], extra: true })
+    expect(parsed).toEqual({ categories: [{ ...item, childCategory: [{ ...item, categoryKey: 2 }] }] })
+  })
 })
 
 describe('category write contracts', () => {
-  it('defines strict POST and PATCH endpoints and strict category response envelopes', () => {
+  it('defines the POST and PATCH endpoints and validates the category they return', () => {
     expect(createCategoryEndpoint).toMatchObject({ method: 'POST', path: '/v1/category', successStatuses: [201] })
     expect(createCategoryEditEndpoint(9)).toMatchObject({ method: 'PATCH', path: '/v1/category/9', successStatuses: [200] })
     const response = { category: { categoryKey: 9, name: 'Travel', icon: 'plane', bgColor: '#123ABC' } }
     expect(createCategoryEndpoint.schema.parse(response)).toEqual(response)
-    for (const invalid of [
-      { ...response, extra: true },
-      { category: { ...response.category, extra: true } },
-      { category: { ...response.category, bgColor: '#123abc' } },
-      { category: { ...response.category, icon: 'server-icon' } },
-    ]) expect(() => createCategoryEndpoint.schema.parse(invalid)).toThrow()
+    expect(createCategoryEndpoint.schema.parse({ ...response, extra: true })).toEqual(response)
+    expect(createCategoryEndpoint.schema.parse({ category: { ...response.category, extra: true } })).toEqual(response)
+    // An icon this build can't draw reads as null rather than failing a write that already succeeded.
+    expect(createCategoryEndpoint.schema.parse({ category: { ...response.category, icon: 'server-icon' } }).category.icon).toBeNull()
+    expect(() => createCategoryEndpoint.schema.parse({ category: { ...response.category, bgColor: '#123abc' } })).toThrow()
   })
 
   it('trims visible names, requires uppercase colors and allowlisted icons, and never permits PATCH reparenting', () => {

@@ -1,5 +1,5 @@
-import { Entity, Enum, Index, ManyToOne, PrimaryKey, Property } from '@mikro-orm/core';
 import type { Rel } from '@mikro-orm/core';
+import { Entity, Enum, Index, ManyToOne, PrimaryKey, Property } from '@mikro-orm/decorators/legacy';
 
 import { Account } from './Account';
 import { Appuser } from './Appuser';
@@ -18,9 +18,9 @@ export enum TransactionAuditEventType {
   BALANCE_RECALC = 'balance_recalc',
   CATEGORIZED = 'categorized',
   CREATED = 'created',
-  /** RAD-394: a possible duplicate was detected on a user/CSV entry but the row was still created
+  /** A possible duplicate was detected on a user/CSV entry but the row was still created
    * (warn-and-allow). Distinct from `DEDUP_SKIPPED`, where the incoming row was NOT created — mixing
-   * the two would corrupt the skip-rate signal RAD-393 measures. The flagged-against row is recorded
+   * the two would corrupt the dedup skip-rate signal. The flagged-against row is recorded
    * in `changes.flaggedAgainstTransactionKey`. */
   DEDUP_FLAGGED = 'dedup_flagged',
   DEDUP_SKIPPED = 'dedup_skipped',
@@ -28,17 +28,17 @@ export enum TransactionAuditEventType {
   PENDING_PROMOTED = 'pending_promoted',
   SOFT_DELETED = 'soft_deleted',
   SYSTEM_EDIT = 'system_edit',
-  /** RAD-394: a row was soft-deleted by an operator-driven remediation (e.g. dedup backfill).
+  /** A row was soft-deleted by an operator-driven remediation (e.g. dedup backfill).
    * Pairs with `SOFT_DELETED` (which is a user-initiated delete from the UI). */
   SYSTEM_REMEDIATION = 'system_remediation',
   USER_EDIT = 'user_edit',
 }
 
 /**
- * Append-only audit trail for transaction changes (RAD-346, Phase 0).
+ * Append-only audit trail for transaction changes.
  *
- * One row per meaningful mutation (create, user edit, categorization, and — in later
- * phases — sync-driven promotions/dedup). Written via explicit `TransactionAuditService.log`
+ * One row per meaningful mutation (create, user edit, categorization, sync-driven
+ * promotions/dedup). Written via explicit `TransactionAuditService.log`
  * calls at each mutation site so the actor (who/why) can be attributed; there is no
  * ORM-subscriber fallback yet. Rows are never updated or deleted through the app.
  */

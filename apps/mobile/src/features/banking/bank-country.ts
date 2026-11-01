@@ -3,7 +3,7 @@ import { getLocales } from 'expo-localization'
 const VALID_COUNTRY_CODE = /^[A-Z]{2}$/
 
 /**
- * RAD-240 — best-effort country hint for the institution picker (`GET
+ * Best-effort country hint for the institution picker (`GET
  * /v1/banking/bank?country=..`). `country` is optional server-side, so an
  * unresolved or malformed device region simply omits the param rather than
  * forwarding garbage upstream. Injectable `read` mirrors resolveSignupLocale

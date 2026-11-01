@@ -4,13 +4,14 @@ import { Moon, Sun } from "lucide-react";
 import { useParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { useTheme } from "next-themes";
-import { useEffect, useState, useTransition } from "react";
+import { useTransition } from "react";
 
 import { usePathname } from "@/i18n/navigation";
 import { useRouter } from "@/i18n/navigation";
 import { routing } from "@/i18n/routing";
 import useUserData from "@/lib/api/user/useUserData";
 import { useUser } from "@/lib/auth/user-context";
+import { useHydrated } from "@/lib/utils/useHydrated";
 
 import {
   Select,
@@ -25,17 +26,13 @@ export default function Appearance() {
   const user = useUser();
   const { theme, setTheme } = useTheme();
   const { data: userData } = useUserData(user?.id, { enabled: !!user?.id });
-  const [mounted, setMounted] = useState(false);
+  const mounted = useHydrated();
   const t = useTranslations();
   const locale = useLocale();
   const router = useRouter();
   const pathname = usePathname();
   const [isPending, startTransition] = useTransition();
   const params = useParams();
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   if (!mounted) {
     return null;

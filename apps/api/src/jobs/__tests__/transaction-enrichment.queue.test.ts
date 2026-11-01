@@ -10,7 +10,6 @@ import {
 } from '@app/jobs/transaction-enrichment.queue';
 
 type EnqueueDeps = Parameters<typeof enqueueTransactionEnrichmentGptJob>[1];
-type EnsureBoss = Parameters<typeof ensureTransactionEnrichmentGptQueue>[0];
 
 vi.mock('@app/jobs/transaction-enrichment.config', () => ({
   buildTransactionEnrichmentConfig: () => ({
@@ -91,7 +90,7 @@ describe('transaction enrichment queue', () => {
 
   it('creates main and DLQ queues', async () => {
     const boss = { createQueue: vi.fn().mockResolvedValue(undefined) };
-    await ensureTransactionEnrichmentGptQueue(boss as unknown as EnsureBoss);
+    await ensureTransactionEnrichmentGptQueue(boss);
     expect(boss.createQueue.mock.calls).toEqual([
       [TRANSACTION_ENRICHMENT_GPT_DLQ],
       [TRANSACTION_ENRICHMENT_GPT_QUEUE, {

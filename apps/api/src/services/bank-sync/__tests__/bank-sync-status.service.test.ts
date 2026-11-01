@@ -54,7 +54,7 @@ describe('bank sync public status', () => {
   it.each([
     [BankSyncFinality.NON_TERMINAL, BankSyncResult.PENDING, 'processing', 'pending', false],
     [BankSyncFinality.TERMINAL_SUCCESS, BankSyncResult.SUCCESS, 'succeeded', 'full_success', true],
-  ])('maps %s/%s when errorCategory/errorCode are hydrated as null (RAD-268 regression)', async (finality, result, state, publicResult, final) => {
+  ])('maps %s/%s when errorCategory/errorCode are hydrated as null', async (finality, result, state, publicResult, final) => {
     // MikroORM hydrates nullable DB columns as `null`, not `undefined`, when
     // an incident is fetched via em.findOne. The rest of this suite's harness
     // builds incidents with `undefined` for absent fields, which never

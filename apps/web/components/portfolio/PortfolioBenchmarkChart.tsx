@@ -80,7 +80,7 @@ function buildDateTicks(data: { x: string }[]) {
     .map((index) => data[index].x);
 }
 
-// RAD-575: takes the locale rather than resolving `undefined` to the runtime's.
+// Takes the locale rather than resolving `undefined` to the runtime's.
 // The sign is built by hand instead of via `signDisplay` because a chart axis
 // wants a bare "0%" at the origin, not "+0%".
 function formatAxisPercent(value: number, locale: string): string {
@@ -240,7 +240,7 @@ const PortfolioBenchmarkChart: React.FC<PortfolioBenchmarkChartProps> = ({
         : null;
 
     return (
-      <div className="border-border/50 bg-background min-w-[10rem] rounded-lg border px-3 py-2 text-xs shadow-xl">
+      <div className="border-border/50 bg-background min-w-[10rem] rounded-lg border px-3 py-2 text-xs shadow-lg">
         <div className="mb-2 font-medium">{formatChartDate(label ?? "")}</div>
         <div className="grid gap-1.5">
           {hasPortfolioValue ? (

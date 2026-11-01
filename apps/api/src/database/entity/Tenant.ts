@@ -1,5 +1,6 @@
-import { Entity, EntityRepositoryType, Enum, ManyToOne, PrimaryKey, Property } from '@mikro-orm/core';
+import { EntityRepositoryType } from '@mikro-orm/core';
 import type { Rel } from '@mikro-orm/core';
+import { Entity, Enum, ManyToOne, PrimaryKey, Property } from '@mikro-orm/decorators/legacy';
 
 import { TenantRepository } from '../repositories/TenantRepository';
 

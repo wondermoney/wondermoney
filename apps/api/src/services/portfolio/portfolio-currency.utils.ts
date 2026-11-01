@@ -51,8 +51,8 @@ export function resolveHoldingUnitAmount(holding: HoldingUnitAmountLike): number
 }
 
 export function roundCurrency(value: number): number {
-  // RAD-audit: was `Math.round(value * 100) / 100`, which rounds toward +Infinity for
-  // negatives. Expenses are stored negative, so income and expenses rounded in opposite
-  // directions. Delegates to the shared half-even helper.
+  // Not `Math.round(value * 100) / 100`, which rounds toward +Infinity for negatives: expenses
+  // are stored negative, so income and expenses would round in opposite directions. Delegates
+  // to the shared half-even helper.
   return roundDisplay(value);
 }

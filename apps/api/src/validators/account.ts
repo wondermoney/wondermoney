@@ -25,7 +25,7 @@ export const updateTransactionsRequestSchema = z.object({ body: z.object({ categ
 export const getTransactionHistoryRequestSchema = z.object({ params: z.object({ transactionId: positiveIntId }) });
 
 /**
- * RAD-579 — the three filters the transactions table used to apply in the browser.
+ * The three server-side filters of the transactions table.
  *
  * Accepted repeated (`?accountKeys=1&accountKeys=2`) or comma-separated (`?accountKeys=1,2`), since
  * both shapes reach an Express query depending on how the client serialises. Empty strings are
@@ -44,7 +44,7 @@ const csvList = z
   });
 
 /** The client's sentinel for "transactions with no category at all". Kept identical to the web value. */
-export const UNCATEGORIZED_FILTER_VALUE = '__uncategorized__';
+const UNCATEGORIZED_FILTER_VALUE = '__uncategorized__';
 
 const csvIntList = csvList.transform((parts) => (parts ? parts.map((part) => positiveIntId.parse(part)) : undefined));
 
@@ -57,18 +57,49 @@ const csvCategoryList = csvList.transform((parts) =>
       }
     : undefined,
 );
-export const getTransactionsRequestSchema = z.object({ query: z.object({ accountKeys: csvIntList, categoryKeys: csvCategoryList, confidence: z.nativeEnum(CategorizationConfidence).optional(), cursor: z.string().trim().max(64).regex(/^\d+_\d+$/, 'Malformed cursor').optional(), fromDate: validDate.optional(), includeEmptyAccounts: z.union([z.boolean(), z.string()]).optional().transform((val) => (typeof val === 'undefined' ? undefined : typeof val === 'boolean' ? val : val.toLowerCase() === 'true')), includeHidden: z.union([z.boolean(), z.string()]).optional().transform((val) => (typeof val === 'undefined' ? undefined : typeof val === 'boolean' ? val : val.toLowerCase() === 'true')), limit: boundedLimit({ defaultValue: 100, max: 500 }).optional().default(100), toDate: validDate.optional(), transactionTypes: csvList, unreviewedOnly: z.union([z.boolean(), z.string()]).optional().transform((val) => (typeof val === 'undefined' ? undefined : typeof val === 'boolean' ? val : val.toLowerCase() === 'true')) }) });
-export const getAccountTransactionsRequestSchema = z.object({ query: z.object({ accountId: positiveIntId.optional(), categoryKeys: csvCategoryList, confidence: z.nativeEnum(CategorizationConfidence).optional(), cursor: z.string().trim().max(64).regex(/^\d+_\d+$/, 'Malformed cursor').optional(), fromDate: validDate.optional(), includeHidden: z.union([z.boolean(), z.string()]).optional().transform((val) => (typeof val === 'undefined' ? undefined : typeof val === 'boolean' ? val : val.toLowerCase() === 'true')), limit: boundedLimit({ defaultValue: 100, max: 500 }).optional().default(100), toDate: validDate.optional(), transactionTypes: csvList, unreviewedOnly: z.union([z.boolean(), z.string()]).optional().transform((val) => (typeof val === 'undefined' ? undefined : typeof val === 'boolean' ? val : val.toLowerCase() === 'true')) }) });
+export const getTransactionsRequestSchema = z.object({ query: z.object({ accountKeys: csvIntList, categoryKeys: csvCategoryList, confidence: z.enum(CategorizationConfidence).optional(), cursor: z.string().trim().max(64).regex(/^\d+_\d+$/, 'Malformed cursor').optional(), fromDate: validDate.optional(), includeEmptyAccounts: z.union([z.boolean(), z.string()]).optional().transform((val) => (typeof val === 'undefined' ? undefined : typeof val === 'boolean' ? val : val.toLowerCase() === 'true')), includeHidden: z.union([z.boolean(), z.string()]).optional().transform((val) => (typeof val === 'undefined' ? undefined : typeof val === 'boolean' ? val : val.toLowerCase() === 'true')), limit: boundedLimit({ defaultValue: 100, max: 500 }).optional().default(100), toDate: validDate.optional(), transactionTypes: csvList, unreviewedOnly: z.union([z.boolean(), z.string()]).optional().transform((val) => (typeof val === 'undefined' ? undefined : typeof val === 'boolean' ? val : val.toLowerCase() === 'true')) }) });
+export const getAccountTransactionsRequestSchema = z.object({ query: z.object({ accountId: positiveIntId.optional(), categoryKeys: csvCategoryList, confidence: z.enum(CategorizationConfidence).optional(), cursor: z.string().trim().max(64).regex(/^\d+_\d+$/, 'Malformed cursor').optional(), fromDate: validDate.optional(), includeHidden: z.union([z.boolean(), z.string()]).optional().transform((val) => (typeof val === 'undefined' ? undefined : typeof val === 'boolean' ? val : val.toLowerCase() === 'true')), limit: boundedLimit({ defaultValue: 100, max: 500 }).optional().default(100), toDate: validDate.optional(), transactionTypes: csvList, unreviewedOnly: z.union([z.boolean(), z.string()]).optional().transform((val) => (typeof val === 'undefined' ? undefined : typeof val === 'boolean' ? val : val.toLowerCase() === 'true')) }) });
 export const getTransactionMerchantsRequestSchema = z.object({ query: z.object({ limit: boundedLimit({ defaultValue: 20, max: 50 }).optional().default(20), search: z.string().trim().max(200).optional().default('') }) });
-export const createOfflineAccountRequestSchema = z.object({ body: z.object({ accountTypeId: positiveIntId.optional(), currencyId: positiveIntId, currentBalance: z.preprocess((v) => (typeof v === 'string' ? Number(v) : v), z.number().finite().max(999999999999)), financialInstitutionId: z.number().optional(), name: z.string().min(1).max(100) }) });
+export const createOfflineAccountRequestSchema = z.object({ body: z.object({ accountTypeId: positiveIntId.optional(), currencyId: positiveIntId, currentBalance: z.preprocess((v) => (typeof v === 'string' ? Number(v) : v), z.number().max(999999999999)), financialInstitutionId: z.number().optional(), name: z.string().min(1).max(100) }) });
 export const createTransactionRequestSchema = z.object({ body: z.object({ categoryId: z.string().nullable().optional().transform((val) => (val ? positiveIntId.parse(val) : undefined)), description: z.string().max(500).optional().transform((val) => (val ? val : undefined)), exchangeRate: z.string().optional().transform((val) => (val ? finiteAmount.parse(val) : undefined)), notes: z.string().max(1000).nullable().optional(), originalAmount: z.string().optional().transform((val) => (val ? finiteAmount.parse(val) : undefined)), originalCurrencyId: z.string().optional().transform((val) => (val ? positiveIntId.parse(val) : undefined)), settlementAmount: finiteAmount, settlementCurrencyId: positiveIntId, transactionDate: validDate, transactionMerchantId: z.number().nullable().optional(), transactionMerchantName: z.string().max(200).nullable().optional().transform((val) => (val ? val : undefined)), transactionTypeId: positiveIntId }), params: z.object({ accountId: positiveIntId }) });
 export const createTransactionOCRImportRequestSchema = z.object({ file: z.object({ buffer: z.instanceof(Buffer), encoding: z.string(), fieldname: z.string(), mimetype: z.string(), originalname: z.string(), size: z.number() }).refine((file) => file.size <= 5000000, `Max file size is 5MB.`).refine((file) => ['application/pdf', 'image/jpeg', 'image/jpg', 'image/png', 'image/webp'].includes(file.mimetype), 'Only .jpg, .jpeg, .png, .webp and .pdf formats are supported.').refine((file) => magicByteMatches(file.buffer, file.mimetype), 'Uploaded file content does not match the declared file type.') });
 
+const LEADING_DATE = /^(\d{4})-(\d{2})-(\d{2})/;
+const isoDateTime = z.union([z.iso.datetime({ offset: true }), z.iso.datetime({ local: true })]);
+
+function isRealCalendarDate(value: string): boolean {
+  const match = LEADING_DATE.exec(value);
+  if (!match) return false;
+  const [year, month, day] = [Number(match[1]), Number(match[2]), Number(match[3])];
+  const date = new Date(Date.UTC(year, month - 1, day));
+  return date.getUTCFullYear() === year && date.getUTCMonth() === month - 1 && date.getUTCDate() === day;
+}
+
+/**
+ * The model reads the date off the receipt, which usually prints a calendar day and rarely a time
+ * zone. Accept a full ISO date-time, a date-time without an offset (read as UTC), or a bare date
+ * (pinned to 12:00 UTC so the calendar day survives conversion to any user's local time), and
+ * normalise all of them to an ISO string.
+ */
+const ocrTransactionDate = z.string().transform((value, ctx) => {
+  const trimmed = value.trim();
+  const isDateOnly = /^\d{4}-\d{2}-\d{2}$/.test(trimmed);
+
+  if ((!isDateOnly && !isoDateTime.safeParse(trimmed).success) || !isRealCalendarDate(trimmed)) {
+    ctx.addIssue({ code: 'custom', message: 'Invalid transaction date' });
+    return z.NEVER;
+  }
+
+  if (isDateOnly) return new Date(`${trimmed}T12:00:00.000Z`).toISOString();
+  const hasOffset = /(?:Z|[+-]\d{2}:?\d{2})$/i.test(trimmed);
+  return new Date(hasOffset ? trimmed : `${trimmed}Z`).toISOString();
+});
+
 export const transactionOCRModelOutputSchema = z
   .object({
-    settlementAmount: z.number().finite(),
+    settlementAmount: z.number(),
     settlementCurrency: z.string().trim().regex(/^[A-Z]{3}$/),
-    transactionDate: z.string().datetime({ offset: true }),
+    transactionDate: ocrTransactionDate,
     transactionMerchantName: z.string().trim().max(200),
   })
   .strict();

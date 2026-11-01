@@ -17,7 +17,7 @@ export interface DemoBankTransactionFixture {
   type: DemoBankTransactionType;
 }
 
-export type DemoBankTransactionType = 'PAYMENT' | 'TRANSFER_IN' | 'TRANSFER_OUT';
+export type DemoBankTransactionType = 'DEPOSIT' | 'PAYMENT' | 'TRANSFER_IN' | 'TRANSFER_OUT';
 
 export type DemoPortfolioName = (typeof demoPortfolios)[number]['name'];
 export type DemoPortfolioSymbol = 'AAPL' | 'CRM' | 'CURRENCY_EUR' | 'CURRENCY_USD' | 'GOOGL' | 'INTC' | 'NVDA' | 'TXN';
@@ -43,7 +43,8 @@ export const demoBankTransactionFixtures: DemoBankTransactionFixture[] = [
     externalTransactionId: `${DEMO_BANK_TRANSACTION_ID_PREFIX}SALARY-00`,
     merchant: 'Acme Consulting',
     offsetDays: 0,
-    type: 'TRANSFER_IN',
+    // A salary is income, not a transfer.
+    type: 'DEPOSIT',
   },
   {
     accountName: demoAccounts.current.accountName,
@@ -214,7 +215,7 @@ export const demoBankTransactionFixtures: DemoBankTransactionFixture[] = [
       externalTransactionId: `${DEMO_BANK_TRANSACTION_ID_PREFIX}${key}`,
       merchant,
       offsetDays: index + 2,
-      type: amount > 0 ? 'TRANSFER_IN' : 'PAYMENT',
+      type: amount > 0 ? 'DEPOSIT' : 'PAYMENT',
     }),
   ),
   {

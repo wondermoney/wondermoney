@@ -64,8 +64,12 @@ export default function FirstRunOnboardingRouteShell({
 
   const hasBackStep = currentStepIndex > 0 && currentStep !== "completion";
 
+  // canRender gates the step until this effect has read and persisted the
+  // first-run state (localStorage) and recorded analytics; it has to flip
+  // after those side effects, so it is set here deliberately.
   useEffect(() => {
     if (!user?.id) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- see above
       setCanRender(false);
       return;
     }

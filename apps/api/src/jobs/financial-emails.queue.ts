@@ -32,7 +32,7 @@ const RETENTION_SECONDS = 604_800;
 // (see financial-email-user-worker.service.ts), so this only bounds pg-boss's own job expiry.
 const PG_BOSS_MAX_EXPIRE_SECONDS = 23 * 60 * 60;
 const pgBossExpireInSeconds = (maxAgeSeconds: number | undefined) => Math.min(maxAgeSeconds ?? PG_BOSS_MAX_EXPIRE_SECONDS, PG_BOSS_MAX_EXPIRE_SECONDS);
-const coordinatorPayloadSchema = z.object({ correlationId: z.string().min(1), cursor: z.number().int().nonnegative().optional(), scheduledFor: z.string().datetime({ offset: true }) });
+const coordinatorPayloadSchema = z.object({ correlationId: z.string().min(1), cursor: z.number().int().nonnegative().optional(), scheduledFor: z.iso.datetime({ offset: true }) });
 const userPayloadSchema = coordinatorPayloadSchema.extend({ appuserKey: z.number().int().positive() });
 
 const validateFinancialEmailCoordinatorPayload = (payload: FinancialEmailCoordinatorPayload) => coordinatorPayloadSchema.parse(payload);
@@ -60,6 +60,7 @@ for (const queue of FINANCIAL_EMAIL_QUEUES) {
 
 export const scheduleBudgetEmails = (boss: BossSchedule) => boss.schedule(BUDGET_EMAIL_COORDINATOR_QUEUE, BUDGET_EMAIL_CRON, {}, { key: BUDGET_EMAIL_SCHEDULE_KEY, singletonKey: BUDGET_EMAIL_SCHEDULE_KEY, tz: FINANCIAL_EMAIL_TIME_ZONE });
 export const scheduleWeeklyEmails = (boss: BossSchedule) => boss.schedule(WEEKLY_EMAIL_COORDINATOR_QUEUE, WEEKLY_EMAIL_CRON, {}, { key: WEEKLY_EMAIL_SCHEDULE_KEY, singletonKey: WEEKLY_EMAIL_SCHEDULE_KEY, tz: FINANCIAL_EMAIL_TIME_ZONE });
+/** @public Paused with the lifecycle emails: `worker.ts` unschedules it and nothing schedules it. */
 export const scheduleMonthlyStoryEmails = (boss: BossSchedule) => boss.schedule(MONTHLY_STORY_EMAIL_COORDINATOR_QUEUE, MONTHLY_STORY_EMAIL_CRON, {}, { key: MONTHLY_STORY_EMAIL_SCHEDULE_KEY, singletonKey: MONTHLY_STORY_EMAIL_SCHEDULE_KEY, tz: FINANCIAL_EMAIL_TIME_ZONE });
 export const unscheduleBudgetEmails = (boss: BossSchedule) => boss.unschedule(BUDGET_EMAIL_COORDINATOR_QUEUE, BUDGET_EMAIL_SCHEDULE_KEY);
 export const unscheduleWeeklyEmails = (boss: BossSchedule) => boss.unschedule(WEEKLY_EMAIL_COORDINATOR_QUEUE, WEEKLY_EMAIL_SCHEDULE_KEY);

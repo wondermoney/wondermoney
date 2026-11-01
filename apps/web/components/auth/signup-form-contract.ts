@@ -4,7 +4,7 @@ import { env } from "@/lib/utils/env";
 import { canBypassRecaptchaForE2E } from "@/lib/utils/recaptcha-e2e-bypass";
 
 export const signupFormSchema = z.object({
-  email: z.string().email("Invalid email"),
+  email: z.email("Invalid email"),
   inviteToken: z.string().optional(),
   password: z.string().min(8, "Password must be at least 8 characters"),
 });
@@ -16,6 +16,14 @@ export type SignupFormSchema = z.infer<typeof signupFormSchema>;
 // email's local part — users can rename themselves later in settings.
 export function deriveNameFromEmail(email: string): string {
   return email.split("@")[0] || email;
+}
+
+/**
+ * reCAPTCHA is optional: an instance without a site key (a self-hosted server, by default) has
+ * no captcha to run, and signup must not fail for want of one.
+ */
+export function isRecaptchaConfigured() {
+  return Boolean(env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY);
 }
 
 export function canBypassRecaptchaClientFailure() {

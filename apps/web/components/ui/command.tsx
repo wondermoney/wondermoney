@@ -63,7 +63,7 @@ const CommandList = React.forwardRef<
     // `min-h-0 flex-1` is what lets the list give way when its popover is
     // capped at the available viewport height: it stays at most 300px, and
     // shrinks below that rather than pushing the search box and the footer out
-    // of view (RAD-614).
+    // of view.
     className={cn(
       "max-h-[300px] min-h-0 flex-1 overflow-x-hidden overflow-y-auto",
       className,
@@ -138,7 +138,7 @@ const CommandShortcut = ({
   return (
     <span
       className={cn(
-        "text-muted-foreground ml-auto text-xs tracking-widest",
+        "text-muted-foreground ml-auto text-xs",
         className,
       )}
       {...props}

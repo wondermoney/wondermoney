@@ -1,6 +1,9 @@
 import { merge } from "lodash-es";
 import type { Metadata } from "next";
 
+import { isDefaultInstanceName } from "@/lib/instance-name";
+import { getInstanceName } from "@/lib/instance-name.server";
+
 import { getBaseUrl } from "./url";
 
 type MetadataGenerator = Omit<Metadata, "description" | "title"> & {
@@ -9,32 +12,38 @@ type MetadataGenerator = Omit<Metadata, "description" | "title"> & {
   image?: string;
 };
 
-const applicationName = "WonderMoney";
-const author: Metadata["authors"] = {
-  name: "RadixCatch",
-  url: getBaseUrl(),
-};
-const publisher = "RadixCatch";
-const twitterHandle = "@wondermoneyapp";
+/** The hosted service's publisher and social account; a renamed instance is not theirs. */
+const hostedPublisher = "RadixCatch";
+const hostedTwitterHandle = "@wondermoneyapp";
 
 function resolveMetadataBaseUrl(baseUrl: string): URL {
   return new URL(/^https?:\/\//.test(baseUrl) ? baseUrl : `https://${baseUrl}`);
 }
 
-export const createMetadata = ({
+/**
+ * Page metadata for an instance called `instanceName`: the tab title is "<page> | <instance>",
+ * and the instance names the app for bookmarks, home-screen installs and link previews.
+ */
+export const buildMetadata = ({
   title,
   description,
   image,
+  instanceName,
   ...properties
-}: MetadataGenerator): Metadata => {
+}: MetadataGenerator & { instanceName: string }): Metadata => {
+  const applicationName = instanceName;
   const parsedTitle = `${title} | ${applicationName}`;
+  const hosted = isDefaultInstanceName(instanceName);
   const defaultMetadata: Metadata = {
     metadataBase: resolveMetadataBaseUrl(getBaseUrl()),
     title: parsedTitle,
     description,
     applicationName,
-    authors: [author],
-    creator: author.name,
+    ...(hosted && {
+      authors: [{ name: hostedPublisher, url: getBaseUrl() }],
+      creator: hostedPublisher,
+      publisher: hostedPublisher,
+    }),
     formatDetection: { telephone: false },
     appleWebApp: {
       capable: true,
@@ -48,8 +57,10 @@ export const createMetadata = ({
       siteName: applicationName,
       locale: "en_US",
     },
-    publisher,
-    twitter: { card: "summary_large_image", creator: twitterHandle },
+    twitter: {
+      card: "summary_large_image",
+      ...(hosted && { creator: hostedTwitterHandle }),
+    },
   };
 
   const metadata: Metadata = merge(defaultMetadata, properties);
@@ -62,3 +73,9 @@ export const createMetadata = ({
 
   return metadata;
 };
+
+/** {@link buildMetadata} for this instance, its name read from the API. */
+export const createMetadata = async (
+  properties: MetadataGenerator,
+): Promise<Metadata> =>
+  buildMetadata({ ...properties, instanceName: await getInstanceName() });

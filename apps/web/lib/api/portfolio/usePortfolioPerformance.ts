@@ -48,7 +48,7 @@ export interface PerformanceResponse {
  * Fetches performance chart data
  * Uses path param for individual portfolio, aggregate endpoint for all
  */
-export async function getPortfolioPerformance(
+async function getPortfolioPerformance(
   portfolioId: number | null,
   period: Period = "YTD",
   apiClient: AxiosInstance = api,

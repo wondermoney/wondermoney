@@ -17,7 +17,7 @@ export interface TransactionMerchantsParams {
   search?: string;
 }
 
-export async function getTransactionMerchants(
+async function getTransactionMerchants(
   params: TransactionMerchantsParams = {},
   apiClient: AxiosInstance = api,
 ): Promise<GetTransactionMerchantsResponse> {

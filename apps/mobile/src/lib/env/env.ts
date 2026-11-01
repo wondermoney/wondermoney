@@ -1,7 +1,7 @@
 import { z } from 'zod'
 
 /**
- * RAD-518 — PostHog project API keys are write-only client credentials and are
+ * PostHog project API keys are write-only client credentials and are
  * prefixed `phc_`. Anything else in this slot (a personal API key `phx_`, a
  * feature-flag secret, an empty string from an unset shell variable) is refused
  * rather than shipped in the bundle. The ingest host is not configurable — see
@@ -51,5 +51,3 @@ export function parseEnv(input: Record<string, unknown>) {
     posthogKey: env.EXPO_PUBLIC_POSTHOG_KEY,
   }
 }
-
-export type MobileEnvironment = ReturnType<typeof parseEnv>

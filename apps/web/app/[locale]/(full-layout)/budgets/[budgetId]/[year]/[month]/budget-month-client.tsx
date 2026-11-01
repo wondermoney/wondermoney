@@ -1,16 +1,15 @@
 "use client";
 
 import { addMonths, format, subMonths } from "date-fns";
-import { ArrowLeft, ArrowRight } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { useMemo } from "react";
 
+import { BudgetMonthNavigator } from "@/components/budget/BudgetMonthNavigator";
 import BudgetOverviewTable from "@/components/budget/BudgetOverviewTable";
 import BudgetTableMonth from "@/components/budget/BudgetTable";
 import GoalsBudgetSection from "@/components/goals/GoalsBudgetSection";
 import { Amount } from "@/components/ui/Amount";
 import { Text } from "@/components/ui/Typography";
-import { Heading } from "@/components/ui/Typography";
 import { useRouter } from "@/i18n/navigation";
 import type { GetBudgetTemplateByYearResponse } from "@/lib/api/budget/useBudgetTemplateByYear";
 import type { GetBudgetTemplateByYearAndMonthResponse } from "@/lib/api/budget/useBudgetTemplateByYearAndMonth";
@@ -156,37 +155,17 @@ export default function BudgetMonthClient({
     <>
       <div className="bg-background my-4 rounded-xl">
         <div className="flex flex-row items-center justify-between">
-          <div className="flex flex-row items-center gap-2 p-4 pl-0">
-            <ArrowLeft
-              onClick={hasPreviousMonth ? navigateToPreviousMonth : undefined}
-              className={cn(
-                "size-8",
-                "text-primary",
-                "bg-primary/5",
-                "rounded-full",
-                "p-1",
-                !hasPreviousMonth && "opacity-30",
-              )}
-              style={{ cursor: hasPreviousMonth ? "pointer" : "not-allowed" }}
-            />
-            <Heading variant="h4">
-              {budgetDate
+          <BudgetMonthNavigator
+            label={
+              budgetDate
                 ? `${format(budgetDate, "LLL", { locale: getDateFnsLocale(locale) })} ${budgetDate.getFullYear()}`
-                : null}
-            </Heading>
-            <ArrowRight
-              onClick={hasNextMonth ? navigateToNextMonth : undefined}
-              className={cn(
-                "size-8",
-                "text-primary",
-                "bg-primary/5",
-                "rounded-full",
-                "p-1",
-                !hasNextMonth && "opacity-30",
-              )}
-              style={{ cursor: hasNextMonth ? "pointer" : "not-allowed" }}
-            />
-          </div>
+                : null
+            }
+            hasPreviousMonth={hasPreviousMonth}
+            hasNextMonth={hasNextMonth}
+            onPreviousMonth={navigateToPreviousMonth}
+            onNextMonth={navigateToNextMonth}
+          />
           <div className="flex flex-col items-end p-4 pr-0">
             <Text
               variant="largeText"

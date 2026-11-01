@@ -40,7 +40,7 @@ export default function DataHealthConsentExpiring({
       unsubscribeUrl={unsubscribeUrl}
     >
       <p className="m-0">Renovar demora cerca de um minuto e mantém os teus saldos e movimentos a chegar ao WonderMoney sem falhas, para a tua visão completa se manter atualizada. Não muda mais nada.</p>
-      <p className="m-0 mt-[10px]">Este acesso continua só de leitura através de Open Banking regulado (GoCardless). O WonderMoney lê as tuas contas para manter a tua visão atualizada, e nunca pode mexer no teu dinheiro nem vender os teus dados.</p>
+      <p className="m-0 mt-[10px]">Este acesso continua só de leitura através de Open Banking, com a tua própria chave da Enable Banking. O WonderMoney lê as tuas contas para manter a tua visão atualizada, e nunca pode mexer no teu dinheiro nem vender os teus dados.</p>
     </LifecycleEmailLayout>
   );
 }

@@ -4,6 +4,7 @@ import { formatDistanceToNow } from "date-fns";
 import { AlertCircle, RefreshCw } from "lucide-react";
 import { useLocale } from "next-intl";
 
+import { clampSyncedAt } from "@/components/account/sync-time";
 import { cn } from "@/lib/utils";
 import { getDateFnsLocale } from "@/lib/utils/dateFnsLocale";
 
@@ -56,11 +57,14 @@ export function DataProvenance({
     );
   }
 
+  // A refresh time is always in the past; a future one (clock skew, a seeded
+  // timestamp) would read "in almost 20 years", so it is clamped to now.
+  const syncedAt = clampSyncedAt(updatedAt);
   const date =
-    updatedAt instanceof Date
-      ? updatedAt
-      : updatedAt
-        ? new Date(updatedAt)
+    syncedAt instanceof Date
+      ? syncedAt
+      : syncedAt
+        ? new Date(syncedAt)
         : null;
   const hasValidDate = date !== null && !Number.isNaN(date.getTime());
 

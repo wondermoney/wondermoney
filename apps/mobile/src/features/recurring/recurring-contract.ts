@@ -1,21 +1,32 @@
 import { z } from 'zod'
 
-import { readEndpoint, writeEndpoint } from '@/lib/api/runtime-schema'
+import { readEndpoint, tolerantEnum, writeEndpoint } from '@/lib/api/runtime-schema'
 
-export const recurringIdSchema = z.number().int().positive().safe()
+const recurringIdSchema = z.number().int().positive().safe()
 const positiveId = recurringIdSchema
 const finiteMoney = z.number().finite()
 const optionalMoney = finiteMoney.nullish()
 const optionalDate = z.iso.datetime().nullish()
 
-export const recurringTypeSchema = z.enum(['bill', 'subscription'])
-export const recurringStatusSchema = z.enum(['candidate', 'confirmed', 'dismissed', 'paused', 'ended'])
-export const recurringSourceSchema = z.enum(['detected', 'user_created'])
-export const recurringCadenceSchema = z.enum(['biweekly', 'monthly', 'quarterly', 'weekly', 'yearly'])
-export const recurringAmountTypeSchema = z.enum(['fixed', 'variable'])
+const RECURRING_TYPES = ['bill', 'subscription'] as const
+const RECURRING_CADENCES = ['biweekly', 'monthly', 'quarterly', 'weekly', 'yearly'] as const
+const RECURRING_AMOUNT_TYPES = ['fixed', 'variable'] as const
 
-const accountRelationSchema = z.object({ accountKey: positiveId }).strict()
-const currencySchema = z.object({ currencyKey: positiveId, code: z.string().regex(/^[A-Z]{3}$/) }).strict()
+// Write side: the metadata body only ever carries values this build knows.
+const recurringTypeSchema = z.enum(RECURRING_TYPES)
+const recurringCadenceSchema = z.enum(RECURRING_CADENCES)
+const recurringAmountTypeSchema = z.enum(RECURRING_AMOUNT_TYPES)
+
+// Read side: a value this build doesn't know reads as 'unknown' and renders as "unavailable" on
+// that one row instead of failing the whole recurring list.
+const recurringStatusSchema = tolerantEnum(['candidate', 'confirmed', 'dismissed', 'paused', 'ended'], 'unknown')
+const recurringSourceSchema = tolerantEnum(['detected', 'user_created'], 'unknown')
+const recurringTypeResponseSchema = tolerantEnum(RECURRING_TYPES, 'unknown')
+const recurringCadenceResponseSchema = tolerantEnum(RECURRING_CADENCES, 'unknown')
+const recurringAmountTypeResponseSchema = tolerantEnum(RECURRING_AMOUNT_TYPES, 'unknown')
+
+const accountRelationSchema = z.object({ accountKey: positiveId })
+const currencySchema = z.object({ currencyKey: positiveId, code: z.string().regex(/^[A-Z]{3}$/) })
 const categorySchema = z.object({
   categoryKey: positiveId,
   name: z.string().min(1).max(255),
@@ -23,19 +34,19 @@ const categorySchema = z.object({
   bgColor: z.string().nullish(),
   textColor: z.string().nullish(),
   icon: z.string().nullish(),
-}).strict()
+})
 
 export const recurringItemSchema = z.object({
   recurringSeriesKey: positiveId,
-  type: recurringTypeSchema,
+  type: recurringTypeResponseSchema,
   status: recurringStatusSchema,
   source: recurringSourceSchema,
   confidenceScore: z.number().finite().min(0).max(100),
   displayName: z.string().min(1).max(255),
   normalizedMerchantKey: z.string().min(1).max(255),
-  cadence: recurringCadenceSchema,
+  cadence: recurringCadenceResponseSchema,
   cadenceConfidence: z.number().finite().min(0).max(100),
-  amountType: recurringAmountTypeSchema,
+  amountType: recurringAmountTypeResponseSchema,
   expectedAmount: optionalMoney,
   expectedAmountMin: optionalMoney,
   expectedAmountMax: optionalMoney,
@@ -47,9 +58,9 @@ export const recurringItemSchema = z.object({
   accountKey: accountRelationSchema.nullish(),
   category: categorySchema.nullish(),
   currency: currencySchema.nullish(),
-}).strict()
+})
 
-export const recurringItemsResponseSchema = z.object({ items: z.array(recurringItemSchema) }).strict()
+export const recurringItemsResponseSchema = z.object({ items: z.array(recurringItemSchema) })
 
 const summaryTotalsSchema = z.object({
   billMaxTotal: finiteMoney,
@@ -63,7 +74,7 @@ const summaryTotalsSchema = z.object({
   subscriptionMinTotal: finiteMoney,
   variableMaxTotal: finiteMoney,
   variableMinTotal: finiteMoney,
-}).strict()
+})
 
 export const recurringSummarySchema = z.object({
   billMaxTotal: finiteMoney,
@@ -80,7 +91,7 @@ export const recurringSummarySchema = z.object({
   subscriptionMinTotal: finiteMoney,
   variableMaxTotal: finiteMoney,
   variableMinTotal: finiteMoney,
-}).strict()
+})
 
 export type RecurringItemDto = z.infer<typeof recurringItemSchema>
 export type RecurringSummaryDto = z.infer<typeof recurringSummarySchema>
@@ -104,14 +115,13 @@ export type RecurringMetadataInput = z.infer<typeof recurringMetadataSchema>
 // Mirrors web's onRestore, which reuses the update endpoint with `status: 'candidate'` rather than
 // a dedicated restore route (see recurring-client.tsx handleRecurringAction's "restore" case).
 export const recurringRestoreSchema = z.object({ status: z.literal('candidate') }).strict()
-export type RecurringRestoreInput = z.infer<typeof recurringRestoreSchema>
 
 const detectionCountSchema = z.number().int().nonnegative().safe()
 export const recurringDetectionResponseSchema = z.object({
   created: detectionCountSchema,
   updated: detectionCountSchema,
   skipped: detectionCountSchema,
-}).strict()
+})
 export type RecurringDetectionResult = z.infer<typeof recurringDetectionResponseSchema>
 
 const emptyResponseSchema = z.undefined()
@@ -128,7 +138,7 @@ export const createUpdateRecurringEndpoint = (id: number) => {
   return writeEndpoint({
     method: 'PATCH',
     path: `/v1/recurring/${id}`,
-    schema: z.object({ recurringSeries: recurringItemSchema }).strict(),
+    schema: z.object({ recurringSeries: recurringItemSchema }),
   })
 }
 

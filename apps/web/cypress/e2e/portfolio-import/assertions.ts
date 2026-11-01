@@ -7,11 +7,14 @@ export type PortfolioContext = {
 
 export type ImportPreview = {
   readonly rows: {
-    readonly ready: readonly {
-      readonly normalized?: Record<string, unknown>;
-    }[];
+    readonly duplicate: readonly ImportPreviewRow[];
+    readonly failed: readonly ImportPreviewRow[];
+    readonly invalid: readonly ImportPreviewRow[];
+    readonly needsAssetReview: readonly ImportPreviewRow[];
+    readonly ready: readonly ImportPreviewRow[];
   };
   readonly summary: {
+    readonly failedRows: number;
     readonly needsAssetReviewRows: number;
     readonly totalRows: number;
     readonly unsupportedAssets?: readonly {
@@ -21,12 +24,116 @@ export type ImportPreview = {
   };
 };
 
+type ImportPreviewRow = {
+  readonly failureReason?: string;
+  readonly id: number;
+  readonly normalized?: Record<string, unknown>;
+  readonly raw: Record<string, unknown>;
+  readonly rowNumber: number;
+  readonly skipReason?: string;
+  readonly status: string;
+};
+
 type PortfolioTransaction = {
   readonly feeAmount?: number | string;
+  readonly financialAssetKey: { readonly symbol: string };
   readonly itemType?: string;
   readonly quantity: number | string;
   readonly settlementCurrencyKey: { readonly code: string };
 };
+
+type ExpectedRejectedTransaction = NonNullable<
+  BrokerImportCase["expectedRejectedTransaction"]
+>;
+
+export function unsupportedAssetsFromPreview(
+  preview: Pick<ImportPreview, "summary">,
+): NonNullable<ImportPreview["summary"]["unsupportedAssets"]> {
+  return preview.summary.unsupportedAssets ?? [];
+}
+
+export function assertRejectedTransactionInPreview(
+  preview: ImportPreview,
+  expected: ExpectedRejectedTransaction,
+  expectedFailedRows: number,
+): ImportPreviewRow {
+  if (!Array.isArray(preview.rows?.failed)) {
+    throw new Error(
+      "Import preview contract is missing rows.failed; cannot verify rejected transaction",
+    );
+  }
+  if (preview.rows.failed.length !== expectedFailedRows) {
+    throw new Error(
+      `Import preview rows.failed expected ${expectedFailedRows} rows, got ${preview.rows.failed.length}`,
+    );
+  }
+
+  const expectedDate = expected.date.match(/^(\d{4})(\d{2})(\d{2})$/);
+  if (!expectedDate) {
+    throw new Error(`Rejected transaction ${expected.transactionId} has an invalid expected date`);
+  }
+  const expectedNormalizedDate = `${expectedDate[1]}-${expectedDate[2]}-${expectedDate[3]}T00:00:00.000Z`;
+  const expectedDirection = expected.quantity < 0 ? "SELL" : "BUY";
+  const failedRow = preview.rows.failed.find((row) => {
+    const normalized = row.normalized;
+    if (!normalized) return false;
+
+    const normalizedTicker = normalized["ticker"];
+    const normalizedAssetSymbol = normalized["assetSymbol"];
+    const hasExpectedAssetIdentity =
+      (normalizedTicker === expected.symbol ||
+        normalizedAssetSymbol === expected.symbol) &&
+      (normalizedTicker === undefined || normalizedTicker === expected.symbol) &&
+      (normalizedAssetSymbol === undefined ||
+        normalizedAssetSymbol === expected.symbol);
+    const raw = row.raw;
+    const rawIdentityIsConsistent =
+      (raw["TransactionID"] === undefined ||
+        raw["TransactionID"] === expected.transactionId) &&
+      (raw["Symbol"] === undefined || raw["Symbol"] === expected.symbol) &&
+      (raw["TradeDate"] === undefined || raw["TradeDate"] === expected.date) &&
+      (raw["Quantity"] === undefined ||
+        Number(raw["Quantity"]) === expected.quantity);
+
+    return (
+      normalized["externalTransactionId"] === expected.transactionId &&
+      hasExpectedAssetIdentity &&
+      normalized["date"] === expectedNormalizedDate &&
+      Number(normalized["quantity"]) === Math.abs(expected.quantity) &&
+      normalized["transactionType"] === expectedDirection &&
+      rawIdentityIsConsistent
+    );
+  });
+  if (!failedRow) {
+    throw new Error(
+      `Import preview rows.failed is missing ${expected.symbol} transaction ${expected.transactionId} (${expected.date}, quantity ${expected.quantity})`,
+    );
+  }
+  if (failedRow.status !== "failed") {
+    throw new Error(
+      `Rejected transaction ${expected.transactionId} has status ${failedRow.status}, expected failed`,
+    );
+  }
+  if (
+    !failedRow.failureReason ||
+    !expected.reason.test(failedRow.failureReason)
+  ) {
+    throw new Error(
+      `Rejected transaction ${expected.transactionId} failure reason did not match ${expected.reason}`,
+    );
+  }
+  return failedRow;
+}
+
+export function persistedUnsupportedAssetSymbols(
+  transactions: readonly PortfolioTransaction[],
+  unsupportedAssets: readonly { readonly symbol: string }[],
+): string[] {
+  const skippedSymbols = new Set(unsupportedAssets.map(({ symbol }) => symbol));
+  return transactions
+    .map(({ financialAssetKey }) => financialAssetKey.symbol)
+    .filter((symbol) => skippedSymbols.has(symbol));
+}
 
 export function assertImportPreview(
   preview: ImportPreview,
@@ -34,7 +141,7 @@ export function assertImportPreview(
 ): void {
   expect(preview.summary.totalRows).to.equal(input.expectedRows);
   expect(preview.summary.needsAssetReviewRows).to.equal(0);
-  expect(preview.summary.unsupportedAssets ?? []).to.deep.equal(
+  expect(unsupportedAssetsFromPreview(preview)).to.deep.equal(
     input.expectedUnsupportedAssets ?? [],
   );
   const isins = preview.rows.ready.flatMap((row) => {
@@ -44,6 +151,18 @@ export function assertImportPreview(
   expect([...new Set(isins)].sort()).to.deep.equal(
     [...input.expectedIsins].sort(),
   );
+  if (input.expectedHoldingIdentities) {
+    for (const expected of input.expectedHoldingIdentities) {
+      expect(
+        preview.rows.ready.some(
+          (row) =>
+            row.normalized?.["ticker"] === expected.symbol &&
+            row.normalized?.["isin"] === expected.isin,
+        ),
+        `${expected.symbol} identity ${expected.isin}`,
+      ).to.equal(true);
+    }
+  }
 }
 
 export function assertImportedTransactions(
@@ -70,6 +189,29 @@ export function assertImportedTransactions(
       0,
     );
     expect(fees).to.be.closeTo(input.expectedFeeTotal, 0.000001);
+    if (input.expectedFeesByCurrency) {
+      const feesByCurrency = transactions.reduce<Record<string, number>>(
+        (totals, transaction) => {
+          const currency = transaction.settlementCurrencyKey.code;
+          totals[currency] =
+            (totals[currency] ?? 0) +
+            Math.abs(Number(transaction.feeAmount ?? 0));
+          return totals;
+        },
+        {},
+      );
+      expect(feesByCurrency).to.deep.equal(input.expectedFeesByCurrency);
+    }
+
+    if (input.expectedUnsupportedAssets?.length) {
+      expect(
+        persistedUnsupportedAssetSymbols(
+          transactions,
+          input.expectedUnsupportedAssets,
+        ),
+        "unsupported assets must not be persisted as transactions",
+      ).to.deep.equal([]);
+    }
 
     if (input.expectedTransactionDetails) {
       expect(
@@ -85,7 +227,9 @@ export function assertImportedTransactions(
             ),
           ),
         ].sort(),
-      ).to.deep.equal([...input.expectedTransactionDetails.settlementCurrencies]);
+      ).to.deep.equal([
+        ...input.expectedTransactionDetails.settlementCurrencies,
+      ]);
     }
   });
 }
@@ -95,7 +239,9 @@ export function assertImportedHoldingQuantities(
   input: BrokerImportCase,
   apiBaseUrl: string,
 ): void {
-  cy.request<{ holdings: { quantity: number }[] }>({
+  cy.request<{
+    holdings: { financialAssetSymbol: string; quantity: number }[];
+  }>({
     failOnStatusCode: false,
     headers: { Authorization: `Bearer ${context.accessToken}` },
     log: false,
@@ -104,9 +250,21 @@ export function assertImportedHoldingQuantities(
     expect(status, "portfolio holdings status").to.equal(200);
     expect(
       body.holdings.map((holding) => holding.quantity).sort((a, b) => a - b),
-    ).to.deep.equal(
-      [...input.expectedHoldingQuantities].sort((a, b) => a - b),
-    );
+    ).to.deep.equal([...input.expectedHoldingQuantities].sort((a, b) => a - b));
+    if (input.expectedHoldingIdentities) {
+      expect(
+        body.holdings
+          .map(({ financialAssetSymbol, quantity }) => ({
+            symbol: financialAssetSymbol,
+            quantity,
+          }))
+          .sort((a, b) => a.symbol.localeCompare(b.symbol)),
+      ).to.deep.equal(
+        input.expectedHoldingIdentities
+          .map(({ symbol, quantity }) => ({ symbol, quantity }))
+          .sort((a, b) => a.symbol.localeCompare(b.symbol)),
+      );
+    }
   });
 }
 
@@ -115,15 +273,18 @@ export function assertRealizedGains(
   input: BrokerImportCase,
   apiBaseUrl: string,
 ): void {
-  cy.request<{ summary: { realizedGains: number } }>({
+  const expectedRealizedGain = input.expectedRealizedGain;
+  if (expectedRealizedGain === undefined) return;
+  cy.request<{ summary: { currency: string; realizedGains: number } }>({
     failOnStatusCode: false,
     headers: { Authorization: `Bearer ${context.accessToken}` },
     log: false,
     url: `${apiBaseUrl}/v1/portfolio/${context.portfolioId}/dashboard?period=ALL`,
   }).then(({ body, status }) => {
     expect(status, "portfolio dashboard status").to.equal(200);
+    expect(body.summary.currency, "realized gain currency").to.equal("EUR");
     expect(body.summary.realizedGains).to.be.closeTo(
-      input.expectedRealizedGain,
+      expectedRealizedGain,
       0.01,
     );
   });

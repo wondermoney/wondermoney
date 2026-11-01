@@ -102,7 +102,7 @@ const responseBodyForSchema = (
 ): unknown => method === 'HEAD' || response.status === 204 ? undefined : response.body
 
 /**
- * RAD-517 — the app's only genuinely unexpected failure: the server answered
+ * The app's only genuinely unexpected failure: the server answered
  * 2xx with a body the endpoint's own schema rejects, i.e. the API contract
  * drifted. Today that is invisible — it becomes the same generic failure state
  * as a dropped connection — which is exactly what crash/error reporting is for.

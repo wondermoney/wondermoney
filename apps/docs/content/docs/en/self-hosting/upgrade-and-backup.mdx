@@ -14,7 +14,7 @@ The API applies any database changes when it starts. To stay on a specific relea
 
 ## Back up
 
-Everything that matters is in the Postgres database, plus the MinIO volume if you use the bundled storage.
+Everything that matters is in the Postgres database, plus the `storage-data` volume if you use the bundled storage.
 
 ```sh
 docker compose exec -T postgres pg_dump -U wondermoney -Fc wondermoney > wondermoney-$(date +%F).dump

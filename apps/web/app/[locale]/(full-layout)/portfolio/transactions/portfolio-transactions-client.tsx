@@ -18,8 +18,10 @@ import type { GetPortfoliosResponse } from "@/lib/api/portfolio/usePortfolios";
 import usePortfolios from "@/lib/api/portfolio/usePortfolios";
 import type { GetPortfoliosTransactionsResponse } from "@/lib/api/portfolio/usePortfoliosTransactions";
 import usePortfoliosTransactions from "@/lib/api/portfolio/usePortfoliosTransactions";
+import { serverSeed } from "@/lib/query/server-seed";
 
 interface PortfolioTransactionsClientProps {
+  serverRenderedAt: number;
   initialPortfoliosData: GetPortfoliosResponse;
   initialPortfoliosTransactionsData: GetPortfoliosTransactionsResponse;
   hasAnyTransactions: boolean;
@@ -27,6 +29,7 @@ interface PortfolioTransactionsClientProps {
 }
 
 export default function PortfolioTransactionsClient({
+  serverRenderedAt,
   initialPortfoliosData,
   initialPortfoliosTransactionsData,
   hasAnyTransactions,
@@ -96,7 +99,7 @@ export default function PortfolioTransactionsClient({
   };
 
   const { data: portfoliosData, isLoading: isLoadingPortfoliosData } =
-    usePortfolios({ initialData: initialPortfoliosData });
+    usePortfolios(serverSeed(initialPortfoliosData, serverRenderedAt));
 
   const {
     data: portfoliosTransactionsData,
@@ -110,9 +113,10 @@ export default function PortfolioTransactionsClient({
       // user picks a different range, initialData must not be passed —
       // otherwise React Query treats the new query key as fresh (per the
       // global staleTime) and never fires the actual fetch for it.
-      ...(!hasUsedDateFilter && {
-        initialData: initialPortfoliosTransactionsData,
-      }),
+      ...serverSeed(
+        hasUsedDateFilter ? undefined : initialPortfoliosTransactionsData,
+        serverRenderedAt,
+      ),
     },
   );
 

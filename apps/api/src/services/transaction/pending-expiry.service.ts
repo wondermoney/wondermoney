@@ -1,5 +1,5 @@
 /**
- * Ghost-pending expiry (RAD-346, Phase 4).
+ * Ghost-pending expiry.
  *
  * A pending authorization can be dropped by the merchant and simply vanish from the feed without
  * ever posting. Left alone it lingers forever, making the transaction list (and available balance)
@@ -11,6 +11,7 @@
  */
 import type { EntityManager } from '@mikro-orm/core';
 
+import { HIDDEN_FILTER } from '@app/database/filters/tenant-filter';
 import type { Account } from '@entity/Account';
 import { Transaction } from '@entity/Transaction';
 import { TransactionAuditActorType, TransactionAuditEventType } from '@entity/TransactionAuditLog';
@@ -59,11 +60,13 @@ export async function logDryRunExpirations(
   params: { account: Account; graceDays?: number; now?: Date; pendingStatus: TransactionStatus; seenIdentities: Set<string> },
 ): Promise<number[]> {
   try {
-    const pendings = await em.find(Transaction, { accountKey: params.account, deletedAt: undefined, transactionStatusKey: params.pendingStatus });
+    // Hidden pendings too, as the live path (`applyExpirations`) reads them.
+    const pendings = await em.find(Transaction, { accountKey: params.account, deletedAt: undefined, transactionStatusKey: params.pendingStatus }, { filters: { [HIDDEN_FILTER]: false } });
     if (pendings.length === 0) return [];
 
     const expirable = pendings.map((pending) => ({
-      identities: [pending.nordigenInternalTransactionId, pending.externalTransactionId],
+      // `enableBankingTransactionId` too, as the live path (`applyExpirations`) does.
+      identities: [pending.nordigenInternalTransactionId, pending.externalTransactionId, pending.enableBankingTransactionId],
       transactionDate: pending.transactionDate ?? new Date(0),
       transactionKey: pending.transactionKey,
     }));
@@ -86,7 +89,7 @@ export async function logDryRunExpirations(
       });
     }
 
-    if (keys.length > 0) logger.info({ accountKey: params.account.accountKey, expirations: keys.length }, 'RAD-346 pending expiry (dry-run): intended expirations logged');
+    if (keys.length > 0) logger.info({ accountKey: params.account.accountKey, expirations: keys.length }, 'Pending expiry (dry-run): intended expirations logged');
     return keys;
   } catch (error) {
     logger.warn({ error: error instanceof Error ? error.message : 'unknown' }, 'Pending expiry dry-run failed');

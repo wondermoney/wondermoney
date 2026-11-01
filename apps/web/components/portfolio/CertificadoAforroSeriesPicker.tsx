@@ -25,7 +25,7 @@ import { Text } from "@/components/ui/Typography";
 
 import type { FormInput } from "./PortfolioTransactionAddModal";
 
-export const CA_SERIES_OPTIONS = [
+const CA_SERIES_OPTIONS = [
   {
     descriptionKey: "portfolio-ca-series-a-description",
     symbol: "CA-SERIE-A",

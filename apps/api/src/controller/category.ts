@@ -22,7 +22,7 @@ export async function createCategory(req: Request, res: Response, next: NextFunc
   const {
     body: { color, icon, name, parentCategoryKey },
   } = await zParse(createCategoryRequestSchema, req);
-  // User-created categories are household-shared (RAD-343): scope to the user's tenant.
+  // User-created categories are household-shared: scope to the user's tenant.
   const appuserTenant = await DI.em.getRepository(AppuserTenant).getAppuserTenantByAppuser(user);
   if (!appuserTenant) {
     next(new NotFoundError('Tenant not found'));

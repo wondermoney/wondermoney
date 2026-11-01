@@ -1,12 +1,14 @@
 "use client";
 
 import { ChevronsUpDown } from "lucide-react";
-import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { forwardRef, useEffect, useRef, useState } from "react";
 
-import CategoryIcon from "@/components/ui/CategoryIcon";
+import CategoryIcon, {
+  categoryIconStyle,
+} from "@/components/ui/CategoryIcon";
 import { Text } from "@/components/ui/Typography";
+import { useRouter } from "@/i18n/navigation";
 import type { Category } from "@/lib/api/category/useCategories";
 import { cn } from "@/lib/utils";
 import {
@@ -59,10 +61,7 @@ const CategoryOptionsList = ({
     >
       <CategoryIcon
         icon={category.icon}
-        style={{
-          color: category.bgColor,
-          filter: "brightness(0.8)",
-        }}
+        style={categoryIconStyle(category.bgColor)}
       />
       <Text variant="smallText">
         {category.isSystemCategory
@@ -150,15 +149,12 @@ export const CategoryComboBoxForm = forwardRef<
               )}
             >
               {isLoadingCategories ? (
-                <>Loading...</>
+                <>{t("loading")}</>
               ) : field.value && selectedCategory ? (
                 <div className="flex items-center gap-1">
                   <CategoryIcon
                     icon={selectedCategory?.icon}
-                    style={{
-                      color: selectedCategory?.bgColor,
-                      filter: "brightness(0.8)",
-                    }}
+                    style={categoryIconStyle(selectedCategory?.bgColor)}
                   />
                   {selectedCategory?.isSystemCategory
                     ? t(getCategoryTranslationKey(selectedCategory?.name))
@@ -204,15 +200,12 @@ export const CategoryComboBoxForm = forwardRef<
           )}
         >
           {isLoadingCategories ? (
-            <>Loading...</>
+            <>{t("loading")}</>
           ) : field.value && selectedCategory ? (
             <div className="flex items-center gap-1">
               <CategoryIcon
                 icon={selectedCategory?.icon}
-                style={{
-                  color: selectedCategory?.bgColor,
-                  filter: "brightness(0.8)",
-                }}
+                style={categoryIconStyle(selectedCategory?.bgColor)}
               />
               {selectedCategory?.isSystemCategory
                 ? t(getCategoryTranslationKey(selectedCategory?.name))

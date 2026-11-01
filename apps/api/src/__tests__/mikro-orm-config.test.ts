@@ -7,7 +7,6 @@ const env: Record<string, string> = {
   AZURE_AI_FOUNDRY_API_KEY: 'foundry',
   AZURE_AI_FOUNDRY_API_VERSION: '2024-05-01',
   AZURE_AI_FOUNDRY_ENDPOINT: 'https://example.test',
-  AZURE_OPENAI_API_DEPLOYMENT_NAME: 'gpt',
   AZURE_OPENAI_API_KEY: 'azure',
   AZURE_OPENAI_API_VERSION: '2024-05-01',
   AZURE_OPENAI_DEPLOYMENT: 'gpt',

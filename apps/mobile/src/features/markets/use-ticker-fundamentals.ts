@@ -8,7 +8,7 @@ import { createFundamentalsEndpoint, isValidSymbol } from './markets-contract'
 import { fundamentalsKey } from './query-keys'
 
 /**
- * RAD-511 — key-metrics TTM. `staleTime` mirrors the API's own `/fundamentals` cache window
+ * Key-metrics TTM. `staleTime` mirrors the API's own `/fundamentals` cache window
  * (1 hour, see routes/v1/financial-markets.ts) so this hook never refetches sooner than the
  * server could possibly return fresher data.
  */

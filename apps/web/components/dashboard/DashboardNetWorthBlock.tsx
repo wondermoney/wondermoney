@@ -61,13 +61,13 @@ export default function DashboardNetWorthBlock({
       <div className="grid gap-0 md:grid-cols-2">
         <div className="space-y-4 px-5 py-5 md:px-6 md:py-6">
           <div className="space-y-1.5">
-            <p className="text-muted-foreground text-xs font-medium tracking-[0.18em] uppercase">
+            <p className="text-muted-foreground text-sm font-medium">
               {t("net-worth")}
             </p>
             <p className="text-foreground font-mono text-3xl font-semibold tracking-tight md:text-4xl">
               <Amount value={totalNetWorth} currency={currencyCode} />
             </p>
-            <p className="text-muted-foreground text-xs font-medium tracking-[0.16em] uppercase">
+            <p className="text-muted-foreground text-xs">
               {t("current")}
             </p>
           </div>
@@ -81,9 +81,9 @@ export default function DashboardNetWorthBlock({
 
         <div className="border-border border-t px-5 py-5 md:border-t-0 md:border-l md:px-6 md:py-6">
           <div className="mb-3 flex items-center justify-between gap-3">
-            {/* RAD-566 — this block is its own top-level dashboard section
-                with no SectionHeader above it, so it opens at h2. As an h3 it
-                sat directly under the page h1 and skipped a level. */}
+            {/* This block is its own top-level dashboard section with no
+                SectionHeader above it, so it opens at h2. An h3 would sit
+                directly under the page h1 and skip a level. */}
             <h2 className="text-sm font-medium">{t("net-worth-history")}</h2>
             <span className="text-muted-foreground border-border rounded-full border px-2 py-1 text-xs font-medium">
               {t("net-worth-history-period-6m")}

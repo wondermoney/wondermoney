@@ -8,6 +8,7 @@ import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Link } from "@/components/ui/Link";
 import { Heading, Text } from "@/components/ui/Typography";
+import { useSupportEmail } from "@/lib/api/instance/useInstance";
 import { cn } from "@/lib/utils";
 
 type NotFoundStateProps = {
@@ -18,11 +19,12 @@ type NotFoundStateProps = {
 // contains no `<html>`/`<body>` tags: the nearest ancestor layout that owns those
 // (either `app/[locale]/layout.tsx` or, for the invalid-locale fallback,
 // `app/not-found.tsx` itself) already renders them, and duplicating them here
-// produces React's "nested <html>" mounting error (RAD-642). Keep any future
+// produces React's "nested <html>" mounting error. Keep any future
 // not-found.tsx additions rendering only this component, never their own
 // `<html>`/`<body>`.
 export function NotFoundState({ className }: NotFoundStateProps) {
   const t = useTranslations();
+  const supportEmail = useSupportEmail();
   const titleId = React.useId();
   const descriptionId = React.useId();
 
@@ -41,16 +43,16 @@ export function NotFoundState({ className }: NotFoundStateProps) {
       >
         <CardContent className="space-y-6 p-6 sm:p-8">
           <div className="space-y-3">
-            <Text
-              as="p"
-              variant="smallText"
-              className="border-border bg-background text-muted-foreground inline-flex w-fit rounded-md border px-2.5 py-1 font-mono"
-            >
+            <Text as="p" variant="mutedText">
               {t("app-error-status-label", { status: 404 })}
             </Text>
 
             <div className="space-y-2">
-              <Heading variant="h1" id={titleId}>
+              <Heading
+                variant="h1"
+                id={titleId}
+                className="text-3xl font-semibold lg:text-3xl"
+              >
                 {t("page-not-found")}
               </Heading>
               <Text
@@ -75,18 +77,20 @@ export function NotFoundState({ className }: NotFoundStateProps) {
               </Link>
             </Button>
 
-            <Text
-              as="p"
-              variant="smallText"
-              className="text-muted-foreground flex items-center"
-            >
-              <a
-                className="text-primary inline-flex items-center gap-2 underline-offset-4 hover:underline"
-                href={`mailto:${t("support-email")}`}
+            {supportEmail && (
+              <Text
+                as="p"
+                variant="smallText"
+                className="text-muted-foreground flex items-center"
               >
-                {t("contact-support")}
-              </a>
-            </Text>
+                <a
+                  className="text-primary inline-flex items-center gap-2 underline-offset-4 hover:underline"
+                  href={`mailto:${supportEmail}`}
+                >
+                  {t("contact-support")}
+                </a>
+              </Text>
+            )}
           </div>
         </CardContent>
       </Card>

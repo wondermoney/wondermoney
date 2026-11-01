@@ -57,29 +57,27 @@ const createFormSchema = (t: (key: string) => string) =>
   z.object({
     name: z.string().min(1, t("invalid-account-name")),
     currencyId: z.string().default("151"),
-    // RAD-630: there is no account-type field (checking/savings/credit
+    // There is no account-type field (checking/savings/credit
     // card/loan) in this form, so a negative balance is the only way a debt
     // account (credit card, loan) can be represented at all — it's what
     // makes Net Worth subtract it instead of adding it as an asset. Zero is
     // still rejected as almost certainly a mistyped/empty entry; the API
     // itself has no positivity constraint (`currentBalance` there is just
-    // `z.number().finite().max(999999999999)`), so this mirrors the
+    // a finite `z.number().max(999999999999)`), so this mirrors the
     // server's own bound rather than inventing a stricter one.
     currentBalance: zLocaleNumber.pipe(
       z
-        .number()
-        .finite(t("invalid-current-balance"))
+        .number({ error: t("invalid-current-balance") })
         .max(999999999999, t("invalid-current-balance"))
         .min(-999999999999, t("invalid-current-balance"))
         .refine((value) => value !== 0, {
           message: t("invalid-current-balance"),
         }),
     ),
-    financialInstitutionId: z.coerce.number().optional(),
-    // RAD-651: optional so existing behaviour (no type recorded) is unchanged
-    // for anyone who leaves it unset — the API accepts the create request
-    // exactly as it always did when accountTypeId is absent.
-    accountTypeId: z.coerce.number().optional(),
+    financialInstitutionId: z.coerce.number<number>().optional(),
+    // Optional: leaving it unset records no type, and the API accepts the
+    // create request without accountTypeId.
+    accountTypeId: z.coerce.number<number>().optional(),
   });
 
 type FormSchema = z.infer<ReturnType<typeof createFormSchema>>;

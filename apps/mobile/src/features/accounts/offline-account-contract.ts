@@ -10,21 +10,21 @@ export const accountCurrencySchema = z.object({
   currencyKey: positiveSafeId,
   code: z.string().regex(/^[A-Z]{3}$/),
   description: z.string().trim().min(1).max(255),
-}).strict()
+})
 
 export const accountCurrenciesResponseSchema = z.object({
   currencies: z.array(accountCurrencySchema),
-}).strict()
+})
 
 export const accountFinancialInstitutionSchema = z.object({
   accountFinancialInstitutionKey: positiveSafeId,
   displayName: z.string().trim().min(1).max(255).nullable().optional(),
   logoUrl: z.url().nullable().optional(),
-}).strict()
+})
 
 export const accountFinancialInstitutionsResponseSchema = z.object({
   accountFinancialInstitutions: z.array(accountFinancialInstitutionSchema),
-}).strict()
+})
 
 export const offlineAccountPayloadSchema = z.object({
   name: z.string().trim().min(1).max(100),

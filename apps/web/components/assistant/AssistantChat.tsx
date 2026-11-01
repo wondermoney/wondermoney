@@ -3,7 +3,7 @@
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
 import { ArrowUp, CircleStop, RefreshCw } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import AssistantDataUsedDisclosure from "@/components/assistant/AssistantDataUsedDisclosure";
@@ -19,6 +19,8 @@ type Props = {
 
 export default function AssistantChat({ onStopChange }: Props) {
   const t = useTranslations("assistant");
+  // The API formats amounts and replies in the locale on screen (#61).
+  const locale = useLocale();
   const transport = useMemo(
     () =>
       new DefaultChatTransport({
@@ -27,6 +29,7 @@ export default function AssistantChat({ onStopChange }: Props) {
         prepareSendMessagesRequest: ({ id, messages }) => ({
           body: {
             id,
+            locale,
             messages: messages.map((message) => ({
               id: message.id,
               parts: message.parts
@@ -38,7 +41,7 @@ export default function AssistantChat({ onStopChange }: Props) {
           credentials: "include",
         }),
       }),
-    [],
+    [locale],
   );
 
   const { messages, sendMessage, status, stop, error } = useChat({ transport });
@@ -115,7 +118,7 @@ export default function AssistantChat({ onStopChange }: Props) {
                   <button
                     key={suggestion}
                     type="button"
-                    className="hover:bg-accent/70 text-left text-sm leading-6 rounded-2xl border border-border/70 bg-background px-4 py-3 transition-colors"
+                    className="hover:bg-accent/70 focus-visible:ring-ring text-left text-sm leading-6 rounded-lg border border-border bg-background px-4 py-3 transition-colors duration-[var(--duration-micro)] ease-out focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-hidden disabled:cursor-not-allowed disabled:opacity-50"
                     onClick={() => void handleSend(suggestion)}
                     disabled={isBusy}
                   >
@@ -136,7 +139,7 @@ export default function AssistantChat({ onStopChange }: Props) {
                 >
                   <div
                     className={cn(
-                      "max-w-[90%] rounded-2xl border px-4 py-3 text-sm leading-6 shadow-sm md:max-w-[80%]",
+                      "max-w-[90%] rounded-lg border px-4 py-3 text-sm leading-6 md:max-w-[80%]",
                       message.role === "user"
                         ? "border-primary/15 bg-primary/8 text-foreground"
                         : "border-border/70 bg-background",
@@ -156,7 +159,7 @@ export default function AssistantChat({ onStopChange }: Props) {
                     })}
                     {message.role === "assistant" ? (
                       <div className="mt-3 border-t border-border/60 pt-3">
-                        <AssistantDataUsedDisclosure />
+                        <AssistantDataUsedDisclosure className="border-0 bg-transparent p-0" />
                       </div>
                     ) : null}
                   </div>
@@ -167,7 +170,7 @@ export default function AssistantChat({ onStopChange }: Props) {
           )}
 
           {error ? (
-            <div className="rounded-2xl border border-destructive/20 bg-destructive/5 px-4 py-3 text-sm text-destructive-text">
+            <div className="rounded-lg border border-destructive-text/30 px-4 py-3 text-sm text-destructive-text">
               {t("chat.error")}
             </div>
           ) : null}
@@ -190,7 +193,7 @@ export default function AssistantChat({ onStopChange }: Props) {
           }}
           aria-label={t("chat.placeholder")}
           placeholder={t("chat.placeholder")}
-          className="min-h-24 resize-none rounded-2xl bg-background"
+          className="min-h-24 resize-none rounded-md bg-background"
         />
 
         <div className="flex items-center justify-between gap-3">

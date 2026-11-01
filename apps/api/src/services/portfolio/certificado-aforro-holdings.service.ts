@@ -2,6 +2,7 @@ import * as Sentry from '@sentry/node';
 import { addQuarters } from 'date-fns';
 
 import { DI } from '@app/app';
+import { anyOf, sqlQuery, toDate } from '@app/database/sql';
 import logger from '@utils/logger';
 
 import {
@@ -28,16 +29,16 @@ export function isSavingsCertificateBatch(batch: HoldingBatch): boolean {
 }
 
 async function loadRateAndPremiumData(assetKeys: number[], transactionKeys: number[]): Promise<RateAndPremiumData> {
-  const knex = DI.em.getKnex();
+  const db = sqlQuery(DI.em);
 
   const [rateRows, premiumRows, taxExemptRows] = await Promise.all([
-    knex('certificado_aforro_rate_period').whereIn('financial_asset_key', assetKeys).whereNull('deleted_at') as Promise<
-      { base_rate_bps: number; effective_month: Date; financial_asset_key: number }[]
+    db.selectFrom('certificado_aforro_rate_period').selectAll().where(anyOf('financial_asset_key', assetKeys)).where('deleted_at', 'is', null).execute() as Promise<
+      { base_rate_bps: number; effective_month: Date | string; financial_asset_key: number }[]
     >,
-    knex('certificado_aforro_premium_schedule').whereIn('financial_asset_key', assetKeys).whereNull('deleted_at') as Promise<
-      { cohort_start_date: Date | null; financial_asset_key: number; premium_bps: number; year_from: number; year_to: null | number }[]
+    db.selectFrom('certificado_aforro_premium_schedule').selectAll().where(anyOf('financial_asset_key', assetKeys)).where('deleted_at', 'is', null).execute() as Promise<
+      { cohort_start_date: Date | null | string; financial_asset_key: number; premium_bps: number; year_from: number; year_to: null | number }[]
     >,
-    knex('certificado_aforro_subscription_detail').whereIn('transaction_key', transactionKeys) as Promise<
+    db.selectFrom('certificado_aforro_subscription_detail').selectAll().where(anyOf('transaction_key', transactionKeys)).execute() as Promise<
       { tax_exempt: boolean; transaction_key: number }[]
     >,
   ]);
@@ -45,7 +46,7 @@ async function loadRateAndPremiumData(assetKeys: number[], transactionKeys: numb
   const ratePeriodsByAsset = new Map<number, RatePeriod[]>();
   for (const row of rateRows) {
     const list = ratePeriodsByAsset.get(row.financial_asset_key) ?? [];
-    list.push({ baseRateBps: row.base_rate_bps, effectiveMonth: new Date(row.effective_month) });
+    list.push({ baseRateBps: row.base_rate_bps, effectiveMonth: toDate(row.effective_month) });
     ratePeriodsByAsset.set(row.financial_asset_key, list);
   }
 
@@ -53,7 +54,7 @@ async function loadRateAndPremiumData(assetKeys: number[], transactionKeys: numb
   for (const row of premiumRows) {
     const list = premiumSchedulesByAsset.get(row.financial_asset_key) ?? [];
     list.push({
-      cohortStartDate: row.cohort_start_date ? new Date(row.cohort_start_date) : null,
+      cohortStartDate: row.cohort_start_date ? toDate(row.cohort_start_date) : null,
       premiumBps: row.premium_bps,
       yearFrom: row.year_from,
       yearTo: row.year_to,
@@ -96,7 +97,7 @@ export async function enrichSavingsCertificateHoldings(
   const assetKeys = [...new Set(openBatches.map((b) => b.financial_asset_key))];
   const transactionKeys = openBatches.map((b) => b.transaction_key);
 
-  // Static-mode series (Séries A/B, RAD-446) never read rate/premium data — skip fetching it for
+  // Static-mode series (Séries A/B) never read rate/premium data — skip fetching it for
   // asset keys that resolve to a known static series. Unknown symbols are left in (queried anyway)
   // rather than guessed at, matching the existing "skip with a warn" handling for those below.
   const rateAndPremiumAssetKeys = assetKeys.filter((assetKey) => {
@@ -109,18 +110,19 @@ export async function enrichSavingsCertificateHoldings(
     transactionKeys,
   );
 
-  const knex = DI.em.getKnex();
   const eurExchangeRow =
     currency === 'EUR'
       ? null
-      : ((await knex('exchange_rate as er')
-          .select('er.rate')
+      : await sqlQuery(DI.em)
+          .selectFrom('exchange_rate as er')
           .innerJoin('currency as from_c', 'er.from_currency_key', 'from_c.currency_key')
           .innerJoin('currency as to_c', 'er.to_currency_key', 'to_c.currency_key')
-          .where('from_c.code', 'EUR')
-          .andWhere('to_c.code', currency)
+          .select('er.rate')
+          .where('from_c.code', '=', 'EUR')
+          .where('to_c.code', '=', currency)
           .orderBy('er.date', 'desc')
-          .first()) as undefined | { rate: string });
+          .limit(1)
+          .executeTakeFirst();
   const conversionRate = eurExchangeRow ? Number(eurExchangeRow.rate) : 1;
 
   const lotsByHolding = new Map<string, HoldingBatch[]>();
@@ -140,7 +142,7 @@ export async function enrichSavingsCertificateHoldings(
       continue;
     }
 
-    // Static-mode series (Séries A/B, RAD-446): perpetual, no formula — value is whatever the user
+    // Static-mode series (Séries A/B): perpetual, no formula — value is whatever the user
     // last declared via BUY/SELL, i.e. `remaining_batch` summed directly. No rate/premium lookup,
     // no computeCertificateLotValue, no certificadoAforroDetail (there is no accrual detail to
     // report). currentValue === principal by definition, so gains are always zero.

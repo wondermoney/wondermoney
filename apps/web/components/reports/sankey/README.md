@@ -10,7 +10,7 @@ A custom, accessible Sankey diagram for cash-flow reports.
 
 ## Colors
 
-- Each source node owns a 3-stop left-to-right gradient.
+- Each link is one flat tint of its source node's colour (stroke-opacity 0.45, 0.12 when dimmed); no gradients in the marks.
 - Default palette uses chart tokens: `chart-1` for income, `chart-2` for expenses, `chart-3` for accounts.
 - Pass `color` on individual nodes to override.
 

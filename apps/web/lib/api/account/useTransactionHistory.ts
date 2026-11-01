@@ -29,7 +29,7 @@ export interface GetTransactionHistoryResponse {
   history: TransactionHistoryEntry[];
 }
 
-export async function getTransactionHistory(
+async function getTransactionHistory(
   transactionId: number,
   apiClient: AxiosInstance = api,
 ): Promise<GetTransactionHistoryResponse> {
@@ -40,7 +40,7 @@ export async function getTransactionHistory(
 }
 
 /**
- * Per-transaction activity log (RAD-346). Answers "who changed what, when" — created,
+ * Per-transaction activity log. Answers "who changed what, when" — created,
  * recategorized, amount edited, promoted from pending, expired.
  */
 export default function useTransactionHistory(

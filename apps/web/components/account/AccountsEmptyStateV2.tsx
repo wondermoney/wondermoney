@@ -122,7 +122,7 @@ export default function AccountsEmptyStateV2({
 
   // Balances and institutions come from the shared preview fixture so this
   // screen and Home describe the same fictional person; only the presentation
-  // (which icon, which tint) belongs to this surface. See RAD-589.
+  // (which icon, which tint) belongs to this surface.
   const ACCOUNT_PRESENTATION = [
     { icon: Landmark, iconBg: "bg-info/10", iconColor: "text-info-text" },
     { icon: PiggyBank, iconBg: "bg-success/10", iconColor: "text-success-text" },
@@ -205,7 +205,7 @@ export default function AccountsEmptyStateV2({
         <div className="border-border flex items-center justify-between border-b px-4 py-3 sm:px-6">
           {/* BRAND_GUIDELINES.md §8 forbids "What you'll get"-style feature-list
               framing on empty states; reuse the existing functional
-              "Accounts overview" label instead — RAD-647. */}
+              "Accounts overview" label instead. */}
           <span className="text-foreground text-sm font-medium">
             {t("accounts-overview")}
           </span>

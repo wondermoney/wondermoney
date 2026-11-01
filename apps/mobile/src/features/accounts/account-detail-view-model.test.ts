@@ -29,6 +29,7 @@ describe('account detail view model', () => {
       primaryCurrencyCode: 'EUR',
       refreshedAt: '2026-07-17T10:00:00.000Z',
       source: 'open_banking',
+      csvImportFormat: null,
     })
     expect(mapAccountDetail(dto)).not.toHaveProperty('logoUrl')
   })

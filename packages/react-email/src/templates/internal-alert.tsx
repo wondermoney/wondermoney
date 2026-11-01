@@ -16,7 +16,7 @@ import {
 
 import type { InternalAlertEmailProps } from "../types";
 
-export type { InternalAlertDetail, InternalAlertEmailProps } from "../types";
+export type { InternalAlertEmailProps } from "../types";
 
 const ACCENT = { info: "#7c3aed", warning: "#b45309" } as const;
 

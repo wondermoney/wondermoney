@@ -90,8 +90,8 @@ export default function AccountsList({ accounts }: { accounts: Account[] }) {
   /*
    * § 9 `InspectorDrawer` (D1) — inspect a row without leaving the list.
    *
-   * Clicking an account used to push `/accounts/{id}` immediately, which is the
-   * pattern the archetype exists to replace: a full navigation to answer "what
+   * Clicking an account does not push `/accounts/{id}` immediately: that is the
+   * pattern the archetype exists to replace, a full navigation to answer "what
    * is the IBAN on this one again?". The drawer answers that in place.
    *
    * Navigation is kept, not removed — unlike transactions, an account has a real
@@ -130,7 +130,7 @@ export default function AccountsList({ accounts }: { accounts: Account[] }) {
                   <Wallet className="text-muted-foreground h-4 w-4" />
                 </div>
               )}
-              <div>
+              <div className="min-w-0">
                 <div className="flex items-center gap-1.5">
                   <p className="text-foreground text-sm font-medium">
                     {account.accountName ?? t("unknown")}
@@ -142,7 +142,7 @@ export default function AccountsList({ accounts }: { accounts: Account[] }) {
                     />
                   )}
                 </div>
-                <div className="text-muted-foreground flex items-center gap-1.5 text-xs">
+                <div className="text-muted-foreground flex min-w-0 items-center gap-1.5 text-xs">
                   {!account.isOwnedByViewer && account.ownerFirstName && (
                     <span className="flex items-center gap-1">
                       <Users className="h-2.5 w-2.5" />
@@ -152,10 +152,10 @@ export default function AccountsList({ accounts }: { accounts: Account[] }) {
                   {!account.isOwnedByViewer &&
                     account.ownerFirstName &&
                     account.accountFinancialInstitutionKey?.displayName && (
-                      <span>·</span>
+                      <span aria-hidden="true" className="bg-border h-3 w-px shrink-0" />
                     )}
                   {account.accountFinancialInstitutionKey?.displayName && (
-                    <span>
+                    <span className="min-w-0 truncate">
                       {account.accountFinancialInstitutionKey.displayName}
                     </span>
                   )}
@@ -163,10 +163,11 @@ export default function AccountsList({ accounts }: { accounts: Account[] }) {
                     (account.syncStatus || account.refreshedAt) && (
                       <>
                         {account.accountFinancialInstitutionKey
-                          ?.displayName && <span>·</span>}
+                          ?.displayName && <span aria-hidden="true" className="bg-border h-3 w-px shrink-0" />}
                         <AccountSyncBadge
                           syncStatus={account.syncStatus}
                           refreshedAt={account.refreshedAt}
+                          className="shrink-0 whitespace-nowrap"
                         />
                       </>
                     )}

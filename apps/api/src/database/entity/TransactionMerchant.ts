@@ -1,5 +1,5 @@
-import { Entity, Filter, Index, ManyToOne, PrimaryKey, Property } from '@mikro-orm/core';
 import type { Rel } from '@mikro-orm/core';
+import { Entity, Filter, Index, ManyToOne, PrimaryKey, Property } from '@mikro-orm/decorators/legacy';
 
 import { TENANT_FILTER, tenantOrGlobalCond } from '../filters/tenant-filter';
 

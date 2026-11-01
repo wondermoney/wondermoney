@@ -1,7 +1,6 @@
 "use client";
 
 import { useQueryClient } from "@tanstack/react-query";
-import { type ColumnDef, createColumnHelper } from "@tanstack/react-table";
 import {
   ChevronDown,
   ChevronRight,
@@ -12,9 +11,13 @@ import {
 import { useTranslations } from "next-intl";
 import { useCallback } from "react";
 
-import CategoryIcon from "@/components/ui/CategoryIcon";
+import CategoryIcon, { categoryIconStyle } from "@/components/ui/CategoryIcon";
 import { Table } from "@/components/ui/Table";
 import TableCellDefault from "@/components/ui/Table/Cell/TableCellDefault";
+import {
+  type ColumnDef,
+  createColumnHelper,
+} from "@/components/ui/Table/features";
 import useDeleteCategory from "@/lib/api/category/useDeleteCategory";
 import { cn } from "@/lib/utils";
 import { getCategoryTranslationKey } from "@/lib/utils/categories";
@@ -112,10 +115,9 @@ const CategoriesTable: React.FC<CategoriesTableProps> = ({
       cell: (info) => (
         <CategoryIcon
           icon={info.getValue() as any}
-          style={{
-            color: info.row.original.bgColor,
-            filter: "brightness(0.8)",
-          }}
+          // The pastel colour darkened with `brightness(0.8)` stayed low
+          // contrast; the shared helper mixes it toward the foreground ink.
+          style={categoryIconStyle(info.row.original.bgColor)}
         />
       ),
     }),

@@ -14,7 +14,7 @@ import { textStyles } from '@/theme/typography'
 import { useCompleteOnboarding } from './use-complete-onboarding'
 
 /**
- * RAD-419 — the manual-account activation path from onboarding. Composes the
+ * The manual-account activation path from onboarding. Composes the
  * same building blocks as `OfflineAccountCreateRoute` (accounts tab entry
  * point) but with onboarding-specific navigation: back goes to `/onboarding`
  * instead of `/accounts`, and a successful creation completes onboarding
@@ -37,7 +37,7 @@ export function OnboardingCreateAccountRoute() {
   const params = useLocalSearchParams<{ version?: string }>()
   const version = parseVersion(params.version)
   const options = useOfflineAccountOptions()
-  // RAD-518 — the activation path: reaching this screen means onboarding is
+  // The activation path: reaching this screen means onboarding is
   // still required, so a successful creation here is a first account by
   // construction rather than by guessing at a cached list.
   const create = useCreateOfflineAccount('onboarding')

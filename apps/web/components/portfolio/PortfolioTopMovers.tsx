@@ -12,6 +12,7 @@ import usePortfolioTopMovers, {
 } from "@/lib/api/portfolio/usePortfolioTopMovers";
 import { cn } from "@/lib/utils";
 import { useFormatCurrency } from "@/lib/utils/useFormatCurrency";
+import { useFormatPercentage } from "@/lib/utils/useFormatPercentage";
 
 import { FinancialAssetLogo } from "../FinancialAssetLogo";
 
@@ -29,6 +30,7 @@ interface MoverItemProps {
 
 const MoverItem: React.FC<MoverItemProps> = ({ mover, isGainer, currency }) => {
   const formatCurrency = useFormatCurrency();
+  const formatPercentage = useFormatPercentage();
   return (
     <div className="flex items-center justify-between py-1">
       <div className="flex items-center gap-2">
@@ -54,8 +56,11 @@ const MoverItem: React.FC<MoverItemProps> = ({ mover, isGainer, currency }) => {
             <TrendingDown className="h-4 w-4" />
           )}
           <span>
-            {isGainer ? "+" : ""}
-            {mover.change.toFixed(1)}%
+            {formatPercentage(mover.change / 100, {
+              minimumFractionDigits: 1,
+              maximumFractionDigits: 1,
+              signDisplay: "exceptZero",
+            })}
           </span>
         </div>
         {mover.contribution !== 0 && (

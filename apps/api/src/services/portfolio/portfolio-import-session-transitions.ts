@@ -52,7 +52,7 @@ const PARSEABLE_FROM: readonly PortfolioImportSessionStatus[] = [
   PortfolioImportSessionStatus.WAITING_FOR_UPLOAD,
 ];
 
-export class PortfolioImportSessionTransitions {
+class PortfolioImportSessionTransitions {
   /**
    * Drive the parse-preview transition: lock the session, check legal source state, take
    * an S3 existence precheck, set status to PARSING with the correlation id marker, enqueue,

@@ -324,45 +324,6 @@ export class SubCategorySeeder extends Seeder {
       }),
     );
 
-    // Demo user's own subcategories: only when the demo data set is being seeded.
-    if (ctx._DEMO_appuser) {
-      ctxSubCategoryEntities.push(
-        em.create(Category, {
-          appuserKey: ctx._DEMO_appuser,
-          bgColor: ctx._DEMO_category.bgColor,
-          icon: 'banknote',
-          isSystemCategory: false,
-          name: 'MySubCategory A',
-          parentCategory: ctx._DEMO_category,
-          recurrency: Recurrency.MONTHLY,
-          textColor: ctx._DEMO_category.textColor,
-        }),
-      );
-      ctxSubCategoryEntities.push(
-        em.create(Category, {
-          appuserKey: ctx._DEMO_appuser,
-          bgColor: ctx._DEMO_category.bgColor,
-          icon: 'folder',
-          isSystemCategory: false,
-          name: 'MySubCategory B',
-          parentCategory: ctx._DEMO_category,
-          recurrency: Recurrency.MONTHLY,
-          textColor: ctx._DEMO_category.textColor,
-        }),
-      );
-      ctxSubCategoryEntities.push(
-        em.create(Category, {
-          appuserKey: ctx._DEMO_appuser,
-          bgColor: ctx._DEMO_category.bgColor,
-          icon: 'folder',
-          isSystemCategory: false,
-          name: 'MySubCategory C',
-          parentCategory: ctx._DEMO_category,
-          recurrency: Recurrency.ANNUALLY,
-          textColor: ctx._DEMO_category.textColor,
-        }),
-      );
-    }
     ctx.subCategories = ctxSubCategoryEntities;
   }
 }

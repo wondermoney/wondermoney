@@ -52,9 +52,9 @@ describe('createWorkerHealthServer', () => {
   });
 
   it('returns 503 when the status hook reports unhealthy', async () => {
-    // The endpoint used to answer `{ ok: true }` unconditionally, so a worker whose
-    // pg-boss client never started — or whose database was unreachable — stayed green
-    // forever and nothing restarted it.
+    // An unconditional `{ ok: true }` would keep a worker whose pg-boss client never
+    // started — or whose database was unreachable — green forever, and nothing would
+    // restart it.
     server = createWorkerHealthServer({ status: async () => Promise.resolve({ database: false, ok: false, pgBoss: true }) });
     await server.start(0);
     const address = server.server.address();

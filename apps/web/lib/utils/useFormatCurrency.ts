@@ -6,7 +6,7 @@ import { useCallback } from "react";
 import { formatCurrencyForLocale } from "@/lib/utils/formatCurrency";
 
 /**
- * RAD-572 — money, formatted in the locale the reader chose.
+ * Money, formatted in the locale the reader chose.
  *
  * `formatCurrency` passes `undefined` for locale, and `Intl.NumberFormat(undefined)`
  * resolves to the *runtime's* locale: the browser's in a Client Component, the
@@ -34,4 +34,3 @@ export function useFormatCurrency() {
   );
 }
 
-export default useFormatCurrency;

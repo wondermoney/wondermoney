@@ -14,6 +14,7 @@ vi.mock('../portfolio-snapshot.service', () => ({
   },
 }));
 
+import { kyselyDouble } from '@app/__tests__/__helpers__/kysely-double';
 import { DI } from '@app/app';
 import { FinancialAsset } from '@entity/FinancialAsset';
 import { FinancialAssetStockAdjustment } from '@entity/FinancialAssetStockAdjustment';
@@ -68,23 +69,12 @@ describe('stock split sync service', () => {
       return { financialAssetKey: 7, symbol: 'AAPL' };
     });
     const portfolioRows = options?.portfolioRows ?? [];
-    const knexBuilder = {
-      groupBy: vi.fn().mockReturnThis(),
-      innerJoin: vi.fn().mockReturnThis(),
-      min: vi.fn().mockReturnThis(),
-      select: vi.fn().mockReturnThis(),
-      then: (resolve: (value: typeof portfolioRows) => unknown) => Promise.resolve(resolve(portfolioRows)),
-      where: vi.fn().mockReturnThis(),
-      whereIn: vi.fn().mockReturnThis(),
-      whereNotNull: vi.fn().mockReturnThis(),
-      whereNull: vi.fn().mockReturnThis(),
-    };
-    const getKnexMock = vi.fn().mockReturnValue((() => knexBuilder) as unknown as typeof knexBuilder);
-    const forkMock = vi.fn().mockReturnValue({ clear: clearMock, create: createMock, find: findMock, findOne: findOneMock, findOneOrFail: findOneOrFailMock, flush: flushMock, getKnex: getKnexMock, getReference: getReferenceMock });
+    const getKyselyMock = vi.fn(() => kyselyDouble(() => portfolioRows).db);
+    const forkMock = vi.fn().mockReturnValue({ clear: clearMock, create: createMock, find: findMock, findOne: findOneMock, findOneOrFail: findOneOrFailMock, flush: flushMock, getKysely: getKyselyMock, getReference: getReferenceMock });
 
-    Object.assign(DI.em, { clear: clearMock, create: createMock, find: findMock, findOne: findOneMock, findOneOrFail: findOneOrFailMock, flush: flushMock, fork: forkMock, getKnex: getKnexMock });
+    Object.assign(DI.em, { clear: clearMock, create: createMock, find: findMock, findOne: findOneMock, findOneOrFail: findOneOrFailMock, flush: flushMock, fork: forkMock, getKysely: getKyselyMock });
 
-    return { clearMock, createMock, findMock, findOneMock, findOneOrFailMock, flushMock, forkMock, getKnexMock, getReferenceMock };
+    return { clearMock, createMock, findMock, findOneMock, findOneOrFailMock, flushMock, forkMock, getKyselyMock, getReferenceMock };
   }
 
   beforeEach(() => {
@@ -292,11 +282,11 @@ describe('stock split sync service', () => {
   });
 
   it('refreshes snapshots for affected portfolios after inserting splits', async () => {
-    const { getKnexMock } = setupEm([], { portfolioRows: [{ earliest_transaction_date: '2026-05-18', portfolio_key: 11 }] });
+    const { getKyselyMock } = setupEm([], { portfolioRows: [{ earliest_transaction_date: '2026-05-18', portfolio_key: 11 }] });
     mockedGetSplits.mockResolvedValue([{ date: '2026-05-20', split: '4/1' }]);
 
     await expect(syncStockSplitsForAsset(asset)).resolves.toEqual({ inserted: 1 });
-    expect(getKnexMock).toHaveBeenCalled();
+    expect(getKyselyMock).toHaveBeenCalled();
     expect(snapshotServiceMock.backfillSnapshotsForPortfolio).toHaveBeenCalledWith(11, new Date('2026-05-18'));
   });
 
@@ -330,8 +320,8 @@ describe('stock split sync service', () => {
   });
 
   it('logs and continues when affected portfolio discovery fails', async () => {
-    const getKnexMock = vi.fn().mockImplementation(() => { throw new Error('discovery failed'); });
-    const forkMock = vi.fn().mockReturnValue({ clear: vi.fn(), create: vi.fn(), find: vi.fn().mockResolvedValue([]), findOne: vi.fn(), findOneOrFail: vi.fn(), flush: vi.fn(), getKnex: getKnexMock, getReference: vi.fn() });
+    const getKyselyMock = vi.fn().mockImplementation(() => { throw new Error('discovery failed'); });
+    const forkMock = vi.fn().mockReturnValue({ clear: vi.fn(), create: vi.fn(), find: vi.fn().mockResolvedValue([]), findOne: vi.fn(), findOneOrFail: vi.fn(), flush: vi.fn(), getKysely: getKyselyMock, getReference: vi.fn() });
     Object.assign(DI.em, { fork: forkMock });
     mockedGetSplits.mockResolvedValue([{ date: '2026-05-20', split: '4/1' }]);
 

@@ -147,24 +147,6 @@ export function canConfirmPortfolioImport(
   );
 }
 
-export function shouldWaitForPortfolioImportColumnMappingSuggestion(input: {
-  hasSuggestion?: boolean;
-  hasWarning?: boolean;
-  importSessionId?: number;
-  isSuggesting?: boolean;
-  lastSuggestedImportSessionId?: number;
-  status?: PortfolioImportSessionStatus;
-}) {
-  return Boolean(
-    input.importSessionId &&
-      input.status === "needs_column_mapping" &&
-      !input.hasSuggestion &&
-      !input.hasWarning &&
-      (input.isSuggesting ||
-        input.lastSuggestedImportSessionId !== input.importSessionId),
-  );
-}
-
 export function isDuplicateOnlyResult(
   summary?: PortfolioImportLedgerSummary,
 ): boolean {

@@ -8,7 +8,7 @@ import { createWatchlistEndpoint } from './markets-contract'
 import { watchlistKey } from './query-keys'
 
 /**
- * RAD-243 (slice 2) — same read policy as use-quote: no retry, no
+ * Same read policy as use-quote: no retry, no
  * focus/reconnect refetch, MFA routed through blockAccess.
  * Unlike use-quote there is no route param to validate — it is a single,
  * fixed list per authenticated tenant, so there is no `isInvalidId` concept.

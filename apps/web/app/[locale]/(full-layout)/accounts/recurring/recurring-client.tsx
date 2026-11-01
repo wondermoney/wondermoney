@@ -32,6 +32,7 @@ import {
 } from "@/lib/api/recurring/useRecurringMutations";
 import type { GetRecurringSummaryResponse } from "@/lib/api/recurring/useRecurringSummary";
 import useRecurringSummary from "@/lib/api/recurring/useRecurringSummary";
+import { serverSeed } from "@/lib/query/server-seed";
 import { getCategoryTranslationKey } from "@/lib/utils/categories";
 import {
   formatCurrencyForLocale,
@@ -71,6 +72,7 @@ const formatRelativeDate = (
 };
 
 interface RecurringClientProps {
+  serverRenderedAt: number;
   initialAccountsData: GetAccountsResponse;
   initialRecurringItemsData: GetRecurringItemsResponse;
   initialRecurringSummaryData: GetRecurringSummaryResponse;
@@ -86,6 +88,7 @@ const emptyStateCard = (message: string) => (
 );
 
 export default function RecurringClient({
+  serverRenderedAt,
   initialAccountsData,
   initialRecurringItemsData,
   initialRecurringSummaryData,
@@ -118,16 +121,16 @@ export default function RecurringClient({
     };
   }, []);
 
-  const { data: accountsData } = useAccounts({
-    initialData: initialAccountsData,
-  });
+  const { data: accountsData } = useAccounts(
+    serverSeed(initialAccountsData, serverRenderedAt),
+  );
 
-  const { data: recurringItemsData } = useRecurringItems({
-    initialData: initialRecurringItemsData,
-  });
-  const { data: recurringSummaryData } = useRecurringSummary({
-    initialData: initialRecurringSummaryData,
-  });
+  const { data: recurringItemsData } = useRecurringItems(
+    serverSeed(initialRecurringItemsData, serverRenderedAt),
+  );
+  const { data: recurringSummaryData } = useRecurringSummary(
+    serverSeed(initialRecurringSummaryData, serverRenderedAt),
+  );
 
   const confirmRecurringMutation = useConfirmRecurring();
   const detectRecurringMutation = useDetectRecurring();

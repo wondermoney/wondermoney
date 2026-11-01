@@ -11,6 +11,7 @@ import { getDeltaClassName } from "@/lib/utils/formatCurrency";
 import { useFormatCurrency } from "@/lib/utils/useFormatCurrency";
 
 import { FinancialAssetLogo } from "../FinancialAssetLogo";
+import { FeeConversionNotice } from "./FeeConversionNotice";
 
 export function HoldingPositionHeader({
   summary,
@@ -19,9 +20,9 @@ export function HoldingPositionHeader({
 }) {
   const t = useTranslations();
   const formatCurrency = useFormatCurrency();
-  // RAD-575 — these were module-level `Intl` instances with an `undefined`
-  // locale, so quantities and percentage points followed the runtime rather
-  // than the reader. Memoised per locale rather than rebuilt each render.
+  // Formatted in the reader's locale, not the runtime's (an `undefined` locale
+  // resolves to the browser's or the server's). Memoised per locale rather than
+  // rebuilt each render.
   const locale = useLocale();
   const { formatQuantity, formatPercentPoint } = useMemo(() => {
     const quantity = new Intl.NumberFormat(locale, { maximumFractionDigits: 6 });
@@ -85,7 +86,7 @@ export function HoldingPositionHeader({
           <div className="bg-muted/30 rounded-lg p-3">
             <Text
               variant="mutedText"
-              className="text-xs tracking-wide uppercase"
+              className="text-xs"
             >
               {t("current-value")}
             </Text>
@@ -107,7 +108,7 @@ export function HoldingPositionHeader({
           <div className="bg-muted/30 rounded-lg p-3">
             <Text
               variant="mutedText"
-              className="text-xs tracking-wide uppercase"
+              className="text-xs"
             >
               {t("unrealized-gain-loss")}
             </Text>
@@ -129,7 +130,7 @@ export function HoldingPositionHeader({
           <div className="bg-muted/30 rounded-lg p-3">
             <Text
               variant="mutedText"
-              className="text-xs tracking-wide uppercase"
+              className="text-xs"
             >
               {t("quantity")}
             </Text>
@@ -146,6 +147,10 @@ export function HoldingPositionHeader({
               <span className="ml-1">({summary.invalidReason})</span>
             ) : null}
           </div>
+        ) : null}
+
+        {summary.feeConversionIncomplete ? (
+          <FeeConversionNotice scope="holding" />
         ) : null}
       </CardContent>
     </Card>

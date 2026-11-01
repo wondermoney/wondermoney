@@ -15,7 +15,7 @@ describe('findExistingTransaction', () => {
     expect(em.findOne).not.toHaveBeenCalled();
   });
 
-  it('excludes the synthetic fingerprint branch when a provider id is present (RAD-393)', async () => {
+  it('excludes the synthetic fingerprint branch when a provider id is present', async () => {
     const existing = { transactionKey: 99 } as Transaction;
     const em = mockEm();
     vi.mocked(em.findOne).mockResolvedValue(existing);
@@ -65,7 +65,7 @@ describe('findExistingTransaction', () => {
     });
   });
 
-  // Phase 1d: Enable Banking's replacement identity for `nordigenInternalTransactionId`.
+  // Enable Banking's provider identity, alongside the legacy `nordigenInternalTransactionId`.
   it('queries on enableBankingTransactionId and treats it as a provider id (excludes the fingerprint branch)', async () => {
     const existing = { transactionKey: 99 } as Transaction;
     const em = mockEm();
@@ -121,7 +121,7 @@ describe('findExistingTransactionWithProvenance', () => {
     expect(result).toEqual({ existing, matchedOn: 'nordigenInternalTransactionId' });
   });
 
-  it('does not let the fingerprint match a distinct-bank-id row — the RAD-393 fix (no false skip)', async () => {
+  it('does not let the fingerprint match a distinct-bank-id row (no false skip)', async () => {
     // A second real charge (external bank-B) that shares the date+amount fingerprint with an
     // existing row (bank-A). Because a provider id is present, the fingerprint branch is excluded
     // from the query, so it cannot match the bank-A row — the new charge is created, not skipped.

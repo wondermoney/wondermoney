@@ -52,12 +52,12 @@ class BankSyncPersistenceError extends Error {}
 export const handleAccountInitialSyncJob = async (job: JobWithMetadata<AccountInitialSyncJobPayload>, deps: WorkerDeps = {}) => {
   const { correlationId } = job.data;
   const log = deps.logger ?? logger;
-  // Phase 1d: `provider === 'enable_banking'` is the only branch point in this file — every other
+  // `provider === 'enable_banking'` is the only branch point in this file — every other
   // reference below reads the normalized `syncTargetKeyRaw`/`requisitionId` (an opaque analytics
   // identity for either provider, see `account-initial-sync-enqueue.service.ts`'s docblock) so the
   // incident/background-operation/recovery machinery underneath never has to know which provider
-  // it's looking at. Enable Banking is now the only provider: a payload without
-  // `provider: 'enable_banking'` is a legacy GoCardless job (or a legacy retry payload) and is
+  // it's looking at. Enable Banking is the only provider: a payload without
+  // `provider: 'enable_banking'` is a legacy requisition job (or a legacy retry payload) and is
   // rejected rather than coerced — `nordigenRequisitionKey` and `enableBankingConnectionKey`
   // index different tables, so falling back would resolve the wrong entity whenever the two
   // happen to share a number.
@@ -82,8 +82,7 @@ export const handleAccountInitialSyncJob = async (job: JobWithMetadata<AccountIn
     },
   });
   // Every job is enqueued by this repo's own code and always carries an incidentId (see
-  // `account-initial-sync-enqueue.service.ts`). The GoCardless-era legacy reconciliation path
-  // is gone with the provider.
+  // `account-initial-sync-enqueue.service.ts`).
   const incidentId = job.data.incidentId;
   if (!incidentId) throw new Error('Account initial sync job is missing incidentId');
   const incident = await incidents.assertIncident({ correlationId, flow: 'initial-add', incidentId, producer: 'pgboss-initial', requisitionId, userVisible: true });

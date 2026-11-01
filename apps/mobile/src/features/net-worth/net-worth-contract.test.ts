@@ -65,11 +65,21 @@ describe('net-worth contract', () => {
     ['empty row name', { ...fixture, rows: [{ type: 'accounts', name: '', balance: 1 }] }],
     ['oversized row name', { ...fixture, rows: [{ type: 'accounts', name: 'x'.repeat(256), balance: 1 }] }],
     ['non-finite row', { ...fixture, rows: [{ type: 'accounts', name: 'Cash', balance: NaN }] }],
-    ['wrong row type', { ...fixture, rows: [{ type: 'cash', name: 'Cash', balance: 1 }] }],
+    ['non-string row type', { ...fixture, rows: [{ type: 1, name: 'Cash', balance: 1 }] }],
     ['negative counter', { ...fixture, unsupportedCurrencies: { loans: -1, portfolios: 0 } }],
     ['fraction counter', { ...fixture, unsupportedCurrencies: { loans: 0, portfolios: 0.5 } }],
   ])('rejects %s', (_case, candidate) => {
     expect(netWorthDtoSchema.safeParse(candidate).success).toBe(false)
+  })
+
+  it('drops a breakdown row of a type this build does not know and strips added fields', () => {
+    const parsed = netWorthDtoSchema.parse({
+      ...fixture,
+      rows: [...fixture.rows, { type: 'properties', name: 'Flat', balance: 200_000, valuationDate: '2026-01-01' }],
+      assets: { ...fixture.assets, properties: 200_000 },
+      generatedAt: 'now',
+    })
+    expect(parsed).toEqual(fixture)
   })
 
   it('does not assert arithmetic consistency', () => {

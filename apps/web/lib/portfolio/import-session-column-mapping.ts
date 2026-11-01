@@ -21,10 +21,6 @@ export const PORTFOLIO_IMPORT_COLUMN_SOURCE_TOKENS = {
     `__derived_transaction_type:${strategy}__`,
 } as const;
 
-export function isPortfolioImportColumnSourceToken(value: string) {
-  return value.startsWith("__fixed_") || value.startsWith("__derived_");
-}
-
 export function parsePortfolioImportColumnSourceToken(value: string):
   | { kind: "fixedCurrency"; currency: string }
   | { kind: "fixedTransactionType"; transactionType: string }

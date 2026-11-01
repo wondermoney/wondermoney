@@ -7,7 +7,6 @@ const positiveId = z.number().int().positive()
 /** Mirrors core/api's OCR_UPLOAD_ALLOWED_MIME_TYPES (middleware/multer.ts) and the 5 MB
  * multer.limits.fileSize used for the receipt-scan upload. */
 export const OCR_UPLOAD_MIME_TYPES = ['application/pdf', 'image/jpeg', 'image/jpg', 'image/png', 'image/webp'] as const
-export const OCR_UPLOAD_MAX_BYTES = 5_000_000
 
 const ocrScanResponseSchema = z.object({
   transactionOcrImportId: positiveId,
@@ -17,8 +16,8 @@ const ocrScanResponseSchema = z.object({
     transactionDate: z.string().min(1),
     transactionMerchantId: positiveId.optional(),
     transactionMerchantName: z.string(),
-  }).strict(),
-}).strict()
+  }),
+})
 export type TransactionOcrScanDto = z.infer<typeof ocrScanResponseSchema>
 
 /** POST /v1/account/transaction/ocr — a raw multipart/form-data upload (the only mobile endpoint

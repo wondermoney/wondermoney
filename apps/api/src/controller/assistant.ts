@@ -3,17 +3,18 @@ import { randomUUID } from 'node:crypto';
 import type { Request, Response } from 'express';
 
 import { DI } from '@app/app';
+import { SupportedLanguages } from '@entity/Appuser';
 import { AppuserTenant } from '@entity/AppuserTenant';
 import { AssistantAuditLog } from '@entity/AssistantAuditLog';
 import { AssistantChatRetentionMode, AssistantConsent } from '@entity/AssistantConsent';
 import { AssistantService } from '@service/assistant/assistant.service';
 import { BadRequestError, ERROR_CODE } from '@utils/errors';
-import { assistantAuditLogQuerySchema, assistantChatSchema, assistantConsentUpdateSchema } from '@validators/assistant';
+import { assistantAuditLogQuerySchema, assistantChatSchema, assistantConsentUpdateSchema, type AssistantLocale } from '@validators/assistant';
 import { zParse } from '@validators/parser';
 
 export async function chatWithAssistant(req: Request, res: Response) {
   const { appuser, tenant } = await getAssistantContext(req);
-  const { body: { messages } } = await zParse(assistantChatSchema, req);
+  const { body: { locale, messages } } = await zParse(assistantChatSchema, req);
   const consent = await DI.em.findOne(AssistantConsent, {
     appuserKey: appuser,
     deletedAt: null,
@@ -27,10 +28,15 @@ export async function chatWithAssistant(req: Request, res: Response) {
     });
   }
 
+  await DI.em.populate(appuser, ['currencyKey']);
+
   return AssistantService.streamChat({
     appuserKey: appuser.appuserKey,
     consent: { assistantEnabled: consent.assistantEnabled, consentVersion: consent.consentVersion },
     conversationId: randomUUID(),
+    currency: appuser.currencyKey.code,
+    // The locale the client is showing; older clients send none, so fall back to the account's.
+    locale: locale ?? accountLocale(appuser.language),
     messages,
     req,
     res,
@@ -92,6 +98,10 @@ export async function updateAssistantConsent(req: Request, res: Response) {
   consent.disabledAt = assistantEnabled ? undefined : new Date();
   await DI.em.persist(consent).flush();
   return res.json({ consent: buildConsentResponse(consent) });
+}
+
+function accountLocale(language: SupportedLanguages): AssistantLocale {
+  return language === SupportedLanguages.PT ? 'pt' : 'en';
 }
 
 function buildAuditEventResponse(event: AssistantAuditLog) {

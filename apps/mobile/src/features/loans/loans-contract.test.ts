@@ -31,7 +31,7 @@ describe('loan contracts', () => {
     expect(() => createUpdateLoanRepaymentEndpoint(7, -1)).toThrow()
   })
 
-  it('rejects invalid allocations and candidate wire drift', () => {
+  it('rejects invalid allocations (a request body, so it stays strict)', () => {
     for (const value of [
       { principalAmount: 0, interestAmount: 0, feeAmount: 0, totalPaymentAmount: 1 },
       { principalAmount: 1, interestAmount: -1, feeAmount: 0, totalPaymentAmount: 0 },
@@ -40,8 +40,18 @@ describe('loan contracts', () => {
     ]) expect(loanRepaymentAllocationSchema.safeParse(value).success).toBe(false)
     expect(loanRepaymentAllocationSchema.safeParse({ principalAmount: 1, interestAmount: 0, feeAmount: 0, totalPaymentAmount: 1, notes: 'not writable' }).success).toBe(false)
     expect(loanRepaymentAllocationSchema.safeParse({ principalAmount: 1, interestAmount: 0, feeAmount: 0, totalPaymentAmount: 1, needsReview: false }).success).toBe(false)
-    expect(loanRepaymentCandidatesResponseSchema.safeParse({ candidates: [{ ...repaymentCandidateFixture, transactionKey: 82 }] }).success).toBe(false)
-    expect(loanRepaymentCandidatesResponseSchema.safeParse({ candidates: [{ ...repaymentCandidateFixture, transaction: { ...repaymentCandidateFixture.transaction, amount: -950 } }] }).success).toBe(false)
+  })
+
+  it('keeps parsing candidates when the API adds fields or a confidence this build does not know', () => {
+    const [candidate] = loanRepaymentCandidatesResponseSchema.parse({ candidates: [{
+      ...repaymentCandidateFixture,
+      confidence: 'VERY_HIGH',
+      transactionKey: 82,
+      transaction: { ...repaymentCandidateFixture.transaction, amount: -950 },
+    }] }).candidates
+    expect(candidate!.confidence).toBe('UNKNOWN')
+    expect(candidate).not.toHaveProperty('transactionKey')
+    expect(candidate!.transaction).not.toHaveProperty('amount')
   })
 
   it('accepts only explicit boolean inclusion or sparse descriptive fields', () => {
@@ -91,21 +101,38 @@ describe('loan contracts', () => {
     ['bad currency', { ...loanFixture, currency: { currencyKey: 1, code: 'eur' } }],
     ['nonfinite balance', { ...loanFixture, outstandingPrincipal: Infinity }],
     ['bad date', { ...loanFixture, openingBalanceDate: '01/01/2024' }],
-    ['bad type', { ...loanFixture, type: 'CARD' }],
-    ['bad status', { ...loanFixture, status: 'OVERDUE' }],
-    ['bad rate type', { ...loanFixture, rateType: 'VARIABLE' }],
-    ['extra field', { ...loanFixture, overviewTotal: 123 }],
+    ['missing type', { ...loanFixture, type: undefined }],
+    ['non-string status', { ...loanFixture, status: 1 }],
   ])('rejects loan with %s', (_label, value) => expect(loansResponseSchema.safeParse({ loans: [value] }).success).toBe(false))
+
+  it('reads loan enum values this build does not know as a fallback and strips added fields', () => {
+    const [loan] = loansResponseSchema.parse({ loans: [{
+      ...loanFixture,
+      type: 'CARD',
+      status: 'OVERDUE',
+      rateType: 'VARIABLE',
+      paymentFrequency: 'WEEKLY',
+      progressBasis: 'CURRENT_BALANCE',
+      overviewTotal: 123,
+    }] }).loans
+    expect(loan).toMatchObject({ type: 'OTHER', status: 'UNKNOWN', rateType: 'UNKNOWN', paymentFrequency: 'UNKNOWN', progressBasis: 'UNKNOWN' })
+    expect(loan).not.toHaveProperty('overviewTotal')
+  })
 
   it.each([
     ['bad repayment id', { ...repaymentFixture, loanRepaymentLinkKey: 0 }],
     ['bad payment date', { ...repaymentFixture, paymentDate: 'June 5' }],
     ['nonfinite fee', { ...repaymentFixture, feeAmount: NaN }],
-    ['bad allocation', { ...repaymentFixture, allocationSource: 'IMPORT' }],
+    ['missing allocation', { ...repaymentFixture, allocationSource: undefined }],
     ['bad transaction id', { ...repaymentFixture, transaction: { ...repaymentFixture.transaction, transactionKey: -1 } }],
     ['bad transaction date', { ...repaymentFixture, transaction: { ...repaymentFixture.transaction, transactionDate: '2026-06-05' } }],
-    ['extra nested field', { ...repaymentFixture, transaction: { ...repaymentFixture.transaction, currency: 'EUR' } }],
   ])('rejects repayment with %s', (_label, value) => expect(loanRepaymentsResponseSchema.safeParse({ repayments: [value] }).success).toBe(false))
+
+  it('keeps parsing repayments when the API adds fields or an allocation source', () => {
+    const [repayment] = loanRepaymentsResponseSchema.parse({ repayments: [{ ...repaymentFixture, allocationSource: 'IMPORT', transaction: { ...repaymentFixture.transaction, currency: 'EUR' } }] }).repayments
+    expect(repayment!.allocationSource).toBe('UNKNOWN')
+    expect(repayment!.transaction).not.toHaveProperty('currency')
+  })
 
   it('accepts only positive safe route ids', () => {
     expect(parseLoanId('7')).toBe(7)

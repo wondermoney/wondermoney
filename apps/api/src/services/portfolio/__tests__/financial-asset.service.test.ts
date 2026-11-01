@@ -306,12 +306,11 @@ describe('resolveOrCreateFinancialAsset', () => {
   });
 
   it('resolves EODHD exchange codes via the alias pivot (e.g. "US" -> NYSE) and attributes the new asset', async () => {
-    // RAD-460 regression: the service used to look up exchanges by `acronym`
-    // only, which never matched EODHD's ISO-style codes ("US", "LSE", …)
-    // and silently left new holdings without exchange attribution. The
-    // FinancialAssetExchangeAlias pivot already maps most EODHD codes
-    // to seeded acronyms; the fix is to look up by `acronym OR aliases.name`
-    // in a single query, so this test asserts the filter shape.
+    // Looking exchanges up by `acronym` only never matches EODHD's ISO-style
+    // codes ("US", "LSE", …) and silently leaves new holdings without exchange
+    // attribution. The FinancialAssetExchangeAlias pivot maps most EODHD codes
+    // to seeded acronyms, so the lookup is `acronym OR aliases.name` in a
+    // single query, and this test asserts the filter shape.
     const { mockCreate, mockFindOne, mockForkFindOne } = setupEm({
       createResult: fakeAsset,
       findOneImpl: (Entity) => {
@@ -328,7 +327,7 @@ describe('resolveOrCreateFinancialAsset', () => {
 
     await resolveOrCreateFinancialAsset('AAPL');
 
-    // Filter must match the new $or shape so the alias pivot is consulted.
+    // Filter must match the $or shape so the alias pivot is consulted.
     const exchangeCall = mockForkFindOne.mock.calls.find(([Entity]) => Entity === FinancialAssetExchange);
     expect(exchangeCall).toBeDefined();
     const filter = exchangeCall?.[1] as { $or?: unknown[] };
@@ -347,7 +346,7 @@ describe('resolveOrCreateFinancialAsset', () => {
   });
 
   it('falls through to undefined exchange when the EODHD code has no alias (graceful degradation)', async () => {
-    // RAD-460 follow-up: EODHD codes not yet covered by the alias seeder
+    // EODHD codes not yet covered by the alias seeder
     // ('XETRA', 'STU', 'BA', 'BK', 'HM') still resolve to undefined and the
     // asset is created without exchange attribution. This test pins the
     // graceful-degradation contract.

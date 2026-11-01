@@ -3,7 +3,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useMemo } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
 
@@ -81,7 +81,8 @@ export default function FundTransactionFromGoalDialog({
     },
   });
 
-  const selectedGoalKey = Number(form.watch("goalKey") || defaultGoalKey || 0);
+  const watchedGoalKey = useWatch({ control: form.control, name: "goalKey" });
+  const selectedGoalKey = Number(watchedGoalKey || defaultGoalKey || 0);
   const mutation = useFundGoalTransaction(selectedGoalKey);
   const formattedMax = formatGoalCurrency(maxAmount, currencyCode, locale);
 

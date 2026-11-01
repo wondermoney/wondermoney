@@ -14,9 +14,11 @@ import { Spinner } from "@/components/ui/Spinner";
 import type { GetPortfolioTransactionsResponse } from "@/lib/api/portfolio/usePortfolioTransactions";
 import usePortfolioTransactions from "@/lib/api/portfolio/usePortfolioTransactions";
 import { createPortfolioImportHandoff } from "@/lib/portfolio/portfolio-modal-transition";
+import { serverSeed } from "@/lib/query/server-seed";
 
 interface PortfolioTransactionsClientProps {
   portfolioId: string;
+  serverRenderedAt: number;
   initialPortfolioTransactionsData: GetPortfolioTransactionsResponse;
   hasAnyTransactions: boolean;
   defaultDateRange: { from: Date; to: Date };
@@ -25,6 +27,7 @@ interface PortfolioTransactionsClientProps {
 
 export default function PortfolioTransactionsClient({
   portfolioId,
+  serverRenderedAt,
   initialPortfolioTransactionsData,
   hasAnyTransactions,
   defaultDateRange,
@@ -83,7 +86,7 @@ export default function PortfolioTransactionsClient({
       fromDate: transactionDateRange?.from,
       toDate: transactionDateRange?.to,
     },
-    { initialData: initialPortfolioTransactionsData },
+    serverSeed(initialPortfolioTransactionsData, serverRenderedAt),
   );
 
   const noTransactions =

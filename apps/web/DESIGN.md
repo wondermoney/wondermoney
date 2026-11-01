@@ -176,7 +176,7 @@ The palette is a near-monochrome violet-tinted neutral system with a single spar
 - **Headline** (600, 30px): major section heading.
 - **Title** (600, 20px): card or group title; also the unified page-title treatment used on data-surface (Ledger/Overview) routes after the 2026 density pass.
 - **Body** (400, 16px, line-height 1.75): default paragraph text.
-- **Label** (400, 14px): metadata, helper text, secondary information — sentence case, never uppercase-tracked as a systemwide default (see Do's and Don'ts for the accepted house exception).
+- **Label** (400, 14px): metadata, helper text, secondary information — sentence case and untracked, never uppercase (see Do's and Don'ts).
 - **Financial** (400, 16px, tabular-nums, Geist Mono): any rendered money value, in a table cell or inline in prose.
 
 Use sentence case, one display-level heading per page, unskipped heading levels, and locale-aware formatting for all three shipped locales (`en`, `pt`, `es`).
@@ -245,7 +245,7 @@ Desktop: a 14rem grouped side-rail. The current page gets a violet-tinted 5% bac
 - **Do** accompany every color-coded financial sign with a `+`/`-` or an explicit label/icon; color alone never carries meaning.
 - **Do** use Geist Mono with tabular figures for every rendered money value, in tables and in prose.
 - **Do** use an em dash (`—`) for a genuinely missing value — never a bare `0` or a blank cell standing in for "no data."
-- **Do** use sentence-case, letter-tracked uppercase micro-labels as the house convention for small structural labels (nav-group headers, column eyebrows) — this reversed an earlier "sentence case only" rule once it became clear the uppercase-tracked pattern was already the dominant, load-bearing convention across the app, including in the navigation chrome itself.
+- **Do** set small structural labels (nav-group headers, figure labels, column heads) in the body face, a step smaller, sentence case and untracked. No uppercase transform, no letter-spacing. The tracked-caps micro-label was briefly the house convention; the 2026-10 Hallmark polish retired it (gate 67) across the shell and the shared components.
 - **Do** keep every interactive primitive's full state contract: default, hover, focus-visible, active, disabled, loading, error, and success, each expressed distinctly.
 - **Do** hold every mobile interactive target to at least 44×44px.
 - **Do** use exactly one label per concept, everywhere it appears — the string used in the nav item, the page title, any badge, and the equivalent screen in `mobile/` must all be the identical string, in the identical case. A concept that shows up as `PREVIEW` on one screen and `Preview` on the next is the same defect as two different names for the same feature — see `DESIGN_HISTORY.md` for a confirmed live example.

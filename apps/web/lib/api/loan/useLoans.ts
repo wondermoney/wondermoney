@@ -8,7 +8,7 @@ export interface GetLoansResponse {
   loans: LoanListItem[];
 }
 
-export async function getLoans(
+async function getLoans(
   apiClient: AxiosInstance = api,
 ): Promise<GetLoansResponse> {
   const { data } = await apiClient.get<GetLoansResponse>("/v1/loan");

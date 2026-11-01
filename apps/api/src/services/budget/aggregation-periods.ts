@@ -32,7 +32,7 @@ export interface LisbonWeeklyPeriod {
   year: number;
 }
 
-const scheduledForSchema = z.string().datetime({ offset: true });
+const scheduledForSchema = z.iso.datetime({ offset: true });
 
 export function getLisbonBudgetPeriod(scheduledFor: string): LisbonBudgetPeriod {
   const instant = parseScheduledFor(scheduledFor);

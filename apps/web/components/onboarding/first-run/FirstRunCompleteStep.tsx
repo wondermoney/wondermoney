@@ -1,6 +1,6 @@
 "use client";
 
-import { Check } from "lucide-react";
+import { Check, Minus } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { usePostHog } from "posthog-js/react";
 import { useEffect, useRef } from "react";
@@ -15,6 +15,7 @@ import {
   getFirstRunStepRoute,
   markFirstRunCompleted,
 } from "@/lib/onboarding/firstRunOnboarding";
+import { cn } from "@/lib/utils";
 import {
   ACTIVATION_EVENTS,
   captureActivationEvent,
@@ -41,12 +42,12 @@ export default function FirstRunCompleteStep() {
   // on mount (idempotent) so the flag can't be lost if the user closes the tab
   // or navigates away without pressing the final CTA — otherwise an
   // account-less (skipped) user would be redirected back into the wizard on the
-  // next hard load, forever (RAD-356). The CTA still marks + fires analytics.
+  // next hard load, forever. The CTA still marks + fires analytics.
   //
-  // Also report completion to the server (RAD-226 versioned onboarding
-  // contract) so `appuser.onboardingCompletedAt` gets persisted — the local
-  // flag alone drives wizard visibility but was never previously reflected
-  // server-side. Best-effort: never blocks or gates the local-first flow.
+  // Also report completion to the server (versioned onboarding contract) so
+  // `appuser.onboardingCompletedAt` gets persisted — the local flag alone is
+  // not reflected server-side. Best-effort: never blocks or gates the
+  // local-first flow.
   useEffect(() => {
     if (markedRef.current) return;
     if (!user?.id) return;
@@ -56,7 +57,9 @@ export default function FirstRunCompleteStep() {
     // eslint-disable-next-line react-hooks/exhaustive-deps -- mutate identity is stable per mutation instance; including it would refire on every render
   }, [user?.id]);
 
-  const rows: { label: string; detail?: string }[] = [];
+  // `skipped` rows say so with a dash, not the success tick: a step the user
+  // passed over is not a step that went well.
+  const rows: { label: string; detail?: string; skipped?: boolean }[] = [];
 
   if (state.selectedGoals.length) {
     for (const goal of state.selectedGoals) {
@@ -66,7 +69,7 @@ export default function FirstRunCompleteStep() {
       });
     }
   } else {
-    rows.push({ label: t("completion.summary.goalsSkipped") });
+    rows.push({ label: t("completion.summary.goalsSkipped"), skipped: true });
   }
 
   if (state.accountStep === "connected") {
@@ -81,7 +84,10 @@ export default function FirstRunCompleteStep() {
   } else if (state.accountStep === "manual_added") {
     rows.push({ label: t("completion.summary.accountManual") });
   } else {
-    rows.push({ label: t("completion.summary.accountSkipped") });
+    rows.push({
+      label: t("completion.summary.accountSkipped"),
+      skipped: true,
+    });
   }
 
   return (
@@ -90,10 +96,7 @@ export default function FirstRunCompleteStep() {
         <span className="bg-primary text-primary-foreground flex size-10 items-center justify-center rounded-md">
           <Check className="size-5" strokeWidth={2.5} />
         </span>
-        <p className="text-muted-foreground mt-5 text-xs font-semibold tracking-[0.14em] uppercase">
-          {t("preview.completion.profileStarted")}
-        </p>
-        <h1 className="text-foreground mt-3 text-2xl font-semibold tracking-tight text-balance sm:text-3xl">
+        <h1 className="text-foreground mt-5 text-2xl font-semibold tracking-tight text-balance sm:text-3xl">
           {t("completion.celebrationHeadline")}
         </h1>
         <p className="text-muted-foreground mt-3 max-w-md text-base leading-7">
@@ -115,8 +118,17 @@ export default function FirstRunCompleteStep() {
                   3.05:1 in light mode. Bare `text-success-text` measures
                   5.33:1 light and 8.95:1 dark, and is how the app already draws
                   a success glyph in components/ui/sonner-options.tsx. */}
-              <span className="text-success-text flex size-5 shrink-0 items-center justify-center">
-                <Check className="size-3" strokeWidth={3} />
+              <span
+                className={cn(
+                  "flex size-5 shrink-0 items-center justify-center",
+                  row.skipped ? "text-muted-foreground" : "text-success-text",
+                )}
+              >
+                {row.skipped ? (
+                  <Minus className="size-3" strokeWidth={3} />
+                ) : (
+                  <Check className="size-3" strokeWidth={3} />
+                )}
               </span>
               <span className="text-foreground flex-1 text-sm font-medium">
                 {row.label}
@@ -144,7 +156,7 @@ function FirstRunCompleteFooter() {
 
   const handleComplete = () => {
     const next = markFirstRunCompleted(user?.id);
-    // Idempotent server-side (RAD-226): safe to call again even though the
+    // Idempotent server-side: safe to call again even though the
     // mount effect above already reported completion once.
     completeVersionedOnboarding.mutate();
     posthog?.capture(FIRST_RUN_EVENTS.completed, {

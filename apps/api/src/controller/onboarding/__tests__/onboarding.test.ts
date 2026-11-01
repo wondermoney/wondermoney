@@ -74,7 +74,7 @@ describe('getOnboardingBootstrap', () => {
     await getOnboardingBootstrap({ tenant, user } as unknown as Request, res);
 
     // No populate: the versioned flow decides on `createdAt` alone, so the
-    // join table is not loaded on every bootstrap any more (RAD-601).
+    // join table is not loaded on every bootstrap.
     expect(mocks.findOne).toHaveBeenCalledExactlyOnceWith(
       Appuser,
       { appuserKey: 71, deletedAt: undefined, recordActive: true },
@@ -145,11 +145,10 @@ describe('getOnboardingBootstrap', () => {
     expect(jsonState(res).completedVersion).toBe(0);
   });
 
-  it('does not read the appuser_onboarding join table to decide (RAD-601)', async () => {
-    // The bug: this used to resolve legacy completion from the presence of any
-    // `appuser_onboarding` row, and `AppuserRepository.createUser` gives every
-    // new account a step-1 row at registration. So every post-RAD-226 signup
-    // looked legacy-complete and no new user ever reached the journey. A user
+  it('does not read the appuser_onboarding join table to decide', async () => {
+    // `AppuserRepository.createUser` gives every new account a step-1
+    // `appuser_onboarding` row at registration, so deciding from the presence of
+    // that row would make every signup look legacy-complete. A user
     // created after the cutoff must be required even though the row is there —
     // an appuser whose collection would throw if touched proves it is not read.
     const appuser = makeAppuser();
@@ -238,7 +237,7 @@ describe('completeOnboarding', () => {
     await completeOnboarding(onboardingRequest(), res);
 
     // No populate: the versioned flow decides on `createdAt` alone, so the
-    // join table is not loaded on every bootstrap any more (RAD-601).
+    // join table is not loaded on every bootstrap.
     expect(mocks.findOne).toHaveBeenCalledExactlyOnceWith(
       Appuser,
       { appuserKey: 71, deletedAt: undefined, recordActive: true },

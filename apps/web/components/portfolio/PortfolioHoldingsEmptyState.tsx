@@ -97,7 +97,7 @@ const PortfolioHoldingsEmptyState: React.FC<
             ].map((h, i) => (
               <Text
                 key={i}
-                className={`text-muted-foreground text-[10px] font-medium ${i >= 3 ? "text-right" : ""}`}
+                className={`text-muted-foreground text-[11px] font-medium ${i >= 3 ? "text-right" : ""}`}
               >
                 {h}
               </Text>
@@ -112,7 +112,7 @@ const PortfolioHoldingsEmptyState: React.FC<
             >
               <div>
                 <span
-                  className={`inline-block rounded border px-1.5 py-0.5 text-[10px] font-medium ${holding.typeBadgeClass}`}
+                  className={`inline-block rounded border px-1.5 py-0.5 text-[11px] font-medium ${holding.typeBadgeClass}`}
                 >
                   {t(holding.type)}
                 </span>
@@ -130,7 +130,7 @@ const PortfolioHoldingsEmptyState: React.FC<
                     }}
                   />
                 </div>
-                <Text className="text-muted-foreground font-mono text-[10px] font-medium">
+                <Text className="text-muted-foreground font-mono text-[11px] font-medium">
                   {holding.allocation}%
                 </Text>
               </div>

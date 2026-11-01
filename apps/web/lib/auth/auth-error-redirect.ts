@@ -12,10 +12,6 @@ export function deriveAuthLocaleFromPathname(pathname: string) {
   return resolveAuthLocale(pathname.split("/")[1] ?? "");
 }
 
-export function buildLocalizedAuthCompletePath(locale: string) {
-  return `/${resolveAuthLocale(locale)}/auth/complete`;
-}
-
 export function buildLocalizedAuthErrorPath(locale: string) {
   return `/${resolveAuthLocale(locale)}/auth/auth-code-error`;
 }
@@ -35,17 +31,4 @@ export function buildSafeAuthOrigin(_requestOrigin: string) {
   }
 
   return "";
-}
-
-export function sanitizeNextPath(next: string | null) {
-  if (
-    !next ||
-    !next.startsWith("/") ||
-    next.startsWith("//") ||
-    next.startsWith("/\\")
-  ) {
-    return "/";
-  }
-
-  return next;
 }

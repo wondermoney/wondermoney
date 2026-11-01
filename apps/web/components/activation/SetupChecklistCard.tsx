@@ -160,8 +160,8 @@ export function SetupChecklistCard({
             aria-valuenow={completedStepsCount}
           >
             <div
-              className="bg-primary h-full rounded-full transition-[width]"
-              style={{ width: `${progressPercent}%` }}
+              className="bg-primary h-full w-full rounded-full transition-transform duration-[var(--duration-short)] ease-out motion-reduce:transition-none"
+              style={{ transform: `translateX(-${100 - progressPercent}%)` }}
             />
           </div>
         </div>

@@ -5,7 +5,7 @@ export const portfolioColumnMappingFields = ['transactionDate', 'transactionType
 const optionalString = z.preprocess((value) => value === null ? undefined : value, z.string().min(1).optional());
 const optionalInt = z.preprocess((value) => value === null ? undefined : value, z.number().int().min(0).optional());
 const optionalBoolean = z.preprocess((value) => value === null ? undefined : value, z.boolean().optional());
-export const portfolioImportCurrencyCodeSchema = z.enum(['EUR', 'USD', 'JPY', 'GBP', 'AUD', 'CAD', 'CHF', 'SEK', 'NOK', 'BRL', 'DKK']);
+const portfolioImportCurrencyCodeSchema = z.enum(['EUR', 'USD', 'JPY', 'GBP', 'AUD', 'CAD', 'CHF', 'SEK', 'NOK', 'BRL', 'DKK']);
 export const portfolioImportFixedValuesSchema = z.object({
   currency: portfolioImportCurrencyCodeSchema.optional(),
   transactionType: z.enum(['BUY', 'SELL']).optional(),
@@ -37,7 +37,7 @@ export const portfolioColumnMappingTransformationsSchema = z.object({
   thousandsSeparator: z.preprocess((value) => value === null ? undefined : value, z.enum(['.', ',', ' ', 'none']).optional()),
 }).strict().superRefine((value, ctx) => {
   if (value.decimalSeparator && value.thousandsSeparator && value.thousandsSeparator !== 'none' && value.decimalSeparator === value.thousandsSeparator) {
-    ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'decimalSeparator and thousandsSeparator must differ unless thousandsSeparator is none' });
+    ctx.addIssue({ code: 'custom', message: 'decimalSeparator and thousandsSeparator must differ unless thousandsSeparator is none' });
   }
 });
 
@@ -48,7 +48,7 @@ export const portfolioCsvLayoutSchema = z.object({
   headerRowIndex: optionalInt,
 }).strict().superRefine((value, ctx) => {
   if (value.dataStartRowIndex === undefined || value.headerRowIndex === undefined) return;
-  if (value.dataStartRowIndex <= value.headerRowIndex) ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'dataStartRowIndex must be after headerRowIndex' });
+  if (value.dataStartRowIndex <= value.headerRowIndex) ctx.addIssue({ code: 'custom', message: 'dataStartRowIndex must be after headerRowIndex' });
 });
 
 export const portfolioColumnMappingSuggestionSchema = z.object({

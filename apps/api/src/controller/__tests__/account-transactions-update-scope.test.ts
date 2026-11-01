@@ -7,10 +7,9 @@ import { InternalServerError, NotFoundError, UnauthorizedError } from '@utils/er
 
 import { mockRes } from '../../__tests__/__helpers__/mock-request';
 
-// RAD-218: the transaction update path used to load the edited transaction and its "future"
-// transactions scoped only by app user + date, so editing one account could rewrite running
-// balances on later transactions belonging to another account — and potentially another tenant.
-// These tests pin the authorization + scoping + atomicity contract of the amount-edit path.
+// An amount edit rewrites running balances on the edited transaction's later rows. Scoped only by
+// app user + date, editing one account could rewrite balances on another account — and potentially
+// another tenant. These tests pin the authorization + scoping + atomicity contract of that path.
 
 const mocked = vi.hoisted(() => {
   // Declare the async signatures explicitly so mockImplementation callbacks may return promises;
@@ -92,7 +91,7 @@ function setupHappyPath({ chain = [editedTransaction()] as Record<string, unknow
   return { account, anchor, chain };
 }
 
-describe('updateTransaction — account/tenant scoping and atomicity (RAD-218)', () => {
+describe('updateTransaction — account/tenant scoping and atomicity', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mocked.em.persist.mockReturnValue(mocked.em);
@@ -153,12 +152,12 @@ describe('updateTransaction — account/tenant scoping and atomicity (RAD-218)',
     expect(filter).toMatchObject({
       accountKey: { accountKey: 100 },
     });
-    // The chain load narrows to settled statuses; RAD-25 keeps hidden rows included via the disabled filter.
+    // The chain load narrows to settled statuses; hidden rows stay included via the disabled filter.
     const statuses = (filter as { transactionStatusKey?: { name?: { $in?: unknown } } }).transactionStatusKey?.name?.$in;
     expect(statuses).toEqual(['BOOKED']);
   });
 
-  it('orders the chain deterministically ascending by date then key (RAD-564)', async () => {
+  it('orders the chain deterministically ascending by date then key', async () => {
     setupHappyPath();
     await updateTransaction(makeReq(), mockRes({ json: vi.fn() }), vi.fn());
 
@@ -166,7 +165,7 @@ describe('updateTransaction — account/tenant scoping and atomicity (RAD-218)',
     expect((opts as { orderBy?: unknown }).orderBy).toEqual({ transactionDate: QueryOrder.ASC, transactionKey: QueryOrder.ASC });
   });
 
-  it('includes hidden transactions in the chain load so the stored balance chain stays accurate (RAD-25)', async () => {
+  it('includes hidden transactions in the chain load so the stored balance chain stays accurate', async () => {
     setupHappyPath();
     await updateTransaction(makeReq(), mockRes({ json: vi.fn() }), vi.fn());
 
@@ -188,12 +187,13 @@ describe('updateTransaction — account/tenant scoping and atomicity (RAD-218)',
   });
 
   it('recomputes every later same-account balance via the chain helper and sets account.balance to the chain tail', async () => {
-    // The controller overwrites the anchor's `appuserSettlementAmount` to the new `updatedAmount`
-    // before the helper runs, so the anchor contributes -40 (not the original -100). The helper
-    // opens on the anchor's predecessor balance (zero when the anchor is oldest) and accumulates:
-    //   row 10: 0 + -40 = -40 (anchor, edited)
-    //   row 11: -40 + -50 = -90
-    //   row 12: -90 + -50 = -140
+    // The controller overwrites the anchor's amounts with the new `updatedAmount` before the
+    // helper runs, so the anchor contributes -40 (not the original -100). The anchor is the
+    // oldest row, so the chain opens on what the account held before it: its stored balance
+    // minus its pre-edit amount, 100 - -100 = 200 (not 0). Then:
+    //   row 10: 200 + -40 = 160 (anchor, edited)
+    //   row 11: 160 + -50 = 110
+    //   row 12: 110 + -50 = 60
     const future1 = futureTransaction({ appuserCurrencyBalance: 80, appuserSettlementAmount: -50, balance: 80, settlementAmount: -50, transactionDate: new Date('2026-01-11T00:00:00.000Z'), transactionKey: 11 });
     const future2 = futureTransaction({ appuserCurrencyBalance: 60, appuserSettlementAmount: -50, balance: 60, settlementAmount: -50, transactionDate: new Date('2026-01-12T00:00:00.000Z'), transactionKey: 12 });
     const anchor = editedTransaction();
@@ -202,8 +202,9 @@ describe('updateTransaction — account/tenant scoping and atomicity (RAD-218)',
 
     await updateTransaction(makeReq(), mockRes({ json: vi.fn() }), vi.fn());
 
-    expect(future1.balance).toBe(-90);
-    expect(future2.balance).toBe(-140);
-    expect(account.balance).toBe(-140);
+    expect(anchor.balance).toBe(160);
+    expect(future1.balance).toBe(110);
+    expect(future2.balance).toBe(60);
+    expect(account.balance).toBe(60);
   });
 });

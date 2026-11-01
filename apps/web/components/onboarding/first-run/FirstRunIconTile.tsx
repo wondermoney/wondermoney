@@ -15,16 +15,14 @@ import { cn } from "@/lib/utils";
  * is hue-fixed per slot across both themes and already validated as a
  * categorical palette — so that is what a category tint uses.
  *
- * Two tones were retired rather than translated (RAD-563):
+ * There is deliberately no `blue` or `amber` tone:
  *
- * - `blue` had no honest token. The system carries exactly one non-brand blue
+ * - `blue` has no honest token. The system carries exactly one non-brand blue
  *   (`--chart-5`, sky 235); a second one does not exist, because the ramp's
- *   adjacent-CVD separation is what stops two blues coexisting. Its three call
- *   sites moved to `sky`, which is the nearer hue anyway. Duplicate tones were
- *   already normal here — the goal list assigns `violet` twice.
- * - `amber` had no call sites at all, and the only amber the system owns is
- *   `--warning`, which would have read as "this needs attention" on a tile that
- *   means nothing of the sort.
+ *   adjacent-CVD separation is what stops two blues coexisting. Use `sky`.
+ *   Duplicate tones are normal here — the goal list assigns `violet` twice.
+ * - The only amber the system owns is `--warning`, which would read as "this
+ *   needs attention" on a tile that means nothing of the sort.
  *
  * `rose` survives because its one consumer (the credit-card row of the mock
  * dashboard) marks a *negative balance*, which is what `--destructive-text`

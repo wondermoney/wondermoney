@@ -1,6 +1,5 @@
 "use client";
 
-import { ColumnDef, createColumnHelper } from "@tanstack/react-table";
 import { CoinsIcon, Edit, Filter, Trash2, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { usePostHog } from "posthog-js/react";
@@ -11,6 +10,7 @@ import DatePickerRange from "@/components/ui/DatePickerRange";
 import { Table } from "@/components/ui/Table";
 import TableCellDate from "@/components/ui/Table/Cell/TableCellDate";
 import TableCellDefault from "@/components/ui/Table/Cell/TableCellDefault";
+import { ColumnDef, createColumnHelper } from "@/components/ui/Table/features";
 import {
   isStockSplit,
   isTransactionItem,

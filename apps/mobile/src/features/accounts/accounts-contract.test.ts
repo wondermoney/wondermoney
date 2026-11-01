@@ -81,7 +81,6 @@ describe('accounts contract', () => {
     ['missing refreshed date', { ...account, refreshedAt: undefined }],
     ['malformed refreshed date', { ...account, refreshedAt: '2026-07-17' }],
     ['missing source', { ...account, source: undefined }],
-    ['unknown source', { ...account, source: 'bank' }],
     ['missing isOwnedByViewer', { ...account, isOwnedByViewer: undefined }],
     ['non-boolean isOwnedByViewer', { ...account, isOwnedByViewer: 1 }],
     ['missing isPrivate', { ...account, isPrivate: undefined }],
@@ -89,6 +88,21 @@ describe('accounts contract', () => {
   ])('rejects %s', (_label, candidate) => {
     const response = 'accounts' in candidate ? candidate : { accounts: [candidate] }
     expect(accountsResponseSchema.safeParse(response).success).toBe(false)
+  })
+
+  it('reads a source this build does not know as unknown instead of failing the list', () => {
+    const parsed = accountsResponseSchema.parse({ accounts: [{ ...account, source: 'csv_import' }, account] })
+    expect(parsed.accounts.map((row) => row.source)).toEqual(['unknown', 'open_banking'])
+  })
+
+  it('reads each account\'s CSV import format, an unknown one as unknown, and tolerates its absence', () => {
+    const parsed = accountsResponseSchema.parse({ accounts: [
+      { ...account, csvImportFormat: 'bank' },
+      { ...account, csvImportFormat: 'generic' },
+      { ...account, csvImportFormat: 'bank_v2' },
+      account,
+    ] })
+    expect(parsed.accounts.map((row) => row.csvImportFormat)).toEqual(['bank', 'generic', 'unknown', undefined])
   })
 
   it('reuses the exact account summary schema for the detail response and preserves nulls and zero', () => {
@@ -103,7 +117,7 @@ describe('accounts contract', () => {
         refreshedAt: null,
       },
     }).account).toMatchObject({ balance: 0, appuserCurrencyBalance: 0, accountName: null })
-    expect(accountDetailResponseSchema.safeParse({ account: { ...account, source: 'other' } }).success).toBe(false)
+    expect(accountDetailResponseSchema.parse({ account: { ...account, source: 'other' } }).account.source).toBe('unknown')
     expect(accountDetailResponseSchema.safeParse({}).success).toBe(false)
   })
 

@@ -6,7 +6,7 @@ import { Info, Plus } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useCallback, useState } from "react";
 import { HexColorPicker } from "react-colorful";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
 
@@ -70,7 +70,7 @@ const getCategoryFormSchema = (t: ReturnType<typeof useTranslations>) =>
         !data.parentCategoryKey
       ) {
         ctx.addIssue({
-          code: z.ZodIssueCode.custom,
+          code: "custom",
           message: t("parent-category-required-with-budget"),
           path: ["parentCategoryKey"],
         });
@@ -81,7 +81,7 @@ const getCategoryFormSchema = (t: ReturnType<typeof useTranslations>) =>
         (!data.budgetAmount || data.budgetAmount <= 0)
       ) {
         ctx.addIssue({
-          code: z.ZodIssueCode.custom,
+          code: "custom",
           message: t("budget-amount-required-for-child-category"),
           path: ["budgetAmount"],
         });
@@ -132,10 +132,13 @@ const WizardAddCategoryForm: React.FC<WizardAddCategoryFormProps> = ({
     handleSubmit,
     formState: { isSubmitting },
     reset,
-    watch,
   } = methods;
 
-  const parentCategoryKey = watch("parentCategoryKey");
+  const parentCategoryKey = useWatch({
+    control: methods.control,
+    name: "parentCategoryKey",
+  });
+  const color = useWatch({ control: methods.control, name: "color" });
   const isBudgetDisabled = !parentCategoryKey;
 
   const onSubmit = useCallback(
@@ -326,7 +329,7 @@ const WizardAddCategoryForm: React.FC<WizardAddCategoryFormProps> = ({
                         <CategoryIconPicker
                           selectedIcon={field.value}
                           onIconSelect={field.onChange}
-                          color={watch("color")}
+                          color={color}
                           compact
                         />
                       </FormControl>

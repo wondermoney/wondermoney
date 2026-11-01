@@ -36,7 +36,7 @@ export async function getRecurringSummary(
   return data;
 }
 
-export const recurringSummaryQueryKey = ["recurring-summary"] as const;
+const recurringSummaryQueryKey = ["recurring-summary"] as const;
 
 export default function useRecurringSummary<R = GetRecurringSummaryResponse>(
   options?: Omit<

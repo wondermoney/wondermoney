@@ -1,6 +1,6 @@
 export type BankAccountSyncStatus = "idle" | "processing" | "ready" | "error";
 
-export const BANK_ACCOUNT_SYNC_POLL_INTERVAL_MS = 2500;
+const BANK_ACCOUNT_SYNC_POLL_INTERVAL_MS = 2500;
 
 interface SyncAccountLike {
   refreshedAt?: string | null;

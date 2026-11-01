@@ -62,7 +62,7 @@
         },
         "credentialRequired": {
           "title": "Conectar un banco requiere una configuración rápida y única",
-          "body": "Antes de poder conectar un banco real, añade tu propia clave de Enable Banking desde Ajustes. Puedes hacerlo cuando quieras después de terminar la configuración — por ahora, añade una cuenta manualmente arriba o salta este paso y conéctalo más tarde."
+          "body": "Antes de poder conectar un banco real, añade tu propia clave de Enable Banking desde Ajustes. Puedes hacerlo cuando quieras después de terminar la configuración. Por ahora, añade una cuenta manualmente arriba o salta este paso y conéctalo más tarde."
         }
       },
       "connect": {
@@ -76,16 +76,15 @@
         "retry": "Reintentar",
         "connectErrorBanner": "La conexión no se completó. Inténtalo de nuevo o elige otro banco.",
         "manualTitle": "Añadir una cuenta manualmente",
-        "manualBody": "Sin conexión necesaria. Introduce un saldo para empezar — puedes conectarla para actualizaciones automáticas más tarde.",
+        "manualBody": "Sin conexión necesaria. Introduce un saldo para empezar. Puedes conectarla para actualizaciones automáticas más tarde.",
         "manualNameLabel": "Nombre de la cuenta",
         "manualBalanceLabel": "Saldo actual",
         "manualSubmit": "Añadir cuenta",
         "manualNote": "Las cuentas manuales se incluyen en tu patrimonio neto, pero no se actualizan automáticamente.",
         "syncing": {
-          "processing": "Conectado — importando tus saldos y transacciones…",
+          "processing": "Conectado. Importando tus saldos y transacciones…",
           "succeeded": "Tus cuentas están conectadas y sincronizadas.",
-          "partial": "Conectado. Algunos datos aún están llegando — seguiremos sincronizando en segundo plano.",
-          "trouble": "Conectado. La primera sincronización está tardando un poco más — seguiremos intentándolo en segundo plano."
+          "trouble": "Conectado. La primera sincronización está tardando un poco más. Seguiremos intentándolo en segundo plano."
         }
       },
       "syncValue": {

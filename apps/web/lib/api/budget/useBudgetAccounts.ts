@@ -12,7 +12,7 @@ export interface GetBudgetAccountsResponse {
   accounts: Account[];
 }
 
-export async function getBudgetAccounts(
+async function getBudgetAccounts(
   budgetKey: number,
   apiClient: AxiosInstance = api,
 ): Promise<GetBudgetAccountsResponse> {

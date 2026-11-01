@@ -4,7 +4,7 @@ import en from './resources/en.json'
 import es from './resources/es.json'
 import ptPT from './resources/pt-PT.json'
 
-export const localeResources = {
+const localeResources = {
   en,
   'pt-PT': ptPT,
   es,

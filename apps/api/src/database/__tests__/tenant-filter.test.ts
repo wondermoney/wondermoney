@@ -3,11 +3,11 @@ import { describe, expect, it } from 'vitest';
 import { accountTenantCond, tenantOrGlobalCond, tenantScopedCond, transactionTenantCond } from '../filters/tenant-filter';
 
 /**
- * RAD-343 (A2) — filter condition logic (DB-free). The end-to-end proof that
+ * Tenant filter condition logic (DB-free). The end-to-end proof that
  * MikroORM actually applies these conditions lives in the integration script
  * `src/database/scripts/verify-tenant-filter.ts`.
  */
-describe('RAD-343 A2 — tenant filter conditions', () => {
+describe('tenant filter conditions', () => {
   it('scope-when-present: no tenant context → pass-through (empty condition)', () => {
     expect(tenantScopedCond(undefined)).toEqual({});
     expect(tenantScopedCond({})).toEqual({});

@@ -226,6 +226,86 @@ describe('transaction creation service security checks', () => {
     expect(account.appuserCurrencyBalance).toBe(1050);
   });
 
+  it('stores an expense entered as a negative amount as an outflow, not an inflow', async () => {
+    const currency = { code: 'EUR', currencyKey: 1 };
+    const appuser = { appuserKey: 7, currencyKey: currency };
+    const account = {
+      accountKey: 10,
+      accountOwnerAppuserKey: appuser,
+      appuserCurrencyBalance: 1000,
+      balance: 1000,
+      currencyKey: { currencyKey: 1 },
+      tenantKey: { tenantKey: 1 },
+    };
+
+    mocks.getRepository.mockReturnValue({
+      getAppuserTenantByAppuser: vi.fn().mockResolvedValue({ appuserKey: appuser, tenantKey: { tenantKey: 1 } }),
+    });
+    mocks.findOne
+      .mockResolvedValueOnce(appuser)
+      .mockResolvedValueOnce({ name: 'CARD_PAYMENT', transactionTypeKey: 5 })
+      .mockResolvedValueOnce(account)
+      .mockResolvedValueOnce(currency) // original currency
+      .mockResolvedValueOnce(currency) // settlement currency
+      .mockResolvedValueOnce({ name: 'BOOKED', transactionStatusKey: 1 });
+    mocks.resolveMerchant.mockResolvedValueOnce({ name: 'Store', transactionMerchantKey: 5 });
+
+    const created = await transactionCreationService.createTransaction({
+      accountId: 10,
+      appuserKey: 7,
+      originalAmount: -42.5,
+      originalCurrencyId: 1,
+      settlementAmount: -42.5,
+      settlementCurrencyId: 1,
+      transactionDate: new Date('2026-01-10T00:00:00.000Z'),
+      transactionMerchantName: 'Store',
+      transactionTypeId: 5,
+    });
+
+    expect(created.settlementAmount).toBe(-42.5);
+    expect(created.originalAmount).toBe(-42.5);
+    expect(created.appuserSettlementAmount).toBe(-42.5);
+    expect(created.balance).toBe(957.5);
+    expect(account.balance).toBe(957.5);
+  });
+
+  it('stores an income entered as a negative amount as an inflow', async () => {
+    const currency = { code: 'EUR', currencyKey: 1 };
+    const appuser = { appuserKey: 7, currencyKey: currency };
+    const account = {
+      accountKey: 10,
+      accountOwnerAppuserKey: appuser,
+      appuserCurrencyBalance: 1000,
+      balance: 1000,
+      currencyKey: { currencyKey: 1 },
+      tenantKey: { tenantKey: 1 },
+    };
+
+    mocks.getRepository.mockReturnValue({
+      getAppuserTenantByAppuser: vi.fn().mockResolvedValue({ appuserKey: appuser, tenantKey: { tenantKey: 1 } }),
+    });
+    mocks.findOne
+      .mockResolvedValueOnce(appuser)
+      .mockResolvedValueOnce({ name: 'DEPOSIT', transactionTypeKey: 8 })
+      .mockResolvedValueOnce(account)
+      .mockResolvedValueOnce(currency)
+      .mockResolvedValueOnce({ name: 'BOOKED', transactionStatusKey: 1 });
+    mocks.resolveMerchant.mockResolvedValueOnce({ name: 'Employer', transactionMerchantKey: 6 });
+
+    const created = await transactionCreationService.createTransaction({
+      accountId: 10,
+      appuserKey: 7,
+      settlementAmount: -250,
+      settlementCurrencyId: 1,
+      transactionDate: new Date('2026-01-10T00:00:00.000Z'),
+      transactionMerchantName: 'Employer',
+      transactionTypeId: 8,
+    });
+
+    expect(created.settlementAmount).toBe(250);
+    expect(created.balance).toBe(1250);
+  });
+
   it('preserves a manual opening balance for the first transaction on the same day', async () => {
     const currency = { code: 'EUR', currencyKey: 1 };
     const appuser = { appuserKey: 7, currencyKey: currency };
@@ -321,7 +401,7 @@ describe('transaction creation service security checks', () => {
     expect(account.appuserCurrencyBalance).toBe(300);
   });
 
-  it('includes hidden transactions when recalculating future balances (RAD-25)', async () => {
+  it('includes hidden transactions when recalculating future balances', async () => {
     // A hidden transaction still moved money, so balance recomputation must see it — the future-balance
     // load must disable the hidden filter or the stored balance chain would drift.
     const currency = { code: 'EUR', currencyKey: 1 };
@@ -461,12 +541,12 @@ describe('transaction creation service security checks', () => {
 });
 
 /**
- * RAD-546 — running balance chain. These tests run the service against an in-memory stand-in for the
- * EntityManager so a whole sequence of creates shares state, which is what the bug needed: the third
- * and later back-dated transactions restarted the running balance from zero instead of continuing
- * from the account's opening balance.
+ * Running balance chain. These tests run the service against an in-memory stand-in for the
+ * EntityManager so a whole sequence of creates shares state: that is what it takes to catch a
+ * third or later back-dated transaction restarting the running balance from zero instead of
+ * continuing from the account's opening balance.
  */
-describe('running balance chain (RAD-546)', () => {
+describe('running balance chain', () => {
   const OPENING_BALANCE = 1000;
   const ACCOUNT_CREATED_AT = new Date('2026-08-20T17:00:00.000Z');
   const CREDIT_TYPE = 1;

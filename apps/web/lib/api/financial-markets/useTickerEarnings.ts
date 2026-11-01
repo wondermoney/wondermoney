@@ -17,8 +17,7 @@ export interface TickerEarningsResponse {
   companyEarnings: TickerEarnings[];
 }
 
-// Strict earnings DTO the API now returns (RAD-228): an { earnings } list with
-// `eps`/`revenue` rather than the old `{ companyEarnings }` / `epsActual` shape.
+// The API's strict earnings DTO: an { earnings } list with `eps`/`revenue`.
 // `date` can be null on scheduled-but-undated rows — those are dropped since the
 // chart keys on a real quarter date.
 interface EarningsDto {
@@ -32,7 +31,7 @@ interface EarningsDto {
   symbol: string;
 }
 
-export async function getTickerEarnings(
+async function getTickerEarnings(
   ticker: string,
   apiClient: AxiosInstance = api,
 ): Promise<TickerEarningsResponse> {

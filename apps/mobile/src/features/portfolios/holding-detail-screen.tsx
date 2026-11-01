@@ -8,6 +8,7 @@ import { formatCurrency, formatPercentagePoints } from '@/lib/formatters/financi
 import { themeTokens } from '@/theme/tokens'
 import { textStyles } from '@/theme/typography'
 
+import { FeeConversionNotice } from './fee-conversion-notice'
 import type { PortfolioActivityRow } from './portfolio-activity-view-model'
 import { Metric, PortfolioFailure, PortfolioLoading } from './portfolio-screen-parts'
 import type { HoldingViewModel } from './portfolios-view-model'
@@ -68,6 +69,7 @@ export function HoldingDetailScreen({ state, onBack, onRefresh, onLogout }: Hold
               <Metric label={t('holdingDetail.currentPrice')} value={money(holding.currentPrice)} palette={palette} tone={holding.currentPrice === null ? 'muted' : 'default'} />
               <Metric label={t('holdingDetail.averageBuyPrice')} value={money(holding.averageBuyPrice)} palette={palette} tone={holding.averageBuyPrice === null ? 'muted' : 'default'} />
             </View>
+            {holding.feeConversionIncomplete ? <FeeConversionNotice scope="holding" palette={palette} /> : null}
           </View>
 
           <View style={styles.section}>

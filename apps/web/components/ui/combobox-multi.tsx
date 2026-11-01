@@ -50,11 +50,11 @@ type Props = {
  * Selection is the only thing this control owns; the option list belongs to the
  * caller and is derived on every render.
  *
- * Freezing `options` in a `useState` initializer looked equivalent and was not:
+ * Freezing `options` in a `useState` initializer looks equivalent and is not:
  * callers that build their options from loaded data (the transaction-type
  * filter maps over the fetched transactions) mount with an empty array, so the
- * list stayed empty for the lifetime of the component and the popover opened as
- * an empty 2px sliver — RAD-607.
+ * list would stay empty for the lifetime of the component and the popover
+ * would open as an empty 2px sliver.
  */
 function useSelection(
   initialOptions: Option[],

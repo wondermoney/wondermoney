@@ -1,6 +1,6 @@
 "use client";
 import { useTranslations } from "next-intl";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 import { DrawerDialog } from "@/components/ui/dialog-responsive";
 import type { LoanDetail, LoanRepayment } from "@/lib/api/loan/types";
@@ -25,7 +25,22 @@ export default function RepaymentCandidateDrawer({
     number | null
   >(null);
   const [selectedRepayment, setSelectedRepayment] =
-    useState<LoanRepayment | null>(initialRepayment ?? null);
+    useState<LoanRepayment | null>(open ? (initialRepayment ?? null) : null);
+  // Opening (or a new initial repayment while open) loads that repayment;
+  // closing clears the selection. Adjusted during render, not in effects.
+  const [syncedFrom, setSyncedFrom] = useState({ open, initialRepayment });
+  if (
+    syncedFrom.open !== open ||
+    syncedFrom.initialRepayment !== initialRepayment
+  ) {
+    setSyncedFrom({ open, initialRepayment });
+    if (open) {
+      setSelectedRepayment(initialRepayment ?? null);
+    } else if (syncedFrom.open) {
+      setSelectedTransactionKey(null);
+      setSelectedRepayment(null);
+    }
+  }
   const { data, isLoading } = useLoanRepaymentCandidates(
     loan.loanKey,
     {},
@@ -35,15 +50,6 @@ export default function RepaymentCandidateDrawer({
     data?.candidates.find(
       (item) => item.transactionKey === selectedTransactionKey,
     ) ?? null;
-  useEffect(() => {
-    if (open) setSelectedRepayment(initialRepayment ?? null);
-  }, [initialRepayment, open]);
-  useEffect(() => {
-    if (!open) {
-      setSelectedTransactionKey(null);
-      setSelectedRepayment(null);
-    }
-  }, [open]);
   const selectedCandidate = candidate ?? null;
   return (
     <DrawerDialog

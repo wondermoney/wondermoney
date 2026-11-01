@@ -19,7 +19,7 @@ function isGetRequest(request: AuthRetryRequestConfig): boolean {
 }
 
 // better-auth's session cookie is opaque and has no client-driven refresh
-// flow like Supabase's refreshSession(). On a 401 the best we can do is ask
+// flow. On a 401 the best we can do is ask
 // the better-auth server whether the (cookie-based) session is still valid
 // — if it isn't, the session is effectively gone and we surface the error.
 async function revalidateSession(): Promise<boolean> {
@@ -63,6 +63,11 @@ const api = Axios.create({
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
+    // Normalise 429 at the moment the response lands. A date-form
+    // `Retry-After` measured later would be short by however long the error
+    // sat in a query cache before something asked about it.
+    attachRateLimitInfo(error);
+
     if (!Axios.isAxiosError(error) || error.response?.status !== 401) {
       throw error;
     }

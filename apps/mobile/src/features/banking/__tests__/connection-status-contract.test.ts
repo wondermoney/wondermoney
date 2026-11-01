@@ -24,9 +24,10 @@ describe('banking connection-status contract', () => {
     expect(connectionStatusSchema.parse('processing')).toBe('processing')
   })
 
-  it('rejects unknown status values', () => {
-    expect(connectionStatusSchema.safeParse('pending').success).toBe(false)
-    expect(connectionStatusSchema.safeParse('linked').success).toBe(false)
+  it('reads a status this build does not know as unknown, and still rejects a non-string', () => {
+    expect(connectionStatusSchema.parse('pending')).toBe('unknown')
+    expect(connectionStatusSchema.parse('linked')).toBe('unknown')
+    expect(connectionStatusSchema.safeParse(null).success).toBe(false)
   })
 
   it('keeps nulls explicit and preserves a real zero-length institutionName', () => {
@@ -45,13 +46,14 @@ describe('banking connection-status contract', () => {
     expect(bankConnectionSchema.parse({ ...newConnection, provider: 'EnableBanking' }).provider).toBe('EnableBanking')
   })
 
-  it('rejects unknown provider / accessType values', () => {
-    expect(
-      bankConnectionSchema.safeParse({ ...newConnection, provider: 'Plaid' }).success,
-    ).toBe(false)
-    expect(
-      bankConnectionSchema.safeParse({ ...newConnection, accessType: 'screen_scraping' }).success,
-    ).toBe(false)
+  it('reads a provider or access type this build does not know as unknown instead of failing the list', () => {
+    const parsed = bankConnectionsResponseSchema.parse({ connections: [
+      { ...newConnection, provider: 'Plaid', accessType: 'screen_scraping', status: 'reauthorizing' },
+      newConnection,
+    ] })
+    expect(parsed.connections[0]).toMatchObject({ provider: 'unknown', accessType: 'unknown', status: 'unknown' })
+    expect(parsed.connections[1]).toMatchObject({ provider: 'GoCardless', accessType: 'open_banking', status: 'connected' })
+    expect(bankConnectionSchema.safeParse({ ...newConnection, provider: undefined }).success).toBe(false)
   })
 
   it('exposes the read endpoint at /v1/banking/connections', () => {
@@ -66,7 +68,7 @@ describe('banking connection-status contract', () => {
     expect(parsed.connections).toEqual([])
   })
 
-  it('accepts connectionId as a positive int, null, or absent (RAD-501, forward-compatible)', () => {
+  it('accepts connectionId as a positive int, null, or absent (forward-compatible)', () => {
     expect(bankConnectionSchema.parse({ ...newConnection, connectionId: 42 }).connectionId).toBe(42)
     expect(bankConnectionSchema.parse({ ...newConnection, connectionId: null }).connectionId).toBeNull()
     expect(bankConnectionSchema.parse(newConnection).connectionId).toBeUndefined()

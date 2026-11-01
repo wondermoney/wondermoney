@@ -21,21 +21,22 @@ SMTP_PASSWORD=...
 EMAIL_FROM=money@example.com
 ```
 
-Ou define `RESEND_API_KEY` para usar o Resend. Para testar sem um fornecedor real, inicia o Mailpit incluído com `docker compose --profile mail up -d`, define `SMTP_HOST=mailpit` e `SMTP_PORT=1025`, e lê os emails em http://localhost:8025.
+Ou define `RESEND_API_KEY` para usar o Resend. Para testar sem um fornecedor real, usa o Mailpit incluído: acrescenta `mail` a `COMPOSE_PROFILES`, define `SMTP_HOST=mailpit` e `SMTP_PORT=1025`, corre `docker compose up -d` e lê os emails em http://localhost:8025.
 
 ## Armazenamento de ficheiros
 
-As importações CSV e as cópias de recibos precisam de armazenamento compatível com S3. Para usar o MinIO incluído, inicia-o com `docker compose --profile storage up -d` e define:
+As importações CSV e as cópias de recibos precisam de armazenamento compatível com S3. Para usar o armazenamento incluído ([SeaweedFS](https://github.com/seaweedfs/seaweedfs)), define estes valores no `.env` e corre `docker compose up -d`:
 
 ```sh
+COMPOSE_PROFILES=storage
 AWS_ACCESS_KEY_ID=escolhe-um-utilizador
 AWS_SECRET_ACCESS_KEY=escolhe-uma-palavra-passe-longa
-S3_ENDPOINT=http://minio:9000
+S3_ENDPOINT=http://storage:8333
 S3_PUBLIC_ENDPOINT=http://localhost:9000
 S3_BUCKET=wondermoney
 ```
 
-O `S3_PUBLIC_ENDPOINT` é o endereço que os navegadores usam para chegar ao armazenamento. Qualquer serviço compatível com S3 também funciona, como Cloudflare R2, Backblaze B2 ou AWS S3.
+As duas chaves passam a ser as credenciais do armazenamento, que não arranca sem elas. O `S3_PUBLIC_ENDPOINT` é o endereço que os navegadores usam para chegar ao armazenamento; atrás de um proxy, dá-lhe um nome próprio com HTTPS que encaminhe para a porta 9000. Qualquer serviço compatível com S3 também funciona, como Cloudflare R2, Backblaze B2 ou AWS S3.
 
 ## Funcionalidades de IA
 
@@ -56,11 +57,16 @@ Define `EODHD_API_KEY` para ligar a pesquisa de tickers, as cotações em tempo 
 
 A sincronização bancária não precisa de configuração no servidor. Cada pessoa adiciona a sua própria chave de aplicação Enable Banking nas Definições, por isso as credenciais bancárias nunca são partilhadas entre utilizadores.
 
+## Início de sessão com Google
+
+Define `GOOGLE_CLIENT_ID` e `GOOGLE_CLIENT_SECRET` (de um cliente OAuth no Google Cloud, com `<API_URL>/api/auth/callback/google` como URI de redirecionamento autorizado) para mostrares "Continuar com Google" nas páginas de início de sessão e de registo. Sem os dois, o botão fica escondido.
+
 ## A tua instância
 
 | Definição | O que faz |
 |---|---|
-| `INSTANCE_NAME` | O nome da tua instância |
+| `INSTANCE_NAME` | O nome da tua instância. A aplicação web mostra-o nos títulos dos separadores do navegador, nas pré-visualizações de links e nas páginas de início de sessão e de registo, e no lugar do logótipo da WonderMoney quando o alteras. Cada email usa-o no assunto, no texto e na assinatura, e como nome do remetente se `EMAIL_FROM_NAME` não estiver definido; as aplicações de autenticação mostram-no como etiqueta. A aplicação web lê-o da API, por isso define-o só na API; uma alteração aparece na aplicação web em até cinco minutos |
 | `SIGNUP_MODE` | `open`, `invite` ou `closed` (consulta [Instalar](/pt/docs/self-hosting/install)) |
-| `SUPPORT_EMAIL` | A caixa de correio do formulário de contacto e dos alertas de conta; deixa vazio para os desligar |
+| `SUPPORT_EMAIL` | A caixa de correio do formulário de contacto, dos alertas de conta e do feedback na aplicação, e o endereço de suporte que a aplicação mostra; deixa vazio para os desligar e esconder as ligações de suporte. O formulário "Partilhar Feedback" também precisa de email configurado; sem ele, o formulário fica escondido |
 | `NEXT_PUBLIC_TERMS_URL`, `NEXT_PUBLIC_PRIVACY_URL` | As tuas páginas legais, ligadas a partir da página de registo quando ambas estão definidas |
+| `PRIVACY_POLICY_URL` | A tua política de privacidade, ligada a partir do rodapé dos emails. `{lang}` é substituído pelo idioma do destinatário (`en` ou `pt`), por exemplo `https://example.com/{lang}/privacy`. Por omissão, aponta para as definições de privacidade da aplicação |

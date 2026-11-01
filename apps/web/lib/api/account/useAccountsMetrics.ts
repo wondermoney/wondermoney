@@ -39,7 +39,7 @@ export type GetAccountsMetricsResponse = {
   metrics: AccountMetrics[];
 };
 
-export async function getAccountsMetrics(
+async function getAccountsMetrics(
   params: GetAccountsMetricsRequest,
   apiClient: AxiosInstance = api,
 ): Promise<GetAccountsMetricsResponse> {

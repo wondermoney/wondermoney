@@ -1,6 +1,5 @@
 import {
   type EntityManager,
-  type FilterQuery,
   LockMode,
   QueryOrder,
 } from '@mikro-orm/core';
@@ -69,7 +68,7 @@ export async function deliverAnalyticsOutboxBatch(
         analyticsOutboxKey: { $in: eligibleIds },
         deletedAt: null,
         sentAt: null,
-      } as FilterQuery<AnalyticsOutbox>,
+      },
       {
         limit: ANALYTICS_OUTBOX_BATCH_SIZE,
         lockMode: LockMode.PESSIMISTIC_PARTIAL_WRITE,
@@ -91,7 +90,7 @@ export async function deliverAnalyticsOutboxBatch(
 
       const appuser = await tx.findOne(
         Appuser,
-        { deletedAt: null, externalUserId: row.distinctId, recordActive: true } as FilterQuery<Appuser>,
+        { deletedAt: null, externalUserId: row.distinctId, recordActive: true },
       );
       if (!appuser) {
         blocked += 1;
@@ -157,12 +156,9 @@ async function claimEligibleAnalyticsOutboxIds(em: EntityManager): Promise<numbe
 /**
  * Cached per API key.
  *
- * This job runs once a minute and used to construct a fresh `PostHog` client on every
- * run without ever calling `shutdown()` — 1 440 clients a day, each holding its own HTTP
- * agent. `flushInterval: 0` at least avoided a timer leak, but the allocation churn was
- * pure waste on a long-lived process. One client per key, reused for the process's life;
- * `flush()` is still called explicitly at the end of each batch, so delivery semantics
- * are unchanged.
+ * This job runs once a minute; a fresh `PostHog` client per run would mean 1 440 clients
+ * a day, each holding its own HTTP agent. One client per key, reused for the process's
+ * life; `flush()` is called explicitly at the end of each batch.
  */
 let cachedPostHogClient: undefined | { apiKey: string; client: PostHogDeliveryClient };
 

@@ -32,7 +32,7 @@ export async function getNetWorthHistoryReport(input: ReportServiceInput): Promi
     months: HISTORY_MONTHS,
     toDate: input.filters.toDate ? new Date(input.filters.toDate) : undefined,
   });
-  // RAD-565 — `fromDate` is an *instant*; a Lisbon viewer picking August sends
+  // `fromDate` is an *instant*; a Lisbon viewer picking August sends
   // `2026-07-31T23:00:00Z`. Reading its month in UTC resolved to July, so a July
   // point cleared a filter for August. Resolve it in the caller's calendar.
   //

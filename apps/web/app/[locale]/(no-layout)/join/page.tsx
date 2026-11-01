@@ -8,6 +8,7 @@ import { Link } from "@/components/ui/Link";
 import { Text } from "@/components/ui/Typography";
 import { validateInvite } from "@/lib/api/household/validateInvite";
 import { getServerSession } from "@/lib/auth/server-auth";
+import { getInstanceName } from "@/lib/instance-name.server";
 
 function JoinShell({ children }: { children: React.ReactNode }) {
   return (
@@ -27,6 +28,7 @@ export default async function JoinPage({
 }) {
   const t = await getTranslations("household");
   const { token } = await searchParams;
+  const instanceName = await getInstanceName();
 
   const session = await getServerSession();
   const isLoggedIn = Boolean(session);
@@ -35,9 +37,9 @@ export default async function JoinPage({
   if (isLoggedIn) {
     return (
       <JoinShell>
-        <h2 className="text-foreground mt-8 text-2xl leading-9 font-bold tracking-tight">
+        <h1 className="text-foreground mt-8 text-2xl leading-9 font-bold tracking-tight">
           {t("join.loggedInTitle")}
-        </h2>
+        </h1>
         <Text variant="mutedText" className="mt-2 text-sm leading-6">
           {t("join.loggedInBody")}
         </Text>
@@ -52,31 +54,31 @@ export default async function JoinPage({
   if (!invite) {
     return (
       <JoinShell>
-        <h2 className="text-foreground mt-8 text-2xl leading-9 font-bold tracking-tight">
+        <h1 className="text-foreground mt-8 text-2xl leading-9 font-bold tracking-tight">
           {t("join.invalidTitle")}
-        </h2>
+        </h1>
         <Text variant="mutedText" className="mt-2 text-sm leading-6">
           {t("join.invalidBody")}
         </Text>
         <Link
           href="/auth/login"
-          className="text-primary hover:text-primary/80 mt-6 inline-block text-sm font-semibold underline underline-offset-2"
+          className="text-primary mt-6 inline-block text-sm font-semibold underline underline-offset-2 hover:decoration-2"
         >
-          {t("join.backToApp")}
+          {t("join.backToApp", { instanceName })}
         </Link>
       </JoinShell>
     );
   }
 
   const greeting = invite.inviterName
-    ? t("join.greetingNamed", { name: invite.inviterName })
-    : t("join.greetingGeneric");
+    ? t("join.greetingNamed", { instanceName, name: invite.inviterName })
+    : t("join.greetingGeneric", { instanceName });
 
   return (
     <JoinShell>
-      <h2 className="text-foreground mt-8 text-2xl leading-9 font-bold tracking-tight">
+      <h1 className="text-foreground mt-8 text-2xl leading-9 font-bold tracking-tight">
         {greeting}
-      </h2>
+      </h1>
       <Text variant="mutedText" className="mt-2 text-sm leading-6">
         {t("join.subtitle")}
       </Text>

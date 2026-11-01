@@ -2,6 +2,7 @@ import type { EntityManager } from '@mikro-orm/core';
 
 import { Appuser } from '@entity/Appuser';
 import { AppuserTenant } from '@entity/AppuserTenant';
+import { EnableBankingConnection } from '@entity/EnableBankingConnection';
 import { NordigenRequisition } from '@entity/NordigenRequisition';
 import { Tenant } from '@entity/Tenant';
 import { BadRequestError, ERROR_CODE, ForbiddenError, NotFoundError } from '@utils/errors';
@@ -11,19 +12,19 @@ function ownerKeyOf(tenant: Tenant): number {
 }
 
 /**
- * Revoke a departing member's bank connections (RAD-343 Q3): the household keeps
- * the member's historical accounts/transactions, but their live GoCardless
- * requisitions are soft-deleted so the household stops pulling their bank feed.
- * Mirrors the manual unlink behaviour (local soft-delete).
+ * Revoke a departing member's bank connections: the household keeps
+ * the member's historical accounts/transactions, but their live bank connections are
+ * soft-deleted so the household stops pulling their bank feed — the scheduled refresh
+ * only picks up connections with no `deletedAt`. Mirrors the manual unlink behaviour
+ * (local soft-delete). Enable Banking connections are what actually sync; legacy
+ * requisitions are revoked too so neither provider's rows linger.
  */
 async function revokeRequisitionsFor(em: EntityManager, tenant: Tenant, targetAppuserKey: number, now: Date): Promise<void> {
-  const requisitions = await em.find(NordigenRequisition, {
-    appuserKey: { appuserKey: targetAppuserKey },
-    deletedAt: undefined,
-    tenantKey: tenant,
-  });
-  for (const requisition of requisitions) {
-    requisition.deletedAt = now;
+  const owner = { appuserKey: { appuserKey: targetAppuserKey }, deletedAt: undefined, tenantKey: tenant };
+  const requisitions = await em.find(NordigenRequisition, owner);
+  const connections = await em.find(EnableBankingConnection, owner);
+  for (const revoked of [...requisitions, ...connections]) {
+    revoked.deletedAt = now;
   }
 }
 
@@ -61,7 +62,7 @@ export async function leaveOrRemoveMember(em: EntityManager, tenant: Tenant, req
 }
 
 /**
- * Owner account deletion (RAD-343 Q4): tear down the household — deactivate every
+ * Owner account deletion: tear down the household — deactivate every
  * OTHER member of each tenant this user owns and revoke their bank connections.
  * The account-deletion service already handles the owner's own rows; this covers
  * the partner. Runs inside the deletion transaction (no flush here).

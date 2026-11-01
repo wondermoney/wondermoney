@@ -1,7 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Text } from "@/components/ui/Typography";
 import useUpdatePortfolio from "@/lib/api/portfolio/useUpdatePortfolio";
 import { ALLOCATION_PRESETS } from "@/lib/portfolio/allocation-presets";
+import { useFormatPercentage } from "@/lib/utils/useFormatPercentage";
 
 interface PortfolioTargetAllocationEditorProps {
   isOpen: boolean;
@@ -19,13 +20,23 @@ interface PortfolioTargetAllocationEditorProps {
   currentTargets: Record<string, number> | null | undefined;
 }
 
+function buildTargetInputs(
+  assetClasses: string[],
+  currentTargets: Record<string, number> | null | undefined,
+): Record<string, string> {
+  const initial: Record<string, string> = {};
+  for (const assetClass of assetClasses) {
+    initial[assetClass] = String(currentTargets?.[assetClass] ?? 0);
+  }
+  return initial;
+}
+
 const PortfolioTargetAllocationEditor: React.FC<
   PortfolioTargetAllocationEditorProps
 > = ({ isOpen, closeModal, portfolioId, currentAssetClasses, currentTargets }) => {
   const t = useTranslations();
+  const formatPercentage = useFormatPercentage();
   const updatePortfolio = useUpdatePortfolio();
-  const [targets, setTargets] = useState<Record<string, string>>({});
-
   const allAssetClasses = useMemo(
     () => [
       ...new Set([...currentAssetClasses, ...Object.keys(currentTargets ?? {})]),
@@ -33,13 +44,18 @@ const PortfolioTargetAllocationEditor: React.FC<
     [currentAssetClasses, currentTargets],
   );
 
-  useEffect(() => {
-    const initial: Record<string, string> = {};
-    for (const assetClass of allAssetClasses) {
-      initial[assetClass] = String(currentTargets?.[assetClass] ?? 0);
-    }
-    setTargets(initial);
-  }, [allAssetClasses, currentTargets]);
+  const [targets, setTargets] = useState<Record<string, string>>(() =>
+    buildTargetInputs(allAssetClasses, currentTargets),
+  );
+  // Re-seed the inputs when the saved targets or asset classes change,
+  // adjusting during render rather than in an effect. Compared by content: the
+  // parent builds `currentAssetClasses` fresh on every render.
+  const seedKey = JSON.stringify([allAssetClasses, currentTargets ?? null]);
+  const [seededKey, setSeededKey] = useState(seedKey);
+  if (seedKey !== seededKey) {
+    setSeededKey(seedKey);
+    setTargets(buildTargetInputs(allAssetClasses, currentTargets));
+  }
 
   const total = Object.values(targets).reduce(
     (sum, v) => sum + (Number(v) || 0),
@@ -122,7 +138,7 @@ const PortfolioTargetAllocationEditor: React.FC<
           <Text
             className={`text-sm font-semibold ${Math.abs(total - 100) > 0.1 ? "text-destructive-text" : "text-success-text"}`}
           >
-            {total.toFixed(1)}%
+            {formatPercentage(total / 100, { minimumFractionDigits: 1, maximumFractionDigits: 1 })}
           </Text>
         </div>
 

@@ -50,12 +50,12 @@ export async function getCompanyInformation(req: Request, res: Response) {
     }
     // Fundamentals-tier fields (beta, ceo, description, employees, industry,
     // sector, website, image) are unavailable without EODHD's Fundamentals
-    // tier (not in this plan — see RAD-449 spec) and stay null. Price and
+    // tier (not in our plan) and stay null. Price and
     // changePercentage are NOT fundamentals-gated — they come from the same
     // real-time quote call `getQuote` uses below, so Explorer's header and
     // the Watchlist row show the same "current price" concept from one
     // source of truth instead of one live and one derived from EOD history
-    // (RAD-649 — the two used to disagree, sometimes by a lot, mid-session).
+    // (which can disagree, sometimes by a lot, mid-session).
     const { changePercentage, price } = await fetchQuoteSnapshot(ticker)
     const dto: CompanyInformationResponseDto = {
       beta: null,
@@ -82,19 +82,19 @@ export async function getCompanyInformation(req: Request, res: Response) {
 
 export async function getEarnings(req: Request, _res: Response) {
   await zParse(getEarningsRequestSchema, req)
-  // Not covered by the current EODHD plan tier (Fundamentals-gated). See RAD-449.
+  // Not covered by the current EODHD plan tier (Fundamentals-gated).
   throw new NotFoundError('Earnings data is temporarily unavailable')
 }
 
 export async function getFinancials(req: Request, _res: Response) {
   await zParse(getFinancialsRequestSchema, req)
-  // Not covered by the current EODHD plan tier (Fundamentals-gated). See RAD-449.
+  // Not covered by the current EODHD plan tier (Fundamentals-gated).
   throw new NotFoundError('Financials data is temporarily unavailable')
 }
 
 export async function getFundamentals(req: Request, _res: Response) {
   await zParse(getFundamentalsRequestSchema, req)
-  // Not covered by the current EODHD plan tier (Fundamentals-gated). See RAD-449.
+  // Not covered by the current EODHD plan tier (Fundamentals-gated).
   throw new NotFoundError('Fundamentals data is temporarily unavailable')
 }
 
@@ -112,7 +112,7 @@ export async function getHistoricalDividend(req: Request, res: Response) {
       dividends: rows
         .map((row) => ({
           // EODHD's dividend value is already the per-share cash amount (not an
-          // adjusted-close price like FMP's getDividendAdjusted was). There is no
+          // adjusted-close price). There is no
           // separate "unadjusted price on that date" concept here, so both DTO
           // fields carry the same value — this is the correct, direct mapping,
           // not a fallback.
@@ -159,9 +159,8 @@ export async function getHistoricalPrice(req: Request, res: Response) {
           return {
             // NOTE: `adjClose` here is "dividend amount paid on that date",
             // not a split/dividend-adjusted closing price. This DTO field
-            // has always meant "dividend value on this date if
-            // includeDividends was requested" — a pre-existing naming quirk
-            // inherited from FMP, not something this migration changes.
+            // means "dividend value on this date if includeDividends was
+            // requested" — a naming quirk kept for DTO compatibility.
             adjClose: includeDividends ? dividendByDate.get(date) ?? null : null,
             close: numeric(row.close),
             date,
@@ -183,7 +182,7 @@ export async function getHistoricalPrice(req: Request, res: Response) {
 
 export async function getNews(req: Request, _res: Response) {
   await zParse(getNewsRequestSchema, req)
-  // Not covered by the current EODHD plan tier (Fundamentals-gated). See RAD-449.
+  // Not covered by the current EODHD plan tier (Fundamentals-gated).
   throw new NotFoundError('News data is temporarily unavailable')
 }
 
@@ -243,9 +242,7 @@ export async function searchTicker(req: Request, res: Response) {
         name: stringValue(row.Name),
         symbol: readSymbol(row.Code),
         // EODHD's search results carry an instrument type (e.g. "Common Stock",
-        // "ETF"), unlike FMP's search which never populated it (previously null
-        // here). The DTO field was always typed `nullable string`, so this is
-        // compatible — just newly populated.
+        // "ETF"); the DTO field is a nullable string.
         type: stringValue(row.Type),
       })),
       source: { ...SOURCE_METADATA },
@@ -270,12 +267,12 @@ function dateString(value: unknown): null | string {
  * Real-time price + daily change for `ticker`, from the exact same EODHD
  * real-time quote call `getQuote` above uses. Shared so company-information
  * (Explorer) and quote (Watchlist) can never derive "current price" from two
- * different provider calls again (RAD-649).
+ * different provider calls.
  *
  * Best-effort: a quote hiccup returns nulls rather than throwing, so it
  * doesn't take down the rest of the company-profile response — the caller
  * already resolved that independently via `eodhd.search()`. The frontend
- * knows how to render a null price/changePercentage (RAD-608's last-close
+ * knows how to render a null price/changePercentage (its last-close
  * fallback), same as it already does for a quote-only failure.
  */
 async function fetchQuoteSnapshot(ticker: string): Promise<{ changePercentage: null | number; price: null | number }> {

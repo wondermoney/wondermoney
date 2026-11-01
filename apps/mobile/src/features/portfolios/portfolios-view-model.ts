@@ -19,6 +19,8 @@ export type PortfolioRowViewModel = Readonly<{
 export type PortfolioOverviewViewModel = Readonly<{
   assetCount: number
   currency: string
+  /** A trade fee could not be converted and was left out of the gains. */
+  feesLeftOut?: boolean
   periodReturn: number | null
   portfolioCount: number
   portfolios: readonly PortfolioRowViewModel[]
@@ -35,6 +37,7 @@ export function mapPortfolioOverview(
   return {
     assetCount: dashboard.summary.assetCount,
     currency: dashboard.summary.currency,
+    feesLeftOut: Boolean(dashboard.summary.feeConversionIncompleteAssetKeys?.length),
     periodReturn: dashboard.summary.periodReturn,
     portfolioCount: dashboard.summary.portfolioCount,
     portfolios: dashboard.portfolios.map((portfolio) => ({
@@ -58,6 +61,8 @@ export type HoldingViewModel = Readonly<{
   currency: string
   currentPrice: number | null
   currentValue: number | null
+  /** A fee on this asset could not be converted and was left out of its cost and gain. */
+  feeConversionIncomplete?: boolean
   gain: number | null
   gainPercent: number | null
   id: number
@@ -74,6 +79,7 @@ export type PortfolioDetailViewModel = Readonly<{
   biggestPosition: { ticker: string; weight: number } | null
   currency: string
   description: string | null
+  feesLeftOut?: boolean
   holdings: readonly HoldingViewModel[]
   holdingsCount: number
   id: number
@@ -96,6 +102,7 @@ export function mapPortfolioDetail(
     biggestPosition: dashboard.quickStats.biggestPosition,
     currency: dashboard.summary.currency,
     description: metadata.portfolio.description ?? null,
+    feesLeftOut: Boolean(dashboard.summary.feeConversionIncompleteAssetKeys?.length),
     holdings: holdings.holdings.map((holding) => {
       const invalid = holding.isInvalid === true
       return {
@@ -104,6 +111,7 @@ export function mapPortfolioDetail(
         currency: holding.currency,
         currentPrice: invalid ? null : holding.currentPrice,
         currentValue: invalid ? null : holding.currentValue,
+        feeConversionIncomplete: holding.feeConversionIncomplete === true,
         gain: invalid ? null : holding.unrealizedGains,
         gainPercent: invalid ? null : holding.unrealizedGainsPercentage,
         id: holding.financialAssetKey,

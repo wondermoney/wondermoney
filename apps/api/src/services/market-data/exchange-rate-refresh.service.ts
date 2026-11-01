@@ -1,4 +1,5 @@
 import { DI } from '@app/database/di';
+import { sqlQuery, toDate } from '@app/database/sql';
 import { Currency } from '@entity/Currency';
 
 const SUPPORTED_CURRENCIES = ['EUR', 'USD', 'JPY', 'GBP', 'AUD', 'CAD', 'CHF', 'SEK', 'NOK', 'BRL', 'DKK'] as const;
@@ -30,8 +31,8 @@ async function fetchExchangeRates(mode: Mode): Promise<EcbSeries[]> { return par
  */
 const ECB_FETCH_TIMEOUT_MS = 30_000;
 async function fetchXml(url: string): Promise<string> { const response = await fetch(url, { signal: AbortSignal.timeout(ECB_FETCH_TIMEOUT_MS) }) as unknown as { ok: boolean; status: number; text: () => Promise<string> }; if (!response.ok) throw new Error(`ECB fetch failed: ${response.status}`); const text: string = await response.text(); return text; }
-async function getLastExchangeRateDate() { const knex = DI.em.getKnex() as unknown as { select: (column: string) => { from: (table: string) => { orderBy: (column: string, direction: 'asc' | 'desc') => { limit: (count: number) => { first: () => Promise<undefined | { date?: Date }> } } } } }; const row = await knex.select('date').from('exchange_rate').orderBy('date', 'desc').limit(1).first(); return row?.date ?? null; }
-async function insertRows(rows: ExchangeRateRow[]) { let inserted = 0; let skipped = 0; const knex = DI.em.getKnex(); for (let i = 0; i < rows.length; i += BATCH_SIZE) { const batch = rows.slice(i, i + BATCH_SIZE); const result = await knex('exchange_rate').insert(batch).onConflict(['from_currency_key', 'to_currency_key', 'date']).ignore().returning(['exchange_rate_key']); inserted += result.length; skipped += batch.length - result.length; } return { inserted, skipped }; }
+async function getLastExchangeRateDate() { const row = await sqlQuery(DI.em).selectFrom('exchange_rate').select('date').orderBy('date', 'desc').limit(1).executeTakeFirst(); return row?.date == null ? null : toDate(row.date as Date | string); }
+async function insertRows(rows: ExchangeRateRow[]) { let inserted = 0; let skipped = 0; const db = sqlQuery(DI.em); for (let i = 0; i < rows.length; i += BATCH_SIZE) { const batch = rows.slice(i, i + BATCH_SIZE); const result = await db.insertInto('exchange_rate').values(batch.map((row) => ({ ...row }))).onConflict((conflict) => conflict.columns(['from_currency_key', 'to_currency_key', 'date']).doNothing()).returning(['exchange_rate_key']).execute(); inserted += result.length; skipped += batch.length - result.length; } return { inserted, skipped }; }
 
 function parseEcbXml(xml: string): EcbSeries[] { const series: EcbSeries[] = []; for (const match of xml.matchAll(/<Cube\s+time=(['"])([^'"]+)\1>([\s\S]*?)<\/Cube>/g)) { const rates: Record<string, number> = {}; for (const rateMatch of (match[3] ?? '').matchAll(/<Cube\s+currency=(['"])([A-Z]{3})\1\s+rate=(['"])([0-9.]+)\3\s*\/>/g)) { const currency = rateMatch[2]; const rate = rateMatch[4]; if (!currency || !rate) continue; rates[currency] = Number(rate); } const date = match[2]; if (!date) continue; series.push({ date, rates }); } return series; }
 

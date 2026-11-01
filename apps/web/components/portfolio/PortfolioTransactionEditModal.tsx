@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
-import { SubmitHandler, useForm } from "react-hook-form";
+import { SubmitHandler, useForm, useWatch } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
 
@@ -138,6 +138,10 @@ const PortfolioTransactionEditModal = (
     handleSubmit,
     formState: { isSubmitting },
   } = methods;
+  const [settlementCurrencyId, feeCurrencyId, originalCurrencyId] = useWatch({
+    control,
+    name: ["settlementCurrencyId", "feeCurrencyId", "originalCurrencyId"],
+  });
 
   const onSubmit: SubmitHandler<FormProps> = async (formData: any) => {
     const body: Record<string, any> = {
@@ -309,7 +313,11 @@ const PortfolioTransactionEditModal = (
                     {isLoadingConfigs ? (
                       <Spinner />
                     ) : configsData ? (
-                      <Select {...field}>
+                      <Select
+                        value={field.value ?? ""}
+                        onValueChange={field.onChange}
+                        disabled={field.disabled}
+                      >
                         <SelectTrigger className="w-full">
                           <SelectValue placeholder={t("broker")} />
                         </SelectTrigger>
@@ -387,7 +395,7 @@ const PortfolioTransactionEditModal = (
                         <ComboBoxForm
                           triggerClassName={CURRENCY_TRIGGER_CLASS}
                           field={{
-                            value: methods.watch("settlementCurrencyId"),
+                            value: settlementCurrencyId,
                           }}
                           onSelect={(opt) => {
                             methods.setValue(
@@ -451,7 +459,7 @@ const PortfolioTransactionEditModal = (
                           <ComboBoxForm
                             triggerClassName={CURRENCY_TRIGGER_CLASS}
                             field={{
-                              value: methods.watch("feeCurrencyId"),
+                              value: feeCurrencyId,
                             }}
                             onSelect={(opt) => {
                               methods.setValue(
@@ -516,7 +524,7 @@ const PortfolioTransactionEditModal = (
                           <ComboBoxForm
                             triggerClassName={CURRENCY_TRIGGER_CLASS}
                             field={{
-                              value: methods.watch("originalCurrencyId"),
+                              value: originalCurrencyId,
                             }}
                             onSelect={(opt) => {
                               methods.setValue(

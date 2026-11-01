@@ -138,7 +138,7 @@ export class FinancialEmailOrchestrationService {
 
 function asSnapshot(value: null | Record<string, unknown>): null | StoredSnapshot {
   if (!value) return null;
-  return value as unknown as StoredSnapshot;
+  return value;
 }
 
 function normalizeRange(range: { end: Date; start: Date }) {

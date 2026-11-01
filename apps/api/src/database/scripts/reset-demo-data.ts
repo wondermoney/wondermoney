@@ -305,13 +305,13 @@ async function main() {
 async function upsertByCriteria<T extends object>(
   tx: EntityManager,
   entity: EntityName<T>,
-  criteria: FilterQuery<T>,
+  criteria: FilterQuery<NoInfer<T>>,
   data: object,
 ) {
   const existing = await tx.findOne<T>(entity, criteria);
 
   if (existing) {
-      tx.assign(existing, data as unknown as Parameters<typeof tx.assign<T>>[1]);
+      tx.assign(existing, data);
     return existing;
   }
 

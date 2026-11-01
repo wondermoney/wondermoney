@@ -17,9 +17,8 @@ import {
   type UseReportExportOptions,
 } from "./useReportExport";
 
-// TODO: XLSX export is a follow-up slice; CSV is sufficient for MVP per
-// RAD-156 acceptance criteria. Add `ExportXlsxButton` here when the `xlsx`
-// library is pulled in.
+// TODO: XLSX export is a follow-up; CSV is sufficient for now. Add
+// `ExportXlsxButton` here when the `xlsx` library is pulled in.
 
 interface ExportCsvButtonBaseProps {
   filename: string;

@@ -60,8 +60,8 @@ export default function LoanDetailClient({ loanId }: { loanId: string }) {
   if (loanLoading)
     return (
       <div className="space-y-4">
-        <div className="bg-muted h-10 w-56 animate-pulse rounded" />
-        <div className="bg-muted h-40 animate-pulse rounded" />
+        <div className="bg-muted h-10 w-56 animate-pulse rounded motion-reduce:animate-none" />
+        <div className="bg-muted h-40 animate-pulse rounded motion-reduce:animate-none" />
         <div className="text-muted-foreground text-sm">
           {t("detail.loading")}
         </div>

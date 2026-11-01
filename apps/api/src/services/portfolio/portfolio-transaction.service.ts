@@ -11,7 +11,6 @@ import type { Appuser } from '@entity/Appuser';
 import { AppuserTenant } from '@entity/AppuserTenant';
 import { CertificadoAforroSubscriptionDetail } from '@entity/CertificadoAforroSubscriptionDetail';
 import { Currency } from '@entity/Currency';
-import { ExchangeRate } from '@entity/ExchangeRate';
 import type { FinancialAsset } from '@entity/FinancialAsset';
 import { FinancialAssetStockAdjustment } from '@entity/FinancialAssetStockAdjustment';
 import { FinancialBroker } from '@entity/FinancialBroker';
@@ -29,6 +28,7 @@ import { resolveOrCreateFinancialAsset } from './financial-asset.service.js';
 import historicalAssetPriceBackfillClient, { type HistoricalAssetPriceBackfillItem, toYmd } from './historical-asset-price-backfill-client.js';
 import { type HoldingTransactionTimelineItem, replayHoldingTimeline, type StockSplitTimelineItem } from './portfolio-holdings.utils.js';
 import portfolioSnapshotService from './portfolio-snapshot.service.js';
+import { applyUserCurrencyConversion, resolveUserCurrencyConversion } from './portfolio-transaction-conversion.js';
 import { syncStockSplitsForAsset } from './stock-split-sync.service.js';
 
 interface CreateTransactionParams {
@@ -93,7 +93,7 @@ interface UpdateTransactionParams {
  * silently interpolated the literal string "undefined", and the resulting key
  * carried no tenant/portfolio component against a DB-global unique constraint, so
  * two different tenants entering the same symbol/amount/timestamp collided with a
- * raw 500 (RAD-603). A random id sidesteps both: manual entries have no import to
+ * raw 500. A random id sidesteps both: manual entries have no import to
  * re-run, so there is nothing for a content-derived key to protect here.
  */
 function generateManualPortfolioTransactionId(): string {
@@ -106,7 +106,7 @@ const SELL_QUANTITY_EXCEEDS_HOLDINGS_MESSAGE = 'Sell quantity exceeds available 
  * Turns a missing enqueue seam into a loud, up-front failure. Callers that enable
  * maintenance must supply the transport before anything is persisted; discovering the
  * missing dependency after commit would strand a saved transaction behind a retry that
- * then hits the unique constraint instead of the real problem (RAD-603 pattern).
+ * then hits the unique constraint instead of the real problem.
  */
 function requireMaintenanceEnqueue(enqueue: Enqueue | undefined): Enqueue {
   if (!enqueue) {
@@ -568,7 +568,7 @@ class PortfolioTransactionService {
     }
 
     // Certificados de Aforro never have stock splits — skip the (real, rate-limited) EODHD
-    // sync call entirely for this asset type rather than firing it pointlessly (RAD-445).
+    // sync call entirely for this asset type rather than firing it pointlessly.
     if (!isSavingsCertificate) {
       try {
         await syncStockSplitsForAsset(financialAsset);
@@ -635,9 +635,10 @@ class PortfolioTransactionService {
       financialTransaction.settlementExchangeRate = unitPrice / originalUnitPrice;
     }
 
-    // Handle fee currency
-    if (feeAmount && feeCurrencyId) {
-      const feeCurrency = await em.findOne(Currency, { currencyKey: feeCurrencyId });
+    // Handle fee currency. A fee sent without a currency is in the settlement currency (the
+    // importer's rule too): gains need a currency for every non-zero fee.
+    if (feeAmount) {
+      const feeCurrency = feeCurrencyId ? await em.findOne(Currency, { currencyKey: feeCurrencyId }) : settlementCurrency;
       if (!feeCurrency) {
         throw new NotFoundError('Fee currency not found');
       }
@@ -645,21 +646,8 @@ class PortfolioTransactionService {
       financialTransaction.feeAmount = feeAmount;
     }
 
-    // Convert to user's currency if necessary
-    const userCurrency = appuser.currencyKey;
-    const isTrxCurrencyDifferentFromUserCurrency = financialTransaction.settlementCurrencyKey !== userCurrency;
-    if (isTrxCurrencyDifferentFromUserCurrency) {
-      const exchangeRate = await em.findOne(ExchangeRate, {
-        date: financialTransaction.transactionDate,
-        fromCurrency: financialTransaction.settlementCurrencyKey,
-        toCurrency: userCurrency,
-      });
-      if (exchangeRate) {
-        financialTransaction.appuserSettlementAmount = financialTransaction.settlementAmount * exchangeRate.rate;
-        financialTransaction.appuserCurrencyExchangeRate = exchangeRate.rate;
-        financialTransaction.appuserUnitAmount = financialTransaction.settlementUnitAmount * exchangeRate.rate;
-      }
-    }
+    // Convert to the user's currency at the latest rate on or before the trade date.
+    applyUserCurrencyConversion(financialTransaction, await resolveUserCurrencyConversion(em, financialTransaction, appuser.currencyKey));
 
     try {
       await em.transactional(async (txEm) => {
@@ -673,7 +661,7 @@ class PortfolioTransactionService {
         }
         txEm.persist(financialTransaction);
         // taxExempt only means anything for accrual-mode series (C/D/E/F): the detail row feeds
-        // the accrual engine's tax-exempt-withholding branch. Séries A/B (RAD-446) are
+        // the accrual engine's tax-exempt-withholding branch. Séries A/B are
         // static-valuation and have no tax-exempt/accrual concept, so — same as every non-Savings-
         // Certificate asset type — taxExempt is silently ignored for them: no error, no detail row,
         // since it's an optional field and a client sending `false` (its default) must not error.
@@ -696,7 +684,7 @@ class PortfolioTransactionService {
       // Best-effort: the transaction above already committed. A failure here (asset-price
       // provider hiccup, backfill timeout) must not turn a persisted transaction into a
       // response the caller reads as failure and retries — retrying then hits the unique
-      // constraint on a transaction that was never actually missing (RAD-603).
+      // constraint on a transaction that was never actually missing.
       try {
         // Ensure recent asset price is available
         await assetPriceService.ensureRecentAssetPrice(financialAsset);
@@ -788,7 +776,7 @@ class PortfolioTransactionService {
     // `unitPrice` of 1 (see the identical guard in createPortfolioTransaction). Without this check
     // a valid Savings Certificate transaction (e.g. `{quantity: 5000, unitPrice: 1}`) could be
     // edited to `{quantity: 1, unitPrice: 5000}`, reproducing the same silent-wrong-valuation bug
-    // via the update path (RAD-445).
+    // via the update path.
     if (params.unitPrice !== undefined && transaction.financialAssetKey) {
       await DI.em.populate(transaction.financialAssetKey, ['financialAssetTypeKey']);
       const isSavingsCertificate = transaction.financialAssetKey.financialAssetTypeKey?.name === SAVINGS_CERTIFICATE_TYPE_NAME;
@@ -832,6 +820,10 @@ class PortfolioTransactionService {
       }
     }
 
+    if (transaction.feeAmount && !transaction.feeCurrencyKey) {
+      transaction.feeCurrencyKey = transaction.settlementCurrencyKey;
+    }
+
     if (params.originalUnitPrice !== undefined) {
       transaction.originalUnitAmount = params.originalUnitPrice ?? undefined;
       if (transaction.originalUnitAmount && transaction.quantity) {
@@ -864,20 +856,10 @@ class PortfolioTransactionService {
       transaction.settlementExchangeRate = undefined;
     }
 
-    // Recalculate user currency conversion if needed
-    const userCurrency = appuser.currencyKey;
-    if (transaction.settlementCurrencyKey !== userCurrency && transaction.transactionDate) {
-      const exchangeRate = await DI.em.findOne(ExchangeRate, {
-        date: transaction.transactionDate,
-        fromCurrency: transaction.settlementCurrencyKey,
-        toCurrency: userCurrency,
-      });
-      if (exchangeRate) {
-        transaction.appuserSettlementAmount = transaction.settlementAmount * exchangeRate.rate;
-        transaction.appuserCurrencyExchangeRate = exchangeRate.rate;
-        transaction.appuserUnitAmount = transaction.settlementUnitAmount * exchangeRate.rate;
-      }
-    }
+    // Recalculate user currency conversion if needed. With nothing to convert (settled in the
+    // user's currency) or no rate, the converted amounts are cleared rather than left over from
+    // the transaction's previous currency, price or date.
+    applyUserCurrencyConversion(transaction, await resolveUserCurrencyConversion(DI.em, transaction, appuser.currencyKey));
 
     if (transaction.financialAssetKey) {
       await DI.em.transactional(async (entityManager) => {

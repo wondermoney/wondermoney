@@ -128,9 +128,8 @@ function SaveUpGoalCardBody({
         {progress !== null && (
           <GoalProgressBar value={Math.min(progress, 100)} />
         )}
-        {/* This line used to read "<available> / <target>", repeating the
-            available figure already set large above it — the card printed
-            €0.00 twice, 45px apart. Only the target is new information. */}
+        {/* Not "<available> / <target>": the available figure is already set
+            large above it. Only the target is new information. */}
         <div className="text-muted-foreground flex items-center justify-between gap-3 text-xs">
           <span className="font-mono whitespace-nowrap tabular-nums">
             {t("goals.of-target", {

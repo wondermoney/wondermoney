@@ -21,8 +21,8 @@ export default function GlobalError({
   }, [error]);
 
   return (
-    <html>
-      <body>
+    <html style={{ overflowX: "clip" }}>
+      <body style={{ overflowX: "clip" }}>
         {/* `NextError` is the default Next.js error page component. Its type
         definition requires a `statusCode` prop. However, since the App Router
         does not expose status codes for errors, we simply pass 0 to render a

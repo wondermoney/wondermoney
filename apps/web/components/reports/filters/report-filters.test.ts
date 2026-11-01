@@ -1,5 +1,5 @@
 /**
- * RAD-562 — the report request must name the calendar it wants months in.
+ * The report request must name the calendar it wants months in.
  *
  * `buildReportFilters` is the single place every `/v1/reports/*` request (chart
  * and CSV alike) gets its envelope from, so these checks pin both halves of the

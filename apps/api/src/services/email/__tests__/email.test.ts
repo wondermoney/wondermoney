@@ -48,7 +48,7 @@ describe('internal admin emails', () => {
 
     const payload = resendSendMock.mock.calls[0]?.[0];
     expect(payload.to).toBe('support@wonder.money');
-    expect(payload.subject).toBe('Wonder.money - Account deleted');
+    expect(payload.subject).toBe('WonderMoney - Account deleted');
     expect(payload.html).toContain('Account deleted');
     expect(payload.html).toContain('user@example.com');
     expect(payload.html).toContain('123');
@@ -104,7 +104,7 @@ describe('rendered Resend boundary', () => {
   });
 
   it('overrides the sender when a personal from is supplied', async () => {
-    // RAD-583: the founder outreach must arrive from a person. Defaulting it to
+    // The founder outreach must arrive from a person. Defaulting it to
     // the product's `hello@` sender would make a reply-seeking personal note
     // read as marketing.
     resendSendMock.mockResolvedValue({ data: { id: 'x' }, error: null });
@@ -153,7 +153,7 @@ describe('legacy sendEmail via Resend', () => {
     const payload = resendSendMock.mock.calls[0]?.[0];
     expect(payload).toMatchObject({
       from: 'Wonder.money <hello@wonder.money>',
-      subject: 'Wonder.money - Support',
+      subject: 'WonderMoney - Support',
       to: 'support@wonder.money',
     });
     expect(payload.html).toContain('Support request');
@@ -162,6 +162,28 @@ describe('legacy sendEmail via Resend', () => {
     expect(payload.html).toContain('user@example.com');
     expect(payload).not.toHaveProperty('attachments');
     expect(payload).not.toHaveProperty('template');
+  });
+
+  it('emails in-app feedback to the support inbox with replies going to the user', async () => {
+    const { sendFeedbackEmail } = await loadModule('production');
+    resendSendMock.mockResolvedValue({ data: { id: 'resend-id' }, error: null });
+
+    const outcome = await sendFeedbackEmail({ email: 'user@example.com', message: 'The chart is wrong', name: 'Ada', page: '/budgets', type: 'bug' });
+
+    expect(outcome).toEqual({ providerMessageIds: ['resend-id'], type: 'accepted' });
+    const payload = resendSendMock.mock.calls[0]?.[0];
+    expect(payload).toMatchObject({ replyTo: 'Ada <user@example.com>', to: 'support@wonder.money' });
+    expect(payload.html).toContain('The chart is wrong');
+    expect(payload.html).toContain('/budgets');
+  });
+
+  it('reports feedback the provider refused as not delivered', async () => {
+    const { sendFeedbackEmail } = await loadModule('production');
+    resendSendMock.mockResolvedValue({ data: null, error: { name: 'validation_error', statusCode: 422 } });
+
+    const outcome = await sendFeedbackEmail({ email: 'user@example.com', message: 'Hi', type: 'other' });
+
+    expect(outcome.type).toBe('rejected');
   });
 
 });
@@ -343,6 +365,49 @@ describe('transactional user emails (welcome)', () => {
     const { sendWelcomeEmail } = await loadModule('production');
     await sendWelcomeEmail({ ...user, firstName: undefined });
     expect(resendSendMock.mock.calls[0]?.[0].to).toBe('user@example.com');
+  });
+});
+
+describe('instance name in user emails', () => {
+  beforeEach(() => {
+    resendCtor.mockClear();
+    resendSendMock.mockReset();
+    resendSendMock.mockResolvedValue({ data: { id: 'resend-id' }, error: null });
+    vi.unstubAllEnvs();
+  });
+
+  const lastPayload = () => resendSendMock.mock.calls.at(-1)?.[0] as { html: string; subject: string; text: string };
+
+  it('names a self-hosted instance by INSTANCE_NAME, never the hosted brand', async () => {
+    const { sendAccountSyncEmail, sendEmailVerificationEmail, sendPasswordResetEmail, sendWelcomeEmail } = await loadModule('production');
+    vi.stubEnv('INSTANCE_NAME', 'Casa Finance');
+
+    await sendPasswordResetEmail({ email: 'ada@example.com', name: 'Ada' }, 'https://money.example.com/reset?token=t');
+    const reset = lastPayload();
+    expect(reset.subject).toBe('Reset your Casa Finance password');
+    expect(reset.text).toContain('— The Casa Finance team');
+
+    await sendEmailVerificationEmail({ email: 'ada@example.com' }, 'https://money.example.com/verify?token=t');
+    expect(lastPayload().subject).toBe('Verify your Casa Finance email');
+
+    await sendWelcomeEmail({ appuserKey: 42, emailAddress: 'ada@example.com', language: 'EN' });
+    expect(lastPayload().subject).toContain('Welcome to Casa Finance');
+
+    await sendAccountSyncEmail({ email: 'ada@example.com' }, { bankName: 'Millennium' }, 'EN');
+    expect(lastPayload().subject).toBe('Millennium is connected to Casa Finance');
+
+    for (const [payload] of resendSendMock.mock.calls as [{ subject: string; text: string }][]) {
+      expect(`${payload.subject} ${payload.text}`).not.toMatch(/Wonder\.?money/iu);
+    }
+  });
+
+  it('keeps the hosted name when INSTANCE_NAME is unset', async () => {
+    const { sendPasswordResetEmail } = await loadModule('production');
+    vi.stubEnv('INSTANCE_NAME', '');
+
+    await sendPasswordResetEmail({ email: 'ada@example.com' }, 'https://app.example.test/reset?token=t');
+    expect(lastPayload().subject).toBe('Reset your WonderMoney password');
+    expect(lastPayload().text).toContain('— The WonderMoney team');
   });
 });
 

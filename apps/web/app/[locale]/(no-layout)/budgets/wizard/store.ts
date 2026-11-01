@@ -56,7 +56,7 @@ export function buildDependentsSchema(
     if (!household) return;
     if (data.dependentsNum > household.householdSize) {
       ctx.addIssue({
-        code: z.ZodIssueCode.custom,
+        code: "custom",
         message: maxDependentsMessage,
         path: ["dependentsNum"],
       });

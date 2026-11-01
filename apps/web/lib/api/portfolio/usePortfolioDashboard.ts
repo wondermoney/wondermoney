@@ -5,6 +5,9 @@ import type { SupportedCurrencyCodes } from "@/lib/utils/currencySymbol";
 
 import api from "../api";
 
+// The API adds opt-in summary fields only when asked, so strict older clients keep parsing.
+const DASHBOARD_INCLUDE = "feeConversion";
+
 export type Period = "1M" | "3M" | "6M" | "YTD" | "1Y" | "ALL";
 
 export interface DashboardSummary {
@@ -19,6 +22,12 @@ export interface DashboardSummary {
   lastUpdated: string;
   unrealizedGains: number;
   realizedGains: number;
+  /**
+   * Assets with a trade fee the API could not convert to the user's currency
+   * (counted as zero). Sent only when requested with `include=feeConversion`
+   * and non-empty; covers fully sold assets, which have no holding to flag.
+   */
+  feeConversionIncompleteAssetKeys?: number[];
 }
 
 export interface PortfolioBreakdownItem {
@@ -56,7 +65,7 @@ export async function getAggregateDashboard(
 ): Promise<AggregateDashboardResponse> {
   const { data } = await apiClient.get<AggregateDashboardResponse>(
     `/v1/portfolio/dashboard`,
-    { params: { period } },
+    { params: { period, include: DASHBOARD_INCLUDE } },
   );
   return data;
 }
@@ -71,7 +80,7 @@ export async function getPortfolioDashboard(
 ): Promise<IndividualDashboardResponse> {
   const { data } = await apiClient.get<IndividualDashboardResponse>(
     `/v1/portfolio/${portfolioId}/dashboard`,
-    { params: { period } },
+    { params: { period, include: DASHBOARD_INCLUDE } },
   );
   return data;
 }

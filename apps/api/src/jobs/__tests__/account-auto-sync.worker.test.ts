@@ -52,7 +52,7 @@ describe('scheduled bank sync producer contract worker', () => {
   it('passes the stable queue job id as scheduleRunId on every scan retry', async () => {
     const h = harness();
     const scheduler = { enqueueDueAccountSyncs: vi.fn().mockResolvedValue({ enqueued: 1, failed: 0, skipped: 0 }) };
-    await expect(handleAccountAutoSyncScheduleJob(pgBossJob({}, { id: 'schedule-job', retryCount: 2, retryLimit: 3 }) as Parameters<typeof handleAccountAutoSyncScheduleJob>[0], { backgroundOperationService: h.backgroundOperationService, schedulerService: scheduler } as unknown as Parameters<typeof handleAccountAutoSyncScheduleJob>[1])).resolves.toBe(true);
+    await expect(handleAccountAutoSyncScheduleJob(pgBossJob({}, { id: 'schedule-job', retryCount: 2, retryLimit: 3 }) as Parameters<typeof handleAccountAutoSyncScheduleJob>[0], { backgroundOperationService: h.backgroundOperationService, schedulerService: scheduler })).resolves.toBe(true);
     expect(scheduler.enqueueDueAccountSyncs).toHaveBeenCalledWith(expect.objectContaining({ scheduleRunId: 'schedule-job' }));
   });
 
@@ -62,7 +62,7 @@ describe('scheduled bank sync producer contract worker', () => {
   ])('persists exhausted schedule %s and returns false without throwing', async (scan, status) => {
     const h = harness();
     const scheduler = { enqueueDueAccountSyncs: vi.fn().mockResolvedValue(scan) };
-    await expect(handleAccountAutoSyncScheduleJob(pgBossJob({}, { id: 'schedule-terminal', retryCount: 3, retryLimit: 3 }) as Parameters<typeof handleAccountAutoSyncScheduleJob>[0], { backgroundOperationService: h.backgroundOperationService, schedulerService: scheduler } as unknown as Parameters<typeof handleAccountAutoSyncScheduleJob>[1])).resolves.toBe(false);
+    await expect(handleAccountAutoSyncScheduleJob(pgBossJob({}, { id: 'schedule-terminal', retryCount: 3, retryLimit: 3 }) as Parameters<typeof handleAccountAutoSyncScheduleJob>[0], { backgroundOperationService: h.backgroundOperationService, schedulerService: scheduler })).resolves.toBe(false);
     expect(h.backgroundOperationService.finishJob).toHaveBeenCalledWith(expect.any(String), 'schedule-terminal', expect.objectContaining({ retryable: false, status }));
     expect(h.backgroundOperationService.markAttemptFailedForRetry).not.toHaveBeenCalled();
   });
@@ -70,11 +70,11 @@ describe('scheduled bank sync producer contract worker', () => {
   it('captures and returns false after an unexpected exhausted schedule failure is persisted', async () => {
     const h = harness();
     const scheduler = { enqueueDueAccountSyncs: vi.fn().mockRejectedValue(new Error('unexpected secret detail')) };
-    await expect(handleAccountAutoSyncScheduleJob(pgBossJob({}, { id: 'schedule-terminal-error', retryCount: 3, retryLimit: 3 }) as Parameters<typeof handleAccountAutoSyncScheduleJob>[0], { backgroundOperationService: h.backgroundOperationService, schedulerService: scheduler } as unknown as Parameters<typeof handleAccountAutoSyncScheduleJob>[1])).resolves.toBe(false);
+    await expect(handleAccountAutoSyncScheduleJob(pgBossJob({}, { id: 'schedule-terminal-error', retryCount: 3, retryLimit: 3 }) as Parameters<typeof handleAccountAutoSyncScheduleJob>[0], { backgroundOperationService: h.backgroundOperationService, schedulerService: scheduler })).resolves.toBe(false);
     expect(h.backgroundOperationService.finishJob).toHaveBeenCalledWith(expect.any(String), 'schedule-terminal-error', expect.objectContaining({ retryable: false, status: 'failed' }));
   });
 
-  describe('Enable Banking connections (Phase 1e)', () => {
+  describe('Enable Banking connections', () => {
     const ebPayload = (overrides: Record<string, unknown> = {}) => ({
       appuserKey: 9,
       connectionId: 'session-20',

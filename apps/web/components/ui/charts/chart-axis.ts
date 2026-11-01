@@ -6,7 +6,7 @@ export const chartAxisProps = {
 
 /**
  * X-axis defaults. Recharts' `minTickGap` is 5px, which on a year of daily
- * closes printed two dozen dates across the axis — a wall of text (RAD-612).
+ * closes prints two dozen dates across the axis — a wall of text.
  * A gap wide enough for a formatted date makes the tick count fall out of the
  * available width instead of out of the number of points, so the same chart
  * thins itself on a phone without any breakpoint logic.
@@ -24,9 +24,9 @@ export const chartGridProps = {
 /**
  * Evenly spaced ticks on rounded values covering [min, max].
  *
- * Recharts' own domain ends at the data's extremes, so a price series produced
+ * Recharts' own domain ends at the data's extremes, so a price series produces
  * ticks like 239.15 / 269.15 / 299.15 / 347.56 — three even steps and then a
- * jump, which cannot be read at a glance (RAD-611, RAD-613). This picks a step
+ * jump, which cannot be read at a glance. This picks a step
  * from the 1 / 2 / 2.5 / 5 / 10 family and lands every tick on a multiple of
  * it.
  */
@@ -81,16 +81,15 @@ function roundToStep(value: number, step: number): number {
  * Width to reserve for the Y-axis gutter, estimated from the labels that will
  * actually be drawn.
  *
- * The flat 76px default was picked so a long currency label ("US$340.00") would
- * not be clipped, and then charged to every chart — the net worth chart reserved
- * it for labels half that wide and pushed its plot area far to the right
- * (RAD-613). Recharts gives us no measured text width, so this estimates from
- * the tick font (12px) and clamps to a sane band.
+ * A flat 76px gutter fits a long currency label ("US$340.00"), but charged to
+ * every chart it reserves room for labels half that wide and pushes the plot
+ * area far to the right. Recharts gives us no measured text width, so this
+ * estimates from the tick font (12px) and clamps to a sane band.
  *
- * `maxWidth` defaults to the original 96px currency-label cap; a category axis
- * (long free-text names, e.g. "Cafe, Restaurants & Bars") passes a wider one —
- * see `truncateAxisLabel` for the ellipsis backstop once even that cap isn't
- * enough (RAD-645).
+ * `maxWidth` defaults to the 96px currency-label cap; a category axis (long
+ * free-text names, e.g. "Cafe, Restaurants & Bars") passes a wider one — see
+ * `truncateAxisLabel` for the ellipsis backstop once even that cap isn't
+ * enough.
  */
 export function estimateYAxisWidth(
   labels: string[] | undefined,
@@ -106,9 +105,9 @@ export function estimateYAxisWidth(
 /**
  * Truncates a tick label to fit `maxChars`, ellipsizing the tail rather than
  * letting Recharts draw the full string and have it clipped raw by the SVG's
- * default `overflow: hidden` — the failure mode that turned "Uncategorized"
- * into "ncategorized" and "CAFE_RESTAURANTS_BARS" into "ANTS_BARS" on a narrow
- * category axis (RAD-645). Mirrors the Sankey chart's own `truncateLabel`.
+ * default `overflow: hidden` — which turns "Uncategorized" into "ncategorized"
+ * and "CAFE_RESTAURANTS_BARS" into "ANTS_BARS" on a narrow category axis.
+ * Mirrors the Sankey chart's own `truncateLabel`.
  */
 export function truncateAxisLabel(label: string, maxChars: number): string {
   if (maxChars <= 1) return "…";

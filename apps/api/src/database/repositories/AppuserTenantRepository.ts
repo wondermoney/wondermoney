@@ -7,8 +7,8 @@ import { ExtendedEntityRepository } from './_ExtendedEntityRepository';
 export class AppuserTenantRepository extends ExtendedEntityRepository<AppuserTenant> {
   public countActiveByTenant = (tenant: Tenant) =>
     this.count({ deletedAt: undefined, recordActive: true, tenantKey: tenant });
-  // role defaults to OWNER (every historical link is the user's own tenant). The
-  // household invite flow (RAD-343) passes MEMBER when linking a joining partner.
+  // role defaults to OWNER (a signup links the user to their own tenant). The
+  // household invite flow passes MEMBER when linking a joining partner.
   public createAppuserTenant = (appUser: Appuser, tenant: Tenant, role: HouseholdRole = HouseholdRole.OWNER) => {
     const appuserTenant = new AppuserTenant();
     appuserTenant.appuserKey = appUser;

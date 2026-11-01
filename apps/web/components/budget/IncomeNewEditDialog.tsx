@@ -125,11 +125,11 @@ const IncomeNewEditDialog: React.FC<Props> = ({
       <Form {...methods}>
         <FormContent
           onSubmit={(event) => {
-            // This dialog is portalled into `document.body` by Radix
-            // (RAD-332), but React re-dispatches synthetic events along the
+            // This dialog is portalled into `document.body` by Radix,
+            // but React re-dispatches synthetic events along the
             // *component* tree, not the DOM tree — a `submit` fired here
             // still bubbles up to the wizard income step's own `<form>`,
-            // even though the two elements are unrelated in the DOM (RAD-633).
+            // even though the two elements are unrelated in the DOM.
             // Without stopping it, submitting this dialog also submits the
             // outer step: `useCreateBudget` fires immediately, using
             // whatever `incomes` the outer form happened to hold at that

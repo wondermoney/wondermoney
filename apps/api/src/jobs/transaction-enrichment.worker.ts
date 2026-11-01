@@ -40,7 +40,7 @@ interface TransactionEnrichmentWorkerDependencies {
 }
 
 /**
- * Worker for the DeepSeek transaction-enrichment pipeline (RAD-414).
+ * Worker for the DeepSeek transaction-enrichment pipeline.
  *
  * Runs post-sync/non-critical. Fail-safe and idempotent: the ONLY path that triggers a pg-boss
  * retry is a `throw` on a transient transport error (429 / >=500); every other outcome returns a
@@ -78,7 +78,7 @@ export async function handleTransactionEnrichmentGptJob(
   // (DeepSeekHttpError 429/>=500) rethrows to trigger a pg-boss retry. Everything else — DB errors
   // from findOne/find/flush, parse/validation, terminal 4xx — is deterministic: mark the row FAILED
   // and consume the job, so a guaranteed-to-fail input never re-reserves budget or re-calls the
-  // model across the retry limit (RAD-414 M1).
+  // model across the retry limit.
   let enrichment: null | TransactionEnrichment = null;
   try {
     enrichment = await em.findOne(TransactionEnrichment, { transactionEnrichmentKey: payload.transactionEnrichmentKey });
@@ -141,7 +141,7 @@ export async function handleTransactionEnrichmentGptJob(
       enrichment.categorySuggestionKey = getRef(em, Category, suggestion.result.categorySuggestionKey);
     }
     enrichment.completedAt = now();
-    // `write` mode applies a confident suggestion to a still-uncategorized transaction (RAD-414); a
+    // `write` mode applies a confident suggestion to a still-uncategorized transaction; a
     // recorded-but-not-applied suggestion stays `SHADOW`. `shadow` mode never applies.
     const applied = config.mode === 'write' && (await applySuggestionIfEligible(em, transaction, suggestion.result, config.writeConfidenceThreshold));
     enrichment.status = applied ? TransactionEnrichmentStatus.COMPLETED : TransactionEnrichmentStatus.SHADOW;
@@ -212,7 +212,7 @@ export async function handleTransactionEnrichmentGptJob(
 const UNINFORMATIVE_CATEGORY_NAME = 'OTHER';
 
 /**
- * Apply a confident AI suggestion to a still-uncategorized transaction (RAD-414 write mode).
+ * Apply a confident AI suggestion to a still-uncategorized transaction (write mode).
  *
  * Guardrails: needs a category suggestion, a confidence at/above the threshold, and a resolvable
  * account owner; and it only applies when the transaction has NO existing category for that user, so
@@ -231,9 +231,8 @@ async function applySuggestionIfEligible(
   const appuserKey = resolveAccountOwnerKey(transaction);
   if (appuserKey === undefined) return false;
 
-  // RAD-584: never write `OTHER`, at any confidence. It was 45% of every
-  // suggestion the model has ever made (1,092 of 2,448) and 89 had already been
-  // applied. Writing it is worse than writing nothing — it carries no
+  // Never write `OTHER`, at any confidence. It is the model's most common
+  // suggestion by far. Writing it is worse than writing nothing — it carries no
   // information *and* it marks the transaction categorised, so it stops being an
   // enrichment candidate and drops off every needs-attention surface. Matched by
   // name because the key is seed-order dependent (see CategorySeeder).
@@ -294,9 +293,9 @@ async function loadCandidateCategories(
 }
 
 /**
- * Personalize the candidate list to the categories this user actually uses (RAD-425 Slice 2): ranks
+ * Personalize the candidate list to the categories this user actually uses: ranks
  * by the same per-user correction-vote counts (`TransactionCategoryStats`, source=user) that already
- * drive the deterministic categorizer's stats fallback (RAD-342 G2/G4) — an aggregated signal, so no
+ * drive the deterministic categorizer's stats fallback — an aggregated signal, so no
  * raw transaction history is ever read or sent to the model, only category labels.
  */
 async function loadPersonalizedCandidateCategories(

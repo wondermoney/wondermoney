@@ -14,7 +14,7 @@ import { buildCashflowCsv, getCashflowCsv, getCashflowReport } from '../cashflow
 import { REPORT_DEFAULT_TIME_ZONE } from '../report-months';
 
 /**
- * RAD-555 — the boundary cases.
+ * The boundary cases.
  *
  * Every range below is written the way a client actually builds one: local
  * midnight on the first of the month, and the last millisecond of the last day,
@@ -29,7 +29,7 @@ const makeFilters = (overrides: Partial<ReportFilters> = {}): ReportFilters =>
     includeTransfers: false,
     timezone: REPORT_DEFAULT_TIME_ZONE,
     ...overrides,
-  }) as ReportFilters;
+  });
 
 const makeInput = (overrides: Partial<ReportFilters> = {}): ReportServiceInput =>
   ({

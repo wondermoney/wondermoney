@@ -8,6 +8,14 @@ describe('account insight contracts', () => {
     expect(createAggregateMetricsEndpoint(scope).path).toContain('/v1/account/metrics?fromDate=')
     expect(createAccountMetricsEndpoint(2, scope.fromDate).path).not.toContain('toDate')
   })
+  it('keeps parsing when the API adds fields or a metric type this build does not know', () => {
+    const [metric] = metricsResponseSchema.parse({ metrics: [{ ...metricFixture, type: 'transfer', averageBalance: 3 }], extra: 1 }).metrics
+    expect(metric!.type).toBe('unknown')
+    expect(metric).not.toHaveProperty('averageBalance')
+    const [category] = categorySpendingResponseSchema.parse({ categorySpending: [{ ...categoryFixture, budget: 5, childCategories: categoryFixture.childCategories.map((child) => ({ ...child, budget: 5 })) }] }).categorySpending
+    expect(category).not.toHaveProperty('budget')
+    expect(cashflowResponseSchema.parse({ cashflow: [{ ...cashflowFixture, balance: 1 }] }).cashflow[0]).toEqual(cashflowFixture)
+  })
   it('accepts signed cashflow and validates dates', () => {
     expect(cashflowResponseSchema.parse({ cashflow: [cashflowFixture] }).cashflow[0]?.amount).toBe(-42.5)
     expect(cashflowResponseSchema.safeParse({ cashflow: [{ ...cashflowFixture, date: 'July' }] }).success).toBe(false)

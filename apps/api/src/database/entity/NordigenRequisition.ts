@@ -1,17 +1,6 @@
-import {
-  Collection,
-  Entity,
-  EntityRepositoryType,
-  Enum,
-  Index,
-  LoadStrategy,
-  ManyToOne,
-  OneToMany,
-  PrimaryKey,
-  Property,
-  Unique,
-} from '@mikro-orm/core';
+import { Collection, EntityRepositoryType, LoadStrategy } from '@mikro-orm/core';
 import type { Rel } from '@mikro-orm/core';
+import { Entity, Enum, Index, ManyToOne, OneToMany, PrimaryKey, Property, Unique } from '@mikro-orm/decorators/legacy';
 
 import { NordigenRequisitionRepository } from '../repositories/NordigenRequisitionRepository';
 

@@ -8,7 +8,7 @@ export interface GetLoanOverviewResponse {
   overview: LoanOverview;
 }
 
-export async function getLoanOverview(
+async function getLoanOverview(
   apiClient: AxiosInstance = api,
 ): Promise<GetLoanOverviewResponse> {
   const { data } =

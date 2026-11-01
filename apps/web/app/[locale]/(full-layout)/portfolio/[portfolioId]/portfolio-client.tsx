@@ -37,15 +37,18 @@ import usePortfolioHistoryStatus from "@/lib/api/portfolio/usePortfolioHistorySt
 import usePortfolioHoldings from "@/lib/api/portfolio/usePortfolioHoldings";
 import useUpdatePortfolio from "@/lib/api/portfolio/useUpdatePortfolio";
 import { getPortfolioImportTransactionsHref } from "@/lib/portfolio/portfolio-modal-transition";
+import { serverSeed } from "@/lib/query/server-seed";
 import { invalidatePortfolioDetail } from "@/lib/utils/queryInvalidation";
 
 interface PortfolioClientProps {
   portfolioId: number;
+  serverRenderedAt: number;
   initialPortfolioData: GetPortfolioResponse;
 }
 
 export default function PortfolioClient({
   portfolioId,
+  serverRenderedAt,
   initialPortfolioData,
 }: PortfolioClientProps) {
   const t = useTranslations();
@@ -60,7 +63,7 @@ export default function PortfolioClient({
   const { data: portfolioData, isLoading: isLoadingPortfolioData } =
     usePortfolio(portfolioId, {
       enabled: !!portfolioId,
-      initialData: initialPortfolioData,
+      ...serverSeed(initialPortfolioData, serverRenderedAt),
     });
 
   const { data: dashboardData, isLoading: isLoadingDashboard } =
@@ -155,9 +158,10 @@ export default function PortfolioClient({
             <Button
               variant="ghost"
               size="icon"
+              aria-label={t("portfolio-settings")}
               onClick={() => setIsSettingsOpen(true)}
             >
-              <Settings className="h-5 w-5" />
+              <Settings className="h-5 w-5" aria-hidden="true" />
             </Button>
           </div>
         }

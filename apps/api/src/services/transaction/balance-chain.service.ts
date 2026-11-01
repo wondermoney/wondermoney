@@ -1,5 +1,5 @@
 /**
- * RAD-564 — the account running-balance chain, in one place.
+ * The account running-balance chain, in one place.
  *
  * `transaction.balance` is a *stored running total*, not a per-row fact the provider hands us. It
  * only means anything if every writer maintains the same invariant, over the same total order, over
@@ -8,38 +8,34 @@
  *     row[1].balance = opening + row[1].settlementAmount
  *     row[n].balance = row[n-1].balance + row[n].settlementAmount
  *
- * Before RAD-564 there were three writers with three different models — manual creation
- * (`transaction-creation.service.ts`, chain, ordered `(transactionDate, transactionKey)`), CSV
- * import (`account-csv-balance-recalculation.service.ts`, chain, ordered
- * `(transactionDate, settlementAmount, transactionKey)`) and bank sync
- * (`account-initial-sync-transaction.service.ts`, *no* chain: each import batch back-derived its own
- * opening from `account.balance` and assigned balances as though the batch were a contiguous suffix
- * of history). On production that left 51.6% of the links on bank-synced accounts broken.
+ * There are three writers — manual creation (`transaction-creation.service.ts`), CSV import
+ * (`account-csv-balance-recalculation.service.ts`) and bank sync
+ * (`account-initial-sync-transaction.service.ts`) — and all of them take membership, order and
+ * accumulation from here. A writer with its own model (a different tie-break, or a batch that
+ * back-derives its own opening as though it were a contiguous suffix of history) breaks links.
  *
  * ORDER. `(transactionDate ASC, transactionKey ASC)` — the exact reverse of the order the
  * transactions list endpoint renders (`transactions.ts`), so the number in the row above a row in
  * the UI is the number its balance was accumulated from. `transactionKey` is the tie-break because
- * it is the only total order available on same-date rows (RAD-546).
+ * it is the only total order available on same-date rows.
  *
- * MEMBERSHIP. Every *settled* row on the account, hidden rows included (RAD-25 — hiding a row from
- * the UI does not mean the money did not move) and soft-deleted rows included (matching RAD-546 and
- * the RAD-554 sizing query, whose chain queries filter on nothing but `accountKey` and
- * `transactionDate`). Excluded:
+ * MEMBERSHIP. Every *settled* row on the account, hidden rows included (hiding a row from the UI
+ * does not mean the money did not move) and soft-deleted rows included (the chain queries filter
+ * on nothing but `accountKey` and `transactionDate`). Excluded:
  *   - rows with a NULL `transactionDate` — they have no position in the order;
  *   - PENDING and EXPIRED rows — a pending authorisation has not settled and an expired one never
- *     will, so neither moved money. They carry `balance = null`, which is what they already carry
- *     today; RAD-564 stops treating those nulls as chain members that "diverge".
+ *     will, so neither moved money. They carry `balance = null` and are not chain members, so
+ *     their nulls never count as a link that "diverges".
  * Manual and CSV accounts only ever hold BOOKED rows, so the settled restriction is a no-op there
- * and the three writers now share one definition.
+ * and the three writers share one definition.
  *
- * ANCHOR. There is no stored opening-balance column (see the RAD-554 docblock), so a whole-account
+ * ANCHOR. There is no stored opening-balance column, so a whole-account
  * recomputation has to be anchored on a value that survived:
  *   - manual / CSV accounts anchor at the *head*: the user typed an opening balance, transactions
  *     accumulate on top of it, and `account.balance` is the chain tail — a derived value.
  *   - bank-synced accounts anchor at the *tail*: the provider is the source of truth for
  *     `account.balance`, so the chain is rebuilt backwards from it and `account.balance` is never
- *     overwritten. This is RAD-554's `preserve-account-balance` strategy applied as a forward-going
- *     rule, and it is what makes the newest row's balance equal the figure on the accounts list.
+ *     overwritten. This is what makes the newest row's balance equal the figure on the accounts list.
  *
  * The tail anchor has a known cost, stated here so it is a choice and not an accident: if the
  * provider balance moves for a reason that is not a booked row (a pending authorisation clearing
@@ -47,7 +43,7 @@
  * Every row stays mutually consistent and the top row still matches the accounts list, but a
  * historical row's displayed balance can change between two views. The alternative — anchoring at
  * the head — keeps history fixed and instead lets `account.balance` disagree with the tail, which
- * is the user-visible defect this ticket also had to fix. Tail wins because the accounts list and
+ * is a user-visible defect. Tail wins because the accounts list and
  * the top of the transactions list are the two numbers a user actually compares.
  */
 
@@ -60,19 +56,18 @@ import { big, toNumber } from '@utils/money';
 
 /**
  * Balances are `numeric(18, 4)` in Postgres but accumulated in JS floats, so stored values carry
- * float noise. Anything under half a hundredth of a cent is noise, not a change (matches
- * `rad554-balance-chain.ts`).
+ * float noise. Anything under half a hundredth of a cent is noise, not a change.
  */
-export const BALANCE_TOLERANCE = 0.005;
+const BALANCE_TOLERANCE = 0.005;
 
 /**
  * Transaction statuses whose money has actually moved and therefore participate in the chain.
- * PENDING has not settled; EXPIRED (RAD-346) never will.
+ * PENDING has not settled; EXPIRED never will.
  */
 export const SETTLED_TRANSACTION_STATUSES = ['BOOKED'] as const;
 
 /** The chain's total order. The transactions list renders its exact reverse. */
-export const CHAIN_ORDER_BY = {
+const CHAIN_ORDER_BY = {
   transactionDate: QueryOrder.ASC,
   transactionKey: QueryOrder.ASC,
 } as const;
@@ -87,6 +82,11 @@ export interface ChainBalance {
  * balance verbatim, so everything upstream of the anchor is left exactly as stored.
  */
 export interface ChainAnchor {
+  /**
+   * The anchor row's amounts before the change. Needed when the anchor is the account's oldest
+   * row: with no predecessor, the opening is its stored balance minus these.
+   */
+  previous?: Pick<ChainRow, 'appuserSettlementAmount' | 'settlementAmount'>;
   transactionKey: number;
 }
 
@@ -169,7 +169,7 @@ export async function loadChainRows(
       ...extraWhere,
     },
     {
-      // RAD-25: the chain is physical, so hidden rows count here too.
+      // The chain is physical, so hidden rows count here too.
       filters: { [HIDDEN_FILTER]: false },
       orderBy: CHAIN_ORDER_BY,
     },
@@ -177,7 +177,7 @@ export async function loadChainRows(
 }
 
 /**
- * RAD-564: rebuild a bank-synced account's whole chain, anchored on `account.balance`.
+ * Rebuild a bank-synced account's whole chain, anchored on `account.balance`.
  *
  * `account.balance` has just been written from the provider (`account-initial-sync-account.service`
  * runs before the transaction phase in both sync workers), so it is the one trustworthy number on
@@ -192,7 +192,9 @@ export async function loadChainRows(
  * `anchor` narrows the recomputation to a suffix. When a caller knows a single row's amount changed
  * — an edit to a stored transaction — only that row and every row after it can have moved; rows
  * before it still hold the balance the *previous* row produced, so the anchor's preceding row is
- * taken as the opening balance verbatim and left untouched. This is the head-anchored counterpart
+ * taken as the opening balance verbatim and left untouched. When the anchor is the oldest row there
+ * is no preceding row, so the opening is the anchor's own stored balance minus `anchor.previous`
+ * (its pre-change amounts); without `previous` it falls back to the tail anchor. This is the head-anchored counterpart
  * to the tail anchor: history upstream of the edit is fixed rather than re-derived from
  * `account.balance`. The row set (settled, non-null date, hidden included) and the
  * `(transactionDate, transactionKey)` order are unchanged, so the suffix boundaries match a
@@ -221,15 +223,26 @@ export async function recalculateChainFromAccountBalance(
   let startIndex = 0;
   let opening: ChainBalance;
 
-  if (anchorIndex >= 0) {
+  const anchorRow = anchorIndex >= 0 ? rows[anchorIndex] : undefined;
+  const prior = anchorIndex > 0 ? rows[anchorIndex - 1] : undefined;
+
+  if (prior) {
     // The anchor itself is the first row that can have changed; its predecessor's stored balance is
     // still correct, so it becomes the opening and every earlier row is never written.
     startIndex = anchorIndex;
-    const prior = anchorIndex > 0 ? rows[anchorIndex - 1] : undefined;
     opening = {
-      appuserCurrencyBalance: prior?.appuserCurrencyBalance ?? prior?.balance ?? 0,
-      balance: prior?.balance ?? 0,
+      appuserCurrencyBalance: prior.appuserCurrencyBalance ?? prior.balance ?? 0,
+      balance: prior.balance ?? 0,
     };
+  } else if (anchorRow && anchor?.previous && anchorRow.balance != null) {
+    // The oldest row has no predecessor: what the account held before it is its stored balance
+    // minus its pre-change amount. Opening at 0 instead would replace the balance with the sum of
+    // the rows.
+    startIndex = anchorIndex;
+    opening = openingFromTail([anchor.previous], {
+      appuserCurrencyBalance: anchorRow.appuserCurrencyBalance ?? anchorRow.balance,
+      balance: anchorRow.balance,
+    });
   } else {
     const tail: ChainBalance = {
       appuserCurrencyBalance: account.appuserCurrencyBalance ?? account.balance ?? 0,

@@ -2,7 +2,7 @@ import { z } from 'zod';
 
 /**
  * Enable Banking's callback query shape (`?code=&state=` on success, `?error=&state=`
- * on failure) — not GoCardless's `?ref=&error=&details=` shape used by the existing
+ * on failure) — not the `?ref=&error=&details=` shape of
  * `bankConnectionCallbackRequestSchema`. Every field is optional, including `state`:
  * this endpoint is hit directly by the end user's browser with no WonderMoney session,
  * so a malformed/missing value must fall through to a safe redirect in the controller

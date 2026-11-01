@@ -5,7 +5,7 @@ import api from "../api";
 import { goalQueryKey } from "./keys";
 import type { GetGoalResponse } from "./types";
 
-export async function getGoal(goalKey: number, apiClient: AxiosInstance = api): Promise<GetGoalResponse> {
+async function getGoal(goalKey: number, apiClient: AxiosInstance = api): Promise<GetGoalResponse> {
   const { data } = await apiClient.get<GetGoalResponse>(`/v1/goals/${goalKey}`);
   return data;
 }

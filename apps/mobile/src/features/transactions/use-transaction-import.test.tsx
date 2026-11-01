@@ -23,6 +23,7 @@ function setup() {
 
 const supportedUpload = { key: 'k1', presignedUrl: 'https://s3.example/upload', isSupportedBank: true }
 const unsupportedUpload = { key: 'k1', presignedUrl: 'https://s3.example/upload', isSupportedBank: false }
+const genericUpload = { key: 'k1', presignedUrl: 'https://s3.example/upload', isSupportedBank: false, csvImportFormat: 'generic' as const }
 const started = { correlationId: 'c1', status: 'queued' }
 const file = { uri: 'file:///picked.csv', name: 'picked.csv' }
 const noWait = { wait: async () => undefined }
@@ -46,12 +47,12 @@ describe('useTransactionImport', () => {
     expect(mockWrite.mock.calls[1]?.[0].path).toBe('/v1/account/7/transaction/import')
     expect(mockWrite.mock.calls[1]?.[1].body).toEqual({ key: 'k1' })
     expect(mockRead).toHaveBeenCalledTimes(2)
-    expect(hook.result.current.state).toEqual({ phase: 'done', outcome: 'succeeded' })
+    expect(hook.result.current.state).toEqual({ phase: 'done', outcome: 'succeeded', format: 'bank', rows: null })
     expect(invalidate).toHaveBeenCalledWith(expect.objectContaining({ predicate: expect.any(Function) }))
     await hook.unmount(); client.clear()
   })
 
-  it('skips upload and start entirely when the bank format is unsupported', async () => {
+  it('stops before uploading for an unsupported bank on an API that reports no format', async () => {
     mockWrite.mockResolvedValueOnce(unsupportedUpload)
 
     const { client, wrapper } = setup()
@@ -59,6 +60,60 @@ describe('useTransactionImport', () => {
     await act(async () => { await hook.result.current.start(7, file) })
 
     expect(hook.result.current.state).toEqual({ phase: 'error', reason: 'unsupported-bank' })
+    expect(mockUpload).not.toHaveBeenCalled()
+    expect(mockWrite).toHaveBeenCalledTimes(1)
+    await hook.unmount(); client.clear()
+  })
+
+  it('imports a generic CSV for an account without a supported bank and reports the rejected rows', async () => {
+    mockWrite.mockResolvedValueOnce(genericUpload).mockResolvedValueOnce(started)
+    mockUpload.mockResolvedValue(undefined)
+    mockRead.mockResolvedValueOnce({ correlationId: 'c1', status: 'partial', progress: { imported: 1, failed: 1, totalRows: 2 } })
+
+    const { client, wrapper } = setup()
+    const hook = await renderHook(() => useTransactionImport(noWait), { wrapper })
+    await act(async () => { await hook.result.current.start(7, file) })
+
+    expect(mockUpload).toHaveBeenCalledWith('file:///picked.csv', 'https://s3.example/upload')
+    expect(mockWrite.mock.calls[1]?.[0].path).toBe('/v1/account/7/transaction/import')
+    expect(hook.result.current.state).toEqual({ phase: 'done', outcome: 'partial', format: 'generic', rows: { failed: 1, total: 2 } })
+    await hook.unmount(); client.clear()
+  })
+
+  it('imports a bank statement when the API reports the bank format', async () => {
+    mockWrite.mockResolvedValueOnce({ ...supportedUpload, csvImportFormat: 'bank' }).mockResolvedValueOnce(started)
+    mockUpload.mockResolvedValue(undefined)
+    mockRead.mockResolvedValueOnce({ correlationId: 'c1', status: 'succeeded', progress: { imported: 3, failed: 0, totalRows: 3 } })
+
+    const { client, wrapper } = setup()
+    const hook = await renderHook(() => useTransactionImport(noWait), { wrapper })
+    await act(async () => { await hook.result.current.start(7, { uri: 'file:///statement.xlsx', name: 'statement.xlsx' }) })
+
+    expect(hook.result.current.state).toEqual({ phase: 'done', outcome: 'succeeded', format: 'bank', rows: { failed: 0, total: 3 } })
+    await hook.unmount(); client.clear()
+  })
+
+  it('stops before uploading when the API reports a format this build does not know', async () => {
+    mockWrite.mockResolvedValueOnce({ ...supportedUpload, csvImportFormat: 'unknown' })
+
+    const { client, wrapper } = setup()
+    const hook = await renderHook(() => useTransactionImport(noWait), { wrapper })
+    await act(async () => { await hook.result.current.start(7, file) })
+
+    expect(hook.result.current.state).toEqual({ phase: 'error', reason: 'unknown-format' })
+    expect(mockUpload).not.toHaveBeenCalled()
+    expect(mockWrite).toHaveBeenCalledTimes(1)
+    await hook.unmount(); client.clear()
+  })
+
+  it('refuses a non-CSV file for the generic format before uploading it', async () => {
+    mockWrite.mockResolvedValueOnce(genericUpload)
+
+    const { client, wrapper } = setup()
+    const hook = await renderHook(() => useTransactionImport(noWait), { wrapper })
+    await act(async () => { await hook.result.current.start(7, { uri: 'file:///statement.xlsx', name: 'statement.xlsx' }) })
+
+    expect(hook.result.current.state).toEqual({ phase: 'error', reason: 'csv-only' })
     expect(mockUpload).not.toHaveBeenCalled()
     expect(mockWrite).toHaveBeenCalledTimes(1)
     await hook.unmount(); client.clear()
@@ -86,7 +141,7 @@ describe('useTransactionImport', () => {
     const hook = await renderHook(() => useTransactionImport(noWait), { wrapper })
     await act(async () => { await hook.result.current.start(7, file) })
 
-    expect(hook.result.current.state).toEqual({ phase: 'done', outcome: 'failed' })
+    expect(hook.result.current.state).toEqual({ phase: 'done', outcome: 'failed', format: 'bank', rows: null })
     expect(mockRead).not.toHaveBeenCalled()
     expect(invalidate).not.toHaveBeenCalled()
     await hook.unmount(); client.clear()
@@ -102,7 +157,7 @@ describe('useTransactionImport', () => {
     const hook = await renderHook(() => useTransactionImport(noWait), { wrapper })
     await act(async () => { await hook.result.current.start(7, file) })
 
-    expect(hook.result.current.state).toEqual({ phase: 'done', outcome: 'partial' })
+    expect(hook.result.current.state).toEqual({ phase: 'done', outcome: 'partial', format: 'bank', rows: null })
     expect(invalidate).toHaveBeenCalled()
     await hook.unmount(); client.clear()
   })
@@ -117,7 +172,7 @@ describe('useTransactionImport', () => {
     const hook = await renderHook(() => useTransactionImport(noWait), { wrapper })
     await act(async () => { await hook.result.current.start(7, file) })
 
-    expect(hook.result.current.state).toEqual({ phase: 'done', outcome: 'needs_action' })
+    expect(hook.result.current.state).toEqual({ phase: 'done', outcome: 'needs_action', format: 'bank', rows: null })
     expect(invalidate).not.toHaveBeenCalled()
     await hook.unmount(); client.clear()
   })

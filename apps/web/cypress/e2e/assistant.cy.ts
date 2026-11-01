@@ -5,13 +5,13 @@ describe.skip("Assistant consent flow", () => {
   // assistantEnabled do not leak between cases.
 
   it("shows the assistant launcher on the authenticated settings page", () => {
-    cy.visit("http://localhost:3000/en/settings?tab=assistant");
+    cy.visit("/en/settings?tab=assistant");
 
     cy.get('[data-testid="assistant-launcher"]').should("be.visible");
   });
 
   it("opens the consent screen before assistant access is enabled", () => {
-    cy.visit("http://localhost:3000/en/settings?tab=assistant");
+    cy.visit("/en/settings?tab=assistant");
 
     cy.get('[data-testid="assistant-launcher"]').click();
     cy.get('[data-testid="assistant-panel"]').should("be.visible");
@@ -20,7 +20,7 @@ describe.skip("Assistant consent flow", () => {
   });
 
   it("dismisses the consent screen", () => {
-    cy.visit("http://localhost:3000/en/settings?tab=assistant");
+    cy.visit("/en/settings?tab=assistant");
 
     cy.get('[data-testid="assistant-launcher"]').click();
     cy.get('[data-testid="assistant-dismiss"]').click();
@@ -29,7 +29,7 @@ describe.skip("Assistant consent flow", () => {
 
   it("shows the launcher and bottom nav on mobile", () => {
     cy.viewport("iphone-se2");
-    cy.visit("http://localhost:3000/en/settings?tab=assistant");
+    cy.visit("/en/settings?tab=assistant");
 
     cy.get('[data-testid="bottom-nav"]').should("be.visible");
     cy.get('[data-testid="assistant-launcher"]').should("be.visible");

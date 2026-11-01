@@ -55,17 +55,17 @@ export default function TransactionReviewInbox({
           <Text className="text-muted-foreground max-w-2xl">
             {t("transaction-review-description")}
           </Text>
-          <div className="text-muted-foreground flex flex-wrap gap-2 text-sm">
+          <div className="text-muted-foreground flex flex-wrap items-center gap-2 text-sm">
             <span>
               {t("transaction-review-left", { count: buckets.totalUnreviewed })}
             </span>
-            <span>·</span>
+            <span aria-hidden="true" className="bg-border h-3 w-px shrink-0" />
             <span>
               {t("transaction-review-needs-category-count", {
                 count: buckets.needsCategory.length,
               })}
             </span>
-            <span>·</span>
+            <span aria-hidden="true" className="bg-border h-3 w-px shrink-0" />
             <span>
               {t("transaction-review-suggested-count", {
                 count: buckets.suggestedCategory.length,

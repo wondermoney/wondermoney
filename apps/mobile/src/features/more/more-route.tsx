@@ -68,7 +68,7 @@ function hostedOnlyActions(appInfo: ReturnType<typeof getRuntimeAppDisplayInfo>)
       const destination = buildFeedbackMailDestination(appInfo, input)
       if (!destination) throw new Error('Feedback destination unavailable')
       await Linking.openURL(destination)
-      // RAD-518 — the category only. `input.message` is the user's own words
+      // The category only. `input.message` is the user's own words
       // and stays in the mail channel it was written for; see link-policy.ts.
       captureAnalyticsEvent('feedback_submitted', { category: input.category })
     },

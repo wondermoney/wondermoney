@@ -13,7 +13,7 @@ function caught(input: unknown): { message: string; name: string; retryAfter?: n
   }
 }
 
-describe('handleEodhdError (RAD-449)', () => {
+describe('handleEodhdError', () => {
   it('maps a 404-status EodhdError to NotFoundError, regardless of code', () => {
     const thrown = caught(new EodhdError('not found', 'client_error', 404));
     expect(thrown).toBeInstanceOf(NotFoundError);

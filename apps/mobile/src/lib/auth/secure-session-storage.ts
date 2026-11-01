@@ -57,7 +57,7 @@ type StorageOperation = 'read' | 'write' | 'delete'
  */
 export type StorageFailureKind = 'recoverable' | 'destructive'
 
-export class SecureSessionStorageError extends Error {
+class SecureSessionStorageError extends Error {
   override name = 'SecureSessionStorageError'
 
   constructor(readonly operation: StorageOperation) {

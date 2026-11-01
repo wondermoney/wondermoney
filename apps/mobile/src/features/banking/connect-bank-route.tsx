@@ -4,12 +4,12 @@ import { useState } from 'react'
 
 import { captureAnalyticsEvent } from '@/lib/telemetry/analytics'
 
+import { BANK_CONNECTION_RETURN_URL, bankConnectionsHref, readBankConnectionResult } from './bank-connection-return'
 import type { ConnectBankScreenState } from './connect-bank-screen'
 import { ConnectBankScreen } from './connect-bank-screen'
 import { mapBankInstitutions } from './institutions-view-model'
 import { useBankInstitutions } from './use-bank-institutions'
 import { classifyStartBankConnectionFailure, type StartBankConnectionFailure, useStartBankConnection } from './use-start-bank-connection'
-import { useReturnFromBrowser } from './use-return-from-browser'
 
 function resolveViewState(query: ReturnType<typeof useBankInstitutions>): ConnectBankScreenState {
   if (query.isAccessTransition) return { status: 'access-transition' }
@@ -22,23 +22,18 @@ function resolveViewState(query: ReturnType<typeof useBankInstitutions>): Connec
 }
 
 /**
- * RAD-240 — institution picker → start requisition → in-app browser consent.
- * There is no native-app callback (see start-connection-contract.ts), so once
- * the browser opens this route arms useReturnFromBrowser and, on return,
- * hands off to the connections list with a `justStarted` marker rather than
- * claiming to know the connection succeeded.
+ * Institution picker → start authorization → consent in an auth session.
+ * The connection is started with `returnTo=mobile`, so the API's callback
+ * redirects to the app's own return link and the session closes itself.
+ * However the session ends (it saw the return link, or the user closed it),
+ * this route hands off to the connections list with a `justStarted` marker,
+ * plus the callback's outcome when the session saw it. Otherwise the list polls.
  */
 export function ConnectBankRoute() {
   const router = useRouter()
   const institutions = useBankInstitutions()
   const start = useStartBankConnection()
-  const [browserArmed, setBrowserArmed] = useState(false)
   const [startFailure, setStartFailure] = useState<StartBankConnectionFailure | null>(null)
-
-  useReturnFromBrowser(browserArmed, () => {
-    setBrowserArmed(false)
-    router.replace({ pathname: '/more/banking', params: { justStarted: '1' } } as Href)
-  })
 
   return (
     <ConnectBankScreen
@@ -54,18 +49,21 @@ export function ConnectBankRoute() {
         setStartFailure(null)
         start.mutate(row.id, {
           onSuccess: ({ redirectUrl }) => {
-            // RAD-518 — an authorization exists and consent is about to open.
+            // An authorization exists and consent is about to open.
             // No institution name and no redirect URL: the ADR approves no
             // properties here, and the redirect URL is a credential-bearing URL.
             captureAnalyticsEvent('bank_connection_started')
-            setBrowserArmed(true)
-            WebBrowser.openBrowserAsync(redirectUrl, { presentationStyle: WebBrowser.WebBrowserPresentationStyle.AUTOMATIC }).catch(() => {
-              // Best-effort: if the browser itself never opened, return-detection
-              // has nothing to key off. Fall back to the connections screen's
-              // manual refresh rather than leaving the user stuck on the picker.
-              setBrowserArmed(false)
-              router.replace('/more/banking' as Href)
-            })
+            WebBrowser.openAuthSessionAsync(redirectUrl, BANK_CONNECTION_RETURN_URL).then(
+              (result) => {
+                router.replace(bankConnectionsHref(readBankConnectionResult(result)) as Href)
+              },
+              () => {
+                // The session never opened. Fall back to the connections
+                // screen's manual refresh rather than leaving the user stuck
+                // on the picker.
+                router.replace('/more/banking' as Href)
+              },
+            )
           },
           onError: (error) => {
             // The connection never got off the ground. The classified reason

@@ -1,5 +1,5 @@
 /**
- * RAD-518 — product analytics boundary, bound by `docs/telemetry-adr.md`.
+ * Product analytics boundary, bound by `docs/telemetry-adr.md`.
  *
  * The ADR is the spec, not a guideline: event names come from a closed allowlist
  * and every property on every event is enumerated there. This module is the
@@ -11,7 +11,7 @@
  * Deliberately absent: `identify`, `alias`, `group`, `register`, and any
  * free-form `properties` escape hatch. The ADR leaves user-level identification
  * unapproved, so there is no surface here that could carry an email, a name, a
- * Supabase user ID, a resource ID, an amount, or user-authored text.
+ * user ID, a resource ID, an amount, or user-authored text.
  *
  * This module never imports the PostHog SDK; the vendor client is injected as an
  * `AnalyticsClientPort` (see `posthog-analytics-client.ts`), the same
@@ -161,14 +161,12 @@ export type Analytics = Readonly<{
 }>
 
 /**
- * RAD-518/RAD-517 ADRs originally gated this to `local`/`staging` only, pending
- * a production rollout decision. Superseded: `production` is now an approved
- * capture environment — see `docs/telemetry-adr.md` and
- * `docs/telemetry-adr-sentry.md` "Update" sections. The event/property
- * allowlist this gate protects (no free-form properties, no `identify()`, no
- * PII) is unchanged; only the environment allowlist widened. The parameter is
- * a plain `string`, not `MobileEnvironment['appEnv']`, so this stays an
- * explicit allowlist rather than a denylist.
+ * The approved capture environments (`local`, `staging`, `production`) — see
+ * `docs/telemetry-adr.md` and `docs/telemetry-adr-sentry.md`. The
+ * event/property allowlist this gate protects forbids free-form properties,
+ * `identify()` and PII. The parameter is a plain `string`, not
+ * `MobileEnvironment['appEnv']`, so this stays an explicit allowlist rather
+ * than a denylist.
  */
 export function isAnalyticsCaptureApproved(environment: string): boolean {
   if (environment !== 'local' && environment !== 'staging' && environment !== 'production') return false

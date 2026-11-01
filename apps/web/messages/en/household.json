@@ -39,8 +39,8 @@
     },
     "cancel": "Cancel",
     "join": {
-      "greetingNamed": "{name} invited you to their WonderMoney household",
-      "greetingGeneric": "You've been invited to a WonderMoney household",
+      "greetingNamed": "{name} invited you to their {instanceName} household",
+      "greetingGeneric": "You've been invited to a {instanceName} household",
       "subtitle": "Create your account to share accounts, budgets, and goals.",
       "emailLockedHint": "This invite is for {email}",
       "invalidTitle": "This invitation link isn't valid",
@@ -48,7 +48,7 @@
       "loggedInTitle": "You're already signed in",
       "loggedInBody": "Household invites can only be accepted with a new account. Log out and create one with the invited email to join.",
       "logoutAndJoin": "Log out & create account",
-      "backToApp": "Go to WonderMoney"
+      "backToApp": "Go to {instanceName}"
     },
     "toast": {
       "inviteSent": "Invitation sent",

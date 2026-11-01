@@ -1,6 +1,6 @@
-import knex from 'knex';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { kyselyDouble } from '@app/__tests__/__helpers__/kysely-double';
 import { buildBudgetTransactionAccountVisibility } from '@service/budget/spending';
 import { Recurrency } from '@utils/budget';
 
@@ -53,8 +53,6 @@ import {
   updateBudgetCategory,
   updateBudgetTemplateAccounts,
 } from '../budget';
-
-const queryKnex = knex({ client: 'pg' });
 
 describe('updateBudgetCategory', () => {
   beforeEach(() => {
@@ -263,8 +261,7 @@ describe('budget account assignments', () => {
       },
     };
     mocked.find.mockResolvedValueOnce([account]);
-    mocked.findOne.mockResolvedValueOnce(budget);
-    mocked.findOneOrFail.mockResolvedValueOnce(template);
+    mocked.findOne.mockResolvedValueOnce(budget).mockResolvedValueOnce(template);
     const sendStatus = vi.fn();
     const res = mockRes({ sendStatus });
 
@@ -281,13 +278,13 @@ describe('budget account assignments', () => {
 
 describe('budget transaction aggregation scope', () => {
   it('generates tenant, active-account, and private-owner visibility predicates', () => {
-    const predicate = buildBudgetTransactionAccountVisibility(queryKnex, 17, 42);
-    const compiled = predicate.toSQL();
+    const { db } = kyselyDouble();
+    const compiled = db.selectFrom('transaction').selectAll().where(buildBudgetTransactionAccountVisibility(17, 42)).compile();
 
-    expect(compiled.sql).toContain('budget_account.tenant_key = ?');
+    expect(compiled.sql).toContain('budget_account.tenant_key = $1');
     expect(compiled.sql).toContain('budget_account.closed = false');
     expect(compiled.sql).toContain('budget_account.deleted_at IS NULL');
-    expect(compiled.sql).toContain('(budget_account.is_private = false OR budget_account.account_owner_appuser_key = ?)');
-    expect(compiled.bindings).toEqual([17, 42]);
+    expect(compiled.sql).toContain('(budget_account.is_private = false OR budget_account.account_owner_appuser_key = $2)');
+    expect(compiled.parameters).toEqual([17, 42]);
   });
 });

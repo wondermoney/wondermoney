@@ -111,9 +111,7 @@ export function AccountDetailScreen({ state, recentTransactions, onBack, onRetry
 
   const data = state.data
   const name = data.accountName ?? t('accounts.unnamed')
-  const source = data.source === 'manual'
-    ? t('accounts.source.manual')
-    : t('accounts.source.openBanking')
+  const source = t(`accounts.source.${data.source === 'open_banking' ? 'openBanking' : data.source}`)
   const original = data.originalBalance === null
     ? t('accounts.balanceUnavailable')
     : formatCurrency(data.originalBalance, { locale, currency: data.originalCurrencyCode })

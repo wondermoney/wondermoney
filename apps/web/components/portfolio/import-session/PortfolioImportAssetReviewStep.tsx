@@ -2,7 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import { usePostHog } from "posthog-js/react";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { toast } from "sonner";
 
 import {
@@ -56,6 +56,42 @@ function getGroupRows(
   return rows.filter((row) => row.assetGroupId === groupId);
 }
 
+// Pre-select the recommended candidate for every blocking group the user has
+// not decided yet. Returns `current` itself when nothing changes.
+function withRecommendedDecisions(
+  current: Record<number, PortfolioImportAssetGroupDecision>,
+  groups: NonNullable<PortfolioImportSessionPreviewResponse["assetGroups"]>,
+): Record<number, PortfolioImportAssetGroupDecision> {
+  let next = current;
+
+  for (const group of groups) {
+    if (!isBlockingAssetReviewGroup(group)) continue;
+    if (next[group.id]) continue;
+
+    const recommendedCandidate =
+      group.recommendedCandidateId == null
+        ? undefined
+        : group.candidates?.find(
+            (candidate) =>
+              candidate.id === group.recommendedCandidateId ||
+              candidate.isRecommended,
+          );
+
+    if (!recommendedCandidate) continue;
+
+    if (next === current) {
+      next = { ...current };
+    }
+
+    next[group.id] = {
+      action: "use_candidate",
+      candidateId: recommendedCandidate.id,
+    };
+  }
+
+  return next;
+}
+
 export function PortfolioImportAssetReviewStep({
   importSessionId,
   onPreviewRefetch,
@@ -66,7 +102,7 @@ export function PortfolioImportAssetReviewStep({
   const confirmAssetMappings = useConfirmPortfolioImportAssetMappings();
   const [decisions, setDecisions] = useState<
     Record<number, PortfolioImportAssetGroupDecision>
-  >({});
+  >(() => withRecommendedDecisions({}, preview?.assetGroups ?? []));
   const [recoveryState, setRecoveryState] = useState<
     | {
         descriptionKey: string;
@@ -92,40 +128,15 @@ export function PortfolioImportAssetReviewStep({
     [preview?.assetGroups],
   );
 
-  useEffect(() => {
-    const groups = preview?.assetGroups ?? [];
-
-    setDecisions((current) => {
-      let next = current;
-
-      for (const group of groups) {
-        if (!isBlockingAssetReviewGroup(group)) continue;
-        if (next[group.id]) continue;
-
-        const recommendedCandidate =
-          group.recommendedCandidateId == null
-            ? undefined
-            : group.candidates?.find(
-                (candidate) =>
-                  candidate.id === group.recommendedCandidateId ||
-                  candidate.isRecommended,
-              );
-
-        if (!recommendedCandidate) continue;
-
-        if (next === current) {
-          next = { ...current };
-        }
-
-        next[group.id] = {
-          action: "use_candidate",
-          candidateId: recommendedCandidate.id,
-        };
-      }
-
-      return next;
-    });
-  }, [preview?.assetGroups]);
+  // Seed recommended decisions whenever the preview's asset groups change,
+  // adjusting during render rather than in an effect.
+  const assetGroups = preview?.assetGroups;
+  const [seededAssetGroups, setSeededAssetGroups] = useState(assetGroups);
+  if (assetGroups !== seededAssetGroups) {
+    setSeededAssetGroups(assetGroups);
+    const next = withRecommendedDecisions(decisions, assetGroups ?? []);
+    if (next !== decisions) setDecisions(next);
+  }
 
   const pendingBlockingGroups = getPendingAssetReviewGroupIds(
     blockingGroups,
@@ -304,7 +315,6 @@ export function PortfolioImportAssetReviewStep({
                         </div>
                         <div className="text-muted-foreground mt-0.5 flex flex-wrap items-center gap-2 text-xs">
                           <span className="font-mono tabular-nums">#{group.id}</span>
-                          <span>·</span>
                           <span className="font-mono tabular-nums">{rowCount}</span>
                           <span>{t("portfolio-import-affected-rows")}</span>
                         </div>
@@ -320,7 +330,7 @@ export function PortfolioImportAssetReviewStep({
         </Accordion>
       ) : null}
 
-      <div className="bg-background/95 supports-[backdrop-filter]:bg-background/80 sticky bottom-0 flex flex-col gap-2 border-t pt-2 backdrop-blur">
+      <div className="bg-background sticky bottom-0 flex flex-col gap-2 border-t pt-2">
         {!isComplete ? (
           <div className="text-muted-foreground text-sm">
             {t("portfolio-import-asset-review-pending-groups", {

@@ -1,5 +1,6 @@
-import { Entity, EntityRepositoryType, Enum, Index, ManyToOne, PrimaryKey, Property, Unique } from '@mikro-orm/core';
+import { EntityRepositoryType } from '@mikro-orm/core';
 import type { Rel } from '@mikro-orm/core';
+import { Entity, Enum, Index, ManyToOne, PrimaryKey, Property, Unique } from '@mikro-orm/decorators/legacy';
 
 import { HouseholdInviteRepository } from '../repositories/HouseholdInviteRepository';
 
@@ -8,7 +9,7 @@ import { Base } from './BaseEntity';
 import { Tenant } from './Tenant';
 
 /**
- * RAD-343 (B1) — invitation lifecycle for a partner to join a household tenant.
+ * Invitation lifecycle for a partner to join a household tenant.
  * A pending invite consumes the household's single open seat.
  */
 export enum HouseholdInviteStatus {

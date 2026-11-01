@@ -62,7 +62,7 @@
         },
         "credentialRequired": {
           "title": "Connecting a bank needs a quick one-time setup",
-          "body": "Before you can link a real bank, add your own Enable Banking key from Settings. You can do that anytime after setup — for now, add an account manually above or skip this step and connect later."
+          "body": "Before you can link a real bank, add your own Enable Banking key from Settings. You can do that anytime after setup. For now, add an account manually above or skip this step and connect later."
         }
       },
       "connect": {
@@ -76,16 +76,15 @@
         "retry": "Try again",
         "connectErrorBanner": "Connection wasn't completed. Try again or pick another bank.",
         "manualTitle": "Add an account manually",
-        "manualBody": "No connection needed. Enter a balance to start — you can connect it for automatic updates later.",
+        "manualBody": "No connection needed. Enter a balance to start. You can connect it for automatic updates later.",
         "manualNameLabel": "Account name",
         "manualBalanceLabel": "Current balance",
         "manualSubmit": "Add account",
         "manualNote": "Manual accounts are included in your net worth but won't update automatically.",
         "syncing": {
-          "processing": "Connected — pulling in your balances and transactions…",
+          "processing": "Connected. Pulling in your balances and transactions…",
           "succeeded": "Your accounts are connected and synced.",
-          "partial": "Connected. Some data is still coming in — we'll keep syncing in the background.",
-          "trouble": "Connected. Finishing the first sync is taking a little longer — we'll keep trying in the background."
+          "trouble": "Connected. Finishing the first sync is taking a little longer. We'll keep trying in the background."
         }
       },
       "syncValue": {
@@ -115,7 +114,7 @@
         "inProgress": {
           "title": "What's happening right now",
           "balances": "Reading your account details and current balances.",
-          "transactions": "Pulling in your transaction history — up to 12 months, depending on what your bank shares.",
+          "transactions": "Pulling in your transaction history: up to 12 months, depending on what your bank shares.",
           "categories": "Sorting each transaction into a category as it arrives."
         },
         "openBankingNote": "16.5 million active open banking connections in the UK by December 2025, up 36% in a year. Connecting a bank this way is now ordinary."
@@ -319,7 +318,7 @@
     "dashboard": {
       "triggerLabel": "Help",
       "title": "Welcome to your dashboard",
-      "description": "This is your main dashboard – your future go-to spot for a clear overview of your financial life, all in one place.",
+      "description": "This is your main dashboard: your future go-to spot for a clear overview of your financial life, all in one place.",
       "content1": "See your net worth across all accounts at a glance.",
       "content2": "Track budget health and top spending categories as your data refreshes.",
       "content3": "Connect a bank account to populate your dashboard with real transactions."

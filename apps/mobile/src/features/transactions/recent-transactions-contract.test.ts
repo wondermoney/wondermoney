@@ -8,9 +8,13 @@ describe('recent transactions contract', () => {
     expect(recentTransactionsResponseSchema.parse({ transactions: [persisted, synthetic] }).transactions).toHaveLength(2)
   })
 
-  it('rejects any extra/sensitive field (strict) and a malformed currency', () => {
-    expect(recentTransactionsResponseSchema.safeParse({ transactions: [{ ...persisted, transactionKey: 1 }] }).success).toBe(false)
+  it('drops any field outside the five instead of rejecting the list, and rejects a malformed currency', () => {
+    expect(recentTransactionsResponseSchema.parse({ transactions: [{ ...persisted, transactionKey: 1 }] }).transactions[0]).toEqual(persisted)
     expect(recentTransactionsResponseSchema.safeParse({ transactions: [{ ...persisted, currencyCode: 'eur' }] }).success).toBe(false)
+  })
+
+  it('reads an entry type this build does not know as unknown', () => {
+    expect(recentTransactionsResponseSchema.parse({ transactions: [{ ...persisted, entryType: 'pending_transaction' }] }).transactions[0]!.entryType).toBe('unknown')
   })
 
   it('keeps null amount and currency explicit and preserves zero', () => {

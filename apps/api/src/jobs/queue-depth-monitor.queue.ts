@@ -2,7 +2,7 @@ import type { PgBossLike } from '@service/queue/pgboss-client';
 
 export const QUEUE_DEPTH_MONITOR_QUEUE = 'queue-depth.monitor';
 export const QUEUE_DEPTH_MONITOR_CRON = '*/5 * * * *';
-export const QUEUE_DEPTH_MONITOR_SINGLETON_KEY = 'queue-depth.monitor.v1';
+const QUEUE_DEPTH_MONITOR_SINGLETON_KEY = 'queue-depth.monitor.v1';
 /**
  * Renaming this slug starts a brand-new Sentry monitor with no history, which is
  * exactly the wrong thing for the one check that guards every other check.

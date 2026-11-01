@@ -1,9 +1,9 @@
 import { z } from 'zod'
 
-import { readEndpoint, writeEndpoint } from '@/lib/api/runtime-schema'
+import { readEndpoint, tolerantEnum, writeEndpoint } from '@/lib/api/runtime-schema'
 
 const money = z.number().finite()
-const currency = z.object({ code: z.string().regex(/^[A-Z]{3}$/) }).strict()
+const currency = z.object({ code: z.string().regex(/^[A-Z]{3}$/) })
 const positiveId = z.number().int().positive()
 const transactionId = z.number().int().safe().refine((value) => value !== 0)
 
@@ -19,9 +19,11 @@ const category = z.object({
 const recurringSeries = z.object({
   recurringSeriesKey: positiveId,
   displayName: z.string().min(1).max(255),
-  type: z.enum(['subscription', 'bill']),
-  amountType: z.enum(['fixed', 'variable']),
-  status: z.enum(['candidate', 'confirmed', 'dismissed', 'ended', 'paused']),
+  // Values this build doesn't know read as 'unknown', so one new recurring type or status can't
+  // fail the whole transaction list.
+  type: tolerantEnum(['subscription', 'bill'], 'unknown'),
+  amountType: tolerantEnum(['fixed', 'variable'], 'unknown'),
+  status: tolerantEnum(['candidate', 'confirmed', 'dismissed', 'ended', 'paused'], 'unknown'),
 })
 
 const transactionBaseShape = {
@@ -50,7 +52,7 @@ const transactionBaseShape = {
   recurringSeries: recurringSeries.nullable(),
 } as const
 
-export const accountTransactionSchema = z.object(transactionBaseShape)
+const accountTransactionSchema = z.object(transactionBaseShape)
 export const aggregateTransactionSchema = z.object({
   ...transactionBaseShape,
   loanRepayment: z.object({
@@ -132,9 +134,6 @@ export function parseTransactionDateRange(fromDate: string, toDate: string): Rea
   if (from.getTime() > to.getTime()) throw new Error('The start date must not be after the end date.')
   return Object.freeze({ fromDate: from.toISOString(), toDate: to.toISOString() })
 }
-
-// Kept as an alias for the focused, single-row review call site.
-export const markTransactionsReviewedEndpoint = updateTransactionsEndpoint
 
 export type EditTransactionAmountDraft = Readonly<{ transactionId: number; updatedAmount: string; description?: string }>
 export type FrozenEditTransactionAmount = Readonly<{

@@ -1,6 +1,6 @@
 import { z } from 'zod'
 
-import { readEndpoint } from '@/lib/api/runtime-schema'
+import { readEndpoint, tolerantEnum } from '@/lib/api/runtime-schema'
 
 const money = z.number().finite().nullish()
 const count = z.number().int().nonnegative().nullish()
@@ -11,7 +11,7 @@ export const accountMetricSchema = z.object({
   accountKey: z.number().int().positive(),
   accountName: z.string().max(255).nullish(),
   currencyCode: currencyCode.nullish(),
-  type: z.enum(['inflow', 'outflow']),
+  type: tolerantEnum(['inflow', 'outflow'], 'unknown'),
   inflowCurrentPeriod: money,
   inflowPastPeriod: money,
   inflowDelta: money,
@@ -24,13 +24,13 @@ export const accountMetricSchema = z.object({
   transactionCountPastPeriod: count,
   transactionCountDelta: deltaCount,
   transactionCountDeltaPercentage: money,
-}).strict()
+})
 
-export const metricsResponseSchema = z.object({ metrics: z.array(accountMetricSchema) }).strict()
+export const metricsResponseSchema = z.object({ metrics: z.array(accountMetricSchema) })
 export const cashflowResponseSchema = z.object({ cashflow: z.array(z.object({
   amount: z.number().finite(),
   date: z.iso.datetime(),
-}).strict()) }).strict()
+})) })
 
 const categoryShape = {
   amount: z.number().finite(),
@@ -43,12 +43,12 @@ const categoryShape = {
   numTransactions: z.number().int().nonnegative(),
   textColor: z.string().max(100).nullish(),
 } as const
-const childCategorySchema = z.object(categoryShape).strict()
+const childCategorySchema = z.object(categoryShape)
 export const categorySpendingSchema = z.object({
   ...categoryShape,
   childCategories: z.array(childCategorySchema),
-}).strict()
-export const categorySpendingResponseSchema = z.object({ categorySpending: z.array(categorySpendingSchema) }).strict()
+})
+export const categorySpendingResponseSchema = z.object({ categorySpending: z.array(categorySpendingSchema) })
 
 export type InsightPeriod = 'month' | '30-days' | '90-days'
 export type AccountMetricDto = z.infer<typeof accountMetricSchema>

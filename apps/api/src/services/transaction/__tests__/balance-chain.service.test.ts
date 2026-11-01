@@ -71,7 +71,7 @@ describe('balance chain — membership', () => {
     expect(isSettledStatusName(undefined)).toBe(false);
   });
 
-  it('loads settled rows only, hidden rows included (RAD-25), in chain order', async () => {
+  it('loads settled rows only, hidden rows included, in chain order', async () => {
     const em = { find: vi.fn().mockResolvedValue([]), flush: vi.fn() };
     await loadChainRows(em, { accountKey: 11 } as unknown as Account, { transactionDate: { $ne: null } });
     const [, where, options] = em.find.mock.calls[0] ?? [];
@@ -97,7 +97,7 @@ describe('balance chain — recalculateChainFromAccountBalance', () => {
   it('never writes account.balance — the provider owns it', async () => {
     const rows = [row(10)];
     const em = { find: vi.fn().mockResolvedValue(rows), flush: vi.fn() };
-    const account = { appuserCurrencyBalance: 999, balance: 500 } as { appuserCurrencyBalance: number; balance: number };
+    const account = { appuserCurrencyBalance: 999, balance: 500 };
 
     await recalculateChainFromAccountBalance(em, account as unknown as Account);
 
@@ -161,18 +161,53 @@ describe('balance chain — recalculateChainFromAccountBalance anchored on an ed
     expect(em.flush).toHaveBeenCalledOnce();
   });
 
-  it('anchors on the oldest row with a zero opening when there is no predecessor', async () => {
+  /*
+   * With no predecessor the opening is what the account held before that row: its stored
+   * running balance minus its pre-edit amount. An opening of 0 would replace a 3190 balance with
+   * the sum of its rows.
+   */
+  it('moves the balance by only the edit when the oldest row is edited', async () => {
     const rows = [
-      { appuserSettlementAmount: 30, balance: 999, settlementAmount: 25, transactionKey: 1 },
+      // Edited in place from -12.75 to -10; the stored balances still reflect -12.75.
+      { appuserCurrencyBalance: 3187.25, appuserSettlementAmount: -10, balance: 3187.25, settlementAmount: -10, transactionKey: 1 },
+      { appuserCurrencyBalance: 3237.25, appuserSettlementAmount: 50, balance: 3237.25, settlementAmount: 50, transactionKey: 2 },
+    ];
+    const em = { find: vi.fn().mockResolvedValue(rows), flush: vi.fn() };
+
+    const { tail } = await recalculateChainFromAccountBalance(em, { appuserCurrencyBalance: 3237.25, balance: 3237.25 } as unknown as Account, {
+      previous: { appuserSettlementAmount: -12.75, settlementAmount: -12.75 },
+      transactionKey: 1,
+    });
+
+    expect(rows[0]).toMatchObject({ appuserCurrencyBalance: 3190, balance: 3190 });
+    expect(rows[1]).toMatchObject({ appuserCurrencyBalance: 3240, balance: 3240 });
+    expect(tail).toEqual({ appuserCurrencyBalance: 3240, balance: 3240 });
+  });
+
+  it('derives the user-currency opening from the user-currency amounts on a foreign account', async () => {
+    // GBP account, EUR user: edited from -20 GBP (-23 EUR) to -10 GBP (-11.5 EUR).
+    const rows = [{ appuserCurrencyBalance: 1127, appuserSettlementAmount: -11.5, balance: 980, settlementAmount: -10, transactionKey: 1 }];
+    const em = { find: vi.fn().mockResolvedValue(rows), flush: vi.fn() };
+
+    const { tail } = await recalculateChainFromAccountBalance(em, { appuserCurrencyBalance: 1127, balance: 980 } as unknown as Account, {
+      previous: { appuserSettlementAmount: -23, settlementAmount: -20 },
+      transactionKey: 1,
+    });
+
+    expect(tail).toEqual({ appuserCurrencyBalance: 1138.5, balance: 990 });
+  });
+
+  it('keeps the account balance when the oldest row is anchored without its previous amount', async () => {
+    const rows = [
+      { balance: 999, settlementAmount: 25, transactionKey: 1 },
       { balance: 888, settlementAmount: 5, transactionKey: 2 },
     ];
     const em = { find: vi.fn().mockResolvedValue(rows), flush: vi.fn() };
 
-    const { tail } = await recalculateChainFromAccountBalance(em, { balance: 0 } as unknown as Account, { transactionKey: 1 });
+    const { tail } = await recalculateChainFromAccountBalance(em, { appuserCurrencyBalance: 3200, balance: 3200 } as unknown as Account, { transactionKey: 1 });
 
-    expect(rows[0]).toMatchObject({ appuserCurrencyBalance: 30, balance: 25 });
-    expect(rows[1]).toMatchObject({ appuserCurrencyBalance: 35, balance: 30 });
-    expect(tail).toEqual({ appuserCurrencyBalance: 35, balance: 30 });
+    expect(tail).toEqual({ appuserCurrencyBalance: 3200, balance: 3200 });
+    expect(rows.map((r) => r.balance)).toEqual([3195, 3200]);
   });
 
   it('falls back to the whole-account tail anchor when the anchor row is not a chain member', async () => {
@@ -194,7 +229,8 @@ describe('balance chain — recalculateChainFromAccountBalance anchored on an ed
 
     expect(account.balance).toBe(500);
     expect(account.appuserCurrencyBalance).toBe(500);
-    expect(rows[0]?.balance).toBe(10);
+    // No predecessor and no previous amount: rebuilt from the account balance, not from 0.
+    expect(rows[0]?.balance).toBe(500);
   });
 
   it('is idempotent for an anchored suffix — a second run rewrites nothing', async () => {

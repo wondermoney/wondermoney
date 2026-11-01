@@ -1,6 +1,5 @@
 "use client";
 
-import { DollarSign } from "lucide-react";
 import { useTranslations } from "next-intl";
 import React from "react";
 
@@ -35,10 +34,7 @@ const PortfolioDividendIncome: React.FC<PortfolioDividendIncomeProps> = ({
       ) : (
         <div className="flex flex-col gap-4">
           {/* Total */}
-          <div className="flex items-center gap-3">
-            <div className="bg-success/10 flex h-10 w-10 items-center justify-center rounded-lg">
-              <DollarSign className="text-success-text h-5 w-5" />
-            </div>
+          <div className="flex items-center">
             <div className="flex flex-col gap-1">
               <span className="text-muted-foreground text-sm">
                 {t("total-dividends")}

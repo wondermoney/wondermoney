@@ -11,6 +11,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { PreviewBadge } from "@/components/ui/PreviewBadge";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
 import {
@@ -122,7 +123,7 @@ export function RecurringPaymentsPreview({
   return (
     <Card
       className={cn(
-        "border-border bg-card overflow-hidden opacity-90 shadow-sm",
+        "border-border bg-card overflow-hidden opacity-90 shadow-none",
         className,
       )}
     >
@@ -131,17 +132,12 @@ export function RecurringPaymentsPreview({
           <span className="text-foreground text-sm font-medium">
             {t("title")}
           </span>
-          <Badge
-            variant="muted"
-            className="border-border bg-background/80 text-muted-foreground text-[11px] tracking-wide"
-          >
-            {tCommon("preview")}
-          </Badge>
+          <PreviewBadge />
         </div>
 
         <div className="space-y-4 p-4 md:p-6">
           <div className="grid gap-3 sm:grid-cols-2">
-            <div className="border-border bg-background/70 rounded-xl border p-4">
+            <div className="bg-muted rounded-lg p-4">
               <div className="text-muted-foreground text-xs tracking-wide">
                 {t("noAccountsPreviewMonthlyImpact")}
               </div>
@@ -153,7 +149,7 @@ export function RecurringPaymentsPreview({
               />
             </div>
 
-            <div className="border-border bg-background/70 rounded-xl border p-4">
+            <div className="bg-muted rounded-lg p-4">
               <div className="text-muted-foreground text-xs tracking-wide">
                 {t("noAccountsPreviewNeedsReview")}
               </div>
@@ -188,7 +184,7 @@ export function RecurringPaymentsPreview({
                       <PopoverTrigger asChild>
                         <button
                           type="button"
-                          className="border-border bg-background/60 hover:bg-background/90 focus-visible:ring-ring flex min-h-11 w-full items-center justify-between gap-4 rounded-lg border px-3 py-3 text-left transition-colors focus-visible:ring-2 focus-visible:outline-none"
+                          className="bg-muted/60 hover:bg-muted focus-visible:ring-ring flex min-h-11 w-full items-center justify-between gap-4 rounded-lg px-3 py-3 text-left transition-colors focus-visible:ring-2 focus-visible:outline-none"
                           aria-label={t("previewItemAriaLabel", { merchant })}
                         >
                           <div className="min-w-0 space-y-1">
@@ -198,11 +194,9 @@ export function RecurringPaymentsPreview({
                             <div className="text-muted-foreground flex flex-wrap items-center gap-2 text-xs">
                               <span>{typeLabels[item.type]}</span>
                               <span
-                                className="text-border"
                                 aria-hidden="true"
-                              >
-                                •
-                              </span>
+                                className="bg-border h-3 w-px shrink-0"
+                              />
                               <span>{dateFormatter.format(item.due)}</span>
                             </div>
                           </div>

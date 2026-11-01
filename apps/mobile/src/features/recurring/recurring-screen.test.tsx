@@ -3,6 +3,7 @@ import { I18nextProvider } from 'react-i18next'
 
 import { initMobileI18n } from '@/lib/i18n'
 
+import { recurringItemsResponseSchema } from './recurring-contract'
 import { RecurringScreen } from './recurring-screen'
 import { mapRecurringItems, mapRecurringSummary } from './recurring-view-model'
 import { recurringItemFixture, recurringSummaryFixture } from './test-fixtures'
@@ -125,5 +126,30 @@ describe('RecurringScreen', () => {
     expect(view.getByRole('button', { name: 'Scanning' }).props.accessibilityState).toEqual({ disabled: true, busy: true })
     expect(view.getByRole('button', { name: 'Confirm' })).toBeDisabled()
     expect(view.getByRole('button', { name: 'Edit details' })).toBeDisabled()
+  })
+})
+
+describe('RecurringScreen with values this build does not know', () => {
+  it('renders a row whose type, cadence and status are new to this build', async () => {
+    const i18n = await initMobileI18n('en')
+    const response = recurringItemsResponseSchema.parse({ items: [{ ...recurringItemFixture, type: 'membership', cadence: 'daily', status: 'snoozed', extra: true }] })
+    const rows = mapRecurringItems(response, new Map([[2, 'Daily account']]))
+    const view = await render(<I18nextProvider i18n={i18n}><RecurringScreen state={{ status: 'loaded', rows, summary: mapRecurringSummary(recurringSummaryFixture), refreshing: false }} onBack={jest.fn()} onRefresh={jest.fn()} /></I18nextProvider>)
+    expect(view.getByText('Other recurring payment · Schedule unavailable · Status unavailable')).toBeOnTheScreen()
+    expect(view.queryByRole('button', { name: 'Confirm' })).not.toBeOnTheScreen()
+  })
+
+  it('saves a rename without sending back a type, cadence or amount it does not know', async () => {
+    const i18n = await initMobileI18n('en')
+    const response = recurringItemsResponseSchema.parse({ items: [{ ...recurringItemFixture, type: 'membership', cadence: 'daily', amountType: 'tiered' }] })
+    const onUpdate = jest.fn().mockResolvedValue('success')
+    const view = await render(<I18nextProvider i18n={i18n}><RecurringScreen state={{ status: 'loaded', rows: mapRecurringItems(response), summary: mapRecurringSummary(recurringSummaryFixture), refreshing: false }} categories={[]} onBack={jest.fn()} onRefresh={jest.fn()} onUpdate={onUpdate} /></I18nextProvider>)
+    fireEvent.press(view.getByRole('button', { name: 'Edit details' }))
+    await waitFor(() => expect(view.getByLabelText('Display name')).toBeOnTheScreen())
+    fireEvent.press(view.getByRole('button', { name: 'Save changes' }))
+    await waitFor(() => expect(onUpdate).toHaveBeenCalledTimes(1))
+    const metadata = onUpdate.mock.calls[0][1]
+    expect(metadata.displayName).toBe(recurringItemFixture.displayName)
+    for (const field of ['type', 'cadence', 'amountType', 'expectedAmount', 'expectedAmountMin', 'expectedAmountMax']) expect(metadata).not.toHaveProperty(field)
   })
 })

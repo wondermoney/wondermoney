@@ -15,7 +15,7 @@ Next.js 16 frontend for WonderMoney.
 
 ## Prerequisites
 
-- Node.js `v24` from `.nvmrc`
+- Node.js `v26` from `.nvmrc`
 - pnpm, from the repository root (`packageManager` in the root `package.json`)
 
 ## Setup

@@ -2,10 +2,9 @@
  * Canonical portfolio import session state derivation.
  *
  * Owns the terminal-kind vocabulary, the confirmable predicate, and the row/group
- * status + summary computations that were previously copied across the portfolio
- * import services. Helpers are pure: they read entities by reference and return
- * values. Callers stay responsible for persistence, matching the existing
- * per-module transactional pattern.
+ * status + summary computations shared by the portfolio import services. Helpers
+ * are pure: they read entities by reference and return values. Callers stay
+ * responsible for persistence, matching the per-module transactional pattern.
  */
 import { PortfolioImportAssetGroup, PortfolioImportAssetGroupStatus } from '@entity/PortfolioImportAssetGroup';
 import { PortfolioImportRow, PortfolioImportRowStatus } from '@entity/PortfolioImportRow';
@@ -53,7 +52,7 @@ const TERMINAL_KINDS: readonly TerminalKind[] = ['cancelled', 'duplicate_only', 
 
 /**
  * Row/group counts for a session summary. Canonical source for the summary shape
- * previously duplicated in `portfolio-import-asset-mapping` and friends.
+ * used by `portfolio-import-asset-mapping` and friends.
  */
 export function buildImportSessionSummary(rows: PortfolioImportRow[], groups: PortfolioImportAssetGroup[]): ImportSessionSummary {
   const readyRows = rows.filter((row) => row.status === PortfolioImportRowStatus.READY).length;

@@ -18,6 +18,13 @@ describe('net worth history contract', () => {
     expect(netWorthHistorySummarySchema.parse(summary)).toEqual(summary)
   })
 
+  it('reads a readiness this build does not know as insufficient history and strips added fields', () => {
+    const parsed = netWorthHistorySummarySchema.parse({ ...summary, readiness: 'backfilling', points: [{ ...summary.points[0], forecast: 1 }], extra: true })
+    expect(parsed.readiness).toBe('insufficient_history')
+    expect(parsed.points[0]).toEqual(summary.points[0])
+    expect(parsed).not.toHaveProperty('extra')
+  })
+
   it('rejects a non-monthly granularity and malformed dates', () => {
     expect(netWorthHistorySummarySchema.safeParse({ ...summary, granularity: 'weekly' }).success).toBe(false)
     expect(netWorthHistorySummarySchema.safeParse({ ...summary, points: [{ ...summary.points[0], date: '2026/01/01' }] }).success).toBe(false)

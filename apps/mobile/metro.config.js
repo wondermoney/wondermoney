@@ -1,5 +1,5 @@
-// RAD-517 — the repo had no Metro config at all until now; this one exists only so
-// Sentry can stamp a Debug ID into the JS bundle and the matching source map.
+// This Metro config exists only so Sentry can stamp a Debug ID into the JS
+// bundle and the matching source map.
 //
 // `getSentryExpoConfig` is Expo's own `getDefaultConfig(__dirname)` with Sentry's
 // serializer wrapped around it, so the bundling behaviour is otherwise unchanged.
@@ -8,7 +8,6 @@
 // produced a stack trace, and crash reports stay minified.
 //
 // See docs/telemetry-adr-sentry.md and app.config.ts's Sentry plugin entry.
-// eslint-disable-next-line @typescript-eslint/no-require-imports
 const { getSentryExpoConfig } = require('@sentry/react-native/metro')
 
 const config = getSentryExpoConfig(__dirname)

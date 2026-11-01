@@ -54,7 +54,7 @@ export type ScreenerScreenProps = {
 }
 
 /**
- * RAD-241 (slice 3) — the filter form is a heavier, explicit-submit version
+ * The filter form is a heavier, explicit-submit version
  * of markets-search-screen's controlled input: five plain TextInputs stage
  * changes via onFormChange (no request fires per keystroke), and only the
  * "Apply filters" action fetches. Below the form, a results list mirrors
@@ -272,7 +272,7 @@ function Field({ label, placeholder, value, onChangeText, palette, keyboardType 
 }
 
 /**
- * RAD-193 — memoized so the screener's growing "load more" result set (which
+ * Memoized so the screener's growing "load more" result set (which
  * can reach into the hundreds of rows) doesn't re-run price/market-cap
  * formatting for every already-rendered row on each parent re-render.
  */

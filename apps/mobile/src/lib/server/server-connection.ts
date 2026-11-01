@@ -1,6 +1,8 @@
 import * as SecureStore from 'expo-secure-store'
 import { z } from 'zod'
 
+import { tolerantEnum } from '@/lib/api/runtime-schema'
+
 /**
  * Which WonderMoney server the app talks to. The build has a default (EXPO_PUBLIC_API_BASE_URL);
  * someone running their own server can point the app at it from the sign-in screen. The choice
@@ -45,11 +47,16 @@ const instanceSchema = z.object({
     contactForm: z.boolean(),
     email: z.boolean(),
     fileStorage: z.boolean(),
+    // Optional so an older server that doesn't report it still parses; the app reads a
+    // missing value as "not offered" (see use-instance.ts).
+    googleSignIn: z.boolean().optional(),
     marketData: z.boolean(),
   }),
   minAppVersion: z.string().nullable(),
   name: z.string().min(1),
-  signupMode: z.enum(['open', 'invite', 'closed']),
+  // A mode this build doesn't know reads as 'unknown' instead of rejecting the server as
+  // "not WonderMoney".
+  signupMode: tolerantEnum(['open', 'invite', 'closed'], 'unknown'),
 })
 
 export type InstanceDescription = z.infer<typeof instanceSchema>
@@ -70,14 +77,16 @@ export function isOlderVersion(version: string, minimum: string): boolean {
   return false
 }
 
-/** Asks a server to describe itself (`GET /v1/instance`) and whether this app version can use it. */
-export async function checkServer(
-  baseUrl: string,
-  deps: { appVersion: string; fetchImpl?: typeof fetch },
-): Promise<ServerCheck> {
+type InstanceFetch =
+  | { instance: InstanceDescription; status: 'ok' }
+  | { status: 'not-wondermoney' }
+  | { status: 'unreachable' }
+
+/** `GET /v1/instance` on `baseUrl`, parsed with the tolerant schema above. */
+export async function fetchInstance(baseUrl: string, fetchImpl: typeof fetch = fetch): Promise<InstanceFetch> {
   let response: Response
   try {
-    response = await (deps.fetchImpl ?? fetch)(`${baseUrl}/v1/instance`, { headers: { Accept: 'application/json' } })
+    response = await fetchImpl(`${baseUrl}/v1/instance`, { headers: { Accept: 'application/json' } })
   } catch {
     return { status: 'unreachable' }
   }
@@ -89,7 +98,17 @@ export async function checkServer(
     return { status: 'not-wondermoney' }
   }
   if (!parsed.success) return { status: 'not-wondermoney' }
-  const { minAppVersion } = parsed.data
-  if (minAppVersion && isOlderVersion(deps.appVersion, minAppVersion)) return { minAppVersion, status: 'update-required' }
   return { instance: parsed.data, status: 'ok' }
+}
+
+/** Asks a server to describe itself (`GET /v1/instance`) and whether this app version can use it. */
+export async function checkServer(
+  baseUrl: string,
+  deps: { appVersion: string; fetchImpl?: typeof fetch },
+): Promise<ServerCheck> {
+  const fetched = await fetchInstance(baseUrl, deps.fetchImpl ?? fetch)
+  if (fetched.status !== 'ok') return fetched
+  const { minAppVersion } = fetched.instance
+  if (minAppVersion && isOlderVersion(deps.appVersion, minAppVersion)) return { minAppVersion, status: 'update-required' }
+  return fetched
 }

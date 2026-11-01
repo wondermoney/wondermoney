@@ -3,6 +3,7 @@
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 
+import { useInstanceName } from "@/components/instance/InstanceNameProvider";
 import { useRouter } from "@/i18n/navigation";
 
 import { Button } from "../ui/button";
@@ -11,6 +12,7 @@ import UserAccountDelete from "../user/UserAccountDelete";
 
 export default function Privacy() {
   const t = useTranslations();
+  const instanceName = useInstanceName();
   const router = useRouter();
 
   const [isDeleteUserAccountModalOpen, setIsDeleteUserAccountModalOpen] =
@@ -79,9 +81,11 @@ export default function Privacy() {
 
       <div className="grid max-w-7xl grid-cols-1 gap-x-8 gap-y-10 px-4 py-16 sm:px-6 md:grid-cols-3 lg:px-8">
         <div>
-          <Heading variant="h2">{t("delete-wondermoney-account")}</Heading>
+          <Heading variant="h2">
+            {t("delete-wondermoney-account", { instanceName })}
+          </Heading>
           <Text variant="lead" className="mt-1 text-sm">
-            {t("delete-wondermoney-account-description")}
+            {t("delete-wondermoney-account-description", { instanceName })}
           </Text>
         </div>
 
@@ -91,7 +95,7 @@ export default function Privacy() {
             variant="destructive"
             onClick={() => setIsDeleteUserAccountModalOpen(true)}
           >
-            {t("delete-wondermoney-account")}
+            {t("delete-wondermoney-account", { instanceName })}
           </Button>
           <UserAccountDelete
             isOpen={isDeleteUserAccountModalOpen}

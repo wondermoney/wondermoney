@@ -7,9 +7,9 @@ import { normalizeFinancialLocale } from "@/lib/utils/formatCurrency";
 import { formatPercentageForLocale } from "@/lib/utils/formatPercentage";
 
 /**
- * RAD-575 — `formatPercentage` bound to the active locale, same signature, so a
+ * `formatPercentage` bound to the active locale, same signature, so a
  * component swaps its import and adds one line while its call sites stay put.
- * Mirrors `useFormatCurrency` (RAD-572).
+ * Mirrors `useFormatCurrency`.
  */
 export function useFormatPercentage() {
   const locale = useLocale();
@@ -25,4 +25,3 @@ export function useFormatPercentage() {
   );
 }
 
-export default useFormatPercentage;

@@ -1,7 +1,6 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { motion } from "motion/react";
 import { useTranslations } from "next-intl";
 import React from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
@@ -48,32 +47,25 @@ export default function HouseholdPage() {
 
   return (
     <div>
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-      >
+      {/* The entrance is CSS, not motion/react: a self-running animation
+          that leaves the step visible with scripting off or before hydration;
+          `motion-safe:` drops it for anyone who asked for reduced motion.
+          motion/react rendered every block at opacity 0 into the HTML and
+          animated regardless of that setting. */}
+      <div className="motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-5 motion-safe:fill-mode-both motion-safe:duration-500">
         <Heading variant="h2" className="text-center" id="household-size-label">
           {t("household-composition")}
         </Heading>
-      </motion.div>
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.2 }}
-      >
+      </div>
+      <div className="motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-5 motion-safe:fill-mode-both motion-safe:delay-200 motion-safe:duration-500">
         <Text
           variant="mutedText"
           className="text-muted-foreground mx-auto mt-2 w-full max-w-md text-center"
         >
           {t("household-composition-description")}
         </Text>
-      </motion.div>
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.4 }}
-      >
+      </div>
+      <div className="motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-5 motion-safe:fill-mode-both motion-safe:delay-400 motion-safe:duration-500">
         <Form {...methods}>
           <FormContent
             className="flex w-full flex-col gap-8"
@@ -114,7 +106,7 @@ export default function HouseholdPage() {
             </div>
           </FormContent>
         </Form>
-      </motion.div>
+      </div>
     </div>
   );
 }

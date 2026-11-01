@@ -6,7 +6,7 @@ import api from "../api";
 
 /**
  * Forward-looking earnings window. Empty for now — EODHD's Fundamentals plan
- * does not include the earnings calendar (see RAD-449 / getPortfolioCalendar in
+ * does not include the earnings calendar (see getPortfolioCalendar in
  * `api/src/controller/portfolio.ts`). The shape is kept here so the type system
  * is ready when the underlying plan supports earnings.
  */
@@ -19,7 +19,7 @@ export interface EarningsEvent {
 
 /**
  * Upcoming dividend row as returned by EODHD's /div endpoint (verified live
- * against AAPL/MSFT/JNJ/KO/PG.US on 2026-08-05; see RAD-449 task 16). The API
+ * against AAPL/MSFT/JNJ/KO/PG.US on 2026-08-05). The API
  * tag-teams each row with the symbol it was queried for (`symbol: s`).
  */
 export interface DividendEvent {
@@ -51,7 +51,7 @@ export interface PortfolioCalendarResponse {
 }
 
 // Loose, runtime Zod schemas so a future EODHD field rename (or stale cache)
-// can no longer silently break the Calendar page. We do not enforce the
+// cannot silently break the Calendar page. We do not enforce the
 // optional dividend fields — EODHD has been observed to omit `payDate` and
 // `declarationDate` on older rows.
 const earningsEventSchema = z.object({
@@ -66,7 +66,7 @@ const dividendEventSchema = z
     date: z.string(),
     symbol: z.string(),
   })
-  .passthrough();
+  .loose();
 
 const portfolioCalendarResponseSchema = z.object({
   earnings: z.array(earningsEventSchema),
@@ -98,7 +98,7 @@ function parseCalendarResponse(raw: unknown): PortfolioCalendarResponse {
   };
 }
 
-export async function getPortfolioCalendar(
+async function getPortfolioCalendar(
   apiClient: AxiosInstance = api,
 ): Promise<PortfolioCalendarResponse> {
   const { data } = await apiClient.get("/v1/portfolio/calendar");

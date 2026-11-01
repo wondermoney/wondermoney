@@ -223,6 +223,8 @@ export interface PortfolioImportSessionPreviewResponse {
   portfolioId: number;
   rows: {
     duplicate: PortfolioImportPreviewRow[];
+    /** Rows that failed while a confirmed import ran; absent on APIs that predate the bucket. */
+    failed?: PortfolioImportPreviewRow[];
     invalid: PortfolioImportPreviewRow[];
     needsAssetReview: PortfolioImportPreviewRow[];
     ready: PortfolioImportPreviewRow[];
@@ -262,11 +264,6 @@ export interface PortfolioImportSessionCreateRequest {
 
 export interface PortfolioImportSessionParseRequest {
   importSessionId: string | number;
-}
-
-export interface PortfolioImportSessionPreviewRequest {
-  importSessionId: string | number;
-  limit?: number;
 }
 
 export interface PortfolioImportSessionSuggestColumnMappingRequest {

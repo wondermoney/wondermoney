@@ -1,4 +1,3 @@
-import { useQuery } from "@tanstack/react-query";
 import type { AxiosInstance } from "axios";
 
 import api from "../api";
@@ -12,8 +11,8 @@ export interface Ticker {
 
 export type TickerSearchResponse = Array<Ticker>;
 
-// The strict search DTO the API now returns (RAD-228): a { results, source }
-// envelope of allow-listed fields rather than a bare array of raw FMP rows.
+// The API's strict search DTO: a { results, source } envelope of allow-listed
+// fields.
 interface SearchResultDto {
   symbol: string;
   name: string | null;
@@ -37,7 +36,7 @@ function toTicker(result: SearchResultDto): Ticker {
 
 // The provider returns matches in an order that can bury the primary listing
 // below foreign ones (e.g. "Microsoft" -> 4338.HK, MSF.DE, … above MSFT).
-// Re-rank so the listing a user most likely wants surfaces first (RAD-366).
+// Re-rank so the listing a user most likely wants surfaces first.
 function rankTickerResults(
   searchTerm: string,
   results: TickerSearchResponse,
@@ -79,7 +78,7 @@ async function fetchTickerSearch(
 // re-renders, and panel re-opens — which a time-based debounce can't coalesce.
 // Ticker search results are effectively static within a session (a symbol's
 // name/exchange doesn't change), so cache the promise by normalized term and
-// hand identical searches the same request: at most one XHR per term (RAD-365).
+// hand identical searches the same request: at most one XHR per term.
 const searchCache = new Map<string, Promise<TickerSearchResponse>>();
 
 export async function getTickerSearch(
@@ -104,11 +103,4 @@ export async function getTickerSearch(
   });
   searchCache.set(key, request);
   return request;
-}
-
-export default function useTickerSearch(ticker: string) {
-  return useQuery<TickerSearchResponse>({
-    queryKey: ["ticker-search", ticker],
-    queryFn: () => getTickerSearch(ticker),
-  });
 }

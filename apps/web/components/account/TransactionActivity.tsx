@@ -47,7 +47,7 @@ function actorKey(actorType: TransactionAuditActorType): string {
 }
 
 /**
- * Per-transaction activity log (RAD-346) — the antidote to "my edits disappeared". Shows created /
+ * Per-transaction activity log — the antidote to "my edits disappeared". Shows created /
  * recategorized / edited / promoted-from-pending / expired, with who and when.
  */
 export default function TransactionActivity({
@@ -60,7 +60,7 @@ export default function TransactionActivity({
 
   return (
     <section aria-label={t("transaction-activity-title")} className="mt-2">
-      <h3 className="text-muted-foreground mb-2 text-xs font-medium tracking-wide uppercase">
+      <h3 className="text-muted-foreground mb-2 text-xs font-medium">
         {t("transaction-activity-title")}
       </h3>
       {isLoading ? (
@@ -70,7 +70,7 @@ export default function TransactionActivity({
           aria-label={t("transaction-activity-title")}
         >
           {Array.from({ length: 2 }).map((_, index) => (
-            <div key={index} className="bg-muted h-6 animate-pulse rounded" />
+            <div key={index} className="bg-muted h-6 animate-pulse rounded motion-reduce:animate-none" />
           ))}
         </div>
       ) : isError ? (

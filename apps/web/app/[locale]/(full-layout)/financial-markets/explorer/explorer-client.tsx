@@ -4,7 +4,7 @@ import { Star } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { usePostHog } from "posthog-js/react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 import FinancialMarketsExplorerEmptyState from "@/components/financial-market/FinancialMarketsExplorerEmptyState";
 import FinancialMarketsExplorerSearch from "@/components/financial-market/FinancialMarketsExplorerSearch";
@@ -34,17 +34,19 @@ export default function ExplorerClient({ initialTicker }: ExplorerClientProps) {
   const { data: watchlistSymbols = [] } = useWatchlist();
   const toggleWatchlist = useToggleWatchlist();
 
+  const tickerFromUrl = searchParams.get("ticker");
   const [selectedTicker, setSelectedTicker] = useState<string | null>(
-    initialTicker,
+    tickerFromUrl || initialTicker,
   );
 
-  // Sync state with URL changes
-  useEffect(() => {
-    const tickerFromUrl = searchParams.get("ticker");
-    if (tickerFromUrl && tickerFromUrl !== selectedTicker) {
-      setSelectedTicker(tickerFromUrl);
-    }
-  }, [searchParams, selectedTicker]);
+  // Follow the ticker in the URL when it changes (e.g. back/forward). Adjusted
+  // during render, and keyed on the URL value only, so a selection made here
+  // is not reverted while router.replace is still updating the URL.
+  const [prevTickerFromUrl, setPrevTickerFromUrl] = useState(tickerFromUrl);
+  if (tickerFromUrl !== prevTickerFromUrl) {
+    setPrevTickerFromUrl(tickerFromUrl);
+    if (tickerFromUrl) setSelectedTicker(tickerFromUrl);
+  }
 
   const onTickerSelected = (ticker: string) => {
     setSelectedTicker(ticker);
@@ -59,8 +61,8 @@ export default function ExplorerClient({ initialTicker }: ExplorerClientProps) {
 
   return (
     <PageShell>
-      {/* RAD-566 — with a ticker selected this route's outline was h2, h2, h2
-          and no <h1>. The company card is about one symbol, not about the
+      {/* The route's own <h1>: with a ticker selected the cards below are all
+          h2s. The company card is about one symbol, not about the
           page, so the page title lives here rather than being promoted out of
           a card that changes with the search. */}
       <PageHeader

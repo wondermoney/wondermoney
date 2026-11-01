@@ -1,14 +1,23 @@
 import { z } from 'zod'
 
-import { readEndpoint } from '../../lib/api/runtime-schema'
+import { readEndpoint, tolerantEnum } from '../../lib/api/runtime-schema'
 
-export const netWorthRowTypeSchema = z.enum(['accounts', 'portfolios', 'loans'])
+const netWorthRowTypeSchema = z.enum(['accounts', 'portfolios', 'loans'])
 
 export const netWorthRowSchema = z.object({
   type: netWorthRowTypeSchema,
   name: z.string().min(1).max(255),
   balance: z.number().finite(),
 })
+
+// A row of a type this build doesn't know (a new asset class, say) is dropped from the breakdown
+// rather than shown with the wrong sign or failing the whole summary. The server's totals still
+// include it.
+const netWorthRowsSchema = z.array(z.object({
+  type: tolerantEnum(['accounts', 'portfolios', 'loans'], 'unknown'),
+  name: z.string().min(1).max(255),
+  balance: z.number().finite(),
+})).transform((rows) => rows.filter((row): row is NetWorthRowDto => row.type !== 'unknown'))
 
 export const netWorthDtoSchema = z.object({
   currencyCode: z.string().regex(/^[A-Z]{3}$/),
@@ -20,20 +29,15 @@ export const netWorthDtoSchema = z.object({
   liabilities: z.object({
     loans: z.number().finite(),
   }),
-  rows: z.array(netWorthRowSchema),
+  rows: netWorthRowsSchema,
   unsupportedCurrencies: z.object({
     loans: z.number().int().nonnegative(),
     portfolios: z.number().int().nonnegative(),
   }),
 })
 
-export type NetWorthRowType = z.infer<typeof netWorthRowTypeSchema>
 export type NetWorthRowDto = z.infer<typeof netWorthRowSchema>
 export type NetWorthDto = z.infer<typeof netWorthDtoSchema>
-export type NetWorthSummaryDto = NetWorthDto
-
-export const netWorthSchema = netWorthDtoSchema
-export const netWorthSummarySchema = netWorthDtoSchema
 
 export const netWorthEndpoint = readEndpoint({
   method: 'GET',
@@ -55,7 +59,8 @@ export const netWorthHistoryPointSchema = z.object({
   isComplete: z.boolean(),
 })
 
-export const netWorthHistoryReadinessSchema = z.enum(['empty', 'insufficient_history', 'ready'])
+// A readiness this build doesn't know reads as 'insufficient_history', the conservative state.
+export const netWorthHistoryReadinessSchema = tolerantEnum(['empty', 'insufficient_history', 'ready'], 'insufficient_history')
 
 export const netWorthHistorySummarySchema = z.object({
   currencyCode: z.string().regex(/^[A-Z]{3}$/),

@@ -23,18 +23,17 @@ export const env = createEnv({
     NEXT_PUBLIC_POSTHOG_KEY: z.string().optional(),
     NEXT_PUBLIC_ENABLE_ANALYTICS: z.literal("1").optional(),
     NEXT_PUBLIC_ENABLE_SENTRY: z.literal("1").optional(),
-    NEXT_PUBLIC_APP_URL: z.string().url().optional(),
+    NEXT_PUBLIC_APP_URL: z.url().optional(),
     NEXT_PUBLIC_VERCEL_ENV: z
       .enum(["development", "preview", "production"])
       .optional(),
-    NEXT_PUBLIC_VERCEL_URL: z.string().url().optional(),
+    NEXT_PUBLIC_VERCEL_URL: z.url().optional(),
     NEXT_PUBLIC_GA_MEASUREMENT_ID: z.string().optional(),
-    // Optional (not .string().url() required) because it isn't set in every
+    // Optional (not a required z.url()) because it isn't set in every
     // local .env.local today — callers fall back to http://localhost:3001.
-    NEXT_PUBLIC_API_URL: z.string().url().optional(),
+    NEXT_PUBLIC_API_URL: z.url().optional(),
     NEXT_PUBLIC_RECAPTCHA_SITE_KEY: z.string().optional(),
     NEXT_PUBLIC_E2E_BYPASS_RECAPTCHA: z.literal("1").optional(),
-    NEXT_PUBLIC_BANK_CONNECTIONS_PAUSED: z.literal("1").optional(),
   },
   /*
    * Due to how Next.js bundles environment variables on Edge and Client,
@@ -63,8 +62,6 @@ export const env = createEnv({
     NEXT_PUBLIC_RECAPTCHA_SITE_KEY: process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY,
     NEXT_PUBLIC_E2E_BYPASS_RECAPTCHA:
       process.env.NEXT_PUBLIC_E2E_BYPASS_RECAPTCHA,
-    NEXT_PUBLIC_BANK_CONNECTIONS_PAUSED:
-      process.env.NEXT_PUBLIC_BANK_CONNECTIONS_PAUSED,
     E2E_BYPASS_RECAPTCHA: process.env.E2E_BYPASS_RECAPTCHA,
     RECAPTCHA_SECRET_KEY: process.env.RECAPTCHA_SECRET_KEY,
   },

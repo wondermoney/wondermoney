@@ -4,7 +4,8 @@ import { I18nextProvider } from 'react-i18next'
 
 import { initMobileI18n } from '@/lib/i18n'
 
-import type { BankConnectionRow } from '../connection-status-view-model'
+import { bankConnectionsResponseSchema } from '../connection-status-contract'
+import { mapBankConnections, type BankConnectionRow } from '../connection-status-view-model'
 import { ConnectionsScreen, type ConnectionsScreenState } from '../connections-screen'
 
 const row = (over: Partial<BankConnectionRow> = {}): BankConnectionRow => ({
@@ -115,5 +116,40 @@ describe('ConnectionsScreen import-statement fallback', () => {
     const button = view.getByRole('button', { name: 'Import a statement for Real Bank instead' })
     await fireEvent.press(button)
     expect(onImportStatement).toHaveBeenCalledTimes(1)
+  })
+})
+
+describe('ConnectionsScreen with values this build does not know', () => {
+  it('renders a row whose provider and status are new to this build alongside known rows', async () => {
+    const response = bankConnectionsResponseSchema.parse({ connections: [
+      { accessType: 'open_banking', dataFreshAsOf: null, expiresAt: null, institutionName: 'New Bank', provider: 'Plaid', status: 'reauthorizing', region: 'eu' },
+      { accessType: 'open_banking', dataFreshAsOf: null, expiresAt: null, institutionName: 'Real Bank', provider: 'GoCardless', status: 'connected' },
+    ] })
+    const view = await renderScreen({ state: loadedState(mapBankConnections(response.connections)) })
+    expect(view.getByText('New Bank')).toBeOnTheScreen()
+    expect(view.getByText('Status unavailable')).toBeOnTheScreen()
+    expect(view.getByText('Real Bank')).toBeOnTheScreen()
+    expect(view.getByText('Connected')).toBeOnTheScreen()
+  })
+})
+
+describe('ConnectionsScreen after returning from the bank', () => {
+  const waitingTitle = async () => (await initMobileI18n('en')).t('banking.connections.justStarted.title')
+
+  it('announces a failed connection as an alert instead of the waiting notice', async () => {
+    const view = await renderScreen({ state: loadedState([]), justStarted: true, connectionResult: 'error' })
+    expect(view.getByRole('alert')).toBeOnTheScreen()
+    expect(view.queryByText(await waitingTitle())).not.toBeOnTheScreen()
+  })
+
+  it('confirms a successful connection without raising an alert', async () => {
+    const view = await renderScreen({ state: loadedState([]), justStarted: true, connectionResult: 'success' })
+    expect(view.queryByRole('alert')).not.toBeOnTheScreen()
+    expect(view.queryByText(await waitingTitle())).not.toBeOnTheScreen()
+  })
+
+  it('shows the waiting notice when the outcome is unknown', async () => {
+    const view = await renderScreen({ state: loadedState([]), justStarted: true, connectionResult: null })
+    expect(view.getByText(await waitingTitle())).toBeOnTheScreen()
   })
 })

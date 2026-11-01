@@ -21,10 +21,8 @@ async function getUser(req: Request, _res: Response, next: NextFunction): Promis
     throw new BadRequestError('User not found');
   }
   req.user = appUser;
-  Sentry.setUser({
-    email: req.user.emailAddress,
-    id: req.user.appuserKey.toString(),
-  });
+  // Id only: no email, name or IP may reach Sentry (issue #38).
+  Sentry.setUser({ id: req.user.appuserKey.toString() });
   next();
 }
 

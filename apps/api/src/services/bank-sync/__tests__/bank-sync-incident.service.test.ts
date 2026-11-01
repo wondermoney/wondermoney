@@ -240,7 +240,7 @@ describe('BankSyncIncidentService', () => {
     })).rejects.toThrow('conflicting completion');
   });
 
-  it('normalizes a PostgreSQL-hydrated null incident institution to undefined on the first finalize (RAD-303)', async () => {
+  it('normalizes a PostgreSQL-hydrated null incident institution to undefined on the first finalize', async () => {
     const h = harness();
     const incident = await h.service.allocateIncident({ ...identity, institutionId: undefined });
     Object.assign(incident, { institutionId: null });
@@ -402,7 +402,7 @@ describe('BankSyncIncidentService', () => {
     expect(incident.eligibleAfter).toBeUndefined();
   });
 
-  it('backfills the incident institution id from the first attempt that learns it (RAD-519)', async () => {
+  it('backfills the incident institution id from the first attempt that learns it', async () => {
     const h = harness();
     const incident = await h.service.allocateIncident({ ...identity, institutionId: undefined });
     expect(incident.institutionId).toBeUndefined();
@@ -421,7 +421,7 @@ describe('BankSyncIncidentService', () => {
     expect(incident.institutionId).toBe('revolut');
   });
 
-  it('does not conflict a later allocate/reconcile replay against a backfilled institution id (RAD-519)', async () => {
+  it('does not conflict a later allocate/reconcile replay against a backfilled institution id', async () => {
     const h = harness();
     const incident = await h.service.allocateIncident({ ...identity, institutionId: undefined });
     const attempt = await h.service.startAttempt({ incidentId: incident.incidentId, queueAttempt: 1, queueJobId: 'learns-institution' });

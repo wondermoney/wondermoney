@@ -51,8 +51,12 @@ export function useRateLimitRetry(
     onRetryRef.current = onRetry;
   }, [onRetry]);
 
+  // Registering with the coordinator is an external side effect, and the
+  // window it hands back is only known after registering, so this effect
+  // publishes it (and resets when the error clears) deliberately.
   React.useEffect(() => {
     if (!info) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- see above
       setResumeAt(null);
       setSecondsRemaining(0);
       setIsResuming(false);

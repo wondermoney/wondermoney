@@ -30,8 +30,19 @@ export function ReportTrendIndicator({
   }
 
   const isFlat = value === 0;
+  // Two separate questions. The arrow, the sign and the default word say which
+  // way the figure moved; the colour says whether that is good. They used to
+  // share `isPositive`, so on a "positive-is-down" figure (spending) a rise
+  // drew a down chevron and a minus sign: "-840.3%" for spending that grew.
+  const isRising = value > 0;
   const trendLabel =
-    label ?? (isFlat ? t("flat") : isPositive ? t("up") : t("down"));
+    label ?? (isFlat ? t("flat") : isRising ? t("up") : t("down"));
+  // U+2212, the real minus sign: the hyphen is shorter than the plus and
+  // misaligns signed figures in Geist Mono.
+  const signedPercentage =
+    percentage === undefined
+      ? undefined
+      : `${isFlat ? "" : isRising ? "+" : "\u2212"}${Math.abs(percentage)}%`;
 
   const colorClass = isFlat
     ? "text-muted-foreground"
@@ -39,11 +50,7 @@ export function ReportTrendIndicator({
       ? "text-success-text"
       : "text-destructive-text";
 
-  const Icon = isFlat
-    ? Minus
-    : isPositive
-      ? ChevronUp
-      : ChevronDown;
+  const Icon = isFlat ? Minus : isRising ? ChevronUp : ChevronDown;
 
   return (
     <div
@@ -52,13 +59,13 @@ export function ReportTrendIndicator({
         colorClass,
         className,
       )}
-      aria-label={`${trendLabel} ${percentage !== undefined ? `${percentage}%` : ""}`}
+      aria-label={`${trendLabel} ${signedPercentage ?? ""}`.trim()}
     >
-      <Icon className="size-4 shrink-0" />
+      <Icon className="size-4 shrink-0" aria-hidden="true" />
       <span className="text-sm">{trendLabel}</span>
-      {percentage !== undefined ? (
-        <span className="font-mono text-sm">
-          {`${isPositive ? "+" : isFlat ? "" : "-"}${Math.abs(percentage)}%`}
+      {signedPercentage !== undefined ? (
+        <span className="font-mono text-sm tabular-nums">
+          {signedPercentage}
         </span>
       ) : null}
     </div>

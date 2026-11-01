@@ -35,8 +35,8 @@ describe('money arithmetic', () => {
 
   it('rounds half-even, symmetrically across the sign boundary', () => {
     // This is the bug the module exists to fix. `Math.round` rounds toward +Infinity for
-    // negatives, so with expenses stored negative, income and expenses previously rounded
-    // in opposite directions.
+    // negatives, so with expenses stored negative, income and expenses would round in
+    // opposite directions.
     expect(roundDisplay(2.345)).toBe(2.34);
     expect(roundDisplay(-2.345)).toBe(-2.34);
     expect(roundDisplay(2.355)).toBe(2.36);

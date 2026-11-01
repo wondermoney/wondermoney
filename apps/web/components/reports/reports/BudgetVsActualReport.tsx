@@ -189,8 +189,9 @@ export function BudgetVsActualReport() {
                   key={row.categoryKey}
                   className={cn(
                     "transition-colors",
-                    isOverBudget &&
-                      "border-l-destructive bg-destructive/5 border-l-4",
+                    // The "Over budget" word carries the state; the 4px red
+                    // side stripe on top of it was a third, louder signal.
+                    isOverBudget && "bg-destructive/5",
                   )}
                 >
                   <TableCell>

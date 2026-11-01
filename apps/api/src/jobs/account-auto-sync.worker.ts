@@ -56,12 +56,11 @@ const AUTO_SYNC_EXTRA_ERROR_CODES = [
 export const handleAccountAutoSyncRequisitionJob = async (job: JobWithMetadata<AccountAutoSyncRequisitionJobPayload>, deps: { accountService?: typeof accountInitialSyncAccountService; analyticsOutbox?: unknown; backgroundOperationService?: BgDeps; bankSyncIncidentService?: IncidentDeps; enableBankingCredentialService?: Pick<typeof enableBankingCredentialService, 'getDecryptedCredential'>; enqueue?: Enqueue; logger?: Pick<Logger, 'info' | 'warn'>; transactionService?: typeof accountInitialSyncTransactionService } = {}) => {
   const bg = deps.backgroundOperationService ?? backgroundOperationService;
   const jobData = job.data;
-  // Phase 1e: `provider === 'enable_banking'` is the only branch point in this file — mirrors
-  // `account-initial-sync.worker.ts`'s Phase 1d treatment exactly (see that file's docblock).
-  // `syncTargetKeyRaw`/`requisitionId` are the same opaque provider-agnostic identity fields used
-  // there. Enable Banking is now the only provider: a payload without `provider: 'enable_banking'`
-  // is a legacy GoCardless job and is rejected rather than coerced, since the two key fields index
-  // different tables.
+  // `provider === 'enable_banking'` is the only branch point in this file, as in
+  // `account-initial-sync.worker.ts`. `syncTargetKeyRaw`/`requisitionId` are the same opaque
+  // provider-agnostic identity fields used there. Enable Banking is the only provider: a payload
+  // without `provider: 'enable_banking'` is a legacy requisition job and is rejected rather than
+  // coerced, since the two key fields index different tables.
   const isEnableBanking = jobData.provider === 'enable_banking';
   const syncTargetKeyRaw = isEnableBanking ? jobData.enableBankingConnectionKey : undefined;
   const requisitionId = isEnableBanking ? jobData.connectionId : undefined;
@@ -81,8 +80,7 @@ export const handleAccountAutoSyncRequisitionJob = async (job: JobWithMetadata<A
     },
   });
   // Every job is enqueued by this repo's own code and always carries an incidentId (see
-  // `account-auto-sync-scheduler.service.ts`). The GoCardless-era legacy reconciliation path is
-  // gone with the provider.
+  // `account-auto-sync-scheduler.service.ts`).
   const incidentId = jobData.incidentId;
   if (!incidentId) throw new Error('Account auto sync job is missing incidentId');
   await incidents.assertIncident({ correlationId, flow: 'scheduled-refresh', incidentId, producer: 'pgboss-scheduled', requisitionId, userVisible: false });
@@ -113,9 +111,8 @@ export const handleAccountAutoSyncRequisitionJob = async (job: JobWithMetadata<A
     return final;
   };
   try {
-    // Phase 1e §3: resolve the owning appuser's own Enable Banking BYOK credential as an
-    // *earlier failure point* inside this same try/catch — no new error-handling structure, per
-    // the plan. A missing/inactive/undecryptable credential becomes `EnableBankingCredentialInvalidError`,
+    // Resolve the owning appuser's own Enable Banking BYOK credential as an *earlier failure
+    // point* inside this same try/catch, so it shares the error handling below. A missing/inactive/undecryptable credential becomes `EnableBankingCredentialInvalidError`,
     // which `classifyBankSyncError` below treats as non-retryable (a per-user secret that pg-boss
     // backoff can never fix on its own), classified via the existing `authentication` bank-sync
     // error category/code (see `safeThrownErrorCode`) rather than a new one.

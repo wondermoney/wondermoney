@@ -87,7 +87,7 @@ export type PortfolioAnalyticsViewModel = Readonly<{
 
 export type PortfolioDividendIncomeViewModel = Pick<PortfolioAnalyticsViewModel, 'currency' | 'dividends' | 'totalDividends'>
 
-/** Shared by both the aggregate analytics panel and the per-portfolio detail screen (RAD-515) —
+/** Shared by both the aggregate analytics panel and the per-portfolio detail screen —
  * same dividend-income response shape, just scoped to a different endpoint. */
 export function mapPortfolioDividendIncome(
   dividends: PortfolioDividendIncomeDto,

@@ -1,5 +1,5 @@
 /**
- * RAD-575 — compact numbers in the reader's locale. See `formatPercentage.ts`
+ * Compact numbers in the reader's locale. See `formatPercentage.ts`
  * for why an `undefined` locale is wrong here.
  */
 export const formatNumberForLocale = (val: number, locale: string) =>

@@ -13,14 +13,17 @@ const googlePort = () => ({
 const nonce = async () => ({ raw: 'raw-nonce', hashed: 'hashed-nonce' })
 
 describe('Google identity provider', () => {
-  it('configures the pinned public client IDs and only the hashed nonce', async () => {
+  it('hands the API the same nonce Google embeds in the token', async () => {
+    // The API's Google verifier compares the token's `nonce` claim to this value exactly
+    // (Apple's also accepts the raw half and hashes it; Google's does not), and Google
+    // copies the configured nonce into the claim verbatim.
     const google = googlePort()
     const provider = createGoogleIdentityProvider({ google, createNonce: nonce })
 
     await expect(provider.requestIdentity()).resolves.toEqual({
       status: 'obtained',
       idToken: 'google-id-token',
-      nonce: 'raw-nonce',
+      nonce: 'hashed-nonce',
     })
     expect(google.configure).toHaveBeenCalledWith({
       webClientId: googleOAuthClients.webClientId,

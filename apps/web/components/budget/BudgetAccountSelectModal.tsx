@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 
+import OpenBankingNotice from "@/components/account/OpenBankingNotice";
 import {
   Form,
   FormControl,
@@ -55,9 +56,6 @@ const BudgetAccountSelectModal = ({
   onAddOfflineAccountClick,
 }: BudgetAccountSelectModalProps) => {
   const t = useTranslations();
-  const bopLink = t("faq-bop-link");
-  const termsLink = t("faq-terms-link");
-  const privacyLink = t("faq-privacy-link");
   const methods = useForm<AccountTransactionFormData>({
     defaultValues: { selectedAccounts: [] },
   });
@@ -245,44 +243,7 @@ const BudgetAccountSelectModal = ({
                 </AccordionTrigger>
                 <AccordionContent className="text-foreground text-left">
                   <div className="space-y-3">
-                    <Text variant="smallText" className="text-foreground">
-                      {t.rich("faq-open-banking-body-1", {
-                        bopLink: (chunks) => (
-                          <a
-                            href={bopLink}
-                            target="_blank"
-                            className="text-primary font-semibold underline-offset-2 hover:underline"
-                            rel="noreferrer"
-                          >
-                            {chunks}
-                          </a>
-                        ),
-                      })}
-                    </Text>
-                    <Text variant="smallText" className="text-foreground">
-                      {t.rich("faq-open-banking-body-2", {
-                        termsLink: (chunks) => (
-                          <a
-                            href={termsLink}
-                            target="_blank"
-                            className="text-primary font-semibold underline-offset-2 hover:underline"
-                            rel="noreferrer"
-                          >
-                            {chunks}
-                          </a>
-                        ),
-                        privacyLink: (chunks) => (
-                          <a
-                            href={privacyLink}
-                            target="_blank"
-                            className="text-primary font-semibold underline-offset-2 hover:underline"
-                            rel="noreferrer"
-                          >
-                            {chunks}
-                          </a>
-                        ),
-                      })}
-                    </Text>
+                    <OpenBankingNotice />
                   </div>
                 </AccordionContent>
               </AccordionItem>

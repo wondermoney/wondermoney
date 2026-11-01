@@ -8,7 +8,7 @@ export interface AssistantAuditLogResponse {
   events: AssistantAuditEvent[];
 }
 
-export async function getAssistantAuditLog(
+async function getAssistantAuditLog(
   apiClient: AxiosInstance = api,
 ): Promise<AssistantAuditLogResponse> {
   const { data } = await apiClient.get<AssistantAuditLogResponse>(

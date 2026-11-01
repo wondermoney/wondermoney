@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 
@@ -11,6 +10,8 @@ import { Spinner } from "@/components/ui/Spinner";
 import { useRouter } from "@/i18n/navigation";
 import { authClient } from "@/lib/auth/client";
 import { getMfaFailureRedirectPath } from "@/lib/auth/mfa-redirect";
+import { getSafeNextPath } from "@/lib/auth/safe-next-path";
+import { stripLocalePrefix } from "@/lib/navigation/strip-locale-prefix";
 
 export default function MfaPage() {
   const locale = useLocale();
@@ -37,7 +38,13 @@ export default function MfaPage() {
       }
       if (data?.session) {
         // A full session already exists — no 2FA challenge left to verify.
-        router.push("/");
+        const next = getSafeNextPath(
+          new URLSearchParams(window.location.search).get("next"),
+          window.location.origin,
+        );
+        // `next` is already localised and this router prepends the
+        // locale, so strip it or /en/settings becomes /en/en/settings.
+        router.push(next ? stripLocalePrefix(next) : "/");
         return;
       }
       setLoading(false);
@@ -46,40 +53,34 @@ export default function MfaPage() {
   }, [locale, router]);
 
   return (
-    <div className="grid min-h-dvh grid-cols-1 lg:grid-cols-2">
-      <div className="relative hidden bg-white lg:block">
-        <Image
-          src="/undraw_personal_finance.svg"
-          alt=""
-          fill
-          className="mx-auto size-full max-w-3xl p-16 lg:p-20"
-        />
-      </div>
-      <div className="flex items-center justify-center px-6 py-12">
-        <div className="w-full max-w-lg">
-          <div>
-            {loading ? (
-              <Spinner />
-            ) : (
-              <>
-                <Logo />
-                <h2 className="mt-8 text-2xl leading-9 font-bold tracking-tight text-gray-900">
-                  {t("multi-factor-authentication")}
-                </h2>
-                <p className="mt-2 text-sm leading-6 text-gray-500">
-                  {t("not-a-member")}
-                  <Link
-                    href="/auth/signup"
-                    className="text-brand-700 hover:text-brand-600 ml-1 font-semibold underline underline-offset-2"
-                  >
-                    {t("create-account-link")}
-                  </Link>
-                </p>
-              </>
-            )}
-          </div>
-          {!loading && <MfaForm />}
+    <div className="flex min-h-dvh items-center justify-center px-6 py-12">
+      <div className="w-full max-w-lg">
+        <div>
+          {loading ? (
+            <Spinner />
+          ) : (
+            <>
+              <Logo />
+              <h1 className="text-foreground mt-8 text-2xl leading-9 font-bold tracking-tight">
+                {t("multi-factor-authentication")}
+              </h1>
+            </>
+          )}
         </div>
+        {!loading && (
+          <>
+            <MfaForm />
+            {/* Mid-sign-in, so no sign-up link: the only other way out is back to login. */}
+            <p className="text-muted-foreground mt-6 text-center text-sm leading-6">
+              <Link
+                href="/auth/login"
+                className="text-primary font-semibold underline underline-offset-2 hover:decoration-2"
+              >
+                {t("mfa-back-to-login")}
+              </Link>
+            </p>
+          </>
+        )}
       </div>
     </div>
   );

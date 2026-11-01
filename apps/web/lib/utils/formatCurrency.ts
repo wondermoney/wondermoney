@@ -28,12 +28,11 @@ export const FINANCIAL_VALUE_LAYOUT = "font-mono whitespace-nowrap tabular-nums"
  * Three helpers, not one, because a money figure is one of three things and
  * only two of them earn colour. See DESIGN_HISTORY.md rule 2.
  *
- * There used to be a single `getFinancialValueClassName` that painted every
- * negative red and every positive green, wherever it appeared. The budget
- * month view is what that looks like at scale: eight green amounts stacked
- * above eight green "100%"s, none of which carry information, and no headroom
- * left to mark the one row that is actually over budget. When everything is
- * coloured, nothing is.
+ * A single helper that painted every negative red and every positive green,
+ * wherever it appeared, would turn the budget month view into eight green
+ * amounts stacked above eight green "100%"s, none of which carry information,
+ * and leave no headroom to mark the one row that is actually over budget. When
+ * everything is coloured, nothing is.
  *
  * The sign is what communicates direction. Colour is for the exception.
  */
@@ -92,12 +91,6 @@ const formatCurrencyValue = (
     ...options,
   }).format(val);
 };
-
-export const formatCurrency = (
-  val: number,
-  currency: string = "EUR",
-  options?: Intl.NumberFormatOptions,
-) => formatCurrencyValue(val, currency, undefined, options);
 
 export const formatCurrencyForLocale = (
   val: number,

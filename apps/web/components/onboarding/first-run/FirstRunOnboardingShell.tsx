@@ -4,7 +4,10 @@ import { ArrowLeft } from "lucide-react";
 import Image from "next/image";
 import type { ReactNode } from "react";
 
+import { useInstanceName } from "@/components/instance/InstanceNameProvider";
+import { InstanceNameWordmark } from "@/components/layout/Logo";
 import { Button } from "@/components/ui/button";
+import { isDefaultInstanceName } from "@/lib/instance-name";
 import { cn } from "@/lib/utils";
 
 type FirstRunOnboardingShellBaseProps = {
@@ -38,18 +41,24 @@ export default function FirstRunOnboardingShell({
   onBack,
   backLabel,
 }: FirstRunOnboardingShellProps) {
+  const instanceName = useInstanceName();
+
   return (
     <main className="bg-background min-h-screen">
-      <header className="border-border/60 bg-background/95 supports-[backdrop-filter]:bg-background/80 fixed inset-x-0 top-0 z-20 border-b backdrop-blur">
+      <header className="border-border bg-background fixed inset-x-0 top-0 z-20 border-b">
         <div className="mx-auto flex h-14 w-full max-w-2xl items-center px-4 sm:px-6">
-          <Image
-            src="/logo.png"
-            alt="WonderMoney"
-            width={98}
-            height={36}
-            priority
-            className="h-8 w-auto"
-          />
+          {isDefaultInstanceName(instanceName) ? (
+            <Image
+              src="/logo.png"
+              alt={instanceName}
+              width={98}
+              height={36}
+              priority
+              className="h-8 w-auto"
+            />
+          ) : (
+            <InstanceNameWordmark name={instanceName} className="text-xl" />
+          )}
         </div>
       </header>
 
@@ -61,13 +70,18 @@ export default function FirstRunOnboardingShell({
                 key={i}
                 className={cn(
                   "h-0.5 flex-1 transition-colors duration-300",
-                  i <= stepIndex ? "bg-primary" : "bg-muted",
+                  // `bg-muted` sat 1.03:1 on the canvas, so the steps still
+                  // to come did not show at all in light mode.
+                  i <= stepIndex ? "bg-primary" : "bg-border",
                 )}
               />
             ))}
           </div>
-          <p className="text-muted-foreground mt-2 text-xs">
-            {progressLabel} · {stepLabel}
+          {/* Two facts, two places: the count under the first segment, the
+              step's name under the last, instead of one dot-joined string. */}
+          <p className="text-muted-foreground mt-2 flex justify-between gap-4 text-xs">
+            <span>{progressLabel}</span>
+            <span className="text-foreground font-medium">{stepLabel}</span>
           </p>
         </div>
 
@@ -76,7 +90,7 @@ export default function FirstRunOnboardingShell({
         </div>
       </div>
 
-      <footer className="border-border/60 bg-background/95 supports-[backdrop-filter]:bg-background/80 fixed inset-x-0 bottom-0 z-20 border-t backdrop-blur">
+      <footer className="border-border bg-background fixed inset-x-0 bottom-0 z-20 border-t">
         <div className="mx-auto flex min-h-16 w-full max-w-2xl items-center gap-2 px-4 py-2 sm:px-6">
           {onBack ? (
             <Button

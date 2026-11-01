@@ -222,7 +222,8 @@
     "unnamed": "Cuenta sin nombre",
     "source": {
       "manual": "Manual",
-      "openBanking": "Open Banking"
+      "openBanking": "Open Banking",
+      "unknown": "Otro origen"
     },
     "balanceUnavailable": "Saldo no disponible",
     "convertedBalance": "Saldo convertido",
@@ -476,7 +477,8 @@
     "cancel": "Cancelar",
     "recurringType": {
       "subscription": "Suscripción",
-      "bill": "Factura"
+      "bill": "Factura",
+      "unknown": "Recurrente"
     },
     "error": {
       "title": "No se pudieron cargar las transacciones",
@@ -596,10 +598,33 @@
     "action": "Importar transacciones",
     "back": "Atrás",
     "title": "Importar transacciones",
-    "helper": "Sube un extracto bancario (CSV, XLS o XLSX) para añadir transacciones a una cuenta.",
+    "helper": "Añade transacciones a una cuenta desde un archivo.",
     "account": "Cuenta",
     "accountsLoading": "Cargando cuentas",
     "noAccounts": "No hay cuentas disponibles para importar",
+    "bankFormat": "Sube el extracto tal como lo exportó {{bank}}, en CSV o Excel.",
+    "yourBank": "tu banco",
+    "legacyFormat": "Sube un extracto bancario (CSV, XLS o XLSX).",
+    "unknownFormat": "Esta versión de la app no puede importar en esta cuenta. Actualiza la app o importa en la web.",
+    "generic": {
+      "intro": "No podemos leer directamente los extractos del banco de esta cuenta, así que el archivo debe ser un CSV con estas columnas, con sus nombres en la primera fila, y ninguna otra.",
+      "optional": "opcional",
+      "columns": {
+        "date": "La fecha, con el formato AAAA-MM-DD.",
+        "amount": "Un importe con punto para los decimales, por ejemplo 23.40. En la mayoría de los tipos es el tipo el que indica si el dinero salió o entró. Cambio de divisa y Reversión no tienen dirección: escribe el dinero que sale como negativo (-23.40) y el que entra como positivo.",
+        "merchant": "A quién pagaste, o quién te pagó.",
+        "internalTransactionId": "Un ID único para la fila. Se omite una fila cuyo ID ya se importó en esta cuenta.",
+        "transactionTypeKey": "El código del tipo, de la lista de códigos de tipo.",
+        "description": "Una nota para la transacción."
+      },
+      "template": "Compartir plantilla",
+      "templateSharing": "Preparando plantilla…",
+      "templateFailed": "No se pudo compartir la plantilla en este dispositivo.",
+      "typeCodes": "Códigos de tipo",
+      "showTypeCodes": "Mostrar códigos de tipo",
+      "hideTypeCodes": "Ocultar códigos de tipo",
+      "rowsFailed": "No se pudieron importar {{failed}} de {{total}} filas. Revisa sus columnas, fechas, importes y códigos de tipo con el formato."
+    },
     "chooseFile": "Elegir archivo",
     "phases": {
       "uploading": "Subiendo archivo…",
@@ -624,7 +649,9 @@
       "network": "Comprueba tu conexión e inténtalo de nuevo.",
       "upload-failed": "No se pudo subir el archivo. Comprueba tu conexión e inténtalo de nuevo.",
       "unsupported-bank": "Este formato de banco aún no es compatible.",
-      "general": "No se pudo completar la importación. Comprueba tu conexión e inténtalo de nuevo."
+      "general": "No se pudo completar la importación. Comprueba tu conexión e inténtalo de nuevo.",
+      "unknown-format": "Esta versión de la app no puede importar en esta cuenta. Actualiza la app o importa en la web.",
+      "csv-only": "Esta cuenta importa un archivo CSV con el formato indicado. Elige un archivo .csv."
     }
   },
   "transactionOcr": {
@@ -779,21 +806,24 @@
     "notIncluded": "No incluida en el resumen mensual",
     "type": {
       "bill": "Factura",
-      "subscription": "Suscripción"
+      "subscription": "Suscripción",
+      "unknown": "Otro pago recurrente"
     },
     "cadence": {
       "weekly": "Semanal",
       "biweekly": "Cada dos semanas",
       "monthly": "Mensual",
       "quarterly": "Trimestral",
-      "yearly": "Anual"
+      "yearly": "Anual",
+      "unknown": "Frecuencia no disponible"
     },
     "status": {
       "candidate": "Candidata",
       "confirmed": "Confirmada",
       "dismissed": "Descartada",
       "paused": "En pausa",
-      "ended": "Finalizada"
+      "ended": "Finalizada",
+      "unknown": "Estado no disponible"
     },
     "error": {
       "title": "No se pudo cargar la actividad recurrente",
@@ -1051,7 +1081,8 @@
     "nextPaymentValue": "Próximo pago el {{date}}",
     "paymentDayValue": "Pago habitual el día {{day}}",
     "frequency": {
-      "MONTHLY": "al mes"
+      "MONTHLY": "al mes",
+      "UNKNOWN": "con una frecuencia desconocida"
     },
     "type": {
       "AUTO_LOAN": "Préstamo para automóvil",
@@ -1063,7 +1094,8 @@
     "status": {
       "ACTIVE": "Activo",
       "CLOSED": "Cerrado",
-      "PAID_OFF": "Pagado"
+      "PAID_OFF": "Pagado",
+      "UNKNOWN": "Estado no disponible"
     }
   },
   "loanDetail": {
@@ -1089,7 +1121,8 @@
     "progressValue": "{{value}} amortizado respecto a {{basis}}",
     "progressBasis": {
       "OPENING_BALANCE": "principal inicial",
-      "ORIGINAL_PRINCIPAL": "principal original"
+      "ORIGINAL_PRINCIPAL": "principal original",
+      "UNKNOWN": "una base desconocida"
     },
     "rateType": {
       "FIXED": "Tipo fijo",
@@ -1135,7 +1168,8 @@
     "confidence": {
       "HIGH": "Candidato de confianza alta",
       "MEDIUM": "Candidato de confianza media",
-      "LOW": "Candidato de confianza baja"
+      "LOW": "Candidato de confianza baja",
+      "UNKNOWN": "Confianza del candidato no disponible"
     },
     "outstandingContext": "Principal pendiente actual {{amount}}",
     "transactionAmountUnknownCurrency": "Importe registrado {{amount}} · moneda no disponible",
@@ -1649,7 +1683,8 @@
       "paused": "En pausa",
       "completed": "Completado",
       "archived": "Archivado",
-      "progress-unavailable": "Progreso no disponible"
+      "progress-unavailable": "Progreso no disponible",
+      "unknown": "Estado no disponible"
     },
     "debtStrategy": {
       "linkLabel": "Estrategia de pago de deudas",
@@ -1862,8 +1897,10 @@
       "paused": "En pausa",
       "resumed": "Reanudado",
       "spent_from_goal": "Aplicado a gastos",
-      "transaction_funding_reversed": "Asignación restablecida"
-    }
+      "transaction_funding_reversed": "Asignación restablecida",
+      "unknown": "Otra actividad"
+    },
+    "transactionExpired": "Transacción caducada — descartada por el banco. Este objetivo sigue cubriéndola."
   },
   "portfolios": {
     "title": "Cartera",
@@ -2542,7 +2579,8 @@
         "processing": "Procesando",
         "connected": "Conectado",
         "error": "Error",
-        "expired": "Consentimiento expirado"
+        "expired": "Consentimiento expirado",
+        "unknown": "Estado no disponible"
       },
       "error": {
         "title": "No se pudieron cargar las conexiones bancarias",
@@ -2553,6 +2591,16 @@
         "message": "El estado de las conexiones recibido no se pudo verificar. Inténtalo de nuevo para obtener una versión actualizada."
       },
       "connectCta": "Conectar un banco",
+      "result": {
+        "success": {
+          "title": "Banco conectado",
+          "message": "Tus cuentas se están importando y aparecerán aquí en breve."
+        },
+        "error": {
+          "title": "La conexión no se completó",
+          "message": "Tu banco no completó la conexión. Intenta conectar de nuevo."
+        }
+      },
       "justStarted": {
         "title": "Ya casi está",
         "message": "Termina de conectar en el navegador y vuelve aquí. Mostraremos el estado de tu conexión en cuanto esté lista."
@@ -2827,6 +2875,11 @@
     "confirm": "Importar transacciones",
     "succeeded_one": "{{count}} transacción importada.",
     "succeeded_other": "{{count}} transacciones importadas.",
+    "partial_one": "{{count}} transacción importada. Algunas filas no se pudieron importar.",
+    "partial_other": "{{count}} transacciones importadas. Algunas filas no se pudieron importar.",
+    "failedRowsTitle": "Filas que no se pudieron importar",
+    "failedRow": "Fila {{row}}",
+    "failedRowNoReason": "No se registró ningún motivo.",
     "done": "Hecho",
     "tryAgain": "Inténtalo de nuevo",
     "failures": {
@@ -2861,6 +2914,11 @@
       "submit": "Confirmar asociaciones de activos",
       "submitting": "Confirmando…"
     }
+  },
+  "portfolioFees": {
+    "holdingLabel": "Comisiones excluidas",
+    "holding": "Algunas comisiones de esta posición no se pudieron convertir a tu moneda, así que se excluyeron de su coste y su ganancia.",
+    "gains": "Algunas comisiones de operaciones no se pudieron convertir a tu moneda, así que se excluyeron de estas ganancias."
   },
   "portfolioTickerSearch": {
     "placeholder": "p. ej. AAPL",

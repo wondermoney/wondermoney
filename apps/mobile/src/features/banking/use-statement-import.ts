@@ -48,7 +48,7 @@ export type UseStatementImportOptions = Readonly<{
 const defaultWait = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms))
 
 /**
- * RAD-502 — upload -> trigger parse+import -> poll until terminal. Simpler
+ * Upload -> trigger parse+import -> poll until terminal. Simpler
  * than usePortfolioImport by design: no column-mapping or asset-review
  * step (see statement-import-contract.ts for why), so there is nothing to
  * separately confirm — the server runs parse and import as one background

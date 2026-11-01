@@ -8,7 +8,7 @@ export interface GetLoanRepaymentsResponse {
   repayments: LoanRepayment[];
 }
 
-export async function getLoanRepayments(
+async function getLoanRepayments(
   loanId: number | string,
   apiClient: AxiosInstance = api,
 ): Promise<GetLoanRepaymentsResponse> {

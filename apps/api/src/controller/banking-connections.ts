@@ -1,7 +1,6 @@
 import { QueryOrder } from '@mikro-orm/core';
 import type { Request, Response } from 'express';
 
-import { AccountFinancialInstitution } from '@entity/AccountFinancialInstitution';
 import { EnableBankingConnection, EnableBankingConnectionStatus } from '@entity/EnableBankingConnection';
 import { NordigenRequisition, NordigenRequisitionStatus } from '@entity/NordigenRequisition';
 import { authedUser } from '@middleware/authed-context';
@@ -49,7 +48,7 @@ function isNullOrBlank(value: null | string | undefined): boolean {
 }
 
 /**
- * A GoCardless institution id is uppercase letters and digits, optionally
+ * A (legacy) GoCardless institution id is uppercase letters and digits, optionally
  * with underscores, and at least 5 chars long. The DTO is allowed to
  * surface a human-readable name only — anything that looks like an
  * upstream id is treated as a placeholder and collapsed to null.
@@ -61,7 +60,7 @@ function isProviderIdPlaceholder(value: string): boolean {
 }
 
 /**
- * RAD-246 — the *only* place a tenant-resolved institution display name may
+ * The *only* place a tenant-resolved institution display name may
  * be surfaced. The rules are conservative: a name is returned only when one
  * distinct, human-safe display name exists across the requisition's
  * accounts. A conflict or a provider-ID placeholder collapses to null so
@@ -135,8 +134,7 @@ function computeStatus(req: OwnedRequisition, accounts: AccountWithInstitution[]
  * Shared "is this expiry-bearing, linked connection actually usable" check —
  * factored out of `computeStatus` so `computeEnableBankingStatus` can reuse
  * the exact same freshness/expiry rules against `EnableBankingConnection`'s
- * `accessValidUntil` instead of `NordigenRequisition`'s `expiresAt`. Logic is
- * unchanged from the pre-extraction `computeStatus` LN branch.
+ * `accessValidUntil` instead of `NordigenRequisition`'s `expiresAt`.
  */
 function resolveLinkedConnectionStatus(expiresAt: Date | null | undefined, accounts: AccountWithInstitution[]): ConnectionStatus {
   if (!expiresAt || Number.isNaN(expiresAt.getTime())) return 'error';
@@ -211,21 +209,19 @@ function toIso(value: Date | null | undefined): null | string {
 }
 
 /**
- * RAD-246 — read-only, tenant-safe bank-connection status collection.
+ * Read-only, tenant-safe bank-connection status collection.
  *
  * Scopes by `req.tenant + req.user + deletedAt: undefined`, newest-first
  * within each provider's own query. The DTO is the *only* output: no entity
  * identifiers, no provider status payload, no nested entities. Empty list is
  * a 200.
  *
- * Widened (mirroring `getRequisitions` in `controller/user.ts`) to also
- * surface `EnableBankingConnection` rows alongside `NordigenRequisition`,
- * discriminated by the DTO's `provider` field. Deliberately scoped to
- * `deletedAt: undefined` for the same reason as that sibling widening:
- * `unlinkRequisition` soft-deletes `EnableBankingConnection` rows, and a user
- * shouldn't see an unlinked connection back in this list. Also scoped to
- * `tenantKey: req.tenant`, matching the pre-existing GoCardless query, to
- * preserve household/tenant isolation.
+ * Like `getRequisitions` in `controller/user.ts`, surfaces `EnableBankingConnection`
+ * rows alongside legacy `NordigenRequisition` rows, discriminated by the DTO's
+ * `provider` field. Enable Banking rows are scoped to `deletedAt: undefined`:
+ * `unlinkRequisition` soft-deletes them, and a user shouldn't see an unlinked
+ * connection back in this list. Both queries are scoped to `tenantKey: req.tenant`
+ * to preserve household/tenant isolation.
  */
 export async function getBankConnections(req: Request, res: Response) {
   const user = authedUser(req);
@@ -262,10 +258,6 @@ export async function getBankConnections(req: Request, res: Response) {
     connections: [...requisitions.map(mapRequisition), ...enableBankingConnections.map(mapEnableBankingConnection)],
   });
 }
-
-// Re-export the institution entity to satisfy the loader's static analysis
-// in case the controller is moved; the actual load happens through DI.
-export { AccountFinancialInstitution };
 
 // Test-only helper: exposes the decision rules so the status matrix can be
 // covered without a real database.

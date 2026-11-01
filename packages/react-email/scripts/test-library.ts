@@ -5,6 +5,7 @@ import {
   renderAccountConnectedEmail,
   renderBudgetThresholdAlert,
   renderInternalAlertEmail,
+  renderLifecycleEmail,
   renderLifecycleNudgeEmail,
   renderMonthlyStory,
   renderWeeklyInsights,
@@ -171,10 +172,10 @@ for (const url of [monthlyStoryUrls.settingsUrl, monthlyStoryUrls.privacyUrl, mo
   assert.ok(monthlyStoryRendered.html.includes(url.replaceAll("&", "&amp;")));
 }
 
-// Regression (final review, RAD-164): pt-PT uses '.' as the thousands separator
-// and ',' as the decimal separator (e.g. formatMoney renders "1.200,00 €"). A
-// locale-blind digit strip previously mis-parsed that as 1.2, zeroing/inverting
-// the comparison-bar widths whenever one side of the bar crossed €1000. Assert
+// pt-PT uses '.' as the thousands separator and ',' as the decimal separator
+// (e.g. formatMoney renders "1.200,00 €"). A locale-blind digit strip would
+// mis-parse that as 1.2, zeroing/inverting the comparison-bar widths whenever
+// one side of the bar crosses €1000. Assert
 // the actual rendered bar widths are proportional to the real amounts — baseline
 // (1.200,00 €) must be the full bar (100%) and subject (800,00 €) must be ~67%
 // (800 / 1200), never the reverse.
@@ -320,5 +321,34 @@ await assert.rejects(
 // A self-hosted instance on a LAN address sends plain-http links.
 const lanConnected = await renderAccountConnectedEmail({ language: "en", bankName: "X", dashboardUrl: "http://192.168.1.10:3000/en/accounts" });
 assert.ok(lanConnected.html.includes("http://192.168.1.10:3000/en/accounts"), "http link must render");
+
+// A self-hosted instance's emails carry its own name, not WonderMoney's logo, name or legal entity.
+{
+  const brandName = "Casa Finance";
+  const lan = {
+    ctaUrl: "http://192.168.1.10:3000/en",
+    settingsUrl: "http://192.168.1.10:3000/en/settings",
+    privacyUrl: "http://192.168.1.10:3000/privacy",
+    unsubscribeUrl: "http://192.168.1.10:3000/en/email/unsubscribe/T",
+  };
+  const selfHosted = [
+    await renderAccountConnectedEmail({ language: "en", bankName: "X", dashboardUrl: "http://192.168.1.10:3000/en/accounts", brandName }),
+    await renderAccountConnectedEmail({ language: "pt", bankName: "X", dashboardUrl: "http://192.168.1.10:3000/pt/accounts", brandName }),
+    await renderBudgetThresholdAlert({ ...budgetProps([budgetItem("near")]), ...lan, language: "en", brandName }),
+    await renderLifecycleNudgeEmail({ language: "en", subject: "s", heading: "h", body: ["b"], unsubscribeUrl: lan.unsubscribeUrl, brandName }),
+    await renderLifecycleEmail({ campaign: "data_health", step: "consent_expiring", language: "en", ctaUrl: lan.ctaUrl, unsubscribeUrl: lan.unsubscribeUrl, brandName }),
+  ];
+  for (const email of selfHosted) {
+    assert.ok(email.text.includes(brandName), "self-hosted email must name the instance");
+    assert.ok(!/Wonder\.?money|Radix Catch/i.test(email.text), "self-hosted email must not carry the hosted brand");
+    assert.ok(!email.html.includes("app.wonder.money/logo.png"), "self-hosted email must not load the hosted logo");
+  }
+  assert.ok(selfHosted[0].subject.includes(brandName), "account-connected subject must name the instance");
+
+  // Unset or blank, the hosted brand stays.
+  const hosted = await renderAccountConnectedEmail({ language: "en", bankName: "X", dashboardUrl: "https://app.wonder.money/en/accounts", brandName: " " });
+  assert.ok(hosted.subject.includes("WonderMoney"));
+  assert.ok(hosted.html.includes("app.wonder.money/logo.png") && hosted.text.includes("Radix Catch"));
+}
 
 console.log("Production library renderers verified.");

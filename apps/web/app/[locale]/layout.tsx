@@ -7,11 +7,12 @@ import Script from "next/script";
 import { hasLocale, NextIntlClientProvider } from "next-intl";
 import { setRequestLocale } from "next-intl/server";
 import type { ReactNode } from "react";
-import { use } from "react";
 
+import { InstanceNameProvider } from "@/components/instance/InstanceNameProvider";
 import PivotBanner from "@/components/layout/PivotBanner";
 import { TailwindIndicator } from "@/components/ui/TailwindIndicator";
 import { routing } from "@/i18n/routing";
+import { getInstanceName } from "@/lib/instance-name.server";
 import { cn } from "@/lib/utils";
 
 import AnalyticsPageView from "../AnalyticsPageView";
@@ -25,13 +26,11 @@ const reactDevToolsEnabled =
   return routing.locales.map((locale) => ({ locale }));
 } */
 
-export default function RootLayout(props: {
+export default async function RootLayout(props: {
   children: ReactNode;
   params: Promise<{ locale: string }>;
 }) {
-  const params = use(props.params);
-
-  const { locale } = params;
+  const { locale } = await props.params;
 
   // Ensure that the incoming `locale` is valid
   if (!hasLocale(routing.locales, locale)) {
@@ -39,9 +38,10 @@ export default function RootLayout(props: {
   }
 
   setRequestLocale(locale);
+  const instanceName = await getInstanceName();
 
   return (
-    <html lang={locale} suppressHydrationWarning>
+    <html lang={locale} className="overflow-x-clip" suppressHydrationWarning>
       <head>
         {reactDevToolsEnabled ? (
           <>
@@ -60,17 +60,19 @@ export default function RootLayout(props: {
       </head>
       <body
         className={cn(
-          "bg-background min-h-dvh font-sans antialiased",
+          "bg-background min-h-dvh overflow-x-clip font-sans antialiased",
           GeistSans.variable,
           GeistMono.variable,
         )}
       >
         <NextIntlClientProvider>
-          <Providers>
-            <AnalyticsPageView />
-            <PivotBanner />
-            {props.children}
-          </Providers>
+          <InstanceNameProvider name={instanceName}>
+            <Providers>
+              <AnalyticsPageView />
+              <PivotBanner />
+              {props.children}
+            </Providers>
+          </InstanceNameProvider>
         </NextIntlClientProvider>
         <TailwindIndicator />
       </body>

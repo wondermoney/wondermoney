@@ -85,7 +85,7 @@ function DesktopPanel({
           aria-describedby="assistant-panel-description"
           aria-labelledby="assistant-panel-title"
           className={cn(
-            "bg-background data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:slide-out-to-right data-[state=open]:slide-in-from-right fixed top-0 right-0 z-50 flex h-dvh w-[min(100vw,30rem)] flex-col overflow-hidden border-l shadow-2xl outline-none",
+            "bg-background data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:slide-out-to-right data-[state=open]:slide-in-from-right fixed top-0 right-0 z-50 flex h-dvh w-full max-w-[30rem] flex-col overflow-hidden border-l shadow-2xl outline-none",
           )}
         >
           <PanelChrome onClose={onClose}>{children}</PanelChrome>
@@ -107,7 +107,7 @@ function MobilePanel({
 }>) {
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
-      <DrawerContent className="border-border/70 h-[88dvh] overflow-hidden rounded-t-[24px]">
+      <DrawerContent className="border-border/70 h-[88dvh] overflow-hidden rounded-t-xl">
         <PanelChrome onClose={onClose}>{children}</PanelChrome>
       </DrawerContent>
     </Drawer>

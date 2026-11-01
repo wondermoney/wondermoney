@@ -46,11 +46,11 @@ function normalizeCurrentStep(value: unknown): FirstRunStep {
     : createInitialFirstRunState().currentStep;
 }
 
-export function isFirstRunGoal(value: string): value is FirstRunGoal {
+function isFirstRunGoal(value: string): value is FirstRunGoal {
   return isOneOf(FIRST_RUN_GOALS, value);
 }
 
-export function normalizeGoals(goals: unknown): FirstRunGoal[] {
+function normalizeGoals(goals: unknown): FirstRunGoal[] {
   if (!Array.isArray(goals)) return [];
 
   const validGoals = goals.filter(

@@ -1,22 +1,24 @@
 # Base image pinned by digest for reproducible builds. Dependabot's `docker`
 # ecosystem (.github/dependabot.yml) opens a monthly PR to bump it.
-# node:22-alpine as of 2026-09-15.
-FROM node:22-alpine@sha256:c610fcdfb1d5b4740dd70c284ed3cb16bb857e0f7166196e36a5501df7a3aa32 AS builder
+# node:26.13.0-alpine (Node 26 LTS) as of 2026-10-31.
+FROM node:26.13.0-alpine@sha256:c6ad9e9c1d80f6eb607c26b4b0a132ff7a2344fad1c78ea3baa2a7d4c8de6d94 AS builder
 
 # NOTE: no native build toolchain is installed here on purpose.
 # This stage used to `apk add build-base g++ cairo-dev jpeg-dev pango-dev
 # giflib-dev` "for canvas". There is no `canvas` package in the tree: `pdf-to-img`
-# depends on `pdfjs-dist@5`, which uses `@napi-rs/canvas` — a *prebuilt* native
+# depends on `pdfjs-dist@6`, which uses `@napi-rs/canvas` — a *prebuilt* native
 # binary that needs no cairo/pango headers and no compiler. The toolchain was a
 # multi-minute apk install on every cache miss for nothing. If a dependency ever
 # genuinely needs to compile against cairo, add it back with a comment naming it.
 
 # Build context is the monorepo root: `docker build -f apps/api/Dockerfile .`
 WORKDIR /repo
-RUN corepack enable
+# Node 25+ no longer bundles corepack, so install it (pinned) before enabling it; it then
+# provides the pnpm version in the root package.json's packageManager field.
+RUN npm install -g corepack@0.36.0 && corepack enable
 
 # Lockfile and manifests first, so the dependency layer is cached across source changes.
-COPY pnpm-lock.yaml pnpm-workspace.yaml package.json .npmrc* ./
+COPY pnpm-lock.yaml pnpm-workspace.yaml package.json .pnpmfile.cjs .npmrc* ./
 COPY apps/api/package.json apps/api/
 COPY packages/shared/package.json packages/shared/
 COPY packages/react-email/package.json packages/react-email/
@@ -37,21 +39,14 @@ RUN if [ -n "$GIT_COMMIT_SHA" ]; then \
 RUN pnpm --filter @wondermoney/shared --filter @wondermoney/react-email run build:lib \
   && pnpm --filter @wondermoney/api run build
 
-# Production dependencies only, in the same monorepo layout: the hoisted node_modules at
-# the root, any version-conflicting copies under apps/api, and the workspace packages
-# (linked from node_modules/@wondermoney) with just their build output.
-FROM node:22-alpine@sha256:c610fcdfb1d5b4740dd70c284ed3cb16bb857e0f7166196e36a5501df7a3aa32 AS prod-deps
-WORKDIR /repo
-RUN corepack enable
-COPY pnpm-lock.yaml pnpm-workspace.yaml package.json ./
-COPY apps/api/package.json apps/api/
-COPY packages/shared/package.json packages/shared/
-COPY packages/react-email/package.json packages/react-email/
+# Production dependencies only: `pnpm deploy` installs just the API's own production closure
+# (#100) into a standalone directory, with the workspace packages copied in as regular
+# packages (their built `dist`, per their `files`/.npmignore). A filtered `pnpm install` can't
+# do this under `nodeLinker: hoisted`: it installs every workspace project's dependencies, which
+# put next, expo, react-native, fumadocs and the rest of web/docs/mobile into this image.
+# .pnpmfile.cjs keeps the optional next/expo peers of better-auth out of that closure.
 RUN --mount=type=cache,id=pnpm,target=/root/.local/share/pnpm/store \
-  pnpm install --frozen-lockfile --prod --ignore-scripts --filter @wondermoney/api... \
-  && mkdir -p apps/api/node_modules
-COPY --from=builder /repo/packages/shared/dist packages/shared/dist
-COPY --from=builder /repo/packages/react-email/dist packages/react-email/dist
+  pnpm --filter @wondermoney/api deploy --prod --ignore-scripts /out
 
 # node-prune strips docs/tests/typings out of node_modules.
 #
@@ -67,12 +62,12 @@ COPY --from=builder /repo/packages/react-email/dist packages/react-email/dist
 # amd64-only, which is fine on CI but warns on an arm64 laptop.
 FROM softonic/node-prune:latest@sha256:468f604c94b81f07fc79e15fa7fdd22f0ac826b7f412708ac6c5b148f71f1df8 AS pruner
 
-COPY --from=prod-deps /repo/node_modules /home/node/app/node_modules
+COPY --from=builder /out/node_modules /home/node/app/node_modules
 
 RUN node-prune /home/node/app/node_modules
 
 # Start production image build
-FROM node:22-alpine@sha256:c610fcdfb1d5b4740dd70c284ed3cb16bb857e0f7166196e36a5501df7a3aa32 AS runtime-base
+FROM node:26.13.0-alpine@sha256:c6ad9e9c1d80f6eb607c26b4b0a132ff7a2344fad1c78ea3baa2a7d4c8de6d94 AS runtime-base
 
 ARG APP_ENV=production
 ARG DEPLOY_ENV=${APP_ENV}
@@ -110,10 +105,10 @@ RUN mkdir -p /home/node/app \
 
 USER node
 
-# Copy node modules and build directory
-COPY --from=pruner --chown=node:node /home/node/app/node_modules ./node_modules
-COPY --from=prod-deps --chown=node:node /repo/packages ./packages
-COPY --from=prod-deps --chown=node:node /repo/apps/api/node_modules ./apps/api/node_modules
+# The deployed API: its package.json (ESM `type`, MikroORM CLI config), the pruned production
+# node_modules and the build. The path stays apps/api so the working directory is unchanged.
+COPY --from=builder --chown=node:node /out/package.json ./apps/api/package.json
+COPY --from=pruner --chown=node:node /home/node/app/node_modules ./apps/api/node_modules
 COPY --from=builder --chown=node:node /repo/apps/api/dist ./apps/api/dist
 COPY --from=builder --chown=node:node /repo/apps/api/src/generated ./apps/api/dist/generated
 COPY --from=builder --chown=node:node /repo/apps/api/src/database/entity ./apps/api/dist/database/entity

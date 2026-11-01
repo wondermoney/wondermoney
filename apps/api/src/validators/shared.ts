@@ -36,15 +36,10 @@ export const validDate = z.union([z.date(), z.number(), z.string()])
 /**
  * A bounded, defaulted `limit` query parameter.
  *
- * RAD-audit: `options.defaultValue` was destructured in the signature and then never used —
- * `.default()` was never called. The account schemas got away with it by chaining an
- * explicit `.optional().default(100)` afterwards; the portfolio schemas did not, so
- * `GET /v1/portfolios/transactions` with no `limit` produced `undefined`, the service's
- * `...(limit ? { limit } : {})` emitted no LIMIT clause at all, and the endpoint returned
- * every financial transaction the user owned with seven populates.
- *
- * `defaultValue` is now actually applied, and a non-positive default is rejected at schema
- * construction time rather than silently becoming "unbounded".
+ * `defaultValue` is always applied: an omitted `limit` must never reach a service as
+ * `undefined`, where `...(limit ? { limit } : {})` would emit no LIMIT clause at all. A
+ * non-positive default is rejected at schema construction time rather than silently
+ * becoming "unbounded".
  */
 export function boundedLimit(options: { defaultValue: number; max: number; min?: number }) {
   const min = options.min ?? 1;
