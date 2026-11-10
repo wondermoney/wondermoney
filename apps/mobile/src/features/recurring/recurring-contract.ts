@@ -96,6 +96,23 @@ export const recurringSummarySchema = z.object({
 export type RecurringItemDto = z.infer<typeof recurringItemSchema>
 export type RecurringSummaryDto = z.infer<typeof recurringSummarySchema>
 
+const RECURRING_OCCURRENCE_STATUSES = ['due', 'overdue', 'paid', 'projected'] as const
+const recurringOccurrenceStatusSchema = tolerantEnum(RECURRING_OCCURRENCE_STATUSES, 'unknown')
+
+export const recurringOccurrenceSchema = z.object({
+  seriesKey: positiveId,
+  name: z.string().min(1).max(255),
+  date: z.iso.datetime(),
+  expectedAmount: optionalMoney,
+  status: recurringOccurrenceStatusSchema,
+  currency: z.string().regex(/^[A-Z]{3}$/).nullish(),
+})
+
+export const recurringOccurrencesResponseSchema = z.object({ items: z.array(recurringOccurrenceSchema) })
+
+export type RecurringOccurrenceDto = z.infer<typeof recurringOccurrenceSchema>
+export type RecurringOccurrenceStatusDto = RecurringOccurrenceDto['status']
+
 export const recurringMetadataSchema = z.object({
   amountType: recurringAmountTypeSchema.optional(),
   cadence: recurringCadenceSchema.optional(),
@@ -150,3 +167,15 @@ export const recurringDetectionEndpoint = writeEndpoint({
 
 export const recurringItemsEndpoint = readEndpoint({ method: 'GET', path: '/v1/recurring', schema: recurringItemsResponseSchema })
 export const recurringSummaryEndpoint = readEndpoint({ method: 'GET', path: '/v1/recurring/summary', schema: recurringSummarySchema })
+
+const DAY_PATTERN = /^\d{4}-\d{2}-\d{2}$/
+
+/** The occurrences in a calendar range. Both days are `YYYY-MM-DD`, as the API takes them. */
+export const createRecurringOccurrencesEndpoint = (from: string, to: string) => {
+  if (!DAY_PATTERN.test(from) || !DAY_PATTERN.test(to)) throw new Error('Recurring occurrences need YYYY-MM-DD days')
+  return readEndpoint({
+    method: 'GET',
+    path: `/v1/recurring/occurrences?from=${from}&to=${to}`,
+    schema: recurringOccurrencesResponseSchema,
+  })
+}

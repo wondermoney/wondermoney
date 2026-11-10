@@ -12,6 +12,7 @@ import AccountAddSyncModal from "@/components/account/AccountCreateSyncModal";
 import { RecurringCategoryImpact } from "@/components/recurring/RecurringCategoryImpact";
 import { RecurringDetectionEmptyState } from "@/components/recurring/RecurringDetectionEmptyState";
 import { RecurringItemsTable } from "@/components/recurring/RecurringItemsTable";
+import { RecurringMonthCalendar } from "@/components/recurring/RecurringMonthCalendar";
 import { RecurringNoAccountsEmptyState } from "@/components/recurring/RecurringNoAccountsEmptyState";
 import { RecurringReviewQueue } from "@/components/recurring/RecurringReviewQueue";
 import type { RecurringStatusBadgeLabels } from "@/components/recurring/RecurringStatusBadge";
@@ -30,11 +31,14 @@ import {
   useDismissRecurring,
   useUpdateRecurring,
 } from "@/lib/api/recurring/useRecurringMutations";
+import useRecurringOccurrences from "@/lib/api/recurring/useRecurringOccurrences";
 import type { GetRecurringSummaryResponse } from "@/lib/api/recurring/useRecurringSummary";
 import useRecurringSummary from "@/lib/api/recurring/useRecurringSummary";
 import { serverSeed } from "@/lib/query/server-seed";
 import { getCategoryTranslationKey } from "@/lib/utils/categories";
 import { normalizeFinancialLocale } from "@/lib/utils/formatCurrency";
+import { calendarDays, monthKey } from "@/lib/utils/recurring-calendar";
+import { localCalendarDay } from "@/lib/utils/transaction-date";
 import { useFormatCurrency, useFormatCurrencyForScreenReader } from "@/lib/utils/useFormatCurrency";
 
 const isCurrencyCode = (value: unknown): value is string =>
@@ -108,6 +112,19 @@ export default function RecurringClient({
     [financialLocale],
   );
   const [currentTime, setCurrentTime] = useState(referenceTime);
+  const [visibleMonth, setVisibleMonth] = useState(() =>
+    monthKey(new Date(referenceTime)),
+  );
+  const [selectedDay, setSelectedDay] = useState(() =>
+    localCalendarDay(new Date(referenceTime)),
+  );
+  const todayDay = localCalendarDay(new Date(currentTime));
+  const calendarRange = useMemo(() => {
+    const days = calendarDays(visibleMonth);
+    return { from: days[0]!, to: days[days.length - 1]! };
+  }, [visibleMonth]);
+  const { data: occurrencesData, isLoading: occurrencesLoading } =
+    useRecurringOccurrences(calendarRange.from, calendarRange.to);
 
   useEffect(() => {
     const updateCurrentTime = () => setCurrentTime(Date.now());
@@ -423,6 +440,47 @@ export default function RecurringClient({
             <p className="text-muted-foreground text-sm">
               {t("mixedCurrencyNote")}
             </p>
+          ) : null}
+
+          {recurringItems.some((item) => item.status === "confirmed") ? (
+            <section className="space-y-3">
+              <div className="space-y-1">
+                <Heading variant="h2" className="text-xl">
+                  {t("calendar")}
+                </Heading>
+                <Text variant="mutedText" className="text-muted-foreground">
+                  {t("calendarDescription")}
+                </Text>
+              </div>
+              <RecurringMonthCalendar
+                month={visibleMonth}
+                selectedDay={selectedDay}
+                today={todayDay}
+                items={occurrencesData?.items ?? []}
+                isLoading={occurrencesLoading}
+                locale={financialLocale}
+                onSelectDay={setSelectedDay}
+                onMonthChange={setVisibleMonth}
+                onToday={() => {
+                  setVisibleMonth(monthKey(new Date(currentTime)));
+                  setSelectedDay(todayDay);
+                }}
+                labels={{
+                  previousMonth: t("calendarPreviousMonth"),
+                  nextMonth: t("calendarNextMonth"),
+                  today: t("calendarToday"),
+                  emptyDay: t("calendarEmptyDay"),
+                  loading: t("calendarLoading"),
+                  paymentCount: (count) => t("paymentCount", { count }),
+                  status: {
+                    due: t("calendarStatusDue"),
+                    overdue: t("calendarStatusOverdue"),
+                    paid: t("calendarStatusPaid"),
+                    projected: t("calendarStatusProjected"),
+                  },
+                }}
+              />
+            </section>
           ) : null}
 
           {reviewItems.length > 0 ? (

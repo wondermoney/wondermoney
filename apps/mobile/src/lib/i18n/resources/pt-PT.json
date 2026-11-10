@@ -1196,6 +1196,19 @@
       "paused": "Pausado",
       "ended": "Terminado",
       "dismissed": "Ignorado"
+    },
+    "calendar": "Calendário",
+    "calendarDescription": "Que contas caem em cada dia deste mês",
+    "calendarPreviousMonth": "Mês anterior",
+    "calendarNextMonth": "Mês seguinte",
+    "calendarEmpty": "Sem pagamentos recorrentes este mês",
+    "calendarLoading": "A carregar os pagamentos deste mês…",
+    "calendarUnavailable": "Os pagamentos deste mês não estão disponíveis",
+    "occurrenceStatus": {
+      "paid": "Pago",
+      "due": "A vencer",
+      "overdue": "Em atraso",
+      "projected": "Previsto"
     }
   },
   "more": {

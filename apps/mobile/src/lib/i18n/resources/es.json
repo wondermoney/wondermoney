@@ -1196,6 +1196,19 @@
       "paused": "Pausado",
       "ended": "Finalizado",
       "dismissed": "Descartado"
+    },
+    "calendar": "Calendario",
+    "calendarDescription": "Qué facturas caen en cada día de este mes",
+    "calendarPreviousMonth": "Mes anterior",
+    "calendarNextMonth": "Mes siguiente",
+    "calendarEmpty": "No hay pagos recurrentes este mes",
+    "calendarLoading": "Cargando los pagos de este mes…",
+    "calendarUnavailable": "Los pagos de este mes no están disponibles",
+    "occurrenceStatus": {
+      "paid": "Pagado",
+      "due": "Vence hoy",
+      "overdue": "Vencido",
+      "projected": "Previsto"
     }
   },
   "more": {

@@ -2996,6 +2996,16 @@
         }
       }
     },
+    "/v1/recurring/occurrences": {
+      "get": {
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/v1/recurring/detect": {
       "post": {
         "description": "",

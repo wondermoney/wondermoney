@@ -1,4 +1,4 @@
-import { createConfirmRecurringEndpoint, createDismissRecurringEndpoint, createUpdateRecurringEndpoint, recurringDetectionEndpoint, recurringDetectionResponseSchema, recurringItemsEndpoint, recurringItemsResponseSchema, recurringMetadataSchema, recurringRestoreSchema, recurringSummaryEndpoint, recurringSummarySchema } from './recurring-contract'
+import { createConfirmRecurringEndpoint, createDismissRecurringEndpoint, createRecurringOccurrencesEndpoint, createUpdateRecurringEndpoint, recurringDetectionEndpoint, recurringDetectionResponseSchema, recurringItemsEndpoint, recurringItemsResponseSchema, recurringMetadataSchema, recurringOccurrencesResponseSchema, recurringRestoreSchema, recurringSummaryEndpoint, recurringSummarySchema } from './recurring-contract'
 import { recurringItemFixture, recurringSummaryFixture } from './test-fixtures'
 
 describe('recurring API contracts', () => {
@@ -77,5 +77,17 @@ describe('recurring API contracts', () => {
     expect(recurringRestoreSchema.safeParse({}).success).toBe(false)
     expect(recurringRestoreSchema.safeParse({ status: 'candidate', displayName: 'Rent' }).success).toBe(false)
     expect(createUpdateRecurringEndpoint(7)).toMatchObject({ method: 'PATCH', path: '/v1/recurring/7' })
+  })
+  it('parses occurrence entries and builds the ranged endpoint', () => {
+    const response = recurringOccurrencesResponseSchema.parse({
+      items: [{ seriesKey: 1, name: 'Rent', date: '2026-03-05T00:00:00.000Z', expectedAmount: 20, status: 'paid', currency: 'EUR' }],
+    })
+    expect(response.items[0]).toMatchObject({ name: 'Rent', status: 'paid' })
+    expect(recurringOccurrencesResponseSchema.parse({ items: [{ ...response.items[0], status: 'unknown-status' }] }).items[0]).toMatchObject({ status: 'unknown' })
+    expect(createRecurringOccurrencesEndpoint('2026-03-01', '2026-03-31')).toMatchObject({
+      method: 'GET',
+      path: '/v1/recurring/occurrences?from=2026-03-01&to=2026-03-31',
+    })
+    expect(() => createRecurringOccurrencesEndpoint('March', '2026-03-31')).toThrow()
   })
 })

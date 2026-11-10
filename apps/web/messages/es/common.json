@@ -2320,7 +2320,18 @@
     "biweekly": "Quincenal",
     "monthly": "Mensual",
     "quarterly": "Trimestral",
-    "yearly": "Anual"
+    "yearly": "Anual",
+    "calendar": "Calendario",
+    "calendarDescription": "Qué facturas caen en cada día de este mes.",
+    "calendarPreviousMonth": "Mes anterior",
+    "calendarNextMonth": "Mes siguiente",
+    "calendarToday": "Hoy",
+    "calendarEmptyDay": "No hay pagos recurrentes en este día.",
+    "calendarLoading": "Cargando los pagos de este mes…",
+    "calendarStatusPaid": "Pagado",
+    "calendarStatusDue": "Vence hoy",
+    "calendarStatusOverdue": "Vencido",
+    "calendarStatusProjected": "Previsto"
   },
   "analytics-consent": {
     "title": "Tus opciones de privacidad",

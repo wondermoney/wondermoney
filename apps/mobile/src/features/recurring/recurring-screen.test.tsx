@@ -5,7 +5,8 @@ import { initMobileI18n } from '@/lib/i18n'
 
 import { recurringItemsResponseSchema } from './recurring-contract'
 import { RecurringScreen } from './recurring-screen'
-import { mapRecurringItems, mapRecurringSummary } from './recurring-view-model'
+import { groupAgenda } from './recurring-calendar'
+import { mapRecurringItems, mapRecurringOccurrences, mapRecurringSummary } from './recurring-view-model'
 import { recurringItemFixture, recurringSummaryFixture } from './test-fixtures'
 
 describe('RecurringScreen', () => {
@@ -201,5 +202,36 @@ describe('RecurringScreen with values this build does not know', () => {
     const metadata = onUpdate.mock.calls[0][1]
     expect(metadata.displayName).toBe(recurringItemFixture.displayName)
     for (const field of ['type', 'cadence', 'amountType', 'expectedAmount', 'expectedAmountMin', 'expectedAmountMax']) expect(metadata).not.toHaveProperty(field)
+  })
+})
+
+describe('RecurringScreen month agenda', () => {
+  it('lists the month grouped by day with each payment state', async () => {
+    const i18n = await initMobileI18n('en')
+    const agenda = groupAgenda(mapRecurringOccurrences({ items: [
+      { seriesKey: 1, name: 'Rent', date: '2026-03-05T00:00:00.000Z', expectedAmount: 850, status: 'overdue', currency: 'EUR' },
+      { seriesKey: 2, name: 'Internet', date: '2026-03-05T00:00:00.000Z', expectedAmount: 39.9, status: 'paid', currency: 'EUR' },
+      { seriesKey: 3, name: 'Gym', date: '2026-03-12T00:00:00.000Z', expectedAmount: 30, status: 'projected', currency: 'EUR' },
+    ] }))
+    const view = await render(<I18nextProvider i18n={i18n}><RecurringScreen state={{ status: 'loaded', rows: mapRecurringItems({ items: [recurringItemFixture] }), summary: mapRecurringSummary(recurringSummaryFixture), refreshing: false, agenda, agendaMonth: '2026-03' }} onBack={jest.fn()} onRefresh={jest.fn()} onAgendaMonthChange={jest.fn()} /></I18nextProvider>)
+
+    expect(view.getByRole('header', { name: 'Calendar' })).toBeOnTheScreen()
+    expect(view.getByText('March 2026')).toBeOnTheScreen()
+    expect(view.getByText('Thu, Mar 5')).toBeOnTheScreen()
+    expect(view.getByText('Rent')).toBeOnTheScreen()
+    expect(view.getByText('Overdue')).toBeOnTheScreen()
+    expect(view.getByText('Paid')).toBeOnTheScreen()
+    expect(view.getByText('€850.00')).toBeOnTheScreen()
+  })
+
+  it('moves to the next and previous month', async () => {
+    const i18n = await initMobileI18n('en')
+    const onAgendaMonthChange = jest.fn()
+    const view = await render(<I18nextProvider i18n={i18n}><RecurringScreen state={{ status: 'loaded', rows: mapRecurringItems({ items: [recurringItemFixture] }), summary: mapRecurringSummary(recurringSummaryFixture), refreshing: false, agenda: [], agendaMonth: '2026-03' }} onBack={jest.fn()} onRefresh={jest.fn()} onAgendaMonthChange={onAgendaMonthChange} /></I18nextProvider>)
+
+    fireEvent.press(view.getByRole('button', { name: 'Next month' }))
+    expect(onAgendaMonthChange).toHaveBeenCalledWith('2026-04')
+    fireEvent.press(view.getByRole('button', { name: 'Previous month' }))
+    expect(onAgendaMonthChange).toHaveBeenCalledWith('2026-02')
   })
 })

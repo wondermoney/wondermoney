@@ -8,6 +8,7 @@ import { recurringSummaryFixture } from './test-fixtures'
 const mockAccounts = jest.fn()
 const mockItems = jest.fn()
 const mockSummary = jest.fn()
+const mockOccurrences = jest.fn()
 const mockCategories = jest.fn()
 const mockMutation = jest.fn()
 const mockBlockAccess = jest.fn()
@@ -19,11 +20,12 @@ jest.mock('@/features/categories/use-categories', () => ({ useCategories: () => 
 jest.mock('./use-recurring-items', () => ({ useRecurringItems: () => mockItems() }))
 jest.mock('./use-recurring-mutations', () => ({ useRecurringMutations: () => mockMutation() }))
 jest.mock('./use-recurring-summary', () => ({ useRecurringSummary: () => mockSummary() }))
+jest.mock('./use-recurring-occurrences', () => ({ useRecurringOccurrences: () => mockOccurrences() }))
 jest.mock('./recurring-screen', () => ({ RecurringScreen: (props: { state: { status: string } }) => { mockScreenProps = props; const Native = jest.requireActual<typeof import('react-native')>('react-native'); return <Native.Text>{props.state.status}</Native.Text> } }))
 
 const base = { isAccessTransition: false, isLoading: false, isRefreshFailure: false, isRefreshing: false, error: null, refetch: jest.fn() }
 describe('RecurringRoute', () => {
-  beforeEach(() => { mockAccounts.mockReset(); mockItems.mockReset(); mockSummary.mockReset(); mockBlockAccess.mockReset(); mockCategories.mockReturnValue({ ...base, data: { categories: [] }, isError: false }); mockMutation.mockReturnValue({ isPending: false, variables: undefined, mutateAsync: jest.fn() }) })
+  beforeEach(() => { mockAccounts.mockReset(); mockItems.mockReset(); mockSummary.mockReset(); mockOccurrences.mockReset(); mockOccurrences.mockReturnValue({ ...base, refetch: jest.fn().mockResolvedValue({ isError: false }), data: { items: [] } }); mockBlockAccess.mockReset(); mockCategories.mockReturnValue({ ...base, data: { categories: [] }, isError: false }); mockMutation.mockReturnValue({ isPending: false, variables: undefined, mutateAsync: jest.fn() }) })
   it('maps no-account separately from an empty recurring list', async () => {
     mockAccounts.mockReturnValue({ ...base, data: { accounts: [] } })
     mockItems.mockReturnValue({ ...base, data: { items: [] } })

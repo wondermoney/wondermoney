@@ -1,4 +1,6 @@
-import type { RecurringItemDto, RecurringSummaryDto } from './recurring-contract'
+import { localCalendarDay } from '@/lib/dates/transaction-date'
+
+import type { RecurringItemDto, RecurringOccurrenceDto, RecurringSummaryDto } from './recurring-contract'
 
 export type RecurringRowViewModel = Readonly<{
   id: number
@@ -79,6 +81,29 @@ export function mapRecurringItems(
     if (b.nextExpectedAt === null) return -1
     return a.nextExpectedAt.localeCompare(b.nextExpectedAt)
   })
+}
+
+export type RecurringAgendaEntry = Readonly<{
+  seriesKey: number
+  name: string
+  date: string
+  /** The calendar day (`YYYY-MM-DD`) the entry is listed under. */
+  day: string
+  amount: number | null
+  currency: string | null
+  status: RecurringOccurrenceDto['status']
+}>
+
+export function mapRecurringOccurrences(input: { items: readonly RecurringOccurrenceDto[] }): RecurringAgendaEntry[] {
+  return input.items.map((item) => ({
+    seriesKey: item.seriesKey,
+    name: item.name,
+    date: item.date,
+    day: localCalendarDay(item.date),
+    amount: item.expectedAmount ?? null,
+    currency: item.currency ?? null,
+    status: item.status,
+  })).sort((a, b) => a.date.localeCompare(b.date) || a.name.localeCompare(b.name) || a.seriesKey - b.seriesKey)
 }
 
 export function mapRecurringSummary(summary: RecurringSummaryDto): RecurringSummaryViewModel {
