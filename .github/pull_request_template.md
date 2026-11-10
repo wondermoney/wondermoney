@@ -1,4 +1,4 @@
-<!-- Branch from `develop` and target `develop`: `main` only receives promotions from it. -->
+<!-- Branch from `develop` and target `develop`: `main` only receives release pull requests from it. -->
 
 ## What and why
 

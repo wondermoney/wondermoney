@@ -14,8 +14,9 @@ permissions:
   contents: read
 
 # A new push to a pull request cancels its previous run. Pushes to develop and main get a group
-# per commit instead, so every commit there finishes its run: promote.sh and the API deploy
-# workflows (api-staging.yml, api-production.yml) gate on CI having passed on that exact commit.
+# per commit instead, so every commit there finishes its run: the release pull request's required
+# check (release-pr.yml) and the API deploy workflows (api-staging.yml, api-production.yml) rely
+# on CI having passed on that exact commit.
 concurrency:
   group: ${{ github.workflow }}-${{ github.event_name == 'pull_request' && github.ref || github.sha }}
   cancel-in-progress: true

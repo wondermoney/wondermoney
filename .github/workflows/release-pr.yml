@@ -1,0 +1,104 @@
+name: Release PR
+
+# Keeps one open pull request from develop into main, titled "Release: develop → main", whose
+# body lists what merging it would release. Merging it (merge commit only: a ruleset on main
+# blocks squash and rebase) is the release: the push to main runs the production deploys.
+#
+# The pull request is opened with GITHUB_TOKEN, and events made with that token start no
+# workflows, so ci.yml gets no pull_request run for it. It does not need one: branch protection
+# looks for the required "Type-check, lint, test and build" check on the pull request's head
+# commit, which is develop's head, and ci.yml's push run on develop already reports it there. If
+# the check is missing (that run was cancelled or failed for a flaky reason), run CI again on
+# develop: Actions > CI > Run workflow, branch develop. That run reports on the same commit.
+#
+# Creating the pull request needs the repository setting "Allow GitHub Actions to create and
+# approve pull requests" (Settings > Actions > General). Without it the job fails with a note;
+# open the pull request by hand once (gh pr create --base main --head develop) and later runs
+# keep its title and body current.
+on:
+  push:
+    branches: [develop]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: write
+
+# One run at a time; a newer push supersedes a run still going, which would write an older list.
+concurrency:
+  group: release-pr
+  cancel-in-progress: true
+
+jobs:
+  release-pr:
+    name: Update the release pull request
+    # Only the main repository releases; forks have no main to deploy.
+    if: github.repository == 'wondermoney/wondermoney'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: develop
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Create or update the release pull request
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TITLE: 'Release: develop → main'
+        run: |
+          set -euo pipefail
+          repo="$GITHUB_REPOSITORY"
+          compare="$GITHUB_SERVER_URL/$repo/compare/main...develop"
+          range=origin/main..origin/develop
+
+          count=$(git rev-list --count "$range")
+          if [ "$count" -eq 0 ]; then
+            echo "develop has nothing that main does not; no release pull request needed."
+            exit 0
+          fi
+
+          # develop's own history (first parents): one entry per merged pull request, or per
+          # commit pushed to develop directly. Grouped by the pull request title's
+          # Conventional Commits type.
+          features=""; fixes=""; other=""; direct=""
+          while IFS=$'\t' read -r sha subject; do
+            if [[ "$subject" =~ ^Merge\ pull\ request\ \#([0-9]+) ]]; then
+              number="${BASH_REMATCH[1]}"
+              if ! title=$(gh api "repos/$repo/pulls/$number" --jq .title 2>/dev/null) || [ -z "$title" ]; then
+                title="$subject"
+              fi
+              line="- ${title} (#${number})"
+              case "$title" in
+                feat:* | feat\(* | feat!:*) features+="$line"$'\n' ;;
+                fix:* | fix\(* | fix!:*) fixes+="$line"$'\n' ;;
+                *) other+="$line"$'\n' ;;
+              esac
+            else
+              direct+="- ${subject} (${sha:0:9})"$'\n'
+            fi
+          done < <(git log --first-parent --reverse --format='%H%x09%s' "$range" | head -n 300)
+
+          body_file="$RUNNER_TEMP/release-body.md"
+          {
+            echo "Releases ${count} commit(s) from \`develop\` to \`main\` ([compare](${compare}))."
+            echo
+            echo "**Merge with a merge commit; merging deploys production.** Squash and rebase merges are blocked on \`main\`."
+            echo
+            [ -n "$features" ] && printf '### Features\n\n%s\n' "$features"
+            [ -n "$fixes" ] && printf '### Fixes\n\n%s\n' "$fixes"
+            [ -n "$other" ] && printf '### Other changes\n\n%s\n' "$other"
+            [ -n "$direct" ] && printf '### Commits pushed to develop\n\n%s\n' "$direct"
+            echo "---"
+            echo
+            echo "The required check comes from CI's push run on develop's head commit, which this pull request's head is. If it is missing, run CI on develop (Actions > CI > Run workflow, branch \`develop\`). This body is regenerated on every push to develop by \`.github/workflows/release-pr.yml\`."
+          } > "$body_file"
+
+          number=$(gh pr list -R "$repo" --base main --head develop --state open --json number --jq '.[0].number // empty')
+          if [ -n "$number" ]; then
+            gh pr edit "$number" -R "$repo" --title "$TITLE" --body-file "$body_file"
+            echo "Updated $GITHUB_SERVER_URL/$repo/pull/$number"
+          elif ! gh pr create -R "$repo" --base main --head develop --title "$TITLE" --body-file "$body_file"; then
+            echo "::error::Could not open the release pull request. Enable Settings > Actions > General > \"Allow GitHub Actions to create and approve pull requests\", or open it once by hand: gh pr create --base main --head develop"
+            exit 1
+          fi
