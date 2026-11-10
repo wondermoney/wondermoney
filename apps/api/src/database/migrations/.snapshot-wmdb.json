@@ -7534,6 +7534,23 @@
           "enumItems": [],
           "mappedType": "integer"
         },
+        "last_sync_attempt_at": {
+          "name": "last_sync_attempt_at",
+          "type": "timestamptz(6)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "unique": false,
+          "length": 6,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "datetime"
+        },
         "max_consent_validity_seconds": {
           "name": "max_consent_validity_seconds",
           "type": "int",

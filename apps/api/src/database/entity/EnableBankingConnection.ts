@@ -64,6 +64,14 @@ export class EnableBankingConnection extends Base {
 
   [EntityRepositoryType]: EnableBankingConnectionRepository;
 
+  /**
+   * When a sync last tried to reach the bank, whatever the outcome. The scheduler waits
+   * `BANK_SYNC_MIN_INTERVAL_HOURS` from this time, so a failed attempt also waits out the
+   * interval instead of spending another of the bank's PSD2 unattended-access calls.
+   */
+  @Property({ columnType: 'timestamptz', nullable: true })
+  lastSyncAttemptAt?: Date;
+
   @Property({ nullable: true })
   maxConsentValiditySeconds?: number;
 

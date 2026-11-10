@@ -61,6 +61,8 @@ Set `EODHD_API_KEY` to turn on ticker search, live prices and the Financial Mark
 
 Bank sync needs no server configuration. Each person adds their own Enable Banking application key under Settings, so bank credentials are never shared between users.
 
+The worker syncs each bank connection at most once every `BANK_SYNC_MIN_INTERVAL_HOURS` hours, 20 by default. Under PSD2 a bank may limit unattended access to four calls a day per account, so set it to `6` or more to stay inside that limit. A failed sync waits the same interval before the next try. Set it on the worker; a value that is not a positive number stops the worker at start-up.
+
 ## Google sign-in
 
 Set both `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` (from an OAuth client in Google Cloud, with `<API_URL>/api/auth/callback/google` as its authorised redirect URI) to offer "Continue with Google" on the login and sign-up pages. Without both, the button is hidden.

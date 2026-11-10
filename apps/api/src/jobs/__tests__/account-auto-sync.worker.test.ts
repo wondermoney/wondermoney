@@ -21,7 +21,7 @@ function harness() {
   const transactionService = { syncTransactionsForRequisition: vi.fn().mockResolvedValue({ status: 'completed' }) };
   const backgroundOperationService = { attachQueueJob: vi.fn(), claimJobStart: vi.fn().mockResolvedValue(true), createQueuedOperation: vi.fn(), finishJob: vi.fn().mockResolvedValue(true), heartbeatJob: vi.fn().mockResolvedValue(true), markAttemptFailedForRetry: vi.fn().mockResolvedValue(true) };
   const enableBankingCredentialService = { getDecryptedCredential: vi.fn().mockResolvedValue({ applicationId: 'app-1', privateKeyPem: 'pem-1' }) };
-  const connectionSyncState = { checkConsent: vi.fn().mockResolvedValue('active'), deferNextSync: vi.fn().mockResolvedValue(new Date()) };
+  const connectionSyncState = { checkConsent: vi.fn().mockResolvedValue('active'), deferNextSync: vi.fn().mockResolvedValue(new Date()), markAttempt: vi.fn(async () => { order.push('attempt'); return new Date(); }) };
   return { accountService, backgroundOperationService, bankSyncIncidentService, connectionSyncState, enableBankingCredentialService, order, transactionService };
 }
 
@@ -32,7 +32,8 @@ describe('scheduled bank sync producer contract worker', () => {
     await expect(handleAccountAutoSyncRequisitionJob(pgBossJob(payload, { id: 'job-1', retryCount: 0, retryLimit: 3 }) as Parameters<typeof handleAccountAutoSyncRequisitionJob>[0], { ...h, enqueue } as unknown as Parameters<typeof handleAccountAutoSyncRequisitionJob>[1])).resolves.toBe(true);
     expect(h.bankSyncIncidentService.assertIncident).toHaveBeenCalledWith(expect.objectContaining({ flow: 'scheduled-refresh', incidentId: payload.incidentId, producer: 'pgboss-scheduled', userVisible: false }));
     expect(h.bankSyncIncidentService.startAttempt).toHaveBeenCalledWith({ incidentId: payload.incidentId, queueAttempt: 1, queueJobId: 'job-1' });
-    expect(h.order).toEqual(['start', 'provider', 'finalize']);
+    expect(h.order).toEqual(['start', 'attempt', 'provider', 'finalize']);
+    expect(h.connectionSyncState.markAttempt).toHaveBeenCalledWith(12);
     expect(h.bankSyncIncidentService.finalizeAttempt).toHaveBeenCalledWith(expect.objectContaining({ final: true, result: 'full_success', treatmentEligible: false }));
     expect(h.transactionService.syncTransactionsForRequisition).toHaveBeenCalledWith(expect.any(Object), { enqueue });
   });
@@ -170,6 +171,20 @@ describe('scheduled bank sync producer contract worker', () => {
       h.accountService.syncAccountsForRequisition.mockResolvedValueOnce({ status: 'failed' });
       await expect(run(h, 'eb-ordinary-failure')).rejects.toThrow('failed');
       expect(h.connectionSyncState.checkConsent).not.toHaveBeenCalled();
+    });
+
+    it('records the attempt before a failing provider call, so the retry waits out the interval', async () => {
+      const h = harness();
+      h.accountService.syncAccountsForRequisition.mockRejectedValueOnce(Object.assign(new Error('bank unreachable'), { name: 'ProviderUnavailableError', status: 503 }));
+      await expect(run(h, 'eb-attempt-failure')).rejects.toThrow('bank unreachable');
+      expect(h.connectionSyncState.markAttempt).toHaveBeenCalledWith(20);
+    });
+
+    it('still syncs when the attempt time cannot be recorded', async () => {
+      const h = harness();
+      h.connectionSyncState.markAttempt.mockRejectedValueOnce(new Error('db down'));
+      await expect(run(h, 'eb-attempt-write-failed')).resolves.toBe(true);
+      expect(h.accountService.syncAccountsForRequisition).toHaveBeenCalledTimes(1);
     });
 
     it('does not let one connection credential failure affect a sibling job for a different connection', async () => {

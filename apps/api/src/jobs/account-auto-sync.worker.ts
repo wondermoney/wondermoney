@@ -35,6 +35,7 @@ interface BgDeps {
 interface ConnectionSyncStateDeps {
   checkConsent: (enableBankingConnectionKey: number) => Promise<'active' | 'ended' | 'unknown'>;
   deferNextSync: (enableBankingConnectionKey: number, retryAfterSeconds?: number) => Promise<Date | undefined>;
+  markAttempt: (enableBankingConnectionKey: number) => Promise<Date | undefined>;
 }
 
 interface IncidentDeps {
@@ -119,6 +120,17 @@ export const handleAccountAutoSyncRequisitionJob = async (job: JobWithMetadata<A
   };
   const log = deps.logger ?? logger;
   const syncState = deps.connectionSyncState ?? enableBankingConnectionSyncState;
+  // Recorded before the provider call, so a failure also waits out
+  // `BANK_SYNC_MIN_INTERVAL_HOURS` instead of spending another of the bank's daily calls. A
+  // failed write must not stop a sync that is otherwise fine: the next scan may re-enqueue the
+  // connection early, which is the lesser harm.
+  const recordAttempt = async () => {
+    try {
+      await syncState.markAttempt(key);
+    } catch (error) {
+      log.warn({ enableBankingConnectionKey: key, error: error instanceof Error ? error.message : String(error) }, 'Could not record the bank sync attempt time');
+    }
+  };
   // A rate limit is final for this run: a pg-boss retry a minute later would only spend more of a
   // quota the bank has already refused. The scheduler picks the connection up again once
   // `nextEligibleSyncAt` (from `Retry-After`, else the default sync interval) has passed.
@@ -142,6 +154,7 @@ export const handleAccountAutoSyncRequisitionJob = async (job: JobWithMetadata<A
     }
   };
   try {
+    await recordAttempt();
     // Resolve the owning appuser's own Enable Banking BYOK credential as an *earlier failure
     // point* inside this same try/catch, so it shares the error handling below. A missing/inactive/undecryptable credential becomes `EnableBankingCredentialInvalidError`,
     // which `classifyBankSyncError` below treats as non-retryable (a per-user secret that pg-boss

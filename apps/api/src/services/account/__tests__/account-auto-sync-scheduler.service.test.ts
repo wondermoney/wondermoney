@@ -169,6 +169,12 @@ describe('account auto sync scheduler service', () => {
     vi.unstubAllEnvs();
   });
 
+  it('refuses to scan with an invalid BANK_SYNC_MIN_INTERVAL_HOURS rather than silently using the default', async () => {
+    vi.stubEnv('BANK_SYNC_MIN_INTERVAL_HOURS', 'six');
+    await expect(service.enqueueDueAccountSyncs()).rejects.toThrow(/BANK_SYNC_MIN_INTERVAL_HOURS/);
+    vi.unstubAllEnvs();
+  });
+
   describe('Enable Banking connections', () => {
     it('enqueues a due Enable Banking connection with a real, future accessValidUntil', async () => {
       const connection = { appuserKey: { appuserKey: 9, externalUserId: 'dddddddd-dddd-4ddd-8ddd-dddddddddddd' }, enableBankingConnectionKey: 20, sessionId: 'session-20', state: 'state-20' };
