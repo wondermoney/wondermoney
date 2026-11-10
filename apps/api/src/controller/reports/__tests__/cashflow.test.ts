@@ -60,8 +60,8 @@ describe('getCashflowReport', () => {
     expect(res.json).toHaveBeenCalledWith({
       completeness: { currencyCode: 'EUR', isComplete: true, unconvertedCurrencies: [], unconvertedTransactions: 0 },
       data: [
-        { expenses: 300, income: 1000, month: '2026-01-01T00:00:00.000Z', net: 700 },
-        { expenses: 800, income: 2000, month: '2026-02-01T00:00:00.000Z', net: 1200 },
+        { expenses: 300, income: 1000, month: '2026-01-01T00:00:00.000Z', net: 700, savingsRate: 0.7 },
+        { expenses: 800, income: 2000, month: '2026-02-01T00:00:00.000Z', net: 1200, savingsRate: 0.6 },
       ],
       filters: expect.any(Object),
       generatedAt: expect.any(String),
