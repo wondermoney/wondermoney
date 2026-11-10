@@ -3,6 +3,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { addAccount, addPartner, addTransaction, currencyFor, type Household, seedHousehold, type StatusName } from '@app/__tests__/__helpers__/finance-fixtures';
 import { useTestDatabase } from '@app/__tests__/__helpers__/pg-test-db';
+import { setTenantContext } from '@app/database/filters/tenant-filter';
 import type { Account } from '@entity/Account';
 import type { Appuser } from '@entity/Appuser';
 import { Currency } from '@entity/Currency';
@@ -20,7 +21,8 @@ import { planTransfers, reconcileTransfers, type TransferRow } from '../transfer
  * apart at most. Only such a matched pair is typed TRANSFER_OUT / TRANSFER_IN, which reports leave out.
  */
 describe('transfer matching', () => {
-  const db = useTestDatabase();
+  // The real server when TEST_POSTGRES_URL is set (two members, a pool of connections), else PGlite.
+  const db = useTestDatabase({ postgresUrl: process.env['TEST_POSTGRES_URL'] });
   const day = (iso: string) => new Date(`${iso}T00:00:00Z`);
   let sequence = 0;
 
@@ -309,6 +311,90 @@ describe('transfer matching', () => {
     await reconcile(ctx.household.tenant.tenantKey, { from: day('2026-07-01') });
 
     expect((await stored(oldOut, oldIn, newOut, newIn)).map((r) => r.type)).toEqual(['PAYMENT', 'DEPOSIT', 'TRANSFER_OUT', 'TRANSFER_IN']);
+  });
+
+  /*
+   * A pair re-types both rows as transfers. A shared row must never become a transfer into an
+   * account only one member can see: the other member would learn that a private account exists.
+   */
+  describe('account privacy', () => {
+    async function twoMembers() {
+      const ctx = await household();
+      const partner = await addPartner(ctx.em, ctx.household);
+      return { ...ctx, partner };
+    }
+
+    it('never pairs a shared-account row with a partner\'s private-account row, in either direction', async () => {
+      const ctx = await twoMembers();
+      const partnersPrivate = await addAccount(ctx.em, ctx.household, { isPrivate: true, name: "Partner's private", owner: ctx.partner });
+      // Money out of a shared account into the partner's private one.
+      const sharedOut = await row(ctx, { account: ctx.current, amount: -100, date: '2026-07-03' });
+      const privateIn = await row(ctx, { account: partnersPrivate, amount: 100, appuser: ctx.partner, date: '2026-07-03' });
+      // Money out of the partner's private account into a shared one.
+      const privateOut = await row(ctx, { account: partnersPrivate, amount: -200, appuser: ctx.partner, date: '2026-07-10' });
+      const sharedIn = await row(ctx, { account: ctx.savings, amount: 200, date: '2026-07-10' });
+
+      await reconcile(ctx.household.tenant.tenantKey);
+
+      expect((await stored(sharedOut, privateIn, privateOut, sharedIn)).map((r) => r.type)).toEqual(['PAYMENT', 'DEPOSIT', 'PAYMENT', 'DEPOSIT']);
+    });
+
+    it('never pairs a shared-account row with the owner\'s own private-account row', async () => {
+      // The owner sees both accounts; the partner sees only the shared one.
+      const ctx = await twoMembers();
+      const ownPrivate = await addAccount(ctx.em, ctx.household, { isPrivate: true, name: 'My private' });
+      const sharedOut = await row(ctx, { account: ctx.current, amount: -100, date: '2026-07-03' });
+      const privateIn = await row(ctx, { account: ownPrivate, amount: 100, date: '2026-07-03' });
+
+      await reconcile(ctx.household.tenant.tenantKey);
+
+      expect((await stored(sharedOut, privateIn)).map((r) => r.type)).toEqual(['PAYMENT', 'DEPOSIT']);
+    });
+
+    it('pairs two shared accounts and two private accounts of the same member', async () => {
+      const ctx = await twoMembers();
+      const partnerFirst = await addAccount(ctx.em, ctx.household, { isPrivate: true, name: 'Partner first', owner: ctx.partner });
+      const partnerSecond = await addAccount(ctx.em, ctx.household, { isPrivate: true, name: 'Partner second', owner: ctx.partner });
+      const sharedOut = await row(ctx, { account: ctx.current, amount: -100, date: '2026-07-03' });
+      const sharedIn = await row(ctx, { account: ctx.savings, amount: 100, date: '2026-07-03' });
+      const privateOut = await row(ctx, { account: partnerFirst, amount: -50, appuser: ctx.partner, date: '2026-07-05' });
+      const privateIn = await row(ctx, { account: partnerSecond, amount: 50, appuser: ctx.partner, date: '2026-07-05' });
+
+      await reconcile(ctx.household.tenant.tenantKey);
+
+      expect(await stored(sharedOut, sharedIn, privateOut, privateIn)).toEqual([
+        { counterpart: sharedIn.transactionKey, type: 'TRANSFER_OUT' },
+        { counterpart: sharedOut.transactionKey, type: 'TRANSFER_IN' },
+        { counterpart: privateIn.transactionKey, type: 'TRANSFER_OUT' },
+        { counterpart: privateOut.transactionKey, type: 'TRANSFER_IN' },
+      ]);
+    });
+
+    it('dissolves a stored pair that spans a shared and a private account, leaving the shared side a payment', async () => {
+      const ctx = await twoMembers();
+      const partnersPrivate = await addAccount(ctx.em, ctx.household, { isPrivate: true, name: "Partner's private", owner: ctx.partner });
+      const out = await row(ctx, { account: ctx.current, amount: -300, date: '2026-07-03' });
+      const into = await row(ctx, { account: partnersPrivate, amount: 300, appuser: ctx.partner, date: '2026-07-03' });
+      // A pair an earlier run made before the account became private.
+      out.transactionTypeKey = ctx.types.TRANSFER_OUT;
+      into.transactionTypeKey = ctx.types.TRANSFER_IN;
+      out.transferCounterpartKey = into;
+      into.transferCounterpartKey = out;
+      await ctx.em.flush();
+
+      const result = await reconcile(ctx.household.tenant.tenantKey);
+
+      expect(result.pairsDissolved).toBe(1);
+      expect(await stored(out, into)).toEqual([{ counterpart: null, type: 'PAYMENT' }, { counterpart: null, type: 'DEPOSIT' }]);
+      // What the member who does not own the private account sees: the shared row, now a plain
+      // payment, and neither the private row nor a link to it.
+      const asOtherMember = db.em();
+      setTenantContext(asOtherMember, { appuserKey: ctx.household.appuser.appuserKey, tenantKey: ctx.household.tenant.tenantKey });
+      const visible = await asOtherMember.findOneOrFail(Transaction, { transactionKey: out.transactionKey }, { populate: ['transactionTypeKey'] });
+      expect(visible.transactionTypeKey?.name).toBe('PAYMENT');
+      expect(visible.transferCounterpartKey).toBeNull();
+      await expect(asOtherMember.findOne(Transaction, { transactionKey: into.transactionKey })).resolves.toBeNull();
+    });
   });
 
   /*
