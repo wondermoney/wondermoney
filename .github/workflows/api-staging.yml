@@ -63,11 +63,12 @@ jobs:
           include: 'apps/api/src/utils/constants.ts'
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v4
-      # The API is compiled once, in the image's build stage, while CI runs. This exports that
-      # stage's dist (the Dockerfile's `dist` target) for the Sentry release below, so Sentry
-      # gets the source maps of exactly the files the image runs; the image builds after the CI
-      # gate reuse the stage from this builder's cache. Layers are cached between deploys in
-      # the GitHub Actions cache, per image.
+      # Everything is built here, while CI runs on the same commit; nothing is pushed before the
+      # gate below. The first build exports the compiled API (the Dockerfile's `dist` target)
+      # for the Sentry release, so Sentry gets the source maps of exactly the files the image
+      # runs. The second builds the API image into this builder's cache and saves its layers to
+      # the GitHub Actions cache, so that upload overlaps with CI too. The worker image is the
+      # same layers with another CMD. After the gate, the pushes reuse this builder's cache.
       - name: Build the API
         uses: docker/build-push-action@v7
         with:
@@ -78,6 +79,22 @@ jobs:
           build-args: |
             GIT_COMMIT_SHA=${{ github.sha }}
           cache-from: type=gha,scope=api
+      - name: Build the images
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: apps/api/Dockerfile
+          target: api
+          build-args: |
+            GIT_COMMIT_SHA=${{ github.sha }}
+            APP_ENV=staging
+            DEPLOY_ENV=staging
+          cache-from: type=gha,scope=api
+          # mode=min saves the image's own layers (above all the production node_modules, which
+          # only change with the lockfile), not the build stages: saving and restoring the
+          # builder's multi-gigabyte dependency layer took longer than installing it again. A
+          # failed upload costs the next deploy time, not this one.
+          cache-to: type=gha,mode=min,scope=api,ignore-error=true
       # CI (.github/workflows/ci.yml) runs on this same commit, with type-check, lint and the
       # API tests with coverage thresholds; this deploy waits for it instead of running them a
       # second time. Nothing is pushed or deployed until CI has passed on exactly this SHA. The
@@ -135,6 +152,8 @@ jobs:
             type=semver,pattern={{major}}.{{minor}}
             type=semver,pattern={{major}}
             type=sha
+      # Both images were built before the CI gate; these steps take them from the builder's
+      # cache and upload them.
       - name: Build and push API
         uses: docker/build-push-action@v7
         with:
@@ -143,7 +162,6 @@ jobs:
           file: apps/api/Dockerfile
           target: api
           cache-from: type=gha,scope=api
-          cache-to: type=gha,mode=max,scope=api
           tags: ${{ steps.meta-api.outputs.tags }}
           labels: ${{ steps.meta-api.outputs.labels }}
           build-args: |
@@ -157,8 +175,7 @@ jobs:
           context: .
           file: apps/api/Dockerfile
           target: worker
-          cache-from: type=gha,scope=api-worker
-          cache-to: type=gha,mode=max,scope=api-worker
+          cache-from: type=gha,scope=api
           tags: ${{ steps.meta-worker.outputs.tags }}
           labels: ${{ steps.meta-worker.outputs.labels }}
           build-args: |
