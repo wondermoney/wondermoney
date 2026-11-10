@@ -3968,7 +3968,16 @@
       "heading": "Aparência",
       "description": "Altere a aparência da aplicação.",
       "theme": "Tema",
-      "language": "Idioma"
+      "language": "Idioma",
+      "previewFeatures": {
+        "heading": "Funcionalidades em pré-visualização",
+        "description": "Experimente funcionalidades antes de estarem prontas para todos.",
+        "label": "Ativar funcionalidades em pré-visualização",
+        "hint": "As funcionalidades em pré-visualização estão inacabadas. Podem mudar, falhar ou ser removidas sem aviso.",
+        "saving": "A guardar…",
+        "saveError": "Não foi possível guardar. Tente novamente.",
+        "loadError": "Não foi possível carregar as suas preferências."
+      }
     },
     "categories": {
       "description": "Gerir as suas categorias"

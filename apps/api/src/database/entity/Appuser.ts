@@ -86,6 +86,15 @@ export class Appuser extends Base {
   @Property({ columnType: 'int', nullable: true })
   onboardingCompletedVersion?: number;
 
+  /**
+   * Per-user preferences (`{ previewFeatures: boolean }` today). A JSON document
+   * rather than a column per setting, so a new preference does not need a
+   * migration. `@validators/preferences` validates it on every read and write and
+   * drops unknown keys.
+   */
+  @Property({ columnType: 'jsonb', default: '{}', type: 'json' })
+  preferences: Record<string, unknown> = {};
+
   @Property()
   recordActive = true;
 }

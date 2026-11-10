@@ -3376,6 +3376,24 @@
         }
       }
     },
+    "/v1/user/me/preferences": {
+      "get": {
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "patch": {
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/v1/user/me/onboarding": {
       "get": {
         "description": "",

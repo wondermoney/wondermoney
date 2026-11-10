@@ -13,6 +13,8 @@ import { themeTokens } from '@/theme/tokens'
 import { usePalette } from '@/theme/use-palette'
 import { SettingsField, SettingsPage, SettingsSection } from '@/features/more/settings-ui'
 
+import { PreviewFeaturesSection } from './preview-features-section'
+
 const THEMES: readonly ThemePreference[] = ['system', 'light', 'dark']
 const LANGUAGES: readonly LanguagePreference[] = ['device', 'en', 'pt-PT', 'es']
 
@@ -63,6 +65,7 @@ export function PreferencesScreen() {
         </FormGroup>
       </SettingsSection>
 
+      <PreviewFeaturesSection />
     </SettingsPage>
   )
 }

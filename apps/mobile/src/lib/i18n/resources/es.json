@@ -3968,7 +3968,16 @@
       "heading": "Apariencia",
       "description": "Cambia el aspecto de la aplicación.",
       "theme": "Tema",
-      "language": "Idioma"
+      "language": "Idioma",
+      "previewFeatures": {
+        "heading": "Funciones en vista previa",
+        "description": "Prueba funciones antes de que estén listas para todos.",
+        "label": "Activar funciones en vista previa",
+        "hint": "Las funciones en vista previa están inacabadas. Pueden cambiar, fallar o desaparecer sin aviso.",
+        "saving": "Guardando…",
+        "saveError": "No se pudo guardar. Inténtalo de nuevo.",
+        "loadError": "No se pudieron cargar tus preferencias."
+      }
     },
     "categories": {
       "description": "Gestiona tus categorías"

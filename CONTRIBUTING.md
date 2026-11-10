@@ -83,6 +83,14 @@ User-facing text goes through the translation files (English, Portuguese and Spa
 please don't hardcode strings. If you can't translate, add the English text and say so
 in the pull request.
 
+## Shipping a feature behind preview features
+
+A feature that is not ready for everyone can ship behind the per-user preview toggle
+instead of living on a long branch. The API route returns 404 for users without the flag,
+and the web and mobile entry points are hidden for them. Anyone can turn it on in
+Settings to try it. [docs/preview-features.md](docs/preview-features.md) covers the
+preference store, the API middleware, the client hooks and the tests.
+
 ## Using AI
 
 You may use AI tools. We review your contribution, not the tool, and you own it:
