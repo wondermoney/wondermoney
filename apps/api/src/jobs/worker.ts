@@ -136,8 +136,6 @@ import {
   sendInstanceHeartbeatNow,
 } from '@app/jobs/instance-heartbeat.queue';
 import { instrumentedBatch } from '@app/jobs/job-instrumentation';
-import { ensureLifecycleCronQueue, ensureLifecycleSendQueue, LIFECYCLE_CRON_QUEUE, LIFECYCLE_CRON_SCHEDULE, LIFECYCLE_SEND_QUEUE, scheduleLifecycleCron } from '@app/jobs/lifecycle-send.queue';
-import { handleLifecycleSendJob } from '@app/jobs/lifecycle-send.worker';
 import {
   ensurePortfolioCsvImportConfirmedQueue,
   PORTFOLIO_CSV_IMPORT_CONFIRMED_QUEUE,
@@ -189,7 +187,6 @@ import {
 } from '@app/jobs/worker-heartbeat.queue';
 import { handleWorkerHeartbeatJob } from '@app/jobs/worker-heartbeat.worker';
 import { BackgroundOperationStatus } from '@entity/BackgroundOperation';
-import { reconcileStaleLifecycleClaims } from '@service/lifecycle/lifecycle-claim-reconcile';
 import backgroundOperationRecoveryService from '@service/operations/background-operation-recovery.service';
 import backgroundOperationService from '@service/operations/background-operation.service';
 import { purgeExpiredOperationSecrets } from '@service/operations/operation-secret.service';
@@ -301,7 +298,6 @@ export const createWorker = (deps: WorkerDeps = {}) => {
   /** Queues whose exhausted jobs are copied to a dead-letter queue this worker consumes. */
   const deadLetteredQueues = [
     ...FINANCIAL_EMAIL_QUEUES,
-    LIFECYCLE_SEND_QUEUE,
     BANK_RECOVERY_QUEUE,
     BANK_SYNC_ALERT_SEND_QUEUE,
   ];
@@ -347,8 +343,6 @@ export const createWorker = (deps: WorkerDeps = {}) => {
     // queues uncreated (and boss.work() below would throw "Queue does not exist") whenever both
     // legacy streams are disabled.
     await ensureFinancialEmailQueues(boss);
-    await ensureLifecycleSendQueue(boss);
-    await ensureLifecycleCronQueue(boss);
     await ensureBankSyncAlertSweepQueue(boss);
     await ensureBankSyncAlertSendQueue(boss);
     await ensureTransactionEnrichmentGptQueue(boss);
@@ -388,7 +382,6 @@ export const createWorker = (deps: WorkerDeps = {}) => {
       if (workerHeartbeatEnabled()) await scheduleWorkerHeartbeatJob(boss);
       // What `GET /v1/health/ready` reads to tell whether the worker still finishes jobs.
       await scheduleInstanceHeartbeatJob(boss);
-      await scheduleLifecycleCron(boss);
       await scheduleBankSyncAlertSweep(boss);
       await scheduleTransactionImportSweep(boss);
       await unscheduleBudgetEmails(boss);
@@ -669,20 +662,6 @@ export const createWorker = (deps: WorkerDeps = {}) => {
       ),
     );
 
-    await boss.work(LIFECYCLE_SEND_QUEUE, { includeMetadata: true }, workJobs<JobWithMetadata<unknown>>(
-      LIFECYCLE_SEND_QUEUE, (job) => runInRequestContext(() => handleLifecycleSendJob(job)),
-    ));
-    await boss.work(LIFECYCLE_CRON_QUEUE, workCronJobs<Job<unknown>>(
-      LIFECYCLE_CRON_QUEUE,
-      { checkinMarginMinutes: 120, maxRuntimeMinutes: 60, monitorSlug: LIFECYCLE_CRON_QUEUE, schedule: LIFECYCLE_CRON_SCHEDULE },
-      () => runInRequestContext(async () => {
-        // Resolves delivery claims whose lease expired without an outcome — the residue
-        // of a worker that died mid-send. This rides the daily lifecycle tick rather than
-        // its own queue.
-        const stale = await reconcileStaleLifecycleClaims(new Date());
-        if (stale > 0) log.warn({ queue: LIFECYCLE_CRON_QUEUE, stale }, 'Reconciled stale lifecycle delivery claims');
-      }),
-    ));
     await boss.work(BANK_SYNC_ALERT_SWEEP_QUEUE, workCronJobs<Job<unknown>>(
       BANK_SYNC_ALERT_SWEEP_QUEUE,
       { checkinMarginMinutes: 120, maxRuntimeMinutes: 30, monitorSlug: BANK_SYNC_ALERT_SWEEP_QUEUE, schedule: BANK_SYNC_ALERT_SWEEP_CRON },

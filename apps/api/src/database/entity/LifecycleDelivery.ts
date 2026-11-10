@@ -1,16 +1,34 @@
 import type { Rel } from '@mikro-orm/core';
 import { Check, Entity, Enum, Index, ManyToOne, PrimaryKey, Property, Unique } from '@mikro-orm/decorators/legacy';
 
-import { LifecycleCampaign, LifecycleDeliveryStatus } from '@service/lifecycle/lifecycle-types';
-
 import { Appuser, SupportedLanguages } from './Appuser';
 import { Base } from './BaseEntity';
 
 /**
- * Generic per-user lifecycle email delivery. One row per (user, campaign, step),
- * mirroring the (since removed) trial-lifecycle delivery state machine (claim tokens, idempotency,
- * status transitions) but campaign-agnostic so every lifecycle track reuses it.
- * `step` is a plain string column (values differ per campaign — e.g. ActivationStep).
+ * The retired lifecycle campaigns. None is sent any more; the values stay so existing
+ * `lifecycle_delivery` rows still hydrate.
+ */
+export enum LifecycleCampaign {
+  ACTIVATION = 'activation',
+  DATA_HEALTH = 'data_health',
+  ENGAGEMENT = 'engagement',
+  REACTIVATION = 'reactivation',
+}
+
+export enum LifecycleDeliveryStatus {
+  CLAIMED = 'claimed',
+  FAILED = 'failed',
+  NEEDS_RECONCILIATION = 'needs_reconciliation',
+  PENDING = 'pending',
+  SENT = 'sent',
+  SUPPRESSED = 'suppressed',
+}
+
+/**
+ * Per-user delivery record of the retired lifecycle emails, one row per (user, campaign, step).
+ * Nothing writes to it any more: the last campaign (`data_health`, the consent-expiry reminder)
+ * was replaced by per-connection bank sync alerts (`BankSyncAlertDelivery`). The entity stays so
+ * the table and its history are kept until a migration drops them.
  */
 @Check({ expression: `"provider_attempt_count" between 0 and 2`, name: 'lifecycle_delivery_provider_attempt_count_check' })
 @Check({ expression: `"deleted_at" is null`, name: 'lifecycle_delivery_never_soft_delete_check' })
