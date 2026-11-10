@@ -87,7 +87,7 @@ vi.mock('@controller/banking', () => ({
   startBankConnection: handler,
   unlinkRequisition: handler,
 }));
-vi.mock('@controller/banking-connections', () => ({ getBankConnections: handler }));
+vi.mock('@controller/banking-connections', () => ({ getBankConnections: handler, getBankConnectionSyncs: handler }));
 
 vi.mock('@route/account', () => ({ default: makeRouter() }));
 vi.mock('@route/admin', () => ({ default: makeRouter() }));
