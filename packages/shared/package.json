@@ -34,16 +34,16 @@
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
-    "big.js": "^6.2.1",
+    "big.js": "^7.0.1",
     "csv-parse": "^7.0.3",
     "eodhd": "^1.0.1",
     "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz"
   },
   "devDependencies": {
     "@eslint/js": "9.39.5",
-    "@types/big.js": "^6.2.2",
+    "@types/big.js": "^7.0.0",
     "@types/node": "^26.6.6",
-    "@vitest/ui": "5.0.5",
+    "@vitest/ui": "5.1.0",
     "eslint": "9.39.5",
     "eslint-config-prettier": "^10.1.8",
     "globals": "^17.13.0",
@@ -51,6 +51,6 @@
     "tsup": "9.0.0",
     "typescript": "6.0.3",
     "typescript-eslint": "8.72.1",
-    "vitest": "5.0.5"
+    "vitest": "5.1.0"
   }
 }

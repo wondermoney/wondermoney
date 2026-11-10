@@ -6,6 +6,7 @@ import { useLocale, useTranslations } from "next-intl";
 import * as React from "react";
 import Dropzone, {
   type DropzoneProps,
+  ErrorCode,
   type FileRejection,
 } from "react-dropzone";
 import { toast } from "sonner";
@@ -144,6 +145,18 @@ export function FileUploader(props: FileUploaderProps) {
 
   const onDrop = React.useCallback(
     (acceptedFiles: File[], rejectedFiles: FileRejection[]) => {
+      // Since react-dropzone 19, a drop over the file limit accepts the files up to the limit
+      // and rejects the rest. Keep refusing the whole drop, so a too-big drop never starts an
+      // upload of only some of its files.
+      const exceedsLimit = rejectedFiles.some(({ errors }) =>
+        errors.some((error) => error.code === ErrorCode.TooManyFiles),
+      );
+
+      if (exceedsLimit) {
+        toast.error(t("file-uploader-too-many-files", { count: maxFileCount }));
+        return;
+      }
+
       if (!multiple && maxFileCount === 1 && acceptedFiles.length > 1) {
         toast.error(t("file-uploader-too-many-files", { count: maxFileCount }));
         return;
@@ -228,6 +241,8 @@ export function FileUploader(props: FileUploaderProps) {
         maxFiles={maxFileCount}
         multiple={maxFileCount > 1 || multiple}
         disabled={isDisabled}
+        // react-dropzone 19.2 added paste-to-upload; the uploader takes drops and the picker only.
+        noPaste
       >
         {({ getRootProps, getInputProps, isDragActive }) => (
           <div

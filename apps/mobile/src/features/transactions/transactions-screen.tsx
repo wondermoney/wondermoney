@@ -1,3 +1,4 @@
+import type { TFunction } from 'i18next'
 import { memo, useCallback, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { FlatList, Pressable, RefreshControl, ScrollView, StyleSheet, Switch, View } from 'react-native'
@@ -988,7 +989,7 @@ function formatAvailableMoney(
 }
 
 /** "To <name>" for an outgoing transfer with a destination; otherwise that it is left out of totals. */
-function transferDetail(item: TransactionViewModel, t: (key: string, options?: Record<string, unknown>) => string): string {
+function transferDetail(item: TransactionViewModel, t: TFunction): string {
   const destination = item.transferDestination
   if (!destination) return t('transactions.transfer.excluded')
   return t('transactions.transfer.to', { name: destination.name ?? t(`transactions.transfer.destinationGroups.${destination.type}`) })
