@@ -61,6 +61,8 @@ Define `EODHD_API_KEY` para activar la búsqueda de tickers, las cotizaciones en
 
 La sincronización bancaria no necesita configuración en el servidor. Cada persona añade su propia clave de aplicación de Enable Banking en la Configuración, así que las credenciales bancarias nunca se comparten entre usuarios.
 
+El worker sincroniza cada conexión bancaria como máximo una vez cada `BANK_SYNC_MIN_INTERVAL_HOURS` horas, 20 por defecto. Según la PSD2, un banco puede limitar el acceso no asistido a cuatro llamadas al día por cuenta, así que defínela en `6` o más para mantenerte dentro de ese límite. Una sincronización fallida espera el mismo intervalo antes del siguiente intento. Defínela en el worker; un valor que no sea un número positivo impide que el worker arranque.
+
 ## Inicio de sesión con Google
 
 Define `GOOGLE_CLIENT_ID` y `GOOGLE_CLIENT_SECRET` (de un cliente OAuth en Google Cloud, con `<API_URL>/api/auth/callback/google` como URI de redirección autorizado) para mostrar "Continuar con Google" en las páginas de inicio de sesión y de registro. Sin ambos, el botón queda oculto.

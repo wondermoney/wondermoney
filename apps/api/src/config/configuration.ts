@@ -82,6 +82,9 @@ const wholeNumber = (description: string) => z.string().trim()
 const fraction = (description: string, max: number) => z.string().trim()
   .refine((v) => /^\d+(?:\.\d+)?$/.test(v) && Number(v) <= max, `${description} (must be a fraction from 0 to ${max}, such as 0.02 for 2 percent)`);
 
+const positiveNumber = (description: string) => z.string().trim()
+  .refine((v) => /^\d+(?:\.\d+)?$/.test(v) && Number.isFinite(Number(v)) && Number(v) > 0, `${description} (must be a finite positive number, such as 6)`);
+
 const boolFlag = (description: string) => z.enum(['1', '0', 'true', 'false', 'on', 'off', 'yes', 'no'], {
   error: `${description} (must be one of 1/0/true/false/on/off/yes/no)`,
 });
@@ -213,6 +216,10 @@ const apiSchema = sharedSchema.extend({
 });
 
 const workerSchema = sharedSchema.extend({
+  // Minimum hours between unattended bank syncs per connection
+  // (`services/account/account-auto-sync-scheduler.service.ts`). PSD2 lets a bank cap
+  // unattended access at four calls a day per account, so 6 or more keeps one app inside it.
+  BANK_SYNC_MIN_INTERVAL_HOURS: positiveNumber('Minimum unattended bank sync interval').optional(),
   ENABLE_PGBOSS_DEMO_DATA_REFRESH: boolFlag('Demo-data refresh flag (worker only)').optional(),
   HETRIX_WORKER_HEARTBEAT_URL: z.string().trim().optional(),
   PGBOSS_QUEUE_DEPTH_MONITOR_ENABLED: boolFlag('Queue depth monitor flag').optional(),

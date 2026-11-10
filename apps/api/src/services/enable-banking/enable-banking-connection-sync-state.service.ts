@@ -12,6 +12,8 @@ import { enableBankingCredentialService } from './enable-banking-credential.serv
  *    bank ended the consent early: the connection becomes `EXPIRED`, which the scheduler skips.
  *  - {@link EnableBankingConnectionSyncState.deferNextSync}: after a rate limit, keep the
  *    scheduler away until the provider's `Retry-After` has passed.
+ *  - {@link EnableBankingConnectionSyncState.markAttempt}: before the provider call, record when
+ *    the attempt happened, so a failure also waits out the minimum sync interval.
  */
 export type ConsentCheckResult = 'active' | 'ended' | 'unknown';
 
@@ -65,6 +67,20 @@ export class EnableBankingConnectionSyncState {
     connection.nextEligibleSyncAt = new Date(now.getTime() + seconds * 1000);
     await em.flush();
     return connection.nextEligibleSyncAt;
+  }
+
+  /**
+   * Records that a sync is about to reach the bank, before the provider call, so the scheduler
+   * waits the minimum interval from the attempt even when the call fails. Returns the recorded
+   * time, or undefined when the connection no longer exists.
+   */
+  async markAttempt(enableBankingConnectionKey: number): Promise<Date | undefined> {
+    const em = await this.em();
+    const connection = await em.findOne(EnableBankingConnection, { deletedAt: undefined, enableBankingConnectionKey });
+    if (!connection) return undefined;
+    connection.lastSyncAttemptAt = (this.deps.now ?? (() => new Date()))();
+    await em.flush();
+    return connection.lastSyncAttemptAt;
   }
 
   private async em(): Promise<SyncStateEm> {

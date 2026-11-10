@@ -84,6 +84,14 @@ describe('loadConfiguration', () => {
     expect(() => loadConfiguration('api', { ...validApi, TRANSFER_MATCH_FX_TOLERANCE: '-0.01' })).toThrow(/TRANSFER_MATCH_FX_TOLERANCE/);
   });
 
+  it('takes the minimum unattended sync interval in hours and refuses anything that is not a positive number', () => {
+    expect(() => loadConfiguration('worker', { ...validShared, BANK_SYNC_MIN_INTERVAL_HOURS: '6' })).not.toThrow();
+    expect(() => loadConfiguration('worker', { ...validShared, BANK_SYNC_MIN_INTERVAL_HOURS: '0.5' })).not.toThrow();
+    for (const value of ['0', '-6', '6h', 'six', 'Infinity', 'NaN']) {
+      expect(() => loadConfiguration('worker', { ...validShared, BANK_SYNC_MIN_INTERVAL_HOURS: value })).toThrow(/BANK_SYNC_MIN_INTERVAL_HOURS/);
+    }
+  });
+
   it('parses worker roles with worker-only fields', () => {
     const worker = loadConfiguration('worker', {
       ...validShared,
