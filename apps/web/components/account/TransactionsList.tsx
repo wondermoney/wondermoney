@@ -3,12 +3,11 @@
 import { Wallet } from "lucide-react";
 import { useTranslations } from "next-intl";
 
-import { Amount } from "@/components/ui/Amount";
+import { TransactionAmount } from "@/components/account/TransactionAmount";
 import CategoryIcon from "@/components/ui/CategoryIcon";
 import { formatTxDate } from "@/lib/account/accounts-formatters";
 import type { Transaction } from "@/lib/api/account/useTransactions";
 import { getCategoryTranslationKey } from "@/lib/utils/categories";
-import { useFormatCurrency } from "@/lib/utils/useFormatCurrency";
 
 export default function TransactionsList({
   transactions,
@@ -16,7 +15,6 @@ export default function TransactionsList({
   transactions: Transaction[];
 }) {
   const t = useTranslations();
-  const formatCurrency = useFormatCurrency();
 
   // Show at most 8 recent transactions
   const recentTxs = transactions.slice(0, 8);
@@ -24,9 +22,6 @@ export default function TransactionsList({
   return (
     <div className="divide-border divide-y">
       {recentTxs.map((tx) => {
-        const amount = tx.appuserSettlementAmount ?? tx.settlementAmount;
-        const currency =
-          tx.appuserCurrencyKey?.code ?? tx.settlementCurrencyKey.code;
         const category = tx.appuserTransactionCategories?.[0];
 
         return (
@@ -73,9 +68,12 @@ export default function TransactionsList({
                 </div>
               </div>
             </div>
-            <span className="text-foreground shrink-0 font-mono text-sm">
-              <Amount value={amount} currency={currency} />
-            </span>
+            {/* With no exchange rate, the original amount in its own
+                currency, marked as not converted. */}
+            <TransactionAmount
+              transaction={tx}
+              className="text-foreground shrink-0 font-mono text-sm"
+            />
           </div>
         );
       })}

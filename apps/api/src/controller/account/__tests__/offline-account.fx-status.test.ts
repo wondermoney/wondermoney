@@ -55,6 +55,46 @@ describe('an offline account in a currency with no exchange rate', () => {
     expect(response.body.rows.map((row: { name: string }) => row.name)).not.toContain('Yen savings');
   });
 
+  it('names the currency net worth could not convert', async () => {
+    const { household, jpy } = await aHousehold();
+    await accounts.as(household.appuser).post('/v1/account/offline').send({ currencyId: jpy.currencyKey, currentBalance: 10_000, name: 'Yen savings' });
+
+    const response = await netWorth.as(household.appuser).get('/v1/net-worth');
+
+    expect(response.body.unconvertedCurrencies).toEqual(['JPY']);
+  });
+
+  it('is listed as not converted, keeping its own balance', async () => {
+    const { household, jpy } = await aHousehold();
+    await accounts.as(household.appuser).post('/v1/account/offline').send({ currencyId: jpy.currencyKey, currentBalance: 10_000, name: 'Yen savings' });
+
+    const response = await accounts.as(household.appuser).get('/v1/account');
+
+    const listed = response.body.accounts.find((account: { accountName: string }) => account.accountName === 'Yen savings');
+    expect(listed).toMatchObject({ appuserCurrencyBalance: null, balance: 10_000, fxRateDate: null, fxStatus: 'missing' });
+  });
+
+  it('is listed as estimated, with the date of the old rate it was converted at', async () => {
+    const { household, jpy } = await aHousehold();
+    const em = db.em();
+    em.create(ExchangeRate, { date: new Date(Date.UTC(2026, 0, 15)), fromCurrency: jpy, rate: 0.006, toCurrency: household.currency }, { partial: true });
+    await em.flush();
+    await accounts.as(household.appuser).post('/v1/account/offline').send({ currencyId: jpy.currencyKey, currentBalance: 10_000, name: 'Yen savings' });
+
+    const response = await accounts.as(household.appuser).get('/v1/account');
+
+    const listed = response.body.accounts.find((account: { accountName: string }) => account.accountName === 'Yen savings');
+    expect(listed).toMatchObject({ appuserCurrencyBalance: 60, fxRateDate: '2026-01-15', fxStatus: 'provisional' });
+  });
+
+  it('lists an account in its owner currency as exact', async () => {
+    const { household } = await aHousehold();
+
+    const response = await accounts.as(household.appuser).get(`/v1/account/${household.account.accountKey}`);
+
+    expect(response.body.account).toMatchObject({ fxRateDate: null, fxStatus: 'exact' });
+  });
+
   it('converts at the stored rate and marks it exact', async () => {
     const { household, jpy } = await aHousehold(0.006);
 

@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import assert from "node:assert/strict";
 
-import { cleanup, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { NextIntlClientProvider } from "next-intl";
 import { afterEach, beforeEach, test, vi } from "vitest";
 
@@ -172,4 +172,44 @@ test("privacy mode hides every figure in the hero and keeps the words", () => {
   } finally {
     setStoredPrivacyMode(false);
   }
+});
+
+test("a net worth that leaves out unconverted items carries a warning naming the currencies", () => {
+  state.netWorth = {
+    ...state.netWorth,
+    unconverted: { count: 1, currencies: ["JPY"] },
+  };
+  renderHero();
+
+  fireEvent.click(
+    screen.getByRole("button", { name: "Not every amount could be converted" }),
+  );
+
+  const note = screen.getByRole("note");
+  assert.match(
+    note.textContent ?? "",
+    /leaves out 1 account, loan or portfolio/,
+  );
+  assert.match(note.textContent ?? "", /No exchange rate yet for JPY\./);
+  assert.equal(
+    screen
+      .getByRole("link", { name: "Add an exchange rate" })
+      .getAttribute("href"),
+    "/settings?tab=currencies&from=JPY",
+  );
+});
+
+test("a complete net worth carries no warning", () => {
+  state.netWorth = {
+    ...state.netWorth,
+    unconverted: { count: 0, currencies: [] },
+  };
+  renderHero();
+
+  assert.equal(
+    screen.queryByRole("button", {
+      name: "Not every amount could be converted",
+    }),
+    null,
+  );
 });

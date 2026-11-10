@@ -9,6 +9,7 @@ import type { Currency } from '@entity/Currency';
 import { LoanRepaymentLink } from '@entity/LoanRepaymentLink';
 import { RecurringOccurrence } from '@entity/RecurringOccurrence';
 import { Transaction } from '@entity/Transaction';
+import { describeFx, type FxDisplay, UNKNOWN_FX } from '@service/currency/fx-display';
 import { completenessFromCounts } from '@service/reports/report-currency';
 import { compareTags, type TagDto, toTagDto } from '@service/tag/tag.service';
 import { type CategorySpendingFlags, loadCategorySpendingFlags } from '@service/transaction/category-spending';
@@ -98,8 +99,9 @@ export async function listTransactions(request: TransactionListRequest) {
 
   const loanRepayments = await loadLoanRepayments(transactions);
   const spendingFlags = await loadCategorySpendingFlags(DI.em, tenantKey);
-  const rows = transactions.map((transaction) => {
-    const row = toTransactionRow(transaction, viewerAppuserKey, spendingFlags);
+  const fx = await describeTransactionsFx(transactions);
+  const rows = transactions.map((transaction, index) => {
+    const row = { ...toTransactionRow(transaction, viewerAppuserKey, spendingFlags), ...(fx[index] ?? UNKNOWN_FX) };
     const loanRepayment = summarizeLoanRepayments(loanRepayments.get(transaction.transactionKey) ?? []);
     return loanRepayment ? { ...row, loanRepayment } : row;
   });
@@ -136,6 +138,20 @@ export async function listTransactions(request: TransactionListRequest) {
   };
 }
 
+/** How each row's amount in the user's currency was converted (`fx-display.ts`). */
+async function describeTransactionsFx(transactions: Transaction[]): Promise<FxDisplay[]> {
+  return describeFx(
+    DI.em,
+    transactions.map((transaction) => ({
+      converted: transaction.appuserSettlementAmount,
+      date: transaction.transactionDate ?? transaction.createdAt,
+      from: transaction.settlementCurrencyKey,
+      status: transaction.fxStatus,
+      to: transaction.appuserCurrencyKey,
+    })),
+  );
+}
+
 async function loadLoanRepayments(transactions: Transaction[]): Promise<Map<number, LoanRepaymentLink[]>> {
   const links = await DI.em.find(
     LoanRepaymentLink,
@@ -156,9 +172,9 @@ async function loadLoanRepayments(transactions: Transaction[]): Promise<Map<numb
 async function loadScopeAccounts(scope: TransactionListRequest['scope'], viewer: TransactionViewer): Promise<Account[]> {
   const visible: FilterQuery<Account> = { $or: [{ isPrivate: false }, { accountOwnerAppuserKey: { appuserKey: viewer.viewerAppuserKey } }], deletedAt: undefined, tenantKey: { tenantKey: viewer.tenantKey } };
   if (scope === 'all-accounts') {
-    return DI.em.find(Account, visible, { populate: ['currencyKey', 'accountFinancialInstitutionKey'] });
+    return DI.em.find(Account, visible, { populate: ['currencyKey', 'accountFinancialInstitutionKey', 'accountOwnerAppuserKey.currencyKey'] });
   }
-  const account = await DI.em.findOne(Account, { $and: [visible, { accountKey: scope.accountKey }] }, { populate: ['currencyKey', 'accountFinancialInstitutionKey'] });
+  const account = await DI.em.findOne(Account, { $and: [visible, { accountKey: scope.accountKey }] }, { populate: ['currencyKey', 'accountFinancialInstitutionKey', 'accountOwnerAppuserKey.currencyKey'] });
   if (!account) throw new NotFoundError('Account not found');
   return [account];
 }
@@ -295,7 +311,7 @@ async function loadRecurringSeries(transactions: Transaction[], tenantKey: numbe
   return bySeries;
 }
 
-async function syntheticOpeningBalanceRows(accounts: Account[], filters: TransactionFilterInput, viewerCurrencyCode: string): Promise<TransactionRow[]> {
+async function syntheticOpeningBalanceRows(accounts: Account[], filters: TransactionFilterInput, viewerCurrencyCode: string): Promise<(FxDisplay & TransactionRow)[]> {
   const { accountKeys, categoryKeys, fromDate, tagKeys, toDate, transactionTypes, unreviewedOnly } = filters;
   const namedCategoriesOnly = categoryKeys !== undefined && categoryKeys.keys.length > 0 && !categoryKeys.includeUncategorized;
   const tagged = tagKeys !== undefined && tagKeys.length > 0;
@@ -315,9 +331,15 @@ async function syntheticOpeningBalanceRows(accounts: Account[], filters: Transac
       DI.em.count(Transaction, { accountKey: { accountKey: account.accountKey }, deletedAt: undefined }, { filters: { [HIDDEN_FILTER]: false } }),
     ),
   );
-  return candidates
-    .filter((_, index) => transactionCounts[index] === 0)
-    .map((account) => ({
+  const opened = candidates.filter((_, index) => transactionCounts[index] === 0);
+  // The row carries the account's balance, converted the way the account's was.
+  const fx = await describeFx(
+    DI.em,
+    opened.map((account) => ({ converted: account.appuserCurrencyBalance, date: new Date(), from: account.currencyKey, status: account.fxStatus, to: account.accountOwnerAppuserKey?.currencyKey })),
+  );
+  return opened
+    .map((account, index) => ({
+      ...(fx[index] ?? UNKNOWN_FX),
       // The institution's logo is the opening row's mark, as on the account's real rows.
       accountKey: {
         accountFinancialInstitutionKey: account.accountFinancialInstitutionKey ? { logoUrl: account.accountFinancialInstitutionKey.logoUrl ?? null } : null,

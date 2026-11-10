@@ -12,6 +12,7 @@ import DataLoadError from "@/components/ui/DataLoadError";
 import { Link } from "@/components/ui/Link";
 import { SectionEmpty } from "@/components/ui/RuledSection";
 import { Skeleton } from "@/components/ui/skeleton";
+import { UnconvertedTotalWarning } from "@/components/ui/UnconvertedTotalWarning";
 import useAccounts from "@/lib/api/account/useAccounts";
 import useNetWorth from "@/lib/api/net-worth/useNetWorth";
 import useNetWorthHistory from "@/lib/api/reports/netWorthHistory";
@@ -239,11 +240,16 @@ export function NetWorthHero() {
     <div className="grid items-end gap-8 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:gap-16">
       <div className="flex min-w-0 flex-col gap-6">
         <div className="flex flex-col gap-2">
-          <p>
+          <p className="flex items-center gap-2">
             <Amount
               value={summary.netWorth}
               currency={currency}
               className={FIGURE_CLASS}
+            />
+            {/* A figure that leaves something out says so beside itself. */}
+            <UnconvertedTotalWarning
+              unconverted={summary.unconverted}
+              currency={currency}
             />
           </p>
           {changes.lastMonth ? (

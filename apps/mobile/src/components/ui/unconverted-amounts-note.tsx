@@ -4,7 +4,7 @@ import { Text } from '@/components/ui/text'
 import type { AmountsCompleteness } from '@/lib/api/completeness'
 
 /** "GBP and USD": Intl.ListFormat where the engine has it, a comma-separated list where it doesn't. */
-function formatCurrencyList(currencies: readonly string[], locale: string): string {
+export function formatCurrencyList(currencies: readonly string[], locale: string): string {
   try {
     if (typeof Intl.ListFormat === 'function') return new Intl.ListFormat(locale, { style: 'long', type: 'conjunction' }).format(currencies)
   } catch {

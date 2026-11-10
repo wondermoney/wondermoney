@@ -1,6 +1,7 @@
 import { useQuery, type UseQueryOptions } from "@tanstack/react-query";
 import type { AxiosInstance } from "axios";
 
+import type { FxStatus } from "@/lib/fx/fx-status";
 import type { SupportedCurrencyCodes } from "@/lib/utils/currencySymbol";
 
 import api from "../api";
@@ -42,6 +43,13 @@ export interface Account {
   appuserCurrencyAvailableBalance: number | null;
   /** Sync freshness signal for open-banking accounts. Null for manual/unknown. */
   syncStatus: SyncStatus | null;
+  /**
+   * How `appuserCurrencyBalance` was converted from the account's currency
+   * (`lib/fx/fx-status.ts`); null when the API did not say.
+   */
+  fxStatus?: FxStatus | null;
+  /** The date of the old rate a `provisional` balance was converted at. */
+  fxRateDate?: string | null;
 }
 
 export type AccountCsvImportFormat = "bank" | "generic";
@@ -108,6 +116,8 @@ function normalizeCurrencyCode(value: unknown): string {
 function normalizeAccountCurrencyCode(value: unknown): SupportedCurrencyCodes {
   return normalizeCurrencyCode(value) as SupportedCurrencyCodes;
 }
+
+const VALID_FX_STATUS = new Set<FxStatus>(["exact", "missing", "provisional"]);
 
 const VALID_STALENESS = new Set<SyncStaleness>([
   "error",
@@ -219,6 +229,12 @@ function normalizeAccount(account: unknown): Account {
       account.appuserCurrencyAvailableBalance,
     ),
     syncStatus: normalizeSyncStatus(account.syncStatus),
+    // Lenient: an unknown or absent status reads as "not said".
+    fxStatus: VALID_FX_STATUS.has(account.fxStatus as FxStatus)
+      ? (account.fxStatus as FxStatus)
+      : null,
+    fxRateDate:
+      typeof account.fxRateDate === "string" ? account.fxRateDate : null,
   };
 }
 

@@ -2557,5 +2557,16 @@
     "failed": "No se pudieron recalcular los saldos. Vuelve a intentarlo en unos minutos.",
     "too-soon": "Esta cuenta se recalculó hace menos de un minuto. Vuelve a intentarlo en breve.",
     "error": "No se pudo iniciar el recálculo. Vuelve a intentarlo."
+  },
+  "fx": {
+    "not-converted": "Sin convertir",
+    "not-converted-hint": "Aún no hay tipo de cambio para {currency}, así que este importe se queda en {currency} y fuera de los totales.",
+    "estimated": "Estimado",
+    "estimated-hint": "Convertido al tipo de cambio del {date}, el más reciente disponible. Se vuelve a convertir cuando llega uno más reciente.",
+    "estimated-hint-no-date": "Convertido a un tipo de cambio antiguo, el más reciente disponible. Se vuelve a convertir cuando llega uno más reciente.",
+    "incomplete-label": "No se pudieron convertir todos los importes",
+    "total-leaves-out": "Este total deja fuera {count, plural, one {# cuenta, préstamo o cartera} other {# cuentas, préstamos o carteras}} que no se pudieron valorar en {currency}.",
+    "missing-rates": "Aún no hay tipo de cambio para {currencies}.",
+    "add-rate": "Añadir un tipo de cambio"
   }
 }

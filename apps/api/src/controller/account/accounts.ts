@@ -18,6 +18,7 @@ import { resolveAccountCsvImportFormat } from '@service/account/account-csv-impo
 import { startAccountRecalculation } from '@service/account/account-recalculation.service';
 import { computeSyncStatus } from '@service/account/account-sync-status.service';
 import { convertWithStatus, rateScope } from '@service/currency/exchange-rate';
+import { describeFx, type FxDisplay, UNKNOWN_FX } from '@service/currency/fx-display';
 import { isManualAccount } from '@service/transaction/balance-chain.service';
 import { BadRequestError, ERROR_CODE, ForbiddenError, InternalServerError, NotFoundError } from '@utils/errors';
 
@@ -141,11 +142,12 @@ export async function getAccount(req: Request, res: Response) {
     throw new NotFoundError('Account not found');
   }
 
-  const [openIncidentRequisitionIds, pendingSumsByAccount] = await Promise.all([
+  const [openIncidentRequisitionIds, pendingSumsByAccount, [fx]] = await Promise.all([
     loadOpenIncidentRequisitionIds(req.user),
     loadPendingSumsByAccount([account.accountKey]),
+    describeAccountsFx([account]),
   ]);
-  return res.json({ account: mapAccountSummary(account, { now: new Date(), openIncidentRequisitionIds, pendingSumsByAccount, viewerAppuserKey: req.user.appuserKey }) });
+  return res.json({ account: mapAccountSummary(account, { now: new Date(), openIncidentRequisitionIds, pendingSumsByAccount, viewerAppuserKey: req.user.appuserKey }, fx) });
 }
 
 export async function getAccountFinancialInstitutions(_req: Request, res: Response) {
@@ -186,12 +188,13 @@ export async function getAccounts(req: Request, res: Response) {
       ],
     },
   );
-  const [openIncidentRequisitionIds, pendingSumsByAccount] = await Promise.all([
+  const [openIncidentRequisitionIds, pendingSumsByAccount, fx] = await Promise.all([
     loadOpenIncidentRequisitionIds(req.user),
     loadPendingSumsByAccount(accounts.map((account) => account.accountKey)),
+    describeAccountsFx(accounts),
   ]);
   const syncContext = { now: new Date(), openIncidentRequisitionIds, pendingSumsByAccount, viewerAppuserKey: req.user.appuserKey };
-  const transformedData = accounts.map((account) => mapAccountSummary(account, syncContext));
+  const transformedData = accounts.map((account, index) => mapAccountSummary(account, syncContext, fx[index]));
   return res.json({ accounts: transformedData });
 }
 
@@ -239,7 +242,20 @@ export interface AccountSyncContext {
   viewerAppuserKey?: number;
 }
 
-export function mapAccountSummary(account: Account, syncContext?: AccountSyncContext) {
+/**
+ * How each account's balance in its owner's currency was converted. Balances are revalued at the
+ * latest rate (`fx-reconvert.service.ts`), so a provisional one is dated by today's latest rate.
+ */
+function describeAccountsFx(accounts: Account[]): Promise<FxDisplay[]> {
+  const now = new Date();
+  return describeFx(
+    DI.em,
+    accounts.map((account) => ({ converted: account.appuserCurrencyBalance, date: now, from: account.currencyKey, status: account.fxStatus, to: account.accountOwnerAppuserKey?.currencyKey })),
+  );
+}
+
+/** `fx` says how the balance was converted; without it the account reports no FX status. */
+export function mapAccountSummary(account: Account, syncContext?: AccountSyncContext, fx: FxDisplay = UNKNOWN_FX) {
   const currencyCode = resolveRequiredCurrencyCode(account.currencyKey.code, 'account');
   const ownerCurrencyCode = resolveRequiredCurrencyCode(
     account.accountOwnerAppuserKey?.currencyKey.code,
@@ -270,6 +286,8 @@ export function mapAccountSummary(account: Account, syncContext?: AccountSyncCon
     // Which file the account's CSV import reads: the bank's statement export, or the generic format.
     csvImportFormat: resolveAccountCsvImportFormat(institution?.name).format,
     currencyKey: { code: currencyCode },
+    fxRateDate: fx.fxRateDate,
+    fxStatus: fx.fxStatus,
     // Household: privacy state + who owns the account, for the privacy
     // toggle (owner-only) and shared-context surfacing.
     isOwnedByViewer:

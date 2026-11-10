@@ -38,6 +38,10 @@ describe('mapNetWorthSummary', () => {
     expect(mapNetWorthSummary(dto(loans, portfolios)).completeness).toBe('partial')
   })
 
+  it('marks a summary that leaves out an unconverted account as partial', () => {
+    expect(mapNetWorthSummary({ ...dto(0, 0), unsupportedCurrencies: { accounts: 1, loans: 0, portfolios: 0 } }).completeness).toBe('partial')
+  })
+
   it('never infers complete when unsupported counters are zero', () => {
     expect(mapNetWorthSummary(dto(0, 0)).completeness).toBe('unknown')
   })

@@ -2557,5 +2557,16 @@
     "failed": "The balances could not be recalculated. Try again in a few minutes.",
     "too-soon": "This account was recalculated less than a minute ago. Try again shortly.",
     "error": "The recalculation could not be started. Try again."
+  },
+  "fx": {
+    "not-converted": "Not converted",
+    "not-converted-hint": "No exchange rate for {currency} yet, so this amount stays in {currency} and is left out of totals.",
+    "estimated": "Estimated",
+    "estimated-hint": "Converted at the rate from {date}, the latest one available. It is converted again when a newer rate arrives.",
+    "estimated-hint-no-date": "Converted at an older rate, the latest one available. It is converted again when a newer rate arrives.",
+    "incomplete-label": "Not every amount could be converted",
+    "total-leaves-out": "This total leaves out {count, plural, one {# account, loan or portfolio} other {# accounts, loans or portfolios}} that could not be valued in {currency}.",
+    "missing-rates": "No exchange rate yet for {currencies}.",
+    "add-rate": "Add an exchange rate"
   }
 }

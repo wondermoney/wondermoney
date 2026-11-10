@@ -76,6 +76,11 @@ export interface NetWorthSummary {
   suggestPortfolioLink: boolean;
   totalNetWorth: number;
   /**
+   * The currencies of the accounts and loans left out of the totals for want of an exchange rate,
+   * sorted, so a client can name them. A partly valued portfolio has no single currency to name.
+   */
+  unconvertedCurrencies: string[];
+  /**
    * Rows left out of the totals because they could not be valued in `currencyCode`. An account
    * counts here when its balance cannot be converted: it adds nothing, and the summary is incomplete.
    */
@@ -142,10 +147,12 @@ export class NetWorthService {
     const rates = await loadAccountRates(DI.em, accounts, currencyCode, asOf, rateScope(resolveTenantKeyNumber(appuserTenant.tenantKey)));
     const accountRows: NetWorthInputRow[] = [];
     let unconvertedAccounts = 0;
+    const unconvertedCurrencies = new Set<string>();
     for (const account of accounts) {
       const value = accountBalanceIn(account, currencyCode, rates, asOf);
       if (!value) {
         unconvertedAccounts += 1;
+        if (account.currencyKey.code) unconvertedCurrencies.add(account.currencyKey.code);
         continue;
       }
       accountRows.push({ balance: Money.toNumber(value), id: account.accountKey, name: account.accountName ?? 'Account' });
@@ -164,8 +171,10 @@ export class NetWorthService {
       portfolios: portfolios.filter((portfolio) => !portfolio.supportedCurrency && portfolio.countedInAccountId == null).length,
     };
 
+    for (const loan of loans) if (loan.currencyKey.code && loan.currencyKey.code !== currencyCode) unconvertedCurrencies.add(loan.currencyKey.code);
+
     return {
-      ...buildNetWorthSummary({ accounts: accountRows, currencyCode, loans: loanRows, portfolios, unsupportedCurrencies }),
+      ...buildNetWorthSummary({ accounts: accountRows, currencyCode, loans: loanRows, portfolios, unconvertedCurrencies: [...unconvertedCurrencies], unsupportedCurrencies }),
       suggestPortfolioLink: shouldSuggestPortfolioLink(accounts, portfolioRows.map((row) => row.link)),
     };
   }
@@ -403,6 +412,7 @@ function buildNetWorthSummary(input: {
   currencyCode: string;
   loans: NetWorthInputRow[];
   portfolios: NetWorthInputRow[];
+  unconvertedCurrencies?: string[];
   unsupportedCurrencies?: { accounts?: number; loans?: number; portfolios?: number };
 }): Omit<NetWorthSummary, 'suggestPortfolioLink'> {
   // Every row reaching here is already in the viewer's currency.
@@ -428,6 +438,7 @@ function buildNetWorthSummary(input: {
       ...input.loans.map((loan) => ({ ...loan, balance: -loan.balance, type: 'loans' as const })),
     ],
     totalNetWorth: subtractMoney(addMoney(assetsAccounts, assetsPortfolios), liabilitiesLoans),
+    unconvertedCurrencies: [...(input.unconvertedCurrencies ?? [])].sort(),
     unsupportedCurrencies,
   };
 }

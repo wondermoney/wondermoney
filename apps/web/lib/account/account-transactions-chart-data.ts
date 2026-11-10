@@ -15,7 +15,8 @@ interface ProcessedTransaction {
     accountKey: number;
   };
   editedSettlementAmount?: number;
-  appuserSettlementAmount: number;
+  /** Null when no exchange rate converts it; such a row adds nothing to the chart. */
+  appuserSettlementAmount: number | null;
   appuserCurrencyBalance: number;
 }
 
@@ -58,7 +59,7 @@ function getAccountKeys(transactions: ProcessedTransaction[]): number[] {
 function calculateDailyAmount(transactions: ProcessedTransaction[], date: Date): number {
   return transactions
     .filter((tx) => endOfDay(tx.transactionDate).getTime() === date.getTime())
-    .reduce((sum, tx) => sum + Math.abs(tx.editedSettlementAmount ?? tx.appuserSettlementAmount), 0);
+    .reduce((sum, tx) => sum + Math.abs(tx.editedSettlementAmount ?? tx.appuserSettlementAmount ?? 0), 0);
 }
 
 function calculateBalanceAtDate(transactions: ProcessedTransaction[], date: Date, accountKeys: number[]): number {
@@ -80,7 +81,7 @@ function calculateOpeningBalance(transactions: ProcessedTransaction[], accountKe
       return acc;
     }
 
-    const transactionAmount = firstTransactionForAccount.editedSettlementAmount ?? firstTransactionForAccount.appuserSettlementAmount;
+    const transactionAmount = firstTransactionForAccount.editedSettlementAmount ?? firstTransactionForAccount.appuserSettlementAmount ?? 0;
 
     return acc + (firstTransactionForAccount.transactionKey > 0
       ? firstTransactionForAccount.appuserCurrencyBalance - transactionAmount

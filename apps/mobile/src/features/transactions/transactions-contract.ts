@@ -1,6 +1,7 @@
 import { z } from 'zod'
 
 import { tagSchema } from '@/features/tags/tags-contract'
+import { fxRateDateSchema, fxStatusSchema } from '@/lib/api/fx-status'
 import { readEndpoint, tolerantEnum, writeEndpoint } from '@/lib/api/runtime-schema'
 import { deviceTimeZone } from '@/lib/dates/transaction-date'
 
@@ -58,6 +59,9 @@ const transactionBaseShape = {
   appuserCurrencyKey: currency.nullish(),
   balance: money.nullish(),
   appuserCurrencyBalance: money.nullish(),
+  // How `appuserSettlementAmount` was converted; optional, an older API doesn't send them.
+  fxStatus: fxStatusSchema,
+  fxRateDate: fxRateDateSchema,
   transactionMerchantKey: z.object({ name: z.string().min(1).max(200) }).nullable().optional(),
   reviewed: z.boolean(),
   hidden: z.boolean().optional(),

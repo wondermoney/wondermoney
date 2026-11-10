@@ -8,6 +8,7 @@ import { AccountMark } from "@/components/account/AccountMark";
 import { Amount } from "@/components/ui/Amount";
 import DataLoadError from "@/components/ui/DataLoadError";
 import { RowsSkeleton, Section } from "@/components/ui/RuledSection";
+import { UnconvertedTotalWarning } from "@/components/ui/UnconvertedTotalWarning";
 import useAccounts from "@/lib/api/account/useAccounts";
 import useNetWorth from "@/lib/api/net-worth/useNetWorth";
 import {
@@ -176,6 +177,13 @@ export function BalanceSheetSection() {
     <Section id="sheet-heading" title={t("title")}>
       <PortfolioLinkSuggestion
         suggested={netWorth.suggestPortfolioLink === true}
+      />
+      {/* What could not be valued has no row here, so the sheet says so. */}
+      <UnconvertedTotalWarning
+        unconverted={netWorth.unconverted}
+        currency={currency}
+        variant="note"
+        className="mb-4"
       />
       <div className="grid grid-cols-1 sm:grid-cols-2">
         <div className="sm:pr-6">

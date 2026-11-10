@@ -6,7 +6,7 @@ import { inTimeZone } from '@/test/time-zone'
 
 import { TransactionsScreen } from './transactions-screen'
 import { mapTransactions } from './transactions-view-model'
-import { nullishTransactionFixture, transactionFixture } from './test-fixtures'
+import { estimatedTransactionFixture, nullishTransactionFixture, transactionFixture, unconvertedTransactionFixture } from './test-fixtures'
 
 jest.mock('@/components/ui/date-field', () => jest.requireActual('./test-date-field'))
 
@@ -374,6 +374,21 @@ describe('TransactionsScreen', () => {
     await fireEvent.press(row)
     expect(view.getAllByText('Amount and currency unavailable')).toHaveLength(3)
     expect(view.getByText('Amount unavailable')).toBeOnTheScreen()
+  })
+  it('shows the original amount of a row with no exchange rate, marked not converted', async () => {
+    const { view } = await renderLoaded([unconvertedTransactionFixture])
+    const status = view.getByTestId('transaction-fx-status')
+    expect(status).toHaveTextContent('Not converted')
+    expect(view.getByRole('button', { name: /^Tokyo kiosk,.*-¥10,000, Debit,.*Not converted\. No exchange rate for JPY yet/ })).toBeOnTheScreen()
+  })
+  it('marks a row converted at an old rate as estimated, with the rate date', async () => {
+    const { view } = await renderLoaded([estimatedTransactionFixture])
+    expect(view.getByTestId('transaction-fx-status')).toHaveTextContent(/Estimated.*Rate of Nov 3, 2026/)
+    expect(view.getByRole('button', { name: /^Osaka cafe,.*-€60\.00.*Estimated\. Converted at the rate from Nov 3, 2026/ })).toBeOnTheScreen()
+  })
+  it('marks nothing on a row converted at a current rate', async () => {
+    const { view } = await renderLoaded([transactionFixture])
+    expect(view.queryByTestId('transaction-fx-status')).not.toBeOnTheScreen()
   })
   it('shows a present amount without inventing a missing currency', async () => {
     const { view } = await renderLoaded([{ ...transactionFixture, transactionKey: 89, appuserCurrencyKey: null }])

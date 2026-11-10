@@ -32,6 +32,7 @@ import type { Category } from "@/lib/api/category/useCategories";
 import { isDemoReadOnlyError } from "@/lib/api/errors";
 import useTags from "@/lib/api/tag/useTags";
 import { useRateLimitToast } from "@/lib/api/useRateLimitToast";
+import { transactionFxView } from "@/lib/fx/fx-status";
 import { cn } from "@/lib/utils";
 import { transactionDisplayDate } from "@/lib/utils/transaction-date";
 import { useFormatCurrency } from "@/lib/utils/useFormatCurrency";
@@ -81,6 +82,7 @@ import {
   type FundGoalTransactionRequest,
 } from "./AccountTransactionEditSheet";
 import { LedgerDateCell, LedgerMonthLabel } from "./LedgerCells";
+import { TransactionAmount } from "./TransactionAmount";
 import TransactionReviewControl from "./TransactionReviewControl";
 import {
   TransactionSplitLinesList,
@@ -529,9 +531,6 @@ const AccountTransactionsTable: React.FC<AccountTransactionTableProps> =
               </div>
             ) : null}
             {mobileTransactions.map((transaction) => {
-              const amount =
-                transaction.editedSettlementAmount ??
-                transaction.appuserSettlementAmount;
               const firstCategory = transaction.appuserTransactionCategories[0];
               // A split row says so, with how many categories, instead of one category.
               const categoryLabel = isSplitTransaction(transaction)
@@ -571,9 +570,8 @@ const AccountTransactionsTable: React.FC<AccountTransactionTableProps> =
                             "—"}
                         </p>
                       </div>
-                      <Amount
-                        value={amount}
-                        currency={transaction.appuserCurrencyKey.code}
+                      <TransactionAmount
+                        transaction={transaction}
                         className="shrink-0 font-mono text-sm leading-tight font-semibold"
                       />
                       {withRowActions && (
@@ -974,15 +972,10 @@ const AccountTransactionsTable: React.FC<AccountTransactionTableProps> =
                         </TooltipContent>
                       </Tooltip>
                     )}
-                    <span className="text-foreground font-mono text-sm font-semibold whitespace-nowrap">
-                      <Amount
-                        value={
-                          info.row.original.editedSettlementAmount ??
-                          info.getValue()
-                        }
-                        currency={info.row.original.appuserCurrencyKey.code}
-                      />
-                    </span>
+                    <TransactionAmount
+                      transaction={info.row.original}
+                      className="text-foreground font-mono text-sm font-semibold whitespace-nowrap"
+                    />
                   </div>
                 </TooltipProvider>
                 {info.row.original.loanRepayment ? (
@@ -1002,14 +995,17 @@ const AccountTransactionsTable: React.FC<AccountTransactionTableProps> =
                         info.row.original.appuserCurrencyKey.code,
                       ),
                       total: formatCurrency(
-                        info.row.original.appuserSettlementAmount,
+                        info.row.original.appuserSettlementAmount ?? 0,
                         info.row.original.appuserCurrencyKey.code,
                       ),
                     })}
                   </span>
                 ) : null}
+                {/* The original amount, under the converted one; a row with
+                    no conversion already shows it as its figure. */}
                 {info.row.original.appuserCurrencyKey.code !==
-                info.row.original.settlementCurrencyKey.code ? (
+                  info.row.original.settlementCurrencyKey.code &&
+                transactionFxView(info.row.original).status !== "missing" ? (
                   <span className="text-muted-foreground font-mono text-xs">
                     <Amount
                       value={info.row.original.settlementAmount}
@@ -1699,12 +1695,8 @@ const AccountTransactionsTable: React.FC<AccountTransactionTableProps> =
             // one place § 9's value-as-title genuinely applies.
             title={
               inspectedTransaction ? (
-                <Amount
-                  value={
-                    inspectedTransaction.editedSettlementAmount ??
-                    inspectedTransaction.appuserSettlementAmount
-                  }
-                  currency={inspectedTransaction.appuserCurrencyKey.code}
+                <TransactionAmount
+                  transaction={inspectedTransaction}
                   className="font-mono"
                 />
               ) : null

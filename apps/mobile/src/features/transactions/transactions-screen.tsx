@@ -10,6 +10,7 @@ import { Button as UiButton } from '@/components/ui/button'
 import { DateField } from '@/components/ui/date-field'
 import { EntityMark } from '@/components/ui/entity-mark'
 import { FLOATING_ACTION_SIZE, FloatingActionButton } from '@/components/ui/floating-action-button'
+import { describeFxState, FxStatusLabel } from '@/components/ui/fx-status-label'
 import { Icon } from '@/components/ui/icon'
 import { IconButton } from '@/components/ui/icon-button'
 import { ListGroupHeading, ListRow } from '@/components/ui/list-row'
@@ -859,16 +860,20 @@ const TransactionRow = memo(function TransactionRow({
 }: TransactionRowProps) {
   const { hidden: amountsHidden } = usePrivacyMode()
   const { t } = useTranslation()
-  const amount = formatAvailableMoney(item.amount, item.currency, locale, t, amountsHidden)
-  const signedAmount = item.amount !== null && item.amount > 0 ? `+${amount}` : amount
+  // With no exchange rate there is no amount in the user's currency: the row shows its original one.
+  const shownValue = item.fx.status === 'missing' ? item.fx.amount : item.amount
+  const shownCurrency = item.fx.status === 'missing' ? item.fx.currency : item.currency
+  const amount = formatAvailableMoney(shownValue, shownCurrency, locale, t, amountsHidden)
+  const signedAmount = shownValue !== null && shownValue > 0 ? `+${amount}` : amount
+  const fxCopy = describeFxState(item.fx, t, locale)
   const direction = t(`transactions.${item.direction === 'unknown' ? 'amount' : item.direction}`)
   const fullDate = formatTransactionDate(item.date, locale)
   const title = item.title ?? t('transactions.unnamed')
   const account = item.accountName ?? t('transactions.accountUnavailable')
   const selectable = selecting && isSelectable(item)
   const editable = isSelectable(item)
-  const figure = item.amount !== null && item.currency !== null
-    ? <Amount currency={item.currency} locale={locale} size="amountBase" value={item.amount} />
+  const figure = shownValue !== null && shownCurrency !== null
+    ? <Amount currency={shownCurrency} locale={locale} size="amountBase" value={shownValue} />
     : <Text variant="amountBase">{amount}</Text>
 
   return (
@@ -876,7 +881,7 @@ const TransactionRow = memo(function TransactionRow({
     <View style={[!monthStart && { borderTopWidth: 1, borderTopColor: palette.border }, item.hidden && styles.hiddenRow]}>
       {monthStart ? <ListGroupHeading first={isFirst} title={formatMonth(item.date, locale)} variant="heading" /> : null}
       <ListRow
-        accessibilityLabel={[title, account, signedAmount, direction, fullDate].join(', ')}
+        accessibilityLabel={[title, account, signedAmount, direction, fullDate, fxCopy ? `${fxCopy.label}. ${fxCopy.hint}` : null].filter(Boolean).join(', ')}
         density="comfortable"
         figure={figure}
         leading={selectable ? (
@@ -900,10 +905,11 @@ const TransactionRow = memo(function TransactionRow({
         onPress={() => { if (!selecting) onToggleExpand(item.id); else if (selectable && !scopeLocked) onToggleSelect(item.id) }}
         title={title}
       >
-        {!item.reviewed || item.hidden ? (
+        {!item.reviewed || item.hidden || fxCopy ? (
           <View style={styles.statusLine}>
             {!item.reviewed ? <Text style={styles.statusText} tone="warning" variant="meta">{t('transactions.needsReview')}</Text> : null}
             {item.hidden ? <Text style={styles.statusText} tone="muted" variant="meta">{t('transactions.hidden')}</Text> : null}
+            <FxStatusLabel locale={locale} state={item.fx} testID="transaction-fx-status" />
           </View>
         ) : null}
         <TagChips tags={item.tags} />
@@ -1048,7 +1054,7 @@ const styles = StyleSheet.create({
   dateRow: { flexDirection: 'row', flexWrap: 'wrap', gap: themeTokens.spacing[3] },
   dateCell: { flexGrow: 1, flexBasis: 140 },
   hiddenRow: { opacity: 0.5 },
-  statusLine: { flexDirection: 'row', flexWrap: 'wrap', columnGap: themeTokens.spacing[2] },
+  statusLine: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', columnGap: themeTokens.spacing[2], rowGap: themeTokens.spacing[1] },
   statusText: { fontWeight: '500' },
   checkbox: { width: 20, height: 20, borderWidth: 1, borderRadius: themeTokens.radius.sm, alignItems: 'center', justifyContent: 'center' },
   details: { padding: themeTokens.spacing[4], borderRadius: themeTokens.radius.lg, marginBottom: themeTokens.spacing[3], gap: themeTokens.spacing[3] },

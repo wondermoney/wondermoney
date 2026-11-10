@@ -1,5 +1,6 @@
 import { z } from 'zod'
 
+import { fxRateDateSchema, fxStatusSchema } from '../../lib/api/fx-status'
 import { readEndpoint, tolerantEnum, writeEndpoint } from '../../lib/api/runtime-schema'
 
 const currencySchema = z.object({
@@ -57,6 +58,9 @@ export const accountSummarySchema = z.object({
   // The account type's key ('CHECKING', 'CREDIT_CARD', 'MORTGAGE', …) for the row's glyph when there
   // is no institution logo. Optional: older APIs don't send it.
   accountType: z.string().max(255).nullish().catch(null),
+  // How `appuserCurrencyBalance` was converted; optional, an older API doesn't send them.
+  fxStatus: fxStatusSchema,
+  fxRateDate: fxRateDateSchema,
 })
 
 export const accountUpdateWriteSchema = z.object({

@@ -10,7 +10,8 @@ export const mapNetWorthSummary = (dto: NetWorthDto): NetWorthSummaryViewModel =
   ...dto,
   // Tolerate a partial summary (an older cached shape): no rows reads as an empty breakdown.
   rows: Array.isArray(dto.rows) ? dto.rows : [],
-  completeness: (dto.unsupportedCurrencies?.loans ?? 0) > 0
+  completeness: (dto.unsupportedCurrencies?.accounts ?? 0) > 0
+    || (dto.unsupportedCurrencies?.loans ?? 0) > 0
     || (dto.unsupportedCurrencies?.portfolios ?? 0) > 0
     ? 'partial'
     : 'unknown',

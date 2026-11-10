@@ -231,7 +231,10 @@
       "error": "Não foi possível carregar as estatísticas",
       "topCategory": "{{name}} — {{amount}} este mês"
     },
-    "helpText": "Uma visão geral rápida das suas contas, portefólio e passivos."
+    "helpText": "Uma visão geral rápida das suas contas, portefólio e passivos.",
+    "unsupportedAccount_one": "{{count}} saldo de conta não está incluído",
+    "unsupportedAccount_other": "{{count}} saldos de conta não estão incluídos",
+    "unconvertedCurrencies": "Ainda não há taxa de câmbio para {{currencies}}."
   },
   "home": {
     "netWorth": {
@@ -3940,5 +3943,18 @@
     "show": "Mostrar montantes",
     "setting": "Ocultar montantes",
     "settingHelp": "Oculta saldos e montantes neste dispositivo, para quando alguém consegue ver o seu ecrã. As percentagens continuam visíveis."
+  },
+  "fxStatus": {
+    "missing": {
+      "label": "Não convertido",
+      "hint": "Ainda não há taxa de câmbio para {{currency}}, por isso este montante aparece em {{currency}} e fica de fora dos totais.",
+      "hintNoCurrency": "Ainda não há taxa de câmbio, por isso este montante aparece na moeda original e fica de fora dos totais."
+    },
+    "provisional": {
+      "label": "Estimado",
+      "rateOf": "Taxa de {{date}}",
+      "hint": "Convertido à taxa de {{date}}, a mais recente disponível. É atualizado quando chegar uma taxa mais recente.",
+      "hintNoDate": "Convertido a uma taxa mais antiga, a mais recente disponível. É atualizado quando chegar uma taxa mais recente."
+    }
   }
 }

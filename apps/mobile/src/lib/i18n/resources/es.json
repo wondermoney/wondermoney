@@ -231,7 +231,10 @@
       "error": "No se pudo cargar la información",
       "topCategory": "{{name}} — {{amount}} este mes"
     },
-    "helpText": "Un resumen rápido de tus cuentas, cartera y pasivos."
+    "helpText": "Un resumen rápido de tus cuentas, cartera y pasivos.",
+    "unsupportedAccount_one": "No se incluye {{count}} saldo de cuenta",
+    "unsupportedAccount_other": "No se incluyen {{count}} saldos de cuenta",
+    "unconvertedCurrencies": "Aún no hay tipo de cambio para {{currencies}}."
   },
   "home": {
     "netWorth": {
@@ -3940,5 +3943,18 @@
     "show": "Mostrar importes",
     "setting": "Ocultar importes",
     "settingHelp": "Oculta saldos e importes en este dispositivo, para cuando alguien pueda ver tu pantalla. Los porcentajes siguen visibles."
+  },
+  "fxStatus": {
+    "missing": {
+      "label": "Sin convertir",
+      "hint": "Aún no hay tipo de cambio para {{currency}}, así que este importe se muestra en {{currency}} y queda fuera de los totales.",
+      "hintNoCurrency": "Aún no hay tipo de cambio, así que este importe se muestra en su moneda original y queda fuera de los totales."
+    },
+    "provisional": {
+      "label": "Estimado",
+      "rateOf": "Tipo del {{date}}",
+      "hint": "Convertido al tipo del {{date}}, el más reciente disponible. Se actualiza cuando llega uno más reciente.",
+      "hintNoDate": "Convertido a un tipo anterior, el más reciente disponible. Se actualiza cuando llega uno más reciente."
+    }
   }
 }

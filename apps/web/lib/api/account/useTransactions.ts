@@ -7,6 +7,7 @@ import {
 import type { AxiosInstance } from "axios";
 
 import type { TransferDestinationRow } from "@/lib/account/transaction-transfer";
+import type { FxFields } from "@/lib/fx/fx-status";
 import type { SupportedCurrencyCodes } from "@/lib/utils/currencySymbol";
 
 import api from "../api";
@@ -16,7 +17,11 @@ import { transactionDateRangeParams } from "../date-range";
 import type { Tag } from "../tag/useTags";
 import type { TransactionSplitLine } from "./useTransactionSplits";
 
-export interface Transaction {
+/**
+ * `fxStatus` / `fxRateDate` say how `appuserSettlementAmount` was converted
+ * (`lib/fx/fx-status.ts`); read them through `transactionFxView`.
+ */
+export interface Transaction extends FxFields {
   transactionKey: number;
   transactionDate: string; // date iso
   recurringSeries?: {
@@ -42,7 +47,8 @@ export interface Transaction {
   settlementAmount: number;
   editedSettlementAmount?: number;
   settlementCurrencyKey: { code: SupportedCurrencyCodes };
-  appuserSettlementAmount: number;
+  /** Null when no exchange rate converts the amount (`fxStatus` `missing`). */
+  appuserSettlementAmount: number | null;
   appuserCurrencyKey: { code: SupportedCurrencyCodes };
   balance: number;
   appuserCurrencyBalance: number;

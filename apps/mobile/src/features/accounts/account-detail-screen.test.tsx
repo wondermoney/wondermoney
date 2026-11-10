@@ -74,6 +74,24 @@ describe('AccountDetailScreen', () => {
     expect(edit).toHaveBeenCalledTimes(1)
   })
 
+  it('leads an account with no exchange rate with its own balance, marked not converted', async () => {
+    const { view } = await renderScreen({ status: 'loaded', data: { ...openBanking, convertedBalance: null, fx: { status: 'missing', amount: 100, currency: 'USD' } } })
+    const original = formatCurrency(100, { locale: 'en', currency: 'USD' })
+    expect(view.getByLabelText(`Account balance, ${original}, Not converted. No exchange rate for USD yet, so this amount is shown in USD and left out of totals.`)).toBeOnTheScreen()
+    expect(view.getByTestId('account-balance-fx-status')).toHaveTextContent('Not converted')
+    expect(view.queryByText('Balance unavailable')).not.toBeOnTheScreen()
+  })
+
+  it('marks a balance converted at an old rate as estimated, with the rate date', async () => {
+    const { view } = await renderScreen({ status: 'loaded', data: { ...openBanking, fx: { status: 'provisional', rateDate: '2026-01-15' } } })
+    expect(view.getByTestId('account-balance-fx-status')).toHaveTextContent(/Estimated.*Rate of Jan 15, 2026/)
+  })
+
+  it('marks nothing on a balance converted at a current rate', async () => {
+    const { view } = await renderScreen({ status: 'loaded', data: { ...openBanking, fx: { status: 'exact' } } })
+    expect(view.queryByTestId('account-balance-fx-status')).not.toBeOnTheScreen()
+  })
+
   it('adds a transaction from the floating "+" and keeps edit and import behind the overflow menu', async () => {
     const onCreateTransaction = jest.fn()
     const onImportTransactions = jest.fn()
