@@ -21,6 +21,7 @@ import { PortfolioPerformanceChart, type PortfolioPerformanceState } from './por
 import { Metric, PortfolioFailure, PortfolioLoading } from './portfolio-screen-parts'
 import {
   DividendIncomeBody,
+  hasDividendIncome,
   type DividendIncomeData,
   HoldingsList,
   PortfolioAllocationSection,
@@ -190,7 +191,7 @@ export function PortfoliosScreen({ state, sections = idleSections, period = 'YTD
           <PortfolioAllocationSection locale={locale} state={sections.allocation} title={t('portfolioSections.allocation')} />
           <PortfolioMetricsSection locale={locale} state={sections.metrics} />
           <PortfolioTopMoversSection currency={data.currency} locale={locale} state={sections.topMovers} />
-          {sections.dividends.status === 'loaded' && sections.dividends.data.totalDividends > 0 ? (
+          {sections.dividends.status === 'loaded' && hasDividendIncome(sections.dividends.data) ? (
             <Section title={t('portfolioSections.dividendIncome')} variant="open">
               <DividendIncomeBody data={sections.dividends.data} locale={locale} />
             </Section>

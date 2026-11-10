@@ -56,14 +56,14 @@ export function ReportsHubRoute() {
   let sankeyState: SankeyReportViewState
   if (sankeyQuery.isAccessTransition) sankeyState = { status: 'access-transition' }
   else if (sankeyQuery.isLoading) sankeyState = { status: 'loading' }
-  else if (sankeyQuery.data) sankeyState = { status: 'loaded', report: mapSankeyReport(sankeyQuery.data), refreshing: sankeyQuery.isFetching }
+  else if (sankeyQuery.data) sankeyState = { status: 'loaded', report: mapSankeyReport(sankeyQuery.data), completeness: sankeyQuery.data.completeness, refreshing: sankeyQuery.isFetching }
   else if (sankeyQuery.error instanceof ApiError && sankeyQuery.error.code === 'invalid-response') sankeyState = { status: 'invalid-response' }
   else sankeyState = { status: 'error' }
 
   let cashflowState: CashflowReportViewState
   if (cashflowQuery.isAccessTransition) cashflowState = { status: 'access-transition' }
   else if (cashflowQuery.isLoading) cashflowState = { status: 'loading' }
-  else if (cashflowQuery.data) cashflowState = { status: 'loaded', report: mapCashflowReport(cashflowQuery.data), refreshing: cashflowQuery.isFetching }
+  else if (cashflowQuery.data) cashflowState = { status: 'loaded', report: mapCashflowReport(cashflowQuery.data), completeness: cashflowQuery.data.completeness, refreshing: cashflowQuery.isFetching }
   else if (cashflowQuery.error instanceof ApiError && cashflowQuery.error.code === 'invalid-response') cashflowState = { status: 'invalid-response' }
   else cashflowState = { status: 'error' }
 
@@ -75,6 +75,7 @@ export function ReportsHubRoute() {
       status: 'loaded',
       report: mapSpendingByCategoryReport(spendingQuery.data, spendingQuery.priorData, t('reports.other')),
       trendReady: spendingQuery.priorReady,
+      completeness: spendingQuery.data.completeness,
       refreshing: spendingQuery.isFetching,
     }
   } else if (spendingQuery.error instanceof ApiError && spendingQuery.error.code === 'invalid-response') spendingState = { status: 'invalid-response' }
@@ -90,7 +91,7 @@ export function ReportsHubRoute() {
   let budgetState: BudgetVsActualViewState
   if (budgetQuery.isAccessTransition) budgetState = { status: 'access-transition' }
   else if (budgetQuery.isLoading) budgetState = { status: 'loading' }
-  else if (budgetQuery.data) budgetState = { status: 'loaded', report: mapBudgetVsActualReport(budgetQuery.data), refreshing: budgetQuery.isFetching }
+  else if (budgetQuery.data) budgetState = { status: 'loaded', report: mapBudgetVsActualReport(budgetQuery.data), completeness: budgetQuery.data.completeness, refreshing: budgetQuery.isFetching }
   else if (budgetQuery.error instanceof ApiError && budgetQuery.error.code === 'invalid-response') budgetState = { status: 'invalid-response' }
   else budgetState = { status: 'error' }
 

@@ -13,6 +13,8 @@ import { Section } from '@/components/ui/section'
 import { SegmentedControl } from '@/components/ui/segmented-control'
 import { Stat, StatList, StatValue } from '@/components/ui/stat'
 import { Text } from '@/components/ui/text'
+import { UnconvertedAmountsNote } from '@/components/ui/unconverted-amounts-note'
+import type { AmountsCompleteness } from '@/lib/api/completeness'
 import { useFormatMoney } from '@/lib/formatters/money-display'
 import { themeTokens } from '@/theme/tokens'
 import { usePalette } from '@/theme/use-palette'
@@ -400,13 +402,23 @@ export function PortfolioQuickStatsSection({ holdingsCount, biggestPosition, bes
 
 // ─── Dividend income ────────────────────────────────────────────────────────
 
-export type DividendIncomeData = Readonly<{ currency: string | null; dividends: readonly Readonly<{ symbol: string; value: number }>[]; totalDividends: number }>
+export type DividendIncomeData = Readonly<{ currency: string | null; dividends: readonly Readonly<{ symbol: string; value: number }>[]; totalDividends: number; completeness?: AmountsCompleteness }>
+
+/** Whether there is anything to say about dividends: some were received, or some were left out of the total. */
+export const hasDividendIncome = (data: DividendIncomeData) => data.totalDividends > 0 || data.completeness?.isComplete === false
 
 /** Web's `PortfolioDividendIncome`: the total, then "Dividends by Asset", largest first. */
 export function DividendIncomeBody({ data, locale, emptyLabel }: { data: DividendIncomeData; locale: string; emptyLabel?: string }) {
   const formatMoney = useFormatMoney()
   const { t } = useTranslation()
-  if (data.totalDividends === 0 || data.dividends.length === 0) return <Text tone="muted" variant="meta">{emptyLabel ?? t('portfolioSections.noDividends')}</Text>
+  if (data.totalDividends === 0 || data.dividends.length === 0) {
+    return (
+      <View style={styles.stack}>
+        <Text tone="muted" variant="meta">{emptyLabel ?? t('portfolioSections.noDividends')}</Text>
+        <UnconvertedAmountsNote completeness={data.completeness} testID="dividend-income-unconverted" />
+      </View>
+    )
+  }
   const label = (value: number) => (data.currency ? formatMoney(value, { locale, currency: data.currency }) : t('portfolioAnalytics.valueCurrencyUnavailable', { value: formatMoney(value, { locale, currency: null, minimumFractionDigits: 0, maximumFractionDigits: 2 }) }))
   const sorted = [...data.dividends].sort((a, b) => b.value - a.value)
   return (
@@ -424,6 +436,7 @@ export function DividendIncomeBody({ data, locale, emptyLabel }: { data: Dividen
           </View>
         ))}
       </View>
+      <UnconvertedAmountsNote completeness={data.completeness} testID="dividend-income-unconverted" />
     </View>
   )
 }

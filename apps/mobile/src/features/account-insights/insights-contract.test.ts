@@ -26,6 +26,11 @@ describe('account insight contracts', () => {
     expect(categorySpendingResponseSchema.parse({ categorySpending: [categoryFixture] }).categorySpending[0]?.categoryKey).toBe(-1)
     expect(createCategorySpendingEndpoint(scope, 5).path).toContain('limit=5')
   })
+  it('reads which category spending was left out for want of an exchange rate', () => {
+    const completeness = { currencyCode: 'EUR', isComplete: false, unconvertedTransactions: 2, unconvertedCurrencies: ['USD'] }
+    expect(categorySpendingResponseSchema.parse({ categorySpending: [], completeness }).completeness).toEqual(completeness)
+    expect(categorySpendingResponseSchema.parse({ categorySpending: [] }).completeness).toBeUndefined()
+  })
   it.each([
     { ...metricFixture, currencyCode: 'eur' },
     { ...metricFixture, inflowCurrentPeriod: Infinity },

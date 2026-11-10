@@ -2885,6 +2885,11 @@
       "heading": "Exporta tus datos",
       "helper": "Descarga todo lo que ves en tu hogar (cuentas, transacciones, presupuestos, objetivos, préstamos e inversiones) en un zip con archivos JSON y CSV. Las cuentas privadas de tu pareja no se incluyen.",
       "start": "Exportar todos los datos",
+      "protect": "Proteger el archivo con una contraseña",
+      "password": "Contraseña",
+      "passwordConfirm": "Repetir contraseña",
+      "passwordHint": "Al menos {{min}} caracteres; lo mejor es una frase larga. La necesitarás para abrir el archivo con 7-Zip, Keka o WinRAR. Una contraseña olvidada no se puede recuperar.",
+      "protected": "Esta exportación está protegida con contraseña.",
       "download": "Descargar exportación",
       "preparing": "Preparando tu exportación. Te enviaremos un email cuando esté lista.",
       "readyUntil": "Disponible para descargar hasta el {{date}}.",
@@ -2892,7 +2897,11 @@
       "webOnly": "Este servidor crea las exportaciones mientras se descargan. Exporta tus datos desde la aplicación web, en Configuración > Privacidad.",
       "errors": {
         "limit": "Puedes exportar tus datos hasta 3 veces al día. Inténtalo de nuevo más tarde.",
-        "unknown": "No se pudo iniciar la exportación. Comprueba tu conexión e inténtalo de nuevo."
+        "unknown": "No se pudo iniciar la exportación. Comprueba tu conexión e inténtalo de nuevo.",
+        "too-short": "Usa al menos {{min}} caracteres.",
+        "mismatch": "Las contraseñas no coinciden.",
+        "password": "El servidor no aceptó esta contraseña. Usa entre {{min}} y {{max}} caracteres.",
+        "in-progress": "Hay otra exportación en curso. Descárgala o espera a que termine e inténtalo de nuevo."
       }
     },
     "mfa": {
@@ -3500,6 +3509,12 @@
     "holdingLabel": "Comisiones excluidas",
     "holding": "Algunas comisiones de esta posición no se pudieron convertir a tu moneda, así que se excluyeron de su coste y su ganancia.",
     "gains": "Algunas comisiones de operaciones no se pudieron convertir a tu moneda, así que se excluyeron de estas ganancias."
+  },
+  "unconvertedAmounts": {
+    "withCurrencies_one": "Algunos importes están en otras monedas: {{count}} transacción en {{currencies}} queda fuera de este total hasta que haya un tipo de cambio.",
+    "withCurrencies_other": "Algunos importes están en otras monedas: {{count}} transacciones en {{currencies}} quedan fuera de este total hasta que haya un tipo de cambio.",
+    "noCurrency_one": "Algunos importes están en otras monedas: {{count}} transacción queda fuera de este total hasta que haya un tipo de cambio.",
+    "noCurrency_other": "Algunos importes están en otras monedas: {{count}} transacciones quedan fuera de este total hasta que haya un tipo de cambio."
   },
   "portfolioTickerSearch": {
     "placeholder": "p. ej. AAPL",

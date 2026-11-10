@@ -89,6 +89,12 @@ describe('mapPortfolioDividendIncome', () => {
     expect(mapPortfolioDividendIncome(dto, 'eur')).toMatchObject({ currency: null })
     expect(mapPortfolioDividendIncome(dto, null)).toMatchObject({ currency: null })
   })
+
+  it('keeps what was left out of the totals and shows them in the currency the API names', () => {
+    const completeness = { currencyCode: 'USD', isComplete: false, unconvertedTransactions: 1, unconvertedCurrencies: ['GBP'] }
+    const dto = { byAsset: [{ financialAssetKey: 1, symbol: 'AAPL', totalDividends: 4 }], totalDividends: 4, completeness }
+    expect(mapPortfolioDividendIncome(dto, 'EUR')).toMatchObject({ currency: 'USD', completeness })
+  })
 })
 
 describe('portfolio activity view model labels', () => {

@@ -2885,6 +2885,11 @@
       "heading": "Export your data",
       "helper": "Download everything in your household that you can see (accounts, transactions, budgets, goals, loans and investments) as a zip of JSON and CSV files. Your partner's private accounts are not included.",
       "start": "Export all data",
+      "protect": "Protect the file with a password",
+      "password": "Password",
+      "passwordConfirm": "Repeat password",
+      "passwordHint": "At least {{min}} characters; a long passphrase is best. You need it to open the file with 7-Zip, Keka or WinRAR. A forgotten password cannot be recovered.",
+      "protected": "This export is password protected.",
       "download": "Download export",
       "preparing": "Preparing your export. We will email you when it is ready.",
       "readyUntil": "Available to download until {{date}}.",
@@ -2892,7 +2897,11 @@
       "webOnly": "This server prepares exports as they download. Export your data from the web app, in Settings > Privacy.",
       "errors": {
         "limit": "You can export your data up to 3 times a day. Please try again later.",
-        "unknown": "The export could not be started. Check your connection and try again."
+        "unknown": "The export could not be started. Check your connection and try again.",
+        "too-short": "Use at least {{min}} characters.",
+        "mismatch": "The passwords do not match.",
+        "password": "The server did not accept this password. Use between {{min}} and {{max}} characters.",
+        "in-progress": "Another export is still in progress. Download it or wait for it to finish, then try again."
       }
     },
     "mfa": {
@@ -3500,6 +3509,12 @@
     "holdingLabel": "Fees left out",
     "holding": "Some fees on this holding couldn't be converted to your currency, so they were left out of its cost and gain.",
     "gains": "Some trade fees couldn't be converted to your currency, so they were left out of these gains."
+  },
+  "unconvertedAmounts": {
+    "withCurrencies_one": "Some amounts are in different currencies: {{count}} transaction in {{currencies}} is left out of this total until an exchange rate is available.",
+    "withCurrencies_other": "Some amounts are in different currencies: {{count}} transactions in {{currencies}} are left out of this total until an exchange rate is available.",
+    "noCurrency_one": "Some amounts are in different currencies: {{count}} transaction is left out of this total until an exchange rate is available.",
+    "noCurrency_other": "Some amounts are in different currencies: {{count}} transactions are left out of this total until an exchange rate is available."
   },
   "portfolioTickerSearch": {
     "placeholder": "e.g. AAPL",

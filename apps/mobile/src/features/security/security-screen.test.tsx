@@ -1,4 +1,4 @@
-import { fireEvent, render } from '@testing-library/react-native'
+import { fireEvent, render, waitFor } from '@testing-library/react-native'
 import { I18nextProvider } from 'react-i18next'
 
 import { initMobileI18n } from '@/lib/i18n'
@@ -121,6 +121,71 @@ describe('SecurityScreen', () => {
       const { view } = await renderScreen({ dataExport: dataExport({ failure: 'limit' }) })
       expect(view.getByRole('alert')).toBeOnTheScreen()
       expect(view.getByText(/up to 3 times a day/i)).toBeOnTheScreen()
+    })
+
+    const PASSPHRASE = 'correct horse battery staple'
+
+    const protectWith = async (view: Awaited<ReturnType<typeof renderScreen>>['view'], password: string, confirmation = password) => {
+      await fireEvent.press(view.getByRole('switch', { name: 'Protect the file with a password' }))
+      await fireEvent.changeText(view.getByLabelText('Password'), password)
+      await fireEvent.changeText(view.getByLabelText('Repeat password'), confirmation)
+      await fireEvent.press(view.getByRole('button', { name: 'Export all data' }))
+    }
+
+    it('starts an export without a password unless the member asks for one', async () => {
+      const props = dataExport()
+      const { view } = await renderScreen({ dataExport: props })
+      expect(view.queryByLabelText('Password')).not.toBeOnTheScreen()
+      await fireEvent.press(view.getByRole('button', { name: 'Export all data' }))
+      expect(props.onStart).toHaveBeenCalledWith(undefined)
+    })
+
+    it('sends the password once it is long enough and typed twice, then clears it', async () => {
+      const props = dataExport({ onStart: jest.fn().mockResolvedValue(true) })
+      const { view } = await renderScreen({ dataExport: props })
+      await protectWith(view, PASSPHRASE)
+      expect(props.onStart).toHaveBeenCalledWith(PASSPHRASE)
+      await waitFor(() => expect(view.queryByLabelText('Password')).not.toBeOnTheScreen())
+    })
+
+    it('keeps the password when the server did not accept the export', async () => {
+      const props = dataExport({ onStart: jest.fn().mockResolvedValue(false) })
+      const { view } = await renderScreen({ dataExport: props })
+      await protectWith(view, PASSPHRASE)
+      expect(props.onStart).toHaveBeenCalledTimes(1)
+      expect(view.getByLabelText('Password').props.value).toBe(PASSPHRASE)
+    })
+
+    it('blocks a password shorter than 16 characters', async () => {
+      const props = dataExport()
+      const { view } = await renderScreen({ dataExport: props })
+      await protectWith(view, 'fifteen chars!!')
+      expect(props.onStart).not.toHaveBeenCalled()
+      expect(view.getByRole('alert')).toHaveTextContent('Use at least 16 characters.')
+    })
+
+    it('blocks a confirmation that does not match', async () => {
+      const props = dataExport()
+      const { view } = await renderScreen({ dataExport: props })
+      await protectWith(view, PASSPHRASE, `${PASSPHRASE}.`)
+      expect(props.onStart).not.toHaveBeenCalled()
+      expect(view.getByRole('alert')).toHaveTextContent('The passwords do not match.')
+    })
+
+    it('says under the password field when the server rejected the password', async () => {
+      const { view } = await renderScreen({ dataExport: dataExport({ failure: 'password' }) })
+      await fireEvent.press(view.getByRole('switch', { name: 'Protect the file with a password' }))
+      expect(view.getByRole('alert')).toHaveTextContent(/did not accept this password.*between 16 and 256 characters/i)
+    })
+
+    it('explains that another export is still running', async () => {
+      const { view } = await renderScreen({ dataExport: dataExport({ failure: 'in-progress' }) })
+      expect(view.getByRole('alert')).toHaveTextContent(/another export is still in progress/i)
+    })
+
+    it('says a prepared export is password protected', async () => {
+      const { view } = await renderScreen({ dataExport: dataExport({ status: 'ready', readyUntil: '9 Nov 2026, 10:00', protectedExport: true }) })
+      expect(view.getByText('This export is password protected.')).toBeOnTheScreen()
     })
   })
 

@@ -6,7 +6,6 @@ import { useTranslation } from 'react-i18next'
 import { useAppLock } from '@/components/providers/app-lock-provider'
 import { useProductRuntime } from '@/components/providers/product-runtime-provider'
 import { useProfile } from '@/features/self/use-self-resource'
-import { ApiError } from '@/lib/api/errors'
 import { useConfirmedFeature } from '@/lib/server/use-instance'
 
 import type { AppLockFailure } from './app-lock-section'
@@ -15,7 +14,7 @@ import type { MfaSecuritySectionStatus } from './mfa-security-section'
 import type { PasswordChangeFailure } from './password-change-section'
 import { SecurityScreen } from './security-screen'
 import { useChangePassword } from './use-change-password'
-import { isDataExportPreparing, useLatestDataExport, useStartDataExport } from './use-data-export'
+import { classifyDataExportFailure, isDataExportPreparing, useLatestDataExport, useStartDataExport } from './use-data-export'
 import { classifyDeleteAccountFailure, useDeleteAccount, type DeleteAccountFailure } from './use-delete-account'
 import { useMfaEnrollment } from './use-mfa-enrollment'
 import { useMfaFactorStatus } from './use-mfa-factor-status'
@@ -132,14 +131,17 @@ export function SecurityRoute() {
         available: exportsStored,
         status: isDataExportPreparing(latest) ? 'preparing' : exportReady ? 'ready' : latest?.status === 'failed' ? 'failed' : 'idle',
         readyUntil: exportReady && latest.expiresAt ? new Date(latest.expiresAt).toLocaleString(i18n.language) : null,
+        protectedExport: latest?.encrypted === true,
         starting: startExport.isPending,
         failure: exportFailure,
-        onStart: async () => {
+        onStart: async (password) => {
           setExportFailure(null)
           try {
-            await startExport.mutateAsync()
+            await startExport.mutateAsync(password === undefined ? {} : { password })
+            return true
           } catch (error) {
-            setExportFailure(error instanceof ApiError && error.code === 'http' && error.status === 429 ? 'limit' : 'unknown')
+            setExportFailure(classifyDataExportFailure(error))
+            return false
           }
         },
         onDownload: () => {
