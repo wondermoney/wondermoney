@@ -62,6 +62,7 @@
     "watchlist": "Seguimiento",
     "goals": "Objetivos",
     "loans": "Préstamos",
+    "assets": "Bienes",
     "reports": "Informes",
     "help": "Ayuda",
     "settings": "Configuración",
@@ -217,6 +218,8 @@
     "unsupportedLoan_other": "No se incluyen {{count}} saldos de préstamos",
     "unsupportedPortfolio_one": "No se incluye {{count}} cartera",
     "unsupportedPortfolio_other": "No se incluyen {{count}} carteras",
+    "unsupportedManualAsset_one": "No se incluye {{count}} bien",
+    "unsupportedManualAsset_other": "No se incluyen {{count}} bienes",
     "viewTrend": "Ver evolución del patrimonio",
     "budgetHealth": {
       "title": "Estado del presupuesto",
@@ -231,7 +234,10 @@
       "error": "No se pudo cargar la información",
       "topCategory": "{{name}} — {{amount}} este mes"
     },
-    "helpText": "Un resumen rápido de tus cuentas, cartera y pasivos."
+    "helpText": "Un resumen rápido de tus cuentas, cartera y pasivos.",
+    "unsupportedAccount_one": "No se incluye {{count}} saldo de cuenta",
+    "unsupportedAccount_other": "No se incluyen {{count}} saldos de cuenta",
+    "unconvertedCurrencies": "Aún no hay tipo de cambio para {{currencies}}."
   },
   "home": {
     "netWorth": {
@@ -295,6 +301,7 @@
       "groups": {
         "accounts": "Cuentas",
         "portfolios": "Carteras",
+        "manualAssets": "Inmuebles y otros bienes",
         "loans": "Préstamos"
       },
       "countedIn": "Incluida en {{account}}"
@@ -486,6 +493,28 @@
     "invalidResponse": {
       "title": "No se pudieron verificar los datos de la cuenta",
       "message": "No se pudieron verificar los datos de la cuenta recibidos"
+    }
+  },
+  "accountRecalculate": {
+    "action": "Recalcular saldos",
+    "confirmTitle": "¿Recalcular los saldos?",
+    "confirmMessage": "Esto reconstruye el saldo acumulado de cada transacción de esta cuenta: una cuenta manual o importada parte de su saldo inicial, una conectada al banco termina en el saldo que indica tu banco. Tus transacciones no cambian.",
+    "confirm": "Recalcular",
+    "running": "Recalculando los saldos…",
+    "background": "Los saldos se siguen recalculando. Se actualizan cuando termine.",
+    "alreadyCorrect": "Saldos revisados: ya eran correctos.",
+    "done_one": "Saldos recalculados: {{count}} transacción corregida",
+    "done_other": "Saldos recalculados: {{count}} transacciones corregidas",
+    "balanceChange": "Saldo: {{before}} → {{after}}",
+    "dismiss": "Cerrar",
+    "failures": {
+      "too-soon": "Esta cuenta se recalculó hace menos de un minuto. Vuelve a intentarlo en breve.",
+      "demo": "Recalcular no está disponible en la demo.",
+      "access": "Vuelve a iniciar sesión para recalcular esta cuenta.",
+      "not-found": "Esta cuenta ya no está disponible.",
+      "network": "No se pudo contactar con el servidor. Revisa tu conexión y vuelve a intentarlo.",
+      "failed": "No se pudieron recalcular los saldos. Vuelve a intentarlo en unos minutos.",
+      "general": "No se pudo iniciar el recálculo. Vuelve a intentarlo."
     }
   },
   "accountEdit": {
@@ -1675,6 +1704,121 @@
       "invalid-routeTitle": "Préstamo no disponible",
       "invalid-routeMessage": "Vuelve a Préstamos y elige un préstamo disponible."
     }
+  },
+  "manualAssets": {
+    "title": "Bienes",
+    "description": "Viviendas, vehículos y otras cosas tuyas a las que ningún banco ni mercado pone precio. Tú decides cuánto valen.",
+    "loading": "Cargando los bienes",
+    "errorTitle": "No se pudieron cargar los bienes",
+    "errorMessage": "Comprueba tu conexión y vuelve a intentarlo.",
+    "invalidTitle": "No se pudieron mostrar los bienes",
+    "invalidMessage": "El servidor envió algo que esta versión de la app no puede leer. Vuelve a intentarlo o actualiza la app.",
+    "stale": "Estas cifras pueden estar desactualizadas: la última actualización falló.",
+    "emptyTitle": "Cuenta tu vivienda y tu coche en tu patrimonio neto",
+    "emptyMessage": "Añade lo que tienes y ningún banco ni mercado informa: una vivienda, un vehículo, un objeto de valor. Tú dices cuánto vale y lo actualizas cuando cambie. Actualizar un valor nunca crea una transacción.",
+    "add": "Añadir bien",
+    "total": "Valor total",
+    "unconverted_one": "{{count}} bien queda fuera del total: todavía no hay tipo de cambio para {{currencies}}.",
+    "unconverted_other": "{{count}} bienes quedan fuera del total: todavía no hay tipo de cambio para {{currencies}}.",
+    "noRate": "Sin tipo de cambio",
+    "private": "Privado",
+    "archivedTitle": "Archivados",
+    "archivedDescription": "Ya no cuentan en el patrimonio neto. Su historial se conserva.",
+    "lastValued": "Valorado el {{date}}",
+    "kinds": {
+      "property": "Inmueble",
+      "vehicle": "Vehículo",
+      "valuable": "Objeto de valor",
+      "other": "Otro"
+    },
+    "failures": {
+      "demo": "La demo es de solo lectura, así que no se guardó nada.",
+      "access": "Ya no puedes cambiar este bien. Vuelve a iniciar sesión o consúltalo con tu hogar.",
+      "mfa": "Confirma que eres tú para continuar.",
+      "not-found": "Este bien ya no existe, o es privado del otro miembro de tu hogar.",
+      "invalid": "Algo de lo introducido no es válido. Revisa los campos y vuelve a intentarlo.",
+      "invalid-response": "Puede que se haya guardado, pero no se pudo leer la respuesta del servidor. Actualiza antes de volver a intentarlo.",
+      "network-ambiguous": "Se cortó la conexión, así que no se sabe si se guardó. Actualiza antes de volver a intentarlo.",
+      "general": "No se pudo guardar. Vuelve a intentarlo."
+    }
+  },
+  "manualAssetDetail": {
+    "back": "Bienes",
+    "loading": "Cargando el bien",
+    "errorTitle": "No se pudo cargar este bien",
+    "errorMessage": "Comprueba tu conexión y vuelve a intentarlo.",
+    "invalidTitle": "No se pudo mostrar este bien",
+    "invalidMessage": "El servidor envió algo que esta versión de la app no puede leer. Vuelve a intentarlo o actualiza la app.",
+    "notFoundTitle": "Bien no encontrado",
+    "notFoundMessage": "Puede que se haya eliminado, o que sea privado del otro miembro de tu hogar.",
+    "invalidIdTitle": "Bien no encontrado",
+    "invalidIdMessage": "Este enlace no lleva a un bien.",
+    "stale": "Estas cifras pueden estar desactualizadas: la última actualización falló.",
+    "valueToday": "Valor hoy",
+    "lastValue": "Última valoración",
+    "archivedOn": "Archivado el {{date}}",
+    "estimated": "Estimado a partir de la variación anual desde la valoración del {{date}}",
+    "updateValue": "Actualizar valor",
+    "historyTitle": "Valor a lo largo del tiempo",
+    "chartLabel": "Valor a lo largo del tiempo, del {{from}} al {{to}}",
+    "valuationsTitle": "Valoraciones",
+    "manageOnWeb": "Edita, archiva o elimina este bien, o corrige una valoración, en WonderMoney en la web.",
+    "facts": {
+      "title": "Detalles",
+      "kind": "Tipo",
+      "purchased": "Compra",
+      "purchasedValue": "{{amount}} el {{date}}",
+      "changeSincePurchase": "Variación desde la compra",
+      "growth": "Variación anual",
+      "growthFrom": "{{rate}} desde el {{date}}",
+      "visibility": "Visibilidad",
+      "private": "Privado: solo tú",
+      "shared": "Compartido con tu hogar",
+      "owner": "Titular",
+      "notes": "Notas"
+    }
+  },
+  "manualAssetCreate": {
+    "title": "Añadir bien",
+    "loading": "Cargando las monedas",
+    "metadataError": "No se pudieron cargar las monedas. Cierra y vuelve a intentarlo.",
+    "save": "Añadir bien",
+    "saving": "Añadiendo",
+    "value": "Valor actual",
+    "name": "Nombre",
+    "namePlaceholder": "p. ej. Casa familiar",
+    "kind": "Tipo",
+    "currency": "Moneda",
+    "choose": "Elegir",
+    "valuationDate": "Valorado el",
+    "purchasePrice": "Precio de compra",
+    "purchasePriceOptional": "Precio de compra, opcional",
+    "purchaseDate": "Fecha de compra",
+    "purchaseHint": "Opcional. Con precio y fecha, el historial del valor empieza en la compra.",
+    "growthRate": "Variación anual (%)",
+    "growthRateOptional": "Variación anual en porcentaje, opcional",
+    "growthRateHint": "El valor cambia este porcentaje cada año después de la última valoración. Usa un número negativo para algo que pierde valor, como un coche.",
+    "private": "Bien privado",
+    "privateDescription": "Solo tú ves este bien. Queda fuera del patrimonio neto del otro miembro del hogar.",
+    "notes": "Notas",
+    "notesOptional": "Notas, opcional",
+    "optional": "Opcional",
+    "fieldErrors": {
+      "value": "Introduce cero o más",
+      "amount": "Introduce cero o más",
+      "growthRate": "Introduce un porcentaje mayor que -100 y hasta 1000"
+    }
+  },
+  "manualAssetValuation": {
+    "title": "Actualizar valor",
+    "save": "Guardar valor",
+    "saving": "Guardando",
+    "value": "Valor",
+    "date": "Fecha",
+    "note": "Nota",
+    "noteOptional": "Nota, opcional",
+    "notePlaceholder": "p. ej. Estimación de la agencia",
+    "description": "Registrar un valor nunca crea una transacción. Un valor ya registrado para la misma fecha se sustituye."
   },
   "budgets": {
     "title": "Presupuestos",
@@ -3918,5 +4062,18 @@
     "show": "Mostrar importes",
     "setting": "Ocultar importes",
     "settingHelp": "Oculta saldos e importes en este dispositivo, para cuando alguien pueda ver tu pantalla. Los porcentajes siguen visibles."
+  },
+  "fxStatus": {
+    "missing": {
+      "label": "Sin convertir",
+      "hint": "Aún no hay tipo de cambio para {{currency}}, así que este importe se muestra en {{currency}} y queda fuera de los totales.",
+      "hintNoCurrency": "Aún no hay tipo de cambio, así que este importe se muestra en su moneda original y queda fuera de los totales."
+    },
+    "provisional": {
+      "label": "Estimado",
+      "rateOf": "Tipo del {{date}}",
+      "hint": "Convertido al tipo del {{date}}, el más reciente disponible. Se actualiza cuando llega uno más reciente.",
+      "hintNoDate": "Convertido a un tipo anterior, el más reciente disponible. Se actualiza cuando llega uno más reciente."
+    }
   }
 }

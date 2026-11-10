@@ -4,6 +4,7 @@ import { DI } from '@app/database/di';
 import { Budget } from '@entity/Budget';
 import { BudgetTemplateCategory } from '@entity/BudgetTemplateCategory';
 import { Transaction } from '@entity/Transaction';
+import { rateScope } from '@service/currency/exchange-rate';
 import { CATEGORY_LINE_POPULATE, spendingLinesOf } from '@service/transaction/category-lines';
 import { loadCategorySpendingFlags } from '@service/transaction/category-spending';
 import { addMoney } from '@utils/money';
@@ -31,8 +32,8 @@ export async function getBudgetVsActualReport(input: ReportServiceInput): Promis
   // Budgets are household-shared: tenant-scoped.
   const budgets = await DI.em.find(Budget, { deletedAt: undefined, tenantKey: tenant }, { populate: ['currencyKey'] });
   const budget = budgets[0];
-  if (!budget) return { completeness: (await loadViewerCurrencyAmounts(DI.em, user, [])).completeness(), data: [] };
-  const nothingToReport = async () => ({ completeness: (await loadReportCurrencyAmounts(DI.em, budget.currencyKey.code, [])).completeness(), data: [] });
+  if (!budget) return { completeness: (await loadViewerCurrencyAmounts(DI.em, user, rateScope(tenant), [])).completeness(), data: [] };
+  const nothingToReport = async () => ({ completeness: (await loadReportCurrencyAmounts(DI.em, budget.currencyKey.code, [], rateScope(tenant))).completeness(), data: [] });
 
   const templates = await DI.em.find(
     BudgetTemplateCategory,
@@ -64,17 +65,14 @@ export async function getBudgetVsActualReport(input: ReportServiceInput): Promis
   // than erroring, so the web layer can render its "set up a budget" empty state.
   if (budgetedByCategory.size === 0) return nothingToReport();
 
-  const where = buildTransactionWhere(filters, tenant, user);
-  if (budgetAccountKeys.size > 0) {
-    const accountCondition = where['accountKey'] as Record<string, unknown>;
-    accountCondition['accountKey'] = { $in: [...budgetAccountKeys] };
-  }
+  // The budget's accounts, when it names any, in place of the report's account filter.
+  const where = buildTransactionWhere(filters, tenant, user, budgetAccountKeys.size > 0 ? { accountKeys: [...budgetAccountKeys] } : {});
 
   const transactions = await DI.em.find(Transaction, where, { populate: CATEGORY_POPULATE });
   const repayments = await loadLoanRepaymentLinks(DI.em, tenant, transactions);
   // The budgeted amounts are in the budget's currency, so the actual spending is too, whoever views
   // it (as on the budget pages).
-  const amounts = await loadReportCurrencyAmounts(DI.em, budget.currencyKey.code, transactions, repayments);
+  const amounts = await loadReportCurrencyAmounts(DI.em, budget.currencyKey.code, transactions, rateScope(tenant), repayments);
   const spendingFlags = await loadCategorySpendingFlags(DI.em, tenant.tenantKey);
 
   const categoryKeysFilter = filters.categoryKeys;

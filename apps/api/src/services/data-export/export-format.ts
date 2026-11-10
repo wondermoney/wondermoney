@@ -55,7 +55,8 @@
  * same manifest and the format version does not change.
  */
 export const EXPORT_FORMAT = 'wondermoney-export';
-export const EXPORT_FORMAT_VERSION = '1.0';
+/** 1.1 added `data/manual-assets.json` and `data/manual-asset-valuations.json`. */
+export const EXPORT_FORMAT_VERSION = '1.1';
 
 export interface ExportManifest {
   appVersion: string;

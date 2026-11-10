@@ -1,17 +1,25 @@
 import type { FilterQuery } from '@mikro-orm/core';
+import type { QBFilterQuery } from '@mikro-orm/postgresql';
 
 import { DI } from '@app/database/di';
 import { HIDDEN_FILTER } from '@app/database/filters/tenant-filter';
 import { CategorizationConfidence, Transaction } from '@entity/Transaction';
+import type { ReportCompleteness } from '@service/reports/report-currency';
 
-import { transactionDateRangeWhere } from './transaction-date-range';
-import { excludeExpired } from './transaction-status';
+import { type TransactionScope, transactionScopeWhere, type TransactionStatusName } from './transaction-scope';
+import { getTransactionTotals } from './transaction-totals';
 
 /**
- * The result count for `GET /v1/account/transaction`.
+ * The result count and summed amount for `GET /v1/account/transaction`.
  *
  * The table pages rows, so the total has to come from the server: the browser
  * only knows the loaded set ("12 of 22"), not the real one ("12 of 8,623").
+ *
+ * The rows are a {@link TransactionScope} (`transaction-scope.ts`), like every report and
+ * dashboard total, plus the table's own filters. The scope options default to what the table has
+ * always shown (every status but EXPIRED, transfers and every category included); a report links
+ * to its own rows by passing its options (`listFiltersForReport`), and the summed amount is then
+ * the report's total.
  *
  * ## No facet counts
  *
@@ -36,8 +44,20 @@ export interface TransactionFilterInput {
   /** Category keys, plus whether uncategorized transactions are wanted too. */
   categoryKeys?: { includeUncategorized: boolean; keys: number[] };
   confidence?: CategorizationConfidence;
+  /** Money in or money out only (`TransactionScope.direction`). */
+  direction?: 'in' | 'out';
+  /** Leave out rows wholly in categories that are not spending; the amount adds only spending lines. */
+  excludeNonSpending?: boolean;
+  /** Leave out transfers between own accounts. */
+  excludeTransfers?: boolean;
   fromDate?: Date;
   includeHidden?: boolean;
+  /** Only rows stored in this member currency, by code (a report's currency filter). */
+  memberCurrencyCode?: string;
+  /** Merchant keys; a transaction matches when it has one of them. */
+  merchantKeys?: number[];
+  /** Only these statuses; absent means every status but EXPIRED, legacy rows with none included. */
+  statuses?: TransactionStatusName[];
   /** Tag keys; a transaction matches when it carries any of them. Empty/absent means no tag filter. */
   tagKeys?: number[];
   /** The viewer's IANA time zone: date-only rows are matched by calendar day (`transaction-date-range.ts`). */
@@ -48,17 +68,23 @@ export interface TransactionFilterInput {
   unreviewedOnly?: boolean;
 }
 
-export function buildTransactionWhere(filters: TransactionFilterInput): FilterQuery<Transaction> {
-  const { accountKeys, categoryKeys, confidence, fromDate, tagKeys, timeZone, toDate, transactionTypes, unreviewedOnly } = filters;
+/** Who is looking: the household and the member, whose currency the summed amount is in. */
+export interface TransactionViewer {
+  currency: { code: string; currencyKey: number };
+  tenantKey: number;
+  viewerAppuserKey: number;
+}
 
-  // The table carries no status, so an EXPIRED row would read as money that moved and land
-  // in the review inbox: it is neither listed nor counted. Pending and status-less rows stay.
-  return excludeExpired({
-    accountKey: {
-      deletedAt: undefined,
-      ...(accountKeys && accountKeys.length > 0 ? { accountKey: { $in: accountKeys } } : {}),
-    },
-    deletedAt: undefined,
+/**
+ * The list's scope: the options the request passed, else what the table has always shown. The
+ * table carries no status, so an EXPIRED row would read as money that moved and land in the review
+ * inbox: it is neither listed nor counted. Pending and status-less rows stay.
+ */
+export function buildTransactionWhere(filters: TransactionFilterInput, viewer: Pick<TransactionViewer, 'tenantKey' | 'viewerAppuserKey'>): FilterQuery<Transaction> {
+  const { categoryKeys, confidence, tagKeys, transactionTypes, unreviewedOnly } = filters;
+
+  return {
+    ...transactionScopeWhere(listScope(filters, viewer)),
     ...(unreviewedOnly ? { reviewed: false } : {}),
     ...(confidence ? { categorizationConfidence: confidence } : {}),
     ...(transactionTypes && transactionTypes.length > 0
@@ -66,8 +92,29 @@ export function buildTransactionWhere(filters: TransactionFilterInput): FilterQu
       : {}),
     ...buildCategoryWhere(categoryKeys),
     ...buildTagWhere(tagKeys),
-    ...transactionDateRangeWhere({ from: fromDate, timeZone, to: toDate }),
-  });
+  };
+}
+
+export function listScope(filters: TransactionFilterInput, viewer: Pick<TransactionViewer, 'tenantKey' | 'viewerAppuserKey'>): TransactionScope {
+  return {
+    accountKeys: filters.accountKeys,
+    dateRange: { from: filters.fromDate, timeZone: filters.timeZone, to: filters.toDate },
+    direction: filters.direction,
+    includeHidden: filters.includeHidden === true,
+    includeNonSpending: filters.excludeNonSpending !== true,
+    includeTransfers: filters.excludeTransfers !== true,
+    memberCurrencyCode: filters.memberCurrencyCode,
+    merchantKeys: filters.merchantKeys,
+    statuses: filters.statuses && filters.statuses.length > 0 ? filters.statuses : 'not-expired',
+    tenantKey: viewer.tenantKey,
+    viewerAppuserKey: viewer.viewerAppuserKey,
+  };
+}
+
+/** Whether the request asked for a report's scope rather than the table's default one. */
+export function hasReportScope(filters: TransactionFilterInput): boolean {
+  return (filters.statuses?.length ?? 0) > 0 || filters.excludeTransfers === true || filters.excludeNonSpending === true || filters.direction !== undefined
+    || filters.memberCurrencyCode !== undefined || (filters.merchantKeys?.length ?? 0) > 0;
 }
 
 /**
@@ -121,25 +168,46 @@ function buildCategoryWhere(
  * The tag filter: any of the tags. `$some` is an EXISTS on the link table, so it never shares a
  * join with the category branches. The links are read through the tenant filter like the rows.
  */
-function buildTagWhere(tagKeys: TransactionFilterInput['tagKeys']): Record<string, unknown> {
+export function buildTagWhere(tagKeys: readonly number[] | undefined): Record<string, unknown> {
   if (!tagKeys || tagKeys.length === 0) return {};
   return { transactionTags: { $some: { tagKey: { $in: tagKeys } } } };
 }
 
+/** The list's total: how many rows match, and what they add up to. */
+export interface TransactionListTotal {
+  /** In the viewer's currency, to 4 decimals; only the lines the scope counts (`excludeNonSpending`, a category filter). */
+  amount: number;
+  completeness: ReportCompleteness;
+  count: number;
+  /** The part of `amount` from rows that add money, in the same currency. */
+  moneyIn: number;
+  /** The part from rows that take money, as a positive amount: `amount` is `moneyIn - moneyOut`. */
+  moneyOut: number;
+}
+
 /**
- * Rows matching the filters as applied, before `limit`.
+ * Rows matching the filters as applied, before `limit`, counted and summed in one query.
  *
- * `em.count` goes through both default MikroORM filters — the tenant filter with
- * its private-account carve-out, and the hidden filter — exactly as `em.find`
- * does, so the number can never describe rows the caller may not read.
+ * The rows are the ones `em.find` lists: the same `where`, through the same default MikroORM
+ * filters (the tenant filter with its private-account carve-out, and the hidden filter), so the
+ * number can never describe rows the caller may not read. The scope's own tenant and privacy
+ * conditions hold where no filter is set too.
  *
- * `includeHidden` is not a `where` clause; it disables the hidden filter, which
- * is why it is passed as an option rather than folded into `buildTransactionWhere`.
+ * `includeHidden` disables the hidden filter as well as the scope's hidden condition, which is
+ * why it is applied as an option and not only in the `where`.
+ *
+ * The amount is summed like the dashboard's cash flow (`transaction-totals.ts`): a split row adds
+ * only its lines in the filtered categories, and with `excludeNonSpending` only its spending lines.
  */
-export async function getTransactionTotal(filters: TransactionFilterInput): Promise<number> {
-  return DI.em.count(
-    Transaction,
-    buildTransactionWhere(filters),
-    filters.includeHidden === true ? { filters: { [HIDDEN_FILTER]: false } } : {},
-  );
+export async function getTransactionTotal(filters: TransactionFilterInput, viewer: TransactionViewer): Promise<TransactionListTotal> {
+  const listed = DI.em.createQueryBuilder(Transaction, 'listed').select('listed.transactionKey').where(buildTransactionWhere(filters, viewer) as QBFilterQuery<Transaction, 'listed'>);
+  await listed.applyFilters(filters.includeHidden === true ? { [HIDDEN_FILTER]: false } : {});
+  const totals = await getTransactionTotals(DI.em, {
+    currency: viewer.currency,
+    lines: { categoryKeys: filters.categoryKeys, spendingOnly: filters.excludeNonSpending === true },
+    rows: { params: [...listed.getParams()], sql: `t.transaction_key in (${listed.getQuery()})` },
+    tenantKey: viewer.tenantKey,
+  });
+  const total = totals.months.get('') ?? { amount: 0, moneyIn: 0, moneyOut: 0 };
+  return { ...total, completeness: totals.completeness, count: totals.count };
 }

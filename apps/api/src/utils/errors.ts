@@ -48,6 +48,10 @@ export const ERROR_CODE = {
   // --- Specific: a client can and should behave differently for each of these ---
   /** Account-level action reserved to the owner (privacy toggle), not the partner. */
   ACCOUNT_OWNER_REQUIRED: 'account_owner_required',
+  /** Changing whether a manual asset is private, by the member who does not own it (403). */
+  MANUAL_ASSET_OWNER_REQUIRED: 'manual_asset_owner_required',
+  /** Deleting the only valuation of a manual asset (409). An asset keeps one; delete the asset instead. */
+  MANUAL_ASSET_LAST_VALUATION: 'manual_asset_last_valuation',
   /** The assistant is not enabled for this user. */
   ASSISTANT_NOT_ENABLED: 'assistant_not_enabled',
   /**
@@ -91,6 +95,10 @@ export const ERROR_CODE = {
   TRANSACTION_EXPIRED: 'transaction_expired',
   /** Creating or renaming a tag: the household already has a tag with this name, ignoring case (409). */
   TAG_NAME_TAKEN: 'tag_name_taken',
+  /** Adding an exchange-rate override: the household already has one for this pair and day (409). Change that one instead. */
+  EXCHANGE_RATE_OVERRIDE_EXISTS: 'exchange_rate_override_exists',
+  /** An exchange-rate override names a currency WonderMoney does not offer (400). */
+  UNKNOWN_CURRENCY: 'unknown_currency',
   /**
    * Reordering rules: the list is not exactly the household's live rules (one was added or
    * deleted meanwhile, or a key is not the household's) (409). Reload the rules and try again.
@@ -101,6 +109,13 @@ export const ERROR_CODE = {
    * (409). Wait for it to finish, then apply again.
    */
   RULE_APPLY_IN_PROGRESS: 'rule_apply_in_progress',
+  /**
+   * Recalculating an account's balances: the last recalculation of this account was started less
+   * than a minute ago (429, with `Retry-After`).
+   */
+  ACCOUNT_RECALCULATION_TOO_SOON: 'account_recalculation_too_soon',
+  /** Editing the opening balance of a bank-synced account, whose balance comes from the bank (400). */
+  OPENING_BALANCE_MANUAL_ONLY: 'opening_balance_manual_only',
   /**
    * Splitting a transaction: the lines do not add up to its amount, mix signs, include a zero line,
    * are fewer than two, or carry more decimals than amounts are stored with (400).
@@ -116,7 +131,7 @@ export const ERROR_CODE = {
    */
   DATA_EXPORT_IN_PROGRESS: 'data_export_in_progress',
   /**
-   * Restoring an export: the household already has accounts, portfolios, budgets, goals or loans
+   * Restoring an export: the household already has accounts, portfolios, budgets, goals, loans or manual assets
    * (409). Restore only fills an empty household; it never merges.
    */
   HOUSEHOLD_NOT_EMPTY: 'household_not_empty',

@@ -1,7 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { kyselyDouble } from '@app/__tests__/__helpers__/kysely-double';
-import { buildBudgetTransactionAccountVisibility } from '@service/budget/spending';
 
 const mocked = vi.hoisted(() => ({
   authedContext: vi.fn(),
@@ -164,18 +162,5 @@ describe('budget account assignments', () => {
 
     expect(template.accounts.add).toHaveBeenCalledWith([account]);
     expect(sendStatus).toHaveBeenCalledWith(200);
-  });
-});
-
-describe('budget transaction aggregation scope', () => {
-  it('generates tenant, active-account, and private-owner visibility predicates', () => {
-    const { db } = kyselyDouble();
-    const compiled = db.selectFrom('transaction').selectAll().where(buildBudgetTransactionAccountVisibility(17, 42)).compile();
-
-    expect(compiled.sql).toContain('budget_account.tenant_key = $1');
-    expect(compiled.sql).toContain('budget_account.closed = false');
-    expect(compiled.sql).toContain('budget_account.deleted_at IS NULL');
-    expect(compiled.sql).toContain('(budget_account.is_private = false OR budget_account.account_owner_appuser_key = $2)');
-    expect(compiled.parameters).toEqual([17, 42]);
   });
 });

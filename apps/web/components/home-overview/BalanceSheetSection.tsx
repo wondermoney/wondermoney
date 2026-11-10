@@ -1,6 +1,6 @@
 "use client";
 
-import { Briefcase, ReceiptText } from "lucide-react";
+import { Briefcase, Building2, ReceiptText } from "lucide-react";
 import { useTranslations } from "next-intl";
 import type { ReactNode } from "react";
 
@@ -8,6 +8,7 @@ import { AccountMark } from "@/components/account/AccountMark";
 import { Amount } from "@/components/ui/Amount";
 import DataLoadError from "@/components/ui/DataLoadError";
 import { RowsSkeleton, Section } from "@/components/ui/RuledSection";
+import { UnconvertedTotalWarning } from "@/components/ui/UnconvertedTotalWarning";
 import useAccounts from "@/lib/api/account/useAccounts";
 import useNetWorth from "@/lib/api/net-worth/useNetWorth";
 import {
@@ -140,7 +141,8 @@ export function BalanceSheetSection() {
     ]),
   );
   // Each row's mark: the bank's logo for an account (a wallet without one),
-  // a briefcase for a portfolio and a receipt for a loan.
+  // a briefcase for a portfolio, a building for a manually valued asset and a
+  // receipt for a loan.
   const markFor: MarkFor = (type, row) => {
     const account =
       type === "accounts" && row.recordId !== undefined
@@ -156,9 +158,11 @@ export function BalanceSheetSection() {
         fallbackIcon={
           type === "portfolios"
             ? Briefcase
-            : type === "loans"
-              ? ReceiptText
-              : undefined
+            : type === "manualAssets"
+              ? Building2
+              : type === "loans"
+                ? ReceiptText
+                : undefined
         }
       />
     );
@@ -176,6 +180,13 @@ export function BalanceSheetSection() {
     <Section id="sheet-heading" title={t("title")}>
       <PortfolioLinkSuggestion
         suggested={netWorth.suggestPortfolioLink === true}
+      />
+      {/* What could not be valued has no row here, so the sheet says so. */}
+      <UnconvertedTotalWarning
+        unconverted={netWorth.unconverted}
+        currency={currency}
+        variant="note"
+        className="mb-4"
       />
       <div className="grid grid-cols-1 sm:grid-cols-2">
         <div className="sm:pr-6">

@@ -1,0 +1,123 @@
+{
+  "assets": {
+    "page": {
+      "title": "Bienes",
+      "description": "Viviendas, vehículos y otras cosas tuyas a las que ningún banco ni mercado pone precio. Tú dices cuánto valen."
+    },
+    "actions": {
+      "add": "Añadir bien",
+      "edit": "Editar bien",
+      "save": "Guardar cambios",
+      "updateValue": "Actualizar valor",
+      "archive": "Archivar",
+      "unarchive": "Recuperar",
+      "delete": "Eliminar bien",
+      "back": "Bienes"
+    },
+    "empty": {
+      "title": "Cuenta tu vivienda y tu coche en tu patrimonio neto",
+      "description": "Añade lo que es tuyo y ningún banco ni mercado informa: una vivienda, un vehículo, un objeto de valor. Tú dices cuánto vale y lo actualizas cuando cambie. Actualizar un valor nunca crea una transacción."
+    },
+    "kinds": {
+      "property": "Inmueble",
+      "vehicle": "Vehículo",
+      "valuable": "Objeto de valor",
+      "other": "Otro"
+    },
+    "summary": {
+      "total": "Valor total",
+      "count": "Bienes contados",
+      "unconverted": "{count, plural, one {# bien queda fuera del total} other {# bienes quedan fuera del total}}: todavía no hay tipo de cambio para {currencies}."
+    },
+    "table": {
+      "asset": "Bien",
+      "lastValued": "Última valoración",
+      "value": "Valor",
+      "valueIn": "En {currency}",
+      "noRate": "Sin tipo de cambio",
+      "private": "Privado",
+      "archivedTitle": "Archivados",
+      "archivedDescription": "Ya no cuentan en el patrimonio neto. Su historial se conserva."
+    },
+    "fields": {
+      "name": "Nombre",
+      "namePlaceholder": "p. ej. Vivienda familiar",
+      "kind": "Tipo",
+      "value": "Valor actual",
+      "currency": "Moneda",
+      "valuationDate": "Valorado el",
+      "purchasePrice": "Precio de compra",
+      "purchaseDate": "Fecha de compra",
+      "purchaseHint": "Opcional. Con precio y fecha, el historial del valor empieza en la compra.",
+      "growthRate": "Variación anual",
+      "growthRateHint": "Opcional. El valor cambia en este porcentaje cada año después de la última valoración. Usa un número negativo para algo que pierde valor, como un coche.",
+      "growthStartDate": "Varía desde",
+      "growthStartDateHint": "Opcional. El valor se queda como está hasta esta fecha.",
+      "private": "Bien privado",
+      "privateDescription": "Solo tú ves este bien. Queda fuera del patrimonio neto del otro miembro del hogar.",
+      "notes": "Notas",
+      "notesPlaceholder": "Lo que merezca la pena recordar sobre este bien",
+      "datePlaceholder": "Elige una fecha"
+    },
+    "validation": {
+      "required": "Este campo es obligatorio",
+      "growthRange": "Introduce un porcentaje por encima de -100 y hasta 1000",
+      "negative": "Introduce cero o más"
+    },
+    "valuation": {
+      "addTitle": "Actualizar valor",
+      "editTitle": "Editar valoración",
+      "description": "Registrar un valor nunca crea una transacción. Un valor ya registrado para la misma fecha se sustituye.",
+      "value": "Valor",
+      "date": "Fecha",
+      "note": "Nota",
+      "notePlaceholder": "p. ej. Estimación de la agencia",
+      "save": "Guardar valor"
+    },
+    "detail": {
+      "loading": "Cargando el bien",
+      "valueLabel": "Valor hoy",
+      "archivedOn": "Archivado el {date}",
+      "estimated": "Estimado a partir de la variación anual desde la valoración del {date}.",
+      "errors": {
+        "loadFailed": "No se pudo cargar este bien",
+        "loadFailedBody": "Puede que se haya eliminado, o que sea privado del otro miembro de tu hogar."
+      },
+      "history": {
+        "title": "Valor a lo largo del tiempo",
+        "seriesLabel": "Valor"
+      },
+      "valuations": {
+        "title": "Valoraciones",
+        "date": "Fecha",
+        "value": "Valor",
+        "note": "Nota",
+        "actions": "Acciones",
+        "edit": "Editar",
+        "remove": "Quitar",
+        "removeTitle": "¿Quitar esta valoración?",
+        "removeConfirm": "El valor y su historial se vuelven a calcular con las valoraciones que quedan.",
+        "lastOne": "Un bien conserva al menos una valoración. Elimina el bien en su lugar."
+      },
+      "facts": {
+        "title": "Detalles",
+        "kind": "Tipo",
+        "purchased": "Compra",
+        "purchasedOn": "<amount></amount> el {date}",
+        "changeSincePurchase": "Variación desde la compra",
+        "growth": "Variación anual",
+        "growthFrom": "{rate} desde el {date}",
+        "visibility": "Visibilidad",
+        "private": "Privado: solo tú",
+        "shared": "Compartido con tu hogar",
+        "owner": "Titular",
+        "notes": "Notas"
+      },
+      "archiveTitle": "¿Archivar este bien?",
+      "archiveConfirm": "Deja de contar en el patrimonio neto desde hoy. Su historial se conserva.",
+      "deleteTitle": "¿Eliminar este bien?",
+      "deleteConfirm": "Sus valoraciones se eliminan con él, y sale del historial de tu patrimonio neto. No se puede deshacer.",
+      "ownerOnlyPrivacy": "Solo el titular del bien puede cambiar si es privado."
+    }
+  }
+}

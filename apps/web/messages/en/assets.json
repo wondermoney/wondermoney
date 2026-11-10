@@ -1,0 +1,123 @@
+{
+  "assets": {
+    "page": {
+      "title": "Assets",
+      "description": "Homes, vehicles and other things you own that no bank or market prices. You set what they are worth."
+    },
+    "actions": {
+      "add": "Add asset",
+      "edit": "Edit asset",
+      "save": "Save changes",
+      "updateValue": "Update value",
+      "archive": "Archive",
+      "unarchive": "Bring back",
+      "delete": "Delete asset",
+      "back": "Assets"
+    },
+    "empty": {
+      "title": "Count your home and car in your net worth",
+      "description": "Add what you own that no bank or market reports: a home, a vehicle, a valuable. You say what it is worth and update it when that changes. Updating a value never creates a transaction."
+    },
+    "kinds": {
+      "property": "Property",
+      "vehicle": "Vehicle",
+      "valuable": "Valuable",
+      "other": "Other"
+    },
+    "summary": {
+      "total": "Total value",
+      "count": "Assets counted",
+      "unconverted": "{count, plural, one {# asset is left out of the total} other {# assets are left out of the total}}: there is no exchange rate for {currencies} yet."
+    },
+    "table": {
+      "asset": "Asset",
+      "lastValued": "Last valued",
+      "value": "Value",
+      "valueIn": "In {currency}",
+      "noRate": "No exchange rate",
+      "private": "Private",
+      "archivedTitle": "Archived",
+      "archivedDescription": "No longer counted in net worth. Their history stays."
+    },
+    "fields": {
+      "name": "Name",
+      "namePlaceholder": "e.g. Family home",
+      "kind": "Kind",
+      "value": "Current value",
+      "currency": "Currency",
+      "valuationDate": "Valued on",
+      "purchasePrice": "Purchase price",
+      "purchaseDate": "Purchase date",
+      "purchaseHint": "Optional. With a price and a date, the value history starts at the purchase.",
+      "growthRate": "Yearly change",
+      "growthRateHint": "Optional. The value changes by this percentage each year after the latest valuation. Use a negative number for something that loses value, such as a car.",
+      "growthStartDate": "Changes from",
+      "growthStartDateHint": "Optional. The value stays as it is until this date.",
+      "private": "Private asset",
+      "privateDescription": "Only you see this asset. It stays out of the other household member's net worth.",
+      "notes": "Notes",
+      "notesPlaceholder": "Anything worth remembering about this asset",
+      "datePlaceholder": "Pick a date"
+    },
+    "validation": {
+      "required": "This field is required",
+      "growthRange": "Enter a percentage above -100 and up to 1000",
+      "negative": "Enter zero or more"
+    },
+    "valuation": {
+      "addTitle": "Update value",
+      "editTitle": "Edit valuation",
+      "description": "Recording a value never creates a transaction. A value already recorded for the same date is replaced.",
+      "value": "Value",
+      "date": "Date",
+      "note": "Note",
+      "notePlaceholder": "e.g. Agent estimate",
+      "save": "Save value"
+    },
+    "detail": {
+      "loading": "Loading asset",
+      "valueLabel": "Value today",
+      "archivedOn": "Archived on {date}",
+      "estimated": "Estimated from the yearly change since the valuation of {date}.",
+      "errors": {
+        "loadFailed": "This asset could not be loaded",
+        "loadFailedBody": "It may have been deleted, or it is private to the other member of your household."
+      },
+      "history": {
+        "title": "Value over time",
+        "seriesLabel": "Value"
+      },
+      "valuations": {
+        "title": "Valuations",
+        "date": "Date",
+        "value": "Value",
+        "note": "Note",
+        "actions": "Actions",
+        "edit": "Edit",
+        "remove": "Remove",
+        "removeTitle": "Remove this valuation?",
+        "removeConfirm": "The value and its history are worked out again from the valuations left.",
+        "lastOne": "An asset keeps at least one valuation. Delete the asset instead."
+      },
+      "facts": {
+        "title": "Details",
+        "kind": "Kind",
+        "purchased": "Purchased",
+        "purchasedOn": "<amount></amount> on {date}",
+        "changeSincePurchase": "Change since purchase",
+        "growth": "Yearly change",
+        "growthFrom": "{rate} from {date}",
+        "visibility": "Visibility",
+        "private": "Private: only you",
+        "shared": "Shared with your household",
+        "owner": "Owner",
+        "notes": "Notes"
+      },
+      "archiveTitle": "Archive this asset?",
+      "archiveConfirm": "It stops counting in net worth from today. Its history stays.",
+      "deleteTitle": "Delete this asset?",
+      "deleteConfirm": "Its valuations go with it, and it leaves your net worth history. This cannot be undone.",
+      "ownerOnlyPrivacy": "Only the asset's owner can change whether it is private."
+    }
+  }
+}

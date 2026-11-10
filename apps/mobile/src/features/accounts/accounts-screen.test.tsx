@@ -8,6 +8,8 @@ import { touchHeight } from '@/test/touch-target'
 import { accountsResponseSchema } from './accounts-contract'
 import { AccountsScreen, type AccountsData, type AccountsInsights } from './accounts-screen'
 import { mapAccounts } from './accounts-view-model'
+import { estimatedTransactionFixture, transactionFixture, unconvertedTransactionFixture } from '@/features/transactions/test-fixtures'
+import { mapTransactions } from '@/features/transactions/transactions-view-model'
 
 // The charts draw on a Skia canvas this jest environment can't host; a stand-in keeps the
 // screen's own logic under test (see portfolio-performance-chart.test.tsx).
@@ -99,6 +101,37 @@ describe('AccountsScreen', () => {
     expect(touchHeight(rows[0])).toBeGreaterThanOrEqual(44)
     await fireEvent.press(rows[0])
     expect(selectAccount).toHaveBeenCalledWith(1)
+  })
+
+  it('leads an account with no exchange rate with its own balance, marked not converted', async () => {
+    const yen = data.accounts[2]!
+    const { view } = await renderScreen({ status: 'loaded', data: { accounts: [{ ...yen, convertedBalance: null, fx: { status: 'missing', amount: 1200, currency: 'JPY' } }] } })
+    const [row] = view.getAllByTestId('account-row')
+    const original = formatCurrency(1200, { locale: 'en', currency: 'JPY' })
+    expect(row!.props.accessibilityLabel).toBe(`Yen savings, Shared by Ana, Bank Two, ${original}, Not converted. No exchange rate for JPY yet, so this amount is shown in JPY and left out of totals.`)
+    expect(view.getByTestId('account-fx-status')).toHaveTextContent('Not converted')
+    expect(view.queryByText('Balance unavailable')).not.toBeOnTheScreen()
+  })
+
+  it('marks an account converted at an old rate as estimated, with the rate date', async () => {
+    const { view } = await renderScreen({ status: 'loaded', data: { accounts: [{ ...data.accounts[2]!, fx: { status: 'provisional', rateDate: '2026-01-15' } }] } })
+    expect(view.getByTestId('account-fx-status')).toHaveTextContent(/Estimated.*Rate of Jan 15, 2026/)
+    expect(view.getAllByTestId('account-row')[0]!.props.accessibilityLabel).toMatch(/Estimated\. Converted at the rate from Jan 15, 2026/)
+  })
+
+  it('marks nothing on an account converted at a current rate', async () => {
+    const { view } = await renderScreen({ status: 'loaded', data: { accounts: [{ ...data.accounts[2]!, fx: { status: 'exact' } }] } })
+    expect(view.queryByTestId('account-fx-status')).not.toBeOnTheScreen()
+  })
+
+  it('shows a last transaction with no exchange rate in its own currency, marked, and an estimated one with its rate date', async () => {
+    const transactions = { status: 'loaded' as const, data: mapTransactions({ transactions: [unconvertedTransactionFixture, estimatedTransactionFixture, transactionFixture] }) }
+    const { view } = await renderScreen({ status: 'loaded', data: { ...complete, insights: { ...insights, transactions } } })
+    const labels = view.getAllByTestId('transaction-fx-status')
+    expect(labels).toHaveLength(2)
+    expect(labels[0]).toHaveTextContent('Not converted')
+    expect(labels[1]).toHaveTextContent(/Estimated.*Nov 3, 2026/)
+    expect(view.getByText(/10,000/)).toBeOnTheScreen()
   })
 
   it('opens the row menu for edit and delete', async () => {

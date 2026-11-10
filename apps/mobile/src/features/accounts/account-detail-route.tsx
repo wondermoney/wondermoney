@@ -16,6 +16,7 @@ import { AccountDetailScreen, type AccountDetailData, type AccountDetailViewStat
 import { mapAccountDetail } from './account-detail-view-model'
 import { parseAccountId } from './accounts-contract'
 import { useAccount } from './use-account'
+import { useAccountRecalculation } from './use-account-recalculation'
 
 export function AccountDetailRoute() {
   const params = useLocalSearchParams<{ accountId?: string | string[] }>()
@@ -28,6 +29,7 @@ export function AccountDetailRoute() {
   // The account's ledger feeds the Balance growth chart, as on web.
   const noFilters = useMemo(() => ({}), [])
   const ledger = useTransactions(noFilters, accountId ?? 0)
+  const recalculation = useAccountRecalculation()
   const router = useRouter()
   const { signOut } = useProductRuntime()
   let state: AccountDetailViewState
@@ -79,6 +81,9 @@ export function AccountDetailRoute() {
         ? () => router.push({ pathname: '/accounts/transactions/import', params: { accountId: String(accountId) } })
         : undefined}
       onEdit={() => router.push({ pathname: '/accounts/[accountId]/edit', params: { accountId: String(accountId) } })}
+      onRecalculate={accountId === null ? undefined : () => { void recalculation.start(accountId) }}
+      recalculation={recalculation.state}
+      onDismissRecalculation={recalculation.reset}
     />
   )
 }

@@ -1,5 +1,6 @@
 import { DI } from '@app/database/di';
 import { Transaction } from '@entity/Transaction';
+import { rateScope } from '@service/currency/exchange-rate';
 import { CATEGORY_LINE_POPULATE, spendingLinesOf } from '@service/transaction/category-lines';
 import { loadCategorySpendingFlags } from '@service/transaction/category-spending';
 
@@ -68,7 +69,7 @@ export async function getSankeyReport(input: ReportServiceInput): Promise<Report
   const transactions = await DI.em.find(Transaction, buildTransactionWhere(filters, tenant, user), {
     populate: CATEGORY_POPULATE,
   });
-  const amounts = await loadViewerCurrencyAmounts(DI.em, user, transactions);
+  const amounts = await loadViewerCurrencyAmounts(DI.em, user, rateScope(tenant), transactions);
   const spendingFlags = await loadCategorySpendingFlags(DI.em, tenant.tenantKey);
 
   const categoryKeys = filters.categoryKeys;

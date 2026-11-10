@@ -2,11 +2,11 @@ import { z } from 'zod'
 
 import { readEndpoint, tolerantEnum } from '../../lib/api/runtime-schema'
 
-const netWorthRowTypeSchema = z.enum(['accounts', 'portfolios', 'loans'])
+const netWorthRowTypeSchema = z.enum(['accounts', 'portfolios', 'manualAssets', 'loans'])
 
 export const netWorthRowSchema = z.object({
   type: netWorthRowTypeSchema,
-  /** The account, portfolio or loan key, so a row can be matched to its record (its logo). */
+  /** The account, portfolio, manual asset or loan key, so a row can be matched to its record (its logo). */
   id: z.number().int().positive().optional(),
   name: z.string().min(1).max(255),
   balance: z.number().finite(),
@@ -18,7 +18,7 @@ export const netWorthRowSchema = z.object({
 // rather than shown with the wrong sign or failing the whole summary. The server's totals still
 // include it.
 const netWorthRowsSchema = z.array(z.object({
-  type: tolerantEnum(['accounts', 'portfolios', 'loans'], 'unknown'),
+  type: tolerantEnum(['accounts', 'portfolios', 'manualAssets', 'loans'], 'unknown'),
   id: z.number().int().positive().optional().catch(undefined),
   name: z.string().min(1).max(255),
   balance: z.number().finite(),
@@ -31,15 +31,22 @@ export const netWorthDtoSchema = z.object({
   assets: z.object({
     accounts: z.number().finite(),
     portfolios: z.number().finite(),
+    /** Homes, vehicles and other manually valued assets; absent from older APIs. */
+    manualAssets: z.number().finite().optional(),
   }),
   liabilities: z.object({
     loans: z.number().finite(),
   }),
   rows: netWorthRowsSchema,
   unsupportedCurrencies: z.object({
+    // Accounts left out for want of an exchange rate; an older API doesn't send it.
+    accounts: z.number().int().nonnegative().optional().catch(undefined),
     loans: z.number().int().nonnegative(),
     portfolios: z.number().int().nonnegative(),
+    manualAssets: z.number().int().nonnegative().optional(),
   }),
+  /** The currencies of the accounts and loans left out, so the note can name them. Optional. */
+  unconvertedCurrencies: z.array(z.string().regex(/^[A-Z]{3}$/)).optional().catch(undefined),
 })
 
 export type NetWorthRowDto = z.infer<typeof netWorthRowSchema>
@@ -61,6 +68,8 @@ export const netWorthHistoryPointSchema = z.object({
   totalNetWorth: z.number().finite().nullable(),
   accountsTotal: z.number().finite().nullable(),
   portfoliosTotal: z.number().finite().nullable(),
+  /** Absent from older APIs. */
+  manualAssetsTotal: z.number().finite().nullable().optional(),
   loansTotal: z.number().finite().nullable(),
   isComplete: z.boolean(),
 })

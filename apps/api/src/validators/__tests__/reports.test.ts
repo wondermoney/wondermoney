@@ -63,6 +63,14 @@ describe('reportFiltersSchema timezone', () => {
     expect(result.success).toBe(false);
   });
 
+  it('reads the pending and transfer switches as the words a query string carries', () => {
+    // A client that sends the switch off (the web app always sends both) must get it off.
+    expect(reportFiltersSchema.parse({ includePending: 'false', includeTransfers: 'false' })).toMatchObject({ includePending: false, includeTransfers: false });
+    expect(reportFiltersSchema.parse({ includePending: 'true', includeTransfers: 'true' })).toMatchObject({ includePending: true, includeTransfers: true });
+    expect(reportFiltersSchema.parse({ includePending: true, includeTransfers: false })).toMatchObject({ includePending: true, includeTransfers: false });
+    expect(reportFiltersSchema.safeParse({ includePending: 'maybe' }).success).toBe(false);
+  });
+
   it('leaves the rest of the envelope untouched', () => {
     const parsed = reportFiltersSchema.parse({ fromDate: '2026-08-01T00:00:00.000Z' });
 

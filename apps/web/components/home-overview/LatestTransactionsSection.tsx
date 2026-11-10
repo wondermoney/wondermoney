@@ -2,7 +2,7 @@
 
 import { useTranslations } from "next-intl";
 
-import { Amount } from "@/components/ui/Amount";
+import { TransactionAmount } from "@/components/account/TransactionAmount";
 import { buttonVariants } from "@/components/ui/button";
 import DataLoadError from "@/components/ui/DataLoadError";
 import { Link } from "@/components/ui/Link";
@@ -83,9 +83,8 @@ function TransactionRow({ transaction }: { transaction: Transaction }) {
         role="cell"
         className="col-start-2 row-span-2 row-start-1 self-center py-0 text-right md:py-3"
       >
-        <Amount
-          value={transaction.appuserSettlementAmount}
-          currency={transaction.appuserCurrencyKey.code}
+        <TransactionAmount
+          transaction={transaction}
           signed
           className="font-mono text-sm md:text-base"
         />

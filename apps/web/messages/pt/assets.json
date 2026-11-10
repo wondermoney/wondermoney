@@ -1,0 +1,123 @@
+{
+  "assets": {
+    "page": {
+      "title": "Bens",
+      "description": "Casas, veículos e outras coisas tuas a que nenhum banco ou mercado dá preço. És tu que dizes quanto valem."
+    },
+    "actions": {
+      "add": "Adicionar bem",
+      "edit": "Editar bem",
+      "save": "Guardar alterações",
+      "updateValue": "Atualizar valor",
+      "archive": "Arquivar",
+      "unarchive": "Repor",
+      "delete": "Eliminar bem",
+      "back": "Bens"
+    },
+    "empty": {
+      "title": "Conta a tua casa e o teu carro no património",
+      "description": "Adiciona o que é teu e que nenhum banco ou mercado reporta: uma casa, um veículo, um objeto de valor. Dizes quanto vale e atualizas quando isso mudar. Atualizar um valor nunca cria uma transação."
+    },
+    "kinds": {
+      "property": "Imóvel",
+      "vehicle": "Veículo",
+      "valuable": "Objeto de valor",
+      "other": "Outro"
+    },
+    "summary": {
+      "total": "Valor total",
+      "count": "Bens contados",
+      "unconverted": "{count, plural, one {# bem fica fora do total} other {# bens ficam fora do total}}: ainda não há taxa de câmbio para {currencies}."
+    },
+    "table": {
+      "asset": "Bem",
+      "lastValued": "Última avaliação",
+      "value": "Valor",
+      "valueIn": "Em {currency}",
+      "noRate": "Sem taxa de câmbio",
+      "private": "Privado",
+      "archivedTitle": "Arquivados",
+      "archivedDescription": "Já não contam para o património. O histórico mantém-se."
+    },
+    "fields": {
+      "name": "Nome",
+      "namePlaceholder": "ex.: Casa de família",
+      "kind": "Tipo",
+      "value": "Valor atual",
+      "currency": "Moeda",
+      "valuationDate": "Avaliado em",
+      "purchasePrice": "Preço de compra",
+      "purchaseDate": "Data de compra",
+      "purchaseHint": "Opcional. Com preço e data, o histórico do valor começa na compra.",
+      "growthRate": "Variação anual",
+      "growthRateHint": "Opcional. O valor muda nesta percentagem em cada ano depois da última avaliação. Usa um número negativo para algo que perde valor, como um carro.",
+      "growthStartDate": "Varia a partir de",
+      "growthStartDateHint": "Opcional. O valor fica como está até esta data.",
+      "private": "Bem privado",
+      "privateDescription": "Só tu vês este bem. Fica fora do património do outro membro do agregado.",
+      "notes": "Notas",
+      "notesPlaceholder": "O que valha a pena lembrar sobre este bem",
+      "datePlaceholder": "Escolhe uma data"
+    },
+    "validation": {
+      "required": "Este campo é obrigatório",
+      "growthRange": "Introduz uma percentagem acima de -100 e até 1000",
+      "negative": "Introduz zero ou mais"
+    },
+    "valuation": {
+      "addTitle": "Atualizar valor",
+      "editTitle": "Editar avaliação",
+      "description": "Registar um valor nunca cria uma transação. Um valor já registado para a mesma data é substituído.",
+      "value": "Valor",
+      "date": "Data",
+      "note": "Nota",
+      "notePlaceholder": "ex.: Estimativa da agência",
+      "save": "Guardar valor"
+    },
+    "detail": {
+      "loading": "A carregar o bem",
+      "valueLabel": "Valor hoje",
+      "archivedOn": "Arquivado em {date}",
+      "estimated": "Estimado a partir da variação anual desde a avaliação de {date}.",
+      "errors": {
+        "loadFailed": "Não foi possível carregar este bem",
+        "loadFailedBody": "Pode ter sido eliminado, ou é privado do outro membro do teu agregado."
+      },
+      "history": {
+        "title": "Valor ao longo do tempo",
+        "seriesLabel": "Valor"
+      },
+      "valuations": {
+        "title": "Avaliações",
+        "date": "Data",
+        "value": "Valor",
+        "note": "Nota",
+        "actions": "Ações",
+        "edit": "Editar",
+        "remove": "Remover",
+        "removeTitle": "Remover esta avaliação?",
+        "removeConfirm": "O valor e o histórico voltam a ser calculados a partir das avaliações que ficam.",
+        "lastOne": "Um bem mantém pelo menos uma avaliação. Em vez disso, elimina o bem."
+      },
+      "facts": {
+        "title": "Detalhes",
+        "kind": "Tipo",
+        "purchased": "Compra",
+        "purchasedOn": "<amount></amount> em {date}",
+        "changeSincePurchase": "Variação desde a compra",
+        "growth": "Variação anual",
+        "growthFrom": "{rate} a partir de {date}",
+        "visibility": "Visibilidade",
+        "private": "Privado: só tu",
+        "shared": "Partilhado com o teu agregado",
+        "owner": "Titular",
+        "notes": "Notas"
+      },
+      "archiveTitle": "Arquivar este bem?",
+      "archiveConfirm": "Deixa de contar para o património a partir de hoje. O histórico mantém-se.",
+      "deleteTitle": "Eliminar este bem?",
+      "deleteConfirm": "As avaliações vão com ele, e sai do histórico do teu património. Não é possível anular.",
+      "ownerOnlyPrivacy": "Só o titular do bem pode alterar se é privado."
+    }
+  }
+}

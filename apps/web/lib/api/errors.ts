@@ -14,6 +14,8 @@
 
 /** Mirrors `ERROR_CODE` in the API's `utils/errors.ts`. */
 export const API_ERROR_CODE = {
+  /** The account's balances were recalculated less than a minute ago (429, with `Retry-After`). */
+  ACCOUNT_RECALCULATION_TOO_SOON: "account_recalculation_too_soon",
   ACCOUNT_RECONNECT_EMAIL_UNVERIFIED: "account_reconnect_email_unverified",
   AI_ALLOWANCE_EXHAUSTED: "ai_allowance_exhausted",
   ASSISTANT_NOT_ENABLED: "assistant_not_enabled",
@@ -30,6 +32,10 @@ export const API_ERROR_CODE = {
   INVITE_EMAIL_MISMATCH: "invite_email_mismatch",
   INVITE_EXPIRED: "invite_expired",
   INVITE_INVALID: "invite_invalid",
+  /** Deleting the only valuation of a manual asset; it keeps one (409). */
+  MANUAL_ASSET_LAST_VALUATION: "manual_asset_last_valuation",
+  /** Changing whether a manual asset is private, by the member who does not own it (403). */
+  MANUAL_ASSET_OWNER_REQUIRED: "manual_asset_owner_required",
   NOT_FOUND: "not_found",
   /** The portfolio is linked to an account only the other member can see; `details.linkedBy` names them (403). */
   PORTFOLIO_LINK_HELD_BY_MEMBER: "portfolio_link_held_by_member",

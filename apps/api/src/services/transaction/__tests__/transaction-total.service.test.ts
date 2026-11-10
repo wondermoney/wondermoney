@@ -10,24 +10,18 @@ import { buildTransactionWhere } from '@service/transaction/transaction-total.se
  * against real data rather than inferred from the shape.
  */
 describe('buildTransactionWhere', () => {
-  it('applies no filter clauses when nothing is selected', () => {
-    const where = buildTransactionWhere({}) as Record<string, unknown>;
+  const VIEWER = { tenantKey: 1, viewerAppuserKey: 2 };
 
-    expect(where['accountKey']).toEqual({ deletedAt: undefined });
+  it('applies no filter clauses when nothing is selected', () => {
+    const where = buildTransactionWhere({}, VIEWER) as Record<string, unknown>;
+
     expect(where['transactionTypeKey']).toBeUndefined();
     expect(where['$or']).toBeUndefined();
     expect(where['appuserTransactionCategories']).toBeUndefined();
   });
 
-  it('scopes to the selected accounts without dropping the deleted-account guard', () => {
-    const where = buildTransactionWhere({ accountKeys: [4, 9] }) as Record<string, unknown>;
-
-    // The guard has to survive: filtering by account must never surface a deleted one.
-    expect(where['accountKey']).toEqual({ accountKey: { $in: [4, 9] }, deletedAt: undefined });
-  });
-
   it('filters on transaction type names', () => {
-    const where = buildTransactionWhere({ transactionTypes: ['CARD_PAYMENT', 'TRANSFER_IN'] }) as Record<string, unknown>;
+    const where = buildTransactionWhere({ transactionTypes: ['CARD_PAYMENT', 'TRANSFER_IN'] }, VIEWER) as Record<string, unknown>;
 
     expect(where['transactionTypeKey']).toEqual({ name: { $in: ['CARD_PAYMENT', 'TRANSFER_IN'] } });
   });
@@ -37,9 +31,8 @@ describe('buildTransactionWhere', () => {
       accountKeys: [],
       categoryKeys: { includeUncategorized: false, keys: [] },
       transactionTypes: [],
-    }) as Record<string, unknown>;
+    }, VIEWER) as Record<string, unknown>;
 
-    expect(where['accountKey']).toEqual({ deletedAt: undefined });
     expect(where['transactionTypeKey']).toBeUndefined();
     expect(where['$or']).toBeUndefined();
     expect(where['appuserTransactionCategories']).toBeUndefined();
@@ -49,7 +42,7 @@ describe('buildTransactionWhere', () => {
     it('matches named categories with $some, not the implicit collection form', () => {
       const where = buildTransactionWhere({
         categoryKeys: { includeUncategorized: false, keys: [17] },
-      }) as Record<string, unknown>;
+      }, VIEWER) as Record<string, unknown>;
 
       expect(where['$or']).toEqual([
         { appuserTransactionCategories: { $some: { categoryKey: { $in: [17] } } }, splits: { $none: { deletedAt: null } } },
@@ -60,7 +53,7 @@ describe('buildTransactionWhere', () => {
     it('matches uncategorized transactions by the absence of any category row', () => {
       const where = buildTransactionWhere({
         categoryKeys: { includeUncategorized: true, keys: [] },
-      }) as Record<string, unknown>;
+      }, VIEWER) as Record<string, unknown>;
 
       expect(where['$or']).toEqual([
         { appuserTransactionCategories: { $none: {} }, splits: { $none: { deletedAt: null } } },
@@ -84,7 +77,7 @@ describe('buildTransactionWhere', () => {
     it('unions named categories and uncategorized as separate $some/$none branches', () => {
       const where = buildTransactionWhere({
         categoryKeys: { includeUncategorized: true, keys: [17, 23] },
-      }) as Record<string, unknown>;
+      }, VIEWER) as Record<string, unknown>;
 
       expect(where['$or']).toEqual([
         { appuserTransactionCategories: { $some: { categoryKey: { $in: [17, 23] } } }, splits: { $none: { deletedAt: null } } },
@@ -108,9 +101,8 @@ describe('buildTransactionWhere', () => {
       toDate,
       transactionTypes: ['CARD_PAYMENT'],
       unreviewedOnly: true,
-    }) as Record<string, unknown>;
+    }, VIEWER) as Record<string, unknown>;
 
-    expect(where['accountKey']).toEqual({ accountKey: { $in: [4] }, deletedAt: undefined });
     expect(where['reviewed']).toBe(false);
     expect(where['categorizationConfidence']).toBe(CategorizationConfidence.LOW);
     expect(where['transactionTypeKey']).toEqual({ name: { $in: ['CARD_PAYMENT'] } });

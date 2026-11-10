@@ -22,6 +22,7 @@ import {
   ComposedAreaBarChartBase,
   useChartFormatters,
 } from "@/components/ui/charts";
+import { UnconvertedAmountsNotice } from "@/components/ui/UnconvertedAmountsNotice";
 import useCashflow, { getCashflow } from "@/lib/api/reports/cashflow";
 import {
   buildCashflowSeries,
@@ -194,6 +195,12 @@ export function CashflowReport() {
           )}
         />
       )}
+      {!isPending && !error ? (
+        <UnconvertedAmountsNotice
+          completeness={data?.completeness}
+          className="mt-3 max-w-prose"
+        />
+      ) : null}
     </ReportCard>
   );
 }

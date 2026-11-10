@@ -1,0 +1,44 @@
+---
+title: Saldos incorrectos
+description: Reconstruye los saldos de una cuenta cuando su saldo acumulado o su total parecen incorrectos.
+---
+
+Cada transacción de una cuenta lleva un saldo acumulado: lo que la cuenta tenía justo después de ella. Si esas cifras dejan de cuadrar, **Recalcular saldos** las reconstruye desde el principio.
+
+## Síntomas
+
+- El saldo acumulado junto a una transacción no es el anterior más el importe de la transacción.
+- El saldo de una cuenta no coincide con su saldo inicial más sus transacciones.
+- El gráfico del historial de saldo da un salto en un día sin transacciones.
+- Una cuenta en otra moneda no muestra saldo convertido, o muestra uno que ya no sigue el tipo de cambio.
+
+## Qué revisar
+
+- Si hay una transacción pendiente de por medio. Las transacciones pendientes y caducadas no cuentan para el saldo acumulado hasta que se liquidan.
+- En una cuenta conectada al banco, si terminó la última sincronización. Su saldo es el que indica tu banco.
+- En una cuenta manual o importada, si el saldo inicial es correcto. Es el saldo que indicaste al crear la cuenta.
+
+## Qué probar
+
+1. En la web, abre **Cuentas**, abre el menú junto a la cuenta y elige **Recalcular saldos**. En el móvil, abre la cuenta, toca el menú de más acciones y elige **Recalcular saldos**.
+2. Confirma. El recálculo se ejecuta en segundo plano, así que puedes cerrar la ventana o salir de la pantalla.
+3. Cuando termina, un mensaje indica cuántas transacciones se corrigieron y muestra el saldo antes y después. "Ya eran correctos" significa que no había nada que corregir.
+
+Qué hace el recálculo:
+
+- Una cuenta manual o importada parte de su saldo inicial y suma cada transacción liquidada por orden de fecha. El saldo de la cuenta pasa a ser el resultado.
+- Una cuenta conectada al banco se reconstruye hacia atrás desde el saldo que indica tu banco, que nunca se modifica.
+- Los importes guardados sin tipo de cambio se convierten de nuevo cuando ya hay un tipo, y el saldo en tu moneda se actualiza al tipo más reciente.
+- Las transacciones en sí (importes, fechas, descripciones, categorías) no cambian y, en una cuenta que ya es correcta, no cambia nada, así que puedes repetirlo sin problema.
+
+Cualquier miembro del hogar que vea la cuenta puede recalcularla; una cuenta privada solo la puede recalcular su propietario. Cada cuenta se puede recalcular una vez por minuto.
+
+## Cuándo contactar con soporte
+
+Contacta con soporte si los saldos siguen siendo incorrectos después de un recálculo. Si falta una transacción o aparece dos veces, consulta primero [Problemas de importación de transacciones](/es/docs/troubleshooting/transaction-import-problems); en una cuenta conectada al banco cuyo saldo bancario es incorrecto, consulta [Problemas de conexión bancaria](/es/docs/troubleshooting/bank-connection-problems).
+
+## Páginas relacionadas
+
+- [Problemas de importación de transacciones](/es/docs/troubleshooting/transaction-import-problems)
+- [Problemas de conexión bancaria](/es/docs/troubleshooting/bank-connection-problems)
+- [Contactar con soporte](/es/docs/troubleshooting/contact-support)

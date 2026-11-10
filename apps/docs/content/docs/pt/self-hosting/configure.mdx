@@ -75,6 +75,7 @@ Define `GOOGLE_CLIENT_ID` e `GOOGLE_CLIENT_SECRET` (de um cliente OAuth no Googl
 | `SPONSOR_URL` | Uma página onde os teus utilizadores podem contribuir para manter a instância (Open Collective, GitHub Sponsors, ...). As perguntas frequentes da aplicação web incluem a ligação quando está definida |
 | `NEXT_PUBLIC_TERMS_URL`, `NEXT_PUBLIC_PRIVACY_URL` | As tuas páginas legais, ligadas a partir da página de registo quando ambas estão definidas |
 | `PRIVACY_POLICY_URL` | A tua política de privacidade, ligada a partir do rodapé dos emails. `{lang}` é substituído pelo idioma do destinatário (`en` ou `pt`), por exemplo `https://example.com/{lang}/privacy`. Por omissão, aponta para as definições de privacidade da aplicação |
+| `TRANSFER_MATCH_FX_TOLERANCE` | A diferença aceite entre os dois lados de uma transferência entre contas em moedas diferentes, depois de converter o valor que saiu à taxa de câmbio desse dia, como fração do valor que chegou: `0.02` (por omissão) é 2 por cento. Aumenta-a se a margem cambial e as comissões do teu banco forem maiores; no máximo `0.25`. Define-a na API e no worker |
 
 ## Analytics
 

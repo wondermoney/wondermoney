@@ -1,6 +1,7 @@
 import {
   BarChart3,
   Briefcase,
+  Building2,
   CandlestickChart,
   Home,
   Landmark,
@@ -103,6 +104,13 @@ export const NAVIGATION: NavigationItem[] = [
         href: "/portfolio/transactions",
       },
     ],
+  },
+  {
+    id: "assets",
+    labelKey: "navigation.assets",
+    href: "/assets",
+    icon: Building2,
+    group: "investments",
   },
   {
     id: "financial-markets",

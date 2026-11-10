@@ -62,6 +62,7 @@
     "watchlist": "Watchlist",
     "goals": "Goals",
     "loans": "Loans",
+    "assets": "Assets",
     "reports": "Reports",
     "help": "Help",
     "settings": "Settings",
@@ -217,6 +218,8 @@
     "unsupportedLoan_other": "{{count}} loan balances are not included",
     "unsupportedPortfolio_one": "{{count}} portfolio is not included",
     "unsupportedPortfolio_other": "{{count}} portfolios are not included",
+    "unsupportedManualAsset_one": "{{count}} asset is not included",
+    "unsupportedManualAsset_other": "{{count}} assets are not included",
     "viewTrend": "View net worth trend",
     "budgetHealth": {
       "title": "Budget health",
@@ -231,7 +234,10 @@
       "error": "Could not load insights",
       "topCategory": "{{name}} — {{amount}} this month"
     },
-    "helpText": "A quick overview of your accounts, portfolio, and liabilities."
+    "helpText": "A quick overview of your accounts, portfolio, and liabilities.",
+    "unsupportedAccount_one": "{{count}} account balance is not included",
+    "unsupportedAccount_other": "{{count}} account balances are not included",
+    "unconvertedCurrencies": "No exchange rate yet for {{currencies}}."
   },
   "home": {
     "netWorth": {
@@ -295,6 +301,7 @@
       "groups": {
         "accounts": "Accounts",
         "portfolios": "Portfolios",
+        "manualAssets": "Property and other assets",
         "loans": "Loans"
       },
       "countedIn": "Counted in {{account}}"
@@ -486,6 +493,28 @@
     "invalidResponse": {
       "title": "Could not verify account data",
       "message": "The account data received could not be verified"
+    }
+  },
+  "accountRecalculate": {
+    "action": "Recalculate balances",
+    "confirmTitle": "Recalculate balances?",
+    "confirmMessage": "This rebuilds the running balance of every transaction on this account: a manual or imported account starts from its opening balance, a bank-connected one ends on the balance your bank reports. Your transactions are not changed.",
+    "confirm": "Recalculate",
+    "running": "Recalculating balances…",
+    "background": "Balances are still being recalculated. They update when it finishes.",
+    "alreadyCorrect": "Balances checked: they were already correct.",
+    "done_one": "Balances recalculated: {{count}} transaction corrected",
+    "done_other": "Balances recalculated: {{count}} transactions corrected",
+    "balanceChange": "Balance: {{before}} → {{after}}",
+    "dismiss": "Dismiss",
+    "failures": {
+      "too-soon": "This account was recalculated less than a minute ago. Try again shortly.",
+      "demo": "Recalculating is not available in the demo.",
+      "access": "Sign in again to recalculate this account.",
+      "not-found": "This account is no longer available.",
+      "network": "Could not reach the server. Check your connection and try again.",
+      "failed": "The balances could not be recalculated. Try again in a few minutes.",
+      "general": "The recalculation could not be started. Try again."
     }
   },
   "accountEdit": {
@@ -1675,6 +1704,121 @@
       "invalid-routeTitle": "Loan not available",
       "invalid-routeMessage": "Return to Loans and choose an available loan."
     }
+  },
+  "manualAssets": {
+    "title": "Assets",
+    "description": "Homes, vehicles and other things you own that no bank or market prices. You set what they are worth.",
+    "loading": "Loading assets",
+    "errorTitle": "Assets could not be loaded",
+    "errorMessage": "Check your connection and try again.",
+    "invalidTitle": "Assets could not be shown",
+    "invalidMessage": "The server sent something this version of the app cannot read. Try again, or update the app.",
+    "stale": "These figures may be out of date: the last refresh failed.",
+    "emptyTitle": "Count your home and car in your net worth",
+    "emptyMessage": "Add what you own that no bank or market reports: a home, a vehicle, a valuable. You say what it is worth and update it when that changes. Updating a value never creates a transaction.",
+    "add": "Add asset",
+    "total": "Total value",
+    "unconverted_one": "{{count}} asset is left out of the total: there is no exchange rate for {{currencies}} yet.",
+    "unconverted_other": "{{count}} assets are left out of the total: there is no exchange rate for {{currencies}} yet.",
+    "noRate": "No exchange rate",
+    "private": "Private",
+    "archivedTitle": "Archived",
+    "archivedDescription": "No longer counted in net worth. Their history stays.",
+    "lastValued": "Valued {{date}}",
+    "kinds": {
+      "property": "Property",
+      "vehicle": "Vehicle",
+      "valuable": "Valuable",
+      "other": "Other"
+    },
+    "failures": {
+      "demo": "The demo is read-only, so nothing was saved.",
+      "access": "You can no longer change this asset. Sign in again or check with your household.",
+      "mfa": "Confirm it is you to continue.",
+      "not-found": "This asset no longer exists, or it is private to the other member of your household.",
+      "invalid": "Something entered is not valid. Check the fields and try again.",
+      "invalid-response": "It may have been saved, but the server's answer could not be read. Refresh before trying again.",
+      "network-ambiguous": "The connection dropped, so it is not known whether it was saved. Refresh before trying again.",
+      "general": "It could not be saved. Try again."
+    }
+  },
+  "manualAssetDetail": {
+    "back": "Assets",
+    "loading": "Loading asset",
+    "errorTitle": "This asset could not be loaded",
+    "errorMessage": "Check your connection and try again.",
+    "invalidTitle": "This asset could not be shown",
+    "invalidMessage": "The server sent something this version of the app cannot read. Try again, or update the app.",
+    "notFoundTitle": "Asset not found",
+    "notFoundMessage": "It may have been deleted, or it is private to the other member of your household.",
+    "invalidIdTitle": "Asset not found",
+    "invalidIdMessage": "This link does not point to an asset.",
+    "stale": "These figures may be out of date: the last refresh failed.",
+    "valueToday": "Value today",
+    "lastValue": "Last valued",
+    "archivedOn": "Archived on {{date}}",
+    "estimated": "Estimated from the yearly change since the valuation of {{date}}",
+    "updateValue": "Update value",
+    "historyTitle": "Value over time",
+    "chartLabel": "Value over time, from {{from}} to {{to}}",
+    "valuationsTitle": "Valuations",
+    "manageOnWeb": "Edit, archive or delete this asset, or correct a valuation, in WonderMoney on the web.",
+    "facts": {
+      "title": "Details",
+      "kind": "Kind",
+      "purchased": "Purchased",
+      "purchasedValue": "{{amount}} on {{date}}",
+      "changeSincePurchase": "Change since purchase",
+      "growth": "Yearly change",
+      "growthFrom": "{{rate}} from {{date}}",
+      "visibility": "Visibility",
+      "private": "Private: only you",
+      "shared": "Shared with your household",
+      "owner": "Owner",
+      "notes": "Notes"
+    }
+  },
+  "manualAssetCreate": {
+    "title": "Add asset",
+    "loading": "Loading currencies",
+    "metadataError": "The currencies could not be loaded. Close and try again.",
+    "save": "Add asset",
+    "saving": "Adding",
+    "value": "Current value",
+    "name": "Name",
+    "namePlaceholder": "e.g. Family home",
+    "kind": "Kind",
+    "currency": "Currency",
+    "choose": "Choose",
+    "valuationDate": "Valued on",
+    "purchasePrice": "Purchase price",
+    "purchasePriceOptional": "Purchase price, optional",
+    "purchaseDate": "Purchase date",
+    "purchaseHint": "Optional. With a price and a date, the value history starts at the purchase.",
+    "growthRate": "Yearly change (%)",
+    "growthRateOptional": "Yearly change in percent, optional",
+    "growthRateHint": "The value changes by this percentage each year after the latest valuation. Use a negative number for something that loses value, such as a car.",
+    "private": "Private asset",
+    "privateDescription": "Only you see this asset. It stays out of the other household member's net worth.",
+    "notes": "Notes",
+    "notesOptional": "Notes, optional",
+    "optional": "Optional",
+    "fieldErrors": {
+      "value": "Enter zero or more",
+      "amount": "Enter zero or more",
+      "growthRate": "Enter a percentage above -100 and up to 1000"
+    }
+  },
+  "manualAssetValuation": {
+    "title": "Update value",
+    "save": "Save value",
+    "saving": "Saving",
+    "value": "Value",
+    "date": "Date",
+    "note": "Note",
+    "noteOptional": "Note, optional",
+    "notePlaceholder": "e.g. Agent estimate",
+    "description": "Recording a value never creates a transaction. A value already recorded for the same date is replaced."
   },
   "budgets": {
     "title": "Budgets",
@@ -3918,5 +4062,18 @@
     "show": "Show amounts",
     "setting": "Hide amounts",
     "settingHelp": "Masks balances and amounts on this device, for when someone can see your screen. Percentages stay visible."
+  },
+  "fxStatus": {
+    "missing": {
+      "label": "Not converted",
+      "hint": "No exchange rate for {{currency}} yet, so this amount is shown in {{currency}} and left out of totals.",
+      "hintNoCurrency": "No exchange rate yet, so this amount is shown in its own currency and left out of totals."
+    },
+    "provisional": {
+      "label": "Estimated",
+      "rateOf": "Rate of {{date}}",
+      "hint": "Converted at the rate from {{date}}, the latest available. It is updated when a newer rate arrives.",
+      "hintNoDate": "Converted at an older rate, the latest available. It is updated when a newer rate arrives."
+    }
   }
 }

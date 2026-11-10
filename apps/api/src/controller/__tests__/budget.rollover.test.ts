@@ -142,6 +142,7 @@ describe('budget rollover', () => {
     const purchase = await spend(em, household, categories.groceries, -60, on(2025, 7));
     expect(row(await month(household, budget, 2025, 8), 'Groceries').category_rolled_over).toBe(40);
 
+    purchase.editedSettlementAmount = -90;
     purchase.appuserSettlementAmount = -90;
     await em.flush();
 

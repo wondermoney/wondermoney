@@ -7,15 +7,21 @@ import {
 import type { AxiosInstance } from "axios";
 
 import type { TransferDestinationRow } from "@/lib/account/transaction-transfer";
+import type { FxFields } from "@/lib/fx/fx-status";
 import type { SupportedCurrencyCodes } from "@/lib/utils/currencySymbol";
 
 import api from "../api";
 import type { Category } from "../category/useCategories";
+import type { AmountsCompleteness } from "../completeness";
 import { transactionDateRangeParams } from "../date-range";
 import type { Tag } from "../tag/useTags";
 import type { TransactionSplitLine } from "./useTransactionSplits";
 
-export interface Transaction {
+/**
+ * `fxStatus` / `fxRateDate` say how `appuserSettlementAmount` was converted
+ * (`lib/fx/fx-status.ts`); read them through `transactionFxView`.
+ */
+export interface Transaction extends FxFields {
   transactionKey: number;
   transactionDate: string; // date iso
   recurringSeries?: {
@@ -41,7 +47,8 @@ export interface Transaction {
   settlementAmount: number;
   editedSettlementAmount?: number;
   settlementCurrencyKey: { code: SupportedCurrencyCodes };
-  appuserSettlementAmount: number;
+  /** Null when no exchange rate converts the amount (`fxStatus` `missing`). */
+  appuserSettlementAmount: number | null;
   appuserCurrencyKey: { code: SupportedCurrencyCodes };
   balance: number;
   appuserCurrencyBalance: number;
@@ -88,6 +95,21 @@ export interface GetTransactionsResponse {
    * because repeating the count for every page of a long scroll is pure waste.
    */
   total?: null | number;
+  /**
+   * What the matching rows add up to in the viewer's currency, from the same
+   * query as `total`; with `excludeNonSpending` or a category filter, only the
+   * split lines those keep. `null` on a continuation page, absent from an older
+   * API. Rows with no exchange rate are left out and counted in `completeness`.
+   */
+  totalAmount?: null | number;
+  /**
+   * The parts of `totalAmount` from rows that add money and from rows that
+   * take it (as a positive amount), from the same query. `null` on a
+   * continuation page, absent from an older API.
+   */
+  moneyIn?: null | number;
+  moneyOut?: null | number;
+  completeness?: AmountsCompleteness | null;
   limit?: number;
   hasMore?: boolean;
   /**
@@ -124,6 +146,17 @@ export interface GetTransactionRequest {
   /** Tag keys; a row matches when it carries any of them. */
   tagKeys?: string[];
   /**
+   * A report's scope (`lib/account/transaction-report-scope.ts`), so the list
+   * holds exactly the rows behind a report total. Absent, the list shows every
+   * status but expired, transfers and every category.
+   */
+  statuses?: string[];
+  excludeTransfers?: boolean;
+  excludeNonSpending?: boolean;
+  direction?: "in" | "out";
+  merchantKeys?: string[];
+  memberCurrency?: string;
+  /**
    * Continuation token from the previous page's `nextCursor`. Omit for page one.
    *
    * Keyset, not offset: the cursor names the last row seen, so inserts and
@@ -156,6 +189,8 @@ export async function getTransactions(
     categoryKeys: list(params.categoryKeys),
     tagKeys: list(params.tagKeys),
     transactionTypes: list(params.transactionTypes),
+    statuses: list(params.statuses),
+    merchantKeys: list(params.merchantKeys),
   };
   const { data } = await apiClient.get<GetTransactionsResponse>(
     "/v1/account/transaction",
@@ -216,6 +251,8 @@ export function useInfiniteTransactions(
           hasMore: query.hasNextPage,
           limit: firstPage?.limit,
           total: firstPage?.total ?? undefined,
+          totalAmount: firstPage?.totalAmount ?? undefined,
+          completeness: firstPage?.completeness ?? undefined,
           transactions: pages.flatMap((page) => page.transactions),
         }
       : undefined,

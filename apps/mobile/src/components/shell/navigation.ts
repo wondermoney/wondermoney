@@ -77,10 +77,10 @@ export function currentPage(section: ShellSection, pathname: string): ShellSecti
 const FLOW_SEGMENT = /\/(create|edit|import|scan|connect|add|transaction-create)(\/|$)/
 /**
  * Flows whose last segment is a noun rather than a verb: a budget's linked
- * accounts and a portfolio's settings. Anchored to their parent so the
+ * accounts, a portfolio's settings and an asset's Update value. Anchored to their parent so the
  * Accounts tab and the Settings pages keep the top bar.
  */
-const FLOW_ROUTES = [/^\/budgets\/[^/]+\/accounts\/?$/, /^\/portfolio\/[^/]+\/settings\/?$/]
+const FLOW_ROUTES = [/^\/budgets\/[^/]+\/accounts\/?$/, /^\/portfolio\/[^/]+\/settings\/?$/, /^\/assets\/[^/]+\/value\/?$/]
 
 export function showsTopBar(pathname: string): boolean {
   if (pathname.startsWith('/onboarding')) return false

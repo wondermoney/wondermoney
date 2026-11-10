@@ -6,10 +6,9 @@ import { Amount } from "@/components/ui/Amount";
 import { buttonVariants } from "@/components/ui/button";
 import { Link } from "@/components/ui/Link";
 import { Skeleton } from "@/components/ui/skeleton";
-import { aggregateMetrics } from "@/lib/account/accounts-metrics";
+import { UnconvertedAmountsNotice } from "@/components/ui/UnconvertedAmountsNotice";
 import { getAccountsOverviewCurrencyCode } from "@/lib/account/accounts-overview-state";
 import type { Account } from "@/lib/api/account/useAccounts";
-import useAccountsMetrics from "@/lib/api/account/useAccountsMetrics";
 import useTransactions from "@/lib/api/account/useTransactions";
 import { cn } from "@/lib/utils";
 
@@ -17,9 +16,11 @@ import { cn } from "@/lib/utils";
  * The figures above the ledger: how many transactions the current view holds,
  * money in and out over the date range, and how many still need review.
  *
- * Money in and out come from the same metrics, summed the same way, as the
- * Accounts overview, so the two pages agree; they cover every account in the
- * date range, whatever the table's filters, and the caption says so.
+ * Money in and out are the transaction list's own sums (`moneyIn`,
+ * `moneyOut`) for the date range alone: the rows the table lists with no
+ * filter set, summed by the same query as its count and in the viewer's
+ * currency, a partner's rows converted. They cover every account whatever the
+ * table's filters, and the caption says so.
  */
 export function TransactionsLead({
   accounts,
@@ -34,20 +35,20 @@ export function TransactionsLead({
   viewTotal?: number | null;
 }) {
   const t = useTranslations("transactionsPage");
-  const metrics = useAccountsMetrics({ fromDate, toDate });
+  const flows = useTransactions({ fromDate, toDate, limit: 1 });
   const unreviewed = useTransactions({
     fromDate,
     toDate,
     limit: 1,
     unreviewedOnly: true,
   });
-  const currency = getAccountsOverviewCurrencyCode(
-    accounts[0]?.accountOwnerAppuserKey?.currencyKey?.code,
-  );
-  const totals =
-    metrics.data?.metrics && metrics.data.metrics.length > 0
-      ? aggregateMetrics(metrics.data.metrics)
-      : null;
+  const currency =
+    flows.data?.completeness?.currencyCode ??
+    getAccountsOverviewCurrencyCode(
+      accounts[0]?.accountOwnerAppuserKey?.currencyKey?.code,
+    );
+  const moneyIn = flows.data?.moneyIn ?? 0;
+  const moneyOut = flows.data?.moneyOut ?? 0;
   const reviewCount =
     unreviewed.data?.total ?? unreviewed.data?.transactions.length;
 
@@ -69,9 +70,9 @@ export function TransactionsLead({
           <dt className="text-muted-foreground text-sm">{t("money-in")}</dt>
           <dd className="mt-1 text-2xl font-medium tracking-tight">
             {figure(
-              metrics.isPending,
+              flows.isPending,
               <Amount
-                value={metrics.isError ? null : (totals?.inflowCurrent ?? 0)}
+                value={flows.isError ? null : moneyIn}
                 currency={currency}
                 signed
                 className="font-mono"
@@ -83,9 +84,9 @@ export function TransactionsLead({
           <dt className="text-muted-foreground text-sm">{t("money-out")}</dt>
           <dd className="mt-1 text-2xl font-medium tracking-tight">
             {figure(
-              metrics.isPending,
+              flows.isPending,
               <Amount
-                value={metrics.isError ? null : -(totals?.outflowCurrent ?? 0)}
+                value={flows.isError ? null : -moneyOut}
                 currency={currency}
                 className="font-mono"
               />,
@@ -121,6 +122,10 @@ export function TransactionsLead({
         </div>
       </dl>
       <p className="text-muted-foreground mt-3 text-xs">{t("flows-caption")}</p>
+      <UnconvertedAmountsNotice
+        completeness={flows.data?.completeness ?? undefined}
+        className="mt-1 text-xs"
+      />
     </div>
   );
 }

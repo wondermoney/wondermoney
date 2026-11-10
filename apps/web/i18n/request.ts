@@ -18,10 +18,12 @@ export default getRequestConfig(async ({ requestLocale }) => {
     ...(await import(`../messages/${locale}/household.json`)).default,
     ...(await import(`../messages/${locale}/reports.json`)).default,
     ...(await import(`../messages/${locale}/loans.json`)).default,
+    ...(await import(`../messages/${locale}/assets.json`)).default,
     ...(await import(`../messages/${locale}/home.json`)).default,
     ...(await import(`../messages/${locale}/transactions.json`)).default,
     ...(await import(`../messages/${locale}/budget.json`)).default,
     ...(await import(`../messages/${locale}/rules.json`)).default,
+    ...(await import(`../messages/${locale}/currencies.json`)).default,
   };
 
   return { locale, messages };

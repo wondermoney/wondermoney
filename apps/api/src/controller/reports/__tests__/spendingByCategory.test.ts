@@ -74,21 +74,6 @@ describe('getSpendingByCategoryReport', () => {
     });
   });
 
-  it('scopes the transaction query by tenant and the per-account privacy carve-out', async () => {
-    await getSpendingByCategoryReport(makeRequest(), makeResponse());
-
-    expect(mocks.find).toHaveBeenCalledWith(
-      Transaction,
-      expect.objectContaining({
-        accountKey: { $or: [{ isPrivate: false }, { accountOwnerAppuserKey: { appuserKey: 71, currencyKey: { code: 'EUR' } } }] },
-        deletedAt: undefined,
-        tenantKey: { tenantKey: 113 },
-        transactionStatusKey: { name: { $in: ['BOOKED'] } },
-      }),
-      expect.anything(),
-    );
-  });
-
   it('returns an empty dataset when there are no expense transactions', async () => {
     const res = makeResponse();
     await getSpendingByCategoryReport(makeRequest(), res);

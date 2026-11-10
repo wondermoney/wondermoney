@@ -112,3 +112,21 @@ test("a complete report shows no note", () => {
 
   assert.equal(screen.queryByRole("note"), null);
 });
+
+test("the total opens the list of the money out it adds up", () => {
+  state.response = respond([groceries], 0);
+
+  renderReport();
+
+  const link = screen.getByRole("link", {
+    name: /See the transactions behind this total/,
+  });
+  const url = new URL(link.getAttribute("href") ?? "", "https://app.example");
+  assert.match(url.pathname, /\/accounts\/transactions$/);
+  assert.equal(url.searchParams.get("fromDate"), "2026-07-01T00:00:00.000Z");
+  assert.equal(url.searchParams.get("toDate"), "2026-07-31T23:59:59.000Z");
+  assert.equal(url.searchParams.get("statuses"), "BOOKED");
+  assert.equal(url.searchParams.get("direction"), "out");
+  assert.equal(url.searchParams.get("excludeTransfers"), "true");
+  assert.equal(url.searchParams.get("excludeNonSpending"), "true");
+});

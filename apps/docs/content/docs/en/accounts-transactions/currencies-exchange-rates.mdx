@@ -1,0 +1,35 @@
+---
+title: Currencies and exchange rates
+description: How WonderMoney converts amounts in other currencies, and what the "Not converted" and "Estimated" labels mean.
+---
+
+Your accounts and transactions can be in any currency. WonderMoney shows every total in your own currency, converting other amounts with the European Central Bank's daily exchange rates, which cover the main currencies.
+
+## How each amount is converted
+
+Every amount in another currency is converted at the rate for its date. A transaction or an account balance can be in one of three states:
+
+- **Converted.** A rate exists for the date, so the amount appears in your currency, with the original amount underneath. There is no label.
+- **Estimated.** The only rate available is more than a week older than the amount's date. The amount is converted at that rate and marked **Estimated**; the label's tooltip gives the date of the rate. It counts in your totals, and it is converted again as soon as a newer rate is published.
+- **Not converted.** No rate exists for the currency. The amount is shown in its own currency, marked **Not converted**, and left out of every total in your currency. It is never counted as if it were already in your currency.
+
+On mobile, the labels appear on the same rows; the account and transaction screens read them out with the amount.
+
+## Totals that leave amounts out
+
+When a total leaves out amounts it could not convert, it says so:
+
+- **Net worth.** A warning sign beside the figure on Home opens an explanation of how many accounts, loans or portfolios were left out and which currencies have no rate. The balance sheet below repeats it.
+- **Accounts.** The total on the Accounts page shows as unavailable, with a warning that names the currencies without a rate.
+- **Reports, budgets and cash flow.** A note under the total says how many transactions were left out, and in which currencies.
+
+Where a warning names a currency, **Add an exchange rate** takes you to the Currencies settings.
+
+## When the labels go away
+
+Rates are fetched every working day. After each update, WonderMoney converts estimated and unconverted amounts again, and converts the balance of every account in another currency at the latest rate. A label disappears once a rate for the amount's date exists.
+
+## Related links
+
+- [Manual offline account](/en/docs/accounts-transactions/manual-offline-account)
+- [Understand transactions](/en/docs/accounts-transactions/understand-transactions)

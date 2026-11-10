@@ -227,7 +227,7 @@ describe('account csv import service', () => {
 
   it('uses exchange rates for appuser settlement when currencies differ', async () => {
     const exchangeRate = { rate: 1.1 };
-    const account = { accountKey: 1, accountOwnerAppuserKey: { appuserKey: 9, currencyKey: { code: 'USD', currencyKey: 5 } }, currencyKey: { code: 'EUR', currencyKey: 2 } } as { accountKey: number; accountOwnerAppuserKey: { appuserKey: number; currencyKey: { code: string; currencyKey: number } }; appuserCurrencyBalance?: number; currencyKey: { code: string; currencyKey: number } };
+    const account = { accountKey: 1, accountOwnerAppuserKey: { appuserKey: 9, currencyKey: { code: 'USD', currencyKey: 5 } }, currencyKey: { code: 'EUR', currencyKey: 2 }, tenantKey: { tenantKey: 1 } } as { accountKey: number; accountOwnerAppuserKey: { appuserKey: number; currencyKey: { code: string; currencyKey: number } }; appuserCurrencyBalance?: number; currencyKey: { code: string; currencyKey: number }; tenantKey: { tenantKey: number } };
     const em = { create: vi.fn((_: unknown, value: unknown) => value), find: vi.fn().mockResolvedValue([]), findOne: vi.fn((entity, criteria) => {
       if (entity.name === 'Account') return Promise.resolve(account);
       if (entity.name === 'TransactionStatus' && criteria) return Promise.resolve({ name: 'BOOKED', transactionStatusKey: 1 });
@@ -275,7 +275,7 @@ describe('account csv import service', () => {
   });
 
   it('stores no converted amount when no rate exists on or before the row date, not a later rate or the raw amount', async () => {
-    const account = { accountKey: 1, accountOwnerAppuserKey: { appuserKey: 9, currencyKey: { code: 'USD', currencyKey: 5 } }, currencyKey: { code: 'EUR', currencyKey: 2 } } as { accountKey: number; accountOwnerAppuserKey: { appuserKey: number; currencyKey: { code: string; currencyKey: number } }; appuserCurrencyBalance?: number; currencyKey: { code: string; currencyKey: number } };
+    const account = { accountKey: 1, accountOwnerAppuserKey: { appuserKey: 9, currencyKey: { code: 'USD', currencyKey: 5 } }, currencyKey: { code: 'EUR', currencyKey: 2 }, tenantKey: { tenantKey: 1 } } as { accountKey: number; accountOwnerAppuserKey: { appuserKey: number; currencyKey: { code: string; currencyKey: number } }; appuserCurrencyBalance?: number; currencyKey: { code: string; currencyKey: number }; tenantKey: { tenantKey: number } };
     const em = { create: vi.fn((_: unknown, value: unknown) => value), find: vi.fn().mockResolvedValue([]), findOne: vi.fn((entity, criteria) => {
       if (entity.name === 'Account') return Promise.resolve(account);
       if (entity.name === 'TransactionStatus' && criteria) return Promise.resolve({ name: 'BOOKED', transactionStatusKey: 1 });

@@ -49,7 +49,7 @@ export async function getNetWorthHistoryReport(input: ReportServiceInput): Promi
 
   return closingPointPerMonth(completePoints)
     .map((point) => {
-      const assets = (point.accountsTotal ?? 0) + (point.portfoliosTotal ?? 0);
+      const assets = (point.accountsTotal ?? 0) + (point.portfoliosTotal ?? 0) + (point.manualAssetsTotal ?? 0);
       const liabilities = point.loansTotal ?? 0;
       return {
         breakdown: {

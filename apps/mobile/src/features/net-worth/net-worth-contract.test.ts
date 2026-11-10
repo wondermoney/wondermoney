@@ -19,6 +19,11 @@ describe('net-worth contract', () => {
     expect(netWorthDtoSchema.parse(fixture)).toEqual(fixture)
   })
 
+  it('reads the unconverted accounts and the currencies left out, tolerating older APIs and bad values', () => {
+    expect(netWorthDtoSchema.parse({ ...fixture, unsupportedCurrencies: { accounts: 2, loans: 0, portfolios: 0 }, unconvertedCurrencies: ['JPY', 'THB'] })).toMatchObject({ unsupportedCurrencies: { accounts: 2 }, unconvertedCurrencies: ['JPY', 'THB'] })
+    expect(netWorthDtoSchema.parse({ ...fixture, unconvertedCurrencies: 'JPY' }).unconvertedCurrencies).toBeUndefined()
+  })
+
   it.each(['EUR', 'USD', 'JPY'])('accepts ISO-shaped currency code %s', (currencyCode) => {
     expect(netWorthDtoSchema.safeParse({ ...fixture, currencyCode }).success).toBe(true)
   })
@@ -85,6 +90,17 @@ describe('net-worth contract', () => {
       generatedAt: 'now',
     })
     expect(parsed).toEqual(fixture)
+  })
+
+  it('reads manually valued assets as their own rows and totals, still optional for older APIs', () => {
+    const withAssets = {
+      ...fixture,
+      assets: { ...fixture.assets, manualAssets: 250_000 },
+      rows: [...fixture.rows, { type: 'manualAssets', id: 3, name: 'Family home', balance: 250_000 }],
+      unsupportedCurrencies: { ...fixture.unsupportedCurrencies, manualAssets: 1 },
+    }
+    expect(netWorthDtoSchema.parse(withAssets)).toEqual(withAssets)
+    expect(netWorthDtoSchema.parse(fixture).assets.manualAssets).toBeUndefined()
   })
 
   it('does not assert arithmetic consistency', () => {

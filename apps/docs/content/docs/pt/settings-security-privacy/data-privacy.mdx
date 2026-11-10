@@ -33,13 +33,13 @@ A análise e a atribuição dependem do consentimento. Se não consentiste a an�
 
 **Definições > Privacidade > Exportar todos os dados** (ou **Definições > Segurança** na aplicação móvel) descarrega tudo o que vês no teu agregado familiar, num ficheiro zip chamado `wondermoney-export-AAAA-MM-DD.zip`:
 
-- `data/`: um ficheiro JSON por tipo de dados: contas, transações, categorias e definições de categorias, comerciantes, etiquetas, divisões de transações, regras, pagamentos recorrentes, orçamentos, objetivos, empréstimos, carteiras e as suas transações, a tua lista de observação e as tuas preferências. As linhas referem-se umas às outras por identificadores que só têm significado dentro da exportação.
+- `data/`: um ficheiro JSON por tipo de dados: contas, transações, categorias e definições de categorias, comerciantes, etiquetas, divisões de transações, regras, pagamentos recorrentes, orçamentos, objetivos, empréstimos, ativos avaliados manualmente e as respetivas avaliações, carteiras e as suas transações, a tua lista de observação e as tuas preferências. As linhas referem-se umas às outras por identificadores que só têm significado dentro da exportação.
 - `csv/`: transações, contas, transações de carteira e posições atuais, para folhas de cálculo. Os valores usam o ponto como separador decimal e as datas estão no formato `AAAA-MM-DD`.
 - `manifest.json`: a versão do formato, quando a exportação foi feita e o número de linhas e uma soma de verificação SHA-256 de cada ficheiro.
 
 O que não é incluído:
 
-- As contas privadas do teu parceiro, e as respetivas transações, divisões, etiquetas, pagamentos recorrentes e regras. Os empréstimos e a lista de observação dele também ficam de fora.
+- As contas privadas do teu parceiro, e as respetivas transações, divisões, etiquetas, pagamentos recorrentes e regras. Os ativos privados, os empréstimos e a lista de observação dele também ficam de fora.
 - Palavras-passe, sessões, segredos de autenticação de dois fatores, credenciais bancárias e tokens de ligação. Uma conta que esteve ligada a um banco indica-o, sem nenhum dos dados da ligação.
 - Registos de auditoria, utilização de IA e dados de análise.
 
@@ -58,7 +58,7 @@ O formato deriva a chave da palavra-passe com uma função rápida, por isso é 
 
 ## Restaurar a partir de uma exportação
 
-Uma exportação pode ser carregada de volta no WonderMoney, no mesmo servidor ou noutro, por exemplo quando mudas entre o serviço alojado e o teu próprio servidor. O restauro só preenche um agregado vazio: funciona enquanto o teu agregado não tem contas, carteiras, orçamentos, objetivos ou empréstimos, e nunca junta uma exportação a dados existentes. Só o titular do agregado pode restaurar, e o servidor precisa de armazenamento de ficheiros.
+Uma exportação pode ser carregada de volta no WonderMoney, no mesmo servidor ou noutro, por exemplo quando mudas entre o serviço alojado e o teu próprio servidor. O restauro só preenche um agregado vazio: funciona enquanto o teu agregado não tem contas, carteiras, orçamentos, objetivos, empréstimos ou ativos avaliados manualmente, e nunca junta uma exportação a dados existentes. Só o titular do agregado pode restaurar, e o servidor precisa de armazenamento de ficheiros.
 
 1. Abre **Definições > Privacidade > Restaurar a partir de uma exportação**, ou escolhe **Restaurar a partir de uma exportação** no primeiro ecrã depois de te registares.
 2. Escolhe o ficheiro `wondermoney-export-AAAA-MM-DD.zip` (até 64 MB) e seleciona **Verificar ficheiro**. Numa exportação protegida por palavra-passe, introduz a palavra-passe quando for pedida.

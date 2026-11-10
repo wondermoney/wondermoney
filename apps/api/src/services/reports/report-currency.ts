@@ -4,7 +4,7 @@ import type { Appuser } from '@entity/Appuser';
 import { LoanRepaymentLink } from '@entity/LoanRepaymentLink';
 import type { Tenant } from '@entity/Tenant';
 import type { Transaction } from '@entity/Transaction';
-import { loadRateTable, type RateTable } from '@service/currency/exchange-rate';
+import { loadRateTable, type RateScope, type RateTable } from '@service/currency/exchange-rate';
 import { big, Money } from '@utils/money';
 
 /**
@@ -49,6 +49,37 @@ export function currencyKeySql(currencyKey: number): string {
 }
 
 /**
+ * SQL twin of {@link ReportCurrencyAmounts.amountOf}, before any rate: the amount of the
+ * transaction aliased `alias` as a total in the currency `currencyKey` reads it. The settlement
+ * amount when the row was settled in that currency (exact, not converted into the member's
+ * currency and back), else the amount stored in the member's currency, which still needs the
+ * day's rate when {@link needsRateSql} says so. Null when no converted amount was stored: the row
+ * is left out and counted, never read at its settlement amount.
+ */
+export function amountInCurrencySql(alias: string, currencyKey: number): string {
+  const row = `"${alias}"`;
+  return `(case when ${row}.appuser_settlement_amount is null then null
+    when ${settledInSql(alias, currencyKey)} then coalesce(${row}.edited_settlement_amount, ${row}.settlement_amount)
+    else ${row}.appuser_settlement_amount end)`;
+}
+
+/**
+ * SQL: {@link amountInCurrencySql} is in the member's currency and that currency is not
+ * `currencyKey`, so the total multiplies it by the rate of the transaction's day. A row with no
+ * recorded member currency is read in the total's currency, as {@link ReportCurrencyAmounts} reads it.
+ */
+export function needsRateSql(alias: string, currencyKey: number): string {
+  const row = `"${alias}"`;
+  return `(${row}.appuser_settlement_amount is not null and not ${settledInSql(alias, currencyKey)}
+    and ${row}.appuser_currency_key is not null and ${row}.appuser_currency_key <> ${currencyKeySql(currencyKey)})`;
+}
+
+function settledInSql(alias: string, currencyKey: number): string {
+  const row = `"${alias}"`;
+  return `(${row}.settlement_currency_key = ${currencyKeySql(currencyKey)} and coalesce(${row}.edited_settlement_amount, ${row}.settlement_amount) is not null)`;
+}
+
+/**
  * The UTC calendar day of a transaction, as `YYYY-MM-DD`, for grouping rows before they are
  * converted. Rates are stored once a day at UTC midnight, so every moment of a UTC day takes the
  * same rate: converting a day's sum is exact, and needs one lookup instead of one per row.
@@ -78,14 +109,14 @@ export function completenessFromCounts(currencyCode: string, counts: Unconverted
   return { currencyCode, isComplete: unconvertedTransactions === 0, unconvertedCurrencies, unconvertedTransactions };
 }
 
-export async function loadDailyRates(em: EntityManager, targetCurrency: string, groups: DailyCurrencyGroup[]): Promise<DailyRateLookup> {
+export async function loadDailyRates(em: EntityManager, targetCurrency: string, groups: DailyCurrencyGroup[], scope: RateScope): Promise<DailyRateLookup> {
   const dayOf = (day: string) => new Date(`${day}T00:00:00Z`);
   const foreign = groups.flatMap((group) => (group.currencyCode != null && group.currencyCode !== targetCurrency && group.day != null ? [{ currencyCode: group.currencyCode, day: group.day }] : []));
   let rates: null | RateTable = null;
   if (foreign.length > 0) {
     const days = foreign.map((group) => group.day).sort();
     const window = { from: dayOf(days[0] ?? ''), to: dayOf(days.at(-1) ?? '') };
-    rates = await loadRateTable(em, foreign.map((group) => ({ from: group.currencyCode, to: targetCurrency })), window);
+    rates = await loadRateTable(em, foreign.map((group) => ({ from: group.currencyCode, to: targetCurrency })), window, scope);
   }
   return (group) => {
     if (group.currencyCode == null || group.currencyCode === targetCurrency) return 1;
@@ -197,16 +228,16 @@ export class ReportCurrencyAmounts {
  * Load the rates needed to show `transactions` to `viewer`, in the viewer's currency. The report's
  * query populates {@link REPORT_CURRENCY_POPULATE}.
  */
-export async function loadViewerCurrencyAmounts(em: EntityManager, viewer: Appuser, transactions: ReportTransaction[], repayments: ReadonlyMap<number, readonly ReportLoanRepayment[]> = new Map()): Promise<ReportCurrencyAmounts> {
+export async function loadViewerCurrencyAmounts(em: EntityManager, viewer: Appuser, scope: RateScope, transactions: ReportTransaction[], repayments: ReadonlyMap<number, readonly ReportLoanRepayment[]> = new Map()): Promise<ReportCurrencyAmounts> {
   if (!viewer.currencyKey.code) await em.populate(viewer, ['currencyKey']);
-  return loadReportCurrencyAmounts(em, viewer.currencyKey.code, transactions, repayments);
+  return loadReportCurrencyAmounts(em, viewer.currencyKey.code, transactions, scope, repayments);
 }
 
 /**
  * Load the rates that convert `transactions` (and the interest and fees of their loan repayments,
  * keyed by transaction) into `currencyCode`, at each transaction's date.
  */
-export async function loadReportCurrencyAmounts(em: EntityManager, currencyCode: string, transactions: ReportTransaction[], repayments: ReadonlyMap<number, readonly ReportLoanRepayment[]> = new Map()): Promise<ReportCurrencyAmounts> {
+export async function loadReportCurrencyAmounts(em: EntityManager, currencyCode: string, transactions: ReportTransaction[], scope: RateScope, repayments: ReadonlyMap<number, readonly ReportLoanRepayment[]> = new Map()): Promise<ReportCurrencyAmounts> {
   let earliest = Number.POSITIVE_INFINITY;
   let latest = Number.NEGATIVE_INFINITY;
   const pairs = [];
@@ -220,7 +251,7 @@ export async function loadReportCurrencyAmounts(em: EntityManager, currencyCode:
     latest = Math.max(latest, transaction.transactionDate.getTime());
   }
   const window = pairs.length === 0 ? { from: new Date(), to: new Date() } : { from: new Date(earliest), to: new Date(latest) };
-  return new ReportCurrencyAmounts(currencyCode, await loadRateTable(em, pairs, window));
+  return new ReportCurrencyAmounts(currencyCode, await loadRateTable(em, pairs, window, scope));
 }
 
 /**

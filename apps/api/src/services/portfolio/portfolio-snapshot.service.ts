@@ -12,7 +12,7 @@ import { FinancialAssetStockAdjustment } from '@entity/FinancialAssetStockAdjust
 import { FinancialTransaction } from '@entity/FinancialTransaction';
 import { Portfolio } from '@entity/Portfolio';
 import { PortfolioSnapshot } from '@entity/PortfolioSnapshot';
-import { convertAtLatestRate } from '@service/currency/exchange-rate';
+import { convertAtLatestRate, FEED_RATES_ONLY } from '@service/currency/exchange-rate';
 import logger from '@utils/logger';
 import { big, roundDisplay } from '@utils/money';
 
@@ -405,8 +405,8 @@ class PortfolioSnapshotService {
 
     const appuserCurrency = portfolio.portfolioOwnerAppuserKey.currencyKey;
     const portfolioCurrency = portfolio.currencyKey;
-    const totalValue = await convertAtLatestRate(DI.em, appuserCurrencyTotalValue, appuserCurrency, portfolioCurrency, today);
-    const costBasis = await convertAtLatestRate(DI.em, appuserCurrencyCostBasis, appuserCurrency, portfolioCurrency, today);
+    const totalValue = await convertAtLatestRate(DI.em, appuserCurrencyTotalValue, appuserCurrency, portfolioCurrency, today, FEED_RATES_ONLY);
+    const costBasis = await convertAtLatestRate(DI.em, appuserCurrencyCostBasis, appuserCurrency, portfolioCurrency, today, FEED_RATES_ONLY);
 
     // Find existing snapshot for today or create new one
     let snapshot = await DI.em.findOne(PortfolioSnapshot, {

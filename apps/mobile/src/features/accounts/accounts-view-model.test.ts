@@ -37,6 +37,7 @@ describe('accounts view model', () => {
       lastSyncedAt: null,
       institutionLogoUrl: null,
       accountType: null,
+      fx: { status: 'exact' },
     })
     expect('logoUrl' in result).toBe(false)
   })
@@ -51,6 +52,22 @@ describe('accounts view model', () => {
   it("carries the institution's logo and the account type for the row's mark", () => {
     const result = mapAccountSummary({ ...dto(1), accountFinancialInstitutionKey: { displayName: 'Bank', logoUrl: 'https://cdn.example/bank.png' }, accountType: 'CREDIT_CARD' })
     expect(result).toMatchObject({ institutionLogoUrl: 'https://cdn.example/bank.png', accountType: 'CREDIT_CARD' })
+  })
+
+  it('reads a balance with no exchange rate as not converted, keeping its own balance to show', () => {
+    expect(mapAccountSummary({ ...dto(null), fxStatus: 'missing', fxRateDate: null }).fx).toEqual({ status: 'missing', amount: -12.5, currency: 'USD' })
+  })
+
+  it('reads a legacy balance with no status and no converted amount as not converted', () => {
+    expect(mapAccountSummary(dto(null)).fx).toEqual({ status: 'missing', amount: -12.5, currency: 'USD' })
+  })
+
+  it('reads a balance converted at an old rate as estimated, with the rate date', () => {
+    expect(mapAccountSummary({ ...dto(10), fxStatus: 'provisional', fxRateDate: '2026-01-15' }).fx).toEqual({ status: 'provisional', rateDate: '2026-01-15' })
+  })
+
+  it('reads an account in its owner currency as exact, whatever the status says', () => {
+    expect(mapAccountSummary({ ...dto(null), currencyKey: { code: 'GBP' }, fxStatus: 'missing' }).fx).toEqual({ status: 'exact' })
   })
 
   it('preserves response order', () => {

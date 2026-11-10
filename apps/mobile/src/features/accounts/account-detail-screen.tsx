@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { ScrollView, StyleSheet, View } from 'react-native'
+import { Alert, ScrollView, StyleSheet, View } from 'react-native'
 
 import { Amount } from '@/components/ui/amount'
 import { BackControl } from '@/components/ui/back-control'
@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { accountMark, EntityMark, type EntityMarkSource } from '@/components/ui/entity-mark'
 import { FLOATING_ACTION_SIZE, FloatingActionButton } from '@/components/ui/floating-action-button'
+import { describeFxState, FxStatusLabel } from '@/components/ui/fx-status-label'
 import { HeadlineFigure } from '@/components/ui/headline-figure'
 import { IconButton } from '@/components/ui/icon-button'
 import { List, ListRow } from '@/components/ui/list-row'
@@ -29,6 +30,7 @@ import type { RecentTransactionRow } from '@/features/transactions/recent-transa
 
 import { accountFreshness } from './account-freshness'
 import type { AccountDetailViewModel } from './account-detail-view-model'
+import type { AccountRecalculationState } from './use-account-recalculation'
 import type { SectionState } from './accounts-screen'
 import { freshnessStatus } from './balances-provenance'
 import { FailureState, LoadingState, SectionMessage } from './screen-states'
@@ -59,6 +61,10 @@ export type AccountDetailScreenProps = {
   onCreateTransaction?: () => void
   onImportTransactions?: () => void
   onEdit: () => void
+  /** "Recalculate balances" in the overflow menu, after a confirmation; its progress and result show below the header. */
+  onRecalculate?: () => void
+  recalculation?: AccountRecalculationState
+  onDismissRecalculation?: () => void
 }
 
 const LAST_TRANSACTIONS = 5
@@ -71,7 +77,7 @@ const LAST_TRANSACTIONS = 5
  * Outflow / Savings rate, then Balance growth and Last transactions as open
  * sections. Adding a transaction is the floating "+".
  */
-export function AccountDetailScreen({ state, recentTransactions, onBack, onRetry, onRetryRecent, onLogout, onViewTransactions, onCreateTransaction, onImportTransactions, onEdit }: AccountDetailScreenProps) {
+export function AccountDetailScreen({ state, recentTransactions, onBack, onRetry, onRetryRecent, onLogout, onViewTransactions, onCreateTransaction, onImportTransactions, onEdit, onRecalculate, recalculation, onDismissRecalculation }: AccountDetailScreenProps) {
   const formatMoney = useFormatMoney()
   const { t, i18n } = useTranslation()
   const palette = usePalette()
@@ -97,7 +103,10 @@ export function AccountDetailScreen({ state, recentTransactions, onBack, onRetry
 
   const data = state.data
   const name = data.accountName ?? t('accounts.unnamed')
-  const multiCurrency = data.originalCurrencyCode !== data.primaryCurrencyCode
+  const fx = data.fx ?? { status: 'exact' as const }
+  const fxCopy = describeFxState(fx, t, locale)
+  // With no exchange rate there is no balance in the owner's currency: lead with the account's own.
+  const multiCurrency = data.originalCurrencyCode !== data.primaryCurrencyCode && fx.status !== 'missing'
   // Web leads with the balance in the reader's currency when the account is in another one.
   const primaryValue = multiCurrency ? data.convertedBalance : data.originalBalance
   const primaryCurrency = multiCurrency ? data.primaryCurrencyCode : data.originalCurrencyCode
@@ -110,7 +119,16 @@ export function AccountDetailScreen({ state, recentTransactions, onBack, onRetry
   const moreActions = [
     { value: 'edit' as const, label: t('accountDetail.edit') },
     ...(onImportTransactions ? [{ value: 'import' as const, label: t('accountsOverview.importTransactions') }] : []),
+    ...(onRecalculate ? [{ value: 'recalculate' as const, label: t('accountRecalculate.action') }] : []),
   ]
+
+  const confirmRecalculate = () => {
+    if (!onRecalculate || recalculation?.phase === 'running') return
+    Alert.alert(t('accountRecalculate.confirmTitle'), t('accountRecalculate.confirmMessage'), [
+      { text: t('common.cancel'), style: 'cancel' },
+      { text: t('accountRecalculate.confirm'), onPress: onRecalculate },
+    ])
+  }
 
   return (
     <View style={styles.safeArea}>
@@ -137,15 +155,21 @@ export function AccountDetailScreen({ state, recentTransactions, onBack, onRetry
             />
           </View>
 
+          {recalculation && recalculation.phase !== 'idle' ? (
+            <RecalculationNotice locale={locale} onDismiss={onDismissRecalculation} state={recalculation} />
+          ) : null}
+
           {state.status === 'refresh-error' ? (
             <Notice action={<Button label={t('common.retry')} onPress={onRetry} size="sm" variant="outline" />} message={t('accountDetail.stale')} />
           ) : null}
 
           <View style={styles.lead}>
             <HeadlineFigure
-              accessibilityLabel={`${t('accountsOverview.accountBalance')}, ${primaryText}`}
+              accessibilityLabel={[`${t('accountsOverview.accountBalance')}, ${primaryText}`, fxCopy ? `${fxCopy.label}. ${fxCopy.hint}` : null].filter(Boolean).join(', ')}
               currency={primaryCurrency}
-              footer={primaryValue === null ? <Text tone="muted" variant="label">{t('accounts.balanceUnavailable')}</Text> : undefined}
+              footer={primaryValue === null
+                ? <Text tone="muted" variant="label">{t('accounts.balanceUnavailable')}</Text>
+                : fxCopy ? <FxStatusLabel locale={locale} state={fx} testID="account-balance-fx-status" /> : undefined}
               label={t('accountsOverview.accountBalance')}
               locale={locale}
               secondary={multiCurrency ? { value: data.originalBalance, currency: data.originalCurrencyCode } : null}
@@ -177,7 +201,11 @@ export function AccountDetailScreen({ state, recentTransactions, onBack, onRetry
       <OptionSheet
         mode="menu"
         onClose={() => setMoreOpen(false)}
-        onSelect={(value) => { if (value === 'edit') onEdit(); else onImportTransactions?.() }}
+        onSelect={(value) => {
+          if (value === 'edit') onEdit()
+          else if (value === 'recalculate') confirmRecalculate()
+          else onImportTransactions?.()
+        }}
         options={moreActions}
         title={name}
         visible={moreOpen}
@@ -186,6 +214,24 @@ export function AccountDetailScreen({ state, recentTransactions, onBack, onRetry
     {onCreateTransaction ? <FloatingActionButton accessibilityLabel={t('accountsOverview.addTransaction')} onPress={onCreateTransaction} testID="account-add-transaction" /> : null}
     </View>
   )
+}
+
+function RecalculationNotice({ state, locale, onDismiss }: { state: Exclude<AccountRecalculationState, { phase: 'idle' }>; locale: string; onDismiss?: () => void }) {
+  const { t } = useTranslation()
+  const formatMoney = useFormatMoney()
+  const dismiss = onDismiss ? <Button label={t('accountRecalculate.dismiss')} onPress={onDismiss} size="sm" variant="outline" /> : undefined
+  if (state.phase === 'running') return <Notice message={t('accountRecalculate.running')} testID="account-recalculation" />
+  if (state.phase === 'background') return <Notice action={dismiss} message={t('accountRecalculate.background')} testID="account-recalculation" />
+  if (state.phase === 'error') return <Notice action={dismiss} message={t(`accountRecalculate.failures.${state.reason}`)} testID="account-recalculation" tone="destructive" />
+  const { result } = state
+  if (result.rowsChanged === 0) return <Notice action={dismiss} message={t('accountRecalculate.alreadyCorrect')} testID="account-recalculation" />
+  const change = result.balanceBefore !== null && result.balanceAfter !== null
+    ? t('accountRecalculate.balanceChange', {
+        before: formatMoney(result.balanceBefore, { locale, currency: result.currency }),
+        after: formatMoney(result.balanceAfter, { locale, currency: result.currency }),
+      })
+    : undefined
+  return <Notice action={dismiss} message={change} testID="account-recalculation" title={t('accountRecalculate.done', { count: result.rowsChanged })} />
 }
 
 function RecentRows({ state, locale, onRetry, onCreateTransaction, accountMark: openingMark }: { state: RecentTransactionsSectionState; locale: string; onRetry: () => void | Promise<void>; onCreateTransaction?: () => void; accountMark: EntityMarkSource }) {

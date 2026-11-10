@@ -1,5 +1,6 @@
 import { fireEvent, render, within } from '@testing-library/react-native'
 import { I18nextProvider } from 'react-i18next'
+import { Alert } from 'react-native'
 
 import { formatCurrency } from '@/lib/formatters/financial'
 import { initMobileI18n } from '@/lib/i18n'
@@ -73,6 +74,24 @@ describe('AccountDetailScreen', () => {
     expect(edit).toHaveBeenCalledTimes(1)
   })
 
+  it('leads an account with no exchange rate with its own balance, marked not converted', async () => {
+    const { view } = await renderScreen({ status: 'loaded', data: { ...openBanking, convertedBalance: null, fx: { status: 'missing', amount: 100, currency: 'USD' } } })
+    const original = formatCurrency(100, { locale: 'en', currency: 'USD' })
+    expect(view.getByLabelText(`Account balance, ${original}, Not converted. No exchange rate for USD yet, so this amount is shown in USD and left out of totals.`)).toBeOnTheScreen()
+    expect(view.getByTestId('account-balance-fx-status')).toHaveTextContent('Not converted')
+    expect(view.queryByText('Balance unavailable')).not.toBeOnTheScreen()
+  })
+
+  it('marks a balance converted at an old rate as estimated, with the rate date', async () => {
+    const { view } = await renderScreen({ status: 'loaded', data: { ...openBanking, fx: { status: 'provisional', rateDate: '2026-01-15' } } })
+    expect(view.getByTestId('account-balance-fx-status')).toHaveTextContent(/Estimated.*Rate of Jan 15, 2026/)
+  })
+
+  it('marks nothing on a balance converted at a current rate', async () => {
+    const { view } = await renderScreen({ status: 'loaded', data: { ...openBanking, fx: { status: 'exact' } } })
+    expect(view.queryByTestId('account-balance-fx-status')).not.toBeOnTheScreen()
+  })
+
   it('adds a transaction from the floating "+" and keeps edit and import behind the overflow menu', async () => {
     const onCreateTransaction = jest.fn()
     const onImportTransactions = jest.fn()
@@ -89,6 +108,42 @@ describe('AccountDetailScreen', () => {
     await fireEvent.press(view.getByRole('button', { name: 'More actions' }))
     await fireEvent.press(view.getByRole('menuitem', { name: 'Edit account' }))
     expect(edit).toHaveBeenCalledTimes(1)
+  })
+
+  it('recalculates balances from the overflow menu after a confirmation', async () => {
+    const onRecalculate = jest.fn()
+    const alert = jest.spyOn(Alert, 'alert').mockImplementation(() => undefined)
+    const { view } = await renderScreen({ status: 'loaded', data: openBanking }, { onRecalculate, recalculation: { phase: 'idle' } })
+
+    await fireEvent.press(view.getByRole('button', { name: 'More actions' }))
+    await fireEvent.press(view.getByRole('menuitem', { name: 'Recalculate balances' }))
+    expect(onRecalculate).not.toHaveBeenCalled()
+    const buttons = alert.mock.calls[0]?.[2] ?? []
+    buttons.find((button) => button.text === 'Recalculate')?.onPress?.()
+    expect(onRecalculate).toHaveBeenCalledTimes(1)
+    alert.mockRestore()
+  })
+
+  it('shows a recalculation running, then what it corrected', async () => {
+    const running = await renderScreen({ status: 'loaded', data: openBanking }, { onRecalculate: jest.fn(), recalculation: { phase: 'running' } })
+    expect(running.view.getByRole('alert', { name: 'Recalculating balances…' })).toBeOnTheScreen()
+
+    const onDismissRecalculation = jest.fn()
+    const done = await renderScreen({ status: 'loaded', data: openBanking }, {
+      onRecalculate: jest.fn(),
+      onDismissRecalculation,
+      recalculation: { phase: 'done', result: { balanceAfter: 140, balanceBefore: 500, currency: 'USD', rowsChanged: 2 } },
+    })
+    const notice = done.view.getByTestId('account-recalculation')
+    expect(within(notice).getByText('Balances recalculated: 2 transactions corrected')).toBeOnTheScreen()
+    const before = formatCurrency(500, { locale: 'en', currency: 'USD' })
+    const after = formatCurrency(140, { locale: 'en', currency: 'USD' })
+    expect(within(notice).getByText(`Balance: ${before} → ${after}`)).toBeOnTheScreen()
+    await fireEvent.press(within(notice).getByRole('button', { name: 'Dismiss' }))
+    expect(onDismissRecalculation).toHaveBeenCalledTimes(1)
+
+    const tooSoon = await renderScreen({ status: 'loaded', data: openBanking }, { onRecalculate: jest.fn(), recalculation: { phase: 'error', reason: 'too-soon' } })
+    expect(tooSoon.view.getByRole('alert', { name: 'This account was recalculated less than a minute ago. Try again shortly.' })).toBeOnTheScreen()
   })
 
   it('preserves zero and null, avoids same-currency duplication, and omits freshness for manual accounts', async () => {

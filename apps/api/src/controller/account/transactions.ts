@@ -15,9 +15,8 @@ import { TransactionAuditActorType, TransactionAuditEventType, TransactionAuditL
 import { TransactionMerchant } from '@entity/TransactionMerchant';
 import { TransactionType } from '@entity/TransactionType';
 import { authedContext, authedUser } from '@middleware/authed-context';
-import { convertWithStatus } from '@service/currency/exchange-rate';
-import { isMoneyOut, loadLoanRepaymentLinks, loadViewerCurrencyAmounts, REPORT_CURRENCY_POPULATE } from '@service/reports/report-currency';
-import { isTransferTransaction } from '@service/reports/report-filters';
+import { convertWithStatus, rateScope } from '@service/currency/exchange-rate';
+import { loadLoanRepaymentLinks, loadViewerCurrencyAmounts, REPORT_CURRENCY_POPULATE } from '@service/reports/report-currency';
 import { recalculateChainFromAccountBalance } from '@service/transaction/balance-chain.service';
 import { CATEGORY_LINE_POPULATE, spendingLinesOf } from '@service/transaction/category-lines';
 import { loadCategorySpendingFlags } from '@service/transaction/category-spending';
@@ -25,11 +24,10 @@ import { findAssignableCategory } from '@service/transaction/household-category'
 import { normalizeMerchantName } from '@service/transaction/merchant-normalization';
 import { TransactionAuditService } from '@service/transaction/transaction-audit.service';
 import { transactionCreationService } from '@service/transaction/transaction-creation.service';
-import { transactionDateRangeWhere } from '@service/transaction/transaction-date-range';
 import { findManualDuplicate } from '@service/transaction/transaction-dedup.service';
 import { listTransactions } from '@service/transaction/transaction-list.service';
+import { dashboardScope, transactionScopeWhere } from '@service/transaction/transaction-scope';
 import { reconcileSplitsWithAmount } from '@service/transaction/transaction-split.service';
-import { excludeExpired } from '@service/transaction/transaction-status';
 import { retypeTransaction, TRANSFER_DESTINATION_POPULATE, transferDestinationOf } from '@service/transaction/transaction-transfer.service';
 import { reconcileTransfers } from '@service/transaction/transfer-matching.service';
 import { applyUserCategorization } from '@service/transaction/user-categorization.service';
@@ -153,7 +151,7 @@ export async function getAccountTransactions(req: Request, res: Response) {
   // The path `accountId` is authoritative (route is `GET /:accountId/transaction`); the
   // `?accountId=` query is legacy and tolerated for rolling compatibility.
   const {
-    query: { categoryKeys, confidence, cursor, fromDate, includeHidden, limit, tagKeys, timezone, toDate, transactionTypes, unreviewedOnly },
+    query: { categoryKeys, confidence, cursor, direction, excludeNonSpending, excludeTransfers, fromDate, includeHidden, limit, memberCurrency, merchantKeys, statuses, tagKeys, timezone, toDate, transactionTypes, unreviewedOnly },
   } = await zParse(getAccountTransactionsRequestSchema, req);
   const accountParam = req.params['accountId'];
   const accountKey = Number.parseInt(typeof accountParam === 'string' ? accountParam : '', 10);
@@ -161,7 +159,7 @@ export async function getAccountTransactions(req: Request, res: Response) {
   const { tenant, user } = authedContext(req);
   const page = await listTransactions({
     cursor,
-    filters: { categoryKeys, confidence, fromDate, includeHidden, tagKeys, timeZone: timezone, toDate, transactionTypes, unreviewedOnly },
+    filters: { categoryKeys, confidence, direction, excludeNonSpending, excludeTransfers, fromDate, includeHidden, memberCurrencyCode: memberCurrency, merchantKeys, statuses, tagKeys, timeZone: timezone, toDate, transactionTypes, unreviewedOnly },
     limit,
     scope: { accountKey },
     tenantKey: tenant.tenantKey,
@@ -176,37 +174,20 @@ export async function getCategorySpending(req: Request, res: Response, _next: Ne
     query: { fromDate, limit, timezone, toDate },
   } = await zParse(getCategorySpendingRequestSchema, req);
 
-  const accounts = await DI.em.find(Account, {
-    $or: [{ isPrivate: false }, { accountOwnerAppuserKey: user }],
-    deletedAt: undefined,
-    tenantKey: tenant,
+  // The dashboard's rows (`dashboardScope`), money out only: pending counts, EXPIRED rows
+  // never moved money, a transfer between own accounts is not spending, and a row wholly in
+  // categories that are not spending is left out. A row with no converted amount is read by the
+  // sign of its own amount, so it is counted as left out below.
+  const scope = dashboardScope({ dateRange: { from: fromDate ?? startOfMonth(new Date()), timeZone: timezone, to: toDate }, tenantKey: tenant.tenantKey, viewerAppuserKey: user.appuserKey });
+  const expenseTransactions = await DI.em.find(Transaction, transactionScopeWhere({ ...scope, direction: 'out' }), {
+    populate: [...CATEGORY_LINE_POPULATE, ...REPORT_CURRENCY_POPULATE],
   });
-  if (accounts.length === 0) {
-    return res.json({ categorySpending: [], completeness: (await loadViewerCurrencyAmounts(DI.em, user, [])).completeness() });
-  }
-  const transactions = await DI.em.find(
-    Transaction,
-    // EXPIRED rows never moved money; PENDING still counts.
-    excludeExpired({
-      accountKey: { $in: accounts },
-      // Explicit, so deleted transactions are never counted into per-category spending.
-      deletedAt: undefined,
-      tenantKey: tenant,
-      ...transactionDateRangeWhere({ from: fromDate ?? startOfMonth(new Date()), timeZone: timezone, to: toDate }),
-    }),
-    {
-      populate: [...CATEGORY_LINE_POPULATE, ...REPORT_CURRENCY_POPULATE, 'transactionTypeKey'],
-    },
-  );
   const spendingFlags = await loadCategorySpendingFlags(DI.em, tenant.tenantKey);
-  // A transfer between own accounts (matched, or marked by the user) is not spending. A row with no
-  // converted amount is read by the sign of its own amount, so it is counted as left out below.
-  const expenseTransactions = transactions.filter((transaction) => isMoneyOut(transaction) && !isTransferTransaction(transaction));
   const repayments = await loadLoanRepaymentLinks(DI.em, tenant, expenseTransactions);
   // Members keep their own currencies: every amount, and a loan repayment's interest and fees (in
   // the loan's currency), is converted into the viewer's at the rate of the transaction's date. A
   // row with no rate is left out and counted in `completeness`, never added at face value.
-  const amounts = await loadViewerCurrencyAmounts(DI.em, user, expenseTransactions, repayments);
+  const amounts = await loadViewerCurrencyAmounts(DI.em, user, rateScope(tenant), expenseTransactions, repayments);
   const viewerCurrency = amounts.currencyCode;
   // Keyed by top-level category name. Every expense adds to its top-level entry, whether it sits
   // on that category directly or on one of its children.
@@ -338,12 +319,12 @@ export async function getTransactionMerchants(req: Request, res: Response) {
 
 export async function getTransactions(req: Request, res: Response) {
   const {
-    query: { accountKeys, categoryKeys, confidence, cursor, fromDate, includeHidden, limit, tagKeys, timezone, toDate, transactionTypes, unreviewedOnly },
+    query: { accountKeys, categoryKeys, confidence, cursor, direction, excludeNonSpending, excludeTransfers, fromDate, includeHidden, limit, memberCurrency, merchantKeys, statuses, tagKeys, timezone, toDate, transactionTypes, unreviewedOnly },
   } = await zParse(getTransactionsRequestSchema, req);
   const { tenant, user } = authedContext(req);
   const page = await listTransactions({
     cursor,
-    filters: { accountKeys, categoryKeys, confidence, fromDate, includeHidden, tagKeys, timeZone: timezone, toDate, transactionTypes, unreviewedOnly },
+    filters: { accountKeys, categoryKeys, confidence, direction, excludeNonSpending, excludeTransfers, fromDate, includeHidden, memberCurrencyCode: memberCurrency, merchantKeys, statuses, tagKeys, timeZone: timezone, toDate, transactionTypes, unreviewedOnly },
     limit,
     scope: 'all-accounts',
     tenantKey: tenant.tenantKey,
@@ -490,7 +471,7 @@ export async function updateTransaction(req: Request, res: Response, next: NextF
       lockedTransaction.editedSettlementAmount = updatedAmount;
       // Through the one rate resolver and `convertMoney`: with no rate, no converted amount is
       // stored (`missing`), never the amount in the settlement currency.
-      const converted = await convertWithStatus(em, updatedAmount, lockedTransaction.settlementCurrencyKey!, lockedTransaction.appuserCurrencyKey!, lockedTransaction.transactionDate ?? new Date());
+      const converted = await convertWithStatus(em, updatedAmount, lockedTransaction.settlementCurrencyKey!, lockedTransaction.appuserCurrencyKey!, lockedTransaction.transactionDate ?? new Date(), rateScope(tenant));
       lockedTransaction.appuserSettlementAmount = converted.amount;
       lockedTransaction.appuserCurrencyExchangeRate = converted.rate ?? undefined;
       lockedTransaction.fxStatus = converted.fxStatus;

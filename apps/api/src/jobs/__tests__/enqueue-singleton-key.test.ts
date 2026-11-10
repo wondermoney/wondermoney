@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { enqueueAccountAutoSyncRequisitionJob } from '../account-auto-sync.queue';
 import { enqueueAccountCsvImportJob } from '../account-csv-import.queue';
 import { enqueueAccountInitialSyncJob } from '../account-initial-sync.queue';
+import { enqueueAccountRecalculateJob } from '../account-recalculate.queue';
 import { enqueueBankRecoveryAfter } from '../bank-recovery.queue';
 import { enqueueDataExportCleanupJob, enqueueDataExportJob } from '../data-export.queue';
 import { enqueueDataRestoreCleanupJob, enqueueDataRestoreJob } from '../data-restore.queue';
@@ -187,6 +188,10 @@ const ENQUEUE_HELPERS: { invoke: (recorder: Recorder) => Promise<unknown>; name:
     name: 'enqueueRuleApplyJob',
   },
   {
+    invoke: (r) => enqueueAccountRecalculateJob({ correlationId: 'account.recalculate:1' }, asEnqueueDeps(r)),
+    name: 'enqueueAccountRecalculateJob',
+  },
+  {
     invoke: (r) =>
       enqueueTransactionEnrichmentGptJob(
         {
@@ -255,6 +260,22 @@ describe('enqueue idempotency', () => {
     await enqueueTransactionEnrichmentGptJob({ ...gptJob, idempotencyKey: 'b' }, asDeps(enrichment));
 
     expect(enrichment.calls[0]?.options?.['singletonKey']).not.toBe(enrichment.calls[1]?.options?.['singletonKey']);
+  });
+
+  it('never drops an override re-conversion behind the global pass or another household pair', async () => {
+    // `fx.reconvert` is stately: one waiting job per key. An override change that shared a key with
+    // a waiting global pass, or with another household's change, would be dropped and leave that
+    // household's amounts on the old rate.
+    const recorder = createRecorder();
+    const pair = (tenantKey: number, fromCurrency: string) => ({ fromCurrency, tenantKey, toCurrency: 'EUR' });
+
+    await enqueueFxReconvertJob({ correlationId: 'global' }, asEnqueueDeps(recorder));
+    await enqueueFxReconvertJob({ correlationId: 'a', override: pair(1, 'XOF') }, asEnqueueDeps(recorder));
+    await enqueueFxReconvertJob({ correlationId: 'b', override: pair(2, 'XOF') }, asEnqueueDeps(recorder));
+    await enqueueFxReconvertJob({ correlationId: 'c', override: pair(1, 'PLN') }, asEnqueueDeps(recorder));
+
+    const keys = recorder.calls.map((call) => call.options?.['singletonKey']);
+    expect(new Set(keys).size).toBe(4);
   });
 
   it('reuses the same singletonKey when the same unit of work is enqueued twice', async () => {

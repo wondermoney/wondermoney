@@ -1,5 +1,6 @@
 import type { EntityMarkSource } from '@/components/ui/entity-mark'
 import type { TagDto } from '@/features/tags/tags-contract'
+import { type FxState, resolveFxState } from '@/lib/api/fx-status'
 
 import { transactionMark } from './transaction-mark'
 import { isTransferType, type TransactionDto } from './transactions-contract'
@@ -40,6 +41,11 @@ export type TransactionViewModel = Readonly<{
   synthetic: boolean
   /** The row's lead mark: category, transfer arrows, or the institution on the opening row. */
   mark?: EntityMarkSource
+  /**
+   * How `amount` was converted. `missing`: there is no `amount`; show the original (signed) one it
+   * carries, marked "Not converted". `provisional`: `amount` is an estimate at an older rate.
+   */
+  fx: FxState
 }>
 
 /**
@@ -52,12 +58,22 @@ export function mapTransactions(input: { transactions: readonly TransactionDto[]
     const type = transaction.transactionTypeKey?.name ?? null
     const normalizedType = type?.toLowerCase()
     const primaryAmount = transaction.appuserSettlementAmount ?? null
+    const fx = resolveFxState({
+      fxStatus: transaction.fxStatus,
+      fxRateDate: transaction.fxRateDate,
+      converted: primaryAmount,
+      original: transaction.editedSettlementAmount ?? transaction.settlementAmount,
+      fromCurrency: transaction.settlementCurrencyKey?.code,
+      toCurrency: transaction.appuserCurrencyKey?.code,
+    })
+    // A row with no converted amount still has a sign: its original amount's.
+    const signedAmount = primaryAmount ?? (fx.status === 'missing' ? fx.amount : null)
     const fallbackDirection: TransactionViewModel['direction'] = normalizedType === 'credit'
       ? 'credit'
       : normalizedType === 'debit' ? 'debit' : 'unknown'
-    const direction: TransactionViewModel['direction'] = primaryAmount === null || primaryAmount === 0
+    const direction: TransactionViewModel['direction'] = signedAmount === null || signedAmount === 0
       ? fallbackDirection
-      : primaryAmount > 0 ? 'credit' : 'debit'
+      : signedAmount > 0 ? 'credit' : 'debit'
     const isCredit = direction === 'credit'
     return {
       id: transaction.transactionKey,
@@ -97,6 +113,7 @@ export function mapTransactions(input: { transactions: readonly TransactionDto[]
         category: categoryOf(transaction.appuserTransactionCategories[0]),
         institutionLogoUrl: transaction.accountKey.accountFinancialInstitutionKey?.logoUrl ?? null,
       }),
+      fx,
     }
   })
 }

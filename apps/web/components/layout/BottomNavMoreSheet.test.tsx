@@ -52,11 +52,12 @@ function renderSheet(features = instanceFeatures()) {
   return screen.getByTestId("more-sheet");
 }
 
-test("an ordinary account sees Loans, Goals, Financial Markets and Bills & subscriptions", () => {
+test("an ordinary account sees Loans, Assets, Goals, Financial Markets and Bills & subscriptions", () => {
   const sheet = renderSheet();
 
   for (const [name, href] of [
     [nav.loans, "/loans"],
+    [nav.assets, "/assets"],
     [nav.goals, "/goals"],
     [nav["financial-markets"], "/financial-markets"],
     [nav["bills-subscriptions"], "/accounts/recurring"],

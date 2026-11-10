@@ -42,6 +42,17 @@ describe('transactions endpoint contracts', () => {
     expect(row).not.toHaveProperty('sentiment')
   })
 
+  it('reads how each row was converted, an unknown status or malformed rate date as unknown', () => {
+    const [missing, estimated, unknown] = aggregateTransactionsResponseSchema.parse({ transactions: [
+      { ...transactionFixture, appuserSettlementAmount: null, fxStatus: 'missing', fxRateDate: null },
+      { ...transactionFixture, fxStatus: 'provisional', fxRateDate: '2026-11-03' },
+      { ...transactionFixture, fxStatus: 'guessed', fxRateDate: 'last week' },
+    ] }).transactions
+    expect(missing).toMatchObject({ appuserSettlementAmount: null, fxStatus: 'missing', fxRateDate: null })
+    expect(estimated).toMatchObject({ fxStatus: 'provisional', fxRateDate: '2026-11-03' })
+    expect(unknown).toMatchObject({ fxStatus: null, fxRateDate: null })
+  })
+
   it('accepts explicit null financial and account context on aggregate rows', () => {
     const result = aggregateTransactionsResponseSchema.parse({ transactions: [
       nullishTransactionFixture,

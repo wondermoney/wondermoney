@@ -2,10 +2,10 @@ import { type Expression, type Kysely, sql, type SqlBool } from 'kysely';
 
 import { DI } from '@app/app';
 import { anyOf, type SqlDatabase, sqlQuery } from '@app/database/sql';
-import { completenessFromCounts, currencyKeySql, loadDailyRates, type ReportCompleteness, transactionDaySql, type UnconvertedCount } from '@service/reports/report-currency';
-import { notTransferSql } from '@service/reports/report-filters';
+import { rateScope } from '@service/currency/exchange-rate';
+import { completenessFromCounts, loadDailyRates, needsRateSql, type ReportCompleteness, transactionDaySql, type UnconvertedCount } from '@service/reports/report-currency';
 import { categoryLinesSql } from '@service/transaction/category-lines';
-import { notExpiredTransactionSql } from '@service/transaction/transaction-status';
+import { type TransactionScope, transactionScopeExpression } from '@service/transaction/transaction-scope';
 import { buildEffectiveSpendingAmountSql } from '@utils/account-amounts';
 
 export interface BudgetSpendingCategory {
@@ -159,10 +159,12 @@ export function buildBudgetSpendingQuery(db: Kysely<SqlDatabase>, input: BudgetS
  */
 function buildRowSpendingQuery(db: Kysely<SqlDatabase>, input: BudgetRowsInput, rates: BudgetDayRate[], perRow: boolean) {
   const { templateKeys, tenantKey } = input;
-  // An integer primary key, inlined into the raw amount expression.
-  const budgetCurrencyKey = currencyKeySql(input.currency.currencyKey);
-  const rate = `(CASE WHEN "transaction".appuser_currency_key IS NULL OR "transaction".appuser_currency_key = ${budgetCurrencyKey} THEN 1 ELSE budget_rate.rate END)`;
-  const repaymentRate = `(CASE WHEN loan.currency_key = ${budgetCurrencyKey} THEN 1 ELSE loan_rate.rate END)`;
+  // An integer primary key, inlined into the raw amount expressions.
+  const budgetCurrencyKey = input.currency.currencyKey;
+  // A line is its share of the transaction's amount in the budget's currency (`categoryLines`): a
+  // row settled in that currency reads as its settlement amount, any other one needs its day's rate.
+  const rate = `(CASE WHEN ${needsRateSql('transaction', budgetCurrencyKey)} THEN budget_rate.rate ELSE 1 END)`;
+  const repaymentRate = `(CASE WHEN loan.currency_key = ${String(budgetCurrencyKey)} THEN 1 ELSE loan_rate.rate END)`;
   // Each category line's share of its transaction (the whole amount for an unsplit one), converted
   // at its transaction's day rate. Only when the transaction joined: the line itself carries an
   // amount even for a transaction the budget must not count (another account, another month,
@@ -180,7 +182,7 @@ function buildRowSpendingQuery(db: Kysely<SqlDatabase>, input: BudgetRowsInput, 
     .innerJoin('budget_template_category', 'budget.budget_key', 'budget_template_category.budget_key')
     .innerJoin('category as child_category', 'budget_template_category.category_key', 'child_category.category_key')
     .leftJoin('category as parent_category', 'child_category.parent_category_category_key', 'parent_category.category_key')
-    .leftJoin(categoryLines(tenantKey), 'child_category.category_key', 'category_line.category_key')
+    .leftJoin(categoryLines(input), 'child_category.category_key', 'category_line.category_key')
     .leftJoin('transaction', (join) => join.on(budgetTransactionMatch(input)))
     .leftJoin('loan_repayment_link', (join) =>
       join.onRef('loan_repayment_link.transaction_key', '=', 'transaction.transaction_key').on('loan_repayment_link.deleted_at', 'is', null))
@@ -219,48 +221,36 @@ function buildRowSpendingQuery(db: Kysely<SqlDatabase>, input: BudgetRowsInput, 
     ]);
 }
 
-/** The household's category lines (`category-lines.ts`) as the `category_line` table. */
-function categoryLines(tenantKey: number) {
-  return sql<{ appuser_settlement_amount: null | number; category_key: null | number; transaction_key: number }>`${sql.raw(categoryLinesSql(tenantKey))}`.as('category_line');
+/** The household's category lines (`category-lines.ts`) as the `category_line` table, in the budget's currency before any rate. */
+function categoryLines(input: BudgetRowsInput) {
+  return sql<{ appuser_settlement_amount: null | number; category_key: null | number; transaction_key: number }>`${sql.raw(categoryLinesSql(input.tenantKey, { amountInCurrencyKey: input.currency.currencyKey }))}`.as('category_line');
 }
 
 /**
- * The transactions a budget row counts: with a category line in the row's category, on one of the
- * budget's accounts the viewer may see, in the row's month, not hidden, deleted or expired, and not
- * a transfer between own accounts. A line in a category that is not spending (investments,
- * savings) is never counted. Joins `transaction` to `category_line` and `budget_template_category`.
+ * Which transactions a budget counts (`transaction-scope.ts`): pending ones too (EXPIRED rows never
+ * moved money), no hidden row, no transfer between own accounts, and only accounts that are still
+ * open. Categories that are not spending are left out line by line (`category_line.counts_as_spending`),
+ * so the row-level rule is off here.
+ */
+export function budgetScope(input: Pick<BudgetRowsInput, 'tenantKey' | 'viewerAppuserKey'>): TransactionScope {
+  return { includeHidden: false, includeNonSpending: true, includeTransfers: false, openAccountsOnly: true, statuses: 'not-expired', tenantKey: input.tenantKey, viewerAppuserKey: input.viewerAppuserKey };
+}
+
+/**
+ * The transactions a budget row counts: in the budget's scope ({@link budgetScope}), with a category
+ * line in the row's category that counts as spending, on one of the budget's accounts, in the
+ * row's month. Joins `transaction` to `category_line` and `budget_template_category`.
  *
  * The month is of the UTC calendar, stated rather than left to the session's time zone, so a bank
  * booking (stored at UTC midnight of its date, `transaction-date-range.ts`) is in its own month.
  */
 function budgetTransactionMatch(input: BudgetRowsInput): Expression<SqlBool> {
-  const { accountKeys, tenantKey, viewerAppuserKey } = input;
   return sql<SqlBool>`"category_line"."transaction_key" = "transaction"."transaction_key"
     and "category_line"."counts_as_spending"
-    and ${sql.raw<SqlBool>(notTransferSql('transaction'))}
-    and ${anyOf('transaction.account_key', accountKeys)}
+    and ${anyOf('transaction.account_key', input.accountKeys)}
     and date_part('year', "transaction"."transaction_date" at time zone 'UTC') = "budget_template_category"."year"
     and date_part('month', "transaction"."transaction_date" at time zone 'UTC') = "budget_template_category"."month"
-    and "transaction"."hidden" = false
-    and ${sql.raw<SqlBool>(notExpiredTransactionSql('transaction'))}
-    and "transaction"."deleted_at" is null
-    and "transaction"."tenant_key" = ${tenantKey}
-    and ${buildBudgetTransactionAccountVisibility(tenantKey, viewerAppuserKey)}`;
-}
-
-/**
- * The transaction is on an open account of the tenant that the viewer may see (not a partner's
- * private account).
- */
-export function buildBudgetTransactionAccountVisibility(tenantKey: number, viewerAppuserKey: number): Expression<SqlBool> {
-  return sql<SqlBool>`EXISTS (
-       SELECT 1 FROM account AS budget_account
-       WHERE budget_account.account_key = transaction.account_key
-         AND budget_account.tenant_key = ${tenantKey}
-         AND budget_account.closed = false
-         AND budget_account.deleted_at IS NULL
-         AND (budget_account.is_private = false OR budget_account.account_owner_appuser_key = ${viewerAppuserKey})
-     )`;
+    and ${transactionScopeExpression('transaction', budgetScope(input))}`;
 }
 
 /**
@@ -275,7 +265,7 @@ export async function getBudgetSpending(input: BudgetSpendingInput): Promise<Bud
   const db = sqlQuery(DI.em);
   const [foreignDays, repaymentDays, missing] = await Promise.all([foreignCurrencyDays(db, input), foreignLoanRepaymentDays(db, input), missingAmountCounts(db, input)]);
   const groups = [...foreignDays, ...repaymentDays];
-  const rateFor = await loadDailyRates(DI.em, input.currency.code, groups);
+  const rateFor = await loadDailyRates(DI.em, input.currency.code, groups, rateScope(input.tenantKey));
 
   // One row per currency and day: the spending query joins on them, so a repeat would double a row.
   const rates = new Map<string, BudgetDayRate>();
@@ -303,7 +293,7 @@ export async function getBudgetRowSpending(input: BudgetRowsInput): Promise<Map<
   const db = sqlQuery(DI.em);
   const [foreignDays, repaymentDays, missing] = await Promise.all([foreignCurrencyDays(db, input, true), foreignLoanRepaymentDays(db, input, true), missingAmountCounts(db, input, true)]);
   const groups = [...foreignDays, ...repaymentDays];
-  const rateFor = await loadDailyRates(DI.em, input.currency.code, groups);
+  const rateFor = await loadDailyRates(DI.em, input.currency.code, groups, rateScope(input.tenantKey));
 
   const incomplete = new Set<number>(missing.map((row) => Number(row.templateKey)));
   // One row per currency and day: the spending query joins on them, so a repeat would double a row.
@@ -347,15 +337,14 @@ async function foreignLoanRepaymentDays(db: Kysely<SqlDatabase>, input: BudgetRo
   return rows.map((row) => ({ currencyCode: row.currencyCode as string, currencyKey: Number(row.currencyKey), day: row.day, templateKey: row.templateKey, transactions: row.transactions }));
 }
 
-/** Matched rows not in the budget's currency, counted per member currency and UTC day (and per budget row with `byRow`). */
+/** Matched rows that need a rate into the budget's currency, counted per member currency and UTC day (and per budget row with `byRow`). */
 async function foreignCurrencyDays(db: Kysely<SqlDatabase>, input: BudgetRowsInput, byRow = false) {
   const day = sql<string>`${sql.raw(transactionDaySql('"transaction"'))}`;
   const templateKey = rowKey(byRow);
   const rows = await matchedTransactions(db, input)
     .innerJoin('currency', 'currency.currency_key', 'transaction.appuser_currency_key')
     .select([templateKey.as('templateKey'), 'transaction.appuser_currency_key as currencyKey', 'currency.code as currencyCode', day.as('day'), sql<string>`count(distinct transaction.transaction_key)`.as('transactions')])
-    .where('transaction.appuser_settlement_amount', 'is not', null)
-    .where('transaction.appuser_currency_key', '!=', input.currency.currencyKey)
+    .where(sql.raw<SqlBool>(needsRateSql('transaction', input.currency.currencyKey)))
     .groupBy([templateKey, 'transaction.appuser_currency_key', 'currency.code', day])
     .execute();
   return rows.map((row) => ({ currencyCode: row.currencyCode as string, currencyKey: Number(row.currencyKey), day: row.day, templateKey: row.templateKey, transactions: row.transactions }));
@@ -395,7 +384,7 @@ function matchedTransactions(db: Kysely<SqlDatabase>, input: BudgetRowsInput) {
 function budgetRows(db: Kysely<SqlDatabase>, input: BudgetRowsInput) {
   return db
     .selectFrom('budget_template_category')
-    .innerJoin(categoryLines(input.tenantKey), 'budget_template_category.category_key', 'category_line.category_key')
+    .innerJoin(categoryLines(input), 'budget_template_category.category_key', 'category_line.category_key')
     .innerJoin('transaction', (join) => join.on(budgetTransactionMatch(input)))
     .where(anyOf('budget_template_category.budget_template_category_key', input.templateKeys));
 }

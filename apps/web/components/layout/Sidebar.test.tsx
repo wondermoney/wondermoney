@@ -149,6 +149,12 @@ test("the destinations sit in the day-to-day, investments and planning groups", 
     name: nav["group-investments"],
   });
   within(investments).getByRole("link", { name: nav.portfolio });
+  assert.equal(
+    within(investments)
+      .getByRole("link", { name: nav.assets })
+      .getAttribute("href"),
+    "/assets",
+  );
   const planning = within(main).getByRole("list", {
     name: nav["group-planning"],
   });

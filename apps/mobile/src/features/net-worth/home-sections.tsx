@@ -6,6 +6,7 @@ import { Amount } from '@/components/ui/amount'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { EntityMark, portfolioMark, type EntityMarkSource } from '@/components/ui/entity-mark'
+import { FxStatusLabel } from '@/components/ui/fx-status-label'
 import { Icon } from '@/components/ui/icon'
 import { List, ListRow } from '@/components/ui/list-row'
 import { Section } from '@/components/ui/section'
@@ -13,6 +14,7 @@ import { Text } from '@/components/ui/text'
 import type { LoanDto } from '@/features/loans/loans-contract'
 import { transactionMark } from '@/features/transactions/transaction-mark'
 import type { TransactionDto } from '@/features/transactions/transactions-contract'
+import { resolveFxState } from '@/lib/api/fx-status'
 import { transactionDisplayDate } from '@/lib/dates/transaction-date'
 import { formatCategoryName } from '@/lib/formatters/category-name'
 import { useFormatMoney, useMoneyLabel } from '@/lib/formatters/money-display'
@@ -323,6 +325,7 @@ function SheetSide({ title, groups, total, currency, locale, liability = false, 
   const palette = usePalette()
   const markFor = (type: BalanceSheetGroup['type'], id: number | undefined): EntityMarkSource => {
     if (type === 'portfolios') return (id !== undefined ? portfolioMarks?.get(id) : undefined) ?? portfolioMark()
+    if (type === 'manualAssets') return { glyph: 'home' }
     if (type === 'loans') return { glyph: 'receipt-text' }
     return (id !== undefined ? accountMarks?.get(id) : undefined) ?? { glyph: 'landmark' }
   }
@@ -522,12 +525,22 @@ export function LatestTransactionsSection({ state, locale, onNavigate, onRetry }
         <List divided>
           {transactions.map((transaction) => {
             const category = transaction.appuserTransactionCategories[0]
-            const amount = transaction.appuserSettlementAmount ?? null
+            const fx = resolveFxState({
+              fxStatus: transaction.fxStatus,
+              fxRateDate: transaction.fxRateDate,
+              converted: transaction.appuserSettlementAmount,
+              original: transaction.editedSettlementAmount ?? transaction.settlementAmount,
+              fromCurrency: transaction.settlementCurrencyKey?.code,
+              toCurrency: transaction.appuserCurrencyKey?.code,
+            })
+            // With no exchange rate the row shows its original amount, marked "Not converted".
+            const amount = fx.status === 'missing' ? fx.amount : transaction.appuserSettlementAmount ?? null
+            const currency = fx.status === 'missing' ? fx.currency : transaction.appuserCurrencyKey?.code
             return (
               <ListRow
                 key={transaction.transactionKey}
                 density="comfortable"
-                figure={<Amount currency={transaction.appuserCurrencyKey?.code} locale={locale} size="amountBase" value={amount} />}
+                figure={<Amount currency={currency} locale={locale} size="amountBase" value={amount} />}
                 leading={<EntityMark {...transactionMark({
                   synthetic: transaction.transactionKey < 0,
                   type: transaction.transactionTypeKey?.name,
@@ -546,6 +559,7 @@ export function LatestTransactionsSection({ state, locale, onNavigate, onRetry }
                     </View>
                   )}
                   {transaction.reviewed === false ? <Text tone="warning" variant="label">{t('home.latest.needsReview')}</Text> : null}
+                  <FxStatusLabel locale={locale} state={fx} testID="home-transaction-fx-status" />
                 </View>
               </ListRow>
             )

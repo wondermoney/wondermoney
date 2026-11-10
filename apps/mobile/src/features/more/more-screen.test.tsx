@@ -21,6 +21,7 @@ async function renderScreen(overrides: Partial<React.ComponentProps<typeof MoreS
     onOpenSettings: jest.fn(),
     onOpenMarkets: jest.fn(),
     onOpenLoans: jest.fn(),
+    onOpenAssets: jest.fn(),
     onOpenGoals: jest.fn(),
     onOpenReports: jest.fn(),
     onLogout: jest.fn(),
@@ -59,6 +60,7 @@ describe('MoreScreen', () => {
       ['Settings', 'onOpenSettings'],
       ['Financial Markets', 'onOpenMarkets'],
       ['Loans', 'onOpenLoans'],
+      ['Assets', 'onOpenAssets'],
       ['Goals', 'onOpenGoals'],
       ['Reports', 'onOpenReports'],
     ]

@@ -251,7 +251,7 @@
   "privacy-data-export-protected": "This export is password protected.",
   "privacy-data-export-in-progress": "Another export is still in progress. Download it or wait for it to finish, then try again.",
   "privacy-data-restore-title": "Restore from an export",
-  "privacy-data-restore-description": "Load a WonderMoney export (the zip from Export all data, on this server or another) into your household. This works only while your household has no accounts, portfolios, budgets, goals or loans: nothing is merged.",
+  "privacy-data-restore-description": "Load a WonderMoney export (the zip from Export all data, on this server or another) into your household. This works only while your household has no accounts, portfolios, budgets, goals, loans or assets: nothing is merged.",
   "privacy-data-restore-choose": "Export file (.zip)",
   "privacy-data-restore-cta": "Check file",
   "privacy-data-restore-uploading": "Uploading the file.",
@@ -275,6 +275,7 @@
   "privacy-data-restore-count-budgets": "Budgets",
   "privacy-data-restore-count-goals": "Goals",
   "privacy-data-restore-count-loans": "Loans",
+  "privacy-data-restore-count-manual-assets": "Assets",
   "privacy-data-restore-count-portfolios": "Portfolios",
   "privacy-data-restore-count-portfolio-transactions": "Investment transactions",
   "privacy-data-restore-error-corrupt": "The file is damaged or was changed after it was exported.",
@@ -2540,5 +2541,33 @@
   "budget-rollover-toggle": "Roll over leftover to next month",
   "budget-rollover-toggle-help": "What's left this month is added to next month's amount for this category.",
   "budget-rollover-carries-overspend": "Carry overspending into next month",
-  "budget-rollover-carries-overspend-help": "When off, only unspent money rolls over"
+  "budget-rollover-carries-overspend-help": "When off, only unspent money rolls over",
+  "accountRecalculate": {
+    "menu-item": "Recalculate balances",
+    "title": "Recalculate balances for {name}?",
+    "description": "This rebuilds the running balance of every transaction on the account. A manual or imported account starts from its opening balance; a bank-connected account ends on the balance your bank reports. Amounts stored without an exchange rate are converted again where a rate now exists.",
+    "safe-hint": "Your transactions are not changed, and on an account whose balances are already right nothing changes.",
+    "confirm": "Recalculate",
+    "running": "Recalculating balances…",
+    "background-hint": "You can close this window; the recalculation carries on in the background.",
+    "close": "Close",
+    "continues": "Balances are still being recalculated in the background.",
+    "already-correct": "Balances checked: they were already correct.",
+    "done": "{count, plural, one {Balances recalculated: # transaction corrected} other {Balances recalculated: # transactions corrected}}",
+    "balance-change": "Balance: {before} → {after}",
+    "failed": "The balances could not be recalculated. Try again in a few minutes.",
+    "too-soon": "This account was recalculated less than a minute ago. Try again shortly.",
+    "error": "The recalculation could not be started. Try again."
+  },
+  "fx": {
+    "not-converted": "Not converted",
+    "not-converted-hint": "No exchange rate for {currency} yet, so this amount stays in {currency} and is left out of totals.",
+    "estimated": "Estimated",
+    "estimated-hint": "Converted at the rate from {date}, the latest one available. It is converted again when a newer rate arrives.",
+    "estimated-hint-no-date": "Converted at an older rate, the latest one available. It is converted again when a newer rate arrives.",
+    "incomplete-label": "Not every amount could be converted",
+    "total-leaves-out": "This total leaves out {count, plural, one {# account, loan or portfolio} other {# accounts, loans or portfolios}} that could not be valued in {currency}.",
+    "missing-rates": "No exchange rate yet for {currencies}.",
+    "add-rate": "Add an exchange rate"
+  }
 }

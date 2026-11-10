@@ -77,8 +77,25 @@ const csvCategoryList = csvList.transform((parts) =>
       }
     : undefined,
 );
-export const getTransactionsRequestSchema = z.object({ query: z.object({ accountKeys: csvIntList, categoryKeys: csvCategoryList, confidence: z.enum(CategorizationConfidence).optional(), cursor: z.string().trim().max(64).regex(/^\d+_\d+$/, 'Malformed cursor').optional(), fromDate: validDate.optional(), includeEmptyAccounts: z.union([z.boolean(), z.string()]).optional().transform((val) => (typeof val === 'undefined' ? undefined : typeof val === 'boolean' ? val : val.toLowerCase() === 'true')), includeHidden: z.union([z.boolean(), z.string()]).optional().transform((val) => (typeof val === 'undefined' ? undefined : typeof val === 'boolean' ? val : val.toLowerCase() === 'true')), limit: boundedLimit({ defaultValue: 100, max: 500 }).optional().default(100), tagKeys: csvIntList, timezone: viewerTimeZone, toDate: validDate.optional(), transactionTypes: csvList, unreviewedOnly: z.union([z.boolean(), z.string()]).optional().transform((val) => (typeof val === 'undefined' ? undefined : typeof val === 'boolean' ? val : val.toLowerCase() === 'true')) }) });
-export const getAccountTransactionsRequestSchema = z.object({ query: z.object({ accountId: positiveIntId.optional(), categoryKeys: csvCategoryList, confidence: z.enum(CategorizationConfidence).optional(), cursor: z.string().trim().max(64).regex(/^\d+_\d+$/, 'Malformed cursor').optional(), fromDate: validDate.optional(), includeHidden: z.union([z.boolean(), z.string()]).optional().transform((val) => (typeof val === 'undefined' ? undefined : typeof val === 'boolean' ? val : val.toLowerCase() === 'true')), limit: boundedLimit({ defaultValue: 100, max: 500 }).optional().default(100), tagKeys: csvIntList, timezone: viewerTimeZone, toDate: validDate.optional(), transactionTypes: csvList, unreviewedOnly: z.union([z.boolean(), z.string()]).optional().transform((val) => (typeof val === 'undefined' ? undefined : typeof val === 'boolean' ? val : val.toLowerCase() === 'true')) }) });
+/** `true`/`false` from a query string (any other value reads as false); absent stays undefined. */
+const queryBoolean = z.union([z.boolean(), z.string()]).optional().transform((val) => (typeof val === 'undefined' ? undefined : typeof val === 'boolean' ? val : val.toLowerCase() === 'true'));
+
+/**
+ * The scope options a report passes to list exactly its rows (`listFiltersForReport`,
+ * `transaction-scope.ts`). Absent, the list shows what it always has: every status but EXPIRED,
+ * transfers and every category included.
+ */
+const transactionScopeQuery = {
+  direction: z.enum(['in', 'out']).optional(),
+  excludeNonSpending: queryBoolean,
+  excludeTransfers: queryBoolean,
+  memberCurrency: z.string().trim().regex(/^[A-Z]{3}$/, 'Currency codes are three capital letters').optional(),
+  merchantKeys: csvIntList,
+  statuses: csvList.pipe(z.array(z.enum(['BOOKED', 'PENDING'])).optional()),
+};
+
+export const getTransactionsRequestSchema = z.object({ query: z.object({ ...transactionScopeQuery, accountKeys: csvIntList, categoryKeys: csvCategoryList, confidence: z.enum(CategorizationConfidence).optional(), cursor: z.string().trim().max(64).regex(/^\d+_\d+$/, 'Malformed cursor').optional(), fromDate: validDate.optional(), includeEmptyAccounts: z.union([z.boolean(), z.string()]).optional().transform((val) => (typeof val === 'undefined' ? undefined : typeof val === 'boolean' ? val : val.toLowerCase() === 'true')), includeHidden: z.union([z.boolean(), z.string()]).optional().transform((val) => (typeof val === 'undefined' ? undefined : typeof val === 'boolean' ? val : val.toLowerCase() === 'true')), limit: boundedLimit({ defaultValue: 100, max: 500 }).optional().default(100), tagKeys: csvIntList, timezone: viewerTimeZone, toDate: validDate.optional(), transactionTypes: csvList, unreviewedOnly: z.union([z.boolean(), z.string()]).optional().transform((val) => (typeof val === 'undefined' ? undefined : typeof val === 'boolean' ? val : val.toLowerCase() === 'true')) }) });
+export const getAccountTransactionsRequestSchema = z.object({ query: z.object({ ...transactionScopeQuery, accountId: positiveIntId.optional(), categoryKeys: csvCategoryList, confidence: z.enum(CategorizationConfidence).optional(), cursor: z.string().trim().max(64).regex(/^\d+_\d+$/, 'Malformed cursor').optional(), fromDate: validDate.optional(), includeHidden: z.union([z.boolean(), z.string()]).optional().transform((val) => (typeof val === 'undefined' ? undefined : typeof val === 'boolean' ? val : val.toLowerCase() === 'true')), limit: boundedLimit({ defaultValue: 100, max: 500 }).optional().default(100), tagKeys: csvIntList, timezone: viewerTimeZone, toDate: validDate.optional(), transactionTypes: csvList, unreviewedOnly: z.union([z.boolean(), z.string()]).optional().transform((val) => (typeof val === 'undefined' ? undefined : typeof val === 'boolean' ? val : val.toLowerCase() === 'true')) }) });
 export const getTransactionMerchantsRequestSchema = z.object({ query: z.object({ limit: boundedLimit({ defaultValue: 20, max: 50 }).optional().default(20), search: z.string().trim().max(200).optional().default('') }) });
 export const createOfflineAccountRequestSchema = z.object({ body: z.object({ accountTypeId: positiveIntId.optional(), currencyId: positiveIntId, currentBalance: z.preprocess((v) => (typeof v === 'string' ? Number(v) : v), z.number().max(999999999999)), financialInstitutionId: z.number().optional(), name: z.string().min(1).max(100) }) });
 export const createTransactionRequestSchema = z.object({ body: z.object({ categoryId: z.string().nullable().optional().transform((val) => (val ? positiveIntId.parse(val) : undefined)), description: z.string().max(500).optional().transform((val) => (val ? val : undefined)), exchangeRate: z.string().optional().transform((val) => (val ? finiteAmount.parse(val) : undefined)), notes: z.string().max(1000).nullable().optional(), originalAmount: z.string().optional().transform((val) => (val ? finiteAmount.parse(val) : undefined)), originalCurrencyId: z.string().optional().transform((val) => (val ? positiveIntId.parse(val) : undefined)), settlementAmount: finiteAmount, settlementCurrencyId: positiveIntId, tagIds: tagIdList.optional(), transactionDate: validDate, transactionMerchantId: z.number().nullable().optional(), transactionMerchantName: z.string().max(200).nullable().optional().transform((val) => (val ? val : undefined)), transactionTypeId: positiveIntId }), params: z.object({ accountId: positiveIntId }) });
@@ -128,7 +145,22 @@ export const acceptTransactionOCRImportRequestSchema = z.object({ body: z.object
 export const rejectTransactionOcrImportRequestSchema = z.object({ params: z.object({ transactionOCRImportId: positiveIntId }) });
 export const getAccountsMetricsRequestSchema = z.object({ query: z.object({ fromDate: validDate.optional(), timezone: viewerTimeZone, toDate: validDate.optional() }) });
 export const getAccountMetricsRequestSchema = z.object({ params: z.object({ accountId: positiveIntId }), query: z.object({ fromDate: validDate.optional(), timezone: viewerTimeZone }) });
-export const updateAccountRequestSchema = z.object({ body: z.object({ accountName: z.string().min(1).max(100).optional(), isPrivate: z.boolean().optional() }), params: z.object({ accountId: positiveIntId }) });
+/** Up to the end of today in any timezone: an opening date is when the account was opened, never later. */
+const openingBalanceDate = validDate.refine((value) => value.getTime() <= Date.now() + 86_400_000, { message: 'openingBalanceDate cannot be in the future' });
+/**
+ * `openingBalance` / `openingBalanceDate` apply to manual and CSV accounts only, and start a
+ * recalculation of the account's balances (`account-recalculation.service.ts`).
+ */
+export const updateAccountRequestSchema = z.object({
+  body: z.object({
+    accountName: z.string().min(1).max(100).optional(),
+    isPrivate: z.boolean().optional(),
+    openingBalance: finiteAmount.refine((value) => Math.abs(value) <= 999_999_999_999, { message: 'openingBalance is too large' }).optional(),
+    openingBalanceDate: openingBalanceDate.optional(),
+  }),
+  params: z.object({ accountId: positiveIntId }),
+});
+export const recalculateAccountRequestSchema = z.object({ params: z.object({ accountId: positiveIntId }) });
 export const deleteAccountRequestSchema = z.object({ params: z.object({ accountId: positiveIntId }) });
 export const getRecentTransactionsRequestSchema = z.object({ params: z.object({ accountId: positiveIntId }) });
 export const getAccountPresignedUrlForUploadRequestSchema = z.object({ params: z.object({ accountId: positiveIntId }) });

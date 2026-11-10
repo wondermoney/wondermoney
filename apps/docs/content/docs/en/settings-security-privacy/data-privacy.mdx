@@ -33,13 +33,13 @@ Analytics and attribution are gated on consent. If you have not consented to ana
 
 **Settings > Privacy > Export all data** (or **Settings > Security** in the mobile app) downloads everything in your household that you can see, as a zip file named `wondermoney-export-YYYY-MM-DD.zip`:
 
-- `data/`: one JSON file per kind of data: accounts, transactions, categories and category settings, merchants, tags, transaction splits, rules, recurring payments, budgets, goals, loans, portfolios and their transactions, your watchlist and your preferences. Rows refer to each other by ids that only have meaning inside the export.
+- `data/`: one JSON file per kind of data: accounts, transactions, categories and category settings, merchants, tags, transaction splits, rules, recurring payments, budgets, goals, loans, manually valued assets and their valuations, portfolios and their transactions, your watchlist and your preferences. Rows refer to each other by ids that only have meaning inside the export.
 - `csv/`: transactions, accounts, portfolio transactions and current holdings, for spreadsheets. Amounts use a dot as the decimal separator and dates are written as `YYYY-MM-DD`.
 - `manifest.json`: the format version, when the export was made, and the number of rows and a SHA-256 checksum for every file.
 
 What is not included:
 
-- Your partner's private accounts, and their transactions, splits, tags, recurring payments and rules. Their own loans and watchlist stay out too.
+- Your partner's private accounts, and their transactions, splits, tags, recurring payments and rules. Their private assets, and their own loans and watchlist, stay out too.
 - Passwords, sessions, two-factor secrets, bank credentials and connection tokens. An account that was connected to a bank says so, without any of its connection details.
 - Audit logs, AI usage and analytics data.
 
@@ -58,7 +58,7 @@ The format derives its key from the password with a fast function, so the length
 
 ## Restore from an export
 
-An export can be loaded back into WonderMoney, on the same server or another one, for example when you move between the hosted service and your own server. Restore only fills an empty household: it works while your household has no accounts, portfolios, budgets, goals or loans, and it never merges an export into existing data. Only the household owner can restore, and the server needs file storage.
+An export can be loaded back into WonderMoney, on the same server or another one, for example when you move between the hosted service and your own server. Restore only fills an empty household: it works while your household has no accounts, portfolios, budgets, goals, loans or manually valued assets, and it never merges an export into existing data. Only the household owner can restore, and the server needs file storage.
 
 1. Open **Settings > Privacy > Restore from an export**, or choose **Restore from an export** on the first screen after you sign up.
 2. Choose the `wondermoney-export-YYYY-MM-DD.zip` file (up to 64 MB) and select **Check file**. For a password-protected export, enter its password when asked.

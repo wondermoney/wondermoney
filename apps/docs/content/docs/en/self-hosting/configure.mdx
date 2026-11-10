@@ -75,6 +75,7 @@ Set both `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` (from an OAuth client in 
 | `SPONSOR_URL` | A page where your users can chip in towards running the instance (Open Collective, GitHub Sponsors, ...). The web app's FAQ links to it when set |
 | `NEXT_PUBLIC_TERMS_URL`, `NEXT_PUBLIC_PRIVACY_URL` | Your legal pages, linked from the sign-up page when both are set |
 | `PRIVACY_POLICY_URL` | Your privacy policy, linked from email footers. `{lang}` is replaced with the recipient's language (`en` or `pt`), for example `https://example.com/{lang}/privacy`. Defaults to the app's privacy settings |
+| `TRANSFER_MATCH_FX_TOLERANCE` | How far apart the two halves of a transfer between accounts in different currencies may be once the amount that left is converted at that day's exchange rate, as a fraction of the amount that arrived: `0.02` (the default) is 2 percent. Raise it if your bank's exchange margin and fees are larger; at most `0.25`. Set it on the API and the worker |
 
 ## Analytics
 

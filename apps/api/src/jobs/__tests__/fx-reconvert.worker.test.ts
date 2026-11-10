@@ -5,6 +5,7 @@ import { useTestDatabase } from '@app/__tests__/__helpers__/pg-test-db';
 import { pgBossJob } from '@app/__tests__/__helpers__/pgboss-job';
 import { BackgroundOperationStatus } from '@entity/BackgroundOperation';
 import { ExchangeRate } from '@entity/ExchangeRate';
+import { ExchangeRateOverride } from '@entity/ExchangeRateOverride';
 import { FxStatus, Transaction } from '@entity/Transaction';
 import backgroundOperationService from '@service/operations/background-operation.service';
 
@@ -61,6 +62,38 @@ describe('fx re-conversion job', () => {
     await handleFxReconvertJob(pgBossJob({ correlationId: 'fx.reconvert:test-4' }, { id: 'job-4' }), { reconvert });
 
     expect(await backgroundOperationService.findByCorrelation('fx.reconvert:test-4')).toMatchObject({ progress: { accountsFailed: 2 }, status: BackgroundOperationStatus.PARTIAL });
+  });
+
+  it('re-converts only the household pair named by an override change', async () => {
+    const em = db.em();
+    const household = await seedHousehold(em);
+    const neighbour = await seedHousehold(em);
+    const xof = await currencyFor(em, 'XOF');
+    const day = new Date(Date.now() - 86_400_000);
+    const rowIn = async (owner: typeof household) => em.create(Transaction, {
+      accountKey: await addAccount(em, owner, { balance: 1000, currency: xof }),
+      appuserCurrencyKey: owner.currency,
+      appuserKey: owner.appuser,
+      fxStatus: FxStatus.MISSING,
+      settlementAmount: -10_000,
+      settlementCurrencyKey: xof,
+      tenantKey: owner.tenant,
+      transactionDate: day,
+      transactionStatusKey: owner.statuses.BOOKED,
+    }, { partial: true });
+    const mine = await rowIn(household);
+    const theirs = await rowIn(neighbour);
+    // Both households have the same override; the job names only the first.
+    for (const owner of [household, neighbour]) em.create(ExchangeRateOverride, { date: day, fromCurrency: xof, rate: 0.0015, tenantKey: owner.tenant, toCurrency: owner.currency }, { partial: true });
+    await em.flush();
+
+    const payload = { correlationId: 'fx.reconvert:override-1', override: { fromCurrency: 'XOF', tenantKey: household.tenant.tenantKey, toCurrency: 'EUR' } };
+    await expect(handleFxReconvertJob(pgBossJob(payload, { id: 'job-5' }))).resolves.toBe(true);
+
+    const reload = (row: Transaction) => db.em().findOneOrFail(Transaction, { transactionKey: row.transactionKey }, { filters: false });
+    expect(await reload(mine)).toMatchObject({ appuserSettlementAmount: -15, fxStatus: FxStatus.EXACT });
+    expect(await reload(theirs)).toMatchObject({ appuserSettlementAmount: null, fxStatus: FxStatus.MISSING });
+    expect(await backgroundOperationService.findByCorrelation('fx.reconvert:override-1')).toMatchObject({ progress: { transactionsReconverted: 1 }, status: BackgroundOperationStatus.SUCCEEDED });
   });
 
   it('leaves the operation retryable and rethrows when the run fails', async () => {
