@@ -1,8 +1,54 @@
 # Base image pinned by digest for reproducible builds. Dependabot's `docker`
 # ecosystem (.github/dependabot.yml) opens a monthly PR to bump it.
 # node:26.13.0-alpine (Node 26 LTS) as of 2026-10-31.
-FROM node:26.13.0-alpine@sha256:8996bb5821d62a8fd9bb27c1cb07462f3fdce6e47d640c6a881ead0b064ce216 AS builder
+#
+# Build context is the monorepo root: `docker build -f apps/api/Dockerfile .`
+#
+# Stages, laid out so that a commit that changes only source rebuilds only the compile and
+# the small layers after it:
+#   manifests     the lockfile and the three package.json files
+#   prod-deps     the API's production node_modules, from the manifests alone
+#   pruner        node-prune over prod-deps
+#   builder       dev dependencies, source and the compile
+#   dist          the compiled API alone, for the Sentry source map upload
+#   runtime-base  the image: pruned node_modules, then the builds; `api` and `worker` set CMD
+FROM node:26.13.0-alpine@sha256:8996bb5821d62a8fd9bb27c1cb07462f3fdce6e47d640c6a881ead0b064ce216 AS manifests
+WORKDIR /repo
+# Node 25+ no longer bundles corepack, so install it (pinned) before enabling it; it then
+# provides the pnpm version in the root package.json's packageManager field.
+RUN npm install -g corepack@0.36.0 && corepack enable
+COPY pnpm-lock.yaml pnpm-workspace.yaml package.json .pnpmfile.cjs .npmrc* ./
+COPY apps/api/package.json apps/api/
+COPY packages/shared/package.json packages/shared/
+COPY packages/react-email/package.json packages/react-email/
 
+# Production dependencies only: `pnpm deploy` installs just the API's own production closure
+# into a standalone directory, with the workspace packages copied in as regular packages. A
+# filtered `pnpm install` can't do this under `nodeLinker: hoisted`: it installs every
+# workspace project's dependencies, which put next, expo, react-native, fumadocs and the rest
+# of web/docs/mobile into this image. .pnpmfile.cjs keeps the optional next/expo peers of
+# better-auth out of that closure.
+#
+# It runs from the manifests alone, so this layer and the pruned copy below are reused until
+# the lockfile or a manifest changes. The workspace packages arrive as their package.json
+# only; the runtime stage adds their built `dist` from the builder.
+#
+# The pnpm store is a cache mount, so a local rebuild after a lockfile change downloads only
+# what changed (CI runners start with it empty). `sharing=locked`: this stage and the builder
+# can run at the same time, and one install at a time keeps the store consistent.
+FROM manifests AS prod-deps
+RUN --mount=type=cache,id=pnpm,target=/root/.local/share/pnpm/store,sharing=locked \
+  pnpm --filter @wondermoney/api deploy --prod --ignore-scripts /out
+
+# The compile. Its output is plain JavaScript, so it runs on the build machine's platform: a
+# multi-platform build (publish-images.yml) compiles once, natively, instead of once per
+# platform under emulation. The deploy workflows build for the runner's own platform anyway.
+#
+# Under `nodeLinker: hoisted` this filtered install still installs every workspace project's
+# dependencies (4.2 GB on disk). The deploy workflows keep it out of their layer cache
+# (`mode=min`): reinstalling takes under a minute on a runner, while restoring that layer from
+# the GitHub Actions cache took two to three.
+#
 # NOTE: no native build toolchain is installed here on purpose.
 # This stage used to `apk add build-base g++ cairo-dev jpeg-dev pango-dev
 # giflib-dev` "for canvas". There is no `canvas` package in the tree: `pdf-to-img`
@@ -10,19 +56,11 @@ FROM node:26.13.0-alpine@sha256:8996bb5821d62a8fd9bb27c1cb07462f3fdce6e47d640c6a
 # binary that needs no cairo/pango headers and no compiler. The toolchain was a
 # multi-minute apk install on every cache miss for nothing. If a dependency ever
 # genuinely needs to compile against cairo, add it back with a comment naming it.
-
-# Build context is the monorepo root: `docker build -f apps/api/Dockerfile .`
+FROM --platform=$BUILDPLATFORM node:26.13.0-alpine@sha256:8996bb5821d62a8fd9bb27c1cb07462f3fdce6e47d640c6a881ead0b064ce216 AS builder
 WORKDIR /repo
-# Node 25+ no longer bundles corepack, so install it (pinned) before enabling it; it then
-# provides the pnpm version in the root package.json's packageManager field.
 RUN npm install -g corepack@0.36.0 && corepack enable
-
-# Lockfile and manifests first, so the dependency layer is cached across source changes.
-COPY pnpm-lock.yaml pnpm-workspace.yaml package.json .pnpmfile.cjs .npmrc* ./
-COPY apps/api/package.json apps/api/
-COPY packages/shared/package.json packages/shared/
-COPY packages/react-email/package.json packages/react-email/
-RUN --mount=type=cache,id=pnpm,target=/root/.local/share/pnpm/store \
+COPY --from=manifests /repo ./
+RUN --mount=type=cache,id=pnpm,target=/root/.local/share/pnpm/store,sharing=locked \
   pnpm install --frozen-lockfile --filter @wondermoney/api...
 
 COPY apps/api apps/api
@@ -45,15 +83,6 @@ RUN if [ -n "$WM_VERSION" ]; then \
 RUN pnpm --filter @wondermoney/shared --filter @wondermoney/react-email run build:lib \
   && pnpm --filter @wondermoney/api run build
 
-# Production dependencies only: `pnpm deploy` installs just the API's own production closure
-# into a standalone directory, with the workspace packages copied in as regular
-# packages (their built `dist`, per their `files`/.npmignore). A filtered `pnpm install` can't
-# do this under `nodeLinker: hoisted`: it installs every workspace project's dependencies, which
-# put next, expo, react-native, fumadocs and the rest of web/docs/mobile into this image.
-# .pnpmfile.cjs keeps the optional next/expo peers of better-auth out of that closure.
-RUN --mount=type=cache,id=pnpm,target=/root/.local/share/pnpm/store \
-  pnpm --filter @wondermoney/api deploy --prod --ignore-scripts /out
-
 # The compiled API alone (with its source maps and Sentry debug IDs), exported by the deploy
 # workflows with `--target dist --output type=local,dest=apps/api/dist` to upload the source
 # maps of exactly the files the image runs. Not part of any image.
@@ -74,20 +103,12 @@ COPY --from=builder /repo/apps/api/dist /
 # amd64-only, which is fine on CI but warns on an arm64 laptop.
 FROM softonic/node-prune:latest@sha256:468f604c94b81f07fc79e15fa7fdd22f0ac826b7f412708ac6c5b148f71f1df8 AS pruner
 
-COPY --from=builder /out/node_modules /home/node/app/node_modules
+COPY --from=prod-deps /out/node_modules /home/node/app/node_modules
 
 RUN node-prune /home/node/app/node_modules
 
 # Start production image build
 FROM node:26.13.0-alpine@sha256:8996bb5821d62a8fd9bb27c1cb07462f3fdce6e47d640c6a881ead0b064ce216 AS runtime-base
-
-ARG APP_ENV=production
-ARG DEPLOY_ENV=${APP_ENV}
-ENV APP_ENV=${APP_ENV}
-ENV DEPLOY_ENV=${DEPLOY_ENV}
-# The app refuses to start without NODE_ENV and PORT; deployments may still override them.
-ENV NODE_ENV=production
-ENV PORT=3001
 
 # `curl` is for the container health check, not the app — and it is a cosmetic
 # fix, not a correctness one. Coolify generates a `curl ... || wget ...` check on
@@ -118,14 +139,26 @@ RUN mkdir -p /home/node/app \
 USER node
 
 # The deployed API: its package.json (ESM `type`, MikroORM CLI config), the pruned production
-# node_modules and the build. The path stays apps/api so the working directory is unchanged.
-COPY --from=builder --chown=node:node /out/package.json ./apps/api/package.json
+# node_modules, the workspace packages' builds and the API build. The path stays apps/api so
+# the working directory is unchanged. What changes with source comes last.
+COPY --from=prod-deps --chown=node:node /out/package.json ./apps/api/package.json
 COPY --from=pruner --chown=node:node /home/node/app/node_modules ./apps/api/node_modules
+COPY --from=builder --chown=node:node /repo/packages/shared/dist ./apps/api/node_modules/@wondermoney/shared/dist
+COPY --from=builder --chown=node:node /repo/packages/react-email/dist ./apps/api/node_modules/@wondermoney/react-email/dist
 COPY --from=builder --chown=node:node /repo/apps/api/dist ./apps/api/dist
 COPY --from=builder --chown=node:node /repo/apps/api/src/generated ./apps/api/dist/generated
 COPY --from=builder --chown=node:node /repo/apps/api/src/database/entity ./apps/api/dist/database/entity
 
 WORKDIR /home/node/app/apps/api
+
+# After the layers, so that staging, production and self-hosted images share all of them.
+ARG APP_ENV=production
+ARG DEPLOY_ENV=${APP_ENV}
+ENV APP_ENV=${APP_ENV}
+ENV DEPLOY_ENV=${DEPLOY_ENV}
+# The app refuses to start without NODE_ENV and PORT; deployments may still override them.
+ENV NODE_ENV=production
+ENV PORT=3001
 
 EXPOSE 3001
 
