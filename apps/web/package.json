@@ -30,7 +30,7 @@
     "@algolia/autocomplete-core": "^1.19.6",
     "@algolia/client-search": "^5.49.1",
     "@bprogress/next": "^3.2.12",
-    "@hookform/resolvers": "^6.0.0",
+    "@hookform/resolvers": "^7.0.3",
     "@kodingdotninja/use-tailwind-breakpoint": "^1.0.0",
     "@number-flow/react": "^0.6.0",
     "@radix-ui/react-accordion": "^1.2.12",
