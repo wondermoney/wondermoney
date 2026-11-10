@@ -1,0 +1,78 @@
+name: Bug report
+description: Something in WonderMoney doesn't work as it should.
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report this. Please check the [open issues](https://github.com/wondermoney/wondermoney/issues) first in case it's already known.
+
+        **Never include real financial data** (account numbers, balances, transactions), credentials, tokens or personal details. Replace them with made-up values. Security issues go through [private vulnerability reporting](https://github.com/wondermoney/wondermoney/security/advisories/new), not here.
+  - type: dropdown
+    id: instance
+    attributes:
+      label: Where are you using WonderMoney?
+      options:
+        - The hosted instance (wonder.money)
+        - My own self-hosted instance
+    validations:
+      required: true
+  - type: dropdown
+    id: platform
+    attributes:
+      label: Platform
+      multiple: true
+      options:
+        - Web
+        - iOS app
+        - Android app
+        - API (direct requests)
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Version or commit
+      description: For a self-hosted instance, the image tag (`WM_VERSION`) or commit. For the mobile app, its version from the App Store or Google Play. For the hosted web app, leave it blank.
+      placeholder: e.g. 1.1.0, latest, or a commit SHA
+  - type: input
+    id: environment
+    attributes:
+      label: Browser or device
+      placeholder: e.g. Firefox 140 on Windows 11, iPhone 16 on iOS 26
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Go to ...
+        2. Click ...
+        3. See ...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you expected
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: What happened instead
+      description: Screenshots help; blur or crop anything personal or financial.
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs or error messages
+      description: Browser console errors, or for self-hosted instances `docker compose logs api` around the time of the problem. **Remove personal and financial data, emails, tokens and hostnames before pasting.**
+      render: text
+  - type: checkboxes
+    id: privacy
+    attributes:
+      label: Before you submit
+      options:
+        - label: This report contains no real financial data, credentials, tokens or personal details.
+          required: true
