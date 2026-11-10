@@ -3814,7 +3814,13 @@
       "searchPlaceholder": "Pesquisar {{label}}",
       "noResults": "Sem resultados",
       "unknownAccount": "Conta desconhecida",
-      "dateRange": "Período"
+      "dateRange": "Período",
+      "customRange": "Intervalo personalizado",
+      "customRangeFrom": "De",
+      "customRangeTo": "Até",
+      "customRangeApply": "Aplicar",
+      "customRangeInvalid": "Introduza um intervalo de datas válido.",
+      "customRangeOrder": "A data de início não pode ser posterior à data de fim."
     },
     "budgetVsActual": {
       "title": "Orçamento vs real",

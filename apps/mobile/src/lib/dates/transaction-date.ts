@@ -71,17 +71,28 @@ function localDay(day: string, end: boolean): Date | null {
   return value.getFullYear() === year && value.getMonth() === month && value.getDate() === date ? value : null
 }
 
+/** Which part of a {@link localDayRange} the caller got wrong. */
+export type LocalDayRangeProblem = 'format' | 'invalid-from' | 'invalid-to' | 'order'
+
+/** A rejected {@link localDayRange}: `problem` says which part, `message` is the sentence to show. */
+export class LocalDayRangeError extends Error {
+  constructor(readonly problem: LocalDayRangeProblem, message: string) {
+    super(message)
+    this.name = 'LocalDayRangeError'
+  }
+}
+
 /**
  * A range of whole local calendar days (`YYYY-MM-DD`, both included) as the first and last
  * instant, the form the transaction endpoints take with the device's time zone.
  */
 export function localDayRange(fromDay: string, toDay: string): Readonly<{ fromDate: string; toDate: string }> {
-  if (!DAY_PATTERN.test(fromDay) || !DAY_PATTERN.test(toDay)) throw new Error('Enter both dates as YYYY-MM-DD.')
+  if (!DAY_PATTERN.test(fromDay) || !DAY_PATTERN.test(toDay)) throw new LocalDayRangeError('format', 'Enter both dates as YYYY-MM-DD.')
   const from = localDay(fromDay, false)
-  if (!from) throw new Error('The start date is not a real calendar date.')
+  if (!from) throw new LocalDayRangeError('invalid-from', 'The start date is not a real calendar date.')
   const to = localDay(toDay, true)
-  if (!to) throw new Error('The end date is not a real calendar date.')
-  if (from.getTime() > to.getTime()) throw new Error('The start date must not be after the end date.')
+  if (!to) throw new LocalDayRangeError('invalid-to', 'The end date is not a real calendar date.')
+  if (from.getTime() > to.getTime()) throw new LocalDayRangeError('order', 'The start date must not be after the end date.')
   return Object.freeze({ fromDate: from.toISOString(), toDate: to.toISOString() })
 }
 
