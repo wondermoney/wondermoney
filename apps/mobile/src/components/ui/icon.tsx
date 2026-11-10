@@ -78,6 +78,7 @@ const ICONS = {
   shield: { ios: 'shield', android: 'shield', web: 'shield' },
   mail: { ios: 'envelope', android: 'mail', web: 'mail' },
   layers: { ios: 'square.3.layers.3d', android: 'layers', web: 'layers' },
+  'sliders-horizontal': { ios: 'slider.horizontal.3', android: 'tune', web: 'tune' },
   'shield-check': { ios: 'checkmark.shield', android: 'verified_user', web: 'verified_user' },
   'wallet-cards': { ios: 'wallet.pass', android: 'wallet', web: 'wallet' },
   'line-chart': { ios: 'chart.xyaxis.line', android: 'show_chart', web: 'show_chart' },

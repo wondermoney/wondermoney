@@ -10,6 +10,7 @@ import { useBankAlertBanner } from '@/features/banking/use-bank-alerts'
 import { mapBudget } from '@/features/budgets/budgets-view-model'
 import { useBudgets } from '@/features/budgets/use-budgets'
 import { useLoans } from '@/features/loans/use-loans'
+import { useDashboardLayout } from '@/features/preferences/use-dashboard-layout'
 import { useTransactions } from '@/features/transactions/use-transactions'
 import { ApiError } from '@/lib/api/errors'
 
@@ -73,6 +74,7 @@ export function NetWorthRoute() {
   const insight = useTopSpendingCategory()
   const setupDismissal = useSetupChecklistDismissal()
   const bankAlerts = useBankAlertBanner()
+  const dashboardLayout = useDashboardLayout()
 
   let state: NetWorthViewState
   if (query.isLoading) state = { status: 'loading' }
@@ -196,6 +198,8 @@ export function NetWorthRoute() {
       onRetryLatest={() => void latest.refetch()}
       onRetryLoans={() => void loans.refetch()}
       onViewHistory={() => router.push('/net-worth/history' as unknown as Href)}
+      layout={dashboardLayout.layout}
+      onCustomize={() => router.push('/home/customize' as Href)}
       sections={sections}
       state={state}
       today={today}

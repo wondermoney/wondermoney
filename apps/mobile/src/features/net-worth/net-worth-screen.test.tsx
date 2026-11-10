@@ -369,4 +369,43 @@ describe('NetWorthScreen (Home)', () => {
       expect(storage.saved).toEqual([true, false])
     })
   })
+
+  describe('the saved home layout', () => {
+    const headingOrder = (view: Awaited<ReturnType<typeof renderScreen>>['view']) =>
+      view.getAllByRole('header').map((header) => header.props.children).filter((name): name is string => typeof name === 'string')
+
+    it('renders the sections in the saved order and skips hidden ones', async () => {
+      const { view } = await renderScreen({
+        layout: [
+          { id: 'net-worth', hidden: false },
+          { id: 'loans', hidden: false },
+          { id: 'this-month', hidden: true },
+          { id: 'cashflow', hidden: false },
+          { id: 'balance-sheet', hidden: false },
+          { id: 'latest-transactions', hidden: false },
+        ],
+      })
+
+      const order = headingOrder(view)
+      expect(order.indexOf('Next loan payments')).toBeLessThan(order.indexOf('Net cash flow by month'))
+      expect(view.queryByRole('header', { name: 'This month' })).toBeNull()
+      expect(view.getByRole('header', { name: 'Net worth' })).toBeOnTheScreen()
+    })
+
+    it('opens the customize screen from the header', async () => {
+      const onCustomize = jest.fn()
+      const { view } = await renderScreen({ onCustomize })
+
+      await fireEvent.press(view.getByTestId('home-customize'))
+
+      expect(onCustomize).toHaveBeenCalledTimes(1)
+    })
+
+    it('renders every section when no layout is saved', async () => {
+      const { view } = await renderScreen()
+
+      expect(view.getByRole('header', { name: 'This month' })).toBeOnTheScreen()
+      expect(view.getByRole('header', { name: 'Latest transactions' })).toBeOnTheScreen()
+    })
+  })
 })

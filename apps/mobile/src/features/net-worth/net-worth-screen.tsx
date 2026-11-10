@@ -1,6 +1,12 @@
-import { useCallback, useMemo, useState } from 'react'
+import { useCallback, useMemo, useState, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { RefreshControl, ScrollView, StyleSheet, View } from 'react-native'
+
+import {
+  defaultDashboardLayout,
+  type DashboardLayoutEntry,
+  type DashboardSectionId,
+} from '@wondermoney/shared/dashboard-layout'
 
 import { Amount } from '@/components/ui/amount'
 import { Banner } from '@/components/ui/banner'
@@ -8,6 +14,7 @@ import { Button } from '@/components/ui/button'
 import { DataProvenance } from '@/components/ui/data-provenance'
 import type { EntityMarkSource } from '@/components/ui/entity-mark'
 import { HeadlineFigure } from '@/components/ui/headline-figure'
+import { IconButton } from '@/components/ui/icon-button'
 import { PageHeader } from '@/components/ui/page-header'
 import { SafeAreaView } from '@/components/ui/screen-safe-area'
 import { SegmentedControl } from '@/components/ui/segmented-control'
@@ -93,6 +100,8 @@ export type NetWorthScreenProps = {
   state: NetWorthViewState
   sections: HomeSections
   today: Date
+  /** The home's section order and visibility; defaults to the shipped order. */
+  layout?: readonly DashboardLayoutEntry[]
   onRefresh: () => void | Promise<void>
   onLogout: () => void | Promise<void>
   onViewHistory: () => void
@@ -104,18 +113,21 @@ export type NetWorthScreenProps = {
   onRetryLatest: () => void
   onDismissSetup: () => void
   onDismissBankAlert?: () => void
+  /** Opens "Customize home"; omitted where the affordance should not show. */
+  onCustomize?: () => void
 }
 
 /**
  * Home, as web's `HomeOverview` at phone width: net worth leads (the figure,
  * its change since last month and over the history, what is owned and owed,
- * the month-closing trend), then any bank connection alert, the setup checklist, this month's budgets,
+ * the month-closing trend), then any bank connection alert, the setup checklist,
+ * and the remaining sections in the person's saved order — this month's budgets,
  * the balance sheet, net cash flow, the next loan payments and the latest
  * transactions. Every section loads on its own, so one failed request costs
  * one section, not the page.
  */
 export function NetWorthScreen(props: NetWorthScreenProps) {
-  const { state, sections, today, onRefresh } = props
+  const { state, sections, today, onRefresh, layout = defaultDashboardLayout(), onCustomize } = props
   const { t, i18n } = useTranslation()
   const palette = usePalette()
   const locale = i18n.resolvedLanguage ?? i18n.language ?? 'en'
@@ -137,6 +149,16 @@ export function NetWorthScreen(props: NetWorthScreenProps) {
   const sheet = loaded ? balanceSheet(loaded.rows) : null
   const hasSheet = sheet !== null && (sheet.own.length > 0 || sheet.owe.length > 0)
 
+  // One node per configurable section; the layout decides which render, and in
+  // what order. Net worth is rendered above, pinned first.
+  const sectionNodes: Record<Exclude<DashboardSectionId, 'net-worth'>, ReactNode> = {
+    'this-month': <ThisMonthSection locale={locale} onNavigate={props.onNavigate} onRetry={props.onRetryBudgets} state={sections.month} today={today} />,
+    'balance-sheet': sheet && hasSheet ? <BalanceSheetSection accountMarks={sections.accountMarks} portfolioMarks={sections.portfolioMarks} currency={currency} locale={locale} sheet={sheet} /> : null,
+    cashflow: <CashflowSection currency={currency} locale={locale} onRetry={props.onRetryCashflow} state={sections.cashflow} today={today} />,
+    loans: <LoansSection locale={locale} onNavigate={props.onNavigate} onRetry={props.onRetryLoans} state={sections.loans} />,
+    'latest-transactions': <LatestTransactionsSection locale={locale} onNavigate={props.onNavigate} onRetry={props.onRetryLatest} state={sections.latest} />,
+  }
+
   return (
     <SafeAreaView edges={['left', 'right']} style={[styles.safeArea, { backgroundColor: palette.background }]}>
       <ScrollView
@@ -145,7 +167,22 @@ export function NetWorthScreen(props: NetWorthScreenProps) {
       >
         <View style={styles.page}>
           <View style={styles.lead}>
-            <PageHeader action={<PrivacyToggle />} title={t('navigation.home')} />
+            <PageHeader
+              action={(
+                <View style={styles.headerActions}>
+                  {onCustomize ? (
+                    <IconButton
+                      accessibilityLabel={t('home.customize.action')}
+                      icon="sliders-horizontal"
+                      onPress={onCustomize}
+                      testID="home-customize"
+                    />
+                  ) : null}
+                  <PrivacyToggle />
+                </View>
+              )}
+              title={t('navigation.home')}
+            />
             <NetWorthHero {...props} locale={locale} />
           </View>
 
@@ -155,15 +192,11 @@ export function NetWorthScreen(props: NetWorthScreenProps) {
 
           {sections.setup ? <SetupChecklist onDismiss={props.onDismissSetup} onNavigate={props.onNavigate} steps={sections.setup} /> : null}
 
-          <ThisMonthSection locale={locale} onNavigate={props.onNavigate} onRetry={props.onRetryBudgets} state={sections.month} today={today} />
-
-          {sheet && hasSheet ? <BalanceSheetSection accountMarks={sections.accountMarks} portfolioMarks={sections.portfolioMarks} currency={currency} locale={locale} sheet={sheet} /> : null}
-
-          <CashflowSection currency={currency} locale={locale} onRetry={props.onRetryCashflow} state={sections.cashflow} today={today} />
-
-          <LoansSection locale={locale} onNavigate={props.onNavigate} onRetry={props.onRetryLoans} state={sections.loans} />
-
-          <LatestTransactionsSection locale={locale} onNavigate={props.onNavigate} onRetry={props.onRetryLatest} state={sections.latest} />
+          {layout
+            .filter((entry) => entry.id !== 'net-worth' && !entry.hidden)
+            .map((entry) => (
+              <View key={entry.id}>{sectionNodes[entry.id as Exclude<DashboardSectionId, 'net-worth'>]}</View>
+            ))}
 
           <InsightSection fallbackCurrency={currency} locale={locale} state={sections.insight} />
         </View>
@@ -370,6 +403,7 @@ const styles = StyleSheet.create({
   // Space, not rules, between Home's sections: 40pt and a strong heading.
   page: { width: '100%', maxWidth: 760, alignSelf: 'center', gap: themeTokens.spacing[10] },
   lead: { gap: themeTokens.spacing[6] },
+  headerActions: { flexDirection: 'row', alignItems: 'center', gap: themeTokens.spacing[1] },
   chartBlock: { gap: themeTokens.spacing[3] },
   hero: { gap: themeTokens.spacing[4] },
   heroHeader: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'baseline', justifyContent: 'space-between', columnGap: themeTokens.spacing[8], rowGap: themeTokens.spacing[2] },

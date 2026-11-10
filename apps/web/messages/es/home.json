@@ -1,5 +1,27 @@
 {
   "homeOverview": {
+    "customize": {
+      "action": "Personalizar",
+      "title": "Personalizar inicio",
+      "description": "Elige qué aparece en tu inicio y en qué orden.",
+      "sections": {
+        "net-worth": "Patrimonio neto",
+        "this-month": "Este mes",
+        "balance-sheet": "Balance",
+        "cashflow": "Flujo de caja neto",
+        "loans": "Préstamos",
+        "latest-transactions": "Últimas transacciones"
+      },
+      "moveUp": "Mover {section} hacia arriba",
+      "moveDown": "Mover {section} hacia abajo",
+      "pinned": "Siempre aparece primero",
+      "reset": "Restablecer",
+      "saving": "Guardando…",
+      "saveError": "No se pudo guardar. Inténtalo de nuevo.",
+      "retry": "Reintentar",
+      "loadError": "No se pudo cargar tu inicio.",
+      "done": "Hecho"
+    },
     "bank-alerts": {
       "label": "Alertas de conexiones bancarias",
       "consent-expiring": "{days, plural, =0 {El acceso a {bank} termina en menos de un día.} one {El acceso a {bank} termina en # día.} other {El acceso a {bank} termina en # días.}} Vuelve a conectar para mantener tus transacciones al día.",

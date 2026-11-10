@@ -23,6 +23,7 @@ export default function AuthenticatedLayout() {
           <UnderTopBarProvider active={showsTopBar(pathname)}>
           <Stack screenOptions={{ animation: 'none', headerShown: false }}>
           <Stack.Screen name="(tabs)" />
+          <Stack.Screen name="home/customize" />
           <Stack.Screen name="net-worth/history" />
           <Stack.Screen name="accounts/[accountId]" />
           <Stack.Screen name="accounts/create" />

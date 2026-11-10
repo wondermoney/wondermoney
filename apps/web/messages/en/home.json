@@ -1,5 +1,27 @@
 {
   "homeOverview": {
+    "customize": {
+      "action": "Customize",
+      "title": "Customize home",
+      "description": "Choose what appears on your home and in what order.",
+      "sections": {
+        "net-worth": "Net worth",
+        "this-month": "This month",
+        "balance-sheet": "Balance sheet",
+        "cashflow": "Net cash flow",
+        "loans": "Loans",
+        "latest-transactions": "Latest transactions"
+      },
+      "moveUp": "Move {section} up",
+      "moveDown": "Move {section} down",
+      "pinned": "Always shown first",
+      "reset": "Reset to default",
+      "saving": "Saving…",
+      "saveError": "Could not save. Try again.",
+      "retry": "Try again",
+      "loadError": "Could not load your home layout.",
+      "done": "Done"
+    },
     "bank-alerts": {
       "label": "Bank connection alerts",
       "consent-expiring": "{days, plural, =0 {Access to {bank} ends within a day.} one {Access to {bank} ends in # day.} other {Access to {bank} ends in # days.}} Reconnect to keep your transactions updating.",

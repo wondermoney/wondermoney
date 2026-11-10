@@ -240,6 +240,29 @@
     "unconvertedCurrencies": "No exchange rate yet for {{currencies}}."
   },
   "home": {
+    "customize": {
+      "action": "Customize",
+      "title": "Customize home",
+      "description": "Choose what appears on your home and in what order.",
+      "back": "Back to Home",
+      "sections": {
+        "net-worth": "Net worth",
+        "this-month": "This month",
+        "balance-sheet": "Balance sheet",
+        "cashflow": "Net cash flow",
+        "loans": "Loans",
+        "latest-transactions": "Latest transactions"
+      },
+      "moveUp": "Move {{section}} up",
+      "moveDown": "Move {{section}} down",
+      "pinned": "Always shown first",
+      "reset": "Reset to default",
+      "saving": "Saving…",
+      "saveError": "Could not save. Try again.",
+      "retry": "Try again",
+      "loadError": "Could not load your home layout.",
+      "loading": "Loading your home layout"
+    },
     "netWorth": {
       "title": "Net worth",
       "since": "since the end of {{month}}",
