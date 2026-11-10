@@ -52,6 +52,9 @@ vi.mock("@/lib/auth/user-context", () => ({
     email_confirmed_at: null,
   }),
 }));
+vi.mock("@/lib/api/preview-features/usePreviewFeatures", () => ({
+  usePreviewFeatures: () => false,
+}));
 
 beforeAll(() => {
   window.matchMedia ??= ((query: string) => ({

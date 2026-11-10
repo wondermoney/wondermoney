@@ -44,6 +44,8 @@ export type NavigationItem = {
   children?: NavigationChild[];
   /** Dropped when this server does not offer what the module needs. */
   requires?: "marketData";
+  /** Dropped until the person turns preview features on (`<PreviewGate>`'s nav equivalent). */
+  preview?: boolean;
 };
 
 export const NAVIGATION: NavigationItem[] = [

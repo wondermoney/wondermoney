@@ -3968,7 +3968,16 @@
       "heading": "Appearance",
       "description": "Change the appearance of the app.",
       "theme": "Theme",
-      "language": "Language"
+      "language": "Language",
+      "previewFeatures": {
+        "heading": "Preview features",
+        "description": "Try features before they are ready for everyone.",
+        "label": "Enable preview features",
+        "hint": "Preview features are unfinished. They may change, break or be removed without notice.",
+        "saving": "Saving…",
+        "saveError": "Could not save. Try again.",
+        "loadError": "Could not load your preferences."
+      }
     },
     "categories": {
       "description": "Manage your categories"

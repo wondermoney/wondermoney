@@ -21,6 +21,7 @@ import {
   SelectValue,
 } from "../ui/Select";
 import { Heading, Text } from "../ui/Typography";
+import PreviewFeatures from "./PreviewFeatures";
 
 export default function Appearance() {
   const user = useUser();
@@ -115,6 +116,8 @@ export default function Appearance() {
           </div>
         </div>
       </div>
+
+      <PreviewFeatures />
     </div>
   );
 }

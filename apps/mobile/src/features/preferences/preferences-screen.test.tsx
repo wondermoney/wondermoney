@@ -8,6 +8,7 @@ import { memoryPreferenceStorage, PrivacyModeProvider } from '@/test/privacy-mod
 import { PreferencesScreen } from './preferences-screen'
 
 jest.mock('expo-router', () => ({ useRouter: () => ({ back: jest.fn() }) }))
+jest.mock('./preview-features-section', () => ({ PreviewFeaturesSection: () => null }))
 
 describe('PreferencesScreen: privacy mode', () => {
   it('switches amounts off and on, and saves each choice on the device', async () => {

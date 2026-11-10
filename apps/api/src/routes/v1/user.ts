@@ -15,6 +15,7 @@ import {
   getUserAccountInformation,
   updateData,
 } from '@controller/user';
+import { getPreferences, patchPreferences } from '@controller/user-preferences';
 import { dataExportRateLimit, dataRestoreRateLimit } from '@middleware/rate-limit';
 
 const router = express.Router();
@@ -23,6 +24,8 @@ router.delete('/me', deleteCurrentUserAccount);
 router.get('/me/profile', getCurrentUserProfile);
 router.get('/me/email-notification-preferences', getEmailNotificationPreferences);
 router.patch('/me/email-notification-preferences', patchEmailNotificationPreferences);
+router.get('/me/preferences', getPreferences);
+router.patch('/me/preferences', patchPreferences);
 router.get('/me/onboarding', getOnboardingBootstrap);
 router.get('/me/exports', listDataExports);
 router.post('/me/exports', dataExportRateLimit(), startDataExport);
