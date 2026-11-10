@@ -1,3 +1,4 @@
+import type { TFunction } from 'i18next'
 import { useTranslation } from 'react-i18next'
 import { StyleSheet, Text, View } from 'react-native'
 
@@ -74,7 +75,7 @@ export function PortfolioImportAssetGroupCard({ group, palette, resolution, onRe
   )
 }
 
-function describeResolution(resolution: PortfolioImportAssetGroupResolution, t: (key: string, options?: Record<string, unknown>) => string): string {
+function describeResolution(resolution: PortfolioImportAssetGroupResolution, t: TFunction): string {
   if (resolution.type === 'skip') return t('portfolioImport.assetReview.resolvedSkipped')
   if (resolution.type === 'match') return t('portfolioImport.assetReview.resolvedAsMatch')
   return t('portfolioImport.assetReview.resolvedAs', { symbol: resolution.symbol })

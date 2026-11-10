@@ -1,3 +1,4 @@
+import type { TFunction } from 'i18next'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { RefreshControl, ScrollView, StyleSheet, View } from 'react-native'
@@ -112,7 +113,7 @@ export function DebtStrategyScreen({ state, currencyCode, onBack, onRefresh }: P
   </SafeAreaView>
 }
 
-function formatMonths(months: number, t: (key: string, values?: Record<string, unknown>) => string) {
+function formatMonths(months: number, t: TFunction) {
   const years = Math.floor(months / 12)
   const remaining = months % 12
   const parts: string[] = []
