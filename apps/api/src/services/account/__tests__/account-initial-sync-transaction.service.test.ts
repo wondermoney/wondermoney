@@ -628,6 +628,51 @@ describe('Enable Banking amounts through the real adapter', () => {
     expect(storedPending['enableBankingTransactionId']).toBe('eb-debit-1');
   });
 
+  it('promotes a stored pending whose amount changed when the merchant normalises the same', async () => {
+    const storedPending = {
+      appuserKey: { appuserKey: 9 },
+      enableBankingTransactionId: 'eb-pending-1',
+      settlementAmount: -20,
+      settlementCurrencyKey: { code: 'EUR' },
+      tenantKey: { tenantKey: 3 },
+      transactionDate: new Date('2026-03-01'),
+      transactionKey: 56,
+      transactionMerchantKey: { name: 'CAFE CENTRAL LISBOA' },
+    } as Record<string, unknown>;
+    const em = Object.assign(createEm({ accounts: oneAccount, pendings: [storedPending] }), { getReference: vi.fn((_entity: unknown, key: unknown) => ({ key })) });
+    const tipped: RawRow = { booking_date: '2026-03-02', credit_debit_indicator: 'DBIT', creditor: { name: 'Cafe Central' }, status: 'BOOK', transaction_amount: { amount: '22.00', currency: 'EUR' }, transaction_id: 'eb-tipped-1' };
+
+    await service.syncTransactionsForRequisition({ enableBankingConnectionKey: 1 }, { em: asEm(em), enableBankingSyncAdapterFactory: enableBankingAdapter([tipped]) });
+
+    expect(storedPending['enableBankingTransactionId']).toBe('eb-tipped-1');
+    const audits = em.persist.mock.calls.map(([entity]) => entity as Record<string, unknown>).filter((entity) => entity['eventType'] === 'pending_promoted');
+    expect(audits).toContainEqual(expect.objectContaining({ changes: expect.objectContaining({ amountDifference: { from: null, to: 2 }, matchPass: { from: null, to: 'loose' } }) }));
+  });
+
+  it('leaves two loose candidates alone', async () => {
+    const today = new Date();
+    const pendingDate = new Date(today.getTime() - 24 * 60 * 60 * 1000);
+    const bookingDate = today.toISOString().slice(0, 10);
+    const first = {
+      appuserKey: { appuserKey: 9 },
+      enableBankingTransactionId: 'eb-pending-1',
+      settlementAmount: -20,
+      settlementCurrencyKey: { code: 'EUR' },
+      tenantKey: { tenantKey: 3 },
+      transactionDate: pendingDate,
+      transactionKey: 56,
+      transactionMerchantKey: { name: 'CAFE CENTRAL LISBOA' },
+    } as Record<string, unknown>;
+    const second = { ...first, enableBankingTransactionId: 'eb-pending-2', settlementAmount: -21, transactionKey: 57, transactionMerchantKey: { name: 'CAFE CENTRAL PORTO' } };
+    const em = createEm({ accounts: oneAccount, pendings: [first, second] });
+    const tipped: RawRow = { booking_date: bookingDate, credit_debit_indicator: 'DBIT', creditor: { name: 'Cafe Central' }, status: 'BOOK', transaction_amount: { amount: '22.00', currency: 'EUR' }, transaction_id: 'eb-tipped-1' };
+
+    await service.syncTransactionsForRequisition({ enableBankingConnectionKey: 1 }, { em: asEm(em), enableBankingSyncAdapterFactory: enableBankingAdapter([tipped]) });
+
+    expect(first['enableBankingTransactionId']).toBe('eb-pending-1');
+    expect(second.enableBankingTransactionId).toBe('eb-pending-2');
+  });
+
   describe('rows ingested before amounts were signed', () => {
     // A provider row with neither `transaction_id` nor `entry_reference` is identified by a hash of
     // its fields. These literals are the ids the sync stored for these rows before the sign fix; a

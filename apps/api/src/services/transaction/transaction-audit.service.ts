@@ -138,6 +138,7 @@ function buildAuditWhere(eventType: TransactionAuditEventType, query: Transactio
  * Mirrors the allowlist approach in `AssistantAuditService.sanitizeAuditMetadata`.
  */
 const ALLOWED_CHANGE_FIELDS = new Set([
+  'amountDifference',
   'appuserCurrencyBalance',
   'appuserCurrencyExchangeRate',
   'appuserSettlementAmount',
@@ -153,6 +154,7 @@ const ALLOWED_CHANGE_FIELDS = new Set([
   'incomingInternalTransactionId',
   'incomingNordigenInternalTransactionId',
   'matchedOn',
+  'matchPass',
   'notes',
   'originalAmount',
   'plan',

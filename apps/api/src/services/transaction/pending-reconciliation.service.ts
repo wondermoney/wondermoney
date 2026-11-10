@@ -6,6 +6,10 @@
  * identical booked rows never both promote the same pending. Ambiguous booked rows (more than one
  * candidate pending) are left alone — we never guess with money.
  *
+ * The planner runs the exact pass over every booked row before the loose pass, so a loose match can
+ * never take a pending a later booked row would have matched exactly. Each planned promotion carries
+ * the pass that found it and the amount difference, for the audit trail.
+ *
  * This is planning only — it returns intended promotions. Applying them (mutating the pending row
  * in place → BOOKED) is a separate, flag-gated step; the first rollout logs these intents to the
  * audit table in dry-run mode so we can measure match quality before mutating anything.
@@ -20,15 +24,19 @@ import { TransactionAuditActorType, TransactionAuditEventType } from '@entity/Tr
 import type { TransactionStatus } from '@entity/TransactionStatus';
 import logger from '@utils/logger';
 
-import { findPromotablePendingMatch, type MatchableTransaction, type MatchOptions } from './pending-posted-match.service';
+import { findPendingMatchInPass, type MatchableTransaction, type MatchOptions, type PendingMatchPass } from './pending-posted-match.service';
 import { TransactionAuditService } from './transaction-audit.service';
 
 /** Feature flag for pending→posted reconciliation. `apply` (default/live) · `dry_run` · `off` (kill switch). */
 const PENDING_RECONCILIATION_FLAG = 'TRANSACTION_PENDING_RECONCILIATION';
 
 export interface PlannedPromotion {
+  /** Absolute amount difference between the booked and pending rows, in major units. */
+  amountDifference: number;
   /** Index into the booked-rows array that would be promoted. */
   bookedIndex: number;
+  /** Which matching pass found the candidate. */
+  matchPass: PendingMatchPass;
   /** transactionKey of the stored pending row it would promote in place. */
   pendingKey: number;
 }
@@ -53,17 +61,38 @@ export function planPromotions(
 ): PlannedPromotion[] {
   const available = [...pendingRows];
   const plan: PlannedPromotion[] = [];
+  const looseCandidates: number[] = [];
 
+  // Pass 1: every exact match claims its pending first, so a loose match can never take a pending
+  // that a later booked row would have matched exactly.
   bookedRows.forEach((booked, bookedIndex) => {
-    const result = findPromotablePendingMatch(booked, available, options);
-    if (result.status !== 'promote') return;
-    plan.push({ bookedIndex, pendingKey: result.pending.transactionKey });
-    // Consume the claimed pending so a later booked row can't promote it again.
-    const claimedIndex = available.indexOf(result.pending);
-    if (claimedIndex !== -1) available.splice(claimedIndex, 1);
+    const result = findPendingMatchInPass(booked, available, 'exact', options);
+    if (result.status === 'promote') {
+      plan.push({ amountDifference: result.amountDifference, bookedIndex, matchPass: 'exact', pendingKey: result.pending.transactionKey });
+      consume(available, result.pending);
+      return;
+    }
+    // An ambiguous exact match is left alone: falling through to the looser pass would guess.
+    if (result.status === 'no_match') looseCandidates.push(bookedIndex);
   });
 
-  return plan;
+  // Pass 2: the loose pass only sees booked rows with no exact candidate and pendings no exact
+  // match claimed.
+  for (const bookedIndex of looseCandidates) {
+    const booked = bookedRows[bookedIndex];
+    if (!booked) continue;
+    const result = findPendingMatchInPass(booked, available, 'loose', options);
+    if (result.status !== 'promote') continue;
+    plan.push({ amountDifference: result.amountDifference, bookedIndex, matchPass: 'loose', pendingKey: result.pending.transactionKey });
+    consume(available, result.pending);
+  }
+
+  return plan.sort((a, b) => a.bookedIndex - b.bookedIndex);
+}
+
+function consume<T>(available: T[], claimed: T): void {
+  const index = available.indexOf(claimed);
+  if (index !== -1) available.splice(index, 1);
 }
 
 /**
@@ -82,11 +111,12 @@ export async function logDryRunPromotions(
       Transaction,
       { accountKey: params.account, deletedAt: undefined, transactionStatusKey: params.pendingStatus },
       // Hidden pendings too, as the live path (`applyPromotions`) reads them.
-      { filters: { [HIDDEN_FILTER]: false }, populate: ['settlementCurrencyKey'] },
+      { filters: { [HIDDEN_FILTER]: false }, populate: ['settlementCurrencyKey', 'transactionMerchantKey'] },
     );
     if (pendings.length === 0) return [];
 
     const matchablePendings = pendings.map((pending) => ({
+      counterparty: pending.transactionMerchantKey?.name,
       currencyCode: pending.settlementCurrencyKey?.code ?? '',
       settlementAmount: pending.settlementAmount ?? 0,
       transactionDate: pending.transactionDate ?? new Date(0),
@@ -99,11 +129,20 @@ export async function logDryRunPromotions(
     for (const promotion of plan) {
       const pending = pendingByKey.get(promotion.pendingKey);
       if (!pending) continue;
+      const booked = params.bookedRows[promotion.bookedIndex];
+      const changes: Record<string, { from: unknown; to: unknown }> = {
+        amountDifference: { from: null, to: promotion.amountDifference },
+        matchPass: { from: null, to: promotion.matchPass },
+        transactionStatusKey: { from: 'PENDING', to: 'BOOKED' },
+      };
+      if (promotion.matchPass === 'loose' && booked) {
+        changes['settlementAmount'] = { from: pending.settlementAmount ?? 0, to: booked.settlementAmount };
+      }
       await TransactionAuditService.log(em, {
         accountKey: params.account.accountKey,
         actorType: TransactionAuditActorType.SYNC,
         appuserKey: pending.appuserKey?.appuserKey ?? 0,
-        changes: { transactionStatusKey: { from: 'PENDING', to: 'BOOKED' } },
+        changes,
         eventType: TransactionAuditEventType.PENDING_PROMOTED,
         source: 'pending-reconciliation:dry-run',
         tenantKey: pending.tenantKey?.tenantKey ?? 0,

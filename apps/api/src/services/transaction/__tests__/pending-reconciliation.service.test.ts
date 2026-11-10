@@ -16,7 +16,7 @@ const pending = (over: Partial<typeof base> & { settlementAmount: number; transa
 describe('planPromotions', () => {
   it('plans one promotion when a booked row matches a single stored pending', () => {
     const plan = planPromotions([booked({ settlementAmount: -20 })], [pending({ settlementAmount: -20, transactionKey: 7 })]);
-    expect(plan).toEqual([{ bookedIndex: 0, pendingKey: 7 }]);
+    expect(plan).toEqual([{ amountDifference: 0, bookedIndex: 0, matchPass: 'exact', pendingKey: 7 }]);
   });
 
   it('plans nothing when no booked row matches any pending', () => {
@@ -28,7 +28,7 @@ describe('planPromotions', () => {
       [booked({ settlementAmount: -20 }), booked({ settlementAmount: -20 })],
       [pending({ settlementAmount: -20, transactionKey: 7 })],
     );
-    expect(plan).toEqual([{ bookedIndex: 0, pendingKey: 7 }]);
+    expect(plan).toEqual([{ amountDifference: 0, bookedIndex: 0, matchPass: 'exact', pendingKey: 7 }]);
   });
 
   it('skips ambiguous booked rows (two pendings match one booked)', () => {
@@ -44,7 +44,40 @@ describe('planPromotions', () => {
       [booked({ counterparty: 'a', settlementAmount: -20 }), booked({ counterparty: 'b', settlementAmount: -30 })],
       [pending({ counterparty: 'b', settlementAmount: -30, transactionKey: 8 }), pending({ counterparty: 'a', settlementAmount: -20, transactionKey: 7 })],
     );
-    expect(plan).toEqual([{ bookedIndex: 0, pendingKey: 7 }, { bookedIndex: 1, pendingKey: 8 }]);
+    expect(plan).toEqual([
+      { amountDifference: 0, bookedIndex: 0, matchPass: 'exact', pendingKey: 7 },
+      { amountDifference: 0, bookedIndex: 1, matchPass: 'exact', pendingKey: 8 },
+    ]);
+  });
+
+  it('plans a loose promotion when the amount changed but the merchant normalises the same', () => {
+    const plan = planPromotions(
+      [booked({ counterparty: 'Cafe Central', settlementAmount: -22 })],
+      [pending({ counterparty: 'CAFE CENTRAL LISBOA', settlementAmount: -20, transactionKey: 7 })],
+    );
+    expect(plan).toEqual([{ amountDifference: 2, bookedIndex: 0, matchPass: 'loose', pendingKey: 7 }]);
+  });
+
+  it('leaves two loose candidates alone', () => {
+    const plan = planPromotions(
+      [booked({ counterparty: 'Cafe Central', settlementAmount: -22 })],
+      [
+        pending({ counterparty: 'CAFE CENTRAL LISBOA', settlementAmount: -20, transactionKey: 7 }),
+        pending({ counterparty: 'CAFE CENTRAL PORTO', settlementAmount: -21, transactionKey: 8 }),
+      ],
+    );
+    expect(plan).toEqual([]);
+  });
+
+  it('runs the exact pass over every booked row before the loose pass', () => {
+    const plan = planPromotions(
+      [
+        booked({ counterparty: 'Cafe Central', settlementAmount: -22 }),
+        booked({ counterparty: 'Cafe Central', settlementAmount: -20 }),
+      ],
+      [pending({ counterparty: 'Cafe Central', settlementAmount: -20, transactionKey: 7 })],
+    );
+    expect(plan).toEqual([{ amountDifference: 0, bookedIndex: 1, matchPass: 'exact', pendingKey: 7 }]);
   });
 });
 
@@ -82,11 +115,48 @@ describe('logDryRunPromotions', () => {
       tenant: {} as unknown as AppuserTenant,
     });
 
-    expect(plan).toEqual([{ bookedIndex: 0, pendingKey: 7 }]);
+    expect(plan).toEqual([{ amountDifference: 0, bookedIndex: 0, matchPass: 'exact', pendingKey: 7 }]);
     expect(auditSpy).toHaveBeenCalledTimes(1);
-    expect(auditSpy.mock.calls[0]?.[1]).toMatchObject({ eventType: TransactionAuditEventType.PENDING_PROMOTED, transactionKey: 7 });
+    expect(auditSpy.mock.calls[0]?.[1]).toMatchObject({
+      changes: {
+        amountDifference: { from: null, to: 0 },
+        matchPass: { from: null, to: 'exact' },
+      },
+      eventType: TransactionAuditEventType.PENDING_PROMOTED,
+      transactionKey: 7,
+    });
     // Dry-run: the pending row's status is untouched.
     expect(storedPending.settlementAmount).toBe(-20);
+  });
+
+  it('records the loose pass and amount difference in the audit intent', async () => {
+    const auditSpy = vi.spyOn(TransactionAuditService, 'log').mockResolvedValue(null);
+    const storedPending = {
+      appuserKey: { appuserKey: 9 },
+      settlementAmount: -20,
+      settlementCurrencyKey: { code: 'EUR' },
+      tenantKey: { tenantKey: 3 },
+      transactionDate: new Date('2026-07-15T00:00:00.000Z'),
+      transactionKey: 7,
+      transactionMerchantKey: { name: 'CAFE CENTRAL LISBOA' },
+    };
+    const em = { find: vi.fn().mockResolvedValue([storedPending]) };
+
+    const plan = await logDryRunPromotions(em as unknown as EntityManager, {
+      account: { accountKey: 5 } as unknown as Account,
+      bookedRows: [{ counterparty: 'Cafe Central', currencyCode: 'EUR', settlementAmount: -22, transactionDate: new Date('2026-07-16T00:00:00.000Z') }],
+      pendingStatus: {} as unknown as TransactionStatus,
+      tenant: {} as unknown as AppuserTenant,
+    });
+
+    expect(plan).toEqual([{ amountDifference: 2, bookedIndex: 0, matchPass: 'loose', pendingKey: 7 }]);
+    expect(auditSpy.mock.calls[0]?.[1]).toMatchObject({
+      changes: {
+        amountDifference: { from: null, to: 2 },
+        matchPass: { from: null, to: 'loose' },
+        settlementAmount: { from: -20, to: -22 },
+      },
+    });
   });
 
   it('never throws and returns [] when the pending lookup fails', async () => {
