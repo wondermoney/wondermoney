@@ -22451,6 +22451,23 @@
           "enumItems": [],
           "mappedType": "boolean"
         },
+        "committed_at": {
+          "name": "committed_at",
+          "type": "timestamptz(6)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "unique": false,
+          "length": 6,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "datetime"
+        },
         "correlation_id": {
           "name": "correlation_id",
           "type": "varchar(255)",
@@ -22487,6 +22504,23 @@
         },
         "deleted_at": {
           "name": "deleted_at",
+          "type": "timestamptz(6)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "unique": false,
+          "length": 6,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "datetime"
+        },
+        "details_deleted_at": {
+          "name": "details_deleted_at",
           "type": "timestamptz(6)",
           "unsigned": false,
           "autoincrement": false,
@@ -22586,6 +22620,23 @@
           "collation": null,
           "enumItems": [],
           "mappedType": "string"
+        },
+        "row_counts": {
+          "name": "row_counts",
+          "type": "jsonb",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "json"
         },
         "s3_bucket": {
           "name": "s3_bucket",

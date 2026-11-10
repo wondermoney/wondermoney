@@ -26,12 +26,16 @@ export const enqueueTransactionImportJob = (job: TransactionImportJobPayload, de
 
 QUEUE_REGISTRY.set(TRANSACTION_IMPORT_QUEUE, { ensure: (boss) => ensureTransactionImportQueue(boss), name: TRANSACTION_IMPORT_QUEUE });
 
-/** The daily sweep that deletes expired, uncommitted imports and their rows and files, in every household. */
+/**
+ * The daily sweep, in every household: it deletes expired, uncommitted imports with their rows and
+ * files, and the rows and files of imports committed over 7 days ago (their summary stays).
+ */
 export const TRANSACTION_IMPORT_SWEEP_QUEUE = 'transaction-import.sweep';
 /** 03:30 UTC: night in Europe, between the 03:00 price and snapshot jobs and the 05:00 rate sync. */
 export const TRANSACTION_IMPORT_SWEEP_CRON = '30 3 * * *';
 
-// Deleting an already deleted session is a no-op, so a retry after a database blip is safe.
+// Deleting an already deleted session, or clearing a cleared one, is a no-op, so a retry after a
+// database blip is safe.
 export const ensureTransactionImportSweepQueue = (boss: QueueCreator) =>
   boss.createQueue(TRANSACTION_IMPORT_SWEEP_QUEUE, { expireInSeconds: 1_800, policy: 'exclusive', retentionSeconds: 1_209_600, retryBackoff: true, retryDelay: 300, retryLimit: 2 });
 

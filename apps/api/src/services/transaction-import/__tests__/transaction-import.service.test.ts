@@ -17,6 +17,7 @@ import { TransactionType } from '@entity/TransactionType';
 import type { Enqueue } from '@service/queue/enqueue';
 import { ConflictError, NotFoundError } from '@utils/errors';
 
+import { sweepTransactionImportSessions } from '../transaction-import-sweep';
 import { type TransactionImportDeps, TransactionImportService, type TransactionImportStorage } from '../transaction-import.service';
 
 /*
@@ -344,6 +345,29 @@ describe('staged transaction import', () => {
     const operation = await db.em().findOneOrFail(BackgroundOperation, { correlationId: created.correlationId! });
     expect(operation.status).toBe(BackgroundOperationStatus.SUCCEEDED);
     expect(operation.progress).toMatchObject({ failed: 0, imported: 2, skipped: 0, totalRows: 2 });
+  });
+
+  it('keeps a committed import\'s summary once the daily sweep has deleted its rows, and a later import does not remove it', async () => {
+    let clock = new Date('2026-09-20T10:00:00Z');
+    const ctx = setup({ now: () => clock });
+    const view = await staged(ctx, statement(lines.slice(0, 3)));
+    await ctx.service().decide(ownerScope(), view.session.id, { decision: 'skip', rowIds: view.rows.items.slice(0, 1).map((row) => row.id) });
+    await commitAndRun(ctx, view.session.id);
+    const committed = await ctx.service().get(ownerScope(), view.session.id, {});
+    expect(committed.session).toMatchObject({ committedAt: clock.toISOString(), detailsDeletedAt: null, status: 'succeeded' });
+
+    // Eight days on, the person starts another import, and the sweep runs.
+    clock = new Date(clock.getTime() + 8 * 24 * 60 * 60 * 1000);
+    await staged(ctx, statement(lines.slice(3)));
+    expect((await ctx.service().get(ownerScope(), view.session.id, {})).rows.total).toBe(3);
+    await sweepTransactionImportSessions({ em: db.em(), now: clock, storage: { deleteObject: () => Promise.resolve() } });
+
+    const after = await ctx.service().get(ownerScope(), view.session.id, {});
+    expect(after.session).toMatchObject({ committedAt: committed.session.committedAt, createdAt: committed.session.createdAt, detailsDeletedAt: clock.toISOString(), status: 'succeeded' });
+    expect(after.session.counts).toEqual(committed.session.counts);
+    expect(after.session.counts).toMatchObject({ imported: 2, skipped: 1 });
+    expect(after.rows).toMatchObject({ items: [], total: 0 });
+    expect(await storedTransactions()).toHaveLength(2);
   });
 
   it('does not start on a deleted account', async () => {

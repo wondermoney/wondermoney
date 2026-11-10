@@ -69,6 +69,7 @@ function session(
     accountMapping: {},
     canCommit: true,
     canRetry: false,
+    committedAt: null,
     correlationId: "op-1",
     counts: {
       duplicate: 1,
@@ -81,6 +82,7 @@ function session(
     },
     createdAt: "2026-11-09T10:00:00Z",
     decisions: { import: 2, skip: 1 },
+    detailsDeletedAt: null,
     errorCode: null,
     expiresAt: "2026-11-16T10:00:00Z",
     format: "statement",
@@ -273,5 +275,42 @@ test("reports a finished import once", () => {
   assert.equal(onFinished.mock.calls.length, 1);
   assert.ok(
     screen.getByRole("status").textContent?.includes("2 transactions imported"),
+  );
+});
+
+test("says an old import's details are no longer kept, and still shows its summary", () => {
+  const counts = {
+    duplicate: 0,
+    failed: 0,
+    imported: 2,
+    invalid: 0,
+    new: 0,
+    possible_duplicate: 0,
+    skipped: 1,
+  };
+  renderReview({
+    rows: { items: [], page: 1, pageSize: 50, total: 0 },
+    session: session({
+      committedAt: "2026-11-01T10:00:00Z",
+      counts,
+      decisions: { import: 0, skip: 0 },
+      detailsDeletedAt: "2026-11-09T03:30:00Z",
+      status: "succeeded",
+    }),
+  });
+  const status = screen.getByRole("status");
+  assert.ok(status.textContent?.includes("2 transactions imported"));
+  assert.ok(
+    status.textContent?.includes(messages["import-review-details-deleted"]),
+  );
+});
+
+test("a recent import does not say its details are gone", () => {
+  renderReview({ rows, session: session({ status: "succeeded" }) });
+  assert.equal(
+    screen
+      .getByRole("status")
+      .textContent?.includes(messages["import-review-details-deleted"]),
+    false,
   );
 });
