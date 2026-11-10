@@ -72,7 +72,7 @@ export interface NetWorthSummary {
    * as a breakdown and adds nothing to the totals.
    */
   rows: { balance: number; countedInAccountId?: number; id?: number; name: string; type: NetWorthRowType }[];
-  /** The viewer can see an investment account and the household has an unlinked portfolio: ask whether they hold the same money. */
+  /** The viewer can see an investment account no portfolio is linked to, and the household has an unlinked portfolio: ask whether they hold the same money. */
   suggestPortfolioLink: boolean;
   totalNetWorth: number;
   /**

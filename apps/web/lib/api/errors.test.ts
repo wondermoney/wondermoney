@@ -6,6 +6,7 @@ import { classifyAppError } from "@/lib/errors/app-error";
 
 import {
   getApiErrorCode,
+  getPortfolioLinkHolderName,
   isAiAllowanceExhaustedError,
   isBankCredentialInvalidError,
   isDemoReadOnlyError,
@@ -82,4 +83,14 @@ test("detects a spent AI allowance, from axios or the chat transport", () => {
   assert.equal(isAiAllowanceExhaustedError(new Error(JSON.stringify({ code: "ai_allowance_exhausted" }))), true);
   assert.equal(isAiAllowanceExhaustedError(forbidden("email_verification_required")), false);
   assert.equal(isAiAllowanceExhaustedError(new Error("Failed to fetch")), false);
+});
+
+test("names the member who holds a portfolio's link, and no one for another error", () => {
+  const held = (details: unknown) => ({
+    response: { data: { code: "portfolio_link_held_by_member", details }, status: 403 },
+  });
+  assert.equal(getPortfolioLinkHolderName(held({ linkedBy: "Ana" })), "Ana");
+  assert.equal(getPortfolioLinkHolderName(held({ linkedBy: " " })), undefined);
+  assert.equal(getPortfolioLinkHolderName(held(undefined)), undefined);
+  assert.equal(getPortfolioLinkHolderName({ response: { data: { code: "forbidden", details: { linkedBy: "Ana" } }, status: 403 } }), undefined);
 });

@@ -5,6 +5,7 @@ import { test } from "vitest";
 import {
   chooseLinkAccount,
   draftFromLink,
+  hasUnlinkedInvestmentAccount,
   linkChanged,
   linkInputFromDraft,
   sortLinkableAccounts,
@@ -32,4 +33,12 @@ test("sends a link only when the draft differs from the stored one", () => {
 
 test("lists investment accounts first", () => {
   assert.deepEqual(sortLinkableAccounts([manual, synced]).map((account) => account.accountKey), [1, 2]);
+});
+
+test("suggests a link only for an investment account no portfolio is linked to", () => {
+  const linkedTo = (accountKey: number) => ({ accountLink: { accountKey } });
+  assert.equal(hasUnlinkedInvestmentAccount([synced, manual], []), true);
+  assert.equal(hasUnlinkedInvestmentAccount([synced, manual], [linkedTo(1)]), false);
+  assert.equal(hasUnlinkedInvestmentAccount([synced, manual], [{ accountLink: null }, linkedTo(2)]), true);
+  assert.equal(hasUnlinkedInvestmentAccount([manual], []), false);
 });

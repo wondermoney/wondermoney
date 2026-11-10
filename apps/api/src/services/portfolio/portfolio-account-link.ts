@@ -1,8 +1,9 @@
 import { type EntityManager, wrap } from '@mikro-orm/postgresql';
 
 import { Account } from '@entity/Account';
+import { Appuser } from '@entity/Appuser';
 import { type Portfolio, PortfolioAccountBalanceMode } from '@entity/Portfolio';
-import { ForbiddenError, NotFoundError } from '@utils/errors';
+import { NotFoundError, PortfolioLinkHeldByMemberError } from '@utils/errors';
 
 /**
  * A portfolio's link to the bank or brokerage account that holds it.
@@ -47,11 +48,13 @@ function visiblePortfolioAccountLink(portfolio: PortfolioLinkFields, visibleAcco
 }
 
 /**
- * Whether to ask "Is this the same money?": the viewer can see an investment account and the
- * household has a portfolio with no link. Amounts are not compared.
+ * Whether to ask "Is this the same money?": the viewer can see an investment account that no
+ * portfolio is linked to, and the household has a portfolio with no link. A pair either member
+ * already linked is never suggested. Amounts are not compared.
  */
-export function shouldSuggestPortfolioLink(visibleAccounts: { accountTypeKey?: null | { description?: string } }[], portfolios: PortfolioLinkFields[]): boolean {
-  return visibleAccounts.some((account) => account.accountTypeKey?.description === INVESTMENT_ACCOUNT_TYPE)
+export function shouldSuggestPortfolioLink(visibleAccounts: { accountKey: number; accountTypeKey?: null | { description?: string } }[], portfolios: PortfolioLinkFields[]): boolean {
+  const linkedAccountKeys = new Set(portfolios.map((portfolio) => portfolio.linkedAccountKey?.accountKey));
+  return visibleAccounts.some((account) => account.accountTypeKey?.description === INVESTMENT_ACCOUNT_TYPE && !linkedAccountKeys.has(account.accountKey))
     && portfolios.some((portfolio) => portfolio.linkedAccountKey == null);
 }
 
@@ -86,8 +89,9 @@ export async function setPortfolioAccountLink(em: EntityManager, input: { link: 
     const currentKey = rows[0]?.linked_account_key ?? null;
     if (currentKey != null && currentKey !== link?.accountId) {
       const current = await em.findOne(Account, { accountKey: currentKey }, { fields: ['accountKey', 'accountOwnerAppuserKey', 'deletedAt', 'isPrivate'], filters: false });
-      if (current && current.deletedAt == null && current.isPrivate && current.accountOwnerAppuserKey?.appuserKey !== viewerAppuserKey) {
-        throw new ForbiddenError('This portfolio is linked to an account only the other household member can see.');
+      const ownerKey = current?.accountOwnerAppuserKey?.appuserKey;
+      if (current && current.deletedAt == null && current.isPrivate && ownerKey !== viewerAppuserKey) {
+        throw new PortfolioLinkHeldByMemberError(await memberDisplayName(em, ownerKey));
       }
     }
   }
@@ -101,4 +105,13 @@ export async function setPortfolioAccountLink(em: EntityManager, input: { link: 
   if (!account) throw new NotFoundError('Account not found');
   portfolio.linkedAccountKey = account;
   portfolio.accountBalanceMode = link.mode === 'cash_only' ? PortfolioAccountBalanceMode.CASH_ONLY : PortfolioAccountBalanceMode.INCLUDES_HOLDINGS;
+}
+
+/**
+ * How the household already sees a member: their first name, or their email address without one
+ * (the household settings show the same). Only the member's own fields, never their accounts.
+ */
+async function memberDisplayName(em: EntityManager, appuserKey: number | undefined): Promise<string> {
+  const member = appuserKey == null ? null : await em.findOne(Appuser, { appuserKey }, { fields: ['appuserKey', 'emailAddress', 'firstName'], filters: false });
+  return member?.firstName?.trim() || member?.emailAddress || '';
 }

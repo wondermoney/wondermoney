@@ -7,7 +7,7 @@ import { addAccount, addPartner, type Household, seedHousehold } from '@app/__te
 import { useTestDatabase } from '@app/__tests__/__helpers__/pg-test-db';
 import { tenantHttp, useRequestContextEm } from '@app/__tests__/__helpers__/tenant-http';
 import type { Account } from '@entity/Account';
-import type { Appuser } from '@entity/Appuser';
+import { Appuser } from '@entity/Appuser';
 import { Portfolio } from '@entity/Portfolio';
 import portfolioRoutes from '@route/portfolio';
 
@@ -130,6 +130,27 @@ describe('linking a portfolio to its account', () => {
       expect((await http.as(partner).put(`/v1/portfolio/${portfolioKey}`).send({ accountLink: null })).status).toBe(403);
 
       await expect(storedLink()).resolves.toMatchObject({ accountKey: privateBrokerage.accountKey });
+    });
+
+    it('names the member who holds the link, and nothing about their account', async () => {
+      await link(household.appuser, privateBrokerage);
+
+      const response = await link(partner, brokerage);
+
+      expect(response.status).toBe(403);
+      expect(response.body).toMatchObject({ code: 'portfolio_link_held_by_member', details: { linkedBy: 'Owner' } });
+      expect(JSON.stringify(response.body)).not.toContain('Private brokerage');
+      expect(JSON.stringify(response.body)).not.toContain(String(privateBrokerage.accountKey));
+    });
+
+    it('names the member by their email address when they have no first name', async () => {
+      await link(household.appuser, privateBrokerage);
+      await db.em().nativeUpdate(Appuser, { appuserKey: household.appuser.appuserKey }, { firstName: '  ' });
+
+      const response = await http.as(partner).put(`/v1/portfolio/${portfolioKey}`).send({ accountLink: null });
+
+      expect(response.status).toBe(403);
+      expect(response.body.details).toEqual({ linkedBy: household.appuser.emailAddress });
     });
   });
 });

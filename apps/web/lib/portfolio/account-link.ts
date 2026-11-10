@@ -48,6 +48,23 @@ export function isInvestmentAccount(
   return account.accountType === "INVESTMENT";
 }
 
+/**
+ * Whether to ask "Is this the same money?" for a new portfolio: an investment account the viewer
+ * can see that no portfolio is linked to yet. A link to an account the viewer can see is always
+ * visible to them, whichever member made it, so a pair either member linked is never suggested.
+ */
+export function hasUnlinkedInvestmentAccount(
+  accounts: Pick<LinkableAccount, "accountKey" | "accountType">[],
+  portfolios: { accountLink?: Pick<PortfolioAccountLink, "accountKey"> | null }[],
+): boolean {
+  const linked = new Set(
+    portfolios.map((portfolio) => portfolio.accountLink?.accountKey),
+  );
+  return accounts.some(
+    (account) => isInvestmentAccount(account) && !linked.has(account.accountKey),
+  );
+}
+
 /** The draft after choosing an account: the mode resets to that account's default. */
 export function chooseLinkAccount(
   accounts: LinkableAccount[],
