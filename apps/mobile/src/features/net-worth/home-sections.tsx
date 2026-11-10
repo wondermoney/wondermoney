@@ -325,6 +325,7 @@ function SheetSide({ title, groups, total, currency, locale, liability = false, 
   const palette = usePalette()
   const markFor = (type: BalanceSheetGroup['type'], id: number | undefined): EntityMarkSource => {
     if (type === 'portfolios') return (id !== undefined ? portfolioMarks?.get(id) : undefined) ?? portfolioMark()
+    if (type === 'manualAssets') return { glyph: 'home' }
     if (type === 'loans') return { glyph: 'receipt-text' }
     return (id !== undefined ? accountMarks?.get(id) : undefined) ?? { glyph: 'landmark' }
   }

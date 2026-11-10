@@ -51,6 +51,18 @@ describe('home model', () => {
     expect(sheet.owe.map((group) => group.type)).toEqual(['accounts', 'loans'])
   })
 
+  it('groups manually valued assets on the owned side, after portfolios and counted in its total', () => {
+    const sheet = balanceSheet([
+      { type: 'manualAssets', id: 7, name: 'Family home', balance: 250_000 },
+      { type: 'accounts', name: 'Checking', balance: 1000 },
+      { type: 'portfolios', name: 'ISA', balance: 50 },
+      { type: 'loans', name: 'Mortgage', balance: 180_000 },
+    ])
+    expect(sheet.own.map((group) => [group.type, group.total])).toEqual([['accounts', 1000], ['portfolios', 50], ['manualAssets', 250_000]])
+    expect(sheet.ownTotal).toBe(251_050)
+    expect(sheet.oweTotal).toBe(180_000)
+  })
+
   it("keeps each row's record id, so an account row can wear its institution's mark", () => {
     const sheet = balanceSheet([
       { type: 'accounts', id: 41, name: 'Checking', balance: 1000 },

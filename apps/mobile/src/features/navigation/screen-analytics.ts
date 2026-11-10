@@ -59,6 +59,10 @@ const routePatterns: readonly RoutePattern[] = [
   [['loans', 'create'], 'loan_create'],
   [['loans', WILDCARD], 'loan_detail'],
   [['loans', WILDCARD, 'edit'], 'loan_edit'],
+  [['assets'], 'assets'],
+  [['assets', 'create'], 'asset_create'],
+  [['assets', WILDCARD], 'asset_detail'],
+  [['assets', WILDCARD, 'value'], 'asset_value'],
 
   [['goals', 'create'], 'goal_create'],
   [['goals', 'debt-strategy'], 'debt_strategy'],

@@ -92,6 +92,17 @@ describe('net-worth contract', () => {
     expect(parsed).toEqual(fixture)
   })
 
+  it('reads manually valued assets as their own rows and totals, still optional for older APIs', () => {
+    const withAssets = {
+      ...fixture,
+      assets: { ...fixture.assets, manualAssets: 250_000 },
+      rows: [...fixture.rows, { type: 'manualAssets', id: 3, name: 'Family home', balance: 250_000 }],
+      unsupportedCurrencies: { ...fixture.unsupportedCurrencies, manualAssets: 1 },
+    }
+    expect(netWorthDtoSchema.parse(withAssets)).toEqual(withAssets)
+    expect(netWorthDtoSchema.parse(fixture).assets.manualAssets).toBeUndefined()
+  })
+
   it('does not assert arithmetic consistency', () => {
     expect(netWorthDtoSchema.safeParse({ ...fixture, totalNetWorth: -999 }).success).toBe(true)
   })

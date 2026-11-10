@@ -38,6 +38,9 @@ export default function AuthenticatedLayout() {
           <Stack.Screen name="loans/index" />
           <Stack.Screen name="loans/[loanId]" />
           <Stack.Screen name="loans/[loanId]/edit" />
+          <Stack.Screen name="assets/index" />
+          <Stack.Screen name="assets/[assetId]" />
+          <Stack.Screen name="assets/[assetId]/value" />
           <Stack.Screen name="goals/[goalId]" />
           <Stack.Screen name="goals/create" />
           <Stack.Screen name="portfolio/[portfolioId]" />
