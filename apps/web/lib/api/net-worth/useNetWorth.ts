@@ -8,7 +8,8 @@ export interface RawNetWorthSummary {
   /** False when a row was left out because it could not be valued; absent from older APIs. */
   isComplete?: boolean;
   totalNetWorth: number;
-  assets: { accounts: number; portfolios: number };
+  /** `manualAssets` (homes, vehicles and other manually valued assets) is absent from older APIs. */
+  assets: { accounts: number; manualAssets?: number; portfolios: number };
   liabilities: { loans: number };
   /**
    * A portfolio row with `countedInAccountId` is already inside that account's balance: it is a
@@ -23,10 +24,11 @@ export interface RawNetWorthSummary {
   }>;
   /** Ask "Is this the same money?": an investment account no portfolio is linked to, and an unlinked portfolio. */
   suggestPortfolioLink?: boolean;
-  /** Rows the API could not value in `currencyCode`; `accounts` is absent from older APIs. */
+  /** Rows the API could not value in `currencyCode`; `accounts` and `manualAssets` are absent from older APIs. */
   unsupportedCurrencies: {
     accounts?: number;
     loans: number;
+    manualAssets?: number;
     portfolios: number;
   };
   /** The currencies of the accounts and loans left out for want of a rate; absent from older APIs. */
@@ -75,7 +77,10 @@ export async function getNetWorth(
   const { data } = await apiClient.get<RawNetWorthSummary>("/v1/net-worth");
   return {
     netWorth: {
-      assetsTotal: data.assets.accounts + data.assets.portfolios,
+      assetsTotal:
+        data.assets.accounts +
+        data.assets.portfolios +
+        (data.assets.manualAssets ?? 0),
       currencyCode: data.currencyCode,
       liabilitiesTotal: data.liabilities.loans,
       netWorth: data.totalNetWorth,
@@ -128,6 +133,8 @@ export interface NetWorthHistoryPoint {
   date: string;
   accountsTotal: number | null;
   portfoliosTotal: number | null;
+  /** Manually valued assets; absent from older APIs. */
+  manualAssetsTotal?: number | null;
   loansTotal: number | null;
   totalNetWorth: number | null;
   isComplete: boolean;

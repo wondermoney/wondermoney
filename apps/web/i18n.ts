@@ -49,6 +49,7 @@ export default getRequestConfig(async ({ locale }) => {
     ...(await import(`./messages/${locale}/navigation.json`)).default,
     ...(await import(`./messages/${locale}/onboarding.json`)).default,
     ...(await import(`./messages/${locale}/loans.json`)).default,
+    ...(await import(`./messages/${locale}/assets.json`)).default,
     ...(await import(`./messages/${locale}/household.json`)).default,
     ...(await import(`./messages/${locale}/reports.json`)).default,
   };

@@ -50,6 +50,7 @@
       "groups": {
         "accounts": "Cuentas",
         "portfolios": "Carteras",
+        "manualAssets": "Inmuebles y otros bienes",
         "loans": "Préstamos",
         "other": "Otros"
       },

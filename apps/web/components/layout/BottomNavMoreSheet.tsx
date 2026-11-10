@@ -4,6 +4,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import {
   BarChart3,
   BookOpen,
+  Building2,
   CalendarClock,
   FlaskConical,
   HandCoins,
@@ -177,6 +178,12 @@ export default function BottomNavMoreSheet({ open, onOpenChange }: Props) {
             >
               <HandCoins className="size-5 shrink-0" strokeWidth={1.5} />
               {t("navigation.loans")}
+            </Link>
+          </li>
+          <li>
+            <Link href="/assets" onClick={close} className={itemClass}>
+              <Building2 className="size-5 shrink-0" strokeWidth={1.5} />
+              {t("navigation.assets")}
             </Link>
           </li>
           <li>

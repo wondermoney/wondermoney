@@ -167,7 +167,8 @@ export function overPlanLines(rows: BudgetRow[]): OverPlanLine[] {
   return lines.sort((a, b) => b.over - a.over);
 }
 
-export type BalanceSheetType = "accounts" | "portfolios" | "loans" | "other";
+export type BalanceSheetType =
+  "accounts" | "portfolios" | "manualAssets" | "loans" | "other";
 
 export interface BalanceSheetRow {
   key: string;
@@ -202,6 +203,7 @@ export interface BalanceSheet {
 const GROUP_ORDER: BalanceSheetType[] = [
   "accounts",
   "portfolios",
+  "manualAssets",
   "loans",
   "other",
 ];
