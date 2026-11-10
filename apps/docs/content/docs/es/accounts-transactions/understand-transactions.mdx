@@ -36,6 +36,18 @@ Un intervalo de fechas abarca días completos en tu zona horaria. Los bancos sue
 
 Los periodos de la página de cuentas también siguen tu calendario: **1 mes** empieza el mismo día del mes anterior, y **Año en curso** el 1 de enero, en tu zona horaria. En los pagos recurrentes, **Último pago** y **Próximo previsto** muestran una fecha de apunte como esa misma fecha, y un pago previsto para una fecha de apunte sigue en **Próximos** durante todo ese día.
 
+## Totales
+
+Cada total que WonderMoney muestra para un periodo suma transacciones que puedes listar, y cada uno dice cuáles:
+
+- **Entradas** y **Salidas**, encima de la lista de transacciones, suman todas las transacciones que la lista tiene para el intervalo de fechas, en todas las cuentas y sean cuales sean los filtros de la tabla, en tu moneda: las transacciones del otro miembro se convierten al tipo de cambio de su fecha.
+- **Los informes** cuentan solo las transacciones confirmadas, salvo que actives **Incluir transacciones pendientes**, y dejan fuera las transferencias entre tus propias cuentas, salvo que actives **Incluir transferencias**.
+- **El flujo de caja y el gasto por categoría de la página de inicio** cuentan también las transacciones pendientes, y nunca las transferencias entre tus propias cuentas.
+
+Las transacciones ocultas y caducadas, y las partes de una transacción en una categoría que no cuenta como gasto, nunca entran en un total de un informe o de la página de inicio.
+
+En el informe de gasto por categoría, selecciona el total para abrir la lista de transacciones con exactamente las transacciones que lo forman: las mismas fechas, filtros y opciones, solo salidas. La lista muestra cuánto suman, que es el total del informe. Tus filtros en la lista las acotan aún más, y **Mostrar todas las transacciones** vuelve a la lista completa.
+
 ## Escribir importes
 
 Los campos de importe leen los números como los escribe el idioma de la aplicación. En español y portugués, la coma separa los decimales y el punto agrupa los miles: `1.234,56` es mil doscientos treinta y cuatro con 56 céntimos, y `1.000` es mil. En inglés es al revés: `1,234.56`, y `1.000` es uno.

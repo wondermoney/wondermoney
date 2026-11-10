@@ -44,6 +44,18 @@ A date range covers whole days in your time zone. Banks usually send a booking d
 
 The accounts page's periods follow your calendar too: **1 Month** starts on the same day of the previous month, and **Year to Date** on 1 January, in your time zone. On recurring payments, **Last paid** and **Next expected** show a booking date as that same date, and a payment expected on a booking date stays under **Upcoming** for the whole of that day.
 
+## Totals
+
+Every total WonderMoney shows for a period adds up transactions you can list, and each one says which:
+
+- **Money in** and **Money out** above the transactions list add up every transaction the list holds for the date range, on every account and whatever the table's filters, in your currency: the other member's transactions are converted at the exchange rate of their date.
+- **Reports** count posted transactions only, unless you turn on **Include pending transactions**, and leave out transfers between your own accounts, unless you turn on **Include transfers**.
+- **The home page's** cash flow and spending by category count pending transactions too, and never transfers between your own accounts.
+
+Hidden and expired transactions, and the parts of a transaction in a category that does not count as spending, are never in a report or home page total.
+
+On the spending by category report, select the total to open the transactions list with exactly the transactions behind it: the same dates, filters and switches, money out only. The list shows what they add up to, which is the report's total. Your own filters on the list narrow them further, and **Show all transactions** goes back to the whole list.
+
 ## Typing amounts
 
 Amount fields read numbers the way your app language writes them. In Portuguese and Spanish, the comma is the decimal separator and the dot groups thousands: `1.234,56` is one thousand two hundred thirty-four and 56 cents, and `1.000` is one thousand. In English it is the other way round: `1,234.56`, and `1.000` is one.

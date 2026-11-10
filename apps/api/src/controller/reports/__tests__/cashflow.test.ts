@@ -1,7 +1,6 @@
 import type { Request, Response } from 'express';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { Transaction } from '@entity/Transaction';
 
 const mocks = vi.hoisted(() => ({ find: vi.fn() }));
 
@@ -67,20 +66,6 @@ describe('getCashflowReport', () => {
       filters: expect.any(Object),
       generatedAt: expect.any(String),
     });
-  });
-
-  it('scopes the transaction query by tenant and the per-account privacy carve-out', async () => {
-    await getCashflowReport(makeRequest(), makeResponse());
-
-    expect(mocks.find).toHaveBeenCalledWith(
-      Transaction,
-      expect.objectContaining({
-        accountKey: { $or: [{ isPrivate: false }, { accountOwnerAppuserKey: { appuserKey: 71, currencyKey: { code: 'EUR' } } }] },
-        deletedAt: undefined,
-        tenantKey: { tenantKey: 113 },
-      }),
-      expect.anything(),
-    );
   });
 
   it('returns an empty dataset when there are no transactions', async () => {

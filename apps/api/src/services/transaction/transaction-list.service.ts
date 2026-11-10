@@ -9,10 +9,11 @@ import type { Currency } from '@entity/Currency';
 import { LoanRepaymentLink } from '@entity/LoanRepaymentLink';
 import { RecurringOccurrence } from '@entity/RecurringOccurrence';
 import { Transaction } from '@entity/Transaction';
+import { completenessFromCounts } from '@service/reports/report-currency';
 import { compareTags, type TagDto, toTagDto } from '@service/tag/tag.service';
 import { type CategorySpendingFlags, loadCategorySpendingFlags } from '@service/transaction/category-spending';
 import { SPLIT_LINE_POPULATE, type SplitLineDto, toSplitLineDtos } from '@service/transaction/transaction-split.service';
-import { buildTransactionWhere, getTransactionTotal, type TransactionFilterInput } from '@service/transaction/transaction-total.service';
+import { buildTransactionWhere, getTransactionTotal, hasReportScope, type TransactionFilterInput, type TransactionViewer } from '@service/transaction/transaction-total.service';
 import { TRANSFER_DESTINATION_POPULATE, type TransferDestinationDto, transferDestinationOf } from '@service/transaction/transaction-transfer.service';
 import { NotFoundError } from '@utils/errors';
 
@@ -51,7 +52,9 @@ export interface TransactionRecurringSeriesDto {
  *
  * `total` is counted on the first page only: a paginating client already has it, and re-counting
  * the largest table on every page is waste. Later pages answer `total: null`, and `hasMore`
- * falls back to the cursor.
+ * falls back to the cursor. `totalAmount` and its `moneyIn` and `moneyOut` parts (in the viewer's
+ * currency, with their `completeness`) are the first page's too, summed by the same query as the
+ * count; they add real transactions only.
  */
 type TransactionRow = ReturnType<typeof toTransactionRow>;
 
@@ -61,13 +64,17 @@ export async function listTransactions(request: TransactionListRequest) {
   const viewer = await DI.em.findOne(Appuser, { appuserKey: viewerAppuserKey }, { populate: ['currencyKey'] });
   if (!viewer) throw new NotFoundError('User not found');
 
-  const accounts = await loadScopeAccounts(scope);
-  if (accounts.length === 0) return { hasMore: false, limit, nextCursor: null, total: 0, transactions: [] };
+  const transactionViewer: TransactionViewer = { currency: { code: viewer.currencyKey.code, currencyKey: viewer.currencyKey.currencyKey }, tenantKey, viewerAppuserKey };
+  const accounts = await loadScopeAccounts(scope, transactionViewer);
+  if (accounts.length === 0) {
+    const totals = cursor ? { completeness: null, moneyIn: null, moneyOut: null, totalAmount: null } : { completeness: completenessFromCounts(transactionViewer.currency.code, []), moneyIn: 0, moneyOut: 0, totalAmount: 0 };
+    return { hasMore: false, limit, nextCursor: null, total: 0, ...totals, transactions: [] };
+  }
 
   const filters: TransactionFilterInput = scope === 'all-accounts' ? request.filters : { ...request.filters, accountKeys: [scope.accountKey] };
   const findOptions = request.filters.includeHidden ? { filters: { [HIDDEN_FILTER]: false } } : {};
   const keysetWhere = decodeTransactionCursor(cursor);
-  const where = keysetWhere ? ({ $and: [buildTransactionWhere(filters), keysetWhere] } as FilterQuery<Transaction>) : buildTransactionWhere(filters);
+  const where = keysetWhere ? ({ $and: [buildTransactionWhere(filters, transactionViewer), keysetWhere] } as FilterQuery<Transaction>) : buildTransactionWhere(filters, transactionViewer);
 
   const transactions = await DI.em.find(Transaction, where, {
     limit,
@@ -111,15 +118,20 @@ export async function listTransactions(request: TransactionListRequest) {
     (row) => ({ ...row, recurringSeries: recurringSeries.get(row.transactionKey) ?? null }),
   );
 
-  const total = isFirstPage ? (await getTransactionTotal(filters)) + syntheticRows.length : null;
+  const listTotal = isFirstPage ? await getTransactionTotal(filters, transactionViewer) : null;
+  const total = listTotal ? listTotal.count + syntheticRows.length : null;
 
   return {
+    completeness: listTotal?.completeness ?? null,
     // `total` counts synthetic rows too, so compare it against everything on the page. From page
     // two there is no total and the cursor is the authority on whether another page exists.
     hasMore: total === null ? nextCursor !== null : total > page.length,
     limit,
+    moneyIn: listTotal?.moneyIn ?? null,
+    moneyOut: listTotal?.moneyOut ?? null,
     nextCursor,
     total,
+    totalAmount: listTotal?.amount ?? null,
     transactions: page,
   };
 }
@@ -140,11 +152,13 @@ async function loadLoanRepayments(transactions: Transaction[]): Promise<Map<numb
   return byTransaction;
 }
 
-async function loadScopeAccounts(scope: TransactionListRequest['scope']): Promise<Account[]> {
+/** The accounts the list covers: the household's, a private one only for its owner. Explicit, so it holds with no tenant filter set too. */
+async function loadScopeAccounts(scope: TransactionListRequest['scope'], viewer: TransactionViewer): Promise<Account[]> {
+  const visible: FilterQuery<Account> = { $or: [{ isPrivate: false }, { accountOwnerAppuserKey: { appuserKey: viewer.viewerAppuserKey } }], deletedAt: undefined, tenantKey: { tenantKey: viewer.tenantKey } };
   if (scope === 'all-accounts') {
-    return DI.em.find(Account, { deletedAt: undefined }, { populate: ['currencyKey', 'accountFinancialInstitutionKey'] });
+    return DI.em.find(Account, visible, { populate: ['currencyKey', 'accountFinancialInstitutionKey'] });
   }
-  const account = await DI.em.findOne(Account, { accountKey: scope.accountKey, deletedAt: undefined }, { populate: ['currencyKey', 'accountFinancialInstitutionKey'] });
+  const account = await DI.em.findOne(Account, { $and: [visible, { accountKey: scope.accountKey }] }, { populate: ['currencyKey', 'accountFinancialInstitutionKey'] });
   if (!account) throw new NotFoundError('Account not found');
   return [account];
 }
@@ -244,6 +258,8 @@ function summarizeLoanRepayments(links: LoanRepaymentLink[]) {
  *               *matches* them. That asymmetry is deliberate.
  *   reviewed  — stamped `reviewed: true`, so the needs-review filter excludes them.
  *   tag       — no tags, so any tag filter excludes them.
+ *   scope     — not a transaction, so a report's scope (statuses, transfers, spending, direction,
+ *               merchant, member currency) excludes them.
  *   account   — they carry an `accountKey`, so the account filter narrows rather than excludes.
  *   date      — dated at the account's creation, so a date range excludes them like a real row.
  *
@@ -283,7 +299,8 @@ async function syntheticOpeningBalanceRows(accounts: Account[], filters: Transac
   const { accountKeys, categoryKeys, fromDate, tagKeys, toDate, transactionTypes, unreviewedOnly } = filters;
   const namedCategoriesOnly = categoryKeys !== undefined && categoryKeys.keys.length > 0 && !categoryKeys.includeUncategorized;
   const tagged = tagKeys !== undefined && tagKeys.length > 0;
-  if (unreviewedOnly === true || (transactionTypes !== undefined && transactionTypes.length > 0) || namedCategoriesOnly || tagged) return [];
+  // A report's rows are transactions only: an opening balance is no income, spending or transfer.
+  if (unreviewedOnly === true || (transactionTypes !== undefined && transactionTypes.length > 0) || namedCategoriesOnly || tagged || hasReportScope(filters)) return [];
 
   const candidates = accounts.filter(
     (account) =>

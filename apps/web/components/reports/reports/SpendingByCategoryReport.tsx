@@ -19,7 +19,12 @@ import {
 import { useReportsCurrency } from "@/components/reports/ReportsCurrencyContext";
 import type { ChartConfig } from "@/components/ui/chart";
 import { BarChartBase } from "@/components/ui/charts";
+import { Link } from "@/components/ui/Link";
 import { UnconvertedAmountsNotice } from "@/components/ui/UnconvertedAmountsNotice";
+import {
+  reportTransactionScope,
+  transactionReportScopeHref,
+} from "@/lib/account/transaction-report-scope";
 import useCategories from "@/lib/api/category/useCategories";
 import useSpendingByCategory, {
   getSpendingByCategory,
@@ -120,6 +125,10 @@ export function SpendingByCategoryReport() {
   );
 
   const { delta, percent } = periodTrend(currentTotal, priorTotal);
+  const transactionsHref = useMemo(() => {
+    const scope = reportTransactionScope(filters, "out");
+    return scope ? transactionReportScopeHref(scope) : null;
+  }, [filters]);
 
   const chartData = useMemo(() => {
     if (!data?.data.length) return [];
@@ -175,11 +184,27 @@ export function SpendingByCategoryReport() {
           />
           <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
             <span className="text-muted-foreground text-xs">{t("total")}</span>
-            <ReportAmount
-              value={currentTotal}
-              currencyKey={currencyKey}
-              className="font-medium"
-            />
+            {/* The total opens the list of exactly the rows it adds up: the
+                report's money out, with its filters and scope. */}
+            {transactionsHref ? (
+              <Link
+                href={transactionsHref}
+                className="underline-offset-4 hover:underline"
+              >
+                <ReportAmount
+                  value={currentTotal}
+                  currencyKey={currencyKey}
+                  className="font-medium"
+                />
+                <span className="sr-only">{t("viewTransactions")}</span>
+              </Link>
+            ) : (
+              <ReportAmount
+                value={currentTotal}
+                currencyKey={currencyKey}
+                className="font-medium"
+              />
+            )}
             <ReportTrendIndicator
               value={delta}
               percentage={percent === undefined ? undefined : Math.abs(percent)}

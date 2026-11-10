@@ -49,6 +49,7 @@
         "title": "Spending by category",
         "subtitle": "Where your money went over the period.",
         "total": "Total spent",
+        "viewTransactions": "See the transactions behind this total",
         "noData": {
           "title": "No spending in this period",
           "description": "Try a wider date range or check that accounts are connected."

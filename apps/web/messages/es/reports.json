@@ -49,6 +49,7 @@
         "title": "Gasto por categoría",
         "subtitle": "Adónde fue tu dinero en el periodo.",
         "total": "Total gastado",
+        "viewTransactions": "Ver las transacciones detrás de este total",
         "noData": {
           "title": "Sin gastos en este periodo",
           "description": "Prueba un periodo más amplio o comprueba que las cuentas estén conectadas."

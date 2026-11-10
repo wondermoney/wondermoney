@@ -49,6 +49,7 @@
         "title": "Despesa por categoria",
         "subtitle": "Para onde foi o seu dinheiro no período.",
         "total": "Total gasto",
+        "viewTransactions": "Ver as transações por trás deste total",
         "noData": {
           "title": "Sem despesas neste período",
           "description": "Experimente um período mais alargado ou verifique se as contas estão ligadas."
