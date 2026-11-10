@@ -1,0 +1,125 @@
+name: Image build timing (throwaway)
+
+# Throwaway measurement for #207: builds the API and worker images the way the deploy
+# workflows do, without pushing. "before" uses develop's Dockerfile and steps; "after" uses
+# this branch's. Not for merging.
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/zz-image-build-timing.yml'
+      - 'apps/api/**'
+
+permissions:
+  contents: read
+
+jobs:
+  before:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - name: Use develop's Dockerfile
+        run: git show origin/develop:apps/api/Dockerfile > "$RUNNER_TEMP/Dockerfile.before"
+      - uses: docker/setup-buildx-action@v4
+      - name: Build the API
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: ${{ runner.temp }}/Dockerfile.before
+          target: dist
+          outputs: type=local,dest=apps/api/dist
+          build-args: |
+            GIT_COMMIT_SHA=${{ github.event.pull_request.head.sha }}
+          cache-from: |
+            type=gha,scope=timing-before
+            type=gha,scope=api
+      - name: Build and push API
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: ${{ runner.temp }}/Dockerfile.before
+          target: api
+          outputs: type=image,name=ghcr.io/wondermoney/timing-api,push=false
+          cache-from: |
+            type=gha,scope=timing-before
+            type=gha,scope=api
+          cache-to: type=gha,mode=max,scope=timing-before
+          build-args: |
+            GIT_COMMIT_SHA=${{ github.event.pull_request.head.sha }}
+            APP_ENV=staging
+            DEPLOY_ENV=staging
+      - name: Build and push worker
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: ${{ runner.temp }}/Dockerfile.before
+          target: worker
+          outputs: type=image,name=ghcr.io/wondermoney/timing-worker,push=false
+          cache-from: |
+            type=gha,scope=timing-before-worker
+            type=gha,scope=api-worker
+          cache-to: type=gha,mode=max,scope=timing-before-worker
+          build-args: |
+            GIT_COMMIT_SHA=${{ github.event.pull_request.head.sha }}
+            APP_ENV=staging
+            DEPLOY_ENV=staging
+      - run: du -sh apps/api/dist
+
+  after:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - uses: docker/setup-buildx-action@v4
+      - name: Build the API
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: apps/api/Dockerfile
+          target: dist
+          outputs: type=local,dest=apps/api/dist
+          build-args: |
+            GIT_COMMIT_SHA=${{ github.event.pull_request.head.sha }}
+          cache-from: type=gha,scope=timing-after
+      - name: Build the images
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: apps/api/Dockerfile
+          target: api
+          build-args: |
+            GIT_COMMIT_SHA=${{ github.event.pull_request.head.sha }}
+            APP_ENV=staging
+            DEPLOY_ENV=staging
+          cache-from: type=gha,scope=timing-after
+          cache-to: type=gha,mode=max,scope=timing-after,ignore-error=true
+      # Stand-in for the CI gate.
+      - name: Push API (image export, no push)
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: apps/api/Dockerfile
+          target: api
+          outputs: type=image,name=ghcr.io/wondermoney/timing-api,push=false
+          cache-from: type=gha,scope=timing-after
+          build-args: |
+            GIT_COMMIT_SHA=${{ github.event.pull_request.head.sha }}
+            APP_ENV=staging
+            DEPLOY_ENV=staging
+      - name: Push worker (image export, no push)
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: apps/api/Dockerfile
+          target: worker
+          outputs: type=image,name=ghcr.io/wondermoney/timing-worker,push=false
+          cache-from: type=gha,scope=timing-after
+          build-args: |
+            GIT_COMMIT_SHA=${{ github.event.pull_request.head.sha }}
+            APP_ENV=staging
+            DEPLOY_ENV=staging
+      - run: du -sh apps/api/dist
