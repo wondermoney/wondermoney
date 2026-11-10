@@ -36,6 +36,10 @@ updates:
       # kysely is pinned by @mikro-orm/sql; the API's copy must be the same version, so it moves
       # by hand together with a MikroORM update.
       - dependency-name: kysely
+      # pdf-to-img pins pdfjs-dist exactly, and the API's own pdfjs-dist must be that version: two
+      # copies fail at runtime ("The API version ... does not match the Worker version ...").
+      # Move it by hand together with a pdf-to-img update.
+      - dependency-name: pdfjs-dist
       # @types/node's major is the Node runtime's major: 26 everywhere (.nvmrc and both
       # Dockerfiles) except apps/mobile, which stays on 24 (apps/mobile/.nvmrc) until Expo
       # supports 26. Dependabot would move all of them to the newest Node, so change the major
