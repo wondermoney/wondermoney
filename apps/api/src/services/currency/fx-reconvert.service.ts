@@ -105,17 +105,9 @@ async function reconvertAccount(em: EntityManager, accountKey: number, now: Date
 
   outcome.revalued = await revalueAccount(em, account, now);
 
-  const loaded = await em.find(Transaction, { accountKey: account, transactionDate: { $ne: null }, ...RETRY_WHERE }, {
-    // Hidden and soft-deleted rows are running-balance members too, so they are healed as well.
-    filters: { [HIDDEN_FILTER]: false },
-    orderBy: { transactionKey: 'asc' },
-    populate: ['settlementCurrencyKey', 'appuserCurrencyKey'],
-  });
-  const candidates = loaded.filter(isRetryCandidate);
-  outcome.scanned = candidates.length;
-  for (const row of candidates) {
-    if (await reconvertRow(em, account, row)) outcome.reconverted += 1;
-  }
+  const rows = await reconvertAccountRows(em, account);
+  outcome.scanned = rows.scanned;
+  outcome.reconverted = rows.reconverted;
 
   if (outcome.revalued || outcome.reconverted > 0) {
     await recalculateChainFromAccountBalance(em, account);
@@ -138,8 +130,30 @@ async function runForAccount(em: EntityManager, accountKey: number, now: Date, d
   }
 }
 
-/** The account balance in its owner's currency at the latest rate. False when nothing changed. */
-async function reconvertRow(em: EntityManager, account: Account, row: Transaction): Promise<boolean> {
+/**
+ * Convert again every row on `account` stored without a usable rate, where a better one now exists
+ * (see {@link isUpgrade}), auditing each change as a system edit from `source`. Writes nothing to
+ * the database itself: the caller flushes, inside the transaction that holds the account's lock,
+ * and rebuilds the running balance. Shared with the account recalculation
+ * (`account-recalculation.service.ts`).
+ */
+export async function reconvertAccountRows(em: EntityManager, account: Account, source: string = FX_RECONVERT_AUDIT_SOURCE): Promise<{ reconverted: number; scanned: number }> {
+  const loaded = await em.find(Transaction, { accountKey: account, transactionDate: { $ne: null }, ...RETRY_WHERE }, {
+    // Hidden and soft-deleted rows are running-balance members too, so they are healed as well.
+    filters: { [HIDDEN_FILTER]: false },
+    orderBy: { transactionKey: 'asc' },
+    populate: ['settlementCurrencyKey', 'appuserCurrencyKey'],
+  });
+  const candidates = loaded.filter(isRetryCandidate);
+  let reconverted = 0;
+  for (const row of candidates) {
+    if (await reconvertRow(em, account, row, source)) reconverted += 1;
+  }
+  return { reconverted, scanned: candidates.length };
+}
+
+/** Convert one row again; false when no better rate exists. */
+async function reconvertRow(em: EntityManager, account: Account, row: Transaction, source: string): Promise<boolean> {
   if (row.settlementAmount == null || !row.settlementCurrencyKey || !row.appuserCurrencyKey || !row.transactionDate) return false;
   const converted = await convertWithStatus(em, row.settlementAmount, row.settlementCurrencyKey, row.appuserCurrencyKey, row.transactionDate);
   if (!isUpgrade(row, converted)) return false;
@@ -162,7 +176,7 @@ async function reconvertRow(em: EntityManager, account: Account, row: Transactio
       appuserKey,
       changes,
       eventType: TransactionAuditEventType.SYSTEM_EDIT,
-      source: FX_RECONVERT_AUDIT_SOURCE,
+      source,
       tenantKey,
       transactionKey: row.transactionKey,
     }, { flush: false });
@@ -170,6 +184,7 @@ async function reconvertRow(em: EntityManager, account: Account, row: Transactio
   return true;
 }
 
+/** The account balance in its owner's currency at the latest rate. False when nothing changed. */
 async function revalueAccount(em: EntityManager, account: Account, now: Date): Promise<boolean> {
   const ownerCurrency = account.accountOwnerAppuserKey?.currencyKey;
   if (account.balance == null || !ownerCurrency || account.currencyKey.currencyKey === ownerCurrency.currencyKey) return false;

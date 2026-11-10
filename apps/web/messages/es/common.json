@@ -2540,5 +2540,22 @@
   "budget-rollover-toggle": "Traspasar lo que sobra al mes siguiente",
   "budget-rollover-toggle-help": "Lo que sobre este mes se suma al importe del mes siguiente de esta categoría.",
   "budget-rollover-carries-overspend": "Traspasar el gasto de más al mes siguiente",
-  "budget-rollover-carries-overspend-help": "Si está desactivado, solo se traspasa el dinero no gastado"
+  "budget-rollover-carries-overspend-help": "Si está desactivado, solo se traspasa el dinero no gastado",
+  "accountRecalculate": {
+    "menu-item": "Recalcular saldos",
+    "title": "¿Recalcular los saldos de {name}?",
+    "description": "Esto reconstruye el saldo acumulado de cada transacción de la cuenta. Una cuenta manual o importada parte de su saldo inicial; una cuenta conectada al banco termina en el saldo que indica tu banco. Los importes guardados sin tipo de cambio se convierten de nuevo cuando ya hay un tipo.",
+    "safe-hint": "Tus transacciones no cambian y, en una cuenta con los saldos correctos, no cambia nada.",
+    "confirm": "Recalcular",
+    "running": "Recalculando los saldos…",
+    "background-hint": "Puedes cerrar esta ventana; el recálculo sigue en segundo plano.",
+    "close": "Cerrar",
+    "continues": "Los saldos se siguen recalculando en segundo plano.",
+    "already-correct": "Saldos revisados: ya eran correctos.",
+    "done": "{count, plural, one {Saldos recalculados: # transacción corregida} other {Saldos recalculados: # transacciones corregidas}}",
+    "balance-change": "Saldo: {before} → {after}",
+    "failed": "No se pudieron recalcular los saldos. Vuelve a intentarlo en unos minutos.",
+    "too-soon": "Esta cuenta se recalculó hace menos de un minuto. Vuelve a intentarlo en breve.",
+    "error": "No se pudo iniciar el recálculo. Vuelve a intentarlo."
+  }
 }

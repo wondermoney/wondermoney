@@ -128,7 +128,22 @@ export const acceptTransactionOCRImportRequestSchema = z.object({ body: z.object
 export const rejectTransactionOcrImportRequestSchema = z.object({ params: z.object({ transactionOCRImportId: positiveIntId }) });
 export const getAccountsMetricsRequestSchema = z.object({ query: z.object({ fromDate: validDate.optional(), timezone: viewerTimeZone, toDate: validDate.optional() }) });
 export const getAccountMetricsRequestSchema = z.object({ params: z.object({ accountId: positiveIntId }), query: z.object({ fromDate: validDate.optional(), timezone: viewerTimeZone }) });
-export const updateAccountRequestSchema = z.object({ body: z.object({ accountName: z.string().min(1).max(100).optional(), isPrivate: z.boolean().optional() }), params: z.object({ accountId: positiveIntId }) });
+/** Up to the end of today in any timezone: an opening date is when the account was opened, never later. */
+const openingBalanceDate = validDate.refine((value) => value.getTime() <= Date.now() + 86_400_000, { message: 'openingBalanceDate cannot be in the future' });
+/**
+ * `openingBalance` / `openingBalanceDate` apply to manual and CSV accounts only, and start a
+ * recalculation of the account's balances (`account-recalculation.service.ts`).
+ */
+export const updateAccountRequestSchema = z.object({
+  body: z.object({
+    accountName: z.string().min(1).max(100).optional(),
+    isPrivate: z.boolean().optional(),
+    openingBalance: finiteAmount.refine((value) => Math.abs(value) <= 999_999_999_999, { message: 'openingBalance is too large' }).optional(),
+    openingBalanceDate: openingBalanceDate.optional(),
+  }),
+  params: z.object({ accountId: positiveIntId }),
+});
+export const recalculateAccountRequestSchema = z.object({ params: z.object({ accountId: positiveIntId }) });
 export const deleteAccountRequestSchema = z.object({ params: z.object({ accountId: positiveIntId }) });
 export const getRecentTransactionsRequestSchema = z.object({ params: z.object({ accountId: positiveIntId }) });
 export const getAccountPresignedUrlForUploadRequestSchema = z.object({ params: z.object({ accountId: positiveIntId }) });

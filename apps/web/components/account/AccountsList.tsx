@@ -16,6 +16,7 @@ import { useCallback, useState } from "react";
 import AccountDeleteModal from "@/components/account/AccountDeleteModal";
 import AccountEditSheet from "@/components/account/AccountEditSheet";
 import { AccountMark } from "@/components/account/AccountMark";
+import { AccountRecalculateDialog } from "@/components/account/AccountRecalculateDialog";
 import AccountSyncBadge from "@/components/account/AccountSyncBadge";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -48,6 +49,11 @@ export default function AccountsList({ accounts }: { accounts: Account[] }) {
   }>({ name: null, key: null, isPrivate: false, isOwnedByViewer: false });
   const [editAccModalIsOpen, setEditAccModalIsOpen] = useState(false);
   const [deleteAccModalIsOpen, setDeleteAccModalIsOpen] = useState(false);
+  const [recalculating, setRecalculating] = useState<{
+    key: number;
+    name: string;
+  } | null>(null);
+  const closeRecalculate = useCallback(() => setRecalculating(null), []);
 
   const editAccOpenModal = useCallback(
     (account: Account) => {
@@ -237,6 +243,19 @@ export default function AccountsList({ accounts }: { accounts: Account[] }) {
                     <Pencil className="size-4" /> {t("edit")}
                   </DropdownMenuItem>
                   <DropdownMenuItem
+                    className="flex items-center gap-2"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setRecalculating({
+                        key: account.accountKey,
+                        name: account.accountName ?? t("unknown"),
+                      });
+                    }}
+                  >
+                    <RefreshCw className="size-4" />{" "}
+                    {t("accountRecalculate.menu-item")}
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
                     className="text-destructive-text flex items-center gap-2"
                     onClick={(e) => {
                       e.stopPropagation();
@@ -337,6 +356,14 @@ export default function AccountsList({ accounts }: { accounts: Account[] }) {
           />
         ) : null}
       </InspectorDrawer>
+
+      {recalculating && (
+        <AccountRecalculateDialog
+          accountKey={recalculating.key}
+          accountName={recalculating.name}
+          onClose={closeRecalculate}
+        />
+      )}
 
       {/* Edit / Delete modals */}
       {accountData.name && accountData.key !== null && (

@@ -241,6 +241,7 @@ describe('createWorker', () => {
       'exchange-rate.refresh',
       'fx.reconvert',
       'rule.apply',
+      'account.recalculate',
       'asset-price.historical-backfill',
       'certificado-aforro.rate-sync',
       'budget.year-extension',
@@ -291,6 +292,7 @@ describe('createWorker', () => {
     expect(workMock).toHaveBeenCalledWith('exchange-rate.refresh', expect.any(Function));
     expect(workMock).toHaveBeenCalledWith('fx.reconvert', expect.any(Function));
     expect(workMock).toHaveBeenCalledWith('rule.apply', { includeMetadata: true }, expect.any(Function));
+    expect(workMock).toHaveBeenCalledWith('account.recalculate', { includeMetadata: true }, expect.any(Function));
     expect(workMock).toHaveBeenCalledWith('asset-price.historical-backfill', expect.any(Function));
     expect(workMock).toHaveBeenCalledWith('portfolio.snapshot.auto', expect.any(Function));
     expect(workMock).toHaveBeenCalledWith('portfolio.snapshot.manual', expect.any(Function));

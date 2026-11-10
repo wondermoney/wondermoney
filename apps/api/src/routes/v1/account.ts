@@ -24,6 +24,7 @@ import {
   getTransactions,
   getTransactionTypes,
   previewAccountCsvImport,
+  recalculateAccount,
   rejectTransactionOCRImport,
   startAccountCsvImport,
   updateAccount,
@@ -62,6 +63,7 @@ router.get('/cashflow', getAccountsCashflow);
 router.patch('/:accountId', updateAccount);
 router.delete('/:accountId', deleteAccount);
 router.get('/:accountId/metrics', getAccountMetrics);
+router.post('/:accountId/recalculate', recalculateAccount);
 router.get('/:accountId/recent-transactions', getRecentTransactions);
 router.get('/:accountId/transaction', getAccountTransactions);
 router.post('/:accountId/transaction/upload', getS3PresignedUrlForCsvUpload);

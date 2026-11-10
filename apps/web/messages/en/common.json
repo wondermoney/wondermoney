@@ -2540,5 +2540,22 @@
   "budget-rollover-toggle": "Roll over leftover to next month",
   "budget-rollover-toggle-help": "What's left this month is added to next month's amount for this category.",
   "budget-rollover-carries-overspend": "Carry overspending into next month",
-  "budget-rollover-carries-overspend-help": "When off, only unspent money rolls over"
+  "budget-rollover-carries-overspend-help": "When off, only unspent money rolls over",
+  "accountRecalculate": {
+    "menu-item": "Recalculate balances",
+    "title": "Recalculate balances for {name}?",
+    "description": "This rebuilds the running balance of every transaction on the account. A manual or imported account starts from its opening balance; a bank-connected account ends on the balance your bank reports. Amounts stored without an exchange rate are converted again where a rate now exists.",
+    "safe-hint": "Your transactions are not changed, and on an account whose balances are already right nothing changes.",
+    "confirm": "Recalculate",
+    "running": "Recalculating balances…",
+    "background-hint": "You can close this window; the recalculation carries on in the background.",
+    "close": "Close",
+    "continues": "Balances are still being recalculated in the background.",
+    "already-correct": "Balances checked: they were already correct.",
+    "done": "{count, plural, one {Balances recalculated: # transaction corrected} other {Balances recalculated: # transactions corrected}}",
+    "balance-change": "Balance: {before} → {after}",
+    "failed": "The balances could not be recalculated. Try again in a few minutes.",
+    "too-soon": "This account was recalculated less than a minute ago. Try again shortly.",
+    "error": "The recalculation could not be started. Try again."
+  }
 }

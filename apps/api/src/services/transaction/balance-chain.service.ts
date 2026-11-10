@@ -115,7 +115,7 @@ function isInUserCurrency(row: ChainRow): boolean {
 }
 
 /** Not linked to a bank: its balance is the chain tail, not a provider figure. */
-function isManualAccount(account: Account): boolean {
+export function isManualAccount(account: Pick<Account, 'enableBankingConnectionKey' | 'nordigenRequisitionKey'>): boolean {
   return account.enableBankingConnectionKey == null && account.nordigenRequisitionKey == null;
 }
 

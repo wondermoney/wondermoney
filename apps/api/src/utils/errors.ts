@@ -102,6 +102,13 @@ export const ERROR_CODE = {
    */
   RULE_APPLY_IN_PROGRESS: 'rule_apply_in_progress',
   /**
+   * Recalculating an account's balances: the last recalculation of this account was started less
+   * than a minute ago (429, with `Retry-After`).
+   */
+  ACCOUNT_RECALCULATION_TOO_SOON: 'account_recalculation_too_soon',
+  /** Editing the opening balance of a bank-synced account, whose balance comes from the bank (400). */
+  OPENING_BALANCE_MANUAL_ONLY: 'opening_balance_manual_only',
+  /**
    * Splitting a transaction: the lines do not add up to its amount, mix signs, include a zero line,
    * are fewer than two, or carry more decimals than amounts are stored with (400).
    */

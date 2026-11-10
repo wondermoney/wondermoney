@@ -488,6 +488,28 @@
       "message": "Não foi possível verificar os dados da conta recebidos"
     }
   },
+  "accountRecalculate": {
+    "action": "Recalcular saldos",
+    "confirmTitle": "Recalcular os saldos?",
+    "confirmMessage": "Isto reconstrói o saldo acumulado de cada transação desta conta: uma conta manual ou importada parte do saldo inicial, uma conta ligada ao banco termina no saldo que o teu banco indica. As tuas transações não mudam.",
+    "confirm": "Recalcular",
+    "running": "A recalcular os saldos…",
+    "background": "Os saldos ainda estão a ser recalculados. Atualizam quando terminar.",
+    "alreadyCorrect": "Saldos verificados: já estavam certos.",
+    "done_one": "Saldos recalculados: {{count}} transação corrigida",
+    "done_other": "Saldos recalculados: {{count}} transações corrigidas",
+    "balanceChange": "Saldo: {{before}} → {{after}}",
+    "dismiss": "Fechar",
+    "failures": {
+      "too-soon": "Esta conta foi recalculada há menos de um minuto. Tenta de novo daqui a pouco.",
+      "demo": "Recalcular não está disponível na demonstração.",
+      "access": "Volta a iniciar sessão para recalcular esta conta.",
+      "not-found": "Esta conta já não está disponível.",
+      "network": "Não foi possível contactar o servidor. Verifica a ligação e tenta de novo.",
+      "failed": "Não foi possível recalcular os saldos. Tenta de novo daqui a uns minutos.",
+      "general": "Não foi possível iniciar o recálculo. Tenta de novo."
+    }
+  },
   "accountEdit": {
     "title": "Editar conta",
     "helper": "Atualize o nome e a privacidade desta conta",

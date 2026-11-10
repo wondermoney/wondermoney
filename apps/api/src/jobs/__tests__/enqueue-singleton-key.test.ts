@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { enqueueAccountAutoSyncRequisitionJob } from '../account-auto-sync.queue';
 import { enqueueAccountCsvImportJob } from '../account-csv-import.queue';
 import { enqueueAccountInitialSyncJob } from '../account-initial-sync.queue';
+import { enqueueAccountRecalculateJob } from '../account-recalculate.queue';
 import { enqueueBankRecoveryAfter } from '../bank-recovery.queue';
 import { enqueueDataExportCleanupJob, enqueueDataExportJob } from '../data-export.queue';
 import { enqueueDataRestoreCleanupJob, enqueueDataRestoreJob } from '../data-restore.queue';
@@ -185,6 +186,10 @@ const ENQUEUE_HELPERS: { invoke: (recorder: Recorder) => Promise<unknown>; name:
   {
     invoke: (r) => enqueueRuleApplyJob({ correlationId: 'rule.apply:1' }, asEnqueueDeps(r)),
     name: 'enqueueRuleApplyJob',
+  },
+  {
+    invoke: (r) => enqueueAccountRecalculateJob({ correlationId: 'account.recalculate:1' }, asEnqueueDeps(r)),
+    name: 'enqueueAccountRecalculateJob',
   },
   {
     invoke: (r) =>

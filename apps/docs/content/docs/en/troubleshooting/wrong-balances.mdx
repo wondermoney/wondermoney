@@ -1,0 +1,44 @@
+---
+title: Wrong Balances
+description: Rebuild an account's balances when its running balance or total looks wrong.
+---
+
+Every transaction in an account carries a running balance: what the account held right after it. If those figures stop adding up, **Recalculate balances** rebuilds them from scratch.
+
+## Symptoms
+
+- The running balance beside a transaction is not the one before it plus the transaction's amount.
+- An account's balance does not match its opening balance plus its transactions.
+- The balance history chart jumps on a day with no transaction.
+- A foreign-currency account shows no converted balance, or one that no longer follows the exchange rate.
+
+## What to check
+
+- Whether a pending transaction is involved. Pending and expired transactions do not count towards the running balance until they settle.
+- For a bank-connected account, whether the latest sync finished. Its balance is the one your bank reports.
+- For a manual or imported account, whether the opening balance is right. It is the balance you entered when you created the account.
+
+## What to try
+
+1. On the web, open **Accounts**, open the menu beside the account and choose **Recalculate balances**. On mobile, open the account, tap the more-actions menu and choose **Recalculate balances**.
+2. Confirm. The recalculation runs in the background, so you can close the window or leave the screen.
+3. When it finishes, a message says how many transactions were corrected and shows the balance before and after. "Already correct" means nothing needed fixing.
+
+What the recalculation does:
+
+- A manual or imported account starts from its opening balance and adds each settled transaction in date order. The account's balance becomes the result.
+- A bank-connected account works backwards from the balance your bank reports, which is never changed.
+- Amounts that were stored without an exchange rate are converted again where a rate now exists, and the balance in your currency is refreshed at the latest rate.
+- The transactions themselves (amounts, dates, descriptions, categories) are not changed, and on an account that is already right nothing changes, so it is safe to run more than once.
+
+Any household member who can see the account can recalculate it; a private account can only be recalculated by its owner. Each account can be recalculated once a minute.
+
+## When to contact support
+
+Contact support if the balances are still wrong after a recalculation. If a transaction is missing or appears twice, see [Transaction import problems](/en/docs/troubleshooting/transaction-import-problems) first; for a bank-connected account whose bank balance itself is wrong, see [Bank connection problems](/en/docs/troubleshooting/bank-connection-problems).
+
+## Related pages
+
+- [Transaction import problems](/en/docs/troubleshooting/transaction-import-problems)
+- [Bank connection problems](/en/docs/troubleshooting/bank-connection-problems)
+- [Contact support](/en/docs/troubleshooting/contact-support)

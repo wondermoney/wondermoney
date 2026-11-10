@@ -25,6 +25,7 @@ import {
   ensureAccountInitialSyncQueue,
 } from '@app/jobs/account-initial-sync.queue';
 import { handleAccountInitialSyncJob } from '@app/jobs/account-initial-sync.worker';
+import { ACCOUNT_RECALCULATE_QUEUE, type AccountRecalculatePayload, ensureAccountRecalculateQueue } from '@app/jobs/account-recalculate.queue';
 import {
   ANALYTICS_OUTBOX_CRON,
   ANALYTICS_OUTBOX_QUEUE,
@@ -332,6 +333,7 @@ export const createWorker = (deps: WorkerDeps = {}) => {
     await ensureExchangeRateRefreshQueue(boss);
     await ensureFxReconvertQueue(boss);
     await ensureRuleApplyQueue(boss);
+    await ensureAccountRecalculateQueue(boss);
     await ensureHistoricalAssetPriceBackfillQueue(boss);
     await ensureCertificadoAforroRateSyncQueue(boss);
     await ensureBudgetYearExtensionQueue(boss);
@@ -567,6 +569,15 @@ export const createWorker = (deps: WorkerDeps = {}) => {
       workJobs<JobWithMetadata<Partial<RuleApplyPayload>>>(RULE_APPLY_QUEUE, async (job) => {
         const { handleRuleApplyJob } = await import('@app/jobs/rule-apply.worker');
         await runInRequestContext(() => handleRuleApplyJob(job));
+      }),
+    );
+
+    await boss.work<Partial<AccountRecalculatePayload>>(
+      ACCOUNT_RECALCULATE_QUEUE,
+      { includeMetadata: true },
+      workJobs<JobWithMetadata<Partial<AccountRecalculatePayload>>>(ACCOUNT_RECALCULATE_QUEUE, async (job) => {
+        const { handleAccountRecalculateJob } = await import('@app/jobs/account-recalculate.worker');
+        await runInRequestContext(() => handleAccountRecalculateJob(job));
       }),
     );
 
