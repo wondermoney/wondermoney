@@ -95,6 +95,9 @@ You may use AI tools. We review your contribution, not the tool, and you own it:
 The same goes for issues. Describe what you did and what you saw. Don't paste a model's scan
 of the code, or findings you haven't checked yourself.
 
+A pull request or issue that doesn't meet this may be closed without a detailed review.
+You're welcome to reopen it once it does.
+
 ## Money, tenancy and auth
 
 A bug here can get someone's money wrong or show it to the wrong person, so the bar is higher.
