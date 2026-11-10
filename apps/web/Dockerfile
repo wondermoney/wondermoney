@@ -4,7 +4,7 @@
 #
 # Build context is the monorepo root: `docker build -f apps/web/Dockerfile .`
 
-FROM node:26.13.0-alpine@sha256:c6ad9e9c1d80f6eb607c26b4b0a132ff7a2344fad1c78ea3baa2a7d4c8de6d94 AS builder
+FROM node:26.13.0-alpine@sha256:8996bb5821d62a8fd9bb27c1cb07462f3fdce6e47d640c6a881ead0b064ce216 AS builder
 WORKDIR /repo
 # Node 25+ no longer bundles corepack, so install it (pinned) before enabling it; it then
 # provides the pnpm version in the root package.json's packageManager field.
@@ -35,7 +35,7 @@ ENV NEXT_TELEMETRY_DISABLED=1 \
     NEXT_PUBLIC_TERMS_URL=__WM_RUNTIME_NEXT_PUBLIC_TERMS_URL__
 RUN pnpm --filter @wondermoney/web run build
 
-FROM node:26.13.0-alpine@sha256:c6ad9e9c1d80f6eb607c26b4b0a132ff7a2344fad1c78ea3baa2a7d4c8de6d94 AS runner
+FROM node:26.13.0-alpine@sha256:8996bb5821d62a8fd9bb27c1cb07462f3fdce6e47d640c6a881ead0b064ce216 AS runner
 WORKDIR /app
 ENV NODE_ENV=production \
     NEXT_TELEMETRY_DISABLED=1 \
