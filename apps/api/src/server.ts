@@ -38,3 +38,4 @@ startServer().catch((err) => {
   console.error('Failed to start server:', err);
   throw err;
 });
+// Timing probe for #207: a source-only change.
