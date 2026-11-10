@@ -17,11 +17,11 @@ concurrency:
   cancel-in-progress: true
 jobs:
   deploy-staging:
-    # Deploys only from the main repository, never from a fork. Until the move to the public
-    # repository, the private one deploys too: its DEPLOY_REPO variable names it. Delete that
-    # variable at the cutover and only the public repository deploys.
-    if: github.repository == 'wondermoney/wondermoney' || github.repository == vars.DEPLOY_REPO
-    runs-on: blacksmith-2vcpu-ubuntu-2404
+    # Deploys only from the main repository, never from a fork.
+    if: github.repository == 'wondermoney/wondermoney'
+    runs-on: ubuntu-latest
+    # Typically 6-15 minutes, most of it waiting for CI; the CI wait alone may take 40.
+    timeout-minutes: 75
     # Secrets, variables and protection rules come from the environment (repository-level
     # secrets still apply).
     environment: staging
@@ -54,12 +54,6 @@ jobs:
         uses: actions/checkout@v7
         with:
           fetch-depth: 0
-      - uses: pnpm/action-setup@v6
-      - name: Setup Node.js
-        uses: actions/setup-node@v7
-        with:
-          node-version-file: '.nvmrc'
-          cache: pnpm
       - name: Replace SHA in code
         uses: jacobtomlinson/gha-find-replace@v3
         with:
@@ -67,20 +61,27 @@ jobs:
           replace: '${{ github.sha }}'
           regex: false
           include: 'apps/api/src/utils/constants.ts'
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-      - name: Build workspace packages
-        run: pnpm --filter @wondermoney/shared --filter @wondermoney/react-email run build:lib
-      # Built on the runner too, so Sentry gets the source maps; the image builds the same
-      # source itself, and debug IDs are content hashes, so they match.
-      - name: Generate build
-        run: pnpm --filter @wondermoney/api run build
-        env:
-          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+      # The API is compiled once, in the image's build stage, while CI runs. This exports that
+      # stage's dist (the Dockerfile's `dist` target) for the Sentry release below, so Sentry
+      # gets the source maps of exactly the files the image runs; the image builds after the CI
+      # gate reuse the stage from this builder's cache. Layers are cached between deploys in
+      # the GitHub Actions cache, per image.
+      - name: Build the API
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: apps/api/Dockerfile
+          target: dist
+          outputs: type=local,dest=apps/api/dist
+          build-args: |
+            GIT_COMMIT_SHA=${{ github.sha }}
+          cache-from: type=gha,scope=api
       # CI (.github/workflows/ci.yml) runs on this same commit, with type-check, lint and the
       # API tests with coverage thresholds; this deploy waits for it instead of running them a
       # second time. Nothing is pushed or deployed until CI has passed on exactly this SHA. The
-      # runner build above overlaps with it.
+      # API build above overlaps with it.
       - name: Wait for CI to pass on this commit
         timeout-minutes: 40
         env:
@@ -135,12 +136,14 @@ jobs:
             type=semver,pattern={{major}}
             type=sha
       - name: Build and push API
-        uses: useblacksmith/build-push-action@v2
+        uses: docker/build-push-action@v7
         with:
           push: true
           context: .
           file: apps/api/Dockerfile
           target: api
+          cache-from: type=gha,scope=api
+          cache-to: type=gha,mode=max,scope=api
           tags: ${{ steps.meta-api.outputs.tags }}
           labels: ${{ steps.meta-api.outputs.labels }}
           build-args: |
@@ -148,12 +151,14 @@ jobs:
             APP_ENV=staging
             DEPLOY_ENV=staging
       - name: Build and push worker
-        uses: useblacksmith/build-push-action@v2
+        uses: docker/build-push-action@v7
         with:
           push: true
           context: .
           file: apps/api/Dockerfile
           target: worker
+          cache-from: type=gha,scope=api-worker
+          cache-to: type=gha,mode=max,scope=api-worker
           tags: ${{ steps.meta-worker.outputs.tags }}
           labels: ${{ steps.meta-worker.outputs.labels }}
           build-args: |
@@ -176,7 +181,7 @@ jobs:
             -H "Authorization: Bearer ${{ secrets.COOLIFY_TOKEN }}"
       - name: Wait for API to serve the new commit
         run: |
-          for i in $(seq 1 60); do
+          for _ in $(seq 1 60); do
             deployed=$(curl -sS "${API_URL}/v1/health" | jq -r '.gitCommitHash // empty' || true)
             if [ "$deployed" = "${{ github.sha }}" ]; then
               echo "API is serving ${deployed}"
@@ -205,7 +210,7 @@ jobs:
       - name: Wait for worker deployment to finish
         run: |
           deployment_uuid="${{ steps.deploy-worker.outputs.deployment_uuid }}"
-          for i in $(seq 1 60); do
+          for _ in $(seq 1 60); do
             status=$(curl -sS "${DEPLOY_API_BASE}/api/v1/deployments/${deployment_uuid}" \
               -H "Authorization: Bearer ${{ secrets.COOLIFY_TOKEN }}" | jq -r '.status // empty')
             echo "worker deployment status: ${status:-unknown}"

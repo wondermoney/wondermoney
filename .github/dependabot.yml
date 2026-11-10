@@ -1,4 +1,10 @@
 version: 2
+# Each pull request runs CI (the full suite for npm updates, which change the lockfile), so
+# version updates come in few, grouped batches: npm weekly, actions and Docker images monthly,
+# minor and patch updates grouped, majors apart (they need reading), and a cooldown so a release
+# gets a few days to be fixed or yanked before it arrives here. Security
+# updates are not affected: groups apply to version updates only and the cooldown does not delay
+# them, so each security update opens as soon as its advisory is published.
 updates:
   # One pnpm lockfile for the whole repository. Weekly, minor+patch grouped per dependency
   # class; majors stay individual because they need reading. Expo packages are excluded:
@@ -10,17 +16,22 @@ updates:
       day: monday
       time: '06:00'
       timezone: Europe/Lisbon
-    open-pull-requests-limit: 10
+    open-pull-requests-limit: 5
+    cooldown:
+      default-days: 7
     versioning-strategy: increase-if-necessary
     groups:
       # MikroORM's packages pin each other to the exact version, so every update, majors
       # included, moves them together in one PR.
       mikro-orm:
+        applies-to: version-updates
         patterns: ['@mikro-orm/*']
       production-minor-and-patch:
+        applies-to: version-updates
         dependency-type: production
         update-types: [minor, patch]
       development-minor-and-patch:
+        applies-to: version-updates
         dependency-type: development
         update-types: [minor, patch]
     ignore:
@@ -82,9 +93,18 @@ updates:
     schedule:
       interval: monthly
     open-pull-requests-limit: 5
+    cooldown:
+      default-days: 7
     groups:
       github-actions:
+        applies-to: version-updates
         patterns: ['*']
+        update-types: [minor, patch]
+      # Majors together in one pull request of their own, so they are read before merging.
+      github-actions-major:
+        applies-to: version-updates
+        patterns: ['*']
+        update-types: [major]
 
   # Bumps the pinned base-image tags and digests within the Node major.
   - package-ecosystem: docker
@@ -92,6 +112,13 @@ updates:
     schedule:
       interval: monthly
     open-pull-requests-limit: 5
+    cooldown:
+      default-days: 7
+    # Both Dockerfiles share the Node base image: one pull request bumps them together.
+    groups:
+      docker-images:
+        applies-to: version-updates
+        patterns: ['*']
     ignore:
       # Odd Node majors never become LTS. Move the major by hand, to the next LTS, together with
       # .nvmrc, engines and @types/node.

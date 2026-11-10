@@ -1,26 +1,32 @@
 name: Web Preview
+# A Vercel preview of the web app for each open pull request that changes it: deployed when the
+# pull request opens and on each push to it, not for branches without a pull request.
 on:
-  push:
-    branches-ignore:
-      - main
-      - develop
+  pull_request:
     paths:
       - 'apps/web/**'
       - 'pnpm-lock.yaml'
       - '.github/workflows/web-preview.yml'
 # Each job asks for what it needs.
 permissions: {}
+# A new push to the pull request cancels the preview still building for the previous one.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
 jobs:
   deploy-preview:
-    # Runs on push, so only for branches of this repository: a fork's pull request never
-    # triggers it. Deploys only from the main repository, never from a fork. Until the move to
-    # the public repository, the private one deploys too: its DEPLOY_REPO variable names it.
-    # Delete that variable at the cutover and only the public repository deploys.
-    # Dependabot branches get no secrets, so they can't deploy; CI still checks them.
+    # Deploys only from the main repository's own branches: a fork's pull request gets no
+    # secrets. Dependabot's pull requests get none either, so they can't deploy; CI still checks
+    # them. The release pull request (develop into main) needs no preview: staging is develop.
     if: >-
-      (github.repository == 'wondermoney/wondermoney' || github.repository == vars.DEPLOY_REPO)
+      github.repository == 'wondermoney/wondermoney'
+      && github.event.pull_request.head.repo.full_name == github.repository
+      && github.event.pull_request.user.login != 'dependabot[bot]'
       && github.actor != 'dependabot[bot]'
-    runs-on: blacksmith-2vcpu-ubuntu-2404
+      && github.head_ref != 'develop'
+    runs-on: ubuntu-latest
+    # Typically 4-7 minutes.
+    timeout-minutes: 30
     environment: preview
     permissions:
       contents: read
@@ -33,8 +39,12 @@ jobs:
       SENTRY_PROJECT: web
       NODE_OPTIONS: --max-old-space-size=4096
     steps:
+      # The branch itself rather than the merge commit, as before: Vercel takes the branch name
+      # and commit from the checkout.
       - name: Clone repository
         uses: actions/checkout@v7
+        with:
+          ref: ${{ github.head_ref }}
       - uses: pnpm/action-setup@v6
       - uses: actions/setup-node@v7
         with:
@@ -42,12 +52,7 @@ jobs:
           cache: pnpm
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
-      - name: Lint
-        run: pnpm --filter @wondermoney/web run lint
-      - name: Test
-        run: pnpm --filter @wondermoney/web run test
-      - name: Typecheck
-        run: pnpm --filter @wondermoney/web run type-check
+      # No lint, tests or type-check here: CI runs them on the same pull request.
       - name: Install Vercel CLI
         run: npm install --global vercel@latest
       - name: Pull Vercel Environment Information

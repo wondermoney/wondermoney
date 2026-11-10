@@ -15,11 +15,11 @@ concurrency:
 permissions: {}
 jobs:
   deploy-staging:
-    # Deploys only from the main repository, never from a fork. Until the move to the public
-    # repository, the private one deploys too: its DEPLOY_REPO variable names it. Delete that
-    # variable at the cutover and only the public repository deploys.
-    if: github.repository == 'wondermoney/wondermoney' || github.repository == vars.DEPLOY_REPO
-    runs-on: blacksmith-2vcpu-ubuntu-2404
+    # Deploys only from the main repository, never from a fork.
+    if: github.repository == 'wondermoney/wondermoney'
+    runs-on: ubuntu-latest
+    # Typically 5-10 minutes.
+    timeout-minutes: 30
     environment: staging
     permissions:
       contents: read
