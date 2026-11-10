@@ -106,7 +106,7 @@ describe('net worth with a portfolio linked to its account', () => {
       const { body } = await http.as(household.appuser).get('/v1/net-worth');
 
       expect(body.totalNetWorth).toBe(11_000);
-      expect(body.assets).toEqual({ accounts: 11_000, portfolios: 0 });
+      expect(body.assets).toEqual({ accounts: 11_000, manualAssets: 0, portfolios: 0 });
       expect(portfolioRow(body, portfolio)).toMatchObject({ balance: 8000, countedInAccountId: brokerage.accountKey, name: 'Shares' });
     });
 
@@ -116,7 +116,7 @@ describe('net worth with a portfolio linked to its account', () => {
       const { body } = await http.as(household.appuser).get('/v1/net-worth');
 
       expect(body.totalNetWorth).toBe(19_000);
-      expect(body.assets).toEqual({ accounts: 11_000, portfolios: 8000 });
+      expect(body.assets).toEqual({ accounts: 11_000, manualAssets: 0, portfolios: 8000 });
       expect(portfolioRow(body, portfolio)).toMatchObject({ balance: 8000, name: 'Shares' });
       expect(portfolioRow(body, portfolio)).not.toHaveProperty('countedInAccountId');
     });
@@ -137,7 +137,7 @@ describe('net worth with a portfolio linked to its account', () => {
       const { body } = await http.as(household.appuser).get('/v1/net-worth');
 
       expect(body.totalNetWorth).toBe(9000);
-      expect(body.assets).toEqual({ accounts: 1000, portfolios: 8000 });
+      expect(body.assets).toEqual({ accounts: 1000, manualAssets: 0, portfolios: 8000 });
     });
   });
 
@@ -156,7 +156,7 @@ describe('net worth with a portfolio linked to its account', () => {
       const { body } = await http.as(partner).get('/v1/net-worth');
 
       expect(body.totalNetWorth).toBe(9000);
-      expect(body.assets).toEqual({ accounts: 1000, portfolios: 8000 });
+      expect(body.assets).toEqual({ accounts: 1000, manualAssets: 0, portfolios: 8000 });
       expect(portfolioRow(body, portfolio)).toMatchObject({ balance: 8000, name: 'Shares' });
       expect(portfolioRow(body, portfolio)).not.toHaveProperty('countedInAccountId');
       expect(JSON.stringify(body)).not.toContain('Brokerage');

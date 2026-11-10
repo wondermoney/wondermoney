@@ -32,6 +32,8 @@ import { GoalTransactionFunding } from '@entity/GoalTransactionFunding';
 import { Loan } from '@entity/Loan';
 import { LoanAdjustment } from '@entity/LoanAdjustment';
 import { LoanRepaymentLink } from '@entity/LoanRepaymentLink';
+import { ManualAsset } from '@entity/ManualAsset';
+import { ManualAssetValuation } from '@entity/ManualAssetValuation';
 import { PortfolioAccountBalanceMode } from '@entity/Portfolio';
 import { RecurringOccurrence } from '@entity/RecurringOccurrence';
 import { RecurringSeries } from '@entity/RecurringSeries';
@@ -47,6 +49,7 @@ import { TransactionType } from '@entity/TransactionType';
 import { Watchlist } from '@entity/Watchlist';
 import { writeHouseholdExport } from '@service/data-export/household-export';
 import { LoanAdjustmentType, LoanAllocationSource, LoanPaymentFrequency, LoanRateType, LoanStatus, LoanType } from '@service/loan/loan-types';
+import { ManualAssetKind } from '@service/manual-asset/manual-asset-types';
 
 export interface Scope {
   appuserKey: number;
@@ -145,6 +148,13 @@ export async function richHousehold(em: EntityManager) {
   em.create(GoalTransactionFunding, { amount: 42.5, currencyKey: eur, goalKey: goal, tenantKey: owner.tenant, transactionKey: groceryRun }, { partial: true });
   globalRun.transferDestinationGoalKey = goal;
 
+  // A home bought in dollars with a growth rule and two valuations, and a private car since sold.
+  const house = em.create(ManualAsset, { currencyKey: usd, growthAnnualRatePercent: 2.5, growthStartDate: new Date('2026-01-01'), isPrivate: false, kind: ManualAssetKind.PROPERTY, name: 'Home', notes: 'Top floor', ownerAppuserKey: owner.appuser, purchaseDate: new Date('2020-03-01'), purchasePrice: 180_000.5, tenantKey: owner.tenant }, { partial: true });
+  em.create(ManualAssetValuation, { manualAssetKey: house, tenantKey: owner.tenant, valuationDate: new Date('2020-03-01'), value: 180_000.5 }, { partial: true });
+  em.create(ManualAssetValuation, { manualAssetKey: house, note: 'Agent estimate', tenantKey: owner.tenant, valuationDate: new Date('2026-05-10'), value: 240_000 }, { partial: true });
+  const car = em.create(ManualAsset, { archivedAt: new Date('2026-06-01T09:30:00Z'), currencyKey: eur, isPrivate: true, kind: ManualAssetKind.VEHICLE, name: 'Old car', ownerAppuserKey: owner.appuser, tenantKey: owner.tenant }, { partial: true });
+  em.create(ManualAssetValuation, { manualAssetKey: car, tenantKey: owner.tenant, valuationDate: new Date('2025-01-15'), value: 7000 }, { partial: true });
+
   em.create(Watchlist, { appuserKey: owner.appuser, symbol: 'MSFT', tenantKey: owner.tenant }, { partial: true });
   em.create(EmailNotificationPreference, { appuserKey: owner.appuser, budgetAlertsEnabled: false, weeklyInsightsEnabled: false }, { partial: true });
   await em.flush();
@@ -189,7 +199,7 @@ export function dataFiles(bytes: Uint8Array): Record<string, Record<string, unkn
 }
 
 /** Tables a restore writes, with the column that says which household a row is in. */
-const TENANT_TABLES = ['account', 'budget', 'category', 'financial_transaction', 'goal', 'goal_account_link', 'goal_activity', 'goal_transaction_funding', 'loan', 'loan_adjustment', 'loan_repayment_link', 'portfolio', 'recurring_series', 'rule', 'tag', 'tenant_category_setting', 'transaction', 'transaction_merchant', 'transaction_split', 'transaction_tag', 'watchlist'] as const;
+const TENANT_TABLES = ['account', 'budget', 'category', 'financial_transaction', 'goal', 'goal_account_link', 'goal_activity', 'goal_transaction_funding', 'loan', 'loan_adjustment', 'loan_repayment_link', 'manual_asset', 'manual_asset_valuation', 'portfolio', 'recurring_series', 'rule', 'tag', 'tenant_category_setting', 'transaction', 'transaction_merchant', 'transaction_split', 'transaction_tag', 'watchlist'] as const;
 
 /** How many rows of each household table belong to `tenantKey`. */
 export async function householdRowCounts(em: EntityManager, tenantKey: number): Promise<Record<string, number>> {

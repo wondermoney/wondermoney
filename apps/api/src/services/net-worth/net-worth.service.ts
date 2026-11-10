@@ -14,6 +14,7 @@ import { Transaction } from '@entity/Transaction';
 import { ACCOUNT_BALANCE_POPULATE, accountBalanceIn, loadAccountRates } from '@service/currency/account-balance';
 import { type CurrencyPair, loadRateTable, rateScope, type RateTable } from '@service/currency/exchange-rate';
 import { calculateOutstandingPrincipalWithAdjustments } from '@service/loan/loan-calculation.service';
+import { assetValueFor, currentAssetValueFor, loadAssetRates, type LoadedManualAsset, loadVisibleManualAssets, manualAssetRatePairs } from '@service/manual-asset/manual-asset.service';
 import { portfolioCountedInAccount, type PortfolioLinkFields, shouldSuggestPortfolioLink } from '@service/portfolio/portfolio-account-link';
 import { type PortfolioSnapshotValue, snapshotInViewerCurrency, historyRatePairs as snapshotRatePairs, storedSnapshotValue } from '@service/portfolio/portfolio-history-currency';
 import portfolioHoldingsService from '@service/portfolio/portfolio-holdings.service';
@@ -37,6 +38,8 @@ export interface NetWorthHistoryPoint {
   date: string;
   isComplete: boolean;
   loansTotal: null | number;
+  /** Manually valued assets, each at its latest valuation on or before the date. */
+  manualAssetsTotal: null | number;
   portfoliosTotal: null | number;
   totalNetWorth: null | number;
 }
@@ -57,17 +60,20 @@ export interface NetWorthHistorySummary {
   readiness: NetWorthHistoryReadiness;
 }
 
-export type NetWorthRowType = 'accounts' | 'loans' | 'portfolios';
+export type NetWorthRowType = 'accounts' | 'loans' | 'manualAssets' | 'portfolios';
 
 export interface NetWorthSummary {
-  /** `portfolios` holds only the portfolios that add to the total (see `rows[].countedInAccountId`). */
-  assets: { accounts: number; portfolios: number };
+  /**
+   * `portfolios` holds only the portfolios that add to the total (see `rows[].countedInAccountId`).
+   * `manualAssets` is the manually valued assets (homes, vehicles) at their value today.
+   */
+  assets: { accounts: number; manualAssets: number; portfolios: number };
   currencyCode: string;
   /** False when any row was left out because it could not be valued in `currencyCode`. */
   isComplete: boolean;
   liabilities: { loans: number };
   /**
-   * `id` is the account, portfolio or loan key, so clients can match a row to its record. A
+   * `id` is the account, portfolio, manual asset or loan key, so clients can match a row to its record. A
    * portfolio row with `countedInAccountId` is already inside that account's balance: it is shown
    * as a breakdown and adds nothing to the totals.
    */
@@ -76,15 +82,16 @@ export interface NetWorthSummary {
   suggestPortfolioLink: boolean;
   totalNetWorth: number;
   /**
-   * The currencies of the accounts and loans left out of the totals for want of an exchange rate,
-   * sorted, so a client can name them. A partly valued portfolio has no single currency to name.
+   * The currencies of the accounts, loans and manual assets left out of the totals for want of an
+   * exchange rate, sorted, so a client can name them. A partly valued portfolio has no single
+   * currency to name.
    */
   unconvertedCurrencies: string[];
   /**
-   * Rows left out of the totals because they could not be valued in `currencyCode`. An account
-   * counts here when its balance cannot be converted: it adds nothing, and the summary is incomplete.
+   * Rows left out of the totals because they could not be valued in `currencyCode`. An account or a
+   * manual asset counts here when it cannot be converted: it adds nothing, and the summary is incomplete.
    */
-  unsupportedCurrencies: { accounts: number; loans: number; portfolios: number };
+  unsupportedCurrencies: { accounts: number; loans: number; manualAssets: number; portfolios: number };
 }
 
 interface NetWorthInputRow {
@@ -107,13 +114,15 @@ export class NetWorthService {
       throw new Error("User doesn't have AppuserTenant");
     }
 
-    const [accounts, portfolioRows, loans] = await Promise.all([
+    const [accounts, portfolioRows, manualAssets, loans] = await Promise.all([
       DI.em.find(
         Account,
         { deletedAt: undefined, tenantKey: appuserTenant.tenantKey },
         { orderBy: { createdAt: 'DESC' }, populate: [...ACCOUNT_BALANCE_POPULATE, 'accountTypeKey'] },
       ),
       this.getPortfolioRows(appuser, appuserTenant.tenantKey),
+      // Carries the tenant and the privacy rule itself: the other member's private asset is never loaded.
+      loadVisibleManualAssets(DI.em, { appuserKey: appuser.appuserKey, tenantKey: resolveTenantKeyNumber(appuserTenant.tenantKey) }),
       DI.em.find(
         Loan,
         { deletedAt: undefined, includeInNetWorth: true, ownerAppuserKey: appuser, tenantKey: appuserTenant.tenantKey },
@@ -165,16 +174,32 @@ export class NetWorthService {
       return countedInAccountId == null ? row : { ...row, countedInAccountId };
     });
 
+    // A manual asset counts at its value today, converted from its own currency at the latest
+    // rate. One with no rate is left out and its currency reported, never added at face value.
+    const assetRates = await loadAssetRates(DI.em, manualAssets, currencyCode, { from: asOf, to: asOf }, rateScope(resolveTenantKeyNumber(appuserTenant.tenantKey)));
+    const manualAssetRows: NetWorthInputRow[] = [];
+    const unconvertedAssetCurrencies: string[] = [];
+    for (const loaded of manualAssets) {
+      const value = currentAssetValueFor(loaded, currencyCode, assetRates, asOf);
+      if (!value) continue;
+      if (value.valueInViewerCurrency == null) {
+        unconvertedAssetCurrencies.push(value.currencyCode);
+        continue;
+      }
+      manualAssetRows.push({ balance: value.valueInViewerCurrency, id: loaded.asset.manualAssetKey, name: loaded.asset.name });
+    }
+
     const unsupportedCurrencies = {
       accounts: unconvertedAccounts,
       loans: loanRows.filter((loan) => !loan.supportedCurrency).length,
+      manualAssets: unconvertedAssetCurrencies.length,
       portfolios: portfolios.filter((portfolio) => !portfolio.supportedCurrency && portfolio.countedInAccountId == null).length,
     };
 
     for (const loan of loans) if (loan.currencyKey.code && loan.currencyKey.code !== currencyCode) unconvertedCurrencies.add(loan.currencyKey.code);
 
     return {
-      ...buildNetWorthSummary({ accounts: accountRows, currencyCode, loans: loanRows, portfolios, unconvertedCurrencies: [...unconvertedCurrencies], unsupportedCurrencies }),
+      ...buildNetWorthSummary({ accounts: accountRows, currencyCode, loans: loanRows, manualAssets: manualAssetRows, portfolios, unconvertedCurrencies: [...unconvertedCurrencies, ...unconvertedAssetCurrencies], unsupportedCurrencies }),
       suggestPortfolioLink: shouldSuggestPortfolioLink(accounts, portfolioRows.map((row) => row.link)),
     };
   }
@@ -190,13 +215,14 @@ export class NetWorthService {
     const basePoints = buildMonthlyHistoryPointDates(months, toDate);
     const today = startOfUtcDay(now);
 
-    const [accounts, portfolios, loans] = await Promise.all([
+    const [accounts, portfolios, manualAssets, loans] = await Promise.all([
       DI.em.find(Account, { deletedAt: undefined, tenantKey: appuserTenant.tenantKey }, { populate: ACCOUNT_BALANCE_POPULATE }),
       DI.em.find(Portfolio, { deletedAt: undefined, tenantKey: appuserTenant.tenantKey }, { populate: ['portfolioOwnerAppuserKey.currencyKey'] }),
+      loadVisibleManualAssets(DI.em, { appuserKey: appuser.appuserKey, tenantKey: resolveTenantKeyNumber(appuserTenant.tenantKey) }),
       DI.em.find(Loan, { deletedAt: undefined, includeInNetWorth: true, ownerAppuserKey: appuser, tenantKey: appuserTenant.tenantKey }, { populate: ['currencyKey'] }),
     ]);
 
-    const pointDates = await buildHistoryPointDates({ accounts, appuser, basePoints, tenantKey: appuserTenant.tenantKey, toDate });
+    const pointDates = await buildHistoryPointDates({ accounts, appuser, basePoints, manualAssets, tenantKey: appuserTenant.tenantKey, toDate });
 
     const prefetchedBalances = await prefetchAccountBalancesByPoint(accounts, appuserTenant.tenantKey, pointDates);
     const snapshotsByPoint = await loadPortfolioSnapshotsByPoint(portfolios, pointDates.filter((pointDate) => !isCurrentHistoryPoint(pointDate, today)));
@@ -205,7 +231,7 @@ export class NetWorthService {
     // snapshot is in its owner's currency, converted at the rate at the end of its own day.
     const snapshots = [...snapshotsByPoint.values()].flatMap((byPortfolio) => [...byPortfolio.values()]);
     const ratesFrom = minDate([pointDates[0] ?? toDate, ...snapshots.map((snapshot) => new Date(`${snapshot.date}T00:00:00.000Z`))]);
-    const rates = await loadRateTable(DI.em, [...historyRatePairs(accounts, currencyCode), ...snapshotRatePairs(snapshots, currencyCode)], { from: ratesFrom, to: nextUtcDay(toDate) }, rateScope(resolveTenantKeyNumber(appuserTenant.tenantKey)));
+    const rates = await loadRateTable(DI.em, [...historyRatePairs(accounts, currencyCode), ...snapshotRatePairs(snapshots, currencyCode), ...manualAssetRatePairs(manualAssets, currencyCode)], { from: ratesFrom, to: nextUtcDay(toDate) }, rateScope(resolveTenantKeyNumber(appuserTenant.tenantKey)));
     const toViewer = historyBalanceConverter(currencyCode, rates);
 
     // Today's point is the figure Home shows: `getNetWorth` values portfolios live, while
@@ -221,11 +247,14 @@ export class NetWorthService {
         return currentNetWorthHistoryPoint(currentSummary, formatUtcDate(pointDate), accountsComplete);
       }
       const [portfoliosTotal, portfoliosComplete] = calculatePortfoliosHistoryTotal(portfolios, toViewer, pointDate, snapshotsByPoint.get(pointDate.getTime()) ?? new Map(), accountsCountedAt(accounts, pointDate));
+      const [manualAssetsTotal, manualAssetsComplete] = calculateManualAssetsHistoryTotal(manualAssets, currencyCode, rates, pointDate);
       const [loansTotal, loansComplete] = await calculateLoansHistoryTotal(loans, currencyCode, pointDate);
-      const complete = accountsComplete && portfoliosComplete && loansComplete;
-      const totalNetWorth = accountsTotal != null && portfoliosTotal != null && loansTotal != null ? subtractMoney(addMoney(accountsTotal, portfoliosTotal), loansTotal) : null;
+      const complete = accountsComplete && portfoliosComplete && manualAssetsComplete && loansComplete;
+      const totalNetWorth = accountsTotal != null && portfoliosTotal != null && manualAssetsTotal != null && loansTotal != null
+        ? subtractMoney(sumMoney([accountsTotal, portfoliosTotal, manualAssetsTotal]), loansTotal)
+        : null;
 
-      return { accountsTotal, date: formatUtcDate(pointDate), isComplete: complete, loansTotal, portfoliosTotal, totalNetWorth };
+      return { accountsTotal, date: formatUtcDate(pointDate), isComplete: complete, loansTotal, manualAssetsTotal, portfoliosTotal, totalNetWorth };
     }));
 
     return { currencyCode, granularity: 'monthly', points: pointSummaries, readiness: calculateHistoryReadiness(pointSummaries) };
@@ -279,11 +308,14 @@ export function buildNetWorthSummaryFromSourceRows(input: {
   accounts: NetWorthInputRow[];
   currencyCode: string;
   loans: (NetWorthSourceRow & { includeInNetWorth?: boolean })[];
+  /** Manually valued assets, already in `currencyCode`. */
+  manualAssets?: NetWorthInputRow[];
   portfolios: NetWorthSourceRow[];
 }): Omit<NetWorthSummary, 'suggestPortfolioLink'> {
   const unsupportedCurrencies = {
     accounts: 0,
     loans: input.loans.filter((loan) => loan.includeInNetWorth !== false && !(loan.supportedCurrency ?? true)).length,
+    manualAssets: 0,
     portfolios: input.portfolios.filter((portfolio) => !(portfolio.supportedCurrency ?? true)).length,
   };
 
@@ -293,6 +325,7 @@ export function buildNetWorthSummaryFromSourceRows(input: {
     loans: input.loans
       .filter((loan) => loan.includeInNetWorth !== false && (loan.supportedCurrency ?? true))
       .map(({ supportedCurrency: _supportedCurrency, ...loan }) => loan),
+    manualAssets: input.manualAssets,
     portfolios: input.portfolios.map(({ supportedCurrency: _supportedCurrency, ...portfolio }) => portfolio),
     unsupportedCurrencies,
   });
@@ -312,8 +345,8 @@ export function clampHistoryMonths(months?: number): number {
 /**
  * The history point for today, taken from the live net worth summary so the trend's latest
  * value and Home agree to the cent. Totals are always reported (as Home reports them); a
- * missing account balance, an unpriced holding or a loan in another currency marks the
- * point incomplete.
+ * missing account balance, an unpriced holding, a manual asset with no exchange rate or a loan in
+ * another currency marks the point incomplete.
  */
 export function currentNetWorthHistoryPoint(summary: NetWorthSummary, date: string, accountsComplete = true): NetWorthHistoryPoint {
   return {
@@ -322,8 +355,10 @@ export function currentNetWorthHistoryPoint(summary: NetWorthSummary, date: stri
     isComplete: accountsComplete
       && summary.unsupportedCurrencies.accounts === 0
       && summary.unsupportedCurrencies.loans === 0
+      && summary.unsupportedCurrencies.manualAssets === 0
       && summary.unsupportedCurrencies.portfolios === 0,
     loansTotal: summary.liabilities.loans,
+    manualAssetsTotal: summary.assets.manualAssets,
     portfoliosTotal: summary.assets.portfolios,
     totalNetWorth: summary.totalNetWorth,
   };
@@ -393,8 +428,14 @@ export function resolvePortfolioHistoryTotal(portfolios: { snapshots: NetWorthHi
 
 function addUtcMonths(date: Date, months: number) { return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth() + months, 1)); }
 
-async function buildHistoryPointDates(input: { accounts: Account[]; appuser: Appuser; basePoints: Date[]; tenantKey: AppuserTenant['tenantKey']; toDate: Date }): Promise<Date[]> {
-  if (input.accounts.length === 0) return mergeHistoryPointDates(input.basePoints, []);
+async function buildHistoryPointDates(input: { accounts: Account[]; appuser: Appuser; basePoints: Date[]; manualAssets: LoadedManualAsset[]; tenantKey: AppuserTenant['tenantKey']; toDate: Date }): Promise<Date[]> {
+  const windowStart = startOfUtcDay(addUtcMonths(input.toDate, -5));
+  const windowEnd = nextUtcDay(input.toDate);
+  // A valuation moves net worth on its own day, so that day is a point, like a transaction's.
+  const valuationDates = input.manualAssets
+    .flatMap((loaded) => loaded.valuations.map((valuation) => new Date(valuation.valuationDate)))
+    .filter((date) => date.getTime() >= windowStart.getTime() && date.getTime() < windowEnd.getTime());
+  if (input.accounts.length === 0) return mergeHistoryPointDates(input.basePoints, valuationDates);
 
   // An EXPIRED row never moved money: a balance left on one is no balance, and its date is no point.
   const transactionDates = await DI.em.find(Transaction, excludeExpired({
@@ -402,43 +443,48 @@ async function buildHistoryPointDates(input: { accounts: Account[]; appuser: App
     appuserCurrencyBalance: { $ne: null },
     deletedAt: undefined,
     tenantKey: input.tenantKey,
-    transactionDate: { $gte: startOfUtcDay(addUtcMonths(input.toDate, -5)), $lt: nextUtcDay(input.toDate) },
+    transactionDate: { $gte: windowStart, $lt: windowEnd },
   }), { fields: ['transactionDate'] });
-  return mergeHistoryPointDates(input.basePoints, transactionDates.map((transaction) => transaction.transactionDate).filter((date): date is Date => date != null));
+  return mergeHistoryPointDates(input.basePoints, [...valuationDates, ...transactionDates.map((transaction) => transaction.transactionDate).filter((date): date is Date => date != null)]);
 }
 
 function buildNetWorthSummary(input: {
   accounts: NetWorthInputRow[];
   currencyCode: string;
   loans: NetWorthInputRow[];
+  manualAssets?: NetWorthInputRow[];
   portfolios: NetWorthInputRow[];
   unconvertedCurrencies?: string[];
-  unsupportedCurrencies?: { accounts?: number; loans?: number; portfolios?: number };
+  unsupportedCurrencies?: { accounts?: number; loans?: number; manualAssets?: number; portfolios?: number };
 }): Omit<NetWorthSummary, 'suggestPortfolioLink'> {
   // Every row reaching here is already in the viewer's currency.
   const inViewerCurrency = (rows: NetWorthInputRow[]) => Money.toNumber(Money.sum(rows.map((row) => Money.of(row.balance, input.currencyCode)), input.currencyCode));
   const assetsAccounts = inViewerCurrency(input.accounts);
   const assetsPortfolios = inViewerCurrency(input.portfolios.filter((portfolio) => portfolio.countedInAccountId == null));
+  const manualAssets = input.manualAssets ?? [];
+  const assetsManual = inViewerCurrency(manualAssets);
   const liabilitiesLoans = inViewerCurrency(input.loans);
 
   const unsupportedCurrencies = {
     accounts: input.unsupportedCurrencies?.accounts ?? 0,
     loans: input.unsupportedCurrencies?.loans ?? 0,
+    manualAssets: input.unsupportedCurrencies?.manualAssets ?? 0,
     portfolios: input.unsupportedCurrencies?.portfolios ?? 0,
   };
 
   return {
-    assets: { accounts: assetsAccounts, portfolios: assetsPortfolios },
+    assets: { accounts: assetsAccounts, manualAssets: assetsManual, portfolios: assetsPortfolios },
     currencyCode: input.currencyCode,
-    isComplete: unsupportedCurrencies.accounts === 0 && unsupportedCurrencies.loans === 0 && unsupportedCurrencies.portfolios === 0,
+    isComplete: unsupportedCurrencies.accounts === 0 && unsupportedCurrencies.loans === 0 && unsupportedCurrencies.manualAssets === 0 && unsupportedCurrencies.portfolios === 0,
     liabilities: { loans: liabilitiesLoans },
     rows: [
       ...input.accounts.map((account) => ({ ...account, type: 'accounts' as const })),
       ...input.portfolios.map((portfolio) => ({ ...portfolio, type: 'portfolios' as const })),
+      ...manualAssets.map((asset) => ({ ...asset, type: 'manualAssets' as const })),
       ...input.loans.map((loan) => ({ ...loan, balance: -loan.balance, type: 'loans' as const })),
     ],
-    totalNetWorth: subtractMoney(addMoney(assetsAccounts, assetsPortfolios), liabilitiesLoans),
-    unconvertedCurrencies: [...(input.unconvertedCurrencies ?? [])].sort(),
+    totalNetWorth: subtractMoney(sumMoney([assetsAccounts, assetsPortfolios, assetsManual]), liabilitiesLoans),
+    unconvertedCurrencies: [...new Set(input.unconvertedCurrencies ?? [])].sort(),
     unsupportedCurrencies,
   };
 }
@@ -498,6 +544,24 @@ async function calculateLoansHistoryTotal(loans: Loan[], currencyCode: string, p
     total = addMoney(total, calculateOutstandingPrincipalWithAdjustments({ adjustments: adjustments.map((adj) => ({ amount: adj.amount, effectiveDate: adj.effectiveDate, type: adj.type })), openingPrincipalBalance: loan.openingPrincipalBalance, principalRepayments: repayments.map((repayment) => ({ amount: repayment.principalAmount, effectiveDate: repayment.paymentDate })) }));
   }
   return [total, true];
+}
+
+/**
+ * The manual assets' total at one point: each asset at its latest valuation on or before the
+ * point (grown by its rule, if it has one), converted at the rate in force at the close of the
+ * point's day. An asset with no valuation yet, or archived by then, adds nothing. One that cannot
+ * be converted leaves the point incomplete, never added at face value.
+ */
+function calculateManualAssetsHistoryTotal(manualAssets: LoadedManualAsset[], viewerCurrency: string, rates: RateTable, pointDate: Date): [null | number, boolean] {
+  const rateDate = new Date(nextUtcDay(pointDate).getTime() - 1);
+  const values: number[] = [];
+  for (const loaded of manualAssets) {
+    const value = assetValueFor(loaded, viewerCurrency, rates, { rateDate, valueDate: pointDate });
+    if (!value) continue;
+    if (value.valueInViewerCurrency == null) return [null, false];
+    values.push(value.valueInViewerCurrency);
+  }
+  return [sumMoney(values), true];
 }
 
 /**

@@ -48,6 +48,10 @@ export const ERROR_CODE = {
   // --- Specific: a client can and should behave differently for each of these ---
   /** Account-level action reserved to the owner (privacy toggle), not the partner. */
   ACCOUNT_OWNER_REQUIRED: 'account_owner_required',
+  /** Changing whether a manual asset is private, by the member who does not own it (403). */
+  MANUAL_ASSET_OWNER_REQUIRED: 'manual_asset_owner_required',
+  /** Deleting the only valuation of a manual asset (409). An asset keeps one; delete the asset instead. */
+  MANUAL_ASSET_LAST_VALUATION: 'manual_asset_last_valuation',
   /** The assistant is not enabled for this user. */
   ASSISTANT_NOT_ENABLED: 'assistant_not_enabled',
   /**
@@ -127,7 +131,7 @@ export const ERROR_CODE = {
    */
   DATA_EXPORT_IN_PROGRESS: 'data_export_in_progress',
   /**
-   * Restoring an export: the household already has accounts, portfolios, budgets, goals or loans
+   * Restoring an export: the household already has accounts, portfolios, budgets, goals, loans or manual assets
    * (409). Restore only fills an empty household; it never merges.
    */
   HOUSEHOLD_NOT_EMPTY: 'household_not_empty',

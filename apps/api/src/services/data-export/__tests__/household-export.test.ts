@@ -24,6 +24,8 @@ import { GoalActivity, GoalActivityType } from '@entity/GoalActivity';
 import { GoalTransactionFunding } from '@entity/GoalTransactionFunding';
 import { Loan } from '@entity/Loan';
 import { LoanRepaymentLink } from '@entity/LoanRepaymentLink';
+import { ManualAsset } from '@entity/ManualAsset';
+import { ManualAssetValuation } from '@entity/ManualAssetValuation';
 import { Portfolio, PortfolioAccountBalanceMode } from '@entity/Portfolio';
 import { RecurringOccurrence } from '@entity/RecurringOccurrence';
 import { RecurringSeries } from '@entity/RecurringSeries';
@@ -34,6 +36,7 @@ import { TransactionSplit } from '@entity/TransactionSplit';
 import { TransactionTag } from '@entity/TransactionTag';
 import { Watchlist } from '@entity/Watchlist';
 import { LoanAllocationSource, LoanPaymentFrequency, LoanRateType, LoanStatus, LoanType } from '@service/loan/loan-types';
+import { ManualAssetKind } from '@service/manual-asset/manual-asset-types';
 
 import { type ExportScope, writeHouseholdExport } from '../household-export';
 
@@ -135,6 +138,16 @@ describe('household export', () => {
     em.create(Watchlist, { appuserKey: owner.appuser, symbol: 'OWNERWATCH', tenantKey: owner.tenant }, { partial: true });
     em.create(AppuserMerchantCategory, { appuserKey: owner.appuser, categoryKey: secret.category, source: Source.MANUAL, transactionMerchantKey: secret.merchant }, { partial: true });
 
+    // A shared home with two valuations, and a watch only the owner knows about.
+    const home = em.create(ManualAsset, { currencyKey: owner.currency, growthAnnualRatePercent: 2.5, isPrivate: false, kind: ManualAssetKind.PROPERTY, name: 'SHARED-HOME', ownerAppuserKey: owner.appuser, purchaseDate: new Date('2020-03-01'), purchasePrice: 180_000, tenantKey: owner.tenant }, { partial: true });
+    em.create(ManualAssetValuation, { manualAssetKey: home, tenantKey: owner.tenant, valuationDate: new Date('2020-03-01'), value: 180_000 }, { partial: true });
+    em.create(ManualAssetValuation, { manualAssetKey: home, note: 'SHARED-ESTIMATE', tenantKey: owner.tenant, valuationDate: new Date('2026-05-10'), value: 240_000.5 }, { partial: true });
+    const watch = em.create(ManualAsset, { currencyKey: owner.currency, isPrivate: true, kind: ManualAssetKind.VALUABLE, name: 'SECRET-WATCH', ownerAppuserKey: owner.appuser, tenantKey: owner.tenant }, { partial: true });
+    em.create(ManualAssetValuation, { manualAssetKey: watch, note: 'SECRET-APPRAISAL', tenantKey: owner.tenant, valuationDate: new Date('2026-02-01'), value: 4000 }, { partial: true });
+    const sold = em.create(ManualAsset, { currencyKey: owner.currency, deletedAt: new Date(), isPrivate: false, kind: ManualAssetKind.VEHICLE, name: 'DELETED-CAR', ownerAppuserKey: owner.appuser, tenantKey: owner.tenant }, { partial: true });
+    em.create(ManualAssetValuation, { manualAssetKey: sold, tenantKey: owner.tenant, valuationDate: new Date('2026-02-01'), value: 1 }, { partial: true });
+    em.create(ManualAssetValuation, { deletedAt: new Date(), manualAssetKey: home, note: 'DELETED-VALUATION', tenantKey: owner.tenant, valuationDate: new Date('2026-03-01'), value: 2 }, { partial: true });
+
     // Bank credentials and connection tokens.
     const credential = em.create(EnableBankingCredential, { applicationId: 'EB-APPLICATION-ID', appuserKey: owner.appuser, encryptionKeyVersion: 1, privateKeyAuthTag: 'EB-AUTH-TAG', privateKeyCiphertext: 'EB-PRIVATE-KEY-CIPHERTEXT', privateKeyIv: 'EB-PRIVATE-KEY-IV', tenantKey: owner.tenant }, { partial: true });
     const connection = em.create(EnableBankingConnection, { appuserKey: owner.appuser, aspspCountry: 'PT', aspspName: 'Bank', authorizationId: 'EB-AUTHORIZATION-ID', enableBankingCredentialKey: credential, sessionId: 'EB-SESSION-ID', state: 'EB-STATE-TOKEN', tenantKey: owner.tenant }, { partial: true });
@@ -146,6 +159,8 @@ describe('household export', () => {
     em.create(Goal, { appuserKey: neighbour.appuser, currencyKey: neighbour.currency, name: 'NEIGHBOUR-GOAL', targetAmount: 1, tenantKey: neighbour.tenant }, { partial: true });
     em.create(Budget, { appuserKey: neighbour.appuser, currencyKey: neighbour.currency, name: 'NEIGHBOUR-BUDGET', numAdults: 1, numDependents: 0, tenantKey: neighbour.tenant }, { partial: true });
     em.create(Portfolio, { currencyKey: neighbour.currency, name: 'NEIGHBOUR-PORTFOLIO', portfolioOwnerAppuserKey: neighbour.appuser, tenantKey: neighbour.tenant }, { partial: true });
+    const flat = em.create(ManualAsset, { currencyKey: neighbour.currency, isPrivate: false, kind: ManualAssetKind.PROPERTY, name: 'NEIGHBOUR-FLAT', ownerAppuserKey: neighbour.appuser, tenantKey: neighbour.tenant }, { partial: true });
+    em.create(ManualAssetValuation, { manualAssetKey: flat, note: 'NEIGHBOUR-ESTIMATE', tenantKey: neighbour.tenant, valuationDate: new Date('2026-02-01'), value: 90_000 }, { partial: true });
     await em.flush();
 
     const externalIds = (await em.find(Appuser, {}, { filters: false })).map((user) => user.externalUserId);
@@ -210,6 +225,38 @@ describe('household export', () => {
     expect(archive.data['watchlist']).toEqual([]);
   });
 
+  describe('manual assets', () => {
+    it('holds the shared assets and the member\'s own private ones, each with its live valuations', async () => {
+      const { owner } = await households();
+
+      const archive = await exportFor(scopeOf(owner));
+
+      expect(archive.data['manual-assets']).toEqual([
+        expect.objectContaining({ archivedAt: null, currency: 'EUR', growthAnnualRatePercent: '2.5', growthStartDate: null, id: 1, isPrivate: false, kind: 'property', name: 'SHARED-HOME', ownerMemberId: 1, purchaseDate: '2020-03-01', purchasePrice: '180000' }),
+        expect.objectContaining({ id: 2, isPrivate: true, kind: 'valuable', name: 'SECRET-WATCH', purchasePrice: null }),
+      ]);
+      expect(archive.data['manual-asset-valuations']).toEqual([
+        { date: '2020-03-01', manualAssetId: 1, note: null, value: '180000' },
+        { date: '2026-05-10', manualAssetId: 1, note: 'SHARED-ESTIMATE', value: '240000.5' },
+        { date: '2026-02-01', manualAssetId: 2, note: 'SECRET-APPRAISAL', value: '4000' },
+      ]);
+      expect(archive.text).not.toContain('DELETED');
+    });
+
+    it("leaves the other member's private asset and its valuations out", async () => {
+      const { owner, partner } = await households();
+
+      const archive = await exportFor(scopeOf(owner, partner));
+
+      expect(archive.data['manual-assets']!.map((row) => row['name'])).toEqual(['SHARED-HOME']);
+      expect(archive.data['manual-asset-valuations']).toHaveLength(2);
+      expect(archive.text).not.toContain('SECRET-WATCH');
+      expect(archive.text).not.toContain('SECRET-APPRAISAL');
+      // The shared home is the owner's: the partner's export names them as its owner, not the partner.
+      expect(archive.data['manual-assets']![0]!['ownerMemberId']).toBe(2);
+    });
+  });
+
   it("never holds another household's rows", async () => {
     const { neighbour, owner, partner } = await households();
 
@@ -261,7 +308,7 @@ describe('household export', () => {
 
       const archive = await exportFor(scopeOf(owner));
 
-      expect(archive.manifest.formatVersion).toBe('1.0');
+      expect(archive.manifest.formatVersion).toBe('1.1');
       const paths = Object.keys(archive.entries).filter((path) => path !== 'manifest.json').sort();
       expect(archive.manifest.files.map((file) => file.path).sort()).toEqual(paths);
       for (const file of archive.manifest.files) {

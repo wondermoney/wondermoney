@@ -146,11 +146,14 @@ describe('household restore', () => {
            select account_owner_appuser_key from account where tenant_key = ? union all
            select atc.appuser_key from appuser_transaction_category atc join "transaction" t using (transaction_key) where t.tenant_key = ? union all
            select owner_appuser_key from loan where tenant_key = ? union all
+           select owner_appuser_key from manual_asset where tenant_key = ? union all
            select portfolio_owner_appuser_key from portfolio where tenant_key = ?
          ) members where appuser_key is not null and appuser_key <> ?`,
-        [target.tenant.tenantKey, target.tenant.tenantKey, target.tenant.tenantKey, target.tenant.tenantKey, target.tenant.tenantKey, target.appuser.appuserKey],
+        [target.tenant.tenantKey, target.tenant.tenantKey, target.tenant.tenantKey, target.tenant.tenantKey, target.tenant.tenantKey, target.tenant.tenantKey, target.appuser.appuserKey],
       );
       expect(strangers[0]!.n).toBe(0);
+      expect(restored['manual_asset']).toBe(2);
+      expect(restored['manual_asset_valuation']).toBe(3);
       // References stay inside the household: every restored transaction's account is the household's.
       const crossed = await connection.execute<{ n: number }[]>(
         'select count(*)::int as n from "transaction" t join account a on a.account_key = t.account_key where t.tenant_key = ? and a.tenant_key <> ?',
@@ -169,6 +172,15 @@ describe('household restore', () => {
       await expect(restore(scopeOf(target), parsed)).rejects.toMatchObject({ code: 'household_not_empty' });
 
       expect(await allRowCounts(db.em())).toEqual(before);
+    });
+
+    it('refuses a household whose only data is a manual asset', async () => {
+      const { owner } = await richHousehold(db.em());
+      const parsed = await parsedExportOf(scopeOf(owner));
+      const target = await emptyHousehold(db.em());
+      await db.em().getConnection().execute("insert into manual_asset (created_at, updated_at, owner_appuser_key, currency_key, name, kind, is_private, tenant_key) select now(), now(), ?, currency_key, ?, 'property', false, ? from appuser where appuser_key = ?", [target.appuser.appuserKey, 'Existing home', target.tenant.tenantKey, target.appuser.appuserKey]);
+
+      await expect(restore(scopeOf(target), parsed)).rejects.toMatchObject({ code: 'household_not_empty' });
     });
 
     it('cannot run twice into the same household', async () => {
@@ -195,6 +207,38 @@ describe('household restore', () => {
 
       expect(await allRowCounts(db.em())).toEqual(before);
       expect(Object.values(await householdRowCounts(db.em(), target.tenant.tenantKey)).every((count) => count === 0)).toBe(true);
+    });
+  });
+
+  describe('manual assets', () => {
+    it('restores each asset with its valuations, growth rule, privacy and archive date', async () => {
+      const { owner } = await richHousehold(db.em());
+      const target = await emptyHousehold(db.em());
+
+      const { summary } = await restore(scopeOf(target), await parsedExportOf(scopeOf(owner)));
+
+      expect(summary.counts).toEqual(expect.objectContaining({ 'manual-asset-valuations': 3, 'manual-assets': 2 }));
+      const assets = await db.em().getConnection().execute<Record<string, unknown>[]>(
+        `select a.name, a.kind, a.is_private, c.code as currency, a.purchase_price::text as purchase_price, to_char(a.purchase_date, 'YYYY-MM-DD') as purchase_date,
+           a.growth_annual_rate_percent::text as growth, to_char(a.growth_start_date, 'YYYY-MM-DD') as growth_start, a.notes, (a.archived_at is not null) as archived,
+           (select string_agg(to_char(v.valuation_date, 'YYYY-MM-DD') || '=' || v.value::text, ',' order by v.valuation_date) from manual_asset_valuation v where v.manual_asset_key = a.manual_asset_key and v.tenant_key = a.tenant_key) as valuations
+         from manual_asset a join currency c on c.currency_key = a.currency_key where a.tenant_key = ? order by a.name`, [target.tenant.tenantKey]);
+      expect(assets).toEqual([
+        { archived: false, currency: 'USD', growth: '2.5000', growth_start: '2026-01-01', is_private: false, kind: 'property', name: 'Home', notes: 'Top floor', purchase_date: '2020-03-01', purchase_price: '180000.5000', valuations: '2020-03-01=180000.5000,2026-05-10=240000.0000' },
+        { archived: true, currency: 'EUR', growth: null, growth_start: null, is_private: true, kind: 'vehicle', name: 'Old car', notes: null, purchase_date: null, purchase_price: null, valuations: '2025-01-15=7000.0000' },
+      ]);
+    });
+
+    it('restores an export made before manual assets existed', async () => {
+      const { owner } = await richHousehold(db.em());
+      const parsed = await parsedExportOf(scopeOf(owner));
+      parsed.rows['manual-assets'] = [];
+      parsed.rows['manual-asset-valuations'] = [];
+      const target = await emptyHousehold(db.em());
+
+      const { summary } = await restore(scopeOf(target), parsed);
+
+      expect(summary.counts).toEqual(expect.objectContaining({ 'manual-assets': 0, transactions: 6 }));
     });
   });
 

@@ -33,7 +33,7 @@ import { readRestoreArchive, RestoreError, type RestoreErrorCode, type RestoreEr
  *              snapshot rebuilds. The uploaded file is deleted once it ends either way.
  *
  * Who and where: only the household's owner, only into their own household, and only while it holds
- * no accounts, portfolios, budgets, goals or loans (checked at every step, and again under a lock
+ * no accounts, portfolios, budgets, goals, loans or manual assets (checked at every step, and again under a lock
  * inside the restore's transaction).
  *
  * Limits: one restore at a time per person (starting another replaces one that is waiting, and is
