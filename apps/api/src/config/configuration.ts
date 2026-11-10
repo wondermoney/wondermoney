@@ -79,6 +79,9 @@ const positiveInt = (description: string) => z.string().trim()
 const wholeNumber = (description: string) => z.string().trim()
   .refine((v) => /^\d+$/.test(v), `${description} (must be a whole number, 0 or more)`);
 
+const fraction = (description: string, max: number) => z.string().trim()
+  .refine((v) => /^\d+(?:\.\d+)?$/.test(v) && Number(v) <= max, `${description} (must be a fraction from 0 to ${max}, such as 0.02 for 2 percent)`);
+
 const boolFlag = (description: string) => z.enum(['1', '0', 'true', 'false', 'on', 'off', 'yes', 'no'], {
   error: `${description} (must be one of 1/0/true/false/on/off/yes/no)`,
 });
@@ -103,6 +106,9 @@ const runtimeSchema = z.object({
   PRIVACY_POLICY_URL: z.string().trim().optional(),
   PUBLIC_DIAGNOSTICS_ENABLED: boolFlag('Public diagnostics flag').optional(),
   SIGNUP_MODE: z.enum(['open', 'invite', 'closed']).optional(),
+  // How far the converted outgoing half of a cross-currency transfer may be from the incoming half
+  // (`services/transaction/transfer-matching.service.ts`). Read by the API and the worker.
+  TRANSFER_MATCH_FX_TOLERANCE: fraction('Cross-currency transfer matching tolerance', 0.25).optional(),
   TRUST_PROXY: z.string().trim().superRefine((value, ctx) => {
     try {
       parseTrustProxy(value);

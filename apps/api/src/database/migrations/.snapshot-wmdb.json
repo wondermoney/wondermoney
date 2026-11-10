@@ -20371,6 +20371,23 @@
           "enumItems": [],
           "mappedType": "integer"
         },
+        "transfer_exchange_rate": {
+          "name": "transfer_exchange_rate",
+          "type": "numeric(18,8)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "unique": false,
+          "length": null,
+          "precision": 18,
+          "scale": 8,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "decimal"
+        },
         "unedited_settlement_amount": {
           "name": "unedited_settlement_amount",
           "type": "numeric(18,4)",

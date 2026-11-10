@@ -85,6 +85,15 @@ export class Transaction extends Base {
   @ManyToOne({ cascade: [], deleteRule: 'set null', entity: () => Transaction, fieldName: 'transfer_counterpart_key', nullable: true })
   transferCounterpartKey?: Rel<Transaction>;
 
+  /**
+   * On both rows of a pair across two currencies: the rate the banks settled at, the incoming
+   * amount over the outgoing one (units of the incoming currency per unit of the outgoing). Written
+   * by transfer matching alongside `transferCounterpartKey`; null on a same-currency pair and on
+   * every row not in a pair.
+   */
+  @Property({ columnType: 'numeric(18,8)', nullable: true })
+  transferExchangeRate?: null | number;
+
   /*
    * Where the money of an outgoing transfer went, when the user said so: another household account,
    * a portfolio or a goal. At most one is set, only on a TRANSFER_OUT row (`transaction-transfer.service.ts`).
