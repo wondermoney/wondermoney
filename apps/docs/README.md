@@ -32,3 +32,4 @@ sitemap, Open Graph, and JSON-LD URLs.
 - `proxy.ts` — locale gate plus legacy legal and Markdown rewrites
 
 See `AGENTS.md` and `content/docs/AGENTS.md` for active conventions.
+
