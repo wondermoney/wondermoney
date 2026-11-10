@@ -444,11 +444,12 @@ class AccountInitialSyncTransactionService {
   }
 
   /**
-   * Promote matched pending rows in place. For each booked row that
-   * uniquely matches a stored pending (exact amount/currency/counterparty, ±5d), set that pending's
-   * provider id to the booked row's, so the subsequent persist loop finds it and updates it in place
-   * (status→BOOKED, balance, date, amount) — preserving the user's category/notes and never creating
-   * a duplicate. Returns the keys of the pendings it promoted or expired (so expiry skips them).
+   * Promote matched pending rows in place. For each booked row that uniquely matches a stored
+   * pending (exact amount/currency/counterparty, ±5d, then a looser amount/merchant pass when no
+   * exact match exists), set that pending's provider id to the booked row's, so the subsequent
+   * persist loop finds it and updates it in place (status→BOOKED, balance, date, amount) —
+   * preserving the user's category/notes and never creating a duplicate. Returns the keys of the
+   * pendings it promoted or expired (so expiry skips them).
    *
    * The booked row may already be stored (the provider id is unique per account). Then the
    * pending is not promoted: re-keying it would collide, or, for a row the sync would find through
@@ -463,14 +464,14 @@ class AccountInitialSyncTransactionService {
     let plan: ReturnType<typeof planPromotions>; let pendingByKey: Map<number, Transaction>;
     try {
       // Hidden pendings too: otherwise the booked row is stored again as a visible duplicate.
-      const storedPendings = await em.find(Transaction, { accountKey: account, deletedAt: undefined, transactionStatusKey: statuses.pending }, { filters: { [HIDDEN_FILTER]: false }, populate: ['settlementCurrencyKey'] });
+      const storedPendings = await em.find(Transaction, { accountKey: account, deletedAt: undefined, transactionStatusKey: statuses.pending }, { filters: { [HIDDEN_FILTER]: false }, populate: ['settlementCurrencyKey', 'transactionMerchantKey'] });
       if (storedPendings.length === 0) return handled;
       const bookedMatchables = booked.map((row) => { const tx = row as Partial<BankSyncTransaction>; return { counterparty: tx.creditorName ?? tx.debtorName ?? undefined, currencyCode: tx.transactionAmount?.currency ?? tx.currency ?? '', settlementAmount: Number(tx.transactionAmount?.amount ?? tx.amount), transactionDate: rowDate(tx) }; });
-      const pendingMatchables = storedPendings.map((pending) => ({ currencyCode: pending.settlementCurrencyKey?.code ?? '', settlementAmount: pending.settlementAmount ?? 0, transactionDate: pending.transactionDate ?? new Date(0), transactionKey: pending.transactionKey }));
+      const pendingMatchables = storedPendings.map((pending) => ({ counterparty: pending.transactionMerchantKey?.name, currencyCode: pending.settlementCurrencyKey?.code ?? '', settlementAmount: pending.settlementAmount ?? 0, transactionDate: pending.transactionDate ?? new Date(0), transactionKey: pending.transactionKey }));
       plan = planPromotions(bookedMatchables, pendingMatchables);
       pendingByKey = new Map(storedPendings.map((pending) => [pending.transactionKey, pending]));
     } catch (error) { logger.warn({ error: sanitizeError(error) }, 'Pending promotion failed'); return handled; }
-    for (const { bookedIndex, pendingKey } of plan) {
+    for (const { amountDifference, bookedIndex, matchPass, pendingKey } of plan) {
       const pending = pendingByKey.get(pendingKey); const row = booked[bookedIndex];
       if (!pending || !row) continue;
       const tx = row as Partial<BankSyncTransaction>;
@@ -489,7 +490,14 @@ class AccountInitialSyncTransactionService {
           ? { enableBankingTransactionId: enableBankingTransactionIdFor(accountId, row) }
           : { nordigenInternalTransactionId: tx.internalTransactionId ?? tx.transactionId ?? tx.entryReference ?? this.buildStableId(accountId, row, 'nordigen') });
         handled.add(pendingKey);
-        await TransactionAuditService.log(em, { accountKey: account.accountKey, actorType: TransactionAuditActorType.SYNC, appuserKey: getAppuserKey(tenant.appuserKey), changes: { transactionStatusKey: { from: 'PENDING', to: 'BOOKED' } }, eventType: TransactionAuditEventType.PENDING_PROMOTED, source: 'pending-reconciliation', tenantKey: pending.tenantKey?.tenantKey ?? 0, transactionKey: pendingKey });
+        const bookedAmount = Number(tx.transactionAmount?.amount ?? tx.amount);
+        const changes: Record<string, { from: unknown; to: unknown }> = {
+          amountDifference: { from: null, to: amountDifference },
+          matchPass: { from: null, to: matchPass },
+          transactionStatusKey: { from: 'PENDING', to: 'BOOKED' },
+        };
+        if (matchPass === 'loose' && Number.isFinite(bookedAmount)) changes['settlementAmount'] = { from: pending.settlementAmount ?? 0, to: bookedAmount };
+        await TransactionAuditService.log(em, { accountKey: account.accountKey, actorType: TransactionAuditActorType.SYNC, appuserKey: getAppuserKey(tenant.appuserKey), changes, eventType: TransactionAuditEventType.PENDING_PROMOTED, source: 'pending-reconciliation', tenantKey: pending.tenantKey?.tenantKey ?? 0, transactionKey: pendingKey });
       } catch (error) { logger.warn({ error: sanitizeError(error), transactionKey: pendingKey }, 'Pending promotion failed'); }
     }
     return handled;
