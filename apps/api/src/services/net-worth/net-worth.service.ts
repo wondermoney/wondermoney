@@ -176,7 +176,7 @@ export class NetWorthService {
 
     // A manual asset counts at its value today, converted from its own currency at the latest
     // rate. One with no rate is left out and its currency reported, never added at face value.
-    const assetRates = await loadAssetRates(DI.em, manualAssets, currencyCode, { from: asOf, to: asOf });
+    const assetRates = await loadAssetRates(DI.em, manualAssets, currencyCode, { from: asOf, to: asOf }, rateScope(resolveTenantKeyNumber(appuserTenant.tenantKey)));
     const manualAssetRows: NetWorthInputRow[] = [];
     const unconvertedAssetCurrencies: string[] = [];
     for (const loaded of manualAssets) {

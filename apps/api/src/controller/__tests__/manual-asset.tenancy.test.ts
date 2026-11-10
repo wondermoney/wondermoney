@@ -9,6 +9,7 @@ import { tenantHttp, useRequestContextEm } from '@app/__tests__/__helpers__/tena
 import { Account } from '@entity/Account';
 import type { Appuser } from '@entity/Appuser';
 import { ExchangeRate } from '@entity/ExchangeRate';
+import { ExchangeRateOverride } from '@entity/ExchangeRateOverride';
 import { Transaction } from '@entity/Transaction';
 import manualAssetRoutes from '@route/manual-asset';
 
@@ -334,6 +335,19 @@ describe('manual assets', () => {
       expect(cabin).toMatchObject({ value: 9_000_000, valueInUserCurrency: null });
       const list = await http.as(owner.appuser).get('/v1/manual-assets');
       expect(list.body.summary).toEqual({ currencyCode: 'EUR', isComplete: false, totalValue: 50_000, unconvertedAssets: 1, unconvertedCurrencies: ['JPY'] });
+    });
+
+    it("values an asset at the household's own exchange-rate override, never another household's", async () => {
+      const { neighbour, owner } = await households();
+      const em = db.em();
+      const xof = await currencyFor(em, 'XOF');
+      em.create(ExchangeRateOverride, { date: new Date('2026-01-01T00:00:00Z'), fromCurrency: xof, rate: 0.0015, tenantKey: owner.tenant, toCurrency: owner.currency }, { partial: true });
+      em.create(ExchangeRateOverride, { date: new Date('2026-01-01T00:00:00Z'), fromCurrency: xof, rate: 0.002, tenantKey: neighbour.tenant, toCurrency: neighbour.currency }, { partial: true });
+      await em.flush();
+
+      await createAsset(owner.appuser, owner, { currencyKey: xof.currencyKey, name: 'Plot of land', value: 10_000_000 });
+
+      expect((await listed(owner.appuser))[0]).toMatchObject({ currency: 'XOF', valueInUserCurrency: 15_000 });
     });
 
     it('shows the partner the value in their own currency', async () => {

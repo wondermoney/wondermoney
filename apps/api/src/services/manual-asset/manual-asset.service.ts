@@ -6,7 +6,7 @@ import { Currency } from '@entity/Currency';
 import { ManualAsset } from '@entity/ManualAsset';
 import { ManualAssetValuation } from '@entity/ManualAssetValuation';
 import { Tenant } from '@entity/Tenant';
-import { type CurrencyPair, loadRateTable, type RateTable } from '@service/currency/exchange-rate';
+import { type CurrencyPair, loadRateTable, type RateScope, rateScope, type RateTable } from '@service/currency/exchange-rate';
 import { getRef } from '@utils/em-helpers';
 import { BadRequestError, ConflictError, ERROR_CODE, ForbiddenError, NotFoundError } from '@utils/errors';
 import { Money } from '@utils/money';
@@ -230,7 +230,7 @@ export async function getManualAsset(em: EntityManager, viewer: AssetViewer, man
 
 export async function listManualAssets(em: EntityManager, viewer: AssetViewer, now = new Date()): Promise<{ assets: ManualAssetDto[]; summary: ManualAssetsSummary }> {
   const loaded = await loadVisibleManualAssets(em, viewer);
-  const rates = await loadAssetRates(em, loaded, viewer.currencyCode, { from: now, to: now });
+  const rates = await loadAssetRates(em, loaded, viewer.currencyCode, { from: now, to: now }, rateScope(viewer.tenantKey));
   const assets = loaded.map((item) => toAssetDto(item, viewer, rates, now));
 
   const counted = assets.filter((asset) => asset.value != null);
@@ -251,9 +251,9 @@ export async function listValuations(em: EntityManager, viewer: AssetViewer, man
   return sortedValuationDtos(await loadAssetOrThrow(em, viewer, manualAssetKey));
 }
 
-/** The rates that convert these assets into `viewerCurrency` over `window`. */
-export async function loadAssetRates(em: EntityManager, assets: LoadedManualAsset[], viewerCurrency: string, window: { from: Date; to: Date }): Promise<RateTable> {
-  return loadRateTable(em, manualAssetRatePairs(assets, viewerCurrency), window);
+/** The rates that convert these assets into `viewerCurrency` over `window`: the feed's and the household's overrides (`scope`). */
+export async function loadAssetRates(em: EntityManager, assets: LoadedManualAsset[], viewerCurrency: string, window: { from: Date; to: Date }, scope: RateScope): Promise<RateTable> {
+  return loadRateTable(em, manualAssetRatePairs(assets, viewerCurrency), window, scope);
 }
 
 /** Every live asset the viewer may see, with its live valuations: the household's shared ones and their own private ones. */
@@ -329,7 +329,7 @@ export function visibleAssetsWhere(viewer: Pick<AssetViewer, 'appuserKey' | 'ten
 }
 
 async function describeAsset(em: EntityManager, viewer: AssetViewer, loaded: LoadedManualAsset, now: Date): Promise<ManualAssetDto> {
-  const rates = await loadAssetRates(em, [loaded], viewer.currencyCode, { from: now, to: now });
+  const rates = await loadAssetRates(em, [loaded], viewer.currencyCode, { from: now, to: now }, rateScope(viewer.tenantKey));
   return toAssetDto(loaded, viewer, rates, now);
 }
 
