@@ -17,6 +17,7 @@ import { computeAvailableBalance } from '@service/account/account-available-bala
 import { resolveAccountCsvImportFormat } from '@service/account/account-csv-import-format';
 import { startAccountRecalculation } from '@service/account/account-recalculation.service';
 import { computeSyncStatus } from '@service/account/account-sync-status.service';
+import type { BankSyncLastError } from '@service/bank-sync/bank-sync-history.service';
 import { convertWithStatus, type RateScope, rateScope } from '@service/currency/exchange-rate';
 import { describeFx, type FxDisplay, UNKNOWN_FX } from '@service/currency/fx-display';
 import { isManualAccount } from '@service/transaction/balance-chain.service';
@@ -134,6 +135,7 @@ export async function getAccount(req: Request, res: Response) {
         'currencyKey',
         'accountOwnerAppuserKey',
         'accountOwnerAppuserKey.currencyKey',
+        'enableBankingConnectionKey',
         'nordigenRequisitionKey',
       ],
     },
@@ -142,12 +144,12 @@ export async function getAccount(req: Request, res: Response) {
     throw new NotFoundError('Account not found');
   }
 
-  const [openIncidentRequisitionIds, pendingSumsByAccount, [fx]] = await Promise.all([
-    loadOpenIncidentRequisitionIds(req.user),
+  const [syncIncidentContext, pendingSumsByAccount, [fx]] = await Promise.all([
+    loadSyncIncidentContext(req.user),
     loadPendingSumsByAccount([account.accountKey]),
     describeAccountsFx([account], rateScope(req.tenant)),
   ]);
-  return res.json({ account: mapAccountSummary(account, { now: new Date(), openIncidentRequisitionIds, pendingSumsByAccount, viewerAppuserKey: req.user.appuserKey }, fx) });
+  return res.json({ account: mapAccountSummary(account, { ...syncIncidentContext, now: new Date(), pendingSumsByAccount, viewerAppuserKey: req.user.appuserKey }, fx) });
 }
 
 export async function getAccountFinancialInstitutions(_req: Request, res: Response) {
@@ -184,16 +186,17 @@ export async function getAccounts(req: Request, res: Response) {
         'currencyKey',
         'accountOwnerAppuserKey',
         'accountOwnerAppuserKey.currencyKey',
+        'enableBankingConnectionKey',
         'nordigenRequisitionKey',
       ],
     },
   );
-  const [openIncidentRequisitionIds, pendingSumsByAccount, fx] = await Promise.all([
-    loadOpenIncidentRequisitionIds(req.user),
+  const [syncIncidentContext, pendingSumsByAccount, fx] = await Promise.all([
+    loadSyncIncidentContext(req.user),
     loadPendingSumsByAccount(accounts.map((account) => account.accountKey)),
     describeAccountsFx(accounts, rateScope(req.tenant)),
   ]);
-  const syncContext = { now: new Date(), openIncidentRequisitionIds, pendingSumsByAccount, viewerAppuserKey: req.user.appuserKey };
+  const syncContext = { ...syncIncidentContext, now: new Date(), pendingSumsByAccount, viewerAppuserKey: req.user.appuserKey };
   const transformedData = accounts.map((account, index) => mapAccountSummary(account, syncContext, fx[index]));
   return res.json({ accounts: transformedData });
 }
@@ -233,6 +236,8 @@ export interface PendingSums {
 
 /** Context for the per-account stale-sync signal and available balance. */
 export interface AccountSyncContext {
+  /** Newest failure per requisition id, for the account's `syncStatus.lastError`. */
+  lastErrorByRequisitionId: Map<string, BankSyncLastError>;
   now: Date;
   /** requisitionIds that currently have an open (non-terminal, user-visible) sync incident. */
   openIncidentRequisitionIds: Set<string>;
@@ -265,6 +270,7 @@ export function mapAccountSummary(account: Account, syncContext?: AccountSyncCon
   const institution = account.accountFinancialInstitutionKey;
   const source = account.nordigenRequisitionKey || account.accountId ? ('open_banking' as const) : ('manual' as const);
   const pending = syncContext?.pendingSumsByAccount?.get(account.accountKey);
+  const requisitionId = accountRequisitionId(account);
 
   return {
     accountFinancialInstitutionKey: institution
@@ -300,7 +306,8 @@ export function mapAccountSummary(account: Account, syncContext?: AccountSyncCon
     source,
     syncStatus: syncContext
       ? computeSyncStatus({
-          hasOpenIncident: isAccountIncidentOpen(account, syncContext.openIncidentRequisitionIds),
+          hasOpenIncident: requisitionId ? syncContext.openIncidentRequisitionIds.has(requisitionId) : false,
+          lastError: requisitionId ? syncContext.lastErrorByRequisitionId.get(requisitionId) ?? null : null,
           lastSyncedAt: account.transactionsRefreshedAt ?? account.refreshedAt ?? null,
           now: syncContext.now,
           source,
@@ -309,9 +316,15 @@ export function mapAccountSummary(account: Account, syncContext?: AccountSyncCon
   };
 }
 
-function isAccountIncidentOpen(account: Account, openIncidentRequisitionIds: Set<string>): boolean {
-  const requisitionId = account.nordigenRequisitionKey?.requisitionId;
-  return requisitionId ? openIncidentRequisitionIds.has(requisitionId) : false;
+/**
+ * The provider-issued id incidents store for the account's connection: the legacy
+ * requisition id, or the Enable Banking session (falling back to the pre-link state).
+ */
+function accountRequisitionId(account: Account): string | undefined {
+  const legacy = (account.nordigenRequisitionKey as unknown as undefined | { requisitionId?: string })?.requisitionId;
+  if (legacy) return legacy;
+  const connection = account.enableBankingConnectionKey as unknown as undefined | { sessionId?: null | string; state?: string };
+  return connection?.sessionId ?? connection?.state;
 }
 
 /**
@@ -388,20 +401,6 @@ export async function recalculateAccount(req: Request, res: Response) {
  * Empty map on any failure so available balance degrades to the current balance rather than
  * breaking the accounts list.
  */
-async function loadOpenIncidentRequisitionIds(appuserKey: Appuser): Promise<Set<string>> {
-  try {
-    const incidents = await DI.em.find(
-      BankSyncIncident,
-      { appuserKey, deletedAt: undefined, finality: BankSyncFinality.NON_TERMINAL, userVisible: true },
-      { fields: ['requisitionId'] },
-    );
-    return new Set(incidents.map((incident) => incident.requisitionId).filter((id): id is string => Boolean(id)));
-  } catch {
-    // Degrade to a recency-only staleness signal rather than breaking the accounts list.
-    return new Set();
-  }
-}
-
 async function loadPendingSumsByAccount(accountKeys: number[]): Promise<Map<number, PendingSums>> {
   const sums = new Map<number, PendingSums>();
   if (accountKeys.length === 0) return sums;
@@ -425,6 +424,36 @@ async function loadPendingSumsByAccount(accountKeys: number[]): Promise<Map<numb
     return new Map();
   }
   return sums;
+}
+
+/**
+ * The caller's sync incidents, reduced to the two signals the accounts list needs:
+ * which requisitions currently have an open incident, and the newest failure per
+ * requisition. Empty on any failure so staleness degrades to a recency-only signal
+ * rather than breaking the accounts list.
+ */
+async function loadSyncIncidentContext(appuserKey: Appuser): Promise<Pick<AccountSyncContext, 'lastErrorByRequisitionId' | 'openIncidentRequisitionIds'>> {
+  try {
+    const incidents = await DI.em.find(
+      BankSyncIncident,
+      { appuserKey, deletedAt: undefined },
+      { fields: ['errorCode', 'finality', 'requisitionId', 'updatedAt', 'userVisible'], orderBy: { updatedAt: QueryOrder.DESC } },
+    );
+    const openIncidentRequisitionIds = new Set<string>();
+    const lastErrorByRequisitionId = new Map<string, BankSyncLastError>();
+    for (const incident of incidents) {
+      if (!incident.requisitionId) continue;
+      if (incident.finality === BankSyncFinality.NON_TERMINAL && incident.userVisible === true) {
+        openIncidentRequisitionIds.add(incident.requisitionId);
+      }
+      if (incident.errorCode && !lastErrorByRequisitionId.has(incident.requisitionId)) {
+        lastErrorByRequisitionId.set(incident.requisitionId, { code: incident.errorCode, occurredAt: incident.updatedAt.toISOString() });
+      }
+    }
+    return { lastErrorByRequisitionId, openIncidentRequisitionIds };
+  } catch {
+    return { lastErrorByRequisitionId: new Map(), openIncidentRequisitionIds: new Set() };
+  }
 }
 
 function resolveRequiredCurrencyCode(code: string | undefined, relation: string): string {

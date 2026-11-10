@@ -27,6 +27,12 @@ export const bankSyncStatusRequestSchema = z.object({
   }),
 });
 
+export const bankConnectionSyncsRequestSchema = z.object({
+  params: z.object({
+    connectionId: positiveIntId,
+  }),
+});
+
 export const unlinkRequisitionRequestSchema = z.object({
   params: z.object({
     requisitionId: positiveIntId,

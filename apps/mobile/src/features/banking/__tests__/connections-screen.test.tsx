@@ -16,6 +16,7 @@ const row = (over: Partial<BankConnectionRow> = {}): BankConnectionRow => ({
   daysUntilExpiry: null,
   expiresAt: null,
   institutionName: 'Real Bank',
+  lastError: null,
   provider: 'GoCardless',
   status: 'connected',
   ...over,

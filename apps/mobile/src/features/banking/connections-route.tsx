@@ -81,6 +81,15 @@ export function ConnectionsRoute() {
       }}
       onConnectBank={() => router.push('/more/banking/connect' as Href)}
       onImportStatement={() => router.push('/more/banking/import' as Href)}
+      onViewHistory={(connectionId, institutionName) => {
+        router.push({
+          pathname: '/more/banking/history',
+          params: {
+            connectionId: String(connectionId),
+            ...(institutionName ? { institutionName } : {}),
+          },
+        } as Href)
+      }}
       onDisconnect={async (connectionId) => {
         setDisconnectFailure(null)
         try {

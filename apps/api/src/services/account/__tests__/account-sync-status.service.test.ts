@@ -16,6 +16,7 @@ describe('computeSyncStatus', () => {
     const status = computeSyncStatus({ hasOpenIncident: false, lastSyncedAt: hoursAgo(1), now: NOW, source: 'open_banking' });
     expect(status).toEqual({
       hasOpenIncident: false,
+      lastError: null,
       lastSyncedAt: hoursAgo(1).toISOString(),
       staleness: 'fresh',
     });
@@ -31,12 +32,18 @@ describe('computeSyncStatus', () => {
 
   it('treats a never-synced open-banking account as very_stale', () => {
     const status = computeSyncStatus({ hasOpenIncident: false, lastSyncedAt: null, now: NOW, source: 'open_banking' });
-    expect(status).toEqual({ hasOpenIncident: false, lastSyncedAt: null, staleness: 'very_stale' });
+    expect(status).toEqual({ hasOpenIncident: false, lastError: null, lastSyncedAt: null, staleness: 'very_stale' });
   });
 
   it('reports error when there is an open incident, regardless of recency', () => {
     const status = computeSyncStatus({ hasOpenIncident: true, lastSyncedAt: hoursAgo(1), now: NOW, source: 'open_banking' });
-    expect(status).toEqual({ hasOpenIncident: true, lastSyncedAt: hoursAgo(1).toISOString(), staleness: 'error' });
+    expect(status).toEqual({ hasOpenIncident: true, lastError: null, lastSyncedAt: hoursAgo(1).toISOString(), staleness: 'error' });
+  });
+
+  it('carries the newest failure so the client can say what went wrong and when', () => {
+    const lastError = { code: 'rate_limited', occurredAt: hoursAgo(2).toISOString() };
+    const status = computeSyncStatus({ hasOpenIncident: false, lastError, lastSyncedAt: hoursAgo(1), now: NOW, source: 'open_banking' });
+    expect(status?.lastError).toEqual(lastError);
   });
 
   it('uses inclusive lower bounds: exactly 24h is stale, exactly 72h is very_stale', () => {

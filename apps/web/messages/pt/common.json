@@ -2583,5 +2583,51 @@
     "total-leaves-out": "Este total deixa de fora {count, plural, one {# conta, empréstimo ou carteira} other {# contas, empréstimos ou carteiras}} que não foi possível avaliar em {currency}.",
     "missing-rates": "Ainda não há taxa de câmbio para {currencies}.",
     "add-rate": "Adiciona uma taxa de câmbio"
+  },
+  "bank-sync": {
+    "errors": {
+      "account-phase-failed": "O teu banco não enviou a lista de contas.",
+      "authentication": "O acesso ao teu banco tem de ser configurado novamente.",
+      "cancelled": "A ligação ao banco foi cancelada antes de terminar.",
+      "consent-expired": "O teu acesso a este banco expirou.",
+      "data-validation": "O teu banco enviou dados que não conseguimos ler.",
+      "institution-unavailable": "O teu banco não está disponível neste momento.",
+      "internal": "Algo falhou do nosso lado.",
+      "invalid-requisition": "Esta ligação ao banco já não é válida.",
+      "provider-unavailable": "O teu banco não respondeu.",
+      "queue-unavailable": "Não foi possível iniciar a sincronização.",
+      "rate-limited": "O banco limitou a frequência com que podemos sincronizar.",
+      "timeout": "O teu banco demorou demasiado a responder.",
+      "transaction-phase-failed": "O teu banco não enviou as transações.",
+      "unknown": "A sincronização falhou."
+    },
+    "actions": {
+      "contact-support": "Contactar o suporte",
+      "reconnect": "Voltar a ligar o banco",
+      "wait": "Vamos tentar novamente automaticamente"
+    },
+    "history": {
+      "action": "Histórico de sincronizações",
+      "title": "Histórico de sincronizações",
+      "description": "As últimas 20 tentativas de sincronização desta ligação.",
+      "loading": "A carregar o histórico de sincronizações",
+      "error": "Não foi possível carregar o histórico de sincronizações.",
+      "empty": "Ainda não há sincronizações.",
+      "started": "Início",
+      "finished": "Fim",
+      "inProgress": "Em curso",
+      "accounts": "{count, plural, one {# conta} other {# contas}}",
+      "rows": "{count, plural, one {# transação nova} other {# transações novas}}",
+      "nextAttempt": "Próxima tentativa {date}",
+      "flow": {
+        "initial-add": "Primeira sincronização",
+        "scheduled-refresh": "Sincronização agendada"
+      },
+      "result": {
+        "failed": "Falhou",
+        "full_success": "Concluída",
+        "partial": "Parcialmente concluída"
+      }
+    }
   }
 }

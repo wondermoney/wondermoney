@@ -4098,5 +4098,54 @@
       "hint": "Converted at the rate from {{date}}, the latest available. It is updated when a newer rate arrives.",
       "hintNoDate": "Converted at an older rate, the latest available. It is updated when a newer rate arrives."
     }
+  },
+  "bank-sync": {
+    "errors": {
+      "account-phase-failed": "Your bank didn't send the account list.",
+      "authentication": "Your bank sign-in needs to be set up again.",
+      "cancelled": "The bank connection was cancelled before it finished.",
+      "consent-expired": "Your access to this bank has expired.",
+      "data-validation": "Your bank sent data we couldn't read.",
+      "institution-unavailable": "Your bank isn't available right now.",
+      "internal": "Something went wrong on our side.",
+      "invalid-requisition": "This bank connection is no longer valid.",
+      "provider-unavailable": "Your bank didn't respond.",
+      "queue-unavailable": "The sync couldn't start.",
+      "rate-limited": "The bank limited how often we can sync.",
+      "timeout": "Your bank took too long to respond.",
+      "transaction-phase-failed": "Your bank didn't send the transactions.",
+      "unknown": "The sync failed."
+    },
+    "actions": {
+      "contact-support": "Contact support",
+      "reconnect": "Reconnect your bank",
+      "wait": "We'll try again automatically"
+    },
+    "history": {
+      "action": "Sync history",
+      "actionLabel": "Sync history for {{institution}}",
+      "title": "Sync history",
+      "description": "The last 20 times we tried to sync this connection.",
+      "loading": "Loading sync history",
+      "error": "Could not load sync history.",
+      "empty": "No syncs yet.",
+      "started": "Started",
+      "finished": "Finished",
+      "inProgress": "In progress",
+      "accounts_one": "{{count}} account",
+      "accounts_other": "{{count}} accounts",
+      "rows_one": "{{count}} new transaction",
+      "rows_other": "{{count}} new transactions",
+      "nextAttempt": "Next attempt {{date}}",
+      "flow": {
+        "initial-add": "First sync",
+        "scheduled-refresh": "Scheduled sync"
+      },
+      "result": {
+        "failed": "Failed",
+        "full_success": "Succeeded",
+        "partial": "Partly succeeded"
+      }
+    }
   }
 }

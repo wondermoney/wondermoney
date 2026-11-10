@@ -1,4 +1,5 @@
 import type { EntityManager } from '@mikro-orm/core';
+import { BANK_SYNC_ERROR_CODES, type BankSyncErrorCode } from '@wondermoney/shared';
 
 import { Appuser } from '@entity/Appuser';
 import { BankSyncIncident, BankSyncResult } from '@entity/BankSyncIncident';
@@ -10,7 +11,7 @@ import logger from '@utils/logger';
 export interface BankSyncStatusDto {
   attempts: number;
   errorCategory?: 'authentication' | 'cancelled' | 'consent' | 'data_validation' | 'internal' | 'provider' | 'queue' | 'timeout' | 'unknown';
-  errorCode?: 'account_phase_failed' | 'authentication' | 'cancelled' | 'consent_expired' | 'data_validation' | 'institution_unavailable' | 'internal' | 'invalid_requisition' | 'provider_unavailable' | 'queue_unavailable' | 'rate_limited' | 'timeout' | 'transaction_phase_failed' | 'unknown';
+  errorCode?: BankSyncErrorCode;
   final: boolean;
   incidentId: string;
   result: 'failed' | 'full_success' | 'partial' | 'pending';
@@ -19,7 +20,7 @@ export interface BankSyncStatusDto {
 }
 
 const ERROR_CATEGORIES = new Set<NonNullable<BankSyncStatusDto['errorCategory']>>(['authentication', 'cancelled', 'consent', 'data_validation', 'internal', 'provider', 'queue', 'timeout', 'unknown']);
-const ERROR_CODES = new Set<NonNullable<BankSyncStatusDto['errorCode']>>(['account_phase_failed', 'authentication', 'cancelled', 'consent_expired', 'data_validation', 'institution_unavailable', 'internal', 'invalid_requisition', 'provider_unavailable', 'queue_unavailable', 'rate_limited', 'timeout', 'transaction_phase_failed', 'unknown']);
+const ERROR_CODES = new Set<BankSyncErrorCode>(BANK_SYNC_ERROR_CODES);
 
 export class BankSyncStatusService {
   constructor(private readonly em: EntityManager) {}

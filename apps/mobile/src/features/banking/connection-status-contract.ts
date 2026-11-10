@@ -18,18 +18,9 @@ import { readEndpoint, tolerantEnum, writeEndpoint } from '@/lib/api/runtime-sch
  *
  * `connectionId`: the real `GET /v1/banking/connections` controller
  * (`getBankConnections` / `mapRequisition` / `mapEnableBankingConnection` in
- * api's `banking-connections.ts`) deliberately emits no entity identifiers on
- * this list, so the field is always absent. It stays (`nullable().optional()`)
- * because `use-bank-connection-disconnect-mutation.ts`,
- * `connections-screen.tsx`, and `connections-route.tsx` key the disconnect
- * action off `row.connectionId`, and there is no other identifier to use.
- * The disconnect endpoint this file builds (`DELETE
- * /v1/banking/connections/:connectionId`) does not exist on the real API —
- * the only delete route is `DELETE /v1/banking/requisition/:id`. Since every
- * row normalizes `connectionId` to `null`, the disconnect button is always
- * hidden (see `connections-screen.tsx`'s `canDisconnect` check). Open product/
- * backend decision: either the read DTO needs a stable, non-leaking id, or the
- * disconnect feature needs to come out.
+ * api's `banking-connections.ts`) sends the Enable Banking connection key, so a
+ * row can offer its sync history and its disconnect action. Legacy GoCardless
+ * rows send `null`: they have no history endpoint.
  */
 
 // A status, provider or access type this build doesn't know reads as 'unknown', so one new value
@@ -38,6 +29,16 @@ import { readEndpoint, tolerantEnum, writeEndpoint } from '@/lib/api/runtime-sch
 export const connectionStatusSchema = tolerantEnum(['connected', 'error', 'expired', 'expiring', 'processing', 'revoked'], 'unknown')
 
 export const bankConnectionProviderSchema = tolerantEnum(['GoCardless', 'EnableBanking'], 'unknown')
+
+/**
+ * The newest failure for a connection. `code` is the shared bank-sync vocabulary
+ * (`@wondermoney/shared/bank-sync`); the client translates it and never shows a
+ * provider message.
+ */
+export const bankSyncLastErrorSchema = z.object({
+  code: z.string().min(1),
+  occurredAt: z.string().datetime(),
+})
 
 export const bankConnectionSchema = z
   .object({
@@ -50,6 +51,7 @@ export const bankConnectionSchema = z
     daysUntilExpiry: z.number().int().nonnegative().nullable().optional(),
     expiresAt: z.string().datetime().nullable(),
     institutionName: z.string().nullable(),
+    lastError: bankSyncLastErrorSchema.nullable().optional(),
     provider: bankConnectionProviderSchema,
     status: connectionStatusSchema,
   })
@@ -75,18 +77,17 @@ export const isValidBankConnectionId = (connectionId: number): boolean => (
 )
 
 /**
- * Disconnect (unsync) a linked bank. Mirrors web's
- * `useDeleteRequisition` (`DELETE /v1/banking/requisition/:requisitionKey`)
- * in spirit but is nested under this vertical's own `/v1/banking/connections`
- * resource, matching how goal archive (`DELETE /v1/goals/:id`) and account
- * delete (`DELETE /v1/account/:id`) already key writes off the read
- * collection's own path rather than a legacy sibling route.
+ * Disconnect (unsync) a linked bank. The API's only delete route is
+ * `DELETE /v1/banking/requisition/:requisitionId`; despite the legacy name, the
+ * parameter is the Enable Banking connection key (`unlinkRequisition` resolves
+ * an `EnableBankingConnection` by it). Web's `useDeleteRequisition` uses the
+ * same route.
  */
 export function createDisconnectBankConnectionEndpoint(connectionId: number) {
   if (!isValidBankConnectionId(connectionId)) throw new Error('A positive safe connection id is required.')
   return writeEndpoint({
     method: 'DELETE',
-    path: `/v1/banking/connections/${connectionId}`,
+    path: `/v1/banking/requisition/${connectionId}`,
     schema: z.undefined(),
   })
 }

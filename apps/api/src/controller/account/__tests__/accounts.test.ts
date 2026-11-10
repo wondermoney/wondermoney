@@ -67,6 +67,7 @@ const accountSummaryPopulate = [
   'currencyKey',
   'accountOwnerAppuserKey',
   'accountOwnerAppuserKey.currencyKey',
+  'enableBankingConnectionKey',
   'nordigenRequisitionKey',
 ];
 
@@ -94,11 +95,12 @@ describe('getAccount', () => {
       },
       { populate: accountSummaryPopulate },
     );
-    // Plus the open-incident lookup (stale-sync) and the pending-sums lookup (available balance).
+    // Plus the sync-incident lookup (stale-sync + last error) and the pending-sums lookup
+    // (available balance).
     expect(mocks.find).toHaveBeenCalledWith(
       expect.anything(),
-      { appuserKey: user, deletedAt: undefined, finality: 'non_terminal', userVisible: true },
-      { fields: ['requisitionId'] },
+      { appuserKey: user, deletedAt: undefined },
+      { fields: ['errorCode', 'finality', 'requisitionId', 'updatedAt', 'userVisible'], orderBy: { updatedAt: 'DESC' } },
     );
     expect(mocks.persist).not.toHaveBeenCalled();
   });
@@ -155,7 +157,7 @@ describe('getAccount', () => {
         ownerFirstName: null,
         refreshedAt: '2026-07-18T10:15:00.000Z',
         source: 'open_banking',
-        syncStatus: { hasOpenIncident: false, lastSyncedAt: '2026-07-18T10:15:00.000Z', staleness: 'very_stale' },
+        syncStatus: { hasOpenIncident: false, lastError: null, lastSyncedAt: '2026-07-18T10:15:00.000Z', staleness: 'very_stale' },
       },
     });
     const payload = vi.mocked(res.json).mock.calls[0]?.[0] as { account: Record<string, unknown> };
@@ -244,6 +246,7 @@ describe('getAccounts', () => {
           'currencyKey',
           'accountOwnerAppuserKey',
           'accountOwnerAppuserKey.currencyKey',
+          'enableBankingConnectionKey',
           'nordigenRequisitionKey',
         ],
       },
@@ -318,7 +321,7 @@ describe('getAccounts', () => {
           ownerFirstName: null,
           refreshedAt: '2026-07-17T09:30:00.000Z',
           source: 'open_banking',
-          syncStatus: { hasOpenIncident: false, lastSyncedAt: '2026-07-17T09:30:00.000Z', staleness: 'very_stale' },
+          syncStatus: { hasOpenIncident: false, lastError: null, lastSyncedAt: '2026-07-17T09:30:00.000Z', staleness: 'very_stale' },
         },
         {
           accountFinancialInstitutionKey: null,
@@ -367,13 +370,35 @@ describe('getAccounts', () => {
           transactionsRefreshedAt: new Date(),
         }),
       ])
-      .mockResolvedValueOnce([{ requisitionId: 'req-1' }]);
+      .mockResolvedValueOnce([{ errorCode: null, finality: 'non_terminal', requisitionId: 'req-1', updatedAt: new Date(), userVisible: true }]);
     const res = makeResponse();
 
     await getAccounts({ tenant: { tenantKey: 11 }, user: { appuserKey: 7 } } as unknown as Request, res);
 
     const payload = vi.mocked(res.json).mock.calls[0]?.[0] as { accounts: { syncStatus: unknown }[] };
-    expect(payload.accounts[0]?.syncStatus).toEqual({ hasOpenIncident: true, lastSyncedAt: expect.any(String), staleness: 'error' });
+    expect(payload.accounts[0]?.syncStatus).toEqual({ hasOpenIncident: true, lastError: null, lastSyncedAt: expect.any(String), staleness: 'error' });
+  });
+
+  it('reports the newest failure for the account connection as lastError', async () => {
+    const occurredAt = new Date('2026-07-20T08:00:00.000Z');
+    mocks.find
+      .mockResolvedValueOnce([
+        account({
+          accountKey: 6,
+          nordigenRequisitionKey: { requisitionId: 'req-2' },
+          refreshedAt: new Date(),
+          transactionsRefreshedAt: new Date(),
+        }),
+      ])
+      .mockResolvedValueOnce([{ errorCode: 'rate_limited', finality: 'terminal_failure', requisitionId: 'req-2', updatedAt: occurredAt, userVisible: false }]);
+    const res = makeResponse();
+
+    await getAccounts({ tenant: { tenantKey: 11 }, user: { appuserKey: 7 } } as unknown as Request, res);
+
+    const payload = vi.mocked(res.json).mock.calls[0]?.[0] as { accounts: { syncStatus: unknown }[] };
+    expect(payload.accounts[0]?.syncStatus).toMatchObject({
+      lastError: { code: 'rate_limited', occurredAt: occurredAt.toISOString() },
+    });
   });
 
   it('exposes available balance as the current balance net of pending transactions', async () => {
@@ -444,6 +469,7 @@ describe('mapAccountSummary', () => {
       isPrivate: true,
     });
     const asOwner = mapAccountSummary(owned, {
+      lastErrorByRequisitionId: new Map(),
       now: new Date(),
       openIncidentRequisitionIds: new Set(),
       viewerAppuserKey: 7,
@@ -451,6 +477,7 @@ describe('mapAccountSummary', () => {
     expect(asOwner).toMatchObject({ isOwnedByViewer: true, isPrivate: true, ownerFirstName: 'Ana' });
 
     const asOther = mapAccountSummary(owned, {
+      lastErrorByRequisitionId: new Map(),
       now: new Date(),
       openIncidentRequisitionIds: new Set(),
       viewerAppuserKey: 8,
