@@ -73,6 +73,8 @@ export interface CashflowPoint {
   income: number;
   expenses: number;
   net: number;
+  /** `(income - expenses) / income`; null when the month has no income. */
+  savingsRate?: number | null;
 }
 
 /** Graph shape for `GET /v1/reports/sankey`. */

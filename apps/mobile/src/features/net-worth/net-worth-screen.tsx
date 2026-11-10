@@ -37,7 +37,7 @@ import {
   type SectionState,
   type SetupSteps,
 } from './home-sections'
-import { balanceSheet, formatMonthName, netWorthChanges, type CashflowScale, type NetWorthChange, type ResolvedHistoryPoint } from './home-model'
+import { balanceSheet, formatMonthName, netWorthChanges, type CashflowView, type NetWorthChange, type ResolvedHistoryPoint } from './home-model'
 import type { NetWorthRowDto } from './net-worth-contract'
 import { NetWorthChart } from './net-worth-chart'
 import type { LoanDto } from '@/features/loans/loans-contract'
@@ -80,7 +80,7 @@ export type HomeSections = {
   /** The bank connection alerts not yet dismissed; null or absent shows nothing. */
   bankAlert?: BankAlertBannerModel | null
   month: SectionState<readonly BudgetMonthRow[]>
-  cashflow: SectionState<CashflowScale>
+  cashflow: SectionState<CashflowView>
   loans: SectionState<{ upcoming: readonly LoanDto[]; hasLoans: boolean }>
   latest: SectionState<{ transactions: readonly TransactionDto[]; unreviewedCount: number }>
   insight: InsightState

@@ -58,7 +58,7 @@ const givenTransactions = (...transactions: ReturnType<typeof makeTransaction>[]
 describe('buildCashflowCsv', () => {
   it('emits the contract column order with 2-decimal amounts and a BOM', () => {
     const csv = buildCashflowCsv([
-      { expenses: 300, income: 1000, month: '2026-01-01T00:00:00.000Z', net: 700 },
+      { expenses: 300, income: 1000, month: '2026-01-01T00:00:00.000Z', net: 700, savingsRate: 0.7 },
     ]);
 
     expect(csv).toBe('\uFEFFmonth,income,expenses,net\n2026-01-01T00:00:00.000Z,1000.00,300.00,700.00\n');
@@ -83,7 +83,7 @@ describe('getCashflowReport month bucketing', () => {
       }),
     );
 
-    expect(rows).toEqual([{ expenses: 0, income: 1000, month: '2026-08-01T00:00:00.000Z', net: 1000 }]);
+    expect(rows).toEqual([{ expenses: 0, income: 1000, month: '2026-08-01T00:00:00.000Z', net: 1000, savingsRate: 1 }]);
     expect(rows.map((row) => row.month)).not.toContain('2026-07-01T00:00:00.000Z');
   });
 
@@ -99,7 +99,7 @@ describe('getCashflowReport month bucketing', () => {
       }),
     );
 
-    expect(rows).toEqual([{ expenses: 250, income: 0, month: '2026-08-01T00:00:00.000Z', net: -250 }]);
+    expect(rows).toEqual([{ expenses: 250, income: 0, month: '2026-08-01T00:00:00.000Z', net: -250, savingsRate: null }]);
     expect(rows.map((row) => row.month)).not.toContain('2026-09-01T00:00:00.000Z');
   });
 
@@ -113,7 +113,7 @@ describe('getCashflowReport month bucketing', () => {
 
     const { data: rows } = await getCashflowReport(makeInput({ timezone: 'Europe/Lisbon' }));
 
-    expect(rows).toEqual([{ expenses: 0, income: 300, month: '2026-10-01T00:00:00.000Z', net: 300 }]);
+    expect(rows).toEqual([{ expenses: 0, income: 300, month: '2026-10-01T00:00:00.000Z', net: 300, savingsRate: 1 }]);
   });
 
   it('buckets in the default calendar when the caller sends no timezone', async () => {
@@ -121,7 +121,7 @@ describe('getCashflowReport month bucketing', () => {
 
     const { data: rows } = await getCashflowReport({ ...makeInput(), filters: makeFilters({ timezone: undefined }) });
 
-    expect(rows).toEqual([{ expenses: 0, income: 1000, month: '2026-08-01T00:00:00.000Z', net: 1000 }]);
+    expect(rows).toEqual([{ expenses: 0, income: 1000, month: '2026-08-01T00:00:00.000Z', net: 1000, savingsRate: 1 }]);
   });
 
   it('falls back to the default calendar rather than throwing on an unusable timezone', async () => {
@@ -129,7 +129,7 @@ describe('getCashflowReport month bucketing', () => {
 
     const { data: rows } = await getCashflowReport(makeInput({ timezone: 'Middle/Earth' }));
 
-    expect(rows).toEqual([{ expenses: 0, income: 1000, month: '2026-08-01T00:00:00.000Z', net: 1000 }]);
+    expect(rows).toEqual([{ expenses: 0, income: 1000, month: '2026-08-01T00:00:00.000Z', net: 1000, savingsRate: 1 }]);
   });
 
   it('leaves a month with no transactions absent instead of emitting a zero row', async () => {
@@ -151,7 +151,7 @@ describe('getCashflowReport month bucketing', () => {
 
     const { data: rows } = await getCashflowReport(makeInput({ timezone: 'Europe/Lisbon' }));
 
-    expect(rows).toEqual([{ expenses: 500, income: 500, month: '2026-01-01T00:00:00.000Z', net: 0 }]);
+    expect(rows).toEqual([{ expenses: 500, income: 500, month: '2026-01-01T00:00:00.000Z', net: 0, savingsRate: 0 }]);
   });
 
   it('orders months chronologically across the single- to double-digit boundary', async () => {

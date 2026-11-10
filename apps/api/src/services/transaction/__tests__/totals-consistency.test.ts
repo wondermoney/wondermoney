@@ -26,6 +26,7 @@ import { listTransactions } from '@service/transaction/transaction-list.service'
 import { setTransactionSplits } from '@service/transaction/transaction-split.service';
 import type { TransactionFilterInput } from '@service/transaction/transaction-total.service';
 import { roundDisplay } from '@utils/money';
+import { savingsRateNumber } from '@utils/savings-rate';
 import { reportFiltersSchema } from '@validators/reports';
 
 /*
@@ -270,11 +271,22 @@ describe('report and dashboard totals equal the transaction list total', () => {
       const body = await callHandler(getAccountsCashflow, { fromDate: JULY.fromDate, timezone: TIME_ZONE });
       const listed = await list(DASHBOARD);
 
-      const july = (body['cashflow'] as { amount: number; date: string }[]).find((month) => month.date.startsWith('2026-07'));
+      const july = (body['cashflow'] as { amount: number; date: string; expenses: number; income: number; savingsRate: null | number }[]).find((month) => month.date.startsWith('2026-07'));
       // 2000 + 30 in; 40 + 70 + 15 + 12 + 18 + 5 + 18 + 10 out.
       expect(listed.amount).toBe(1842);
       expect(july?.amount).toBe(listed.amount);
+      expect(july?.income).toBe(listed.moneyIn);
+      expect(july?.expenses).toBe(listed.moneyOut);
       expect((body['completeness'] as { unconvertedTransactions: number }).unconvertedTransactions).toBe(listed.completeness.unconvertedTransactions);
+    });
+
+    it('states the savings rate the shared helper defines, from its own income and expenses', async () => {
+      const body = await callHandler(getAccountsCashflow, { fromDate: JULY.fromDate, timezone: TIME_ZONE });
+
+      const july = (body['cashflow'] as { date: string; expenses: number; income: number; savingsRate: null | number }[]).find((month) => month.date.startsWith('2026-07'));
+      if (!july) throw new Error('The July cash-flow row is missing');
+
+      expect(july.savingsRate).toBe(savingsRateNumber(july.income, july.expenses));
     });
 
     it('category spending is the list\'s money out', async () => {

@@ -26,6 +26,12 @@ export type AmountProps = {
    * a change, where direction is the point.
    */
   delta?: boolean
+  /**
+   * The value whose sign decides the delta's tone, when that is not the
+   * displayed value. Spending is the case: a fall is good, so a negative delta
+   * takes the success tone. Ignored in privacy mode, where the mask has no tone.
+   */
+  toneValue?: number
   align?: TextStyle['textAlign']
   /**
    * Sets the fraction (".67") smaller on the same baseline, about 55% of the
@@ -67,6 +73,7 @@ export function Amount({
   locale,
   size = 'amount',
   delta = false,
+  toneValue,
   align,
   split = false,
   fit = false,
@@ -119,8 +126,9 @@ export function Amount({
 
   // A delta is the one figure where direction *is* the content, so it takes
   // semantic ink — and it takes an explicit sign alongside it, because colour
-  // never acts alone.
-  const tone = delta ? (value > 0 ? 'success' : value < 0 ? 'destructive' : 'muted') : 'default'
+  // never acts alone. `toneValue` lets spending read a fall as the good news.
+  const direction = toneValue ?? value
+  const tone = delta ? (direction > 0 ? 'success' : direction < 0 ? 'destructive' : 'muted') : 'default'
 
   return (
     <View style={[styles.row, align === 'right' ? styles.right : null]} testID={testID}>

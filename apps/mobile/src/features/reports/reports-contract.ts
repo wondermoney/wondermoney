@@ -78,6 +78,8 @@ export const cashflowPointSchema = z.object({
   income: z.number().finite(),
   expenses: z.number().finite(),
   net: z.number().finite(),
+  // `(income - expenses) / income`; null when the month has no income.
+  savingsRate: z.number().finite().nullish(),
 })
 
 const cashflowResponseSchema = reportResponseSchema(z.array(cashflowPointSchema))

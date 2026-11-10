@@ -61,7 +61,17 @@
       "list-label": "Flujo de caja neto, de {from} a {to}",
       "caption": "Entradas menos salidas en todas tus cuentas.",
       "empty-title": "Aún no hay flujo de caja",
-      "empty-body": "Aparece cuando tus cuentas tengan transacciones."
+      "empty-body": "Aparece cuando tus cuentas tengan transacciones.",
+      "this-month": "Este mes",
+      "income": "Ingresos",
+      "spending": "Gastos",
+      "savings-rate": "Tasa de ahorro",
+      "change": "<amount></amount> {vs}",
+      "rate-change": "<points></points> {vs}",
+      "points": "{points} p.p.",
+      "vs": "vs {month}",
+      "vs-same-point": "vs el mismo punto del mes pasado",
+      "formula": "La tasa de ahorro es los ingresos menos los gastos, dividido por los ingresos. Es — cuando los ingresos son cero."
     },
     "loans": {
       "title": "Próximos pagos de préstamos",

@@ -39,6 +39,7 @@ jest.mock('@/features/account-insights/use-top-spending-category', () => ({ useT
 jest.mock('./use-home-data', () => ({
   useHomeBudgetMonths: () => mockMonths,
   useHomeCashflow: () => mocks.cashflow,
+  useHomeCashflowComparison: () => mocks.cashflowComparison,
   useHomePortfolios: () => mocks.portfolios,
 }))
 let mockBankAlertBanner: unknown = null
@@ -75,6 +76,7 @@ describe('NetWorthRoute', () => {
       unreviewed: loaded({ transactions: [], total: 0 }),
       insight: loaded({ categorySpending: [] }),
       cashflow: loaded({ cashflow: [] }),
+      cashflowComparison: loaded({ cashflow: [] }),
       portfolios: loaded({ portfolios: [] }),
     }
   })

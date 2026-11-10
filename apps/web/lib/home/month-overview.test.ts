@@ -10,10 +10,12 @@ import {
   balanceSheet,
   cashflowScale,
   measureGeometry,
+  monthComparisonRange,
   monthPosition,
   monthSummary,
   netWorthChanges,
   overPlanLines,
+  savingsSummary,
   upcomingLoanPayments,
 } from "./month-overview";
 
@@ -508,6 +510,72 @@ test("a yearly subcategory is over plan against its monthly share, not its yearl
   assert.equal(lines[0].name, "VEHICLE_INSURANCE");
   close(lines[0].planned, 50, "monthly plan");
   close(lines[0].over, 10, "over");
+});
+
+test("month-to-date compares against the same days of last month", () => {
+  // 5 November: compare 1-5 November with 1-5 October.
+  const early = monthComparisonRange(new Date(2026, 10, 5, 12));
+  assert.equal(early.samePoint, true);
+  assert.equal(early.from.getTime(), new Date(2026, 9, 1).getTime());
+  assert.equal(early.to.getTime(), new Date(2026, 9, 5, 23, 59, 59, 999).getTime());
+
+  // The last day of November: the whole of October.
+  const lastDay = monthComparisonRange(new Date(2026, 10, 30, 12));
+  assert.equal(lastDay.samePoint, false);
+  assert.equal(lastDay.to.getTime(), new Date(2026, 9, 31, 23, 59, 59, 999).getTime());
+});
+
+test("a short previous month clamps the same-point comparison to its last day", () => {
+  // 30 March: February has 28 days, so the comparison ends on 28 February.
+  const range = monthComparisonRange(new Date(2026, 2, 30, 12));
+  assert.equal(range.samePoint, true);
+  assert.equal(range.to.getTime(), new Date(2026, 1, 28, 23, 59, 59, 999).getTime());
+});
+
+test("the savings summary states this month beside the comparison period", () => {
+  const range = monthComparisonRange(new Date(2026, 10, 5, 12));
+  const summary = savingsSummary(
+    { expenses: 1400, income: 2000, savingsRate: 0.3 },
+    { expenses: 1450, income: 1900, savingsRate: 0.2368 },
+    range,
+  );
+
+  assert.ok(summary);
+  assert.equal(summary.income, 2000);
+  assert.equal(summary.spending, 1400);
+  assert.equal(summary.savingsRate, 0.3);
+  assert.equal(summary.incomeDelta, 100);
+  assert.equal(summary.spendingDelta, -50);
+  close(summary.savingsRateDelta ?? 0, 6.32, "rate delta in points");
+  assert.equal(summary.comparison?.samePoint, true);
+});
+
+test("a comparison period with no data has no deltas, not zero ones", () => {
+  const range = monthComparisonRange(new Date(2026, 10, 5, 12));
+  const summary = savingsSummary(
+    { expenses: 1400, income: 2000, savingsRate: 0.3 },
+    undefined,
+    range,
+  );
+
+  assert.ok(summary);
+  assert.equal(summary.comparison, null);
+  assert.equal(summary.incomeDelta, null);
+  assert.equal(summary.spendingDelta, null);
+  assert.equal(summary.savingsRateDelta, null);
+});
+
+test("a month with no income has no savings rate and no rate delta", () => {
+  const range = monthComparisonRange(new Date(2026, 10, 5, 12));
+  const summary = savingsSummary(
+    { expenses: 400, income: 0, savingsRate: null },
+    { expenses: 300, income: 1000, savingsRate: 0.7 },
+    range,
+  );
+
+  assert.ok(summary);
+  assert.equal(summary.savingsRate, null);
+  assert.equal(summary.savingsRateDelta, null);
 });
 
 test("a carry from last month moves what is left and what counts as over plan", () => {
