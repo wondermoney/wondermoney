@@ -1,0 +1,15 @@
+{
+  "command-palette": {
+    "title": "Command palette",
+    "placeholder": "Search or jump to…",
+    "menu-item": "Command palette",
+    "footer-cta": "Search",
+    "shortcut": "⌘K",
+    "loading": "Loading…",
+    "empty": "No results found.",
+    "groups": {
+      "go-to": "Go to",
+      "actions": "Actions"
+    }
+  }
+}

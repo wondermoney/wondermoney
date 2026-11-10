@@ -12,10 +12,13 @@ import {
   queryClientWithInstance,
 } from "@/lib/api/instance/instance-fixture";
 
+import enCommandPalette from "../../messages/en/command-palette.json";
 import enCommon from "../../messages/en/common.json";
 import enNavigation from "../../messages/en/navigation.json";
+import esCommandPalette from "../../messages/es/command-palette.json";
 import esCommon from "../../messages/es/common.json";
 import esNavigation from "../../messages/es/navigation.json";
+import ptCommandPalette from "../../messages/pt/command-palette.json";
 import ptCommon from "../../messages/pt/common.json";
 import ptNavigation from "../../messages/pt/navigation.json";
 import TopBar from "./TopBar";
@@ -66,9 +69,9 @@ beforeEach(() => {
 afterEach(cleanup);
 
 const locales = [
-  { locale: "en", messages: { ...enCommon, ...enNavigation } },
-  { locale: "pt", messages: { ...ptCommon, ...ptNavigation } },
-  { locale: "es", messages: { ...esCommon, ...esNavigation } },
+  { locale: "en", messages: { ...enCommon, ...enNavigation, ...enCommandPalette } },
+  { locale: "pt", messages: { ...ptCommon, ...ptNavigation, ...ptCommandPalette } },
+  { locale: "es", messages: { ...esCommon, ...esNavigation, ...esCommandPalette } },
 ] as const;
 
 function renderTopBar(

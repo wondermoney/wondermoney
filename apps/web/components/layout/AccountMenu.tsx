@@ -5,6 +5,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import {
   ChevronDown,
   ChevronsUpDown,
+  Command as CommandIcon,
   FlaskConical,
   HelpCircleIcon,
   Lightbulb,
@@ -31,6 +32,7 @@ import { useUser } from "@/lib/auth/user-context";
 import { instanceConfig } from "@/lib/instance";
 import { useHydrated } from "@/lib/utils/useHydrated";
 
+import { openCommandPalette } from "./command-palette-store";
 import Feedback from "./Feedback";
 
 const CHANGELOG_URL = "https://wondermoney.canny.io/changelog";
@@ -168,6 +170,26 @@ export default function AccountMenu({
           </p>
         ) : null}
         <ul className="flex flex-col">
+          <li>
+            <button
+              type="button"
+              className={menuRowClass}
+              aria-keyshortcuts="Meta+K Control+K"
+              onClick={() => {
+                setOpen(false);
+                openCommandPalette();
+              }}
+            >
+              <CommandIcon className="size-4 shrink-0" aria-hidden="true" />
+              {t("command-palette.menu-item")}
+              <span
+                className="text-muted-foreground ml-auto text-xs"
+                aria-hidden="true"
+              >
+                {t("command-palette.shortcut")}
+              </span>
+            </button>
+          </li>
           {inSidebar ? null : (
             <li>
               <Link

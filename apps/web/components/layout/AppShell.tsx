@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 
 import FullLayoutClientOverlays from "@/app/[locale]/(full-layout)/FullLayoutClientOverlays";
 import BottomNav from "@/components/layout/BottomNav";
+import CommandPalette from "@/components/layout/CommandPalette";
 import { PrivacyModeShortcut } from "@/components/layout/PrivacyModeToggle";
 import Sidebar from "@/components/layout/Sidebar";
 import TopBar from "@/components/layout/TopBar";
@@ -29,6 +30,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
       </div>
       <BottomNav />
       <FullLayoutClientOverlays />
+      <CommandPalette />
       <PrivacyModeShortcut />
     </div>
   );
