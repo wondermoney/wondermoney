@@ -5,7 +5,13 @@
     "money-out": "Money out",
     "needs-review": "Needs review",
     "review-link": "Review them",
-    "flows-caption": "Money in and out cover every account over the date range, whatever the filters."
+    "flows-caption": "Money in and out cover every account over the date range, whatever the filters.",
+    "report-scope": {
+      "title": "Transactions behind a report total",
+      "description": "The transactions this report counted, with its filters. Your own filters narrow them further.",
+      "sum": "They add up to",
+      "show-all": "Show all transactions"
+    }
   },
   "transactionTags": {
     "label": "Tags",

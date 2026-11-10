@@ -24,6 +24,15 @@ const optionalStringArray = z
 const optionalKeyArray = optionalStringArray.refine((keys) => keys === undefined || keys.every((key) => /^[1-9]\d*$/.test(key)), { message: 'Keys must be positive integers' });
 
 /**
+ * An on/off switch as a query string carries it: `true`/`false` (or `1`/`0`), off when absent.
+ * `z.coerce.boolean()` would read the string `false` as on, as it reads any non-empty string.
+ */
+const querySwitch = z
+  .union([z.boolean(), z.enum(['true', 'false', '1', '0'])])
+  .default(false)
+  .transform((value) => value === true || value === 'true' || value === '1');
+
+/**
  * Upper bound on `fromDate`..`toDate`, mirroring `getHistoricalPriceRequestSchema`'s
  * `MAX_HISTORICAL_PRICE_RANGE_DAYS`. Without it a caller can ask for
  * `0001-01-01`..`9999-12-31` and force a full-history aggregation per request; the `read`
@@ -38,8 +47,8 @@ export const reportFiltersSchema = z.object({
   categoryKeys: optionalStringArray,
   currencyKey: z.string().optional(),
   fromDate: z.iso.datetime({ offset: true }).optional(),
-  includePending: z.coerce.boolean().optional().default(false),
-  includeTransfers: z.coerce.boolean().optional().default(false),
+  includePending: querySwitch,
+  includeTransfers: querySwitch,
   merchantKeys: optionalStringArray,
   /** Tag keys; a transaction counts when it carries any of them. */
   tagKeys: optionalKeyArray,

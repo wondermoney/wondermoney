@@ -15,9 +15,11 @@ import AccountTransactionAddModal from "@/components/account/AccountTransactionA
 import AccountTransactionImportModal from "@/components/account/AccountTransactionImportModal";
 import TransactionsTable from "@/components/account/AccountTransactionsTable";
 import { TransactionsLead } from "@/components/account/TransactionsLead";
+import { TransactionsReportScope } from "@/components/account/TransactionsReportScope";
 import { AccountsTransactionsOnboarding } from "@/components/onboarding/AccountsTransactionsOnboarding";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/Spinner";
+import type { TransactionReportScope } from "@/lib/account/transaction-report-scope";
 import type { GetAccountsResponse } from "@/lib/api/account/useAccounts";
 import useAccounts from "@/lib/api/account/useAccounts";
 import type { GetTransactionsResponse } from "@/lib/api/account/useTransactions";
@@ -32,6 +34,8 @@ interface AccountsTransactionsClientProps {
   initialTransactionsData: GetTransactionsResponse;
   initialConfigsData: GetConfigsResponse;
   defaultDateRange: { from: Date; to: Date };
+  /** The rows behind a report total, when a report linked here. */
+  reportScope?: TransactionReportScope | null;
 }
 
 export default function AccountsTransactionsClient({
@@ -40,6 +44,7 @@ export default function AccountsTransactionsClient({
   initialTransactionsData,
   initialConfigsData,
   defaultDateRange,
+  reportScope = null,
 }: AccountsTransactionsClientProps) {
   const t = useTranslations();
   const posthog = usePostHog();
@@ -102,10 +107,15 @@ export default function AccountsTransactionsClient({
   };
 
   // Table stuff
-  const [hasUsedDateFilter, setHasUsedDateFilter] = useState(false);
+  // A report's range counts as a chosen one: an empty scope is a result, not a first visit.
+  const [hasUsedDateFilter, setHasUsedDateFilter] = useState(reportScope !== null);
   const [transactionDateRange, setTransactionDateRange] = useState<
     DateRange | undefined
-  >({ from: defaultDateRange.from, to: defaultDateRange.to });
+  >(
+    reportScope
+      ? { from: new Date(reportScope.fromDate), to: new Date(reportScope.toDate) }
+      : { from: defaultDateRange.from, to: defaultDateRange.to },
+  );
   const handleDateRangeChange = (dateRange?: DateRange) => {
     setTransactionDateRange(dateRange);
     setHasUsedDateFilter(true);
@@ -115,6 +125,7 @@ export default function AccountsTransactionsClient({
 
   // True only while the visible query matches what the server rendered.
   const isServerRenderedQuery =
+    !reportScope &&
     !showHiddenTransactions &&
     transactionDateRange?.from?.getTime() === defaultDateRange.from.getTime() &&
     transactionDateRange?.to?.getTime() === defaultDateRange.to.getTime();
@@ -186,11 +197,22 @@ export default function AccountsTransactionsClient({
       fromDate: transactionDateRange?.from,
       toDate: transactionDateRange?.to,
       includeHidden: showHiddenTransactions,
-      accountKeys: tableFilters.accountKeys,
-      categoryKeys: tableFilters.categoryKeys,
-      tagKeys: tableFilters.tagKeys,
+      // The table's own filters narrow a report's; where the table has none, the report's apply.
+      accountKeys: tableFilters.accountKeys.length > 0 ? tableFilters.accountKeys : reportScope?.accountKeys,
+      categoryKeys: tableFilters.categoryKeys.length > 0 ? tableFilters.categoryKeys : reportScope?.categoryKeys,
+      tagKeys: tableFilters.tagKeys.length > 0 ? tableFilters.tagKeys : reportScope?.tagKeys,
       transactionTypes: tableFilters.transactionTypes,
       ...(tableFilters.needsReview ? { unreviewedOnly: true } : {}),
+      ...(reportScope
+        ? {
+            statuses: reportScope.statuses,
+            excludeTransfers: reportScope.excludeTransfers,
+            excludeNonSpending: reportScope.excludeNonSpending,
+            direction: reportScope.direction,
+            merchantKeys: reportScope.merchantKeys,
+            memberCurrency: reportScope.memberCurrency,
+          }
+        : {}),
     },
     {
       enabled: accountsData?.accounts && accountsData.accounts.length > 0,
@@ -355,6 +377,13 @@ export default function AccountsTransactionsClient({
           />
         </div>
       </div>
+
+      {reportScope ? (
+        <TransactionsReportScope
+          totalAmount={transactionsData?.totalAmount}
+          completeness={transactionsData?.completeness}
+        />
+      ) : null}
 
       <TransactionsLead
         accounts={accountsData?.accounts ?? []}

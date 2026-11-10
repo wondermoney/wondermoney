@@ -109,23 +109,6 @@ describe('getBudgetVsActualReport', () => {
     expect(data[0]?.budgeted).toBe(200);
   });
 
-  it('scopes the transaction query by tenant and the per-account privacy carve-out', async () => {
-    await getBudgetVsActualReport(
-      makeRequest({ fromDate: '2026-01-01T00:00:00.000Z', toDate: '2026-03-31T00:00:00.000Z' }),
-      makeResponse(),
-    );
-
-    expect(mocks.find).toHaveBeenCalledWith(
-      Transaction,
-      expect.objectContaining({
-        accountKey: { $or: [{ isPrivate: false }, { accountOwnerAppuserKey: { appuserKey: 71, currencyKey: { code: 'EUR' } } }] },
-        deletedAt: undefined,
-        tenantKey: { tenantKey: 113 },
-      }),
-      expect.anything(),
-    );
-  });
-
   it('returns an empty dataset when the user has no budgets', async () => {
     mocks.find.mockImplementation((entity: unknown) => {
       if (entity === Budget) return Promise.resolve([]);

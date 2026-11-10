@@ -2,6 +2,7 @@ import { Big } from 'big.js';
 
 import type { Category } from '@entity/Category';
 import type { Transaction } from '@entity/Transaction';
+import { amountInCurrencySql } from '@service/reports/report-currency';
 import { big, toNumber } from '@utils/money';
 
 import { type CategorySpendingFlags, effectiveCountsAsSpendingSql } from './category-spending';
@@ -143,18 +144,24 @@ export function hasLineInCategories(transaction: Transaction, categoryKeys: Iter
  *   household (its value or its parent's is off), as `CategorySpendingFlags.countsAsSpending` in
  *   `category-spending.ts`.
  *
+ * With `amountInCurrencyKey`, the lines share out the transaction's amount as a total in that
+ * currency reads it before any rate (`amountInCurrencySql` in `report-currency.ts`): the
+ * settlement amount when the transaction was settled in that currency, else the amount in the
+ * user's currency. The column keeps its name.
+ *
  * Scoped to `tenantKey`, which is inlined (validated as an integer) so the fragment can be used
  * from both Kysely and raw SQL. Callers still apply their own transaction conditions (tenant,
  * privacy, status, dates) through their join to `transaction`.
  */
-export function categoryLinesSql(tenantKey: number): string {
+export function categoryLinesSql(tenantKey: number, options: { amountInCurrencyKey?: number } = {}): string {
   if (!Number.isSafeInteger(tenantKey)) throw new TypeError('tenantKey must be an integer');
+  const base = options.amountInCurrencyKey === undefined ? 't.appuser_settlement_amount' : amountInCurrencySql('t', options.amountInCurrencyKey);
   const shares = `
     select ranked.*, sum(ranked.share) over (partition by ranked.transaction_key) as share_total
     from (
       select s.transaction_key, s.category_key, s.transaction_split_key, t.appuser_key,
-        t.appuser_settlement_amount as base,
-        round(t.appuser_settlement_amount * s.amount / nullif(sum(s.amount) over (partition by s.transaction_key), 0), ${SHARE_SCALE}) as share,
+        ${base} as base,
+        round(${base} * s.amount / nullif(sum(s.amount) over (partition by s.transaction_key), 0), ${SHARE_SCALE}) as share,
         row_number() over (partition by s.transaction_key order by abs(s.amount) desc, s.position asc, s.transaction_split_key asc) as line_rank
       from "transaction_split" s
       join "transaction" t on t.transaction_key = s.transaction_key
@@ -166,7 +173,7 @@ export function categoryLinesSql(tenantKey: number): string {
       split.transaction_split_key, null::int as appuser_transaction_category_key, split.appuser_key
     from (${shares}) split
     union all
-    select a.transaction_key, a.category_key, t.appuser_settlement_amount,
+    select a.transaction_key, a.category_key, ${base} as appuser_settlement_amount,
       null::int as transaction_split_key, a.appuser_transaction_category_key, a.appuser_key
     from "appuser_transaction_category" a
     join "transaction" t on t.transaction_key = a.transaction_key
@@ -178,4 +185,24 @@ export function categoryLinesSql(tenantKey: number): string {
     left join "category" line_category on line_category.category_key = line.category_key
     left join "category" line_parent on line_parent.category_key = line_category.parent_category_category_key
   )`;
+}
+
+/**
+ * SQL: the transaction aliased `alias` has a category line that counts as spending for the
+ * household `tenantKey`, the row-level counterpart of {@link spendingLinesOf} (some line kept). An
+ * unsplit transaction has one line, its category assignment (none: uncategorized, which counts); a
+ * split one counts when any live line does. `tenantKey` is inlined, validated as an integer.
+ */
+export function hasSpendingLineSql(alias: string, tenantKey: number): string {
+  if (!Number.isSafeInteger(tenantKey)) throw new TypeError('tenantKey must be an integer');
+  const row = `"${alias}"`;
+  const counts = `(${effectiveCountsAsSpendingSql('spending_category', tenantKey)} and ${effectiveCountsAsSpendingSql('spending_parent', tenantKey)})`;
+  const categories = `left join "category" spending_category on spending_category.category_key = spending_line.category_key
+      left join "category" spending_parent on spending_parent.category_key = spending_category.parent_category_category_key`;
+  return `(case when exists (select 1 from "transaction_split" live_split where live_split.transaction_key = ${row}."transaction_key" and live_split.deleted_at is null)
+    then exists (select 1 from "transaction_split" spending_line ${categories}
+      where spending_line.transaction_key = ${row}."transaction_key" and spending_line.deleted_at is null and ${counts})
+    else not exists (select 1 from "appuser_transaction_category" spending_line ${categories}
+      where spending_line.transaction_key = ${row}."transaction_key" and spending_line.deleted_at is null and not ${counts})
+  end)`;
 }

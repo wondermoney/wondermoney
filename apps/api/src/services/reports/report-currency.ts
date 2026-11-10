@@ -49,6 +49,37 @@ export function currencyKeySql(currencyKey: number): string {
 }
 
 /**
+ * SQL twin of {@link ReportCurrencyAmounts.amountOf}, before any rate: the amount of the
+ * transaction aliased `alias` as a total in the currency `currencyKey` reads it. The settlement
+ * amount when the row was settled in that currency (exact, not converted into the member's
+ * currency and back), else the amount stored in the member's currency, which still needs the
+ * day's rate when {@link needsRateSql} says so. Null when no converted amount was stored: the row
+ * is left out and counted, never read at its settlement amount.
+ */
+export function amountInCurrencySql(alias: string, currencyKey: number): string {
+  const row = `"${alias}"`;
+  return `(case when ${row}.appuser_settlement_amount is null then null
+    when ${settledInSql(alias, currencyKey)} then coalesce(${row}.edited_settlement_amount, ${row}.settlement_amount)
+    else ${row}.appuser_settlement_amount end)`;
+}
+
+/**
+ * SQL: {@link amountInCurrencySql} is in the member's currency and that currency is not
+ * `currencyKey`, so the total multiplies it by the rate of the transaction's day. A row with no
+ * recorded member currency is read in the total's currency, as {@link ReportCurrencyAmounts} reads it.
+ */
+export function needsRateSql(alias: string, currencyKey: number): string {
+  const row = `"${alias}"`;
+  return `(${row}.appuser_settlement_amount is not null and not ${settledInSql(alias, currencyKey)}
+    and ${row}.appuser_currency_key is not null and ${row}.appuser_currency_key <> ${currencyKeySql(currencyKey)})`;
+}
+
+function settledInSql(alias: string, currencyKey: number): string {
+  const row = `"${alias}"`;
+  return `(${row}.settlement_currency_key = ${currencyKeySql(currencyKey)} and coalesce(${row}.edited_settlement_amount, ${row}.settlement_amount) is not null)`;
+}
+
+/**
  * The UTC calendar day of a transaction, as `YYYY-MM-DD`, for grouping rows before they are
  * converted. Rates are stored once a day at UTC midnight, so every moment of a UTC day takes the
  * same rate: converting a day's sum is exact, and needs one lookup instead of one per row.

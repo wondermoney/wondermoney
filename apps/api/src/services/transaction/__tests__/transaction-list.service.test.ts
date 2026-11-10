@@ -17,6 +17,12 @@ const db = vi.hoisted(() => ({
 
 vi.mock('@app/app', () => ({ DI: { em: { count: db.count, find: db.find, findOne: db.findOne } } }));
 vi.mock('@app/database/di', () => ({ DI: { em: { count: db.count, find: db.find, findOne: db.findOne } } }));
+// The count and sum run as SQL (`transaction-totals.ts`, tested against a real database); here the
+// fake answers the count, so this file can assert how the page is put together around it.
+vi.mock('@service/transaction/transaction-total.service', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@service/transaction/transaction-total.service')>()),
+  getTransactionTotal: vi.fn(async () => ({ amount: 0, completeness: { currencyCode: 'EUR', isComplete: true, unconvertedTransactions: 0 }, count: (await db.count(Transaction, {})) as number, moneyIn: 0, moneyOut: 0 })),
+}));
 
 import { listTransactions, type TransactionListRequest } from '../transaction-list.service';
 

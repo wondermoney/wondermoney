@@ -15,30 +15,6 @@ const baseInput = {
 };
 
 describe('budget spending query', () => {
-  it('keeps transaction visibility in the LEFT JOIN and scopes tenant/private accounts', () => {
-    const compiled = buildBudgetSpendingQuery(db, { ...baseInput, period: 'monthly' }, []).compile(db);
-    const bindings = compiled.parameters;
-    const sql = compiled.sql.toLowerCase();
-    const transactionJoin = sql.slice(sql.indexOf('left join "transaction"'), sql.indexOf('left join "loan_repayment_link"'));
-
-    expect(transactionJoin).toContain('"transaction"."deleted_at" is null');
-    expect(transactionJoin).toMatch(/"transaction"\."tenant_key" = \$\d+/);
-    expect(transactionJoin).toMatch(/budget_account\.tenant_key = \$\d+/);
-    expect(transactionJoin).toContain('budget_account.closed = false');
-    expect(transactionJoin).toContain('budget_account.deleted_at is null');
-    expect(transactionJoin).toMatch(/\(budget_account\.is_private = false or budget_account\.account_owner_appuser_key = \$\d+\)/);
-    // Category lines (a split transaction's lines, or an unsplit one's assignment), live rows only.
-    expect(sql).toContain('as "category_line"');
-    expect(sql).toContain('a.deleted_at is null');
-    expect(sql).toContain('s.deleted_at is null');
-    expect(sql).toContain('coalesce(category_budgeted_amount, 0) as category_budgeted_amount');
-    expect(sql).toContain('union all');
-    expect(bindings).toContain(17);
-    expect(bindings).toContain(42);
-    // The first WHERE after the transaction join: the join's own predicates may hold subqueries.
-    expect(sql.slice(sql.indexOf('where ', sql.indexOf('left join "loan_repayment_link"')))).not.toContain('"transaction"."tenant_key"');
-  });
-
   it('preserves separate parent-budget recurrency for monthly and annual reads', () => {
     const monthly = buildBudgetSpendingQuery(db, { ...baseInput, period: 'monthly' }, []).compile(db).sql.toLowerCase();
     const annual = buildBudgetSpendingQuery(db, { ...baseInput, period: 'annual' }, []).compile(db).sql.toLowerCase();

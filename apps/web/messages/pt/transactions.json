@@ -5,7 +5,13 @@
     "money-out": "Saídas",
     "needs-review": "Por rever",
     "review-link": "Rever",
-    "flows-caption": "Entradas e saídas cobrem todas as contas no intervalo de datas, independentemente dos filtros."
+    "flows-caption": "Entradas e saídas cobrem todas as contas no intervalo de datas, independentemente dos filtros.",
+    "report-scope": {
+      "title": "Transações por trás de um total de relatório",
+      "description": "As transações que este relatório contou, com os filtros dele. Os teus filtros restringem-nas ainda mais.",
+      "sum": "Somam",
+      "show-all": "Mostrar todas as transações"
+    }
   },
   "transactionTags": {
     "label": "Etiquetas",

@@ -64,11 +64,8 @@ export async function getBudgetVsActualReport(input: ReportServiceInput): Promis
   // than erroring, so the web layer can render its "set up a budget" empty state.
   if (budgetedByCategory.size === 0) return nothingToReport();
 
-  const where = buildTransactionWhere(filters, tenant, user);
-  if (budgetAccountKeys.size > 0) {
-    const accountCondition = where['accountKey'] as Record<string, unknown>;
-    accountCondition['accountKey'] = { $in: [...budgetAccountKeys] };
-  }
+  // The budget's accounts, when it names any, in place of the report's account filter.
+  const where = buildTransactionWhere(filters, tenant, user, budgetAccountKeys.size > 0 ? { accountKeys: [...budgetAccountKeys] } : {});
 
   const transactions = await DI.em.find(Transaction, where, { populate: CATEGORY_POPULATE });
   const repayments = await loadLoanRepaymentLinks(DI.em, tenant, transactions);
