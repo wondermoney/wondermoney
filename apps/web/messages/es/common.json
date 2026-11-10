@@ -2509,6 +2509,7 @@
     "cash-only": "No, solo el efectivo",
     "cash-only-hint": "El patrimonio neto cuenta el efectivo de la cuenta y también esta cartera.",
     "managed-by-partner": "Esta cartera está vinculada a una cuenta que solo ve el otro miembro del hogar, así que solo esa persona puede cambiar el vínculo.",
+    "already-linked-by": "Ya vinculada por {name}",
     "suggestion-title": "¿Es el mismo dinero?",
     "suggestion-body": "Tienes una cuenta de inversión y una cartera sin cuenta vinculada. Si la cuenta ya contiene la cartera, vincúlalas para que el patrimonio neto la cuente una sola vez.",
     "suggestion-body-create": "Si esta cartera está en una de tus cuentas, vincúlala para que el patrimonio neto no cuente el mismo dinero dos veces.",

@@ -9,7 +9,10 @@ import { DrawerDialog } from "@/components/ui/dialog-responsive";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/Label";
 import useAccounts from "@/lib/api/account/useAccounts";
-import { getApiErrorCode } from "@/lib/api/errors";
+import {
+  getPortfolioLinkHolderName,
+  isPortfolioLinkRefusal,
+} from "@/lib/api/errors";
 import type { Portfolio } from "@/lib/api/portfolio/usePortfolio";
 import useUpdatePortfolio from "@/lib/api/portfolio/useUpdatePortfolio";
 import {
@@ -66,10 +69,13 @@ const PortfolioSettingsModal: React.FC<PortfolioSettingsModalProps> = ({
       toast.success(t("save"));
       closeModal();
     } catch (error) {
+      const holder = getPortfolioLinkHolderName(error);
       toast.error(
-        getApiErrorCode(error) === "forbidden"
-          ? t("portfolioAccountLink.managed-by-partner")
-          : t("server-error"),
+        holder
+          ? t("portfolioAccountLink.already-linked-by", { name: holder })
+          : isPortfolioLinkRefusal(error)
+            ? t("portfolioAccountLink.managed-by-partner")
+            : t("server-error"),
       );
     }
   };

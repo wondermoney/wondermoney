@@ -11,6 +11,8 @@ import logger from '@utils/logger';
 export interface HttpError {
   /** Stable machine-readable reason — see `ERROR_CODE` in `utils/errors.ts`. */
   code?: string;
+  /** Values for a client to word the error with (see `ApplicationError.details`); sent for 4xx only. */
+  details?: Record<string, string>;
   message?: string;
   retryAfter?: number;
   status?: number;
@@ -91,10 +93,11 @@ export function errorHandler(err: HttpError, req: Request, res: Response, next: 
   // every status — including 5xx, where the message is deliberately withheld — because a client
   // branching on the reason must not have to parse English prose. See `ERROR_CODE`.
 
+  const details = status < 500 && err.details ? { details: err.details } : {};
   // In production/staging: hide details for 5xx, show message for 4xx
   if (APP_ENV === 'production' || APP_ENV === 'staging') {
     const message = status >= 500 ? ERROR.SERVER : err.message || ERROR.SERVER;
-    return res.status(status).json({ code, message });
+    return res.status(status).json({ code, message, ...details });
   }
-  return res.status(status).json({ code, message: err.message || ERROR.SERVER });
+  return res.status(status).json({ code, message: err.message || ERROR.SERVER, ...details });
 }

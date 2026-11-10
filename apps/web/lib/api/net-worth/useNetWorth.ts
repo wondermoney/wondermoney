@@ -21,7 +21,7 @@ export interface RawNetWorthSummary {
     balance: number;
     countedInAccountId?: number;
   }>;
-  /** Ask "Is this the same money?": an investment account and an unlinked portfolio. */
+  /** Ask "Is this the same money?": an investment account no portfolio is linked to, and an unlinked portfolio. */
   suggestPortfolioLink?: boolean;
   /** Rows the API could not value in `currencyCode`; `accounts` is absent from older APIs. */
   unsupportedCurrencies: {

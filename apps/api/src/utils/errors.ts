@@ -128,12 +128,19 @@ export const ERROR_CODE = {
   DATA_RESTORE_NOT_READY: 'data_restore_not_ready',
   /** A restore file over the size limit (400). */
   DATA_RESTORE_TOO_LARGE: 'data_restore_too_large',
+  /**
+   * Changing a portfolio's link to an account only the other household member can see (403).
+   * `details.linkedBy` is that member's display name, so the viewer knows who to ask.
+   */
+  PORTFOLIO_LINK_HELD_BY_MEMBER: 'portfolio_link_held_by_member',
 } as const;
 
 export type ErrorCode = typeof ERROR_CODE[keyof typeof ERROR_CODE];
 
 class ApplicationError extends Error {
   code: ErrorCode;
+  /** Values a client needs to word the error itself, sent beside `code`. Never anything the caller may not see. */
+  details?: Record<string, string>;
   status: StatusCodes;
   constructor(message?: string, status?: StatusCodes, code?: ErrorCode) {
     const errorMessage = message || (status ? getReasonPhrase(status) : 'Unknown error');
@@ -202,6 +209,18 @@ export class NotFoundError extends ApplicationError {
   constructor(message?: string, code: ErrorCode = ERROR_CODE.NOT_FOUND) {
     super(message, StatusCodes.NOT_FOUND, code);
     logger.warn({ error: this }, `NotFoundError: ${message}`);
+  }
+}
+
+/**
+ * A portfolio is linked to an account private to the other household member, so only they can
+ * change the link. Names that member (their display name, which the household already sees) and
+ * nothing about the account. The name stays out of the message, which is logged.
+ */
+export class PortfolioLinkHeldByMemberError extends ForbiddenError {
+  constructor(linkedBy: string) {
+    super('This portfolio is linked to an account only the other household member can see.', ERROR_CODE.PORTFOLIO_LINK_HELD_BY_MEMBER);
+    this.details = { linkedBy };
   }
 }
 

@@ -2509,6 +2509,7 @@
     "cash-only": "Não, só o dinheiro",
     "cash-only-hint": "O património conta o dinheiro da conta e também este portefólio.",
     "managed-by-partner": "Este portefólio está ligado a uma conta que só o outro membro do agregado vê, por isso só esse membro pode alterar a ligação.",
+    "already-linked-by": "Já ligado por {name}",
     "suggestion-title": "É o mesmo dinheiro?",
     "suggestion-body": "Tem uma conta de investimento e um portefólio sem conta ligada. Se a conta já inclui o portefólio, ligue-os para que o património o conte uma só vez.",
     "suggestion-body-create": "Se este portefólio está numa das suas contas, ligue-o para que o património não conte o mesmo dinheiro duas vezes.",

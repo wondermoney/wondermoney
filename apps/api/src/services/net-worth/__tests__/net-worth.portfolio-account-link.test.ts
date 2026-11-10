@@ -229,6 +229,29 @@ describe('net worth with a portfolio linked to its account', () => {
       expect(body.suggestPortfolioLink).toBe(false);
     });
 
+    it('does not suggest it for an investment account already linked to a portfolio, by either member', async () => {
+      const { household, partner } = await brokerageHousehold({ mode: PortfolioAccountBalanceMode.INCLUDES_HOLDINGS });
+      await addPortfolio(db.em(), household, { owner: partner, value: 500 });
+
+      const owner = await http.as(household.appuser).get('/v1/net-worth');
+      const member = await http.as(partner).get('/v1/net-worth');
+
+      expect(owner.body.suggestPortfolioLink).toBe(false);
+      expect(member.body.suggestPortfolioLink).toBe(false);
+    });
+
+    it('still suggests it for another investment account that no portfolio is linked to', async () => {
+      const { household } = await brokerageHousehold({ mode: PortfolioAccountBalanceMode.INCLUDES_HOLDINGS });
+      const em = db.em();
+      const second = await addAccount(em, household, { name: 'Second brokerage' });
+      await em.nativeUpdate(Account, { accountKey: second.accountKey }, { accountTypeKey: await investmentType(em) });
+      await addPortfolio(em, household, { value: 500 });
+
+      const { body } = await http.as(household.appuser).get('/v1/net-worth');
+
+      expect(body.suggestPortfolioLink).toBe(true);
+    });
+
     it('does not suggest it without an investment account the viewer can see', async () => {
       const { partner } = await brokerageHousehold({ brokeragePrivate: true });
 

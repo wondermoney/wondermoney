@@ -2509,6 +2509,7 @@
     "cash-only": "No, cash only",
     "cash-only-hint": "Net worth counts the account's cash and this portfolio.",
     "managed-by-partner": "This portfolio is linked to an account only the other household member can see, so only they can change the link.",
+    "already-linked-by": "Already linked by {name}",
     "suggestion-title": "Is this the same money?",
     "suggestion-body": "You have an investment account and a portfolio that isn't linked to an account. If the account already holds the portfolio, link them so net worth counts it once.",
     "suggestion-body-create": "If this portfolio is held in one of your accounts, link it so net worth doesn't count the same money twice.",
