@@ -1,3 +1,4 @@
+import type { TFunction } from 'i18next'
 import { useTranslation } from 'react-i18next'
 import { ScrollView, StyleSheet, View } from 'react-native'
 
@@ -155,7 +156,7 @@ export function NetWorthHistoryScreen({ state, onBack, onRetry, onLogout }: NetW
   )
 }
 
-function signedMoney(value: number, locale: string, currency: string, t: (key: string, opts?: Record<string, unknown>) => string, hidden: boolean) {
+function signedMoney(value: number, locale: string, currency: string, t: TFunction, hidden: boolean) {
   const magnitude = formatMoneyForDisplay(Math.abs(value), { locale, currency }, hidden)
   if (value > 0) return t('netWorthHistory.change.increase', { amount: magnitude })
   if (value < 0) return t('netWorthHistory.change.decrease', { amount: magnitude })

@@ -1,3 +1,4 @@
+import type { TFunction } from 'i18next'
 import { useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { RefreshControl, ScrollView, StyleSheet, View } from 'react-native'
@@ -279,9 +280,8 @@ export function RecurringScreen({ state, onRefresh, onAddAccount, categories = [
   </SafeAreaView>
 }
 
-type T = (key: string, values?: Record<string, unknown>) => string
-const typeLabel = (row: RecurringRowViewModel, t: T) => t(`recurring.type.${row.type}`)
-const cadenceLabel = (row: RecurringRowViewModel, t: T) => t(`recurring.cadence.${row.cadence}`)
+const typeLabel = (row: RecurringRowViewModel, t: TFunction) => t(`recurring.type.${row.type}`)
+const cadenceLabel = (row: RecurringRowViewModel, t: TFunction) => t(`recurring.cadence.${row.cadence}`)
 
 function money(value: number, currency: string | null, locale: string, hidden: boolean) {
   return formatMoneyForDisplay(value, { locale, currency: isCurrency(currency) ? currency : null }, hidden)

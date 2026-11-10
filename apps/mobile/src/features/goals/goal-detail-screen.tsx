@@ -1,3 +1,4 @@
+import type { TFunction } from 'i18next'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Alert, BackHandler, Pressable, RefreshControl, ScrollView, StyleSheet, TextInput, View } from 'react-native'
@@ -288,7 +289,7 @@ function formatPercent(value: number, locale: string) {
   return new Intl.NumberFormat(locale, { style: 'percent', maximumFractionDigits: 0 }).format(value / 100)
 }
 
-function formatMonths(months: number, t: (key: string, values?: Record<string, unknown>) => string) {
+function formatMonths(months: number, t: TFunction) {
   const years = Math.floor(months / 12)
   const remaining = months % 12
   const parts: string[] = []
