@@ -1,7 +1,7 @@
 # Base image pinned by digest for reproducible builds. Dependabot's `docker`
 # ecosystem (.github/dependabot.yml) opens a monthly PR to bump it.
 # node:26.13.0-alpine (Node 26 LTS) as of 2026-10-31.
-FROM node:26.13.0-alpine@sha256:c6ad9e9c1d80f6eb607c26b4b0a132ff7a2344fad1c78ea3baa2a7d4c8de6d94 AS builder
+FROM node:26.13.0-alpine@sha256:8996bb5821d62a8fd9bb27c1cb07462f3fdce6e47d640c6a881ead0b064ce216 AS builder
 
 # NOTE: no native build toolchain is installed here on purpose.
 # This stage used to `apk add build-base g++ cairo-dev jpeg-dev pango-dev
@@ -73,7 +73,7 @@ COPY --from=builder /out/node_modules /home/node/app/node_modules
 RUN node-prune /home/node/app/node_modules
 
 # Start production image build
-FROM node:26.13.0-alpine@sha256:c6ad9e9c1d80f6eb607c26b4b0a132ff7a2344fad1c78ea3baa2a7d4c8de6d94 AS runtime-base
+FROM node:26.13.0-alpine@sha256:8996bb5821d62a8fd9bb27c1cb07462f3fdce6e47d640c6a881ead0b064ce216 AS runtime-base
 
 ARG APP_ENV=production
 ARG DEPLOY_ENV=${APP_ENV}
