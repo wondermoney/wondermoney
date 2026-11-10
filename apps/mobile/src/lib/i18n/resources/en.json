@@ -488,6 +488,28 @@
       "message": "The account data received could not be verified"
     }
   },
+  "accountRecalculate": {
+    "action": "Recalculate balances",
+    "confirmTitle": "Recalculate balances?",
+    "confirmMessage": "This rebuilds the running balance of every transaction on this account: a manual or imported account starts from its opening balance, a bank-connected one ends on the balance your bank reports. Your transactions are not changed.",
+    "confirm": "Recalculate",
+    "running": "Recalculating balances…",
+    "background": "Balances are still being recalculated. They update when it finishes.",
+    "alreadyCorrect": "Balances checked: they were already correct.",
+    "done_one": "Balances recalculated: {{count}} transaction corrected",
+    "done_other": "Balances recalculated: {{count}} transactions corrected",
+    "balanceChange": "Balance: {{before}} → {{after}}",
+    "dismiss": "Dismiss",
+    "failures": {
+      "too-soon": "This account was recalculated less than a minute ago. Try again shortly.",
+      "demo": "Recalculating is not available in the demo.",
+      "access": "Sign in again to recalculate this account.",
+      "not-found": "This account is no longer available.",
+      "network": "Could not reach the server. Check your connection and try again.",
+      "failed": "The balances could not be recalculated. Try again in a few minutes.",
+      "general": "The recalculation could not be started. Try again."
+    }
+  },
   "accountEdit": {
     "title": "Edit account",
     "helper": "Update the name and privacy of this account",

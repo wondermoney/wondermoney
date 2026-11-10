@@ -5,6 +5,7 @@
     "sign-in-problems",
     "bank-connection-problems",
     "transaction-import-problems",
+    "wrong-balances",
     "budget-setup-problems",
     "portfolio-import-problems",
     "contact-support"

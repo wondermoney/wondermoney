@@ -11,6 +11,7 @@ import type { ProducerOperations } from './pgboss-client';
 export type QueueName =
   | 'account.csv-import'
   | 'account.initial-sync'
+  | 'account.recalculate'
   | 'asset-price.historical-backfill'
   | 'bank-recovery.send'
   | 'bank-sync-alert.send'

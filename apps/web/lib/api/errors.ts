@@ -14,6 +14,8 @@
 
 /** Mirrors `ERROR_CODE` in the API's `utils/errors.ts`. */
 export const API_ERROR_CODE = {
+  /** The account's balances were recalculated less than a minute ago (429, with `Retry-After`). */
+  ACCOUNT_RECALCULATION_TOO_SOON: "account_recalculation_too_soon",
   ACCOUNT_RECONNECT_EMAIL_UNVERIFIED: "account_reconnect_email_unverified",
   AI_ALLOWANCE_EXHAUSTED: "ai_allowance_exhausted",
   ASSISTANT_NOT_ENABLED: "assistant_not_enabled",

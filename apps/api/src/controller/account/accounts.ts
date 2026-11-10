@@ -1,6 +1,7 @@
 import { QueryOrder } from '@mikro-orm/core';
 import dotenv from 'dotenv';
 import type { NextFunction, Request, Response } from 'express';
+import { StatusCodes } from 'http-status-codes';
 import { pick } from 'lodash-es';
 
 import { Account } from '@entity/Account';
@@ -14,9 +15,11 @@ import { Transaction } from '@entity/Transaction';
 import { TransactionStatus } from '@entity/TransactionStatus';
 import { computeAvailableBalance } from '@service/account/account-available-balance.service';
 import { resolveAccountCsvImportFormat } from '@service/account/account-csv-import-format';
+import { startAccountRecalculation } from '@service/account/account-recalculation.service';
 import { computeSyncStatus } from '@service/account/account-sync-status.service';
 import { convertWithStatus } from '@service/currency/exchange-rate';
-import { ERROR_CODE, ForbiddenError, InternalServerError, NotFoundError } from '@utils/errors';
+import { isManualAccount } from '@service/transaction/balance-chain.service';
+import { BadRequestError, ERROR_CODE, ForbiddenError, InternalServerError, NotFoundError } from '@utils/errors';
 
 /*
  * The "not found" branches below are 404s, not 500s: each is a client supplying an id that does
@@ -28,7 +31,7 @@ import { ERROR_CODE, ForbiddenError, InternalServerError, NotFoundError } from '
  */
 import { authedUser } from '@middleware/authed-context';
 import { getFullName } from '@utils/misc';
-import { createOfflineAccountRequestSchema, deleteAccountRequestSchema, getAccountRequestSchema, updateAccountRequestSchema } from '@validators/account';
+import { createOfflineAccountRequestSchema, deleteAccountRequestSchema, getAccountRequestSchema, recalculateAccountRequestSchema, updateAccountRequestSchema } from '@validators/account';
 import { zParse } from '@validators/parser';
 
 import { DI } from '../../app.js';
@@ -300,7 +303,7 @@ function isAccountIncidentOpen(account: Account, openIncidentRequisitionIds: Set
 export async function updateAccount(req: Request, res: Response, next: NextFunction) {
   const user = authedUser(req);
   const {
-    body: { accountName, isPrivate },
+    body: { accountName, isPrivate, openingBalance, openingBalanceDate },
     params: { accountId },
   } = await zParse(updateAccountRequestSchema, req);
   const account = await DI.em.findOne(Account, {
@@ -325,8 +328,40 @@ export async function updateAccount(req: Request, res: Response, next: NextFunct
     }
     account.isPrivate = isPrivate;
   }
+  const opensDifferently = openingBalance !== undefined || openingBalanceDate !== undefined;
+  if (opensDifferently) {
+    // A synced account's balance is the bank's; only a manual or CSV account opens on a figure
+    // the person typed.
+    if (!isManualAccount(account)) {
+      next(new BadRequestError('Only a manual account has an opening balance to edit', ERROR_CODE.OPENING_BALANCE_MANUAL_ONLY));
+      return;
+    }
+    if (openingBalance !== undefined) account.openingBalance = openingBalance;
+    if (openingBalanceDate !== undefined) account.openingBalanceDate = openingBalanceDate;
+  }
   await DI.em.persist(account).flush();
-  return res.sendStatus(200);
+  if (!opensDifferently) return res.sendStatus(200);
+  // The new opening balance only reaches the running balances through a rebuild, so this one is
+  // not rate-limited. Committed first: a run that starts from here on reads it.
+  const { operationId } = await startAccountRecalculation(DI.em, { accountKey: account.accountKey, appuserKey: user.appuserKey, tenantKey: account.tenantKey.tenantKey }, { enqueue: req.enqueue }, { rateLimited: false });
+  return res.status(200).json({ operationId });
+}
+
+/**
+ * `POST /v1/account/:accountId/recalculate`: queue a rebuild of the account's running balances and
+ * answer the operation id to follow on `GET /v1/operations/:id` (202). The tenant filter finds the
+ * account, so another household's account, or the other member's private one, is a 404. 429
+ * `account_recalculation_too_soon` within a minute of the account's last recalculation.
+ */
+export async function recalculateAccount(req: Request, res: Response) {
+  const user = authedUser(req);
+  const {
+    params: { accountId },
+  } = await zParse(recalculateAccountRequestSchema, req);
+  const account = await DI.em.findOne(Account, { accountKey: accountId, deletedAt: undefined });
+  if (!account) throw new NotFoundError(`Account not found: ${accountId}`);
+  const { operationId } = await startAccountRecalculation(DI.em, { accountKey: account.accountKey, appuserKey: user.appuserKey, tenantKey: account.tenantKey.tenantKey }, { enqueue: req.enqueue });
+  return res.status(StatusCodes.ACCEPTED).json({ operationId });
 }
 
 /**

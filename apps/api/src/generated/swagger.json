@@ -436,6 +436,26 @@
         }
       }
     },
+    "/v1/account/{accountId}/recalculate": {
+      "post": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "accountId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": ""
+          }
+        }
+      }
+    },
     "/v1/account/{accountId}/recent-transactions": {
       "get": {
         "description": "",

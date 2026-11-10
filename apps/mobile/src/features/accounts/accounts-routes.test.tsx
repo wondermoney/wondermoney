@@ -23,6 +23,7 @@ jest.mock('@/components/providers/product-runtime-provider', () => ({
 }))
 jest.mock('./use-accounts', () => ({ useAccounts: () => mockUseAccounts() }))
 jest.mock('./use-account', () => ({ useAccount: (id: number | null) => mockUseAccount(id) }))
+jest.mock('./use-account-recalculation', () => ({ useAccountRecalculation: () => ({ state: { phase: 'idle' }, start: jest.fn(), reset: jest.fn() }) }))
 jest.mock('@/features/account-insights/use-account-insights', () => ({ useAccountInsights: () => mockUseInsights() }))
 jest.mock('@/features/account-insights/use-account-metrics', () => ({ useAccountMetrics: (...args: unknown[]) => mockUseAccountMetrics(...args) }))
 jest.mock('@/features/transactions/use-recent-transactions', () => ({ useRecentTransactions: (...args: unknown[]) => mockUseRecentTransactions(...args) }))
