@@ -32,6 +32,7 @@ const COUNTED = [
   "budgets",
   "goals",
   "loans",
+  "manual-assets",
   "portfolios",
   "portfolio-transactions",
 ] as const;

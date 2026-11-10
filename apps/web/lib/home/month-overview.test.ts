@@ -373,6 +373,27 @@ test("a portfolio already inside its account's balance is listed but not added",
   assert.deepEqual(portfolios?.rows.map((row) => [row.amount, row.countedInAccountId]), [[8000, 5]]);
 });
 
+test("a manually valued asset is owned, in its own group after portfolios", () => {
+  const sheet = balanceSheet({
+    netWorth: 259000,
+    rows: [
+      { key: "accounts:1", label: "Current", amount: 1000 },
+      { key: "manualAssets:7", recordId: 7, label: "Home", amount: 250000 },
+      { key: "portfolios:2", label: "Shares", amount: 8000 },
+    ],
+  });
+
+  close(sheet.ownTotal, 259000, "own");
+  assert.deepEqual(
+    sheet.own.map((group) => [group.type, group.total]),
+    [
+      ["accounts", 1000],
+      ["portfolios", 8000],
+      ["manualAssets", 250000],
+    ],
+  );
+});
+
 test("an empty balance sheet has nothing on either side", () => {
   const sheet = balanceSheet({ netWorth: 0, rows: [] });
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { Briefcase, ReceiptText } from "lucide-react";
+import { Briefcase, Building2, ReceiptText } from "lucide-react";
 import { useTranslations } from "next-intl";
 import type { ReactNode } from "react";
 
@@ -141,7 +141,8 @@ export function BalanceSheetSection() {
     ]),
   );
   // Each row's mark: the bank's logo for an account (a wallet without one),
-  // a briefcase for a portfolio and a receipt for a loan.
+  // a briefcase for a portfolio, a building for a manually valued asset and a
+  // receipt for a loan.
   const markFor: MarkFor = (type, row) => {
     const account =
       type === "accounts" && row.recordId !== undefined
@@ -157,9 +158,11 @@ export function BalanceSheetSection() {
         fallbackIcon={
           type === "portfolios"
             ? Briefcase
-            : type === "loans"
-              ? ReceiptText
-              : undefined
+            : type === "manualAssets"
+              ? Building2
+              : type === "loans"
+                ? ReceiptText
+                : undefined
         }
       />
     );

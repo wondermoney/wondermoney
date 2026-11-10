@@ -9,6 +9,7 @@
     "import-portfolio-csv",
     "holdings-allocation",
     "performance-benchmarks",
+    "manual-assets",
     "troubleshoot-portfolio-imports"
   ]
 }
