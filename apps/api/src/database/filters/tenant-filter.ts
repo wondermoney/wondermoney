@@ -75,6 +75,23 @@ export const accountTenantCond = (args?: TenantFilterArgs): Dictionary =>
     ? { $and: [{ tenantKey: args.tenantKey }, { $or: [{ isPrivate: false }, { accountOwnerAppuserKey: args.appuserKey }] }] }
     : {};
 
+/** Manual asset scope + privacy carve-out: a private asset is visible only to its owner. */
+export const manualAssetTenantCond = (args?: TenantFilterArgs): Dictionary =>
+  hasTenant(args)
+    ? { $and: [{ tenantKey: args.tenantKey }, { $or: [{ isPrivate: false }, { ownerAppuserKey: args.appuserKey }] }] }
+    : {};
+
+/** A valuation follows its asset: one on a private asset is visible only to that asset's owner. */
+export const manualAssetValuationTenantCond = (args?: TenantFilterArgs): Dictionary =>
+  hasTenant(args)
+    ? {
+        $and: [
+          { tenantKey: args.tenantKey },
+          { $or: [{ manualAssetKey: { isPrivate: false } }, { manualAssetKey: { ownerAppuserKey: args.appuserKey } }] },
+        ],
+      }
+    : {};
+
 /**
  * RecurringSeries privacy: a recurring series carries the source account,
  * so a series detected from a private account stays owner-only — same shape as Transaction.

@@ -135,6 +135,7 @@ describe('NetWorthService history: today is the live net worth', () => {
       date: iso(today),
       isComplete: true,
       loansTotal: summary.liabilities.loans,
+      manualAssetsTotal: 0,
       portfoliosTotal: summary.assets.portfolios,
       totalNetWorth: summary.totalNetWorth,
     });
@@ -149,6 +150,7 @@ describe('NetWorthService history: today is the live net worth', () => {
       date: iso(lastMonthEnd),
       isComplete: true,
       loansTotal: 168382.33,
+      manualAssetsTotal: 0,
       portfoliosTotal: 14286.16,
       totalNetWorth: 137306.01,
     });

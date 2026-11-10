@@ -140,7 +140,7 @@ export async function restoreHousehold(em: EntityManager, target: RestoreTarget,
   }
 }
 
-/** Whether the household holds any account, portfolio, budget, goal or loan. */
+/** Whether the household holds any account, portfolio, budget, goal, loan or manual asset. */
 export async function isHouseholdEmpty(em: EntityManager, tenantKey: number): Promise<boolean> {
   return !(await householdHasData(sqlQuery(em), tenantKey));
 }
@@ -155,7 +155,8 @@ async function householdHasData(db: Db, tenantKey: number): Promise<boolean> {
       or exists(select 1 from portfolio where tenant_key = ${tenantKey} and deleted_at is null)
       or exists(select 1 from budget where tenant_key = ${tenantKey} and deleted_at is null)
       or exists(select 1 from goal where tenant_key = ${tenantKey} and deleted_at is null)
-      or exists(select 1 from loan where tenant_key = ${tenantKey} and deleted_at is null)) as busy`.execute(db);
+      or exists(select 1 from loan where tenant_key = ${tenantKey} and deleted_at is null)
+      or exists(select 1 from manual_asset where tenant_key = ${tenantKey} and deleted_at is null)) as busy`.execute(db);
   return rows[0]?.busy === true;
 }
 
@@ -281,6 +282,7 @@ class HouseholdRestore {
     await this.merchantCategories();
     await this.tagRows();
     await this.loanRows();
+    await this.manualAssetRows();
     await this.goalRows();
     await this.portfolioRows();
     await this.transactionRows();
@@ -337,6 +339,7 @@ class HouseholdRestore {
     for (const row of rows['goal-activities']) add(row.currency);
     for (const row of rows['goal-transaction-fundings']) add(row.currency);
     for (const row of rows.loans) add(row.currency);
+    for (const row of rows['manual-assets']) add(row.currency);
     for (const row of rows.portfolios) add(row.currency);
     for (const row of rows['portfolio-transactions']) [row.feeCurrency, row.originalCurrency, row.settlementCurrency].forEach(add);
     const known = await lookup(this.db, sql`select currency_key as k, code as name from currency where code = any(${[...codes]})`);
@@ -644,6 +647,44 @@ class HouseholdRestore {
       };
     }));
     this.count('loans', list.length);
+  }
+
+  /** Manual assets and their valuations. Every asset becomes the restoring member's; a private one stays private. */
+  private async manualAssetRows(): Promise<void> {
+    const list = this.rows['manual-assets'];
+    const keys = await allocateKeys(this.db, 'manual_asset', 'manual_asset_key', list.length);
+    const assets = new Keys();
+    await insertRows(this.db, 'manual_asset', list.map((row, index) => {
+      assets.set(row.id, keys[index]!);
+      return {
+        archived_at: row.archivedAt,
+        currency_key: this.currency(row.currency),
+        growth_annual_rate_percent: row.growthAnnualRatePercent,
+        growth_start_date: row.growthStartDate,
+        is_private: row.isPrivate,
+        kind: row.kind,
+        manual_asset_key: keys[index],
+        name: row.name,
+        notes: row.notes,
+        owner_appuser_key: this.target.appuserKey,
+        purchase_date: row.purchaseDate,
+        purchase_price: row.purchasePrice,
+        tenant_key: this.target.tenantKey,
+        ...this.stamp(row.createdAt),
+      };
+    }));
+    this.count('manual-assets', list.length);
+
+    const valuations = this.rows['manual-asset-valuations'].map((row) => ({
+      manual_asset_key: assets.get(row.manualAssetId),
+      note: row.note,
+      tenant_key: this.target.tenantKey,
+      valuation_date: row.date,
+      value: row.value,
+      ...this.stamp(),
+    }));
+    await insertRows(this.db, 'manual_asset_valuation', valuations);
+    this.count('manual-asset-valuations', valuations.length);
   }
 
   private async portfolioRows(): Promise<void> {

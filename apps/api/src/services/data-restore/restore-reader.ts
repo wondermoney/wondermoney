@@ -24,7 +24,7 @@ export interface ParsedExport {
 
 export type RestoreErrorCode =
   | ExportArchiveErrorCode
-  /** The household to restore into already has accounts, portfolios, budgets, goals or loans. */
+  /** The household to restore into already has accounts, portfolios, budgets, goals, loans or manual assets. */
   | 'household_not_empty'
   /** A row that does not match its schema, a duplicate id, or a reference to a row that is not there. */
   | 'invalid_data'

@@ -27,6 +27,8 @@ import { EXPORT_FORMAT, EXPORT_FORMAT_VERSION, type ExportManifest } from './exp
  * - Merchants: only those the member can reach (on a visible transaction, in their own merchant
  *   categories or in a rule), never the household's whole merchant table, whose names would
  *   describe the other member's private spending.
+ * - Manual assets (homes, vehicles): the household's shared ones and the member's own private ones
+ *   (`ManualAsset.isPrivate`), each with its valuations. The other member's private assets are absent.
  * - Loans and the watchlist are personal in the app, so only the member's own.
  * - Categories, category settings, tags, budgets, goals and portfolios are household-wide.
  *
@@ -151,6 +153,7 @@ class HouseholdExport {
   private readonly db: Db;
   private readonly goals = new IdMap();
   private readonly loans = new IdMap();
+  private readonly manualAssets = new IdMap();
   private memberRows: Row[] = [];
   private readonly members = new IdMap();
   private merchantRows: Row[] = [];
@@ -237,6 +240,10 @@ class HouseholdExport {
 
     for (const row of await rowsOf(db, sql`select budget_key from budget where tenant_key = ${tenantKey} and deleted_at is null order by budget_key`)) this.budgets.add(row['budget_key']);
     for (const row of await rowsOf(db, sql`select loan_key from loan where tenant_key = ${tenantKey} and owner_appuser_key = ${appuserKey} and deleted_at is null order by loan_key`)) this.loans.add(row['loan_key']);
+    for (const row of await rowsOf(db, sql`
+      select manual_asset_key from manual_asset
+      where tenant_key = ${tenantKey} and deleted_at is null and (is_private = false or owner_appuser_key = ${appuserKey})
+      order by manual_asset_key`)) this.manualAssets.add(row['manual_asset_key']);
     for (const row of await rowsOf(db, sql`select goal_key from goal where tenant_key = ${tenantKey} and deleted_at is null order by goal_key`)) this.goals.add(row['goal_key']);
     this.portfolioRows = await rowsOf(db, sql`
       select p.portfolio_key, p.name, p.description, p.benchmark_symbol, ${sql.raw(tsx('p.closed_at'))} as closed_at, p.excluded, p.favored,
@@ -279,6 +286,8 @@ class HouseholdExport {
       { format: 'json', path: 'data/loans.json', rows: () => this.loanJson() },
       { format: 'json', path: 'data/loan-adjustments.json', rows: () => this.loanAdjustments() },
       { format: 'json', path: 'data/loan-repayments.json', rows: () => this.loanRepayments() },
+      { format: 'json', path: 'data/manual-assets.json', rows: () => this.manualAssetJson() },
+      { format: 'json', path: 'data/manual-asset-valuations.json', rows: () => this.manualAssetValuations() },
       { format: 'json', path: 'data/portfolios.json', rows: () => this.portfolioJson() },
       { format: 'json', path: 'data/portfolio-transactions.json', rows: () => this.portfolioTransactionJson() },
       { format: 'json', path: 'data/watchlist.json', rows: () => this.watchlist() },
@@ -825,6 +834,43 @@ class HouseholdExport {
         transactionId: this.transactions.get(row['transaction_key']),
       };
     }
+  }
+
+  // --- manual assets ---
+
+  private async* manualAssetJson() {
+    const rows = await rowsOf(this.db, sql`
+      select a.manual_asset_key, a.name, a.kind, a.is_private, a.owner_appuser_key, a.notes, ${sql.raw(dx('a.purchase_date'))} as purchase_date,
+        a.purchase_price::text as purchase_price, a.growth_annual_rate_percent::text as growth_annual_rate_percent,
+        ${sql.raw(dx('a.growth_start_date'))} as growth_start_date, ${sql.raw(tsx('a.archived_at'))} as archived_at,
+        ${sql.raw(tsx('a.created_at'))} as created_at, c.code as currency
+      from manual_asset a left join currency c on c.currency_key = a.currency_key
+      where a.manual_asset_key = any(${this.manualAssets.keys()}) order by a.manual_asset_key`);
+    for (const row of rows) {
+      yield {
+        archivedAt: str(row['archived_at']),
+        createdAt: str(row['created_at']),
+        currency: str(row['currency']),
+        growthAnnualRatePercent: dec(row['growth_annual_rate_percent']),
+        growthStartDate: str(row['growth_start_date']),
+        id: this.manualAssets.get(row['manual_asset_key']),
+        isPrivate: bool(row['is_private']),
+        kind: str(row['kind']),
+        name: str(row['name']),
+        notes: str(row['notes']),
+        ownerMemberId: this.members.get(row['owner_appuser_key']),
+        purchaseDate: str(row['purchase_date']),
+        purchasePrice: dec(row['purchase_price']),
+      };
+    }
+  }
+
+  private async* manualAssetValuations() {
+    const rows = await rowsOf(this.db, sql`
+      select manual_asset_key, ${sql.raw(dx('valuation_date'))} as valuation_date, value::text as value, note from manual_asset_valuation
+      where deleted_at is null and tenant_key = ${this.scope.tenantKey} and manual_asset_key = any(${this.manualAssets.keys()})
+      order by manual_asset_key, valuation_date, manual_asset_valuation_key`);
+    for (const row of rows) yield { date: str(row['valuation_date']), manualAssetId: this.manualAssets.get(row['manual_asset_key']), note: str(row['note']), value: dec(row['value']) };
   }
 
   // --- portfolios ---

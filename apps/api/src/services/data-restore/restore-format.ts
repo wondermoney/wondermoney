@@ -9,8 +9,9 @@ import { EXPORT_FORMAT } from '@service/data-export/export-format';
  *
  * Versions: a restore reads every 1.x export. Rows are parsed leniently about fields (an unknown
  * field from a newer minor version is dropped), strictly about values. An older minor version is
- * brought up to the current one by {@link MINOR_MIGRATIONS} before the rows are checked; 1.0 is
- * the first, so there is nothing to migrate yet. Another major version is refused.
+ * brought up to the current one by {@link MINOR_MIGRATIONS} before the rows are checked. 1.1 only
+ * added files (manual assets), which a 1.0 export simply does not have, so there is nothing to
+ * migrate yet. Another major version is refused.
  */
 export const RESTORE_MAJOR_VERSION = 1;
 
@@ -241,6 +242,22 @@ const loan = z.object({
   termMonths: z.number().int().min(0).max(2000).nullable(),
   type: z.enum(['AUTO_LOAN', 'MORTGAGE', 'OTHER', 'PERSONAL_LOAN', 'STUDENT_LOAN']),
 });
+const manualAsset = z.object({
+  archivedAt: optionalTimestamp,
+  createdAt: optionalTimestamp,
+  currency,
+  growthAnnualRatePercent: optionalDecimal,
+  growthStartDate: day.nullable(),
+  id,
+  isPrivate: z.boolean(),
+  kind: z.enum(['other', 'property', 'valuable', 'vehicle']),
+  name: name(255),
+  notes: text(10_000),
+  ownerMemberId: ref,
+  purchaseDate: day.nullable(),
+  purchasePrice: optionalDecimal,
+});
+const manualAssetValuation = z.object({ date: day, manualAssetId: id, note: text(10_000), value: decimal });
 const loanAdjustment = z.object({ amount: decimal, effectiveDate: day, loanId: id, reason: text(10_000), type: z.enum(['BALANCE_CORRECTION', 'CAPITALIZED_INTEREST', 'FEE', 'PRINCIPAL_DECREASE', 'PRINCIPAL_INCREASE', 'WRITE_OFF']) });
 const loanRepayment = z.object({
   allocationSource: z.enum(['AMORTIZATION_ESTIMATE', 'AUTO_MATCHED', 'MANUAL']),
@@ -312,6 +329,8 @@ export const DATA_FILES = {
   'loan-adjustments': loanAdjustment,
   'loan-repayments': loanRepayment,
   'loans': loan,
+  'manual-asset-valuations': manualAssetValuation,
+  'manual-assets': manualAsset,
   'members': member,
   'merchant-categories': merchantCategory,
   'merchants': merchant,
@@ -386,6 +405,8 @@ export const REFERENCES: readonly { field: string; file: DataFileName; target: D
   { field: 'loanId', file: 'loan-adjustments', target: 'loans' },
   { field: 'loanId', file: 'loan-repayments', target: 'loans' },
   { field: 'transactionId', file: 'loan-repayments', target: 'transactions' },
+  { field: 'ownerMemberId', file: 'manual-assets', target: 'members' },
+  { field: 'manualAssetId', file: 'manual-asset-valuations', target: 'manual-assets' },
   { field: 'linkedAccountId', file: 'portfolios', target: 'accounts' },
   { field: 'ownerMemberId', file: 'portfolios', target: 'members' },
   { field: 'memberId', file: 'portfolio-transactions', target: 'members' },
