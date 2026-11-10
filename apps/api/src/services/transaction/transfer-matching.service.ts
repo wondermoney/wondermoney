@@ -6,7 +6,7 @@ import { Tenant } from '@entity/Tenant';
 import { Transaction } from '@entity/Transaction';
 import { TransactionAuditActorType, TransactionAuditEventType, TransactionAuditLog } from '@entity/TransactionAuditLog';
 import { TransactionType } from '@entity/TransactionType';
-import { resolveExchangeRate } from '@service/currency/exchange-rate';
+import { rateScope, resolveExchangeRate } from '@service/currency/exchange-rate';
 import { getRef } from '@utils/em-helpers';
 import { big, roundMoney, toNumber } from '@utils/money';
 
@@ -180,7 +180,7 @@ export async function reconcileTransfers(em: EntityManager, input: TransferRecon
   const entities = (await loadRows(em, input)).filter((entity) => entity.appuserKey != null);
   const userTyped = await loadUserTypedKeys(em, input.tenantKey);
   const rows = entities.map((entity) => toTransferRow(entity, userTyped));
-  const plan = planTransfers(rows, { fxTolerance: transferMatchFxTolerance(), rateOn: await loadRates(em, rows) });
+  const plan = planTransfers(rows, { fxTolerance: transferMatchFxTolerance(), rateOn: await loadRates(em, rows, input.tenantKey) });
   const result: TransferReconciliationResult = {
     pairsDissolved: plan.pairsDissolved,
     pairsMatched: plan.pairsMatched,
@@ -472,11 +472,13 @@ function matchPairs(candidates: TransferRow[], options: TransferPlanOptions): [T
 /**
  * Every rate the planner may ask for, resolved once each through {@link resolveExchangeRate}. A
  * provisional (old) rate is used as it is; a missing one stays null, so that pair is never made.
+ * The household's own exchange-rate overrides count, as they do for every other conversion.
  */
-async function loadRates(em: EntityManager, rows: TransferRow[]): Promise<TransferPlanOptions['rateOn']> {
+async function loadRates(em: EntityManager, rows: TransferRow[], tenantKey: number): Promise<TransferPlanOptions['rateOn']> {
   const rates = new Map<string, null | number>();
+  const scope = rateScope(tenantKey);
   for (const lookup of rateLookups(rows)) {
-    const resolved = await resolveExchangeRate(em, getRef(em, Currency, lookup.fromCurrencyKey), getRef(em, Currency, lookup.toCurrencyKey), new Date(lookup.day * MS_PER_DAY));
+    const resolved = await resolveExchangeRate(em, getRef(em, Currency, lookup.fromCurrencyKey), getRef(em, Currency, lookup.toCurrencyKey), new Date(lookup.day * MS_PER_DAY), scope);
     rates.set(`${lookup.fromCurrencyKey}>${lookup.toCurrencyKey}@${lookup.day}`, resolved?.rate ?? null);
   }
   return (fromCurrencyKey, toCurrencyKey, day) => rates.get(`${fromCurrencyKey}>${toCurrencyKey}@${day}`) ?? null;

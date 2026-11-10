@@ -7,6 +7,7 @@ import type { Account } from '@entity/Account';
 import type { Appuser } from '@entity/Appuser';
 import { Currency } from '@entity/Currency';
 import { ExchangeRate } from '@entity/ExchangeRate';
+import { ExchangeRateOverride } from '@entity/ExchangeRateOverride';
 import { Transaction } from '@entity/Transaction';
 import { TransactionAuditActorType, TransactionAuditEventType, TransactionAuditLog } from '@entity/TransactionAuditLog';
 import { TransactionType } from '@entity/TransactionType';
@@ -355,6 +356,26 @@ describe('transfer matching', () => {
         { counterpart: into.transactionKey, rate: 1.08, type: 'TRANSFER_OUT' },
         { counterpart: out.transactionKey, rate: 1.08, type: 'TRANSFER_IN' },
       ]);
+    });
+
+    it('pairs at a rate the household set itself, and never at one another household set', async () => {
+      const ctx = await multiCurrencyHousehold();
+      ctx.em.create(ExchangeRateOverride, { date: day('2026-07-03'), fromCurrency: ctx.eur, rate: 1.08, tenantKey: ctx.household.tenant, toCurrency: ctx.usd }, { partial: true });
+      await ctx.em.flush();
+      const out = await row(ctx, { account: ctx.current, amount: -100, date: '2026-07-03' });
+      const into = await row(ctx, { account: ctx.dollars, amount: 108, date: '2026-07-04' });
+      const neighbour = await multiCurrencyHousehold();
+      const theirOut = await row(neighbour, { account: neighbour.current, amount: -100, date: '2026-07-03' });
+      const theirIn = await row(neighbour, { account: neighbour.dollars, amount: 108, date: '2026-07-04' });
+
+      await reconcile(ctx.household.tenant.tenantKey);
+      await reconcile(neighbour.household.tenant.tenantKey);
+
+      expect(await storedWithRate(out, into)).toEqual([
+        { counterpart: into.transactionKey, rate: 1.08, type: 'TRANSFER_OUT' },
+        { counterpart: out.transactionKey, rate: 1.08, type: 'TRANSFER_IN' },
+      ]);
+      expect((await stored(theirOut, theirIn)).map((r) => r.type)).toEqual(['PAYMENT', 'DEPOSIT']);
     });
 
     it('pairs a transfer a bank spread or fee moved within the tolerance, and not one moved beyond it', async () => {
