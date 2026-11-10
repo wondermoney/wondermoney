@@ -1,0 +1,38 @@
+---
+title: Definir tus propios tipos de cambio
+description: Añade un tipo de cambio para un par de divisas y un día cuando la fuente de tipos no lo tiene o se equivocó.
+---
+
+WonderMoney convierte los importes en otras divisas con los tipos de referencia diarios del Banco Central Europeo. La fuente cubre una lista corta de divisas principales en días hábiles. Cuando no tiene tipo para una divisa que usas, o el tipo difiere del que aplicó tu banco, puedes definir el tuyo.
+
+## Qué hace un tipo de cambio propio
+
+- Pertenece a tu hogar. Los dos miembros ven y editan los mismos tipos, y ningún otro hogar se ve afectado.
+- Convierte en un solo sentido: un tipo de XOF a EUR no convierte EUR a XOF. Añade el otro sentido por separado si lo necesitas.
+- Se aplica desde su día hasta que la fuente, u otro tipo tuyo para el mismo par, tenga uno más reciente. En su propio día sustituye al tipo de la fuente.
+- Para una divisa que la fuente no cubre, sigue aplicándose hasta que añadas uno más reciente. Tras siete días sin un tipo más reciente, las conversiones que lo usan se marcan como estimadas.
+
+## Añadir un tipo
+
+1. Abre **Configuración** y elige **Divisas**.
+2. En **Añadir tipo**, elige la divisa **De** la que conviertes y la divisa **A** la que conviertes.
+3. Indica el **Día** al que corresponde el tipo. No puede ser futuro.
+4. Indica el **Tipo**: cuántas unidades de la segunda divisa vale una unidad de la primera. Se aceptan `0,0015` y `0.0015`.
+5. Selecciona **Añadir tipo**.
+
+**A** empieza en tu propia moneda, la que WonderMoney usa para convertir tus importes. Un aviso de tipo que falta o estimado te trae aquí con la moneda, y el día cuando lo tiene, ya rellenados.
+
+Puedes tener un tipo por par y por día. Para cambiarlo, usa el botón de edición junto a él en la lista; puedes cambiar su día y su tipo, pero no las divisas.
+
+## Qué pasa con tus importes
+
+Los totales que WonderMoney calcula al abrir una página, como los informes y el patrimonio neto, usan el nuevo tipo enseguida. Los importes convertidos ya guardados en las transacciones y en los saldos de las cuentas se convierten de nuevo en segundo plano poco después de guardar. Cada cambio queda registrado con el miembro que lo hizo.
+
+## Eliminar un tipo
+
+Selecciona el botón de eliminar junto a un tipo y confirma. Las conversiones de los días que cubría vuelven al tipo de la fuente, o aparecen como no convertidas cuando la fuente no tiene tipo para ese par.
+
+## Páginas relacionadas
+
+- [Entender las transacciones](/es/docs/accounts-transactions/understand-transactions)
+- [Hogar](/es/docs/household)

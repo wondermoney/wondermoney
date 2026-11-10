@@ -12,7 +12,7 @@ import { Transaction } from '@entity/Transaction';
 import { TransactionAuditActorType, TransactionAuditEventType } from '@entity/TransactionAuditLog';
 import { TransactionStatus } from '@entity/TransactionStatus';
 import { TransactionType } from '@entity/TransactionType';
-import { convertWithStatus } from '@service/currency/exchange-rate';
+import { convertWithStatus, rateScope } from '@service/currency/exchange-rate';
 import { triggerRecurringDetectionAfterTransactionIngestion } from '@service/recurring/post-transaction-ingestion-detection.service';
 import { applyRulesToNewTransactions } from '@service/rules/rule-application.service';
 import { linkTags, resolveTags } from '@service/tag/tag.service';
@@ -265,7 +265,7 @@ class TransactionCreationService {
     transaction.appuserCurrencyKey = userCurrency;
 
     // Through the one rate resolver: with no rate, no converted amount is stored (`missing`).
-    const converted = await convertWithStatus(DI.em, transaction.settlementAmount, transactionCurrency, userCurrency, data.transactionDate);
+    const converted = await convertWithStatus(DI.em, transaction.settlementAmount, transactionCurrency, userCurrency, data.transactionDate, rateScope(prepared.appUserTenant.tenantKey));
     transaction.appuserSettlementAmount = converted.amount;
     transaction.appuserCurrencyExchangeRate = converted.rate ?? undefined;
     transaction.fxStatus = converted.fxStatus;

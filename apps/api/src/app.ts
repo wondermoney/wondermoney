@@ -46,6 +46,7 @@ import bankingRoutes from '@route/banking';
 import budgetRoutes from '@route/budget';
 import categoryRoutes from '@route/category';
 import configsRoutes from '@route/configs';
+import currencyRoutes from '@route/currency';
 import feedbackRoutes from '@route/feedback';
 import financialMarketsRoutes from '@route/financial-markets';
 import goalRoutes from '@route/goal';
@@ -204,6 +205,7 @@ export default class Application {
       this.host.use('/v1/category', ...authedTenant(), categoryRoutes);
       this.host.use('/v1/loan', ...authedTenant(), loanRoutes);
       this.host.use('/v1/configs', ...authedTenant(), configsRoutes);
+      this.host.use('/v1/currency', ...authedTenant(), currencyRoutes);
       this.host.use('/v1/feedback', ...authedTenant(feedbackRateLimit), feedbackRoutes);
       this.host.use('/v1/goals', ...authedTenant(), goalRoutes);
       this.host.use('/v1/household', ...authedTenant(), householdRoutes);

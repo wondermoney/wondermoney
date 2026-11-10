@@ -1,0 +1,37 @@
+{
+  "exchangeRates": {
+    "title": "Taxas de câmbio",
+    "description": "Define a tua própria taxa para um par de moedas num dado dia, para uma moeda que a fonte de taxas não cobre ou um dia em que errou. Os dois membros do agregado partilham estas taxas.",
+    "how-it-applies": "Uma taxa aplica-se a partir do seu dia até a fonte, ou outra das tuas taxas, ter uma mais recente. No próprio dia substitui a taxa da fonte. Os montantes já guardados são convertidos de novo em segundo plano.",
+    "table-label": "As tuas taxas de câmbio",
+    "pair": "Par",
+    "date": "Dia",
+    "rate": "Taxa",
+    "from": "De",
+    "to": "Para",
+    "rate-hint": "1 {from} = ? {to}",
+    "rate-reading": "1 {from} = {rate} {to}",
+    "empty": "Ainda não tens taxas de câmbio próprias. As conversões usam a fonte de taxas.",
+    "load-error": "Não foi possível carregar as tuas taxas de câmbio.",
+    "currencies-load-error": "Não foi possível carregar a lista de moedas.",
+    "add": "Adicionar taxa",
+    "save-error": "Não foi possível guardar a taxa.",
+    "created": "Taxa adicionada. Os montantes estão a ser convertidos de novo.",
+    "updated": "Taxa atualizada. Os montantes estão a ser convertidos de novo.",
+    "deleted": "Taxa eliminada. Os montantes estão a ser convertidos de novo.",
+    "edit-named": "Editar a taxa {pair} de {date}",
+    "delete-named": "Eliminar a taxa {pair} de {date}",
+    "delete": "Eliminar taxa",
+    "delete-title": "Eliminar a taxa {pair} de {date}?",
+    "delete-description": "As conversões que a usavam voltam à fonte de taxas, ou aparecem como não convertidas quando a fonte não tem taxa para este par.",
+    "select-currency": "Escolhe uma moeda",
+    "errors": {
+      "currency-required": "Escolhe as duas moedas.",
+      "same-currency": "Escolhe duas moedas diferentes.",
+      "date-required": "Indica um dia.",
+      "date-future": "O dia não pode ser no futuro.",
+      "rate-invalid": "Indica uma taxa maior que zero.",
+      "exists": "Já tens uma taxa para este par neste dia. Edita essa."
+    }
+  }
+}

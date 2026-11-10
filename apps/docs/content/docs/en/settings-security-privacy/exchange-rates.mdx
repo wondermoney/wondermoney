@@ -1,0 +1,38 @@
+---
+title: Set your own exchange rates
+description: Add an exchange rate for a currency pair and day when the rate feed has none or got it wrong.
+---
+
+WonderMoney converts amounts in other currencies with daily reference rates from the European Central Bank. The feed covers a short list of major currencies on business days. When it has no rate for a currency you use, or a rate differs from the one your bank applied, you can set your own.
+
+## What an exchange rate of your own does
+
+- It belongs to your household. Both members see and edit the same rates, and no other household is affected.
+- It converts one direction only: a rate from XOF to EUR does not convert EUR to XOF. Add the other direction separately if you need it.
+- It applies from its day until the feed, or another rate of yours for the same pair, has a newer rate. On its own day it replaces the feed's rate.
+- For a currency the feed does not cover, it keeps applying until you add a newer one. After seven days without a newer rate, conversions that use it are marked as estimated.
+
+## Add a rate
+
+1. Open **Settings** and choose **Currencies**.
+2. Under **Add rate**, pick the currency you convert **From** and the one you convert **To**.
+3. Enter the **Day** the rate is for. It cannot be in the future.
+4. Enter the **Rate**: how many units of the second currency one unit of the first is worth. Both `0.0015` and `0,0015` are accepted.
+5. Select **Add rate**.
+
+**To** starts as your own currency, the one WonderMoney converts your amounts to. A warning about a missing or estimated rate links here with the currency, and the day when it has one, already filled in.
+
+You can keep one rate per pair and day. To change it, use the edit button next to it in the list; you can change its day and rate, but not its currencies.
+
+## What happens to your amounts
+
+Totals that WonderMoney works out when you open a page, such as reports and net worth, use the new rate straight away. Converted amounts already stored on transactions and account balances are converted again in the background shortly after you save. Each change is recorded with the member who made it.
+
+## Delete a rate
+
+Select the delete button next to a rate and confirm. Conversions on the days it covered go back to the feed's rate, or show as not converted when the feed has no rate for that pair.
+
+## Related pages
+
+- [Understand transactions](/en/docs/accounts-transactions/understand-transactions)
+- [Household](/en/docs/household)

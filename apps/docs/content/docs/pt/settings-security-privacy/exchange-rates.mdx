@@ -1,0 +1,38 @@
+---
+title: Definir as tuas taxas de câmbio
+description: Adiciona uma taxa de câmbio para um par de moedas e um dia quando a fonte de taxas não a tem ou errou.
+---
+
+O WonderMoney converte montantes noutras moedas com as taxas de referência diárias do Banco Central Europeu. A fonte cobre uma lista curta de moedas principais nos dias úteis. Quando não tem taxa para uma moeda que usas, ou a taxa difere da que o teu banco aplicou, podes definir a tua.
+
+## O que faz uma taxa de câmbio tua
+
+- Pertence ao teu agregado. Os dois membros veem e editam as mesmas taxas, e nenhum outro agregado é afetado.
+- Converte num só sentido: uma taxa de XOF para EUR não converte EUR para XOF. Adiciona o outro sentido à parte se precisares.
+- Aplica-se a partir do seu dia até a fonte, ou outra taxa tua para o mesmo par, ter uma mais recente. No próprio dia substitui a taxa da fonte.
+- Para uma moeda que a fonte não cobre, continua a aplicar-se até adicionares uma mais recente. Ao fim de sete dias sem taxa mais recente, as conversões que a usam ficam marcadas como estimadas.
+
+## Adicionar uma taxa
+
+1. Abre **Definições** e escolhe **Moedas**.
+2. Em **Adicionar taxa**, escolhe a moeda **De** que convertes e a moeda **Para** que convertes.
+3. Indica o **Dia** a que a taxa se refere. Não pode ser no futuro.
+4. Indica a **Taxa**: quantas unidades da segunda moeda vale uma unidade da primeira. Aceita `0,0015` e `0.0015`.
+5. Seleciona **Adicionar taxa**.
+
+**Para** começa na tua moeda, aquela para que o WonderMoney converte os teus valores. Um aviso de taxa em falta ou estimada traz-te aqui com a moeda, e o dia quando o tem, já preenchidos.
+
+Podes ter uma taxa por par e por dia. Para a mudar, usa o botão de edição ao lado dela na lista; podes mudar o dia e a taxa, mas não as moedas.
+
+## O que acontece aos teus montantes
+
+Os totais que o WonderMoney calcula quando abres uma página, como os relatórios e o património líquido, usam logo a nova taxa. Os montantes convertidos já guardados nas transações e nos saldos das contas são convertidos de novo em segundo plano pouco depois de guardares. Cada alteração fica registada com o membro que a fez.
+
+## Eliminar uma taxa
+
+Seleciona o botão de eliminar ao lado de uma taxa e confirma. As conversões dos dias que ela cobria voltam à taxa da fonte, ou aparecem como não convertidas quando a fonte não tem taxa para esse par.
+
+## Páginas relacionadas
+
+- [Compreender transações](/pt/docs/accounts-transactions/understand-transactions)
+- [Agregado familiar](/pt/docs/household)

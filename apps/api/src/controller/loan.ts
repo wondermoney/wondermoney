@@ -11,7 +11,7 @@ import { LoanAdjustment } from '@entity/LoanAdjustment';
 import { LoanRepaymentLink } from '@entity/LoanRepaymentLink';
 import { Tenant } from '@entity/Tenant';
 import { Transaction } from '@entity/Transaction';
-import { convertAtLatestRate } from '@service/currency/exchange-rate';
+import { convertAtLatestRate, rateScope } from '@service/currency/exchange-rate';
 import {
   calculateLoanProgress,
   calculateNextPaymentDate,
@@ -156,7 +156,7 @@ export async function getLoanOverview(req: Request, res: Response) {
   const converted = await Promise.all(
     loans.map(async (loan, index) => {
       const { outstandingPrincipal } = enriched[index] as { outstandingPrincipal?: number };
-      const convert = (value: number) => convertAtLatestRate(DI.em, value, loan.currencyKey, userCurrency, today);
+      const convert = (value: number) => convertAtLatestRate(DI.em, value, loan.currencyKey, userCurrency, today, rateScope(tenant));
       const [principal, payment] = await Promise.all([convert(outstandingPrincipal ?? 0), convert(loan.regularPaymentAmount ?? 0)]);
       return principal == null || payment == null ? null : { includeInNetWorth: loan.includeInNetWorth, outstandingPrincipal: principal, regularPaymentAmount: payment };
     }),

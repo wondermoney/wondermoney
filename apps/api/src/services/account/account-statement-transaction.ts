@@ -11,7 +11,7 @@ import { TransactionType } from '@entity/TransactionType';
 import accountCsvBalanceRecalculationService from '@service/account/account-csv-balance-recalculation.service';
 import accountCsvCategorizationService from '@service/account/account-csv-categorization.service';
 import type { StatementRow } from '@service/account/account-statement-reader';
-import { convertWithStatus } from '@service/currency/exchange-rate';
+import { convertWithStatus, rateScope } from '@service/currency/exchange-rate';
 import type { Enqueue } from '@service/queue/enqueue';
 import { triggerRecurringDetectionAfterTransactionIngestion } from '@service/recurring/post-transaction-ingestion-detection.service';
 import { applyRulesToNewTransactions } from '@service/rules/rule-application.service';
@@ -99,7 +99,7 @@ export async function buildStatementTransaction(em: EM, context: StatementWriteC
   const merchant = await findOrCreateMerchant(em, context, validated.transactionMerchant);
   // Through the one rate resolver: with no rate on or before the row's date, no converted
   // amount is stored (`missing`), never the amount in the account's currency.
-  const converted = await convertWithStatus(em, signedAmount, currency, context.appuserCurrency, validated.transactionDate);
+  const converted = await convertWithStatus(em, signedAmount, currency, context.appuserCurrency, validated.transactionDate, rateScope(context.account.tenantKey));
   const originalAmountValue = validated['originalAmount'];
   const originalCurrencyValue = validated['originalCurrency'];
   const originalAmount = originalAmountValue !== undefined ? toFiniteNumber(normalizeNumberInput(originalAmountValue) as number | string | { toString: () => string }) : signedAmount;
