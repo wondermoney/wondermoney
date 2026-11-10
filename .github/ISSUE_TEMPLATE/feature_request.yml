@@ -1,0 +1,45 @@
+name: Feature request
+description: Suggest an improvement or a new feature.
+labels: [enhancement]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for the idea. Starting with the problem helps us find the best fix, which may differ from the first one that comes to mind. For open-ended ideas or questions, [Discussions](https://github.com/wondermoney/wondermoney/discussions) may be a better fit.
+  - type: textarea
+    id: problem
+    attributes:
+      label: The problem
+      description: What are you trying to do, and what gets in the way today?
+      placeholder: When I ..., I have to ..., which is frustrating because ...
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Your proposal
+      description: How you'd like it to work. Sketches or screenshots of other apps are welcome.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives and workarounds
+      description: Anything you've tried or considered instead.
+  - type: dropdown
+    id: platform
+    attributes:
+      label: Where would this apply?
+      multiple: true
+      options:
+        - Web
+        - Mobile app
+        - Self-hosting
+        - Documentation
+        - Not sure
+  - type: checkboxes
+    id: contribute
+    attributes:
+      label: Contributing
+      options:
+        - label: I'd like to work on this myself.

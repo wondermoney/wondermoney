@@ -1,0 +1,59 @@
+name: Self-hosting help
+description: Trouble installing, configuring, upgrading or running your own instance.
+labels: [self-hosting]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Please read the [self-hosting guide](https://docs.wonder.money/en/docs/self-hosting) first, in particular [Install](https://docs.wonder.money/en/docs/self-hosting/install), [Configure your instance](https://docs.wonder.money/en/docs/self-hosting/configure) and [Updates and backups](https://docs.wonder.money/en/docs/self-hosting/upgrade-and-backup).
+
+        **Never paste your `.env` file, secrets, tokens, public hostnames or IP addresses, or any financial data.** Replace them with placeholders.
+  - type: dropdown
+    id: method
+    attributes:
+      label: Setup method
+      options:
+        - Docker Compose from apps/api/deploy/selfhost
+        - Docker Compose, modified
+        - Images run another way (Kubernetes, a PaaS, etc.)
+        - Built from source
+        - Other
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: WonderMoney version
+      description: The image tag (`WM_VERSION` in `.env`, or `latest`) or the commit you built from.
+      placeholder: e.g. 1.1.0, latest, or a commit SHA
+    validations:
+      required: true
+  - type: textarea
+    id: versions
+    attributes:
+      label: Environment
+      description: Operating system, Docker and Docker Compose versions (`docker version`, `docker compose version`), CPU architecture, and any reverse proxy in front.
+      placeholder: |
+        OS: Debian 13, arm64
+        Docker: 28.x, Compose v2.x
+        Reverse proxy: Caddy
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: What's going wrong
+      description: What you did, what you expected and what happened instead.
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs
+      description: Output of `docker compose ps` and `docker compose logs --tail 200 api worker web`. **Remove secrets, emails, hostnames, IP addresses and any financial data before pasting.**
+      render: text
+  - type: textarea
+    id: config
+    attributes:
+      label: Configuration changes
+      description: Which settings you changed from the generated `.env` (names only, never values of secrets).

@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Ask a question
+    url: https://github.com/wondermoney/wondermoney/discussions
+    about: Questions, ideas and show-and-tell go in Discussions.
+  - name: Read the documentation
+    url: https://docs.wonder.money
+    about: Guides for using WonderMoney and running your own instance.
+  - name: Report a security vulnerability
+    url: https://github.com/wondermoney/wondermoney/security/advisories/new
+    about: Report it privately, never in a public issue. See SECURITY.md.
