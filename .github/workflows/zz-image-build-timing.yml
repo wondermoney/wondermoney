@@ -84,7 +84,7 @@ jobs:
           outputs: type=local,dest=apps/api/dist
           build-args: |
             GIT_COMMIT_SHA=${{ github.event.pull_request.head.sha }}
-          cache-from: type=gha,scope=timing-after
+          cache-from: type=gha,scope=timing-after-min
       - name: Build the images
         uses: docker/build-push-action@v7
         with:
@@ -95,8 +95,8 @@ jobs:
             GIT_COMMIT_SHA=${{ github.event.pull_request.head.sha }}
             APP_ENV=staging
             DEPLOY_ENV=staging
-          cache-from: type=gha,scope=timing-after
-          cache-to: type=gha,mode=max,scope=timing-after,ignore-error=true
+          cache-from: type=gha,scope=timing-after-min
+          cache-to: type=gha,mode=min,scope=timing-after-min,ignore-error=true
       # Stand-in for the CI gate.
       - name: Push API (image export, no push)
         uses: docker/build-push-action@v7
@@ -105,7 +105,7 @@ jobs:
           file: apps/api/Dockerfile
           target: api
           outputs: type=image,name=ghcr.io/wondermoney/timing-api,push=false
-          cache-from: type=gha,scope=timing-after
+          cache-from: type=gha,scope=timing-after-min
           build-args: |
             GIT_COMMIT_SHA=${{ github.event.pull_request.head.sha }}
             APP_ENV=staging
@@ -117,7 +117,7 @@ jobs:
           file: apps/api/Dockerfile
           target: worker
           outputs: type=image,name=ghcr.io/wondermoney/timing-worker,push=false
-          cache-from: type=gha,scope=timing-after
+          cache-from: type=gha,scope=timing-after-min
           build-args: |
             GIT_COMMIT_SHA=${{ github.event.pull_request.head.sha }}
             APP_ENV=staging
