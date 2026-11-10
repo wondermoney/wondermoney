@@ -37,9 +37,13 @@ export const netWorthDtoSchema = z.object({
   }),
   rows: netWorthRowsSchema,
   unsupportedCurrencies: z.object({
+    // Accounts left out for want of an exchange rate; an older API doesn't send it.
+    accounts: z.number().int().nonnegative().optional().catch(undefined),
     loans: z.number().int().nonnegative(),
     portfolios: z.number().int().nonnegative(),
   }),
+  /** The currencies of the accounts and loans left out, so the note can name them. Optional. */
+  unconvertedCurrencies: z.array(z.string().regex(/^[A-Z]{3}$/)).optional().catch(undefined),
 })
 
 export type NetWorthRowDto = z.infer<typeof netWorthRowSchema>

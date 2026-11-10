@@ -4,6 +4,7 @@
     "index",
     "connect-bank-account",
     "manual-offline-account",
+    "currencies-exchange-rates",
     "manage-bank-connections",
     "understand-transactions",
     "import-transactions-csv",

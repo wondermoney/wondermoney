@@ -1,5 +1,5 @@
 import { mapTransactions } from './transactions-view-model'
-import { nullishTransactionFixture, transactionFixture } from './test-fixtures'
+import { estimatedTransactionFixture, nullishTransactionFixture, transactionFixture, unconvertedTransactionFixture } from './test-fixtures'
 
 describe('transaction view model', () => {
   it('keeps the server order and maps merchant, converted amount, cues, and detail context', () => {
@@ -86,5 +86,21 @@ describe('transaction view model', () => {
     expect(rows.find((row) => row.id === 61)?.direction).toBe('credit')
     expect(rows.find((row) => row.id === 62)?.direction).toBe('unknown')
     expect(rows.find((row) => row.id === 63)?.direction).toBe('debit')
+  })
+  describe('how each row was converted', () => {
+    it('carries the original amount of a row with no exchange rate, keeping its sign as the direction', () => {
+      const [row] = mapTransactions({ transactions: [unconvertedTransactionFixture] })
+      expect(row).toMatchObject({ amount: null, direction: 'debit', fx: { status: 'missing', amount: -10_000, currency: 'JPY' } })
+    })
+
+    it('marks a row converted at an old rate as estimated, with the rate date', () => {
+      const [row] = mapTransactions({ transactions: [estimatedTransactionFixture] })
+      expect(row).toMatchObject({ amount: -60, fx: { status: 'provisional', rateDate: '2026-11-03' } })
+    })
+
+    it('leaves a row in the user currency, or from an older API, exact', () => {
+      const rows = mapTransactions({ transactions: [transactionFixture, nullishTransactionFixture] })
+      expect(rows.map((row) => row.fx)).toEqual([{ status: 'exact' }, { status: 'exact' }])
+    })
   })
 })

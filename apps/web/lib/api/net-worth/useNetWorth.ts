@@ -29,6 +29,8 @@ export interface RawNetWorthSummary {
     loans: number;
     portfolios: number;
   };
+  /** The currencies of the accounts and loans left out for want of a rate; absent from older APIs. */
+  unconvertedCurrencies?: string[];
 }
 
 export interface NetWorth {
@@ -54,7 +56,12 @@ export interface NetWorth {
       currencyCode?: string;
     }>;
   }>;
-  unsupportedCurrencyMetadata?: Array<{ currencyCode: string; reason: string }>;
+  /**
+   * What the totals leave out because it could not be valued in
+   * `currencyCode`: how many accounts, loans and portfolios, and the
+   * currencies with no exchange rate among them.
+   */
+  unconverted?: { count: number; currencies: string[] };
   suggestPortfolioLink?: boolean;
 }
 
@@ -62,7 +69,7 @@ export interface GetNetWorthResponse {
   netWorth: NetWorth;
 }
 
-async function getNetWorth(
+export async function getNetWorth(
   apiClient: AxiosInstance = api,
 ): Promise<GetNetWorthResponse> {
   const { data } = await apiClient.get<RawNetWorthSummary>("/v1/net-worth");
@@ -90,11 +97,13 @@ async function getNetWorth(
           : { countedInAccountId: row.countedInAccountId }),
       })),
       suggestPortfolioLink: data.suggestPortfolioLink === true,
-      unsupportedCurrencyMetadata: Object.entries(
-        data.unsupportedCurrencies,
-      ).flatMap(([currencyCode, count]) =>
-        count > 0 ? [{ currencyCode, reason: "unsupported" }] : [],
-      ),
+      unconverted: {
+        count:
+          (data.unsupportedCurrencies.accounts ?? 0) +
+          data.unsupportedCurrencies.loans +
+          data.unsupportedCurrencies.portfolios,
+        currencies: data.unconvertedCurrencies ?? [],
+      },
     },
   };
 }

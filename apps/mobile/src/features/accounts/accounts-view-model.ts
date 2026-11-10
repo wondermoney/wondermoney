@@ -1,3 +1,5 @@
+import { type FxState, resolveFxState } from '@/lib/api/fx-status'
+
 import type { AccountSource, AccountSummaryDto, AccountsResponseDto, CsvImportFormat } from './accounts-contract'
 
 export type AccountSyncStaleness = 'fresh' | 'stale' | 'very_stale' | 'error' | 'unknown'
@@ -25,6 +27,11 @@ export type AccountSummaryViewModel = Readonly<{
   institutionLogoUrl?: string | null
   /** The API's type key ('CREDIT_CARD'); `null` when unset or not reported. */
   accountType?: string | null
+  /**
+   * How `convertedBalance` was converted. `missing`: there is none; show `originalBalance`, marked
+   * "Not converted". `provisional`: an estimate at an older rate. Absent on older fixtures: exact.
+   */
+  fx?: FxState
 }>
 
 export const mapAccountSummary = (dto: AccountSummaryDto): AccountSummaryViewModel => ({
@@ -46,6 +53,14 @@ export const mapAccountSummary = (dto: AccountSummaryDto): AccountSummaryViewMod
   lastSyncedAt: dto.syncStatus?.lastSyncedAt ?? null,
   institutionLogoUrl: dto.accountFinancialInstitutionKey?.logoUrl ?? null,
   accountType: dto.accountType ?? null,
+  fx: resolveFxState({
+    fxStatus: dto.fxStatus,
+    fxRateDate: dto.fxRateDate,
+    converted: dto.appuserCurrencyBalance,
+    original: dto.balance,
+    fromCurrency: dto.currencyKey.code,
+    toCurrency: dto.accountOwnerAppuserKey.currencyKey.code,
+  }),
 })
 
 export const mapAccounts = (dto: AccountsResponseDto): readonly AccountSummaryViewModel[] => (

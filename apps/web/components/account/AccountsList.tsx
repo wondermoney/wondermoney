@@ -13,6 +13,10 @@ import { useTranslations } from "next-intl";
 import { usePostHog } from "posthog-js/react";
 import { useCallback, useState } from "react";
 
+import {
+  AccountBalance,
+  unconvertedAccountCurrencies,
+} from "@/components/account/AccountBalance";
 import AccountDeleteModal from "@/components/account/AccountDeleteModal";
 import AccountEditSheet from "@/components/account/AccountEditSheet";
 import { AccountMark } from "@/components/account/AccountMark";
@@ -27,8 +31,10 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { InspectorDrawer, PropertyList } from "@/components/ui/InspectorDrawer";
+import { UnconvertedTotalWarning } from "@/components/ui/UnconvertedTotalWarning";
 import { useRouter } from "@/i18n/navigation";
 import type { Account } from "@/lib/api/account/useAccounts";
+import { accountFxView } from "@/lib/fx/fx-status";
 import { cn } from "@/lib/utils";
 import { CurrencyMismatchError, sumMoney } from "@/lib/utils/money";
 import { useFormatCurrency } from "@/lib/utils/useFormatCurrency";
@@ -188,13 +194,13 @@ export default function AccountsList({ accounts }: { accounts: Account[] }) {
                 {/* A balance is a level: not coloured by its sign, and a
                     missing one is an em-dash rather than a sentence in the
                     column the eye scans. DESIGN.md § 9 rules 1–3. */}
-                <Amount
-                  value={account.appuserCurrencyBalance}
-                  currency={account.accountOwnerAppuserKey.currencyKey.code}
+                <AccountBalance
+                  account={account}
                   className="font-mono text-sm font-medium"
                 />
                 {account.accountOwnerAppuserKey.currencyKey.code !==
-                  account.currencyKey.code && (
+                  account.currencyKey.code &&
+                  accountFxView(account).status !== "missing" && (
                   <p className="text-muted-foreground font-mono text-xs">
                     <Amount
                       value={account.balance}
@@ -275,12 +281,22 @@ export default function AccountsList({ accounts }: { accounts: Account[] }) {
         <span className="text-muted-foreground text-sm font-medium">
           {t("total")}
         </span>
-        <span className="text-foreground font-mono text-sm font-semibold">
+        <span className="text-foreground flex items-center gap-2 font-mono text-sm font-semibold">
           {totalBalance !== null
             ? formatCurrency(totalBalance, userCurrency)
             : total.kind === "mixed-currencies"
               ? t("total-balance-mixed-currencies")
               : t("total-balance-incomplete")}
+          {/* A balance with no exchange rate is why a total is missing. */}
+          {total.kind === "incomplete" ? (
+            <UnconvertedTotalWarning
+              unconverted={{
+                count: 0,
+                currencies: unconvertedAccountCurrencies(accounts),
+              }}
+              currency={userCurrency}
+            />
+          ) : null}
         </span>
       </div>
 
@@ -329,15 +345,7 @@ export default function AccountsList({ accounts }: { accounts: Account[] }) {
               {
                 key: "balance",
                 label: t("balance"),
-                value: (
-                  <Amount
-                    value={inspectedAccount.appuserCurrencyBalance}
-                    currency={
-                      inspectedAccount.accountOwnerAppuserKey?.currencyKey
-                        ?.code ?? userCurrency
-                    }
-                  />
-                ),
+                value: <AccountBalance account={inspectedAccount} />,
               },
               {
                 key: "available",

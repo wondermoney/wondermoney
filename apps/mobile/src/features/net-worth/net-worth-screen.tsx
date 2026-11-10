@@ -12,6 +12,7 @@ import { PageHeader } from '@/components/ui/page-header'
 import { SafeAreaView } from '@/components/ui/screen-safe-area'
 import { SegmentedControl } from '@/components/ui/segmented-control'
 import { Text } from '@/components/ui/text'
+import { formatCurrencyList } from '@/components/ui/unconverted-amounts-note'
 import { useMoneyLabel } from '@/lib/formatters/money-display'
 import { formatRelativeTime } from '@/lib/formatters/relative-time'
 import { usePrivacyMode } from '@/lib/privacy/privacy-mode'
@@ -47,8 +48,12 @@ export type NetWorthData = {
   total: number
   rows: readonly NetWorthRowDto[]
   completeness: 'partial' | 'unknown'
+  /** Accounts left out for want of an exchange rate; absent from older APIs. */
+  unsupportedAccountCount?: number
   unsupportedLoanCount: number
   unsupportedPortfolioCount: number
+  /** The currencies of the accounts and loans left out, named under the total. */
+  unconvertedCurrencies?: readonly string[]
 }
 
 export type NetWorthViewState =
@@ -272,11 +277,17 @@ function NetWorthHero({ state, sections, today, locale, onRefresh, onLogout, onV
           value={data.total}
         />
         {data.completeness === 'partial' ? <Text tone="warning" variant="meta">{t('netWorth.completeness.partial')}</Text> : null}
+        {(data.unsupportedAccountCount ?? 0) > 0 ? (
+          <Text accessibilityRole="alert" tone="muted" variant="meta">{t('netWorth.unsupportedAccount', { count: data.unsupportedAccountCount })}</Text>
+        ) : null}
         {data.unsupportedLoanCount > 0 ? (
           <Text accessibilityRole="alert" tone="muted" variant="meta">{t('netWorth.unsupportedLoan', { count: data.unsupportedLoanCount })}</Text>
         ) : null}
         {data.unsupportedPortfolioCount > 0 ? (
           <Text accessibilityRole="alert" tone="muted" variant="meta">{t('netWorth.unsupportedPortfolio', { count: data.unsupportedPortfolioCount })}</Text>
+        ) : null}
+        {data.unconvertedCurrencies && data.unconvertedCurrencies.length > 0 ? (
+          <Text tone="muted" variant="meta" testID="net-worth-unconverted-currencies">{t('netWorth.unconvertedCurrencies', { currencies: formatCurrencyList(data.unconvertedCurrencies, locale) })}</Text>
         ) : null}
         <View style={styles.ownOwe}>
           <View accessible accessibilityLabel={`${t('home.sheet.own')}, ${moneyLabel(sheet.ownTotal, { locale, currency: data.primaryCurrency })}`} style={styles.ownOweItem}>

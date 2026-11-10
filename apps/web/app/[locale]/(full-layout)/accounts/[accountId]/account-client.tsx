@@ -8,6 +8,7 @@ import { usePostHog } from "posthog-js/react";
 import { useMemo, useState } from "react";
 import { DateRange } from "react-day-picker";
 
+import { accountDisplayBalance } from "@/components/account/AccountBalance";
 import AccountTransactionAddModal from "@/components/account/AccountTransactionAddModal";
 import AccountTransactionImportModal from "@/components/account/AccountTransactionImportModal";
 import AccountTransactionsTable from "@/components/account/AccountTransactionsTable";
@@ -15,6 +16,7 @@ import MetricsCards from "@/components/account/MetricsCards";
 import { clampSyncedAt } from "@/components/account/sync-time";
 import { Button } from "@/components/ui/button";
 import { DataProvenance } from "@/components/ui/DataProvenance";
+import { FxStatusBadge } from "@/components/ui/FxStatusBadge";
 import { Link } from "@/components/ui/Link";
 import { ObjectHeader } from "@/components/ui/ObjectHeader";
 import { Section } from "@/components/ui/RuledSection";
@@ -29,6 +31,7 @@ import type { GetAccountTransactionsResponse } from "@/lib/api/account/useAccoun
 import useAccountTransactions from "@/lib/api/account/useAccountTransactions";
 import type { GetConfigsResponse } from "@/lib/api/configs/useConfigs";
 import useConfigs from "@/lib/api/configs/useConfigs";
+import { accountFxView } from "@/lib/fx/fx-status";
 import { serverSeed } from "@/lib/query/server-seed";
 
 // Code-split heavy chart component
@@ -151,13 +154,16 @@ export default function AccountClient({
   // has no institution; the honest rendering is no line at all. § 9 rule 4.
   const institutionName =
     account.accountFinancialInstitutionKey?.displayName ?? null;
-  const currency = account.accountOwnerAppuserKey.currencyKey.code;
+  // With no exchange rate the balance is shown in the account's own currency,
+  // marked "Not converted", and there is no second figure to show.
+  const fx = accountFxView(account);
   const isMultiCurrency =
     account.accountOwnerAppuserKey.currencyKey.code !==
-    account.currencyKey.code;
-  const primaryBalance = isMultiCurrency
-    ? account.appuserCurrencyBalance
-    : account.balance;
+      account.currencyKey.code && fx.status !== "missing";
+  const currency = account.accountOwnerAppuserKey.currencyKey.code;
+  const { value: primaryBalance, currency: balanceCurrency } = isMultiCurrency
+    ? accountDisplayBalance(account)
+    : { value: account.balance, currency: account.currencyKey.code };
 
   return (
     <div className="flex flex-col gap-10 lg:gap-12">
@@ -184,10 +190,14 @@ export default function AccountClient({
                 {t("shared-by", { name: account.ownerFirstName })}
               </span>
             )}
+            <FxStatusBadge
+              view={fx}
+              originalCurrency={account.currencyKey.code}
+            />
           </>
         }
         value={primaryBalance}
-        currency={currency}
+        currency={balanceCurrency}
         valueLabel={t("account-balance")}
         secondaryValue={isMultiCurrency ? account.balance : undefined}
         secondaryCurrency={account.currencyKey.code}

@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { accountMark, EntityMark, type EntityMarkSource } from '@/components/ui/entity-mark'
 import { FLOATING_ACTION_SIZE, FloatingActionButton } from '@/components/ui/floating-action-button'
+import { describeFxState, FxStatusLabel } from '@/components/ui/fx-status-label'
 import { HeadlineFigure } from '@/components/ui/headline-figure'
 import { IconButton } from '@/components/ui/icon-button'
 import { List, ListRow } from '@/components/ui/list-row'
@@ -102,7 +103,10 @@ export function AccountDetailScreen({ state, recentTransactions, onBack, onRetry
 
   const data = state.data
   const name = data.accountName ?? t('accounts.unnamed')
-  const multiCurrency = data.originalCurrencyCode !== data.primaryCurrencyCode
+  const fx = data.fx ?? { status: 'exact' as const }
+  const fxCopy = describeFxState(fx, t, locale)
+  // With no exchange rate there is no balance in the owner's currency: lead with the account's own.
+  const multiCurrency = data.originalCurrencyCode !== data.primaryCurrencyCode && fx.status !== 'missing'
   // Web leads with the balance in the reader's currency when the account is in another one.
   const primaryValue = multiCurrency ? data.convertedBalance : data.originalBalance
   const primaryCurrency = multiCurrency ? data.primaryCurrencyCode : data.originalCurrencyCode
@@ -161,9 +165,11 @@ export function AccountDetailScreen({ state, recentTransactions, onBack, onRetry
 
           <View style={styles.lead}>
             <HeadlineFigure
-              accessibilityLabel={`${t('accountsOverview.accountBalance')}, ${primaryText}`}
+              accessibilityLabel={[`${t('accountsOverview.accountBalance')}, ${primaryText}`, fxCopy ? `${fxCopy.label}. ${fxCopy.hint}` : null].filter(Boolean).join(', ')}
               currency={primaryCurrency}
-              footer={primaryValue === null ? <Text tone="muted" variant="label">{t('accounts.balanceUnavailable')}</Text> : undefined}
+              footer={primaryValue === null
+                ? <Text tone="muted" variant="label">{t('accounts.balanceUnavailable')}</Text>
+                : fxCopy ? <FxStatusLabel locale={locale} state={fx} testID="account-balance-fx-status" /> : undefined}
               label={t('accountsOverview.accountBalance')}
               locale={locale}
               secondary={multiCurrency ? { value: data.originalBalance, currency: data.originalCurrencyCode } : null}

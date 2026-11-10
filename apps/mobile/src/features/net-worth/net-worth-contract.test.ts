@@ -19,6 +19,11 @@ describe('net-worth contract', () => {
     expect(netWorthDtoSchema.parse(fixture)).toEqual(fixture)
   })
 
+  it('reads the unconverted accounts and the currencies left out, tolerating older APIs and bad values', () => {
+    expect(netWorthDtoSchema.parse({ ...fixture, unsupportedCurrencies: { accounts: 2, loans: 0, portfolios: 0 }, unconvertedCurrencies: ['JPY', 'THB'] })).toMatchObject({ unsupportedCurrencies: { accounts: 2 }, unconvertedCurrencies: ['JPY', 'THB'] })
+    expect(netWorthDtoSchema.parse({ ...fixture, unconvertedCurrencies: 'JPY' }).unconvertedCurrencies).toBeUndefined()
+  })
+
   it.each(['EUR', 'USD', 'JPY'])('accepts ISO-shaped currency code %s', (currencyCode) => {
     expect(netWorthDtoSchema.safeParse({ ...fixture, currencyCode }).success).toBe(true)
   })

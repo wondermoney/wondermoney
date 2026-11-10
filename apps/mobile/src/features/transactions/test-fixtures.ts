@@ -29,3 +29,26 @@ export const nullishTransactionFixture: TransactionDto = {
   balance: null,
   appuserCurrencyBalance: null,
 }
+
+/** A ¥10,000 purchase with no exchange rate: no converted amount, `fxStatus` `missing`. */
+export const unconvertedTransactionFixture: TransactionDto = {
+  ...transactionFixture,
+  transactionKey: 51,
+  transactionMerchantKey: { name: 'Tokyo kiosk' },
+  settlementAmount: -10_000,
+  settlementCurrencyKey: { code: 'JPY' },
+  appuserSettlementAmount: null,
+  appuserCurrencyKey: { code: 'EUR' },
+  fxStatus: 'missing',
+  fxRateDate: null,
+}
+
+/** The same purchase converted at an old rate: `fxStatus` `provisional`, dated `fxRateDate`. */
+export const estimatedTransactionFixture: TransactionDto = {
+  ...unconvertedTransactionFixture,
+  transactionKey: 52,
+  transactionMerchantKey: { name: 'Osaka cafe' },
+  appuserSettlementAmount: -60,
+  fxStatus: 'provisional',
+  fxRateDate: '2026-11-03',
+}

@@ -36,6 +36,7 @@ describe('account detail view model', () => {
       lastSyncedAt: null,
       institutionLogoUrl: null,
       accountType: null,
+      fx: { status: 'exact' },
     })
     expect(mapAccountDetail(dto)).not.toHaveProperty('logoUrl')
   })

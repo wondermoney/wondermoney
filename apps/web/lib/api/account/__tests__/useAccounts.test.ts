@@ -37,6 +37,8 @@ test("normalizes omitted legacy fields and derives source when omitted", () => {
     availableBalance: null,
     appuserCurrencyAvailableBalance: null,
     syncStatus: null,
+    fxStatus: null,
+    fxRateDate: null,
   });
   assert.equal(response.accounts[1].source, "open_banking");
 });
@@ -229,5 +231,31 @@ test("keeps the account's CSV import format, reading anything unknown as generic
   assert.deepEqual(
     response.accounts.map((account) => account.csvImportFormat),
     ["bank", "generic", "generic"],
+  );
+});
+
+test("reads how each balance was converted, and ignores a status it does not know", () => {
+  const response = normalizeAccountsResponse({
+    accounts: [
+      { ...requiredAccountFields(1), fxStatus: "missing", fxRateDate: null },
+      {
+        ...requiredAccountFields(2),
+        fxStatus: "provisional",
+        fxRateDate: "2026-01-15",
+      },
+      { ...requiredAccountFields(3), fxStatus: "guessed" },
+    ],
+  });
+
+  assert.deepEqual(
+    response.accounts.map(({ fxStatus, fxRateDate }) => ({
+      fxStatus,
+      fxRateDate,
+    })),
+    [
+      { fxStatus: "missing", fxRateDate: null },
+      { fxStatus: "provisional", fxRateDate: "2026-01-15" },
+      { fxStatus: null, fxRateDate: null },
+    ],
   );
 });

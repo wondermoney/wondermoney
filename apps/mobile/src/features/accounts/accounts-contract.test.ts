@@ -31,6 +31,13 @@ describe('accounts contract', () => {
     expect(accountsResponseSchema.parse({ accounts: [] })).toEqual({ accounts: [] })
   })
 
+  it('reads how the balance was converted, an unknown status as unknown, and tolerates its absence', () => {
+    expect(accountSummarySchema.parse({ ...account, appuserCurrencyBalance: null, fxStatus: 'missing', fxRateDate: null })).toMatchObject({ fxStatus: 'missing', fxRateDate: null })
+    expect(accountSummarySchema.parse({ ...account, fxStatus: 'provisional', fxRateDate: '2026-01-15' })).toMatchObject({ fxStatus: 'provisional', fxRateDate: '2026-01-15' })
+    expect(accountSummarySchema.parse({ ...account, fxStatus: 'guessed' }).fxStatus).toBeNull()
+    expect(accountSummarySchema.parse(account)).not.toHaveProperty('fxStatus')
+  })
+
   it('accepts explicit nulls, zero, and harmless additive fields', () => {
     const candidate = {
       accounts: [{

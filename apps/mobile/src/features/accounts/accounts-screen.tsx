@@ -8,6 +8,7 @@ import { FLOATING_ACTION_SIZE, FloatingActionButton } from '@/components/ui/floa
 import { HeadlineFigure } from '@/components/ui/headline-figure'
 import { Badge } from '@/components/ui/badge'
 import { accountMark, EntityMark } from '@/components/ui/entity-mark'
+import { describeFxState, FxStatusLabel } from '@/components/ui/fx-status-label'
 import { IconButton } from '@/components/ui/icon-button'
 import { List, ListRow } from '@/components/ui/list-row'
 import { Notice } from '@/components/ui/notice'
@@ -413,8 +414,15 @@ const AccountRow = memo(function AccountRow({ account, separated, locale, onSele
   const shared = !account.isOwnedByViewer && account.ownerFirstName ? t('accountsOverview.sharedBy', { name: account.ownerFirstName }) : null
   const metaLine = [shared, account.institutionDisplayName, updated].filter(Boolean).join(' · ')
   const money = (value: number, currency: string) => formatMoney(value, { locale, currency })
-  const primary = account.convertedBalance !== null ? money(account.convertedBalance, account.primaryCurrencyCode) : t('accounts.balanceUnavailable')
-  const original = differs && account.originalBalance !== null ? money(account.originalBalance, account.originalCurrencyCode) : null
+  const fx = account.fx ?? { status: 'exact' as const }
+  const fxCopy = describeFxState(fx, t, locale)
+  // With no exchange rate there is no balance in the owner's currency: the row leads with the
+  // account's own, once, marked "Not converted".
+  const unconverted = fx.status === 'missing' && account.originalBalance !== null
+  const primary = unconverted && account.originalBalance !== null
+    ? money(account.originalBalance, account.originalCurrencyCode)
+    : account.convertedBalance !== null ? money(account.convertedBalance, account.primaryCurrencyCode) : t('accounts.balanceUnavailable')
+  const original = differs && !unconverted && account.originalBalance !== null ? money(account.originalBalance, account.originalCurrencyCode) : null
   const available = account.convertedAvailableBalance != null && account.convertedBalance !== null && account.convertedAvailableBalance !== account.convertedBalance
     ? money(account.convertedAvailableBalance, account.primaryCurrencyCode)
     : null
@@ -426,6 +434,7 @@ const AccountRow = memo(function AccountRow({ account, separated, locale, onSele
     primary,
     original,
     available ? `${t('accountsOverview.available')}: ${available}` : null,
+    fxCopy ? `${fxCopy.label}. ${fxCopy.hint}` : null,
     updated,
   ].filter(Boolean).join(', ')
 
@@ -433,7 +442,9 @@ const AccountRow = memo(function AccountRow({ account, separated, locale, onSele
     <ListRow
       accessibilityLabel={accessibilityLabel}
       badge={account.isPrivate ? <Badge label={t('accountsOverview.private')} tone="outline" /> : undefined}
-      figure={<Amount currency={account.primaryCurrencyCode} locale={locale} value={account.convertedBalance} />}
+      figure={unconverted
+        ? <Amount currency={account.originalCurrencyCode} locale={locale} value={account.originalBalance} />
+        : <Amount currency={account.primaryCurrencyCode} locale={locale} value={account.convertedBalance} />}
       leading={<EntityMark {...accountMark({ logoUrl: account.institutionLogoUrl, institutionName: account.institutionDisplayName, type: account.accountType })} testID="account-mark" />}
       figureMeta={original || available ? (
         <View style={styles.figureMeta}>
@@ -448,7 +459,9 @@ const AccountRow = memo(function AccountRow({ account, separated, locale, onSele
       separated={separated}
       testID="account-row"
       title={name}
-    />
+    >
+      {fxCopy ? <FxStatusLabel locale={locale} state={fx} testID="account-fx-status" /> : null}
+    </ListRow>
   )
 })
 
@@ -459,14 +472,19 @@ function TransactionRow({ row, locale, separated }: { row: TransactionViewModel;
     ? new Intl.DateTimeFormat(locale, { month: 'short', day: 'numeric' }).format(new Date(row.date))
     : null
   const title = row.title ?? row.description ?? t('accounts.unnamed')
+  // With no exchange rate the row shows its original amount, marked "Not converted".
+  const value = row.fx.status === 'missing' ? row.fx.amount : row.amount
+  const currency = row.fx.status === 'missing' ? row.fx.currency : row.currency
   return (
     <ListRow
-      figure={<Amount currency={row.currency} locale={locale} value={row.amount} />}
+      figure={<Amount currency={currency} locale={locale} value={value} />}
       leading={<EntityMark {...(row.mark ?? { glyph: 'tag' })} />}
       meta={[[date, row.category ? formatCategoryName(row.category) : null, row.accountName].filter(Boolean).join(' · ')]}
       separated={separated}
       title={title}
-    />
+    >
+      {row.fx.status === 'exact' ? null : <FxStatusLabel locale={locale} state={row.fx} testID="transaction-fx-status" />}
+    </ListRow>
   )
 }
 

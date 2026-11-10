@@ -128,5 +128,7 @@ test("supports finalized detail payloads", async () => {
     csvImportFormat: "generic",
     availableBalance: null,
     syncStatus: null,
+    fxStatus: null,
+    fxRateDate: null,
   });
 });

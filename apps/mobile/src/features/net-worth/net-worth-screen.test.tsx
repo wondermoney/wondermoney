@@ -6,6 +6,8 @@ import { initMobileI18n } from '@/lib/i18n'
 import { memoryPreferenceStorage, PrivacyModeProvider, renderedText } from '@/test/privacy-mode'
 import { inTimeZone } from '@/test/time-zone'
 
+import { estimatedTransactionFixture, transactionFixture, unconvertedTransactionFixture } from '@/features/transactions/test-fixtures'
+
 import type { BudgetMonthRow } from './home-sections'
 import { NetWorthScreen, type HomeSections, type NetWorthData, type NetWorthScreenProps } from './net-worth-screen'
 
@@ -126,6 +128,27 @@ describe('NetWorthScreen (Home)', () => {
     expect(view.getByText('Partial — some sources are unavailable')).toBeOnTheScreen()
     expect(view.getByText('2 loan balances are not included')).toBeOnTheScreen()
     expect(view.getByText('1 portfolio is not included')).toBeOnTheScreen()
+  })
+
+  it('counts the accounts left out for want of an exchange rate and names their currencies', async () => {
+    const { view } = await renderScreen({ state: { status: 'loaded', data: { ...data, completeness: 'partial', unsupportedAccountCount: 2, unconvertedCurrencies: ['JPY', 'THB'] } } })
+    expect(view.getByText('2 account balances are not included')).toBeOnTheScreen()
+    expect(view.getByTestId('net-worth-unconverted-currencies')).toHaveTextContent('No exchange rate yet for JPY and THB.')
+  })
+
+  it('names no currency when every balance was converted', async () => {
+    const { view } = await renderScreen({ state: { status: 'loaded', data: { ...data, unsupportedAccountCount: 0, unconvertedCurrencies: [] } } })
+    expect(view.queryByTestId('net-worth-unconverted-currencies')).not.toBeOnTheScreen()
+  })
+
+  it('shows a latest transaction with no exchange rate in its own currency, marked, and an estimated one with its rate date', async () => {
+    const { view } = await renderScreen({}, { latest: { status: 'loaded', data: { unreviewedCount: 0, transactions: [unconvertedTransactionFixture, estimatedTransactionFixture, transactionFixture] } } })
+    const labels = view.getAllByTestId('home-transaction-fx-status')
+    expect(labels).toHaveLength(2)
+    expect(labels[0]).toHaveTextContent('Not converted')
+    expect(labels[0]!.props.accessibilityLabel).toMatch(/No exchange rate for JPY yet/)
+    expect(labels[1]).toHaveTextContent(/Estimated.*Rate of Nov 3, 2026/)
+    expect(view.getByText(/10,000/)).toBeOnTheScreen()
   })
 
   it('keeps previously loaded values on a refresh failure, with a retry', async () => {

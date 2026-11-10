@@ -231,7 +231,10 @@
       "error": "Could not load insights",
       "topCategory": "{{name}} — {{amount}} this month"
     },
-    "helpText": "A quick overview of your accounts, portfolio, and liabilities."
+    "helpText": "A quick overview of your accounts, portfolio, and liabilities.",
+    "unsupportedAccount_one": "{{count}} account balance is not included",
+    "unsupportedAccount_other": "{{count}} account balances are not included",
+    "unconvertedCurrencies": "No exchange rate yet for {{currencies}}."
   },
   "home": {
     "netWorth": {
@@ -3940,5 +3943,18 @@
     "show": "Show amounts",
     "setting": "Hide amounts",
     "settingHelp": "Masks balances and amounts on this device, for when someone can see your screen. Percentages stay visible."
+  },
+  "fxStatus": {
+    "missing": {
+      "label": "Not converted",
+      "hint": "No exchange rate for {{currency}} yet, so this amount is shown in {{currency}} and left out of totals.",
+      "hintNoCurrency": "No exchange rate yet, so this amount is shown in its own currency and left out of totals."
+    },
+    "provisional": {
+      "label": "Estimated",
+      "rateOf": "Rate of {{date}}",
+      "hint": "Converted at the rate from {{date}}, the latest available. It is updated when a newer rate arrives.",
+      "hintNoDate": "Converted at an older rate, the latest available. It is updated when a newer rate arrives."
+    }
   }
 }
