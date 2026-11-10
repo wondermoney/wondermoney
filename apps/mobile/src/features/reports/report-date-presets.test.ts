@@ -1,10 +1,26 @@
-import { DEFAULT_REPORT_DATE_PRESET, REPORT_ALL_TIME_START, reportPresetDateRange } from './report-date-presets'
+import { inTimeZone } from '@/test/time-zone'
+
+import {
+  customReportDateRange,
+  DEFAULT_REPORT_DATE_PRESET,
+  formatReportDateRange,
+  isCustomReportDatePreset,
+  REPORT_ALL_TIME_START,
+  REPORT_DATE_PRESETS,
+  ReportCustomRangeError,
+  reportPresetDateRange,
+  reportPresetKey,
+} from './report-date-presets'
 
 const now = new Date(2026, 7, 15) // 15 Aug 2026 (local)
 
 describe('report date presets', () => {
   it('defaults to last3Months', () => {
     expect(DEFAULT_REPORT_DATE_PRESET).toBe('last3Months')
+  })
+
+  it('offers only the named periods, not a custom placeholder', () => {
+    expect(REPORT_DATE_PRESETS).toEqual(['thisMonth', 'lastMonth', 'last3Months', 'last6Months', 'last12Months', 'allTime'])
   })
 
   it('computes thisMonth as the full current calendar month', () => {
@@ -43,5 +59,49 @@ describe('report date presets', () => {
 
   it('falls back to the default preset for an unrecognized value', () => {
     expect(reportPresetDateRange('bogus' as never, now)).toEqual(reportPresetDateRange('last3Months', now))
+  })
+})
+
+describe('a custom report date range', () => {
+  inTimeZone('America/New_York')
+
+  it('carries the chosen local days, start of the first to end of the last', () => {
+    const custom = customReportDateRange('2026-08-03', '2026-08-17')
+    expect(custom.kind).toBe('custom')
+    expect(custom.from).toEqual(new Date(2026, 7, 3, 0, 0, 0, 0))
+    expect(custom.to).toEqual(new Date(2026, 7, 17, 23, 59, 59, 999))
+    expect(reportPresetDateRange(custom)).toEqual({ from: custom.from, to: custom.to })
+  })
+
+  it('is the custom value the picker and the label recognise', () => {
+    const custom = customReportDateRange('2026-08-03', '2026-08-17')
+    expect(isCustomReportDatePreset(custom)).toBe(true)
+    expect(isCustomReportDatePreset('last3Months')).toBe(false)
+    expect(reportPresetKey(custom)).toBe('custom')
+    expect(reportPresetKey('last3Months')).toBe('last3Months')
+  })
+
+  it('rejects a start after the end with an order problem', () => {
+    expect(() => customReportDateRange('2026-08-17', '2026-08-03')).toThrow(ReportCustomRangeError)
+    try {
+      customReportDateRange('2026-08-17', '2026-08-03')
+    } catch (error) {
+      expect(error).toBeInstanceOf(ReportCustomRangeError)
+      expect((error as ReportCustomRangeError).problem).toBe('order')
+    }
+  })
+
+  it('rejects an incomplete or unreal day', () => {
+    expect(() => customReportDateRange(null, '2026-08-03')).toThrow(ReportCustomRangeError)
+    try {
+      customReportDateRange('2026-02-30', '2026-03-01')
+    } catch (error) {
+      expect((error as ReportCustomRangeError).problem).toBe('invalid')
+    }
+  })
+
+  it('formats the label as the transactions range does', () => {
+    const custom = customReportDateRange('2026-08-03', '2026-08-17')
+    expect(formatReportDateRange(custom.from, custom.to, 'en-US')).toBe('Aug 3, 2026 – Aug 17, 2026')
   })
 })

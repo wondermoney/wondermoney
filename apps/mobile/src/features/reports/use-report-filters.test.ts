@@ -1,5 +1,6 @@
 import { act, renderHook } from '@testing-library/react-native'
 
+import { customReportDateRange } from './report-date-presets'
 import { useReportFilters } from './use-report-filters'
 
 describe('useReportFilters', () => {
@@ -35,5 +36,25 @@ describe('useReportFilters', () => {
     expect(hook.result.current.activeFilterCount).toBe(0)
     expect(hook.result.current.filters.categoryKeys).toEqual([])
     expect(hook.result.current.preset).toBe('allTime')
+  })
+
+  it('requests exactly the custom range it was given', async () => {
+    const hook = await renderHook(() => useReportFilters())
+    const custom = customReportDateRange('2026-08-03', '2026-08-17')
+    await act(async () => hook.result.current.selectPreset(custom))
+    expect(hook.result.current.preset).toEqual(custom)
+    expect(hook.result.current.filters.fromDate).toBe(custom.from.toISOString())
+    expect(hook.result.current.filters.toDate).toBe(custom.to.toISOString())
+  })
+
+  it('keeps the custom range while the other filters change', async () => {
+    const hook = await renderHook(() => useReportFilters())
+    const custom = customReportDateRange('2026-08-03', '2026-08-17')
+    await act(async () => hook.result.current.selectPreset(custom))
+    await act(async () => hook.result.current.setAccountKeys(['1']))
+    await act(async () => hook.result.current.setIncludePending(true))
+    expect(hook.result.current.preset).toEqual(custom)
+    expect(hook.result.current.filters.fromDate).toBe(custom.from.toISOString())
+    expect(hook.result.current.filters.toDate).toBe(custom.to.toISOString())
   })
 })

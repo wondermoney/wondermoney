@@ -3806,7 +3806,13 @@
       "searchPlaceholder": "Search {{label}}",
       "noResults": "No results found",
       "unknownAccount": "Unknown account",
-      "dateRange": "Date range"
+      "dateRange": "Date range",
+      "customRange": "Custom range",
+      "customRangeFrom": "From",
+      "customRangeTo": "To",
+      "customRangeApply": "Apply",
+      "customRangeInvalid": "Enter a valid date range.",
+      "customRangeOrder": "The start date must not be after the end date."
     },
     "budgetVsActual": {
       "title": "Budget vs actual",
