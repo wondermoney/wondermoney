@@ -1,0 +1,188 @@
+import { useTranslation } from 'react-i18next'
+import { RefreshControl, ScrollView, StyleSheet, View } from 'react-native'
+
+import { Amount } from '@/components/ui/amount'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { EntityMark } from '@/components/ui/entity-mark'
+import { HeadlineFigure } from '@/components/ui/headline-figure'
+import { ListRow } from '@/components/ui/list-row'
+import { SafeAreaView } from '@/components/ui/screen-safe-area'
+import { Section } from '@/components/ui/section'
+import { Text } from '@/components/ui/text'
+import { Alert, Failure, Header, Loading } from '@/features/loans/loans-screen'
+import { NetWorthChart } from '@/features/net-worth/net-worth-chart'
+import { useFormatMoney } from '@/lib/formatters/money-display'
+import { themeTokens } from '@/theme/tokens'
+import { usePalette } from '@/theme/use-palette'
+
+import { currencyList, kindGlyph } from './assets-screen'
+import type { ManualAssetResponse } from './manual-assets-contract'
+import { changeSincePurchase, formatDay, isEstimated, monthlyChartPoints, shownValue } from './manual-assets-view-model'
+
+export type AssetDetailViewState =
+  | { status: 'loading' }
+  | { status: 'error' }
+  | { status: 'invalid-response' }
+  | { status: 'not-found' }
+  | { status: 'invalid-id' }
+  | { status: 'access-transition' }
+  | { status: 'loaded'; data: ManualAssetResponse; refreshing?: boolean }
+  | { status: 'refresh-error'; data: ManualAssetResponse; refreshing?: boolean }
+
+/**
+ * Web's asset page (`assets/[assetId]/asset-detail-client.tsx`) at phone width: "← Assets"; the
+ * asset's mark, name and kind; today's value as the headline figure (and in the viewer's currency
+ * when it is in another one); Update value as the one control; the value over time; the
+ * valuations, newest first; then the details. Editing, archiving and deleting are on the web.
+ */
+export function AssetDetailScreen({ state, onBack, onUpdateValue, onRefresh }: {
+  state: AssetDetailViewState
+  onBack: () => void
+  onUpdateValue: () => void
+  onRefresh: () => void | Promise<void>
+}) {
+  const { t, i18n } = useTranslation()
+  const formatMoney = useFormatMoney()
+  const palette = usePalette()
+  const locale = i18n.resolvedLanguage ?? i18n.language ?? 'en'
+  if (state.status === 'access-transition') return null
+  if (state.status === 'loading') return <Loading label={t('manualAssetDetail.loading')} />
+  if (state.status !== 'loaded' && state.status !== 'refresh-error') {
+    const key = state.status === 'invalid-response' ? 'invalid' : state.status === 'not-found' ? 'notFound' : state.status === 'invalid-id' ? 'invalidId' : 'error'
+    return <Failure title={t(`manualAssetDetail.${key}Title`)} message={t(`manualAssetDetail.${key}Message`)} onRetry={state.status === 'invalid-id' || state.status === 'not-found' ? undefined : onRefresh} onBack={onBack} fallback="/assets" backLabel={t('manualAssetDetail.back')} />
+  }
+  const { asset, valuations, history } = state.data
+  const money = (value: number) => formatMoney(value, { locale, currency: asset.currency })
+  const value = shownValue(asset)
+  const foreign = asset.currency !== asset.userCurrency
+  const noRate = !asset.archived && foreign && asset.value !== null && asset.valueInUserCurrency === null
+  const change = changeSincePurchase(asset)
+  const percent = (ratio: number) => new Intl.NumberFormat(locale, { style: 'percent', maximumFractionDigits: 1, signDisplay: 'exceptZero' }).format(ratio)
+  const points = monthlyChartPoints(history)
+  const status = asset.archivedAt
+    ? { label: t('manualAssetDetail.archivedOn', { date: new Intl.DateTimeFormat(locale, { dateStyle: 'medium' }).format(new Date(asset.archivedAt)) }) }
+    : isEstimated(asset) && asset.lastValuation
+      ? { label: t('manualAssetDetail.estimated', { date: formatDay(asset.lastValuation.date, locale) }) }
+      : undefined
+  return (
+    <SafeAreaView style={[styles.safeArea, { backgroundColor: palette.background }]}>
+      <ScrollView contentContainerStyle={styles.content} refreshControl={<RefreshControl refreshing={Boolean(state.refreshing)} onRefresh={() => void onRefresh()} tintColor={palette.primary} />}>
+        <View style={styles.page}>
+          <View style={styles.header}>
+            <Header
+              title={asset.name}
+              descriptor={t(`manualAssets.kinds.${asset.kind}`)}
+              badge={asset.isPrivate ? <Badge label={t('manualAssets.private')} tone="muted" /> : undefined}
+              fallback="/assets"
+              backLabel={t('manualAssetDetail.back')}
+              onBack={onBack}
+              leading={<EntityMark glyph={kindGlyph(asset.kind)} />}
+              figure={(
+                <HeadlineFigure
+                  currency={asset.currency}
+                  label={asset.archived ? t('manualAssetDetail.lastValue') : t('manualAssetDetail.valueToday')}
+                  locale={locale}
+                  secondary={foreign && asset.valueInUserCurrency !== null ? { value: asset.valueInUserCurrency, currency: asset.userCurrency } : null}
+                  size="md"
+                  status={status}
+                  testID="asset-value"
+                  value={value}
+                />
+              )}
+            />
+            {noRate ? <Text accessibilityRole="alert" tone="muted" variant="meta">{t('manualAssets.unconverted', { count: 1, currencies: currencyList([asset.currency], locale) })}</Text> : null}
+            {state.status === 'refresh-error' ? <Alert label={t('manualAssetDetail.stale')} /> : null}
+            {!asset.archived ? (
+              <View style={styles.actions}>
+                <Button icon="refresh-cw" label={t('manualAssetDetail.updateValue')} onPress={onUpdateValue} />
+              </View>
+            ) : null}
+          </View>
+
+          {points.length > 1 ? (
+            <Section title={t('manualAssetDetail.historyTitle')} variant="open">
+              <NetWorthChart
+                accessibilityLabel={t('manualAssetDetail.chartLabel', { from: formatDay(points[0].date, locale), to: formatDay(points[points.length - 1].date, locale) })}
+                currency={asset.currency}
+                locale={locale}
+                points={points}
+              />
+            </Section>
+          ) : null}
+
+          <Section title={t('manualAssetDetail.valuationsTitle')} variant="open" testID="asset-valuations">
+            <View>
+              {valuations.map((valuation, index) => (
+                <ListRow
+                  key={valuation.manualAssetValuationKey}
+                  accessibilityLabel={[formatDay(valuation.date, locale), money(valuation.value), valuation.note].filter(Boolean).join(', ')}
+                  figure={<Amount currency={asset.currency} locale={locale} size="amountBase" value={valuation.value} />}
+                  meta={[valuation.note]}
+                  separated={index > 0}
+                  title={formatDay(valuation.date, locale)}
+                />
+              ))}
+            </View>
+          </Section>
+
+          <Section title={t('manualAssetDetail.facts.title')} variant="open" testID="asset-facts">
+            <View>
+              <Fact first label={t('manualAssetDetail.facts.kind')} value={t(`manualAssets.kinds.${asset.kind}`)} />
+              {asset.purchasePrice !== null || asset.purchaseDate !== null ? (
+                <Fact
+                  label={t('manualAssetDetail.facts.purchased')}
+                  value={asset.purchasePrice !== null && asset.purchaseDate !== null
+                    ? t('manualAssetDetail.facts.purchasedValue', { amount: money(asset.purchasePrice), date: formatDay(asset.purchaseDate, locale) })
+                    : asset.purchasePrice !== null ? money(asset.purchasePrice) : formatDay(asset.purchaseDate!, locale)}
+                />
+              ) : null}
+              {change ? (
+                <Fact
+                  label={t('manualAssetDetail.facts.changeSincePurchase')}
+                  // A sign, not only a colour.
+                  value={[`${change.amount > 0 ? '+' : ''}${money(change.amount)}`, change.ratio === null ? null : percent(change.ratio)].filter(Boolean).join(' · ')}
+                />
+              ) : null}
+              {asset.growthRule ? (
+                <Fact
+                  label={t('manualAssetDetail.facts.growth')}
+                  value={asset.growthRule.startDate
+                    ? t('manualAssetDetail.facts.growthFrom', { rate: percent(asset.growthRule.annualRatePercent / 100), date: formatDay(asset.growthRule.startDate, locale) })
+                    : percent(asset.growthRule.annualRatePercent / 100)}
+                />
+              ) : null}
+              <Fact label={t('manualAssetDetail.facts.visibility')} value={asset.isPrivate ? t('manualAssetDetail.facts.private') : t('manualAssetDetail.facts.shared')} />
+              {!asset.isOwner && asset.ownerFirstName ? <Fact label={t('manualAssetDetail.facts.owner')} value={asset.ownerFirstName} /> : null}
+              {asset.notes ? <Fact label={t('manualAssetDetail.facts.notes')} value={asset.notes} /> : null}
+            </View>
+            <Text style={styles.webNote} tone="muted" variant="meta">{t('manualAssetDetail.manageOnWeb')}</Text>
+          </Section>
+        </View>
+      </ScrollView>
+    </SafeAreaView>
+  )
+}
+
+function Fact({ label, value, first = false }: { label: string; value: string; first?: boolean }) {
+  const palette = usePalette()
+  return (
+    <View accessible accessibilityLabel={`${label}, ${value}`} style={[styles.fact, { borderBottomColor: palette.border }, first && styles.firstFact]}>
+      <Text style={styles.factLabel} tone="muted" variant="meta">{label}</Text>
+      <Text style={styles.factValue} variant="meta">{value}</Text>
+    </View>
+  )
+}
+
+const styles = StyleSheet.create({
+  safeArea: { flex: 1 },
+  content: { flexGrow: 1, padding: themeTokens.layout.screenPadding, paddingBottom: themeTokens.spacing[12] },
+  page: { width: '100%', maxWidth: 760, alignSelf: 'center', gap: themeTokens.spacing[10] },
+  header: { gap: themeTokens.spacing[4] },
+  actions: { flexDirection: 'row', gap: themeTokens.spacing[2] },
+  fact: { flexDirection: 'row', justifyContent: 'space-between', gap: themeTokens.spacing[4], paddingVertical: themeTokens.spacing[3], borderBottomWidth: StyleSheet.hairlineWidth },
+  firstFact: { paddingTop: 0 },
+  factLabel: { flexShrink: 0 },
+  factValue: { flexShrink: 1, textAlign: 'right' },
+  webNote: { marginTop: themeTokens.spacing[4] },
+})

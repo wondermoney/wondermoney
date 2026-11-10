@@ -40,6 +40,7 @@ export function MoreRoute() {
       onOpenSettings={() => router.push('/settings/profile' as unknown as Href)}
       onOpenMarkets={() => router.push('/markets' as unknown as Href)}
       onOpenLoans={() => router.push('/loans' as unknown as Href)}
+      onOpenAssets={() => router.push('/assets' as unknown as Href)}
       onOpenGoals={() => router.push('/goals' as unknown as Href)}
       onOpenReports={() => router.push('/reports' as unknown as Href)}
       onOpenHelp={() => openApprovedExternal(externalDestinations.help)}

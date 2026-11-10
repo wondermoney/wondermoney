@@ -74,6 +74,7 @@ export function NetWorthRoute() {
       unsupportedAccountCount: mapped.unsupportedCurrencies?.accounts ?? 0,
       unsupportedLoanCount: mapped.unsupportedCurrencies?.loans ?? 0,
       unsupportedPortfolioCount: mapped.unsupportedCurrencies?.portfolios ?? 0,
+      unsupportedManualAssetCount: mapped.unsupportedCurrencies?.manualAssets ?? 0,
       unconvertedCurrencies: mapped.unconvertedCurrencies ?? [],
     }
     state = query.isRefreshFailure

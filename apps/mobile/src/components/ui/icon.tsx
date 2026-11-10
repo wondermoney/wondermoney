@@ -88,6 +88,9 @@ const ICONS = {
   tag: { ios: 'tag', android: 'sell', web: 'sell' },
   'credit-card': { ios: 'creditcard', android: 'credit_card', web: 'credit_card' },
   info: { ios: 'info.circle', android: 'info', web: 'info' },
+  // Manually valued assets: a vehicle and a valuable (a home is `home`).
+  car: { ios: 'car', android: 'directions_car', web: 'directions_car' },
+  gem: { ios: 'diamond', android: 'diamond', web: 'diamond' },
   // Privacy mode: amounts shown / hidden.
   eye: { ios: 'eye', android: 'visibility', web: 'visibility' },
   'eye-off': { ios: 'eye.slash', android: 'visibility_off', web: 'visibility_off' },

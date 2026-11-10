@@ -93,7 +93,7 @@ export function chartScale(values: readonly number[] | null | undefined, interva
 
 // ── Balance sheet ──────────────────────────────────────────────────────────
 
-export type BalanceSheetType = 'accounts' | 'portfolios' | 'loans'
+export type BalanceSheetType = 'accounts' | 'portfolios' | 'manualAssets' | 'loans'
 
 /**
  * `id` is the account, portfolio or loan key when the API sends it, so the row can wear its record's mark.
@@ -112,7 +112,7 @@ export type BalanceSheet = Readonly<{
   oweTotal: number
 }>
 
-const GROUP_ORDER: readonly BalanceSheetType[] = ['accounts', 'portfolios', 'loans']
+const GROUP_ORDER: readonly BalanceSheetType[] = ['accounts', 'portfolios', 'manualAssets', 'loans']
 
 function groupRows(rows: readonly (BalanceSheetRow & { type: BalanceSheetType })[]): BalanceSheetGroup[] {
   return GROUP_ORDER.flatMap((type) => {

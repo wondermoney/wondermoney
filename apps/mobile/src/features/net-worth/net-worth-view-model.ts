@@ -13,6 +13,7 @@ export const mapNetWorthSummary = (dto: NetWorthDto): NetWorthSummaryViewModel =
   completeness: (dto.unsupportedCurrencies?.accounts ?? 0) > 0
     || (dto.unsupportedCurrencies?.loans ?? 0) > 0
     || (dto.unsupportedCurrencies?.portfolios ?? 0) > 0
+    || (dto.unsupportedCurrencies?.manualAssets ?? 0) > 0
     ? 'partial'
     : 'unknown',
 })

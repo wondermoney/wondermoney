@@ -52,7 +52,9 @@ export type NetWorthData = {
   unsupportedAccountCount?: number
   unsupportedLoanCount: number
   unsupportedPortfolioCount: number
-  /** The currencies of the accounts and loans left out, named under the total. */
+  /** Manually valued assets left out for want of a rate; absent from older APIs. */
+  unsupportedManualAssetCount?: number
+  /** The currencies of the accounts, loans and manual assets left out, named under the total. */
   unconvertedCurrencies?: readonly string[]
 }
 
@@ -285,6 +287,9 @@ function NetWorthHero({ state, sections, today, locale, onRefresh, onLogout, onV
         ) : null}
         {data.unsupportedPortfolioCount > 0 ? (
           <Text accessibilityRole="alert" tone="muted" variant="meta">{t('netWorth.unsupportedPortfolio', { count: data.unsupportedPortfolioCount })}</Text>
+        ) : null}
+        {(data.unsupportedManualAssetCount ?? 0) > 0 ? (
+          <Text accessibilityRole="alert" tone="muted" variant="meta">{t('netWorth.unsupportedManualAsset', { count: data.unsupportedManualAssetCount })}</Text>
         ) : null}
         {data.unconvertedCurrencies && data.unconvertedCurrencies.length > 0 ? (
           <Text tone="muted" variant="meta" testID="net-worth-unconverted-currencies">{t('netWorth.unconvertedCurrencies', { currencies: formatCurrencyList(data.unconvertedCurrencies, locale) })}</Text>
