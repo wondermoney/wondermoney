@@ -2,6 +2,14 @@ import { format, startOfYear, subMonths } from "date-fns";
 
 import type { Period } from "@/lib/api/portfolio/usePortfolioDashboard";
 
+/**
+ * The first day of a portfolio metrics period, as a calendar day (`yyyy-MM-dd`) on the viewer's
+ * calendar. Not an instant range (`dateRangeParams`): the API compares it with the `date` column
+ * of daily portfolio snapshots, and a viewer's-midnight timestamp west of UTC would leave out the
+ * snapshot of the first day.
+ *
+ * @see lib/api/date-range.ts
+ */
 export function getPortfolioFromDate(
   period: Period,
   now = new Date(),

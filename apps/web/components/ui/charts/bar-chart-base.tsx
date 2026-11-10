@@ -19,6 +19,8 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
+import { AMOUNT_MASK } from "@/lib/privacy/mask";
+import { usePrivacyMode } from "@/lib/privacy/usePrivacyMode";
 import { cn } from "@/lib/utils";
 
 import {
@@ -68,6 +70,8 @@ type Props<TData extends object = object> = {
   isAnimationActive?: boolean;
 };
 
+const maskTick = () => AMOUNT_MASK;
+
 export function BarChartBase<TData extends object = object>({
   data,
   xKey,
@@ -75,7 +79,7 @@ export function BarChartBase<TData extends object = object>({
   config,
   className,
   xFormatter,
-  yFormatter,
+  yFormatter: yFormatterProp,
   tooltipFormatter,
   tooltipValueFormatter,
   showLegend = keys.length > 1,
@@ -88,6 +92,10 @@ export function BarChartBase<TData extends object = object>({
   layout = "horizontal",
   isAnimationActive = true,
 }: Props<TData>) {
+  // A value axis with no formatter of its own is assumed to be money while
+  // privacy mode is on: the chart keeps its shape, the ticks lose their figures.
+  const { hidden } = usePrivacyMode();
+  const yFormatter = yFormatterProp ?? (hidden ? maskTick : undefined);
   const getColorKey = (key: string) => `__${key}Fill`;
   const chartData = React.useMemo(() => {
     if (!getBarColor) return data;

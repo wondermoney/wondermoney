@@ -45,7 +45,11 @@ const actor = Object.assign(new Appuser(), { appuserKey: 8 });
 const merchant = Object.assign(new TransactionMerchant(), { transactionMerchantKey: 3 });
 
 describe('applyUserCategorization', () => {
-  beforeEach(() => vi.clearAllMocks());
+  beforeEach(() => {
+    vi.clearAllMocks();
+    // None of these transactions is split.
+    em.find.mockResolvedValue([]);
+  });
 
   it('moves an existing assignment and creates a missing one, stamping user-edit confidence on both', async () => {
     const groceries = category(10);

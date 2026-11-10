@@ -18,6 +18,8 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
+import { AMOUNT_MASK } from "@/lib/privacy/mask";
+import { usePrivacyMode } from "@/lib/privacy/usePrivacyMode";
 import { cn } from "@/lib/utils";
 
 import {
@@ -68,13 +70,15 @@ type Props = {
   children?: React.ReactNode;
 };
 
+const maskTick = () => AMOUNT_MASK;
+
 export function AreaLineChartBase({
   data,
   xKey,
   series,
   config,
   className,
-  yFormatter,
+  yFormatter: yFormatterProp,
   xFormatter,
   xTickCount,
   xTicks,
@@ -92,6 +96,10 @@ export function AreaLineChartBase({
   yAxisWidth,
   children,
 }: Props) {
+  // A value axis with no formatter of its own is assumed to be money while
+  // privacy mode is on: the chart keeps its shape, the ticks lose their figures.
+  const { hidden } = usePrivacyMode();
+  const yFormatter = yFormatterProp ?? (hidden ? maskTick : undefined);
   const gradientPrefix = React.useId().replace(/:/g, "");
   const resolvedYAxisWidth =
     yAxisWidth ??

@@ -8,15 +8,14 @@ import {
   RefreshCw,
   Trash,
   Users,
-  Wallet,
 } from "lucide-react";
-import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { usePostHog } from "posthog-js/react";
 import { useCallback, useState } from "react";
 
 import AccountDeleteModal from "@/components/account/AccountDeleteModal";
 import AccountEditSheet from "@/components/account/AccountEditSheet";
+import { AccountMark } from "@/components/account/AccountMark";
 import AccountSyncBadge from "@/components/account/AccountSyncBadge";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -30,6 +29,7 @@ import { InspectorDrawer, PropertyList } from "@/components/ui/InspectorDrawer";
 import { useRouter } from "@/i18n/navigation";
 import type { Account } from "@/lib/api/account/useAccounts";
 import { cn } from "@/lib/utils";
+import { CurrencyMismatchError, sumMoney } from "@/lib/utils/money";
 import { useFormatCurrency } from "@/lib/utils/useFormatCurrency";
 
 import { Amount } from "../ui/Amount";
@@ -77,15 +77,17 @@ export default function AccountsList({ accounts }: { accounts: Account[] }) {
     [posthog, t],
   );
 
-  const totalBalance = accounts.reduce<number | null>(
-    (sum, account) =>
-      sum === null || account.appuserCurrencyBalance === null
-        ? null
-        : sum + account.appuserCurrencyBalance,
-    0,
-  );
+  /*
+   * Each balance is in its owner's currency, and household members can keep
+   * different ones. The total is in the viewer's currency (the currency of an
+   * account they own), and `sumMoney` refuses to add another member's
+   * balance in a different currency rather than mixing the two.
+   */
   const userCurrency =
-    accounts[0]?.accountOwnerAppuserKey?.currencyKey?.code ?? "EUR";
+    (accounts.find((account) => account.isOwnedByViewer) ?? accounts[0])
+      ?.accountOwnerAppuserKey?.currencyKey?.code ?? "EUR";
+  const total = totalInCurrency(accounts, userCurrency);
+  const totalBalance = total.kind === "total" ? total.amount : null;
 
   /*
    * § 9 `InspectorDrawer` (D1) — inspect a row without leaving the list.
@@ -98,7 +100,9 @@ export default function AccountsList({ accounts }: { accounts: Account[] }) {
    * detail route with charts and its own transaction list, so the drawer carries
    * a primary action through to it rather than pretending to be it.
    */
-  const [inspectedAccount, setInspectedAccount] = useState<Account | null>(null);
+  const [inspectedAccount, setInspectedAccount] = useState<Account | null>(
+    null,
+  );
 
   return (
     <>
@@ -110,26 +114,17 @@ export default function AccountsList({ accounts }: { accounts: Account[] }) {
               posthog.capture("accounts_table_row_clicked");
               setInspectedAccount(account);
             }}
-            className="hover:bg-muted/50 flex cursor-pointer items-center justify-between px-5 py-3.5 transition-colors"
+            className="hover:bg-muted/50 -mx-2 flex cursor-pointer items-center justify-between rounded-md px-2 py-3.5 transition-colors"
           >
             <div className="flex items-center gap-3">
-              {account.accountFinancialInstitutionKey?.logoUrl ? (
-                <Image
-                  src={account.accountFinancialInstitutionKey.logoUrl}
-                  height={36}
-                  width={36}
-                  alt={
-                    account.accountFinancialInstitutionKey.displayName ??
-                    account.accountName ??
-                    t("unknown")
-                  }
-                  className="h-9 w-9 rounded-lg"
-                />
-              ) : (
-                <div className="bg-muted flex h-9 w-9 items-center justify-center rounded-lg">
-                  <Wallet className="text-muted-foreground h-4 w-4" />
-                </div>
-              )}
+              <AccountMark
+                logoUrl={account.accountFinancialInstitutionKey?.logoUrl}
+                label={
+                  account.accountFinancialInstitutionKey?.displayName ??
+                  account.accountName ??
+                  t("unknown")
+                }
+              />
               <div className="min-w-0">
                 <div className="flex items-center gap-1.5">
                   <p className="text-foreground text-sm font-medium">
@@ -152,7 +147,10 @@ export default function AccountsList({ accounts }: { accounts: Account[] }) {
                   {!account.isOwnedByViewer &&
                     account.ownerFirstName &&
                     account.accountFinancialInstitutionKey?.displayName && (
-                      <span aria-hidden="true" className="bg-border h-3 w-px shrink-0" />
+                      <span
+                        aria-hidden="true"
+                        className="bg-border h-3 w-px shrink-0"
+                      />
                     )}
                   {account.accountFinancialInstitutionKey?.displayName && (
                     <span className="min-w-0 truncate">
@@ -163,7 +161,12 @@ export default function AccountsList({ accounts }: { accounts: Account[] }) {
                     (account.syncStatus || account.refreshedAt) && (
                       <>
                         {account.accountFinancialInstitutionKey
-                          ?.displayName && <span aria-hidden="true" className="bg-border h-3 w-px shrink-0" />}
+                          ?.displayName && (
+                          <span
+                            aria-hidden="true"
+                            className="bg-border h-3 w-px shrink-0"
+                          />
+                        )}
                         <AccountSyncBadge
                           syncStatus={account.syncStatus}
                           refreshedAt={account.refreshedAt}
@@ -201,7 +204,12 @@ export default function AccountsList({ accounts }: { accounts: Account[] }) {
                     <p className="text-muted-foreground text-xs">
                       {t("available")}:{" "}
                       <span className="font-mono">
-                        <Amount value={account.appuserCurrencyAvailableBalance} currency={account.accountOwnerAppuserKey.currencyKey.code} />
+                        <Amount
+                          value={account.appuserCurrencyAvailableBalance}
+                          currency={
+                            account.accountOwnerAppuserKey.currencyKey.code
+                          }
+                        />
                       </span>
                     </p>
                   )}
@@ -244,90 +252,91 @@ export default function AccountsList({ accounts }: { accounts: Account[] }) {
         ))}
       </div>
       {/* Total footer */}
-      <div className="border-border bg-muted/30 flex items-center justify-between border-t px-5 py-3">
+      <div className="border-foreground flex items-center justify-between border-t py-3">
         <span className="text-muted-foreground text-sm font-medium">
           {t("total")}
         </span>
         <span className="text-foreground font-mono text-sm font-semibold">
-          {totalBalance === null
-            ? t("total-balance-incomplete")
-            : formatCurrency(totalBalance, userCurrency)}
+          {totalBalance !== null
+            ? formatCurrency(totalBalance, userCurrency)
+            : total.kind === "mixed-currencies"
+              ? t("total-balance-mixed-currencies")
+              : t("total-balance-incomplete")}
         </span>
       </div>
 
-
-        <InspectorDrawer
-          open={inspectedAccount !== null}
-          onOpenChange={(open) => {
-            if (!open) setInspectedAccount(null);
-          }}
-          objectType={t("account")}
-          title={inspectedAccount?.accountName ?? t("unknown")}
-          subtitle={
-            inspectedAccount?.accountFinancialInstitutionKey?.displayName ??
-            undefined
-          }
-          badges={
-            <>
-              {inspectedAccount?.isPrivate ? (
-                <Badge variant="secondary">{t("private-account")}</Badge>
-              ) : null}
-              {inspectedAccount &&
-              (inspectedAccount.syncStatus || inspectedAccount.refreshedAt) ? (
-                <AccountSyncBadge
-                  syncStatus={inspectedAccount.syncStatus}
-                  refreshedAt={inspectedAccount.refreshedAt}
-                />
-              ) : null}
-            </>
-          }
-          actions={
-            inspectedAccount ? (
-              <Button
-                onClick={() => {
-                  const key = inspectedAccount.accountKey;
-                  setInspectedAccount(null);
-                  router.push(`/accounts/${key}`);
-                }}
-              >
-                {t("account-details")}
-              </Button>
-            ) : null
-          }
-        >
-          {inspectedAccount ? (
-            <PropertyList
-              items={[
-                {
-                  key: "balance",
-                  label: t("balance"),
-                  value: (
-                    <Amount
-                      value={inspectedAccount.appuserCurrencyBalance}
-                      currency={
-                        inspectedAccount.accountOwnerAppuserKey?.currencyKey
-                          ?.code ?? userCurrency
-                      }
-                    />
-                  ),
-                },
-                {
-                  key: "available",
-                  label: t("available"),
-                  value: (
-                    <Amount
-                      value={inspectedAccount.appuserCurrencyAvailableBalance}
-                      currency={
-                        inspectedAccount.accountOwnerAppuserKey?.currencyKey
-                          ?.code ?? userCurrency
-                      }
-                    />
-                  ),
-                },
-              ]}
-            />
-          ) : null}
-        </InspectorDrawer>
+      <InspectorDrawer
+        open={inspectedAccount !== null}
+        onOpenChange={(open) => {
+          if (!open) setInspectedAccount(null);
+        }}
+        objectType={t("account")}
+        title={inspectedAccount?.accountName ?? t("unknown")}
+        subtitle={
+          inspectedAccount?.accountFinancialInstitutionKey?.displayName ??
+          undefined
+        }
+        badges={
+          <>
+            {inspectedAccount?.isPrivate ? (
+              <Badge variant="secondary">{t("private-account")}</Badge>
+            ) : null}
+            {inspectedAccount &&
+            (inspectedAccount.syncStatus || inspectedAccount.refreshedAt) ? (
+              <AccountSyncBadge
+                syncStatus={inspectedAccount.syncStatus}
+                refreshedAt={inspectedAccount.refreshedAt}
+              />
+            ) : null}
+          </>
+        }
+        actions={
+          inspectedAccount ? (
+            <Button
+              onClick={() => {
+                const key = inspectedAccount.accountKey;
+                setInspectedAccount(null);
+                router.push(`/accounts/${key}`);
+              }}
+            >
+              {t("account-details")}
+            </Button>
+          ) : null
+        }
+      >
+        {inspectedAccount ? (
+          <PropertyList
+            items={[
+              {
+                key: "balance",
+                label: t("balance"),
+                value: (
+                  <Amount
+                    value={inspectedAccount.appuserCurrencyBalance}
+                    currency={
+                      inspectedAccount.accountOwnerAppuserKey?.currencyKey
+                        ?.code ?? userCurrency
+                    }
+                  />
+                ),
+              },
+              {
+                key: "available",
+                label: t("available"),
+                value: (
+                  <Amount
+                    value={inspectedAccount.appuserCurrencyAvailableBalance}
+                    currency={
+                      inspectedAccount.accountOwnerAppuserKey?.currencyKey
+                        ?.code ?? userCurrency
+                    }
+                  />
+                ),
+              },
+            ]}
+          />
+        ) : null}
+      </InspectorDrawer>
 
       {/* Edit / Delete modals */}
       {accountData.name && accountData.key !== null && (
@@ -370,4 +379,27 @@ export default function AccountsList({ accounts }: { accounts: Account[] }) {
       )}
     </>
   );
+}
+
+type AccountsTotal =
+  | { amount: number; kind: "total" }
+  | { kind: "incomplete" }
+  | { kind: "mixed-currencies" };
+
+function totalInCurrency(accounts: Account[], currency: string): AccountsTotal {
+  try {
+    const amount = sumMoney(
+      accounts.map((account) => ({
+        amount: account.appuserCurrencyBalance,
+        currency: account.accountOwnerAppuserKey.currencyKey.code,
+      })),
+      currency,
+    );
+    return amount === null ? { kind: "incomplete" } : { amount, kind: "total" };
+  } catch (error) {
+    if (error instanceof CurrencyMismatchError) {
+      return { kind: "mixed-currencies" };
+    }
+    throw error;
+  }
 }

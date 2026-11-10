@@ -217,6 +217,11 @@ describe('goals contract', () => {
     expect(parseLocalizedGoalMoney('1 234,5678', 'pt-PT')).toBe(1234.5678)
     expect(parseLocalizedGoalMoney('1.234,5678', 'es')).toBe(1234.5678)
     expect(parseLocalizedGoalMoney('10,0', 'pt-PT')).toBe(10)
+    expect(parseLocalizedGoalMoney('1.234,56', 'pt-PT')).toBe(1234.56)
+    expect(parseLocalizedGoalMoney('1.000', 'pt-PT')).toBe(1000)
+    expect(parseLocalizedGoalMoney('1.000', 'es')).toBe(1000)
+    expect(parseLocalizedGoalMoney('1.000', 'en')).toBe(1)
+    expect(parseLocalizedGoalMoney('1.2.3', 'pt-PT')).toBeNull()
     for (const [value, locale] of [['1,23.45', 'en'], ['12.34,56', 'es'], ['1,23456', 'pt-PT'], ['0', 'en'], ['-1', 'en'], ['Infinity', 'en']] as const) {
       expect(parseLocalizedGoalMoney(value, locale)).toBeNull()
     }
@@ -232,18 +237,29 @@ describe('goals contract', () => {
     }
   })
 
-  it('models the serialized detail response without web-only entity fields', () => {
+  it('models the serialized detail response, keeping only the display fields web reads', () => {
     const { summary, monthlyContributionTarget: _monthlyContributionTarget, ...goal } = goalFixture
     const parsed = goalDetailResponseSchema.parse({
-      goal: { ...goal, description: 'not exposed', icon: 'not exposed', createdAt: 'not exposed' },
+      goal: { ...goal, description: 'Two weeks away', icon: 'not exposed', createdAt: 'not exposed' },
       summary,
       unrelated: true,
     })
-    expect(parsed.goal).not.toHaveProperty('description')
+    expect(parsed.goal.description).toBe('Two weeks away')
     expect(parsed.goal).not.toHaveProperty('icon')
     expect(parsed.goal).not.toHaveProperty('createdAt')
     expect(parsed.goal.monthlyContributionTarget).toBeNull()
     expect(parsed).toMatchObject({ goal: { goalKey: 3 }, summary: { status: 'behind' } })
+  })
+
+  it('reads the goal type and debt projection, and drops a malformed one instead of failing the goal', () => {
+    const parsed = goalsResponseSchema.parse({ goals: [
+      { ...goalFixture, type: 'debt_paydown', currentBalance: 900, summary: { ...goalFixture.summary, debtProjection: { currentBalance: 850, monthlyPayment: 100, months: 9, originalBalance: 1000, paidOffAmount: 150, payoffDate: '2027-08-01', paysOff: true, progressPercentage: 15, totalInterest: 40 } } },
+      { ...goalFixture, goalKey: 4, type: 'lottery', currentBalance: 'lots', summary: { ...goalFixture.summary, debtProjection: { paysOff: 'maybe' } } },
+    ] })
+    expect(parsed.goals[0]).toMatchObject({ type: 'debt_paydown', currentBalance: 900, summary: { debtProjection: { currentBalance: 850, paysOff: true } } })
+    expect(parsed.goals[1].type).toBe('unknown')
+    expect(parsed.goals[1].currentBalance).toBeUndefined()
+    expect(parsed.goals[1].summary.debtProjection).toBeUndefined()
   })
 
   it('carries the expired-transaction flag on a funding entry', () => {

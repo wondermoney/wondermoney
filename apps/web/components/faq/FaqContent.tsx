@@ -4,10 +4,10 @@ import { useTranslations } from "next-intl";
 
 import Logo from "@/components/layout/Logo";
 import { Heading, Text } from "@/components/ui/Typography";
-import { useSupportEmail } from "@/lib/api/instance/useInstance";
+import { useSponsorUrl, useSupportEmail } from "@/lib/api/instance/useInstance";
 import { useHydrated } from "@/lib/utils/useHydrated";
 
-const QUESTION_KEYS = ["q1", "q2", "q3", "q4", "q5", "q6"] as const;
+const QUESTION_KEYS = ["q1", "q2", "q3", "q4", "q5", "support", "q6"] as const;
 
 export function FaqContent() {
   const t = useTranslations("faq");
@@ -16,8 +16,13 @@ export function FaqContent() {
   const hydrated = useHydrated();
   const instanceSupportEmail = useSupportEmail();
   const supportEmail = hydrated ? instanceSupportEmail : null;
-  // The last answer is "write to us"; without a support inbox there is nowhere to write.
-  const questions = QUESTION_KEYS.filter((key) => key !== "q6" || supportEmail);
+  const instanceSponsorUrl = useSponsorUrl();
+  const sponsorUrl = hydrated ? instanceSponsorUrl : null;
+  // The last answer is "write to us"; without a support inbox there is nowhere to write. The
+  // "chip in" answer needs somewhere to send people too.
+  const questions = QUESTION_KEYS.filter(
+    (key) => (key !== "q6" || supportEmail) && (key !== "support" || sponsorUrl),
+  );
 
   return (
     <main className="bg-muted/40 flex min-h-dvh justify-center px-4 py-12 sm:px-6">
@@ -42,7 +47,20 @@ export function FaqContent() {
               <Text className="text-muted-foreground leading-6">
                 {key === "q6"
                   ? t(`${key}Body`, { email: supportEmail ?? "" })
-                  : t(`${key}Body`)}
+                  : key === "support"
+                    ? t.rich("supportBody", {
+                        link: (chunks) => (
+                          <a
+                            href={sponsorUrl ?? undefined}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-foreground font-medium underline underline-offset-4"
+                          >
+                            {chunks}
+                          </a>
+                        ),
+                      })
+                    : t(`${key}Body`)}
               </Text>
             </div>
           ))}

@@ -7,6 +7,8 @@ import { readEndpoint, writeEndpoint } from '@/lib/api/runtime-schema'
  * `EmailNotificationPreferenceState`. `budgetAlerts` and `weeklyInsights` are
  * delivery-gated streams (they carry `deliverySupported`); the other categories
  * are ungated toggles. `marketingOptOut` is the account-level master switch.
+ * `bankSyncAlerts` is optional because a self-hosted server on an older version
+ * doesn't return it yet; the screen hides that toggle when it is absent.
  */
 const categoryStateSchema = z.object({
   effectiveEnabled: z.boolean(),
@@ -21,6 +23,7 @@ const streamStateSchema = z.object({
 
 export const notificationPreferencesSchema = z.object({
   accountRecovery: categoryStateSchema,
+  bankSyncAlerts: categoryStateSchema.optional(),
   budgetAlerts: streamStateSchema,
   growth: categoryStateSchema,
   marketingOptOut: z.boolean(),
@@ -34,6 +37,7 @@ export type NotificationPreferencesDto = z.infer<typeof notificationPreferencesS
 /** Partial patch accepted by the API; at least one field must be present. */
 export type NotificationPreferencePatch = Readonly<{
   accountRecoveryEnabled?: boolean
+  bankSyncAlertsEnabled?: boolean
   budgetAlertsEnabled?: boolean
   growthEmailsEnabled?: boolean
   marketingOptOut?: boolean

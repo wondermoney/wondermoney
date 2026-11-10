@@ -1,16 +1,21 @@
-import { type Href, useNavigation, useRouter } from 'expo-router'
-import { useEffect, useState } from 'react'
+import * as Linking from 'expo-linking'
+import { type Href, usePreventRemove, useRouter } from 'expo-router'
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { useAppLock } from '@/components/providers/app-lock-provider'
 import { useProductRuntime } from '@/components/providers/product-runtime-provider'
 import { useProfile } from '@/features/self/use-self-resource'
+import { ApiError } from '@/lib/api/errors'
+import { useConfirmedFeature } from '@/lib/server/use-instance'
 
 import type { AppLockFailure } from './app-lock-section'
+import type { DataExportFailure } from './data-export-section'
 import type { MfaSecuritySectionStatus } from './mfa-security-section'
 import type { PasswordChangeFailure } from './password-change-section'
 import { SecurityScreen } from './security-screen'
 import { useChangePassword } from './use-change-password'
+import { isDataExportPreparing, useLatestDataExport, useStartDataExport } from './use-data-export'
 import { classifyDeleteAccountFailure, useDeleteAccount, type DeleteAccountFailure } from './use-delete-account'
 import { useMfaEnrollment } from './use-mfa-enrollment'
 import { useMfaFactorStatus } from './use-mfa-factor-status'
@@ -20,8 +25,7 @@ export function SecurityRoute() {
   const mutation = useDeleteAccount()
   const { signOut } = useProductRuntime()
   const router = useRouter()
-  const navigation = useNavigation()
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const [outcome, setOutcome] = useState<DeleteAccountFailure | null>(null)
 
   const factorStatus = useMfaFactorStatus()
@@ -36,10 +40,16 @@ export function SecurityRoute() {
   const [appLockPending, setAppLockPending] = useState(false)
   const [appLockFailure, setAppLockFailure] = useState<AppLockFailure | null>(null)
 
+  // Exports are offered where the server stores them; without storage they are made on the web.
+  const exportsStored = useConfirmedFeature((features) => features.fileStorage)
+  const latestExport = useLatestDataExport(exportsStored)
+  const startExport = useStartDataExport()
+  const [exportFailure, setExportFailure] = useState<DataExportFailure | null>(null)
+  const latest = latestExport.data ?? null
+  const exportReady = latest?.status === 'ready' && latest.downloadUrl !== null
+
   // A deletion in flight must not be interrupted by a back gesture.
-  useEffect(() => navigation.addListener('beforeRemove', (event) => {
-    if (mutation.isPending) event.preventDefault()
-  }), [mutation.isPending, navigation])
+  usePreventRemove(mutation.isPending)
 
   const goBack = () => {
     if (router.canGoBack()) router.back()
@@ -116,6 +126,25 @@ export function SecurityRoute() {
           if (!email) return
           const result = await changePassword.mutateAsync({ email, currentPassword, newPassword })
           if (result.status === 'updated') setPasswordSucceeded(true)
+        },
+      }}
+      dataExport={{
+        available: exportsStored,
+        status: isDataExportPreparing(latest) ? 'preparing' : exportReady ? 'ready' : latest?.status === 'failed' ? 'failed' : 'idle',
+        readyUntil: exportReady && latest.expiresAt ? new Date(latest.expiresAt).toLocaleString(i18n.language) : null,
+        starting: startExport.isPending,
+        failure: exportFailure,
+        onStart: async () => {
+          setExportFailure(null)
+          try {
+            await startExport.mutateAsync()
+          } catch (error) {
+            setExportFailure(error instanceof ApiError && error.code === 'http' && error.status === 429 ? 'limit' : 'unknown')
+          }
+        },
+        onDownload: () => {
+          // A short-lived link to the stored file that needs no sign-in; the browser downloads it.
+          if (latest?.downloadUrl) void Linking.openURL(latest.downloadUrl)
         },
       }}
       appLock={{

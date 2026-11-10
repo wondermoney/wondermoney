@@ -1,8 +1,8 @@
 "use client";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useMemo } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
 
@@ -20,6 +20,7 @@ import {
   FormMessage,
 } from "@/components/ui/Form";
 import { Input } from "@/components/ui/input";
+import { MoneyInput } from "@/components/ui/MoneyInput";
 import {
   Select,
   SelectContent,
@@ -40,6 +41,11 @@ import type {
 import useCreateLoan from "@/lib/api/loan/useCreateLoan";
 import useUpdateLoan from "@/lib/api/loan/useUpdateLoan";
 import { LOAN_TYPE_LABEL_KEY } from "@/lib/loans/loan-labels";
+import {
+  formatLocaleNumberInput,
+  zLocaleNumber,
+  zOptionalLocaleNumber,
+} from "@/lib/utils/number";
 
 /**
  * Convert a `yyyy-mm-dd` string into a local Date, avoiding the UTC-midnight
@@ -81,7 +87,17 @@ function computeMaturityDate(
   return formatDateInputValue(maturity);
 }
 
-function buildBaseSchema(t: (key: string) => string) {
+/**
+ * Amounts and the rate are typed in the reader's locale ("1.234,56" for pt and
+ * es); unreadable input is `invalidAmount`, never another number.
+ */
+function buildBaseSchema(
+  t: (key: string) => string,
+  locale: string,
+  invalidAmount: string,
+) {
+  const amount = () => zLocaleNumber(locale, invalidAmount);
+  const optionalAmount = () => zOptionalLocaleNumber(locale, invalidAmount);
   return z.object({
     name: z.string().min(1, t("validation.required")),
     type: z.enum([
@@ -93,24 +109,29 @@ function buildBaseSchema(t: (key: string) => string) {
     ]),
     providerName: z.string().optional(),
     currencyKey: z.coerce.number<number>().int().positive(),
-    openingPrincipalBalance: z.coerce.number<number>().min(0),
+    openingPrincipalBalance: amount().pipe(z.number().min(0)),
     openingBalanceDate: z.string().min(1, t("validation.required")),
     // Amount originally borrowed at origination — distinct from, and
     // optionally greater than or equal to, openingPrincipalBalance (the
     // balance as of openingBalanceDate). See the cross-field check below.
-    originalPrincipal: z.coerce.number<number>().min(0).optional(),
-    regularPaymentAmount: z.coerce.number<number>().positive().optional(),
+    originalPrincipal: optionalAmount().pipe(z.number().min(0).optional()),
+    regularPaymentAmount: optionalAmount().pipe(
+      z.number().positive().optional(),
+    ),
     // Entered as a percentage (e.g. 3.5 for 3.5%); converted to the
     // basis-points integer the API expects (`annualInterestRateBps`) on
     // submit — see `submit()`.
-    interestRatePercent: z.coerce.number<number>().min(0).max(100).optional(),
+    interestRatePercent: optionalAmount().pipe(
+      z.number().min(0).max(100).optional(),
+    ),
     paymentDayOfMonth: z.coerce.number<number>().min(1).max(31).optional(),
     termMonths: z.coerce.number<number>().int().positive().optional(),
     includeInNetWorth: z.boolean(),
     notes: z.string().optional(),
   });
 }
-type FormValues = z.infer<ReturnType<typeof buildBaseSchema>>;
+type FormInput = z.input<ReturnType<typeof buildBaseSchema>>;
+type FormValues = z.output<ReturnType<typeof buildBaseSchema>>;
 export default function LoanFormDrawer({
   open,
   onOpenChange,
@@ -122,11 +143,12 @@ export default function LoanFormDrawer({
 }) {
   const t = useTranslations("loans");
   const tCommon = useTranslations();
+  const locale = useLocale();
   const createMutation = useCreateLoan();
   const updateMutation = useUpdateLoan();
   const { data: currenciesData } = useCurrencies({ enabled: open });
   const currencies = currenciesData?.currencies ?? [];
-  const defaultValues = useMemo<FormValues>(
+  const defaultValues = useMemo<FormInput>(
     () => ({
       name: loan?.name ?? "",
       type: loan?.type ?? "PERSONAL_LOAN",
@@ -158,27 +180,38 @@ export default function LoanFormDrawer({
   );
   const schema = useMemo(
     () =>
-      buildBaseSchema(t).superRefine((data, ctx) => {
-        if (
-          data.originalPrincipal != null &&
-          data.originalPrincipal < data.openingPrincipalBalance
-        ) {
-          ctx.addIssue({
-            code: "custom",
-            message: t("validation.originalPrincipalTooLow"),
-            path: ["originalPrincipal"],
-          });
-        }
-      }),
-    [t],
+      buildBaseSchema(t, locale, tCommon("invalid-amount")).superRefine(
+        (data, ctx) => {
+          if (
+            data.originalPrincipal != null &&
+            data.originalPrincipal < data.openingPrincipalBalance
+          ) {
+            ctx.addIssue({
+              code: "custom",
+              message: t("validation.originalPrincipalTooLow"),
+              path: ["originalPrincipal"],
+            });
+          }
+        },
+      ),
+    [t, tCommon, locale],
   );
-  const form = useForm<FormValues>({
+  const form = useForm<FormInput, undefined, FormValues>({
     resolver: zodResolver(schema),
     defaultValues,
   });
   useEffect(() => {
     if (open) form.reset(defaultValues);
   }, [open, defaultValues, form]);
+  const currencyKey = useWatch({ control: form.control, name: "currencyKey" });
+  const currencyCode = currencies.find(
+    (currency) => currency.currencyKey === Number(currencyKey),
+  )?.code;
+  const currencyOptions = currencies.map((currency) => ({
+    value: String(currency.currencyKey),
+    label: currency.code,
+  }));
+  const optionalNumber = (value: string) => (value === "" ? undefined : value);
   const submit = async (values: FormValues) => {
     const payload: CreateLoanRequest = {
       name: values.name,
@@ -238,16 +271,12 @@ export default function LoanFormDrawer({
           type="submit"
           loading={createMutation.isPending || updateMutation.isPending}
         >
-          {loan ? t("actions.edit") : t("actions.add")}
+          {loan ? t("actions.save") : t("actions.add")}
         </Button>
       }
     >
       <Form {...form}>
-        <FormContent
-          id="loan-form"
-          onSubmit={form.handleSubmit(submit)}
-          className="space-y-4"
-        >
+        <FormContent id="loan-form" onSubmit={form.handleSubmit(submit)}>
           <FormField
             control={form.control}
             name="name"
@@ -255,7 +284,7 @@ export default function LoanFormDrawer({
               <FormItem>
                 <FormLabel>{t("fields.name")}</FormLabel>
                 <FormControl>
-                  <Input {...field} />
+                  <Input {...field} placeholder={t("fields.namePlaceholder")} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -298,43 +327,27 @@ export default function LoanFormDrawer({
           />
           <FormField
             control={form.control}
-            name="currencyKey"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>{t("fields.currency")}</FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  defaultValue={String(field.value)}
-                >
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {currencies.map((currency) => (
-                      <SelectItem
-                        key={currency.currencyKey}
-                        value={String(currency.currencyKey)}
-                      >
-                        {currency.code}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
             name="openingPrincipalBalance"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>{t("fields.principal")}</FormLabel>
                 <FormControl>
-                  <Input type="number" step="0.01" {...field} />
+                  {/* The currency is chosen here, once; the other amounts
+                      show it but do not repeat the picker. */}
+                  <MoneyInput
+                    {...field}
+                    currencyPicker={{
+                      value: String(currencyKey),
+                      onChange: (value) =>
+                        form.setValue("currencyKey", Number(value), {
+                          shouldDirty: true,
+                        }),
+                      options: currencyOptions,
+                      label: t("fields.currency"),
+                    }}
+                  />
                 </FormControl>
+                <FormMessage />
               </FormItem>
             )}
           />
@@ -345,17 +358,10 @@ export default function LoanFormDrawer({
               <FormItem>
                 <FormLabel>{t("fields.originalPrincipal")}</FormLabel>
                 <FormControl>
-                  <Input
-                    type="number"
-                    step="0.01"
-                    min="0"
+                  <MoneyInput
                     {...field}
+                    currency={currencyCode}
                     value={field.value ?? ""}
-                    onChange={(e) =>
-                      field.onChange(
-                        e.target.value === "" ? undefined : e.target.value,
-                      )
-                    }
                   />
                 </FormControl>
                 <FormDescription>
@@ -372,17 +378,10 @@ export default function LoanFormDrawer({
               <FormItem>
                 <FormLabel>{t("fields.installment")}</FormLabel>
                 <FormControl>
-                  <Input
-                    type="number"
-                    step="0.01"
-                    min="0"
+                  <MoneyInput
                     {...field}
+                    currency={currencyCode}
                     value={field.value ?? ""}
-                    onChange={(e) =>
-                      field.onChange(
-                        e.target.value === "" ? undefined : e.target.value,
-                      )
-                    }
                   />
                 </FormControl>
                 <FormMessage />
@@ -397,17 +396,12 @@ export default function LoanFormDrawer({
                 <FormLabel>{t("fields.interestRate")}</FormLabel>
                 <FormControl>
                   <Input
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    max="100"
+                    inputMode="decimal"
+                    placeholder={t("fields.interestRatePlaceholder")}
+                    className="text-right font-mono"
+                    endAdornment={<span className="font-mono">%</span>}
                     {...field}
-                    value={field.value ?? ""}
-                    onChange={(e) =>
-                      field.onChange(
-                        e.target.value === "" ? undefined : e.target.value,
-                      )
-                    }
+                    value={formatLocaleNumberInput(field.value, locale)}
                   />
                 </FormControl>
                 <FormMessage />
@@ -425,12 +419,13 @@ export default function LoanFormDrawer({
                     type="number"
                     step="1"
                     min="1"
+                    inputMode="numeric"
+                    placeholder={t("fields.termMonthsPlaceholder")}
+                    className="font-mono"
                     {...field}
                     value={field.value ?? ""}
                     onChange={(e) =>
-                      field.onChange(
-                        e.target.value === "" ? undefined : e.target.value,
-                      )
+                      field.onChange(optionalNumber(e.target.value))
                     }
                   />
                 </FormControl>
@@ -451,7 +446,7 @@ export default function LoanFormDrawer({
                   onSelect={(date) =>
                     field.onChange(formatDateInputValue(date))
                   }
-                  placeholder={t("fields.startDate")}
+                  placeholder={t("fields.startDatePlaceholder")}
                 />
                 <FormMessage />
               </FormItem>
@@ -461,8 +456,10 @@ export default function LoanFormDrawer({
             control={form.control}
             name="includeInNetWorth"
             render={({ field }) => (
-              <FormItem className="flex items-center justify-between">
-                <FormLabel>{t("fields.includeInNetWorth")}</FormLabel>
+              <FormItem className="flex-row items-center justify-between">
+                <FormLabel className="mb-0">
+                  {t("fields.includeInNetWorth")}
+                </FormLabel>
                 <FormControl>
                   <Switch
                     checked={field.value}
@@ -479,7 +476,10 @@ export default function LoanFormDrawer({
               <FormItem>
                 <FormLabel>{t("fields.notes")}</FormLabel>
                 <FormControl>
-                  <Textarea {...field} />
+                  <Textarea
+                    {...field}
+                    placeholder={t("fields.notesPlaceholder")}
+                  />
                 </FormControl>
               </FormItem>
             )}

@@ -34,6 +34,7 @@ describe('ProfileEditScreen', () => {
   it('requires at least one name and does not submit an empty change', async () => {
     const onSubmit = jest.fn()
     const { view } = await renderScreen({ initialFirstName: '', initialLastName: '', onSubmit })
+    expect(view.getByRole('button', { name: 'Save changes' })).toBeDisabled()
     await fireEvent.press(view.getByRole('button', { name: 'Save changes' }))
     expect(onSubmit).not.toHaveBeenCalled()
     expect(view.getByRole('alert')).toBeOnTheScreen()
@@ -48,6 +49,16 @@ describe('ProfileEditScreen', () => {
     await fireEvent.press(save)
     expect(onSubmit).not.toHaveBeenCalled()
     expect(view.getByLabelText('First name').props.editable).toBe(false)
+  })
+
+  it('closes from the form bar and keeps the bar locked while pending', async () => {
+    const onCancel = jest.fn()
+    const { view } = await renderScreen({ onCancel })
+    expect(view.getByRole('header', { name: 'Edit name' })).toBeOnTheScreen()
+    await fireEvent.press(view.getByRole('button', { name: 'Close' }))
+    expect(onCancel).toHaveBeenCalledTimes(1)
+    const pending = await renderScreen({ pending: true })
+    expect(pending.view.getByRole('button', { name: 'Close' })).toBeDisabled()
   })
 
   it('surfaces a specific, non-destructive failure', async () => {

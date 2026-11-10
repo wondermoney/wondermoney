@@ -1,7 +1,9 @@
 import { useTranslation } from 'react-i18next'
 import { Pressable, ScrollView, StyleSheet, Text, useColorScheme, View } from 'react-native'
-import { SafeAreaView } from 'react-native-safe-area-context'
 
+import { BackControl } from '@/components/ui/back-control'
+import { PageHeader } from '@/components/ui/page-header'
+import { SafeAreaView } from '@/components/ui/screen-safe-area'
 import { themeTokens, type Palette } from '@/theme/tokens'
 import { textStyles } from '@/theme/typography'
 
@@ -38,11 +40,8 @@ export function StatementImportScreen({ accountsState, selectedAccountId, onSele
     <SafeAreaView style={[styles.safe, { backgroundColor: palette.background }]}>
       <ScrollView contentContainerStyle={styles.content}>
         <View style={styles.page}>
-          <Button label={t('banking.statementImport.back')} onPress={onBack} palette={palette} secondary disabled={busy} />
-          <View style={styles.heading}>
-            <Text accessibilityRole="header" allowFontScaling style={[styles.title, { color: palette.foreground }]}>{t('banking.statementImport.title')}</Text>
-            <Text allowFontScaling style={[styles.helper, { color: palette.mutedForeground }]}>{t('banking.statementImport.helper')}</Text>
-          </View>
+          <BackControl fallback="/more/banking" label={t('banking.statementImport.back')} onPress={onBack} disabled={busy} />
+          <PageHeader palette={palette} title={t('banking.statementImport.title')} instruction={t('banking.statementImport.helper')} />
 
           {state.phase === 'idle' ? (
             <AccountPicker

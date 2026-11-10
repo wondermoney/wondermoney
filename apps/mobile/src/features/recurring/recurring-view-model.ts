@@ -10,6 +10,10 @@ export type RecurringRowViewModel = Readonly<{
   amount: number | null
   amountMin: number | null
   amountMax: number | null
+  /** Web's fallbacks when there is no expected amount. */
+  averageAmount: number | null
+  lastAmount: number | null
+  occurrenceCount: number
   currency: string | null
   nextExpectedAt: string | null
   lastSeenAt: string | null
@@ -56,6 +60,9 @@ export function mapRecurringItems(
     amount: item.expectedAmount ?? null,
     amountMin: item.expectedAmountMin ?? null,
     amountMax: item.expectedAmountMax ?? null,
+    averageAmount: item.averageAmount ?? null,
+    lastAmount: item.lastAmount ?? null,
+    occurrenceCount: item.occurrenceCount,
     currency: item.currency?.code ?? null,
     nextExpectedAt: item.nextExpectedAt ?? null,
     lastSeenAt: item.lastSeenAt ?? null,

@@ -1,5 +1,5 @@
 import { useQueryClient } from '@tanstack/react-query'
-import { useNavigation, useRouter } from 'expo-router'
+import { usePreventRemove, useRouter } from 'expo-router'
 import { useEffect, useRef, useState } from 'react'
 
 import { useProductRuntime } from '@/components/providers/product-runtime-provider'
@@ -15,10 +15,9 @@ export function GoalCreateRoute() {
   const mutation = useCreateGoal()
   const queryClient = useQueryClient()
   const router = useRouter()
-  const navigation = useNavigation()
   const submissionGate = useRef(false)
-  const navigationLock = useRef(false)
-  const navigationUnlocked = useRef(false)
+  const [navigationLocked, setNavigationLocked] = useState(false)
+  const [navigationUnlocked, setNavigationUnlocked] = useState(false)
   const detailFlight = useRef(false)
   const didNavigate = useRef(false)
   const unknownRefreshAttempted = useRef(false)
@@ -28,9 +27,8 @@ export function GoalCreateRoute() {
   const [confirmedGoalId, setConfirmedGoalId] = useState<number | null>(null)
   const [detailState, setDetailState] = useState<'idle' | 'loading' | 'unavailable'>('idle')
 
-  useEffect(() => navigation.addListener('beforeRemove', (event) => {
-    if ((navigationLock.current || mutation.isPending) && !navigationUnlocked.current) event.preventDefault()
-  }), [mutation.isPending, navigation])
+  const disablePrevention = usePreventRemove((navigationLocked || mutation.isPending) && !navigationUnlocked)
+  const unlockNavigation = () => { setNavigationUnlocked(true); disablePrevention() }
 
   const refreshGoals = async () => {
     if (refreshingGoals) return
@@ -59,7 +57,7 @@ export function GoalCreateRoute() {
   const loadCreatedDetail = async (goalId: number) => {
     if (detailFlight.current || didNavigate.current) return
     detailFlight.current = true
-    navigationLock.current = true
+    setNavigationLocked(true)
     setDetailState('loading')
     try {
       await queryClient.fetchQuery({
@@ -69,10 +67,10 @@ export function GoalCreateRoute() {
       })
       if (didNavigate.current) return
       didNavigate.current = true
-      navigationUnlocked.current = true
+      unlockNavigation()
       router.replace({ pathname: '/goals/[goalId]', params: { goalId: String(goalId) } })
     } catch {
-      navigationLock.current = false
+      setNavigationLocked(false)
       setDetailState('unavailable')
     } finally {
       detailFlight.current = false
@@ -82,14 +80,14 @@ export function GoalCreateRoute() {
   const submit = async (payload: GoalCreateWrite) => {
     if (submissionGate.current || mutation.isPending || mutation.unknownGate) return
     submissionGate.current = true
-    navigationLock.current = true
+    setNavigationLocked(true)
     setFailure(null)
     try {
       const created = await mutation.mutateAsync(payload)
       setConfirmedGoalId(created.goalId)
       await loadCreatedDetail(created.goalId)
     } catch (error) {
-      navigationLock.current = false
+      setNavigationLocked(false)
       const kind = classifyGoalCreateFailure(error)
       setFailure(kind)
       if (kind !== 'unknown') submissionGate.current = false
@@ -98,7 +96,7 @@ export function GoalCreateRoute() {
   }
 
   const returnToGoals = () => {
-    navigationUnlocked.current = true
+    unlockNavigation()
     router.replace('/goals')
   }
 

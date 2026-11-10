@@ -51,7 +51,7 @@ interface TimelineTransaction {
 describe('portfolio transaction service', () => {
   const currency = { code: 'EUR', currencyKey: 1 } as Currency;
   const appuser = { appuserKey: 1, currencyKey: currency } as Appuser;
-  const portfolio = { portfolioKey: 11 } as Portfolio;
+  const portfolio = { portfolioKey: 11, portfolioOwnerAppuserKey: appuser } as Portfolio;
   const asset = { financialAssetKey: 7, symbol: 'AAPL' } as FinancialAsset;
   const savingsCertificateAsset = {
     financialAssetKey: 20,
@@ -729,7 +729,6 @@ describe('portfolio transaction service', () => {
     expect(findMock).toHaveBeenCalledWith(
       expect.anything(),
       expect.objectContaining({
-        appuserKey: appuser,
         financialAssetKey: asset,
         portfolioKey: { portfolioKey: portfolio.portfolioKey },
       }),

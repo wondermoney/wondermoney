@@ -3,7 +3,7 @@ import { UniqueConstraintViolationException } from '@mikro-orm/core';
 import { Account } from '@entity/Account';
 import { AccountFinancialInstitution, AccountFinancialInstitutionProvider } from '@entity/AccountFinancialInstitution';
 import { Currency } from '@entity/Currency';
-import type { EnableBankingConnection } from '@entity/EnableBankingConnection';
+import { EnableBankingConnection } from '@entity/EnableBankingConnection';
 import { buildEnableBankingInstitutionRecordId } from '@utils/enable-banking-institution-id';
 import { InternalServerError } from '@utils/errors';
 import logger from '@utils/logger';
@@ -21,6 +21,8 @@ export interface CreateInitialEnableBankingAccountsResult {
   accounts: Account[];
   accountsCreated: number;
   accountsSkipped: number;
+  /** Earlier connections to the bank whose every account moved to this one, now soft-deleted. */
+  connectionsRetired: number;
   skippedReasons: string[];
 }
 
@@ -32,9 +34,12 @@ export interface EnableBankingSessionAccount {
 }
 
 interface EntityManagerLike {
+  count(entityClass: new (...args: never[]) => unknown, where: Record<string, unknown>): Promise<number>;
   create<T>(entityClass: new (...args: never[]) => T, data: Partial<T>): T;
+  find<T>(entityClass: new (...args: never[]) => T, where: Record<string, unknown>, options?: Record<string, unknown>): Promise<T[]>;
   findOne<T>(entityClass: new (...args: never[]) => T, where: Record<string, unknown>, options?: Record<string, unknown>): Promise<null | T>;
   findOneOrFail<T>(entityClass: new (...args: never[]) => T, where: Record<string, unknown>): Promise<T>;
+  flush(): Promise<void>;
   persist(entity: unknown): { flush(): Promise<void> };
 }
 
@@ -55,6 +60,13 @@ const DUPLICATE_ERROR_CODES = new Set(['23505']);
  * Best-effort per account: a single account with an unresolvable currency is skipped (logged),
  * not fatal to the whole batch: there is no HTTP response to fail, and letting the rest of the
  * bank's accounts link is strictly better than aborting all of them over one bad row.
+ *
+ * **Reconnecting.** Renewing a consent means a brand-new connection and session, and the bank may
+ * give every account a new `uid`. Before creating an account, a session account with an IBAN is
+ * matched to an existing *active* account of the same owner, household, bank and currency, so the
+ * user keeps the account row and its history (see {@link findReconnectedAccount}). An earlier
+ * connection whose every account moved over is then soft-deleted, so the connections list does not
+ * keep showing the old consent with a "Reconnect" action.
  */
 export async function createInitialEnableBankingAccounts(
   em: EntityManagerLike,
@@ -85,6 +97,8 @@ export async function createInitialEnableBankingAccounts(
 
   const accounts: Account[] = [];
   const skippedReasons: string[] = [];
+  const claimedAccountKeys = new Set<number>();
+  const previousConnectionKeys = new Set<number>();
 
   for (const raw of sessionAccounts) {
     const sessionAccount = raw as EnableBankingSessionAccount;
@@ -103,12 +117,14 @@ export async function createInitialEnableBankingAccounts(
       continue;
     }
 
-    // Soft-delete revival + accountId/owner keying. No IBAN-fallback dedup here (unlike
-    // `account-initial-sync-account.service.ts`) — that dedup exists for *re-sync* collapsing a second requisition onto the same
-    // real-world account, which cannot happen at first-link time, since this only ever runs once
-    // per connection immediately after `changeToLinked`.
+    // Soft-delete revival + accountId/owner keying, then the reconnect match by IBAN.
     const existingDeleted = await em.findOne(Account, { accountId, accountOwnerAppuserKey: connection.appuserKey, deletedAt: { $ne: null } });
-    const existingActive = existingDeleted ?? await em.findOne(Account, { accountId, accountOwnerAppuserKey: connection.appuserKey, deletedAt: undefined });
+    const existingActive = existingDeleted
+      ?? await em.findOne(Account, { accountId, accountOwnerAppuserKey: connection.appuserKey, deletedAt: undefined })
+      ?? await findReconnectedAccount(em, { claimedAccountKeys, connection, currency, iban: sessionAccount.account_id?.iban, institution, tenantKey });
+    const previousConnectionKey = existingActive?.enableBankingConnectionKey?.enableBankingConnectionKey;
+    if (previousConnectionKey !== undefined && previousConnectionKey !== connection.enableBankingConnectionKey) previousConnectionKeys.add(previousConnectionKey);
+    if (existingActive?.accountKey !== undefined) claimedAccountKeys.add(existingActive.accountKey);
     const account = existingActive ?? em.create(Account, { accountId });
     account.accountId = accountId;
     account.accountOwnerAppuserKey = connection.appuserKey;
@@ -139,7 +155,32 @@ export async function createInitialEnableBankingAccounts(
     accounts.push(account);
   }
 
-  return { accounts, accountsCreated: accounts.length, accountsSkipped: skippedReasons.length, skippedReasons };
+  const connectionsRetired = await retireEmptiedConnections(em, connection, previousConnectionKeys);
+
+  return { accounts, accountsCreated: accounts.length, accountsSkipped: skippedReasons.length, connectionsRetired, skippedReasons };
+}
+
+/**
+ * The existing account a reconnected session account stands for, or null. Matches on IBAN within
+ * the same owner, household, bank and currency (one IBAN can carry several currency pockets, each
+ * its own account), skipping accounts already claimed by an earlier session account of this batch.
+ * Only active accounts match: an account the user removed is not brought back by a reconnect.
+ */
+async function findReconnectedAccount(
+  em: EntityManagerLike,
+  input: { claimedAccountKeys: Set<number>; connection: EnableBankingConnection; currency: Currency; iban: string | undefined; institution: AccountFinancialInstitution; tenantKey: NonNullable<EnableBankingConnection['tenantKey']> },
+): Promise<Account | null> {
+  const iban = input.iban?.trim();
+  if (!iban) return null;
+  const candidates = await em.find(Account, {
+    accountFinancialInstitutionKey: input.institution,
+    accountNumber: iban,
+    accountOwnerAppuserKey: input.connection.appuserKey,
+    currencyKey: input.currency,
+    deletedAt: undefined,
+    tenantKey: input.tenantKey,
+  }, { orderBy: { accountKey: 'asc' } });
+  return candidates.find((candidate) => !input.claimedAccountKeys.has(candidate.accountKey)) ?? null;
 }
 
 function isUniqueConstraintError(error: unknown) {
@@ -150,4 +191,27 @@ function isUniqueConstraintError(error: unknown) {
     if (typeof code === 'string' && DUPLICATE_ERROR_CODES.has(code)) return true;
   }
   return false;
+}
+
+/** Soft-deletes the earlier connections (same owner and household) left with no active account. */
+async function retireEmptiedConnections(em: EntityManagerLike, connection: EnableBankingConnection, connectionKeys: Set<number>): Promise<number> {
+  let retired = 0;
+  for (const enableBankingConnectionKey of connectionKeys) {
+    const remaining = await em.count(Account, { deletedAt: undefined, enableBankingConnectionKey });
+    if (remaining > 0) continue;
+    const previous = await em.findOne(EnableBankingConnection, {
+      appuserKey: connection.appuserKey,
+      deletedAt: undefined,
+      enableBankingConnectionKey,
+      tenantKey: connection.tenantKey,
+    });
+    if (!previous) continue;
+    previous.deletedAt = new Date();
+    retired += 1;
+  }
+  if (retired > 0) {
+    await em.flush();
+    logger.info({ connectionsRetired: retired, enableBankingConnectionKey: connection.enableBankingConnectionKey }, 'Enable Banking reconnect moved every account off earlier connections; retired them');
+  }
+  return retired;
 }

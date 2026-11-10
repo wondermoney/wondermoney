@@ -13,8 +13,7 @@ import api from "../api";
 /**
  * BYOK Enable Banking credential — the user's own Enable Banking application
  * registration (Application ID + private key), validated server-side against
- * Enable Banking's real API before being saved. See
- * `/Users/dc/.claude/plans/sunny-splashing-cook.md` §2/§6.
+ * Enable Banking's real API before being saved.
  *
  * The private key itself never appears in any response shape here — the API
  * only ever hands back the (non-secret) `applicationId` plus validation

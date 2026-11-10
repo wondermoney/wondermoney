@@ -32,8 +32,9 @@ describe('BudgetVsActualScreen', () => {
     const view = await renderWithI18n(
       { state: { status: 'loaded', report }, preset: 'last3Months', currencyCode: 'EUR', onSelectPreset: jest.fn(), onRefresh: jest.fn(), onBack: jest.fn() },
     )
-    expect(view.getByRole('button', { name: 'Last 3 months' }).props.accessibilityState.selected).toBe(true)
-    expect(view.getByRole('button', { name: 'This month' }).props.accessibilityState.selected).toBe(false)
+    await fireEvent.press(view.getByRole('button', { name: 'Date range, Last 3 months' }))
+    expect(view.getByRole('radio', { name: 'Last 3 months' }).props.accessibilityState.checked).toBe(true)
+    expect(view.getByRole('radio', { name: 'This month' }).props.accessibilityState.checked).toBe(false)
     expect(view.getByLabelText(/Dining out.*Over budget/)).toBeTruthy()
     expect(view.queryAllByText('Over budget').length).toBeGreaterThan(0)
   })
@@ -43,7 +44,8 @@ describe('BudgetVsActualScreen', () => {
     const view = await renderWithI18n(
       { state: { status: 'loaded', report }, preset: 'last3Months', currencyCode: 'EUR', onSelectPreset, onRefresh: jest.fn(), onBack: jest.fn() },
     )
-    await fireEvent.press(view.getByRole('button', { name: 'Last 12 months' }))
+    await fireEvent.press(view.getByRole('button', { name: 'Date range, Last 3 months' }))
+    await fireEvent.press(view.getByRole('radio', { name: 'Last 12 months' }))
     expect(onSelectPreset).toHaveBeenCalledWith('last12Months')
   })
 

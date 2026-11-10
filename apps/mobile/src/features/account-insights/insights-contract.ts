@@ -1,6 +1,7 @@
 import { z } from 'zod'
 
 import { readEndpoint, tolerantEnum } from '@/lib/api/runtime-schema'
+import { deviceTimeZone } from '@/lib/dates/transaction-date'
 
 const money = z.number().finite().nullish()
 const count = z.number().int().nonnegative().nullish()
@@ -55,14 +56,23 @@ export type AccountMetricDto = z.infer<typeof accountMetricSchema>
 export type CashflowDto = z.infer<typeof cashflowResponseSchema>['cashflow'][number]
 export type CategorySpendingDto = z.infer<typeof categorySpendingSchema>
 
-export type DateScope = Readonly<{ fromDate: string; toDate: string }>
-const dateQuery = (scope: DateScope, includeTo = true) => {
-  const values = [`fromDate=${Date.parse(scope.fromDate)}`]
+/** `fromDate` is absent for web's "All Time": the API then reads from the first transaction. */
+export type DateScope = Readonly<{ fromDate?: string; toDate: string }>
+/**
+ * The period's query. A dated period goes with the device's time zone, so the API counts a bank
+ * booking (a date with no time) on the calendar day it falls on for this viewer.
+ */
+const dateQuery = (scope: DateScope, includeTo = true, timeZone = deviceTimeZone()) => {
+  const values: string[] = []
+  if (scope.fromDate) values.push(`fromDate=${Date.parse(scope.fromDate)}`)
   if (includeTo) values.push(`toDate=${Date.parse(scope.toDate)}`)
+  if (values.length > 0 && timeZone) values.push(`timezone=${encodeURIComponent(timeZone)}`)
   return values.join('&')
 }
+const withQuery = (path: string, query: string) => (query ? `${path}?${query}` : path)
 
-export const createAggregateMetricsEndpoint = (scope: DateScope) => readEndpoint({ method: 'GET', path: `/v1/account/metrics?${dateQuery(scope)}`, schema: metricsResponseSchema })
-export const createAccountMetricsEndpoint = (accountId: number, fromDate: string) => readEndpoint({ method: 'GET', path: `/v1/account/${accountId}/metrics?fromDate=${Date.parse(fromDate)}`, schema: metricsResponseSchema })
-export const createCashflowEndpoint = (scope: DateScope) => readEndpoint({ method: 'GET', path: `/v1/account/cashflow?${dateQuery(scope, false)}`, schema: cashflowResponseSchema })
-export const createCategorySpendingEndpoint = (scope: DateScope, limit: number) => readEndpoint({ method: 'GET', path: `/v1/account/transaction/category-spending?${dateQuery(scope)}&limit=${limit}`, schema: categorySpendingResponseSchema })
+export const createAggregateMetricsEndpoint = (scope: DateScope) => readEndpoint({ method: 'GET', path: withQuery('/v1/account/metrics', dateQuery(scope)), schema: metricsResponseSchema })
+/** Without `fromDate` the API uses its own default period, as web's account page does. */
+export const createAccountMetricsEndpoint = (accountId: number, fromDate?: string) => readEndpoint({ method: 'GET', path: withQuery(`/v1/account/${accountId}/metrics`, fromDate ? dateQuery({ fromDate, toDate: fromDate }, false) : ''), schema: metricsResponseSchema })
+export const createCashflowEndpoint = (scope: DateScope) => readEndpoint({ method: 'GET', path: withQuery('/v1/account/cashflow', dateQuery(scope, false)), schema: cashflowResponseSchema })
+export const createCategorySpendingEndpoint = (scope: DateScope, limit: number) => readEndpoint({ method: 'GET', path: `/v1/account/transaction/category-spending?${[dateQuery(scope), `limit=${limit}`].filter(Boolean).join('&')}`, schema: categorySpendingResponseSchema })

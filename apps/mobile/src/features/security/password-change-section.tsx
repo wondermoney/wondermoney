@@ -1,10 +1,12 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { StyleSheet, Text, TextInput, View } from 'react-native'
+import { StyleSheet } from 'react-native'
 
-import { SelfAction, type Palette } from '@/features/self/self-screen-parts'
-import { themeTokens } from '@/theme/tokens'
-import { textStyles } from '@/theme/typography'
+import { Button } from '@/components/ui/button'
+import { FormGroup, FormTextRow } from '@/components/ui/form-row'
+import { Text } from '@/components/ui/text'
+import { SettingsSection } from '@/features/more/settings-ui'
+import type { Palette } from '@/features/self/self-screen-parts'
 
 export type PasswordChangeFailure = 'invalid-current-password' | 'weak-password' | 'unavailable'
 
@@ -18,7 +20,7 @@ export type PasswordChangeSectionProps = Readonly<{
 
 const MIN_LENGTH = 8
 
-export function PasswordChangeSection({ pending, succeeded, failure, onSubmit, palette }: PasswordChangeSectionProps) {
+export function PasswordChangeSection({ pending, succeeded, failure, onSubmit }: PasswordChangeSectionProps) {
   const { t } = useTranslation()
   const [currentPassword, setCurrentPassword] = useState('')
   const [newPassword, setNewPassword] = useState('')
@@ -39,101 +41,64 @@ export function PasswordChangeSection({ pending, succeeded, failure, onSubmit, p
     void onSubmit(currentPassword, newPassword)
   }
 
+  // Each error sits under the row it is about; a failure that is about no one
+  // field (a weak password per the server, the service unavailable) stays a
+  // line under the group.
+  const currentError = failure === 'invalid-current-password' ? t('security.password.errors.invalid-current-password') : null
+  const newError = validation === 'too-short' ? t('security.password.errors.too-short') : null
+  const confirmError = validation === 'mismatch' ? t('security.password.errors.mismatch') : null
+  const formFailure = failure && failure !== 'invalid-current-password' ? t(`security.password.errors.${failure}`) : null
   return (
-    <View style={[styles.card, { borderColor: palette.border, backgroundColor: palette.muted }]}>
-      <Text accessibilityRole="header" allowFontScaling style={[styles.cardTitle, { color: palette.foreground }]}>
-        {t('security.password.heading')}
-      </Text>
-      <Text allowFontScaling style={[styles.cardBody, { color: palette.mutedForeground }]}>
-        {t('security.password.helper')}
-      </Text>
-
-      <View style={styles.field}>
-        <Text allowFontScaling style={[styles.label, { color: palette.foreground }]}>{t('security.password.currentLabel')}</Text>
-        <TextInput
-          accessibilityLabel={t('security.password.currentLabel')}
+    <SettingsSection first title={t('security.password.heading')} description={t('settings.security.passwordDescription')}>
+      <FormGroup>
+        <FormTextRow
+          key="current"
           autoComplete="current-password"
           editable={!pending}
+          error={currentError}
+          label={t('security.password.currentLabel')}
           onChangeText={setCurrentPassword}
-          placeholder={t('security.password.currentLabel')}
-          placeholderTextColor={palette.mutedForeground}
           secureTextEntry
-          style={[styles.input, { color: palette.foreground, borderColor: palette.border, backgroundColor: palette.card }]}
           value={currentPassword}
         />
-      </View>
-
-      <View style={styles.field}>
-        <Text allowFontScaling style={[styles.label, { color: palette.foreground }]}>{t('security.password.newLabel')}</Text>
-        <TextInput
-          accessibilityLabel={t('security.password.newLabel')}
+        <FormTextRow
+          key="new"
           autoComplete="new-password"
           editable={!pending}
+          error={newError}
+          label={t('security.password.newLabel')}
           onChangeText={(value) => { setNewPassword(value); setValidation(null) }}
-          placeholder={t('security.password.newLabel')}
-          placeholderTextColor={palette.mutedForeground}
           secureTextEntry
-          style={[styles.input, { color: palette.foreground, borderColor: palette.border, backgroundColor: palette.card }]}
           value={newPassword}
         />
-      </View>
-
-      <View style={styles.field}>
-        <Text allowFontScaling style={[styles.label, { color: palette.foreground }]}>{t('security.password.confirmLabel')}</Text>
-        <TextInput
-          accessibilityLabel={t('security.password.confirmLabel')}
+        <FormTextRow
+          key="confirm"
           autoComplete="new-password"
           editable={!pending}
+          error={confirmError}
+          label={t('security.password.confirmLabel')}
           onChangeText={(value) => { setConfirmPassword(value); setValidation(null) }}
           onSubmitEditing={submit}
-          placeholder={t('security.password.confirmLabel')}
-          placeholderTextColor={palette.mutedForeground}
           returnKeyType="done"
           secureTextEntry
-          style={[styles.input, { color: palette.foreground, borderColor: palette.border, backgroundColor: palette.card }]}
           value={confirmPassword}
         />
-      </View>
+      </FormGroup>
 
-      {validation ? (
-        <Text accessibilityRole="alert" allowFontScaling style={[styles.error, { color: palette.destructive }]}>
-          {t(`security.password.errors.${validation}`)}
-        </Text>
-      ) : null}
-      {failure ? (
-        <Text accessibilityRole="alert" allowFontScaling style={[styles.error, { color: palette.destructive }]}>
-          {t(`security.password.errors.${failure}`)}
-        </Text>
-      ) : null}
-      {succeeded ? (
-        <Text allowFontScaling style={[styles.success, { color: palette.foreground }]}>
-          {t('security.password.success')}
-        </Text>
-      ) : null}
+      {formFailure ? <Text accessibilityRole="alert" tone="destructive" variant="meta">{formFailure}</Text> : null}
+      {succeeded ? <Text tone="success" variant="meta">{t('security.password.success')}</Text> : null}
 
-      <SelfAction
+      <Button
+        disabled={pending}
         label={pending ? t('security.password.saving') : t('security.password.save')}
         onPress={submit}
-        disabled={pending}
-        palette={palette}
-        primary
+        style={styles.submit}
       />
-    </View>
+    </SettingsSection>
   )
 }
 
 const styles = StyleSheet.create({
-  card: {
-    borderWidth: 1,
-    borderRadius: themeTokens.radius.lg,
-    padding: themeTokens.spacing[4],
-    gap: themeTokens.spacing[3],
-  },
-  cardTitle: { ...textStyles.section },
-  cardBody: { ...textStyles.body },
-  field: { gap: themeTokens.spacing[2] },
-  label: { ...textStyles.bodyStrong, fontWeight: '600' as const },
-  input: { ...textStyles.body, minHeight: themeTokens.touchTarget.minimum, borderWidth: 1, borderRadius: themeTokens.radius.md, paddingHorizontal: themeTokens.spacing[3] },
-  error: { ...textStyles.body },
-  success: { ...textStyles.body },
+  // A section on a settings page, not a flow: a normal-width primary button at the start.
+  submit: { alignSelf: 'flex-start' },
 })

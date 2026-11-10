@@ -3,6 +3,7 @@ import { useSyncExternalStore } from 'react'
 import { I18nextProvider } from 'react-i18next'
 import { Pressable, Text } from 'react-native'
 
+import type { PreferenceStorage, StoredPreferences } from '@/features/preferences/preference-storage'
 import { PreferencesScreen } from '@/features/preferences/preferences-screen'
 import { initMobileI18n } from '@/lib/i18n'
 import { themeTokens } from '@/theme/tokens'
@@ -14,7 +15,7 @@ import {
   useSessionPreferences,
 } from './session-preferences-provider'
 
-type NativeScheme = 'light' | 'dark' | 'unspecified'
+type NativeScheme = 'light' | 'dark' | 'auto' | 'unspecified'
 let deviceScheme: 'light' | 'dark' = 'light'
 let override: NativeScheme = 'unspecified'
 const listeners = new Set<() => void>()
@@ -23,6 +24,13 @@ const setColorScheme = jest.fn((scheme: NativeScheme) => {
   listeners.forEach((listener) => listener())
 })
 const appearance = { setColorScheme }
+let stored: StoredPreferences = { theme: null, language: null, privacyMode: null }
+const storage: PreferenceStorage = {
+  load: jest.fn(async () => stored),
+  saveTheme: jest.fn(async (theme) => { stored = { ...stored, theme } }),
+  saveLanguage: jest.fn(async (language) => { stored = { ...stored, language } }),
+  savePrivacyMode: jest.fn(async (privacyMode) => { stored = { ...stored, privacyMode } }),
+}
 const mockBack = jest.fn()
 
 jest.mock('expo-router', () => ({ useRouter: () => ({ back: mockBack }) }))
@@ -33,7 +41,7 @@ function useTestColorScheme() {
       listeners.add(listener)
       return () => listeners.delete(listener)
     },
-    () => override === 'unspecified' ? deviceScheme : override,
+    () => override === 'unspecified' || override === 'auto' ? deviceScheme : override,
   )
 }
 
@@ -52,7 +60,7 @@ function ThemeProbe() {
 
 function TestSessionPreferencesProvider({ children }: { children: React.ReactNode }) {
   const deviceTheme = useTestColorScheme()
-  return <SessionPreferencesProvider deviceLocale="en" appearance={appearance} deviceTheme={deviceTheme}>{children}</SessionPreferencesProvider>
+  return <SessionPreferencesProvider deviceLocale="en" appearance={appearance} deviceTheme={deviceTheme} storage={storage}>{children}</SessionPreferencesProvider>
 }
 
 const provider = (children: React.ReactNode) => <TestSessionPreferencesProvider>{children}</TestSessionPreferencesProvider>
@@ -66,12 +74,13 @@ describe('SessionPreferencesProvider theme atomicity', () => {
   beforeEach(() => {
     deviceScheme = 'light'
     override = 'unspecified'
+    stored = { theme: null, language: null, privacyMode: null }
     setColorScheme.mockClear()
     mockBack.mockClear()
     snapshots.length = 0
   })
 
-  it('sets the RN 0.86 native value before publishing Light, Dark, and System state', async () => {
+  it('sets the React Native native value before publishing Light, Dark, and System state', async () => {
     const view = await render(provider(<ThemeProbe />))
     expect(view.getByText(`system|light|light|${themeTokens.colors.light.background}`)).toBeOnTheScreen()
 
@@ -111,5 +120,16 @@ describe('SessionPreferencesProvider theme atomicity', () => {
     await fireEvent.press(view.getByRole('radio', { name: 'System' }))
     expect(setColorScheme).toHaveBeenLastCalledWith('unspecified')
     expect(view.getByRole('radio', { name: 'System' }).props.accessibilityState).toEqual({ checked: true })
+  })
+
+  it('restores the stored theme on start and saves a new choice', async () => {
+    stored = { theme: 'dark', language: null, privacyMode: null }
+    const view = await render(provider(<ThemeProbe />))
+    await waitFor(() => expect(view.getByText(`dark|dark|dark|${themeTokens.colors.dark.background}`)).toBeOnTheScreen())
+    expect(setColorScheme).toHaveBeenLastCalledWith('dark')
+
+    await fireEvent.press(view.getByRole('button', { name: 'set-light' }))
+    expect(storage.saveTheme).toHaveBeenLastCalledWith('light')
+    expect(stored.theme).toBe('light')
   })
 })

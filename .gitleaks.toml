@@ -1,0 +1,26 @@
+# gitleaks configuration for CI's leak check (.github/workflows/ci.yml, "Leak check").
+# The default rules, plus allowlists for the few values in the tree that look like secrets
+# and are not. Each entry names the exact value, not a path or a whole rule, so a real
+# secret added next to one of them is still caught. See CONTRIBUTING.md, "Leak check".
+
+[extend]
+useDefault = true
+
+# A test encryption key: the bytes 0x00 to 0x1f, base64-encoded.
+[[allowlists]]
+description = "Fake encryption key in API tests"
+targetRules = ["generic-api-key"]
+regexes = ['''^AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8=$''']
+
+# A mocked decryption result, not a key. The rule needs 64 characters between the markers, so
+# its match runs on past this placeholder's closing quote: the entry matches the start only.
+[[allowlists]]
+description = "Placeholder private key in an API test"
+targetRules = ["private-key"]
+regexes = ['''^-----BEGIN PRIVATE KEY-----decrypted-----END PRIVATE KEY-----'\)''']
+
+# PostHog project keys are public client keys, shipped in every app build.
+[[allowlists]]
+description = "Hosted instance's public PostHog project key"
+targetRules = ["generic-api-key"]
+regexes = ['''^phc_KlDfjBgreGCfTKJnwwP5W9I2PEGJsboIKFoedyTHGg4$''']

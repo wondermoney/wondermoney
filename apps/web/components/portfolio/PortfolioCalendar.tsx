@@ -7,6 +7,7 @@ import React, { useMemo } from "react";
 import { Spinner } from "@/components/ui/Spinner";
 import usePortfolioCalendar from "@/lib/api/portfolio/usePortfolioCalendar";
 import type { PortfolioHolding } from "@/lib/api/portfolio/usePortfoliosHoldings";
+import { useFormatCurrency } from "@/lib/utils/useFormatCurrency";
 
 import { FinancialAssetLogo } from "../FinancialAssetLogo";
 
@@ -33,19 +34,16 @@ function formatEpsEstimate(locale: string, value: number) {
   }).format(value);
 }
 
-function formatRevenueEstimate(locale: string, value: number) {
-  return new Intl.NumberFormat(locale, {
-    style: "currency",
-    currency: "USD",
-    notation: "compact",
-    compactDisplay: "short",
-    maximumFractionDigits: 1,
-  }).format(value);
-}
+const REVENUE_ESTIMATE_FORMAT = {
+  notation: "compact",
+  compactDisplay: "short",
+  maximumFractionDigits: 1,
+} as const;
 
 const PortfolioCalendar: React.FC<PortfolioCalendarProps> = ({ holdings }) => {
   const t = useTranslations();
   const locale = useLocale();
+  const formatRevenue = useFormatCurrency();
   const { data, isLoading } = usePortfolioCalendar();
   const earnings = data?.earnings;
   const dividends = data?.dividends;
@@ -80,7 +78,7 @@ const PortfolioCalendar: React.FC<PortfolioCalendarProps> = ({ holdings }) => {
   const hasData = upcomingEarnings.length > 0 || upcomingDividends.length > 0;
 
   return (
-    <div className="p-4">
+    <div className="py-1">
       {isLoading ? (
         <div className="flex h-50 items-center justify-center">
           <Spinner />
@@ -137,9 +135,10 @@ const PortfolioCalendar: React.FC<PortfolioCalendarProps> = ({ holdings }) => {
                             {t("earnings-revenue-estimate")}:
                           </span>{" "}
                           <span className="font-mono tabular-nums">
-                            {formatRevenueEstimate(
-                              locale,
+                            {formatRevenue(
                               event.revenueEstimated,
+                              "USD",
+                              REVENUE_ESTIMATE_FORMAT,
                             )}
                           </span>
                         </div>

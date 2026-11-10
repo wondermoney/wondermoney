@@ -43,6 +43,8 @@ export interface TransactionInput {
   /** Running balance in the user's currency, for net-worth history. */
   appuserCurrencyBalance?: number;
   category?: Category;
+  /** The user currency `amount` is in. Defaults to the household's currency. */
+  currency?: Currency;
   date: Date;
   /** Marks the row as bank-synced, the way the Enable Banking sync stores it. */
   enableBankingTransactionId?: string;
@@ -67,10 +69,11 @@ export async function addMerchant(em: EntityManager, household: Household, name:
 
 export async function addTransaction(em: EntityManager, household: Household, input: TransactionInput): Promise<Transaction> {
   const key = next();
+  const currency = input.currency ?? household.currency;
   const transaction = em.create(Transaction, {
     accountKey: input.account ?? household.account,
     appuserCurrencyBalance: input.appuserCurrencyBalance,
-    appuserCurrencyKey: household.currency,
+    appuserCurrencyKey: currency,
     appuserKey: input.appuser ?? household.appuser,
     appuserSettlementAmount: input.amount,
     balance: input.appuserCurrencyBalance,
@@ -79,9 +82,9 @@ export async function addTransaction(em: EntityManager, household: Household, in
     hidden: input.hidden ?? false,
     internalTransactionId: `internal-${key}`,
     originalAmount: input.amount,
-    originalCurrencyKey: household.currency,
+    originalCurrencyKey: currency,
     settlementAmount: input.amount,
-    settlementCurrencyKey: household.currency,
+    settlementCurrencyKey: currency,
     tenantKey: household.tenant,
     transactionDate: input.date,
     transactionMerchantKey: input.merchant,
@@ -112,22 +115,30 @@ export async function seedHousehold(em: EntityManager): Promise<Household> {
   return { account, appuser, currency, statuses, tenant, types };
 }
 
-/** Add a second, invited member to a household. */
-export async function addPartner(em: EntityManager, household: Household): Promise<Appuser> {
-  const partner = em.create(Appuser, { currencyKey: household.currency, emailAddress: `partner${next()}@example.test`, externalUserId: randomUUID(), firstName: 'Partner' }, { partial: true });
+/** The currency row for `code`, created on first use. */
+export async function currencyFor(em: EntityManager, code: string): Promise<Currency> {
+  const currency = (await em.findOne(Currency, { code })) ?? em.create(Currency, { code, num: String(next()) }, { partial: true });
+  await em.flush();
+  return currency;
+}
+
+/** Add a second, invited member to a household, with their own currency if given. */
+export async function addPartner(em: EntityManager, household: Household, input: { currency?: Currency } = {}): Promise<Appuser> {
+  const partner = em.create(Appuser, { currencyKey: input.currency ?? household.currency, emailAddress: `partner${next()}@example.test`, externalUserId: randomUUID(), firstName: 'Partner' }, { partial: true });
   em.create(AppuserTenant, { appuserKey: partner, recordActive: true, role: HouseholdRole.MEMBER, tenantKey: household.tenant }, { partial: true });
   await em.flush();
   return partner;
 }
 
 /** An account in the household, owned by `owner` (default: the household owner). */
-export async function addAccount(em: EntityManager, household: Household, input: { balance?: number; isPrivate?: boolean; name?: string; owner?: Appuser } = {}): Promise<Account> {
+export async function addAccount(em: EntityManager, household: Household, input: { appuserCurrencyBalance?: number; balance?: number; currency?: Currency; isPrivate?: boolean; name?: string; owner?: Appuser } = {}): Promise<Account> {
   const account = em.create(Account, {
     accountName: input.name ?? `Account ${next()}`,
     accountOwnerAppuserKey: input.owner ?? household.appuser,
+    appuserCurrencyBalance: input.appuserCurrencyBalance,
     balance: input.balance ?? 0,
     closed: false,
-    currencyKey: household.currency,
+    currencyKey: input.currency ?? household.currency,
     isPrivate: input.isPrivate ?? false,
     tenantKey: household.tenant,
   }, { partial: true });

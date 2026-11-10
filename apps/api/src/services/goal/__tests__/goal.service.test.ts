@@ -13,11 +13,15 @@ import { BadRequestError, NotFoundError } from '@utils/errors';
 
 import { buildGoalSummary } from '../goal-summary.service';
 
+/** An account a EUR member owns; the viewer (`findOneOrFail`) keeps EUR too. */
+const eurAccount = (fields: { appuserCurrencyBalance: number }) => ({ accountOwnerAppuserKey: { currencyKey: { code: 'EUR' } }, currencyKey: { code: 'EUR' }, ...fields });
+
 const em = {
   create: vi.fn(),
   find: vi.fn(),
   findAndCount: vi.fn(),
   findOne: vi.fn(),
+  findOneOrFail: vi.fn(() => Promise.resolve({ currencyKey: { code: 'EUR' } })),
   flush: vi.fn(),
   getReference: vi.fn((Entity, id) => ({ [Entity.name === 'Goal' ? 'goalKey' : Entity.name === 'Appuser' ? 'appuserKey' : Entity.name === 'Tenant' ? 'tenantKey' : Entity.name === 'Transaction' ? 'transactionKey' : 'currencyKey']: id })),
   persist: vi.fn().mockReturnThis(),
@@ -379,7 +383,7 @@ describe('GoalService', () => {
     const service = new GoalService(emManager);
     const goal = Object.assign(new Goal(), { currencyKey: { currencyKey: 33 }, goalKey: 1, status: GoalStatus.ACTIVE, targetAmount: 1000 });
     em.findOne.mockResolvedValue(goal);
-    em.find.mockImplementation((Entity) => (Entity === Account ? [{ appuserCurrencyBalance: 500 }] : []));
+    em.find.mockImplementation((Entity) => (Entity === Account ? [eurAccount({ appuserCurrencyBalance: 500 })] : []));
     em.flush.mockResolvedValue(undefined);
     em.flush.mockResolvedValue(undefined);
 
@@ -396,7 +400,7 @@ describe('GoalService', () => {
     const { GoalService } = await import('../goal.service');
     const service = new GoalService(emManager);
     em.find.mockImplementation((Entity) => {
-      if (Entity === Account) return [{ appuserCurrencyBalance: 300 }, { appuserCurrencyBalance: 200 }];
+      if (Entity === Account) return [eurAccount({ appuserCurrencyBalance: 300 }), eurAccount({ appuserCurrencyBalance: 200 })];
       if (Entity === GoalActivity) return [{ amount: 150, type: GoalActivityType.ASSIGNED }];
       return [];
     });
@@ -413,7 +417,7 @@ describe('GoalService', () => {
     const { GoalService } = await import('../goal.service');
     const service = new GoalService(emManager);
     em.find.mockImplementation((Entity) => {
-      if (Entity === Account) return [{ appuserCurrencyBalance: 100 }];
+      if (Entity === Account) return [eurAccount({ appuserCurrencyBalance: 100 })];
       if (Entity === GoalActivity) return [{ amount: 150, type: GoalActivityType.ASSIGNED }];
       return [];
     });
@@ -427,7 +431,7 @@ describe('GoalService', () => {
     const { GoalService } = await import('../goal.service');
     const service = new GoalService(emManager);
     em.find.mockImplementation((Entity) => {
-      if (Entity === Account) return [{ balance: 80 }];
+      if (Entity === Account) return [{ balance: 80, currencyKey: { code: 'EUR' } }];
       return [];
     });
 
@@ -442,7 +446,7 @@ describe('GoalService', () => {
     const goal = Object.assign(new Goal(), { currencyKey: { currencyKey: 33 }, goalKey: 1, status: GoalStatus.ACTIVE, targetAmount: 1000 });
     em.findOne.mockResolvedValue(goal);
     em.find.mockImplementation((Entity) => {
-      if (Entity === Account) return [{ appuserCurrencyBalance: 50 }];
+      if (Entity === Account) return [eurAccount({ appuserCurrencyBalance: 50 })];
       return [];
     });
 
@@ -455,7 +459,7 @@ describe('GoalService', () => {
     const service = new GoalService(emManager);
     const goal = Object.assign(new Goal(), { currencyKey: { currencyKey: 33 }, goalKey: 1, status: GoalStatus.ACTIVE, targetAmount: 1000 });
     em.findOne.mockResolvedValue(goal);
-    em.find.mockImplementation((Entity) => (Entity === Account ? [{ appuserCurrencyBalance: 100 }] : []));
+    em.find.mockImplementation((Entity) => (Entity === Account ? [eurAccount({ appuserCurrencyBalance: 100 })] : []));
     em.flush.mockResolvedValue(undefined);
 
     const result = await service.assignMoneyToGoal({ amount: 100, appuserKey: 11, currencyKey: 33, goalKey: 1, tenantKey: 22 });
@@ -469,7 +473,7 @@ describe('GoalService', () => {
     const goal = Object.assign(new Goal(), { currencyKey: { currencyKey: 33 }, goalKey: 1, status: GoalStatus.ACTIVE, targetAmount: 1000 });
     em.findOne.mockResolvedValue(goal);
     em.find.mockImplementation((Entity) => {
-      if (Entity === Account) return [{ appuserCurrencyBalance: 100 }];
+      if (Entity === Account) return [eurAccount({ appuserCurrencyBalance: 100 })];
       if (Entity === GoalActivity) return [{ amount: 60, type: GoalActivityType.ASSIGNED }];
       return [];
     });
@@ -770,7 +774,7 @@ describe('GoalService', () => {
     const { GoalService } = await import('../goal.service');
     const service = new GoalService(emManager);
     em.findOne.mockResolvedValue(Object.assign(new Goal(), { currencyKey: { currencyKey: 33 }, goalKey: 1, status: GoalStatus.ACTIVE, targetAmount: 1000 }));
-    em.find.mockImplementation((Entity) => (Entity === Account ? [{ appuserCurrencyBalance: 500 }] : []));
+    em.find.mockImplementation((Entity) => (Entity === Account ? [eurAccount({ appuserCurrencyBalance: 500 })] : []));
     em.flush.mockResolvedValue(undefined);
     em.flush.mockResolvedValue(undefined);
 

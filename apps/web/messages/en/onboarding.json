@@ -252,7 +252,6 @@
           "cashLabel": "Cash tracked",
           "cashValue": "€8,420",
           "netWorthLabel": "Net worth",
-          "netWorthValue": "€42,680",
           "budgetLabel": "Budget used",
           "budgetValue": "64%"
         },
@@ -268,13 +267,9 @@
         },
         "syncValue": {
           "balancesLabel": "Balances begin to sync",
-          "balancesValue": "€8,420",
           "transactionsLabel": "Recent transactions start appearing",
-          "transactionsValue": "18",
           "netWorthSyncLabel": "Net worth becomes measurable",
-          "netWorthSyncValue": "€42,680",
-          "budgetSyncLabel": "Budget progress",
-          "budgetSyncValue": "64%"
+          "budgetSyncLabel": "Budget progress"
         },
         "completion": {
           "profileStarted": "Financial profile started",
@@ -302,9 +297,10 @@
           "savingsValue": "€12,450",
           "creditCardLabel": "Credit card",
           "creditCardValue": "-€1,180",
-          "totalLabel": "Total balance",
-          "totalValue": "€16,090"
-        }
+          "totalLabel": "Total balance"
+        },
+        "exampleCaption": "Example figures. Yours appear once your bank has synced.",
+        "exampleValue": "Example: {value}"
       },
       "stepLabels": {
         "welcome": "Welcome",
@@ -313,6 +309,13 @@
         "account": "Connect",
         "sync_value": "Your picture",
         "completion": "Ready"
+      },
+      "restore": {
+        "cta": "Restore from an export",
+        "headline": "Restore your data",
+        "description": "Already use WonderMoney on another server, or kept an export? Load it here and pick up where you left off.",
+        "done": "Go to the dashboard",
+        "back": "Set up from scratch instead"
       }
     },
     "dashboard": {

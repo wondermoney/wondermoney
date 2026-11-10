@@ -3,10 +3,15 @@ import {
   FinancialTransactionType,
   type FinancialTransactionsParserResult,
 } from './types';
+import { optionalNumber, type ParserNumberFormat, requireNumber } from '../number';
+
+// IBKR Flex Query exports always use "." for decimals.
+const IBKR_FORMAT: ParserNumberFormat = { decimalSeparator: '.' };
 
 // This CSV has a ; separator in each row. I havent dont anything with it yet, but theres some info there like transaction type "BUi"
 const ibkrParser = (data: string[][]): FinancialTransactionsParserResult => {
-  return data.map((row) => {
+  return data.map((row, index) => {
+    const where = (column: string) => `IBKR row ${index + 1}, ${column}`;
     const date = row[37]!;
     const [year, month, day] = [
       date.slice(0, 4),
@@ -18,11 +23,11 @@ const ibkrParser = (data: string[][]): FinancialTransactionsParserResult => {
     const assetName = row[6];
     const assetSymbol = row[5]!;
     const exchange = row[12];
-    const quantityParsed = Number.parseFloat(row[41]!);
-    const unitPrice = Number.parseFloat(row[42]!);
+    const quantityParsed = requireNumber(row[41], IBKR_FORMAT, where('quantity'));
+    const unitPrice = requireNumber(row[42], IBKR_FORMAT, where('price'));
     const currency = row[3]!;
-    const totalLocalPrice = Number.parseFloat(row[44]!);
-    const totalPrice = Number.parseFloat(row[44]!);
+    const totalPrice = requireNumber(row[44], IBKR_FORMAT, where('amount'));
+    const totalLocalPrice = totalPrice;
     const exchangeRate = undefined;
     const financialTransactionType =
       totalPrice < 0
@@ -39,7 +44,8 @@ const ibkrParser = (data: string[][]): FinancialTransactionsParserResult => {
       totalPrice,
       externalTransactionId
     );
-    const feeAmount = Math.abs(Number.parseFloat(row[45]!));
+    const fee = optionalNumber(row[45], IBKR_FORMAT, where('commission'));
+    const feeAmount = fee === undefined ? undefined : Math.abs(fee);
     const feeCurrency = row[52];
     return {
       transactionDate,

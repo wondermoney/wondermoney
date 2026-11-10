@@ -45,10 +45,10 @@ describe('provider balance selection', () => {
     expect(selectProviderBalanceAmount({ balances: [{ balanceType: 'closingBooked' }, { balanceAmount: { amount: '3.00' }, balanceType: 'expected' }] })).toBe('3.00');
   });
 
-  it('falls back to the first usable entry for an unknown balance type, and to zero for none', () => {
+  it('falls back to the first usable entry for an unknown balance type, and to nothing for none', () => {
     expect(selectProviderBalanceAmount({ balances: [{ balanceAmount: { amount: '4.00' }, balanceType: 'somethingNew' }] })).toBe('4.00');
-    expect(selectProviderBalanceAmount({ balances: [] })).toBe('0');
-    expect(selectProviderBalanceAmount({})).toBe('0');
+    expect(selectProviderBalanceAmount({ balances: [] })).toBeUndefined();
+    expect(selectProviderBalanceAmount({})).toBeUndefined();
   });
 });
 
@@ -101,6 +101,18 @@ const createEm = (overrides: Partial<{ connection: Connection | null; currency: 
   persist: vi.fn().mockReturnThis(),
 });
 
+
+/** An em whose active-account lookup finds `account`, as a re-sync of a linked account does. */
+const emWithActiveAccount = (account: Record<string, unknown>) => {
+  const em = createEm({ institution: { accountFinancialInstitutionKey: 1 } });
+  const findOne = em.findOne.getMockImplementation()!;
+  em.findOne.mockImplementation((entity: unknown, where: Record<string, unknown>) => {
+    if ((entity as { name?: string }).name !== 'Account') return findOne(entity, where);
+    return (where['deletedAt'] as undefined | { $ne?: unknown })?.$ne === null ? null : account;
+  });
+  return em;
+};
+
 beforeEach(() => vi.clearAllMocks());
 
 describe('account initial sync account service', () => {
@@ -131,13 +143,15 @@ describe('account initial sync account service', () => {
     await service.syncAccountsForRequisition({ enableBankingConnectionKey: 1 }, { em: asEm(em), enableBankingSyncAdapterFactory: () => Promise.resolve(client()) });
     const created = (em.create as unknown as { mock: { calls: [unknown, Record<string, unknown>][] } }).mock.calls.find(([, data]) => data['accountId'] === 'acc-1')?.[1];
     expect(created?.['appuserCurrencyBalance']).toBe(10);
+    expect(created?.['fxStatus']).toBe('exact');
   });
 
-  it('leaves appuserCurrencyBalance undefined when conversion is missing', async () => {
+  it('stores no converted balance, and marks it missing, when no rate exists', async () => {
     const em = createEm({ exchangeRate: null, tenant: { appuserKey: { appuserKey: 9, currencyKey: { code: 'USD' } }, tenantKey: { tenantKey: 3 } } });
     await service.syncAccountsForRequisition({ enableBankingConnectionKey: 1 }, { em: asEm(em), enableBankingSyncAdapterFactory: () => Promise.resolve(client()) });
     const created = (em.create as unknown as { mock: { calls: [unknown, Record<string, unknown>][] } }).mock.calls.find(([, data]) => data['accountId'] === 'acc-1')?.[1];
-    expect(created?.['appuserCurrencyBalance']).toBeUndefined();
+    expect(created?.['appuserCurrencyBalance']).toBeNull();
+    expect(created?.['fxStatus']).toBe('missing');
   });
 
   it('returns partial when one account fails', async () => {
@@ -145,6 +159,67 @@ describe('account initial sync account service', () => {
     const result = await service.syncAccountsForRequisition({ enableBankingConnectionKey: 1 }, { em: asEm(em), enableBankingSyncAdapterFactory: () => Promise.resolve(client({ accounts: ['acc-1', 'acc-2'], fail: 'acc-2' })) });
     expect(result.status).toBe('partial');
     expect(result.failedAccountIds).toEqual(['acc-2']);
+  });
+
+  describe('provider failure signals', () => {
+    const providerError = (status: number, extra: Record<string, unknown> = {}) => Object.assign(new Error(`provider ${status}`), { status, ...extra });
+    /** A client whose `getBalances` answers per account: an error to throw, or a balances list. */
+    const balancesClient = (accounts: string[], answers: Record<string, Error | { balances: { balanceAmount?: { amount: string } }[] }>) => {
+      const balanceCalls: string[] = [];
+      const fake: Client = {
+        account: (accountId: string) => ({
+          getBalances: () => {
+            balanceCalls.push(accountId);
+            const answer = answers[accountId] ?? { balances: [{ balanceAmount: { amount: '10' } }] };
+            return answer instanceof Error ? Promise.reject(answer) : Promise.resolve(answer as { balances: { balanceAmount: { amount: string } }[] });
+          },
+          getDetails: () => Promise.resolve({ account: { currency: 'EUR', name: accountId, ownerName: 'Owner' } }),
+          getMetadata: () => Promise.resolve({ institution_id: 'bank-1' }),
+        }),
+        requisition: { getRequisitionById: () => Promise.resolve({ accounts }) },
+      };
+      return { balanceCalls, fake };
+    };
+
+    it('stops calling the provider at the first rate limit and reports Retry-After', async () => {
+      const { balanceCalls, fake } = balancesClient(['acc-1', 'acc-2', 'acc-3'], { 'acc-1': providerError(429, { retryAfter: 900 }) });
+      const em = createEm();
+      const result = await service.syncAccountsForRequisition({ enableBankingConnectionKey: 1 }, { em: asEm(em), enableBankingSyncAdapterFactory: () => Promise.resolve(fake) });
+      expect(balanceCalls).toEqual(['acc-1']);
+      expect(result).toMatchObject({ accountsFailed: 3, accountsFetched: 0, rateLimited: { retryAfterSeconds: 900 }, status: 'failed' });
+      expect(em.persist).not.toHaveBeenCalled();
+    });
+
+    it('keeps accounts synced before the rate limit and reports a partial result', async () => {
+      const { balanceCalls, fake } = balancesClient(['acc-1', 'acc-2', 'acc-3'], { 'acc-2': providerError(429) });
+      const result = await service.syncAccountsForRequisition({ enableBankingConnectionKey: 1 }, { em: asEm(createEm()), enableBankingSyncAdapterFactory: () => Promise.resolve(fake) });
+      expect(balanceCalls).toEqual(['acc-1', 'acc-2']);
+      expect(result).toMatchObject({ accountsFailed: 2, accountsFetched: 1, failedAccountIds: ['acc-2', 'acc-3'], rateLimited: {}, status: 'partial' });
+    });
+
+    it('reports every account rejected when each one fails with 400 or 401', async () => {
+      const { fake } = balancesClient(['acc-1', 'acc-2'], { 'acc-1': providerError(400), 'acc-2': providerError(401) });
+      const result = await service.syncAccountsForRequisition({ enableBankingConnectionKey: 1 }, { em: asEm(createEm()), enableBankingSyncAdapterFactory: () => Promise.resolve(fake) });
+      expect(result).toMatchObject({ everyAccountRejected: true, status: 'failed' });
+    });
+
+    it('does not report every account rejected when one failed for another reason', async () => {
+      const { fake } = balancesClient(['acc-1', 'acc-2'], { 'acc-1': providerError(400), 'acc-2': providerError(502) });
+      const result = await service.syncAccountsForRequisition({ enableBankingConnectionKey: 1 }, { em: asEm(createEm()), enableBankingSyncAdapterFactory: () => Promise.resolve(fake) });
+      expect(result.status).toBe('failed');
+      expect(result.everyAccountRejected).toBeFalsy();
+    });
+
+    it('fails an account whose provider answered with no balances, leaving its balance and freshness alone', async () => {
+      const existingAccount = { accountId: 'acc-1', accountKey: 9, balance: 250, refreshedAt: new Date('2026-01-01T00:00:00Z') };
+      const { fake } = balancesClient(['acc-1'], { 'acc-1': { balances: [] } });
+      // Served from the first `Account` lookup, so the sync would update it if it got that far.
+      const em = createEm({ deletedAccount: existingAccount });
+      const result = await service.syncAccountsForRequisition({ enableBankingConnectionKey: 1 }, { em: asEm(em), enableBankingSyncAdapterFactory: () => Promise.resolve(fake) });
+      expect(result).toMatchObject({ accountsFailed: 1, status: 'failed' });
+      expect(existingAccount.balance).toBe(250);
+      expect(existingAccount.refreshedAt).toEqual(new Date('2026-01-01T00:00:00Z'));
+    });
   });
 
   it('marks non-duplicate institution create errors as failed', async () => {
@@ -194,6 +269,36 @@ describe('account initial sync account service', () => {
     await service.syncAccountsForRequisition({ enableBankingConnectionKey: 1 }, { em: asEm(em), enableBankingSyncAdapterFactory: () => Promise.resolve(client()) });
     const createdAccount = em.persist.mock.calls[0]?.[0] as undefined | { appuserCurrencyBalance?: number };
     expect(createdAccount?.appuserCurrencyBalance).toBe(10);
+  });
+
+  it('records the first provider balance it sees as the opening balance', async () => {
+    const em = createEm();
+    await service.syncAccountsForRequisition({ enableBankingConnectionKey: 1 }, { em: asEm(em), enableBankingSyncAdapterFactory: () => Promise.resolve(client({ balance: '250.5' })) });
+    const created = (em.create as unknown as { mock: { calls: [unknown, Record<string, unknown>][] } }).mock.calls.find(([, data]) => data['accountId'] === 'acc-1')?.[1];
+    expect(created?.['openingBalance']).toBe(250.5);
+    expect(created?.['openingBalanceDate']).toBeInstanceOf(Date);
+  });
+
+  it('records an opening balance for an account linked without a balance', async () => {
+    const existingAccount: Record<string, unknown> = { accountId: 'acc-1', accountKey: 9 };
+    const em = emWithActiveAccount(existingAccount);
+    await service.syncAccountsForRequisition({ enableBankingConnectionKey: 1 }, { em: asEm(em), enableBankingSyncAdapterFactory: () => Promise.resolve(client({ balance: '40' })) });
+    expect(existingAccount['openingBalance']).toBe(40);
+  });
+
+  it('keeps the opening balance when a later sync reports a new balance', async () => {
+    const openingBalanceDate = new Date('2026-01-01T00:00:00Z');
+    const existingAccount: Record<string, unknown> = { accountId: 'acc-1', accountKey: 9, balance: 100, openingBalance: 100, openingBalanceDate };
+    const em = emWithActiveAccount(existingAccount);
+    await service.syncAccountsForRequisition({ enableBankingConnectionKey: 1 }, { em: asEm(em), enableBankingSyncAdapterFactory: () => Promise.resolve(client({ balance: '75' })) });
+    expect(existingAccount).toMatchObject({ balance: 75, openingBalance: 100, openingBalanceDate });
+  });
+
+  it('leaves the opening balance of an account synced before opening balances existed to the backfill', async () => {
+    const existingAccount: Record<string, unknown> = { accountId: 'acc-1', accountKey: 9, balance: 100 };
+    const em = emWithActiveAccount(existingAccount);
+    await service.syncAccountsForRequisition({ enableBankingConnectionKey: 1 }, { em: asEm(em), enableBankingSyncAdapterFactory: () => Promise.resolve(client({ balance: '75' })) });
+    expect(existingAccount['openingBalance']).toBeUndefined();
   });
 
   it('preserves existing account fields when syncing existing accounts', async () => {

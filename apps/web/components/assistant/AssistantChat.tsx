@@ -6,11 +6,17 @@ import { ArrowUp, CircleStop, RefreshCw } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useMemo, useRef, useState } from "react";
 
+import AiAllowanceNotice from "@/components/assistant/AiAllowanceNotice";
 import AssistantDataUsedDisclosure from "@/components/assistant/AssistantDataUsedDisclosure";
+import EmailVerificationNotice from "@/components/auth/EmailVerificationNotice";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Textarea } from "@/components/ui/textarea";
 import { getApiUrl } from "@/lib/api/api";
+import {
+  isAiAllowanceExhaustedError,
+  isEmailVerificationRequiredError,
+} from "@/lib/api/errors";
 import { cn } from "@/lib/utils";
 
 type Props = {
@@ -19,7 +25,7 @@ type Props = {
 
 export default function AssistantChat({ onStopChange }: Props) {
   const t = useTranslations("assistant");
-  // The API formats amounts and replies in the locale on screen (#61).
+  // The API formats amounts and replies in the locale on screen.
   const locale = useLocale();
   const transport = useMemo(
     () =>
@@ -169,7 +175,11 @@ export default function AssistantChat({ onStopChange }: Props) {
             </div>
           )}
 
-          {error ? (
+          {error && isEmailVerificationRequiredError(error) ? (
+            <EmailVerificationNotice />
+          ) : error && isAiAllowanceExhaustedError(error) ? (
+            <AiAllowanceNotice />
+          ) : error ? (
             <div className="rounded-lg border border-destructive-text/30 px-4 py-3 text-sm text-destructive-text">
               {t("chat.error")}
             </div>

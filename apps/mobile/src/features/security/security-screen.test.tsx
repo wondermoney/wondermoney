@@ -1,9 +1,9 @@
 import { fireEvent, render } from '@testing-library/react-native'
 import { I18nextProvider } from 'react-i18next'
-import { StyleSheet } from 'react-native'
 
 import { initMobileI18n } from '@/lib/i18n'
 
+import { touchHeight } from '@/test/touch-target'
 import { SecurityScreen } from './security-screen'
 import type { DeleteAccountFailure } from './use-delete-account'
 
@@ -43,6 +43,15 @@ async function renderScreen(overrides: Partial<React.ComponentProps<typeof Secur
       onTurnOn: jest.fn(),
       onTurnOff: jest.fn(),
     },
+    dataExport: {
+      available: true,
+      status: 'idle',
+      readyUntil: null,
+      starting: false,
+      failure: null,
+      onStart: jest.fn(),
+      onDownload: jest.fn(),
+    },
     ...overrides,
   }
   const view = await render(
@@ -56,15 +65,63 @@ async function renderScreen(overrides: Partial<React.ComponentProps<typeof Secur
 describe('SecurityScreen', () => {
   it('distinguishes permanent deletion from sign-out and bank disconnection', async () => {
     const { view } = await renderScreen()
-    expect(view.getByRole('header', { name: 'Security' })).toBeOnTheScreen()
+    expect(view.getByRole('header', { name: 'Settings' })).toBeOnTheScreen()
+    expect(view.getByRole('button', { name: 'Settings, Security' })).toBeOnTheScreen()
     expect(view.getByText(/not the same as signing out/i)).toBeOnTheScreen()
     expect(view.getByText(/not the same as disconnecting a bank/i)).toBeOnTheScreen()
     expect(view.getByText(/permanent and cannot be undone/i)).toBeOnTheScreen()
   })
 
-  it('makes no claim about exporting data', async () => {
-    const { view } = await renderScreen()
-    expect(view.queryByText(/export|download your data/i)).not.toBeOnTheScreen()
+  describe('data export', () => {
+    const dataExport = (overrides: Partial<React.ComponentProps<typeof SecurityScreen>['dataExport']> = {}) => ({
+      available: true,
+      status: 'idle' as const,
+      readyUntil: null,
+      starting: false,
+      failure: null,
+      onStart: jest.fn(),
+      onDownload: jest.fn(),
+      ...overrides,
+    })
+
+    it('starts a full export', async () => {
+      const props = dataExport()
+      const { view } = await renderScreen({ dataExport: props })
+      expect(view.getByRole('header', { name: 'Export your data' })).toBeOnTheScreen()
+      await fireEvent.press(view.getByRole('button', { name: 'Export all data' }))
+      expect(props.onStart).toHaveBeenCalledTimes(1)
+    })
+
+    it('cannot start a second export while one is being prepared', async () => {
+      const props = dataExport({ status: 'preparing' })
+      const { view } = await renderScreen({ dataExport: props })
+      expect(view.getByText(/email you when it is ready/i)).toBeOnTheScreen()
+      const button = view.getByRole('button', { name: 'Export all data' })
+      expect(button.props.accessibilityState.disabled).toBe(true)
+      await fireEvent.press(button)
+      expect(props.onStart).not.toHaveBeenCalled()
+    })
+
+    it('offers the download once the export is ready, with how long it stays available', async () => {
+      const props = dataExport({ status: 'ready', readyUntil: '9 Nov 2026, 10:00' })
+      const { view } = await renderScreen({ dataExport: props })
+      expect(view.getByText('Available to download until 9 Nov 2026, 10:00.')).toBeOnTheScreen()
+      await fireEvent.press(view.getByRole('button', { name: 'Download export' }))
+      expect(props.onDownload).toHaveBeenCalledTimes(1)
+      expect(touchHeight(view.getByRole('button', { name: 'Download export' }))).toBeGreaterThanOrEqual(44)
+    })
+
+    it('points to the web app when the server does not store exports', async () => {
+      const { view } = await renderScreen({ dataExport: dataExport({ available: false }) })
+      expect(view.getByText(/from the web app/i)).toBeOnTheScreen()
+      expect(view.queryByRole('button', { name: 'Export all data' })).not.toBeOnTheScreen()
+    })
+
+    it('explains the daily limit', async () => {
+      const { view } = await renderScreen({ dataExport: dataExport({ failure: 'limit' }) })
+      expect(view.getByRole('alert')).toBeOnTheScreen()
+      expect(view.getByText(/up to 3 times a day/i)).toBeOnTheScreen()
+    })
   })
 
   it('requires a deliberate acknowledgement before deletion can be requested', async () => {
@@ -87,7 +144,7 @@ describe('SecurityScreen', () => {
   it('meets the minimum touch target for the destructive action', async () => {
     const { view } = await renderScreen()
     const button = view.getByRole('button', { name: 'Delete account permanently' })
-    expect(StyleSheet.flatten(button.props.style).minHeight).toBeGreaterThanOrEqual(44)
+    expect(touchHeight(button)).toBeGreaterThanOrEqual(44)
   })
 
   it('disables interaction and shows progress while a deletion is pending', async () => {

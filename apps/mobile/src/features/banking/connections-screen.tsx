@@ -1,14 +1,17 @@
-import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Alert, Pressable, RefreshControl, ScrollView, StyleSheet, Text, useColorScheme, View } from 'react-native'
-import { SafeAreaView } from 'react-native-safe-area-context'
+import { Alert, RefreshControl, StyleSheet, View } from 'react-native'
 
+import { Badge, type BadgeTone } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Text } from '@/components/ui/text'
+import { SettingsLoading, SettingsNotice, SettingsPage, SettingsSection } from '@/features/more/settings-ui'
 import { themeTokens, type Palette } from '@/theme/tokens'
-import { textStyles } from '@/theme/typography'
+import { usePalette } from '@/theme/use-palette'
 
 import type { BankConnectionResult } from './bank-connection-return'
 import type { BankConnectionDisconnectFailure } from './use-bank-connection-disconnect-mutation'
 import type { BankConnectionRow } from './connection-status-view-model'
+import { startBankConnectionFailureMessageKey, type StartBankConnectionFailure } from './use-start-bank-connection'
 
 
 export type ConnectionsScreenState =
@@ -20,6 +23,15 @@ export type ConnectionsScreenState =
   | { status: 'loaded'; rows: readonly BankConnectionRow[] }
 
 export type ConnectionDisconnectFailureState = Readonly<{ connectionId: number; failure: BankConnectionDisconnectFailure }>
+
+export type ConnectionReconnectFailureState = Readonly<{ bankId: string; failure: StartBankConnectionFailure }>
+
+/** Rows whose consent has ended, or ends soon, offer "Reconnect". */
+const RECONNECTABLE_STATUSES: ReadonlySet<BankConnectionRow['status']> = new Set(['expiring', 'expired', 'revoked'])
+
+function canReconnectRow(row: BankConnectionRow): boolean {
+  return row.bankId !== null && RECONNECTABLE_STATUSES.has(row.status)
+}
 
 export type ConnectionsScreenProps = {
   state: ConnectionsScreenState
@@ -35,173 +47,117 @@ export type ConnectionsScreenProps = {
   disconnectingConnectionId?: null | number
   disconnectFailure?: ConnectionDisconnectFailureState | null
   onImportStatement?: () => void
+  /** Starts a new connection to the row's bank; the API keeps the existing accounts. */
+  onReconnect?: (bankId: string) => void
+  reconnectingBankId?: null | string
+  reconnectFailure?: ConnectionReconnectFailureState | null
 }
 
-export function ConnectionsScreen({ state, justStarted, connectionResult, refreshing, onBack, onRetry, onRefresh, onConnectBank, onDisconnect, disconnectingConnectionId, disconnectFailure, onImportStatement }: ConnectionsScreenProps) {
+/**
+ * Settings › Connections (web `components/settings/Connections/Connections.tsx`): the
+ * "Bank connections" head and description, then one row per connection (institution,
+ * status badge, expiry, freshness, its actions), flat on the canvas with hairlines.
+ * Mobile keeps its read-only note, the connect button and the callback notices.
+ */
+export function ConnectionsScreen({ state, justStarted, connectionResult, refreshing, onBack, onRetry, onRefresh, onConnectBank, onDisconnect, disconnectingConnectionId, disconnectFailure, onImportStatement, onReconnect, reconnectingBankId, reconnectFailure }: ConnectionsScreenProps) {
   const { t } = useTranslation()
-  const palette = themeTokens.colors[useColorScheme() === 'dark' ? 'dark' : 'light']
-  const [focusedAction, setFocusedAction] = useState<null | 'retry' | 'back' | 'connect'>(null)
+  const palette = usePalette()
 
   if (state.status === 'access-transition') return null
 
   return (
-    <SafeAreaView style={[styles.safeArea, { backgroundColor: palette.background }]}>
-      <ScrollView
-        contentContainerStyle={styles.content}
-        refreshControl={onRefresh ? (
-          <RefreshControl refreshing={Boolean(refreshing)} onRefresh={() => void onRefresh()} tintColor={palette.primary} />
-        ) : undefined}
-      >
-        <View style={styles.page}>
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel={t('self.back')}
-            onFocus={() => setFocusedAction('back')}
-            onBlur={() => setFocusedAction(null)}
-            onPress={() => void onBack()}
-            style={({ pressed }) => [
-              styles.back,
-              focusedAction === 'back' && { borderWidth: 2, borderColor: palette.foreground },
-              pressed && styles.pressed,
-            ]}
-          >
-            <Text allowFontScaling style={[styles.backLabel, { color: palette.foreground }]}>
-              {t('self.back')}
-            </Text>
-          </Pressable>
+    <SettingsPage
+      backLabel={t('self.back')}
+      onBack={onBack}
+      refreshControl={onRefresh ? (
+        <RefreshControl refreshing={Boolean(refreshing)} onRefresh={() => void onRefresh()} tintColor={palette.primary} />
+      ) : undefined}
+      section="connections"
+    >
+      <SettingsSection first title={t('settings.connections.heading')} description={t('settings.connections.description')}>
+        <Text tone="muted" variant="label">{t('banking.connections.readOnlyTrust')}</Text>
 
-          <View style={styles.heading}>
-            <Text accessibilityRole="header" allowFontScaling style={[styles.title, { color: palette.foreground }]}>
-              {t('banking.connections.heading')}
+        {onConnectBank ? (
+          <Button block icon="plus" label={t('banking.connections.connectCta')} onPress={onConnectBank} />
+        ) : null}
+
+        {connectionResult ? (
+          <View style={[styles.notice, { borderColor: connectionResult === 'error' ? palette.destructiveText : palette.border }]}>
+            <Text
+              accessibilityLiveRegion="polite"
+              accessibilityRole={connectionResult === 'error' ? 'alert' : 'text'}
+              variant="metaStrong"
+            >
+              {t(`banking.connections.result.${connectionResult}.title`)}
             </Text>
-            <Text allowFontScaling style={[styles.helper, { color: palette.mutedForeground }]}>
-              {t('banking.connections.helper')}
-            </Text>
+            <Text tone="muted" variant="meta">{t(`banking.connections.result.${connectionResult}.message`)}</Text>
           </View>
-          <Text allowFontScaling style={[styles.trust, { color: palette.mutedForeground }]}>
-            {t('banking.connections.readOnlyTrust')}
-          </Text>
+        ) : justStarted ? (
+          <SettingsNotice
+            message={t('banking.connections.justStarted.message')}
+            title={t('banking.connections.justStarted.title')}
+          />
+        ) : null}
 
-          {onConnectBank ? (
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel={t('banking.connections.connectCta')}
-              onFocus={() => setFocusedAction('connect')}
-              onBlur={() => setFocusedAction(null)}
-              onPress={onConnectBank}
-              style={({ pressed }) => [
-                styles.connectCta,
-                { borderColor: palette.primary, backgroundColor: palette.primary },
-                focusedAction === 'connect' && { borderWidth: 2, borderColor: palette.foreground },
-                pressed && styles.pressed,
-              ]}
-            >
-              <Text allowFontScaling style={[styles.connectCtaLabel, { color: palette.background }]}>
-                {t('banking.connections.connectCta')}
-              </Text>
-            </Pressable>
-          ) : null}
+        {state.status === 'loading' || state.status === 'invalid-id' ? (
+          <SettingsLoading label={t('banking.connections.loading')} />
+        ) : null}
 
-          {connectionResult ? (
-            <View style={[styles.notice, { borderColor: palette.border, backgroundColor: palette.muted }]}>
-              <Text
-                accessibilityRole={connectionResult === 'error' ? 'alert' : 'text'}
-                accessibilityLiveRegion="polite"
-                allowFontScaling
-                style={[styles.noticeTitle, { color: palette.foreground }]}
-              >
-                {t(`banking.connections.result.${connectionResult}.title`)}
-              </Text>
-              <Text allowFontScaling style={[styles.noticeBody, { color: palette.mutedForeground }]}>
-                {t(`banking.connections.result.${connectionResult}.message`)}
-              </Text>
+        {state.status === 'error' || state.status === 'invalid-response' ? (
+          <View style={[styles.notice, { borderColor: palette.border }]}>
+            <Text accessibilityRole="alert" variant="metaStrong">
+              {t(state.status === 'invalid-response' ? 'banking.connections.invalidResponse.title' : 'banking.connections.error.title')}
+            </Text>
+            <Text tone="muted" variant="meta">
+              {t(state.status === 'invalid-response' ? 'banking.connections.invalidResponse.message' : 'banking.connections.error.message')}
+            </Text>
+            <Button label={t('common.retry')} onPress={() => void onRetry()} size="sm" variant="outline" />
+          </View>
+        ) : null}
+
+        {state.status === 'loaded' ? (
+          state.rows.length === 0 ? (
+            <View style={styles.empty}>
+              <Text accessibilityRole="header" variant="metaStrong">{t('banking.connections.emptyTitle')}</Text>
+              <Text tone="muted" variant="meta">{t('banking.connections.emptyMessage')}</Text>
             </View>
-          ) : justStarted ? (
-            <View style={[styles.notice, { borderColor: palette.border, backgroundColor: palette.muted }]}>
-              <Text allowFontScaling style={[styles.noticeTitle, { color: palette.foreground }]}>
-                {t('banking.connections.justStarted.title')}
-              </Text>
-              <Text allowFontScaling style={[styles.noticeBody, { color: palette.mutedForeground }]}>
-                {t('banking.connections.justStarted.message')}
-              </Text>
+          ) : (
+            <View style={[styles.list, { borderColor: palette.border }]}>
+              {state.rows.map((row, index) => (
+                <ConnectionRow
+                  key={row.connectionId ?? `${row.provider}-${row.expiresAt ?? index}`}
+                  row={row}
+                  palette={palette}
+                  separated={index > 0}
+                  onDisconnect={onDisconnect}
+                  disconnecting={row.connectionId !== null && row.connectionId === disconnectingConnectionId}
+                  failure={row.connectionId !== null && disconnectFailure?.connectionId === row.connectionId ? disconnectFailure.failure : null}
+                  onImportStatement={onImportStatement}
+                  onReconnect={onReconnect}
+                  reconnecting={row.bankId !== null && row.bankId === reconnectingBankId}
+                  reconnectBlocked={Boolean(reconnectingBankId)}
+                  reconnectFailure={row.bankId !== null && reconnectFailure?.bankId === row.bankId ? reconnectFailure.failure : null}
+                />
+              ))}
             </View>
-          ) : null}
-
-          {state.status === 'loading' || state.status === 'invalid-id' ? (
-            <View
-              accessible
-              accessibilityRole="progressbar"
-              accessibilityLabel={t('banking.connections.loading')}
-              style={styles.loading}
-            >
-              <View style={[styles.skeleton, { width: 260, height: 20, backgroundColor: palette.muted }]} />
-              <View style={[styles.skeleton, { width: 320, height: 20, backgroundColor: palette.muted }]} />
-            </View>
-          ) : null}
-
-          {state.status === 'error' || state.status === 'invalid-response' ? (
-            <View style={[styles.notice, { borderColor: palette.border, backgroundColor: palette.muted }]}>
-              <Text accessibilityRole="alert" allowFontScaling style={[styles.noticeTitle, { color: palette.foreground }]}>
-                {t(state.status === 'invalid-response' ? 'banking.connections.invalidResponse.title' : 'banking.connections.error.title')}
-              </Text>
-              <Text allowFontScaling style={[styles.noticeBody, { color: palette.mutedForeground }]}>
-                {t(state.status === 'invalid-response' ? 'banking.connections.invalidResponse.message' : 'banking.connections.error.message')}
-              </Text>
-              <Pressable
-                accessibilityRole="button"
-                accessibilityLabel={t('common.retry')}
-                onFocus={() => setFocusedAction('retry')}
-                onBlur={() => setFocusedAction(null)}
-                onPress={() => void onRetry()}
-                style={({ pressed }) => [
-                  styles.retry,
-                  { borderColor: palette.primary, backgroundColor: palette.primary },
-                  focusedAction === 'retry' && { borderWidth: 2, borderColor: palette.foreground },
-                  pressed && styles.pressed,
-                ]}
-              >
-                <Text allowFontScaling style={[styles.retryLabel, { color: palette.background }]}>
-                  {t('common.retry')}
-                </Text>
-              </Pressable>
-            </View>
-          ) : null}
-
-          {state.status === 'loaded' ? (
-            state.rows.length === 0 ? (
-              <View style={[styles.empty, { borderColor: palette.border, backgroundColor: palette.card }]}>
-                <View style={[styles.emptyMarker, { backgroundColor: palette.mutedForeground }]} />
-                <Text accessibilityRole="header" allowFontScaling style={[styles.noticeTitle, { color: palette.foreground }]}>
-                  {t('banking.connections.emptyTitle')}
-                </Text>
-                <Text allowFontScaling style={[styles.noticeBody, { color: palette.mutedForeground }]}>
-                  {t('banking.connections.emptyMessage')}
-                </Text>
-              </View>
-            ) : (
-              <View style={styles.list}>
-                {state.rows.map((row, index) => (
-                  <ConnectionRow
-                    key={row.connectionId ?? `${row.provider}-${row.expiresAt ?? index}`}
-                    row={row}
-                    palette={palette}
-                    separated={index > 0}
-                    onDisconnect={onDisconnect}
-                    disconnecting={row.connectionId !== null && row.connectionId === disconnectingConnectionId}
-                    failure={row.connectionId !== null && disconnectFailure?.connectionId === row.connectionId ? disconnectFailure.failure : null}
-                    onImportStatement={onImportStatement}
-                  />
-                ))}
-              </View>
-            )
-          ) : null}
-        </View>
-      </ScrollView>
-    </SafeAreaView>
+          )
+        ) : null}
+      </SettingsSection>
+    </SettingsPage>
   )
 }
 
-function ConnectionRow({ row, palette, separated, onDisconnect, disconnecting, failure, onImportStatement }: {
+const STATUS_TONE: Record<BankConnectionRow['status'], BadgeTone> = {
+  processing: 'secondary',
+  connected: 'primary',
+  error: 'destructive',
+  expired: 'warning',
+  expiring: 'warning',
+  revoked: 'warning',
+  unknown: 'outline',
+}
+
+function ConnectionRow({ row, palette, separated, onDisconnect, disconnecting, failure, onImportStatement, onReconnect, reconnecting, reconnectBlocked, reconnectFailure }: {
   row: BankConnectionRow
   palette: Palette
   separated: boolean
@@ -209,10 +165,16 @@ function ConnectionRow({ row, palette, separated, onDisconnect, disconnecting, f
   disconnecting: boolean
   failure: BankConnectionDisconnectFailure | null
   onImportStatement?: () => void
+  onReconnect?: (bankId: string) => void
+  reconnecting: boolean
+  reconnectBlocked: boolean
+  reconnectFailure: StartBankConnectionFailure | null
 }) {
   const { t, i18n } = useTranslation()
   const locale = i18n.resolvedLanguage ?? i18n.language ?? 'en'
-  const institution = row.institutionName ?? t('banking.connections.unnamedInstitution')
+  const providerName = PROVIDER_NAMES[row.provider]
+  const institution = row.institutionName?.trim()
+    || (providerName ? t('banking.connections.providerConnection', { provider: providerName }) : t('banking.connections.unnamedInstitution'))
   const statusLabel = t(`banking.connections.status.${row.status}`)
   const dateFormatter = new Intl.DateTimeFormat(locale, { dateStyle: 'medium' })
   const expiry = row.expiresAt ? dateFormatter.format(new Date(row.expiresAt)) : t('banking.connections.unavailableDate')
@@ -221,6 +183,15 @@ function ConnectionRow({ row, palette, separated, onDisconnect, disconnecting, f
     : t('banking.connections.freshnessUnknown')
   const canDisconnect = onDisconnect !== undefined && row.connectionId !== null
   const connectionId = row.connectionId
+  const bankId = row.bankId
+  const canReconnect = onReconnect !== undefined && canReconnectRow(row)
+  const consentNotice = row.status === 'expiring'
+    ? t('banking.connections.consent.expiring', { count: row.daysUntilExpiry ?? 0 })
+    : row.status === 'revoked'
+      ? t('banking.connections.consent.revoked')
+      : row.status === 'expired'
+        ? t('banking.connections.consent.expired')
+        : null
 
   const requestDisconnect = () => {
     if (!canDisconnect || disconnecting || connectionId === null) return
@@ -240,160 +211,94 @@ function ConnectionRow({ row, palette, separated, onDisconnect, disconnecting, f
   }
 
   return (
-    <View
-      style={[
-        styles.row,
-        { borderColor: palette.border },
-        separated && { borderTopWidth: 1, borderTopColor: palette.border },
-      ]}
-    >
+    <View style={[styles.row, separated && { borderTopWidth: 1, borderTopColor: palette.border }]}>
       <View
         accessible
-        accessibilityRole="text"
         accessibilityLabel={t('banking.connections.rowLabel', { institution, status: statusLabel, expiry, freshness })}
+        accessibilityRole="text"
         style={styles.rowSummary}
       >
-        <Text allowFontScaling style={[styles.institution, { color: palette.foreground }]}>
-          {institution}
-        </Text>
-        <Text allowFontScaling style={[styles.status, { color: palette.mutedForeground }]}>
-          {statusLabel}
-        </Text>
-        <Text allowFontScaling style={[styles.meta, { color: palette.mutedForeground }]}>
-          {t('banking.connections.expiresOn', { date: expiry })}
-        </Text>
-        <Text allowFontScaling style={[styles.meta, { color: palette.mutedForeground }]}>
-          {freshness}
-        </Text>
+        <View style={styles.rowTitle}>
+          <Text style={styles.institution} variant="metaStrong">{institution}</Text>
+          <Badge label={statusLabel} tone={STATUS_TONE[row.status] ?? 'outline'} />
+        </View>
+        <Text tone="muted" variant="label">{t('banking.connections.expiresOn', { date: expiry })}</Text>
+        <Text tone="muted" variant="label">{freshness}</Text>
       </View>
 
+      {/* Outside the summary, whose accessibility label would hide it from screen readers. */}
+      {consentNotice ? <Text variant="label">{consentNotice}</Text> : null}
+
+      {reconnectFailure ? (
+        <Text accessibilityRole="alert" tone="destructive" variant="meta">
+          {t(startBankConnectionFailureMessageKey(reconnectFailure))}
+        </Text>
+      ) : null}
+
       {failure ? (
-        <Text accessibilityRole="alert" allowFontScaling style={[styles.rowFailure, { color: palette.destructive }]}>
+        <Text accessibilityRole="alert" tone="destructive" variant="meta">
           {t(`banking.connections.disconnect.failures.${failure}`)}
         </Text>
       ) : null}
 
-      {row.status === 'error' && onImportStatement ? (
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={t('banking.connections.importStatement.actionLabel', { institution })}
-          onPress={onImportStatement}
-          style={({ pressed }) => [styles.importStatement, { borderColor: palette.border }, pressed && styles.pressed]}
-        >
-          <Text allowFontScaling style={[styles.importStatementLabel, { color: palette.primary }]}>
-            {t('banking.connections.importStatement.action')}
-          </Text>
-        </Pressable>
-      ) : null}
-
-      {canDisconnect ? (
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={t('banking.connections.disconnect.actionLabel', { institution })}
-          accessibilityState={{ disabled: disconnecting, busy: disconnecting }}
-          disabled={disconnecting}
-          onPress={requestDisconnect}
-          style={({ pressed }) => [
-            styles.disconnect,
-            { borderColor: palette.destructive },
-            (pressed || disconnecting) && styles.pressed,
-          ]}
-        >
-          <Text allowFontScaling style={[styles.disconnectLabel, { color: palette.destructive }]}>
-            {disconnecting ? t('banking.connections.disconnect.disconnecting') : t('banking.connections.disconnect.action')}
-          </Text>
-        </Pressable>
+      {(row.status === 'error' && onImportStatement) || canDisconnect || canReconnect ? (
+        <View style={styles.actions}>
+          {canReconnect && bankId !== null ? (
+            <Button
+              accessibilityLabel={t('banking.connections.reconnect.actionLabel', { institution })}
+              disabled={reconnectBlocked}
+              icon="refresh-cw"
+              label={reconnecting ? t('banking.connections.reconnect.starting') : t('banking.connections.reconnect.action')}
+              loading={reconnecting}
+              onPress={() => onReconnect(bankId)}
+              size="sm"
+              variant={row.status === 'expiring' ? 'outline' : 'primary'}
+            />
+          ) : null}
+          {row.status === 'error' && onImportStatement ? (
+            <Button
+              accessibilityLabel={t('banking.connections.importStatement.actionLabel', { institution })}
+              label={t('banking.connections.importStatement.action')}
+              onPress={onImportStatement}
+              size="sm"
+              variant="outline"
+            />
+          ) : null}
+          {canDisconnect ? (
+            <Button
+              accessibilityLabel={t('banking.connections.disconnect.actionLabel', { institution })}
+              disabled={disconnecting}
+              label={disconnecting ? t('banking.connections.disconnect.disconnecting') : t('banking.connections.disconnect.action')}
+              loading={disconnecting}
+              onPress={requestDisconnect}
+              size="sm"
+              variant="ghost"
+            />
+          ) : null}
+        </View>
       ) : null}
     </View>
   )
 }
 
+/**
+ * The API names a connection only when its accounts agree on one institution.
+ * Without that name, the provider is still a better title than a generic
+ * "Bank connection" repeated on every row.
+ */
+const PROVIDER_NAMES: Partial<Record<BankConnectionRow['provider'], string>> = {
+  GoCardless: 'GoCardless',
+  EnableBanking: 'Enable Banking',
+}
+
+
 const styles = StyleSheet.create({
-  safeArea: { flex: 1 },
-  content: { flexGrow: 1, padding: themeTokens.layout.screenPadding },
-  page: {
-    width: '100%',
-    maxWidth: 680,
-    alignSelf: 'center',
-    gap: themeTokens.layout.blockGap,
-  },
-  back: {
-    minHeight: themeTokens.touchTarget.minimum,
-    alignSelf: 'flex-start',
-    justifyContent: 'center',
-    paddingHorizontal: themeTokens.spacing[3],
-  },
-  backLabel: { ...textStyles.bodyStrong },
-  heading: { gap: themeTokens.spacing[2] },
-  title: { ...textStyles.title },
-  helper: { ...textStyles.body },
-  loading: { gap: themeTokens.spacing[3] },
-  skeleton: { borderRadius: themeTokens.radius.sm },
-  notice: {
-    borderWidth: 1,
-    borderRadius: themeTokens.radius.lg,
-    padding: themeTokens.spacing[4],
-    gap: themeTokens.spacing[3],
-  },
-  noticeTitle: { ...textStyles.action },
-  noticeBody: { ...textStyles.body },
-  connectCta: {
-    minHeight: themeTokens.touchTarget.minimum,
-    alignSelf: 'flex-start',
-    paddingHorizontal: themeTokens.spacing[4],
-    justifyContent: 'center',
-    borderWidth: 1,
-    borderRadius: themeTokens.radius.md,
-  },
-  connectCtaLabel: { ...textStyles.action },
-  retry: {
-    minHeight: themeTokens.touchTarget.minimum,
-    alignSelf: 'flex-start',
-    paddingHorizontal: themeTokens.spacing[4],
-    justifyContent: 'center',
-    borderWidth: 1,
-    borderRadius: themeTokens.radius.md,
-  },
-  retryLabel: { ...textStyles.action },
-  empty: {
-    borderWidth: 1,
-    borderRadius: themeTokens.radius.md,
-    padding: themeTokens.spacing[4],
-    gap: themeTokens.spacing[3],
-  },
-  emptyMarker: { width: 40, height: 3, borderRadius: themeTokens.radius.pill },
-  trust: { ...textStyles.meta },
-  list: {
-    width: '100%',
-    gap: 0,
-  },
-  row: {
-    width: '100%',
-    padding: themeTokens.spacing[4],
-    gap: themeTokens.spacing[3],
-  },
-  rowSummary: { gap: themeTokens.spacing[1] },
-  institution: { ...textStyles.section },
-  status: { ...textStyles.bodyStrong },
-  meta: { ...textStyles.meta },
-  rowFailure: { ...textStyles.meta },
-  disconnect: {
-    minHeight: themeTokens.touchTarget.minimum,
-    alignSelf: 'flex-start',
-    paddingHorizontal: themeTokens.spacing[4],
-    justifyContent: 'center',
-    borderWidth: 1,
-    borderRadius: themeTokens.radius.md,
-  },
-  disconnectLabel: { ...textStyles.bodyStrong, fontWeight: '600' as const },
-  importStatement: {
-    minHeight: themeTokens.touchTarget.minimum,
-    alignSelf: 'flex-start',
-    paddingHorizontal: themeTokens.spacing[4],
-    justifyContent: 'center',
-    borderWidth: 1,
-    borderRadius: themeTokens.radius.md,
-  },
-  importStatementLabel: { ...textStyles.bodyStrong, fontWeight: '600' as const },
-  pressed: { opacity: 0.72 },
+  notice: { borderWidth: 1, borderRadius: themeTokens.radius.md, padding: themeTokens.spacing[4], gap: themeTokens.spacing[2], alignItems: 'flex-start' },
+  empty: { gap: themeTokens.spacing[1] },
+  list: { borderTopWidth: 1, borderBottomWidth: 1 },
+  row: { paddingVertical: themeTokens.spacing[3], gap: themeTokens.spacing[2] },
+  rowSummary: { gap: 2 },
+  rowTitle: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: themeTokens.spacing[2] },
+  institution: { flexShrink: 1 },
+  actions: { flexDirection: 'row', flexWrap: 'wrap', gap: themeTokens.spacing[2] },
 })

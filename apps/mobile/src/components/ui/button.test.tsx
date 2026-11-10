@@ -4,6 +4,7 @@ import { StyleSheet } from 'react-native'
 import { themeTokens } from '@/theme/tokens'
 
 import { Button } from './button'
+import { touchHeight } from '@/test/touch-target'
 
 const palette = themeTokens.colors.light
 
@@ -35,15 +36,16 @@ describe('Button', () => {
     expect(style.borderWidth).toBe(1)
   })
 
-  it('meets the 48dp touch target and invokes its action', async () => {
+  it('draws at web\'s 40pt, reaches the 44pt floor with slop, and invokes its action', async () => {
     const onPress = jest.fn()
     const view = await render(<Button label="Save" onPress={onPress} />)
     const button = view.getByRole('button', { name: 'Save' })
 
     expect(StyleSheet.flatten(button.props.style)).toMatchObject({
-      minHeight: themeTokens.touchTarget.minimum,
+      minHeight: themeTokens.size.control,
       borderRadius: themeTokens.radius.md,
     })
+    expect(touchHeight(button)).toBeGreaterThanOrEqual(themeTokens.touchTarget.minimum)
     expect(themeTokens.touchTarget.minimum).toBeGreaterThanOrEqual(themeTokens.touchTarget.wcagFloor)
 
     fireEvent.press(button)
@@ -61,6 +63,21 @@ describe('Button', () => {
     expect(onPress).not.toHaveBeenCalled()
     // The label survives, so the user can still tell what they pressed.
     expect(view.getByText('Save')).toBeTruthy()
+  })
+
+  it('draws the quiet destructive action as destructive ink with no box, at the 44pt floor', async () => {
+    const onPress = jest.fn()
+    const view = await render(<Button icon="trash" label="Delete account" onPress={onPress} variant="destructive-quiet" />)
+    const button = view.getByRole('button', { name: 'Delete account' })
+    const style = StyleSheet.flatten(button.props.style)
+
+    expect(style).toMatchObject({ backgroundColor: 'transparent', borderWidth: 0, alignSelf: 'flex-start', minHeight: themeTokens.touchTarget.minimum })
+    expect(StyleSheet.flatten(view.getByText('Delete account').props.style).color).toBe(palette.destructiveText)
+    await fireEvent.press(button)
+    expect(onPress).toHaveBeenCalledTimes(1)
+
+    await view.rerender(<Button icon="trash" label="Deleting…" loading onPress={onPress} variant="destructive-quiet" />)
+    expect(view.getByRole('button', { name: 'Deleting…' }).props.accessibilityState).toMatchObject({ disabled: true, busy: true })
   })
 
   it('loading wins over an explicit disabled={false}', async () => {

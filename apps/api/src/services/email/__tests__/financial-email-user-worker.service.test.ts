@@ -17,7 +17,7 @@ type WorkerDeps = NonNullable<ConstructorParameters<typeof FinancialEmailUserWor
 const range = { end: new Date('2026-07-13T00:00:00Z'), start: new Date('2026-07-06T00:00:00Z') };
 const weekly = (tenantKey: number, overrides: Partial<WeeklyAggregationResult['facts']> = {}): WeeklyAggregationResult => ({
   appuserKey: 7,
-  diagnostics: { ambiguousCategoryAssignments: 0, duplicateTransactionRows: 0, excludedTransfers: 0, invalidAccounts: 0, invalidLoanLinks: 0, invalidTransactionDates: 0, missingConvertedAmounts: 0, uncategorizedTransactions: 0 },
+  diagnostics: { ambiguousCategoryAssignments: 0, duplicateTransactionRows: 0, excludedNonSpending: 0, excludedTransfers: 0, invalidAccounts: 0, invalidLoanLinks: 0, invalidTransactionDates: 0, missingConvertedAmounts: 0, uncategorizedTransactions: 0 },
   facts: { activeBudgetStatus: 'within_plan', categoryTotals: [{ amount: '10', categoryKey: tenantKey, displayName: `Category ${tenantKey}` }], comparisonPercentage: '0', comparisonWeekTotal: '5', isoWeek: 28, isoWeekYear: 2026, subjectWeekTotal: '10', topCategory: { amount: '10', categoryKey: tenantKey, displayName: `Category ${tenantKey}` }, ...overrides },
   period: { comparisonWeek: range, isoWeek: 28, isoWeekYear: 2026, month: 7, monthRange: range, scheduledFor: new Date('2026-07-13T08:00:00Z'), subjectWeek: range, year: 2026 },
   status: 'ok',
@@ -105,7 +105,7 @@ describe('financial email per-user fan-in', () => {
 
   describe('monthlyStory', () => {
     const monthlyPeriod = { day: range, localDate: '2026-08-01', month: 8, monthRange: range, scheduledFor: new Date('2026-08-01T09:00:00Z'), year: 2026 };
-    const diagnostics = { ambiguousCategoryAssignments: 0, duplicateTransactionRows: 0, excludedTransfers: 0, invalidAccounts: 0, invalidLoanLinks: 0, invalidTransactionDates: 0, missingConvertedAmounts: 0, uncategorizedTransactions: 0 };
+    const diagnostics = { ambiguousCategoryAssignments: 0, duplicateTransactionRows: 0, excludedNonSpending: 0, excludedTransfers: 0, invalidAccounts: 0, invalidLoanLinks: 0, invalidTransactionDates: 0, missingConvertedAmounts: 0, uncategorizedTransactions: 0 };
     const monthlyFacts: MonthlyStoryFacts = {
       budgetPressure: 'within_plan',
       categoryDeltas: [{ baselineAmount: '50', categoryKey: 9, direction: 'decrease', displayName: 'Groceries', percentOfBaseline: '-10.00', subjectAmount: '45' }],

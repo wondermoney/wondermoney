@@ -10,11 +10,13 @@ import { z } from "zod";
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
 } from "@/components/ui/Form";
+import { Switch } from "@/components/ui/switch";
 import { useRouter } from "@/i18n/navigation";
 import { Budget } from "@/lib/api/budget/useBudgets";
 import useEditBudget from "@/lib/api/budget/useEditBudget";
@@ -36,10 +38,13 @@ interface BudgetEditModalProps {
   onOpenChange: (open: boolean) => void;
   budgetName: Budget["name"];
   budgetKey: Budget["budgetKey"];
+  /** The budget's current setting; the API's default (on) when unknown. */
+  rolloverCarriesOverspend?: boolean;
 }
 
 const formSchema = z.object({
   name: z.string().min(1, "Name is required"),
+  rolloverCarriesOverspend: z.boolean(),
 });
 
 type FormSchema = z.infer<typeof formSchema>;
@@ -49,6 +54,7 @@ const BudgetEditModal: React.FC<BudgetEditModalProps> = ({
   onOpenChange,
   budgetName,
   budgetKey,
+  rolloverCarriesOverspend = true,
 }) => {
   const t = useTranslations();
   const posthog = usePostHog();
@@ -56,6 +62,7 @@ const BudgetEditModal: React.FC<BudgetEditModalProps> = ({
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: budgetName,
+      rolloverCarriesOverspend,
     },
   });
   const {
@@ -68,7 +75,14 @@ const BudgetEditModal: React.FC<BudgetEditModalProps> = ({
 
   const onSubmit: SubmitHandler<FormSchema> = async (data) => {
     await editBudgetMutation.mutateAsync(
-      { budgetKey, name: data.name },
+      {
+        budgetKey,
+        name: data.name,
+        // Only a changed setting is sent, so a rename stays a rename.
+        ...(data.rolloverCarriesOverspend !== rolloverCarriesOverspend
+          ? { rolloverCarriesOverspend: data.rolloverCarriesOverspend }
+          : {}),
+      },
       {
         onSuccess: () => {
           posthog.capture("budget_edited", { budget_key: budgetKey });
@@ -90,7 +104,7 @@ const BudgetEditModal: React.FC<BudgetEditModalProps> = ({
         </SheetHeader>
         <Form {...methods}>
           <form
-            className="my-8 w-full"
+            className="my-8 w-full space-y-6"
             onSubmit={handleSubmit(onSubmit)}
             id="edit-budget-sheet"
           >
@@ -104,6 +118,28 @@ const BudgetEditModal: React.FC<BudgetEditModalProps> = ({
                     <Input placeholder={t("budget-name")} {...field} />
                   </FormControl>
                   <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={methods.control}
+              name="rolloverCarriesOverspend"
+              render={({ field }) => (
+                <FormItem className="flex flex-row items-start justify-between gap-4">
+                  <div className="space-y-1">
+                    <FormLabel>
+                      {t("budget-rollover-carries-overspend")}
+                    </FormLabel>
+                    <FormDescription>
+                      {t("budget-rollover-carries-overspend-help")}
+                    </FormDescription>
+                  </div>
+                  <FormControl>
+                    <Switch
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
+                  </FormControl>
                 </FormItem>
               )}
             />

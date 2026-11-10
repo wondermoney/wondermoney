@@ -16,6 +16,8 @@ module.exports = {
   // for scheduling jitter that has nothing to do with the test itself.
   testTimeout: 20000,
   setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],
+  // jest-expo's environment with a hook that lets a test run in a given time zone (src/test/time-zone.ts).
+  testEnvironment: '<rootDir>/jest.environment.js',
   testPathIgnorePatterns: ['<rootDir>/.slim/', '<rootDir>/.worktrees/', '<rootDir>/.claude/worktrees/'],
   modulePathIgnorePatterns: ['<rootDir>/.slim/', '<rootDir>/.worktrees/', '<rootDir>/.claude/worktrees/'],
   moduleNameMapper: {
@@ -26,7 +28,10 @@ module.exports = {
   },
   // Forces react-native-worklets (reanimated's native engine, pulled in transitively by
   // victory-native) to resolve its non-native build in tests instead of its native module.
-  resolver: 'react-native-worklets/jest/resolver.js',
+  // Reanimated 4.7 ships a resolver that wraps worklets' one and also sends reanimated's own
+  // initializers to their non-native build; worklets' resolver alone leaves those calling
+  // runOnUISync, which the non-native worklets build throws on.
+  resolver: 'react-native-reanimated/jest/resolver.js',
   // better-auth's Expo plugin is published as ESM .mjs modules. Transform those
   // modules with the same Expo Babel preset used for the application's JS.
   transform: {

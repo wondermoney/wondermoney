@@ -1,15 +1,21 @@
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { BackHandler, Pressable, ScrollView, StyleSheet, Text, TextInput, useColorScheme, View } from 'react-native'
-import { SafeAreaView } from 'react-native-safe-area-context'
+import { BackHandler, ScrollView, StyleSheet, View } from 'react-native'
 
+import { AmountEntry } from '@/components/ui/amount-entry'
 import { Button } from '@/components/ui/button'
-import { formatCurrency } from '@/lib/formatters/financial'
-import { themeTokens, type Palette } from '@/theme/tokens'
-import { textStyles } from '@/theme/typography'
+import { FormBar } from '@/components/ui/form-bar'
+import { FormGroup, FormSelectRow } from '@/components/ui/form-row'
+import { SafeAreaView } from '@/components/ui/screen-safe-area'
+import { Text } from '@/components/ui/text'
+import { FormNotice } from '@/features/transactions/form-field'
+import { parseNumberInput } from '@/lib/formatters/decimal-input'
+import { useFormatMoney } from '@/lib/formatters/money-display'
+import { themeTokens } from '@/theme/tokens'
+import { usePalette } from '@/theme/use-palette'
 
 import type { BudgetRecurrence } from './budgets-contract'
-import { BudgetFailure, BudgetHeader, BudgetLoading } from './budgets-screen'
+import { BudgetFailure, BudgetLoading } from './budgets-screen'
 import type { AddBudgetCategoryFailure } from './use-add-budget-category'
 
 export type LeafCategoryOption = Readonly<{ id: number; name: string }>
@@ -31,13 +37,13 @@ export type BudgetAddCategoryScreenProps = Readonly<{
 }>
 
 export function BudgetAddCategoryScreen(props: BudgetAddCategoryScreenProps) {
+  const formatMoney = useFormatMoney()
   const { t, i18n } = useTranslation()
-  const palette = themeTokens.colors[useColorScheme() === 'dark' ? 'dark' : 'light']
+  const palette = usePalette()
   const [categoryId, setCategoryId] = useState<number | null>(null)
   const [amount, setAmount] = useState('')
   const [recurrence, setRecurrence] = useState<BudgetRecurrence>('MONTHLY')
   const [review, setReview] = useState(false)
-  const [validation, setValidation] = useState(false)
   useEffect(() => {
     if (!props.pending) return
     const subscription = BackHandler.addEventListener('hardwareBackPress', () => true)
@@ -46,36 +52,103 @@ export function BudgetAddCategoryScreen(props: BudgetAddCategoryScreenProps) {
   if (props.status === 'loading') return <BudgetLoading label={t('budgetAddCategory.loading')} palette={palette} />
   if (props.status === 'error') return <BudgetFailure title={t('budgetAddCategory.errorTitle')} message={t('budgetAddCategory.errorMessage')} onRetry={props.onRefresh} onBack={props.onBack} palette={palette} />
   const category = props.categories.find((option) => option.id === categoryId)
-  const parsedAmount = Number(amount)
-  const valid = Boolean(category && Number.isFinite(parsedAmount) && parsedAmount > 0)
+  const locale = i18n.resolvedLanguage ?? i18n.language ?? 'en'
+  // Read in the app's language ("1.234,56" in pt and es).
+  const typedAmount = parseNumberInput(amount, locale)
+  const parsedAmount = typedAmount ?? Number.NaN
+  const amountValid = typedAmount !== null && typedAmount > 0
+  const valid = Boolean(category && amountValid)
+  const amountError = amount.trim() !== '' && !amountValid ? t('budgetAddCategory.amountHint') : null
   const locked = props.reconciliation !== null
   const resolving = props.failure === 'unknown' || props.failure === 'duplicate'
-  const locale = i18n.resolvedLanguage ?? i18n.language ?? 'en'
-  const money = Number.isFinite(parsedAmount) ? formatCurrency(parsedAmount, { locale, currency: props.currency }) : amount
-  return <SafeAreaView style={[styles.safe, { backgroundColor: palette.background }]}><ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={styles.content}><View style={styles.page}>
-    <BudgetHeader title={t('budgetAddCategory.title')} backLabel={t('budgetAddCategory.back')} onBack={props.onBack} disabled={props.pending} palette={palette} />
-    {props.failure && !locked ? <Text accessibilityRole="alert" style={[styles.alert, { color: palette.foreground, borderColor: palette.destructive }]}>{t(`budgetAddCategory.failures.${props.failure}`)}</Text> : null}
-    {locked ? <View style={styles.section}>
-      <Text accessibilityRole="alert" accessibilityLiveRegion="assertive" style={[styles.alert, { color: palette.foreground, borderColor: palette.border, backgroundColor: palette.muted }]}>{t(`budgetAddCategory.reconciliation.${props.reconciliation}`)}</Text>
-      {props.reconciliation === 'absent' ? <Button label={t('budgetAddCategory.newAttempt')} onPress={props.onNewAttempt} palette={palette} variant="primary" /> : null}
-    </View> : !review ? <View style={styles.section}>
-      <Text accessibilityRole="header" style={[styles.sectionTitle, { color: palette.foreground }]}>{t('budgetAddCategory.choose')}</Text>
-      {props.categories.length === 0 ? <Text style={[styles.empty, { color: palette.mutedForeground, borderColor: palette.border }]}>{t('budgetAddCategory.none')}</Text> : <View accessibilityRole="radiogroup" style={styles.options}>{props.categories.map((option) => <Choice key={option.id} label={option.name} selected={categoryId === option.id} disabled={props.pending} onPress={() => setCategoryId(option.id)} palette={palette} />)}</View>}
-      <Text style={[styles.label, { color: palette.foreground }]}>{t('budgetAddCategory.amount')}</Text><TextInput accessibilityLabel={t('budgetAddCategory.amount')} accessibilityHint={t('budgetAddCategory.amountHint')} editable={!props.pending} keyboardType="decimal-pad" value={amount} onChangeText={setAmount} style={[styles.input, { color: palette.foreground, borderColor: palette.border, backgroundColor: palette.background }]} />
-      <Text style={[styles.label, { color: palette.foreground }]}>{t('budgetAddCategory.recurrence')}</Text><View accessibilityRole="radiogroup" style={styles.options}>{recurrences.map((value) => <Choice key={value} label={t(`budgetMonth.recurrence.${value}`)} selected={recurrence === value} disabled={props.pending} onPress={() => setRecurrence(value)} palette={palette} />)}</View>
-      {validation ? <Text accessibilityRole="alert" style={[styles.error, { color: palette.destructive }]}>{t('budgetAddCategory.validation')}</Text> : null}
-      <Button disabled={props.pending || props.categories.length === 0} label={t('budgetAddCategory.review')} onPress={() => { if (!valid) setValidation(true); else { setValidation(false); setReview(true) } }} palette={palette} variant="primary" />
-    </View> : <View style={styles.section}>
-      <Text accessibilityRole="header" style={[styles.sectionTitle, { color: palette.foreground }]}>{t('budgetAddCategory.reviewTitle')}</Text>
-      <View style={[styles.card, { borderColor: palette.border, backgroundColor: palette.card }]}><Text style={[styles.cardTitle, { color: palette.foreground }]}>{category?.name}</Text><Text style={[styles.amount, { color: palette.foreground }]}>{money}</Text><Text style={[styles.helper, { color: palette.mutedForeground }]}>{t(`budgetMonth.recurrence.${recurrence}`)}</Text></View>
-      <Text style={[styles.scope, { color: palette.foreground, borderColor: palette.border, backgroundColor: palette.muted }]}>{t('budgetAddCategory.scope', { year: props.year })}</Text>
-      <Text style={[styles.helper, { color: palette.mutedForeground }]}>{t('budgetAddCategory.safety')}</Text>
-      <View style={styles.actions}><Button disabled={props.pending || resolving} label={t('budgetAddCategory.edit')} onPress={() => setReview(false)} palette={palette} variant="secondary" /><Button disabled={props.pending || resolving} label={props.pending ? t('budgetAddCategory.adding') : t('budgetAddCategory.add')} onPress={() => props.onSubmit({ categoryKey: categoryId!, amountBudgeted: parsedAmount, recurrency: recurrence })} palette={palette} variant="primary" /></View>
-    </View>}
-  </View></ScrollView></SafeAreaView>
+  const money = Number.isFinite(parsedAmount) ? formatMoney(parsedAmount, { locale, currency: props.currency }) : amount
+  const recurrenceLabel = (value: BudgetRecurrence) => t(`budgetMonth.recurrence.${value}`)
+  const save = locked ? undefined : review
+    ? () => void props.onSubmit({ categoryKey: categoryId!, amountBudgeted: parsedAmount, recurrency: recurrence })
+    : () => setReview(true)
+  return <SafeAreaView style={[styles.safe, { backgroundColor: palette.background }]}>
+    <FormBar
+      closeDisabled={props.pending}
+      closeLabel={t('common.close')}
+      onClose={props.onBack}
+      onSave={save}
+      saveDisabled={review ? props.pending || resolving : !valid || props.pending}
+      saveLabel={review ? (props.pending ? t('budgetAddCategory.adding') : t('budgetAddCategory.add')) : t('budgetAddCategory.review')}
+      saving={review && props.pending}
+      title={t('budgetAddCategory.title')}
+    />
+    <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={styles.content}><View style={styles.page}>
+      {props.failure && !locked ? <FormNotice tone="destructive">{t(`budgetAddCategory.failures.${props.failure}`)}</FormNotice> : null}
+      {locked ? <View style={styles.section}>
+        <Text accessibilityLiveRegion="assertive" accessibilityRole="alert" style={[styles.notice, { borderColor: palette.border }]} variant="body">{t(`budgetAddCategory.reconciliation.${props.reconciliation}`)}</Text>
+        {props.reconciliation === 'absent' ? <View style={styles.actions}><Button label={t('budgetAddCategory.newAttempt')} onPress={props.onNewAttempt} variant="primary" /></View> : null}
+      </View> : !review ? <View style={styles.section}>
+        <AmountEntry
+          accessibilityLabel={t('budgetAddCategory.amount')}
+          caption={t('budgetAddCategory.amount')}
+          currency={props.currency}
+          editable={!props.pending}
+          error={amountError}
+          locale={locale}
+          onChangeText={setAmount}
+          value={amount}
+        />
+        {props.categories.length === 0 ? <Text tone="muted" variant="body">{t('budgetAddCategory.none')}</Text> : null}
+        <FormGroup>
+          <FormSelectRow
+            key="category"
+            disabled={props.pending || props.categories.length === 0}
+            hint={t('budgetAddCategory.helper')}
+            label={t('transactionCreate.category')}
+            onChange={setCategoryId}
+            options={props.categories.map((option) => ({ value: option.id, label: option.name }))}
+            placeholder={t('transactionCreate.choose')}
+            value={categoryId}
+          />
+          <FormSelectRow
+            key="recurrence"
+            disabled={props.pending}
+            label={t('budgetAddCategory.recurrence')}
+            onChange={setRecurrence}
+            options={recurrences.map((value) => ({ value, label: recurrenceLabel(value) }))}
+            placeholder={t('transactionCreate.choose')}
+            value={recurrence}
+          />
+        </FormGroup>
+      </View> : <View style={styles.section}>
+        <Text accessibilityRole="header" variant="heading">{t('budgetAddCategory.reviewTitle')}</Text>
+        <View style={[styles.review, { borderColor: palette.border }]}>
+          <ReviewRow label={t('transactionCreate.category')} value={category?.name ?? ''} first />
+          <ReviewRow label={t('budgetAddCategory.amount')} value={money} data />
+          <ReviewRow label={t('budgetAddCategory.recurrence')} value={recurrenceLabel(recurrence)} />
+        </View>
+        <Text variant="body">{t('budgetAddCategory.scope', { year: props.year })}</Text>
+        <Text tone="muted" variant="meta">{t('budgetAddCategory.safety')}</Text>
+        <View style={styles.actions}><Button disabled={props.pending || resolving} label={t('budgetAddCategory.edit')} onPress={() => setReview(false)} variant="secondary" /></View>
+      </View>}
+    </View></ScrollView>
+  </SafeAreaView>
 }
 
-function Choice({ label, selected, disabled, onPress, palette }: { label: string; selected: boolean; disabled: boolean; onPress: () => void; palette: Palette }) { return <Pressable accessibilityRole="radio" accessibilityState={{ checked: selected, disabled }} disabled={disabled} onPress={onPress} style={[styles.choice, { borderColor: selected ? palette.primary : palette.border, backgroundColor: selected ? palette.primarySoft : palette.card }]}><Text style={[styles.choiceText, { color: palette.foreground }]}>{label}</Text></Pressable> }
+function ReviewRow({ label, value, data = false, first = false }: { label: string; value: string; data?: boolean; first?: boolean }) {
+  const palette = usePalette()
+  return (
+    <View style={[styles.reviewRow, !first && { borderTopWidth: 1, borderTopColor: palette.border }]}>
+      <Text style={styles.reviewLabel} variant="body">{label}</Text>
+      <Text style={styles.reviewValue} variant={data ? 'amountBase' : 'body'}>{value}</Text>
+    </View>
+  )
+}
+
 const styles = StyleSheet.create({
-  safe: { flex: 1 }, content: { flexGrow: 1, padding: themeTokens.layout.screenPadding }, page: { width: '100%', maxWidth: 680, alignSelf: 'center', gap: themeTokens.layout.blockGap }, section: { gap: themeTokens.spacing[4] }, sectionTitle: { ...textStyles.section }, options: { flexDirection: 'row', flexWrap: 'wrap', gap: themeTokens.spacing[2] }, choice: { minHeight: themeTokens.touchTarget.minimum, justifyContent: 'center', borderWidth: 1, borderRadius: themeTokens.radius.md, paddingHorizontal: themeTokens.spacing[3] }, choiceText: { ...textStyles.body }, label: { ...textStyles.bodyStrong, fontWeight: '600' as const }, input: { ...textStyles.amount, minHeight: themeTokens.touchTarget.minimum, borderWidth: 1, borderRadius: themeTokens.radius.md, paddingHorizontal: themeTokens.spacing[3] }, card: { borderWidth: 1, borderRadius: themeTokens.radius.xl, padding: themeTokens.spacing[5], gap: themeTokens.spacing[2] }, cardTitle: { ...textStyles.section }, amount: { ...textStyles.display }, helper: { ...textStyles.body }, scope: { ...textStyles.body, borderWidth: 1, borderRadius: themeTokens.radius.md, padding: themeTokens.spacing[4] }, safety: { ...textStyles.body }, actions: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'flex-end', gap: themeTokens.spacing[3] }, alert: { ...textStyles.body, borderWidth: 1, borderRadius: themeTokens.radius.md, padding: themeTokens.spacing[4] }, error: { ...textStyles.body }, empty: { ...textStyles.body, borderWidth: 1, borderRadius: themeTokens.radius.md, padding: themeTokens.spacing[4] },
+  safe: { flex: 1 },
+  content: { flexGrow: 1, paddingHorizontal: themeTokens.layout.screenPadding, paddingBottom: themeTokens.spacing[10] },
+  page: { width: '100%', maxWidth: 680, alignSelf: 'center', gap: themeTokens.spacing[4] },
+  section: { gap: themeTokens.spacing[4] },
+  notice: { borderWidth: 1, borderRadius: themeTokens.radius.md, padding: themeTokens.spacing[4] },
+  review: { borderWidth: 1, borderRadius: themeTokens.radius.xl },
+  reviewRow: { minHeight: 56, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: themeTokens.spacing[4], paddingHorizontal: themeTokens.spacing[4], paddingVertical: themeTokens.spacing[3] },
+  reviewLabel: { flexShrink: 0 },
+  reviewValue: { flexShrink: 1, textAlign: 'right' },
+  actions: { flexDirection: 'row', flexWrap: 'wrap', gap: themeTokens.spacing[2] },
 })

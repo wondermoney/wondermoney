@@ -15,7 +15,18 @@ export type LoanViewModel = Readonly<{
   annualRatePercent: number | null
   rateType: LoanDto['rateType']
   termMonths: number | null
-  remainingTermMonths: number | null
+  /**
+   * The remaining term shown on the detail screen. `contract` counts the months left to the
+   * maturity date; `estimate` is the API's payoff estimate at the stored payment and rate,
+   * used only when the loan has no maturity date.
+   */
+  remainingTerm: Readonly<{ months: number; basis: 'contract' | 'estimate' }> | null
+  /**
+   * The API's estimate when it runs past the contract — the stored payment is below what
+   * clears the balance by maturity (or within the original term). The screen says so rather
+   * than showing a remaining term longer than the loan itself.
+   */
+  payoffBeyondContractMonths: number | null
   progressPercentage: number
   meterPercentage: number
   progressBasis: LoanDto['progressBasis']
@@ -45,7 +56,27 @@ export type LoanRepaymentViewModel = Readonly<{
   }>
 }>
 
-export const mapLoan = (dto: LoanDto): LoanViewModel => ({
+/** Whole monthly payments left between `now` and the maturity date; never negative. */
+export function monthsUntil(maturityDate: string, now: Date): number {
+  const maturity = new Date(maturityDate)
+  if (Number.isNaN(maturity.getTime())) return 0
+  const months = (maturity.getUTCFullYear() - now.getUTCFullYear()) * 12 + (maturity.getUTCMonth() - now.getUTCMonth()) + (maturity.getUTCDate() > now.getUTCDate() ? 1 : 0)
+  return Math.max(0, months)
+}
+
+function remainingTerm(dto: LoanDto, now: Date): Pick<LoanViewModel, 'remainingTerm' | 'payoffBeyondContractMonths'> {
+  const estimate = dto.remainingTermMonthsEstimated
+  const contractMonths = dto.maturityDate ? monthsUntil(dto.maturityDate, now) : null
+  // Without a maturity date the original term is the only contract there is: no balance
+  // can honestly have more left to run than the whole loan had.
+  const limit = contractMonths ?? dto.termMonths ?? null
+  const beyond = estimate !== null && limit !== null && estimate > limit ? estimate : null
+  if (contractMonths !== null) return { remainingTerm: { months: contractMonths, basis: 'contract' }, payoffBeyondContractMonths: beyond }
+  if (estimate !== null && beyond === null) return { remainingTerm: { months: estimate, basis: 'estimate' }, payoffBeyondContractMonths: null }
+  return { remainingTerm: null, payoffBeyondContractMonths: beyond }
+}
+
+export const mapLoan = (dto: LoanDto, now: Date = new Date()): LoanViewModel => ({
   id: dto.loanKey,
   name: dto.name,
   type: dto.type,
@@ -60,7 +91,7 @@ export const mapLoan = (dto: LoanDto): LoanViewModel => ({
   annualRatePercent: dto.annualInterestRateBps == null ? null : dto.annualInterestRateBps / 100,
   rateType: dto.rateType,
   termMonths: dto.termMonths ?? null,
-  remainingTermMonths: dto.remainingTermMonthsEstimated,
+  ...remainingTerm(dto, now),
   progressPercentage: dto.progressPercentage,
   meterPercentage: Math.min(100, Math.max(0, dto.progressPercentage)),
   progressBasis: dto.progressBasis,
@@ -71,7 +102,7 @@ export const mapLoan = (dto: LoanDto): LoanViewModel => ({
   notes: dto.notes ?? null,
 })
 
-export const mapLoans = (response: { loans: LoanDto[] }): LoanViewModel[] => response.loans.map(mapLoan)
+export const mapLoans = (response: { loans: LoanDto[] }): LoanViewModel[] => response.loans.map((dto) => mapLoan(dto))
 
 export const mapRepayments = (response: { repayments: LoanRepaymentDto[] }): LoanRepaymentViewModel[] => (
   response.repayments.map((dto) => ({

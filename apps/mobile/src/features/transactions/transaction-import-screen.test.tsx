@@ -35,7 +35,8 @@ describe('TransactionImportScreen', () => {
     const onSelectAccount = jest.fn()
     const { view } = await renderScreen({ phase: 'idle' }, { onSelectAccount })
     expect(view.getByRole('button', { name: 'Choose file' })).toBeDisabled()
-    await fireEvent.press(view.getByRole('button', { name: 'Daily account' }))
+    await fireEvent.press(view.getByRole('button', { name: 'Account, Choose an account' }))
+    await fireEvent.press(view.getByRole('radio', { name: 'Daily account' }))
     expect(onSelectAccount).toHaveBeenCalledWith(7)
   })
 

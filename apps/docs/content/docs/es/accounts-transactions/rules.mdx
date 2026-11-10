@@ -1,0 +1,66 @@
+---
+title: Reglas
+description: Categoriza, renombra, etiqueta u oculta transacciones automáticamente, comprueba qué coincide con una regla antes de guardarla, y aplícala a las transacciones que ya tienes.
+---
+
+Una regla le dice a WonderMoney qué hacer con las transacciones de cierto tipo: por ejemplo, "cuando la descripción contiene NETFLIX, asignar la categoría Entretenimiento". Las reglas pertenecen al hogar, así que ambos miembros ven y gestionan la misma lista.
+
+## Dónde encontrarlas
+
+En la web, ve a **Configuración → Reglas**. La lista muestra todas las reglas en el orden en que se ejecutan, con un resumen de una línea, como "Descripción contiene NETFLIX, asignar categoría Entretenimiento", y un interruptor para activar o desactivar cada regla.
+
+- **Busca** por nombre, o **filtra** por la categoría que asigna la regla, para encontrar una regla rápidamente.
+- **Reordena** arrastrando una regla, o con sus flechas arriba y abajo. Borra antes la búsqueda y el filtro: el orden siempre abarca la lista completa.
+- **Edita** o **elimina** una regla desde su fila. Eliminar una regla no deshace lo que ya cambió.
+
+## Crear una regla
+
+Elige **Crear regla**, o empieza desde una transacción: abre su menú, elige **Editar** y luego **Crear regla**. Empezar desde una transacción rellena su comercio (o su descripción, si no tiene comercio) y su categoría actual.
+
+Una regla tiene:
+
+- **Condiciones.** Cada una compara un campo de la transacción:
+  - **Descripción** o **Comercio**: contiene, no contiene, es, empieza por, termina en. La comparación ignora mayúsculas, acentos y espacios de más. En la descripción puedes comparar el texto como se muestra o el texto original del banco.
+  - **Importe**: es, es mayor que, es al menos, es menor que, es como máximo, o está entre dos importes. Los importes se comparan sin signo; añade una condición de **Sentido** (entrada o salida de dinero) para distinguirlos.
+  - **Cuenta**, **Categoría** (incluida "Sin categoría"), **Tipo de transacción** y **Moneda**: es una de, o no es ninguna de, los valores que elijas.
+- **Cumplir todas las condiciones o cualquier condición.** Una regla puede tener hasta 20 condiciones.
+- **Acciones**: asignar la categoría, asignar el comercio (elige uno o escribe un nombre nuevo), renombrar la descripción, añadir notas (solo donde las notas están vacías), añadir etiquetas, marcar como revisada u ocultar la transacción. Cada tipo de acción solo puede aparecer una vez en una regla.
+- **Detenerse tras esta regla.** Cuando la regla coincide con una transacción, las reglas de debajo no se ejecutan sobre esa transacción.
+
+Un hogar puede tener hasta 200 reglas.
+
+## Vista previa antes de guardar
+
+Mientras editas, la vista previa junto al formulario muestra cuántas de tus transacciones coinciden con la regla, cuántas de ellas cambiaría, y las 50 coincidencias más recientes con el cambio que recibiría cada una. Se actualiza poco después de que dejes de escribir.
+
+La vista previa evalúa la regla sola y abarca las transacciones del hogar que puedes ver, incluidas las ocultas. Nunca muestra las cuentas privadas del otro miembro. Una coincidencia puede aparecer como **Sin cambios** cuando la transacción ya tiene esos valores, o cuando definiste ese valor tú mismo (ver abajo).
+
+Guardar una regla no cambia las transacciones que ya tienes. Para cambiarlas también, aplica la regla (ver más abajo).
+
+## Aplicar reglas a las transacciones existentes
+
+Después de guardar una regla activa, WonderMoney comprueba cuántas de tus transacciones existentes cambiaría. Si hay alguna, te ofrece **Aplicar a N transacciones**. Confirma para aplicarla, o elige **Ahora no** para dejarlas como están.
+
+Para ejecutar todas las reglas activas sobre las transacciones que ya tienes (por ejemplo, después de reordenarlas), elige **Aplicar a las transacciones existentes** arriba en **Configuración → Reglas**. Las reglas se ejecutan entonces de arriba abajo, como en las transacciones nuevas.
+
+- El número que confirmas es exactamente lo que cambia al aplicar.
+- La aplicación se ejecuta en segundo plano: el diálogo muestra el progreso, y puedes cerrarlo mientras se ejecuta. Al terminar, un mensaje te dice cuántas transacciones cambiaron.
+- Abarca las transacciones del hogar que puedes ver, incluidas las ocultas, pero no las eliminadas ni las cuentas privadas del otro miembro. Todo lo que aparece en "Lo que las reglas nunca cambian" sigue valiendo.
+- Aplicar la misma regla otra vez no cambia nada más. Cada cambio queda registrado en la actividad de la transacción.
+- Solo una aplicación a la vez por hogar: espera a que termine una antes de empezar otra.
+
+## Lo que las reglas nunca cambian
+
+- Lo que definiste a mano: una categoría que elegiste, un comercio o una descripción que editaste, y notas que escribiste. La regla sigue contando como coincidencia, pero deja esos campos como están.
+- El tipo de transacción. Solo la detección de transferencias marca una transacción como transferencia.
+- Las transacciones de las cuentas privadas del otro miembro. Una regla actúa en nombre del miembro que cambió por última vez sus condiciones o acciones, y solo sobre las transacciones que ese miembro puede ver.
+
+## Orden
+
+Las reglas se ejecutan de arriba abajo. Cada regla mira la transacción tal como llegó, no como la dejaron las reglas anteriores. Cuando dos reglas asignan el mismo campo, gana la de abajo; las etiquetas de varias reglas se suman. Activa **Detenerse tras esta regla** para que las reglas de debajo no se ejecuten sobre lo que coincidió con ella.
+
+## Enlaces relacionados
+
+- [Categorizar transacciones](/es/docs/accounts-transactions/categorize-transactions)
+- [Entender las transacciones](/es/docs/accounts-transactions/understand-transactions)
+- [Gestionar categorías](/es/docs/settings-security-privacy/manage-categories)

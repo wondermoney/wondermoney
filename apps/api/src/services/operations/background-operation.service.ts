@@ -94,6 +94,18 @@ class BackgroundOperationService {
     );
   }
 
+  /**
+   * As `claimJobStart`, and also takes back an operation still `running` under this same queue
+   * job: pg-boss hands a job whose worker died back with the same id, and a job that resumes
+   * from its own recorded progress carries on from there.
+   */
+  async claimJobStartOrResume(correlationId: string, queueJobId: string) {
+    return this.executeUpdate(
+      `UPDATE background_operation SET status = 'running', queue_job_id = COALESCE(queue_job_id, ?), started_at = COALESCE(started_at, NOW()), last_heartbeat_at = NOW(), attempt_count = attempt_count + 1, updated_at = NOW() WHERE correlation_id = ? AND deleted_at IS NULL AND ((status = 'queued' AND (queue_job_id IS NOT DISTINCT FROM ? OR queue_job_id IS NULL)) OR (status = 'running' AND queue_job_id = ?)) RETURNING background_operation_key`,
+      [queueJobId, correlationId, queueJobId, queueJobId],
+    );
+  }
+
   async createQueuedOperation(input: { appuserKey?: Appuser | null | number; correlationId?: string; operationType: string; resourceId: string; retryable?: boolean; tenantKey?: null | number }, transaction?: EntityManager) {
     const em = transaction ?? DI.em;
     const operation = em.create(BackgroundOperation, {

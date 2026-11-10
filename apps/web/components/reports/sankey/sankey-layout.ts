@@ -3,12 +3,23 @@ import { sankey, sankeyLinkHorizontal } from "d3-sankey";
 
 export type SankeyNodeKind = "income" | "expense" | "account";
 
+/**
+ * The mark drawn beside a node's label: a category's icon (by stored icon
+ * name, else by category name, as `CategoryIcon` resolves them), a bank's
+ * logo, or the wallet an account with no institution gets.
+ */
+export type SankeyNodeIcon =
+  | { type: "category"; icon?: string; category?: string }
+  | { type: "logo"; url: string }
+  | { type: "wallet" };
+
 export type SankeyNode = {
   id: string;
   label: string;
   kind: SankeyNodeKind;
   color?: string;
   value?: number;
+  icon?: SankeyNodeIcon;
 };
 
 export type SankeyLink = {

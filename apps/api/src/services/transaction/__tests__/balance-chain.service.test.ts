@@ -135,6 +135,44 @@ describe('balance chain — recalculateChainFromAccountBalance', () => {
   });
 });
 
+describe('balance chain — a manual account rebuilt from its opening balance', () => {
+  const eur = { currencyKey: 1 };
+  const gbp = { currencyKey: 2 };
+  const inEur = (settlementAmount: number) => ({ appuserCurrencyKey: eur, settlementAmount, settlementCurrencyKey: eur });
+
+  it('accumulates from the opening balance and corrects a wrong account balance', async () => {
+    const rows: ChainRow[] = [inEur(10), inEur(-4), inEur(20)];
+    const em = { find: vi.fn().mockResolvedValue(rows), flush: vi.fn() };
+    const account = { appuserCurrencyBalance: 999, balance: 999, openingBalance: 100 } as unknown as Account;
+
+    const { tail } = await recalculateChainFromAccountBalance(em, account);
+
+    expect(rows.map((r) => [r.balance, r.appuserCurrencyBalance])).toEqual([[110, 110], [106, 106], [126, 126]]);
+    expect(tail).toEqual({ appuserCurrencyBalance: 126, balance: 126 });
+  });
+
+  it('keeps the user-currency chain on the account balance for a foreign-currency account', async () => {
+    const rows: ChainRow[] = [{ appuserCurrencyKey: eur, appuserSettlementAmount: 12, settlementAmount: 10, settlementCurrencyKey: gbp }];
+    const em = { find: vi.fn().mockResolvedValue(rows), flush: vi.fn() };
+    const account = { appuserCurrencyBalance: 132, balance: 999, openingBalance: 100 } as unknown as Account;
+
+    const { tail } = await recalculateChainFromAccountBalance(em, account);
+
+    expect(tail).toEqual({ appuserCurrencyBalance: 132, balance: 110 });
+  });
+
+  it('anchors a synced account on its provider balance even when it has an opening balance', async () => {
+    const rows: ChainRow[] = [inEur(10), inEur(-4), inEur(20)];
+    const em = { find: vi.fn().mockResolvedValue(rows), flush: vi.fn() };
+    const account = { appuserCurrencyBalance: 26, balance: 26, enableBankingConnectionKey: { enableBankingConnectionKey: 3 }, openingBalance: 100 } as unknown as Account;
+
+    const { tail } = await recalculateChainFromAccountBalance(em, account);
+
+    expect(rows.map((r) => r.balance)).toEqual([10, 6, 26]);
+    expect(tail).toEqual({ appuserCurrencyBalance: 26, balance: 26 });
+  });
+});
+
 describe('balance chain — recalculateChainFromAccountBalance anchored on an edited row', () => {
   it('recomputes only the suffix from the anchor and leaves every earlier row untouched', async () => {
     // A real-ish chain: several rows, settlement and appuser-settlement amounts differing, stored

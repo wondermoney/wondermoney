@@ -269,6 +269,38 @@ describe('transaction creation service security checks', () => {
     expect(account.balance).toBe(957.5);
   });
 
+  it('keeps the note the user typed, and stores a blank one as none', async () => {
+    const currency = { code: 'EUR', currencyKey: 1 };
+    const appuser = { appuserKey: 7, currencyKey: currency };
+    const create = async (notes: string) => {
+      const account = { accountKey: 10, accountOwnerAppuserKey: appuser, appuserCurrencyBalance: 1000, balance: 1000, currencyKey: { currencyKey: 1 }, tenantKey: { tenantKey: 1 } };
+      mocks.getRepository.mockReturnValue({
+        getAppuserTenantByAppuser: vi.fn().mockResolvedValue({ appuserKey: appuser, tenantKey: { tenantKey: 1 } }),
+      });
+      mocks.findOne
+        .mockResolvedValueOnce(appuser)
+        .mockResolvedValueOnce({ name: 'CARD_PAYMENT', transactionTypeKey: 5 })
+        .mockResolvedValueOnce(account)
+        .mockResolvedValueOnce(currency)
+        .mockResolvedValueOnce(currency)
+        .mockResolvedValueOnce({ name: 'BOOKED', transactionStatusKey: 1 });
+      return transactionCreationService.createTransaction({
+        accountId: 10,
+        appuserKey: 7,
+        notes,
+        originalAmount: -12,
+        originalCurrencyId: 1,
+        settlementAmount: -12,
+        settlementCurrencyId: 1,
+        transactionDate: new Date('2026-01-10T00:00:00.000Z'),
+        transactionTypeId: 5,
+      });
+    };
+
+    expect((await create('  Split with Ana  ')).notes).toBe('Split with Ana');
+    expect((await create('   ')).notes).toBeUndefined();
+  });
+
   it('stores an income entered as a negative amount as an inflow', async () => {
     const currency = { code: 'EUR', currencyKey: 1 };
     const appuser = { appuserKey: 7, currencyKey: currency };

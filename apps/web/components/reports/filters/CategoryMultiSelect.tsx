@@ -28,7 +28,7 @@ export function CategoryMultiSelect({
       }))}
       selected={selected}
       onChange={onChange}
-      placeholder={t("placeholder.search")}
+      placeholder={t("placeholder.allCategories")}
       className={className}
     />
   );

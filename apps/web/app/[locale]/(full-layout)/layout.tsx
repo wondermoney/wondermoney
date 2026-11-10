@@ -1,12 +1,9 @@
 import { type ReactNode } from "react";
 
-import Container from "@/components/layout/Container";
-import Wrapper from "@/components/layout/Wrapper";
+import AppShell from "@/components/layout/AppShell";
 import FirstRunOnboardingRedirectGate from "@/components/onboarding/first-run/FirstRunOnboardingRedirectGate";
 import { requireServerAuth } from "@/lib/auth/server-auth";
-
-import FullLayoutClientChrome from "./FullLayoutClientChrome";
-import FullLayoutClientOverlays from "./FullLayoutClientOverlays";
+import { PrivacyModeBoundary } from "@/lib/privacy/PrivacyModeBoundary";
 
 export default async function RootLayout({
   children,
@@ -19,12 +16,10 @@ export default async function RootLayout({
   await requireServerAuth(locale);
 
   return (
-    <FirstRunOnboardingRedirectGate>
-      <Wrapper>
-        <FullLayoutClientChrome />
-        <Container>{children}</Container>
-        <FullLayoutClientOverlays />
-      </Wrapper>
-    </FirstRunOnboardingRedirectGate>
+    <PrivacyModeBoundary>
+      <FirstRunOnboardingRedirectGate>
+        <AppShell>{children}</AppShell>
+      </FirstRunOnboardingRedirectGate>
+    </PrivacyModeBoundary>
   );
 }

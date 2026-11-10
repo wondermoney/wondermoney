@@ -5,7 +5,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { Plus } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { usePostHog } from "posthog-js/react";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -25,7 +25,13 @@ import useConfigs from "@/lib/api/configs/useConfigs";
 import { isDemoReadOnlyError } from "@/lib/api/errors";
 import useCreatePortfolio from "@/lib/api/portfolio/useCreatePortfolio";
 import { useRateLimitToast } from "@/lib/api/useRateLimitToast";
+import {
+  draftFromLink,
+  isInvestmentAccount,
+  linkInputFromDraft,
+} from "@/lib/portfolio/account-link";
 import { getCurrencySymbol } from "@/lib/utils/currencySymbol";
+import { useDismissibleActivation } from "@/lib/utils/useDismissibleActivation";
 
 import { Button } from "../ui/button";
 import { DrawerDialog } from "../ui/dialog-responsive";
@@ -39,7 +45,10 @@ import {
   SelectValue,
 } from "../ui/Select";
 import { Text } from "../ui/Typography";
+import { PortfolioAccountLinkFields } from "./PortfolioAccountLinkFields";
 import { getDefaultPortfolioCurrencyId } from "./PortfolioCreateDialog.helpers";
+
+const LINK_SUGGESTION_DISMISSAL_MS = 365 * 24 * 60 * 60 * 1000;
 
 interface PortfolioCreateDialogProps {
   isOpen: boolean;
@@ -103,8 +112,20 @@ const PortfolioCreateDialog: React.FC<PortfolioCreateDialogProps> = ({
 
   const mutation = useCreatePortfolio();
 
+  // "Is this the same money?": with an investment account in the household, offer to link the
+  // new portfolio to the account that holds it. No amounts are compared.
+  const [link, setLink] = useState(draftFromLink(null));
+  const linkSuggestion = useDismissibleActivation(
+    "portfolio-create-link-suggestion",
+    LINK_SUGGESTION_DISMISSAL_MS,
+  );
+  const accounts = accountsData?.accounts ?? [];
+  const showLinkSuggestion =
+    !linkSuggestion.isDismissed && accounts.some(isInvestmentAccount);
+
   const onSubmit = async (data: FormProps) => {
-    await mutation.mutateAsync(data, {
+    const accountLink = showLinkSuggestion ? linkInputFromDraft(link) : null;
+    await mutation.mutateAsync({ ...data, accountLink }, {
       onSuccess: async (res) => {
         const createdPortfolioKey = res.data.portfolio.portfolioKey;
         posthog.capture("portfolio_created");
@@ -113,6 +134,7 @@ const PortfolioCreateDialog: React.FC<PortfolioCreateDialogProps> = ({
           exact: true,
         });
         reset();
+        setLink(draftFromLink(null));
         onPortfolioCreated?.(createdPortfolioKey);
         setOpen(false);
       },
@@ -216,6 +238,37 @@ const PortfolioCreateDialog: React.FC<PortfolioCreateDialogProps> = ({
               </FormItem>
             )}
           />
+          {showLinkSuggestion ? (
+            <section
+              aria-labelledby="create-portfolio-link-suggestion"
+              className="border-border flex flex-col gap-3 rounded-md border p-4"
+            >
+              <div className="flex items-start justify-between gap-3">
+                <h3
+                  id="create-portfolio-link-suggestion"
+                  className="text-sm font-semibold"
+                >
+                  {t("portfolioAccountLink.suggestion-title")}
+                </h3>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={linkSuggestion.dismiss}
+                >
+                  {t("portfolioAccountLink.dismiss")}
+                </Button>
+              </div>
+              <p className="text-muted-foreground text-sm">
+                {t("portfolioAccountLink.suggestion-body-create")}
+              </p>
+              <PortfolioAccountLinkFields
+                accounts={accounts}
+                value={link}
+                onChange={setLink}
+              />
+            </section>
+          ) : null}
         </FormContent>
       </Form>
     </DrawerDialog>

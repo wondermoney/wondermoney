@@ -1,3 +1,5 @@
+import type { Readable } from 'node:stream';
+
 import { DeleteObjectCommand, GetObjectCommand, HeadObjectCommand, PutObjectCommand, type PutObjectCommandInput, S3Client } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { v4 as uuidv4 } from 'uuid';
@@ -102,6 +104,24 @@ export class S3Service {
     return Buffer.concat(chunks);
   }
 
+  /**
+   * A short-lived link that downloads an object as `fileName`, signed for the endpoint browsers
+   * reach. Used for data exports, which are private: the link is the only way in.
+   */
+  async generatePresignedDownloadUrl(bucket: string, key: string, fileName: string, expiresInSeconds: number): Promise<string> {
+    const command = new GetObjectCommand({ Bucket: bucket, Key: key, ResponseContentDisposition: `attachment; filename="${fileName.replace(/["\\\r\n]/gu, '')}"` });
+    return getSignedUrl(this.presignClient(), command, { expiresIn: expiresInSeconds });
+  }
+
+  /**
+   * A short-lived link a browser PUTs one file of exactly `contentLength` bytes to, signed for the
+   * endpoint browsers reach. Used for restore uploads, which are private.
+   */
+  async generatePresignedUploadUrl(bucket: string, key: string, options: { contentLength: number; contentType: string; expiresInSeconds: number }): Promise<string> {
+    const command = new PutObjectCommand({ Bucket: bucket, ContentLength: options.contentLength, ContentType: options.contentType, Key: key });
+    return getSignedUrl(this.presignClient(), command, { expiresIn: options.expiresInSeconds, signableHeaders: new Set(['content-length', 'content-type']) });
+  }
+
   async getObjectSize(bucket: string, key: string): Promise<number | undefined> {
     const response = await this.client().send(new HeadObjectCommand({ Bucket: bucket, Key: key }));
     return response.ContentLength ?? undefined;
@@ -139,6 +159,11 @@ export class S3Service {
     await this.client().send(new PutObjectCommand(params));
     const { publicEndpoint, region } = this.requireConfig();
     return publicEndpoint ? `${publicEndpoint}/${bucket}/${key}` : `https://${bucket}.s3.${region}.amazonaws.com/${key}`;
+  }
+
+  /** Upload a stream of known length (a file on disk) without reading it into memory. */
+  async uploadStream(bucket: string, key: string, body: Readable, contentLength: number, contentType: string): Promise<void> {
+    await this.client().send(new PutObjectCommand({ Body: body, Bucket: bucket, ContentLength: contentLength, ContentType: contentType, Key: key }));
   }
 
   /** The client the API itself uses. */

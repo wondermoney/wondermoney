@@ -4,6 +4,7 @@ import {
   accountFinancialInstitutionsEndpoint,
   accountFinancialInstitutionsResponseSchema,
   createOfflineAccountEndpoint,
+  invalidOfflineAccountFields,
   OFFLINE_ACCOUNT_BALANCE_MAX,
   offlineAccountPayloadSchema,
   parsePositiveDecimal,
@@ -46,7 +47,25 @@ describe('manual account contracts', () => {
       { name: 'Cash', currentBalance: 1, currencyId: 151, financialInstitutionId: 0 },
       { name: 'Cash', currentBalance: 1, currencyId: 151, accountType: 'cash' },
     ]) expect(offlineAccountPayloadSchema.safeParse(value).success).toBe(false)
-    expect(parsePositiveDecimal('12,50')).toBe(12.5)
-    expect(parsePositiveDecimal('0')).toBeNull()
+    expect(parsePositiveDecimal('12,50', 'en')).toBe(12.5)
+    expect(parsePositiveDecimal('0', 'en')).toBeNull()
+  })
+
+  it.each([
+    ['1.234,56', 'pt-PT', 1234.56],
+    ['1.234,56', 'es', 1234.56],
+    ['1.000', 'pt-PT', 1000],
+    ['1.000', 'es', 1000],
+    ['1.000', 'en', 1],
+    ['1,234.56', 'en', 1234.56],
+  ])('reads the balance %s in %s as %s', (input, locale, expected) => {
+    expect(parsePositiveDecimal(input, locale)).toBe(expected)
+  })
+
+  it('rejects a balance it cannot read instead of saving another number', () => {
+    expect(parsePositiveDecimal('1.2.3', 'pt-PT')).toBeNull()
+    expect(parsePositiveDecimal('-5', 'en')).toBeNull()
+    expect(invalidOfflineAccountFields('Cash', '1.234,56', 151, [{ currencyKey: 151 } as never], 'pt-PT').has('balance')).toBe(false)
+    expect(invalidOfflineAccountFields('Cash', '12,3,4', 151, [{ currencyKey: 151 } as never], 'pt-PT').has('balance')).toBe(true)
   })
 })

@@ -30,6 +30,19 @@ Confirma que a conta terminou a primeira sincronização ou que já tens transa�
 3. Abre uma transação para rever o valor, o comerciante e as notas.
 4. Atualiza a categoria, a descrição ou o estado recorrente quando for preciso.
 
+## Datas e intervalos de datas
+
+Um intervalo de datas abrange dias inteiros no teu fuso horário. Os bancos costumam enviar uma data de movimento sem hora, e a WonderMoney conta essa transação nessa data, estejas onde estiveres: um intervalo que começa ou termina nesse dia inclui-a, e um intervalo que termina no dia anterior não. Uma transação com hora, como uma que adicionas tu, conta a essa hora no teu fuso horário. As listas e os detalhes das transações, na web e na app móvel, mostram uma data de movimento como essa mesma data, e uma transação com hora no seu dia no teu fuso horário.
+
+## Escrever montantes
+
+Os campos de montante leem os números como o idioma da aplicação os escreve. Em português e espanhol, a vírgula separa as casas decimais e o ponto agrupa os milhares: `1.234,56` é mil duzentos e trinta e quatro e 56 cêntimos, e `1.000` é mil. Em inglês é ao contrário: `1,234.56`, e `1.000` é um.
+
+- Um número com os dois separadores, como `1.234,56` ou `1,234.56`, é lido da mesma forma em qualquer idioma.
+- Espaços e apóstrofos podem agrupar os milhares (`1 234,56`, `1'234.56`).
+- São aceites um sinal de menos, parênteses e um símbolo ou código de moeda (`-12,30 €`, `(12,30)`, `EUR 12,30`).
+- Um valor que a WonderMoney não consegue ler com certeza, como `1.2.3` ou `12,`, mostra um erro por baixo do campo em vez de ser guardado como outro montante.
+
 ## Rever
 
 Procura itens sem categoria, entradas duplicadas e transações que pertençam a um pagamento recorrente. Uma revisão curta todas as semanas mantém o histórico útil para orçamentos e resumos.

@@ -6,6 +6,7 @@ import { Transaction } from '@entity/Transaction';
 
 const mocked = vi.hoisted(() => ({
   assign: vi.fn((target: Record<string, unknown>, patch: Record<string, unknown>) => Object.assign(target, patch)),
+  count: vi.fn().mockResolvedValue(0),
   create: vi.fn(),
   find: vi.fn(),
   findOne: vi.fn(),
@@ -19,6 +20,7 @@ vi.mock('@app/app', () => ({
   DI: {
     em: {
       assign: mocked.assign,
+      count: mocked.count,
       create: mocked.create,
       find: mocked.find,
       findOne: mocked.findOne,

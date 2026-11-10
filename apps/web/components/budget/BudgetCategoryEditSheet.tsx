@@ -39,6 +39,7 @@ import {
 } from "../ui/Form";
 import { Input } from "../ui/input";
 import { Label } from "../ui/Label";
+import { MoneyInput } from "../ui/MoneyInput";
 import {
   Select,
   SelectContent,
@@ -55,6 +56,7 @@ import {
   SheetHeader,
   SheetTitle,
 } from "../ui/sheet";
+import { Switch } from "../ui/switch";
 import { BudgetRow } from "./BudgetTable";
 
 const recurrencyOptions = [
@@ -77,12 +79,16 @@ type Props = {
   onCloseAutoFocus?: (event: Event) => void;
 };
 
-const createFormSchema = (t: ReturnType<typeof useTranslations>) =>
+const createFormSchema = (
+  t: ReturnType<typeof useTranslations>,
+  locale: string,
+) =>
   z.object({
-    budgeted: zLocaleNumber.pipe(
+    budgeted: zLocaleNumber(locale, t("invalid-amount")).pipe(
       z.number().positive(t("budget-amount-positive")),
     ),
     recurrency: z.enum(Recurrency).optional(),
+    rolloverEnabled: z.boolean(),
     applyToFollowingMonths: z.boolean().optional().default(true),
   });
 
@@ -101,7 +107,7 @@ export function BudgetCategoryEditSheet({
   const t = useTranslations();
   const locale = useLocale();
   const posthog = usePostHog();
-  const formSchema = createFormSchema(t);
+  const formSchema = createFormSchema(t, locale);
   const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -113,6 +119,7 @@ export function BudgetCategoryEditSheet({
       recurrency: category.recurrency
         ? convertRecurrencyMonthsIntoString(category.recurrency)
         : Recurrency.MONTHLY,
+      rolloverEnabled: category.rolloverEnabled ?? false,
     },
   });
   const {
@@ -137,6 +144,7 @@ export function BudgetCategoryEditSheet({
         month,
         amount: values.budgeted,
         recurrency: values.recurrency,
+        rolloverEnabled: values.rolloverEnabled,
         applyToFollowingMonths: values.applyToFollowingMonths,
       });
       posthog.capture("budget_category_edited", {
@@ -144,6 +152,7 @@ export function BudgetCategoryEditSheet({
         category_key: category.key,
         recurrency: values.recurrency,
         apply_to_following_months: Boolean(values.applyToFollowingMonths),
+        rollover_enabled: values.rolloverEnabled,
       });
       await Promise.all([
         queryClient.invalidateQueries({
@@ -151,6 +160,9 @@ export function BudgetCategoryEditSheet({
         }),
         queryClient.invalidateQueries({
           queryKey: ["budget-template-year", budgetKey, year],
+        }),
+        queryClient.invalidateQueries({
+          queryKey: ["budget", budgetKey, "forecast"],
         }),
       ]);
       // The month page renders its rows from Server Component props, which
@@ -223,22 +235,13 @@ export function BudgetCategoryEditSheet({
                 const budgetedPreviewValue =
                   typeof field.value === "number"
                     ? field.value
-                    : parseLocaleNumber(field.value);
+                    : (parseLocaleNumber(field.value, locale) ?? 0);
 
                 return (
                   <FormItem>
                     <FormLabel>{t("amount")}</FormLabel>
                     <FormControl>
-                      <Input
-                        type="tel"
-                        placeholder={t("amount")}
-                        startAdornment={
-                          <Text variant="mutedText" className="px-4">
-                            {getCurrencySymbol(currency, locale)}
-                          </Text>
-                        }
-                        {...field}
-                      />
+                      <MoneyInput type="tel" currency={currency} {...field} />
                     </FormControl>
                     <FormDescription>
                       {t("total-yearly-value")}:{" "}
@@ -269,6 +272,26 @@ export function BudgetCategoryEditSheet({
                   </FormItem>
                 );
               }}
+            />
+            <FormField
+              control={form.control}
+              name="rolloverEnabled"
+              render={({ field }) => (
+                <FormItem className="flex flex-row items-start justify-between gap-4">
+                  <div className="space-y-1">
+                    <FormLabel>{t("budget-rollover-toggle")}</FormLabel>
+                    <FormDescription>
+                      {t("budget-rollover-toggle-help")}
+                    </FormDescription>
+                  </div>
+                  <FormControl>
+                    <Switch
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
+                  </FormControl>
+                </FormItem>
+              )}
             />
             <FormField
               control={form.control}

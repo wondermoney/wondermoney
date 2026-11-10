@@ -74,7 +74,8 @@ export function ObjectHeader({
   return (
     <div
       className={cn(
-        "border-border bg-card flex flex-col gap-4 rounded-lg border p-4",
+        // Direction A: the object's name and its figure on the canvas, not boxed.
+        "flex flex-col gap-6",
         className,
       )}
     >
@@ -88,14 +89,14 @@ export function ObjectHeader({
               className="text-muted-foreground hover:text-foreground -ml-2"
             >
               <Link href={backHref}>
-                <ArrowLeft className="mr-2 size-4" aria-hidden="true" />
+                <ArrowLeft className="size-4" aria-hidden="true" />
                 {backLabel}
               </Link>
             </Button>
           ) : null}
 
           <div className="flex flex-wrap items-center gap-2">
-            <h1 className="text-foreground text-xl font-semibold tracking-tight">
+            <h1 className="text-foreground text-2xl font-semibold tracking-tight lg:text-3xl">
               {title}
             </h1>
             {badges}
@@ -106,7 +107,13 @@ export function ObjectHeader({
           ) : null}
         </div>
 
-        {actions ? <div className="shrink-0">{actions}</div> : null}
+        {/* The row owns the spacing so callers can pass bare buttons: a
+            fragment of two buttons otherwise renders them edge to edge. */}
+        {actions ? (
+          <div className="flex shrink-0 flex-wrap items-center gap-2">
+            {actions}
+          </div>
+        ) : null}
       </div>
 
       {hasValue ? (
@@ -120,7 +127,7 @@ export function ObjectHeader({
             <Amount
               value={value}
               currency={currency}
-              className="font-mono text-3xl font-semibold tracking-tight"
+              className="font-mono text-4xl leading-tight font-medium tracking-tight lg:text-5xl"
             />
             {secondaryValue !== undefined && secondaryValue !== null ? (
               <Amount

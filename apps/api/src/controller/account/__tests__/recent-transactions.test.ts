@@ -15,10 +15,12 @@ import { getRecentTransactions, RECENT_TRANSACTIONS_LIMIT } from '../recent-tran
 
 interface Row {
   amount: null | number;
+  category?: null | { bgColor: null | string; icon: null | string; textColor: null | string };
   currencyCode: null | string;
   displayName: null | string;
   entryType: string;
   occurredAt: null | string;
+  transfer?: boolean;
 }
 
 const makeResponse = () => ({ json: vi.fn() }) as unknown as Response;
@@ -39,6 +41,7 @@ const account = (overrides: Partial<Account> = {}) =>
 
 const txn = (overrides: Partial<Transaction> = {}) =>
   ({
+    appuserTransactionCategories: { getItems: () => [] },
     description: undefined,
     editedSettlementAmount: undefined,
     settlementAmount: 10,
@@ -75,7 +78,7 @@ describe('getRecentTransactions', () => {
       {
         limit: RECENT_TRANSACTIONS_LIMIT,
         orderBy: { transactionDate: QueryOrder.DESC_NULLS_LAST, transactionKey: QueryOrder.DESC },
-        populate: ['settlementCurrencyKey', 'transactionMerchantKey'],
+        populate: ['settlementCurrencyKey', 'transactionMerchantKey', 'transactionTypeKey', 'appuserTransactionCategories.categoryKey'],
       },
     );
     expect(RECENT_TRANSACTIONS_LIMIT).toBe(5);
@@ -100,13 +103,32 @@ describe('getRecentTransactions', () => {
     const [row] = jsonOf(res).transactions;
     expect(row).toEqual({
       amount: -12.5,
+      category: null,
       currencyCode: 'GBP',
       displayName: 'Blue Bottle',
       entryType: 'persisted_transaction',
       occurredAt: '2026-06-10T09:00:00.000Z',
+      transfer: false,
     });
     // No ids, dirty descriptions, review state, logos, or editable metadata leak.
-    expect(Object.keys(row ?? {}).sort()).toEqual(['amount', 'currencyCode', 'displayName', 'entryType', 'occurredAt']);
+    expect(Object.keys(row ?? {}).sort()).toEqual(['amount', 'category', 'currencyCode', 'displayName', 'entryType', 'occurredAt', 'transfer']);
+  });
+
+  it("gives a persisted row only its mark's needs: the category's icon and colours, and whether it is a transfer", async () => {
+    mocks.findOne.mockResolvedValue(account());
+    const category = { bgColor: '#FEE2E2', categoryKey: 9, icon: 'coffee', name: 'Coffee', textColor: '#991B1B' };
+    mocks.find.mockResolvedValue([
+      txn({ appuserTransactionCategories: { getItems: () => [{ categoryKey: category }] } as unknown as Transaction['appuserTransactionCategories'] }),
+      txn({ transactionTypeKey: { name: 'TRANSFER_OUT' } as unknown as Transaction['transactionTypeKey'] }),
+    ]);
+    const res = makeResponse();
+
+    await getRecentTransactions(request(), res);
+
+    const [categorised, transfer] = jsonOf(res).transactions;
+    expect(categorised).toMatchObject({ category: { bgColor: '#FEE2E2', icon: 'coffee', textColor: '#991B1B' }, transfer: false });
+    expect(Object.keys(categorised?.category ?? {}).sort()).toEqual(['bgColor', 'icon', 'textColor']);
+    expect(transfer).toMatchObject({ category: null, transfer: true });
   });
 
   it('falls back merchant → normalized description → null, preserving case and collapsing whitespace', async () => {

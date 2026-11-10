@@ -1,5 +1,5 @@
 import { useQueryClient } from '@tanstack/react-query'
-import { useLocalSearchParams, useNavigation, useRouter } from 'expo-router'
+import { useLocalSearchParams, usePreventRemove, useRouter } from 'expo-router'
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Alert } from 'react-native'
@@ -21,16 +21,15 @@ function useManagementRoute(mode: 'create' | 'edit', categoryId: number | null) 
   const mutation = useCategoryWrite()
   const queryClient = useQueryClient()
   const router = useRouter()
-  const navigation = useNavigation()
   const { t } = useTranslation()
   const submissionGate = useRef(false)
   const reconciliationFlight = useRef(false)
   const attemptedGate = useRef<CategoryWriteGate | null>(null)
   const demoLock = useRef({ epochId: runtime.epochId, locked: mutation.demoLocked })
   const writePending = useRef(mutation.isPending)
-  const dirty = useRef(false)
-  const allowDeparture = useRef(false)
   const departurePrompt = useRef(false)
+  const [dirty, setDirty] = useState(false)
+  const [departureAllowed, setDepartureAllowed] = useState(false)
   const [failure, setFailure] = useState<CategoryWriteFailure | null>(null)
   const [localDemoLock, setDemoLock] = useState<Readonly<{ epochId: number; locked: boolean }>>({ epochId: runtime.epochId, locked: false })
   const [submitting, setSubmitting] = useState(false)
@@ -47,28 +46,26 @@ function useManagementRoute(mode: 'create' | 'edit', categoryId: number | null) 
   const demoLocked = mutation.demoLocked || (localDemoLock.epochId === runtime.epochId && localDemoLock.locked)
   const pending = mutation.isPending || submitting
 
+  // A write in flight blocks departure outright; unsaved edits ask before discarding them.
+  const disablePrevention = usePreventRemove(!departureAllowed && (pending || dirty), ({ repeat }) => {
+    if (writePending.current || departurePrompt.current) return
+    departurePrompt.current = true
+    Alert.alert(t('categoryManage.discardTitle'), t('categoryManage.discardMessage'), [
+      { text: t('common.cancel'), style: 'cancel', onPress: () => { departurePrompt.current = false } },
+      { text: t('categoryManage.discard'), style: 'destructive', onPress: () => { departurePrompt.current = false; setDepartureAllowed(true); repeat() } },
+    ])
+  })
+  const allowDeparture = () => { setDepartureAllowed(true); disablePrevention() }
+
   const confirmDeparture = (depart: () => void) => {
     if (writePending.current || departurePrompt.current) return
-    if (!dirty.current) { allowDeparture.current = true; depart(); return }
+    if (!dirty) { allowDeparture(); depart(); return }
     departurePrompt.current = true
     Alert.alert(t('categoryManage.discardTitle'), t('categoryManage.discardMessage'), [
       { text: t('common.cancel'), style: 'cancel', onPress: () => { departurePrompt.current = false } },
-      { text: t('categoryManage.discard'), style: 'destructive', onPress: () => { departurePrompt.current = false; allowDeparture.current = true; depart() } },
+      { text: t('categoryManage.discard'), style: 'destructive', onPress: () => { departurePrompt.current = false; allowDeparture(); depart() } },
     ])
   }
-
-  useEffect(() => navigation.addListener('beforeRemove', (event) => {
-    if (allowDeparture.current) return
-    if (writePending.current) { event.preventDefault(); return }
-    if (!dirty.current) return
-    event.preventDefault()
-    if (departurePrompt.current) return
-    departurePrompt.current = true
-    Alert.alert(t('categoryManage.discardTitle'), t('categoryManage.discardMessage'), [
-      { text: t('common.cancel'), style: 'cancel', onPress: () => { departurePrompt.current = false } },
-      { text: t('categoryManage.discard'), style: 'destructive', onPress: () => { departurePrompt.current = false; allowDeparture.current = true; navigation.dispatch(event.data.action) } },
-    ])
-  }), [navigation, t])
 
   useEffect(() => {
     demoLock.current = { epochId: runtime.epochId, locked: mutation.demoLocked || (localDemoLock.epochId === runtime.epochId && localDemoLock.locked) }
@@ -137,7 +134,7 @@ function useManagementRoute(mode: 'create' | 'edit', categoryId: number | null) 
       : { type: 'edit' as const, categoryId: categoryId!, payload: payload as CategoryEditWrite }
     try {
       await mutation.mutateAsync(input)
-      allowDeparture.current = true
+      allowDeparture()
       router.replace('/settings/categories')
     } catch (error) {
       const kind = classifyCategoryWriteFailure(error)
@@ -167,14 +164,15 @@ function useManagementRoute(mode: 'create' | 'edit', categoryId: number | null) 
   else if (mode === 'edit' && (forcedUnavailable === 'not-found' || !current)) unavailable = 'not-found'
   else if (current?.isSystemCategory) unavailable = 'system'
 
-  const parents = query.data?.categories.map((category) => ({ id: category.categoryKey, name: displayCategoryName(category, t) })) ?? []
+  const parents = query.data?.categories.map((category) => ({ id: category.categoryKey, name: displayCategoryName(category, t), countsAsSpending: category.countsAsSpending !== false })) ?? []
   const warning = (name: string, color: string) => query.data ? duplicateWarnings(query.data, { name, color }, categoryId ?? undefined) : { name: false, color: false }
   const initialIcon = current && categoryIconSchema.safeParse(current.icon).success ? current.icon! : 'folder'
-  const initial = current ? { name: current.name, color: parseSafeCategoryColor(current.bgColor) ?? '#2563EB', icon: initialIcon } : undefined
+  const initial = current ? { name: current.name, color: parseSafeCategoryColor(current.bgColor) ?? '#2563EB', icon: initialIcon, countsAsSpending: current.countsAsSpending !== false } : undefined
 
   return {
     mode,
     initial,
+    parentCountsAsSpending: current?.parentCountsAsSpending ?? true,
     initialReview: relevantUnknown?.payload,
     parents,
     duplicateName: (name: string) => warning(name, '#000000').name,
@@ -186,7 +184,7 @@ function useManagementRoute(mode: 'create' | 'edit', categoryId: number | null) 
     resetReviewToken,
     unavailable,
     onBack: () => confirmDeparture(() => router.replace('/settings/categories')),
-    onDirtyChange: (value: boolean) => { dirty.current = value },
+    onDirtyChange: setDirty,
     onRefresh: async () => {
       if (relevantUnknown) await reconcile(relevantUnknown)
       else if (mode === 'edit' && categoryId !== null && forcedUnavailable === 'refresh-error') await refreshEditAfterNotFound(categoryId)

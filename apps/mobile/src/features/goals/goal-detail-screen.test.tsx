@@ -32,27 +32,58 @@ async function renderScreen(state: GoalDetailViewState, locale = 'en', mutationP
   return { view, handlers }
 }
 
+async function openSheet(view: Awaited<ReturnType<typeof render>>, name: RegExp | string) {
+  await fireEvent.press(view.getByRole('button', { name }))
+}
+
+async function openEdit(view: Awaited<ReturnType<typeof render>>) {
+  await openSheet(view, 'Manage goal')
+  await fireEvent.press(view.getByRole('button', { name: 'Edit goal' }))
+}
+
 describe('GoalDetailScreen', () => {
-  it('shows the complete read-only summary and actual overfunded percentage', async () => {
+  it('leads with the name, status, actions and Available, then target, progress and the monthly contribution', async () => {
     const { view } = await renderScreen({ status: 'loaded', data, activityStatus: 'loaded', hasMore: true })
     expect(view.getByRole('header', { name: 'Emergency reserve' })).toBeOnTheScreen()
-    expect(view.getByText('Progress 125% · Over target')).toBeOnTheScreen()
+    expect(view.getByText('Active')).toBeOnTheScreen()
+    expect(view.getByRole('button', { name: 'Assign money' })).toBeOnTheScreen()
+    expect(view.getByRole('button', { name: 'Move money out' })).toBeOnTheScreen()
+    expect(view.getByRole('button', { name: 'Manage goal' })).toBeOnTheScreen()
+    expect(view.getByText('€1,250.00')).toBeOnTheScreen()
+    expect(view.getByLabelText('Target amount, €1,000.00')).toBeOnTheScreen()
+    expect(view.getByLabelText('Progress, 100%')).toBeOnTheScreen()
+    expect(view.getByLabelText('Target date, Jul 18, 2027')).toBeOnTheScreen()
     expect(StyleSheet.flatten(view.getByTestId('goal-detail-progress-fill').props.style).width).toBe('100%')
-    expect(view.getByLabelText('Remaining, €0.00')).toBeOnTheScreen()
+    expect(view.getByRole('header', { name: 'Monthly contribution' })).toBeOnTheScreen()
     expect(view.getByLabelText('Assigned this month, €100.00')).toBeOnTheScreen()
-    expect(view.getByLabelText('Required contribution, €150.00')).toBeOnTheScreen()
-    expect(view.getByLabelText('Shortfall, €25.00')).toBeOnTheScreen()
+    expect(view.getByLabelText('Needed this month, €150.00')).toBeOnTheScreen()
+    expect(view.getByLabelText('Short by, €25.00')).toBeOnTheScreen()
+    expect(view.getByLabelText('Remaining, €0.00')).toBeOnTheScreen()
     expect(view.getByLabelText('Spent, €200.00')).toBeOnTheScreen()
     expect(view.getAllByText('Current account').length).toBeGreaterThan(0)
-    expect(view.getByText('Account names are context only')).toBeOnTheScreen()
+    expect(view.getByRole('header', { name: 'Linked account' })).toBeOnTheScreen()
     expect(view.getByText('Showing 1 of 26')).toBeOnTheScreen()
     expect(view.getByRole('button', { name: 'Link account context' })).toBeOnTheScreen()
-    expect(view.queryByText(/balance/i)).not.toBeOnTheScreen()
+  })
+
+  it('shows a debt goal\'s payoff plan in place of the monthly contribution', async () => {
+    const debtGoal = mapGoalDetail({
+      goal: { ...goal, type: 'debt_paydown', annualInterestRateBps: 1999 },
+      summary: { ...summary, debtProjection: { currentBalance: 900, monthlyPayment: 120, months: 8, payoffDate: '2027-03-01T00:00:00.000Z', paysOff: true, progressPercentage: 10, totalInterest: 55 } },
+    })
+    const { view } = await renderScreen({ status: 'loaded', data: { ...data, goal: debtGoal }, activityStatus: 'loaded', hasMore: false })
+    expect(view.getByRole('header', { name: 'Payoff plan' })).toBeOnTheScreen()
+    expect(view.getByText('19.99% APR')).toBeOnTheScreen()
+    expect(view.getByLabelText('Payoff date, Mar 1, 2027')).toBeOnTheScreen()
+    expect(view.getByLabelText('Time to payoff, 8 months')).toBeOnTheScreen()
+    expect(view.getByLabelText('Total interest, €55.00')).toBeOnTheScreen()
+    expect(view.getByLabelText('Monthly payment, €120.00')).toBeOnTheScreen()
+    expect(view.queryByRole('header', { name: 'Monthly contribution' })).not.toBeOnTheScreen()
   })
 
   it('localizes activity type, date, amount, and loads another offset page explicitly', async () => {
     const { view, handlers } = await renderScreen({ status: 'loaded', data, activityStatus: 'loaded', hasMore: true }, 'pt-PT')
-    expect(view.getByText('Atribuído')).toBeOnTheScreen()
+    expect(view.getByText('Dinheiro atribuído')).toBeOnTheScreen()
     expect(view.getAllByText('25,00 €')).toHaveLength(2)
     expect(view.getByText('Monthly plan')).toBeOnTheScreen()
     const loadMore = view.getByRole('button', { name: 'Carregar mais' })
@@ -95,6 +126,7 @@ describe('GoalDetailScreen', () => {
 
   it('submits only dirty metadata, validates four decimals, and retains ambiguous input', async () => {
     const { view, handlers } = await renderScreen({ status: 'loaded', data, activityStatus: 'loaded', hasMore: false })
+    await openEdit(view)
     const save = view.getByRole('button', { name: 'Save changes' })
     expect(save).toBeDisabled()
     await fireEvent.changeText(view.getByLabelText('Name'), '  Rainy day  ')
@@ -102,6 +134,9 @@ describe('GoalDetailScreen', () => {
     expect(view.getByRole('button', { name: 'Save changes' })).toBeEnabled()
     await fireEvent.press(view.getByRole('button', { name: 'Save changes' }))
     expect(handlers.save).toHaveBeenCalledWith({ name: 'Rainy day', monthlyContributionTarget: null })
+    // A saved edit closes the sheet; reopen it.
+    await waitFor(() => expect(view.queryByRole('button', { name: 'Save changes' })).not.toBeOnTheScreen())
+    await openEdit(view)
 
     handlers.save.mockRejectedValueOnce(new (jest.requireActual('@/lib/api/errors').ApiError)('network'))
     await fireEvent.changeText(view.getByLabelText('Target amount'), '12.34567')
@@ -116,6 +151,7 @@ describe('GoalDetailScreen', () => {
 
   it('treats trim and numeric formatting equivalents as no-ops while distinguishing invalid input', async () => {
     const { view, handlers } = await renderScreen({ status: 'loaded', data, activityStatus: 'loaded', hasMore: false })
+    await openEdit(view)
     await fireEvent.changeText(view.getByLabelText('Name'), '  Emergency reserve  ')
     await fireEvent.changeText(view.getByLabelText('Target amount'), '1000.0')
     await fireEvent.changeText(view.getByLabelText('Monthly contribution target'), '125.0')
@@ -136,6 +172,7 @@ describe('GoalDetailScreen', () => {
     const alert = jest.spyOn(Alert, 'alert').mockImplementation(jest.fn())
     const { view, handlers } = await renderScreen({ status: 'loaded', data, activityStatus: 'loaded', hasMore: false }, 'pt-PT')
     handlers.assign.mockResolvedValue(undefined)
+    await openSheet(view, 'Atribuir dinheiro')
     await fireEvent.changeText(view.getByLabelText('Montante'), '10,5000')
     await fireEvent.press(view.getByRole('button', { name: 'Atribuir ao objetivo' }))
     expect(alert).toHaveBeenCalledWith(
@@ -149,14 +186,15 @@ describe('GoalDetailScreen', () => {
     const buttons = alert.mock.calls[0][2]!
     await act(async () => { buttons[1]?.onPress?.(); await Promise.resolve() })
     expect(handlers.assign).toHaveBeenCalledWith(10.5)
-    await waitFor(() => expect(view.getByLabelText('Montante').props.value).toBe(''))
-    expect(view.getByText('Foram atribuídos 10,50 € a Emergency reserve')).toBeOnTheScreen()
+    await waitFor(() => expect(view.getByText('Foram atribuídos 10,50 € a Emergency reserve')).toBeOnTheScreen())
+    expect(view.queryByLabelText('Montante')).not.toBeOnTheScreen()
     alert.mockRestore()
   })
 
   it('prechecks available reserve and never opens a move-out confirmation for excess', async () => {
     const alert = jest.spyOn(Alert, 'alert').mockImplementation(jest.fn())
     const { view, handlers } = await renderScreen({ status: 'loaded', data, activityStatus: 'loaded', hasMore: false })
+    await openSheet(view, 'Move money out')
     await fireEvent.changeText(view.getByLabelText('Amount'), '1250.0001')
     await fireEvent.press(view.getByRole('button', { name: 'Move out of goal' }))
     expect(view.getByText(/cannot exceed the available reserve/i)).toBeOnTheScreen()
@@ -170,6 +208,7 @@ describe('GoalDetailScreen', () => {
     const alert = jest.spyOn(Alert, 'alert').mockImplementation(jest.fn())
     const { view, handlers } = await renderScreen({ status: 'loaded', data, activityStatus: 'loaded', hasMore: false })
     handlers.moveOut.mockResolvedValue(undefined)
+    await openSheet(view, 'Move money out')
     await fireEvent.changeText(view.getByLabelText('Amount'), '20.2500')
     await fireEvent.press(view.getByRole('button', { name: 'Move out of goal' }))
     expect(alert).toHaveBeenCalledWith(
@@ -187,6 +226,7 @@ describe('GoalDetailScreen', () => {
   it('rechecks the shared lock in an open reserve confirmation and retains definitive failure input', async () => {
     const alert = jest.spyOn(Alert, 'alert').mockImplementation(jest.fn())
     const { view, handlers } = await renderScreen({ status: 'loaded', data, activityStatus: 'loaded', hasMore: false })
+    await openSheet(view, 'Assign money')
     await fireEvent.changeText(view.getByLabelText('Amount'), '25')
     await fireEvent.press(view.getByRole('button', { name: 'Assign to goal' }))
     const buttons = alert.mock.calls[0][2]!
@@ -207,6 +247,7 @@ describe('GoalDetailScreen', () => {
     const alert = jest.spyOn(Alert, 'alert').mockImplementation(jest.fn())
     const { view, handlers } = await renderScreen({ status: 'loaded', data, activityStatus: 'loaded', hasMore: false })
     handlers.assign.mockRejectedValueOnce(new (jest.requireActual('@/lib/api/errors').ApiError)('invalid-response'))
+    await openSheet(view, 'Assign money')
     await fireEvent.changeText(view.getByLabelText('Amount'), '30.125')
     await fireEvent.press(view.getByRole('button', { name: 'Assign to goal' }))
     const buttons = alert.mock.calls[0][2]!
@@ -220,10 +261,9 @@ describe('GoalDetailScreen', () => {
   it('shows the ambiguous gate and disables every goal mutation control until refresh recovery', async () => {
     const { view } = await renderScreen({ status: 'loaded', data, activityStatus: 'loaded', hasMore: false }, 'en', false, true)
     expect(view.getByText(/Goal writes are locked until goal details and activity refresh successfully/)).toBeOnTheScreen()
-    expect(view.getByLabelText('Amount').props.editable).toBe(false)
-    expect(view.getByRole('button', { name: 'Assign to goal' })).toBeDisabled()
-    expect(view.getByRole('button', { name: 'Move out of goal' })).toBeDisabled()
-    expect(view.getByLabelText('Name').props.editable).toBe(false)
+    expect(view.getByRole('button', { name: 'Assign money' })).toBeDisabled()
+    expect(view.getByRole('button', { name: 'Move money out' })).toBeDisabled()
+    expect(view.getByRole('button', { name: 'Manage goal' })).toBeDisabled()
     expect(view.getByRole('button', { name: 'Unlink Current account' })).toBeDisabled()
   })
 
@@ -254,20 +294,17 @@ describe('GoalDetailScreen', () => {
 
   it('keeps every goal write control locked from authoritative pending state', async () => {
     const { view } = await renderScreen({ status: 'loaded', data, activityStatus: 'loaded', hasMore: false }, 'en', true)
-    expect(view.getByLabelText('Name').props.editable).toBe(false)
-    expect(view.getByRole('button', { name: 'Saving' })).toBeDisabled()
+    expect(view.getByRole('button', { name: 'Assign money' })).toBeDisabled()
+    expect(view.getByRole('button', { name: 'Move money out' })).toBeDisabled()
+    expect(view.getByRole('button', { name: 'Archiving…' })).toBeDisabled()
     expect(view.getByRole('button', { name: 'Unlink Current account' })).toBeDisabled()
     expect(view.getByRole('button', { name: 'Linking' })).toBeDisabled()
-    expect(view.getByRole('button', { name: 'Updating reserve' })).toBeDisabled()
-    expect(view.getByRole('button', { name: 'Move out of goal' })).toBeDisabled()
   })
 
   it.each(['archived', 'completed'] as const)('exposes no mutation controls, including archive, for %s goals', async (status) => {
     const lockedGoal = mapGoalDetail({ goal: { ...goal, status }, summary })
     const { view } = await renderScreen({ status: 'loaded', data: { ...data, goal: lockedGoal }, activityStatus: 'loaded', hasMore: false })
-    expect(view.queryByText('Goal details')).not.toBeOnTheScreen()
-    expect(view.queryByText('Internal reserve')).not.toBeOnTheScreen()
-    expect(view.queryByRole('button', { name: /save|link|unlink|assign|move|archive/i })).not.toBeOnTheScreen()
+    expect(view.queryByRole('button', { name: /save|link|unlink|assign|move|archive|manage/i })).not.toBeOnTheScreen()
   })
 
   it('warns, in words and to screen readers, on a funding whose transaction the bank dropped', async () => {
@@ -286,7 +323,8 @@ describe('GoalDetailScreen', () => {
   it('keeps paused goals editable', async () => {
     const pausedGoal = mapGoalDetail({ goal: { ...goal, status: 'paused' }, summary: { ...summary, status: 'paused' } })
     const { view } = await renderScreen({ status: 'loaded', data: { ...data, goal: pausedGoal }, activityStatus: 'loaded', hasMore: false })
-    expect(view.getByText('Goal details')).toBeOnTheScreen()
+    expect(view.getByText('Paused')).toBeOnTheScreen()
+    await openEdit(view)
     expect(view.getByRole('button', { name: 'Save changes' })).toBeDisabled()
   })
 
@@ -294,6 +332,7 @@ describe('GoalDetailScreen', () => {
     it('redirects to move-out instead of confirming archive when a balance remains', async () => {
       const alert = jest.spyOn(Alert, 'alert').mockImplementation(jest.fn())
       const { view, handlers } = await renderScreen({ status: 'loaded', data, activityStatus: 'loaded', hasMore: false })
+      await openSheet(view, 'Manage goal')
       await fireEvent.press(view.getByRole('button', { name: 'Archive goal' }))
       expect(alert).toHaveBeenCalledWith('Move money out first', expect.stringContaining('Move it out below'))
       expect(handlers.archive).not.toHaveBeenCalled()
@@ -304,6 +343,7 @@ describe('GoalDetailScreen', () => {
       const alert = jest.spyOn(Alert, 'alert').mockImplementation(jest.fn())
       const zeroBalanceGoal = mapGoalDetail({ goal, summary: { ...summary, availableAmount: 0 } })
       const { view, handlers } = await renderScreen({ status: 'loaded', data: { ...data, goal: zeroBalanceGoal }, activityStatus: 'loaded', hasMore: false })
+      await openSheet(view, 'Manage goal')
       await fireEvent.press(view.getByRole('button', { name: 'Archive goal' }))
       const buttons = alert.mock.calls[0][2]!
       expect(handlers.archive).not.toHaveBeenCalled()
@@ -316,6 +356,7 @@ describe('GoalDetailScreen', () => {
       const alert = jest.spyOn(Alert, 'alert').mockImplementation(jest.fn())
       const zeroBalanceGoal = mapGoalDetail({ goal, summary: { ...summary, availableAmount: 0 } })
       const { view, handlers } = await renderScreen({ status: 'loaded', data: { ...data, goal: zeroBalanceGoal }, activityStatus: 'loaded', hasMore: false })
+      await openSheet(view, 'Manage goal')
       await fireEvent.press(view.getByRole('button', { name: 'Archive goal' }))
       const buttons = alert.mock.calls[0][2]!
       await act(() => buttons[0]?.onPress?.())
@@ -328,6 +369,7 @@ describe('GoalDetailScreen', () => {
       const zeroBalanceGoal = mapGoalDetail({ goal, summary: { ...summary, availableAmount: 0 } })
       const { view, handlers } = await renderScreen({ status: 'loaded', data: { ...data, goal: zeroBalanceGoal }, activityStatus: 'loaded', hasMore: false })
       handlers.archive.mockRejectedValueOnce(new (jest.requireActual('@/lib/api/errors').ApiError)('demo-forbidden', 403))
+      await openSheet(view, 'Manage goal')
       await fireEvent.press(view.getByRole('button', { name: 'Archive goal' }))
       const buttons = alert.mock.calls[0][2]!
       await act(async () => { buttons[1]?.onPress?.(); await Promise.resolve() })

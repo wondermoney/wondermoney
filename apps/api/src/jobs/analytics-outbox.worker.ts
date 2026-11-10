@@ -10,12 +10,19 @@ import type { EventMessage } from 'posthog-node';
 import { DI } from '@app/database/di';
 import { AnalyticsOutbox } from '@entity/AnalyticsOutbox';
 import { Appuser } from '@entity/Appuser';
-import { hasSensitiveAnalyticsProperties, isCanonicalExternalUserId } from '@service/analytics/analytics-outbox.service';
+import {
+  hasSensitiveAnalyticsProperties,
+  isAnalyticsOutboxEnabled,
+  isCanonicalExternalUserId,
+} from '@service/analytics/analytics-outbox.service';
 import logger from '@utils/logger';
 
 const ANALYTICS_OUTBOX_BATCH_SIZE = 100;
 const CANONICAL_EXTERNAL_UUID_SQL_PATTERN = '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$';
 const DEFAULT_POSTHOG_HOST = 'https://eu.i.posthog.com';
+// Undelivered rows older than this are dropped: rows written before delivery became opt-in,
+// or rows the worker could never deliver (their user is gone).
+const STALE_UNDELIVERED_ROW_DAYS = 30;
 
 export interface AnalyticsOutboxDeliverySummary {
   blocked: number;
@@ -23,8 +30,12 @@ export interface AnalyticsOutboxDeliverySummary {
   scanned: number;
 }
 
+export interface AnalyticsOutboxJobSummary extends AnalyticsOutboxDeliverySummary {
+  purged: number;
+}
+
 interface AnalyticsOutboxWorkerDeps {
-  em?: Pick<EntityManager, 'transactional'>;
+  em?: Pick<EntityManager, 'nativeDelete' | 'transactional'>;
   env?: NodeJS.ProcessEnv;
   logger?: Pick<Logger, 'error' | 'info' | 'warn'>;
   now?: () => Date;
@@ -51,7 +62,7 @@ export async function deliverAnalyticsOutboxBatch(
   const env = deps.env ?? process.env;
   // Product analytics are opt-in: delivery runs only with ANALYTICS_OUTBOX_MODE=live (which then
   // requires POSTHOG_API_KEY). Anything else, including an unset mode, is off.
-  if (env['ANALYTICS_OUTBOX_MODE']?.trim() !== 'live') return { blocked: 0, delivered: 0, scanned: 0 };
+  if (!isAnalyticsOutboxEnabled(env)) return { blocked: 0, delivered: 0, scanned: 0 };
 
   const posthogClient = deps.posthogClient ?? createPostHogDeliveryClient(env);
   const em = deps.em ?? DI.em;
@@ -125,10 +136,21 @@ export async function deliverAnalyticsOutboxBatch(
   });
 }
 
+export async function purgeStaleAnalyticsOutboxRows(
+  deps: { em?: Pick<EntityManager, 'nativeDelete'>; now?: () => Date } = {},
+): Promise<number> {
+  const em = deps.em ?? DI.em;
+  const now = deps.now ?? (() => new Date());
+  const cutoff = new Date(now().getTime() - STALE_UNDELIVERED_ROW_DAYS * 24 * 60 * 60 * 1000);
+  return em.nativeDelete(AnalyticsOutbox, { createdAt: { $lt: cutoff }, sentAt: null });
+}
+
+// Purges on every run, whatever the mode, so an instance with delivery off drains old rows.
 export async function handleAnalyticsOutboxJob(
   deps: AnalyticsOutboxWorkerDeps = {},
-): Promise<AnalyticsOutboxDeliverySummary> {
-  return deliverAnalyticsOutboxBatch(deps);
+): Promise<AnalyticsOutboxJobSummary> {
+  const purged = await purgeStaleAnalyticsOutboxRows({ em: deps.em, now: deps.now });
+  return { ...(await deliverAnalyticsOutboxBatch(deps)), purged };
 }
 
 async function claimEligibleAnalyticsOutboxIds(em: EntityManager): Promise<number[]> {

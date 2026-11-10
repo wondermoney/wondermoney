@@ -3,6 +3,7 @@
 import { useTranslations } from "next-intl";
 import { useMemo } from "react";
 
+import BudgetForecast from "@/components/budget/BudgetForecast";
 import BudgetOverviewTable from "@/components/budget/BudgetOverviewTable";
 import BudgetTable from "@/components/budget/BudgetTable";
 import Stats from "@/components/ui/Stats";
@@ -192,6 +193,7 @@ export default function BudgetYearClient({
             />
           ) : null}
         </div>
+        <BudgetForecast budgetKey={budgetKey} />
       </div>
     </>
   );

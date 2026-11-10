@@ -28,6 +28,19 @@ describe('mapRecentTransactions', () => {
 
   it('carries through nullable display name, date, amount and currency verbatim', () => {
     const [row] = mapRecentTransactions([dto({ displayName: null, occurredAt: null, amount: null, currencyCode: null })])
-    expect(row).toEqual({ kind: 'persisted', displayName: null, occurredAt: null, amount: null, currencyCode: null, direction: null })
+    expect(row).toEqual({ kind: 'persisted', displayName: null, occurredAt: null, amount: null, currencyCode: null, direction: null, mark: { glyph: 'tag' } })
+  })
+
+  it('marks a row by its category, a transfer by arrows, and an uncategorised row with a muted tag', () => {
+    const rows = mapRecentTransactions([
+      dto({ category: { icon: 'coffee', bgColor: '#FEE2E2', textColor: '#991B1B' } }),
+      dto({ transfer: true, category: { icon: 'coffee', bgColor: null, textColor: null } }),
+      dto({ category: null }),
+    ])
+    expect(rows.map((row) => (row.kind === 'persisted' ? row.mark : null))).toEqual([
+      { icon: { name: 'coffee', bgColor: '#FEE2E2', textColor: '#991B1B' } },
+      { glyph: 'arrow-left-right' },
+      { glyph: 'tag' },
+    ])
   })
 })

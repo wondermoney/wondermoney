@@ -20,6 +20,7 @@ describe('manual transaction contract', () => {
     newMerchantName: 'ignored because the existing merchant wins',
     categoryId: 4,
     description: '  Lunch  ',
+    notes: '  Split with Ana  ',
   }
 
   it('freezes the exact mixed API body, prefers an existing merchant, and accepts empty 201', () => {
@@ -34,6 +35,7 @@ describe('manual transaction contract', () => {
         transactionMerchantId: 9,
         categoryId: '4',
         description: 'Lunch',
+        notes: 'Split with Ana',
       },
     })
     const endpoint = createManualTransactionEndpoint(7)

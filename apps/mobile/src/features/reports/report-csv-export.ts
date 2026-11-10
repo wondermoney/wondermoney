@@ -13,7 +13,7 @@ export async function shareReportCsv(csv: string, filename: string): Promise<voi
   const file = new File(Paths.cache, filename)
   if (file.exists) file.delete()
   file.create()
-  file.write(csv)
+  await file.write(csv)
 
   await Sharing.shareAsync(file.uri, { mimeType: 'text/csv', UTI: 'public.comma-separated-values-text' })
 }

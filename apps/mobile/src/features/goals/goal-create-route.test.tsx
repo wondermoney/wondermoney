@@ -12,10 +12,10 @@ const payload: GoalCreateWrite = { name: 'Reserve', targetAmount: 100 }
 const mockMutation = { isPending: false, mutateAsync: jest.fn(), unknownGate: null as null | { payload: GoalCreateWrite } }
 const mockRead = jest.fn()
 const mockReplace = jest.fn()
-const mockAddListener = jest.fn(() => jest.fn())
+const mockUsePreventRemove = jest.fn((_preventRemove: boolean, _onPrevented?: (options: { data: { action: object }; repeat: () => void }) => void) => jest.fn())
 
 jest.mock('expo-router', () => ({
-  useNavigation: () => ({ addListener: mockAddListener }),
+  usePreventRemove: (preventRemove: boolean, onPrevented?: (options: { data: { action: object }; repeat: () => void }) => void) => mockUsePreventRemove(preventRemove, onPrevented),
   useRouter: () => ({ replace: mockReplace }),
 }))
 jest.mock('@/components/providers/product-runtime-provider', () => ({

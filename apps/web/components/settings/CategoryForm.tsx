@@ -22,7 +22,10 @@ import {
 import { Category as CategoryType } from "@/lib/api/category/useCategories";
 import useCreateCategory from "@/lib/api/category/useCreateCategory";
 import useEditCategory from "@/lib/api/category/useEditCategory";
-import { getCategoryTranslationKey } from "@/lib/utils/categories";
+import {
+  countsAsSpending as categoryCountsAsSpending,
+  getCategoryTranslationKey,
+} from "@/lib/utils/categories";
 import { invalidateCategories } from "@/lib/utils/queryInvalidation";
 
 import { Button } from "../ui/button";
@@ -35,6 +38,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../ui/Select";
+import { Switch } from "../ui/switch";
 import CategoryIconPicker from "./CategoryIconPicker";
 
 const categoryFormSchema = z.object({
@@ -42,6 +46,7 @@ const categoryFormSchema = z.object({
   color: z.string().regex(/^#[0-9A-Fa-f]{6}$/, "Invalid color format"),
   icon: z.string().optional(),
   parentCategoryKey: z.string().nullable(),
+  countsAsSpending: z.boolean(),
 });
 
 type CategoryFormData = z.infer<typeof categoryFormSchema>;
@@ -56,9 +61,12 @@ const generateRandomColor = (): string => {
   return color;
 };
 
+/** A category as the form sees it: flattened, with its parent's key. */
+type FormCategory = CategoryType & { parentCategoryKey?: number | null };
+
 interface CategoryFormProps {
-  categories: CategoryType[];
-  editingCategory?: CategoryType | null;
+  categories: FormCategory[];
+  editingCategory?: FormCategory | null;
   onFormReset?: () => void;
 }
 
@@ -81,6 +89,7 @@ const CategoryForm: React.FC<CategoryFormProps> = ({
       name: "",
       icon: "",
       parentCategoryKey: null,
+      countsAsSpending: true,
     },
   });
 
@@ -93,6 +102,23 @@ const CategoryForm: React.FC<CategoryFormProps> = ({
   // Watch for changes to detect duplicates
   const watchedName = useWatch({ control: methods.control, name: "name" });
   const watchedColor = useWatch({ control: methods.control, name: "color" });
+  const watchedParentKey = useWatch({
+    control: methods.control,
+    name: "parentCategoryKey",
+  });
+
+  // A category under a parent that doesn't count as spending never counts
+  // either, so its own switch is shown off and locked.
+  const parentCategory = useMemo(() => {
+    const parentKey = isEditing
+      ? editingCategory?.parentCategoryKey
+      : watchedParentKey
+        ? Number(watchedParentKey)
+        : null;
+    if (parentKey == null) return null;
+    return categories.find((c) => c.categoryKey === parentKey) ?? null;
+  }, [categories, editingCategory, isEditing, watchedParentKey]);
+  const parentExcludesSpending = !categoryCountsAsSpending(parentCategory);
 
   // Categories are already flattened, so we can use them directly
   const allCategories = categories;
@@ -154,6 +180,7 @@ const CategoryForm: React.FC<CategoryFormProps> = ({
         color: editingCategory.bgColor,
         icon: editingCategory.icon || "",
         parentCategoryKey: null, // Categories don't track parent relationships in the form
+        countsAsSpending: editingCategory.countsAsSpending !== false,
       });
     } else {
       reset({
@@ -161,6 +188,7 @@ const CategoryForm: React.FC<CategoryFormProps> = ({
         name: "",
         icon: "",
         parentCategoryKey: null,
+        countsAsSpending: true,
       });
     }
   }, [editingCategory, reset]);
@@ -174,6 +202,9 @@ const CategoryForm: React.FC<CategoryFormProps> = ({
             name: data.name,
             color: data.color,
             icon: data.icon,
+            countsAsSpending: parentExcludesSpending
+              ? undefined
+              : data.countsAsSpending,
           });
           toast.success(t("toast-update-category-success"));
         } else {
@@ -182,6 +213,9 @@ const CategoryForm: React.FC<CategoryFormProps> = ({
             color: data.color,
             icon: data.icon,
             parentCategoryKey: data.parentCategoryKey ?? undefined,
+            countsAsSpending: parentExcludesSpending
+              ? false
+              : data.countsAsSpending,
           });
           toast.success(t("toast-create-category-success"));
         }
@@ -193,6 +227,7 @@ const CategoryForm: React.FC<CategoryFormProps> = ({
           name: "",
           icon: "",
           parentCategoryKey: null,
+          countsAsSpending: true,
         });
 
         onFormReset?.();
@@ -208,6 +243,7 @@ const CategoryForm: React.FC<CategoryFormProps> = ({
       queryClient,
       reset,
       onFormReset,
+      parentExcludesSpending,
       t,
     ],
   );
@@ -218,6 +254,7 @@ const CategoryForm: React.FC<CategoryFormProps> = ({
       name: "",
       icon: "",
       parentCategoryKey: null,
+      countsAsSpending: true,
     });
     onFormReset?.();
   }, [reset, onFormReset]);
@@ -386,6 +423,32 @@ const CategoryForm: React.FC<CategoryFormProps> = ({
               )}
             />
           </div>
+
+          <FormField
+            control={methods.control}
+            name="countsAsSpending"
+            render={({ field }) => (
+              <FormItem className="flex items-start gap-3">
+                <FormControl>
+                  <Switch
+                    checked={parentExcludesSpending ? false : field.value}
+                    onCheckedChange={field.onChange}
+                    disabled={parentExcludesSpending}
+                  />
+                </FormControl>
+                <div className="space-y-1">
+                  <FormLabel className="font-semibold">
+                    {t("counts-as-spending")}
+                  </FormLabel>
+                  <p className="text-muted-foreground text-sm">
+                    {parentExcludesSpending
+                      ? t("counts-as-spending-parent-off")
+                      : t("counts-as-spending-description")}
+                  </p>
+                </div>
+              </FormItem>
+            )}
+          />
 
           <div className="flex gap-2 pt-2">
             <Button

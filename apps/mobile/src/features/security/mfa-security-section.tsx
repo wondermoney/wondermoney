@@ -1,11 +1,14 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { StyleSheet, Text, TextInput, View } from 'react-native'
+import { StyleSheet, View } from 'react-native'
+
+import { FormGroup, FormTextRow } from '@/components/ui/form-row'
+import { Text } from '@/components/ui/text'
+import { SettingsSection } from '@/features/more/settings-ui'
 
 import { SelfAction, type Palette } from '@/features/self/self-screen-parts'
 import { isValidTotpCode, normalizeTotpCode } from '@/lib/auth/mfa-code'
 import { themeTokens } from '@/theme/tokens'
-import { textStyles } from '@/theme/typography'
 
 export type MfaSecuritySectionStatus = 'loading' | 'error' | 'off' | 'enrolling' | 'on'
 
@@ -59,23 +62,17 @@ export function MfaSecuritySection({
   }
 
   return (
-    <View style={[styles.card, { borderColor: palette.border, backgroundColor: palette.muted }]}>
-      <Text accessibilityRole="header" allowFontScaling style={[styles.cardTitle, { color: palette.foreground }]}>
-        {t('security.mfa.heading')}
-      </Text>
-      <Text allowFontScaling style={[styles.cardBody, { color: palette.mutedForeground }]}>
-        {t('security.mfa.helper')}
-      </Text>
+    <SettingsSection title={t('security.mfa.heading')} description={t('security.mfa.helper')}>
 
       {status === 'loading' ? (
-        <Text accessibilityRole="progressbar" accessibilityLabel={t('security.mfa.loading')} allowFontScaling style={[styles.cardBody, { color: palette.mutedForeground }]}>
+        <Text accessibilityRole="progressbar" accessibilityLabel={t('security.mfa.loading')} variant="meta" tone="muted">
           {t('security.mfa.loading')}
         </Text>
       ) : null}
 
       {status === 'error' ? (
         <View style={styles.row}>
-          <Text accessibilityRole="alert" allowFontScaling style={[styles.error, { color: palette.destructive }]}>
+          <Text accessibilityRole="alert" variant="meta" tone="destructive">
             {t('security.mfa.statusUnavailable')}
           </Text>
           <SelfAction label={t('security.mfa.retry')} onPress={onRetryStatus} palette={palette} />
@@ -84,7 +81,7 @@ export function MfaSecuritySection({
 
       {status === 'off' ? (
         <View style={styles.row}>
-          <Text allowFontScaling style={[styles.statusLabel, { color: palette.foreground }]}>
+          <Text variant="metaStrong">
             {t('security.mfa.offLabel')}
           </Text>
           <SelfAction
@@ -94,7 +91,7 @@ export function MfaSecuritySection({
             palette={palette}
           />
           {enrollFailed ? (
-            <Text accessibilityRole="alert" allowFontScaling style={[styles.error, { color: palette.destructive }]}>
+            <Text accessibilityRole="alert" variant="meta" tone="destructive">
               {t('security.mfa.errors.unavailable')}
             </Text>
           ) : null}
@@ -103,52 +100,41 @@ export function MfaSecuritySection({
 
       {status === 'enrolling' && enrollment ? (
         <View style={styles.row}>
-          <Text accessibilityRole="header" allowFontScaling style={[styles.setupHeading, { color: palette.foreground }]}>
+          <Text accessibilityRole="header" variant="metaStrong">
             {t('security.mfa.setupHeading')}
           </Text>
-          <Text allowFontScaling style={[styles.cardBody, { color: palette.mutedForeground }]}>
+          <Text variant="meta" tone="muted">
             {t('security.mfa.setupHelper')}
           </Text>
-          <View style={[styles.secretBox, { borderColor: palette.border }]}>
-            <Text allowFontScaling style={[styles.secretLabel, { color: palette.mutedForeground }]}>
+          <View style={[styles.secretBox, { borderColor: palette.border, backgroundColor: palette.muted }]}>
+            <Text variant="label" tone="muted">
               {t('security.mfa.secretLabel')}
             </Text>
-            <Text selectable allowFontScaling style={[styles.secretValue, { color: palette.foreground }]}>
+            <Text selectable variant="amount">
               {enrollment.secret}
             </Text>
           </View>
 
-          <Text allowFontScaling style={[styles.label, { color: palette.foreground }]}>
-            {t('security.mfa.codeLabel')}
-          </Text>
-          <TextInput
-            accessibilityLabel={t('security.mfa.codeLabel')}
-            autoComplete="one-time-code"
-            editable={!confirmBusy}
-            inputMode="numeric"
-            keyboardType="number-pad"
-            maxLength={6}
-            onChangeText={(value) => { setCode(value); setValidationFailed(false) }}
-            onSubmitEditing={submitCode}
-            placeholder={t('security.mfa.codePlaceholder')}
-            placeholderTextColor={palette.mutedForeground}
-            returnKeyType="done"
-            style={[styles.input, { color: palette.foreground, borderColor: palette.border, backgroundColor: palette.card }]}
-            value={code}
-          />
+          <FormGroup>
+            <FormTextRow
+              key="code"
+              autoComplete="one-time-code"
+              editable={!confirmBusy}
+              error={validationFailed ? t('security.mfa.errors.validation') : confirmFailure === 'invalid-code' ? t('security.mfa.errors.invalidCode') : null}
+              inputMode="numeric"
+              keyboardType="number-pad"
+              label={t('security.mfa.codeLabel')}
+              maxLength={6}
+              onChangeText={(value) => { setCode(value); setValidationFailed(false) }}
+              onSubmitEditing={submitCode}
+              placeholder={t('security.mfa.codePlaceholder')}
+              returnKeyType="done"
+              value={code}
+            />
+          </FormGroup>
 
-          {validationFailed ? (
-            <Text accessibilityRole="alert" allowFontScaling style={[styles.error, { color: palette.destructive }]}>
-              {t('security.mfa.errors.validation')}
-            </Text>
-          ) : null}
-          {confirmFailure === 'invalid-code' ? (
-            <Text accessibilityRole="alert" allowFontScaling style={[styles.error, { color: palette.destructive }]}>
-              {t('security.mfa.errors.invalidCode')}
-            </Text>
-          ) : null}
           {confirmFailure === 'unavailable' ? (
-            <Text accessibilityRole="alert" allowFontScaling style={[styles.error, { color: palette.destructive }]}>
+            <Text accessibilityRole="alert" variant="meta" tone="destructive">
               {t('security.mfa.errors.unavailable')}
             </Text>
           ) : null}
@@ -168,7 +154,7 @@ export function MfaSecuritySection({
 
       {status === 'on' ? (
         <View style={styles.row}>
-          <Text allowFontScaling style={[styles.statusLabel, { color: palette.foreground }]}>
+          <Text variant="metaStrong">
             {t('security.mfa.onLabel')}
           </Text>
           <SelfAction
@@ -178,28 +164,18 @@ export function MfaSecuritySection({
             palette={palette}
           />
           {unenrollFailed ? (
-            <Text accessibilityRole="alert" allowFontScaling style={[styles.error, { color: palette.destructive }]}>
+            <Text accessibilityRole="alert" variant="meta" tone="destructive">
               {t('security.mfa.errors.unavailable')}
             </Text>
           ) : null}
         </View>
       ) : null}
-    </View>
+    </SettingsSection>
   )
 }
 
 const styles = StyleSheet.create({
-  card: {
-    borderWidth: 1,
-    borderRadius: themeTokens.radius.lg,
-    padding: themeTokens.spacing[4],
-    gap: themeTokens.spacing[3],
-  },
-  cardTitle: { ...textStyles.section },
-  cardBody: { ...textStyles.body },
   row: { gap: themeTokens.spacing[3], alignItems: 'flex-start' },
-  statusLabel: { ...textStyles.action },
-  setupHeading: { ...textStyles.action },
   secretBox: {
     width: '100%',
     borderWidth: 1,
@@ -207,10 +183,5 @@ const styles = StyleSheet.create({
     padding: themeTokens.spacing[3],
     gap: themeTokens.spacing[1],
   },
-  secretLabel: { ...textStyles.meta },
-  secretValue: { ...textStyles.body },
-  label: { ...textStyles.bodyStrong, fontWeight: '600' as const },
-  input: { ...textStyles.body, width: '100%', minHeight: themeTokens.touchTarget.minimum, borderWidth: 1, borderRadius: themeTokens.radius.md, paddingHorizontal: themeTokens.spacing[3] },
-  error: { ...textStyles.body },
-  actions: { flexDirection: 'row', flexWrap: 'wrap', gap: themeTokens.spacing[3] },
+  actions: { flexDirection: 'row', flexWrap: 'wrap', gap: themeTokens.spacing[2] },
 })

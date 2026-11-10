@@ -16,7 +16,7 @@ import {
 } from './transaction-ocr-contract'
 import { isManualTransactionAffectedQuery } from './use-create-manual-transaction'
 
-export type TransactionOcrFailure = 'demo' | 'access' | 'mfa' | 'cancelled' | 'network' | 'validation' | 'general'
+export type TransactionOcrFailure = 'demo' | 'unverified' | 'allowance' | 'access' | 'mfa' | 'cancelled' | 'network' | 'validation' | 'general'
 
 export type TransactionOcrPhase =
   | { phase: 'idle' }
@@ -31,6 +31,8 @@ export type ConfirmTransactionOcrInput = Omit<ConfirmTransactionOcrDraft, 'trans
 function classifyFailure(error: unknown): TransactionOcrFailure {
   if (!(error instanceof ApiError)) return 'general'
   if (error.code === 'demo-forbidden') return 'demo'
+  if (error.code === 'email-verification-required') return 'unverified'
+  if (error.code === 'ai-allowance-exhausted') return 'allowance'
   if (error.code === 'mfa-required') return 'mfa'
   if (error.code === 'auth-session' || (error.code === 'http' && (error.status === 401 || error.status === 403))) return 'access'
   if (error.code === 'cancelled') return isPostDispatchCancellation(error) ? 'general' : 'cancelled'

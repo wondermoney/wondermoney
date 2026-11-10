@@ -1,10 +1,11 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { mockReq, mockRes } from '@app/__tests__/__helpers__/mock-request';
+import { buildInfo } from '@utils/constants';
 
 import { getInstance } from '../instance';
 
-const INTEGRATION_KEYS = ['AI_BASE_URL', 'AI_MODEL', 'AWS_ACCESS_KEY_ID', 'AWS_SECRET_ACCESS_KEY', 'AZURE_AI_FOUNDRY_API_KEY', 'AZURE_OPENAI_API_KEY', 'EMAIL_DRIVER', 'EODHD_API_KEY', 'GOOGLE_CLIENT_ID', 'GOOGLE_CLIENT_SECRET', 'INSTANCE_NAME', 'MIN_APP_VERSION', 'RESEND_API_KEY', 'SIGNUP_MODE', 'SMTP_HOST', 'SUPPORT_EMAIL'];
+const INTEGRATION_KEYS = ['AI_BASE_URL', 'AI_MODEL', 'AWS_ACCESS_KEY_ID', 'AWS_SECRET_ACCESS_KEY', 'AZURE_AI_FOUNDRY_API_KEY', 'AZURE_OPENAI_API_KEY', 'EMAIL_DRIVER', 'EODHD_API_KEY', 'GOOGLE_CLIENT_ID', 'GOOGLE_CLIENT_SECRET', 'INSTANCE_NAME', 'MIN_APP_VERSION', 'RESEND_API_KEY', 'SIGNUP_MODE', 'SMTP_HOST', 'SPONSOR_URL', 'SUPPORT_EMAIL'];
 
 describe('GET /v1/instance', () => {
   afterEach(() => {
@@ -22,6 +23,7 @@ describe('GET /v1/instance', () => {
 
     expect(describeInstance()).toEqual({
       apiVersion: 1,
+      ...buildInfo(),
       features: {
         ai: { assistant: false, csvMapping: false, enrichment: false, monthlyStory: false, ocr: false },
         bankSync: true,
@@ -35,6 +37,7 @@ describe('GET /v1/instance', () => {
       minAppVersion: null,
       name: 'WonderMoney',
       signupMode: 'open',
+      sponsorUrl: null,
       supportEmail: null,
     });
   });
@@ -50,6 +53,7 @@ describe('GET /v1/instance', () => {
     vi.stubEnv('MIN_APP_VERSION', '2.1.0');
     vi.stubEnv('SIGNUP_MODE', 'invite');
     vi.stubEnv('SMTP_HOST', 'smtp.example.com');
+    vi.stubEnv('SPONSOR_URL', 'https://opencollective.com/example');
     vi.stubEnv('SUPPORT_EMAIL', 'help@example.com');
 
     expect(describeInstance()).toMatchObject({
@@ -57,6 +61,7 @@ describe('GET /v1/instance', () => {
       minAppVersion: '2.1.0',
       name: 'Casa',
       signupMode: 'invite',
+      sponsorUrl: 'https://opencollective.com/example',
       supportEmail: 'help@example.com',
     });
   });

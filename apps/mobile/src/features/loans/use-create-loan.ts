@@ -5,7 +5,7 @@ import { netWorthKey } from '@/features/net-worth/query-keys'
 import { ApiError } from '@/lib/api/errors'
 
 import { loanCreateEndpoint, loanCreateWriteSchema, type LoanCreateWrite } from './loans-contract'
-import { loansKey } from './query-keys'
+import { loanOverviewKey, loansKey } from './query-keys'
 
 export type LoanCreateFailure = 'demo' | 'access' | 'mfa' | 'invalid' | 'invalid-response' | 'general'
 
@@ -34,6 +34,7 @@ export function useCreateLoan() {
         commit: () => {
           void Promise.all([
             queryClient.invalidateQueries({ queryKey: loansKey(runtime.epochId), exact: true }),
+            queryClient.invalidateQueries({ queryKey: loanOverviewKey(runtime.epochId), exact: true }),
             queryClient.invalidateQueries({ queryKey: netWorthKey(runtime.epochId), exact: true }),
           ])
         },

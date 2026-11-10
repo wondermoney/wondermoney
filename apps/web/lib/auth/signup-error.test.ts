@@ -140,3 +140,13 @@ test("every signup error message exists in en, pt and es", () => {
     }
   }
 });
+
+test("an email with an account from before the sign-in change asks the user to check their inbox", () => {
+  assert.equal(
+    getSignupCallbackErrorKey(
+      apiError(400, "account_reconnect_email_unverified"),
+      { hasInvite: false },
+    ),
+    "toast-signup-error-reconnect-verify",
+  );
+});

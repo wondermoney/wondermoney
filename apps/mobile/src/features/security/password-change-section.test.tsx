@@ -1,5 +1,6 @@
 import { fireEvent, render } from '@testing-library/react-native'
 import { I18nextProvider } from 'react-i18next'
+import { StyleSheet } from 'react-native'
 
 import { initMobileI18n } from '@/lib/i18n'
 import { themeTokens } from '@/theme/tokens'
@@ -86,5 +87,14 @@ describe('PasswordChangeSection', () => {
   it('disables the form while pending', async () => {
     const { view } = await renderSection({ pending: true })
     expect(view.getByRole('button', { name: 'Saving…' })).toBeDisabled()
+    expect(view.getByLabelText('Current password')).toHaveProp('editable', false)
+  })
+
+  it('draws the fields as grouped secure rows with a start-aligned, normal-width submit', async () => {
+    const { view } = await renderSection()
+    for (const label of ['Current password', 'New password', 'Repeat new password']) {
+      expect(view.getByLabelText(label)).toHaveProp('secureTextEntry', true)
+    }
+    expect(StyleSheet.flatten(view.getByRole('button', { name: 'Save new password' }).props.style).alignSelf).toBe('flex-start')
   })
 })

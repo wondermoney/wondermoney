@@ -85,6 +85,15 @@ export type ChangePasswordOutcome =
   | { status: 'weak-password' }
   | { status: 'unavailable' }
 
+/**
+ * Deliberately two-valued: better-auth answers the same way whether or not the address
+ * belongs to an account, and a rate-limit or server refusal is not actionable beyond
+ * "try again later".
+ */
+export type SendVerificationEmailOutcome =
+  | { status: 'sent' }
+  | { status: 'unavailable' }
+
 export type MfaFactorSummary = { id: string; status: 'verified' | 'unverified' }
 
 export type MfaListFactorsOutcome =
@@ -129,4 +138,9 @@ export type AppAuthAdapter = AuthSessionPort<AuthSession>
      * new one, matching web's confirm-then-update flow. Neither password is logged.
      */
     changePassword: (email: string, currentPassword: string, newPassword: string) => Promise<ChangePasswordOutcome>
+    /**
+     * Asks better-auth to email a fresh verification link to `email`. No callback URL is
+     * passed: the server points the link at the web app.
+     */
+    sendVerificationEmail: (email: string) => Promise<SendVerificationEmailOutcome>
   }>

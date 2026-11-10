@@ -1,7 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useMemo } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { toast } from "sonner";
@@ -19,6 +19,7 @@ import {
   FormMessage,
 } from "@/components/ui/Form";
 import { Input } from "@/components/ui/input";
+import { MoneyInput } from "@/components/ui/MoneyInput";
 import { Textarea } from "@/components/ui/textarea";
 import { isDemoReadOnlyError } from "@/lib/api/errors";
 import type { Goal, UpdateGoalRequest } from "@/lib/api/goals/types";
@@ -30,7 +31,9 @@ import {
   parseGoalDateInput,
   parseGoalMoney,
 } from "@/lib/goals/form";
-import { cn } from "@/lib/utils";
+import { formatLocaleNumberInput } from "@/lib/utils/number";
+
+import { GOAL_PRIORITY_TILE_CLASS } from "./goal-option-tiles";
 
 type GoalEditDialogProps = {
   readonly goal: Goal;
@@ -57,20 +60,24 @@ function toDateInputValue(value: Date | null | string | undefined): string {
   return value.toISOString().slice(0, 10);
 }
 
-function buildDefaults(goal: Goal): FormValues {
+// Stored figures are shown with the reader's decimal separator, so editing one
+// and reading it back with parseGoalMoney gives the same number.
+function buildDefaults(goal: Goal, locale: string): FormValues {
+  const show = (value: number | null | undefined) =>
+    formatLocaleNumberInput(value, locale);
   return {
-    currentBalance: String(goal.currentBalance ?? ""),
+    currentBalance: show(goal.currentBalance),
     description: goal.description ?? "",
-    extraPayment: String(goal.extraPayment ?? ""),
+    extraPayment: show(goal.extraPayment),
     interestRate:
       goal.annualInterestRateBps != null
-        ? String(goal.annualInterestRateBps / 100)
+        ? show(goal.annualInterestRateBps / 100)
         : "",
-    minimumPayment: String(goal.minimumPayment ?? ""),
-    monthlyContributionTarget: String(goal.monthlyContributionTarget ?? ""),
+    minimumPayment: show(goal.minimumPayment),
+    monthlyContributionTarget: show(goal.monthlyContributionTarget),
     name: goal.name,
     priority: Math.min(2, Math.max(0, goal.priority ?? 0)) as GoalPriority,
-    targetAmount: String(goal.targetAmount),
+    targetAmount: show(goal.targetAmount),
     targetDate: toDateInputValue(goal.targetDate),
   };
 }
@@ -81,6 +88,8 @@ export default function GoalEditDialog({
   onOpenChange,
 }: GoalEditDialogProps) {
   const t = useTranslations();
+  const locale = useLocale();
+  const money = (value: string) => parseGoalMoney(value, locale);
   const mutation = useUpdateGoal(goal.goalKey);
   const isDebt = goal.type === "debt_paydown";
   const currencyCode =
@@ -107,7 +116,7 @@ export default function GoalEditDialog({
       monthlyContributionTarget: z
         .string()
         .refine(
-          (value) => !value.trim() || parseGoalMoney(value) > 0,
+          (value) => !value.trim() || money(value) > 0,
           t("invalid-amount"),
         ),
       name: z.string().min(1, t("invalid-name")),
@@ -122,26 +131,34 @@ export default function GoalEditDialog({
     })
     .superRefine((values, ctx) => {
       if (isDebt) {
-        if (parseGoalMoney(values.currentBalance) <= 0)
+        // `!(x > 0)` rather than `x <= 0`: an unreadable figure is NaN and
+        // must fail too.
+        if (!(money(values.currentBalance) > 0))
           ctx.addIssue({
             code: "custom",
             message: t("invalid-amount"),
             path: ["currentBalance"],
           });
-        const rate = Number(values.interestRate);
+        const rate = money(values.interestRate);
         if (!Number.isFinite(rate) || rate < 0 || rate > 1000)
           ctx.addIssue({
             code: "custom",
             message: t("goals.debt-interest-invalid"),
             path: ["interestRate"],
           });
-        if (parseGoalMoney(values.minimumPayment) <= 0)
+        if (!(money(values.minimumPayment) > 0))
           ctx.addIssue({
             code: "custom",
             message: t("invalid-amount"),
             path: ["minimumPayment"],
           });
-      } else if (parseGoalMoney(values.targetAmount) <= 0) {
+        if (values.extraPayment.trim() && !(money(values.extraPayment) >= 0))
+          ctx.addIssue({
+            code: "custom",
+            message: t("invalid-amount"),
+            path: ["extraPayment"],
+          });
+      } else if (!(money(values.targetAmount) > 0)) {
         ctx.addIssue({
           code: "custom",
           message: t("invalid-amount"),
@@ -152,13 +169,13 @@ export default function GoalEditDialog({
 
   const form = useForm<FormValues>({
     resolver: zodResolver(schema),
-    defaultValues: buildDefaults(goal),
+    defaultValues: buildDefaults(goal, locale),
   });
 
   useEffect(() => {
     if (!isOpen) return;
-    form.reset(buildDefaults(goal));
-  }, [form, goal, isOpen]);
+    form.reset(buildDefaults(goal, locale));
+  }, [form, goal, isOpen, locale]);
 
   const priority = useWatch({ control: form.control, name: "priority" });
 
@@ -172,13 +189,13 @@ export default function GoalEditDialog({
   const onSubmit = async (values: FormValues) => {
     const body: UpdateGoalRequest = isDebt
       ? {
-          annualInterestRatePercent: Number(values.interestRate),
-          currentBalance: parseGoalMoney(values.currentBalance),
+          annualInterestRatePercent: money(values.interestRate),
+          currentBalance: money(values.currentBalance),
           description: values.description.trim() || null,
           extraPayment: values.extraPayment.trim()
-            ? parseGoalMoney(values.extraPayment)
+            ? money(values.extraPayment)
             : 0,
-          minimumPayment: parseGoalMoney(values.minimumPayment),
+          minimumPayment: money(values.minimumPayment),
           name: values.name.trim(),
           priority: values.priority,
           targetDate: values.targetDate || null,
@@ -186,11 +203,11 @@ export default function GoalEditDialog({
       : {
           description: values.description.trim() || null,
           monthlyContributionTarget: values.monthlyContributionTarget.trim()
-            ? parseGoalMoney(values.monthlyContributionTarget)
+            ? money(values.monthlyContributionTarget)
             : null,
           name: values.name.trim(),
           priority: values.priority,
-          targetAmount: parseGoalMoney(values.targetAmount),
+          targetAmount: money(values.targetAmount),
           targetDate: values.targetDate || null,
         };
 
@@ -209,9 +226,6 @@ export default function GoalEditDialog({
     }
   };
 
-  const moneyLabel = (key: string) =>
-    currencyCode ? `${t(key)} (${currencyCode})` : t(key);
-
   return (
     <DrawerDialog
       open={isOpen}
@@ -219,7 +233,7 @@ export default function GoalEditDialog({
       title={t("goals.edit-title")}
     >
       <Form {...form}>
-        <form className="space-y-4" onSubmit={form.handleSubmit(onSubmit)}>
+        <form className="space-y-6" onSubmit={form.handleSubmit(onSubmit)}>
           <FormField
             control={form.control}
             name="name"
@@ -227,7 +241,14 @@ export default function GoalEditDialog({
               <FormItem>
                 <FormLabel required>{t("goals.name")}</FormLabel>
                 <FormControl>
-                  <Input {...field} />
+                  <Input
+                    {...field}
+                    placeholder={t(
+                      isDebt
+                        ? "goals.debt-name-placeholder"
+                        : "goals.name-placeholder",
+                    )}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -250,16 +271,9 @@ export default function GoalEditDialog({
                   role="radio"
                   aria-checked={priority === option.value}
                   onClick={() => setPriority(option.value)}
-                  className={cn(
-                    "focus-visible:ring-ring rounded-lg border p-3 text-left transition focus:outline-hidden focus-visible:ring-2 focus-visible:ring-offset-2",
-                    priority === option.value
-                      ? "border-primary ring-primary bg-primary/5 ring-1"
-                      : "hover:bg-muted/50",
-                  )}
+                  className={GOAL_PRIORITY_TILE_CLASS}
                 >
-                  <span className="text-foreground block text-sm font-medium">
-                    {t(option.labelKey)}
-                  </span>
+                  {t(option.labelKey)}
                 </button>
               ))}
             </div>
@@ -267,17 +281,24 @@ export default function GoalEditDialog({
 
           {isDebt ? (
             <>
-              <div className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-6">
                 <FormField
                   control={form.control}
                   name="currentBalance"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel required>
-                        {moneyLabel("goals.debt-current-balance")}
+                        {t("goals.debt-current-balance")}
                       </FormLabel>
                       <FormControl>
-                        <Input {...field} inputMode="decimal" type="tel" />
+                        <MoneyInput
+                          {...field}
+                          type="tel"
+                          currency={currencyCode}
+                          placeholder={t(
+                            "goals.debt-current-balance-placeholder",
+                          )}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -292,24 +313,38 @@ export default function GoalEditDialog({
                         {t("goals.debt-interest-rate")}
                       </FormLabel>
                       <FormControl>
-                        <Input {...field} inputMode="decimal" type="tel" />
+                        <Input
+                          {...field}
+                          inputMode="decimal"
+                          type="tel"
+                          placeholder="19.99"
+                          className="text-right font-mono"
+                          endAdornment={<span className="font-mono">%</span>}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
               </div>
-              <div className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-6">
                 <FormField
                   control={form.control}
                   name="minimumPayment"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel required>
-                        {moneyLabel("goals.debt-minimum-payment")}
+                        {t("goals.debt-minimum-payment")}
                       </FormLabel>
                       <FormControl>
-                        <Input {...field} inputMode="decimal" type="tel" />
+                        <MoneyInput
+                          {...field}
+                          type="tel"
+                          currency={currencyCode}
+                          placeholder={t(
+                            "goals.debt-minimum-payment-placeholder",
+                          )}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -320,11 +355,16 @@ export default function GoalEditDialog({
                   name="extraPayment"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>
-                        {moneyLabel("goals.debt-extra-payment")}
-                      </FormLabel>
+                      <FormLabel>{t("goals.debt-extra-payment")}</FormLabel>
                       <FormControl>
-                        <Input {...field} inputMode="decimal" type="tel" />
+                        <MoneyInput
+                          {...field}
+                          type="tel"
+                          currency={currencyCode}
+                          placeholder={t(
+                            "goals.debt-extra-payment-placeholder",
+                          )}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -340,7 +380,7 @@ export default function GoalEditDialog({
                 <FormItem>
                   <FormLabel required>{t("goals.target-amount")}</FormLabel>
                   <FormControl>
-                    <Input {...field} inputMode="decimal" type="tel" />
+                    <MoneyInput {...field} type="tel" currency={currencyCode} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -348,7 +388,7 @@ export default function GoalEditDialog({
             />
           )}
 
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="space-y-6">
             <FormField
               control={form.control}
               name="targetDate"
@@ -363,9 +403,13 @@ export default function GoalEditDialog({
                     form
                     inModal
                     value={parseGoalDateInput(field.value)}
-                    onSelect={(date) => field.onChange(formatGoalDateInput(date))}
-                    disabled={{ before: parseGoalDateInput(minimumTargetDate) as Date }}
-                    placeholder={t("goals.target-date")}
+                    onSelect={(date) =>
+                      field.onChange(formatGoalDateInput(date))
+                    }
+                    disabled={{
+                      before: parseGoalDateInput(minimumTargetDate) as Date,
+                    }}
+                    placeholder={t("goals.target-date-placeholder")}
                   />
                   <FormMessage />
                 </FormItem>
@@ -379,7 +423,11 @@ export default function GoalEditDialog({
                   <FormItem>
                     <FormLabel>{t("goals.monthly-contribution")}</FormLabel>
                     <FormControl>
-                      <Input {...field} inputMode="decimal" type="tel" />
+                      <MoneyInput
+                        {...field}
+                        type="tel"
+                        currency={currencyCode}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -395,7 +443,10 @@ export default function GoalEditDialog({
               <FormItem>
                 <FormLabel>{t("goals.description")}</FormLabel>
                 <FormControl>
-                  <Textarea {...field} />
+                  <Textarea
+                    {...field}
+                    placeholder={t("goals.description-placeholder")}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>

@@ -4,6 +4,7 @@ import { DI } from '@app/database/di';
 import { HIDDEN_FILTER } from '@app/database/filters/tenant-filter';
 import { CategorizationConfidence, Transaction } from '@entity/Transaction';
 
+import { transactionDateRangeWhere } from './transaction-date-range';
 import { excludeExpired } from './transaction-status';
 
 /**
@@ -37,6 +38,10 @@ export interface TransactionFilterInput {
   confidence?: CategorizationConfidence;
   fromDate?: Date;
   includeHidden?: boolean;
+  /** Tag keys; a transaction matches when it carries any of them. Empty/absent means no tag filter. */
+  tagKeys?: number[];
+  /** The viewer's IANA time zone: date-only rows are matched by calendar day (`transaction-date-range.ts`). */
+  timeZone?: string;
   toDate?: Date;
   /** `TransactionType.name` values, e.g. `credit` / `debit`. */
   transactionTypes?: string[];
@@ -44,7 +49,7 @@ export interface TransactionFilterInput {
 }
 
 export function buildTransactionWhere(filters: TransactionFilterInput): FilterQuery<Transaction> {
-  const { accountKeys, categoryKeys, confidence, fromDate, toDate, transactionTypes, unreviewedOnly } = filters;
+  const { accountKeys, categoryKeys, confidence, fromDate, tagKeys, timeZone, toDate, transactionTypes, unreviewedOnly } = filters;
 
   // The table carries no status, so an EXPIRED row would read as money that moved and land
   // in the review inbox: it is neither listed nor counted. Pending and status-less rows stay.
@@ -60,14 +65,8 @@ export function buildTransactionWhere(filters: TransactionFilterInput): FilterQu
       ? { transactionTypeKey: { name: { $in: transactionTypes } } }
       : {}),
     ...buildCategoryWhere(categoryKeys),
-    ...((fromDate ?? toDate)
-      ? {
-          transactionDate: {
-            ...(fromDate ? { $gte: fromDate } : {}),
-            ...(toDate ? { $lte: toDate } : {}),
-          },
-        }
-      : {}),
+    ...buildTagWhere(tagKeys),
+    ...transactionDateRangeWhere({ from: fromDate, timeZone, to: toDate }),
   });
 }
 
@@ -82,6 +81,9 @@ export function buildTransactionWhere(filters: TransactionFilterInput): FilterQu
  *
  * Selecting *only* "Uncategorized" is a meaningful filter on its own, which is why the
  * uncategorized branch is emitted even when `keys` is empty.
+ *
+ * A split transaction matches when any of its lines does: a named category on a line, or an
+ * uncategorized line for "Uncategorized".
  *
  * `$some` is load-bearing and must not be simplified to the implicit collection form. Written as
  * `{ appuserTransactionCategories: { categoryKey: { $in: keys } } }`, MikroORM folds both `$or`
@@ -98,11 +100,30 @@ function buildCategoryWhere(
   const { includeUncategorized, keys } = categoryKeys;
   if (!includeUncategorized && keys.length === 0) return {};
 
+  // A split transaction matches through its lines, an unsplit one through its single assignment
+  // (a split keeps the largest line's category as its assignment, which must not stand in for the
+  // others). `deletedAt: null` keeps removed lines out of the EXISTS subqueries.
+  const notSplit = { splits: { $none: { deletedAt: null } } };
   const branches: Record<string, unknown>[] = [];
-  if (keys.length > 0) branches.push({ appuserTransactionCategories: { $some: { categoryKey: { $in: keys } } } });
-  if (includeUncategorized) branches.push({ appuserTransactionCategories: { $none: {} } });
+  if (keys.length > 0) {
+    branches.push({ appuserTransactionCategories: { $some: { categoryKey: { $in: keys } } }, ...notSplit });
+    branches.push({ splits: { $some: { categoryKey: { $in: keys }, deletedAt: null } } });
+  }
+  if (includeUncategorized) {
+    branches.push({ appuserTransactionCategories: { $none: {} }, ...notSplit });
+    branches.push({ splits: { $some: { categoryKey: null, deletedAt: null } } });
+  }
 
-  return branches.length === 1 ? branches[0]! : { $or: branches };
+  return { $or: branches };
+}
+
+/**
+ * The tag filter: any of the tags. `$some` is an EXISTS on the link table, so it never shares a
+ * join with the category branches. The links are read through the tenant filter like the rows.
+ */
+function buildTagWhere(tagKeys: TransactionFilterInput['tagKeys']): Record<string, unknown> {
+  if (!tagKeys || tagKeys.length === 0) return {};
+  return { transactionTags: { $some: { tagKey: { $in: tagKeys } } } };
 }
 
 /**

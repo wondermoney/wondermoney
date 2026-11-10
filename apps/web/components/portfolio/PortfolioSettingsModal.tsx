@@ -8,8 +8,17 @@ import { Button } from "@/components/ui/button";
 import { DrawerDialog } from "@/components/ui/dialog-responsive";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/Label";
+import useAccounts from "@/lib/api/account/useAccounts";
+import { getApiErrorCode } from "@/lib/api/errors";
 import type { Portfolio } from "@/lib/api/portfolio/usePortfolio";
 import useUpdatePortfolio from "@/lib/api/portfolio/useUpdatePortfolio";
+import {
+  draftFromLink,
+  linkChanged,
+  linkInputFromDraft,
+} from "@/lib/portfolio/account-link";
+
+import { PortfolioAccountLinkFields } from "./PortfolioAccountLinkFields";
 
 interface PortfolioSettingsModalProps {
   isOpen: boolean;
@@ -24,9 +33,11 @@ const PortfolioSettingsModal: React.FC<PortfolioSettingsModalProps> = ({
 }) => {
   const t = useTranslations();
   const updatePortfolio = useUpdatePortfolio();
+  const { data: accountsData } = useAccounts();
 
   const [name, setName] = useState(portfolio.name);
   const [description, setDescription] = useState(portfolio.description ?? "");
+  const [link, setLink] = useState(draftFromLink(portfolio.accountLink));
 
   // Reload the fields from the portfolio when the modal opens (or the
   // portfolio changes while open), adjusting during render.
@@ -36,6 +47,7 @@ const PortfolioSettingsModal: React.FC<PortfolioSettingsModalProps> = ({
     if (isOpen) {
       setName(portfolio.name);
       setDescription(portfolio.description ?? "");
+      setLink(draftFromLink(portfolio.accountLink));
     }
   }
 
@@ -46,11 +58,19 @@ const PortfolioSettingsModal: React.FC<PortfolioSettingsModalProps> = ({
         portfolioId: portfolio.portfolioKey,
         name,
         description: description || null,
+        // Sent only when changed: a link this member cannot see is never touched.
+        ...(linkChanged(portfolio.accountLink, link)
+          ? { accountLink: linkInputFromDraft(link) }
+          : {}),
       });
       toast.success(t("save"));
       closeModal();
-    } catch {
-      toast.error(t("server-error"));
+    } catch (error) {
+      toast.error(
+        getApiErrorCode(error) === "forbidden"
+          ? t("portfolioAccountLink.managed-by-partner")
+          : t("server-error"),
+      );
     }
   };
 
@@ -80,6 +100,12 @@ const PortfolioSettingsModal: React.FC<PortfolioSettingsModalProps> = ({
             onChange={(e) => setDescription(e.target.value)}
           />
         </div>
+
+        <PortfolioAccountLinkFields
+          accounts={accountsData?.accounts ?? []}
+          value={link}
+          onChange={setLink}
+        />
 
         <div className="flex justify-end gap-2 pt-2">
           <Button type="button" variant="outline" onClick={closeModal}>

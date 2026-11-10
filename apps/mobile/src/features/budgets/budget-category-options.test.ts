@@ -2,7 +2,7 @@ import type { CategoryViewModel } from '@/features/categories/categories-view-mo
 
 import { availableLeafCategories } from './budget-category-options'
 
-const item = (id: number, name: string, children: CategoryViewModel[] = []): CategoryViewModel => ({ id, name, children, system: true, color: null, glyph: '□' })
+const item = (id: number, name: string, children: CategoryViewModel[] = []): CategoryViewModel => ({ id, name, children, system: true, color: null, glyph: '□', countsAsSpending: true })
 
 describe('available budget category options', () => {
   it('offers only leaves and excludes categories represented in the current month', () => {

@@ -1,12 +1,12 @@
 import * as DocumentPicker from 'expo-document-picker'
-import { type Href, useNavigation, useRouter } from 'expo-router'
-import { useEffect } from 'react'
+import { type Href, usePreventRemove, useRouter } from 'expo-router'
 
 import { mapAccounts } from '@/features/accounts/accounts-view-model'
 import { useAccounts } from '@/features/accounts/use-accounts'
+import { useResendVerificationEmail } from '@/features/auth/use-resend-verification-email'
 
 import { OCR_UPLOAD_MIME_TYPES } from './transaction-ocr-contract'
-import { TransactionOcrScreen } from './transaction-ocr-screen'
+import { TransactionOcrScreen, type VerificationResendStatus } from './transaction-ocr-screen'
 import { useManualTransactionMetadata } from './use-manual-transaction-metadata'
 import { useTransactionOcr } from './use-transaction-ocr'
 
@@ -17,16 +17,19 @@ export function TransactionOcrRoute() {
   const metadata = useManualTransactionMetadata('')
   const ocr = useTransactionOcr()
   const router = useRouter()
-  const navigation = useNavigation()
+  const resendVerification = useResendVerificationEmail()
 
-  useEffect(() => navigation.addListener('beforeRemove', (event) => {
-    if (BLOCKING_PHASES.has(ocr.state.phase)) event.preventDefault()
-  }), [navigation, ocr.state.phase])
+  usePreventRemove(BLOCKING_PHASES.has(ocr.state.phase))
 
   const accounts = accountsQuery.data ? mapAccounts(accountsQuery.data) : []
   const types = metadata.types.data?.transactionTypes ?? []
   const currencies = metadata.currencies.data?.currencies ?? []
   const metadataLoading = accountsQuery.isLoading || metadata.types.isLoading || metadata.currencies.isLoading
+
+  let verificationResend: VerificationResendStatus = 'idle'
+  if (resendVerification.isPending) verificationResend = 'sending'
+  else if (resendVerification.data?.status === 'sent') verificationResend = 'sent'
+  else if (resendVerification.data || resendVerification.isError) verificationResend = 'failed'
 
   const back = () => router.replace('/accounts' as Href)
 
@@ -47,8 +50,13 @@ export function TransactionOcrRoute() {
       onPickFile={pickFile}
       onConfirm={ocr.confirm}
       onReject={() => { void ocr.reject() }}
-      onReset={ocr.reset}
+      onReset={() => {
+        resendVerification.reset()
+        ocr.reset()
+      }}
       onBack={back}
+      verificationResend={verificationResend}
+      onResendVerification={() => resendVerification.mutate()}
     />
   )
 }

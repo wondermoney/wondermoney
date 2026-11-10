@@ -60,7 +60,7 @@ function MetricCard({
   children,
 }: MetricCardProps) {
   return (
-    <div className="bg-muted/30 overflow-hidden rounded-lg p-3">
+    <div className="border-border overflow-hidden border-t pt-3">
       <dt className="text-muted-foreground flex flex-wrap items-center gap-x-1.5 gap-y-1 text-xs sm:text-sm">
         <span>{label}</span>
         {tooltip && tipLabel ? (
@@ -146,10 +146,10 @@ const PortfolioMetrics: React.FC<PortfolioMetricsProps> = ({ metrics }) => {
   };
 
   return (
-    <section className="border-border bg-card/70 rounded-lg border p-4">
+    <section className="border-foreground border-t-2 pt-4">
       <div className="mb-3 flex items-start justify-between gap-3">
         <div>
-          <h2 className="text-foreground text-sm font-medium">
+          <h2 className="text-foreground text-lg font-semibold tracking-tight">
             {t("advanced-metrics")}
           </h2>
           <p className="text-muted-foreground text-xs">
@@ -163,7 +163,7 @@ const PortfolioMetrics: React.FC<PortfolioMetricsProps> = ({ metrics }) => {
         </div>
       </div>
 
-      <dl className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
+      <dl className="grid grid-cols-1 gap-x-8 gap-y-5 sm:grid-cols-2 xl:grid-cols-3">
         <MetricCard label={t("annual-yield")} helperText={undefined}>
           <div
             className={cn(

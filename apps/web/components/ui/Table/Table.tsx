@@ -75,6 +75,12 @@ interface DataTableProps<TData extends RowData> {
   tableRef?: React.RefObject<TableType<TData> | null>;
   /** Rows the server matched before its own `limit`. See `Pagination`. */
   serverTotal?: number;
+  /**
+   * `ledger` sets the table on the canvas as a ruled statement: no header or
+   * footer fill, a foreground rule under the column heads and above the
+   * footer. Opt-in, so every other table keeps its look.
+   */
+  variant?: "default" | "ledger";
 }
 
 export function Table<TData extends RowData>({
@@ -97,7 +103,9 @@ export function Table<TData extends RowData>({
   footerActions,
   tableRef,
   serverTotal,
+  variant = "default",
 }: DataTableProps<TData>) {
+  const isLedger = variant === "ledger";
   const t = useTranslations();
   const affordanceLabel =
     scrollAffordanceLabel ?? t("scroll-horizontally-hint");
@@ -211,8 +219,20 @@ export function Table<TData extends RowData>({
       )}
       <div className="relative max-w-full">
         <div className="block overflow-x-auto overflow-y-hidden">
-          <SimpleTable>
-            <TableHeader className={cn({ "sticky z-10": sticky })}>
+          <SimpleTable
+            className={cn(
+              // The ledger's outer cells sit on the page margin, under the rule.
+              isLedger &&
+                "lg:[&_td]:px-4 [&_td:first-child]:pl-0 [&_td:last-child]:pr-0 lg:[&_th]:px-4 [&_th:first-child]:pl-0 [&_th:last-child]:pr-0",
+            )}
+          >
+            <TableHeader
+              className={cn(
+                { "sticky z-10": sticky },
+                isLedger &&
+                  "bg-background [&_tr]:border-foreground [&_th]:text-xs",
+              )}
+            >
               {table.getHeaderGroups().map((headerGroup) => (
                 <TableRow key={headerGroup.id}>
                   {headerGroup.headers.map((header) => {
@@ -317,7 +337,12 @@ export function Table<TData extends RowData>({
           />
         )}
         {(footerActions || withPagination) && (
-          <div className="bg-muted/50 flex items-center justify-between p-2">
+          <div
+            className={cn(
+              "flex items-center justify-between p-2",
+              isLedger ? "border-foreground border-t px-0" : "bg-muted/50",
+            )}
+          >
             {footerActions && <>{footerActions}</>}
             {withPagination && (
               <Pagination

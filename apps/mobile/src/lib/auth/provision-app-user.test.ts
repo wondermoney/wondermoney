@@ -12,9 +12,23 @@ describe('provisionAppUser', () => {
     expect(result).toBe('provisioned')
   })
 
-  it('returns failed when the write throws', async () => {
-    const write = jest.fn().mockRejectedValue(new ApiError('network'))
+  it('returns failed when the server refuses the callback', async () => {
+    const write = jest.fn().mockRejectedValue(new ApiError('http', 400))
     await expect(provisionAppUser(clientWith(write), 'en')).resolves.toBe('failed')
+  })
+
+  it('returns failed for a non-API error', async () => {
+    const write = jest.fn().mockRejectedValue(new Error('boom'))
+    await expect(provisionAppUser(clientWith(write), 'en')).resolves.toBe('failed')
+  })
+
+  it.each([
+    ['a network failure', new ApiError('network')],
+    ['a server error', new ApiError('http', 503)],
+    ['rate limiting', new ApiError('http', 429)],
+  ])('returns unavailable (transient) for %s', async (_label, error) => {
+    const write = jest.fn().mockRejectedValue(error)
+    await expect(provisionAppUser(clientWith(write), 'en')).resolves.toBe('unavailable')
   })
 
   it('includes the invite token in the body when provided', async () => {

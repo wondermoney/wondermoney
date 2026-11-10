@@ -1,6 +1,6 @@
 import { initMobileI18n } from '@/lib/i18n'
 
-import { resolveCategorySymbol } from './category-icon'
+import { resolveCategorySymbol } from '@/components/ui/category-icon'
 import { displayCategoryName, mapCategories, parseSafeCategoryColor, resolveCategoryGlyph } from './categories-view-model'
 
 describe('category presentation policy', () => {
@@ -14,6 +14,20 @@ describe('category presentation policy', () => {
     expect(categories.map(({ id, name }) => [id, name])).toEqual([[2, 'Habitação'], [3, 'Habitação'], [4, '  My CUSTOM name  ']])
     expect(displayCategoryName({ name: 'Personal Name', isSystemCategory: false }, i18n.t)).toBe('Personal Name')
     expect(displayCategoryName({ name: 'GROCERIES', isSystemCategory: true }, i18n.t)).toBe('Mercearia')
+  })
+
+  it('counts a category as spending only when it and its main category both do', async () => {
+    const i18n = await initMobileI18n('en')
+    const child = (categoryKey: number, countsAsSpending?: boolean) => ({ categoryKey, name: `Child ${categoryKey}`, textColor: '#111827', bgColor: '#112233', icon: null, isSystemCategory: false, countsAsSpending })
+    const [investments, other] = mapCategories({ categories: [
+      { categoryKey: 1, name: 'INVESTMENTS_AND_SAVINGS', textColor: '#111827', bgColor: '#112233', icon: null, isSystemCategory: true, countsAsSpending: false, childCategory: [child(2, true)] },
+      { categoryKey: 3, name: 'OTHER', textColor: '#111827', bgColor: '#112233', icon: null, isSystemCategory: true, childCategory: [child(4, false), child(5)] },
+    ] }, i18n.t, 'en')
+    expect(investments?.name).toBe('Investments and savings')
+    expect([investments?.countsAsSpending, investments?.children[0]?.countsAsSpending]).toEqual([false, false])
+    expect([other?.countsAsSpending, ...(other?.children ?? []).map((category) => [category.id, category.countsAsSpending])]).toEqual([true, [4, false], [5, true]])
+    // Only a child of a main category that does not count is locked.
+    expect([investments?.lockedByParent, investments?.children[0]?.lockedByParent, other?.children[0]?.lockedByParent]).toEqual([false, true, false])
   })
 
   it('accepts only opaque six-digit hex colors and allowlisted glyphs', () => {

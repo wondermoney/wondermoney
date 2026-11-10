@@ -7,46 +7,35 @@ CSV import brings a bank statement into an account when a bank connection is not
 
 ## Before you start
 
-What the file looks like depends on the account's financial institution:
+Any bank's statement export works, as CSV (any delimiter) or Excel (`.xls`, `.xlsx`). Download it from your bank's website and leave it as the bank wrote it: rows above the column names and totals below the transactions are fine.
 
-- **Millennium BCP, ActivoBank, Bankinter, Banco BPI or Montepio**: import the bank's own statement export (CSV or Excel), as the bank exported it. The account must have that bank as its financial institution; choose it when you add the account (**Add account**, then **Unlinked**).
-- **Any other bank, or an account without a financial institution** (such as one made with **Add an account manually**): import a CSV file in the generic format below.
+For Millennium BCP, ActivoBank, Bankinter, Banco BPI and Montepio, WonderMoney reads the bank's own format when the account has that bank as its financial institution. For every other file, it finds the date, description and amount columns from their names, and works out the date format and the decimal separator from the values. When the names don't settle it, an AI model is asked which column is which: it sees the column names and what kind of values each column holds (dates, numbers, text), never your descriptions, amounts or dates. That uses one of your household's daily CSV mapping calls; on an instance without AI, or once the day's calls are used, you pick the columns yourself.
+
+A file in the older WonderMoney CSV template (with `internalTransactionId` and `transactionTypeKey` columns) still imports as before.
 
 On a self-hosted instance, imports also need [file storage](/en/docs/self-hosting/configure#file-storage).
 
-### Generic CSV format
-
-The first row names the columns, and the file has these columns and no others:
-
-| Column | Required | What goes in it |
-|---|---|---|
-| `date` | Yes | The date, as `YYYY-MM-DD`. |
-| `amount` | Yes | An amount with a dot for decimals, such as `23.40`. For most types the type says whether the money left or arrived, so the sign doesn't matter. Exchange and Revert have no direction of their own: write money that left the account as a negative amount, such as `-23.40`, and money that arrived as a positive one. |
-| `merchant` | Yes | Who you paid, or who paid you. |
-| `internalTransactionId` | Yes | A unique ID for the row. A row whose ID was already imported into this account is skipped, so importing the same file twice adds nothing. |
-| `transactionTypeKey` | Yes | The type's code. The import dialog lists the codes, such as Payment or Card payment for money out and Deposit or Transfer (in) for money in. |
-| `description` | No | A note for the transaction. |
-
-The import dialog shows these columns for a generic account and has a **Download template** button with two example rows that use your instance's type codes.
-
-```csv
-date,amount,merchant,internalTransactionId,transactionTypeKey,description
-2026-01-15,23.40,Grocery store,example-1,3,Weekly shop
-```
-
-On a new instance code `3` is usually Payment; use the codes your dialog lists.
-
 ## Steps
 
-1. Get the file ready: for a supported bank, download the statement as CSV or Excel (`.xlsx`) and leave it as the bank exported it; otherwise save your transactions as a CSV in the generic format.
+1. Download the statement from your bank as CSV or Excel.
 2. Open the account and choose **Import transactions**.
-3. Add the file (up to 5 MB) and choose **Import**.
-4. The import runs in the background. A notification tells you when it has finished, or why it failed. If some rows of a generic file couldn't be imported, the dialog says how many.
+3. Add the file (up to 5 MB). WonderMoney reads it straight away and shows how many transactions it found, the dates they cover, and the first few rows.
+4. Check the rows. If a column is wrong, open **Adjust columns** and pick the right one, or change the date format, the number format, or whether spending is shown as a positive amount (as on some credit card statements). The preview updates as you change them.
+5. Choose **Review transactions**. WonderMoney reads every row of the file and lists them, with nothing imported yet:
+   - **New**: not in the account yet. These are included.
+   - **Already in the account**: the same transaction was imported before, from this file or an overlapping export. These are skipped.
+   - **Couldn't be read**: a row whose date or amount could not be read, with the reason. These never import.
+6. Check the list. Untick a row to skip it, or tick one to include it. Show one kind of row and choose **Include all** or **Skip all** to decide them together.
+7. Choose **Import**, which shows how many transactions it will add. The import runs in the background and shows its progress. If it stops part way (for example, the server restarts), choose **Try again**: it carries on from where it stopped, and nothing is imported twice.
+
+A file that holds several accounts asks which of your accounts each one goes to before it can be imported.
+
+An import you don't finish expires after seven days. In the mobile app the import runs in one step: new transactions are imported and the ones already in the account are skipped.
 
 <DocsImage
   src="/images/docs/accounts-transactions/import-transactions-csv-import-modal.png"
   alt="Import Transactions modal with a drag-and-drop file upload area."
-  caption="The import modal accepts a CSV file of up to 5 MB."
+  caption="The import modal accepts a CSV or Excel file of up to 5 MB."
   width={1440}
   height={900}
 />

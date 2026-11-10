@@ -1,12 +1,5 @@
 import * as React from "react";
 
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-} from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 
 interface ReportCardProps extends Omit<
@@ -19,6 +12,11 @@ interface ReportCardProps extends Omit<
   footer?: React.ReactNode;
 }
 
+/**
+ * One report as a ruled section of the page (Direction A): a heavy rule
+ * above its heading instead of a card around it. Each report is a labelled
+ * region with a real `h2`.
+ */
 export function ReportCard({
   title,
   subtitle,
@@ -28,37 +26,31 @@ export function ReportCard({
   className,
   ...props
 }: ReportCardProps) {
-  // Each report is a section of the page, so its title is a real `h2` and the
-  // card is a labelled region. `CardTitle` stays a `<div>` app-wide on purpose
-  // (see its doc comment); reports are the call site where the answer is yes.
   const titleId = React.useId();
 
   return (
-    <Card
+    <section
       role="region"
       aria-labelledby={titleId}
-      className={cn("flex flex-col", className)}
+      className={cn(
+        "border-foreground flex min-w-0 flex-col border-t-2 pt-4",
+        className,
+      )}
       {...props}
     >
       {/* `flex-wrap` + a basis on the title: the actions are `shrink-0`, so
-          without a wrap the title column is whatever width is left over. On
-          Spending by category — "Export CSV" plus a total and a delta — that
-          left the heading about 60px wide, wrapping one word per line and
-          colliding with the button. Now the actions drop to their own line
-          instead of starving the title. */}
-      <CardHeader className="flex flex-col gap-4 pb-4 sm:flex-row sm:flex-wrap sm:items-start sm:justify-between">
-        {/* The basis only applies in the row layout: in the phone's column
-            layout a flex-basis is a height, and `basis-56` left 224px of
-            empty space under every report title. */}
-        <div className="flex min-w-0 flex-1 flex-col gap-0.5 sm:basis-56">
+          without a wrap the title column is whatever width is left over. The
+          actions drop to their own line instead of starving the title. */}
+      <div className="mb-5 flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-start sm:justify-between">
+        <div className="flex min-w-0 flex-1 flex-col gap-1 sm:basis-56">
           <h2
             id={titleId}
-            className="text-base leading-none font-medium tracking-tight"
+            className="text-foreground text-lg leading-tight font-semibold tracking-tight"
           >
             {title}
           </h2>
           {subtitle ? (
-            <CardDescription className="text-xs">{subtitle}</CardDescription>
+            <p className="text-muted-foreground text-sm">{subtitle}</p>
           ) : null}
         </div>
         {headerActions ? (
@@ -66,9 +58,9 @@ export function ReportCard({
             {headerActions}
           </div>
         ) : null}
-      </CardHeader>
-      <CardContent className="flex-1">{children}</CardContent>
-      {footer ? <CardFooter className="pt-0">{footer}</CardFooter> : null}
-    </Card>
+      </div>
+      <div className="flex-1">{children}</div>
+      {footer ? <div className="pt-4">{footer}</div> : null}
+    </section>
   );
 }

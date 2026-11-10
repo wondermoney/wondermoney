@@ -1,5 +1,11 @@
 {
   "$schema": "https://turbo.build/schema.json",
+  "globalDependencies": [
+    ".nvmrc",
+    ".pnpmfile.cjs",
+    "pnpm-lock.yaml",
+    "pnpm-workspace.yaml"
+  ],
   "tasks": {
     "build": {
       "dependsOn": [
@@ -10,7 +16,8 @@
         "dist/**",
         ".next/**",
         "!.next/cache/**",
-        ".react-email/.next/**"
+        ".react-email/.next/**",
+        "!.react-email/.next/cache/**"
       ]
     },
     "build:lib": {
@@ -34,6 +41,9 @@
     "test": {
       "dependsOn": [
         "^build:lib"
+      ],
+      "passThroughEnv": [
+        "VITEST_MAX_WORKERS"
       ]
     },
     "dev": {

@@ -1,6 +1,6 @@
 "use client";
 
-import { AlertTriangle, CoinsIcon } from "lucide-react";
+import { AlertTriangle } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { usePostHog } from "posthog-js/react";
 import React, { useCallback, useMemo, useState } from "react";
@@ -14,6 +14,7 @@ import {
   type Row,
 } from "@/components/ui/Table/features";
 import { PortfolioHolding } from "@/lib/api/portfolio/usePortfoliosHoldings";
+import { useFormatQuantity } from "@/lib/privacy/useFormatQuantity";
 import { cn } from "@/lib/utils";
 import { getDeltaClassName } from "@/lib/utils/formatCurrency";
 import { useFormatCurrency } from "@/lib/utils/useFormatCurrency";
@@ -40,6 +41,7 @@ const PortfolioHoldingsTable: React.FC<PortfolioHoldingsTableProps> =
     const t = useTranslations();
     const formatPercentage = useFormatPercentage();
     const formatCurrency = useFormatCurrency();
+    const formatQuantity = useFormatQuantity();
     const posthog = usePostHog();
 
     const missingPricing = transactions.some((transaction) => {
@@ -107,9 +109,7 @@ const PortfolioHoldingsTable: React.FC<PortfolioHoldingsTableProps> =
             // Badge has no colour prop, so the old per-type `color` fell
             // through to the DOM and every type rendered as a violet fill.
             // Asset type is a category, not status or an action: neutral.
-            <Badge variant="outline">
-              {t(info.getValue() as any)}
-            </Badge>
+            <Badge variant="outline">{t(info.getValue() as any)}</Badge>
           ),
         }),
         columnHelper.accessor("financialAssetSymbol", {
@@ -123,14 +123,10 @@ const PortfolioHoldingsTable: React.FC<PortfolioHoldingsTableProps> =
                   "text-warning-text rounded-md px-2 py-1",
               )}
             >
-              {info.getValue().startsWith("CURRENCY_") ? (
-                <CoinsIcon />
-              ) : info.row.original.financialAssetLogoUrl ? (
-                <FinancialAssetLogo
-                  symbol={info.getValue()}
-                  logoUrl={info.row.original.financialAssetLogoUrl}
-                />
-              ) : null}
+              <FinancialAssetLogo
+                symbol={info.getValue()}
+                logoUrl={info.row.original.financialAssetLogoUrl}
+              />
               <span className="text-foreground text-sm">
                 {info.getValue().replace("CURRENCY_", "")}
               </span>
@@ -165,7 +161,10 @@ const PortfolioHoldingsTable: React.FC<PortfolioHoldingsTableProps> =
                     className="w-[100px]"
                   />
                   <span className="text-foreground font-mono text-sm font-semibold">
-                    {formatPercentage(Number(info.getValue()) / 100, { minimumFractionDigits: 1, maximumFractionDigits: 1 })}
+                    {formatPercentage(Number(info.getValue()) / 100, {
+                      minimumFractionDigits: 1,
+                      maximumFractionDigits: 1,
+                    })}
                   </span>
                 </>
               ) : (
@@ -184,7 +183,9 @@ const PortfolioHoldingsTable: React.FC<PortfolioHoldingsTableProps> =
             info.row.original.financialAssetType.toLowerCase() ===
             "cash" ? null : (
               <TableCellDefault
-                value={info.getValue()}
+                value={formatQuantity(info.getValue(), {
+                  maximumFractionDigits: 6,
+                })}
                 className="min-w-[5rem] text-right font-mono"
               />
             ),
@@ -199,7 +200,10 @@ const PortfolioHoldingsTable: React.FC<PortfolioHoldingsTableProps> =
             info.row.original.financialAssetType.toLowerCase() ===
             "cash" ? null : (
               <CellNumeric className="min-w-[7.5rem] text-right">
-                <Amount value={info.getValue()} currency={info.row.original.currency} />
+                <Amount
+                  value={info.getValue()}
+                  currency={info.row.original.currency}
+                />
               </CellNumeric>
             ),
         }),
@@ -233,7 +237,10 @@ const PortfolioHoldingsTable: React.FC<PortfolioHoldingsTableProps> =
             info.row.original.financialAssetType.toLowerCase() ===
             "savings certificate" ? null : info.getValue() != null ? (
               <CellNumeric className="min-w-[7.5rem] text-right">
-                <Amount value={info.getValue()} currency={info.row.original.currency} />
+                <Amount
+                  value={info.getValue()}
+                  currency={info.row.original.currency}
+                />
               </CellNumeric>
             ) : (
               <CellNumeric className="text-muted-foreground min-w-[7.5rem] text-right">
@@ -280,11 +287,18 @@ const PortfolioHoldingsTable: React.FC<PortfolioHoldingsTableProps> =
           },
         }),
       ],
-      [columnHelper, formatCurrency, formatPercentage, t, onRowClick],
+      [
+        columnHelper,
+        formatCurrency,
+        formatPercentage,
+        formatQuantity,
+        t,
+        onRowClick,
+      ],
     );
 
     return (
-      <div className="bg-card">
+      <div>
         {readinessNote ? (
           <div className="border-border border-b px-5 py-3">
             <p className="text-muted-foreground text-xs leading-5">
@@ -300,9 +314,7 @@ const PortfolioHoldingsTable: React.FC<PortfolioHoldingsTableProps> =
           withSorting
           withScrollAffordance
           sticky
-          meta={{
-            getRowClasses: () => ({ "border-b-0": true }),
-          }}
+          variant="ledger"
         />
         <PortfolioHoldingDetailsModal
           isOpen={isPortfolioTransactionDetailsModalOpen}

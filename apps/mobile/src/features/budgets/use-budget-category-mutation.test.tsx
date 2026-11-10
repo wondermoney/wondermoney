@@ -36,6 +36,16 @@ describe('budget child-category write', () => {
     await hook.unmount(); client.clear()
   })
 
+  it('sends the rollover switch with the write when it is part of the value', async () => {
+    const { client, wrapper } = setup()
+    mockWrite.mockResolvedValue(undefined)
+    const hook = await renderHook(() => useBudgetCategoryMutation(), { wrapper })
+    const value = { amount: 100, recurrency: 'MONTHLY' as const, applyToFollowingMonths: true, rolloverEnabled: true }
+    await act(async () => { await hook.result.current.mutateAsync({ budgetId: 7, year: 2026, month: 4, categoryId: 11, value }) })
+    expect(mockWrite.mock.calls[0][1].body).toEqual(value)
+    await hook.unmount(); client.clear()
+  })
+
   it('is pessimistic, pending, no-retry/no-replay, and never invalidates without commit', async () => {
     const { client, wrapper } = setup()
     const invalidate = jest.spyOn(client, 'invalidateQueries')

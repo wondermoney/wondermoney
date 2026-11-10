@@ -6,7 +6,6 @@ import { useTranslations } from "next-intl";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { PageShell } from "@/components/layout/PageShell";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { Spinner } from "@/components/ui/Spinner";
 import { Text } from "@/components/ui/Typography";
 import { Link } from "@/i18n/navigation";
@@ -135,32 +134,25 @@ export default function FinancialMarketsWatchlist() {
           <Spinner />
         </div>
       ) : symbols.length === 0 ? (
-        <Card className="border-dashed">
-          <CardContent className="flex flex-col items-center gap-3 p-10 text-center">
-            <Text className="text-foreground font-medium">
-              {t("financial-markets-watchlist-empty-title")}
-            </Text>
-            <Text
-              variant="smallText"
-              className="text-muted-foreground max-w-sm"
-            >
-              {t("financial-markets-watchlist-empty-description")}
-            </Text>
-            <Button asChild>
-              <Link href="/financial-markets/explorer">
-                {t("financial-markets-watchlist-go-to-explorer")}
-              </Link>
-            </Button>
-          </CardContent>
-        </Card>
+        <section className="border-foreground flex flex-col items-start gap-3 border-t-2 pt-6">
+          <Text className="text-foreground font-medium">
+            {t("financial-markets-watchlist-empty-title")}
+          </Text>
+          <Text variant="smallText" className="text-muted-foreground max-w-sm">
+            {t("financial-markets-watchlist-empty-description")}
+          </Text>
+          <Button asChild>
+            <Link href="/financial-markets/explorer">
+              {t("financial-markets-watchlist-go-to-explorer")}
+            </Link>
+          </Button>
+        </section>
       ) : (
-        <Card>
-          <CardContent className="p-4">
-            {symbols.map((symbol) => (
-              <WatchlistRow key={symbol} symbol={symbol} />
-            ))}
-          </CardContent>
-        </Card>
+        <section className="border-foreground border-t-2">
+          {symbols.map((symbol) => (
+            <WatchlistRow key={symbol} symbol={symbol} />
+          ))}
+        </section>
       )}
     </PageShell>
   );

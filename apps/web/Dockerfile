@@ -11,9 +11,12 @@ WORKDIR /repo
 RUN npm install -g corepack@0.36.0 && corepack enable
 COPY pnpm-lock.yaml pnpm-workspace.yaml package.json .pnpmfile.cjs ./
 COPY apps/web/package.json apps/web/
+COPY packages/shared/package.json packages/shared/
 RUN --mount=type=cache,id=pnpm,target=/root/.local/share/pnpm/store \
     pnpm install --frozen-lockfile --filter @wondermoney/web...
 COPY apps/web apps/web
+# The web app imports @wondermoney/shared/decimal as TypeScript source (no build step).
+COPY packages/shared packages/shared
 # Shown next to the version in the app (next.config.ts); publish-images passes it.
 ARG GIT_COMMIT_SHA=""
 ENV NEXT_TELEMETRY_DISABLED=1 \
@@ -24,6 +27,7 @@ ENV NEXT_TELEMETRY_DISABLED=1 \
     NEXT_PUBLIC_AUTH_COOKIE_DOMAIN=__WM_RUNTIME_NEXT_PUBLIC_AUTH_COOKIE_DOMAIN__ \
     NEXT_PUBLIC_DEMO_EMAIL=__WM_RUNTIME_NEXT_PUBLIC_DEMO_EMAIL__ \
     NEXT_PUBLIC_DOCS_URL=__WM_RUNTIME_NEXT_PUBLIC_DOCS_URL__ \
+    NEXT_PUBLIC_GTM_ID=__WM_RUNTIME_NEXT_PUBLIC_GTM_ID__ \
     NEXT_PUBLIC_POSTHOG_KEY=__WM_RUNTIME_NEXT_PUBLIC_POSTHOG_KEY__ \
     NEXT_PUBLIC_PRIVACY_URL=__WM_RUNTIME_NEXT_PUBLIC_PRIVACY_URL__ \
     NEXT_PUBLIC_RECAPTCHA_SITE_KEY=__WM_RUNTIME_NEXT_PUBLIC_RECAPTCHA_SITE_KEY__ \

@@ -1,10 +1,10 @@
 import { fireEvent, render, within } from '@testing-library/react-native'
 import { I18nextProvider } from 'react-i18next'
-import { StyleSheet } from 'react-native'
 
 import { initMobileI18n } from '@/lib/i18n'
 
 import { OfflineAccountCreateScreen, type OfflineAccountCreateScreenProps } from './offline-account-create-screen'
+import { touchHeight } from '@/test/touch-target'
 
 const currencies = [
   { currencyKey: 151, code: 'EUR', description: 'Euro' },
@@ -30,24 +30,32 @@ async function setup(overrides: Partial<OfflineAccountCreateScreenProps> = {}) {
 }
 
 describe('OfflineAccountCreateScreen', () => {
-  it('shows a per-field error under each missing required field and clears them as fixed', async () => {
+  it('keeps the save disabled until the form is valid and shows an error under a wrong entry', async () => {
     const { view } = await setup()
-    await fireEvent.press(view.getByRole('button', { name: 'Review account' }))
-    expect(await view.findByText('Enter a name of 1-100 characters.')).toBeOnTheScreen()
+    const save = () => view.getByRole('button', { name: 'Review account' })
+    expect(save()).toBeDisabled()
+    await fireEvent.changeText(view.getByLabelText('Account name'), '   ')
+    expect(view.getByText('Enter a name of 1-100 characters.')).toBeOnTheScreen()
+    await fireEvent.changeText(view.getByLabelText('Opening/current balance'), '-4')
     expect(view.getByText('Enter a positive balance within the supported limit.')).toBeOnTheScreen()
-    expect(view.getByText('Choose a currency.')).toBeOnTheScreen()
     await fireEvent.changeText(view.getByLabelText('Account name'), 'Cash savings')
     expect(view.queryByText('Enter a name of 1-100 characters.')).not.toBeOnTheScreen()
-    expect(view.getByText('Enter a positive balance within the supported limit.')).toBeOnTheScreen()
+    await fireEvent.changeText(view.getByLabelText('Opening/current balance'), '10')
+    expect(view.queryByText('Enter a positive balance within the supported limit.')).not.toBeOnTheScreen()
+    expect(save()).toBeDisabled()
+    await fireEvent.press(view.getByRole('button', { name: /^Currency/ }))
+    await fireEvent.press(view.getByRole('radio', { name: 'EUR · Euro' }))
+    expect(save()).toBeEnabled()
   })
 
   it('requires explicit currency, positive balance, bounded trimmed name, and no account type', async () => {
     const { view, props } = await setup()
     await fireEvent.changeText(view.getByLabelText('Account name'), '  Cash savings  ')
     await fireEvent.changeText(view.getByLabelText('Opening/current balance'), '25,50')
-    await fireEvent.press(view.getByRole('button', { name: 'Review account' }))
-    expect(view.getByRole('alert')).toHaveTextContent(/choose a currency/i)
+    expect(view.getByRole('button', { name: 'Review account' })).toBeDisabled()
+    await fireEvent.press(view.getByRole('button', { name: /^Currency/ }))
     await fireEvent.press(view.getByRole('radio', { name: 'USD · US Dollar' }))
+    await fireEvent.press(view.getByRole('button', { name: /^Financial institution/ }))
     await fireEvent.press(view.getByRole('radio', { name: 'Bank One' }))
     await fireEvent.press(view.getByRole('button', { name: 'Review account' }))
     expect(view.getByRole('header', { name: 'Review account details' })).toBeOnTheScreen()
@@ -64,6 +72,7 @@ describe('OfflineAccountCreateScreen', () => {
     const { view } = await setup()
     await fireEvent.changeText(view.getByLabelText('Account name'), 'Cash')
     await fireEvent.changeText(view.getByLabelText('Opening/current balance'), '10')
+    await fireEvent.press(view.getByRole('button', { name: /^Currency/ }))
     await fireEvent.press(view.getByRole('radio', { name: 'EUR · Euro' }))
     await fireEvent.press(view.getByRole('button', { name: 'Review account' }))
     expect(view.getByText('Manual maintenance')).toBeOnTheScreen()
@@ -83,7 +92,9 @@ describe('OfflineAccountCreateScreen', () => {
         { accountFinancialInstitutionKey: 9, displayName: 'Credit Union', logoUrl: null },
       ],
     })
+    await fireEvent.press(view.getByRole('button', { name: /^Financial institution/ }))
     await fireEvent.press(view.getByRole('radio', { name: 'Bank One' }))
+    await fireEvent.press(view.getByRole('button', { name: /^Financial institution/ }))
     await fireEvent.changeText(view.getByLabelText('Search banks'), 'credit')
 
     expect(view.queryByRole('radio', { name: 'Bank One' })).not.toBeOnTheScreen()
@@ -101,9 +112,9 @@ describe('OfflineAccountCreateScreen', () => {
       unknownGuard: { payload: { name: 'Cash', currentBalance: 10, currencyId: 151 } },
       onBack: back,
     })
-    expect(view.getByRole('button', { name: 'Back to Accounts' })).toBeDisabled()
+    expect(view.getByRole('button', { name: 'Close' })).toBeDisabled()
     expect(view.queryByRole('button', { name: 'Create manual account' })).not.toBeOnTheScreen()
-    await fireEvent.press(view.getByRole('button', { name: 'Back to Accounts' }))
+    await fireEvent.press(view.getByRole('button', { name: 'Close' }))
     expect(back).not.toHaveBeenCalled()
   })
 
@@ -125,14 +136,17 @@ describe('OfflineAccountCreateScreen', () => {
     expect(view.getByLabelText('Account name').props.value).toBe('')
   })
 
-  it('uses labelled controls, scalable button text, and 48dp touch targets', async () => {
-    const { view } = await setup()
-    for (const name of ['Back to Accounts', 'Review account']) {
-      const button = view.getByRole('button', { name })
-      expect(StyleSheet.flatten(button.props.style).minHeight).toBeGreaterThanOrEqual(48)
-      expect(within(button).getByText(name).props.allowFontScaling).not.toBe(false)
-    }
-    expect(view.getByRole('radio', { name: 'EUR · Euro' }).props.accessibilityState).toEqual({ checked: false })
-    expect(view.getByRole('radio', { name: 'None' }).props.accessibilityState).toEqual({ checked: true })
+  it('opens as a flow with close and save in the form bar and labelled 44dp rows', async () => {
+    const { view, props } = await setup()
+    await fireEvent.press(view.getByRole('button', { name: 'Close' }))
+    expect(props.onBack).toHaveBeenCalledTimes(1)
+    expect(view.getByRole('header', { name: 'Add manual account' })).toBeOnTheScreen()
+    const currency = view.getByRole('button', { name: 'Currency, Choose' })
+    expect(touchHeight(currency)).toBeGreaterThanOrEqual(44)
+    expect(within(currency).getByText('Currency').props.allowFontScaling).not.toBe(false)
+    expect(view.getByRole('button', { name: 'Financial institution, None' })).toBeOnTheScreen()
+    expect(view.queryByText('Back to Accounts')).not.toBeOnTheScreen()
+    await fireEvent.press(currency)
+    expect(view.getByRole('radio', { name: 'EUR · Euro' }).props.accessibilityState).toEqual({ checked: false, selected: false })
   })
 })

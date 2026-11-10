@@ -141,7 +141,7 @@ describe('AppProviders', () => {
   })
 
   it('keeps QueryClient, auth lifecycle, and i18n stable across atomic Light, Dark, and System changes', async () => {
-    type NativeScheme = 'light' | 'dark' | 'unspecified'
+    type NativeScheme = 'light' | 'dark' | 'auto' | 'unspecified'
     let deviceScheme: 'light' | 'dark' = 'light'
     let override: NativeScheme = 'unspecified'
     const listeners = new Set<() => void>()
@@ -154,7 +154,7 @@ describe('AppProviders', () => {
         listeners.add(listener)
         return () => listeners.delete(listener)
       },
-      () => override === 'unspecified' ? deviceScheme : override,
+      () => override === 'unspecified' || override === 'auto' ? deviceScheme : override,
     )
     const session = lifecycle({ status: 'ready', session: null })
     const factory = jest.fn(() => session)

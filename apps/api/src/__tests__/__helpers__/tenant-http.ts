@@ -25,15 +25,18 @@ import { DI } from '@app/database/di';
 import type { Appuser } from '@entity/Appuser';
 import { errorHandler } from '@middleware/error-handler';
 import { authedTenant } from '@middleware/stacks';
+import type { Enqueue } from '@service/queue/enqueue';
 
 import { TEST_USER_HEADER } from './auth-session-double';
 
 export { TEST_USER_HEADER } from '@app/__tests__/__helpers__/auth-session-double';
 
-export function tenantHttp(mountPath: string, router: Router) {
+/** `enqueue`: the queue seam each request carries (`req.enqueue`), for routes that start jobs. */
+export function tenantHttp(mountPath: string, router: Router, options: { enqueue?: Enqueue } = {}) {
   const app = express();
-  app.use((_req, _res, next) => {
+  app.use((req, _res, next) => {
     if (!DI.orm) throw new Error('Test database is not started');
+    if (options.enqueue) req.enqueue = options.enqueue;
     RequestContext.create(DI.orm.em, next);
   });
   app.use(express.json());

@@ -72,8 +72,7 @@ export async function fundGoalTransaction(req: Request, res: Response) {
 }
 
 export async function getAvailableToAssign(req: Request, res: Response) {
-  const availableToAssign = await getGoalService().getAvailableToAssign(await getGoalContext(req));
-  return res.json({ availableToAssign });
+  return res.json(await getGoalService().getAvailableToAssignSummary(await getGoalContext(req)));
 }
 
 export async function getGoal(req: Request, res: Response) {

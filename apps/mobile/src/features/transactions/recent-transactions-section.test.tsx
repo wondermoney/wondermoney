@@ -2,6 +2,7 @@ import { fireEvent, render } from '@testing-library/react-native'
 import { I18nextProvider } from 'react-i18next'
 
 import { initMobileI18n } from '@/lib/i18n'
+import { inTimeZone } from '@/test/time-zone'
 
 import { RecentTransactionsSection, type RecentTransactionsSectionState } from './recent-transactions-section'
 
@@ -30,6 +31,19 @@ describe('RecentTransactionsSection', () => {
     expect(view.getByLabelText(/Blue Bottle,.*€12\.50, Debit/)).toBeOnTheScreen()
     expect(view.getByLabelText(/Refund,.*€20\.00, Credit/)).toBeOnTheScreen()
     expect(view.getByLabelText(/Initial balance,.*€100\.00/)).toBeOnTheScreen()
+  })
+
+  describe.each(['America/New_York', 'Asia/Tokyo'])('for a viewer in %s', (zone) => {
+    inTimeZone(zone)
+
+    it('dates a date-only bank booking on its own date', async () => {
+      const { view } = await renderSection({
+        status: 'loaded',
+        stale: false,
+        rows: [{ kind: 'persisted', displayName: 'Blue Bottle', occurredAt: '2026-08-01T00:00:00.000Z', amount: -12.5, currencyCode: 'EUR', direction: 'debit' }],
+      })
+      expect(view.getByText('Aug 1, 2026')).toBeOnTheScreen()
+    })
   })
 
   it('shows honest unavailable copy for null name, date and amount', async () => {

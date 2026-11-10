@@ -49,7 +49,7 @@ const AccountAddModal: React.FC<AccountAddModalProps> = ({
         trigger === false
           ? undefined
           : (trigger ?? (
-              <Button className="gap-2" size="sm">
+              <Button>
                 <Plus className="size-4" />
                 {t("add-account")}
               </Button>

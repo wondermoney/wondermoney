@@ -201,7 +201,7 @@ export default function PortfolioTransactionsClient({
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-        <h1 className="text-foreground text-xl font-semibold tracking-tight">
+        <h1 className="text-foreground text-2xl font-semibold tracking-tight lg:text-3xl">
           {t("transactions")}
         </h1>
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
@@ -216,12 +216,8 @@ export default function PortfolioTransactionsClient({
             }}
             defaultPortfolioId={portfoliosData?.portfolios[0].portfolioKey.toString()}
             trigger={
-              <Button
-                variant="outline"
-                size="sm"
-                className="w-full gap-1.5 sm:w-auto"
-              >
-                <Download className="size-3.5" />
+              <Button variant="outline" className="w-full sm:w-auto">
+                <Download className="size-4" />
                 {t("import-transactions")}
               </Button>
             }
@@ -236,8 +232,8 @@ export default function PortfolioTransactionsClient({
               }
             }}
             trigger={
-              <Button size="sm" className="w-full gap-1.5 sm:w-auto">
-                <Plus className="size-3.5" />
+              <Button className="w-full sm:w-auto">
+                <Plus className="size-4" />
                 {t("add-transaction")}
               </Button>
             }

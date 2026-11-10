@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import { Text } from "@/components/ui/Typography";
 import useEditTransactions from "@/lib/api/account/useEditTransactions";
 import { Transaction } from "@/lib/api/account/useTransactions";
+import { isSplitTransaction } from "@/lib/api/account/useTransactionSplits";
 import useConfigs from "@/lib/api/configs/useConfigs";
 import { isDemoReadOnlyError } from "@/lib/api/errors";
 import { useDisclosure } from "@/lib/utils/useDIsclosure";
@@ -17,6 +18,7 @@ import { useDisclosure } from "@/lib/utils/useDIsclosure";
 import CategorySelect from "../CategorySelect";
 import Slide from "../ui/Animations/Slide";
 import { Button } from "../ui/button";
+import { useConfirmReplaceSplit } from "./useConfirmReplaceSplit";
 
 interface TransactionReviewControlProps {
   transactions: Transaction[];
@@ -49,6 +51,17 @@ const TransactionReviewControl: React.FC<TransactionReviewControlProps> = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { mutateAsync } = useEditTransactions();
   const queryClient = useQueryClient();
+  // Giving a split transaction one category removes its split, so that is asked first. The
+  // picker remounts while asking, so a cancelled choice does not stay on screen.
+  const { confirm: confirmReplaceSplit, dialog: replaceSplitDialog } =
+    useConfirmReplaceSplit();
+  const [categoryPickerKey, setCategoryPickerKey] = useState(0);
+  const onPickCategory = (value: string) => {
+    if (transactions.some(isSplitTransaction)) {
+      setCategoryPickerKey((key) => key + 1);
+    }
+    confirmReplaceSplit(transactions, () => void onChangeCategory(value));
+  };
   const onChangeCategory = async (value: string) => {
     setIsSubmitting(true);
     posthog.capture("account_transaction_review_set_category", {
@@ -150,6 +163,7 @@ const TransactionReviewControl: React.FC<TransactionReviewControlProps> = ({
         </Text>
         <div className="flex gap-6">
           <CategorySelect
+            key={categoryPickerKey}
             triggerProps={{
               variant: "outline",
               size: "default",
@@ -157,7 +171,7 @@ const TransactionReviewControl: React.FC<TransactionReviewControlProps> = ({
               className: "text-foreground",
             }}
             categories={configsData?.categories ?? []}
-            onChange={onChangeCategory}
+            onChange={onPickCategory}
           />
           {!allTransactionsReviewed && (
             <Button
@@ -195,6 +209,7 @@ const TransactionReviewControl: React.FC<TransactionReviewControlProps> = ({
           )}
         </div>
       </div>
+      {replaceSplitDialog}
     </Slide>
   );
 };

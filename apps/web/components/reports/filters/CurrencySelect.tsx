@@ -9,7 +9,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/Select";
-import { cn } from "@/lib/utils";
 
 interface CurrencySelectProps {
   currencies: Array<{ key: string; name: string }>;
@@ -31,14 +30,8 @@ export function CurrencySelect({
       value={value ?? ""}
       onValueChange={(next) => onChange(next || undefined)}
     >
-      <SelectTrigger
-        className={cn(
-          "h-10 justify-start gap-2 text-left font-normal sm:h-9",
-          className,
-        )}
-        aria-label={t("currency")}
-      >
-        <SelectValue placeholder={t("placeholder.select")} />
+      <SelectTrigger className={className} aria-label={t("currency")}>
+        <SelectValue placeholder={t("placeholder.allCurrencies")} />
       </SelectTrigger>
       <SelectContent>
         {currencies.map((currency) => (

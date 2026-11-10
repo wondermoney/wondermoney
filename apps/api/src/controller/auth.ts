@@ -5,12 +5,13 @@ import { Appuser, AppuserAccountType } from '@entity/Appuser';
 import { recordAnalyticsOutboxEvent } from '@service/analytics/analytics-outbox.service';
 import { ensureAppuserTenantLink, getOrCreateTenant, isAppError } from '@service/auth/auth-callback.service';
 import { getAuthUserFullName } from '@service/auth/auth-callback.utils';
-import { type AuthContext, getPrimaryAuthProvider } from '@service/auth/better-auth';
+import { type AuthContext, betterAuthUserExists, getPrimaryAuthProvider, sendReconnectVerificationEmail } from '@service/auth/better-auth';
+import { reconnectLegacyAppuser } from '@service/auth/legacy-account-reconnect.service';
 import { recordSignup } from '@service/auth/signup-record.service';
 import { sendSignupEmail } from '@service/email/email';
 import { consumeInvite, notifyExistingUserInviteAttempt, validateInviteForSignup } from '@service/household/household-invite.service';
 import { ERROR } from '@utils/constants';
-import { BadRequestError, InternalServerError } from '@utils/errors';
+import { BadRequestError, ERROR_CODE, InternalServerError } from '@utils/errors';
 import { fireAndForget } from '@utils/fire-and-forget';
 import logger from '@utils/logger';
 import { authCallbackRequestSchema, mapRouteLocaleToEmailLanguage } from '@validators/auth';
@@ -69,6 +70,30 @@ export async function authCallback(req: Request, res: Response) {
       if (isDemoAccount(existingUserByEmail)) {
         logger.info({ appuserKey: existingUserByEmail.appuserKey }, 'Demo user logging in via alternate provider');
         return sendAuthCallbackSuccess(res, existingUserByEmail.appuserKey, method, 'demo');
+      }
+
+      const reconnect = await reconnectLegacyAppuser(
+        DI.em,
+        { appuser: existingUserByEmail, emailVerified: authUser.user.emailVerified, externalUserId },
+        { authUserExists: betterAuthUserExists },
+      );
+      if (reconnect === 'reconnected') {
+        logger.info({ appuserKey: existingUserByEmail.appuserKey }, 'Reconnected an account from before better-auth to a new login');
+        const reconnected = await DI.em.getRepository(Appuser).getUserByExternalId(externalUserId);
+        if (!reconnected) throw new InternalServerError('Reconnected account not found');
+        committedSignupAppuserKey = reconnected.appuserKey;
+        provisioningStage = 'tenant';
+        const tenant = await getOrCreateTenant(DI.em, reconnected);
+        provisioningStage = 'tenant-link';
+        await ensureAppuserTenantLink(DI.em, reconnected, tenant);
+        return sendAuthCallbackSuccess(res, reconnected.appuserKey, method, 'login');
+      }
+      if (reconnect === 'email-unverified') {
+        await sendReconnectVerificationEmail(email, body.locale);
+        throw new BadRequestError(
+          'This email has an account from before the sign-in change. We emailed you a link: follow it, then sign in again to reconnect it.',
+          ERROR_CODE.ACCOUNT_RECONNECT_EMAIL_UNVERIFIED,
+        );
       }
 
       logger.warn(

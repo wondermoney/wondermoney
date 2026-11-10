@@ -32,11 +32,19 @@ describe('MarketsSearchScreen', () => {
     expect(view.toJSON()).toBeNull()
   })
 
-  it('leaves the idle screen to the search field itself', async () => {
-    // The idle caption repeated the field's own placeholder verbatim.
+  it('shows web\'s Explorer intro, search field and sample preview when idle', async () => {
     const { view } = await setup()
-    expect(view.queryByText('Search for a ticker by name or symbol')).toBeNull()
-    expect(view.getByPlaceholderText('Search by name or symbol')).toBeOnTheScreen()
+    expect(view.getByRole('header', { name: 'Explorer' })).toBeOnTheScreen()
+    expect(view.getByRole('header', { name: 'Explore an asset' })).toBeOnTheScreen()
+    expect(view.getByPlaceholderText('Search for a ticker or company name, e.g. AAPL or Microsoft')).toBeOnTheScreen()
+    expect(view.getByTestId('explorer-preview')).toBeOnTheScreen()
+    expect(view.getByText('Sample asset')).toBeOnTheScreen()
+    expect(view.getByText('Price history')).toBeOnTheScreen()
+  })
+
+  it('drops the sample preview once there are results', async () => {
+    const { view } = await setup({ state: { status: 'loaded', rows }, query: 'a' })
+    expect(view.queryByTestId('explorer-preview')).not.toBeOnTheScreen()
   })
 
   it('shows a loading state', async () => {
@@ -78,27 +86,23 @@ describe('MarketsSearchScreen', () => {
     expect(props.onQueryChange).toHaveBeenCalledWith('aapl')
   })
 
-  it('invokes onBack from the back action', async () => {
-    const { view, props } = await setup()
-    await fireEvent.press(view.getByRole('button', { name: 'Back' }))
-    expect(props.onBack).toHaveBeenCalledTimes(1)
+  it('has no back link or watchlist link of its own: both are section tabs', async () => {
+    const { view } = await setup()
+    expect(view.queryByRole('button', { name: 'Back' })).not.toBeOnTheScreen()
+    expect(view.queryByRole('link', { name: 'Watchlist' })).not.toBeOnTheScreen()
   })
 
-  it('invokes onOpenWatchlist from the watchlist entry-point action', async () => {
+  it('invokes onOpenScreener from the overflow menu on the title row', async () => {
     const { view, props } = await setup()
-    await fireEvent.press(view.getByRole('button', { name: 'Watchlist' }))
-    expect(props.onOpenWatchlist).toHaveBeenCalledTimes(1)
-  })
-
-  it('invokes onOpenScreener from the screener entry-point action', async () => {
-    const { view, props } = await setup()
-    await fireEvent.press(view.getByRole('button', { name: 'Screener' }))
+    // The screener sits behind the title row's overflow menu.
+    await fireEvent.press(view.getByRole('button', { name: 'More actions' }))
+    await fireEvent.press(view.getByRole('menuitem', { name: 'Screener' }))
     expect(props.onOpenScreener).toHaveBeenCalledTimes(1)
   })
 
   it('keeps allowFontScaling on the title, row, and empty-state text', async () => {
     const { view } = await setup({ state: { status: 'loaded', rows }, query: 'a' })
     expect(within(view.getByRole('button', { name: 'XYZ' })).getByText('XYZ').props.allowFontScaling).not.toBe(false)
-    expect(view.getByText('Markets').props.allowFontScaling).not.toBe(false)
+    expect(view.getByText('Explorer').props.allowFontScaling).not.toBe(false)
   })
 })

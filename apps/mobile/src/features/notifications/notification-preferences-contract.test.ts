@@ -6,6 +6,7 @@ import {
 
 const valid = {
   accountRecovery: { effectiveEnabled: true, storedEnabled: true },
+  bankSyncAlerts: { effectiveEnabled: true, storedEnabled: true },
   budgetAlerts: { deliverySupported: true, effectiveEnabled: true, storedEnabled: true },
   growth: { effectiveEnabled: false, storedEnabled: false },
   marketingOptOut: false,
@@ -33,6 +34,16 @@ describe('notification preferences contract', () => {
   it('strips preference categories and fields the API adds', () => {
     const parsed = notificationPreferencesSchema.parse({ ...valid, productUpdates: { effectiveEnabled: true, storedEnabled: true }, growth: { ...valid.growth, lockedByAdmin: false } })
     expect(parsed).toEqual(valid)
+  })
+
+  it('tolerates an older server that does not return bankSyncAlerts yet', () => {
+    const { bankSyncAlerts: _omitted, ...older } = valid
+    const parsed = notificationPreferencesSchema.parse(older)
+    expect(parsed.bankSyncAlerts).toBeUndefined()
+  })
+
+  it('rejects a malformed bankSyncAlerts category', () => {
+    expect(notificationPreferencesSchema.safeParse({ ...valid, bankSyncAlerts: { storedEnabled: 'yes' } }).success).toBe(false)
   })
 
   it('rejects a non-boolean marketing opt-out', () => {

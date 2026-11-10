@@ -11,7 +11,7 @@ import {
   createLinkLoanRepaymentEndpoint,
   createUpdateLoanRepaymentEndpoint,
 } from './loans-contract'
-import { loanKey, loanRepaymentCandidatesKey, loanRepaymentsKey, loansKey } from './query-keys'
+import { loanKey, loanRepaymentCandidatesKey, loanRepaymentsKey, loanOverviewKey, loansKey } from './query-keys'
 
 export type RepaymentWriteFailure = 'demo' | 'access' | 'mfa' | 'cancelled' | 'not-found' | 'conflict' | 'invalid' | 'unknown' | 'general'
 
@@ -72,6 +72,7 @@ export function useLoanRepaymentMutation() {
           commit: () => {
             refresh = Promise.all([
               queryClient.invalidateQueries({ queryKey: loansKey(runtime.epochId), exact: true }),
+              queryClient.invalidateQueries({ queryKey: loanOverviewKey(runtime.epochId), exact: true }),
               queryClient.invalidateQueries({ queryKey: loanKey(runtime.epochId, write.loanId), exact: true }),
               queryClient.invalidateQueries({ queryKey: loanRepaymentsKey(runtime.epochId, write.loanId), exact: true }),
               queryClient.invalidateQueries({ queryKey: loanRepaymentCandidatesKey(runtime.epochId, write.loanId), exact: true }),

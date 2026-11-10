@@ -29,6 +29,51 @@ Analytics and attribution are gated on consent. If you have not consented to ana
 - Whether connected services are still active
 - Whether connected bank access is still needed
 
+## Export your data
+
+**Settings > Privacy > Export all data** (or **Settings > Security** in the mobile app) downloads everything in your household that you can see, as a zip file named `wondermoney-export-YYYY-MM-DD.zip`:
+
+- `data/`: one JSON file per kind of data: accounts, transactions, categories and category settings, merchants, tags, transaction splits, rules, recurring payments, budgets, goals, loans, portfolios and their transactions, your watchlist and your preferences. Rows refer to each other by ids that only have meaning inside the export.
+- `csv/`: transactions, accounts, portfolio transactions and current holdings, for spreadsheets. Amounts use a dot as the decimal separator and dates are written as `YYYY-MM-DD`.
+- `manifest.json`: the format version, when the export was made, and the number of rows and a SHA-256 checksum for every file.
+
+What is not included:
+
+- Your partner's private accounts, and their transactions, splits, tags, recurring payments and rules. Their own loans and watchlist stay out too.
+- Passwords, sessions, two-factor secrets, bank credentials and connection tokens. An account that was connected to a bank says so, without any of its connection details.
+- Audit logs, AI usage and analytics data.
+
+When the server has file storage, the export is prepared in the background. You get an email when it is ready, and the file can be downloaded from the same place for 24 hours, after which it is deleted. On a self-hosted server without file storage, the zip is built while it downloads, from the web app. You can start up to three exports a day.
+
+### Protect the export with a password
+
+Tick **Protect the file with a password** before you start the export (web app) and choose a password of at least 16 characters. Every file in the zip is then encrypted with AES-256, in the standard WinZip AES format:
+
+- Open it with [7-Zip](https://www.7-zip.org/) (Windows, Linux), [Keka](https://www.keka.io/) (macOS) or WinRAR, and enter the password. The zip tools built into some systems cannot open encrypted archives.
+- A small `README.txt` next to the encrypted files says how to open it. File names and sizes stay visible; their contents do not.
+- A changed or damaged file is detected when it is opened.
+- WonderMoney does not keep the password and cannot recover it. If you forget it, start a new export.
+
+The format derives its key from the password with a fast function, so the length of the password is what protects the file: prefer a long passphrase of several words to a short complex password. The password is sent to the server once, when the export starts, used only while the file is written and then deleted. It is never logged, stored with the export or included in the email, and the server never keeps an unencrypted copy of a protected export.
+
+## Restore from an export
+
+An export can be loaded back into WonderMoney, on the same server or another one, for example when you move between the hosted service and your own server. Restore only fills an empty household: it works while your household has no accounts, portfolios, budgets, goals or loans, and it never merges an export into existing data. Only the household owner can restore, and the server needs file storage.
+
+1. Open **Settings > Privacy > Restore from an export**, or choose **Restore from an export** on the first screen after you sign up.
+2. Choose the `wondermoney-export-YYYY-MM-DD.zip` file (up to 64 MB) and select **Check file**. For a password-protected export, enter its password when asked.
+3. WonderMoney checks the whole file before it writes anything: that it is a WonderMoney export, that no file was changed, added or removed since it was exported (against the checksums in `manifest.json`), and that every row can be read. It then shows what the export holds and anything to know before restoring.
+4. Select **Restore now**. Everything is written at once: if anything fails, nothing is kept and the household stays empty.
+
+What to expect afterwards:
+
+- Accounts that were connected to a bank come back as manual accounts with their full history. No bank credentials are restored, so reconnect them in **Settings > Connections** if you want them to sync again.
+- Everything in the export becomes yours, including what a partner shared with you. Invite your partner again to share the household.
+- Your currency, language and email preferences are set to the ones in the export.
+- Investments are matched to this server's list by ISIN or symbol, and one it does not know is looked up in its market data. The trades of an investment neither knows are left out, and the check lists them before you restore: add them again yourself afterwards. Account balances are restored as exported; balances in other currencies and portfolio history are recalculated in the background shortly after.
+
+The password of a protected export is sent once, when the file is checked, and kept encrypted only until the restore finishes. It is never logged. The uploaded file is deleted when the restore ends, and within a day in any case. You can start up to ten restores a day.
+
 ## Good practice
 
 Review privacy settings after changing your sign-in method, connected banks, or consent choices. If something looks unexpected, start with the linked feature page rather than changing multiple settings at once.

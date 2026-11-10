@@ -1,5 +1,4 @@
-import { type Href, useLocalSearchParams, useNavigation, useRouter } from 'expo-router'
-import { useEffect } from 'react'
+import { type Href, useLocalSearchParams, usePreventRemove, useRouter } from 'expo-router'
 
 import { ApiError } from '@/lib/api/errors'
 
@@ -19,11 +18,8 @@ export function LoanDetailRoute() {
   const candidatesQuery = useLoanRepaymentCandidates(loanId)
   const repaymentMutation = useLoanRepaymentMutation()
   const router = useRouter()
-  const navigation = useNavigation()
   const repaymentPending = loanId !== null && repaymentMutation.isLoanPending(loanId)
-  useEffect(() => navigation.addListener('beforeRemove', (event) => {
-    if (repaymentPending) event.preventDefault()
-  }), [navigation, repaymentPending])
+  usePreventRemove(repaymentPending)
   let state: LoanDetailViewState
   if (loanQuery.isInvalidId) state = { status: 'invalid-id' }
   else if (loanQuery.isAccessTransition || repaymentsQuery.isAccessTransition || candidatesQuery.isAccessTransition) state = { status: 'access-transition' }

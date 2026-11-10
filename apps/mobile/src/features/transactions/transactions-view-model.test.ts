@@ -2,14 +2,39 @@ import { mapTransactions } from './transactions-view-model'
 import { nullishTransactionFixture, transactionFixture } from './test-fixtures'
 
 describe('transaction view model', () => {
-  it('sorts recent-first and maps merchant, converted amount, cues, and detail context', () => {
+  it('keeps the server order and maps merchant, converted amount, cues, and detail context', () => {
     const rows = mapTransactions({ transactions: [
-      transactionFixture,
       { ...transactionFixture, transactionKey: 42, transactionDate: '2026-07-19T10:00:00.000Z', transactionTypeKey: { name: 'credit' }, transactionMerchantKey: undefined, description: 'Salary', appuserSettlementAmount: 1000, recurringSeries: { recurringSeriesKey: 2, displayName: 'Salary', type: 'bill', amountType: 'fixed', status: 'confirmed' } },
+      transactionFixture,
     ] })
     expect(rows.map((row) => row.id)).toEqual([42, 41])
     expect(rows[0]).toMatchObject({ title: 'Salary', isCredit: true, amount: 1000, currency: 'EUR', description: 'Salary' })
     expect(rows[1]).toMatchObject({ title: 'Corner shop', isCredit: true, direction: 'credit', category: 'Groceries', description: 'Card purchase', rawDescription: 'CARD PURCHASE 1234' })
+  })
+
+  it('leaves the server-placed initial balance at the head of the page, as web lists it', () => {
+    const rows = mapTransactions({ transactions: [
+      { ...transactionFixture, transactionKey: -7, transactionDate: '2025-10-04T00:00:00.000Z', description: 'Initial balance' },
+      { ...transactionFixture, transactionKey: 42, transactionDate: '2026-11-03T10:00:00.000Z' },
+    ] })
+    expect(rows.map((row) => row.id)).toEqual([-7, 42])
+  })
+
+  it('leads each row with its mark: category colours, transfer arrows, the institution on the opening row, a tag when uncategorised', () => {
+    const category = { categoryKey: 3, name: 'Coffee', icon: 'coffee', bgColor: '#FEE2E2', textColor: '#991B1B', isSystemCategory: false }
+    const institution = { logoUrl: 'https://cdn.example/bank.png' }
+    const rows = mapTransactions({ transactions: [
+      { ...transactionFixture, appuserTransactionCategories: [category] },
+      { ...transactionFixture, transactionTypeKey: { name: 'TRANSFER_IN' }, appuserTransactionCategories: [category] },
+      { ...transactionFixture, transactionKey: -7, appuserTransactionCategories: [], accountKey: { ...transactionFixture.accountKey, accountFinancialInstitutionKey: institution } },
+      { ...transactionFixture, appuserTransactionCategories: [] },
+    ] })
+    expect(rows.map((row) => row.mark)).toEqual([
+      { icon: { name: 'coffee', bgColor: '#FEE2E2', textColor: '#991B1B' } },
+      { glyph: 'arrow-left-right' },
+      { image: 'https://cdn.example/bank.png', glyph: 'landmark' },
+      { glyph: 'tag' },
+    ])
   })
 
   it('marks negative initial-balance rows synthetic', () => {

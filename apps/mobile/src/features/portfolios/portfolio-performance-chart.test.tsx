@@ -73,6 +73,17 @@ describe('PortfolioPerformanceChart', () => {
     expect(view.getByText(/2026-07-01.*2026-08-01/)).toBeOnTheScreen()
   })
 
+  it('says when some days left out a portfolio it could not convert', async () => {
+    const points = [{ x: 0, value: 1000 }, { x: 1, value: 1100 }]
+    const ready = { points, totalReturnPercent: 10, startDate: '2026-07-01', endDate: '2026-08-01', historyStatus: 'ready' as const }
+    const { view } = await renderChart({ status: 'loaded', data: { ...ready, currencyIncomplete: true } })
+    expect(view.getByText(/no exchange rate/i)).toBeOnTheScreen()
+    view.unmount()
+
+    const complete = await renderChart({ status: 'loaded', data: { ...ready, currencyIncomplete: false } })
+    expect(complete.view.queryByText(/no exchange rate/i)).not.toBeOnTheScreen()
+  })
+
   it('lets the user switch periods', async () => {
     const { view, onSelectPeriod } = await renderChart({ status: 'loading' })
     await fireEvent.press(view.getByRole('tab', { name: '1M' }))

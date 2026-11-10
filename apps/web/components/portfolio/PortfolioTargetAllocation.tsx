@@ -3,7 +3,6 @@
 import { useTranslations } from "next-intl";
 import React from "react";
 
-import { Card } from "@/components/ui/card";
 import type { AssetClassDrift } from "@/lib/api/portfolio/usePortfolioAllocation";
 import { cn } from "@/lib/utils";
 import { useFormatPercentage } from "@/lib/utils/useFormatPercentage";
@@ -23,7 +22,7 @@ const PortfolioTargetAllocation: React.FC<PortfolioTargetAllocationProps> = ({
   }
 
   return (
-    <Card className="p-4">
+    <section className="border-foreground border-t-2 pt-4">
       <div className="flex flex-col gap-3">
         {/* Header row */}
         <div className="text-muted-foreground grid grid-cols-4 gap-2 text-sm font-medium">
@@ -72,7 +71,7 @@ const PortfolioTargetAllocation: React.FC<PortfolioTargetAllocationProps> = ({
           </div>
         ))}
       </div>
-    </Card>
+    </section>
   );
 };
 

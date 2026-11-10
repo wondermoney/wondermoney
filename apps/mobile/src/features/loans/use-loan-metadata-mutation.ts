@@ -6,7 +6,7 @@ import { netWorthKey } from '@/features/net-worth/query-keys'
 import { ApiError } from '@/lib/api/errors'
 
 import { createLoanWriteEndpoint, loanWriteSchema, type LoanWrite } from './loans-contract'
-import { loanKey, loansKey } from './query-keys'
+import { loanKey, loanOverviewKey, loansKey } from './query-keys'
 
 export type LoanWriteFailure = 'demo' | 'access' | 'mfa' | 'cancelled' | 'not-found' | 'network-ambiguous' | 'invalid' | 'invalid-response' | 'general'
 
@@ -51,6 +51,7 @@ export function useLoanMetadataMutation() {
           commit: () => {
             void Promise.all([
               queryClient.invalidateQueries({ queryKey: loansKey(runtime.epochId), exact: true }),
+              queryClient.invalidateQueries({ queryKey: loanOverviewKey(runtime.epochId), exact: true }),
               queryClient.invalidateQueries({ queryKey: loanKey(runtime.epochId, loanId), exact: true }),
               queryClient.invalidateQueries({ queryKey: netWorthKey(runtime.epochId), exact: true }),
             ])

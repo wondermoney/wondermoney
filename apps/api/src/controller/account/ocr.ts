@@ -76,6 +76,8 @@ export async function confirmTransactionOCRImportAndCreateTransaction(req: Reque
       // first id wins).
       categoryId: categoryIds?.[0],
       description,
+      // The user reviewed and confirmed the scanned values.
+      enteredByHand: true,
       exchangeRate,
       originalAmount,
       originalCurrencyId,

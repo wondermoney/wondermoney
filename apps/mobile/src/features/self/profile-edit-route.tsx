@@ -1,5 +1,5 @@
-import { type Href, useNavigation, useRouter } from 'expo-router'
-import { useEffect, useState } from 'react'
+import { type Href, usePreventRemove, useRouter } from 'expo-router'
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useColorScheme } from 'react-native'
 
@@ -15,14 +15,11 @@ export function ProfileEditRoute() {
   const query = useProfile()
   const mutation = useUpdateProfile()
   const router = useRouter()
-  const navigation = useNavigation()
   const { t } = useTranslation()
   const palette = themeTokens.colors[useColorScheme() === 'dark' ? 'dark' : 'light']
   const [failure, setFailure] = useState<ProfileUpdateFailure | null>(null)
 
-  useEffect(() => navigation.addListener('beforeRemove', (event) => {
-    if (mutation.isPending) event.preventDefault()
-  }), [mutation.isPending, navigation])
+  usePreventRemove(mutation.isPending)
 
   const goToProfile = () => {
     if (router.canGoBack()) router.back()
@@ -32,7 +29,7 @@ export function ProfileEditRoute() {
   // The profile is normally already cached from the Profile screen; while it loads,
   // present the shared skeleton rather than an empty form.
   if (query.isLoading || !query.data) {
-    return <SelfLoading label={t('profileEdit.loading')} backLabel={t('profileEdit.cancel')} onBack={goToProfile} palette={palette} />
+    return <SelfLoading label={t('profileEdit.loading')} backLabel={t('common.back')} onBack={goToProfile} palette={palette} />
   }
 
   return (

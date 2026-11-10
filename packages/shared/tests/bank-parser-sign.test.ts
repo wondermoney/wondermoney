@@ -30,3 +30,31 @@ describe('bank statement parsers keep the file sign', () => {
     expect(row?.internalTransactionId).toBe(generateInternalTransactionId(date, amount));
   });
 });
+
+describe('Montepio amounts', () => {
+  const sheet = (amount: string | number, balance: string | number) =>
+    [...filler(9), [date, date, 'SALARIO ACME', amount, balance]] as never;
+
+  it.each([
+    ['1.234.567,89', 1234567.89],
+    ['-1.234,50', -1234.5],
+    ['0,05', 0.05],
+    ['12', 12],
+  ])('reads every thousands separator in %s', (text, amount) => {
+    const [row] = getBankParser('montepio')(sheet(text, '2.345.678,90'));
+
+    expect(row?.settlementAmount.toNumber()).toBe(amount);
+    expect(row?.balance?.toNumber()).toBe(2345678.9);
+  });
+
+  it('keeps a numeric cell as it is', () => {
+    const [row] = getBankParser('montepio')(sheet(-42.5, 1000));
+
+    expect(row?.settlementAmount.toNumber()).toBe(-42.5);
+    expect(row?.balance?.toNumber()).toBe(1000);
+  });
+
+  it('rejects an amount it cannot read instead of guessing', () => {
+    expect(() => getBankParser('montepio')(sheet('1.23.45', '0,00'))).toThrow(/1\.23\.45/);
+  });
+});

@@ -6,6 +6,7 @@ import { Appuser, AppuserAccountType } from '@entity/Appuser';
 import { Seeder } from '@mikro-orm/seeder';
 
 import { demoPersona } from './demo/demo-fixtures';
+import { CURRENT_ONBOARDING_VERSION } from '../../onboarding-version';
 import { createUser } from '../utils/better-auth-user';
 import { getSeedNow, requireSeedDependency, seedPassword } from '../utils/seed';
 
@@ -31,6 +32,8 @@ export class AppuserSeeder extends Seeder {
       firstName: 'Admin',
       accountType: AppuserAccountType.ADMIN,
       onboarding: [1, 2, 3, 4, 5],
+      onboardingCompletedAt: seedNow,
+      onboardingCompletedVersion: CURRENT_ONBOARDING_VERSION,
     });
     ctx._DEMO_appuser = em.create(Appuser, {
       currencyKey: eurCurrency,
@@ -41,6 +44,10 @@ export class AppuserSeeder extends Seeder {
       accountType: AppuserAccountType.DEMO,
       lastName: demoPersona.lastName,
       onboarding: [1, 2, 3, 4, 5],
+      // The demo profile is read-only (blockDemoMutation), so it could never
+      // POST its own completion: seed it past the journey, like admin.
+      onboardingCompletedAt: seedNow,
+      onboardingCompletedVersion: CURRENT_ONBOARDING_VERSION,
     });
     ctx._EMPTY_appuser = em.create(Appuser, {
       currencyKey: eurCurrency,

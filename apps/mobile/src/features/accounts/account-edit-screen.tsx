@@ -1,13 +1,18 @@
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Alert, BackHandler, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Switch, Text, TextInput, useColorScheme, View } from 'react-native'
-import { SafeAreaView } from 'react-native-safe-area-context'
+import { Alert, BackHandler, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, View } from 'react-native'
 
+import { Button } from '@/components/ui/button'
+import { FormBar } from '@/components/ui/form-bar'
+import { FormGroup, FormSwitchRow, FormTextRow } from '@/components/ui/form-row'
+import { Notice } from '@/components/ui/notice'
+import { SafeAreaView } from '@/components/ui/screen-safe-area'
+import { Text as UiText } from '@/components/ui/text'
 import { themeTokens, type Palette } from '@/theme/tokens'
-import { textStyles } from '@/theme/typography'
-import { BackControl } from '@/components/ui/back-control'
+import { usePalette } from '@/theme/use-palette'
 
 import { accountUpdateWriteSchema, type AccountUpdateWrite } from './accounts-contract'
+import { LoadingState } from './screen-states'
 import { classifyAccountDeleteFailure, type AccountDeleteFailure } from './use-account-delete-mutation'
 import { classifyAccountWriteFailure, type AccountWriteFailure } from './use-account-metadata-mutation'
 
@@ -53,9 +58,9 @@ const confirmDiscard = (title: string, message: string, cancel: string, proceed:
 
 export function AccountEditScreen(props: Props) {
   const { t } = useTranslation()
-  const palette = themeTokens.colors[useColorScheme() === 'dark' ? 'dark' : 'light']
+  const palette = usePalette()
   if (props.state.status === 'access-transition') return null
-  if (props.state.status === 'loading') return <SafeAreaView style={[styles.safe, { backgroundColor: palette.background }]}><View accessibilityRole="progressbar" accessibilityLabel={t('accountEdit.loading')} style={styles.center}><Text style={{ color: palette.foreground }}>{t('accountEdit.loading')}</Text></View></SafeAreaView>
+  if (props.state.status === 'loading') return <LoadingState label={t('accountEdit.loading')} />
   if (props.state.status !== 'loaded' && props.state.status !== 'refresh-error') return <EditFailure status={props.state.status} onBack={props.onBack} onRetry={props.onRetry} palette={palette} />
   return <AccountEditForm key={props.state.model.id} {...props} model={props.state.model} stale={props.state.status === 'refresh-error'} palette={palette} />
 }
@@ -109,35 +114,50 @@ function AccountEditForm({ model, stale, onBack, onSaveAccount, onDeleteAccount,
 
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: palette.background }]}>
+      <FormBar
+        closeDisabled={locked}
+        closeLabel={t('common.close')}
+        onClose={() => void requestExit()}
+        onSave={() => void saveAccount()}
+        saveDisabled={!dirty || locked}
+        saveLabel={pending ? t('accountEdit.saving') : t('accountEdit.saveDetails')}
+        saving={pending}
+        title={t('accountEdit.title')}
+      />
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={styles.keyboard}>
-        <ScrollView keyboardShouldPersistTaps="handled" keyboardDismissMode="interactive" contentContainerStyle={[styles.content, styles.contentWithBottomInset]}>
+        <ScrollView keyboardShouldPersistTaps="handled" keyboardDismissMode="interactive" contentContainerStyle={styles.content}>
           <View style={styles.page}>
-            <BackControl fallback="/accounts" onPress={() => void requestExit()} color={palette.primary} disabled={locked} />
-            <View style={styles.heading}><Text accessibilityRole="header" style={[styles.title, { color: palette.foreground }]}>{t('accountEdit.title')}</Text><Text style={[styles.helper, { color: palette.mutedForeground }]}>{t('accountEdit.helper')}</Text></View>
-            {stale ? <Text accessibilityRole="alert" style={[styles.notice, { color: palette.foreground, borderColor: palette.border, backgroundColor: palette.muted }]}>{t('accountEdit.stale')}</Text> : null}
-            {failure ? <Text accessibilityRole="alert" style={[styles.notice, { color: palette.foreground, borderColor: palette.destructive }]}>{t(`accountEdit.failures.${failure}`)}</Text> : null}
-            {deleteFailure ? <Text accessibilityRole="alert" style={[styles.notice, { color: palette.foreground, borderColor: palette.destructive }]}>{t(`accountEdit.deleteFailures.${deleteFailure}`)}</Text> : null}
-            <View style={[styles.panel, { backgroundColor: palette.card, borderColor: palette.border }]}>
-              <Text accessibilityRole="header" style={[styles.sectionTitle, { color: palette.foreground }]}>{t('accountEdit.detailsTitle')}</Text>
-              <Text style={[styles.label, { color: palette.foreground }]}>{t('accountEdit.name')}</Text>
-              <TextInput accessibilityLabel={t('accountEdit.name')} accessibilityHint={t('accountEdit.nameHint')} editable={!locked} maxLength={100} value={name} onChangeText={setName} style={[styles.input, { color: palette.foreground, borderColor: palette.border, backgroundColor: palette.background }]} />
-              <Text style={[styles.limit, { color: palette.mutedForeground }]}>{t('accountEdit.characterCount', { count: name.length, max: 100 })}</Text>
+            <UiText tone="muted" variant="meta">{t('accountEdit.helper')}</UiText>
+            {stale ? <Notice message={t('accountEdit.stale')} /> : null}
+            {failure ? <Notice message={t(`accountEdit.failures.${failure}`)} tone="destructive" /> : null}
+            {deleteFailure ? <Notice message={t(`accountEdit.deleteFailures.${deleteFailure}`)} tone="destructive" /> : null}
+            <FormGroup>
+              <FormTextRow
+                key="name"
+                accessibilityHint={t('accountEdit.nameHint')}
+                accessibilityLabel={t('accountEdit.name')}
+                editable={!locked}
+                hint={t('accountEdit.characterCount', { count: name.length, max: 100 })}
+                label={t('accountEdit.name')}
+                maxLength={100}
+                onChangeText={setName}
+                value={name}
+              />
               {model.isOwnedByViewer ? (
-                <View style={styles.privacyRow}>
-                  <View style={styles.switchCopy}>
-                    <Text style={[styles.label, { color: palette.foreground }]}>{t('accountEdit.privacyTitle')}</Text>
-                    <Text style={[styles.helper, { color: palette.mutedForeground }]}>{t('accountEdit.privacyHelper')}</Text>
-                  </View>
-                  <Switch accessibilityRole="switch" accessibilityLabel={t('accountEdit.privacySwitch')} accessibilityState={{ disabled: locked, checked: isPrivate }} disabled={locked} value={isPrivate} onValueChange={setIsPrivate} trackColor={{ false: palette.muted, true: palette.primary }} />
-                </View>
+                <FormSwitchRow
+                  key="privacy"
+                  accessibilityLabel={t('accountEdit.privacySwitch')}
+                  disabled={locked}
+                  hint={t('accountEdit.privacyHelper')}
+                  label={t('accountEdit.privacyTitle')}
+                  onValueChange={setIsPrivate}
+                  value={isPrivate}
+                />
               ) : null}
-              <Button label={pending ? t('accountEdit.saving') : t('accountEdit.saveDetails')} disabled={!dirty || locked} busy={pending} onPress={saveAccount} palette={palette} />
-            </View>
-            <Button label={t('common.cancel')} disabled={locked} busy={false} onPress={requestExit} palette={palette} secondary />
-            <View style={[styles.dangerPanel, { borderColor: palette.destructive }]}>
-              <Text accessibilityRole="header" style={[styles.sectionTitle, { color: palette.foreground }]}>{t('accountEdit.dangerTitle')}</Text>
-              <Text style={[styles.helper, { color: palette.mutedForeground }]}>{t('accountEdit.dangerHelper')}</Text>
-              <Button label={deletePending ? t('accountEdit.deleting') : t('accountEdit.deleteAccount')} disabled={locked} busy={deletePending} onPress={deleteAccount} palette={palette} destructive />
+            </FormGroup>
+            <View style={styles.danger}>
+              <Button disabled={locked} icon="trash" label={deletePending ? t('accountEdit.deleting') : t('accountEdit.deleteAccount')} loading={deletePending} onPress={() => void deleteAccount()} variant="destructive-quiet" />
+              <UiText tone="muted" variant="meta">{t('accountEdit.dangerHelper')}</UiText>
             </View>
           </View>
         </ScrollView>
@@ -146,22 +166,27 @@ function AccountEditForm({ model, stale, onBack, onSaveAccount, onDeleteAccount,
   )
 }
 
-function Button({ label, disabled, busy, onPress, palette, secondary = false, destructive = false }: { label: string; disabled: boolean; busy: boolean; onPress: () => void | Promise<void>; palette: Palette; secondary?: boolean; destructive?: boolean }) {
-  const tint = destructive ? palette.destructive : palette.primary
-  return <Pressable accessibilityRole="button" accessibilityLabel={label} accessibilityState={{ disabled, busy }} disabled={disabled} onPress={() => void onPress()} style={[styles.button, { borderColor: tint, backgroundColor: secondary || destructive ? 'transparent' : tint }, disabled && styles.disabled]}><Text style={[styles.buttonText, { color: secondary || destructive ? tint : palette.background }]}>{label}</Text></Pressable>
-}
-
 function EditFailure({ status, onBack, onRetry, palette }: { status: Exclude<AccountEditViewState['status'], 'loaded' | 'refresh-error' | 'loading' | 'access-transition'>; onBack: () => void; onRetry: () => void | Promise<void>; palette: Palette }) {
   const { t } = useTranslation()
   const canRetry = status !== 'invalid-id'
-  return <SafeAreaView style={[styles.safe, { backgroundColor: palette.background }]}><View style={styles.center}><Text accessibilityRole="header" style={[styles.title, { color: palette.foreground }]}>{t(`accountEdit.states.${status}Title`)}</Text><Text style={[styles.helper, { color: palette.mutedForeground }]}>{t(`accountEdit.states.${status}Message`)}</Text>{canRetry ? <Button label={t('common.retry')} disabled={false} busy={false} onPress={onRetry} palette={palette} /> : null}<BackControl fallback="/accounts" label={t('accountEdit.back')} onPress={onBack} disabled={false} /></View></SafeAreaView>
+  return (
+    <SafeAreaView style={[styles.safe, { backgroundColor: palette.background }]}>
+      <FormBar closeLabel={t('accountEdit.back')} onClose={onBack} />
+      <View style={styles.center}>
+        <UiText accessibilityRole="header" variant="heading">{t(`accountEdit.states.${status}Title`)}</UiText>
+        <UiText tone="muted" variant="body">{t(`accountEdit.states.${status}Message`)}</UiText>
+        {canRetry ? <View style={styles.retry}><Button label={t('common.retry')} onPress={onRetry} /></View> : null}
+      </View>
+    </SafeAreaView>
+  )
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1 }, keyboard: { flex: 1 }, content: { flexGrow: 1, padding: themeTokens.layout.screenPadding }, contentWithBottomInset: { paddingBottom: themeTokens.spacing[6] * 2 }, page: { width: '100%', maxWidth: 720, alignSelf: 'center', gap: themeTokens.layout.blockGap }, center: { flex: 1, width: '100%', maxWidth: 520, alignSelf: 'center', justifyContent: 'center', padding: themeTokens.layout.screenPadding, gap: themeTokens.spacing[4] },
-  back: { minHeight: themeTokens.touchTarget.minimum, justifyContent: 'center', alignSelf: 'flex-start' }, backText: { ...textStyles.action }, heading: { gap: themeTokens.spacing[2] }, title: { ...textStyles.title, fontWeight: '700' as const }, helper: { ...textStyles.body },
-  panel: { borderWidth: 1, borderRadius: themeTokens.radius.xl, padding: themeTokens.spacing[5], gap: themeTokens.spacing[3] }, sectionTitle: { ...textStyles.section, fontWeight: '700' as const }, label: { ...textStyles.bodyStrong, fontWeight: '600' as const, marginTop: themeTokens.spacing[2] }, input: { ...textStyles.body, minHeight: themeTokens.touchTarget.minimum, borderWidth: 1, borderRadius: themeTokens.radius.md, paddingHorizontal: themeTokens.spacing[3] }, limit: { ...textStyles.amountSmall, alignSelf: 'flex-end' },
-  privacyRow: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: themeTokens.spacing[3], marginTop: themeTokens.spacing[3] }, switchCopy: { flex: 1, minWidth: 200, gap: themeTokens.spacing[1] },
-  dangerPanel: { borderWidth: 1, borderRadius: themeTokens.radius.xl, padding: themeTokens.spacing[5], gap: themeTokens.spacing[3] },
-  button: { minHeight: themeTokens.touchTarget.minimum, borderWidth: 1, borderRadius: themeTokens.radius.md, paddingHorizontal: themeTokens.spacing[4], alignItems: 'center', justifyContent: 'center', marginTop: themeTokens.spacing[2] }, buttonText: { ...textStyles.action, fontWeight: '700' as const }, disabled: { opacity: 0.45 }, notice: { ...textStyles.body, borderWidth: 1, borderRadius: themeTokens.radius.md, padding: themeTokens.spacing[4] },
+  safe: { flex: 1 },
+  keyboard: { flex: 1 },
+  content: { flexGrow: 1, paddingHorizontal: themeTokens.layout.screenPadding, paddingBottom: themeTokens.spacing[12] },
+  page: { width: '100%', maxWidth: 720, alignSelf: 'center', gap: themeTokens.spacing[4] },
+  center: { flex: 1, width: '100%', maxWidth: 520, alignSelf: 'center', justifyContent: 'center', padding: themeTokens.layout.screenPadding, gap: themeTokens.spacing[4] },
+  retry: { alignItems: 'flex-start' },
+  danger: { marginTop: themeTokens.spacing[6], gap: themeTokens.spacing[1] },
 })

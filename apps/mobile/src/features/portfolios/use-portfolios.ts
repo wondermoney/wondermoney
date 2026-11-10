@@ -1,9 +1,9 @@
-import { useQuery } from '@tanstack/react-query'
+import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import { useMemo } from 'react'
 
 import { useProductRuntime } from '@/components/providers/product-runtime-provider'
 
-import { aggregatePortfolioDashboardEndpoint, portfoliosEndpoint } from './portfolios-contract'
+import { createAggregatePortfolioDashboardEndpoint, type PortfolioPerformancePeriod, portfoliosEndpoint } from './portfolios-contract'
 import {
   conservativePortfolioQueryOptions,
   isAccessError,
@@ -12,7 +12,7 @@ import {
 } from './query-state'
 import { aggregatePortfolioDashboardKey, portfoliosKey } from './query-keys'
 
-export function usePortfolios() {
+export function usePortfolios(period: PortfolioPerformancePeriod = 'YTD') {
   const { runtime, blockAccess } = useProductRuntime()
   if (!runtime) throw new Error('usePortfolios requires an authenticated runtime')
 
@@ -22,8 +22,10 @@ export function usePortfolios() {
     ...conservativePortfolioQueryOptions,
   })
   const dashboard = useQuery({
-    queryKey: aggregatePortfolioDashboardKey(runtime.epochId),
-    queryFn: () => runtime.apiClient.read(aggregatePortfolioDashboardEndpoint),
+    queryKey: aggregatePortfolioDashboardKey(runtime.epochId, period),
+    queryFn: () => runtime.apiClient.read(createAggregatePortfolioDashboardEndpoint(period)),
+    // Switching period keeps the previous figures on screen until the new ones land.
+    placeholderData: keepPreviousData,
     ...conservativePortfolioQueryOptions,
   })
   const errors = useMemo(() => [portfolios.error, dashboard.error], [dashboard.error, portfolios.error])

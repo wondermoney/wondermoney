@@ -1,91 +1,132 @@
-import { useRouter } from 'expo-router'
+import { useState } from 'react'
+import { Pressable, StyleSheet, View } from 'react-native'
 import { useTranslation } from 'react-i18next'
-import { Pressable, ScrollView, StyleSheet, Text, useColorScheme, View } from 'react-native'
-import { SafeAreaView } from 'react-native-safe-area-context'
 
 import {
   type LanguagePreference,
   type ThemePreference,
   useSessionPreferences,
 } from '@/components/providers/session-preferences-provider'
-import { PageHeader } from '@/components/ui/page-header'
+import { FormGroup, FormSelectRow, FormSwitchRow } from '@/components/ui/form-row'
+import { Text } from '@/components/ui/text'
 import { themeTokens } from '@/theme/tokens'
-import { textStyles } from '@/theme/typography'
+import { usePalette } from '@/theme/use-palette'
+import { SettingsField, SettingsPage, SettingsSection } from '@/features/more/settings-ui'
 
+const THEMES: readonly ThemePreference[] = ['system', 'light', 'dark']
+const LANGUAGES: readonly LanguagePreference[] = ['device', 'en', 'pt-PT', 'es']
+
+/**
+ * Settings › Appearance (web `components/settings/Appearance.tsx`): the section head,
+ * then Theme, Language and privacy mode (amounts masked on this device). Three themes fit a segmented control (one tap, all choices
+ * visible); the language is a settings row that opens the list. Mobile keeps its "System" theme and
+ * "Device language" options and the note on what the language changes.
+ */
 export function PreferencesScreen() {
-  const router = useRouter()
   const { t } = useTranslation()
   const preferences = useSessionPreferences()
-  const palette = themeTokens.colors[useColorScheme() === 'dark' ? 'dark' : 'light']
-  const themes: ThemePreference[] = ['system', 'light', 'dark']
-  const languages: LanguagePreference[] = ['device', 'en', 'pt-PT', 'es']
+  const themeLabel = (value: ThemePreference) => t(`preferences.theme.${value}`)
+  const languageLabel = (value: LanguagePreference) => t(`preferences.locale.${value}`)
 
   return (
-    <SafeAreaView style={[styles.safe, { backgroundColor: palette.background }]}>
-      <ScrollView contentContainerStyle={styles.content}>
-        <View style={styles.page}>
-          <Pressable accessibilityRole="button" accessibilityLabel={t('preferences.back')} onPress={() => router.back()} style={styles.back}>
-            <Text allowFontScaling style={[styles.action, { color: palette.primary }]}>{t('preferences.back')}</Text>
-          </Pressable>
-          <PageHeader palette={palette}
-            helpText={t('preferences.helper')} title={t('preferences.title')} />
-          <ChoiceGroup
-            label={t('preferences.appearance')}
-            values={themes}
-            selected={preferences.themePreference}
-            labelFor={(value) => t(`preferences.theme.${value}`)}
-            onSelect={preferences.setThemePreference}
-            palette={palette}
+    <SettingsPage backLabel={t('preferences.back')} section="appearance">
+      <SettingsSection first title={t('settings.appearance.heading')} description={t('settings.appearance.description')}>
+        <SettingsField label={t('settings.appearance.theme')}>
+          <ThemeChoice
+            label={t('settings.appearance.theme')}
+            labelFor={themeLabel}
+            onChange={preferences.setThemePreference}
+            value={preferences.themePreference}
           />
-          <ChoiceGroup
-            label={t('preferences.language')}
-            values={languages}
-            selected={preferences.languagePreference}
-            labelFor={(value) => t(`preferences.locale.${value}`)}
-            onSelect={preferences.setLanguagePreference}
-            palette={palette}
-          />
-          <View style={[styles.note, { borderColor: palette.border, backgroundColor: palette.muted }]}>
-            <Text allowFontScaling style={[styles.noteText, { color: palette.foreground }]}>{t('preferences.sessionOnly')}</Text>
-            <Text allowFontScaling style={[styles.noteText, { color: palette.mutedForeground }]}>{t('preferences.languageScope')}</Text>
-          </View>
+        </SettingsField>
+        <View style={styles.language}>
+          <FormGroup>
+            <FormSelectRow
+              label={t('settings.appearance.language')}
+              onChange={preferences.setLanguagePreference}
+              options={LANGUAGES.map((value) => ({ value, label: languageLabel(value) }))}
+              placeholder={languageLabel('device')}
+              testID="preferences-language"
+              value={preferences.languagePreference}
+            />
+          </FormGroup>
+          <Text tone="muted" variant="meta">{t('preferences.languageScope')}</Text>
         </View>
-      </ScrollView>
-    </SafeAreaView>
+        <FormGroup>
+          <FormSwitchRow
+            hint={t('privacy.settingHelp')}
+            label={t('privacy.setting')}
+            onValueChange={preferences.setPrivacyMode}
+            testID="preferences-privacy-mode"
+            value={preferences.privacyMode}
+          />
+        </FormGroup>
+      </SettingsSection>
+
+    </SettingsPage>
   )
 }
 
-function ChoiceGroup<Value extends string>({ label, values, selected, labelFor, onSelect, palette }: {
+/**
+ * The segmented-control look (muted track, the chosen segment on the canvas; a hairline
+ * stands in for web's `shadow-xs`, which lint keeps to the shared control) with radio semantics, because a theme is one choice of three.
+ */
+function ThemeChoice({ label, value, labelFor, onChange }: {
   label: string
-  values: readonly Value[]
-  selected: Value
-  labelFor: (value: Value) => string
-  onSelect: (value: Value) => void
-  palette: (typeof themeTokens.colors)[keyof typeof themeTokens.colors]
+  value: ThemePreference
+  labelFor: (value: ThemePreference) => string
+  onChange: (value: ThemePreference) => void
 }) {
-  return <View style={styles.group} accessibilityRole="radiogroup">
-    <Text accessibilityRole="header" allowFontScaling style={[styles.groupTitle, { color: palette.foreground }]}>{label}</Text>
-    <View style={[styles.list, { borderColor: palette.border }]}>
-      {values.map((value, index) => <Pressable
-        key={value}
-        accessibilityRole="radio"
-        accessibilityState={{ checked: selected === value }}
-        accessibilityLabel={labelFor(value)}
-        onPress={() => onSelect(value)}
-        style={({ pressed }) => [styles.row, index > 0 && { borderTopColor: palette.border, borderTopWidth: 1 }, pressed && styles.pressed]}
-      >
-        <Text allowFontScaling style={[styles.rowText, { color: palette.foreground }]}>{labelFor(value)}</Text>
-        <Text accessible={false} style={[styles.check, { color: selected === value ? palette.primary : palette.mutedForeground }]}>{selected === value ? '●' : '○'}</Text>
-      </Pressable>)}
+  const palette = usePalette()
+  const [focused, setFocused] = useState<ThemePreference | null>(null)
+  const slop = (themeTokens.touchTarget.minimum - SEGMENT_HEIGHT) / 2
+  return (
+    <View accessibilityLabel={label} accessibilityRole="radiogroup" style={[styles.track, { backgroundColor: palette.muted }]}>
+      {THEMES.map((option) => {
+        const selected = option === value
+        return (
+          <Pressable
+            key={option}
+            accessibilityLabel={labelFor(option)}
+            accessibilityRole="radio"
+            accessibilityState={{ checked: selected }}
+            hitSlop={{ top: slop, bottom: slop }}
+            onBlur={() => setFocused(null)}
+            onFocus={() => setFocused(option)}
+            onPress={() => onChange(option)}
+            style={({ pressed }) => [
+              styles.segment,
+              selected ? { backgroundColor: palette.background, borderWidth: 1, borderColor: palette.border } : null,
+              focused === option && { borderWidth: 2, borderColor: palette.ring },
+              pressed && { opacity: 0.72 },
+            ]}
+          >
+            <Text style={{ color: selected ? palette.foreground : palette.mutedForeground }} variant="metaStrong">
+              {labelFor(option)}
+            </Text>
+          </Pressable>
+        )
+      })}
     </View>
-  </View>
+  )
 }
 
+const SEGMENT_HEIGHT = 32
+
 const styles = StyleSheet.create({
-  safe: { flex: 1 }, content: { flexGrow: 1, padding: themeTokens.layout.screenPadding }, page: { width: '100%', maxWidth: 680, alignSelf: 'center', gap: themeTokens.spacing[6] },
-  back: { minHeight: 44, justifyContent: 'center', alignSelf: 'flex-start' }, action: { ...textStyles.action },
-  heading: { gap: themeTokens.spacing[2] }, title: { ...textStyles.title }, helper: { ...textStyles.body },
-  group: { gap: themeTokens.spacing[3] }, groupTitle: { ...textStyles.section },
-  list: { borderWidth: 1, borderRadius: 12, overflow: 'hidden' }, row: { minHeight: 48, paddingHorizontal: themeTokens.spacing[4], paddingVertical: themeTokens.spacing[3], flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: themeTokens.spacing[4] }, rowText: { ...textStyles.body, flex: 1 }, check: { ...textStyles.title, fontWeight: '400' as const },
-  note: { borderWidth: 1, borderRadius: 12, padding: themeTokens.spacing[4], gap: themeTokens.spacing[2] }, noteText: { ...textStyles.body }, pressed: { opacity: 0.72 },
+  language: { gap: themeTokens.spacing[2] },
+  track: {
+    flexDirection: 'row',
+    minHeight: themeTokens.size.control,
+    padding: themeTokens.spacing[1],
+    borderRadius: themeTokens.radius.md,
+  },
+  segment: {
+    flex: 1,
+    minHeight: SEGMENT_HEIGHT,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: themeTokens.spacing[3],
+    borderRadius: themeTokens.radius.sm,
+  },
 })

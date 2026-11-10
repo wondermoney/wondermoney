@@ -150,11 +150,13 @@ describe('portfolio endpoint contracts', () => {
     expect(portfolioHoldingsResponseSchema.parse({ holdings: [invalidHolding] }).holdings[0]?.feeConversionIncomplete).toBeUndefined()
   })
 
-  it('strips fields the API adds and rejects ratio-shaped period labels', () => {
+  it('strips fields the API adds and accepts every requested period label', () => {
     const summary = { assetCount: 1, currency: 'EUR', lastUpdated: '2026-07-19T10:00:00.000Z', periodLabel: 'YTD', periodReturn: 12.4, portfolioCount: 1, realizedGains: 0, totalGainLoss: 4, totalGainLossPercent: 2, totalValue: 204, unrealizedGains: 4 }
     expect(aggregateDashboardResponseSchema.safeParse({ portfolios: [], summary }).success).toBe(true)
     expect(aggregateDashboardResponseSchema.parse({ portfolios: [], summary: { ...summary, extra: true } }).summary).toEqual(summary)
-    expect(aggregateDashboardResponseSchema.safeParse({ portfolios: [], summary: { ...summary, periodLabel: 'ALL' } }).success).toBe(false)
+    // The label echoes the requested period ('1M' … 'ALL'); only a missing one is rejected.
+    expect(aggregateDashboardResponseSchema.safeParse({ portfolios: [], summary: { ...summary, periodLabel: 'ALL' } }).success).toBe(true)
+    expect(aggregateDashboardResponseSchema.safeParse({ portfolios: [], summary: { ...summary, periodLabel: '' } }).success).toBe(false)
   })
 
   it('normalizes normal transaction numbers and decimal strings without inventing missing values', () => {

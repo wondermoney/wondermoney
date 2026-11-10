@@ -1,14 +1,25 @@
-import { RefreshControl, ScrollView, StyleSheet, Text, useColorScheme, View } from 'react-native'
+import { useRef } from 'react'
+import { RefreshControl, ScrollView, StyleSheet, View, type ScrollViewInstance } from 'react-native'
 import { useTranslation } from 'react-i18next'
-import { SafeAreaView } from 'react-native-safe-area-context'
 
+import { Amount } from '@/components/ui/amount'
+import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { formatCurrency } from '@/lib/formatters/financial'
-import { themeTokens, type Palette } from '@/theme/tokens'
-import { textStyles } from '@/theme/typography'
+import { EntityMark } from '@/components/ui/entity-mark'
+import { HeadlineFigure } from '@/components/ui/headline-figure'
+import { IconButton } from '@/components/ui/icon-button'
+import { ListRow } from '@/components/ui/list-row'
+import { SafeAreaView } from '@/components/ui/screen-safe-area'
+import { Section } from '@/components/ui/section'
+import { Stat, StatList, StatValue } from '@/components/ui/stat'
+import { Text } from '@/components/ui/text'
+import { formatTransactionDate } from '@/lib/dates/transaction-date'
+import { useFormatMoney } from '@/lib/formatters/money-display'
+import { themeTokens } from '@/theme/tokens'
+import { usePalette } from '@/theme/use-palette'
 
 import type { LoanRepaymentViewModel, LoanViewModel } from './loans-view-model'
-import { Alert, Failure, formatDate, Header, Loading } from './loans-screen'
+import { Alert, Failure, formatDate, Header, Loading, LoanProgress } from './loans-screen'
 import { LoanRepaymentWorkflow, type CandidateState } from './loan-repayment-workflow'
 import type { FrozenRepaymentWrite } from './loan-repayment-allocation'
 import type { RepaymentWriteFailure } from './use-loan-repayment-mutation'
@@ -30,91 +41,209 @@ export type LoanDetailViewState =
   | { status: 'loaded'; loan: LoanViewModel; history: HistoryState; refreshing?: boolean }
   | { status: 'refresh-error'; loan: LoanViewModel; history: HistoryState; refreshing?: boolean }
 
+type RepaymentWorkflowProps = { candidates: CandidateState; pending: boolean; refreshRequired: boolean; onWrite: (write: FrozenRepaymentWrite) => Promise<RepaymentWriteFailure | 'success'>; onRefreshCandidates: () => void | Promise<void>; onResolveUnknown: () => Promise<boolean> }
 
-export function LoanDetailScreen({ state, onBack, onEdit = () => {}, onRefresh, repaymentWorkflow }: { state: LoanDetailViewState; onBack: () => void; onEdit?: () => void; onRefresh: () => void | Promise<void>; repaymentWorkflow?: { candidates: CandidateState; pending: boolean; refreshRequired: boolean; onWrite: (write: FrozenRepaymentWrite) => Promise<RepaymentWriteFailure | 'success'>; onRefreshCandidates: () => void | Promise<void>; onResolveUnknown: () => Promise<boolean> } }) {
+/**
+ * Web's loan detail (`loans/[loanId]/loan-detail-client.tsx`) at phone width, in the calm
+ * structure: "← Loans"; the loan's mark, name and provider with Edit loan as the title row's one
+ * glyph; Outstanding principal as the headline figure with the next payment as its status line;
+ * Link repayment as the one control; Regular payment, Annual rate, Remaining term and Repayment
+ * progress as a stat list; then Repayments and Loan assumptions as open sections. Linking (web's
+ * drawer) sits under Repayments here.
+ */
+export function LoanDetailScreen({ state, onBack, onEdit = () => {}, onRefresh, repaymentWorkflow }: { state: LoanDetailViewState; onBack: () => void; onEdit?: () => void; onRefresh: () => void | Promise<void>; repaymentWorkflow?: RepaymentWorkflowProps }) {
+  const formatMoney = useFormatMoney()
   const { t, i18n } = useTranslation()
-  const palette = themeTokens.colors[useColorScheme() === 'dark' ? 'dark' : 'light']
+  const palette = usePalette()
   const locale = i18n.resolvedLanguage ?? i18n.language ?? 'en'
+  const scroll = useRef<ScrollViewInstance>(null)
+  const workflowY = useRef(0)
   if (state.status === 'access-transition') return null
-  if (state.status === 'loading') return <Loading label={t('loanDetail.loading')} palette={palette} />
+  if (state.status === 'loading') return <Loading label={t('loanDetail.loading')} />
   if (state.status === 'error' || state.status === 'invalid-response' || state.status === 'not-found' || state.status === 'invalid-id') {
     const key = state.status === 'invalid-response' ? 'invalid' : state.status === 'not-found' ? 'notFound' : state.status === 'invalid-id' ? 'invalidId' : 'error'
-    return <Failure title={t(`loanDetail.${key}Title`)} message={t(`loanDetail.${key}Message`)} onRetry={state.status === 'invalid-id' ? undefined : onRefresh} onBack={onBack} backLabel={t('loanDetail.back')} palette={palette} />
+    return <Failure title={t(`loanDetail.${key}Title`)} message={t(`loanDetail.${key}Message`)} onRetry={state.status === 'invalid-id' ? undefined : onRefresh} onBack={onBack} fallback="/loans" backLabel={t('loanDetail.back')} />
   }
   const { loan } = state
-  const money = (value: number) => formatCurrency(value, { locale, currency: loan.currencyCode })
-  const percent = new Intl.NumberFormat(locale, { style: 'percent', maximumFractionDigits: 2 }).format(loan.progressPercentage / 100)
+  const money = (value: number) => formatMoney(value, { locale, currency: loan.currencyCode })
+  const percent = (value: number, digits = 0) => new Intl.NumberFormat(locale, { style: 'percent', minimumFractionDigits: digits, maximumFractionDigits: digits }).format(value / 100)
+  const remaining = loan.remainingTerm
   return (
     <SafeAreaView style={[styles.safeArea, { backgroundColor: palette.background }]}>
-      <ScrollView contentContainerStyle={styles.content} refreshControl={<RefreshControl refreshing={Boolean(state.refreshing)} onRefresh={() => void onRefresh()} tintColor={palette.primary} />}>
+      <ScrollView ref={scroll} contentContainerStyle={styles.content} refreshControl={<RefreshControl refreshing={Boolean(state.refreshing)} onRefresh={() => void onRefresh()} tintColor={palette.primary} />}>
         <View style={styles.page}>
-          <Header title={loan.name} helper={`${t(`loans.type.${loan.type}`)} · ${t(`loans.status.${loan.status}`)}`} backLabel={t('loanDetail.back')} onBack={onBack} palette={palette} />
-          {state.status === 'refresh-error' ? <Alert label={t('loanDetail.stale')} palette={palette} /> : null}
-          <Button accessibilityLabel={t('loanDetail.edit')} label={t('loanDetail.edit')} onPress={onEdit} palette={palette} style={styles.editButton} variant="secondary" />
-          <View style={styles.hero}>
-            <Text allowFontScaling style={[styles.kicker, { color: palette.mutedForeground }]}>{t('loans.outstanding')}</Text>
-            <Text
-              accessibilityLabel={`${t('loans.outstanding')}, ${money(loan.outstanding)}, ${loan.currencyCode}`}
-              accessible
-              allowFontScaling
-              style={[styles.heroAmount, { color: palette.foreground }]}
-            >
-              {money(loan.outstanding)}
-            </Text>
-            <View style={[styles.track, { backgroundColor: palette.muted }]}><View testID="loan-progress" style={[styles.fill, { width: `${loan.meterPercentage}%`, backgroundColor: palette.chart1 }]} /></View>
-            <Text allowFontScaling style={[styles.progressText, { color: palette.mutedForeground }]}>{t('loanDetail.progressValue', { value: percent, basis: t(`loanDetail.progressBasis.${loan.progressBasis}`) })}</Text>
+          <View style={styles.header}>
+            <Header
+              title={loan.name}
+              descriptor={loan.providerName ?? t('loanDetail.providerUnavailable')}
+              badge={loan.status !== 'ACTIVE' ? <Badge label={t(`loans.status.${loan.status}`)} tone="muted" /> : undefined}
+              fallback="/loans"
+              backLabel={t('loanDetail.back')}
+              onBack={onBack}
+              leading={<EntityMark glyph="receipt-text" />}
+              // The only secondary action, so its own glyph rather than a one-item menu.
+              action={<IconButton accessibilityLabel={t('loanDetail.editLoan')} icon="pencil" onPress={onEdit} style={styles.overflow} />}
+              figure={(
+                <View style={styles.figure}>
+                  <HeadlineFigure
+                    currency={loan.currencyCode}
+                    label={t('loans.outstanding')}
+                    locale={locale}
+                    size="md"
+                    status={loan.nextPaymentDate ? { label: `${t('loans.nextPayment')} ${formatDate(loan.nextPaymentDate, locale)}` } : undefined}
+                    value={loan.outstanding}
+                  />
+                </View>
+              )}
+            />
+            {state.status === 'refresh-error' ? <Alert label={t('loanDetail.stale')} /> : null}
+            {repaymentWorkflow ? (
+              <View style={styles.actions}>
+                <Button icon="link" label={t('loanDetail.linkRepayment')} onPress={() => scroll.current?.scrollTo({ y: workflowY.current, animated: true })} />
+              </View>
+            ) : null}
           </View>
-          <View style={styles.grid}>
-            <Metric label={t('loanDetail.openingBalance')} value={money(loan.openingBalance)} palette={palette} />
-            {loan.originalPrincipal !== null ? <Metric label={t('loanDetail.originalPrincipal')} value={money(loan.originalPrincipal)} palette={palette} /> : null}
-            {loan.regularPayment !== null ? <Metric label={t('loanDetail.regularPayment')} value={money(loan.regularPayment)} helper={t(`loans.frequency.${loan.paymentFrequency}`)} palette={palette} /> : null}
-            {loan.annualRatePercent !== null ? <Metric label={t('loanDetail.interestRate')} value={new Intl.NumberFormat(locale, { style: 'percent', maximumFractionDigits: 2 }).format(loan.annualRatePercent / 100)} helper={t(`loanDetail.rateType.${loan.rateType}`)} palette={palette} /> : null}
-            {loan.termMonths !== null ? <Metric label={t('loanDetail.term')} value={t('loanDetail.monthCount', { count: loan.termMonths })} palette={palette} /> : null}
-            {loan.remainingTermMonths !== null ? <Metric label={t('loanDetail.remainingTerm')} value={t('loanDetail.monthCount', { count: loan.remainingTermMonths })} palette={palette} /> : null}
-          </View>
-          <View style={[styles.context, { borderColor: palette.border, backgroundColor: palette.muted }]}>
-            <Text accessibilityRole="header" allowFontScaling style={[styles.sectionTitle, { color: palette.foreground }]}>{t('loanDetail.loanDetails')}</Text>
-            <DetailRow label={t('loanDetail.openingDate')} value={formatDate(loan.openingBalanceDate, locale)} palette={palette} />
-            {loan.nextPaymentDate ? <DetailRow label={t('loanDetail.nextPayment')} value={formatDate(loan.nextPaymentDate, locale)} palette={palette} /> : null}
-            {loan.paymentDay ? <DetailRow label={t('loanDetail.paymentDay')} value={String(loan.paymentDay)} palette={palette} /> : null}
-            {loan.maturityDate ? <DetailRow label={t('loanDetail.maturity')} value={formatDate(loan.maturityDate, locale)} palette={palette} /> : null}
-            {loan.providerName ? <DetailRow label={t('loanDetail.provider')} value={loan.providerName} palette={palette} /> : null}
-            {loan.notes ? <DetailRow label={t('loanDetail.notes')} value={loan.notes} palette={palette} /> : null}
-          </View>
-          <RepaymentHistory state={state.history} currency={loan.currencyCode} locale={locale} palette={palette} />
-          {repaymentWorkflow ? <LoanRepaymentWorkflow loan={loan} candidates={repaymentWorkflow.candidates} repayments={'repayments' in state.history ? state.history.repayments : []} pending={repaymentWorkflow.pending} refreshRequired={repaymentWorkflow.refreshRequired} onWrite={repaymentWorkflow.onWrite} onRefreshCandidates={repaymentWorkflow.onRefreshCandidates} onResolveUnknown={repaymentWorkflow.onResolveUnknown} /> : null}
+
+          <StatList>
+            <Stat label={t('loanDetail.regularPayment')} value={loan.regularPayment} currency={loan.currencyCode} locale={locale} helper={loan.regularPayment !== null ? t(`loans.frequency.${loan.paymentFrequency}`) : undefined} />
+            <Stat label={t('loanDetail.annualRate')} locale={locale} valueNode={<StatValue>{loan.annualRatePercent !== null ? percent(loan.annualRatePercent, 2) : '—'}</StatValue>} helper={loan.annualRatePercent !== null ? t(`loanDetail.rateType.${loan.rateType}`) : undefined} />
+            <Stat
+              label={t(remaining?.basis === 'estimate' ? 'loanDetail.remainingTerm' : 'loanDetail.remainingTermContract')}
+              locale={locale}
+              valueNode={<StatValue>{remaining ? t('loanDetail.monthCount', { count: remaining.months }) : '—'}</StatValue>}
+              helper={loan.payoffBeyondContractMonths !== null ? <Text accessibilityRole="alert" testID="loan-payoff-beyond-contract" tone="warning" variant="label">{t('loanDetail.payoffBeyondContract', { count: loan.payoffBeyondContractMonths })}</Text> : undefined}
+            />
+            <Stat
+              label={t('loanDetail.repaymentProgress')}
+              locale={locale}
+              valueNode={<StatValue>{percent(loan.meterPercentage)}</StatValue>}
+              helper={(
+                <View style={styles.progressHelper}>
+                  <LoanProgress testID="loan-progress" value={loan.meterPercentage} label={t('loans.progressRepaid', { value: Math.round(loan.meterPercentage) })} />
+                  <Text tone="muted" variant="label">{t('loanDetail.progressValue', { value: percent(loan.progressPercentage, 2), basis: t(`loanDetail.progressBasis.${loan.progressBasis}`) })}</Text>
+                </View>
+              )}
+            />
+          </StatList>
+
+          <RepaymentHistory state={state.history} currency={loan.currencyCode} locale={locale} />
+
+          {repaymentWorkflow ? (
+            <View onLayout={(event) => { workflowY.current = event.nativeEvent.layout.y }}>
+              <LoanRepaymentWorkflow loan={loan} candidates={repaymentWorkflow.candidates} repayments={'repayments' in state.history ? state.history.repayments : []} pending={repaymentWorkflow.pending} refreshRequired={repaymentWorkflow.refreshRequired} onWrite={repaymentWorkflow.onWrite} onRefreshCandidates={repaymentWorkflow.onRefreshCandidates} onResolveUnknown={repaymentWorkflow.onResolveUnknown} />
+            </View>
+          ) : null}
+
+          <Section title={t('loanDetail.assumptions')} variant="open">
+            <View>
+              <DetailRow first label={t('loanDetail.lender')} value={loan.providerName ?? t('loanDetail.providerUnavailable')} />
+              <DetailRow label={t('loanDetail.loanType')} value={t(`loans.type.${loan.type}`)} />
+              <DetailRow label={t('loanDetail.statusLabel')} value={t(`loans.status.${loan.status}`)} />
+              <DetailRow label={t('loanDetail.description')} value={loan.notes ?? '—'} />
+              {/* Mobile-only terms web keeps in its edit drawer, listed after web's four. */}
+              <DetailRow label={t('loanDetail.openingBalance')} value={money(loan.openingBalance)} figure />
+              {loan.originalPrincipal !== null ? <DetailRow label={t('loanDetail.originalPrincipal')} value={money(loan.originalPrincipal)} figure /> : null}
+              {loan.termMonths !== null ? <DetailRow label={t('loanDetail.term')} value={t('loanDetail.monthCount', { count: loan.termMonths })} /> : null}
+              <DetailRow label={t('loanDetail.openingDate')} value={formatDate(loan.openingBalanceDate, locale)} />
+              {loan.nextPaymentDate ? <DetailRow label={t('loanDetail.nextPayment')} value={formatDate(loan.nextPaymentDate, locale)} /> : null}
+              {loan.paymentDay ? <DetailRow label={t('loanDetail.paymentDay')} value={String(loan.paymentDay)} /> : null}
+              {loan.maturityDate ? <DetailRow label={t('loanDetail.maturity')} value={formatDate(loan.maturityDate, locale)} /> : null}
+            </View>
+          </Section>
         </View>
       </ScrollView>
     </SafeAreaView>
   )
 }
 
-function Metric({ label, value, helper, palette }: { label: string; value: string; helper?: string; palette: Palette }) {
-  return <View accessible accessibilityLabel={[label, value, helper].filter(Boolean).join(', ')} style={[styles.metric, { borderColor: palette.border, backgroundColor: palette.card }]}><Text allowFontScaling style={[styles.kicker, { color: palette.mutedForeground }]}>{label}</Text><Text allowFontScaling style={[styles.metricValue, { color: palette.foreground }]}>{value}</Text>{helper ? <Text allowFontScaling style={[styles.small, { color: palette.mutedForeground }]}>{helper}</Text> : null}</View>
+/** Web `LoanAssumptionsCard` row: muted label left, value right, hairline under (`py-2.5 text-sm`). */
+function DetailRow({ label, value, figure = false, first = false }: { label: string; value: string; figure?: boolean; first?: boolean }) {
+  const palette = usePalette()
+  return (
+    <View accessible accessibilityLabel={`${label}, ${value}`} style={[styles.detailRow, { borderBottomColor: palette.border }, first && styles.firstRow]}>
+      <Text style={styles.detailLabel} tone="muted" variant="meta">{label}</Text>
+      <Text style={styles.detailValue} variant={figure ? 'amount' : 'meta'}>{value}</Text>
+    </View>
+  )
 }
 
-function DetailRow({ label, value, palette }: { label: string; value: string; palette: Palette }) {
-  return <View accessible accessibilityLabel={`${label}, ${value}`} style={[styles.detailRow, { borderTopColor: palette.border }]}><Text allowFontScaling style={[styles.detailLabel, { color: palette.mutedForeground }]}>{label}</Text><Text allowFontScaling style={[styles.detailValue, { color: palette.foreground }]}>{value}</Text></View>
-}
-
-function RepaymentHistory({ state, currency, locale, palette }: { state: HistoryState; currency: string; locale: string; palette: Palette }) {
+/** Web `LoanRepaymentsTable` at phone width: one row per repayment, its split beneath. */
+function RepaymentHistory({ state, currency, locale }: { state: HistoryState; currency: string; locale: string }) {
   const { t } = useTranslation()
-  return <View style={styles.history}><View style={styles.sectionHeading}><Text accessibilityRole="header" allowFontScaling style={[styles.sectionTitle, { color: palette.foreground }]}>{t('loanDetail.repayments')}</Text><Text allowFontScaling style={[styles.small, { color: palette.mutedForeground }]}>{t('loanDetail.repaymentsHelper')}</Text></View>{state.status === 'loading' ? <Text accessible accessibilityRole="progressbar" accessibilityLabel={t('loanDetail.repaymentsLoading')} allowFontScaling style={[styles.historyState, { color: palette.mutedForeground, borderColor: palette.border }]}>{t('loanDetail.repaymentsLoading')}</Text> : state.status === 'error' || state.status === 'invalid-response' ? <Text accessible accessibilityRole="alert" accessibilityLabel={t(state.status === 'invalid-response' ? 'loanDetail.repaymentsInvalid' : 'loanDetail.repaymentsError')} allowFontScaling style={[styles.historyState, { color: palette.foreground, borderColor: palette.border }]}>{t(state.status === 'invalid-response' ? 'loanDetail.repaymentsInvalid' : 'loanDetail.repaymentsError')}</Text> : <>{state.status === 'refresh-error' ? <Alert label={t('loanDetail.repaymentsStale')} palette={palette} /> : null}{state.repayments.length === 0 ? <View style={[styles.historyState, { borderColor: palette.border, backgroundColor: palette.muted }]}><Text accessibilityRole="header" allowFontScaling style={[styles.sectionTitle, { color: palette.foreground }]}>{t('loanDetail.repaymentsEmptyTitle')}</Text><Text allowFontScaling style={[styles.small, { color: palette.mutedForeground }]}>{t('loanDetail.repaymentsEmptyMessage')}</Text></View> : <View style={styles.repaymentList}>{state.repayments.map((repayment) => <RepaymentCard key={repayment.id} repayment={repayment} currency={currency} locale={locale} palette={palette} />)}</View>}</>}</View>
+  return (
+    <Section title={t('loanDetail.repaymentsTitle')} variant="open">
+      <Text tone="muted" variant="meta">{t('loanDetail.repaymentsHelper')}</Text>
+      {state.status === 'loading' ? <Text accessible accessibilityLabel={t('loanDetail.repaymentsLoading')} accessibilityRole="progressbar" tone="muted" variant="meta">{t('loanDetail.repaymentsLoading')}</Text>
+        : state.status === 'error' || state.status === 'invalid-response' ? <Alert label={t(state.status === 'invalid-response' ? 'loanDetail.repaymentsInvalid' : 'loanDetail.repaymentsError')} />
+          : (
+            <>
+              {state.status === 'refresh-error' ? <Alert label={t('loanDetail.repaymentsStale')} /> : null}
+              {state.repayments.length === 0 ? (
+                <View style={styles.emptyHistory}>
+                  <Text variant="metaStrong">{t('loanDetail.repaymentsEmptyTitle')}</Text>
+                  <Text tone="muted" variant="meta">{t('loanDetail.repaymentsEmptyMessage')}</Text>
+                </View>
+              ) : (
+                <View>
+                  {state.repayments.map((repayment, index) => <RepaymentRow key={repayment.id} repayment={repayment} currency={currency} locale={locale} separated={index > 0} />)}
+                  <Text style={styles.totalNote} tone="muted" variant="label">{t('loanDetail.totalNote')}</Text>
+                </View>
+              )}
+            </>
+          )}
+    </Section>
+  )
 }
 
-function RepaymentCard({ repayment, currency, locale, palette }: { repayment: LoanRepaymentViewModel; currency: string; locale: string; palette: Palette }) {
+function RepaymentRow({ repayment, currency, locale, separated }: { repayment: LoanRepaymentViewModel; currency: string; locale: string; separated: boolean }) {
+  const formatMoney = useFormatMoney()
   const { t } = useTranslation()
-  const money = (value: number) => formatCurrency(value, { locale, currency })
+  const money = (value: number) => formatMoney(value, { locale, currency })
   const transactionName = repayment.transaction.merchantName ?? repayment.transaction.description
-  const transactionDate = repayment.transaction.date ? formatDate(repayment.transaction.date, locale) : null
-  return <View style={[styles.repayment, { borderColor: palette.border, backgroundColor: palette.card }]}><View style={styles.repaymentTop}><View style={styles.repaymentHeading}><Text allowFontScaling style={[styles.repaymentDate, { color: palette.foreground }]}>{formatDate(repayment.paymentDate, locale)}</Text>{transactionName ? <Text allowFontScaling style={[styles.small, { color: palette.mutedForeground }]}>{transactionName}</Text> : null}</View><Text allowFontScaling style={[styles.total, { color: palette.foreground }]}>{money(repayment.total)}</Text></View><View style={styles.allocations}><Allocation label={t('loanDetail.principal')} value={money(repayment.principal)} palette={palette} /><Allocation label={t('loanDetail.interest')} value={money(repayment.interest)} palette={palette} /><Allocation label={t('loanDetail.fee')} value={money(repayment.fee)} palette={palette} /></View><Text allowFontScaling style={[styles.small, { color: palette.mutedForeground }]}>{t('loanDetail.totalNote')}</Text>{repayment.transaction.settlementAmount !== null ? <Text allowFontScaling style={[styles.transaction, { color: palette.mutedForeground }]}>{t('loanDetail.transactionAmountNoCurrency', { value: new Intl.NumberFormat(locale, { maximumFractionDigits: 2 }).format(repayment.transaction.settlementAmount) })}</Text> : null}{transactionDate ? <Text allowFontScaling style={[styles.transaction, { color: palette.mutedForeground }]}>{t('loanDetail.transactionDate', { date: transactionDate })}</Text> : null}{repayment.notes ? <Text allowFontScaling style={[styles.transaction, { color: palette.mutedForeground }]}>{repayment.notes}</Text> : null}{repayment.needsReview ? <Text allowFontScaling style={[styles.review, { color: palette.destructive }]}>{t('loanDetail.needsReview')}</Text> : null}</View>
+  const transactionDate = repayment.transaction.date ? formatTransactionDate(repayment.transaction.date, locale) : null
+  return (
+    <ListRow
+      badge={repayment.needsReview ? <Text tone="warning" variant="label">{t('loanDetail.needsReview')}</Text> : undefined}
+      figure={<Amount currency={currency} locale={locale} size="amount" value={repayment.total} />}
+      meta={[formatDate(repayment.paymentDate, locale), repayment.notes]}
+      separated={separated}
+      title={transactionName ?? formatDate(repayment.paymentDate, locale)}
+    >
+      <View style={styles.allocations}>
+        <Allocation label={t('loanDetail.principal')} value={money(repayment.principal)} />
+        <Allocation label={t('loanDetail.interest')} value={money(repayment.interest)} />
+        <Allocation label={t('loanDetail.fee')} value={money(repayment.fee)} />
+      </View>
+      {repayment.transaction.settlementAmount !== null ? <Text tone="muted" variant="label">{t('loanDetail.transactionAmountNoCurrency', { value: formatMoney(repayment.transaction.settlementAmount, { locale, currency: null, minimumFractionDigits: 0, maximumFractionDigits: 2 }) })}</Text> : null}
+      {transactionDate ? <Text tone="muted" variant="label">{t('loanDetail.transactionDate', { date: transactionDate })}</Text> : null}
+    </ListRow>
+  )
 }
 
-function Allocation({ label, value, palette }: { label: string; value: string; palette: Palette }) {
-  return <View accessible accessibilityLabel={`${label}, ${value}`} style={styles.allocation}><Text allowFontScaling style={[styles.allocationLabel, { color: palette.mutedForeground }]}>{label}</Text><Text allowFontScaling style={[styles.allocationValue, { color: palette.foreground }]}>{value}</Text></View>
+function Allocation({ label, value }: { label: string; value: string }) {
+  return (
+    <View accessible accessibilityLabel={`${label}, ${value}`} style={styles.allocation}>
+      <Text tone="muted" variant="label">{label}</Text>
+      <Text variant="amountSmall">{value}</Text>
+    </View>
+  )
 }
 
 const styles = StyleSheet.create({
-  safeArea: { flex: 1 }, content: { flexGrow: 1, padding: themeTokens.layout.screenPadding }, page: { width: '100%', maxWidth: 760, alignSelf: 'center', gap: themeTokens.layout.blockGap }, editButton: { alignSelf: 'flex-start' }, hero: { gap: themeTokens.spacing[2] }, kicker: { ...textStyles.label, fontWeight: '600' as const }, heroAmount: { ...textStyles.display }, currency: { ...textStyles.amountSmall }, track: { height: 4, borderRadius: themeTokens.radius.pill, overflow: 'hidden', marginTop: themeTokens.spacing[2] }, fill: { height: '100%', borderRadius: themeTokens.radius.pill }, progressText: { ...textStyles.meta }, grid: { flexDirection: 'row', flexWrap: 'wrap', gap: themeTokens.spacing[3] }, metric: { width: '48%', flexGrow: 1, minWidth: 145, borderWidth: 1, borderRadius: themeTokens.radius.lg, padding: themeTokens.spacing[4], gap: themeTokens.spacing[1] }, metricValue: { ...textStyles.amount }, small: { ...textStyles.label },
-  context: { borderWidth: 1, borderRadius: themeTokens.radius.lg, padding: themeTokens.spacing[4], gap: themeTokens.spacing[2] }, sectionTitle: { ...textStyles.section }, detailRow: { borderTopWidth: 1, paddingTop: themeTokens.spacing[3], gap: themeTokens.spacing[1] }, detailLabel: { ...textStyles.label }, detailValue: { ...textStyles.body }, history: { gap: themeTokens.spacing[4] }, sectionHeading: { gap: themeTokens.spacing[1] }, historyState: { ...textStyles.body, borderWidth: 1, borderRadius: themeTokens.radius.lg, padding: themeTokens.spacing[5] }, repaymentList: { gap: themeTokens.spacing[3] }, repayment: { borderWidth: 1, borderRadius: themeTokens.radius.lg, padding: themeTokens.spacing[4], gap: themeTokens.spacing[3] }, repaymentTop: { flexDirection: 'row', justifyContent: 'space-between', gap: themeTokens.spacing[3] }, repaymentHeading: { flex: 1, gap: themeTokens.spacing[1] }, repaymentDate: { ...textStyles.action }, total: { ...textStyles.amount }, allocations: { flexDirection: 'row', gap: themeTokens.spacing[3] }, allocation: { flex: 1, gap: themeTokens.spacing[1] }, allocationLabel: { ...textStyles.label }, allocationValue: { ...textStyles.amountSmall }, transaction: { ...textStyles.label }, review: { ...textStyles.label, fontWeight: '600' as const },
+  safeArea: { flex: 1 },
+  content: { flexGrow: 1, padding: themeTokens.layout.screenPadding, paddingBottom: themeTokens.spacing[12] },
+  page: { width: '100%', maxWidth: 760, alignSelf: 'center', gap: themeTokens.spacing[10] },
+  header: { gap: themeTokens.spacing[6] },
+  figure: { paddingTop: themeTokens.spacing[4] },
+  overflow: { marginRight: -11, marginVertical: -6 },
+  actions: { flexDirection: 'row', flexWrap: 'wrap', gap: themeTokens.spacing[2] },
+  progressHelper: { gap: themeTokens.spacing[2], paddingTop: themeTokens.spacing[1] },
+  detailRow: { flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between', gap: themeTokens.spacing[4], paddingVertical: themeTokens.spacing[3], borderBottomWidth: 1 },
+  firstRow: {},
+  detailLabel: { flexShrink: 0, maxWidth: '50%' },
+  detailValue: { flexShrink: 1, textAlign: 'right' },
+  emptyHistory: { gap: themeTokens.spacing[1] },
+  totalNote: { paddingTop: themeTokens.spacing[3] },
+  allocations: { flexDirection: 'row', gap: themeTokens.spacing[3], paddingTop: themeTokens.spacing[2] },
+  allocation: { flex: 1, gap: 2 },
 })

@@ -5,6 +5,7 @@ import { useMemo } from "react";
 
 import Text from "@/components/ui/Typography/Text";
 import type { HoldingPositionSummary } from "@/lib/portfolio/holding-detail-summary";
+import { useFormatQuantity } from "@/lib/privacy/useFormatQuantity";
 import { cn } from "@/lib/utils";
 import { useFormatCurrency } from "@/lib/utils/useFormatCurrency";
 
@@ -17,15 +18,14 @@ export function HoldingPositionMetrics({
   const formatCurrency = useFormatCurrency();
   // Formatted in the reader's locale, not the runtime's.
   const locale = useLocale();
-  const { formatQuantity, formatPercentPoint } = useMemo(() => {
-    const quantity = new Intl.NumberFormat(locale, { maximumFractionDigits: 6 });
+  const formatQuantity = useFormatQuantity();
+  const { formatPercentPoint } = useMemo(() => {
     const percent = new Intl.NumberFormat(locale, {
       minimumFractionDigits: 1,
       maximumFractionDigits: 1,
     });
     return {
       formatPercentPoint: (value: number) => `${percent.format(value)}%`,
-      formatQuantity: (value: number) => quantity.format(value),
     };
   }, [locale]);
   // Needs the active locale, so it lives inside the component.
@@ -54,7 +54,7 @@ export function HoldingPositionMetrics({
           },
           {
             label: t("quantity"),
-            value: formatQuantity(summary.quantity),
+            value: formatQuantity(summary.quantity, { maximumFractionDigits: 6 }),
           },
           {
             label: t("portfolio-weight"),

@@ -124,7 +124,7 @@ export interface GoalActivity {
   sourceKey?: null | number;
   sourceType?: null | string;
   /**
-   * Set by the API (#154) on a `spent_from_goal` entry whose transaction has since expired (the
+   * Set by the API on a `spent_from_goal` entry whose transaction has since expired (the
    * bank retracted it) while this goal still funds it. Absent from older servers.
    */
   transactionExpired?: boolean;

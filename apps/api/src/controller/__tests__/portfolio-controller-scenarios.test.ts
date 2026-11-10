@@ -13,6 +13,8 @@ const mocked = vi.hoisted(() => ({
   getEodhdDividends: vi.fn(),
   getPortfolioCsvBucketName: vi.fn().mockReturnValue('portfolios-csv-dev'),
   getPortfoliosHoldings: vi.fn(),
+  getPortfolioValues: vi.fn(),
+  latestImportBrokers: vi.fn(),
   markNeedsAction: vi.fn().mockResolvedValue(true),
   persist: vi.fn().mockReturnThis(),
   presignedUrl: vi.fn(),
@@ -34,7 +36,7 @@ vi.mock('../../app.js', async () => {
         find: mocked.find,
         findOne: mocked.findOne,
         flush: mocked.flush,
-        // The latest-snapshot balances `getPortfolios` reads with hand-written SQL.
+        // Hand-written SQL reads answer from `snapshotRows`.
         getKysely: () => kyselyDouble(() => mocked.snapshotRows()).db,
         persist: mocked.persist,
       },
@@ -54,13 +56,14 @@ vi.mock('@service/storage/s3', () => ({
     getPortfolioCsvBucketName: mocked.getPortfolioCsvBucketName,
   },
 }));
+vi.mock('@service/portfolio/portfolio-brokers', () => ({ latestImportBrokers: mocked.latestImportBrokers }));
 vi.mock('@service/portfolio/portfolio-import-session.service', () => ({
   default: {
     createSession: mocked.createImportSession,
   },
 }));
 vi.mock('@service/operations/background-operation.service', () => ({ default: { attachQueueJob: mocked.attachQueueJob, createQueuedOperation: mocked.createQueuedOperation, finish: mocked.finish, markNeedsAction: mocked.markNeedsAction } }));
-vi.mock('../../services/portfolio/portfolio-holdings.service.js', () => ({ default: { getPortfoliosHoldings: mocked.getPortfoliosHoldings } }));
+vi.mock('../../services/portfolio/portfolio-holdings.service.js', () => ({ default: { getPortfoliosHoldings: mocked.getPortfoliosHoldings, getPortfolioValues: mocked.getPortfolioValues } }));
 
 import { zParse } from '@app/validators/parser';
 import { BadRequestError, NotFoundError } from '@utils/errors';
@@ -92,6 +95,8 @@ describe('portfolio controller scenarios', () => {
     mocked.markNeedsAction.mockReset().mockResolvedValue(true);
     mocked.reviewPresignedUrl.mockReset();
     mocked.getPortfoliosHoldings.mockReset();
+    mocked.getPortfolioValues.mockReset();
+    mocked.latestImportBrokers.mockReset().mockResolvedValue(new Map());
     vi.mocked(zParse).mockReset().mockImplementation((_schema: ZodType, req: unknown) => Promise.resolve(req));
   });
 
@@ -323,7 +328,7 @@ describe('portfolio controller scenarios', () => {
     });
   });
 
-  it('returns portfolio balances in app-user currency from latest snapshots', async () => {
+  it('returns each portfolio at its current value in app-user currency, the value the dashboards show, with the broker it was imported from', async () => {
     mocked.find.mockResolvedValueOnce([
       {
         currencyKey: { code: 'USD' },
@@ -331,10 +336,10 @@ describe('portfolio controller scenarios', () => {
         name: 'US Portfolio',
         portfolioKey: 1,
       },
+      { currencyKey: { code: 'EUR' }, description: null, name: 'Partner picks', portfolioKey: 2 },
     ]);
-    mocked.snapshotRows.mockReturnValueOnce([
-      { balance: '106', portfolio_key: 1 },
-    ]);
+    mocked.getPortfolioValues.mockResolvedValueOnce(new Map([[1, { isComplete: true, value: 106 }]]));
+    mocked.latestImportBrokers.mockResolvedValueOnce(new Map([[1, { displayName: 'Degiro', id: 1, name: 'degiro' }]]));
 
     const json = vi.fn();
     await getPortfolios(
@@ -350,16 +355,27 @@ describe('portfolio controller scenarios', () => {
     expect(json).toHaveBeenCalledWith({
       portfolios: [
         {
+          accountLink: null,
           appuserCurrencyCode: 'EUR',
           balance: 106,
+          broker: { displayName: 'Degiro', id: 1, name: 'degiro' },
           currencyKey: { code: 'USD' },
           description: 'US brokerage',
           name: 'US Portfolio',
           portfolioKey: 1,
         },
+        {
+          accountLink: null,
+          appuserCurrencyCode: 'EUR',
+          balance: 0,
+          broker: null,
+          currencyKey: { code: 'EUR' },
+          description: null,
+          name: 'Partner picks',
+          portfolioKey: 2,
+        },
       ],
     });
-    vi.useRealTimers();
   });
 
   it('populates currencyKey so a single portfolio response carries a real currency code', async () => {
@@ -372,7 +388,7 @@ describe('portfolio controller scenarios', () => {
     });
 
     const json = vi.fn();
-    await getPortfolio({ params: { portfolioId: 1 } } as unknown as Parameters<typeof getPortfolio>[0], mockRes({ json }));
+    await getPortfolio({ params: { portfolioId: 1 }, tenant: { tenantKey: 9 }, user: { appuserKey: 1 } } as unknown as Parameters<typeof getPortfolio>[0], mockRes({ json }));
 
     expect(mocked.findOne).toHaveBeenCalledWith(
       expect.anything(),
@@ -381,6 +397,7 @@ describe('portfolio controller scenarios', () => {
     );
     expect(json).toHaveBeenCalledWith({
       portfolio: {
+        accountLink: null,
         currencyKey: { code: 'USD' },
         description: 'US brokerage',
         name: 'US Portfolio',

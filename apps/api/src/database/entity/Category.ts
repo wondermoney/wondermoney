@@ -26,6 +26,16 @@ export class Category extends Base {
   @OneToMany(() => Category, (category) => category.parentCategory)
   childCategory = new Collection<Category>(this);
 
+  /**
+   * Whether money in this category is spending. Off for money that only moves to the household's
+   * own savings or investments ("Investments and savings"): such a category, and every child of
+   * one, is left out of reports, budgets and the dashboard's cash flow. For a system category this
+   * is the default; a household's own choice for it is a `TenantCategorySetting`. Read it through
+   * `services/transaction/category-spending.ts`, never directly.
+   */
+  @Property({ default: true })
+  countsAsSpending = true;
+
   [EntityRepositoryType]: CategoryRepository;
 
   @Property({ length: 255, nullable: true })

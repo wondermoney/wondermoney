@@ -5,6 +5,11 @@ import { initMobileI18n } from '@/lib/i18n'
 
 import { NetWorthHistoryRoute } from './net-worth-history-route'
 
+// The Skia canvas needs a native backend jest doesn't have; the chart's own logic is the axis
+// labels beside it, which render as React Native text.
+jest.mock('victory-native', () => ({ CartesianChart: () => null, Area: () => null, Line: () => null }))
+
+
 const mockReplace = jest.fn()
 const mockBack = jest.fn()
 const mockCanGoBack = jest.fn()

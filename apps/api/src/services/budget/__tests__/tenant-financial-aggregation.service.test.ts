@@ -171,6 +171,42 @@ describe('TenantFinancialAggregationService', () => {
     });
   });
 
+  describe('with rollover', () => {
+    it('measures spend against the month\'s available amount, last month\'s surplus included', async () => {
+      loadBudgetAllocations.mockResolvedValue([allocation({ amountAvailable: '140', amountBudgeted: '100' })]);
+      loadTransactions.mockResolvedValue([transaction({ effectiveAmount: '-100' })]);
+      // 100 of 100 budgeted, but only 71% of the 140 available.
+      await expect(service.aggregateBudgetThresholds(input)).resolves.toMatchObject({ facts: [] });
+
+      loadTransactions.mockResolvedValue([transaction({ effectiveAmount: '-120' })]);
+      await expect(service.aggregateBudgetThresholds(input)).resolves.toMatchObject({
+        facts: [{ actualPercentage: '85.71', amountBudgeted: '140', amountSpent: '120', remainingOrOverAmount: '20', state: 'near' }],
+      });
+    });
+
+    it('alerts sooner when last month\'s overspend was carried in', async () => {
+      loadBudgetAllocations.mockResolvedValue([allocation({ amountAvailable: '50', amountBudgeted: '100' })]);
+      loadTransactions.mockResolvedValue([transaction({ effectiveAmount: '-60' })]);
+      await expect(service.aggregateBudgetThresholds(input)).resolves.toMatchObject({
+        facts: [{ amountBudgeted: '50', remainingOrOverAmount: '10', state: 'over' }],
+      });
+    });
+
+    it('reports a month the carried overspend left nothing for as over once it spends, without an alert email', async () => {
+      loadBudgetAllocations.mockResolvedValue([allocation({ amountAvailable: '-10', amountBudgeted: '100' })]);
+      loadTransactions.mockResolvedValue([transaction({ effectiveAmount: '-5' })]);
+      // There is no percentage of nothing to put in an alert; the budget badge still says over.
+      await expect(service.aggregateBudgetThresholds(input)).resolves.toMatchObject({ facts: [] });
+      await expect(service.aggregateWeeklyInsights(input)).resolves.toMatchObject({ facts: { activeBudgetStatus: 'over' } });
+    });
+
+    it('counts the available amount in the remaining headroom', async () => {
+      loadBudgetAllocations.mockResolvedValue([allocation({ amountAvailable: '140', amountBudgeted: '100' })]);
+      loadTransactions.mockResolvedValue([transaction({ effectiveAmount: '-100' })]);
+      await expect(service.aggregateBudgetRemaining(input)).resolves.toMatchObject({ facts: { remaining: '40', spent: '100', totalBudgeted: '140' } });
+    });
+  });
+
   it('returns a positive overage amount', async () => {
     loadTransactions.mockResolvedValue([transaction({ effectiveAmount: '-125' })]);
     await expect(service.aggregateBudgetThresholds(input)).resolves.toMatchObject({

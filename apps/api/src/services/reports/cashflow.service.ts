@@ -1,11 +1,14 @@
 import { DI } from '@app/database/di';
 import { Transaction } from '@entity/Transaction';
-import { getEffectiveAppuserAmount } from '@utils/account-amounts';
-import { addMoney } from '@utils/money';
+import { CATEGORY_LINE_POPULATE, spendingLinesOf } from '@service/transaction/category-lines';
+import { loadCategorySpendingFlags } from '@service/transaction/category-spending';
+import { transactionCalendarDay } from '@service/transaction/transaction-date-range';
+import { addMoney, sumMoney } from '@utils/money';
 
 import { round2, toCsv } from './csv';
-import { buildTransactionWhere, type ReportServiceInput, transactionMatchesCategoryKeys } from './report-filters';
-import { getMonthKey, getMonthStartIso, resolveReportTimeZone } from './report-months';
+import { loadViewerCurrencyAmounts, REPORT_CURRENCY_POPULATE, type ReportResult } from './report-currency';
+import { buildTransactionWhere, lineMatchesCategoryKeys, type ReportServiceInput, transactionMatchesCategoryKeys } from './report-filters';
+import { getMonthStartIso, resolveReportTimeZone } from './report-months';
 
 /**
  * Monthly cash flow.
@@ -34,10 +37,7 @@ export interface CashflowRow {
   net: number;
 }
 
-const CATEGORY_POPULATE = [
-  'appuserTransactionCategories.categoryKey',
-  'appuserCurrencyKey',
-] as const;
+const CATEGORY_POPULATE = [...CATEGORY_LINE_POPULATE, ...REPORT_CURRENCY_POPULATE] as const;
 
 export function buildCashflowCsv(rows: CashflowRow[]): string {
   const header = ['month', 'income', 'expenses', 'net'];
@@ -57,15 +57,17 @@ export function buildCashflowCsv(rows: CashflowRow[]): string {
  * export and the chart are the same numbers by construction.
  */
 export async function getCashflowCsv(input: ReportServiceInput): Promise<string> {
-  return buildCashflowCsv(await getCashflowReport(input));
+  return buildCashflowCsv((await getCashflowReport(input)).data);
 }
 
-export async function getCashflowReport(input: ReportServiceInput): Promise<CashflowRow[]> {
+export async function getCashflowReport(input: ReportServiceInput): Promise<ReportResult<CashflowRow[]>> {
   const { filters, tenant, user } = input;
 
   const transactions = await DI.em.find(Transaction, buildTransactionWhere(filters, tenant, user), {
-    populate: filters.categoryKeys !== undefined ? CATEGORY_POPULATE : undefined,
+    populate: CATEGORY_POPULATE,
   });
+  const amounts = await loadViewerCurrencyAmounts(DI.em, user, transactions);
+  const spendingFlags = await loadCategorySpendingFlags(DI.em, tenant.tenantKey);
 
   const categoryKeys = filters.categoryKeys;
   const timeZone = resolveReportTimeZone(filters.timezone);
@@ -74,8 +76,16 @@ export async function getCashflowReport(input: ReportServiceInput): Promise<Cash
     if (!transaction.transactionDate) continue;
     if (categoryKeys !== undefined && !transactionMatchesCategoryKeys(transaction, categoryKeys)) continue;
 
-    const amount = getEffectiveAppuserAmount(transaction);
-    const monthKey = getMonthKey(transaction.transactionDate, timeZone);
+    // In the viewer's currency; a row no rate converts is left out and counted. A line in a category
+    // that is not spending (investments, savings) is left out, in and out; with a category filter,
+    // a split transaction counts only its matching lines.
+    const converted = amounts.amountOf(transaction);
+    if (converted === null) continue;
+    const lines = spendingLinesOf(transaction, converted, spendingFlags).filter((line) => lineMatchesCategoryKeys(line, categoryKeys));
+    if (lines.length === 0) continue;
+    const amount = sumMoney(lines.map((line) => line.amount));
+    // A bank booking is in the month of its own date.
+    const monthKey = transactionCalendarDay(transaction.transactionDate, timeZone).slice(0, 7);
     const current = monthlyTotals.get(monthKey);
     const next = current ?? { expenses: 0, income: 0 };
     // Money arithmetic, not float accumulation, for the monthly totals.
@@ -84,7 +94,7 @@ export async function getCashflowReport(input: ReportServiceInput): Promise<Cash
     monthlyTotals.set(monthKey, next);
   }
 
-  return [...monthlyTotals.entries()]
+  const data = [...monthlyTotals.entries()]
     .sort(([a], [b]) => a.localeCompare(b))
     .map(([monthKey, totals]) => {
       const income = round2(totals.income);
@@ -96,4 +106,5 @@ export async function getCashflowReport(input: ReportServiceInput): Promise<Cash
         net: round2(income - expenses),
       };
     });
+  return { completeness: amounts.completeness(), data };
 }

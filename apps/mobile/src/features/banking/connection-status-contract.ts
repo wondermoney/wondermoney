@@ -9,7 +9,7 @@ import { readEndpoint, tolerantEnum, writeEndpoint } from '@/lib/api/runtime-sch
  *
  * `provider` covers both providers whose connections the backend's
  * `GET /v1/banking/connections` can list, discriminated by this field. Both
- * map onto the same 4-value `status` vocabulary.
+ * map onto the same `status` vocabulary.
  *
  * Not `.strict()`, same as `start-connection-contract.ts`: this validates a
  * cross-repo HTTP response, not our own DTO, so an additive field on the API
@@ -34,15 +34,20 @@ import { readEndpoint, tolerantEnum, writeEndpoint } from '@/lib/api/runtime-sch
 
 // A status, provider or access type this build doesn't know reads as 'unknown', so one new value
 // shows as an "unknown" row instead of failing the whole list.
-export const connectionStatusSchema = tolerantEnum(['connected', 'error', 'expired', 'processing'], 'unknown')
+// `expiring`: the consent ends within 14 days. `revoked`: the bank ended the consent early.
+export const connectionStatusSchema = tolerantEnum(['connected', 'error', 'expired', 'expiring', 'processing', 'revoked'], 'unknown')
 
 export const bankConnectionProviderSchema = tolerantEnum(['GoCardless', 'EnableBanking'], 'unknown')
 
 export const bankConnectionSchema = z
   .object({
     accessType: tolerantEnum(['open_banking'], 'unknown'),
+    // The id `GET /v1/banking/bank/:bankId/start` takes, so the row can offer "Reconnect".
+    // Optional: an older API does not send it, and then the row has no reconnect action.
+    bankId: z.string().min(1).nullable().optional(),
     connectionId: z.number().int().positive().nullable().optional(),
     dataFreshAsOf: z.string().datetime().nullable(),
+    daysUntilExpiry: z.number().int().nonnegative().nullable().optional(),
     expiresAt: z.string().datetime().nullable(),
     institutionName: z.string().nullable(),
     provider: bankConnectionProviderSchema,

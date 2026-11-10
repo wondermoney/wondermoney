@@ -3,7 +3,7 @@ import { type Href, useRouter } from 'expo-router'
 
 import type { ScreenerEntryDto, ScreenerFilters, ScreenerResponseDto } from './markets-contract'
 import { mapScreenerResults } from './markets-view-model'
-import { ScreenerScreen, type ScreenerFilterFormValues, type ScreenerScreenState } from './screener-screen'
+import { ScreenerScreen, type ScreenerFilterFormValues, type ScreenerNumberFilters, type ScreenerScreenState } from './screener-screen'
 import { useScreener } from './use-screener'
 
 const SCREENER_PAGE_SIZE = 25
@@ -23,21 +23,15 @@ const emptyForm: ScreenerFilterFormValues = {
 
 type AppliedFilters = Omit<ScreenerFilters, 'page' | 'limit'>
 
-function parseNumberInput(value: string): number | undefined {
-  const trimmed = value.trim()
-  if (trimmed === '') return undefined
-  const parsed = Number(trimmed)
-  return Number.isFinite(parsed) ? parsed : undefined
-}
-
-function buildAppliedFilters(form: ScreenerFilterFormValues): AppliedFilters {
+/** `numbers` are the bounds the screen already read in the app's language. */
+function buildAppliedFilters(form: ScreenerFilterFormValues, numbers: Partial<ScreenerNumberFilters>): AppliedFilters {
   return {
     isEtf: form.isEtf,
     isActivelyTrading: form.isActivelyTrading,
-    priceMoreThan: parseNumberInput(form.priceMoreThan),
-    priceLowerThan: parseNumberInput(form.priceLowerThan),
-    marketCapMoreThan: parseNumberInput(form.marketCapMoreThan),
-    marketCapLowerThan: parseNumberInput(form.marketCapLowerThan),
+    priceMoreThan: numbers.priceMoreThan,
+    priceLowerThan: numbers.priceLowerThan,
+    marketCapMoreThan: numbers.marketCapMoreThan,
+    marketCapLowerThan: numbers.marketCapLowerThan,
     sector: form.sector ?? undefined,
     industry: form.industry ?? undefined,
     country: form.country ?? undefined,
@@ -116,13 +110,13 @@ export function ScreenerRoute() {
     setHasMore(currentData.hasMore)
   }, [generation, page, screener.data])
 
-  const onApplyFilters = () => {
+  const onApplyFilters = (numbers: Partial<ScreenerNumberFilters> = {}) => {
     mergedDataRef.current = undefined
     setPage(0)
     setAccumulated([])
     setHasMore(false)
     setGeneration((current) => current + 1)
-    setApplied(buildAppliedFilters(form))
+    setApplied(buildAppliedFilters(form, numbers))
   }
 
   const onLoadMore = () => {

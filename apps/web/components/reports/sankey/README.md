@@ -7,6 +7,7 @@ A custom, accessible Sankey diagram for cash-flow reports.
 - Three columns by default: `income` → `expense` → `account`.
 - Falls back to two columns (`income` → `expense`) when no `account` nodes are present.
 - Nodes are sized by total flow; link thickness encodes value (non-color cue).
+- Pass `icon` on a node to draw a 14px mark beside its label: a category icon, a bank logo, or a wallet. `SankeyReport` joins these from configs categories and accounts by node id.
 
 ## Colors
 

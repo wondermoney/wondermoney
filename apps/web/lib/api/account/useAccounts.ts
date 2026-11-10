@@ -26,6 +26,8 @@ export interface Account {
   accountOwnerAppuserKey: { currencyKey: { code: string } };
   refreshedAt: string | null;
   source: "manual" | "open_banking";
+  /** The account type ('CHECKING', 'SAVINGS', 'INVESTMENT', ...), or null when none was set. */
+  accountType?: string | null;
   /**
    * Which file the account's CSV import reads: its bank's statement export ("bank"), or the
    * generic CSV format, for any other bank or an account without one ("generic").
@@ -61,6 +63,7 @@ export interface AccountWire {
   accountOwnerAppuserKey: { currencyKey: { code: string } };
   refreshedAt?: string | null;
   source?: string | null;
+  accountType?: string | null;
   csvImportFormat?: string | null;
   isPrivate?: boolean;
   isOwnedByViewer?: boolean;
@@ -203,6 +206,8 @@ function normalizeAccount(account: unknown): Account {
     refreshedAt,
     // Transitional compatibility for payloads deployed before `source` existed.
     source,
+    accountType:
+      typeof account.accountType === "string" ? account.accountType : null,
     // Lenient: a missing or unknown value reads as the generic format.
     csvImportFormat: account.csvImportFormat === "bank" ? "bank" : "generic",
     // Household fields default off for payloads deployed before these existed.

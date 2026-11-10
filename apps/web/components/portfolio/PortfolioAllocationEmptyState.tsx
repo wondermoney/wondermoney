@@ -4,7 +4,6 @@ import { useTranslations } from "next-intl";
 import React from "react";
 
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import { Text } from "@/components/ui/Typography";
 import { ALLOCATION_PRESETS } from "@/lib/portfolio/allocation-presets";
 
@@ -13,14 +12,13 @@ interface PortfolioAllocationEmptyStateProps {
   onCustomize: () => void;
 }
 
-const PortfolioAllocationEmptyState: React.FC<PortfolioAllocationEmptyStateProps> = ({
-  onApplyPreset,
-  onCustomize,
-}) => {
+const PortfolioAllocationEmptyState: React.FC<
+  PortfolioAllocationEmptyStateProps
+> = ({ onApplyPreset, onCustomize }) => {
   const t = useTranslations();
 
   return (
-    <Card className="flex flex-col items-center gap-3 p-6 text-center">
+    <section className="border-foreground flex flex-col items-start gap-3 border-t-2 pt-4">
       <Text className="text-sm font-medium">
         {t("portfolio-allocation-set-target-title")}
       </Text>
@@ -42,7 +40,7 @@ const PortfolioAllocationEmptyState: React.FC<PortfolioAllocationEmptyStateProps
           {t("allocation-customize")}
         </Button>
       </div>
-    </Card>
+    </section>
   );
 };
 

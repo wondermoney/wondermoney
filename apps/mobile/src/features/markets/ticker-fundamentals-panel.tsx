@@ -1,8 +1,8 @@
 import { useTranslation } from 'react-i18next'
 import { StyleSheet, Text, View } from 'react-native'
 
-import { formatCurrency } from '@/lib/formatters/financial'
-import { themeTokens } from '@/theme/tokens'
+import { useFormatMoney, useHideMoneyText } from '@/lib/formatters/money-display'
+import { Section } from '@/components/ui/section'
 import { textStyles } from '@/theme/typography'
 
 import { type Palette, ReadOnlyField } from './markets-screen-parts'
@@ -36,7 +36,9 @@ function FundamentalsMetrics({ data, currency, palette }: { data: FundamentalsVi
   const { t, i18n } = useTranslation()
   const locale = i18n.resolvedLanguage ?? i18n.language ?? 'en'
   const unavailable = t('assetDetail.unavailable')
-  const amount = (value: number) => (currency ? formatCurrency(value, { locale, currency }) : decimalText(value, locale))
+  const formatMoney = useFormatMoney()
+  const hideMoney = useHideMoneyText()
+  const amount = (value: number) => formatMoney(value, { locale, currency })
   const weekRangeText = data.fiftyTwoWeekLow !== null && data.fiftyTwoWeekHigh !== null
     ? `${amount(data.fiftyTwoWeekLow)} – ${amount(data.fiftyTwoWeekHigh)}`
     : unavailable
@@ -45,7 +47,7 @@ function FundamentalsMetrics({ data, currency, palette }: { data: FundamentalsVi
     <View>
       <ReadOnlyField
         label={t('assetDetail.fundamentals.marketCap')}
-        value={data.marketCap === null ? unavailable : formatScreenerMarketCap(data.marketCap, locale, unavailable)}
+        value={data.marketCap === null ? unavailable : hideMoney(formatScreenerMarketCap(data.marketCap, locale, unavailable), locale)}
         palette={palette}
       />
       <ReadOnlyField label={t('assetDetail.fundamentals.weekRange')} value={weekRangeText} palette={palette} separated />
@@ -93,28 +95,23 @@ export function TickerFundamentalsPanel({ state, currency, palette }: TickerFund
   const { t } = useTranslation()
 
   return (
-    <View style={[styles.card, { borderColor: palette.border, backgroundColor: palette.muted }]}>
-      <Text accessibilityRole="header" allowFontScaling style={[styles.title, { color: palette.foreground }]}>
-        {t('assetDetail.fundamentals.heading')}
-      </Text>
+    <Section title={t('assetDetail.fundamentals.heading')} variant="open">
 
       {state.status === 'loading' ? (
         <Text accessibilityRole="progressbar" accessibilityLabel={t('assetDetail.fundamentals.loading')} allowFontScaling style={[styles.helper, { color: palette.mutedForeground }]}>
           {t('assetDetail.fundamentals.loading')}
         </Text>
       ) : state.status === 'error' ? (
-        <Text accessibilityRole="alert" allowFontScaling style={[styles.helper, { color: palette.destructive }]}>
+        <Text accessibilityRole="alert" allowFontScaling style={[styles.helper, { color: palette.destructiveText }]}>
           {t('assetDetail.fundamentals.error')}
         </Text>
       ) : (
         <FundamentalsMetrics data={state.data} currency={currency} palette={palette} />
       )}
-    </View>
+    </Section>
   )
 }
 
 const styles = StyleSheet.create({
-  card: { width: '100%', borderWidth: 1, borderRadius: themeTokens.radius.xl, padding: themeTokens.spacing[4], gap: themeTokens.spacing[3] },
-  title: { ...textStyles.section },
-  helper: { ...textStyles.body },
+  helper: { ...textStyles.meta },
 })

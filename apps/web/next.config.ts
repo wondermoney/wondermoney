@@ -54,6 +54,9 @@ const nextConfig: NextConfig = {
     remotePatterns: [],
   },
   reactStrictMode: true,
+  // `@wondermoney/shared/decimal` is published as TypeScript source (it has no
+  // dependencies and no build step), so Next compiles it with the app.
+  transpilePackages: ["@wondermoney/shared"],
   /**
    * The loans module lived at /credits until we renamed it to the word we
    * actually use. Emails already sent, bookmarks and anything else holding the

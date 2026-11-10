@@ -12,6 +12,7 @@ const captured = jest.mocked(captureAnalyticsEvent)
 let mockConnections: BankConnectionDto[] = []
 const connection = (status: BankConnectionDto['status']): BankConnectionDto => ({
   accessType: 'open_banking',
+  bankId: 'UFQ6OlJldm9sdXQ',
   connectionId: 42,
   dataFreshAsOf: null,
   expiresAt: null,
@@ -29,6 +30,18 @@ const mockMutateAsync = jest.fn()
 let mockParams: { justStarted?: string; connection?: string } = {}
 let mockIsPending = false
 let mockVariables: number | undefined
+
+const mockStartMutate = jest.fn()
+let mockStartPending = false
+let mockStartVariables: string | undefined
+const mockOpenAuthSessionAsync = jest.fn()
+jest.mock('expo-web-browser', () => ({
+  openAuthSessionAsync: (...args: unknown[]) => mockOpenAuthSessionAsync(...args),
+}))
+jest.mock('../use-start-bank-connection', () => ({
+  useStartBankConnection: () => ({ mutate: mockStartMutate, isPending: mockStartPending, variables: mockStartVariables }),
+  classifyStartBankConnectionFailure: jest.requireActual('../use-start-bank-connection').classifyStartBankConnectionFailure,
+}))
 
 jest.mock('expo-router', () => ({
   useRouter: () => ({ replace: mockReplace, push: mockPush, back: mockBack, canGoBack: mockCanGoBack }),
@@ -64,6 +77,9 @@ jest.mock('../connections-screen', () => ({
     disconnectingConnectionId: number | null
     disconnectFailure: { connectionId: number; failure: string } | null
     onImportStatement: () => void
+    onReconnect: (bankId: string) => void
+    reconnectingBankId: string | null
+    reconnectFailure: { bankId: string; failure: string } | null
   }) => {
     const Native = jest.requireActual<typeof import('react-native')>('react-native')
     return (
@@ -76,6 +92,9 @@ jest.mock('../connections-screen', () => ({
         <Native.Pressable accessibilityRole="button" accessibilityLabel="Refresh" onPress={props.onRefresh}><Native.Text>Refresh</Native.Text></Native.Pressable>
         <Native.Pressable accessibilityRole="button" accessibilityLabel="Disconnect" onPress={() => void props.onDisconnect(42)}><Native.Text>Disconnect</Native.Text></Native.Pressable>
         <Native.Pressable accessibilityRole="button" accessibilityLabel="ImportStatement" onPress={props.onImportStatement}><Native.Text>Import statement</Native.Text></Native.Pressable>
+        <Native.Text testID="reconnecting">{String(props.reconnectingBankId)}</Native.Text>
+        <Native.Text testID="reconnectFailure">{props.reconnectFailure ? `${props.reconnectFailure.bankId}:${props.reconnectFailure.failure}` : 'none'}</Native.Text>
+        <Native.Pressable accessibilityRole="button" accessibilityLabel="Reconnect" onPress={() => props.onReconnect('UFQ6OlJldm9sdXQ')}><Native.Text>Reconnect</Native.Text></Native.Pressable>
       </>
     )
   },
@@ -87,6 +106,45 @@ describe('ConnectionsRoute', () => {
     mockRefetch.mockClear(); mockParams = {}
     mockMutateAsync.mockReset(); mockIsPending = false; mockVariables = undefined
     mockConnections = []; captured.mockClear()
+    mockStartMutate.mockReset(); mockStartPending = false; mockStartVariables = undefined
+    mockOpenAuthSessionAsync.mockReset()
+  })
+
+  describe('reconnecting a bank', () => {
+    it('starts a new connection for the bank, opens its consent and returns to the list with the outcome', async () => {
+      mockOpenAuthSessionAsync.mockResolvedValue({ type: 'success', url: 'wondermoney://more/banking?enableBankingConnection=success' })
+      mockStartMutate.mockImplementation((_bankId: string, options: { onSuccess: (data: { redirectUrl: string }) => void }) => {
+        options.onSuccess({ redirectUrl: 'https://bank.example/consent' })
+      })
+      const view = await render(<ConnectionsRoute />)
+
+      await fireEvent.press(view.getByRole('button', { name: 'Reconnect' }))
+      await Promise.resolve()
+
+      expect(mockStartMutate).toHaveBeenCalledWith('UFQ6OlJldm9sdXQ', expect.anything())
+      expect(mockOpenAuthSessionAsync).toHaveBeenCalledWith('https://bank.example/consent', 'wondermoney://more/banking')
+      expect(mockReplace).toHaveBeenCalledWith({ pathname: '/more/banking', params: { justStarted: '1', connection: 'success' } })
+      expect(captured.mock.calls).toEqual([['bank_connection_started']])
+    })
+
+    it('shows a classified failure on the row when the connection cannot start', async () => {
+      mockStartMutate.mockImplementation((_bankId: string, options: { onError: (error: unknown) => void }) => {
+        options.onError(new ApiError('http', 404))
+      })
+      const view = await render(<ConnectionsRoute />)
+
+      await fireEvent.press(view.getByRole('button', { name: 'Reconnect' }))
+
+      expect(view.getByTestId('reconnectFailure')).toHaveTextContent('UFQ6OlJldm9sdXQ:not-found')
+      expect(mockOpenAuthSessionAsync).not.toHaveBeenCalled()
+    })
+
+    it('passes through the bank being reconnected while it starts', async () => {
+      mockStartPending = true
+      mockStartVariables = 'UFQ6OlJldm9sdXQ'
+      const view = await render(<ConnectionsRoute />)
+      expect(view.getByTestId('reconnecting')).toHaveTextContent('UFQ6OlJldm9sdXQ')
+    })
   })
 
   describe('bank connection outcomes', () => {

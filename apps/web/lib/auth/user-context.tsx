@@ -24,6 +24,7 @@ export function useUser() {
   return {
     id: user.id,
     email: user.email,
+    name: user.name,
     email_confirmed_at: user.emailVerified
       ? new Date(user.createdAt ?? 0).toISOString()
       : null,

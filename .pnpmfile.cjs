@@ -1,5 +1,5 @@
 // Drops optional peer dependencies that only the web and mobile apps provide, so pnpm stops
-// resolving them into the API's dependency closure (#100).
+// resolving them into the API's dependency closure.
 //
 // pnpm links an optional peer whenever a matching version exists anywhere in the workspace.
 // Because web depends on next and mobile on expo, the API's better-auth and @better-auth/expo

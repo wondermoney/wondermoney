@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useProductRuntime } from '@/components/providers/product-runtime-provider'
 
 import { OnboardingScreen } from './onboarding-screen'
-import { useCompleteOnboarding } from './use-complete-onboarding'
+import { classifyCompleteOnboardingFailure, useCompleteOnboarding } from './use-complete-onboarding'
 import { useOnboardingBootstrap } from './use-onboarding-bootstrap'
 import { mapOnboardingState } from './onboarding-view-model'
 
@@ -19,6 +19,11 @@ export function OnboardingRoute() {
   const hasLeft = useRef(false)
 
   const state = resolveViewState(bootstrap)
+  // `access` hands over to the MFA/sign-in gate and `cancelled` is the user's
+  // own doing; everything else is a failure the screen must say out loud,
+  // or "Skip setup" looks like it did nothing.
+  const failure = completion.error ? classifyCompleteOnboardingFailure(completion.error) : null
+  const completionFailure = failure === 'access' || failure === 'cancelled' ? null : failure
 
   // If the user is no longer required (legacy / re-fetched completed), leave
   // the journey and go back to the app. This keeps the route idempotent
@@ -50,6 +55,7 @@ export function OnboardingRoute() {
     <OnboardingScreen
       state={state}
       pending={completion.isPending}
+      completionFailure={completionFailure}
       outcome={outcome}
       onRetry={() => { void bootstrap.refetch() }}
       onConnectBank={async () => {
@@ -62,10 +68,11 @@ export function OnboardingRoute() {
       onSkip={async () => {
         if (state.status !== 'loaded') return
         setOutcome('skip')
+        completion.reset()
         try {
           await completion.mutateAsync({ version: state.view.version })
         } catch {
-          // The screen surfaces the error from `classifyCompleteOnboardingFailure`.
+          // The screen shows `completionFailure`, classified above.
         } finally {
           setOutcome('idle')
         }

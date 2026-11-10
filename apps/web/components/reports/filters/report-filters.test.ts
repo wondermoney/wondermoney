@@ -80,6 +80,16 @@ test("the navigable filters are untouched by the calendar", () => {
   assert.equal(withZone.currencyKey, "EUR");
 });
 
+test("the tag filter travels in the link as `tags` and reaches the API as tagKeys", () => {
+  const filters = buildReportFilters(
+    new URLSearchParams({ tags: "4, 9" }),
+    undefined,
+  );
+
+  assert.deepEqual(filters.tagKeys, ["4", "9"]);
+  assert.deepEqual(buildReportFilters(new URLSearchParams(), undefined).tagKeys, []);
+});
+
 test("the calendar is not a URL param, so shared links stay device-neutral", () => {
   // A link shared from Madrid must not force Madrid months on a Lisbon reader:
   // the zone describes the device, not the report.

@@ -5,11 +5,30 @@ import api from "../api";
 
 export interface RawNetWorthSummary {
   currencyCode: string;
+  /** False when a row was left out because it could not be valued; absent from older APIs. */
+  isComplete?: boolean;
   totalNetWorth: number;
   assets: { accounts: number; portfolios: number };
   liabilities: { loans: number };
-  rows: Array<{ type: string; name: string; balance: number }>;
-  unsupportedCurrencies: { loans: number; portfolios: number };
+  /**
+   * A portfolio row with `countedInAccountId` is already inside that account's balance: it is a
+   * breakdown and adds nothing to the totals. Absent from older APIs.
+   */
+  rows: Array<{
+    type: string;
+    id?: number;
+    name: string;
+    balance: number;
+    countedInAccountId?: number;
+  }>;
+  /** Ask "Is this the same money?": an investment account and an unlinked portfolio. */
+  suggestPortfolioLink?: boolean;
+  /** Rows the API could not value in `currencyCode`; `accounts` is absent from older APIs. */
+  unsupportedCurrencies: {
+    accounts?: number;
+    loans: number;
+    portfolios: number;
+  };
 }
 
 export interface NetWorth {
@@ -19,10 +38,14 @@ export interface NetWorth {
   liabilitiesTotal?: number;
   rows?: Array<{
     key: string;
+    /** The account, portfolio or loan key behind the row, when the API sends it. */
+    recordId?: number;
     label: string;
     amount: number;
     isLiability?: boolean;
     currencyCode?: string;
+    /** Shown, but already counted in this account's balance. */
+    countedInAccountId?: number;
     subRows?: Array<{
       key: string;
       label: string;
@@ -32,6 +55,7 @@ export interface NetWorth {
     }>;
   }>;
   unsupportedCurrencyMetadata?: Array<{ currencyCode: string; reason: string }>;
+  suggestPortfolioLink?: boolean;
 }
 
 export interface GetNetWorthResponse {
@@ -58,9 +82,14 @@ async function getNetWorth(
         // liability treatment (e.g. the red account name in
         // DashboardNetworthTable) as a dedicated loan row.
         isLiability: row.type === "loans" || row.balance < 0,
-        key: `${row.type}:${row.name}`,
+        key: `${row.type}:${row.id ?? row.name}`,
+        recordId: row.id,
         label: row.name,
+        ...(row.countedInAccountId === undefined
+          ? {}
+          : { countedInAccountId: row.countedInAccountId }),
       })),
+      suggestPortfolioLink: data.suggestPortfolioLink === true,
       unsupportedCurrencyMetadata: Object.entries(
         data.unsupportedCurrencies,
       ).flatMap(([currencyCode, count]) =>
@@ -84,9 +113,7 @@ export default function useNetWorth<R = GetNetWorthResponse>(
 }
 
 export type NetWorthHistoryReadiness =
-  | "ready"
-  | "insufficient_history"
-  | "empty";
+  "ready" | "insufficient_history" | "empty";
 
 export interface NetWorthHistoryPoint {
   date: string;

@@ -5,6 +5,8 @@ import { Alert, Pressable, StyleSheet, Text, TextInput, View } from 'react-nativ
 import { budgetCategoryWriteSchema, type BudgetCategoryWrite, type BudgetRecurrence } from './budgets-contract'
 import type { BudgetCategoryChildViewModel } from './budgets-view-model'
 import { classifyBudgetCategoryWriteFailure, type BudgetCategoryWriteFailure } from './use-budget-category-mutation'
+import { FormSwitchRow } from '@/components/ui/form-row'
+import { parseNumberInput } from '@/lib/formatters/decimal-input'
 import { themeTokens, type Palette } from '@/theme/tokens'
 import { textStyles } from '@/theme/typography'
 
@@ -14,11 +16,10 @@ const recurrences: readonly BudgetRecurrence[] = ['MONTHLY_14', 'MONTHLY', 'QUAR
 
 export const monthsInCategoryScope = (month: number, scope: BudgetCategoryScope): number => scope === 'month' ? 1 : 13 - month
 
-export function parseRawBudgetAmount(value: string): number | null {
-  const normalized = value.trim().replace(',', '.')
-  if (!/^\d+(?:\.\d+)?$/.test(normalized)) return null
-  const amount = Number(normalized)
-  return Number.isFinite(amount) && amount > 0 ? amount : null
+/** The typed amount, read in the app's language; `null` unless it is positive. */
+export function parseRawBudgetAmount(value: string, locale: string): number | null {
+  const amount = parseNumberInput(value, locale)
+  return amount !== null && amount > 0 ? amount : null
 }
 
 const confirmForwardScope = (title: string, message: string, cancel: string, proceed: string) => new Promise<boolean>((resolve) => {
@@ -34,12 +35,15 @@ export function BudgetCategoryEditor({ child, year, month, locale, pending, pale
   const [amountInput, setAmountInput] = useState(initialAmount)
   const [recurrence, setRecurrence] = useState<BudgetRecurrence | null>(child.recurrence)
   const [scope, setScope] = useState<BudgetCategoryScope>('month')
+  const [rolloverEnabled, setRolloverEnabled] = useState(child.rolloverEnabled)
   const [failure, setFailure] = useState<BudgetCategoryWriteFailure | null>(null)
-  const amount = parseRawBudgetAmount(amountInput)
+  const amount = parseRawBudgetAmount(amountInput, locale)
   const value = amount === null || recurrence === null ? null : {
     amount,
     recurrency: recurrence,
     applyToFollowingMonths: scope === 'through-december',
+    // Only a change is sent: an unchanged switch leaves each month's own setting alone.
+    ...(rolloverEnabled !== child.rolloverEnabled ? { rolloverEnabled } : {}),
   }
   const valid = value !== null && budgetCategoryWriteSchema.safeParse(value).success
 
@@ -75,6 +79,16 @@ export function BudgetCategoryEditor({ child, year, month, locale, pending, pale
     <Text style={[styles.label, { color: palette.foreground }]}>{t('budgetCategory.recurrence')}</Text>
     {child.recurrence === null ? <Text accessibilityRole="alert" style={[styles.legacy, { color: palette.mutedForeground }]}>{t('budgetCategory.legacyRecurrence')}</Text> : null}
     <View accessibilityRole="radiogroup" style={styles.choices}>{recurrences.map((option) => <Choice key={option} label={t(`budgetMonth.recurrence.${option}`)} selected={recurrence === option} disabled={pending} onPress={() => setRecurrence(option)} palette={palette} />)}</View>
+    <View style={[styles.switch, { borderColor: palette.border, backgroundColor: palette.background }]}>
+      <FormSwitchRow
+        disabled={pending}
+        hint={t('budgetCategory.rolloverHint')}
+        label={t('budgetCategory.rollover')}
+        onValueChange={setRolloverEnabled}
+        testID="budget-category-rollover"
+        value={rolloverEnabled}
+      />
+    </View>
     <Text style={[styles.label, { color: palette.foreground }]}>{t('budgetCategory.scope')}</Text>
     <View accessibilityRole="radiogroup" style={styles.choices}>
       <Choice label={t('budgetCategory.scopeMonth')} selected={scope === 'month'} disabled={pending} onPress={() => setScope('month')} palette={palette} />
@@ -97,5 +111,5 @@ function EditorButton({ label, disabled, busy, onPress, primary = false, palette
 }
 
 const styles = StyleSheet.create({
-  editor: { borderWidth: 1, borderRadius: themeTokens.radius.lg, padding: themeTokens.spacing[4], gap: themeTokens.spacing[3] }, title: { ...textStyles.section, fontWeight: '700' as const }, helper: { ...textStyles.meta }, label: { ...textStyles.bodyStrong, fontWeight: '700' as const, marginTop: themeTokens.spacing[1] }, input: { ...textStyles.amount, minHeight: themeTokens.touchTarget.minimum, borderWidth: 1, borderRadius: themeTokens.radius.md, paddingHorizontal: themeTokens.spacing[3] }, choices: { gap: themeTokens.spacing[2] }, choice: { minHeight: themeTokens.touchTarget.minimum, borderWidth: 1, borderRadius: themeTokens.radius.md, padding: themeTokens.spacing[3], flexDirection: 'row', alignItems: 'center', gap: themeTokens.spacing[3] }, radio: { width: 22, height: 22, borderRadius: 11, borderWidth: 2, alignItems: 'center', justifyContent: 'center' }, radioDot: { width: 10, height: 10, borderRadius: 5 }, choiceLabel: { ...textStyles.body, flex: 1 }, legacy: { ...textStyles.meta }, scopeNote: { ...textStyles.label }, actions: { flexDirection: 'row', flexWrap: 'wrap', gap: themeTokens.spacing[3] }, button: { minHeight: themeTokens.touchTarget.minimum, borderWidth: 1, borderRadius: themeTokens.radius.md, justifyContent: 'center', alignItems: 'center', paddingHorizontal: themeTokens.spacing[4] }, buttonText: { ...textStyles.bodyStrong, fontWeight: '700' as const }, disabled: { opacity: 0.45 }, alert: { ...textStyles.meta, borderWidth: 1, borderRadius: themeTokens.radius.md, padding: themeTokens.spacing[3] },
+  editor: { borderWidth: 1, borderRadius: themeTokens.radius.lg, padding: themeTokens.spacing[4], gap: themeTokens.spacing[3] }, title: { ...textStyles.section, fontWeight: '700' as const }, helper: { ...textStyles.meta }, label: { ...textStyles.bodyStrong, fontWeight: '700' as const, marginTop: themeTokens.spacing[1] }, input: { ...textStyles.amount, minHeight: themeTokens.touchTarget.minimum, borderWidth: 1, borderRadius: themeTokens.radius.md, paddingHorizontal: themeTokens.spacing[3] }, choices: { gap: themeTokens.spacing[2] }, choice: { minHeight: themeTokens.touchTarget.minimum, borderWidth: 1, borderRadius: themeTokens.radius.md, padding: themeTokens.spacing[3], flexDirection: 'row', alignItems: 'center', gap: themeTokens.spacing[3] }, radio: { width: 22, height: 22, borderRadius: 11, borderWidth: 2, alignItems: 'center', justifyContent: 'center' }, radioDot: { width: 10, height: 10, borderRadius: 5 }, choiceLabel: { ...textStyles.body, flex: 1 }, legacy: { ...textStyles.meta }, scopeNote: { ...textStyles.label }, switch: { borderWidth: 1, borderRadius: themeTokens.radius.md, overflow: 'hidden' }, actions: { flexDirection: 'row', flexWrap: 'wrap', gap: themeTokens.spacing[3] }, button: { minHeight: themeTokens.touchTarget.minimum, borderWidth: 1, borderRadius: themeTokens.radius.md, justifyContent: 'center', alignItems: 'center', paddingHorizontal: themeTokens.spacing[4] }, buttonText: { ...textStyles.bodyStrong, fontWeight: '700' as const }, disabled: { opacity: 0.45 }, alert: { ...textStyles.meta, borderWidth: 1, borderRadius: themeTokens.radius.md, padding: themeTokens.spacing[3] },
 })

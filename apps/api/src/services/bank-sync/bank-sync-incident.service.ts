@@ -85,6 +85,8 @@ export interface FinalizeBankSyncAttemptInput {
   incidentId: string;
   institutionId?: string;
   result: BankSyncContractResult;
+  /** The provider's `Retry-After`, in seconds, when the attempt was rate-limited. */
+  retryAfterSeconds?: number;
   /** Fail-closed rollout snapshot captured by the producer at completion. */
   treatmentMode?: 'internal-allowlist' | 'live' | null;
   /** Transitional compatibility for producers which can only explicitly opt out. */
@@ -301,6 +303,7 @@ export class BankSyncIncidentService {
       // The institution is discovered mid-sync (the requisition/account response), never known at
       // allocation time, so the incident row starts without it — backfill it here, first value wins.
       incident.institutionId ??= event.institution_id;
+      if (input.retryAfterSeconds !== undefined) incident.retryAfterSeconds = input.retryAfterSeconds;
 
       incident.attempts = Math.max(incident.attempts, input.attempt);
       if (input.result !== 'full_success' && !incident.recoveryTreatmentModeSnapshot) {

@@ -1,18 +1,18 @@
 import { useTranslation } from 'react-i18next'
-import { RefreshControl, ScrollView, StyleSheet, useColorScheme, View } from 'react-native'
-import { SafeAreaView } from 'react-native-safe-area-context'
+import { RefreshControl, ScrollView, StyleSheet, View } from 'react-native'
 
 import { PageHeader } from '@/components/ui/page-header'
-import { BackControl } from '@/components/ui/back-control'
 import { themeTokens } from '@/theme/tokens'
+import { SafeAreaView } from '@/components/ui/screen-safe-area'
+import { usePalette } from '@/theme/use-palette'
 
 import { BudgetVsActualBody, type BudgetVsActualBodyProps } from './budget-vs-actual-screen'
 import { CashflowReportBody, type CashflowReportBodyProps } from './cashflow-report-screen'
 import { NetWorthHistoryReportBody, type NetWorthHistoryReportBodyProps } from './net-worth-history-report-screen'
 import { PortfolioPerformanceReportBody, type PortfolioPerformanceReportBodyProps } from './portfolio-performance-report-screen'
 import type { ReportDatePreset } from './report-date-presets'
-import { ReportFilterPanel } from './report-filter-panel'
-import { ReportPresetBar, styles as sharedStyles } from './report-screen-parts'
+import { ReportFiltersBar } from './report-filters-bar'
+import { styles as sharedStyles } from './report-screen-parts'
 import { SankeyReportBody, type SankeyReportBodyProps } from './sankey-report-screen'
 import { SpendingByCategoryReportBody, type SpendingByCategoryReportBodyProps } from './spending-by-category-report-screen'
 import type { useReportFilterOptions } from './use-report-filter-options'
@@ -25,7 +25,6 @@ export type ReportsHubScreenProps = {
   onSelectPreset: (preset: ReportDatePreset) => void
   refreshing: boolean
   onRefreshAll: () => void | Promise<void>
-  onBack: () => void
   sankey: SankeyReportBodyProps
   cashflow: CashflowReportBodyProps
   spendingByCategory: SpendingByCategoryReportBodyProps
@@ -35,12 +34,12 @@ export type ReportsHubScreenProps = {
 }
 
 /**
- * All six reports composed inline on one scrolling page, matching web's
- * `/reports`, so the two platforms feel like the same app for a surface
- * that's otherwise identical. One shared date-range/filter bar
- * controls every section, same as web's single `ReportFiltersBar`; each
- * section still tracks its own load/error/export state independently,
- * since each is backed by a different endpoint.
+ * Web's `/reports` at phone width: the "Reports" title, one filter row (period
+ * select, Filters, reset), then every report as an open section in web's order
+ * — Sankey, cash flow, spending by category, net worth, budget vs actual,
+ * portfolio performance. Each section keeps its own query, export and
+ * load/error state, so one failing report doesn't block the rest. Reports is
+ * a destination (the bottom bar's More), so there is no back link, as on web.
  */
 export function ReportsHubScreen({
   preset,
@@ -49,7 +48,6 @@ export function ReportsHubScreen({
   onSelectPreset,
   refreshing,
   onRefreshAll,
-  onBack,
   sankey,
   cashflow,
   spendingByCategory,
@@ -58,7 +56,7 @@ export function ReportsHubScreen({
   portfolioPerformance,
 }: ReportsHubScreenProps) {
   const { t } = useTranslation()
-  const palette = themeTokens.colors[useColorScheme() === 'dark' ? 'dark' : 'light']
+  const palette = usePalette()
 
   return (
     <SafeAreaView style={[sharedStyles.safeArea, { backgroundColor: palette.background }]}>
@@ -67,21 +65,19 @@ export function ReportsHubScreen({
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => void onRefreshAll()} tintColor={palette.primary} />}
       >
         <View style={sharedStyles.page}>
-          <View style={styles.header}>
-            <BackControl fallback="/more" onPress={onBack} color={palette.primary} />
-            <PageHeader palette={palette} helpText={t('reportsHub.helper')} title={t('reportsHub.title')} />
+          {/* The title, then the one control row, then the reports. */}
+          <View style={styles.lead}>
+            <PageHeader title={t('reportsHub.title')} />
+            <ReportFiltersBar filterOptions={filterOptions} filterState={filterState} onSelectPreset={onSelectPreset} preset={preset} />
           </View>
-
-          <ReportPresetBar preset={preset} onSelectPreset={onSelectPreset} palette={palette} />
-          <ReportFilterPanel filterState={filterState} filterOptions={filterOptions} palette={palette} />
-
-          {/* Flagship Sankey first — same prime placement as web. */}
-          <SankeyReportBody {...sankey} />
-          <CashflowReportBody {...cashflow} />
-          <SpendingByCategoryReportBody {...spendingByCategory} />
-          <NetWorthHistoryReportBody {...netWorthHistory} />
-          <BudgetVsActualBody {...budgetVsActual} />
-          <PortfolioPerformanceReportBody {...portfolioPerformance} />
+          <View style={sharedStyles.reports}>
+            <SankeyReportBody {...sankey} />
+            <CashflowReportBody {...cashflow} />
+            <SpendingByCategoryReportBody {...spendingByCategory} />
+            <NetWorthHistoryReportBody {...netWorthHistory} />
+            <BudgetVsActualBody {...budgetVsActual} />
+            <PortfolioPerformanceReportBody {...portfolioPerformance} />
+          </View>
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -89,5 +85,5 @@ export function ReportsHubScreen({
 }
 
 const styles = StyleSheet.create({
-  header: { gap: themeTokens.spacing[4] },
+  lead: { gap: themeTokens.spacing[4] },
 })

@@ -142,3 +142,6 @@ src/database/entity/*.d.ts.map
 # END oh-my-opencode-slim worktrees
 
 .playwright-mcp
+
+# Vitest blob reports (CI shards)
+.vitest/

@@ -1,8 +1,8 @@
 import { useQuery, type UseQueryOptions } from "@tanstack/react-query";
 import type { AxiosInstance } from "axios";
-import { format } from "date-fns";
 
 import api from "../api";
+import { transactionDateRangeParams } from "../date-range";
 import type { Transaction } from "./useTransactions";
 
 export interface GetAccountTransactionsResponse {
@@ -29,6 +29,8 @@ export interface GetAccountTransactionsRequest {
    */
   transactionTypes?: string[];
   categoryKeys?: string[];
+  /** Tag keys; a row matches when it carries any of them. */
+  tagKeys?: string[];
 }
 
 export async function getAccountTransactions(
@@ -44,9 +46,9 @@ export async function getAccountTransactions(
     values && values.length > 0 ? values.join(",") : undefined;
   const _params = {
     ...rest,
-    ...(fromDate && { fromDate: format(fromDate, "yyyy-MM-dd") }),
-    ...(toDate && { toDate: format(toDate, "yyyy-MM-dd") }),
+    ...transactionDateRangeParams({ fromDate, toDate }),
     categoryKeys: list(params.categoryKeys),
+    tagKeys: list(params.tagKeys),
     transactionTypes: list(params.transactionTypes),
   };
   const { data } = await apiClient.get<GetAccountTransactionsResponse>(

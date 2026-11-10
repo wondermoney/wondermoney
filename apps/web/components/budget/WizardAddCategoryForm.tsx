@@ -3,7 +3,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQueryClient } from "@tanstack/react-query";
 import { Info, Plus } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useCallback, useState } from "react";
 import { HexColorPicker } from "react-colorful";
 import { useForm, useWatch } from "react-hook-form";
@@ -26,7 +26,7 @@ import useCreateCategory from "@/lib/api/category/useCreateCategory";
 import { isDemoReadOnlyError } from "@/lib/api/errors";
 import { shouldAddCreatedCategoryToBudget } from "@/lib/utils/budget-wizard";
 import { getCategoryTranslationKey } from "@/lib/utils/categories";
-import { zLocaleNumber } from "@/lib/utils/number";
+import { zOptionalLocaleNumber } from "@/lib/utils/number";
 import { invalidateCategories } from "@/lib/utils/queryInvalidation";
 
 import { Button } from "../ui/button";
@@ -49,15 +49,18 @@ const recurrencyOptions = [
   { value: "BI_ANNUALLY", label: "recurrency_biannually" },
 ];
 
-const getCategoryFormSchema = (t: ReturnType<typeof useTranslations>) =>
+const getCategoryFormSchema = (
+  t: ReturnType<typeof useTranslations>,
+  locale: string,
+) =>
   z
     .object({
       name: z.string().min(1, t("category-name-required")),
       color: z.string().regex(/^#[0-9A-Fa-f]{6}$/, t("invalid-color-format")),
       icon: z.string().optional(),
       parentCategoryKey: z.string().nullable(),
-      budgetAmount: zLocaleNumber
-        .pipe(z.number().min(0, t("budget-amount-positive")))
+      budgetAmount: zOptionalLocaleNumber(locale, t("invalid-amount"))
+        .pipe(z.number().min(0, t("budget-amount-positive")).optional())
         .optional(),
       recurrency: z
         .enum(["MONTHLY", "MONTHLY_14", "QUARTERLY", "ANNUALLY", "BI_ANNUALLY"])
@@ -113,7 +116,8 @@ const WizardAddCategoryForm: React.FC<WizardAddCategoryFormProps> = ({
   const useAddBudgetCategoryMutation = useAddBudgetCategory();
   const { data: categoriesResponse } = useCategories();
   const categories = categoriesResponse?.categories || [];
-  const categoryFormSchema = getCategoryFormSchema(t);
+  const locale = useLocale();
+  const categoryFormSchema = getCategoryFormSchema(t, locale);
   const [isAdvancedOpen, setIsAdvancedOpen] = useState(false);
 
   const methods = useForm({

@@ -10,10 +10,12 @@ ENV NODE_ENV=development
 
 COPY pnpm-lock.yaml pnpm-workspace.yaml package.json .pnpmfile.cjs ./
 COPY apps/web/package.json apps/web/
+COPY packages/shared/package.json packages/shared/
 RUN --mount=type=cache,id=pnpm,target=/root/.local/share/pnpm/store \
     pnpm install --frozen-lockfile --filter @wondermoney/web...
 
 COPY apps/web apps/web
+COPY packages/shared packages/shared
 WORKDIR /repo/apps/web
 EXPOSE 3000
 CMD ["sh", "-c", "pnpm run dev --port ${PORT:-3000}"]

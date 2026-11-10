@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next'
 import { StyleSheet, Text, View } from 'react-native'
 import { CartesianChart, Line } from 'victory-native'
 
+import { Section } from '@/components/ui/section'
 import { SegmentedControl } from '@/components/ui/segmented-control'
 import { themeTokens, type Palette } from '@/theme/tokens'
 import { textStyles } from '@/theme/typography'
@@ -17,18 +18,17 @@ export type PortfolioPerformanceState =
 export type PortfolioPerformanceChartProps = Readonly<{
   state: PortfolioPerformanceState
   period: PortfolioPerformancePeriod
-  onSelectPeriod: (period: PortfolioPerformancePeriod) => void
+  /** Omit where the page's own period select drives the chart (the overview, as web). */
+  onSelectPeriod?: (period: PortfolioPerformancePeriod) => void
   palette: Palette
 }>
 
 export function PortfolioPerformanceChart({ state, period, onSelectPeriod, palette }: PortfolioPerformanceChartProps) {
   const { t } = useTranslation()
   return (
-    <View style={[styles.card, { borderColor: palette.border, backgroundColor: palette.muted }]}>
-      <Text accessibilityRole="header" allowFontScaling style={[styles.title, { color: palette.foreground }]}>
-        {t('portfolioDetail.performance.heading')}
-      </Text>
-      <SegmentedControl
+    // Web's ruled "Performance" section: the chart on the canvas, no card around it.
+    <Section title={t('portfolioDetail.performance.heading')} variant="open" style={styles.card}>
+      {onSelectPeriod ? <SegmentedControl
         accessibilityLabel={t('portfolioDetail.performance.title')}
         onChange={onSelectPeriod}
         options={PORTFOLIO_PERFORMANCE_PERIODS.map((value) => ({
@@ -39,18 +39,16 @@ export function PortfolioPerformanceChart({ state, period, onSelectPeriod, palet
         // narrow phone in one non-wrapping row — scroll rather than clip.
         scrollable
         value={period}
-      />
+      /> : null}
 
       {state.status === 'loading' ? (
-        <Text accessibilityRole="progressbar" accessibilityLabel={t('portfolioDetail.performance.loading')} allowFontScaling style={[styles.helper, { color: palette.mutedForeground }]}>
-          {t('portfolioDetail.performance.loading')}
-        </Text>
+        <View accessible accessibilityRole="progressbar" accessibilityLabel={t('portfolioDetail.performance.loading')} style={[styles.placeholder, { backgroundColor: palette.muted }]} />
       ) : state.status === 'error' ? (
-        <Text accessibilityRole="alert" allowFontScaling style={[styles.helper, { color: palette.destructive }]}>
+        <Text accessibilityRole="alert" allowFontScaling style={[styles.helper, { color: palette.destructiveText }]}>
           {t('portfolioDetail.performance.error')}
         </Text>
       ) : state.data.historyStatus !== 'ready' || state.data.points.length < 2 ? (
-        <Text allowFontScaling style={[styles.helper, { color: palette.mutedForeground }]}>
+        <Text allowFontScaling style={[styles.helper, styles.emptyCopy, { color: palette.mutedForeground }]}>
           {t(state.data.historyStatus === 'empty' ? 'portfolioDetail.performance.empty' : 'portfolioDetail.performance.insufficientHistory')}
         </Text>
       ) : (
@@ -83,18 +81,25 @@ export function PortfolioPerformanceChart({ state, period, onSelectPeriod, palet
               </Text>
             ) : null}
           </View>
+          {state.data.currencyIncomplete ? (
+            <Text allowFontScaling style={[styles.helper, { color: palette.warningText }]}>
+              {t('portfolioDetail.performance.currencyIncomplete')}
+            </Text>
+          ) : null}
         </>
       )}
-    </View>
+    </Section>
   )
 }
 
 const styles = StyleSheet.create({
-  card: { width: '100%', borderWidth: 1, borderRadius: themeTokens.radius.xl, padding: themeTokens.spacing[4], gap: themeTokens.spacing[3] },
+  card: { width: '100%' },
+  placeholder: { width: '100%', height: 240, borderRadius: themeTokens.radius.md },
+  emptyCopy: { paddingVertical: themeTokens.spacing[10], textAlign: 'center' },
   title: { ...textStyles.section },
   periods: { flexDirection: 'row', flexWrap: 'wrap', gap: themeTokens.spacing[2] },
-  helper: { ...textStyles.body },
-  chart: { width: '100%', height: 200 },
+  helper: { ...textStyles.meta },
+  chart: { width: '100%', height: 240 },
   summary: { gap: themeTokens.spacing[1] },
   returnText: { ...textStyles.amount },
 })

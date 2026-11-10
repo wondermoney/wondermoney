@@ -29,6 +29,7 @@ test("normalizes omitted legacy fields and derives source when omitted", () => {
     appuserCurrencyBalance: null,
     refreshedAt: null,
     source: "manual",
+    accountType: null,
     csvImportFormat: "generic",
     isPrivate: false,
     isOwnedByViewer: false,

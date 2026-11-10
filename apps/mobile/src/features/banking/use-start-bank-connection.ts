@@ -8,6 +8,11 @@ import { createStartBankConnectionEndpoint } from './start-connection-contract'
 
 export type StartBankConnectionFailure = 'access' | 'mfa' | 'not-found' | 'unavailable' | 'general'
 
+/** The message for a failure, under `banking.connect.startError`. */
+export function startBankConnectionFailureMessageKey(failure: StartBankConnectionFailure): string {
+  return `banking.connect.startError.${failure === 'not-found' ? 'notFound' : failure}`
+}
+
 export function classifyStartBankConnectionFailure(error: unknown): StartBankConnectionFailure {
   if (!(error instanceof ApiError)) return 'general'
   if (error.code === 'mfa-required') return 'mfa'

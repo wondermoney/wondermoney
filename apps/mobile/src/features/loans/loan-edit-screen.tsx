@@ -1,13 +1,21 @@
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Alert, BackHandler, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Switch, Text, TextInput, useColorScheme, View } from 'react-native'
-import { SafeAreaView } from 'react-native-safe-area-context'
+import { Alert, BackHandler, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, View } from 'react-native'
 
+import { AmountEntry } from '@/components/ui/amount-entry'
+import { Button } from '@/components/ui/button'
+import { DateField } from '@/components/ui/date-field'
+import { FormBar } from '@/components/ui/form-bar'
+import { FormGroup, FormSelectRow, FormSwitchRow, FormTextRow } from '@/components/ui/form-row'
+import { Notice } from '@/components/ui/notice'
+import { SafeAreaView } from '@/components/ui/screen-safe-area'
+import { Text } from '@/components/ui/text'
+import { formatNumberInput, toWireDecimalInput } from '@/lib/formatters/decimal-input'
 import { basisPointsToPercent, percentToBasisPoints } from '@/lib/formatters/interest-rate'
-import { themeTokens, type Palette } from '@/theme/tokens'
-import { textStyles } from '@/theme/typography'
-import { BackControl } from '@/components/ui/back-control'
+import { themeTokens } from '@/theme/tokens'
+import { usePalette } from '@/theme/use-palette'
 
+import { loanNumberErrors } from './loan-form-rows'
 import { loanWriteSchema, type LoanType, type LoanWrite } from './loans-contract'
 import { classifyLoanWriteFailure, type LoanWriteFailure } from './use-loan-metadata-mutation'
 
@@ -25,6 +33,8 @@ export type LoanEditModel = Readonly<{
   regularPaymentAmount: number | null
   annualInterestRateBps: number | null
   termMonths: number | null
+  /** The loan's currency (ISO code), shown on the principal; it can't be changed here. */
+  currencyCode?: string | null
 }>
 
 export type LoanEditViewState =
@@ -86,34 +96,57 @@ const confirmDiscard = (title: string, message: string, cancel: string, proceed:
 
 export function LoanEditScreen(props: Props) {
   const { t } = useTranslation()
-  const palette = themeTokens.colors[useColorScheme() === 'dark' ? 'dark' : 'light']
+  const palette = usePalette()
   if (props.state.status === 'access-transition') return null
-  if (props.state.status === 'loading') return <SafeAreaView style={[styles.safe, { backgroundColor: palette.background }]}><View accessibilityRole="progressbar" accessibilityLabel={t('loanEdit.loading')} style={styles.center}><Text style={{ color: palette.foreground }}>{t('loanEdit.loading')}</Text></View></SafeAreaView>
-  if (props.state.status !== 'loaded' && props.state.status !== 'refresh-error') return <EditFailure status={props.state.status} onBack={props.onBack} onRetry={props.onRetry} palette={palette} />
-  return <LoanEditForm key={props.state.model.id} {...props} model={props.state.model} stale={props.state.status === 'refresh-error'} palette={palette} />
+  if (props.state.status === 'loading') {
+    return (
+      <SafeAreaView style={[styles.safe, { backgroundColor: palette.background }]}>
+        <FormBar closeLabel={t('common.close')} onClose={props.onBack} title={t('loanEdit.title')} />
+        <View accessibilityLabel={t('loanEdit.loading')} accessibilityRole="progressbar" style={styles.center}><Text tone="muted" variant="meta">{t('loanEdit.loading')}</Text></View>
+      </SafeAreaView>
+    )
+  }
+  if (props.state.status !== 'loaded' && props.state.status !== 'refresh-error') return <EditFailure status={props.state.status} onBack={props.onBack} onRetry={props.onRetry} />
+  return <LoanEditForm key={props.state.model.id} {...props} model={props.state.model} stale={props.state.status === 'refresh-error'} />
 }
 
-function LoanEditForm({ model, stale, onBack, onSaveLoan, onRefreshAuthoritative, pending, refreshRequired, palette }: Omit<Props, 'state' | 'onRetry'> & { model: LoanEditModel; stale: boolean; palette: Palette }) {
-  const { t } = useTranslation()
+/**
+ * Edit loan, as a calm-structure flow: the form bar (close, save details),
+ * the opening principal big and centred, the details as one group of rows,
+ * then the net worth switch on its own, which saves through its own
+ * confirmation rather than the ✓.
+ */
+function LoanEditForm({ model, stale, onBack, onSaveLoan, onRefreshAuthoritative, pending, refreshRequired }: Omit<Props, 'state' | 'onRetry'> & { model: LoanEditModel; stale: boolean }) {
+  const { t, i18n } = useTranslation()
+  const palette = usePalette()
+  const locale = i18n.resolvedLanguage ?? i18n.language ?? 'en'
+  // Read in the app's language ("1.234,56" in pt and es), then compared and sent as dot decimals.
+  const decimal = (value: string) => toWireDecimalInput(value, locale)
   const [saved, setSaved] = useState<LoanEditModel>(model)
   const [name, setName] = useState(model.name)
   const [providerName, setProviderName] = useState(model.providerName ?? '')
   const [notes, setNotes] = useState(model.notes ?? '')
   const [type, setType] = useState<LoanType>(model.type)
-  const [openingPrincipalBalance, setOpeningPrincipalBalance] = useState(String(model.openingPrincipalBalance))
+  const [openingPrincipalBalance, setOpeningPrincipalBalance] = useState(() => formatNumberInput(model.openingPrincipalBalance, locale))
   const [openingBalanceDate, setOpeningBalanceDate] = useState(model.openingBalanceDate)
-  const [regularPaymentAmount, setRegularPaymentAmount] = useState(model.regularPaymentAmount === null ? '' : String(model.regularPaymentAmount))
-  const [annualInterestRateBps, setAnnualInterestRateBps] = useState(model.annualInterestRateBps === null ? '' : String(basisPointsToPercent(model.annualInterestRateBps)))
+  const [regularPaymentAmount, setRegularPaymentAmount] = useState(model.regularPaymentAmount === null ? '' : formatNumberInput(model.regularPaymentAmount, locale))
+  const [annualInterestRateBps, setAnnualInterestRateBps] = useState(model.annualInterestRateBps === null ? '' : formatNumberInput(basisPointsToPercent(model.annualInterestRateBps), locale))
   const [termMonths, setTermMonths] = useState(model.termMonths === null ? '' : String(model.termMonths))
   const [includeInNetWorth, setIncludeInNetWorth] = useState(model.includeInNetWorth)
   const [confirmationTarget, setConfirmationTarget] = useState<boolean | null>(null)
   const [refreshingAuthoritative, setRefreshingAuthoritative] = useState(false)
   const [failure, setFailure] = useState<LoanWriteFailure | null>(null)
-  const changes = createLoanMetadataChanges(saved, { name, providerName, notes, type, openingPrincipalBalance, openingBalanceDate, regularPaymentAmount, annualInterestRateBps, termMonths })
+  const typed = { openingPrincipalBalance: decimal(openingPrincipalBalance), regularPaymentAmount: decimal(regularPaymentAmount), annualInterestRateBps: decimal(annualInterestRateBps), termMonths }
+  const changes = createLoanMetadataChanges(saved, { name, providerName, notes, type, openingBalanceDate, ...typed })
   const inclusionDirty = includeInNetWorth !== saved.includeInNetWorth
   const dirty = changes !== null || inclusionDirty
   const locked = pending || refreshingAuthoritative
   const inclusionLocked = locked || refreshRequired || stale
+  const fieldsLocked = locked || refreshRequired
+  const numbers = loanNumberErrors(typed)
+  const nameError = name === '' ? t('loanCreate.fieldErrors.name') : null
+  const dateError = openingBalanceDate.trim() !== '' && !/^\d{4}-\d{2}-\d{2}$/.test(openingBalanceDate.trim()) ? t('loanCreate.fieldErrors.startDate') : undefined
+  const valid = changes !== null && loanWriteSchema.safeParse(changes).success && !numbers.principal && !numbers.installment && !numbers.rate && !numbers.term
 
   const requestExit = async () => {
     if (locked) return
@@ -128,7 +161,7 @@ function LoanEditForm({ model, stale, onBack, onSaveLoan, onRefreshAuthoritative
   })
 
   const saveMetadata = async () => {
-    if (!changes || locked || refreshRequired) return
+    if (!changes || !valid || locked || refreshRequired) return
     if (!loanWriteSchema.safeParse(changes).success) { setFailure('invalid'); return }
     setFailure(null)
     try {
@@ -188,83 +221,104 @@ function LoanEditForm({ model, stale, onBack, onSaveLoan, onRefreshAuthoritative
     }
   }
 
+  const refreshAction = <Button disabled={locked} label={refreshingAuthoritative ? t('loanEdit.refreshing') : t('loanEdit.refreshAuthoritative')} loading={refreshingAuthoritative} onPress={() => void refreshAuthoritative()} size="sm" variant="secondary" />
+
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: palette.background }]}>
+      <FormBar
+        closeDisabled={locked}
+        closeLabel={t('common.close')}
+        onClose={() => void requestExit()}
+        onSave={() => void saveMetadata()}
+        saveDisabled={!valid || locked || refreshRequired}
+        saveLabel={pending && confirmationTarget === null ? t('loanEdit.saving') : t('loanEdit.saveDetails')}
+        saving={pending && confirmationTarget === null}
+        title={t('loanEdit.title')}
+      />
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={styles.keyboard}>
         <ScrollView keyboardShouldPersistTaps="handled" keyboardDismissMode="interactive" contentContainerStyle={styles.content}>
-        <View style={styles.page}>
-          <BackControl fallback="/loans" onPress={() => void requestExit()} color={palette.primary} disabled={locked} />
-          <View style={styles.heading}><Text accessibilityRole="header" style={[styles.title, { color: palette.foreground }]}>{t('loanEdit.title')}</Text><Text style={[styles.helper, { color: palette.mutedForeground }]}>{t('loanEdit.helper')}</Text></View>
-          {stale && !refreshRequired ? <View style={[styles.noticeBox, { borderColor: palette.border, backgroundColor: palette.muted }]}><Text accessibilityRole="alert" style={[styles.helper, { color: palette.foreground }]}>{t('loanEdit.stale')}</Text><Button label={refreshingAuthoritative ? t('loanEdit.refreshing') : t('loanEdit.refreshAuthoritative')} disabled={locked} busy={refreshingAuthoritative} onPress={refreshAuthoritative} palette={palette} secondary /></View> : null}
-          {failure ? <Text accessibilityRole="alert" style={[styles.notice, { color: palette.foreground, borderColor: palette.destructive }]}>{t(`loanEdit.failures.${failure}`)}</Text> : null}
-          {refreshRequired ? <View style={[styles.noticeBox, { borderColor: palette.destructive, backgroundColor: palette.card }]}><Text accessibilityRole="alert" style={[styles.helper, { color: palette.foreground }]}>{t('loanEdit.refreshRequired')}</Text><Button label={refreshingAuthoritative ? t('loanEdit.refreshing') : t('loanEdit.refreshAuthoritative')} disabled={locked} busy={refreshingAuthoritative} onPress={refreshAuthoritative} palette={palette} secondary /></View> : null}
-          <View style={[styles.panel, { backgroundColor: palette.card, borderColor: palette.border }]}>
-            <Text accessibilityRole="header" style={[styles.sectionTitle, { color: palette.foreground }]}>{t('loanEdit.detailsTitle')}</Text>
-            <FieldLabel text={t('loanEdit.name')} palette={palette} />
-            <TextInput accessibilityLabel={t('loanEdit.name')} accessibilityHint={t('loanEdit.nameHint')} editable={!locked && !refreshRequired} maxLength={255} value={name} onChangeText={setName} returnKeyType="next" style={[styles.input, { color: palette.foreground, borderColor: palette.border, backgroundColor: palette.background }]} />
-            <CharacterCount count={name.length} max={255} palette={palette} />
-            <FieldLabel text={t('loanEdit.provider')} palette={palette} />
-            <TextInput accessibilityLabel={t('loanEdit.provider')} accessibilityHint={t('loanEdit.providerHint')} editable={!locked && !refreshRequired} maxLength={255} value={providerName} onChangeText={setProviderName} returnKeyType="next" style={[styles.input, { color: palette.foreground, borderColor: palette.border, backgroundColor: palette.background }]} />
-            <CharacterCount count={providerName.length} max={255} palette={palette} />
-            <FieldLabel text={t('loanEdit.type')} palette={palette} />
-            <View accessibilityRole="radiogroup" accessibilityLabel={t('loanEdit.type')} style={styles.choices}>
-              {CREDIT_TYPES.map((item) => <TypeChoice key={item} label={t(`loans.type.${item}`)} selected={type === item} disabled={locked || refreshRequired} onPress={() => setType(item)} palette={palette} />)}
+          <View style={styles.page}>
+            {stale && !refreshRequired ? <Notice action={refreshAction} message={t('loanEdit.stale')} /> : null}
+            {failure ? <Notice message={t(`loanEdit.failures.${failure}`)} tone="destructive" /> : null}
+            {refreshRequired ? <Notice action={refreshAction} message={t('loanEdit.refreshRequired')} tone="destructive" /> : null}
+            <AmountEntry
+              accessibilityLabel={t('loanEdit.principal')}
+              caption={t('loanEdit.principal')}
+              currency={model.currencyCode ?? null}
+              editable={!fieldsLocked}
+              error={numbers.principal ? t('loanCreate.fieldErrors.principal') : null}
+              locale={locale}
+              onChangeText={setOpeningPrincipalBalance}
+              value={openingPrincipalBalance}
+            />
+            <View style={styles.section}>
+              <Text accessibilityRole="header" variant="heading">{t('loanEdit.detailsTitle')}</Text>
+              <FormGroup>
+                <FormTextRow key="name" accessibilityHint={t('loanEdit.nameHint')} editable={!fieldsLocked} error={nameError} label={t('loanEdit.name')} maxLength={255} onChangeText={setName} returnKeyType="next" value={name} />
+                <FormTextRow key="provider" accessibilityHint={t('loanEdit.providerHint')} editable={!fieldsLocked} label={t('loanEdit.provider')} maxLength={255} onChangeText={setProviderName} placeholder={t('loanCreate.optional')} returnKeyType="next" value={providerName} />
+                <FormSelectRow key="type" disabled={fieldsLocked} label={t('loanEdit.type')} onChange={setType} options={CREDIT_TYPES.map((item) => ({ value: item, label: t(`loans.type.${item}`) }))} placeholder={t('loanCreate.choose')} value={type} />
+                <DateField key="date" appearance="row" disabled={fieldsLocked} error={dateError} label={t('loanEdit.startDate')} onChange={(value) => setOpeningBalanceDate(value ?? '')} value={openingBalanceDate || null} />
+                <FormTextRow key="installment" accessibilityLabel={t('loanEdit.installmentOptional')} editable={!fieldsLocked} error={numbers.installment ? t('loanCreate.fieldErrors.installment') : null} keyboardType="decimal-pad" label={t('loanCreate.installment')} onChangeText={setRegularPaymentAmount} placeholder={t('loanCreate.optional')} value={regularPaymentAmount} />
+                <FormTextRow key="rate" accessibilityLabel={t('loanEdit.interestRateOptional')} editable={!fieldsLocked} error={numbers.rate ? t('loanCreate.fieldErrors.interestRate') : null} keyboardType="decimal-pad" label={t('loanCreate.interestRate')} onChangeText={setAnnualInterestRateBps} placeholder={t('loanCreate.optional')} value={annualInterestRateBps} />
+                <FormTextRow key="term" accessibilityLabel={t('loanEdit.termMonthsOptional')} editable={!fieldsLocked} error={numbers.term ? t('loanCreate.fieldErrors.termMonths') : null} keyboardType="number-pad" label={t('loanCreate.termMonths')} onChangeText={setTermMonths} placeholder={t('loanCreate.optional')} value={termMonths} />
+                <FormTextRow key="notes" accessibilityHint={t('loanEdit.notesHint')} editable={!fieldsLocked} label={t('loanEdit.notes')} maxLength={10_000} multiline onChangeText={setNotes} placeholder={t('loanCreate.optional')} value={notes} />
+              </FormGroup>
             </View>
-            <FieldLabel text={t('loanEdit.principal')} palette={palette} />
-            <TextInput accessibilityLabel={t('loanEdit.principal')} editable={!locked && !refreshRequired} keyboardType="decimal-pad" value={openingPrincipalBalance} onChangeText={setOpeningPrincipalBalance} style={[styles.input, { color: palette.foreground, borderColor: palette.border, backgroundColor: palette.background }]} />
-            <FieldLabel text={t('loanEdit.startDate')} palette={palette} />
-            <TextInput accessibilityLabel={t('loanEdit.startDate')} accessibilityHint={t('loanEdit.startDatePlaceholder')} editable={!locked && !refreshRequired} maxLength={10} value={openingBalanceDate} onChangeText={setOpeningBalanceDate} style={[styles.input, { color: palette.foreground, borderColor: palette.border, backgroundColor: palette.background }]} />
-            <FieldLabel text={t('loanEdit.installmentOptional')} palette={palette} />
-            <TextInput accessibilityLabel={t('loanEdit.installmentOptional')} editable={!locked && !refreshRequired} keyboardType="decimal-pad" value={regularPaymentAmount} onChangeText={setRegularPaymentAmount} style={[styles.input, { color: palette.foreground, borderColor: palette.border, backgroundColor: palette.background }]} />
-            <FieldLabel text={t('loanEdit.interestRateOptional')} palette={palette} />
-            <TextInput accessibilityLabel={t('loanEdit.interestRateOptional')} editable={!locked && !refreshRequired} keyboardType="decimal-pad" value={annualInterestRateBps} onChangeText={setAnnualInterestRateBps} style={[styles.input, { color: palette.foreground, borderColor: palette.border, backgroundColor: palette.background }]} />
-            <FieldLabel text={t('loanEdit.termMonthsOptional')} palette={palette} />
-            <TextInput accessibilityLabel={t('loanEdit.termMonthsOptional')} editable={!locked && !refreshRequired} keyboardType="number-pad" value={termMonths} onChangeText={setTermMonths} style={[styles.input, { color: palette.foreground, borderColor: palette.border, backgroundColor: palette.background }]} />
-            <FieldLabel text={t('loanEdit.notes')} palette={palette} />
-            <TextInput accessibilityLabel={t('loanEdit.notes')} accessibilityHint={t('loanEdit.notesHint')} editable={!locked && !refreshRequired} maxLength={10_000} multiline value={notes} onChangeText={setNotes} style={[styles.input, styles.textarea, { color: palette.foreground, borderColor: palette.border, backgroundColor: palette.background }]} />
-            <CharacterCount count={notes.length} max={10_000} palette={palette} />
-            <Button label={pending ? t('loanEdit.saving') : t('loanEdit.saveDetails')} disabled={!changes || locked || refreshRequired} busy={pending} onPress={saveMetadata} palette={palette} />
+            <View style={styles.section}>
+              <Text accessibilityRole="header" variant="heading">{t('loanEdit.netWorthTitle')}</Text>
+              <FormGroup>
+                <FormSwitchRow
+                  accessibilityHint={t('loanEdit.netWorthHint')}
+                  accessibilityLabel={t('loanEdit.netWorthSwitch')}
+                  disabled={inclusionLocked || confirmationTarget !== null}
+                  hint={t('loanEdit.netWorthHelper')}
+                  label={t('loanCreate.includeInNetWorth')}
+                  onValueChange={stageInclusion}
+                  value={includeInNetWorth}
+                />
+              </FormGroup>
+              {confirmationTarget !== null ? (
+                <Notice
+                  action={(
+                    <View style={styles.actions}>
+                      <Button disabled={locked} label={t('common.cancel')} onPress={cancelInclusion} size="sm" variant="secondary" />
+                      <Button disabled={inclusionLocked} label={pending ? t('loanEdit.saving') : t('loanEdit.netWorthConfirm')} loading={pending} onPress={() => void saveInclusion()} size="sm" />
+                    </View>
+                  )}
+                  message={t(confirmationTarget ? 'loanEdit.netWorthConfirmInclude' : 'loanEdit.netWorthConfirmExclude')}
+                  title={t('loanEdit.netWorthConfirmTitle')}
+                />
+              ) : null}
+            </View>
           </View>
-          <View style={[styles.panel, styles.netWorthPanel, { backgroundColor: palette.card, borderColor: palette.border }]}>
-            <View style={styles.switchCopy}><Text accessibilityRole="header" style={[styles.sectionTitle, { color: palette.foreground }]}>{t('loanEdit.netWorthTitle')}</Text><Text style={[styles.helper, { color: palette.mutedForeground }]}>{t('loanEdit.netWorthHelper')}</Text></View>
-            <Switch accessibilityRole="switch" accessibilityLabel={t('loanEdit.netWorthSwitch')} accessibilityHint={t('loanEdit.netWorthHint')} accessibilityState={{ disabled: inclusionLocked || confirmationTarget !== null, checked: includeInNetWorth }} disabled={inclusionLocked || confirmationTarget !== null} value={includeInNetWorth} onValueChange={stageInclusion} trackColor={{ false: palette.muted, true: palette.primary }} />
-            {confirmationTarget !== null ? <View style={[styles.confirmation, { borderColor: palette.primary, backgroundColor: palette.background }]}><Text accessibilityRole="header" style={[styles.label, { color: palette.foreground }]}>{t('loanEdit.netWorthConfirmTitle')}</Text><Text accessibilityRole="alert" style={[styles.helper, { color: palette.mutedForeground }]}>{t(confirmationTarget ? 'loanEdit.netWorthConfirmInclude' : 'loanEdit.netWorthConfirmExclude')}</Text><View style={styles.confirmActions}><Button label={t('common.cancel')} disabled={locked} busy={false} onPress={cancelInclusion} palette={palette} secondary /><Button label={pending ? t('loanEdit.saving') : t('loanEdit.netWorthConfirm')} disabled={inclusionLocked} busy={pending} onPress={saveInclusion} palette={palette} /></View></View> : null}
-          </View>
-          <Button label={t('common.cancel')} disabled={locked} busy={false} onPress={requestExit} palette={palette} secondary />
-        </View>
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
   )
 }
 
-function FieldLabel({ text, palette }: { text: string; palette: Palette }) {
-  return <Text style={[styles.label, { color: palette.foreground }]}>{text}</Text>
-}
-
-function TypeChoice({ label, selected, disabled, onPress, palette }: { label: string; selected: boolean; disabled: boolean; onPress: () => void; palette: Palette }) {
-  return <Pressable accessibilityRole="radio" hitSlop={{ top: 7, bottom: 7 }} accessibilityState={{ checked: selected, disabled }} disabled={disabled} onPress={onPress} style={[styles.choice, { borderColor: selected ? palette.primary : palette.border, backgroundColor: selected ? palette.primarySoft : palette.card }, disabled && styles.disabled]}><Text style={[styles.choiceText, { color: selected ? palette.primary : palette.foreground }]}>{label}</Text></Pressable>
-}
-
-function CharacterCount({ count, max, palette }: { count: number; max: number; palette: Palette }) {
+function EditFailure({ status, onBack, onRetry }: { status: Exclude<LoanEditViewState['status'], 'loaded' | 'refresh-error' | 'loading' | 'access-transition'>; onBack: () => void; onRetry: () => void | Promise<void> }) {
   const { t } = useTranslation()
-  return <Text style={[styles.limit, { color: palette.mutedForeground }]}>{t('loanEdit.characterCount', { count, max })}</Text>
-}
-
-function Button({ label, disabled, busy, onPress, palette, secondary = false }: { label: string; disabled: boolean; busy: boolean; onPress: () => void | Promise<void>; palette: Palette; secondary?: boolean }) {
-  return <Pressable accessibilityRole="button" accessibilityLabel={label} accessibilityState={{ disabled, busy }} disabled={disabled} onPress={() => void onPress()} style={[styles.button, { borderColor: palette.primary, backgroundColor: secondary ? 'transparent' : palette.primary }, disabled && styles.disabled]}><Text style={[styles.buttonText, { color: secondary ? palette.primary : palette.background }]}>{label}</Text></Pressable>
-}
-
-function EditFailure({ status, onBack, onRetry, palette }: { status: Exclude<LoanEditViewState['status'], 'loaded' | 'refresh-error' | 'loading' | 'access-transition'>; onBack: () => void; onRetry: () => void | Promise<void>; palette: Palette }) {
-  const { t } = useTranslation()
+  const palette = usePalette()
   const canRetry = status !== 'invalid-route'
-  return <SafeAreaView style={[styles.safe, { backgroundColor: palette.background }]}><View style={styles.center}><Text accessibilityRole="header" style={[styles.title, { color: palette.foreground }]}>{t(`loanEdit.states.${status}Title`)}</Text><Text style={[styles.helper, { color: palette.mutedForeground }]}>{t(`loanEdit.states.${status}Message`)}</Text>{canRetry ? <Button label={t('common.retry')} disabled={false} busy={false} onPress={onRetry} palette={palette} /> : null}<BackControl fallback="/loans" label={t('loanEdit.back')} onPress={onBack} disabled={false} /></View></SafeAreaView>
+  return (
+    <SafeAreaView style={[styles.safe, { backgroundColor: palette.background }]}>
+      <FormBar closeLabel={t('common.close')} onClose={onBack} title={t('loanEdit.title')} />
+      <View style={styles.center}>
+        <Text accessibilityRole="header" variant="heading">{t(`loanEdit.states.${status}Title`)}</Text>
+        <Text tone="muted" variant="meta">{t(`loanEdit.states.${status}Message`)}</Text>
+        {canRetry ? <Button label={t('common.retry')} onPress={() => void onRetry()} /> : null}
+      </View>
+    </SafeAreaView>
+  )
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1 }, keyboard: { flex: 1 }, content: { flexGrow: 1, padding: themeTokens.layout.screenPadding }, page: { width: '100%', maxWidth: 720, alignSelf: 'center', gap: themeTokens.layout.blockGap }, center: { flex: 1, width: '100%', maxWidth: 520, alignSelf: 'center', justifyContent: 'center', padding: themeTokens.layout.screenPadding, gap: themeTokens.spacing[4] },
-  back: { minHeight: themeTokens.touchTarget.minimum, justifyContent: 'center', alignSelf: 'flex-start' }, backText: { ...textStyles.action }, heading: { gap: themeTokens.spacing[2] }, title: { ...textStyles.title, fontWeight: '700' as const }, helper: { ...textStyles.body },
-  panel: { borderWidth: 1, borderRadius: themeTokens.radius.xl, padding: themeTokens.spacing[5], gap: themeTokens.spacing[3] }, netWorthPanel: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between' }, switchCopy: { flex: 1, minWidth: 220, gap: themeTokens.spacing[1], paddingRight: themeTokens.spacing[4] }, confirmation: { width: '100%', borderWidth: 1, borderRadius: themeTokens.radius.md, padding: themeTokens.spacing[4], gap: themeTokens.spacing[2] }, confirmActions: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'flex-end', gap: themeTokens.spacing[2] }, sectionTitle: { ...textStyles.section, fontWeight: '700' as const }, label: { ...textStyles.bodyStrong, fontWeight: '600' as const, marginTop: themeTokens.spacing[2] }, input: { ...textStyles.body, minHeight: themeTokens.touchTarget.minimum, borderWidth: 1, borderRadius: themeTokens.radius.md, paddingHorizontal: themeTokens.spacing[3] }, textarea: { minHeight: 132, paddingTop: themeTokens.spacing[3], textAlignVertical: 'top' }, limit: { ...textStyles.amountSmall, alignSelf: 'flex-end' },
-  choices: { flexDirection: 'row', flexWrap: 'wrap', gap: themeTokens.spacing[2] }, choice: { minHeight: 34, justifyContent: 'center', borderWidth: 1, borderRadius: themeTokens.radius.md, paddingHorizontal: themeTokens.spacing[3] }, choiceText: { ...textStyles.meta },
-  button: { minHeight: themeTokens.touchTarget.minimum, borderWidth: 1, borderRadius: themeTokens.radius.md, paddingHorizontal: themeTokens.spacing[4], alignItems: 'center', justifyContent: 'center', marginTop: themeTokens.spacing[2] }, buttonText: { ...textStyles.action, fontWeight: '700' as const }, disabled: { opacity: 0.45 }, notice: { ...textStyles.body, borderWidth: 1, borderRadius: themeTokens.radius.md, padding: themeTokens.spacing[4] }, noticeBox: { borderWidth: 1, borderRadius: themeTokens.radius.md, padding: themeTokens.spacing[4], gap: themeTokens.spacing[2] },
+  safe: { flex: 1 },
+  keyboard: { flex: 1 },
+  content: { flexGrow: 1, paddingHorizontal: themeTokens.layout.screenPadding, paddingBottom: themeTokens.spacing[10] },
+  page: { width: '100%', maxWidth: 720, alignSelf: 'center', gap: themeTokens.spacing[4] },
+  section: { gap: themeTokens.spacing[4], paddingTop: themeTokens.spacing[4] },
+  center: { flex: 1, width: '100%', maxWidth: 520, alignSelf: 'center', justifyContent: 'center', alignItems: 'flex-start', padding: themeTokens.layout.screenPadding, gap: themeTokens.spacing[4] },
+  actions: { flexDirection: 'row', flexWrap: 'wrap', gap: themeTokens.spacing[2] },
 })

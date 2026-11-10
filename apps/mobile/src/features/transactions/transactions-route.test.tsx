@@ -2,11 +2,13 @@ import { render } from '@testing-library/react-native'
 
 import { ApiError } from '@/lib/api/errors'
 
+import { transactionFixture } from './test-fixtures'
 import { TransactionsRoute } from './transactions-route'
 
 const mockUseTransactions = jest.fn()
 const mockMutateAsync = jest.fn()
 const mockMutateAmountAsync = jest.fn()
+const mockMutateTransferAsync = jest.fn()
 let mockParams: { accountId?: string } = {}
 const mockBlockAccess = jest.fn()
 const mockPush = jest.fn()
@@ -16,10 +18,20 @@ jest.mock('expo-router', () => ({ useLocalSearchParams: () => mockParams, useRou
 jest.mock('react-i18next', () => ({ useTranslation: () => ({ t: (key: string) => key, i18n: { language: 'en', resolvedLanguage: 'en' } }) }))
 jest.mock('@/components/providers/product-runtime-provider', () => ({ useProductRuntime: () => ({ blockAccess: mockBlockAccess }) }))
 jest.mock('@/features/categories/use-categories', () => ({ useCategories: () => ({ isLoading: true }) }))
+const mockSetTags = jest.fn()
+jest.mock('@/features/tags/use-tags', () => ({
+  useTags: () => ({ isLoading: false, data: { tags: [{ tagKey: 5, name: 'Trip', color: '#ef4444' }] } }),
+  useSetTransactionTags: () => ({ mutateAsync: mockSetTags, isPending: false }),
+  useCreateTagForPicker: () => jest.fn(),
+  toTagsState: (query: { data?: { tags: unknown[] } }) => query.data ? { status: 'loaded', tags: query.data.tags } : { status: 'error' },
+}))
 jest.mock('@/features/accounts/use-accounts', () => ({ useAccounts: () => mockUseAccounts() }))
 jest.mock('./use-transactions', () => ({ useTransactions: (...args: unknown[]) => mockUseTransactions(...args) }))
+jest.mock('./use-transactions-lead', () => ({ useTransactionsLead: () => ({ flows: { status: 'loading' }, reviewCount: { status: 'loading' } }) }))
 jest.mock('./use-mark-reviewed', () => ({ useTransactionBulkActions: () => ({ mutateAsync: mockMutateAsync, isPending: false }) }))
 jest.mock('./use-edit-transaction-amount', () => ({ useEditTransactionAmount: () => ({ mutateAsync: mockMutateAmountAsync, isPending: false }) }))
+jest.mock('./use-edit-transaction-transfer', () => ({ useEditTransactionTransfer: () => ({ mutateAsync: mockMutateTransferAsync, isPending: false }) }))
+jest.mock('./use-transfer-destinations', () => ({ useTransferDestinations: () => ({ accounts: [], portfolios: [{ key: 3, name: 'ETFs' }], goals: [] }) }))
 jest.mock('./transactions-screen', () => ({ TransactionsScreen: (props: { state: { status: string } }) => { mockCapturedProps = props; const Native = jest.requireActual<typeof import('react-native')>('react-native'); return <Native.Text>{props.state.status}</Native.Text> } }))
 
 describe('TransactionsRoute', () => {
@@ -42,17 +54,47 @@ describe('TransactionsRoute', () => {
     ;(mockCapturedProps.onScanReceipt as () => void)()
     expect(mockPush).toHaveBeenCalledWith('/accounts/transactions/scan')
   })
+  it('names no account on the all-accounts list, whatever account the first row is on', async () => {
+    mockUseTransactions.mockReturnValue({ isInvalidAccountId: false, isAccessTransition: false, isLoading: false, data: { transactions: [transactionFixture], total: 1, hasMore: false }, refetch: jest.fn() })
+    mockUseAccounts.mockReturnValue({ data: { accounts: [{ accountKey: 7, accountName: 'Daily account' }] } })
+    await render(<TransactionsRoute />)
+    expect(mockCapturedProps.accountName).toBeNull()
+  })
+  it("names the account on a single-account list, even before it has a transaction", async () => {
+    mockParams = { accountId: '7' }
+    mockUseTransactions.mockReturnValue({ isInvalidAccountId: false, isAccessTransition: false, isLoading: false, data: { transactions: [], total: 0, hasMore: false }, refetch: jest.fn() })
+    mockUseAccounts.mockReturnValue({ data: { accounts: [{ accountKey: 3, accountName: 'Other' }, { accountKey: 7, accountName: 'Daily account' }] } })
+    await render(<TransactionsRoute perAccount />)
+    expect(mockCapturedProps.accountName).toBe('Daily account')
+    expect(mockCapturedProps.perAccount).toBe(true)
+    expect(mockCapturedProps.lead).toBeUndefined()
+  })
+  it('reports the oldest account refresh as the list freshness, and the lead in the owner currency', async () => {
+    mockUseTransactions.mockReturnValue({ isInvalidAccountId: false, isAccessTransition: false, isLoading: false, data: { transactions: [], total: 0, hasMore: false }, refetch: jest.fn() })
+    mockUseAccounts.mockReturnValue({ data: { accounts: [
+      { accountKey: 1, accountName: 'A', refreshedAt: '2026-11-04T10:00:00.000Z', accountOwnerAppuserKey: { currencyKey: { code: 'EUR' } } },
+      { accountKey: 2, accountName: 'B', refreshedAt: '2026-11-01T10:00:00.000Z', accountOwnerAppuserKey: { currencyKey: { code: 'EUR' } } },
+      { accountKey: 3, accountName: 'Manual', refreshedAt: null, accountOwnerAppuserKey: { currencyKey: { code: 'EUR' } } },
+    ] } })
+    await render(<TransactionsRoute />)
+    expect(mockCapturedProps.freshness).toEqual({ kind: 'updated', at: '2026-11-01T10:00:00.000Z' })
+    expect(mockCapturedProps.leadCurrency).toBe('EUR')
+    expect(mockCapturedProps.lead).toEqual({ flows: { status: 'loading' }, reviewCount: { status: 'loading' } })
+  })
   it('maps aggregate loading without inventing a tab', async () => {
     mockUseTransactions.mockReturnValue({ isInvalidAccountId: false, isAccessTransition: false, isLoading: true, refetch: jest.fn() })
     const view = await render(<TransactionsRoute />)
     expect(view.getByText('loading')).toBeOnTheScreen()
-    expect(mockUseTransactions).toHaveBeenCalledWith({}, null)
+    // Web opens on the last 60 days, so the list does too.
+    expect(mockUseTransactions).toHaveBeenCalledWith({ fromDate: expect.any(String), toDate: expect.any(String) }, null)
+    const [{ fromDate, toDate }] = mockUseTransactions.mock.calls[0] as [{ fromDate: string; toDate: string }]
+    expect(Math.round((Date.parse(toDate) - Date.parse(fromDate)) / 86_400_000)).toBe(61)
   })
   it('passes the validated nested account id and maps not found', async () => {
     mockParams = { accountId: '7' }
     mockUseTransactions.mockReturnValue({ isInvalidAccountId: false, isAccessTransition: false, isLoading: false, data: undefined, isNotFound: true, refetch: jest.fn() })
     const view = await render(<TransactionsRoute perAccount />)
-    expect(mockUseTransactions).toHaveBeenCalledWith({}, 7)
+    expect(mockUseTransactions).toHaveBeenCalledWith({ fromDate: expect.any(String), toDate: expect.any(String) }, 7)
     expect(view.getByText('not-found')).toBeOnTheScreen()
   })
 
@@ -120,5 +162,29 @@ describe('TransactionsRoute', () => {
     const result = await (mockCapturedProps.onEditAmount as (id: number, updatedAmount: string, description?: string) => Promise<string>)(41, '9.99', 'Corner shop groceries')
     expect(result).toBe('success')
     expect(mockMutateAmountAsync).toHaveBeenCalledWith({ transactionId: 41, updatedAmount: '9.99', description: 'Corner shop groceries' })
+  })
+  it('passes the household tags through and maps a tag change to its result', async () => {
+    mockUseTransactions.mockReturnValue({ isInvalidAccountId: false, isAccessTransition: false, isLoading: true, refetch: jest.fn() })
+    mockSetTags.mockReset()
+    mockSetTags.mockResolvedValueOnce(undefined).mockRejectedValueOnce(new ApiError('demo-forbidden'))
+    await render(<TransactionsRoute />)
+    expect(mockCapturedProps.tags).toEqual({ status: 'loaded', tags: [{ tagKey: 5, name: 'Trip', color: '#ef4444' }] })
+    const setTags = mockCapturedProps.onSetTags as (id: number, tagIds: readonly number[]) => Promise<string>
+    await expect(setTags(41, [5])).resolves.toBe('success')
+    expect(mockSetTags).toHaveBeenCalledWith({ transactionId: 41, tagIds: [5] })
+    await expect(setTags(41, [])).resolves.toBe('demo')
+  })
+
+  it('passes transfer destinations through and maps a transfer change to its result', async () => {
+    mockUseTransactions.mockReturnValue({ isInvalidAccountId: false, isAccessTransition: false, isLoading: true, refetch: jest.fn() })
+    mockMutateTransferAsync.mockReset()
+    mockMutateTransferAsync.mockResolvedValueOnce(undefined).mockRejectedValueOnce(new ApiError('demo-forbidden'))
+    await render(<TransactionsRoute />)
+    expect(mockCapturedProps.transferDestinations).toEqual({ accounts: [], portfolios: [{ key: 3, name: 'ETFs' }], goals: [] })
+    const setTransfer = mockCapturedProps.onSetTransfer as (draft: object) => Promise<string>
+    const draft = { transactionId: 41, direction: 'debit', transfer: true, destination: { type: 'portfolio', key: 3 } }
+    await expect(setTransfer(draft)).resolves.toBe('success')
+    expect(mockMutateTransferAsync).toHaveBeenCalledWith(draft)
+    await expect(setTransfer(draft)).resolves.toBe('demo')
   })
 })

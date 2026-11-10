@@ -14,11 +14,14 @@
 
 /** Mirrors `ERROR_CODE` in the API's `utils/errors.ts`. */
 export const API_ERROR_CODE = {
+  ACCOUNT_RECONNECT_EMAIL_UNVERIFIED: "account_reconnect_email_unverified",
+  AI_ALLOWANCE_EXHAUSTED: "ai_allowance_exhausted",
   ASSISTANT_NOT_ENABLED: "assistant_not_enabled",
   BAD_REQUEST: "bad_request",
   BANK_CREDENTIAL_INVALID: "bank_credential_invalid",
   CONFLICT: "conflict",
   DEMO_READ_ONLY: "demo_read_only",
+  EMAIL_VERIFICATION_REQUIRED: "email_verification_required",
   FORBIDDEN: "forbidden",
   HOUSEHOLD_FULL: "household_full",
   HOUSEHOLD_OWNER_REQUIRED: "household_owner_required",
@@ -34,6 +37,16 @@ export const API_ERROR_CODE = {
    * it for that reason; normalising it needs a coordinated release.
    */
   RATE_LIMITED: "RATE_LIMITED",
+  RULE_ORDER_STALE: "rule_order_stale",
+  /** The household already has rules being applied to its transactions (409). */
+  RULE_APPLY_IN_PROGRESS: "rule_apply_in_progress",
+  /** The split's lines do not add up, mix signs, include a zero or are fewer than two (400). */
+  SPLIT_INVALID: "split_invalid",
+  TAG_NAME_TAKEN: "tag_name_taken",
+  /** A loan repayment already splits principal from interest, so it cannot be split (409). */
+  TRANSACTION_HAS_LOAN_REPAYMENT: "transaction_has_loan_repayment",
+  /** A split transaction cannot be linked as a loan repayment until its split is removed (409). */
+  TRANSACTION_IS_SPLIT: "transaction_is_split",
   UNAUTHORIZED: "unauthorized",
   VALIDATION_FAILED: "validation_failed",
 } as const;
@@ -82,6 +95,37 @@ export function isDemoReadOnlyError(error: unknown): boolean {
   return (
     response?.status === 403 && hasCode(error, API_ERROR_CODE.DEMO_READ_ONLY)
   );
+}
+
+/**
+ * The code on an axios error, or on the plain `Error` the AI SDK's chat
+ * transport throws, whose message is the response body.
+ */
+function aiRouteErrorCode(error: unknown): string | undefined {
+  const code = getApiErrorCode(error);
+  if (code || !(error instanceof Error)) return code;
+  try {
+    const body = JSON.parse(error.message) as { code?: unknown };
+    return typeof body.code === "string" ? body.code : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+/**
+ * An AI feature on a server that keeps AI to verified accounts, from an account
+ * that has not followed its verification link yet. Offer to resend it.
+ */
+export function isEmailVerificationRequiredError(error: unknown): boolean {
+  return aiRouteErrorCode(error) === API_ERROR_CODE.EMAIL_VERIFICATION_REQUIRED;
+}
+
+/**
+ * The household used up today's allowance for an AI feature. It resets at
+ * midnight UTC, so say when instead of offering a retry.
+ */
+export function isAiAllowanceExhaustedError(error: unknown): boolean {
+  return aiRouteErrorCode(error) === API_ERROR_CODE.AI_ALLOWANCE_EXHAUSTED;
 }
 
 /** A household route a member reached but only the owner may use. */

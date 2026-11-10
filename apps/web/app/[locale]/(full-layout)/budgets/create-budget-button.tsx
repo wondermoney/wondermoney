@@ -13,9 +13,5 @@ export function CreateBudgetButton() {
     router.push("/budgets/wizard");
   };
 
-  return (
-    <Button onClick={handleCreateBudget} size="sm" className="gap-2">
-      {t("create-budget")}
-    </Button>
-  );
+  return <Button onClick={handleCreateBudget}>{t("create-budget")}</Button>;
 }

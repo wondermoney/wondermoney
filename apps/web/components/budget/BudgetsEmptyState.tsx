@@ -1,12 +1,13 @@
 "use client";
 
 import { Plus } from "lucide-react";
-import { useLocale, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
 
 import CategoryIcon from "@/components/ui/CategoryIcon";
 import { PreviewBadge } from "@/components/ui/PreviewBadge";
 import { Text } from "@/components/ui/Typography";
 import { getCategoryTranslationKey } from "@/lib/utils/categories";
+import { useFormatCurrency } from "@/lib/utils/useFormatCurrency";
 
 import { Button } from "../ui/button";
 
@@ -50,16 +51,11 @@ const BudgetsEmptyState: React.FC<BudgetsEmptyStateProps> = ({
   onCreateBudget,
 }) => {
   const t = useTranslations();
-  const locale = useLocale();
-
-  // The sample figures were interpolated raw (`€{category.spent}`), so the
-  // preview showed `€1200 / €1500` while every real balance in the product
-  // renders `€1,200.00`. Match the product.
-  const fmt = (value: number) =>
-    `€${value.toLocaleString(locale, {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    })}`;
+  // The same formatter as every real balance, so the sample reads `€1,200.00`
+  // in English and `1200,00 €` in Portuguese rather than an English `€` prefix
+  // glued to every locale's digits.
+  const formatCurrency = useFormatCurrency();
+  const fmt = (value: number) => formatCurrency(value, "EUR");
 
   return (
     <div className="flex flex-col gap-6">

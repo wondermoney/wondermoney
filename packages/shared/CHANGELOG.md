@@ -12,13 +12,13 @@
 
 ### Minor Changes
 
-- Add getScreener to the Eodhd SDK wrapper, delegating to the underlying client's stock screener endpoint and unwrapping the response to its data array (RAD-459)
+- Add getScreener to the Eodhd SDK wrapper, delegating to the underlying client's stock screener endpoint and unwrapping the response to its data array
 
 ## 8.1.0
 
 ### Minor Changes
 
-- Add Eodhd SDK wrapper for the EODHD financial data provider migration (RAD-449)
+- Add Eodhd SDK wrapper for the EODHD financial data provider migration
 
 ## 8.0.5
 

@@ -15,8 +15,11 @@ export function BudgetVsActualRoute() {
   const filterState = useReportFilters()
   const filterOptions = useReportFilterOptions()
   const query = useBudgetVsActualReport(filterState.filters)
-  const currencyCode = useReportsCurrency()
+  const viewerCurrency = useReportsCurrency()
   const { state: exportState, exportCsv } = useReportExport('budget-vs-actual', filterState.filters, new Date().toISOString().slice(0, 10))
+
+  // The budgeted amounts are in the budget's currency, and so is the actual spending the API sends.
+  const currencyCode = query.data?.completeness?.currencyCode ?? viewerCurrency
 
   let state: BudgetVsActualViewState
   if (query.isAccessTransition) state = { status: 'access-transition' }

@@ -386,7 +386,7 @@ const PortfolioTransactionImportModal: React.FC<
   const fileName = selectedFile?.name ?? activeFileName;
   const triggerMode = getPortfolioTransactionImportTriggerMode(trigger);
   const defaultTrigger = (
-    <Button className="gap-2" size="sm">
+    <Button>
       <Download className="size-4" />
       {t("import-transactions")}
     </Button>

@@ -30,6 +30,7 @@ export interface EnableBankingClient {
   exchangeSession(code: string): Promise<EnableBankingExchangeSessionResult>;
   getAccountBalances(accountId: string): Promise<unknown>;
   getAccountTransactions(accountId: string, params: EnableBankingTransactionsParams): Promise<unknown>;
+  getSession(sessionId: string): Promise<EnableBankingSessionResult>;
   listInstitutions(params: { country?: string }): Promise<EnableBankingInstitution[]>;
   startAuthorization(params: EnableBankingStartAuthorizationParams): Promise<EnableBankingStartAuthorizationResult>;
 }
@@ -46,6 +47,16 @@ export interface EnableBankingInstitution {
   logo?: string;
   maximum_consent_validity?: number;
   name: string;
+}
+
+/**
+ * `GET /sessions/{session_id}`. `status` is Enable Banking's `SessionStatus`: `AUTHORIZED` while the
+ * consent holds, otherwise one of `CANCELLED`, `CLOSED`, `EXPIRED`, `INVALID`,
+ * `PENDING_AUTHORIZATION`, `RETURNED_FROM_BANK` or `REVOKED`.
+ */
+export interface EnableBankingSessionResult {
+  status: string;
+  validUntil?: string;
 }
 
 export interface EnableBankingStartAuthorizationParams {
@@ -127,6 +138,14 @@ export function createEnableBankingClient({ applicationId, privateKeyPem }: Crea
       return data;
     },
 
+    async getSession(sessionId) {
+      const headers = await authHeaders();
+      const { data } = await request<{ access?: { valid_until?: string }; status: string }>('getSession', () =>
+        httpClient.get(`/sessions/${encodeURIComponent(sessionId)}`, { headers }),
+      );
+      return { status: data.status, validUntil: data.access?.valid_until };
+    },
+
     async listInstitutions(params) {
       const headers = await authHeaders();
       const { data } = await request<{ aspsps: EnableBankingInstitution[] }>('listInstitutions', () =>
@@ -189,11 +208,19 @@ async function request<T = unknown>(operation: string, call: () => Promise<{ dat
     if (status === 403) throw new ForbiddenError('Enable Banking rejected the request as forbidden');
     if (status === 404) throw new NotFoundError('Enable Banking resource not found');
     if (status === 429) {
-      const retryAfterHeader = error.response.headers['retry-after'];
-      const retryAfter = typeof retryAfterHeader === 'string' ? Number(retryAfterHeader) : undefined;
-      throw new TooManyRequestsError('Enable Banking rate limit reached', Number.isFinite(retryAfter) ? retryAfter : undefined);
+      throw new TooManyRequestsError('Enable Banking rate limit reached', parseRetryAfter(error.response.headers['retry-after']));
     }
     if (status >= 500) throw new BadGatewayError('Enable Banking is temporarily unavailable');
     throw new InternalServerError(`Unexpected Enable Banking response (${status})`);
   }
+}
+
+/** `Retry-After` is either delay-seconds or an HTTP-date (RFC 9110, section 10.2.3). */
+function parseRetryAfter(header: unknown): number | undefined {
+  if (typeof header !== 'string' || header.trim() === '') return undefined;
+  const seconds = Number(header);
+  if (Number.isFinite(seconds)) return seconds >= 0 ? seconds : undefined;
+  const at = Date.parse(header);
+  if (Number.isNaN(at)) return undefined;
+  return Math.max(0, Math.ceil((at - Date.now()) / 1000));
 }

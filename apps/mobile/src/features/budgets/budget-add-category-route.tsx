@@ -1,5 +1,5 @@
-import { useLocalSearchParams, useNavigation, useRouter } from 'expo-router'
-import { useEffect, useRef, useState } from 'react'
+import { useLocalSearchParams, usePreventRemove, useRouter } from 'expo-router'
+import { useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { useCategories } from '@/features/categories/use-categories'
@@ -24,11 +24,10 @@ export function BudgetAddCategoryRoute() {
   const mutation = useAddBudgetCategory()
   const { t, i18n } = useTranslation()
   const router = useRouter()
-  const navigation = useNavigation()
   const [failure, setFailure] = useState<AddBudgetCategoryFailure | null>(null)
   const [reconciliation, setReconciliation] = useState<Reconciliation>(null)
   const submissionGate = useRef(false)
-  useEffect(() => navigation.addListener('beforeRemove', (event) => { if (mutation.isPending) event.preventDefault() }), [mutation.isPending, navigation])
+  usePreventRemove(mutation.isPending)
   const represented = new Set(budget.data?.budget.categories.map((row) => row.category_key) ?? [])
   const tree = categories.data ? mapCategories(categories.data, t, i18n.resolvedLanguage ?? i18n.language ?? 'en') : []
   const leaves = availableLeafCategories(tree, represented)

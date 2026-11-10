@@ -1,5 +1,5 @@
 import { useQueryClient } from '@tanstack/react-query'
-import { type Href, useLocalSearchParams, useNavigation, useRouter } from 'expo-router'
+import { type Href, useLocalSearchParams, usePreventRemove, useRouter } from 'expo-router'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
@@ -9,6 +9,7 @@ import { mapAccounts } from '@/features/accounts/accounts-view-model'
 import { useAccounts } from '@/features/accounts/use-accounts'
 import { mapCategories } from '@/features/categories/categories-view-model'
 import { useCategories } from '@/features/categories/use-categories'
+import { toTagsState, useCreateTagForPicker, useTags } from '@/features/tags/use-tags'
 import { ApiError } from '@/lib/api/errors'
 
 import type { FrozenManualTransaction } from './manual-transaction-contract'
@@ -25,6 +26,8 @@ export function ManualTransactionRoute() {
   const initialAccountId = parseAccountId(params.accountId)
   const accounts = useAccounts()
   const categories = useCategories()
+  const tagsQuery = useTags()
+  const createTag = useCreateTagForPicker()
   const [merchantSearch, setMerchantSearch] = useState('')
   const metadata = useManualTransactionMetadata(merchantSearch)
   const mutation = useCreateManualTransaction()
@@ -32,12 +35,9 @@ export function ManualTransactionRoute() {
   const queryClient = useQueryClient()
   const [outcome, setOutcome] = useState<ManualTransactionFailure | null>(null)
   const router = useRouter()
-  const navigation = useNavigation()
   const { t, i18n } = useTranslation()
 
-  useEffect(() => navigation.addListener('beforeRemove', (event) => {
-    if (mutation.isPending) event.preventDefault()
-  }), [mutation.isPending, navigation])
+  usePreventRemove(mutation.isPending)
 
   useEffect(() => {
     const errors = [metadata.types.error, metadata.currencies.error, metadata.merchants.error]
@@ -59,6 +59,8 @@ export function ManualTransactionRoute() {
   return <ManualTransactionScreen
     accounts={accounts.data ? mapAccounts(accounts.data) : []}
     categories={categories.data ? mapCategories(categories.data, t, locale) : []}
+    tags={toTagsState(tagsQuery)}
+    onCreateTag={createTag}
     types={metadata.types.data?.transactionTypes ?? []}
     currencies={metadata.currencies.data?.currencies ?? []}
     merchants={metadata.merchants.data?.transactionMerchants ?? []}

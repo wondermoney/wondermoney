@@ -1,8 +1,9 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { useMemo } from "react";
+import { type ReactNode, useMemo } from "react";
 
+import { PageHeader } from "@/components/layout/PageHeader";
 import { Button } from "@/components/ui/button";
 import { Heading, Text } from "@/components/ui/Typography";
 import { Link } from "@/i18n/navigation";
@@ -47,78 +48,88 @@ export default function TransactionReviewInbox({
 
   if (buckets.totalUnreviewed === 0) return <TransactionReviewEmptyState />;
 
+  const figure = (chunks: ReactNode) => (
+    <span className="text-foreground block font-mono text-xl font-semibold tabular-nums">
+      {chunks}
+    </span>
+  );
+
   return (
-    <div className="flex flex-col gap-6">
-      <div className="bg-card flex flex-col gap-4 rounded-lg border p-5 md:flex-row md:items-start md:justify-between">
-        <div className="space-y-1">
-          <Heading variant="h2">{t("transaction-review-title")}</Heading>
-          <Text className="text-muted-foreground max-w-2xl">
-            {t("transaction-review-description")}
-          </Text>
-          <div className="text-muted-foreground flex flex-wrap items-center gap-2 text-sm">
-            <span>
-              {t("transaction-review-left", { count: buckets.totalUnreviewed })}
-            </span>
-            <span aria-hidden="true" className="bg-border h-3 w-px shrink-0" />
-            <span>
-              {t("transaction-review-needs-category-count", {
-                count: buckets.needsCategory.length,
-              })}
-            </span>
-            <span aria-hidden="true" className="bg-border h-3 w-px shrink-0" />
-            <span>
-              {t("transaction-review-suggested-count", {
-                count: buckets.suggestedCategory.length,
-              })}
-            </span>
-          </div>
-        </div>
-        <Button asChild variant="outline" size="sm">
-          <Link href="/accounts/transactions">{t("view-all")}</Link>
-        </Button>
+    <div className="flex flex-col gap-8">
+      <div className="flex flex-col gap-6">
+        <PageHeader
+          title={t("transaction-review-title")}
+          description={t("transaction-review-description")}
+          actions={
+            <Button asChild variant="secondary">
+              <Link href="/accounts/transactions">{t("view-all")}</Link>
+            </Button>
+          }
+        />
+        <ul className="text-muted-foreground flex flex-wrap gap-x-8 gap-y-4 text-sm">
+          <li>
+            {t.rich("transaction-review-left", {
+              count: buckets.totalUnreviewed,
+              figure,
+            })}
+          </li>
+          <li>
+            {t.rich("transaction-review-needs-category-count", {
+              count: buckets.needsCategory.length,
+              figure,
+            })}
+          </li>
+          <li>
+            {t.rich("transaction-review-suggested-count", {
+              count: buckets.suggestedCategory.length,
+              figure,
+            })}
+          </li>
+        </ul>
       </div>
 
       {buckets.needsCategory.length > 0 && (
-        <section className="space-y-3">
-          <div>
-            <Heading variant="h3">
+        <section className="flex flex-col gap-4">
+          <div className="space-y-1">
+            <Heading variant="h4" as="h2">
               {t("transaction-review-needs-category-title")}
             </Heading>
-            <Text className="text-muted-foreground">
+            <Text className="text-muted-foreground text-sm">
               {t("transaction-review-needs-category-description")}
             </Text>
           </div>
-          <div className="space-y-2">
+          <ul className="divide-border divide-y rounded-lg border">
             {buckets.needsCategory.map((transaction) => (
-              <TransactionReviewRow
-                key={transaction.transactionKey}
-                categories={categories}
-                isPending={isTransactionPending(transaction)}
-                mode="needs-category"
-                onCategorize={(categoryId) =>
-                  categorizeTransactions([transaction], categoryId)
-                }
-                transaction={transaction}
-              />
+              <li key={transaction.transactionKey}>
+                <TransactionReviewRow
+                  categories={categories}
+                  isPending={isTransactionPending(transaction)}
+                  mode="needs-category"
+                  onCategorize={(categoryId) =>
+                    categorizeTransactions([transaction], categoryId)
+                  }
+                  transaction={transaction}
+                />
+              </li>
             ))}
-          </div>
+          </ul>
         </section>
       )}
 
       {buckets.suggestedCategory.length > 0 && (
-        <section className="space-y-3">
-          <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
-            <div>
-              <Heading variant="h3">
+        <section className="flex flex-col gap-4">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+            <div className="space-y-1">
+              <Heading variant="h4" as="h2">
                 {t("transaction-review-suggested-title")}
               </Heading>
-              <Text className="text-muted-foreground">
+              <Text className="text-muted-foreground text-sm">
                 {t("transaction-review-suggested-description")}
               </Text>
             </div>
             <Button
               type="button"
-              size="sm"
+              className="shrink-0"
               onClick={() => approveTransactions(buckets.suggestedCategory)}
               disabled={hasPendingSuggested}
               loading={hasPendingSuggested}
@@ -126,30 +137,35 @@ export default function TransactionReviewInbox({
               {t("transaction-review-approve-all")}
             </Button>
           </div>
-          <div className="space-y-2">
-            {suggestedGroups.map((group) => (
-              <div key={group.key} className="space-y-2">
-                {group.transactions.length > 1 && (
-                  <div className="text-muted-foreground px-1 text-sm">
-                    {t("transaction-review-group-summary", {
-                      label: group.label,
-                      count: group.transactions.length,
-                    })}
-                  </div>
-                )}
-                <div className="space-y-2">
+          {/* One list for the section. A merchant with several transactions
+              gets a header row carrying its count and a batch approve, so the
+              action sits beside what it acts on. */}
+          <ul className="divide-border divide-y rounded-lg border">
+            {suggestedGroups.map((group) => {
+              const groupPending = group.transactions.some((transaction) =>
+                isTransactionPending(transaction),
+              );
+              return (
+                <li key={group.key}>
                   {group.transactions.length > 1 && (
-                    <div className="flex justify-end px-1">
+                    <div className="bg-muted flex flex-wrap items-center justify-between gap-x-4 gap-y-2 px-4 py-2">
+                      <div className="flex min-w-0 flex-1 basis-40 items-baseline gap-2">
+                        <h3 className="text-foreground truncate text-sm font-medium">
+                          {group.label}
+                        </h3>
+                        <span className="text-muted-foreground shrink-0 text-sm">
+                          {t("transaction-review-group-summary", {
+                            count: group.transactions.length,
+                          })}
+                        </span>
+                      </div>
                       <Button
                         type="button"
                         size="sm"
-                        variant="outline"
-                        disabled={group.transactions.some((transaction) =>
-                          isTransactionPending(transaction),
-                        )}
-                        loading={group.transactions.some((transaction) =>
-                          isTransactionPending(transaction),
-                        )}
+                        variant="secondary"
+                        className="shrink-0"
+                        disabled={groupPending}
+                        loading={groupPending}
                         onClick={() => approveTransactions(group.transactions)}
                       >
                         {t("transaction-review-approve-group", {
@@ -158,23 +174,26 @@ export default function TransactionReviewInbox({
                       </Button>
                     </div>
                   )}
-                  {group.transactions.map((transaction) => (
-                    <TransactionReviewRow
-                      key={transaction.transactionKey}
-                      categories={categories}
-                      isPending={isTransactionPending(transaction)}
-                      mode="suggested"
-                      onApprove={() => approveTransactions([transaction])}
-                      onCategorize={(categoryId) =>
-                        categorizeTransactions([transaction], categoryId)
-                      }
-                      transaction={transaction}
-                    />
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
+                  <ul className="divide-border divide-y">
+                    {group.transactions.map((transaction) => (
+                      <li key={transaction.transactionKey}>
+                        <TransactionReviewRow
+                          categories={categories}
+                          isPending={isTransactionPending(transaction)}
+                          mode="suggested"
+                          onApprove={() => approveTransactions([transaction])}
+                          onCategorize={(categoryId) =>
+                            categorizeTransactions([transaction], categoryId)
+                          }
+                          transaction={transaction}
+                        />
+                      </li>
+                    ))}
+                  </ul>
+                </li>
+              );
+            })}
+          </ul>
         </section>
       )}
     </div>

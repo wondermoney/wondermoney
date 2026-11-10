@@ -6,6 +6,7 @@ import { useMemo } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import Text from "@/components/ui/Typography/Text";
 import type { HoldingPositionSummary } from "@/lib/portfolio/holding-detail-summary";
+import { useFormatQuantity } from "@/lib/privacy/useFormatQuantity";
 import { cn } from "@/lib/utils";
 import { getDeltaClassName } from "@/lib/utils/formatCurrency";
 import { useFormatCurrency } from "@/lib/utils/useFormatCurrency";
@@ -24,8 +25,8 @@ export function HoldingPositionHeader({
   // resolves to the browser's or the server's). Memoised per locale rather than
   // rebuilt each render.
   const locale = useLocale();
-  const { formatQuantity, formatPercentPoint } = useMemo(() => {
-    const quantity = new Intl.NumberFormat(locale, { maximumFractionDigits: 6 });
+  const formatQuantity = useFormatQuantity();
+  const { formatPercentPoint } = useMemo(() => {
     const percent = new Intl.NumberFormat(locale, {
       minimumFractionDigits: 1,
       maximumFractionDigits: 1,
@@ -38,7 +39,6 @@ export function HoldingPositionHeader({
     return {
       formatPercentPoint: (value: number, { signed = false } = {}) =>
         `${(signed ? signedPercent : percent).format(value)}%`,
-      formatQuantity: (value: number) => quantity.format(value),
     };
   }, [locale]);
 
@@ -65,13 +65,11 @@ export function HoldingPositionHeader({
     <Card>
       <CardContent className="space-y-4 p-4 md:p-6">
         <div className="flex items-start gap-3">
-          {summary.logoUrl ? (
-            <FinancialAssetLogo
-              symbol={summary.symbol}
-              logoUrl={summary.logoUrl}
-              priority
-            />
-          ) : null}
+          <FinancialAssetLogo
+            symbol={summary.symbol}
+            logoUrl={summary.logoUrl}
+            priority
+          />
           <div className="space-y-1">
             <div className="font-mono text-xl leading-none font-semibold">
               {summary.symbol}
@@ -135,7 +133,7 @@ export function HoldingPositionHeader({
               {t("quantity")}
             </Text>
             <div className="text-foreground mt-1 font-mono text-lg font-semibold">
-              {formatQuantity(summary.quantity)}
+              {formatQuantity(summary.quantity, { maximumFractionDigits: 6 })}
             </div>
           </div>
         </div>

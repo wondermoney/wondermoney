@@ -4,7 +4,7 @@
   },
   "build": {
     "base": {
-      "corepack": true
+      "pnpm": "12.6.0"
     },
     "development": {
       "extends": "base",
@@ -42,18 +42,18 @@
   },
   "submit": {
     "production": {
-      "ios": {
-        "ascAppId": "6800748899",
-        "appleTeamId": "4ZVMAV8GNL",
-        "ascApiKeyPath": "./secrets/AuthKey_C74H8LNL7H.p8",
-        "ascApiKeyId": "C74H8LNL7H",
-        "ascApiKeyIssuerId": "fe654225-7930-4c27-8cc8-eb120055c292"
-      },
       "android": {
         "serviceAccountKeyPath": "./secrets/play-service-account.json",
         "track": "production",
         "releaseStatus": "inProgress",
         "rollout": 0.2
+      }
+    },
+    "internal": {
+      "android": {
+        "serviceAccountKeyPath": "./secrets/play-service-account.json",
+        "track": "internal",
+        "releaseStatus": "completed"
       }
     }
   }

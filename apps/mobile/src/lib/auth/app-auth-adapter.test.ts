@@ -21,6 +21,7 @@ const createPort = (overrides: Partial<{
   signUpEmail: jest.Mock
   signOut: jest.Mock
   changePassword: jest.Mock
+  sendVerificationEmail: jest.Mock
   twoFactorEnable: jest.Mock
   twoFactorDisable: jest.Mock
   twoFactorVerifyTotp: jest.Mock
@@ -36,6 +37,7 @@ const createPort = (overrides: Partial<{
     signUp: { email: overrides.signUpEmail ?? jest.fn() },
     signOut: overrides.signOut ?? jest.fn().mockResolvedValue({ data: {}, error: null }),
     changePassword: overrides.changePassword ?? jest.fn(),
+    sendVerificationEmail: overrides.sendVerificationEmail ?? jest.fn(),
     twoFactor: {
       enable: overrides.twoFactorEnable ?? jest.fn(),
       disable: overrides.twoFactorDisable ?? jest.fn().mockResolvedValue({ data: { status: true }, error: null }),
@@ -235,6 +237,19 @@ describe('app auth adapter — password change and classification', () => {
     await expect(adapter.changePassword('a@b.co', 'old', 'short')).resolves.toEqual({ status: 'weak-password' })
   })
 
+  it('maps send-verification-email outcomes and passes only the email', async () => {
+    const sendVerificationEmail = jest.fn()
+      .mockResolvedValueOnce({ data: { status: true }, error: null })
+      .mockResolvedValueOnce({ data: null, error: errorLike(429) })
+      .mockRejectedValueOnce(new Error('offline'))
+    const adapter = createAppAuthAdapter(createPort({ sendVerificationEmail }))
+
+    await expect(adapter.sendVerificationEmail('a@b.co')).resolves.toEqual({ status: 'sent' })
+    expect(sendVerificationEmail).toHaveBeenCalledWith({ email: 'a@b.co' })
+    await expect(adapter.sendVerificationEmail('a@b.co')).resolves.toEqual({ status: 'unavailable' })
+    await expect(adapter.sendVerificationEmail('a@b.co')).resolves.toEqual({ status: 'unavailable' })
+  })
+
   it('treats only 401/403 as an invalid session, everything else as transient', () => {
     const adapter = createAppAuthAdapter(createPort())
 
@@ -253,5 +268,80 @@ describe('app auth adapter — password change and classification', () => {
     await adapter.signInWithPassword('a@b.co', 'secret')
     await adapter.signOutLocal()
     await expect(adapter.getState()).resolves.toEqual({ status: 'signed-out' })
+  })
+})
+
+/**
+ * Mirrors better-auth's `$store`: `listen` is a nanostores `subscribe`, which
+ * calls the listener once, synchronously, before any signal fires.
+ */
+const createSignalStore = () => {
+  const listeners: (() => void)[] = []
+  return {
+    notify: (_signal: string) => { listeners.forEach((listener) => listener()) },
+    listen: (_signal: string, listener: () => void) => {
+      listeners.push(listener)
+      listener()
+    },
+  }
+}
+
+const flush = () => new Promise((resolve) => setTimeout(resolve, 0))
+
+describe('app auth adapter — session signal', () => {
+  it('ignores the synchronous call nanostores makes on subscribe', async () => {
+    const getSession = jest.fn().mockResolvedValue({ data: sessionData('a'), error: null })
+    const port = createPort({ getSession })
+    port.$store = createSignalStore()
+    const callback = jest.fn()
+
+    createAppAuthAdapter(port).onAuthStateChange(callback)
+    await flush()
+
+    expect(getSession).not.toHaveBeenCalled()
+    expect(callback).not.toHaveBeenCalled()
+  })
+
+  it('reports a session change when the signal fires', async () => {
+    const getSession = jest.fn().mockResolvedValue({ data: sessionData('a'), error: null })
+    const store = createSignalStore()
+    const port = createPort({ getSession })
+    port.$store = store
+    const callback = jest.fn()
+
+    createAppAuthAdapter(port).onAuthStateChange(callback)
+    store.notify('$sessionSignal')
+    await flush()
+
+    expect(callback).toHaveBeenCalledWith('SESSION_CHANGED', { user: { id: 'a' }, accessToken: 'token-a' })
+  })
+
+  it('never reports a failed session lookup as signed out', async () => {
+    const getSession = jest.fn().mockResolvedValue({ data: null, error: { status: 0 } })
+    const store = createSignalStore()
+    const port = createPort({ getSession })
+    port.$store = store
+    const callback = jest.fn()
+
+    createAppAuthAdapter(port).onAuthStateChange(callback)
+    store.notify('$sessionSignal')
+    await flush()
+
+    expect(getSession).toHaveBeenCalledTimes(1)
+    expect(callback).not.toHaveBeenCalled()
+  })
+
+  it('still reports a confirmed sign-out (no session, no error)', async () => {
+    const getSession = jest.fn().mockResolvedValue({ data: null, error: null })
+    const store = createSignalStore()
+    const port = createPort({ getSession })
+    port.$store = store
+    const callback = jest.fn()
+
+    createAppAuthAdapter(port).onAuthStateChange(callback)
+    store.notify('$sessionSignal')
+    await flush()
+
+    expect(callback).toHaveBeenCalledWith('SESSION_CHANGED', null)
   })
 })

@@ -34,6 +34,7 @@ import type {
   MfaTotpEnrollOutcome,
   MfaUnenrollOutcome,
   MfaVerifyOutcome,
+  SendVerificationEmailOutcome,
   SignInOutcome,
   SignUpOutcome,
 } from '@/lib/auth/app-auth'
@@ -89,6 +90,8 @@ export type ProductRuntimeContextValue = Readonly<{
   mfaListFactors: () => Promise<MfaListFactorsOutcome>
   /** Thin proxy to the injected auth adapter's password-change operation; usable in any route state. */
   changePassword: (email: string, currentPassword: string, newPassword: string) => Promise<ChangePasswordOutcome>
+  /** Thin proxy to the injected auth adapter's resend-verification-email operation. */
+  sendVerificationEmail: (email: string) => Promise<SendVerificationEmailOutcome>
   /**
    * Public, pre-signup household-invite validation. Calls the raw transport
    * directly — there is no session yet to authenticate an ApiClient with. Usable in any
@@ -119,6 +122,15 @@ async function cancelThenClearQueryClient(queryClient: QueryClient): Promise<voi
       // Unmount cleanup is fail-closed and must never create an unhandled rejection.
     }
   }
+}
+
+/**
+ * The runtime when one is mounted, `null` otherwise. For shell chrome (the top
+ * bar's person menu) that renders above every screen, including in tests and
+ * states where no runtime provider exists; screens use `useProductRuntime`.
+ */
+export function useOptionalProductRuntime() {
+  return useContext(ProductRuntimeContext)
 }
 
 export function useProductRuntime() {
@@ -273,6 +285,16 @@ export function ProductRuntimeProvider({
     // including no sign-out on failure — or a stale result could resurrect access after
     // a sign-out/clear, or clobber a fresher run.
     if (startVersion !== activationVersion.current || epoch !== epochCounter.current) return
+    if (outcome === 'unavailable') {
+      // Transient (offline, server down): the stored session is still valid, so it is
+      // kept. Signing out here wiped a good session on a cold start without network.
+      // The next launch, or signing in again, retries provisioning.
+      runtimeRef.current = null
+      setRuntime(null)
+      setActivationError('provision-failed')
+      setRouteState({ status: 'signed-out' })
+      return
+    }
     if (outcome === 'failed') {
       await auth.signOutLocal().catch(() => undefined)
       runtimeRef.current = null
@@ -392,6 +414,7 @@ export function ProductRuntimeProvider({
     (email: string, currentPassword: string, newPassword: string) => auth.changePassword(email, currentPassword, newPassword),
     [auth],
   )
+  const sendVerificationEmail = useCallback((email: string) => auth.sendVerificationEmail(email), [auth])
   const validateHouseholdInvite = useCallback(
     (token: string) => validateHouseholdInviteToken(transport, token),
     [transport],
@@ -434,6 +457,7 @@ export function ProductRuntimeProvider({
     mfaUnenroll,
     mfaListFactors,
     changePassword,
+    sendVerificationEmail,
     completeMfaVerification,
     validateHouseholdInvite,
   }), [
@@ -452,6 +476,7 @@ export function ProductRuntimeProvider({
     routeState,
     runSignOut,
     runtime,
+    sendVerificationEmail,
     signInWithIdToken,
     signInWithPassword,
     signUp,

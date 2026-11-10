@@ -29,7 +29,7 @@ export function PageHeader({
     >
       <div className="flex min-w-0 flex-col gap-2">
         <div className="flex flex-wrap items-center gap-3">
-          <h1 className="text-foreground text-xl font-semibold tracking-tight">
+          <h1 className="text-foreground text-2xl font-semibold tracking-tight lg:text-3xl">
             {title}
           </h1>
           {badge}

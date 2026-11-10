@@ -11,13 +11,13 @@ import { reportsQuerySchema } from '@validators/reports';
 export async function getSpendingByCategoryReport(req: Request, res: Response) {
   if (!req.user || !req.tenant) throw new Error('User not found');
   const { query } = await zParse(reportsQuerySchema, req);
-  const data = await getSpendingByCategoryReportData({ filters: query, tenant: req.tenant, user: req.user });
-  return res.json({ data, filters: query, generatedAt: new Date().toISOString() });
+  const { completeness, data } = await getSpendingByCategoryReportData({ filters: query, tenant: req.tenant, user: req.user });
+  return res.json({ completeness, data, filters: query, generatedAt: new Date().toISOString() });
 }
 
 export async function getSpendingByCategoryReportCsv(req: Request, res: Response) {
   if (!req.user || !req.tenant) throw new Error('User not found');
   const { query } = await zParse(reportsQuerySchema, req);
-  const data = await getSpendingByCategoryReportData({ filters: query, tenant: req.tenant, user: req.user });
+  const { data } = await getSpendingByCategoryReportData({ filters: query, tenant: req.tenant, user: req.user });
   return sendCsv(res, 'spending-by-category.csv', buildSpendingByCategoryCsv(data));
 }

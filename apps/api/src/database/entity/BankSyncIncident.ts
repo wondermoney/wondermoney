@@ -124,6 +124,10 @@ export class BankSyncIncident extends Base {
   @Enum(() => BankSyncResult)
   result!: BankSyncResult;
 
+  /** The provider's `Retry-After`, in seconds, from the latest rate-limited attempt. */
+  @Property({ nullable: true })
+  retryAfterSeconds?: number;
+
   @Property({ columnType: 'text' })
   rolloutMode!: BankSyncRolloutMode;
 

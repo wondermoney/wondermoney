@@ -83,6 +83,7 @@ export function RecurringRoute() {
   return <RecurringScreen
     state={state}
     onBack={() => router.replace('/accounts')}
+    onAddAccount={() => router.push('/accounts/create')}
     onRefresh={async () => {
       const [, itemResult, summaryResult] = await Promise.all([accounts.refetch(), items.refetch(), summary.refetch()])
       if (!itemResult.isError && !summaryResult.isError) setScanNeedsRefresh(false)

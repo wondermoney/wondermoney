@@ -5,6 +5,8 @@ import { FlatList, Pressable, StyleSheet, Text, TextInput, View } from 'react-na
 import { themeTokens, type Palette } from '@/theme/tokens'
 import { textStyles } from '@/theme/typography'
 
+import { Icon } from '@/components/ui/icon'
+
 import type { ReportFilterOption } from './report-filter-options'
 
 export type ReportMultiSelectPickerProps = Readonly<{
@@ -43,15 +45,16 @@ export function ReportMultiSelectPicker({ label, options, selected, onChange, pa
 
   return (
     <View style={styles.field}>
+      <Text allowFontScaling style={[styles.label, { color: palette.mutedForeground }]}>{label}</Text>
       <Pressable
         accessibilityRole="button"
         accessibilityLabel={`${label}, ${summary}`}
         accessibilityState={{ expanded }}
         onPress={() => setExpanded((value) => !value)}
-        style={[styles.summary, { borderColor: palette.border, backgroundColor: palette.card }]}
+        style={({ pressed }) => [styles.summary, { borderColor: palette.input, backgroundColor: palette.background }, pressed && { opacity: 0.72 }]}
       >
-        <Text allowFontScaling style={[styles.label, { color: palette.foreground }]}>{label}</Text>
-        <Text allowFontScaling style={[styles.summaryValue, { color: selected.length > 0 ? palette.foreground : palette.mutedForeground }]}>{summary}</Text>
+        <Text allowFontScaling numberOfLines={1} style={[styles.summaryValue, { color: selected.length > 0 ? palette.foreground : palette.mutedForeground }]}>{summary}</Text>
+        <Icon color={palette.mutedForeground} name={expanded ? 'chevron-up' : 'chevron-down'} />
       </Pressable>
 
       {expanded ? (
@@ -96,9 +99,9 @@ export function ReportMultiSelectPicker({ label, options, selected, onChange, pa
 
 const styles = StyleSheet.create({
   field: { gap: themeTokens.spacing[2] },
-  summary: { minHeight: themeTokens.touchTarget.minimum, borderWidth: 1, borderRadius: themeTokens.radius.md, paddingHorizontal: themeTokens.spacing[3], paddingVertical: themeTokens.spacing[2], gap: themeTokens.spacing[1] },
-  label: { ...textStyles.bodyStrong, fontWeight: '600' as const },
-  summaryValue: { ...textStyles.body },
+  summary: { minHeight: themeTokens.size.control, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: themeTokens.spacing[2], borderWidth: 1, borderRadius: themeTokens.radius.md, paddingHorizontal: themeTokens.spacing[3] },
+  label: { ...textStyles.label, fontWeight: '500' as const },
+  summaryValue: { ...textStyles.meta, flexShrink: 1 },
   panel: { borderWidth: 1, borderRadius: themeTokens.radius.md, padding: themeTokens.spacing[3], gap: themeTokens.spacing[2], maxHeight: 320 },
   clearRow: { minHeight: themeTokens.touchTarget.minimum, justifyContent: 'center' },
   clearLabel: { ...textStyles.bodyStrong, fontWeight: '600' as const },

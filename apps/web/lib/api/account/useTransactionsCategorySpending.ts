@@ -1,8 +1,9 @@
 import { useQuery, type UseQueryOptions } from "@tanstack/react-query";
 import type { AxiosInstance } from "axios";
-import { format } from "date-fns";
 
 import api from "../api";
+import type { AmountsCompleteness } from "../completeness";
+import { transactionDateRangeParams } from "../date-range";
 
 interface CategorySpending {
   categoryKey: number;
@@ -20,8 +21,11 @@ export interface CategoriesSpending extends CategorySpending {
   childCategories: CategorySpending[];
 }
 
+/** Amounts in the viewer's currency (`completeness.currencyCode`). */
 export interface GetTransactionsCategorySpendingResponse {
   categorySpending: CategoriesSpending[];
+  /** The expenses left out because no exchange rate converts them. */
+  completeness?: AmountsCompleteness;
 }
 
 export interface GetTransactionsCategorySpendingRequest {
@@ -37,14 +41,13 @@ export interface GetTransactionsCategorySpendingRequest {
  * @param params - Query parameters for filtering category spending
  * @param apiClient - Optional Axios instance. Defaults to client-side API.
  */
-async function getTransactionsCategorySpending(
+export async function getTransactionsCategorySpending(
   params: GetTransactionsCategorySpendingRequest = {},
   apiClient: AxiosInstance = api,
 ): Promise<GetTransactionsCategorySpendingResponse> {
   const _params = {
     ...params,
-    ...(params.fromDate && { fromDate: format(params.fromDate, "yyyy-MM-dd") }),
-    ...(params.toDate && { toDate: format(params.toDate, "yyyy-MM-dd") }),
+    ...transactionDateRangeParams(params),
   };
   const { data } = await apiClient.get<GetTransactionsCategorySpendingResponse>(
     "/v1/account/transaction/category-spending",

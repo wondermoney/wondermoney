@@ -19,15 +19,12 @@ import {
 } from "@/components/ui/Form";
 import { isDemoReadOnlyError } from "@/lib/api/errors";
 import useMoveGoalMoneyOut from "@/lib/api/goals/useMoveGoalMoneyOut";
-import { formatGoalCurrency } from "@/lib/goals/format";
+import { useFormatGoalCurrency } from "@/lib/goals/useFormatGoalCurrency";
+import { zLocaleNumber } from "@/lib/utils/number";
 
 import { Input } from "../ui/input";
 
-const schema = z.object({
-  amount: z.coerce.number<number>(),
-});
-
-type FormValues = z.infer<typeof schema>;
+type FormValues = { amount: string | number };
 
 export default function MoveGoalMoneyDialog({
   goalKey,
@@ -44,25 +41,30 @@ export default function MoveGoalMoneyDialog({
 }) {
   const t = useTranslations();
   const locale = useLocale();
+  const formatGoalCurrency = useFormatGoalCurrency();
   const mutation = useMoveGoalMoneyOut(goalKey);
-  const amountSchema = z.coerce
-    .number<number>()
-    .gt(0, { message: t("goals.amount-must-be-positive") })
-    .max(availableAmount, {
-      message: t("goals.move-money-insufficient", {
-        amount: formatGoalCurrency(availableAmount, currencyCode, locale),
+  // Typed in the user's locale ("1.234,56" for pt and es); unreadable input is
+  // an error, never another number.
+  const amountSchema = zLocaleNumber(locale, t("invalid-amount")).pipe(
+    z
+      .number()
+      .gt(0, { message: t("goals.amount-must-be-positive") })
+      .max(availableAmount, {
+        message: t("goals.move-money-insufficient", {
+          amount: formatGoalCurrency(availableAmount, currencyCode, locale),
+        }),
       }),
-    });
-  const form = useForm<FormValues>({
-    resolver: zodResolver(schema.extend({ amount: amountSchema })),
-    defaultValues: { amount: 0 },
+  );
+  const form = useForm<FormValues, undefined, { amount: number }>({
+    resolver: zodResolver(z.object({ amount: amountSchema })),
+    defaultValues: { amount: "" },
   });
 
   useEffect(() => {
-    if (isOpen) form.reset({ amount: 0 });
+    if (isOpen) form.reset({ amount: "" });
   }, [form, isOpen]);
 
-  const onSubmit = async (values: FormValues) => {
+  const onSubmit = async (values: { amount: number }) => {
     try {
       await mutation.mutateAsync(
         { amount: values.amount },
@@ -103,9 +105,6 @@ export default function MoveGoalMoneyDialog({
                   <Input
                     {...field}
                     className="font-mono tabular-nums"
-                    type="number"
-                    min="0"
-                    step="0.01"
                     inputMode="decimal"
                   />
                 </FormControl>

@@ -1,12 +1,17 @@
 "use client";
 
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useCallback } from "react";
 
-import { formatCurrencyForLocale } from "@/lib/utils/formatCurrency";
+import {
+  formatMoneyForDisplay,
+  formatMoneyForScreenReader,
+} from "@/lib/privacy/format-money";
+import { usePrivacyMode } from "@/lib/privacy/usePrivacyMode";
 
 /**
- * Money, formatted in the locale the reader chose.
+ * Money, formatted in the locale the reader chose, and masked while privacy
+ * mode is on.
  *
  * `formatCurrency` passes `undefined` for locale, and `Intl.NumberFormat(undefined)`
  * resolves to the *runtime's* locale: the browser's in a Client Component, the
@@ -17,20 +22,37 @@ import { formatCurrencyForLocale } from "@/lib/utils/formatCurrency";
  * mismatch that visibly rewrites figures after hydration.
  *
  * This returns a function with `formatCurrency`'s exact signature, bound to the
- * active locale. A component swaps the module import for this hook and every
- * existing call site keeps working untouched — the alternative was rewriting
- * ~110 call sites to thread a locale through by hand.
- *
- * Client Components only. A Server Component already receives `locale` as a
- * param and should call `formatCurrencyForLocale` with it directly.
+ * active locale and to privacy mode (`€•••••` while it is on). It is the string
+ * path every UI component takes; `<Amount>` is the markup path. Both mask, so a
+ * figure rendered through either one cannot leak.
  */
 export function useFormatCurrency() {
   const locale = useLocale();
+  const { hidden } = usePrivacyMode();
 
   return useCallback(
     (val: number, currency = "EUR", options?: Intl.NumberFormatOptions) =>
-      formatCurrencyForLocale(val, currency, locale, options),
-    [locale],
+      formatMoneyForDisplay(val, currency, locale, { ...options, hidden }),
+    [locale, hidden],
   );
 }
 
+/**
+ * The spoken form of a figure (`11,250.00 euros`), for an `sr-only` span or an
+ * `aria-label`. While privacy mode is on it reads "Hidden amount" instead.
+ */
+export function useFormatCurrencyForScreenReader() {
+  const locale = useLocale();
+  const { hidden } = usePrivacyMode();
+  const t = useTranslations("privacy-mode");
+
+  return useCallback(
+    (val: number, currency = "EUR", options?: Intl.NumberFormatOptions) =>
+      formatMoneyForScreenReader(val, currency, locale, {
+        ...options,
+        hidden,
+        hiddenLabel: hidden ? t("hidden-amount") : "",
+      }),
+    [locale, hidden, t],
+  );
+}

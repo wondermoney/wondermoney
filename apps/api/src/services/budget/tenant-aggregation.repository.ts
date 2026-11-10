@@ -1,11 +1,15 @@
 import type { EntityManager } from '@mikro-orm/postgresql';
+import Big from 'big.js';
 
 import { DI } from '@app/database/di';
+import { categoryLinesSql } from '@service/transaction/category-lines';
 import { notExpiredTransactionSql } from '@service/transaction/transaction-status';
 import { buildEffectiveAmountSql } from '@utils/account-amounts';
 
+import { money } from './aggregation-classifier';
 import type { InstantRange } from './aggregation-periods';
 import type { BudgetAllocationRow, TenantAggregationRepository, TransactionAggregationRow } from './aggregation-types';
+import { loadAvailableAmounts } from './budget-rollover.service';
 
 export class MikroOrmTenantAggregationRepository implements TenantAggregationRepository {
   private get em(): EntityManager {
@@ -29,8 +33,9 @@ export class MikroOrmTenantAggregationRepository implements TenantAggregationRep
     return (row as undefined | { present: number })?.present === 1;
   }
 
+  /** Each row with rollover on carries `amountAvailable`: its budget plus last month's rollover. */
   async loadBudgetAllocations(appuserKey: number, month: number, year: number): Promise<BudgetAllocationRow[]> {
-    return this.em.getConnection().execute<BudgetAllocationRow[]>(
+    const rows = await this.em.getConnection().execute<BudgetAllocationRow[]>(
       `select
          budget."budget_key" as "budgetKey", budget."name" as "budgetName",
          template."budget_template_category_key" as "budgetTemplateCategoryKey",
@@ -60,6 +65,11 @@ export class MikroOrmTenantAggregationRepository implements TenantAggregationRep
        order by budget."budget_key", template."budget_template_category_key", account."account_key"`,
       [appuserKey, year, month, appuserKey, appuserKey],
     );
+    const available = await loadAvailableAmounts(this.em, { budgetKeys: [...new Set(rows.map((row) => row.budgetKey))], month, viewerAppuserKey: appuserKey, year });
+    return rows.map((row) => {
+      const amount = available.get(row.budgetTemplateCategoryKey);
+      return amount === undefined ? row : { ...row, amountAvailable: money(new Big(amount)) };
+    });
   }
 
   async loadTransactions(appuserKey: number, tenantKey: number, range: InstantRange): Promise<TransactionAggregationRow[]> {
@@ -74,8 +84,11 @@ export class MikroOrmTenantAggregationRepository implements TenantAggregationRep
          account."account_key" as "accountKey", account."tenant_key" as "accountTenantKey",
          account."account_owner_appuser_key" as "accountOwnerAppuserKey", account."closed" as "accountClosed",
          (account."deleted_at" is not null) as "accountDeleted",
-         assignment."appuser_transaction_category_key" as "assignmentKey",
-         assignment."appuser_key" as "assignmentAppuserKey", (assignment."deleted_at" is not null) as "assignmentDeleted",
+         -- One row per category line: a split transaction's lines, or an unsplit one's assignment.
+         line."appuser_transaction_category_key" as "assignmentKey", line."transaction_split_key" as "splitKey",
+         line."appuser_settlement_amount"::text as "lineAmount",
+         line."appuser_key" as "assignmentAppuserKey", false as "assignmentDeleted",
+         line."counts_as_spending" as "countsAsSpending",
          category."category_key" as "categoryKey", category."name" as "categoryName",
          category."owner_appuser_key" as "categoryOwnerAppuserKey", (category."deleted_at" is not null) as "categoryDeleted",
          category."is_system_category" as "categorySystem",
@@ -89,8 +102,8 @@ export class MikroOrmTenantAggregationRepository implements TenantAggregationRep
        from "transaction" tx
        join "account" account on account."account_key" = tx."account_key"
        left join "transaction_type" transaction_type on transaction_type."transaction_type_key" = tx."transaction_type_key"
-       left join "appuser_transaction_category" assignment on assignment."transaction_key" = tx."transaction_key"
-       left join "category" category on category."category_key" = assignment."category_key"
+       left join ${categoryLinesSql(tenantKey)} line on line."transaction_key" = tx."transaction_key"
+       left join "category" category on category."category_key" = line."category_key"
        left join "category" parent on parent."category_key" = category."parent_category_category_key"
        left join "loan_repayment_link" loan on loan."transaction_key" = tx."transaction_key"
        where tx."appuser_key" = ? and tx."tenant_key" = ?
@@ -101,7 +114,7 @@ export class MikroOrmTenantAggregationRepository implements TenantAggregationRep
          and ${notExpiredTransactionSql('tx')}
          and account."tenant_key" = ? and account."account_owner_appuser_key" = ?
          and account."closed" = false and account."deleted_at" is null
-       order by tx."transaction_key", assignment."appuser_transaction_category_key", loan."loan_repayment_link_key"`,
+       order by tx."transaction_key", line."appuser_transaction_category_key", line."transaction_split_key", loan."loan_repayment_link_key"`,
       [appuserKey, tenantKey, range.start, range.end, tenantKey, appuserKey],
     );
     return rows.map((row) => ({ ...row, transactionDate: normalizeTransactionDate(row.transactionDate) }));

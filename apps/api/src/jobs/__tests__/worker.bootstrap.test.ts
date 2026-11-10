@@ -99,6 +99,9 @@ vi.mock('@app/jobs/job-instrumentation', async (importOriginal) => {
 vi.mock('@service/operations/background-operation.service', () => ({
   default: { claimJobStart: claimJobStartMock, finishJob: finishJobMock },
 }));
+vi.mock('@service/operations/operation-secret.service', () => ({
+  purgeExpiredOperationSecrets: () => Promise.resolve(0),
+}));
 vi.mock('@app/jobs/account-auto-sync.worker', () => ({
   handleAccountAutoSyncRequisitionJob: handleAccountAutoSyncRequisitionJobMock,
   handleAccountAutoSyncScheduleJob: handleAccountAutoSyncScheduleJobMock,
@@ -220,6 +223,11 @@ describe('createWorker', () => {
       'bank-recovery.send',
       'bank-recovery.dispatch',
       'account.csv-import',
+      'user.data-export',
+      'user.data-export.cleanup',
+      'user.data-restore',
+      'user.data-restore.cleanup',
+      'transaction-import',
       'portfolio.csv-import-confirmed',
       'portfolio.csv-parse-preview',
       'portfolio.snapshot.auto',
@@ -231,8 +239,11 @@ describe('createWorker', () => {
       'asset-price.refresh',
       'demo-data.refresh',
       'exchange-rate.refresh',
+      'fx.reconvert',
+      'rule.apply',
       'asset-price.historical-backfill',
       'certificado-aforro.rate-sync',
+      'budget.year-extension',
       'worker.heartbeat',
       // ensureFinancialEmailQueues always creates all six financial-email queues (budget,
       // weekly, monthlyStory), regardless of which stream's schedule/consumer flags are
@@ -247,6 +258,9 @@ describe('createWorker', () => {
       'email.monthly_story.user',
       'lifecycle.send',
       'lifecycle.cron',
+      'bank-sync-alert.sweep',
+      'transaction-import.sweep',
+      'bank-sync-alert.send',
       'transaction.enrichment.gpt.dlq',
       'transaction.enrichment.gpt',
     ]));
@@ -264,6 +278,11 @@ describe('createWorker', () => {
     expect(workMock).toHaveBeenCalledWith('foundation.health-check', expect.any(Function));
     expect(workMock).toHaveBeenCalledWith('account.initial-sync', { includeMetadata: true }, expect.any(Function));
     expect(workMock).toHaveBeenCalledWith('account.csv-import', expect.any(Function));
+    expect(workMock).toHaveBeenCalledWith('user.data-export', expect.any(Function));
+    expect(workMock).toHaveBeenCalledWith('user.data-export.cleanup', expect.any(Function));
+    expect(workMock).toHaveBeenCalledWith('user.data-restore', expect.any(Function));
+    expect(workMock).toHaveBeenCalledWith('user.data-restore.cleanup', expect.any(Function));
+    expect(workMock).toHaveBeenCalledWith('transaction-import', expect.any(Function));
     expect(workMock).toHaveBeenCalledWith('portfolio.csv-import-confirmed', expect.any(Function));
     expect(workMock).toHaveBeenCalledWith('portfolio.csv-parse-preview', expect.any(Function));
     expect(workMock).toHaveBeenCalledWith('account.auto-sync.schedule', { includeMetadata: true }, expect.any(Function));
@@ -272,6 +291,8 @@ describe('createWorker', () => {
     expect(workMock).toHaveBeenCalledWith('asset-price.refresh', expect.any(Function));
     expect(workMock).toHaveBeenCalledWith('demo-data.refresh', expect.any(Function));
     expect(workMock).toHaveBeenCalledWith('exchange-rate.refresh', expect.any(Function));
+    expect(workMock).toHaveBeenCalledWith('fx.reconvert', expect.any(Function));
+    expect(workMock).toHaveBeenCalledWith('rule.apply', { includeMetadata: true }, expect.any(Function));
     expect(workMock).toHaveBeenCalledWith('asset-price.historical-backfill', expect.any(Function));
     expect(workMock).toHaveBeenCalledWith('portfolio.snapshot.auto', expect.any(Function));
     expect(workMock).toHaveBeenCalledWith('portfolio.snapshot.manual', expect.any(Function));
@@ -298,8 +319,12 @@ describe('createWorker', () => {
       'portfolio.snapshot.auto',
       'portfolio.snapshot.manual',
       'certificado-aforro.rate-sync',
+      'budget.year-extension',
       'lifecycle.send',
       'lifecycle.cron',
+      'bank-sync-alert.sweep',
+      'transaction-import.sweep',
+      'bank-sync-alert.send',
       'email.monthly_story.user',
       'account.auto-sync.requisition',
       'background-operation.recovery',
@@ -338,6 +363,11 @@ describe('createWorker', () => {
       singletonKey: 'background-operation.recovery',
       tz: 'UTC',
     });
+    expect(scheduleMock).toHaveBeenCalledWith('transaction-import.sweep', '30 3 * * *', {}, {
+      key: 'transaction-import.sweep',
+      singletonKey: 'transaction-import.sweep',
+      tz: 'UTC',
+    });
     expect(scheduleMock).toHaveBeenCalledWith('analytics.outbox', '* * * * *', {}, {
       key: 'analytics.outbox',
       singletonKey: 'analytics.outbox',
@@ -368,7 +398,10 @@ describe('createWorker', () => {
       'exchange-rate.refresh',
       'portfolio.snapshot.auto',
       'certificado-aforro.rate-sync',
+      'budget.year-extension',
       'lifecycle.cron',
+      'bank-sync-alert.sweep',
+      'transaction-import.sweep',
       // Monthly Money Story is paused as part of the free/BYOK pivot too — the scheduler owner
       // tears that schedule down (see the unschedule assertions below) instead of registering it.
     ]));
@@ -449,6 +482,37 @@ describe('createWorker', () => {
       tz: 'UTC',
     });
     expect(unscheduleMock).toHaveBeenCalledWith('worker.heartbeat');
+  });
+
+  it('runs the instance heartbeat that readiness reads on the scheduler owner, with no external URL needed', async () => {
+    vi.stubEnv('PGBOSS_SCHEDULE', 'true');
+    const boss = createBossMock();
+    const worker = createWorker({
+      backgroundOperationService: backgroundOperationServiceMock(),
+      createBoss: vi.fn(() => boss),
+      logger: { error: vi.fn(), info: vi.fn(), warn: vi.fn() },
+    });
+
+    await worker.start();
+
+    expect(callNames(scheduleMock.mock.calls)).toContain('instance.heartbeat');
+    expect(callNames(sendMock.mock.calls)).toContain('instance.heartbeat');
+    expect(callNames(workMock.mock.calls)).toContain('instance.heartbeat');
+  });
+
+  it('does not schedule the instance heartbeat on a worker that does not own the schedules', async () => {
+    vi.stubEnv('PGBOSS_SCHEDULE', 'false');
+    const boss = createBossMock();
+    const worker = createWorker({
+      backgroundOperationService: backgroundOperationServiceMock(),
+      createBoss: vi.fn(() => boss),
+      logger: { error: vi.fn(), info: vi.fn(), warn: vi.fn() },
+    });
+
+    await worker.start();
+
+    expect(callNames(scheduleMock.mock.calls)).not.toContain('instance.heartbeat');
+    expect(callNames(sendMock.mock.calls)).not.toContain('instance.heartbeat');
   });
 
   it('does not schedule the worker heartbeat when the heartbeat URL is absent', async () => {

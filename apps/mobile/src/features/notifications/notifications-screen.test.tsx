@@ -9,6 +9,7 @@ import { NotificationsScreen, type NotificationsViewState } from './notification
 
 const preferences: NotificationPreferencesDto = {
   accountRecovery: { effectiveEnabled: false, storedEnabled: false },
+  bankSyncAlerts: { effectiveEnabled: true, storedEnabled: true },
   budgetAlerts: { deliverySupported: true, effectiveEnabled: true, storedEnabled: true },
   growth: { effectiveEnabled: false, storedEnabled: false },
   marketingOptOut: false,
@@ -48,6 +49,24 @@ describe('NotificationsScreen', () => {
     // growth is still in the payload but has no toggle
     expect(view.queryByRole('switch', { name: /Product update emails/ })).toBeNull()
     expect(view.getByRole('switch', { name: 'Unsubscribe from all marketing emails' })).toBeOnTheScreen()
+    expect(view.getByRole('switch', { name: 'Turn off Bank connection alerts' })).toBeOnTheScreen()
+    expect(view.getByText(/7 days and 1 day before/)).toBeOnTheScreen()
+  })
+
+  it('hides the bank connection alerts toggle when the server does not return it', async () => {
+    const { bankSyncAlerts: _omitted, ...older } = preferences
+    const mapped = mapNotificationPreferences(older)
+    const { view } = await renderScreen({
+      state: { status: 'loaded', rows: mapped.rows, marketingOptOut: false, refreshFailed: false, refreshing: false },
+    })
+    expect(view.queryByRole('switch', { name: /Bank connection alerts/ })).toBeNull()
+    expect(view.getByRole('switch', { name: 'Turn off Budget alerts' })).toBeOnTheScreen()
+  })
+
+  it('toggling bank connection alerts requests the inverse of its stored value', async () => {
+    const { view, props } = await renderScreen()
+    await fireEvent.press(view.getByRole('switch', { name: 'Turn off Bank connection alerts' }))
+    expect(props.onToggleStream).toHaveBeenCalledWith('bankSyncAlerts', false)
   })
 
   it('surfaces a delivery pause reason and disables a delivery-unsupported stream', async () => {

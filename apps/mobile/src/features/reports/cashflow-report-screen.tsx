@@ -1,16 +1,24 @@
 import { useTranslation } from 'react-i18next'
-import { RefreshControl, ScrollView, StyleSheet, Text, useColorScheme, View } from 'react-native'
-import { SafeAreaView } from 'react-native-safe-area-context'
+import { StyleSheet, View } from 'react-native'
 import { CartesianChart, Line } from 'victory-native'
 
-import { BackControl } from '@/components/ui/back-control'
-import { formatCurrency } from '@/lib/formatters/financial'
+import { Amount } from '@/components/ui/amount'
+import { Text } from '@/components/ui/text'
+import { useFormatMoney } from '@/lib/formatters/money-display'
 import { themeTokens } from '@/theme/tokens'
-import { textStyles } from '@/theme/typography'
+import { usePalette } from '@/theme/use-palette'
 
 import type { ReportDatePreset } from './report-date-presets'
-import { ReportFilterPanel } from './report-filter-panel'
-import { ReportExportButton, ReportPresetBar, ReportSectionFailure, ReportSectionHeading, ReportSectionLoading, styles as sharedStyles } from './report-screen-parts'
+import { ReportFiltersBar } from './report-filters-bar'
+import {
+  ReportEmptyState,
+  ReportExportButton,
+  ReportSection,
+  ReportSectionFailure,
+  ReportSectionLoading,
+  ReportStandalonePage,
+  ReportTrend,
+} from './report-screen-parts'
 import type { ReportExportState } from './use-report-export'
 import type { useReportFilterOptions } from './use-report-filter-options'
 import type { useReportFilters } from './use-report-filters'
@@ -39,133 +47,106 @@ export type CashflowReportScreenProps = CashflowReportBodyProps & {
   onBack: () => void
 }
 
-/** The report's title, export action, and content — no preset/filter bar and
- * no page chrome, so it can be composed inline as one section of the
- * reports hub (which shares one preset/filter bar across all sections) or
- * wrapped by CashflowReportScreen below for standalone use. */
+/**
+ * Web's `CashflowReport`: the export icon and "Trailing 3-month net average"
+ * with its amount in the header; income (success), expenses (destructive) and
+ * net (chart 1) over the months, on the page — no box around the chart.
+ */
 export function CashflowReportBody({ state, currencyCode, exportState, onExport, onRefresh }: CashflowReportBodyProps) {
+  const formatMoney = useFormatMoney()
   const { t, i18n } = useTranslation()
-  const palette = themeTokens.colors[useColorScheme() === 'dark' ? 'dark' : 'light']
+  const palette = usePalette()
   const locale = i18n.resolvedLanguage ?? i18n.language ?? 'en'
-  const money = (value: number) => formatCurrency(value, { locale, currency: currencyCode })
+  const money = (value: number) => formatMoney(value, { locale, currency: currencyCode })
   const signedMoney = (value: number) => `${value > 0 ? '+' : ''}${money(value)}`
   const title = t('reports.cashflow.title')
-  const helper = t('reports.cashflow.subtitle')
 
   if (state.status === 'access-transition') return null
 
+  const exportAction = <ReportExportButton onExport={onExport} status={exportState.status} />
+  let actions: React.ReactNode = exportAction
+  let content: React.ReactNode
+
   if (state.status === 'loading') {
-    return (
-      <View style={sharedStyles.section}>
-        <ReportSectionHeading title={title} helper={helper} palette={palette} />
-        <ReportSectionLoading label={t('reports.cashflow.loading')} palette={palette} />
+    content = <ReportSectionLoading label={t('reports.cashflow.loading')} />
+  } else if (state.status === 'error' || state.status === 'invalid-response') {
+    content = <ReportSectionFailure invalid={state.status === 'invalid-response'} onRetry={onRefresh} />
+  } else {
+    const { report } = state
+    actions = (
+      <>
+        {exportAction}
+        <View
+          accessible
+          accessibilityLabel={t('reports.cashflow.trailingNetAverage', { value: signedMoney(report.trailingNetAverage) })}
+          style={styles.figure}
+        >
+          <ReportTrend label={t('reports.cashflow.trailingNetAverageLabel')} value={report.trailingNetAverage} />
+          <Amount currency={currencyCode} locale={locale} value={report.trailingNetAverage} />
+        </View>
+      </>
+    )
+    content = report.points.length === 0 ? (
+      <ReportEmptyState description={t('reports.cashflow.emptyMessage')} icon="arrow-left-right" title={t('reports.cashflow.emptyTitle')} />
+    ) : (
+      <View style={styles.body}>
+        {/* The Skia canvas has nothing a screen reader can walk; the container
+            carries the name, the figures live in the header and the legend. */}
+        <View accessible accessibilityLabel={title} style={styles.chart}>
+          <CartesianChart data={[...report.points]} xKey="x" yKeys={['income', 'expenses', 'net']}>
+            {({ points }) => (
+              <>
+                <Line color={palette.successText} curveType="linear" points={points.income} strokeWidth={2} />
+                <Line color={palette.destructiveText} curveType="linear" points={points.expenses} strokeWidth={2} />
+                <Line color={palette.chart1} curveType="linear" points={points.net} strokeWidth={2} />
+              </>
+            )}
+          </CartesianChart>
+        </View>
+        <View style={styles.legend}>
+          <LegendItem color={palette.successText} label={t('reports.cashflow.income')} />
+          <LegendItem color={palette.destructiveText} label={t('reports.cashflow.expenses')} />
+          <LegendItem color={palette.chart1} label={t('reports.cashflow.net')} />
+        </View>
       </View>
     )
   }
-
-  if (state.status === 'error' || state.status === 'invalid-response') {
-    return (
-      <View style={sharedStyles.section}>
-        <ReportSectionHeading title={title} helper={helper} palette={palette} />
-        <ReportSectionFailure
-          message={t(state.status === 'invalid-response' ? 'reports.invalidMessage' : 'reports.errorMessage')}
-          onRetry={onRefresh}
-          palette={palette}
-        />
-      </View>
-    )
-  }
-
-  const { report } = state
-  const trailingGaining = report.trailingNetAverage >= 0
-  const trailingLabel = t('reports.cashflow.trailingNetAverage', { value: signedMoney(report.trailingNetAverage) })
 
   return (
-    <View style={sharedStyles.section}>
-      <ReportSectionHeading title={title} helper={helper} palette={palette} />
-      <ReportExportButton status={exportState.status} onExport={onExport} palette={palette} />
-
-      {report.points.length === 0 ? (
-        <View style={[sharedStyles.empty, { borderColor: palette.border, backgroundColor: palette.card }]}>
-          <Text accessibilityRole="header" allowFontScaling style={[sharedStyles.emptyTitle, { color: palette.foreground }]}>
-            {t('reports.cashflow.emptyTitle')}
-          </Text>
-          <Text allowFontScaling style={[sharedStyles.body, { color: palette.mutedForeground }]}>
-            {t('reports.cashflow.emptyMessage')}
-          </Text>
-        </View>
-      ) : (
-        <View style={[styles.card, { borderColor: palette.border, backgroundColor: palette.muted }]}>
-          {/* CartesianChart/Line render onto a Skia canvas with no screen-reader-navigable
-              content — the container gets a static label, and the real figures live in the
-              accessible legend and trailing-average text below. */}
-          <View accessible accessibilityLabel={title} style={styles.chart}>
-            <CartesianChart data={[...report.points]} xKey="x" yKeys={['income', 'expenses', 'net']}>
-              {({ points }) => (
-                <>
-                  <Line points={points.income} color={palette.chart1} strokeWidth={2} curveType="linear" />
-                  <Line points={points.expenses} color={palette.chart2} strokeWidth={2} curveType="linear" />
-                  <Line points={points.net} color={palette.chart3} strokeWidth={2} curveType="linear" />
-                </>
-              )}
-            </CartesianChart>
-          </View>
-
-          <View style={styles.legend}>
-            <LegendItem label={t('reports.cashflow.income')} color={palette.chart1} palette={palette} />
-            <LegendItem label={t('reports.cashflow.expenses')} color={palette.chart2} palette={palette} />
-            <LegendItem label={t('reports.cashflow.net')} color={palette.chart3} palette={palette} />
-          </View>
-
-          <Text
-            accessible
-            accessibilityLabel={trailingLabel}
-            allowFontScaling
-            style={[styles.trailing, { color: trailingGaining ? palette.successText : palette.destructiveText }]}
-          >
-            {trailingLabel}
-          </Text>
-        </View>
-      )}
-    </View>
+    <ReportSection actions={actions} description={t('reports.cashflow.subtitle')} testID="cashflow-report" title={title}>
+      {content}
+    </ReportSection>
   )
 }
 
 export function CashflowReportScreen({ state, preset, currencyCode, filterState, filterOptions, exportState, onSelectPreset, onExport, onRefresh, onBack }: CashflowReportScreenProps) {
-  const palette = themeTokens.colors[useColorScheme() === 'dark' ? 'dark' : 'light']
   if (state.status === 'access-transition') return null
   return (
-    <SafeAreaView style={[sharedStyles.safeArea, { backgroundColor: palette.background }]}>
-      <ScrollView
-        contentContainerStyle={sharedStyles.content}
-        refreshControl={<RefreshControl refreshing={Boolean(state.status === 'loaded' && state.refreshing)} onRefresh={() => void onRefresh()} tintColor={palette.primary} />}
-      >
-        <View style={sharedStyles.page}>
-          <BackControl fallback="/reports" onPress={onBack} color={palette.primary} />
-          <ReportPresetBar preset={preset} onSelectPreset={onSelectPreset} palette={palette} />
-          <ReportFilterPanel filterState={filterState} filterOptions={filterOptions} palette={palette} />
-          <CashflowReportBody state={state} currencyCode={currencyCode} exportState={exportState} onExport={onExport} onRefresh={onRefresh} />
-        </View>
-      </ScrollView>
-    </SafeAreaView>
+    <ReportStandalonePage
+      controls={<ReportFiltersBar filterOptions={filterOptions} filterState={filterState} onSelectPreset={onSelectPreset} preset={preset} />}
+      onBack={onBack}
+      onRefresh={onRefresh}
+      refreshing={Boolean(state.status === 'loaded' && state.refreshing)}
+    >
+      <CashflowReportBody currencyCode={currencyCode} exportState={exportState} onExport={onExport} onRefresh={onRefresh} state={state} />
+    </ReportStandalonePage>
   )
 }
 
-function LegendItem({ label, color, palette }: { label: string; color: string; palette: (typeof themeTokens.colors)[keyof typeof themeTokens.colors] }) {
+function LegendItem({ label, color }: { label: string; color: string }) {
   return (
     <View style={styles.legendItem}>
       <View style={[styles.legendDot, { backgroundColor: color }]} />
-      <Text allowFontScaling style={[styles.legendLabel, { color: palette.mutedForeground }]}>{label}</Text>
+      <Text tone="muted" variant="label">{label}</Text>
     </View>
   )
 }
 
 const styles = StyleSheet.create({
-  card: { width: '100%', borderWidth: 1, borderRadius: themeTokens.radius.xl, padding: themeTokens.spacing[4], gap: themeTokens.spacing[3] },
-  chart: { width: '100%', height: 220 },
+  figure: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', columnGap: themeTokens.spacing[2], rowGap: themeTokens.spacing[1] },
+  body: { gap: themeTokens.spacing[3] },
+  chart: { width: '100%', height: 240 },
   legend: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', gap: themeTokens.spacing[4] },
   legendItem: { flexDirection: 'row', alignItems: 'center', gap: themeTokens.spacing[2] },
-  legendDot: { width: 10, height: 10, borderRadius: 5 },
-  legendLabel: { ...textStyles.meta },
-  trailing: { ...textStyles.amount, textAlign: 'center' },
+  legendDot: { width: 8, height: 8, borderRadius: 4 },
 })

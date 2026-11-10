@@ -134,20 +134,19 @@ describe('SegmentedControl', () => {
     { label: '30 days', value: '30-days' },
   ] as const
 
-  it('spends the accent on the selected segment only', async () => {
+  it('lifts the selected segment onto the canvas, as web Tabs does, with no accent', async () => {
     const view = await render(
       <SegmentedControl accessibilityLabel="Period" onChange={jest.fn()} options={options} value="month" />,
     )
 
     const style = (name: string) => StyleSheet.flatten(view.getByLabelText(name).props.style)
-    expect(style('Month').backgroundColor).toBe(palette.primaryWash)
-    // A border on every segment makes a row of separate boxes instead of one
-    // control, so there's one shared border around the track (see the
-    // `tablist` element), not a per-segment border color.
+    expect(style('Month').backgroundColor).toBe(palette.background)
     expect(style('30 days').backgroundColor).toBe('transparent')
+    // The track is the muted surface; no per-segment borders.
+    expect(StyleSheet.flatten(view.getByLabelText('Period').props.style).backgroundColor).toBe(palette.muted)
   })
 
-  it('stays 48pt to the finger even though it draws at 34', async () => {
+  it('stays 44pt to the finger even though it draws at 32', async () => {
     // The compact chip is only safe because `hitSlop` makes up the difference.
     // If someone "tidies up" the hitSlop, this is what catches it.
     const view = await render(

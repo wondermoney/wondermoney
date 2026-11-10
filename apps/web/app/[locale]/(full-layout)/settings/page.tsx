@@ -36,6 +36,8 @@ const Assistant = dynamic(() => import("@/components/settings/Assistant"));
 const UserCategoriesTable = dynamic(
   () => import("@/components/settings/Categories"),
 );
+const Tags = dynamic(() => import("@/components/settings/Tags"));
+const Rules = dynamic(() => import("@/components/settings/Rules"));
 const Household = dynamic(() => import("@/components/settings/Household"));
 const Notifications = dynamic(
   () => import("@/components/settings/Notifications"),
@@ -66,6 +68,8 @@ const tabs = [
     label: "navigation.categories",
     Component: UserCategoriesTable,
   },
+  { name: "tags", label: "navigation.tags", Component: Tags },
+  { name: "rules", label: "navigation.rules", Component: Rules },
   { name: "household", label: "navigation.household", Component: Household },
   {
     name: "notifications",
@@ -92,7 +96,7 @@ const TAB_GROUPS: readonly { label: string; tabs: readonly string[] }[] = [
   },
   {
     label: "navigation.settings-group-money",
-    tabs: ["bank-provider", "connections", "categories"],
+    tabs: ["bank-provider", "connections", "categories", "tags", "rules"],
   },
   {
     label: "navigation.settings-group-preferences",
@@ -177,9 +181,9 @@ const SettingsPage = () => {
 
   return (
     <PageShell>
-      {/* The route's own <h1>: the sidebar nav is not part of the outline, so
-          without it a screen reader's heading list would start at the first
-          tab panel's own heading. */}
+      {/* The route's own <h1>: the top bar's navigation is not part of the
+          outline, so without it a screen reader's heading list would start at
+          the first tab panel's own heading. */}
       <PageHeader title={t("navigation.settings")} />
       <BankConnectionReturn />
       <Tabs value={selectedTab} onValueChange={handleTabChange}>
@@ -219,12 +223,18 @@ const SettingsPage = () => {
           </Select>
         </div>
         <div className="relative hidden lg:block">
+          {/* Direction A: underlined tabs on the canvas, the same treatment as
+              the section tabs under the top bar, not a pill strip. */}
           <TabsList
             ref={tabListRef}
-            className="w-full justify-start overflow-x-auto"
+            className="border-border h-auto w-full justify-start gap-6 overflow-x-auto rounded-none border-b bg-transparent p-0"
           >
             {visibleTabs.map((tab) => (
-              <TabsTrigger key={tab.name} value={tab.name}>
+              <TabsTrigger
+                key={tab.name}
+                value={tab.name}
+                className="h-11 rounded-none px-0 data-[state=active]:bg-transparent data-[state=active]:shadow-[inset_0_-2px_0_var(--primary)] data-[state=inactive]:hover:bg-transparent"
+              >
                 {t(tab.label)}
               </TabsTrigger>
             ))}
@@ -232,18 +242,18 @@ const SettingsPage = () => {
           {canScrollLeft && (
             <div
               aria-hidden="true"
-              className="from-muted pointer-events-none absolute inset-y-0 left-0 z-10 w-8 rounded-l-md bg-linear-to-r to-transparent"
+              className="from-background pointer-events-none absolute inset-y-0 left-0 z-10 w-8 bg-linear-to-r to-transparent"
             />
           )}
           {canScrollRight && (
             <div
               aria-hidden="true"
-              className="from-muted pointer-events-none absolute inset-y-0 right-0 z-10 w-8 rounded-r-md bg-linear-to-l to-transparent"
+              className="from-background pointer-events-none absolute inset-y-0 right-0 z-10 w-8 bg-linear-to-l to-transparent"
             />
           )}
         </div>
         {visibleTabs.map((tab) => (
-          <TabsContent key={tab.name} value={tab.name}>
+          <TabsContent key={tab.name} value={tab.name} className="pt-6">
             {tab.name === selectedTab ? <SelectedComponent /> : null}
           </TabsContent>
         ))}

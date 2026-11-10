@@ -1,9 +1,13 @@
+import { parseLocaleNumber } from "@/lib/utils/number";
+
 /**
  * Convert a `yyyy-mm-dd` string (the format the goals API expects for
  * targetDate) into a local Date, avoiding the UTC-midnight parsing of
  * `new Date("yyyy-mm-dd")` that can shift the day in negative-offset zones.
  */
-export function parseGoalDateInput(value: string | null | undefined): Date | undefined {
+export function parseGoalDateInput(
+  value: string | null | undefined,
+): Date | undefined {
   if (!value) return undefined;
   const match = /^(\d{4})-(\d{2})-(\d{2})/.exec(value);
   if (!match) return undefined;
@@ -29,36 +33,11 @@ export const GOAL_PRIORITY_OPTIONS: ReadonlyArray<{
   { labelKey: "goals.priority-high", value: 2 },
 ];
 
-export function parseGoalMoney(value: string): number {
-  const trimmed = value.trim();
-  if (!trimmed) return Number.NaN;
-
-  const normalized = trimmed.replace(/\s+/g, "");
-  const hasDot = normalized.includes(".");
-  const hasComma = normalized.includes(",");
-
-  if (hasDot && hasComma) {
-    const decimalSeparator =
-      normalized.lastIndexOf(",") > normalized.lastIndexOf(".") ? "," : ".";
-    const thousandsSeparator = decimalSeparator === "," ? "." : ",";
-    return Number(
-      normalized
-        .replaceAll(thousandsSeparator, "")
-        .replace(decimalSeparator, "."),
-    );
-  }
-
-  const separator = hasComma ? "," : hasDot ? "." : null;
-  if (!separator) return Number(normalized);
-
-  const parts = normalized.split(separator);
-  if (parts.length !== 2) return Number.NaN;
-
-  const fraction = parts[1];
-  if (fraction === undefined) return Number.NaN;
-  if (fraction.length === 3)
-    return Number(normalized.replaceAll(separator, ""));
-  if (fraction.length < 1 || fraction.length > 2) return Number.NaN;
-
-  return Number(`${parts[0]?.replaceAll(/[.,]/g, "")}.${fraction}`);
+/**
+ * A goal amount or rate the user typed, in their locale ("1.000" is 1000 for a pt or es
+ * reader and 1 for an en reader). NaN when it is blank or not unambiguously a number, so
+ * the form can reject it instead of saving another figure.
+ */
+export function parseGoalMoney(value: string, locale: string): number {
+  return parseLocaleNumber(value, locale) ?? Number.NaN;
 }

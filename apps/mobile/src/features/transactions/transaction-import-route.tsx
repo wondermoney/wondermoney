@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import * as DocumentPicker from 'expo-document-picker'
-import { type Href, useLocalSearchParams, useNavigation, useRouter } from 'expo-router'
-import { useEffect, useState } from 'react'
+import { type Href, useLocalSearchParams, usePreventRemove, useRouter } from 'expo-router'
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { parseAccountId } from '@/features/accounts/accounts-contract'
@@ -35,14 +35,11 @@ export function TransactionImportRoute() {
   const [selectedAccountId, setSelectedAccountId] = useState<number | null>(initialAccountId)
   const importState = useTransactionImport()
   const router = useRouter()
-  const navigation = useNavigation()
   const { t } = useTranslation()
   const { runtime } = useProductRuntime()
   const [templateStatus, setTemplateStatus] = useState<TemplateShareStatus>('idle')
 
-  useEffect(() => navigation.addListener('beforeRemove', (event) => {
-    if (BLOCKING_PHASES.has(importState.state.phase)) event.preventDefault()
-  }), [importState.state.phase, navigation])
+  usePreventRemove(BLOCKING_PHASES.has(importState.state.phase))
 
   const accountModels = accountsQuery.data ? mapAccounts(accountsQuery.data) : []
   const accounts = accountModels.map((account) => ({ id: account.accountId, name: account.accountName ?? t('accounts.unnamed') }))

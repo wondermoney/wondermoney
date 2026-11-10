@@ -47,12 +47,22 @@ Everything lives in `.env`; it is commented section by section. After editing it
 | The in-app "Share Feedback" form, emailed to you | `SUPPORT_EMAIL` plus email (SMTP or Resend) |
 | "Continue with Google" | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` |
 | Bank sync | nothing on the server: each user adds their own Enable Banking key in Settings |
+| Analytics for your own instance (off by default) | `NEXT_PUBLIC_GTM_ID`, `NEXT_PUBLIC_POSTHOG_KEY`, or `ANALYTICS_OUTBOX_MODE=live` with `POSTHOG_API_KEY` |
 
 To read outgoing mail without a real provider, add `mail` to `COMPOSE_PROFILES` and set
 `SMTP_HOST=mailpit`, `SMTP_PORT=1025`; mail appears at http://localhost:8025.
 
 `COMPOSE_PROFILES` (e.g. `storage,mail`) switches on the optional services for every
 `docker compose` command, so `up`, `pull` and `down` all include them.
+
+### What your instance sends
+
+Nothing leaves your server for the WonderMoney project. Without configuration, the only
+outside call is the worker's daily download of euro exchange rates from the European Central
+Bank. Everything else is switched on by its setting: email (SMTP or Resend), AI (`AI_BASE_URL`),
+market data (EODHD), file storage (S3), error tracking (`SENTRY_DSN`,
+`NEXT_PUBLIC_SENTRY_DSN`), analytics (above), Google sign-in, reCAPTCHA, and bank sync (Enable
+Banking, once a user adds their key). The docs site's self-hosting guide lists each one.
 
 ### The mobile app
 
@@ -104,6 +114,19 @@ docker compose up -d
 
 The API applies any new database migrations when it starts. To stay on a release, set
 `WM_VERSION` (e.g. `WM_VERSION=1.4`) instead of `latest`.
+
+## Monitor
+
+`GET /v1/health` answers 200 while the API process runs; the container health check uses it.
+`GET /v1/health/ready` is for uptime monitors: it answers 200 when Postgres responds, no job has
+waited too long to start (`HEALTH_MAX_JOB_AGE_MINUTES`, 60 by default) and the worker finished
+its 5-minute heartbeat job in the last 15 minutes, and 503 with the failing check otherwise. It
+also reports the server's `version` and `commit`.
+
+With [Uptime Kuma](https://github.com/louislam/uptime-kuma), add an "HTTP(s) - Keyword"
+monitor for `https://api.money.example.com/v1/health/ready` with the keyword `"status":"ok"`
+and a 60-second interval. `docker compose ps` also shows the `worker` container as unhealthy
+when its job runner stops or it loses Postgres.
 
 ## Back up
 

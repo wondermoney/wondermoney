@@ -1,6 +1,7 @@
 import { useQuery, type UseQueryOptions } from "@tanstack/react-query";
 import type { AxiosInstance } from "axios";
 
+import type { PortfolioAccountLink } from "@/lib/portfolio/account-link";
 import type { SupportedCurrencyCodes } from "@/lib/utils/currencySymbol";
 
 import api from "../api";
@@ -15,6 +16,8 @@ export interface Portfolio {
   excluded?: boolean;
   favored?: boolean;
   targetAllocation?: Record<string, number> | null;
+  /** The account that holds this portfolio, when the viewer can see it. */
+  accountLink?: PortfolioAccountLink | null;
 }
 
 export interface GetPortfolioResponse {

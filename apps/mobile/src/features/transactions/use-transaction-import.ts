@@ -52,9 +52,9 @@ const defaultWait = (ms: number) => new Promise<void>((resolve) => setTimeout(re
 /**
  * Mirrors web's presigned-upload -> background-job import -> status-polling flow
  * (useCreateAccountTransactionsCsvUrl -> S3 PUT -> useStartAccountCsvImport ->
- * useBackgroundOperation). The upload response says which format the account reads (#182):
- * a bank's own export or the generic CSV. An unknown format, an unsupported bank on an API from
- * before #182, or a non-.csv file for the generic format stops before any bytes are uploaded.
+ * useBackgroundOperation). The upload response says which format the account reads:
+ * a bank's own export or the generic CSV. An unknown format, an unsupported bank on an API that
+ * does not report the format, or a non-.csv file for the generic format stops before any bytes are uploaded.
  */
 export function useTransactionImport(options: UseTransactionImportOptions = {}) {
   const { runtime, blockAccess } = useProductRuntime()

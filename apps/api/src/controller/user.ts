@@ -13,6 +13,7 @@ import { NordigenRequisition } from '@entity/NordigenRequisition';
 import { Onboarding } from '@entity/Onboarding';
 import { authedUser } from '@middleware/authed-context';
 import { deleteWonderMoneyAccount } from '@service/account/account-deletion.service';
+import { enableBankingConsentOf } from '@service/enable-banking/enable-banking-consent';
 import { ERROR } from '@utils/constants';
 import { buildEnableBankingInstitutionRecordId } from '@utils/enable-banking-institution-id';
 import { BadRequestError, ConflictError, InternalServerError, NotFoundError } from '@utils/errors';
@@ -165,9 +166,14 @@ export async function getRequisitions(req: Request, res: Response) {
   const nordigenItems = nordigenRequisitions.map((r) => ({ ...r, provider: 'GoCardless' as const }));
   const enableBankingItems = enableBankingConnections.map((connection) => {
     const institution = institutionByRecordId.get(buildEnableBankingInstitutionRecordId({ country: connection.aspspCountry, name: connection.aspspName }));
+    // The consent's state (`expiring` within 14 days, `revoked` when the bank ended it early) is
+    // decided here, once, so the web never recomputes the reconnect window itself.
+    const consent = enableBankingConsentOf(connection);
     return {
       // eslint-disable-next-line @typescript-eslint/no-misused-spread
       ...connection,
+      consentStatus: consent.state,
+      daysUntilExpiry: consent.daysUntilExpiry,
       expiresAt: connection.accessValidUntil,
       institution: {
         country: connection.aspspCountry,

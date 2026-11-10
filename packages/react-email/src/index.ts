@@ -5,6 +5,10 @@ import AccountConnectedEmail, {
   getAccountConnectedPreheader,
   getAccountConnectedSubject,
 } from "./templates/account-connected.js";
+import BankSyncAlertEmail, {
+  getBankSyncAlertPreheader,
+  getBankSyncAlertSubject,
+} from "./templates/bank-sync-alert.js";
 import BudgetThresholdAlert, {
   getBudgetThresholdPreheader,
   getBudgetThresholdSubject,
@@ -29,6 +33,7 @@ import MonthlyStory, {
 } from "./templates/monthly-story.js";
 import type {
   AccountConnectedEmailProps,
+  BankSyncAlertEmailProps,
   BudgetThresholdAlertProps,
   InternalAlertEmailProps,
   LifecycleNudgeEmailProps,
@@ -37,7 +42,7 @@ import type {
 } from "./types.js";
 import { getWeeklyInsightsPreheader } from "./weekly-insights-preheader.js";
 
-export type { AccountConnectedEmailProps, BudgetThresholdAlertProps, BudgetThresholdItem, InternalAlertDetail, InternalAlertEmailProps, LifecycleNudgeEmailProps, MonthlyStoryCategoryDelta, MonthlyStoryDataSufficientProps, MonthlyStoryInsufficientDataProps, MonthlyStoryMetric, MonthlyStoryProps, MonthlyStoryRecurringChange, TransactionalEmailLanguage, WeeklyBudgetSummary, WeeklyInsightsProps } from "./types.js";
+export type { AccountConnectedEmailProps, BankSyncAlertEmailProps, BankSyncAlertKind, BudgetThresholdAlertProps, BudgetThresholdItem, InternalAlertDetail, InternalAlertEmailProps, LifecycleNudgeEmailProps, MonthlyStoryCategoryDelta, MonthlyStoryDataSufficientProps, MonthlyStoryInsufficientDataProps, MonthlyStoryMetric, MonthlyStoryProps, MonthlyStoryRecurringChange, TransactionalEmailLanguage, WeeklyBudgetSummary, WeeklyInsightsProps } from "./types.js";
 export { getWeeklyInsightsPreheader } from "./weekly-insights-preheader.js";
 export { LIFECYCLE_COPY, getLifecycleCopy } from "./lifecycle-copy.js";
 export { DEFAULT_BRAND_NAME, resolveBrandName } from "./components/Brand.js";
@@ -150,6 +155,19 @@ export async function renderAccountConnectedEmail(
     preheader: getAccountConnectedPreheader(props.language, props.bankName),
     ...output,
   };
+}
+
+export async function renderBankSyncAlertEmail(
+  props: BankSyncAlertEmailProps,
+): Promise<RenderedEmail> {
+  assertWebUrl("reconnectUrl", props.reconnectUrl);
+  assertWebUrl("settingsUrl", props.settingsUrl);
+  // Subject and preheader first: they throw when the kind's date is missing.
+  const subject = getBankSyncAlertSubject(props);
+  const preheader = getBankSyncAlertPreheader(props);
+  const output = await renderElement(createElement(BankSyncAlertEmail, props));
+
+  return { subject, preheader, ...output };
 }
 
 export async function renderInternalAlertEmail(

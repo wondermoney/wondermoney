@@ -23,7 +23,10 @@ export function LoanEditRoute() {
     includeInNetWorth: loan.includeInNetWorth,
     type: loan.type,
     openingPrincipalBalance: loan.openingPrincipalBalance,
-    openingBalanceDate: loan.openingBalanceDate,
+    // The API may send the date as an ISO datetime; the form edits a date
+    // (YYYY-MM-DD), read in UTC as the detail screen shows it.
+    openingBalanceDate: loan.openingBalanceDate.slice(0, 10),
+    currencyCode: loan.currency.code,
     regularPaymentAmount: loan.regularPaymentAmount ?? null,
     annualInterestRateBps: loan.annualInterestRateBps ?? null,
     termMonths: loan.termMonths ?? null,

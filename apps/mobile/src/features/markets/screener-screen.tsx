@@ -1,18 +1,24 @@
 import { memo } from 'react'
 import { useTranslation } from 'react-i18next'
-import { FlatList, Pressable, StyleSheet, Switch, Text, TextInput, useColorScheme, View } from 'react-native'
+import { FlatList, StyleSheet, View } from 'react-native'
 import type { ListRenderItemInfo } from 'react-native'
-import { SafeAreaView } from 'react-native-safe-area-context'
 
 import { BackControl } from '@/components/ui/back-control'
 import { Button } from '@/components/ui/button'
+import { assetMark, EntityMark } from '@/components/ui/entity-mark'
+import { FormGroup, FormSwitchRow, FormTextRow } from '@/components/ui/form-row'
+import { ListRow } from '@/components/ui/list-row'
 import { PageHeader } from '@/components/ui/page-header'
+import { SafeAreaView } from '@/components/ui/screen-safe-area'
+import { Text } from '@/components/ui/text'
+import { parseNumberInput } from '@/lib/formatters/decimal-input'
+import { useHideMoneyText } from '@/lib/formatters/money-display'
 import { themeTokens } from '@/theme/tokens'
-import { textStyles } from '@/theme/typography'
+import { usePalette } from '@/theme/use-palette'
 
 import { AVAILABLE_COUNTRIES, AVAILABLE_EXCHANGES, AVAILABLE_INDUSTRIES, AVAILABLE_SECTORS } from './screener-canonical-lists'
 import { CanonicalValuePicker } from './canonical-value-picker'
-import { MarketsFailure, marketsStyles, type Palette } from './markets-screen-parts'
+import { MarketsFailure, marketsStyles } from './markets-screen-parts'
 import { formatScreenerMarketCap, formatScreenerPrice, type ScreenerRow } from './markets-view-model'
 
 export type ScreenerFilterFormValues = Readonly<{
@@ -43,30 +49,48 @@ export type ScreenerScreenState =
     loadMoreError: boolean
   }
 
+/** The typed price and market-cap bounds, read in the app's language; blank is no bound. */
+export type ScreenerNumberFilters = Readonly<{
+  priceMoreThan: number | undefined
+  priceLowerThan: number | undefined
+  marketCapMoreThan: number | undefined
+  marketCapLowerThan: number | undefined
+}>
+
+const NUMBER_FIELDS = ['priceMoreThan', 'priceLowerThan', 'marketCapMoreThan', 'marketCapLowerThan'] as const
+
 export type ScreenerScreenProps = {
   state: ScreenerScreenState
   form: ScreenerFilterFormValues
   onFormChange: (patch: Partial<ScreenerFilterFormValues>) => void
-  onApplyFilters: () => void
+  onApplyFilters: (numbers: ScreenerNumberFilters) => void
   onLoadMore: () => void
   onSelectSymbol: (symbol: string) => void
   onBack: () => void
 }
 
 /**
- * The filter form is a heavier, explicit-submit version
- * of markets-search-screen's controlled input: five plain TextInputs stage
- * changes via onFormChange (no request fires per keystroke), and only the
- * "Apply filters" action fetches. Below the form, a results list mirrors
- * watchlist-screen's row/list shape but paginated: a "Load more" action
+ * The filters are two groups of form rows (the switches and the price and
+ * market-cap bounds, then the four canonical lists) that stage changes via
+ * onFormChange (no request fires per keystroke); only the "Apply filters"
+ * action fetches. Below them, the results are flat rows, paginated: a "Load more" action
  * appears whenever `hasMore` is true, mirroring goal-detail-screen's
  * load-more convention (loadingMore disables it, loadMoreError shows a
  * scoped note beside the list rather than replacing it with a full error).
  */
 export function ScreenerScreen({ state, form, onFormChange, onApplyFilters, onLoadMore, onSelectSymbol, onBack }: ScreenerScreenProps) {
   const { t, i18n } = useTranslation()
-  const palette = themeTokens.colors[useColorScheme() === 'dark' ? 'dark' : 'light']
+  const palette = usePalette()
   const locale = i18n.resolvedLanguage ?? i18n.language ?? 'en'
+  // "1.000" is a thousand in pt and es and one in en; anything unreadable blocks the search.
+  const parsedBounds = Object.fromEntries(NUMBER_FIELDS.map((field) => [field, form[field].trim() === '' ? undefined : parseNumberInput(form[field], locale)])) as Record<(typeof NUMBER_FIELDS)[number], number | null | undefined>
+  const invalidBound = (field: (typeof NUMBER_FIELDS)[number]) => parsedBounds[field] === null
+  const boundsValid = NUMBER_FIELDS.every((field) => !invalidBound(field))
+  const boundError = (field: (typeof NUMBER_FIELDS)[number]) => (invalidBound(field) ? t('screener.numberInvalid') : null)
+  const apply = () => {
+    if (!boundsValid) return
+    onApplyFilters(Object.fromEntries(NUMBER_FIELDS.map((field) => [field, parsedBounds[field] ?? undefined])) as ScreenerNumberFilters)
+  }
 
   if (state.status === 'access-transition') return null
 
@@ -79,23 +103,21 @@ export function ScreenerScreen({ state, form, onFormChange, onApplyFilters, onLo
         backLabel={t('screener.back')}
         retryLabel={t('common.retry')}
         onBack={onBack}
-        onRetry={onApplyFilters}
+        onRetry={apply}
         palette={palette}
       />
     )
   }
 
+  const any = t('screener.canonicalPicker.any')
   const priceUnavailable = t('screener.priceUnavailable')
   const marketCapUnavailable = t('screener.marketCapUnavailable')
   const rows = state.status === 'loaded' ? state.rows : []
   const renderRow = ({ item, index }: ListRenderItemInfo<ScreenerRow>) => (
     <ScreenerRowView
       row={item}
-      palette={palette}
       locale={locale}
       separated={index > 0}
-      isFirst={index === 0}
-      isLast={index === rows.length - 1}
       onPress={() => onSelectSymbol(item.symbol)}
       priceUnavailable={priceUnavailable}
       marketCapUnavailable={marketCapUnavailable}
@@ -104,65 +126,27 @@ export function ScreenerScreen({ state, form, onFormChange, onApplyFilters, onLo
 
   const header = (
     <View style={headingStyles.headerGroup}>
-      <BackControl fallback="/more" label={t('screener.back')} onPress={onBack} />
+      <BackControl destination={t('navigation.explorer')} fallback="/markets" label={t('screener.back')} onPress={onBack} />
 
-      <PageHeader palette={palette}
-            helpText={t('screener.helper')} title={t('screener.title')} />
+      <PageHeader helpText={t('screener.helper')} title={t('screener.title')} />
 
-      <View style={[headingStyles.form, { borderColor: palette.border, backgroundColor: palette.card }]}>
-        <Toggle
-          label={t('screener.isEtfLabel')}
-          value={form.isEtf}
-          onValueChange={(value) => onFormChange({ isEtf: value })}
-          palette={palette}
-        />
-        <Toggle
-          label={t('screener.isActivelyTradingLabel')}
-          value={form.isActivelyTrading}
-          onValueChange={(value) => onFormChange({ isActivelyTrading: value })}
-          palette={palette}
-        />
-        <View style={headingStyles.formRow}>
-          <Field
-            label={t('screener.priceMoreThanLabel')}
-            value={form.priceMoreThan}
-            onChangeText={(value) => onFormChange({ priceMoreThan: value })}
-            palette={palette}
-            keyboardType="decimal-pad"
-            style={headingStyles.formHalf}
-          />
-          <Field
-            label={t('screener.priceLowerThanLabel')}
-            value={form.priceLowerThan}
-            onChangeText={(value) => onFormChange({ priceLowerThan: value })}
-            palette={palette}
-            keyboardType="decimal-pad"
-            style={headingStyles.formHalf}
-          />
-        </View>
-        <View style={headingStyles.formRow}>
-          <Field
-            label={t('screener.marketCapMoreThanLabel')}
-            value={form.marketCapMoreThan}
-            onChangeText={(value) => onFormChange({ marketCapMoreThan: value })}
-            palette={palette}
-            keyboardType="decimal-pad"
-            style={headingStyles.formHalf}
-          />
-          <Field
-            label={t('screener.marketCapLowerThanLabel')}
-            value={form.marketCapLowerThan}
-            onChangeText={(value) => onFormChange({ marketCapLowerThan: value })}
-            palette={palette}
-            keyboardType="decimal-pad"
-            style={headingStyles.formHalf}
-          />
-        </View>
-        <CanonicalValuePicker label={t('screener.sectorLabel')} options={AVAILABLE_SECTORS} selected={form.sector} onSelect={(value) => onFormChange({ sector: value })} palette={palette} />
-        <CanonicalValuePicker label={t('screener.industryLabel')} options={AVAILABLE_INDUSTRIES} selected={form.industry} onSelect={(value) => onFormChange({ industry: value })} palette={palette} />
-        <CanonicalValuePicker label={t('screener.countryLabel')} options={AVAILABLE_COUNTRIES} selected={form.country} onSelect={(value) => onFormChange({ country: value })} palette={palette} />
-        <CanonicalValuePicker label={t('screener.exchangeLabel')} options={AVAILABLE_EXCHANGES} selected={form.exchange} onSelect={(value) => onFormChange({ exchange: value })} palette={palette} />
-        <Button label={t('screener.apply')} onPress={onApplyFilters} palette={palette} variant="primary" />
+      {/* The filters as one group of rows, staged until "Apply filters". */}
+      <View style={headingStyles.filters}>
+        <FormGroup>
+          <FormSwitchRow label={t('screener.isEtfLabel')} value={form.isEtf} onValueChange={(value) => onFormChange({ isEtf: value })} />
+          <FormSwitchRow label={t('screener.isActivelyTradingLabel')} value={form.isActivelyTrading} onValueChange={(value) => onFormChange({ isActivelyTrading: value })} />
+          <FormTextRow autoCapitalize="none" autoCorrect={false} error={boundError('priceMoreThan')} keyboardType="decimal-pad" label={t('screener.priceMoreThanLabel')} onChangeText={(value) => onFormChange({ priceMoreThan: value })} placeholder={any} value={form.priceMoreThan} />
+          <FormTextRow autoCapitalize="none" autoCorrect={false} error={boundError('priceLowerThan')} keyboardType="decimal-pad" label={t('screener.priceLowerThanLabel')} onChangeText={(value) => onFormChange({ priceLowerThan: value })} placeholder={any} value={form.priceLowerThan} />
+          <FormTextRow autoCapitalize="none" autoCorrect={false} error={boundError('marketCapMoreThan')} keyboardType="decimal-pad" label={t('screener.marketCapMoreThanLabel')} onChangeText={(value) => onFormChange({ marketCapMoreThan: value })} placeholder={any} value={form.marketCapMoreThan} />
+          <FormTextRow autoCapitalize="none" autoCorrect={false} error={boundError('marketCapLowerThan')} keyboardType="decimal-pad" label={t('screener.marketCapLowerThanLabel')} onChangeText={(value) => onFormChange({ marketCapLowerThan: value })} placeholder={any} value={form.marketCapLowerThan} />
+        </FormGroup>
+        <FormGroup>
+          <CanonicalValuePicker label={t('screener.sectorLabel')} options={AVAILABLE_SECTORS} selected={form.sector} onSelect={(value) => onFormChange({ sector: value })} />
+          <CanonicalValuePicker label={t('screener.industryLabel')} options={AVAILABLE_INDUSTRIES} selected={form.industry} onSelect={(value) => onFormChange({ industry: value })} />
+          <CanonicalValuePicker label={t('screener.countryLabel')} options={AVAILABLE_COUNTRIES} selected={form.country} onSelect={(value) => onFormChange({ country: value })} />
+          <CanonicalValuePicker label={t('screener.exchangeLabel')} options={AVAILABLE_EXCHANGES} selected={form.exchange} onSelect={(value) => onFormChange({ exchange: value })} />
+        </FormGroup>
+        <Button block disabled={!boundsValid} label={t('screener.apply')} onPress={apply} variant="primary" />
       </View>
 
       {state.status === 'loading' ? (
@@ -173,24 +157,22 @@ export function ScreenerScreen({ state, form, onFormChange, onApplyFilters, onLo
       ) : null}
 
       {state.status === 'idle' ? (
-        <Text allowFontScaling style={[headingStyles.empty, { color: palette.mutedForeground }]}>
-          {t('screener.idle')}
-        </Text>
+        <Text tone="muted" variant="meta">{t('screener.idle')}</Text>
       ) : null}
 
-       {state.status === 'empty' ? (
-         <View style={headingStyles.emptyGroup}>
-           <Text allowFontScaling style={[headingStyles.emptyTitle, { color: palette.foreground }]}>{t('screener.emptyTitle')}</Text>
-           <Text allowFontScaling style={[headingStyles.empty, { color: palette.mutedForeground }]}>{t('screener.empty')}</Text>
-         </View>
-       ) : null}
+      {state.status === 'empty' ? (
+        <View style={headingStyles.emptyGroup}>
+          <Text variant="bodyStrong">{t('screener.emptyTitle')}</Text>
+          <Text tone="muted" variant="meta">{t('screener.empty')}</Text>
+        </View>
+      ) : null}
     </View>
   )
 
   const footer = state.status === 'loaded' ? (
     <View style={headingStyles.footerGroup}>
       {state.loadMoreError ? (
-        <Text accessibilityRole="alert" allowFontScaling style={[headingStyles.note, { color: palette.destructive }]}>
+        <Text accessibilityRole="alert" tone="destructive" variant="meta">
           {t('screener.loadMoreError')}
         </Text>
       ) : null}
@@ -199,7 +181,6 @@ export function ScreenerScreen({ state, form, onFormChange, onApplyFilters, onLo
           disabled={state.loadingMore}
           label={state.loadingMore ? t('screener.loadingMore') : t('screener.loadMore')}
           onPress={onLoadMore}
-          palette={palette}
           variant="secondary"
         />
       ) : null}
@@ -216,142 +197,54 @@ export function ScreenerScreen({ state, form, onFormChange, onApplyFilters, onLo
         keyboardShouldPersistTaps="handled"
         contentContainerStyle={headingStyles.content}
         ListHeaderComponent={header}
-        ListFooterComponent={footer}
+        ListFooterComponent={footer ?? undefined}
       />
     </SafeAreaView>
   )
 }
 
-function Toggle({ label, value, onValueChange, palette }: {
-  label: string
-  value: boolean
-  onValueChange: (value: boolean) => void
-  palette: Palette
-}) {
-  return (
-    <View style={headingStyles.switchRow}>
-      <Text allowFontScaling style={[headingStyles.fieldLabel, { color: palette.foreground }]}>{label}</Text>
-      <Switch
-        accessibilityRole="switch"
-        accessibilityLabel={label}
-        accessibilityState={{ checked: value }}
-        value={value}
-        onValueChange={onValueChange}
-        trackColor={{ false: palette.muted, true: palette.primary }}
-      />
-    </View>
-  )
-}
-
-function Field({ label, placeholder, value, onChangeText, palette, keyboardType = 'default', style }: {
-  label: string
-  placeholder?: string
-  value: string
-  onChangeText: (value: string) => void
-  palette: Palette
-  keyboardType?: 'default' | 'decimal-pad'
-  style?: object
-}) {
-  return (
-    <View style={[headingStyles.field, style]}>
-      <Text allowFontScaling style={[headingStyles.fieldLabel, { color: palette.foreground }]}>{label}</Text>
-      <TextInput
-        accessibilityLabel={label}
-        placeholder={placeholder}
-        placeholderTextColor={palette.mutedForeground}
-        value={value}
-        onChangeText={onChangeText}
-        keyboardType={keyboardType}
-        autoCapitalize="none"
-        autoCorrect={false}
-        allowFontScaling
-        style={[headingStyles.input, { color: palette.foreground, borderColor: palette.border, backgroundColor: palette.background }]}
-      />
-    </View>
-  )
-}
-
 /**
- * Memoized so the screener's growing "load more" result set (which
+ * One result: the ticker's mark, the company (or the symbol when the provider
+ * sends no name), the symbol and sector beneath, the price right with the
+ * market cap under it. Memoized so the growing "load more" result set (which
  * can reach into the hundreds of rows) doesn't re-run price/market-cap
  * formatting for every already-rendered row on each parent re-render.
  */
-const ScreenerRowView = memo(function ScreenerRowView({ row, palette, locale, separated, isFirst, isLast, onPress, priceUnavailable, marketCapUnavailable }: {
+const ScreenerRowView = memo(function ScreenerRowView({ row, locale, separated, onPress, priceUnavailable, marketCapUnavailable }: {
   row: ScreenerRow
-  palette: Palette
   locale: string
   separated: boolean
-  isFirst: boolean
-  isLast: boolean
   onPress: () => void
   priceUnavailable: string
   marketCapUnavailable: string
 }) {
-  const priceText = formatScreenerPrice(row.price, locale, priceUnavailable)
-  const marketCapText = formatScreenerMarketCap(row.marketCap, locale, marketCapUnavailable)
+  // Screener prices and market caps arrive without a currency; privacy mode masks them all the same.
+  const hideMoney = useHideMoneyText()
+  const priceText = row.price === null ? priceUnavailable : hideMoney(formatScreenerPrice(row.price, locale, priceUnavailable), locale)
+  const marketCapText = row.marketCap === null ? marketCapUnavailable : hideMoney(formatScreenerMarketCap(row.marketCap, locale, marketCapUnavailable), locale)
   const label = [row.name, row.symbol, row.sector, row.price !== null ? priceText : null].filter(Boolean).join(', ')
+  const detail = row.name ? [row.symbol, row.sector].filter(Boolean).join(' · ') : row.sector
   return (
-    <Pressable
-      accessibilityRole="button"
+    <ListRow
       accessibilityLabel={label}
+      density="comfortable"
+      figure={<Text align="right" tone={row.price === null ? 'muted' : 'default'} variant="amount">{priceText}</Text>}
+      figureMeta={<Text align="right" tone="muted" variant="amountSmall">{marketCapText}</Text>}
+      leading={<EntityMark {...assetMark(row.symbol, null)} />}
+      meta={[detail]}
       onPress={onPress}
-      style={({ pressed }) => [
-        headingStyles.row,
-        { borderColor: palette.border },
-        isFirst && headingStyles.rowFirst,
-        isLast && headingStyles.rowLast,
-        separated && { borderTopWidth: 1, borderTopColor: palette.border },
-        pressed && headingStyles.pressed,
-      ]}
-    >
-      <View style={headingStyles.rowIdentity}>
-        {row.name ? <Text allowFontScaling style={[headingStyles.rowName, { color: palette.foreground }]}>{row.name}</Text> : null}
-        <Text allowFontScaling style={[headingStyles.rowSymbol, { color: row.name ? palette.mutedForeground : palette.foreground }]}>
-          {row.symbol}{row.sector ? ` · ${row.sector}` : ''}
-        </Text>
-      </View>
-      <View style={headingStyles.rowMetrics}>
-        <Text allowFontScaling style={[headingStyles.rowPrice, { color: palette.foreground }]}>{priceText}</Text>
-        <Text allowFontScaling style={[headingStyles.rowMarketCap, { color: palette.mutedForeground }]}>{marketCapText}</Text>
-      </View>
-    </Pressable>
+      separated={separated}
+      title={row.name ?? row.symbol}
+    />
   )
 })
 
 const headingStyles = StyleSheet.create({
   content: { flexGrow: 1, padding: themeTokens.layout.screenPadding, width: '100%', maxWidth: 680, alignSelf: 'center' },
-  headerGroup: { width: '100%', gap: themeTokens.spacing[6], marginBottom: themeTokens.spacing[6] },
+  headerGroup: { width: '100%', gap: themeTokens.spacing[6], marginBottom: themeTokens.spacing[4] },
   footerGroup: { width: '100%', gap: themeTokens.spacing[3], marginTop: themeTokens.spacing[3] },
-  form: { width: '100%', borderWidth: 1, borderRadius: themeTokens.radius.lg, padding: themeTokens.spacing[4], gap: themeTokens.spacing[3] },
-  formRow: { flexDirection: 'row', gap: themeTokens.spacing[3] },
-  switchRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', minHeight: themeTokens.touchTarget.minimum },
-  formHalf: { flex: 1 },
-  field: { gap: themeTokens.spacing[2] },
-  fieldLabel: { ...textStyles.meta, fontWeight: '600' as const },
-  input: { ...textStyles.body, minHeight: themeTokens.touchTarget.minimum, borderWidth: 1, borderRadius: themeTokens.radius.md, paddingHorizontal: themeTokens.spacing[4] },
+  filters: { gap: themeTokens.spacing[4] },
   loading: { gap: themeTokens.spacing[3] },
   skeleton: { borderRadius: themeTokens.radius.sm },
-  empty: { ...textStyles.body }, emptyGroup: { gap: themeTokens.spacing[2] }, emptyTitle: { ...textStyles.section },
-  results: { width: '100%', gap: themeTokens.spacing[3] },
-  note: { ...textStyles.meta },
-  row: {
-    width: '100%',
-    minHeight: themeTokens.touchTarget.minimum,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    padding: themeTokens.spacing[4],
-    gap: themeTokens.spacing[3],
-    borderLeftWidth: 1,
-    borderRightWidth: 1,
-  },
-  rowFirst: { borderTopWidth: 1, borderTopLeftRadius: themeTokens.radius.lg, borderTopRightRadius: themeTokens.radius.lg },
-  rowLast: { borderBottomWidth: 1, borderBottomLeftRadius: themeTokens.radius.lg, borderBottomRightRadius: themeTokens.radius.lg, overflow: 'hidden' },
-  rowIdentity: { flex: 1, gap: themeTokens.spacing[1] },
-  rowName: { ...textStyles.section },
-  rowSymbol: { ...textStyles.amountSmall },
-  rowMetrics: { alignItems: 'flex-end', gap: themeTokens.spacing[1] },
-  rowPrice: { ...textStyles.amount },
-  rowMarketCap: { ...textStyles.amountSmall },
-  pressed: { opacity: 0.72 },
+  emptyGroup: { gap: themeTokens.spacing[2] },
 })

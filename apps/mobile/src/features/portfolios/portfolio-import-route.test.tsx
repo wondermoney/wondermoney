@@ -6,7 +6,7 @@ import { initMobileI18n } from '@/lib/i18n'
 import { PortfolioImportRoute } from './portfolio-import-route'
 
 const mockReplace = jest.fn()
-const mockAddListener = jest.fn((_event: string, _handler: (event: { preventDefault: () => void }) => void) => jest.fn())
+const mockUsePreventRemove = jest.fn((_preventRemove: boolean, _onPrevented?: (options: { data: { action: object }; repeat: () => void }) => void) => jest.fn())
 const mockGetDocumentAsync = jest.fn()
 const mockStart = jest.fn()
 const mockConfirm = jest.fn()
@@ -16,7 +16,7 @@ let mockImportState: { state: { phase: string; preview?: unknown }; start: typeo
   state: { phase: 'idle' }, start: mockStart, confirm: mockConfirm, reset: mockReset,
 }
 
-jest.mock('expo-router', () => ({ useLocalSearchParams: () => mockParams, useRouter: () => ({ replace: mockReplace }), useNavigation: () => ({ addListener: mockAddListener }) }))
+jest.mock('expo-router', () => ({ useLocalSearchParams: () => mockParams, useRouter: () => ({ replace: mockReplace }), usePreventRemove: (preventRemove: boolean, onPrevented?: (options: { data: { action: object }; repeat: () => void }) => void) => mockUsePreventRemove(preventRemove, onPrevented) }))
 jest.mock('expo-document-picker', () => ({ getDocumentAsync: (...args: unknown[]) => mockGetDocumentAsync(...args) }))
 jest.mock('./use-portfolio-import', () => ({ usePortfolioImport: () => mockImportState }))
 
@@ -27,7 +27,7 @@ async function renderRoute() {
 
 describe('PortfolioImportRoute', () => {
   beforeEach(() => {
-    mockReplace.mockReset(); mockAddListener.mockReset().mockReturnValue(jest.fn())
+    mockReplace.mockReset(); mockUsePreventRemove.mockClear()
     mockGetDocumentAsync.mockReset(); mockStart.mockReset(); mockConfirm.mockReset(); mockReset.mockReset()
     mockParams = { portfolioId: '7' }
     mockImportState = { state: { phase: 'idle' }, start: mockStart, confirm: mockConfirm, reset: mockReset }
@@ -64,10 +64,7 @@ describe('PortfolioImportRoute', () => {
   it('guards navigation away while an import is in flight, but not once it settles', async () => {
     mockImportState = { state: { phase: 'parsing' }, start: mockStart, confirm: mockConfirm, reset: mockReset }
     await renderRoute()
-    const guard = mockAddListener.mock.calls[0]?.[1]
-    const blocked = { preventDefault: jest.fn() }
-    guard?.(blocked)
-    expect(blocked.preventDefault).toHaveBeenCalledTimes(1)
+    expect(mockUsePreventRemove.mock.lastCall?.[0]).toBe(true)
 
     const preview = {
       assetGroups: [], importSessionId: 41, limits: { rowsPerBucket: 25 }, portfolioId: 7,
@@ -76,9 +73,6 @@ describe('PortfolioImportRoute', () => {
     }
     mockImportState = { state: { phase: 'review', preview }, start: mockStart, confirm: mockConfirm, reset: mockReset }
     await renderRoute()
-    const allowed = { preventDefault: jest.fn() }
-    const secondGuard = mockAddListener.mock.calls[1]?.[1]
-    secondGuard?.(allowed)
-    expect(allowed.preventDefault).not.toHaveBeenCalled()
+    expect(mockUsePreventRemove.mock.lastCall?.[0]).toBeFalsy()
   })
 })

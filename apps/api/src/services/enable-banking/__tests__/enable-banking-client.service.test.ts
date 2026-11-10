@@ -148,6 +148,26 @@ describe('createEnableBankingClient', () => {
     await expect(client.listInstitutions({})).rejects.toMatchObject({ name: 'TooManyRequestsError', retryAfter: 30, status: 429 });
   });
 
+  it('reads an HTTP-date Retry-After as the seconds left until that date', async () => {
+    vi.useFakeTimers({ now: new Date('2026-11-06T10:00:00Z') });
+    try {
+      const { createEnableBankingClient } = await importClient();
+      mocks.get.mockRejectedValueOnce(axiosErrorWithStatus(429, { 'retry-after': 'Fri, 06 Nov 2026 12:00:00 GMT' }));
+      const client = createEnableBankingClient({ applicationId: 'app-123', privateKeyPem: 'test-pem' });
+      await expect(client.listInstitutions({})).rejects.toMatchObject({ retryAfter: 7200, status: 429 });
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('getSession reads the session status from GET /sessions/{id}', async () => {
+    const { createEnableBankingClient } = await importClient();
+    mocks.get.mockResolvedValueOnce({ data: { access: { valid_until: '2027-01-01T00:00:00Z' }, accounts: ['a-1'], status: 'REVOKED' } });
+    const client = createEnableBankingClient({ applicationId: 'app-123', privateKeyPem: 'test-pem' });
+    await expect(client.getSession('sess/1')).resolves.toEqual({ status: 'REVOKED', validUntil: '2027-01-01T00:00:00Z' });
+    expect(mocks.get).toHaveBeenCalledWith('/sessions/sess%2F1', { headers: { Authorization: 'Bearer signed.jwt.token' } });
+  });
+
   it('maps a 500 response to BadGatewayError', async () => {
     const { createEnableBankingClient } = await importClient();
     mocks.get.mockRejectedValueOnce(axiosErrorWithStatus(500));

@@ -1,14 +1,19 @@
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { BackHandler, ScrollView, StyleSheet, Text, useColorScheme, View } from 'react-native'
-import { SafeAreaView } from 'react-native-safe-area-context'
+import { BackHandler, ScrollView, StyleSheet, View } from 'react-native'
 
-import { BackControl } from '@/components/ui/back-control'
-import { PageHeader } from '@/components/ui/page-header'
+import { Button } from '@/components/ui/button'
+import { EntityMark, portfolioMark } from '@/components/ui/entity-mark'
+import { FormBar } from '@/components/ui/form-bar'
+import { FormGroup, FormSwitchRow, FormTextRow } from '@/components/ui/form-row'
+import { Notice } from '@/components/ui/notice'
+import { SafeAreaView } from '@/components/ui/screen-safe-area'
+import { Text } from '@/components/ui/text'
+import { formatNumberInput, parseNumberInput } from '@/lib/formatters/decimal-input'
 import { themeTokens } from '@/theme/tokens'
-import { textStyles } from '@/theme/typography'
+import { usePalette } from '@/theme/use-palette'
 
-import { PortfolioButton, PortfolioField, PortfolioToggle } from './portfolio-form-parts'
+import { PortfolioReviewList, PortfolioReviewRow } from './portfolio-form-parts'
 import type { PortfolioSettingsReconciliation } from './portfolio-settings-reconciliation'
 import {
   PORTFOLIO_ALLOCATION_PRESETS,
@@ -23,9 +28,9 @@ import type { PortfolioSettingsFailure } from './use-portfolio-settings'
 
 export type PortfolioSettingsModel = Readonly<{ id: number; name: string; description: string | null; currency: string; benchmarkSymbol: string | null; excluded: boolean; favored: boolean; targetAllocation: Readonly<Record<string, number>> | null }>
 
-function allocationInputsFrom(source: Readonly<Record<string, number>> | null | undefined): Record<PortfolioTargetAssetClass, string> {
+function allocationInputsFrom(source: Readonly<Record<string, number>> | null | undefined, locale: string): Record<PortfolioTargetAssetClass, string> {
   return Object.fromEntries(
-    PORTFOLIO_TARGET_ASSET_CLASSES.map((key) => [key, source?.[key] !== undefined ? String(source[key]) : '']),
+    PORTFOLIO_TARGET_ASSET_CLASSES.map((key) => [key, source?.[key] !== undefined ? formatNumberInput(source[key], locale) : '']),
   ) as Record<PortfolioTargetAssetClass, string>
 }
 
@@ -56,33 +61,32 @@ export function PortfolioSettingsScreen({
   onAcknowledgeReconciliation,
   onDismissApplied,
 }: PortfolioSettingsScreenProps) {
-  const { t } = useTranslation()
-  const palette = themeTokens.colors[useColorScheme() === 'dark' ? 'dark' : 'light']
+  const { t, i18n } = useTranslation()
+  const palette = usePalette()
+  // Percentages are read in the app's language ("12,5" in pt and es).
+  const locale = i18n.resolvedLanguage ?? i18n.language ?? 'en'
   const [name, setName] = useState(unknownPayload?.name ?? model.name)
   const [description, setDescription] = useState(unknownPayload && 'description' in unknownPayload ? unknownPayload.description ?? '' : model.description ?? '')
   const [benchmarkSymbol, setBenchmarkSymbol] = useState(unknownPayload && 'benchmarkSymbol' in unknownPayload ? unknownPayload.benchmarkSymbol ?? '' : model.benchmarkSymbol ?? '')
   const [excluded, setExcluded] = useState(unknownPayload?.excluded ?? model.excluded)
   const [favored, setFavored] = useState(unknownPayload?.favored ?? model.favored)
   const [allocationInputs, setAllocationInputs] = useState<Record<PortfolioTargetAssetClass, string>>(() => (
-    allocationInputsFrom(unknownPayload && 'targetAllocation' in unknownPayload ? unknownPayload.targetAllocation : model.targetAllocation)
+    allocationInputsFrom(unknownPayload && 'targetAllocation' in unknownPayload ? unknownPayload.targetAllocation : model.targetAllocation, locale)
   ))
   const [reviewed, setReviewed] = useState<Readonly<PortfolioSettingsWrite> | null>(null)
-  const [validation, setValidation] = useState(false)
   const blocked = unknownPayload !== null
 
   const allocationHasEntries = PORTFOLIO_TARGET_ASSET_CLASSES.some((key) => allocationInputs[key].trim().length > 0)
   const allocationTotal = PORTFOLIO_TARGET_ASSET_CLASSES.reduce((sum, key) => {
-    const parsed = Number(allocationInputs[key].trim())
-    return sum + (Number.isFinite(parsed) ? parsed : 0)
+    const parsed = parseNumberInput(allocationInputs[key], locale)
+    return sum + (parsed ?? 0)
   }, 0)
 
   const applyAllocationPreset = (preset: keyof typeof PORTFOLIO_ALLOCATION_PRESETS) => {
-    setAllocationInputs(allocationInputsFrom(PORTFOLIO_ALLOCATION_PRESETS[preset]))
-    setValidation(false)
+    setAllocationInputs(allocationInputsFrom(PORTFOLIO_ALLOCATION_PRESETS[preset], locale))
   }
   const clearAllocation = () => {
-    setAllocationInputs(allocationInputsFrom(null))
-    setValidation(false)
+    setAllocationInputs(allocationInputsFrom(null, locale))
   }
 
   useEffect(() => {
@@ -91,30 +95,35 @@ export function PortfolioSettingsScreen({
     return () => listener.remove()
   }, [pending])
 
+  // The candidate is re-derived on every render: the ✓ stays disabled until
+  // something changed and every change is valid.
+  const nextName = name.trim()
+  const nextDescription = description.trim().length === 0 ? null : description
+  const nextBenchmarkSymbol = benchmarkSymbol.trim().length === 0 ? null : benchmarkSymbol.trim()
+  const allocationEntries = PORTFOLIO_TARGET_ASSET_CLASSES
+    .map((key) => [key, allocationInputs[key].trim()] as const)
+    .filter(([, raw]) => raw.length > 0)
+  const nextAllocation = allocationEntries.length === 0
+    ? null
+    : Object.fromEntries(allocationEntries.map(([key, raw]) => [key, parseNumberInput(raw, locale) ?? Number.NaN]))
+  const candidate = {
+    ...(nextName !== model.name ? { name: nextName } : {}),
+    ...(nextDescription !== model.description ? { description: nextDescription } : {}),
+    ...(nextBenchmarkSymbol !== model.benchmarkSymbol ? { benchmarkSymbol: nextBenchmarkSymbol } : {}),
+    ...(excluded !== model.excluded ? { excluded } : {}),
+    ...(favored !== model.favored ? { favored } : {}),
+    ...(!portfolioTargetAllocationsEqual(nextAllocation, model.targetAllocation) ? { targetAllocation: nextAllocation } : {}),
+  }
+  const parsed = portfolioSettingsWriteSchema.safeParse(candidate)
+  const invalidAllocation = (key: PortfolioTargetAssetClass) => {
+    const raw = allocationInputs[key].trim()
+    const value = parseNumberInput(raw, locale)
+    return raw.length > 0 && !(value !== null && value >= 0)
+  }
+  const nameError = nextName.length === 0 ? t('portfolioSettings.nameError') : null
+
   const buildReview = () => {
-    const nextName = name.trim()
-    const nextDescription = description.trim().length === 0 ? null : description
-    const nextBenchmarkSymbol = benchmarkSymbol.trim().length === 0 ? null : benchmarkSymbol.trim()
-    const allocationEntries = PORTFOLIO_TARGET_ASSET_CLASSES
-      .map((key) => [key, allocationInputs[key].trim()] as const)
-      .filter(([, raw]) => raw.length > 0)
-    const nextAllocation = allocationEntries.length === 0
-      ? null
-      : Object.fromEntries(allocationEntries.map(([key, raw]) => [key, Number(raw)]))
-    const candidate = {
-      ...(nextName !== model.name ? { name: nextName } : {}),
-      ...(nextDescription !== model.description ? { description: nextDescription } : {}),
-      ...(nextBenchmarkSymbol !== model.benchmarkSymbol ? { benchmarkSymbol: nextBenchmarkSymbol } : {}),
-      ...(excluded !== model.excluded ? { excluded } : {}),
-      ...(favored !== model.favored ? { favored } : {}),
-      ...(!portfolioTargetAllocationsEqual(nextAllocation, model.targetAllocation) ? { targetAllocation: nextAllocation } : {}),
-    }
-    const parsed = portfolioSettingsWriteSchema.safeParse(candidate)
-    if (!parsed.success) {
-      setValidation(true)
-      return
-    }
-    setValidation(false)
+    if (!parsed.success) return
     setReviewed(Object.freeze(parsed.data))
   }
 
@@ -125,42 +134,45 @@ export function PortfolioSettingsScreen({
     setBenchmarkSymbol(model.benchmarkSymbol ?? '')
     setExcluded(model.excluded)
     setFavored(model.favored)
-    setAllocationInputs(allocationInputsFrom(model.targetAllocation))
-    setValidation(false)
+    setAllocationInputs(allocationInputsFrom(model.targetAllocation, locale))
     setReviewed(null)
   }
 
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: palette.background }]}>
+      <FormBar
+        closeDisabled={pending}
+        closeLabel={t('common.close')}
+        onClose={onBack}
+        onSave={blocked ? undefined : reviewed ? () => void onSave(reviewed) : buildReview}
+        saveDisabled={reviewed ? pending : !parsed.success || pending}
+        saveLabel={reviewed ? (pending ? t('portfolioSettings.saving') : t('portfolioSettings.confirm')) : t('portfolioSettings.review')}
+        saving={reviewed !== null && pending}
+        title={t('portfolioSettings.title')}
+      />
       <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={styles.content}>
         <View style={styles.page}>
-          <View style={styles.header}>
-            <BackControl fallback="/portfolio" label={t('portfolioSettings.back')} onPress={onBack} disabled={pending} />
-            <View style={styles.heading}>
-              <PageHeader palette={palette}
-            instruction={t('portfolioSettings.helper')} title={t('portfolioSettings.title')} />
+          <View style={styles.identity}>
+            <EntityMark {...portfolioMark()} />
+            <View style={styles.identityText}>
+              <Text variant="bodyStrong">{model.name}</Text>
+              <Text tone="muted" variant="meta">{t('portfolioSettings.currencyLocked', { currency: model.currency })}</Text>
             </View>
-          </View>
-
-          <View style={[styles.identity, { borderColor: palette.border, backgroundColor: palette.muted }]}>
-            <Text style={[styles.name, { color: palette.foreground }]}>{model.name}</Text>
-            <Text style={[styles.helper, { color: palette.mutedForeground }]}>{t('portfolioSettings.currencyLocked', { currency: model.currency })}</Text>
           </View>
 
           {reconciliation === 'applied' && !blocked ? (
-            <View style={[styles.notice, { borderColor: palette.primary, backgroundColor: palette.muted }]}>
-              <Text accessibilityRole="header" style={[styles.sectionTitle, { color: palette.foreground }]}>{t('portfolioSettings.appliedTitle')}</Text>
-              <Text accessibilityRole="alert" style={[styles.helper, { color: palette.mutedForeground }]}>{t('portfolioSettings.appliedMessage')}</Text>
-              <View style={styles.actions}><PortfolioButton label={t('portfolioSettings.continue')} onPress={onDismissApplied} palette={palette} /></View>
-            </View>
+            <Notice
+              action={<Button label={t('portfolioSettings.continue')} onPress={onDismissApplied} size="sm" />}
+              message={t('portfolioSettings.appliedMessage')}
+              title={t('portfolioSettings.appliedTitle')}
+            />
           ) : null}
 
           {blocked ? (
-            <View style={[styles.notice, { borderColor: palette.destructive, backgroundColor: palette.muted }]}>
-              <Text accessibilityRole="header" style={[styles.sectionTitle, { color: palette.foreground }]}>{t('portfolioSettings.unknownTitle')}</Text>
-              <Text accessibilityRole="alert" style={[styles.helper, { color: palette.mutedForeground }]}>{t('portfolioSettings.unknownMessage')}</Text>
-              <ReviewChanges payload={unknownPayload} palette={palette} />
-              <Text style={[styles.helper, { color: palette.mutedForeground }]}>
+            <View style={styles.form}>
+              <Notice message={t('portfolioSettings.unknownMessage')} title={t('portfolioSettings.unknownTitle')} tone="destructive" />
+              <ReviewChanges payload={unknownPayload} />
+              <Text tone="muted" variant="meta">
                 {reconciling
                   ? t('portfolioSettings.reconciling')
                   : reconciliation === 'not-applied'
@@ -170,61 +182,65 @@ export function PortfolioSettingsScreen({
                       : t('portfolioSettings.reconcileRequired')}
               </Text>
               <View style={styles.actions}>
-                <BackControl fallback="/portfolio" label={t('portfolioSettings.back')} onPress={onBack} />
+                <Button label={t('portfolioSettings.back')} onPress={onBack} variant="secondary" />
                 {reconciliation === 'not-applied'
-                  ? <PortfolioButton label={t('portfolioSettings.acknowledge')} onPress={onAcknowledgeReconciliation} palette={palette} />
-                  : <PortfolioButton label={t('portfolioSettings.refresh')} onPress={onReconcile} palette={palette} disabled={reconciling} busy={reconciling} />}
+                  ? <Button label={t('portfolioSettings.acknowledge')} onPress={onAcknowledgeReconciliation} />
+                  : <Button disabled={reconciling} label={t('portfolioSettings.refresh')} loading={reconciling} onPress={() => void onReconcile()} />}
               </View>
             </View>
           ) : reviewed ? (
             <View style={styles.form}>
-              <Text accessibilityRole="header" style={[styles.sectionTitle, { color: palette.foreground }]}>{t('portfolioSettings.reviewTitle')}</Text>
-              <Text style={[styles.helper, { color: palette.mutedForeground }]}>{t('portfolioSettings.reviewHelper')}</Text>
-              <ReviewChanges payload={reviewed} palette={palette} />
-              {failure ? <Text accessibilityRole="alert" style={[styles.alert, { color: palette.destructive }]}>{t(`portfolioSettings.failures.${failure}`)}</Text> : null}
+              <View style={styles.head}>
+                <Text accessibilityRole="header" variant="heading">{t('portfolioSettings.reviewTitle')}</Text>
+                <Text tone="muted" variant="meta">{t('portfolioSettings.reviewHelper')}</Text>
+              </View>
+              <ReviewChanges payload={reviewed} />
+              {failure ? <Notice message={t(`portfolioSettings.failures.${failure}`)} tone="destructive" /> : null}
               <View style={styles.actions}>
-                <PortfolioButton label={t('portfolioSettings.cancelReview')} onPress={cancelReview} palette={palette} secondary disabled={pending} />
-                <PortfolioButton label={t('portfolioSettings.edit')} onPress={editReview} palette={palette} secondary disabled={pending} />
-                <PortfolioButton label={pending ? t('portfolioSettings.saving') : t('portfolioSettings.confirm')} onPress={() => onSave(reviewed)} palette={palette} disabled={pending} busy={pending} />
+                <Button disabled={pending} label={t('portfolioSettings.cancelReview')} onPress={cancelReview} variant="secondary" />
+                <Button disabled={pending} label={t('portfolioSettings.edit')} onPress={editReview} variant="secondary" />
               </View>
             </View>
           ) : (
             <View style={styles.form}>
-              <PortfolioField label={t('portfolioSettings.name')} value={name} onChange={(value) => { setName(value); setValidation(false) }} maxLength={255} palette={palette} required disabled={pending} />
-              <PortfolioField label={t('portfolioSettings.description')} value={description} onChange={(value) => { setDescription(value); setValidation(false) }} maxLength={500} palette={palette} multiline disabled={pending} />
-              <Text style={[styles.helper, { color: palette.mutedForeground }]}>{t('portfolioSettings.blankDescription')}</Text>
-              <PortfolioField label={t('portfolioSettings.benchmarkSymbol')} value={benchmarkSymbol} onChange={(value) => { setBenchmarkSymbol(value); setValidation(false) }} maxLength={20} palette={palette} disabled={pending} />
-              <Text style={[styles.helper, { color: palette.mutedForeground }]}>{t('portfolioSettings.blankBenchmark')}</Text>
-              <PortfolioToggle label={t('portfolioSettings.excluded')} helper={t('portfolioSettings.excludedHelper')} value={excluded} onToggle={(next) => { setExcluded(next); setValidation(false) }} palette={palette} disabled={pending} />
-              <PortfolioToggle label={t('portfolioSettings.favored')} helper={t('portfolioSettings.favoredHelper')} value={favored} onToggle={(next) => { setFavored(next); setValidation(false) }} palette={palette} disabled={pending} />
+              <FormGroup>
+                <FormTextRow key="name" editable={!pending} error={nameError} label={t('portfolioSettings.name')} maxLength={255} onChangeText={setName} value={name} />
+                <FormTextRow key="description" editable={!pending} hint={t('portfolioSettings.blankDescription')} label={t('portfolioSettings.description')} maxLength={500} multiline onChangeText={setDescription} value={description} />
+                <FormTextRow key="benchmark" autoCapitalize="characters" autoCorrect={false} editable={!pending} hint={t('portfolioSettings.blankBenchmark')} label={t('portfolioSettings.benchmarkSymbol')} maxLength={20} onChangeText={setBenchmarkSymbol} placeholder={t('portfolioTickerSearch.placeholder')} value={benchmarkSymbol} />
+                <FormSwitchRow key="excluded" disabled={pending} hint={t('portfolioSettings.excludedHelper')} label={t('portfolioSettings.excluded')} onValueChange={setExcluded} value={excluded} />
+                <FormSwitchRow key="favored" disabled={pending} hint={t('portfolioSettings.favoredHelper')} label={t('portfolioSettings.favored')} onValueChange={setFavored} value={favored} />
+              </FormGroup>
 
-              <Text accessibilityRole="header" style={[styles.sectionTitle, { color: palette.foreground }]}>{t('portfolioSettings.allocation.heading')}</Text>
-              <Text style={[styles.helper, { color: palette.mutedForeground }]}>{t('portfolioSettings.allocation.helper')}</Text>
-              <View style={styles.actions}>
-                <PortfolioButton label={t('portfolioSettings.allocation.presets.conservative')} onPress={() => applyAllocationPreset('conservative')} palette={palette} secondary disabled={pending} />
-                <PortfolioButton label={t('portfolioSettings.allocation.presets.balanced')} onPress={() => applyAllocationPreset('balanced')} palette={palette} secondary disabled={pending} />
-                <PortfolioButton label={t('portfolioSettings.allocation.presets.growth')} onPress={() => applyAllocationPreset('growth')} palette={palette} secondary disabled={pending} />
-                <PortfolioButton label={t('portfolioSettings.allocation.clear')} onPress={clearAllocation} palette={palette} secondary disabled={pending || !allocationHasEntries} />
+              <View style={styles.section}>
+                <View style={styles.head}>
+                  <Text accessibilityRole="header" variant="heading">{t('portfolioSettings.allocation.heading')}</Text>
+                  <Text tone="muted" variant="meta">{t('portfolioSettings.allocation.helper')}</Text>
+                </View>
+                <View style={styles.actions}>
+                  <Button disabled={pending} label={t('portfolioSettings.allocation.presets.conservative')} onPress={() => applyAllocationPreset('conservative')} size="sm" variant="secondary" />
+                  <Button disabled={pending} label={t('portfolioSettings.allocation.presets.balanced')} onPress={() => applyAllocationPreset('balanced')} size="sm" variant="secondary" />
+                  <Button disabled={pending} label={t('portfolioSettings.allocation.presets.growth')} onPress={() => applyAllocationPreset('growth')} size="sm" variant="secondary" />
+                  <Button disabled={pending || !allocationHasEntries} label={t('portfolioSettings.allocation.clear')} onPress={clearAllocation} size="sm" variant="ghost" />
+                </View>
+                <FormGroup>
+                  {PORTFOLIO_TARGET_ASSET_CLASSES.map((key) => (
+                    <FormTextRow
+                      key={key}
+                      editable={!pending}
+                      error={invalidAllocation(key) ? t('portfolioSettings.allocation.invalid') : null}
+                      keyboardType="decimal-pad"
+                      label={t(`portfolioSettings.allocation.classes.${PORTFOLIO_TARGET_ASSET_CLASS_I18N_KEYS[key]}`)}
+                      maxLength={6}
+                      onChangeText={(value) => setAllocationInputs((prev) => ({ ...prev, [key]: value }))}
+                      placeholder="0"
+                      value={allocationInputs[key]}
+                    />
+                  ))}
+                </FormGroup>
+                <Text tone="muted" variant="meta">{t('portfolioSettings.allocation.total', { total: allocationTotal })}</Text>
               </View>
-              {PORTFOLIO_TARGET_ASSET_CLASSES.map((key) => (
-                <PortfolioField
-                  key={key}
-                  label={t(`portfolioSettings.allocation.classes.${PORTFOLIO_TARGET_ASSET_CLASS_I18N_KEYS[key]}`)}
-                  value={allocationInputs[key]}
-                  onChange={(value) => { setAllocationInputs((prev) => ({ ...prev, [key]: value })); setValidation(false) }}
-                  maxLength={6}
-                  palette={palette}
-                  disabled={pending}
-                  keyboardType="decimal-pad"
-                />
-              ))}
-              <Text style={[styles.helper, { color: allocationHasEntries && allocationTotal !== 100 ? palette.destructive : palette.mutedForeground }]}>
-                {t('portfolioSettings.allocation.total', { total: allocationTotal })}
-              </Text>
 
-              {validation ? <Text accessibilityRole="alert" style={[styles.alert, { color: palette.destructive }]}>{t('portfolioSettings.validation')}</Text> : null}
-              {failure ? <Text accessibilityRole="alert" style={[styles.alert, { color: palette.destructive }]}>{t(`portfolioSettings.failures.${failure}`)}</Text> : null}
-              <PortfolioButton label={t('portfolioSettings.review')} onPress={buildReview} palette={palette} disabled={pending} />
+              {failure ? <Notice message={t(`portfolioSettings.failures.${failure}`)} tone="destructive" /> : null}
             </View>
           )}
         </View>
@@ -233,52 +249,40 @@ export function PortfolioSettingsScreen({
   )
 }
 
-function ReviewChanges({ payload, palette }: { payload: Readonly<PortfolioSettingsWrite>; palette: (typeof themeTokens.colors)[keyof typeof themeTokens.colors] }) {
+function ReviewChanges({ payload }: { payload: Readonly<PortfolioSettingsWrite> }) {
   const { t } = useTranslation()
   return (
-    <View style={[styles.reviewCard, { borderColor: palette.border, backgroundColor: palette.card }]}>
-      {payload.name !== undefined ? <ReviewRow label={t('portfolioSettings.name')} value={payload.name} palette={palette} /> : null}
-      {payload.description !== undefined ? <ReviewRow label={t('portfolioSettings.description')} value={payload.description === null ? t('portfolioSettings.descriptionCleared') : payload.description} palette={palette} /> : null}
-      {payload.benchmarkSymbol !== undefined ? <ReviewRow label={t('portfolioSettings.benchmarkSymbol')} value={payload.benchmarkSymbol === null ? t('portfolioSettings.benchmarkCleared') : payload.benchmarkSymbol} palette={palette} /> : null}
-      {payload.excluded !== undefined ? <ReviewRow label={t('portfolioSettings.excluded')} value={t(payload.excluded ? 'portfolioSettings.on' : 'portfolioSettings.off')} palette={palette} /> : null}
-      {payload.favored !== undefined ? <ReviewRow label={t('portfolioSettings.favored')} value={t(payload.favored ? 'portfolioSettings.on' : 'portfolioSettings.off')} palette={palette} /> : null}
+    <PortfolioReviewList>
+      {payload.name !== undefined ? <PortfolioReviewRow key="name" label={t('portfolioSettings.name')} value={payload.name} /> : null}
+      {payload.description !== undefined ? <PortfolioReviewRow key="description" label={t('portfolioSettings.description')} value={payload.description === null ? t('portfolioSettings.descriptionCleared') : payload.description} /> : null}
+      {payload.benchmarkSymbol !== undefined ? <PortfolioReviewRow key="benchmark" label={t('portfolioSettings.benchmarkSymbol')} value={payload.benchmarkSymbol === null ? t('portfolioSettings.benchmarkCleared') : payload.benchmarkSymbol} /> : null}
+      {payload.excluded !== undefined ? <PortfolioReviewRow key="excluded" label={t('portfolioSettings.excluded')} value={t(payload.excluded ? 'portfolioSettings.on' : 'portfolioSettings.off')} /> : null}
+      {payload.favored !== undefined ? <PortfolioReviewRow key="favored" label={t('portfolioSettings.favored')} value={t(payload.favored ? 'portfolioSettings.on' : 'portfolioSettings.off')} /> : null}
       {payload.targetAllocation !== undefined ? (
         payload.targetAllocation === null
-          ? <ReviewRow label={t('portfolioSettings.allocation.heading')} value={t('portfolioSettings.allocation.cleared')} palette={palette} />
+          ? <PortfolioReviewRow key="allocation" label={t('portfolioSettings.allocation.heading')} value={t('portfolioSettings.allocation.cleared')} />
           : PORTFOLIO_TARGET_ASSET_CLASSES
             .filter((key) => payload.targetAllocation![key] !== undefined)
             .map((key) => (
-              <ReviewRow
+              <PortfolioReviewRow
                 key={key}
                 label={t(`portfolioSettings.allocation.classes.${PORTFOLIO_TARGET_ASSET_CLASS_I18N_KEYS[key]}`)}
                 value={t('portfolioSettings.allocation.percent', { value: payload.targetAllocation![key] })}
-                palette={palette}
               />
             ))
       ) : null}
-    </View>
+    </PortfolioReviewList>
   )
-}
-
-function ReviewRow({ label, value, palette }: { label: string; value: string; palette: (typeof themeTokens.colors)[keyof typeof themeTokens.colors] }) {
-  return <View accessible accessibilityLabel={`${label}: ${value}`} style={styles.reviewRow}><Text style={[styles.helper, { color: palette.mutedForeground }]}>{label}</Text><Text style={[styles.reviewValue, { color: palette.foreground }]}>{value}</Text></View>
 }
 
 const styles = StyleSheet.create({
   safe: { flex: 1 },
-  content: { flexGrow: 1, padding: themeTokens.layout.screenPadding },
-  page: { width: '100%', maxWidth: 680, alignSelf: 'center', gap: themeTokens.layout.blockGap },
-  header: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'flex-start', gap: themeTokens.spacing[4] },
-  heading: { flex: 1, minWidth: 220, gap: themeTokens.spacing[1] },
-  helper: { ...textStyles.body },
-  identity: { borderWidth: 1, borderRadius: themeTokens.radius.lg, padding: themeTokens.spacing[4], gap: themeTokens.spacing[1] },
-  name: { ...textStyles.section },
+  content: { flexGrow: 1, paddingHorizontal: themeTokens.layout.screenPadding, paddingBottom: themeTokens.spacing[10] },
+  page: { width: '100%', maxWidth: 720, alignSelf: 'center', gap: themeTokens.spacing[6], paddingTop: themeTokens.spacing[2] },
+  identity: { flexDirection: 'row', alignItems: 'center', gap: themeTokens.spacing[3] },
+  identityText: { flex: 1, minWidth: 0, gap: themeTokens.spacing[1] },
   form: { gap: themeTokens.spacing[4] },
-  alert: { ...textStyles.body },
-  notice: { borderWidth: 1, borderRadius: themeTokens.radius.lg, padding: themeTokens.spacing[4], gap: themeTokens.spacing[3] },
-  sectionTitle: { ...textStyles.section },
-  actions: { flexDirection: 'row', flexWrap: 'wrap', gap: themeTokens.spacing[3] },
-  reviewCard: { borderWidth: 1, borderRadius: themeTokens.radius.lg, padding: themeTokens.spacing[4], gap: themeTokens.spacing[3] },
-  reviewRow: { gap: themeTokens.spacing[1] },
-  reviewValue: { ...textStyles.action },
+  head: { gap: themeTokens.spacing[2] },
+  section: { gap: themeTokens.spacing[4], paddingTop: themeTokens.spacing[6] },
+  actions: { flexDirection: 'row', flexWrap: 'wrap', gap: themeTokens.spacing[2] },
 })

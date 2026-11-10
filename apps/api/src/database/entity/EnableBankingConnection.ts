@@ -68,6 +68,13 @@ export class EnableBankingConnection extends Base {
   maxConsentValiditySeconds?: number;
 
   /**
+   * The scheduler leaves the connection alone until this time. Set when the provider rate-limits
+   * a sync, from its `Retry-After` or the default sync interval.
+   */
+  @Property({ columnType: 'timestamptz', nullable: true })
+  nextEligibleSyncAt?: Date;
+
+  /**
    * Where the callback sends the browser afterwards. Set once, when the connection is started;
    * null means the web app.
    */

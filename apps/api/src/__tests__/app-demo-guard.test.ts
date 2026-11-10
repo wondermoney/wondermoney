@@ -141,14 +141,19 @@ const GUARDED_MOUNTS = [
   '/v1/user',
 ];
 
-async function loadApp() {
-  vi.resetModules();
-  Object.assign(process.env, { ADMIN_API_KEY: 'admin-key', NODE_ENV: 'development', PORT: '3001' });
-  const { default: Application } = await import('../app');
-  const app = new Application();
-  await app.connect();
-  await app.init(false);
-  return app.host;
+// Every test asks the same question of the same configuration, so the app is built once per file.
+let host: Promise<express.Express> | undefined;
+
+function loadApp() {
+  host ??= (async () => {
+    Object.assign(process.env, { ADMIN_API_KEY: 'admin-key', NODE_ENV: 'development', PORT: '3001' });
+    const { default: Application } = await import('../app');
+    const app = new Application();
+    await app.connect();
+    await app.init(false);
+    return app.host;
+  })();
+  return host;
 }
 
 describe('demo guard and tenant scope on authenticated mounts', () => {

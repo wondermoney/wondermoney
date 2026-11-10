@@ -1,6 +1,5 @@
 import * as DocumentPicker from 'expo-document-picker'
-import { type Href, useLocalSearchParams, useNavigation, useRouter } from 'expo-router'
-import { useEffect } from 'react'
+import { type Href, useLocalSearchParams, usePreventRemove, useRouter } from 'expo-router'
 import { useTranslation } from 'react-i18next'
 import { useColorScheme } from 'react-native'
 
@@ -18,14 +17,11 @@ export function PortfolioImportRoute() {
   const params = useLocalSearchParams<{ portfolioId?: string | string[] }>()
   const portfolioId = parsePortfolioId(params.portfolioId)
   const router = useRouter()
-  const navigation = useNavigation()
   const { t } = useTranslation()
   const palette = themeTokens.colors[useColorScheme() === 'dark' ? 'dark' : 'light']
   const importState = usePortfolioImport(portfolioId ?? 1)
 
-  useEffect(() => navigation.addListener('beforeRemove', (event) => {
-    if (BLOCKING_PHASES.has(importState.state.phase) || importState.resolvingAssetGroups) event.preventDefault()
-  }), [importState.resolvingAssetGroups, importState.state.phase, navigation])
+  usePreventRemove(BLOCKING_PHASES.has(importState.state.phase) || importState.resolvingAssetGroups)
 
   const back = () => {
     if (portfolioId === null) { router.replace('/portfolio' as Href); return }

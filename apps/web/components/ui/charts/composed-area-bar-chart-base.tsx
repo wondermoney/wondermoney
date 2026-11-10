@@ -5,6 +5,7 @@ import {
   Area,
   Bar,
   CartesianGrid,
+  Cell,
   ComposedChart,
   Line,
   XAxis,
@@ -19,6 +20,8 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
+import { AMOUNT_MASK } from "@/lib/privacy/mask";
+import { usePrivacyMode } from "@/lib/privacy/usePrivacyMode";
 import { cn } from "@/lib/utils";
 
 import { chartAxisProps, chartGridProps } from "./chart-axis";
@@ -43,6 +46,12 @@ type Props = {
   >["labelFormatter"];
   barSize?: number;
   radius?: number;
+  /**
+   * Bar series whose sign is the information (money in against money out):
+   * each bar is green when positive and red when negative instead of taking
+   * its series colour.
+   */
+  signedBarKeys?: string[];
   /** Optional line series rendered on top of the area and bar layers. */
   lineKeys?: string[];
   /** Disable Recharts entrance animations for users who prefer reduced motion. */
@@ -102,6 +111,8 @@ function renderProvisionalDot(provisionalKey: string) {
   };
 }
 
+const maskTick = () => AMOUNT_MASK;
+
 export function ComposedAreaBarChartBase({
   data,
   xKey,
@@ -110,17 +121,22 @@ export function ComposedAreaBarChartBase({
   config,
   className,
   xFormatter,
-  yFormatter,
+  yFormatter: yFormatterProp,
   tooltipFormatter,
   tooltipValueFormatter,
   tooltipLabelFormatter,
   barSize = 4,
   radius = 4,
+  signedBarKeys = [],
   lineKeys = [],
   isAnimationActive = true,
   connectNulls = false,
   provisionalKey,
 }: Props) {
+  // A value axis with no formatter of its own is assumed to be money while
+  // privacy mode is on: the chart keeps its shape, the ticks lose their figures.
+  const { hidden } = usePrivacyMode();
+  const yFormatter = yFormatterProp ?? (hidden ? maskTick : undefined);
   const gradientPrefix = React.useId().replace(/:/g, "");
   const lineDot = provisionalKey
     ? renderProvisionalDot(provisionalKey)
@@ -198,7 +214,20 @@ export function ComposedAreaBarChartBase({
             radius={radius}
             barSize={barSize}
             isAnimationActive={isAnimationActive}
-          />
+          >
+            {signedBarKeys.includes(key)
+              ? data.map((row, index) => (
+                  <Cell
+                    key={index}
+                    fill={
+                      Number((row as Record<string, unknown>)[key]) < 0
+                        ? "var(--destructive-text)"
+                        : "var(--success-text)"
+                    }
+                  />
+                ))
+              : null}
+          </Bar>
         ))}
         {lineKeys.map((key) => (
           <Line

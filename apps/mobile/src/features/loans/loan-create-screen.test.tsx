@@ -7,16 +7,22 @@ import { LoanCreateScreen, type LoanCreateScreenProps } from './loan-create-scre
 
 const currencies = [{ currencyKey: 1, code: 'EUR', description: 'Euro' }, { currencyKey: 2, code: 'USD', description: 'US Dollar' }]
 
-const renderScreen = async (overrides: Partial<LoanCreateScreenProps> = {}) => {
-  const i18n = await initMobileI18n('en')
+const renderScreen = async (overrides: Partial<LoanCreateScreenProps> = {}, language = 'en') => {
+  const i18n = await initMobileI18n(language)
   const props: LoanCreateScreenProps = { currencies, loading: false, metadataError: false, pending: false, outcome: null, onBack: jest.fn(), onCreate: jest.fn().mockResolvedValue(undefined), ...overrides }
   return { props, view: await render(<I18nextProvider i18n={i18n}><LoanCreateScreen {...props} /></I18nextProvider>) }
 }
 
+/** Opens a select row's sheet and picks one option. */
+const choose = async (view: Awaited<ReturnType<typeof renderScreen>>['view'], field: string, option: string) => {
+  await fireEvent.press(view.getByRole('button', { name: new RegExp(`^${field},`) }))
+  await fireEvent.press(view.getByRole('radio', { name: option }))
+}
+
 async function fillRequiredFields(view: Awaited<ReturnType<typeof renderScreen>>['view']) {
   await fireEvent.changeText(view.getByLabelText('Name'), 'Home loan')
-  await fireEvent.press(view.getByRole('radio', { name: 'Mortgage' }))
-  await fireEvent.press(view.getByRole('radio', { name: 'EUR · Euro' }))
+  await choose(view, 'Loan type', 'Mortgage')
+  await choose(view, 'Currency', 'EUR · Euro')
   await fireEvent.changeText(view.getByLabelText('Opening principal balance'), '250000')
   await fireEvent.changeText(view.getByLabelText('Start date'), '2026-01-01')
 }
@@ -52,28 +58,78 @@ describe('LoanCreateScreen', () => {
     })))
   })
 
-  it('shows a per-field error under each missing required field and never calls onCreate', async () => {
+  it('keeps Add loan disabled until every required field is valid, without flagging empty fields', async () => {
     const onCreate = jest.fn()
     const { view } = await renderScreen({ onCreate })
-    // Start date defaults to today, so it's the one required field that's
-    // already valid on a fresh, untouched form — everything else is empty.
+    expect(view.getByRole('button', { name: 'Add loan' })).toBeDisabled()
+    expect(view.queryByText('Enter a name for this loan.')).not.toBeOnTheScreen()
+    expect(view.queryByText('Choose a loan type.')).not.toBeOnTheScreen()
+    await fillRequiredFields(view)
+    expect(view.getByRole('button', { name: 'Add loan' })).toBeEnabled()
+    await fireEvent.changeText(view.getByLabelText('Start date'), '')
+    expect(view.getByRole('button', { name: 'Add loan' })).toBeDisabled()
     await fireEvent.press(view.getByRole('button', { name: 'Add loan' }))
-    expect(await view.findByText('Enter a name for this loan.')).toBeOnTheScreen()
-    expect(view.getByText('Choose a loan type.')).toBeOnTheScreen()
-    expect(view.getByText('Choose a currency.')).toBeOnTheScreen()
-    expect(view.getByText('Enter a starting balance greater than 0.')).toBeOnTheScreen()
-    expect(view.queryByText('Enter a valid start date (YYYY-MM-DD).')).not.toBeOnTheScreen()
     expect(onCreate).not.toHaveBeenCalled()
   })
 
-  it('shows the start-date error once it is cleared', async () => {
+  it('shows an error under a row whose value is entered and wrong', async () => {
+    const { view } = await renderScreen()
+    await fillRequiredFields(view)
+    await fireEvent.changeText(view.getByLabelText('Start date'), '2026-13-40')
+    expect(view.getByText('Enter a valid start date (YYYY-MM-DD).')).toBeOnTheScreen()
+    await fireEvent.changeText(view.getByLabelText('Term, months (optional)'), '1.5')
+    expect(view.getByText('Enter a whole number of months greater than 0.')).toBeOnTheScreen()
+    await fireEvent.changeText(view.getByLabelText('Annual interest rate, % (optional)'), '120')
+    expect(view.getByText('Enter a rate from 0 to 100.')).toBeOnTheScreen()
+    await fireEvent.changeText(view.getByLabelText('Opening principal balance'), '0')
+    expect(view.getByText('Enter a starting balance greater than 0.')).toBeOnTheScreen()
+    expect(view.getByRole('button', { name: 'Add loan' })).toBeDisabled()
+  })
+
+  it('accepts a comma as the decimal point in the principal', async () => {
+    const onCreate = jest.fn().mockResolvedValue(undefined)
+    const { view } = await renderScreen({ onCreate })
+    await fillRequiredFields(view)
+    await fireEvent.changeText(view.getByLabelText('Opening principal balance'), '1500,50')
+    await fireEvent.press(view.getByRole('button', { name: 'Add loan' }))
+    await waitFor(() => expect(onCreate).toHaveBeenCalledWith(expect.objectContaining({ openingPrincipalBalance: 1500.5 })))
+  })
+
+  it.each([
+    ['pt-PT', '1.234,56', 1234.56],
+    ['es', '1.000', 1000],
+    ['en', '1.000', 1],
+    ['en', '1,000', 1000],
+  ])('reads the principal in %s: %s is %s', async (language, typed, expected) => {
+    const onCreate = jest.fn().mockResolvedValue(undefined)
+    const i18n = await initMobileI18n(language)
+    const { view } = await renderScreen({ onCreate }, language)
+    await fireEvent.changeText(view.getByLabelText(i18n.t('loanCreate.name')), 'Home loan')
+    await fireEvent.press(view.getByRole('button', { name: new RegExp(`^${i18n.t('loanCreate.type')},`) }))
+    await fireEvent.press(view.getByRole('radio', { name: i18n.t('loans.type.MORTGAGE') }))
+    await fireEvent.press(view.getByRole('button', { name: new RegExp(`^${i18n.t('loanCreate.currency')},`) }))
+    await fireEvent.press(view.getByRole('radio', { name: 'EUR · Euro' }))
+    await fireEvent.changeText(view.getByLabelText(i18n.t('loanCreate.startDate')), '2026-01-01')
+    await fireEvent.changeText(view.getByLabelText(i18n.t('loanCreate.principal')), typed)
+    await fireEvent.press(view.getByRole('button', { name: i18n.t('loanCreate.save') }))
+    await waitFor(() => expect(onCreate).toHaveBeenCalledWith(expect.objectContaining({ openingPrincipalBalance: expected })))
+  })
+
+  it('shows an error instead of saving a principal it cannot read', async () => {
     const onCreate = jest.fn()
     const { view } = await renderScreen({ onCreate })
     await fillRequiredFields(view)
-    await fireEvent.changeText(view.getByLabelText('Start date'), '')
-    await fireEvent.press(view.getByRole('button', { name: 'Add loan' }))
-    expect(await view.findByText('Enter a valid start date (YYYY-MM-DD).')).toBeOnTheScreen()
+    await fireEvent.changeText(view.getByLabelText('Opening principal balance'), '1.2.3')
+    expect(view.getByText('Enter a starting balance greater than 0.')).toBeOnTheScreen()
+    expect(view.getByRole('button', { name: 'Add loan' })).toBeDisabled()
     expect(onCreate).not.toHaveBeenCalled()
+  })
+
+  it('closes through the form bar', async () => {
+    const onBack = jest.fn()
+    const { view } = await renderScreen({ onBack })
+    await fireEvent.press(view.getByRole('button', { name: 'Close' }))
+    expect(onBack).toHaveBeenCalledTimes(1)
   })
 
   it('lets the net worth switch be toggled off before submitting', async () => {
@@ -100,7 +156,8 @@ describe('LoanCreateScreen', () => {
   it('locks every field and the submit action while pending', async () => {
     const { view } = await renderScreen({ pending: true })
     expect(view.getByLabelText('Name').props.editable).toBe(false)
-    expect(view.getByRole('button', { name: 'Saving…' }).props.accessibilityState.disabled).toBe(true)
+    expect(view.getByRole('button', { name: 'Saving…' })).toBeDisabled()
+    expect(view.getByRole('button', { name: 'Close' })).toBeDisabled()
   })
 
   it.each(['pt-PT', 'es'])('renders translated, labelled controls in %s', async (language) => {

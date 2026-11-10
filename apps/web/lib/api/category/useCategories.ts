@@ -10,6 +10,12 @@ export interface ChildCategory {
   textColor: string;
   icon?: string;
   isSystemCategory: boolean;
+  /**
+   * Whether rows in this category count as spending (reports, budgets, home
+   * cash flow). Absent on older payloads: read it as true. A category under a
+   * parent that doesn't count never counts either ({@link countsAsSpending}).
+   */
+  countsAsSpending?: boolean;
 }
 
 export interface Category extends ChildCategory {

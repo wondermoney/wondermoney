@@ -1,20 +1,27 @@
 import { useTranslation } from 'react-i18next'
-import { RefreshControl, ScrollView, StyleSheet, Text, useColorScheme, View } from 'react-native'
-import { SafeAreaView } from 'react-native-safe-area-context'
+import { StyleSheet, View } from 'react-native'
 
-import { BackControl } from '@/components/ui/back-control'
-import { formatCategoryName } from '@/lib/formatters/category-name'
-import { formatCurrency } from '@/lib/formatters/financial'
-import { themeTokens, type Palette } from '@/theme/tokens'
-import { textStyles } from '@/theme/typography'
+import { Amount } from '@/components/ui/amount'
+import { Text } from '@/components/ui/text'
+import { useFormatMoney } from '@/lib/formatters/money-display'
+import { themeTokens } from '@/theme/tokens'
 
+import type { BudgetVsActualReportViewModel } from './budget-vs-actual-view-model'
 import type { ReportDatePreset } from './report-date-presets'
-import { ReportFilterPanel } from './report-filter-panel'
-import { ReportExportButton, ReportPresetBar, ReportSectionFailure, ReportSectionHeading, ReportSectionLoading, styles as sharedStyles } from './report-screen-parts'
+import { ReportFiltersBar } from './report-filters-bar'
+import {
+  ReportEmptyState,
+  ReportExportButton,
+  ReportSection,
+  ReportSectionFailure,
+  ReportSectionLoading,
+  ReportStandalonePage,
+  ReportTable,
+  useReportCategoryName,
+} from './report-screen-parts'
 import type { ReportExportState } from './use-report-export'
 import type { useReportFilterOptions } from './use-report-filter-options'
 import type { useReportFilters } from './use-report-filters'
-import type { BudgetVsActualReportViewModel } from './budget-vs-actual-view-model'
 
 export type BudgetVsActualViewState =
   | { status: 'loading' }
@@ -39,140 +46,101 @@ export type BudgetVsActualScreenProps = BudgetVsActualBodyProps & {
   onBack: () => void
 }
 
+/**
+ * Web's `BudgetVsActualReport`: a five-column table (Category, Budgeted,
+ * Actual, Variance, % Used) that scrolls sideways at phone width, most-used
+ * first. An over-budget row takes a faint destructive wash and "Over budget"
+ * in destructive text beside the name — the word carries the state.
+ */
 export function BudgetVsActualBody({ state, currencyCode, exportState, onExport, onRefresh }: BudgetVsActualBodyProps) {
+  const formatMoney = useFormatMoney()
   const { t, i18n } = useTranslation()
-  const palette = themeTokens.colors[useColorScheme() === 'dark' ? 'dark' : 'light']
+  const categoryName = useReportCategoryName()
   const locale = i18n.resolvedLanguage ?? i18n.language ?? 'en'
-  const money = (value: number) => formatCurrency(value, { locale, currency: currencyCode })
+  const money = (value: number) => formatMoney(value, { locale, currency: currencyCode })
   const percent = (value: number) => new Intl.NumberFormat(locale, { style: 'percent', maximumFractionDigits: 0 }).format(value / 100)
-  const title = t('reports.budgetVsActual.title')
-  const helper = t('reports.budgetVsActual.subtitle')
 
   if (state.status === 'access-transition') return null
 
+  let content: React.ReactNode
   if (state.status === 'loading') {
-    return (
-      <View style={sharedStyles.section}>
-        <ReportSectionHeading title={title} helper={helper} palette={palette} />
-        <ReportSectionLoading label={t('reports.budgetVsActual.loading')} palette={palette} />
-      </View>
-    )
-  }
-
-  if (state.status === 'error' || state.status === 'invalid-response') {
-    return (
-      <View style={sharedStyles.section}>
-        <ReportSectionHeading title={title} helper={helper} palette={palette} />
-        <ReportSectionFailure
-          message={t(state.status === 'invalid-response' ? 'reports.invalidMessage' : 'reports.errorMessage')}
-          onRetry={onRefresh}
-          palette={palette}
-        />
-      </View>
-    )
-  }
-
-  return (
-    <View style={sharedStyles.section}>
-      <ReportSectionHeading title={title} helper={helper} palette={palette} />
-      <ReportExportButton status={exportState.status} onExport={onExport} palette={palette} />
-
-      {state.report.rows.length === 0 ? (
-        <View style={[sharedStyles.empty, { borderColor: palette.border, backgroundColor: palette.card }]}>
-          <Text accessibilityRole="header" allowFontScaling style={[sharedStyles.emptyTitle, { color: palette.foreground }]}>
-            {t('reports.budgetVsActual.emptyTitle')}
-          </Text>
-          <Text allowFontScaling style={[sharedStyles.body, { color: palette.mutedForeground }]}>
-            {t('reports.budgetVsActual.emptyMessage')}
-          </Text>
-        </View>
-      ) : (
-        <View style={styles.list}>
-          {state.report.rows.map((row) => {
-            const label = [
-              formatCategoryName(row.name),
+    content = <ReportSectionLoading label={t('reports.budgetVsActual.loading')} />
+  } else if (state.status === 'error' || state.status === 'invalid-response') {
+    content = <ReportSectionFailure invalid={state.status === 'invalid-response'} onRetry={onRefresh} />
+  } else if (state.report.rows.length === 0) {
+    content = <ReportEmptyState description={t('reports.budgetVsActual.emptyMessage')} icon="piggy-bank" title={t('reports.budgetVsActual.emptyTitle')} />
+  } else {
+    const amount = (value: number) => <Amount align="right" currency={currencyCode} locale={locale} value={value} />
+    content = (
+      <ReportTable
+        columns={[
+          { key: 'category', label: t('reports.budgetVsActual.category'), width: 200 },
+          { key: 'budgeted', label: t('reports.budgetVsActual.budgeted'), align: 'right', width: 120 },
+          { key: 'actual', label: t('reports.budgetVsActual.actual'), align: 'right', width: 120 },
+          { key: 'variance', label: t('reports.budgetVsActual.variance'), align: 'right', width: 120 },
+          { key: 'percentUsed', label: t('reports.budgetVsActual.percentUsed'), align: 'right', width: 88 },
+        ]}
+        rows={state.report.rows.map((row) => {
+          const name = categoryName(row.name)
+          return {
+            key: row.categoryKey,
+            emphasis: row.overBudget ? 'over' as const : undefined,
+            accessibilityLabel: [
+              name,
               `${t('reports.budgetVsActual.budgeted')}, ${money(row.budgeted)}`,
               `${t('reports.budgetVsActual.actual')}, ${money(row.actual)}`,
               `${t('reports.budgetVsActual.variance')}, ${money(row.variance)}`,
               `${t('reports.budgetVsActual.percentUsed')}, ${percent(row.percentUsed)}`,
               row.overBudget ? t('reports.budgetVsActual.overBudget') : null,
-            ].filter(Boolean).join(', ')
-            return (
-              <View
-                key={row.categoryKey}
-                accessible
-                accessibilityLabel={label}
-                style={[
-                  styles.row,
-                  { borderColor: palette.border, backgroundColor: palette.card },
-                  row.overBudget && { borderColor: palette.destructiveText, borderLeftWidth: 3 },
-                ]}
-              >
-                <View style={styles.rowTop}>
-                  <View style={styles.rowHeading}>
-                    <View style={[styles.dot, { backgroundColor: row.color }]} />
-                    <Text allowFontScaling style={[styles.rowName, { color: palette.foreground }]}>{formatCategoryName(row.name)}</Text>
-                  </View>
-                  {row.overBudget ? (
-                    <Text allowFontScaling style={[styles.overBudgetTag, { color: palette.destructiveText }]}>
-                      {t('reports.budgetVsActual.overBudget')}
-                    </Text>
-                  ) : null}
+            ].filter(Boolean).join(', '),
+            cells: {
+              category: (
+                <View style={styles.category}>
+                  <View style={[styles.dot, { backgroundColor: row.color }]} />
+                  <Text variant="meta">{name}</Text>
+                  {row.overBudget ? <Text style={styles.over} tone="destructive" variant="label">{t('reports.budgetVsActual.overBudget')}</Text> : null}
                 </View>
-                <View style={styles.rowMetrics}>
-                  <Metric label={t('reports.budgetVsActual.budgeted')} value={money(row.budgeted)} palette={palette} />
-                  <Metric label={t('reports.budgetVsActual.actual')} value={money(row.actual)} palette={palette} />
-                  <Metric label={t('reports.budgetVsActual.variance')} value={money(row.variance)} palette={palette} />
-                  <Metric label={t('reports.budgetVsActual.percentUsed')} value={percent(row.percentUsed)} palette={palette} />
-                </View>
-              </View>
-            )
-          })}
-        </View>
-      )}
-    </View>
+              ),
+              budgeted: amount(row.budgeted),
+              actual: amount(row.actual),
+              variance: amount(row.variance),
+              percentUsed: <Text align="right" variant="amount">{percent(row.percentUsed)}</Text>,
+            },
+          }
+        })}
+        scrollable
+      />
+    )
+  }
+
+  return (
+    <ReportSection
+      actions={state.status === 'loading' || state.status === 'error' || state.status === 'invalid-response' ? undefined : <ReportExportButton onExport={onExport} status={exportState.status} />}
+      description={t('reports.budgetVsActual.subtitle')}
+      testID="budget-vs-actual-report"
+      title={t('reports.budgetVsActual.title')}
+    >
+      {content}
+    </ReportSection>
   )
 }
 
 export function BudgetVsActualScreen({ state, preset, currencyCode, filterState, filterOptions, exportState, onSelectPreset, onExport, onRefresh, onBack }: BudgetVsActualScreenProps) {
-  const palette = themeTokens.colors[useColorScheme() === 'dark' ? 'dark' : 'light']
   if (state.status === 'access-transition') return null
   return (
-    <SafeAreaView style={[sharedStyles.safeArea, { backgroundColor: palette.background }]}>
-      <ScrollView
-        contentContainerStyle={sharedStyles.content}
-        refreshControl={<RefreshControl refreshing={Boolean(state.status === 'loaded' && state.refreshing)} onRefresh={() => void onRefresh()} tintColor={palette.primary} />}
-      >
-        <View style={sharedStyles.page}>
-          <BackControl fallback="/reports" onPress={onBack} color={palette.primary} />
-          <ReportPresetBar preset={preset} onSelectPreset={onSelectPreset} palette={palette} />
-          <ReportFilterPanel filterState={filterState} filterOptions={filterOptions} palette={palette} />
-          <BudgetVsActualBody state={state} currencyCode={currencyCode} exportState={exportState} onExport={onExport} onRefresh={onRefresh} />
-        </View>
-      </ScrollView>
-    </SafeAreaView>
-  )
-}
-
-function Metric({ label, value, palette }: { label: string; value: string; palette: Palette }) {
-  return (
-    <View style={styles.metric}>
-      <Text allowFontScaling style={[styles.metricLabel, { color: palette.mutedForeground }]}>{label}</Text>
-      <Text allowFontScaling style={[styles.metricValue, { color: palette.foreground }]}>{value}</Text>
-    </View>
+    <ReportStandalonePage
+      controls={<ReportFiltersBar filterOptions={filterOptions} filterState={filterState} onSelectPreset={onSelectPreset} preset={preset} />}
+      onBack={onBack}
+      onRefresh={onRefresh}
+      refreshing={Boolean(state.status === 'loaded' && state.refreshing)}
+    >
+      <BudgetVsActualBody currencyCode={currencyCode} exportState={exportState} onExport={onExport} onRefresh={onRefresh} state={state} />
+    </ReportStandalonePage>
   )
 }
 
 const styles = StyleSheet.create({
-  list: { gap: themeTokens.spacing[3] },
-  row: { borderWidth: 1, borderRadius: themeTokens.radius.lg, padding: themeTokens.spacing[4], gap: themeTokens.spacing[3] },
-  rowTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: themeTokens.spacing[3] },
-  rowHeading: { flexDirection: 'row', alignItems: 'center', gap: themeTokens.spacing[2] },
-  dot: { width: 10, height: 10, borderRadius: 5 },
-  rowName: { ...textStyles.action },
-  overBudgetTag: { ...textStyles.label, fontWeight: '600' as const },
-  rowMetrics: { flexDirection: 'row', flexWrap: 'wrap', gap: themeTokens.spacing[4] },
-  metric: { gap: themeTokens.spacing[1] },
-  metricLabel: { ...textStyles.label },
-  metricValue: { ...textStyles.amount },
+  category: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: themeTokens.spacing[2] },
+  dot: { width: 8, height: 8, borderRadius: 4 },
+  over: { fontWeight: '500' },
 })

@@ -3,14 +3,14 @@ import { useLocale, useTranslations } from "next-intl";
 import GoalProgressBar from "@/components/goals/GoalProgressBar";
 import GoalStatusBadge from "@/components/goals/GoalStatusBadge";
 import { Badge } from "@/components/ui/badge";
-import { Card } from "@/components/ui/card";
 import { Link } from "@/components/ui/Link";
 import type { Goal } from "@/lib/api/goals/types";
 import {
-  formatGoalCurrency,
   formatGoalDate,
   formatGoalPercentage,
 } from "@/lib/goals/format";
+import { goalProgress } from "@/lib/goals/progress";
+import { useFormatGoalCurrency } from "@/lib/goals/useFormatGoalCurrency";
 
 function getCurrencyCode(goal: Goal) {
   return (
@@ -31,17 +31,18 @@ function DebtGoalCardBody({
   locale: string;
 }) {
   const t = useTranslations();
+  const formatGoalCurrency = useFormatGoalCurrency();
   const projection = goal.summary?.debtProjection;
   const balance = projection?.currentBalance ?? goal.currentBalance ?? null;
   // Use summary.progressPercentage to stay consistent with the goal detail page
   // (GoalDetailHeader) — both views now read the same metric.
-  const progress = goal.summary?.progressPercentage ?? null;
+  const progress = goalProgress(goal);
 
   return (
     <>
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0 space-y-2">
-          <h2 className="text-foreground truncate text-sm font-medium">
+          <h2 className="text-foreground truncate text-base font-medium">
             {goal.name}
           </h2>
           <div className="flex flex-wrap items-center gap-2">
@@ -53,7 +54,7 @@ function DebtGoalCardBody({
           </div>
         </div>
         <div className="text-right">
-          <p className="text-foreground font-mono text-lg font-semibold">
+          <p className="text-foreground font-mono text-xl font-medium">
             {balance === null
               ? "—"
               : formatGoalCurrency(balance, currency, locale)}
@@ -64,7 +65,7 @@ function DebtGoalCardBody({
         </div>
       </div>
 
-      <div className="mt-5 space-y-3">
+      <div className="mt-3 space-y-2 md:max-w-xl">
         {progress !== null && (
           <GoalProgressBar value={Math.min(progress, 100)} />
         )}
@@ -95,16 +96,16 @@ function SaveUpGoalCardBody({
   locale: string;
 }) {
   const t = useTranslations();
+  const formatGoalCurrency = useFormatGoalCurrency();
   const available = goal.summary?.availableAmount ?? null;
   const target = goal.targetAmount ?? 0;
-  const progress =
-    available !== null && target > 0 ? (available / target) * 100 : null;
+  const progress = goalProgress(goal);
 
   return (
     <>
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0 space-y-2">
-          <h2 className="text-foreground truncate text-sm font-medium">
+          <h2 className="text-foreground truncate text-base font-medium">
             {goal.name}
           </h2>
           <GoalStatusBadge
@@ -113,7 +114,7 @@ function SaveUpGoalCardBody({
           />
         </div>
         <div className="text-right">
-          <p className="text-foreground font-mono text-lg font-semibold">
+          <p className="text-foreground font-mono text-xl font-medium">
             {available === null
               ? "—"
               : formatGoalCurrency(available, currency, locale)}
@@ -124,7 +125,7 @@ function SaveUpGoalCardBody({
         </div>
       </div>
 
-      <div className="mt-5 space-y-3">
+      <div className="mt-3 space-y-2 md:max-w-xl">
         {progress !== null && (
           <GoalProgressBar value={Math.min(progress, 100)} />
         )}
@@ -145,20 +146,26 @@ function SaveUpGoalCardBody({
   );
 }
 
+/**
+ * One goal as a ledger row: what it is, how far along, and its figure. The
+ * whole row opens the goal; the hover wash is the only frame it gets.
+ */
 export default function GoalCard({ goal }: { goal: Goal }) {
   const locale = useLocale();
+  const formatGoalCurrency = useFormatGoalCurrency();
   const currency = getCurrencyCode(goal);
   const isDebt = goal.type === "debt_paydown";
 
   return (
-    <Link href={`/goals/${goal.goalKey}`} className="block">
-      <Card className="p-5">
-        {isDebt ? (
-          <DebtGoalCardBody currency={currency} goal={goal} locale={locale} />
-        ) : (
-          <SaveUpGoalCardBody currency={currency} goal={goal} locale={locale} />
-        )}
-      </Card>
+    <Link
+      href={`/goals/${goal.goalKey}`}
+      className="hover:bg-foreground/5 -mx-2 block rounded-md px-2 py-4 transition-colors duration-[var(--duration-micro)] motion-reduce:transition-none"
+    >
+      {isDebt ? (
+        <DebtGoalCardBody currency={currency} goal={goal} locale={locale} />
+      ) : (
+        <SaveUpGoalCardBody currency={currency} goal={goal} locale={locale} />
+      )}
     </Link>
   );
 }

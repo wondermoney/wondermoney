@@ -59,7 +59,10 @@ import portfolioRoutes from '@route/portfolio';
 import portfolioImportSessionRoutes from '@route/portfolio-import-session';
 import recurringRoutes from '@route/recurring';
 import reportsRoutes from '@route/reports';
+import ruleRoutes from '@route/rule';
 import supportRoutes from '@route/support';
+import tagRoutes from '@route/tag';
+import transactionImportRoutes from '@route/transaction-import';
 import userRoutes from '@route/user';
 import { authHandler } from '@service/auth/better-auth';
 import { GITHUB_SHA, isCorsOriginAllowed } from '@utils/constants';
@@ -215,7 +218,10 @@ export default class Application {
       this.host.use('/v1/assistant', ...authedTenant(assistantRateLimit), assistantRoutes);
       this.host.use('/v1/recurring', ...authedTenant(), recurringRoutes);
       this.host.use('/v1/reports', ...authedTenant(), reportsRoutes);
+      this.host.use('/v1/rule', ...authedTenant(), ruleRoutes);
       this.host.use('/v1/support', supportRateLimit(), supportRoutes);
+      this.host.use('/v1/tag', ...authedTenant(), tagRoutes);
+      this.host.use('/v1/transaction-import-sessions', ...authedTenant(importSessionRateLimit), transactionImportRoutes);
       this.host.use('/v1/user', ...authedTenant(), userRoutes);
 
       this.host.use((req, res, next: NextFunction) => {

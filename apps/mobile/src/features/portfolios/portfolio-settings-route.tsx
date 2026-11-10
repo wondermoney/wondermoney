@@ -1,4 +1,4 @@
-import { type Href, useLocalSearchParams, useNavigation, useRouter } from 'expo-router'
+import { type Href, useLocalSearchParams, usePreventRemove, useRouter } from 'expo-router'
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useColorScheme } from 'react-native'
@@ -19,23 +19,21 @@ export function PortfolioSettingsRoute() {
   const detail = usePortfolioMetadata(portfolioId)
   const mutation = usePortfolioSettings(portfolioId ?? 1)
   const router = useRouter()
-  const navigation = useNavigation()
   const { signOut } = useProductRuntime()
   const { t } = useTranslation()
   const palette = themeTokens.colors[useColorScheme() === 'dark' ? 'dark' : 'light']
-  const navigationUnlocked = useRef(false)
+  const [navigationUnlocked, setNavigationUnlocked] = useState(false)
   const autoReconciledPayload = useRef<Readonly<PortfolioSettingsWrite> | null>(null)
   const [fallbackPortfolio, setFallbackPortfolio] = useState<PortfolioResponseDto['portfolio'] | null>(() => detail.data?.portfolio.portfolioKey === portfolioId ? detail.data.portfolio : null)
   const [failure, setFailure] = useState<PortfolioSettingsFailure | null>(null)
   const [reconciling, setReconciling] = useState(false)
   const [reconciliation, setReconciliation] = useState<PortfolioSettingsReconciliation | null>(null)
 
-  useEffect(() => navigation.addListener('beforeRemove', (event) => {
-    if (mutation.isPending && !navigationUnlocked.current) event.preventDefault()
-  }), [mutation.isPending, navigation])
+  const disablePrevention = usePreventRemove(mutation.isPending && !navigationUnlocked)
+  const unlockNavigation = () => { setNavigationUnlocked(true); disablePrevention() }
 
   const back = () => {
-    navigationUnlocked.current = true
+    unlockNavigation()
     if (portfolioId === null) router.replace('/portfolio' as Href)
     else router.replace({ pathname: '/portfolio/[portfolioId]', params: { portfolioId: String(portfolioId) } } as Href)
   }
@@ -108,7 +106,7 @@ export function PortfolioSettingsRoute() {
         try {
           const response = await mutation.mutateAsync(value)
           if (response.portfolio.portfolioKey !== portfolio.portfolioKey) throw new Error('Mismatched portfolio detail')
-          navigationUnlocked.current = true
+          unlockNavigation()
           router.replace({ pathname: '/portfolio/[portfolioId]', params: { portfolioId: String(portfolio.portfolioKey) } } as Href)
         } catch (error) {
           setFailure(classifyPortfolioSettingsFailure(error))

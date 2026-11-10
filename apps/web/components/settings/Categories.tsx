@@ -55,6 +55,8 @@ const UserCategoriesTable: React.FC = () => {
         bgColor: c.bgColor,
         icon: c.icon,
         isSystemCategory: c.isSystemCategory,
+        countsAsSpending: c.countsAsSpending,
+        parentCategoryKey: null,
       },
       ...c.subRows.map((subCategory) => ({
         name: subCategory.name,
@@ -63,6 +65,8 @@ const UserCategoriesTable: React.FC = () => {
         bgColor: subCategory.bgColor,
         icon: subCategory.icon,
         isSystemCategory: subCategory.isSystemCategory,
+        countsAsSpending: subCategory.countsAsSpending,
+        parentCategoryKey: c.categoryKey,
       })),
     ]);
   }, [categories]);
@@ -100,6 +104,8 @@ const UserCategoriesTable: React.FC = () => {
                   bgColor: editingCategory.bgColor,
                   icon: editingCategory.icon,
                   isSystemCategory: editingCategory.isSystemCategory,
+                  countsAsSpending: editingCategory.countsAsSpending,
+                  parentCategoryKey: editingCategory.parentCategoryKey ?? null,
                 }
               : null
           }

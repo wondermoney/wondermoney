@@ -5,6 +5,7 @@ import { recordAnalyticsOutboxEvent } from '@service/analytics/analytics-outbox.
 
 
 const EXTERNAL_USER_ID = '1f8fab82-1cc1-427b-9f51-5b9fe416bd88';
+const LIVE = { ANALYTICS_OUTBOX_MODE: 'live' } as NodeJS.ProcessEnv;
 
 describe('analytics outbox producer', () => {
   it('persists an idempotent event and owns the deterministic insert id', async () => {
@@ -16,8 +17,8 @@ describe('analytics outbox producer', () => {
       properties: { $insert_id: 'untrusted', appuser_key: '42' },
     };
 
-    await recordAnalyticsOutboxEvent({ upsert }, input);
-    await recordAnalyticsOutboxEvent({ upsert }, input);
+    await recordAnalyticsOutboxEvent({ upsert }, input, LIVE);
+    await recordAnalyticsOutboxEvent({ upsert }, input, LIVE);
 
     expect(upsert).toHaveBeenCalledTimes(2);
     for (const [entity, data, options] of upsert.mock.calls) {
@@ -34,6 +35,24 @@ describe('analytics outbox producer', () => {
     }
   });
 
+  // A self-hosted instance delivers nothing by default, so it must not pile up rows either.
+  it.each([
+    {},
+    { ANALYTICS_OUTBOX_MODE: 'off' },
+    { ANALYTICS_OUTBOX_MODE: 'internal-allowlist' },
+  ])('writes nothing while delivery is off: %o', async (env) => {
+    const upsert = vi.fn();
+
+    await recordAnalyticsOutboxEvent({ upsert }, {
+      distinctId: EXTERNAL_USER_ID,
+      eventId: 'login.v1:session-1',
+      eventName: 'login',
+      properties: {},
+    }, env);
+
+    expect(upsert).not.toHaveBeenCalled();
+  });
+
   it.each([
     '1F8FAB82-1CC1-427B-9F51-5B9FE416BD88',
     'not-a-uuid',
@@ -46,7 +65,7 @@ describe('analytics outbox producer', () => {
       eventId: 'login.v1:session-1',
       eventName: 'login',
       properties: {},
-    })).rejects.toThrow('canonical lowercase external UUID');
+    }, LIVE)).rejects.toThrow('canonical lowercase external UUID');
 
     expect(upsert).not.toHaveBeenCalled();
   });
@@ -64,7 +83,7 @@ describe('analytics outbox producer', () => {
       eventId: 'login.v1:session-1',
       eventName: 'login',
       properties,
-    })).rejects.toThrow('sensitive data');
+    }, LIVE)).rejects.toThrow('sensitive data');
 
     expect(upsert).not.toHaveBeenCalled();
   });

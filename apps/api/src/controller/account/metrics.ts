@@ -4,6 +4,7 @@ import { sql } from 'kysely';
 
 import { sqlQuery } from '@app/database/sql';
 import { authedContext } from '@middleware/authed-context';
+import { transactionDateRangeExpression } from '@service/transaction/transaction-date-range';
 import { notExpiredTransactionSql } from '@service/transaction/transaction-status';
 import { buildEffectiveAmountSql } from '@utils/account-amounts';
 import {
@@ -37,7 +38,7 @@ interface AccountMetrics {
 export async function getAccountMetrics(req: Request, res: Response) {
   const {
     params: { accountId },
-    query: { fromDate },
+    query: { fromDate, timezone },
   } = await zParse(getAccountMetricsRequestSchema, req);
 
   const { appuserKey, tenantKey } = authedContext(req);
@@ -51,6 +52,8 @@ export async function getAccountMetrics(req: Request, res: Response) {
   pastPeriodEnd.setDate(pastPeriodEnd.getDate() - 1);
   const pastPeriodStart = new Date(pastPeriodEnd);
   pastPeriodStart.setDate(pastPeriodStart.getDate() - periodDays);
+  const inCurrentPeriod = transactionDateRangeExpression('t.transaction_date', { from: currentPeriodStart, timeZone: timezone, to: currentPeriodEnd });
+  const inPastPeriod = transactionDateRangeExpression('t.transaction_date', { from: pastPeriodStart, timeZone: timezone, to: pastPeriodEnd });
 
   const metrics = (await sqlQuery(DI.em)
     .with('c', (db) =>
@@ -74,22 +77,22 @@ export async function getAccountMetrics(req: Request, res: Response) {
           sql<string>`'inflow'`.as('type'),
           // Current period inflow
           sql<number>`COALESCE(SUM(CASE WHEN ${effectiveAmount} > 0 THEN ${effectiveAmount} ELSE 0 END)
-             FILTER (WHERE t.transaction_date BETWEEN ${currentPeriodStart} AND ${currentPeriodEnd}), 0)`.as('inflowCurrentPeriod'),
+             FILTER (WHERE ${inCurrentPeriod}), 0)`.as('inflowCurrentPeriod'),
           // Current period outflow
           sql<number>`ABS(COALESCE(SUM(CASE WHEN ${effectiveAmount} < 0 THEN ${effectiveAmount} ELSE 0 END)
-             FILTER (WHERE t.transaction_date BETWEEN ${currentPeriodStart} AND ${currentPeriodEnd}), 0))`.as('outflowCurrentPeriod'),
+             FILTER (WHERE ${inCurrentPeriod}), 0))`.as('outflowCurrentPeriod'),
           // Current period transaction count
           sql<number>`CAST(COALESCE(COUNT(t.transaction_key)
-             FILTER (WHERE t.transaction_date BETWEEN ${currentPeriodStart} AND ${currentPeriodEnd}), 0) AS INTEGER)`.as('transactionCountCurrentPeriod'),
+             FILTER (WHERE ${inCurrentPeriod}), 0) AS INTEGER)`.as('transactionCountCurrentPeriod'),
           // Past period inflow
           sql<number>`COALESCE(SUM(CASE WHEN ${effectiveAmount} > 0 THEN ${effectiveAmount} ELSE 0 END)
-             FILTER (WHERE t.transaction_date BETWEEN ${pastPeriodStart} AND ${pastPeriodEnd}), 0)`.as('inflowPastPeriod'),
+             FILTER (WHERE ${inPastPeriod}), 0)`.as('inflowPastPeriod'),
           // Past period outflow
           sql<number>`ABS(COALESCE(SUM(CASE WHEN ${effectiveAmount} < 0 THEN ${effectiveAmount} ELSE 0 END)
-             FILTER (WHERE t.transaction_date BETWEEN ${pastPeriodStart} AND ${pastPeriodEnd}), 0))`.as('outflowPastPeriod'),
+             FILTER (WHERE ${inPastPeriod}), 0))`.as('outflowPastPeriod'),
           // Past period transaction count
           sql<number>`CAST(COALESCE(COUNT(t.transaction_key)
-             FILTER (WHERE t.transaction_date BETWEEN ${pastPeriodStart} AND ${pastPeriodEnd}), 0) AS INTEGER)`.as('transactionCountPastPeriod'),
+             FILTER (WHERE ${inPastPeriod}), 0) AS INTEGER)`.as('transactionCountPastPeriod'),
         ])
         // Household-scoped (raw SQL bypasses the tenant filter) + per-account
         // privacy carve-out — a private account's metrics are visible only to its owner.
@@ -116,7 +119,7 @@ export async function getAccountMetrics(req: Request, res: Response) {
 
 export async function getAccountsMetrics(req: Request, res: Response) {
   const {
-    query: { fromDate, toDate },
+    query: { fromDate, timezone, toDate },
   } = await zParse(getAccountsMetricsRequestSchema, req);
 
   const { appuserKey, tenantKey } = authedContext(req);
@@ -130,6 +133,8 @@ export async function getAccountsMetrics(req: Request, res: Response) {
   pastPeriodEnd.setDate(pastPeriodEnd.getDate() - 1);
   const pastPeriodStart = new Date(pastPeriodEnd);
   pastPeriodStart.setDate(pastPeriodStart.getDate() - periodDays);
+  const inCurrentPeriod = transactionDateRangeExpression('t.transaction_date', { from: currentPeriodStart, timeZone: timezone, to: currentPeriodEnd });
+  const inPastPeriod = transactionDateRangeExpression('t.transaction_date', { from: pastPeriodStart, timeZone: timezone, to: pastPeriodEnd });
 
   const metrics = (await sqlQuery(DI.em)
     .with('c', (db) =>
@@ -153,22 +158,22 @@ export async function getAccountsMetrics(req: Request, res: Response) {
           sql<string>`'inflow'`.as('type'),
           // Current period inflow
           sql<number>`COALESCE(SUM(CASE WHEN ${effectiveAmount} > 0 THEN ${effectiveAmount} ELSE 0 END)
-             FILTER (WHERE t.transaction_date BETWEEN ${currentPeriodStart} AND ${currentPeriodEnd}), 0)`.as('inflowCurrentPeriod'),
+             FILTER (WHERE ${inCurrentPeriod}), 0)`.as('inflowCurrentPeriod'),
           // Current period outflow
           sql<number>`ABS(COALESCE(SUM(CASE WHEN ${effectiveAmount} < 0 THEN ${effectiveAmount} ELSE 0 END)
-             FILTER (WHERE t.transaction_date BETWEEN ${currentPeriodStart} AND ${currentPeriodEnd}), 0))`.as('outflowCurrentPeriod'),
+             FILTER (WHERE ${inCurrentPeriod}), 0))`.as('outflowCurrentPeriod'),
           // Current period transaction count
           sql<number>`CAST(COALESCE(COUNT(t.transaction_key)
-             FILTER (WHERE t.transaction_date BETWEEN ${currentPeriodStart} AND ${currentPeriodEnd}), 0) AS INTEGER)`.as('transactionCountCurrentPeriod'),
+             FILTER (WHERE ${inCurrentPeriod}), 0) AS INTEGER)`.as('transactionCountCurrentPeriod'),
           // Past period inflow
           sql<number>`COALESCE(SUM(CASE WHEN ${effectiveAmount} > 0 THEN ${effectiveAmount} ELSE 0 END)
-             FILTER (WHERE t.transaction_date BETWEEN ${pastPeriodStart} AND ${pastPeriodEnd}), 0)`.as('inflowPastPeriod'),
+             FILTER (WHERE ${inPastPeriod}), 0)`.as('inflowPastPeriod'),
           // Past period outflow
           sql<number>`ABS(COALESCE(SUM(CASE WHEN ${effectiveAmount} < 0 THEN ${effectiveAmount} ELSE 0 END)
-             FILTER (WHERE t.transaction_date BETWEEN ${pastPeriodStart} AND ${pastPeriodEnd}), 0))`.as('outflowPastPeriod'),
+             FILTER (WHERE ${inPastPeriod}), 0))`.as('outflowPastPeriod'),
           // Past period transaction count
           sql<number>`CAST(COALESCE(COUNT(t.transaction_key)
-             FILTER (WHERE t.transaction_date BETWEEN ${pastPeriodStart} AND ${pastPeriodEnd}), 0) AS INTEGER)`.as('transactionCountPastPeriod'),
+             FILTER (WHERE ${inPastPeriod}), 0) AS INTEGER)`.as('transactionCountPastPeriod'),
         ])
         // Household-scoped (raw SQL bypasses the tenant filter) + per-account
         // privacy carve-out — private accounts are visible only to their owner.

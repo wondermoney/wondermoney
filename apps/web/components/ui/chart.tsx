@@ -3,6 +3,8 @@ import * as React from "react";
 import * as RechartsPrimitive from "recharts";
 
 import { Text } from "@/components/ui/Typography";
+import { AMOUNT_MASK } from "@/lib/privacy/mask";
+import { usePrivacyMode } from "@/lib/privacy/usePrivacyMode";
 import { cn } from "@/lib/utils";
 
 // Format: { THEME_NAME: CSS_SELECTOR }
@@ -148,6 +150,7 @@ const ChartTooltipContent = React.forwardRef<
     // The un-formatted fallback below formats in the reader's locale; a bare
     // `toLocaleString()` would follow the runtime's instead.
     const locale = useLocale();
+    const { hidden } = usePrivacyMode();
 
     const tooltipLabel = React.useMemo(() => {
       if (hideLabel || !payload?.length) {
@@ -264,7 +267,11 @@ const ChartTooltipContent = React.forwardRef<
                                 index,
                                 item.payload,
                               )
-                            : typeof item.value === "number"
+                            : hidden
+                              ? // No formatter says what this value is, so
+                                // privacy mode assumes it is money.
+                                AMOUNT_MASK
+                              : typeof item.value === "number"
                               ? item.value.toLocaleString(locale)
                               : Array.isArray(item.value)
                                 ? item.value

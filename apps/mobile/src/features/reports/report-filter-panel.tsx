@@ -1,92 +1,110 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Pressable, StyleSheet, Text, View } from 'react-native'
+import { Modal, Pressable, ScrollView, StyleSheet, View } from 'react-native'
 
+import { Button } from '@/components/ui/button'
+import { SafeAreaView } from '@/components/ui/screen-safe-area'
+import { Text } from '@/components/ui/text'
 import { themeTokens, type Palette } from '@/theme/tokens'
-import { textStyles } from '@/theme/typography'
+import { usePalette } from '@/theme/use-palette'
 
 import { ReportCurrencyPicker } from './report-currency-picker'
+import { Icon } from '@/components/ui/icon'
 import { ReportMultiSelectPicker } from './report-multi-select-picker'
+import { ReportIconButton } from './report-screen-parts'
 import type { useReportFilterOptions } from './use-report-filter-options'
 import type { useReportFilters } from './use-report-filters'
 
 export type ReportFilterPanelProps = Readonly<{
   filterState: ReturnType<typeof useReportFilters>
   filterOptions: ReturnType<typeof useReportFilterOptions>
-  palette: Palette
+  /** @deprecated read from the colour scheme; accepted so older call sites compile. */
+  palette?: Palette
 }>
 
-/** Shared across all 6 report screens — the account/category/merchant/currency filters and the
- * pending/transfers toggles, collapsed behind a single "Filters" trigger (with an active-count
- * badge) so the date-preset bar stays the primary, always-visible control. */
-export function ReportFilterPanel({ filterState, filterOptions, palette }: ReportFilterPanelProps) {
+/**
+ * Web's "Filters" outline button and the sheet it opens (`ReportFiltersBar`):
+ * one labelled control per row — accounts, categories, merchants, currency —
+ * then the pending/transfers checkboxes. The reset lives on the bar, beside
+ * the trigger, as on web.
+ */
+export function ReportFilterPanel({ filterState, filterOptions }: ReportFilterPanelProps) {
   const { t } = useTranslation()
-  const [expanded, setExpanded] = useState(false)
-  const { fields, activeFilterCount, setAccountKeys, setCategoryKeys, setMerchantKeys, setCurrencyKey, setIncludePending, setIncludeTransfers, resetFields } = filterState
+  const palette = usePalette()
+  const [open, setOpen] = useState(false)
+  const { fields, activeFilterCount, setAccountKeys, setCategoryKeys, setMerchantKeys, setCurrencyKey, setIncludePending, setIncludeTransfers } = filterState
 
   const triggerLabel = t('reports.filters.openLabel', { suffix: activeFilterCount > 0 ? t('reports.filters.activeCount', { count: activeFilterCount }) : '' })
+  const title = t('reports.filters.title')
 
   return (
-    <View style={styles.container}>
-      <Pressable
-        accessibilityRole="button"
+    <>
+      <Button
         accessibilityLabel={triggerLabel}
-        accessibilityState={{ expanded }}
-        onPress={() => setExpanded((value) => !value)}
-        style={[styles.trigger, { borderColor: palette.border, backgroundColor: palette.card }]}
-      >
-        <Text allowFontScaling style={[styles.triggerText, { color: palette.foreground }]}>{t('reports.filters.title')}</Text>
-        {activeFilterCount > 0 ? (
-          <View style={[styles.badge, { backgroundColor: palette.primary }]}>
-            <Text allowFontScaling style={[styles.badgeText, { color: palette.background }]}>{activeFilterCount}</Text>
+        icon="filter"
+        count={activeFilterCount}
+        label={title}
+        onPress={() => setOpen(true)}
+        variant="outline"
+      />
+      <Modal animationType="slide" onRequestClose={() => setOpen(false)} presentationStyle="pageSheet" visible={open}>
+        <SafeAreaView style={[styles.sheet, { backgroundColor: palette.background }]}>
+          <View style={[styles.sheetHead, { borderBottomColor: palette.border }]}>
+            <Text accessibilityRole="header" variant="section">{title}</Text>
+            <ReportIconButton icon="x" label={t('reports.filters.close')} onPress={() => setOpen(false)} />
           </View>
-        ) : null}
-      </Pressable>
-
-      {expanded ? (
-        <View style={[styles.panel, { borderColor: palette.border, backgroundColor: palette.muted }]}>
-          <ReportMultiSelectPicker label={t('reports.filters.accounts')} options={filterOptions.accounts} selected={fields.accountKeys} onChange={setAccountKeys} palette={palette} />
-          <ReportMultiSelectPicker label={t('reports.filters.categories')} options={filterOptions.categories} selected={fields.categoryKeys} onChange={setCategoryKeys} palette={palette} />
-          <ReportMultiSelectPicker label={t('reports.filters.merchants')} options={filterOptions.merchants} selected={fields.merchantKeys} onChange={setMerchantKeys} palette={palette} />
-          <ReportCurrencyPicker currencies={filterOptions.currencies} selected={fields.currencyKey} onChange={setCurrencyKey} palette={palette} />
-
-          <ReportFilterToggle label={t('reports.filters.includePending')} value={fields.includePending} onToggle={setIncludePending} palette={palette} />
-          <ReportFilterToggle label={t('reports.filters.includeTransfers')} value={fields.includeTransfers} onToggle={setIncludeTransfers} palette={palette} />
-
-          <Pressable accessibilityRole="button" onPress={resetFields} style={styles.resetRow}>
-            <Text allowFontScaling style={[styles.resetText, { color: palette.primary }]}>{t('reports.filters.reset')}</Text>
-          </Pressable>
-        </View>
-      ) : null}
-    </View>
+          <ScrollView contentContainerStyle={styles.sheetBody} keyboardShouldPersistTaps="handled">
+            <View style={styles.fields}>
+              <ReportMultiSelectPicker label={t('reports.filters.accounts')} options={filterOptions.accounts} selected={fields.accountKeys} onChange={setAccountKeys} palette={palette} />
+              <ReportMultiSelectPicker label={t('reports.filters.categories')} options={filterOptions.categories} selected={fields.categoryKeys} onChange={setCategoryKeys} palette={palette} />
+              <ReportMultiSelectPicker label={t('reports.filters.merchants')} options={filterOptions.merchants} selected={fields.merchantKeys} onChange={setMerchantKeys} palette={palette} />
+              <ReportCurrencyPicker currencies={filterOptions.currencies} selected={fields.currencyKey} onChange={setCurrencyKey} palette={palette} />
+            </View>
+            <View style={styles.toggles}>
+              <ReportFilterToggle label={t('reports.filters.includePending')} value={fields.includePending} onToggle={setIncludePending} />
+              <ReportFilterToggle label={t('reports.filters.includeTransfers')} value={fields.includeTransfers} onToggle={setIncludeTransfers} />
+            </View>
+          </ScrollView>
+        </SafeAreaView>
+      </Modal>
+    </>
   )
 }
 
-function ReportFilterToggle({ label, value, onToggle, palette }: { label: string; value: boolean; onToggle: (next: boolean) => void; palette: Palette }) {
+/** Web's `Checkbox` + label: a 16pt input-stroke square, filled primary with a check when on. */
+function ReportFilterToggle({ label, value, onToggle }: { label: string; value: boolean; onToggle: (next: boolean) => void }) {
+  const palette = usePalette()
   return (
     <Pressable
       accessibilityRole="switch"
       accessibilityLabel={label}
       accessibilityState={{ checked: value }}
       onPress={() => onToggle(!value)}
-      style={styles.toggleRow}
+      style={({ pressed }) => [styles.toggleRow, pressed && styles.pressed]}
     >
-      <View style={[styles.checkbox, { borderColor: palette.primary }, value && { backgroundColor: palette.primary }]} />
-      <Text allowFontScaling style={[styles.toggleLabel, { color: palette.foreground }]}>{label}</Text>
+      <View style={[styles.checkbox, { borderColor: value ? palette.primary : palette.input, backgroundColor: value ? palette.primary : 'transparent' }]}>
+        {value ? <Icon color={palette.primaryForeground} name="check" size={12} /> : null}
+      </View>
+      <Text style={styles.toggleLabel} variant="meta">{label}</Text>
     </Pressable>
   )
 }
 
 const styles = StyleSheet.create({
-  container: { gap: themeTokens.spacing[3] },
-  trigger: { minHeight: themeTokens.touchTarget.minimum, flexDirection: 'row', alignItems: 'center', alignSelf: 'flex-start', gap: themeTokens.spacing[2], borderWidth: 1, borderRadius: themeTokens.radius.pill, paddingHorizontal: themeTokens.spacing[4] },
-  triggerText: { ...textStyles.bodyStrong, fontWeight: '600' as const },
-  badge: { minWidth: 20, height: 20, borderRadius: 10, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 5 },
-  badgeText: { ...textStyles.amountSmall },
-  panel: { borderWidth: 1, borderRadius: themeTokens.radius.lg, padding: themeTokens.spacing[4], gap: themeTokens.spacing[4] },
-  toggleRow: { minHeight: themeTokens.touchTarget.minimum, flexDirection: 'row', alignItems: 'center', gap: themeTokens.spacing[3] },
-  checkbox: { width: 20, height: 20, borderWidth: 1.5, borderRadius: themeTokens.radius.sm },
-  toggleLabel: { ...textStyles.body, flex: 1 },
-  resetRow: { minHeight: themeTokens.touchTarget.minimum, alignSelf: 'flex-start', justifyContent: 'center' },
-  resetText: { ...textStyles.bodyStrong, fontWeight: '600' as const },
+  sheet: { flex: 1 },
+  sheetHead: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: themeTokens.layout.screenPadding,
+    paddingVertical: themeTokens.spacing[3],
+    borderBottomWidth: 1,
+  },
+  sheetBody: { padding: themeTokens.layout.screenPadding, gap: themeTokens.spacing[4] },
+  fields: { gap: themeTokens.spacing[4] },
+  toggles: { gap: themeTokens.spacing[1] },
+  toggleRow: { minHeight: themeTokens.touchTarget.minimum, flexDirection: 'row', alignItems: 'center', gap: themeTokens.spacing[2] },
+  checkbox: { width: 16, height: 16, borderWidth: 1, borderRadius: themeTokens.radius.sm, alignItems: 'center', justifyContent: 'center' },
+  toggleLabel: { flex: 1 },
+  pressed: { opacity: 0.72 },
 })

@@ -87,11 +87,11 @@ test("picking a transaction type and a broker shows them without a controlled-st
   const error = vi.spyOn(console, "error");
   renderModal();
 
-  await user.click(selectTrigger(messages["transaction-type"]));
+  await user.click(selectTrigger(messages["transaction-type-placeholder"]));
   await user.click(
     await screen.findByRole("option", { name: messages["financial-transaction-type-SELL"] }),
   );
-  await user.click(selectTrigger(messages.broker));
+  await user.click(selectTrigger(messages["broker-placeholder"]));
   await user.click(await screen.findByRole("option", { name: "DEGIRO" }));
 
   assert.ok(screen.getAllByRole("combobox").some((c) => c.textContent === messages["financial-transaction-type-SELL"]));
@@ -106,7 +106,7 @@ test("saving without a transaction type is refused with a field error", async ()
   const user = userEvent.setup();
   renderModal();
 
-  await user.click(screen.getByRole("button", { name: messages.add }));
+  await user.click(screen.getByRole("button", { name: messages["add-transaction"] }));
 
   await waitFor(() => assert.ok(screen.getByText(messages["invalid-type"])));
   assert.equal(mutateAsync.mock.calls.length, 0);

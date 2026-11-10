@@ -6,8 +6,12 @@ const netWorthRowTypeSchema = z.enum(['accounts', 'portfolios', 'loans'])
 
 export const netWorthRowSchema = z.object({
   type: netWorthRowTypeSchema,
+  /** The account, portfolio or loan key, so a row can be matched to its record (its logo). */
+  id: z.number().int().positive().optional(),
   name: z.string().min(1).max(255),
   balance: z.number().finite(),
+  /** A portfolio already inside this account's balance: shown, but not part of any total. */
+  countedInAccountId: z.number().int().positive().optional(),
 })
 
 // A row of a type this build doesn't know (a new asset class, say) is dropped from the breakdown
@@ -15,8 +19,10 @@ export const netWorthRowSchema = z.object({
 // include it.
 const netWorthRowsSchema = z.array(z.object({
   type: tolerantEnum(['accounts', 'portfolios', 'loans'], 'unknown'),
+  id: z.number().int().positive().optional().catch(undefined),
   name: z.string().min(1).max(255),
   balance: z.number().finite(),
+  countedInAccountId: z.number().int().positive().optional().catch(undefined),
 })).transform((rows) => rows.filter((row): row is NetWorthRowDto => row.type !== 'unknown'))
 
 export const netWorthDtoSchema = z.object({

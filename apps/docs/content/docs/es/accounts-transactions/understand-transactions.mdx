@@ -30,6 +30,19 @@ Asegúrate de que la cuenta ha terminado su primera sincronización o de que tie
 3. Abre una transacción para revisar el importe, el comercio y las notas.
 4. Actualiza la categoría, la descripción o el estado de recurrencia cuando sea necesario.
 
+## Fechas e intervalos de fechas
+
+Un intervalo de fechas abarca días completos en tu zona horaria. Los bancos suelen enviar una fecha de apunte sin hora, y WonderMoney cuenta esa transacción en esa fecha estés donde estés: un intervalo que empieza o termina ese día la incluye, y uno que termina el día anterior no. Una transacción con hora, como una que añades tú, cuenta a esa hora en tu zona horaria. Las listas y los detalles de las transacciones, en la web y en la app móvil, muestran una fecha de apunte como esa misma fecha, y una transacción con hora en su día en tu zona horaria.
+
+## Escribir importes
+
+Los campos de importe leen los números como los escribe el idioma de la aplicación. En español y portugués, la coma separa los decimales y el punto agrupa los miles: `1.234,56` es mil doscientos treinta y cuatro con 56 céntimos, y `1.000` es mil. En inglés es al revés: `1,234.56`, y `1.000` es uno.
+
+- Un número con los dos separadores, como `1.234,56` o `1,234.56`, se lee igual en cualquier idioma.
+- Los espacios y los apóstrofos pueden agrupar los miles (`1 234,56`, `1'234.56`).
+- Se aceptan un signo menos, paréntesis y un símbolo o código de moneda (`-12,30 €`, `(12,30)`, `EUR 12,30`).
+- Un valor que WonderMoney no puede leer con certeza, como `1.2.3` o `12,`, muestra un error bajo el campo en lugar de guardarse como otro importe.
+
 ## Revisión
 
 Busca elementos sin categoría, entradas duplicadas y transacciones que pertenezcan a un pago recurrente. Una revisión breve cada semana mantiene el historial de la cuenta útil para los presupuestos y los resúmenes.

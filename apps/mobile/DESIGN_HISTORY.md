@@ -90,6 +90,7 @@ Recorded rather than quietly carried.
 | --- | --- | --- |
 | Default category color | `#2563EB` in `category-manage-screen.tsx` — an arbitrary blue not in the palette. | It's a *data* default: changing it changes what gets persisted for new categories. Worth changing to `chart5`, deliberately, as its own task. |
 | Google brand marks | `#4285F4` / `#EA4335` / `#FBBC05` / `#34A853` in `social-sign-in-buttons.tsx`. | Not debt. Google's brand guidelines require exact values; tokenizing them would be wrong. |
+| Default tag color | `#94a3b8` in `features/tags/tags-contract.ts`, the API's own default, used when a tag arrives without a readable colour. | Not debt: a data default that must match what the API stores. Tag colours only ever draw a dot beside foreground text on `muted`, so no contrast depends on them. |
 | Category colors | User-chosen hex, stored server-side, rendered as-is. | Not debt — user data. The ink on top is chosen by luminance at render, from the two halves' `foreground` values. |
 | App lock | Needs enrolled biometrics, so it can't be exercised on a simulator. | Reviewed from source only. Verify on a device before trusting it. |
 | Asset pricing on staging | Portfolio value reads €0.00 with a real holding. | Not a UI fault — staging has no quote for the instrument. |

@@ -9,14 +9,14 @@ import { ProfileEditRoute } from './profile-edit-route'
 const mockReplace = jest.fn()
 const mockBack = jest.fn()
 const mockCanGoBack = jest.fn()
-const mockAddListener = jest.fn(() => () => {})
+const mockUsePreventRemove = jest.fn((_preventRemove: boolean, _onPrevented?: (options: { data: { action: object }; repeat: () => void }) => void) => jest.fn())
 const mockProfile = jest.fn()
 const mockMutateAsync = jest.fn()
 let mockPending = false
 
 jest.mock('expo-router', () => ({
   useRouter: () => ({ replace: mockReplace, back: mockBack, canGoBack: mockCanGoBack }),
-  useNavigation: () => ({ addListener: mockAddListener }),
+  usePreventRemove: (preventRemove: boolean, onPrevented?: (options: { data: { action: object }; repeat: () => void }) => void) => mockUsePreventRemove(preventRemove, onPrevented),
 }))
 jest.mock('./use-self-resource', () => ({ useProfile: () => mockProfile() }))
 jest.mock('./use-update-profile', () => {
@@ -67,6 +67,6 @@ describe('ProfileEditRoute', () => {
   it('registers a guard against leaving mid-save', async () => {
     mockProfile.mockReturnValue(loaded)
     await renderRoute()
-    expect(mockAddListener).toHaveBeenCalledWith('beforeRemove', expect.any(Function))
+    expect(mockUsePreventRemove).toHaveBeenCalled()
   })
 })

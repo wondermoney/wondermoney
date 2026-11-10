@@ -24,6 +24,7 @@ const mocked = vi.hoisted(() => ({
     createGoal: vi.fn(),
     fundTransactionFromGoal: vi.fn(),
     getAvailableToAssign: vi.fn(),
+    getAvailableToAssignSummary: vi.fn(),
     getGoal: vi.fn(),
     getGoalActivity: vi.fn(),
     linkGoalAccount: vi.fn(),
@@ -197,12 +198,12 @@ describe('goal controller scenarios', () => {
 
   it('gets available-to-assign for the current appuser/tenant', async () => {
     mocked.appuserTenantRepo.getAppuserTenantByAppuser.mockResolvedValueOnce({ tenantKey: { tenantKey: 22 } });
-    mocked.goalService.getAvailableToAssign.mockResolvedValueOnce(350);
+    mocked.goalService.getAvailableToAssignSummary.mockResolvedValueOnce({ availableToAssign: 350, isComplete: true, unconvertedAccounts: 0 });
 
     const res = mockRes({ json: vi.fn() });
     await getAvailableToAssign({ user: { appuserKey: 11, currencyKey: { currencyKey: 2 } } } as Parameters<typeof getAvailableToAssign>[0], res);
 
-    expect(mocked.goalService.getAvailableToAssign).toHaveBeenCalledWith({ appuserKey: 11, tenantKey: 22 });
-    expect(res.json).toHaveBeenCalledWith({ availableToAssign: 350 });
+    expect(mocked.goalService.getAvailableToAssignSummary).toHaveBeenCalledWith({ appuserKey: 11, tenantKey: 22 });
+    expect(res.json).toHaveBeenCalledWith({ availableToAssign: 350, isComplete: true, unconvertedAccounts: 0 });
   });
 });

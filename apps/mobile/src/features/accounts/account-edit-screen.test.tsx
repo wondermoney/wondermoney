@@ -73,11 +73,11 @@ describe('account metadata editor', () => {
     jest.spyOn(Alert, 'alert').mockImplementation((_title, _message, buttons) => { buttons?.[1]?.onPress?.() })
     const { view } = await renderEditor({ onBack: back })
     await fireEvent.changeText(view.getByLabelText('Name'), 'Unsaved')
-    await fireEvent.press(view.getByRole('button', { name: 'Cancel' }))
+    await fireEvent.press(view.getByRole('button', { name: 'Close' }))
     await waitFor(() => expect(back).toHaveBeenCalled())
     const pending = await renderEditor({ pending: true })
     expect(pending.view.getByLabelText('Name').props.editable).toBe(false)
-    expect(pending.view.getByRole('button', { name: 'Cancel' }).props.accessibilityState.disabled).toBe(true)
+    expect(pending.view.getByRole('button', { name: 'Close' }).props.accessibilityState.disabled).toBe(true)
   })
 
   it('shows stale authoritative details as an alert', async () => {
@@ -129,7 +129,7 @@ describe('account metadata editor', () => {
       const { view } = await renderEditor({ deletePending: true })
       expect(view.getByRole('button', { name: 'Deleting…' }).props.accessibilityState.disabled).toBe(true)
       expect(view.getByLabelText('Name').props.editable).toBe(false)
-      expect(view.getByRole('button', { name: 'Cancel' }).props.accessibilityState.disabled).toBe(true)
+      expect(view.getByRole('button', { name: 'Close' }).props.accessibilityState.disabled).toBe(true)
     })
   })
 })

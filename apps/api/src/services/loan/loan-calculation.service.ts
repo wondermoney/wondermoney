@@ -54,7 +54,9 @@ export function calculateOutstandingPrincipalWithAdjustments(input: {
     ...(input.principalRepayments ?? []).map((repayment) => ({ kind: 'repayment' as const, ...repayment })),
   ].sort((a, b) => (a.effectiveDate?.getTime() ?? Number.POSITIVE_INFINITY) - (b.effectiveDate?.getTime() ?? Number.POSITIVE_INFINITY));
 
-  let balance = input.openingPrincipalBalance;
+  // Accumulated exactly: a float running sum drifts (168382.32999999996 instead of
+  // 168382.33), and that noise reached the DTO and every figure derived from it.
+  let balance = big(input.openingPrincipalBalance);
   let correctionAppliedAt: null | number = null;
 
   for (const event of events) {
@@ -62,27 +64,37 @@ export function calculateOutstandingPrincipalWithAdjustments(input: {
     if (event.kind === 'adjustment') {
       switch (event.type) {
         case 'BALANCE_CORRECTION':
-          balance = event.amount;
+          balance = big(event.amount);
           correctionAppliedAt = eventTime;
           break;
         case 'CAPITALIZED_INTEREST':
         case 'FEE':
         case 'PRINCIPAL_INCREASE':
-          if (correctionAppliedAt == null || eventTime >= correctionAppliedAt) balance += event.amount;
+          if (correctionAppliedAt == null || eventTime >= correctionAppliedAt) balance = balance.plus(big(event.amount));
           break;
         case 'PRINCIPAL_DECREASE':
         case 'WRITE_OFF':
-          if (correctionAppliedAt == null || eventTime >= correctionAppliedAt) balance -= event.amount;
+          if (correctionAppliedAt == null || eventTime >= correctionAppliedAt) balance = balance.minus(big(event.amount));
           break;
       }
     } else if (correctionAppliedAt == null || eventTime >= correctionAppliedAt) {
-      balance -= event.amount;
+      balance = balance.minus(big(event.amount));
     }
   }
 
-  return balance;
+  return roundDisplay(balance);
 }
 
+/**
+ * Months the balance takes to reach zero at the regular payment, from the annuity formula
+ * n = -ln(1 - P·r / M) / ln(1 + r), rounded up (the last payment is a partial one).
+ *
+ * This is an estimate from the stored payment and rate, not the contract: when the stored
+ * payment is below the annuity payment the contract implies (a stale payment after a rate
+ * change, or a mistyped figure), the estimate honestly runs past the maturity date. Callers
+ * compare it with the contract rather than this function capping it, because a capped
+ * figure would hide that the payment no longer clears the loan on time.
+ */
 export function calculateRemainingTermMonths(input: {
   annualInterestRateBps: number;
   outstandingPrincipal: number;

@@ -72,7 +72,9 @@
     },
 
     /* Types */
-    "typeRoots": ["./node_modules/@types", "./src/types"],
+    // The hoisted install puts @types/node here or at the workspace root, depending on which
+    // versions other workspace packages ask for.
+    "typeRoots": ["./node_modules/@types", "../../node_modules/@types", "./src/types"],
     "types": ["node"]
   },
   "include": ["src/**/*.ts"],

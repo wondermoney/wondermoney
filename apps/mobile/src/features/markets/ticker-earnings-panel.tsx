@@ -2,7 +2,8 @@ import { useTranslation } from 'react-i18next'
 import { StyleSheet, Text, View } from 'react-native'
 import { CartesianChart, Scatter } from 'victory-native'
 
-import { formatCurrency } from '@/lib/formatters/financial'
+import { useFormatMoney } from '@/lib/formatters/money-display'
+import { Section } from '@/components/ui/section'
 import { themeTokens } from '@/theme/tokens'
 import { textStyles } from '@/theme/typography'
 
@@ -24,8 +25,9 @@ const STATEMENT_CURRENCY = 'USD'
 
 function EarningsSummaryRow({ point, locale, unavailable, palette }: { point: EarningsChartPoint; locale: string; unavailable: string; palette: Palette }) {
   const { t } = useTranslation()
-  const actualText = point.actual === null ? unavailable : formatCurrency(point.actual, { locale, currency: STATEMENT_CURRENCY })
-  const estimatedText = point.estimated === null ? unavailable : formatCurrency(point.estimated, { locale, currency: STATEMENT_CURRENCY })
+  const formatMoney = useFormatMoney()
+  const actualText = point.actual === null ? unavailable : formatMoney(point.actual, { locale, currency: STATEMENT_CURRENCY })
+  const estimatedText = point.estimated === null ? unavailable : formatMoney(point.estimated, { locale, currency: STATEMENT_CURRENCY })
   return (
     <Text allowFontScaling style={[styles.summaryRow, { color: palette.foreground }]}>
       {t('assetDetail.earnings.row', { quarter: point.quarter || unavailable, actual: actualText, estimated: estimatedText })}
@@ -39,17 +41,14 @@ export function TickerEarningsPanel({ state, palette }: TickerEarningsPanelProps
   const unavailable = t('assetDetail.unavailable')
 
   return (
-    <View style={[styles.card, { borderColor: palette.border, backgroundColor: palette.muted }]}>
-      <Text accessibilityRole="header" allowFontScaling style={[styles.title, { color: palette.foreground }]}>
-        {t('assetDetail.earnings.heading')}
-      </Text>
+    <Section title={t('assetDetail.earnings.heading')} variant="open">
 
       {state.status === 'loading' ? (
         <Text accessibilityRole="progressbar" accessibilityLabel={t('assetDetail.earnings.loading')} allowFontScaling style={[styles.helper, { color: palette.mutedForeground }]}>
           {t('assetDetail.earnings.loading')}
         </Text>
       ) : state.status === 'error' ? (
-        <Text accessibilityRole="alert" allowFontScaling style={[styles.helper, { color: palette.destructive }]}>
+        <Text accessibilityRole="alert" allowFontScaling style={[styles.helper, { color: palette.destructiveText }]}>
           {t('assetDetail.earnings.error')}
         </Text>
       ) : state.points.length === 0 ? (
@@ -94,14 +93,12 @@ export function TickerEarningsPanel({ state, palette }: TickerEarningsPanelProps
           </View>
         </>
       )}
-    </View>
+    </Section>
   )
 }
 
 const styles = StyleSheet.create({
-  card: { width: '100%', borderWidth: 1, borderRadius: themeTokens.radius.xl, padding: themeTokens.spacing[4], gap: themeTokens.spacing[3] },
-  title: { ...textStyles.section },
-  helper: { ...textStyles.body },
+  helper: { ...textStyles.meta },
   legend: { flexDirection: 'row', flexWrap: 'wrap', gap: themeTokens.spacing[4] },
   legendItem: { flexDirection: 'row', alignItems: 'center', gap: themeTokens.spacing[2] },
   legendSwatch: { width: 10, height: 10, borderRadius: themeTokens.radius.pill },

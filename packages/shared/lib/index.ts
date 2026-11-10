@@ -1,5 +1,6 @@
 import * as csv from './csv';
-export { csv };
+import * as transactionImport from './import';
+export { csv, transactionImport };
 
 // EODHD exports
 export {
@@ -10,3 +11,4 @@ export {
 export * as EodhdTypes from './services/eodhd/types';
 
 export * from './entities';
+export * from './decimal';

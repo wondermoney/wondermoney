@@ -3,7 +3,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Download, Plus } from "lucide-react";
 import Image from "next/image";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { usePostHog } from "posthog-js/react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { SubmitHandler, useForm, useWatch } from "react-hook-form";
@@ -28,13 +28,17 @@ import { useRateLimitToast } from "@/lib/api/useRateLimitToast";
 import {
   buildCurrencyOptions,
   CURRENCY_TRIGGER_CLASS,
-  useAmountPlaceholder,
 } from "@/lib/utils/currency-field";
-import { zLocaleNumber } from "@/lib/utils/number";
+import {
+  formatLocaleNumberInput,
+  zLocaleNumber,
+  zOptionalLocaleNumber,
+} from "@/lib/utils/number";
 
 import { Button } from "../ui/button";
 import { ComboBoxForm } from "../ui/combobox";
 import { Input } from "../ui/input";
+import { MoneyInput } from "../ui/MoneyInput";
 import {
   Select,
   SelectContent,
@@ -59,7 +63,7 @@ interface PortfolioTransactionAddModalProps {
   trigger?: React.ReactNode;
 }
 
-const createFormSchema = (t: (key: string) => string) =>
+const createFormSchema = (t: (key: string) => string, locale: string) =>
   z.object({
     portfolioId: z.string().min(1, t("invalid-portfolio")),
     transactionDate: z.date(),
@@ -68,12 +72,12 @@ const createFormSchema = (t: (key: string) => string) =>
     assetKind: z.enum(["ticker", "certificado-aforro"]).default("ticker"),
     assetSymbol: z.string(),
     taxExempt: z.boolean().optional(),
-    quantity: zLocaleNumber,
-    unitPrice: zLocaleNumber,
+    quantity: zLocaleNumber(locale, t("invalid-amount")),
+    unitPrice: zLocaleNumber(locale, t("invalid-amount")),
     settlementCurrencyId: z.string(),
-    feeAmount: zLocaleNumber.optional(),
+    feeAmount: zOptionalLocaleNumber(locale, t("invalid-amount")),
     feeCurrencyId: z.string().optional(),
-    originalUnitPrice: zLocaleNumber.optional(),
+    originalUnitPrice: zOptionalLocaleNumber(locale, t("invalid-amount")),
     originalCurrencyId: z.string().optional(),
     notes: z.string().optional(),
     hasFees: z.boolean().default(false),
@@ -113,9 +117,9 @@ const PortfolioTransactionAddModal: React.FC<
   trigger,
 }) => {
   const t = useTranslations();
-  const amountPlaceholder = useAmountPlaceholder();
   const notifyIfRateLimited = useRateLimitToast();
-  const formSchema = useMemo(() => createFormSchema(t), [t]);
+  const locale = useLocale();
+  const formSchema = useMemo(() => createFormSchema(t, locale), [t, locale]);
 
   const { data: configsData, isLoading: isLoadingConfigs } = useConfigs();
   const { data: portfoliosData, isLoading: isLoadingPortfoliosData } =
@@ -327,7 +331,7 @@ const PortfolioTransactionAddModal: React.FC<
         trigger !== undefined ? (
           (trigger ?? undefined)
         ) : (
-          <Button className="gap-2" size="sm">
+          <Button>
             <Plus className="size-4" />
             {t("add-transaction")}
           </Button>
@@ -337,7 +341,7 @@ const PortfolioTransactionAddModal: React.FC<
       footer={
         <>
           {importHref ? (
-            <Button asChild className="gap-2" size="lg" variant="ghost">
+            <Button asChild variant="ghost">
               <a href={importHref}>
                 <Download className="size-4" />
                 {t("import-transactions")}
@@ -345,8 +349,6 @@ const PortfolioTransactionAddModal: React.FC<
             </Button>
           ) : onImportTransactions ? (
             <Button
-              className="gap-2"
-              size="lg"
               type="button"
               variant="ghost"
               disabled={isSubmitting}
@@ -357,13 +359,12 @@ const PortfolioTransactionAddModal: React.FC<
             </Button>
           ) : null}
           <Button
-            size="lg"
             type="submit"
             loading={isSubmitting}
             disabled={isSubmitting}
             form="add-portfolio-transaction-form"
           >
-            {t("add")}
+            {t("add-transaction")}
           </Button>
         </>
       }
@@ -380,9 +381,7 @@ const PortfolioTransactionAddModal: React.FC<
               name="portfolioId"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="font-semibold" required>
-                    {t("portfolio")}
-                  </FormLabel>
+                  <FormLabel required>{t("portfolio")}</FormLabel>
                   <FormControl>
                     {isLoadingPortfoliosData ? (
                       <Spinner />
@@ -393,7 +392,9 @@ const PortfolioTransactionAddModal: React.FC<
                         disabled={field.disabled}
                       >
                         <SelectTrigger className="w-full">
-                          <SelectValue placeholder={t("portfolio")} />
+                          <SelectValue
+                            placeholder={t("portfolio-placeholder")}
+                          />
                         </SelectTrigger>
                         <SelectContent>
                           <SelectGroup>
@@ -420,7 +421,7 @@ const PortfolioTransactionAddModal: React.FC<
               name="transactionDate"
               render={({ field: { onChange, value } }) => (
                 <FormItem>
-                  <FormLabel className="font-semibold" required>
+                  <FormLabel required>
                     {assetKind === "certificado-aforro"
                       ? t("portfolio-ca-subscription-date-label")
                       : t("date")}
@@ -442,9 +443,7 @@ const PortfolioTransactionAddModal: React.FC<
               name="financialTransactionTypeId"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="font-semibold" required>
-                    {t("transaction-type")}
-                  </FormLabel>
+                  <FormLabel required>{t("transaction-type")}</FormLabel>
                   <FormControl>
                     {isLoadingConfigs ? (
                       <Spinner />
@@ -455,7 +454,9 @@ const PortfolioTransactionAddModal: React.FC<
                         disabled={field.disabled}
                       >
                         <SelectTrigger className="w-full">
-                          <SelectValue placeholder={t("transaction-type")} />
+                          <SelectValue
+                            placeholder={t("transaction-type-placeholder")}
+                          />
                         </SelectTrigger>
                         <SelectContent>
                           <SelectGroup>
@@ -488,9 +489,7 @@ const PortfolioTransactionAddModal: React.FC<
             name="assetKind"
             render={({ field: { onChange, value } }) => (
               <FormItem>
-                <FormLabel className="font-semibold">
-                  {t("portfolio-ca-asset-kind-label")}
-                </FormLabel>
+                <FormLabel>{t("portfolio-ca-asset-kind-label")}</FormLabel>
                 <FormControl>
                   <Tabs value={value} onValueChange={onChange}>
                     <TabsList>
@@ -513,7 +512,7 @@ const PortfolioTransactionAddModal: React.FC<
               name="brokerId"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="font-semibold">{t("broker")}</FormLabel>
+                  <FormLabel>{t("broker")}</FormLabel>
                   <FormControl>
                     {isLoadingConfigs ? (
                       <Spinner />
@@ -524,7 +523,7 @@ const PortfolioTransactionAddModal: React.FC<
                         disabled={field.disabled}
                       >
                         <SelectTrigger className="w-full">
-                          <SelectValue placeholder={t("broker")} />
+                          <SelectValue placeholder={t("broker-placeholder")} />
                         </SelectTrigger>
                         <SelectContent>
                           <SelectGroup>
@@ -563,9 +562,7 @@ const PortfolioTransactionAddModal: React.FC<
                 name="assetSymbol"
                 render={({ field: { onChange, value } }) => (
                   <FormItem>
-                    <FormLabel className="font-semibold" required>
-                      {t("ticker")}
-                    </FormLabel>
+                    <FormLabel required>{t("ticker")}</FormLabel>
                     <FormControl>
                       <TickerAutoComplete
                         selectedTicker={value}
@@ -585,7 +582,7 @@ const PortfolioTransactionAddModal: React.FC<
               name="quantity"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="font-semibold" required>
+                  <FormLabel required>
                     {assetKind === "certificado-aforro"
                       ? t("portfolio-ca-principal-label")
                       : t("quantity")}
@@ -596,7 +593,7 @@ const PortfolioTransactionAddModal: React.FC<
                       step="any"
                       placeholder="100"
                       {...field}
-                      value={field.value == null ? "" : String(field.value)}
+                      value={formatLocaleNumberInput(field.value, locale)}
                     />
                   </FormControl>
                   <FormMessage />
@@ -610,19 +607,15 @@ const PortfolioTransactionAddModal: React.FC<
                 name="unitPrice"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel required className="font-semibold">
-                      {t("unit-price")}
-                    </FormLabel>
+                    <FormLabel required>{t("unit-price")}</FormLabel>
                     <FormControl>
-                      <Input
+                      <MoneyInput
                         type="tel"
                         step="any"
                         min="0"
-                        placeholder={amountPlaceholder}
-                        className="w-full pr-4 text-right"
                         {...field}
-                        value={field.value == null ? "" : String(field.value)}
-                        startAdornment={
+                        value={formatLocaleNumberInput(field.value, locale)}
+                        currencySlot={
                           <ComboBoxForm
                             triggerClassName={CURRENCY_TRIGGER_CLASS}
                             field={{
@@ -652,9 +645,7 @@ const PortfolioTransactionAddModal: React.FC<
             name="hasFees"
             render={({ field }) => (
               <FormItem className="flex-row items-center gap-2">
-                <FormLabel className="m-0 font-semibold">
-                  {t("add-fees")}
-                </FormLabel>
+                <FormLabel className="m-0">{t("add-fees")}</FormLabel>
                 <FormControl>
                   <Switch
                     checked={!!field.value}
@@ -675,19 +666,15 @@ const PortfolioTransactionAddModal: React.FC<
                 name="feeAmount"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel required className="font-semibold">
-                      {t("fee-amount")}
-                    </FormLabel>
+                    <FormLabel required>{t("fee-amount")}</FormLabel>
                     <FormControl>
-                      <Input
+                      <MoneyInput
                         type="tel"
                         step="any"
                         min="0"
-                        placeholder={amountPlaceholder}
-                        className="w-full pr-4 text-right"
                         {...field}
-                        value={field.value == null ? "" : String(field.value)}
-                        startAdornment={
+                        value={formatLocaleNumberInput(field.value, locale)}
+                        currencySlot={
                           <ComboBoxForm
                             triggerClassName={CURRENCY_TRIGGER_CLASS}
                             field={{
@@ -716,7 +703,7 @@ const PortfolioTransactionAddModal: React.FC<
             name="addOriginalCurrency"
             render={({ field }) => (
               <FormItem className="flex-row items-center gap-2">
-                <FormLabel className="m-0 font-semibold">
+                <FormLabel className="m-0">
                   {t("add-original-currency-and-amount")}
                 </FormLabel>
                 <FormControl>
@@ -739,19 +726,15 @@ const PortfolioTransactionAddModal: React.FC<
                 name="originalUnitPrice"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel required className="font-semibold">
-                      {t("original-price")}
-                    </FormLabel>
+                    <FormLabel required>{t("original-price")}</FormLabel>
                     <FormControl>
-                      <Input
+                      <MoneyInput
                         type="tel"
                         step="0.01"
                         min="0"
-                        placeholder={amountPlaceholder}
-                        className="w-full pr-4 text-right"
                         {...field}
-                        value={field.value == null ? "" : String(field.value)}
-                        startAdornment={
+                        value={formatLocaleNumberInput(field.value, locale)}
+                        currencySlot={
                           <ComboBoxForm
                             triggerClassName={CURRENCY_TRIGGER_CLASS}
                             field={{
@@ -780,7 +763,7 @@ const PortfolioTransactionAddModal: React.FC<
             name="notes"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="font-semibold">{t("notes")}</FormLabel>
+                <FormLabel>{t("notes")}</FormLabel>
                 <FormControl>
                   <Textarea
                     placeholder="e.g. bought right before earnings"

@@ -41,6 +41,10 @@ export class Budget extends Base {
   @Property({ default: 0 })
   numDependents!: number;
 
+  /** Rollover carries an overspend into the next month as well as a surplus. False drops overspend. */
+  @Property({ default: true })
+  rolloverCarriesOverspend = true;
+
   // Household tenant that owns this budget. Budgets are shared household-wide.
   @ManyToOne({ cascade: [], entity: () => Tenant, fieldName: 'tenant_key' })
   tenantKey!: Rel<Tenant>;

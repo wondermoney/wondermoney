@@ -77,7 +77,6 @@
       ],
       "ignore": [],
       "ignoreDependencies": [
-        "@expo/ui",
         "expo-glass-effect",
         "@emnapi/core",
         "@emnapi/runtime",

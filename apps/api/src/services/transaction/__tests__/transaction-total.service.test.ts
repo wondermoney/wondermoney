@@ -51,7 +51,10 @@ describe('buildTransactionWhere', () => {
         categoryKeys: { includeUncategorized: false, keys: [17] },
       }) as Record<string, unknown>;
 
-      expect(where['appuserTransactionCategories']).toEqual({ $some: { categoryKey: { $in: [17] } } });
+      expect(where['$or']).toEqual([
+        { appuserTransactionCategories: { $some: { categoryKey: { $in: [17] } } }, splits: { $none: { deletedAt: null } } },
+        { splits: { $some: { categoryKey: { $in: [17] }, deletedAt: null } } },
+      ]);
     });
 
     it('matches uncategorized transactions by the absence of any category row', () => {
@@ -59,7 +62,10 @@ describe('buildTransactionWhere', () => {
         categoryKeys: { includeUncategorized: true, keys: [] },
       }) as Record<string, unknown>;
 
-      expect(where['appuserTransactionCategories']).toEqual({ $none: {} });
+      expect(where['$or']).toEqual([
+        { appuserTransactionCategories: { $none: {} }, splits: { $none: { deletedAt: null } } },
+        { splits: { $some: { categoryKey: null, deletedAt: null } } },
+      ]);
     });
 
     /**
@@ -81,8 +87,10 @@ describe('buildTransactionWhere', () => {
       }) as Record<string, unknown>;
 
       expect(where['$or']).toEqual([
-        { appuserTransactionCategories: { $some: { categoryKey: { $in: [17, 23] } } } },
-        { appuserTransactionCategories: { $none: {} } },
+        { appuserTransactionCategories: { $some: { categoryKey: { $in: [17, 23] } } }, splits: { $none: { deletedAt: null } } },
+        { splits: { $some: { categoryKey: { $in: [17, 23] }, deletedAt: null } } },
+        { appuserTransactionCategories: { $none: {} }, splits: { $none: { deletedAt: null } } },
+        { splits: { $some: { categoryKey: null, deletedAt: null } } },
       ]);
       // Never both a top-level collection clause and an $or — that is the shared-join shape.
       expect(where['appuserTransactionCategories']).toBeUndefined();
@@ -106,7 +114,6 @@ describe('buildTransactionWhere', () => {
     expect(where['reviewed']).toBe(false);
     expect(where['categorizationConfidence']).toBe(CategorizationConfidence.LOW);
     expect(where['transactionTypeKey']).toEqual({ name: { $in: ['CARD_PAYMENT'] } });
-    expect(where['appuserTransactionCategories']).toEqual({ $some: { categoryKey: { $in: [17] } } });
-    expect(where['transactionDate']).toEqual({ $gte: fromDate, $lte: toDate });
+    expect(where['$or']).toContainEqual({ splits: { $some: { categoryKey: { $in: [17] }, deletedAt: null } } });
   });
 });

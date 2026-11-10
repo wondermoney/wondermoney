@@ -41,7 +41,7 @@ describe('watchlist controller', () => {
   describe('getWatchlist', () => {
     it('returns the user symbols, scoped to the appuser + tenant, in insertion order', async () => {
       const { getWatchlist } = await import('../watchlist');
-      mocks.find.mockResolvedValue([{ symbol: 'AAPL' }, { symbol: 'MSFT' }]);
+      mocks.find.mockResolvedValueOnce([{ symbol: 'AAPL' }, { symbol: 'MSFT' }]).mockResolvedValueOnce([]);
       const { json, res } = fakeRes();
       const req = { user: appuser } as unknown as Request;
 
@@ -52,7 +52,36 @@ describe('watchlist controller', () => {
         { appuserKey: appuser, tenantKey: tenant },
         { orderBy: { createdAt: 'asc' } },
       );
-      expect(json).toHaveBeenCalledWith({ symbols: ['AAPL', 'MSFT'] });
+      expect(json).toHaveBeenCalledWith(expect.objectContaining({ symbols: ['AAPL', 'MSFT'] }));
+    });
+
+    it("gives each symbol its known asset's logo, and null where none is known", async () => {
+      const { getWatchlist } = await import('../watchlist');
+      mocks.find
+        .mockResolvedValueOnce([{ symbol: 'AAPL' }, { symbol: 'ZZZZ' }])
+        .mockResolvedValueOnce([{ logoUrl: 'https://cdn.example/aapl.png', symbol: 'AAPL' }]);
+      const { json, res } = fakeRes();
+
+      await getWatchlist({ user: appuser } as unknown as Request, res);
+
+      expect(json).toHaveBeenCalledWith({
+        items: [
+          { logoUrl: 'https://cdn.example/aapl.png', symbol: 'AAPL' },
+          { logoUrl: null, symbol: 'ZZZZ' },
+        ],
+        symbols: ['AAPL', 'ZZZZ'],
+      });
+    });
+
+    it('does not look up logos for an empty list', async () => {
+      const { getWatchlist } = await import('../watchlist');
+      mocks.find.mockResolvedValueOnce([]);
+      const { json, res } = fakeRes();
+
+      await getWatchlist({ user: appuser } as unknown as Request, res);
+
+      expect(mocks.find).toHaveBeenCalledTimes(1);
+      expect(json).toHaveBeenCalledWith({ items: [], symbols: [] });
     });
   });
 

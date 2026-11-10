@@ -18,11 +18,11 @@ const mockUseBudgets = jest.fn()
 const mockUseBudgetMonth = jest.fn()
 const mockRead = jest.fn()
 const mockReplace = jest.fn()
-const mockAddListener = jest.fn(() => jest.fn())
+const mockUsePreventRemove = jest.fn((_preventRemove: boolean, _onPrevented?: (options: { data: { action: object }; repeat: () => void }) => void) => jest.fn())
 
 jest.mock('expo-router', () => ({
   useLocalSearchParams: () => ({ budgetId: '7' }),
-  useNavigation: () => ({ addListener: mockAddListener }),
+  usePreventRemove: (preventRemove: boolean, onPrevented?: (options: { data: { action: object }; repeat: () => void }) => void) => mockUsePreventRemove(preventRemove, onPrevented),
   useRouter: () => ({ replace: mockReplace }),
 }))
 jest.mock('react-i18next', () => ({ useTranslation: () => ({ t: (key: string) => key, i18n: { language: 'en', resolvedLanguage: 'en' } }) }))

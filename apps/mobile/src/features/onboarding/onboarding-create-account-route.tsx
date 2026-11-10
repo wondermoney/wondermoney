@@ -1,9 +1,9 @@
-import { type Href, useLocalSearchParams, useNavigation, useRouter } from 'expo-router'
-import { useEffect, useRef } from 'react'
+import { type Href, useLocalSearchParams, usePreventRemove, useRouter } from 'expo-router'
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Pressable, StyleSheet, Text, useColorScheme, View } from 'react-native'
-import { SafeAreaView } from 'react-native-safe-area-context'
 
+import { SafeAreaView } from '@/components/ui/screen-safe-area'
 import { OfflineAccountCreateScreen } from '@/features/accounts/offline-account-create-screen'
 import { classifyOfflineAccountCreateFailure, useCreateOfflineAccount } from '@/features/accounts/use-create-offline-account'
 import { useOfflineAccountOptions } from '@/features/accounts/use-offline-account-options'
@@ -43,12 +43,9 @@ export function OnboardingCreateAccountRoute() {
   const create = useCreateOfflineAccount('onboarding')
   const completion = useCompleteOnboarding()
   const router = useRouter()
-  const navigation = useNavigation()
-  const navigationUnlocked = useRef(false)
-
-  useEffect(() => navigation.addListener('beforeRemove', (event) => {
-    if ((create.isPending || completion.isPending) && !navigationUnlocked.current) event.preventDefault()
-  }), [create.isPending, completion.isPending, navigation])
+  const [navigationUnlocked, setNavigationUnlocked] = useState(false)
+  const disablePrevention = usePreventRemove((create.isPending || completion.isPending) && !navigationUnlocked)
+  const unlockNavigation = () => { setNavigationUnlocked(true); disablePrevention() }
 
   if (version === null) {
     return <InvalidVersionState onBack={() => router.replace('/onboarding' as Href)} />
@@ -77,13 +74,13 @@ export function OnboardingCreateAccountRoute() {
       } catch {
         // See file header: the account was created, so we still proceed.
       }
-      navigationUnlocked.current = true
+      unlockNavigation()
       router.replace('/' as Href)
       return null
     }}
     onCheckAccounts={async () => {
       await create.reconcile()
-      navigationUnlocked.current = true
+      unlockNavigation()
       router.replace('/' as Href)
     }}
     onCreateAnother={create.clearUnknownGuard}

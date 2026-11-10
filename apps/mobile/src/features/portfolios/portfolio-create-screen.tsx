@@ -1,54 +1,132 @@
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { BackHandler, ScrollView, StyleSheet, Text, useColorScheme, View } from 'react-native'
-import { SafeAreaView } from 'react-native-safe-area-context'
+import { BackHandler, ScrollView, StyleSheet, View } from 'react-native'
 
-import { BackControl } from '@/components/ui/back-control'
-import { PageHeader } from '@/components/ui/page-header'
+import { Button } from '@/components/ui/button'
+import { FormBar } from '@/components/ui/form-bar'
+import { FormGroup, FormSelectRow, FormTextRow } from '@/components/ui/form-row'
+import { Notice } from '@/components/ui/notice'
+import { SafeAreaView } from '@/components/ui/screen-safe-area'
+import { Text } from '@/components/ui/text'
 import { themeTokens } from '@/theme/tokens'
-import { textStyles } from '@/theme/typography'
+import { usePalette } from '@/theme/use-palette'
 
-import { PortfolioButton, PortfolioChoice, PortfolioField } from './portfolio-form-parts'
+import { PortfolioReviewList, PortfolioReviewRow } from './portfolio-form-parts'
 import { portfolioCreateWriteSchema, type PortfolioCreateWrite, type PortfolioCurrencyDto } from './portfolios-contract'
 import type { PortfolioCreateFailure } from './use-create-portfolio'
 
+/**
+ * Create a portfolio, as a calm-structure flow: the form bar (close, save),
+ * then the name and currency as rows. The ✓ reviews first, and the ✓ on the
+ * review creates the portfolio.
+ */
 export function PortfolioCreateScreen({ currencies, defaultCurrencyId, pending, unknownPayload, failure, detailState, confirmedPortfolioId, refreshingList, listRefreshFailed, onBack, onSubmit, onRefreshList, onRetryDetail }: {
   currencies: readonly PortfolioCurrencyDto[]; defaultCurrencyId: number | null; pending: boolean; unknownPayload: Readonly<PortfolioCreateWrite> | null; failure: PortfolioCreateFailure | null; detailState: 'idle' | 'loading' | 'unavailable'; confirmedPortfolioId: number | null; refreshingList: boolean; listRefreshFailed: boolean; onBack: () => void; onSubmit: (value: PortfolioCreateWrite) => Promise<void>; onRefreshList: () => Promise<void>; onRetryDetail: () => Promise<void>
 }) {
   const { t } = useTranslation()
-  const palette = themeTokens.colors[useColorScheme() === 'dark' ? 'dark' : 'light']
+  const palette = usePalette()
   const [name, setName] = useState(unknownPayload?.name ?? '')
   const [currencyId, setCurrencyId] = useState<number | null>(unknownPayload?.currencyId ?? defaultCurrencyId)
   const [reviewed, setReviewed] = useState<Readonly<PortfolioCreateWrite> | null>(unknownPayload)
-  const [validation, setValidation] = useState(false)
   const unknown = unknownPayload !== null
   const effective = unknownPayload ?? reviewed
 
   useEffect(() => { if (!pending) return; const listener = BackHandler.addEventListener('hardwareBackPress', () => true); return () => listener.remove() }, [pending])
-  const review = () => {
-    const currencyExists = currencyId !== null && currencies.some((currency) => currency.currencyKey === currencyId)
-    const result = portfolioCreateWriteSchema.safeParse({ name, currencyId })
-    if (!currencyExists || !result.success) { setValidation(true); return }
-    setValidation(false); setReviewed(Object.freeze(result.data))
-  }
+
+  const currencyExists = currencyId !== null && currencies.some((currency) => currency.currencyKey === currencyId)
+  const parsed = portfolioCreateWriteSchema.safeParse({ name, currencyId })
+  const ready = currencyExists && parsed.success
+  // A name of only spaces is entered and wrong; an empty one only keeps the ✓ disabled.
+  const nameError = name.length > 0 && name.trim().length === 0 ? t('portfolioCreate.validation') : null
+  const review = () => { if (ready && parsed.success) setReviewed(Object.freeze(parsed.data)) }
   const selected = currencies.find((currency) => currency.currencyKey === effective?.currencyId)
-  return <SafeAreaView style={[styles.safe, { backgroundColor: palette.background }]}><ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={styles.content}><View style={styles.page}>
-    <View style={styles.header}><BackControl fallback="/portfolio" label={t('portfolioCreate.back')} onPress={onBack} disabled={pending} /><View style={styles.heading}><PageHeader palette={palette}
-            instruction={t('portfolioCreate.helper')} title={t('portfolioCreate.title')} /></View></View>
-    {!effective ? <View style={styles.form}>
-      <PortfolioField label={t('portfolioCreate.name')} value={name} onChange={(value) => { setName(value); setValidation(false) }} maxLength={255} palette={palette} required />
-      <View style={styles.field}><Text style={[styles.label, { color: palette.foreground }]}>{t('portfolioCreate.currency')} *</Text><Text style={[styles.helper, { color: palette.mutedForeground }]}>{t('portfolioCreate.currencyHelper')}</Text><View accessibilityRole="radiogroup" accessibilityLabel={t('portfolioCreate.currency')} style={styles.options}>{currencies.map((currency) => <PortfolioChoice key={currency.currencyKey} label={`${currency.code} · ${currency.description}`} selected={currencyId === currency.currencyKey} onPress={() => { setCurrencyId(currency.currencyKey); setValidation(false) }} palette={palette} />)}</View></View>
-      {validation ? <Text accessibilityRole="alert" style={[styles.alert, { color: palette.destructive }]}>{t('portfolioCreate.validation')}</Text> : null}<PortfolioButton label={t('portfolioCreate.review')} onPress={review} palette={palette} />
-    </View> : <View style={styles.form}>
-      <Text accessibilityRole="header" style={[styles.sectionTitle, { color: palette.foreground }]}>{t('portfolioCreate.reviewTitle')}</Text><Text style={[styles.helper, { color: palette.mutedForeground }]}>{t('portfolioCreate.reviewHelper')}</Text>
-      <View style={[styles.card, { borderColor: palette.border, backgroundColor: palette.card }]}><Review label={t('portfolioCreate.name')} value={effective.name} palette={palette} /><Review label={t('portfolioCreate.currency')} value={selected ? `${selected.code} · ${selected.description}` : String(effective.currencyId)} palette={palette} /></View>
-      {failure && !unknown ? <Text accessibilityRole="alert" style={[styles.alert, { color: palette.destructive }]}>{t(`portfolioCreate.failures.${failure}`)}</Text> : null}
-      {unknown ? <View style={[styles.notice, { borderColor: palette.destructive, backgroundColor: palette.muted }]}><Text accessibilityRole="header" style={[styles.sectionTitle, { color: palette.foreground }]}>{t('portfolioCreate.unknownTitle')}</Text><Text accessibilityRole="alert" style={[styles.helper, { color: palette.mutedForeground }]}>{t('portfolioCreate.unknownMessage')}</Text><Text style={[styles.helper, { color: palette.mutedForeground }]}>{refreshingList ? t('portfolioCreate.reconciling') : listRefreshFailed ? t('portfolioCreate.refreshFailed') : t('portfolioCreate.noInference')}</Text><View style={styles.actions}><BackControl fallback="/portfolio" label={t('portfolioCreate.back')} onPress={onBack} /><PortfolioButton label={t('portfolioCreate.refreshList')} onPress={onRefreshList} palette={palette} disabled={refreshingList} busy={refreshingList} /></View></View>
-      : confirmedPortfolioId !== null ? <View style={[styles.notice, { borderColor: palette.border, backgroundColor: palette.muted }]}><Text accessibilityRole="header" style={[styles.sectionTitle, { color: palette.foreground }]}>{detailState === 'loading' ? t('portfolioCreate.confirming') : t('portfolioCreate.detailUnavailableTitle')}</Text><Text accessibilityRole={detailState === 'unavailable' ? 'alert' : undefined} style={[styles.helper, { color: palette.mutedForeground }]}>{t(detailState === 'loading' ? 'portfolioCreate.confirmingMessage' : 'portfolioCreate.detailUnavailableMessage', { id: confirmedPortfolioId })}</Text>{detailState === 'unavailable' ? <View style={styles.actions}><BackControl fallback="/portfolio" label={t('portfolioCreate.back')} onPress={onBack} /><PortfolioButton label={t('portfolioCreate.retryDetail')} onPress={onRetryDetail} palette={palette} /></View> : null}</View>
-      : <View style={styles.actions}><PortfolioButton label={t('portfolioCreate.edit')} onPress={() => setReviewed(null)} palette={palette} secondary disabled={pending} /><PortfolioButton label={pending ? t('portfolioCreate.creating') : t('portfolioCreate.confirm')} onPress={() => onSubmit(effective)} palette={palette} disabled={pending} busy={pending} /></View>}
-    </View>}
-  </View></ScrollView></SafeAreaView>
+  const confirming = effective !== null && !unknown && confirmedPortfolioId === null
+
+  return (
+    <SafeAreaView style={[styles.safe, { backgroundColor: palette.background }]}>
+      <FormBar
+        closeDisabled={pending}
+        closeLabel={t('common.close')}
+        onClose={onBack}
+        onSave={!effective ? review : confirming ? () => void onSubmit(effective) : undefined}
+        saveDisabled={!effective ? !ready : pending}
+        saveLabel={!effective ? t('portfolioCreate.review') : pending ? t('portfolioCreate.creating') : t('portfolioCreate.confirm')}
+        saving={confirming && pending}
+        title={t('portfolioCreate.title')}
+      />
+      <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={styles.content}>
+        <View style={styles.page}>
+          {!effective ? (
+            <View style={styles.form}>
+              <FormGroup>
+                <FormTextRow key="name" error={nameError} label={t('portfolioCreate.name')} maxLength={255} onChangeText={setName} value={name} />
+                <FormSelectRow
+                  key="currency"
+                  hint={t('portfolioCreate.currencyHelper')}
+                  label={t('portfolioCreate.currency')}
+                  onChange={setCurrencyId}
+                  options={currencies.map((currency) => ({ value: currency.currencyKey, label: `${currency.code} · ${currency.description}` }))}
+                  placeholder={t('transactionCreate.choose')}
+                  value={currencyExists ? currencyId : null}
+                />
+              </FormGroup>
+            </View>
+          ) : (
+            <View style={styles.form}>
+              <View style={styles.reviewHead}>
+                <Text accessibilityRole="header" variant="heading">{t('portfolioCreate.reviewTitle')}</Text>
+                <Text tone="muted" variant="meta">{t('portfolioCreate.reviewHelper')}</Text>
+              </View>
+              <PortfolioReviewList>
+                <PortfolioReviewRow key="name" label={t('portfolioCreate.name')} value={effective.name} />
+                <PortfolioReviewRow key="currency" label={t('portfolioCreate.currency')} value={selected ? `${selected.code} · ${selected.description}` : String(effective.currencyId)} />
+              </PortfolioReviewList>
+              {failure && !unknown ? <Notice message={t(`portfolioCreate.failures.${failure}`)} tone="destructive" /> : null}
+              {unknown ? (
+                <View style={styles.state}>
+                  <Notice message={t('portfolioCreate.unknownMessage')} title={t('portfolioCreate.unknownTitle')} tone="destructive" />
+                  <Text tone="muted" variant="meta">{refreshingList ? t('portfolioCreate.reconciling') : listRefreshFailed ? t('portfolioCreate.refreshFailed') : t('portfolioCreate.noInference')}</Text>
+                  <View style={styles.actions}>
+                    <Button label={t('portfolioCreate.back')} onPress={onBack} variant="secondary" />
+                    <Button disabled={refreshingList} label={t('portfolioCreate.refreshList')} loading={refreshingList} onPress={() => void onRefreshList()} />
+                  </View>
+                </View>
+              ) : confirmedPortfolioId !== null ? (
+                <View style={styles.state}>
+                  {detailState === 'unavailable'
+                    ? <Notice message={t('portfolioCreate.detailUnavailableMessage', { id: confirmedPortfolioId })} title={t('portfolioCreate.detailUnavailableTitle')} />
+                    : (
+                      <View style={styles.reviewHead}>
+                        <Text accessibilityRole="header" variant="bodyStrong">{t('portfolioCreate.confirming')}</Text>
+                        <Text accessibilityRole="progressbar" tone="muted" variant="meta">{t('portfolioCreate.confirmingMessage', { id: confirmedPortfolioId })}</Text>
+                      </View>
+                    )}
+                  {detailState === 'unavailable' ? (
+                    <View style={styles.actions}>
+                      <Button label={t('portfolioCreate.back')} onPress={onBack} variant="secondary" />
+                      <Button label={t('portfolioCreate.retryDetail')} onPress={() => void onRetryDetail()} />
+                    </View>
+                  ) : null}
+                </View>
+              ) : (
+                <View style={styles.actions}>
+                  <Button disabled={pending} label={t('portfolioCreate.edit')} onPress={() => setReviewed(null)} variant="secondary" />
+                </View>
+              )}
+            </View>
+          )}
+        </View>
+      </ScrollView>
+    </SafeAreaView>
+  )
 }
 
-function Review({ label, value, palette }: { label: string; value: string; palette: (typeof themeTokens.colors)[keyof typeof themeTokens.colors] }) { return <View accessible accessibilityLabel={`${label}: ${value}`} style={styles.review}><Text style={[styles.helper, { color: palette.mutedForeground }]}>{label}</Text><Text style={[styles.value, { color: palette.foreground }]}>{value}</Text></View> }
-const styles = StyleSheet.create({ safe: { flex: 1 }, content: { flexGrow: 1, padding: themeTokens.layout.screenPadding }, page: { width: '100%', maxWidth: 680, alignSelf: 'center', gap: themeTokens.layout.blockGap }, header: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'flex-start', gap: themeTokens.spacing[4] }, heading: { flex: 1, minWidth: 220, gap: themeTokens.spacing[1] }, helper: { ...textStyles.body }, form: { gap: themeTokens.spacing[4] }, field: { gap: themeTokens.spacing[2] }, label: { ...textStyles.bodyStrong, fontWeight: '600' as const }, options: { gap: themeTokens.spacing[2] }, sectionTitle: { ...textStyles.section }, card: { borderWidth: 1, borderRadius: themeTokens.radius.lg, padding: themeTokens.spacing[4], gap: themeTokens.spacing[3] }, review: { gap: themeTokens.spacing[1] }, value: { ...textStyles.action }, actions: { flexDirection: 'row', flexWrap: 'wrap', gap: themeTokens.spacing[3] }, notice: { borderWidth: 1, borderRadius: themeTokens.radius.lg, padding: themeTokens.spacing[4], gap: themeTokens.spacing[3] }, alert: { ...textStyles.body } })
+const styles = StyleSheet.create({
+  safe: { flex: 1 },
+  content: { flexGrow: 1, paddingHorizontal: themeTokens.layout.screenPadding, paddingBottom: themeTokens.spacing[10] },
+  page: { width: '100%', maxWidth: 720, alignSelf: 'center' },
+  form: { gap: themeTokens.spacing[4], paddingTop: themeTokens.spacing[4] },
+  reviewHead: { gap: themeTokens.spacing[2] },
+  state: { gap: themeTokens.spacing[3] },
+  actions: { flexDirection: 'row', flexWrap: 'wrap', gap: themeTokens.spacing[2] },
+})

@@ -77,7 +77,8 @@ describe('SignInRoute', () => {
     expect(view.getByRole('button', { name: 'Sign in' })).toBeOnTheScreen()
     // …and Apple/Google only exist because the route composed them in.
     expect(view.getByText('social-sign-in-block')).toBeOnTheScreen()
-    expect(view.getByText('Forgot password?')).toBeOnTheScreen()
-    expect(view.getByText('New here? Create an account')).toBeOnTheScreen()
+    expect(view.getByRole('link', { name: 'Forgot your password?' })).toBeOnTheScreen()
+    expect(view.getByText('Not a member?')).toBeOnTheScreen()
+    expect(view.getByRole('link', { name: 'Create an account' })).toBeOnTheScreen()
   })
 })

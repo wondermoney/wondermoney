@@ -1,5 +1,7 @@
 import express from 'express';
 
+import { downloadDataExport, getDataExport, listDataExports, startDataExport } from '@controller/data-export';
+import { commitDataRestore, getDataRestore, listDataRestores, startDataRestore, validateDataRestore } from '@controller/data-restore';
 import { getEmailNotificationPreferences, patchEmailNotificationPreferences } from '@controller/email-notifications';
 import { deleteEnableBankingCredential, getEnableBankingCredential, saveEnableBankingCredential } from '@controller/enable-banking-credential';
 import { completeOnboarding, getOnboardingBootstrap } from '@controller/onboarding';
@@ -13,6 +15,7 @@ import {
   getUserAccountInformation,
   updateData,
 } from '@controller/user';
+import { dataExportRateLimit, dataRestoreRateLimit } from '@middleware/rate-limit';
 
 const router = express.Router();
 
@@ -21,6 +24,15 @@ router.get('/me/profile', getCurrentUserProfile);
 router.get('/me/email-notification-preferences', getEmailNotificationPreferences);
 router.patch('/me/email-notification-preferences', patchEmailNotificationPreferences);
 router.get('/me/onboarding', getOnboardingBootstrap);
+router.get('/me/exports', listDataExports);
+router.post('/me/exports', dataExportRateLimit(), startDataExport);
+router.get('/me/exports/:exportId', getDataExport);
+router.get('/me/exports/:exportId/download', dataExportRateLimit(), downloadDataExport);
+router.get('/me/restores', listDataRestores);
+router.post('/me/restores', dataRestoreRateLimit(), startDataRestore);
+router.get('/me/restores/:restoreId', getDataRestore);
+router.post('/me/restores/:restoreId/validate', dataRestoreRateLimit(), validateDataRestore);
+router.post('/me/restores/:restoreId/commit', dataRestoreRateLimit(), commitDataRestore);
 router.post('/me/onboarding/complete', completeOnboarding);
 // Registered before `/:userId` (single path segment, would otherwise shadow it) —
 // same reasoning as `/me/profile` above.

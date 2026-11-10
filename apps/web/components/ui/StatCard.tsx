@@ -48,7 +48,7 @@ export interface StatCardProps {
    */
   tone?: AmountTone;
   /** Muted line under the figure — provenance, definition, unit. */
-  helper?: string;
+  helper?: ReactNode;
   /**
    * How the figure is arrived at, behind a help icon beside the label.
    *
@@ -100,7 +100,9 @@ export function StatCard({
     <div
       // Tighter on a phone: three of these stacked at desktop padding spend
       // more of a 390px screen on frame than on figures.
-      className={cn("bg-card p-3 sm:p-4", className)}
+      // Direction A: a cell of a ruled stat row, not a box. The row's
+      // hairlines separate the cells; the first cell sits on the margin.
+      className={cn("py-3 sm:px-6 sm:py-0 sm:first:pl-0", className)}
     >
       <div className="flex items-center justify-between gap-2">
         {/* Sentence case, not letterspaced caps — § 9 density contract. */}
@@ -140,7 +142,7 @@ export function StatCard({
             value={value}
             currency={currency}
             tone={tone}
-            className="font-mono text-xl font-semibold tracking-tight"
+            className="font-mono text-2xl font-medium tracking-tight"
           />
         )}
         {showComparison ? (
@@ -156,7 +158,7 @@ export function StatCard({
       </div>
 
       {helper ? (
-        <p className="text-muted-foreground mt-0.5 text-xs">{helper}</p>
+        <div className="text-muted-foreground mt-0.5 text-xs">{helper}</div>
       ) : null}
     </div>
   );
@@ -172,11 +174,10 @@ export function StatCardGrid({
   return (
     <div
       className={cn(
-        // One hairline-joined block on mobile, separate cells from `sm`.
-        // Four individually-bordered, individually-padded boxes stacked down a
-        // 360px screen is the "marketing site layout on a working instrument"
-        // DESIGN.md §9 calls out — the frames cost more space than the numbers.
-        "border-border divide-border grid grid-cols-1 divide-y overflow-hidden rounded-lg border",
+        // Direction A: a ruled stat row on the canvas. Hairlines between the
+        // cells (stacked on a phone, side by side from `sm`), no frame around
+        // them: boxed stats cost more space than the numbers they hold.
+        "divide-border grid grid-cols-1 divide-y",
         "sm:grid-cols-3 sm:divide-x sm:divide-y-0",
         className,
       )}

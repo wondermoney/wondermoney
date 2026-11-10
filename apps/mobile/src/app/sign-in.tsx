@@ -1,23 +1,30 @@
 import { Link, useLocalSearchParams } from 'expo-router'
-import { Text, useColorScheme, View } from 'react-native'
 import { useTranslation } from 'react-i18next'
 import { useProductRuntime } from '@/components/providers/product-runtime-provider'
+import { AuthLink, AuthLead } from '@/features/auth/auth-form-styles'
 import { ServerSwitcher } from '@/features/auth/server-switcher'
 import { SignInScreen } from '@/features/auth/sign-in-screen'
 import { SocialSignIn } from '@/features/auth/social-sign-in'
 import { captureAnalyticsEvent } from '@/lib/telemetry/analytics'
-import { themeTokens } from '@/theme/tokens'
 
 export default function SignInRoute() {
   const { t } = useTranslation()
   const { signInWithPassword, blockAccess, activationError, clearActivationError } = useProductRuntime()
   const params = useLocalSearchParams<{ notice?: string }>()
   const passwordUpdatedNotice = params.notice === 'passwordUpdated' ? t('auth.resetPassword.success') : undefined
-  const colorScheme = useColorScheme()
-  const palette = themeTokens.colors[colorScheme === 'dark' ? 'dark' : 'light']
+  const provisionFailed = activationError === 'provision-failed'
   return (
     <SignInScreen
-      notice={activationError === 'provision-failed' ? t('auth.errors.provisionFailed') : passwordUpdatedNotice}
+      notice={provisionFailed ? t('auth.errors.provisionFailed') : passwordUpdatedNotice}
+      noticeTone={provisionFailed ? 'destructive' : 'default'}
+      title={t('auth.welcomeBack')}
+      lead={(
+        <AuthLead
+          link={<Link asChild href="/sign-up"><AuthLink label={t('auth.createAccountLink')} strong /></Link>}
+          text={t('auth.notMember')}
+        />
+      )}
+      forgotPasswordLink={<Link asChild href="/forgot-password"><AuthLink label={t('auth.forgotPasswordLink')} /></Link>}
       onSubmit={async (email, password) => {
         clearActivationError()
         const outcome = await signInWithPassword(email, password)
@@ -33,14 +40,12 @@ export default function SignInRoute() {
         if (outcome.status === 'accepted') captureAnalyticsEvent('sign_in_completed', { provider: 'email' })
         return outcome.status
       }}
-      footer={
-        <View style={{ gap: themeTokens.spacing[3] }}>
+      footer={(
+        <>
           <SocialSignIn />
-          <Link href="/forgot-password"><Text style={{ color: palette.primary }}>{t('auth.forgotPasswordLink')}</Text></Link>
-          <Link href="/sign-up"><Text style={{ color: palette.primary }}>{t('auth.noAccount')}</Text></Link>
           <ServerSwitcher />
-        </View>
-      }
+        </>
+      )}
     />
   )
 }

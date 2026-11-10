@@ -1,18 +1,7 @@
 "use client";
 
 import { startOfDay, subDays } from "date-fns";
-import {
-  ArrowDownLeft,
-  ArrowUpRight,
-  Lock,
-  MoveUpRight,
-  PiggyBank,
-  Plus,
-  TrendingDown,
-  TrendingUp,
-  Upload,
-  Users,
-} from "lucide-react";
+import { Lock, Plus, Upload, Users } from "lucide-react";
 import dynamic from "next/dynamic";
 import { useTranslations } from "next-intl";
 import { usePostHog } from "posthog-js/react";
@@ -22,16 +11,16 @@ import { DateRange } from "react-day-picker";
 import AccountTransactionAddModal from "@/components/account/AccountTransactionAddModal";
 import AccountTransactionImportModal from "@/components/account/AccountTransactionImportModal";
 import AccountTransactionsTable from "@/components/account/AccountTransactionsTable";
+import MetricsCards from "@/components/account/MetricsCards";
 import { clampSyncedAt } from "@/components/account/sync-time";
-import { Amount } from "@/components/ui/Amount";
 import { Button } from "@/components/ui/button";
 import { DataProvenance } from "@/components/ui/DataProvenance";
 import { Link } from "@/components/ui/Link";
 import { ObjectHeader } from "@/components/ui/ObjectHeader";
+import { Section } from "@/components/ui/RuledSection";
 import { Spinner } from "@/components/ui/Spinner";
 import type { GetAccountResponse } from "@/lib/api/account/useAccount";
 import useAccount from "@/lib/api/account/useAccount";
-import type { AccountMetrics } from "@/lib/api/account/useAccountMetrics";
 import type { GetAccountMetricsResponse } from "@/lib/api/account/useAccountMetrics";
 import useAccountMetrics from "@/lib/api/account/useAccountMetrics";
 import type { GetAccountsResponse } from "@/lib/api/account/useAccounts";
@@ -41,169 +30,12 @@ import useAccountTransactions from "@/lib/api/account/useAccountTransactions";
 import type { GetConfigsResponse } from "@/lib/api/configs/useConfigs";
 import useConfigs from "@/lib/api/configs/useConfigs";
 import { serverSeed } from "@/lib/query/server-seed";
-import { cn } from "@/lib/utils";
-import { useFormatCurrency } from "@/lib/utils/useFormatCurrency";
-import { useFormatPercentage } from "@/lib/utils/useFormatPercentage";
 
 // Code-split heavy chart component
 const AccountTransactionsChart = dynamic(
   () => import("@/components/account/AccountTransactionsChart"),
   { loading: () => <Spinner /> },
 );
-
-// ---------- Helper: aggregate metrics ----------
-
-function aggregateMetrics(metrics: AccountMetrics[]) {
-  const agg = metrics.reduce(
-    (acc, cur) => ({
-      inflowCurrent: acc.inflowCurrent + cur.inflowCurrentPeriod,
-      inflowPast: acc.inflowPast + cur.inflowPastPeriod,
-      inflowDelta: acc.inflowDelta + cur.inflowDelta,
-      outflowCurrent: acc.outflowCurrent + cur.outflowCurrentPeriod,
-      outflowPast: acc.outflowPast + cur.outflowPastPeriod,
-      outflowDelta: acc.outflowDelta + cur.outflowDelta,
-    }),
-    {
-      inflowCurrent: 0,
-      inflowPast: 0,
-      inflowDelta: 0,
-      outflowCurrent: 0,
-      outflowPast: 0,
-      outflowDelta: 0,
-    },
-  );
-
-  const inflowPct =
-    agg.inflowPast === 0
-      ? agg.inflowCurrent > 0
-        ? Infinity
-        : 0
-      : (agg.inflowCurrent - agg.inflowPast) / agg.inflowPast;
-  const outflowPct =
-    agg.outflowPast === 0
-      ? agg.outflowCurrent > 0
-        ? Infinity
-        : 0
-      : (agg.outflowCurrent - agg.outflowPast) / agg.outflowPast;
-
-  return { ...agg, inflowPct, outflowPct };
-}
-
-// ---------- Metrics Cards ----------
-
-function MetricsCards({
-  metrics,
-  currency,
-}: {
-  metrics: AccountMetrics[];
-  currency: string;
-}) {
-  const t = useTranslations();
-  const formatPercentage = useFormatPercentage();
-  const formatCurrency = useFormatCurrency();
-  const agg = aggregateMetrics(metrics);
-
-  const netSavings = agg.inflowCurrent - agg.outflowCurrent;
-  const savingsRate =
-    agg.inflowCurrent > 0 ? netSavings / agg.inflowCurrent : 0;
-
-  const cards = [
-    {
-      icon: ArrowDownLeft,
-      label: t("inflow"),
-      value: agg.inflowCurrent,
-      delta: agg.inflowDelta,
-      pct: agg.inflowPct,
-      positiveIsGood: true,
-      isSavingsRate: false,
-    },
-    {
-      icon: ArrowUpRight,
-      label: t("outflow"),
-      value: agg.outflowCurrent,
-      delta: agg.outflowDelta,
-      pct: agg.outflowPct,
-      positiveIsGood: false,
-      isSavingsRate: false,
-    },
-    {
-      icon: PiggyBank,
-      label: t("savings-rate"),
-      value: netSavings,
-      delta: 0,
-      pct: savingsRate,
-      positiveIsGood: true,
-      isSavingsRate: true,
-    },
-  ];
-
-  return (
-    <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-      {cards.map((card) => {
-        const isPositive = card.delta > 0;
-        const isNeutral = card.delta === 0 && !card.isSavingsRate;
-        const isGoodTrend = card.isSavingsRate
-          ? netSavings >= 0
-          : card.positiveIsGood
-            ? isPositive
-            : !isPositive;
-        const trendColor = isNeutral
-          ? "text-muted-foreground"
-          : isGoodTrend
-            ? "text-success-text"
-            : "text-destructive-text";
-        const TrendIcon = isPositive ? TrendingUp : TrendingDown;
-
-        return (
-          <div
-            key={card.label}
-            className="border-border bg-card rounded-lg border p-4"
-          >
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <card.icon className="text-muted-foreground h-3.5 w-3.5" />
-                <span className="text-muted-foreground text-sm">
-                  {card.label}
-                </span>
-              </div>
-              {card.isSavingsRate ? (
-                <span
-                  className={cn(
-                    "text-xs font-medium",
-                    netSavings >= 0
-                      ? "text-success-text"
-                      : "text-destructive-text",
-                  )}
-                >
-                  {formatPercentage(Math.abs(savingsRate))}
-                </span>
-              ) : (
-                !isNeutral && (
-                  <div className="flex items-center gap-1">
-                    <TrendIcon className={cn("h-3 w-3", trendColor)} />
-                    {card.pct !== null && isFinite(card.pct) && (
-                      <span className={cn("text-xs font-medium", trendColor)}>
-                        {formatPercentage(Math.abs(card.pct))}
-                      </span>
-                    )}
-                  </div>
-                )
-              )}
-            </div>
-            <p className="text-foreground mt-2 font-mono text-xl font-semibold tracking-tight">
-              <Amount value={card.value} currency={currency} />
-            </p>
-            {card.isSavingsRate && (
-              <p className="text-muted-foreground mt-0.5 text-xs">
-                {t("net-savings")}
-              </p>
-            )}
-          </div>
-        );
-      })}
-    </div>
-  );
-}
 
 // ---------- Main Component ----------
 
@@ -227,7 +59,6 @@ export default function AccountClient({
   initialAccountMetricsData,
 }: AccountClientProps) {
   const t = useTranslations();
-  const formatPercentage = useFormatPercentage();
   const posthog = usePostHog();
 
   const { data: accountsData, isLoading: isLoadingAccountsData } = useAccount(
@@ -329,7 +160,7 @@ export default function AccountClient({
     : account.balance;
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-10 lg:gap-12">
       {/* One header for the object, replacing a name-only header plus a
           separate "Account balance" card below it — the figure a person opens
           this page to see was the third thing on it, boxed on its own.
@@ -374,7 +205,7 @@ export default function AccountClient({
         }
         actions={
           transactionAccount ? (
-            <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+            <>
               <AccountTransactionImportModal
                 isOpen={isImportTransactionModalOpen}
                 setOpen={(open) => {
@@ -386,12 +217,8 @@ export default function AccountClient({
                 }}
                 accounts={[transactionAccount]}
                 trigger={
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="w-full gap-1.5 sm:w-auto"
-                  >
-                    <Upload className="size-3.5" />
+                  <Button variant="outline" className="w-full sm:w-auto">
+                    <Upload className="size-4" />
                     {t("import-transactions")}
                   </Button>
                 }
@@ -407,13 +234,13 @@ export default function AccountClient({
                 }}
                 accounts={[transactionAccount]}
                 trigger={
-                  <Button size="sm" className="w-full gap-1.5 sm:w-auto">
-                    <Plus className="size-3.5" />
+                  <Button className="w-full sm:w-auto">
+                    <Plus className="size-4" />
                     {t("add-transaction")}
                   </Button>
                 }
               />
-            </div>
+            </>
           ) : null
         }
       />
@@ -428,23 +255,16 @@ export default function AccountClient({
           accountMetricsData.metrics.length > 0 ? (
           <MetricsCards
             metrics={accountMetricsData.metrics}
-            currency={currency}
+            userCurrency={currency}
           />
         ) : (
-          <div className="border-border bg-card rounded-lg border px-4 py-8 text-center">
-            <p className="text-muted-foreground text-sm">{t("no-metrics")}</p>
-          </div>
+          <p className="text-muted-foreground text-sm">{t("no-metrics")}</p>
         )}
       </section>
 
       {/* Balance chart */}
-      <section className="border-border bg-card rounded-lg border">
-        <div className="border-border border-b px-5 py-3">
-          <h2 className="text-foreground text-sm font-medium">
-            {t("balance-growth")}
-          </h2>
-        </div>
-        <div className="p-5">
+      <Section id="balance-growth-heading" title={t("balance-growth")}>
+        <div>
           {isLoadingTransactionsData && !isTransactionsPlaceholderData ? (
             <div className="flex h-75 items-center justify-center">
               <Spinner />
@@ -463,23 +283,22 @@ export default function AccountClient({
             </div>
           )}
         </div>
-      </section>
+      </Section>
 
       {/* Recent transactions */}
-      <section className="border-border bg-card rounded-lg border">
-        <div className="border-border flex items-center justify-between border-b px-5 py-3">
-          <h2 className="text-foreground text-sm font-medium">
-            {t("last-transactions")}
-          </h2>
+      <Section
+        id="last-transactions-heading"
+        title={t("last-transactions")}
+        aside={
           <Link
             href={`/accounts/${accountId}/transactions`}
-            className="text-primary text-xs font-medium no-underline hover:underline"
+            className="text-primary text-sm font-medium no-underline hover:underline"
           >
-            {t("view-all")}{" "}
-            <MoveUpRight strokeWidth={2} className="ml-0.5 inline size-3" />
+            {t("view-all")}
           </Link>
-        </div>
-        <div className="p-0">
+        }
+      >
+        <div>
           {isLoading ? (
             <div className="flex h-50 items-center justify-center">
               <Spinner />
@@ -487,6 +306,7 @@ export default function AccountClient({
           ) : transactionsData?.transactions &&
             transactionsData.transactions.length > 0 ? (
             <AccountTransactionsTable
+              layout="ledger"
               transactions={transactionsForTable ?? []}
               categories={configsData?.categories ?? []}
               withAccountFilter={false}
@@ -503,18 +323,14 @@ export default function AccountClient({
               <p className="text-muted-foreground text-sm">
                 {t("empty-transactions-description")}
               </p>
-              <Button
-                size="sm"
-                className="gap-1.5"
-                onClick={openAddManualTransactionModal}
-              >
-                <Plus className="size-3.5" />
+              <Button onClick={openAddManualTransactionModal}>
+                <Plus className="size-4" />
                 {t("add-transaction")}
               </Button>
             </div>
           )}
         </div>
-      </section>
+      </Section>
     </div>
   );
 }

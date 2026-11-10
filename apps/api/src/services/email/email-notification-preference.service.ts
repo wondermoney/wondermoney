@@ -20,6 +20,7 @@ export interface EmailCategoryToggleState {
 
 export interface EmailNotificationPreferencePatch {
   accountRecoveryEnabled?: boolean;
+  bankSyncAlertsEnabled?: boolean;
   budgetAlertsEnabled?: boolean;
   growthEmailsEnabled?: boolean;
   marketingOptOut?: boolean;
@@ -29,6 +30,7 @@ export interface EmailNotificationPreferencePatch {
 
 export interface EmailNotificationPreferenceState {
   accountRecovery: EmailCategoryToggleState;
+  bankSyncAlerts: EmailCategoryToggleState;
   budgetAlerts: EmailNotificationStreamState;
   growth: EmailCategoryToggleState;
   marketingOptOut: boolean;
@@ -52,7 +54,7 @@ export interface FreshWorkerEmailEligibility extends EmailNotificationStreamStat
 }
 
 /** The `EmailNotificationPreference` columns read/written by the settings surface, keyed by their entity field name. */
-type PreferenceCategoryColumns = Partial<Pick<EmailNotificationPreference, 'accountRecoveryEnabled' | 'budgetAlertsEnabled' | 'growthEmailsEnabled' | 'monthlyStoryEnabled' | 'weeklyInsightsEnabled'>>;
+type PreferenceCategoryColumns = Partial<Pick<EmailNotificationPreference, 'accountRecoveryEnabled' | 'bankSyncAlertsEnabled' | 'budgetAlertsEnabled' | 'growthEmailsEnabled' | 'monthlyStoryEnabled' | 'weeklyInsightsEnabled'>>;
 
 /**
  * Loosely typed so both a real `Appuser` entity (`marketingOptOut?: Date`) and
@@ -76,8 +78,9 @@ interface LockedAppuserRow {
 }
 
 /** category -> `email_notification_preference` snake_case column name (mirrors `EMAIL_CATEGORY_FLAG`, but for the settings read/write raw SQL). */
-const CATEGORY_PATCH_COLUMN: Record<'accountRecoveryEnabled' | 'budgetAlertsEnabled' | 'growthEmailsEnabled' | 'monthlyStoryEnabled' | 'weeklyInsightsEnabled', string> = {
+const CATEGORY_PATCH_COLUMN: Record<'accountRecoveryEnabled' | 'bankSyncAlertsEnabled' | 'budgetAlertsEnabled' | 'growthEmailsEnabled' | 'monthlyStoryEnabled' | 'weeklyInsightsEnabled', string> = {
   accountRecoveryEnabled: 'account_recovery_enabled',
+  bankSyncAlertsEnabled: 'bank_sync_alerts_enabled',
   budgetAlertsEnabled: 'budget_alerts_enabled',
   growthEmailsEnabled: 'growth_emails_enabled',
   monthlyStoryEnabled: 'monthly_story_enabled',
@@ -186,7 +189,7 @@ export class EmailNotificationPreferenceService {
         // current preference row instead of writing one, so the returned state is accurate
         // without disturbing stored category values.
         const preferenceRow = await tx.getConnection().execute<PreferenceCategoryColumns>(
-          `select "account_recovery_enabled" as "accountRecoveryEnabled", "budget_alerts_enabled" as "budgetAlertsEnabled",
+          `select "account_recovery_enabled" as "accountRecoveryEnabled", "bank_sync_alerts_enabled" as "bankSyncAlertsEnabled", "budget_alerts_enabled" as "budgetAlertsEnabled",
                   "growth_emails_enabled" as "growthEmailsEnabled", "monthly_story_enabled" as "monthlyStoryEnabled",
                   "weekly_insights_enabled" as "weeklyInsightsEnabled"
            from "email_notification_preference"
@@ -204,13 +207,14 @@ export class EmailNotificationPreferenceService {
       const now = new Date();
       const columns = categoryFields.map((field) => CATEGORY_PATCH_COLUMN[field]);
       const stored = await tx.getConnection().execute<Record<string, boolean>>(
-        `insert into "email_notification_preference" ("appuser_key", "account_recovery_enabled", "budget_alerts_enabled", "growth_emails_enabled", "monthly_story_enabled", "weekly_insights_enabled", "created_at", "updated_at")
-         values (?, ?, ?, ?, ?, ?, ?, ?)
+        `insert into "email_notification_preference" ("appuser_key", "account_recovery_enabled", "bank_sync_alerts_enabled", "budget_alerts_enabled", "growth_emails_enabled", "monthly_story_enabled", "weekly_insights_enabled", "created_at", "updated_at")
+         values (?, ?, ?, ?, ?, ?, ?, ?, ?)
          on conflict ("appuser_key") do update set ${columns.map((column) => `"${column}" = excluded."${column}"`).join(', ')}, "deleted_at" = null, "updated_at" = excluded."updated_at"
-         returning "account_recovery_enabled", "budget_alerts_enabled", "growth_emails_enabled", "monthly_story_enabled", "weekly_insights_enabled"`,
+         returning "account_recovery_enabled", "bank_sync_alerts_enabled", "budget_alerts_enabled", "growth_emails_enabled", "monthly_story_enabled", "weekly_insights_enabled"`,
         [
           appuserKey,
           patch.accountRecoveryEnabled ?? true,
+          patch.bankSyncAlertsEnabled ?? true,
           patch.budgetAlertsEnabled ?? true,
           patch.growthEmailsEnabled ?? true,
           patch.monthlyStoryEnabled ?? true,
@@ -222,6 +226,7 @@ export class EmailNotificationPreferenceService {
       );
       return this.toState(lockedAppuser, {
         accountRecoveryEnabled: stored['account_recovery_enabled'],
+        bankSyncAlertsEnabled: stored['bank_sync_alerts_enabled'],
         budgetAlertsEnabled: stored['budget_alerts_enabled'],
         growthEmailsEnabled: stored['growth_emails_enabled'],
         monthlyStoryEnabled: stored['monthly_story_enabled'],
@@ -253,6 +258,7 @@ export class EmailNotificationPreferenceService {
     });
     return {
       accountRecovery: category(EmailCategory.ACCOUNT_RECOVERY),
+      bankSyncAlerts: category(EmailCategory.BANK_SYNC_ALERTS),
       budgetAlerts: stream(storedOrDefault(preference?.budgetAlertsEnabled)),
       growth: category(EmailCategory.GROWTH),
       marketingOptOut: Boolean(appuser.marketingOptOut),

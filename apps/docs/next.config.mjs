@@ -10,8 +10,8 @@ const config = {
   agentRules: false,
   async redirects() {
     return [
-      // RAD-574 — the screener was removed from the product (RAD-570: EODHD
-      // serves /screener only above the tier we pay for). These pages were
+      // The screener was removed from the product (EODHD serves /screener
+      // only above the tier we pay for). These pages were
       // indexed, so they redirect to the section index rather than 404. The
       // .md variants exist because proxy.ts serves a Markdown representation
       // of every docs page for LLM consumers.

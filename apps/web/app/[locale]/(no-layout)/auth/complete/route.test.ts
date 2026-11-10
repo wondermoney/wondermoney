@@ -120,3 +120,22 @@ test("a real Google signup still gets its completion markers on next", async () 
   assert.equal(location.searchParams.get("signup_completed"), "1");
   assert.equal(location.searchParams.get("signup_source"), "auth_complete");
 });
+
+test("Google sign-in completes through the API's CSRF origin check", async () => {
+  stubSession(true);
+  // The API rejects a cookie-authenticated POST whose Origin is not the web
+  // app's. This server-side call has no browser to supply one.
+  apiPost.mockImplementation(
+    async (_url: string, _body: unknown, config?: { headers?: Record<string, string> }) => {
+      if (config?.headers?.Origin !== APP_ORIGIN) {
+        throw Object.assign(new Error("Invalid request origin"), { status: 401 });
+      }
+      return { data: { outcome: "login", method: "google" } };
+    },
+  );
+
+  const location = await completeWith("");
+
+  assert.equal(location.origin, APP_ORIGIN);
+  assert.equal(location.pathname, "/en");
+});

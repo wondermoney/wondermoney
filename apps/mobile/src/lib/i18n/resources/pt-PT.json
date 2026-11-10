@@ -4,6 +4,10 @@
   "retry": "Tentar novamente",
   "common": {
     "back": "Voltar",
+    "selectDate": "Selecionar data",
+    "clearDate": "Limpar data",
+    "done": "Concluído",
+    "dateNotSet": "Sem data",
     "retry": "Tentar novamente",
     "refresh": "Atualizar",
     "cancel": "Cancelar",
@@ -11,14 +15,62 @@
     "preview": "Pré-visualização",
     "unavailable": "Indisponível",
     "mixedCurrencies_one": "{{count}} moeda",
-    "mixedCurrencies_other": "{{count}} moedas"
+    "mixedCurrencies_other": "{{count}} moedas",
+    "relativeTime": {
+      "lessThanMinute": "há menos de um minuto",
+      "minutes_one": "há {{count}} minuto",
+      "minutes_other": "há {{count}} minutos",
+      "aboutHours_one": "há cerca de {{count}} hora",
+      "aboutHours_other": "há cerca de {{count}} horas",
+      "days_one": "há {{count}} dia",
+      "days_other": "há {{count}} dias",
+      "aboutMonths_one": "há cerca de {{count}} mês",
+      "aboutMonths_other": "há cerca de {{count}} meses",
+      "months_one": "há {{count}} mês",
+      "months_other": "há {{count}} meses",
+      "aboutYears_one": "há cerca de {{count}} ano",
+      "aboutYears_other": "há cerca de {{count}} anos",
+      "overYears_one": "há mais de {{count}} ano",
+      "overYears_other": "há mais de {{count}} anos",
+      "almostYears_one": "há quase {{count}} ano",
+      "almostYears_other": "há quase {{count}} anos",
+      "now": "agora",
+      "seconds_one": "há {{count}} segundo",
+      "seconds_other": "há {{count}} segundos",
+      "hours_one": "há {{count}} hora",
+      "hours_other": "há {{count}} horas",
+      "yesterday": "ontem",
+      "lastMonth": "o mês passado",
+      "lastYear": "o ano passado",
+      "years_one": "há {{count}} ano",
+      "years_other": "há {{count}} anos"
+    },
+    "close": "Fechar",
+    "moreActions": "Mais ações"
   },
   "navigation": {
     "home": "Início",
     "accounts": "Contas",
     "budgets": "Orçamentos",
     "portfolio": "Portefólio",
-    "more": "Mais"
+    "more": "Mais",
+    "overview": "Resumo",
+    "transactions": "Transações",
+    "billsSubscriptions": "Faturas e subscrições",
+    "financialMarkets": "Mercados financeiros",
+    "explorer": "Explorador",
+    "watchlist": "Lista de Interesse",
+    "goals": "Objetivos",
+    "loans": "Empréstimos",
+    "reports": "Relatórios",
+    "help": "Ajuda",
+    "settings": "Definições",
+    "appearance": "Aparência",
+    "mainNavigation": "Navegação principal",
+    "openUserMenu": "Abrir menu do utilizador",
+    "darkMode": "Modo escuro",
+    "lightMode": "Modo claro",
+    "version": "v{{version}}"
   },
   "auth": {
     "title": "Iniciar sessão",
@@ -46,8 +98,8 @@
       "linkExpired": "Esta ligação de reposição expirou. Peça uma nova"
     },
     "signup": {
-      "title": "Criar conta",
-      "helper": "Comece a sua conta WonderMoney",
+      "title": "Crie a sua conta",
+      "helper": "Gratuito e de código aberto.",
       "confirmPassword": "Confirmar palavra-passe",
       "terms": "Aceito os Termos e a Política de Privacidade",
       "termsConsent": "Aceito os Termos e a Política de Privacidade",
@@ -55,11 +107,11 @@
       "termsLink": "Termos",
       "consentAnd": "e a",
       "privacyLink": "Política de Privacidade",
-      "submit": "Criar conta",
+      "submit": "Criar conta agora",
       "submitting": "A criar conta"
     },
     "social": {
-      "divider": "ou",
+      "divider": "Ou continuar com",
       "apple": "Continuar com a Apple",
       "google": "Continuar com o Google",
       "signingIn": "A iniciar sessão",
@@ -68,9 +120,9 @@
       }
     },
     "forgotPassword": {
-      "title": "Repor a sua palavra-passe",
+      "title": "Enviar email para repor a palavra-passe",
       "helper": "Introduza o seu email e enviamos-lhe uma ligação de reposição",
-      "submit": "Enviar ligação de reposição",
+      "submit": "Enviar email para repor a palavra-passe",
       "submitting": "A enviar",
       "sent": "Se existir uma conta com esse email, enviámos uma ligação de reposição",
       "backToSignIn": "Voltar ao início de sessão"
@@ -111,7 +163,12 @@
         "notWonderMoney": "Esse endereço não é um servidor WonderMoney.",
         "updateRequired": "Este servidor precisa da versão {{version}} da app ou mais recente. Atualiza a app e tenta novamente."
       }
-    }
+    },
+    "welcomeBack": "Bem-vindo de volta",
+    "notMember": "Não é membro?",
+    "createAccountLink": "Crie uma conta",
+    "alreadyMember": "Já é membro?",
+    "loginLink": "Iniciar sessão"
   },
   "access": {
     "mfa": {
@@ -175,6 +232,120 @@
       "topCategory": "{{name}} — {{amount}} este mês"
     },
     "helpText": "Uma visão geral rápida das suas contas, portefólio e passivos."
+  },
+  "home": {
+    "netWorth": {
+      "title": "Património",
+      "since": "desde o fim de {{month}}",
+      "chartLabel": "Património no fecho de cada mês, de {{from}} a {{to}}",
+      "historyError": "Não foi possível carregar a evolução.",
+      "emptyTitle": "Ainda sem contas",
+      "emptyBody": "Adicione uma conta para ver o que tem e o que deve.",
+      "emptyAction": "Adicionar conta",
+      "rangeLabel": "Período do gráfico",
+      "ranges": {
+        "3m": "3M",
+        "6m": "6M",
+        "1y": "1A"
+      }
+    },
+    "balancesUpdated": "Saldos atualizados {{time}}",
+    "tryAgain": "Tentar novamente",
+    "errorTitle": "Erro ao carregar dados",
+    "setup": {
+      "title": "Termine de configurar o seu dashboard",
+      "count": "{{completed}} de {{total}} passos concluídos",
+      "nudgeOne": "Está quase: falta um passo para ter uma visão geral mais útil.",
+      "nudgeMany": "Conclua estes passos para ter uma visão geral mais útil.",
+      "viewSteps": "Mostrar passos de onboarding",
+      "hideSteps": "Ocultar passos de onboarding",
+      "hideForNow": "Ocultar por agora",
+      "complete": "Concluído",
+      "incomplete": "Incompleto",
+      "steps": {
+        "account": "Ligue ou adicione as suas contas",
+        "transactions": "Reveja as suas transações",
+        "budget": "Crie o seu primeiro orçamento",
+        "portfolio": "Acompanhe os seus investimentos"
+      }
+    },
+    "month": {
+      "title": "Este mês",
+      "lastDay": "Último dia de {{month}}",
+      "daysLeft_one": "Falta {{count}} dia de {{month}}",
+      "daysLeft_other": "Faltam {{count}} dias de {{month}}",
+      "left": "disponível para gastar",
+      "overspent": "acima do plano",
+      "spentOf": "gastos de",
+      "planned": "planeados",
+      "overPlan_one": "{{count}} categoria acima do plano",
+      "overPlan_other": "{{count}} categorias acima do plano",
+      "measureLabel": "{{name}}: {{spent}} gastos de {{planned}} planeados",
+      "rowError": "Não foi possível carregar este mês.",
+      "emptyTitle": "Ainda sem orçamento",
+      "emptyBody": "Defina um plano mensal para ver quanto ainda pode gastar e o que está acima do plano.",
+      "emptyAction": "Criar orçamento"
+    },
+    "sheet": {
+      "title": "Balanço",
+      "own": "O que tem",
+      "owe": "O que deve",
+      "total": "Total",
+      "sideEmpty": "Nada aqui.",
+      "groups": {
+        "accounts": "Contas",
+        "portfolios": "Portefólios",
+        "loans": "Empréstimos"
+      },
+      "countedIn": "Incluído em {{account}}"
+    },
+    "cashflow": {
+      "title": "Fluxo de caixa líquido por mês",
+      "listLabel": "Fluxo de caixa líquido, de {{from}} a {{to}}",
+      "caption": "Entradas menos saídas em todas as suas contas.",
+      "emptyTitle": "Ainda sem fluxo de caixa",
+      "emptyBody": "Aparece quando as suas contas tiverem transações."
+    },
+    "loans": {
+      "title": "Próximos pagamentos de empréstimos",
+      "left": "em dívida",
+      "rate": "a {{rate}}",
+      "emptyTitle": "Sem empréstimos",
+      "emptyBody": "Adicione um empréstimo para ver aqui os próximos pagamentos.",
+      "noneDueTitle": "Sem pagamentos de empréstimos previstos",
+      "noneDueBody": "Os empréstimos ativos com uma próxima data de pagamento aparecem aqui.",
+      "action": "Ver empréstimos"
+    },
+    "latest": {
+      "title": "Últimas transações",
+      "review_one": "{{count}} por rever",
+      "review_other": "{{count}} por rever",
+      "all": "Todas as transações",
+      "uncategorised": "Sem categoria",
+      "needsReview": "Por rever",
+      "emptyTitle": "Ainda sem transações",
+      "emptyBody": "Ligue um banco ou adicione uma transação para a ver aqui.",
+      "action": "Ver contas"
+    },
+    "bankAlerts": {
+      "unnamedBank": "O seu banco",
+      "expiring_zero": "{{bank}}: o acesso termina em menos de um dia",
+      "expiring_one": "{{bank}}: o acesso termina dentro de {{count}} dia",
+      "expiring_other": "{{bank}}: o acesso termina dentro de {{count}} dias",
+      "expiringSoon": "{{bank}}: o acesso termina em breve",
+      "revoked": "{{bank}} terminou o acesso antes do prazo",
+      "failing": "{{bank}} não sincroniza desde {{date}}",
+      "failingUnknownDate": "{{bank}} não sincroniza há algum tempo",
+      "hint": {
+        "consent_expiring": "Volte a ligar para manter os dados sincronizados.",
+        "consent_revoked": "Volte a ligar para retomar a sincronização.",
+        "sync_failing": "Voltar a ligar o banco costuma resolver."
+      },
+      "more_one": "E mais {{count}} alerta bancário.",
+      "more_other": "E mais {{count}} alertas bancários.",
+      "reconnect": "Voltar a ligar",
+      "dismiss": "Dispensar"
+    }
   },
   "netWorthHistory": {
     "back": "Voltar",
@@ -243,7 +414,7 @@
   },
   "offlineAccount": {
     "title": "Adicionar conta manual",
-    "helper": "Registe um saldo que irá manter manualmente. Isto não liga um banco nem importa transações.",
+    "helper": "Um saldo que atualiza manualmente, sem ligação a um banco.",
     "back": "Voltar a Contas",
     "loading": "A carregar opções da conta",
     "optionsError": "Não foi possível carregar as opções da conta",
@@ -383,23 +554,29 @@
     "needsReview": "Por rever",
     "showHidden": "Mostrar transações ocultas",
     "customRange": "Intervalo de datas personalizado",
-    "customRangeNote": "Introduza uma data de início e fim (AAAA-MM-DD) e aplique para substituir o filtro de data predefinido",
     "customRangeFrom": "Data de início do intervalo personalizado",
     "customRangeTo": "Data de fim do intervalo personalizado",
     "customRangeDatePlaceholder": "AAAA-MM-DD",
     "customRangeApply": "Aplicar intervalo de datas",
     "customRangeInvalid": "Introduza um intervalo de datas válido",
     "loadedScope": "Os filtros aplicam-se apenas à janela do servidor carregada, com um pedido de até {{limit}} resultados",
-    "load100": "Carregar até 100",
-    "load500": "Carregar até 500",
     "loadedFilters": "Filtrar resultados carregados",
-    "loadedFiltersNote": "Estes filtros alteram apenas a janela do servidor atualmente carregada",
+    "loadedFiltersNote": "Estes filtros restringem as transações já carregadas",
     "merchantFilter": "Filtrar resultados carregados por comerciante",
     "merchantPlaceholder": "Nome do comerciante",
     "allAccounts": "Todas as contas",
     "allCategories": "Todas as categorias",
     "allTypes": "Todos os tipos",
-    "showMore": "Mostrar mais {{count}} resultados carregados",
+    "accountFilter": "Conta",
+    "categoryFilter": "Categoria",
+    "typeFilter": "Tipo",
+    "dateRange": "Intervalo de datas",
+    "importOrScan": "Importar ou digitalizar",
+    "loadMore": "Carregar mais",
+    "resultCount_one": "{{count}} transação",
+    "resultCount_other": "{{count}} transações",
+    "resultShowing": "A mostrar {{shown}} de {{total}}",
+    "showMore": "Mostrar mais {{count}}",
     "stale": "Não foi possível atualizar. A mostrar as transações carregadas anteriormente",
     "emptyTitle": "Sem transações correspondentes",
     "empty": {
@@ -440,6 +617,7 @@
     "markingReviewed": "A marcar como revista",
     "editAmount": "Editar montante",
     "editAmountInput": "Montante da transação",
+    "editAmountInvalid": "Introduza um número, como 12,50 ou -12,50.",
     "editDescriptionInput": "Descrição da transação",
     "descriptionPlaceholder": "Descrição (opcional)",
     "saveAmount": "Guardar montante",
@@ -449,7 +627,7 @@
     "bulkActions": "Ações para as transações selecionadas",
     "selectedCount_one": "1 transação selecionada",
     "selectedCount_other": "{{count}} transações selecionadas",
-    "selectionScope": "A seleção inclui apenas transações persistidas com identificador positivo nesta janela carregada do servidor",
+    "selectionScope": "Só pode selecionar transações desta lista. Os saldos iniciais não podem ser alterados.",
     "reviewSelected": "Rever selecionadas",
     "chooseCategory": "Escolher categoria",
     "hideSelected": "Ocultar selecionadas",
@@ -503,11 +681,75 @@
       "network": "O resultado do pedido na rede é incerto. Verifique as transações selecionadas antes de tentar novamente",
       "error": "Não foi possível alterar as transações selecionadas. Tente novamente"
     },
-    "resultBoundary_one": "{{loaded}} resultado carregado de uma janela de {{limit}} do servidor",
-    "resultBoundary_other": "{{loaded}} resultados carregados de uma janela de {{limit}} do servidor",
-    "moreFilters_zero": "Mais filtros",
+    "moreFilters_zero": "Filtros",
     "moreFilters_one": "{{count}} filtro",
-    "moreFilters_other": "{{count}} filtros"
+    "moreFilters_other": "{{count}} filtros",
+    "help": "Acompanhe todos os movimentos financeiros em todas as suas contas ligadas numa vista organizada.",
+    "inView": "Transações na vista",
+    "moneyIn": "Entradas",
+    "moneyOut": "Saídas",
+    "reviewLink": "Rever",
+    "needReviewCount_one": "1 por rever",
+    "needReviewCount_other": "{{count}} por rever",
+    "balancesUpdated": "Saldos atualizados {{time}}",
+    "balancesStale": "Algumas ligações precisam de atenção",
+    "last60Days": "Últimos 60 dias",
+    "last90Days": "Últimos 90 dias",
+    "filtersTitle": "Filtros",
+    "clearAll": "Limpar tudo",
+    "close": "Fechar",
+    "rowActions": "Ações para {{name}}",
+    "showDetails": "Mostrar detalhes",
+    "hideDetails": "Ocultar detalhes",
+    "transfer": {
+      "mark": "Marcar como transferência",
+      "unmark": "Não é uma transferência",
+      "chooseDestination": "Para onde foi",
+      "destinationTitle": "Para onde foi este dinheiro?",
+      "noDestination": "Não indicado",
+      "destinationGroups": {
+        "account": "Contas",
+        "portfolio": "Carteiras",
+        "goal": "Objetivos"
+      },
+      "label": "Transferência",
+      "to": "Para {{name}}",
+      "excluded": "Entre o seu próprio dinheiro: fica fora das despesas e receitas",
+      "spendingLabel": "Despesa",
+      "notSpending": "A categoria não conta como despesa"
+    }
+  },
+  "tags": {
+    "title": "Etiquetas",
+    "optional": "Etiquetas (opcional)",
+    "none": "Nenhuma",
+    "listLabel": "Etiquetas: {{names}}",
+    "more_one": "+{{count}}",
+    "more_other": "+{{count}}",
+    "edit": "Editar etiquetas",
+    "editFor": "Etiquetas de {{name}}",
+    "save": "Guardar etiquetas",
+    "saving": "A guardar…",
+    "done": "Concluído",
+    "close": "Fechar",
+    "loading": "A carregar etiquetas…",
+    "unavailable": "As etiquetas não estão disponíveis de momento.",
+    "empty": "Ainda não há etiquetas. Crie uma abaixo.",
+    "limit": "Uma transação pode ter até {{max}} etiquetas.",
+    "newTag": "Nova etiqueta",
+    "newTagPlaceholder": "Por exemplo, Viagem ao Porto",
+    "create": "Criar “{{name}}”",
+    "selectExisting": "Selecionar “{{name}}”",
+    "filter": "Etiquetas",
+    "filterNote": "Mostra as transações com qualquer uma das etiquetas selecionadas, em todo o período.",
+    "filterNamed": "Filtrar por {{name}}",
+    "result": {
+      "taken": "Já existe uma etiqueta com este nome.",
+      "demo": "Os perfis de demonstração são só de leitura. A etiqueta não foi criada.",
+      "mfa": "É necessária autenticação multifator. A etiqueta não foi criada.",
+      "network": "O pedido teve um resultado de rede incerto. Verifique as etiquetas antes de tentar novamente.",
+      "error": "Não foi possível criar a etiqueta. Tente novamente."
+    }
   },
   "recentTransactions": {
     "heading": "Transações recentes",
@@ -525,11 +767,12 @@
   },
   "transactionCreate": {
     "action": "Adicionar transação",
-    "title": "Adicionar uma transação",
+    "title": "Adicionar transação",
     "helper": "Registe manualmente uma transação. Nada é guardado antes da revisão e confirmação.",
     "back": "Voltar",
     "loading": "A carregar detalhes da transação",
     "metadataError": "Não foi possível verificar as contas, tipos, moedas, comerciantes ou categorias. Volte atrás e tente mais tarde.",
+    "choose": "Escolher",
     "account": "Conta",
     "date": "Data",
     "datePlaceholder": "AAAA-MM-DD",
@@ -551,6 +794,8 @@
     "noCategory": "Sem categoria",
     "description": "Descrição",
     "descriptionOptional": "Descrição (opcional)",
+    "note": "Nota",
+    "noteOptional": "Nota (opcional)",
     "descriptionPlaceholder": "Uma descrição breve",
     "validation": "Verifique os campos obrigatórios. Use uma data válida que não seja futura, um montante sem sinal superior a zero e um comerciante.",
     "review": "Rever transação",
@@ -592,6 +837,21 @@
       "title": "O resultado é desconhecido",
       "message": "O pedido pode ter sido concluído. Esta transação revista não pode ser novamente submetida. Atualize e verifique a conta, data, montante e comerciante correspondentes antes de qualquer outra ação.",
       "inspect": "Atualizar e verificar conta"
+    },
+    "kindLabel": "Tipo de movimento",
+    "kinds": {
+      "expense": "Despesa",
+      "income": "Receita",
+      "transfer": "Transferência"
+    },
+    "typeShort": "Tipo",
+    "currencyShort": "Moeda",
+    "merchantRowPlaceholder": "Nome ou pesquisa",
+    "optional": "Opcional",
+    "today": "Hoje",
+    "errors": {
+      "amount": "Introduza um montante superior a zero, sem sinal.",
+      "date": "Use uma data válida que não seja futura."
     }
   },
   "transactionImport": {
@@ -601,6 +861,7 @@
     "helper": "Adicione transações a uma conta a partir de um ficheiro.",
     "account": "Conta",
     "accountsLoading": "A carregar contas",
+    "chooseAccount": "Escolha uma conta",
     "noAccounts": "Não há contas disponíveis para importar",
     "bankFormat": "Carregue o extrato tal como o {{bank}} o exportou, em CSV ou Excel.",
     "yourBank": "seu banco",
@@ -677,8 +938,22 @@
     "scanAnother": "Digitalizar outro recibo",
     "done": "Concluído",
     "tryAgain": "Tentar novamente",
+    "allowance": {
+      "title": "As digitalizações de recibos de hoje esgotaram-se",
+      "body": "O seu agregado familiar já utilizou a quota diária de digitalização de recibos. A quota é reposta à meia-noite UTC. Pode continuar a adicionar a transação manualmente."
+    },
+    "verifyEmail": {
+      "title": "Verifique o seu email para digitalizar recibos",
+      "body": "Para digitalizar recibos, o seu endereço de email tem de estar verificado. Enviámos uma ligação de verificação para o seu email. Abra-a e tente novamente.",
+      "resend": "Reenviar email de verificação",
+      "sending": "A enviar…",
+      "sent": "Email de verificação enviado. Consulte a sua caixa de entrada.",
+      "failed": "Não foi possível enviar o email de verificação. Tente novamente daqui a pouco."
+    },
     "failures": {
       "demo": "Digitalizar recibos não está disponível no modo de demonstração.",
+      "allowance": "O seu agregado familiar já utilizou a quota diária de digitalização de recibos. A quota é reposta à meia-noite UTC.",
+      "unverified": "Verifique o seu endereço de email para digitalizar recibos.",
       "access": "O seu acesso foi alterado. Tente novamente.",
       "mfa": "É necessária verificação adicional.",
       "cancelled": "O pedido foi cancelado antes de ser enviado.",
@@ -713,12 +988,12 @@
     "transactionCount_other": "{{count}} transações"
   },
   "recurring": {
-    "title": "Contas e subscrições recorrentes",
+    "title": "Faturas e subscrições",
     "helper": "Reveja e ajuste a atividade recorrente identificada nas transações registadas",
     "confirm": "Confirmar",
     "dismiss": "Ignorar",
     "dismissing": "A ignorar",
-    "restore": "Restaurar",
+    "restore": "Repor",
     "edit": "Editar detalhes",
     "demoReadOnly": "Os perfis de demonstração são apenas de leitura. Não é possível alterar os detalhes recorrentes",
     "dismissConfirm": {
@@ -740,8 +1015,8 @@
     "scan": {
       "title": "Verificar atividade recorrente",
       "helper": "Execute novamente a deteção com as transações atualmente disponíveis",
-      "action": "Analisar novamente",
-      "scanning": "A analisar",
+      "action": "Procurar novamente",
+      "scanning": "A procurar…",
       "confirmTitle": "Analisar novamente a atividade recorrente?",
       "confirmMessage": "Esta verificação pode criar novas candidatas recorrentes ou atualizar candidatas existentes.",
       "cancel": "Agora não",
@@ -774,22 +1049,20 @@
       "amount": "Introduza um montante não negativo",
       "range": "O montante mínimo não pode exceder o máximo"
     },
-    "back": "Voltar a Contas",
     "loading": "A carregar atividade recorrente",
-    "lastChecked": "Última verificação em {{date}}",
+    "lastChecked": "Última verificação {{time}}",
     "neverChecked": "Não existe uma verificação recorrente concluída",
     "stale": "Não foi possível atualizar. A mostrar a atividade recorrente carregada anteriormente",
     "itemsUnavailable": "Não foi possível carregar os elementos recorrentes. As restantes informações continuam disponíveis",
     "summaryUnavailable": "Não foi possível carregar o resumo recorrente. Os elementos disponíveis continuam visíveis",
-    "monthlySummary": "Resumo mensal do servidor",
     "monthlyTotal": "Total mensal",
     "monthlyRange": "Intervalo mensal previsto",
+    "currencyCount_one": "{{count}} moeda",
+    "currencyCount_other": "{{count}} moedas",
     "subscriptions": "Subscrições",
-    "bills": "Contas",
+    "bills": "Faturas",
     "includedCount": "Séries incluídas",
     "reviewCount": "Por rever",
-    "summaryCurrencyNote": "Os totais são fornecidos pelo WonderMoney. Os totais por moeda são apresentados separadamente abaixo",
-    "acrossCurrencies": "{{value}} entre moedas",
     "currencyTotal": "{{currency}} · {{count}} incluídas",
     "currencyRange": "Intervalo em {{currency}}",
     "amountUnavailable": "Montante indisponível",
@@ -805,13 +1078,13 @@
     "included": "Incluída no resumo mensal",
     "notIncluded": "Não incluída no resumo mensal",
     "type": {
-      "bill": "Conta",
+      "bill": "Fatura",
       "subscription": "Subscrição",
       "unknown": "Outro pagamento recorrente"
     },
     "cadence": {
       "weekly": "Semanal",
-      "biweekly": "A cada duas semanas",
+      "biweekly": "Quinzenal",
       "monthly": "Mensal",
       "quarterly": "Trimestral",
       "yearly": "Anual",
@@ -840,6 +1113,52 @@
     "noItems": {
       "title": "Sem atividade recorrente identificada",
       "message": "O WonderMoney não identificou contas ou subscrições recorrentes nas transações disponíveis"
+    },
+    "subtitle": "Revise subscrições, faturas e cobranças repetidas detetadas nas suas transações.",
+    "monthlyEstimate": "Total mensal estimado",
+    "estimateHint": "Inclui pagamentos confirmados e deteções de confiança elevada",
+    "reviewActionLabel": "Rever pagamentos recorrentes detetados",
+    "needsReviewTitle": "Precisa de revisão",
+    "notRecurring": "Não recorrente",
+    "markNotRecurring": "Marcar como não recorrente",
+    "confirmMerchant": "Confirmar {{merchant}}",
+    "notRecurringMerchant": "Não recorrente: {{merchant}}",
+    "markNotRecurringMerchant": "Marcar {{merchant}} como não recorrente",
+    "restoreMerchant": "Repor {{merchant}}",
+    "usuallyPerCharge": "Normalmente {{amount}} por cobrança",
+    "cadenceBasedEstimate": "Estimativa baseada no calendário de pagamentos",
+    "paymentsSeen_one": "{{{count}}} pagamento encontrado",
+    "paymentsSeen_other": "{{{count}}} pagamentos encontrados",
+    "paymentCount_one": "{{{count}}} pagamento",
+    "paymentCount_other": "{{{count}}} pagamentos",
+    "shareOfTotal": "{{percentage}}% do total",
+    "upcoming": "Próximos",
+    "timelineDescription": "Pagamentos previstos para breve.",
+    "categoryImpact": "Impacto por categoria",
+    "categoryImpactDescription": "Impacto mensal por categoria.",
+    "paymentHistory": "Histórico de pagamentos",
+    "tableDescription": "Padrões recorrentes confirmados, detetados e ignorados.",
+    "reviewQueueDescription": "Revise as subscrições e faturas detetadas antes de entrarem na lista de recorrentes.",
+    "upcomingEmpty": "Ainda não foram encontrados pagamentos recorrentes.",
+    "categoryImpactEmpty": "Ainda não há impacto por categoria para mostrar.",
+    "expectedAround": "Previsto por volta de",
+    "merchant": "Comerciante",
+    "frequency": "Frequência",
+    "nextExpected": "Próximo previsto",
+    "lastPaid": "Último pagamento",
+    "uncategorized": "Sem categoria",
+    "mixedCurrencyNote": "Foram detetadas várias moedas. Os valores são mostrados por moeda.",
+    "emptyTitle": "Ainda não foram detetados pagamentos recorrentes",
+    "emptyDescription": "Procure agora nas transações recentes. As próximas sincronizações verificarão automaticamente.",
+    "emptyScannedDescription": "Verificámos as suas transações recentes e não encontrámos pagamentos recorrentes. Novos resultados vão aparecer aqui automaticamente.",
+    "detectRecurring": "Procurar pagamentos recorrentes",
+    "badge": {
+      "confirmed": "Confirmado",
+      "detected": "Detetado",
+      "needsReview": "Precisa de revisão",
+      "paused": "Pausado",
+      "ended": "Terminado",
+      "dismissed": "Ignorado"
     }
   },
   "more": {
@@ -910,7 +1229,6 @@
       "pt-PT": "Português (Portugal)",
       "es": "Español"
     },
-    "sessionOnly": "Estas escolhas aplicam-se apenas a esta sessão da aplicação e não são guardadas.",
     "languageScope": "O idioma altera apenas a interface da aplicação. Não altera o idioma do email nem do perfil da conta."
   },
   "categories": {
@@ -967,8 +1285,15 @@
       "health": "Saúde",
       "gym-and-sports": "Ginásio e desportos",
       "salary": "Salário",
+      "investments-and-savings": "Investimentos e poupanças",
+      "investments": "Investimentos",
+      "savings": "Poupanças",
       "unknown": "Categoria do sistema"
-    }
+    },
+    "notSpending": "Não conta como despesa",
+    "countsAsSpendingNamed": "Conta como despesa: {{name}}",
+    "toggleFailedTitle": "Não foi possível atualizar a categoria",
+    "toggleFailedMessage": "Verifique a ligação e tente novamente."
   },
   "categoryManage": {
     "icons": {
@@ -1008,6 +1333,7 @@
     "editHelper": "Atualize esta categoria pessoal. As categorias do sistema não podem ser alteradas.",
     "back": "Voltar a Categorias",
     "name": "Nome",
+    "nameError": "Introduza um nome visível com 1 a 255 caracteres.",
     "color": "Cor",
     "colorHint": "Use uma cor hexadecimal de seis dígitos, por exemplo #2563EB.",
     "colorPreview": "Pré-visualização da cor selecionada",
@@ -1056,7 +1382,12 @@
       "cancelled": "O pedido foi cancelado antes do envio. Nada mudou e pode confirmar novamente.",
       "unknown": "O resultado é desconhecido. Atualize as Categorias antes de outra alteração.",
       "general": "Não foi possível alterar a categoria."
-    }
+    },
+    "countsAsSpending": "Conta como despesa",
+    "countsAsSpendingHint": "Desligue para dinheiro que move para investimentos ou poupanças: fica fora dos relatórios, orçamentos e do fluxo de caixa do início.",
+    "countsAsSpendingParentOff": "A categoria principal não conta como despesa, por isso esta também não.",
+    "countsYes": "Sim",
+    "countsNo": "Não"
   },
   "loans": {
     "title": "Empréstimos",
@@ -1069,8 +1400,8 @@
     "errorMessage": "Verifique a ligação e tente novamente",
     "invalidTitle": "Não foi possível verificar os dados dos empréstimos",
     "invalidMessage": "Não foi possível verificar os dados do empréstimo recebidos",
-    "emptyTitle": "Sem empréstimos",
-    "emptyMessage": "Não existem empréstimos disponíveis para este perfil",
+    "emptyTitle": "Ainda sem empréstimos",
+    "emptyMessage": "Adicione o primeiro empréstimo para acompanhar saldos e pagamentos.",
     "previewSubtitle": "Exemplo de acompanhamento de um empréstimo",
     "previewProvider": "Banco",
     "previewTermValue": "28a 4m",
@@ -1096,7 +1427,18 @@
       "CLOSED": "Fechado",
       "PAID_OFF": "Liquidado",
       "UNKNOWN": "Estado indisponível"
-    }
+    },
+    "description": "Acompanhe empréstimos, planos de pagamento e saldos num só lugar.",
+    "summary": {
+      "outstandingDebt": "Dívida em aberto",
+      "monthlyRepayments": "Pagamentos mensais",
+      "interestFees": "Juros e taxas",
+      "netWorthImpact": "Impacto no património líquido",
+      "needReview": "A rever"
+    },
+    "progressRepaid": "{{value}}% pago",
+    "nextPayment": "Próximo pagamento",
+    "rate": "Taxa"
   },
   "loanDetail": {
     "back": "Voltar a Empréstimos",
@@ -1116,6 +1458,9 @@
     "interestRate": "Taxa de juro anual",
     "term": "Prazo original",
     "remainingTerm": "Prazo restante estimado",
+    "remainingTermContract": "Prazo restante",
+    "payoffBeyondContract_one": "Com a prestação e a taxa atuais, o capital leva {{count}} mês a liquidar, mais do que o prazo que resta a este empréstimo. Confirme a prestação e a taxa.",
+    "payoffBeyondContract_other": "Com a prestação e a taxa atuais, o capital leva {{count}} meses a liquidar, mais do que o prazo que resta a este empréstimo. Confirme a prestação e a taxa.",
     "monthCount_one": "{{count}} mês",
     "monthCount_other": "{{count}} meses",
     "progressValue": "{{value}} amortizado face a {{basis}}",
@@ -1151,7 +1496,18 @@
     "transactionAmountNoCurrency": "Montante registado da transação {{value}}; este endpoint não fornece a moeda da transação",
     "transactionDate": "Data da transação {{date}}",
     "needsReview": "A repartição precisa de revisão",
-    "edit": "Editar detalhes do empréstimo"
+    "edit": "Editar detalhes do empréstimo",
+    "linkRepayment": "Associar pagamento",
+    "editLoan": "Editar empréstimo",
+    "providerUnavailable": "Fornecedor indisponível",
+    "annualRate": "Taxa anual",
+    "repaymentProgress": "Progresso do pagamento",
+    "assumptions": "Premissas do empréstimo",
+    "lender": "Credor",
+    "loanType": "Tipo de empréstimo",
+    "statusLabel": "Estado",
+    "description": "Descrição",
+    "repaymentsTitle": "Pagamentos"
   },
   "loanRepayment": {
     "title": "Correspondência de reembolsos",
@@ -1232,6 +1588,13 @@
     "includeInNetWorth": "Incluir no património líquido estimado",
     "notesOptional": "Notas (opcional)",
     "notesPlaceholder": "Outros detalhes a registar",
+    "choose": "Escolher",
+    "optional": "Opcional",
+    "provider": "Entidade",
+    "installment": "Prestação mensal",
+    "interestRate": "Taxa de juro, %",
+    "termMonths": "Prazo, meses",
+    "notes": "Notas",
     "validation": "Introduza um nome, tipo de empréstimo, moeda, saldo inicial e data de início.",
     "save": "Adicionar empréstimo",
     "saving": "A guardar…",
@@ -1248,7 +1611,10 @@
       "type": "Escolha o tipo de empréstimo.",
       "currency": "Escolha uma moeda.",
       "principal": "Introduza um saldo inicial superior a 0.",
-      "startDate": "Introduza uma data de início válida (AAAA-MM-DD)."
+      "startDate": "Introduza uma data de início válida (AAAA-MM-DD).",
+      "installment": "Introduza uma prestação superior a 0.",
+      "interestRate": "Introduza uma taxa entre 0 e 100.",
+      "termMonths": "Introduza um número inteiro de meses superior a 0."
     }
   },
   "loanEdit": {
@@ -1320,8 +1686,8 @@
     "errorMessage": "Verifique a ligação e tente novamente",
     "invalidTitle": "Não foi possível verificar os dados do orçamento",
     "invalidMessage": "Não foi possível verificar os dados do orçamento recebidos",
-    "emptyTitle": "Sem orçamento atual",
-    "emptyMessage": "Compare um plano mensal com o que gastou realmente",
+    "emptyTitle": "Faça orçamento com o método dos envelopes",
+    "emptyMessage": "Atribua dinheiro a categorias e dê a cada euro uma função antes de o gastar.",
     "planned": "Planeado",
     "spent": "Gasto",
     "remaining": "Restante",
@@ -1333,7 +1699,20 @@
     "preview": "Plano mensal",
     "previewHousing": "Habitação",
     "previewFood": "Alimentação",
-    "previewTransport": "Transportes"
+    "previewTransport": "Transportes",
+    "overviewTitle": "Visão geral de orçamentos",
+    "name": "Nome",
+    "progress": "Progresso",
+    "rowIncomeSummary": "{{amount}} por mês de {{sources}}",
+    "rowCategoryCount_one": "{{count}} categoria",
+    "rowCategoryCount_other": "{{count}} categorias",
+    "rowAccountCount_one": "{{count}} conta",
+    "rowAccountCount_other": "{{count}} contas",
+    "nothingBudgeted": "Ainda sem valores orçamentados",
+    "nothingSpent": "Ainda sem gastos",
+    "createFirst": "Criar o seu primeiro orçamento",
+    "total": "Total",
+    "actionsFor": "Ações para {{name}}"
   },
   "budgetMonth": {
     "back": "Voltar a Orçamentos",
@@ -1392,7 +1771,47 @@
         "invalid": "Não foi possível remover esta categoria.",
         "general": "Não foi possível remover esta categoria."
       }
-    }
+    },
+    "help": "Mantenha-se no caminho certo com os seus objetivos de gastos e monitorize facilmente o seu progresso ao longo do mês.",
+    "viewBy": "Ver por:",
+    "viewByLabel": "Ver por",
+    "month": "Mês",
+    "year": "Ano",
+    "previousMonth": "Mês anterior",
+    "nextMonth": "Mês seguinte",
+    "leftIn": "Disponível em {{month}}",
+    "overspentIn": "Acima do plano em {{month}} por",
+    "spent": "Gasto",
+    "planned": "Planeado",
+    "overPlan": "Acima do plano",
+    "overPlanUnit_one": "linha",
+    "overPlanUnit_other": "linhas",
+    "monthlyRemaining": "Restante no mês",
+    "annualRemaining": "Restando no ano",
+    "monthlySpent": "Gasto no mês",
+    "annualSpent": "Gasto no ano",
+    "monthlyPlanned": "Orçamentado no mês",
+    "annualPlanned": "Orçamentado no ano",
+    "progress": "Progresso",
+    "recurrenceLabel": "Recorrência",
+    "timesPerYear": "{{count}}x por ano",
+    "linkAccount": "Ligar conta",
+    "accountsLinked_one": "Conta ligada",
+    "accountsLinked_other": "Contas ligadas",
+    "measureLabel": "{{name}}: {{spent}} gastos de {{planned}} planeados",
+    "spentOfPlanned": "{{spent}} de {{planned}} gastos",
+    "rolledOverSurplus": "+{{amount}} do mês passado",
+    "rolledOverOverspent": "−{{amount}} gastos a mais no mês passado",
+    "rolledOverIncomplete": "Pode estar demasiado alto: parte das despesas do mês passado não pôde ser convertida para a moeda deste orçamento.",
+    "keyLabel": "Como ler as barras",
+    "keyPlan": "Plano",
+    "keySpent": "Gasto dentro do plano",
+    "keyOver": "Gasto acima do plano",
+    "overview": "Resumo",
+    "budgeted": "Orçamentado",
+    "remaining": "Restante",
+    "inPercentage": "(em %)",
+    "categoryActions": "Ações para {{name}}"
   },
   "budgetCategory": {
     "edit": "Editar orçamento de {{name}}",
@@ -1402,6 +1821,8 @@
     "amount": "Montante por ocorrência",
     "amountHint": "Montante positivo obrigatório",
     "recurrence": "Recorrência",
+    "rollover": "Transitar o que sobra para o mês seguinte",
+    "rolloverHint": "O que sobrar no fim do mês é somado ao mês seguinte. Aplica-se aos meses escolhidos abaixo.",
     "legacyRecurrence": "Esta categoria não tem uma recorrência guardada. Selecione uma explicitamente antes de guardar.",
     "scope": "Aplicar alteração a",
     "scopeMonth": "Apenas ao mês selecionado",
@@ -1446,7 +1867,9 @@
       "fieldErrors": {
         "household": "A dimensão do agregado deve estar entre 1 e 10.",
         "dependents": "Os dependentes têm de ser menos do que a dimensão do agregado."
-      }
+      },
+      "question": "Quantas pessoas vivem na sua casa?",
+      "description": "Inclua crianças e outros dependentes. Isto ajudará-nos a criar um orçamento que funcione para toda a sua família."
     },
     "income": {
       "title": "Rendimento",
@@ -1494,7 +1917,16 @@
       },
       "candidate": "Candidato a orçamento {{id}}",
       "noInference": "Um candidato não confirma como foi criado"
-    }
+    },
+    "dependents": {
+      "question": "Das pessoas que vivem na sua casa, quantas são dependentes?",
+      "description": "Quer um orçamento que realmente se adapte à sua vida? Partilhar o seu agregado familiar ajuda-nos a criar um plano financeiro personalizado."
+    },
+    "incomeStep": {
+      "question": "Qual é o seu rendimento total da família?",
+      "description": "É importante que adicione o seu rendimento atual para ter visibilidade total sobre as suas finanças."
+    },
+    "progress": "Passo {{current}} de {{total}}"
   },
   "budgetAddCategory": {
     "title": "Adicionar categoria existente",
@@ -1574,7 +2006,8 @@
     "yearToDate": "Ano até à data",
     "fullYear": "Ano completo",
     "categories": "Categorias",
-    "noCategories": "Não existem categorias disponíveis para este ano"
+    "noCategories": "Não existem categorias disponíveis para este ano",
+    "help": "Assuma o controlo do seu plano financeiro anual e gira despesas menos frequentes com confiança."
   },
   "budgetEdit": {
     "title": "Editar orçamento",
@@ -1586,6 +2019,8 @@
     "name": "Nome",
     "nameHint": "Até 100 caracteres",
     "description": "Descrição",
+    "carryOverspend": "Transitar gastos a mais para o mês seguinte",
+    "carryOverspendHint": "O que for gasto acima do montante de uma categoria é descontado no mês seguinte. Desligado, só transita o dinheiro não gasto.",
     "descriptionHint": "Opcional, até 500 caracteres",
     "characterCount": "{{count}} / {{max}}",
     "saveDetails": "Guardar detalhes",
@@ -1641,9 +2076,9 @@
     "tabActive": "Ativos",
     "tabArchived": "Arquivados",
     "loading": "A carregar objetivos",
-    "empty": "Reserve dinheiro para um fim específico",
-    "emptyTitle": "Comece pelo seu primeiro objetivo",
-    "archivedEmpty": "Os objetivos arquivados aparecem aqui",
+    "empty": "Crie um objetivo para reservar dinheiro orçamentado para algo específico, como um fundo de emergência, férias, impostos ou a entrada de uma casa.",
+    "emptyTitle": "Dê um propósito ao seu dinheiro",
+    "archivedEmpty": "Não há objetivos arquivados.",
     "archivedEmptyTitle": "Ainda não existem itens arquivados",
     "restore": "Restaurar",
     "restoring": "A restaurar…",
@@ -1664,6 +2099,8 @@
     "monthlyContributionValue": "Contribuição mensal {{value}}",
     "targetDate": "Data da meta {{date}}",
     "onTrackNote": "No caminho certo significa que não é possível calcular um défice; não é uma garantia",
+    "helpText": "Reservas internas atribuídas por finalidade. No caminho certo significa que não é possível calcular um défice; não é uma garantia.",
+    "back": "Voltar a Mais",
     "showDetails": "Mostrar detalhes de {{name}}",
     "hideDetails": "Ocultar detalhes de {{name}}",
     "showDetailsLabel": "Mostrar detalhes",
@@ -1684,7 +2121,8 @@
       "completed": "Concluído",
       "archived": "Arquivado",
       "progress-unavailable": "Progresso indisponível",
-      "unknown": "Estado indisponível"
+      "unknown": "Estado indisponível",
+      "active": "Ativo"
     },
     "debtStrategy": {
       "linkLabel": "Estratégia de quitação de dívidas",
@@ -1712,11 +2150,18 @@
       "invalidMessage": "Os dados de quitação de dívidas recebidos não puderam ser verificados",
       "ineligibleTitle": "Não há dívidas suficientes para comparar",
       "ineligibleMessage": "Comparar estratégias de quitação requer pelo menos dois objetivos de dívida."
-    }
+    },
+    "subtitle": "Reserve dinheiro orçamentado para planos futuros.",
+    "typeDebt": "Pagar dívida",
+    "debtRemaining": "Em dívida",
+    "payoffBy": "Quitação até {{date}}",
+    "payoffTooLow": "Pagamento baixo",
+    "payoffTimeline": "Cronograma de quitação",
+    "ofAmount": "de {{amount}}"
   },
   "goalCreate": {
-    "title": "Criar um objetivo",
-    "helper": "Defina o plano e confirme os detalhes exatos antes de o criar",
+    "title": "Criar objetivo",
+    "helper": "Reserve dinheiro orçamentado para algo específico.",
     "back": "Voltar a Objetivos",
     "name": "Nome do objetivo",
     "target": "Montante objetivo",
@@ -1725,7 +2170,7 @@
     "date": "Data da meta",
     "optional": "Opcional",
     "moneyHint": "Introduza um montante positivo com até quatro casas decimais",
-    "dateHint": "Opcional. Use AAAA-MM-DD e escolha uma data futura",
+    "dateHint": "Opcional. Escolha uma data futura",
     "currencyTitle": "Utiliza a moeda do seu perfil",
     "currencyHelper": "Não existe escolha de moeda aqui. O servidor cria este objetivo na moeda do seu perfil autenticado",
     "validation": "Verifique todos os campos obrigatórios. Os montantes devem ser positivos e ter no máximo quatro casas decimais, e a data opcional deve ser futura",
@@ -1886,24 +2331,47 @@
       "message": "Não foi possível verificar os dados do objetivo recebidos"
     },
     "activityType": {
-      "archived": "Arquivado",
-      "assigned": "Atribuído",
-      "completed": "Concluído",
+      "archived": "Objetivo arquivado",
+      "assigned": "Dinheiro atribuído",
+      "completed": "Objetivo concluído",
       "goal_created": "Objetivo criado",
       "goal_updated": "Objetivo atualizado",
       "manual_adjustment": "Ajuste manual",
-      "moved_in": "Reatribuído para o objetivo",
-      "moved_out": "Reatribuído do objetivo",
-      "paused": "Em pausa",
-      "resumed": "Retomado",
-      "spent_from_goal": "Aplicado a despesas",
-      "transaction_funding_reversed": "Atribuição reposta",
+      "moved_in": "Dinheiro entrou",
+      "moved_out": "Dinheiro saiu",
+      "paused": "Objetivo pausado",
+      "resumed": "Objetivo retomado",
+      "spent_from_goal": "Gasto do objetivo",
+      "transaction_funding_reversed": "Financiamento revertido",
       "unknown": "Outra atividade"
     },
-    "transactionExpired": "Transação expirada — descartada pelo banco. Este objetivo continua a cobri-la."
+    "transactionExpired": "Transação expirada — descartada pelo banco. Este objetivo continua a cobri-la.",
+    "assignMoney": "Atribuir dinheiro",
+    "moveMoneyOut": "Mover dinheiro para fora",
+    "manage": "Gerir objetivo",
+    "edit": "Editar objetivo",
+    "progress": "Progresso",
+    "targetDateLabel": "Data alvo",
+    "monthlyContribution": "Contribuição mensal",
+    "assignedThisMonth": "Atribuído este mês",
+    "neededThisMonth": "Necessário este mês",
+    "shortBy": "Em falta",
+    "budgetExplainer": "Atribuir dinheiro a um objetivo muda a finalidade do dinheiro. Mover dinheiro entre contas muda onde ele está guardado.",
+    "linkedAccount": "Conta associada",
+    "accountContextNote": "Isto ajuda a ver onde o dinheiro está guardado. Não altera o saldo do objetivo.",
+    "assignTitle": "Atribuir dinheiro ao objetivo",
+    "moveOutTitle": "Mover dinheiro para fora do objetivo",
+    "editTitle": "Editar objetivo",
+    "payoffPlan": "Plano de quitação",
+    "apr": "TAEG",
+    "payoffDate": "Data de quitação",
+    "never": "Nunca",
+    "monthlyPayment": "Pagamento mensal",
+    "neverPaysOffHint": "O pagamento mensal não cobre os juros, por isso esta dívida nunca é quitada. Aumente o pagamento mínimo ou extra.",
+    "targetAmount": "Valor alvo"
   },
   "portfolios": {
-    "title": "Portefólio",
+    "title": "Portefólios",
     "helper": "Na moeda do seu perfil",
     "loading": "A carregar portefólios",
     "errorTitle": "Não foi possível carregar os portefólios",
@@ -1926,7 +2394,21 @@
     "create": "Criar portefólio",
     "previewValue": "Pré-visualização do valor total",
     "previewAllocation": "Alocação de exemplo",
-    "emptyMessage": "As carteiras e as posições aparecem aqui depois de criadas"
+    "emptyMessage": "As carteiras e as posições aparecem aqui depois de criadas",
+    "description": "Esta é uma visão geral dos seus portefólios, incluindo evolução do saldo, últimas transações e análises.",
+    "helpHint": "Saber mais sobre portefólios",
+    "period": "Período de tempo",
+    "periods": {
+      "1M": "1 mês",
+      "3M": "3 meses",
+      "6M": "6 meses",
+      "YTD": "Ano até à data",
+      "1Y": "1 ano",
+      "ALL": "Todo o período"
+    },
+    "addTransaction": "Adicionar transação",
+    "selectPortfolio": "Selecionar portefólio",
+    "add": "Adicionar"
   },
   "portfolioDetail": {
     "back": "Voltar a Portefólio",
@@ -1943,6 +2425,7 @@
       "error": "Não foi possível carregar o histórico de desempenho",
       "empty": "Ainda não há histórico de desempenho disponível",
       "insufficientHistory": "Ainda não há histórico suficiente para representar o desempenho",
+      "currencyIncomplete": "Alguns dias excluem um portefólio numa moeda sem taxa de câmbio para esse dia, por isso esses totais estão incompletos.",
       "totalReturn": "{{value}}%",
       "range": "{{start}} – {{end}}",
       "periods": {
@@ -2074,7 +2557,8 @@
       },
       "total": "Total: {{total}}%",
       "percent": "{{value}}%",
-      "cleared": "Alocação-alvo removida"
+      "cleared": "Alocação-alvo removida",
+      "invalid": "Introduza uma percentagem igual ou superior a 0."
     },
     "on": "Ativado",
     "off": "Desativado",
@@ -2087,6 +2571,7 @@
     "confirm": "Confirmar alterações",
     "saving": "A guardar alterações",
     "validation": "Altere pelo menos um campo e introduza um nome válido",
+    "nameError": "Introduza um nome com até 255 caracteres.",
     "descriptionCleared": "Remover a descrição atual",
     "unknownTitle": "Resultado desconhecido",
     "unknownMessage": "Os valores enviados foram mantidos. É necessário atualizar os dados oficiais antes de voltar a guardar",
@@ -2124,8 +2609,8 @@
   },
   "portfolioActivity": {
     "back": "Voltar",
-    "aggregateTitle": "Atividade do portefólio",
-    "portfolioTitle": "Atividade do portefólio",
+    "aggregateTitle": "Transações",
+    "portfolioTitle": "Transações",
     "scope": "Atividade mais recente primeiro. Os resultados são de leitura apenas",
     "scopeEditable": "Atividade mais recente primeiro. As transações podem ser editadas ou removidas",
     "delete": "Eliminar",
@@ -2167,18 +2652,30 @@
     "splitReadOnly": "Desdobramento de ações, leitura apenas",
     "splitRatio": "{{numerator}} por {{denominator}}",
     "splitRatioUnavailable": "Detalhes do rácio indisponíveis",
+    "cash": "Numerário ({{currency}})",
+    "types": {
+      "BUY": "Compra",
+      "SELL": "Venda",
+      "DIVIDEND": "Dividendo",
+      "DEPOSIT": "Depósito",
+      "WITHDRAWAL": "Levantamento",
+      "OFFER": "Oferta"
+    },
     "unknownType": "Transação",
     "assetUnavailable": "Ativo indisponível",
     "unavailable": "Data e hora indisponíveis",
     "quantityValue": "Quantidade {{value}}",
     "portfolioContext": "Portefólio {{name}}",
     "filters": "Filtros de data",
-    "filterHint": "Datas de calendário opcionais no formato AAAA-MM-DD",
     "fromDate": "Data inicial",
     "toDate": "Data final",
-    "applyDates": "Aplicar datas",
-    "clearDates": "Limpar datas",
     "invalidDates": "Introduza datas de calendário válidas, com a data inicial não posterior à data final",
+    "filterType": "Tipo de transação",
+    "filterTicker": "Ticker",
+    "filterPortfolio": "Portefólio",
+    "allTickers": "Todos os tickers",
+    "allPortfolios": "Todos os portefólios",
+    "emptyFiltered": "Nenhuma atividade corresponde a estes filtros",
     "rateLimitTitle": "A atividade está temporariamente limitada",
     "rateLimitMessage": "Foram efetuados demasiados pedidos. Tente mais tarde",
     "rateLimitCached": "Não foi possível atualizar a atividade porque os pedidos estão temporariamente limitados. A atividade carregada anteriormente continua visível",
@@ -2217,6 +2714,7 @@
     "risk": "Métricas de risco",
     "riskReady": "A API indica histórico suficiente para as métricas de risco",
     "riskNotReady": "A API indica histórico insuficiente. Os valores de risco não são apresentados como prontos",
+    "needsHistory": "Ainda sem histórico suficiente",
     "riskLevel": "Nível de risco",
     "volatility": "Volatilidade",
     "maxDrawdown": "Perda máxima",
@@ -2383,6 +2881,20 @@
         "auth-failed": "Não foi possível confirmar. Tente novamente."
       }
     },
+    "dataExport": {
+      "heading": "Exportar os teus dados",
+      "helper": "Descarrega tudo o que vês no teu agregado (contas, transações, orçamentos, objetivos, empréstimos e investimentos) num zip com ficheiros JSON e CSV. As contas privadas do teu parceiro não são incluídas.",
+      "start": "Exportar todos os dados",
+      "download": "Descarregar exportação",
+      "preparing": "A preparar a tua exportação. Enviamos-te um email quando estiver pronta.",
+      "readyUntil": "Disponível para descarregar até {{date}}.",
+      "failed": "Não foi possível concluir a exportação. Tenta novamente.",
+      "webOnly": "Este servidor cria as exportações enquanto são descarregadas. Exporta os teus dados na aplicação web, em Definições > Privacidade.",
+      "errors": {
+        "limit": "Podes exportar os teus dados até 3 vezes por dia. Tenta novamente mais tarde.",
+        "unknown": "Não foi possível iniciar a exportação. Verifica a tua ligação e tenta novamente."
+      }
+    },
     "mfa": {
       "heading": "Autenticação de dois fatores",
       "helper": "Adiciona um código de utilização única de uma aplicação de autenticação ao iniciar sessão.",
@@ -2443,6 +2955,11 @@
       "description": "Alertas quando uma ligação bancária precisa de ser restabelecida, com os passos para resolver.",
       "detail": "Não inclui alertas de segurança sobre o seu início de sessão, que são sempre enviados."
     },
+    "bankSyncAlerts": {
+      "title": "Alertas de ligações bancárias",
+      "description": "Receba um email quando o acesso a um banco estiver prestes a terminar (7 dias e 1 dia antes), quando um banco terminar o acesso antes do prazo ou quando um banco não sincronizar há mais de 2 dias.",
+      "detail": "Inclui apenas as ligações bancárias que configurou."
+    },
     "marketingOptOut": {
       "title": "Cancelar subscrição de todos os emails de marketing",
       "description": "Desative todos os emails opcionais acima de uma só vez. Pode reativá-los a qualquer momento.",
@@ -2483,12 +3000,12 @@
       "continue": "Continuar",
       "welcome": {
         "headline": "Reúna aqui o seu plano financeiro.",
-        "description": "Contas, orçamentos e investimentos num só sítio.",
+        "description": "Reúna contas, orçamentos e investimentos suportados para ver o que tem, para onde vai e como muda ao longo do tempo.",
         "cta": "Começar configuração"
       },
       "goals": {
         "headline": "O que quer melhorar primeiro?",
-        "description": "Escolha um ou dois. Pode alterar mais tarde.",
+        "description": "Escolha até 2. Vamos adaptar a configuração à imagem financeira que quer construir.",
         "options": {
           "all_in_one": "Ver tudo num só lugar",
           "spending": "Perceber para onde vai o dinheiro",
@@ -2497,7 +3014,16 @@
           "financial_freedom": "Planear objetivos a longo prazo",
           "exploring": "Estou só a explorar"
         },
-        "cta": "Continuar"
+        "cta": "Continuar",
+        "maxSelected": "Escolha até 2 objetivos.",
+        "helpers": {
+          "all_in_one": "Reúna contas, orçamentos e investimentos suportados.",
+          "spending": "Veja para onde vai o dinheiro todos os meses.",
+          "budget": "Transforme gastos num plano simples.",
+          "investments_net_worth": "Mantenha dinheiro, investimentos e património juntos.",
+          "financial_freedom": "Mantenha o foco nos objetivos de longo prazo.",
+          "exploring": "Veja primeiro como funciona."
+        }
       },
       "privacy": {
         "headline": "Só leitura significa só leitura.",
@@ -2512,6 +3038,26 @@
         "description": "Uma chega para o painel ficar útil.",
         "cta": "Ligar conta bancária",
         "manualCta": "Adicionar conta manualmente"
+      },
+      "stepLabels": {
+        "welcome": "Bem-vindo",
+        "goals": "Os teus objetivos",
+        "privacy": "Privacidade",
+        "account": "Ligar"
+      },
+      "facts": {
+        "connected": {
+          "title": "Contas, orçamentos e portefólio",
+          "description": "Os seus gastos do dia a dia e património a longo prazo vivem no mesmo espaço."
+        },
+        "readOnly": {
+          "title": "Acesso apenas de leitura",
+          "description": "A WonderMoney não pode mover dinheiro, fazer pagamentos ou iniciar transferências."
+        },
+        "netWorth": {
+          "title": "Património líquido como referência",
+          "description": "Contas e investimentos combinam-se num só número para o ajudar a perceber a sua posição."
+        }
       }
     },
     "heading": "Bem-vindo à WonderMoney",
@@ -2552,6 +3098,12 @@
       "title": "Não foi possível verificar o percurso de início",
       "message": "O percurso recebido não pôde ser verificado. Tente novamente para obter uma versão atualizada."
     },
+    "completeFailure": {
+      "demo": "Os perfis de demonstração são só de leitura, por isso a configuração não pode ser marcada como concluída. Nada foi alterado.",
+      "network": "Não foi possível concluir a configuração. Verifique a ligação e tente novamente.",
+      "stale": "A configuração mudou desde que este ecrã abriu. Volte atrás e tente novamente.",
+      "unknown": "Não foi possível concluir a configuração. Tente novamente."
+    },
     "createAccount": {
       "back": "Voltar à integração",
       "invalidVersion": {
@@ -2563,7 +3115,7 @@
   "banking": {
     "connections": {
       "heading": "Ligações bancárias",
-      "helper": "Os bancos que associou. Renovar continua a ser gerido na web; pode desligar um banco aqui.",
+      "helper": "Os bancos que associou. Volte a ligar um banco aqui quando o consentimento terminar, ou desligue-o.",
       "loading": "A carregar ligações bancárias",
       "empty": "Ainda não existem ligações bancárias ativas. Associe um banco na web para o ver aqui.",
       "emptyTitle": "Ainda não existem ligações bancárias",
@@ -2575,12 +3127,15 @@
       "freshnessUnknown": "Atualidade dos dados indisponível",
       "unavailableDate": "indisponível",
       "unnamedInstitution": "Ligação bancária",
+      "providerConnection": "Ligação {{provider}}",
       "status": {
         "processing": "Em processamento",
         "connected": "Ligado",
         "error": "Erro",
         "expired": "Consentimento expirado",
-        "unknown": "Estado indisponível"
+        "unknown": "Estado indisponível",
+        "expiring": "Expira em breve",
+        "revoked": "Terminada pelo banco"
       },
       "error": {
         "title": "Não foi possível carregar as ligações bancárias",
@@ -2625,6 +3180,18 @@
       "importStatement": {
         "action": "Importar um extrato em alternativa",
         "actionLabel": "Importar um extrato para {{institution}} em alternativa"
+      },
+      "consent": {
+        "expiring_zero": "O consentimento termina hoje. Volte a ligar para manter os dados sincronizados.",
+        "expiring_one": "O consentimento termina dentro de {{count}} dia. Volte a ligar para manter os dados sincronizados.",
+        "expiring_other": "O consentimento termina dentro de {{count}} dias. Volte a ligar para manter os dados sincronizados.",
+        "revoked": "O seu banco terminou o acesso antes do prazo. Volte a ligar para retomar a sincronização.",
+        "expired": "O consentimento terminou. Volte a ligar para retomar a sincronização."
+      },
+      "reconnect": {
+        "action": "Voltar a ligar",
+        "actionLabel": "Voltar a ligar {{institution}}",
+        "starting": "A abrir o seu banco…"
       }
     },
     "connect": {
@@ -2692,7 +3259,7 @@
     "title": "Mercados",
     "helper": "Pesquise ações, ETFs e outros ativos.",
     "back": "Voltar",
-    "placeholder": "Pesquisar por nome ou símbolo",
+    "placeholder": "Procurar por ticker ou nome da empresa (ex. AAPL, Microsoft, ETF)",
     "searchLabel": "Pesquisar ativos",
     "loading": "A pesquisar",
     "empty": "Sem resultados para \"{{term}}\"",
@@ -2706,7 +3273,15 @@
     },
     "watchlistLink": "Lista de seguimento",
     "screenerLink": "Pesquisador",
-    "emptyTitle": "Nenhum instrumento encontrado"
+    "emptyTitle": "Nenhum instrumento encontrado",
+    "exploreTitle": "Explore um ativo",
+    "exploreDescription": "Pesquise uma ação ou ETF para ver histórico de preços, detalhes da empresa, métricas fundamentais, dados financeiros e resultados.",
+    "previewCompany": "Ativo de exemplo",
+    "previewName": "Nome do Ativo",
+    "previewChart": "Histórico de preços",
+    "previewFundamentals": "Fundamentais",
+    "previewFinancials": "Finanças",
+    "previewEarnings": "Resultados"
   },
   "assetDetail": {
     "loading": "A carregar cotação",
@@ -2792,9 +3367,9 @@
     "back": "Voltar",
     "loading": "A carregar lista de seguimento",
     "empty": {
-      "title": "A sua lista de seguimento está vazia",
-      "message": "Pesquise um ativo e adicione-o à sua lista de seguimento para o acompanhar aqui.",
-      "searchAction": "Pesquisar instrumentos"
+      "title": "Ainda não há ativos",
+      "message": "Procure uma ação ou ETF no Explorador e toque na estrela para o adicionar aqui.",
+      "searchAction": "Ir para o Explorador"
     },
     "error": {
       "title": "Não foi possível carregar a lista de seguimento",
@@ -2812,7 +3387,12 @@
       "add": "Adicionar à lista de seguimento",
       "remove": "Remover da lista de seguimento",
       "pending": "A atualizar…"
-    }
+    },
+    "description": "Acompanhe os ativos que lhe interessam.",
+    "marketDataUnavailable": "Dados de mercado indisponíveis",
+    "liveQuoteUnavailable": "Cotação em tempo real indisponível",
+    "period1d": "1D",
+    "changeDay": "Alteração (dia)"
   },
   "screener": {
     "title": "Pesquisador",
@@ -2824,6 +3404,7 @@
     "priceLowerThanLabel": "Preço máximo",
     "marketCapMoreThanLabel": "Capitalização mínima",
     "marketCapLowerThanLabel": "Capitalização máxima",
+    "numberInvalid": "Introduza um número, como 1500 ou 12,50.",
     "sectorLabel": "Setor",
     "industryLabel": "Indústria",
     "countryLabel": "País",
@@ -3010,7 +3591,7 @@
     },
     "portfolioPerformance": {
       "label": "Desempenho do portefólio",
-      "description": "Movimento e rendibilidade por conta no período"
+      "description": "Movimento do saldo por conta no período"
     },
     "netWorthHistory": {
       "label": "Património líquido ao longo do tempo",
@@ -3065,11 +3646,12 @@
       "selectedCount": "{{count}} selecionados",
       "searchPlaceholder": "Pesquisar {{label}}",
       "noResults": "Sem resultados",
-      "unknownAccount": "Conta desconhecida"
+      "unknownAccount": "Conta desconhecida",
+      "dateRange": "Período"
     },
     "budgetVsActual": {
       "title": "Orçamento vs real",
-      "subtitle": "Gasto planeado comparado com o que gastou de facto, por categoria",
+      "subtitle": "Como a sua despesa acompanhou o orçamento.",
       "loading": "A carregar orçamento vs real",
       "budgeted": "Orçamentado",
       "actual": "Real",
@@ -3077,35 +3659,41 @@
       "percentUsed": "% utilizado",
       "overBudget": "Acima do orçamento",
       "emptyTitle": "Sem categorias orçamentadas no período",
-      "emptyMessage": "Crie um orçamento ou alargue o período para ver este relatório"
+      "emptyMessage": "Crie um orçamento ou alargue o período para ver este relatório",
+      "category": "Categoria"
     },
     "portfolioPerformance": {
       "title": "Desempenho do portefólio",
-      "subtitle": "Movimento e rendibilidade por conta no período",
+      "subtitle": "Como variou o valor de cada carteira no período, descontando o que entrou e saiu.",
       "loading": "A carregar o desempenho do portefólio",
-      "aggregateReturn": "{{value}} de rendibilidade combinada",
-      "startBalance": "Início",
-      "endBalance": "Fim",
-      "return": "Rendibilidade",
-      "contributions": "Contribuições",
-      "startCaveat": "O saldo inicial reflete a primeira transação do período; a rendibilidade pode incluir o efeito dessa transação.",
-      "emptyTitle": "Sem contas para mostrar",
-      "emptyMessage": "Ligue uma conta para ver aqui o seu desempenho"
+      "aggregateReturn": "{{value}} de variação combinada",
+      "startValue": "Valor inicial",
+      "netContributions": "Contribuições líquidas",
+      "change": "Variação",
+      "dividends": "Dividendos",
+      "endValue": "Valor final",
+      "unknownValue": "Sem valor registado",
+      "noExchangeRate": "Ainda sem taxa de câmbio",
+      "emptyTitle": "Sem carteiras para mostrar",
+      "emptyMessage": "Adicione uma carteira para ver aqui o seu desempenho",
+      "portfolio": "Carteira",
+      "total": "Total"
     },
     "netWorthHistory": {
       "title": "Património líquido ao longo do tempo",
-      "subtitle": "O total de ativos menos passivos, mês a mês",
+      "subtitle": "Total de ativos menos passivos, mês a mês.",
       "loading": "A carregar o histórico do património líquido",
       "trend": "{{delta}} ({{percent}}) desde o mês passado",
       "assets": "Ativos",
       "liabilities": "Passivos",
       "emptyTitle": "Ainda sem histórico",
       "emptyMessage": "O património líquido será preenchido à medida que as contas registarem atividade",
-      "trendNoBasis": "{{delta}} sem mês anterior para comparar"
+      "trendNoBasis": "{{delta}} sem mês anterior para comparar",
+      "netWorth": "Património líquido"
     },
     "spendingByCategory": {
       "title": "Gastos por categoria",
-      "subtitle": "Para onde foi o seu dinheiro durante o período",
+      "subtitle": "Para onde foi o seu dinheiro no período.",
       "loading": "A carregar os gastos por categoria",
       "total": "Total gasto",
       "trend": "{{delta}} ({{percent}}) face ao período anterior",
@@ -3115,25 +3703,205 @@
     },
     "cashflow": {
       "title": "Fluxo de caixa",
-      "subtitle": "Rendimentos vs despesas ao longo do tempo",
+      "subtitle": "Receitas vs despesas ao longo do tempo.",
       "loading": "A carregar o fluxo de caixa",
       "income": "Rendimentos",
       "expenses": "Despesas",
       "net": "Líquido",
       "trailingNetAverage": "{{value}} de média líquida dos últimos 3 meses",
       "emptyTitle": "Ainda sem fluxo de caixa",
-      "emptyMessage": "Assim que as transações forem registadas, o seu fluxo de caixa mensal aparecerá aqui"
+      "emptyMessage": "Assim que as transações forem registadas, o seu fluxo de caixa mensal aparecerá aqui",
+      "trailingNetAverageLabel": "Média móvel do saldo (3 meses)"
     },
     "sankey": {
       "title": "Sankey de fluxo de caixa",
-      "subtitle": "Do rendimento, através das categorias, até às contas",
+      "subtitle": "Das receitas, pelas categorias, até às contas.",
       "loading": "A carregar os fluxos de caixa",
       "total": "{{value}} de entrada total",
       "source": "Origem",
       "target": "Destino",
       "value": "Valor",
       "emptyTitle": "Atividade insuficiente",
-      "emptyMessage": "Adicione mais transações para ver o fluxo do seu dinheiro"
+      "emptyMessage": "Adicione mais transações para ver o fluxo do seu dinheiro",
+      "mobileNotice": "Este gráfico vê-se melhor num ecrã mais largo."
+    },
+    "trend": {
+      "up": "Subiu",
+      "down": "Desceu",
+      "flat": "Estável",
+      "vsPriorPeriod": "vs. período anterior"
     }
+  },
+  "accountsOverview": {
+    "title": "Visão geral das contas",
+    "help": "Esta é uma visão geral das suas contas, incluindo crescimento do saldo, últimas transações e insights.",
+    "period": "Período",
+    "timeframes": {
+      "1M": "1 mês",
+      "3M": "3 meses",
+      "6M": "6 meses",
+      "YTD": "Ano até à data",
+      "1Y": "1 ano",
+      "ALL": "Todo o período"
+    },
+    "addTransaction": "Adicionar transação",
+    "addAccount": "Adicionar Conta",
+    "add": "Adicionar",
+    "totalBalance": "Saldo Total",
+    "vsLastPeriod": "vs período anterior",
+    "balancesUpdated": "Saldos atualizados {{time}}",
+    "balancesStale": "Algumas ligações precisam de atenção",
+    "totalIncomplete": "Indisponível — faltam alguns saldos",
+    "inflow": "Entradas",
+    "outflow": "Saídas",
+    "savingsRate": "Taxa de Poupança",
+    "netSavingsRate": "Poupança líquida neste período, {{rate}} das entradas",
+    "noMetrics": "Não há métricas para mostrar",
+    "spendingByCategory": "Gastos por Categoria",
+    "emptyCategorySpending": "Os gastos por categoria aparecem aqui assim que tiver despesas categorizadas neste período.",
+    "balanceGrowth": "Evolução do saldo",
+    "emptyTransactions": "O seu fluxo de caixa aparecerá aqui assim que houver transações disponíveis. Ligue uma conta bancária, adicione transações manualmente ou importe um extrato bancário para começar a acompanhar entradas e saídas de dinheiro.",
+    "accounts": "Contas",
+    "total": "Total",
+    "lastTransactions": "Últimas transações",
+    "viewAll": "Ver tudo",
+    "cashflow": "Fluxo de caixa",
+    "accountBalance": "Saldo da conta",
+    "available": "Disponível",
+    "private": "Privada",
+    "sharedBy": "Partilhada por {{name}}",
+    "edit": "Editar",
+    "delete": "Eliminar",
+    "linked": "Ligada",
+    "unlinked": "Não ligada",
+    "linkedDescription": "Importe todas as transações automaticamente.",
+    "unlinkedDescription": "Começe com o seu saldo actual e introduza as suas transações.",
+    "importTransactions": "Importar transações",
+    "actionsFor": "Ações para {{name}}",
+    "justNow": "agora mesmo",
+    "editAccount": "Editar conta",
+    "deleteAccount": "Eliminar conta",
+    "accountDetails": "Detalhes da conta",
+    "sectionUnavailable": "Não foi possível carregar esta secção. Puxe para baixo para tentar novamente.",
+    "linkedAccount": "Associar uma conta bancária"
+  },
+  "settings": {
+    "title": "Definições",
+    "groups": {
+      "account": "Conta",
+      "money": "Dinheiro",
+      "preferences": "Preferências"
+    },
+    "sections": {
+      "profile": "Perfil",
+      "security": "Segurança",
+      "household": "Agregado familiar",
+      "connections": "Ligações",
+      "categories": "Categorias",
+      "appearance": "Aparência",
+      "notifications": "Notificações"
+    },
+    "profile": {
+      "heading": "Informação pessoal",
+      "email": "Endereço de email"
+    },
+    "appearance": {
+      "heading": "Aparência",
+      "description": "Altere a aparência da aplicação.",
+      "theme": "Tema",
+      "language": "Idioma"
+    },
+    "categories": {
+      "description": "Gerir as suas categorias"
+    },
+    "household": {
+      "description": "Partilhe contas, orçamentos e objetivos com o seu parceiro."
+    },
+    "connections": {
+      "heading": "Ligações bancárias",
+      "description": "Acompanhe as suas ligações bancárias, renove-as ou cancele-as."
+    },
+    "security": {
+      "passwordDescription": "Atualize a palavra-passe associada à sua conta."
+    }
+  },
+  "portfolioSections": {
+    "totalValue": "Valor Total",
+    "portfolioCount_one": "{{count}} portefólio",
+    "portfolioCount_other": "{{count}} portefólios",
+    "totalGainLoss": "Ganho/Perda Total",
+    "periodReturn": "{{period}} Retorno",
+    "unrealizedGains": "Ganhos Não Realizados",
+    "realizedGains": "Ganhos Realizados",
+    "needsHistory": "Precisa de mais histórico",
+    "periodReturnUnavailable": "Precisamos de um ponto de referência do período para mostrar isto.",
+    "noHoldings": "Sem posições",
+    "emptyTitle": "Ainda sem transações",
+    "emptyDescription": "Adicione a sua primeira transação para começar a acompanhar o desempenho, alocação e ganhos.",
+    "performance": "Performance",
+    "allocation": "Alocação",
+    "breakdown": "Distribuição de portefólios",
+    "topMovers": "Maiores Movimentos",
+    "dividendIncome": "Rendimento de Dividendos",
+    "allHoldings": "Todas as Posições",
+    "holdings": "Posições",
+    "quickStats": "Estatísticas Rápidas",
+    "advancedMetrics": "Métricas avançadas",
+    "advancedMetricsDescription": "Os indicadores de risco e retorno só aparecem quando o histórico é suficiente.",
+    "annualYield": "Rendimento anual",
+    "volatility": "Volatilidade",
+    "sharpeRatio": "Índice de Sharpe",
+    "maxDrawdown": "Drawdown Máximo",
+    "riskLevel": "Nível de risco",
+    "riskLevels": {
+      "Low": "Baixo",
+      "Medium": "Médio",
+      "High": "Alto"
+    },
+    "unavailable": {
+      "annualYield": "Precisa de um ano de histórico",
+      "volatility": "Precisa de 3 meses de histórico de preços",
+      "sharpeRatio": "Precisa de um ano de histórico",
+      "maxDrawdown": "Precisa de uma janela de drawdown maior",
+      "riskLevel": "Precisa de 3 meses de histórico para calcular o risco"
+    },
+    "readiness": {
+      "performance": "O histórico de desempenho precisa de cerca de um mês de snapshots diários.",
+      "risk": "As métricas de risco precisam de mais histórico de preços."
+    },
+    "byType": "Por Tipo",
+    "bySector": "Por Setor",
+    "byAsset": "Por Ativo",
+    "allocationView": "Vista da alocação",
+    "allocationEmpty": "A alocação aparece depois de as posições terem preço.",
+    "allocationEmptyNote": "Precisamos de posições com preço para dividir o portefólio.",
+    "gainers": "Ganhos",
+    "losers": "Perdas",
+    "noGainers": "Sem ganhos",
+    "noLosers": "Sem perdas",
+    "topMoversEmpty": "Os maiores movimentos aparecem assim que tivermos mais de uma posição com preço ou histórico suficiente.",
+    "totalDividends": "Total de Dividendos",
+    "dividendsByAsset": "Dividendos por Ativo",
+    "noDividends": "Sem rendimento de dividendos",
+    "assets": "ativos",
+    "biggestPosition": "Maior Posição",
+    "bestPerformer": "Melhor Performance",
+    "worstPerformer": "Pior Performance",
+    "dataUnavailable": "Dados indisponíveis",
+    "weight": "Peso",
+    "gain": "Ganho",
+    "performanceInsufficient": "Precisamos de pelo menos dois snapshots para mostrar uma tendência.",
+    "performanceWaiting": "O desempenho aparece assim que existirem snapshots.",
+    "loading": "A carregar",
+    "sectionError": "Não foi possível carregar esta secção. Puxe para baixo para tentar novamente.",
+    "more": "Mais sobre este portefólio",
+    "allocationShare": "{{label}}, {{percent}}"
+  },
+  "privacy": {
+    "hiddenAmount": "Montante oculto",
+    "hide": "Ocultar montantes",
+    "show": "Mostrar montantes",
+    "setting": "Ocultar montantes",
+    "settingHelp": "Oculta saldos e montantes neste dispositivo, para quando alguém consegue ver o seu ecrã. As percentagens continuam visíveis."
   }
 }

@@ -15,6 +15,8 @@ const positiveSafeId = z.number().int().positive().max(Number.MAX_SAFE_INTEGER)
 const portfolioSummarySchema = z.object({
   appuserCurrencyCode: currencyCodeSchema,
   balance: finite,
+  /** The broker it was last imported from; absent on older servers and hand-kept portfolios. */
+  broker: z.object({ displayName: z.string(), name: z.string() }).nullable().optional().catch(null),
   currencyKey: z.object({ code: currencyCodeSchema }),
   description: z.string().nullable().optional(),
   name: z.string(),
@@ -32,7 +34,8 @@ const dashboardSummarySchema = z.object({
   // request asks with include=feeConversion and the list is non-empty; covers fully sold assets.
   feeConversionIncompleteAssetKeys: z.array(z.number().int().positive()).optional(),
   lastUpdated: z.iso.datetime(),
-  periodLabel: z.literal('YTD'),
+  // The period the figures cover ('YTD', '1M', … 'ALL'); the API echoes the requested period.
+  periodLabel: z.string().min(1),
   periodReturn: finiteNullable,
   portfolioCount: z.number().int().nonnegative().optional(),
   realizedGains: finite,
@@ -342,10 +345,13 @@ export const createPortfolioWriteEndpoint = writeEndpoint({
 // The API sends opt-in dashboard fields only when asked. Older builds shipped strict schemas
 // that rejected unknown fields, so this keeps them parsing the summary.
 const DASHBOARD_INCLUDE = 'include=feeConversion'
-export const aggregatePortfolioDashboardEndpoint = readEndpoint({
-  method: 'GET', path: `/v1/portfolio/dashboard?period=YTD&${DASHBOARD_INCLUDE}`, schema: aggregateDashboardResponseSchema,
+export const createAggregatePortfolioDashboardEndpoint = (period: PortfolioPerformancePeriod = 'YTD') => readEndpoint({
+  method: 'GET' as const, path: `/v1/portfolio/dashboard?period=${period}&${DASHBOARD_INCLUDE}`, schema: aggregateDashboardResponseSchema,
 })
+export const aggregatePortfolioDashboardEndpoint = createAggregatePortfolioDashboardEndpoint('YTD')
 export const portfolioAllocationEndpoint = readEndpoint({ method: 'GET', path: '/v1/portfolio/allocation', schema: portfolioAllocationResponseSchema })
+// Every holding across the household's portfolios (web's "All Holdings").
+export const aggregatePortfolioHoldingsEndpoint = readEndpoint({ method: 'GET', path: '/v1/portfolio/holdings', schema: portfolioHoldingsResponseSchema })
 export const portfolioDividendIncomeEndpoint = readEndpoint({ method: 'GET', path: '/v1/portfolio/dividend-income', schema: portfolioDividendIncomeResponseSchema })
 export const portfolioMetricsEndpoint = readEndpoint({ method: 'GET', path: '/v1/portfolio/metrics', schema: portfolioMetricsResponseSchema })
 
@@ -406,6 +412,9 @@ export const createPortfolioHoldingsEndpoint = (id: number) => readEndpoint({
 // one portfolio via the same /v1/portfolio/{id}/... path family as holdings/dashboard/activity.
 export const createPortfolioDividendIncomeEndpoint = (id: number) => readEndpoint({
   method: 'GET' as const, path: portfolioPath(id, '/dividend-income'), schema: portfolioDividendIncomeResponseSchema,
+})
+export const createPortfolioAllocationEndpoint = (id: number) => readEndpoint({
+  method: 'GET' as const, path: portfolioPath(id, '/allocation'), schema: portfolioAllocationResponseSchema,
 })
 export const createDeletePortfolioTransactionEndpoint = (portfolioId: number, transactionId: number) => {
   if (!Number.isSafeInteger(transactionId) || transactionId <= 0) throw new Error('A positive safe transaction id is required.')
@@ -558,6 +567,12 @@ export const portfolioPerformanceResponseSchema = z.object({
   benchmarkStatus: tolerantEnum(['waiting_for_portfolio_history', 'missing_benchmark_data', 'ready'], 'unknown').optional(),
   // A status this build doesn't know reads as null, which the view model treats like an absent one.
   portfolioHistoryStatus: tolerantEnum(['empty', 'insufficient_history', 'ready'], null).optional(),
+  // Whether every portfolio's history converted into the viewer's currency; absent from older APIs.
+  completeness: z.object({
+    currencyCode: z.string(),
+    incompleteDates: z.array(dateOnly),
+    isComplete: z.boolean(),
+  }).optional(),
   minDataPointsForComparison: z.number().int().nonnegative(),
   period: z.string(),
   readiness: z.object({
@@ -568,8 +583,30 @@ export const portfolioPerformanceResponseSchema = z.object({
 export type PortfolioPerformanceResponseDto = z.infer<typeof portfolioPerformanceResponseSchema>
 export type PortfolioPerformancePoint = z.infer<typeof performancePointSchema>
 
-export const createPortfolioPerformanceEndpoint = (portfolioId: number, period: PortfolioPerformancePeriod = 'YTD') => readEndpoint({
+/** `null` is the household aggregate (`/v1/portfolio/performance`), as web's chart on /portfolio. */
+export const createPortfolioPerformanceEndpoint = (portfolioId: number | null, period: PortfolioPerformancePeriod = 'YTD') => readEndpoint({
   method: 'GET' as const,
-  path: `${portfolioPath(portfolioId, '/performance')}?period=${period}`,
+  path: `${portfolioId === null ? '/v1/portfolio/performance' : portfolioPath(portfolioId, '/performance')}?period=${period}`,
   schema: portfolioPerformanceResponseSchema,
+})
+
+const topMoverSchema = z.object({
+  change: finite,
+  contribution: finite,
+  logoUrl: z.string().nullable().optional(),
+  name: z.string().nullable().optional(),
+  ticker: z.string(),
+})
+export const portfolioTopMoversResponseSchema = z.object({
+  gainers: z.array(topMoverSchema),
+  losers: z.array(topMoverSchema),
+  period: z.string(),
+})
+export type PortfolioTopMoversDto = z.infer<typeof portfolioTopMoversResponseSchema>
+
+/** Web's Top Movers (five gainers, five losers). `null` is the household aggregate. */
+export const createPortfolioTopMoversEndpoint = (portfolioId: number | null, period: PortfolioPerformancePeriod = 'YTD') => readEndpoint({
+  method: 'GET' as const,
+  path: `${portfolioId === null ? '/v1/portfolio/top-movers' : portfolioPath(portfolioId, '/top-movers')}?period=${period}&limit=5`,
+  schema: portfolioTopMoversResponseSchema,
 })

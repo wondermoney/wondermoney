@@ -1,3 +1,4 @@
+import { portfoliosResponseSchema } from './portfolios-contract'
 import { mapPortfolioDetail, mapPortfolioOverview } from './portfolios-view-model'
 
 const summary = { assetCount: 1, currency: 'EUR' as const, lastUpdated: '2026-07-19T10:00:00.000Z', periodLabel: 'YTD' as const, periodReturn: 12.4, realizedGains: 2, totalGainLoss: 20, totalGainLossPercent: 10, totalValue: 220, unrealizedGains: 18 }
@@ -10,6 +11,32 @@ describe('portfolio view models', () => {
     )
     expect(result.totalValue).toBe(220)
     expect(result.portfolios[0]).toMatchObject({ value: 220, currency: 'EUR', nativeCurrency: 'USD' })
+  })
+
+  it('counts every household portfolio even when the summary counts only the caller\'s own', () => {
+    const result = mapPortfolioOverview(
+      { portfolios: [
+        { appuserCurrencyCode: 'EUR', balance: 220, currencyKey: { code: 'EUR' }, name: 'Long-term', portfolioKey: 7 },
+        { appuserCurrencyCode: 'EUR', balance: 80, currencyKey: { code: 'EUR' }, name: 'Tech picks', portfolioKey: 8 },
+      ] },
+      { portfolios: [{ currency: 'EUR', gainPercent: 10, name: 'Long-term', portfolioKey: 7, value: 220, weight: 100 }], summary: { ...summary, portfolioCount: 1 } },
+    )
+    expect(result.portfolioCount).toBe(2)
+  })
+
+  it('names each portfolio\'s broker from the list, and reads a server that sends none as no broker', () => {
+    const list = portfoliosResponseSchema.parse({ portfolios: [
+      { appuserCurrencyCode: 'EUR', balance: 220, broker: { displayName: 'Degiro', id: 1, name: 'degiro' }, currencyKey: { code: 'EUR' }, name: 'Long-term', portfolioKey: 7 },
+      { appuserCurrencyCode: 'EUR', balance: 80, currencyKey: { code: 'EUR' }, name: 'By hand', portfolioKey: 8 },
+    ] })
+    const result = mapPortfolioOverview(list, {
+      portfolios: [
+        { currency: 'EUR', gainPercent: 10, name: 'Long-term', portfolioKey: 7, value: 220, weight: 73 },
+        { currency: 'EUR', gainPercent: 0, name: 'By hand', portfolioKey: 8, value: 80, weight: 27 },
+      ],
+      summary: { ...summary, portfolioCount: 2 },
+    })
+    expect(result.portfolios.map((portfolio) => portfolio.brokerName)).toEqual(['Degiro', null])
   })
 
   it('maps invalid holdings to null financial values and never zero-valued fallbacks', () => {

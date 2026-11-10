@@ -576,6 +576,41 @@ export function sendWelcomeEmail(input: TransactionalUserEmailInput) {
   });
 }
 
+/* Data export ready (trigger: the export job stored the archive). CTA → Settings > Privacy, which
+ * makes a fresh download link; the email never carries the file or a link to it. */
+const dataExportReadyCopy = (brand: string): Record<'EN' | 'PT', TransactionalNudgeCopy> => ({
+  EN: {
+    body: [
+      `The export of your ${brand} data you asked for is ready.`,
+      'Download it from Settings > Privacy within 24 hours. After that the file is deleted and you can start a new export.',
+      'If you did not ask for this export, change your password and check the devices signed in to your account.',
+    ],
+    ctaLabel: 'Download your data',
+    heading: 'Your data export is ready',
+    preheader: 'Download it within 24 hours.',
+    subject: `Your ${brand} data export is ready`,
+  },
+  PT: {
+    body: [
+      `A exportação dos teus dados da ${brand} que pediste está pronta.`,
+      'Descarrega-a em Definições > Privacidade nas próximas 24 horas. Depois disso o ficheiro é apagado e podes pedir uma nova exportação.',
+      'Se não pediste esta exportação, muda a tua palavra-passe e verifica os dispositivos com sessão iniciada na tua conta.',
+    ],
+    ctaLabel: 'Descarregar os teus dados',
+    heading: 'A exportação dos teus dados está pronta',
+    preheader: 'Descarrega-a nas próximas 24 horas.',
+    subject: `A exportação dos teus dados da ${brand} está pronta`,
+  },
+});
+
+export function sendDataExportReadyEmail(input: TransactionalUserEmailInput) {
+  const lang = toRenderLang(input.language);
+  return sendTransactionalNudge(input, dataExportReadyCopy(instanceName())[input.language], {
+    ctaUrl: `${appBase()}/${lang}/settings?tab=privacy`,
+    settingsUrl: `${appBase()}/${lang}/settings?tab=privacy`,
+  });
+}
+
 /**
  * Maps a Resend send result to the bank-recovery outcome taxonomy the worker/service branch on.
  * Resend never throws for send/network failures, so every non-success arrives here as an `error`

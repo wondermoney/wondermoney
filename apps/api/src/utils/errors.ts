@@ -72,8 +72,62 @@ export const ERROR_CODE = {
   INVITE_EXPIRED: 'invite_expired',
   /** Household invite (signup): unknown token or revoked by the owner (400). */
   INVITE_INVALID: 'invite_invalid',
+  /**
+   * Auth callback: the email belongs to an account from before better-auth, and this login has not
+   * verified it yet. A verification link was emailed; after following it, signing in reconnects (400).
+   */
+  ACCOUNT_RECONNECT_EMAIL_UNVERIFIED: 'account_reconnect_email_unverified',
+  /**
+   * An AI feature on a server that requires a verified email (`AI_REQUIRES_VERIFIED_EMAIL`), from
+   * an account that has not verified yet (403). Offer to resend the verification email.
+   */
+  EMAIL_VERIFICATION_REQUIRED: 'email_verification_required',
+  /**
+   * The household used up today's allowance for this AI feature (`AI_DAILY_LIMIT_<FEATURE>`, 403).
+   * It resets at midnight UTC; say so rather than offering a retry.
+   */
+  AI_ALLOWANCE_EXHAUSTED: 'ai_allowance_exhausted',
   /** The transaction is EXPIRED (the bank retracted it): no money moved, so it cannot be funded. */
   TRANSACTION_EXPIRED: 'transaction_expired',
+  /** Creating or renaming a tag: the household already has a tag with this name, ignoring case (409). */
+  TAG_NAME_TAKEN: 'tag_name_taken',
+  /**
+   * Reordering rules: the list is not exactly the household's live rules (one was added or
+   * deleted meanwhile, or a key is not the household's) (409). Reload the rules and try again.
+   */
+  RULE_ORDER_STALE: 'rule_order_stale',
+  /**
+   * Applying rules to existing transactions: the household already has a run queued or going
+   * (409). Wait for it to finish, then apply again.
+   */
+  RULE_APPLY_IN_PROGRESS: 'rule_apply_in_progress',
+  /**
+   * Splitting a transaction: the lines do not add up to its amount, mix signs, include a zero line,
+   * are fewer than two, or carry more decimals than amounts are stored with (400).
+   */
+  SPLIT_INVALID: 'split_invalid',
+  /** Splitting a transaction linked as a loan repayment, which already splits principal from interest (409). */
+  TRANSACTION_HAS_LOAN_REPAYMENT: 'transaction_has_loan_repayment',
+  /** Linking a split transaction as a loan repayment; remove the split first (409). */
+  TRANSACTION_IS_SPLIT: 'transaction_is_split',
+  /**
+   * Starting a data export while one of the other kind (with or without a password) is still in
+   * progress (409). Wait for it to finish, or download it, then start again.
+   */
+  DATA_EXPORT_IN_PROGRESS: 'data_export_in_progress',
+  /**
+   * Restoring an export: the household already has accounts, portfolios, budgets, goals or loans
+   * (409). Restore only fills an empty household; it never merges.
+   */
+  HOUSEHOLD_NOT_EMPTY: 'household_not_empty',
+  /** Starting a restore while another is being checked or restored (409). Wait for it to finish. */
+  DATA_RESTORE_IN_PROGRESS: 'data_restore_in_progress',
+  /** Validating a restore whose file has not been uploaded yet (409). Upload it, then validate. */
+  DATA_RESTORE_NOT_UPLOADED: 'data_restore_not_uploaded',
+  /** Committing a restore that has not passed validation, or one past its window (409). */
+  DATA_RESTORE_NOT_READY: 'data_restore_not_ready',
+  /** A restore file over the size limit (400). */
+  DATA_RESTORE_TOO_LARGE: 'data_restore_too_large',
 } as const;
 
 export type ErrorCode = typeof ERROR_CODE[keyof typeof ERROR_CODE];

@@ -20,6 +20,9 @@ const optionalStringArray = z
     .filter((item) => item.length > 0))
   .optional();
 
+/** Like `optionalStringArray`, but every entry must be a positive integer key. */
+const optionalKeyArray = optionalStringArray.refine((keys) => keys === undefined || keys.every((key) => /^[1-9]\d*$/.test(key)), { message: 'Keys must be positive integers' });
+
 /**
  * Upper bound on `fromDate`..`toDate`, mirroring `getHistoricalPriceRequestSchema`'s
  * `MAX_HISTORICAL_PRICE_RANGE_DAYS`. Without it a caller can ask for
@@ -38,6 +41,8 @@ export const reportFiltersSchema = z.object({
   includePending: z.coerce.boolean().optional().default(false),
   includeTransfers: z.coerce.boolean().optional().default(false),
   merchantKeys: optionalStringArray,
+  /** Tag keys; a transaction counts when it carries any of them. */
+  tagKeys: optionalKeyArray,
   timezone: z
     .string()
     .refine(isSupportedTimeZone, { message: 'timezone must be a valid IANA time zone name, e.g. Europe/Lisbon' })

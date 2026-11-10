@@ -1,10 +1,11 @@
 import type { Request, Response } from 'express';
 import { describe, expect, it, vi } from 'vitest';
 
-import { addTransaction, type Household, seedHousehold } from '@app/__tests__/__helpers__/finance-fixtures';
+import { addTransaction, currencyFor, type Household, seedHousehold } from '@app/__tests__/__helpers__/finance-fixtures';
 import { useTestDatabase } from '@app/__tests__/__helpers__/pg-test-db';
 import { Account } from '@entity/Account';
-import { Transaction } from '@entity/Transaction';
+import { ExchangeRate } from '@entity/ExchangeRate';
+import { FxStatus, Transaction } from '@entity/Transaction';
 import { BadRequestError } from '@utils/errors';
 
 vi.mock('@app/app', async () => ({ DI: (await import('@app/database/di')).DI }));
@@ -96,5 +97,38 @@ describe('editing a transaction amount', () => {
     expect(await attemptEdit(household, manual.transactionKey, -101)).toBeInstanceOf(BadRequestError);
 
     await expect(stored(household, manual.transactionKey)).resolves.toEqual({ accountBalance: 905, amount: -95, balance: 905 });
+  });
+
+  describe('on a row in another currency', () => {
+    async function seedForeignCharge(rate?: number) {
+      const em = db.em();
+      const household = await seedHousehold(em);
+      const usd = await currencyFor(em, 'USD');
+      if (rate !== undefined) em.create(ExchangeRate, { date: new Date('2026-07-09T00:00:00Z'), fromCurrency: usd, rate, toCurrency: household.currency }, { partial: true });
+      await em.flush();
+      const charge = await addTransaction(em, household, { amount: -100, appuserCurrencyBalance: 900, currency: usd, date: new Date('2026-07-10T12:00:00Z'), status: 'BOOKED' });
+      // Settled in dollars, counted in the owner's euros.
+      await em.nativeUpdate(Transaction, { transactionKey: charge.transactionKey }, { appuserCurrencyKey: household.currency, appuserSettlementAmount: -90, fxStatus: FxStatus.EXACT });
+      await em.nativeUpdate(Account, { accountKey: household.account.accountKey }, { appuserCurrencyBalance: 900, balance: 1000 });
+      return { charge, household };
+    }
+
+    it('converts the edited amount at the rate for the row date, exactly', async () => {
+      const { charge, household } = await seedForeignCharge(0.9);
+
+      await edit(household, charge.transactionKey, -33.33);
+
+      const row = await db.em().findOneOrFail(Transaction, { transactionKey: charge.transactionKey }, { filters: false });
+      expect(row).toMatchObject({ appuserSettlementAmount: -29.997, fxStatus: FxStatus.EXACT });
+    });
+
+    it('stores no converted amount when no rate exists, rather than the dollar amount', async () => {
+      const { charge, household } = await seedForeignCharge();
+
+      await edit(household, charge.transactionKey, -50);
+
+      const row = await db.em().findOneOrFail(Transaction, { transactionKey: charge.transactionKey }, { filters: false });
+      expect(row).toMatchObject({ appuserCurrencyBalance: null, appuserSettlementAmount: null, fxStatus: FxStatus.MISSING, settlementAmount: -50 });
+    });
   });
 });

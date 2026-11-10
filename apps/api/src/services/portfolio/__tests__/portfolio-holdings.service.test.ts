@@ -146,12 +146,16 @@ const makeDatabaseMock = ({
       return matchingRates.slice(0, 1);
     }
     if (!sql.includes('from "financial_transaction" as "ft"')) return [];
-    const filteredRows = (rawRows as Record<string, unknown>[]).filter((row) =>
+    // `type in (...)`: the trade query takes buys and sells only.
+    const typeList = /"ft"\."financial_transaction_type_key" in \(([^)]*)\)/.exec(sql)?.[1];
+    const types = typeList?.split(', ').map((placeholder) => parameters[Number(placeholder.slice(1)) - 1]);
+    const filteredRows = (rawRows as Record<string, unknown>[]).filter((row) => types == null || types.includes(row['financial_transaction_type_key'])).filter((row) =>
       Object.entries(predicates).every(([column, value]) => {
         if (column === 'ft.tenant_key') return row['tenant_key'] == null || row['tenant_key'] === value;
         if (column === 'p.tenant_key') return row['portfolio_tenant_key'] == null || row['portfolio_tenant_key'] === value;
         if (column === 'ft.portfolio_key') return row['portfolio_key'] == null || row['portfolio_key'] === value;
         if (column === 'ft.appuser_key') return row['appuser_key'] == null || row['appuser_key'] === value;
+        if (column === 'ft.financial_transaction_type_key') return row['financial_transaction_type_key'] === value;
         return true;
       }),
     );
@@ -961,6 +965,94 @@ describe('portfolio holdings service', () => {
     expect(result.totalRealizedGains).toBe(-12);
   });
 
+});
+
+describe('investment cash flows', () => {
+  it('prices buys with their fees as money in and sales net of fees as money out, in the user currency', async () => {
+    const rawRows = [
+      // 2 x 80 EUR plus a 10 USD fee at the stored 0.8: 168 EUR invested.
+      { appuser_currency_code: 'EUR', appuser_currency_exchange_rate: 0.8, appuser_unit_amount: 80, fee_amount: 10, fee_currency_code: 'USD', fee_currency_key: 1, financial_asset_currency_code: 'USD', financial_asset_key: 1, financial_asset_name: 'ETF', financial_asset_symbol: 'ETF', financial_asset_type_name: 'ETF', financial_transaction_type_key: FINANCIAL_TRANSACTION_TYPES.BUY, portfolio_key: 42, quantity: 2, settlement_amount: -200, settlement_currency_code: 'USD', settlement_currency_key: 1, settlement_unit_amount: 100, transaction_date: new Date('2024-01-01T00:00:00Z'), transaction_key: 1 },
+      // 135 EUR of proceeds less a 2 USD fee at the stored 0.9: 133.2 EUR returned.
+      { appuser_currency_code: 'EUR', appuser_currency_exchange_rate: 0.9, appuser_settlement_amount: 135, fee_amount: -2, fee_currency_code: 'USD', fee_currency_key: 1, financial_asset_currency_code: 'USD', financial_asset_key: 1, financial_asset_name: 'ETF', financial_asset_symbol: 'ETF', financial_asset_type_name: 'ETF', financial_transaction_type_key: FINANCIAL_TRANSACTION_TYPES.SELL, portfolio_key: 42, quantity: -1, settlement_amount: -150, settlement_currency_code: 'USD', settlement_currency_key: 1, settlement_unit_amount: 150, transaction_date: new Date('2024-02-01T00:00:00Z'), transaction_key: 2 },
+    ];
+    Object.assign(DI.em, { getKysely: makeDatabaseMock({ rawRows }) });
+
+    const flows = await portfolioHoldingsService.getInvestmentCashFlows(1);
+
+    expect(flows).toHaveLength(2);
+    expect(flows[0]).toMatchObject({ date: new Date('2024-01-01T00:00:00Z'), kind: 'BUY' });
+    expect(flows[0]!.amount).toBeCloseTo(-168, 8);
+    expect(flows[1]).toMatchObject({ date: new Date('2024-02-01T00:00:00Z'), kind: 'SELL' });
+    expect(flows[1]!.amount).toBeCloseTo(133.2, 8);
+  });
+
+  it('counts dividends as money out, each in the currency its amount is in, in date order', async () => {
+    const rawRows = [
+      makeTransactionRow({ appuser_currency_code: 'EUR', appuser_unit_amount: 100, quantity: 10, transaction_date: new Date('2024-01-01T00:00:00Z') }),
+      // Settled in another currency: its converted amount.
+      { appuser_currency_code: 'EUR', appuser_currency_key: 2, appuser_settlement_amount: 9, financial_asset_key: 1, financial_transaction_type_key: FINANCIAL_TRANSACTION_TYPES.DIVIDEND, portfolio_key: 7, settlement_amount: 10, settlement_currency_key: 1, transaction_date: new Date('2024-06-01T00:00:00Z'), transaction_key: 3 },
+      // Settled in the user's own currency: its settlement amount.
+      { appuser_currency_code: 'EUR', appuser_currency_key: 2, appuser_settlement_amount: null, financial_asset_key: 1, financial_transaction_type_key: FINANCIAL_TRANSACTION_TYPES.DIVIDEND, portfolio_key: 7, settlement_amount: 12, settlement_currency_code: 'EUR', settlement_currency_key: 2, transaction_date: new Date('2024-03-01T00:00:00Z'), transaction_key: 4 },
+      // Another currency with no converted amount: in that currency, for the reader to convert.
+      { appuser_currency_code: 'EUR', appuser_currency_key: 2, appuser_settlement_amount: null, financial_asset_key: 1, financial_transaction_type_key: FINANCIAL_TRANSACTION_TYPES.DIVIDEND, portfolio_key: 7, settlement_amount: 50, settlement_currency_code: 'USD', settlement_currency_key: 3, transaction_date: new Date('2024-04-01T00:00:00Z'), transaction_key: 5 },
+    ];
+    Object.assign(DI.em, { getKysely: makeDatabaseMock({ rawRows }) });
+
+    const flows = await portfolioHoldingsService.getInvestmentCashFlows(1);
+
+    expect(flows).toEqual([
+      { amount: -1000, currencyCode: 'EUR', date: new Date('2024-01-01T00:00:00Z'), kind: 'BUY' },
+      { amount: 12, currencyCode: 'EUR', date: new Date('2024-03-01T00:00:00Z'), kind: 'DIVIDEND' },
+      { amount: 50, currencyCode: 'USD', date: new Date('2024-04-01T00:00:00Z'), kind: 'DIVIDEND' },
+      { amount: 9, currencyCode: 'EUR', date: new Date('2024-06-01T00:00:00Z'), kind: 'DIVIDEND' },
+    ]);
+  });
+
+  it('says which currency each trade is in: the member\'s when it was converted, else the settlement currency', async () => {
+    const rawRows = [
+      makeTransactionRow({ appuser_currency_code: 'EUR', appuser_unit_amount: 90, quantity: 1, settlement_currency_code: 'USD', settlement_unit_amount: 100 }),
+      makeTransactionRow({ appuser_currency_code: 'EUR', appuser_unit_amount: null, quantity: 1, settlement_currency_code: 'USD', settlement_unit_amount: 100, transaction_key: 2 }),
+      makeTransactionRow({ appuser_currency_code: 'EUR', appuser_settlement_amount: 45, financial_transaction_type_key: FINANCIAL_TRANSACTION_TYPES.SELL, settlement_amount: 50, settlement_currency_code: 'USD', transaction_date: new Date('2024-02-01T00:00:00Z'), transaction_key: 3 }),
+      makeTransactionRow({ appuser_currency_code: 'EUR', appuser_settlement_amount: null, financial_transaction_type_key: FINANCIAL_TRANSACTION_TYPES.SELL, settlement_amount: 50, settlement_currency_code: 'USD', transaction_date: new Date('2024-02-01T00:00:00Z'), transaction_key: 4 }),
+    ];
+    Object.assign(DI.em, { getKysely: makeDatabaseMock({ rawRows }) });
+
+    const flows = await portfolioHoldingsService.getInvestmentCashFlows(1);
+
+    expect(flows.map((flow) => [flow.amount, flow.currencyCode])).toEqual([[-90, 'EUR'], [-100, 'USD'], [45, 'EUR'], [50, 'USD']]);
+  });
+
+  it('narrows to one portfolio\'s trades and dividends when asked', async () => {
+    const rawRows = [
+      makeTransactionRow({ portfolio_key: 7, quantity: 1 }),
+      makeTransactionRow({ portfolio_key: 8, quantity: 3, transaction_key: 2 }),
+      { appuser_currency_key: 2, appuser_settlement_amount: 5, financial_asset_key: 1, financial_transaction_type_key: FINANCIAL_TRANSACTION_TYPES.DIVIDEND, portfolio_key: 7, settlement_amount: 5, settlement_currency_key: 2, transaction_date: new Date('2024-03-01T00:00:00Z'), transaction_key: 3 },
+      { appuser_currency_key: 2, appuser_settlement_amount: 6, financial_asset_key: 1, financial_transaction_type_key: FINANCIAL_TRANSACTION_TYPES.DIVIDEND, portfolio_key: 8, settlement_amount: 6, settlement_currency_key: 2, transaction_date: new Date('2024-03-01T00:00:00Z'), transaction_key: 4 },
+    ];
+    Object.assign(DI.em, { getKysely: makeDatabaseMock({ rawRows }) });
+
+    const flows = await portfolioHoldingsService.getInvestmentCashFlows(1, 7, 8);
+
+    expect(flows.map((flow) => flow.amount)).toEqual([-300, 6]);
+  });
+
+  it('keeps another household\'s trades and dividends out', async () => {
+    const queryLog: LoggedQuery[] = [];
+    const rawRows = [
+      makeTransactionRow({ portfolio_tenant_key: 7, tenant_key: 7 }),
+      makeTransactionRow({ portfolio_tenant_key: 8, tenant_key: 8, transaction_key: 2 }),
+      { appuser_currency_key: 2, appuser_settlement_amount: 5, financial_asset_key: 1, financial_transaction_type_key: FINANCIAL_TRANSACTION_TYPES.DIVIDEND, portfolio_key: 7, portfolio_tenant_key: 7, settlement_amount: 5, settlement_currency_key: 2, tenant_key: 7, transaction_date: new Date('2024-03-01T00:00:00Z'), transaction_key: 3 },
+      { appuser_currency_key: 2, appuser_settlement_amount: 6, financial_asset_key: 1, financial_transaction_type_key: FINANCIAL_TRANSACTION_TYPES.DIVIDEND, portfolio_key: 8, portfolio_tenant_key: 8, settlement_amount: 6, settlement_currency_key: 2, tenant_key: 8, transaction_date: new Date('2024-03-01T00:00:00Z'), transaction_key: 4 },
+    ];
+    Object.assign(DI.em, { getKysely: makeDatabaseMock({ queryLog, rawRows }) });
+
+    const flows = await portfolioHoldingsService.getInvestmentCashFlows(1, 7);
+
+    expect(flows.map((flow) => flow.amount)).toEqual([-100, 5]);
+    const transactionQueries = queryLog.filter((query) => query.sql.includes('from "financial_transaction" as "ft"'));
+    expect(transactionQueries).toHaveLength(2);
+    for (const query of transactionQueries) expect(query.predicates).toMatchObject({ 'ft.tenant_key': 7, 'p.tenant_key': 7 });
+  });
 });
 
 describe('Savings Certificate holdings integration', () => {

@@ -7,6 +7,7 @@ import type { NativeIdentityProviderId } from '@/lib/auth/native-identity'
 import { themeTokens, type Palette } from '@/theme/tokens'
 import { textStyles } from '@/theme/typography'
 
+import { AuthDivider } from './auth-form-styles'
 import type { SocialSignInFailure } from './use-social-sign-in'
 
 export type SocialSignInButtonsProps = Readonly<{
@@ -40,13 +41,7 @@ export function SocialSignInButtons({
 
   return (
     <View style={styles.group}>
-      <View style={styles.divider}>
-        <View style={[styles.dividerRule, { backgroundColor: palette.border }]} />
-        <Text allowFontScaling style={[styles.dividerLabel, { color: palette.mutedForeground }]}>
-          {t('auth.social.divider')}
-        </Text>
-        <View style={[styles.dividerRule, { backgroundColor: palette.border }]} />
-      </View>
+      <AuthDivider label={t('auth.social.divider')} />
 
       {providers.map((provider) => (provider === 'apple' ? (
         <AppleAuthentication.AppleAuthenticationButton
@@ -76,7 +71,7 @@ export function SocialSignInButtons({
           accessibilityLabel={t('auth.social.errors.unavailable')}
           accessibilityRole="alert"
           allowFontScaling
-          style={[styles.error, { color: palette.destructive }]}
+          style={[styles.error, { color: palette.destructiveText }]}
         >
           {t('auth.social.errors.unavailable')}
         </Text>
@@ -103,8 +98,8 @@ function GoogleButton({
       style={({ pressed }) => [
         styles.button,
         styles.googleButton,
-        { backgroundColor: palette.card, borderColor: palette.border },
-        focused && { borderWidth: 2, borderColor: palette.foreground },
+        { backgroundColor: palette.card, borderColor: palette.input },
+        focused && { borderWidth: 2, borderColor: palette.ring },
         (pressed || busy) && styles.buttonBusy,
       ]}
       testID="social-sign-in-google"
@@ -130,10 +125,8 @@ function GoogleIcon() {
 }
 
 const styles = StyleSheet.create({
-  group: { width: '100%', gap: themeTokens.spacing[3] },
-  divider: { flexDirection: 'row', alignItems: 'center', gap: themeTokens.spacing[3] },
-  dividerRule: { flex: 1, height: StyleSheet.hairlineWidth },
-  dividerLabel: { ...textStyles.body },
+  // Web: the divider `mt-10`, the provider buttons `mt-6` under it.
+  group: { width: '100%', gap: themeTokens.spacing[6] },
   // Shared by both providers on purpose: equal size means equal prominence.
   button: { width: '100%', height: themeTokens.touchTarget.minimum },
   buttonBusy: { opacity: 0.72 },
@@ -152,6 +145,6 @@ const styles = StyleSheet.create({
   googleAccentRed: { backgroundColor: '#EA4335' },
   googleAccentYellow: { backgroundColor: '#FBBC05', right: 1, top: 15 },
   googleAccentGreen: { backgroundColor: '#34A853', left: 1, top: 15 },
-  googleLabel: { ...textStyles.bodyStrong, fontWeight: '600' as const },
-  error: { ...textStyles.body },
+  googleLabel: { ...textStyles.metaStrong, fontWeight: '600' as const },
+  error: { ...textStyles.meta },
 })

@@ -53,6 +53,20 @@ import { handleBankRecoveryDispatchJob } from '@app/jobs/bank-recovery-dispatch.
 import { BANK_RECOVERY_QUEUE, ensureBankRecoveryQueue } from '@app/jobs/bank-recovery.queue';
 import { handleBankRecoveryJob } from '@app/jobs/bank-recovery.worker';
 import {
+  BANK_SYNC_ALERT_SEND_QUEUE,
+  BANK_SYNC_ALERT_SWEEP_CRON,
+  BANK_SYNC_ALERT_SWEEP_QUEUE,
+  ensureBankSyncAlertSendQueue,
+  ensureBankSyncAlertSweepQueue,
+  scheduleBankSyncAlertSweep,
+} from '@app/jobs/bank-sync-alert.queue';
+import {
+  BUDGET_YEAR_EXTENSION_CRON,
+  BUDGET_YEAR_EXTENSION_QUEUE,
+  ensureBudgetYearExtensionQueue,
+  scheduleBudgetYearExtensionJob,
+} from '@app/jobs/budget-year-extension.queue';
+import {
   CERTIFICADO_AFORRO_RATE_SYNC_CRON,
   CERTIFICADO_AFORRO_RATE_SYNC_MONITOR_SLUG,
   CERTIFICADO_AFORRO_RATE_SYNC_QUEUE,
@@ -60,6 +74,21 @@ import {
   scheduleCertificadoAforroRateSyncAutoJob,
 } from '@app/jobs/certificado-aforro-rate-sync.queue';
 import { type CronMonitorOptions, withCronMonitor } from '@app/jobs/cron-monitor';
+import {
+  DATA_EXPORT_CLEANUP_QUEUE,
+  DATA_EXPORT_QUEUE,
+  type DataExportJobPayload,
+  ensureDataExportCleanupQueue,
+  ensureDataExportQueue,
+} from '@app/jobs/data-export.queue';
+import {
+  DATA_RESTORE_CLEANUP_QUEUE,
+  DATA_RESTORE_QUEUE,
+  type DataRestoreCleanupJobPayload,
+  type DataRestoreJobPayload,
+  ensureDataRestoreCleanupQueue,
+  ensureDataRestoreQueue,
+} from '@app/jobs/data-restore.queue';
 import { deadLetterQueueName, handleDeadLetterJob } from '@app/jobs/dead-letter';
 import {
   DEMO_DATA_REFRESH_CRON,
@@ -95,10 +124,17 @@ import {
   WEEKLY_EMAIL_CRON,
   WEEKLY_EMAIL_DELIVERY_QUEUE,
 } from '@app/jobs/financial-emails.queue';
+import { ensureFxReconvertQueue, FX_RECONVERT_QUEUE, type FxReconvertPayload } from '@app/jobs/fx-reconvert.queue';
 import {
   ensureHistoricalAssetPriceBackfillQueue,
   HISTORICAL_ASSET_PRICE_BACKFILL_QUEUE,
 } from '@app/jobs/historical-asset-price-backfill.queue';
+import {
+  ensureInstanceHeartbeatQueue,
+  INSTANCE_HEARTBEAT_QUEUE,
+  scheduleInstanceHeartbeatJob,
+  sendInstanceHeartbeatNow,
+} from '@app/jobs/instance-heartbeat.queue';
 import { instrumentedBatch } from '@app/jobs/job-instrumentation';
 import { ensureLifecycleCronQueue, ensureLifecycleSendQueue, LIFECYCLE_CRON_QUEUE, LIFECYCLE_CRON_SCHEDULE, LIFECYCLE_SEND_QUEUE, scheduleLifecycleCron } from '@app/jobs/lifecycle-send.queue';
 import { handleLifecycleSendJob } from '@app/jobs/lifecycle-send.worker';
@@ -130,9 +166,19 @@ import {
 } from '@app/jobs/queue-depth-monitor.queue';
 import { handleQueueDepthMonitorJob } from '@app/jobs/queue-depth-monitor.worker';
 import { removeRetiredQueues } from '@app/jobs/retired-queues';
+import { ensureRuleApplyQueue, RULE_APPLY_QUEUE, type RuleApplyPayload } from '@app/jobs/rule-apply.queue';
 import { handleTransactionEnrichmentDlqJob } from '@app/jobs/transaction-enrichment-dlq.worker';
 import { ensureTransactionEnrichmentGptQueue, TRANSACTION_ENRICHMENT_GPT_DLQ, TRANSACTION_ENRICHMENT_GPT_QUEUE } from '@app/jobs/transaction-enrichment.queue';
 import { handleTransactionEnrichmentGptJob } from '@app/jobs/transaction-enrichment.worker';
+import {
+  ensureTransactionImportQueue,
+  ensureTransactionImportSweepQueue,
+  scheduleTransactionImportSweep,
+  TRANSACTION_IMPORT_QUEUE,
+  TRANSACTION_IMPORT_SWEEP_CRON,
+  TRANSACTION_IMPORT_SWEEP_QUEUE,
+  type TransactionImportJobPayload,
+} from '@app/jobs/transaction-import.queue';
 import { type BackgroundOperationServiceDeps } from '@app/jobs/types';
 import {
   ensureWorkerHeartbeatQueue,
@@ -144,9 +190,9 @@ import {
 import { handleWorkerHeartbeatJob } from '@app/jobs/worker-heartbeat.worker';
 import { BackgroundOperationStatus } from '@entity/BackgroundOperation';
 import { reconcileStaleLifecycleClaims } from '@service/lifecycle/lifecycle-claim-reconcile';
-import { runLifecycleSweeps } from '@service/lifecycle/lifecycle-cron';
 import backgroundOperationRecoveryService from '@service/operations/background-operation-recovery.service';
 import backgroundOperationService from '@service/operations/background-operation.service';
+import { purgeExpiredOperationSecrets } from '@service/operations/operation-secret.service';
 import { createWorkerEnqueueAdapter } from '@service/queue/enqueue';
 import { createPgBossClient, type PgBossLike } from '@service/queue/pgboss-client';
 import logger from '@utils/logger';
@@ -257,6 +303,7 @@ export const createWorker = (deps: WorkerDeps = {}) => {
     ...FINANCIAL_EMAIL_QUEUES,
     LIFECYCLE_SEND_QUEUE,
     BANK_RECOVERY_QUEUE,
+    BANK_SYNC_ALERT_SEND_QUEUE,
   ];
 
   const start = async () => {
@@ -270,6 +317,12 @@ export const createWorker = (deps: WorkerDeps = {}) => {
     await ensureBankRecoveryQueue(boss);
     await ensureBankRecoveryDispatchQueue(boss);
     await ensureAccountCsvImportQueue(boss);
+    await ensureDataExportQueue(boss);
+    await ensureDataExportCleanupQueue(boss);
+    await ensureDataRestoreQueue(boss);
+    await ensureDataRestoreCleanupQueue(boss);
+    await ensureTransactionImportQueue(boss);
+    await ensureTransactionImportSweepQueue(boss);
     await ensurePortfolioCsvImportConfirmedQueue(boss);
     await ensurePortfolioCsvParsePreviewQueue(boss);
     await ensurePortfolioSnapshotAutoQueue(boss);
@@ -281,9 +334,13 @@ export const createWorker = (deps: WorkerDeps = {}) => {
     await ensureAssetPriceRefreshQueue(boss);
     await ensureDemoDataRefreshQueue(boss);
     await ensureExchangeRateRefreshQueue(boss);
+    await ensureFxReconvertQueue(boss);
+    await ensureRuleApplyQueue(boss);
     await ensureHistoricalAssetPriceBackfillQueue(boss);
     await ensureCertificadoAforroRateSyncQueue(boss);
+    await ensureBudgetYearExtensionQueue(boss);
     await ensureWorkerHeartbeatQueue(boss);
+    await ensureInstanceHeartbeatQueue(boss);
     // monthlyStory ships unconditionally (no feature flag), so its queues must always exist —
     // budget/weekly queue creation piggybacks on the same call since ensureFinancialEmailQueues
     // is idempotent and gating it behind the budget/weekly flags would leave the monthly-story
@@ -292,6 +349,8 @@ export const createWorker = (deps: WorkerDeps = {}) => {
     await ensureFinancialEmailQueues(boss);
     await ensureLifecycleSendQueue(boss);
     await ensureLifecycleCronQueue(boss);
+    await ensureBankSyncAlertSweepQueue(boss);
+    await ensureBankSyncAlertSendQueue(boss);
     await ensureTransactionEnrichmentGptQueue(boss);
     await ensureQueueDepthMonitorQueue(boss);
     if (schedulerEnabled()) {
@@ -322,11 +381,16 @@ export const createWorker = (deps: WorkerDeps = {}) => {
       await scheduleExchangeRateRefreshJob(boss);
       await schedulePortfolioSnapshotAutoJob(boss);
       await scheduleCertificadoAforroRateSyncAutoJob(boss);
+      await scheduleBudgetYearExtensionJob(boss);
       // Unschedule-then-conditionally-schedule keeps the schedule from drifting
       // when the heartbeat URL is added or removed between deploys.
       await unscheduleWorkerHeartbeatJob(boss);
       if (workerHeartbeatEnabled()) await scheduleWorkerHeartbeatJob(boss);
+      // What `GET /v1/health/ready` reads to tell whether the worker still finishes jobs.
+      await scheduleInstanceHeartbeatJob(boss);
       await scheduleLifecycleCron(boss);
+      await scheduleBankSyncAlertSweep(boss);
+      await scheduleTransactionImportSweep(boss);
       await unscheduleBudgetEmails(boss);
       await unscheduleWeeklyEmails(boss);
       await scheduleBudgetEmails(boss);
@@ -402,6 +466,46 @@ export const createWorker = (deps: WorkerDeps = {}) => {
       }),
     );
 
+    await boss.work<DataExportJobPayload>(
+      DATA_EXPORT_QUEUE,
+      workJobs<Job<DataExportJobPayload>>(DATA_EXPORT_QUEUE, async (job) => {
+        const { handleDataExportJob } = await import('@app/jobs/data-export.worker');
+        await runInRequestContext(() => handleDataExportJob(job, { enqueue }));
+      }),
+    );
+
+    await boss.work<DataExportJobPayload>(
+      DATA_EXPORT_CLEANUP_QUEUE,
+      workJobs<Job<DataExportJobPayload>>(DATA_EXPORT_CLEANUP_QUEUE, async (job) => {
+        const { handleDataExportCleanupJob } = await import('@app/jobs/data-export.worker');
+        await runInRequestContext(() => handleDataExportCleanupJob(job, { enqueue }));
+      }),
+    );
+
+    await boss.work<DataRestoreJobPayload>(
+      DATA_RESTORE_QUEUE,
+      workJobs<Job<DataRestoreJobPayload>>(DATA_RESTORE_QUEUE, async (job) => {
+        const { handleDataRestoreJob } = await import('@app/jobs/data-restore.worker');
+        await runInRequestContext(() => handleDataRestoreJob(job, { enqueue }));
+      }),
+    );
+
+    await boss.work<DataRestoreCleanupJobPayload>(
+      DATA_RESTORE_CLEANUP_QUEUE,
+      workJobs<Job<DataRestoreCleanupJobPayload>>(DATA_RESTORE_CLEANUP_QUEUE, async (job) => {
+        const { handleDataRestoreCleanupJob } = await import('@app/jobs/data-restore.worker');
+        await runInRequestContext(() => handleDataRestoreCleanupJob(job, { enqueue }));
+      }),
+    );
+
+    await boss.work<TransactionImportJobPayload>(
+      TRANSACTION_IMPORT_QUEUE,
+      workJobs<Job<TransactionImportJobPayload>>(TRANSACTION_IMPORT_QUEUE, async (job) => {
+        const { handleTransactionImportJob } = await import('@app/jobs/transaction-import.worker');
+        await runInRequestContext(() => handleTransactionImportJob(job, { enqueue }));
+      }),
+    );
+
     await boss.work<PortfolioCsvImportConfirmedJobPayload>(
       PORTFOLIO_CSV_IMPORT_CONFIRMED_QUEUE,
       workJobs<Job<PortfolioCsvImportConfirmedJobPayload>>(PORTFOLIO_CSV_IMPORT_CONFIRMED_QUEUE, async (job) => {
@@ -458,10 +562,27 @@ export const createWorker = (deps: WorkerDeps = {}) => {
         async (job) => {
           const { handleExchangeRateRefreshJob } = await import('@app/jobs/exchange-rate-refresh.worker');
           await runInRequestContext(() =>
-            handleExchangeRateRefreshJob(job, { backgroundOperationService }),
+            handleExchangeRateRefreshJob(job, { backgroundOperationService, enqueue }),
           );
         },
       ),
+    );
+
+    await boss.work<Partial<RuleApplyPayload>>(
+      RULE_APPLY_QUEUE,
+      { includeMetadata: true },
+      workJobs<JobWithMetadata<Partial<RuleApplyPayload>>>(RULE_APPLY_QUEUE, async (job) => {
+        const { handleRuleApplyJob } = await import('@app/jobs/rule-apply.worker');
+        await runInRequestContext(() => handleRuleApplyJob(job));
+      }),
+    );
+
+    await boss.work<Partial<FxReconvertPayload>>(
+      FX_RECONVERT_QUEUE,
+      workJobs<Job<Partial<FxReconvertPayload>>>(FX_RECONVERT_QUEUE, async (job) => {
+        const { handleFxReconvertJob } = await import('@app/jobs/fx-reconvert.worker');
+        await runInRequestContext(() => handleFxReconvertJob(job));
+      }),
     );
 
     await boss.work<{ asOfDate?: string; correlationId?: string; dryRun?: boolean }>(
@@ -535,6 +656,19 @@ export const createWorker = (deps: WorkerDeps = {}) => {
       ),
     );
 
+    await boss.work<Record<string, never>>(
+      BUDGET_YEAR_EXTENSION_QUEUE,
+      // Once a year: a schedule that silently stopped would only show on 1 January.
+      workCronJobs<Job<Record<string, never>>>(
+        BUDGET_YEAR_EXTENSION_QUEUE,
+        { checkinMarginMinutes: 120, maxRuntimeMinutes: 30, monitorSlug: BUDGET_YEAR_EXTENSION_QUEUE, schedule: BUDGET_YEAR_EXTENSION_CRON },
+        async (job) => {
+          const { handleBudgetYearExtensionJob } = await import('@app/jobs/budget-year-extension.worker');
+          await runInRequestContext(() => handleBudgetYearExtensionJob(job, { logger: log }));
+        },
+      ),
+    );
+
     await boss.work(LIFECYCLE_SEND_QUEUE, { includeMetadata: true }, workJobs<JobWithMetadata<unknown>>(
       LIFECYCLE_SEND_QUEUE, (job) => runInRequestContext(() => handleLifecycleSendJob(job)),
     ));
@@ -547,9 +681,28 @@ export const createWorker = (deps: WorkerDeps = {}) => {
         // its own queue.
         const stale = await reconcileStaleLifecycleClaims(new Date());
         if (stale > 0) log.warn({ queue: LIFECYCLE_CRON_QUEUE, stale }, 'Reconciled stale lifecycle delivery claims');
-        await runLifecycleSweeps(enqueue, new Date());
       }),
     ));
+    await boss.work(BANK_SYNC_ALERT_SWEEP_QUEUE, workCronJobs<Job<unknown>>(
+      BANK_SYNC_ALERT_SWEEP_QUEUE,
+      { checkinMarginMinutes: 120, maxRuntimeMinutes: 30, monitorSlug: BANK_SYNC_ALERT_SWEEP_QUEUE, schedule: BANK_SYNC_ALERT_SWEEP_CRON },
+      async () => {
+        const { handleBankSyncAlertSweepJob } = await import('@app/jobs/bank-sync-alert.worker');
+        await runInRequestContext(() => handleBankSyncAlertSweepJob({ enqueue, logger: log }));
+      },
+    ));
+    await boss.work(TRANSACTION_IMPORT_SWEEP_QUEUE, workCronJobs<Job<unknown>>(
+      TRANSACTION_IMPORT_SWEEP_QUEUE,
+      { checkinMarginMinutes: 120, maxRuntimeMinutes: 30, monitorSlug: TRANSACTION_IMPORT_SWEEP_QUEUE, schedule: TRANSACTION_IMPORT_SWEEP_CRON },
+      async () => {
+        const { handleTransactionImportSweepJob } = await import('@app/jobs/transaction-import.worker');
+        await runInRequestContext(() => handleTransactionImportSweepJob({ logger: log }));
+      },
+    ));
+    await boss.work(BANK_SYNC_ALERT_SEND_QUEUE, workJobs<Job<unknown>>(BANK_SYNC_ALERT_SEND_QUEUE, async (job) => {
+      const { handleBankSyncAlertSendJob } = await import('@app/jobs/bank-sync-alert.worker');
+      await runInRequestContext(() => handleBankSyncAlertSendJob(job, { logger: log }));
+    }));
 
     if (schedulerEnabled()) {
       await boss.work(BUDGET_EMAIL_COORDINATOR_QUEUE, { includeMetadata: true }, workCronJobs<JobWithMetadata<Partial<FinancialEmailCoordinatorPayload>>>(
@@ -624,7 +777,9 @@ export const createWorker = (deps: WorkerDeps = {}) => {
           const summary = await runInRequestContext(() =>
             backgroundOperationRecoveryService.recoverOnce({ boss, logger: log }),
           );
-          log.info({ queue: BACKGROUND_OPERATION_RECOVERY_QUEUE, summary }, 'Background operation recovery completed');
+          // One-time secrets (a data export password) left behind by an operation that never read them.
+          const purgedSecrets = await runInRequestContext(() => purgeExpiredOperationSecrets());
+          log.info({ purgedSecrets, queue: BACKGROUND_OPERATION_RECOVERY_QUEUE, summary }, 'Background operation recovery completed');
         } catch (error) {
           log.error({ error, queue: BACKGROUND_OPERATION_RECOVERY_QUEUE }, 'Background operation recovery failed');
           throw error;
@@ -656,6 +811,9 @@ export const createWorker = (deps: WorkerDeps = {}) => {
       () => handleWorkerHeartbeatJob({ logger: log }),
     ));
 
+    // Does nothing: pg-boss recording the completion is the whole point (instance-heartbeat.queue.ts).
+    await boss.work(INSTANCE_HEARTBEAT_QUEUE, workJobs<Job<unknown>>(INSTANCE_HEARTBEAT_QUEUE, () => Promise.resolve()));
+
     await boss.work(TRANSACTION_ENRICHMENT_GPT_QUEUE, { includeMetadata: true }, workJobs<JobWithMetadata<unknown>>(
       TRANSACTION_ENRICHMENT_GPT_QUEUE, (job) => runInRequestContext(() => handleTransactionEnrichmentGptJob(job, { logger: log })),
     ));
@@ -673,6 +831,9 @@ export const createWorker = (deps: WorkerDeps = {}) => {
       const dlq = deadLetterQueueName(originQueue);
       await boss.work(dlq, workJobs<Job<unknown>>(dlq, (job) => handleDeadLetterJob(originQueue, job, { logger: log })));
     }
+
+    // After the consumer is registered, so it is picked up straight away.
+    if (schedulerEnabled()) await sendInstanceHeartbeatNow(boss);
 
     running = true;
     log.info({ queue: FOUNDATION_QUEUE }, 'pg-boss worker started');

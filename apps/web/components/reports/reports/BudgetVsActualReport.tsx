@@ -24,6 +24,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/Table";
+import { UnconvertedAmountsNotice } from "@/components/ui/UnconvertedAmountsNotice";
 import { Link } from "@/i18n/navigation";
 import useAccounts from "@/lib/api/account/useAccounts";
 import useCategories from "@/lib/api/category/useCategories";
@@ -51,7 +52,7 @@ export function BudgetVsActualReport() {
   const { data, isLoading, error, refetch } = useBudgetVsActual(filters);
   const { data: accountsData } = useAccounts();
   const { data: categoriesData } = useCategories();
-  const { currencyKey } = useReportsCurrency();
+  const { currencyKey: viewerCurrency } = useReportsCurrency();
 
   const hasAccounts = accountsData
     ? accountsData.accounts.length > 0
@@ -75,6 +76,9 @@ export function BudgetVsActualReport() {
       : row.name;
   };
 
+  // The budgeted amounts are in the budget's currency, and the API reports the actual spending in
+  // it too, whoever views the report; it names that currency in `completeness`.
+  const currencyKey = data?.completeness?.currencyCode ?? viewerCurrency;
   const rows = data?.data ?? [];
   const sortedRows = [...rows].sort(sortByPercentUsedDesc);
   const csvFilename = `reports/budget-vs-actual-${format(new Date(), "yyyy-MM-dd")}`;
@@ -158,6 +162,10 @@ export function BudgetVsActualReport() {
           title={t("noData.title")}
           description={t("noData.description")}
         />
+        <UnconvertedAmountsNotice
+          completeness={data?.completeness}
+          className="mt-3 max-w-prose"
+        />
       </ReportCard>
     );
   }
@@ -238,6 +246,10 @@ export function BudgetVsActualReport() {
           </TableBody>
         </SimpleTable>
       </div>
+      <UnconvertedAmountsNotice
+        completeness={data?.completeness}
+        className="mt-3 max-w-prose"
+      />
     </ReportCard>
   );
 }

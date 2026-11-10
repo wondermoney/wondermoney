@@ -8,13 +8,13 @@ import type { PortfolioResponseDto } from './portfolios-contract'
 
 const createPayload = { name: 'Future', currencyId: 151 }
 const metadata: { portfolio: PortfolioResponseDto['portfolio'] } = { portfolio: { portfolioKey: 7, name: 'Future', description: null, currencyKey: { code: 'EUR' } } }
-const mockRead = jest.fn(); const mockReplace = jest.fn(); const mockAddListener = jest.fn(() => jest.fn()); const mockBlockAccess = jest.fn(); const mockSignOut = jest.fn()
+const mockRead = jest.fn(); const mockReplace = jest.fn(); const mockUsePreventRemove = jest.fn((_preventRemove: boolean, _onPrevented?: (options: { data: { action: object }; repeat: () => void }) => void) => jest.fn()); const mockBlockAccess = jest.fn(); const mockSignOut = jest.fn()
 const mockCreate = { isPending: false, mutateAsync: jest.fn(), unknownOutcome: null as null | { payload: typeof createPayload } }
 const mockCurrencies = { data: { currencies: [{ currencyKey: 151, code: 'EUR', description: 'Euro' }] }, isPending: false, isAccessTransition: false, isInvalidResponse: false, refetch: jest.fn() }
 const mockDetail = { data: metadata, error: null, isAccessTransition: false, isInvalidId: false, isInvalidResponse: false, isNotFound: false, refetch: jest.fn() }
 const mockSettings = { isPending: false, mutateAsync: jest.fn(), unknownOutcome: null as null | { payload: { name?: string; description?: string | null } }, acknowledgeReconciliation: jest.fn() }
 
-jest.mock('expo-router', () => ({ useLocalSearchParams: () => ({ portfolioId: '7' }), useNavigation: () => ({ addListener: mockAddListener }), useRouter: () => ({ replace: mockReplace }) }))
+jest.mock('expo-router', () => ({ useLocalSearchParams: () => ({ portfolioId: '7' }), usePreventRemove: (preventRemove: boolean, onPrevented?: (options: { data: { action: object }; repeat: () => void }) => void) => mockUsePreventRemove(preventRemove, onPrevented), useRouter: () => ({ replace: mockReplace }) }))
 jest.mock('react-i18next', () => ({ useTranslation: () => ({ t: (key: string) => key }) }))
 jest.mock('@/components/providers/product-runtime-provider', () => ({ useProductRuntime: () => ({ runtime: { epochId: 8, apiClient: { read: mockRead } }, blockAccess: mockBlockAccess, signOut: mockSignOut }) }))
 jest.mock('./use-portfolio-currencies', () => ({ usePortfolioCurrencies: () => mockCurrencies }))

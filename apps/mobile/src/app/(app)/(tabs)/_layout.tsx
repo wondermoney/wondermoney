@@ -12,6 +12,7 @@ export default function ProductTabsLayout() {
         budgets: t('navigation.budgets'),
         portfolio: t('navigation.portfolio'),
         more: t('navigation.more'),
+        mainNavigation: t('navigation.mainNavigation'),
       }}
     />
   )

@@ -52,7 +52,7 @@ const AccountTransactionsChart: React.FC<AccountTransactionsLineChartProps> =
           },
           dailyAmount: {
             label: t("daily-amount"),
-            color: "var(--chart-2)",
+            color: "var(--muted-foreground)",
           },
         }),
         [t],
@@ -63,6 +63,7 @@ const AccountTransactionsChart: React.FC<AccountTransactionsLineChartProps> =
           xKey="x"
           areaKeys={["balance"]}
           barKeys={["dailyAmount"]}
+          signedBarKeys={["dailyAmount"]}
           data={chartData}
           config={chartConfig}
           className="h-[300px] md:h-[400px]"

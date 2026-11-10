@@ -7,15 +7,23 @@ export interface CategoryEditRequest {
   name?: string;
   icon?: string;
   color?: string;
+  countsAsSpending?: boolean;
 }
 
 const useEditCategory = () => {
   return useMutation({
-    mutationFn: ({ categoryKey, name, icon, color }: CategoryEditRequest) =>
+    mutationFn: ({
+      categoryKey,
+      name,
+      icon,
+      color,
+      countsAsSpending,
+    }: CategoryEditRequest) =>
       api.patch<CategoryEditRequest>(`/v1/category/${categoryKey}`, {
         name,
         icon,
         color,
+        countsAsSpending,
       }),
   });
 };

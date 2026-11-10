@@ -1,3 +1,4 @@
+import type { StatementMapping } from '@service/account/account-statement-mapping.schema';
 export const ACCOUNT_CSV_IMPORT_QUEUE = 'account.csv-import';
 // `expireInSeconds` explicit: a CSV import is bounded work a user is waiting on, and
 // pg-boss's 900 s default was inherited rather than chosen.
@@ -9,6 +10,8 @@ export interface AccountCsvImportJobPayload {
   bucket: string;
   correlationId: string;
   key: string;
+  /** The columns the person confirmed in the import preview; absent, the worker finds them itself. */
+  mapping?: StatementMapping;
 }
 
 export const ensureAccountCsvImportQueue = (boss: { createQueue: (queue: string, options?: Record<string, unknown>) => Promise<unknown> }) =>

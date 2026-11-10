@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * RAD-447: Mirror <DocsImage> refs from content/docs/en MDX files into the
+ * Mirror <DocsImage> refs from content/docs/en MDX files into the
  * pt/ and es/ sibling files, but only when the localized screenshot already
  * exists under public/images/docs/<locale>/<section>/.
  *

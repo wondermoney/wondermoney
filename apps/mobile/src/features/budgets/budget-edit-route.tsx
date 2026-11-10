@@ -27,6 +27,7 @@ export function BudgetEditRoute() {
         id: detail.data.budget.budgetKey,
         name: detail.data.budget.name,
         description: detail.data.budget.description ?? null,
+        rolloverCarriesOverspend: detail.data.budget.rolloverCarriesOverspend ?? null,
       },
       refreshing: detail.isRefreshing,
     }

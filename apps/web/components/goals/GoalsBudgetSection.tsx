@@ -8,7 +8,7 @@ import { Card } from "@/components/ui/card";
 import { Link } from "@/components/ui/Link";
 import type { Goal } from "@/lib/api/goals/types";
 import useGoals from "@/lib/api/goals/useGoals";
-import { formatGoalCurrency } from "@/lib/goals/format";
+import { useFormatGoalCurrency } from "@/lib/goals/useFormatGoalCurrency";
 
 function getCurrencyCode(goal: Goal) {
   return (
@@ -17,15 +17,6 @@ function getCurrencyCode(goal: Goal) {
       ? goal.currencyKey.code
       : null)
   );
-}
-
-function formatAmount(
-  value: number | null | undefined,
-  currency: string | null,
-  locale: string,
-) {
-  if (value === null || value === undefined) return "—";
-  return formatGoalCurrency(value, currency, locale);
 }
 
 function getNeededThisMonth(goal: Goal) {
@@ -43,6 +34,15 @@ function getStatusTranslationKey(status: string) {
 export default function GoalsBudgetSection() {
   const t = useTranslations();
   const locale = useLocale();
+  const formatGoalCurrency = useFormatGoalCurrency();
+  const formatAmount = (
+    value: number | null | undefined,
+    currency: string | null,
+    locale: string,
+  ) =>
+    value === null || value === undefined
+      ? "—"
+      : formatGoalCurrency(value, currency, locale);
   const { data, isError, isLoading } = useGoals();
   const goals = data?.goals ?? [];
 

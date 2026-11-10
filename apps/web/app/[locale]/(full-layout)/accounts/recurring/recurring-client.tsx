@@ -34,11 +34,8 @@ import type { GetRecurringSummaryResponse } from "@/lib/api/recurring/useRecurri
 import useRecurringSummary from "@/lib/api/recurring/useRecurringSummary";
 import { serverSeed } from "@/lib/query/server-seed";
 import { getCategoryTranslationKey } from "@/lib/utils/categories";
-import {
-  formatCurrencyForLocale,
-  formatCurrencyForScreenReader,
-  normalizeFinancialLocale,
-} from "@/lib/utils/formatCurrency";
+import { normalizeFinancialLocale } from "@/lib/utils/formatCurrency";
+import { useFormatCurrency, useFormatCurrencyForScreenReader } from "@/lib/utils/useFormatCurrency";
 
 const isCurrencyCode = (value: unknown): value is string =>
   typeof value === "string" && /^[A-Z]{3}$/.test(value);
@@ -95,6 +92,8 @@ export default function RecurringClient({
   referenceTime,
 }: RecurringClientProps) {
   const locale = useLocale();
+  const formatAmountSpoken = useFormatCurrencyForScreenReader();
+  const formatAmountText = useFormatCurrency();
   const financialLocale = normalizeFinancialLocale(locale) ?? locale;
   const t = useTranslations("recurring");
   const tCommon = useTranslations();
@@ -369,9 +368,8 @@ export default function RecurringClient({
           {!noAccounts && recurringItems.length > 0 ? (
             <Button
               type="button"
-              size="sm"
               variant="outline"
-              className="min-h-11 shrink-0 gap-2"
+              className="min-h-11 shrink-0"
               onClick={handleScan}
               disabled={detectRecurringMutation.isPending}
             >
@@ -471,19 +469,17 @@ export default function RecurringClient({
                       <>
                         <span className="sr-only">
                           {t("usuallyPerCharge", {
-                            amount: formatCurrencyForScreenReader(
+                            amount: formatAmountSpoken(
                               fallbackAmount,
                               itemCurrencyCode,
-                              financialLocale,
                             ),
                           })}
                         </span>
                         <span aria-hidden="true">
                           {t("usuallyPerCharge", {
-                            amount: formatCurrencyForLocale(
+                            amount: formatAmountText(
                               fallbackAmount,
                               itemCurrencyCode,
-                              financialLocale,
                               { minimumFractionDigits: 2 },
                             ),
                           })}

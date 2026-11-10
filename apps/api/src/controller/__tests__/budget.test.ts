@@ -2,7 +2,6 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { kyselyDouble } from '@app/__tests__/__helpers__/kysely-double';
 import { buildBudgetTransactionAccountVisibility } from '@service/budget/spending';
-import { Recurrency } from '@utils/budget';
 
 const mocked = vi.hoisted(() => ({
   authedContext: vi.fn(),
@@ -45,119 +44,11 @@ vi.mock('@utils/errors', () => {
   return { BadRequestError, NotFoundError };
 });
 
-import { BudgetTemplateCategory } from '@entity/BudgetTemplateCategory';
-
 import { mockReq, mockRes } from '../../__tests__/__helpers__/mock-request';
 import {
   updateBudgetAccounts,
-  updateBudgetCategory,
   updateBudgetTemplateAccounts,
 } from '../budget';
-
-describe('updateBudgetCategory', () => {
-  beforeEach(() => {
-    mocked.find.mockReset();
-    mocked.findOne.mockReset();
-    mocked.findOneOrFail.mockReset();
-    mocked.flush.mockReset().mockResolvedValue(undefined);
-    mocked.persist.mockReset();
-    mocked.persist.mockReturnThis();
-    mocked.authedContext.mockReset();
-  });
-
-  it('batch-loads following budget category months when applying updates forward', async () => {
-    const budget = { appuserKey: 42, budgetKey: 7 };
-    const templates = [10, 11, 12].map((month) => ({
-      amountBudgeted: 75,
-      budgetKey: { budgetKey: 7 },
-      categoryKey: { categoryKey: 3 },
-      month,
-      recurrency: Recurrency.QUARTERLY,
-      year: 2026,
-    })) as unknown as BudgetTemplateCategory[];
-
-    mocked.findOne.mockResolvedValueOnce(budget);
-    mocked.find.mockResolvedValueOnce(templates);
-
-    const next = vi.fn();
-    const sendStatus = vi.fn();
-    const res = mockRes({ sendStatus });
-
-    await updateBudgetCategory(
-      Object.assign(mockReq({ body: { amount: 125, applyToFollowingMonths: true, recurrency: Recurrency.MONTHLY } }), {
-        params: { budgetKey: 7, categoryKey: 3, month: 10, year: 2026 },
-      }),
-      res,
-      next,
-    );
-
-    expect(next).not.toHaveBeenCalled();
-    expect(sendStatus).toHaveBeenCalledWith(200);
-    expect(mocked.find).toHaveBeenCalledTimes(1);
-    expect(mocked.find).toHaveBeenCalledWith(
-      BudgetTemplateCategory,
-      expect.objectContaining({
-        budgetKey: { budgetKey: 7 },
-        categoryKey: { categoryKey: 3 },
-        month: expect.objectContaining({ $gte: 10, $lte: 12 }),
-        year: 2026,
-      }),
-    );
-    expect(mocked.findOne).toHaveBeenCalledTimes(1);
-    expect(mocked.persist).toHaveBeenCalledTimes(1);
-    expect(mocked.persist).toHaveBeenCalledWith(templates);
-    expect(templates).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({ amountBudgeted: 125, recurrency: Recurrency.MONTHLY }),
-      ]),
-    );
-    expect(templates.every((template) => template.amountBudgeted === 125 && template.recurrency === Recurrency.MONTHLY)).toBe(
-      true,
-    );
-  });
-
-  it('returns a not found error when a future month template is missing', async () => {
-    const budget = { appuserKey: 42, budgetKey: 7 };
-    const templates = [
-      {
-        amountBudgeted: 75,
-        budgetKey: { budgetKey: 7 },
-        categoryKey: { categoryKey: 3 },
-        month: 10,
-        recurrency: Recurrency.QUARTERLY,
-        year: 2026,
-      },
-      {
-        amountBudgeted: 75,
-        budgetKey: { budgetKey: 7 },
-        categoryKey: { categoryKey: 3 },
-        month: 12,
-        recurrency: Recurrency.QUARTERLY,
-        year: 2026,
-      },
-    ] as unknown as BudgetTemplateCategory[];
-
-    mocked.findOne.mockResolvedValueOnce(budget);
-    mocked.find.mockResolvedValueOnce(templates);
-
-    const next = vi.fn();
-    const sendStatus = vi.fn();
-    const res = mockRes({ sendStatus });
-
-    await updateBudgetCategory(
-      Object.assign(mockReq({ body: { amount: 125, applyToFollowingMonths: true, recurrency: Recurrency.MONTHLY } }), {
-        params: { budgetKey: 7, categoryKey: 3, month: 10, year: 2026 },
-      }),
-      res,
-      next,
-    );
-
-    expect(next).toHaveBeenCalledTimes(1);
-    expect(next.mock.calls[0]?.[0]).toEqual(expect.objectContaining({ message: 'Budget template category for next months not found' }));
-    expect(mocked.persist).not.toHaveBeenCalled();
-    expect(sendStatus).not.toHaveBeenCalled();
-  });
-});
 
 describe('budget account assignments', () => {
   const tenant = { tenantKey: 17 };

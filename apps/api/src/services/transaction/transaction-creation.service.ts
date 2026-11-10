@@ -8,13 +8,15 @@ import { Appuser } from '@entity/Appuser';
 import { AppuserTenant } from '@entity/AppuserTenant';
 import { Category } from '@entity/Category';
 import { Currency } from '@entity/Currency';
-import { ExchangeRate } from '@entity/ExchangeRate';
 import { Transaction } from '@entity/Transaction';
 import { TransactionAuditActorType, TransactionAuditEventType } from '@entity/TransactionAuditLog';
 import { TransactionStatus } from '@entity/TransactionStatus';
 import { TransactionType } from '@entity/TransactionType';
+import { convertWithStatus } from '@service/currency/exchange-rate';
 import { triggerRecurringDetectionAfterTransactionIngestion } from '@service/recurring/post-transaction-ingestion-detection.service';
-import { accumulateChain, loadChainRows, SETTLED_TRANSACTION_STATUSES } from '@service/transaction/balance-chain.service';
+import { applyRulesToNewTransactions } from '@service/rules/rule-application.service';
+import { linkTags, resolveTags } from '@service/tag/tag.service';
+import { accumulateChain, loadChainRows, SETTLED_TRANSACTION_STATUSES, storedAppuserBalance } from '@service/transaction/balance-chain.service';
 import { findAssignableCategory } from '@service/transaction/household-category';
 import { TransactionAuditService } from '@service/transaction/transaction-audit.service';
 import { signTransactionAmount } from '@service/transaction/transaction-direction';
@@ -22,19 +24,32 @@ import { transactionMerchantService } from '@service/transaction/transaction-mer
 import { applyUserCategorization } from '@service/transaction/user-categorization.service';
 import { InternalServerError, NotFoundError } from '@utils/errors';
 import logger from '@utils/logger';
-import { addMoney, convertMoney } from '@utils/money';
+import { addMoney } from '@utils/money';
 
 export interface TransactionData {
   accountId: number;
   appuserKey: number;
   categoryId?: null | number;
+  /**
+   * The caller runs the household's rules itself, once for its whole batch (a file import).
+   * Otherwise they run on this transaction as soon as it is created.
+   */
+  deferRules?: boolean;
   description?: string;
+  /**
+   * A person typed this entry (manual or confirmed OCR entry), so the description and merchant
+   * they gave are theirs: rules never change them. False for file imports.
+   */
+  enteredByHand?: boolean;
   exchangeRate?: number;
   nordigenInternalTransactionId?: string;
+  notes?: null | string;
   originalAmount?: number;
   originalCurrencyId?: number;
   settlementAmount: number;
   settlementCurrencyId: number;
+  /** Household tags to put on the new transaction. */
+  tagIds?: number[];
   transactionDate: Date;
   transactionMerchantId?: null | number;
   transactionMerchantName?: null | string;
@@ -86,6 +101,8 @@ class TransactionCreationService {
       // link has to wait until phase 9, after the balance chain has been computed and stored.
       // Resolving up-front keeps the "unknown category never creates a transaction" behaviour.
       const category = data.categoryId ? await this.resolveCategory(data.categoryId, prepared.appUserTenant) : null;
+      // Tags likewise: an unknown or foreign tag 404s before anything is written.
+      const tags = await resolveTags(DI.em, prepared.appUserTenant.tenantKey.tenantKey, data.tagIds ?? []);
 
       // Phase 6: Set transaction status
       await this.setStatus(prepared.transaction);
@@ -100,6 +117,10 @@ class TransactionCreationService {
       if (category) {
         await applyUserCategorization(DI.em, { actor: prepared.appuser, category, transactions: [prepared.transaction] });
       }
+      if (tags.length > 0) {
+        linkTags(DI.em, prepared.transaction, tags);
+        await DI.em.flush();
+      }
 
       // Record the creation in the audit trail (best-effort; never blocks the create). The type is
       // the user's choice, including a generic CSV row's, which carries a file id like a synced row:
@@ -109,12 +130,21 @@ class TransactionCreationService {
         actorAppuserKey: data.appuserKey,
         actorType: TransactionAuditActorType.USER,
         appuserKey: data.appuserKey,
-        changes: { transactionTypeKey: { from: null, to: prepared.transactionType.name } },
+        changes: {
+          transactionTypeKey: { from: null, to: prepared.transactionType.name },
+          ...(tags.length > 0 ? { tagKeys: { from: [], to: tags.map((tag) => tag.tagKey).sort((a, b) => a - b) } } : {}),
+        },
         eventType: TransactionAuditEventType.CREATED,
         source: 'manual-transaction',
         tenantKey: getTenantKeyValue(prepared.transaction.tenantKey),
         transactionKey: prepared.transaction.transactionKey,
       });
+
+      // The household's rules, after the person's own choices (a category they picked is theirs, and
+      // so are the description and merchant they typed). Never fails the create.
+      if (!data.deferRules) {
+        await applyRulesToNewTransactions(DI.em, getTenantKeyValue(prepared.transaction.tenantKey), [prepared.transaction.transactionKey], 'manual-transaction');
+      }
 
       await triggerRecurringDetectionAfterTransactionIngestion(
         getTenantKeyValue(prepared.transaction.tenantKey),
@@ -187,6 +217,11 @@ class TransactionCreationService {
     transaction.settlementExchangeRate = data.exchangeRate;
     transaction.accountKey = prepared.account;
     transaction.description = data.description ?? undefined;
+    transaction.notes = data.notes?.trim() || undefined;
+    if (data.enteredByHand) {
+      transaction.descriptionEditedByUser = !!data.description?.trim();
+      transaction.merchantEditedByUser = true;
+    }
     transaction.appuserKey = prepared.appUserTenant.appuserKey;
     transaction.tenantKey = prepared.appUserTenant.tenantKey;
   }
@@ -229,26 +264,11 @@ class TransactionCreationService {
     const userCurrency = appuser.currencyKey;
     transaction.appuserCurrencyKey = userCurrency;
 
-    const isTransactionCurrencyDifferentFromUserCurrency = transactionCurrency !== userCurrency;
-    if (isTransactionCurrencyDifferentFromUserCurrency) {
-      const rate = await DI.em.findOne(
-        ExchangeRate,
-        {
-          date: { $lte: data.transactionDate },
-          fromCurrency: transactionCurrency,
-          toCurrency: userCurrency,
-        },
-        {
-          orderBy: { date: QueryOrder.DESC },
-        },
-      );
-
-      if (rate) {
-        transaction.appuserSettlementAmount = convertMoney(transaction.settlementAmount, rate.rate);
-      }
-    } else {
-      transaction.appuserSettlementAmount = transaction.settlementAmount;
-    }
+    // Through the one rate resolver: with no rate, no converted amount is stored (`missing`).
+    const converted = await convertWithStatus(DI.em, transaction.settlementAmount, transactionCurrency, userCurrency, data.transactionDate);
+    transaction.appuserSettlementAmount = converted.amount;
+    transaction.appuserCurrencyExchangeRate = converted.rate ?? undefined;
+    transaction.fxStatus = converted.fxStatus;
   }
 
   /**
@@ -303,7 +323,10 @@ class TransactionCreationService {
     const preceding = await this.findPrecedingBalance(transaction, account);
 
     transaction.balance = addMoney(preceding.balance, transaction.settlementAmount);
-    transaction.appuserCurrencyBalance = addMoney(preceding.appuserCurrencyBalance, transaction.appuserSettlementAmount);
+    // Unknown once either side has no user-currency amount; never carried on at face value.
+    transaction.appuserCurrencyBalance = preceding.appuserCurrencyBalance == null || transaction.appuserSettlementAmount == null
+      ? null
+      : addMoney(preceding.appuserCurrencyBalance, transaction.appuserSettlementAmount);
 
     await this.recalculateFutureBalances(transaction, account);
   }
@@ -320,7 +343,7 @@ class TransactionCreationService {
   private async findPrecedingBalance(
     transaction: Transaction,
     account: Account,
-  ): Promise<{ appuserCurrencyBalance: number; balance: number }> {
+  ): Promise<{ appuserCurrencyBalance: null | number; balance: number }> {
     // A new row always sorts last within its own date (serial key), so same-date rows precede it.
     const mostRecentOlder = await DI.em.findOne(
       Transaction,
@@ -344,7 +367,7 @@ class TransactionCreationService {
       logger.debug('Handling newer transaction scenario');
 
       return {
-        appuserCurrencyBalance: mostRecentOlder.appuserCurrencyBalance ?? 0,
+        appuserCurrencyBalance: storedAppuserBalance(mostRecentOlder, 0),
         balance: mostRecentOlder.balance ?? 0,
       };
     }
@@ -366,7 +389,9 @@ class TransactionCreationService {
       logger.debug('Handling older transaction scenario');
 
       return {
-        appuserCurrencyBalance: (firstNewer.appuserCurrencyBalance ?? 0) - (firstNewer.appuserSettlementAmount ?? 0),
+        appuserCurrencyBalance: firstNewer.fxStatus != null && (firstNewer.appuserCurrencyBalance == null || firstNewer.appuserSettlementAmount == null)
+          ? null
+          : (firstNewer.appuserCurrencyBalance ?? 0) - (firstNewer.appuserSettlementAmount ?? 0),
         balance: (firstNewer.balance ?? 0) - (firstNewer.settlementAmount ?? 0),
       };
     }
@@ -376,7 +401,7 @@ class TransactionCreationService {
     // First transaction on the account: the manually entered balance is the opening balance and the
     // transaction is applied on top of it, whether it is back-dated or not.
     return {
-      appuserCurrencyBalance: account.appuserCurrencyBalance ?? 0,
+      appuserCurrencyBalance: storedAppuserBalance(account, 0),
       balance: account.balance ?? 0,
     };
   }
@@ -393,7 +418,7 @@ class TransactionCreationService {
     });
 
     const tail = accumulateChain(futureTransactions, {
-      appuserCurrencyBalance: transaction.appuserCurrencyBalance ?? 0,
+      appuserCurrencyBalance: transaction.appuserCurrencyBalance ?? null,
       balance: transaction.balance ?? 0,
     });
 

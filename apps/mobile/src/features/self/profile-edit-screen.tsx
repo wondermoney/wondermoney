@@ -1,14 +1,16 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { ScrollView, StyleSheet, Text, TextInput, useColorScheme, View } from 'react-native'
-import { SafeAreaView } from 'react-native-safe-area-context'
+import { ScrollView, StyleSheet, View } from 'react-native'
 
-import { Button } from '@/components/ui/button'
-import { PageHeader } from '@/components/ui/page-header'
+import { FormBar } from '@/components/ui/form-bar'
+import { FormGroup, FormTextRow } from '@/components/ui/form-row'
+import { SafeAreaView } from '@/components/ui/screen-safe-area'
+import { Text } from '@/components/ui/text'
+import { FormNotice } from '@/features/transactions/form-field'
 import { themeTokens } from '@/theme/tokens'
-import { textStyles } from '@/theme/typography'
+import { usePalette } from '@/theme/use-palette'
 
-import { SelfAction, selfStyles } from './self-screen-parts'
+import { selfStyles } from './self-screen-parts'
 import type { ProfileNamePayload } from './profile-update-contract'
 import type { ProfileUpdateFailure } from './use-update-profile'
 
@@ -30,20 +32,18 @@ export function ProfileEditScreen({
   onSubmit,
 }: ProfileEditScreenProps) {
   const { t } = useTranslation()
-  const palette = themeTokens.colors[useColorScheme() === 'dark' ? 'dark' : 'light']
+  const palette = usePalette()
   const [firstName, setFirstName] = useState(initialFirstName)
   const [lastName, setLastName] = useState(initialLastName)
-  const [validation, setValidation] = useState(false)
+
+  const trimmedFirst = firstName.trim()
+  const trimmedLast = lastName.trim()
+  // At least one name: with both blank the ✓ stays disabled and says why
+  // under the rows.
+  const blank = !trimmedFirst && !trimmedLast
 
   const submit = () => {
-    if (pending) return
-    const trimmedFirst = firstName.trim()
-    const trimmedLast = lastName.trim()
-    if (!trimmedFirst && !trimmedLast) {
-      setValidation(true)
-      return
-    }
-    setValidation(false)
+    if (pending || blank) return
     const payload: ProfileNamePayload = {
       ...(trimmedFirst ? { firstName: trimmedFirst } : {}),
       ...(trimmedLast ? { lastName: trimmedLast } : {}),
@@ -53,51 +53,45 @@ export function ProfileEditScreen({
 
   return (
     <SafeAreaView style={[selfStyles.safeArea, { backgroundColor: palette.background }]}>
-      <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={selfStyles.content}>
-        <View style={selfStyles.page}>
-          <SelfAction label={t('profileEdit.cancel')} onPress={onCancel} palette={palette} disabled={pending} />
-
-          <PageHeader palette={palette}
-            instruction={t('profileEdit.helper')} title={t('profileEdit.title')} />
-
-          <View style={styles.field}>
-            <Text allowFontScaling style={[styles.label, { color: palette.foreground }]}>{t('profileEdit.firstName')}</Text>
-            <TextInput
+      <FormBar
+        closeDisabled={pending}
+        closeLabel={t('common.close')}
+        onClose={onCancel}
+        onSave={submit}
+        saveDisabled={blank || pending}
+        saveLabel={pending ? t('profileEdit.saving') : t('profileEdit.save')}
+        saving={pending}
+        title={t('profileEdit.title')}
+      />
+      <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={styles.content}>
+        <View style={styles.page}>
+          <Text tone="muted" variant="meta">{t('profileEdit.helper')}</Text>
+          <FormGroup>
+            <FormTextRow
+              key="first"
               accessibilityLabel={t('profileEdit.firstName')}
               autoCapitalize="words"
               editable={!pending}
+              label={t('profileEdit.firstName')}
               maxLength={100}
               onChangeText={setFirstName}
               placeholder={t('profileEdit.firstNamePlaceholder')}
-              placeholderTextColor={palette.mutedForeground}
-              style={[styles.input, { color: palette.foreground, borderColor: palette.border, backgroundColor: palette.card }]}
               value={firstName}
             />
-          </View>
-
-          <View style={styles.field}>
-            <Text allowFontScaling style={[styles.label, { color: palette.foreground }]}>{t('profileEdit.lastName')}</Text>
-            <TextInput
+            <FormTextRow
+              key="last"
               accessibilityLabel={t('profileEdit.lastName')}
               autoCapitalize="words"
               editable={!pending}
+              error={blank ? t('profileEdit.validation') : null}
+              label={t('profileEdit.lastName')}
               maxLength={100}
               onChangeText={setLastName}
               placeholder={t('profileEdit.lastNamePlaceholder')}
-              placeholderTextColor={palette.mutedForeground}
-              style={[styles.input, { color: palette.foreground, borderColor: palette.border, backgroundColor: palette.card }]}
               value={lastName}
             />
-          </View>
-
-          {validation ? (
-            <Text accessibilityRole="alert" allowFontScaling style={[styles.error, { color: palette.destructive }]}>{t('profileEdit.validation')}</Text>
-          ) : null}
-          {failure ? (
-            <Text accessibilityRole="alert" allowFontScaling style={[styles.error, { color: palette.destructive }]}>{t(`profileEdit.errors.${failure}`)}</Text>
-          ) : null}
-
-          <Button label={pending ? t('profileEdit.saving') : t('profileEdit.save')} onPress={submit} palette={palette} variant="primary" disabled={pending} />
+          </FormGroup>
+          {failure ? <FormNotice tone="destructive">{t(`profileEdit.errors.${failure}`)}</FormNotice> : null}
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -105,8 +99,6 @@ export function ProfileEditScreen({
 }
 
 const styles = StyleSheet.create({
-  field: { gap: themeTokens.spacing[2] },
-  label: { ...textStyles.bodyStrong, fontWeight: '600' as const },
-  input: { ...textStyles.body, minHeight: themeTokens.touchTarget.minimum, borderWidth: 1, borderRadius: themeTokens.radius.md, paddingHorizontal: themeTokens.spacing[3] },
-  error: { ...textStyles.body },
+  content: { flexGrow: 1, paddingHorizontal: themeTokens.layout.screenPadding, paddingBottom: themeTokens.spacing[10] },
+  page: { width: '100%', maxWidth: 680, alignSelf: 'center', gap: themeTokens.spacing[4] },
 })

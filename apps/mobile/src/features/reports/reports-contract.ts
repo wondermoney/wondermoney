@@ -17,6 +17,8 @@ export type ReportFilters = Readonly<{
   currencyKey?: string
   includePending?: boolean
   includeTransfers?: boolean
+  /** IANA time zone the period's days and months are in; the API's default when absent. */
+  timezone?: string
 }>
 
 function reportQuery(filters: ReportFilters): string {
@@ -29,6 +31,7 @@ function reportQuery(filters: ReportFilters): string {
   if (filters.currencyKey !== undefined) params.set('currencyKey', filters.currencyKey)
   if (filters.includePending) params.set('includePending', 'true')
   if (filters.includeTransfers) params.set('includeTransfers', 'true')
+  if (filters.timezone) params.set('timezone', filters.timezone)
   return params.toString()
 }
 
@@ -119,17 +122,27 @@ export const budgetVsActualRowSchema = z.object({
   percentUsed: z.number().finite(),
 })
 
-export const budgetVsActualResponseSchema = reportResponseSchema(z.array(budgetVsActualRowSchema))
+// The report names the currency its amounts are in: the budget's, which need not be the viewer's.
+export const budgetVsActualResponseSchema = reportResponseSchema(z.array(budgetVsActualRowSchema)).extend({
+  completeness: z.object({ currencyCode: z.string() }).optional(),
+})
 export type BudgetVsActualRow = z.infer<typeof budgetVsActualRowSchema>
 
+/**
+ * One household portfolio over the period, every amount in the appuser currency. A value the API
+ * cannot know (no snapshot, or a trade or dividend with no exchange rate) is null, and so is anything
+ * derived from it: change = endValue - startValue - netContributions.
+ */
 export const portfolioPerformanceReportRowSchema = z.object({
-  accountKey: z.string(),
+  portfolioKey: z.string(),
   name: z.string(),
   currency: z.string(),
-  startBalance: z.number().finite(),
-  endBalance: z.number().finite(),
-  return: z.number().finite(),
-  contributions: z.number().finite(),
+  startValue: z.number().finite().nullable(),
+  netContributions: z.number().finite().nullable(),
+  change: z.number().finite().nullable(),
+  changePercent: z.number().finite().nullable(),
+  dividends: z.number().finite().nullable(),
+  endValue: z.number().finite().nullable(),
 })
 
 const portfolioPerformanceReportResponseSchema = reportResponseSchema(z.array(portfolioPerformanceReportRowSchema))
@@ -175,10 +188,18 @@ export function createBudgetVsActualEndpoint(filters: ReportFilters) {
   })
 }
 
+/**
+ * The portfolio report covers every household portfolio over the period: account, category,
+ * merchant and transaction filters don't apply to it, so only the period is sent.
+ */
+export function portfolioPerformanceFilters(filters: ReportFilters): ReportFilters {
+  return { fromDate: filters.fromDate, toDate: filters.toDate }
+}
+
 export function createPortfolioPerformanceReportEndpoint(filters: ReportFilters) {
   return readEndpoint({
     method: 'GET',
-    path: `/v1/reports/portfolio-performance?${reportQuery(filters)}`,
+    path: `/v1/reports/portfolio-performance?${reportQuery(portfolioPerformanceFilters(filters))}`,
     schema: portfolioPerformanceReportResponseSchema,
   })
 }
@@ -189,5 +210,6 @@ export type ReportSlug = 'spending-by-category' | 'cashflow' | 'sankey' | 'net-w
  * query params, server-generated CSV body. Not a schema-validated JSON endpoint, so it's built for
  * apiClient.readRaw rather than .read. */
 export function createReportCsvEndpoint(slug: ReportSlug, filters: ReportFilters): RawReadEndpoint {
-  return { method: 'GET', path: `/v1/reports/${slug}.csv?${reportQuery(filters)}` }
+  const scoped = slug === 'portfolio-performance' ? portfolioPerformanceFilters(filters) : filters
+  return { method: 'GET', path: `/v1/reports/${slug}.csv?${reportQuery(scoped)}` }
 }

@@ -6,7 +6,6 @@ import { useId, useRef, useState } from "react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import { Link } from "@/components/ui/Link";
 import {
   Select,
@@ -92,8 +91,8 @@ export default function GoalAccountContext({ goal }: { goal: Goal }) {
   };
 
   return (
-    <Card className="space-y-4 p-6">
-      <h2 className="text-foreground text-sm font-semibold">
+    <section className="border-foreground space-y-4 border-t-2 pt-4">
+      <h2 className="text-foreground text-lg font-semibold tracking-tight">
         {t("goals.linked-account")}
       </h2>
       <p className="text-muted-foreground text-sm">
@@ -201,6 +200,6 @@ export default function GoalAccountContext({ goal }: { goal: Goal }) {
           </Button>
         </div>
       ) : null}
-    </Card>
+    </section>
   );
 }

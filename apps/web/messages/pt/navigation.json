@@ -29,6 +29,8 @@
     "review": "Revisão",
     "home": "Início",
     "categories": "Categorias",
+    "tags": "Etiquetas",
+    "rules": "Regras",
     "household": "Agregado familiar",
     "appearance": "Aparência",
     "profile": "Perfil",
@@ -47,5 +49,17 @@
     "settings-group-account": "Conta",
     "settings-group-money": "Dinheiro",
     "settings-group-preferences": "Preferências"
+  },
+  "top-bar": {
+    "dark-mode": "Modo escuro",
+    "light-mode": "Modo claro"
+  },
+  "privacy-mode": {
+    "hide-amounts": "Ocultar montantes",
+    "show-amounts": "Mostrar montantes",
+    "hidden-amount": "Montante oculto",
+    "amounts-hidden": "Montantes ocultos",
+    "amounts-shown": "Montantes visíveis",
+    "shortcut-hint": "Atalho: Shift+P"
   }
 }

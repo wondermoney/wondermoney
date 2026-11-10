@@ -9,7 +9,7 @@ import { SecurityRoute } from './security-route'
 const mockReplace = jest.fn()
 const mockBack = jest.fn()
 const mockCanGoBack = jest.fn()
-const mockAddListener = jest.fn(() => () => {})
+const mockUsePreventRemove = jest.fn((_preventRemove: boolean, _onPrevented?: (options: { data: { action: object }; repeat: () => void }) => void) => jest.fn())
 const mockSignOut = jest.fn()
 const mockMutateAsync = jest.fn()
 let mockPending = false
@@ -38,7 +38,7 @@ let mockAppLock: { isLoaded: boolean; enabled: boolean } = { isLoaded: true, ena
 
 jest.mock('expo-router', () => ({
   useRouter: () => ({ replace: mockReplace, back: mockBack, canGoBack: mockCanGoBack }),
-  useNavigation: () => ({ addListener: mockAddListener }),
+  usePreventRemove: (preventRemove: boolean, onPrevented?: (options: { data: { action: object }; repeat: () => void }) => void) => mockUsePreventRemove(preventRemove, onPrevented),
 }))
 jest.mock('@/components/providers/product-runtime-provider', () => ({
   useProductRuntime: () => ({ signOut: mockSignOut }),
@@ -72,6 +72,25 @@ jest.mock('@/components/providers/app-lock-provider', () => ({
   useAppLock: () => ({ ...mockAppLock, setEnabled: mockAppLockSetEnabled }),
 }))
 
+let mockFileStorage = true
+let mockLatestExport: null | { id: string; status: string; delivery: string; downloadUrl: string | null; expiresAt: string | null; fileName: string } = null
+const mockStartExport = jest.fn()
+const mockOpenURL = jest.fn()
+jest.mock('@/lib/server/use-instance', () => ({
+  useConfirmedFeature: () => mockFileStorage,
+}))
+jest.mock('./use-data-export', () => {
+  const actual = jest.requireActual('./use-data-export')
+  return {
+    ...actual,
+    useLatestDataExport: () => ({ data: mockLatestExport }),
+    useStartDataExport: () => ({ mutateAsync: mockStartExport, isPending: false }),
+  }
+})
+jest.mock('expo-linking', () => ({
+  openURL: (url: string) => mockOpenURL(url),
+}))
+
 async function renderRoute() {
   const i18n = await initMobileI18n('en')
   return render(<I18nextProvider i18n={i18n}><SecurityRoute /></I18nextProvider>)
@@ -99,6 +118,40 @@ describe('SecurityRoute', () => {
     mockProfile = { data: { profile: { emailAddress: 'person@example.com' } } }
     mockAppLockSetEnabled.mockReset()
     mockAppLock = { isLoaded: true, enabled: false }
+    mockFileStorage = true
+    mockLatestExport = null
+    mockStartExport.mockReset()
+    mockOpenURL.mockReset()
+  })
+
+  describe('data export', () => {
+    it('starts an export and explains the daily limit when the server refuses it', async () => {
+      mockStartExport.mockRejectedValue(new ApiError('http', 429))
+      const view = await renderRoute()
+      await fireEvent.press(view.getByRole('button', { name: 'Export all data' }))
+      await waitFor(() => expect(view.getByText(/up to 3 times a day/i)).toBeOnTheScreen())
+      expect(mockStartExport).toHaveBeenCalledTimes(1)
+    })
+
+    it('opens the short-lived link of a ready export', async () => {
+      mockLatestExport = { id: 'e1', status: 'ready', delivery: 'storage', downloadUrl: 'https://files.example.test/export.zip?signed', expiresAt: '2026-11-09T10:00:00.000Z', fileName: 'wondermoney-export-2026-11-08.zip' }
+      const view = await renderRoute()
+      await fireEvent.press(view.getByRole('button', { name: 'Download export' }))
+      expect(mockOpenURL).toHaveBeenCalledWith('https://files.example.test/export.zip?signed')
+    })
+
+    it('shows a stored export being prepared', async () => {
+      mockLatestExport = { id: 'e1', status: 'running', delivery: 'storage', downloadUrl: null, expiresAt: null, fileName: 'wondermoney-export-2026-11-08.zip' }
+      const view = await renderRoute()
+      expect(view.getByText(/email you when it is ready/i)).toBeOnTheScreen()
+    })
+
+    it('does not offer exports on a server without file storage', async () => {
+      mockFileStorage = false
+      const view = await renderRoute()
+      expect(view.queryByRole('button', { name: 'Export all data' })).not.toBeOnTheScreen()
+      expect(view.getByText(/from the web app/i)).toBeOnTheScreen()
+    })
   })
 
   it('retires the local session by signing out only after a confirmed deletion', async () => {
@@ -134,7 +187,7 @@ describe('SecurityRoute', () => {
 
   it('registers a guard that prevents leaving while a deletion is in flight', async () => {
     await renderRoute()
-    expect(mockAddListener).toHaveBeenCalledWith('beforeRemove', expect.any(Function))
+    expect(mockUsePreventRemove).toHaveBeenCalled()
   })
 
   describe('two-factor authentication wiring', () => {

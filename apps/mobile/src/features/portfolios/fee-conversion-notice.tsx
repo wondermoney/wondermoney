@@ -1,7 +1,7 @@
-import { SymbolView } from 'expo-symbols'
 import { useTranslation } from 'react-i18next'
 import { StyleSheet, Text, View } from 'react-native'
 
+import { Icon } from '@/components/ui/icon'
 import { themeTokens } from '@/theme/tokens'
 import { textStyles } from '@/theme/typography'
 
@@ -17,7 +17,7 @@ export function FeeConversionNotice({ scope, palette, compact = false }: { scope
   const message = t(scope === 'holding' ? 'portfolioFees.holding' : 'portfolioFees.gains')
   return (
     <View accessible accessibilityRole="text" accessibilityLabel={message} testID={`fee-conversion-notice-${scope}`} style={styles.row}>
-      <SymbolView name={{ ios: 'exclamationmark.triangle', android: 'warning', web: 'warning' }} size={14} tintColor={palette.warningText} />
+      <Icon color={palette.warningText} name="alert-triangle" size={14} />
       <Text allowFontScaling style={[styles.text, { color: palette.warningText }]}>
         {compact ? t('portfolioFees.holdingLabel') : message}
       </Text>

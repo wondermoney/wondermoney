@@ -46,6 +46,21 @@ function actorKey(actorType: TransactionAuditActorType): string {
     : "transaction-activity-automatic";
 }
 
+/** "by you", "automatically", or, for a change a household rule made, which rule. */
+function actorLabel(
+  entry: TransactionHistoryEntry,
+  t: ReturnType<typeof useTranslations>,
+  locale: string,
+): string {
+  if (entry.source !== "rule") return t(actorKey(entry.actorType));
+  const names = (entry.rules ?? []).map((rule) => rule.name);
+  if (names.length === 0) return t("transaction-activity-by-a-rule");
+  return t("transaction-activity-by-rule", {
+    count: names.length,
+    names: new Intl.ListFormat(locale, { type: "conjunction" }).format(names),
+  });
+}
+
 /**
  * Per-transaction activity log — the antidote to "my edits disappeared". Shows created /
  * recategorized / edited / promoted-from-pending / expired, with who and when.
@@ -108,7 +123,7 @@ function ActivityRow({ entry }: { entry: TransactionHistoryEntry }) {
         <p className="text-foreground leading-tight">
           {label}{" "}
           <span className="text-muted-foreground">
-            {t(actorKey(entry.actorType))}
+            {actorLabel(entry, t, locale)}
           </span>
         </p>
         <time

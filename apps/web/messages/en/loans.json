@@ -10,7 +10,8 @@
       "delete": "Delete loan",
       "recordPayment": "Record payment",
       "linkRepayment": "Link repayment",
-      "unlinkRepayment": "Unlink repayment"
+      "unlinkRepayment": "Unlink repayment",
+      "save": "Save changes"
     },
     "fields": {
       "name": "Loan name",
@@ -31,7 +32,12 @@
       "startDate": "Start date",
       "dueDate": "Due date",
       "linkedAccount": "Linked account",
-      "linkedTransaction": "Linked repayment"
+      "linkedTransaction": "Linked repayment",
+      "namePlaceholder": "e.g. Home mortgage",
+      "interestRatePlaceholder": "0.00",
+      "termMonthsPlaceholder": "e.g. 360",
+      "startDatePlaceholder": "Pick the start date",
+      "notesPlaceholder": "Anything worth remembering about this loan"
     },
     "types": {
       "personal": "Personal",
@@ -133,7 +139,9 @@
         "removeAssociation": "Remove association",
         "removeConfirm": "Remove this repayment association?",
         "editAllocationLabel": "Edit repayment allocation",
-        "removeAssociationLabel": "Remove repayment association"
+        "removeAssociationLabel": "Remove repayment association",
+        "transaction": "Bank transaction",
+        "split": "<principal></principal> principal, <interest></interest> interest, <fees></fees> fees"
       },
       "amortization": {
         "title": "Amortization preview",
@@ -154,7 +162,8 @@
       "progress": "Progress",
       "progressLabel": "Progress",
       "status": "Status",
-      "actions": "Actions"
+      "actions": "Actions",
+      "nextPayment": "Next payment"
     },
     "emptyPreview": {
       "title": "Preview",

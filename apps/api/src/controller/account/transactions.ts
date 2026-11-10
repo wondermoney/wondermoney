@@ -9,25 +9,32 @@ import { sqlQuery } from '@app/database/sql';
 import { Account } from '@entity/Account';
 import { Appuser } from '@entity/Appuser';
 import { Category } from '@entity/Category';
-import { ExchangeRate } from '@entity/ExchangeRate';
-import { LoanRepaymentLink } from '@entity/LoanRepaymentLink';
-import { Transaction } from '@entity/Transaction';
+import { Rule } from '@entity/Rule';
+import { FxStatus, Transaction } from '@entity/Transaction';
 import { TransactionAuditActorType, TransactionAuditEventType, TransactionAuditLog } from '@entity/TransactionAuditLog';
 import { TransactionMerchant } from '@entity/TransactionMerchant';
 import { TransactionType } from '@entity/TransactionType';
 import { authedContext, authedUser } from '@middleware/authed-context';
-import { calculateEffectiveSpendingAmount } from '@service/loan/loan-spending-adjustment.service';
+import { convertWithStatus } from '@service/currency/exchange-rate';
+import { isMoneyOut, loadLoanRepaymentLinks, loadViewerCurrencyAmounts, REPORT_CURRENCY_POPULATE } from '@service/reports/report-currency';
+import { isTransferTransaction } from '@service/reports/report-filters';
 import { recalculateChainFromAccountBalance } from '@service/transaction/balance-chain.service';
+import { CATEGORY_LINE_POPULATE, spendingLinesOf } from '@service/transaction/category-lines';
+import { loadCategorySpendingFlags } from '@service/transaction/category-spending';
 import { findAssignableCategory } from '@service/transaction/household-category';
 import { normalizeMerchantName } from '@service/transaction/merchant-normalization';
 import { TransactionAuditService } from '@service/transaction/transaction-audit.service';
 import { transactionCreationService } from '@service/transaction/transaction-creation.service';
+import { transactionDateRangeWhere } from '@service/transaction/transaction-date-range';
 import { findManualDuplicate } from '@service/transaction/transaction-dedup.service';
 import { listTransactions } from '@service/transaction/transaction-list.service';
+import { reconcileSplitsWithAmount } from '@service/transaction/transaction-split.service';
 import { excludeExpired } from '@service/transaction/transaction-status';
+import { retypeTransaction, TRANSFER_DESTINATION_POPULATE, transferDestinationOf } from '@service/transaction/transaction-transfer.service';
+import { reconcileTransfers } from '@service/transaction/transfer-matching.service';
 import { applyUserCategorization } from '@service/transaction/user-categorization.service';
-import { filterExpenseTransactions, getEffectiveAppuserAmount } from '@utils/account-amounts';
 import { BadRequestError, InternalServerError, NotFoundError, UnauthorizedError } from '@utils/errors';
+import { addMoney } from '@utils/money';
 import {
   createTransactionRequestSchema,
   getAccountTransactionsRequestSchema,
@@ -76,10 +83,12 @@ export async function createTransaction(req: Request, res: Response, next: NextF
       categoryId,
       description,
       exchangeRate,
+      notes,
       originalAmount,
       originalCurrencyId,
       settlementAmount,
       settlementCurrencyId,
+      tagIds,
       transactionDate,
       transactionMerchantId,
       transactionMerchantName,
@@ -101,11 +110,14 @@ export async function createTransaction(req: Request, res: Response, next: NextF
       appuserKey: authenticatedUser.appuserKey,
       categoryId,
       description,
+      enteredByHand: true,
       exchangeRate,
+      notes,
       originalAmount,
       originalCurrencyId,
       settlementAmount,
       settlementCurrencyId,
+      tagIds,
       transactionDate,
       transactionMerchantId,
       transactionMerchantName,
@@ -141,7 +153,7 @@ export async function getAccountTransactions(req: Request, res: Response) {
   // The path `accountId` is authoritative (route is `GET /:accountId/transaction`); the
   // `?accountId=` query is legacy and tolerated for rolling compatibility.
   const {
-    query: { categoryKeys, confidence, cursor, fromDate, includeHidden, limit, toDate, transactionTypes, unreviewedOnly },
+    query: { categoryKeys, confidence, cursor, fromDate, includeHidden, limit, tagKeys, timezone, toDate, transactionTypes, unreviewedOnly },
   } = await zParse(getAccountTransactionsRequestSchema, req);
   const accountParam = req.params['accountId'];
   const accountKey = Number.parseInt(typeof accountParam === 'string' ? accountParam : '', 10);
@@ -149,7 +161,7 @@ export async function getAccountTransactions(req: Request, res: Response) {
   const { tenant, user } = authedContext(req);
   const page = await listTransactions({
     cursor,
-    filters: { categoryKeys, confidence, fromDate, includeHidden, toDate, transactionTypes, unreviewedOnly },
+    filters: { categoryKeys, confidence, fromDate, includeHidden, tagKeys, timeZone: timezone, toDate, transactionTypes, unreviewedOnly },
     limit,
     scope: { accountKey },
     tenantKey: tenant.tenantKey,
@@ -161,7 +173,7 @@ export async function getAccountTransactions(req: Request, res: Response) {
 export async function getCategorySpending(req: Request, res: Response, _next: NextFunction) {
   const { tenant, user } = authedContext(req);
   const {
-    query: { fromDate, limit, toDate },
+    query: { fromDate, limit, timezone, toDate },
   } = await zParse(getCategorySpendingRequestSchema, req);
 
   const accounts = await DI.em.find(Account, {
@@ -170,7 +182,7 @@ export async function getCategorySpending(req: Request, res: Response, _next: Ne
     tenantKey: tenant,
   });
   if (accounts.length === 0) {
-    return res.json({ categorySpending: [] });
+    return res.json({ categorySpending: [], completeness: (await loadViewerCurrencyAmounts(DI.em, user, [])).completeness() });
   }
   const transactions = await DI.em.find(
     Transaction,
@@ -180,31 +192,22 @@ export async function getCategorySpending(req: Request, res: Response, _next: Ne
       // Explicit, so deleted transactions are never counted into per-category spending.
       deletedAt: undefined,
       tenantKey: tenant,
-      transactionDate: {
-        $gte: fromDate ?? startOfMonth(new Date()),
-        ...(toDate && { $lte: toDate }),
-      },
+      ...transactionDateRangeWhere({ from: fromDate ?? startOfMonth(new Date()), timeZone: timezone, to: toDate }),
     }),
     {
-      populate: [
-        'appuserTransactionCategories.categoryKey',
-        'appuserTransactionCategories.categoryKey.parentCategory',
-        'appuserCurrencyKey',
-      ],
+      populate: [...CATEGORY_LINE_POPULATE, ...REPORT_CURRENCY_POPULATE, 'transactionTypeKey'],
     },
   );
-  const loanRepaymentLinks = await DI.em.find(LoanRepaymentLink, {
-    deletedAt: undefined,
-    transactionKey: { $in: transactions },
-  });
-  const loanRepaymentLinkMap = new Map<number, LoanRepaymentLink[]>();
-  for (const link of loanRepaymentLinks) {
-    const transactionKey = link.transactionKey.transactionKey;
-    const current = loanRepaymentLinkMap.get(transactionKey);
-    if (current) current.push(link);
-    else loanRepaymentLinkMap.set(transactionKey, [link]);
-  }
-  const expenseTransactions = filterExpenseTransactions(transactions);
+  const spendingFlags = await loadCategorySpendingFlags(DI.em, tenant.tenantKey);
+  // A transfer between own accounts (matched, or marked by the user) is not spending. A row with no
+  // converted amount is read by the sign of its own amount, so it is counted as left out below.
+  const expenseTransactions = transactions.filter((transaction) => isMoneyOut(transaction) && !isTransferTransaction(transaction));
+  const repayments = await loadLoanRepaymentLinks(DI.em, tenant, expenseTransactions);
+  // Members keep their own currencies: every amount, and a loan repayment's interest and fees (in
+  // the loan's currency), is converted into the viewer's at the rate of the transaction's date. A
+  // row with no rate is left out and counted in `completeness`, never added at face value.
+  const amounts = await loadViewerCurrencyAmounts(DI.em, user, expenseTransactions, repayments);
+  const viewerCurrency = amounts.currencyCode;
   // Keyed by top-level category name. Every expense adds to its top-level entry, whether it sits
   // on that category directly or on one of its children.
   const categorySpending: CategorySpending = {};
@@ -218,24 +221,27 @@ export async function getCategorySpending(req: Request, res: Response, _next: Ne
     textColor: category.textColor,
   });
   const uncategorized: CategoryDisplay = { bgColor: '#000000', categoryKey: -1, icon: undefined, isSystemCategory: true, textColor: '#FFFFFF' };
-  for (const transaction of expenseTransactions) {
-    const amount = Math.abs(calculateEffectiveSpendingAmount({
-      loanRepaymentLinks: loanRepaymentLinkMap.get(transaction.transactionKey) ?? [],
-      transactionAmount: getEffectiveAppuserAmount(transaction),
-    }));
-    const currency = transaction.appuserCurrencyKey?.code;
-    const trxCategory = transaction.appuserTransactionCategories.getItems()[0]?.categoryKey;
+  // Each line of a split transaction counts in its own category, like a separate transaction; a line
+  // in a category that is not spending (investments, savings) is left out.
+  const lines = expenseTransactions.flatMap((transaction) => {
+    // A row none of whose lines counts as spending is neither added nor counted as left out.
+    if (spendingLinesOf(transaction, null, spendingFlags).length === 0) return [];
+    const spending = amounts.spendingAmountOf(transaction, repayments.get(transaction.transactionKey) ?? []);
+    if (spending === null) return [];
+    return spendingLinesOf(transaction, spending, spendingFlags).map((line) => ({ amount: Math.abs(line.amount ?? 0), category: line.category ?? undefined, currency: viewerCurrency }));
+  });
+  for (const { amount, category: trxCategory, currency } of lines) {
     const parentCategory = trxCategory?.parentCategory ?? undefined;
     const topLevel = parentCategory ?? trxCategory;
     const topLevelName = topLevel?.name ?? 'Uncategorized';
 
     const entry = (categorySpending[topLevelName] ??= { ...display(topLevel ?? uncategorized, currency), amount: 0, childCategories: {}, numTransactions: 0 });
-    entry.amount += amount;
+    entry.amount = addMoney(entry.amount, amount);
     entry.numTransactions += 1;
 
     if (parentCategory && trxCategory) {
       const child = (entry.childCategories[trxCategory.name] ??= { ...display(trxCategory, currency), amount: 0, numTransactions: 0 });
-      child.amount += amount;
+      child.amount = addMoney(child.amount, amount);
       child.numTransactions += 1;
     }
   }
@@ -251,7 +257,7 @@ export async function getCategorySpending(req: Request, res: Response, _next: Ne
 
   const limitedData = orderBy(transformedData, 'amount', 'desc').slice(0, limit);
 
-  return res.json({ categorySpending: limitedData });
+  return res.json({ categorySpending: limitedData, completeness: amounts.completeness() });
 }
 
 export async function getTransactionHistory(req: Request, res: Response, next: NextFunction) {
@@ -285,9 +291,23 @@ export async function getTransactionHistory(req: Request, res: Response, next: N
     { deletedAt: undefined, tenantKey: tenant, transactionKey: transaction },
     { orderBy: { createdAt: QueryOrder.DESC } },
   );
-  const transformedData = history.map((entry) =>
-    pick(entry, ['transactionAuditLogKey', 'eventType', 'actorType', 'actorAppuserKey.appuserKey', 'source', 'changes', 'createdAt']),
-  );
+  // An entry a rule wrote names the rule, so the history can say which one. Both members see every
+  // household rule; a rule deleted since keeps its name here.
+  const ruleKeysOf = (entry: TransactionAuditLog): number[] => {
+    const ruleKeys = (entry.changes as null | Record<string, undefined | { to?: unknown }>)?.['ruleKeys']?.to;
+    return Array.isArray(ruleKeys) ? ruleKeys.filter((key): key is number => Number.isInteger(key)) : [];
+  };
+  const ruleKeys = [...new Set(history.flatMap(ruleKeysOf))];
+  const rules = ruleKeys.length > 0 ? await DI.em.find(Rule, { ruleKey: { $in: ruleKeys }, tenantKey: tenant }, { fields: ['name', 'ruleKey'] }) : [];
+  const ruleNames = new Map(rules.map((rule) => [rule.ruleKey, rule.name]));
+  const transformedData = history.map((entry) => {
+    const picked = pick(entry, ['transactionAuditLogKey', 'eventType', 'actorType', 'actorAppuserKey.appuserKey', 'source', 'changes', 'createdAt']);
+    const named = ruleKeysOf(entry).flatMap((ruleKey) => {
+      const name = ruleNames.get(ruleKey);
+      return name === undefined ? [] : [{ name, ruleKey }];
+    });
+    return named.length > 0 ? { ...picked, rules: named } : picked;
+  });
   return res.json({ history: transformedData });
 }
 
@@ -318,12 +338,12 @@ export async function getTransactionMerchants(req: Request, res: Response) {
 
 export async function getTransactions(req: Request, res: Response) {
   const {
-    query: { accountKeys, categoryKeys, confidence, cursor, fromDate, includeHidden, limit, toDate, transactionTypes, unreviewedOnly },
+    query: { accountKeys, categoryKeys, confidence, cursor, fromDate, includeHidden, limit, tagKeys, timezone, toDate, transactionTypes, unreviewedOnly },
   } = await zParse(getTransactionsRequestSchema, req);
   const { tenant, user } = authedContext(req);
   const page = await listTransactions({
     cursor,
-    filters: { accountKeys, categoryKeys, confidence, fromDate, includeHidden, toDate, transactionTypes, unreviewedOnly },
+    filters: { accountKeys, categoryKeys, confidence, fromDate, includeHidden, tagKeys, timeZone: timezone, toDate, transactionTypes, unreviewedOnly },
     limit,
     scope: 'all-accounts',
     tenantKey: tenant.tenantKey,
@@ -347,7 +367,7 @@ export async function getTransactionTypes(_req: Request, res: Response) {
 
 export async function updateTransaction(req: Request, res: Response, next: NextFunction) {
   const {
-    body: { categoryKey, updatedAmount },
+    body: { categoryKey, transactionType, transferDestination, updatedAmount },
     params: { transactionId },
   } = await zParse(updateTransactionRequestSchema, req);
   // Authorize before any database access — a missing user or unresolved tenant must never
@@ -364,12 +384,28 @@ export async function updateTransaction(req: Request, res: Response, next: NextF
       // A revealed hidden transaction (already id/tenant-scoped) must be editable — e.g.
       // re-categorizing it — without a false not-found. Disable only the hidden filter.
       filters: { [HIDDEN_FILTER]: false },
-      populate: ['accountKey', 'appuserTransactionCategories.categoryKey', 'settlementCurrencyKey', 'appuserCurrencyKey'],
+      populate: ['accountKey', 'appuserTransactionCategories.categoryKey', 'settlementCurrencyKey', 'appuserCurrencyKey', 'transactionTypeKey', ...TRANSFER_DESTINATION_POPULATE],
     },
   );
   if (!transaction) {
     next(new NotFoundError('Transaction not found'));
     return;
+  }
+  // "Mark as transfer" first: it validates everything it was given before changing anything.
+  if (transactionType !== undefined || transferDestination !== undefined) {
+    const { typeChanged } = await retypeTransaction(DI.em, { actor: user, destination: transferDestination, tenant, transaction, typeName: transactionType });
+    await DI.em.flush();
+    // Let transfer matching look at the row again now: a row marked as a transfer may pair with its
+    // other half, and one marked as not a transfer leaves its pair (its partner gets its type back).
+    if (typeChanged) {
+      await DI.em.transactional((em) => reconcileTransfers(em, {
+        actorType: TransactionAuditActorType.SYSTEM,
+        apply: true,
+        from: transaction.transactionDate ?? undefined,
+        source: 'transfer-matching',
+        tenantKey: tenant.tenantKey,
+      }));
+    }
   }
   if (categoryKey) {
     const category = await findAssignableCategory(DI.em, tenant, categoryKey);
@@ -452,27 +488,12 @@ export async function updateTransaction(req: Request, res: Response, next: NextF
       };
       lockedTransaction.uneditedSettlementAmount ??= lockedTransaction.settlementAmount;
       lockedTransaction.editedSettlementAmount = updatedAmount;
-      const shouldConvertAmount = lockedTransaction.settlementCurrencyKey!.code !== lockedTransaction.appuserCurrencyKey!.code;
-      if (shouldConvertAmount) {
-        const exchangeRate = await em.findOne(
-          ExchangeRate,
-          {
-            date: { $lte: lockedTransaction.transactionDate },
-            fromCurrency: lockedTransaction.settlementCurrencyKey!,
-            toCurrency: lockedTransaction.appuserCurrencyKey!,
-          },
-          {
-            orderBy: { date: QueryOrder.DESC },
-          },
-        );
-        if (exchangeRate) {
-          lockedTransaction.appuserSettlementAmount = updatedAmount * exchangeRate.rate;
-        } else {
-          lockedTransaction.appuserSettlementAmount = updatedAmount;
-        }
-      } else {
-        lockedTransaction.appuserSettlementAmount = updatedAmount;
-      }
+      // Through the one rate resolver and `convertMoney`: with no rate, no converted amount is
+      // stored (`missing`), never the amount in the settlement currency.
+      const converted = await convertWithStatus(em, updatedAmount, lockedTransaction.settlementCurrencyKey!, lockedTransaction.appuserCurrencyKey!, lockedTransaction.transactionDate ?? new Date());
+      lockedTransaction.appuserSettlementAmount = converted.amount;
+      lockedTransaction.appuserCurrencyExchangeRate = converted.rate ?? undefined;
+      lockedTransaction.fxStatus = converted.fxStatus;
       // Mirror the edit onto the chain's stored `settlementAmount` so the helper accumulates from
       // the new value (the chain is the source of truth for the running-balance recomputation;
       // `editedSettlementAmount` is just a flag for callers that care to distinguish edited rows).
@@ -487,7 +508,12 @@ export async function updateTransaction(req: Request, res: Response, next: NextF
       );
       account.balance = tail.balance;
       account.appuserCurrencyBalance = tail.appuserCurrencyBalance;
+      if (tail.appuserCurrencyBalance === null) account.fxStatus = FxStatus.MISSING;
       em.persist(account);
+
+      // A split follows its transaction's amount: its lines are rescaled (and the row goes back to
+      // the review inbox), or the split is removed when it can no longer be kept.
+      await reconcileSplitsWithAmount(em, lockedTransaction, { actorAppuserKey: user.appuserKey, actorType: TransactionAuditActorType.USER, source: 'transaction-amount-edit' });
 
       // Record the money edit atomically with the balance changes (flush:false → commits with this tx).
       await TransactionAuditService.log(
@@ -515,6 +541,7 @@ export async function updateTransaction(req: Request, res: Response, next: NextF
       transaction.editedSettlementAmount = lockedTransaction.editedSettlementAmount;
       transaction.balance = lockedTransaction.balance;
       transaction.appuserCurrencyBalance = lockedTransaction.appuserCurrencyBalance;
+      transaction.reviewed = lockedTransaction.reviewed;
     });
   }
 
@@ -540,7 +567,7 @@ export async function updateTransaction(req: Request, res: Response, next: NextF
     'appuserTransactionCategories.categoryKey',
   ]);
 
-  return res.json({ transaction: transformedData });
+  return res.json({ transaction: { ...transformedData, transferDestination: transferDestinationOf(transaction, user.appuserKey) } });
 }
 
 export async function updateTransactions(req: Request, res: Response, next: NextFunction) {

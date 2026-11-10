@@ -1,3 +1,5 @@
+import { parseNumberInput } from '@/lib/formatters/decimal-input'
+
 import { loanRepaymentAllocationSchema, type LoanRepaymentAllocation } from './loans-contract'
 
 export type RepaymentAllocationInputs = Readonly<{
@@ -12,26 +14,11 @@ export type RepaymentAllocationBounds = Readonly<{
   transactionAmount: number | null
 }>
 
-const escapeRegex = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-
-const localeSeparators = (locale: string): { decimal: string; groupPattern: string } => {
-  const normalized = locale.toLowerCase()
-  if (normalized === 'en' || normalized.startsWith('en-')) return { decimal: '.', groupPattern: ',' }
-  if (normalized === 'pt' || normalized.startsWith('pt-')) return { decimal: ',', groupPattern: '[\\u0020\\u00a0\\u202f]' }
-  if (normalized === 'es' || normalized.startsWith('es-')) return { decimal: ',', groupPattern: '\\.' }
-  throw new Error('Unsupported money locale.')
-}
-
+/** One typed allocation component, read in the app's language; throws unless it is a number >= 0. */
 export function parseUnsignedLocaleAmount(value: string, locale: string): number {
-  const { decimal, groupPattern } = localeSeparators(locale)
-  const trimmed = value.trim()
-  const integerPattern = `(?:\\d+|\\d{1,3}(?:${groupPattern}\\d{3})+)`
-  const pattern = new RegExp(`^${integerPattern}(?:${escapeRegex(decimal)}\\d+)?$`, 'u')
-  if (!pattern.test(trimmed)) throw new Error('Enter a correctly grouped unsigned number.')
-  const withoutGroups = trimmed.replace(new RegExp(groupPattern, 'gu'), '')
-  const normalized = decimal === '.' ? withoutGroups : withoutGroups.replace(decimal, '.')
-  const parsed = Number(normalized)
-  if (!Number.isFinite(parsed)) throw new Error('Enter a finite number.')
+  const parsed = parseNumberInput(value, locale)
+  if (parsed === null) throw new Error('Enter a correctly grouped unsigned number.')
+  if (parsed < 0 || value.trim().startsWith('-')) throw new Error('Enter an unsigned number.')
   return parsed
 }
 

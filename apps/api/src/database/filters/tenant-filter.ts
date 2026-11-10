@@ -38,6 +38,12 @@ const hasTenant = (args?: TenantFilterArgs): args is TenantContext => args?.tena
 /** tenantKey = current tenant. For NOT-NULL tenant entities with no privacy dimension. */
 export const tenantScopedCond = (args?: TenantFilterArgs): Dictionary => (hasTenant(args) ? { tenantKey: args.tenantKey } : {});
 
+/**
+ * tenantKey = current tenant AND appuserKey = current member. For records only the member who made
+ * them may see, not the rest of the household (a staged transaction import).
+ */
+export const ownerScopedCond = (args?: TenantFilterArgs): Dictionary => (hasTenant(args) ? { appuserKey: args.appuserKey, tenantKey: args.tenantKey } : {});
+
 /** tenantKey = current tenant OR NULL — NULL-tenant rows are global/system and shared across tenants. */
 export const tenantOrGlobalCond = (args?: TenantFilterArgs): Dictionary =>
   hasTenant(args) ? { $or: [{ tenantKey: args.tenantKey }, { tenantKey: null }] } : {};
@@ -87,3 +93,11 @@ export const recurringSeriesTenantCond = transactionTenantCond;
 export const HIDDEN_FILTER = 'hidden';
 
 export const hiddenTransactionCond = () => ({ hidden: false });
+
+/**
+ * Removed split lines (`TransactionSplit`) are soft-deleted. Hidden everywhere, including when
+ * `Transaction.splits` is populated, so no reader can count a removed line next to its replacement.
+ */
+export const LIVE_SPLIT_FILTER = 'liveSplit';
+
+export const liveSplitCond = () => ({ deletedAt: null });

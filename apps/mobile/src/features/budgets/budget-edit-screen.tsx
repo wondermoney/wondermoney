@@ -1,22 +1,26 @@
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Alert, BackHandler, Pressable, ScrollView, StyleSheet, Text, TextInput, useColorScheme, View } from 'react-native'
-import { SafeAreaView } from 'react-native-safe-area-context'
+import { Alert, BackHandler, ScrollView, StyleSheet, View } from 'react-native'
 
-import { Button as SharedButton } from '@/components/ui/button'
-import { PageHeader } from '@/components/ui/page-header'
-import { BackControl } from '@/components/ui/back-control'
+import { Button } from '@/components/ui/button'
+import { FormBar } from '@/components/ui/form-bar'
+import { FormGroup, FormSwitchRow, FormTextRow } from '@/components/ui/form-row'
+import { Notice } from '@/components/ui/notice'
+import { SafeAreaView } from '@/components/ui/screen-safe-area'
+import { Text } from '@/components/ui/text'
+import { usePalette } from '@/theme/use-palette'
 
 import { budgetMetadataWriteSchema } from './budgets-contract'
 import { classifyBudgetDeleteFailure, type BudgetDeleteFailure } from './use-budget-delete-mutation'
 import { classifyBudgetWriteFailure, type BudgetWriteFailure } from './use-budget-metadata-mutation'
 import { themeTokens, type Palette } from '@/theme/tokens'
-import { textStyles } from '@/theme/typography'
 
 export type BudgetEditModel = Readonly<{
   id: number
   name: string
   description: string | null
+  /** Null when the server has no rollover: the setting is then not shown or sent. */
+  rolloverCarriesOverspend: boolean | null
 }>
 
 export type BudgetEditViewState =
@@ -28,7 +32,7 @@ type Props = Readonly<{
   state: BudgetEditViewState
   onBack: () => void
   onRetry: () => void | Promise<void>
-  onSaveMetadata: (value: { name: string; description: string }) => Promise<void>
+  onSaveMetadata: (value: { name: string; description: string; rolloverCarriesOverspend?: boolean }) => Promise<void>
   onDeleteBudget?: () => Promise<void>
   deletePending?: boolean
   pending: boolean
@@ -44,9 +48,9 @@ const confirmDiscard = (title: string, message: string, cancel: string, proceed:
 
 export function BudgetEditScreen(props: Props) {
   const { t } = useTranslation()
-  const palette = themeTokens.colors[useColorScheme() === 'dark' ? 'dark' : 'light']
+  const palette = usePalette()
   if (props.state.status === 'access-transition') return null
-  if (props.state.status === 'loading') return <SafeAreaView style={[styles.safe, { backgroundColor: palette.background }]}><View accessibilityRole="progressbar" accessibilityLabel={t('budgetEdit.loading')} style={styles.center}><Text style={{ color: palette.foreground }}>{t('budgetEdit.loading')}</Text></View></SafeAreaView>
+  if (props.state.status === 'loading') return <SafeAreaView style={[styles.safe, { backgroundColor: palette.background }]}><FormBar closeLabel={t('common.close')} onClose={props.onBack} title={t('budgetEdit.title')} /><View accessibilityRole="progressbar" accessibilityLabel={t('budgetEdit.loading')} style={styles.center}><Text tone="muted" variant="meta">{t('budgetEdit.loading')}</Text></View></SafeAreaView>
   if (props.state.status !== 'loaded' && props.state.status !== 'refresh-error') return <EditFailure status={props.state.status} onBack={props.onBack} onRetry={props.onRetry} palette={palette} />
   return <BudgetEditForm key={props.state.model.id} {...props} model={props.state.model} stale={props.state.status === 'refresh-error'} palette={palette} />
 }
@@ -57,9 +61,11 @@ function BudgetEditForm({ model, stale, onBack, onSaveMetadata, onDeleteBudget, 
   const [savedDescription, setSavedDescription] = useState(model.description ?? '')
   const [name, setName] = useState(model.name)
   const [description, setDescription] = useState(model.description ?? '')
+  const [savedCarryOverspend, setSavedCarryOverspend] = useState(model.rolloverCarriesOverspend)
+  const [carryOverspend, setCarryOverspend] = useState(model.rolloverCarriesOverspend)
   const [failure, setFailure] = useState<BudgetWriteFailure | null>(null)
   const [deleteFailure, setDeleteFailure] = useState<BudgetDeleteFailure | null>(null)
-  const dirty = name !== savedName || description !== savedDescription
+  const dirty = name !== savedName || description !== savedDescription || carryOverspend !== savedCarryOverspend
   const locked = pending || deletePending
 
   const deleteBudget = async () => {
@@ -88,13 +94,14 @@ function BudgetEditForm({ model, stale, onBack, onSaveMetadata, onDeleteBudget, 
 
   const saveMetadata = async () => {
     if (!dirty || pending) return
-    const candidate = { name, description }
+    const candidate = { name, description, ...(carryOverspend !== null && carryOverspend !== savedCarryOverspend ? { rolloverCarriesOverspend: carryOverspend } : {}) }
     if (!budgetMetadataWriteSchema.safeParse(candidate).success) { setFailure('invalid'); return }
     setFailure(null)
     try {
       await onSaveMetadata(candidate)
       setSavedName(name)
       setSavedDescription(description)
+      setSavedCarryOverspend(carryOverspend)
     } catch (error) {
       setFailure(classifyBudgetWriteFailure(error))
     }
@@ -102,30 +109,65 @@ function BudgetEditForm({ model, stale, onBack, onSaveMetadata, onDeleteBudget, 
 
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: palette.background }]}>
-      <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={[styles.content, styles.contentWithBottomInset]}>
+      <FormBar
+        closeDisabled={locked}
+        closeLabel={t('common.close')}
+        onClose={() => void requestExit()}
+        onSave={() => void saveMetadata()}
+        saveDisabled={!dirty || locked}
+        saveLabel={pending ? t('budgetEdit.saving') : t('budgetEdit.saveDetails')}
+        saving={pending}
+        title={t('budgetEdit.title')}
+      />
+      <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={styles.content}>
         <View style={styles.page}>
-          <BackControl fallback="/budgets" onPress={() => void requestExit()} color={palette.primary} disabled={locked} />
-          <PageHeader palette={palette}
-            instruction={t('budgetEdit.helper')} title={t('budgetEdit.title')} />
-          {stale ? <Text accessibilityRole="alert" style={[styles.notice, { color: palette.foreground, borderColor: palette.border, backgroundColor: palette.muted }]}>{t('budgetEdit.stale')}</Text> : null}
-          {failure ? <Text accessibilityRole="alert" style={[styles.notice, { color: palette.foreground, borderColor: palette.destructive }]}>{t(`budgetEdit.failures.${failure}`)}</Text> : null}
-          {deleteFailure ? <Text accessibilityRole="alert" style={[styles.notice, { color: palette.foreground, borderColor: palette.destructive }]}>{t(`budgetEdit.deleteFailures.${deleteFailure}`)}</Text> : null}
-          <View style={[styles.panel, { backgroundColor: palette.card, borderColor: palette.border }]}>
-            <Text accessibilityRole="header" style={[styles.sectionTitle, { color: palette.foreground }]}>{t('budgetEdit.detailsTitle')}</Text>
-            <Text style={[styles.label, { color: palette.foreground }]}>{t('budgetEdit.name')}</Text>
-            <TextInput accessibilityLabel={t('budgetEdit.name')} accessibilityHint={t('budgetEdit.nameHint')} editable={!locked} maxLength={100} value={name} onChangeText={setName} style={[styles.input, { color: palette.foreground, borderColor: palette.border, backgroundColor: palette.background }]} />
-            <Text style={[styles.limit, { color: palette.mutedForeground }]}>{t('budgetEdit.characterCount', { count: name.length, max: 100 })}</Text>
-            <Text style={[styles.label, { color: palette.foreground }]}>{t('budgetEdit.description')}</Text>
-            <TextInput accessibilityLabel={t('budgetEdit.description')} accessibilityHint={t('budgetEdit.descriptionHint')} editable={!locked} maxLength={500} multiline value={description} onChangeText={setDescription} style={[styles.input, styles.textarea, { color: palette.foreground, borderColor: palette.border, backgroundColor: palette.background }]} />
-            <Text style={[styles.limit, { color: palette.mutedForeground }]}>{t('budgetEdit.characterCount', { count: description.length, max: 500 })}</Text>
-            <SharedButton disabled={!dirty || locked} label={pending ? t('budgetEdit.saving') : t('budgetEdit.saveDetails')} onPress={saveMetadata} palette={palette} style={styles.saveButton} variant="primary" />
-          </View>
-          <SharedButton disabled={locked} label={t('common.cancel')} onPress={requestExit} palette={palette} variant="secondary" />
+          <Text tone="muted" variant="meta">{t('budgetEdit.helper')}</Text>
+          {stale ? <Notice message={t('budgetEdit.stale')} /> : null}
+          {failure ? <Notice message={t(`budgetEdit.failures.${failure}`)} tone="destructive" /> : null}
+          {deleteFailure ? <Notice message={t(`budgetEdit.deleteFailures.${deleteFailure}`)} tone="destructive" /> : null}
+          <FormGroup>
+            <FormTextRow
+              key="name"
+              accessibilityHint={t('budgetEdit.nameHint')}
+              accessibilityLabel={t('budgetEdit.name')}
+              editable={!locked}
+              hint={t('budgetEdit.characterCount', { count: name.length, max: 100 })}
+              label={t('budgetEdit.name')}
+              maxLength={100}
+              onChangeText={setName}
+              value={name}
+            />
+            <FormTextRow
+              key="description"
+              accessibilityHint={t('budgetEdit.descriptionHint')}
+              accessibilityLabel={t('budgetEdit.description')}
+              editable={!locked}
+              hint={t('budgetEdit.characterCount', { count: description.length, max: 500 })}
+              label={t('budgetEdit.description')}
+              maxLength={500}
+              multiline
+              onChangeText={setDescription}
+              placeholder={t('transactionCreate.optional')}
+              value={description}
+            />
+          </FormGroup>
+          {carryOverspend !== null ? (
+            <FormGroup>
+              <FormSwitchRow
+                key="carry-overspend"
+                disabled={locked}
+                hint={t('budgetEdit.carryOverspendHint')}
+                label={t('budgetEdit.carryOverspend')}
+                onValueChange={setCarryOverspend}
+                testID="budget-carry-overspend"
+                value={carryOverspend}
+              />
+            </FormGroup>
+          ) : null}
           {onDeleteBudget ? (
-            <View style={[styles.dangerPanel, { borderColor: palette.destructive }]}>
-              <Text accessibilityRole="header" style={[styles.sectionTitle, { color: palette.foreground }]}>{t('budgetEdit.dangerTitle')}</Text>
-              <Text style={[styles.helper, { color: palette.mutedForeground }]}>{t('budgetEdit.dangerHelper')}</Text>
-              <Button label={deletePending ? t('budgetEdit.deleting') : t('budgetEdit.deleteBudget')} disabled={locked} busy={deletePending} onPress={deleteBudget} palette={palette} destructive />
+            <View style={styles.danger}>
+              <Button disabled={locked} icon="trash" label={deletePending ? t('budgetEdit.deleting') : t('budgetEdit.deleteBudget')} loading={deletePending} onPress={() => void deleteBudget()} variant="destructive-quiet" />
+              <Text tone="muted" variant="meta">{t('budgetEdit.dangerHelper')}</Text>
             </View>
           ) : null}
         </View>
@@ -134,21 +176,26 @@ function BudgetEditForm({ model, stale, onBack, onSaveMetadata, onDeleteBudget, 
   )
 }
 
-function Button({ label, disabled, busy, onPress, palette, secondary = false, destructive = false }: { label: string; disabled: boolean; busy: boolean; onPress: () => void | Promise<void>; palette: Palette; secondary?: boolean; destructive?: boolean }) {
-  const tint = destructive ? palette.destructive : palette.primary
-  return <Pressable accessibilityRole="button" accessibilityLabel={label} accessibilityState={{ disabled, busy }} disabled={disabled} onPress={() => void onPress()} style={[styles.button, { borderColor: tint, backgroundColor: secondary || destructive ? 'transparent' : tint }, disabled && styles.disabled]}><Text style={[styles.buttonText, { color: secondary || destructive ? tint : palette.background }]}>{label}</Text></Pressable>
-}
-
 function EditFailure({ status, onBack, onRetry, palette }: { status: Exclude<BudgetEditViewState['status'], 'loaded' | 'refresh-error' | 'loading' | 'access-transition'>; onBack: () => void; onRetry: () => void | Promise<void>; palette: Palette }) {
   const { t } = useTranslation()
   const canRetry = status !== 'invalid-route'
-  return <SafeAreaView style={[styles.safe, { backgroundColor: palette.background }]}><View style={styles.center}><Text accessibilityRole="header" style={[styles.title, { color: palette.foreground }]}>{t(`budgetEdit.states.${status}Title`)}</Text><Text style={[styles.helper, { color: palette.mutedForeground }]}>{t(`budgetEdit.states.${status}Message`)}</Text>{canRetry ? <Button label={t('common.retry')} disabled={false} busy={false} onPress={onRetry} palette={palette} /> : null}<BackControl fallback="/budgets" label={t('budgetEdit.back')} onPress={onBack} disabled={false} /></View></SafeAreaView>
+  return (
+    <SafeAreaView style={[styles.safe, { backgroundColor: palette.background }]}>
+      <FormBar closeLabel={t('budgetEdit.back')} onClose={onBack} />
+      <View style={styles.center}>
+        <Text accessibilityRole="header" variant="heading">{t(`budgetEdit.states.${status}Title`)}</Text>
+        <Text tone="muted" variant="body">{t(`budgetEdit.states.${status}Message`)}</Text>
+        {canRetry ? <View style={styles.retry}><Button label={t('common.retry')} onPress={onRetry} /></View> : null}
+      </View>
+    </SafeAreaView>
+  )
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1 }, content: { flexGrow: 1, padding: themeTokens.layout.screenPadding }, contentWithBottomInset: { paddingBottom: themeTokens.spacing[6] * 2 }, page: { width: '100%', maxWidth: 720, alignSelf: 'center', gap: themeTokens.layout.blockGap }, center: { flex: 1, width: '100%', maxWidth: 520, alignSelf: 'center', justifyContent: 'center', padding: themeTokens.layout.screenPadding, gap: themeTokens.spacing[4] },
-  back: { minHeight: themeTokens.touchTarget.minimum, justifyContent: 'center', alignSelf: 'flex-start' }, backText: { ...textStyles.action }, heading: { gap: themeTokens.spacing[2] }, title: { ...textStyles.title, fontWeight: '700' as const }, helper: { ...textStyles.body },
-  panel: { borderWidth: 1, borderRadius: themeTokens.radius.xl, padding: themeTokens.spacing[5], gap: themeTokens.spacing[3] }, sectionTitle: { ...textStyles.section, fontWeight: '700' as const }, label: { ...textStyles.bodyStrong, fontWeight: '600' as const, marginTop: themeTokens.spacing[2] }, input: { ...textStyles.body, minHeight: themeTokens.touchTarget.minimum, borderWidth: 1, borderRadius: themeTokens.radius.md, paddingHorizontal: themeTokens.spacing[3] }, textarea: { minHeight: 104, paddingTop: themeTokens.spacing[3], textAlignVertical: 'top' }, limit: { ...textStyles.amountSmall, alignSelf: 'flex-end' },
-  dangerPanel: { borderWidth: 1, borderRadius: themeTokens.radius.xl, padding: themeTokens.spacing[5], gap: themeTokens.spacing[3], marginTop: themeTokens.spacing[4] },
-  button: { minHeight: themeTokens.touchTarget.minimum, borderWidth: 1, borderRadius: themeTokens.radius.md, paddingHorizontal: themeTokens.spacing[4], alignItems: 'center', justifyContent: 'center', marginTop: themeTokens.spacing[2] }, buttonText: { ...textStyles.action, fontWeight: '700' as const }, disabled: { opacity: 0.45 }, notice: { ...textStyles.body, borderWidth: 1, borderRadius: themeTokens.radius.md, padding: themeTokens.spacing[4] }, saveButton: { marginTop: themeTokens.spacing[2] },
+  safe: { flex: 1 },
+  content: { flexGrow: 1, paddingHorizontal: themeTokens.layout.screenPadding, paddingBottom: themeTokens.spacing[12] },
+  page: { width: '100%', maxWidth: 720, alignSelf: 'center', gap: themeTokens.spacing[4] },
+  center: { flex: 1, width: '100%', maxWidth: 520, alignSelf: 'center', justifyContent: 'center', padding: themeTokens.layout.screenPadding, gap: themeTokens.spacing[4] },
+  retry: { alignItems: 'flex-start' },
+  danger: { marginTop: themeTokens.spacing[6], gap: themeTokens.spacing[1] },
 })

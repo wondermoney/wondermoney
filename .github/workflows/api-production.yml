@@ -1,0 +1,291 @@
+name: API Production Deployment
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - 'apps/api/**'
+      - 'packages/**'
+      - 'pnpm-lock.yaml'
+      - '.github/workflows/api-production.yml'
+# Each job asks for what it needs.
+permissions: {}
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  deploy-prod:
+    # Deploys only from the main repository, never from a fork. Until the move to the public
+    # repository, the private one deploys too: its DEPLOY_REPO variable names it. Delete that
+    # variable at the cutover and only the public repository deploys.
+    # Production deploys only from main, whichever way the run started; the production
+    # environment's branch rule and required reviewer gate it again.
+    if: >-
+      (github.repository == 'wondermoney/wondermoney' || github.repository == vars.DEPLOY_REPO)
+      && github.ref == 'refs/heads/main'
+    runs-on: blacksmith-2vcpu-ubuntu-2404
+    # Secrets, variables and protection rules come from the environment (repository-level
+    # secrets still apply).
+    environment: production
+    permissions:
+      # Reads CI's runs for the gate below.
+      actions: read
+      contents: read
+      # Pushes the images to GitHub Container Registry.
+      packages: write
+    env:
+      # The Coolify instance's base URL, a secret so run logs (public in the public repository)
+      # mask it, and the API's public base URL, an environment variable; both without a
+      # trailing slash.
+      DEPLOY_API_BASE: ${{ secrets.DEPLOY_API_BASE }}
+      API_URL: ${{ vars.API_URL }}
+    steps:
+      # The deploy targets come from settings, so a missing one fails here instead of halfway
+      # through the deploy.
+      - name: Check deploy configuration
+        if: vars.COOLIFY_PRD_DEPLOY_ENABLED == 'true'
+        run: |
+          missing=0
+          for name in DEPLOY_API_BASE API_URL; do
+            if [ -z "${!name}" ]; then
+              echo "::error::${name} is not set (Settings > Secrets and variables > Actions: the DEPLOY_API_BASE secret, the API_URL variable of the production environment)."
+              missing=1
+            fi
+          done
+          exit "$missing"
+      - name: Clone repository
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - uses: pnpm/action-setup@v6
+      - name: Setup Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version-file: '.nvmrc'
+          cache: pnpm
+      - name: Replace SHA in code
+        uses: jacobtomlinson/gha-find-replace@v3
+        with:
+          find: '##REPLACE_GITHUB_COMMIT_SHA_HERE##'
+          replace: '${{ github.sha }}'
+          regex: false
+          include: 'apps/api/src/utils/constants.ts'
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Build workspace packages
+        run: pnpm --filter @wondermoney/shared --filter @wondermoney/react-email run build:lib
+      # Built on the runner too, so Sentry gets the source maps; the image builds the same
+      # source itself, and debug IDs are content hashes, so they match.
+      - name: Generate build
+        run: pnpm --filter @wondermoney/api run build
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+      # CI (.github/workflows/ci.yml) runs on this same commit, with type-check, lint and the
+      # API tests with coverage thresholds; this deploy waits for it instead of running them a
+      # second time. Nothing is pushed or deployed until CI has passed on exactly this SHA. The
+      # runner build above overlaps with it.
+      - name: Wait for CI to pass on this commit
+        timeout-minutes: 40
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          while true; do
+            runs=$(gh run list -R "$GITHUB_REPOSITORY" --workflow ci.yml --commit "$GITHUB_SHA" --json status,conclusion,url)
+            if jq -e 'any(.[]; .conclusion == "success")' <<<"$runs" >/dev/null; then
+              echo "CI passed on ${GITHUB_SHA}: $(jq -r 'map(select(.conclusion == "success"))[0].url' <<<"$runs")"
+              exit 0
+            fi
+            if jq -e 'length > 0 and all(.[]; .status == "completed")' <<<"$runs" >/dev/null; then
+              echo "::error::CI did not pass on ${GITHUB_SHA}; not deploying."
+              jq -r '.[] | "\(.conclusion) \(.url)"' <<<"$runs"
+              exit 1
+            fi
+            echo "waiting for CI on ${GITHUB_SHA:0:9}: $(jq -r 'if length == 0 then "not started" else map(.status) | join(", ") end' <<<"$runs")"
+            sleep 20
+          done
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Docker meta API
+        id: meta-api
+        uses: docker/metadata-action@v6
+        with:
+          images: |
+            ghcr.io/${{ github.repository_owner }}/api
+          tags: |
+            type=schedule
+            type=ref,event=branch
+            type=ref,event=pr
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=semver,pattern={{major}}
+            type=sha
+            # The production Coolify apps pull the :master tag (the old repository's branch name).
+            type=raw,value=master
+      - name: Docker meta worker
+        id: meta-worker
+        uses: docker/metadata-action@v6
+        with:
+          images: |
+            ghcr.io/${{ github.repository_owner }}/api-worker
+          tags: |
+            type=schedule
+            type=ref,event=branch
+            type=ref,event=pr
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=semver,pattern={{major}}
+            type=sha
+            # The production Coolify apps pull the :master tag (the old repository's branch name).
+            type=raw,value=master
+      - name: Build and push API
+        uses: useblacksmith/build-push-action@v2
+        with:
+          push: true
+          context: .
+          file: apps/api/Dockerfile
+          target: api
+          tags: ${{ steps.meta-api.outputs.tags }}
+          labels: ${{ steps.meta-api.outputs.labels }}
+          build-args: |
+            GIT_COMMIT_SHA=${{ github.sha }}
+            APP_ENV=production
+            DEPLOY_ENV=production
+      - name: Build and push worker
+        uses: useblacksmith/build-push-action@v2
+        with:
+          push: true
+          context: .
+          file: apps/api/Dockerfile
+          target: worker
+          tags: ${{ steps.meta-worker.outputs.tags }}
+          labels: ${{ steps.meta-worker.outputs.labels }}
+          build-args: |
+            GIT_COMMIT_SHA=${{ github.sha }}
+            APP_ENV=production
+            DEPLOY_ENV=production
+      - name: Create Sentry release
+        uses: getsentry/action-release@v3
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          SENTRY_ORG: ${{ secrets.SENTRY_ORG }}
+          SENTRY_PROJECT: api
+        with:
+          environment: production
+          sourcemaps: './apps/api/dist'
+      - name: Deploy API via Coolify
+        id: deploy-api
+        if: vars.COOLIFY_PRD_DEPLOY_ENABLED == 'true'
+        run: |
+          response=$(curl --fail -sS -X POST \
+            "${DEPLOY_API_BASE}/api/v1/deploy?uuid=${{ secrets.COOLIFY_PRD_API_UUID }}&force=false" \
+            -H "Authorization: Bearer ${{ secrets.COOLIFY_TOKEN }}")
+          echo "$response"
+          deployment_uuid=$(echo "$response" | jq -r '.deployments[0].deployment_uuid // empty')
+          if [ -z "$deployment_uuid" ]; then
+            echo "Could not extract deployment_uuid from Coolify /deploy response: $response" >&2
+            exit 1
+          fi
+          echo "deployment_uuid=${deployment_uuid}" >> "$GITHUB_OUTPUT"
+      - name: Wait for API deployment to finish
+        if: vars.COOLIFY_PRD_DEPLOY_ENABLED == 'true'
+        run: |
+          deployment_uuid="${{ steps.deploy-api.outputs.deployment_uuid }}"
+          for i in $(seq 1 60); do
+            status=$(curl -sS "${DEPLOY_API_BASE}/api/v1/deployments/${deployment_uuid}" \
+              -H "Authorization: Bearer ${{ secrets.COOLIFY_TOKEN }}" | jq -r '.status // empty')
+            echo "deployment status: ${status:-unknown}"
+            if [ "$status" = "finished" ]; then exit 0; fi
+            if [ "$status" = "failed" ] || [ "$status" = "cancelled-by-user" ]; then
+              echo "API deployment ended with status: $status" >&2
+              exit 1
+            fi
+            sleep 10
+          done
+          echo "API deployment did not finish within 10 minutes (last status: ${status:-unknown})" >&2
+          exit 1
+      # Coolify reporting "finished" only proves the orchestrator finished, not that
+      # the app is serving. Staging verifies end-to-end via /v1/health's
+      # gitCommitHash; this is the production port of that check.
+      #
+      # Caveat: in production `/v1/health` deliberately returns a bare
+      # {"status":"ok"} unless PUBLIC_DIAGNOSTICS_ENABLED=true, so we fall back to
+      # the admin-gated /v1/health/details using the ADMIN_API_KEY secret. If
+      # neither source yields a commit hash the step warns and passes rather than
+      # blocking every production deploy on an optional secret.
+      - name: Verify API is serving the new commit
+        if: vars.COOLIFY_PRD_DEPLOY_ENABLED == 'true'
+        env:
+          ADMIN_API_KEY: ${{ secrets.ADMIN_API_KEY }}
+          TARGET_SHA: ${{ github.sha }}
+        run: |
+          seen=""
+          for i in $(seq 1 60); do
+            hash=$(curl -fsS --max-time 10 "${API_URL}/v1/health" 2>/dev/null | jq -r '.gitCommitHash // empty' || true)
+            if [ -z "$hash" ] && [ -n "${ADMIN_API_KEY:-}" ]; then
+              hash=$(curl -fsS --max-time 10 -H "x-api-key: ${ADMIN_API_KEY}" \
+                "${API_URL}/v1/health/details" 2>/dev/null | jq -r '.gitCommitHash // empty' || true)
+            fi
+            if [ -n "$hash" ]; then
+              seen="$hash"
+              if [ "$hash" = "$TARGET_SHA" ]; then
+                echo "API is serving ${hash}"
+                exit 0
+              fi
+            fi
+            if [ -z "$seen" ] && [ "$i" -ge 12 ]; then
+              echo "::warning::Production did not expose gitCommitHash after 2 minutes. /v1/health hides it unless PUBLIC_DIAGNOSTICS_ENABLED=true and no usable ADMIN_API_KEY secret is configured for /v1/health/details. Falling back to the Coolify status check only."
+              exit 0
+            fi
+            echo "waiting... currently: ${hash:-unavailable}"
+            sleep 10
+          done
+          echo "API did not report ${TARGET_SHA} within 10 minutes (last seen: ${seen:-unavailable})" >&2
+          exit 1
+      - name: Deploy worker via Coolify
+        id: deploy-worker
+        if: vars.COOLIFY_PRD_DEPLOY_ENABLED == 'true'
+        run: |
+          response=$(curl --fail -sS -X POST \
+            "${DEPLOY_API_BASE}/api/v1/deploy?uuid=${{ secrets.COOLIFY_PRD_WORKER_UUID }}&force=false" \
+            -H "Authorization: Bearer ${{ secrets.COOLIFY_TOKEN }}")
+          echo "$response"
+          deployment_uuid=$(echo "$response" | jq -r '.deployments[0].deployment_uuid // empty')
+          if [ -z "$deployment_uuid" ]; then
+            echo "Could not extract deployment_uuid from Coolify /deploy response: $response" >&2
+            exit 1
+          fi
+          echo "deployment_uuid=${deployment_uuid}" >> "$GITHUB_OUTPUT"
+      # Without this, a worker that crash-loops on boot reads as a successful deploy.
+      #
+      # That is not hypothetical: a boot-time env check rejected prod-worker's (legitimately
+      # empty) HISTORICAL_ASSET_PRICE_BACKFILL_RUNNER, so four consecutive deploys failed,
+      # Coolify rolled back to the previous container each time, and this workflow reported
+      # success for all four. The worker served ten-day-old code -- including the crons for
+      # features that had just been switched on -- and nothing surfaced it.
+      #
+      # The worker has no public health endpoint to poll for a commit hash the way the API
+      # does, but Coolify's own deployment record is enough: it marked every one of those
+      # runs `failed`.
+      - name: Wait for worker deployment to finish
+        if: vars.COOLIFY_PRD_DEPLOY_ENABLED == 'true'
+        run: |
+          deployment_uuid="${{ steps.deploy-worker.outputs.deployment_uuid }}"
+          for i in $(seq 1 60); do
+            status=$(curl -sS "${DEPLOY_API_BASE}/api/v1/deployments/${deployment_uuid}" \
+              -H "Authorization: Bearer ${{ secrets.COOLIFY_TOKEN }}" | jq -r '.status // empty')
+            echo "worker deployment status: ${status:-unknown}"
+            if [ "$status" = "finished" ]; then exit 0; fi
+            if [ "$status" = "failed" ] || [ "$status" = "cancelled-by-user" ]; then
+              echo "Worker deployment ended with status: $status" >&2
+              exit 1
+            fi
+            sleep 10
+          done
+          echo "Worker deployment did not finish within 10 minutes (last status: ${status:-unknown})" >&2
+          exit 1

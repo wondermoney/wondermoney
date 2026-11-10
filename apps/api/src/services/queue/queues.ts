@@ -13,6 +13,7 @@ export type QueueName =
   | 'account.initial-sync'
   | 'asset-price.historical-backfill'
   | 'bank-recovery.send'
+  | 'bank-sync-alert.send'
   | 'demo-data.refresh'
   | 'email.budget.coordinator'
   | 'email.budget.user'
@@ -21,12 +22,19 @@ export type QueueName =
   | 'email.weekly.coordinator'
   | 'email.weekly.user'
   | 'foundation.health-check'
+  | 'fx.reconvert'
   | 'lifecycle.send'
   | 'portfolio.csv-import-confirmed'
   | 'portfolio.csv-parse-preview'
   | 'portfolio.snapshot.auto'
   | 'portfolio.snapshot.manual'
-  | 'transaction.enrichment.gpt';
+  | 'rule.apply'
+  | 'transaction-import'
+  | 'transaction.enrichment.gpt'
+  | 'user.data-export'
+  | 'user.data-export.cleanup'
+  | 'user.data-restore'
+  | 'user.data-restore.cleanup';
 
 /**
  * A registered queue.

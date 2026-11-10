@@ -29,6 +29,51 @@ Los análisis y la atribución dependen del consentimiento. Si no has dado tu co
 - Si los servicios conectados siguen activados
 - Si el acceso bancario conectado sigue siendo necesario
 
+## Exportar tus datos
+
+**Configuración > Privacidad > Exportar todos los datos** (o **Ajustes > Seguridad** en la aplicación móvil) descarga todo lo que ves en tu hogar, en un archivo zip llamado `wondermoney-export-AAAA-MM-DD.zip`:
+
+- `data/`: un archivo JSON por tipo de datos: cuentas, transacciones, categorías y su configuración, comercios, etiquetas, divisiones de transacciones, reglas, pagos recurrentes, presupuestos, objetivos, préstamos, carteras y sus transacciones, tu lista de seguimiento y tus preferencias. Las filas se refieren entre sí mediante identificadores que solo tienen sentido dentro de la exportación.
+- `csv/`: transacciones, cuentas, transacciones de cartera y posiciones actuales, para hojas de cálculo. Los importes usan el punto como separador decimal y las fechas tienen el formato `AAAA-MM-DD`.
+- `manifest.json`: la versión del formato, cuándo se hizo la exportación y el número de filas y una suma de comprobación SHA-256 de cada archivo.
+
+Qué no se incluye:
+
+- Las cuentas privadas de tu pareja, ni sus transacciones, divisiones, etiquetas, pagos recurrentes y reglas. Sus préstamos y su lista de seguimiento tampoco se incluyen.
+- Contraseñas, sesiones, secretos de autenticación en dos pasos, credenciales bancarias y tokens de conexión. Una cuenta que estuvo conectada a un banco lo indica, sin ninguno de los datos de la conexión.
+- Registros de auditoría, uso de IA y datos de analítica.
+
+Cuando el servidor tiene almacenamiento de archivos, la exportación se prepara en segundo plano. Recibes un email cuando está lista y puedes descargar el archivo en el mismo lugar durante 24 horas; después se elimina. En un servidor propio sin almacenamiento de archivos, el zip se crea mientras se descarga, desde la aplicación web. Puedes iniciar hasta tres exportaciones al día.
+
+### Proteger la exportación con una contraseña
+
+Marca **Proteger el archivo con una contraseña** antes de iniciar la exportación (aplicación web) y elige una contraseña de al menos 16 caracteres. Todos los archivos del zip se cifran entonces con AES-256, en el formato estándar WinZip AES:
+
+- Ábrelo con [7-Zip](https://www.7-zip.org/) (Windows, Linux), [Keka](https://www.keka.io/) (macOS) o WinRAR, e introduce la contraseña. Las herramientas de zip integradas de algunos sistemas no abren archivos cifrados.
+- Un pequeño `README.txt` junto a los archivos cifrados explica cómo abrirlo. Los nombres y tamaños de los archivos quedan visibles; su contenido no.
+- Un archivo modificado o dañado se detecta al abrirlo.
+- WonderMoney no guarda la contraseña y no puede recuperarla. Si la olvidas, inicia una nueva exportación.
+
+El formato deriva la clave de la contraseña con una función rápida, así que lo que protege el archivo es la longitud de la contraseña: mejor una frase larga de varias palabras que una contraseña corta y compleja. La contraseña se envía al servidor una vez, cuando empieza la exportación, se usa solo mientras se escribe el archivo y después se elimina. Nunca se registra en logs, se guarda con la exportación ni se incluye en el email, y el servidor nunca guarda una copia sin cifrar de una exportación protegida.
+
+## Restaurar desde una exportación
+
+Una exportación se puede volver a cargar en WonderMoney, en el mismo servidor o en otro, por ejemplo cuando pasas del servicio alojado a tu propio servidor. La restauración solo llena un hogar vacío: funciona mientras tu hogar no tiene cuentas, carteras, presupuestos, objetivos ni préstamos, y nunca combina una exportación con datos existentes. Solo el titular del hogar puede restaurar, y el servidor necesita almacenamiento de archivos.
+
+1. Abre **Configuración > Privacidad > Restaurar desde una exportación**, o elige **Restaurar desde una exportación** en la primera pantalla después de registrarte.
+2. Elige el archivo `wondermoney-export-AAAA-MM-DD.zip` (hasta 64 MB) y selecciona **Comprobar archivo**. En una exportación protegida con contraseña, introduce la contraseña cuando se pida.
+3. WonderMoney comprueba el archivo entero antes de escribir nada: que es una exportación de WonderMoney, que ningún archivo se modificó, añadió ni eliminó desde la exportación (con las sumas de comprobación de `manifest.json`) y que todas las filas se pueden leer. Después muestra lo que contiene la exportación y lo que conviene saber antes de restaurar.
+4. Selecciona **Restaurar ahora**. Todo se escribe de una vez: si algo falla, no se guarda nada y el hogar sigue vacío.
+
+Qué esperar después:
+
+- Las cuentas que estaban conectadas a un banco vuelven como cuentas manuales, con todo su historial. No se restaura ninguna credencial bancaria, así que vuelve a conectarlas en **Configuración > Conexiones** si quieres que se sincronicen de nuevo.
+- Todo lo que hay en la exportación pasa a ser tuyo, incluido lo que una pareja compartió contigo. Invita de nuevo a tu pareja para compartir el hogar.
+- Tu moneda, idioma y preferencias de correo pasan a ser los de la exportación.
+- Las inversiones se asocian a la lista de este servidor por ISIN o símbolo, y una que no conozca se busca en sus datos de mercado. Las operaciones de una inversión que ninguno de los dos conozca se quedan fuera, y la comprobación las muestra antes de restaurar: añádelas tú después. Los saldos de las cuentas se restauran tal como se exportaron; los saldos en otras monedas y el historial de las carteras se recalculan en segundo plano poco después.
+
+La contraseña de una exportación protegida se envía una vez, cuando se comprueba el archivo, y se guarda cifrada solo hasta que termina la restauración. Nunca se registra. El archivo subido se elimina cuando termina la restauración y, en cualquier caso, en un día. Puedes iniciar hasta diez restauraciones al día.
+
 ## Buenas prácticas
 
 Revisa la configuración de privacidad después de cambiar tu método de inicio de sesión, los bancos conectados o las opciones de consentimiento. Si algo parece inesperado, empieza por la página de la función correspondiente en lugar de cambiar varios ajustes a la vez.

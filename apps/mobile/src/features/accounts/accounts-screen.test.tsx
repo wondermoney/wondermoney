@@ -1,80 +1,152 @@
-import { fireEvent, render, within } from '@testing-library/react-native'
+import { fireEvent, render } from '@testing-library/react-native'
 import { I18nextProvider } from 'react-i18next'
-import { StyleSheet } from 'react-native'
 
 import { formatCurrency } from '@/lib/formatters/financial'
 import { initMobileI18n } from '@/lib/i18n'
+import { touchHeight } from '@/test/touch-target'
 
 import { accountsResponseSchema } from './accounts-contract'
-import { AccountsScreen, type AccountsData } from './accounts-screen'
+import { AccountsScreen, type AccountsData, type AccountsInsights } from './accounts-screen'
 import { mapAccounts } from './accounts-view-model'
+
+// The charts draw on a Skia canvas this jest environment can't host; a stand-in keeps the
+// screen's own logic under test (see portfolio-performance-chart.test.tsx).
+jest.mock('victory-native', () => ({
+  CartesianChart: (props: { children: (args: { points: Record<string, unknown>; chartBounds: { bottom: number } }) => React.ReactNode }) =>
+    props.children({ points: { balance: [], gain: [], loss: [] }, chartBounds: { bottom: 0 } }),
+  Area: () => null,
+  Bar: () => null,
+  Line: () => null,
+}))
 
 const data: AccountsData = {
   accounts: [
     { accountId: 1, accountName: 'Current account', institutionDisplayName: 'Bank One', isOwnedByViewer: true, isPrivate: false, source: 'open_banking', csvImportFormat: null, originalBalance: 0, originalCurrencyCode: 'EUR', primaryCurrencyCode: 'EUR', convertedBalance: 0, refreshedAt: '2026-07-17T10:00:00Z' },
-    { accountId: 2, accountName: null, institutionDisplayName: null, isOwnedByViewer: true, isPrivate: false, source: 'manual', csvImportFormat: null, originalBalance: null, originalCurrencyCode: 'EUR', primaryCurrencyCode: 'EUR', convertedBalance: null, refreshedAt: null },
-    { accountId: 3, accountName: 'Yen savings', institutionDisplayName: 'Bank Two', isOwnedByViewer: false, isPrivate: false, source: 'open_banking', csvImportFormat: null, originalBalance: 1200, originalCurrencyCode: 'JPY', primaryCurrencyCode: 'EUR', convertedBalance: 7.2, refreshedAt: 'invalid' },
+    { accountId: 2, accountName: null, institutionDisplayName: null, isOwnedByViewer: true, isPrivate: true, source: 'manual', csvImportFormat: null, originalBalance: null, originalCurrencyCode: 'EUR', primaryCurrencyCode: 'EUR', convertedBalance: null, refreshedAt: null },
+    { accountId: 3, accountName: 'Yen savings', institutionDisplayName: 'Bank Two', isOwnedByViewer: false, ownerFirstName: 'Ana', isPrivate: false, source: 'open_banking', csvImportFormat: null, originalBalance: 1200, originalCurrencyCode: 'JPY', primaryCurrencyCode: 'EUR', convertedBalance: 7.2, refreshedAt: 'invalid' },
   ],
 }
 
-async function renderScreen(state: React.ComponentProps<typeof AccountsScreen>['state']) {
+const complete: AccountsData = {
+  accounts: [
+    { ...data.accounts[0]!, convertedBalance: 1000, originalBalance: 1000 },
+    { ...data.accounts[2]!, convertedBalance: 7.2 },
+  ],
+}
+
+const insights: AccountsInsights = {
+  timeframe: 'YTD',
+  metrics: { status: 'loaded', summary: { inflowCurrent: 300, inflowPast: 100, outflowCurrent: 120, outflowPast: 60, inflowPct: 2, outflowPct: 1, netSavings: 180, netSavingsPast: 40, savingsRate: 0.6 } },
+  categories: { status: 'loaded', data: [{ id: 4, name: 'Groceries', amount: -75, currency: 'EUR', transactionCount: 3 }] },
+  balance: { status: 'loaded', data: [] },
+  transactions: { status: 'loaded', data: [] },
+  cashflow: { status: 'loaded', data: [] },
+}
+
+async function renderScreen(state: React.ComponentProps<typeof AccountsScreen>['state'], extra: Partial<React.ComponentProps<typeof AccountsScreen>> = {}) {
   const i18n = await initMobileI18n('en')
   const refresh = jest.fn()
   const logout = jest.fn()
   const selectAccount = jest.fn()
-  const view = await render(<I18nextProvider i18n={i18n}><AccountsScreen state={state} onRefresh={refresh} onLogout={logout} onSelectAccount={selectAccount} onCreateAccount={jest.fn()} onViewTransactions={jest.fn()} onViewRecurring={jest.fn()} onInsightPeriodChange={jest.fn()} /></I18nextProvider>)
-  return { view, refresh, logout, selectAccount }
+  const createAccount = jest.fn()
+  const view = await render(<I18nextProvider i18n={i18n}><AccountsScreen state={state} onRefresh={refresh} onLogout={logout} onSelectAccount={selectAccount} onCreateAccount={createAccount} onViewTransactions={jest.fn()} {...extra} /></I18nextProvider>)
+  return { view, refresh, logout, selectAccount, createAccount }
 }
 
 describe('AccountsScreen', () => {
-  it('renders accessible insight periods and keeps mixed-currency account metrics separate', async () => {
-    const state: React.ComponentProps<typeof AccountsScreen>['state'] = { status: 'loaded', data: { accounts: data.accounts, insights: { period: 'month', metricGroups: [
-      { currency: 'EUR', rows: [{ accountId: 1, accountName: 'Euro account', currency: 'EUR', inflow: 100, outflow: 40, transactionCount: 2 }] },
-      { currency: 'USD', rows: [{ accountId: 2, accountName: 'Dollar account', currency: 'USD', inflow: 50, outflow: 20, transactionCount: 1 }] },
-    ], categories: [{ id: -1, name: 'Uncategorized', amount: 20, currency: null, transactionCount: 1 }], cashflow: [{ date: '2026-07-01T00:00:00.000Z', amount: -10, currency: null }] } } }
-    const { view } = await renderScreen(state)
-    expect(view.getByRole('header', { name: 'Insights' })).toBeOnTheScreen()
-    expect(view.getByRole('tab', { name: 'Current month' }).props.accessibilityState.selected).toBe(true)
-    expect(view.getByText('EUR')).toBeOnTheScreen()
-    expect(view.getByText('USD')).toBeOnTheScreen()
-    expect(view.getAllByText(/Reporting currency unavailable/)).toHaveLength(2)
-    expect(view.getByText('Balances')).toBeOnTheScreen()
+  it('leads with the title and one add action, the period, total balance with change, then the flow stats', async () => {
+    const onTimeframeChange = jest.fn()
+    const onCreateTransaction = jest.fn()
+    const { view } = await renderScreen({ status: 'loaded', data: { ...complete, insights } }, { onTimeframeChange, onCreateTransaction })
+    expect(view.getByRole('header', { name: 'Accounts overview' })).toBeOnTheScreen()
+    expect(view.getByRole('button', { name: 'Period, Year to Date' })).toBeOnTheScreen()
+    // The floating "+" holds both add actions.
+    expect(view.queryByRole('button', { name: 'Add account' })).not.toBeOnTheScreen()
+    expect(view.getByTestId('accounts-add').props.accessibilityLabel).toBe('Add')
+    await fireEvent.press(view.getByRole('button', { name: 'Add' }))
+    expect(view.getByRole('menuitem', { name: /^Add account/ })).toBeOnTheScreen()
+    await fireEvent.press(view.getByRole('menuitem', { name: 'Add transaction' }))
+    expect(onCreateTransaction).toHaveBeenCalledTimes(1)
+    expect(view.getByText('Total balance')).toBeOnTheScreen()
+    // The total's change, then each stat's comparison.
+    expect(view.getAllByText('vs last period')).toHaveLength(4)
+    for (const label of ['Inflow', 'Outflow', 'Savings rate']) expect(view.getByText(label)).toBeOnTheScreen()
+    expect(view.getByText('Net savings this period, 60% of inflow')).toBeOnTheScreen()
+    const headers = view.getAllByRole('header').map((node) => node.props.children)
+    expect(headers).toEqual(expect.arrayContaining(['Spending by category', 'Balance growth', 'Accounts', 'Last transactions', 'Cashflow']))
+    expect(headers.indexOf('Spending by category')).toBeLessThan(headers.indexOf('Accounts'))
+    expect(headers.indexOf('Accounts')).toBeLessThan(headers.indexOf('Cashflow'))
+    expect(view.getByText('Groceries')).toBeOnTheScreen()
+    await fireEvent.press(view.getByRole('button', { name: 'Period, Year to Date' }))
+    await fireEvent.press(view.getByRole('radio', { name: '1 Month' }))
+    expect(onTimeframeChange).toHaveBeenCalledWith('1M')
   })
-  it('preserves order and distinguishes zero, null, and converted balances', async () => {
+
+  it('shows the reader-currency balance per row, the account currency beside it, and a total', async () => {
     const { view, selectAccount } = await renderScreen({ status: 'loaded', data })
     const rows = view.getAllByTestId('account-row')
-    const updated = new Intl.DateTimeFormat('en', {
-      dateStyle: 'medium',
-      timeStyle: 'short',
-    }).format(new Date('2026-07-17T10:00:00Z'))
     const eurZero = formatCurrency(0, { locale: 'en', currency: 'EUR' })
     const yen = formatCurrency(1200, { locale: 'en', currency: 'JPY' })
     const converted = formatCurrency(7.2, { locale: 'en', currency: 'EUR' })
-
     expect(rows).toHaveLength(3)
-    expect(rows[0].props.accessibilityLabel).toBe(
-      `Current account, Bank One, Open Banking, ${eurZero}, EUR, Updated ${updated}`,
-    )
-    expect(rows[1].props.accessibilityLabel).toBe(
-      'Unnamed account, Manual, Balance unavailable',
-    )
-    expect(rows[2].props.accessibilityLabel).toBe(
-      `Yen savings, Bank Two, Open Banking, ${yen}, JPY, Converted balance, ${converted}, EUR`,
-    )
-    expect(view.getByText('Bank One')).toBeOnTheScreen()
-    expect(view.getByText(/^Updated /)).toBeOnTheScreen()
-    expect(view.getByText(/Converted balance:.*€7\.20 EUR/)).toBeOnTheScreen()
+    expect(rows[0].props.accessibilityLabel).toMatch(new RegExp(`^Current account, Bank One, ${eurZero.replace('.', '\\.')}`))
+    expect(rows[1].props.accessibilityLabel).toBe('Unnamed account, Private, Balance unavailable')
+    expect(rows[2].props.accessibilityLabel).toBe(`Yen savings, Shared by Ana, Bank Two, ${converted}, ${yen}`)
+    expect(view.getByText(yen)).toBeOnTheScreen()
     expect(view.queryByText(/invalid/i)).not.toBeOnTheScreen()
-    expect(rows[0].props.accessibilityRole).toBe('button')
-    expect(StyleSheet.flatten(rows[0].props.style).minHeight).toBeGreaterThanOrEqual(48)
+    // One balance is missing, so the total is unknown rather than smaller.
+    expect(view.getAllByText('Unavailable — some balances are missing').length).toBeGreaterThan(0)
+    expect(touchHeight(rows[0])).toBeGreaterThanOrEqual(44)
     await fireEvent.press(rows[0])
     expect(selectAccount).toHaveBeenCalledWith(1)
+  })
+
+  it('opens the row menu for edit and delete', async () => {
+    const onEditAccount = jest.fn()
+    const { view } = await renderScreen({ status: 'loaded', data }, { onEditAccount })
+    await fireEvent.press(view.getByRole('button', { name: 'Actions for Current account' }))
+    await fireEvent.press(view.getByRole('menuitem', { name: 'Edit' }))
+    expect(onEditAccount).toHaveBeenCalledWith(1)
+  })
+
+  it('adds a manual account from the floating add, and keeps linking a bank and import behind the overflow menu', async () => {
+    const onConnectBank = jest.fn()
+    const onImportTransactions = jest.fn()
+    const { view, createAccount } = await renderScreen({ status: 'loaded', data }, { onConnectBank, onImportTransactions, onCreateTransaction: jest.fn() })
+    await fireEvent.press(view.getByRole('button', { name: 'Add' }))
+    await fireEvent.press(view.getByRole('menuitem', { name: /^Add account/ }))
+    expect(createAccount).toHaveBeenCalledTimes(1)
+    await fireEvent.press(view.getByRole('button', { name: 'More actions' }))
+    await fireEvent.press(view.getByRole('menuitem', { name: /^Link a bank account/ }))
+    expect(onConnectBank).toHaveBeenCalledTimes(1)
+    await fireEvent.press(view.getByRole('button', { name: 'More actions' }))
+    await fireEvent.press(view.getByRole('menuitem', { name: 'Import transactions' }))
+    expect(onImportTransactions).toHaveBeenCalledTimes(1)
+  })
+
+  it('has no overflow menu when there is nothing secondary to offer', async () => {
+    const { view } = await renderScreen({ status: 'loaded', data })
+    expect(view.queryByRole('button', { name: 'More actions' })).not.toBeOnTheScreen()
+  })
+
+  it('makes the add action Add account itself when there is nothing else to add', async () => {
+    const { view, createAccount } = await renderScreen({ status: 'loaded', data })
+    await fireEvent.press(view.getByRole('button', { name: 'Add account' }))
+    expect(createAccount).toHaveBeenCalledTimes(1)
+    expect(view.queryByRole('menuitem')).not.toBeOnTheScreen()
+  })
+
+  it('keeps each insight section independent of the others', async () => {
+    const { view } = await renderScreen({ status: 'loaded', data: { ...complete, insights: { ...insights, categories: { status: 'error' }, metrics: { status: 'loading' } } } })
+    expect(view.getByText('Could not load this section. Pull down to try again.')).toBeOnTheScreen()
+    expect(view.getByText('Yen savings')).toBeOnTheScreen()
   })
 
   it('renders empty, loading, stale, initial error, and invalid states safely', async () => {
     const empty = await renderScreen({ status: 'loaded', data: { ...data, accounts: [] } })
     expect(empty.view.getByText('No accounts yet')).toBeOnTheScreen()
-    expect(empty.view.getByRole('button', { name: 'Add manual account' })).toBeOnTheScreen()
+    await fireEvent.press(empty.view.getByRole('button', { name: 'Add account' }))
+    expect(empty.createAccount).toHaveBeenCalledTimes(1)
 
     const loading = await renderScreen({ status: 'loading' })
     expect(loading.view.getByRole('progressbar', { name: 'Loading accounts' })).toBeOnTheScreen()
@@ -93,16 +165,21 @@ describe('AccountsScreen', () => {
     }
   })
 
-  it('renders no remote images, totals, writes, or detail navigation', async () => {
+  it('exposes no images to screen readers (marks are decorative) and keeps sign-out in the account menu', async () => {
     const { view } = await renderScreen({ status: 'loaded', data })
     expect(view.queryByRole('image')).not.toBeOnTheScreen()
-    expect(view.queryByText(/total|connect|import/i)).not.toBeOnTheScreen()
-    expect(view.queryAllByRole('link')).toHaveLength(0)
+    expect(view.queryByRole('button', { name: 'Sign out' })).not.toBeOnTheScreen()
   })
 
-  it('keeps sign-out out of the primary dashboard, matching the web account menu', async () => {
-    const { view } = await renderScreen({ status: 'loaded', data })
-    expect(view.queryByRole('button', { name: 'Sign out' })).not.toBeOnTheScreen()
+  it("leads each account row with its institution's logo, else the institution's letters, else a type glyph", async () => {
+    const withLogo = { ...data, accounts: [{ ...data.accounts[0]!, institutionLogoUrl: 'https://cdn.example/bank-one.png' }, data.accounts[1]!, data.accounts[2]!] }
+    const { view } = await renderScreen({ status: 'loaded', data: withLogo })
+    const marks = view.getAllByTestId('account-mark', { includeHiddenElements: true })
+    expect(marks).toHaveLength(3)
+    expect(view.getAllByTestId('account-mark-image', { includeHiddenElements: true })).toHaveLength(1)
+    expect(view.getByText('BT', { includeHiddenElements: true })).toBeOnTheScreen()
+    // The row's own label still names the account; the mark adds nothing to it.
+    expect(view.getAllByRole('button', { name: /^Current account, Bank One/ })).toHaveLength(1)
   })
 
   it('hides all account chrome during an access transition', async () => {
@@ -110,13 +187,9 @@ describe('AccountsScreen', () => {
     expect(view.toJSON()).toBeNull()
   })
 
-  it('keeps primary actions scalable and at least 48dp', async () => {
-    const { view } = await renderScreen({ status: 'loaded', data })
-    for (const name of ['Add manual account']) {
-      const action = view.getByRole('button', { name })
-      expect(StyleSheet.flatten(action.props.style).minHeight).toBeGreaterThanOrEqual(48)
-      expect(within(action).getByText(name).props.allowFontScaling).not.toBe(false)
-    }
+  it('keeps primary actions scalable and at least 44dp to the finger', async () => {
+    const { view } = await renderScreen({ status: 'loaded', data }, { onCreateTransaction: jest.fn() })
+    expect(touchHeight(view.getByRole('button', { name: 'Add' }))).toBeGreaterThanOrEqual(44)
   })
 
   it('uses pull-to-refresh instead of a persistent refresh button', async () => {
@@ -130,10 +203,9 @@ describe('AccountsScreen with values this build does not know', () => {
     const response = accountsResponseSchema.parse({ accounts: [{
       accountFinancialInstitutionKey: null, accountKey: 4, accountName: 'Imported account', accountOwnerAppuserKey: { currencyKey: { code: 'EUR' } },
       appuserCurrencyBalance: 10, balance: 10, currencyKey: { code: 'EUR' }, isOwnedByViewer: true, isPrivate: false,
-      refreshedAt: null, source: 'csv_import', syncState: 'idle',
+      refreshedAt: null, source: 'csv_import', syncState: 'idle', syncStatus: { staleness: 'mystery', lastSyncedAt: 'not a date' },
     }] })
     const { view } = await renderScreen({ status: 'loaded', data: { accounts: mapAccounts(response) } })
     expect(view.getByText('Imported account')).toBeOnTheScreen()
-    expect(view.getByText(/Other source/)).toBeOnTheScreen()
   })
 })

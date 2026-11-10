@@ -1,6 +1,6 @@
 import type { BudgetRecurrence } from './budgets-contract'
-import { adjacentBudgetPeriod, mapBudget, mapBudgetYear, normalizePlannedMonthly } from './budgets-view-model'
-import { budgetFixture, budgetYearFixture, childRow, parentRow } from './test-fixtures'
+import { adjacentBudgetPeriod, budgetYearToDateMonth, mapBudget, mapBudgetYear, normalizePlannedMonthly } from './budgets-view-model'
+import { budgetFixture, budgetYearFixture, childRow, parentRow, rolloverChildRow } from './test-fixtures'
 
 const child = (
   id: number,
@@ -47,6 +47,30 @@ describe('budget view model', () => {
       { planned: 10, remaining: 0 },
     ])
     expect(value.totals).toMatchObject({ planned: 170, spent: 100, remaining: 70 })
+  })
+
+  it('measures remaining, progress and over against the available amount when rollover carries', () => {
+    const surplus = mapBudget({ ...budgetFixture, categories: [{ ...parentRow, category_amount: 120 }, rolloverChildRow(40, { category_amount: 120 })] })
+    const [rent] = surplus.categories[0].children
+    expect(rent).toMatchObject({ budgeted: 100, rolledOver: 40, planned: 140, remaining: 20, overspent: false, rolloverEnabled: true, rolloverIncomplete: false })
+    expect(rent.progressPercentage).toBeCloseTo(120 / 1.4)
+    expect(surplus.categories[0]).toMatchObject({ budgeted: 100, rolledOver: 40, planned: 140, remaining: 20, overspent: false, rolloverEnabled: true })
+    expect(surplus.totals).toMatchObject({ planned: 140, spent: 120, remaining: 20, overspent: false })
+
+    const overspent = mapBudget({ ...budgetFixture, categories: [{ ...parentRow, category_amount: 80 }, { ...rolloverChildRow(-25, { category_amount: 80 }), category_rollover_incomplete: true }] })
+    expect(overspent.categories[0].children[0]).toMatchObject({ budgeted: 100, rolledOver: -25, planned: 75, remaining: -5, overspent: true, rolloverIncomplete: true })
+    expect(overspent.categories[0]).toMatchObject({ rolledOver: -25, planned: 75, overspent: true, rolloverIncomplete: true })
+  })
+
+  it('adds the rollover to the recurrence-normalized plan, not the raw amount', () => {
+    const value = mapBudget({ ...budgetFixture, categories: [parentRow, rolloverChildRow(15, { category_budgeted_amount: 120, category_recurrency: 'QUARTERLY', category_amount: 0 })] })
+    expect(value.categories[0].children[0]).toMatchObject({ rawAmount: 120, budgeted: 40, rolledOver: 15, planned: 55 })
+  })
+
+  it('reads a budget without rollover exactly as before', () => {
+    const value = mapBudget(budgetFixture)
+    expect(value.rolloverCarriesOverspend).toBe(true)
+    expect(value.categories[0].children[0]).toMatchObject({ budgeted: 100, rolledOver: 0, planned: 100, remaining: -20, rolloverEnabled: false })
   })
 
   it('produces consistent list and detail plans despite different API parent values', () => {
@@ -123,5 +147,21 @@ describe('budget year view model', () => {
 
   it('falls back to response year when no authoritative year is given', () => {
     expect(mapBudgetYear(budgetYearFixture).year).toBe(2026)
+  })
+})
+
+describe('budgetYearToDateMonth', () => {
+  const november2026 = new Date(2026, 10, 5)
+
+  it('stops the current year at the current month', () => {
+    expect(budgetYearToDateMonth(2026, november2026)).toBe(11)
+  })
+
+  it('covers every month of a past year', () => {
+    expect(budgetYearToDateMonth(2025, november2026)).toBe(12)
+  })
+
+  it('has no year to date for a year that has not started', () => {
+    expect(budgetYearToDateMonth(2027, november2026)).toBeNull()
   })
 })

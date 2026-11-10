@@ -8,6 +8,7 @@
 /** Every optional (toggle-able) email category. Transactional emails have no category — they always send. */
 export enum EmailCategory {
   ACCOUNT_RECOVERY = 'ACCOUNT_RECOVERY',
+  BANK_SYNC_ALERTS = 'BANK_SYNC_ALERTS',
   BUDGET_ALERTS = 'BUDGET_ALERTS',
   GROWTH = 'GROWTH',
   WEEKLY_INSIGHTS = 'WEEKLY_INSIGHTS',
@@ -16,6 +17,7 @@ export enum EmailCategory {
 /** The subset of `EmailNotificationPreference` columns that gate optional-email categories. */
 export interface EmailCategoryFlags {
   accountRecoveryEnabled: boolean;
+  bankSyncAlertsEnabled: boolean;
   budgetAlertsEnabled: boolean;
   growthEmailsEnabled: boolean;
   weeklyInsightsEnabled: boolean;
@@ -24,6 +26,7 @@ export interface EmailCategoryFlags {
 /** category -> `EmailNotificationPreference` flag field name. The one place this mapping is defined. */
 export const EMAIL_CATEGORY_FLAG: Record<EmailCategory, keyof EmailCategoryFlags> = {
   [EmailCategory.ACCOUNT_RECOVERY]: 'accountRecoveryEnabled',
+  [EmailCategory.BANK_SYNC_ALERTS]: 'bankSyncAlertsEnabled',
   [EmailCategory.BUDGET_ALERTS]: 'budgetAlertsEnabled',
   [EmailCategory.GROWTH]: 'growthEmailsEnabled',
   [EmailCategory.WEEKLY_INSIGHTS]: 'weeklyInsightsEnabled',

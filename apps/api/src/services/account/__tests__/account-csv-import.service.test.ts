@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-const { balancePlanMock, categorizeMock, createTransactionMock, getBankParserMock, getObjectBufferMock, getObjectTextMock, parseExcelMock, recurringDetectionMock, s3GetObjectBufferMock } = vi.hoisted(() => ({ balancePlanMock: vi.fn(), categorizeMock: vi.fn(), createTransactionMock: vi.fn(), getBankParserMock: vi.fn(), getObjectBufferMock: vi.fn(), getObjectTextMock: vi.fn(), parseExcelMock: vi.fn(), recurringDetectionMock: vi.fn().mockResolvedValue(undefined), s3GetObjectBufferMock: vi.fn() }));
+const { balancePlanMock, categorizeMock, createTransactionMock, getBankParserMock, getObjectTextMock, parseExcelMock, recurringDetectionMock, s3GetObjectBufferMock } = vi.hoisted(() => ({ balancePlanMock: vi.fn(), categorizeMock: vi.fn(), createTransactionMock: vi.fn(), getBankParserMock: vi.fn(), getObjectTextMock: vi.fn(), parseExcelMock: vi.fn(), recurringDetectionMock: vi.fn().mockResolvedValue(undefined), s3GetObjectBufferMock: vi.fn() }));
 vi.mock('@wondermoney/shared', () => ({ csv: { getBankParser: getBankParserMock, parseExcel: parseExcelMock } }));
 vi.mock('@service/account/account-csv-balance-recalculation.service', () => ({ default: { planBankBalances: balancePlanMock } }));
 vi.mock('@service/account/account-csv-categorization.service', () => ({ default: { categorizeTransaction: categorizeMock } }));
@@ -23,8 +23,11 @@ describe('account csv import service', () => {
 
   const safeObjectSize = vi.fn((_bucket: string, _key: string) => Promise.resolve(undefined as number | undefined));
 
+  // The same file as text and as bytes: the service sniffs the bytes before choosing a reader.
   function withSafeCsvDeps(overrides: Record<string, unknown> = {}) {
-    return { getObjectBuffer: getObjectBufferMock, getObjectSize: safeObjectSize, getObjectText: getObjectTextMock, ...overrides };
+    const getObjectText = (overrides['getObjectText'] as typeof getObjectTextMock | undefined) ?? getObjectTextMock;
+    const getObjectBuffer = (overrides['getObjectBuffer'] as ((bucket: string, key: string) => Promise<Buffer>) | undefined) ?? (async (bucket: string, key: string) => Buffer.from(String(await getObjectText(bucket, key) ?? '')));
+    return { getObjectSize: safeObjectSize, ...overrides, getObjectBuffer, getObjectText };
   }
 
   it('imports quoted csv rows using default transaction service', async () => {
@@ -244,8 +247,8 @@ describe('account csv import service', () => {
 
     expect(em.create).not.toHaveBeenCalled();
     expect(account.appuserCurrencyBalance).toBe(10);
-    expect(em.findOne).toHaveBeenCalledWith(expect.any(Function), { accountKey: 1, deletedAt: undefined }, { populate: ['accountOwnerAppuserKey.currencyKey', 'currencyKey'] });
-    expect(em.findOne).toHaveBeenCalledWith(expect.any(Function), expect.objectContaining({ date: { $lte: new Date('2025-01-01') }, fromCurrency: { code: 'EUR', currencyKey: 3 }, toCurrency: { code: 'USD', currencyKey: 5 } }), expect.objectContaining({ orderBy: { date: 'DESC', toCurrency: 'ASC' } }));
+    const [, , importedTransactions] = balancePlanMock.mock.calls.at(-1) ?? [];
+    expect(importedTransactions[0]).toEqual(expect.objectContaining({ appuserSettlementAmount: -11, fxStatus: 'exact' }));
   });
 
   it('creates a merchant it has not seen before and links it to the imported row', async () => {
@@ -271,7 +274,7 @@ describe('account csv import service', () => {
     expect(importedTransactions[0]).toEqual(expect.objectContaining({ transactionMerchantKey: { entity: 'TransactionMerchant', name: 'Shop' } }));
   });
 
-  it('falls back to oldest exchange rate and signed settlement amount when no historical rate exists', async () => {
+  it('stores no converted amount when no rate exists on or before the row date, not a later rate or the raw amount', async () => {
     const account = { accountKey: 1, accountOwnerAppuserKey: { appuserKey: 9, currencyKey: { code: 'USD', currencyKey: 5 } }, currencyKey: { code: 'EUR', currencyKey: 2 } } as { accountKey: number; accountOwnerAppuserKey: { appuserKey: number; currencyKey: { code: string; currencyKey: number } }; appuserCurrencyBalance?: number; currencyKey: { code: string; currencyKey: number } };
     const em = { create: vi.fn((_: unknown, value: unknown) => value), find: vi.fn().mockResolvedValue([]), findOne: vi.fn((entity, criteria) => {
       if (entity.name === 'Account') return Promise.resolve(account);
@@ -292,7 +295,8 @@ describe('account csv import service', () => {
     await svc.importAccountCsv({ accountKey: 1, bankName: 'bcp', bucket: 'b', key: 'k' }, withSafeCsvDeps({ em: em as unknown as ImportEm, getObjectBuffer: vi.fn().mockResolvedValue(Buffer.from('raw,csv')) }));
 
     expect(em.create).not.toHaveBeenCalled();
-    expect(em.findOne).toHaveBeenCalledWith(expect.any(Function), expect.objectContaining({ fromCurrency: { code: 'EUR', currencyKey: 3 }, toCurrency: { code: 'USD', currencyKey: 5 } }), expect.objectContaining({ orderBy: { date: 'ASC', toCurrency: 'ASC' } }));
+    const [, , importedTransactions] = balancePlanMock.mock.calls.at(-1) ?? [];
+    expect(importedTransactions[0]).toEqual(expect.objectContaining({ appuserSettlementAmount: null, fxStatus: 'missing', settlementAmount: -10 }));
   });
 
   it('allows extra fields from bank parsers', async () => {
@@ -401,13 +405,14 @@ describe('account csv import service', () => {
     expect(createTransactionMock).not.toHaveBeenCalled();
   });
 
-  it('rejects malformed bank rows without importing them', async () => {
+  it('rejects a file the bank parser cannot read and whose columns cannot be found', async () => {
     const em = { find: vi.fn().mockResolvedValue([]), findOne: vi.fn().mockResolvedValueOnce({ accountKey: 1, accountOwnerAppuserKey: { appuserKey: 9 }, currencyKey: { currencyKey: 2 } }), flush: vi.fn() };
     parseExcelMock.mockResolvedValueOnce([['raw-bank-row']]);
     getBankParserMock.mockReturnValueOnce(() => [{ descriptionDirty: 'x'.repeat(600), internalTransactionId: 'bank-int-1', settlementAmount: Number.POSITIVE_INFINITY, settlementCurrency: 'EUR', transactionDate: new Date('invalid'), transactionMerchant: 'Shop', transactionType: 'CARD_PAYMENT' }]);
     const svc = new AccountCsvImportService();
 
-    await expect(svc.importAccountCsv({ accountKey: 1, bankName: 'bcp', bucket: 'b', key: 'k' }, withSafeCsvDeps({ em: em as unknown as ImportEm, getObjectBuffer: vi.fn().mockResolvedValue(Buffer.from('raw,csv')) }))).resolves.toMatchObject({ failed: 1, imported: 0, skipped: 0 });
+    // Nothing the bank parser read is a transaction, and the file has no columns to fall back to.
+    await expect(svc.importAccountCsv({ accountKey: 1, bankName: 'bcp', bucket: 'b', key: 'k' }, withSafeCsvDeps({ em: em as unknown as ImportEm, getObjectBuffer: vi.fn().mockResolvedValue(Buffer.from('raw,csv')) }))).rejects.toThrow('Could not work out the columns');
     expect(createTransactionMock).not.toHaveBeenCalled();
   });
 

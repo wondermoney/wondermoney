@@ -1,37 +1,41 @@
 import { StyleSheet, View } from 'react-native'
 
 import { Text } from '@/components/ui/text'
-import { themeTokens } from '@/theme/tokens'
+import { themeTokens, type Palette } from '@/theme/tokens'
 import { usePalette } from '@/theme/use-palette'
 
-export type BadgeTone = 'neutral' | 'destructive' | 'warning' | 'info' | 'success'
+/**
+ * Web's badge variants (`components/ui/badge.tsx`). `outline` is the plain
+ * status chip web uses for "Active" / "Pay off debt"; `neutral` is the older
+ * mobile name for web's `muted`.
+ */
+export type BadgeTone =
+  | 'outline'
+  | 'neutral'
+  | 'muted'
+  | 'secondary'
+  | 'primary'
+  | 'destructive'
+  | 'warning'
+  | 'info'
+  | 'success'
 
 /**
  * Status is a word in a badge, never a colour alone.
  *
- * The label is required and cannot be empty — a bare coloured dot is not a
- * status, it is a puzzle. The badge belongs inline with the title it describes,
- * not in a trailing column.
+ * Mirrors web's `<Badge>`: 4pt radius, 1pt border, `px-2 py-0.5`, 12/600.
+ * Fills are solid (never washed) because each `-foreground` is contrast-tested
+ * against its solid fill. The badge sits inline with the title it describes.
  *
- * Badges look heterogeneous in a row and that is the accepted outcome: in the
- * light half `destructive` and `info` are dark fills with near-white text while
- * `warning` and `success` are light fills with dark ink, because that is where
- * each hue reaches 4.5:1 in gamut. Two uniform alternatives were measured on
- * the web half and both failed the floor.
+ * @param label  required, non-empty: a bare coloured dot is not a status.
+ * @param tone   defaults to `neutral` (web `muted`); status chips like "Active" want `outline`.
  */
 export function Badge({ label, tone = 'neutral', testID }: { label: string; tone?: BadgeTone; testID?: string }) {
   const palette = usePalette()
-
-  const { background, color } = {
-    neutral: { background: palette.muted, color: palette.mutedForeground },
-    destructive: { background: palette.destructive, color: palette.destructiveForeground },
-    warning: { background: palette.warning, color: palette.warningForeground },
-    info: { background: palette.info, color: palette.infoForeground },
-    success: { background: palette.success, color: palette.successForeground },
-  }[tone]
+  const { background, color, border } = surfaceFor(tone, palette)
 
   return (
-    <View style={[styles.badge, { backgroundColor: background }]} testID={testID}>
+    <View style={[styles.badge, { backgroundColor: background, borderColor: border }]} testID={testID}>
       <Text variant="label" style={[styles.label, { color }]}>
         {label}
       </Text>
@@ -39,12 +43,35 @@ export function Badge({ label, tone = 'neutral', testID }: { label: string; tone
   )
 }
 
+function surfaceFor(tone: BadgeTone, palette: Palette) {
+  switch (tone) {
+    case 'outline':
+      return { background: 'transparent', color: palette.foreground, border: palette.border }
+    case 'neutral':
+    case 'muted':
+      return { background: palette.muted, color: palette.mutedForeground, border: palette.border }
+    case 'secondary':
+      return { background: palette.secondary, color: palette.secondaryForeground, border: palette.input }
+    case 'primary':
+      return { background: palette.primary, color: palette.primaryForeground, border: 'transparent' }
+    case 'destructive':
+      return { background: palette.destructive, color: palette.destructiveForeground, border: 'transparent' }
+    case 'warning':
+      return { background: palette.warning, color: palette.warningForeground, border: 'transparent' }
+    case 'info':
+      return { background: palette.info, color: palette.infoForeground, border: 'transparent' }
+    case 'success':
+      return { background: palette.success, color: palette.successForeground, border: 'transparent' }
+  }
+}
+
 const styles = StyleSheet.create({
   badge: {
     borderRadius: themeTokens.radius.sm,
+    borderWidth: 1,
     paddingHorizontal: themeTokens.spacing[2],
     paddingVertical: 2,
     alignSelf: 'flex-start',
   },
-  label: { fontWeight: '500' },
+  label: { fontWeight: '600' },
 })

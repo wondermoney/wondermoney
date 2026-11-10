@@ -8,7 +8,7 @@ import { initMobileI18n } from '@/lib/i18n'
 import { BudgetEditScreen, type BudgetEditModel } from './budget-edit-screen'
 import { classifyBudgetWriteFailure } from './use-budget-metadata-mutation'
 
-const model: BudgetEditModel = { id: 7, name: 'Household plan', description: 'Shared spending' }
+const model: BudgetEditModel = { id: 7, name: 'Household plan', description: 'Shared spending', rolloverCarriesOverspend: true }
 
 const renderEditor = async (overrides: Partial<React.ComponentProps<typeof BudgetEditScreen>> = {}) => {
   const i18n = await initMobileI18n('en')
@@ -30,6 +30,23 @@ describe('budget metadata editor', () => {
     await waitFor(() => expect(view.getByRole('button', { name: 'Save details' }).props.accessibilityState.disabled).toBe(true))
   })
 
+  it('saves the carry-overspending switch with the details, only when it changed', async () => {
+    const save = jest.fn().mockResolvedValue(undefined)
+    const { view } = await renderEditor({ onSaveMetadata: save })
+    const toggle = view.getByRole('switch', { name: 'Carry overspending into next month' })
+    expect(toggle.props.value).toBe(true)
+    expect(view.getByText(/only unspent money rolls over/)).toBeOnTheScreen()
+    await fireEvent(toggle, 'valueChange', false)
+    await fireEvent.press(view.getByRole('button', { name: 'Save details' }))
+    await waitFor(() => expect(save).toHaveBeenCalledWith({ name: 'Household plan', description: 'Shared spending', rolloverCarriesOverspend: false }))
+    await waitFor(() => expect(view.getByRole('button', { name: 'Save details' }).props.accessibilityState.disabled).toBe(true))
+  })
+
+  it('does not offer the carry-overspending switch when the server has no rollover', async () => {
+    const { view } = await renderEditor({ state: { status: 'loaded', model: { ...model, rolloverCarriesOverspend: null } } })
+    expect(view.queryByRole('switch', { name: 'Carry overspending into next month' })).toBeNull()
+  })
+
   it('preserves input and explains ambiguous network failure without retrying it', async () => {
     const save = jest.fn().mockRejectedValue(new ApiError('network'))
     const { view } = await renderEditor({ onSaveMetadata: save })
@@ -49,11 +66,11 @@ describe('budget metadata editor', () => {
     jest.spyOn(Alert, 'alert').mockImplementation((_title, _message, buttons) => { buttons?.[1]?.onPress?.() })
     const { view } = await renderEditor({ onBack: back })
     await fireEvent.changeText(view.getByLabelText('Name'), 'Unsaved')
-    await fireEvent.press(view.getByRole('button', { name: 'Cancel' }))
+    await fireEvent.press(view.getByRole('button', { name: 'Close' }))
     await waitFor(() => expect(back).toHaveBeenCalled())
     const pending = await renderEditor({ pending: true })
     expect(pending.view.getByLabelText('Name').props.editable).toBe(false)
-    expect(pending.view.getByRole('button', { name: 'Cancel' }).props.accessibilityState.disabled).toBe(true)
+    expect(pending.view.getByRole('button', { name: 'Close' }).props.accessibilityState.disabled).toBe(true)
   })
 
   it('shows stale authoritative metadata as an alert and no account controls', async () => {
@@ -97,7 +114,7 @@ describe('budget metadata editor', () => {
       const { view } = await renderEditor({ onDeleteBudget: jest.fn(), deletePending: true })
       expect(view.getByRole('button', { name: 'Deleting…' }).props.accessibilityState.disabled).toBe(true)
       expect(view.getByLabelText('Name').props.editable).toBe(false)
-      expect(view.getByRole('button', { name: 'Cancel' }).props.accessibilityState.disabled).toBe(true)
+      expect(view.getByRole('button', { name: 'Close' }).props.accessibilityState.disabled).toBe(true)
     })
   })
 })

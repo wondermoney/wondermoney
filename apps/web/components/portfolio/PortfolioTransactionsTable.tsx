@@ -1,6 +1,6 @@
 "use client";
 
-import { CoinsIcon, Edit, Filter, Trash2, X } from "lucide-react";
+import { Edit, Filter, Trash2, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { usePostHog } from "posthog-js/react";
 import React, { useCallback, useMemo, useState } from "react";
@@ -17,6 +17,7 @@ import {
   type PortfolioTransaction,
   type PortfolioTransactionItem,
 } from "@/lib/api/portfolio/portfolioTransactionTypes";
+import { useFormatQuantity } from "@/lib/privacy/useFormatQuantity";
 import { useFormatCurrency } from "@/lib/utils/useFormatCurrency";
 
 import { FinancialAssetLogo } from "../FinancialAssetLogo";
@@ -64,6 +65,7 @@ const PortfolioTransactionsTable: React.FC<PortfolioTransactionsTableProps> =
     }) => {
       const t = useTranslations();
       const formatCurrency = useFormatCurrency();
+      const formatQuantity = useFormatQuantity();
       const posthog = usePostHog();
       const [resetPagination, setResetPagination] = useState(false);
 
@@ -114,11 +116,7 @@ const PortfolioTransactionsTable: React.FC<PortfolioTransactionsTableProps> =
             value: symbol,
             customRender: (
               <div className="flex items-center gap-2">
-                {symbol.startsWith("CURRENCY_") ? (
-                  <CoinsIcon />
-                ) : logoUrl ? (
-                  <FinancialAssetLogo symbol={symbol} logoUrl={logoUrl} />
-                ) : null}
+                <FinancialAssetLogo symbol={symbol} logoUrl={logoUrl} />
                 <Text>{symbol.replace("CURRENCY_", "")}</Text>
               </div>
             ),
@@ -250,16 +248,10 @@ const PortfolioTransactionsTable: React.FC<PortfolioTransactionsTableProps> =
             header: t("ticker"),
             cell: ({ row }) => (
               <div className="flex items-center gap-2">
-                {row.original.financialAssetKey.symbol.startsWith(
-                  "CURRENCY_",
-                ) ? (
-                  <CoinsIcon />
-                ) : row.original.financialAssetKey.logoUrl ? (
-                  <FinancialAssetLogo
-                    symbol={row.original.financialAssetKey.symbol}
-                    logoUrl={row.original.financialAssetKey.logoUrl}
-                  />
-                ) : null}
+                <FinancialAssetLogo
+                  symbol={row.original.financialAssetKey.symbol}
+                  logoUrl={row.original.financialAssetKey.logoUrl}
+                />
                 <Text>
                   {row.original.financialAssetKey.symbol.replace(
                     "CURRENCY_",
@@ -285,7 +277,7 @@ const PortfolioTransactionsTable: React.FC<PortfolioTransactionsTableProps> =
                     "WITHDRAWAL") ? null : (
                 <CellNumeric className="text-right">
                   {isTransactionItem(row.original)
-                    ? row.original.quantity
+                    ? formatQuantity(row.original.quantity)
                     : null}
                 </CellNumeric>
               ),
@@ -370,7 +362,7 @@ const PortfolioTransactionsTable: React.FC<PortfolioTransactionsTableProps> =
               ),
           }),
         ],
-        [columnHelper, formatCurrency, t],
+        [columnHelper, formatCurrency, formatQuantity, t],
       );
 
       const transactionPortfolioOptions = useMemo(
@@ -634,7 +626,7 @@ const PortfolioTransactionsTable: React.FC<PortfolioTransactionsTableProps> =
                 </div>
                 {renderActiveFilterTags("hidden md:flex")}
               </div>
-              <div className="flex flex-row items-center justify-between gap-2 md:hidden">
+              <div className="flex flex-row flex-wrap items-center justify-between gap-2 md:hidden">
                 {transactionDateRange && setTransactionDateRange && (
                   <DatePickerRange
                     onSelect={onDateRangeFilterChange}
@@ -662,16 +654,15 @@ const PortfolioTransactionsTable: React.FC<PortfolioTransactionsTableProps> =
               {renderActiveFilterTags("md:hidden")}
             </>
           )}
-          <div className="border-border bg-card border">
-            <Table
-              columns={columns}
-              data={filteredTransactions}
-              withPagination={withPagination}
-              withScrollAffordance
-              sticky={sticky}
-              footerActions={footerActions}
-            />
-          </div>
+          <Table
+            columns={columns}
+            data={filteredTransactions}
+            withPagination={withPagination}
+            withScrollAffordance
+            sticky={sticky}
+            footerActions={footerActions}
+            variant="ledger"
+          />
           {editingTransaction && (
             <PortfolioTransactionEditModal
               isOpen={!!editingTransaction}

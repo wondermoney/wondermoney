@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { EnableBankingConnection, EnableBankingConnectionStatus } from '@entity/EnableBankingConnection';
 import { NordigenRequisition, NordigenRequisitionStatus } from '@entity/NordigenRequisition';
+import { decodeEnableBankingInstitutionId, encodeEnableBankingInstitutionId } from '@utils/enable-banking-institution-id';
 
 // The controller imports `../app.js` (DI), which transitively pulls env-throwing modules.
 // Most tests here only exercise pure `__testOnly` helpers, so stub the app
@@ -27,11 +28,13 @@ type BankingAccount = Parameters<typeof computeStatus>[1][number];
 type EnableBankingInput = Parameters<typeof computeEnableBankingStatus>[0];
 type RequisitionInput = Parameters<typeof computeStatus>[0];
 
-const baseAccount = (overrides: Partial<{ deletedAt: Date | null; institutionDisplayName: null | string; institutionName: null | string; refreshedAt: Date | null; transactionsRefreshedAt: Date | null; }> = {}): BankingAccount => ({
+const baseAccount = (overrides: Partial<{ deletedAt: Date | null; institutionDisplayName: null | string; institutionName: null | string; isPrivate: boolean; ownerAppuserKey: number; refreshedAt: Date | null; transactionsRefreshedAt: Date | null; }> = {}): BankingAccount => ({
   accountFinancialInstitutionKey: overrides.institutionDisplayName !== undefined || overrides.institutionName !== undefined
     ? { displayName: overrides.institutionDisplayName ?? null, name: overrides.institutionName ?? null }
     : null,
+  accountOwnerAppuserKey: { appuserKey: overrides.ownerAppuserKey ?? 1 },
   deletedAt: overrides.deletedAt ?? null,
+  isPrivate: overrides.isPrivate ?? false,
   refreshedAt: overrides.refreshedAt ?? null,
   transactionsRefreshedAt: overrides.transactionsRefreshedAt ?? null,
 });
@@ -118,11 +121,40 @@ describe('institution name resolution', () => {
     expect(resolveInstitutionName([baseAccount({ institutionDisplayName: null, institutionName: 'SANDBOXFINANCE_SFIN0000' })])).toBeNull();
   });
 
-  it('returns null when two accounts have different institution display names', () => {
+  it('names the bank once when several accounts share it', () => {
     expect(resolveInstitutionName([
       baseAccount({ institutionDisplayName: 'Real Bank' }),
+      baseAccount({ institutionDisplayName: 'Real Bank' }),
+    ])).toBe('Real Bank');
+  });
+
+  it('names every bank, most accounts first, when the accounts span banks', () => {
+    expect(resolveInstitutionName([
       baseAccount({ institutionDisplayName: 'Other Bank' }),
-    ])).toBeNull();
+      baseAccount({ institutionDisplayName: 'Real Bank' }),
+      baseAccount({ institutionDisplayName: 'Real Bank' }),
+      baseAccount({ institutionDisplayName: 'Third Bank' }),
+    ])).toBe('Real Bank, Other Bank, Third Bank');
+  });
+
+  it("does not reveal the institution of another member's private account", () => {
+    const accounts = [
+      baseAccount({ institutionDisplayName: 'Real Bank', ownerAppuserKey: 1 }),
+      baseAccount({ institutionDisplayName: 'Secret Bank', isPrivate: true, ownerAppuserKey: 2 }),
+    ];
+    expect(resolveInstitutionName(accounts, 1)).toBe('Real Bank');
+    expect(resolveInstitutionName([accounts[1]!], 1)).toBeNull();
+  });
+
+  it("names the viewer's own private account", () => {
+    expect(resolveInstitutionName([baseAccount({ institutionDisplayName: 'Own Bank', isPrivate: true, ownerAppuserKey: 1 })], 1)).toBe('Own Bank');
+  });
+
+  it('ignores soft-deleted accounts', () => {
+    expect(resolveInstitutionName([
+      baseAccount({ institutionDisplayName: 'Real Bank' }),
+      baseAccount({ deletedAt: new Date('2026-07-29T09:00:00.000Z'), institutionDisplayName: 'Closed Bank' }),
+    ])).toBe('Real Bank');
   });
 
   it('returns null when the only displayName looks like a provider-id placeholder', () => {
@@ -171,7 +203,8 @@ describe('DTO mapping (forbidden identifiers are never present)', () => {
       }),
     ];
     const dto = mapRequisition({ ...req, accounts: { getItems: () => accounts } });
-    expect(Object.keys(dto).sort()).toEqual(['accessType', 'dataFreshAsOf', 'expiresAt', 'institutionName', 'provider', 'status']);
+    expect(Object.keys(dto).sort()).toEqual(['accessType', 'bankId', 'dataFreshAsOf', 'daysUntilExpiry', 'expiresAt', 'institutionName', 'provider', 'status']);
+    expect(dto.daysUntilExpiry).toBe(30);
     expect(dto.provider).toBe('GoCardless');
     expect(dto.accessType).toBe('open_banking');
     expect(dto.status).toBe('connected');
@@ -180,20 +213,21 @@ describe('DTO mapping (forbidden identifiers are never present)', () => {
     expect(dto.dataFreshAsOf).toBe(new Date('2026-07-30T10:00:00.000Z').toISOString());
   });
 
-  it('returns null for institutionName when accounts have mixed display names', () => {
+  it('names a connection whose accounts span banks after all of them', () => {
     const req = baseReq();
     const accounts = [
       baseAccount({ institutionDisplayName: 'Real Bank' }),
       baseAccount({ institutionDisplayName: 'Other Bank' }),
     ];
-    const dto = mapRequisition({ ...req, accounts: { getItems: () => accounts } });
-    expect(dto.institutionName).toBeNull();
+    const dto = mapRequisition({ ...req, accounts: { getItems: () => accounts } }, 1);
+    expect(dto.institutionName).toBe('Real Bank, Other Bank');
   });
 });
 
 const baseEnableBankingConnection = (overrides: Partial<{ accessValidUntil: Date | null; aspspName: null | string; status: EnableBankingConnectionStatus }> = {}): EnableBankingInput => ({
   accessValidUntil: overrides.accessValidUntil ?? null,
   accounts: { getItems: () => [] as BankingAccount[] },
+  aspspCountry: 'PT',
   aspspName: 'aspspName' in overrides ? overrides.aspspName ?? null : 'Test Bank',
   status: overrides.status ?? EnableBankingConnectionStatus.LINKED,
 });
@@ -239,6 +273,19 @@ describe('Enable Banking status matrix', () => {
     const accounts = [baseAccount({ refreshedAt: new Date('2026-07-30T10:00:00.000Z') })];
     expect(computeEnableBankingStatus(baseEnableBankingConnection({ accessValidUntil: new Date('2026-08-30T12:00:00.000Z'), status: EnableBankingConnectionStatus.LINKED }), accounts)).toBe('connected');
   });
+
+  it('linked with accessValidUntil within 14 days -> expiring, even with every account fresh', () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-07-31T12:00:00.000Z'));
+    const accounts = [baseAccount({ refreshedAt: new Date('2026-07-30T10:00:00.000Z') })];
+    expect(computeEnableBankingStatus(baseEnableBankingConnection({ accessValidUntil: new Date('2026-08-10T12:00:00.000Z'), status: EnableBankingConnectionStatus.LINKED }), accounts)).toBe('expiring');
+  });
+
+  it('expired while accessValidUntil is still in the future -> revoked (the bank ended consent early)', () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-07-31T12:00:00.000Z'));
+    expect(computeEnableBankingStatus(baseEnableBankingConnection({ accessValidUntil: new Date('2026-12-01T12:00:00.000Z'), status: EnableBankingConnectionStatus.EXPIRED }), [])).toBe('revoked');
+  });
 });
 
 describe('Enable Banking DTO mapping', () => {
@@ -252,7 +299,8 @@ describe('Enable Banking DTO mapping', () => {
       status: EnableBankingConnectionStatus.LINKED,
     });
     const dto = mapEnableBankingConnection({ ...connection, accounts: { getItems: () => accounts } });
-    expect(Object.keys(dto).sort()).toEqual(['accessType', 'dataFreshAsOf', 'expiresAt', 'institutionName', 'provider', 'status']);
+    expect(Object.keys(dto).sort()).toEqual(['accessType', 'bankId', 'dataFreshAsOf', 'daysUntilExpiry', 'expiresAt', 'institutionName', 'provider', 'status']);
+    expect(dto.daysUntilExpiry).toBe(30);
     expect(dto.provider).toBe('EnableBanking');
     expect(dto.accessType).toBe('open_banking');
     expect(dto.status).toBe('connected');
@@ -261,14 +309,22 @@ describe('Enable Banking DTO mapping', () => {
     expect(dto.dataFreshAsOf).toBe(new Date('2026-07-30T10:00:00.000Z').toISOString());
   });
 
+  it('returns the bank id the start-connection endpoint takes, so a client can reconnect', () => {
+    const dto = mapEnableBankingConnection(baseEnableBankingConnection({ aspspName: 'Real Bank' }));
+    expect(dto.bankId).not.toBeNull();
+    expect(decodeEnableBankingInstitutionId(dto.bankId ?? '')).toEqual({ country: 'PT', name: 'Real Bank' });
+  });
+
   it('collapses a null/blank aspspName to a null institutionName', () => {
     const dto = mapEnableBankingConnection(baseEnableBankingConnection({ aspspName: null }));
     expect(dto.institutionName).toBeNull();
+    expect(dto.bankId).toBeNull();
   });
 
   it('returns null expiresAt when accessValidUntil is not yet set', () => {
     const dto = mapEnableBankingConnection(baseEnableBankingConnection({ accessValidUntil: null, status: EnableBankingConnectionStatus.CREATED }));
     expect(dto.expiresAt).toBeNull();
+    expect(dto.daysUntilExpiry).toBeNull();
     expect(dto.status).toBe('processing');
   });
 });
@@ -304,10 +360,29 @@ describe('getBankConnections', () => {
     expect(json).toHaveBeenCalledWith({ connections: [mapRequisition(requisition)] });
   });
 
+  it("names a GoCardless connection without the caller's partner's private account", async () => {
+    const accounts = [
+      baseAccount({ institutionDisplayName: 'Real Bank', ownerAppuserKey: 1 }),
+      baseAccount({ institutionDisplayName: 'Secret Bank', isPrivate: true, ownerAppuserKey: 2 }),
+    ];
+    const requisition: RequisitionInput = {
+      accounts: { getItems: () => accounts },
+      expiresAt: new Date('2026-08-30T12:00:00.000Z'),
+      status: NordigenRequisitionStatus.LN,
+    };
+    mockFind({ nordigenRequisitions: [requisition] });
+    const json = vi.fn();
+
+    await getBankConnections(buildReq(), { json } as unknown as Response);
+
+    expect(json).toHaveBeenCalledWith({ connections: [expect.objectContaining({ institutionName: 'Real Bank' })] });
+  });
+
   it('includes an Enable Banking connection with correctly mapped fields', async () => {
     const connection: EnableBankingInput = {
       accessValidUntil: new Date('2026-08-30T12:00:00.000Z'),
       accounts: { getItems: () => [] },
+      aspspCountry: 'PT',
       aspspName: 'Enable Bank',
       status: EnableBankingConnectionStatus.LINKED,
     };
@@ -320,7 +395,9 @@ describe('getBankConnections', () => {
       connections: [
         {
           accessType: 'open_banking',
+          bankId: encodeEnableBankingInstitutionId({ country: 'PT', name: 'Enable Bank' }),
           dataFreshAsOf: null,
+          daysUntilExpiry: 30,
           expiresAt: new Date('2026-08-30T12:00:00.000Z').toISOString(),
           institutionName: 'Enable Bank',
           provider: 'EnableBanking',

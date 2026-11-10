@@ -1,10 +1,13 @@
 import type { AxiosInstance } from "axios";
 
 import api from "../api";
+import type { AmountsCompleteness } from "../completeness";
 import { TemplateBudget } from "./useBudgetTemplateByYearAndMonth";
 
 export interface GetBudgetTemplateByYearResponse {
   budget: TemplateBudget;
+  /** Rows with no amount in the budget's currency, left out of the spending. */
+  completeness?: AmountsCompleteness;
 }
 
 export interface GetBudgetTemplateByYearRequest {

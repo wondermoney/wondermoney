@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 
 import FirstRunOnboardingRouteShell from "@/components/onboarding/first-run/FirstRunOnboardingRouteShell";
+import { PrivacyModeBoundary } from "@/lib/privacy/PrivacyModeBoundary";
 
 export default function OnboardingLayout({
   children,
@@ -8,6 +9,8 @@ export default function OnboardingLayout({
   children: ReactNode;
 }) {
   return (
-    <FirstRunOnboardingRouteShell>{children}</FirstRunOnboardingRouteShell>
+    <PrivacyModeBoundary>
+      <FirstRunOnboardingRouteShell>{children}</FirstRunOnboardingRouteShell>
+    </PrivacyModeBoundary>
   );
 }

@@ -1,8 +1,11 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 
 import {
   addMoney,
   convertMoney,
+  CurrencyMismatchError,
+  guardCurrencyMismatch,
+  Money,
   moneyEquals,
   roundDisplay,
   subtractMoney,
@@ -68,5 +71,54 @@ describe('money arithmetic', () => {
     expect(moneyEquals(1.0001, 1.0002)).toBe(false);
     // Differ only beyond the column's scale -> the same stored value.
     expect(moneyEquals(1.000041, 1.000042)).toBe(true);
+  });
+});
+
+describe('Money, an amount that carries its currency', () => {
+  it('adds, subtracts and sums amounts in one currency exactly', () => {
+    expect(Money.toNumber(Money.add(Money.of(0.1, 'EUR'), Money.of(0.2, 'EUR')))).toBe(0.3);
+    expect(Money.toNumber(Money.subtract(Money.of(10, 'USD'), Money.of(2.5, 'USD')))).toBe(7.5);
+    expect(Money.toNumber(Money.sum([Money.of(1, 'EUR'), Money.of(2, 'EUR')], 'EUR'))).toBe(3);
+    expect(Money.toNumber(Money.sum([], 'GBP'))).toBe(0);
+    expect(Money.sum([], 'GBP').currency).toBe('GBP');
+  });
+
+  it('refuses to add, subtract or sum amounts in different currencies', () => {
+    expect(() => Money.add(Money.of(10, 'EUR'), Money.of(10, 'USD'))).toThrow(CurrencyMismatchError);
+    expect(() => Money.subtract(Money.of(10, 'EUR'), Money.of(10, 'USD'))).toThrow(CurrencyMismatchError);
+    expect(() => Money.sum([Money.of(10, 'EUR'), Money.of(10, 'USD')], 'EUR')).toThrow(CurrencyMismatchError);
+    // A one-item sum still checks the target currency.
+    expect(() => Money.sum([Money.of(10, 'USD')], 'EUR')).toThrow(CurrencyMismatchError);
+  });
+
+  it('names the operation and both currencies in the error', () => {
+    let caught: unknown;
+    try {
+      Money.add(Money.of(1, 'EUR'), Money.of(1, 'JPY'));
+    } catch (error) {
+      caught = error;
+    }
+    expect(caught).toBeInstanceOf(CurrencyMismatchError);
+    expect(caught).toMatchObject({ left: 'EUR', operation: 'add', right: 'JPY' });
+  });
+
+  it('converts only with an explicit rate and target currency', () => {
+    const converted = Money.convert(Money.of(19.99, 'EUR'), { rate: 1.0825, to: 'USD' });
+    expect(converted.currency).toBe('USD');
+    expect(Money.toNumber(converted)).toBe(21.6392);
+  });
+
+  it('refuses a conversion within one currency at any rate but 1', () => {
+    expect(Money.toNumber(Money.convert(Money.of(5, 'EUR'), { rate: 1, to: 'EUR' }))).toBe(5);
+    expect(() => Money.convert(Money.of(5, 'EUR'), { rate: 1.1, to: 'EUR' })).toThrow(RangeError);
+  });
+
+  it('logs a mismatch in production and hands back the fallback, but throws everywhere else', () => {
+    const log = vi.fn();
+    const mismatch = () => Money.add(Money.of(1, 'EUR'), Money.of(1, 'USD'));
+
+    expect(() => guardCurrencyMismatch('net worth', mismatch, () => null)).toThrow(CurrencyMismatchError);
+    expect(guardCurrencyMismatch('net worth', mismatch, () => null, { log, rethrow: false })).toBeNull();
+    expect(log).toHaveBeenCalledWith(expect.objectContaining({ left: 'EUR', operation: 'add', right: 'USD', where: 'net worth' }));
   });
 });

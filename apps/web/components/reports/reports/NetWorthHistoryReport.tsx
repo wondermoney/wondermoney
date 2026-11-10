@@ -21,29 +21,19 @@ import { AreaLineChartBase } from "@/components/ui/charts/area-line-chart-base";
 import useNetWorthHistory, {
   getNetWorthHistory,
 } from "@/lib/api/reports/netWorthHistory";
+import {
+  monthlyNetWorthPoints,
+  netWorthAxisLabels,
+} from "@/lib/reports/net-worth-labels";
 import { periodTrend } from "@/lib/reports/period-trend";
-import { formatCurrencyForLocale } from "@/lib/utils/formatCurrency";
-
-/**
- * The API writes this label as `Date.UTC(year, month, 1)`: a floating calendar
- * month, deliberately not a zoned instant (see
- * `api/src/services/reports/report-months.ts`). Reading it in the browser's zone
- * would shift every row a month back for viewers west of UTC. Same rule as
- * `utcOrdinal` in `lib/reports/cashflow-series.ts`.
- */
-function formatMonthLabel(isoDate: string, locale: string): string {
-  return new Intl.DateTimeFormat(locale, {
-    month: "short",
-    timeZone: "UTC",
-    year: "2-digit",
-  }).format(new Date(isoDate));
-}
+import { useFormatCurrency } from "@/lib/utils/useFormatCurrency";
 
 export function NetWorthHistoryReport() {
   const t = useTranslations("reports.reports.netWorthHistory");
   const tCommon = useTranslations("reports.common");
   const { filters } = useReportFilters();
   const locale = useLocale();
+  const formatAmountText = useFormatCurrency();
   const { currencyKey } = useReportsCurrency();
   const { data, isPending, error, refetch } = useNetWorthHistory(filters);
 
@@ -59,9 +49,14 @@ export function NetWorthHistoryReport() {
 
   const chartData = useMemo(() => {
     if (!data?.data) return [];
-    return data.data.map((point) => ({
+    const monthly = monthlyNetWorthPoints(data.data);
+    const labels = netWorthAxisLabels(
+      monthly.map((point) => point.date),
+      locale,
+    );
+    return monthly.map((point, index) => ({
       date: point.date,
-      month: formatMonthLabel(point.date, locale),
+      month: labels[index],
       netWorth: point.netWorth,
     }));
   }, [data, locale]);
@@ -77,7 +72,7 @@ export function NetWorthHistoryReport() {
   );
 
   const trend = useMemo(() => {
-    const points = data?.data;
+    const points = data?.data ? monthlyNetWorthPoints(data.data) : undefined;
     // No earlier month to compare against: no delta and no ratio.
     if (!points || points.length < 2) {
       return { delta: 0, percent: undefined };
@@ -135,14 +130,14 @@ export function NetWorthHistoryReport() {
             config={chartConfig}
             className="h-[420px]"
             yFormatter={(value) =>
-              formatCurrencyForLocale(value, currencyKey, locale, {
+              formatAmountText(value, currencyKey, {
                 notation: "compact",
                 maximumFractionDigits: 0,
               })
             }
             tooltipValueFormatter={(value) => (
               <span className="font-mono whitespace-nowrap tabular-nums">
-                {formatCurrencyForLocale(Number(value), currencyKey, locale, {
+                {formatAmountText(Number(value), currencyKey, {
                   maximumFractionDigits: 2,
                 })}
               </span>

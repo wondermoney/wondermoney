@@ -1,8 +1,9 @@
 name: CI
 
 # Runs on every pull request (forks included: no secrets needed) and on the long-lived
-# branches. Turbo runs each task only in the packages that have it. The private repository
-# runs it on Blacksmith runners; the public one (and forks) on GitHub-hosted runners.
+# branches. Turbo runs each task only in the packages that have it. Jobs run on the runner the
+# CI_RUNS_ON repository variable names, and on GitHub-hosted runners where it is unset (forks
+# included).
 on:
   pull_request:
   push:
@@ -12,44 +13,224 @@ on:
 permissions:
   contents: read
 
+# A new push to a pull request cancels its previous run. Pushes to develop and main get a group
+# per commit instead, so every commit there finishes its run: promote.sh and the API deploy
+# workflows (api-staging.yml, api-production.yml) gate on CI having passed on that exact commit.
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: ${{ github.workflow }}-${{ github.event_name == 'pull_request' && github.ref || github.sha }}
   cancel-in-progress: true
 
+env:
+  # Where turbo keeps its local cache, which the jobs below carry between runs.
+  TURBO_CACHE_DIR: .turbo/cache
+
 jobs:
-  checks:
-    name: Type-check, lint, test and build
-    runs-on: ${{ github.repository == 'wondermoney/wondermoney-internal' && 'blacksmith-2vcpu-ubuntu-2404' || 'ubuntu-latest' }}
-    timeout-minutes: 30
+  # Type-check, lint, the tests of every package but the API, and the builds run as parallel jobs;
+  # "Type-check, lint, test and build", further down, gathers them under the one check name they
+  # used to share as a single job.
+  #
+  # Each of these jobs keeps turbo's cache between runs with actions/cache, keyed by job, resolved
+  # Node version and commit; a run restores the newest entry of its branch or of the base branch.
+  # A task whose inputs did not change replays its logs and outputs instead of running. Turbo's
+  # hash covers the package's files, the hashes of the workspace packages it depends on (a change
+  # to packages/shared re-runs everything that uses it), its locked dependencies and the
+  # globalDependencies in turbo.json (a lockfile or workspace change re-runs everything). The
+  # prune step then drops the entries this run did not use, so the cache does not grow.
+  lint:
+    name: Type-check and lint
+    runs-on: ${{ vars.CI_RUNS_ON || 'ubuntu-latest' }}
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v7
       - uses: pnpm/action-setup@v6
-      - uses: actions/setup-node@v7
+      - id: node
+        uses: actions/setup-node@v7
         with:
           node-version-file: .nvmrc
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      # The API's tests run in the "API extras" job (with coverage), on a runner of their own:
-      # sharing two vCPUs with every other package's tests pushes some past their timeouts.
+      - uses: actions/cache@v6
+        with:
+          path: .turbo/cache
+          key: turbo-lint-${{ runner.os }}-node${{ steps.node.outputs.node-version }}-${{ github.sha }}
+          restore-keys: turbo-lint-${{ runner.os }}-node${{ steps.node.outputs.node-version }}-
       # Two at a time on two vCPUs: the API's type-check and typed lint each need up to 4 GB.
-      - run: pnpm turbo run type-check lint --concurrency=2
-      - run: pnpm turbo run test --filter='!@wondermoney/api'
-      # One at a time: the Next.js builds and the API compile don't fit in memory together.
+      - run: pnpm turbo run type-check lint --concurrency=2 --summarize
+      - run: .github/scripts/prune-turbo-cache.sh
+
+  # The tests of every package but the API (the "API tests" jobs, on runners of their own:
+  # sharing two vCPUs with other packages' tests pushed some past their timeouts) and the mobile
+  # app (the next job).
+  test:
+    name: Tests
+    runs-on: ${{ vars.CI_RUNS_ON || 'ubuntu-latest' }}
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - id: node
+        uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - uses: actions/cache@v6
+        with:
+          path: .turbo/cache
+          key: turbo-test-${{ runner.os }}-node${{ steps.node.outputs.node-version }}-${{ github.sha }}
+          restore-keys: turbo-test-${{ runner.os }}-node${{ steps.node.outputs.node-version }}-
+      # Vitest's default is one worker fewer than the cores: on two vCPUs, one test file at a time
+      # while the main process mostly waits. A worker per core nearly halves the web suite.
+      - run: VITEST_MAX_WORKERS=$(nproc) pnpm turbo run test --filter='!@wondermoney/api' --filter='!@wondermoney/mobile' --summarize
+      - run: .github/scripts/prune-turbo-cache.sh
+
+  mobile-test:
+    name: Mobile tests
+    runs-on: ${{ vars.CI_RUNS_ON || 'ubuntu-latest' }}
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - id: node
+        uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - uses: actions/cache@v6
+        with:
+          path: .turbo/cache
+          key: turbo-mobile-test-${{ runner.os }}-node${{ steps.node.outputs.node-version }}-${{ github.sha }}
+          restore-keys: turbo-mobile-test-${{ runner.os }}-node${{ steps.node.outputs.node-version }}-
+      # Jest's transform cache: the Babel output for the app and for React Native's untranspiled
+      # modules. Entries are keyed by file content and transform config, so a stale one is never
+      # used. Started afresh when the lockfile changes, so it does not grow without bound.
+      - uses: actions/cache@v6
+        with:
+          path: apps/mobile/node_modules/.cache/jest
+          key: jest-mobile-${{ runner.os }}-node${{ steps.node.outputs.node-version }}-${{ hashFiles('pnpm-lock.yaml') }}-${{ github.sha }}
+          restore-keys: jest-mobile-${{ runner.os }}-node${{ steps.node.outputs.node-version }}-${{ hashFiles('pnpm-lock.yaml') }}-
+      # jest.config.js's maxWorkers (25%, for a busy development machine) is one worker on two
+      # vCPUs; this runner runs nothing else.
+      - run: pnpm turbo run test --filter=@wondermoney/mobile --summarize -- --maxWorkers=$(nproc) --cacheDirectory=node_modules/.cache/jest
+      - run: .github/scripts/prune-turbo-cache.sh
+
+  # The web app on one runner, everything else on another: on one runner the Next.js builds and the
+  # API compile had to run one at a time, as they don't fit in memory together.
+  build:
+    name: Build (${{ matrix.name }})
+    runs-on: ${{ vars.CI_RUNS_ON || 'ubuntu-latest' }}
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - id: web
+            name: web
+            filter: '@wondermoney/web'
+          # Docs, the email templates and the API.
+          - id: rest
+            name: docs, email, API
+            filter: '!@wondermoney/web'
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - id: node
+        uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - uses: actions/cache@v6
+        with:
+          path: .turbo/cache
+          key: turbo-build-${{ matrix.id }}-${{ runner.os }}-node${{ steps.node.outputs.node-version }}-${{ github.sha }}
+          restore-keys: turbo-build-${{ matrix.id }}-${{ runner.os }}-node${{ steps.node.outputs.node-version }}-
       - name: Build
-        run: pnpm turbo run build --concurrency=1
+        run: pnpm turbo run build --filter='${{ matrix.filter }}' --concurrency=1 --summarize
         env:
           SKIP_ENV_VALIDATION: '1'
           NEXT_PUBLIC_SITE_URL: https://docs.wonder.money
+      - run: .github/scripts/prune-turbo-cache.sh
+
+  # Secrets and text that must not be published in this public repository. gitleaks checks a pull
+  # request's commits (a push: the whole tree) against the default rules and the allowlist in
+  # .gitleaks.toml. leak-check.sh greps the tree, and a pull request's added lines and commit
+  # messages, for the patterns in .github/leak-patterns.txt and, where secrets are available
+  # (pushes and same-repository pull requests, not forks), the maintainers' private list in the
+  # LEAK_PATTERNS secret. CONTRIBUTING.md, "Leak check", covers false positives.
+  leak-check:
+    name: Leak check
+    runs-on: ${{ vars.CI_RUNS_ON || 'ubuntu-latest' }}
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          # The pull request's commits, not only the merge result.
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Install gitleaks
+        env:
+          GITLEAKS_VERSION: 8.30.1
+        run: |
+          case "$(uname -m)" in
+            x86_64) arch=x64; sha256=551f6fc83ea457d62a0d98237cbad105af8d557003051f41f3e7ca7b3f2470eb ;;
+            aarch64) arch=arm64; sha256=e4a487ee7ccd7d3a7f7ec08657610aa3606637dab924210b3aee62570fb4b080 ;;
+            *) echo "::error::No gitleaks checksum for $(uname -m)"; exit 1 ;;
+          esac
+          archive="$RUNNER_TEMP/gitleaks.tar.gz"
+          curl -fsSL -o "$archive" "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/gitleaks_${GITLEAKS_VERSION}_linux_${arch}.tar.gz"
+          echo "$sha256  $archive" | sha256sum -c -
+          mkdir -p "$RUNNER_TEMP/gitleaks"
+          tar -xzf "$archive" -C "$RUNNER_TEMP/gitleaks" gitleaks
+          echo "$RUNNER_TEMP/gitleaks" >> "$GITHUB_PATH"
+      - name: Scan for secrets (gitleaks)
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          if [ -n "$HEAD_SHA" ]; then
+            gitleaks git . --config .gitleaks.toml --redact --no-banner --exit-code 1 --log-opts="--no-merges $BASE_SHA..$HEAD_SHA"
+          else
+            gitleaks dir . --config .gitleaks.toml --redact --no-banner --exit-code 1
+          fi
+      - name: Scan for internal identifiers
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          LEAK_PATTERNS: ${{ secrets.LEAK_PATTERNS }}
+        run: |
+          if [ -z "$LEAK_PATTERNS" ]; then
+            echo "::notice::LEAK_PATTERNS is not available to this run (a fork's pull request, or the secret is unset): checking the public patterns only."
+          fi
+          .github/scripts/leak-check.sh ${HEAD_SHA:+"$BASE_SHA..$HEAD_SHA"}
+
+  # The single check these jobs replaced, kept so anything that looks for it by name still finds
+  # it: it passes only when every one of them passed. It gathers the leak check too, so the
+  # required check covers it.
+  checks:
+    name: Type-check, lint, test and build
+    needs: [lint, test, mobile-test, build, leak-check]
+    if: always()
+    runs-on: ${{ vars.CI_RUNS_ON || 'ubuntu-latest' }}
+    timeout-minutes: 5
+    steps:
+      - name: Require every check job to have passed
+        env:
+          NEEDS: ${{ toJSON(needs) }}
+        run: |
+          jq -r 'to_entries[] | "\(.key): \(.value.result)"' <<<"$NEEDS"
+          jq -e 'all(.[]; .result == "success")' <<<"$NEEDS" >/dev/null
 
   api:
     name: API extras
-    runs-on: ${{ github.repository == 'wondermoney/wondermoney-internal' && 'blacksmith-2vcpu-ubuntu-2404' || 'ubuntu-latest' }}
-    timeout-minutes: 20
+    runs-on: ${{ vars.CI_RUNS_ON || 'ubuntu-latest' }}
+    # Typically 2-3 minutes; the timeout is there to catch a hang.
+    timeout-minutes: 10
     defaults:
       run:
         working-directory: apps/api
-    # Disposable database for the migration snapshot check below, and the server on which
-    # tests of concurrent sessions create (and drop) their own throwaway database.
+    # Disposable database for the migration snapshot check below.
     services:
       postgres:
         image: postgres:16
@@ -100,15 +281,86 @@ jobs:
             echo "::error::src/database/migrations/.snapshot-wmdb.json does not match the entities. Regenerate it with 'pnpm --filter @wondermoney/api migrate:dev:create' against a local database migrated to the head of the chain, and commit it with the migration."
             exit 1
           fi
-      - name: Tests with coverage thresholds
-        env:
-          # Lets the tests that need several real sessions (pg-test-db.ts) run; skipped elsewhere.
-          TEST_POSTGRES_URL: postgres://postgres:ci@localhost:5432/wmdb
-        run: pnpm run test:coverage
       # Reporting-only: known, triaged advisories remain in the production tree.
       - name: Audit production dependencies
         continue-on-error: true
         run: pnpm audit --prod --audit-level high
+
+  # The API suite (~4,400 tests) split across runners. Each shard records its results and coverage
+  # in a blob report; "API coverage" merges them and enforces the thresholds once, on the whole
+  # suite (vitest.config.ts: a shard's own coverage is partial, so it checks none).
+  api-tests:
+    name: API tests (${{ matrix.shard }}/3)
+    runs-on: ${{ vars.CI_RUNS_ON || 'ubuntu-latest' }}
+    # A shard typically takes 3-4 minutes, setup included; the timeout is there to catch a hang.
+    timeout-minutes: 12
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3]
+    defaults:
+      run:
+        working-directory: apps/api
+    # The server on which tests of concurrent sessions create (and drop) their own throwaway
+    # database (pg-test-db.ts).
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: ci
+          POSTGRES_DB: wmdb
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready --health-interval 5s --health-timeout 5s --health-retries 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @wondermoney/shared --filter @wondermoney/react-email run build:lib
+      - name: Tests (shard ${{ matrix.shard }} of 3)
+        env:
+          # Lets the tests that need several real sessions (pg-test-db.ts) run; skipped elsewhere.
+          TEST_POSTGRES_URL: postgres://postgres:ci@localhost:5432/wmdb
+          VITEST_COVERAGE_PARTIAL: '1'
+        run: pnpm exec vitest run --coverage --shard=${{ matrix.shard }}/3 --reporter=dot --reporter=blob
+      - uses: actions/upload-artifact@v7
+        with:
+          name: api-test-blob-${{ matrix.shard }}
+          path: apps/api/.vitest/blob
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 3
+
+  api-coverage:
+    name: API coverage
+    needs: api-tests
+    runs-on: ${{ vars.CI_RUNS_ON || 'ubuntu-latest' }}
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: apps/api
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - uses: actions/download-artifact@v8
+        with:
+          pattern: api-test-blob-*
+          merge-multiple: true
+          path: apps/api/.vitest/blob
+      # Re-reports every shard's results (failing if any test failed) and enforces the coverage
+      # thresholds in vitest.config.ts on the merged coverage.
+      - name: Merge shard reports and enforce coverage thresholds
+        run: pnpm exec vitest run --merge-reports --coverage --reporter=dot
 
   # Browser smoke tests: the Cypress specs that need only the web dev server (anonymous
   # redirects, login page, mobile navigation). No API or database is started; the
@@ -117,7 +369,7 @@ jobs:
   # of it the install and the first webpack compile.
   web-e2e:
     name: Web E2E smoke
-    runs-on: ${{ github.repository == 'wondermoney/wondermoney-internal' && 'blacksmith-2vcpu-ubuntu-2404' || 'ubuntu-latest' }}
+    runs-on: ${{ vars.CI_RUNS_ON || 'ubuntu-latest' }}
     timeout-minutes: 15
     defaults:
       run:
@@ -142,6 +394,9 @@ jobs:
         env:
           NEXT_PUBLIC_API_URL: http://localhost:3001
           NEXT_TELEMETRY_DISABLED: '1'
+          # Opens the analytics gate a production build opens, with no keys set, as on a
+          # default self-hosted instance: no-tracking.cy.ts asserts nothing loads.
+          NEXT_PUBLIC_ENABLE_ANALYTICS: '1'
       - name: Upload failure screenshots
         if: failure()
         uses: actions/upload-artifact@v7
@@ -152,7 +407,7 @@ jobs:
 
   mobile:
     name: Mobile extras
-    runs-on: ${{ github.repository == 'wondermoney/wondermoney-internal' && 'blacksmith-2vcpu-ubuntu-2404' || 'ubuntu-latest' }}
+    runs-on: ${{ vars.CI_RUNS_ON || 'ubuntu-latest' }}
     timeout-minutes: 15
     defaults:
       run:
@@ -160,7 +415,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7
       - uses: pnpm/action-setup@v6
-      # Expo tooling stays on Node 24 until Expo states Node 26 support (#43).
+      # Expo tooling stays on Node 24 until Expo states Node 26 support.
       - uses: actions/setup-node@v7
         with:
           node-version-file: apps/mobile/.nvmrc

@@ -1,0 +1,66 @@
+---
+title: Rules
+description: Categorize, rename, tag or hide transactions automatically, preview what a rule matches before you save it, and apply it to the transactions you already have.
+---
+
+A rule tells WonderMoney what to do with transactions that look a certain way: for example, "when the description contains NETFLIX, set the category to Entertainment". Rules belong to the household, so both members see and manage the same list.
+
+## Where to find them
+
+On the web, go to **Settings → Rules**. The list shows every rule in the order it runs, with a one-line summary such as "Description contains NETFLIX, set category Entertainment" and a switch to turn the rule on or off.
+
+- **Search** by name, or **filter** by the category a rule sets, to find a rule quickly.
+- **Reorder** by dragging a rule, or with its up and down arrows. Clear the search and filter first: the order always covers the whole list.
+- **Edit** or **delete** a rule from its row. Deleting a rule does not undo what it already changed.
+
+## Create a rule
+
+Choose **Create rule**, or start from a transaction: open its menu, choose **Edit**, then **Create rule**. Starting from a transaction fills in its merchant (or its description when it has no merchant) and its current category.
+
+A rule has:
+
+- **Conditions.** Each one compares a field of the transaction:
+  - **Description** or **Merchant**: contains, does not contain, is, starts with, ends with. Matching ignores capitals, accents and extra spaces. For the description you can match the text as shown or the bank's original text.
+  - **Amount**: is, is more than, is at least, is less than, is at most, or is between two amounts. Amounts are compared without their sign; add a **Direction** condition (money in or money out) to tell them apart.
+  - **Account**, **Category** (including "Uncategorized"), **Transaction type** and **Currency**: is any of, or is none of, the values you pick.
+- **Match all conditions or any condition.** A rule can have up to 20 conditions.
+- **Actions**: set the category, set the merchant (pick one or type a new name), rename the description, add notes (only where notes are empty), add tags, mark as reviewed, or hide the transaction. Each kind of action can appear once in a rule.
+- **Stop after this rule.** When the rule matches a transaction, the rules below it do not run on that transaction.
+
+A household can have up to 200 rules.
+
+## Preview before you save
+
+While you edit, the preview beside the form shows how many of your transactions the rule matches, how many of them it would change, and the 50 most recent matches with the change each would get. It updates a moment after you stop typing.
+
+The preview judges the rule on its own and covers the household's transactions you can see, hidden ones included. It never shows the other member's private accounts. A match can show **No change** when the transaction already has those values, or when you set that value yourself (see below).
+
+Saving a rule does not change the transactions you already have. To change them too, apply the rule (see below).
+
+## Apply rules to existing transactions
+
+After you save an active rule, WonderMoney checks how many of your existing transactions it would change. If there are any, it offers **Apply to N transactions**. Confirm to apply it, or choose **Not now** to leave them as they are.
+
+To run every active rule over the transactions you already have (for example after reordering them), choose **Apply to existing transactions** at the top of **Settings → Rules**. Rules then run from top to bottom, as they do on new transactions.
+
+- The count you confirm is exactly what applying changes.
+- Applying runs in the background: the dialog shows its progress, and you can close it while it runs. A message tells you how many transactions changed when it finishes.
+- It covers the household's transactions you can see, hidden ones included, but not deleted ones or the other member's private accounts. Everything listed under "What rules never change" still holds.
+- Applying the same rule again changes nothing more. Each change is recorded in the transaction's activity.
+- Only one run at a time per household: wait for one to finish before starting another.
+
+## What rules never change
+
+- Anything you set by hand: a category you chose, a merchant or description you edited, and notes you wrote. The rule still counts as a match, but leaves those fields alone.
+- The transaction type. Only transfer matching marks a transaction as a transfer.
+- Transactions on the other member's private accounts. A rule acts for the member who last changed its conditions or actions, and only on transactions that member can see.
+
+## Order
+
+Rules run from top to bottom. Each rule looks at the transaction as it arrived, not as earlier rules left it. When two rules set the same field, the lower one wins; tags from several rules add up. Turn on **Stop after this rule** to keep the rules below from running on what it matched.
+
+## Related links
+
+- [Categorize transactions](/en/docs/accounts-transactions/categorize-transactions)
+- [Understand transactions](/en/docs/accounts-transactions/understand-transactions)
+- [Manage categories](/en/docs/settings-security-privacy/manage-categories)

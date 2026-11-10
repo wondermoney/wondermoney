@@ -1,15 +1,14 @@
 {
   "$comment": [
-    "RAD-577 — the sub-processor list, as one source of truth.",
+    "The sub-processor list, as one source of truth.",
     "",
     "A sub-processor list is a GDPR Article 13/14 disclosure, and the Privacy Policy",
     "itself promises that 'a current list of sub-processors and their locations is",
-    "maintained in the sub-processor section below'. RAD-573 found that §12 still named",
-    "Financial Modeling Prep months after RAD-449 replaced it with EODHD: a disclosure",
-    "that described processing which was no longer happening, and omitted processing",
-    "that was.",
+    "maintained in the sub-processor section below'. A policy that goes on naming a",
+    "provider after it has been replaced describes processing that is no longer happening",
+    "and omits processing that is.",
     "",
-    "This file exists so that cannot happen quietly again. `scripts/check-sub-processors.mjs`",
+    "This file exists so that cannot happen quietly. `scripts/check-sub-processors.mjs`",
     "asserts every entry here has a heading in all three locale policies and that no",
     "policy names a processor missing from here. Adding a provider to the stack without",
     "adding it here, or here without disclosing it, fails the check.",
@@ -35,8 +34,7 @@
       "purpose": "Product analytics and session replay.",
       "evidence": "web AnalyticsInit.tsx: posthog.init({ api_host: 'https://eu.posthog.com' }), posthog.startSessionRecording() outside development, posthog.identify(user.id, { email }); api depends on posthog-node.",
       "personalData": "Email address, Supabase user id, usage events, and session recordings of authenticated screens — which contain account balances and transaction descriptions.",
-      "location": "European Union (eu.posthog.com)",
-      "notes": "Session replay was undisclosed. The policy described PostHog as product analytics only, which understates recording the user's screen."
+      "location": "European Union (eu.posthog.com)"
     },
     {
       "id": "sentry",
@@ -44,26 +42,25 @@
       "purpose": "Error and performance monitoring.",
       "evidence": "api depends on @sentry/node (SENTRY_DSN); web depends on @sentry/nextjs.",
       "personalData": "Error context, which can include user identifiers and request metadata.",
-      "location": "United States (org wonder-money, region us.sentry.io)",
-      "notes": "The Sentry org is on the US region, not the EU one. §7's Article 46 transfer basis has to cover this."
+      "location": "United States (us.sentry.io)"
     },
     {
       "id": "supabase",
       "heading": { "en": "Supabase", "pt": "Supabase", "es": "Supabase" },
       "purpose": "Authentication and identity only.",
-      "evidence": "api depends on @supabase/supabase-js with SUPABASE_JWT_SECRET / SUPABASE_SERVICE_KEY; web depends on @supabase/ssr. The application database is Postgres on the self-hosted VPS (api/CLAUDE.md), not Supabase.",
+      "evidence": "api depends on @supabase/supabase-js with SUPABASE_JWT_SECRET / SUPABASE_SERVICE_KEY; web depends on @supabase/ssr. The application database is the self-hosted Postgres (see the application-hosting entry), not Supabase.",
       "personalData": "Email address, authentication credentials and MFA state.",
       "location": "European Union",
-      "notes": "The policy claimed 'personal data, account data, and financial sync state are stored in Supabase's EU-hosted Postgres databases'. That has not been true since the move to the self-hosted stack — financial data lives in the VPS Postgres. RAD-283/RAD-298/RAD-299 will remove Supabase entirely; this entry must be replaced, not just deleted, when better-auth lands."
+      "notes": "Financial data lives in the self-hosted Postgres, not in Supabase. When Supabase is removed in favour of better-auth, this entry must be replaced, not just deleted."
     },
     {
       "id": "application-hosting",
       "heading": { "en": "netcup", "pt": "netcup", "es": "netcup" },
       "purpose": "Hosting for the API, the background worker and the production Postgres database that holds all account and transaction data.",
-      "evidence": "The stack runs as Docker containers on a VPS, with Postgres in a container on the same host. Provider confirmed on the host itself, 2026-08-22: /sys/class/dmi/id/sys_vendor reads 'netcup', and the public address 159.195.156.103 resolves to v2202607383589485341.goodsrv.de, AS197540 netcup GmbH, Nuremberg, Bavaria, DE.",
+      "evidence": "The API, the background worker and Postgres run as Docker containers on a virtual server operated by netcup GmbH.",
       "personalData": "Everything: accounts, transactions, balances, budgets, portfolios, household membership.",
       "location": "Germany (Nuremberg)",
-      "notes": "Was the single most significant gap. The infrastructure provider hosting the production database is not named anywhere in the repositories, so it had to be read off the machine. Coolify itself is self-hosted software, not a processor; the processor is netcup GmbH, who operate the VPS. Inside the EEA, so no Article 46 transfer safeguard is needed for the primary data store."
+      "notes": "Coolify is self-hosted software, not a processor; the processor is netcup GmbH, which operates the server. Inside the EEA, so no Article 46 transfer safeguard is needed for the primary data store."
     },
     {
       "id": "vercel",
@@ -96,7 +93,7 @@
       "evidence": "api services/eodhd.service.ts (EODHD_API_KEY).",
       "personalData": "None — ticker symbols only.",
       "location": "European Union",
-      "notes": "Replaced Financial Modeling Prep in RAD-449 (2026-08-05). The policy still named FMP until RAD-573."
+      "notes": "Replaced Financial Modeling Prep on 2026-08-05."
     },
     {
       "id": "llm-providers",
@@ -105,7 +102,7 @@
       "evidence": "api depends on @ai-sdk/azure and openai against an Azure AI Foundry resource (AZURE_OPENAI_ENDPOINT, AZURE_AI_FOUNDRY_ENDPOINT).",
       "personalData": "Transaction descriptions and merchant names; receipt and invoice images; CSV column headers.",
       "location": "European Union",
-      "notes": "Deliberately not named in the policy — founder decision, 2026-08-21: the section keeps its generic category wording rather than naming Microsoft/Azure. Revisit if a named disclosure is ever required. The generic wording is a choice on record, not an oversight."
+      "notes": "The policy describes this processor by category rather than naming the vendor; the generic wording is a deliberate choice."
     },
     {
       "id": "gocardless",
@@ -114,7 +111,7 @@
       "evidence": "No live integration: the api no longer reads NORDIGEN_* variables or calls GoCardless. Data from earlier connections stays (NordigenRequisition, Transaction.nordigenInternalTransactionId).",
       "personalData": "Bank account identifiers, balances and transaction history, on user instruction.",
       "location": "European Union (France)",
-      "notes": "No longer live: every bank connection now goes through Enable Banking. The entry stays in the policy because bank data was shared with GoCardless for connections made before the Enable Banking BYOK migration (2026-09); whether and when to remove it is a legal decision."
+      "notes": "No longer live: every bank connection now goes through Enable Banking. The entry stays in the policy because bank data was shared with GoCardless for connections made before the move to Enable Banking (2026-09)."
     },
     {
       "id": "enable-banking",
@@ -132,7 +129,7 @@
       "evidence": "api depends on @aws-sdk/client-s3 (AWS_ACCESS_KEY_ID); services/s3.ts pins region 'eu-west-2'. Callers: account/ocr.ts, account/imports.ts, portfolio-import-session.ts, webhooks/stripe.ts.",
       "personalData": "Uploaded bank statement CSVs, portfolio CSVs, and receipt/invoice images submitted for OCR — the most sensitive documents in the product.",
       "location": "United Kingdom (eu-west-2, London)",
-      "notes": "Undisclosed, and outside the EEA. The UK holds a European Commission adequacy decision, so an Article 46 safeguard is not required while that stands, but the policy's §7 transfer language and the LLM section's 'primary location of these services will be in Europe' both need to account for it. Moving the bucket to eu-west-1 (Ireland) or eu-central-1 (Frankfurt) would remove the question entirely."
+      "notes": "Outside the EEA. The UK holds a European Commission adequacy decision, so an Article 46 safeguard is not required while that stands."
     },
     {
       "id": "moloni",
@@ -140,8 +137,7 @@
       "purpose": "Portuguese statutory invoicing.",
       "evidence": "api services/moloni.ts against api.moloni.pt, called from controller/webhooks/stripe.ts. createCostumer sends { name: firstName + lastName, billingId: VAT number, country }.",
       "personalData": "Full name, VAT/tax identification number, country.",
-      "location": "Portugal",
-      "notes": "Undisclosed. §15 names Stripe as the payment processor but says nothing about who issues the invoice, which is a separate processor receiving directly identifying data."
+      "location": "Portugal"
     },
     {
       "id": "google-recaptcha",
@@ -149,8 +145,7 @@
       "purpose": "Anti-abuse scoring on signup and lead forms.",
       "evidence": "web depends on react-google-recaptcha-v3 (components/auth/ReCaptchaProvider.tsx, app/api/recaptcha/route.ts); lp depends on react-google-recaptcha-hook.",
       "personalData": "IP address, browser and device signals, interaction behaviour — collected before the visitor has an account.",
-      "location": "United States",
-      "notes": "Undisclosed, and it runs on visitors who never register. RAD-331 records it rejecting automated traffic on production signup, so it is live."
+      "location": "United States"
     },
     {
       "id": "github",
@@ -188,7 +183,7 @@
     },
     {
       "id": "aws-s3-growth",
-      "reason": "wondermoney-growth-content holds public marketing images only. The customer-document buckets are the aws-s3 entry above."
+      "reason": "A separate bucket holds public marketing images only. The customer-document buckets are the aws-s3 entry above."
     }
   ]
 }

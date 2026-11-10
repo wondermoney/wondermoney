@@ -2,7 +2,7 @@ import { useLocale, useTranslations } from "next-intl";
 
 import { StatCard, StatCardGrid } from "@/components/ui/StatCard";
 import type { Goal } from "@/lib/api/goals/types";
-import { formatGoalCurrency } from "@/lib/goals/format";
+import { useFormatGoalCurrency } from "@/lib/goals/useFormatGoalCurrency";
 
 function getCurrencyCode(goal?: Goal) {
   return (
@@ -16,6 +16,7 @@ function getCurrencyCode(goal?: Goal) {
 export default function GoalSummaryCards({ goals }: { goals: Goal[] }) {
   const t = useTranslations();
   const locale = useLocale();
+  const formatGoalCurrency = useFormatGoalCurrency();
   const currencyCodes = goals.map((goal) => getCurrencyCode(goal));
   const knownCurrencyCodes = currencyCodes.filter((code): code is string =>
     Boolean(code),

@@ -33,7 +33,7 @@ describe('monthly budget spending and linked accounts', () => {
     await em.flush();
     await addTransaction(em, household, { amount: -10, category: groceries, date: new Date('2026-07-15T12:00:00Z'), status: 'BOOKED' });
 
-    const rows = await getBudgetSpending({ accountKeys: accounts.map((account) => account.accountKey), period: 'monthly', templateKeys: [template.budgetTemplateCategoryKey], tenantKey: household.tenant.tenantKey, viewerAppuserKey: household.appuser.appuserKey });
+    const { categories: rows } = await getBudgetSpending({ accountKeys: accounts.map((account) => account.accountKey), currency: household.currency, period: 'monthly', templateKeys: [template.budgetTemplateCategoryKey], tenantKey: household.tenant.tenantKey, viewerAppuserKey: household.appuser.appuserKey });
 
     expect(rows.find((row) => row.child_category_name === 'Groceries')).toMatchObject({ category_amount: 10 });
     expect(rows.find((row) => row.child_category_name === null && row.parent_category_name === 'Food')).toMatchObject({ category_amount: 10 });

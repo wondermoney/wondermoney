@@ -130,7 +130,7 @@ export default function PortfolioClient({
     holdingsData.holdings.length === 0;
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-10 lg:gap-12">
       {/* Same header shell as the account and goal detail pages, and a way back
           to the list this was reached from. No `value` is passed: the total
           leads the summary grid immediately below, and repeating it here is
@@ -142,14 +142,14 @@ export default function PortfolioClient({
         backLabel={t("portfolio")}
         title={portfolioData.portfolio.name}
         actions={
-          <div className="flex flex-wrap items-center gap-2">
+          <>
             <PortfolioTransactionAddModal
               isOpen={isAddTransactionOpen}
               setOpen={setIsAddTransactionOpen}
               defaultPortfolioId={String(portfolioId)}
               importHref={`/${locale}${getPortfolioImportTransactionsHref(String(portfolioId))}`}
               trigger={
-                <Button className="gap-2" size="sm">
+                <Button>
                   <Plus className="size-4" />
                   {t("add-transaction")}
                 </Button>
@@ -161,9 +161,9 @@ export default function PortfolioClient({
               aria-label={t("portfolio-settings")}
               onClick={() => setIsSettingsOpen(true)}
             >
-              <Settings className="h-5 w-5" aria-hidden="true" />
+              <Settings className="size-4" aria-hidden="true" />
             </Button>
-          </div>
+          </>
         }
       />
 
@@ -213,9 +213,9 @@ export default function PortfolioClient({
           )}
 
           {/* Performance + Allocation */}
-          <section className="border-border bg-card rounded-lg border">
-            <div className="border-border border-b px-5 py-3">
-              <h2 className="text-foreground text-sm font-medium">
+          <section className="border-foreground min-w-0 border-t-2 pt-4">
+            <div className="mb-4">
+              <h2 className="text-foreground text-lg font-semibold tracking-tight">
                 {t("performance")}
               </h2>
             </div>
@@ -239,10 +239,10 @@ export default function PortfolioClient({
           </section>
 
           {/* Top Movers + Quick Stats */}
-          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-            <section className="border-border bg-card rounded-lg border">
-              <div className="border-border border-b px-5 py-3">
-                <h2 className="text-foreground text-sm font-medium">
+          <div className="grid grid-cols-1 gap-10 lg:grid-cols-2 lg:gap-12">
+            <section className="border-foreground min-w-0 border-t-2 pt-4">
+              <div className="mb-4">
+                <h2 className="text-foreground text-lg font-semibold tracking-tight">
                   {t("top-movers")}
                 </h2>
               </div>
@@ -253,9 +253,9 @@ export default function PortfolioClient({
               />
             </section>
             {dashboardData?.quickStats && (
-              <section className="border-border bg-card rounded-lg border">
-                <div className="border-border border-b px-5 py-3">
-                  <h2 className="text-foreground text-sm font-medium">
+              <section className="border-foreground min-w-0 border-t-2 pt-4">
+                <div className="mb-4">
+                  <h2 className="text-foreground text-lg font-semibold tracking-tight">
                     {t("quick-stats")}
                   </h2>
                 </div>
@@ -270,9 +270,9 @@ export default function PortfolioClient({
           />
 
           {portfolioData?.portfolio.targetAllocation ? (
-            <section className="border-border bg-card rounded-lg border">
-              <div className="border-border flex items-center justify-between border-b px-5 py-3">
-                <h2 className="text-foreground text-sm font-medium">
+            <section className="border-foreground min-w-0 border-t-2 pt-4">
+              <div className="mb-4 flex items-center justify-between">
+                <h2 className="text-foreground text-lg font-semibold tracking-tight">
                   {t("target-allocation")}
                 </h2>
                 <Button
@@ -311,24 +311,26 @@ export default function PortfolioClient({
           />
 
           {/* Dividend Income — only shown when portfolio has dividends */}
-          {dividendData && dividendData.totalDividends > 0 && (
-            <section className="border-border bg-card rounded-lg border">
-              <div className="border-border border-b px-5 py-3">
-                <h2 className="text-foreground text-sm font-medium">
-                  {t("dividend-income")}
-                </h2>
-              </div>
-              <PortfolioDividendIncome
-                portfolioId={portfolioId}
-                currency={dashboardData?.summary?.currency}
-              />
-            </section>
-          )}
+          {dividendData &&
+            (dividendData.totalDividends > 0 ||
+              dividendData.completeness?.isComplete === false) && (
+              <section className="border-foreground min-w-0 border-t-2 pt-4">
+                <div className="mb-4">
+                  <h2 className="text-foreground text-lg font-semibold tracking-tight">
+                    {t("dividend-income")}
+                  </h2>
+                </div>
+                <PortfolioDividendIncome
+                  portfolioId={portfolioId}
+                  currency={dashboardData?.summary?.currency}
+                />
+              </section>
+            )}
 
           {/* Holdings */}
-          <section className="border-border bg-card rounded-lg border">
-            <div className="border-border border-b px-5 py-3">
-              <h2 className="text-foreground text-sm font-medium">
+          <section className="border-foreground min-w-0 border-t-2 pt-4">
+            <div className="mb-4">
+              <h2 className="text-foreground text-lg font-semibold tracking-tight">
                 {t("holdings")}
               </h2>
             </div>

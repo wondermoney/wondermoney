@@ -36,11 +36,23 @@ export function isCanonicalExternalUserId(externalUserId: string): boolean {
   return CANONICAL_UUID.test(externalUserId);
 }
 
+/**
+ * Product analytics are opt-in: the worker delivers only with ANALYTICS_OUTBOX_MODE=live (and a
+ * POSTHOG_API_KEY). Anything else, including an unset mode, is off, and then no outbox rows are
+ * written either, so a self-hosted instance never accumulates events it will not send. Set the
+ * mode on both the API and the worker: each writes rows.
+ */
+export function isAnalyticsOutboxEnabled(env: NodeJS.ProcessEnv = process.env): boolean {
+  return env['ANALYTICS_OUTBOX_MODE']?.trim() === 'live';
+}
+
 export async function recordAnalyticsOutboxEvent(
   em: Pick<EntityManager, 'upsert'>,
   input: AnalyticsOutboxEventInput,
+  env: NodeJS.ProcessEnv = process.env,
 ): Promise<void> {
   assertAnalyticsOutboxEvent(input);
+  if (!isAnalyticsOutboxEnabled(env)) return;
   const timestamp = new Date();
   await em.upsert(
     AnalyticsOutbox,

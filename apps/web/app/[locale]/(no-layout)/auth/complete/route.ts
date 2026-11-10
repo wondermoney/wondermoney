@@ -120,7 +120,10 @@ async function completeAuth(request: NextRequest) {
       { locale },
       {
         baseURL: getServerApiUrl(),
-        headers: { Cookie: cookieHeader },
+        // The API refuses a cookie-authenticated POST without an allowed
+        // Origin (csrf-origin.ts). A browser would send one; this request is
+        // the web server's own, so it states the app origin the API expects.
+        headers: { Cookie: cookieHeader, Origin: safeOrigin },
       },
     );
 

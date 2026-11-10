@@ -1,13 +1,52 @@
+import { parseEnv } from '@expo/env'
+import { existsSync, readFileSync } from 'node:fs'
+import { join } from 'node:path'
 import type { ExpoConfig } from 'expo/config'
+import { type ConfigPlugin, withGradleProperties } from 'expo/config-plugins'
 
 // JSON, not the sibling .ts module: Expo's config loader transpiles app.config.ts alone
 // and cannot resolve a TypeScript import. See src/lib/auth/google-oauth-clients.ts.
 import googleOAuthClients from './src/lib/auth/google-oauth-clients.json'
 
+// EAS's free Android builder (4 vCPUs, 16 GB) ran out of memory compiling every native
+// module's C++ for four ABIs in parallel, and the Gradle daemon was killed mid-build.
+// Phones only need the two ARM ABIs (x86/x86_64 are emulators and some Chromebooks), and
+// two workers keep the parallel CMake jobs within the machine's memory.
+const RELEASE_GRADLE_PROPERTIES: Record<string, string> = {
+  reactNativeArchitectures: 'armeabi-v7a,arm64-v8a',
+  'org.gradle.workers.max': '2',
+}
+
+const withReleaseGradleProperties: ConfigPlugin = (expoConfig) =>
+  withGradleProperties(expoConfig, (gradleConfig) => {
+    for (const [key, value] of Object.entries(RELEASE_GRADLE_PROPERTIES)) {
+      gradleConfig.modResults = gradleConfig.modResults.filter(
+        (item) => item.type !== 'property' || item.key !== key,
+      )
+      gradleConfig.modResults.push({ type: 'property', key, value })
+    }
+    return gradleConfig
+  })
+
+// The Expo CLI loads .env files before evaluating this config, but EAS CLI turns that off
+// (EXPO_NO_DOTENV), so read these two keys from the gitignored .env.local here. A value already
+// in the environment (an EAS Build worker, or the shell) wins.
+const EAS_PROJECT_KEYS = ['WONDERMONEY_EXPO_OWNER', 'WONDERMONEY_EAS_PROJECT_ID'] as const
+const localEnvFile = join(__dirname, '.env.local')
+if (existsSync(localEnvFile)) {
+  const localEnv = parseEnv(readFileSync(localEnvFile, 'utf8'))
+  for (const key of EAS_PROJECT_KEYS) {
+    if (!process.env[key] && localEnv[key]) process.env[key] = localEnv[key]
+  }
+}
+
+const EXPO_OWNER = process.env.WONDERMONEY_EXPO_OWNER
+const EAS_PROJECT_ID = process.env.WONDERMONEY_EAS_PROJECT_ID
+
 const config: ExpoConfig = {
   name: 'WonderMoney',
   slug: 'wondermoney',
-  version: '1.0.1',
+  version: '1.0.2',
   orientation: 'default',
   icon: './assets/images/icon.png',
   scheme: 'wondermoney',
@@ -95,12 +134,11 @@ const config: ExpoConfig = {
     typedRoutes: true,
     reactCompiler: true,
   },
-  owner: 'nip10',
-  extra: {
-    eas: {
-      projectId: '2245b75c-7f6f-42b6-9e80-f03178b9ebdb',
-    },
-  },
+  // The Expo account and EAS project are the maintainer's (or a fork's), not part of the
+  // source: they come from the environment, with no defaults. Without them the app still
+  // runs locally; EAS commands need both. See README.md, "EAS configuration".
+  ...(EXPO_OWNER ? { owner: EXPO_OWNER } : {}),
+  ...(EAS_PROJECT_ID ? { extra: { eas: { projectId: EAS_PROJECT_ID } } } : {}),
 }
 
-export default config
+export default withReleaseGradleProperties(config)

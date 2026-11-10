@@ -114,6 +114,14 @@ export default defineConfig(
           message: '`as never` is forbidden — it is assignable to every type and erases the compiler\'s ability to flag a genuine mismatch. Retype the value (FilterQuery<T>, FindOptions<T>, RequiredEntityData<T>, EntityKey<T>) or use the typed test helpers in src/__tests__/__helpers__/. New uses are caught here; existing usages are tracked in the arch/as-never-batch refactor.',
           selector: 'TSAsExpression[typeAnnotation.typeName.name="never"], TSAsExpression[typeAnnotation.type="TSNeverKeyword"]',
         },
+        {
+          message: 'No implied exchange rate of 1: a missing rate means no converted amount, not the amount itself. Resolve rates through resolveExchangeRate/convertWithStatus (@service/currency/exchange-rate) and store null with FxStatus.MISSING when there is none.',
+          selector: [
+            'LogicalExpression[operator=/^(\\?\\?|\\|\\|)$/][right.value=1][left.type="Identifier"][left.name=/[Rr]ate$/]',
+            'LogicalExpression[operator=/^(\\?\\?|\\|\\|)$/][right.value=1][left.type="MemberExpression"][left.property.name=/[Rr]ate$/]',
+            'LogicalExpression[operator=/^(\\?\\?|\\|\\|)$/][right.value=1][left.type="ChainExpression"][left.expression.property.name=/[Rr]ate$/]',
+          ].join(', '),
+        },
       ],
 
       // Stylistic concerns that don't interfere with Prettier

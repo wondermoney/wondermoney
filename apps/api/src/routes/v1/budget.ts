@@ -8,6 +8,7 @@ import {
   editBudget,
   getBudget,
   getBudgetAccounts,
+  getBudgetForecast,
   getBudgets,
   getBudgetsFull,
   getBudgetTemplateByYear,
@@ -25,6 +26,7 @@ router.get('/', getBudgets);
 router.get('/full', getBudgetsFull);
 router.get('/:budgetKey', getBudget);
 router.get('/:budgetKey/accounts', getBudgetAccounts);
+router.get('/:budgetKey/forecast', getBudgetForecast);
 router.get('/:budgetKey/:year/:month', getBudgetTemplateByYearAndMonth);
 router.get('/:budgetKey/:year', getBudgetTemplateByYear);
 router.get('/:budgetKey/:year/until/:month', getBudgetTemplateByYearUntilMonth);

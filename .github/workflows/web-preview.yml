@@ -1,0 +1,58 @@
+name: Web Preview
+on:
+  push:
+    branches-ignore:
+      - main
+      - develop
+    paths:
+      - 'apps/web/**'
+      - 'pnpm-lock.yaml'
+      - '.github/workflows/web-preview.yml'
+# Each job asks for what it needs.
+permissions: {}
+jobs:
+  deploy-preview:
+    # Runs on push, so only for branches of this repository: a fork's pull request never
+    # triggers it. Deploys only from the main repository, never from a fork. Until the move to
+    # the public repository, the private one deploys too: its DEPLOY_REPO variable names it.
+    # Delete that variable at the cutover and only the public repository deploys.
+    # Dependabot branches get no secrets, so they can't deploy; CI still checks them.
+    if: >-
+      (github.repository == 'wondermoney/wondermoney' || github.repository == vars.DEPLOY_REPO)
+      && github.actor != 'dependabot[bot]'
+    runs-on: blacksmith-2vcpu-ubuntu-2404
+    environment: preview
+    permissions:
+      contents: read
+    env:
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+      SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+      SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
+      SENTRY_ORG: ${{ secrets.SENTRY_ORG }}
+      SENTRY_PROJECT: web
+      NODE_OPTIONS: --max-old-space-size=4096
+    steps:
+      - name: Clone repository
+        uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Lint
+        run: pnpm --filter @wondermoney/web run lint
+      - name: Test
+        run: pnpm --filter @wondermoney/web run test
+      - name: Typecheck
+        run: pnpm --filter @wondermoney/web run type-check
+      - name: Install Vercel CLI
+        run: npm install --global vercel@latest
+      - name: Pull Vercel Environment Information
+        run: vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
+      - name: Build Project Artifacts
+        run: vercel build --token=${{ secrets.VERCEL_TOKEN }}
+      - name: Deploy Project Artifacts to Vercel
+        run: vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }}

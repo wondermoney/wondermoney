@@ -29,7 +29,7 @@ import {
   findPartialMonth,
   getTrailingNetAverage,
 } from "@/lib/reports/cashflow-series";
-import { formatCurrencyForLocale } from "@/lib/utils/formatCurrency";
+import { useFormatCurrency } from "@/lib/utils/useFormatCurrency";
 
 export function CashflowReport() {
   const t = useTranslations("reports.reports.cashflow");
@@ -37,6 +37,7 @@ export function CashflowReport() {
   const tCommon = useTranslations("reports.common");
   const { filters } = useReportFilters();
   const locale = useLocale();
+  const formatAmountText = useFormatCurrency();
   const { currencyKey } = useReportsCurrency();
   const shouldReduceMotion = useReducedMotion();
 
@@ -82,15 +83,15 @@ export function CashflowReport() {
     () => ({
       income: {
         label: t("income"),
-        color: "var(--chart-1)",
+        color: "var(--success-text)",
       },
       expenses: {
         label: t("expenses"),
-        color: "var(--chart-2)",
+        color: "var(--destructive-text)",
       },
       net: {
         label: t("net"),
-        color: "var(--chart-3)",
+        color: "var(--chart-1)",
       },
     }),
     [t],
@@ -183,7 +184,7 @@ export function CashflowReport() {
             )}`;
           }}
           yFormatter={(value) =>
-            formatCurrencyForLocale(Number(value), currencyKey, locale, {
+            formatAmountText(Number(value), currencyKey, {
               notation: "compact",
               maximumFractionDigits: 0,
             })

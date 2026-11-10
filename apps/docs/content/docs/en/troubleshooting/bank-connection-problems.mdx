@@ -19,7 +19,8 @@ Before the bank flow starts, WonderMoney explains what happens next, including t
 - Whether the bank currently supports the connection method you are using.
 - Whether you completed every approval step at the bank.
 - Whether the account is connected to the correct account.
-- Whether the connection expired or was revoked.
+- Whether the connection expired or was revoked. When every account stops answering, WonderMoney asks the bank whether your consent still holds. If the bank ended it early, the connection shows as ended by the bank and stops refreshing until you reconnect it. See Consent length and reconnecting below.
+- Whether the bank is limiting refreshes. Banks may allow only a few automatic refreshes a day. When a bank asks WonderMoney to slow down, the next automatic refresh waits until the time the bank gives, or about a day if it gives none.
 
 ## What to try
 
@@ -27,6 +28,18 @@ Before the bank flow starts, WonderMoney explains what happens next, including t
 2. Sign in to the bank carefully and confirm every permission screen.
 3. Wait a few minutes and refresh the accounts list.
 4. Remove the connection and reconnect it if the process is stuck.
+
+## Consent length and reconnecting
+
+Banks give WonderMoney read-only access for a limited time. Under PSD2 a consent lasts at most 180 days, and each bank sets its own limit, often 90 or 180 days. The connections list in Settings shows when each consent ends.
+
+- **Expiring soon.** In the last 14 days before a consent ends, the connection shows how many days are left and offers **Reconnect**, on the web and in the mobile app.
+- **Consent expired.** The consent reached its end date. Data stops refreshing until you reconnect.
+- **Ended by bank.** The bank ended the consent before its end date, for example after you changed your online banking password or withdrew access in your banking app. Data stops refreshing until you reconnect.
+
+WonderMoney also emails you about 7 days and again within the last day before a consent ends, and when the bank ends it early. See [Email preferences](/en/docs/settings-security-privacy/email-preferences) to turn these alerts off.
+
+Reconnecting starts a new consent with the same bank. When it completes, WonderMoney matches the bank's accounts to the ones you already have by account number (IBAN) and currency, so your accounts, balances and transaction history stay as they are. The old connection leaves the list once all its accounts have moved to the new one. An account you removed is not brought back, and an account the bank shares without an account number may appear as a new account.
 
 ## Enable Banking key problems
 

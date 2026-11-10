@@ -1,9 +1,14 @@
+"use client";
+
 import type { ReactNode } from "react";
 
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import type { RecurringItem } from "@/lib/api/recurring/useRecurringItems";
 import { cn } from "@/lib/utils";
-import { formatCurrencyForScreenReader } from "@/lib/utils/formatCurrency";
+import {
+  useFormatCurrency,
+  useFormatCurrencyForScreenReader,
+} from "@/lib/utils/useFormatCurrency";
 
 type ImpactItem = RecurringItem;
 
@@ -48,23 +53,12 @@ const isFiniteNumber = (value: unknown): value is number =>
 const isCurrencyCode = (value: unknown): value is string =>
   typeof value === "string" && /^[A-Z]{3}$/.test(value);
 
-const formatMoney = (value: number, currencyCode?: string, locale?: string) => {
-  if (!isCurrencyCode(currencyCode)) {
-    return new Intl.NumberFormat(locale, {
-      notation: "standard",
-      maximumFractionDigits: 2,
-      minimumFractionDigits: 2,
-    }).format(value);
-  }
+type FormatMoney = ReturnType<typeof useFormatCurrency>;
+type FormatSpoken = ReturnType<typeof useFormatCurrencyForScreenReader>;
 
-  return new Intl.NumberFormat(locale, {
-    style: "currency",
-    notation: "standard",
-    maximumFractionDigits: 2,
-    minimumFractionDigits: 2,
-    currency: currencyCode,
-  }).format(value);
-};
+// A non-ISO code formats as a plain number with two decimals.
+const formatMoney = (format: FormatMoney, value: number, currencyCode?: string) =>
+  format(value, currencyCode ?? "", { minimumFractionDigits: 2 });
 
 const getRecurringRange = (item: ImpactItem) => {
   const multiplier = cadenceMonthlyMultiplier[item.cadence];
@@ -94,27 +88,23 @@ const getRecurringRange = (item: ImpactItem) => {
 };
 
 const formatRange = (
+  format: FormatMoney,
   min: number,
   max: number,
   currencyCode?: string,
-  locale?: string,
 ) =>
   min === max
-    ? formatMoney(min, currencyCode, locale)
-    : `${formatMoney(min, currencyCode, locale)}–${formatMoney(max, currencyCode, locale)}`;
+    ? formatMoney(format, min, currencyCode)
+    : `${formatMoney(format, min, currencyCode)}–${formatMoney(format, max, currencyCode)}`;
 
 const formatAccessibleRange = (
+  formatSpoken: FormatSpoken,
   min: number,
   max: number,
   currencyCode?: string,
-  locale?: string,
 ) => {
   const accessibleMoney = (value: number) =>
-    formatCurrencyForScreenReader(
-      value,
-      isCurrencyCode(currencyCode) ? currencyCode : "EUR",
-      locale ?? "en",
-    );
+    formatSpoken(value, isCurrencyCode(currencyCode) ? currencyCode : "EUR");
 
   return min === max
     ? accessibleMoney(min)
@@ -129,6 +119,9 @@ export function RecurringCategoryImpact({
   labels,
   className,
 }: RecurringCategoryImpactProps) {
+  const format = useFormatCurrency();
+  const formatSpoken = useFormatCurrencyForScreenReader();
+
   if (items.length === 0) {
     return labels.emptyState ? <>{labels.emptyState}</> : null;
   }
@@ -215,18 +208,18 @@ export function RecurringCategoryImpact({
                 <div className="font-mono text-sm font-medium whitespace-nowrap tabular-nums">
                   <span className="sr-only">
                     {formatAccessibleRange(
+                      formatSpoken,
                       group.amountMin,
                       group.amountMax,
                       group.currencyCode,
-                      locale,
                     )}
                   </span>
                   <span aria-hidden="true">
                     {formatRange(
+                      format,
                       group.amountMin,
                       group.amountMax,
                       group.currencyCode,
-                      locale,
                     )}
                   </span>
                 </div>

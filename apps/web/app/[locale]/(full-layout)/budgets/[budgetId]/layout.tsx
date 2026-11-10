@@ -14,7 +14,7 @@ import { BudgetsMonthlyViewOnboarding } from "@/components/onboarding/BudgetsMon
 import { BudgetsYearlyViewOnboarding } from "@/components/onboarding/BudgetsYearlyViewOnboarding";
 import { Spinner } from "@/components/ui/Spinner";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Heading, Text } from "@/components/ui/Typography";
+import { Text } from "@/components/ui/Typography";
 import { usePathname, useRouter } from "@/i18n/navigation";
 import { useBankConnectionResult } from "@/lib/account/useBankConnectionResult";
 import { safePostHogCapture } from "@/lib/analytics/safe-diagnostics";
@@ -183,10 +183,12 @@ export default function BudgetLayout({ children }: { children: ReactNode }) {
         <Spinner />
       ) : (
         <div className="flex flex-col gap-2">
-          <div className="flex flex-col justify-between gap-2 md:flex-row md:items-center">
+          <div className="mb-4 flex flex-col justify-between gap-3 md:flex-row md:items-end">
             <div className="flex flex-col justify-center gap-2">
               <div className="flex items-center gap-2">
-                <Heading variant="h2">{budgetData.budget.name}</Heading>
+                <h1 className="text-foreground text-2xl font-semibold tracking-tight lg:text-3xl">
+                  {budgetData.budget.name}
+                </h1>
                 {params.month === undefined ? (
                   <BudgetsYearlyViewOnboarding />
                 ) : (

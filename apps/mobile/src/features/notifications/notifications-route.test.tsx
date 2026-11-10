@@ -33,6 +33,7 @@ jest.mock('./use-notification-preferences', () => {
 
 const preferences: NotificationPreferencesDto = {
   accountRecovery: { effectiveEnabled: true, storedEnabled: true },
+  bankSyncAlerts: { effectiveEnabled: true, storedEnabled: true },
   budgetAlerts: { deliverySupported: true, effectiveEnabled: true, storedEnabled: true },
   growth: { effectiveEnabled: false, storedEnabled: false },
   marketingOptOut: false,

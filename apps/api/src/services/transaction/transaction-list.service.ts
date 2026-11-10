@@ -1,5 +1,5 @@
 import { type FilterQuery, QueryOrder } from '@mikro-orm/core';
-import { orderBy, pick, random } from 'lodash-es';
+import { orderBy, pick } from 'lodash-es';
 
 import { DI } from '@app/app';
 import { HIDDEN_FILTER } from '@app/database/filters/tenant-filter';
@@ -9,7 +9,11 @@ import type { Currency } from '@entity/Currency';
 import { LoanRepaymentLink } from '@entity/LoanRepaymentLink';
 import { RecurringOccurrence } from '@entity/RecurringOccurrence';
 import { Transaction } from '@entity/Transaction';
+import { compareTags, type TagDto, toTagDto } from '@service/tag/tag.service';
+import { type CategorySpendingFlags, loadCategorySpendingFlags } from '@service/transaction/category-spending';
+import { SPLIT_LINE_POPULATE, type SplitLineDto, toSplitLineDtos } from '@service/transaction/transaction-split.service';
 import { buildTransactionWhere, getTransactionTotal, type TransactionFilterInput } from '@service/transaction/transaction-total.service';
+import { TRANSFER_DESTINATION_POPULATE, type TransferDestinationDto, transferDestinationOf } from '@service/transaction/transaction-transfer.service';
 import { NotFoundError } from '@utils/errors';
 
 export interface TransactionListRequest {
@@ -41,8 +45,9 @@ export interface TransactionRecurringSeriesDto {
  * and exactly `transaction_tenant_date_key_idx`, so keyset paging costs the same at any
  * depth. Each row carries its loan-repayment split and recurring-series membership.
  *
- * Offline accounts with no transaction on the first page get a synthetic "Initial balance" row
- * so the client can show their balance at all (see `syntheticOpeningBalanceRows`).
+ * Offline accounts with no transaction at all get a synthetic "Initial balance" row so the client
+ * can show their balance at all (see `syntheticOpeningBalanceRows`). It sits at the account's
+ * creation date in the same order, on whichever page that date falls.
  *
  * `total` is counted on the first page only: a paginating client already has it, and re-counting
  * the largest table on every page is waste. Later pages answer `total: null`, and `hasMore`
@@ -76,27 +81,37 @@ export async function listTransactions(request: TransactionListRequest) {
       'transactionTypeKey',
       'transactionStatusKey',
       'appuserTransactionCategories.categoryKey',
+      'appuserTransactionCategories.categoryKey.parentCategory',
+      'transactionTags.tagKey',
+      ...SPLIT_LINE_POPULATE,
+      ...TRANSFER_DESTINATION_POPULATE,
     ],
     ...findOptions,
   });
 
   const loanRepayments = await loadLoanRepayments(transactions);
+  const spendingFlags = await loadCategorySpendingFlags(DI.em, tenantKey);
   const rows = transactions.map((transaction) => {
-    const row = toTransactionRow(transaction);
+    const row = toTransactionRow(transaction, viewerAppuserKey, spendingFlags);
     const loanRepayment = summarizeLoanRepayments(loanRepayments.get(transaction.transactionKey) ?? []);
     return loanRepayment ? { ...row, loanRepayment } : row;
   });
 
   const isFirstPage = !cursor;
-  const syntheticRows = isFirstPage ? syntheticOpeningBalanceRows(accounts, transactions, filters, viewer.currencyKey.code) : [];
-
-  const recurringSeries = await loadRecurringSeries(transactions, tenantKey);
-  const page = [...syntheticRows, ...rows].map((row) => ({ ...row, recurringSeries: recurringSeries.get(row.transactionKey) ?? null }));
-
-  const total = isFirstPage ? (await getTransactionTotal(filters)) + syntheticRows.length : null;
   const lastRow = transactions.at(-1);
   // Null when this page is the end of the set, so a client can stop without a second call.
   const nextCursor = lastRow && transactions.length >= limit ? encodeTransactionCursor(lastRow) : null;
+
+  const syntheticRows = await syntheticOpeningBalanceRows(accounts, filters, viewer.currencyKey.code);
+  const pageSyntheticRows = syntheticRows.filter((row) => onThisPage(row.transactionDate, cursorTime(cursor), nextCursor ? lastRow?.transactionDate : undefined));
+
+  const recurringSeries = await loadRecurringSeries(transactions, tenantKey);
+  // Newest first, an opening row after any real row of the same instant: it came before them.
+  const page = orderBy([...rows, ...pageSyntheticRows], [(row) => row.transactionDate?.getTime() ?? 0, (row) => ((row.transactionKey ?? 0) < 0 ? 0 : 1)], ['desc', 'desc']).map(
+    (row) => ({ ...row, recurringSeries: recurringSeries.get(row.transactionKey) ?? null }),
+  );
+
+  const total = isFirstPage ? (await getTransactionTotal(filters)) + syntheticRows.length : null;
 
   return {
     // `total` counts synthetic rows too, so compare it against everything on the page. From page
@@ -127,21 +142,24 @@ async function loadLoanRepayments(transactions: Transaction[]): Promise<Map<numb
 
 async function loadScopeAccounts(scope: TransactionListRequest['scope']): Promise<Account[]> {
   if (scope === 'all-accounts') {
-    return DI.em.find(Account, { deletedAt: undefined }, { populate: ['currencyKey'] });
+    return DI.em.find(Account, { deletedAt: undefined }, { populate: ['currencyKey', 'accountFinancialInstitutionKey'] });
   }
-  const account = await DI.em.findOne(Account, { accountKey: scope.accountKey, deletedAt: undefined }, { populate: ['currencyKey'] });
+  const account = await DI.em.findOne(Account, { accountKey: scope.accountKey, deletedAt: undefined }, { populate: ['currencyKey', 'accountFinancialInstitutionKey'] });
   if (!account) throw new NotFoundError('Account not found');
   return [account];
 }
 
-function toTransactionRow(transaction: Transaction) {
+function pickTransactionRow(transaction: Transaction, spendingFlags: CategorySpendingFlags) {
   return pick(
     {
       // eslint-disable-next-line @typescript-eslint/no-misused-spread
       ...transaction,
-      appuserTransactionCategories: transaction.appuserTransactionCategories.map((assignment) =>
-        pick(assignment.categoryKey, ['categoryKey', 'name', 'icon', 'bgColor', 'textColor', 'parentCategory', 'isSystemCategory']),
-      ),
+      // `countsAsSpending` is the household's value, the parent's included (`category-spending.ts`).
+      appuserTransactionCategories: transaction.appuserTransactionCategories.map((assignment) => ({
+        ...pick(assignment.categoryKey, ['categoryKey', 'name', 'icon', 'bgColor', 'textColor', 'isSystemCategory']),
+        countsAsSpending: spendingFlags.countsAsSpending(assignment.categoryKey),
+        parentCategory: assignment.categoryKey.parentCategory?.categoryKey,
+      })),
     },
     [
       'transactionKey',
@@ -170,6 +188,25 @@ function toTransactionRow(transaction: Transaction) {
   );
 }
 
+/**
+ * A row carries its tags and, when it is split, its lines (empty otherwise). A split row's
+ * `appuserTransactionCategories` is the largest line's category; clients show the lines instead.
+ * An outgoing transfer carries where it went, when the user said so.
+ */
+function toTransactionRow(transaction: Transaction, viewerAppuserKey: number, spendingFlags: CategorySpendingFlags): Omit<ReturnType<typeof pickTransactionRow>, 'splits'> & { splits: SplitLineDto[]; tags: TagDto[]; transferDestination: null | TransferDestinationDto } {
+  return { ...pickTransactionRow(transaction, spendingFlags), splits: toSplitLineDtos(transaction), tags: rowTags(transaction), transferDestination: transferDestinationOf(transaction, viewerAppuserKey) };
+}
+
+/** The row's tags, by name. The links come through the tenant filter, so only a visible row has any. */
+function rowTags(transaction: Transaction): TagDto[] {
+  return transaction.transactionTags
+    .getItems()
+    .map((link) => link.tagKey)
+    .filter((tag) => !tag.deletedAt)
+    .map(toTagDto)
+    .sort(compareTags);
+}
+
 /** A transaction's loan repayment split, summed across every active link (ordered by loan for a stable name). */
 function summarizeLoanRepayments(links: LoanRepaymentLink[]) {
   if (links.length === 0) return null;
@@ -196,7 +233,8 @@ function summarizeLoanRepayments(links: LoanRepaymentLink[]) {
 }
 
 /**
- * "Initial balance" rows for offline (non-bank-linked) accounts with no transaction on this page.
+ * "Initial balance" rows for offline (non-bank-linked) accounts with no transaction at all. Their
+ * balance has never moved, so the row carries it, dated when the account was created.
  *
  * They are not transactions, but the client renders and counts them, so the filters have to treat
  * them the way the client would:
@@ -205,12 +243,14 @@ function summarizeLoanRepayments(links: LoanRepaymentLink[]) {
  *   category  — no categories, so a named-category filter excludes them but `__uncategorized__`
  *               *matches* them. That asymmetry is deliberate.
  *   reviewed  — stamped `reviewed: true`, so the needs-review filter excludes them.
+ *   tag       — no tags, so any tag filter excludes them.
  *   account   — they carry an `accountKey`, so the account filter narrows rather than excludes.
+ *   date      — dated at the account's creation, so a date range excludes them like a real row.
  *
  * `confidence` is not in this list: it is a server-side filter that never saw these rows.
  *
- * First page only — they have no position in the keyset order, and re-emitting them on every page
- * (each time with a fresh random negative key) left clients unable to de-duplicate them.
+ * Each page emits only the rows whose date falls within it (`onThisPage`), and the key is the
+ * account's, negated, so a client that sees one twice can de-duplicate it.
  */
 async function loadRecurringSeries(transactions: Transaction[], tenantKey: number): Promise<Map<number | undefined, TransactionRecurringSeriesDto>> {
   const bySeries = new Map<number | undefined, TransactionRecurringSeriesDto>();
@@ -239,21 +279,35 @@ async function loadRecurringSeries(transactions: Transaction[], tenantKey: numbe
   return bySeries;
 }
 
-function syntheticOpeningBalanceRows(accounts: Account[], transactions: Transaction[], filters: TransactionFilterInput, viewerCurrencyCode: string): TransactionRow[] {
-  const { accountKeys, categoryKeys, transactionTypes, unreviewedOnly } = filters;
+async function syntheticOpeningBalanceRows(accounts: Account[], filters: TransactionFilterInput, viewerCurrencyCode: string): Promise<TransactionRow[]> {
+  const { accountKeys, categoryKeys, fromDate, tagKeys, toDate, transactionTypes, unreviewedOnly } = filters;
   const namedCategoriesOnly = categoryKeys !== undefined && categoryKeys.keys.length > 0 && !categoryKeys.includeUncategorized;
-  if (unreviewedOnly === true || (transactionTypes !== undefined && transactionTypes.length > 0) || namedCategoriesOnly) return [];
+  const tagged = tagKeys !== undefined && tagKeys.length > 0;
+  if (unreviewedOnly === true || (transactionTypes !== undefined && transactionTypes.length > 0) || namedCategoriesOnly || tagged) return [];
 
-  const accountsOnPage = new Set(transactions.map((transaction) => transaction.accountKey?.accountKey));
-  return accounts
-    .filter(
-      (account) =>
-        !account.nordigenRequisitionKey &&
-        !accountsOnPage.has(account.accountKey) &&
-        (!accountKeys || accountKeys.length === 0 || accountKeys.includes(account.accountKey)),
-    )
+  const candidates = accounts.filter(
+    (account) =>
+      !account.nordigenRequisitionKey &&
+      (!accountKeys || accountKeys.length === 0 || accountKeys.includes(account.accountKey)) &&
+      (!fromDate || account.createdAt >= fromDate) &&
+      (!toDate || account.createdAt <= toDate),
+  );
+  // Hidden rows count: a balance that moved through a hidden row has still moved.
+  const transactionCounts = await Promise.all(
+    candidates.map((account) =>
+      DI.em.count(Transaction, { accountKey: { accountKey: account.accountKey }, deletedAt: undefined }, { filters: { [HIDDEN_FILTER]: false } }),
+    ),
+  );
+  return candidates
+    .filter((_, index) => transactionCounts[index] === 0)
     .map((account) => ({
-      accountKey: { accountKey: account.accountKey, accountName: account.accountName, currencyKey: { code: account.currencyKey.code } } as Account,
+      // The institution's logo is the opening row's mark, as on the account's real rows.
+      accountKey: {
+        accountFinancialInstitutionKey: account.accountFinancialInstitutionKey ? { logoUrl: account.accountFinancialInstitutionKey.logoUrl ?? null } : null,
+        accountKey: account.accountKey,
+        accountName: account.accountName,
+        currencyKey: { code: account.currencyKey.code },
+      } as unknown as Account,
       appuserCurrencyBalance: account.appuserCurrencyBalance,
       appuserCurrencyKey: { code: viewerCurrencyCode } as Currency,
       appuserSettlementAmount: account.appuserCurrencyBalance,
@@ -265,9 +319,23 @@ function syntheticOpeningBalanceRows(accounts: Account[], transactions: Transact
       reviewed: true,
       settlementAmount: account.balance,
       settlementCurrencyKey: { code: account.currencyKey.code } as Currency,
+      splits: [],
+      tags: [],
       transactionDate: account.createdAt,
-      transactionKey: random(Number.MIN_SAFE_INTEGER, -1),
+      transactionKey: -account.accountKey,
+      transferDestination: null,
     }));
+}
+
+/** The page spans `[its last row's date, the cursor's date)`; the first page has no upper end and the last no lower one. */
+function cursorTime(cursor: string | undefined): Date | undefined {
+  const time = Number(cursor?.split('_')[0]);
+  return cursor && Number.isSafeInteger(time) ? new Date(time) : undefined;
+}
+
+function onThisPage(date: Date | undefined, before: Date | undefined, from: Date | undefined): boolean {
+  if (!date) return false;
+  return (!before || date < before) && (!from || date >= from);
 }
 
 /** `<epochMs>_<transactionKey>` of the last row on a page. Opaque to clients. */

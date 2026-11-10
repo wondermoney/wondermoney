@@ -46,6 +46,13 @@ describe('BudgetVsActualRoute', () => {
     expect(view.getByText('Groceries')).toBeOnTheScreen()
   })
 
+  it('shows the amounts in the budget\'s currency the report names, not the viewer\'s', async () => {
+    mockQuery = { ...mockQuery, data: { ...responseData, completeness: { currencyCode: 'USD', isComplete: true, unconvertedTransactions: 0 } } }
+    const view = await renderRoute()
+    expect(view.queryAllByText(/\$400/).length).toBeGreaterThan(0)
+    expect(view.queryAllByText(/€/)).toHaveLength(0)
+  })
+
   it('wires the export button to useReportExport', async () => {
     const view = await renderRoute()
     await fireEvent.press(view.getByRole('button', { name: 'Export CSV' }))

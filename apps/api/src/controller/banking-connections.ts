@@ -4,6 +4,8 @@ import type { Request, Response } from 'express';
 import { EnableBankingConnection, EnableBankingConnectionStatus } from '@entity/EnableBankingConnection';
 import { NordigenRequisition, NordigenRequisitionStatus } from '@entity/NordigenRequisition';
 import { authedUser } from '@middleware/authed-context';
+import { daysUntil, enableBankingConsentOf } from '@service/enable-banking/enable-banking-consent';
+import { encodeEnableBankingInstitutionId } from '@utils/enable-banking-institution-id';
 import { InternalServerError } from '@utils/errors';
 
 import { DI } from '../app.js';
@@ -14,25 +16,40 @@ const ACCESS_TYPE = 'open_banking' as const;
 
 interface AccountWithInstitution {
   accountFinancialInstitutionKey?: null | { displayName?: null | string; name?: null | string };
+  accountOwnerAppuserKey?: null | { appuserKey?: number };
   deletedAt?: Date | null;
+  isPrivate?: boolean;
   refreshedAt?: Date | null;
   transactionsRefreshedAt?: Date | null;
 }
 
 interface BankConnectionDto {
   accessType: typeof ACCESS_TYPE;
+  /**
+   * The id `GET /v1/banking/bank/:bankId/start` takes to connect this bank again, so a client can
+   * offer "Reconnect" without searching the bank list. Null for the legacy provider, which can no
+   * longer be connected.
+   */
+  bankId: null | string;
   dataFreshAsOf: null | string;
+  /** Whole days until the consent ends, 0 once it has ended, null when there is no end date. */
+  daysUntilExpiry: null | number;
   expiresAt: null | string;
   institutionName: null | string;
   provider: typeof ENABLE_BANKING_PROVIDER | typeof PROVIDER;
   status: ConnectionStatus;
 }
 
-type ConnectionStatus = 'connected' | 'error' | 'expired' | 'processing';
+/**
+ * `expiring`: linked, with the consent ending within 14 days. `revoked`: the bank ended the
+ * consent before its end date. Both apply to Enable Banking only; see `enable-banking-consent.ts`.
+ */
+type ConnectionStatus = 'connected' | 'error' | 'expired' | 'expiring' | 'processing' | 'revoked';
 
 interface OwnedEnableBankingConnection {
   accessValidUntil?: Date | null;
   accounts: { getItems: () => AccountWithInstitution[] };
+  aspspCountry?: null | string;
   aspspName?: null | string;
   status: EnableBankingConnectionStatus;
 }
@@ -60,30 +77,39 @@ function isProviderIdPlaceholder(value: string): boolean {
 }
 
 /**
- * The *only* place a tenant-resolved institution display name may
- * be surfaced. The rules are conservative: a name is returned only when one
- * distinct, human-safe display name exists across the requisition's
- * accounts. A conflict or a provider-ID placeholder collapses to null so
- * the DTO never leaks a value the mobile client cannot use.
+ * The *only* place a GoCardless connection's institution name is derived.
+ * `NordigenRequisition` stores no institution of its own, so the name comes from
+ * the human-safe `displayName` of the institutions its accounts carry:
+ *
+ * - one distinct name: that name;
+ * - several (one requisition spanning banks, as seeded data does): every
+ *   distinct name, most accounts first, joined with ", ". Naming only the most
+ *   common bank would mislabel the others, and a "4 banks" label would be
+ *   untranslated copy from the API; a list of proper nouns needs no locale;
+ * - none: null, and the client shows its provider fallback.
+ *
+ * The upstream `name` is a provider id (e.g. 'SANDBOXFINANCE_SFIN0000') and is
+ * never used; a provider-id-shaped displayName is skipped too. Soft-deleted
+ * accounts don't name the connection, and neither does another member's private
+ * account (`viewerAppuserKey`), so its institution can't leak through the label.
  */
-function resolveInstitutionName(accounts: AccountWithInstitution[]): null | string {
-  // Only the human-safe `displayName` is eligible. A provider-id-shaped
-  // displayName is also rejected: the underlying `name` on
-  // AccountFinancialInstitution is the upstream provider id (e.g.
-  // 'SANDBOXFINANCE_SFIN0000'), and the DTO must never surface a value
-  // the mobile client cannot use. A null/blank displayName collapses to
-  // "no candidate", the same outcome as a missing relation.
-  const candidates: string[] = [];
+function isOwnedBy(account: AccountWithInstitution, viewerAppuserKey: number | undefined): boolean {
+  if (viewerAppuserKey === undefined) return false;
+  return account.accountOwnerAppuserKey?.appuserKey === viewerAppuserKey;
+}
+
+function resolveInstitutionName(accounts: AccountWithInstitution[], viewerAppuserKey?: number): null | string {
+  const counts = new Map<string, number>();
   for (const account of accounts) {
-    const institution = account.accountFinancialInstitutionKey;
-    if (!institution) continue;
-    const display = institution.displayName?.trim();
+    if (account.deletedAt) continue;
+    if (account.isPrivate && !isOwnedBy(account, viewerAppuserKey)) continue;
+    const display = account.accountFinancialInstitutionKey?.displayName?.trim();
     if (!display || isProviderIdPlaceholder(display)) continue;
-    candidates.push(display);
+    counts.set(display, (counts.get(display) ?? 0) + 1);
   }
-  if (candidates.length === 0) return null;
-  const first = candidates[0]!;
-  return candidates.every((c) => c === first) ? first : null;
+  if (counts.size === 0) return null;
+  // Map preserves first-seen order and Array#sort is stable, so ties keep it.
+  return [...counts.entries()].sort((a, b) => b[1] - a[1]).map(([name]) => name).join(', ');
 }
 
 /**
@@ -145,38 +171,36 @@ function resolveLinkedConnectionStatus(expiresAt: Date | null | undefined, accou
 }
 
 /**
- * Maps `EnableBankingConnectionStatus` onto the existing `ConnectionStatus`
- * vocabulary. `created` and `authorized` are both pre-session, in-progress
- * states in Enable Banking's two-step `POST /auth` -> `POST /sessions` flow —
- * neither has an exact match in the existing vocabulary, so both collapse to
- * `processing`, the same value `NordigenRequisitionStatus.CR` (created) maps
- * to. `linked` reuses `resolveLinkedConnectionStatus` against
- * `accessValidUntil`, mirroring how a GoCardless `LN` requisition is resolved
- * against `expiresAt`.
+ * Maps an Enable Banking connection onto the `ConnectionStatus` vocabulary through its consent
+ * state (`enableBankingConsentOf`). A consent that is still in force is `expiring` when it ends
+ * within 14 days, whatever its accounts' freshness: renewing it is the action the user needs.
+ * Otherwise the same freshness rules as a GoCardless `LN` requisition decide between
+ * `processing` and `connected`.
  */
 function computeEnableBankingStatus(connection: OwnedEnableBankingConnection, accounts: AccountWithInstitution[]): ConnectionStatus {
-  switch (connection.status) {
-    case EnableBankingConnectionStatus.AUTHORIZED:
-    case EnableBankingConnectionStatus.CREATED:
-      return 'processing';
-    case EnableBankingConnectionStatus.ERROR:
-      return 'error';
-    case EnableBankingConnectionStatus.EXPIRED:
-      return 'expired';
-    case EnableBankingConnectionStatus.LINKED:
+  const { state } = enableBankingConsentOf(connection);
+  switch (state) {
+    case 'active':
       return resolveLinkedConnectionStatus(connection.accessValidUntil, accounts);
-    default:
-      return 'error';
+    case 'error':
+    case 'expired':
+    case 'expiring':
+    case 'revoked':
+      return state;
+    case 'pending':
+      return 'processing';
   }
 }
 
-function mapRequisition(req: OwnedRequisition): BankConnectionDto {
+function mapRequisition(req: OwnedRequisition, viewerAppuserKey?: number): BankConnectionDto {
   const accounts = req.accounts.getItems();
   return {
     accessType: ACCESS_TYPE,
+    bankId: null,
     dataFreshAsOf: computeFreshnessAsOf(accounts),
+    daysUntilExpiry: req.status === NordigenRequisitionStatus.LN ? daysUntil(req.expiresAt) : null,
     expiresAt: toIso(req.expiresAt),
-    institutionName: resolveInstitutionName(accounts),
+    institutionName: resolveInstitutionName(accounts, viewerAppuserKey),
     provider: PROVIDER,
     status: computeStatus(req, accounts),
   };
@@ -184,8 +208,8 @@ function mapRequisition(req: OwnedRequisition): BankConnectionDto {
 
 /**
  * Enable Banking counterpart to `mapRequisition`. Unlike GoCardless,
- * `institutionName` doesn't need `resolveInstitutionName`'s cross-account
- * agreement + provider-id-placeholder rules: Enable Banking's `aspspName` is
+ * `institutionName` doesn't need `resolveInstitutionName`'s account-derived
+ * name + provider-id-placeholder rules: Enable Banking's `aspspName` is
  * always a human-readable ASPSP display name straight from Enable Banking's
  * own registry, not a raw upstream id, so a direct (blank-guarded) mapping is
  * enough.
@@ -194,7 +218,11 @@ function mapEnableBankingConnection(connection: OwnedEnableBankingConnection): B
   const accounts = connection.accounts.getItems();
   return {
     accessType: ACCESS_TYPE,
+    bankId: connection.aspspCountry && !isNullOrBlank(connection.aspspName)
+      ? encodeEnableBankingInstitutionId({ country: connection.aspspCountry, name: connection.aspspName ?? '' })
+      : null,
     dataFreshAsOf: computeFreshnessAsOf(accounts),
+    daysUntilExpiry: enableBankingConsentOf(connection).daysUntilExpiry,
     expiresAt: toIso(connection.accessValidUntil),
     institutionName: isNullOrBlank(connection.aspspName) ? null : (connection.aspspName?.trim() ?? null),
     provider: ENABLE_BANKING_PROVIDER,
@@ -255,7 +283,7 @@ export async function getBankConnections(req: Request, res: Response) {
     ),
   ]);
   return res.json({
-    connections: [...requisitions.map(mapRequisition), ...enableBankingConnections.map(mapEnableBankingConnection)],
+    connections: [...requisitions.map((requisition) => mapRequisition(requisition, user.appuserKey)), ...enableBankingConnections.map(mapEnableBankingConnection)],
   });
 }
 

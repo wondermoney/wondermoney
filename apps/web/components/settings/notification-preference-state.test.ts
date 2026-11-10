@@ -151,4 +151,7 @@ test("builds independent partial PATCH payloads for every stream", () => {
     buildNotificationPreferencePatch("accountRecovery", true),
     { accountRecoveryEnabled: true },
   );
+  assert.deepEqual(buildNotificationPreferencePatch("bankSyncAlerts", false), {
+    bankSyncAlertsEnabled: false,
+  });
 });

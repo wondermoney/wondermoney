@@ -1,24 +1,57 @@
 import { memo, useCallback, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Pressable, RefreshControl, ScrollView, StyleSheet, Text, useColorScheme, View } from 'react-native'
-import { SafeAreaView } from 'react-native-safe-area-context'
+import { RefreshControl, ScrollView, StyleSheet, View } from 'react-native'
 
+import { Amount } from '@/components/ui/amount'
 import { Button } from '@/components/ui/button'
+import { FLOATING_ACTION_SIZE, FloatingActionButton } from '@/components/ui/floating-action-button'
+import { HeadlineFigure } from '@/components/ui/headline-figure'
+import { Badge } from '@/components/ui/badge'
+import { accountMark, EntityMark } from '@/components/ui/entity-mark'
+import { IconButton } from '@/components/ui/icon-button'
+import { List, ListRow } from '@/components/ui/list-row'
+import { Notice } from '@/components/ui/notice'
 import { PageHeader } from '@/components/ui/page-header'
 import { PreviewLabel } from '@/components/ui/preview-label'
-import { SegmentedControl } from '@/components/ui/segmented-control'
+import { SafeAreaView } from '@/components/ui/screen-safe-area'
+import { EmptyState, Section } from '@/components/ui/section'
+import { SelectTrigger } from '@/components/ui/select-trigger'
+import { OptionSheet } from '@/components/ui/sheet'
+import { Text } from '@/components/ui/text'
 import { formatCategoryName } from '@/lib/formatters/category-name'
-import { formatCurrency } from '@/lib/formatters/financial'
-import { themeTokens, type Palette } from '@/theme/tokens'
-import { textStyles } from '@/theme/typography'
-import type { InsightPeriod } from '@/features/account-insights/insights-contract'
-import type { CashflowRow, CategoryRow, MetricGroup } from '@/features/account-insights/insights-view-model'
+import { useFormatMoney } from '@/lib/formatters/money-display'
+import { formatRelativeTime } from '@/lib/formatters/relative-time'
+import { themeTokens } from '@/theme/tokens'
+import { usePalette } from '@/theme/use-palette'
+import { ACCOUNTS_TIMEFRAMES, type AccountsTimeframe } from '@/features/account-insights/accounts-timeframe'
+import { BalanceGrowthChart } from '@/features/account-insights/balance-growth-chart'
+import type { BalancePoint } from '@/features/account-insights/balance-growth'
+import { CashflowChart } from '@/features/account-insights/cashflow-chart'
+import { CategorySpendingList } from '@/features/account-insights/category-spending-list'
+import type { CashflowRow, CategoryRow } from '@/features/account-insights/insights-view-model'
+import { MetricsStats, type MetricsSectionState } from '@/features/account-insights/metrics-stats'
+import type { TransactionViewModel } from '@/features/transactions/transactions-view-model'
 
+import { aggregateFreshness } from './account-freshness'
+import { freshnessStatus } from './balances-provenance'
 import type { AccountSummaryViewModel } from './accounts-view-model'
+import { FailureState, LoadingState, SectionMessage } from './screen-states'
+
+export type SectionState<T> = { status: 'loading' } | { status: 'error' } | { status: 'loaded'; data: T }
+
+/** Period-scoped figures, each loaded on its own so one failing never hides the accounts. */
+export type AccountsInsights = Readonly<{
+  timeframe: AccountsTimeframe
+  metrics: MetricsSectionState
+  categories: SectionState<readonly CategoryRow[]>
+  balance: SectionState<readonly BalancePoint[]>
+  transactions: SectionState<readonly TransactionViewModel[]>
+  cashflow: SectionState<readonly CashflowRow[]>
+}>
 
 export type AccountsData = {
   accounts: readonly AccountSummaryViewModel[]
-  insights?: { period: InsightPeriod; metricGroups: readonly MetricGroup[]; categories: readonly CategoryRow[]; cashflow: readonly CashflowRow[] }
+  insights?: AccountsInsights
 }
 
 export type AccountsViewState =
@@ -34,556 +67,444 @@ export type AccountsScreenProps = {
   onRefresh: () => void | Promise<void>
   onLogout: () => void | Promise<void>
   onSelectAccount: (accountId: number) => void
+  /** Manual ("Unlinked") account. */
   onCreateAccount: () => void
+  /** Bank connection ("Linked") account. Without it, "Add account" goes straight to manual. */
+  onConnectBank?: () => void
+  onCreateTransaction?: () => void
+  onEditAccount?: (accountId: number) => void
   onViewTransactions: () => void
-  onViewRecurring: () => void
-  onInsightPeriodChange: (period: InsightPeriod) => void
+  onTimeframeChange?: (timeframe: AccountsTimeframe) => void
+  /** Import a bank statement; listed behind the title row's overflow menu. */
+  onImportTransactions?: () => void
 }
 
+const LAST_TRANSACTIONS = 8
 
+/**
+ * Web's Accounts overview (`app/[locale]/(full-layout)/accounts/accounts-client.tsx`)
+ * at phone width: title + Help with one "+" (Add transaction / Add account) on
+ * the same row, the period select,
+ * Total balance with its change and provenance, Inflow / Outflow / Savings
+ * rate, then Spending by category, Balance growth, Accounts (with total),
+ * Last transactions and Cashflow, each under a ruled section head.
+ */
 export function AccountsScreen({
   state,
   onRefresh,
   onLogout,
   onSelectAccount,
   onCreateAccount,
+  onConnectBank,
+  onCreateTransaction,
+  onEditAccount,
   onViewTransactions,
-  onViewRecurring,
-  onInsightPeriodChange,
+  onTimeframeChange,
+  onImportTransactions,
 }: AccountsScreenProps) {
+  const formatMoney = useFormatMoney()
   const { t, i18n } = useTranslation()
-  const palette = themeTokens.colors[useColorScheme() === 'dark' ? 'dark' : 'light']
+  const palette = usePalette()
   const locale = i18n.resolvedLanguage ?? i18n.language ?? 'en'
-  // Stable across renders so AccountRow (React.memo) doesn't re-render every
-  // row when unrelated state changes (e.g. switching the insights period).
   const selectAccount = useCallback((accountId: number) => onSelectAccount(accountId), [onSelectAccount])
+  const [periodOpen, setPeriodOpen] = useState(false)
+  const [addOpen, setAddOpen] = useState(false)
+  const [moreOpen, setMoreOpen] = useState(false)
+  const [menuAccount, setMenuAccount] = useState<AccountSummaryViewModel | null>(null)
+  // The spinner belongs to the gesture: background refetches (an invalidation,
+  // a period change) must not pin it, and on iOS a RefreshControl mounted with
+  // `refreshing` already true sticks and pushes the title down.
+  const [pulling, setPulling] = useState(false)
+  const pullToRefresh = useCallback(async () => {
+    setPulling(true)
+    try {
+      await onRefresh()
+    } finally {
+      setPulling(false)
+    }
+  }, [onRefresh])
 
   if (state.status === 'access-transition') return null
-
-  if (state.status === 'loading') {
-    return <LoadingState label={t('accounts.loading')} palette={palette} />
-  }
-
+  if (state.status === 'loading') return <LoadingState label={t('accounts.loading')} />
   if (state.status === 'error' || state.status === 'invalid-response') {
+    const invalid = state.status === 'invalid-response'
     return (
-      <StateFailure
-        invalid={state.status === 'invalid-response'}
-        onRefresh={onRefresh}
+      <FailureState
+        message={t(invalid ? 'accounts.invalidMessage' : 'accounts.errorMessage')}
         onLogout={onLogout}
-        palette={palette}
+        onRetry={onRefresh}
+        title={t(invalid ? 'accounts.invalidTitle' : 'accounts.errorTitle')}
       />
     )
   }
 
-  return (
-    <SafeAreaView style={[styles.safeArea, { backgroundColor: palette.background }]}>
-      <ScrollView
-        contentContainerStyle={styles.content}
-        refreshControl={<RefreshControl refreshing={Boolean(state.refreshing)} onRefresh={() => void onRefresh()} tintColor={palette.primary} />}
-      >
-        <View style={styles.page}>
-          <PageHeader title={t('accounts.title')} />
+  const { accounts, insights } = state.data
+  const hasAccounts = accounts.length > 0
+  const currency = accounts[0]?.primaryCurrencyCode ?? 'EUR'
+  const timeframe = insights?.timeframe ?? 'YTD'
+  // The floating "+" holds both add actions (account and transaction). With
+  // no accounts, or no transaction route, it is Add account itself.
+  const canAddTransaction = hasAccounts && Boolean(onCreateTransaction)
+  const add = () => (canAddTransaction ? setAddOpen(true) : onCreateAccount())
+  // Secondary actions sit behind the title row's overflow glyph.
+  const moreActions = [
+    ...(onConnectBank ? [{ value: 'linked' as const, label: t('accountsOverview.linkedAccount'), meta: t('accountsOverview.linkedDescription') }] : []),
+    ...(onImportTransactions && hasAccounts ? [{ value: 'import' as const, label: t('accountsOverview.importTransactions') }] : []),
+  ]
 
-          {state.data.accounts.length > 0 ? <>
-            {/* Only "Add manual account" is bordered/filled — it's the one
-                action on this screen that wants emphasis. "View transactions"
-                and "Recurring bills" are borderless (ghost), or three
-                independently-bordered elements stack directly against each
-                other with no shared container (the No-Nesting rule in
-                DESIGN.md). */}
-            <View style={styles.primaryActions}>
-              <Button label={t('accounts.addManual')} onPress={onCreateAccount} variant="primary" style={{ minHeight: 48 }} />
-              <Button label={t('accounts.viewTransactions')} onPress={onViewTransactions} variant="ghost" />
+  const header = (
+    <View style={styles.headerBlock}>
+      <PageHeader
+        action={moreActions.length > 0 ? (
+          <IconButton accessibilityLabel={t('common.moreActions')} icon="more-vertical" onPress={() => setMoreOpen(true)} style={styles.overflow} testID="accounts-more" />
+        ) : undefined}
+        helpLabel={false}
+        helpText={t('accountsOverview.help')}
+        title={t('accountsOverview.title')}
+      />
+    </View>
+  )
+
+  // The one control: the period the change and the flow stats cover.
+  const periodControl = hasAccounts && insights && onTimeframeChange ? (
+    <View style={styles.controls}>
+      <SelectTrigger
+        accessibilityLabel={t('accountsOverview.period')}
+        icon="calendar"
+        onPress={() => setPeriodOpen(true)}
+        size="sm"
+        testID="accounts-period"
+        value={t(`accountsOverview.timeframes.${timeframe}`)}
+      />
+    </View>
+  ) : null
+
+  const sheets = (
+    <>
+      {onTimeframeChange ? (
+        <OptionSheet
+          onClose={() => setPeriodOpen(false)}
+          onSelect={onTimeframeChange}
+          options={ACCOUNTS_TIMEFRAMES.map((value) => ({ value, label: t(`accountsOverview.timeframes.${value}`) }))}
+          title={t('accountsOverview.period')}
+          value={timeframe}
+          visible={periodOpen}
+        />
+      ) : null}
+      {canAddTransaction ? (
+        <OptionSheet
+          mode="menu"
+          onClose={() => setAddOpen(false)}
+          onSelect={(value) => {
+            if (value === 'transaction') onCreateTransaction?.()
+            else onCreateAccount()
+          }}
+          options={[
+            { value: 'account' as const, label: t('accountsOverview.addAccount'), meta: t('accountsOverview.unlinkedDescription') },
+            { value: 'transaction' as const, label: t('accountsOverview.addTransaction') },
+          ]}
+          title={t('accountsOverview.add')}
+          visible={addOpen}
+        />
+      ) : null}
+      {moreActions.length > 0 ? (
+        <OptionSheet
+          mode="menu"
+          onClose={() => setMoreOpen(false)}
+          onSelect={(value) => {
+            if (value === 'linked') onConnectBank?.()
+            else onImportTransactions?.()
+          }}
+          options={moreActions}
+          title={t('common.moreActions')}
+          visible={moreOpen}
+        />
+      ) : null}
+      {onEditAccount ? (
+        <OptionSheet
+          mode="menu"
+          onClose={() => setMenuAccount(null)}
+          onSelect={(value) => {
+            if (!menuAccount) return
+            if (value === 'details') onSelectAccount(menuAccount.accountId)
+            else onEditAccount(menuAccount.accountId)
+          }}
+          options={[
+            { value: 'details', label: t('accountsOverview.accountDetails') },
+            { value: 'edit', label: t('accountsOverview.edit') },
+            { value: 'delete', label: t('accountsOverview.delete'), destructive: true },
+          ]}
+          title={menuAccount?.accountName ?? t('accounts.unnamed')}
+          visible={menuAccount !== null}
+        />
+      ) : null}
+    </>
+  )
+
+  const fab = (
+    <FloatingActionButton
+      aboveTabBar
+      accessibilityLabel={canAddTransaction ? t('accountsOverview.add') : t('accountsOverview.addAccount')}
+      onPress={add}
+      testID="accounts-add"
+    />
+  )
+
+  const stale = state.status === 'refresh-error'
+    ? <Notice action={<Button label={t('common.retry')} onPress={onRefresh} size="sm" variant="outline" />} message={t('accounts.stale')} />
+    : null
+
+  if (!hasAccounts) {
+    return (
+      <View style={styles.safeArea}>
+        <SafeAreaView style={[styles.safeArea, { backgroundColor: palette.background }]}>
+          <ScrollView contentContainerStyle={styles.content} refreshControl={<RefreshControl onRefresh={() => void pullToRefresh()} refreshing={pulling} tintColor={palette.primary} />}>
+            <View style={styles.page}>
+              {header}
+              {stale}
+              <EmptyState preview={<AccountPreview locale={locale} />} title={t('accounts.empty')} />
             </View>
-            <Button label={t('accounts.viewRecurring')} onPress={onViewRecurring} variant="ghost" block style={{ minHeight: 48 }} />
-          </> : null}
+          </ScrollView>
+          {sheets}
+        </SafeAreaView>
+        {fab}
+      </View>
+    )
+  }
 
-          {state.data.insights ? <InsightsSection data={state.data.insights} locale={locale} palette={palette} onPeriodChange={onInsightPeriodChange} /> : null}
+  // A total with one balance missing is not a smaller total: it is unknown.
+  const totalBalance = accounts.reduce<number | null>(
+    (sum, account) => (sum === null || account.convertedBalance === null ? null : sum + account.convertedBalance),
+    0,
+  )
+  const metrics = insights?.metrics
+  const netChange = metrics?.status === 'loaded' && metrics.summary
+    ? metrics.summary.inflowCurrent - metrics.summary.outflowCurrent
+    : null
 
-          {state.status === 'refresh-error' ? (
-            <View style={[styles.banner, { backgroundColor: palette.muted, borderColor: palette.border }]}><Text
-              accessible
-              accessibilityRole="alert"
-              accessibilityLabel={t('accounts.stale')}
-              allowFontScaling
-              style={[
-                styles.banner,
-                {
-                  color: palette.foreground,
-                  backgroundColor: palette.muted,
-                  borderColor: palette.border,
-                },
-              ]}
-            >
-              {t('accounts.stale')}
-            </Text><Button label={t('common.retry')} onPress={onRefresh} palette={palette} variant="secondary" /></View>
+  const freshness = aggregateFreshness(accounts)
+
+  return (
+    <View style={styles.safeArea}>
+    <SafeAreaView style={[styles.safeArea, { backgroundColor: palette.background }]}>
+      <ScrollView contentContainerStyle={styles.content} refreshControl={<RefreshControl onRefresh={() => void pullToRefresh()} refreshing={pulling} tintColor={palette.primary} />}>
+        <View style={styles.page}>
+          {header}
+          {stale}
+
+          <View style={styles.lead}>
+            <HeadlineFigure
+              currency={currency}
+              deltas={totalBalance !== null && netChange !== null ? [{ value: netChange, label: t('accountsOverview.vsLastPeriod'), trend: true }] : []}
+              footer={totalBalance === null ? <Text tone="muted" variant="label">{t('accountsOverview.totalIncomplete')}</Text> : undefined}
+              label={t('accountsOverview.totalBalance')}
+              labelIsHeader
+              locale={locale}
+              status={freshnessStatus(freshness, t)}
+              testID="accounts-total-balance"
+              value={totalBalance}
+            />
+            {periodControl}
+            {metrics ? <MetricsStats currency={currency} locale={locale} state={metrics} testID="accounts-metrics" /> : null}
+          </View>
+
+          {insights ? (
+            <Section title={t('accountsOverview.spendingByCategory')} variant="open">
+              <SectionBody state={insights.categories} render={(rows) => <CategorySpendingList currency={currency} locale={locale} rows={rows} />} />
+            </Section>
           ) : null}
 
-          {state.data.accounts.length === 0 ? (
-            <View style={[styles.empty, { backgroundColor: palette.card, borderColor: palette.border }]}>
-              <Text accessibilityRole="header" allowFontScaling style={[styles.emptyTitle, { color: palette.foreground }]}>
-                {t('accounts.empty')}
-              </Text>
-              <AccountPreview locale={locale} palette={palette} />
-              <Button label={t('accounts.addManual')} onPress={onCreateAccount} palette={palette} variant="primary" style={{ minHeight: 48 }} />
-            </View>
-          ) : (
-            <View style={styles.listSection}>
-              {/* Insights above shows period-scoped inflow/outflow; this list
-                  shows current balance. Same accounts, different numbers — an
-                  explicit heading here keeps the two from reading as one
-                  section repeating itself (see DESIGN_HISTORY.md). */}
-              {state.data.insights ? (
-                <Text accessibilityRole="header" style={[styles.sectionTitle, { color: palette.foreground }]}>
-                  {t('accounts.balances')}
-                </Text>
-              ) : null}
-              <View style={[styles.list, { borderColor: palette.border }]}>
-                {state.data.accounts.map((account, index) => (
+          {insights ? (
+            <Section title={t('accountsOverview.balanceGrowth')} variant="open">
+              <SectionBody state={insights.balance} render={(points) => <BalanceGrowthChart locale={locale} points={points} testID="accounts-balance-chart" />} />
+            </Section>
+          ) : null}
+
+          <Section title={t('accountsOverview.accounts')} variant="open">
+            <View>
+              <List>
+                {accounts.map((account, index) => (
                   <AccountRow
-                    key={account.accountId}
                     account={account}
-                    separated={index > 0}
+                    key={account.accountId}
                     locale={locale}
-                    palette={palette}
+                    onMore={onEditAccount ? setMenuAccount : undefined}
                     onSelect={selectAccount}
+                    separated={index > 0}
                   />
                 ))}
+              </List>
+              <View style={[styles.total, { borderTopColor: palette.border }]}>
+                <Text tone="muted" variant="metaStrong">{t('accountsOverview.total')}</Text>
+                {totalBalance === null
+                  ? <Text tone="muted" variant="label">{t('accountsOverview.totalIncomplete')}</Text>
+                  : <Text style={styles.totalFigure} variant="amount">{formatMoney(totalBalance, { locale, currency })}</Text>}
               </View>
             </View>
+          </Section>
+
+          {insights ? (
+            <Section
+              action={<Button label={t('accountsOverview.viewAll')} onPress={onViewTransactions} size="sm" variant="link" />}
+              title={t('accountsOverview.lastTransactions')}
+              variant="open"
+            >
+              <SectionBody
+                render={(rows) => rows.length === 0 ? (
+                  <View style={styles.emptyBlock}>
+                    <Text style={styles.center} tone="muted" variant="meta">{t('accountsOverview.emptyTransactions')}</Text>
+                    {onCreateTransaction ? <Button icon="plus" label={t('accountsOverview.addTransaction')} onPress={onCreateTransaction} /> : null}
+                  </View>
+                ) : (
+                  <List>
+                    {rows.slice(0, LAST_TRANSACTIONS).map((row, index) => <TransactionRow key={row.id} locale={locale} row={row} separated={index > 0} />)}
+                  </List>
+                )}
+                state={insights.transactions}
+              />
+            </Section>
+          ) : (
+            <Button label={t('accounts.viewTransactions')} onPress={onViewTransactions} variant="link" />
           )}
 
+          {insights ? (
+            <Section title={t('accountsOverview.cashflow')} variant="open">
+              <SectionBody state={insights.cashflow} render={(rows) => <CashflowChart locale={locale} rows={rows} testID="accounts-cashflow-chart" />} />
+            </Section>
+          ) : null}
         </View>
       </ScrollView>
+      {sheets}
     </SafeAreaView>
+    {fab}
+    </View>
   )
 }
 
+function SectionBody<T>({ state, render }: { state: SectionState<T>; render: (data: T) => React.ReactNode }) {
+  if (state.status === 'loading') return <SectionMessage loading />
+  if (state.status === 'error') return <SectionMessage />
+  return <>{render(state.data)}</>
+}
+
 /**
- * Memoized so switching the insights period (which
- * re-renders AccountsScreen with a new `state.data.insights`, but the same
- * `state.data.accounts`) doesn't re-run every account row's currency/date
- * formatting.
+ * Web's `AccountsList` row: name (with a lock when private), shared-by,
+ * institution and sync freshness muted beneath; the balance in the reader's
+ * currency on the right with the account's own currency under it when they
+ * differ, and the "…" menu. Memoized so a period change doesn't re-format
+ * every row.
  */
-const AccountRow = memo(function AccountRow({ account, separated, locale, palette, onSelect }: {
+const AccountRow = memo(function AccountRow({ account, separated, locale, onSelect, onMore }: {
   account: AccountSummaryViewModel
   separated: boolean
   locale: string
-  palette: Palette
   onSelect: (accountId: number) => void
+  onMore?: (account: AccountSummaryViewModel) => void
 }) {
   const { t } = useTranslation()
-  const money = (value: number, currency: string) => formatCurrency(value, { locale, currency })
+  const formatMoney = useFormatMoney()
   const name = account.accountName ?? t('accounts.unnamed')
-  const source = t(`accounts.source.${account.source === 'open_banking' ? 'openBanking' : account.source}`)
-  const original = account.originalBalance !== null
-    ? money(account.originalBalance, account.originalCurrencyCode)
-    : t('accounts.balanceUnavailable')
-  const converted = account.convertedBalance !== null
-    && account.originalCurrencyCode !== account.primaryCurrencyCode
-    ? money(account.convertedBalance, account.primaryCurrencyCode)
+  const differs = account.originalCurrencyCode !== account.primaryCurrencyCode
+  const synced = account.source === 'open_banking' ? formatRelativeTime(account.lastSyncedAt ?? account.refreshedAt, t) : null
+  const updated = synced ? t('accounts.updated', { date: synced }) : null
+  const shared = !account.isOwnedByViewer && account.ownerFirstName ? t('accountsOverview.sharedBy', { name: account.ownerFirstName }) : null
+  const metaLine = [shared, account.institutionDisplayName, updated].filter(Boolean).join(' · ')
+  const money = (value: number, currency: string) => formatMoney(value, { locale, currency })
+  const primary = account.convertedBalance !== null ? money(account.convertedBalance, account.primaryCurrencyCode) : t('accounts.balanceUnavailable')
+  const original = differs && account.originalBalance !== null ? money(account.originalBalance, account.originalCurrencyCode) : null
+  const available = account.convertedAvailableBalance != null && account.convertedBalance !== null && account.convertedAvailableBalance !== account.convertedBalance
+    ? money(account.convertedAvailableBalance, account.primaryCurrencyCode)
     : null
-  const validDate = account.refreshedAt
-    && !Number.isNaN(Date.parse(account.refreshedAt))
-    ? new Intl.DateTimeFormat(locale, {
-        dateStyle: 'medium',
-        timeStyle: 'short',
-      }).format(new Date(account.refreshedAt))
-    : null
-  const updated = validDate ? t('accounts.updated', { date: validDate }) : null
   const accessibilityLabel = [
     name,
+    account.isPrivate ? t('accountsOverview.private') : null,
+    shared,
     account.institutionDisplayName,
-    source,
+    primary,
     original,
-    account.originalBalance !== null ? account.originalCurrencyCode : null,
-    converted
-      ? `${t('accounts.convertedBalance')}, ${converted}, ${account.primaryCurrencyCode}`
-      : null,
+    available ? `${t('accountsOverview.available')}: ${available}` : null,
     updated,
   ].filter(Boolean).join(', ')
 
   return (
-    <Pressable
-      testID="account-row"
-      accessibilityRole="button"
+    <ListRow
       accessibilityLabel={accessibilityLabel}
+      badge={account.isPrivate ? <Badge label={t('accountsOverview.private')} tone="outline" /> : undefined}
+      figure={<Amount currency={account.primaryCurrencyCode} locale={locale} value={account.convertedBalance} />}
+      leading={<EntityMark {...accountMark({ logoUrl: account.institutionLogoUrl, institutionName: account.institutionDisplayName, type: account.accountType })} testID="account-mark" />}
+      figureMeta={original || available ? (
+        <View style={styles.figureMeta}>
+          {original ? <Text align="right" tone="muted" variant="amountSmall">{original}</Text> : null}
+          {available ? <Text align="right" tone="muted" variant="label">{`${t('accountsOverview.available')}: ${available}`}</Text> : null}
+        </View>
+      ) : null}
+      meta={[metaLine || null]}
+      moreAccessibilityLabel={t('accountsOverview.actionsFor', { name })}
+      onMorePress={onMore ? () => onMore(account) : undefined}
       onPress={() => onSelect(account.accountId)}
-      style={({ pressed }) => [
-        styles.row,
-        separated && {
-          borderTopWidth: 1,
-          borderTopColor: palette.border,
-        },
-        pressed && styles.pressed,
-      ]}
-    >
-      <View style={styles.rowMain}>
-        <Text
-          allowFontScaling
-          style={[styles.name, { color: palette.foreground }]}
-        >
-          {name}
-        </Text>
-        {account.institutionDisplayName ? (
-          <Text
-            allowFontScaling
-            style={[styles.meta, { color: palette.mutedForeground }]}
-          >
-            {account.institutionDisplayName}
-          </Text>
-        ) : null}
-        <Text
-          allowFontScaling
-          style={[styles.meta, { color: palette.mutedForeground }]}
-        >
-          {source}
-        </Text>
-        {updated ? (
-          <Text
-            allowFontScaling
-            style={[styles.updated, { color: palette.mutedForeground }]}
-          >
-            {updated}
-          </Text>
-        ) : null}
-      </View>
-      <View style={styles.amounts}>
-        <Text
-          allowFontScaling
-          style={[
-            styles.amount,
-            {
-              color: account.originalBalance === null
-                ? palette.mutedForeground
-                : palette.foreground,
-            },
-          ]}
-        >
-          {original}
-        </Text>
-        {converted ? (
-          <Text
-            allowFontScaling
-            style={[styles.converted, { color: palette.mutedForeground }]}
-          >
-            {t('accounts.convertedBalance')}: {converted} {account.primaryCurrencyCode}
-          </Text>
-        ) : null}
-      </View>
-    </Pressable>
+      separated={separated}
+      testID="account-row"
+      title={name}
+    />
   )
 })
 
-function InsightsSection({ data, locale, palette, onPeriodChange }: { data: NonNullable<AccountsData['insights']>; locale: string; palette: Palette; onPeriodChange: (period: InsightPeriod) => void }) {
+/** Web's `TransactionsList` row: merchant or description, date · category · account, the amount. */
+function TransactionRow({ row, locale, separated }: { row: TransactionViewModel; locale: string; separated: boolean }) {
   const { t } = useTranslation()
-  const money = (value: number | null, currency: string | null) => {
-    if (value === null) return t('insights.unavailable')
-    if (!currency) return `${new Intl.NumberFormat(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(value)} · ${t('insights.currencyUnavailable')}`
-    return formatCurrency(value, { locale, currency })
-  }
-  // Three "nothing here for this period" messages stacked inside a card that is
-  // itself empty is three ways of saying the same thing. Say it once.
-  const empty = !data.metricGroups.length && !data.categories.length && !data.cashflow.length
-
-  return <View accessible accessibilityLabel={t('insights.title')} style={styles.insights}>
-    <Text accessibilityRole="header" style={[styles.sectionTitle, { color: palette.foreground }]}>{t('insights.title')}</Text>
-    <SegmentedControl
-      accessibilityLabel={t('insights.period')}
-      onChange={onPeriodChange}
-      options={(['month', '30-days', '90-days'] as const).map((period) => ({ value: period, label: t(`insights.periods.${period}`) }))}
-      scrollable
-      value={data.period}
+  const date = Number.isFinite(Date.parse(row.date))
+    ? new Intl.DateTimeFormat(locale, { month: 'short', day: 'numeric' }).format(new Date(row.date))
+    : null
+  const title = row.title ?? row.description ?? t('accounts.unnamed')
+  return (
+    <ListRow
+      figure={<Amount currency={row.currency} locale={locale} value={row.amount} />}
+      leading={<EntityMark {...(row.mark ?? { glyph: 'tag' })} />}
+      meta={[[date, row.category ? formatCategoryName(row.category) : null, row.accountName].filter(Boolean).join(' · ')]}
+      separated={separated}
+      title={title}
     />
-    {empty ? (
-      <Text style={[styles.meta, { color: palette.mutedForeground }]}>{t('insights.empty')}</Text>
-    ) : (
-      <>
-        {data.metricGroups.length ? <>
-          <Text style={[styles.insightHeading, { color: palette.foreground }]}>{t('insights.accounts')}</Text>
-          {data.metricGroups.map((group, groupIndex) => <View key={group.currency ?? `unavailable-${groupIndex}`} style={styles.insightGroup}><Text style={[styles.currencyHeading, { color: palette.mutedForeground }]}>{group.currency ?? t('insights.currencyUnavailable')}</Text>{group.rows.map((row) => <View key={row.accountId} accessible accessibilityLabel={[row.accountName ?? t('accounts.unnamed'), money(row.inflow, row.currency), money(row.outflow, row.currency)].join(', ')} style={styles.insightRow}><View style={styles.rowMain}><Text style={[styles.name, { color: palette.foreground }]}>{row.accountName ?? t('accounts.unnamed')}</Text><Text style={[styles.meta, { color: palette.mutedForeground }]}>{row.transactionCount === null ? t('insights.transactionCountUnavailable') : t('insights.transactionCount', { count: row.transactionCount })}</Text></View><View style={styles.amounts}><Text style={[styles.converted, { color: palette.foreground }]}>{t('insights.inflow')} {money(row.inflow, row.currency)}</Text><Text style={[styles.converted, { color: palette.foreground }]}>{t('insights.outflow')} {money(row.outflow, row.currency)}</Text></View></View>)}</View>)}
-        </> : null}
-        {data.categories.length ? <>
-          <Text style={[styles.insightHeading, { color: palette.foreground }]}>{t('insights.topCategories')}</Text>
-          {data.categories.map((category) => <View key={category.id} style={styles.summaryLine}><Text style={[styles.meta, { color: palette.foreground }]}>{formatCategoryName(category.name)}</Text><Text style={[styles.converted, { color: palette.foreground }]}>{money(category.amount, category.currency)}</Text></View>)}
-        </> : null}
-        {data.cashflow.length ? <>
-          <Text style={[styles.insightHeading, { color: palette.foreground }]}>{t('insights.cashflow')}</Text>
-          {data.cashflow.map((item) => <View key={item.date} style={styles.summaryLine}><Text style={[styles.meta, { color: palette.mutedForeground }]}>{new Intl.DateTimeFormat(locale, { month: 'long', year: 'numeric' }).format(new Date(item.date))}</Text><Text style={[styles.converted, { color: item.amount === 0 ? palette.mutedForeground : palette.foreground }]}>{money(item.amount, item.currency)}</Text></View>)}
-        </> : null}
-      </>
-    )}
-  </View>
+  )
 }
 
-function AccountPreview({ locale, palette }: { locale: string; palette: Palette }) {
+/** Web's empty-state preview: the shape of the page with sample accounts, labelled as a preview. */
+function AccountPreview({ locale }: { locale: string }) {
   const { t } = useTranslation()
-  const money = (value: number) => formatCurrency(value, { locale, currency: 'EUR' })
-  const accounts = [
+  const palette = usePalette()
+  const rows = [
     { name: t('accounts.previewMain'), institution: t('accounts.previewBank'), balance: 3280.5 },
     { name: t('accounts.previewSavings'), institution: t('accounts.previewSavingsBank'), balance: 8150 },
     { name: t('accounts.previewCard'), institution: t('accounts.previewCardBank'), balance: -1000.5 },
   ]
-  return <View accessibilityLabel={t('accounts.preview')} style={[styles.preview, { borderColor: palette.border, backgroundColor: palette.background }]}>
-    <View style={styles.previewLabelWrap}><PreviewLabel /></View>
-    <View style={styles.previewHero}><Text style={[styles.previewHeroLabel, { color: palette.mutedForeground }]}>{t('accounts.previewBalance')}</Text><Text style={[styles.previewAmount, { color: palette.foreground }]}>{money(10430)}</Text></View>
-    {accounts.map((account) => <View key={account.name} style={[styles.previewRow, { borderTopColor: palette.border }]}><View style={styles.rowMain}><Text style={[styles.name, { color: palette.foreground }]}>{account.name}</Text><Text style={[styles.meta, { color: palette.mutedForeground }]}>{account.institution}</Text></View><Text style={[styles.previewValue, { color: palette.foreground }]}>{money(account.balance)}</Text></View>)}
-  </View>
-}
-
-function LoadingState({ label, palette }: { label: string; palette: Palette }) {
   return (
-    <SafeAreaView style={[styles.safeArea, { backgroundColor: palette.background }]}>
-      <View
-        accessible
-        accessibilityRole="progressbar"
-        accessibilityLabel={label}
-        style={styles.loading}
-      >
-        {[220, 320, 320].map((width, index) => (
-          <View
-            key={index}
-            style={[styles.skeleton, { width, backgroundColor: palette.muted }]}
-          />
-        ))}
+    <View accessibilityLabel={t('accounts.preview')} style={[styles.preview, { borderColor: palette.border }]}>
+      <View style={styles.previewHead}>
+        <PreviewLabel />
+        <Text tone="muted" variant="label">{t('accounts.previewBalance')}</Text>
+        <Amount currency="EUR" locale={locale} size="stat" value={10430} />
       </View>
-    </SafeAreaView>
-  )
-}
-
-function Action({
-  label,
-  onPress,
-  palette,
-  primary = false,
-  disabled = false,
-}: {
-  label: string
-  onPress: () => void | Promise<void>
-  palette: Palette
-  primary?: boolean
-  disabled?: boolean
-}) {
-  const [focused, setFocused] = useState(false)
-  return (
-    <Pressable
-      accessibilityRole="button"
-      accessibilityState={{ disabled, busy: disabled }}
-      disabled={disabled}
-      onBlur={() => setFocused(false)}
-      onFocus={() => setFocused(true)}
-      onPress={() => void onPress()}
-      style={({ pressed }) => [
-        styles.action,
-        {
-          borderColor: primary ? 'transparent' : palette.input,
-          backgroundColor: primary ? palette.primary : 'transparent',
-        },
-        focused && { borderWidth: 2, borderColor: palette.foreground },
-        (pressed || disabled) && styles.pressed,
-      ]}
-    >
-      <Text
-        allowFontScaling
-        style={[
-          styles.actionLabel,
-          { color: primary ? palette.primaryForeground : palette.foreground },
-        ]}
-      >
-        {label}
-      </Text>
-    </Pressable>
-  )
-}
-
-function StateFailure({
-  invalid,
-  onRefresh,
-  onLogout,
-  palette,
-}: {
-  invalid: boolean
-  onRefresh: AccountsScreenProps['onRefresh']
-  onLogout: AccountsScreenProps['onLogout']
-  palette: Palette
-}) {
-  const { t } = useTranslation()
-  return (
-    <SafeAreaView style={[styles.safeArea, { backgroundColor: palette.background }]}>
-      <ScrollView contentContainerStyle={styles.center}>
-        <View style={styles.failure}>
-          <View style={[styles.errorMarker, { backgroundColor: palette.destructive }]} />
-          <Text
-            accessibilityRole="header"
-            allowFontScaling
-            style={[styles.failureTitle, { color: palette.foreground }]}
-          >
-            {t(invalid ? 'accounts.invalidTitle' : 'accounts.errorTitle')}
-          </Text>
-          <Text
-            allowFontScaling
-            style={[styles.helper, { color: palette.mutedForeground }]}
-          >
-            {t(invalid ? 'accounts.invalidMessage' : 'accounts.errorMessage')}
-          </Text>
-          <View style={styles.actions}>
-            <Action label={t('common.retry')} onPress={onRefresh} palette={palette} primary />
-            <Action label={t('common.signOut')} onPress={onLogout} palette={palette} />
-          </View>
-        </View>
-      </ScrollView>
-    </SafeAreaView>
+      <List divided>
+        {rows.map((row) => (
+          <ListRow figure={<Amount currency="EUR" locale={locale} value={row.balance} />} key={row.name} leading={<EntityMark {...accountMark({ institutionName: row.institution })} />} meta={[row.institution]} title={row.name} />
+        ))}
+      </List>
+    </View>
   )
 }
 
 const styles = StyleSheet.create({
   safeArea: { flex: 1 },
-  content: {
-    flexGrow: 1,
-    padding: themeTokens.layout.screenPadding,
-  },
-  page: {
-    width: '100%',
-    maxWidth: 760,
-    alignSelf: 'center',
-    gap: themeTokens.layout.blockGap,
-  },
-  header: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
-    gap: themeTokens.spacing[4],
-  },
-  primaryActions: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: themeTokens.spacing[3],
-  },
-  heading: {
-    flex: 1,
-    minWidth: 240,
-    gap: themeTokens.spacing[2],
-  },
-  title: { ...textStyles.title },
-  helper: { ...textStyles.body },
-  listSection: { gap: themeTokens.layout.sectionGap },
-  list: {
-    borderWidth: 1,
-    borderRadius: themeTokens.radius.lg,
-    overflow: 'hidden',
-  },
-  row: {
-    minHeight: 88,
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
-    gap: themeTokens.spacing[4],
-    padding: themeTokens.spacing[4],
-  },
-  rowMain: {
-    flex: 1,
-    minWidth: 180,
-    gap: themeTokens.spacing[1],
-  },
-  name: {
-    fontFamily: themeTokens.typography.roles.interface.fontFamily,
-    fontSize: themeTokens.typography.roles.interface.fontSize,
-    lineHeight: themeTokens.typography.roles.interface.lineHeight,
-    fontWeight: '500',
-  },
-  meta: { ...textStyles.meta },
-  updated: {
-    fontFamily: themeTokens.typography.roles.caption.fontFamily,
-    fontSize: themeTokens.typography.roles.caption.fontSize,
-    lineHeight: 17,
-  },
-  amounts: {
-    alignItems: 'flex-end',
-    gap: themeTokens.spacing[1],
-  },
-  amount: {
-    fontFamily: themeTokens.typography.roles.data.fontFamily,
-    fontSize: themeTokens.typography.roles.data.fontSize,
-    lineHeight: themeTokens.typography.roles.data.lineHeight,
-  },
-  converted: {
-    fontFamily: themeTokens.typography.roles.data.fontFamily,
-    fontSize: themeTokens.typography.roles.caption.fontSize,
-    lineHeight: 17,
-  },
-  empty: {
-    borderWidth: 1,
-    borderRadius: themeTokens.radius.lg,
-    padding: themeTokens.spacing[4],
-    gap: themeTokens.layout.sectionGap,
-  },
-  emptyTitle: { ...textStyles.action },
-  preview: { borderWidth: 1, borderRadius: themeTokens.radius.lg, overflow: 'hidden' },
-  previewLabelWrap: { paddingHorizontal: themeTokens.layout.cardPadding, paddingTop: themeTokens.layout.cardPadding },
-  previewHero: { padding: themeTokens.spacing[3], gap: themeTokens.spacing[1] },
-  previewHeroLabel: { ...textStyles.label },
-  previewAmount: { ...textStyles.display },
-  previewRow: { flexDirection: 'row', justifyContent: 'space-between', gap: themeTokens.spacing[3], padding: themeTokens.spacing[3], borderTopWidth: 1 },
-  previewValue: { ...textStyles.amount },
-  banner: { ...textStyles.body, borderWidth: 1, borderRadius: themeTokens.radius.md, padding: themeTokens.spacing[4] },
-  action: {
-    minWidth: themeTokens.touchTarget.minimum,
-    minHeight: themeTokens.touchTarget.minimum,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 1,
-    borderRadius: themeTokens.radius.md,
-    paddingHorizontal: themeTokens.spacing[4],
-  },
-  actionLabel: {
-    fontFamily: themeTokens.typography.roles.interface.fontFamily,
-    fontSize: themeTokens.typography.roles.interface.fontSize,
-    lineHeight: themeTokens.typography.roles.interface.lineHeight,
-    fontWeight: '600',
-  },
-  pressed: { opacity: 0.72 },
-  loading: {
-    flex: 1,
-    maxWidth: 760,
-    width: '100%',
-    alignSelf: 'center',
-    padding: themeTokens.layout.screenPadding,
-    gap: themeTokens.spacing[5],
-  },
-  skeleton: {
-    maxWidth: '100%',
-    height: themeTokens.spacing[6],
-    borderRadius: themeTokens.radius.sm,
-  },
-  center: {
-    flexGrow: 1,
-    justifyContent: 'center',
-    padding: themeTokens.layout.screenPadding,
-  },
-  failure: {
-    width: '100%',
-    maxWidth: 480,
-    alignSelf: 'center',
-    gap: themeTokens.spacing[4],
-  },
-  errorMarker: {
-    width: 36,
-    height: 2,
-  },
-  failureTitle: { ...textStyles.title },
-  actions: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: themeTokens.spacing[3],
-  },
-  insights: { width: '100%', gap: themeTokens.layout.sectionGap },
-  sectionTitle: { ...textStyles.section },
-  insightPeriods: { flexDirection: 'row', flexWrap: 'wrap', gap: themeTokens.spacing[2] },
-  period: { minHeight: 44, justifyContent: 'center', borderWidth: 1, borderRadius: themeTokens.radius.pill, paddingHorizontal: themeTokens.spacing[4] },
-  periodText: { ...textStyles.meta, fontWeight: '500' as const },
-  insightHeading: { ...textStyles.action },
-  currencyHeading: { ...textStyles.amountSmall },
-  insightGroup: { gap: themeTokens.spacing[2] },
-  insightRow: { minHeight: 56, flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', gap: themeTokens.spacing[3], paddingVertical: themeTokens.spacing[2] },
-  summaryLine: { flexDirection: 'row', justifyContent: 'space-between', gap: themeTokens.spacing[3] },
+  content: { flexGrow: 1, padding: themeTokens.layout.screenPadding, paddingBottom: FLOATING_ACTION_SIZE + themeTokens.spacing[8] },
+  page: { width: '100%', maxWidth: 760, alignSelf: 'center', gap: themeTokens.spacing[10] },
+  headerBlock: { gap: themeTokens.spacing[3] },
+  overflow: { marginRight: -11, marginVertical: -6 },
+  controls: { flexDirection: 'row', alignItems: 'center' },
+  lead: { gap: themeTokens.spacing[6] },
+  total: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: themeTokens.spacing[3], borderTopWidth: 1, paddingVertical: themeTokens.spacing[3] },
+  totalFigure: { fontWeight: '600' },
+  figureMeta: { alignItems: 'flex-end' },
+  emptyBlock: { alignItems: 'center', gap: themeTokens.spacing[3], paddingVertical: themeTokens.spacing[6] },
+  center: { textAlign: 'center' },
+  preview: { borderWidth: 1, borderRadius: themeTokens.radius.lg, paddingHorizontal: themeTokens.spacing[4] },
+  previewHead: { gap: themeTokens.spacing[1], paddingVertical: themeTokens.spacing[4] },
 })

@@ -16,6 +16,8 @@ Cada fila muestra un indicador de confianza para la sugerencia — alta, media o
 
 Los elementos que corriges se usan para aprender la correspondencia de ese comercio, de modo que la próxima transacción del mismo comercio sea más fácil de categorizar.
 
+Si tu hogar tiene reglas, se aplican primero a cada transacción nueva, venga de la sincronización bancaria, de un archivo importado, de un recibo o de una que añades a mano. Una categoría fijada por una regla prevalece sobre la correspondencia aprendida, y esa transacción no se envía para una sugerencia de IA. Las reglas nunca cambian una categoría que elegiste tú, ni una descripción o comercio que escribiste o editaste, y se aplican una sola vez, cuando llega la transacción: una sincronización posterior no deshace tus cambios. El historial de actividad de la transacción indica la regla que la cambió.
+
 ## Antes de empezar
 
 Revisa primero la lista de transacciones para poder detectar los elementos que van juntos. Si una transacción forma parte de un pago recurrente, decide si debe usar la misma categoría todos los meses.
@@ -31,13 +33,77 @@ Revisa primero la lista de transacciones para poder detectar los elementos que v
 
 Cuando aplicas una categoría a varias transacciones a la vez, la categoría elegida se escribe en cada transacción y se actualiza la correspondencia del comercio, de modo que la elección persiste y ayuda a las futuras sugerencias. Lo mismo ocurre cuando confirmas una categoría para un recibo extraído con OCR: la categoría que seleccionas es la que se escribe.
 
+## Dividir una transacción
+
+Algunos pagos cubren más de una cosa: un ticket del supermercado con comida y artículos del hogar, o una cuenta de la farmacia que en parte es un regalo. Dividir reparte el importe de una transacción entre varias categorías, para que cada parte cuente en su propio presupuesto e informe.
+
+1. Abre el menú de la transacción y elige **Editar**.
+2. En **Categoría**, elige **Dividir**. Empiezas con dos líneas: la categoría actual con el importe completo y una línea vacía.
+3. Da a cada línea una categoría y un importe. Escribe el importe como cifra o como porcentaje de la transacción, por ejemplo `25%`. Puedes añadir una nota breve a cualquier línea.
+4. Sigue **Falta asignar** debajo de las líneas. Usa **Completar lo restante** en una línea para ponerle lo que falta, o **Dividir a partes iguales** para repartir el importe por igual. **Guardar** sigue desactivado hasta que las líneas suman exactamente el importe de la transacción.
+
+Los importes están en la moneda de la cuenta y se escriben sin signo: cada línea toma el signo de la transacción. Una división necesita al menos dos líneas y ninguna línea puede ser cero.
+
+En la lista de transacciones, una transacción dividida muestra **Dividida** con cuántas categorías usa, en lugar de una sola categoría. Selecciónala para ver cada línea, o abre los detalles de la transacción para ver las líneas con sus notas. Un filtro de categoría incluye una transacción dividida cuando alguna de sus líneas está en esa categoría.
+
+Para cambiar una división, vuelve a abrir **Editar** y cambia las líneas. Para deshacerla, elige **Quitar división** y confirma: la transacción vuelve a tener una sola categoría, la de su línea más grande. Dar una sola categoría a una transacción dividida por otra vía, como la categorización en masa, también quita la división, así que WonderMoney te pregunta antes.
+
+Si el importe de una transacción dividida cambia más tarde, por ejemplo cuando se liquida un pago pendiente, las líneas se ajustan al nuevo importe y la transacción queda marcada para revisión. El pago de un préstamo no se puede dividir, porque ya separa capital e intereses.
+
+## Etiquetas
+
+Las etiquetas marcan transacciones de distintas categorías. Una transacción tiene una categoría, pero puede llevar varias etiquetas, así que una etiqueta sirve para todo lo que atraviesa categorías: un viaje, una reforma en casa, un gasto de trabajo que vas a reclamar. Las etiquetas pertenecen al hogar, así que los dos miembros ven y usan la misma lista.
+
+### Añadir o quitar etiquetas
+
+- **En la web**, abre el menú de una transacción y elige **Editar**; después usa el campo **Etiquetas**. Elige etiquetas existentes o escribe un nombre nuevo y elige **Crear etiqueta** para crearla al momento. El mismo campo aparece cuando añades una transacción a mano.
+- **En la aplicación móvil**, toca una transacción para abrir sus detalles y elige **Editar etiquetas**, o usa **Editar etiquetas** en el menú de la fila. Escribe un nombre en **Nueva etiqueta** para crear una. Cuando añades una transacción a mano, la fila **Etiquetas** abre el mismo selector.
+
+Una transacción puede llevar hasta 50 etiquetas. Los nombres de las etiquetas son únicos en el hogar sin distinguir mayúsculas de minúsculas: "Viaje" y "viaje" son la misma etiqueta.
+
+### Ver y filtrar por etiqueta
+
+Las etiquetas aparecen como pequeños chips después de la categoría, en la lista de transacciones y en los detalles de una transacción. Cada chip muestra el nombre de la etiqueta con su color en un punto, para que el nombre se lea bien en los temas claro y oscuro.
+
+Para ver solo las transacciones con etiqueta, abre **Filtros** y elige una o varias etiquetas. Una transacción coincide cuando lleva cualquiera de las etiquetas elegidas, y el filtro abarca todo el periodo, no solo las filas ya cargadas. En la web, el panel de filtros de los informes tiene el mismo filtro de etiquetas.
+
+### Cambiar el nombre, el color o eliminar etiquetas
+
+En la web, ve a **Configuración → Etiquetas**. Desde ahí puedes cambiar el nombre de una etiqueta, su color, añadir una nueva o eliminar una. Eliminar una etiqueta la quita de todas las transacciones del hogar; las transacciones en sí no cambian.
+
+## Dinero que no es gasto
+
+Mover dinero a un bróker, a un plan de pensiones o a una hucha de ahorro no es un gasto. WonderMoney lo deja fuera del gasto de dos formas.
+
+### Inversiones y ahorros
+
+Todos los hogares tienen la categoría del sistema **Inversiones y ahorros**, con **Inversiones** y **Ahorros** debajo. Por defecto, estas categorías no cuentan como gasto: las transacciones en ellas quedan fuera de los informes, los presupuestos y el flujo de caja de la página de inicio. No se mueve nada a ellas automáticamente; elige la categoría en las transacciones a las que corresponda, como con cualquier otra. En una transacción dividida, solo quedan fuera las partes en estas categorías.
+
+Todas las categorías, incluidas las del sistema, tienen el interruptor **Cuenta como gasto**. Está activado por defecto, salvo en Inversiones y ahorros. Desactívalo en una categoría, como una hucha de ahorro tuya, y sus transacciones también salen del gasto. Actívalo en Inversiones y ahorros si quieres que esas transacciones cuenten como gasto. Cambiar una categoría cambia también las categorías que tiene debajo, y una categoría dentro de otra que no cuenta como gasto tampoco cuenta.
+
+El interruptor solo afecta a tu hogar: los dos miembros ven el mismo ajuste y ningún otro hogar se ve afectado.
+
+- **En la web**, ve a **Configuración → Categorías** y usa el interruptor **Cuenta como gasto** en cualquier fila. En una categoría tuya, también está en el formulario al crearla o editarla.
+- **En la aplicación móvil**, una categoría del sistema tiene el interruptor **Cuenta como gasto** en su fila en **Configuración → Categorías**. En una categoría tuya, usa **Cuenta como gasto** al crearla o editarla. Las categorías que no cuentan aparecen señaladas en la lista.
+
+### Marcar como transferencia
+
+WonderMoney reconoce una transferencia entre dos de tus cuentas cuando encuentra los dos lados: el dinero que sale de una cuenta y el mismo importe que llega a la otra, como mucho unos días después. Las dos filas quedan entonces fuera de los ingresos y del gasto. Un pago a un bróker, o a una cuenta que no has conectado, no tiene el otro lado, así que sigue siendo un pago hasta que lo marques.
+
+- **En la web**, abre el menú de la transacción, elige **Editar** y activa **Marcar como transferencia**.
+- **En la aplicación móvil**, abre el menú de la fila y elige **Marcar como transferencia**.
+
+Para el dinero que sale, también puedes indicar a dónde fue: otra de tus cuentas, una cartera o un objetivo. Es una nota en la transacción; no añade nada a la cartera ni al objetivo. Para deshacerlo, desactiva el interruptor en la web, o elige **No es una transferencia** en la aplicación móvil.
+
+Una transacción que has marcado sigue siendo una transferencia: la detección automática de transferencias nunca la vuelve a cambiar. Si más adelante encuentra el otro lado en otra de tus cuentas, enlaza las dos.
+
 ## Revisión
 
 Revisa las categorías al final de la semana o del mes y corrige cualquier cosa que se haya adivinado demasiado rápido. Unas categorías coherentes hacen que el seguimiento del presupuesto y las búsquedas sean más fiables.
 
 ## Problemas comunes
 
-- Un único pago se repartió entre más de un propósito.
+- Un único pago cubrió más de un propósito: divídelo en lugar de elegir la parte más grande.
 - La categoría es demasiado amplia para ser útil.
 - A los reembolsos o las reversiones se les asignó la misma categoría que al cargo original.
 - Las transacciones importadas heredaron una categoría que no encaja con tu configuración.

@@ -200,9 +200,8 @@ const AccountTransactionAddModal: React.FC<AccountTransactionAddModalProps> = ({
                 variant="outline"
                 loading={createTransactionMutation.isPending}
                 onClick={() => setCurrentStep(TransactionAddStep.OCR)}
-                className="gap-2"
               >
-                <Sparkles strokeWidth={1} />
+                <Sparkles className="size-4" />
                 {t("autofill-transaction")}
               </Button>
             )}
@@ -212,9 +211,7 @@ const AccountTransactionAddModal: React.FC<AccountTransactionAddModalProps> = ({
               disabled={createTransactionMutation.isPending}
               form="add-account-transaction-form"
             >
-              {createTransactionMutation.isPending
-                ? t("creating_transaction")
-                : t("create_transaction")}
+              {t("add-transaction")}
             </Button>
           </div>
         );
@@ -301,7 +298,7 @@ const AccountTransactionAddModal: React.FC<AccountTransactionAddModalProps> = ({
         trigger !== undefined ? (
           (trigger ?? undefined)
         ) : (
-          <Button className="grow gap-2" size="sm">
+          <Button className="grow">
             <Plus className="size-4" />
             {t("add-transaction")}
           </Button>

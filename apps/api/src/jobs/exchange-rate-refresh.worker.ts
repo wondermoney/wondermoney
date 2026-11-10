@@ -1,12 +1,15 @@
 import type { Job } from 'pg-boss';
 
+import { enqueueFxReconvertJob } from '@app/jobs/fx-reconvert.queue';
 import { BackgroundOperationStatus } from '@entity/BackgroundOperation';
 import exchangeRateRefreshService from '@service/market-data/exchange-rate-refresh.service';
 import backgroundOperationService from '@service/operations/background-operation.service';
+import type { Enqueue } from '@service/queue/enqueue';
+import logger from '@utils/logger';
 
 function isDuplicate(error: unknown) { const err = error as { cause?: { code?: unknown }; code?: unknown; constructor?: { name?: string }; name?: unknown }; return err.code === '23505' || err.name === 'UniqueConstraintViolationException' || err.constructor?.name === 'UniqueConstraintViolationException' || err.cause?.code === '23505'; }
 
-export const handleExchangeRateRefreshJob = async (job: Job<{ correlationId?: string }>, deps: { backgroundOperationService?: typeof backgroundOperationService; exchangeRateRefreshService?: typeof exchangeRateRefreshService } = {}) => {
+export const handleExchangeRateRefreshJob = async (job: Job<{ correlationId?: string }>, deps: { backgroundOperationService?: typeof backgroundOperationService; enqueue?: Enqueue; exchangeRateRefreshService?: typeof exchangeRateRefreshService } = {}) => {
   const bg = deps.backgroundOperationService ?? backgroundOperationService;
   const correlationId = job.data.correlationId ?? `exchange-rate.refresh:${job.id}`;
   try { await bg.createQueuedOperation({ correlationId, operationType: 'exchange-rate.refresh', resourceId: 'exchange-rate-refresh:scheduled-run', retryable: false }); } catch (error) { if (!isDuplicate(error)) throw error; }
@@ -18,7 +21,6 @@ export const handleExchangeRateRefreshJob = async (job: Job<{ correlationId?: st
     await bg.heartbeatJob(correlationId, job.id, { progress: result, stage: 'exchange-rate.refresh:completed' });
     const finished = await bg.finishJob(correlationId, job.id, { retryable: false, stage: 'exchange-rate.refresh:succeeded', status: BackgroundOperationStatus.SUCCEEDED });
     if (!finished) throw new Error('exchange-rate.refresh job failed to finish');
-    return true;
   } catch (error) {
     // Reset the operation to `queued` rather than terminal-failing it, and rethrow so
     // pg-boss actually retries. Raising this queue's `retryLimit` alone would have done
@@ -29,4 +31,11 @@ export const handleExchangeRateRefreshJob = async (job: Job<{ correlationId?: st
     await bg.markAttemptFailedForRetry(correlationId, job.id, { errorCode: 'exchange_rate_refresh_failed', stage: 'exchange-rate.refresh:failed' });
     throw error;
   }
+  // Rows stored without a usable rate, and foreign-currency balances, catch up with the new rates.
+  // Queued even when nothing new was inserted: an earlier attempt of this run may have inserted
+  // them. A failure here leaves the refresh succeeded; the next refresh queues the pass again.
+  if (deps.enqueue) {
+    try { await enqueueFxReconvertJob({ correlationId: `fx.reconvert:${correlationId}` }, { enqueue: deps.enqueue }); } catch (error) { logger.error({ correlationId, error }, 'Could not queue fx.reconvert after the exchange-rate refresh'); }
+  }
+  return true;
 };

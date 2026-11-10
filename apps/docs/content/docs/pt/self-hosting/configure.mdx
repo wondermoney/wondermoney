@@ -49,6 +49,10 @@ AI_MODEL=llama3.1
 
 Define `AI_API_KEY` quando o endpoint exigir uma chave. Para usares um modelo diferente numa funcionalidade, define `AI_MODEL_<FUNCIONALIDADE>`; por exemplo, a leitura de recibos precisa de um modelo que leia imagens, definido com `AI_MODEL_OCR`.
 
+Se o registo estiver aberto e pagares pelo modelo, define `AI_REQUIRES_VERIFIED_EMAIL=true`. As contas criadas com email e palavra-passe recebem então um link de verificação por email, e têm de o seguir antes de poderem usar o assistente, a leitura de recibos ou o mapeamento de colunas com IA. As contas Google e Apple contam como verificadas. É preciso ter o email configurado.
+
+Para limitar o que cada agregado pode gastar no modelo por dia, define `AI_DAILY_LIMIT_ASSISTANT` (mensagens ao assistente), `AI_DAILY_LIMIT_OCR` (leituras de recibos) e `AI_DAILY_LIMIT_CSV_MAPPING` (importações CSV mapeadas pelo modelo). Os membros de um agregado partilham o limite, que é reposto à meia-noite UTC. Deixa-os vazios para não haver limite. Quando um agregado chega a um limite, a aplicação avisa até ao dia seguinte; as importações CSV continuam a funcionar, com as colunas mapeadas à mão.
+
 ## Dados de mercado
 
 Define `EODHD_API_KEY` para ligar a pesquisa de tickers, as cotações em tempo real e o módulo de Mercados Financeiros.
@@ -68,5 +72,37 @@ Define `GOOGLE_CLIENT_ID` e `GOOGLE_CLIENT_SECRET` (de um cliente OAuth no Googl
 | `INSTANCE_NAME` | O nome da tua instância. A aplicação web mostra-o nos títulos dos separadores do navegador, nas pré-visualizações de links e nas páginas de início de sessão e de registo, e no lugar do logótipo da WonderMoney quando o alteras. Cada email usa-o no assunto, no texto e na assinatura, e como nome do remetente se `EMAIL_FROM_NAME` não estiver definido; as aplicações de autenticação mostram-no como etiqueta. A aplicação web lê-o da API, por isso define-o só na API; uma alteração aparece na aplicação web em até cinco minutos |
 | `SIGNUP_MODE` | `open`, `invite` ou `closed` (consulta [Instalar](/pt/docs/self-hosting/install)) |
 | `SUPPORT_EMAIL` | A caixa de correio do formulário de contacto, dos alertas de conta e do feedback na aplicação, e o endereço de suporte que a aplicação mostra; deixa vazio para os desligar e esconder as ligações de suporte. O formulário "Partilhar Feedback" também precisa de email configurado; sem ele, o formulário fica escondido |
+| `SPONSOR_URL` | Uma página onde os teus utilizadores podem contribuir para manter a instância (Open Collective, GitHub Sponsors, ...). As perguntas frequentes da aplicação web incluem a ligação quando está definida |
 | `NEXT_PUBLIC_TERMS_URL`, `NEXT_PUBLIC_PRIVACY_URL` | As tuas páginas legais, ligadas a partir da página de registo quando ambas estão definidas |
 | `PRIVACY_POLICY_URL` | A tua política de privacidade, ligada a partir do rodapé dos emails. `{lang}` é substituído pelo idioma do destinatário (`en` ou `pt`), por exemplo `https://example.com/{lang}/privacy`. Por omissão, aponta para as definições de privacidade da aplicação |
+
+## Analytics
+
+A tua instância não carrega analytics nem gestor de tags, nem regista eventos de utilização, a menos que os ligues. Cada definição abaixo liga um serviço, que envia para a tua própria conta nesse serviço; deixa-as vazias para manter tudo desligado.
+
+| Definição | O que liga |
+|---|---|
+| `NEXT_PUBLIC_GTM_ID` | O teu contentor do Google Tag Manager (`GTM-XXXXXXX`), carregado em todas as páginas da aplicação web |
+| `NEXT_PUBLIC_POSTHOG_KEY` | O PostHog na aplicação web: visualizações de página, eventos de utilização e gravações de sessão, associados ao endereço de email de cada utilizador |
+| `ANALYTICS_OUTBOX_MODE=live` com `POSTHOG_API_KEY` | Eventos de registo, início de sessão e sincronização bancária enviados para o PostHog pela API e pelo worker. Define ambos na API e no worker; com o modo desligado, nenhum evento é registado |
+
+Se ligares algum destes, informa os teus utilizadores na tua política de privacidade (`NEXT_PUBLIC_PRIVACY_URL`) e pede consentimento quando a lei o exigir.
+
+## O que a tua instância envia
+
+Nada é enviado para o projeto WonderMoney. Cada serviço externo que a tua instância pode contactar, e o que o liga:
+
+| Serviço | Contactado por | Ligado por |
+|---|---|---|
+| Banco Central Europeu | O worker, uma vez por dia, para descarregar as taxas de câmbio do euro. Não envia dados sobre ti nem sobre os teus utilizadores | Sempre ligado |
+| Email (o teu servidor SMTP ou o Resend) | A API e o worker, para enviar redefinições de palavra-passe, convites e notificações | `SMTP_HOST` ou `RESEND_API_KEY` |
+| IA (o teu endpoint compatível com OpenAI) | A API e o worker, com o recibo, as colunas do CSV, as transações ou as mensagens de chat de que a funcionalidade precisa | `AI_BASE_URL` e `AI_MODEL` |
+| Dados de mercado (EODHD) | A API e o worker, com símbolos de cotação, não dados de utilizadores | `EODHD_API_KEY` |
+| Armazenamento de ficheiros (o teu armazenamento compatível com S3) | A API e os navegadores, para importações de CSV e cópias de recibos | `S3_ENDPOINT` e `S3_BUCKET` |
+| Registo de erros (Sentry) | A API, o worker e a aplicação web, com relatórios de erros | `SENTRY_DSN` (API e worker), `NEXT_PUBLIC_SENTRY_DSN` (aplicação web) |
+| Analytics (Google Tag Manager, PostHog) | Consulta [Analytics](#analytics) | `NEXT_PUBLIC_GTM_ID`, `NEXT_PUBLIC_POSTHOG_KEY`, `ANALYTICS_OUTBOX_MODE=live` |
+| Sincronização bancária (Enable Banking) | A API e o worker, para os utilizadores que ligam um banco | A chave Enable Banking de cada utilizador, adicionada nas Definições |
+| Início de sessão com Google | Os navegadores e a API, quando um utilizador escolhe "Continuar com Google" | `GOOGLE_CLIENT_ID` e `GOOGLE_CLIENT_SECRET` |
+| reCAPTCHA | Os navegadores no formulário de contacto, e a aplicação web para verificar a resposta | `NEXT_PUBLIC_RECAPTCHA_SITE_KEY` e `RECAPTCHA_SECRET_KEY` |
+
+Os navegadores também carregam os logótipos de bancos e bolsas a partir dos endereços guardados no catálogo de bancos e ativos. A aplicação móvel não envia analytics nem relatórios de erros enquanto está ligada ao teu servidor.

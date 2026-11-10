@@ -8,7 +8,7 @@ import { StatementImportRoute } from '../statement-import-route'
 const mockReplace = jest.fn()
 const mockBack = jest.fn()
 const mockCanGoBack = jest.fn().mockReturnValue(true)
-const mockAddListener = jest.fn((_event: string, _handler: (event: { preventDefault: () => void }) => void) => jest.fn())
+const mockUsePreventRemove = jest.fn((_preventRemove: boolean, _onPrevented?: (options: { data: { action: object }; repeat: () => void }) => void) => jest.fn())
 const mockGetDocumentAsync = jest.fn()
 const mockStart = jest.fn()
 const mockReset = jest.fn()
@@ -23,7 +23,7 @@ let mockImportState: { state: { phase: string; summary?: unknown; reason?: strin
 
 jest.mock('expo-router', () => ({
   useRouter: () => ({ replace: mockReplace, back: mockBack, canGoBack: mockCanGoBack }),
-  useNavigation: () => ({ addListener: mockAddListener }),
+  usePreventRemove: (preventRemove: boolean, onPrevented?: (options: { data: { action: object }; repeat: () => void }) => void) => mockUsePreventRemove(preventRemove, onPrevented),
 }))
 jest.mock('expo-document-picker', () => ({ getDocumentAsync: (...args: unknown[]) => mockGetDocumentAsync(...args) }))
 jest.mock('@/features/accounts/use-accounts', () => ({ useAccounts: () => mockAccounts }))
@@ -37,7 +37,7 @@ async function renderRoute() {
 describe('StatementImportRoute', () => {
   beforeEach(() => {
     mockReplace.mockReset(); mockBack.mockReset(); mockCanGoBack.mockReset().mockReturnValue(true)
-    mockAddListener.mockReset().mockReturnValue(jest.fn())
+    mockUsePreventRemove.mockClear()
     mockGetDocumentAsync.mockReset(); mockStart.mockReset(); mockReset.mockReset(); mockRefetch.mockReset()
     mockAccounts = { data: undefined, isLoading: true, error: null, refetch: mockRefetch }
     mockImportState = { state: { phase: 'idle' }, start: mockStart, reset: mockReset }
@@ -98,16 +98,10 @@ describe('StatementImportRoute', () => {
   it('guards navigation away while an import is in flight, but not once it settles', async () => {
     mockImportState = { state: { phase: 'processing' }, start: mockStart, reset: mockReset }
     await renderRoute()
-    const guard = mockAddListener.mock.calls[0]?.[1]
-    const blocked = { preventDefault: jest.fn() }
-    guard?.(blocked)
-    expect(blocked.preventDefault).toHaveBeenCalledTimes(1)
+    expect(mockUsePreventRemove.mock.lastCall?.[0]).toBe(true)
 
     mockImportState = { state: { phase: 'succeeded', summary: undefined }, start: mockStart, reset: mockReset }
     await renderRoute()
-    const allowed = { preventDefault: jest.fn() }
-    const secondGuard = mockAddListener.mock.calls[1]?.[1]
-    secondGuard?.(allowed)
-    expect(allowed.preventDefault).not.toHaveBeenCalled()
+    expect(mockUsePreventRemove.mock.lastCall?.[0]).toBe(false)
   })
 })

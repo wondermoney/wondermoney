@@ -221,6 +221,14 @@ pnpm --dir "$WT/apps/web" e2e:headless
 notification (Radix's popper Select raises it when the list opens); every other
 uncaught application error still fails the test.
 
+## Privacy mode spec
+
+`cypress/e2e/privacy-mode.cy.ts` uses the same local API and disposable database,
+but not the worker or S3. It signs up a fresh `test+<uuid>@example.invalid` user,
+seeds one offline account, turns privacy mode on and fails if any main route
+shows a currency symbol touching a digit. Enable it with
+`E2E_PRIVACY_MODE_ENABLED=1` alongside `E2E_API_BASE_URL`.
+
 ## Ports
 
 - Port 3100 is the web app, 3101 the API, 3102 the worker health endpoint,

@@ -17,14 +17,17 @@ import { onboardingBootstrapKey } from './query-keys'
  * Outcomes surfaced to the screen: `access` covers MFA / auth
  * (route through `blockAccess`); `stale` is a 400 from a client that posted
  * a version the server no longer considers current (caller should refetch);
+ * `demo` is the read-only demo profile's 403;
  * `network` is the ambiguous "we don't know" bucket and must not be
  * interpreted as completion.
  */
-export type CompleteOnboardingFailure = 'access' | 'cancelled' | 'network' | 'stale' | 'unknown'
+export type CompleteOnboardingFailure = 'access' | 'cancelled' | 'demo' | 'network' | 'stale' | 'unknown'
 
 export function classifyCompleteOnboardingFailure(error: unknown): CompleteOnboardingFailure {
   if (!(error instanceof ApiError)) return 'unknown'
   if (error.code === 'mfa-required' || error.code === 'auth-session') return 'access'
+  // A read-only demo profile is refused every write, completion included.
+  if (error.code === 'demo-forbidden') return 'demo'
   if (error.code === 'http' && error.status === 400) return 'stale'
   if (error.code === 'cancelled') return 'cancelled'
   if (error.code === 'http' || error.code === 'network') return 'network'

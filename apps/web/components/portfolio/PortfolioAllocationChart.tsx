@@ -10,7 +10,6 @@ import { PieChartBase } from "@/components/ui/charts";
 import { Spinner } from "@/components/ui/Spinner";
 import usePortfolioAllocation from "@/lib/api/portfolio/usePortfolioAllocation";
 import type { SupportedCurrencyCodes } from "@/lib/utils/currencySymbol";
-import { formatCurrencyForLocale } from "@/lib/utils/formatCurrency";
 import { useFormatCurrency } from "@/lib/utils/useFormatCurrency";
 import { useFormatPercentage } from "@/lib/utils/useFormatPercentage";
 
@@ -19,17 +18,6 @@ interface PortfolioAllocationChartProps {
   currency: SupportedCurrencyCodes;
   showSectorToggle?: boolean;
 }
-
-/**
- * Takes the locale explicitly rather than letting `Intl` fall back to
- * the runtime's. Exported for the chart's own test, which is why it is a plain
- * function and not the hook.
- */
-export const formatPortfolioAllocationValue = (
-  value: number,
-  currency: SupportedCurrencyCodes,
-  locale: string,
-) => formatCurrencyForLocale(value, currency, locale);
 
 // The project's validated categorical ramp, in order. This replaced eight raw
 // hexes that tracked neither theme and had never been checked for
@@ -117,7 +105,7 @@ const PortfolioAllocationChart: React.FC<PortfolioAllocationChartProps> = ({
   );
 
   return (
-    <div className="p-4">
+    <div className="py-1">
       {showSectorToggle && (
         <div className="mb-3 flex gap-1">
           <Button

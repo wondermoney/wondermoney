@@ -1,41 +1,38 @@
 import { ReactNode, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import {
-  KeyboardAvoidingView,
-  Platform,
-  Pressable,
-  ScrollView,
-  Text,
-  TextInput,
-  useColorScheme,
-  View,
-} from 'react-native'
-import { SafeAreaView } from 'react-native-safe-area-context'
+import { StyleSheet, View } from 'react-native'
 
+import { Button } from '@/components/ui/button'
+import { Text } from '@/components/ui/text'
 import { themeTokens } from '@/theme/tokens'
 
-import { authFormStyles as styles, AuthFooter, AuthLogo, FieldError, FieldLabel } from './auth-form-styles'
+import { AuthField, AuthFooter, AuthLayout, AuthNotice, AuthTextInput } from './auth-form-styles'
 
 export type SignInOutcome = 'accepted' | 'invalid-credentials' | 'unavailable' | 'mfa-pending'
 
 export type SignInScreenProps = {
   onSubmit: (email: string, password: string) => Promise<SignInOutcome>
   notice?: string
+  /** `default` for good news ("Password updated"); errors stay destructive. */
+  noticeTone?: 'default' | 'destructive'
+  /** The page title, "Welcome back". Defaults to "Sign in". */
+  title?: string
+  /** The muted line under the title ("Not a member? Create an account"). */
+  lead?: ReactNode
+  /** Sits right-aligned under the password, as web's "Forgot your password?". */
+  forgotPasswordLink?: ReactNode
+  /** Social sign-in, other links and the server switcher, under the submit button. */
   footer?: ReactNode
 }
 
-export function SignInScreen({ onSubmit, notice, footer }: SignInScreenProps) {
+export function SignInScreen({ onSubmit, notice, noticeTone = 'destructive', title, lead, forgotPasswordLink, footer }: SignInScreenProps) {
   const { t } = useTranslation()
-  const colorScheme = useColorScheme()
-  const palette = themeTokens.colors[colorScheme === 'dark' ? 'dark' : 'light']
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const emailRef = useRef('')
   const passwordRef = useRef('')
-  const [focused, setFocused] = useState<'email' | 'password' | null>(null)
   const [errors, setErrors] = useState<{ email?: string; password?: string; submit?: string }>({})
   const [submitting, setSubmitting] = useState(false)
-  const [buttonFocused, setButtonFocused] = useState(false)
 
   const submit = () => {
     if (submitting) return
@@ -61,106 +58,67 @@ export function SignInScreen({ onSubmit, notice, footer }: SignInScreenProps) {
   }
 
   return (
-    <SafeAreaView style={[styles.safeArea, { backgroundColor: palette.background }]}>
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        style={styles.keyboard}
-      >
-        <ScrollView
-          keyboardShouldPersistTaps="handled"
-          contentContainerStyle={styles.scrollContent}
-        >
-          <View style={styles.panel}>
-            <AuthLogo />
-            <View style={styles.headingGroup}>
-              <Text accessibilityRole="header" allowFontScaling style={[styles.title, { color: palette.foreground }]}>
-                {t('auth.title')}
-              </Text>
-              <Text allowFontScaling style={[styles.helper, { color: palette.mutedForeground }]}>
-                {t('auth.helper')}
-              </Text>
-            </View>
+    <AuthLayout
+      footer={footer ? <AuthFooter>{footer}</AuthFooter> : undefined}
+      notice={notice ? <AuthNotice message={notice} tone={noticeTone} /> : undefined}
+      lead={lead}
+      title={title ?? t('auth.title')}
+    >
+      <AuthField error={errors.email} label={t('auth.email')}>
+        <AuthTextInput
+          accessibilityLabel={t('auth.email')}
+          autoCapitalize="none"
+          autoComplete="email"
+          invalid={Boolean(errors.email)}
+          keyboardType="email-address"
+          onChangeText={(value) => {
+            emailRef.current = value
+            setEmail(value)
+          }}
+          placeholder={t('auth.email')}
+          returnKeyType="next"
+          value={email}
+        />
+      </AuthField>
 
-            {notice ? (
-              <Text accessible accessibilityLabel={notice} accessibilityRole="alert" allowFontScaling style={[styles.error, { color: palette.destructive }]}>
-                {notice}
-              </Text>
-            ) : null}
+      <AuthField error={errors.password} label={t('auth.password')}>
+        <AuthTextInput
+          accessibilityLabel={t('auth.password')}
+          autoCapitalize="none"
+          autoComplete="password"
+          invalid={Boolean(errors.password)}
+          onChangeText={(value) => {
+            passwordRef.current = value
+            setPassword(value)
+          }}
+          onSubmitEditing={submit}
+          placeholder={t('auth.password')}
+          returnKeyType="done"
+          secureTextEntry
+          value={password}
+        />
+      </AuthField>
 
-            <View style={styles.form}>
-              <FieldLabel color={palette.foreground}>{t('auth.email')}</FieldLabel>
-              <TextInput
-                accessibilityLabel={t('auth.email')}
-                autoCapitalize="none"
-                autoComplete="email"
-                keyboardType="email-address"
-                onBlur={() => setFocused(null)}
-                onChangeText={(value) => {
-                  emailRef.current = value
-                  setEmail(value)
-                }}
-                onFocus={() => setFocused('email')}
-                returnKeyType="next"
-                style={[
-                  styles.input,
-                  { color: palette.foreground, borderColor: focused === 'email' ? palette.primary : palette.border },
-                ]}
-                value={email}
-              />
-              {errors.email ? <FieldError color={palette.destructive}>{errors.email}</FieldError> : null}
+      {forgotPasswordLink ? <View style={localStyles.forgot}>{forgotPasswordLink}</View> : null}
 
-              <FieldLabel color={palette.foreground}>{t('auth.password')}</FieldLabel>
-              <TextInput
-                accessibilityLabel={t('auth.password')}
-                autoCapitalize="none"
-                autoComplete="password"
-                onBlur={() => setFocused(null)}
-                onChangeText={(value) => {
-                  passwordRef.current = value
-                  setPassword(value)
-                }}
-                onFocus={() => setFocused('password')}
-                onSubmitEditing={submit}
-                returnKeyType="done"
-                secureTextEntry
-                style={[
-                  styles.input,
-                  { color: palette.foreground, borderColor: focused === 'password' ? palette.primary : palette.border },
-                ]}
-                value={password}
-              />
-              {errors.password ? <FieldError color={palette.destructive}>{errors.password}</FieldError> : null}
+      {errors.submit ? (
+        <Text accessible accessibilityLabel={errors.submit} accessibilityRole="alert" tone="destructive" variant="meta">
+          {errors.submit}
+        </Text>
+      ) : null}
 
-              {errors.submit ? (
-                <Text accessible accessibilityLabel={errors.submit} accessibilityRole="alert" allowFontScaling style={[styles.error, { color: palette.destructive }]}>
-                  {errors.submit}
-                </Text>
-              ) : null}
-
-              <Pressable
-                accessibilityRole="button"
-                accessibilityState={{ disabled: submitting, busy: submitting }}
-                disabled={submitting}
-                onBlur={() => setButtonFocused(false)}
-                onFocus={() => setButtonFocused(true)}
-                onPress={submit}
-                style={({ pressed }) => [
-                  styles.primaryButton,
-                  { backgroundColor: palette.primary },
-                  buttonFocused && { borderColor: palette.foreground, borderWidth: 2 },
-                  (pressed || submitting) && styles.buttonPressed,
-                ]}
-              >
-                <Text allowFontScaling style={[styles.buttonLabel, { color: palette.background }]}>
-                  {submitting ? t('auth.submitting') : t('auth.submit')}
-                </Text>
-              </Pressable>
-
-               <AuthFooter>{footer}</AuthFooter>
-            </View>
-          </View>
-        </ScrollView>
-      </KeyboardAvoidingView>
-    </SafeAreaView>
+      <Button
+        block
+        disabled={submitting}
+        label={submitting ? t('auth.submitting') : t('auth.submit')}
+        onPress={submit}
+      />
+    </AuthLayout>
   )
 }
+
+const localStyles = StyleSheet.create({
+  // Web: `flex items-center justify-end`, the link on the right under the password.
+  // A row, so AuthLink's alignSelf only sets its vertical position and the link sits right, as on web.
+  forgot: { flexDirection: 'row', justifyContent: 'flex-end', marginTop: -themeTokens.spacing[2] },
+})

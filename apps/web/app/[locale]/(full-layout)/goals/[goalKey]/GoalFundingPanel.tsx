@@ -1,8 +1,7 @@
 import { useLocale, useTranslations } from "next-intl";
 
-import { Card } from "@/components/ui/card";
 import type { Goal, GoalSummary } from "@/lib/api/goals/types";
-import { formatGoalCurrency } from "@/lib/goals/format";
+import { useFormatGoalCurrency } from "@/lib/goals/useFormatGoalCurrency";
 
 function currencyFor(goal: Goal) {
   return (
@@ -21,11 +20,12 @@ export default function GoalFundingPanel({
 }) {
   const t = useTranslations();
   const locale = useLocale();
+  const formatGoalCurrency = useFormatGoalCurrency();
   const c = currencyFor(goal);
 
   return (
-    <Card className="space-y-4 p-6">
-      <h2 className="text-foreground text-sm font-semibold">
+    <section className="border-foreground space-y-4 border-t-2 pt-4">
+      <h2 className="text-foreground text-lg font-semibold tracking-tight">
         {t("goals.monthly-contribution")}
       </h2>
       <div className="grid gap-4 sm:grid-cols-3">
@@ -60,7 +60,7 @@ export default function GoalFundingPanel({
       {/* No Assign money / Move money out pair here: the header already has
           it, and repeating it would put two primaries on one screen for the
           same action. The header owns them; this panel reports the numbers. */}
-    </Card>
+    </section>
   );
 }
 

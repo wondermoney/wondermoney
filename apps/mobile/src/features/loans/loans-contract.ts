@@ -183,6 +183,25 @@ export type LoanRepaymentAllocation = z.infer<typeof loanRepaymentAllocationSche
 
 export const loansEndpoint = readEndpoint({ method: 'GET', path: '/v1/loan', schema: loansResponseSchema })
 
+// Web's `useLoanOverview` (GET /v1/loan/overview): the Loans page's headline totals, already
+// converted into the user's currency by the API.
+export const loanOverviewResponseSchema = z.object({
+  overview: z.object({
+    currency: z.string().regex(/^[A-Z]{3}$/).optional(),
+    interestFeesThisMonth: finiteMoney,
+    monthlyRepaymentTotal: finiteMoney,
+    netWorthImpact: finiteMoney,
+    repaymentsNeedingReviewCount: z.number().int().nonnegative(),
+    totalOutstandingDebt: finiteMoney,
+    totalOutstandingAmount: finiteMoney.optional(),
+    unconvertedLoanCount: z.number().int().nonnegative().optional(),
+  }),
+})
+
+export type LoanOverviewDto = z.infer<typeof loanOverviewResponseSchema>['overview']
+
+export const loanOverviewEndpoint = readEndpoint({ method: 'GET', path: '/v1/loan/overview', schema: loanOverviewResponseSchema })
+
 export const loanCreateEndpoint = writeEndpoint({ method: 'POST', path: '/v1/loan', schema: loanResponseSchema, successStatuses: [201] })
 
 export const isValidLoanId = (value: number): boolean => Number.isSafeInteger(value) && value > 0

@@ -15,7 +15,7 @@ async function renderRoute() {
 }
 
 const mockReplace = jest.fn()
-const mockAddListener = jest.fn().mockReturnValue(jest.fn())
+const mockUsePreventRemove = jest.fn((_preventRemove: boolean, _onPrevented?: (options: { data: { action: object }; repeat: () => void }) => void) => jest.fn())
 const mockCreateMutate = jest.fn()
 const mockReconcile = jest.fn()
 const mockClear = jest.fn()
@@ -27,7 +27,7 @@ let mockSearchParams: { version?: string } = { version: '3' }
 jest.mock('expo-router', () => ({
   useLocalSearchParams: () => mockSearchParams,
   useRouter: () => ({ replace: mockReplace }),
-  useNavigation: () => ({ addListener: mockAddListener }),
+  usePreventRemove: (preventRemove: boolean, onPrevented?: (options: { data: { action: object }; repeat: () => void }) => void) => mockUsePreventRemove(preventRemove, onPrevented),
 }))
 jest.mock('@/features/accounts/use-offline-account-options', () => ({ useOfflineAccountOptions: () => ({
   currencies: { data: { currencies: [{ currencyKey: 151, code: 'EUR', description: 'Euro' }] } },
@@ -51,7 +51,7 @@ jest.mock('@/features/accounts/offline-account-create-screen', () => ({ OfflineA
 
 describe('onboarding create-account route', () => {
   beforeEach(() => {
-    mockReplace.mockReset(); mockAddListener.mockClear(); mockCreateMutate.mockReset(); mockReconcile.mockReset(); mockClear.mockReset(); mockCompletionMutate.mockReset()
+    mockReplace.mockReset(); mockUsePreventRemove.mockClear(); mockCreateMutate.mockReset(); mockReconcile.mockReset(); mockClear.mockReset(); mockCompletionMutate.mockReset()
     mockCreatePending = false; mockCompletionPending = false; mockSearchParams = { version: '3' }
   })
 
@@ -92,10 +92,7 @@ describe('onboarding create-account route', () => {
   it('registers a pending navigation removal lock while either mutation is in flight', async () => {
     mockCreatePending = true
     await renderRoute()
-    const listener = mockAddListener.mock.calls[0][1]
-    const event = { preventDefault: jest.fn() }
-    listener(event)
-    expect(event.preventDefault).toHaveBeenCalledTimes(1)
+    expect(mockUsePreventRemove.mock.lastCall?.[0]).toBe(true)
   })
 
   it('falls back to an invalid-version state and returns to onboarding when the version param is missing', async () => {

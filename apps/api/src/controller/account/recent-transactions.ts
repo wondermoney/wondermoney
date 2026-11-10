@@ -13,20 +13,34 @@ import { DI } from '../../app.js';
 /**
  * Least-privilege recent-transactions summary for the mobile account
  * detail. Returns at most the five newest entries for one authorized account with an
- * explicit five-field shape and NO ids, dirty descriptions, review state, logos, or
- * editable metadata. The legacy transaction endpoint remains for the web editor and
- * is never a mobile fallback.
+ * explicit shape and NO ids, dirty descriptions, review state, logos, or editable
+ * metadata. A persisted row also carries what its leading mark needs and nothing more:
+ * its category's icon and colours (not the category's id or name) and whether it is one
+ * side of a transfer. The legacy transaction endpoint remains for the web editor and is
+ * never a mobile fallback.
  */
 
 export const RECENT_TRANSACTIONS_LIMIT = 5;
 
+interface RecentTransactionCategoryMarkDto {
+  bgColor: null | string;
+  icon: null | string;
+  textColor: null | string;
+}
+
 interface RecentTransactionDto {
   amount: null | number;
+  /** Persisted rows only: the first category's icon and colours, `null` when uncategorised. */
+  category?: null | RecentTransactionCategoryMarkDto;
   currencyCode: null | string;
   displayName: null | string;
   entryType: RecentTransactionEntryType;
   occurredAt: null | string;
+  /** Persisted rows only: the row is one side of a transfer between two accounts. */
+  transfer?: boolean;
 }
+
+const TRANSFER_TYPES = new Set(['TRANSFER_IN', 'TRANSFER_OUT']);
 
 type RecentTransactionEntryType = 'persisted_transaction' | 'synthetic_initial_balance';
 
@@ -75,7 +89,7 @@ export async function getRecentTransactions(req: Request, res: Response) {
     {
       limit: RECENT_TRANSACTIONS_LIMIT,
       orderBy: { transactionDate: QueryOrder.DESC_NULLS_LAST, transactionKey: QueryOrder.DESC },
-      populate: ['settlementCurrencyKey', 'transactionMerchantKey'],
+      populate: ['settlementCurrencyKey', 'transactionMerchantKey', 'transactionTypeKey', 'appuserTransactionCategories.categoryKey'],
     },
   );
 
@@ -102,17 +116,27 @@ function mapRecentTransaction(transaction: Transaction): RecentTransactionDto {
   return {
     // Edited settlement amount, then settlement amount, then null. Zero is preserved.
     amount: toFiniteAmount(transaction.editedSettlementAmount ?? transaction.settlementAmount),
+    category: resolveCategoryMark(transaction),
     currencyCode: transaction.settlementCurrencyKey?.code ?? null,
     displayName: resolveDisplayName(transaction),
     entryType: 'persisted_transaction',
     occurredAt: transaction.transactionDate ? transaction.transactionDate.toISOString() : null,
+    transfer: TRANSFER_TYPES.has(transaction.transactionTypeKey?.name.trim().toUpperCase() ?? ''),
   };
 }
 
+/** The first assigned category's icon and colours, as the transactions list reads them. */
 function normalizeDisplayDescription(description: string | undefined): null | string {
   if (description === undefined) return null;
   const normalized = description.trim().replace(/\s+/g, ' ');
   return normalized.length > 0 ? normalized : null;
+}
+
+function resolveCategoryMark(transaction: Transaction): null | RecentTransactionCategoryMarkDto {
+  const [assignment] = transaction.appuserTransactionCategories.getItems();
+  const category = assignment?.categoryKey;
+  if (!category) return null;
+  return { bgColor: category.bgColor, icon: category.icon ?? null, textColor: category.textColor };
 }
 
 /** Numeric columns can arrive as strings from the driver; keep zero, drop non-finite. */

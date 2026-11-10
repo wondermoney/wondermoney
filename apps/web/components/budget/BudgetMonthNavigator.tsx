@@ -44,7 +44,13 @@ export function BudgetMonthNavigator({
       >
         <ArrowLeft className="size-6" aria-hidden="true" />
       </Button>
-      <Heading variant="h4">{label}</Heading>
+      <Heading
+        variant="h4"
+        as="h2"
+        className="text-xl font-semibold lg:text-2xl"
+      >
+        {label}
+      </Heading>
       <Button
         type="button"
         variant="ghost"

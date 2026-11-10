@@ -22,6 +22,10 @@ export interface BudgetFull {
   }[];
   categories: BudgetCategory[];
   incomes: BudgetIncome[];
+  /** Overspending carries into the next month (off: only unspent money does). */
+  rolloverCarriesOverspend: boolean;
+  /** False when a carried amount rests on spending that could not be converted. */
+  rolloverComplete: boolean;
 }
 
 export interface GetBudgetsFullResponse {

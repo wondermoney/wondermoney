@@ -7,7 +7,7 @@ describe('session preference resolution', () => {
 
   it('resolves explicit and system themes', () => {
     expect(resolveTheme('system', 'dark')).toBe('dark')
-    expect(resolveTheme('system', 'unspecified')).toBe('light')
+    expect(resolveTheme('system', null)).toBe('light')
     expect(resolveTheme('light', 'dark')).toBe('light')
   })
 })

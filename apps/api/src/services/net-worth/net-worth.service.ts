@@ -1,7 +1,7 @@
 import { sql } from 'kysely';
 
 import { DI } from '@app/database/di';
-import { anyOf, sqlQuery } from '@app/database/sql';
+import { sqlQuery } from '@app/database/sql';
 import { Account } from '@entity/Account';
 import { Appuser } from '@entity/Appuser';
 import { AppuserTenant } from '@entity/AppuserTenant';
@@ -11,9 +11,14 @@ import { LoanRepaymentLink } from '@entity/LoanRepaymentLink';
 import { Portfolio } from '@entity/Portfolio';
 import { PortfolioSnapshot } from '@entity/PortfolioSnapshot';
 import { Transaction } from '@entity/Transaction';
+import { ACCOUNT_BALANCE_POPULATE, accountBalanceIn, loadAccountRates } from '@service/currency/account-balance';
+import { type CurrencyPair, loadRateTable, type RateTable } from '@service/currency/exchange-rate';
 import { calculateOutstandingPrincipalWithAdjustments } from '@service/loan/loan-calculation.service';
+import { portfolioCountedInAccount, type PortfolioLinkFields, shouldSuggestPortfolioLink } from '@service/portfolio/portfolio-account-link';
+import { type PortfolioSnapshotValue, snapshotInViewerCurrency, historyRatePairs as snapshotRatePairs, storedSnapshotValue } from '@service/portfolio/portfolio-history-currency';
+import portfolioHoldingsService from '@service/portfolio/portfolio-holdings.service';
 import { excludeExpired, notExpiredTransactionSql } from '@service/transaction/transaction-status';
-import { addMoney, sumMoney } from '@utils/money';
+import { addMoney, Money, subtractMoney, sumMoney } from '@utils/money';
 
 export interface NetWorthHistoryAccountLike {
   appuserCurrencyBalance?: null | number;
@@ -55,16 +60,33 @@ export interface NetWorthHistorySummary {
 export type NetWorthRowType = 'accounts' | 'loans' | 'portfolios';
 
 export interface NetWorthSummary {
+  /** `portfolios` holds only the portfolios that add to the total (see `rows[].countedInAccountId`). */
   assets: { accounts: number; portfolios: number };
   currencyCode: string;
+  /** False when any row was left out because it could not be valued in `currencyCode`. */
+  isComplete: boolean;
   liabilities: { loans: number };
-  rows: { balance: number; name: string; type: NetWorthRowType }[];
+  /**
+   * `id` is the account, portfolio or loan key, so clients can match a row to its record. A
+   * portfolio row with `countedInAccountId` is already inside that account's balance: it is shown
+   * as a breakdown and adds nothing to the totals.
+   */
+  rows: { balance: number; countedInAccountId?: number; id?: number; name: string; type: NetWorthRowType }[];
+  /** The viewer can see an investment account and the household has an unlinked portfolio: ask whether they hold the same money. */
+  suggestPortfolioLink: boolean;
   totalNetWorth: number;
-  unsupportedCurrencies: { loans: number; portfolios: number };
+  /**
+   * Rows left out of the totals because they could not be valued in `currencyCode`. An account
+   * counts here when its balance cannot be converted: it adds nothing, and the summary is incomplete.
+   */
+  unsupportedCurrencies: { accounts: number; loans: number; portfolios: number };
 }
 
 interface NetWorthInputRow {
   balance: number;
+  /** Portfolios only: the counted account whose balance already includes this portfolio. */
+  countedInAccountId?: number;
+  id?: number;
   name: string;
 }
 
@@ -84,7 +106,7 @@ export class NetWorthService {
       DI.em.find(
         Account,
         { deletedAt: undefined, tenantKey: appuserTenant.tenantKey },
-        { orderBy: { createdAt: 'DESC' }, populate: ['currencyKey'] },
+        { orderBy: { createdAt: 'DESC' }, populate: [...ACCOUNT_BALANCE_POPULATE, 'accountTypeKey'] },
       ),
       this.getPortfolioRows(appuser, appuserTenant.tenantKey),
       DI.em.find(
@@ -108,19 +130,44 @@ export class NetWorthService {
         });
 
         return loan.currencyKey.code === currencyCode
-          ? { balance: outstandingPrincipal, name: loan.name, supportedCurrency: true }
-          : { balance: 0, name: loan.name, supportedCurrency: false };
+          ? { balance: outstandingPrincipal, id: loan.loanKey, name: loan.name, supportedCurrency: true }
+          : { balance: 0, id: loan.loanKey, name: loan.name, supportedCurrency: false };
       }),
     );
 
-    const accountRows = accounts.map((account) => ({ balance: account.appuserCurrencyBalance ?? 0, name: account.accountName ?? 'Account' }));
+    // Each member keeps their own currency, and an account's stored user-currency balance is in its
+    // owner's. Convert every account into the viewer's currency; one that cannot be converted is
+    // left out and counted, never added in a foreign currency.
+    const asOf = new Date();
+    const rates = await loadAccountRates(DI.em, accounts, currencyCode, asOf);
+    const accountRows: NetWorthInputRow[] = [];
+    let unconvertedAccounts = 0;
+    for (const account of accounts) {
+      const value = accountBalanceIn(account, currencyCode, rates, asOf);
+      if (!value) {
+        unconvertedAccounts += 1;
+        continue;
+      }
+      accountRows.push({ balance: Money.toNumber(value), id: account.accountKey, name: account.accountName ?? 'Account' });
+    }
+
+    // A portfolio inside a counted account's balance is shown but not added (`portfolio-account-link.ts`).
+    const countedAccountKeys = new Set(accountRows.map((row) => row.id).filter((id): id is number => id != null));
+    const portfolios: NetWorthSourceRow[] = portfolioRows.map(({ link, ...row }) => {
+      const countedInAccountId = portfolioCountedInAccount(link, countedAccountKeys);
+      return countedInAccountId == null ? row : { ...row, countedInAccountId };
+    });
 
     const unsupportedCurrencies = {
+      accounts: unconvertedAccounts,
       loans: loanRows.filter((loan) => !loan.supportedCurrency).length,
-      portfolios: portfolioRows.filter((portfolio) => !portfolio.supportedCurrency).length,
+      portfolios: portfolios.filter((portfolio) => !portfolio.supportedCurrency && portfolio.countedInAccountId == null).length,
     };
 
-    return buildNetWorthSummary({ accounts: accountRows, currencyCode, loans: loanRows, portfolios: portfolioRows, unsupportedCurrencies });
+    return {
+      ...buildNetWorthSummary({ accounts: accountRows, currencyCode, loans: loanRows, portfolios, unsupportedCurrencies }),
+      suggestPortfolioLink: shouldSuggestPortfolioLink(accounts, portfolioRows.map((row) => row.link)),
+    };
   }
 
   async getNetWorthHistory(appuser: Appuser, options?: { granularity?: NetWorthHistoryGranularity; months?: number; toDate?: Date }): Promise<NetWorthHistorySummary> {
@@ -135,22 +182,39 @@ export class NetWorthService {
     const today = startOfUtcDay(now);
 
     const [accounts, portfolios, loans] = await Promise.all([
-      DI.em.find(Account, { deletedAt: undefined, tenantKey: appuserTenant.tenantKey }),
-      DI.em.find(Portfolio, { deletedAt: undefined, tenantKey: appuserTenant.tenantKey }),
+      DI.em.find(Account, { deletedAt: undefined, tenantKey: appuserTenant.tenantKey }, { populate: ACCOUNT_BALANCE_POPULATE }),
+      DI.em.find(Portfolio, { deletedAt: undefined, tenantKey: appuserTenant.tenantKey }, { populate: ['portfolioOwnerAppuserKey.currencyKey'] }),
       DI.em.find(Loan, { deletedAt: undefined, includeInNetWorth: true, ownerAppuserKey: appuser, tenantKey: appuserTenant.tenantKey }, { populate: ['currencyKey'] }),
     ]);
 
     const pointDates = await buildHistoryPointDates({ accounts, appuser, basePoints, tenantKey: appuserTenant.tenantKey, toDate });
 
     const prefetchedBalances = await prefetchAccountBalancesByPoint(accounts, appuserTenant.tenantKey, pointDates);
+    const snapshotsByPoint = await loadPortfolioSnapshotsByPoint(portfolios, pointDates.filter((pointDate) => !isCurrentHistoryPoint(pointDate, today)));
+    // A running balance is in the account owner's currency and an opening balance in the
+    // account's own; each is converted into the viewer's at the point's rate. A portfolio
+    // snapshot is in its owner's currency, converted at the rate at the end of its own day.
+    const snapshots = [...snapshotsByPoint.values()].flatMap((byPortfolio) => [...byPortfolio.values()]);
+    const ratesFrom = minDate([pointDates[0] ?? toDate, ...snapshots.map((snapshot) => new Date(`${snapshot.date}T00:00:00.000Z`))]);
+    const rates = await loadRateTable(DI.em, [...historyRatePairs(accounts, currencyCode), ...snapshotRatePairs(snapshots, currencyCode)], { from: ratesFrom, to: nextUtcDay(toDate) });
+    const toViewer = historyBalanceConverter(currencyCode, rates);
+
+    // Today's point is the figure Home shows: `getNetWorth` values portfolios live, while
+    // snapshots lag (yesterday's misses today's trades). Earlier points stay on snapshots.
+    const currentSummary = pointDates.some((pointDate) => isCurrentHistoryPoint(pointDate, today))
+      ? await this.getNetWorth(appuser)
+      : undefined;
 
     const pointSummaries = await Promise.all(pointDates.map(async (pointDate) => {
       const isCurrentPoint = isCurrentHistoryPoint(pointDate, today);
-      const [accountsTotal, accountsComplete] = await calculateAccountsHistoryTotal(accounts, appuser, appuserTenant.tenantKey, pointDate, isCurrentPoint, prefetchedBalances);
-      const [portfoliosTotal, portfoliosComplete] = await calculatePortfoliosHistoryTotal(portfolios, pointDate);
+      const [accountsTotal, accountsComplete] = await calculateAccountsHistoryTotal(accounts, toViewer, appuserTenant.tenantKey, pointDate, isCurrentPoint, prefetchedBalances);
+      if (isCurrentPoint && currentSummary) {
+        return currentNetWorthHistoryPoint(currentSummary, formatUtcDate(pointDate), accountsComplete);
+      }
+      const [portfoliosTotal, portfoliosComplete] = calculatePortfoliosHistoryTotal(portfolios, toViewer, pointDate, snapshotsByPoint.get(pointDate.getTime()) ?? new Map(), accountsCountedAt(accounts, pointDate));
       const [loansTotal, loansComplete] = await calculateLoansHistoryTotal(loans, currencyCode, pointDate);
       const complete = accountsComplete && portfoliosComplete && loansComplete;
-      const totalNetWorth = accountsTotal != null && portfoliosTotal != null && loansTotal != null ? accountsTotal + portfoliosTotal - loansTotal : null;
+      const totalNetWorth = accountsTotal != null && portfoliosTotal != null && loansTotal != null ? subtractMoney(addMoney(accountsTotal, portfoliosTotal), loansTotal) : null;
 
       return { accountsTotal, date: formatUtcDate(pointDate), isComplete: complete, loansTotal, portfoliosTotal, totalNetWorth };
     }));
@@ -158,41 +222,28 @@ export class NetWorthService {
     return { currencyCode, granularity: 'monthly', points: pointSummaries, readiness: calculateHistoryReadiness(pointSummaries) };
   }
 
-  private async getPortfolioRows(_appuser: Appuser, tenantKey: AppuserTenant['tenantKey']) {
+  private async getPortfolioRows(appuser: Appuser, tenantKey: AppuserTenant['tenantKey']) {
     const portfolios = await DI.em.find(
       Portfolio,
       { deletedAt: undefined, tenantKey },
       { populate: ['currencyKey'] },
     );
 
-    // Raw SQL bypasses the tenant filter, so both the outer read and the MAX() subquery are
-    // explicitly scoped to this tenant's own portfolios (unscoped, this would read EVERY tenant's
-    // latest portfolio balance into request memory), and both skip soft-deleted snapshots (a deleted
-    // snapshot could otherwise win MAX(snapshot_date) and become the reported balance).
-    const portfolioKeys = portfolios.map((portfolio) => portfolio.portfolioKey);
-    const latestSnapshots = portfolioKeys.length === 0 ? [] : await sqlQuery(DI.em)
-      .selectFrom('portfolio_snapshot as ps')
-      .innerJoin(
-        sql<{ max_date: unknown; portfolio_key: unknown }>`(SELECT portfolio_key, MAX(snapshot_date) as max_date FROM portfolio_snapshot
-             WHERE deleted_at IS NULL AND portfolio_key = ANY(${portfolioKeys}) GROUP BY portfolio_key)`.as('latest'),
-        (join) => join.onRef('ps.portfolio_key', '=', 'latest.portfolio_key').onRef('ps.snapshot_date', '=', 'latest.max_date'),
-      )
-      .select(['ps.portfolio_key', sql<null | number | string>`ps.appuser_currency_total_value`.as('balance')])
-      .where('ps.deleted_at', 'is', null)
-      .where(anyOf('ps.portfolio_key', portfolioKeys))
-      .execute();
+    // Each portfolio at its current value, the figure the portfolio screens show
+    // (`valuePortfolioHoldings`), not the latest daily snapshot, which misses today's trades.
+    // The holdings reads carry the explicit tenant predicate their raw SQL needs.
+    const values = await portfolioHoldingsService.getPortfolioValues(
+      appuser,
+      portfolios.map((portfolio) => portfolio.portfolioKey),
+      resolveTenantKeyNumber(tenantKey),
+    );
 
-    const balanceMap = new Map<number, number>();
-    for (const row of latestSnapshots) {
-      if (row.balance == null) continue;
-      balanceMap.set(row.portfolio_key as number, Number(row.balance) || 0);
-    }
-
+    // A holding with no price or exchange rate leaves the value partial: it still counts what
+    // could be valued, and `supportedCurrency: false` reports the total as incomplete.
     return portfolios.map((portfolio) => {
-      const balance = balanceMap.get(portfolio.portfolioKey);
-      return balance == null
-        ? { balance: 0, name: portfolio.name, supportedCurrency: false }
-        : { balance, name: portfolio.name, supportedCurrency: true };
+      const value = values.get(portfolio.portfolioKey) ?? { isComplete: true, value: 0 };
+      const link: PortfolioLinkFields = { accountBalanceMode: portfolio.accountBalanceMode, linkedAccountKey: portfolio.linkedAccountKey };
+      return { balance: value.value, id: portfolio.portfolioKey, link, name: portfolio.name, supportedCurrency: value.isComplete };
     });
   }
 
@@ -220,8 +271,9 @@ export function buildNetWorthSummaryFromSourceRows(input: {
   currencyCode: string;
   loans: (NetWorthSourceRow & { includeInNetWorth?: boolean })[];
   portfolios: NetWorthSourceRow[];
-}): NetWorthSummary {
+}): Omit<NetWorthSummary, 'suggestPortfolioLink'> {
   const unsupportedCurrencies = {
+    accounts: 0,
     loans: input.loans.filter((loan) => loan.includeInNetWorth !== false && !(loan.supportedCurrency ?? true)).length,
     portfolios: input.portfolios.filter((portfolio) => !(portfolio.supportedCurrency ?? true)).length,
   };
@@ -246,6 +298,26 @@ export function calculateHistoryReadiness(points: Pick<NetWorthHistoryPoint, 'to
 
 export function clampHistoryMonths(months?: number): number {
   return clamp(months ?? 6, 2, 12);
+}
+
+/**
+ * The history point for today, taken from the live net worth summary so the trend's latest
+ * value and Home agree to the cent. Totals are always reported (as Home reports them); a
+ * missing account balance, an unpriced holding or a loan in another currency marks the
+ * point incomplete.
+ */
+export function currentNetWorthHistoryPoint(summary: NetWorthSummary, date: string, accountsComplete = true): NetWorthHistoryPoint {
+  return {
+    accountsTotal: summary.assets.accounts,
+    date,
+    isComplete: accountsComplete
+      && summary.unsupportedCurrencies.accounts === 0
+      && summary.unsupportedCurrencies.loans === 0
+      && summary.unsupportedCurrencies.portfolios === 0,
+    loansTotal: summary.liabilities.loans,
+    portfoliosTotal: summary.assets.portfolios,
+    totalNetWorth: summary.totalNetWorth,
+  };
 }
 
 export function isCurrentHistoryPoint(pointDate: Date, today: Date): boolean {
@@ -331,72 +403,76 @@ function buildNetWorthSummary(input: {
   currencyCode: string;
   loans: NetWorthInputRow[];
   portfolios: NetWorthInputRow[];
-  unsupportedCurrencies?: { loans?: number; portfolios?: number };
-}): NetWorthSummary {
-  const assetsAccounts = sumMoney(input.accounts.map((account) => account.balance));
-  const assetsPortfolios = sumMoney(input.portfolios.map((portfolio) => portfolio.balance));
-  const liabilitiesLoans = sumMoney(input.loans.map((loan) => loan.balance));
+  unsupportedCurrencies?: { accounts?: number; loans?: number; portfolios?: number };
+}): Omit<NetWorthSummary, 'suggestPortfolioLink'> {
+  // Every row reaching here is already in the viewer's currency.
+  const inViewerCurrency = (rows: NetWorthInputRow[]) => Money.toNumber(Money.sum(rows.map((row) => Money.of(row.balance, input.currencyCode)), input.currencyCode));
+  const assetsAccounts = inViewerCurrency(input.accounts);
+  const assetsPortfolios = inViewerCurrency(input.portfolios.filter((portfolio) => portfolio.countedInAccountId == null));
+  const liabilitiesLoans = inViewerCurrency(input.loans);
+
+  const unsupportedCurrencies = {
+    accounts: input.unsupportedCurrencies?.accounts ?? 0,
+    loans: input.unsupportedCurrencies?.loans ?? 0,
+    portfolios: input.unsupportedCurrencies?.portfolios ?? 0,
+  };
 
   return {
     assets: { accounts: assetsAccounts, portfolios: assetsPortfolios },
     currencyCode: input.currencyCode,
+    isComplete: unsupportedCurrencies.accounts === 0 && unsupportedCurrencies.loans === 0 && unsupportedCurrencies.portfolios === 0,
     liabilities: { loans: liabilitiesLoans },
     rows: [
       ...input.accounts.map((account) => ({ ...account, type: 'accounts' as const })),
       ...input.portfolios.map((portfolio) => ({ ...portfolio, type: 'portfolios' as const })),
       ...input.loans.map((loan) => ({ ...loan, balance: -loan.balance, type: 'loans' as const })),
     ],
-    totalNetWorth: assetsAccounts + assetsPortfolios - liabilitiesLoans,
-    unsupportedCurrencies: {
-      loans: input.unsupportedCurrencies?.loans ?? 0,
-      portfolios: input.unsupportedCurrencies?.portfolios ?? 0,
-    },
+    totalNetWorth: subtractMoney(addMoney(assetsAccounts, assetsPortfolios), liabilitiesLoans),
+    unsupportedCurrencies,
   };
 }
 
+/** The accounts a history point counts: those that existed by its day. */
+function accountsCountedAt(accounts: Account[], pointDate: Date): Set<number> {
+  return new Set(relevantAccountsAt(accounts, pointDate).map((account) => account.accountKey));
+}
+
 /**
- * Per-(point, account) closing balance for every history point, in ONE query.
- *
- * `buildHistoryPointDates` expands the point list with every distinct transaction date in the
- * last six months, so an active user produces ~170 points. An unbounded, fully-hydrated
- * `find(Transaction)` per point — purely to pick the newest row per account — would be ~170
- * unbounded scans issued concurrently against a default pool of 10, hydrating millions of
- * objects into one identity map.
- *
- * A `LEFT JOIN LATERAL ... LIMIT 1` per (point, account) pair asks the database for exactly
- * the row the code actually wanted. It is served by `transaction_account_date_active_idx`
- * (`account_key, transaction_date DESC, transaction_key DESC` WHERE `deleted_at IS NULL`).
- *
- * Returns `Map<pointDateMs, Map<accountKey, balance>>`. A missing inner entry means the
- * account had no balance-carrying row at that point, which the caller treats as incomplete.
+ * The accounts' total at one point. Each account counts at its newest balance-carrying row on or
+ * before the point; an account with no such row counts at its opening balance, once the point
+ * reaches the date it was recorded. An account with neither, or whose opening balance cannot be
+ * converted to the viewer's currency at the point's rate, leaves the point incomplete.
  */
-/** `tenantKey` arrives as either a loaded entity reference or a bare number. */
-async function calculateAccountsHistoryTotal(accounts: Account[], _appuser: Appuser, tenantKey: AppuserTenant['tenantKey'], pointDate: Date, isCurrentPoint: boolean, prefetched?: Map<number, Map<number, number>>): Promise<[null | number, boolean]> {
-  const relevantAccounts = accounts.filter((account) => pointDate.getTime() >= startOfUtcDay(account.createdAt).getTime());
+async function calculateAccountsHistoryTotal(accounts: Account[], toViewer: HistoryBalanceConverter, tenantKey: AppuserTenant['tenantKey'], pointDate: Date, isCurrentPoint: boolean, prefetched?: Map<number, Map<number, number>>): Promise<[null | number, boolean]> {
+  const relevantAccounts = relevantAccountsAt(accounts, pointDate);
   if (relevantAccounts.length === 0) return [0, true];
 
-  if (isCurrentPoint) {
-    if (relevantAccounts.some((account) => account.appuserCurrencyBalance == null)) return [null, false];
-    return [sumMoney(relevantAccounts.map((account) => account.appuserCurrencyBalance)), true];
-  }
+  // Every balance is converted to the viewer's currency before it is added; one that cannot be
+  // leaves the point incomplete.
+  const totalOf = (valueOf: (account: Account) => null | number): [null | number, boolean] => {
+    const values = relevantAccounts.map(valueOf);
+    if (values.some((value) => value == null)) return [null, false];
+    return [sumMoney(values), true];
+  };
+
+  if (isCurrentPoint) return totalOf((account) => toViewer.runningBalance(account, account.appuserCurrencyBalance, pointDate));
   // Prefer the single prefetched lateral-join result. The per-point fallback is kept for
   // callers (and tests) that invoke this directly without a prefetch.
-  const prefetchedForPoint = prefetched?.get(pointDate.getTime());
-  if (prefetchedForPoint) {
-    const balances = relevantAccounts.map((account) => prefetchedForPoint.get(account.accountKey));
-    if (balances.some((balance) => balance == null)) return [null, false];
-    return [sumMoney(balances), true];
-  }
+  const rowBalances = prefetched?.get(pointDate.getTime()) ?? await loadAccountBalancesAt(relevantAccounts, tenantKey, pointDate);
+  return totalOf((account) => {
+    const rowBalance = rowBalances.get(account.accountKey);
+    return rowBalance == null ? toViewer.openingBalance(account, pointDate) : toViewer.runningBalance(account, rowBalance, pointDate);
+  });
+}
 
-  const transactions = await DI.em.find(Transaction, excludeExpired({ accountKey: { $in: relevantAccounts }, deletedAt: undefined, tenantKey, transactionDate: { $lt: nextUtcDay(pointDate) } }), { orderBy: { transactionDate: 'DESC', transactionKey: 'DESC' } });
-  const byAccount = new Map<number, Transaction>();
-  for (const transaction of transactions) {
-    const accountKey = transaction.accountKey?.accountKey;
-    if (accountKey == null || byAccount.has(accountKey) || transaction.appuserCurrencyBalance == null) continue;
-    byAccount.set(accountKey, transaction);
-  }
-  if (byAccount.size !== relevantAccounts.length) return [null, false];
-  return [sumMoney(relevantAccounts.map((account) => byAccount.get(account.accountKey)?.appuserCurrencyBalance)), true];
+/** Converts an account's balances or a portfolio's snapshot at a history point into the viewer's currency; null when it cannot. */
+interface HistoryBalanceConverter {
+  /** The opening balance, in the account's own currency; null before it was recorded or without one. */
+  openingBalance(account: Account, pointDate: Date): null | number;
+  /** A portfolio snapshot, in the currency it was stored in, at the rate at the end of its own day (see `historyInViewerCurrency`). */
+  portfolioSnapshot(snapshot: PortfolioSnapshotValue): null | number;
+  /** A running balance, in the account owner's currency. */
+  runningBalance(account: Account, balance: null | number | undefined, pointDate: Date): null | number;
 }
 
 async function calculateLoansHistoryTotal(loans: Loan[], currencyCode: string, pointDate: Date): Promise<[null | number, boolean]> {
@@ -413,38 +489,132 @@ async function calculateLoansHistoryTotal(loans: Loan[], currencyCode: string, p
   return [total, true];
 }
 
-async function calculatePortfoliosHistoryTotal(portfolios: Portfolio[], pointDate: Date): Promise<[null | number, boolean]> {
-  const relevantPortfolios = portfolios.filter((portfolio) => pointDate.getTime() >= startOfUtcDay(portfolio.createdAt).getTime());
-  if (relevantPortfolios.length === 0) return [0, true];
-
-  const snapshots = await DI.em.find(PortfolioSnapshot, { deletedAt: undefined, portfolioKey: { $in: relevantPortfolios }, snapshotDate: { $lt: nextUtcDay(pointDate) } }, { orderBy: { portfolioSnapshotKey: 'DESC', snapshotDate: 'DESC' } });
-  const latestByPortfolio = new Map<number, PortfolioSnapshot>();
-  for (const snapshot of snapshots) {
-    const portfolioKey = snapshot.portfolioKey.portfolioKey;
-    const existing = latestByPortfolio.get(portfolioKey);
-    if (snapshot.appuserCurrencyTotalValue == null) continue;
-    if (existing && comparePortfolioSnapshotsByAsOfDate(existing, snapshot) >= 0) continue;
-    latestByPortfolio.set(portfolioKey, snapshot);
-  }
-  if (latestByPortfolio.size !== relevantPortfolios.length) return [null, false];
-  let total = 0;
+/**
+ * The portfolios' total at one point: each portfolio at its latest snapshot on or before the point,
+ * converted into the viewer's currency. A portfolio with no snapshot yet, or whose snapshot cannot
+ * be converted, leaves the point incomplete, never added at face value.
+ */
+function calculatePortfoliosHistoryTotal(portfolios: Portfolio[], toViewer: HistoryBalanceConverter, pointDate: Date, latestByPortfolio: Map<number, PortfolioSnapshotValue>, countedAccountKeys: ReadonlySet<number>): [null | number, boolean] {
+  // A portfolio inside an account counted at this point adds nothing, and needs no snapshot.
+  const relevantPortfolios = portfolios.filter((portfolio) => pointDate.getTime() >= startOfUtcDay(portfolio.createdAt).getTime()
+    && portfolioCountedInAccount(portfolio, countedAccountKeys) == null);
+  const values: number[] = [];
   for (const portfolio of relevantPortfolios) {
     const snapshot = latestByPortfolio.get(portfolio.portfolioKey);
-    if (snapshot?.appuserCurrencyTotalValue == null) return [null, false];
-    total = addMoney(total, snapshot.appuserCurrencyTotalValue);
+    const value = snapshot ? toViewer.portfolioSnapshot(snapshot) : null;
+    if (value == null) return [null, false];
+    values.push(value);
   }
-  return [total, true];
-}
-function clamp(value: number, min: number, max: number) { return Math.min(max, Math.max(min, value)); }
-function comparePortfolioSnapshotsByAsOfDate(a: PortfolioSnapshot, b: PortfolioSnapshot) {
-  return a.snapshotDate.getTime() - b.snapshotDate.getTime() || a.portfolioSnapshotKey - b.portfolioSnapshotKey;
+  return [sumMoney(values), true];
 }
 
+function clamp(value: number, min: number, max: number) { return Math.min(max, Math.max(min, value)); }
 function endOfUtcMonth(date: Date) { return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth() + 1, 0)); }
 
 function formatUtcDate(date: Date) { return date.toISOString().slice(0, 10); }
+
+function historyBalanceConverter(viewerCurrency: string, rates: RateTable): HistoryBalanceConverter {
+  // The rate in force at the close of the point's day.
+  const closeOf = (pointDate: Date) => new Date(nextUtcDay(pointDate).getTime() - 1);
+  const convert = (amount: number, from: string | undefined, pointDate: Date): null | number => {
+    if (!from) return null;
+    const rate = rates.rateOn(from, viewerCurrency, closeOf(pointDate));
+    if (rate == null) return null;
+    return Money.toNumber(Money.convert(Money.of(amount, from), { rate, to: viewerCurrency }));
+  };
+  return {
+    openingBalance: (account, pointDate) => {
+      if (account.openingBalance == null || account.openingBalanceDate == null) return null;
+      if (pointDate.getTime() < startOfUtcDay(account.openingBalanceDate).getTime()) return null;
+      return convert(account.openingBalance, account.currencyKey.code, pointDate);
+    },
+    portfolioSnapshot: (snapshot) => snapshotInViewerCurrency(snapshot, viewerCurrency, rates),
+    runningBalance: (account, balance, pointDate) => {
+      if (balance == null) return null;
+      return convert(balance, account.accountOwnerAppuserKey?.currencyKey.code, pointDate);
+    },
+  };
+}
+
+/** The currency pairs the history converts through: owners' running balances and accounts' opening balances. */
+function historyRatePairs(accounts: Account[], viewerCurrency: string): CurrencyPair[] {
+  const pairs: CurrencyPair[] = [];
+  for (const account of accounts) {
+    const ownerCurrency = account.accountOwnerAppuserKey?.currencyKey.code;
+    if (ownerCurrency) pairs.push({ from: ownerCurrency, to: viewerCurrency });
+    const accountCurrency = account.currencyKey.code;
+    if (account.openingBalance != null && accountCurrency) pairs.push({ from: accountCurrency, to: viewerCurrency });
+  }
+  return pairs;
+}
+
+/**
+ * The newest running balance in the user's currency of each account at `pointDate`, for callers
+ * without a prefetch. `tenantKey` arrives as either a loaded entity reference or a bare number.
+ */
+async function loadAccountBalancesAt(accounts: Account[], tenantKey: AppuserTenant['tenantKey'], pointDate: Date): Promise<Map<number, number>> {
+  const transactions = await DI.em.find(Transaction, excludeExpired({ accountKey: { $in: accounts }, deletedAt: undefined, tenantKey, transactionDate: { $lt: nextUtcDay(pointDate) } }), { orderBy: { transactionDate: 'DESC', transactionKey: 'DESC' } });
+  const byAccount = new Map<number, number>();
+  for (const transaction of transactions) {
+    const accountKey = transaction.accountKey?.accountKey;
+    if (accountKey == null || byAccount.has(accountKey) || transaction.appuserCurrencyBalance == null) continue;
+    byAccount.set(accountKey, transaction.appuserCurrencyBalance);
+  }
+  return byAccount;
+}
+
+/**
+ * Each portfolio's latest snapshot holding a value on or before each point, keyed by point time
+ * then portfolio key, in the currency it was stored in. Snapshots are read once for every point.
+ */
+async function loadPortfolioSnapshotsByPoint(portfolios: Portfolio[], pointDates: Date[]): Promise<Map<number, Map<number, PortfolioSnapshotValue>>> {
+  const byPoint = new Map<number, Map<number, PortfolioSnapshotValue>>();
+  if (portfolios.length === 0 || pointDates.length === 0) return byPoint;
+  const lastPoint = new Date(Math.max(...pointDates.map((pointDate) => pointDate.getTime())));
+
+  const ownerCurrency = new Map(portfolios.map((portfolio) => [portfolio.portfolioKey, portfolio.portfolioOwnerAppuserKey.currencyKey.code]));
+  const rows = await DI.em.find(
+    PortfolioSnapshot,
+    { deletedAt: undefined, portfolioKey: { $in: portfolios }, snapshotDate: { $lt: nextUtcDay(lastPoint) } },
+    { orderBy: [{ snapshotDate: 'ASC' }, { portfolioSnapshotKey: 'ASC' }], populate: ['appuserCurrencyKey', 'currencyKey'] },
+  );
+  // A snapshot with no value at all says nothing about the portfolio; an older one stands in.
+  const snapshots = rows
+    .filter((row) => row.appuserCurrencyTotalValue != null || row.totalValue != null)
+    .map((row) => ({ portfolioKey: row.portfolioKey.portfolioKey, time: new Date(row.snapshotDate).getTime(), value: storedSnapshotValue(row, ownerCurrency.get(row.portfolioKey.portfolioKey)) }));
+
+  // One sweep: points and snapshots both run oldest first, each point keeping the newest so far.
+  const latest = new Map<number, PortfolioSnapshotValue>();
+  let next = 0;
+  for (const pointDate of pointDates.toSorted((a, b) => a.getTime() - b.getTime())) {
+    const cutoff = nextUtcDay(pointDate).getTime();
+    for (let snapshot = snapshots[next]; snapshot && snapshot.time < cutoff; snapshot = snapshots[++next]) latest.set(snapshot.portfolioKey, snapshot.value);
+    byPoint.set(pointDate.getTime(), new Map(latest));
+  }
+  return byPoint;
+}
+
+function minDate(dates: Date[]): Date { return new Date(Math.min(...dates.map((date) => date.getTime()))); }
+
 function nextUtcDay(date: Date) { return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate() + 1)); }
 
+/**
+ * Per-(point, account) closing balance for every history point, in ONE query.
+ *
+ * `buildHistoryPointDates` expands the point list with every distinct transaction date in the
+ * last six months, so an active user produces ~170 points. An unbounded, fully-hydrated
+ * `find(Transaction)` per point — purely to pick the newest row per account — would be ~170
+ * unbounded scans issued concurrently against a default pool of 10, hydrating millions of
+ * objects into one identity map.
+ *
+ * A `LEFT JOIN LATERAL ... LIMIT 1` per (point, account) pair asks the database for exactly
+ * the row the code actually wanted. It is served by `transaction_account_date_active_idx`
+ * (`account_key, transaction_date DESC, transaction_key DESC` WHERE `deleted_at IS NULL`).
+ *
+ * Returns `Map<pointDateMs, Map<accountKey, balance>>`. A missing inner entry means the
+ * account had no balance-carrying row at that point; the caller then falls back to its opening
+ * balance.
+ */
 async function prefetchAccountBalancesByPoint(
   accounts: Account[],
   tenantKey: AppuserTenant['tenantKey'],
@@ -486,6 +656,10 @@ async function prefetchAccountBalancesByPoint(
     byPoint.get(pointMs)?.set(row.account_key, Number(row.balance));
   }
   return byPoint;
+}
+
+function relevantAccountsAt(accounts: Account[], pointDate: Date): Account[] {
+  return accounts.filter((account) => pointDate.getTime() >= startOfUtcDay(account.createdAt).getTime());
 }
 
 function resolveTenantKeyNumber(tenantKey: AppuserTenant['tenantKey']): number {

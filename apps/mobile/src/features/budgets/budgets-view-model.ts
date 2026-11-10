@@ -1,3 +1,4 @@
+import { parseSafeCategoryColor } from '@/features/categories/categories-view-model'
 import { formatCategoryName } from '@/lib/formatters/category-name'
 import type { BudgetCategoryRowDto, BudgetDto, BudgetRecurrence, BudgetYearDto } from './budgets-contract'
 
@@ -13,13 +14,29 @@ export type BudgetTotals = Readonly<{
 export type BudgetCategoryViewModel = Readonly<{
   id: number
   name: string
+  /**
+   * What the line may spend: its monthly plan plus what last month rolled over. Remaining, the
+   * share of the plan and "over" all measure against this. Without rollover it is the plan.
+   */
   planned: number
+  /** The line's own monthly plan, before any rollover. */
+  budgeted: number
+  /** What last month left over (negative when it overspent); 0 when nothing carries. */
+  rolledOver: number
+  /** Rollover is on for the line (a parent: for any of its subcategories). */
+  rolloverEnabled: boolean
+  /** The carried amount rests on spending that could not be converted, so it may be too high. */
+  rolloverIncomplete: boolean
   spent: number
   remaining: number
   recurrence: BudgetRecurrence | null
   progressPercentage: number | null
   meterPercentage: number
   overspent: boolean
+  /** The category's icon name and swatch colours, as web's category chip draws them. */
+  icon: string | null
+  bgColor: string | null
+  textColor: string | null
 }>
 
 export type BudgetCategoryGroupViewModel = BudgetCategoryViewModel & Readonly<{
@@ -40,6 +57,9 @@ export type BudgetViewModel = Readonly<{
   totals: BudgetTotals
   categories: readonly BudgetCategoryGroupViewModel[]
   accounts: readonly Readonly<{ id: number; name: string | null }>[]
+  incomes: readonly Readonly<{ name: string; amount: number }>[]
+  /** Off: only unspent money rolls over, an overspend is dropped. */
+  rolloverCarriesOverspend: boolean
 }>
 
 export type BudgetYearViewModel = Readonly<{
@@ -82,14 +102,31 @@ const metrics = (planned: number, spent: number): BudgetTotals => {
   }
 }
 
+const swatch = (row: BudgetCategoryRowDto) => ({
+  icon: row.category_icon,
+  bgColor: parseSafeCategoryColor(row.category_bg_color),
+  textColor: parseSafeCategoryColor(row.category_text_color),
+})
+
+/**
+ * A subcategory's plan is its recurrence-normalized monthly amount (as web shows it), and what it
+ * may spend adds last month's rollover on top. The API's `category_available` adds the rollover to
+ * the raw amount instead; the two agree for monthly lines, and this keeps the shown plan, the
+ * carried line and the remaining figure adding up for the others.
+ */
 const mapChildRow = (row: BudgetCategoryRowDto, name: string): BudgetCategoryChildViewModel => {
-  const planned = normalizePlannedMonthly(row.category_budgeted_amount, row.category_recurrency)
+  const budgeted = normalizePlannedMonthly(row.category_budgeted_amount, row.category_recurrency)
   return {
     id: row.category_key,
     name,
+    ...swatch(row),
     rawAmount: row.category_budgeted_amount,
     recurrence: row.category_recurrency,
-    ...metrics(planned, row.category_amount),
+    budgeted,
+    rolledOver: row.category_rolled_over,
+    rolloverEnabled: row.category_rollover_enabled,
+    rolloverIncomplete: row.category_rollover_incomplete,
+    ...metrics(budgeted + row.category_rolled_over, row.category_amount),
   }
 }
 
@@ -108,7 +145,13 @@ function mapBudgetCategories(rows: readonly BudgetCategoryRowDto[]): Readonly<{ 
       id: parent.category_key,
       name: formatCategoryName(parent.parent_category_name),
       recurrence: null,
+      ...swatch(parent),
       children,
+      budgeted: children.reduce((sum, child) => sum + child.budgeted, 0),
+      // A parent's rollover is its subcategories' (the API sums them the same way).
+      rolledOver: children.reduce((sum, child) => sum + child.rolledOver, 0),
+      rolloverEnabled: children.some((child) => child.rolloverEnabled),
+      rolloverIncomplete: children.some((child) => child.rolloverIncomplete),
       ...metrics(planned, parent.category_amount),
     }
   })
@@ -137,6 +180,8 @@ export function mapBudget(dto: BudgetDto, authoritativePeriod?: { year: number; 
     totals,
     categories,
     accounts: mapBudgetAccounts(dto.accounts),
+    incomes: dto.incomes.map((income) => ({ name: income.name, amount: income.amount })),
+    rolloverCarriesOverspend: dto.rolloverCarriesOverspend,
   }
 }
 
@@ -165,8 +210,73 @@ export function mapBudgetYear(dto: BudgetYearDto, authoritativeYear?: number): B
   }
 }
 
+/**
+ * The last month the "Year to date" comparison covers for a budget year, read in the device's
+ * calendar: every month of a past year, the months through the current one in the current year,
+ * and none of a year that has not started (`null`: there is no year to date to show).
+ */
+export function budgetYearToDateMonth(year: number, today: Date = new Date()): number | null {
+  const currentYear = today.getFullYear()
+  if (year < currentYear) return 12
+  if (year > currentYear) return null
+  return today.getMonth() + 1
+}
+
 export function adjacentBudgetPeriod(year: number, month: number, direction: -1 | 1) {
   if (direction === -1 && month === 1) return { year: year - 1, month: 12 }
   if (direction === 1 && month === 12) return { year: year + 1, month: 1 }
   return { year, month: month + direction }
+}
+
+/** Web's `OVER_PLAN_TOLERANCE` (`lib/home/month-overview.ts`): half a cent is not over. */
+const OVER_PLAN_TOLERANCE = 0.005
+const isOver = (spent: number, planned: number) => spent - planned > OVER_PLAN_TOLERANCE
+
+/**
+ * Web's `overPlanLines(rows).length`: the most specific lines that spent past their plan. A
+ * subcategory counts on its own; a parent counts only when none of its children is over.
+ */
+export function overPlanLineCount(categories: readonly BudgetCategoryGroupViewModel[]): number {
+  return categories.reduce((count, category) => {
+    const overChildren = category.children.filter((child) => isOver(child.spent, child.planned)).length
+    if (overChildren > 0) return count + overChildren
+    return count + (isOver(category.spent, category.planned) ? 1 : 0)
+  }, 0)
+}
+
+/** Web's `countBudgetedCategories`: a leaf where a parent has children, the parent where it has none. */
+export const budgetedLineCount = (categories: readonly BudgetCategoryGroupViewModel[]): number => (
+  categories.reduce((total, category) => total + (category.children.length > 0 ? category.children.length : 1), 0)
+)
+
+/** Stored income amounts are already monthly equivalents (see `calculateAnnualIncome`). */
+export const monthlyIncome = (incomes: readonly { amount: number }[]): number => (
+  incomes.reduce((total, income) => total + income.amount, 0)
+)
+
+/**
+ * Web's `measureScale` (`components/budget/BudgetTable.tsx`): the largest plan or spend among the
+ * categories and their subcategories, so every bar on the page reads on one scale.
+ */
+export function budgetMeasureScale(categories: readonly BudgetCategoryGroupViewModel[]): number {
+  return Math.max(0, ...categories.flatMap((category) => [
+    category.planned,
+    category.spent,
+    ...category.children.flatMap((child) => [child.planned, child.spent]),
+  ]))
+}
+
+export type MeasureGeometry = Readonly<{ plan: number; fill: number; over: number }>
+
+const clampPercent = (value: number) => Math.min(100, Math.max(0, value))
+
+/** Web's `measureGeometry` (`lib/home/month-overview.ts`), in percentages of the shared scale. */
+export function measureGeometry(spent: number, planned: number, scaleMax: number): MeasureGeometry {
+  if (!(scaleMax > 0)) return { plan: 0, fill: 0, over: 0 }
+  const safeSpent = Math.max(0, spent)
+  const safePlanned = Math.max(0, planned)
+  const plan = clampPercent((safePlanned / scaleMax) * 100)
+  const fill = clampPercent((Math.min(safeSpent, safePlanned) / scaleMax) * 100)
+  const over = Math.min(100 - plan, clampPercent((Math.max(0, safeSpent - safePlanned) / scaleMax) * 100))
+  return { plan, fill, over }
 }

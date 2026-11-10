@@ -38,7 +38,7 @@ describe('generic CSV import signs each row by its type, and keeps the file sign
     const body = rows.map((row, i) => `2026-09-${String(i + 1).padStart(2, '0')},${row.amount},,Merchant ${i},,generic-${i},${typeKeys[row.type]}`);
     return new AccountCsvImportService().importAccountCsv(
       { accountKey: household.account.accountKey, bucket: 'bucket', key: 'generic.csv' },
-      { em: db.em(), getObjectSize: () => Promise.resolve(undefined), getObjectText: () => Promise.resolve([HEADER, ...body].join('\n')) },
+      { em: db.em(), getObjectBuffer: () => Promise.resolve(Buffer.from([HEADER, ...body].join('\n'))), getObjectSize: () => Promise.resolve(undefined), getObjectText: () => Promise.resolve([HEADER, ...body].join('\n')) },
     );
   }
 

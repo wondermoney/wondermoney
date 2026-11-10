@@ -16,10 +16,11 @@ import { instanceName } from '@config/instance-name';
 import { BETTER_AUTH_IP_ADDRESS_OPTIONS } from '@middleware/client-ip';
 import { configuredAppleOptions } from '@service/auth/apple-options';
 import { resolveAuthCookiePrefix } from '@service/auth/cookie-prefix';
+import { aiRequiresVerifiedEmail, verificationLinkLandingOnApp } from '@service/auth/email-verification-policy';
 import { isSignupAllowed, type SignupPolicyDeps } from '@service/auth/signup-policy';
 import { TWO_FACTOR_COOKIE_MAX_AGE_SECONDS, twoFactorOAuthGuard } from '@service/auth/two-factor-oauth-guard';
 import { sendEmailVerificationEmail, sendPasswordResetEmail } from '@service/email/email';
-import { BACKEND_URL, BETTER_AUTH_TRUSTED_ORIGINS } from '@utils/constants';
+import { BACKEND_URL, BETTER_AUTH_TRUSTED_ORIGINS, FRONTEND_URL } from '@utils/constants';
 
 // Validated better-auth / social sign-in env, resolved through the configuration module so
 // every key is shape-checked once and read from a single place. `assertEnv('api')` in the
@@ -186,8 +187,11 @@ const auth = betterAuth({
     },
   },
   emailVerification: {
+    // A server that keeps AI to verified accounts mails the link at sign-up; otherwise nothing
+    // asks for verification, so nothing is sent.
+    sendOnSignUp: aiRequiresVerifiedEmail(),
     sendVerificationEmail: async ({ url, user }) => {
-      await sendEmailVerificationEmail({ email: user.email, name: user.name }, url);
+      await sendEmailVerificationEmail({ email: user.email, name: user.name }, verificationLinkLandingOnApp(url, FRONTEND_URL));
     },
   },
   // twoFactor (TOTP + backup codes), jwt (JWKS at /api/auth/jwks for web's local
@@ -292,6 +296,24 @@ export const deleteBetterAuthUser = async (userId: string): Promise<void> => {
 /** Remove any better-auth user with this email (idempotent seed/test helper). Cascades to account/session/twoFactor. */
 export const deleteBetterAuthUserByEmail = async (email: string): Promise<void> => {
   await betterAuthPool.query(`delete from "${BETTER_AUTH_SCHEMA}"."user" where email = $1`, [email]);
+};
+
+/** Whether a better-auth user with this id exists (an account's login is still live). */
+export const betterAuthUserExists = async (userId: string): Promise<boolean> => {
+  const { rows } = await betterAuthPool.query<{ exists: boolean }>(
+    `select exists(select 1 from "${BETTER_AUTH_SCHEMA}"."user" where id = $1) as "exists"`,
+    [userId],
+  );
+  return rows[0]?.exists === true;
+};
+
+/**
+ * Email better-auth's verification link to `email`. Following it marks the address verified and
+ * lands on the web login page, where signing in again reconnects the account from before
+ * better-auth (see legacy-account-reconnect.service.ts).
+ */
+export const sendReconnectVerificationEmail = async (email: string, locale: string): Promise<void> => {
+  await auth.api.sendVerificationEmail({ body: { callbackURL: `${FRONTEND_URL}/${locale}/auth/login`, email } });
 };
 
 /** Create a better-auth email/password user in-process (correct password hashing, credential account).

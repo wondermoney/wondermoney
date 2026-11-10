@@ -22,6 +22,15 @@ describe('banking connection-status contract', () => {
     expect(connectionStatusSchema.parse('error')).toBe('error')
     expect(connectionStatusSchema.parse('expired')).toBe('expired')
     expect(connectionStatusSchema.parse('processing')).toBe('processing')
+    expect(connectionStatusSchema.parse('expiring')).toBe('expiring')
+    expect(connectionStatusSchema.parse('revoked')).toBe('revoked')
+  })
+
+  it('reads the reconnect bank id and days left, and accepts a row from an API that sends neither', () => {
+    const parsed = bankConnectionSchema.parse({ ...newConnection, bankId: 'UFQ6OlRlc3Q', daysUntilExpiry: 12, status: 'expiring' })
+    expect(parsed).toMatchObject({ bankId: 'UFQ6OlRlc3Q', daysUntilExpiry: 12, status: 'expiring' })
+    expect(bankConnectionSchema.safeParse(newConnection).success).toBe(true)
+    expect(bankConnectionSchema.safeParse({ ...newConnection, daysUntilExpiry: -1 }).success).toBe(false)
   })
 
   it('reads a status this build does not know as unknown, and still rejects a non-string', () => {

@@ -46,11 +46,11 @@ export default function LoanDetailHeader({
       actions={
         <>
           <Button onClick={onLinkRepayments}>
-            <Link2 className="mr-2 size-4" />
+            <Link2 className="size-4" />
             {t("actions.linkRepayment")}
           </Button>
           <Button variant="secondary" onClick={onEdit}>
-            <Pencil className="mr-2 size-4" />
+            <Pencil className="size-4" />
             {t("actions.edit")}
           </Button>
         </>

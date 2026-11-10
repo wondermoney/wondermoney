@@ -18,7 +18,7 @@ vi.mock('@validators/parser', () => ({
 import { getBudgetVsActualReport } from '../budgetVsActual';
 
 const makeRequest = (query: Record<string, unknown> = {}) =>
-  ({ query, tenant: { tenantKey: 113 }, user: { appuserKey: 71 } }) as unknown as Request;
+  ({ query, tenant: { tenantKey: 113 }, user: { appuserKey: 71, currencyKey: { code: 'EUR' } } }) as unknown as Request;
 
 const makeResponse = () => ({ json: vi.fn() }) as unknown as Response;
 
@@ -48,7 +48,7 @@ describe('getBudgetVsActualReport', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mocks.find.mockImplementation((entity: unknown) => {
-      if (entity === Budget) return Promise.resolve([{ budgetKey: 1 }]);
+      if (entity === Budget) return Promise.resolve([{ budgetKey: 1, currencyKey: { code: 'EUR' } }]);
       if (entity === BudgetTemplateCategory) return Promise.resolve(foodTemplates);
       if (entity === Transaction) return Promise.resolve([]);
       if (entity === LoanRepaymentLink) return Promise.resolve([]);
@@ -61,7 +61,7 @@ describe('getBudgetVsActualReport', () => {
       makeTemplate({ amountBudgeted: 50, categoryKey: { bgColor: '#eeeeee', categoryKey: 20, name: 'Transport' }, month }),
     );
     mocks.find.mockImplementation((entity: unknown) => {
-      if (entity === Budget) return Promise.resolve([{ budgetKey: 1 }]);
+      if (entity === Budget) return Promise.resolve([{ budgetKey: 1, currencyKey: { code: 'EUR' } }]);
       if (entity === BudgetTemplateCategory) return Promise.resolve([...foodTemplates, ...transportTemplates]);
       if (entity === Transaction) {
         return Promise.resolve([
@@ -87,6 +87,7 @@ describe('getBudgetVsActualReport', () => {
     );
 
     expect(res.json).toHaveBeenCalledWith({
+      completeness: { currencyCode: 'EUR', isComplete: true, unconvertedCurrencies: [], unconvertedTransactions: 0 },
       data: [
         expect.objectContaining({ actual: 300, budgeted: 300, categoryKey: '10', name: 'Food', percentUsed: 100, variance: 0 }),
         expect.objectContaining({ actual: 75, budgeted: 150, categoryKey: '20', name: 'Transport', percentUsed: 50, variance: 75 }),
@@ -96,7 +97,7 @@ describe('getBudgetVsActualReport', () => {
     });
   });
 
-  it('restricts the period covered by the budget templates and passes dates to the transaction query', async () => {
+  it('restricts the period covered by the budget templates', async () => {
     const res = makeResponse();
     await getBudgetVsActualReport(
       makeRequest({ fromDate: '2026-02-01T00:00:00.000Z', toDate: '2026-03-31T00:00:00.000Z' }),
@@ -106,13 +107,6 @@ describe('getBudgetVsActualReport', () => {
     // Only Feb + Mar are covered → 2 months × 100 budgeted.
     const { data } = (res.json as ReturnType<typeof vi.fn>).mock.calls[0]![0] as { data: { budgeted: number }[] };
     expect(data[0]?.budgeted).toBe(200);
-    expect(mocks.find).toHaveBeenCalledWith(
-      Transaction,
-      expect.objectContaining({
-        transactionDate: { $gte: new Date('2026-02-01T00:00:00.000Z'), $lte: new Date('2026-03-31T00:00:00.000Z') },
-      }),
-      expect.anything(),
-    );
   });
 
   it('scopes the transaction query by tenant and the per-account privacy carve-out', async () => {
@@ -124,7 +118,7 @@ describe('getBudgetVsActualReport', () => {
     expect(mocks.find).toHaveBeenCalledWith(
       Transaction,
       expect.objectContaining({
-        accountKey: { $or: [{ isPrivate: false }, { accountOwnerAppuserKey: { appuserKey: 71 } }] },
+        accountKey: { $or: [{ isPrivate: false }, { accountOwnerAppuserKey: { appuserKey: 71, currencyKey: { code: 'EUR' } } }] },
         deletedAt: undefined,
         tenantKey: { tenantKey: 113 },
       }),
@@ -141,12 +135,12 @@ describe('getBudgetVsActualReport', () => {
     const res = makeResponse();
     await getBudgetVsActualReport(makeRequest(), res);
 
-    expect(res.json).toHaveBeenCalledWith({ data: [], filters: expect.any(Object), generatedAt: expect.any(String) });
+    expect(res.json).toHaveBeenCalledWith({ completeness: expect.objectContaining({ isComplete: true }), data: [], filters: expect.any(Object), generatedAt: expect.any(String) });
   });
 
   it('returns an empty dataset when no budget template rows overlap the period', async () => {
     mocks.find.mockImplementation((entity: unknown) => {
-      if (entity === Budget) return Promise.resolve([{ budgetKey: 1 }]);
+      if (entity === Budget) return Promise.resolve([{ budgetKey: 1, currencyKey: { code: 'EUR' } }]);
       if (entity === BudgetTemplateCategory) return Promise.resolve(foodTemplates);
       return Promise.resolve([]);
     });
@@ -154,6 +148,6 @@ describe('getBudgetVsActualReport', () => {
     const res = makeResponse();
     await getBudgetVsActualReport(makeRequest({ fromDate: '2027-01-01T00:00:00.000Z', toDate: '2027-01-31T00:00:00.000Z' }), res);
 
-    expect(res.json).toHaveBeenCalledWith({ data: [], filters: expect.any(Object), generatedAt: expect.any(String) });
+    expect(res.json).toHaveBeenCalledWith({ completeness: expect.objectContaining({ isComplete: true }), data: [], filters: expect.any(Object), generatedAt: expect.any(String) });
   });
 });

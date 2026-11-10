@@ -7,6 +7,8 @@ import { BankSyncIncidentService } from '@service/bank-sync/bank-sync-incident.s
 import { bankSyncEnvironment, canonicalBankSyncDistinctId } from '@service/bank-sync/bank-sync-producer-policy';
 import backgroundOperationService from '@service/operations/background-operation.service';
 
+import { DEFAULT_ACCOUNT_SYNC_INTERVAL_HOURS } from './account-sync-interval';
+
 const assertPositiveInteger = (name: string, value: number) => {
   if (!Number.isInteger(value) || value <= 0) throw new Error(`${name} must be a positive integer`);
   return value;
@@ -39,16 +41,20 @@ interface EligibleSyncTarget {
 export default {
   async enqueueDueAccountSyncs(input: { backgroundOperationService?: { attachQueueJob: (correlationId: string, queueJobId: string) => Promise<boolean>; createQueuedOperation: (input: Record<string, unknown>, transaction?: unknown) => Promise<unknown>; findByCorrelation?: (correlationId: string) => Promise<null | { queueJobId?: null | string; retryable?: boolean; status: string }>; markNeedsAction?: (correlationId: string, errorCode: string, stage?: string) => Promise<unknown>; resetRetryableQueueing?: (correlationId: string, transaction?: unknown) => Promise<boolean> }; bankSyncIncidentService?: BankSyncIncidentService; boss?: { send: (queue: string, data: Record<string, unknown>, options?: Record<string, unknown>) => Promise<unknown> }; limit?: number; maxEnqueued?: number; now?: Date; scheduleRunId?: string; send?: (queue: string, data: Record<string, unknown>, options?: Record<string, unknown>) => Promise<unknown>; staleHours?: number } = {}) {
     const now = input.now ?? new Date();
-    const staleHours = input.staleHours ?? 20;
+    const staleHours = input.staleHours ?? DEFAULT_ACCOUNT_SYNC_INTERVAL_HOURS;
     const limit = input.limit ?? 100;
     const maxEnqueuedInput = input.maxEnqueued === undefined
       ? (process.env['ACCOUNT_AUTO_SYNC_MAX_ENQUEUED'] === undefined ? undefined : parsePositiveInteger('ACCOUNT_AUTO_SYNC_MAX_ENQUEUED', process.env['ACCOUNT_AUTO_SYNC_MAX_ENQUEUED'], Number.MAX_SAFE_INTEGER))
       : assertPositiveInteger('maxEnqueued', input.maxEnqueued);
     const staleBefore = new Date(now.getTime() - staleHours * 60 * 60 * 1000);
     const staleOr = [{ refreshedAt: null }, { refreshedAt: { $lte: staleBefore } }];
-    // Gated on the connection's real provider-returned `accessValidUntil`.
+    // Gated on the connection's real provider-returned `accessValidUntil`, and on
+    // `nextEligibleSyncAt`, which a rate-limited sync sets from the provider's `Retry-After`.
     const enableBankingAccounts = await DI.em.find(Account, {
-      $or: staleOr,
+      $and: [
+        { $or: staleOr },
+        { $or: [{ enableBankingConnectionKey: { nextEligibleSyncAt: null } }, { enableBankingConnectionKey: { nextEligibleSyncAt: { $lte: now } } }] },
+      ],
       closed: false,
       deletedAt: undefined,
       enableBankingConnectionKey: { accessValidUntil: { $gt: now }, appuserKey: { $ne: null }, deletedAt: undefined, status: EnableBankingConnectionStatus.LINKED },

@@ -7,8 +7,10 @@ import {
 
 const row = (status: BankConnectionRow['status']): BankConnectionRow => ({
   accessType: 'open_banking',
+  bankId: null,
   connectionId: 1,
   dataFreshAsOf: null,
+  daysUntilExpiry: null,
   expiresAt: null,
   institutionName: 'Test Bank',
   provider: 'GoCardless',
@@ -19,6 +21,10 @@ describe('tallyConnections', () => {
   it('counts settled outcomes and ignores connections still processing', () => {
     expect(tallyConnections([row('connected'), row('processing'), row('error'), row('expired')]))
       .toEqual({ connected: 1, failed: 2 })
+  })
+
+  it('counts an expiring consent as connected and one the bank ended as failed', () => {
+    expect(tallyConnections([row('expiring'), row('revoked')])).toEqual({ connected: 1, failed: 1 })
   })
 
   it('carries nothing but counts, so no institution can leak through it', () => {

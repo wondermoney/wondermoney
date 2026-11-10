@@ -258,11 +258,11 @@ describe('account initial sync transaction service', () => {
     expect(created).toMatchObject({ originalAmount: 11, originalCurrencyKey: { code: 'USD' }, settlementAmount: 10, settlementExchangeRate: 1.1 });
   });
 
-  it('uses fallback appuser settlement amount when no exchange rate exists', async () => {
+  it('stores no user-currency amount when no exchange rate exists', async () => {
     const em = createEm({ currency: { code: 'EUR', currencyKey: 1 }, exchangeRate: null, tenant: { appuserKey: { appuserKey: 9, currencyKey: { code: 'USD', currencyKey: 2 } }, tenantKey: { tenantKey: 3 } } });
     await service.syncTransactionsForRequisition({ enableBankingConnectionKey: 1 }, { em: asEm(em), enableBankingSyncAdapterFactory: bankSyncFactory({ 'acc-1': { booked: [{ amount: '10', bookingDate: '2026-01-01', currency: 'EUR', transactionId: 'fx-2' }], pending: [] }, 'acc-2': { booked: [], pending: [] } }) });
     const created = (em.create as unknown as { mock: { calls: [unknown, Record<string, unknown>][] } }).mock.calls[0]?.[1];
-    expect(created).toMatchObject({ appuserCurrencyExchangeRate: undefined, appuserCurrencyKey: { code: 'USD', currencyKey: 2 }, appuserSettlementAmount: 10 });
+    expect(created).toMatchObject({ appuserCurrencyExchangeRate: undefined, appuserCurrencyKey: { code: 'USD', currencyKey: 2 }, appuserSettlementAmount: null, fxStatus: 'missing' });
   });
 
   it('queries exchange rates without deletedAt filtering', async () => {
@@ -303,6 +303,36 @@ describe('account initial sync transaction service', () => {
       { em: asEm(emFailed), enableBankingSyncAdapterFactory: bankSyncFactory(undefined, ['acc-1']) },
     );
     expect(failed['transactionsRefreshedAt']).toBeUndefined();
+  });
+
+  describe('provider failure signals', () => {
+    const providerError = (status: number, extra: Record<string, unknown> = {}) => Object.assign(new Error(`provider ${status}`), { status, ...extra });
+    /** Answers `getTransactions` per account: an error to throw, or an empty feed. */
+    const answeringFactory = (errors: Record<string, Error>) => {
+      const calls: string[] = [];
+      const factory = vi.fn().mockResolvedValue({ account: (accountId: string) => ({ getTransactions: () => { calls.push(accountId); const error = errors[accountId]; return error ? Promise.reject(error) : Promise.resolve({ transactions: { booked: [], pending: [] } }); } }) });
+      return { calls, factory };
+    };
+
+    it('stops at a rate limit and never advances transactionsRefreshedAt for the accounts it did not sync', async () => {
+      const before = new Date('2026-01-01T00:00:00Z');
+      const first = { accountId: 'acc-1', accountKey: 11, transactionsRefreshedAt: before } as Record<string, unknown>;
+      const second = { accountId: 'acc-2', accountKey: 12, transactionsRefreshedAt: before } as Record<string, unknown>;
+      const third = { accountId: 'acc-3', accountKey: 13, transactionsRefreshedAt: before } as Record<string, unknown>;
+      const { calls, factory } = answeringFactory({ 'acc-2': providerError(429, { retryAfter: 60 }) });
+      const result = await service.syncTransactionsForRequisition({ enableBankingConnectionKey: 1 }, { em: asEm(createEm({ accounts: [first, second, third] })), enableBankingSyncAdapterFactory: factory });
+      expect(calls).toEqual(['acc-1', 'acc-2']);
+      expect(result).toMatchObject({ accountsProcessed: 1, failedAccountIds: ['acc-2', 'acc-3'], rateLimited: { retryAfterSeconds: 60 }, status: 'partial' });
+      expect(first['transactionsRefreshedAt']).not.toBe(before);
+      expect(second['transactionsRefreshedAt']).toBe(before);
+      expect(third['transactionsRefreshedAt']).toBe(before);
+    });
+
+    it('reports every account rejected when each fetch fails with 400 or 401', async () => {
+      const { factory } = answeringFactory({ 'acc-1': providerError(401), 'acc-2': providerError(400) });
+      const result = await service.syncTransactionsForRequisition({ enableBankingConnectionKey: 1 }, { em: asEm(createEm()), enableBankingSyncAdapterFactory: factory });
+      expect(result).toMatchObject({ everyAccountRejected: true, status: 'failed' });
+    });
   });
 
   it('promotes a matching stored pending in place by rewriting its provider id', async () => {

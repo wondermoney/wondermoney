@@ -2,6 +2,7 @@ import { useQuery, type UseQueryOptions } from "@tanstack/react-query";
 import type { AxiosInstance } from "axios";
 
 import api from "../api";
+import type { AmountsCompleteness } from "../completeness";
 
 interface DividendByAsset {
   financialAssetKey: number;
@@ -9,8 +10,11 @@ interface DividendByAsset {
   totalDividends: number;
 }
 
+/** Totals in the viewer's currency (`completeness.currencyCode`). */
 export interface DividendIncomeResponse {
   byAsset: DividendByAsset[];
+  /** The dividends left out because no exchange rate converts them. */
+  completeness?: AmountsCompleteness;
   totalDividends: number;
 }
 

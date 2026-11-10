@@ -1,5 +1,4 @@
 import { Tabs } from 'expo-router'
-import { SymbolView } from 'expo-symbols'
 import type { ComponentProps } from 'react'
 import {
   Pressable,
@@ -12,11 +11,12 @@ import {
 } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
+import { Icon, type IconName } from '@/components/ui/icon'
 import { themeTokens, type Palette } from '@/theme/tokens'
 import { textStyles } from '@/theme/typography'
 
 export type ProductNavigationProps = {
-  labels: { home: string; accounts: string; budgets: string; portfolio: string; more: string }
+  labels: { home: string; accounts: string; budgets: string; portfolio: string; more: string; mainNavigation?: string }
   availableWidth?: number
 }
 
@@ -26,44 +26,41 @@ const WIDE_BREAKPOINT = 768
 const RAIL_WIDTH = 220
 
 /**
- * Tab icons, matched to the web app's mobile bottom bar.
- *
- * Web draws Home / Landmark / PieChart / Briefcase / LayoutGrid; this drew
- * hand-built shapes — a house, three lines, a target ring, three bars and
- * three dots — so the same destination looked like a different thing on each
- * platform. These are the closest system symbols to web's icons, per platform,
- * which keeps the pairing recognisable without shipping an icon library.
+ * Tab icons: web BottomNav's lucide glyphs (Home, Landmark, PieChart,
+ * Briefcase, LayoutGrid) as outline system symbols. Current is shown by
+ * weight and ink, never by a filled glyph — web does it with `strokeWidth`.
  */
-const TAB_SYMBOLS: Record<string, { ios: string; android: string; web: string }> = {
-  index: { ios: 'house.fill', android: 'home', web: 'home' },
-  accounts: { ios: 'building.columns.fill', android: 'account_balance', web: 'account_balance' },
-  budgets: { ios: 'chart.pie.fill', android: 'pie_chart', web: 'pie_chart' },
-  portfolio: { ios: 'briefcase.fill', android: 'work', web: 'work' },
-  more: { ios: 'square.grid.2x2.fill', android: 'grid_view', web: 'grid_view' },
+const TAB_ICONS: Record<string, IconName> = {
+  index: 'home',
+  accounts: 'landmark',
+  budgets: 'pie-chart',
+  portfolio: 'briefcase',
+  more: 'layout-grid',
 }
 
-function DomainGlyph({ name, color }: { name: string; active: boolean; color: string }) {
-  const symbol = TAB_SYMBOLS[name] ?? TAB_SYMBOLS.more!
-  return <SymbolView name={symbol as never} size={22} tintColor={color} />
+function DomainGlyph({ name, active, color }: { name: string; active: boolean; color: string }) {
+  return <Icon color={color} name={TAB_ICONS[name] ?? 'layout-grid'} size={themeTokens.size.icon} weight={active ? 'semibold' : 'light'} />
 }
 
 function ProductTabBar({
   state,
   descriptors,
-  navigation,
+  emitter,
+  navigateToTab,
   wide,
   palette,
-}: TabBarProps & { wide: boolean; palette: Palette }) {
+  mainNavigationLabel,
+}: TabBarProps & { wide: boolean; palette: Palette; mainNavigationLabel?: string }) {
   const targets = state.routes.map((route, index) => {
     const selected = state.index === index
     const label = descriptors[route.key].options.title ?? route.name
     const onPress = () => {
-      const event = navigation.emit({
+      const event = emitter.emit({
         type: 'tabPress',
         target: route.key,
         canPreventDefault: true,
       })
-      if (!selected && !event.defaultPrevented) navigation.navigate(route.name, route.params)
+      if (!selected && !event.defaultPrevented) navigateToTab(route.key)
     }
 
     return (
@@ -76,24 +73,16 @@ function ProductTabBar({
         style={({ pressed }) => [
           styles.target,
           wide ? styles.railTarget : styles.bottomTarget,
-          selected && { backgroundColor: palette.primarySoft },
+          // Web: the bottom bar marks current with ink and weight only; the
+          // sidebar (the rail's counterpart) gives it violet on a 10% wash.
+          wide && selected && { backgroundColor: palette.primarySoft },
           pressed && styles.pressed,
         ]}
       >
-        {selected ? (
-          <View
-            accessible={false}
-            style={[
-               styles.marker,
-              wide ? styles.railMarker : styles.bottomMarker,
-              { backgroundColor: palette.primary },
-            ]}
-          />
-        ) : null}
         <DomainGlyph
           name={route.name}
           active={selected}
-          color={selected ? palette.primary : palette.mutedForeground}
+          color={wide ? (selected ? palette.primary : palette.mutedForeground) : selected ? palette.foreground : palette.mutedForeground}
         />
         <Text
           allowFontScaling
@@ -101,8 +90,8 @@ function ProductTabBar({
             styles.label,
             wide ? styles.railLabel : styles.bottomLabel,
             {
-              color: selected ? palette.primary : palette.mutedForeground,
-              fontWeight: selected ? '600' : '500',
+              color: wide ? (selected ? palette.primary : palette.foreground) : selected ? palette.foreground : palette.mutedForeground,
+              fontWeight: selected ? '500' : '400',
             },
           ]}
         >
@@ -114,22 +103,23 @@ function ProductTabBar({
 
   return (
     <SafeAreaView
-      edges={wide ? ['top', 'bottom', 'left'] : ['bottom', 'left', 'right']}
+      edges={wide ? ['bottom', 'left'] : ['bottom', 'left', 'right']}
       style={[
         wide ? styles.railSafeArea : styles.bottomSafeArea,
-        { backgroundColor: palette.card, borderColor: palette.border },
+        { backgroundColor: palette.background, borderColor: palette.border },
       ]}
     >
       {wide ? (
         <ScrollView
           testID="product-rail"
+          accessibilityLabel={mainNavigationLabel}
           accessibilityRole="tablist"
           contentContainerStyle={styles.rail}
         >
           {targets}
         </ScrollView>
       ) : (
-        <View testID="product-bottom-bar" accessibilityRole="tablist" style={styles.bottomBar}>
+        <View testID="product-bottom-bar" accessibilityLabel={mainNavigationLabel} accessibilityRole="tablist" style={styles.bottomBar}>
           {targets}
         </View>
       )}
@@ -145,7 +135,7 @@ export function ProductNavigation({ labels, availableWidth }: ProductNavigationP
   return (
     <Tabs
       backBehavior="history"
-      tabBar={(props) => <ProductTabBar {...props} wide={wide} palette={palette} />}
+      tabBar={(props) => <ProductTabBar {...props} wide={wide} palette={palette} mainNavigationLabel={labels.mainNavigation} />}
       screenOptions={{
         animation: 'none',
         headerShown: false,
@@ -176,10 +166,11 @@ const styles = StyleSheet.create({
     paddingVertical: themeTokens.spacing[4],
     gap: themeTokens.spacing[1],
   },
+  // Web BottomNav: a plain `h-16` bar, five equal cells, hairline on top.
   bottomBar: {
     flexDirection: 'row',
-    paddingHorizontal: themeTokens.spacing[1],
-    paddingTop: themeTokens.spacing[1],
+    height: themeTokens.size.bottomBar,
+    alignItems: 'center',
   },
   target: {
     position: 'relative',
@@ -199,33 +190,16 @@ const styles = StyleSheet.create({
   },
   bottomTarget: {
     flex: 1,
-    minHeight: 64,
+    minHeight: themeTokens.size.bottomBar,
     paddingHorizontal: themeTokens.spacing[1],
     paddingVertical: themeTokens.spacing[2],
-    gap: themeTokens.spacing[1],
-  },
-  pressed: { opacity: 0.72 },
-  marker: {
-    position: 'absolute',
+    gap: 2,
     borderRadius: 0,
   },
-  railMarker: {
-    left: 0,
-    width: 2,
-    height: 28,
-  },
-  bottomMarker: {
-    top: 0,
-    width: 28,
-    height: 2,
-  },
+  pressed: { opacity: 0.72 },
   label: {
     fontFamily: themeTokens.typography.roles.interface.fontFamily,
   },
-  railLabel: {
-    flexShrink: 1,
-    fontSize: themeTokens.typography.roles.interface.fontSize,
-    lineHeight: themeTokens.typography.roles.interface.lineHeight,
-  },
+  railLabel: { ...textStyles.meta, flexShrink: 1 },
   bottomLabel: { ...textStyles.label, textAlign: 'center' },
 })

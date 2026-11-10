@@ -14,6 +14,10 @@ vi.mock('@app/database/di', () => ({ DI: { em: emMocks } }));
 vi.mock('../portfolio/portfolio-dashboard.service', () => ({
   default: { getAggregateDashboard: vi.fn() },
 }));
+const portfolioValuesMock = vi.hoisted(() => vi.fn());
+vi.mock('@service/portfolio/portfolio-holdings.service', () => ({
+  default: { getPortfolioValues: portfolioValuesMock },
+}));
 
 import {
   buildMonthlyHistoryPointDates,
@@ -40,6 +44,133 @@ beforeEach(() => {
   });
   emMocks.find.mockResolvedValue([]);
   emMocks.getKysely.mockReturnValue(kyselyDouble().db);
+  portfolioValuesMock.mockResolvedValue(new Map());
+});
+
+describe('NetWorthService portfolios', () => {
+  function appuserInEur(): Appuser {
+    emMocks.populate.mockResolvedValue(undefined);
+    return { currencyKey: { code: 'EUR' } } as Appuser;
+  }
+
+  it('counts every household portfolio at its current value, the value the portfolio screens show', async () => {
+    emMocks.find.mockImplementation((entity: { name?: string }) => Promise.resolve(entity.name === 'Portfolio'
+      ? [{ name: 'Long-term', portfolioKey: 7 }, { name: 'Tech picks', portfolioKey: 8 }]
+      : []));
+    portfolioValuesMock.mockResolvedValue(new Map([
+      [7, { isComplete: true, value: 12535.86 }],
+      [8, { isComplete: true, value: 2453.28 }],
+    ]));
+
+    const result = await new NetWorthService().getNetWorth(appuserInEur());
+
+    expect(result.assets.portfolios).toBe(14989.14);
+    expect(result.unsupportedCurrencies.portfolios).toBe(0);
+    expect(result.rows.filter((row) => row.type === 'portfolios')).toEqual([
+      { balance: 12535.86, id: 7, name: 'Long-term', supportedCurrency: true, type: 'portfolios' },
+      { balance: 2453.28, id: 8, name: 'Tech picks', supportedCurrency: true, type: 'portfolios' },
+    ]);
+  });
+
+  it('keeps what a partly priced portfolio is worth and reports the total as incomplete', async () => {
+    emMocks.find.mockImplementation((entity: { name?: string }) => Promise.resolve(entity.name === 'Portfolio'
+      ? [{ name: 'Long-term', portfolioKey: 7 }]
+      : []));
+    portfolioValuesMock.mockResolvedValue(new Map([[7, { isComplete: false, value: 100 }]]));
+
+    const result = await new NetWorthService().getNetWorth(appuserInEur());
+
+    expect(result.assets.portfolios).toBe(100);
+    expect(result.unsupportedCurrencies.portfolios).toBe(1);
+  });
+});
+
+describe('NetWorthService history: today is the live net worth', () => {
+  const now = new Date();
+  const today = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+  const lastMonthEnd = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 0));
+  const yesterday = new Date(today.getTime() - 86_400_000);
+  const aYearAgo = new Date(Date.UTC(now.getUTCFullYear() - 1, 0, 1));
+  const iso = (date: Date) => date.toISOString().slice(0, 10);
+
+  function seedHousehold() {
+    emMocks.populate.mockResolvedValue(undefined);
+    const account = { accountKey: 6, accountName: 'Conta Ordenado', accountOwnerAppuserKey: { currencyKey: { code: 'EUR' } }, appuserCurrencyBalance: 289923.86, createdAt: aYearAgo, currencyKey: { code: 'EUR' } };
+    const portfolio = { createdAt: aYearAgo, name: 'Long-term', portfolioKey: 7, portfolioOwnerAppuserKey: { currencyKey: { code: 'EUR' } } };
+    const loan = { currencyKey: { code: 'EUR' }, loanKey: 7, name: 'Crédito habitação', openingBalanceDate: aYearAgo, openingPrincipalBalance: 168382.33 };
+    const snapshots = [
+      // Last month's close, and yesterday's snapshot, which misses today's buy.
+      { appuserCurrencyKey: { code: 'EUR' }, appuserCurrencyTotalValue: 14286.16, portfolioKey: { portfolioKey: 7 }, portfolioSnapshotKey: 1, snapshotDate: lastMonthEnd },
+      { appuserCurrencyKey: { code: 'EUR' }, appuserCurrencyTotalValue: 14592.53, portfolioKey: { portfolioKey: 7 }, portfolioSnapshotKey: 2, snapshotDate: yesterday },
+    ];
+    emMocks.find.mockImplementation((entity: { name?: string }, where: { snapshotDate?: { $lt: Date } }) => {
+      switch (entity.name) {
+        case 'Account': return Promise.resolve([account]);
+        case 'Loan': return Promise.resolve([loan]);
+        case 'Portfolio': return Promise.resolve([portfolio]);
+        case 'PortfolioSnapshot': return Promise.resolve(snapshots.filter((snapshot) => snapshot.snapshotDate < (where.snapshotDate?.$lt ?? new Date(8.64e15))));
+        default: return Promise.resolve([]);
+      }
+    });
+    // The account's running balance at every past point (the prefetch's lateral join).
+    emMocks.getKysely.mockReturnValue(kyselyDouble((query) => {
+      const bounds = (query.parameters[0] ?? []) as string[];
+      return bounds.map((bound) => ({ account_key: 6, balance: 291402.18, point_date: bound }));
+    }).db);
+    portfolioValuesMock.mockResolvedValue(new Map([[7, { isComplete: true, value: 14989.14 }]]));
+    return { currencyKey: { code: 'EUR' } } as Appuser;
+  }
+
+  it('values today\'s point exactly as getNetWorth does, portfolios live rather than from yesterday\'s snapshot', async () => {
+    const appuser = seedHousehold();
+    const service = new NetWorthService();
+
+    const [summary, history] = await Promise.all([service.getNetWorth(appuser), service.getNetWorthHistory(appuser, { months: 2 })]);
+
+    const latest = history.points.at(-1);
+    expect(latest?.date).toBe(iso(today));
+    expect(summary.totalNetWorth).toBe(136530.67);
+    expect(latest).toEqual({
+      accountsTotal: summary.assets.accounts,
+      date: iso(today),
+      isComplete: true,
+      loansTotal: summary.liabilities.loans,
+      portfoliosTotal: summary.assets.portfolios,
+      totalNetWorth: summary.totalNetWorth,
+    });
+    expect(latest?.portfoliosTotal).toBe(14989.14);
+  });
+
+  it('keeps an earlier point on its snapshot', async () => {
+    const history = await new NetWorthService().getNetWorthHistory(seedHousehold(), { months: 2 });
+
+    expect(history.points.find((point) => point.date === iso(lastMonthEnd))).toEqual({
+      accountsTotal: 291402.18,
+      date: iso(lastMonthEnd),
+      isComplete: true,
+      loansTotal: 168382.33,
+      portfoliosTotal: 14286.16,
+      totalNetWorth: 137306.01,
+    });
+  });
+
+  it('marks today incomplete, still counting what could be valued, when a holding has no price', async () => {
+    const appuser = seedHousehold();
+    portfolioValuesMock.mockResolvedValue(new Map([[7, { isComplete: false, value: 100 }]]));
+
+    const history = await new NetWorthService().getNetWorthHistory(appuser, { months: 2 });
+
+    expect(history.points.at(-1)).toMatchObject({ isComplete: false, portfoliosTotal: 100, totalNetWorth: 121641.53 });
+  });
+
+  it('values a past period end on snapshots only', async () => {
+    const appuser = seedHousehold();
+
+    const history = await new NetWorthService().getNetWorthHistory(appuser, { months: 2, toDate: lastMonthEnd });
+
+    expect(portfolioValuesMock).not.toHaveBeenCalled();
+    expect(history.points.at(-1)).toMatchObject({ date: iso(lastMonthEnd), portfoliosTotal: 14286.16 });
+  });
 });
 
 describe('NetWorthService currency relation', () => {
@@ -88,6 +219,21 @@ describe('NetWorthService currency relation', () => {
 });
 
 describe('buildNetWorthSummaryFromSourceRows', () => {
+  it('carries each row\'s record id through, so clients can match it', () => {
+    const result = buildNetWorthSummaryFromSourceRows({
+      accounts: [{ balance: 1200, id: 7, name: 'Cash' }],
+      currencyCode: 'EUR',
+      loans: [{ balance: 500, id: 3, name: 'Car' }],
+      portfolios: [{ balance: 900, id: 2, name: 'Long-term' }],
+    });
+
+    expect(result.rows.map((row) => [row.type, row.id])).toEqual([
+      ['accounts', 7],
+      ['portfolios', 2],
+      ['loans', 3],
+    ]);
+  });
+
   it('includes accounts in assets', () => {
     const result = buildNetWorthSummaryFromSourceRows({
       accounts: [{ balance: 1200, name: 'Cash' }],

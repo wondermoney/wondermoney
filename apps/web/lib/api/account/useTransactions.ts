@@ -6,10 +6,14 @@ import {
 } from "@tanstack/react-query";
 import type { AxiosInstance } from "axios";
 
+import type { TransferDestinationRow } from "@/lib/account/transaction-transfer";
 import type { SupportedCurrencyCodes } from "@/lib/utils/currencySymbol";
 
 import api from "../api";
 import type { Category } from "../category/useCategories";
+import { transactionDateRangeParams } from "../date-range";
+import type { Tag } from "../tag/useTags";
+import type { TransactionSplitLine } from "./useTransactionSplits";
 
 export interface Transaction {
   transactionKey: number;
@@ -22,6 +26,11 @@ export interface Transaction {
     status: "candidate" | "confirmed" | "dismissed" | "paused" | "ended";
   } | null;
   transactionTypeKey?: { name: string };
+  /**
+   * Where an outgoing transfer went, when the user said so. Optional because
+   * an older API does not send it.
+   */
+  transferDestination?: TransferDestinationRow | null;
   accountKey: {
     accountName: string;
     accountKey: number;
@@ -37,6 +46,16 @@ export interface Transaction {
   balance: number;
   appuserCurrencyBalance: number;
   appuserTransactionCategories: Category[];
+  /**
+   * The household tags on the row, by name. Optional because an older API does
+   * not send it; read it as `transaction.tags ?? []`.
+   */
+  tags?: Tag[];
+  /**
+   * The lines of a split transaction, in order; empty when it is not split. Optional because an
+   * older API does not send it; read it through `isSplitTransaction`.
+   */
+  splits?: TransactionSplitLine[];
   loanRepayment?: {
     loanKey: number;
     loanKeys?: number[];
@@ -102,6 +121,8 @@ export interface GetTransactionRequest {
   accountKeys?: string[];
   transactionTypes?: string[];
   categoryKeys?: string[];
+  /** Tag keys; a row matches when it carries any of them. */
+  tagKeys?: string[];
   /**
    * Continuation token from the previous page's `nextCursor`. Omit for page one.
    *
@@ -130,10 +151,10 @@ export async function getTransactions(
 
   const _params = {
     ...params,
-    ...(params.fromDate && { fromDate: params.fromDate.getTime() }),
-    ...(params.toDate && { toDate: params.toDate.getTime() }),
+    ...transactionDateRangeParams(params),
     accountKeys: list(params.accountKeys),
     categoryKeys: list(params.categoryKeys),
+    tagKeys: list(params.tagKeys),
     transactionTypes: list(params.transactionTypes),
   };
   const { data } = await apiClient.get<GetTransactionsResponse>(

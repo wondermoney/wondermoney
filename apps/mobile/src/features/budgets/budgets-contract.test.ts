@@ -37,6 +37,27 @@ describe('budgets contracts', () => {
     expect(budget!.incomes[0]!.recurrency).toBeNull()
   })
 
+  it('reads each category\'s rollover, and defaults it for a server without rollover', () => {
+    const legacyRow = (row: Record<string, unknown>) => Object.fromEntries(Object.entries(row).filter(([key]) => !key.startsWith('category_rollover') && key !== 'category_rolled_over' && key !== 'category_available'))
+    const { rolloverCarriesOverspend: _carry, ...legacyBudget } = budgetFixture
+    const legacy = budgetMonthResponseSchema.parse({ budget: { ...legacyBudget, categories: [legacyRow(parentRow), legacyRow(childRow)] }, hasPreviousMonth: false, hasNextMonth: false })
+    expect(legacy.rolloverComplete).toBe(true)
+    expect(legacy.budget.rolloverCarriesOverspend).toBe(true)
+    expect(legacy.budget.categories[1]).toMatchObject({ category_rolled_over: 0, category_available: 100, category_rollover_enabled: false, category_rollover_incomplete: false })
+
+    const current = budgetMonthResponseSchema.parse({
+      budget: { ...budgetFixture, rolloverCarriesOverspend: false, categories: [{ ...parentRow, category_rolled_over: -25, category_available: 75, category_rollover_enabled: true, category_rollover_incomplete: true }, { ...childRow, category_rolled_over: -25, category_available: 75, category_rollover_enabled: true, category_rollover_incomplete: true }] },
+      hasPreviousMonth: true,
+      hasNextMonth: false,
+      rolloverComplete: false,
+    })
+    expect(current.rolloverComplete).toBe(false)
+    expect(current.budget.rolloverCarriesOverspend).toBe(false)
+    expect(current.budget.categories[1]).toMatchObject({ category_rolled_over: -25, category_available: 75, category_rollover_enabled: true, category_rollover_incomplete: true })
+    expect(budgetsResponseSchema.safeParse({ budgets: [{ ...budgetFixture, categories: [{ ...childRow, category_rolled_over: 'x' }] }] }).success).toBe(false)
+    expect(budgetDetailResponseSchema.parse({ budget: { budgetKey: 7, name: 'Plan', rolloverCarriesOverspend: false } }).budget.rolloverCarriesOverspend).toBe(false)
+  })
+
   it('requires strict navigation flags for month detail', () => {
     expect(budgetMonthResponseSchema.safeParse({ budget: budgetFixture, hasPreviousMonth: true, hasNextMonth: false }).success).toBe(true)
     expect(budgetMonthResponseSchema.safeParse({ budget: budgetFixture, hasPreviousMonth: true }).success).toBe(false)
@@ -60,6 +81,11 @@ describe('budgets contracts', () => {
     expect(budgetMetadataWriteSchema.safeParse({ name: 'n'.repeat(100), description: 'd'.repeat(500) }).success).toBe(true)
     expect(budgetMetadataWriteSchema.safeParse({ name: 'n'.repeat(101), description: '' }).success).toBe(false)
     expect(budgetMetadataWriteSchema.safeParse({ name: 'Plan', description: 'd'.repeat(501) }).success).toBe(false)
+    // The rollover setting can be sent alone or with the name; an empty body cannot.
+    expect(budgetMetadataWriteSchema.safeParse({ rolloverCarriesOverspend: false }).success).toBe(true)
+    expect(budgetMetadataWriteSchema.safeParse({ name: 'Plan', description: '', rolloverCarriesOverspend: true }).success).toBe(true)
+    expect(budgetMetadataWriteSchema.safeParse({}).success).toBe(false)
+    expect(budgetMetadataWriteSchema.safeParse({ description: 'only' }).success).toBe(false)
     expect(() => createBudgetDetailEndpoint(0)).toThrow()
     expect(() => createBudgetMetadataEndpoint(0)).toThrow()
   })
@@ -78,7 +104,9 @@ describe('budgets contracts', () => {
       { amount: 1, recurrency: 'WEEKLY', applyToFollowingMonths: false },
       { amount: 1, recurrency: 'MONTHLY' },
       { amount: 1, recurrency: 'MONTHLY', applyToFollowingMonths: false, extra: true },
+      { amount: 1, recurrency: 'MONTHLY', applyToFollowingMonths: false, rolloverEnabled: 'yes' },
     ]) expect(budgetCategoryWriteSchema.safeParse(body).success).toBe(false)
+    expect(budgetCategoryWriteSchema.parse({ amount: 1, recurrency: 'MONTHLY', applyToFollowingMonths: true, rolloverEnabled: true })).toEqual({ amount: 1, recurrency: 'MONTHLY', applyToFollowingMonths: true, rolloverEnabled: true })
     for (const [budgetId, year, month, categoryId] of [[0, 2026, 4, 11], [7, 2026, 13, 11], [7, 2026, 4, 0]] as const) expect(() => createBudgetCategoryEndpoint(budgetId, year, month, categoryId)).toThrow()
   })
 

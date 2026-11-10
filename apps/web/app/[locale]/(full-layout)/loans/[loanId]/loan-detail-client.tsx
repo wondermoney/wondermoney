@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowLeft, Link2, Pencil, RefreshCw } from "lucide-react";
+import { ArrowLeft, RefreshCw } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 
@@ -12,7 +12,6 @@ import LoanDetailSummaryCards from "@/components/loan/LoanDetailSummaryCards";
 import LoanFormDrawer from "@/components/loan/LoanFormDrawer";
 import LoanRepaymentsTable from "@/components/loan/LoanRepaymentsTable";
 import RepaymentCandidateDrawer from "@/components/loan/RepaymentCandidateDrawer";
-import { Amount } from "@/components/ui/Amount";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useRouter } from "@/i18n/navigation";
@@ -20,6 +19,7 @@ import type { LoanRepayment } from "@/lib/api/loan/types";
 import useDeleteLoanRepayment from "@/lib/api/loan/useDeleteLoanRepayment";
 import useLoan from "@/lib/api/loan/useLoan";
 import useLoanRepayments from "@/lib/api/loan/useLoanRepayments";
+import { loanSummary } from "@/lib/loans/loan-summary";
 
 export default function LoanDetailClient({ loanId }: { loanId: string }) {
   const t = useTranslations("loans");
@@ -40,22 +40,7 @@ export default function LoanDetailClient({ loanId }: { loanId: string }) {
   const loan = loanData?.loan;
   const repayments = repaymentsData?.repayments ?? [];
 
-  const summary = useMemo(() => {
-    const principal = loan?.openingPrincipalBalance ?? 0;
-    const outstanding = loan?.outstandingPrincipal ?? 0;
-    const payment = loan?.regularPaymentAmount ?? 0;
-    const rate = loan?.annualInterestRateBps ?? 0;
-    const remaining =
-      loan?.remainingTermMonthsEstimated ?? loan?.termMonths ?? null;
-    const progress =
-      principal > 0
-        ? Math.max(
-            0,
-            Math.min(100, ((principal - outstanding) / principal) * 100),
-          )
-        : 0;
-    return { principal, outstanding, payment, rate, remaining, progress };
-  }, [loan]);
+  const summary = useMemo(() => (loan ? loanSummary(loan) : null), [loan]);
 
   if (loanLoading)
     return (
@@ -67,7 +52,7 @@ export default function LoanDetailClient({ loanId }: { loanId: string }) {
         </div>
       </div>
     );
-  if (loanError || !loan)
+  if (loanError || !loan || !summary)
     return (
       <Card>
         <CardContent className="p-6">
@@ -88,7 +73,7 @@ export default function LoanDetailClient({ loanId }: { loanId: string }) {
     );
 
   return (
-    <div className="space-y-6">
+    <div className="flex flex-col gap-10 lg:gap-12">
       <LoanDetailHeader
         loan={loan}
         summary={summary}
@@ -96,56 +81,40 @@ export default function LoanDetailClient({ loanId }: { loanId: string }) {
         onEdit={() => setEditOpen(true)}
       />
       <LoanDetailSummaryCards loan={loan} summary={summary} />
-      <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
-        <div className="space-y-6">
-          <LoanRepaymentsTable
-            loan={loan}
-            repayments={repayments}
-            loading={repaymentsLoading}
-            onLinkRepayment={() => setCandidatesOpen(true)}
-            onEditRepayment={(repayment) => {
-              setEditingRepayment(repayment);
-              setCandidatesOpen(true);
-            }}
-            onRemoveRepayment={async (repayment) => {
-              if (!window.confirm(t("detail.repayments.removeConfirm"))) return;
-              await deleteMutation.mutateAsync({
-                loanId: loan.loanKey,
-                repaymentLinkId: repayment.loanRepaymentLinkKey,
-              });
-            }}
-          />
+      {/* The repayments ledger takes the full width: eight columns do not
+          fit beside the assumptions without cutting the last one off. */}
+      <LoanRepaymentsTable
+        loan={loan}
+        repayments={repayments}
+        loading={repaymentsLoading}
+        onEditRepayment={(repayment) => {
+          setEditingRepayment(repayment);
+          setCandidatesOpen(true);
+        }}
+        onRemoveRepayment={async (repayment) => {
+          if (!window.confirm(t("detail.repayments.removeConfirm"))) return;
+          await deleteMutation.mutateAsync({
+            loanId: loan.loanKey,
+            repaymentLinkId: repayment.loanRepaymentLinkKey,
+          });
+        }}
+      />
+      <div className="grid gap-10 xl:grid-cols-[minmax(0,1fr)_380px] xl:gap-12">
+        <div className="min-w-0">
           <LoanAmortizationPreview loan={loan} repayments={repayments} />
         </div>
-        <div className="space-y-6">
-          <LoanAssumptionsCard loan={loan} />
-          <Card>
-            <CardContent className="space-y-3 p-4">
-              <div className="text-sm font-medium">
-                {t("detail.actions.title")}
-              </div>
-              <div className="flex flex-col gap-2">
-                <Button onClick={() => setCandidatesOpen(true)}>
-                  <Link2 className="mr-2 size-4" />
-                  {t("actions.linkRepayment")}
-                </Button>
-                <Button variant="secondary" onClick={() => setEditOpen(true)}>
-                  <Pencil className="mr-2 size-4" />
-                  {t("actions.edit")}
-                </Button>
-                <Button variant="outline" onClick={() => setAdjustOpen(true)}>
-                  <RefreshCw className="mr-2 size-4" />
-                  {t("detail.actions.adjustBalance")}
-                </Button>
-              </div>
-              <div className="text-muted-foreground text-xs">
-                <Amount
-                  value={summary.outstanding}
-                  currency={loan.currency.code}
-                />
-              </div>
-            </CardContent>
-          </Card>
+        <div className="min-w-0">
+          {/* Linking a repayment and editing the loan sit in the header; the
+              balance adjustment is the one action only this page offers. */}
+          <LoanAssumptionsCard
+            loan={loan}
+            action={
+              <Button variant="secondary" onClick={() => setAdjustOpen(true)}>
+                <RefreshCw className="mr-2 size-4" />
+                {t("detail.actions.adjustBalance")}
+              </Button>
+            }
+          />
         </div>
       </div>
       <RepaymentCandidateDrawer

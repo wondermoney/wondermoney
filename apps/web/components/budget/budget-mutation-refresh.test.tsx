@@ -99,6 +99,31 @@ test("renaming a budget refreshes the route-backed overview and closes the sheet
   assert.ok(touchesBudgetList(invalidated));
 });
 
+test("turning off carried overspending sends only that change with the name", async () => {
+  const onOpenChange = vi.fn();
+  renderWithClient(
+    <BudgetEditModal
+      isOpen
+      onOpenChange={onOpenChange}
+      budgetName="Home"
+      budgetKey={4}
+      rolloverCarriesOverspend
+    />,
+  );
+
+  const toggle = screen.getByRole("switch", {
+    name: enMessages["budget-rollover-carries-overspend"],
+  });
+  assert.equal(toggle.getAttribute("aria-checked"), "true");
+  await userEvent.click(toggle);
+  await userEvent.click(screen.getByRole("button", { name: enMessages.save }));
+
+  await vi.waitFor(() => assert.deepEqual(onOpenChange.mock.calls, [[false]]));
+  assert.deepEqual(h.edit.mock.calls, [
+    [{ budgetKey: 4, name: "Home", rolloverCarriesOverspend: false }],
+  ]);
+});
+
 test("deleting a budget refreshes the route-backed overview and closes the dialog", async () => {
   const closeModal = vi.fn();
   const invalidated = renderWithClient(

@@ -11,16 +11,18 @@ import { Appuser } from '@entity/Appuser';
 import { AppuserTenant } from '@entity/AppuserTenant';
 import { Currency } from '@entity/Currency';
 import { EnableBankingConnection, EnableBankingConnectionStatus } from '@entity/EnableBankingConnection';
-import { ExchangeRate } from '@entity/ExchangeRate';
-import { Transaction } from '@entity/Transaction';
+import { FxStatus, Transaction } from '@entity/Transaction';
 import { TransactionAuditActorType, TransactionAuditEventType } from '@entity/TransactionAuditLog';
 import { TransactionMerchant } from '@entity/TransactionMerchant';
 import { TransactionStatus } from '@entity/TransactionStatus';
 import { TransactionType } from '@entity/TransactionType';
+import { isProviderRejection, type ProviderRateLimit, providerRateLimitOf } from '@service/bank-sync-run/provider-failure';
+import { resolveExchangeRate } from '@service/currency/exchange-rate';
 import { createEnableBankingSyncAdapter, type StableIdFields } from '@service/enable-banking/enable-banking-sync-adapter';
 import backgroundOperationService from '@service/operations/background-operation.service';
 import type { Enqueue } from '@service/queue/enqueue';
 import { triggerRecurringDetectionAfterTransactionIngestion } from '@service/recurring/post-transaction-ingestion-detection.service';
+import { applyRulesToNewTransactions } from '@service/rules/rule-application.service';
 import { enqueueTransactionEnrichmentForTenant } from '@service/transaction-enrichment/transaction-enrichment-enqueue.service';
 import { recalculateChainFromAccountBalance } from '@service/transaction/balance-chain.service';
 import { applyCategorizationOutcome } from '@service/transaction/categorization-confidence';
@@ -30,6 +32,7 @@ import { TransactionAuditService } from '@service/transaction/transaction-audit.
 import { findExistingTransaction, findExistingTransactionWithProvenance } from '@service/transaction/transaction-dedup.service';
 import deterministicCategorizationService from '@service/transaction/transaction-deterministic-categorization.service';
 import { enrichTransactionMetadata, isTransactionMetadataEnrichmentEnabled } from '@service/transaction/transaction-metadata-enrichment.service';
+import { reconcileSplitsWithAmount } from '@service/transaction/transaction-split.service';
 import { reconcileTransfers } from '@service/transaction/transfer-matching.service';
 import { sanitizeProviderResponse } from '@utils/error-sanitizer';
 import { InternalServerError, NotFoundError } from '@utils/errors';
@@ -38,12 +41,12 @@ import { convertMoney, roundMoney, toNumber } from '@utils/money';
 
 /** See the identical note in `account-initial-sync-account.service.ts` — `requisitionId`/
  * `requisitionKey` are provider-agnostic sync-target identity fields. */
-export interface AccountInitialSyncTransactionsResult { accountsFailed: number; accountsProcessed: number; accountsTotal: number; appuserKey: number; failedAccountIds: string[]; requisitionId: string; requisitionKey: number; status: 'completed' | 'failed' | 'partial'; transactionsCategorized: number; transactionsCreated: number; transactionsFailed: number; transactionsFetched: number; transactionsSkipped: number; }
+export interface AccountInitialSyncTransactionsResult { accountsFailed: number; accountsProcessed: number; accountsTotal: number; appuserKey: number; everyAccountRejected?: boolean; failedAccountIds: string[]; rateLimited?: ProviderRateLimit; requisitionId: string; requisitionKey: number; status: 'completed' | 'failed' | 'partial'; transactionsCategorized: number; transactionsCreated: number; transactionsFailed: number; transactionsFetched: number; transactionsSkipped: number; }
 
 interface BankSyncClient { account: (accountId: string) => { getTransactions: (input?: { country?: string; dateFrom?: string; dateTo?: string }) => Promise<BankSyncTransactionsResponse> }; }
 /** Berlin-Group-shaped transaction row. Both bank providers normalise into this shape;
  * declared locally so the app carries no dependency on any provider SDK's types. */
-export interface BankSyncTransaction { amount?: string; bookingDate?: string; creditDebitIndicator?: string; creditorName?: string; creditorReference?: string; currency?: string; currencyExchange?: { exchangeRate?: number | string; instructedAmount?: { amount?: string; currency?: string }; sourceCurrency?: string }; debtorName?: string; entryReference?: string; internalTransactionId?: string; providerStatus?: string; remittanceInformationStructured?: string; remittanceInformationUnstructured?: string; stableIdFields?: StableIdFields; transactionAmount?: { amount?: string; currency?: string }; transactionDate?: string; transactionId?: string; valueDate?: string }
+export interface BankSyncTransaction { amount?: string; bookingDate?: string; creditDebitIndicator?: string; creditorName?: string; creditorReference?: string; currency?: string; currencyExchange?: { exchangeRate?: number | string; instructedAmount?: { amount?: string; currency?: string }; sourceCurrency?: string }; debtorName?: string; entryReference?: string; internalTransactionId?: string; providerStatus?: string; remittanceInformationStructured?: string; remittanceInformationUnstructured?: string; stableIdFields?: StableIdFields; /** Set by `withStableIdOccurrences`: the row is the nth (0-based) id-less row with this content in its fetch. */ stableIdOccurrence?: number; transactionAmount?: { amount?: string; currency?: string }; transactionDate?: string; transactionId?: string; valueDate?: string }
 /** `voided`: rows the provider reports as rejected or cancelled. Never ingested; used only to retract a stored copy. */
 interface BankSyncTransactionsResponse { transactions?: { booked?: BankSyncTransaction[]; pending?: BankSyncTransaction[]; voided?: BankSyncTransaction[] } }
 interface Deps { backgroundOperationService?: typeof backgroundOperationService; em?: EntityManager; enableBankingSyncAdapterFactory?: (connection: EnableBankingConnection) => Promise<BankSyncClient>; enqueue?: Enqueue; logger?: Pick<typeof logger, 'error' | 'info' | 'warn'>;  }
@@ -86,17 +89,24 @@ class AccountInitialSyncTransactionService {
 
     let transactionsCreated = 0; let transactionsCategorized = 0; let transactionsFetched = 0; let transactionsFailed = 0; let transactionsSkipped = 0;
     const failedAccountIds: string[] = []; const processedAccountIds = new Set<string>(); const affectedTenantKeys = new Set<number>();
-    for (const account of accounts) {
+    // See `account-initial-sync-account.service.ts`: a rate limit stops the loop, and a 400/401 on
+    // every account is reported so the worker can check whether the consent ended.
+    let rateLimited: ProviderRateLimit | undefined; let rejectedCount = 0;
+    for (const [index, account] of accounts.entries()) {
       let accountCreated = 0; let accountFailed = 0; let accountSkipped = 0;
       try {
         const response = await client.account(account.accountId ?? '').getTransactions({ country: '', dateFrom: dateOffset(new Date(), input.fetchWindowDays ?? 365), dateTo: isoDate(new Date()) });
         const transactions = response.transactions;
-        const booked = transactions?.booked ?? [];
-        const pending = transactions?.pending ?? [];
+        const accountStableId = account.accountId ?? String(account.accountKey);
+        // Identical id-less rows are told apart by their position among their twins, counted per
+        // list: a pending row and its booked version must not shift each other's identity.
+        const booked = withStableIdOccurrences(accountStableId, transactions?.booked ?? []);
+        const pending = withStableIdOccurrences(accountStableId, transactions?.pending ?? []);
+        const voided = withStableIdOccurrences(accountStableId, transactions?.voided ?? []);
         // A rejected or cancelled row is never ingested, and a stored copy (e.g. a legacy row stored
         // as booked) is retracted. Before promotions, so a voided pending can
         // never be promoted by an unrelated booked row of the same amount.
-        if (txnStatusExpired) await this.applyVoids(em, account, transactions?.voided ?? [], txnStatusExpired, enableBanking);
+        if (txnStatusExpired) await this.applyVoids(em, account, voided, txnStatusExpired, enableBanking);
         // Pending→posted reconciliation. `apply` promotes/expires in place (live);
         // `dry_run` only logs intended changes. Off = kill switch. Always before the persist loop so a
         // promoted pending is then found by provider-id dedup and updated (never duplicated).
@@ -104,7 +114,7 @@ class AccountInitialSyncTransactionService {
           const seenPendingIdentities = new Set<string>();
           // An id-less Enable Banking pending is stored under its stable hash, so that hash is one
           // of its identities too; without it a pending still in the feed would expire after the grace window.
-          for (const row of pending) { const tx = row as Partial<BankSyncTransaction>; for (const id of [tx.transactionId, tx.internalTransactionId, tx.entryReference, enableBanking ? this.buildStableId(account.accountId ?? String(account.accountKey), row, 'enable_banking') : undefined]) if (id) seenPendingIdentities.add(id); }
+          for (const row of pending) { const tx = row as Partial<BankSyncTransaction>; for (const id of [tx.transactionId, tx.internalTransactionId, tx.entryReference, enableBanking ? this.buildStableId(accountStableId, row, 'enable_banking') : undefined]) if (id) seenPendingIdentities.add(id); }
           if (reconciliationMode === 'apply') {
             const promotedKeys = await this.applyPromotions(em, account, tenant, booked, { expired: txnStatusExpired, pending: txnStatusPending }, seenPendingIdentities, enableBanking);
             if (txnStatusExpired) await this.applyExpirations(em, account, txnStatusPending, txnStatusExpired, seenPendingIdentities, promotedKeys);
@@ -118,10 +128,13 @@ class AccountInitialSyncTransactionService {
         }
         const rows: { pending: boolean; row: BankSyncTransaction }[] = [...pending.map((row) => ({ pending: true, row })), ...booked.map((row) => ({ pending: false, row }))];
         transactionsFetched += rows.length;
+        const createdTransactions: Transaction[] = [];
         for (const item of rows) {
           const mapped = await this.persistTransaction(em, account, tenant, item.row, item.pending, settledStatusByName, transactionTypes, metadataEnrichmentEnabled, enableBanking);
-          accountCreated += mapped.created; accountSkipped += mapped.skipped; accountFailed += mapped.failed; transactionsCategorized += mapped.categorized ?? 0; if (mapped.created > 0 && mapped.tenantKey) affectedTenantKeys.add(mapped.tenantKey);
+          accountCreated += mapped.created; accountSkipped += mapped.skipped; accountFailed += mapped.failed; if (mapped.createdTransaction) createdTransactions.push(mapped.createdTransaction); if (mapped.created > 0 && mapped.tenantKey) affectedTenantKeys.add(mapped.tenantKey);
         }
+        transactionsCategorized += await this.categorizeNewTransactions(em, tenant, createdTransactions);
+        await this.auditMissingOccurrences(em, account, tenant, booked, enableBanking);
         // The running balance is a chain over the whole account, not a per-batch suffix.
         // Persisting the batch above leaves the newly created rows without a balance and the rows it
         // updated with a stale one, so the chain is rebuilt here — every settled row on the account,
@@ -138,6 +151,14 @@ class AccountInitialSyncTransactionService {
         if (input.correlationId && input.queueJobId) await bg.heartbeatJob(input.correlationId, input.queueJobId, { progress: { accountsProcessed: processedAccountIds.size, accountsTotal: accounts.length, failedAccountIds, transactionsCategorized, transactionsCreated, transactionsFailed, transactionsFetched, transactionsSkipped }, stage: 'account.initial-sync:syncing-transactions' });
       } catch (error) {
         failedAccountIds.push(account.accountId ?? String(account.accountKey)); transactionsFailed += 1;
+        if (isProviderRejection(error)) rejectedCount += 1;
+        rateLimited = providerRateLimitOf(error);
+        if (rateLimited) {
+          // The accounts not yet fetched count as failed, so their freshness marker stays put.
+          failedAccountIds.push(...accounts.slice(index + 1).map((rest) => rest.accountId ?? String(rest.accountKey)));
+          log.warn({ accountId: account.accountId, rateLimited }, 'Account initial sync stopped: provider rate limit');
+          break;
+        }
         log.warn({ accountId: account.accountId, error: sanitizeError(error) }, 'Account initial sync transaction fetch failed');
         // This only ever logged, so the 48-incident data_validation cluster had no Sentry
         // event to investigate from — matching account-initial-sync-account.service.ts's per-account
@@ -188,7 +209,8 @@ class AccountInitialSyncTransactionService {
     // Best-effort, fail-open shadow enrichment enqueue. Dormant by default; never blocks sync.
     for (const tenantKey of affectedTenantKeys) await enqueueTransactionEnrichmentForTenant(tenantKey, 'account-initial-sync', { enqueue: deps.enqueue });
     const status = failedAccountIds.length === accounts.length ? 'failed' : failedAccountIds.length > 0 ? 'partial' : 'completed';
-    return { accountsFailed: failedAccountIds.length, accountsProcessed: processedAccountIds.size, accountsTotal: accounts.length, appuserKey: getAppuserKey(appuserRef), failedAccountIds, requisitionId, requisitionKey, status, transactionsCategorized, transactionsCreated, transactionsFailed, transactionsFetched, transactionsSkipped };
+    const signals = { ...(processedAccountIds.size === 0 && rejectedCount === accounts.length ? { everyAccountRejected: true } : {}), ...(rateLimited ? { rateLimited } : {}) };
+    return { accountsFailed: failedAccountIds.length, accountsProcessed: processedAccountIds.size, accountsTotal: accounts.length, appuserKey: getAppuserKey(appuserRef), ...signals, failedAccountIds, requisitionId, requisitionKey, status, transactionsCategorized, transactionsCreated, transactionsFailed, transactionsFetched, transactionsSkipped };
   }
 
   /** See `account-initial-sync-account.service.ts`'s identical-purpose `resolveSyncTarget`. */
@@ -209,8 +231,23 @@ class AccountInitialSyncTransactionService {
     }
     return 0;
   }
+  /**
+   * The rows this sync created on one account, in order: the household's rules first (once for the
+   * batch), then learned categorization, which leaves a row a rule categorized as it is. Only
+   * created rows: a re-fetched row is never run through the rules again, so nothing the user changed
+   * since is undone. Both steps are best-effort and never fail the sync. Returns how many rows got a
+   * category.
+   */
+  private async categorizeNewTransactions(em: EntityManager, tenant: AppuserTenant, created: Transaction[]): Promise<number> {
+    if (created.length === 0) return 0;
+    const applied = await applyRulesToNewTransactions(em, tenant.tenantKey.tenantKey, created.map((transaction) => transaction.transactionKey), 'account-initial-sync');
+    let categorized = applied.filter((evaluation) => evaluation.changes.category).length;
+    for (const transaction of created) {
+      if (transaction.transactionMerchantKey) categorized += await this.categorizeIfEnabled(em, tenant.appuserKey, transaction);
+    }
+    return categorized;
+  }
   private emptyResult(requisitionId: string, requisitionKey: number, appuserRef: Appuser): AccountInitialSyncTransactionsResult { return { accountsFailed: 0, accountsProcessed: 0, accountsTotal: 0, appuserKey: getAppuserKey(appuserRef), failedAccountIds: [], requisitionId, requisitionKey, status: 'failed', transactionsCategorized: 0, transactionsCreated: 0, transactionsFailed: 0, transactionsFetched: 0, transactionsSkipped: 0 }; }
-  private async findAppuserExchangeRate(em: EntityManager, fromCurrency: Currency, toCurrency?: Currency, date?: Date) { if (!toCurrency || fromCurrency.code === toCurrency.code) return undefined; const queryDate = date ?? new Date(); return em.findOne(ExchangeRate, { date: { $lte: queryDate }, fromCurrency, toCurrency }, { orderBy: { date: 'DESC', toCurrency: 'ASC' } }); }
   private async findTransactionStatus(em: EntityManager, names: string[]) { for (const name of names) { const status = await em.findOne(TransactionStatus, { name }); if (status) return status; } return null; }
   private async loadTransactionTypes(em: EntityManager) { const names = ['TRANSFER_IN', 'TRANSFER_OUT', 'PAYMENT', 'CARD_PAYMENT', 'DEPOSIT', 'TOPUP', 'FEE']; const out = new Map<string, TransactionType>(); for (const name of names) { const type = await em.findOne(TransactionType, { name }); if (type) out.set(name, type); } return out; }
   private async resolveSyncTarget(
@@ -234,7 +271,7 @@ class AccountInitialSyncTransactionService {
   // know a row's position in the account's total order.
   // Leaving them out of `common` also means an in-place update never clobbers a good stored balance
   // with `undefined` if the rebuild later fails.
-  private async persistTransaction(em: EntityManager, account: Account, tenant: AppuserTenant, row: BankSyncTransaction, pending: boolean, statuses: Record<'BOOKED' | 'PENDING', null | TransactionStatus>, types: Map<string, TransactionType>, metadataEnrichmentEnabled: boolean, enableBanking = false): Promise<{ categorized?: number; created: number; failed: number; skipped: number; tenantKey?: number }> {
+  private async persistTransaction(em: EntityManager, account: Account, tenant: AppuserTenant, row: BankSyncTransaction, pending: boolean, statuses: Record<'BOOKED' | 'PENDING', null | TransactionStatus>, types: Map<string, TransactionType>, metadataEnrichmentEnabled: boolean, enableBanking = false): Promise<{ created: number; createdTransaction?: Transaction; failed: number; skipped: number; tenantKey?: number }> {
     const tx = row as Partial<BankSyncTransaction>; const settlementCurrencyCode = tx.transactionAmount?.currency ?? tx.currency; if (!settlementCurrencyCode) return { created: 0, failed: 1, skipped: 0 };
     const currency = await em.findOne(Currency, { code: settlementCurrencyCode }); if (!currency) return { created: 0, failed: 1, skipped: 0 };
     const status = pending ? statuses.PENDING : statuses.BOOKED; if (!status) return { created: 0, failed: 1, skipped: 0 };
@@ -276,7 +313,10 @@ class AccountInitialSyncTransactionService {
     const appuserCurrency = appuser.currencyKey;
     const appuserCurrencyCode = appuserCurrency.code;
     const sameCurrency = appuserCurrencyCode === currency.code;
-    const rate = sameCurrency ? undefined : await this.findAppuserExchangeRate(em, currency, appuserCurrency, date);
+    // The one resolver picks the rate; with none, no converted amount is stored (never the raw one).
+    const resolvedRate = await resolveExchangeRate(em, currency, appuserCurrency, date);
+    const toAppuserCurrency = (value: number): null | number => (resolvedRate ? (sameCurrency ? value : convertMoney(value, resolvedRate.rate)) : null);
+    const fxStatus = resolvedRate ? resolvedRate.status : FxStatus.MISSING;
     const settlementExchangeRate = tx.currencyExchange?.exchangeRate != null ? Number(tx.currencyExchange.exchangeRate) : undefined;
     const instructedAmount = tx.currencyExchange?.instructedAmount;
     const originalCurrencyCode = instructedAmount?.currency ?? tx.currencyExchange?.sourceCurrency ?? (settlementExchangeRate && tx.currencyExchange?.sourceCurrency && tx.currencyExchange.sourceCurrency !== currency.code ? tx.currencyExchange.sourceCurrency : undefined);
@@ -286,11 +326,11 @@ class AccountInitialSyncTransactionService {
       : settlementExchangeRate && tx.currencyExchange?.sourceCurrency && tx.currencyExchange.sourceCurrency !== currency.code
         ? Number(settlementAmountRaw) * settlementExchangeRate
         : Number(settlementAmountRaw);
-    const appuserSettlementAmount = sameCurrency ? amount : rate?.rate ? convertMoney(amount, rate.rate) : amount;
+    const appuserSettlementAmount = toAppuserCurrency(amount);
     const appuserCurrencyKey = appuser.currencyKey;
     const transactionMerchantKey = await this.resolveMerchant(em, tx);
     const metadata = this.buildTransactionMetadata(row, metadataEnrichmentEnabled);
-    const common: EntityData<Transaction> = { accountKey: account, appuserCurrencyExchangeRate: rate?.rate, appuserCurrencyKey, appuserSettlementAmount, ...metadata, enableBankingTransactionId, externalTransactionId, internalTransactionId, nordigenInternalTransactionId, originalAmount: Number.isFinite(originalAmount) ? originalAmount : amount, originalCurrencyKey: originalCurrencyKey ?? currency, settlementAmount: amount, settlementCurrencyKey: currency, settlementExchangeRate, tenantKey: tenant.tenantKey, transactionDate: date, transactionMerchantKey, transactionStatusKey: status, transactionTypeKey: type };
+    const common: EntityData<Transaction> = { accountKey: account, appuserCurrencyExchangeRate: sameCurrency ? undefined : resolvedRate?.rate, appuserCurrencyKey, appuserSettlementAmount, fxStatus, ...metadata, enableBankingTransactionId, externalTransactionId, internalTransactionId, nordigenInternalTransactionId, originalAmount: Number.isFinite(originalAmount) ? originalAmount : amount, originalCurrencyKey: originalCurrencyKey ?? currency, settlementAmount: amount, settlementCurrencyKey: currency, settlementExchangeRate, tenantKey: tenant.tenantKey, transactionDate: date, transactionMerchantKey, transactionStatusKey: status, transactionTypeKey: type };
     if (existing && existingMatch) {
       // A pending row has no running balance. A legacy row stored as booked, and still pending at
       // the provider, would otherwise keep the stale balance it was given, and net-worth history
@@ -323,17 +363,57 @@ class AccountInitialSyncTransactionService {
         common.settlementAmount = editedAmount;
         // The bank's current amount stays the bound for the user's next edit.
         common.uneditedSettlementAmount = amount;
-        common.appuserSettlementAmount = sameCurrency ? editedAmount : rate?.rate ? convertMoney(editedAmount, rate.rate) : editedAmount;
+        common.appuserSettlementAmount = toAppuserCurrency(editedAmount);
       }
       // The type is written when a row is created, and afterwards only by transfer matching
       // (which pairs and un-pairs rows, and re-types a legacy TRANSFER_IN credit). Re-fetching a row
       // must not undo a pair, or a type a user set.
       delete common.transactionTypeKey;
-      Object.assign(existing as unknown as Record<string, unknown>, common); try { await em.persist(existing).flush(); return { created: 0, failed: 0, skipped: 0, tenantKey: existing.tenantKey?.tenantKey }; } catch (error) { return isDuplicate(error) ? { created: 0, failed: 0, skipped: 1 } : { created: 0, failed: 1, skipped: 0 }; }
+      Object.assign(existing as unknown as Record<string, unknown>, common);
+      try {
+        await em.persist(existing).flush();
+      } catch (error) {
+        return isDuplicate(error) ? { created: 0, failed: 0, skipped: 1 } : { created: 0, failed: 1, skipped: 0 };
+      }
+      // A split follows the bank's new amount: rescaled and back to the review inbox, or removed
+      // when it can no longer be kept. An unchanged amount leaves it alone. Best-effort: the row is
+      // stored either way, and every total shares the transaction's amount out by the lines'
+      // proportions, so lines left unscaled still count the transaction exactly once.
+      try {
+        await reconcileSplitsWithAmount(em, existing, { actorType: TransactionAuditActorType.SYNC, source: 'transaction-splits-rescale' });
+      } catch (error) {
+        logger.warn({ error: sanitizeError(error), transactionKey: existing.transactionKey }, 'Rescaling a split transaction after sync failed');
+      }
+      return { created: 0, failed: 0, skipped: 0, tenantKey: existing.tenantKey?.tenantKey };
     }
     const transactionEntity = em.create(Transaction, { ...common, appuserKey: tenant.appuserKey }, { partial: true });
-    try { await em.persist(transactionEntity).flush(); const categorized = transactionMerchantKey ? await this.categorizeIfEnabled(em, tenant.appuserKey, transactionEntity) : 0; return { categorized, created: 1, failed: 0, skipped: 0, tenantKey: transactionEntity.tenantKey?.tenantKey }; } catch (error) { if (isDuplicate(error)) return { categorized: 0, created: 0, failed: 0, skipped: 1 }; return { categorized: 0, created: 0, failed: 1, skipped: 0 }; }
+    try { await em.persist(transactionEntity).flush(); return { created: 1, createdTransaction: transactionEntity, failed: 0, skipped: 0, tenantKey: transactionEntity.tenantKey?.tenantKey }; } catch (error) { if (isDuplicate(error)) return { created: 0, failed: 0, skipped: 1 }; return { created: 0, failed: 1, skipped: 0 }; }
   }
+  /**
+   * A stored repeat of an id-less row (`<hash>:<n>`) that this fetch no longer reports: the fetch
+   * holds fewer identical booked rows than the sync stored. The row is kept (a bank listing one of two
+   * identical purchases is no proof the other did not happen) and a `DEDUP_SKIPPED` audit row flags it
+   * for review. Booked rows only: a pending repeat that leaves the feed expires on its own. Only content
+   * this fetch still reports is checked, so a row outside the fetch window is never flagged. Best-effort.
+   */
+  private async auditMissingOccurrences(em: EntityManager, account: Account, tenant: AppuserTenant, booked: BankSyncTransaction[], enableBanking: boolean): Promise<void> {
+    const accountId = account.accountId ?? String(account.accountKey);
+    const prefix = enableBanking ? 'enable_banking' : 'nordigen';
+    const fetched = new Map<string, number>();
+    for (const row of booked) { if (hasProviderId(row)) continue; const hash = stableContentHash(accountId, row); fetched.set(hash, (fetched.get(hash) ?? 0) + 1); }
+    if (fetched.size === 0) return;
+    try {
+      const column = enableBanking ? 'enableBankingTransactionId' : 'nordigenInternalTransactionId';
+      const stored = await em.find(Transaction, { accountKey: account, [column]: { $like: `${prefix}:%:%` }, deletedAt: undefined }, { filters: { [HIDDEN_FILTER]: false }, populate: ['transactionStatusKey'] });
+      for (const row of stored) {
+        const occurrence = parseOccurrenceId(row[column], prefix);
+        const count = occurrence ? fetched.get(occurrence.hash) : undefined;
+        if (!occurrence || count === undefined || occurrence.index < count || row.transactionStatusKey?.name !== 'BOOKED') continue;
+        await TransactionAuditService.log(em, { accountKey: account.accountKey, actorType: TransactionAuditActorType.SYNC, appuserKey: getAppuserKey(row.appuserKey ?? tenant.appuserKey), changes: { occurrence: { from: null, to: occurrence.index }, occurrencesFetched: { from: null, to: count }, reason: { from: null, to: 'occurrence_missing_from_fetch' } }, eventType: TransactionAuditEventType.DEDUP_SKIPPED, source: 'account-initial-sync:occurrence-missing', tenantKey: row.tenantKey?.tenantKey ?? tenant.tenantKey.tenantKey, transactionKey: row.transactionKey });
+      }
+    } catch (error) { logger.warn({ error: sanitizeError(error) }, 'Auditing missing id-less repeats failed'); }
+  }
+
   /**
    * Retract stored copies of rows the provider now reports as rejected or cancelled. A legacy row
    * may have been ingested as booked (every Enable Banking status but `PEND` once was), so it may
@@ -473,9 +553,43 @@ class AccountInitialSyncTransactionService {
  * of its fields. Enable Banking rows hash `stableIdFields` (the unsigned provider amount and the
  * legacy indicator mapping), so signing the amount does not re-key stored rows. Neither the provider
  * status nor `transactionDate` is an input, so re-classifying a row never changes its identity.
- * Exported for the status repair, which must find stored rows exactly as the sync does.
+ *
+ * Two id-less rows with identical content (two coffees, same shop, same day) hash alike, so the nth
+ * repeat in one fetch (`stableIdOccurrence`, set by `withStableIdOccurrences`) is `<hash>:<n>`. The
+ * first keeps the bare hash: every id-less row stored before repeats were numbered is keyed by it and
+ * keeps its identity. Exported for the status repair, which must find stored rows exactly as the sync does.
  */
-export function buildStableId(accountId: string, row: BankSyncTransaction, prefix: 'enable_banking' | 'nordigen' = 'nordigen') { const transaction = row as Partial<BankSyncTransaction>; const preferred = transaction.transactionId ?? transaction.internalTransactionId ?? transaction.entryReference; if (preferred) return `${prefix}:${preferred}`; const hash = crypto.createHash('sha256').update(JSON.stringify({ accountId, amount: transaction.stableIdFields?.amount ?? transaction.transactionAmount?.amount ?? transaction.amount ?? null, bookingDate: transaction.bookingDate ?? null, creditorName: transaction.creditorName ?? null, creditorReference: transaction.creditorReference ?? null, currency: transaction.transactionAmount?.currency ?? transaction.currency ?? null, debit: (transaction.stableIdFields ? transaction.stableIdFields.creditDebitIndicator : transaction.creditDebitIndicator) ?? null, debtorName: transaction.debtorName ?? null, remittance: transaction.remittanceInformationUnstructured ?? null, remittanceStructured: transaction.remittanceInformationStructured ?? null, valueDate: transaction.valueDate ?? null })).digest('hex'); return `${prefix}:${hash}`; }
+export function buildStableId(accountId: string, row: BankSyncTransaction, prefix: 'enable_banking' | 'nordigen' = 'nordigen') { const transaction = row as Partial<BankSyncTransaction>; const preferred = providerIdOf(transaction); if (preferred) return `${prefix}:${preferred}`; const hash = stableContentHash(accountId, transaction); const occurrence = transaction.stableIdOccurrence ?? 0; return occurrence > 0 ? `${prefix}:${hash}:${occurrence}` : `${prefix}:${hash}`; }
+
+/**
+ * Copies of one fetched list's rows (booked, pending or voided), each id-less row numbered among the
+ * rows of identical content before it. Identical rows are interchangeable, so which one gets which
+ * number does not matter, and a later fetch of the same rows maps them onto the same ids. Rows with a
+ * provider id are returned as they are.
+ */
+export function withStableIdOccurrences<T extends BankSyncTransaction>(accountId: string, rows: T[]): T[] {
+  const seen = new Map<string, number>();
+  return rows.map((row) => {
+    if (hasProviderId(row)) return row;
+    const hash = stableContentHash(accountId, row);
+    const occurrence = seen.get(hash) ?? 0;
+    seen.set(hash, occurrence + 1);
+    return { ...row, stableIdOccurrence: occurrence };
+  });
+}
+
+/** The provider id `buildStableId` prefers over the hash; a row without one is "id-less". */
+function hasProviderId(row: Partial<BankSyncTransaction>) { return Boolean(providerIdOf(row)); }
+function providerIdOf(row: Partial<BankSyncTransaction>) { return row.transactionId ?? row.internalTransactionId ?? row.entryReference; }
+
+/** The hash of the fields that identify an id-less row. */
+function stableContentHash(accountId: string, row: Partial<BankSyncTransaction>): string { return crypto.createHash('sha256').update(JSON.stringify({ accountId, amount: row.stableIdFields?.amount ?? row.transactionAmount?.amount ?? row.amount ?? null, bookingDate: row.bookingDate ?? null, creditorName: row.creditorName ?? null, creditorReference: row.creditorReference ?? null, currency: row.transactionAmount?.currency ?? row.currency ?? null, debit: (row.stableIdFields ? row.stableIdFields.creditDebitIndicator : row.creditDebitIndicator) ?? null, debtorName: row.debtorName ?? null, remittance: row.remittanceInformationUnstructured ?? null, remittanceStructured: row.remittanceInformationStructured ?? null, valueDate: row.valueDate ?? null })).digest('hex'); }
+
+/** A numbered repeat's id, `<prefix>:<hash>:<n>`, split into its hash and number. */
+function parseOccurrenceId(id: null | string | undefined, prefix: string): undefined | { hash: string; index: number } {
+  const match = id?.startsWith(`${prefix}:`) ? /^([0-9a-f]{64}):(\d+)$/.exec(id.slice(prefix.length + 1)) : null;
+  return match?.[1] && match[2] ? { hash: match[1], index: Number(match[2]) } : undefined;
+}
 
 /**
  * The `enableBankingTransactionId` the sync stores for a row: its `entry_reference`, otherwise what

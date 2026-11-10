@@ -9,7 +9,7 @@ O WonderMoney evita duplicados como parte do processo normal de transações, pe
 
 Cada transação tem uma impressão digital que a identifica. Quando os dados recebidos coincidem com uma impressão digital existente, o duplicado é descartado em vez de criar uma segunda linha. Na rara ocasião em que a correspondência não é certa, a transação é mantida e marcada com um aviso para que possas decidir.
 
-Todas as decisões ficam registadas no registo de auditoria das transações, incluindo duplicados descartados e mudanças de estado. A tolerância da impressão digital é deliberadamente estreita: duas transações legítimas que parecem semelhantes — por exemplo duas compras idênticas no mesmo dia — não são tratadas como duplicados, porque uma referência bancária distinta é suficiente para os distinguir.
+Todas as decisões ficam registadas no registo de auditoria das transações, incluindo duplicados descartados e mudanças de estado. A tolerância da impressão digital é deliberadamente estreita: duas transações legítimas que parecem semelhantes — por exemplo duas compras idênticas no mesmo dia — não são tratadas como duplicados. Uma referência bancária distinta distingue-as e, quando o banco envia compras idênticas sem referência, cada uma que o banco lista continua a ser guardada como uma transação própria.
 
 ## Versões pendente e confirmada
 

@@ -2,7 +2,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ChevronRight } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
 
@@ -25,6 +25,7 @@ import {
 } from "@/components/ui/Form";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/Label";
+import { MoneyInput } from "@/components/ui/MoneyInput";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { Text } from "@/components/ui/Typography";
@@ -41,11 +42,11 @@ import { cn } from "@/lib/utils";
 import {
   buildCurrencyOptions,
   CURRENCY_TRIGGER_CLASS,
-  useAmountPlaceholder,
 } from "@/lib/utils/currency-field";
 import { getCurrencySymbol } from "@/lib/utils/currencySymbol";
 
 import { CategoryComboBoxForm } from "../CategoryComboBoxForm";
+import { TagPicker } from "../tags/TagPicker";
 
 interface AccountTransactionAddFormProps {
   accounts: Account[];
@@ -59,8 +60,11 @@ const AccountTransactionAddForm: React.FC<AccountTransactionAddFormProps> = ({
   onSubmit,
 }) => {
   const t = useTranslations();
-  const amountPlaceholder = useAmountPlaceholder();
-  const formSchema = useMemo(() => createTransactionFormSchema(t), [t]);
+  const locale = useLocale();
+  const formSchema = useMemo(
+    () => createTransactionFormSchema(t, locale),
+    [t, locale],
+  );
   const defaultAccountId =
     accounts.length === 1 ? accounts[0].accountKey.toString() : "";
   const autoSelectedAccountIdRef = useRef<string | undefined>(
@@ -93,6 +97,7 @@ const AccountTransactionAddForm: React.FC<AccountTransactionAddFormProps> = ({
       description: "",
       notes: "",
       categoryId: undefined,
+      tagIds: [],
     },
   });
 
@@ -279,7 +284,7 @@ const AccountTransactionAddForm: React.FC<AccountTransactionAddFormProps> = ({
                 onSelect={(opt) => {
                   setValue(field.name, opt?.value || "");
                 }}
-                placeholder={t("account")}
+                placeholder={t("transaction-account-placeholder")}
                 options={accountsOptions}
               />
               <FormMessage />
@@ -314,7 +319,7 @@ const AccountTransactionAddForm: React.FC<AccountTransactionAddFormProps> = ({
               <FormControl>
                 <Input
                   {...field}
-                  placeholder={t("description")}
+                  placeholder={t("transaction-description-placeholder")}
                   className="w-full"
                 />
               </FormControl>
@@ -334,7 +339,7 @@ const AccountTransactionAddForm: React.FC<AccountTransactionAddFormProps> = ({
                 onSelect={(opt) => {
                   setValue(field.name, opt?.value || "");
                 }}
-                placeholder={t("type")}
+                placeholder={t("transaction-type-placeholder")}
                 options={transactionTypesOptions}
               />
               <FormMessage />
@@ -369,7 +374,7 @@ const AccountTransactionAddForm: React.FC<AccountTransactionAddFormProps> = ({
                 }
                 createEmptyHint={t("type-merchant-name-to-create")}
                 onQueryChange={setMerchantSearch}
-                placeholder={t("transaction-merchant")}
+                placeholder={t("transaction-merchant-placeholder")}
                 options={transactionMerchantsOptions}
               />
               <FormMessage role="alert" />
@@ -383,14 +388,12 @@ const AccountTransactionAddForm: React.FC<AccountTransactionAddFormProps> = ({
             <FormItem>
               <FormLabel required>{t("settlement-amount")}</FormLabel>
               <FormControl>
-                <Input
+                <MoneyInput
                   type="tel"
                   step="0.01"
                   min="0"
-                  placeholder={amountPlaceholder}
-                  className="w-full pr-4 text-right"
                   {...field}
-                  startAdornment={
+                  currencySlot={
                     <ComboBoxForm
                       triggerClassName={CURRENCY_TRIGGER_CLASS}
                       field={{ value: selectedCurrency }}
@@ -424,6 +427,24 @@ const AccountTransactionAddForm: React.FC<AccountTransactionAddFormProps> = ({
             </FormItem>
           )}
         />
+        {/* Tags only on manual entry: the receipt-confirmation endpoint takes
+            no tags, so offering them there would drop them silently. */}
+        {!ocrData ? (
+          <FormField
+            control={control}
+            name="tagIds"
+            render={({ field }) => (
+              <FormItem className="col-span-2">
+                <FormLabel>{t("transactionTags.label")}</FormLabel>
+                <TagPicker
+                  value={field.value ?? []}
+                  onChange={(tagKeys) => field.onChange(tagKeys)}
+                />
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        ) : null}
         <Collapsible
           open={isOtherDetailsOpen}
           onOpenChange={() => setIsOtherDetailsOpen(!isOtherDetailsOpen)}
@@ -468,14 +489,12 @@ const AccountTransactionAddForm: React.FC<AccountTransactionAddFormProps> = ({
                     <FormItem>
                       <FormLabel>{t("original-amount")}</FormLabel>
                       <FormControl>
-                        <Input
+                        <MoneyInput
                           type="tel"
                           step="0.01"
                           min="0"
-                          placeholder={amountPlaceholder}
-                          className="w-full pr-4 text-right"
                           {...field}
-                          startAdornment={
+                          currencySlot={
                             <ComboBoxForm
                               triggerClassName={CURRENCY_TRIGGER_CLASS}
                               field={{ value: selectedOriginalCurrency }}
@@ -514,7 +533,7 @@ const AccountTransactionAddForm: React.FC<AccountTransactionAddFormProps> = ({
                           type="tel"
                           step="0.0001"
                           min="0"
-                          placeholder={t("exchange-rate")}
+                          placeholder={t("exchange-rate-placeholder")}
                           {...field}
                           value={field.value || ""}
                         />
@@ -531,7 +550,10 @@ const AccountTransactionAddForm: React.FC<AccountTransactionAddFormProps> = ({
                   <FormItem>
                     <FormLabel>{t("notes")}</FormLabel>
                     <FormControl>
-                      <Textarea placeholder={t("notes")} {...field} />
+                      <Textarea
+                        placeholder={t("transaction-notes-placeholder")}
+                        {...field}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

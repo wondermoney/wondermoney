@@ -82,4 +82,15 @@ describe('S3Service', () => {
     const params = [...new URL(presignedUrl).searchParams.keys()].map((key) => key.toLowerCase());
     expect(params.filter((key) => key.includes('checksum'))).toEqual([]);
   });
+
+  it('signs a restore upload link for exactly the announced size, on the public endpoint', async () => {
+    const service = new S3Service(MINIO);
+
+    const url = new URL(await service.generatePresignedUploadUrl('wondermoney', 'data-restores/1/a.zip', { contentLength: 1234, contentType: 'application/zip', expiresInSeconds: 900 }));
+
+    expect(url.origin).toBe('https://files.example.com');
+    // The store refuses an upload whose length or type differs from what was signed.
+    expect(url.searchParams.get('X-Amz-SignedHeaders')?.split(';')).toEqual(expect.arrayContaining(['content-length', 'content-type', 'host']));
+    expect([...url.searchParams.keys()].filter((key) => key.toLowerCase().includes('checksum'))).toEqual([]);
+  });
 });

@@ -1,4 +1,3 @@
-import { QueryOrder } from '@mikro-orm/core';
 import { format } from 'date-fns';
 import { sql } from 'kysely';
 
@@ -6,14 +5,17 @@ import { DI } from '@app/app';
 import { anyOf, sqlQuery, toDate } from '@app/database/sql';
 import type { Appuser } from '@entity/Appuser';
 import { Portfolio } from '@entity/Portfolio';
-import { PortfolioSnapshot } from '@entity/PortfolioSnapshot';
+import { loadRateTable } from '@service/currency/exchange-rate';
+import { sumMoney } from '@utils/money';
 
 import assetPriceService from './asset-price.service';
 import { type AssetClassDrift, computeAllocationDrift, generateGuidanceText } from './portfolio-allocation-drift';
-import { getPreferredSnapshotTotalValue } from './portfolio-currency.utils';
 import { calculateCostBasis, getPeriodStartDate } from './portfolio-dashboard.utils';
+import { historyInViewerCurrency, historyRatePairs, type PortfolioSnapshotValue } from './portfolio-history-currency';
 import portfolioHoldingsService from './portfolio-holdings.service';
 import { filterValidHoldings } from './portfolio-holdings.utils';
+import { combinePeriodMeasures, findSnapshotPointOnOrBefore, loadCashFlowsInViewerCurrency, measurePortfolioPeriod, periodFlowsSince, type PortfolioPeriodMeasure, resolveViewerCurrency } from './portfolio-period-performance';
+import { valuePortfolioHoldings } from './portfolio-value';
 
 export type Period = '1M' | '1Y' | '3M' | '6M' | 'ALL' | 'YTD';
 interface AggregateDashboardResponse {
@@ -72,10 +74,22 @@ interface PerformanceDataPoint {
   value: number;
 }
 
+/**
+ * Whether every snapshot could be valued in the viewer's currency. A day that left one out
+ * (no exchange rate) is listed; its point counts only what could be converted.
+ */
+interface PerformanceCompleteness {
+  currencyCode: string;
+  incompleteDates: string[];
+  isComplete: boolean;
+}
+
 interface PerformanceResponse {
   benchmarkDataPoints?: PerformanceDataPoint[];
   benchmarkStatus: BenchmarkStatus;
   benchmarkSymbol?: string;
+  /** Absent only when the history is empty because a holding is invalid. */
+  completeness?: PerformanceCompleteness;
   dataPoints: PerformanceDataPoint[];
   minDataPointsForComparison: number;
   normalizedBenchmarkDataPoints?: PerformanceDataPoint[];
@@ -178,13 +192,24 @@ function normalizeToPercentReturns(dataPoints: PerformanceDataPoint[]): Performa
 /**
  * Service for providing portfolio dashboard data
  */
+/**
+ * Portfolios belong to the household, so a request (which carries the tenant) sees the
+ * partner's portfolios too. Without a tenant (worker paths) this falls back to the owner.
+ */
 export class PortfolioDashboardService {
-  private calculatePeriodReturn(totalValue: number, startSnapshot: number): null | number {
-    if (startSnapshot > 0) {
-      return ((totalValue - startSnapshot) / startSnapshot) * 100;
-    }
-
-    return totalValue > 0 ? null : 0;
+  /**
+   * One portfolio from the period's start snapshot to its live value; see `measurePortfolioPeriod`.
+   * The live value is in the viewer's currency, so the start snapshot and the trades in the period
+   * are read in it too.
+   */
+  private async measurePeriod(appuser: Appuser, portfolioKey: number, periodStartDate: Date, liveValue: number, tenantKey?: number): Promise<PortfolioPeriodMeasure> {
+    const viewerCurrency = await resolveViewerCurrency(appuser);
+    const [recorded, startSnapshot] = await Promise.all([
+      portfolioHoldingsService.getInvestmentCashFlows(appuser.appuserKey, tenantKey, portfolioKey),
+      findSnapshotPointOnOrBefore(portfolioKey, periodStartDate, viewerCurrency),
+    ]);
+    const flows = await loadCashFlowsInViewerCurrency(recorded, viewerCurrency, periodFlowsSince(periodStartDate, startSnapshot));
+    return measurePortfolioPeriod({ end: { kind: 'live', value: liveValue }, flows, fromDate: periodStartDate, startSnapshot });
   }
 
   /**
@@ -194,7 +219,7 @@ export class PortfolioDashboardService {
     // Get all portfolios
     const portfolios = await DI.em.find(
       Portfolio,
-      { deletedAt: undefined, portfolioOwnerAppuserKey: appuser },
+      { deletedAt: undefined, ...portfolioScope(appuser, tenantKey) },
       { populate: ['currencyKey'] },
     );
 
@@ -204,30 +229,28 @@ export class PortfolioDashboardService {
 
     // Calculate totals
     const validHoldings = filterValidHoldings(holdings);
-    const pricedHoldings = validHoldings.filter((h): h is typeof h & { currentValue: number } => h.currentValue != null);
     const { feeConversionIncompleteAssetKeys, totalCostBasisOfSold, totalRealizedGains } = await portfolioHoldingsService.getRealizedGains(appuser.appuserKey, undefined, tenantKey);
-    const totalValue = pricedHoldings.reduce((sum, h) => sum + h.currentValue, 0);
     const costBasis = calculateCostBasis(validHoldings);
     const unrealizedGains = validHoldings.reduce((sum, h) => sum + (h.unrealizedGains || 0), 0);
     const totalGainLoss = unrealizedGains + totalRealizedGains;
     const totalCostBasis = costBasis + totalCostBasisOfSold;
     const totalGainLossPercent = totalCostBasis > 0 ? (totalGainLoss / totalCostBasis) * 100 : 0;
 
-    // Get period start value from snapshots
+    // Build portfolio breakdown. Each portfolio is valued as the portfolio list and net worth
+    // value it, and the total is their sum, so every surface shows the same figures.
+    const portfolioBreakdown: Omit<PortfolioBreakdownItem, 'weight'>[] = [];
     const periodStartDate = getPeriodStartDate(period);
-    const startSnapshot = await this.getAggregateValueAtDate(appuser, periodStartDate);
-    const periodReturn = hasInvalidHoldings ? null : this.calculatePeriodReturn(totalValue, startSnapshot);
-
-    // Build portfolio breakdown
-    const portfolioBreakdown: PortfolioBreakdownItem[] = [];
+    const periodMeasures: PortfolioPeriodMeasure[] = [];
 
     for (const portfolio of portfolios) {
       const portfolioHoldings = await portfolioHoldingsService.getPortfolioHoldings(appuser, portfolio.portfolioKey, tenantKey);
       const validPortfolioHoldings = filterValidHoldings(portfolioHoldings);
-      const portfolioValue = validPortfolioHoldings.reduce((sum, h) => sum + (h.currentValue || 0), 0);
+      const portfolioValue = valuePortfolioHoldings(portfolioHoldings).value;
       const portfolioCostBasis = calculateCostBasis(validPortfolioHoldings);
       const portfolioGain =
         portfolioCostBasis > 0 ? ((portfolioValue - portfolioCostBasis) / portfolioCostBasis) * 100 : 0;
+
+      periodMeasures.push(await this.measurePeriod(appuser, portfolio.portfolioKey, periodStartDate, portfolioValue, tenantKey));
 
       portfolioBreakdown.push({
         currency: appuser.currencyKey.code || 'EUR',
@@ -235,15 +258,20 @@ export class PortfolioDashboardService {
         name: portfolio.name,
         portfolioKey: portfolio.portfolioKey,
         value: portfolioValue,
-        weight: totalValue > 0 ? (portfolioValue / totalValue) * 100 : 0,
       });
     }
+    const totalValue = sumMoney(portfolioBreakdown.map((item) => item.value));
+
+    // Net of the money put in during the period, so new contributions are not counted as return.
+    const periodReturn = hasInvalidHoldings ? null : combinePeriodMeasures(periodMeasures).changePercent;
 
     // Get unique asset count
     const uniqueAssets = new Set(validHoldings.map((h) => h.financialAssetKey));
 
     return {
-      portfolios: portfolioBreakdown.toSorted((a, b) => b.value - a.value),
+      portfolios: portfolioBreakdown
+        .map((item) => ({ ...item, weight: totalValue > 0 ? (item.value / totalValue) * 100 : 0 }))
+        .toSorted((a, b) => b.value - a.value),
       summary: {
         assetCount: uniqueAssets.size,
         currency: appuser.currencyKey.code || 'EUR',
@@ -274,7 +302,7 @@ export class PortfolioDashboardService {
     // Get portfolio
     const portfolio = await DI.em.findOne(
       Portfolio,
-      { deletedAt: undefined, portfolioKey: portfolioId, portfolioOwnerAppuserKey: appuser },
+      { deletedAt: undefined, portfolioKey: portfolioId, ...portfolioScope(appuser, tenantKey) },
       { populate: ['currencyKey'] },
     );
 
@@ -289,16 +317,17 @@ export class PortfolioDashboardService {
     // Calculate totals
     const validHoldings = filterValidHoldings(holdings);
     const { feeConversionIncompleteAssetKeys, totalCostBasisOfSold, totalRealizedGains } = await portfolioHoldingsService.getRealizedGains(appuser.appuserKey, portfolioId, tenantKey);
-    const totalValue = validHoldings.reduce((sum, h) => sum + (h.currentValue || 0), 0);
+    const totalValue = valuePortfolioHoldings(holdings).value;
     const costBasis = calculateCostBasis(validHoldings);
     const unrealizedGains = validHoldings.reduce((sum, h) => sum + (h.unrealizedGains || 0), 0);
     const totalGainLoss = unrealizedGains + totalRealizedGains;
     const totalGainLossPercent = costBasis + totalCostBasisOfSold > 0 ? (totalGainLoss / (costBasis + totalCostBasisOfSold)) * 100 : 0;
 
-    // Get period return
+    // Period return, net of the money put in during the period
     const periodStartDate = getPeriodStartDate(period);
-    const startSnapshot = await this.getPortfolioValueAtDate(portfolioId, periodStartDate);
-    const periodReturn = hasInvalidHoldings ? null : this.calculatePeriodReturn(totalValue, startSnapshot);
+    const periodReturn = hasInvalidHoldings
+      ? null
+      : (await this.measurePeriod(appuser, portfolioId, periodStartDate, totalValue, tenantKey)).changePercent;
 
     // Calculate quick stats
     const sortedByWeight = validHoldings
@@ -350,26 +379,8 @@ export class PortfolioDashboardService {
     };
   }
 
-  /**
-   * Get aggregate portfolio value at a specific date
-   */
-  private async getAggregateValueAtDate(appuser: Appuser, date: Date): Promise<number> {
-    const portfolios = await DI.em.find(Portfolio, {
-      deletedAt: undefined,
-      portfolioOwnerAppuserKey: appuser,
-    });
 
-    let totalValue = 0;
-    for (const portfolio of portfolios) {
-      totalValue += await this.getPortfolioValueAtDate(portfolio.portfolioKey, date);
-    }
 
-    return totalValue;
-  }
-
-  /**
-   * Get portfolio value at a specific date from snapshots
-   */
   /**
    * Start-of-period price for MANY assets in one query.
    *
@@ -400,18 +411,7 @@ export class PortfolioDashboardService {
     return prices;
   }
 
-  private async getPortfolioValueAtDate(portfolioId: number, date: Date): Promise<number> {
-    const snapshot = await DI.em.findOne(
-      PortfolioSnapshot,
-      {
-        portfolioKey: { portfolioKey: portfolioId },
-        snapshotDate: { $lte: date },
-      },
-      { orderBy: { snapshotDate: QueryOrder.DESC } },
-    );
 
-    return snapshot ? getPreferredSnapshotTotalValue(snapshot) : 0;
-  }
 
   /**
    * Get performance data for chart
@@ -431,7 +431,7 @@ export class PortfolioDashboardService {
     if (portfolioId) {
       const portfolio = await DI.em.findOne(
         Portfolio,
-        { deletedAt: undefined, portfolioKey: portfolioId, portfolioOwnerAppuserKey: appuser },
+        { deletedAt: undefined, portfolioKey: portfolioId, ...portfolioScope(appuser, tenantKey) },
         { populate: ['currencyKey'] },
       );
 
@@ -470,112 +470,77 @@ export class PortfolioDashboardService {
       };
     }
 
-    if (portfolioId) {
-      // Single portfolio - use ORM
-      const [snapshots, benchmarkPrices] = await Promise.all([
-        DI.em.find(
-          PortfolioSnapshot,
-          {
-            portfolioKey: { portfolioKey: portfolioId },
-            snapshotDate: { $gte: periodStartDate },
-          },
-          { orderBy: { snapshotDate: QueryOrder.ASC } },
-        ),
-        benchmarkPromise,
-      ]);
+    // A single portfolio was found (and scoped) above; the aggregate is every household portfolio.
+    const portfolioIds = portfolioId
+      ? [portfolioId]
+      : (await DI.em.find(Portfolio, { deletedAt: undefined, ...portfolioScope(appuser, tenantKey) })).map((p) => p.portfolioKey);
 
-      const dataPoints: PerformanceDataPoint[] = snapshots.map((s) => ({
-        date: format(s.snapshotDate, 'yyyy-MM-dd'),
-        value: getPreferredSnapshotTotalValue(s),
-      }));
-      const portfolioHistoryStatus = getPortfolioHistoryStatus(dataPoints);
-      const filteredBenchmarkPrices = filterBenchmarkToPortfolioRange(benchmarkPrices, dataPoints);
-      const benchmarkStatus = getBenchmarkStatus(portfolioHistoryStatus, filteredBenchmarkPrices);
+    const [history, benchmarkPrices] = await Promise.all([
+      this.loadHistoryInViewerCurrency(appuser, portfolioIds, periodStartDate, tenantKey),
+      benchmarkPromise,
+    ]);
+    const { completeness, dataPoints } = history;
+    const portfolioHistoryStatus = getPortfolioHistoryStatus(dataPoints);
+    const filteredBenchmarkPrices = filterBenchmarkToPortfolioRange(benchmarkPrices, dataPoints);
+    const benchmarkStatus = getBenchmarkStatus(portfolioHistoryStatus, filteredBenchmarkPrices);
 
-      return {
-        benchmarkDataPoints: filteredBenchmarkPrices,
-        benchmarkStatus,
-        benchmarkSymbol,
-        dataPoints,
-        minDataPointsForComparison: MIN_PERFORMANCE_DATA_POINTS,
-        normalizedBenchmarkDataPoints: normalizeToPercentReturns(filteredBenchmarkPrices),
-        normalizedDataPoints: normalizeToPercentReturns(dataPoints),
-        period,
-        portfolioHistoryStatus,
-        readiness: {
-          benchmark: { status: benchmarkStatus },
-          performance: { status: portfolioHistoryStatus },
-        },
-      };
-    } else {
-      // Aggregate - need to sum across all portfolios for each date (complex query - use raw SQL)
-      const portfolios = await DI.em.find(Portfolio, {
-        deletedAt: undefined,
-        portfolioOwnerAppuserKey: appuser,
-      });
+    return {
+      benchmarkDataPoints: filteredBenchmarkPrices,
+      benchmarkStatus,
+      benchmarkSymbol,
+      completeness,
+      dataPoints,
+      minDataPointsForComparison: MIN_PERFORMANCE_DATA_POINTS,
+      normalizedBenchmarkDataPoints: normalizeToPercentReturns(filteredBenchmarkPrices),
+      normalizedDataPoints: normalizeToPercentReturns(dataPoints),
+      period,
+      portfolioHistoryStatus,
+      readiness: {
+        benchmark: { status: benchmarkStatus },
+        performance: { status: portfolioHistoryStatus },
+      },
+    };
+  }
 
-      const portfolioIds = portfolios.map((p) => p.portfolioKey);
+  /**
+   * The portfolios' daily history in the viewer's currency. Each snapshot is read in the currency
+   * it was stored in (its owner's, or the portfolio's when no owner-currency value was stored) and
+   * converted at its day's rate; see `historyInViewerCurrency`.
+   */
+  private async loadHistoryInViewerCurrency(appuser: Appuser, portfolioIds: number[], periodStartDate: Date, tenantKey?: number): Promise<{ completeness: PerformanceCompleteness; dataPoints: PerformanceDataPoint[] }> {
+    const viewerCurrency = await resolveViewerCurrency(appuser);
+    if (portfolioIds.length === 0) return { completeness: { currencyCode: viewerCurrency, incompleteDates: [], isComplete: true }, dataPoints: [] };
 
-      if (portfolioIds.length === 0) {
-        const benchmarkPrices = await benchmarkPromise;
-        const benchmarkStatus = getBenchmarkStatus('empty', benchmarkPrices);
-        return {
-          benchmarkDataPoints: benchmarkPrices,
-          benchmarkStatus,
-          benchmarkSymbol,
-          dataPoints: [],
-          minDataPointsForComparison: MIN_PERFORMANCE_DATA_POINTS,
-          normalizedBenchmarkDataPoints: normalizeToPercentReturns(benchmarkPrices),
-          normalizedDataPoints: [],
-          period,
-          portfolioHistoryStatus: 'empty',
-          readiness: {
-            benchmark: { status: benchmarkStatus },
-            performance: { status: 'empty' },
-          },
-        };
-      }
+    const rows = await sqlQuery(DI.em)
+      .selectFrom('portfolio_snapshot as ps')
+      .innerJoin('portfolio as p', 'ps.portfolio_key', 'p.portfolio_key')
+      .leftJoin('currency as appuser_c', 'ps.appuser_currency_key', 'appuser_c.currency_key')
+      .leftJoin('appuser as owner', 'p.portfolio_owner_appuser_key', 'owner.appuser_key')
+      .leftJoin('currency as owner_c', 'owner.currency_key', 'owner_c.currency_key')
+      .leftJoin('currency as snapshot_c', 'ps.currency_key', 'snapshot_c.currency_key')
+      .select([
+        'ps.snapshot_date',
+        sql<null | string>`COALESCE(ps.appuser_currency_total_value, ps.total_value)`.as('value'),
+        // A value stored before the owner-currency key was recorded is in the owner's currency.
+        sql<null | string>`CASE WHEN ps.appuser_currency_total_value IS NOT NULL THEN COALESCE(appuser_c.code, owner_c.code) ELSE snapshot_c.code END`.as('currency_code'),
+      ])
+      .where(anyOf('ps.portfolio_key', portfolioIds))
+      .where('ps.snapshot_date', '>=', periodStartDate)
+      .where('ps.deleted_at', 'is', null)
+      .where('p.deleted_at', 'is', null)
+      // Raw SQL bypasses MikroORM's tenant filter; preserve the explicit household scope.
+      .$if(tenantKey != null, (query) => query.where('p.tenant_key', '=', tenantKey))
+      .orderBy('ps.snapshot_date', 'asc')
+      .execute() as { currency_code: null | string; snapshot_date: Date | string; value: null | number | string }[];
 
-      const snapshotQuery = sqlQuery(DI.em)
-        .selectFrom('portfolio_snapshot as ps')
-        .innerJoin('portfolio as p', 'ps.portfolio_key', 'p.portfolio_key')
-        .select(['ps.snapshot_date', sql<string>`SUM(COALESCE(ps.appuser_currency_total_value, ps.total_value))`.as('total_value')])
-        .where(anyOf('ps.portfolio_key', portfolioIds))
-        .where('ps.snapshot_date', '>=', periodStartDate)
-        .where('p.deleted_at', 'is', null)
-        // Raw SQL bypasses MikroORM's tenant filter; preserve the explicit household scope.
-        .$if(tenantKey != null, (query) => query.where('p.tenant_key', '=', tenantKey));
-
-      const [aggregatedSnapshotsRaw, benchmarkPrices] = await Promise.all([
-        snapshotQuery.groupBy('ps.snapshot_date').orderBy('ps.snapshot_date', 'asc').execute(),
-        benchmarkPromise,
-      ]);
-      const aggregatedSnapshots = aggregatedSnapshotsRaw as { snapshot_date: Date | string; total_value: string }[];
-
-      const dataPoints: PerformanceDataPoint[] = aggregatedSnapshots.map((s) => ({
-        date: format(toDate(s.snapshot_date), 'yyyy-MM-dd'),
-        value: s.total_value ? Number(s.total_value) : 0,
-      }));
-      const portfolioHistoryStatus = getPortfolioHistoryStatus(dataPoints);
-      const filteredBenchmarkPrices = filterBenchmarkToPortfolioRange(benchmarkPrices, dataPoints);
-      const benchmarkStatus = getBenchmarkStatus(portfolioHistoryStatus, filteredBenchmarkPrices);
-
-      return {
-        benchmarkDataPoints: filteredBenchmarkPrices,
-        benchmarkStatus,
-        benchmarkSymbol,
-        dataPoints,
-        minDataPointsForComparison: MIN_PERFORMANCE_DATA_POINTS,
-        normalizedBenchmarkDataPoints: normalizeToPercentReturns(filteredBenchmarkPrices),
-        normalizedDataPoints: normalizeToPercentReturns(dataPoints),
-        period,
-        portfolioHistoryStatus,
-        readiness: {
-          benchmark: { status: benchmarkStatus },
-          performance: { status: portfolioHistoryStatus },
-        },
-      };
-    }
+    const snapshots: PortfolioSnapshotValue[] = rows.map((row) => ({
+      currencyCode: row.value == null ? null : row.currency_code,
+      date: format(toDate(row.snapshot_date), 'yyyy-MM-dd'),
+      value: row.value == null ? 0 : Number(row.value),
+    }));
+    const rates = await loadRateTable(DI.em, historyRatePairs(snapshots, viewerCurrency), { from: periodStartDate, to: new Date() });
+    const { dataPoints, incompleteDates } = historyInViewerCurrency(snapshots, viewerCurrency, rates);
+    return { completeness: { currencyCode: viewerCurrency, incompleteDates, isComplete: incompleteDates.length === 0 }, dataPoints };
   }
 
   /**
@@ -787,6 +752,10 @@ export class PortfolioDashboardService {
 
     return { gainers, losers, period };
   }
+}
+
+function portfolioScope(appuser: Appuser, tenantKey?: number): { portfolioOwnerAppuserKey: Appuser } | { tenantKey: { tenantKey: number } } {
+  return tenantKey == null ? { portfolioOwnerAppuserKey: appuser } : { tenantKey: { tenantKey } };
 }
 
 export default new PortfolioDashboardService();

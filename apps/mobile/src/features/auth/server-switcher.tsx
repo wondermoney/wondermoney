@@ -1,13 +1,16 @@
 import * as Application from 'expo-application'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Pressable, Text, TextInput, useColorScheme, View } from 'react-native'
+import { StyleSheet, useColorScheme, View } from 'react-native'
+
+import { Button } from '@/components/ui/button'
+import { Text } from '@/components/ui/text'
 
 import { useServerSwitch } from '@/components/providers/server-switch-provider'
 import { checkServer, normalizeServerUrl, type ServerCheck } from '@/lib/server/server-connection'
 import { themeTokens } from '@/theme/tokens'
 
-import { authFormStyles as styles, FieldError } from './auth-form-styles'
+import { AuthField, AuthLink, AuthTextInput } from './auth-form-styles'
 
 type Props = Readonly<{
   /** Injected for tests; defaults to the installed app's version. */
@@ -55,57 +58,56 @@ export function ServerSwitcher({ appVersion = Application.nativeApplicationVersi
     await switchServer(url)
   }
 
+  // Mobile-only (web is served from the server it talks to): a quiet line under the
+  // form, the host in mono, the actions as web-style links.
   if (!editing) {
     return (
-      <View style={{ gap: themeTokens.spacing[1] }}>
-        <Text style={[styles.helper, { color: palette.mutedForeground }]}>
-          {t('auth.server.current', { host: hostOf(apiBaseUrl) })}
-        </Text>
-        <Pressable accessibilityRole="button" onPress={() => setEditing(true)}>
-          <Text style={{ color: palette.primary }}>{t('auth.server.change')}</Text>
-        </Pressable>
-        {!usesDefaultServer && (
-          <Pressable accessibilityRole="button" onPress={() => { void switchServer(null) }}>
-            <Text style={{ color: palette.primary }}>{t('auth.server.useDefault')}</Text>
-          </Pressable>
-        )}
+      <View style={[localStyles.block, { borderTopColor: palette.border }]}>
+        <Text tone="muted" variant="label">{t('auth.server.current', { host: hostOf(apiBaseUrl) })}</Text>
+        <View style={localStyles.links}>
+          <AuthLink label={t('auth.server.change')} onPress={() => setEditing(true)} />
+          {!usesDefaultServer && (
+            <AuthLink label={t('auth.server.useDefault')} onPress={() => { void switchServer(null) }} />
+          )}
+        </View>
       </View>
     )
   }
 
   return (
-    <View style={styles.form}>
-      <Text style={[styles.label, { color: palette.foreground }]}>{t('auth.server.label')}</Text>
-      <TextInput
-        accessibilityLabel={t('auth.server.label')}
-        autoCapitalize="none"
-        autoCorrect={false}
-        keyboardType="url"
-        onChangeText={setAddress}
-        onSubmitEditing={() => { void connect() }}
-        placeholder="money.example.com"
-        placeholderTextColor={palette.mutedForeground}
-        style={[styles.input, { borderColor: palette.border, color: palette.foreground }]}
-        value={address}
-      />
-      {error ? <FieldError color={palette.destructive}>{error}</FieldError> : null}
-      <Pressable
-        accessibilityRole="button"
-        accessibilityState={{ busy: connecting, disabled: connecting }}
-        disabled={connecting}
-        onPress={() => { void connect() }}
-        style={({ pressed }) => [styles.primaryButton, { backgroundColor: palette.primary }, pressed && styles.buttonPressed]}
-      >
-        <Text style={[styles.buttonLabel, { color: palette.primaryForeground }]}>
-          {connecting ? t('auth.server.connecting') : t('auth.server.connect')}
-        </Text>
-      </Pressable>
-      <Pressable accessibilityRole="button" onPress={() => { setEditing(false); setError(undefined) }}>
-        <Text style={{ color: palette.primary }}>{t('auth.server.cancel')}</Text>
-      </Pressable>
+    <View style={[localStyles.block, { borderTopColor: palette.border }]}>
+      <AuthField error={error} label={t('auth.server.label')}>
+        <AuthTextInput
+          accessibilityLabel={t('auth.server.label')}
+          autoCapitalize="none"
+          autoCorrect={false}
+          invalid={Boolean(error)}
+          keyboardType="url"
+          onChangeText={setAddress}
+          onSubmitEditing={() => { void connect() }}
+          placeholder="money.example.com"
+          value={address}
+        />
+      </AuthField>
+      <View style={localStyles.actions}>
+        <Button
+          disabled={connecting}
+          label={connecting ? t('auth.server.connecting') : t('auth.server.connect')}
+          loading={connecting}
+          onPress={() => { void connect() }}
+          variant="outline"
+        />
+        <Button label={t('auth.server.cancel')} onPress={() => { setEditing(false); setError(undefined) }} variant="ghost" />
+      </View>
     </View>
   )
 }
+
+const localStyles = StyleSheet.create({
+  block: { gap: themeTokens.spacing[3], borderTopWidth: 1, paddingTop: themeTokens.spacing[4] },
+  links: { flexDirection: 'row', flexWrap: 'wrap', columnGap: themeTokens.spacing[4], rowGap: themeTokens.spacing[2] },
+  actions: { flexDirection: 'row', gap: themeTokens.spacing[2] },
+})
 
 function hostOf(url: string): string {
   try {

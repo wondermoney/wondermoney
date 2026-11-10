@@ -1,0 +1,91 @@
+{
+  "homeOverview": {
+    "bank-alerts": {
+      "label": "Bank connection alerts",
+      "consent-expiring": "{days, plural, =0 {Access to {bank} ends within a day.} one {Access to {bank} ends in # day.} other {Access to {bank} ends in # days.}} Reconnect to keep your transactions updating.",
+      "consent-revoked": "{bank} ended access to your accounts. Reconnect to keep your transactions updating.",
+      "sync-failing": "{bank} hasn’t updated since {date}. Reconnecting usually fixes this.",
+      "sync-failing-no-date": "{bank} hasn’t updated for more than 2 days. Reconnecting usually fixes this.",
+      "unknown-bank": "Your bank",
+      "more": "{count, plural, one {And # more connection needs attention.} other {And # more connections need attention.}}",
+      "reconnect": "Reconnect",
+      "dismiss": "Dismiss"
+    },
+    "net-worth": {
+      "title": "Net worth",
+      "since": "since the end of {month}",
+      "chart-label": "Net worth at the close of each month, {from} to {to}",
+      "history-error": "The change over time didn’t load.",
+      "retry": "Try again",
+      "empty-title": "No accounts yet",
+      "empty-body": "Add an account to see what you own and owe.",
+      "empty-action": "Add an account"
+    },
+    "shell": {
+      "dark-mode": "Dark mode",
+      "light-mode": "Light mode"
+    },
+    "month": {
+      "title": "This month",
+      "days-left": "{days, plural, =0 {Last day of {month}} one {# day of {month} to go} other {# days of {month} to go}}",
+      "left": "left to spend",
+      "overspent": "over the plan",
+      "spent-of": "<spent></spent> spent of <planned></planned> planned",
+      "over-plan": "{count, plural, one {# category over plan} other {# categories over plan}}",
+      "measure-label": "{name}: {spent} spent of {planned} planned",
+      "row-error": "This month didn’t load.",
+      "retry": "Try again"
+    },
+    "budget-empty": {
+      "title": "No budget yet",
+      "body": "Set a monthly plan to see what is left to spend and what is over plan.",
+      "action": "Create a budget"
+    },
+    "sheet": {
+      "title": "Balance sheet",
+      "own": "You own",
+      "owe": "You owe",
+      "total": "Total",
+      "side-empty": "Nothing here.",
+      "groups": {
+        "accounts": "Accounts",
+        "portfolios": "Portfolios",
+        "loans": "Loans",
+        "other": "Other"
+      },
+      "counted-in": "Counted in {account}"
+    },
+    "cashflow": {
+      "title": "Net cash flow by month",
+      "list-label": "Net cash flow, {from} to {to}",
+      "caption": "Money in less money out across your accounts.",
+      "empty-title": "No cash flow yet",
+      "empty-body": "It appears once your accounts have transactions."
+    },
+    "loans": {
+      "title": "Next loan payments",
+      "outstanding": "<amount></amount> left",
+      "rate": "at {rate}",
+      "empty-title": "No loans",
+      "empty-body": "Add a loan to see its next payments here.",
+      "none-due-title": "No loan payments due",
+      "none-due-body": "Active loans with a next payment date appear here.",
+      "action": "Go to loans"
+    },
+    "latest": {
+      "title": "Latest transactions",
+      "review": "{count, plural, one {# needs review} other {# need review}}",
+      "all": "All transactions",
+      "caption": "{count, plural, one {The most recent transaction} other {The # most recent transactions}}",
+      "date": "Date",
+      "description": "Description",
+      "category": "Category",
+      "amount": "Amount",
+      "uncategorised": "Uncategorised",
+      "needs-review": "Needs review",
+      "empty-title": "No transactions yet",
+      "empty-body": "Connect a bank or add a transaction to see it here.",
+      "action": "Go to accounts"
+    }
+  }
+}

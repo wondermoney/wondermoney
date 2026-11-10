@@ -12,7 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import useAccounts from "@/lib/api/account/useAccounts";
 import type { StrategyResult } from "@/lib/api/goals/types";
 import useDebtStrategy from "@/lib/api/goals/useDebtStrategy";
-import { formatGoalCurrency } from "@/lib/goals/format";
+import { useFormatGoalCurrency } from "@/lib/goals/useFormatGoalCurrency";
 
 function formatMonths(months: number, t: ReturnType<typeof useTranslations>) {
   const years = Math.floor(months / 12);
@@ -37,6 +37,7 @@ function StrategyChart({
   strategy: StrategyResult;
   t: ReturnType<typeof useTranslations>;
 }) {
+  const formatGoalCurrency = useFormatGoalCurrency();
   const data = strategy.order.map((id) => {
     const perDebt = strategy.perDebt.find((debt) => debt.id === id);
     return {
@@ -67,6 +68,7 @@ function StrategyChart({
 export default function DebtStrategySection() {
   const t = useTranslations();
   const locale = useLocale();
+  const formatGoalCurrency = useFormatGoalCurrency();
   const { data } = useDebtStrategy();
   const { data: accountsData } = useAccounts();
   const currencyCode =

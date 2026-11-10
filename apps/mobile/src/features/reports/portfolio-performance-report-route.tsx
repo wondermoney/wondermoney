@@ -6,14 +6,12 @@ import { mapPortfolioPerformanceReport } from './portfolio-performance-report-vi
 import { PortfolioPerformanceReportScreen, type PortfolioPerformanceReportViewState } from './portfolio-performance-report-screen'
 import { usePortfolioPerformanceReport } from './use-portfolio-performance-report'
 import { useReportExport } from './use-report-export'
-import { useReportFilterOptions } from './use-report-filter-options'
 import { useReportFilters } from './use-report-filters'
 import { useReportsCurrency } from './use-reports-currency'
 
 export function PortfolioPerformanceReportRoute() {
   const router = useRouter()
   const filterState = useReportFilters()
-  const filterOptions = useReportFilterOptions()
   const query = usePortfolioPerformanceReport(filterState.filters)
   const currencyCode = useReportsCurrency()
   const { state: exportState, exportCsv } = useReportExport('portfolio-performance', filterState.filters, new Date().toISOString().slice(0, 10))
@@ -31,8 +29,6 @@ export function PortfolioPerformanceReportRoute() {
       state={state}
       preset={filterState.preset}
       currencyCode={currencyCode}
-      filterState={filterState}
-      filterOptions={filterOptions}
       exportState={exportState}
       onSelectPreset={filterState.selectPreset}
       onExport={exportCsv}

@@ -62,17 +62,13 @@ export function DateRangePicker({
     <Popover open={isOpen} onOpenChange={setIsOpen}>
       <PopoverTrigger asChild>
         <Button
-          variant="outline"
-          size="sm"
-          className={cn(
-            "h-10 justify-start gap-2 px-3 text-left font-normal sm:h-9",
-            className,
-          )}
+          variant="input"
+          className={cn("justify-start px-3 text-left", className)}
           aria-label={t("dateRange")}
         >
-          <CalendarIcon className="size-4 shrink-0" />
+          <CalendarIcon className="size-4" />
           <span className="truncate">{displayLabel}</span>
-          <ChevronDown className="ml-auto size-4 shrink-0 opacity-50" />
+          <ChevronDown className="ml-auto size-4 opacity-50" />
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-auto p-0" align="start">

@@ -1,5 +1,3 @@
-export const GOOGLE_TAG_MANAGER_ID = "GTM-MGJJLRNH";
-
 export const RETENTION_GROWTH_EVENTS = {
   profileCompletenessViewed: "profile_completeness_viewed",
   profileCompletenessItemClicked: "profile_completeness_item_clicked",

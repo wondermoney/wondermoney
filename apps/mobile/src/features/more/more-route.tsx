@@ -34,18 +34,14 @@ export function MoreRoute() {
       appInfo={appInfo}
       email={profile.data?.profile.emailAddress}
       onLogout={signOut}
-      onOpenBudgets={() => router.push('/budgets' as unknown as Href)}
-      onOpenLoans={() => router.push('/loans' as unknown as Href)}
-      onOpenProfile={() => router.push('/settings/profile' as unknown as Href)}
-      onOpenBankConnections={() => router.push('/more/banking' as unknown as Href)}
-      onOpenGoals={() => router.push('/goals' as unknown as Href)}
+      onOpenAccountsOverview={() => router.push('/accounts' as unknown as Href)}
+      onOpenTransactions={() => router.push('/accounts/transactions' as unknown as Href)}
+      onOpenRecurring={() => router.push('/accounts/recurring' as unknown as Href)}
+      onOpenSettings={() => router.push('/settings/profile' as unknown as Href)}
       onOpenMarkets={() => router.push('/markets' as unknown as Href)}
+      onOpenLoans={() => router.push('/loans' as unknown as Href)}
+      onOpenGoals={() => router.push('/goals' as unknown as Href)}
       onOpenReports={() => router.push('/reports' as unknown as Href)}
-      onOpenPreferences={() => router.push('/settings/preferences' as unknown as Href)}
-      onOpenCategories={() => router.push('/settings/categories' as unknown as Href)}
-      onOpenHousehold={() => router.push('/settings/household' as unknown as Href)}
-      onOpenNotifications={() => router.push('/settings/notifications' as unknown as Href)}
-      onOpenSecurity={() => router.push('/settings/security' as unknown as Href)}
       onOpenHelp={() => openApprovedExternal(externalDestinations.help)}
       {...(onHostedServer ? hostedOnlyActions(appInfo) : {})}
     />

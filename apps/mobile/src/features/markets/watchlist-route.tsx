@@ -17,7 +17,8 @@ function resolveWatchlistState(
 ): WatchlistScreenState {
   if (watchlist.isAccessTransition) return { status: 'access-transition' }
   if (watchlist.data) {
-    const rows = buildWatchlistRows(watchlist.data.symbols, quoteResults)
+    const logos = watchlist.data.items ? new Map(watchlist.data.items.map((item) => [item.symbol, item.logoUrl])) : undefined
+    const rows = buildWatchlistRows(watchlist.data.symbols, quoteResults, logos)
     return rows.length === 0 ? { status: 'empty' } : { status: 'loaded', rows }
   }
   if (watchlist.isLoading) return { status: 'loading' }
@@ -64,6 +65,7 @@ export function WatchlistRoute() {
         if (router.canGoBack()) router.back()
         else router.replace('/markets' as Href)
       }}
+      onOpenExplorer={() => router.replace('/markets' as Href)}
       onRetry={() => { void watchlist.refetch() }}
       onSelectSymbol={(symbol) => router.push({ pathname: '/markets/[symbol]', params: { symbol } })}
       onRemove={(symbol) => removeMutation.mutate(symbol)}

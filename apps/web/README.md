@@ -33,7 +33,8 @@ Environment variable names:
 - `NEXT_PUBLIC_TAWK_HASH`
 - `NEXT_PUBLIC_TAWK_PROPERTY_ID`
 - `NEXT_PUBLIC_TAWK_WIDGET_ID`
-- `NEXT_PUBLIC_POSTHOG_KEY`
+- `NEXT_PUBLIC_POSTHOG_KEY` and `NEXT_PUBLIC_GTM_ID` (optional: each turns on its tracker;
+  unset, none loads)
 - `NEXT_PUBLIC_RECAPTCHA_SITE_KEY`
 - `RECAPTCHA_SECRET_KEY`
 

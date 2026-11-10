@@ -1,17 +1,25 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { ScrollView, StyleSheet, Text, View } from 'react-native'
-import { SafeAreaView } from 'react-native-safe-area-context'
+import { Pressable, ScrollView, StyleSheet, View } from 'react-native'
 
-import { BackControl } from '@/components/ui/back-control'
-import { PageHeader } from '@/components/ui/page-header'
+import { AmountEntry } from '@/components/ui/amount-entry'
+import { DateField } from '@/components/ui/date-field'
+import { assetMark, EntityMark } from '@/components/ui/entity-mark'
+import { FormBar } from '@/components/ui/form-bar'
+import { FormGroup, FormRow, FormRowNote, FormSelectRow, FormTextRow } from '@/components/ui/form-row'
+import { Notice } from '@/components/ui/notice'
+import { SafeAreaView } from '@/components/ui/screen-safe-area'
+import { SegmentedControl } from '@/components/ui/segmented-control'
+import { Text } from '@/components/ui/text'
+import type { TickerSearchResultDto } from '@/features/markets/markets-contract'
+import { useTickerSearch } from '@/features/markets/use-ticker-search'
 import { formatCategoryName } from '@/lib/formatters/category-name'
+import { toWireDecimalInput } from '@/lib/formatters/decimal-input'
 import { themeTokens } from '@/theme/tokens'
-import { textStyles } from '@/theme/typography'
+import { usePalette } from '@/theme/use-palette'
 
 import type { PortfolioCurrencyDto, PortfolioTransactionTypeDto } from './portfolios-contract'
-import { PortfolioButton, PortfolioChoice, PortfolioField, type PortfolioPalette } from './portfolio-form-parts'
-import { PortfolioTickerSearchField } from './portfolio-ticker-search-field'
+import type { PortfolioPalette } from './portfolio-form-parts'
 import type { CreatePortfolioTransactionFailure } from './use-create-portfolio-transaction'
 
 const localToday = () => {
@@ -65,122 +73,190 @@ export type PortfolioTransactionCreateScreenProps = Readonly<{
   onCreate: (draft: PortfolioTransactionCreateDraftState) => Promise<void>
 }>
 
+const SEGMENT_TYPES = new Set(['BUY', 'SELL'])
+
 /**
- * Manual BUY/SELL transaction entry. Mirrors web's PortfolioTransactionAddModal field
- * set minus broker/fee/original-currency (mobile-scoped, same rationale as the edit form), and
- * deliberately never offers DIVIDEND as a type — the screen only ever receives the already-filtered
- * transactionTypes list from its route.
+ * Manual BUY/SELL transaction entry, as a calm-structure flow: the form bar
+ * (close, save), the unit price big and centred, Buy | Sell, then one group
+ * of rows. Mirrors web's PortfolioTransactionAddModal field set minus
+ * broker/fee/original-currency (mobile-scoped, same rationale as the edit
+ * form), and never offers DIVIDEND as a type: the route passes the
+ * already-filtered transactionTypes list.
  */
 export function PortfolioTransactionCreateScreen({ transactionTypes, currencies, defaultCurrencyId, loading, metadataError, pending, outcome, palette, onBack, onCreate }: PortfolioTransactionCreateScreenProps) {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
+  const locale = i18n.resolvedLanguage ?? i18n.language ?? 'en'
   const [assetSymbol, setAssetSymbol] = useState('')
-  const [financialTransactionTypeId, setFinancialTransactionTypeId] = useState<number | null>(null)
+  // Buy is chosen up front, as Expense is on Add transaction. The types can
+  // arrive after the first render, so the default is derived (BUY by name,
+  // else the first type) until the person picks one.
+  const [chosenTypeId, setFinancialTransactionTypeId] = useState<number | null>(null)
+  const defaultType = transactionTypes.find((type) => type.name.toUpperCase() === 'BUY') ?? transactionTypes[0]
+  const financialTransactionTypeId = chosenTypeId ?? defaultType?.financialTransactionTypeKey ?? null
   const [settlementCurrencyId, setSettlementCurrencyId] = useState<number | null>(defaultCurrencyId)
   const [quantity, setQuantity] = useState('')
   const [unitPrice, setUnitPrice] = useState('')
   const [transactionDate, setTransactionDate] = useState(localToday)
   const [notes, setNotes] = useState('')
-  const [submitted, setSubmitted] = useState(false)
   const locked = pending
 
   if (loading) return <StatePage palette={palette} title={t('portfolioTransactionCreate.loading')} onBack={onBack} progress />
   if (metadataError) return <StatePage palette={palette} title={t('portfolioTransactionCreate.metadataError')} onBack={onBack} />
 
-  // Re-derived from current state on every render (not stored separately) so
-  // a field's error clears the moment it's fixed, not only on the next
-  // submit — but only once a first submit attempt has happened.
-  const draftFields = { assetSymbol, financialTransactionTypeId, settlementCurrencyId, quantity, unitPrice, transactionDate }
-  const shown = submitted ? invalidFields(draftFields) : new Set<TransactionField>()
+  // Re-derived on every render. A field not filled yet only keeps the ✓
+  // disabled; an error shows under a row for what was entered and is wrong.
+  // Numbers are read in the app's language ("1.234,56" in pt and es) and kept as dot decimals.
+  const decimal = (value: string) => toWireDecimalInput(value, locale)
+  const draft = { assetSymbol, financialTransactionTypeId, settlementCurrencyId, quantity: decimal(quantity), unitPrice: decimal(unitPrice), transactionDate }
+  const invalid = invalidFields(draft)
+  const ready = invalid.size === 0
+  const quantityError = quantity.trim() !== '' && invalid.has('quantity') ? t('portfolioTransactionCreate.fieldErrors.quantity') : null
+  const unitPriceError = unitPrice.trim() !== '' && invalid.has('unitPrice') ? t('portfolioTransactionCreate.fieldErrors.unitPrice') : null
+  const dateError = transactionDate.trim() !== '' && invalid.has('date') ? t('portfolioTransactionCreate.fieldErrors.date') : undefined
+  const currency = currencies.find((item) => item.currencyKey === settlementCurrencyId) ?? null
+  const typeLabel = (type: PortfolioTransactionTypeDto) => t(`portfolioTransactionCreate.types.${type.name.toUpperCase()}`, { defaultValue: formatCategoryName(type.name) })
 
-  const submit = async () => {
-    setSubmitted(true)
-    const fields = invalidFields(draftFields)
-    if (fields.size > 0) return
-    await onCreate({ assetSymbol, financialTransactionTypeId, notes, quantity, settlementCurrencyId, transactionDate, unitPrice })
+  // Buy | Sell are the segmented control; any other type (deposit, withdrawal,
+  // offer…) is chosen from a Type row, so no segment label ever has to break.
+  const segmentTypes = transactionTypes.filter((type) => SEGMENT_TYPES.has(type.name.toUpperCase()))
+  const showTypeRow = transactionTypes.length > 1 && segmentTypes.length < transactionTypes.length
+
+  const submit = () => {
+    if (!ready || locked) return
+    void onCreate({ ...draft, notes })
   }
 
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: palette.background }]}>
+      <FormBar
+        closeDisabled={locked}
+        closeLabel={t('common.close')}
+        onClose={onBack}
+        onSave={submit}
+        saveDisabled={!ready || locked}
+        saveLabel={pending ? t('portfolioTransactionCreate.saving') : t('portfolioTransactionCreate.save')}
+        saving={pending}
+        title={t('portfolioTransactionCreate.title')}
+      />
       <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
         <View style={styles.page}>
-          <BackControl fallback="/portfolio" label={t('portfolioTransactionCreate.back')} onPress={onBack} disabled={locked} />
-          <View style={styles.heading}>
-            <PageHeader palette={palette}
-            instruction={t('portfolioTransactionCreate.helper')} title={t('portfolioTransactionCreate.title')} />
-          </View>
-
-          <View style={styles.form}>
-            <View style={styles.field}>
-              <Text style={[styles.label, { color: palette.foreground }]}>{t('portfolioTransactionCreate.type')} *</Text>
-              <View accessibilityRole="radiogroup" accessibilityLabel={t('portfolioTransactionCreate.type')} style={styles.options}>
-                {transactionTypes.map((type) => (
-                  <PortfolioChoice
-                    key={type.financialTransactionTypeKey}
-                    label={t(`portfolioTransactionCreate.types.${type.name.toUpperCase()}`, { defaultValue: formatCategoryName(type.name) })}
-                    selected={financialTransactionTypeId === type.financialTransactionTypeKey}
-                    onPress={() => setFinancialTransactionTypeId(type.financialTransactionTypeKey)}
-                    palette={palette}
-                    disabled={locked}
-                  />
-                ))}
-              </View>
-              {shown.has('type') ? <Text accessibilityRole="alert" style={[styles.fieldError, { color: palette.destructiveText }]}>{t('portfolioTransactionCreate.fieldErrors.type')}</Text> : null}
-            </View>
-
-            {assetSymbol ? (
-              <View style={styles.field}>
-                <Text style={[styles.label, { color: palette.foreground }]}>{t('portfolioTransactionCreate.asset')} *</Text>
-                <View style={[styles.selectedAsset, { borderColor: palette.border, backgroundColor: palette.muted }]}>
-                  <Text accessibilityLabel={`${t('portfolioTransactionCreate.asset')}: ${assetSymbol}`} style={[styles.selectedAssetText, { color: palette.foreground }]}>{assetSymbol}</Text>
-                  <PortfolioButton label={t('portfolioTransactionCreate.changeAsset')} onPress={() => setAssetSymbol('')} palette={palette} secondary disabled={locked} />
-                </View>
-              </View>
-            ) : (
-              <View style={styles.field}>
-                <PortfolioTickerSearchField
-                  label={`${t('portfolioTransactionCreate.asset')} *`}
-                  palette={palette}
-                  disabled={locked}
-                  onSelect={(result) => setAssetSymbol(result.symbol)}
-                />
-                {shown.has('asset') ? <Text accessibilityRole="alert" style={[styles.fieldError, { color: palette.destructiveText }]}>{t('portfolioTransactionCreate.fieldErrors.asset')}</Text> : null}
-              </View>
-            )}
-
-            <PortfolioField label={t('portfolioTransactionCreate.quantity')} value={quantity} onChange={setQuantity} palette={palette} maxLength={20} required disabled={locked} keyboardType="decimal-pad" invalid={shown.has('quantity')} errorText={shown.has('quantity') ? t('portfolioTransactionCreate.fieldErrors.quantity') : undefined} />
-            <PortfolioField label={t('portfolioTransactionCreate.unitPrice')} value={unitPrice} onChange={setUnitPrice} palette={palette} maxLength={20} required disabled={locked} keyboardType="decimal-pad" invalid={shown.has('unitPrice')} errorText={shown.has('unitPrice') ? t('portfolioTransactionCreate.fieldErrors.unitPrice') : undefined} />
-            <PortfolioField label={t('portfolioTransactionCreate.transactionDate')} value={transactionDate} onChange={setTransactionDate} palette={palette} maxLength={10} required disabled={locked} invalid={shown.has('date')} errorText={shown.has('date') ? t('portfolioTransactionCreate.fieldErrors.date') : undefined} />
-
-            <View style={styles.field}>
-              <Text style={[styles.label, { color: palette.foreground }]}>{t('portfolioTransactionCreate.currency')} *</Text>
-              <View accessibilityRole="radiogroup" accessibilityLabel={t('portfolioTransactionCreate.currency')} style={styles.options}>
-                {currencies.map((currency) => (
-                  <PortfolioChoice
-                    key={currency.currencyKey}
-                    compact
-                    label={`${currency.code} · ${currency.description}`}
-                    visibleLabel={currency.code}
-                    selected={settlementCurrencyId === currency.currencyKey}
-                    onPress={() => setSettlementCurrencyId(currency.currencyKey)}
-                    palette={palette}
-                    disabled={locked}
-                  />
-                ))}
-              </View>
-              {shown.has('currency') ? <Text accessibilityRole="alert" style={[styles.fieldError, { color: palette.destructiveText }]}>{t('portfolioTransactionCreate.fieldErrors.currency')}</Text> : null}
-            </View>
-
-            <PortfolioField label={t('portfolioTransactionCreate.notesOptional')} value={notes} onChange={setNotes} palette={palette} maxLength={1000} multiline disabled={locked} />
-
-          </View>
+          <AmountEntry
+            accessibilityLabel={t('portfolioTransactionCreate.unitPrice')}
+            caption={t('portfolioTransactionCreate.unitPrice')}
+            currency={currency?.code ?? null}
+            editable={!locked}
+            error={unitPriceError}
+            locale={locale}
+            onChangeText={setUnitPrice}
+            value={unitPrice}
+          />
+          {segmentTypes.length > 1 ? (
+            <SegmentedControl
+              accessibilityLabel={t('portfolioTransactionCreate.type')}
+              fill
+              onChange={(value) => { if (!locked) setFinancialTransactionTypeId(Number(value)) }}
+              options={segmentTypes.map((type) => ({ value: String(type.financialTransactionTypeKey), label: typeLabel(type) }))}
+              value={String(financialTransactionTypeId)}
+            />
+          ) : null}
+          <FormGroup>
+            {showTypeRow ? (
+              <FormSelectRow
+                key="type"
+                accessibilityLabel={t('portfolioTransactionCreate.type')}
+                disabled={locked}
+                label={t('transactionCreate.typeShort')}
+                onChange={setFinancialTransactionTypeId}
+                options={transactionTypes.map((type) => ({ value: type.financialTransactionTypeKey, label: typeLabel(type) }))}
+                placeholder={t('transactionCreate.choose')}
+                sheetTitle={t('portfolioTransactionCreate.type')}
+                value={financialTransactionTypeId}
+              />
+            ) : null}
+            <AssetRow key="asset" disabled={locked} label={t('portfolioTransactionCreate.asset')} onChange={setAssetSymbol} symbol={assetSymbol} />
+            <FormTextRow key="quantity" editable={!locked} error={quantityError} keyboardType="decimal-pad" label={t('portfolioTransactionCreate.quantity')} maxLength={20} onChangeText={setQuantity} placeholder="0" value={quantity} />
+            <FormSelectRow
+              key="currency"
+              disabled={locked}
+              label={t('portfolioTransactionCreate.currency')}
+              onChange={setSettlementCurrencyId}
+              options={currencies.map((item) => ({ value: item.currencyKey, label: `${item.code} · ${item.description}` }))}
+              placeholder={t('transactionCreate.choose')}
+              value={settlementCurrencyId}
+            />
+            <DateField key="date" appearance="row" disabled={locked} error={dateError} label={t('portfolioTransactionCreate.transactionDate')} maximumDate={localToday()} onChange={(value) => setTransactionDate(value ?? '')} value={transactionDate || null} />
+            <FormTextRow key="notes" accessibilityLabel={t('portfolioTransactionCreate.notesOptional')} editable={!locked} label={t('transactionCreate.note')} maxLength={1000} multiline onChangeText={setNotes} placeholder={t('transactionCreate.optional')} value={notes} />
+          </FormGroup>
+          {outcome ? <Notice message={t(`portfolioTransactionCreate.failures.${outcome}`)} tone="destructive" /> : null}
         </View>
       </ScrollView>
-
-      <View style={[styles.footer, { borderTopColor: palette.border, backgroundColor: palette.background }]}>
-        {outcome ? <Text accessibilityRole="alert" style={[styles.alert, { color: palette.destructiveText }]}>{t(`portfolioTransactionCreate.failures.${outcome}`)}</Text> : null}
-        <PortfolioButton label={pending ? t('portfolioTransactionCreate.saving') : t('portfolioTransactionCreate.save')} onPress={submit} palette={palette} disabled={locked} busy={pending} />
-      </View>
     </SafeAreaView>
+  )
+}
+
+/**
+ * The asset as a row: a search the person types into, its matches listed
+ * under it, and once one is picked, a row showing it (tap to change).
+ */
+function AssetRow({ label, symbol, onChange, disabled }: { label: string; symbol: string; onChange: (symbol: string) => void; disabled: boolean }) {
+  const { t } = useTranslation()
+  const [query, setQuery] = useState('')
+  const search = useTickerSearch(symbol ? '' : query)
+  const trimmed = query.trim()
+  const results = search.data?.results ?? []
+
+  if (symbol) {
+    return (
+      <FormRow
+        disabled={disabled}
+        hint={t('portfolioTransactionCreate.changeAsset')}
+        label={label}
+        onPress={() => onChange('')}
+        value={symbol}
+        valueLeading={<EntityMark {...assetMark(symbol, null)} size="sm" />}
+      />
+    )
+  }
+  return (
+    <View>
+      <FormTextRow
+        autoCapitalize="characters"
+        autoCorrect={false}
+        editable={!disabled}
+        label={label}
+        onChangeText={setQuery}
+        placeholder={t('portfolioTickerSearch.placeholder')}
+        value={query}
+      />
+      {trimmed.length > 0 && search.isFetching ? <Text accessibilityLabel={t('portfolioTickerSearch.searching')} accessibilityRole="progressbar" style={styles.note} tone="muted" variant="meta">{t('portfolioTickerSearch.searching')}</Text> : null}
+      {trimmed.length > 0 && !search.isFetching && results.length === 0 ? <FormRowNote>{t('portfolioTickerSearch.noResults')}</FormRowNote> : null}
+      {results.map((result: TickerSearchResultDto) => (
+        <AssetResult key={`${result.symbol}-${result.exchange ?? ''}`} disabled={disabled} onPress={() => { setQuery(''); onChange(result.symbol) }} result={result} />
+      ))}
+    </View>
+  )
+}
+
+function AssetResult({ result, onPress, disabled }: { result: TickerSearchResultDto; onPress: () => void; disabled: boolean }) {
+  const palette = usePalette()
+  const [focused, setFocused] = useState(false)
+  return (
+    <Pressable
+      accessibilityLabel={[result.name, result.symbol, result.exchange].filter(Boolean).join(', ')}
+      accessibilityRole="button"
+      accessibilityState={{ disabled }}
+      disabled={disabled}
+      onBlur={() => setFocused(false)}
+      onFocus={() => setFocused(true)}
+      onPress={onPress}
+      style={({ pressed }) => [styles.result, pressed && { backgroundColor: palette.muted }, focused && [styles.focused, { borderColor: palette.ring }], disabled && styles.disabled]}
+    >
+      <EntityMark {...assetMark(result.symbol, null)} size="sm" />
+      <View style={styles.resultText}>
+        <Text numberOfLines={1} variant="bodyStrong">{result.symbol}{result.exchange ? ` · ${result.exchange}` : ''}</Text>
+        {result.name ? <Text numberOfLines={1} tone="muted" variant="meta">{result.name}</Text> : null}
+      </View>
+    </Pressable>
   )
 }
 
@@ -188,9 +264,9 @@ function StatePage({ palette, title, onBack, progress = false }: { palette: Port
   const { t } = useTranslation()
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: palette.background }]}>
+      <FormBar closeLabel={t('common.close')} onClose={onBack} title={t('portfolioTransactionCreate.title')} />
       <View style={styles.state}>
-        <BackControl fallback="/portfolio" label={t('portfolioTransactionCreate.back')} onPress={onBack} />
-        <Text accessibilityRole={progress ? 'progressbar' : 'alert'} style={[styles.helper, { color: palette.foreground }]}>{title}</Text>
+        <Text accessibilityRole={progress ? 'progressbar' : 'alert'} tone={progress ? 'muted' : 'default'} variant="meta">{title}</Text>
       </View>
     </SafeAreaView>
   )
@@ -198,18 +274,13 @@ function StatePage({ palette, title, onBack, progress = false }: { palette: Port
 
 const styles = StyleSheet.create({
   safe: { flex: 1 },
-  footer: { borderTopWidth: StyleSheet.hairlineWidth * 2, padding: themeTokens.layout.screenPadding, gap: themeTokens.spacing[2] },
-  content: { flexGrow: 1, padding: themeTokens.layout.screenPadding },
-  page: { width: '100%', maxWidth: 680, alignSelf: 'center', gap: themeTokens.layout.blockGap },
-  heading: { gap: themeTokens.spacing[1] },
-  helper: { ...textStyles.body },
-  form: { gap: themeTokens.spacing[4] },
-  field: { gap: themeTokens.spacing[2] },
-  label: { ...textStyles.bodyStrong, fontWeight: '600' as const },
-  options: { flexDirection: 'row', flexWrap: 'wrap', gap: themeTokens.spacing[2] },
-  selectedAsset: { minHeight: themeTokens.touchTarget.minimum, flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: themeTokens.spacing[2], borderWidth: 1, borderRadius: themeTokens.radius.md, padding: themeTokens.spacing[3] },
-  selectedAssetText: { ...textStyles.amount },
-  alert: { ...textStyles.body },
-  fieldError: { ...textStyles.amountSmall },
-  state: { flex: 1, justifyContent: 'center', alignItems: 'flex-start', padding: themeTokens.layout.screenPadding, gap: themeTokens.spacing[5] },
+  content: { flexGrow: 1, paddingHorizontal: themeTokens.layout.screenPadding, paddingBottom: themeTokens.spacing[10] },
+  page: { width: '100%', maxWidth: 720, alignSelf: 'center', gap: themeTokens.spacing[4] },
+  note: { paddingHorizontal: themeTokens.spacing[4], paddingBottom: themeTokens.spacing[3] },
+  result: { minHeight: themeTokens.touchTarget.minimum + themeTokens.spacing[2], flexDirection: 'row', alignItems: 'center', gap: themeTokens.spacing[3], paddingHorizontal: themeTokens.spacing[4], paddingVertical: themeTokens.spacing[2] },
+  resultText: { flex: 1, minWidth: 0 },
+  // Focus draws inside the row so the group's hairlines don't move.
+  focused: { borderWidth: 2, borderRadius: themeTokens.radius.xl },
+  disabled: { opacity: 0.5 },
+  state: { flex: 1, alignItems: 'flex-start', padding: themeTokens.layout.screenPadding },
 })

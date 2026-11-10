@@ -1,0 +1,13 @@
+# Matches of leak-patterns.txt that are not leaks. Perl-compatible regular expressions, one per
+# line; an entry must match the whole matched text. Keep entries narrow: prefer changing the
+# source (an RFC 5737 address, a neutral name) to adding one here.
+
+# Unspecified, loopback, private (RFC 1918) and documentation (RFC 5737) IPv4 addresses.
+0\.0\.0\.0
+127\.\d+\.\d+\.\d+
+10\.\d+\.\d+\.\d+
+172\.(1[6-9]|2[0-9]|3[01])\.\d+\.\d+
+192\.168\.\d+\.\d+
+192\.0\.2\.\d+
+198\.51\.100\.\d+
+203\.0\.113\.\d+

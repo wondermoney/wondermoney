@@ -6,8 +6,10 @@ import { classifyAppError } from "@/lib/errors/app-error";
 
 import {
   getApiErrorCode,
+  isAiAllowanceExhaustedError,
   isBankCredentialInvalidError,
   isDemoReadOnlyError,
+  isEmailVerificationRequiredError,
   isHouseholdOwnerRequiredError,
 } from "./errors";
 
@@ -62,4 +64,22 @@ test("classifies a 403 as auth and a 401 as auth", () => {
 test("detects invalid bank credentials, which need a reconnect not a retry", () => {
   assert.equal(isBankCredentialInvalidError(forbidden("bank_credential_invalid")), true);
   assert.equal(isBankCredentialInvalidError(forbidden("not_found")), false);
+});
+
+test("detects an unverified email on an AI route, from axios or the chat transport", () => {
+  assert.equal(isEmailVerificationRequiredError(forbidden("email_verification_required")), true);
+  assert.equal(
+    isEmailVerificationRequiredError(new Error(JSON.stringify({ code: "email_verification_required", message: "Verify" }))),
+    true,
+  );
+  assert.equal(isEmailVerificationRequiredError(forbidden("demo_read_only")), false);
+  assert.equal(isEmailVerificationRequiredError(new Error("Failed to fetch")), false);
+  assert.equal(isEmailVerificationRequiredError(undefined), false);
+});
+
+test("detects a spent AI allowance, from axios or the chat transport", () => {
+  assert.equal(isAiAllowanceExhaustedError(forbidden("ai_allowance_exhausted")), true);
+  assert.equal(isAiAllowanceExhaustedError(new Error(JSON.stringify({ code: "ai_allowance_exhausted" }))), true);
+  assert.equal(isAiAllowanceExhaustedError(forbidden("email_verification_required")), false);
+  assert.equal(isAiAllowanceExhaustedError(new Error("Failed to fetch")), false);
 });

@@ -6,6 +6,12 @@ import type { ReportServiceInput } from '../report-filters';
 
 const mocks = vi.hoisted(() => ({ find: vi.fn() }));
 
+// The mocked EntityManager answers every query with the scenario's rows; the household has made no
+// "counts as spending" choices.
+vi.mock('@service/transaction/category-spending', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@service/transaction/category-spending')>();
+  return { ...actual, loadCategorySpendingFlags: () => Promise.resolve(new actual.CategorySpendingFlags()) };
+});
 vi.mock('@app/database/di', () => ({
   DI: { em: { find: mocks.find } },
 }));
@@ -37,7 +43,7 @@ describe('getBudgetVsActualReport covered months', () => {
     ({
       filters: { includePending: false, includeTransfers: false, timezone: REPORT_DEFAULT_TIME_ZONE, ...overrides },
       tenant: { tenantKey: 113 },
-      user: { appuserKey: 71 },
+      user: { appuserKey: 71, currencyKey: { code: 'EUR' } },
     }) as unknown as ReportServiceInput;
 
   /** One budget, one template per `[year, month]`, and no transactions. */
@@ -50,10 +56,9 @@ describe('getBudgetVsActualReport covered months', () => {
       year,
     }));
     mocks.find
-      .mockResolvedValueOnce([{ budgetKey: 1 }]) // budgets
+      .mockResolvedValueOnce([{ budgetKey: 1, currencyKey: { code: 'EUR' } }]) // budgets
       .mockResolvedValueOnce(templates) // templates
-      .mockResolvedValueOnce([]) // transactions
-      .mockResolvedValueOnce([]); // loan repayment links
+      .mockResolvedValueOnce([]); // transactions
   };
 
   beforeEach(() => {
@@ -65,7 +70,7 @@ describe('getBudgetVsActualReport covered months', () => {
     // of `fromDate` started the covered set in July and paid out July's budget.
     givenTemplatesFor([2026, 7], [2026, 8]);
 
-    const rows = await getBudgetVsActualReport(
+    const { data: rows } = await getBudgetVsActualReport(
       makeInput({ fromDate: '2026-07-31T23:00:00.000Z', timezone: 'Europe/Lisbon', toDate: '2026-08-31T22:59:59.999Z' }),
     );
 
@@ -78,7 +83,7 @@ describe('getBudgetVsActualReport covered months', () => {
     // silently drop every month before October.
     givenTemplatesFor([2026, 9]);
 
-    const rows = await getBudgetVsActualReport(
+    const { data: rows } = await getBudgetVsActualReport(
       makeInput({ fromDate: '2026-08-31T23:00:00.000Z', timezone: 'Europe/Lisbon', toDate: '2026-09-30T22:59:59.999Z' }),
     );
 
@@ -88,7 +93,7 @@ describe('getBudgetVsActualReport covered months', () => {
   it('covers every month spanned by a range that crosses a year boundary', async () => {
     givenTemplatesFor([2026, 12], [2027, 1]);
 
-    const rows = await getBudgetVsActualReport(
+    const { data: rows } = await getBudgetVsActualReport(
       makeInput({ fromDate: '2026-11-30T23:00:00.000Z', timezone: 'Europe/Lisbon', toDate: '2027-01-31T22:59:59.999Z' }),
     );
 
@@ -98,7 +103,7 @@ describe('getBudgetVsActualReport covered months', () => {
   it('falls back to the default calendar rather than throwing on an unusable timezone', async () => {
     givenTemplatesFor([2026, 7], [2026, 8]);
 
-    const rows = await getBudgetVsActualReport(
+    const { data: rows } = await getBudgetVsActualReport(
       makeInput({ fromDate: '2026-07-31T23:00:00.000Z', timezone: 'Middle/Earth', toDate: '2026-08-31T22:59:59.999Z' }),
     );
 
@@ -108,7 +113,7 @@ describe('getBudgetVsActualReport covered months', () => {
   it('returns an empty dataset when no template overlaps the period', async () => {
     givenTemplatesFor([2025, 3]);
 
-    const rows = await getBudgetVsActualReport(
+    const { data: rows } = await getBudgetVsActualReport(
       makeInput({ fromDate: '2026-07-31T23:00:00.000Z', timezone: 'Europe/Lisbon', toDate: '2026-08-31T22:59:59.999Z' }),
     );
 

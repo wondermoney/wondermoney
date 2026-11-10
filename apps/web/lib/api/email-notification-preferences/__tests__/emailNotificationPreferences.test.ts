@@ -33,6 +33,10 @@ const response: EmailNotificationPreferencesResponse = {
     storedEnabled: true,
     effectiveEnabled: true,
   },
+  bankSyncAlerts: {
+    storedEnabled: true,
+    effectiveEnabled: true,
+  },
   marketingOptOut: false,
 };
 

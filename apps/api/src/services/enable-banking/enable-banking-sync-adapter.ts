@@ -80,7 +80,8 @@ import { enableBankingCredentialService } from './enable-banking-credential.serv
  * hash is computed from the unsigned amount and a frozen indicator mapping (`CRDT`→`credit`,
  * `DBTR`→`debit`, `DBIT` passed through), and it is stored in `enableBankingTransactionId`.
  * `stableIdFields` carries exactly those inputs so the hash, and with it the identity of every
- * row already ingested, does not change.
+ * row already ingested, does not change. A second row with identical content in the same fetch is
+ * stored as `<hash>:1`, a third as `<hash>:2` (`withStableIdOccurrences`); the first keeps the bare hash.
  *
  * **`credit_debit_indicator` caveat (flag for live verification):** the existing
  * `account-initial-sync-transaction.service.ts#resolveType` does

@@ -4,11 +4,11 @@ import {
   type UseQueryOptions,
 } from "@tanstack/react-query";
 import type { AxiosInstance } from "axios";
-import { format } from "date-fns";
 
 import type { SupportedCurrencyCodes } from "@/lib/utils/currencySymbol";
 
 import api from "../api";
+import { transactionDateRangeParams } from "../date-range";
 
 export interface AccountMetrics {
   type: "inflow" | "outflow";
@@ -39,14 +39,11 @@ export type GetAccountsMetricsResponse = {
   metrics: AccountMetrics[];
 };
 
-async function getAccountsMetrics(
+export async function getAccountsMetrics(
   params: GetAccountsMetricsRequest,
   apiClient: AxiosInstance = api,
 ): Promise<GetAccountsMetricsResponse> {
-  const _params = {
-    ...(params.fromDate && { fromDate: format(params.fromDate, "yyyy-MM-dd") }),
-    ...(params.toDate && { toDate: format(params.toDate, "yyyy-MM-dd") }),
-  };
+  const _params = transactionDateRangeParams(params);
   const { data } = await apiClient.get<GetAccountsMetricsResponse>(
     "/v1/account/metrics",
     {

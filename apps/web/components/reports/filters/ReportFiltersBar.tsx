@@ -18,6 +18,7 @@ import {
 import useAccounts from "@/lib/api/account/useAccounts";
 import useTransactionMerchants from "@/lib/api/account/useTransactionMerchants";
 import useCategories from "@/lib/api/category/useCategories";
+import useTags from "@/lib/api/tag/useTags";
 import { cn } from "@/lib/utils";
 import {
   getCategoryTranslationKey,
@@ -29,6 +30,7 @@ import { CategoryMultiSelect } from "./CategoryMultiSelect";
 import { CurrencySelect } from "./CurrencySelect";
 import { DateRangePicker } from "./DateRangePicker";
 import { MerchantMultiSelect } from "./MerchantMultiSelect";
+import { TagMultiSelect } from "./TagMultiSelect";
 import { useReportFilters } from "./useReportFilters";
 
 interface ReportFiltersBarProps {
@@ -41,6 +43,7 @@ export function ReportFiltersBar({ className }: ReportFiltersBarProps) {
   const { data: accountsData } = useAccounts();
   const { data: categoriesData } = useCategories();
   const { data: merchantsData } = useTransactionMerchants();
+  const { data: tagsData } = useTags();
 
   const accounts = useMemo(
     () =>
@@ -73,6 +76,16 @@ export function ReportFiltersBar({ className }: ReportFiltersBarProps) {
     [merchantsData],
   );
 
+  const tags = useMemo(
+    () =>
+      (tagsData?.tags ?? []).map((tag) => ({
+        key: tag.tagKey.toString(),
+        name: tag.name,
+        color: tag.color,
+      })),
+    [tagsData],
+  );
+
   const currencies = useMemo(() => {
     const codes = new Set(
       (accountsData?.accounts ?? []).map((account) => account.currencyKey.code),
@@ -88,6 +101,7 @@ export function ReportFiltersBar({ className }: ReportFiltersBarProps) {
     setAccountKeys,
     setCategoryKeys,
     setMerchantKeys,
+    setTagKeys,
     setCurrencyKey,
     setIncludePending,
     setIncludeTransfers,
@@ -104,9 +118,9 @@ export function ReportFiltersBar({ className }: ReportFiltersBarProps) {
           control is also labelled now; the currency select in particular read
           as a bare "Select…". */}
       <div className="flex flex-col gap-4">
-        <div className="flex flex-col gap-1.5">
+        <div className="flex flex-col gap-2">
           <Label className="text-muted-foreground text-xs font-medium">
-            {tRoot("navigation.accounts")}
+            {t("accounts")}
           </Label>
           <AccountMultiSelect
             accounts={accounts}
@@ -114,9 +128,9 @@ export function ReportFiltersBar({ className }: ReportFiltersBarProps) {
             onChange={setAccountKeys}
           />
         </div>
-        <div className="flex flex-col gap-1.5">
+        <div className="flex flex-col gap-2">
           <Label className="text-muted-foreground text-xs font-medium">
-            {tRoot("navigation.categories")}
+            {t("categories")}
           </Label>
           <CategoryMultiSelect
             categories={categories}
@@ -124,9 +138,9 @@ export function ReportFiltersBar({ className }: ReportFiltersBarProps) {
             onChange={setCategoryKeys}
           />
         </div>
-        <div className="flex flex-col gap-1.5">
+        <div className="flex flex-col gap-2">
           <Label className="text-muted-foreground text-xs font-medium">
-            {tRoot("merchant")}
+            {t("merchants")}
           </Label>
           <MerchantMultiSelect
             merchants={merchants}
@@ -134,9 +148,21 @@ export function ReportFiltersBar({ className }: ReportFiltersBarProps) {
             onChange={setMerchantKeys}
           />
         </div>
-        <div className="flex flex-col gap-1.5">
+        {tags.length > 0 || filters.tagKeys.length > 0 ? (
+          <div className="flex flex-col gap-2">
+            <Label className="text-muted-foreground text-xs font-medium">
+              {t("tags")}
+            </Label>
+            <TagMultiSelect
+              tags={tags}
+              selected={filters.tagKeys}
+              onChange={setTagKeys}
+            />
+          </div>
+        ) : null}
+        <div className="flex flex-col gap-2">
           <Label className="text-muted-foreground text-xs font-medium">
-            {tRoot("currency")}
+            {t("currency")}
           </Label>
           <CurrencySelect
             currencies={currencies}
@@ -205,6 +231,12 @@ export function ReportFiltersBar({ className }: ReportFiltersBarProps) {
       remove: () =>
         setMerchantKeys(filters.merchantKeys.filter((k) => k !== key)),
     })),
+    ...filters.tagKeys.map((key) => ({
+      id: `tag:${key}`,
+      label: tRoot("transactionTags.label"),
+      value: nameOf(tags, key),
+      remove: () => setTagKeys(filters.tagKeys.filter((k) => k !== key)),
+    })),
     ...(filters.currencyKey
       ? [
           {
@@ -247,12 +279,7 @@ export function ReportFiltersBar({ className }: ReportFiltersBarProps) {
             panel, not a dropdown. */}
         <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
           <SheetTrigger asChild>
-            <Button
-              variant="outline"
-              size="sm"
-              className="h-10 gap-2 sm:h-9"
-              aria-label={t("title")}
-            >
+            <Button variant="outline" aria-label={t("title")}>
               <Filter className="size-4" />
               {t("title")}
               {activeFilterCount > 0 && (
@@ -273,13 +300,7 @@ export function ReportFiltersBar({ className }: ReportFiltersBarProps) {
           </SheetContent>
         </Sheet>
 
-        <Button
-          variant="ghost"
-          size="sm"
-          className="h-10 gap-2 sm:h-9"
-          onClick={resetFilters}
-          aria-label={t("reset")}
-        >
+        <Button variant="ghost" onClick={resetFilters} aria-label={t("reset")}>
           <RotateCcw className="size-4" />
           <span className="hidden sm:inline">{t("reset")}</span>
         </Button>

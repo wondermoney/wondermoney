@@ -103,6 +103,7 @@ const BudgetOverviewTable: React.FC<BudgetOverviewTableProps> = ({
       columns={columns}
       data={data}
       meta={{ getRowStyles: (): CSSProperties => ({ height: 64 }) }}
+      variant="ledger"
     />
   );
 };

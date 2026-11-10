@@ -14,15 +14,14 @@ const data = { categories: [{ ...system, childCategory: [user] }] }
 const mockReplace = jest.fn()
 const mockRead = jest.fn()
 const mockMutate = jest.fn()
-const mockAddListener = jest.fn(() => jest.fn())
-const mockDispatch = jest.fn()
+const mockUsePreventRemove = jest.fn((_preventRemove: boolean, _onPrevented?: (options: { data: { action: object }; repeat: () => void }) => void) => jest.fn())
 let mockParam: string | string[] | undefined
 let mockGate: CategoryWriteGate | null = null
 let mockPending = false
 let mockDemoLocked = false
 let mockQuery = { data, isAccessTransition: false, isLoading: false, error: null as Error | null, refetch: jest.fn(async () => undefined) }
 
-jest.mock('expo-router', () => ({ useLocalSearchParams: () => ({ categoryId: mockParam }), useNavigation: () => ({ addListener: mockAddListener, dispatch: mockDispatch }), useRouter: () => ({ replace: mockReplace }) }))
+jest.mock('expo-router', () => ({ useLocalSearchParams: () => ({ categoryId: mockParam }), usePreventRemove: (preventRemove: boolean, onPrevented?: (options: { data: { action: object }; repeat: () => void }) => void) => mockUsePreventRemove(preventRemove, onPrevented), useRouter: () => ({ replace: mockReplace }) }))
 jest.mock('@/components/providers/product-runtime-provider', () => ({ useProductRuntime: () => ({ runtime: { epochId: 3, apiClient: { read: mockRead } } }) }))
 jest.mock('./use-categories', () => {
   const actual = jest.requireActual<typeof import('./use-categories')>('./use-categories')
@@ -91,21 +90,13 @@ describe('category management routes', () => {
   it('prevents stack departure while a write is pending and retains the dirty guard otherwise', async () => {
     mockPending = true
     const pending = await renderRoute(<CategoryCreateRoute />)
-    const pendingCall = mockAddListener.mock.calls.at(-1) as unknown as [string, (event: { preventDefault: jest.Mock; data: { action: object } }) => void]
-    const pendingListener = pendingCall[1]
-    const pendingEvent = { preventDefault: jest.fn(), data: { action: {} } }
-    pendingListener(pendingEvent)
-    expect(pendingEvent.preventDefault).toHaveBeenCalled()
+    expect(mockUsePreventRemove.mock.lastCall?.[0]).toBe(true)
     await pending.view.unmount(); pending.client.clear()
 
     mockPending = false
     const dirty = await renderRoute(<CategoryCreateRoute />)
     await fireEvent.press(dirty.view.getByRole('button', { name: 'Mark category dirty' }))
-    const dirtyCall = mockAddListener.mock.calls.at(-1) as unknown as [string, (event: { preventDefault: jest.Mock; data: { action: object } }) => void]
-    const dirtyListener = dirtyCall[1]
-    const dirtyEvent = { preventDefault: jest.fn(), data: { action: {} } }
-    dirtyListener(dirtyEvent)
-    expect(dirtyEvent.preventDefault).toHaveBeenCalled()
+    expect(mockUsePreventRemove.mock.lastCall?.[0]).toBe(true)
     await dirty.view.unmount(); dirty.client.clear()
   })
 

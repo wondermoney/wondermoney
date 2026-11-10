@@ -6,13 +6,17 @@ import { enqueueAccountAutoSyncRequisitionJob } from '../account-auto-sync.queue
 import { enqueueAccountCsvImportJob } from '../account-csv-import.queue';
 import { enqueueAccountInitialSyncJob } from '../account-initial-sync.queue';
 import { enqueueBankRecoveryAfter } from '../bank-recovery.queue';
+import { enqueueDataExportCleanupJob, enqueueDataExportJob } from '../data-export.queue';
+import { enqueueDataRestoreCleanupJob, enqueueDataRestoreJob } from '../data-restore.queue';
 import { enqueueDemoDataRefreshJob } from '../demo-data-refresh.queue';
 import { enqueueFinancialEmailCoordinator, enqueueFinancialEmailUser } from '../financial-emails.queue';
+import { enqueueFxReconvertJob } from '../fx-reconvert.queue';
 import { enqueueLifecycleSend } from '../lifecycle-send.queue';
 import { enqueuePortfolioCsvImportConfirmedJob } from '../portfolio-csv-import-confirmed.queue';
 import { enqueuePortfolioCsvParsePreviewJob } from '../portfolio-csv-parse-preview.queue';
 import { enqueuePortfolioSnapshotManualJob } from '../portfolio-snapshot.queue';
 import { enqueueFoundationJob } from '../queue';
+import { enqueueRuleApplyJob } from '../rule-apply.queue';
 import { enqueueTransactionEnrichmentGptJob } from '../transaction-enrichment.queue';
 
 /**
@@ -127,8 +131,28 @@ const ENQUEUE_HELPERS: { invoke: (recorder: Recorder) => Promise<unknown>; name:
     name: 'enqueueBankRecoveryAfter',
   },
   {
+    invoke: (r) => enqueueDataExportJob({ correlationId: 'user.data-export:1' }, asEnqueueDeps(r)),
+    name: 'enqueueDataExportJob',
+  },
+  {
+    invoke: (r) => enqueueDataExportCleanupJob({ correlationId: 'user.data-export:1' }, SCHEDULED_FOR, asEnqueueDeps(r)),
+    name: 'enqueueDataExportCleanupJob',
+  },
+  {
+    invoke: (r) => enqueueDataRestoreJob({ correlationId: 'user.data-restore:1', mode: 'validate' }, asEnqueueDeps(r)),
+    name: 'enqueueDataRestoreJob',
+  },
+  {
+    invoke: (r) => enqueueDataRestoreCleanupJob({ correlationId: 'user.data-restore:1' }, SCHEDULED_FOR, asEnqueueDeps(r)),
+    name: 'enqueueDataRestoreCleanupJob',
+  },
+  {
     invoke: (r) => Promise.resolve(enqueueDemoDataRefreshJob({ correlationId: 'demo-1' }, asEnqueueDeps(r))),
     name: 'enqueueDemoDataRefreshJob',
+  },
+  {
+    invoke: (r) => enqueueFxReconvertJob({ correlationId: 'fx.reconvert:exchange-rate.refresh:1' }, asEnqueueDeps(r)),
+    name: 'enqueueFxReconvertJob',
   },
   {
     invoke: (r) =>
@@ -169,6 +193,10 @@ const ENQUEUE_HELPERS: { invoke: (recorder: Recorder) => Promise<unknown>; name:
   {
     invoke: (r) => Promise.resolve(enqueuePortfolioSnapshotManualJob({ correlationId: 'corr-1', portfolioId: 9 }, asEnqueueDeps(r))),
     name: 'enqueuePortfolioSnapshotManualJob',
+  },
+  {
+    invoke: (r) => enqueueRuleApplyJob({ correlationId: 'rule.apply:1' }, asEnqueueDeps(r)),
+    name: 'enqueueRuleApplyJob',
   },
   {
     invoke: (r) =>

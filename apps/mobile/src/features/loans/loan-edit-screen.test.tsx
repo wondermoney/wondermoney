@@ -45,17 +45,42 @@ describe('loan metadata editor', () => {
   it('renders the widened financial fields pre-filled and saves an edited principal alongside the loan type', async () => {
     const save = jest.fn().mockResolvedValue(undefined)
     const { view } = await renderEditor({ onSaveLoan: save })
-    expect(view.getByLabelText('Loan type')).toBeOnTheScreen()
-    expect(view.getByRole('radio', { name: 'Mortgage' }).props.accessibilityState.checked).toBe(true)
+    expect(view.getByRole('button', { name: 'Loan type, Mortgage' })).toBeOnTheScreen()
     expect(view.getByLabelText('Opening principal balance').props.value).toBe('250000')
     expect(view.getByLabelText('Start date').props.value).toBe('2026-01-01')
     expect(view.getByLabelText('Monthly installment (optional)').props.value).toBe('1200')
     expect(view.getByLabelText('Annual interest rate, % (optional)').props.value).toBe('4.5')
     expect(view.getByLabelText('Term, months (optional)').props.value).toBe('360')
     await fireEvent.changeText(view.getByLabelText('Opening principal balance'), '260000')
+    await fireEvent.press(view.getByRole('button', { name: 'Loan type, Mortgage' }))
     await fireEvent.press(view.getByRole('radio', { name: 'Personal loan' }))
     await fireEvent.press(view.getByRole('button', { name: 'Save details' }))
     await waitFor(() => expect(save).toHaveBeenCalledWith({ type: 'PERSONAL_LOAN', openingPrincipalBalance: 260_000 }))
+  })
+
+  it('pre-fills and reads numbers in the app language', async () => {
+    const save = jest.fn().mockResolvedValue(undefined)
+    const i18n = await initMobileI18n('pt-PT')
+    const { view } = await renderEditor({ onSaveLoan: save }, 'pt-PT')
+    const rate = view.getByLabelText(i18n.t('loanEdit.interestRateOptional'))
+    expect(rate.props.value).toBe('4,5')
+    await fireEvent.changeText(view.getByLabelText(i18n.t('loanCreate.principal')), '1.234,56')
+    await fireEvent.press(view.getByRole('button', { name: i18n.t('loanEdit.saveDetails') }))
+    await waitFor(() => expect(save).toHaveBeenCalledWith({ openingPrincipalBalance: 1234.56 }))
+  })
+
+  it('keeps Save disabled for a principal it cannot read', async () => {
+    const save = jest.fn()
+    const { view } = await renderEditor({ onSaveLoan: save })
+    await fireEvent.changeText(view.getByLabelText('Opening principal balance'), '1.2.3')
+    expect(view.getByRole('button', { name: 'Save details' })).toBeDisabled()
+  })
+
+  it('opens on an existing loan with no field errors and the principal in the loan\'s currency', async () => {
+    const { view } = await renderEditor({ state: { status: 'loaded', model: { ...model, currencyCode: 'EUR' } } })
+    expect(view.getByText('€')).toBeOnTheScreen()
+    expect(view.queryByText(/Enter a valid start date/)).not.toBeOnTheScreen()
+    expect(view.queryByRole('alert')).not.toBeOnTheScreen()
   })
 
   it('uses exact limits, submits a sparse empty-string clear, and clears dirty only after success', async () => {
@@ -74,9 +99,17 @@ describe('loan metadata editor', () => {
     const save = jest.fn()
     const { view } = await renderEditor({ onSaveLoan: save })
     await fireEvent.changeText(view.getByLabelText('Name'), '')
-    await fireEvent.press(view.getByRole('button', { name: 'Save details' }))
     expect(await view.findByRole('alert')).toHaveTextContent(/enter a name/i)
+    expect(view.getByRole('button', { name: 'Save details' })).toBeDisabled()
+    await fireEvent.press(view.getByRole('button', { name: 'Save details' }))
     expect(save).not.toHaveBeenCalled()
+  })
+
+  it('flags an out-of-range rate under its row and keeps Save disabled', async () => {
+    const { view } = await renderEditor()
+    await fireEvent.changeText(view.getByLabelText('Annual interest rate, % (optional)'), '150')
+    expect(view.getByText('Enter a rate from 0 to 100.')).toBeOnTheScreen()
+    expect(view.getByRole('button', { name: 'Save details' })).toBeDisabled()
   })
 
   it('retains all input and explains an ambiguous failure without a retry', async () => {
@@ -172,20 +205,20 @@ describe('loan metadata editor', () => {
     jest.spyOn(Alert, 'alert').mockImplementation((_title, _message, buttons) => { buttons?.[1]?.onPress?.() })
     const { view } = await renderEditor({ onBack: back })
     await fireEvent.changeText(view.getByLabelText('Provider'), 'Unsaved')
-    await fireEvent.press(view.getByRole('button', { name: 'Cancel' }))
+    await fireEvent.press(view.getByRole('button', { name: 'Close' }))
     await waitFor(() => expect(back).toHaveBeenCalled())
     const pending = await renderEditor({ pending: true })
     expect(pending.view.getByLabelText('Name').props.editable).toBe(false)
     expect(pending.view.getByLabelText('Provider').props.editable).toBe(false)
     expect(pending.view.getByLabelText('Notes').props.editable).toBe(false)
     expect(pending.view.getByRole('switch').props.disabled).toBe(true)
-    expect(pending.view.getByRole('button', { name: 'Cancel' }).props.accessibilityState.disabled).toBe(true)
-    expect(pending.view.getByRole('button', { name: 'Back' }).props.accessibilityState.disabled).toBe(true)
+    expect(pending.view.getByRole('button', { name: 'Close' })).toBeDisabled()
+    expect(pending.view.getByRole('button', { name: 'Saving…' })).toBeDisabled()
   })
 
   it.each(['pt-PT', 'es'])('provides translated, labelled controls in %s', async (language) => {
     const { view } = await renderEditor({}, language)
-    expect(view.getAllByRole('button').length).toBeGreaterThanOrEqual(3)
+    expect(view.getAllByRole('button').length).toBeGreaterThanOrEqual(2)
     expect(view.getByRole('switch')).toBeOnTheScreen()
     expect(view.getAllByLabelText(/Nome|Nombre|Entidade|Entidad|Notas/).length).toBeGreaterThan(0)
   })

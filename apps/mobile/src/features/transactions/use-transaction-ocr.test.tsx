@@ -53,6 +53,30 @@ describe('useTransactionOcr', () => {
     await hook.unmount(); client.clear()
   })
 
+  it('classifies an unverified-email refusal as its own failure without blocking access', async () => {
+    mockWrite.mockRejectedValueOnce(new ApiError('email-verification-required', 403))
+    const { client, wrapper } = setup()
+    const hook = await renderHook(() => useTransactionOcr(), { wrapper })
+
+    await act(async () => { await hook.result.current.scan(file) })
+
+    expect(hook.result.current.state).toEqual({ phase: 'error', reason: 'unverified' })
+    expect(mockBlockAccess).not.toHaveBeenCalled()
+    await hook.unmount(); client.clear()
+  })
+
+  it('classifies an exhausted daily allowance as its own failure without blocking access', async () => {
+    mockWrite.mockRejectedValueOnce(new ApiError('ai-allowance-exhausted', 403))
+    const { client, wrapper } = setup()
+    const hook = await renderHook(() => useTransactionOcr(), { wrapper })
+
+    await act(async () => { await hook.result.current.scan(file) })
+
+    expect(hook.result.current.state).toEqual({ phase: 'error', reason: 'allowance' })
+    expect(mockBlockAccess).not.toHaveBeenCalled()
+    await hook.unmount(); client.clear()
+  })
+
   it('confirms a reviewed scan, invalidates transaction content, and reaches succeeded', async () => {
     mockWrite.mockResolvedValueOnce(scanResult).mockImplementationOnce(async (_endpoint, options) => { options.commit(undefined); return undefined })
     const { client, wrapper } = setup()

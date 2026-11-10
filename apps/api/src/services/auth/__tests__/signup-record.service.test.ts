@@ -16,6 +16,8 @@ import { recordSignup } from '../signup-record.service';
 
 beforeEach(() => {
   mocked.transactional.mockReset();
+  vi.unstubAllEnvs();
+  vi.stubEnv('ANALYTICS_OUTBOX_MODE', 'live');
 });
 
 const signupInput = {
@@ -137,6 +139,17 @@ describe('recordSignup', () => {
       eventName: 'signup',
       properties: { appuser_key: String(result.appuser.appuserKey), locale: 'EN', method: 'email' },
     });
+  });
+
+  it('creates the appuser but no analytics event while delivery is off', async () => {
+    vi.stubEnv('ANALYTICS_OUTBOX_MODE', 'off');
+    const db = fakeDatabase();
+
+    const result = await recordSignup(signupInput);
+
+    expect(result.created).toBe(true);
+    expect(db.appusers.get(signupInput.externalUserId)).toBe(result.appuser);
+    expect(db.outbox).toHaveLength(0);
   });
 
   it('keeps email and names out of the analytics event', async () => {

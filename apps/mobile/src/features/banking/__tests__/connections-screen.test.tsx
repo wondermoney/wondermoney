@@ -10,8 +10,10 @@ import { ConnectionsScreen, type ConnectionsScreenState } from '../connections-s
 
 const row = (over: Partial<BankConnectionRow> = {}): BankConnectionRow => ({
   accessType: 'open_banking',
+  bankId: null,
   connectionId: 42,
   dataFreshAsOf: null,
+  daysUntilExpiry: null,
   expiresAt: null,
   institutionName: 'Real Bank',
   provider: 'GoCardless',
@@ -36,13 +38,13 @@ describe('ConnectionsScreen disconnect', () => {
 
   it('does not render a disconnect action when no onDisconnect handler is supplied', async () => {
     const view = await renderScreen({ state: loadedState([row()]) })
-    expect(view.queryByRole('button', { name: /disconnect/i })).not.toBeOnTheScreen()
+    expect(view.queryByRole('button', { name: /^disconnect/i })).not.toBeOnTheScreen()
   })
 
   it('does not render a disconnect action for a row with no connectionId', async () => {
     const onDisconnect = jest.fn()
     const view = await renderScreen({ state: loadedState([row({ connectionId: null })]), onDisconnect })
-    expect(view.queryByRole('button', { name: /disconnect/i })).not.toBeOnTheScreen()
+    expect(view.queryByRole('button', { name: /^disconnect/i })).not.toBeOnTheScreen()
   })
 
   it('asks for confirmation before disconnecting', async () => {
@@ -119,6 +121,46 @@ describe('ConnectionsScreen import-statement fallback', () => {
   })
 })
 
+describe('ConnectionsScreen reconnect', () => {
+  const reconnectable = (over: Partial<BankConnectionRow> = {}) => row({ bankId: 'UFQ6OlJlYWwgQmFuaw', provider: 'EnableBanking', ...over })
+
+  it.each(['expiring', 'expired', 'revoked'] as const)('offers Reconnect on a %s connection and starts it for that bank', async (status) => {
+    const onReconnect = jest.fn()
+    const view = await renderScreen({ state: loadedState([reconnectable({ daysUntilExpiry: 5, status })]), onReconnect })
+    await fireEvent.press(view.getByRole('button', { name: 'Reconnect Real Bank' }))
+    expect(onReconnect).toHaveBeenCalledWith('UFQ6OlJlYWwgQmFuaw')
+  })
+
+  it('does not offer Reconnect on a working connection, or on one with no bank id', async () => {
+    const onReconnect = jest.fn()
+    const view = await renderScreen({
+      state: loadedState([reconnectable({ status: 'connected' }), reconnectable({ bankId: null, connectionId: 43, institutionName: 'Old Bank', status: 'expired' })]),
+      onReconnect,
+    })
+    expect(view.queryByRole('button', { name: /^reconnect/i })).not.toBeOnTheScreen()
+  })
+
+  it('says how many days an expiring consent has left, and that a bank ended one early', async () => {
+    const view = await renderScreen({
+      state: loadedState([reconnectable({ daysUntilExpiry: 5, status: 'expiring' }), reconnectable({ connectionId: 43, institutionName: 'Other Bank', status: 'revoked' })]),
+      onReconnect: jest.fn(),
+    })
+    expect(view.getByText(/5 days/)).toBeOnTheScreen()
+    expect(view.getByText('Ended by bank')).toBeOnTheScreen()
+  })
+
+  it('disables Reconnect while a connection is starting and shows why one failed', async () => {
+    const view = await renderScreen({
+      state: loadedState([reconnectable({ status: 'expired' })]),
+      onReconnect: jest.fn(),
+      reconnectingBankId: 'UFQ6OlJlYWwgQmFuaw',
+      reconnectFailure: { bankId: 'UFQ6OlJlYWwgQmFuaw', failure: 'not-found' },
+    })
+    expect(view.getByRole('button', { name: 'Reconnect Real Bank' })).toBeDisabled()
+    expect(view.getByRole('alert')).toHaveTextContent('That bank is no longer available. Choose another one.')
+  })
+})
+
 describe('ConnectionsScreen with values this build does not know', () => {
   it('renders a row whose provider and status are new to this build alongside known rows', async () => {
     const response = bankConnectionsResponseSchema.parse({ connections: [
@@ -151,5 +193,18 @@ describe('ConnectionsScreen after returning from the bank', () => {
   it('shows the waiting notice when the outcome is unknown', async () => {
     const view = await renderScreen({ state: loadedState([]), justStarted: true, connectionResult: null })
     expect(view.getByText(await waitingTitle())).toBeOnTheScreen()
+  })
+})
+
+describe('ConnectionsScreen row title', () => {
+  it('names an unnamed connection by its provider, and falls back to the generic label', async () => {
+    const view = await renderScreen({ state: loadedState([row({ institutionName: null }), row({ connectionId: 43, institutionName: null, provider: 'unknown' })]) })
+    expect(view.getByText('GoCardless connection')).toBeOnTheScreen()
+    expect(view.getByText('Bank connection')).toBeOnTheScreen()
+  })
+
+  it('shows a back control instead of a plain text link', async () => {
+    const view = await renderScreen({ state: loadedState([row()]) })
+    expect(view.getByRole('button', { name: 'Back to More' })).toBeOnTheScreen()
   })
 })

@@ -55,6 +55,7 @@ const createAuth = () => ({
   mfaUnenroll: jest.fn(),
   mfaListFactors: jest.fn(),
   changePassword: jest.fn(),
+  sendVerificationEmail: jest.fn(),
 })
 
 function Probe({ capture }: { capture: (value: ProductRuntimeContextValue) => void }) {
@@ -589,6 +590,28 @@ describe('ProductRuntimeProvider integration', () => {
     queryClient.clear()
   })
 
+  it('on a transient provisioning failure, keeps the stored session (no sign-out)', async () => {
+    ;(provisionAppUser as jest.Mock).mockReset().mockResolvedValue('unavailable')
+    const auth = createAuth()
+    let latest!: ProductRuntimeContextValue
+    const queryClient = new QueryClient()
+    const view = await render(
+      <QueryClientProvider client={queryClient}>
+        <AppSessionProvider session={session('a')}>
+          <ProductRuntimeProvider auth={auth as never} transport={{ request: jest.fn() } as never}>
+            <Probe capture={(value) => { latest = value }} />
+          </ProductRuntimeProvider>
+        </AppSessionProvider>
+      </QueryClientProvider>,
+    )
+
+    await waitFor(() => expect(latest.activationError).toBe('provision-failed'))
+    expect(latest.runtime).toBeNull()
+    expect(auth.signOutLocal).not.toHaveBeenCalled()
+    await view.unmount()
+    queryClient.clear()
+  })
+
   it('does not let a stale provisioning result overwrite a newer activation outcome', async () => {
     const provisioning = [deferred<'provisioned' | 'failed'>(), deferred<'provisioned' | 'failed'>()]
     let callIndex = 0
@@ -760,6 +783,16 @@ describe('ProductRuntimeProvider MFA', () => {
 
     await expect(harness.current().changePassword('person@example.com', 'oldpw12345', 'newpw12345')).resolves.toEqual({ status: 'updated' })
     expect(auth.changePassword).toHaveBeenCalledWith('person@example.com', 'oldpw12345', 'newpw12345')
+    await harness.cleanup()
+  })
+
+  it('exposes a thin proxy to the injected auth adapter resend-verification-email operation', async () => {
+    const auth = createAuth()
+    auth.sendVerificationEmail.mockResolvedValue({ status: 'sent' })
+    const harness = await createHarness(session('a'), { auth })
+
+    await expect(harness.current().sendVerificationEmail('person@example.com')).resolves.toEqual({ status: 'sent' })
+    expect(auth.sendVerificationEmail).toHaveBeenCalledWith('person@example.com')
     await harness.cleanup()
   })
 

@@ -41,6 +41,15 @@ describe('account auto sync scheduler service', () => {
     expect(em.find).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ enableBankingConnectionKey: expect.objectContaining({ accessValidUntil: { $gt: expect.any(Date) } }) }), expect.anything());
   });
 
+  it('asks only for linked connections that are not waiting out a rate limit', async () => {
+    const now = new Date('2026-01-01T00:00:00Z');
+    await service.enqueueDueAccountSyncs({ backgroundOperationService: backgroundOperationService() as unknown as EnqueueBg, now });
+    const where = em.find.mock.calls[0]?.[1] as Record<string, unknown>;
+    // A connection whose consent ended is EXPIRED, so the LINKED filter drops it.
+    expect(where['enableBankingConnectionKey']).toMatchObject({ status: 'linked' });
+    expect(where['$and']).toContainEqual({ $or: [{ enableBankingConnectionKey: { nextEligibleSyncAt: null } }, { enableBankingConnectionKey: { nextEligibleSyncAt: { $lte: now } } }] });
+  });
+
   it('creates retryable queued operations and attaches queue jobs before returning', async () => {
     const bg = {
       attachQueueJob: vi.fn().mockResolvedValue(true),

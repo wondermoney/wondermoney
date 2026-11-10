@@ -1,15 +1,19 @@
 "use client";
 
+import { Wallet } from "lucide-react";
 import { useTranslations } from "next-intl";
 import * as React from "react";
 
 import { Amount } from "@/components/ui/Amount";
+import CategoryIcon, { categoryIconStyle } from "@/components/ui/CategoryIcon";
 import { cn } from "@/lib/utils";
+import { useFormatCurrency } from "@/lib/utils/useFormatCurrency";
 
 import {
   computeSankeyLayout,
   type SankeyData,
   type SankeyNode,
+  type SankeyNodeIcon,
   type SankeyNodeKind,
 } from "./sankey-layout";
 
@@ -22,30 +26,20 @@ export type SankeyChartProps = {
 };
 
 const NODE_WIDTH = 20;
-// Expense-node labels render below their node (see `nodeLabelPosition`), at
-// `y1 + LABEL_MARGIN + 12`, so anything less than ~32px of padding lets a
-// label bleed into the next node down the column.
+// Every label sits beside its node, centred on it (see `nodeLabelPosition`),
+// so the padding only has to clear half a line of text above and below.
 const NODE_PADDING = 32;
 const LABEL_MARGIN = 8;
 const CHAR_WIDTH_ESTIMATE = 6;
 const MIN_WIDTH = 320;
 const MIN_TOUCH_SIZE = 44;
-const MIN_LABELED_NODE_HEIGHT = 18;
-
-function formatCurrency(
-  value: number,
-  locale: string,
-  currencyKey: string,
-): string {
-  try {
-    return new Intl.NumberFormat(locale, {
-      style: "currency",
-      currency: currencyKey,
-    }).format(value);
-  } catch {
-    return value.toLocaleString(locale);
-  }
-}
+// A label is centred on its node and overhangs into the padding, so even a
+// thin node can carry one.
+const MIN_LABELED_NODE_HEIGHT = 2;
+const ICON_SIZE = 14;
+const ICON_GAP = 4;
+// The label's halo, shared by the text and the icons drawn beside it.
+const HALO_WIDTH = 3;
 
 function truncateLabel(label: string, maxChars: number): string {
   if (maxChars <= 1) return "…";
@@ -68,7 +62,6 @@ function nodeLabelPosition(node: {
   y0: number;
   y1: number;
 }): LabelPosition {
-  const midX = (node.x0 + node.x1) / 2;
   const midY = (node.y0 + node.y1) / 2;
 
   switch (node.kind) {
@@ -90,33 +83,192 @@ function nodeLabelPosition(node: {
       };
     case "expense":
     default:
+      // To the right of the node, on its centre line: below it, the label
+      // read as the name of the next node down.
       return {
-        x: midX,
-        y: node.y1 + LABEL_MARGIN + 12,
-        textAnchor: "middle",
-        dominantBaseline: "hanging",
+        x: node.x1 + LABEL_MARGIN,
+        y: midY,
+        textAnchor: "start",
+        dominantBaseline: "middle",
         maxChars: 0,
       };
   }
 }
 
-function nodeLabelMaxChars(kind: SankeyNodeKind, columnWidth: number): number {
+function nodeLabelMaxChars(
+  kind: SankeyNodeKind,
+  columnWidth: number,
+  hasIcon: boolean,
+): number {
+  const iconWidth = hasIcon ? ICON_SIZE + ICON_GAP : 0;
   switch (kind) {
     case "income":
     case "account":
-      return Math.max(
-        0,
-        Math.floor(
-          (columnWidth - NODE_WIDTH - LABEL_MARGIN) / CHAR_WIDTH_ESTIMATE,
-        ),
-      );
     case "expense":
     default:
       return Math.max(
         0,
-        Math.floor((columnWidth - LABEL_MARGIN * 2) / CHAR_WIDTH_ESTIMATE),
+        Math.floor(
+          (columnWidth - NODE_WIDTH - LABEL_MARGIN - iconWidth) /
+            CHAR_WIDTH_ESTIMATE,
+        ),
       );
   }
+}
+
+/**
+ * A label's icon at `ICON_SIZE`, its top-left corner at the origin. Line
+ * icons get the label's halo (a background-coloured copy drawn first, the
+ * stroke widened to match the text's), since they sit on the flow bands as
+ * often as the text does. A logo is opaque and needs none.
+ */
+function NodeIconMark({
+  icon,
+  color,
+}: {
+  icon: SankeyNodeIcon;
+  color: string;
+}) {
+  const size = `${ICON_SIZE}px`;
+  // Lucide draws a 2-unit stroke in a 24-unit box; the halo adds the text
+  // halo's width on top of it, scaled into that box.
+  const haloStroke = 2 + (HALO_WIDTH * 24) / ICON_SIZE;
+  const halo: React.CSSProperties = {
+    color: "var(--background)",
+    strokeWidth: haloStroke,
+  };
+
+  switch (icon.type) {
+    case "logo":
+      return (
+        <image
+          href={icon.url}
+          width={ICON_SIZE}
+          height={ICON_SIZE}
+          preserveAspectRatio="xMidYMid meet"
+          style={{ clipPath: "inset(0 round 3px)" }}
+        />
+      );
+    case "wallet":
+      return (
+        <>
+          <Wallet width={size} height={size} style={halo} />
+          <Wallet
+            width={size}
+            height={size}
+            className="text-muted-foreground"
+          />
+        </>
+      );
+    case "category":
+    default:
+      return (
+        <>
+          <CategoryIcon
+            icon={icon.icon}
+            category={icon.icon ? undefined : icon.category}
+            width={size}
+            height={size}
+            style={halo}
+          />
+          <CategoryIcon
+            icon={icon.icon}
+            category={icon.icon ? undefined : icon.category}
+            width={size}
+            height={size}
+            // The node's own colour, mixed toward the ink so the pastel
+            // category colours clear contrast in both themes.
+            style={categoryIconStyle(color)}
+          />
+        </>
+      );
+  }
+}
+
+/**
+ * A node's label with its icon beside it. Income labels read outward from
+ * the node (icon, then text) and account labels mirror them, so the icon
+ * always sits nearest its node. An expense label is centred under its node,
+ * so the icon and text are centred together, which needs the text's
+ * rendered width.
+ */
+function NodeLabel({
+  node,
+  position,
+  text,
+}: {
+  node: SankeyNode & { color: string };
+  position: LabelPosition;
+  text: string;
+}) {
+  const textRef = React.useRef<SVGTextElement>(null);
+  const [textWidth, setTextWidth] = React.useState<number | null>(null);
+  const icon = node.icon;
+  const centered = position.textAnchor === "middle";
+
+  React.useLayoutEffect(() => {
+    if (!icon || !centered || !textRef.current) return;
+    setTextWidth(textRef.current.getComputedTextLength());
+  }, [icon, centered, text]);
+
+  const iconWidth = icon ? ICON_SIZE + ICON_GAP : 0;
+  let textX = position.x;
+  let iconX = position.x;
+  if (position.textAnchor === "start") {
+    textX = position.x + iconWidth;
+  } else if (position.textAnchor === "end") {
+    textX = position.x - iconWidth;
+    iconX = position.x - ICON_SIZE;
+  } else {
+    textX = position.x + iconWidth / 2;
+    iconX = position.x - ((textWidth ?? 0) + iconWidth) / 2;
+  }
+  // Centred on the text line: a middle baseline sits on the line's centre;
+  // a hanging one sits at the top of the 11px glyphs, about 5px above it.
+  const iconY =
+    position.dominantBaseline === "middle"
+      ? position.y - ICON_SIZE / 2
+      : position.y + 5 - ICON_SIZE / 2;
+
+  return (
+    <>
+      {icon && (!centered || textWidth !== null) ? (
+        <g
+          transform={`translate(${iconX} ${iconY})`}
+          style={{ pointerEvents: "none" }}
+          aria-hidden="true"
+        >
+          <NodeIconMark icon={icon} color={node.color} />
+        </g>
+      ) : null}
+      <text
+        ref={textRef}
+        x={textX}
+        y={position.y}
+        textAnchor={position.textAnchor}
+        dominantBaseline={position.dominantBaseline}
+        // Foreground, not muted: these labels sit on coloured
+        // flow bands as often as on the canvas, and muted ink
+        // fell under 4.5:1 on the pale bands (Gifts on lime).
+        className="fill-foreground font-sans text-[11px]"
+        // Labels can sit over a link's colored flow band, not
+        // just the canvas — a plain muted-foreground fill
+        // disappears against a similarly light/dark band. A
+        // background-color stroke behind the glyphs
+        // (paintOrder puts the stroke under the fill) reads as
+        // a halo instead of an outline.
+        style={{
+          pointerEvents: "none",
+          paintOrder: "stroke",
+          stroke: "var(--background)",
+          strokeWidth: HALO_WIDTH,
+          strokeLinejoin: "round",
+        }}
+      >
+        {text}
+      </text>
+    </>
+  );
 }
 
 function useContainerWidth(ref: React.RefObject<HTMLDivElement | null>) {
@@ -146,13 +298,12 @@ function renderLinkTooltip(
   source: SankeyNode,
   target: SankeyNode,
   value: number,
-  locale: string,
-  currencyKey: string,
+  formatValue: (value: number) => string,
 ): string {
   return t("linkTooltip", {
     source: source.label,
     target: target.label,
-    value: formatCurrency(value, locale, currencyKey),
+    value: formatValue(value),
   });
 }
 
@@ -160,12 +311,11 @@ function renderNodeTooltip(
   t: (key: string, values?: Record<string, string>) => string,
   node: SankeyNode,
   value: number,
-  locale: string,
-  currencyKey: string,
+  formatValue: (value: number) => string,
 ): string {
   return t("nodeTooltip", {
     label: node.label,
-    value: formatCurrency(value, locale, currencyKey),
+    value: formatValue(value),
   });
 }
 
@@ -173,10 +323,11 @@ export function SankeyChart({
   data,
   height = 360,
   className,
-  locale,
   currencyKey,
 }: SankeyChartProps) {
   const t = useTranslations("reports.reports.sankey");
+  const formatMoney = useFormatCurrency();
+  const formatValue = (value: number) => formatMoney(value, currencyKey);
   const containerRef = React.useRef<HTMLDivElement>(null);
   const width = useContainerWidth(containerRef);
   const [hoveredNodeId, setHoveredNodeId] = React.useState<string | null>(null);
@@ -213,7 +364,7 @@ export function SankeyChart({
     setTooltip({
       x: event.clientX,
       y: event.clientY,
-      content: renderLinkTooltip(t, source, target, value, locale, currencyKey),
+      content: renderLinkTooltip(t, source, target, value, formatValue),
     });
   };
 
@@ -226,7 +377,7 @@ export function SankeyChart({
     setTooltip({
       x: event.clientX,
       y: event.clientY,
-      content: renderNodeTooltip(t, node, value, locale, currencyKey),
+      content: renderNodeTooltip(t, node, value, formatValue),
     });
   };
 
@@ -275,7 +426,7 @@ export function SankeyChart({
         <svg
           role="img"
           aria-label={t("ariaLabel", {
-            total: formatCurrency(layout.totalValue, locale, currencyKey),
+            total: formatValue(layout.totalValue),
           })}
           viewBox={`0 0 ${width} ${height}`}
           className="h-auto w-full"
@@ -350,8 +501,7 @@ export function SankeyChart({
                       link.source,
                       link.target,
                       link.value,
-                      locale,
-                      currencyKey,
+                      formatValue,
                     )}
                   </title>
                 </g>
@@ -363,7 +513,11 @@ export function SankeyChart({
           <g>
             {sortedNodes.map((node) => {
               const label = nodeLabelPosition(node);
-              const maxChars = nodeLabelMaxChars(node.kind, columnWidth);
+              const maxChars = nodeLabelMaxChars(
+                node.kind,
+                columnWidth,
+                node.icon !== undefined,
+              );
               const displayLabel = truncateLabel(node.label, maxChars);
               const isHovered = hoveredNodeId === node.id;
               const isConnected = layout.links.some(
@@ -417,8 +571,7 @@ export function SankeyChart({
                       t,
                       node,
                       nodeTotalValues.get(node.id) ?? 0,
-                      locale,
-                      currencyKey,
+                      formatValue,
                     )}
                   </title>
                   {/* A category's node height is proportional to its flow
@@ -430,31 +583,11 @@ export function SankeyChart({
                       reachable via the tooltip on hover/focus and via the
                       "Spending by category" list beside this chart. */}
                   {node.y1 - node.y0 >= MIN_LABELED_NODE_HEIGHT ? (
-                    <text
-                      x={label.x}
-                      y={label.y}
-                      textAnchor={label.textAnchor}
-                      dominantBaseline={label.dominantBaseline}
-                      // Foreground, not muted: these labels sit on coloured
-                      // flow bands as often as on the canvas, and muted ink
-                      // fell under 4.5:1 on the pale bands (Gifts on lime).
-                      className="fill-foreground font-sans text-[11px]"
-                      // Labels can sit over a link's colored flow band, not
-                      // just the canvas — a plain muted-foreground fill
-                      // disappears against a similarly light/dark band. A
-                      // background-color stroke behind the glyphs
-                      // (paintOrder puts the stroke under the fill) reads as
-                      // a halo instead of an outline.
-                      style={{
-                        pointerEvents: "none",
-                        paintOrder: "stroke",
-                        stroke: "var(--background)",
-                        strokeWidth: 3,
-                        strokeLinejoin: "round",
-                      }}
-                    >
-                      {displayLabel}
-                    </text>
+                    <NodeLabel
+                      node={node}
+                      position={label}
+                      text={displayLabel}
+                    />
                   ) : null}
                 </g>
               );

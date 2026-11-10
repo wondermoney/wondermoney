@@ -240,6 +240,16 @@ describe('BankSyncIncidentService', () => {
     })).rejects.toThrow('conflicting completion');
   });
 
+  it('keeps the provider Retry-After of a rate-limited attempt on the incident', async () => {
+    const h = harness();
+    const incident = await h.service.allocateIncident(identity);
+    await h.service.startAttempt({ incidentId: incident.incidentId, queueAttempt: 1, queueJobId: 'job-1' });
+    const result = await h.service.finalizeAttempt({
+      attempt: 1, errorCode: 'rate_limited', final: true, incidentId: incident.incidentId, result: 'failed', retryAfterSeconds: 3600, treatmentEligible: false,
+    });
+    expect(result.incident).toMatchObject({ errorCode: 'rate_limited', retryAfterSeconds: 3600 });
+  });
+
   it('normalizes a PostgreSQL-hydrated null incident institution to undefined on the first finalize', async () => {
     const h = harness();
     const incident = await h.service.allocateIncident({ ...identity, institutionId: undefined });

@@ -2,10 +2,8 @@ import { randomUUID } from 'node:crypto';
 
 import { format } from 'date-fns';
 import type { Request, Response } from 'express';
-import { sql } from 'kysely';
 import { pick } from 'lodash-es';
 
-import { anyOf, sqlQuery } from '@app/database/sql';
 import { enqueuePortfolioSnapshotManualJob } from '@app/jobs/portfolio-snapshot.queue';
 import { zParse } from '@app/validators/parser';
 import {
@@ -41,6 +39,8 @@ import { Portfolio } from '@entity/Portfolio';
 import { authedContext } from '@middleware/authed-context';
 import eodhd from '@service/market-data/eodhd.service';
 import backgroundOperationService from '@service/operations/background-operation.service';
+import { loadVisiblePortfolioAccountLinks, setPortfolioAccountLink } from '@service/portfolio/portfolio-account-link';
+import { latestImportBrokers } from '@service/portfolio/portfolio-brokers';
 import portfolioImportSessionService from '@service/portfolio/portfolio-import-session.service';
 import s3Service from '@service/storage/s3';
 import { BadRequestError, InternalServerError, NotFoundError } from '@utils/errors';
@@ -54,9 +54,9 @@ import portfolioTransactionService from '../services/portfolio/portfolio-transac
 
 
 export async function createPortfolio(req: Request, res: Response) {
-  const { user } = authedContext(req);
+  const { tenantKey, user } = authedContext(req);
   const {
-    body: { currencyId, name },
+    body: { accountLink, currencyId, name },
   } = await zParse(createPortfolioRequestSchema, req);
   const appUserTenant = await DI.em.getRepository(AppuserTenant).getAppuserTenantByAppuser(user);
   if (!appUserTenant) {
@@ -71,6 +71,7 @@ export async function createPortfolio(req: Request, res: Response) {
   portfolio.currencyKey = currencyKey;
   portfolio.portfolioOwnerAppuserKey = appUserTenant.appuserKey;
   portfolio.tenantKey = appUserTenant.tenantKey;
+  if (accountLink) await setPortfolioAccountLink(DI.em, { link: accountLink, portfolio, tenantKey, viewerAppuserKey: user.appuserKey });
   await DI.em.persist(portfolio).flush();
 
   return res.status(201).json({
@@ -124,7 +125,7 @@ export async function createPortfolioImportSession(req: Request, res: Response) 
 }
 
 export async function createPortfolioTransaction(req: Request, res: Response) {
-  const { user } = authedContext(req);
+  const { tenantKey, user } = authedContext(req);
   const {
     body: {
       assetSymbol,
@@ -157,6 +158,8 @@ export async function createPortfolioTransaction(req: Request, res: Response) {
     quantity,
     settlementCurrencyId,
     taxExempt,
+    // Any household member may write to any of the household's portfolios.
+    tenantId: tenantKey,
     transactionDate,
     unitPrice,
   }, undefined, { enqueue: req.enqueue });
@@ -164,7 +167,12 @@ export async function createPortfolioTransaction(req: Request, res: Response) {
   return res.sendStatus(201);
 }
 
+/**
+ * Any household member may delete any of the household's portfolios, as with accounts: a
+ * portfolio is shared, and the delete is soft.
+ */
 export async function deletePortfolio(req: Request, res: Response) {
+  const { tenantKey } = authedContext(req);
   const {
     params: { portfolioId },
   } = await zParse(deletePortfolioRequestSchema, req);
@@ -172,7 +180,8 @@ export async function deletePortfolio(req: Request, res: Response) {
   const portfolio = await DI.em.findOne(Portfolio, {
     deletedAt: undefined,
     portfolioKey: portfolioId,
-  }, { populate: ['currencyKey'] });
+    tenantKey: { tenantKey },
+  });
   if (!portfolio) {
     throw new NotFoundError('Portfolio not found');
   }
@@ -185,12 +194,12 @@ export async function deletePortfolio(req: Request, res: Response) {
 }
 
 export async function deletePortfolioTransaction(req: Request, res: Response) {
-  const { user } = authedContext(req);
+  const { tenantKey, user } = authedContext(req);
   const {
     params: { portfolioId, transactionId },
   } = await zParse(deletePortfolioTransactionRequestSchema, req);
 
-  await portfolioTransactionService.deletePortfolioTransaction(user, portfolioId, transactionId);
+  await portfolioTransactionService.deletePortfolioTransaction(user, portfolioId, transactionId, tenantKey);
 
   return res.sendStatus(204);
 }
@@ -202,11 +211,12 @@ export async function getBrokers(_req: Request, res: Response) {
 
 export async function getDividendIncome(req: Request, res: Response) {
   const { tenant, user } = authedContext(req);
-  const income = await portfolioHoldingsService.getDividendIncome(user.appuserKey, undefined, tenant.tenantKey);
+  const income = await portfolioHoldingsService.getDividendIncome(user, undefined, tenant.tenantKey);
   return res.json(income);
 }
 
 export async function getPortfolio(req: Request, res: Response) {
+  const { tenantKey } = authedContext(req);
   const {
     params: { portfolioId },
   } = await zParse(getPortfolioRequestSchema, req);
@@ -217,8 +227,10 @@ export async function getPortfolio(req: Request, res: Response) {
   if (!portfolio) {
     throw new NotFoundError('Portfolio not found');
   }
+  const links = await loadVisiblePortfolioAccountLinks(DI.em, tenantKey, [portfolio]);
   const transformedData = {
     ...pick(portfolio, ['portfolioKey', 'name', 'description', 'targetAllocation']),
+    accountLink: links.get(portfolio.portfolioKey) ?? null,
     currencyKey: { code: portfolio.currencyKey.code },
   };
   return res.json({ portfolio: transformedData });
@@ -229,7 +241,7 @@ export async function getPortfolioDividendIncome(req: Request, res: Response) {
   const {
     params: { portfolioId },
   } = await zParse(getPortfolioRequestSchema, req);
-  const income = await portfolioHoldingsService.getDividendIncome(user.appuserKey, portfolioId, tenant.tenantKey);
+  const income = await portfolioHoldingsService.getDividendIncome(user, portfolioId, tenant.tenantKey);
   return res.json(income);
 }
 
@@ -252,42 +264,28 @@ export async function getPortfolioHoldings(req: Request, res: Response) {
 }
 
 export async function getPortfolios(req: Request, res: Response) {
-  const { user } = authedContext(req);
+  const { tenant, user } = authedContext(req);
   const portfolios = await DI.em.find(
     Portfolio,
     { deletedAt: undefined },
     { populate: ['currencyKey'] },
   );
 
-  // Get latest snapshot balance per portfolio in a single query.
-  // Raw SQL bypasses the ORM filters (see `net-worth.service.ts#getPortfolioRows`), so
-  // scope to the caller's own (already tenant-filtered) portfolios, and exclude
-  // soft-deleted snapshots.
+  // The current value, priced from holdings exactly as the dashboards and net worth price it
+  // (`valuePortfolioHoldings`). The latest snapshot is yesterday's and misses today's trades.
   const portfolioKeys = portfolios.map((portfolio) => portfolio.portfolioKey);
-  const latestSnapshots = portfolioKeys.length === 0 ? [] : await sqlQuery(DI.em)
-    .selectFrom('portfolio_snapshot as ps')
-    .innerJoin(
-      sql<{ max_date: unknown; portfolio_key: unknown }>`(SELECT portfolio_key, MAX(snapshot_date) as max_date FROM portfolio_snapshot
-           WHERE deleted_at IS NULL AND portfolio_key = ANY(${portfolioKeys}) GROUP BY portfolio_key)`.as('latest'),
-      (join) => join.onRef('ps.portfolio_key', '=', 'latest.portfolio_key').onRef('ps.snapshot_date', '=', 'latest.max_date'),
-    )
-    .select([
-      'ps.portfolio_key',
-      sql<null | number>`COALESCE(ps.appuser_currency_total_value, ps.total_value)`.as('balance'),
-    ])
-    .where('ps.deleted_at', 'is', null)
-    .where(anyOf('ps.portfolio_key', portfolioKeys))
-    .execute();
-
-  const balanceMap = new Map<number, number>();
-  for (const row of latestSnapshots) {
-    balanceMap.set(row.portfolio_key as number, Number(row.balance) || 0);
-  }
+  const [values, brokers, links] = await Promise.all([
+    portfolioHoldingsService.getPortfolioValues(user, portfolioKeys, tenant.tenantKey),
+    latestImportBrokers(DI.em, portfolioKeys),
+    loadVisiblePortfolioAccountLinks(DI.em, tenant.tenantKey, portfolios),
+  ]);
 
   const transformedData = portfolios.map((t) => ({
     ...pick(t, ['portfolioKey', 'name', 'description', 'currencyKey.code']),
+    accountLink: links.get(t.portfolioKey) ?? null,
     appuserCurrencyCode: user.currencyKey.code,
-    balance: balanceMap.get(t.portfolioKey) ?? 0,
+    balance: values.get(t.portfolioKey)?.value ?? 0,
+    broker: brokers.get(t.portfolioKey) ?? null,
   }));
   return res.json({ portfolios: transformedData });
 }
@@ -369,14 +367,17 @@ export async function rebuildPortfolioSnapshot(req: Request, res: Response) {
 }
 
 export async function updatePortfolio(req: Request, res: Response) {
+  const { appuserKey, tenantKey } = authedContext(req);
   const {
-    body: { benchmarkSymbol, currencyId, description, excluded, favored, name, targetAllocation },
+    body: { accountLink, benchmarkSymbol, currencyId, description, excluded, favored, name, targetAllocation },
     params: { portfolioId },
   } = await zParse(updatePortfolioRequestSchema, req);
 
+  // Any household member may change any of the household's portfolios.
   const portfolio = await DI.em.findOne(Portfolio, {
     deletedAt: undefined,
     portfolioKey: portfolioId,
+    tenantKey: { tenantKey },
   });
   if (!portfolio) {
     throw new NotFoundError('Portfolio not found');
@@ -396,6 +397,7 @@ export async function updatePortfolio(req: Request, res: Response) {
     }
   }
   if (targetAllocation !== undefined) portfolio.targetAllocation = targetAllocation ?? undefined;
+  if (accountLink !== undefined) await setPortfolioAccountLink(DI.em, { link: accountLink, portfolio, tenantKey, viewerAppuserKey: appuserKey });
 
   if (currencyId !== undefined) {
     const currency = await DI.em.findOne(Currency, { currencyKey: currencyId });
@@ -411,13 +413,13 @@ export async function updatePortfolio(req: Request, res: Response) {
 }
 
 export async function updatePortfolioTransaction(req: Request, res: Response) {
-  const { user } = authedContext(req);
+  const { tenantKey, user } = authedContext(req);
   const {
     body,
     params: { portfolioId, transactionId },
   } = await zParse(updatePortfolioTransactionRequestSchema, req);
 
-  await portfolioTransactionService.updatePortfolioTransaction(user, portfolioId, transactionId, body, { enqueue: req.enqueue });
+  await portfolioTransactionService.updatePortfolioTransaction(user, portfolioId, transactionId, body, { enqueue: req.enqueue }, tenantKey);
 
   return res.sendStatus(200);
 }

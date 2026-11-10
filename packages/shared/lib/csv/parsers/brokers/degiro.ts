@@ -3,9 +3,30 @@ import {
   FinancialTransactionType,
   type FinancialTransactionsParserResult,
 } from './types';
+import {
+  detectFileDecimalSeparator,
+  optionalNumber,
+  type ParserNumberFormat,
+  requireNumber,
+} from '../number';
 
-const degiroParser = (data: string[][]): FinancialTransactionsParserResult => {
-  return data.map((row) => {
+// Quantity, price, local value, value, exchange rate.
+const NUMBER_COLUMNS = [6, 7, 9, 11, 13];
+
+/**
+ * DEGIRO writes numbers in the account's interface language ("100,50" in pt, es, nl or de;
+ * "100.50" in en). Without an explicit separator, the file's own unambiguous values decide it.
+ */
+const degiroParser = (
+  data: string[][],
+  options: ParserNumberFormat = {}
+): FinancialTransactionsParserResult => {
+  const format: ParserNumberFormat = {
+    decimalSeparator:
+      options.decimalSeparator ?? detectFileDecimalSeparator(data, NUMBER_COLUMNS),
+  };
+  return data.map((row, index) => {
+    const where = (column: string) => `DEGIRO row ${index + 1}, ${column}`;
     const date = row[0]!;
     const [day, month, year] = date.split('-').map(Number);
     const time = row[1]!;
@@ -16,17 +37,16 @@ const degiroParser = (data: string[][]): FinancialTransactionsParserResult => {
     const isin = assetSymbol;
     const exchange1 = row[4]!;
     const exchange2 = row[5]!;
-    const unitPrice = Number.parseFloat(row[7]!);
+    const unitPrice = requireNumber(row[7], format, where('price'));
     const currency = row[8]!;
-    const totalLocalPrice = Number.parseFloat(row[9]!);
-    const totalPrice = Number.parseFloat(row[11]!);
-    const exchangeRate =
-      row[13] !== '' ? Number.parseFloat(row[13]!) : undefined;
+    const totalLocalPrice = requireNumber(row[9], format, where('local value'));
+    const totalPrice = requireNumber(row[11], format, where('value'));
+    const exchangeRate = optionalNumber(row[13], format, where('exchange rate'));
     const financialTransactionType =
       totalPrice < 0
         ? FinancialTransactionType.BUY
         : FinancialTransactionType.SELL;
-    const quantityParsed = Number.parseFloat(row[6]!);
+    const quantityParsed = requireNumber(row[6], format, where('quantity'));
     const quantity =
       financialTransactionType === FinancialTransactionType.BUY
         ? quantityParsed

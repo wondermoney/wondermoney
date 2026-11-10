@@ -6,6 +6,8 @@
  * currency — formatting is a UI concern.
  */
 
+import type { AmountsCompleteness } from "../completeness";
+
 /**
  * Shared report filter envelope.
  *
@@ -20,6 +22,8 @@ export interface ReportFilters {
   accountKeys?: string[];
   categoryKeys?: string[];
   merchantKeys?: string[];
+  /** Tag keys; a transaction counts when it carries any of them. */
+  tagKeys?: string[];
   currencyKey?: string;
   includePending?: boolean;
   includeTransfers?: boolean;
@@ -41,6 +45,12 @@ export type ReportFormat = "json" | "csv";
 
 /** Generic report response envelope. */
 export interface ReportResponse<T> {
+  /**
+   * Whether every row could be valued in the viewer's currency. Rows in a
+   * currency with no exchange rate are left out of `data` and counted here.
+   * Sent by the spending, cash flow, Sankey and budget reports.
+   */
+  completeness?: AmountsCompleteness;
   data: T;
   generatedAt: string;
   filters: ReportFilters;
@@ -108,13 +118,28 @@ export interface BudgetVsActualRow {
   percentUsed: number;
 }
 
-/** Row shape for `GET /v1/reports/portfolio-performance`. */
+/**
+ * Row shape for `GET /v1/reports/portfolio-performance`: one household
+ * portfolio over the period, every amount in the appuser currency.
+ * `change = endValue - startValue - netContributions`; a value the API cannot
+ * know (no snapshot) is `null`, and so is any figure derived from it.
+ */
 export interface PortfolioPerformanceRow {
-  accountKey: string;
+  portfolioKey: string;
   name: string;
   currency: string;
-  startBalance: number;
-  endBalance: number;
-  return: number;
-  contributions: number;
+  /** Value when the period opens; 0 for a portfolio started within it. */
+  startValue: number | null;
+  /**
+   * Buys minus sales in the period (fees included), each converted at the
+   * rate of its date; null when one has no rate.
+   */
+  netContributions: number | null;
+  change: number | null;
+  /** `change` as a % of start value plus net contributions, when positive. */
+  changePercent: number | null;
+  /** Dividends paid in the period, reported beside the change; null when one has no rate. */
+  dividends: number | null;
+  /** Value when the period closes: live for a current period. */
+  endValue: number | null;
 }

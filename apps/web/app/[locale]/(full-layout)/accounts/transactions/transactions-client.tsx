@@ -14,6 +14,7 @@ import AccountsTransactionsEmptyState from "@/components/account/AccountsTransac
 import AccountTransactionAddModal from "@/components/account/AccountTransactionAddModal";
 import AccountTransactionImportModal from "@/components/account/AccountTransactionImportModal";
 import TransactionsTable from "@/components/account/AccountTransactionsTable";
+import { TransactionsLead } from "@/components/account/TransactionsLead";
 import { AccountsTransactionsOnboarding } from "@/components/onboarding/AccountsTransactionsOnboarding";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/Spinner";
@@ -133,11 +134,13 @@ export default function AccountsTransactionsClient({
     accountKeys: string[];
     categoryKeys: string[];
     needsReview: boolean;
+    tagKeys: string[];
     transactionTypes: string[];
   }>({
     accountKeys: [],
     categoryKeys: [],
     needsReview: false,
+    tagKeys: [],
     transactionTypes: [],
   });
 
@@ -146,6 +149,7 @@ export default function AccountsTransactionsClient({
       accountKeys: string[];
       categoryKeys: string[];
       needsReview: boolean;
+      tagKeys: string[];
       transactionTypes: string[];
     }) => {
       // The table re-reports on every render of its effect, so bail when nothing moved —
@@ -154,6 +158,7 @@ export default function AccountsTransactionsClient({
         current.needsReview === next.needsReview &&
         current.accountKeys.join() === next.accountKeys.join() &&
         current.categoryKeys.join() === next.categoryKeys.join() &&
+        current.tagKeys.join() === next.tagKeys.join() &&
         current.transactionTypes.join() === next.transactionTypes.join()
           ? current
           : next,
@@ -166,6 +171,7 @@ export default function AccountsTransactionsClient({
   const hasTableFilters =
     tableFilters.accountKeys.length > 0 ||
     tableFilters.categoryKeys.length > 0 ||
+    tableFilters.tagKeys.length > 0 ||
     tableFilters.transactionTypes.length > 0 ||
     tableFilters.needsReview;
 
@@ -182,6 +188,7 @@ export default function AccountsTransactionsClient({
       includeHidden: showHiddenTransactions,
       accountKeys: tableFilters.accountKeys,
       categoryKeys: tableFilters.categoryKeys,
+      tagKeys: tableFilters.tagKeys,
       transactionTypes: tableFilters.transactionTypes,
       ...(tableFilters.needsReview ? { unreviewedOnly: true } : {}),
     },
@@ -295,14 +302,14 @@ export default function AccountsTransactionsClient({
   }
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-8">
       {/* Header */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div className="flex flex-col gap-1">
           <div className="flex items-center gap-2">
             {/* § 9 rule 3: a declarative header — the title and nothing else.
-                No supporting sentence; the table starts immediately. */}
-            <h1 className="text-foreground text-xl font-semibold tracking-tight">
+                No supporting sentence; the figures and the ledger follow. */}
+            <h1 className="text-foreground text-2xl font-semibold tracking-tight lg:text-3xl">
               {t("transactions")}
             </h1>
             <AccountsTransactionsOnboarding />
@@ -323,12 +330,8 @@ export default function AccountsTransactionsClient({
             }}
             accounts={accountsData?.accounts ?? []}
             trigger={
-              <Button
-                variant="outline"
-                size="sm"
-                className="w-full gap-1.5 sm:w-auto"
-              >
-                <Download className="size-3.5" />
+              <Button variant="outline" className="w-full sm:w-auto">
+                <Download className="size-4" />
                 {t("import-transactions")}
               </Button>
             }
@@ -344,8 +347,8 @@ export default function AccountsTransactionsClient({
             }}
             accounts={accountsData?.accounts ?? []}
             trigger={
-              <Button size="sm" className="w-full gap-1.5 sm:w-auto">
-                <Plus className="size-3.5" />
+              <Button className="w-full sm:w-auto">
+                <Plus className="size-4" />
                 {t("add-transaction")}
               </Button>
             }
@@ -353,8 +356,16 @@ export default function AccountsTransactionsClient({
         </div>
       </div>
 
-      {/* Transactions table */}
+      <TransactionsLead
+        accounts={accountsData?.accounts ?? []}
+        fromDate={transactionDateRange?.from}
+        toDate={transactionDateRange?.to}
+        viewTotal={transactionsData?.total}
+      />
+
+      {/* Transactions ledger */}
       <TransactionsTable
+        layout="ledger"
         transactions={transactionsData?.transactions ?? []}
         serverTotal={transactionsData?.total}
         footerActions={

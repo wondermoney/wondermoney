@@ -17,7 +17,8 @@ description: Diagnostica problemas al vincular una cuenta bancaria o al configur
 - Si el banco admite actualmente el método de conexión que usas.
 - Si completaste todos los pasos de aprobación en el banco.
 - Si la cuenta está conectada a la cuenta correcta.
-- Si la conexión caducó o fue revocada.
+- Si la conexión caducó o fue revocada. Cuando ninguna cuenta responde, WonderMoney pregunta al banco si tu consentimiento sigue activo. Si el banco lo terminó antes de tiempo, la conexión aparece como finalizada por el banco y deja de actualizarse hasta que la vuelvas a conectar. Consulta Duración del consentimiento y volver a conectar, más abajo.
+- Si el banco está limitando las actualizaciones. Los bancos pueden permitir solo unas pocas actualizaciones automáticas al día. Cuando un banco pide a WonderMoney que reduzca el ritmo, la siguiente actualización automática espera hasta la hora que indica el banco, o alrededor de un día si no indica ninguna.
 
 ## Qué probar
 
@@ -25,6 +26,18 @@ description: Diagnostica problemas al vincular una cuenta bancaria o al configur
 2. Inicia sesión en el banco con cuidado y confirma cada pantalla de permisos.
 3. Espera unos minutos y actualiza la lista de cuentas.
 4. Elimina la conexión y vuelve a conectarla si el proceso se queda bloqueado.
+
+## Duración del consentimiento y volver a conectar
+
+Los bancos dan a WonderMoney acceso de solo lectura durante un tiempo limitado. Según PSD2, un consentimiento dura como máximo 180 días, y cada banco fija su propio límite, a menudo 90 o 180 días. La lista de conexiones en Configuración muestra cuándo termina cada consentimiento.
+
+- **Caduca pronto.** En los últimos 14 días antes de que termine un consentimiento, la conexión muestra cuántos días quedan y ofrece **Volver a conectar**, en la web y en la app móvil.
+- **Consentimiento caducado.** El consentimiento llegó a su fecha de fin. Los datos dejan de actualizarse hasta que vuelvas a conectar.
+- **Finalizada por el banco.** El banco terminó el consentimiento antes de tiempo, por ejemplo después de que cambiaras la contraseña de la banca online o retiraras el acceso en la app del banco. Los datos dejan de actualizarse hasta que vuelvas a conectar.
+
+WonderMoney también te envía un correo unos 7 días antes y otro en el último día antes de que termine un consentimiento, y cuando el banco lo termina antes de tiempo. Consulta [Preferencias de correo](/es/docs/settings-security-privacy/email-preferences) para desactivar estas alertas.
+
+Volver a conectar inicia un nuevo consentimiento con el mismo banco. Cuando termina, WonderMoney asocia las cuentas del banco con las que ya tienes por número de cuenta (IBAN) y moneda, así que tus cuentas, saldos e historial de transacciones se mantienen. La conexión antigua sale de la lista cuando todas sus cuentas pasan a la nueva. Una cuenta que eliminaste no vuelve, y una cuenta que el banco comparta sin número de cuenta puede aparecer como cuenta nueva.
 
 ## Problemas con la clave de Enable Banking
 

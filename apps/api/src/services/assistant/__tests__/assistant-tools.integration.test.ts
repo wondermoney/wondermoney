@@ -75,7 +75,7 @@ describe('AssistantToolsService integration shape', () => {
 
   it('reports spending by category in the base currency', async () => {
     mocked.em.find.mockResolvedValueOnce([
-      { categoryKey: { name: 'Groceries' }, transactionKey: { appuserSettlementAmount: -40, transactionTypeKey: { name: 'card_payment' } } },
+      { appuserSettlementAmount: -40, appuserTransactionCategories: { getItems: () => [{ categoryKey: { name: 'Groceries' } }] }, transactionTypeKey: { name: 'card_payment' } },
     ]);
 
     const tools = AssistantToolsService.createTools({ appuserKey: 1, consentVersion: 1, conversationId: 'conversation-1', currency: 'EUR', tenantKey: 2 });

@@ -6,15 +6,16 @@ import { budgetFixture } from './test-fixtures'
 
 const mockPush = jest.fn()
 const mockReplace = jest.fn()
-const mockAddListener = jest.fn((_event: string, _handler: (event: { preventDefault: () => void }) => void) => jest.fn())
+const mockUsePreventRemove = jest.fn((_preventRemove: boolean, _onPrevented?: (options: { data: { action: object }; repeat: () => void }) => void) => jest.fn())
 let mockParams: Record<string, string | string[] | undefined> = {}
 const mockUseBudgets = jest.fn()
 const mockUseBudgetMonth = jest.fn()
 const mockCategoryMutation = { isPending: false, mutateAsync: jest.fn() }
 const mockCategoryDeleteMutation = { isPending: false, mutateAsync: jest.fn() }
-jest.mock('expo-router', () => ({ useRouter: () => ({ push: mockPush, replace: mockReplace }), useNavigation: () => ({ addListener: mockAddListener }), useLocalSearchParams: () => mockParams }))
+jest.mock('expo-router', () => ({ useRouter: () => ({ push: mockPush, replace: mockReplace }), usePreventRemove: (preventRemove: boolean, onPrevented?: (options: { data: { action: object }; repeat: () => void }) => void) => mockUsePreventRemove(preventRemove, onPrevented), useLocalSearchParams: () => mockParams }))
 jest.mock('./use-budgets', () => ({ useBudgets: () => mockUseBudgets() }))
 jest.mock('./use-budget-month', () => ({ useBudgetMonth: (...args: unknown[]) => mockUseBudgetMonth(...args) }))
+jest.mock('./use-budget-year', () => ({ useBudgetYear: () => ({ data: undefined, refetch: jest.fn() }) }))
 jest.mock('./use-budget-category-mutation', () => ({ useBudgetCategoryMutation: () => mockCategoryMutation }))
 jest.mock('./use-budget-category-delete-mutation', () => ({ useBudgetCategoryDeleteMutation: () => mockCategoryDeleteMutation }))
 jest.mock('./budgets-screen', () => ({
@@ -31,7 +32,7 @@ jest.mock('./budget-month-screen', () => ({
 }))
 
 describe('budget routes', () => {
-  beforeEach(() => { mockPush.mockReset(); mockReplace.mockReset(); mockAddListener.mockClear(); mockUseBudgets.mockReset(); mockUseBudgetMonth.mockReset(); mockCategoryMutation.isPending = false; mockCategoryMutation.mutateAsync.mockReset().mockResolvedValue(undefined); mockCategoryDeleteMutation.isPending = false; mockCategoryDeleteMutation.mutateAsync.mockReset().mockResolvedValue(undefined); mockParams = {} })
+  beforeEach(() => { mockPush.mockReset(); mockReplace.mockReset(); mockUsePreventRemove.mockClear(); mockUseBudgets.mockReset(); mockUseBudgetMonth.mockReset(); mockCategoryMutation.isPending = false; mockCategoryMutation.mutateAsync.mockReset().mockResolvedValue(undefined); mockCategoryDeleteMutation.isPending = false; mockCategoryDeleteMutation.mutateAsync.mockReset().mockResolvedValue(undefined); mockParams = {} })
 
   it('opens a nested month route from the list', async () => {
     mockUseBudgets.mockReturnValue({ data: { budgets: [budgetFixture] }, isLoading: false, isAccessTransition: false, isRefreshFailure: false, refetch: jest.fn() })
@@ -74,10 +75,7 @@ describe('budget routes', () => {
     mockCategoryMutation.isPending = true
     mockUseBudgetMonth.mockReturnValue({ isInvalidRoute: false, isAccessTransition: false, isLoading: false, data: { budget: budgetFixture, hasPreviousMonth: true, hasNextMonth: true }, isRefreshFailure: false, refetch: jest.fn() })
     await render(<BudgetMonthRoute />)
-    const beforeRemove = mockAddListener.mock.calls.find(([event]) => event === 'beforeRemove')?.[1]
-    const preventDefault = jest.fn()
-    beforeRemove?.({ preventDefault })
-    expect(preventDefault).toHaveBeenCalled()
+    expect(mockUsePreventRemove.mock.lastCall?.[0]).toBe(true)
   })
 
   it('blocks navigator back removal while the guarded category deletion is pending', async () => {
@@ -85,10 +83,7 @@ describe('budget routes', () => {
     mockCategoryDeleteMutation.isPending = true
     mockUseBudgetMonth.mockReturnValue({ isInvalidRoute: false, isAccessTransition: false, isLoading: false, data: { budget: budgetFixture, hasPreviousMonth: true, hasNextMonth: true }, isRefreshFailure: false, refetch: jest.fn() })
     await render(<BudgetMonthRoute />)
-    const beforeRemove = mockAddListener.mock.calls.find(([event]) => event === 'beforeRemove')?.[1]
-    const preventDefault = jest.fn()
-    beforeRemove?.({ preventDefault })
-    expect(preventDefault).toHaveBeenCalled()
+    expect(mockUsePreventRemove.mock.lastCall?.[0]).toBe(true)
   })
 
   it('uses validated route period, not response metadata, for child category removal', async () => {

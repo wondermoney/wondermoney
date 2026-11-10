@@ -7,6 +7,7 @@ export interface CreateCategoryRequest {
   icon?: string;
   color?: string;
   parentCategoryKey?: string;
+  countsAsSpending?: boolean;
 }
 
 export interface CreateCategoryResponse {
@@ -15,6 +16,7 @@ export interface CreateCategoryResponse {
     name: string;
     icon?: string;
     color?: string;
+    countsAsSpending?: boolean;
   };
 }
 
@@ -25,12 +27,14 @@ const useCreateCategory = () => {
       icon,
       color,
       parentCategoryKey,
+      countsAsSpending,
     }: CreateCategoryRequest) =>
       api.post<CreateCategoryResponse>(`/v1/category`, {
         name,
         icon,
         color,
         parentCategoryKey,
+        countsAsSpending,
       }),
   });
 };

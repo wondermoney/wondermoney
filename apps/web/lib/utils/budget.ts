@@ -9,9 +9,31 @@ import {
 export const getMonthlyBudgetedValue = (row: BudgetRowLike) =>
   convertMonthlyAmountToAnuallizedMonthlyAmount(row.budgeted, row.recurrency);
 
-export const calculateParentBudgetedFromSubRows = (
-  subRows: BudgetRowLike[],
-) => subRows.reduce((sum, subRow) => sum + getMonthlyBudgetedValue(subRow), 0);
+/**
+ * What the row may spend this month: its monthly plan (as the Planned column
+ * shows it) plus what last month carried in. Equals the API's
+ * `category_available` for a monthly row; for a parent or a non-monthly row
+ * the plan part is the spread figure the screen shows, not the raw entered
+ * amount the API adds to. Without rollover this is the plan.
+ */
+export const getMonthlyAvailableValue = (row: BudgetRowLike) =>
+  getMonthlyBudgetedValue(row) + (row.rolledOver ?? 0);
+
+/** What the row has left this month: available minus spent (negative when over). */
+export const getBudgetRowRemaining = (row: BudgetRowLike) =>
+  getMonthlyAvailableValue(row) - (row.spent ?? 0);
+
+/**
+ * Spent as a share of what the row may spend (1 = all of it). 0 when nothing
+ * is available, so an empty plan never divides by zero.
+ */
+export const getBudgetRowProgress = (row: BudgetRowLike) => {
+  const available = getMonthlyAvailableValue(row);
+  return available === 0 ? 0 : (row.spent ?? 0) / available;
+};
+
+export const calculateParentBudgetedFromSubRows = (subRows: BudgetRowLike[]) =>
+  subRows.reduce((sum, subRow) => sum + getMonthlyBudgetedValue(subRow), 0);
 
 export const getBudgetRowMonthlyBudgetedTotal = (data: BudgetRowLike[]) => {
   return data.reduce((acc, row) => {
@@ -22,6 +44,12 @@ export const getBudgetRowMonthlyBudgetedTotal = (data: BudgetRowLike[]) => {
     return acc + getMonthlyBudgetedValue(row);
   }, 0);
 };
+
+const rolloverOf = (category: BudgetCategory) => ({
+  rolledOver: category.category_rolled_over ?? 0,
+  rolloverEnabled: category.category_rollover_enabled ?? false,
+  rolloverIncomplete: category.category_rollover_incomplete ?? false,
+});
 
 export const convertBudgetTemplatesIntoRows = (
   categories: BudgetCategory[],
@@ -57,6 +85,7 @@ export const convertBudgetTemplatesIntoRows = (
         textColor: category.category_text_color,
         bgColor: category.category_bg_color,
         isSystemCategory: category.category_is_system_category,
+        ...rolloverOf(category),
         subRows: [],
       };
       tableRows.push(parentRow);
@@ -77,6 +106,7 @@ export const convertBudgetTemplatesIntoRows = (
           textColor: childCategory.category_text_color,
           bgColor: childCategory.category_bg_color,
           isSystemCategory: childCategory.category_is_system_category,
+          ...rolloverOf(childCategory),
         };
         parentRow.subRows.push(childRow);
       }
@@ -96,18 +126,31 @@ export const convertBudgetTemplatesIntoRows = (
   return tableRows;
 };
 
-export const calculatePlannedAndSpentValue = (data: BudgetRow[]) => {
+/**
+ * The month's totals. `totalPlanned` is the plan alone (the Planned column's
+ * sum); `totalAvailable` adds what rollover carried in, and is what remaining
+ * and `totalPercentage` (remaining as a share of available) measure against.
+ */
+export const calculatePlannedAndSpentValue = (data: BudgetRowLike[]) => {
   const totalPlanned = getBudgetRowMonthlyBudgetedTotal(data);
   let totalSpent = 0;
+  let totalRolledOver = 0;
 
   for (const row of data) {
     totalSpent += row.spent ?? 0;
+    // A parent's carry is already the sum of its subcategories'.
+    totalRolledOver += row.rolledOver ?? 0;
   }
+
+  const totalAvailable = totalPlanned + totalRolledOver;
 
   return {
     totalPlanned,
+    totalAvailable,
     totalSpent,
     totalPercentage:
-      totalPlanned > 0 ? ((totalPlanned - totalSpent) / totalPlanned) * 100 : 0,
+      totalAvailable > 0
+        ? ((totalAvailable - totalSpent) / totalAvailable) * 100
+        : 0,
   };
 };

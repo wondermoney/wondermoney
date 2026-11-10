@@ -3,6 +3,7 @@ import { StyleSheet, Text, View } from 'react-native'
 import { CartesianChart, Line } from 'victory-native'
 
 import { SegmentedControl } from '@/components/ui/segmented-control'
+import { Section } from '@/components/ui/section'
 import { themeTokens } from '@/theme/tokens'
 import { textStyles } from '@/theme/typography'
 
@@ -25,10 +26,7 @@ export type AssetPriceChartProps = Readonly<{
 export function AssetPriceChart({ state, period, onSelectPeriod, palette }: AssetPriceChartProps) {
   const { t } = useTranslation()
   return (
-    <View style={[styles.card, { borderColor: palette.border, backgroundColor: palette.muted }]}>
-      <Text accessibilityRole="header" allowFontScaling style={[styles.title, { color: palette.foreground }]}>
-        {t('assetDetail.priceChart.heading')}
-      </Text>
+    <Section title={t('assetDetail.priceChart.heading')} variant="open">
       <SegmentedControl
         accessibilityLabel={t('assetDetail.priceChart.title')}
         onChange={onSelectPeriod}
@@ -44,7 +42,7 @@ export function AssetPriceChart({ state, period, onSelectPeriod, palette }: Asse
           {t('assetDetail.priceChart.loading')}
         </Text>
       ) : state.status === 'error' ? (
-        <Text accessibilityRole="alert" allowFontScaling style={[styles.helper, { color: palette.destructive }]}>
+        <Text accessibilityRole="alert" allowFontScaling style={[styles.helper, { color: palette.destructiveText }]}>
           {t('assetDetail.priceChart.error')}
         </Text>
       ) : state.points.length < 2 ? (
@@ -61,14 +59,12 @@ export function AssetPriceChart({ state, period, onSelectPeriod, palette }: Asse
           </CartesianChart>
         </View>
       )}
-    </View>
+    </Section>
   )
 }
 
 const styles = StyleSheet.create({
-  card: { width: '100%', borderWidth: 1, borderRadius: themeTokens.radius.xl, padding: themeTokens.spacing[4], gap: themeTokens.spacing[3] },
-  title: { ...textStyles.section },
   periods: { flexDirection: 'row', flexWrap: 'wrap', gap: themeTokens.spacing[2] },
-  helper: { ...textStyles.body },
+  helper: { ...textStyles.meta },
   chart: { width: '100%', height: 200 },
 })

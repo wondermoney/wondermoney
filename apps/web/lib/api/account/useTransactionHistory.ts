@@ -23,6 +23,8 @@ export interface TransactionHistoryEntry {
   source: string | null;
   changes: Record<string, { from: unknown; to: unknown }> | null;
   createdAt: string;
+  /** The household rules that made this change, when a rule did (source `rule`). */
+  rules?: { name: string; ruleKey: number }[];
 }
 
 export interface GetTransactionHistoryResponse {

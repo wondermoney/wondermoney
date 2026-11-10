@@ -2,7 +2,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQueryClient } from "@tanstack/react-query";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { usePostHog } from "posthog-js/react";
 import { useMemo } from "react";
 import { SubmitHandler, useForm, useWatch } from "react-hook-form";
@@ -28,7 +28,6 @@ import { useRateLimitToast } from "@/lib/api/useRateLimitToast";
 import {
   buildCurrencyOptions,
   CURRENCY_TRIGGER_CLASS,
-  useAmountPlaceholder,
 } from "@/lib/utils/currency-field";
 import { zLocaleNumber } from "@/lib/utils/number";
 import { invalidateAccounts } from "@/lib/utils/queryInvalidation";
@@ -38,6 +37,7 @@ import { ComboBoxForm } from "../ui/combobox";
 import { VirtualizedCombobox } from "../ui/combobox-virtualized";
 import { DrawerDialog } from "../ui/dialog-responsive";
 import { Input } from "../ui/input";
+import { MoneyInput } from "../ui/MoneyInput";
 import {
   Select,
   SelectContent,
@@ -53,7 +53,7 @@ interface AccountAddOfflineModalProps {
   onSuccess?: () => void | Promise<void>;
 }
 
-const createFormSchema = (t: (key: string) => string) =>
+const createFormSchema = (t: (key: string) => string, locale: string) =>
   z.object({
     name: z.string().min(1, t("invalid-account-name")),
     currencyId: z.string().default("151"),
@@ -65,7 +65,7 @@ const createFormSchema = (t: (key: string) => string) =>
     // itself has no positivity constraint (`currentBalance` there is just
     // a finite `z.number().max(999999999999)`), so this mirrors the
     // server's own bound rather than inventing a stricter one.
-    currentBalance: zLocaleNumber.pipe(
+    currentBalance: zLocaleNumber(locale, t("invalid-current-balance")).pipe(
       z
         .number({ error: t("invalid-current-balance") })
         .max(999999999999, t("invalid-current-balance"))
@@ -89,10 +89,10 @@ const AccountAddOfflineModal = ({
   onSuccess,
 }: AccountAddOfflineModalProps) => {
   const t = useTranslations();
-  const amountPlaceholder = useAmountPlaceholder();
   const notifyIfRateLimited = useRateLimitToast();
   const posthog = usePostHog();
-  const formSchema = useMemo(() => createFormSchema(t), [t]);
+  const locale = useLocale();
+  const formSchema = useMemo(() => createFormSchema(t, locale), [t, locale]);
   const methods = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -179,7 +179,7 @@ const AccountAddOfflineModal = ({
           disabled={isSubmitting}
           form="add-offline-modal"
         >
-          {t("create-account")}
+          {t("add-account")}
         </Button>
       }
     >
@@ -196,7 +196,10 @@ const AccountAddOfflineModal = ({
               <FormItem>
                 <FormLabel required>{t("name")}</FormLabel>
                 <FormControl>
-                  <Input placeholder={t("account-name")} {...field} />
+                  <Input
+                    placeholder={t("account-name-placeholder")}
+                    {...field}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -269,13 +272,11 @@ const AccountAddOfflineModal = ({
               <FormItem>
                 <FormLabel required>{t("current-balance")}</FormLabel>
                 <FormControl>
-                  <Input
+                  <MoneyInput
                     type="tel"
                     step="0.01"
-                    placeholder={amountPlaceholder}
-                    className="w-full pr-4 text-right"
                     {...field}
-                    startAdornment={
+                    currencySlot={
                       <ComboBoxForm
                         triggerClassName={CURRENCY_TRIGGER_CLASS}
                         field={{ value: currencyValue }}

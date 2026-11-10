@@ -1,4 +1,7 @@
+import type { EntityMarkSource } from '@/components/ui/entity-mark'
+
 import type { RecentTransactionDto } from './recent-transactions-contract'
+import { transactionMark } from './transaction-mark'
 
 /** Sign expressed as text so it never depends on colour alone. Zero has no direction. */
 export type RecentTransactionDirection = 'credit' | 'debit' | null
@@ -11,6 +14,8 @@ export type RecentTransactionRow =
       amount: number | null
       currencyCode: string | null
       direction: RecentTransactionDirection
+      /** Category, transfer arrows or the uncategorised tag. Absent from rows built before the API sent it. */
+      mark?: EntityMarkSource
     }>
   | Readonly<{
       kind: 'synthetic-initial-balance'
@@ -41,6 +46,10 @@ export function mapRecentTransactions(dtos: readonly RecentTransactionDto[]): re
       amount: dto.amount,
       currencyCode: dto.currencyCode,
       direction: directionOf(dto.amount),
+      mark: transactionMark({
+        transfer: dto.transfer === true,
+        category: dto.category ? { name: dto.category.icon, bgColor: dto.category.bgColor, textColor: dto.category.textColor } : null,
+      }),
     }
   })
 }

@@ -70,7 +70,7 @@ describe('CSV import: money in is income unless it is an own-account transfer', 
     const body = rows.map((row) => `${row.date.toISOString()},${row.amount},,Merchant,,generic-${++sequence},${types[row.type].transactionTypeKey}`);
     return new AccountCsvImportService().importAccountCsv(
       { accountKey: account.accountKey, bucket: 'bucket', key: 'generic.csv' },
-      { em: db.em(), getObjectSize: () => Promise.resolve(undefined), getObjectText: () => Promise.resolve([GENERIC_HEADER, ...body].join('\n')) },
+      { em: db.em(), getObjectBuffer: () => Promise.resolve(Buffer.from([GENERIC_HEADER, ...body].join('\n'))), getObjectSize: () => Promise.resolve(undefined), getObjectText: () => Promise.resolve([GENERIC_HEADER, ...body].join('\n')) },
     );
   }
 
@@ -79,7 +79,7 @@ describe('CSV import: money in is income unless it is an own-account transfer', 
     return rows.map((row) => ({ amount: row.settlementAmount, type: row.transactionTypeKey?.name }));
   }
 
-  const cashflow = () => getCashflowReport({ filters: reportFiltersSchema.parse({ fromDate: '2026-09-01T00:00:00Z', toDate: '2026-09-30T23:59:59Z' }), tenant: household.tenant, user: household.appuser });
+  const cashflow = async () => (await getCashflowReport({ filters: reportFiltersSchema.parse({ fromDate: '2026-09-01T00:00:00Z', toDate: '2026-09-30T23:59:59Z' }), tenant: household.tenant, user: household.appuser })).data;
 
   describe('bank statement', () => {
     it('counts an imported salary as income', async () => {

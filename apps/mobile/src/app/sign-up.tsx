@@ -1,16 +1,16 @@
 import { Link, useRouter } from 'expo-router'
 import { useEffect, useState } from 'react'
-import { Text, useColorScheme, View } from 'react-native'
+import { View } from 'react-native'
 import { useTranslation } from 'react-i18next'
 
 import { useProductRuntime } from '@/components/providers/product-runtime-provider'
+import { AuthLink, AuthLead } from '@/features/auth/auth-form-styles'
 import { InviteInvalidScreen } from '@/features/auth/invite-invalid-screen'
 import { SignUpScreen } from '@/features/auth/sign-up-screen'
 import { SocialSignIn } from '@/features/auth/social-sign-in'
 import type { InviteValidationDto } from '@/lib/auth/household-invite-validation'
 import { setPendingInviteToken, takePendingInviteToken } from '@/lib/auth/invite-token-store'
 import { captureAnalyticsEvent } from '@/lib/telemetry/analytics'
-import { themeTokens } from '@/theme/tokens'
 
 type InviteState =
   | { status: 'none' }
@@ -24,8 +24,6 @@ export default function SignUpRoute() {
   const router = useRouter()
   const [pendingToken] = useState(() => takePendingInviteToken())
   const [invite, setInvite] = useState<InviteState>(() => (pendingToken ? { status: 'validating' } : { status: 'none' }))
-  const colorScheme = useColorScheme()
-  const palette = themeTokens.colors[colorScheme === 'dark' ? 'dark' : 'light']
 
   useEffect(() => {
     if (!pendingToken) return
@@ -73,16 +71,19 @@ export default function SignUpRoute() {
         if (outcome.status === 'accepted') captureAnalyticsEvent('sign_up_completed', { provider: 'email' })
         return outcome.status
       }}
+      lead={(
+        <AuthLead
+          link={<Link asChild href="/sign-in"><AuthLink label={t('auth.loginLink')} strong /></Link>}
+          text={`${t('auth.signup.helper')} ${t('auth.alreadyMember')}`}
+        />
+      )}
       footer={(
-        <View style={{ gap: themeTokens.spacing[3] }}>
-          <SocialSignIn
-            flow="sign_up"
-            onBeforeSignIn={() => {
-              if (invite.status === 'valid') setPendingInviteToken(invite.token)
-            }}
-          />
-          <Link href="/sign-in"><Text style={{ color: palette.primary }}>{t('auth.haveAccount')}</Text></Link>
-        </View>
+        <SocialSignIn
+          flow="sign_up"
+          onBeforeSignIn={() => {
+            if (invite.status === 'valid') setPendingInviteToken(invite.token)
+          }}
+        />
       )}
     />
   )

@@ -34,6 +34,8 @@ import {
 import { getCountryCodeClient } from "@/lib/utils/countries";
 import { SUPPORTED_BANK_COUNTRY_CODES } from "@/lib/utils/countries/bank-countries";
 import { countryFlags } from "@/lib/utils/countries/country-flag";
+import { useAmountPlaceholder } from "@/lib/utils/currency-field";
+import { parseLocaleNumber } from "@/lib/utils/number";
 
 import FirstRunIconTile from "./FirstRunIconTile";
 import { useFirstRunOnboardingFooter } from "./FirstRunOnboardingRouteShell";
@@ -407,17 +409,29 @@ function ManualPanel({
   // (common.json), not under onboarding.firstRun, so they need their own unscoped
   // useTranslations() call (matches AccountCreateOfflineModal's usage of these keys).
   const tCommon = useTranslations();
+  const locale = useLocale();
   const user = useUser();
   const posthog = usePostHog();
   const createOffline = useCreateOfflineAccount();
   const [name, setName] = useState("");
   const [balance, setBalance] = useState("");
+  const [balanceInvalid, setBalanceInvalid] = useState(false);
+  const amountPlaceholder = useAmountPlaceholder();
 
   const submit = () => {
+    // Typed in the reader's locale ("1.234,56" for pt and es). Blank is a zero
+    // balance; anything unreadable is refused rather than saved as 0.
+    const currentBalance = balance.trim()
+      ? parseLocaleNumber(balance, locale)
+      : 0;
+    if (currentBalance === null) {
+      setBalanceInvalid(true);
+      return;
+    }
     createOffline.mutate(
       {
         name: name || tCommon("my-account"),
-        currentBalance: Number(balance) || 0,
+        currentBalance,
         // 151 is the app-default currency key (matches AccountCreateOfflineModal's default);
         // currencyId is a numeric currency key, not an ISO code.
         currencyId: "151",
@@ -471,10 +485,26 @@ function ManualPanel({
           <Input
             id="fr-manual-account-balance"
             value={balance}
-            onChange={(e) => setBalance(e.target.value)}
+            onChange={(e) => {
+              setBalance(e.target.value);
+              setBalanceInvalid(false);
+            }}
             inputMode="decimal"
-            placeholder="0.00"
+            placeholder={amountPlaceholder}
+            aria-invalid={balanceInvalid}
+            aria-describedby={
+              balanceInvalid ? "fr-manual-account-balance-error" : undefined
+            }
           />
+          {balanceInvalid && (
+            <p
+              id="fr-manual-account-balance-error"
+              role="alert"
+              className="text-destructive-text text-sm"
+            >
+              {tCommon("invalid-amount")}
+            </p>
+          )}
         </div>
         <p className="text-muted-foreground text-xs">
           {t("connect.manualNote")}

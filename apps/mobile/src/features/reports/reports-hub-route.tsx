@@ -1,4 +1,3 @@
-import { type Href, useRouter } from 'expo-router'
 import { useTranslation } from 'react-i18next'
 
 import { ApiError } from '@/lib/api/errors'
@@ -34,7 +33,6 @@ import { useSpendingByCategoryReport } from './use-spending-by-category-report'
  * section keeps its own query, export, and refresh so one failing report
  * doesn't block the rest of the page. */
 export function ReportsHubRoute() {
-  const router = useRouter()
   const { t } = useTranslation()
   const filterState = useReportFilters()
   const filterOptions = useReportFilterOptions()
@@ -119,7 +117,6 @@ export function ReportsHubRoute() {
       onSelectPreset={filterState.selectPreset}
       refreshing={refreshing}
       onRefreshAll={refreshAll}
-      onBack={() => router.replace('/more' as unknown as Href)}
       sankey={{ state: sankeyState, currencyCode, exportState: sankeyExport.state, onExport: sankeyExport.exportCsv, onRefresh: async () => { await sankeyQuery.refetch() } }}
       cashflow={{ state: cashflowState, currencyCode, exportState: cashflowExport.state, onExport: cashflowExport.exportCsv, onRefresh: async () => { await cashflowQuery.refetch() } }}
       spendingByCategory={{ state: spendingState, currencyCode, exportState: spendingExport.state, onExport: spendingExport.exportCsv, onRefresh: async () => { await spendingQuery.refetch() } }}

@@ -49,6 +49,10 @@ AI_MODEL=llama3.1
 
 Define `AI_API_KEY` cuando el endpoint necesite una clave. Para usar otro modelo en una función concreta, define `AI_MODEL_<FUNCIÓN>`; por ejemplo, la lectura de recibos necesita un modelo que lea imágenes, definido con `AI_MODEL_OCR`.
 
+Si el registro está abierto y pagas por el modelo, define `AI_REQUIRES_VERIFIED_EMAIL=true`. Las cuentas creadas con correo y contraseña reciben entonces un enlace de verificación por correo, y tienen que seguirlo antes de poder usar el asistente, la lectura de recibos o el mapeo de columnas con IA. Las cuentas de Google y Apple cuentan como verificadas. Necesita el correo configurado.
+
+Para limitar lo que cada hogar puede gastar en el modelo al día, define `AI_DAILY_LIMIT_ASSISTANT` (mensajes al asistente), `AI_DAILY_LIMIT_OCR` (lecturas de recibos) y `AI_DAILY_LIMIT_CSV_MAPPING` (importaciones CSV que mapea el modelo). Los miembros de un hogar comparten el límite, que se reinicia a medianoche UTC. Déjalos vacíos para no tener límite. Cuando un hogar llega a un límite, la aplicación lo indica hasta el día siguiente; las importaciones CSV siguen funcionando, con las columnas mapeadas a mano.
+
 ## Datos de mercado
 
 Define `EODHD_API_KEY` para activar la búsqueda de tickers, las cotizaciones en tiempo real y el módulo de Mercados Financieros.
@@ -68,5 +72,37 @@ Define `GOOGLE_CLIENT_ID` y `GOOGLE_CLIENT_SECRET` (de un cliente OAuth en Googl
 | `INSTANCE_NAME` | El nombre de tu instancia. La aplicación web lo muestra en los títulos de las pestañas del navegador, en las vistas previas de enlaces y en las páginas de inicio de sesión y registro, y en lugar del logotipo de WonderMoney cuando lo cambias. Cada correo lo usa en el asunto, el texto y la firma, y como nombre del remitente si `EMAIL_FROM_NAME` no está definido; las aplicaciones de autenticación lo muestran como etiqueta. La aplicación web lo lee de la API, así que defínelo solo en la API; un cambio aparece en la aplicación web en un máximo de cinco minutos |
 | `SIGNUP_MODE` | `open`, `invite` o `closed` (consulta [Instalar](/es/docs/self-hosting/install)) |
 | `SUPPORT_EMAIL` | El buzón del formulario de contacto, de las alertas de cuenta y de los comentarios desde la aplicación, y la dirección de soporte que muestra la aplicación; déjalo vacío para desactivarlos y ocultar los enlaces de soporte. El formulario "Compartir comentarios" también necesita el correo configurado; sin él, el formulario se oculta |
+| `SPONSOR_URL` | Una página donde tus usuarios pueden contribuir a mantener la instancia (Open Collective, GitHub Sponsors, ...). Las preguntas frecuentes de la aplicación web la enlazan cuando está definida |
 | `NEXT_PUBLIC_TERMS_URL`, `NEXT_PUBLIC_PRIVACY_URL` | Tus páginas legales, enlazadas desde la página de registro cuando ambas están definidas |
 | `PRIVACY_POLICY_URL` | Tu política de privacidad, enlazada desde el pie de los correos. `{lang}` se sustituye por el idioma del destinatario (`en` o `pt`), por ejemplo `https://example.com/{lang}/privacy`. Por defecto, apunta a los ajustes de privacidad de la aplicación |
+
+## Analítica
+
+Tu instancia no carga analítica ni gestor de etiquetas, ni registra eventos de uso, a menos que los actives. Cada ajuste de abajo activa un servicio, que envía a tu propia cuenta en ese servicio; déjalos vacíos para mantener todo desactivado.
+
+| Ajuste | Qué activa |
+|---|---|
+| `NEXT_PUBLIC_GTM_ID` | Tu contenedor de Google Tag Manager (`GTM-XXXXXXX`), cargado en todas las páginas de la aplicación web |
+| `NEXT_PUBLIC_POSTHOG_KEY` | PostHog en la aplicación web: vistas de página, eventos de uso y grabaciones de sesión, asociados a la dirección de correo de cada usuario |
+| `ANALYTICS_OUTBOX_MODE=live` con `POSTHOG_API_KEY` | Eventos de registro, inicio de sesión y sincronización bancaria enviados a PostHog por la API y el worker. Define ambos en la API y en el worker; con el modo desactivado, no se registra ningún evento |
+
+Si activas alguno, informa a tus usuarios en tu política de privacidad (`NEXT_PUBLIC_PRIVACY_URL`) y pide su consentimiento cuando la ley lo exija.
+
+## Qué envía tu instancia
+
+No se envía nada al proyecto WonderMoney. Cada servicio externo que tu instancia puede contactar, y lo que lo activa:
+
+| Servicio | Lo contacta | Se activa con |
+|---|---|---|
+| Banco Central Europeo | El worker, una vez al día, para descargar los tipos de cambio del euro. No envía datos sobre ti ni sobre tus usuarios | Siempre activo |
+| Correo (tu servidor SMTP o Resend) | La API y el worker, para enviar restablecimientos de contraseña, invitaciones y notificaciones | `SMTP_HOST` o `RESEND_API_KEY` |
+| IA (tu endpoint compatible con OpenAI) | La API y el worker, con el recibo, las columnas del CSV, las transacciones o los mensajes de chat que necesita la función | `AI_BASE_URL` y `AI_MODEL` |
+| Datos de mercado (EODHD) | La API y el worker, con símbolos bursátiles, no datos de usuarios | `EODHD_API_KEY` |
+| Almacenamiento de archivos (tu almacenamiento compatible con S3) | La API y los navegadores, para importaciones de CSV y copias de recibos | `S3_ENDPOINT` y `S3_BUCKET` |
+| Registro de errores (Sentry) | La API, el worker y la aplicación web, con informes de errores | `SENTRY_DSN` (API y worker), `NEXT_PUBLIC_SENTRY_DSN` (aplicación web) |
+| Analítica (Google Tag Manager, PostHog) | Consulta [Analítica](#analítica) | `NEXT_PUBLIC_GTM_ID`, `NEXT_PUBLIC_POSTHOG_KEY`, `ANALYTICS_OUTBOX_MODE=live` |
+| Sincronización bancaria (Enable Banking) | La API y el worker, para los usuarios que conectan un banco | La clave de Enable Banking de cada usuario, añadida en Ajustes |
+| Inicio de sesión con Google | Los navegadores y la API, cuando un usuario elige "Continuar con Google" | `GOOGLE_CLIENT_ID` y `GOOGLE_CLIENT_SECRET` |
+| reCAPTCHA | Los navegadores en el formulario de contacto, y la aplicación web para comprobar la respuesta | `NEXT_PUBLIC_RECAPTCHA_SITE_KEY` y `RECAPTCHA_SECRET_KEY` |
+
+Los navegadores también cargan los logotipos de bancos y bolsas desde las direcciones guardadas en el catálogo de bancos y activos. La aplicación móvil no envía analítica ni informes de errores mientras está conectada a tu servidor.

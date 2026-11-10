@@ -14,10 +14,9 @@ import AccountTransactionImportModal from "./AccountTransactionImportModal";
 
 const mocks = vi.hoisted(() => ({
   presign: vi.fn(),
+  preview: vi.fn(),
   put: vi.fn(async () => ({ status: 200 })),
-  startImport: vi.fn(async () => ({
-    data: { correlationId: "csv-1", status: "queued" },
-  })),
+  createImport: vi.fn(async () => ({ id: "import-1", status: "parsing" })),
   toastError: vi.fn(),
 }));
 
@@ -28,21 +27,19 @@ vi.mock("sonner", () => ({
 vi.mock("@/lib/api/account/useCreateAccountTransactionsCsvUrl", () => ({
   default: () => ({ isPending: false, mutate: mocks.presign }),
 }));
-vi.mock("@/lib/api/account/useStartAccountCsvImport", () => ({
-  default: () => ({ isPending: false, mutateAsync: mocks.startImport }),
+vi.mock("@/lib/api/account/usePreviewAccountCsvImport", () => ({
+  default: () => ({ isPending: false, mutateAsync: mocks.preview }),
 }));
-vi.mock("@/lib/api/background-operation/useBackgroundOperation", () => ({
-  useBackgroundOperation: () => ({ data: undefined }),
-}));
-vi.mock("@/lib/api/configs/useConfigs", () => ({
-  default: () => ({
-    data: {
-      transactionTypes: [
-        { transactionTypeKey: 4, name: "PAYMENT" },
-        { transactionTypeKey: 9, name: "DEPOSIT" },
-      ],
-    },
+vi.mock("@/lib/api/transaction-import/useTransactionImport", () => ({
+  useCreateTransactionImport: () => ({
+    isPending: false,
+    mutateAsync: mocks.createImport,
   }),
+}));
+vi.mock("./TransactionImportReview", () => ({
+  default: ({ importId }: { importId: string }) => (
+    <div data-testid="review">{importId}</div>
+  ),
 }));
 vi.mock("@/lib/api/instance/useInstance", () => ({
   useFeature: () => true,
@@ -74,8 +71,9 @@ beforeAll(() => {
 });
 beforeEach(() => {
   mocks.presign.mockReset();
+  mocks.preview.mockReset();
   mocks.put.mockClear();
-  mocks.startImport.mockClear();
+  mocks.createImport.mockClear();
   mocks.toastError.mockClear();
 });
 afterEach(() => cleanup());
@@ -149,82 +147,131 @@ function presignAnswers(isSupportedBank: boolean) {
   );
 }
 
-async function importFile(name: string) {
+const MAPPING = {
+  columns: { amount: 2, date: 0, description: 1 },
+  dateFormat: "DMY",
+  decimalSeparator: ",",
+  headerRowIndex: 0,
+  invertAmounts: false,
+} as const;
+
+/** The preview endpoint's answer for a file it read. */
+function previewOf(overrides: Record<string, unknown> = {}) {
+  return {
+    data: {
+      ambiguousDateFormat: false,
+      firstDate: "2026-01-02",
+      headers: ["Data", "Descrição", "Montante"],
+      invalidRows: 0,
+      lastDate: "2026-01-31",
+      mapping: MAPPING,
+      sample: [
+        {
+          amount: -12.4,
+          currency: "EUR",
+          date: "2026-01-02",
+          description: "PINGO DOCE",
+        },
+      ],
+      source: "columns",
+      totalRows: 42,
+      ...overrides,
+    },
+  };
+}
+
+async function pickFile(name: string) {
   const user = userEvent.setup();
   const input = document.querySelector<HTMLInputElement>('input[type="file"]');
   assert.ok(input, "no file input");
-  await user.upload(
-    input,
-    new File(["date,amount\n"], name, { type: "text/csv" }),
-  );
-  await user.click(screen.getByRole("button", { name: messages.import }));
+  await user.upload(input, new File(["Data;Descrição;Montante\n"], name));
+  return user;
 }
 
-test.each([
-  ["a manual account with no bank", manualAccount],
-  ["an account at a bank without a statement parser", unsupportedBankAccount],
-])(
-  "%s is offered the generic CSV format and its import starts",
-  async (_kind, selected) => {
-    presignAnswers(false);
-    renderModal(selected);
+test("a file from any bank is read as soon as it is picked, and is staged for review with the columns found", async () => {
+  presignAnswers(false);
+  mocks.preview.mockResolvedValue(previewOf());
+  renderModal(unsupportedBankAccount);
 
-    const format = screen.getByTestId("account-import-generic-format");
-    assert.ok(format.textContent?.includes("transactionTypeKey"));
-    assert.ok(
-      screen.getByRole("button", {
-        name: messages["import-transactions-generic-download-template"],
-      }),
-    );
+  const user = await pickFile("extrato.csv");
 
-    await importFile("transactions.csv");
-
-    await waitFor(() => assert.equal(mocks.startImport.mock.calls.length, 1));
-    assert.equal(mocks.put.mock.calls.length, 1);
-    assert.deepEqual(mocks.startImport.mock.calls[0], [
-      { accountId: "3", key: "account-3-upload.csv" },
-    ]);
-    assert.equal(mocks.toastError.mock.calls.length, 0);
-  },
-);
-
-test("a supported bank's account is asked for the bank's own export and its import starts", async () => {
-  presignAnswers(true);
-  renderModal(supportedBankAccount);
-
-  assert.ok(
-    screen
-      .getByTestId("account-import-bank-format")
-      .textContent?.includes("Millennium BCP"),
+  const preview = await screen.findByTestId("statement-preview");
+  assert.ok(preview.textContent?.includes("42 transactions"));
+  assert.ok(preview.textContent?.includes("PINGO DOCE"));
+  await user.click(
+    screen.getByRole("button", { name: messages["import-review-start"] }),
   );
-  assert.equal(screen.queryByTestId("account-import-generic-format"), null);
 
-  await importFile("statement.csv");
-
-  await waitFor(() => assert.equal(mocks.startImport.mock.calls.length, 1));
+  await waitFor(() => assert.equal(mocks.createImport.mock.calls.length, 1));
+  assert.deepEqual(mocks.createImport.mock.calls[0], [
+    { accountId: "3", key: "account-3-upload.csv", mapping: MAPPING },
+  ]);
+  // Nothing is imported yet: the dialog moves on to the review.
+  assert.equal((await screen.findByTestId("review")).textContent, "import-1");
   assert.equal(mocks.toastError.mock.calls.length, 0);
 });
 
-test("picking another account in the dialog switches to that account's format and imports into it", async () => {
+test("a supported bank's own export is staged without columns", async () => {
   presignAnswers(true);
-  const user = userEvent.setup();
+  mocks.preview.mockResolvedValue(
+    previewOf({ bankName: "bcp", mapping: undefined, source: "bank" }),
+  );
+  renderModal(supportedBankAccount);
+
+  const user = await pickFile("statement.xlsx");
+  await screen.findByTestId("statement-preview");
+  await user.click(
+    screen.getByRole("button", { name: messages["import-review-start"] }),
+  );
+
+  await waitFor(() => assert.equal(mocks.createImport.mock.calls.length, 1));
+  assert.deepEqual(mocks.createImport.mock.calls[0], [
+    { accountId: "3", key: "account-3-upload.csv", mapping: undefined },
+  ]);
+});
+
+test("a file whose columns could not be found cannot be imported until they are picked", async () => {
+  presignAnswers(false);
+  mocks.preview.mockResolvedValue(
+    previewOf({
+      mapping: { ...MAPPING, columns: { description: 1 } },
+      sample: [],
+      source: "none",
+      totalRows: 0,
+    }),
+  );
+  renderModal(manualAccount);
+
+  await pickFile("export.csv");
+  await screen.findByTestId("statement-preview");
+
+  assert.ok(
+    screen.getByText(messages["import-statement-source-none"]),
+    "asks for the columns",
+  );
+  assert.equal(
+    screen
+      .getByRole("button", { name: messages["import-review-start"] })
+      .hasAttribute("disabled"),
+    true,
+  );
+});
+
+test("picking another account uploads the file again for that account", async () => {
+  presignAnswers(false);
+  mocks.preview.mockResolvedValue(previewOf());
   renderModal(
     { ...unsupportedBankAccount, accountKey: 7, accountName: "1822" },
-    { ...supportedBankAccount, accountKey: 8, accountName: "BCP" },
+    { ...manualAccount, accountKey: 8, accountName: "Cash" },
   );
-  assert.ok(screen.getByTestId("account-import-generic-format"));
 
-  await user.click(screen.getByRole("combobox"));
-  await user.click(await screen.findByRole("option", { name: "BCP" }));
+  const user = await pickFile("extrato.csv");
+  await screen.findByTestId("statement-preview");
+  await user.click(screen.getAllByRole("combobox")[0]);
+  await user.click(await screen.findByRole("option", { name: "Cash" }));
 
-  await waitFor(() =>
-    assert.ok(screen.getByTestId("account-import-bank-format")),
-  );
-  assert.equal(screen.queryByTestId("account-import-generic-format"), null);
-
-  await importFile("statement.csv");
-  await waitFor(() => assert.equal(mocks.startImport.mock.calls.length, 1));
-  assert.deepEqual(mocks.startImport.mock.calls[0], [
-    { accountId: "8", key: "account-3-upload.csv" },
-  ]);
+  await waitFor(() => assert.equal(mocks.presign.mock.calls.length, 2));
+  assert.deepEqual(mocks.presign.mock.calls[1][0], { accountId: "8" });
+  await waitFor(() => assert.equal(mocks.preview.mock.calls.length, 2));
+  assert.equal(mocks.preview.mock.calls[1][0].accountId, "8");
 });

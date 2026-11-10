@@ -20,12 +20,19 @@ import {
   ACTIVATION_EVENTS,
   captureActivationEvent,
 } from "@/lib/utils/analytics";
+import { useFormatCurrency } from "@/lib/utils/useFormatCurrency";
 
+import { EXAMPLE_FIGURES } from "./exampleFigures";
 import { useFirstRunOnboardingFooter } from "./FirstRunOnboardingRouteShell";
 import { FirstRunCentered } from "./FirstRunStepScaffold";
 
 export default function FirstRunCompleteStep() {
   const t = useTranslations("onboarding.firstRun");
+  const formatCurrency = useFormatCurrency();
+  const example = (value: number) =>
+    t("preview.exampleValue", {
+      value: formatCurrency(value, "EUR", { maximumFractionDigits: 0 }),
+    });
   const user = useUser();
   const setFooter = useFirstRunOnboardingFooter();
   const state = getFirstRunState(user?.id);
@@ -75,11 +82,11 @@ export default function FirstRunCompleteStep() {
   if (state.accountStep === "connected") {
     rows.push({
       label: t("completion.summary.accountConnected"),
-      detail: t("preview.account.totalValue"),
+      detail: example(EXAMPLE_FIGURES.accountsTotal),
     });
     rows.push({
       label: t("completion.summary.netWorthTracked"),
-      detail: t("preview.welcome.netWorthValue"),
+      detail: example(EXAMPLE_FIGURES.netWorth),
     });
   } else if (state.accountStep === "manual_added") {
     rows.push({ label: t("completion.summary.accountManual") });

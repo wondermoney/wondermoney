@@ -8,6 +8,7 @@
     "understand-transactions",
     "import-transactions-csv",
     "categorize-transactions",
+    "rules",
     "recurring-payments",
     "missing-duplicate-transactions"
   ]

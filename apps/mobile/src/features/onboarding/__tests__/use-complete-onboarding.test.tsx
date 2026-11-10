@@ -123,6 +123,7 @@ describe('useCompleteOnboarding', () => {
     expect(classifyCompleteOnboardingFailure(new ApiError('cancelled'))).toBe('cancelled')
     expect(classifyCompleteOnboardingFailure(new Error('boom'))).toBe('unknown')
     expect(classifyCompleteOnboardingFailure(new ApiError('auth-session'))).toBe('access')
+    expect(classifyCompleteOnboardingFailure(new ApiError('demo-forbidden', 403))).toBe('demo')
   })
 
   it('treats a server that returns the completed bootstrap (idempotent second call) as a clean success', async () => {

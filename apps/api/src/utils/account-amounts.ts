@@ -33,10 +33,14 @@ export function buildEffectiveAmountSql(alias: string): string {
  * A loan repayment contributes only its interest and fees, which are money out too; its principal
  * is a transfer to the loan, and must not net against expenses as a positive amount.
  */
-export function buildEffectiveSpendingAmountSql(transactionAlias: string, repaymentLinkAlias?: string): string {
-  if (!repaymentLinkAlias) return buildEffectiveAmountSql(transactionAlias);
+export function buildEffectiveSpendingAmountSql(transactionAlias: string, repaymentLinkAlias?: string, rateSql?: string, repaymentRateSql?: string): string {
+  // `rateSql` converts the user-currency amount into another currency (null when no rate exists).
+  const amount = rateSql ? `${buildEffectiveAmountSql(transactionAlias)} * ${rateSql}` : buildEffectiveAmountSql(transactionAlias);
+  if (!repaymentLinkAlias) return amount;
 
-  return `CASE WHEN ${repaymentLinkAlias}.loan_repayment_link_key IS NULL THEN ${buildEffectiveAmountSql(transactionAlias)} ELSE -(COALESCE(${repaymentLinkAlias}.interest_amount, 0) + COALESCE(${repaymentLinkAlias}.fee_amount, 0)) END`;
+  // Interest and fees are in the loan's currency; `repaymentRateSql` converts them (null: no rate).
+  const repaymentCost = `-(COALESCE(${repaymentLinkAlias}.interest_amount, 0) + COALESCE(${repaymentLinkAlias}.fee_amount, 0))`;
+  return `CASE WHEN ${repaymentLinkAlias}.loan_repayment_link_key IS NULL THEN ${amount} ELSE ${repaymentRateSql ? `${repaymentCost} * ${repaymentRateSql}` : repaymentCost} END`;
 }
 
 export function filterExpenseTransactions<T extends TransactionAmountLike>(transactions: T[]): T[] {

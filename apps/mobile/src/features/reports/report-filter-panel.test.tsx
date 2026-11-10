@@ -5,6 +5,7 @@ import { initMobileI18n } from '@/lib/i18n'
 import { themeTokens } from '@/theme/tokens'
 
 import { ReportFilterPanel } from './report-filter-panel'
+import { ReportFiltersBar } from './report-filters-bar'
 import { useReportFilters } from './use-report-filters'
 
 const palette = themeTokens.colors.light
@@ -28,7 +29,7 @@ describe('ReportFilterPanel', () => {
     expect(view.queryByText('3')).toBeNull()
   })
 
-  it('expands to reveal every filter control on press', async () => {
+  it('opens the filter sheet with every filter control on press', async () => {
     const { view } = await renderPanel()
     await fireEvent.press(view.getByRole('button', { name: 'Filters' }))
     expect(view.getByRole('button', { name: /^Accounts,/ })).toBeTruthy()
@@ -46,12 +47,21 @@ describe('ReportFilterPanel', () => {
     expect(filterStateHook.result.current.fields.includePending).toBe(true)
   })
 
-  it('resets fields via the reset action inside the expanded panel', async () => {
-    const { view, filterStateHook } = await renderPanel()
-    await fireEvent.press(view.getByRole('button', { name: 'Filters' }))
-    await fireEvent.press(view.getByRole('switch', { name: 'Include transfers' }))
+  it('the bar\'s reset icon clears the fields and the period', async () => {
+    const i18n = await initMobileI18n('en')
+    const filterStateHook = await renderHook(() => useReportFilters())
+    const onSelectPreset = jest.fn()
+    const bar = await render(
+      <I18nextProvider i18n={i18n}>
+        <ReportFiltersBar filterOptions={filterOptions} filterState={filterStateHook.result.current} onSelectPreset={onSelectPreset} preset="last6Months" />
+      </I18nextProvider>,
+    )
+    await fireEvent.press(bar.getByRole('button', { name: 'Filters' }))
+    await fireEvent.press(bar.getByRole('switch', { name: 'Include transfers' }))
     expect(filterStateHook.result.current.fields.includeTransfers).toBe(true)
-    await fireEvent.press(view.getByRole('button', { name: 'Reset filters' }))
+    await fireEvent.press(bar.getByRole('button', { name: 'Close filters' }))
+    await fireEvent.press(bar.getByRole('button', { name: 'Reset filters' }))
     expect(filterStateHook.result.current.fields.includeTransfers).toBe(false)
+    expect(onSelectPreset).toHaveBeenCalledWith('last3Months')
   })
 })

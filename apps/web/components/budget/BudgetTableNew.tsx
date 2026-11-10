@@ -1,7 +1,7 @@
 "use client";
 
 import { ChevronDown, ChevronRight, Trash } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import {
   CSSProperties,
   useCallback,
@@ -304,6 +304,7 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
   onBudgetChange,
 }) => {
   const t = useTranslations();
+  const locale = useLocale();
   const formatPercentage = useFormatPercentage();
   const formatCurrency = useFormatCurrency();
   const notifyIfRateLimited = useRateLimitToast();
@@ -369,9 +370,9 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
   const updateData = useCallback(
     (row: Row<BudgetRow>, columnId: string, value: string) => {
       const categoryKey = row.original.key;
-      const newBudgetedValue = parseLocaleNumber(value);
+      const newBudgetedValue = parseLocaleNumber(value, locale);
 
-      if (!Number.isFinite(newBudgetedValue) || newBudgetedValue <= 0) {
+      if (newBudgetedValue === null || newBudgetedValue <= 0) {
         toast.error(t("budget-amount-positive"));
         return false;
       }
@@ -474,6 +475,7 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
       notifyIfRateLimited,
       onBudgetChange,
       t,
+      locale,
     ],
   );
 

@@ -119,4 +119,4 @@ pages:
     url: http://localhost:64590/en/portfolio/<portfolioId>/transactions
     note: >-
       This MDX page exists on disk but is not in meta.json — recommend adding it
-      to the nav in a follow-up (the RAD-427 ticket already documents this).
+      to the nav in a follow-up.

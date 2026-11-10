@@ -1,13 +1,17 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Pressable, ScrollView, StyleSheet, Text, useColorScheme, View } from 'react-native'
-import { SafeAreaView } from 'react-native-safe-area-context'
+import { Pressable, ScrollView, StyleSheet, View } from 'react-native'
 
-import { Button } from '@/components/ui/button'
+import { accountMark, EntityMark } from '@/components/ui/entity-mark'
+import { FormBar } from '@/components/ui/form-bar'
+import { Icon } from '@/components/ui/icon'
+import { SafeAreaView } from '@/components/ui/screen-safe-area'
+import { Text as UiText } from '@/components/ui/text'
+import { FormNotice } from '@/features/transactions/form-field'
 import { themeTokens, type Palette } from '@/theme/tokens'
-import { textStyles } from '@/theme/typography'
+import { usePalette } from '@/theme/use-palette'
 
-import { BudgetFailure, BudgetHeader, BudgetLoading } from './budgets-screen'
+import { BudgetFailure, BudgetLoading } from './budgets-screen'
 import type { BudgetAccountsWriteFailure } from './use-budget-accounts-mutation'
 
 export type BudgetAccountOption = Readonly<{ id: number; name: string | null }>
@@ -25,7 +29,7 @@ export type BudgetAccountsScreenProps = Readonly<{
 
 export function BudgetAccountsScreen(props: BudgetAccountsScreenProps) {
   const { t } = useTranslation()
-  const palette = themeTokens.colors[useColorScheme() === 'dark' ? 'dark' : 'light']
+  const palette = usePalette()
   if (props.status === 'loading') return <BudgetLoading label={t('budgetAccounts.loading')} palette={palette} />
   if (props.status === 'error') return <BudgetFailure title={t('budgetAccounts.errorTitle')} message={t('budgetAccounts.errorMessage')} onRetry={props.onRefresh} onBack={props.onBack} palette={palette} />
   return <BudgetAccountsForm key={props.linkedIds.join(',')} {...props} palette={palette} />
@@ -48,51 +52,79 @@ function BudgetAccountsForm({ accounts, linkedIds, pending, failure, onBack, onS
 
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: palette.background }]}>
+      <FormBar
+        closeDisabled={pending}
+        closeLabel={t('common.close')}
+        onClose={onBack}
+        onSave={() => void onSubmit([...selected])}
+        saveDisabled={!dirty || pending}
+        saveLabel={pending ? t('budgetAccounts.saving') : t('budgetAccounts.save')}
+        saving={pending}
+        title={t('budgetAccounts.title')}
+      />
       <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={styles.content}>
         <View style={styles.page}>
-          <BudgetHeader title={t('budgetAccounts.title')} backLabel={t('budgetAccounts.back')} onBack={onBack} disabled={pending} palette={palette} />
-          {failure ? <Text accessibilityRole="alert" style={[styles.alert, { color: palette.foreground, borderColor: palette.destructive }]}>{t(`budgetAccounts.failures.${failure}`)}</Text> : null}
+          <UiText tone="muted" variant="meta">{t('budgetAccounts.helper')}</UiText>
+          {failure ? <FormNotice tone="destructive">{t(`budgetAccounts.failures.${failure}`)}</FormNotice> : null}
           {accounts.length === 0 ? (
-            <Text style={[styles.empty, { color: palette.mutedForeground, borderColor: palette.border }]}>{t('budgetAccounts.none')}</Text>
+            <UiText tone="muted" variant="body">{t('budgetAccounts.none')}</UiText>
           ) : (
-            <View accessibilityRole="list" style={styles.list}>
-              {accounts.map((account, index) => {
-                const checked = selected.has(account.id)
-                const label = account.name ?? t('accounts.unnamed')
-                return (
-                  <Pressable
-                    key={account.id}
-                    accessibilityRole="checkbox"
-                    accessibilityLabel={label}
-                    accessibilityState={{ checked, disabled: pending }}
-                    disabled={pending}
-                    onPress={() => toggle(account.id)}
-                    style={({ pressed }) => [styles.row, index > 0 && { borderTopWidth: 1, borderTopColor: palette.border }, (pressed || pending) && styles.pressed]}
-                  >
-                    <View style={[styles.checkbox, { borderColor: checked ? palette.primary : palette.border, backgroundColor: checked ? palette.primary : 'transparent' }]}>
-                      <Text accessible={false} style={[styles.checkmark, { color: palette.background }]}>{checked ? '✓' : ''}</Text>
-                    </View>
-                    <Text allowFontScaling style={[styles.rowLabel, { color: palette.foreground }]}>{label}</Text>
-                  </Pressable>
-                )
-              })}
+            <View accessibilityRole="list" style={[styles.list, { borderColor: palette.border }]}>
+              {accounts.map((account, index) => (
+                <AccountCheckRow
+                  key={account.id}
+                  checked={selected.has(account.id)}
+                  disabled={pending}
+                  first={index === 0}
+                  label={account.name ?? t('accounts.unnamed')}
+                  onPress={() => toggle(account.id)}
+                />
+              ))}
             </View>
           )}
-          <Button disabled={!dirty || pending} label={pending ? t('budgetAccounts.saving') : t('budgetAccounts.save')} onPress={() => onSubmit([...selected])} palette={palette} variant="primary" />
         </View>
       </ScrollView>
     </SafeAreaView>
   )
 }
 
+/** One account as a 56pt form row: its mark, its name, and a checkbox on the right. */
+function AccountCheckRow({ label, checked, disabled, first, onPress }: { label: string; checked: boolean; disabled: boolean; first: boolean; onPress: () => void }) {
+  const palette = usePalette()
+  const [focused, setFocused] = useState(false)
+  return (
+    <Pressable
+      accessibilityLabel={label}
+      accessibilityRole="checkbox"
+      accessibilityState={{ checked, disabled }}
+      disabled={disabled}
+      onBlur={() => setFocused(false)}
+      onFocus={() => setFocused(true)}
+      onPress={onPress}
+      style={({ pressed }) => [
+        styles.row,
+        !first && { borderTopWidth: 1, borderTopColor: palette.border },
+        focused && { borderWidth: 2, borderColor: palette.ring, borderRadius: themeTokens.radius.xl },
+        pressed && { backgroundColor: palette.muted },
+        disabled && styles.disabled,
+      ]}
+    >
+      <EntityMark {...accountMark({ institutionName: null, type: null })} size="sm" />
+      <UiText numberOfLines={2} style={styles.rowLabel} variant="body">{label}</UiText>
+      <View style={[styles.checkbox, { borderColor: checked ? palette.primary : palette.input, backgroundColor: checked ? palette.primary : 'transparent' }]}>
+        {checked ? <Icon color={palette.primaryForeground} name="check" size={themeTokens.size.iconSmall} weight="semibold" /> : null}
+      </View>
+    </Pressable>
+  )
+}
+
 const styles = StyleSheet.create({
-  safe: { flex: 1 }, content: { flexGrow: 1, padding: themeTokens.layout.screenPadding }, page: { width: '100%', maxWidth: 680, alignSelf: 'center', gap: themeTokens.layout.blockGap },
-  alert: { ...textStyles.body, borderWidth: 1, borderRadius: themeTokens.radius.md, padding: themeTokens.spacing[4] },
-  empty: { ...textStyles.body, borderWidth: 1, borderRadius: themeTokens.radius.md, padding: themeTokens.spacing[4] },
-  list: { borderWidth: 1, borderRadius: themeTokens.radius.lg, overflow: 'hidden' },
-  row: { minHeight: themeTokens.touchTarget.minimum, flexDirection: 'row', alignItems: 'center', gap: themeTokens.spacing[3], paddingHorizontal: themeTokens.spacing[4], paddingVertical: themeTokens.spacing[3] },
+  safe: { flex: 1 },
+  content: { flexGrow: 1, paddingHorizontal: themeTokens.layout.screenPadding, paddingBottom: themeTokens.spacing[10] },
+  page: { width: '100%', maxWidth: 680, alignSelf: 'center', gap: themeTokens.spacing[4] },
+  list: { borderWidth: 1, borderRadius: themeTokens.radius.xl, overflow: 'hidden' },
+  row: { minHeight: 56, flexDirection: 'row', alignItems: 'center', gap: themeTokens.spacing[3], paddingHorizontal: themeTokens.spacing[4], paddingVertical: themeTokens.spacing[2] },
+  rowLabel: { flex: 1 },
   checkbox: { width: 24, height: 24, borderWidth: 2, borderRadius: themeTokens.radius.sm, alignItems: 'center', justifyContent: 'center' },
-  checkmark: { ...textStyles.action, fontWeight: '700' as const },
-  rowLabel: { ...textStyles.body, flex: 1 },
-  pressed: { opacity: 0.68 },
+  disabled: { opacity: 0.5 },
 })

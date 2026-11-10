@@ -86,6 +86,20 @@ export const RATE_LIMIT_FAMILIES = {
    */
   authExchange: { limit: 30, relaxable: false, scope: 'ip', windowMs: QUARTER_HOUR_MS },
 
+  /**
+   * Starting and downloading a full data export (`/v1/user/me/exports`): each one reads the whole
+   * household. The service also allows only one export in progress and three a day per person;
+   * this bounds the requests around them (status polls ride the ordinary `read` family).
+   */
+  dataExport: { limit: 20, relaxable: true, scope: 'identity', windowMs: HOUR_MS },
+
+  /**
+   * Starting, validating and committing a restore (`/v1/user/me/restores`): each validate or commit
+   * reads a whole uploaded export in the worker. The service also allows one restore at a time and
+   * ten a day per person; this bounds the requests around them (status polls ride `read`).
+   */
+  dataRestore: { limit: 20, relaxable: true, scope: 'identity', windowMs: HOUR_MS },
+
   /** `/v1/feedback` — each request sends an email to the operator's inbox. */
   feedback: { limit: 10, relaxable: false, scope: 'identity', windowMs: HOUR_MS },
 
@@ -97,8 +111,8 @@ export const RATE_LIMIT_FAMILIES = {
   globalBackstop: { limit: 3000, relaxable: true, scope: 'ip', windowMs: QUARTER_HOUR_MS },
 
   /**
-   * Portfolio statement/CSV import *mutations*: parsing and column/asset mapping are CPU- and
-   * IO-heavy. The preview GET the wizard polls while a parse runs rides the `read` family, so
+   * Portfolio and transaction import-session *mutations*: parsing, mapping, row decisions and
+   * commits are CPU- and IO-heavy. The preview GET the wizard polls while a parse runs rides the `read` family, so
    * polling can never exhaust the parse budget.
    */
   importSession: { limit: 120, relaxable: true, scope: 'identity', windowMs: QUARTER_HOUR_MS },
@@ -331,6 +345,12 @@ export const publicMarketingRateLimit = (): RequestHandler => createRateLimiter(
 /** `/v1/feedback` — sends email. */
 export const feedbackRateLimit = (): RequestHandler => createRateLimiter({ family: 'feedback' });
 
+/** Starting or downloading a full data export. */
+export const dataExportRateLimit = (): RequestHandler => createRateLimiter({ family: 'dataExport' });
+
+/** Starting, validating or committing a restore. */
+export const dataRestoreRateLimit = (): RequestHandler => createRateLimiter({ family: 'dataRestore' });
+
 /** `/v1/support` — sends email. */
 export const supportRateLimit = (): RequestHandler => createRateLimiter({ family: 'support' });
 
@@ -340,7 +360,7 @@ export const publicReadRateLimit = (): RequestHandler => createRateLimiter({ fam
 /** `/v1/assistant` — cheap GETs on the ordinary read budget, LLM calls on their own. */
 export const assistantRateLimit = (): RequestHandler => createMethodScopedRateLimiter('read', 'assistant');
 
-/** `/v1/portfolio-import-sessions` — preview polling on the read budget, parsing on its own. */
+/** `/v1/portfolio-import-sessions` and `/v1/transaction-import-sessions` — polling on the read budget, mutations on their own. */
 export const importSessionRateLimit = (): RequestHandler => createMethodScopedRateLimiter('read', 'importSession');
 
 /** Reads that reach the paid market-data provider; called per route group. */

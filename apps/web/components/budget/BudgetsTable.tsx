@@ -22,7 +22,6 @@ import {
   calculatePlannedAndSpentValue,
   convertBudgetTemplatesIntoRows,
 } from "@/lib/utils/budget";
-import { formatCurrencyForLocale } from "@/lib/utils/formatCurrency";
 import { useFormatCurrency } from "@/lib/utils/useFormatCurrency";
 import { useFormatPercentage } from "@/lib/utils/useFormatPercentage";
 import { useBreakpoint } from "@/lib/utils/useTailwindBreakpoints";
@@ -71,6 +70,7 @@ const BudgetsTable: React.FC<BudgetsTableProps> = memo(({ budgets }) => {
   const [budgetData, setBudgetData] = useState<{
     name: BudgetFull["name"] | null;
     key: BudgetFull["budgetKey"] | null;
+    rolloverCarriesOverspend?: BudgetFull["rolloverCarriesOverspend"];
   }>({ name: null, key: null });
 
   const [editBudgetModalIsOpen, setEditBudgetModalIsOpen] = useState(false);
@@ -81,8 +81,8 @@ const BudgetsTable: React.FC<BudgetsTableProps> = memo(({ budgets }) => {
   };
   const editBudgetOpenModal = useCallback(
     (rowIndex: number) => {
-      const { name, budgetKey } = budgets[rowIndex];
-      setBudgetData({ name, key: budgetKey });
+      const { name, budgetKey, rolloverCarriesOverspend } = budgets[rowIndex];
+      setBudgetData({ name, key: budgetKey, rolloverCarriesOverspend });
       setEditBudgetModalIsOpen(true);
       posthog.capture("edit_budget_modal", { action: "opened" });
     },
@@ -113,10 +113,11 @@ const BudgetsTable: React.FC<BudgetsTableProps> = memo(({ budgets }) => {
     () =>
       budgets.map((budget) => {
         const rows = convertBudgetTemplatesIntoRows(budget.categories);
-        const { totalPlanned, totalSpent } =
+        const { totalPlanned, totalAvailable, totalSpent } =
           calculatePlannedAndSpentValue(rows);
+        // Spent against what the month may spend: plan plus rollover.
         const progress =
-          totalPlanned > 0 ? (totalSpent / totalPlanned) * 100 : 0;
+          totalAvailable > 0 ? (totalSpent / totalAvailable) * 100 : 0;
 
         return {
           totalSpent,
@@ -143,10 +144,9 @@ const BudgetsTable: React.FC<BudgetsTableProps> = memo(({ budgets }) => {
       if (budget.incomes.length > 0) {
         facts.push(
           t("budget-row-income-summary", {
-            amount: formatCurrencyForLocale(
+            amount: formatCurrency(
               monthlyIncomeOf(budget),
               budget.currencyCode,
-              locale,
             ),
             sources: budget.incomes.map((income) => income.name).join(", "),
           }),
@@ -192,7 +192,7 @@ const BudgetsTable: React.FC<BudgetsTableProps> = memo(({ budgets }) => {
           ]
         : parts[index],
     );
-  }, [budgets, locale, t]);
+  }, [budgets, formatCurrency, t]);
 
   // Memoize columns to prevent unnecessary table re-renders
   // https://github.com/TanStack/table/issues/4382#issuecomment-1801830220
@@ -377,10 +377,14 @@ const BudgetsTable: React.FC<BudgetsTableProps> = memo(({ budgets }) => {
       {budgetData.key && budgetData.name && (
         <>
           <BudgetEditModal
+            // A fresh form per budget and per saved state: the form reads its
+            // values only when it mounts.
+            key={`${budgetData.key}-${budgetData.name}-${budgetData.rolloverCarriesOverspend}`}
             isOpen={editBudgetModalIsOpen}
             onOpenChange={setEditBudgetModalIsOpen}
             budgetName={budgetData.name}
             budgetKey={budgetData.key}
+            rolloverCarriesOverspend={budgetData.rolloverCarriesOverspend}
           />
           <BudgetDeleteModal
             isOpen={deleteBudgetModalIsOpen}

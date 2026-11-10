@@ -10,6 +10,8 @@ export enum Source {
   DETERMINISTIC = 'deterministic',
   MANUAL = 'manual',
   OPENAI = 'openai',
+  /** Set by a household rule (`services/rules`). */
+  RULE = 'rule',
   USER = 'user',
 }
 

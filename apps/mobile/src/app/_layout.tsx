@@ -30,7 +30,7 @@ SplashScreen.preventAutoHideAsync()
 
 const appStatePort = {
   get currentState() {
-    return AppState.currentState
+    return AppState.currentState ?? null
   },
   addEventListener: (_event: 'change', callback: (state: string) => void) => AppState.addEventListener('change', callback),
 }

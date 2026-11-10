@@ -1,11 +1,11 @@
 import { fireEvent, render, within } from '@testing-library/react-native'
 import { I18nextProvider } from 'react-i18next'
-import { StyleSheet } from 'react-native'
 
 import { formatCurrency } from '@/lib/formatters/financial'
 import { initMobileI18n } from '@/lib/i18n'
 
 import { AccountDetailScreen, type AccountDetailData } from './account-detail-screen'
+import { touchHeight } from '@/test/touch-target'
 
 const openBanking: AccountDetailData = {
   accountId: 42,
@@ -22,7 +22,7 @@ const openBanking: AccountDetailData = {
   csvImportFormat: null,
 }
 
-async function renderScreen(state: React.ComponentProps<typeof AccountDetailScreen>['state']) {
+async function renderScreen(state: React.ComponentProps<typeof AccountDetailScreen>['state'], extra: Partial<React.ComponentProps<typeof AccountDetailScreen>> = {}) {
   const i18n = await initMobileI18n('en')
   const back = jest.fn()
   const retry = jest.fn()
@@ -39,32 +39,55 @@ async function renderScreen(state: React.ComponentProps<typeof AccountDetailScre
         onLogout={logout}
         onViewTransactions={jest.fn()}
         onEdit={edit}
+        {...extra}
       />
     </I18nextProvider>,
   )
   return { view, back, retry, logout, edit }
 }
 
+jest.mock('victory-native', () => ({
+  CartesianChart: (props: { children: (args: { points: Record<string, unknown>; chartBounds: { bottom: number } }) => React.ReactNode }) =>
+    props.children({ points: { balance: [] }, chartBounds: { bottom: 0 } }),
+  Area: () => null,
+  Line: () => null,
+}))
+
 describe('AccountDetailScreen', () => {
-  it('shows only the bounded read-only detail and an accessible Back action', async () => {
+  it('matches web: back link, name and institution, the balance figure, Edit and Back', async () => {
     const { view, back, edit } = await renderScreen({ status: 'loaded', data: openBanking })
-    const original = formatCurrency(100, { locale: 'en', currency: 'USD' })
     const converted = formatCurrency(90.25, { locale: 'en', currency: 'EUR' })
     expect(view.getByRole('header', { name: 'Everyday' })).toBeOnTheScreen()
-    // Institution and source are one descriptor line — "Wonder Bank · Open
-    // Banking" — rather than two stacked muted lines under the title.
-    expect(view.getByText('Wonder Bank · Open Banking')).toBeOnTheScreen()
-    expect(view.getByLabelText(`Original balance, ${original}, USD`)).toBeOnTheScreen()
-    expect(view.getByLabelText(`Converted balance, ${converted}, EUR`)).toBeOnTheScreen()
-    expect(view.getByText(/^Last updated /)).toBeOnTheScreen()
+    expect(view.getByText('Wonder Bank')).toBeOnTheScreen()
+    // A USD account read in EUR leads with the EUR figure, the USD one beside it.
+    expect(view.getByLabelText(`Account balance, ${converted}`)).toBeOnTheScreen()
+    expect(view.getByText(/^Balances updated /)).toBeOnTheScreen()
     const button = view.getByRole('button', { name: 'Back' })
-    expect(StyleSheet.flatten(button.props.style).minHeight).toBeGreaterThanOrEqual(44)
+    expect(touchHeight(button)).toBeGreaterThanOrEqual(44)
     await fireEvent.press(button)
     expect(back).toHaveBeenCalledTimes(1)
     expect(view.queryByRole('image')).not.toBeOnTheScreen()
-    expect(view.getByText('View account transactions')).toBeOnTheScreen()
-    expect(view.queryByText(/chart|delete|import|add|refresh bank/i)).not.toBeOnTheScreen()
+    expect(view.getByRole('header', { name: 'Last transactions' })).toBeOnTheScreen()
+    expect(view.getByRole('button', { name: 'View all' })).toBeOnTheScreen()
     await fireEvent.press(view.getByRole('button', { name: 'Edit account' }))
+    expect(edit).toHaveBeenCalledTimes(1)
+  })
+
+  it('adds a transaction from the floating "+" and keeps edit and import behind the overflow menu', async () => {
+    const onCreateTransaction = jest.fn()
+    const onImportTransactions = jest.fn()
+    const { view, edit } = await renderScreen({ status: 'loaded', data: openBanking }, { onCreateTransaction, onImportTransactions })
+    const add = view.getByTestId('account-add-transaction')
+    expect(add.props.accessibilityLabel).toBe('Add transaction')
+    expect(touchHeight(add)).toBeGreaterThanOrEqual(44)
+    await fireEvent.press(add)
+    expect(onCreateTransaction).toHaveBeenCalledTimes(1)
+    expect(view.queryByRole('button', { name: 'Import transactions' })).not.toBeOnTheScreen()
+    await fireEvent.press(view.getByRole('button', { name: 'More actions' }))
+    await fireEvent.press(view.getByRole('menuitem', { name: 'Import transactions' }))
+    expect(onImportTransactions).toHaveBeenCalledTimes(1)
+    await fireEvent.press(view.getByRole('button', { name: 'More actions' }))
+    await fireEvent.press(view.getByRole('menuitem', { name: 'Edit account' }))
     expect(edit).toHaveBeenCalledTimes(1)
   })
 
@@ -81,31 +104,20 @@ describe('AccountDetailScreen', () => {
     }
     const { view } = await renderScreen({ status: 'loaded', data: manual })
     expect(view.getByRole('header', { name: 'Unnamed account' })).toBeOnTheScreen()
-    expect(view.getByLabelText(/Original balance,.*0\.00.*EUR/)).toBeOnTheScreen()
-    expect(view.queryByText('Converted balance')).not.toBeOnTheScreen()
-    expect(view.queryByText(/updated|update time/i)).not.toBeOnTheScreen()
-
-    const convertedZero = await renderScreen({
-      status: 'loaded',
-      data: { ...openBanking, convertedBalance: 0 },
-    })
-    expect(convertedZero.view.getByLabelText(/Converted balance,.*0\.00.*EUR/)).toBeOnTheScreen()
+    expect(view.getByLabelText(/Account balance,.*0\.00/)).toBeOnTheScreen()
+    expect(view.queryByText(/updated/i)).not.toBeOnTheScreen()
 
     const unavailable = await renderScreen({
       status: 'loaded',
       data: { ...openBanking, originalBalance: null, convertedBalance: null, refreshedAt: null },
     })
-    expect(unavailable.view.getByText('Balance unavailable')).toBeOnTheScreen()
-    expect(unavailable.view.getByText('Converted balance unavailable')).toBeOnTheScreen()
-    expect(unavailable.view.getByText('Update time unavailable')).toBeOnTheScreen()
+    expect(unavailable.view.getAllByText('Balance unavailable').length).toBeGreaterThan(0)
   })
 
-  it('labels account metrics from the selected start through server-now', async () => {
-    const { view } = await renderScreen({ status: 'loaded', data: { ...openBanking, metricsFromDate: '2026-07-01T00:00:00.000Z', metrics: [{ accountId: 42, accountName: 'Everyday', currency: 'USD', inflow: 100, outflow: 40, transactionCount: 2 }] } })
-    expect(view.getByText('Account metrics')).toBeOnTheScreen()
-    expect(view.getByText(/through the server's current time/)).toBeOnTheScreen()
-    expect(view.getByLabelText(/Inflow,.*100\.00.*USD/)).toBeOnTheScreen()
-    expect(view.queryByText(/end date/i)).not.toBeOnTheScreen()
+  it('shows inflow, outflow and savings rate with last period beside each', async () => {
+    const { view } = await renderScreen({ status: 'loaded', data: { ...openBanking, metrics: { status: 'loaded', summary: { inflowCurrent: 100, inflowPast: 50, outflowCurrent: 40, outflowPast: 20, inflowPct: 1, outflowPct: 1, netSavings: 60, netSavingsPast: 30, savingsRate: 0.6 } } } })
+    for (const label of ['Inflow', 'Outflow', 'Savings rate']) expect(view.getByText(label)).toBeOnTheScreen()
+    expect(view.getAllByText('vs last period')).toHaveLength(3)
   })
 
   it('handles loading, not found, stale, invalid, and access transition states', async () => {
@@ -128,8 +140,8 @@ describe('AccountDetailScreen', () => {
 
   it('keeps action text scalable', async () => {
     const { view } = await renderScreen({ status: 'error' })
-    for (const name of ['Back', 'Retry', 'Sign out']) {
-      expect(within(view.getByRole('button', { name })).getByText(name).props.allowFontScaling).not.toBe(false)
+    for (const [name, text] of [['Back', 'Accounts'], ['Retry', 'Retry'], ['Sign out', 'Sign out']] as const) {
+      expect(within(view.getByRole('button', { name })).getByText(text).props.allowFontScaling).not.toBe(false)
     }
   })
 })

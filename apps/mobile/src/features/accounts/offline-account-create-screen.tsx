@@ -1,12 +1,20 @@
 import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Pressable, ScrollView, StyleSheet, Text, TextInput, useColorScheme, View } from 'react-native'
-import { SafeAreaView } from 'react-native-safe-area-context'
+import { Modal, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native'
 
-import { BackControl } from '@/components/ui/back-control'
-import { formatCurrency } from '@/lib/formatters/financial'
-import { themeTokens, type Palette } from '@/theme/tokens'
+import { Button } from '@/components/ui/button'
+import { accountMark, EntityMark } from '@/components/ui/entity-mark'
+import { FormBar } from '@/components/ui/form-bar'
+import { FormGroup, FormRow, FormSelectRow, FormTextRow } from '@/components/ui/form-row'
+import { Icon } from '@/components/ui/icon'
+import { SafeAreaView } from '@/components/ui/screen-safe-area'
+import { Text as UiText } from '@/components/ui/text'
+import { FormNotice } from '@/features/transactions/form-field'
+import { formatNumberInput } from '@/lib/formatters/decimal-input'
+import { useFormatMoney } from '@/lib/formatters/money-display'
+import { themeTokens } from '@/theme/tokens'
 import { textStyles } from '@/theme/typography'
+import { usePalette } from '@/theme/use-palette'
 
 import {
   invalidOfflineAccountFields,
@@ -14,7 +22,6 @@ import {
   parsePositiveDecimal,
   type AccountCurrencyDto,
   type AccountFinancialInstitutionDto,
-  type OfflineAccountField,
   type OfflineAccountPayload,
 } from './offline-account-contract'
 import type { OfflineAccountCreateFailure, OfflineAccountUnknownGuard } from './use-create-offline-account'
@@ -41,19 +48,20 @@ export function OfflineAccountCreateScreen({
   onCheckAccounts,
   onCreateAnother,
 }: OfflineAccountCreateScreenProps) {
+  const formatMoney = useFormatMoney()
   const { t, i18n } = useTranslation()
-  const palette = themeTokens.colors[useColorScheme() === 'dark' ? 'dark' : 'light']
+  const palette = usePalette()
   const initial = unknownGuard?.payload
+  const locale = i18n.resolvedLanguage ?? i18n.language ?? 'en'
   const [name, setName] = useState(initial?.name ?? '')
-  const [balance, setBalance] = useState(initial ? String(initial.currentBalance) : '')
+  const [balance, setBalance] = useState(initial ? formatNumberInput(initial.currentBalance, locale) : '')
   const [currencyId, setCurrencyId] = useState<number | null>(initial?.currencyId ?? null)
   const [institutionId, setInstitutionId] = useState<number | null>(initial?.financialInstitutionId ?? null)
   const [reviewed, setReviewed] = useState<OfflineAccountPayload | null>(initial ?? null)
   const [phase, setPhase] = useState<'form' | 'review' | 'unknown'>(initial ? 'unknown' : 'form')
   const [failure, setFailure] = useState<OfflineAccountCreateFailure | null>(null)
-  const [submitted, setSubmitted] = useState(false)
   const [institutionQuery, setInstitutionQuery] = useState('')
-  const locale = i18n.resolvedLanguage ?? i18n.language ?? 'en'
+  const [institutionOpen, setInstitutionOpen] = useState(false)
   const selectedCurrency = currencies.find((item) => item.currencyKey === (reviewed?.currencyId ?? currencyId))
   const selectedInstitution = institutions.find((item) => item.accountFinancialInstitutionKey === (reviewed?.financialInstitutionId ?? institutionId))
 
@@ -67,19 +75,18 @@ export function OfflineAccountCreateScreen({
   }, [availableInstitutions, institutionQuery])
 
   // Re-derived on every render (not stored) so a field's error clears the
-  // moment it's fixed, not only on the next submit attempt.
-  const shownInvalid = submitted ? invalidOfflineAccountFields(name, balance, currencyId, currencies) : new Set<OfflineAccountField>()
+  // moment it's fixed.
+  const shownInvalid = invalidOfflineAccountFields(name, balance, currencyId, currencies, locale)
   // The institution list is a fixed, UI-constrained choice — not covered by
   // invalidOfflineAccountFields — so a stale reference (e.g. from a resumed
   // unknownGuard payload whose institution no longer exists) has nowhere
   // field-level to surface and falls back to the old generic message.
   const institutionExists = institutionId === null || institutions.some((item) => item.accountFinancialInstitutionKey === institutionId)
-  const showInstitutionError = submitted && !institutionExists
+  const showInstitutionError = !institutionExists
 
   const stageReview = () => {
-    setSubmitted(true)
-    const amount = parsePositiveDecimal(balance)
-    if (invalidOfflineAccountFields(name, balance, currencyId, currencies).size > 0 || !institutionExists) return
+    const amount = parsePositiveDecimal(balance, locale)
+    if (shownInvalid.size > 0 || !institutionExists) return
     const result = offlineAccountPayloadSchema.safeParse({
       name,
       currentBalance: amount,
@@ -87,7 +94,6 @@ export function OfflineAccountCreateScreen({
       ...(institutionId === null ? {} : { financialInstitutionId: institutionId }),
     })
     if (!result.success) return
-    setSubmitted(false)
     setFailure(null)
     setReviewed(Object.freeze(result.data))
     setPhase('review')
@@ -110,127 +116,114 @@ export function OfflineAccountCreateScreen({
     setInstitutionQuery('')
     setReviewed(null)
     setFailure(null)
-    setSubmitted(false)
     setPhase('form')
   }
 
+  const formReady = shownInvalid.size === 0 && institutionExists
+  // Errors show for what was entered and is wrong; a field not filled yet only
+  // keeps the ✓ disabled.
+  const nameError = name.length > 0 && shownInvalid.has('name') ? t('offlineAccount.fieldErrors.name') : null
+  const balanceError = balance.trim() !== '' && shownInvalid.has('balance') ? t('offlineAccount.fieldErrors.balance') : null
+  const currencyError = currencyId !== null && shownInvalid.has('currency') ? t('offlineAccount.fieldErrors.currency') : null
+  const editing = phase === 'form'
+
   return (
     <SafeAreaView style={[styles.safeArea, { backgroundColor: palette.background }]}>
+      <FormBar
+        closeDisabled={pending}
+        closeLabel={t('common.close')}
+        onClose={onBack}
+        onSave={editing ? stageReview : phase === 'review' ? () => void confirm() : undefined}
+        saveDisabled={editing ? !formReady || pending : pending}
+        saveLabel={editing ? t('offlineAccount.review') : pending ? t('offlineAccount.creating') : t('offlineAccount.confirm')}
+        saving={!editing && pending}
+        title={t('offlineAccount.title')}
+      />
       <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={styles.content}>
         <View style={styles.page}>
-          <View style={styles.topline}>
-            <BackControl fallback="/accounts" label={t('offlineAccount.back')} onPress={onBack} disabled={pending} />
-            <Text accessibilityRole="header" allowFontScaling style={[styles.title, { color: palette.foreground }]}>{t('offlineAccount.title')}</Text>
-          </View>
-          <Text allowFontScaling style={[styles.lead, { color: palette.mutedForeground }]}>{t('offlineAccount.helper')}</Text>
-
-          {phase === 'form' ? <>
-            <FieldLabel text={t('offlineAccount.name')} required palette={palette} />
-            <TextInput
-              accessibilityLabel={t('offlineAccount.name')}
-              autoCapitalize="sentences"
-              maxLength={100}
-              onChangeText={setName}
-              placeholder={t('offlineAccount.namePlaceholder')}
-              placeholderTextColor={palette.mutedForeground}
-              style={[styles.input, { color: palette.foreground, borderColor: shownInvalid.has('name') ? palette.destructive : palette.border, backgroundColor: palette.card }, shownInvalid.has('name') && styles.inputInvalid]}
-              value={name}
-            />
-            <Text style={[styles.counter, { color: palette.mutedForeground }]}>{name.length}/100</Text>
-            {shownInvalid.has('name') ? <Text accessibilityRole="alert" style={[styles.error, { color: palette.destructive }]}>{t('offlineAccount.fieldErrors.name')}</Text> : null}
-
-            <FieldLabel text={t('offlineAccount.currency')} required palette={palette} />
-            <View accessibilityRole="radiogroup" accessibilityLabel={t('offlineAccount.currency')} style={styles.chips}>
-              {currencies.map((currency) => <Choice
-                key={currency.currencyKey}
-                compact
-                label={`${currency.code} · ${currency.description}`}
-                visibleLabel={currency.code}
-                selected={currencyId === currency.currencyKey}
-                onPress={() => setCurrencyId(currency.currencyKey)}
-                palette={palette}
-              />)}
-            </View>
-            {shownInvalid.has('currency') ? <Text accessibilityRole="alert" style={[styles.error, { color: palette.destructive }]}>{t('offlineAccount.fieldErrors.currency')}</Text> : null}
-
-            <FieldLabel text={t('offlineAccount.institution')} palette={palette} />
-            <View accessibilityRole="radiogroup" accessibilityLabel={t('offlineAccount.institution')} style={styles.options}>
-              <Choice label={t('offlineAccount.none')} selected={institutionId === null} onPress={() => setInstitutionId(null)} palette={palette} />
-              <TextInput
-                accessibilityLabel={t('banking.connect.searchLabel')}
-                autoCapitalize="none"
-                autoCorrect={false}
-                onChangeText={setInstitutionQuery}
-                placeholder={t('banking.connect.searchLabel')}
-                placeholderTextColor={palette.mutedForeground}
-                style={[styles.input, { color: palette.foreground, borderColor: palette.border, backgroundColor: palette.card }]}
-                value={institutionQuery}
+          {editing ? <>
+            <UiText tone="muted" variant="meta">{t('offlineAccount.helper')}</UiText>
+            <FormGroup>
+              <FormTextRow
+                key="name"
+                accessibilityLabel={t('offlineAccount.name')}
+                autoCapitalize="sentences"
+                editable={!pending}
+                error={nameError}
+                label={t('offlineAccount.name')}
+                maxLength={100}
+                onChangeText={setName}
+                placeholder={t('offlineAccount.namePlaceholder')}
+                value={name}
               />
-              {filteredInstitutions.length === 0 ? (
-                <Text style={[styles.helper, { color: palette.mutedForeground }]}>{t('banking.connect.noMatches')}</Text>
-              ) : (
-                // A shared background-step container with per-row dividers,
-                // not N individually-bordered rows — a wall of boxes here
-                // was the worst No-Nesting violation in the app (RAD audit).
-                <View style={[styles.institutionList, { backgroundColor: palette.muted }]}>
-                  {filteredInstitutions.slice(0, INSTITUTION_RESULT_LIMIT).map((institution, index) => (
-                    <View key={institution.accountFinancialInstitutionKey} style={index > 0 ? [styles.institutionRow, { borderTopColor: palette.border }] : undefined}>
-                      <Choice
-                        label={institution.label}
-                        selected={institutionId === institution.accountFinancialInstitutionKey}
-                        onPress={() => setInstitutionId(institution.accountFinancialInstitutionKey)}
-                        palette={palette}
-                        bordered={false}
-                      />
-                    </View>
-                  ))}
-                  {filteredInstitutions.length > INSTITUTION_RESULT_LIMIT ? (
-                    <Text style={[styles.helper, styles.institutionRow, { color: palette.mutedForeground, borderTopColor: palette.border }]}>
-                      {t('offlineAccount.institutionMore', { count: filteredInstitutions.length - INSTITUTION_RESULT_LIMIT })}
-                    </Text>
-                  ) : null}
-                </View>
-              )}
-              {showInstitutionError ? <Text accessibilityRole="alert" style={[styles.error, { color: palette.destructive }]}>{t('offlineAccount.validation.fields')}</Text> : null}
-            </View>
-
-            <FieldLabel text={t('offlineAccount.balance')} required palette={palette} />
-            <TextInput
-              accessibilityLabel={t('offlineAccount.balance')}
-              keyboardType="decimal-pad"
-              onChangeText={setBalance}
-              placeholder="0.00"
-              placeholderTextColor={palette.mutedForeground}
-              style={[styles.input, styles.amountInput, { color: palette.foreground, borderColor: shownInvalid.has('balance') ? palette.destructive : palette.border, backgroundColor: palette.card }, shownInvalid.has('balance') && styles.inputInvalid]}
-              value={balance}
+              <FormRow
+                key="institution"
+                disabled={pending}
+                error={showInstitutionError ? t('offlineAccount.validation.fields') : null}
+                expanded={institutionOpen}
+                label={t('offlineAccount.institution')}
+                onPress={() => setInstitutionOpen(true)}
+                placeholder={t('offlineAccount.none')}
+                value={selectedInstitution ? (selectedInstitution.displayName ?? t('offlineAccount.institutionUnnamed')) : null}
+                valueLeading={selectedInstitution ? <EntityMark {...accountMark({ logoUrl: selectedInstitution.logoUrl, institutionName: selectedInstitution.displayName, type: null })} size="sm" /> : undefined}
+              />
+              <FormTextRow
+                key="balance"
+                accessibilityLabel={t('offlineAccount.balance')}
+                editable={!pending}
+                error={balanceError}
+                hint={t('offlineAccount.balanceHelper')}
+                keyboardType="decimal-pad"
+                label={t('offlineAccount.balance')}
+                onChangeText={setBalance}
+                placeholder="0.00"
+                value={balance}
+              />
+              <FormSelectRow
+                key="currency"
+                disabled={pending}
+                error={currencyError}
+                label={t('offlineAccount.currency')}
+                onChange={(value) => setCurrencyId(value)}
+                options={currencies.map((currency) => ({ value: currency.currencyKey, label: `${currency.code} · ${currency.description}` }))}
+                placeholder={t('transactionCreate.choose')}
+                value={currencyId}
+              />
+            </FormGroup>
+            <InstitutionSheet
+              institutions={filteredInstitutions}
+              onClose={() => setInstitutionOpen(false)}
+              onQuery={setInstitutionQuery}
+              onSelect={setInstitutionId}
+              query={institutionQuery}
+              selected={institutionId}
+              visible={institutionOpen}
             />
-            <Text allowFontScaling style={[styles.helper, { color: palette.mutedForeground }]}>{t('offlineAccount.balanceHelper')}</Text>
-            {shownInvalid.has('balance') ? <Text accessibilityRole="alert" style={[styles.error, { color: palette.destructive }]}>{t('offlineAccount.fieldErrors.balance')}</Text> : null}
-            <Button label={t('offlineAccount.review')} onPress={stageReview} palette={palette} />
           </> : reviewed ? <>
-            <View style={[styles.review, { borderColor: palette.border, backgroundColor: palette.card }]}>
-              <Text accessibilityRole="header" style={[styles.sectionTitle, { color: palette.foreground }]}>{t('offlineAccount.reviewTitle')}</Text>
-              <ReviewRow label={t('offlineAccount.name')} value={reviewed.name} palette={palette} />
-              <ReviewRow label={t('offlineAccount.balance')} value={selectedCurrency ? formatCurrency(reviewed.currentBalance, { locale, currency: selectedCurrency.code }) : String(reviewed.currentBalance)} data palette={palette} />
-              <ReviewRow label={t('offlineAccount.currency')} value={selectedCurrency ? `${selectedCurrency.code} · ${selectedCurrency.description}` : t('offlineAccount.unavailable')} palette={palette} />
-              <ReviewRow label={t('offlineAccount.institution')} value={selectedInstitution?.displayName ?? (reviewed.financialInstitutionId ? t('offlineAccount.institutionUnnamed') : t('offlineAccount.none'))} palette={palette} />
+            <UiText accessibilityRole="header" variant="heading">{t('offlineAccount.reviewTitle')}</UiText>
+            <View style={[styles.review, { borderColor: palette.border }]}>
+              <ReviewRow label={t('offlineAccount.name')} value={reviewed.name} first />
+              <ReviewRow label={t('offlineAccount.balance')} value={formatMoney(reviewed.currentBalance, { locale, currency: selectedCurrency?.code ?? null })} data />
+              <ReviewRow label={t('offlineAccount.currency')} value={selectedCurrency ? `${selectedCurrency.code} · ${selectedCurrency.description}` : t('offlineAccount.unavailable')} />
+              <ReviewRow label={t('offlineAccount.institution')} value={selectedInstitution?.displayName ?? (reviewed.financialInstitutionId ? t('offlineAccount.institutionUnnamed') : t('offlineAccount.none'))} />
             </View>
-            <View style={[styles.context, { borderColor: palette.border, backgroundColor: palette.muted }]}>
-              <Text style={[styles.sectionTitle, { color: palette.foreground }]}>{t('offlineAccount.manualTitle')}</Text>
-              <Text style={[styles.helper, { color: palette.mutedForeground }]}>{t('offlineAccount.manualContext')}</Text>
-              <Text style={[styles.helper, { color: palette.mutedForeground }]}>{t('offlineAccount.conversionContext')}</Text>
+            <View style={styles.context}>
+              <UiText variant="bodyStrong">{t('offlineAccount.manualTitle')}</UiText>
+              <UiText tone="muted" variant="meta">{t('offlineAccount.manualContext')}</UiText>
+              <UiText tone="muted" variant="meta">{t('offlineAccount.conversionContext')}</UiText>
             </View>
-            {failure ? <Text accessibilityRole="alert" style={[styles.error, { color: palette.destructive }]}>{t(`offlineAccount.errors.${failure}`)}</Text> : null}
+            {failure ? <FormNotice tone="destructive">{t(`offlineAccount.errors.${failure}`)}</FormNotice> : null}
             {phase === 'unknown' ? <>
-              <View style={[styles.unknown, { borderColor: palette.destructive }]}>
-                <Text style={[styles.sectionTitle, { color: palette.foreground }]}>{t('offlineAccount.unknownTitle')}</Text>
-                <Text accessibilityRole="alert" style={[styles.helper, { color: palette.mutedForeground }]}>{t('offlineAccount.unknownMessage')}</Text>
+              <View style={styles.context}>
+                <UiText variant="bodyStrong">{t('offlineAccount.unknownTitle')}</UiText>
+                <FormNotice tone="destructive">{t('offlineAccount.unknownMessage')}</FormNotice>
               </View>
-              <Button label={t('offlineAccount.checkAccounts')} onPress={onCheckAccounts} palette={palette} />
-              <Button label={t('offlineAccount.createAnother')} onPress={createAnother} palette={palette} secondary />
+              <View style={styles.actions}>
+                <Button label={t('offlineAccount.checkAccounts')} onPress={onCheckAccounts} />
+                <Button label={t('offlineAccount.createAnother')} onPress={createAnother} variant="secondary" />
+              </View>
             </> : <View style={styles.actions}>
-              <Button label={t('offlineAccount.edit')} onPress={() => { setPhase('form'); setFailure(null) }} palette={palette} secondary disabled={pending} />
-              <Button label={pending ? t('offlineAccount.creating') : t('offlineAccount.confirm')} onPress={confirm} palette={palette} disabled={pending} busy={pending} />
+              <Button disabled={pending} label={t('offlineAccount.edit')} onPress={() => { setPhase('form'); setFailure(null) }} variant="secondary" />
             </View>}
           </> : null}
         </View>
@@ -239,36 +232,93 @@ export function OfflineAccountCreateScreen({
   )
 }
 
-function FieldLabel({ text, required = false, palette }: { text: string; required?: boolean; palette: Palette }) {
-  return <Text style={[styles.label, { color: palette.foreground }]}>{text}{required ? ' *' : ''}</Text>
-}
-
-function ReviewRow({ label, value, data = false, palette }: { label: string; value: string; data?: boolean; palette: Palette }) {
-  return <View accessible accessibilityLabel={`${label}: ${value}`} style={styles.reviewRow}><Text style={[styles.helper, { color: palette.mutedForeground }]}>{label}</Text><Text style={[data ? styles.dataValue : styles.value, { color: palette.foreground }]}>{value}</Text></View>
+function ReviewRow({ label, value, data = false, first = false }: { label: string; value: string; data?: boolean; first?: boolean }) {
+  const palette = usePalette()
+  return (
+    <View accessible accessibilityLabel={`${label}: ${value}`} style={[styles.reviewRow, !first && { borderTopWidth: 1, borderTopColor: palette.border }]}>
+      <UiText style={styles.reviewLabel} variant="body">{label}</UiText>
+      <UiText style={styles.reviewValue} variant={data ? 'amountBase' : 'body'}>{value}</UiText>
+    </View>
+  )
 }
 
 /** Search narrows to this many before the form asks you to keep typing. */
 const INSTITUTION_RESULT_LIMIT = 8
 
-function Choice({ label, visibleLabel, selected, onPress, palette, compact = false, bordered = true }: { label: string; visibleLabel?: string; selected: boolean; onPress: () => void; palette: Palette; compact?: boolean; bordered?: boolean }) {
-  // Unselected chips carry no border of their own, whether or not `bordered`
-  // is set — a dozen-plus currency chips each individually boxed read as a
-  // wall of empty containers. Only the selected chip earns a border/fill.
-  return <Pressable accessibilityRole="radio" accessibilityState={{ checked: selected }} accessibilityLabel={label} onPress={onPress} style={({ pressed }) => [compact ? styles.chip : styles.choice, selected ? { borderColor: bordered ? palette.primary : 'transparent', backgroundColor: palette.primaryWash } : { borderWidth: 0, backgroundColor: bordered ? palette.muted : 'transparent' }, pressed && styles.pressed]}>{compact ? null : <View style={[styles.radio, { borderColor: selected ? palette.primary : palette.mutedForeground }]}>{selected ? <View style={[styles.radioDot, { backgroundColor: palette.primary }]} /> : null}</View>}<Text style={[styles.choiceText, { color: selected ? palette.primary : palette.foreground }]}>{visibleLabel ?? label}</Text></Pressable>
-}
-
-function Button({ label, onPress, palette, secondary = false, disabled = false, busy = false }: { label: string; onPress: () => void | Promise<void>; palette: Palette; secondary?: boolean; disabled?: boolean; busy?: boolean }) {
-  return <Pressable accessibilityRole="button" accessibilityLabel={label} accessibilityState={{ disabled, busy }} disabled={disabled} onPress={() => void onPress()} style={({ pressed }) => [styles.button, { borderColor: palette.primary, backgroundColor: secondary ? 'transparent' : palette.primary }, (pressed || disabled) && styles.pressed]}><Text allowFontScaling style={[styles.buttonText, { color: secondary ? palette.primary : palette.background }]}>{label}</Text></Pressable>
+/** Web's institution combobox at phone width: a sheet with a search field and a radio list. */
+function InstitutionSheet({ visible, institutions, query, selected, onQuery, onSelect, onClose }: {
+  visible: boolean
+  institutions: readonly (AccountFinancialInstitutionDto & { label: string })[]
+  query: string
+  selected: number | null
+  onQuery: (value: string) => void
+  onSelect: (value: number | null) => void
+  onClose: () => void
+}) {
+  const { t } = useTranslation()
+  const palette = usePalette()
+  const choose = (value: number | null) => { onSelect(value); onClose() }
+  const options: { value: number | null; label: string }[] = [
+    { value: null, label: t('offlineAccount.none') },
+    ...institutions.slice(0, INSTITUTION_RESULT_LIMIT).map((item) => ({ value: item.accountFinancialInstitutionKey, label: item.label })),
+  ]
+  return (
+    <Modal animationType="slide" onRequestClose={onClose} transparent visible={visible}>
+      <Pressable accessibilityLabel={t('offlineAccount.institution')} onPress={onClose} style={[styles.backdrop, { backgroundColor: palette.scrim }]} />
+      <SafeAreaView edges={['bottom']} style={[styles.sheet, { backgroundColor: palette.popover, borderColor: palette.border }, themeTokens.shadow.overlay]}>
+        <UiText accessibilityRole="header" variant="section">{t('offlineAccount.institution')}</UiText>
+        <TextInput
+          accessibilityLabel={t('banking.connect.searchLabel')}
+          autoCapitalize="none"
+          autoCorrect={false}
+          onChangeText={onQuery}
+          placeholder={t('banking.connect.searchLabel')}
+          placeholderTextColor={palette.mutedForeground}
+          style={[styles.input, { color: palette.foreground, borderColor: palette.input }]}
+          value={query}
+        />
+        <ScrollView accessibilityLabel={t('offlineAccount.institution')} accessibilityRole="radiogroup" keyboardShouldPersistTaps="handled" style={styles.sheetList}>
+          {options.map((option, index) => {
+            const checked = option.value === selected
+            return (
+              <Pressable
+                accessibilityLabel={option.label}
+                accessibilityRole="radio"
+                accessibilityState={{ checked }}
+                key={String(option.value)}
+                onPress={() => choose(option.value)}
+                style={({ pressed }) => [styles.option, index > 0 && { borderTopWidth: 1, borderTopColor: palette.border }, pressed && { backgroundColor: palette.muted }]}
+              >
+                <UiText numberOfLines={1} style={styles.optionText} tone={checked ? 'primary' : 'default'} variant={checked ? 'bodyStrong' : 'body'}>{option.label}</UiText>
+                {checked ? <Icon color={palette.primary} name="check" size={16} /> : null}
+              </Pressable>
+            )
+          })}
+          {institutions.length === 0 ? <UiText style={styles.sheetNote} tone="muted" variant="meta">{t('banking.connect.noMatches')}</UiText> : null}
+          {institutions.length > INSTITUTION_RESULT_LIMIT ? (
+            <UiText style={styles.sheetNote} tone="muted" variant="meta">{t('offlineAccount.institutionMore', { count: institutions.length - INSTITUTION_RESULT_LIMIT })}</UiText>
+          ) : null}
+        </ScrollView>
+      </SafeAreaView>
+    </Modal>
+  )
 }
 
 const styles = StyleSheet.create({
-  safeArea: { flex: 1 }, content: { flexGrow: 1, padding: themeTokens.layout.screenPadding }, page: { width: '100%', maxWidth: 680, alignSelf: 'center', gap: themeTokens.spacing[3] },
-  topline: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: themeTokens.spacing[4] }, title: { ...textStyles.title, fontWeight: '700' as const, flex: 1, minWidth: 220 },
-  lead: { ...textStyles.body, marginBottom: themeTokens.spacing[3] }, label: { ...textStyles.bodyStrong, fontWeight: '600' as const, marginTop: themeTokens.spacing[2] },
-  input: { ...textStyles.body, minHeight: themeTokens.touchTarget.minimum, borderWidth: 1, borderRadius: themeTokens.radius.md, paddingHorizontal: themeTokens.spacing[3] }, inputInvalid: { borderWidth: 2 }, amountInput: { fontFamily: themeTokens.typography.roles.data.fontFamily, textAlign: 'right' }, counter: { ...textStyles.amountSmall, alignSelf: 'flex-end' },
-  options: { gap: themeTokens.spacing[2] }, chips: { flexDirection: 'row', flexWrap: 'wrap', gap: themeTokens.spacing[2] }, institutionList: { borderRadius: themeTokens.radius.md, overflow: 'hidden' }, institutionRow: { borderTopWidth: StyleSheet.hairlineWidth, paddingHorizontal: themeTokens.spacing[3], paddingVertical: themeTokens.spacing[2] }, chip: { minHeight: 34, justifyContent: 'center', borderWidth: 1, borderRadius: themeTokens.radius.md, paddingHorizontal: themeTokens.spacing[3] }, choice: { minHeight: themeTokens.touchTarget.minimum, flexDirection: 'row', alignItems: 'center', gap: themeTokens.spacing[3], borderWidth: 1, borderRadius: themeTokens.radius.md, paddingHorizontal: themeTokens.spacing[3], paddingVertical: themeTokens.spacing[2] }, choiceText: { ...textStyles.body, flex: 1 }, radio: { width: 20, height: 20, borderWidth: 1, borderRadius: 10, alignItems: 'center', justifyContent: 'center' }, radioDot: { width: 10, height: 10, borderRadius: 5 },
-  helper: { ...textStyles.body }, error: { ...textStyles.body },
-  review: { borderWidth: 1, borderRadius: themeTokens.radius.lg, padding: themeTokens.spacing[5], gap: themeTokens.spacing[3] }, sectionTitle: { ...textStyles.section }, reviewRow: { gap: themeTokens.spacing[1] }, value: { ...textStyles.body }, dataValue: { ...textStyles.amount },
-  context: { borderWidth: 1, borderRadius: themeTokens.radius.lg, padding: themeTokens.spacing[4], gap: themeTokens.spacing[2] }, unknown: { borderLeftWidth: 3, paddingLeft: themeTokens.spacing[4], gap: themeTokens.spacing[2] }, actions: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'flex-end', gap: themeTokens.spacing[3] },
-  button: { minHeight: themeTokens.touchTarget.minimum, minWidth: themeTokens.touchTarget.minimum, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderRadius: themeTokens.radius.md, paddingHorizontal: themeTokens.spacing[4] }, buttonText: { ...textStyles.action }, pressed: { opacity: 0.68 },
+  safeArea: { flex: 1 },
+  content: { flexGrow: 1, paddingHorizontal: themeTokens.layout.screenPadding, paddingBottom: themeTokens.spacing[10] },
+  page: { width: '100%', maxWidth: 680, alignSelf: 'center', gap: themeTokens.spacing[4] },
+  input: { ...textStyles.body, minHeight: themeTokens.size.control, borderWidth: 1, borderRadius: themeTokens.radius.md, paddingHorizontal: themeTokens.spacing[3] },
+  backdrop: { flex: 1 },
+  sheet: { maxHeight: '80%', borderTopWidth: 1, borderTopLeftRadius: themeTokens.radius.xl, borderTopRightRadius: themeTokens.radius.xl, paddingTop: themeTokens.spacing[4], paddingHorizontal: themeTokens.layout.screenPadding, gap: themeTokens.spacing[3] },
+  sheetList: { flexGrow: 0 },
+  sheetNote: { paddingVertical: themeTokens.spacing[3] },
+  option: { minHeight: themeTokens.touchTarget.minimum + 8, flexDirection: 'row', alignItems: 'center', gap: themeTokens.spacing[3], paddingVertical: themeTokens.spacing[3] },
+  optionText: { flex: 1 },
+  review: { borderWidth: 1, borderRadius: themeTokens.radius.xl },
+  reviewRow: { minHeight: 56, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: themeTokens.spacing[4], paddingHorizontal: themeTokens.spacing[4], paddingVertical: themeTokens.spacing[3] },
+  reviewLabel: { flexShrink: 0 },
+  reviewValue: { flexShrink: 1, textAlign: 'right' },
+  context: { gap: themeTokens.spacing[2] },
+  actions: { flexDirection: 'row', flexWrap: 'wrap', gap: themeTokens.spacing[2] },
 })

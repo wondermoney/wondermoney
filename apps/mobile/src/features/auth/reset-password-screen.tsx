@@ -1,20 +1,10 @@
 import { ReactNode, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import {
-  KeyboardAvoidingView,
-  Platform,
-  Pressable,
-  ScrollView,
-  Text,
-  TextInput,
-  useColorScheme,
-  View,
-} from 'react-native'
-import { SafeAreaView } from 'react-native-safe-area-context'
 
-import { themeTokens } from '@/theme/tokens'
+import { Button } from '@/components/ui/button'
+import { Text } from '@/components/ui/text'
 
-import { authFormStyles as styles, AuthLogo, FieldError, FieldLabel } from './auth-form-styles'
+import { AuthField, AuthLayout, AuthTextInput } from './auth-form-styles'
 
 export type ConfirmResetOutcomeView = 'accepted' | 'weak-password' | 'link-expired' | 'unavailable'
 
@@ -25,16 +15,12 @@ export type ResetPasswordScreenProps = {
 
 export function ResetPasswordScreen({ onSubmit, footer }: ResetPasswordScreenProps) {
   const { t } = useTranslation()
-  const colorScheme = useColorScheme()
-  const palette = themeTokens.colors[colorScheme === 'dark' ? 'dark' : 'light']
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const passwordRef = useRef('')
   const confirmPasswordRef = useRef('')
-  const [focused, setFocused] = useState<'password' | 'confirmPassword' | null>(null)
   const [errors, setErrors] = useState<{ password?: string; confirmPassword?: string; submit?: string }>({})
   const [submitting, setSubmitting] = useState(false)
-  const [buttonFocused, setButtonFocused] = useState(false)
 
   const submit = () => {
     if (submitting) return
@@ -63,105 +49,58 @@ export function ResetPasswordScreen({ onSubmit, footer }: ResetPasswordScreenPro
   }
 
   return (
-    <SafeAreaView style={[styles.safeArea, { backgroundColor: palette.background }]}>
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        style={styles.keyboard}
-      >
-        <ScrollView
-          keyboardShouldPersistTaps="handled"
-          contentContainerStyle={styles.scrollContent}
-        >
-          <View style={styles.panel}>
-            <AuthLogo />
-            <View style={styles.headingGroup}>
-              <Text accessibilityRole="header" allowFontScaling style={[styles.title, { color: palette.foreground }]}>
-                {t('auth.resetPassword.title')}
-              </Text>
-              <Text allowFontScaling style={[styles.helper, { color: palette.mutedForeground }]}>
-                {t('auth.resetPassword.helper')}
-              </Text>
-            </View>
+    <AuthLayout
+      footer={footer}
+      lead={<Text tone="muted" variant="meta">{t('auth.resetPassword.helper')}</Text>}
+      title={t('auth.resetPassword.title')}
+    >
+      <AuthField error={errors.password} label={t('auth.resetPassword.newPassword')} required>
+        <AuthTextInput
+          accessibilityLabel={t('auth.resetPassword.newPassword')}
+          autoCapitalize="none"
+          autoComplete="password-new"
+          invalid={Boolean(errors.password)}
+          onChangeText={(value) => {
+            passwordRef.current = value
+            setPassword(value)
+          }}
+          placeholder={t('auth.resetPassword.newPassword')}
+          returnKeyType="next"
+          secureTextEntry
+          value={password}
+        />
+      </AuthField>
 
-            <View style={styles.form}>
-              <FieldLabel color={palette.foreground}>{t('auth.resetPassword.newPassword')}</FieldLabel>
-              <TextInput
-                accessibilityLabel={t('auth.resetPassword.newPassword')}
-                autoCapitalize="none"
-                autoComplete="password-new"
-                onBlur={() => setFocused(null)}
-                onChangeText={(value) => {
-                  passwordRef.current = value
-                  setPassword(value)
-                }}
-                onFocus={() => setFocused('password')}
-                returnKeyType="next"
-                secureTextEntry
-                style={[
-                  styles.input,
-                  { color: palette.foreground, borderColor: focused === 'password' ? palette.primary : palette.border },
-                ]}
-                value={password}
-              />
-              {errors.password ? <FieldError color={palette.destructive}>{errors.password}</FieldError> : null}
+      <AuthField error={errors.confirmPassword} label={t('auth.resetPassword.confirmPassword')} required>
+        <AuthTextInput
+          accessibilityLabel={t('auth.resetPassword.confirmPassword')}
+          autoCapitalize="none"
+          autoComplete="password-new"
+          invalid={Boolean(errors.confirmPassword)}
+          onChangeText={(value) => {
+            confirmPasswordRef.current = value
+            setConfirmPassword(value)
+          }}
+          onSubmitEditing={submit}
+          placeholder={t('auth.resetPassword.confirmPassword')}
+          returnKeyType="done"
+          secureTextEntry
+          value={confirmPassword}
+        />
+      </AuthField>
 
-              <FieldLabel color={palette.foreground}>{t('auth.resetPassword.confirmPassword')}</FieldLabel>
-              <TextInput
-                accessibilityLabel={t('auth.resetPassword.confirmPassword')}
-                autoCapitalize="none"
-                autoComplete="password-new"
-                onBlur={() => setFocused(null)}
-                onChangeText={(value) => {
-                  confirmPasswordRef.current = value
-                  setConfirmPassword(value)
-                }}
-                onFocus={() => setFocused('confirmPassword')}
-                onSubmitEditing={submit}
-                returnKeyType="done"
-                secureTextEntry
-                style={[
-                  styles.input,
-                  {
-                    color: palette.foreground,
-                    borderColor: focused === 'confirmPassword' ? palette.primary : palette.border,
-                  },
-                ]}
-                value={confirmPassword}
-              />
-              {errors.confirmPassword ? (
-                <FieldError color={palette.destructive}>{errors.confirmPassword}</FieldError>
-              ) : null}
+      {errors.submit ? (
+        <Text accessible accessibilityLabel={errors.submit} accessibilityRole="alert" tone="destructive" variant="meta">
+          {errors.submit}
+        </Text>
+      ) : null}
 
-              {errors.submit ? (
-                <Text accessible accessibilityLabel={errors.submit} accessibilityRole="alert" allowFontScaling style={[styles.error, { color: palette.destructive }]}>
-                  {errors.submit}
-                </Text>
-              ) : null}
-
-              <Pressable
-                accessibilityRole="button"
-                accessibilityState={{ disabled: submitting, busy: submitting }}
-                disabled={submitting}
-                onBlur={() => setButtonFocused(false)}
-                onFocus={() => setButtonFocused(true)}
-                onPress={submit}
-                style={({ pressed }) => [
-                  styles.primaryButton,
-                  { backgroundColor: palette.primary },
-                  buttonFocused && { borderColor: palette.foreground, borderWidth: 2 },
-                  (pressed || submitting) && styles.buttonPressed,
-                ]}
-              >
-                <Text allowFontScaling style={[styles.buttonLabel, { color: palette.background }]}>
-                  {submitting ? t('auth.resetPassword.submitting') : t('auth.resetPassword.submit')}
-                </Text>
-              </Pressable>
-
-              {footer}
-            </View>
-          </View>
-        </ScrollView>
-      </KeyboardAvoidingView>
-    </SafeAreaView>
+      <Button
+        block
+        disabled={submitting}
+        label={submitting ? t('auth.resetPassword.submitting') : t('auth.resetPassword.submit')}
+        onPress={submit}
+      />
+    </AuthLayout>
   )
 }

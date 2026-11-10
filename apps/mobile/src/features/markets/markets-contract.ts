@@ -165,6 +165,11 @@ export function createHistoricalPriceEndpoint(symbol: string, period: Historical
  */
 export const watchlistResponseSchema = z.object({
   symbols: z.array(z.string().trim().min(1).max(20)),
+  // Each symbol with its known asset's logo. Optional: an older API sends `symbols` only.
+  items: z.array(z.object({
+    symbol: z.string().trim().min(1).max(20),
+    logoUrl: z.string().nullable(),
+  })).optional().catch(undefined),
 })
 
 export function createWatchlistEndpoint() {

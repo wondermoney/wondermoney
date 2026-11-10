@@ -1,9 +1,11 @@
 import { DI } from '@app/database/di';
 import { Transaction } from '@entity/Transaction';
-import { getEffectiveAppuserAmount } from '@utils/account-amounts';
+import { CATEGORY_LINE_POPULATE, spendingLinesOf } from '@service/transaction/category-lines';
+import { loadCategorySpendingFlags } from '@service/transaction/category-spending';
 
 import { round2, toCsv } from './csv';
-import { buildTransactionWhere, type ReportServiceInput, transactionMatchesCategoryKeys } from './report-filters';
+import { loadViewerCurrencyAmounts, REPORT_CURRENCY_POPULATE, type ReportResult } from './report-currency';
+import { buildTransactionWhere, lineMatchesCategoryKeys, type ReportServiceInput, transactionMatchesCategoryKeys } from './report-filters';
 
 export interface SankeyData {
   links: SankeyLink[];
@@ -42,12 +44,7 @@ interface CategoryBucket {
   value: number;
 }
 
-const CATEGORY_POPULATE = [
-  'appuserTransactionCategories.categoryKey',
-  'appuserTransactionCategories.categoryKey.parentCategory',
-  'accountKey',
-  'appuserCurrencyKey',
-] as const;
+const CATEGORY_POPULATE = [...CATEGORY_LINE_POPULATE, 'accountKey', ...REPORT_CURRENCY_POPULATE] as const;
 
 export function buildSankeyCsv(data: SankeyData): string {
   const nodesSection = `# nodes\n${stripBom(
@@ -65,12 +62,14 @@ export function buildSankeyCsv(data: SankeyData): string {
   return `\uFEFF${nodesSection}\n${linksSection}`;
 }
 
-export async function getSankeyReport(input: ReportServiceInput): Promise<SankeyData> {
+export async function getSankeyReport(input: ReportServiceInput): Promise<ReportResult<SankeyData>> {
   const { filters, tenant, user } = input;
 
   const transactions = await DI.em.find(Transaction, buildTransactionWhere(filters, tenant, user), {
     populate: CATEGORY_POPULATE,
   });
+  const amounts = await loadViewerCurrencyAmounts(DI.em, user, transactions);
+  const spendingFlags = await loadCategorySpendingFlags(DI.em, tenant.tenantKey);
 
   const categoryKeys = filters.categoryKeys;
   const visible = categoryKeys === undefined ? transactions : transactions.filter((transaction) => transactionMatchesCategoryKeys(transaction, categoryKeys));
@@ -80,11 +79,19 @@ export async function getSankeyReport(input: ReportServiceInput): Promise<Sankey
   const expenseByCategoryAccount = new Map<string, { accountKey: string; accountLabel: string; categoryKey: string; value: number }>();
   const accountTotals = new Map<string, { label: string; value: number }>();
 
-  for (const transaction of visible) {
-    const amount = getEffectiveAppuserAmount(transaction);
-    const assignedCategory = transaction.appuserTransactionCategories.getItems()[0]?.categoryKey;
+  // One flow per category line: a split transaction feeds each of its lines' categories. A line in a
+  // category that is not spending (investments, savings) is no flow.
+  const flows = visible.flatMap((transaction) => {
+    // In the viewer's currency; a row no rate converts is left out and counted.
+    const converted = amounts.amountOf(transaction);
+    if (converted === null) return [];
+    return spendingLinesOf(transaction, converted, spendingFlags)
+      .filter((line) => lineMatchesCategoryKeys(line, categoryKeys))
+      .map((line) => ({ account: transaction.accountKey, amount: line.amount ?? 0, assignedCategory: line.category }));
+  });
+
+  for (const { account, amount, assignedCategory } of flows) {
     const categoryKey = assignedCategory ? String(assignedCategory.categoryKey) : null;
-    const account = transaction.accountKey;
     const accountKey = account ? String(account.accountKey) : null;
 
     if (amount > 0) {
@@ -192,7 +199,7 @@ export async function getSankeyReport(input: ReportServiceInput): Promise<Sankey
     }
   }
 
-  return { links, nodes };
+  return { completeness: amounts.completeness(), data: { links, nodes } };
 }
 
 function bucketAccounts(entries: [string, { label: string; value: number }][], limit: number): CategoryBucket[] {

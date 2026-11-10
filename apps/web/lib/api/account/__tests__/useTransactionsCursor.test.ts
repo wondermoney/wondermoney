@@ -78,6 +78,19 @@ test("keeps sending the filters alongside the cursor", async () => {
   assert.equal(params?.unreviewedOnly, true);
 });
 
+test("sends a tag filter comma-separated and drops an empty one", async () => {
+  const sent: unknown[] = [];
+  const api = client((_url, config) => {
+    sent.push(config?.params?.tagKeys);
+    return { transactions: [] };
+  });
+
+  await getTransactions({ tagKeys: ["3", "8"] }, api);
+  await getTransactions({ tagKeys: [] }, api);
+
+  assert.deepEqual(sent, ["3,8", undefined]);
+});
+
 test("a null nextCursor is the end of the list", async () => {
   const api = client(() => ({
     nextCursor: null,

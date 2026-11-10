@@ -1,5 +1,7 @@
 export type ApiErrorCode =
   | 'demo-forbidden'
+  | 'email-verification-required'
+  | 'ai-allowance-exhausted'
   | 'auth-session'
   | 'mfa-required'
   | 'cancelled'
@@ -15,6 +17,8 @@ export type ApiErrorOptions = Readonly<{
 
 const diagnosticMessages: Record<ApiErrorCode, string> = {
   'demo-forbidden': 'This action is unavailable in demo mode.',
+  'email-verification-required': 'This action requires a verified email address.',
+  'ai-allowance-exhausted': "Today's allowance for this AI feature is used up.",
   'auth-session': 'The authenticated session could not be used.',
   'mfa-required': 'Multi-factor authentication is required.',
   cancelled: 'The operation was cancelled.',

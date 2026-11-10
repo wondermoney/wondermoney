@@ -11,6 +11,8 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
+import { AMOUNT_MASK } from "@/lib/privacy/mask";
+import { usePrivacyMode } from "@/lib/privacy/usePrivacyMode";
 import { cn } from "@/lib/utils";
 
 import { chartAxisProps, chartGridProps } from "./chart-axis";
@@ -43,6 +45,8 @@ type Props = {
   yAxisWidth?: number;
 };
 
+const maskTick = () => AMOUNT_MASK;
+
 export function ScatterChartBase({
   data,
   xKey,
@@ -50,7 +54,7 @@ export function ScatterChartBase({
   config,
   className,
   xFormatter,
-  yFormatter,
+  yFormatter: yFormatterProp,
   tooltipFormatter,
   tooltipValueFormatter,
   tooltipContent,
@@ -59,6 +63,10 @@ export function ScatterChartBase({
   xType = "category",
   yAxisWidth = 76,
 }: Props) {
+  // A value axis with no formatter of its own is assumed to be money while
+  // privacy mode is on: the chart keeps its shape, the ticks lose their figures.
+  const { hidden } = usePrivacyMode();
+  const yFormatter = yFormatterProp ?? (hidden ? maskTick : undefined);
   const chartData = React.useMemo(
     () =>
       data.map((row) => ({

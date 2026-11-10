@@ -4,8 +4,8 @@ import posthog from "posthog-js";
 import { useEffect } from "react";
 
 import { useUser } from "@/lib/auth/user-context";
-import { GOOGLE_TAG_MANAGER_ID } from "@/lib/utils/analytics";
 import {
+  getGtmId,
   isAnalyticsEnabled,
   isGtmEnabled,
 } from "@/lib/utils/analytics-enabled";
@@ -13,9 +13,11 @@ import { env } from "@/lib/utils/env";
 
 const GTM_SCRIPT_ID = "google-tag-manager";
 
-function Gtm({ enabled }: { enabled: boolean }) {
+// Loads only when the instance sets NEXT_PUBLIC_GTM_ID (see analytics-enabled).
+function Gtm() {
   useEffect(() => {
-    if (!enabled || !isGtmEnabled()) {
+    const gtmId = getGtmId();
+    if (!isGtmEnabled() || !gtmId) {
       document.getElementById(GTM_SCRIPT_ID)?.remove();
       return;
     }
@@ -24,17 +26,16 @@ function Gtm({ enabled }: { enabled: boolean }) {
     const script = document.createElement("script");
     script.id = GTM_SCRIPT_ID;
     script.async = true;
-    script.src = `https://www.googletagmanager.com/gtm.js?id=${GOOGLE_TAG_MANAGER_ID}`;
+    script.src = `https://www.googletagmanager.com/gtm.js?id=${encodeURIComponent(gtmId)}`;
     document.head.append(script);
-  }, [enabled]);
+  }, []);
 
   return null;
 }
 
 export function AnalyticsInit() {
   const user = useUser();
-  const analyticsEnabled =
-    isAnalyticsEnabled() && Boolean(env.NEXT_PUBLIC_POSTHOG_KEY);
+  const analyticsEnabled = isAnalyticsEnabled();
 
   useEffect(() => {
     const posthogKey = env.NEXT_PUBLIC_POSTHOG_KEY;
@@ -62,5 +63,5 @@ export function AnalyticsInit() {
     if (user?.id) posthog.identify(user.id, { email: user.email });
   }, [analyticsEnabled, user?.id, user?.email]);
 
-  return <Gtm enabled />;
+  return <Gtm />;
 }

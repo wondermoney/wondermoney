@@ -1,9 +1,10 @@
-import { useContext, useState } from 'react'
+import { useState } from 'react'
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
-import { SafeAreaInsetsContext, SafeAreaView } from 'react-native-safe-area-context'
 
+import { SafeAreaView } from '@/components/ui/screen-safe-area'
 import { themeTokens } from '@/theme/tokens'
 import { textStyles } from '@/theme/typography'
+import { BackControl } from '@/components/ui/back-control'
 
 export type Palette = (typeof themeTokens.colors)[keyof typeof themeTokens.colors]
 
@@ -54,11 +55,10 @@ export function MarketsLoading({ label, palette, backLabel, onBack }: {
   backLabel: string
   onBack: () => void
 }) {
-  const insets = useContext(SafeAreaInsetsContext)
   return (
     <SafeAreaView edges={['left', 'right', 'bottom']} style={[styles.safeArea, { backgroundColor: palette.background }]}>
-      <View style={[styles.loadingHeader, { paddingTop: themeTokens.spacing[6] + (insets?.top ?? 0) }]}>
-        <MarketsAction label={backLabel} onPress={onBack} palette={palette} />
+      <View style={styles.loadingHeader}>
+        <BackControl fallback="/markets" label={backLabel} onPress={onBack} />
       </View>
       <View accessible accessibilityRole="progressbar" accessibilityLabel={label} style={styles.loading}>
         {['heading', 'row-one', 'row-two'].map((key) => (
@@ -88,13 +88,11 @@ export function MarketsFailure({
   palette: Palette
   retryable?: boolean
 }) {
-  const insets = useContext(SafeAreaInsetsContext)
   return (
     <SafeAreaView edges={['left', 'right', 'bottom']} style={[styles.safeArea, { backgroundColor: palette.background }]}>
-      <ScrollView contentContainerStyle={[styles.centered, { paddingTop: themeTokens.spacing[6] + (insets?.top ?? 0) }]}>
+      <ScrollView contentContainerStyle={styles.centered}>
         <View style={styles.failure}>
-          <MarketsAction label={backLabel} onPress={onBack} palette={palette} />
-          <View style={[styles.errorMarker, { backgroundColor: palette.destructive }]} />
+          <BackControl fallback="/markets" label={backLabel} onPress={onBack} />
           <Text accessibilityRole="header" allowFontScaling style={[styles.failureTitle, { color: palette.foreground }]}>
             {title}
           </Text>
@@ -141,11 +139,12 @@ export function ReadOnlyField({ label, value, palette, tone = 'default', separat
 export const marketsStyles = StyleSheet.create({
   safeArea: { flex: 1 },
   content: { flexGrow: 1, padding: themeTokens.layout.screenPadding },
-  page: { width: '100%', maxWidth: 680, alignSelf: 'center', gap: themeTokens.layout.blockGap },
+  // Space, not rules, between the title, the figure and the sections.
+  page: { width: '100%', maxWidth: 680, alignSelf: 'center', gap: themeTokens.spacing[8] },
   heading: { gap: themeTokens.spacing[2] },
   title: { ...textStyles.title },
   helper: { ...textStyles.body },
-  list: { borderWidth: 1, borderRadius: themeTokens.radius.lg, overflow: 'hidden' },
+  list: { width: '100%' },
 })
 
 const styles = StyleSheet.create({
@@ -157,13 +156,13 @@ const styles = StyleSheet.create({
   loadingHeader: { padding: themeTokens.layout.screenPadding, alignItems: 'flex-start' },
   loading: { flex: 1, width: '100%', maxWidth: 680, alignSelf: 'center', padding: themeTokens.layout.screenPadding, gap: themeTokens.spacing[5] },
   skeleton: { width: '100%', height: 56, borderRadius: themeTokens.radius.md },
-  centered: { flexGrow: 1, justifyContent: 'center', padding: themeTokens.layout.screenPadding },
+  centered: { flexGrow: 1, padding: themeTokens.layout.screenPadding },
   failure: { width: '100%', maxWidth: 480, alignSelf: 'center', alignItems: 'flex-start', gap: themeTokens.spacing[4] },
-  errorMarker: { width: 36, height: 2 },
   failureTitle: { ...textStyles.title },
   body: { ...textStyles.body },
   actions: { flexDirection: 'row', flexWrap: 'wrap', gap: themeTokens.spacing[3] },
-  field: { minHeight: 68, padding: themeTokens.spacing[4], gap: themeTokens.spacing[2] },
-  fieldLabel: { ...textStyles.meta },
-  fieldValue: { ...textStyles.amount },
+  // A read-only row: muted 14px label left, mono 14/600 value right, baselines aligned.
+  field: { minHeight: themeTokens.touchTarget.minimum, flexDirection: 'row', flexWrap: 'wrap', alignItems: 'baseline', justifyContent: 'space-between', columnGap: themeTokens.spacing[4], rowGap: themeTokens.spacing[1], paddingVertical: themeTokens.spacing[3] },
+  fieldLabel: { ...textStyles.meta, flexShrink: 1 },
+  fieldValue: { ...textStyles.amount, fontWeight: '600' as const, textAlign: 'right' },
 })

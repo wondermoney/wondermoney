@@ -43,7 +43,7 @@ const DatePicker: React.FC<DatePickerProps> = ({
         !value && "text-muted-foreground",
       )}
     >
-      <CalendarIcon className="mr-2 size-4" />
+      <CalendarIcon className="size-4" />
       {value ? (
         new Intl.DateTimeFormat(locale, { dateStyle: "medium" }).format(value)
       ) : (

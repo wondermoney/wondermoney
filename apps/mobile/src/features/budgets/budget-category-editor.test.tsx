@@ -8,7 +8,7 @@ import { themeTokens } from '@/theme/tokens'
 
 import { BudgetCategoryEditor, monthsInCategoryScope, parseRawBudgetAmount } from './budget-category-editor'
 import { mapBudget } from './budgets-view-model'
-import { budgetFixture, childRow } from './test-fixtures'
+import { budgetFixture, childRow, parentRow, rolloverChildRow } from './test-fixtures'
 
 const child = mapBudget(budgetFixture).categories[0].children[0]
 
@@ -32,6 +32,23 @@ describe('budget child-category editor', () => {
     await fireEvent.press(view.getByRole('button', { name: 'Save category budget' }))
     await waitFor(() => expect(save).toHaveBeenCalledWith({ amount: 125.5, recurrency: 'QUARTERLY', applyToFollowingMonths: false }))
     expect(alert).not.toHaveBeenCalled()
+  })
+
+  it('saves the rollover switch with rolloverEnabled, and leaves it out when unchanged', async () => {
+    const save = jest.fn().mockResolvedValue(undefined)
+    const { view } = await renderEditor({ onSave: save })
+    const toggle = view.getByRole('switch', { name: 'Roll over leftover to next month' })
+    expect(toggle.props.value).toBe(false)
+    await fireEvent(toggle, 'valueChange', true)
+    await fireEvent.press(view.getByRole('button', { name: 'Save category budget' }))
+    await waitFor(() => expect(save).toHaveBeenCalledWith({ amount: 100, recurrency: 'MONTHLY', applyToFollowingMonths: false, rolloverEnabled: true }))
+
+    const unchanged = jest.fn().mockResolvedValue(undefined)
+    const enabled = mapBudget({ ...budgetFixture, categories: [parentRow, rolloverChildRow(0)] }).categories[0].children[0]
+    const second = await renderEditor({ child: enabled, onSave: unchanged })
+    expect(second.view.getByRole('switch', { name: 'Roll over leftover to next month' }).props.value).toBe(true)
+    await fireEvent.press(second.view.getByRole('button', { name: 'Save category budget' }))
+    await waitFor(() => expect(unchanged).toHaveBeenCalledWith({ amount: 100, recurrency: 'MONTHLY', applyToFollowingMonths: false }))
   })
 
   it('requires an explicit recurrence for legacy null rows and exposes every exact recurrence', async () => {
@@ -75,9 +92,13 @@ describe('budget child-category editor', () => {
     expect(view.getByRole('radio', { name: 'Monthly' }).props.accessibilityState.disabled).toBe(true)
     expect(view.getByRole('radio', { name: 'Selected month only' }).props.accessibilityState.disabled).toBe(true)
     expect(view.getByRole('button', { name: 'Cancel' }).props.accessibilityState.disabled).toBe(true)
-    expect(parseRawBudgetAmount('0')).toBeNull()
-    expect(parseRawBudgetAmount('-2')).toBeNull()
-    expect(parseRawBudgetAmount('Infinity')).toBeNull()
-    expect(parseRawBudgetAmount('1.25')).toBe(1.25)
+    expect(parseRawBudgetAmount('0', 'en')).toBeNull()
+    expect(parseRawBudgetAmount('-2', 'en')).toBeNull()
+    expect(parseRawBudgetAmount('Infinity', 'en')).toBeNull()
+    expect(parseRawBudgetAmount('1.2.3', 'pt-PT')).toBeNull()
+    expect(parseRawBudgetAmount('1.25', 'en')).toBe(1.25)
+    expect(parseRawBudgetAmount('1.234,56', 'pt-PT')).toBe(1234.56)
+    expect(parseRawBudgetAmount('1.000', 'es')).toBe(1000)
+    expect(parseRawBudgetAmount('1.000', 'en')).toBe(1)
   })
 })

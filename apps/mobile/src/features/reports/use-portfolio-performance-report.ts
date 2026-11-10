@@ -5,14 +5,16 @@ import { useProductRuntime } from '@/components/providers/product-runtime-provid
 
 import { portfolioPerformanceReportKey } from './query-keys'
 import { conservativeReportQueryOptions, isAccessError, isInvalidResponse, useReportAccessErrors } from './query-state'
-import { createPortfolioPerformanceReportEndpoint, type ReportFilters } from './reports-contract'
+import { createPortfolioPerformanceReportEndpoint, portfolioPerformanceFilters, type ReportFilters } from './reports-contract'
 
 export function usePortfolioPerformanceReport(filters: ReportFilters) {
   const { runtime, blockAccess } = useProductRuntime()
   if (!runtime) throw new Error('usePortfolioPerformanceReport requires an authenticated runtime')
+  // Only the period applies, so changing an account or category filter does not refetch it.
+  const periodFilters = portfolioPerformanceFilters(filters)
   const query = useQuery({
-    queryKey: portfolioPerformanceReportKey(runtime.epochId, filters),
-    queryFn: () => runtime.apiClient.read(createPortfolioPerformanceReportEndpoint(filters)),
+    queryKey: portfolioPerformanceReportKey(runtime.epochId, periodFilters),
+    queryFn: () => runtime.apiClient.read(createPortfolioPerformanceReportEndpoint(periodFilters)),
     ...conservativeReportQueryOptions,
   })
   const errors = useMemo(() => [query.error], [query.error])

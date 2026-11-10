@@ -1,8 +1,8 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useTranslations } from "next-intl";
-import { useEffect } from "react";
+import { useLocale, useTranslations } from "next-intl";
+import { useEffect, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -26,18 +26,28 @@ import type {
 } from "@/lib/api/loan/types";
 import useLinkLoanRepayment from "@/lib/api/loan/useLinkLoanRepayment";
 import useUpdateLoanRepayment from "@/lib/api/loan/useUpdateLoanRepayment";
+import { formatLocaleNumberInput, zLocaleNumber } from "@/lib/utils/number";
 
-const schema = z
-  .object({
-    total: z.coerce.number<number>().min(0),
-    principal: z.coerce.number<number>().min(0),
-    interest: z.coerce.number<number>().min(0),
-    fees: z.coerce.number<number>().min(0),
-  })
-  .refine(
-    (v) => Math.abs(v.total - (v.principal + v.interest + v.fees)) < 0.01,
-    { message: "sum" },
-  );
+/**
+ * Amounts are typed in the reader's locale ("1.234,56" for pt and es); blank or
+ * unreadable input is `invalidAmount`, never 0 or another number.
+ */
+const buildSchema = (locale: string, invalidAmount: string) => {
+  const amount = () =>
+    zLocaleNumber(locale, invalidAmount).pipe(z.number().min(0));
+  return z
+    .object({
+      total: amount(),
+      principal: amount(),
+      interest: amount(),
+      fees: amount(),
+    })
+    .refine(
+      (v) => Math.abs(v.total - (v.principal + v.interest + v.fees)) < 0.01,
+      { message: "sum" },
+    );
+};
+type Schema = ReturnType<typeof buildSchema>;
 
 export default function RepaymentAllocationForm({
   loan,
@@ -54,9 +64,14 @@ export default function RepaymentAllocationForm({
 }) {
   const t = useTranslations("loans");
   const tCommon = useTranslations();
+  const locale = useLocale();
   const link = useLinkLoanRepayment();
   const update = useUpdateLoanRepayment();
-  const form = useForm({
+  const schema = useMemo(
+    () => buildSchema(locale, tCommon("invalid-amount")),
+    [locale, tCommon],
+  );
+  const form = useForm<z.input<Schema>, undefined, z.output<Schema>>({
     resolver: zodResolver(schema),
     defaultValues: {
       total: existingRepayment?.totalPaymentAmount ?? candidate.amount,
@@ -73,7 +88,7 @@ export default function RepaymentAllocationForm({
       fees: existingRepayment?.feeAmount ?? 0,
     });
   }, [candidate, existingRepayment, form]);
-  const submit = async (values: z.infer<typeof schema>) => {
+  const submit = async (values: z.output<Schema>) => {
     const payload = {
       transactionKey: candidate.transactionKey,
       totalPaymentAmount: values.total,
@@ -124,7 +139,11 @@ export default function RepaymentAllocationForm({
               <FormItem>
                 <FormLabel>{t("detail.repayments.totalPayment")}</FormLabel>
                 <FormControl>
-                  <Input type="number" step="0.01" {...field} />
+                  <Input
+                    inputMode="decimal"
+                    {...field}
+                    value={formatLocaleNumberInput(field.value, locale)}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -138,7 +157,11 @@ export default function RepaymentAllocationForm({
                 <FormItem>
                   <FormLabel>{t("detail.repayments.principal")}</FormLabel>
                   <FormControl>
-                    <Input type="number" step="0.01" {...field} />
+                    <Input
+                      inputMode="decimal"
+                      {...field}
+                      value={formatLocaleNumberInput(field.value, locale)}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -151,7 +174,11 @@ export default function RepaymentAllocationForm({
                 <FormItem>
                   <FormLabel>{t("detail.repayments.interest")}</FormLabel>
                   <FormControl>
-                    <Input type="number" step="0.01" {...field} />
+                    <Input
+                      inputMode="decimal"
+                      {...field}
+                      value={formatLocaleNumberInput(field.value, locale)}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -164,7 +191,11 @@ export default function RepaymentAllocationForm({
                 <FormItem>
                   <FormLabel>{t("detail.repayments.fees")}</FormLabel>
                   <FormControl>
-                    <Input type="number" step="0.01" {...field} />
+                    <Input
+                      inputMode="decimal"
+                      {...field}
+                      value={formatLocaleNumberInput(field.value, locale)}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

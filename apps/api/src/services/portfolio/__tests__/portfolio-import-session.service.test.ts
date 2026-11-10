@@ -43,7 +43,7 @@ describe('portfolio import session service', () => {
 
     const result = await service.createSession({ appuser, columnMappingJson: { source: 'test' }, correlationId: 'portfolio.csv-import-session:12:abc', expiresAt: new Date('2026-06-19T00:00:00.000Z'), portfolioId: 12, s3Bucket: 'portfolios-csv-dev', s3Key: 'import-sessions/12/abc.csv', summaryJson: { totalRows: 0 }, tenant });
 
-    expect(em.findOne).toHaveBeenCalledWith(expect.any(Function), expect.objectContaining({ closedAt: undefined, deletedAt: undefined, portfolioKey: 12, portfolioOwnerAppuserKey: appuser, tenantKey: tenant }), expect.objectContaining({ populate: ['portfolioOwnerAppuserKey', 'tenantKey'] }));
+    expect(em.findOne).toHaveBeenCalledWith(expect.any(Function), expect.objectContaining({ closedAt: undefined, deletedAt: undefined, portfolioKey: 12, tenantKey: tenant }), expect.objectContaining({ populate: ['portfolioOwnerAppuserKey', 'tenantKey'] }));
     expect(result.appuserKey).toBe(appuser);
     expect(result.financialBrokerKey).toBeUndefined();
     expect(result.tenantKey).toBe(tenant);
@@ -83,7 +83,7 @@ describe('portfolio import session service', () => {
 
     await expect(service.createSession({ appuser, correlationId: 'portfolio.csv-import-session:12:abc', portfolioId: 12, s3Bucket: 'portfolios-csv-dev', s3Key: 'import-sessions/12/abc.csv', tenant })).rejects.toThrow('Portfolio not found');
 
-    expect(em.findOne).toHaveBeenCalledWith(expect.any(Function), expect.objectContaining({ closedAt: undefined, deletedAt: undefined, portfolioKey: 12, portfolioOwnerAppuserKey: appuser, tenantKey: tenant }), expect.objectContaining({ populate: ['portfolioOwnerAppuserKey', 'tenantKey'] }));
+    expect(em.findOne).toHaveBeenCalledWith(expect.any(Function), expect.objectContaining({ closedAt: undefined, deletedAt: undefined, portfolioKey: 12, tenantKey: tenant }), expect.objectContaining({ populate: ['portfolioOwnerAppuserKey', 'tenantKey'] }));
   });
 
   it('fetches only an owned session', async () => {

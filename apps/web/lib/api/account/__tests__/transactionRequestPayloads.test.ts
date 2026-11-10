@@ -26,11 +26,11 @@ const formInput = {
   transactionTypeId: "1",
 };
 
-const submit = (input: Record<string, unknown>) =>
-  toTransactionRequest(createTransactionFormSchema(t).parse(input));
+const submit = (input: Record<string, unknown>, locale = "pt") =>
+  toTransactionRequest(createTransactionFormSchema(t, locale).parse(input));
 
-const buildRequest = (input: Record<string, unknown>) => {
-  const { accountId: _accountId, ...request } = submit(input);
+const buildRequest = (input: Record<string, unknown>, locale = "pt") => {
+  const { accountId: _accountId, ...request } = submit(input, locale);
   return buildCreateTransactionPayload(request);
 };
 
@@ -65,13 +65,72 @@ test("drops the original-currency fields after the switch is turned off", () => 
 });
 
 test("an incomplete original amount does not block the form once the switch is off", () => {
-  const result = createTransactionFormSchema(t).safeParse({
+  const result = createTransactionFormSchema(t, "pt").safeParse({
     ...formInput,
     hasOriginalAmount: false,
     originalAmount: "127",
   });
 
   assert.equal(result.success, true);
+});
+
+test("reads amounts in the user's locale", () => {
+  assert.equal(
+    buildRequest({ ...formInput, settlementAmount: "1.234,56" }, "pt")
+      .settlementAmount,
+    "1234.56",
+  );
+  assert.equal(
+    buildRequest({ ...formInput, settlementAmount: "1.000" }, "es")
+      .settlementAmount,
+    "1000",
+  );
+  assert.equal(
+    buildRequest({ ...formInput, settlementAmount: "1.000" }, "en")
+      .settlementAmount,
+    "1",
+  );
+  assert.equal(
+    buildRequest({ ...formInput, settlementAmount: "1,234.56" }, "en")
+      .settlementAmount,
+    "1234.56",
+  );
+});
+
+test("an unreadable or blank amount is a form error, not another number", () => {
+  for (const settlementAmount of ["12,,5", "1.2.3", "abc", ""]) {
+    const result = createTransactionFormSchema(t, "pt").safeParse({
+      ...formInput,
+      settlementAmount,
+    });
+    assert.equal(result.success, false, settlementAmount);
+    assert.deepEqual(
+      result.error?.issues.map((issue) => issue.message),
+      ["invalid-amount"],
+    );
+  }
+
+  const badRate = createTransactionFormSchema(t, "pt").safeParse({
+    ...formInput,
+    exchangeRate: "1,2,3",
+    hasOriginalAmount: true,
+    originalAmount: "127,00",
+    originalCurrencyId: "47",
+  });
+  assert.equal(badRate.success, false);
+});
+
+test("a blank optional amount is no amount", () => {
+  const body = buildRequest({
+    ...formInput,
+    exchangeRate: "",
+    hasOriginalAmount: true,
+    originalAmount: "127,00",
+    originalCurrencyId: "47",
+  });
+
+  assert.equal(body.originalAmount, "127");
+  assert.equal(body.exchangeRate, undefined);
 });
 
 test("sends a new merchant by name and an existing one by numeric key", () => {
@@ -92,6 +151,17 @@ test("sends a new merchant name without the surrounding whitespace OCR or typing
 
   assert.equal(body.transactionMerchantName, "Cafe Central");
   assert.equal(body.transactionMerchantId, undefined);
+});
+
+test("sends the chosen tags with a new transaction", () => {
+  const body = buildRequest({ ...formInput, tagIds: [4, 9] });
+
+  assert.deepEqual(body.tagIds, [4, 9]);
+});
+
+test("leaves tagIds off the body when no tag is chosen", () => {
+  assert.equal("tagIds" in buildRequest(formInput), false);
+  assert.equal("tagIds" in buildRequest({ ...formInput, tagIds: [] }), false);
 });
 
 test("confirms an OCR import with the chosen category and string amounts", () => {

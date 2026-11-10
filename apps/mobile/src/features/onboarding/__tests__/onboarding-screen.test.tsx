@@ -217,4 +217,19 @@ describe('OnboardingScreen for a user who is no longer required', () => {
     fireEvent.press(view.getByLabelText('Connect bank account'))
     expect(view.getByLabelText('Connect bank account')).toBeTruthy()
   })
+
+  it('says why setup could not be finished instead of failing silently', async () => {
+    const view = await renderScreen({
+      state: { status: 'loaded', view: newUserView },
+      pending: false,
+      completionFailure: 'demo',
+      outcome: 'idle',
+      onSkip: jest.fn(),
+      onConnectBank: jest.fn(),
+      onCreateAccount: jest.fn(),
+      onRetry: jest.fn(),
+    })
+
+    expect(view.getByRole('alert', { name: /Demo profiles are read-only/ })).toBeTruthy()
+  })
 })

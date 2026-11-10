@@ -1,0 +1,59 @@
+---
+title: Monitoring
+description: Check that your instance is up and that its background jobs still run, with an uptime monitor such as Uptime Kuma.
+---
+
+Bank syncs, imports, price updates and scheduled emails run in the background worker. If the worker stops, the app still opens, so nothing on screen tells you. The API has two endpoints to watch.
+
+## Health endpoints
+
+| Endpoint | Answers | Use it for |
+|---|---|---|
+| `GET /v1/health` | 200 whenever the API process is running | Container health checks. It never touches the database, so a slow database doesn't restart the API |
+| `GET /v1/health/ready` | 200 when everything works, 503 when something doesn't | Uptime monitors and alerts |
+
+Both are public and need no key. `/v1/health/ready` checks three things, in parallel and each within 3 seconds:
+
+| Check | Fails when |
+|---|---|
+| `database` | Postgres doesn't answer a simple query |
+| `queue` | The job queue can't be read, or a job has waited to start for longer than `HEALTH_MAX_JOB_AGE_MINUTES` (60 by default). Scheduled email batches, which drain over a few hours on purpose, get longer |
+| `worker` | The worker hasn't finished its heartbeat job, which runs every 5 minutes, in the last 15 minutes |
+
+A healthy answer looks like this:
+
+```json
+{
+  "status": "ok",
+  "checks": {
+    "database": { "status": "ok" },
+    "queue": { "status": "ok" },
+    "worker": { "status": "ok", "lastHeartbeatAt": "2026-11-07T12:00:00.000Z" }
+  },
+  "version": "1.2.0",
+  "commit": "4f1c2e0..."
+}
+```
+
+When something fails, `status` is `degraded`, the response is a 503, and the failing check carries a short `reason` such as `timeout`, `unreachable`, `backlog` or `stale_heartbeat`. The details are in the logs: `docker compose logs api` for the check, `docker compose logs worker` for the jobs.
+
+Right after you start the stack, `worker` can fail for a few seconds until the worker's first heartbeat finishes.
+
+`version` and `commit` say which release the server runs. `GET /v1/instance` reports them too.
+
+## Uptime Kuma
+
+[Uptime Kuma](https://github.com/louislam/uptime-kuma) is a self-hosted monitor that can alert you by email, Telegram, ntfy and many other channels. Add a monitor:
+
+- **Monitor type**: HTTP(s) - Keyword
+- **URL**: `https://api.money.example.com/v1/health/ready` (your `API_URL` followed by `/v1/health/ready`)
+- **Keyword**: `"status":"ok"`
+- **Heartbeat interval**: 60 seconds
+
+Any monitor that checks for a 200 status works the same way. The endpoint caches its answer for 5 seconds and allows 300 requests per 15 minutes from one address, so poll it every 30 seconds or less often.
+
+If Uptime Kuma runs in the same Compose project, use `http://api:3001/v1/health/ready`.
+
+## Containers
+
+`docker compose ps` shows each container as healthy or unhealthy. The `worker` container turns unhealthy when its job runner has stopped or it can't reach Postgres. It doesn't notice a job that hangs; `/v1/health/ready` does.

@@ -23,7 +23,7 @@ describe('useTopSpendingCategory', () => {
     const hook = await renderHook(() => useTopSpendingCategory(new Date('2026-08-15T00:00:00.000Z')), { wrapper })
     await waitFor(() => expect(hook.result.current.data).toBeDefined())
     expect(mockRead).toHaveBeenCalledTimes(1)
-    expect(mockRead.mock.calls[0]?.[0].path).toMatch(/^\/v1\/account\/transaction\/category-spending\?fromDate=\d+&toDate=\d+&limit=1$/)
+    expect(mockRead.mock.calls[0]?.[0].path).toMatch(/^\/v1\/account\/transaction\/category-spending\?fromDate=\d+&toDate=\d+&timezone=[^&]+&limit=1$/)
     await hook.unmount(); client.clear()
   })
 

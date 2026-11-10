@@ -186,7 +186,7 @@ Use sentence case, one display-level heading per page, unskipped heading levels,
 
 ## Layout
 
-Mobile is a one-column document with bottom navigation and at least 16px page padding. Desktop adds a 14rem grouped side-rail (three labeled groups — Day-to-day, Investments, Planning — plus an ungrouped Home) alongside the content column; the rail is `hidden` below the `lg` breakpoint, and the bottom bar is its mobile equivalent, so the 44px touch-target floor applies to the bottom bar, not the desktop rail.
+Mobile is a one-column document with a slim top bar, bottom navigation and at least 16px page padding. Desktop puts a 248px sidebar beside one capped content column; below the `lg` breakpoint its destinations move to the bottom bar, so the 44px touch-target floor applies to the bottom bar.
 
 Route families carry distinct shapes: **Overview** (dashboard) is stat-led — a headline figure and its trend lead, cards follow. **Ledger** routes (accounts, transactions, budgets, portfolio, goals, reports) are a workbench — the table or chart *is* the content, filters sit adjacent to it. **Flow** routes (auth, onboarding, the budget wizard) are single-column, one decision per screen, with progress stated rather than implied. **Settings** is a long constrained document (`max-w-4xl`), not a grid of cards.
 
@@ -234,7 +234,7 @@ Radius base is 8px (`0.5rem`), with a small/medium/large/extra-large scale of 4/
 - **Disabled:** reduced opacity, hover suppressed.
 
 ### Navigation
-Desktop: a 14rem grouped side-rail. The current page gets a violet-tinted 5% background wash plus a 2px left rule and violet text — a full 10% wash was tried and found to fail contrast against the rail's own muted background, not just the canvas. A section containing the current page gets the rule and violet text but no fill, so an expanded parent and its active child don't both compete for attention. Everything else is plain foreground text with a neutral 5% hover wash. Mobile: a bottom tab bar is the equivalent surface, sized to the 44px touch-target floor.
+Desktop: a 248px sidebar (`components/layout/Sidebar.tsx`), the destinations defined once in `components/layout/navigation.ts`. Home sits above three groups named by what the person is doing: day-to-day (Accounts, Loans, Budgets), investments (Portfolio, Financial Markets) and planning (Goals, Reports); group names are the body face, a step smaller, muted and untracked. Every row is 36px with a 20px icon. The current destination gets violet text on a 10% violet fill. A section with pages of its own (Accounts, Portfolio, Financial Markets) lists them under itself while you are inside it; the section then reads as their heading in foreground text, and the current page carries the violet. Settings, Help and the person's menu (name, email; what's new, feedback, the theme, log out, the version, the demo-mode note) sit at the foot. Content runs in one capped column (`max-w-[85rem]`) on the canvas, with no surrounding card. Mobile: a slim top bar (`TopBar.tsx`) keeps the wordmark, the person's menu and the current section's pages as tabs, and a bottom tab bar carries the destinations, sized to the 44px touch-target floor.
 
 ## Do's and Don'ts
 

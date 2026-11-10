@@ -24,7 +24,7 @@ export default function GoalCreateDialog({
     <DrawerDialog
       open={isOpen}
       onOpenChange={setOpen}
-      title={t("goals.create-title")}
+      title={t("goals.create")}
       description={t("goals.create-description")}
     >
       <CreateGoalForm

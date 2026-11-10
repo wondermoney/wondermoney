@@ -36,10 +36,11 @@ const makeResponse = () => ({ json: vi.fn() }) as unknown as Response;
 // Partial relation shapes are intentional: these fixtures only carry the fields the controller
 // reads, so typing the override surface loosely avoids a never-cast on every nested relation.
 type AccountFixtureOverrides = Partial<
-  Omit<Account, 'accountFinancialInstitutionKey' | 'accountOwnerAppuserKey' | 'currencyKey' | 'nordigenRequisitionKey' | 'tenantKey'>
+  Omit<Account, 'accountFinancialInstitutionKey' | 'accountOwnerAppuserKey' | 'accountTypeKey' | 'currencyKey' | 'nordigenRequisitionKey' | 'tenantKey'>
 > & {
   accountFinancialInstitutionKey?: null | { displayName?: null | string; logoUrl?: null | string; name?: string };
   accountOwnerAppuserKey?: null | { appuserKey?: number; currencyKey?: { code?: string }; firstName?: string };
+  accountTypeKey?: null | { description?: string };
   currencyKey?: null | { code?: string };
   nordigenRequisitionKey?: null | { nordigenRequisitionKey?: number; requisitionId?: string };
   tenantKey?: null | { tenantKey?: number };
@@ -62,6 +63,7 @@ const account = (overrides: AccountFixtureOverrides = {}) => ({
 
 const accountSummaryPopulate = [
   'accountFinancialInstitutionKey',
+  'accountTypeKey',
   'currencyKey',
   'accountOwnerAppuserKey',
   'accountOwnerAppuserKey.currencyKey',
@@ -138,6 +140,7 @@ describe('getAccount', () => {
         accountKey: 41,
         accountName: null,
         accountOwnerAppuserKey: { currencyKey: { code: 'USD' } },
+        accountType: null,
         appuserCurrencyAvailableBalance: null,
         appuserCurrencyBalance: null,
         availableBalance: 0,
@@ -234,6 +237,7 @@ describe('getAccounts', () => {
         orderBy: [{ accountName: QueryOrder.ASC }, { accountKey: QueryOrder.ASC }],
         populate: [
           'accountFinancialInstitutionKey',
+          'accountTypeKey',
           'currencyKey',
           'accountOwnerAppuserKey',
           'accountOwnerAppuserKey.currencyKey',
@@ -297,6 +301,7 @@ describe('getAccounts', () => {
           accountKey: 2,
           accountName: 'Linked',
           accountOwnerAppuserKey: { currencyKey: { code: 'EUR' } },
+          accountType: null,
           appuserCurrencyAvailableBalance: 0,
           appuserCurrencyBalance: 0,
           availableBalance: 0,
@@ -315,6 +320,7 @@ describe('getAccounts', () => {
           accountKey: 3,
           accountName: null,
           accountOwnerAppuserKey: { currencyKey: { code: 'EUR' } },
+          accountType: null,
           appuserCurrencyAvailableBalance: null,
           appuserCurrencyBalance: null,
           availableBalance: null,
@@ -446,6 +452,15 @@ describe('mapAccountSummary', () => {
   });
 });
 
+describe('mapAccountSummary accountType', () => {
+  it.each([
+    ['a typed account', { description: 'CREDIT_CARD' }, 'CREDIT_CARD'],
+    ['an account with no type', undefined, null],
+  ] as const)('tells the client the type of %s, so it can pick a glyph', (_kind, accountTypeKey, expected) => {
+    expect(mapAccountSummary(account({ accountTypeKey })).accountType).toBe(expected);
+  });
+});
+
 describe('mapAccountSummary csvImportFormat', () => {
   it.each([
     ['a supported bank', { displayName: 'Millennium BCP', name: 'Millennium BCP' }, 'bank'],
@@ -550,6 +565,23 @@ describe('createOfflineAccount accountTypeId', () => {
     expect(next).not.toHaveBeenCalled();
     expect(sendStatus).toHaveBeenCalledWith(201);
     expect(persisted[0]?.['accountTypeKey']).toBeUndefined();
+  });
+
+  it('records the typed balance as the opening balance, dated when the account was created', async () => {
+    mocks.findOne.mockImplementation((Entity: unknown) => (Entity === Currency ? currency : null));
+    const persisted = captureFirstPersistedAccount();
+    const before = Date.now();
+
+    await createOfflineAccount(
+      { body: { currencyId: 1, currentBalance: 1000, name: 'Savings' }, user: { appuserKey: 7 } } as unknown as Request,
+      { sendStatus: vi.fn() } as unknown as Response,
+      vi.fn(),
+    );
+
+    expect(persisted[0]).toMatchObject({ balance: 1000, openingBalance: 1000 });
+    const openingBalanceDate = persisted[0]?.['openingBalanceDate'] as Date;
+    expect(openingBalanceDate.getTime()).toBeGreaterThanOrEqual(before);
+    expect(openingBalanceDate.getTime()).toBeLessThanOrEqual(Date.now());
   });
 
   it('fails closed with an error and does not persist when accountTypeId matches no seeded AccountType', async () => {

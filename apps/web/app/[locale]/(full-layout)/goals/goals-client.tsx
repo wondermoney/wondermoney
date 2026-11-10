@@ -21,8 +21,7 @@ import { isDemoReadOnlyError } from "@/lib/api/errors";
 import type { Goal } from "@/lib/api/goals/types";
 import useGoals from "@/lib/api/goals/useGoals";
 import useRestoreGoal from "@/lib/api/goals/useRestoreGoal";
-
-type GoalsView = "active" | "archived";
+import { goalsForView, type GoalsView } from "@/lib/goals/view";
 
 function ArchivedGoalCard({ goal }: { goal: Goal }) {
   const t = useTranslations();
@@ -92,10 +91,7 @@ export function GoalsClient() {
   }
 
   const allGoals = data?.goals ?? [];
-  const goals =
-    view === "archived"
-      ? allGoals.filter((goal) => goal.status === "archived")
-      : allGoals;
+  const goals = goalsForView(allGoals, view);
 
   // With no goals yet, this header button and the one inside GoalsEmptyState
   // were the same label, icon and variant twice on one screen, 650px apart.
@@ -104,12 +100,12 @@ export function GoalsClient() {
   const showHeaderCreateGoal = !(view === "active" && allGoals.length === 0);
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-8">
       <GoalCreateDialog isOpen={createGoalOpen} setOpen={setCreateGoalOpen} />
 
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div className="space-y-1">
-          <h1 className="text-foreground text-xl font-semibold tracking-tight">
+          <h1 className="text-foreground text-2xl font-semibold tracking-tight lg:text-3xl">
             {t("goals.title")}
           </h1>
           <p className="text-muted-foreground max-w-2xl text-sm">
@@ -130,17 +126,21 @@ export function GoalsClient() {
           <TabsTrigger value="archived">{t("goals.tab-archived")}</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="active" className="flex flex-col gap-6">
+        <TabsContent value="active" className="flex flex-col gap-10 pt-4">
           {goals.length === 0 ? (
             <GoalsEmptyState onCreateGoal={openCreateGoal} />
           ) : (
             <>
               <GoalSummaryCards goals={goals} />
-              <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+              {/* A ruled ledger of goals, one per row, each drawn against
+                  its own target. */}
+              <ul className="border-foreground divide-border divide-y border-t-2">
                 {goals.map((goal) => (
-                  <GoalCard key={goal.goalKey} goal={goal} />
+                  <li key={goal.goalKey}>
+                    <GoalCard goal={goal} />
+                  </li>
                 ))}
-              </div>
+              </ul>
               <DebtStrategySection />
             </>
           )}

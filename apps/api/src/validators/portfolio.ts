@@ -115,8 +115,18 @@ export const confirmPortfolioImportAssetMappingsRequestSchema = z.object({
 });
 
 
+/**
+ * The account that holds a portfolio and whether that account's balance includes the holdings.
+ * Linking always answers the question; null removes the link.
+ */
+export const portfolioAccountLinkSchema = z.object({
+  accountId: positiveIntId,
+  mode: z.enum(['cash_only', 'includes_holdings']),
+}).nullable();
+
 export const createPortfolioRequestSchema = z.object({
   body: z.object({
+    accountLink: portfolioAccountLinkSchema.optional(),
     currencyId: positiveIntId,
     name: z.string(),
   }),
@@ -124,6 +134,7 @@ export const createPortfolioRequestSchema = z.object({
 
 export const updatePortfolioRequestSchema = z.object({
   body: z.object({
+    accountLink: portfolioAccountLinkSchema.optional(),
     benchmarkSymbol: z.string().max(20).optional(),
     currencyId: positiveIntId.optional(),
     description: z.string().max(500).nullable().optional(),

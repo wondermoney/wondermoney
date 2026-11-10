@@ -7,9 +7,8 @@ on:
     tags: ['v*']
   workflow_dispatch:
 
-permissions:
-  contents: read
-  packages: write
+# Each job asks for what it needs.
+permissions: {}
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -17,7 +16,14 @@ concurrency:
 
 jobs:
   publish:
+    # Publishes only from the main repository, never from a fork. Until the move to the public
+    # repository, the private one may publish too: its DEPLOY_REPO variable names it. Delete
+    # that variable at the cutover.
+    if: github.repository == 'wondermoney/wondermoney' || github.repository == vars.DEPLOY_REPO
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
     strategy:
       matrix:
         include:
@@ -55,7 +61,9 @@ jobs:
           target: ${{ matrix.target }}
           platforms: linux/amd64,linux/arm64
           push: true
-          build-args: GIT_COMMIT_SHA=${{ github.sha }}
+          build-args: |
+            GIT_COMMIT_SHA=${{ github.sha }}
+            WM_VERSION=${{ steps.meta.outputs.version }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha,scope=${{ matrix.image }}

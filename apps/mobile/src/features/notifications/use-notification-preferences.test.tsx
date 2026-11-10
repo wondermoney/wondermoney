@@ -18,6 +18,7 @@ jest.mock('@/components/providers/product-runtime-provider', () => ({
 
 const state = {
   accountRecovery: { effectiveEnabled: true, storedEnabled: true },
+  bankSyncAlerts: { effectiveEnabled: true, storedEnabled: true },
   budgetAlerts: { deliverySupported: true, effectiveEnabled: false, storedEnabled: false },
   growth: { effectiveEnabled: true, storedEnabled: true },
   marketingOptOut: false,

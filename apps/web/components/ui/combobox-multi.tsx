@@ -130,11 +130,16 @@ export function ComboBoxMulti({
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
           <Button
-            variant="secondary"
+            variant="input"
             role="combobox"
             className={cn("w-50 justify-between", className)}
           >
-            <span className="truncate">
+            <span
+              className={cn(
+                "truncate",
+                selectedOptions.length === 0 && "text-muted-foreground",
+              )}
+            >
               {selectedOptions.length === 0 &&
                 (placeholder ?? "Select an option")}
               {selectedOptions.length === 1 && selectedOptions[0].label}
@@ -166,11 +171,16 @@ export function ComboBoxMulti({
     <Drawer open={open} onOpenChange={setOpen}>
       <DrawerTrigger asChild>
         <Button
-          variant="secondary"
+          variant="input"
           role="combobox"
           className={cn("w-50 justify-start", className)}
         >
-          <span className="truncate">
+          <span
+            className={cn(
+              "truncate",
+              selectedOptions.length === 0 && "text-muted-foreground",
+            )}
+          >
             {selectedOptions.length === 0 &&
               (placeholder ?? "Select an option")}
             {selectedOptions.length === 1 && selectedOptions[0].label}
@@ -242,11 +252,16 @@ export const MultiComboBoxForm = forwardRef<
         <Popover open={open} onOpenChange={setOpen}>
           <PopoverTrigger asChild>
             <Button
-              variant="outline"
+              variant="input"
               role="combobox"
               className={cn("min-w-50 justify-between", className)}
             >
-              <span className="truncate">
+              <span
+                className={cn(
+                  "truncate",
+                  selectedOptions.length === 0 && "text-muted-foreground",
+                )}
+              >
                 {selectedOptions.length === 0 &&
                   (placeholder ?? "Select an option")}
                 {selectedOptions.length === 1 && selectedOptions[0].label}
@@ -278,11 +293,16 @@ export const MultiComboBoxForm = forwardRef<
       <Drawer open={open} onOpenChange={setOpen}>
         <DrawerTrigger asChild>
           <Button
-            variant="outline"
+            variant="input"
             role="combobox"
             className={cn("min-w-50 justify-start", className)}
           >
-            <span className="truncate">
+            <span
+              className={cn(
+                "truncate",
+                selectedOptions.length === 0 && "text-muted-foreground",
+              )}
+            >
               {selectedOptions.length === 0 &&
                 (placeholder ?? "Select an option")}
               {selectedOptions.length === 1 && selectedOptions[0].label}

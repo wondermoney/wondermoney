@@ -7,6 +7,7 @@ import { AppuserTenant } from '@entity/AppuserTenant';
 import { RecurringSeries } from '@entity/RecurringSeries';
 import { Tenant } from '@entity/Tenant';
 import { detectRecurringCandidatesForTenant } from '@service/recurring/recurring-detection.service';
+import { isExpectedRecurring } from '@service/recurring/recurring-expectation';
 import { RecurringAmountType, RecurringCadence, RecurringSeriesStatus, RecurringSeriesType } from '@service/recurring/recurring-types';
 import { findAssignableCategory } from '@service/transaction/household-category';
 import { BadRequestError, NotFoundError } from '@utils/errors';
@@ -152,9 +153,7 @@ function currencyKeyFor(series: RecurringSeries) {
 
 function currencyTotalsFor(series: RecurringSeries) {
   const key = currencyKeyFor(series);
-  const included =
-    series.status === RecurringSeriesStatus.confirmed ||
-    (series.status === RecurringSeriesStatus.candidate && series.confidenceScore >= 90);
+  const included = isExpectedRecurring(series);
   const totals: Record<string, SummaryTotals> = {
     [key]: {
       billMaxTotal: 0,
@@ -317,13 +316,11 @@ async function resolveTenantKey(req: AuthedRequest) {
 }
 
 function summaryFor(series: RecurringSeries) {
-  const included =
-    series.status === RecurringSeriesStatus.confirmed ||
-    (series.status === RecurringSeriesStatus.candidate && series.confidenceScore >= 90);
+  const included = isExpectedRecurring(series);
   return {
     ...(included ? totalsForIncludedSeries(series) : emptySummaryTotals()),
     detectedIncludedCount: included ? 1 : 0,
-    needsReviewCount: series.status === RecurringSeriesStatus.candidate && series.confidenceScore < 90 ? 1 : 0,
+    needsReviewCount: series.status === RecurringSeriesStatus.candidate && !included ? 1 : 0,
   };
 }
 

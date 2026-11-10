@@ -21,6 +21,9 @@ interface CategorizationOutcome {
 
 class AccountCsvCategorizationService {
   async categorizeTransaction(em: CategorizationEntityManager, appuser: unknown, transaction: Transaction): Promise<CategorizationOutcome> {
+    // A category is already there (a household rule set it): learned categorization never replaces it.
+    const existing = await em.findOne(AppuserTransactionCategory, { deletedAt: undefined, transactionKey: transaction });
+    if (existing) return { assigned: false, reason: 'already_categorized' };
     const transactionMerchant = transaction.transactionMerchantKey;
     const merchantName = transactionMerchant?.name ?? transaction.descriptionDirty ?? transaction.description ?? transaction.internalTransactionId;
     if (!merchantName) return { assigned: false, reason: 'merchant_no_mapping' };

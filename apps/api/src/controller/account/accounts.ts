@@ -10,12 +10,12 @@ import { Appuser } from '@entity/Appuser';
 import { AppuserTenant } from '@entity/AppuserTenant';
 import { BankSyncFinality, BankSyncIncident } from '@entity/BankSyncIncident';
 import { Currency } from '@entity/Currency';
-import { ExchangeRate } from '@entity/ExchangeRate';
 import { Transaction } from '@entity/Transaction';
 import { TransactionStatus } from '@entity/TransactionStatus';
 import { computeAvailableBalance } from '@service/account/account-available-balance.service';
 import { resolveAccountCsvImportFormat } from '@service/account/account-csv-import-format';
 import { computeSyncStatus } from '@service/account/account-sync-status.service';
+import { convertWithStatus } from '@service/currency/exchange-rate';
 import { ERROR_CODE, ForbiddenError, InternalServerError, NotFoundError } from '@utils/errors';
 
 /*
@@ -28,7 +28,6 @@ import { ERROR_CODE, ForbiddenError, InternalServerError, NotFoundError } from '
  */
 import { authedUser } from '@middleware/authed-context';
 import { getFullName } from '@utils/misc';
-import { convertMoney } from '@utils/money';
 import { createOfflineAccountRequestSchema, deleteAccountRequestSchema, getAccountRequestSchema, updateAccountRequestSchema } from '@validators/account';
 import { zParse } from '@validators/parser';
 
@@ -61,27 +60,15 @@ export async function createOfflineAccount(req: Request, res: Response, next: Ne
   }
   account.currencyKey = accountCurrency;
   account.balance = currentBalance;
-  const appuserCurrency = user.currencyKey;
-  if (account.balance && accountCurrency.currencyKey !== appuserCurrency.currencyKey) {
-    // If the account currency is different from the user's currency, we need to get the exchange
-    // rate and convert the balance. No need to convert 0 balances
-    const exchangeRate = await DI.em.findOne(
-      ExchangeRate,
-      {
-        date: { $lte: new Date() },
-        fromCurrency: accountCurrency,
-        toCurrency: appuserCurrency,
-      },
-      {
-        orderBy: { date: QueryOrder.DESC },
-      },
-    );
-    if (exchangeRate) {
-      account.appuserCurrencyBalance = convertMoney(account.balance, exchangeRate.rate);
-    }
-  } else {
-    account.appuserCurrencyBalance = account.balance;
-  }
+  // The typed balance is what the account held when it was opened: net worth history counts it
+  // from today until a transaction carries a running balance.
+  account.openingBalance = currentBalance;
+  account.openingBalanceDate = new Date();
+  // The balance in the owner's currency, through the one rate resolver. With no rate none is
+  // stored (`missing`), so totals report the account as unconverted rather than at face value.
+  const converted = await convertWithStatus(DI.em, account.balance, accountCurrency, user.currencyKey, new Date());
+  account.appuserCurrencyBalance = converted.amount;
+  account.fxStatus = converted.fxStatus;
   account.accountOwnerAppuserKey = appUserTenant.appuserKey;
   if (financialInstitutionId) {
     const accountFinancialInstitution = await DI.em.findOne(AccountFinancialInstitution, {
@@ -139,6 +126,7 @@ export async function getAccount(req: Request, res: Response) {
     {
       populate: [
         'accountFinancialInstitutionKey',
+        'accountTypeKey',
         'currencyKey',
         'accountOwnerAppuserKey',
         'accountOwnerAppuserKey.currencyKey',
@@ -187,6 +175,7 @@ export async function getAccounts(req: Request, res: Response) {
       orderBy: [{ accountName: QueryOrder.ASC }, { accountKey: QueryOrder.ASC }],
       populate: [
         'accountFinancialInstitutionKey',
+        'accountTypeKey',
         'currencyKey',
         'accountOwnerAppuserKey',
         'accountOwnerAppuserKey.currencyKey',
@@ -266,7 +255,10 @@ export function mapAccountSummary(account: Account, syncContext?: AccountSyncCon
       : null,
     accountKey: account.accountKey,
     accountName: account.accountName ?? null,
+    // The type's key ('CHECKING', 'SAVINGS', 'CREDIT_CARD', 'MORTGAGE', 'LOAN', 'INVESTMENT'), so a
+    // client can pick a glyph for an account with no institution logo. Null when none was set.
     accountOwnerAppuserKey: { currencyKey: { code: ownerCurrencyCode } },
+    accountType: account.accountTypeKey?.description ?? null,
     appuserCurrencyAvailableBalance:
       account.appuserCurrencyBalance == null && !pending ? null : computeAvailableBalance(account.appuserCurrencyBalance, [pending?.appuserSettlement]),
     appuserCurrencyBalance: account.appuserCurrencyBalance ?? null,

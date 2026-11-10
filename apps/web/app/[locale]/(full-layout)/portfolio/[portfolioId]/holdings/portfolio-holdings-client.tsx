@@ -62,7 +62,7 @@ export default function PortfolioHoldingsClient({
 
   return (
     <div className="flex flex-col gap-6">
-      <h1 className="text-foreground text-xl font-semibold tracking-tight">
+      <h1 className="text-foreground text-2xl font-semibold tracking-tight lg:text-3xl">
         {t("holdings")}
       </h1>
       <section className="border-border bg-card rounded-lg border">

@@ -14,11 +14,8 @@ import {
 import { PreviewBadge } from "@/components/ui/PreviewBadge";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
-import {
-  formatCurrencyForLocale,
-  formatCurrencyForScreenReader,
-  normalizeFinancialLocale,
-} from "@/lib/utils/formatCurrency";
+import { normalizeFinancialLocale } from "@/lib/utils/formatCurrency";
+import { useFormatCurrency, useFormatCurrencyForScreenReader } from "@/lib/utils/useFormatCurrency";
 
 import { RecurringStatusBadge } from "./RecurringStatusBadge";
 
@@ -73,13 +70,15 @@ function AccessiblePreviewAmount({
   currencyCode: string;
   locale: string;
 }) {
+  const formatAmountSpoken = useFormatCurrencyForScreenReader();
+  const formatAmountText = useFormatCurrency();
   return (
     <span className={className}>
       <span className="sr-only">
-        {formatCurrencyForScreenReader(amount, currencyCode, locale)}
+        {formatAmountSpoken(amount, currencyCode)}
       </span>
       <span aria-hidden="true">
-        {formatCurrencyForLocale(amount, currencyCode, locale)}
+        {formatAmountText(amount, currencyCode)}
       </span>
     </span>
   );

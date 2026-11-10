@@ -162,6 +162,27 @@ export function privacyPolicyUrl(lang: string): string {
 // Do not touch this! The CI/CD pipeline overwrites this string.
 export const GITHUB_SHA = '##REPLACE_GITHUB_COMMIT_SHA_HERE##';
 
+// Do not touch this either: the image build (`WM_VERSION` build argument) overwrites it with the
+// release version, e.g. 1.2.0 for an image built from tag v1.2.0.
+export const RELEASE_VERSION = '##REPLACE_WM_VERSION_HERE##';
+
+/**
+ * What this build is, for `GET /v1/instance` and `GET /v1/health/ready`: the release version
+ * (`dev` when the image was not built from a release) and the commit it was built from (null in
+ * a local build).
+ */
+export function buildInfo(): { commit: null | string; version: string } {
+  return readBuildInfo(GITHUB_SHA, RELEASE_VERSION);
+}
+
+/** Reads the stamped commit and version; a placeholder the build never replaced means unstamped. */
+export function readBuildInfo(commit: string, version: string): { commit: null | string; version: string } {
+  return {
+    commit: commit.startsWith('##REPLACE_') ? null : commit,
+    version: version === '' || version.startsWith('##REPLACE_') ? 'dev' : version,
+  };
+}
+
 /**
  * Registered with Enable Banking as this application's `redirect_url` (see
  * `EnableBankingStartAuthorizationParams.redirectUrl`).

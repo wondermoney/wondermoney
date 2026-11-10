@@ -51,6 +51,11 @@ describe('reports contract', () => {
     expect(query.has('includeTransfers')).toBe(false)
   })
 
+  it('sends the viewer\'s time zone when the filters state one', () => {
+    const query = new URLSearchParams(createCashflowEndpoint({ ...baseFilters, timezone: 'Asia/Tokyo' }).path.split('?')[1])
+    expect(query.get('timezone')).toBe('Asia/Tokyo')
+  })
+
   it.each([
     ['spending-by-category', createSpendingByCategoryEndpoint],
     ['cashflow', createCashflowEndpoint],
@@ -89,8 +94,16 @@ describe('reports contract', () => {
     }).success).toBe(false)
   })
 
+  it('sends only the period for portfolio performance, as JSON and as CSV: account and transaction filters do not apply to portfolios', () => {
+    const filters = { ...baseFilters, accountKeys: ['acc-1'], includePending: true }
+    for (const path of [createPortfolioPerformanceReportEndpoint(filters).path, createReportCsvEndpoint('portfolio-performance', filters).path]) {
+      const query = new URLSearchParams(path.split('?')[1])
+      expect([...query.keys()].sort()).toEqual(['fromDate', 'toDate'])
+    }
+  })
+
   it.each([
-    'spending-by-category', 'cashflow', 'sankey', 'net-worth-history', 'budget-vs-actual', 'portfolio-performance',
+    'spending-by-category', 'cashflow', 'sankey', 'net-worth-history', 'budget-vs-actual',
   ] as const)('builds the %s.csv endpoint with the same filter query as the JSON endpoint', (slug) => {
     const endpoint = createReportCsvEndpoint(slug, { ...baseFilters, accountKeys: ['acc-1'] })
     expect(endpoint.method).toBe('GET')

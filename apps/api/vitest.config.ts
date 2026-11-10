@@ -5,6 +5,12 @@ import { defineConfig } from 'vitest/config';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
+// CI splits the suite across runners (`--shard=i/n --reporter=blob`). A shard's coverage is
+// partial by construction, so a shard (VITEST_COVERAGE_PARTIAL=1) only records it into its blob;
+// the merge job (`vitest run --merge-reports --coverage`) reports it and enforces the thresholds
+// once, on the whole suite.
+const partialCoverage = process.env.VITEST_COVERAGE_PARTIAL === '1';
+
 export default defineConfig({
   resolve: {
     alias: {
@@ -53,7 +59,7 @@ export default defineConfig({
         'src/utils/**/*.ts',
       ],
       provider: 'v8',
-      reporter: ['text', 'lcov', 'html'],
+      reporter: partialCoverage ? [] : ['text', 'lcov', 'html'],
       reportsDirectory: 'coverage',
       // Ratcheted to roughly three points below the measured numbers, which leaves room for an
       // ordinary change to dip without failing CI while still catching a real regression. The
@@ -62,7 +68,7 @@ export default defineConfig({
       // not have caught anything. Raise these again when the numbers move, not before.
       //
       // Long-term target from CLAUDE.md remains 80% statements / 75% branches.
-      thresholds: {
+      thresholds: partialCoverage ? undefined : {
         branches: 68,
         functions: 75,
         lines: 77,

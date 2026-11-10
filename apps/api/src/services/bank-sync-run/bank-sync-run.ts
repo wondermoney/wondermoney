@@ -17,20 +17,39 @@
  *  - {@link runBankSyncPhases}: runs account + transaction phases with an
  *    optional pre-phase hook (the credential check used by auto-sync).
  */
+import { type ProviderRateLimit, providerRateLimitOf } from './provider-failure';
+
 export type BankSyncPhaseStatus = 'failed' | 'full_success' | 'partial';
+
+/**
+ * What a phase learned about why its accounts failed, beyond the status:
+ *  - `rateLimited`: the provider answered 429 and the phase stopped calling it;
+ *  - `everyAccountRejected`: no account succeeded and every one failed with 400 or 401, the
+ *    usual sign that the bank ended the consent early.
+ */
+export interface BankSyncPhaseSignals {
+  everyAccountRejected?: boolean;
+  rateLimited?: ProviderRateLimit;
+}
 
 /**
  * Status strings produced by the underlying sync services
  * (`account-initial-sync-account.service.ts`, `…-transaction.service.ts`).
  * The run module normalizes `'completed'` to its own `'full_success'`.
  */
-export interface BankSyncPhaseResult {
+export interface BankSyncPhaseResult extends BankSyncPhaseSignals {
   accountsTotal?: number;
   institutionIds?: string[];
   status: BankSyncPhaseStatus;
 }
 
 export type ServicePhaseStatus = 'completed' | 'failed' | 'partial';
+
+interface ServicePhaseResult extends BankSyncPhaseSignals {
+  accountsTotal?: number;
+  institutionIds?: string[];
+  status: ServicePhaseStatus;
+}
 
 /**
  * Sanitize an account-phase count for the incident record. pg-boss / Postgres
@@ -50,6 +69,8 @@ export function safeAccountCount(value: number | undefined): number | undefined 
 export interface BankSyncErrorClassification {
   code: string;
   isPermanent: boolean;
+  /** Set for `rate_limited` when the provider sent a `Retry-After`. */
+  retryAfterSeconds?: number;
 }
 
 export interface BankSyncExtraCodeRule {
@@ -90,11 +111,7 @@ export interface RunBankSyncPhasesInput {
       correlationId: string;
       enableBankingConnectionKey: number;
       queueJobId: string;
-    }) => Promise<{
-      accountsTotal?: number;
-      institutionIds?: string[];
-      status: ServicePhaseStatus;
-    }>;
+    }) => Promise<ServicePhaseResult>;
   };
   correlationId: string;
   enableBankingConnectionKey: number;
@@ -107,11 +124,7 @@ export interface RunBankSyncPhasesInput {
       enableBankingConnectionKey: number;
       fetchWindowDays: number;
       queueJobId: string;
-    }, deps?: { enqueue?: import('@service/queue/enqueue').Enqueue }) => Promise<{
-      accountsTotal?: number;
-      institutionIds?: string[];
-      status: ServicePhaseStatus;
-    }>;
+    }, deps?: { enqueue?: import('@service/queue/enqueue').Enqueue }) => Promise<ServicePhaseResult>;
   };
   /**
    * Optional hook that runs before the account phase. Auto-sync uses this for
@@ -124,6 +137,10 @@ export function classifyBankSyncError(error: unknown, opts: ClassifyBankSyncErro
   for (const rule of opts.extraCodes ?? []) {
     if (rule.match(error)) return { code: rule.code, isPermanent: true };
   }
+  // Before the status checks below: a rate limit is temporary, so never permanent, but retrying
+  // it straight away spends quota the provider has just refused. Callers decide when to try again.
+  const rateLimit = providerRateLimitOf(error);
+  if (rateLimit) return { code: 'rate_limited', isPermanent: false, ...rateLimit };
   const name = error instanceof Error ? error.name : '';
   const status = (error as { status?: unknown }).status;
   const isPermanent = opts.permanentErrorNames.includes(name)
@@ -136,16 +153,12 @@ export function classifyBankSyncError(error: unknown, opts: ClassifyBankSyncErro
   return { code: 'internal', isPermanent: false };
 }
 
-const toPhaseResult = (input: {
-  accountsTotal?: number;
-  institutionIds?: string[];
-  status: ServicePhaseStatus;
-}): BankSyncPhaseResult => ({
+const toPhaseResult = (input: ServicePhaseResult): BankSyncPhaseResult => ({
   ...input,
   status: input.status === 'completed' ? 'full_success' : input.status,
 });
 
-export interface RunBankSyncPhasesResult {
+export interface RunBankSyncPhasesResult extends BankSyncPhaseSignals {
   status: BankSyncPhaseStatus;
   /** Account-phase result (always present). */
   account: BankSyncPhaseResult;
@@ -163,6 +176,9 @@ export interface RunBankSyncPhasesResult {
  *  - account phase
  *  - transaction phase only if account succeeded
  *  - either phase `failed` returns immediately
+ *  - a rate-limited account phase returns immediately too, even when some accounts succeeded,
+ *    so the transaction phase does not call a provider that has just refused us
+ *  - the failing phase's signals (`rateLimited`, `everyAccountRejected`) are passed up
  *  - `partial` collapses: any partial anywhere returns `partial`
  *  - both full success returns `full_success`
  */
@@ -174,8 +190,8 @@ export async function runBankSyncPhases(input: RunBankSyncPhasesInput): Promise<
     queueJobId: input.queueJobId,
   });
   const account = toPhaseResult(rawAccount);
-  if (account.status === 'failed') {
-    return { account, failedAt: 'account', status: 'failed', transaction: undefined };
+  if (account.status === 'failed' || account.rateLimited) {
+    return { account, ...signalsOf(account), failedAt: 'account', status: account.status === 'failed' ? 'failed' : 'partial', transaction: undefined };
   }
   const rawTransaction = await input.transactionService.syncTransactionsForRequisition({
     correlationId: input.correlationId,
@@ -185,10 +201,20 @@ export async function runBankSyncPhases(input: RunBankSyncPhasesInput): Promise<
   }, { enqueue: input.enqueue });
   const transaction = toPhaseResult(rawTransaction);
   if (transaction.status === 'failed') {
-    return { account, failedAt: 'transaction', status: 'failed', transaction };
+    return { account, ...signalsOf(transaction), failedAt: 'transaction', status: 'failed', transaction };
+  }
+  if (transaction.rateLimited) {
+    return { account, failedAt: 'transaction', rateLimited: transaction.rateLimited, status: 'partial', transaction };
   }
   if (account.status === 'partial' || transaction.status === 'partial') {
     return { account, failedAt: undefined, status: 'partial', transaction };
   }
   return { account, failedAt: undefined, status: 'full_success', transaction };
+}
+
+function signalsOf(phase: BankSyncPhaseResult): BankSyncPhaseSignals {
+  return {
+    ...(phase.everyAccountRejected ? { everyAccountRejected: true } : {}),
+    ...(phase.rateLimited ? { rateLimited: phase.rateLimited } : {}),
+  };
 }

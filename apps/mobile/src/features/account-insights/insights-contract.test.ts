@@ -1,4 +1,6 @@
-import { cashflowResponseSchema, categorySpendingResponseSchema, createAccountMetricsEndpoint, createAggregateMetricsEndpoint, createCategorySpendingEndpoint, metricsResponseSchema } from './insights-contract'
+import { cashflowResponseSchema, categorySpendingResponseSchema, createAccountMetricsEndpoint, createAggregateMetricsEndpoint, createCashflowEndpoint, createCategorySpendingEndpoint, metricsResponseSchema } from './insights-contract'
+import { inTimeZone } from '@/test/time-zone'
+
 import { cashflowFixture, categoryFixture, metricFixture } from './test-fixtures'
 
 describe('account insight contracts', () => {
@@ -29,4 +31,21 @@ describe('account insight contracts', () => {
     { ...metricFixture, inflowCurrentPeriod: Infinity },
     { ...metricFixture, transactionCountCurrentPeriod: -1 },
   ])('rejects malformed present metric values', (metric) => expect(metricsResponseSchema.safeParse({ metrics: [metric] }).success).toBe(false))
+
+  describe.each(['America/New_York', 'Asia/Tokyo'])('for a viewer in %s', (zone) => {
+    inTimeZone(zone)
+    const query = (path: string) => new URLSearchParams(path.split('?')[1])
+
+    it('sends the device time zone with every dated insight, so the API counts a bank booking on its own date', () => {
+      expect(query(createAggregateMetricsEndpoint(scope).path).get('timezone')).toBe(zone)
+      expect(query(createCashflowEndpoint(scope).path).get('timezone')).toBe(zone)
+      expect(query(createCategorySpendingEndpoint(scope, 5).path).get('timezone')).toBe(zone)
+      expect(query(createAccountMetricsEndpoint(2, scope.fromDate).path).get('timezone')).toBe(zone)
+    })
+
+    it('sends none when no start bounds the period', () => {
+      expect(createAccountMetricsEndpoint(2).path).toBe('/v1/account/2/metrics')
+      expect(createCashflowEndpoint({ toDate: scope.toDate }).path).toBe('/v1/account/cashflow')
+    })
+  })
 })

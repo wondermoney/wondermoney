@@ -15,18 +15,14 @@ async function renderScreen(overrides: Partial<React.ComponentProps<typeof MoreS
     onOpenPrivacy: jest.fn().mockResolvedValue(undefined),
     onOpenTerms: jest.fn().mockResolvedValue(undefined),
     onOpenSupport: jest.fn().mockResolvedValue(undefined),
-    onOpenProfile: jest.fn(),
-    onOpenBudgets: jest.fn(),
-    onOpenLoans: jest.fn(),
-    onOpenBankConnections: jest.fn(),
-    onOpenGoals: jest.fn(),
+    onOpenAccountsOverview: jest.fn(),
+    onOpenTransactions: jest.fn(),
+    onOpenRecurring: jest.fn(),
+    onOpenSettings: jest.fn(),
     onOpenMarkets: jest.fn(),
+    onOpenLoans: jest.fn(),
+    onOpenGoals: jest.fn(),
     onOpenReports: jest.fn(),
-    onOpenPreferences: jest.fn(),
-    onOpenCategories: jest.fn(),
-    onOpenHousehold: jest.fn(),
-    onOpenNotifications: jest.fn(),
-    onOpenSecurity: jest.fn(),
     onLogout: jest.fn(),
     onSubmitFeedback: jest.fn().mockResolvedValue(undefined),
     ...overrides,
@@ -56,38 +52,28 @@ describe('MoreScreen', () => {
 
   it('opens each functional destination only after its row is pressed', async () => {
     const { view, props } = await renderScreen()
+    const inside: [string, keyof typeof props][] = [
+      ['Overview', 'onOpenAccountsOverview'],
+      ['Transactions', 'onOpenTransactions'],
+      ['Bills & subscriptions', 'onOpenRecurring'],
+      ['Settings', 'onOpenSettings'],
+      ['Financial Markets', 'onOpenMarkets'],
+      ['Loans', 'onOpenLoans'],
+      ['Goals', 'onOpenGoals'],
+      ['Reports', 'onOpenReports'],
+    ]
+    for (const [, handler] of inside) expect(props[handler]).not.toHaveBeenCalled()
     expect(props.onOpenPrivacy).not.toHaveBeenCalled()
-    expect(props.onOpenTerms).not.toHaveBeenCalled()
-    expect(props.onOpenSupport).not.toHaveBeenCalled()
-    expect(props.onOpenProfile).not.toHaveBeenCalled()
-    expect(props.onOpenBudgets).not.toHaveBeenCalled()
-    expect(props.onOpenLoans).not.toHaveBeenCalled()
-    expect(props.onOpenMarkets).not.toHaveBeenCalled()
-    expect(props.onOpenReports).not.toHaveBeenCalled()
-    expect(view.getByRole('button', { name: 'Profile, opens in the app' })).toBeOnTheScreen()
-
+    for (const [label, handler] of inside) {
+      await fireEvent.press(view.getByRole('button', { name: `${label}, opens in the app` }))
+      expect(props[handler]).toHaveBeenCalledTimes(1)
+    }
     await fireEvent.press(view.getByRole('button', { name: 'Privacy policy, opens outside the app' }))
     await fireEvent.press(view.getByRole('button', { name: 'Terms of service, opens outside the app' }))
     await fireEvent.press(view.getByRole('button', { name: 'Support, opens your mail app' }))
-    await fireEvent.press(view.getByRole('button', { name: 'Profile, opens in the app' }))
-    await fireEvent.press(view.getByRole('button', { name: 'Budgets, opens in the app' }))
-    await fireEvent.press(view.getByRole('button', { name: 'Loans, opens in the app' }))
-    await fireEvent.press(view.getByRole('button', { name: 'Markets, opens in the app' }))
-    expect(props.onOpenMarkets).toHaveBeenCalledTimes(1)
-    await fireEvent.press(view.getByRole('button', { name: 'Reports, opens in the app' }))
-    expect(props.onOpenReports).toHaveBeenCalledTimes(1)
-    await fireEvent.press(view.getByRole('button', { name: 'Household, opens in the app' }))
-    expect(props.onOpenHousehold).toHaveBeenCalledTimes(1)
-    await fireEvent.press(view.getByRole('button', { name: 'Notifications, opens in the app' }))
-    expect(props.onOpenNotifications).toHaveBeenCalledTimes(1)
-    await fireEvent.press(view.getByRole('button', { name: 'Security, opens in the app' }))
-    expect(props.onOpenSecurity).toHaveBeenCalledTimes(1)
     expect(props.onOpenPrivacy).toHaveBeenCalledTimes(1)
     expect(props.onOpenTerms).toHaveBeenCalledTimes(1)
     expect(props.onOpenSupport).toHaveBeenCalledTimes(1)
-    expect(props.onOpenProfile).toHaveBeenCalledTimes(1)
-    expect(props.onOpenBudgets).toHaveBeenCalledTimes(1)
-    expect(props.onOpenLoans).toHaveBeenCalledTimes(1)
   })
 
   it('shows a specific retryable local failure without exposing product data', async () => {
@@ -125,23 +111,20 @@ describe('MoreScreen', () => {
     const { view } = await renderScreen()
     expect(view.getByText('Version 1.0.0')).toBeOnTheScreen()
     expect(view.getByText('Environment Local')).toBeOnTheScreen()
-    expect(view.getByRole('button', { name: 'Household, opens in the app' })).toBeOnTheScreen()
-    expect(view.getByRole('button', { name: 'Notifications, opens in the app' })).toBeOnTheScreen()
-    expect(view.getByRole('button', { name: 'Security, opens in the app' })).toBeOnTheScreen()
+    expect(view.getByRole('button', { name: 'Settings, opens in the app' })).toBeOnTheScreen()
     expect(view.queryByText(/payment method|pricing|bank balance/i)).not.toBeOnTheScreen()
     expect(view.queryByRole('image')).not.toBeOnTheScreen()
     for (const label of [
       'Privacy policy, opens outside the app',
       'Terms of service, opens outside the app',
       'Support, opens your mail app',
-      'Profile, opens in the app',
-      'Budgets, opens in the app',
+      'Settings, opens in the app',
       'Loans, opens in the app',
-      'Markets, opens in the app',
+      'Financial Markets, opens in the app',
     ]) {
       const row = view.getByRole('button', { name: label })
       expect(StyleSheet.flatten(row.props.style).minHeight).toBeGreaterThanOrEqual(44)
-      expect(within(row).getAllByText(/Privacy|Terms|Support|Profile|Budgets|Loan|Markets/)[0].props.allowFontScaling).not.toBe(false)
+      expect(within(row).getAllByText(/Privacy|Terms|Support|Settings|Loan|Markets/)[0].props.allowFontScaling).not.toBe(false)
     }
     const privacy = view.getByRole('button', { name: 'Privacy policy, opens outside the app' })
     await fireEvent(privacy, 'focus')

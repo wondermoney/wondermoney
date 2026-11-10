@@ -26,6 +26,7 @@ import { FinancialAssetSeeder } from './FinancialAssetSeeder';
 import { FinancialAssetTypeSeeder } from './FinancialAssetTypeSeeder';
 import { FinancialBrokerSeeder } from './FinancialBrokerSeeder';
 import { FinancialTransactionTypeSeeder } from './FinancialTransactionTypeSeeder';
+import { InvestmentsAndSavingsCategorySeeder } from './InvestmentsAndSavingsCategorySeeder';
 import { OnboardingSeeder } from './OnboardingSeeder';
 import { SubCategorySeeder } from './SubcategorySeeder';
 import { TenantStatusSeeder } from './TenantStatusSeeder';
@@ -64,6 +65,8 @@ export class ReferenceDataSeeder extends Seeder {
       FinancialTransactionTypeSeeder,
       CategorySeeder,
       SubCategorySeeder,
+      // After the other categories, so their keys (which demo seeders index) do not move.
+      InvestmentsAndSavingsCategorySeeder,
       TransactionTypeSeeder,
       TransactionStatusSeeder,
     ], ctx);

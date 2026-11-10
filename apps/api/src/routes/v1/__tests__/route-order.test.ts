@@ -48,11 +48,14 @@ const { controllerStub } = vi.hoisted(() => {
 
 vi.mock('@controller/goal', controllerStub);
 vi.mock('@controller/user', controllerStub);
+vi.mock('@controller/data-export', controllerStub);
+vi.mock('@controller/data-restore', controllerStub);
 vi.mock('@controller/onboarding', controllerStub);
 vi.mock('@controller/email-notifications', controllerStub);
 vi.mock('@controller/enable-banking-credential', controllerStub);
 vi.mock('@controller/portfolio', controllerStub);
 vi.mock('@controller/banking', controllerStub);
+vi.mock('@controller/banking-alerts', controllerStub);
 vi.mock('@controller/banking-connections', controllerStub);
 vi.mock('@controller/admin/background-operation', controllerStub);
 vi.mock('@controller/admin/demo-data', controllerStub);
@@ -63,6 +66,12 @@ vi.mock('@controller/admin/transaction-enrichment', controllerStub);
 // passthrough that tags the response, so the "is this endpoint rate limited?" question is
 // answered by an observable header instead of by counting entries in `route.stack`.
 vi.mock('@middleware/rate-limit', () => ({
+  dataExportRateLimit: () => (_req: express.Request, _res: express.Response, next: express.NextFunction) => {
+    next();
+  },
+  dataRestoreRateLimit: () => (_req: express.Request, _res: express.Response, next: express.NextFunction) => {
+    next();
+  },
   marketDataRateLimit: () => (_req: express.Request, res: express.Response, next: express.NextFunction) => {
     res.setHeader('x-market-data-limiter', 'applied');
     next();
@@ -131,6 +140,10 @@ describe('route ordering', () => {
       ['get', '/enable-banking-credential', 'getEnableBankingCredential'],
       ['post', '/enable-banking-credential', 'saveEnableBankingCredential'],
       ['delete', '/enable-banking-credential', 'deleteEnableBankingCredential'],
+      ['get', '/me/exports', 'listDataExports'],
+      ['post', '/me/exports', 'startDataExport'],
+      ['get', '/me/restores', 'listDataRestores'],
+      ['post', '/me/restores', 'startDataRestore'],
     ];
 
     it.each(cases)('%s %s is not swallowed by /:userId', async (method, path, handler) => {
@@ -265,8 +278,10 @@ describe('route ordering', () => {
   });
 
   describe('banking router', () => {
-    it('routes /bank and /connections ahead of the param routes', async () => {
+    it('routes /bank, /alerts and /connections ahead of the param routes', async () => {
       const app = await mount('@route/banking');
+
+      await expect(dispatch(app, 'get', '/alerts')).resolves.toEqual({ handler: 'getBankingAlerts', params: {} });
 
       await expect(dispatch(app, 'get', '/bank')).resolves.toEqual({ handler: 'getBankList', params: {} });
       await expect(dispatch(app, 'get', '/connections')).resolves.toEqual({

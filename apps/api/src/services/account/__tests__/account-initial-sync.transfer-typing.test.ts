@@ -66,8 +66,8 @@ describe('bank sync: incoming money is income unless it is an own-account transf
   }
 
   /** The cash-flow report with the default filters, as web and mobile send them: transfers excluded. */
-  function cashflow(household: Household) {
-    return getCashflowReport({ filters: reportFiltersSchema.parse(JULY), tenant: household.tenant, user: household.appuser });
+  async function cashflow(household: Household) {
+    return (await getCashflowReport({ filters: reportFiltersSchema.parse(JULY), tenant: household.tenant, user: household.appuser })).data;
   }
 
   it('stores a salary as a deposit and the two halves of a transfer to savings as a transfer pair', async () => {

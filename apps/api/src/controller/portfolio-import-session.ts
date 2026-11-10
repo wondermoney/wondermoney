@@ -1,7 +1,10 @@
 import type { Request, Response } from 'express';
 
+import { DI } from '@app/database/di';
 import { zParse } from '@app/validators/parser';
 import { confirmPortfolioImportAssetMappingsRequestSchema, confirmPortfolioImportColumnMappingRequestSchema, confirmPortfolioImportSessionRequestSchema, getPortfolioImportSessionPreviewRequestSchema, parsePortfolioImportSessionRequestSchema, suggestPortfolioImportColumnMappingRequestSchema } from '@app/validators/portfolio';
+import { canUseAi } from '@middleware/email-verification';
+import { spendAiAllowance } from '@service/ai/ai-allowance.service';
 import portfolioCsvColumnMappingService from '@service/portfolio/portfolio-csv-column-mapping.service';
 import portfolioImportAssetMappingService from '@service/portfolio/portfolio-import-asset-mapping.service';
 import portfolioImportSessionPreviewService from '@service/portfolio/portfolio-import-session-preview.service';
@@ -56,9 +59,10 @@ export async function getPortfolioImportSessionPreview(req: Request, res: Respon
 export async function suggestPortfolioImportSessionColumnMapping(req: Request, res: Response) {
   const { params: { importSessionId } } = await zParse(suggestPortfolioImportColumnMappingRequestSchema, req);
   if (!req.user) throw new BadRequestError('Unauthorized');
-  if (!req.tenant) throw new NotFoundError('Tenant not found');
+  const { tenant } = req;
+  if (!tenant) throw new NotFoundError('Tenant not found');
 
-  const result = await portfolioCsvColumnMappingService.suggestColumnMapping({ appuser: req.user, importSessionId, tenant: req.tenant });
+  const result = await portfolioCsvColumnMappingService.suggestColumnMapping({ allowModel: canUseAi(req), appuser: req.user, importSessionId, spendModelCall: () => spendAiAllowance(DI.em, tenant.tenantKey, 'csvMapping'), tenant });
   return res.status(200).json({ columnMapping: result.columnMapping, importSessionId: result.importSessionId, mappingSource: result.mappingSource, status: result.status, warning: result.warning });
 }
 

@@ -35,12 +35,18 @@ ARG GIT_COMMIT_SHA=
 RUN if [ -n "$GIT_COMMIT_SHA" ]; then \
       sed -i "s/##REPLACE_GITHUB_COMMIT_SHA_HERE##/${GIT_COMMIT_SHA}/" apps/api/src/utils/constants.ts; \
     fi
+# Stamped into RELEASE_VERSION, reported by /v1/instance and /v1/health/ready. The release
+# workflow passes the tag's version (1.2.0 for v1.2.0); unset, the build reports "dev".
+ARG WM_VERSION=
+RUN if [ -n "$WM_VERSION" ]; then \
+      sed -i "s|##REPLACE_WM_VERSION_HERE##|${WM_VERSION}|" apps/api/src/utils/constants.ts; \
+    fi
 
 RUN pnpm --filter @wondermoney/shared --filter @wondermoney/react-email run build:lib \
   && pnpm --filter @wondermoney/api run build
 
 # Production dependencies only: `pnpm deploy` installs just the API's own production closure
-# (#100) into a standalone directory, with the workspace packages copied in as regular
+# into a standalone directory, with the workspace packages copied in as regular
 # packages (their built `dist`, per their `files`/.npmignore). A filtered `pnpm install` can't
 # do this under `nodeLinker: hoisted`: it installs every workspace project's dependencies, which
 # put next, expo, react-native, fumadocs and the rest of web/docs/mobile into this image.

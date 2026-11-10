@@ -64,6 +64,18 @@ export interface EnableBankingInstitution {
   logoUrl: string | null;
 }
 
+/**
+ * The API's reading of an Enable Banking consent (`enable-banking-consent.ts`):
+ * `expiring` within 14 days of its end, `revoked` when the bank ended it early.
+ */
+export type EnableBankingConsentStatus =
+  | "active"
+  | "error"
+  | "expired"
+  | "expiring"
+  | "pending"
+  | "revoked";
+
 export interface EnableBankingRequisition extends RequisitionBase {
   provider: "EnableBanking";
   enableBankingConnectionKey: number;
@@ -71,6 +83,9 @@ export interface EnableBankingRequisition extends RequisitionBase {
   aspspName: string;
   aspspCountry: string;
   status: "created" | "authorized" | "linked" | "error" | "expired";
+  consentStatus: EnableBankingConsentStatus;
+  /** Whole days until the consent ends; 0 once ended; null before it is linked. */
+  daysUntilExpiry: number | null;
   institution: EnableBankingInstitution;
 }
 

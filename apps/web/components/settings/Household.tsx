@@ -50,20 +50,24 @@ const memberLabel = (member: HouseholdMember): string =>
   member.firstName?.trim() || member.emailAddress;
 
 const initials = (member: HouseholdMember): string =>
-  (member.firstName?.trim()?.[0] ?? member.emailAddress[0] ?? "?").toUpperCase();
+  (
+    member.firstName?.trim()?.[0] ??
+    member.emailAddress[0] ??
+    "?"
+  ).toUpperCase();
 
 function Shell({ children }: { children: React.ReactNode }) {
   const t = useTranslations("household");
   return (
-    <div className="divide-y divide-border">
-      <div className="grid max-w-7xl grid-cols-1 gap-x-8 gap-y-10 px-4 py-16 sm:px-6 md:grid-cols-3 lg:px-8">
+    <div className="divide-border divide-y">
+      <div className="grid max-w-7xl grid-cols-1 gap-x-8 gap-y-10 py-10 md:grid-cols-3">
         <div>
           <Heading variant="h2">{t("title")}</Heading>
           <Text variant="lead" className="mt-1 text-sm">
             {t("description")}
           </Text>
         </div>
-        <div className="space-y-8 rounded bg-card p-4 md:col-span-2">
+        <div className="bg-card space-y-8 rounded p-4 md:col-span-2">
           {children}
         </div>
       </div>
@@ -175,12 +179,9 @@ export default function Household() {
     <Shell>
       <div className="flex flex-col gap-3">
         <Heading variant="h4">{t("members.heading")}</Heading>
-        <ul className="divide-y divide-border rounded-md border">
+        <ul className="divide-border divide-y rounded-md border">
           {members.map((member) => (
-            <li
-              key={member.appuserKey}
-              className="flex items-center gap-3 p-3"
-            >
+            <li key={member.appuserKey} className="flex items-center gap-3 p-3">
               <Avatar className="size-9">
                 <AvatarFallback>{initials(member)}</AvatarFallback>
               </Avatar>
@@ -188,7 +189,7 @@ export default function Household() {
                 <span className="truncate text-sm font-medium">
                   {memberLabel(member)}
                 </span>
-                <span className="truncate text-xs text-muted-foreground">
+                <span className="text-muted-foreground truncate text-xs">
                   {member.emailAddress}
                 </span>
               </div>
@@ -196,7 +197,9 @@ export default function Household() {
                 {member.appuserKey === me?.appuserKey && (
                   <Badge variant="secondary">{t("members.you")}</Badge>
                 )}
-                <Badge variant={member.role === "owner" ? "secondary" : "muted"}>
+                <Badge
+                  variant={member.role === "owner" ? "secondary" : "muted"}
+                >
                   {member.role === "owner"
                     ? t("members.roleOwner")
                     : t("members.roleMember")}
@@ -224,7 +227,7 @@ export default function Household() {
               <span className="truncate text-sm font-medium">
                 {t("pending.sentTo", { email: pendingInvite.email })}
               </span>
-              <span className="text-xs text-muted-foreground">
+              <span className="text-muted-foreground text-xs">
                 {t("pending.expires", {
                   date: format.dateTime(new Date(pendingInvite.expiresAt), {
                     dateStyle: "medium",
@@ -259,7 +262,7 @@ export default function Household() {
       {canInvite && (
         <div className="flex flex-col gap-2">
           <Heading variant="h4">{t("invite.heading")}</Heading>
-          <Text className="text-sm text-muted-foreground">
+          <Text className="text-muted-foreground text-sm">
             {t("invite.description")}
           </Text>
           <Form {...form}>

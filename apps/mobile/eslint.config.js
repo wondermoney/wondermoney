@@ -50,6 +50,7 @@ const DESIGN_RULES = [
       'src/features/auth/social-sign-in-buttons.tsx', // Google brand marks
       'src/features/categories/category-manage-screen.tsx', // persisted data default
       'src/features/categories/category-manage-route.tsx', // same
+      'src/features/tags/tags-contract.ts', // the API's default tag colour, a persisted data default
       'src/features/reports/spending-by-category-report-view-model.ts', // "Other" bucket
     ],
   },
@@ -92,6 +93,24 @@ const DESIGN_RULES = [
     selector:
       "MemberExpression[object.object.name='themeTokens'][object.property.name='shadow'][property.name!='overlay']",
     message: "Cards are border-defined; only themeTokens.shadow.overlay (for overlays) is allowed.",
+    // Web's TabsTrigger lifts the selected segment off the muted track with `shadow-xs`.
+    except: ['src/components/ui/segmented-control.tsx'],
+  },
+  {
+    // Privacy mode: money reaches the screen through `Amount`, `useFormatMoney`,
+    // `useMoneyLabel` or `formatMoneyForDisplay`, which mask it when the mode is on. A raw
+    // currency formatter in UI code is a figure that stays readable with the mode on.
+    selector:
+      "ImportDeclaration[source.value=/formatters\\/financial$/] > ImportSpecifier[imported.name='formatCurrency'], NewExpression[callee.object.name='Intl'][callee.property.name='NumberFormat'] > ObjectExpression > Property[key.name='style'][value.value='currency']",
+    message:
+      "Format money through Amount, useFormatMoney/useMoneyLabel or formatMoneyForDisplay (src/lib/formatters/money-display.ts) so privacy mode can mask it.",
+    except: [
+      'src/lib/formatters/financial.ts', // the raw formatter itself
+      'src/lib/formatters/money-display.ts', // the privacy-aware wrapper
+      'src/components/ui/amount.tsx', // masks in privacy mode
+      'src/components/ui/amount-entry.tsx', // reads the currency symbol for an input, no amount
+      'src/features/net-worth/home-model.ts', // compact axis labels; NetWorthChart masks them
+    ],
   },
 ];
 

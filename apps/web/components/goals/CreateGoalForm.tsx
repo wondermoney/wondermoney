@@ -1,15 +1,21 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { ChevronRight } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { usePostHog } from "posthog-js/react";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
 
 import { Button } from "@/components/ui/button";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 import DatePicker from "@/components/ui/DatePicker";
 import {
   Form,
@@ -20,6 +26,7 @@ import {
   FormMessage,
 } from "@/components/ui/Form";
 import { Input } from "@/components/ui/input";
+import { MoneyInput } from "@/components/ui/MoneyInput";
 import {
   Select,
   SelectContent,
@@ -41,6 +48,12 @@ import {
   parseGoalMoney,
 } from "@/lib/goals/form";
 import { cn } from "@/lib/utils";
+import { formatLocaleNumberInput } from "@/lib/utils/number";
+
+import {
+  GOAL_OPTION_TILE_CLASS,
+  GOAL_PRIORITY_TILE_CLASS,
+} from "./goal-option-tiles";
 
 interface FormValues {
   loanKey?: string;
@@ -83,8 +96,9 @@ export default function CreateGoalForm({
     return `${tomorrow.getFullYear()}-${String(tomorrow.getMonth() + 1).padStart(2, "0")}-${String(tomorrow.getDate()).padStart(2, "0")}`;
   }, []);
 
-  const positiveMoney = (value?: string) =>
-    !value?.trim() || parseGoalMoney(value) > 0;
+  const locale = useLocale();
+  const money = (value: string) => parseGoalMoney(value, locale);
+  const positiveMoney = (value?: string) => !value?.trim() || money(value) > 0;
 
   const schema = z
     .object({
@@ -95,7 +109,7 @@ export default function CreateGoalForm({
         .string()
         .optional()
         .refine(
-          (value) => !value?.trim() || parseGoalMoney(value) >= 0,
+          (value) => !value?.trim() || money(value) >= 0,
           t("goals.amount-must-be-positive"),
         ),
       interestRate: z.string().optional(),
@@ -115,16 +129,15 @@ export default function CreateGoalForm({
     })
     .superRefine((values, ctx) => {
       if (values.type === "debt_paydown") {
-        if (
-          !values.currentBalance ||
-          parseGoalMoney(values.currentBalance) <= 0
-        )
+        // `!(x > 0)` rather than `x <= 0`: an unreadable figure is NaN and
+        // must fail too.
+        if (!values.currentBalance || !(money(values.currentBalance) > 0))
           ctx.addIssue({
             code: "custom",
             message: t("goals.amount-must-be-positive"),
             path: ["currentBalance"],
           });
-        const rate = Number(values.interestRate);
+        const rate = money(values.interestRate ?? "");
         if (
           !values.interestRate?.trim() ||
           !Number.isFinite(rate) ||
@@ -136,19 +149,13 @@ export default function CreateGoalForm({
             message: t("goals.debt-interest-invalid"),
             path: ["interestRate"],
           });
-        if (
-          !values.minimumPayment ||
-          parseGoalMoney(values.minimumPayment) <= 0
-        )
+        if (!values.minimumPayment || !(money(values.minimumPayment) > 0))
           ctx.addIssue({
             code: "custom",
             message: t("goals.amount-must-be-positive"),
             path: ["minimumPayment"],
           });
-      } else if (
-        !values.targetAmount ||
-        parseGoalMoney(values.targetAmount) <= 0
-      ) {
+      } else if (!values.targetAmount || !(money(values.targetAmount) > 0)) {
         ctx.addIssue({
           code: "custom",
           message: t("goals.amount-must-be-positive"),
@@ -184,6 +191,7 @@ export default function CreateGoalForm({
   };
 
   const priority = useWatch({ control: form.control, name: "priority" });
+  const [isAdvancedOpen, setIsAdvancedOpen] = useState(false);
 
   const setPriority = (next: GoalPriority) => {
     form.setValue("priority", next, {
@@ -197,17 +205,14 @@ export default function CreateGoalForm({
     const facility = loans.find((loan) => String(loan.loanKey) === loanKey);
     if (!facility) return;
     if (!form.getValues("name")) form.setValue("name", facility.name);
-    form.setValue(
-      "currentBalance",
-      String(facility.outstandingPrincipal ?? ""),
-    );
+    // In the reader's number format, so the prefilled figure reads back as is.
+    const show = (value: number | null | undefined) =>
+      formatLocaleNumberInput(value, locale);
+    form.setValue("currentBalance", show(facility.outstandingPrincipal));
     if (facility.annualInterestRateBps != null)
-      form.setValue(
-        "interestRate",
-        String(facility.annualInterestRateBps / 100),
-      );
+      form.setValue("interestRate", show(facility.annualInterestRateBps / 100));
     if (facility.regularPaymentAmount != null)
-      form.setValue("minimumPayment", String(facility.regularPaymentAmount));
+      form.setValue("minimumPayment", show(facility.regularPaymentAmount));
   };
 
   const onSubmit = async (values: FormValues) => {
@@ -217,14 +222,14 @@ export default function CreateGoalForm({
 
     const body: CreateGoalRequest = debt
       ? {
-          annualInterestRatePercent: Number(values.interestRate),
+          annualInterestRatePercent: money(values.interestRate ?? ""),
           loanKey: values.loanKey ? Number(values.loanKey) : undefined,
-          currentBalance: parseGoalMoney(values.currentBalance ?? ""),
+          currentBalance: money(values.currentBalance ?? ""),
           description: values.description || undefined,
           extraPayment: values.extraPayment?.trim()
-            ? parseGoalMoney(values.extraPayment)
+            ? money(values.extraPayment)
             : undefined,
-          minimumPayment: parseGoalMoney(values.minimumPayment ?? ""),
+          minimumPayment: money(values.minimumPayment ?? ""),
           name: values.name,
           priority: values.priority,
           targetDate: values.targetDate || undefined,
@@ -233,11 +238,11 @@ export default function CreateGoalForm({
       : {
           description: values.description || undefined,
           monthlyContributionTarget: monthlyContributionTarget
-            ? parseGoalMoney(monthlyContributionTarget)
+            ? money(monthlyContributionTarget)
             : undefined,
           name: values.name,
           priority: values.priority,
-          targetAmount: parseGoalMoney(values.targetAmount ?? ""),
+          targetAmount: money(values.targetAmount ?? ""),
           targetDate: values.targetDate || undefined,
           type: "save_up",
         };
@@ -267,9 +272,6 @@ export default function CreateGoalForm({
     }
   };
 
-  const moneyAdornment = currencyCode ? <span>{currencyCode}</span> : undefined;
-  const moneyInputClass = "min-h-11 w-full pr-4 text-right font-mono";
-
   return (
     <Form {...form}>
       <form
@@ -294,17 +296,12 @@ export default function CreateGoalForm({
                 role="radio"
                 aria-checked={goalType === option}
                 onClick={() => setGoalType(option)}
-                className={cn(
-                  "focus-visible:ring-ring rounded-lg border p-3 text-left transition focus:outline-hidden focus-visible:ring-2 focus-visible:ring-offset-2",
-                  goalType === option
-                    ? "border-primary ring-primary bg-primary/5 ring-1"
-                    : "hover:bg-muted/50",
-                )}
+                className={GOAL_OPTION_TILE_CLASS}
               >
                 <span className="text-foreground block text-sm font-medium">
                   {t(`goals.type-${option}`)}
                 </span>
-                <span className="text-muted-foreground mt-0.5 block text-xs">
+                <span className="text-muted-foreground mt-1 block text-xs">
                   {t(`goals.type-${option}-hint`)}
                 </span>
               </button>
@@ -328,16 +325,9 @@ export default function CreateGoalForm({
                 role="radio"
                 aria-checked={priority === option.value}
                 onClick={() => setPriority(option.value)}
-                className={cn(
-                  "focus-visible:ring-ring rounded-lg border p-3 text-left transition focus:outline-hidden focus-visible:ring-2 focus-visible:ring-offset-2",
-                  priority === option.value
-                    ? "border-primary ring-primary bg-primary/5 ring-1"
-                    : "hover:bg-muted/50",
-                )}
+                className={GOAL_PRIORITY_TILE_CLASS}
               >
-                <span className="text-foreground block text-sm font-medium">
-                  {t(option.labelKey)}
-                </span>
+                {t(option.labelKey)}
               </button>
             ))}
           </div>
@@ -355,7 +345,7 @@ export default function CreateGoalForm({
                   onValueChange={prefillFromFacility}
                 >
                   <FormControl>
-                    <SelectTrigger className="min-h-11">
+                    <SelectTrigger>
                       <SelectValue
                         placeholder={t("goals.debt-link-facility-placeholder")}
                       />
@@ -387,7 +377,6 @@ export default function CreateGoalForm({
               <FormControl>
                 <Input
                   {...field}
-                  className="min-h-11"
                   required
                   placeholder={
                     isDebt
@@ -403,29 +392,24 @@ export default function CreateGoalForm({
 
         {isDebt ? (
           <>
-            <div className="grid gap-4 md:grid-cols-2">
+            <div className="space-y-6">
               <FormField
                 control={form.control}
                 name="currentBalance"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel required>
-                      {currencyCode
-                        ? `${t("goals.debt-current-balance")} (${currencyCode})`
-                        : t("goals.debt-current-balance")}
+                      {t("goals.debt-current-balance")}
                     </FormLabel>
                     <FormControl>
-                      <Input
+                      <MoneyInput
                         {...field}
                         required
                         type="tel"
-                        inputMode="decimal"
                         placeholder={t(
                           "goals.debt-current-balance-placeholder",
                         )}
-                        className={moneyInputClass}
-                        wrapperClassName="min-h-11"
-                        startAdornment={moneyAdornment}
+                        currency={currencyCode}
                       />
                     </FormControl>
                     <FormMessage />
@@ -447,9 +431,8 @@ export default function CreateGoalForm({
                         type="tel"
                         inputMode="decimal"
                         placeholder="19.99"
-                        className={moneyInputClass}
-                        wrapperClassName="min-h-11"
-                        startAdornment={<span>%</span>}
+                        className="text-right font-mono"
+                        endAdornment={<span className="font-mono">%</span>}
                       />
                     </FormControl>
                     <FormMessage />
@@ -457,29 +440,24 @@ export default function CreateGoalForm({
                 )}
               />
             </div>
-            <div className="grid gap-4 md:grid-cols-2">
+            <div className="space-y-6">
               <FormField
                 control={form.control}
                 name="minimumPayment"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel required>
-                      {currencyCode
-                        ? `${t("goals.debt-minimum-payment")} (${currencyCode})`
-                        : t("goals.debt-minimum-payment")}
+                      {t("goals.debt-minimum-payment")}
                     </FormLabel>
                     <FormControl>
-                      <Input
+                      <MoneyInput
                         {...field}
                         required
                         type="tel"
-                        inputMode="decimal"
                         placeholder={t(
                           "goals.debt-minimum-payment-placeholder",
                         )}
-                        className={moneyInputClass}
-                        wrapperClassName="min-h-11"
-                        startAdornment={moneyAdornment}
+                        currency={currencyCode}
                       />
                     </FormControl>
                     <FormMessage />
@@ -491,20 +469,13 @@ export default function CreateGoalForm({
                 name="extraPayment"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>
-                      {currencyCode
-                        ? `${t("goals.debt-extra-payment")} (${currencyCode})`
-                        : t("goals.debt-extra-payment")}
-                    </FormLabel>
+                    <FormLabel>{t("goals.debt-extra-payment")}</FormLabel>
                     <FormControl>
-                      <Input
+                      <MoneyInput
                         {...field}
                         type="tel"
-                        inputMode="decimal"
                         placeholder={t("goals.debt-extra-payment-placeholder")}
-                        className={moneyInputClass}
-                        wrapperClassName="min-h-11"
-                        startAdornment={moneyAdornment}
+                        currency={currencyCode}
                       />
                     </FormControl>
                     <FormMessage />
@@ -519,21 +490,13 @@ export default function CreateGoalForm({
             name="targetAmount"
             render={({ field }) => (
               <FormItem>
-                <FormLabel required>
-                  {currencyCode
-                    ? `${t("goals.target-amount")} (${currencyCode})`
-                    : t("goals.target-amount")}
-                </FormLabel>
+                <FormLabel required>{t("goals.target-amount")}</FormLabel>
                 <FormControl>
-                  <Input
+                  <MoneyInput
                     {...field}
                     required
                     type="tel"
-                    inputMode="decimal"
-                    placeholder={t("goals.target-amount-placeholder")}
-                    className={moneyInputClass}
-                    wrapperClassName="min-h-11"
-                    startAdornment={moneyAdornment}
+                    currency={currencyCode}
                   />
                 </FormControl>
                 <FormMessage />
@@ -542,62 +505,64 @@ export default function CreateGoalForm({
           />
         )}
 
-        <div className="grid gap-4 md:grid-cols-2">
-          <FormField
-            control={form.control}
-            name="targetDate"
-            render={({ field }) => (
-              <FormItem className="flex flex-col">
-                <FormLabel>
-                  {isDebt
-                    ? t("goals.debt-target-date")
-                    : t("goals.target-date")}
-                </FormLabel>
-                <DatePicker
-                  form
-                  inModal
-                  value={parseGoalDateInput(field.value)}
-                  onSelect={(date) => field.onChange(formatGoalDateInput(date))}
-                  disabled={{ before: parseGoalDateInput(tomorrowIso) as Date }}
-                  placeholder={t("goals.target-date")}
-                />
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
+        <FormField
+          control={form.control}
+          name="targetDate"
+          render={({ field }) => (
+            <FormItem className="flex flex-col">
+              <FormLabel>
+                {isDebt ? t("goals.debt-target-date") : t("goals.target-date")}
+              </FormLabel>
+              <DatePicker
+                form
+                inModal
+                value={parseGoalDateInput(field.value)}
+                onSelect={(date) => field.onChange(formatGoalDateInput(date))}
+                disabled={{ before: parseGoalDateInput(tomorrowIso) as Date }}
+                placeholder={t("goals.target-date-placeholder")}
+              />
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
         {!isDebt && (
-          <div className="bg-muted/30 space-y-4 rounded-lg p-4">
-            <h3 className="text-sm font-medium">
-              {t("goals.advanced-options")}
-            </h3>
-            <FormField
-              control={form.control}
-              name="monthlyContributionTarget"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>
-                    {currencyCode
-                      ? `${t("goals.monthly-contribution")} (${currencyCode})`
-                      : t("goals.monthly-contribution")}
-                  </FormLabel>
-                  <FormControl>
-                    <Input
-                      {...field}
-                      type="tel"
-                      inputMode="decimal"
-                      placeholder={t("goals.monthly-contribution-placeholder")}
-                      className={moneyInputClass}
-                      wrapperClassName="min-h-11"
-                      startAdornment={moneyAdornment}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
+          <Collapsible open={isAdvancedOpen} onOpenChange={setIsAdvancedOpen}>
+            <CollapsibleTrigger asChild>
+              <button
+                type="button"
+                className="text-foreground focus-visible:ring-ring flex items-center gap-2 rounded-md text-sm font-medium focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-hidden"
+              >
+                <ChevronRight
+                  className={cn(
+                    "size-4 transition-transform motion-reduce:transition-none",
+                    isAdvancedOpen && "rotate-90",
+                  )}
+                  aria-hidden="true"
+                />
+                {t("goals.advanced-options")}
+              </button>
+            </CollapsibleTrigger>
+            <CollapsibleContent className="pt-6">
+              <FormField
+                control={form.control}
+                name="monthlyContributionTarget"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t("goals.monthly-contribution")}</FormLabel>
+                    <FormControl>
+                      <MoneyInput
+                        {...field}
+                        type="tel"
+                        currency={currencyCode}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </CollapsibleContent>
+          </Collapsible>
         )}
 
         <FormField
@@ -625,7 +590,6 @@ export default function CreateGoalForm({
 
         <div className="flex justify-end">
           <Button
-            className="min-h-11"
             type="submit"
             loading={createGoal.isPending || form.formState.isSubmitting}
             disabled={createGoal.isPending || form.formState.isSubmitting}

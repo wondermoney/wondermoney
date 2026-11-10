@@ -34,16 +34,18 @@ describe('buildNotificationPreferencePatch', () => {
     expect(buildNotificationPreferencePatch('budgetAlerts', true)).toEqual({ budgetAlertsEnabled: true })
     expect(buildNotificationPreferencePatch('weeklyInsights', false)).toEqual({ weeklyInsightsEnabled: false })
     expect(buildNotificationPreferencePatch('accountRecovery', true)).toEqual({ accountRecoveryEnabled: true })
+    expect(buildNotificationPreferencePatch('bankSyncAlerts', false)).toEqual({ bankSyncAlertsEnabled: false })
   })
 })
 
 describe('mapNotificationPreferences', () => {
   const preferences: NotificationPreferencesDto = {
     accountRecovery: { effectiveEnabled: true, storedEnabled: true },
+    bankSyncAlerts: { effectiveEnabled: false, storedEnabled: true },
     budgetAlerts: { deliverySupported: true, effectiveEnabled: false, storedEnabled: true },
     growth: { effectiveEnabled: false, storedEnabled: false },
     marketingOptOut: true,
-      weeklyInsights: { deliverySupported: false, effectiveEnabled: false, storedEnabled: false },
+    weeklyInsights: { deliverySupported: false, effectiveEnabled: false, storedEnabled: false },
   }
 
   it('produces one row per stream in fixed order and surfaces the master opt-out', () => {
@@ -54,5 +56,13 @@ describe('mapNotificationPreferences', () => {
     expect(budget.storedEnabled).toBe(true)
     // Stored on but not effective while marketing is opted out → paused/marketingOptOut.
     expect(budget.view).toEqual({ status: 'paused', pauseReason: 'marketingOptOut', canEnable: true, canChange: true })
+    const bankSync = mapped.rows.find((row) => row.stream === 'bankSyncAlerts')!
+    expect(bankSync.view).toEqual({ status: 'paused', pauseReason: 'marketingOptOut', canEnable: true, canChange: true })
+  })
+
+  it('omits the bank connection alerts row when an older server does not return it', () => {
+    const { bankSyncAlerts: _omitted, ...older } = preferences
+    const mapped = mapNotificationPreferences(older)
+    expect(mapped.rows.map((row) => row.stream)).toEqual(['budgetAlerts', 'weeklyInsights', 'accountRecovery'])
   })
 })

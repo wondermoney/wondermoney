@@ -1,4 +1,4 @@
-import { fireEvent, render, renderHook } from '@testing-library/react-native'
+import { render, renderHook } from '@testing-library/react-native'
 import { I18nextProvider } from 'react-i18next'
 
 import { initMobileI18n } from '@/lib/i18n'
@@ -26,7 +26,6 @@ async function renderWithI18n(overrides: Partial<ReportsHubScreenProps> = {}) {
     onSelectPreset: jest.fn(),
     refreshing: false,
     onRefreshAll: jest.fn(),
-    onBack: jest.fn(),
     sankey: loading,
     cashflow: loading,
     spendingByCategory: { ...loading, state: { status: 'loading' } },
@@ -56,10 +55,9 @@ describe('ReportsHubScreen', () => {
     expect(view.getAllByText('Last 3 months').length).toBe(1)
   })
 
-  it('navigates back', async () => {
-    const onBack = jest.fn()
-    const view = await renderWithI18n({ onBack })
-    await fireEvent.press(view.getByRole('button', { name: 'Back' }))
-    expect(onBack).toHaveBeenCalledTimes(1)
+  it('is a destination with its own title and no back link, as on web', async () => {
+    const view = await renderWithI18n()
+    expect(view.getByText('Reports')).toBeOnTheScreen()
+    expect(view.queryByRole('button', { name: 'Back' })).toBeNull()
   })
 })

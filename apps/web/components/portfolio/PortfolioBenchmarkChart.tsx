@@ -1,20 +1,18 @@
 "use client";
 
 import { useLocale, useTranslations } from "next-intl";
-import { useCallback } from "react";
-import React, { useMemo } from "react";
+import React, { useCallback, useMemo } from "react";
 
 import { type ChartConfig, ChartTooltip } from "@/components/ui/chart";
-import {
-  AreaLineChartBase,
-  useChartFormatters,
-} from "@/components/ui/charts";
+import { AreaLineChartBase, useChartFormatters } from "@/components/ui/charts";
 import { Spinner } from "@/components/ui/Spinner";
 import type { Period } from "@/lib/api/portfolio/usePortfolioDashboard";
 import usePortfolioPerformance, {
   type PortfolioBenchmarkReadinessStatus,
 } from "@/lib/api/portfolio/usePortfolioPerformance";
 import { cn } from "@/lib/utils";
+
+import { PortfolioHistoryCurrencyNotice } from "./PortfolioHistoryCurrencyNotice";
 
 interface PortfolioBenchmarkChartProps {
   portfolioId: number | null;
@@ -295,7 +293,7 @@ const PortfolioBenchmarkChart: React.FC<PortfolioBenchmarkChartProps> = ({
   };
 
   return (
-    <div className="px-5 py-4">
+    <div className="py-1">
       {isLoading ? (
         <div className="flex h-[300px] items-center justify-center">
           <Spinner />
@@ -334,6 +332,9 @@ const PortfolioBenchmarkChart: React.FC<PortfolioBenchmarkChartProps> = ({
               tooltipContent={renderTooltip}
             />
           </div>
+          <PortfolioHistoryCurrencyNotice
+            completeness={performanceData?.completeness}
+          />
         </div>
       )}
     </div>

@@ -4,19 +4,15 @@ import { AlertTriangle } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { useMemo } from "react";
 
-import { Card } from "@/components/ui/card";
 import type { ChartConfig } from "@/components/ui/chart";
-import {
-  AreaLineChartBase,
-  useChartFormatters,
-} from "@/components/ui/charts";
+import { AreaLineChartBase, useChartFormatters } from "@/components/ui/charts";
 import type { Goal, GoalSummary } from "@/lib/api/goals/types";
 import {
-  formatGoalCurrency,
   formatGoalDate,
   formatGoalInterestRate,
 } from "@/lib/goals/format";
 import { buildPayoffSeries } from "@/lib/goals/payoff";
+import { useFormatGoalCurrency } from "@/lib/goals/useFormatGoalCurrency";
 
 interface DebtPayoffPanelProps {
   currencyCode?: string;
@@ -42,6 +38,7 @@ export default function DebtPayoffPanel({
   const t = useTranslations();
   const { formatCompactCurrency } = useChartFormatters();
   const locale = useLocale();
+  const formatGoalCurrency = useFormatGoalCurrency();
   const projection = summary.debtProjection;
 
   const series = useMemo(
@@ -55,7 +52,9 @@ export default function DebtPayoffPanel({
   );
 
   const chartConfig = useMemo<ChartConfig>(
-    () => ({ balance: { color: "var(--chart-1)", label: t("goals.debt-balance") } }),
+    () => ({
+      balance: { color: "var(--chart-1)", label: t("goals.debt-balance") },
+    }),
     [t],
   );
 
@@ -82,14 +81,18 @@ export default function DebtPayoffPanel({
     },
     {
       label: t("goals.debt-monthly-payment"),
-      value: formatGoalCurrency(projection.monthlyPayment, currencyCode, locale),
+      value: formatGoalCurrency(
+        projection.monthlyPayment,
+        currencyCode,
+        locale,
+      ),
     },
   ];
 
   return (
-    <Card className="space-y-5 p-5">
+    <section className="border-foreground space-y-5 border-t-2 pt-4">
       <div className="flex items-center justify-between gap-3">
-        <h2 className="text-foreground text-sm font-medium">
+        <h2 className="text-foreground text-lg font-semibold tracking-tight">
           {t("goals.debt-payoff-plan")}
         </h2>
         {goal.annualInterestRateBps != null && (
@@ -105,7 +108,10 @@ export default function DebtPayoffPanel({
           role="alert"
           className="border-destructive/40 bg-destructive/5 text-destructive-text flex items-start gap-2 rounded-lg border p-3 text-xs"
         >
-          <AlertTriangle className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
+          <AlertTriangle
+            className="mt-0.5 size-4 shrink-0"
+            aria-hidden="true"
+          />
           <p>{t("goals.debt-never-pays-off-hint")}</p>
         </div>
       )}
@@ -140,6 +146,6 @@ export default function DebtPayoffPanel({
           />
         </div>
       )}
-    </Card>
+    </section>
   );
 }

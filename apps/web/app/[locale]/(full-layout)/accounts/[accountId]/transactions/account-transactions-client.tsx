@@ -104,19 +104,27 @@ export default function AccountTransactionsClient({
   const [tableFilters, setTableFilters] = useState<{
     categoryKeys: string[];
     needsReview: boolean;
+    tagKeys: string[];
     transactionTypes: string[];
-  }>({ categoryKeys: [], needsReview: false, transactionTypes: [] });
+  }>({
+    categoryKeys: [],
+    needsReview: false,
+    tagKeys: [],
+    transactionTypes: [],
+  });
 
   const handleTableFiltersChange = useCallback(
     (next: {
       categoryKeys: string[];
       needsReview: boolean;
+      tagKeys: string[];
       transactionTypes: string[];
     }) => {
       // The table re-reports from an effect, so bail when nothing moved or this loops.
       setTableFilters((current) =>
         current.needsReview === next.needsReview &&
         current.categoryKeys.join() === next.categoryKeys.join() &&
+        current.tagKeys.join() === next.tagKeys.join() &&
         current.transactionTypes.join() === next.transactionTypes.join()
           ? current
           : next,
@@ -127,6 +135,7 @@ export default function AccountTransactionsClient({
 
   const hasTableFilters =
     tableFilters.categoryKeys.length > 0 ||
+    tableFilters.tagKeys.length > 0 ||
     tableFilters.transactionTypes.length > 0 ||
     tableFilters.needsReview;
 
@@ -138,6 +147,7 @@ export default function AccountTransactionsClient({
         fromDate: transactionDateRange?.from,
         toDate: transactionDateRange?.to,
         categoryKeys: tableFilters.categoryKeys,
+        tagKeys: tableFilters.tagKeys,
         transactionTypes: tableFilters.transactionTypes,
       },
       {
@@ -181,12 +191,8 @@ export default function AccountTransactionsClient({
           }}
           accounts={[transactionAccount]}
           trigger={
-            <Button
-              variant="outline"
-              size="sm"
-              className="w-full gap-1.5 sm:w-auto"
-            >
-              <Download className="size-3.5" />
+            <Button variant="outline" className="w-full sm:w-auto">
+              <Download className="size-4" />
               {t("import-transactions")}
             </Button>
           }
@@ -204,10 +210,9 @@ export default function AccountTransactionsClient({
           trigger={
             <Button
               {...(addVariant ? { variant: addVariant } : {})}
-              size="sm"
-              className="w-full gap-1.5 sm:w-auto"
+              className="w-full sm:w-auto"
             >
-              <Plus className="size-3.5" />
+              <Plus className="size-4" />
               {t("add-transaction")}
             </Button>
           }
@@ -235,7 +240,7 @@ export default function AccountTransactionsClient({
         {/* Header */}
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div>
-            <h1 className="text-foreground text-xl font-semibold tracking-tight">
+            <h1 className="text-foreground text-2xl font-semibold tracking-tight lg:text-3xl">
               {t("transactions")}
             </h1>
             {accountName && (
@@ -268,11 +273,11 @@ export default function AccountTransactionsClient({
   }
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-8">
       {/* Header */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h1 className="text-foreground text-xl font-semibold tracking-tight">
+          <h1 className="text-foreground text-2xl font-semibold tracking-tight lg:text-3xl">
             {t("transactions")}
           </h1>
           {accountName && (
@@ -284,15 +289,11 @@ export default function AccountTransactionsClient({
         {renderTransactionActions()}
       </div>
 
-      {/* Transactions table */}
-      <section className="border-border bg-card rounded-lg border">
-        <div className="border-border border-b px-5 py-3">
-          <h2 className="text-foreground text-sm font-medium">
-            {t("all-transactions")}
-          </h2>
-        </div>
-        <div className="p-0">
+      {/* Transactions ledger, as on the all-accounts page */}
+      <section aria-label={t("all-transactions")}>
+        <div>
           <TransactionsTable
+            layout="ledger"
             transactions={transactionsData?.transactions ?? []}
             categories={configsData?.categories ?? []}
             showUnreviewedOnly={showUnreviewedOnly}

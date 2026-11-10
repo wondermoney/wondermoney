@@ -29,7 +29,8 @@ import {
 import { isDemoReadOnlyError } from "@/lib/api/errors";
 import useFundGoalTransaction from "@/lib/api/goals/useFundGoalTransaction";
 import useGoals from "@/lib/api/goals/useGoals";
-import { formatGoalCurrency } from "@/lib/goals/format";
+import { useFormatGoalCurrency } from "@/lib/goals/useFormatGoalCurrency";
+import { parseLocaleNumber } from "@/lib/utils/number";
 
 type FormValues = {
   goalKey: string;
@@ -51,6 +52,7 @@ export default function FundTransactionFromGoalDialog({
 }) {
   const t = useTranslations();
   const locale = useLocale();
+  const formatGoalCurrency = useFormatGoalCurrency();
   const { data } = useGoals(undefined, { enabled: isOpen });
   const goals = useMemo(() => data?.goals ?? [], [data?.goals]);
   const defaultGoalKey = useMemo(
@@ -63,14 +65,17 @@ export default function FundTransactionFromGoalDialog({
     resolver: zodResolver(
       z.object({
         goalKey: z.string().min(1, t("goals.fund-transaction-goal-required")),
+        // Read in the user's locale; unreadable input fails the first check
+        // instead of becoming another number.
         amount: z
           .string()
           .refine(
-            (value) => Number(value) > 0,
+            (value) => (parseLocaleNumber(value, locale) ?? Number.NaN) > 0,
             t("goals.fund-transaction-amount-positive"),
           )
           .refine(
-            (value) => Number(value) <= maxAmount,
+            (value) =>
+              (parseLocaleNumber(value, locale) ?? Number.NaN) <= maxAmount,
             t("goals.fund-transaction-amount-max", { amount: maxAmount }),
           ),
       }),
@@ -98,7 +103,10 @@ export default function FundTransactionFromGoalDialog({
   const onSubmit = async (values: FormValues) => {
     try {
       await mutation.mutateAsync(
-        { amount: Number(values.amount), transactionKey },
+        {
+          amount: parseLocaleNumber(values.amount, locale) ?? Number.NaN,
+          transactionKey,
+        },
         { onSuccess: () => onOpenChange(false) },
       );
     } catch (error) {
@@ -175,9 +183,6 @@ export default function FundTransactionFromGoalDialog({
                     {...field}
                     className="font-mono tabular-nums"
                     inputMode="decimal"
-                    min="0"
-                    step="0.01"
-                    type="number"
                   />
                 </FormControl>
                 <p className="text-muted-foreground text-xs">

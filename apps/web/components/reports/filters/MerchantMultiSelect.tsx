@@ -28,7 +28,7 @@ export function MerchantMultiSelect({
       }))}
       selected={selected}
       onChange={onChange}
-      placeholder={t("placeholder.search")}
+      placeholder={t("placeholder.allMerchants")}
       className={className}
     />
   );

@@ -1,7 +1,8 @@
-import { roundDisplay } from '@utils/money';
+import { convertMoney, roundDisplay } from '@utils/money';
 interface HoldingCurrentMetricsInput {
   assetType: string;
   averageBuyPrice: number;
+  /** 1 in the asset's own currency; null or undefined when no rate exists, leaving the holding unvalued. */
   conversionRate?: null | number;
   quantity: number;
   rawCurrentPrice: null | number;
@@ -29,8 +30,9 @@ export function resolveHoldingCurrentMetrics({
   rawCurrentPrice,
 }: HoldingCurrentMetricsInput) {
   const effectiveRawPrice = assetType.toLowerCase() === 'cash' ? 1 : rawCurrentPrice;
-  const currentPrice = effectiveRawPrice != null
-    ? roundCurrency(effectiveRawPrice * (conversionRate ?? 1))
+  // No rate means no price in the target currency: never an implied rate of 1.
+  const currentPrice = effectiveRawPrice != null && conversionRate != null
+    ? roundCurrency(convertMoney(effectiveRawPrice, conversionRate))
     : null;
   const currentValue = currentPrice != null ? roundCurrency(currentPrice * quantity) : null;
   const initialInvestment = averageBuyPrice * quantity;

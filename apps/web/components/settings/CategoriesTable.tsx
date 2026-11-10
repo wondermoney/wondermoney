@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useCallback } from "react";
+import { toast } from "sonner";
 
 import CategoryIcon, { categoryIconStyle } from "@/components/ui/CategoryIcon";
 import { Table } from "@/components/ui/Table";
@@ -19,11 +20,16 @@ import {
   createColumnHelper,
 } from "@/components/ui/Table/features";
 import useDeleteCategory from "@/lib/api/category/useDeleteCategory";
+import useEditCategory from "@/lib/api/category/useEditCategory";
 import { cn } from "@/lib/utils";
-import { getCategoryTranslationKey } from "@/lib/utils/categories";
+import {
+  countsAsSpending,
+  getCategoryTranslationKey,
+} from "@/lib/utils/categories";
 import { invalidateCategories } from "@/lib/utils/queryInvalidation";
 
 import { Button } from "../ui/button";
+import { Switch } from "../ui/switch";
 import {
   Tooltip,
   TooltipContent,
@@ -45,6 +51,27 @@ const CategoriesTable: React.FC<CategoriesTableProps> = ({
   const queryClient = useQueryClient();
   const t = useTranslations();
   const useDeleteCategoryMutation = useDeleteCategory();
+  const editCategory = useEditCategory();
+
+  // Works on every category, built-in ones included: the choice is the
+  // household's own and never changes another household's totals. Switching a
+  // parent switches its subcategories with it.
+  const onToggleCountsAsSpending = useCallback(
+    (categoryKey: CategoryWithUI["categoryKey"], checked: boolean) => {
+      editCategory.mutate(
+        { categoryKey, countsAsSpending: checked },
+        {
+          onSuccess: async () => {
+            await invalidateCategories(queryClient);
+          },
+          onError: () => {
+            toast.error(t("toast-update-category-error"));
+          },
+        },
+      );
+    },
+    [editCategory, queryClient, t],
+  );
 
   const onDeleteCategory = useCallback(
     (categoryKey: CategoryWithUI["categoryKey"]) => {
@@ -120,6 +147,41 @@ const CategoriesTable: React.FC<CategoriesTableProps> = ({
           style={categoryIconStyle(info.row.original.bgColor)}
         />
       ),
+    }),
+    columnHelper.display({
+      header: t("counts-as-spending"),
+      id: "countsAsSpending",
+      cell: (info) => {
+        const parent = info.row.getParentRow()?.original;
+        // Under a parent that doesn't count, a subcategory never counts either.
+        const lockedByParent = parent != null && !countsAsSpending(parent);
+        const name = info.row.original.isSystemCategory
+          ? t(getCategoryTranslationKey(info.row.original.name))
+          : info.row.original.name;
+        const control = (
+          <Switch
+            aria-label={`${t("counts-as-spending")}: ${name}`}
+            checked={countsAsSpending(info.row.original, parent)}
+            disabled={lockedByParent || editCategory.isPending}
+            onCheckedChange={(checked) =>
+              onToggleCountsAsSpending(info.row.original.categoryKey, checked)
+            }
+          />
+        );
+        if (!lockedByParent) return control;
+        return (
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span>{control}</span>
+              </TooltipTrigger>
+              <TooltipContent>
+                <Text>{t("counts-as-spending-parent-off")}</Text>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        );
+      },
     }),
     columnHelper.display({
       header: t("actions"),

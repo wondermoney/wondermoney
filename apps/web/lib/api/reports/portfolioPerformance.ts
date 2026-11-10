@@ -20,7 +20,7 @@ export interface GetPortfolioPerformanceRequest extends ReportFilters {
 }
 
 /**
- * Fetches per-account portfolio period performance.
+ * Fetches per-portfolio performance over the report period.
  * Can be used in both Server Components and Client Components.
  *
  * @param params - Filter envelope; pass `format: "csv"` to download a Blob

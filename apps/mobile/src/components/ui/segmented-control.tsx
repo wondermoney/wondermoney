@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native'
 
 import { Text } from '@/components/ui/text'
@@ -7,23 +8,25 @@ import { usePalette } from '@/theme/use-palette'
 export type SegmentOption<T extends string> = { value: T; label: string }
 
 /**
- * A choice between a small, fixed set of views — a period, a range, a tab.
+ * A choice between a small, fixed set of views — Month | Year, Active | Archived.
  *
- * The selected segment is one of the seven places the accent may appear. It
- * carries a `primaryWash` fill plus `primary` ink, and the unselected segments
- * carry neither: this is the whole reason the control reads at a glance.
- * Giving *every* segment a `primary` border is how a screen ends up with eight
- * accent elements and no answer to "which one is on".
+ * Mirrors web's `TabsList` / `TabsTrigger` (`components/ui/tabs.tsx`): a muted
+ * track (`bg-muted h-10 p-1 rounded-md`), each segment `px-3 py-1.5 text-sm
+ * font-medium`, the selected one lifted onto the canvas (`bg-background
+ * text-foreground shadow-xs`), the rest muted ink. No violet: web spends no
+ * accent here, and neither does this.
  *
- * `accessibilityState.selected` does the announcing, so colour is not carrying
- * the state alone.
+ * Segments draw at 32pt; `hitSlop` makes each 44pt to the finger.
+ * `accessibilityState.selected` announces the state, so colour never carries it alone.
  *
- * One shared border around the whole track, not one border per segment — with
- * a border on every individual segment, three or more options read as a row of
- * separate boxes rather than one control (the
- * No-Nesting / box-stacking rule in `DESIGN.md`). The selected segment's inner
- * background wash is the only per-segment visual; unselected segments are
- * borderless and transparent.
+ * @param options      the segments, in order.
+ * @param value        the selected option's value.
+ * @param onChange     called with the pressed option's value.
+ * @param accessibilityLabel  names the group ("Period").
+ * @param scrollable   for more options than fit: they scroll instead of wrapping.
+ * @param size         `sm` draws the track at 36pt to sit beside 36pt buttons in a control row.
+ * @param fill         stretches the track to the full width and shares it equally between the
+ *                     segments (a flow's Expense | Income | Transfer, a chart's range switch).
  */
 export function SegmentedControl<T extends string>({
   options,
@@ -31,19 +34,26 @@ export function SegmentedControl<T extends string>({
   onChange,
   accessibilityLabel,
   scrollable = false,
+  size = 'default',
+  fill = false,
   testID,
 }: {
   options: readonly SegmentOption<T>[]
   value: T
   onChange: (value: T) => void
   accessibilityLabel: string
-  /** For more options than fit — they scroll rather than wrap into a block. */
   scrollable?: boolean
+  size?: 'default' | 'sm'
+  fill?: boolean
   testID?: string
 }) {
   const palette = usePalette()
+  const [focused, setFocused] = useState<T | null>(null)
+  const small = size === 'sm'
+  const segmentHeight = small ? SEGMENT_HEIGHT_SMALL : SEGMENT_HEIGHT
+  const slop = (themeTokens.touchTarget.minimum - segmentHeight) / 2
 
-  const segments = options.map((option, index) => {
+  const segments = options.map((option) => {
     const selected = option.value === value
     return (
       <Pressable
@@ -51,20 +61,24 @@ export function SegmentedControl<T extends string>({
         accessibilityRole="tab"
         accessibilityState={{ selected }}
         key={option.value}
-        // The control is 34pt tall but 48pt to the finger. Chips at full
-        // touch-target height dominate a dense screen, and the fix is to grow
-        // the *touch* area rather than the drawn one. Vertical only — adjacent
-        // chips sit 8pt apart, and horizontal slop would overlap them.
-        hitSlop={{ top: 7, bottom: 7 }}
+        // Vertical only: horizontal slop would overlap the neighbouring segment.
+        hitSlop={{ top: slop, bottom: slop }}
+        onBlur={() => setFocused(null)}
+        onFocus={() => setFocused(option.value)}
         onPress={() => onChange(option.value)}
         style={({ pressed }) => [
           styles.segment,
-          index > 0 && { borderLeftWidth: 1, borderLeftColor: palette.border },
-          { backgroundColor: selected ? palette.primaryWash : 'transparent' },
+          small && styles.segmentSmall,
+          fill && styles.segmentFill,
+          selected
+            ? [{ backgroundColor: palette.background }, themeTokens.shadow.xs]
+            : { backgroundColor: 'transparent' },
+          focused === option.value && { borderWidth: 2, borderColor: palette.ring },
           pressed && styles.pressed,
         ]}
       >
-        <Text style={{ color: selected ? palette.primary : palette.mutedForeground }} variant="meta">
+        {/* One line per label, never a word broken mid-way: the font shrinks to fit instead. */}
+        <Text adjustsFontSizeToFit minimumFontScale={0.7} numberOfLines={1} style={{ color: selected ? palette.foreground : palette.mutedForeground }} variant="metaStrong">
           {option.label}
         </Text>
       </Pressable>
@@ -76,7 +90,7 @@ export function SegmentedControl<T extends string>({
       <ScrollView
         accessibilityLabel={accessibilityLabel}
         accessibilityRole="tablist"
-        contentContainerStyle={[styles.track, { borderColor: palette.input }]}
+        contentContainerStyle={[styles.track, small && styles.trackSmall, { backgroundColor: palette.muted }]}
         horizontal
         showsHorizontalScrollIndicator={false}
         testID={testID}
@@ -90,7 +104,7 @@ export function SegmentedControl<T extends string>({
     <View
       accessibilityLabel={accessibilityLabel}
       accessibilityRole="tablist"
-      style={[styles.track, { borderColor: palette.input, alignSelf: 'flex-start' }]}
+      style={[styles.track, small && styles.trackSmall, { backgroundColor: palette.muted, alignSelf: fill ? 'stretch' : 'flex-start' }]}
       testID={testID}
     >
       {segments}
@@ -98,17 +112,25 @@ export function SegmentedControl<T extends string>({
   )
 }
 
+const SEGMENT_HEIGHT = 32
+const SEGMENT_HEIGHT_SMALL = 28
+
 const styles = StyleSheet.create({
   track: {
     flexDirection: 'row',
-    borderWidth: 1,
+    alignItems: 'center',
+    minHeight: themeTokens.size.control,
+    padding: themeTokens.spacing[1],
     borderRadius: themeTokens.radius.md,
-    overflow: 'hidden',
   },
+  trackSmall: { minHeight: themeTokens.size.controlSmall, padding: 4 },
+  segmentSmall: { minHeight: SEGMENT_HEIGHT_SMALL, paddingHorizontal: themeTokens.spacing[2] },
   segment: {
-    minHeight: 34,
+    minHeight: SEGMENT_HEIGHT,
     justifyContent: 'center',
     paddingHorizontal: themeTokens.spacing[3],
+    borderRadius: themeTokens.radius.sm,
   },
+  segmentFill: { flex: 1, alignItems: 'center' },
   pressed: { opacity: 0.72 },
 })

@@ -4,7 +4,6 @@ import { Check, ChevronDown, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Command,
@@ -31,7 +30,8 @@ interface MultiSelectProps {
   selected: string[];
   onChange: (selected: string[]) => void;
   label: string;
-  placeholder?: string;
+  placeholder: string;
+  searchPlaceholder?: string;
   className?: string;
 }
 
@@ -41,6 +41,7 @@ export function MultiSelect({
   onChange,
   label,
   placeholder,
+  searchPlaceholder,
   className,
 }: MultiSelectProps) {
   const t = useTranslations("reports.filters");
@@ -76,28 +77,40 @@ export function MultiSelect({
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>
       <PopoverTrigger asChild>
+        {/* The `input` surface, not `outline`: this is a form control, and the
+            violet outline made an empty filter read as an active one. Two
+            names fit the trigger; past that a count says more than a
+            truncated list. */}
         <Button
-          variant="outline"
-          size="sm"
-          className={cn(
-            "h-10 justify-start gap-2 px-3 text-left font-normal sm:h-9",
-            className,
-          )}
+          variant="input"
+          role="combobox"
+          aria-expanded={isOpen}
+          className={cn("w-full justify-between px-3 text-left", className)}
           aria-label={label}
         >
-          <span className="truncate font-medium">{label}</span>
-          {selected.length > 0 && (
-            <Badge variant="secondary" className="ml-1 shrink-0">
-              {t("selected", { count: selected.length })}
-            </Badge>
-          )}
-          <ChevronDown className="ml-auto size-4 shrink-0 opacity-50" />
+          <span
+            className={cn(
+              "truncate",
+              selected.length === 0 && "text-muted-foreground",
+            )}
+          >
+            {selected.length === 0
+              ? placeholder
+              : selected.length <= 2 &&
+                  selectedLabels.length === selected.length
+                ? selectedLabels.join(", ")
+                : t("selected", { count: selected.length })}
+          </span>
+          <ChevronDown className="size-4 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-72 p-0" align="start">
+      <PopoverContent
+        className="w-(--radix-popover-trigger-width) min-w-72 p-0"
+        align="start"
+      >
         <Command>
           <CommandInput
-            placeholder={placeholder ?? t("placeholder.search")}
+            placeholder={searchPlaceholder ?? t("placeholder.search")}
             value={search}
             onValueChange={setSearch}
           />

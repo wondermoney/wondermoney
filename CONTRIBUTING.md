@@ -37,7 +37,8 @@ schema only (data goes in seeders), and `.env` must point at a local database.
 
 ## Making a change
 
-1. Fork the repository and create a branch from `main`.
+1. Fork the repository and create a branch from `develop`, the default branch. Open the
+   pull request against `develop` too: `main` only receives promotions from `develop`.
 2. Keep the change focused: one fix or feature per pull request.
 3. Add or update tests for behaviour you change. A good test fails for a reason a user
    would care about; it asserts outcomes, not implementation details.
@@ -49,6 +50,30 @@ schema only (data goes in seeders), and `.env` must point at a local database.
 User-facing text goes through the translation files (English, Portuguese and Spanish);
 please don't hardcode strings. If you can't translate, add the English text and say so
 in the pull request.
+
+## Leak check
+
+CI's "Leak check" job keeps secrets and private details out of this public repository. It
+runs [gitleaks](https://github.com/gitleaks/gitleaks) over your pull request's commits
+(`.gitleaks.toml`), and greps the tree, the lines your commits add and their messages for the
+patterns in `.github/leak-patterns.txt`: internal ticket ids, personal paths such as home
+directories, IP addresses outside the loopback, private and documentation ranges, and the like.
+A hit fails the "Type-check, lint, test and build" check and prints `file:line`. To run it
+locally (gitleaks from your package manager):
+
+```bash
+gitleaks git . --config .gitleaks.toml --log-opts="origin/develop..HEAD"
+.github/scripts/leak-check.sh origin/develop..HEAD
+```
+
+If it flags something real, remove it and rewrite the commit that added it (`git rebase -i`,
+then force-push your branch): history is public too. If it is a false positive:
+
+- **Example values:** use obviously fake ones, such as an RFC 5737 address (`192.0.2.1`,
+  `198.51.100.1`, `203.0.113.1`) or a key like `test-key`, rather than allowlisting.
+- **Otherwise:** say so in the pull request. The fix is a narrower pattern in
+  `leak-patterns.txt`, an exact match in `.github/leak-allow.txt`, or an allowlist entry in
+  `.gitleaks.toml` that names the exact value, never a whole file or rule.
 
 ## License
 

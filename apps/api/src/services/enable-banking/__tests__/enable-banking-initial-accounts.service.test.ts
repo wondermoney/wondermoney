@@ -20,7 +20,9 @@ function createEm(overrides: Partial<{ currency: unknown; existingAccount: unkno
   for (const rejection of overrides.persistRejects ?? []) flush.mockRejectedValueOnce(rejection);
   flush.mockResolvedValue(undefined);
   return {
+    count: vi.fn().mockResolvedValue(0),
     create: vi.fn((_entity: unknown, data: unknown) => data),
+    find: vi.fn().mockResolvedValue([]),
     findOne: vi.fn((entity: unknown, where: Record<string, unknown>) => {
       const name = (entity as { name?: string }).name;
       if (name === 'AccountFinancialInstitution') return Object.hasOwn(overrides, 'institution') ? overrides.institution : null;

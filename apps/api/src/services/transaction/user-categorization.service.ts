@@ -7,6 +7,7 @@ import type { Transaction } from '@entity/Transaction';
 import { stampTransactionEnrichmentOutcome } from '@service/transaction-enrichment/transaction-enrichment-outcome.service';
 import { markUserCategorized } from '@service/transaction/categorization-confidence';
 import { decrementMerchantCategoryStat, incrementMerchantCategoryStat, learnAppuserMerchantCategory } from '@service/transaction/merchant-category-stats.service';
+import { removeSplitsBeforeCategorizing } from '@service/transaction/transaction-split.service';
 
 export interface UserCategorizationInput {
   /** The household member making the choice — their merchant votes and learned mapping are updated. */
@@ -25,7 +26,8 @@ export interface UserCategorizationInput {
  * - categorization confidence is stamped `high` / `user_edit` (`reviewed` is the caller's call);
  * - an outstanding AI suggestion is marked accepted or overridden;
  * - the actor's merchant→category vote moves from the old category to the new one, and the
- *   per-user merchant mapping is learned — only where the transaction has a merchant.
+ *   per-user merchant mapping is learned — only where the transaction has a merchant;
+ * - a split transaction stops being split: one category now covers its whole amount.
  *
  * Returns each transaction's previous category (`undefined` when it had none) by `transactionKey`,
  * so callers can write their audit entries.
@@ -33,6 +35,7 @@ export interface UserCategorizationInput {
 export async function applyUserCategorization(em: EntityManager, input: UserCategorizationInput): Promise<Map<number, Category | undefined>> {
   const { actor, category, transactions } = input;
   const previousCategories = new Map<number, Category | undefined>();
+  await removeSplitsBeforeCategorizing(em, transactions, actor.appuserKey);
 
   for (const transaction of transactions) {
     const assignment = transaction.appuserTransactionCategories.getItems()[0];

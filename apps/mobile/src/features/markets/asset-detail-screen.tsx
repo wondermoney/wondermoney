@@ -1,14 +1,17 @@
-import { useContext } from 'react'
 import { useTranslation } from 'react-i18next'
-import { ScrollView, StyleSheet, Text, useColorScheme, View } from 'react-native'
-import { SafeAreaInsetsContext, SafeAreaView } from 'react-native-safe-area-context'
+import { ScrollView, StyleSheet, Text, View } from 'react-native'
 
 import { BackControl } from '@/components/ui/back-control'
 import { Button } from '@/components/ui/button'
+import { assetMark, EntityMark } from '@/components/ui/entity-mark'
+import { HeadlineFigure } from '@/components/ui/headline-figure'
 import { ObjectHeader } from '@/components/ui/page-header'
-import { formatCurrency, formatPercentagePoints } from '@/lib/formatters/financial'
+import { SafeAreaView } from '@/components/ui/screen-safe-area'
+import { formatPercentagePoints } from '@/lib/formatters/financial'
+import { useFormatMoney } from '@/lib/formatters/money-display'
 import { themeTokens } from '@/theme/tokens'
 import { textStyles } from '@/theme/typography'
+import { usePalette } from '@/theme/use-palette'
 
 import { AssetPriceChart, type AssetPriceChartProps } from './asset-price-chart'
 import { formatAsOfTimestamp, signPrefix, type QuoteViewModel } from './markets-view-model'
@@ -52,10 +55,10 @@ export type AssetDetailScreenProps = {
 }
 
 export function AssetDetailScreen({ state, onBack, onRetry, watchlistToggle, onToggleWatchlist, isTogglingWatchlist, priceChart, fundamentals, financials, earnings }: AssetDetailScreenProps) {
+  const formatMoney = useFormatMoney()
   const { t, i18n } = useTranslation()
-  const palette = themeTokens.colors[useColorScheme() === 'dark' ? 'dark' : 'light']
+  const palette = usePalette()
   const locale = i18n.resolvedLanguage ?? i18n.language ?? 'en'
-  const insets = useContext(SafeAreaInsetsContext)
 
   if (state.status === 'access-transition') return null
   if (state.status === 'loading') {
@@ -80,35 +83,21 @@ export function AssetDetailScreen({ state, onBack, onRetry, watchlistToggle, onT
 
   const unavailable = t('assetDetail.unavailable')
   const { data } = state
-  const amount = (value: number) => (data.currency
-    ? formatCurrency(value, { locale, currency: data.currency })
-    : new Intl.NumberFormat(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(value))
+  const amount = (value: number) => formatMoney(value, { locale, currency: data.currency ?? null })
   const priceText = data.price === null ? unavailable : amount(data.price)
   const changeText = data.change === null
     ? unavailable
     : `${signPrefix(data.change)}${amount(data.change)}${data.changePercent === null ? '' : ` (${formatPercentagePoints(data.changePercent, locale, { maximumFractionDigits: 2 })})`}`
+  const changePercentText = data.changePercent === null ? null : formatPercentagePoints(data.changePercent, locale, { maximumFractionDigits: 2 })
   const volumeText = data.volume === null ? unavailable : new Intl.NumberFormat(locale).format(data.volume)
   const marketStateText = t(`assetDetail.marketStates.${data.marketState ?? 'unknown'}`)
   const asOfText = t('assetDetail.asOf', { date: formatAsOfTimestamp(data.source.asOf, locale, unavailable) })
 
   return (
     <SafeAreaView edges={['left', 'right', 'bottom']} style={[marketsStyles.safeArea, { backgroundColor: palette.background }]}>
-      <ScrollView contentContainerStyle={[marketsStyles.content, { paddingTop: themeTokens.spacing[6] + (insets?.top ?? 0) }]}>
+      <ScrollView contentContainerStyle={marketsStyles.content}>
         <View style={marketsStyles.page}>
-          <View style={styles.headerRow}>
-            <BackControl fallback="/more" label={t('assetDetail.back')} onPress={onBack} />
-            {watchlistToggle.status === 'known' ? (
-              <Button
-                disabled={isTogglingWatchlist}
-                label={isTogglingWatchlist
-                  ? t('watchlist.toggle.pending')
-                  : t(watchlistToggle.isWatchlisted ? 'watchlist.toggle.remove' : 'watchlist.toggle.add')}
-                onPress={onToggleWatchlist}
-                palette={palette}
-                variant="secondary"
-              />
-            ) : null}
-          </View>
+          <BackControl destination={t('navigation.explorer')} fallback="/markets" label={t('assetDetail.back')} onPress={onBack} />
 
           {state.status === 'refresh-error' ? (
             <Text accessibilityRole="alert" allowFontScaling style={[styles.banner, { color: palette.foreground, borderColor: palette.border, backgroundColor: palette.muted }]}>
@@ -116,19 +105,46 @@ export function AssetDetailScreen({ state, onBack, onRetry, watchlistToggle, onT
             </Text>
           ) : null}
 
-          <ObjectHeader descriptor={data.name ?? undefined} title={data.symbol} />
+          {/* Web's company card at phone width: the ticker's mark and symbol lead, the name
+              beneath, and the watch toggle is an outline star beside the title. Then the price
+              as the headline figure: the day's change under it, and a status line with the
+              market state and how fresh the quote is. */}
+          <ObjectHeader
+            action={watchlistToggle.status === 'known' ? (
+              <Button
+                icon={watchlistToggle.isWatchlisted ? 'star-filled' : 'star'}
+                label={isTogglingWatchlist
+                  ? t('watchlist.toggle.pending')
+                  : t(watchlistToggle.isWatchlisted ? 'watchlist.toggle.remove' : 'watchlist.toggle.add')}
+                loading={isTogglingWatchlist}
+                onPress={onToggleWatchlist}
+                size="icon"
+                variant="outline"
+              />
+            ) : undefined}
+            descriptor={data.name ?? undefined}
+            figure={(
+              <View style={styles.figure}>
+                <HeadlineFigure
+                  accessibilityLabel={`${t('assetDetail.price')}, ${priceText}, ${t('assetDetail.change')}, ${changeText}`}
+                  currency={data.currency}
+                  deltas={data.change === null ? undefined : [{ value: data.change, label: changePercentText ?? '' }]}
+                  label={t('assetDetail.price')}
+                  labelTone="muted"
+                  locale={locale}
+                  size="md"
+                  status={{ label: asOfText, tone: data.marketState === 'open' ? 'success' : 'muted' }}
+                  value={data.price}
+                />
+              </View>
+            )}
+            leading={<EntityMark {...assetMark(data.symbol, null)} />}
+            title={data.symbol}
+          />
 
-          <View style={[marketsStyles.list, { borderColor: palette.border }]}>
-            <ReadOnlyField label={t('assetDetail.price')} value={priceText} palette={palette} />
-            <ReadOnlyField
-              label={t('assetDetail.change')}
-              value={changeText}
-              palette={palette}
-              separated
-              tone={data.change === null ? 'muted' : data.change > 0 ? 'positive' : data.change < 0 ? 'negative' : 'default'}
-            />
+          <View>
+            <ReadOnlyField label={t('assetDetail.marketState')} value={marketStateText} palette={palette} />
             <ReadOnlyField label={t('assetDetail.volume')} value={volumeText} palette={palette} separated />
-            <ReadOnlyField label={t('assetDetail.marketState')} value={marketStateText} palette={palette} separated />
           </View>
 
           <AssetPriceChart {...priceChart} palette={palette} />
@@ -139,7 +155,6 @@ export function AssetDetailScreen({ state, onBack, onRetry, watchlistToggle, onT
 
           <TickerEarningsPanel state={earnings} palette={palette} />
 
-          <Text allowFontScaling style={[styles.asOf, { color: palette.mutedForeground }]}>{asOfText}</Text>
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -147,7 +162,6 @@ export function AssetDetailScreen({ state, onBack, onRetry, watchlistToggle, onT
 }
 
 const styles = StyleSheet.create({
-  headerRow: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: themeTokens.spacing[3] },
-  banner: { ...textStyles.body, borderWidth: 1, borderRadius: themeTokens.radius.md, padding: themeTokens.spacing[4] },
-  asOf: { ...textStyles.meta },
+  figure: { marginTop: themeTokens.spacing[4] },
+  banner: { ...textStyles.meta, borderWidth: 1, borderRadius: themeTokens.radius.md, padding: themeTokens.spacing[4] },
 })

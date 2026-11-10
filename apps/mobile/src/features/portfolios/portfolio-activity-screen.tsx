@@ -1,15 +1,26 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Alert, RefreshControl, ScrollView, StyleSheet, Text, TextInput, useColorScheme, View } from 'react-native'
-import { SafeAreaView } from 'react-native-safe-area-context'
+import { Alert, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native'
 
 import { BackControl } from '@/components/ui/back-control'
+import { assetMark, EntityMark } from '@/components/ui/entity-mark'
+import { Button } from '@/components/ui/button'
+import { DateField } from '@/components/ui/date-field'
+import { FLOATING_ACTION_SIZE, FloatingActionButton } from '@/components/ui/floating-action-button'
+import { FormGroup, FormTextRow } from '@/components/ui/form-row'
+import { Notice } from '@/components/ui/notice'
+import { ListGroupHeading, ListRow } from '@/components/ui/list-row'
 import { PageHeader } from '@/components/ui/page-header'
-import { formatCategoryName } from '@/lib/formatters/category-name'
-import { formatCurrency } from '@/lib/formatters/financial'
+import { SafeAreaView } from '@/components/ui/screen-safe-area'
+import { OptionSheet } from '@/components/ui/sheet'
+import { Text as UiText } from '@/components/ui/text'
+import { usePalette } from '@/theme/use-palette'
+import { formatNumberInput, toWireDecimalInput } from '@/lib/formatters/decimal-input'
+import { useFormatMoney, useFormatQuantity } from '@/lib/formatters/money-display'
 import { themeTokens } from '@/theme/tokens'
 import { textStyles } from '@/theme/typography'
 
+import { activeRowFilterCount, filterActivityRows, NO_ROW_FILTERS, PortfolioActivityToolbar, type PortfolioActivityRowFilters } from './portfolio-activity-toolbar'
 import type { PortfolioActivityRow } from './portfolio-activity-view-model'
 import { type Palette, PortfolioFailure, PortfolioLoading, ScreenAction } from './portfolio-screen-parts'
 import type { PortfolioActivityFilters, PortfolioTransactionEditDraft } from './portfolios-contract'
@@ -20,98 +31,108 @@ export type PortfolioActivityViewState =
   | { status: 'access-transition' | 'error' | 'invalid-request' | 'invalid-response' | 'loading' | 'not-found' | 'rate-limited' }
   | { status: 'loaded' | 'refresh-error' | 'rate-limited-cached'; rows: readonly PortfolioActivityRow[]; refreshing?: boolean }
 
+export { activityCalendarFilters } from './portfolio-activity-toolbar'
+
 export function formatPortfolioActivityTimestamp(value: string | null, locale: string, unavailable: string): string {
   if (value === null) return unavailable
   return new Intl.DateTimeFormat(locale, { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(value))
 }
 
-export function activityCalendarFilters(from: string, to: string): PortfolioActivityFilters | null {
-  const date = (value: string, end: boolean): string | undefined | null => {
-    if (value === '') return undefined
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return null
-    const suffix = end ? 'T23:59:59.999Z' : 'T00:00:00.000Z'
-    const parsed = new Date(`${value}${suffix}`)
-    if (Number.isNaN(parsed.getTime()) || parsed.toISOString().slice(0, 10) !== value) return null
-    return parsed.toISOString()
-  }
-  const fromDate = date(from, false)
-  const toDate = date(to, true)
-  if (fromDate === null || toDate === null || (fromDate && toDate && fromDate > toDate)) return null
-  return { ...(fromDate ? { fromDate } : {}), ...(toDate ? { toDate } : {}) }
-}
-
-export function PortfolioActivityScreen({ state, aggregate, filters, onBack, onApplyFilters, onRefresh, onLogout, onDeleteTransaction, onEditTransaction, onAddTransaction }: {
+export function PortfolioActivityScreen({ state, aggregate, filters, onBack, onApplyFilters, onRefresh, onLogout, onDeleteTransaction, onEditTransaction, onAddTransaction, portfolioOptions = [] }: {
   state: PortfolioActivityViewState
   aggregate: boolean
   filters: PortfolioActivityFilters
   onBack: () => void
-  onApplyFilters: (filters: PortfolioActivityFilters) => void
+  /** `all` is the explicit "All dates" choice; with no dates the route opens on the last 60 days. */
+  onApplyFilters: (filters: PortfolioActivityFilters, options?: { all?: boolean }) => void
   onRefresh: () => void | Promise<unknown>
   onLogout: () => void | Promise<void>
   onDeleteTransaction?: (transactionKey: number) => Promise<void>
   onEditTransaction?: (transactionKey: number, draft: PortfolioTransactionEditDraft) => Promise<void>
-  onAddTransaction?: () => void
+  /** Opens the add flow; on the aggregate page it is given the portfolio picked from `portfolioOptions`. */
+  onAddTransaction?: (portfolioId?: number) => void
+  portfolioOptions?: readonly { value: number; label: string }[]
 }) {
   const { t, i18n } = useTranslation()
-  const palette = themeTokens.colors[useColorScheme() === 'dark' ? 'dark' : 'light']
+  const palette = usePalette()
   const locale = i18n.resolvedLanguage ?? i18n.language ?? 'en'
+  const [picking, setPicking] = useState(false)
+  const [rowFilters, setRowFilters] = useState<PortfolioActivityRowFilters>(NO_ROW_FILTERS)
   if (state.status === 'access-transition') return null
-  if (state.status === 'loading') return <PortfolioLoading label={t('portfolioActivity.loading')} palette={palette} onBack={onBack} backLabel={t('portfolioActivity.back')} />
+  if (state.status === 'loading') return <PortfolioLoading label={t('portfolioActivity.loading')} palette={palette} onBack={aggregate ? undefined : onBack} backLabel={t('portfolioActivity.back')} />
   if (state.status === 'rate-limited') return <RateLimited onBack={onBack} onRetry={onRefresh} palette={palette} />
   if (state.status === 'error' || state.status === 'invalid-request' || state.status === 'invalid-response' || state.status === 'not-found') {
     const key = state.status === 'invalid-request' ? 'invalidRequest' : state.status === 'invalid-response' ? 'invalidResponse' : state.status === 'not-found' ? 'notFound' : 'error'
     return <PortfolioFailure title={t(`portfolioActivity.${key}.title`)} message={t(`portfolioActivity.${key}.message`)} retryLabel={t('common.retry')} signOutLabel={t('common.signOut')} backLabel={t('portfolioActivity.back')} onRetry={onRefresh} onSignOut={onLogout} onBack={onBack} canRetry={state.status === 'error' || state.status === 'invalid-response'} palette={palette} />
   }
   if (!('rows' in state)) return null
+  const canAdd = onAddTransaction !== undefined && (!aggregate || portfolioOptions.length > 0)
+  const add = () => {
+    if (!onAddTransaction) return
+    if (!aggregate) onAddTransaction()
+    else if (portfolioOptions.length === 1) onAddTransaction(portfolioOptions[0]!.value)
+    else setPicking(true)
+  }
+  const visibleRows = filterActivityRows(state.rows, rowFilters)
+  const groups = groupByMonth(visibleRows, locale)
   return (
+    <View style={styles.safeArea}>
     <SafeAreaView style={[styles.safeArea, { backgroundColor: palette.background }]}>
-      <ScrollView contentContainerStyle={styles.content} refreshControl={<RefreshControl refreshing={Boolean(state.refreshing)} onRefresh={() => void onRefresh()} tintColor={palette.primary} />}>
+      <ScrollView contentContainerStyle={[styles.content, canAdd && styles.contentUnderButton]} refreshControl={<RefreshControl refreshing={Boolean(state.refreshing)} onRefresh={() => void onRefresh()} tintColor={palette.primary} />}>
         <View style={styles.page}>
-          <BackControl fallback="/portfolio" onPress={onBack} color={palette.primary} label={t('portfolioActivity.back')} />
-          <View style={styles.heading}>
-            <PageHeader
-              palette={palette}
-            provenance={!aggregate && onDeleteTransaction ? t('portfolioActivity.scopeEditable') : t('portfolioActivity.scope')}
-              title={aggregate ? t('portfolioActivity.aggregateTitle') : t('portfolioActivity.portfolioTitle')}
-            />
-          </View>
-          <FilterControls filters={filters} onApply={onApplyFilters} palette={palette} />
+          {/* The aggregate page is a section tab (Overview | Transactions), as web: no back link. */}
+          {!aggregate ? <BackControl fallback="/portfolio" onPress={onBack} label={t('portfolioActivity.back')} /> : null}
+          <PageHeader title={aggregate ? t('portfolioActivity.aggregateTitle') : t('portfolioActivity.portfolioTitle')} />
+          <PortfolioActivityToolbar aggregate={aggregate} filters={filters} onApply={onApplyFilters} onRowFiltersChange={setRowFilters} rowFilters={rowFilters} rows={state.rows} />
           {state.status === 'rate-limited-cached' ? <RateLimitBanner onRetry={onRefresh} palette={palette} /> : null}
-          {state.status === 'refresh-error' ? <Text accessibilityRole="alert" style={[styles.banner, { color: palette.foreground, borderColor: palette.border, backgroundColor: palette.muted }]}>{t('portfolioActivity.stale')}</Text> : null}
-          {state.rows.length === 0 ? <View style={[styles.filters, { borderColor: palette.border, backgroundColor: palette.card }]}><Text style={[styles.rowType, { color: palette.foreground }]}>{t('portfolioActivity.emptyTitle')}</Text><Text style={[styles.body, { color: palette.mutedForeground }]}>{t('portfolioActivity.empty')}</Text>{!aggregate && onAddTransaction ? <ScreenAction label={t('portfolioActivity.addTransaction')} onPress={onAddTransaction} palette={palette} primary /> : null}</View> : (
-            <View style={styles.list}>{state.rows.map((row) => <ActivityRow key={row.id} row={row} locale={locale} palette={palette} onDelete={!aggregate ? onDeleteTransaction : undefined} onEdit={!aggregate ? onEditTransaction : undefined} />)}</View>
+          {state.status === 'refresh-error' ? <Notice message={t('portfolioActivity.stale')} /> : null}
+          {visibleRows.length === 0 ? (
+            <View style={styles.empty}>
+              <UiText variant="bodyStrong">{t('portfolioActivity.emptyTitle')}</UiText>
+              <UiText tone="muted" variant="meta">{t(state.rows.length > 0 && activeRowFilterCount(rowFilters) > 0 ? 'portfolioActivity.emptyFiltered' : 'portfolioActivity.empty')}</UiText>
+              {state.rows.length > 0 && activeRowFilterCount(rowFilters) > 0 ? <View style={styles.emptyAction}><Button label={t('transactions.clearFilters')} onPress={() => setRowFilters(NO_ROW_FILTERS)} size="sm" variant="outline" /></View> : null}
+            </View>
+          ) : (
+            <View style={styles.list}>
+              {groups.map((group, index) => (
+                <View key={group.key}>
+                  <ListGroupHeading first={index === 0} title={group.title} variant="heading" />
+                  {group.rows.map((row, rowIndex) => <ActivityRow key={row.id} row={row} locale={locale} palette={palette} separated={rowIndex > 0} onDelete={!aggregate ? onDeleteTransaction : undefined} onEdit={!aggregate ? onEditTransaction : undefined} />)}
+                </View>
+              ))}
+            </View>
           )}
-          <Text style={[styles.caption, { color: palette.mutedForeground }]}>{t('portfolioActivity.bounded')}</Text>
+          <UiText tone="muted" variant="meta">{t('portfolioActivity.bounded')}</UiText>
         </View>
       </ScrollView>
+      <OptionSheet mode="menu" onClose={() => setPicking(false)} onSelect={(id) => onAddTransaction?.(id)} options={portfolioOptions} title={t('portfolios.selectPortfolio')} visible={picking} />
     </SafeAreaView>
+    {canAdd ? <FloatingActionButton accessibilityLabel={t('portfolioActivity.addTransaction')} onPress={add} testID="portfolio-activity-add" /> : null}
+    </View>
   )
 }
 
-function FilterControls({ filters, onApply, palette }: { filters: PortfolioActivityFilters; onApply: (filters: PortfolioActivityFilters) => void; palette: Palette }) {
-  const { t } = useTranslation()
-  const [from, setFrom] = useState(filters.fromDate?.slice(0, 10) ?? '')
-  const [to, setTo] = useState(filters.toDate?.slice(0, 10) ?? '')
-  const [invalid, setInvalid] = useState(false)
-  const apply = () => {
-    const result = activityCalendarFilters(from.trim(), to.trim())
-    setInvalid(result === null)
-    if (result) onApply(result)
+/** Rows under their month ("November 2026"), newest first as the API sends them — web's ledger grouping. */
+function groupByMonth(rows: readonly PortfolioActivityRow[], locale: string) {
+  const groups: { key: string; title: string; rows: PortfolioActivityRow[] }[] = []
+  for (const row of rows) {
+    const key = row.timestamp ? row.timestamp.slice(0, 7) : 'unknown'
+    let group = groups.find((candidate) => candidate.key === key)
+    if (!group) {
+      const title = row.timestamp ? new Intl.DateTimeFormat(locale, { month: 'long', year: 'numeric', timeZone: 'UTC' }).format(new Date(row.timestamp)) : '—'
+      group = { key, title, rows: [] }
+      groups.push(group)
+    }
+    group.rows.push(row)
   }
-  return <View style={[styles.filters, { borderWidth: 0, backgroundColor: palette.muted }]}>
-    <Text accessibilityRole="header" style={[styles.rowType, { color: palette.foreground }]}>{t('portfolioActivity.filters')}</Text>
-    <Text style={[styles.caption, { color: palette.mutedForeground }]}>{t('portfolioActivity.filterHint')}</Text>
-    <View style={styles.filterFields}>
-      <View style={styles.field}><Text nativeID="portfolio-from-label" style={[styles.caption, { color: palette.foreground }]}>{t('portfolioActivity.fromDate')}</Text><TextInput accessibilityLabelledBy="portfolio-from-label" value={from} onChangeText={setFrom} placeholder="YYYY-MM-DD" autoCapitalize="none" inputMode="numeric" style={[styles.input, { color: palette.foreground, borderColor: palette.border }]} /></View>
-      <View style={styles.field}><Text nativeID="portfolio-to-label" style={[styles.caption, { color: palette.foreground }]}>{t('portfolioActivity.toDate')}</Text><TextInput accessibilityLabelledBy="portfolio-to-label" value={to} onChangeText={setTo} placeholder="YYYY-MM-DD" autoCapitalize="none" inputMode="numeric" style={[styles.input, { color: palette.foreground, borderColor: palette.border }]} /></View>
-    </View>
-    {invalid ? <Text accessibilityRole="alert" style={[styles.caption, { color: palette.destructive }]}>{t('portfolioActivity.invalidDates')}</Text> : null}
-    <View style={styles.actions}><ScreenAction label={t('portfolioActivity.applyDates')} onPress={apply} palette={palette} /><ScreenAction label={t('portfolioActivity.clearDates')} onPress={() => { setFrom(''); setTo(''); setInvalid(false); onApply({}) }} palette={palette} /></View>
-  </View>
+  return groups
 }
 
-function ActivityRow({ row, locale, palette, onDelete, onEdit }: { row: PortfolioActivityRow; locale: string; palette: Palette; onDelete?: (transactionKey: number) => Promise<void>; onEdit?: (transactionKey: number, draft: PortfolioTransactionEditDraft) => Promise<void> }) {
+function ActivityRow({ row, locale, palette, separated, onDelete, onEdit }: { row: PortfolioActivityRow; locale: string; palette: Palette; separated: boolean; onDelete?: (transactionKey: number) => Promise<void>; onEdit?: (transactionKey: number, draft: PortfolioTransactionEditDraft) => Promise<void> }) {
+  const formatMoney = useFormatMoney()
+  const formatQuantity = useFormatQuantity()
   const { t } = useTranslation()
+  const [menuOpen, setMenuOpen] = useState(false)
   const [deleting, setDeleting] = useState(false)
   const [failure, setFailure] = useState<DeletePortfolioTransactionFailure | null>(null)
   const [editing, setEditing] = useState(false)
@@ -122,13 +143,13 @@ function ActivityRow({ row, locale, palette, onDelete, onEdit }: { row: Portfoli
   const [dateDraft, setDateDraft] = useState('')
   const [notesDraft, setNotesDraft] = useState('')
   const timestamp = formatPortfolioActivityTimestamp(row.timestamp, locale, t('portfolioActivity.unavailable'))
-  const type = row.itemType === 'STOCK_SPLIT' ? t('portfolioActivity.stockSplit') : (row.type ? formatCategoryName(row.type) : t('portfolioActivity.unknownType'))
-  const amount = row.amount === null ? null : row.currency ? `${formatCurrency(row.amount, { locale, currency: row.currency })}` : new Intl.NumberFormat(locale, { maximumFractionDigits: 8 }).format(row.amount)
-  const quantity = row.quantity === null ? null : new Intl.NumberFormat(locale, { maximumFractionDigits: 8 }).format(row.quantity)
+  const type = row.itemType === 'STOCK_SPLIT' ? t('portfolioActivity.stockSplit') : (row.type ? t(`portfolioActivity.types.${row.type}`, { defaultValue: row.typeLabel ?? row.type }) : t('portfolioActivity.unknownType'))
+  const amount = row.amount === null ? null : row.currency ? formatMoney(row.amount, { locale, currency: row.currency }) : formatMoney(row.amount, { locale, currency: null, minimumFractionDigits: 0, maximumFractionDigits: 8 })
+  const quantity = row.quantity === null ? null : formatQuantity(row.quantity, { locale })
   const completeRatio = row.split !== null && row.split.numerator !== null && row.split.denominator !== null && row.split.ratio !== null
   const ratio = completeRatio ? t('portfolioActivity.splitRatio', { numerator: row.split!.numerator, denominator: row.split!.denominator }) : null
   const ratioDetails = row.itemType === 'STOCK_SPLIT' ? ratio ?? t('portfolioActivity.splitRatioUnavailable') : null
-  const identity = [row.ticker, row.name].filter(Boolean).join(' · ') || t('portfolioActivity.assetUnavailable')
+  const identity = row.cashCurrency ? t('portfolioActivity.cash', { currency: row.cashCurrency }) : [row.ticker, row.name].filter(Boolean).join(' · ') || t('portfolioActivity.assetUnavailable')
   const label = [type, identity, timestamp, quantity ? t('portfolioActivity.quantityValue', { value: quantity }) : null, amount, row.currency && !amount ? row.currency : null, row.portfolioName, ratioDetails, row.itemType === 'STOCK_SPLIT' ? t('portfolioActivity.splitReadOnly') : null].filter(Boolean).join(', ')
   const canDelete = onDelete !== undefined && row.itemType === 'TRANSACTION' && row.transactionKey !== null
   const canEdit = onEdit !== undefined && row.itemType === 'TRANSACTION' && row.transactionKey !== null
@@ -154,8 +175,8 @@ function ActivityRow({ row, locale, palette, onDelete, onEdit }: { row: Portfoli
 
   const startEditing = () => {
     if (!canEdit) return
-    setQuantityDraft(row.quantity !== null ? String(row.quantity) : '')
-    setUnitPriceDraft(row.unitPrice !== null ? String(row.unitPrice) : '')
+    setQuantityDraft(row.quantity !== null ? formatNumberInput(row.quantity, locale) : '')
+    setUnitPriceDraft(row.unitPrice !== null ? formatNumberInput(row.unitPrice, locale) : '')
     setDateDraft(row.timestamp !== null ? row.timestamp.slice(0, 10) : '')
     setNotesDraft(row.notes ?? '')
     setEditFailure(null)
@@ -168,14 +189,21 @@ function ActivityRow({ row, locale, palette, onDelete, onEdit }: { row: Portfoli
     setEditFailure(null)
   }
 
+  // Read in the app's language ("1.234,56" in pt and es) and sent as dot decimals.
+  const quantityWire = toWireDecimalInput(quantityDraft, locale)
+  const unitPriceWire = toWireDecimalInput(unitPriceDraft, locale)
+  const unreadable = (draft: string, wire: string) => draft.trim() !== '' && !(Number(wire) > 0)
+  const quantityInvalid = unreadable(quantityDraft, quantityWire)
+  const unitPriceInvalid = unreadable(unitPriceDraft, unitPriceWire)
+
   const saveEdit = () => {
-    if (!canEdit || saving) return
+    if (!canEdit || saving || quantityInvalid || unitPriceInvalid) return
     const originalDate = row.timestamp !== null ? row.timestamp.slice(0, 10) : ''
     setSaving(true)
     setEditFailure(null)
     void onEdit!(row.transactionKey!, {
-      quantity: quantityDraft.trim() !== String(row.quantity ?? '') ? quantityDraft : undefined,
-      unitPrice: unitPriceDraft.trim() !== String(row.unitPrice ?? '') ? unitPriceDraft : undefined,
+      quantity: quantityWire !== String(row.quantity ?? '') ? quantityWire : undefined,
+      unitPrice: unitPriceWire !== String(row.unitPrice ?? '') ? unitPriceWire : undefined,
       transactionDate: dateDraft.trim() !== originalDate ? dateDraft : undefined,
       notes: notesDraft.trim() !== (row.notes ?? '') ? notesDraft : undefined,
     })
@@ -184,44 +212,57 @@ function ActivityRow({ row, locale, palette, onDelete, onEdit }: { row: Portfoli
       .finally(() => setSaving(false))
   }
 
+  const dateLabel = row.timestamp === null ? t('portfolioActivity.unavailable') : new Intl.DateTimeFormat(locale, { dateStyle: 'medium' }).format(new Date(row.timestamp))
+  const title = row.cashCurrency ?? row.ticker ?? identity
+  // Edit and delete sit behind the row's "…", as on the account ledger.
+  const menu = [
+    ...(canEdit && !editing && !deleting ? [{ value: 'edit' as const, label: t('portfolioActivity.edit') }] : []),
+    ...(canDelete && !editing && !deleting ? [{ value: 'delete' as const, label: t('portfolioActivity.delete'), destructive: true }] : []),
+  ]
+  const runMenu = (value: 'edit' | 'delete') => (value === 'edit' ? startEditing() : deleteTransaction())
   return (
-    <View style={[styles.row, { borderBottomColor: palette.border }]}>
-      <View testID="portfolio-activity-row" accessible accessibilityLabel={label} style={styles.rowContent}>
-        <View style={styles.rowMain}>
-          <Text style={[styles.rowType, { color: palette.foreground }]}>{type}</Text>
-          <Text style={[styles.ticker, { color: palette.foreground }]}>{identity}</Text>
-          <Text style={[styles.caption, { color: palette.mutedForeground }]}>{timestamp}</Text>
-          {row.portfolioName ? <Text style={[styles.caption, { color: palette.mutedForeground }]}>{t('portfolioActivity.portfolioContext', { name: row.portfolioName })}</Text> : null}
-          {row.itemType === 'STOCK_SPLIT' ? <Text style={[styles.readOnly, { color: palette.foreground }]}>{ratioDetails} · {t('portfolioActivity.splitReadOnly')}</Text> : null}
-        </View>
-        <View style={styles.rowValues}>
-          {quantity ? <Text style={[styles.data, { color: palette.mutedForeground }]}>{t('portfolioActivity.quantityValue', { value: quantity })}</Text> : null}
-          {amount ? <Text style={[styles.data, { color: palette.foreground }]}>{amount}</Text> : null}
-          {row.currency && !amount ? <Text style={[styles.data, { color: palette.mutedForeground }]}>{row.currency}</Text> : null}
-        </View>
-      </View>
-      {failure ? <Text accessibilityRole="alert" style={[styles.deleteFailure, { color: palette.foreground, borderColor: palette.destructive }]}>{t(`portfolioActivity.deleteFailures.${failure}`)}</Text> : null}
+    <View style={[styles.row, separated && { borderTopWidth: 1, borderTopColor: palette.border }]}>
+      {/* Web's row at phone width: the asset, its type and date beneath; the settlement amount
+          right with the quantity under it. */}
+      <ListRow
+        testID="portfolio-activity-row"
+        accessibilityLabel={label}
+        density="comfortable"
+        onMorePress={menu.length > 0 ? () => setMenuOpen(true) : undefined}
+        moreAccessibilityLabel={t('transactions.rowActions', { name: title })}
+        leading={<EntityMark {...(row.cashCurrency ? { glyph: 'coins' as const } : assetMark(row.ticker, row.logoUrl))} />}
+        title={title}
+        meta={[[type, dateLabel].join(' · '), row.cashCurrency ? identity : row.name, row.portfolioName ? t('portfolioActivity.portfolioContext', { name: row.portfolioName }) : null]}
+        figure={amount ? <UiText align="right" variant="amount">{amount}</UiText> : row.currency ? <UiText align="right" tone="muted" variant="amount">{row.currency}</UiText> : undefined}
+        figureMeta={quantity ? <UiText align="right" tone="muted" variant="amountSmall">{t('portfolioActivity.quantityValue', { value: quantity })}</UiText> : undefined}
+      >
+        {row.itemType === 'STOCK_SPLIT' ? <UiText tone="muted" variant="metaStrong">{ratioDetails} · {t('portfolioActivity.splitReadOnly')}</UiText> : null}
+      </ListRow>
+      {failure ? <Notice message={t(`portfolioActivity.deleteFailures.${failure}`)} tone="destructive" /> : null}
       {editing ? (
         <View style={styles.editForm}>
-          <View style={styles.editField}><Text nativeID={`portfolio-edit-quantity-${row.id}`} style={[styles.caption, { color: palette.foreground }]}>{t('portfolioActivity.editQuantity')}</Text><TextInput accessibilityLabelledBy={`portfolio-edit-quantity-${row.id}`} editable={!saving} value={quantityDraft} onChangeText={setQuantityDraft} keyboardType="decimal-pad" style={[styles.input, { color: palette.foreground, borderColor: palette.border }]} /></View>
-          <View style={styles.editField}><Text nativeID={`portfolio-edit-unit-price-${row.id}`} style={[styles.caption, { color: palette.foreground }]}>{t('portfolioActivity.editUnitPrice')}</Text><TextInput accessibilityLabelledBy={`portfolio-edit-unit-price-${row.id}`} editable={!saving} value={unitPriceDraft} onChangeText={setUnitPriceDraft} keyboardType="decimal-pad" style={[styles.input, { color: palette.foreground, borderColor: palette.border }]} /></View>
-          <View style={styles.editField}><Text nativeID={`portfolio-edit-date-${row.id}`} style={[styles.caption, { color: palette.foreground }]}>{t('portfolioActivity.editDate')}</Text><TextInput accessibilityLabelledBy={`portfolio-edit-date-${row.id}`} editable={!saving} value={dateDraft} onChangeText={setDateDraft} placeholder="YYYY-MM-DD" autoCapitalize="none" inputMode="numeric" style={[styles.input, { color: palette.foreground, borderColor: palette.border }]} /></View>
-          <View style={styles.editField}><Text nativeID={`portfolio-edit-notes-${row.id}`} style={[styles.caption, { color: palette.foreground }]}>{t('portfolioActivity.editNotes')}</Text><TextInput accessibilityLabelledBy={`portfolio-edit-notes-${row.id}`} editable={!saving} value={notesDraft} onChangeText={setNotesDraft} multiline style={[styles.input, styles.multiline, { color: palette.foreground, borderColor: palette.border }]} /></View>
-          {editFailure ? <Text accessibilityRole="alert" style={[styles.deleteFailure, { color: palette.foreground, borderColor: palette.destructive }]}>{t(`portfolioActivity.editFailures.${editFailure}`)}</Text> : null}
+          <FormGroup>
+            <FormTextRow editable={!saving} error={quantityInvalid ? t('portfolioTransactionCreate.fieldErrors.quantity') : null} keyboardType="decimal-pad" label={t('portfolioActivity.editQuantity')} onChangeText={setQuantityDraft} value={quantityDraft} />
+            <FormTextRow editable={!saving} error={unitPriceInvalid ? t('portfolioTransactionCreate.fieldErrors.unitPrice') : null} keyboardType="decimal-pad" label={t('portfolioActivity.editUnitPrice')} onChangeText={setUnitPriceDraft} value={unitPriceDraft} />
+            <DateField appearance="row" disabled={saving} label={t('portfolioActivity.editDate')} onChange={(value) => setDateDraft(value ?? '')} value={dateDraft || null} />
+            <FormTextRow editable={!saving} label={t('portfolioActivity.editNotes')} multiline onChangeText={setNotesDraft} value={notesDraft} />
+          </FormGroup>
+          {editFailure ? <Notice message={t(`portfolioActivity.editFailures.${editFailure}`)} tone="destructive" /> : null}
           <View style={styles.actions}>
-            <ScreenAction label={t('common.cancel')} onPress={cancelEditing} palette={palette} disabled={saving} />
-            <ScreenAction label={saving ? t('portfolioActivity.savingEdit') : t('portfolioActivity.saveEdit')} onPress={saveEdit} palette={palette} disabled={saving} />
+            <Button label={t('common.cancel')} onPress={cancelEditing} disabled={saving} size="sm" variant="secondary" />
+            <Button label={saving ? t('portfolioActivity.savingEdit') : t('portfolioActivity.saveEdit')} onPress={saveEdit} disabled={saving || quantityInvalid || unitPriceInvalid} size="sm" variant="primary" />
           </View>
         </View>
-      ) : canEdit ? <ScreenAction label={t('portfolioActivity.edit')} onPress={startEditing} palette={palette} disabled={deleting} /> : null}
-      {canDelete && !editing ? <ScreenAction label={deleting ? t('portfolioActivity.deleting') : t('portfolioActivity.delete')} onPress={deleteTransaction} palette={palette} disabled={deleting} destructive /> : null}
+      ) : null}
+      {deleting ? <UiText tone="muted" variant="meta">{t('portfolioActivity.deleting')}</UiText> : null}
+      <OptionSheet mode="menu" onClose={() => setMenuOpen(false)} onSelect={runMenu} options={menu} title={title} visible={menuOpen} />
     </View>
   )
 }
 
 function RateLimited({ onBack, onRetry, palette }: { onBack: () => void; onRetry: () => void | Promise<unknown>; palette: Palette }) {
   const { t } = useTranslation()
-  return <SafeAreaView style={[styles.safeArea, { backgroundColor: palette.background }]}><View style={styles.centered}><Text accessibilityRole="header" style={[styles.title, { color: palette.foreground }]}>{t('portfolioActivity.rateLimitTitle')}</Text><Text accessibilityRole="alert" style={[styles.body, { color: palette.mutedForeground }]}>{t('portfolioActivity.rateLimitMessage')}</Text><View style={styles.actions}><BackControl fallback="/portfolio" onPress={onBack} color={palette.primary} label={t('portfolioActivity.back')} /><ScreenAction label={t('portfolioActivity.tryAgain')} onPress={onRetry} palette={palette} primary /></View></View></SafeAreaView>
+  return <SafeAreaView style={[styles.safeArea, { backgroundColor: palette.background }]}><View style={styles.centered}><Text accessibilityRole="header" style={[styles.title, { color: palette.foreground }]}>{t('portfolioActivity.rateLimitTitle')}</Text><Text accessibilityRole="alert" style={[styles.body, { color: palette.mutedForeground }]}>{t('portfolioActivity.rateLimitMessage')}</Text><View style={styles.actions}><BackControl fallback="/portfolio" onPress={onBack} label={t('portfolioActivity.back')} /><ScreenAction label={t('portfolioActivity.tryAgain')} onPress={onRetry} palette={palette} primary /></View></View></SafeAreaView>
 }
 
 function RateLimitBanner({ onRetry, palette }: { onRetry: () => void | Promise<unknown>; palette: Palette }) {
@@ -230,5 +271,18 @@ function RateLimitBanner({ onRetry, palette }: { onRetry: () => void | Promise<u
 }
 
 const styles = StyleSheet.create({
-  safeArea: { flex: 1 }, content: { flexGrow: 1, padding: themeTokens.layout.screenPadding }, page: { width: '100%', maxWidth: 800, alignSelf: 'center', alignItems: 'flex-start', gap: themeTokens.layout.blockGap }, heading: { width: '100%', gap: themeTokens.spacing[2] }, title: { ...textStyles.title }, body: { ...textStyles.body }, caption: { ...textStyles.meta }, filters: { width: '100%', borderWidth: 1, borderRadius: themeTokens.radius.lg, padding: themeTokens.spacing[4], gap: themeTokens.spacing[3] }, filterFields: { flexDirection: 'row', flexWrap: 'wrap', gap: themeTokens.spacing[3] }, field: { flex: 1, minWidth: 180, gap: themeTokens.spacing[1] }, input: { ...textStyles.amount, minHeight: themeTokens.touchTarget.minimum, borderWidth: 1, borderRadius: themeTokens.radius.md, paddingHorizontal: themeTokens.spacing[3] }, list: { width: '100%' }, row: { minHeight: 104, gap: themeTokens.spacing[3], borderBottomWidth: StyleSheet.hairlineWidth, paddingVertical: themeTokens.spacing[4] }, rowContent: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', gap: themeTokens.spacing[4] }, rowMain: { flex: 1, minWidth: 180, gap: themeTokens.spacing[1] }, rowValues: { alignItems: 'flex-end', gap: themeTokens.spacing[1] }, deleteFailure: { ...textStyles.meta, borderWidth: 1, borderRadius: themeTokens.radius.md, padding: themeTokens.spacing[3] }, editForm: { width: '100%', gap: themeTokens.spacing[3] }, editField: { gap: themeTokens.spacing[1] }, multiline: { minHeight: 72, paddingTop: themeTokens.spacing[2], textAlignVertical: 'top' }, rowType: { ...textStyles.action }, ticker: { ...textStyles.amount }, data: { ...textStyles.amount }, readOnly: { ...textStyles.meta, fontWeight: '600' as const }, empty: { ...textStyles.body, width: '100%', borderWidth: 1, borderRadius: themeTokens.radius.lg, padding: themeTokens.spacing[5] }, banner: { width: '100%', borderWidth: 1, borderRadius: themeTokens.radius.md, padding: themeTokens.spacing[4], gap: themeTokens.spacing[3] }, centered: { flex: 1, width: '100%', maxWidth: 520, alignSelf: 'center', justifyContent: 'center', gap: themeTokens.spacing[4], padding: themeTokens.layout.screenPadding }, actions: { flexDirection: 'row', flexWrap: 'wrap', gap: themeTokens.spacing[3] },
+  safeArea: { flex: 1 },
+  content: { flexGrow: 1, padding: themeTokens.layout.screenPadding, paddingBottom: themeTokens.spacing[12] },
+  contentUnderButton: { paddingBottom: FLOATING_ACTION_SIZE + themeTokens.spacing[8] },
+  page: { width: '100%', maxWidth: 800, alignSelf: 'center', gap: themeTokens.spacing[6] },
+  title: { ...textStyles.title }, body: { ...textStyles.body },
+  // The ledger: months under a 20/600 heading with space above, hairlines between rows, no rules.
+  list: { width: '100%' },
+  row: { gap: themeTokens.spacing[2], paddingBottom: themeTokens.spacing[1] },
+  editForm: { width: '100%', gap: themeTokens.spacing[3], paddingBottom: themeTokens.spacing[3] },
+  empty: { width: '100%', gap: themeTokens.spacing[2] },
+  emptyAction: { alignItems: 'flex-start' },
+  banner: { ...textStyles.meta, width: '100%', borderWidth: 1, borderRadius: themeTokens.radius.md, padding: themeTokens.spacing[4], gap: themeTokens.spacing[3] },
+  centered: { flex: 1, width: '100%', maxWidth: 520, alignSelf: 'center', justifyContent: 'center', gap: themeTokens.spacing[4], padding: themeTokens.layout.screenPadding },
+  actions: { flexDirection: 'row', flexWrap: 'wrap', gap: themeTokens.spacing[2] },
 })

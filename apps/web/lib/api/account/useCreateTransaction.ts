@@ -18,6 +18,8 @@ export interface CreateTransactionRequest {
   transactionMerchantId?: number;
   transactionMerchantName: string;
   categoryId?: string;
+  /** Household tag keys to put on the new transaction. */
+  tagIds?: number[];
 }
 
 const stringifyAmount = (value: TransactionAmount | undefined) =>
@@ -38,6 +40,7 @@ export const buildCreateTransactionPayload = ({
   originalCurrencyId,
   settlementAmount,
   settlementCurrencyId,
+  tagIds,
   transactionDate,
   transactionMerchantId,
   transactionMerchantName,
@@ -54,6 +57,8 @@ export const buildCreateTransactionPayload = ({
     originalCurrencyId: hasOriginalAmount ? originalCurrencyId : undefined,
     settlementAmount: stringifyAmount(settlementAmount),
     settlementCurrencyId,
+    // Sent only when there are tags, so an API without tag support never sees the field.
+    ...(tagIds && tagIds.length > 0 ? { tagIds } : {}),
     transactionDate,
     transactionMerchantId,
     transactionMerchantName,

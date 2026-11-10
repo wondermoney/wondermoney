@@ -78,7 +78,7 @@ describe('rate-limit families', () => {
       const { adminApiRateLimit } = await loadRateLimitModule(PRODUCTION_ENV);
       const app = buildApp(adminApiRateLimit());
 
-      const statuses = await drain(app, 6, 'get', '9.9.9.9');
+      const statuses = await drain(app, 6, 'get', '203.0.113.99');
 
       expect(statuses.slice(0, 5)).toEqual([200, 200, 200, 200, 200]);
       expect(statuses[5]).toBe(429);
@@ -103,7 +103,7 @@ describe('rate-limit families', () => {
       const { adminApiRateLimit } = await loadRateLimitModule(STAGING_ENV);
       const app = buildApp(adminApiRateLimit());
 
-      const statuses = await drain(app, 6, 'get', '9.9.9.8');
+      const statuses = await drain(app, 6, 'get', '203.0.113.98');
 
       expect(statuses[4]).toBe(200);
       expect(statuses[5]).toBe(429);
@@ -332,7 +332,7 @@ describe('breach observability', () => {
     const { adminApiRateLimit } = await loadRateLimitModule(PRODUCTION_ENV);
     const app = buildApp(adminApiRateLimit());
 
-    await drain(app, 6, 'get', '9.9.9.1');
+    await drain(app, 6, 'get', '203.0.113.91');
 
     expect(sentry.addBreadcrumb).toHaveBeenCalledTimes(1);
     expect(sentry.addBreadcrumb).toHaveBeenCalledWith(
@@ -347,7 +347,7 @@ describe('breach observability', () => {
     const app = buildApp(adminApiRateLimit());
 
     // 5 allowed, then enough 429s to cross the threshold twice over.
-    await drain(app, 5 + RATE_LIMIT_REPORT_THRESHOLD * 2, 'get', '9.9.9.2');
+    await drain(app, 5 + RATE_LIMIT_REPORT_THRESHOLD * 2, 'get', '203.0.113.92');
 
     expect(sentry.captureMessage).toHaveBeenCalledTimes(1);
     expect(sentry.captureMessage).toHaveBeenCalledWith(
@@ -363,7 +363,7 @@ describe('breach observability', () => {
 
     const app = buildApp(adminApiRateLimit());
     // One short of the threshold: still nothing reported.
-    await drain(app, 5 + RATE_LIMIT_REPORT_THRESHOLD - 1, 'get', '9.9.9.3');
+    await drain(app, 5 + RATE_LIMIT_REPORT_THRESHOLD - 1, 'get', '203.0.113.93');
 
     expect(sentry.captureMessage).not.toHaveBeenCalled();
   });

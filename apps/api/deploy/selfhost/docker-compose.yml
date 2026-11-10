@@ -76,6 +76,14 @@ services:
     depends_on:
       api:
         condition: service_healthy
+    # Unhealthy when pg-boss has stopped or the worker cannot reach Postgres. For whether jobs
+    # actually run, monitor the API's /v1/health/ready (README.md, "Monitor").
+    healthcheck:
+      test: ['CMD-SHELL', 'curl -fsS -o /dev/null "http://localhost:$${WORKER_HEALTH_PORT:-$${PORT:-3001}}/health"']
+      interval: 30s
+      timeout: 5s
+      start_period: 60s
+      retries: 3
 
   # Only the settings the web app reads: it never sees the database password or the API's
   # secrets.
@@ -94,6 +102,10 @@ services:
       NEXT_PUBLIC_DOCS_URL: ${NEXT_PUBLIC_DOCS_URL:-}
       NEXT_PUBLIC_RECAPTCHA_SITE_KEY: ${NEXT_PUBLIC_RECAPTCHA_SITE_KEY:-}
       RECAPTCHA_SECRET_KEY: ${RECAPTCHA_SECRET_KEY:-}
+      NEXT_PUBLIC_SENTRY_DSN: ${NEXT_PUBLIC_SENTRY_DSN:-}
+      # Analytics: off unless set (see .env).
+      NEXT_PUBLIC_GTM_ID: ${NEXT_PUBLIC_GTM_ID:-}
+      NEXT_PUBLIC_POSTHOG_KEY: ${NEXT_PUBLIC_POSTHOG_KEY:-}
     depends_on:
       api:
         condition: service_healthy

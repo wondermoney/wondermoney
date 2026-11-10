@@ -4,10 +4,12 @@ import { ApiError } from '@/lib/api/errors'
 
 import { LoansScreen, type LoansViewState } from './loans-screen'
 import { mapLoans } from './loans-view-model'
+import { useLoanOverview } from './use-loan-overview'
 import { useLoans } from './use-loans'
 
 export function LoansRoute() {
   const query = useLoans()
+  const overview = useLoanOverview()
   const router = useRouter()
   let state: LoansViewState
   if (query.isAccessTransition) state = { status: 'access-transition' }
@@ -17,8 +19,9 @@ export function LoansRoute() {
   else state = { status: 'error' }
   return <LoansScreen
     state={state}
+    overview={overview.data?.overview ?? null}
     onBack={() => router.replace('/more')}
-    onRefresh={async () => { await query.refetch() }}
+    onRefresh={async () => { await Promise.all([query.refetch(), overview.refetch()]) }}
     onOpenLoan={(loanId) => router.push({ pathname: '/loans/[loanId]', params: { loanId: String(loanId) } })}
     onCreateLoan={() => router.push('/loans/create')}
   />

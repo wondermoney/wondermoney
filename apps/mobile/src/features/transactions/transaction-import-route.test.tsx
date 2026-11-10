@@ -8,7 +8,7 @@ import { TransactionImportRoute } from './transaction-import-route'
 
 const mockPush = jest.fn()
 const mockReplace = jest.fn()
-const mockAddListener = jest.fn((_event: string, _handler: (event: { preventDefault: () => void }) => void) => jest.fn())
+const mockUsePreventRemove = jest.fn((_preventRemove: boolean, _onPrevented?: (options: { data: { action: object }; repeat: () => void }) => void) => jest.fn())
 const mockGetDocumentAsync = jest.fn()
 const mockStart = jest.fn()
 const mockReset = jest.fn()
@@ -20,7 +20,7 @@ let mockImportState: { state: { phase: string; outcome?: string; reason?: string
   state: { phase: 'idle' }, start: mockStart, reset: mockReset,
 }
 
-jest.mock('expo-router', () => ({ useLocalSearchParams: () => mockParams, useRouter: () => ({ push: mockPush, replace: mockReplace }), useNavigation: () => ({ addListener: mockAddListener }) }))
+jest.mock('expo-router', () => ({ useLocalSearchParams: () => mockParams, useRouter: () => ({ push: mockPush, replace: mockReplace }), usePreventRemove: (preventRemove: boolean, onPrevented?: (options: { data: { action: object }; repeat: () => void }) => void) => mockUsePreventRemove(preventRemove, onPrevented) }))
 jest.mock('expo-document-picker', () => ({ getDocumentAsync: (...args: unknown[]) => mockGetDocumentAsync(...args) }))
 jest.mock('@/features/accounts/use-accounts', () => ({ useAccounts: () => mockUseAccounts() }))
 jest.mock('./use-transaction-import', () => ({ useTransactionImport: () => mockImportState }))
@@ -42,7 +42,7 @@ const accountsData = {
 
 describe('TransactionImportRoute', () => {
   beforeEach(() => {
-    mockPush.mockReset(); mockReplace.mockReset(); mockAddListener.mockReset().mockReturnValue(jest.fn())
+    mockPush.mockReset(); mockReplace.mockReset(); mockUsePreventRemove.mockClear()
     mockGetDocumentAsync.mockReset(); mockStart.mockReset(); mockReset.mockReset(); mockRead.mockReset(); mockShareCsv.mockReset()
     mockParams = {}
     mockUseAccounts = () => ({ data: accountsData, isLoading: false })
@@ -51,8 +51,9 @@ describe('TransactionImportRoute', () => {
 
   it('lists mapped accounts, falling back to an unnamed label', async () => {
     const view = await renderRoute()
-    expect(view.getByRole('button', { name: 'Daily account' })).toBeOnTheScreen()
-    expect(view.getByRole('button', { name: 'Unnamed account' })).toBeOnTheScreen()
+    await fireEvent.press(view.getByRole('button', { name: /^Account,/ }))
+    expect(view.getByRole('radio', { name: 'Daily account' })).toBeOnTheScreen()
+    expect(view.getByRole('radio', { name: 'Unnamed account' })).toBeOnTheScreen()
   })
 
   it('preselects the account id from route params', async () => {
@@ -114,16 +115,10 @@ describe('TransactionImportRoute', () => {
   it('guards navigation away while an import is in flight, but not once it settles', async () => {
     mockImportState = { state: { phase: 'processing' }, start: mockStart, reset: mockReset }
     await renderRoute()
-    const guard = mockAddListener.mock.calls[0]?.[1]
-    const blocked = { preventDefault: jest.fn() }
-    guard?.(blocked)
-    expect(blocked.preventDefault).toHaveBeenCalledTimes(1)
+    expect(mockUsePreventRemove.mock.lastCall?.[0]).toBe(true)
 
     mockImportState = { state: { phase: 'done', outcome: 'succeeded' }, start: mockStart, reset: mockReset }
     await renderRoute()
-    const allowed = { preventDefault: jest.fn() }
-    const secondGuard = mockAddListener.mock.calls[1]?.[1]
-    secondGuard?.(allowed)
-    expect(allowed.preventDefault).not.toHaveBeenCalled()
+    expect(mockUsePreventRemove.mock.lastCall?.[0]).toBe(false)
   })
 })

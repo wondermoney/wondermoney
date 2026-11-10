@@ -1,4 +1,4 @@
-import { fireEvent, render } from '@testing-library/react-native'
+import { render } from '@testing-library/react-native'
 import { I18nextProvider } from 'react-i18next'
 
 import { initMobileI18n } from '@/lib/i18n'
@@ -67,9 +67,9 @@ describe('ReportsHubRoute', () => {
     expect(view.getByLabelText('+€500.00 trailing 3-month net average')).toBeTruthy()
   })
 
-  it('replaces with More on back', async () => {
+  it('shows one filter row for every report', async () => {
     const view = await renderRoute()
-    await fireEvent.press(view.getByRole('button', { name: 'Back' }))
-    expect(mockReplace).toHaveBeenCalledWith('/more')
+    expect(view.getAllByTestId('report-filters-bar')).toHaveLength(1)
+    expect(view.getByRole('button', { name: 'Filters' })).toBeTruthy()
   })
 })

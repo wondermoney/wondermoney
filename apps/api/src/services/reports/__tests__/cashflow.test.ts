@@ -6,6 +6,12 @@ import type { ReportServiceInput } from '../report-filters';
 
 const mocks = vi.hoisted(() => ({ find: vi.fn() }));
 
+// The mocked EntityManager answers every query with the scenario's rows; the household has made no
+// "counts as spending" choices.
+vi.mock('@service/transaction/category-spending', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@service/transaction/category-spending')>();
+  return { ...actual, loadCategorySpendingFlags: () => Promise.resolve(new actual.CategorySpendingFlags()) };
+});
 vi.mock('@app/database/di', () => ({
   DI: { em: { find: mocks.find } },
 }));
@@ -35,7 +41,7 @@ const makeInput = (overrides: Partial<ReportFilters> = {}): ReportServiceInput =
   ({
     filters: makeFilters(overrides),
     tenant: { tenantKey: 113 },
-    user: { appuserKey: 71 },
+    user: { appuserKey: 71, currencyKey: { code: 'EUR' } },
   }) as unknown as ReportServiceInput;
 
 const makeTransaction = (isoDate: string, amount: number) => ({
@@ -69,7 +75,7 @@ describe('getCashflowReport month bucketing', () => {
     // Europe/Lisbon, August 2026 (UTC+1): local 1 Aug 00:30 is 31 Jul 23:30 UTC.
     givenTransactions(makeTransaction('2026-07-31T23:30:00.000Z', 1000));
 
-    const rows = await getCashflowReport(
+    const { data: rows } = await getCashflowReport(
       makeInput({
         fromDate: '2026-07-31T23:00:00.000Z',
         timezone: 'Europe/Lisbon',
@@ -85,7 +91,7 @@ describe('getCashflowReport month bucketing', () => {
     // America/New_York, August 2026 (UTC-4): local 31 Aug 22:00 is 1 Sep 02:00 UTC.
     givenTransactions(makeTransaction('2026-09-01T02:00:00.000Z', -250));
 
-    const rows = await getCashflowReport(
+    const { data: rows } = await getCashflowReport(
       makeInput({
         fromDate: '2026-08-01T04:00:00.000Z',
         timezone: 'America/New_York',
@@ -105,7 +111,7 @@ describe('getCashflowReport month bucketing', () => {
       makeTransaction('2026-10-31T23:30:00.000Z', 200), // +0 winter time -> 31 Oct local
     );
 
-    const rows = await getCashflowReport(makeInput({ timezone: 'Europe/Lisbon' }));
+    const { data: rows } = await getCashflowReport(makeInput({ timezone: 'Europe/Lisbon' }));
 
     expect(rows).toEqual([{ expenses: 0, income: 300, month: '2026-10-01T00:00:00.000Z', net: 300 }]);
   });
@@ -113,7 +119,7 @@ describe('getCashflowReport month bucketing', () => {
   it('buckets in the default calendar when the caller sends no timezone', async () => {
     givenTransactions(makeTransaction('2026-07-31T23:30:00.000Z', 1000));
 
-    const rows = await getCashflowReport({ ...makeInput(), filters: makeFilters({ timezone: undefined }) });
+    const { data: rows } = await getCashflowReport({ ...makeInput(), filters: makeFilters({ timezone: undefined }) });
 
     expect(rows).toEqual([{ expenses: 0, income: 1000, month: '2026-08-01T00:00:00.000Z', net: 1000 }]);
   });
@@ -121,7 +127,7 @@ describe('getCashflowReport month bucketing', () => {
   it('falls back to the default calendar rather than throwing on an unusable timezone', async () => {
     givenTransactions(makeTransaction('2026-07-31T23:30:00.000Z', 1000));
 
-    const rows = await getCashflowReport(makeInput({ timezone: 'Middle/Earth' }));
+    const { data: rows } = await getCashflowReport(makeInput({ timezone: 'Middle/Earth' }));
 
     expect(rows).toEqual([{ expenses: 0, income: 1000, month: '2026-08-01T00:00:00.000Z', net: 1000 }]);
   });
@@ -132,7 +138,7 @@ describe('getCashflowReport month bucketing', () => {
       makeTransaction('2026-03-15T12:00:00.000Z', -200),
     );
 
-    const rows = await getCashflowReport(makeInput({ timezone: 'Europe/Lisbon' }));
+    const { data: rows } = await getCashflowReport(makeInput({ timezone: 'Europe/Lisbon' }));
 
     expect(rows.map((row) => row.month)).toEqual(['2026-01-01T00:00:00.000Z', '2026-03-01T00:00:00.000Z']);
   });
@@ -143,7 +149,7 @@ describe('getCashflowReport month bucketing', () => {
       makeTransaction('2026-01-16T12:00:00.000Z', -500),
     );
 
-    const rows = await getCashflowReport(makeInput({ timezone: 'Europe/Lisbon' }));
+    const { data: rows } = await getCashflowReport(makeInput({ timezone: 'Europe/Lisbon' }));
 
     expect(rows).toEqual([{ expenses: 500, income: 500, month: '2026-01-01T00:00:00.000Z', net: 0 }]);
   });
@@ -155,7 +161,7 @@ describe('getCashflowReport month bucketing', () => {
       makeTransaction('2026-10-10T12:00:00.000Z', 200),
     );
 
-    const rows = await getCashflowReport(makeInput({ timezone: 'Europe/Lisbon' }));
+    const { data: rows } = await getCashflowReport(makeInput({ timezone: 'Europe/Lisbon' }));
 
     expect(rows.map((row) => row.month)).toEqual([
       '2026-09-01T00:00:00.000Z',
@@ -184,7 +190,7 @@ describe('getCashflowCsv', () => {
     });
 
     givenTransactions(...transactions);
-    const rows = await getCashflowReport(input);
+    const { data: rows } = await getCashflowReport(input);
     givenTransactions(...transactions);
     const csv = await getCashflowCsv(input);
 

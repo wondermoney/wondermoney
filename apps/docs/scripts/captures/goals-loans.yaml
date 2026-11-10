@@ -141,8 +141,8 @@ pages:
           pt: "Adicionar crédito"
           es: "Añadir crédito"
     note: >-
-      The open drawer is the capture target. Submit will silently fail
-      (RAD-436); do not submit. credits.json actions.add. Fallback trigger
+      The open drawer is the capture target. Submit will silently fail;
+      do not submit. credits.json actions.add. Fallback trigger
       label: "Add".
 
   - slug: track-repayments

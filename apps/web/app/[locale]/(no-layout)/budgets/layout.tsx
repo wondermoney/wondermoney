@@ -1,6 +1,7 @@
 import { getTranslations } from "next-intl/server";
 import type { ReactNode } from "react";
 
+import { PrivacyModeBoundary } from "@/lib/privacy/PrivacyModeBoundary";
 import { createMetadata } from "@/lib/utils/metadata";
 
 export const generateMetadata = async ({
@@ -15,5 +16,5 @@ export const generateMetadata = async ({
 };
 
 export default function PageLayout({ children }: { children: ReactNode }) {
-  return children;
+  return <PrivacyModeBoundary>{children}</PrivacyModeBoundary>;
 }

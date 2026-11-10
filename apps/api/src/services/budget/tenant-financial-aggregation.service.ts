@@ -22,7 +22,7 @@ import type {
   TenantAggregationRepository,
   WeeklyAggregationResult,
 } from './aggregation-types';
-import { buildBudgetPressure, spendForAllocation } from './budget-spending-projection';
+import { availableForAllocation, buildBudgetPressure, classifyAvailableThreshold, spendForAllocation } from './budget-spending-projection';
 import { MikroOrmTenantAggregationRepository } from './tenant-aggregation.repository';
 import { partitionByEligibility, uniqueAllocations } from './tenant-budget-eligibility';
 
@@ -45,7 +45,10 @@ export class TenantFinancialAggregationService {
     const transactions = classifyTransactions(transactionRows, input.appuserKey, input.tenantKey, diagnostics);
     const facts = allocations.rows.flatMap((allocation) => {
       const spent = spendForAllocation(allocation, transactions, allocations.rows);
-      const budgeted = new Big(allocation.amountBudgeted);
+      // Measured against what the month may spend, rollover included. With nothing available
+      // there is no percentage to put in an alert; the budget badge still shows it over.
+      const budgeted = availableForAllocation(allocation);
+      if (budgeted.lte(0)) return [];
       const threshold = classifyBudgetThreshold(spent, budgeted);
       if (!threshold) return [];
       return [{
@@ -91,7 +94,7 @@ export class TenantFinancialAggregationService {
     let totalSpent = new Big(0);
     for (const allocation of uniqueAllocations(allocations.rows)) {
       const spent = spendForAllocation(allocation, transactions, allocations.rows);
-      totalBudgeted = totalBudgeted.plus(allocation.amountBudgeted);
+      totalBudgeted = totalBudgeted.plus(availableForAllocation(allocation));
       totalSpent = totalSpent.plus(spent);
     }
     const remaining = totalBudgeted.minus(totalSpent);
@@ -385,7 +388,7 @@ export class TenantFinancialAggregationService {
     const diagnostics = createDiagnostics();
     const transactions = classifyTransactions(rows, appuserKey, tenantKey, diagnostics);
     const thresholds = validAllocations.map((allocation) =>
-      classifyBudgetThreshold(spendForAllocation(allocation, transactions, allocations), new Big(allocation.amountBudgeted)),
+      classifyAvailableThreshold(spendForAllocation(allocation, transactions, allocations), availableForAllocation(allocation)),
     );
     return buildBudgetPressure(thresholds);
   }
@@ -396,7 +399,7 @@ function activeBudgetStatus(
   transactions: ReturnType<typeof classifyTransactions>,
 ): 'near' | 'over' | 'within_plan' | null {
   const thresholds = uniqueAllocations(allocations).map((allocation) =>
-    classifyBudgetThreshold(spendForAllocation(allocation, transactions, allocations), new Big(allocation.amountBudgeted)),
+    classifyAvailableThreshold(spendForAllocation(allocation, transactions, allocations), availableForAllocation(allocation)),
   );
   return buildBudgetPressure(thresholds);
 }

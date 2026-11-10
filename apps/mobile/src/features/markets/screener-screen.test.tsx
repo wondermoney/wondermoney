@@ -23,8 +23,8 @@ const rows = [
   { marketCap: null, name: null, price: null, sector: null, symbol: 'XYZ' },
 ]
 
-async function setup(overrides: Partial<ScreenerScreenProps> = {}) {
-  const i18n = await initMobileI18n('en')
+async function setup(overrides: Partial<ScreenerScreenProps> = {}, language = 'en') {
+  const i18n = await initMobileI18n(language)
   const props: ScreenerScreenProps = {
     state: { status: 'idle' },
     form: emptyForm,
@@ -85,6 +85,26 @@ describe('ScreenerScreen', () => {
     expect(props.onFormChange).toHaveBeenCalledWith({ marketCapMoreThan: '1000000' })
     await fireEvent.changeText(view.getByLabelText('Max market cap'), '5000000000')
     expect(props.onFormChange).toHaveBeenCalledWith({ marketCapLowerThan: '5000000000' })
+    expect(props.onApplyFilters).not.toHaveBeenCalled()
+  })
+
+  it.each([
+    ['pt-PT', '1.000', '1.234,5', 1000, 1234.5],
+    ['es', '2.500.000', '0,5', 2500000, 0.5],
+    ['en', '1,000', '1.000', 1000, 1],
+  ])('reads the bounds in %s', async (language, marketCap, price, expectedCap, expectedPrice) => {
+    const { view, props } = await setup({ form: { ...emptyForm, marketCapMoreThan: marketCap, priceLowerThan: price } }, language)
+    expect(view.queryByRole('alert')).not.toBeOnTheScreen()
+    const i18n = await initMobileI18n(language)
+    await fireEvent.press(view.getByRole('button', { name: i18n.t('screener.apply') }))
+    expect(props.onApplyFilters).toHaveBeenLastCalledWith({ priceMoreThan: undefined, priceLowerThan: expectedPrice, marketCapMoreThan: expectedCap, marketCapLowerThan: undefined })
+  })
+
+  it('shows an error and does not search with a bound it cannot read', async () => {
+    const { view, props } = await setup({ form: { ...emptyForm, priceMoreThan: '1.2.3' } })
+    expect(view.getByText('Enter a number, like 1500 or 12.50.')).toBeOnTheScreen()
+    expect(view.getByRole('button', { name: 'Apply filters' })).toBeDisabled()
+    await fireEvent.press(view.getByRole('button', { name: 'Apply filters' }))
     expect(props.onApplyFilters).not.toHaveBeenCalled()
   })
 

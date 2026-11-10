@@ -15,11 +15,13 @@ import {
   safeInstitutionId,
 } from '@service/bank-sync-run/bank-sync-run';
 import { BankSyncIncidentService } from '@service/bank-sync/bank-sync-incident.service';
+import { enableBankingConnectionSyncState } from '@service/enable-banking/enable-banking-connection-sync-state.service';
 import { enableBankingCredentialService } from '@service/enable-banking/enable-banking-credential.service';
 import backgroundOperationService from '@service/operations/background-operation.service';
 import type { Enqueue } from '@service/queue/enqueue';
 import type { PgBossLike } from '@service/queue/pgboss-client';
 import { EnableBankingCredentialInvalidError } from '@utils/errors';
+import logger from '@utils/logger';
 
 interface BgDeps {
   attachQueueJob: (correlationId: string, queueJobId: string) => Promise<boolean>;
@@ -30,10 +32,15 @@ interface BgDeps {
   markAttemptFailedForRetry: (correlationId: string, queueJobId: string, input: { errorCode?: string; stage?: string }) => Promise<boolean>;
 }
 
+interface ConnectionSyncStateDeps {
+  checkConsent: (enableBankingConnectionKey: number) => Promise<'active' | 'ended' | 'unknown'>;
+  deferNextSync: (enableBankingConnectionKey: number, retryAfterSeconds?: number) => Promise<Date | undefined>;
+}
+
 interface IncidentDeps {
   assertIncident: (input: { correlationId: string; flow: 'scheduled-refresh'; incidentId: string; producer: 'pgboss-scheduled'; requisitionId: string; userVisible: false }) => Promise<unknown>;
   completeOrAllocateLegacyIncident?: BankSyncIncidentService['completeOrAllocateLegacyIncident'];
-  finalizeAttempt: (input: { accountCount?: number; attempt: number; errorCategory?: string; errorCode?: string; final: boolean; incidentId: string; institutionId?: string; result: 'failed' | 'full_success' | 'partial'; treatmentEligible: false }) => Promise<unknown>;
+  finalizeAttempt: (input: { accountCount?: number; attempt: number; errorCategory?: string; errorCode?: string; final: boolean; incidentId: string; institutionId?: string; result: 'failed' | 'full_success' | 'partial'; retryAfterSeconds?: number; treatmentEligible: false }) => Promise<unknown>;
   startAttempt: (input: { incidentId: string; queueAttempt: number; queueJobId: string }) => Promise<{ attempt: number; completedAt?: Date; final?: boolean; result?: string }>;
 }
 
@@ -53,7 +60,7 @@ const AUTO_SYNC_EXTRA_ERROR_CODES = [
   { code: 'authentication', match: (error: unknown) => error instanceof Error && error.name === 'EnableBankingCredentialInvalidError' },
 ] as const;
 
-export const handleAccountAutoSyncRequisitionJob = async (job: JobWithMetadata<AccountAutoSyncRequisitionJobPayload>, deps: { accountService?: typeof accountInitialSyncAccountService; analyticsOutbox?: unknown; backgroundOperationService?: BgDeps; bankSyncIncidentService?: IncidentDeps; enableBankingCredentialService?: Pick<typeof enableBankingCredentialService, 'getDecryptedCredential'>; enqueue?: Enqueue; logger?: Pick<Logger, 'info' | 'warn'>; transactionService?: typeof accountInitialSyncTransactionService } = {}) => {
+export const handleAccountAutoSyncRequisitionJob = async (job: JobWithMetadata<AccountAutoSyncRequisitionJobPayload>, deps: { accountService?: typeof accountInitialSyncAccountService; analyticsOutbox?: unknown; backgroundOperationService?: BgDeps; bankSyncIncidentService?: IncidentDeps; connectionSyncState?: ConnectionSyncStateDeps; enableBankingCredentialService?: Pick<typeof enableBankingCredentialService, 'getDecryptedCredential'>; enqueue?: Enqueue; logger?: Pick<Logger, 'info' | 'warn'>; transactionService?: typeof accountInitialSyncTransactionService } = {}) => {
   const bg = deps.backgroundOperationService ?? backgroundOperationService;
   const jobData = job.data;
   // `provider === 'enable_banking'` is the only branch point in this file, as in
@@ -104,11 +111,35 @@ export const handleAccountAutoSyncRequisitionJob = async (job: JobWithMetadata<A
     await releaseClaim();
     throw new AccountAutoSyncPersistenceError(String(error));
   }
-  const finalize = async (result: 'failed' | 'full_success' | 'partial', errorCode?: string, nonRetryable = false, accountResult?: { accountsTotal?: number; institutionIds?: string[] }) => {
+  const finalize = async (result: 'failed' | 'full_success' | 'partial', errorCode?: string, nonRetryable = false, accountResult?: { accountsTotal?: number; institutionIds?: string[] }, retryAfterSeconds?: number) => {
     const final = result === 'full_success' || nonRetryable || job.retryCount >= job.retryLimit;
     const safe = result === 'full_success' ? undefined : normalizeBankSyncError({ code: errorCode ?? 'provider_unavailable' });
-    try { await incidents.finalizeAttempt({ accountCount: safeAccountCount(accountResult?.accountsTotal), attempt, errorCategory: safe?.error_category, errorCode: safe?.error_code, final, incidentId, institutionId: safeInstitutionId(accountResult?.institutionIds), result, treatmentEligible: false }); } catch (error) { await releaseClaim(); throw new AccountAutoSyncPersistenceError(String(error)); }
+    try { await incidents.finalizeAttempt({ accountCount: safeAccountCount(accountResult?.accountsTotal), attempt, errorCategory: safe?.error_category, errorCode: safe?.error_code, final, incidentId, institutionId: safeInstitutionId(accountResult?.institutionIds), result, ...(retryAfterSeconds === undefined ? {} : { retryAfterSeconds }), treatmentEligible: false }); } catch (error) { await releaseClaim(); throw new AccountAutoSyncPersistenceError(String(error)); }
     return final;
+  };
+  const log = deps.logger ?? logger;
+  const syncState = deps.connectionSyncState ?? enableBankingConnectionSyncState;
+  // A rate limit is final for this run: a pg-boss retry a minute later would only spend more of a
+  // quota the bank has already refused. The scheduler picks the connection up again once
+  // `nextEligibleSyncAt` (from `Retry-After`, else the default sync interval) has passed.
+  const finishRateLimited = async (result: 'failed' | 'partial', retryAfterSeconds: number | undefined, accountResult?: { accountsTotal?: number; institutionIds?: string[] }) => {
+    try {
+      await syncState.deferNextSync(key, retryAfterSeconds);
+    } catch (error) {
+      log.warn({ enableBankingConnectionKey: key, error: error instanceof Error ? error.message : String(error) }, 'Could not defer the next sync after a rate limit');
+    }
+    await finalize(result, 'rate_limited', true, accountResult, retryAfterSeconds);
+    return false;
+  };
+  // Every account rejected with 400/401 usually means the bank ended the consent early. Only the
+  // session's own status can tell; a failed check changes nothing and the run fails as before.
+  const consentEnded = async () => {
+    try {
+      return await syncState.checkConsent(key) === 'ended';
+    } catch (error) {
+      log.warn({ enableBankingConnectionKey: key, error: error instanceof Error ? error.message : String(error) }, 'Enable Banking consent check failed');
+      return false;
+    }
   };
   try {
     // Resolve the owning appuser's own Enable Banking BYOK credential as an *earlier failure
@@ -136,6 +167,11 @@ export const handleAccountAutoSyncRequisitionJob = async (job: JobWithMetadata<A
       queueJobId: job.id,
       transactionService: deps.transactionService ?? accountInitialSyncTransactionService,
     });
+    if (phases.rateLimited) return await finishRateLimited(phases.status === 'partial' ? 'partial' : 'failed', phases.rateLimited.retryAfterSeconds, phases.account);
+    if (phases.status === 'failed' && phases.everyAccountRejected && await consentEnded()) {
+      await finalize('failed', 'consent_expired', true, phases.account);
+      return false;
+    }
     if (phases.status === 'failed') {
       const errorCode = phases.failedAt === 'account' ? 'account_phase_failed' : 'transaction_phase_failed';
       if (await finalize('failed', errorCode, false, phases.account)) return false;
@@ -149,7 +185,8 @@ export const handleAccountAutoSyncRequisitionJob = async (job: JobWithMetadata<A
     return true;
   } catch (error) {
     if (error instanceof AccountAutoSyncOutcomeError || error instanceof AccountAutoSyncPersistenceError) throw error;
-    const { code, isPermanent } = classifyBankSyncError(error, { extraCodes: AUTO_SYNC_EXTRA_ERROR_CODES, permanentErrorNames: PERMANENT_AUTO_SYNC_ERROR_NAMES });
+    const { code, isPermanent, retryAfterSeconds } = classifyBankSyncError(error, { extraCodes: AUTO_SYNC_EXTRA_ERROR_CODES, permanentErrorNames: PERMANENT_AUTO_SYNC_ERROR_NAMES });
+    if (code === 'rate_limited') return await finishRateLimited('failed', retryAfterSeconds);
     const final = await finalize('failed', code, isPermanent);
     if (final) return false;
     throw error;

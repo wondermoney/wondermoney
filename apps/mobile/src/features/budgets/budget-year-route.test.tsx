@@ -19,12 +19,13 @@ jest.mock('./budget-year-screen', () => ({
   },
 }))
 
+const thisYear = new Date().getFullYear()
 const yearBudget = { budget: { budgetKey: 7, name: 'Plan', year: 2026, categories: [], accounts: [], incomes: [], currencyCode: 'EUR', description: null } }
 const toDateBudget = { budget: { budgetKey: 7, name: 'Plan', year: 2026, categories: [], accounts: [], incomes: [], currencyCode: 'EUR', description: null } }
 
 describe('BudgetYearRoute', () => {
   beforeEach(() => {
-    mockParams = { budgetId: '7', year: '2026' }
+    mockParams = { budgetId: '7', year: String(new Date().getFullYear()) }
     mockReplace.mockReset()
     mockUseBudgetYear.mockReset().mockReturnValue({ data: yearBudget, isInvalidRoute: false, isAccessTransition: false, isLoading: false, isNotFound: false, isRefreshFailure: false, isRefreshing: false, refetch: jest.fn() })
     mockUseBudgetYearToDate.mockReset().mockReturnValue({ data: toDateBudget, isInvalidRoute: false, isAccessTransition: false, isLoading: false, isNotFound: false, isRefreshFailure: false, isRefreshing: false, refetch: jest.fn() })
@@ -32,16 +33,30 @@ describe('BudgetYearRoute', () => {
 
   it('maps both the full year and year-to-date data by the validated route year', async () => {
     const view = await render(<BudgetYearRoute />)
-    expect(mockUseBudgetYear).toHaveBeenCalledWith(7, 2026)
-    expect(mockUseBudgetYearToDate).toHaveBeenCalledWith(7, 2026, new Date().getMonth() + 1)
-    expect(view.getByText('loaded:2026:0')).toBeOnTheScreen()
+    expect(mockUseBudgetYear).toHaveBeenCalledWith(7, thisYear)
+    expect(mockUseBudgetYearToDate).toHaveBeenCalledWith(7, thisYear, new Date().getMonth() + 1)
+    expect(view.getByText(`loaded:${thisYear}:0`)).toBeOnTheScreen()
+  })
+
+  it('compares a past year through December', async () => {
+    mockParams = { budgetId: '7', year: String(thisYear - 1) }
+    await render(<BudgetYearRoute />)
+    expect(mockUseBudgetYearToDate).toHaveBeenCalledWith(7, thisYear - 1, 12)
+  })
+
+  it('shows a year that has not started without a year-to-date comparison', async () => {
+    mockParams = { budgetId: '7', year: String(thisYear + 1) }
+    mockUseBudgetYearToDate.mockReturnValue({ data: undefined, isInvalidRoute: true, isAccessTransition: false, isLoading: false, isNotFound: false, isRefreshFailure: false, refetch: jest.fn() })
+    const view = await render(<BudgetYearRoute />)
+    expect(mockUseBudgetYearToDate).toHaveBeenCalledWith(7, thisYear + 1, null)
+    expect(view.getByText(`loaded:${thisYear + 1}:-`)).toBeOnTheScreen()
   })
 
   it('rejects a malformed budget id or year without a valid request', async () => {
-    mockParams = { budgetId: ['7'], year: '2026' }
+    mockParams = { budgetId: ['7'], year: String(thisYear) }
     mockUseBudgetYear.mockReturnValue({ data: undefined, isInvalidRoute: true, isAccessTransition: false, isLoading: false, isNotFound: false, isRefreshFailure: false, refetch: jest.fn() })
     const view = await render(<BudgetYearRoute />)
-    expect(mockUseBudgetYear).toHaveBeenCalledWith(null, 2026)
+    expect(mockUseBudgetYear).toHaveBeenCalledWith(null, thisYear)
     expect(view.getByText('invalid-route:-:-')).toBeOnTheScreen()
   })
 
@@ -60,7 +75,7 @@ describe('BudgetYearRoute', () => {
   it('maps refresh-error when either query is a stale-data failure', async () => {
     mockUseBudgetYear.mockReturnValue({ data: yearBudget, isInvalidRoute: false, isAccessTransition: false, isLoading: false, isNotFound: false, isRefreshFailure: true, isRefreshing: false, refetch: jest.fn() })
     const view = await render(<BudgetYearRoute />)
-    expect(view.getByText('refresh-error:2026:0')).toBeOnTheScreen()
+    expect(view.getByText(`refresh-error:${thisYear}:0`)).toBeOnTheScreen()
   })
 
   it('never requests without an authenticated access transition being mapped', async () => {

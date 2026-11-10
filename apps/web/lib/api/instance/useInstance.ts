@@ -24,6 +24,8 @@ export interface InstanceDescription {
   minAppVersion: null | string;
   name: string;
   signupMode: "closed" | "invite" | "open";
+  /** The operator's `SPONSOR_URL`; null, or absent on an older API, hides the link. */
+  sponsorUrl?: null | string;
   /** The operator's `SUPPORT_EMAIL`; null when the instance has no support inbox. */
   supportEmail: null | string;
 }
@@ -91,4 +93,11 @@ export function useSupportEmail(): null | string {
   const { data } = useInstance();
   const hydrated = useHydrated();
   return hydrated ? (data?.supportEmail ?? null) : null;
+}
+
+/** Where users can chip in towards running this instance, or null: no link is shown then. */
+export function useSponsorUrl(): null | string {
+  const { data } = useInstance();
+  const hydrated = useHydrated();
+  return hydrated ? (data?.sponsorUrl ?? null) : null;
 }

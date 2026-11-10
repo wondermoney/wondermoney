@@ -12,6 +12,7 @@ import { toast } from "sonner";
 
 import { Amount } from "@/components/ui/Amount";
 import CategoryIcon from "@/components/ui/CategoryIcon";
+import { Measure } from "@/components/ui/Measure";
 import { Table } from "@/components/ui/Table";
 import {
   type ColumnDef,
@@ -25,6 +26,11 @@ import { isDemoReadOnlyError } from "@/lib/api/errors";
 import { useRateLimitToast } from "@/lib/api/useRateLimitToast";
 import type { BudgetRow } from "@/lib/budget/rows";
 import { cn } from "@/lib/utils";
+import {
+  getBudgetRowProgress,
+  getBudgetRowRemaining,
+  getMonthlyAvailableValue,
+} from "@/lib/utils/budget";
 import { getThresholdClassName } from "@/lib/utils/formatCurrency";
 import { convertMonthlyAmountToAnuallizedMonthlyAmount } from "@/lib/utils/recurrency";
 import { useFormatCurrency } from "@/lib/utils/useFormatCurrency";
@@ -37,8 +43,27 @@ import { Button } from "../ui/button";
 import CellNumeric from "../ui/Table/Cell/CellNumeric";
 import TableCellDefault from "../ui/Table/Cell/TableCellDefault";
 import { BudgetCategoryActionsMenu } from "./BudgetCategoryActionsMenu";
+import { RolloverCarryLine } from "./RolloverCarryLine";
 
 export type { BudgetRow } from "@/lib/budget/rows";
+
+/**
+ * The measure's shared scale: the largest plan or spend among the categories
+ * and their subcategories, each planned figure taken as the Planned column
+ * shows it plus what rollover carried in (the amount the bar measures
+ * against), so a €58 plan and a €548 plan read at their true sizes.
+ */
+function measureScale(rows: BudgetRow[]): number {
+  const planned = getMonthlyAvailableValue;
+  return Math.max(
+    0,
+    ...rows.flatMap((row) => [
+      planned(row),
+      row.spent,
+      ...row.subRows.flatMap((child) => [planned(child), child.spent]),
+    ]),
+  );
+}
 
 function MobileBudgetCategoriesList({
   data,
@@ -62,6 +87,7 @@ function MobileBudgetCategoriesList({
   const t = useTranslations();
   const formatPercentage = useFormatPercentage();
   const formatCurrency = useFormatCurrency();
+  const scaleMax = measureScale(data);
 
   return (
     <div className="space-y-3 md:hidden">
@@ -76,11 +102,14 @@ function MobileBudgetCategoriesList({
             parentRow.budgeted,
             parentRow.recurrency,
           );
-        const parentRemaining = normalizedParentBudgetedValue - parentRow.spent;
-        const parentProgress =
-          normalizedParentBudgetedValue === 0
-            ? 0
-            : parentRow.spent / normalizedParentBudgetedValue;
+        // Measured against what the month may spend: the plan plus what
+        // rollover carried in.
+        const parentAvailable = getMonthlyAvailableValue(parentRow);
+        const parentRemaining = getBudgetRowRemaining(parentRow);
+        const parentProgress = getBudgetRowProgress(parentRow);
+        const parentName = parentRow.isSystemCategory
+          ? t(getCategoryTranslationKey(parentRow.name))
+          : parentRow.name;
 
         return (
           <div
@@ -145,6 +174,7 @@ function MobileBudgetCategoriesList({
                     currency={currency}
                   />
                 </Text>
+                <RolloverCarryLine row={parentRow} currency={currency} />
               </div>
             </div>
 
@@ -157,17 +187,16 @@ function MobileBudgetCategoriesList({
                   {formatPercentage(parentProgress)}
                 </Text>
               </div>
-              <div className="bg-muted h-2 w-full overflow-hidden rounded-full">
-                <div
-                  className={cn(
-                    "h-full rounded-full",
-                    parentProgress > 1 ? "bg-destructive" : "bg-primary",
-                  )}
-                  style={{
-                    width: `${Math.min(100, Math.max(0, parentProgress * 100))}%`,
-                  }}
-                />
-              </div>
+              <Measure
+                spent={parentRow.spent}
+                planned={parentAvailable}
+                scaleMax={scaleMax}
+                label={t("budgetPage.measure-label", {
+                  name: parentName,
+                  spent: formatCurrency(parentRow.spent, currency),
+                  planned: formatCurrency(parentAvailable, currency),
+                })}
+              />
             </div>
 
             {parentRow.subRows.length > 0 ? (
@@ -178,11 +207,9 @@ function MobileBudgetCategoriesList({
                       row.budgeted,
                       row.recurrency,
                     );
-                  const remaining = normalizedBudgetedValue - row.spent;
-                  const remainingPercentage =
-                    normalizedBudgetedValue === 0
-                      ? 0
-                      : remaining / normalizedBudgetedValue;
+                  const available = getMonthlyAvailableValue(row);
+                  const remaining = getBudgetRowRemaining(row);
+                  const progress = getBudgetRowProgress(row);
 
                   return (
                     <div key={row.key} className="bg-muted/30 rounded-lg p-3">
@@ -220,6 +247,7 @@ function MobileBudgetCategoriesList({
                                 />
                               </span>
                             </span>
+                            <RolloverCarryLine row={row} currency={currency} />
                             <span className="truncate">
                               {view === "month"
                                 ? t("monthly-spent")
@@ -281,20 +309,21 @@ function MobileBudgetCategoriesList({
                         <div className="text-muted-foreground mb-1 flex items-center justify-between text-xs">
                           <span className="truncate">{t("progress")}</span>
                           <span className="text-foreground font-mono">
-                            {formatPercentage(1 - remainingPercentage)}
+                            {formatPercentage(progress)}
                           </span>
                         </div>
-                        <div className="bg-muted h-2 w-full overflow-hidden rounded-full">
-                          <div
-                            className={cn(
-                              "h-full rounded-full",
-                              remaining < 0 ? "bg-destructive" : "bg-primary",
-                            )}
-                            style={{
-                              width: `${Math.min(100, Math.max(0, (1 - remainingPercentage) * 100))}%`,
-                            }}
-                          />
-                        </div>
+                        <Measure
+                          spent={row.spent}
+                          planned={available}
+                          scaleMax={scaleMax}
+                          label={t("budgetPage.measure-label", {
+                            name: row.isSystemCategory
+                              ? t(getCategoryTranslationKey(row.name))
+                              : row.name,
+                            spent: formatCurrency(row.spent, currency),
+                            planned: formatCurrency(available, currency),
+                          })}
+                        />
                       </div>
                     </div>
                   );
@@ -411,6 +440,7 @@ const BudgetTable: React.FC<BudgetTableProps> = React.memo(
       ],
     );
 
+    const scaleMax = useMemo(() => measureScale(data), [data]);
     const columnHelper = useMemo(() => createColumnHelper<BudgetRow>(), []);
 
     // Memoize columns to prevent unnecessary table re-renders
@@ -490,6 +520,35 @@ const BudgetTable: React.FC<BudgetTableProps> = React.memo(
             );
           },
         }),
+        columnHelper.display({
+          id: "measure",
+          header: () => (
+            <div className="whitespace-nowrap">
+              {t("budgetPage.measure-header")}
+            </div>
+          ),
+          size: 260,
+          cell: ({ row }) => {
+            // The plan plus what rollover carried in.
+            const planned = getMonthlyAvailableValue(row.original);
+            const name = row.original.isSystemCategory
+              ? t(getCategoryTranslationKey(row.original.name))
+              : row.original.name;
+            return (
+              <Measure
+                className="w-full min-w-40"
+                spent={row.original.spent}
+                planned={planned}
+                scaleMax={scaleMax}
+                label={t("budgetPage.measure-label", {
+                  name,
+                  spent: formatCurrency(row.original.spent, currency),
+                  planned: formatCurrency(planned, currency),
+                })}
+              />
+            );
+          },
+        }),
         columnHelper.accessor("recurrency", {
           header: "",
           size: 120,
@@ -533,7 +592,7 @@ const BudgetTable: React.FC<BudgetTableProps> = React.memo(
               </div>
             ),
           cell: ({ row, getValue }) => (
-            <CellNumeric>
+            <CellNumeric className="flex-col items-end gap-0.5">
               <Amount
                 value={convertMonthlyAmountToAnuallizedMonthlyAmount(
                   getValue(),
@@ -541,6 +600,7 @@ const BudgetTable: React.FC<BudgetTableProps> = React.memo(
                 )}
                 currency={currency}
               />
+              <RolloverCarryLine row={row.original} currency={currency} />
             </CellNumeric>
           ),
         }),
@@ -571,19 +631,12 @@ const BudgetTable: React.FC<BudgetTableProps> = React.memo(
               </div>
             ),
           cell: ({ row }) => {
-            const { budgeted, recurrency, spent } = row.original;
-
-            const normalizedBudgetedValue =
-              convertMonthlyAmountToAnuallizedMonthlyAmount(
-                budgeted,
-                recurrency,
-              );
-
-            const remaining = normalizedBudgetedValue - spent;
+            // Against what the month may spend: the plan plus what
+            // rollover carried in.
+            const available = getMonthlyAvailableValue(row.original);
+            const remaining = getBudgetRowRemaining(row.original);
             const remainingPercentage =
-              normalizedBudgetedValue === 0
-                ? 0
-                : remaining / normalizedBudgetedValue;
+              available === 0 ? 0 : remaining / available;
 
             return (
               <CellNumeric className="flex-col items-end">
@@ -670,6 +723,8 @@ const BudgetTable: React.FC<BudgetTableProps> = React.memo(
         currency,
         view,
         footerData,
+        scaleMax,
+        formatCurrency,
       ],
     );
 
@@ -687,6 +742,7 @@ const BudgetTable: React.FC<BudgetTableProps> = React.memo(
             withScrollAffordance
             withExpandableRows
             defaultExpanded={false}
+            variant="ledger"
           />
         </div>
         <MobileBudgetCategoriesList

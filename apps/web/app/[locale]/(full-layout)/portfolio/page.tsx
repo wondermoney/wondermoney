@@ -149,12 +149,12 @@ const Portfolio = () => {
   }
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-10 lg:gap-12">
       {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <div className="flex items-center gap-1.5">
-            <h1 className="text-foreground text-xl font-semibold tracking-tight">
+            <h1 className="text-foreground text-2xl font-semibold tracking-tight lg:text-3xl">
               {t("portfolios")}
             </h1>
             <HelpHint
@@ -183,7 +183,7 @@ const Portfolio = () => {
                 setIsImportTransactionModalOpen,
               )}
               trigger={
-                <Button className="gap-2" size="sm">
+                <Button>
                   <Plus className="size-4" />
                   {t("add-transaction")}
                 </Button>
@@ -229,7 +229,7 @@ const Portfolio = () => {
           }}
         />
       ) : (
-        <div className="border-border bg-card rounded-lg border px-4 py-8 text-center">
+        <div className="py-4">
           <p className="text-muted-foreground text-sm">
             {t("no-data-available")}
           </p>
@@ -237,9 +237,9 @@ const Portfolio = () => {
       )}
 
       {/* Performance */}
-      <section className="border-border bg-card rounded-lg border">
-        <div className="border-border border-b px-5 py-3">
-          <h2 className="text-foreground text-sm font-medium">
+      <section className="border-foreground min-w-0 border-t-2 pt-4">
+        <div className="mb-4">
+          <h2 className="text-foreground text-lg font-semibold tracking-tight">
             {t("performance")}
           </h2>
         </div>
@@ -251,10 +251,10 @@ const Portfolio = () => {
       </section>
 
       {/* Allocation + Benchmark */}
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <section className="border-border bg-card rounded-lg border">
-          <div className="border-border border-b px-5 py-3">
-            <h2 className="text-foreground text-sm font-medium">
+      <div className="grid grid-cols-1 gap-10 lg:grid-cols-2 lg:gap-12">
+        <section className="border-foreground min-w-0 border-t-2 pt-4">
+          <div className="mb-4">
+            <h2 className="text-foreground text-lg font-semibold tracking-tight">
               {t("allocation")}
             </h2>
           </div>
@@ -265,9 +265,9 @@ const Portfolio = () => {
           />
         </section>
 
-        <section className="border-border bg-card rounded-lg border">
-          <div className="border-border border-b px-5 py-3">
-            <h2 className="text-foreground text-sm font-medium">
+        <section className="border-foreground min-w-0 border-t-2 pt-4">
+          <div className="mb-4">
+            <h2 className="text-foreground text-lg font-semibold tracking-tight">
               {t("benchmark-comparison")}
             </h2>
           </div>
@@ -277,9 +277,9 @@ const Portfolio = () => {
 
       {/* Portfolios Breakdown */}
       {dashboardData?.portfolios && (
-        <section className="border-border bg-card rounded-lg border">
-          <div className="border-border border-b px-5 py-3">
-            <h2 className="text-foreground text-sm font-medium">
+        <section className="border-foreground min-w-0 border-t-2 pt-4">
+          <div className="mb-4">
+            <h2 className="text-foreground text-lg font-semibold tracking-tight">
               {t("portfolio-breakdown")}
             </h2>
           </div>
@@ -288,10 +288,10 @@ const Portfolio = () => {
       )}
 
       {/* Top Movers + Calendar */}
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <section className="border-border bg-card rounded-lg border">
-          <div className="border-border border-b px-5 py-3">
-            <h2 className="text-foreground text-sm font-medium">
+      <div className="grid grid-cols-1 gap-10 lg:grid-cols-2 lg:gap-12">
+        <section className="border-foreground min-w-0 border-t-2 pt-4">
+          <div className="mb-4">
+            <h2 className="text-foreground text-lg font-semibold tracking-tight">
               {t("top-movers")}
             </h2>
           </div>
@@ -302,9 +302,9 @@ const Portfolio = () => {
           />
         </section>
 
-        <section className="border-border bg-card rounded-lg border">
-          <div className="border-border border-b px-5 py-3">
-            <h2 className="text-foreground text-sm font-medium">
+        <section className="border-foreground min-w-0 border-t-2 pt-4">
+          <div className="mb-4">
+            <h2 className="text-foreground text-lg font-semibold tracking-tight">
               {t("portfolio-calendar")}
             </h2>
           </div>
@@ -313,24 +313,26 @@ const Portfolio = () => {
       </div>
 
       {/* Dividend Income — only shown when at least one portfolio has dividends */}
-      {dividendData && dividendData.totalDividends > 0 && (
-        <section className="border-border bg-card rounded-lg border">
-          <div className="border-border border-b px-5 py-3">
-            <h2 className="text-foreground text-sm font-medium">
-              {t("dividend-income")}
-            </h2>
-          </div>
-          <PortfolioDividendIncome
-            portfolioId={null}
-            currency={dashboardData?.summary?.currency}
-          />
-        </section>
-      )}
+      {dividendData &&
+        (dividendData.totalDividends > 0 ||
+          dividendData.completeness?.isComplete === false) && (
+          <section className="border-foreground min-w-0 border-t-2 pt-4">
+            <div className="mb-4">
+              <h2 className="text-foreground text-lg font-semibold tracking-tight">
+                {t("dividend-income")}
+              </h2>
+            </div>
+            <PortfolioDividendIncome
+              portfolioId={null}
+              currency={dashboardData?.summary?.currency}
+            />
+          </section>
+        )}
 
       {/* Holdings */}
-      <section className="border-border bg-card rounded-lg border">
-        <div className="border-border border-b px-5 py-3">
-          <h2 className="text-foreground text-sm font-medium">
+      <section className="border-foreground min-w-0 border-t-2 pt-4">
+        <div className="mb-4">
+          <h2 className="text-foreground text-lg font-semibold tracking-tight">
             {t("all-holdings")}
           </h2>
         </div>

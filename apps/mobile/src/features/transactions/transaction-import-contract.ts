@@ -14,7 +14,7 @@ export function isTerminalTransactionImportStatus(status: string): status is Ter
   return (TERMINAL_TRANSACTION_IMPORT_STATUSES as readonly string[]).includes(status)
 }
 
-// csvImportFormat: see accounts-contract. On an API from before #182 it is missing and
+// csvImportFormat: see accounts-contract. On an older API it is missing and
 // isSupportedBank decides, as it did before.
 const uploadResponseSchema = z.object({
   key: z.string().min(1),

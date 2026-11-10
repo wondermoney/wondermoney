@@ -10,7 +10,7 @@ export const WIZARD_START_ROUTE = "/budgets/wizard";
  * also leaves no budget id behind. Call the returned `leaveWizard` first so
  * that clearing is not mistaken for a missing budget: otherwise this redirect
  * runs after Finish's navigation and wins, landing the user on the wizard's
- * first step instead of their budget (#67).
+ * first step instead of their budget.
  */
 export function useRequireWizardBudget(
   budgetId: number | undefined,

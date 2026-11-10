@@ -1,19 +1,21 @@
 import { type Href, useLocalSearchParams, useRouter } from 'expo-router'
+import * as WebBrowser from 'expo-web-browser'
 import { useEffect, useRef, useState } from 'react'
 
 import { captureAnalyticsEvent } from '@/lib/telemetry/analytics'
 
-import { parseBankConnectionResultParam } from './bank-connection-return'
+import { BANK_CONNECTION_RETURN_URL, bankConnectionsHref, parseBankConnectionResultParam, readBankConnectionResult } from './bank-connection-return'
 import {
   isFirstBankConnection,
   resolveConnectionOutcomes,
   tallyConnections,
   type ConnectionTally,
 } from './connection-outcome-policy'
-import { ConnectionsScreen, type ConnectionDisconnectFailureState } from './connections-screen'
+import { ConnectionsScreen, type ConnectionDisconnectFailureState, type ConnectionReconnectFailureState } from './connections-screen'
 import { mapBankConnections } from './connection-status-view-model'
 import { classifyBankConnectionDisconnectFailure, useBankConnectionDisconnectMutation } from './use-bank-connection-disconnect-mutation'
 import { useBankConnections } from './use-bank-connections'
+import { classifyStartBankConnectionFailure, useStartBankConnection } from './use-start-bank-connection'
 
 function resolveViewState(query: ReturnType<typeof useBankConnections>) {
   if (query.isAccessTransition) return { status: 'access-transition' as const }
@@ -39,6 +41,8 @@ export function ConnectionsRoute() {
   const state = resolveViewState(query)
   const disconnectMutation = useBankConnectionDisconnectMutation()
   const [disconnectFailure, setDisconnectFailure] = useState<ConnectionDisconnectFailureState | null>(null)
+  const start = useStartBankConnection()
+  const [reconnectFailure, setReconnectFailure] = useState<ConnectionReconnectFailureState | null>(null)
 
   // This screen's polling is the app's only view of a consent flow
   // settling, so the terminal funnel steps are captured from the transition
@@ -87,6 +91,32 @@ export function ConnectionsRoute() {
       }}
       disconnectingConnectionId={disconnectMutation.isPending ? (disconnectMutation.variables ?? null) : null}
       disconnectFailure={disconnectFailure}
+      // Reconnecting is the connect flow for the row's bank: a new consent, opened in an auth
+      // session that returns here. The API matches the new session's accounts to the existing
+      // ones, so the user keeps their accounts and history.
+      onReconnect={(bankId) => {
+        setReconnectFailure(null)
+        start.mutate(bankId, {
+          onSuccess: ({ redirectUrl }) => {
+            captureAnalyticsEvent('bank_connection_started')
+            WebBrowser.openAuthSessionAsync(redirectUrl, BANK_CONNECTION_RETURN_URL).then(
+              (result) => {
+                router.replace(bankConnectionsHref(readBankConnectionResult(result)) as Href)
+                void query.refetch()
+              },
+              () => {
+                void query.refetch()
+              },
+            )
+          },
+          onError: (error) => {
+            captureAnalyticsEvent('bank_connection_failed')
+            setReconnectFailure({ bankId, failure: classifyStartBankConnectionFailure(error) })
+          },
+        })
+      }}
+      reconnectingBankId={start.isPending ? (start.variables ?? null) : null}
+      reconnectFailure={reconnectFailure}
     />
   )
 }

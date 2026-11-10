@@ -45,6 +45,7 @@ describe('EmailNotificationPreferenceService', () => {
 
     await expect(service.getForAppuser(7)).resolves.toEqual({
       accountRecovery: { effectiveEnabled: true, storedEnabled: true },
+      bankSyncAlerts: { effectiveEnabled: true, storedEnabled: true },
       budgetAlerts: { deliverySupported: true, effectiveEnabled: true, storedEnabled: true },
       growth: { effectiveEnabled: true, storedEnabled: true },
       marketingOptOut: false,
@@ -63,6 +64,32 @@ describe('EmailNotificationPreferenceService', () => {
       growth: { effectiveEnabled: false, storedEnabled: true },
       marketingOptOut: true,
     });
+  });
+
+  it('reads bank sync alerts as its own category, paused by the global opt-out', async () => {
+    const preference = Object.assign(new EmailNotificationPreference(), { bankSyncAlertsEnabled: false });
+    findOne.mockImplementation((entity: unknown) => Promise.resolve(entity === Appuser ? eligibleUser() : preference));
+    await expect(service.getForAppuser(7)).resolves.toMatchObject({
+      accountRecovery: { effectiveEnabled: true, storedEnabled: true },
+      bankSyncAlerts: { effectiveEnabled: false, storedEnabled: false },
+    });
+
+    findOne.mockImplementation((entity: unknown) => Promise.resolve(entity === Appuser ? Object.assign(eligibleUser(), { marketingOptOut: new Date('2026-01-01') }) : null));
+    await expect(service.getForAppuser(7)).resolves.toMatchObject({ bankSyncAlerts: { effectiveEnabled: false, storedEnabled: true } });
+  });
+
+  it('persists a bank sync alerts opt-out without touching the other categories', async () => {
+    execute.mockImplementation((sql: string) => Promise.resolve(sql.startsWith('select')
+      ? eligibleUser()
+      : { account_recovery_enabled: true, bank_sync_alerts_enabled: false, budget_alerts_enabled: true, growth_emails_enabled: true, monthly_story_enabled: true, weekly_insights_enabled: true }));
+
+    const result = await service.patchForAppuser(7, { bankSyncAlertsEnabled: false });
+
+    const [sql] = execute.mock.calls[1] as [string];
+    expect(sql).toContain('"bank_sync_alerts_enabled" = excluded."bank_sync_alerts_enabled"');
+    expect(sql).not.toContain('do update set "account_recovery_enabled"');
+    expect(result.bankSyncAlerts.storedEnabled).toBe(false);
+    expect(result.accountRecovery.storedEnabled).toBe(true);
   });
 
   it('honours an explicitly disabled stream', async () => {
@@ -122,7 +149,7 @@ describe('EmailNotificationPreferenceService', () => {
     expect(sql).toContain('"budget_alerts_enabled" = excluded."budget_alerts_enabled"');
     expect(sql).not.toContain('do update set "weekly_insights_enabled"');
     expect(sql).toContain('"deleted_at" = null');
-    expect(sql).toContain('returning "account_recovery_enabled", "budget_alerts_enabled", "growth_emails_enabled", "monthly_story_enabled", "weekly_insights_enabled"');
+    expect(sql).toContain('returning "account_recovery_enabled", "bank_sync_alerts_enabled", "budget_alerts_enabled", "growth_emails_enabled", "monthly_story_enabled", "weekly_insights_enabled"');
     expect(execute.mock.calls[1]?.[2]).toBe('get');
     expect(result.weeklyInsights.storedEnabled).toBe(true);
     expect(result.budgetAlerts.storedEnabled).toBe(false);

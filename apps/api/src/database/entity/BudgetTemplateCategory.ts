@@ -38,6 +38,14 @@ export class BudgetTemplateCategory {
   @Enum(() => Recurrency)
   recurrency?: Recurrency = Recurrency.MONTHLY;
 
+  /**
+   * This month takes part in rollover: it receives what the month before left over (when that
+   * month takes part too) and passes its own leftover on. Computed on read
+   * (`services/budget/budget-rollover.ts`); nothing derived is stored.
+   */
+  @Property({ default: false })
+  rolloverEnabled = false;
+
   @Index()
   @Property()
   year!: number;

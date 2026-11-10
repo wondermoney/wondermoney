@@ -20,8 +20,10 @@ describe('mapBankConnections', () => {
     expect(rows).toEqual([
       {
         accessType: 'open_banking',
+        bankId: null,
         connectionId: null,
         dataFreshAsOf: '2026-07-30T10:00:00.000Z',
+        daysUntilExpiry: null,
         expiresAt: '2026-08-30T12:00:00.000Z',
         institutionName: 'Real Bank',
         provider: 'GoCardless',
@@ -29,14 +31,21 @@ describe('mapBankConnections', () => {
       },
       {
         accessType: 'open_banking',
+        bankId: null,
         connectionId: null,
         dataFreshAsOf: '2026-07-30T10:00:00.000Z',
+        daysUntilExpiry: null,
         expiresAt: '2026-08-30T12:00:00.000Z',
         institutionName: null,
         provider: 'GoCardless',
         status: 'error',
       },
     ])
+  })
+
+  it('carries the reconnect bank id and days left when the API sends them', () => {
+    const [row] = mapBankConnections([dto({ bankId: 'UFQ6OlRlc3Q', daysUntilExpiry: 9, status: 'expiring' })])
+    expect(row).toMatchObject({ bankId: 'UFQ6OlRlc3Q', daysUntilExpiry: 9, status: 'expiring' })
   })
 
   it('returns an empty list when the response is empty', () => {

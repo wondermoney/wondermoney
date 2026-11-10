@@ -4,6 +4,7 @@ import { test } from "vitest";
 
 import type { Category } from "../api/category/useCategories";
 import {
+  countsAsSpending,
   getCategoryDisplayName,
   getCategorySearchKeywords,
   getSelectableCategories,
@@ -35,9 +36,7 @@ test("getSelectableCategories includes custom parent categories and subcategorie
       categoryKey: 10,
       isSystemCategory: false,
       name: "Custom parent",
-      childCategory: [
-        makeCategory({ categoryKey: 11, name: "Custom child" }),
-      ],
+      childCategory: [makeCategory({ categoryKey: 11, name: "Custom child" })],
     }),
     makeCategory({
       categoryKey: 12,
@@ -59,7 +58,11 @@ test("getSelectableCategories keeps system parent headings out of transaction op
       isSystemCategory: true,
       name: "Other",
       childCategory: [
-        makeCategory({ categoryKey: 2, isSystemCategory: true, name: "Travel" }),
+        makeCategory({
+          categoryKey: 2,
+          isSystemCategory: true,
+          name: "Travel",
+        }),
       ],
     }),
   ];
@@ -104,7 +107,12 @@ test("getCategoryDisplayName passes a user-defined category name through unchang
 test("getCategorySearchKeywords includes the translated label alongside the raw name", () => {
   assert.deepEqual(
     getCategorySearchKeywords("STREAMING_SERVICES", "Streaming Services"),
-    ["STREAMING_SERVICES", "Streaming Services", "Subscription", "Subscriptions"],
+    [
+      "STREAMING_SERVICES",
+      "Streaming Services",
+      "Subscription",
+      "Subscriptions",
+    ],
   );
 });
 
@@ -116,7 +124,7 @@ test('getCategorySearchKeywords finds Streaming Services when searching "Subscri
 
   assert(
     keywords.some((keyword) => /subscription/i.test(keyword)),
-    "Streaming Services must be searchable by \"Subscription\"/\"Subscriptions\"",
+    'Streaming Services must be searchable by "Subscription"/"Subscriptions"',
   );
 });
 
@@ -142,7 +150,22 @@ test("getCategorySearchKeywords is a no-op passthrough for categories with no sy
 });
 
 test("getCategorySearchKeywords de-duplicates when the raw name and label are identical", () => {
-  assert.deepEqual(getCategorySearchKeywords("Custom category", "Custom category"), [
-    "Custom category",
-  ]);
+  assert.deepEqual(
+    getCategorySearchKeywords("Custom category", "Custom category"),
+    ["Custom category"],
+  );
+});
+
+test("a category counts as spending only when it and its parent both do", () => {
+  assert.equal(countsAsSpending({ countsAsSpending: true }), true);
+  assert.equal(countsAsSpending({}), true);
+  assert.equal(countsAsSpending({ countsAsSpending: false }), false);
+  assert.equal(
+    countsAsSpending({ countsAsSpending: true }, { countsAsSpending: false }),
+    false,
+  );
+  assert.equal(
+    countsAsSpending({ countsAsSpending: true }, { countsAsSpending: true }),
+    true,
+  );
 });

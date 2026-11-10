@@ -1,4 +1,4 @@
-import { filterPortfolioActivityByTicker, mapPortfolioActivity, mapPortfolioDividendIncome } from './portfolio-activity-view-model'
+import { filterPortfolioActivityByTicker, mapPortfolioActivity, mapPortfolioDividendIncome, sentenceCaseKey } from './portfolio-activity-view-model'
 import { portfolioActivityResponseSchema } from './portfolios-contract'
 
 const completeSplit = {
@@ -90,3 +90,20 @@ describe('mapPortfolioDividendIncome', () => {
     expect(mapPortfolioDividendIncome(dto, null)).toMatchObject({ currency: null })
   })
 })
+
+describe('portfolio activity view model labels', () => {
+  it('reads a cash asset as its currency and keeps the type key with a sentence-case label', () => {
+    const response = portfolioActivityResponseSchema.parse({ transactions: [
+      { financialAssetKey: { financialAssetKey: 1, name: 'EUR', symbol: 'CURRENCY_EUR' }, financialTransactionTypeKey: { financialTransactionTypeKey: 4, name: 'DEPOSIT' }, portfolioKey: { name: 'Long-term', portfolioKey: 7 }, quantity: 1, settlementAmount: 400, transactionDate: '2026-11-04T00:00:00.000Z', transactionKey: 72 },
+      { financialAssetKey: { financialAssetKey: 11, name: 'Apple Inc.', symbol: 'AAPL' }, financialTransactionTypeKey: { financialTransactionTypeKey: 1, name: 'BUY' }, portfolioKey: { name: 'Long-term', portfolioKey: 7 }, quantity: 4, settlementAmount: 387.58, transactionDate: '2026-11-05T00:00:00.000Z', transactionKey: 73 },
+    ] })
+    const [deposit, buy] = mapPortfolioActivity(response.transactions)
+    expect(deposit).toMatchObject({ cashCurrency: 'EUR', name: null, ticker: null, type: 'DEPOSIT', typeLabel: 'Deposit' })
+    expect(buy).toMatchObject({ cashCurrency: null, name: 'Apple Inc.', ticker: 'AAPL', type: 'BUY', typeLabel: 'Buy' })
+  })
+
+  it('sentence-cases multi-word keys', () => {
+    expect(sentenceCaseKey('STOCK_SPLIT')).toBe('Stock split')
+  })
+})
+

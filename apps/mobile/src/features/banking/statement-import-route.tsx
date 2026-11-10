@@ -1,6 +1,6 @@
 import * as DocumentPicker from 'expo-document-picker'
-import { type Href, useNavigation, useRouter } from 'expo-router'
-import { useEffect, useState } from 'react'
+import { type Href, usePreventRemove, useRouter } from 'expo-router'
+import { useState } from 'react'
 
 import { useAccounts } from '@/features/accounts/use-accounts'
 import { ApiError } from '@/lib/api/errors'
@@ -21,14 +21,11 @@ const BLOCKING_PHASES = new Set(['uploading', 'processing'])
  */
 export function StatementImportRoute() {
   const router = useRouter()
-  const navigation = useNavigation()
   const accounts = useAccounts()
   const importState = useStatementImport()
   const [selectedAccountId, setSelectedAccountId] = useState<null | number>(null)
 
-  useEffect(() => navigation.addListener('beforeRemove', (event) => {
-    if (BLOCKING_PHASES.has(importState.state.phase)) event.preventDefault()
-  }), [importState.state.phase, navigation])
+  usePreventRemove(BLOCKING_PHASES.has(importState.state.phase))
 
   const back = () => {
     if (router.canGoBack()) router.back()

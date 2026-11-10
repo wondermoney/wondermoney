@@ -2,6 +2,7 @@ import Big from 'big.js';
 import { type TransactionsParserResult, TransactionStatus } from './types';
 import { extractDataFromTransactionDescription } from '../../../entities/transactions/extract-description';
 import { generateInternalTransactionId } from '../../../entities/transactions/generate-internal-id';
+import { requireDecimalString } from '../number';
 
 export type MontepioTransaction = [
   Date,
@@ -11,23 +12,30 @@ export type MontepioTransaction = [
   string | number
 ];
 
+// Montepio writes amounts as text in the Portuguese format ("1.234,56"), or as numeric cells.
+const MONTEPIO_FORMAT = { decimalSeparator: ',' } as const;
+
 const START_ROW = 9;
 const END_ROW = undefined;
 
 const montepioParser = (
   data: MontepioTransaction[]
 ): TransactionsParserResult => {
-  return data.slice(START_ROW, END_ROW).map((t) => {
+  return data.slice(START_ROW, END_ROW).map((t, index) => {
     const descriptionDirty = t[2];
     const { merchant, type } = extractDataFromTransactionDescription(
       'montepio',
       descriptionDirty
     );
     const transactionDate = t[0];
-    const amountStr = t[3].toString().replace('.', '').replace(',', '.');
-    const amount = new Big(amountStr);
+    const row = START_ROW + index + 1;
+    const amount = new Big(
+      requireDecimalString(t[3], MONTEPIO_FORMAT, `Montepio row ${row}, amount`)
+    );
     const balance = t[4]
-      ? new Big(t[4].toString().replace('.', '').replace(',', '.'))
+      ? new Big(
+          requireDecimalString(t[4], MONTEPIO_FORMAT, `Montepio row ${row}, balance`)
+        )
       : undefined;
     const currency = 'EUR';
     const internalTransactionId = generateInternalTransactionId(

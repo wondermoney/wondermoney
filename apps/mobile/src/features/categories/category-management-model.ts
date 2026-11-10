@@ -1,11 +1,12 @@
 import type { CategoriesResponse, CategoryCreateWrite, CategoryDto, CategoryEditWrite } from './categories-contract'
 
-export type VisibleCategory = Readonly<CategoryDto & { root: boolean }>
+/** `parentCountsAsSpending`: false when the category sits under a main category that does not count. */
+export type VisibleCategory = Readonly<CategoryDto & { root: boolean; parentCountsAsSpending: boolean }>
 
 function flattenCategories(response: CategoriesResponse): VisibleCategory[] {
   return response.categories.flatMap((root) => [
-    { ...root, root: true },
-    ...root.childCategory.map((child) => ({ ...child, root: false })),
+    { ...root, root: true, parentCountsAsSpending: true },
+    ...root.childCategory.map((child) => ({ ...child, root: false, parentCountsAsSpending: root.countsAsSpending !== false })),
   ])
 }
 
@@ -30,6 +31,15 @@ export function duplicateWarnings(
   }
 }
 
+/**
+ * Whether `payload` may be sent for `category`. A household's own category takes every field; a
+ * built-in (system) one is shared by every household, so only "counts as spending" can be set on
+ * it, and the server keeps that choice for this household only.
+ */
+export function isEditAllowed(category: Pick<CategoryDto, 'isSystemCategory'>, payload: CategoryEditWrite): boolean {
+  return !category.isSystemCategory || Object.keys(payload).every((field) => field === 'countsAsSpending')
+}
+
 export type CategoryReconciliation = 'create-neutral' | 'edit-applied' | 'edit-not-applied' | 'edit-not-found'
 
 export function reconcileCategoryWrite(
@@ -39,9 +49,10 @@ export function reconcileCategoryWrite(
   // Names and colors are not unique, so a matching POST result cannot prove that the request committed.
   if (gate.type === 'create') return 'create-neutral'
   const current = findVisibleCategory(response, gate.categoryId)
-  if (!current || current.isSystemCategory) return 'edit-not-found'
+  if (!current || !isEditAllowed(current, gate.payload)) return 'edit-not-found'
   const matches = (gate.payload.name === undefined || current.name === gate.payload.name)
     && (gate.payload.color === undefined || current.bgColor.toUpperCase() === gate.payload.color)
     && (gate.payload.icon === undefined || current.icon === gate.payload.icon)
+    && (gate.payload.countsAsSpending === undefined || (current.countsAsSpending !== false) === gate.payload.countsAsSpending)
   return matches ? 'edit-applied' : 'edit-not-applied'
 }

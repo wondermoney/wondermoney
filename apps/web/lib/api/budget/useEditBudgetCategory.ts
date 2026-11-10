@@ -9,6 +9,8 @@ export interface BudgetEditRequest {
   month: number;
   amount?: number;
   recurrency?: string;
+  /** With `applyToFollowingMonths` (default true) it applies to every later stored month too. */
+  rolloverEnabled?: boolean;
   applyToFollowingMonths?: boolean;
 }
 
@@ -22,11 +24,13 @@ const useEditBudgetCategory = () => {
       amount,
       recurrency,
       applyToFollowingMonths,
+      rolloverEnabled,
     }: BudgetEditRequest) =>
       api.patch(`/v1/budget/${budgetKey}/${year}/${month}/${categoryKey}`, {
         amount,
         recurrency,
         applyToFollowingMonths,
+        rolloverEnabled,
       }),
   });
 };

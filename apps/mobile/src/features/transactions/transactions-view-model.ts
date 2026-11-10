@@ -1,4 +1,8 @@
-import type { TransactionDto } from './transactions-contract'
+import type { EntityMarkSource } from '@/components/ui/entity-mark'
+import type { TagDto } from '@/features/tags/tags-contract'
+
+import { transactionMark } from './transaction-mark'
+import { isTransferType, type TransactionDto } from './transactions-contract'
 
 export type TransactionViewModel = Readonly<{
   id: number
@@ -21,13 +25,28 @@ export type TransactionViewModel = Readonly<{
   convertedBalance: number | null
   convertedBalanceCurrency: string | null
   category: string | null
+  /** False when the row's category is one that does not count as spending (investments, savings). */
+  categoryCountsAsSpending: boolean
+  /** Typed as a transfer between the household's own money: left out of spending and income. */
+  isTransfer: boolean
+  /** Where an outgoing transfer went, when someone said so. */
+  transferDestination: NonNullable<TransactionDto['transferDestination']> | null
+  /** The household tags on the row, by name; empty when the server sent none. */
+  tags: readonly TagDto[]
   reviewed: boolean
   hidden: boolean
   recurring: TransactionDto['recurringSeries']
   repayment: TransactionDto['loanRepayment']
   synthetic: boolean
+  /** The row's lead mark: category, transfer arrows, or the institution on the opening row. */
+  mark?: EntityMarkSource
 }>
 
+/**
+ * Keeps the server's order, as web does: the API sorts by date and key, newest
+ * first, with the synthetic "Initial balance" rows at their account's creation
+ * date.
+ */
 export function mapTransactions(input: { transactions: readonly TransactionDto[] }): TransactionViewModel[] {
   return input.transactions.map((transaction) => {
     const type = transaction.transactionTypeKey?.name ?? null
@@ -63,11 +82,25 @@ export function mapTransactions(input: { transactions: readonly TransactionDto[]
       convertedBalance: transaction.appuserCurrencyBalance ?? null,
       convertedBalanceCurrency: transaction.appuserCurrencyKey?.code ?? null,
       category: transaction.appuserTransactionCategories[0]?.name ?? null,
+      categoryCountsAsSpending: transaction.appuserTransactionCategories[0]?.countsAsSpending !== false,
+      isTransfer: isTransferType(type),
+      transferDestination: transaction.transferDestination ?? null,
+      tags: transaction.tags ?? [],
       reviewed: transaction.reviewed,
       hidden: transaction.hidden ?? false,
       recurring: transaction.recurringSeries,
       repayment: transaction.loanRepayment,
       synthetic: transaction.transactionKey < 0,
+      mark: transactionMark({
+        synthetic: transaction.transactionKey < 0,
+        type,
+        category: categoryOf(transaction.appuserTransactionCategories[0]),
+        institutionLogoUrl: transaction.accountKey.accountFinancialInstitutionKey?.logoUrl ?? null,
+      }),
     }
-  }).sort((a, b) => b.date.localeCompare(a.date) || b.id - a.id)
+  })
+}
+
+function categoryOf(category: TransactionDto['appuserTransactionCategories'][number] | undefined) {
+  return category ? { name: category.icon ?? null, bgColor: category.bgColor ?? null, textColor: category.textColor ?? null } : null
 }

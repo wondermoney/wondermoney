@@ -11,7 +11,7 @@ import {
   TrendingUp,
   Wallet,
 } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { useFormatter, useTranslations } from "next-intl";
 import { usePostHog } from "posthog-js/react";
 import { useEffect, useRef } from "react";
 
@@ -33,7 +33,9 @@ import {
   ACTIVATION_EVENTS,
   captureActivationEvent,
 } from "@/lib/utils/analytics";
+import { useFormatCurrency } from "@/lib/utils/useFormatCurrency";
 
+import { EXAMPLE_FIGURES } from "./exampleFigures";
 import FirstRunIconTile, { type FirstRunIconTone } from "./FirstRunIconTile";
 import { useFirstRunOnboardingFooter } from "./FirstRunOnboardingRouteShell";
 import { FirstRunSplit, FirstRunStepIntro } from "./FirstRunStepScaffold";
@@ -78,6 +80,8 @@ const SYNC_STATUS_META: Record<
 
 export default function FirstRunSyncStep() {
   const t = useTranslations("onboarding.firstRun");
+  const format = useFormatter();
+  const formatCurrency = useFormatCurrency();
   const user = useUser();
   const posthog = usePostHog();
   const setFooter = useFirstRunOnboardingFooter();
@@ -150,7 +154,8 @@ export default function FirstRunSyncStep() {
       statusKind = "succeeded";
     } else if (
       latestConnection?.status === "error" ||
-      latestConnection?.status === "expired"
+      latestConnection?.status === "expired" ||
+      latestConnection?.status === "revoked"
     ) {
       statusLine = t("connect.syncing.trouble");
       statusKind = "trouble";
@@ -196,28 +201,32 @@ export default function FirstRunSyncStep() {
       icon: Wallet,
       tone: "violet",
       label: t("syncValue.cards.balances.title"),
-      value: t("preview.syncValue.balancesValue"),
+      value: formatCurrency(EXAMPLE_FIGURES.accountsTotal, "EUR", {
+        maximumFractionDigits: 0,
+      }),
       description: t("syncValue.cards.balances.description"),
     },
     {
       icon: ArrowLeftRight,
       tone: "sky",
       label: t("syncValue.cards.transactions.title"),
-      value: t("preview.syncValue.transactionsValue"),
+      value: format.number(EXAMPLE_FIGURES.transactions),
       description: t("syncValue.cards.transactions.description"),
     },
     {
       icon: PiggyBank,
       tone: "sky",
       label: t("syncValue.cards.budgets.title"),
-      value: t("preview.syncValue.budgetSyncValue"),
+      value: format.number(EXAMPLE_FIGURES.budgetUsed, { style: "percent" }),
       description: t("syncValue.cards.budgets.description"),
     },
     {
       icon: TrendingUp,
       tone: "green",
       label: t("syncValue.cards.netWorth.title"),
-      value: t("preview.syncValue.netWorthSyncValue"),
+      value: formatCurrency(EXAMPLE_FIGURES.netWorth, "EUR", {
+        maximumFractionDigits: 0,
+      }),
       description: t("syncValue.cards.netWorth.description"),
       emphasize: true,
     },
@@ -270,29 +279,34 @@ export default function FirstRunSyncStep() {
               </ul>
             </div>
           ) : null}
-          <div className="divide-border divide-y border-y">
-            {cards.map((card) => (
-              <div key={card.label} className="flex items-center gap-3 py-3">
-                <div className="flex min-w-0 flex-1 items-center gap-2.5">
-                  <FirstRunIconTile
-                    icon={card.icon}
-                    tone={card.tone}
-                    size="sm"
-                  />
-                  <span className="min-w-0">
-                    <span className="text-muted-foreground block text-sm font-medium">
-                      {card.label}
+          <div>
+            <p className="text-muted-foreground mb-2 text-xs leading-5">
+              {t("preview.exampleCaption")}
+            </p>
+            <div className="divide-border divide-y border-y">
+              {cards.map((card) => (
+                <div key={card.label} className="flex items-center gap-3 py-3">
+                  <div className="flex min-w-0 flex-1 items-center gap-2.5">
+                    <FirstRunIconTile
+                      icon={card.icon}
+                      tone={card.tone}
+                      size="sm"
+                    />
+                    <span className="min-w-0">
+                      <span className="text-muted-foreground block text-sm font-medium">
+                        {card.label}
+                      </span>
+                      <span className="text-muted-foreground block text-xs leading-5">
+                        {card.description}
+                      </span>
                     </span>
-                    <span className="text-muted-foreground block text-xs leading-5">
-                      {card.description}
+                    <span className="ml-auto font-mono text-sm font-semibold tabular-nums">
+                      {card.value}
                     </span>
-                  </span>
-                  <span className="ml-auto font-mono text-sm font-semibold tabular-nums">
-                    {card.value}
-                  </span>
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
           {showOpenBankingNote ? (
             <div className="flex items-start gap-3.5">

@@ -43,10 +43,28 @@ export const invalidateBudgets = async (
 };
 
 export const invalidateCategories = async (qc: QueryClient) => {
+  invalidateTransactions(qc);
   await Promise.all([
     qc.invalidateQueries({ queryKey: ["categories"] }),
     qc.invalidateQueries({ queryKey: ["configs"] }),
     qc.invalidateQueries({ queryKey: ["transactions-category-spending"] }),
+    // A category's "Counts as spending" flag moves every spending total, and
+    // the transaction rows carry it too.
+    qc.invalidateQueries({ queryKey: ["accounts-cashflow"] }),
+    qc.invalidateQueries({ queryKey: ["reports"] }),
+    invalidateBudgets(qc),
+  ]);
+};
+
+/**
+ * After a row stops or starts counting as spending (marked as a transfer, or
+ * un-marked): the transaction lists, home cash flow, reports and budgets.
+ */
+export const invalidateSpendingTotals = async (qc: QueryClient) => {
+  invalidateTransactions(qc);
+  await Promise.all([
+    qc.invalidateQueries({ queryKey: ["reports"] }),
+    invalidateBudgets(qc),
   ]);
 };
 
@@ -81,7 +99,9 @@ export const invalidatePortfolioDetail = (
     qc.invalidateQueries({
       queryKey: ["portfolio-transactions", { portfolioId }],
     });
-    qc.invalidateQueries({ queryKey: ["portfolios-transactions", { portfolioId }] });
+    qc.invalidateQueries({
+      queryKey: ["portfolios-transactions", { portfolioId }],
+    });
   }
   qc.invalidateQueries({ queryKey: ["portfolio-history-status"] });
   qc.invalidateQueries({ queryKey: ["portfolio"] });

@@ -1,10 +1,10 @@
 import { useState } from 'react'
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
-import { SafeAreaView } from 'react-native-safe-area-context'
+import { Pressable, ScrollView, StyleSheet, View } from 'react-native'
 
-import { themeTokens } from '@/theme/tokens'
-import { textStyles } from '@/theme/typography'
 import { BackControl } from '@/components/ui/back-control'
+import { SafeAreaView } from '@/components/ui/screen-safe-area'
+import { Text } from '@/components/ui/text'
+import { themeTokens } from '@/theme/tokens'
 
 export type Palette = (typeof themeTokens.colors)[keyof typeof themeTokens.colors]
 
@@ -42,7 +42,7 @@ export function ScreenAction({
         (pressed || disabled) && sharedStyles.pressed,
       ]}
     >
-      <Text allowFontScaling style={[sharedStyles.actionLabel, { color: primary ? palette.primaryForeground : destructive ? palette.destructive : palette.foreground }]}>
+      <Text tone={primary ? 'onPrimary' : destructive ? 'destructive' : 'default'} variant="action">
         {label}
       </Text>
     </Pressable>
@@ -76,10 +76,9 @@ export function PortfolioFailure({
     <SafeAreaView style={[sharedStyles.safeArea, { backgroundColor: palette.background }]}>
       <ScrollView contentContainerStyle={sharedStyles.centered}>
         <View style={sharedStyles.failure}>
-          {onBack ? <BackControl fallback="/portfolio" onPress={onBack} color={palette.primary} /> : null}
-          <View style={[sharedStyles.errorMarker, { backgroundColor: palette.destructive }]} />
-          <Text accessibilityRole="header" allowFontScaling style={[sharedStyles.failureTitle, { color: palette.foreground }]}>{title}</Text>
-          <Text allowFontScaling style={[sharedStyles.body, { color: palette.mutedForeground }]}>{message}</Text>
+          {onBack ? <BackControl fallback="/portfolio" onPress={onBack} label={backLabel} /> : null}
+          <Text accessibilityRole="header" variant="title">{title}</Text>
+          <Text tone="muted" variant="body">{message}</Text>
           <View style={sharedStyles.actions}>
             {canRetry ? <ScreenAction label={retryLabel} onPress={onRetry} palette={palette} primary /> : null}
             <ScreenAction label={signOutLabel} onPress={onSignOut} palette={palette} />
@@ -98,7 +97,7 @@ export function PortfolioLoading({ label, palette, onBack, backLabel }: {
 }) {
   return (
     <SafeAreaView style={[sharedStyles.safeArea, { backgroundColor: palette.background }]}>
-      {onBack ? <View style={sharedStyles.loadingBack}><BackControl fallback="/portfolio" onPress={onBack} color={palette.primary} /></View> : null}
+      {onBack ? <View style={sharedStyles.loadingBack}><BackControl fallback="/portfolio" onPress={onBack} label={backLabel} /></View> : null}
       <View accessible accessibilityRole="progressbar" accessibilityLabel={label} style={sharedStyles.loading}>
         {[160, 300, 300, 240].map((width, index) => (
           <View key={index} style={[sharedStyles.skeleton, { width, height: index === 1 ? 112 : 28, backgroundColor: palette.muted }]} />
@@ -108,23 +107,18 @@ export function PortfolioLoading({ label, palette, onBack, backLabel }: {
   )
 }
 
-export function Metric({ label, value, palette, tone = 'default' }: {
+export function Metric({ label, value, tone = 'default' }: {
   label: string
   value: string
-  palette: Palette
+  /** Kept for callers; the text tones come from the palette already. */
+  palette?: Palette
   tone?: 'default' | 'positive' | 'negative' | 'muted'
 }) {
-  const color = tone === 'positive'
-    ? palette.successText
-    : tone === 'negative'
-      ? palette.destructiveText
-      : tone === 'muted'
-        ? palette.mutedForeground
-        : palette.foreground
+  const textTone = tone === 'positive' ? 'success' : tone === 'negative' ? 'destructive' : tone
   return (
     <View accessible accessibilityLabel={`${label}, ${value}`} style={sharedStyles.metric}>
-      <Text allowFontScaling style={[sharedStyles.metricLabel, { color: palette.mutedForeground }]}>{label}</Text>
-      <Text allowFontScaling style={[sharedStyles.metricValue, { color }]}>{value}</Text>
+      <Text tone="muted" variant="meta">{label}</Text>
+      <Text tone={textTone} variant="amount">{value}</Text>
     </View>
   )
 }
@@ -132,18 +126,12 @@ export function Metric({ label, value, palette, tone = 'default' }: {
 const sharedStyles = StyleSheet.create({
   safeArea: { flex: 1 },
   action: { minWidth: themeTokens.touchTarget.minimum, minHeight: themeTokens.touchTarget.minimum, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderRadius: themeTokens.radius.md, paddingHorizontal: themeTokens.spacing[4] },
-  actionLabel: { ...textStyles.action },
   pressed: { opacity: 0.72 },
   centered: { flexGrow: 1, justifyContent: 'center', padding: themeTokens.layout.screenPadding },
   failure: { width: '100%', maxWidth: 480, alignSelf: 'center', alignItems: 'flex-start', gap: themeTokens.spacing[4] },
-  errorMarker: { width: 36, height: 2 },
-  failureTitle: { ...textStyles.title },
-  body: { ...textStyles.body },
   actions: { flexDirection: 'row', flexWrap: 'wrap', gap: themeTokens.spacing[3] },
-  loadingBack: { paddingHorizontal: themeTokens.spacing[6], paddingTop: themeTokens.spacing[6], alignItems: 'flex-start' },
+  loadingBack: { paddingHorizontal: themeTokens.layout.screenPadding, paddingTop: themeTokens.layout.screenPadding, alignItems: 'flex-start' },
   loading: { flex: 1, width: '100%', maxWidth: 760, alignSelf: 'center', padding: themeTokens.layout.screenPadding, gap: themeTokens.spacing[5] },
   skeleton: { maxWidth: '100%', borderRadius: themeTokens.radius.md },
   metric: { flex: 1, minWidth: 128, gap: themeTokens.spacing[1] },
-  metricLabel: { ...textStyles.meta },
-  metricValue: { ...textStyles.amount },
 })

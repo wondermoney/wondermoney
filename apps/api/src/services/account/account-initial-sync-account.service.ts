@@ -1,4 +1,4 @@
-import { UniqueConstraintViolationException } from '@mikro-orm/core';
+import { type EntityManager, UniqueConstraintViolationException } from '@mikro-orm/core';
 import * as Sentry from '@sentry/node';
 
 import { DI } from '@app/database/di';
@@ -7,13 +7,14 @@ import { AccountFinancialInstitution, AccountFinancialInstitutionProvider } from
 import { AppuserTenant } from '@entity/AppuserTenant';
 import { Currency } from '@entity/Currency';
 import { EnableBankingConnection, EnableBankingConnectionStatus } from '@entity/EnableBankingConnection';
-import { ExchangeRate } from '@entity/ExchangeRate';
+import { FxStatus } from '@entity/Transaction';
+import { isProviderRejection, type ProviderRateLimit, providerRateLimitOf } from '@service/bank-sync-run/provider-failure';
+import { convertWithStatus, type FxConversion } from '@service/currency/exchange-rate';
 import { createEnableBankingSyncAdapter } from '@service/enable-banking/enable-banking-sync-adapter';
 import backgroundOperationService from '@service/operations/background-operation.service';
 import { sanitizeProviderResponse } from '@utils/error-sanitizer';
 import { ConflictError, InternalServerError, NotFoundError } from '@utils/errors';
 import logger from '@utils/logger';
-import { convertMoney } from '@utils/money';
 
 /**
  * `requisitionId`/`requisitionKey` are legacy names for provider-agnostic "sync target identity"
@@ -31,6 +32,10 @@ export interface AccountInitialSyncAccountsResult {
   appuserKey: number;
   failedAccountIds: string[];
   institutionIds: string[];
+  /** Every account failed, and each with a provider 400 or 401: a likely sign of ended consent. */
+  everyAccountRejected?: boolean;
+  /** The provider rate-limited a call; the phase stopped there. */
+  rateLimited?: ProviderRateLimit;
   requisitionId: string;
   requisitionKey: number;
   status: 'completed' | 'failed' | 'partial';
@@ -81,14 +86,18 @@ interface Deps {
   logger?: Pick<typeof logger, 'error' | 'info' | 'warn'>;
 }
 
-export function selectProviderBalanceAmount(response: AccountBalanceResponseLike): string {
+/**
+ * Undefined when the provider sent no usable balance. That is a failed fetch, not a zero balance:
+ * reading it as zero would overwrite the real balance and mark the account fresh.
+ */
+export function selectProviderBalanceAmount(response: AccountBalanceResponseLike): string | undefined {
   const usable = (response.balances ?? []).filter((item) => item.balanceAmount?.amount != null);
   for (const balanceType of BALANCE_TYPE_PREFERENCE) {
     const match = usable.find((item) => item.balanceType === balanceType);
     if (match?.balanceAmount?.amount != null) return match.balanceAmount.amount;
   }
   // Unknown or absent balanceType: fall back to the first usable entry, as before.
-  return usable[0]?.balanceAmount?.amount ?? '0';
+  return usable[0]?.balanceAmount?.amount;
 }
 
 const DUPLICATE_ERROR_CODES = new Set(['23505']);
@@ -158,7 +167,9 @@ class AccountInitialSyncAccountService {
 
     const fulfilled: { accountId: string; created: boolean; institutionId: string }[] = [];
     const failedAccountIds: string[] = [];
-    for (const accountId of accountIds) {
+    let rateLimited: ProviderRateLimit | undefined;
+    let rejectedCount = 0;
+    for (const [index, accountId] of accountIds.entries()) {
       try {
       const [detailsResponse, metadata, balances] = await Promise.all([
         client.account(accountId).getDetails(),
@@ -185,6 +196,7 @@ class AccountInitialSyncAccountService {
       }
 
       const balanceAmount = selectProviderBalanceAmount(balances);
+      if (balanceAmount === undefined) throw new InternalServerError(`Provider returned no balance for account: ${accountId}`);
       const balance = Number(balanceAmount);
       if (!Number.isFinite(balance)) throw new InternalServerError(`Invalid balance for account: ${accountId}`);
       const existingDeleted = await em.findOne(Account, { accountId, accountOwnerAppuserKey: tenant.appuserKey, deletedAt: { $ne: null } });
@@ -213,8 +225,18 @@ class AccountInitialSyncAccountService {
       account.accountOwnerAppuserKey = tenant.appuserKey;
       account.accountName ||= details.name ?? institutionId;
       account.accountNumber ||= metadataInfo.iban ?? undefined;
+      // The first balance the provider reports is what the account held when it was linked. Net
+      // worth history counts it from then until a transaction carries a running balance. An account
+      // that already had a balance before opening balances existed gets one from the startup
+      // backfill instead (`backfillAccountOpeningBalances`), which can derive it from its rows.
+      if (account.openingBalance == null && account.balance == null) {
+        account.openingBalance = balance;
+        account.openingBalanceDate = new Date();
+      }
       account.balance = balance;
-      account.appuserCurrencyBalance = await resolveAppuserCurrencyBalance(em, currency, tenant, balance);
+      const converted = await resolveAppuserCurrencyBalance(em, currency, tenant, balance);
+      account.appuserCurrencyBalance = converted.amount;
+      account.fxStatus = converted.fxStatus;
       account.currencyKey = currency;
       account.accountFinancialInstitutionKey = institution;
       account.enableBankingConnectionKey = target.connection;
@@ -232,6 +254,7 @@ class AccountInitialSyncAccountService {
         reloaded.accountNumber = account.accountNumber;
         reloaded.balance = account.balance;
         reloaded.appuserCurrencyBalance = account.appuserCurrencyBalance;
+        reloaded.fxStatus = account.fxStatus;
         reloaded.currencyKey = account.currencyKey;
         reloaded.accountFinancialInstitutionKey = account.accountFinancialInstitutionKey;
         reloaded.enableBankingConnectionKey = account.enableBankingConnectionKey;
@@ -244,6 +267,15 @@ class AccountInitialSyncAccountService {
       fulfilled.push({ accountId, created: !wasExisting, institutionId });
       } catch (error) {
         failedAccountIds.push(accountId);
+        if (isProviderRejection(error)) rejectedCount += 1;
+        rateLimited = providerRateLimitOf(error);
+        if (rateLimited) {
+          // Every further call spends quota the provider has just refused. The accounts not yet
+          // visited count as failed, so nothing marks them fresh.
+          failedAccountIds.push(...accountIds.slice(index + 1));
+          log.warn({ accountId, rateLimited, requisitionId }, 'Account initial sync stopped: provider rate limit');
+          break;
+        }
         log.warn({ accountId, error: sanitizeError(error), requisitionId }, 'Account initial sync account fetch failed');
         const providerResponse = sanitizeProviderResponse(error);
         Sentry.captureException(error, {
@@ -265,6 +297,8 @@ class AccountInitialSyncAccountService {
       requisitionId,
       requisitionKey,
       status: accountIds.length === 0 || accountsFetched === 0 ? 'failed' : failedAccountIds.length === 0 ? 'completed' : 'partial',
+      ...(accountsFetched === 0 && rejectedCount === accountIds.length ? { everyAccountRejected: true } : {}),
+      ...(rateLimited ? { rateLimited } : {}),
     };
 
     if (input.correlationId && input.queueJobId) {
@@ -339,12 +373,11 @@ function isUniqueConstraintError(error: unknown) {
   return false;
 }
 
-async function resolveAppuserCurrencyBalance(em: NonNullable<Deps['em']>, accountCurrency: Currency, tenant: AppuserTenant, balance: number) {
+/** The balance in the owner's currency at today's rate; with no rate, none (`missing`), never the raw one. */
+async function resolveAppuserCurrencyBalance(em: NonNullable<Deps['em']>, accountCurrency: Currency, tenant: AppuserTenant, balance: number): Promise<FxConversion> {
   const appuserCurrency = (tenant.appuserKey as unknown as undefined | { currencyKey?: Currency })?.currencyKey;
-  if (!appuserCurrency || appuserCurrency.code === accountCurrency.code) return balance;
-  const exchangeRate = await em.findOne(ExchangeRate, { date: { $lte: new Date() }, fromCurrency: accountCurrency, toCurrency: appuserCurrency }, { orderBy: { date: 'DESC', toCurrency: 'ASC' } });
-  if (!exchangeRate?.rate) return undefined;
-  return convertMoney(balance, exchangeRate.rate);
+  if (!appuserCurrency) return { amount: null, fxStatus: FxStatus.MISSING, rate: null };
+  return convertWithStatus(em as unknown as EntityManager, balance, accountCurrency, appuserCurrency, new Date());
 }
 
 function sanitizeError(error: unknown) {

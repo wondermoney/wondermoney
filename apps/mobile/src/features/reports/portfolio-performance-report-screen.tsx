@@ -1,19 +1,27 @@
 import { useTranslation } from 'react-i18next'
-import { RefreshControl, ScrollView, StyleSheet, Text, useColorScheme, View } from 'react-native'
-import { SafeAreaView } from 'react-native-safe-area-context'
+import { StyleSheet, View } from 'react-native'
 
-import { BackControl } from '@/components/ui/back-control'
-import { formatCurrency } from '@/lib/formatters/financial'
-import { themeTokens, type Palette } from '@/theme/tokens'
-import { textStyles } from '@/theme/typography'
+import { Amount } from '@/components/ui/amount'
+import { Text } from '@/components/ui/text'
+import { formatPercentagePoints } from '@/lib/formatters/financial'
+import { useFormatMoney } from '@/lib/formatters/money-display'
+import { themeTokens } from '@/theme/tokens'
 
+import type { PortfolioPerformanceReportViewModel, PortfolioPerformanceTotals } from './portfolio-performance-report-view-model'
 import type { ReportDatePreset } from './report-date-presets'
-import { ReportFilterPanel } from './report-filter-panel'
-import { ReportExportButton, ReportPresetBar, ReportSectionFailure, ReportSectionHeading, ReportSectionLoading, styles as sharedStyles } from './report-screen-parts'
+import { ReportFiltersBar } from './report-filters-bar'
+import {
+  ReportEmptyState,
+  ReportExportButton,
+  ReportSection,
+  ReportSectionFailure,
+  ReportSectionLoading,
+  ReportStandalonePage,
+  ReportTable,
+  ReportTrend,
+  type ReportTableRow,
+} from './report-screen-parts'
 import type { ReportExportState } from './use-report-export'
-import type { useReportFilterOptions } from './use-report-filter-options'
-import type { useReportFilters } from './use-report-filters'
-import type { PortfolioPerformanceReportViewModel } from './portfolio-performance-report-view-model'
 
 export type PortfolioPerformanceReportViewState =
   | { status: 'loading' }
@@ -30,147 +38,125 @@ export type PortfolioPerformanceReportBodyProps = {
   onRefresh: () => void | Promise<void>
 }
 
+/**
+ * The report covers every household portfolio over the period, so the standalone screen offers the
+ * period only: the account and transaction filters of the other reports don't apply to it.
+ */
 export type PortfolioPerformanceReportScreenProps = PortfolioPerformanceReportBodyProps & {
   preset: ReportDatePreset
-  filterState: ReturnType<typeof useReportFilters>
-  filterOptions: ReturnType<typeof useReportFilterOptions>
   onSelectPreset: (preset: ReportDatePreset) => void
   onBack: () => void
 }
 
+type Figures = Readonly<{ name: string; startValue: number | null; netContributions: number | null; change: number | null; changePercent: number | null; dividends: number | null; endValue: number | null }>
+
+/**
+ * Web's `PortfolioPerformanceReport`: a six-column table (Portfolio, Start
+ * value, Net contributions, Change, Dividends, End value) that scrolls sideways
+ * at phone width, biggest movers first, with a Total row when there is more
+ * than one portfolio. A value the API has no snapshot for is an em dash.
+ */
 export function PortfolioPerformanceReportBody({ state, currencyCode, exportState, onExport, onRefresh }: PortfolioPerformanceReportBodyProps) {
+  const formatMoney = useFormatMoney()
   const { t, i18n } = useTranslation()
-  const palette = themeTokens.colors[useColorScheme() === 'dark' ? 'dark' : 'light']
   const locale = i18n.resolvedLanguage ?? i18n.language ?? 'en'
-  const money = (value: number) => formatCurrency(value, { locale, currency: currencyCode })
+  const money = (value: number) => formatMoney(value, { locale, currency: currencyCode })
   const signedMoney = (value: number) => `${value > 0 ? '+' : ''}${money(value)}`
-  const title = t('reports.portfolioPerformance.title')
-  const helper = t('reports.portfolioPerformance.subtitle')
+  const unknown = t('reports.portfolioPerformance.unknownValue')
+  // Contributions and dividends are unknown only when a trade or payout has no exchange rate.
+  const noRate = t('reports.portfolioPerformance.noExchangeRate')
+  const optionalMoneyLabel = (value: number | null, unknownLabel = unknown) => value === null ? unknownLabel : money(value)
+  const changeLabel = (change: number | null, percent: number | null) => change === null
+    ? unknown
+    : percent === null ? signedMoney(change) : `${signedMoney(change)} (${formatPercentagePoints(percent, locale, { maximumFractionDigits: 2 })})`
 
   if (state.status === 'access-transition') return null
 
+  const amount = (value: number | null, unknownLabel = unknown) => value === null
+    ? <Text accessibilityLabel={unknownLabel} align="right" tone="muted" variant="amount">—</Text>
+    : <Amount align="right" currency={currencyCode} locale={locale} value={value} />
+
+  const toRow = (key: string, figures: Figures, emphasis?: 'total'): ReportTableRow => ({
+    key,
+    emphasis,
+    accessibilityLabel: [
+      figures.name,
+      `${t('reports.portfolioPerformance.startValue')}, ${optionalMoneyLabel(figures.startValue)}`,
+      `${t('reports.portfolioPerformance.netContributions')}, ${optionalMoneyLabel(figures.netContributions, noRate)}`,
+      `${t('reports.portfolioPerformance.change')}, ${changeLabel(figures.change, figures.changePercent)}`,
+      `${t('reports.portfolioPerformance.dividends')}, ${optionalMoneyLabel(figures.dividends, noRate)}`,
+      `${t('reports.portfolioPerformance.endValue')}, ${optionalMoneyLabel(figures.endValue)}`,
+    ].join(', '),
+    cells: {
+      portfolio: figures.name,
+      startValue: amount(figures.startValue),
+      netContributions: amount(figures.netContributions, noRate),
+      change: figures.change === null ? amount(null) : (
+        <View style={styles.change}>
+          <Text align="right" variant="amount">{signedMoney(figures.change)}</Text>
+          <ReportTrend percentage={figures.changePercent} value={figures.change} />
+        </View>
+      ),
+      dividends: amount(figures.dividends, noRate),
+      endValue: amount(figures.endValue),
+    },
+  })
+
+  let content: React.ReactNode
   if (state.status === 'loading') {
-    return (
-      <View style={sharedStyles.section}>
-        <ReportSectionHeading title={title} helper={helper} palette={palette} />
-        <ReportSectionLoading label={t('reports.portfolioPerformance.loading')} palette={palette} />
-      </View>
+    content = <ReportSectionLoading label={t('reports.portfolioPerformance.loading')} />
+  } else if (state.status === 'error' || state.status === 'invalid-response') {
+    content = <ReportSectionFailure invalid={state.status === 'invalid-response'} onRetry={onRefresh} />
+  } else if (state.report.rows.length === 0) {
+    content = <ReportEmptyState description={t('reports.portfolioPerformance.emptyMessage')} icon="trending-up" title={t('reports.portfolioPerformance.emptyTitle')} />
+  } else {
+    const { rows, totals } = state.report
+    const totalFigures: Figures & PortfolioPerformanceTotals = { name: t('reports.portfolioPerformance.total'), ...totals }
+    content = (
+      <ReportTable
+        columns={[
+          { key: 'portfolio', label: t('reports.portfolioPerformance.portfolio'), width: 160 },
+          { key: 'startValue', label: t('reports.portfolioPerformance.startValue'), align: 'right', width: 128 },
+          { key: 'netContributions', label: t('reports.portfolioPerformance.netContributions'), align: 'right', width: 160 },
+          { key: 'change', label: t('reports.portfolioPerformance.change'), align: 'right', width: 144 },
+          { key: 'dividends', label: t('reports.portfolioPerformance.dividends'), align: 'right', width: 112 },
+          { key: 'endValue', label: t('reports.portfolioPerformance.endValue'), align: 'right', width: 128 },
+        ]}
+        rows={[
+          ...rows.map((row) => toRow(row.portfolioKey, row)),
+          ...(rows.length > 1 ? [toRow('__total__', totalFigures, 'total')] : []),
+        ]}
+        scrollable
+      />
     )
   }
-
-  if (state.status === 'error' || state.status === 'invalid-response') {
-    return (
-      <View style={sharedStyles.section}>
-        <ReportSectionHeading title={title} helper={helper} palette={palette} />
-        <ReportSectionFailure
-          message={t(state.status === 'invalid-response' ? 'reports.invalidMessage' : 'reports.errorMessage')}
-          onRetry={onRefresh}
-          palette={palette}
-        />
-      </View>
-    )
-  }
-
-  const { report } = state
-  const aggregateGaining = report.aggregateReturn >= 0
 
   return (
-    <View style={sharedStyles.section}>
-      <ReportSectionHeading title={title} helper={helper} palette={palette} />
-      <ReportExportButton status={exportState.status} onExport={onExport} palette={palette} />
-
-      {report.rows.length === 0 ? (
-        <View style={[sharedStyles.empty, { borderColor: palette.border, backgroundColor: palette.card }]}>
-          <Text accessibilityRole="header" allowFontScaling style={[sharedStyles.emptyTitle, { color: palette.foreground }]}>
-            {t('reports.portfolioPerformance.emptyTitle')}
-          </Text>
-          <Text allowFontScaling style={[sharedStyles.body, { color: palette.mutedForeground }]}>
-            {t('reports.portfolioPerformance.emptyMessage')}
-          </Text>
-        </View>
-      ) : (
-        <>
-          <Text
-            accessible
-            accessibilityLabel={t('reports.portfolioPerformance.aggregateReturn', { value: signedMoney(report.aggregateReturn) })}
-            allowFontScaling
-            style={[styles.aggregate, { color: aggregateGaining ? palette.successText : palette.destructiveText }]}
-          >
-            {t('reports.portfolioPerformance.aggregateReturn', { value: signedMoney(report.aggregateReturn) })}
-          </Text>
-
-          <View style={styles.list}>
-            {report.rows.map((row) => {
-              const label = [
-                row.name,
-                row.currency,
-                `${t('reports.portfolioPerformance.startBalance')}, ${money(row.startBalance)}`,
-                `${t('reports.portfolioPerformance.contributions')}, ${money(row.contributions)}`,
-                `${t('reports.portfolioPerformance.return')}, ${signedMoney(row.return)}`,
-                `${t('reports.portfolioPerformance.endBalance')}, ${money(row.endBalance)}`,
-              ].join(', ')
-              return (
-                <View key={row.accountKey} accessible accessibilityLabel={label} style={[styles.row, { borderColor: palette.border, backgroundColor: palette.card }]}>
-                  <View style={styles.rowTop}>
-                    <Text allowFontScaling style={[styles.rowName, { color: palette.foreground }]}>{row.name}</Text>
-                    <Text allowFontScaling style={[styles.rowCurrency, { color: palette.mutedForeground }]}>{row.currency}</Text>
-                  </View>
-                  <View style={styles.rowMetrics}>
-                    <Metric label={t('reports.portfolioPerformance.startBalance')} value={money(row.startBalance)} palette={palette} />
-                    <Metric label={t('reports.portfolioPerformance.contributions')} value={money(row.contributions)} palette={palette} />
-                    <Metric label={t('reports.portfolioPerformance.return')} value={signedMoney(row.return)} valueColor={row.gaining ? palette.successText : palette.destructiveText} palette={palette} />
-                    <Metric label={t('reports.portfolioPerformance.endBalance')} value={money(row.endBalance)} palette={palette} />
-                  </View>
-                </View>
-              )
-            })}
-          </View>
-          <Text allowFontScaling style={[styles.caveat, { color: palette.mutedForeground }]}>{t('reports.portfolioPerformance.startCaveat')}</Text>
-        </>
-      )}
-    </View>
+    <ReportSection
+      actions={state.status === 'loading' || state.status === 'error' || state.status === 'invalid-response' ? undefined : <ReportExportButton onExport={onExport} status={exportState.status} />}
+      description={t('reports.portfolioPerformance.subtitle')}
+      testID="portfolio-performance-report"
+      title={t('reports.portfolioPerformance.title')}
+    >
+      {content}
+    </ReportSection>
   )
 }
 
-export function PortfolioPerformanceReportScreen({ state, preset, currencyCode, filterState, filterOptions, exportState, onSelectPreset, onExport, onRefresh, onBack }: PortfolioPerformanceReportScreenProps) {
-  const palette = themeTokens.colors[useColorScheme() === 'dark' ? 'dark' : 'light']
+export function PortfolioPerformanceReportScreen({ state, preset, currencyCode, exportState, onSelectPreset, onExport, onRefresh, onBack }: PortfolioPerformanceReportScreenProps) {
   if (state.status === 'access-transition') return null
   return (
-    <SafeAreaView style={[sharedStyles.safeArea, { backgroundColor: palette.background }]}>
-      <ScrollView
-        contentContainerStyle={sharedStyles.content}
-        refreshControl={<RefreshControl refreshing={Boolean(state.status === 'loaded' && state.refreshing)} onRefresh={() => void onRefresh()} tintColor={palette.primary} />}
-      >
-        <View style={sharedStyles.page}>
-          <BackControl fallback="/reports" onPress={onBack} color={palette.primary} />
-          <ReportPresetBar preset={preset} onSelectPreset={onSelectPreset} palette={palette} />
-          <ReportFilterPanel filterState={filterState} filterOptions={filterOptions} palette={palette} />
-          <PortfolioPerformanceReportBody state={state} currencyCode={currencyCode} exportState={exportState} onExport={onExport} onRefresh={onRefresh} />
-        </View>
-      </ScrollView>
-    </SafeAreaView>
-  )
-}
-
-function Metric({ label, value, valueColor, palette }: { label: string; value: string; valueColor?: string; palette: Palette }) {
-  return (
-    <View style={styles.metric}>
-      <Text allowFontScaling style={[styles.metricLabel, { color: palette.mutedForeground }]}>{label}</Text>
-      <Text allowFontScaling style={[styles.metricValue, { color: valueColor ?? palette.foreground }]}>{value}</Text>
-    </View>
+    <ReportStandalonePage
+      controls={<ReportFiltersBar onSelectPreset={onSelectPreset} preset={preset} />}
+      onBack={onBack}
+      onRefresh={onRefresh}
+      refreshing={Boolean(state.status === 'loaded' && state.refreshing)}
+    >
+      <PortfolioPerformanceReportBody currencyCode={currencyCode} exportState={exportState} onExport={onExport} onRefresh={onRefresh} state={state} />
+    </ReportStandalonePage>
   )
 }
 
 const styles = StyleSheet.create({
-  aggregate: { ...textStyles.amount, textAlign: 'center' },
-  list: { gap: themeTokens.spacing[3] },
-  row: { borderWidth: 1, borderRadius: themeTokens.radius.lg, padding: themeTokens.spacing[4], gap: themeTokens.spacing[3] },
-  rowTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: themeTokens.spacing[3] },
-  rowName: { ...textStyles.action },
-  rowCurrency: { ...textStyles.amountSmall },
-  rowMetrics: { flexDirection: 'row', flexWrap: 'wrap', gap: themeTokens.spacing[4] },
-  metric: { gap: themeTokens.spacing[1] },
-  metricLabel: { ...textStyles.label },
-  metricValue: { ...textStyles.amount },
-  caveat: { ...textStyles.label },
+  change: { alignItems: 'flex-end', gap: themeTokens.spacing[1] },
 })

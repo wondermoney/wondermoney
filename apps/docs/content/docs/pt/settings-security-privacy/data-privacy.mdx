@@ -29,6 +29,51 @@ A análise e a atribuição dependem do consentimento. Se não consentiste a an�
 - Se os serviços ligados continuam ativos
 - Se o acesso bancário ligado continua a ser necessário
 
+## Exportar os teus dados
+
+**Definições > Privacidade > Exportar todos os dados** (ou **Definições > Segurança** na aplicação móvel) descarrega tudo o que vês no teu agregado familiar, num ficheiro zip chamado `wondermoney-export-AAAA-MM-DD.zip`:
+
+- `data/`: um ficheiro JSON por tipo de dados: contas, transações, categorias e definições de categorias, comerciantes, etiquetas, divisões de transações, regras, pagamentos recorrentes, orçamentos, objetivos, empréstimos, carteiras e as suas transações, a tua lista de observação e as tuas preferências. As linhas referem-se umas às outras por identificadores que só têm significado dentro da exportação.
+- `csv/`: transações, contas, transações de carteira e posições atuais, para folhas de cálculo. Os valores usam o ponto como separador decimal e as datas estão no formato `AAAA-MM-DD`.
+- `manifest.json`: a versão do formato, quando a exportação foi feita e o número de linhas e uma soma de verificação SHA-256 de cada ficheiro.
+
+O que não é incluído:
+
+- As contas privadas do teu parceiro, e as respetivas transações, divisões, etiquetas, pagamentos recorrentes e regras. Os empréstimos e a lista de observação dele também ficam de fora.
+- Palavras-passe, sessões, segredos de autenticação de dois fatores, credenciais bancárias e tokens de ligação. Uma conta que esteve ligada a um banco indica-o, sem nenhum dos dados da ligação.
+- Registos de auditoria, utilização de IA e dados de análise.
+
+Quando o servidor tem armazenamento de ficheiros, a exportação é preparada em segundo plano. Recebes um email quando estiver pronta e podes descarregar o ficheiro no mesmo sítio durante 24 horas; depois disso é apagado. Num servidor próprio sem armazenamento de ficheiros, o zip é criado enquanto é descarregado, a partir da aplicação web. Podes pedir até três exportações por dia.
+
+### Proteger a exportação com uma palavra-passe
+
+Marca **Proteger o ficheiro com uma palavra-passe** antes de iniciar a exportação (aplicação web) e escolhe uma palavra-passe com pelo menos 16 caracteres. Todos os ficheiros do zip ficam então cifrados com AES-256, no formato padrão WinZip AES:
+
+- Abre-o com o [7-Zip](https://www.7-zip.org/) (Windows, Linux), o [Keka](https://www.keka.io/) (macOS) ou o WinRAR, e introduz a palavra-passe. As ferramentas de zip integradas de alguns sistemas não abrem arquivos cifrados.
+- Um pequeno `README.txt` ao lado dos ficheiros cifrados explica como abri-lo. Os nomes e tamanhos dos ficheiros ficam visíveis; o conteúdo não.
+- Um ficheiro alterado ou danificado é detetado ao abri-lo.
+- O WonderMoney não guarda a palavra-passe e não a consegue recuperar. Se a esqueceres, inicia uma nova exportação.
+
+O formato deriva a chave da palavra-passe com uma função rápida, por isso é o comprimento da palavra-passe que protege o ficheiro: prefere uma frase longa com várias palavras a uma palavra-passe curta e complexa. A palavra-passe é enviada ao servidor uma vez, quando a exportação começa, usada só enquanto o ficheiro é escrito e depois apagada. Nunca é registada em logs, guardada com a exportação nem incluída no email, e o servidor nunca guarda uma cópia não cifrada de uma exportação protegida.
+
+## Restaurar a partir de uma exportação
+
+Uma exportação pode ser carregada de volta no WonderMoney, no mesmo servidor ou noutro, por exemplo quando mudas entre o serviço alojado e o teu próprio servidor. O restauro só preenche um agregado vazio: funciona enquanto o teu agregado não tem contas, carteiras, orçamentos, objetivos ou empréstimos, e nunca junta uma exportação a dados existentes. Só o titular do agregado pode restaurar, e o servidor precisa de armazenamento de ficheiros.
+
+1. Abre **Definições > Privacidade > Restaurar a partir de uma exportação**, ou escolhe **Restaurar a partir de uma exportação** no primeiro ecrã depois de te registares.
+2. Escolhe o ficheiro `wondermoney-export-AAAA-MM-DD.zip` (até 64 MB) e seleciona **Verificar ficheiro**. Numa exportação protegida por palavra-passe, introduz a palavra-passe quando for pedida.
+3. O WonderMoney verifica o ficheiro inteiro antes de escrever o que quer que seja: que é uma exportação do WonderMoney, que nenhum ficheiro foi alterado, acrescentado ou removido desde a exportação (com as somas de verificação do `manifest.json`) e que todas as linhas podem ser lidas. Depois mostra o que a exportação contém e o que deves saber antes de restaurar.
+4. Seleciona **Restaurar agora**. Tudo é escrito de uma vez: se alguma coisa falhar, nada fica guardado e o agregado continua vazio.
+
+O que esperar depois:
+
+- As contas que estavam ligadas a um banco voltam como contas manuais, com todo o histórico. Nenhuma credencial bancária é restaurada, por isso volta a ligá-las em **Definições > Ligações** se quiseres que voltem a sincronizar.
+- Tudo o que está na exportação passa a ser teu, incluindo o que um parceiro partilhou contigo. Convida o teu parceiro novamente para partilhar o agregado.
+- A tua moeda, idioma e preferências de email passam a ser os da exportação.
+- Os investimentos são associados à lista deste servidor pelo ISIN ou pelo símbolo, e um que não conheça é procurado nos seus dados de mercado. As transações de um investimento que nenhum dos dois conheça ficam de fora, e a verificação lista-as antes de restaurares: acrescenta-as tu depois. Os saldos das contas são restaurados como foram exportados; os saldos noutras moedas e o histórico das carteiras são recalculados em segundo plano pouco depois.
+
+A palavra-passe de uma exportação protegida é enviada uma vez, quando o ficheiro é verificado, e guardada cifrada apenas até o restauro terminar. Nunca é registada. O ficheiro enviado é apagado quando o restauro termina e, em qualquer caso, no prazo de um dia. Podes iniciar até dez restauros por dia.
+
 ## Boas práticas
 
 Revê as definições de privacidade depois de mudares o método de início de sessão, os bancos ligados ou as escolhas de consentimento. Se algo parecer inesperado, começa pela página da funcionalidade em causa em vez de alterares várias definições ao mesmo tempo.

@@ -42,10 +42,12 @@ export async function getNetWorthHistoryReport(input: ReportServiceInput): Promi
     ? getMonthKey(new Date(input.filters.fromDate), resolveReportTimeZone(input.filters.timezone))
     : null;
 
-  return summary.points
+  const completePoints = summary.points
     .filter((point) => point.totalNetWorth != null)
     // Both keys are zero-padded `YYYY-MM`, so string ordering is chronological.
-    .filter((point) => fromMonthKey === null || point.date.slice(0, 7) >= fromMonthKey)
+    .filter((point) => fromMonthKey === null || point.date.slice(0, 7) >= fromMonthKey);
+
+  return closingPointPerMonth(completePoints)
     .map((point) => {
       const assets = (point.accountsTotal ?? 0) + (point.portfoliosTotal ?? 0);
       const liabilities = point.loansTotal ?? 0;
@@ -64,4 +66,20 @@ export async function getNetWorthHistoryReport(input: ReportServiceInput): Promi
 function monthStartOf(date: string): Date {
   const parsed = new Date(`${date}T00:00:00.000Z`);
   return new Date(Date.UTC(parsed.getUTCFullYear(), parsed.getUTCMonth(), 1));
+}
+
+/**
+ * The history service adds a point on every transaction day as well as each
+ * month end, so a busy month carries many points. The report is month by month:
+ * keep each month's latest complete point, its closing net worth. `point.date`
+ * is a floating zero-padded `YYYY-MM-DD`, so string order is chronological.
+ */
+function closingPointPerMonth<T extends { date: string }>(points: T[]): T[] {
+  const byMonth = new Map<string, T>();
+  for (const point of points) {
+    const monthKey = point.date.slice(0, 7);
+    const current = byMonth.get(monthKey);
+    if (!current || point.date > current.date) byMonth.set(monthKey, point);
+  }
+  return [...byMonth.values()];
 }

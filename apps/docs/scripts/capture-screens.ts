@@ -1,5 +1,5 @@
 /**
- * Capture raw full-page product screenshots for the docs site (RAD-427).
+ * Capture raw full-page product screenshots for the docs site.
  *
  * Companion to `scripts/crop-screens.ts`: this script drives the browser and
  * writes full-page PNGs into `dogfood-output/docs-screens/<section>/`, which the

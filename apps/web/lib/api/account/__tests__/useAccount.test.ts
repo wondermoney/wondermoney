@@ -123,6 +123,7 @@ test("supports finalized detail payloads", async () => {
   // the expectation went stale when normalizeAccountsResponse gained them.
   assert.deepEqual(response.account, {
     ...finalizedAccount,
+    accountType: null,
     appuserCurrencyAvailableBalance: null,
     csvImportFormat: "generic",
     availableBalance: null,

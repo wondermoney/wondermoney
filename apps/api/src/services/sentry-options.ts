@@ -63,7 +63,7 @@ function isScannerNoise(errorType: string | undefined, requestUrl: string | unde
 }
 
 /**
- * What a Sentry event from the API or worker may carry (issue #38). Sentry 11 collects everything
+ * What a Sentry event from the API or worker may carry. Sentry 11 collects everything
  * by default when `dataCollection` is unset — request/response bodies, cookies, every header, query
  * strings, user info, database query parameters/results, queue arguments and gen-AI inputs/outputs —
  * so every category is stated here. Both the API (`app.ts`) and the worker (`worker.ts`) initialise
@@ -100,7 +100,7 @@ export function buildSentryOptions(): Sentry.NodeOptions {
     dsn: SENTRY_DSN,
     environment: APP_ENV,
     maxValueLength: 8196,
-    // What an event may carry (issue #38). Applied by the SDK before `beforeSend`, which still
+    // What an event may carry. Applied by the SDK before `beforeSend`, which still
     // runs its own scrub over whatever is left.
     beforeSend(event) {
       const request = event.request;

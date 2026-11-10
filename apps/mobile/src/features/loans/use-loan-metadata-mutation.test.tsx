@@ -19,7 +19,7 @@ const setup = () => {
 describe('loan metadata write', () => {
   beforeEach(() => { mockWrite.mockReset(); mockBlockAccess.mockReset() })
 
-  it('writes the exact sparse body once and invalidates current-epoch loan and net worth only after commit', async () => {
+  it('writes the exact sparse body once and invalidates current-epoch loan, overview and net worth only after commit', async () => {
     const { client, wrapper } = setup()
     const invalidate = jest.spyOn(client, 'invalidateQueries')
     const response = { loan: { ...loanFixture, providerName: '', notes: 'Retained' } }
@@ -29,8 +29,9 @@ describe('loan metadata write', () => {
     expect(mockWrite).toHaveBeenCalledTimes(1)
     expect(mockWrite.mock.calls[0][0]).toMatchObject({ method: 'PATCH', path: '/v1/loan/7' })
     expect(mockWrite.mock.calls[0][1].body).toEqual({ providerName: '', notes: 'Retained' })
-    expect(invalidate).toHaveBeenCalledTimes(3)
+    expect(invalidate).toHaveBeenCalledTimes(4)
     expect(invalidate).toHaveBeenCalledWith({ queryKey: ['loans', 'list', 8], exact: true })
+    expect(invalidate).toHaveBeenCalledWith({ queryKey: ['loans', 'overview', 8], exact: true })
     expect(invalidate).toHaveBeenCalledWith({ queryKey: ['loans', 'detail', 8, 7], exact: true })
     expect(invalidate).toHaveBeenCalledWith({ queryKey: ['net-worth', 8], exact: true })
     expect(invalidate).not.toHaveBeenCalledWith(expect.objectContaining({ queryKey: ['loans', 'repayments', 8, 7] }))

@@ -1,7 +1,7 @@
 "use client";
 
 import { useQueryClient } from "@tanstack/react-query";
-import { MoveUpRight, Plus, TrendingDown, TrendingUp } from "lucide-react";
+import { Plus, TrendingDown, TrendingUp } from "lucide-react";
 import dynamic from "next/dynamic";
 import { useSearchParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
@@ -28,7 +28,9 @@ import CategoryIcon from "@/components/ui/CategoryIcon";
 import { DataProvenance } from "@/components/ui/DataProvenance";
 import { Link } from "@/components/ui/Link";
 import { StatCardsSkeleton } from "@/components/ui/PageSkeleton";
+import { Section } from "@/components/ui/RuledSection";
 import { Spinner } from "@/components/ui/Spinner";
+import { UnconvertedAmountsNotice } from "@/components/ui/UnconvertedAmountsNotice";
 import { useRouter } from "@/i18n/navigation";
 import { getAggregateFreshness } from "@/lib/account/accounts-freshness";
 import { aggregateMetrics } from "@/lib/account/accounts-metrics";
@@ -65,6 +67,7 @@ import { getCategoryTranslationKey } from "@/lib/utils/categories";
 import { resolveCategoryColor } from "@/lib/utils/categoryColor";
 import { invalidateAccounts } from "@/lib/utils/queryInvalidation";
 import { useFormatCurrency } from "@/lib/utils/useFormatCurrency";
+import { useFormatPercentage } from "@/lib/utils/useFormatPercentage";
 import { useHydrated } from "@/lib/utils/useHydrated";
 
 import {
@@ -116,6 +119,7 @@ export default function AccountsClient({
   initialAccountsData,
   initialConfigsData,
 }: AccountsClientProps) {
+  const formatPercentage = useFormatPercentage();
   const t = useTranslations();
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -478,12 +482,12 @@ export default function AccountsClient({
   const accountsFreshness = getAggregateFreshness(accountsData?.accounts);
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-10 lg:gap-12">
       {/* Header row */}
       <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
         <div>
           <div className="flex items-center gap-2">
-            <h1 className="text-foreground text-xl font-semibold tracking-tight">
+            <h1 className="text-foreground text-2xl font-semibold tracking-tight lg:text-3xl">
               {t("accounts-overview")}
             </h1>
             <AccountsOnboarding />
@@ -512,8 +516,8 @@ export default function AccountsClient({
                 }
                 accounts={accountsData?.accounts ?? []}
                 trigger={
-                  <Button size="sm" className="w-full gap-1.5">
-                    <Plus className="size-3.5" />
+                  <Button className="w-full">
+                    <Plus className="size-4" />
                     {t("add-transaction")}
                   </Button>
                 }
@@ -527,11 +531,10 @@ export default function AccountsClient({
               trigger={
                 <Button
                   variant="outline"
-                  size="sm"
-                  className="w-full gap-1.5"
+                  className="w-full"
                   aria-label={t("add-account")}
                 >
-                  <Plus className="size-3.5" />
+                  <Plus className="size-4" />
                   {t("add-account")}
                 </Button>
               }
@@ -543,92 +546,89 @@ export default function AccountsClient({
       {/* Alerts */}
       {recoveryBanner}
 
-      {/* Total balance hero */}
-      <div className="border-border bg-card rounded-lg border p-5">
-        <p className="text-muted-foreground text-sm">{t("total-balance")}</p>
-        {/* `flex-wrap`, and the delta group cannot shrink: without either, at
+      {/* Lead: the total balance, then the period's flows as a ruled stat row. */}
+      <div className="flex flex-col gap-8">
+        <div>
+          <p className="text-foreground text-base font-medium">
+            {t("total-balance")}
+          </p>
+          {/* `flex-wrap`, and the delta group cannot shrink: without either, at
             320px the 3xl figure took the full line and the change printed on
             top of it. The figure goes through <Amount> so a missing total is
             an em-dash with the reason beneath, rather than a sentence sitting
             in the slot where a number belongs. § 9 rules 1, 3 and 5. */}
-        <div className="mt-1 flex flex-wrap items-baseline gap-x-3 gap-y-1">
-          <Amount
-            value={totalBalance}
-            currency={userCurrency}
-            className="font-mono text-3xl font-semibold tracking-tight"
-          />
-          {totalBalance !== null && netChange !== null && netChange !== 0 && (
-            <div className="flex shrink-0 items-center gap-1">
-              {netChange > 0 ? (
-                <TrendingUp className="text-success-text h-3.5 w-3.5" />
-              ) : (
-                <TrendingDown className="text-destructive-text h-3.5 w-3.5" />
-              )}
-              <Amount
-                value={netChange}
-                currency={userCurrency}
-                tone="delta"
-                signed
-                className="font-mono text-sm font-medium"
-              />
-              <span className="text-muted-foreground text-xs">
-                {t("vs-previous-period")}
-              </span>
-            </div>
-          )}
-        </div>
-        {totalBalance === null ? (
-          <p className="text-muted-foreground mt-1 text-xs">
-            {t("total-balance-incomplete")}
-          </p>
-        ) : null}
-        {/* § 9 rule 6. A total summed from bank connections with no "as of"
+          <div className="mt-1 flex flex-wrap items-baseline gap-x-3 gap-y-1">
+            <Amount
+              value={totalBalance}
+              currency={userCurrency}
+              className="font-mono text-5xl leading-tight font-medium tracking-tight lg:text-6xl"
+            />
+            {totalBalance !== null && netChange !== null && netChange !== 0 && (
+              <div className="flex shrink-0 items-center gap-1">
+                {netChange > 0 ? (
+                  <TrendingUp className="text-success-text h-3.5 w-3.5" />
+                ) : (
+                  <TrendingDown className="text-destructive-text h-3.5 w-3.5" />
+                )}
+                <Amount
+                  value={netChange}
+                  currency={userCurrency}
+                  tone="delta"
+                  signed
+                  className="font-mono text-sm font-medium"
+                />
+                <span className="text-muted-foreground text-xs">
+                  {t("vs-previous-period")}
+                </span>
+              </div>
+            )}
+          </div>
+          {totalBalance === null ? (
+            <p className="text-muted-foreground mt-1 text-xs">
+              {t("total-balance-incomplete")}
+            </p>
+          ) : null}
+          {/* § 9 rule 6. A total summed from bank connections with no "as of"
             invites the reader to assume it is live. The timestamp is the
             *oldest* sync in the set, because the total is only as current as
             its stalest component. */}
-        {accountsFreshness ? (
-          <DataProvenance
-            className="mt-1.5"
-            updatedAt={clampSyncedAt(accountsFreshness.oldestSyncedAt)}
-            isStale={accountsFreshness.isStale}
-            errorLabel={
-              accountsFreshness.hasError
-                ? t("provenance-balances-stale")
-                : undefined
-            }
-            label={(time) => t("provenance-balances-updated", { time })}
-          />
-        ) : null}
-      </div>
+          {accountsFreshness ? (
+            <DataProvenance
+              className="mt-1.5"
+              updatedAt={clampSyncedAt(accountsFreshness.oldestSyncedAt)}
+              isStale={accountsFreshness.isStale}
+              errorLabel={
+                accountsFreshness.hasError
+                  ? t("provenance-balances-stale")
+                  : undefined
+              }
+              label={(time) => t("provenance-balances-updated", { time })}
+            />
+          ) : null}
+        </div>
 
-      {/* Metrics cards */}
-      <section>
-        {/* A skeleton in the cards' own shape, not a 96px box with a spinner
+        {/* Metrics */}
+        <section>
+          {/* A skeleton in the cards' own shape, not a 96px box with a spinner
             in it — the spinner told you nothing and then reflowed the page
             when it stopped. § 9. */}
-        {isLoadingAccountsMetricsData && !isAccountsMetricsPlaceholderData ? (
-          <StatCardsSkeleton />
-        ) : accountsMetricsData?.metrics &&
-          accountsMetricsData.metrics.length > 0 ? (
-          <MetricsCards
-            metrics={accountsMetricsData.metrics}
-            userCurrency={userCurrency}
-          />
-        ) : (
-          <div className="border-border bg-card rounded-lg border px-4 py-8 text-center">
+          {isLoadingAccountsMetricsData && !isAccountsMetricsPlaceholderData ? (
+            <StatCardsSkeleton />
+          ) : accountsMetricsData?.metrics &&
+            accountsMetricsData.metrics.length > 0 ? (
+            <MetricsCards
+              metrics={accountsMetricsData.metrics}
+              userCurrency={userCurrency}
+            />
+          ) : (
             <p className="text-muted-foreground text-sm">{t("no-metrics")}</p>
-          </div>
-        )}
-      </section>
+          )}
+        </section>
+      </div>
 
       {/* Spending by category */}
-      <section className="border-border bg-card rounded-lg border">
-        <div className="border-border border-b px-5 py-3">
-          <h2 className="text-foreground text-sm font-medium">
-            {t("spending-by-category")}
-          </h2>
-        </div>
-        <div className="p-5">
+      <Section id="spending-heading" title={t("spending-by-category")}>
+        <div>
           {isLoadingCategorySpending ? (
             <div className="flex h-30 items-center justify-center">
               <Spinner />
@@ -650,7 +650,7 @@ export default function AccountsClient({
                 return (
                   <div
                     key={cat.categoryKey}
-                    className="flex items-center gap-3 px-5 py-3"
+                    className="flex items-center gap-3 py-3 first:pt-0"
                   >
                     <div
                       className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg"
@@ -677,7 +677,10 @@ export default function AccountsClient({
                           {t(getCategoryTranslationKey(cat.name))}
                         </span>
                         <span className="text-foreground shrink-0 font-mono text-sm font-medium">
-                          <Amount value={Math.abs(cat.amount)} currency={cat.currency ?? userCurrency} />
+                          <Amount
+                            value={Math.abs(cat.amount)}
+                            currency={cat.currency ?? userCurrency}
+                          />
                         </span>
                       </div>
                       <div className="mt-1.5 flex items-center gap-2">
@@ -693,8 +696,8 @@ export default function AccountsClient({
                             }}
                           />
                         </div>
-                        <span className="text-muted-foreground w-8 text-right text-xs">
-                          {Math.round(pct)}%
+                        <span className="text-muted-foreground w-10 text-right font-mono text-xs">
+                          {formatPercentage(pct / 100)}
                         </span>
                       </div>
                     </div>
@@ -709,17 +712,18 @@ export default function AccountsClient({
               </p>
             </div>
           )}
+          {!isLoadingCategorySpending && (
+            <UnconvertedAmountsNotice
+              completeness={categorySpendingData?.completeness}
+              className="pt-3"
+            />
+          )}
         </div>
-      </section>
+      </Section>
 
       {/* Balance chart */}
-      <section className="border-border bg-card rounded-lg border">
-        <div className="border-border border-b px-5 py-3">
-          <h2 className="text-foreground text-sm font-medium">
-            {t("balance-growth")}
-          </h2>
-        </div>
-        <div className="p-5">
+      <Section id="balance-growth-heading" title={t("balance-growth")}>
+        <div>
           {isLoadingTransactionsData && !isTransactionsPlaceholderData ? (
             <div className="flex h-75 items-center justify-center">
               <Spinner />
@@ -740,37 +744,31 @@ export default function AccountsClient({
             </div>
           )}
         </div>
-      </section>
+      </Section>
 
       {/* Accounts + Transactions grid */}
-      <div className="grid gap-6 lg:grid-cols-5">
+      <div className="grid gap-10 lg:grid-cols-5 lg:gap-12">
         {/* Accounts list */}
-        <div className="lg:col-span-2">
-          <div className="border-border bg-card rounded-lg border">
-            <div className="border-border border-b px-5 py-3">
-              <h2 className="text-foreground text-sm font-medium">
-                {t("accounts")}
-              </h2>
-            </div>
+        <div className="min-w-0 lg:col-span-2">
+          <Section id="accounts-list-heading" title={t("accounts")}>
             <AccountsList accounts={accountsData?.accounts ?? []} />
-          </div>
+          </Section>
         </div>
 
         {/* Recent transactions */}
-        <div className="lg:col-span-3">
-          <div className="border-border bg-card rounded-lg border">
-            <div className="border-border flex items-center justify-between border-b px-5 py-3">
-              <h2 className="text-foreground text-sm font-medium">
-                {t("last-transactions")}
-              </h2>
+        <div className="min-w-0 lg:col-span-3">
+          <Section
+            id="last-transactions-heading"
+            title={t("last-transactions")}
+            aside={
               <Link
                 href="/accounts/transactions"
-                className="text-primary text-xs font-medium no-underline hover:underline"
+                className="text-primary text-sm font-medium no-underline hover:underline"
               >
-                {t("view-all")}{" "}
-                <MoveUpRight strokeWidth={2} className="ml-0.5 inline size-3" />
+                {t("view-all")}
               </Link>
-            </div>
+            }
+          >
             {isLoadingTransactions ? (
               <div className="flex h-50 items-center justify-center">
                 <Spinner />
@@ -785,30 +783,21 @@ export default function AccountsClient({
                     {t("empty-transactions-description")}
                   </p>
                   {hasAccounts ? (
-                    <Button
-                      size="sm"
-                      className="gap-1.5"
-                      onClick={openAddManualTransactionModal}
-                    >
-                      <Plus className="size-3.5" />
+                    <Button onClick={openAddManualTransactionModal}>
+                      <Plus className="size-4" />
                       {t("add-transaction")}
                     </Button>
                   ) : null}
                 </div>
               </div>
             )}
-          </div>
+          </Section>
         </div>
       </div>
 
       {/* Cashflow chart */}
-      <section className="border-border bg-card rounded-lg border">
-        <div className="border-border border-b px-5 py-3">
-          <h2 className="text-foreground text-sm font-medium">
-            {t("cashflow")}
-          </h2>
-        </div>
-        <div className="p-5">
+      <Section id="cashflow-heading" title={t("cashflow")}>
+        <div>
           {isLoadingAccountsCashflowData &&
           !isAccountsCashflowPlaceholderData ? (
             <div className="flex h-75 items-center justify-center">
@@ -828,7 +817,7 @@ export default function AccountsClient({
             </div>
           )}
         </div>
-      </section>
+      </Section>
 
       {/* Modals */}
       <AccountAddSyncModal

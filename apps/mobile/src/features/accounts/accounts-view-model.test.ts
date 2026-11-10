@@ -16,7 +16,7 @@ const dto = (converted: number | null): AccountSummaryDto => ({
 })
 
 describe('accounts view model', () => {
-  it('preserves exact values and nulls without exposing a logo', () => {
+  it('preserves exact values and nulls, carrying the institution logo only as the mark', () => {
     const result = mapAccountSummary(dto(0))
     expect(result).toEqual({
       accountId: 41,
@@ -31,6 +31,12 @@ describe('accounts view model', () => {
       refreshedAt: '2026-07-17T12:00:00.000Z',
       source: 'manual',
       csvImportFormat: null,
+      ownerFirstName: null,
+      convertedAvailableBalance: null,
+      syncStaleness: null,
+      lastSyncedAt: null,
+      institutionLogoUrl: null,
+      accountType: null,
     })
     expect('logoUrl' in result).toBe(false)
   })
@@ -40,6 +46,11 @@ describe('accounts view model', () => {
     expect(result.convertedBalance).toBeNull()
     expect(result.originalBalance).toBe(-12.5)
     expect(result).not.toHaveProperty('completeness')
+  })
+
+  it("carries the institution's logo and the account type for the row's mark", () => {
+    const result = mapAccountSummary({ ...dto(1), accountFinancialInstitutionKey: { displayName: 'Bank', logoUrl: 'https://cdn.example/bank.png' }, accountType: 'CREDIT_CARD' })
+    expect(result).toMatchObject({ institutionLogoUrl: 'https://cdn.example/bank.png', accountType: 'CREDIT_CARD' })
   })
 
   it('preserves response order', () => {

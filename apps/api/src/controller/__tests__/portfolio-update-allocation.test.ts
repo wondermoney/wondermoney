@@ -1,3 +1,4 @@
+import type { Request } from 'express';
 import { describe, expect, it, vi } from 'vitest';
 import type { ZodType } from 'zod';
 
@@ -18,12 +19,14 @@ vi.mock('../../app.js', () => ({
 import { mockReq, mockRes } from '../../__tests__/__helpers__/mock-request';
 import { updatePortfolio } from '../portfolio';
 
+const authed = (req: Request): Request => Object.assign(req, { tenant: { tenantKey: 1 }, user: { appuserKey: 1 } });
+
 describe('updatePortfolio targetAllocation validation', () => {
   it('rejects targetAllocation with unknown asset class keys', async () => {
     mocked.findOne.mockResolvedValue({ portfolioKey: 7 });
     mocked.find.mockResolvedValue([{ name: 'Equities' }, { name: 'Fixed Income' }]);
 
-    const req = mockReq({ body: { targetAllocation: { NotARealClass: 100 } }, params: { portfolioId: '7' } });
+    const req = authed(mockReq({ body: { targetAllocation: { NotARealClass: 100 } }, params: { portfolioId: '7' } }));
     const res = mockRes();
 
     await expect(updatePortfolio(req, res)).rejects.toThrow(/Unknown asset class/);
@@ -33,7 +36,7 @@ describe('updatePortfolio targetAllocation validation', () => {
     mocked.findOne.mockResolvedValue({ portfolioKey: 7 });
     mocked.find.mockResolvedValue([{ name: 'Equities' }, { name: 'Fixed Income' }]);
 
-    const req = mockReq({ body: { targetAllocation: { Equities: 60, 'Fixed Income': 40 } }, params: { portfolioId: '7' } });
+    const req = authed(mockReq({ body: { targetAllocation: { Equities: 60, 'Fixed Income': 40 } }, params: { portfolioId: '7' } }));
     const json = vi.fn();
     const res = mockRes({ json });
 

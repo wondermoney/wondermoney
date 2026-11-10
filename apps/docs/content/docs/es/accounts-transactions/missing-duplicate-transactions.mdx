@@ -9,7 +9,7 @@ WonderMoney evita los duplicados como parte de su flujo normal de transacciones,
 
 Cada transacción lleva una huella que la identifica. Cuando los datos entrantes coinciden con una huella existente, el duplicado se descarta en lugar de crear una segunda fila. En la rara ocasión en que la coincidencia no es segura, la transacción se conserva y se marca con una pista para que tú decidas.
 
-Cada decisión queda registrada en el registro de auditoría de la transacción, incluidos los duplicados omitidos y los cambios de estado. La tolerancia de la huella es deliberadamente estrecha: dos transacciones legítimas que se parecen — por ejemplo, dos compras idénticas el mismo día — no se tratan como duplicadas, porque una referencia bancaria distinta basta para diferenciarlas.
+Cada decisión queda registrada en el registro de auditoría de la transacción, incluidos los duplicados omitidos y los cambios de estado. La tolerancia de la huella es deliberadamente estrecha: dos transacciones legítimas que se parecen — por ejemplo, dos compras idénticas el mismo día — no se tratan como duplicadas. Una referencia bancaria distinta las diferencia y, cuando el banco envía compras idénticas sin referencia, cada una que el banco lista se sigue guardando como una transacción propia.
 
 ## Versiones pendiente y confirmada
 

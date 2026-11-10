@@ -1,13 +1,19 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Pressable, ScrollView, StyleSheet, Text, useColorScheme, View } from 'react-native'
-import { SafeAreaView } from 'react-native-safe-area-context'
+import { ActivityIndicator, ScrollView, StyleSheet, View } from 'react-native'
 
 import { BackControl } from '@/components/ui/back-control'
-import { themeTokens, type Palette } from '@/theme/tokens'
-import { textStyles } from '@/theme/typography'
+import { Button } from '@/components/ui/button'
+import { PageHeader } from '@/components/ui/page-header'
+import { SafeAreaView } from '@/components/ui/screen-safe-area'
+import { Text } from '@/components/ui/text'
+import { themeTokens } from '@/theme/tokens'
+import { usePalette } from '@/theme/use-palette'
+
+import { FormNotice } from './form-field'
 
 import { GENERIC_CSV_COLUMNS, GENERIC_CSV_OPTIONAL_COLUMNS, rowsFailedCounts, type TransactionImportFlow } from './generic-csv-format'
+import { SelectField } from './select-field'
 import type { TransactionImportPhase } from './use-transaction-import'
 
 export type TransactionImportAccountOption = Readonly<{ id: number; name: string }>
@@ -50,7 +56,7 @@ export function TransactionImportScreen({
   onBack,
 }: TransactionImportScreenProps) {
   const { t } = useTranslation()
-  const palette = themeTokens.colors[useColorScheme() === 'dark' ? 'dark' : 'light']
+  const palette = usePalette()
   const busy = BUSY_PHASES.has(state.phase)
   const rowsFailed = state.phase === 'done' ? rowsFailedCounts(state.format, state.outcome, state.rows) : null
 
@@ -58,57 +64,56 @@ export function TransactionImportScreen({
     <SafeAreaView style={[styles.safe, { backgroundColor: palette.background }]}>
       <ScrollView contentContainerStyle={styles.content}>
         <View style={styles.page}>
-          <View style={styles.header}>
-            <BackControl fallback="/accounts" label={t('transactionImport.back')} onPress={onBack} disabled={busy} />
-            <View style={styles.heading}>
-              <Text accessibilityRole="header" style={[styles.title, { color: palette.foreground }]}>{t('transactionImport.title')}</Text>
-              <Text style={[styles.helper, { color: palette.mutedForeground }]}>{t('transactionImport.helper')}</Text>
-            </View>
-          </View>
+          <BackControl fallback="/accounts/transactions" onPress={onBack} disabled={busy} />
+          <PageHeader title={t('transactionImport.title')} instruction={t('transactionImport.helper')} />
 
           {state.phase === 'idle' ? (
             <View style={styles.form}>
-              <Text accessibilityRole="header" style={[styles.sectionTitle, { color: palette.foreground }]}>{t('transactionImport.account')}</Text>
-              {accountsLoading ? <Text accessibilityRole="progressbar" style={[styles.helper, { color: palette.mutedForeground }]}>{t('transactionImport.accountsLoading')}</Text> : null}
-              {!accountsLoading && accounts.length === 0 ? <Text style={[styles.helper, { color: palette.mutedForeground }]}>{t('transactionImport.noAccounts')}</Text> : null}
-              <View style={styles.filters}>
-                {accounts.map((account) => (
-                  <Filter key={account.id} label={account.name} selected={selectedAccountId === account.id} palette={palette} onPress={() => onSelectAccount(account.id)} />
-                ))}
-              </View>
-              {flow === 'generic' ? (
-                <GenericFormat palette={palette} typeCodes={typeCodes} templateStatus={templateStatus} onShareTemplate={onShareTemplate} />
+              {accountsLoading ? <Text accessibilityRole="progressbar" tone="muted" variant="meta">{t('transactionImport.accountsLoading')}</Text> : null}
+              {!accountsLoading && accounts.length === 0 ? <Text tone="muted" variant="meta">{t('transactionImport.noAccounts')}</Text> : null}
+              {accounts.length > 0 ? (
+                <SelectField
+                  label={t('transactionImport.account')}
+                  onChange={onSelectAccount}
+                  options={accounts.map((account) => ({ value: account.id, label: account.name }))}
+                  placeholder={t('transactionImport.chooseAccount')}
+                  value={selectedAccountId}
+                />
               ) : null}
-              {flow === 'bank' ? <Text style={[styles.helper, { color: palette.mutedForeground }]}>{t('transactionImport.bankFormat', { bank: bankName ?? t('transactionImport.yourBank') })}</Text> : null}
-              {flow === 'legacy' ? <Text style={[styles.helper, { color: palette.mutedForeground }]}>{t('transactionImport.legacyFormat')}</Text> : null}
-              {flow === 'unknown' ? <Text accessibilityRole="alert" style={[styles.helper, { color: palette.destructive }]}>{t('transactionImport.unknownFormat')}</Text> : null}
-              <Button label={t('transactionImport.chooseFile')} onPress={onPickFile} palette={palette} primary disabled={selectedAccountId === null || flow === 'unknown'} />
+              {flow === 'generic' ? (
+                <GenericFormat typeCodes={typeCodes} templateStatus={templateStatus} onShareTemplate={onShareTemplate} />
+              ) : null}
+              {flow === 'bank' ? <Text tone="muted" variant="meta">{t('transactionImport.bankFormat', { bank: bankName ?? t('transactionImport.yourBank') })}</Text> : null}
+              {flow === 'legacy' ? <Text tone="muted" variant="meta">{t('transactionImport.legacyFormat')}</Text> : null}
+              {flow === 'unknown' ? <FormNotice tone="destructive">{t('transactionImport.unknownFormat')}</FormNotice> : null}
+              <Button block icon="upload" label={t('transactionImport.chooseFile')} onPress={onPickFile} disabled={selectedAccountId === null || flow === 'unknown'} />
             </View>
           ) : null}
 
           {busy ? (
-            <Text accessibilityRole="progressbar" accessibilityLabel={t(`transactionImport.phases.${state.phase}`)} style={[styles.helper, { color: palette.mutedForeground }]}>
-              {t(`transactionImport.phases.${state.phase}`)}
-            </Text>
+            <View accessible accessibilityRole="progressbar" accessibilityLabel={t(`transactionImport.phases.${state.phase}`)} style={styles.progress}>
+              <ActivityIndicator color={palette.mutedForeground} size="small" />
+              <Text tone="muted" variant="meta">{t(`transactionImport.phases.${state.phase}`)}</Text>
+            </View>
           ) : null}
 
           {state.phase === 'done' ? (
             <View style={styles.form}>
-              <Text accessibilityRole="alert" style={[styles.outcome, { color: ROWS_CREATED_OUTCOMES.has(state.outcome) ? palette.foreground : palette.destructive }]}>
+              <Text accessibilityRole="alert" tone={ROWS_CREATED_OUTCOMES.has(state.outcome) ? 'default' : 'destructive'} variant="bodyStrong">
                 {t(`transactionImport.outcomes.${state.outcome}`)}
               </Text>
-              {rowsFailed ? <Text style={[styles.helper, { color: palette.mutedForeground }]}>{t('transactionImport.generic.rowsFailed', rowsFailed)}</Text> : null}
+              {rowsFailed ? <Text tone="muted" variant="meta">{t('transactionImport.generic.rowsFailed', rowsFailed)}</Text> : null}
               <View style={styles.actions}>
-                <Button label={t('transactionImport.importAnother')} onPress={onReset} palette={palette} />
-                <Button label={t('transactionImport.done')} onPress={onBack} palette={palette} primary />
+                <Button block label={t('transactionImport.done')} onPress={onBack} />
+                <Button block label={t('transactionImport.importAnother')} onPress={onReset} variant="outline" />
               </View>
             </View>
           ) : null}
 
           {state.phase === 'error' ? (
             <View style={styles.form}>
-              <Text accessibilityRole="alert" style={[styles.outcome, { color: palette.destructive }]}>{t(`transactionImport.failures.${state.reason}`)}</Text>
-              <Button label={t('transactionImport.tryAgain')} onPress={onReset} palette={palette} primary />
+              <FormNotice tone="destructive">{t(`transactionImport.failures.${state.reason}`)}</FormNotice>
+              <Button block label={t('transactionImport.tryAgain')} onPress={onReset} />
             </View>
           ) : null}
         </View>
@@ -117,49 +122,55 @@ export function TransactionImportScreen({
   )
 }
 
-function GenericFormat({ palette, typeCodes, templateStatus, onShareTemplate }: {
-  palette: Palette
+/**
+ * The generic CSV's columns. A background step (muted), not a bordered box,
+ * so it reads as part of the form rather than a card inside it.
+ */
+function GenericFormat({ typeCodes, templateStatus, onShareTemplate }: {
   typeCodes: readonly TransactionImportTypeCode[]
   templateStatus: TemplateShareStatus
   onShareTemplate: () => void | Promise<void>
 }) {
   const { t } = useTranslation()
+  const palette = usePalette()
   const [showTypeCodes, setShowTypeCodes] = useState(false)
   return (
-    <View testID="transaction-import-generic-format" style={[styles.panel, { borderColor: palette.border }]}>
-      <Text style={[styles.helper, { color: palette.foreground }]}>{t('transactionImport.generic.intro')}</Text>
+    <View testID="transaction-import-generic-format" style={[styles.panel, { backgroundColor: palette.muted }]}>
+      <Text variant="meta">{t('transactionImport.generic.intro')}</Text>
       {GENERIC_CSV_COLUMNS.map((column) => (
         <View key={column} style={styles.column}>
-          <Text style={[styles.columnName, { color: palette.foreground }]}>
+          <Text variant="amount">
             {column}
-            {GENERIC_CSV_OPTIONAL_COLUMNS.has(column) ? <Text style={{ color: palette.mutedForeground }}>{` (${t('transactionImport.generic.optional')})`}</Text> : null}
+            {GENERIC_CSV_OPTIONAL_COLUMNS.has(column) ? <Text tone="muted" variant="label">{` (${t('transactionImport.generic.optional')})`}</Text> : null}
           </Text>
-          <Text style={[styles.helper, { color: palette.mutedForeground }]}>{t(`transactionImport.generic.columns.${column}`)}</Text>
+          <Text tone="muted" variant="label">{t(`transactionImport.generic.columns.${column}`)}</Text>
         </View>
       ))}
-      <View style={styles.actions}>
+      <View style={styles.inlineActions}>
         <Button
-          label={t(templateStatus === 'sharing' ? 'transactionImport.generic.templateSharing' : 'transactionImport.generic.template')}
-          onPress={onShareTemplate}
-          palette={palette}
           disabled={templateStatus === 'sharing'}
+          label={t(templateStatus === 'sharing' ? 'transactionImport.generic.templateSharing' : 'transactionImport.generic.template')}
+          loading={templateStatus === 'sharing'}
+          onPress={onShareTemplate}
+          size="sm"
+          variant="secondary"
         />
         {typeCodes.length > 0 ? (
           <Button
             label={t(showTypeCodes ? 'transactionImport.generic.hideTypeCodes' : 'transactionImport.generic.showTypeCodes')}
             onPress={() => setShowTypeCodes((shown) => !shown)}
-            palette={palette}
-            expanded={showTypeCodes}
+            size="sm"
+            variant="ghost"
           />
         ) : null}
       </View>
-      {templateStatus === 'error' ? <Text accessibilityRole="alert" style={[styles.helper, { color: palette.destructive }]}>{t('transactionImport.generic.templateFailed')}</Text> : null}
+      {templateStatus === 'error' ? <Text accessibilityRole="alert" tone="destructive" variant="meta">{t('transactionImport.generic.templateFailed')}</Text> : null}
       {showTypeCodes ? (
         <View accessibilityLabel={t('transactionImport.generic.typeCodes')} style={styles.typeCodes}>
           {typeCodes.map((type) => (
             <View key={type.code} style={styles.typeCode}>
-              <Text style={[styles.columnName, styles.code, { color: palette.foreground }]}>{type.code}</Text>
-              <Text style={[styles.helper, styles.typeLabel, { color: palette.mutedForeground }]}>{type.label}</Text>
+              <Text style={styles.code} variant="amount">{String(type.code)}</Text>
+              <Text style={styles.typeLabel} tone="muted" variant="meta">{type.label}</Text>
             </View>
           ))}
         </View>
@@ -168,45 +179,18 @@ function GenericFormat({ palette, typeCodes, templateStatus, onShareTemplate }: 
   )
 }
 
-function Filter({ label, selected, palette, onPress }: { label: string; selected: boolean; palette: Palette; onPress: () => void }) {
-  return (
-    <Pressable accessibilityRole="button" accessibilityState={{ selected }} onPress={onPress} style={({ pressed }) => [styles.filter, { borderColor: selected ? palette.primary : palette.border, backgroundColor: selected ? palette.primarySoft : 'transparent' }, pressed && styles.pressed]}>
-      <Text style={[styles.filterText, { color: selected ? palette.primary : palette.foreground }]}>{label}</Text>
-    </Pressable>
-  )
-}
-
-function Button({ label, onPress, palette, primary = false, disabled = false, expanded }: { label: string; onPress: () => void | Promise<void>; palette: Palette; primary?: boolean; disabled?: boolean; expanded?: boolean }) {
-  return (
-    <Pressable accessibilityRole="button" accessibilityState={{ disabled, busy: disabled, expanded }} disabled={disabled} onPress={() => void onPress()} style={({ pressed }) => [styles.button, { borderColor: primary ? 'transparent' : palette.input, backgroundColor: primary ? palette.primary : 'transparent' }, (pressed || disabled) && styles.pressed]}>
-      <Text style={[styles.buttonText, { color: primary ? palette.primaryForeground : palette.foreground }]}>{label}</Text>
-    </Pressable>
-  )
-}
-
 const styles = StyleSheet.create({
   safe: { flex: 1 },
-  content: { flexGrow: 1, padding: themeTokens.layout.screenPadding },
-  page: { width: '100%', maxWidth: 680, alignSelf: 'center', gap: themeTokens.layout.blockGap },
-  header: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'flex-start', gap: themeTokens.spacing[4] },
-  heading: { flex: 1, minWidth: 220, gap: themeTokens.spacing[1] },
-  title: { ...textStyles.title, fontWeight: '700' as const },
-  helper: { ...textStyles.body },
-  sectionTitle: { ...textStyles.section },
-  outcome: { ...textStyles.action },
+  content: { flexGrow: 1, padding: themeTokens.layout.screenPadding, paddingBottom: themeTokens.spacing[8] },
+  page: { width: '100%', maxWidth: 680, alignSelf: 'center', gap: themeTokens.spacing[6] },
   form: { gap: themeTokens.spacing[4] },
-  panel: { gap: themeTokens.spacing[3], borderWidth: 1, borderRadius: themeTokens.radius.md, padding: themeTokens.spacing[4] },
-  column: { gap: themeTokens.spacing[1] },
-  columnName: { ...textStyles.bodyStrong },
+  progress: { flexDirection: 'row', alignItems: 'center', gap: themeTokens.spacing[2] },
+  panel: { gap: themeTokens.spacing[3], borderRadius: themeTokens.radius.lg, padding: themeTokens.spacing[4] },
+  column: { gap: 2 },
   typeCodes: { gap: themeTokens.spacing[1] },
   typeCode: { flexDirection: 'row', gap: themeTokens.spacing[3] },
-  code: { minWidth: 32, fontVariant: ['tabular-nums'] },
+  code: { minWidth: 32 },
   typeLabel: { flex: 1 },
-  filters: { flexDirection: 'row', flexWrap: 'wrap', gap: themeTokens.spacing[2] },
-  filter: { minHeight: 44, justifyContent: 'center', borderWidth: 1, borderRadius: themeTokens.radius.pill, paddingHorizontal: themeTokens.spacing[4] },
-  filterText: { ...textStyles.bodyStrong },
-  actions: { flexDirection: 'row', flexWrap: 'wrap', gap: themeTokens.spacing[3] },
-  button: { minHeight: themeTokens.touchTarget.minimum, minWidth: themeTokens.touchTarget.minimum, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderRadius: themeTokens.radius.md, paddingHorizontal: themeTokens.spacing[4] },
-  buttonText: { ...textStyles.action },
-  pressed: { opacity: 0.65 },
+  actions: { gap: themeTokens.spacing[2] },
+  inlineActions: { flexDirection: 'row', flexWrap: 'wrap', gap: themeTokens.spacing[2] },
 })

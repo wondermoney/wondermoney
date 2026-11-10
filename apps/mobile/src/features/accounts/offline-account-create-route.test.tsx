@@ -3,7 +3,7 @@ import { fireEvent, render } from '@testing-library/react-native'
 import { OfflineAccountCreateRoute } from './offline-account-create-route'
 
 const mockReplace = jest.fn()
-const mockAddListener = jest.fn().mockReturnValue(jest.fn())
+const mockUsePreventRemove = jest.fn((_preventRemove: boolean, _onPrevented?: (options: { data: { action: object }; repeat: () => void }) => void) => jest.fn())
 const mockMutate = jest.fn()
 const mockReconcile = jest.fn()
 const mockClear = jest.fn()
@@ -11,7 +11,7 @@ let mockPending = false
 
 jest.mock('expo-router', () => ({
   useRouter: () => ({ replace: mockReplace }),
-  useNavigation: () => ({ addListener: mockAddListener }),
+  usePreventRemove: (preventRemove: boolean, onPrevented?: (options: { data: { action: object }; repeat: () => void }) => void) => mockUsePreventRemove(preventRemove, onPrevented),
 }))
 jest.mock('./use-offline-account-options', () => ({ useOfflineAccountOptions: () => ({
   currencies: { data: { currencies: [{ currencyKey: 151, code: 'EUR', description: 'Euro' }] } },
@@ -32,7 +32,7 @@ jest.mock('./offline-account-create-screen', () => ({ OfflineAccountCreateScreen
 
 describe('manual account creation route', () => {
   beforeEach(() => {
-    mockReplace.mockReset(); mockAddListener.mockClear(); mockMutate.mockReset(); mockReconcile.mockReset(); mockClear.mockReset(); mockPending = false
+    mockReplace.mockReset(); mockUsePreventRemove.mockClear(); mockMutate.mockReset(); mockReconcile.mockReset(); mockClear.mockReset(); mockPending = false
   })
 
   it('awaits successful creation and returns to Accounts without inferring a created id', async () => {
@@ -55,9 +55,6 @@ describe('manual account creation route', () => {
   it('registers a pending navigation removal lock', async () => {
     mockPending = true
     await render(<OfflineAccountCreateRoute />)
-    const listener = mockAddListener.mock.calls[0][1]
-    const event = { preventDefault: jest.fn() }
-    listener(event)
-    expect(event.preventDefault).toHaveBeenCalledTimes(1)
+    expect(mockUsePreventRemove.mock.lastCall?.[0]).toBe(true)
   })
 })

@@ -1,7 +1,7 @@
 /**
- * #95 one-off repair: Enable Banking rows stored as BOOKED although the provider never booked them.
+ * One-off repair: Enable Banking rows stored as BOOKED although the provider never booked them.
  *
- * Until #95 every Enable Banking row whose status was not `PEND` was stored as BOOKED, so pending,
+ * Until the status fix, every Enable Banking row whose status was not `PEND` was stored as BOOKED, so pending,
  * held, scheduled, rejected and cancelled rows sit in the running balance and the totals, and a
  * pending row whose booked version arrived under another id left a booked duplicate behind. The
  * status was never stored, so this re-fetches each linked Enable Banking account from the provider
@@ -32,7 +32,7 @@ import { EnableBankingConnection, EnableBankingConnectionStatus } from '@entity/
 import { Transaction } from '@entity/Transaction';
 import { TransactionAuditActorType, TransactionAuditEventType } from '@entity/TransactionAuditLog';
 import { TransactionStatus } from '@entity/TransactionStatus';
-import { type BankSyncTransaction, enableBankingTransactionIdFor, legacyEnableBankingTransactionIdFor } from '@service/account/account-initial-sync-transaction.service';
+import { type BankSyncTransaction, enableBankingTransactionIdFor, legacyEnableBankingTransactionIdFor, withStableIdOccurrences } from '@service/account/account-initial-sync-transaction.service';
 import { type AdaptedTransactionsResponse, classifyStatus, createEnableBankingSyncAdapter } from '@service/enable-banking/enable-banking-sync-adapter';
 import { loadChainRows, recalculateChainFromAccountBalance } from '@service/transaction/balance-chain.service';
 import { planStatusRepair, type ReportedRow, type StatusRepairPlan } from '@service/transaction/enable-banking-status-repair.service';
@@ -124,15 +124,17 @@ async function repairAccount(em: EntityManager, accountKey: number, response: Ad
   const accountId = account.accountId ?? String(account.accountKey);
   const report: AccountReport = { accountKey, balanceRowsMoved: 0, byChange: {}, changed: 0, coverageFrom: null, review: [], skipped: 0, tenantKey: account.tenantKey.tenantKey };
 
-  const providerRows = [...(response.transactions?.booked ?? []), ...(response.transactions?.pending ?? []), ...(response.transactions?.voided ?? [])] as BankSyncTransaction[];
+  // Repeats of an id-less row are numbered per list, exactly as the sync numbers them.
+  const lists = [response.transactions?.booked ?? [], response.transactions?.pending ?? [], response.transactions?.voided ?? []] as BankSyncTransaction[][];
+  const providerRows = lists.flatMap((rows) => withStableIdOccurrences(accountId, rows));
   // Nothing reported means nothing covered: no row can be judged missing.
   const reportedDates = providerRows.map((row) => row.bookingDate ?? row.valueDate ?? row.transactionDate).filter((date): date is string => Boolean(date)).sort();
   if (reportedDates.length === 0) return report;
   const oldestReported = reportedDates[0] ?? requestedFrom;
   const coverageFrom = new Date(`${oldestReported > requestedFrom ? oldestReported : requestedFrom}T00:00:00.000Z`);
   report.coverageFrom = isoDate(coverageFrom);
-  // #96: a row is stored under its `entry_reference`, or under its `transaction_id` if it was stored
-  // before #96 and not re-synced since. Legacy ids go first so a current id always wins a clash.
+  // A row is stored under its `entry_reference`, or under its `transaction_id` if it was stored
+  // before ids moved to `entry_reference` and not re-synced since. Legacy ids go first so a current id always wins a clash.
   const reportAs = (id: (accountId: string, row: BankSyncTransaction) => string) => providerRows.map((row) => ({ classification: classifyStatus(row.providerStatus), id: id(accountId, row), providerStatus: row.providerStatus }));
   const reported: ReportedRow[] = [...reportAs(legacyEnableBankingTransactionIdFor), ...reportAs(enableBankingTransactionIdFor)];
 

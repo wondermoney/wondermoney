@@ -37,4 +37,10 @@ describe('mapPortfolioPerformance', () => {
     expect(mapPortfolioPerformance(withoutStatus).historyStatus).toBe('ready')
     expect(mapPortfolioPerformance({ ...withoutStatus, dataPoints: [] }).historyStatus).toBe('empty')
   })
+
+  it('flags a history that left out a portfolio it could not convert into the viewer\'s currency', () => {
+    expect(mapPortfolioPerformance({ ...base, completeness: { currencyCode: 'EUR', incompleteDates: ['2026-07-15'], isComplete: false } }).currencyIncomplete).toBe(true)
+    expect(mapPortfolioPerformance({ ...base, completeness: { currencyCode: 'EUR', incompleteDates: [], isComplete: true } }).currencyIncomplete).toBe(false)
+    expect(mapPortfolioPerformance(base).currencyIncomplete).toBe(false)
+  })
 })

@@ -58,7 +58,7 @@ export default function GoalDetailClient({ goalKey }: { goalKey: number }) {
   const isDebt = goal.type === "debt_paydown";
 
   return (
-    <div className="space-y-6">
+    <div className="flex flex-col gap-10 lg:gap-12">
       <GoalDetailHeader
         goal={goal}
         summary={summary}
@@ -67,8 +67,8 @@ export default function GoalDetailClient({ goalKey }: { goalKey: number }) {
         onEdit={() => setEditOpen(true)}
         onMoveMoneyOut={() => setMoveOpen(true)}
       />
-      <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)]">
-        <div className="space-y-6">
+      <div className="grid items-start gap-10 xl:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] xl:gap-12">
+        <div className="flex min-w-0 flex-col gap-10">
           {isDebt ? (
             <DebtPayoffPanel
               currencyCode={currencyCode}

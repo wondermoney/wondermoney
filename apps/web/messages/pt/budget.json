@@ -1,0 +1,47 @@
+{
+  "budgetPage": {
+    "left-in": "Disponível em {month}",
+    "overspent-in": "Acima do plano em {month} por",
+    "spent": "Gasto",
+    "planned": "Planeado",
+    "over-plan": "Acima do plano",
+    "over-plan-unit": "{count, plural, =0 {linhas} one {linha} other {linhas}}",
+    "measure-header": "Gasto face ao plano",
+    "measure-label": "{name}: {spent} gastos de {planned} planeados",
+    "key-label": "Como ler as barras",
+    "key-plan": "Plano",
+    "key-spent": "Gasto dentro do plano",
+    "key-over": "Gasto acima do plano",
+    "rolled-over-surplus": "<money>+{amount}</money> do mês passado",
+    "rolled-over-overspend": "<money>−{amount}</money> gastos a mais no mês passado",
+    "rollover-incomplete": "Parte dos gastos do mês passado não pôde ser convertida, por isso este valor pode estar demasiado alto",
+    "rollover-incomplete-month": "Alguns gastos anteriores não puderam ser convertidos, por isso um valor transitado pode estar demasiado alto."
+  },
+  "budgetForecast": {
+    "title": "Previsão",
+    "months-label": "Meses a mostrar",
+    "months-option": "{count} m",
+    "basis": "A partir deste mês. Os gastos deste mês são reais até {date}; tudo o resto é uma projeção a partir do plano do orçamento, do rendimento previsto e de {count, plural, =0 {nenhum pagamento recorrente} one {# pagamento recorrente} other {# pagamentos recorrentes}}, não dinheiro gasto.",
+    "incomplete": "Alguns valores {count, plural, =0 {não puderam ser convertidos} other {em {currencies} não puderam ser convertidos}} para a moeda do orçamento, por isso os meses assinalados ficam por baixo.",
+    "chart-caption": "Rendimento previsto face aos gastos esperados por mês. Os gastos esperados são o plano de cada categoria, ou mais quando o já gasto e os pagamentos recorrentes por vir já o ultrapassam.",
+    "month": "Mês",
+    "planned": "Planeado",
+    "carried": "Transitado",
+    "spent-so-far": "Gasto até agora",
+    "recurring-projected": "Recorrentes (projeção)",
+    "expected-spending": "Gastos esperados",
+    "planned-income": "Rendimento previsto",
+    "net": "Sobra",
+    "kind-current": "Real até agora, depois projeção",
+    "kind-future": "Projeção",
+    "month-incomplete": "incompleto",
+    "recurring-items": "{count, plural, one {# pagamento recorrente} other {# pagamentos recorrentes}} nesta previsão",
+    "cadence": {
+      "weekly": "semanal",
+      "biweekly": "de duas em duas semanas",
+      "monthly": "mensal",
+      "quarterly": "trimestral",
+      "yearly": "anual"
+    }
+  }
+}

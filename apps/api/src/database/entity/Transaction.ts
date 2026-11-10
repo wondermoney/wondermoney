@@ -1,6 +1,6 @@
 import { Collection } from '@mikro-orm/core';
 import type { Rel } from '@mikro-orm/core';
-import { Entity, Enum, Filter, Index, ManyToOne, OneToMany, PrimaryKey, Property, Unique } from '@mikro-orm/decorators/legacy';
+import { Check, Entity, Enum, Filter, Index, ManyToOne, OneToMany, PrimaryKey, Property, Unique } from '@mikro-orm/decorators/legacy';
 
 import { HIDDEN_FILTER, hiddenTransactionCond, TENANT_FILTER, transactionTenantCond } from '../filters/tenant-filter';
 
@@ -9,9 +9,13 @@ import { Appuser } from './Appuser';
 import { AppuserTransactionCategory } from './AppuserTransactionCategory';
 import { Base } from './BaseEntity';
 import { Currency } from './Currency';
+import { Goal } from './Goal';
+import { Portfolio } from './Portfolio';
 import { Tenant } from './Tenant';
 import { TransactionMerchant } from './TransactionMerchant';
+import { TransactionSplit } from './TransactionSplit';
 import { TransactionStatus } from './TransactionStatus';
+import { TransactionTag } from './TransactionTag';
 import { TransactionType } from './TransactionType';
 
 export enum CategorizationConfidence {
@@ -21,6 +25,23 @@ export enum CategorizationConfidence {
   NONE = 'none',
 }
 
+/**
+ * How a stored amount in the user's currency was converted.
+ *
+ * - `exact`: same currency, or converted at a stored rate from within the staleness window.
+ * - `provisional`: converted at the latest stored rate, which is older than the window.
+ * - `missing`: no rate exists, so no converted amount is stored. Totals leave the row out and
+ *   say so; it is never counted at a rate of 1.
+ *
+ * Null on rows written before the column existed.
+ */
+export enum FxStatus {
+  EXACT = 'exact',
+  MISSING = 'missing',
+  PROVISIONAL = 'provisional',
+}
+
+@Check({ expression: `num_nonnulls("transfer_destination_account_key", "transfer_destination_portfolio_key", "transfer_destination_goal_key") <= 1`, name: 'transaction_transfer_destination_single_check' })
 @Entity()
 @Filter({ args: false, cond: transactionTenantCond, default: true, name: TENANT_FILTER })
 @Filter({ cond: hiddenTransactionCond, default: true, name: HIDDEN_FILTER })
@@ -64,6 +85,20 @@ export class Transaction extends Base {
   @ManyToOne({ cascade: [], deleteRule: 'set null', entity: () => Transaction, fieldName: 'transfer_counterpart_key', nullable: true })
   transferCounterpartKey?: Rel<Transaction>;
 
+  /*
+   * Where the money of an outgoing transfer went, when the user said so: another household account,
+   * a portfolio or a goal. At most one is set, only on a TRANSFER_OUT row (`transaction-transfer.service.ts`).
+   * A description only: it moves no money and creates no row on the other side.
+   */
+  @ManyToOne({ cascade: [], deleteRule: 'set null', entity: () => Account, fieldName: 'transfer_destination_account_key', nullable: true })
+  transferDestinationAccountKey?: Rel<Account>;
+
+  @ManyToOne({ cascade: [], deleteRule: 'set null', entity: () => Goal, fieldName: 'transfer_destination_goal_key', nullable: true })
+  transferDestinationGoalKey?: Rel<Goal>;
+
+  @ManyToOne({ cascade: [], deleteRule: 'set null', entity: () => Portfolio, fieldName: 'transfer_destination_portfolio_key', nullable: true })
+  transferDestinationPortfolioKey?: Rel<Portfolio>;
+
   // The original transaction value and currency (before any conversion by the bank)
   @Property({ columnType: 'numeric(18,4)', nullable: true })
   originalAmount?: number;
@@ -99,11 +134,16 @@ export class Transaction extends Base {
   @ManyToOne({ cascade: [], entity: () => Currency, fieldName: 'appuser_currency_key', nullable: true })
   appuserCurrencyKey?: Rel<Currency>;
 
+  /** Null when no rate converts the amount (`fxStatus` is then `missing`). */
   @Property({ columnType: 'numeric(18,4)', nullable: true })
-  appuserSettlementAmount?: number;
+  appuserSettlementAmount?: null | number;
 
   @Property({ nullable: true })
   externalTransactionId?: string;
+
+  /** How `appuserSettlementAmount` was converted; see {@link FxStatus}. */
+  @Enum({ items: () => FxStatus, nullable: true })
+  fxStatus?: FxStatus | null;
 
   // Base64 encoded transaction identifier
   // We use this to detect duplicate transactions
@@ -118,8 +158,16 @@ export class Transaction extends Base {
   @Property({ nullable: true })
   descriptionDirty?: string;
 
+  /** The description was set by a person (typed on a manual entry); rules never change it. */
+  @Property({ default: false })
+  descriptionEditedByUser = false;
+
   @Property({ nullable: true })
   internalTransactionId?: string;
+
+  /** The merchant was set by a person (chosen on a manual entry); rules never change it. */
+  @Property({ default: false })
+  merchantEditedByUser = false;
 
   @Property({ nullable: true })
   nordigenInternalTransactionId?: string;
@@ -137,16 +185,27 @@ export class Transaction extends Base {
 
   // The account balance at the time of the transaction in the user's WonderMoney prefered currency (appuser.currency_key)
   @Property({ columnType: 'numeric(18, 4)', nullable: true })
-  appuserCurrencyBalance?: number;
+  appuserCurrencyBalance?: null | number;
 
   @OneToMany({ cascade: [], entity: () => AppuserTransactionCategory, mappedBy: 'transactionKey' })
   appuserTransactionCategories = new Collection<AppuserTransactionCategory>(this);
 
+  /** The household tags on this transaction; see {@link TransactionTag}. */
   @Property({ default: false })
   hidden = false;
 
   @Property({ default: false })
   reviewed = false;
+
+  @OneToMany({ cascade: [], entity: () => TransactionTag, mappedBy: 'transactionKey' })
+  transactionTags = new Collection<TransactionTag>(this);
+
+  /**
+   * The live lines of a split transaction, empty when it is not split; see {@link TransactionSplit}.
+   * Readers that total by category go through `services/transaction/category-lines.ts`.
+   */
+  @OneToMany({ cascade: [], entity: () => TransactionSplit, mappedBy: 'transactionKey', orderBy: { position: 'ASC' } })
+  splits = new Collection<TransactionSplit>(this);
 
   /** How confident the categorizer was (or 'high'/user_edit when the user set it). Null = never evaluated. */
   @Enum({ items: () => CategorizationConfidence, nullable: true })

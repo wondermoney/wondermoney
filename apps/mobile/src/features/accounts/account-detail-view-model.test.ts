@@ -16,7 +16,7 @@ const dto: AccountSummaryDto = {
 }
 
 describe('account detail view model', () => {
-  it('preserves server values and nulls without exposing the remote logo', () => {
+  it('preserves server values and nulls, the remote logo only as the mark', () => {
     expect(mapAccountDetail(dto)).toEqual({
       accountId: 42,
       accountName: null,
@@ -30,6 +30,12 @@ describe('account detail view model', () => {
       refreshedAt: '2026-07-17T10:00:00.000Z',
       source: 'open_banking',
       csvImportFormat: null,
+      ownerFirstName: null,
+      convertedAvailableBalance: null,
+      syncStaleness: null,
+      lastSyncedAt: null,
+      institutionLogoUrl: null,
+      accountType: null,
     })
     expect(mapAccountDetail(dto)).not.toHaveProperty('logoUrl')
   })

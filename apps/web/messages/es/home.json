@@ -1,0 +1,91 @@
+{
+  "homeOverview": {
+    "bank-alerts": {
+      "label": "Alertas de conexiones bancarias",
+      "consent-expiring": "{days, plural, =0 {El acceso a {bank} termina en menos de un día.} one {El acceso a {bank} termina en # día.} other {El acceso a {bank} termina en # días.}} Vuelve a conectar para mantener tus transacciones al día.",
+      "consent-revoked": "{bank} ha terminado el acceso a tus cuentas. Vuelve a conectar para mantener tus transacciones al día.",
+      "sync-failing": "{bank} no se actualiza desde el {date}. Volver a conectar suele solucionarlo.",
+      "sync-failing-no-date": "{bank} lleva más de 2 días sin actualizarse. Volver a conectar suele solucionarlo.",
+      "unknown-bank": "Tu banco",
+      "more": "{count, plural, one {Y # conexión más necesita atención.} other {Y # conexiones más necesitan atención.}}",
+      "reconnect": "Volver a conectar",
+      "dismiss": "Descartar"
+    },
+    "net-worth": {
+      "title": "Patrimonio neto",
+      "since": "desde el cierre de {month}",
+      "chart-label": "Patrimonio neto al cierre de cada mes, de {from} a {to}",
+      "history-error": "No se pudo cargar la evolución.",
+      "retry": "Reintentar",
+      "empty-title": "Aún no hay cuentas",
+      "empty-body": "Añade una cuenta para ver lo que tienes y lo que debes.",
+      "empty-action": "Añadir cuenta"
+    },
+    "shell": {
+      "dark-mode": "Modo oscuro",
+      "light-mode": "Modo claro"
+    },
+    "month": {
+      "title": "Este mes",
+      "days-left": "{days, plural, =0 {Último día de {month}} one {Queda # día de {month}} other {Quedan # días de {month}}}",
+      "left": "disponible para gastar",
+      "overspent": "por encima del plan",
+      "spent-of": "<spent></spent> gastados de <planned></planned> previstos",
+      "over-plan": "{count, plural, one {# categoría por encima del plan} other {# categorías por encima del plan}}",
+      "measure-label": "{name}: {spent} gastados de {planned} previstos",
+      "row-error": "No se pudo cargar este mes.",
+      "retry": "Reintentar"
+    },
+    "budget-empty": {
+      "title": "Aún no hay presupuesto",
+      "body": "Define un plan mensual para ver cuánto te queda por gastar y qué supera el plan.",
+      "action": "Crear presupuesto"
+    },
+    "sheet": {
+      "title": "Balance",
+      "own": "Lo que tienes",
+      "owe": "Lo que debes",
+      "total": "Total",
+      "side-empty": "Nada aquí.",
+      "groups": {
+        "accounts": "Cuentas",
+        "portfolios": "Carteras",
+        "loans": "Préstamos",
+        "other": "Otros"
+      },
+      "counted-in": "Incluida en {account}"
+    },
+    "cashflow": {
+      "title": "Flujo de caja neto por mes",
+      "list-label": "Flujo de caja neto, de {from} a {to}",
+      "caption": "Entradas menos salidas en todas tus cuentas.",
+      "empty-title": "Aún no hay flujo de caja",
+      "empty-body": "Aparece cuando tus cuentas tengan transacciones."
+    },
+    "loans": {
+      "title": "Próximos pagos de préstamos",
+      "outstanding": "<amount></amount> pendientes",
+      "rate": "al {rate}",
+      "empty-title": "Sin préstamos",
+      "empty-body": "Añade un préstamo para ver aquí sus próximos pagos.",
+      "none-due-title": "No hay pagos de préstamos previstos",
+      "none-due-body": "Aquí aparecen los préstamos activos con una próxima fecha de pago.",
+      "action": "Ver préstamos"
+    },
+    "latest": {
+      "title": "Últimas transacciones",
+      "review": "{count, plural, one {# por revisar} other {# por revisar}}",
+      "all": "Todas las transacciones",
+      "caption": "{count, plural, one {La transacción más reciente} other {Las # transacciones más recientes}}",
+      "date": "Fecha",
+      "description": "Descripción",
+      "category": "Categoría",
+      "amount": "Importe",
+      "uncategorised": "Sin categoría",
+      "needs-review": "Por revisar",
+      "empty-title": "Aún no hay transacciones",
+      "empty-body": "Conecta un banco o añade una transacción para verla aquí.",
+      "action": "Ver cuentas"
+    }
+  }
+}

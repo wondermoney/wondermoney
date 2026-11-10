@@ -13,7 +13,7 @@ import {
   type CategoryCreateWrite,
   type CategoryEditWrite,
 } from './categories-contract'
-import { findVisibleCategory, isVisibleRoot } from './category-management-model'
+import { findVisibleCategory, isEditAllowed, isVisibleRoot } from './category-management-model'
 import { categoriesKey } from './use-categories'
 
 export type CategoryWriteInput =
@@ -88,7 +88,7 @@ export function useCategoryWrite() {
       }
       if (input.type === 'edit') {
         const current = findVisibleCategory(categories, input.categoryId)
-        if (!current || current.isSystemCategory) throw new CategoryWriteBlockedError('Only visible user categories can be edited.')
+        if (!current || !isEditAllowed(current, parsed as CategoryEditWrite)) throw new CategoryWriteBlockedError('Only visible user categories can be edited; a system category only takes countsAsSpending.')
       }
       const frozen = Object.freeze(input.type === 'create'
         ? { type: 'create' as const, payload: parsed as CategoryCreateWrite }

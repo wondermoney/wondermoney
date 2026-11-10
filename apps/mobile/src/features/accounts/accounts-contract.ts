@@ -21,6 +21,14 @@ export const accountSourceSchema = tolerantEnum(['manual', 'open_banking'], 'unk
 export const csvImportFormatSchema = tolerantEnum(['bank', 'generic'], 'unknown')
 export type CsvImportFormat = z.infer<typeof csvImportFormatSchema>
 
+export const syncStalenessSchema = tolerantEnum(['fresh', 'stale', 'very_stale', 'error'], 'unknown')
+
+/** Sync freshness for an open-banking account (web `SyncStatus`). */
+export const syncStatusSchema = z.object({
+  staleness: syncStalenessSchema,
+  lastSyncedAt: z.iso.datetime().nullish().catch(null),
+})
+
 export const accountSummarySchema = z.object({
   accountFinancialInstitutionKey: z.object({
     displayName: z.string().max(255).nullable(),
@@ -41,6 +49,14 @@ export const accountSummarySchema = z.object({
   refreshedAt: z.iso.datetime().nullable(),
   source: accountSourceSchema,
   csvImportFormat: csvImportFormatSchema.optional(),
+  // Web reads these too (lib/api/account/useAccounts.ts). Each is optional and falls back to
+  // null when malformed, so an older API or a new shape never fails the whole accounts list.
+  ownerFirstName: z.string().max(255).nullish().catch(null),
+  appuserCurrencyAvailableBalance: z.number().finite().nullish().catch(null),
+  syncStatus: syncStatusSchema.nullish().catch(null),
+  // The account type's key ('CHECKING', 'CREDIT_CARD', 'MORTGAGE', …) for the row's glyph when there
+  // is no institution logo. Optional: older APIs don't send it.
+  accountType: z.string().max(255).nullish().catch(null),
 })
 
 export const accountUpdateWriteSchema = z.object({

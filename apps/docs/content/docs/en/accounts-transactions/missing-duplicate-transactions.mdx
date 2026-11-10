@@ -9,7 +9,7 @@ WonderMoney prevents duplicates as part of its normal transaction pipeline, so m
 
 Each transaction carries a fingerprint that identifies it. When incoming data matches an existing fingerprint, the duplicate is dropped instead of creating a second row. On the rare occasion the match is uncertain, the transaction is kept and flagged with a hint so you can decide.
 
-Every decision is recorded in the transaction audit log, including skipped duplicates and status changes. The fingerprint tolerance is deliberately narrow: two legitimate transactions that look similar — for example two identical purchases on the same day — are not treated as duplicates, because a distinct bank reference is enough to tell them apart.
+Every decision is recorded in the transaction audit log, including skipped duplicates and status changes. The fingerprint tolerance is deliberately narrow: two legitimate transactions that look similar — for example two identical purchases on the same day — are not treated as duplicates. A distinct bank reference tells them apart, and when the bank sends identical purchases without one, each one the bank lists is still kept as its own transaction.
 
 ## Pending and posted versions
 

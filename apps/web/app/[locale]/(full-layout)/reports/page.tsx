@@ -36,7 +36,7 @@ export default function ReportsPage() {
           title={tRoot("connect-your-bank-account")}
           description={tRoot("bank-connection-description")}
           cta={
-            <Button asChild size="sm">
+            <Button asChild>
               <Link href="/accounts">{tRoot("add-account")}</Link>
             </Button>
           }
@@ -44,7 +44,7 @@ export default function ReportsPage() {
         />
       ) : (
         <ReportsCurrencyProvider>
-          <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-12">
             <ReportFiltersBar />
 
             {/* Flagship Sankey — full width. Each report card is its own
@@ -53,7 +53,7 @@ export default function ReportsPage() {
             <SankeyReport />
 
             {/* Cash flow + spending breakdown side by side */}
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <div className="grid grid-cols-1 gap-12 lg:grid-cols-2">
               <CashflowReport />
               <SpendingByCategoryReport />
             </div>
@@ -61,11 +61,10 @@ export default function ReportsPage() {
             {/* Net worth over time — full width for the trend */}
             <NetWorthHistoryReport />
 
-            {/* Budget vs actual + portfolio performance side by side */}
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-              <BudgetVsActualReport />
-              <PortfolioPerformanceReport />
-            </div>
+            {/* Budget vs actual and portfolio performance are tables of five
+                and six columns: side by side, each was cut off at 1280. */}
+            <BudgetVsActualReport />
+            <PortfolioPerformanceReport />
           </div>
         </ReportsCurrencyProvider>
       )}

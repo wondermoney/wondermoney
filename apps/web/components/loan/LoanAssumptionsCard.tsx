@@ -1,18 +1,27 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import type { ReactNode } from "react";
 
-import { Card, CardContent } from "@/components/ui/card";
+import { Section } from "@/components/ui/RuledSection";
 import type { LoanDetail } from "@/lib/api/loan/types";
 import {
   LOAN_STATUS_LABEL_KEY,
   LOAN_TYPE_LABEL_KEY,
 } from "@/lib/loans/loan-labels";
 
-export default function LoanAssumptionsCard({ loan }: { loan: LoanDetail }) {
+export default function LoanAssumptionsCard({
+  loan,
+  action,
+}: {
+  loan: LoanDetail;
+  action?: ReactNode;
+}) {
   const t = useTranslations("loans");
   const rows = [
-    [t("fields.lender"), t("detail.providerUnavailable")],
+    // The lender always printed "provider unavailable", even with the
+    // provider's name on the loan (and in the header above it).
+    [t("fields.lender"), loan.providerName || t("detail.providerUnavailable")],
     [t("fields.type"), t(`types.${LOAN_TYPE_LABEL_KEY[loan.type] ?? "other"}`)],
     [
       t("fields.status"),
@@ -21,23 +30,22 @@ export default function LoanAssumptionsCard({ loan }: { loan: LoanDetail }) {
     [t("detail.description"), loan.description ?? loan.notes ?? t("detail.na")],
   ] as const;
   return (
-    <Card>
-      <CardContent className="space-y-3 p-4">
-        <div className="text-sm font-medium">
-          {t("detail.assumptions.title")}
-        </div>
-        <div className="space-y-2">
-          {rows.map(([label, value]) => (
-            <div
-              key={label}
-              className="flex items-start justify-between gap-4 text-sm"
-            >
-              <span className="text-muted-foreground">{label}</span>
-              <span className="text-right">{value}</span>
-            </div>
-          ))}
-        </div>
-      </CardContent>
-    </Card>
+    <Section
+      id="loan-assumptions-heading"
+      title={t("detail.assumptions.title")}
+    >
+      <dl>
+        {rows.map(([label, value]) => (
+          <div
+            key={label}
+            className="border-border flex items-start justify-between gap-4 border-b py-2.5 text-sm"
+          >
+            <dt className="text-muted-foreground">{label}</dt>
+            <dd className="text-foreground text-right">{value}</dd>
+          </div>
+        ))}
+      </dl>
+      {action ? <div className="mt-4">{action}</div> : null}
+    </Section>
   );
 }

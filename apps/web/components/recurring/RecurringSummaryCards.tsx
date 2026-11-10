@@ -1,9 +1,14 @@
+"use client";
+
 import type { ReactNode } from "react";
 
 import { Card, CardContent } from "@/components/ui/card";
 import type { RecurringSummary } from "@/lib/api/recurring/useRecurringSummary";
 import { cn } from "@/lib/utils";
-import { formatCurrencyForScreenReader } from "@/lib/utils/formatCurrency";
+import {
+  useFormatCurrency,
+  useFormatCurrencyForScreenReader,
+} from "@/lib/utils/useFormatCurrency";
 
 type SummaryLike = Partial<RecurringSummary> | null | undefined;
 type SummaryCurrencyTotals = Record<string, unknown>;
@@ -32,52 +37,34 @@ const isFiniteNumber = (value: unknown): value is number =>
 const isCurrencyCode = (value: unknown): value is string =>
   typeof value === "string" && /^[A-Z]{3}$/.test(value);
 
-const formatMoney = (value: number, currencyCode?: string, locale?: string) => {
-  if (!isCurrencyCode(currencyCode)) {
-    return new Intl.NumberFormat(locale, {
-      notation: "standard",
-      maximumFractionDigits: 2,
-      minimumFractionDigits: 2,
-    }).format(value);
-  }
-
-  return new Intl.NumberFormat(locale, {
-    style: "currency",
-    notation: "standard",
-    maximumFractionDigits: 2,
-    minimumFractionDigits: 2,
-    currency: currencyCode,
-  }).format(value);
-};
-
-const formatAccessibleMoney = (
-  value: number,
-  currencyCode?: string,
-  locale?: string,
-) =>
-  formatCurrencyForScreenReader(
-    value,
-    isCurrencyCode(currencyCode) ? currencyCode : "EUR",
-    locale ?? "en",
-  );
+/** Money for the summary cards; a non-ISO code formats as a plain number. */
+function useSummaryMoney() {
+  const format = useFormatCurrency();
+  const formatSpoken = useFormatCurrencyForScreenReader();
+  return {
+    formatMoney: (value: number, currencyCode?: string) =>
+      format(value, currencyCode ?? "", { minimumFractionDigits: 2 }),
+    formatAccessibleMoney: (value: number, currencyCode?: string) =>
+      formatSpoken(value, isCurrencyCode(currencyCode) ? currencyCode : "EUR"),
+  };
+}
 
 function AmountLine({
   value,
   currencyCode,
-  locale,
 }: {
   value: number | null;
   currencyCode?: string;
-  locale?: string;
 }) {
+  const { formatMoney, formatAccessibleMoney } = useSummaryMoney();
   return value === null ? (
     <span className="text-muted-foreground">—</span>
   ) : (
     <span className="font-mono text-2xl leading-none font-semibold tracking-tight tabular-nums">
       <span className="sr-only">
-        {formatAccessibleMoney(value, currencyCode, locale)}
+        {formatAccessibleMoney(value, currencyCode)}
       </span>
-      <span aria-hidden="true">{formatMoney(value, currencyCode, locale)}</span>
+      <span aria-hidden="true">{formatMoney(value, currencyCode)}</span>
     </span>
   );
 }
@@ -86,30 +73,29 @@ function AmountRange({
   min,
   max,
   currencyCode,
-  locale,
 }: {
   min: number | null;
   max: number | null;
   currencyCode?: string;
-  locale?: string;
 }) {
+  const { formatMoney, formatAccessibleMoney } = useSummaryMoney();
   if (min === null && max === null) {
-    return <AmountLine value={null} currencyCode={currencyCode} locale={locale} />;
+    return <AmountLine value={null} currencyCode={currencyCode} />;
   }
 
   const lower = min ?? max ?? 0;
   const upper = max ?? min ?? 0;
   const accessibleLabel =
     lower === upper
-      ? formatAccessibleMoney(lower, currencyCode, locale)
-      : `${formatAccessibleMoney(lower, currencyCode, locale)} – ${formatAccessibleMoney(upper, currencyCode, locale)}`;
+      ? formatAccessibleMoney(lower, currencyCode)
+      : `${formatAccessibleMoney(lower, currencyCode)} – ${formatAccessibleMoney(upper, currencyCode)}`;
   return (
     <span className="font-mono text-2xl leading-none font-semibold tracking-tight whitespace-nowrap tabular-nums">
       <span className="sr-only">{accessibleLabel}</span>
       <span aria-hidden="true">
         {lower === upper
-          ? formatMoney(lower, currencyCode, locale)
-          : `${formatMoney(lower, currencyCode, locale)}–${formatMoney(upper, currencyCode, locale)}`}
+          ? formatMoney(lower, currencyCode)
+          : `${formatMoney(lower, currencyCode)}–${formatMoney(upper, currencyCode)}`}
       </span>
     </span>
   );
@@ -214,7 +200,6 @@ export function RecurringSummaryCards({
                 min={isFiniteNumber(totals.monthlyMinTotal) ? totals.monthlyMinTotal : null}
                 max={isFiniteNumber(totals.monthlyMaxTotal) ? totals.monthlyMaxTotal : null}
                 currencyCode={code}
-                locale={locale}
               />
             </CardContent>
           </Card>
@@ -227,16 +212,16 @@ export function RecurringSummaryCards({
     <div className={cn("grid gap-4 md:grid-cols-2 2xl:grid-cols-4", className)}>
       <SummaryCard
         label={labels.monthlyEstimate}
-        value={<AmountRange min={monthlyMinTotal} max={monthlyMaxTotal} currencyCode={currencyCode} locale={locale} />}
+        value={<AmountRange min={monthlyMinTotal} max={monthlyMaxTotal} currencyCode={currencyCode} />}
         hint={labels.estimateHint}
       />
       <SummaryCard
         label={labels.subscriptions}
-        value={<AmountRange min={subscriptionMinTotal} max={subscriptionMaxTotal} currencyCode={currencyCode} locale={locale} />}
+        value={<AmountRange min={subscriptionMinTotal} max={subscriptionMaxTotal} currencyCode={currencyCode} />}
       />
       <SummaryCard
         label={labels.bills}
-        value={<AmountRange min={billMinTotal} max={billMaxTotal} currencyCode={currencyCode} locale={locale} />}
+        value={<AmountRange min={billMinTotal} max={billMaxTotal} currencyCode={currencyCode} />}
       />
       <SummaryCard
         label={labels.needsReview}

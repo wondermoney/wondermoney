@@ -2,8 +2,8 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import Image from "next/image";
-import { useTranslations } from "next-intl";
-import { useState } from "react";
+import { useLocale, useTranslations } from "next-intl";
+import { useMemo, useState } from "react";
 import { SubmitHandler, useForm, useWatch } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -25,13 +25,17 @@ import { useRateLimitToast } from "@/lib/api/useRateLimitToast";
 import {
   buildCurrencyOptions,
   CURRENCY_TRIGGER_CLASS,
-  useAmountPlaceholder,
 } from "@/lib/utils/currency-field";
-import { zLocaleNumber } from "@/lib/utils/number";
+import {
+  formatWireDecimalInput,
+  zLocaleNumber,
+  zOptionalLocaleNumber,
+} from "@/lib/utils/number";
 
 import { Button } from "../ui/button";
 import { ComboBoxForm } from "../ui/combobox";
 import { Input } from "../ui/input";
+import { MoneyInput } from "../ui/MoneyInput";
 import {
   Select,
   SelectContent,
@@ -67,29 +71,31 @@ interface PortfolioTransactionEditModalProps {
   data: TransactionData;
 }
 
-const formSchema = z.object({
+const createFormSchema = (t: (key: string) => string, locale: string) =>
+  z.object({
   transactionDate: z.date(),
   financialTransactionTypeId: z.string(),
-  quantity: zLocaleNumber,
-  unitPrice: zLocaleNumber,
+  quantity: zLocaleNumber(locale, t("invalid-amount")),
+  unitPrice: zLocaleNumber(locale, t("invalid-amount")),
   settlementCurrencyId: z.string(),
   brokerId: z.string().optional(),
-  feeAmount: zLocaleNumber.optional(),
+  feeAmount: zOptionalLocaleNumber(locale, t("invalid-amount")),
   feeCurrencyId: z.string().optional(),
-  originalUnitPrice: zLocaleNumber.optional(),
+  originalUnitPrice: zOptionalLocaleNumber(locale, t("invalid-amount")),
   originalCurrencyId: z.string().optional(),
   notes: z.string().optional(),
   hasFees: z.boolean().default(false),
   addOriginalCurrency: z.boolean().default(false),
 });
 
-type FormProps = z.infer<typeof formSchema>;
+type FormProps = z.infer<ReturnType<typeof createFormSchema>>;
 
 const PortfolioTransactionEditModal = (
   props: PortfolioTransactionEditModalProps,
 ) => {
   const t = useTranslations();
-  const amountPlaceholder = useAmountPlaceholder();
+  const locale = useLocale();
+  const formSchema = useMemo(() => createFormSchema(t, locale), [t, locale]);
   const notifyIfRateLimited = useRateLimitToast();
   const { isOpen, closeModal, data } = props;
 
@@ -116,15 +122,18 @@ const PortfolioTransactionEditModal = (
     defaultValues: {
       transactionDate: new Date(data.transactionDate),
       financialTransactionTypeId: data.financialTransactionTypeId.toString(),
-      quantity: String(data.quantity),
-      unitPrice: String(data.unitPrice),
+      quantity: formatWireDecimalInput(data.quantity, locale),
+      unitPrice: formatWireDecimalInput(data.unitPrice, locale),
       settlementCurrencyId: data.settlementCurrencyId.toString(),
       brokerId: data.brokerId?.toString(),
-      feeAmount: data.feeAmount != null ? String(data.feeAmount) : undefined,
+      feeAmount:
+        data.feeAmount != null
+          ? formatWireDecimalInput(data.feeAmount, locale)
+          : undefined,
       feeCurrencyId: data.feeCurrencyId?.toString(),
       originalUnitPrice:
         data.originalUnitPrice != null
-          ? String(data.originalUnitPrice)
+          ? formatWireDecimalInput(data.originalUnitPrice, locale)
           : undefined,
       originalCurrencyId: data.originalCurrencyId?.toString(),
       notes: data.notes ?? "",
@@ -383,15 +392,13 @@ const PortfolioTransactionEditModal = (
                     {t("unit-price")}
                   </FormLabel>
                   <FormControl>
-                    <Input
+                    <MoneyInput
                       type="tel"
                       step="any"
                       min="0"
-                      placeholder={amountPlaceholder}
-                      className="w-full pr-4 text-right"
                       {...field}
                       value={(field.value as string) ?? ""}
-                      startAdornment={
+                      currencySlot={
                         <ComboBoxForm
                           triggerClassName={CURRENCY_TRIGGER_CLASS}
                           field={{
@@ -447,15 +454,13 @@ const PortfolioTransactionEditModal = (
                       {t("fee-amount")}
                     </FormLabel>
                     <FormControl>
-                      <Input
+                      <MoneyInput
                         type="tel"
                         step="any"
                         min="0"
-                        placeholder={amountPlaceholder}
-                        className="w-full pr-4 text-right"
                         {...field}
                         value={(field.value as string) ?? ""}
-                        startAdornment={
+                        currencySlot={
                           <ComboBoxForm
                             triggerClassName={CURRENCY_TRIGGER_CLASS}
                             field={{
@@ -512,15 +517,13 @@ const PortfolioTransactionEditModal = (
                       {t("original-price")}
                     </FormLabel>
                     <FormControl>
-                      <Input
+                      <MoneyInput
                         type="tel"
                         step="any"
                         min="0"
-                        placeholder={amountPlaceholder}
-                        className="w-full pr-4 text-right"
                         {...field}
                         value={(field.value as string) ?? ""}
-                        startAdornment={
+                        currencySlot={
                           <ComboBoxForm
                             triggerClassName={CURRENCY_TRIGGER_CLASS}
                             field={{

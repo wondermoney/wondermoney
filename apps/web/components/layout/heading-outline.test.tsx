@@ -7,58 +7,24 @@ import { afterEach, test } from "vitest";
 import { PageHeader } from "./PageHeader";
 import { PageShell } from "./PageShell";
 import { SectionHeader } from "./SectionHeader";
-import { SidebarNavGroup } from "./SidebarNavGroup";
 
 afterEach(cleanup);
-
-const groups = [
-  { id: "day-to-day", label: "Day-to-day" },
-  { id: "investments", label: "Investments" },
-  { id: "planning", label: "Planning" },
-];
-
-const navGroups = groups.map((group) => (
-  <SidebarNavGroup key={group.id} id={group.id} label={group.label}>
-    <li>
-      <a href={`/${group.id}`}>A destination</a>
-    </li>
-  </SidebarNavGroup>
-));
 
 const headingLevels = (root: ParentNode) =>
   [...root.querySelectorAll("h1, h2, h3, h4, h5, h6")].map((heading) =>
     Number(heading.tagName[1]),
   );
 
-test("sidebar nav groups add no headings to the document outline", () => {
-  const { container } = render(<>{navGroups}</>);
-  assert.deepEqual(headingLevels(container), []);
-});
-
-test("each sidebar nav group is a list named by its visible label", () => {
-  const { container } = render(<>{navGroups}</>);
-
-  for (const group of groups) {
-    const list = [...container.querySelectorAll("ul")].find((ul) => {
-      const labelId = ul.getAttribute("aria-labelledby");
-      return (
-        labelId &&
-        container.querySelector(`#${labelId}`)?.textContent === group.label
-      );
-    });
-    assert.ok(list, `the ${group.label} list is labelled by its visible label`);
-
-    const label = container.querySelector(
-      `#${list.getAttribute("aria-labelledby")}`,
-    )!;
-    assert.ok(!label.closest(".sr-only"), "the label stays visible");
-  }
-});
-
 test("a page behind the navigation opens on a single h1 and skips no heading level", () => {
   const { container } = render(
     <>
-      <nav aria-label="Main navigation">{navGroups}</nav>
+      <nav aria-label="Main navigation">
+        <ul>
+          <li>
+            <a href="#destination">A destination</a>
+          </li>
+        </ul>
+      </nav>
       <main>
         <PageShell>
           <PageHeader title="A page title" description="…" />

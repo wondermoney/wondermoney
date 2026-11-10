@@ -1,73 +1,54 @@
-import { useState } from 'react'
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
-import { SafeAreaView } from 'react-native-safe-area-context'
+import { ScrollView, StyleSheet, View } from 'react-native'
 
+import { BackControl } from '@/components/ui/back-control'
+import { Button } from '@/components/ui/button'
+import { SafeAreaView } from '@/components/ui/screen-safe-area'
+import { Text } from '@/components/ui/text'
+import { SettingsLoading, SettingsNotice, SettingsPage, type SettingsSectionId } from '@/features/more/settings-ui'
 import { themeTokens } from '@/theme/tokens'
 import { textStyles } from '@/theme/typography'
-import { BackControl } from '@/components/ui/back-control'
 
 export type Palette = (typeof themeTokens.colors)[keyof typeof themeTokens.colors]
 
+/** A settings-page action: web's `Button` (primary, or outline). */
 export function SelfAction({
   label,
   onPress,
-  palette,
   primary = false,
   disabled = false,
 }: {
   label: string
   onPress: () => void | Promise<void>
-  palette: Palette
+  /** @deprecated read from the colour scheme now; accepted and ignored. */
+  palette?: Palette
   primary?: boolean
   disabled?: boolean
 }) {
-  const [focused, setFocused] = useState(false)
-  return (
-    <Pressable
-      accessibilityRole="button"
-      accessibilityState={{ disabled, busy: disabled }}
-      disabled={disabled}
-      onBlur={() => setFocused(false)}
-      onFocus={() => setFocused(true)}
-      onPress={() => void onPress()}
-      style={({ pressed }) => [
-        styles.action,
-        {
-          borderColor: primary ? 'transparent' : palette.input,
-          backgroundColor: primary ? palette.primary : 'transparent',
-        },
-        focused && { borderWidth: 2, borderColor: palette.foreground },
-        (pressed || disabled) && styles.pressed,
-      ]}
-    >
-      <Text
-        allowFontScaling
-        style={[
-          styles.actionLabel,
-          { color: primary ? palette.primaryForeground : palette.foreground },
-        ]}
-      >
-        {label}
-      </Text>
-    </Pressable>
-  )
+  return <Button disabled={disabled} label={label} onPress={() => void onPress()} variant={primary ? 'primary' : 'outline'} />
 }
 
-export function SelfLoading({ label, palette, backLabel, onBack }: {
+export function SelfLoading({ label, palette, backLabel, onBack, section }: {
   label: string
   palette: Palette
   backLabel: string
   onBack: () => void
+  /** Inside Settings: draw the Settings title and section select above the placeholder. */
+  section?: SettingsSectionId
 }) {
+  if (section) {
+    return (
+      <SettingsPage backLabel={backLabel} onBack={onBack} section={section}>
+        <SettingsLoading label={label} />
+      </SettingsPage>
+    )
+  }
   return (
     <SafeAreaView style={[styles.safeArea, { backgroundColor: palette.background }]}>
       <View style={styles.loadingHeader}>
-        <BackControl fallback="/more" onPress={onBack} color={palette.primary} />
+        <BackControl fallback="/more" label={backLabel} onPress={onBack} />
       </View>
-      <View accessible accessibilityRole="progressbar" accessibilityLabel={label} style={styles.loading}>
-        {['heading', 'row-one', 'row-two'].map((key) => (
-          <View key={key} style={[styles.skeleton, { backgroundColor: palette.muted }]} />
-        ))}
+      <View style={styles.loading}>
+        <SettingsLoading label={label} />
       </View>
     </SafeAreaView>
   )
@@ -84,7 +65,9 @@ export function SelfFailure({
   onLogout,
   palette,
   retryable = true,
+  section,
 }: {
+  section?: SettingsSectionId
   title: string
   message: string
   backLabel: string
@@ -96,40 +79,45 @@ export function SelfFailure({
   palette: Palette
   retryable?: boolean
 }) {
+  const body = (
+    <View style={styles.failure}>
+      <Text accessibilityRole="header" variant="section">{title}</Text>
+      <Text tone="muted" variant="meta">{message}</Text>
+      <View style={styles.actions}>
+        {retryable ? <SelfAction label={retryLabel} onPress={onRetry} primary /> : null}
+        <SelfAction label={signOutLabel} onPress={onLogout} />
+      </View>
+    </View>
+  )
+  if (section) {
+    return <SettingsPage backLabel={backLabel} onBack={onBack} section={section}>{body}</SettingsPage>
+  }
   return (
     <SafeAreaView style={[styles.safeArea, { backgroundColor: palette.background }]}>
       <ScrollView contentContainerStyle={styles.centered}>
-        <View style={styles.failure}>
-          <BackControl fallback="/more" onPress={onBack} color={palette.primary} />
-          <View style={[styles.errorMarker, { backgroundColor: palette.destructive }]} />
-          <Text accessibilityRole="header" allowFontScaling style={[styles.failureTitle, { color: palette.foreground }]}>
-            {title}
-          </Text>
-          <Text allowFontScaling style={[styles.body, { color: palette.mutedForeground }]}>
-            {message}
-          </Text>
-          <View style={styles.actions}>
-            {retryable ? <SelfAction label={retryLabel} onPress={onRetry} palette={palette} primary /> : null}
-            <SelfAction label={signOutLabel} onPress={onLogout} palette={palette} />
-          </View>
+        <View style={styles.failurePage}>
+          <BackControl fallback="/more" label={backLabel} onPress={onBack} />
+          {body}
         </View>
       </ScrollView>
     </SafeAreaView>
   )
 }
 
-export function SelfStaleBanner({ message, retryLabel, refreshing, onRetry, palette }: {
+export function SelfStaleBanner({ message, retryLabel, refreshing, onRetry }: {
   message: string
   retryLabel: string
   refreshing: boolean
   onRetry: () => void | Promise<void>
-  palette: Palette
+  /** @deprecated read from the colour scheme now; accepted and ignored. */
+  palette?: Palette
 }) {
   return (
-    <View style={[styles.staleBanner, { borderColor: palette.border, backgroundColor: palette.muted }]}>
-      <Text accessible accessibilityRole="alert" accessibilityLabel={message} allowFontScaling style={[styles.staleText, { color: palette.foreground }]}>{message}</Text>
-      <SelfAction label={retryLabel} onPress={onRetry} disabled={refreshing} palette={palette} />
-    </View>
+    <SettingsNotice
+      action={<Button label={retryLabel} loading={refreshing} onPress={() => void onRetry()} size="sm" variant="outline" />}
+      alert
+      message={message}
+    />
   )
 }
 
@@ -175,17 +163,18 @@ const styles = StyleSheet.create({
   actionLabel: { ...textStyles.action },
   pressed: { opacity: 0.72 },
   loadingHeader: { padding: themeTokens.layout.screenPadding, alignItems: 'flex-start' },
-  loading: { flex: 1, width: '100%', maxWidth: 680, alignSelf: 'center', padding: themeTokens.layout.screenPadding, gap: themeTokens.spacing[5] },
+  loading: { flex: 1, width: '100%', maxWidth: 680, alignSelf: 'center', padding: themeTokens.layout.screenPadding },
   skeleton: { width: '100%', height: 56, borderRadius: themeTokens.radius.md },
   centered: { flexGrow: 1, justifyContent: 'center', padding: themeTokens.layout.screenPadding },
-  failure: { width: '100%', maxWidth: 480, alignSelf: 'center', alignItems: 'flex-start', gap: themeTokens.spacing[4] },
+  failure: { alignItems: 'flex-start', gap: themeTokens.spacing[3] },
+  failurePage: { width: '100%', maxWidth: 480, alignSelf: 'center', alignItems: 'flex-start', gap: themeTokens.spacing[6] },
   errorMarker: { width: 36, height: 2 },
   failureTitle: { ...textStyles.title },
   body: { ...textStyles.body },
   actions: { flexDirection: 'row', flexWrap: 'wrap', gap: themeTokens.spacing[3] },
   staleBanner: { borderWidth: 1, borderRadius: themeTokens.radius.md, padding: themeTokens.spacing[4], gap: themeTokens.spacing[3], alignItems: 'flex-start' },
   staleText: { ...textStyles.body },
-  row: { minHeight: themeTokens.layout.rowMinHeight, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: themeTokens.spacing[4], paddingVertical: themeTokens.spacing[2] },
+  row: { minHeight: themeTokens.layout.rowMinHeight, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: themeTokens.spacing[4], paddingHorizontal: themeTokens.spacing[3], paddingVertical: themeTokens.spacing[2] },
   rowLabel: { ...textStyles.meta },
   rowValue: { ...textStyles.body, flexShrink: 1, textAlign: 'right' },
 })

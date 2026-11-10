@@ -11,9 +11,15 @@ node_modules/
 .worktrees/
 .sandboxes/
 .sandbox-dev-claims/
-.opencode/*
-!.opencode/skills/
+# Maintainer-local agent and tool state: never committed
+.opencode/
+.infisical.json
+.hallmark*
+.impeccable*
 opencode.json
 .superpowers/
 .slim/
 .husky/_/
+
+# Per-user Claude Code settings (shared project settings live in .claude/settings.json)
+**/.claude/settings.local.json

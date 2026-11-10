@@ -1,12 +1,21 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Pressable, RefreshControl, ScrollView, StyleSheet, Text, useColorScheme, View } from 'react-native'
-import { SafeAreaView } from 'react-native-safe-area-context'
-import { BackControl } from '@/components/ui/back-control'
+import { RefreshControl, ScrollView, StyleSheet, View } from 'react-native'
 
-import { formatCurrency } from '@/lib/formatters/financial'
-import { themeTokens, type Palette } from '@/theme/tokens'
-import { textStyles } from '@/theme/typography'
+import { BackControl } from '@/components/ui/back-control'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Card } from '@/components/ui/card'
+import { Notice } from '@/components/ui/notice'
+import { PageHeader } from '@/components/ui/page-header'
+import { ProgressBar } from '@/components/ui/progress-bar'
+import { SafeAreaView } from '@/components/ui/screen-safe-area'
+import { Section } from '@/components/ui/section'
+import { SegmentedControl } from '@/components/ui/segmented-control'
+import { Text } from '@/components/ui/text'
+import { useFormatMoney } from '@/lib/formatters/money-display'
+import { themeTokens } from '@/theme/tokens'
+import { usePalette } from '@/theme/use-palette'
 
 import type { DebtStrategyPlan, DebtStrategyViewModel } from './debt-strategy-view-model'
 
@@ -22,25 +31,33 @@ type Props = Readonly<{
 }>
 type Strategy = 'avalanche' | 'snowball'
 
+/**
+ * Web's `DebtStrategySection` (shown on the Goals page) as its own page: the title and what it
+ * compares, Avalanche and Snowball side by side on a muted step, the saving, then the interest
+ * each debt carries under the chosen order.
+ */
 export function DebtStrategyScreen({ state, currencyCode, onBack, onRefresh }: Props) {
+  const formatMoney = useFormatMoney()
   const { t, i18n } = useTranslation()
-  const palette = themeTokens.colors[useColorScheme() === 'dark' ? 'dark' : 'light']
+  const palette = usePalette()
   const locale = i18n.resolvedLanguage ?? i18n.language ?? 'en'
   const [tab, setTab] = useState<Strategy>('avalanche')
 
   if (state.status === 'access-transition') return null
-  if (state.status === 'loading') return <Loading palette={palette} label={t('goals.debtStrategy.loading')} onBack={onBack} />
+  if (state.status === 'loading') return <Loading label={t('goals.debtStrategy.loading')} onBack={onBack} />
   if (!('data' in state)) {
     const invalid = state.status === 'invalid-response'
-    return <SafeAreaView style={[styles.safe, { backgroundColor: palette.background }]}><View style={styles.failure}>
-      <Button label={t('goals.debtStrategy.back')} onPress={onBack} palette={palette} />
-      <Text accessibilityRole="header" style={[styles.title, { color: palette.foreground }]}>{t(invalid ? 'goals.debtStrategy.invalidTitle' : 'goals.debtStrategy.errorTitle')}</Text>
-      <Text style={[styles.body, { color: palette.mutedForeground }]}>{t(invalid ? 'goals.debtStrategy.invalidMessage' : 'goals.debtStrategy.errorMessage')}</Text>
-      <Button label={t('common.retry')} onPress={onRefresh} palette={palette} primary />
-    </View></SafeAreaView>
+    return <SafeAreaView style={[styles.safe, { backgroundColor: palette.background }]}><ScrollView contentContainerStyle={styles.content}><View style={styles.page}>
+      <BackControl fallback="/goals" label={t('goals.debtStrategy.back')} onPress={onBack} />
+      <Card density="standalone"><View style={styles.stack}>
+        <Text accessibilityRole="header" variant="section">{t(invalid ? 'goals.debtStrategy.invalidTitle' : 'goals.debtStrategy.errorTitle')}</Text>
+        <Text tone="muted" variant="meta">{t(invalid ? 'goals.debtStrategy.invalidMessage' : 'goals.debtStrategy.errorMessage')}</Text>
+        <Button label={t('common.retry')} onPress={onRefresh} style={styles.hug} />
+      </View></Card>
+    </View></ScrollView></SafeAreaView>
   }
 
-  const money = (value: number) => currencyCode ? formatCurrency(value, { locale, currency: currencyCode }) : String(value)
+  const money = (value: number) => formatMoney(value, { locale, currency: currencyCode ?? null })
   const { data } = state
 
   return <SafeAreaView style={[styles.safe, { backgroundColor: palette.background }]}>
@@ -49,49 +66,45 @@ export function DebtStrategyScreen({ state, currencyCode, onBack, onRefresh }: P
       refreshControl={<RefreshControl refreshing={Boolean(state.refreshing)} onRefresh={() => void onRefresh()} tintColor={palette.primary} />}
     >
       <View style={styles.page}>
-        <Button label={t('goals.debtStrategy.back')} onPress={onBack} palette={palette} />
-        <View style={styles.heading}>
-          <Text accessibilityRole="header" style={[styles.title, { color: palette.foreground }]}>{t('goals.debtStrategy.title')}</Text>
-          <Text style={[styles.body, { color: palette.mutedForeground }]}>{t('goals.debtStrategy.subtitle')}</Text>
+        <View style={styles.stack}>
+          <BackControl fallback="/goals" label={t('goals.debtStrategy.back')} onPress={onBack} />
+          <PageHeader description={t('goals.debtStrategy.subtitle')} title={t('goals.debtStrategy.title')} />
         </View>
 
-        {state.status === 'refresh-error' ? <View style={[styles.banner, { borderColor: palette.border, backgroundColor: palette.muted }]}><Text accessibilityRole="alert" style={[styles.bannerText, { color: palette.foreground }]}>{t('goals.debtStrategy.stale')}</Text><Button label={t('common.retry')} onPress={onRefresh} palette={palette} /></View> : null}
+        {state.status === 'refresh-error' ? <Notice title={t('goals.debtStrategy.stale')} action={<Button label={t('common.retry')} onPress={onRefresh} size="sm" variant="secondary" style={styles.hug} />} /> : null}
 
         {!data.eligible ? (
-          <View style={[styles.empty, { borderColor: palette.border }]}>
-            <Text style={[styles.sectionTitle, { color: palette.foreground }]}>{t('goals.debtStrategy.ineligibleTitle')}</Text>
-            <Text style={[styles.body, { color: palette.mutedForeground }]}>{t('goals.debtStrategy.ineligibleMessage')}</Text>
-          </View>
+          <Section title={t('goals.debtStrategy.ineligibleTitle')} variant="open">
+            <Text tone="muted" variant="meta">{t('goals.debtStrategy.ineligibleMessage')}</Text>
+          </Section>
         ) : (
           <>
             <View style={styles.cards}>
-              <StrategyCard kind="avalanche" plan={data.avalanche} recommended={data.cheaper === 'avalanche' && data.interestSaved !== 0} money={money} t={t} palette={palette} />
-              <StrategyCard kind="snowball" plan={data.snowball} recommended={data.cheaper === 'snowball' && data.interestSaved !== 0} money={money} t={t} palette={palette} />
+              <StrategyCard kind="avalanche" plan={data.avalanche} recommended={data.cheaper === 'avalanche' && data.interestSaved !== 0} money={money} />
+              <StrategyCard kind="snowball" plan={data.snowball} recommended={data.cheaper === 'snowball' && data.interestSaved !== 0} money={money} />
             </View>
 
-            {data.interestSaved > 0 ? <Text style={[styles.body, { color: palette.mutedForeground }]}>{t('goals.debtStrategy.savings', { amount: money(data.interestSaved) })}</Text> : null}
+            {data.interestSaved > 0 ? <Text tone="muted" variant="meta">{t('goals.debtStrategy.savings', { amount: money(data.interestSaved) })}</Text> : null}
 
-            <View accessibilityRole="tablist" style={styles.tabs}>
-              <Tab label={t('goals.debtStrategy.avalanche')} selected={tab === 'avalanche'} onPress={() => setTab('avalanche')} palette={palette} />
-              <Tab label={t('goals.debtStrategy.snowball')} selected={tab === 'snowball'} onPress={() => setTab('snowball')} palette={palette} />
-            </View>
-
-            <View style={[styles.chart, { borderColor: palette.border }]}>
-              <Text style={[styles.sectionTitle, { color: palette.foreground }]}>{t('goals.debtStrategy.chartTitle')}</Text>
+            <Section title={t('goals.debtStrategy.chartTitle')} variant="open">
+              <SegmentedControl
+                accessibilityLabel={t('goals.debtStrategy.title')}
+                options={[{ value: 'avalanche', label: t('goals.debtStrategy.avalanche') }, { value: 'snowball', label: t('goals.debtStrategy.snowball') }]}
+                value={tab}
+                onChange={setTab}
+              />
               <View style={styles.list}>
                 {(tab === 'avalanche' ? data.avalanche : data.snowball).bars.map((bar) => (
                   <View key={bar.id} accessible accessibilityLabel={`${bar.name}, ${money(bar.interest)}`} style={styles.barRow}>
                     <View style={styles.barHeading}>
-                      <Text style={[styles.barName, { color: palette.foreground }]}>{bar.name}</Text>
-                      <Text style={[styles.barAmount, { color: palette.foreground }]}>{money(bar.interest)}</Text>
+                      <Text style={styles.shrink} variant="metaStrong">{bar.name}</Text>
+                      <Text variant="amount">{money(bar.interest)}</Text>
                     </View>
-                    <View style={[styles.track, { backgroundColor: palette.muted }]}>
-                      <View testID={`debt-strategy-bar-${bar.id}`} style={[styles.fill, { width: `${bar.widthPercent}%`, backgroundColor: palette.chart1 }]} />
-                    </View>
+                    <ProgressBar testID={`debt-strategy-bar-${bar.id}`} track="border" value={bar.widthPercent} />
                   </View>
                 ))}
               </View>
-            </View>
+            </Section>
           </>
         )}
       </View>
@@ -108,71 +121,47 @@ function formatMonths(months: number, t: (key: string, values?: Record<string, u
   return parts.join(' ')
 }
 
-function StrategyCard({ kind, plan, recommended, money, t, palette }: { kind: Strategy; plan: DebtStrategyPlan; recommended: boolean; money: (value: number) => string; t: (key: string, values?: Record<string, unknown>) => string; palette: Palette }) {
-  return <View style={[styles.card, { borderColor: palette.border, backgroundColor: palette.muted }]}>
+function StrategyCard({ kind, plan, recommended, money }: { kind: Strategy; plan: DebtStrategyPlan; recommended: boolean; money: (value: number) => string }) {
+  const { t } = useTranslation()
+  const palette = usePalette()
+  // Web `bg-muted/40 rounded-lg p-4`: a background step, not a bordered box.
+  return <View style={[styles.card, { backgroundColor: palette.muted }]}>
     <View style={styles.cardHeading}>
-      <Text style={[styles.sectionTitle, { color: palette.foreground }]}>{t(`goals.debtStrategy.${kind}`)}</Text>
-      {recommended ? <View style={[styles.badge, { backgroundColor: palette.primarySoft }]}><Text style={[styles.badgeText, { color: palette.primary }]}>{t('goals.debtStrategy.recommended')}</Text></View> : null}
+      <Text accessibilityRole="header" variant="bodyStrong">{t(`goals.debtStrategy.${kind}`)}</Text>
+      {recommended ? <Badge label={t('goals.debtStrategy.recommended')} tone="success" /> : null}
     </View>
-    <Text style={[styles.caption, { color: palette.mutedForeground }]}>{t(`goals.debtStrategy.${kind}Hint`)}</Text>
+    <Text tone="muted" variant="meta">{t(`goals.debtStrategy.${kind}Hint`)}</Text>
     <View style={styles.cardStats}>
-      <View style={styles.cardStat}><Text style={[styles.caption, { color: palette.mutedForeground }]}>{t('goals.debtStrategy.timeToPayoff')}</Text><Text style={[styles.cardStatValue, { color: palette.foreground }]}>{formatMonths(plan.months, t)}</Text></View>
-      <View style={styles.cardStat}><Text style={[styles.caption, { color: palette.mutedForeground }]}>{t('goals.debtStrategy.totalInterest')}</Text><Text style={[styles.cardStatValue, { color: palette.foreground }]}>{money(plan.totalInterest)}</Text></View>
+      <View style={styles.cardStat}><Text tone="muted" variant="label">{t('goals.debtStrategy.timeToPayoff')}</Text><Text style={styles.strong} variant="amount">{formatMonths(plan.months, t)}</Text></View>
+      <View style={styles.cardStat}><Text tone="muted" variant="label">{t('goals.debtStrategy.totalInterest')}</Text><Text style={styles.strong} variant="amount">{money(plan.totalInterest)}</Text></View>
     </View>
   </View>
 }
 
-function Tab({ label, selected, onPress, palette }: { label: string; selected: boolean; onPress: () => void; palette: Palette }) {
-  return <Pressable accessibilityRole="tab" accessibilityState={{ selected }} onPress={onPress} style={[styles.tab, { borderColor: selected ? palette.primary : palette.border, backgroundColor: selected ? palette.primarySoft : 'transparent' }]}>
-    <Text style={[styles.tabText, { color: selected ? palette.primary : palette.mutedForeground }]}>{label}</Text>
-  </Pressable>
-}
-
-function Button({ label, accessibilityLabel, onPress, palette, primary = false }: { label: string; accessibilityLabel?: string; onPress: () => void | Promise<void>; palette: Palette; primary?: boolean }) {
-  return <Pressable accessibilityRole="button" accessibilityLabel={accessibilityLabel ?? label} onPress={() => void onPress()} style={({ pressed }) => [styles.button, { borderColor: primary ? 'transparent' : palette.input, backgroundColor: primary ? palette.primary : 'transparent' }, pressed && styles.pressed]}>
-    <Text style={[styles.buttonText, { color: primary ? palette.primaryForeground : palette.foreground }]}>{label}</Text>
-  </Pressable>
-}
-
-function Loading({ palette, label, onBack }: { palette: Palette; label: string; onBack: () => void }) {
-  return <SafeAreaView style={[styles.safe, { backgroundColor: palette.background }]}><View style={styles.loading}><BackControl fallback="/goals" onPress={onBack} color={palette.primary} /><View accessible accessibilityRole="progressbar" accessibilityLabel={label} style={styles.loadingBars}>{[220, 320, 300].map((width, index) => <View key={index} style={[styles.skeleton, { width, backgroundColor: palette.muted }]} />)}</View></View></SafeAreaView>
+function Loading({ label, onBack }: { label: string; onBack: () => void }) {
+  const { t } = useTranslation()
+  const palette = usePalette()
+  return <SafeAreaView style={[styles.safe, { backgroundColor: palette.background }]}><View style={styles.loading}><BackControl fallback="/goals" label={t('goals.debtStrategy.back')} onPress={onBack} /><View accessible accessibilityRole="progressbar" accessibilityLabel={label} style={styles.stack}>{[220, 320, 300].map((width, index) => <View key={index} style={[styles.skeleton, { width, backgroundColor: palette.muted }]} />)}</View></View></SafeAreaView>
 }
 
 const styles = StyleSheet.create({
   safe: { flex: 1 },
-  content: { flexGrow: 1, padding: themeTokens.layout.screenPadding },
-  page: { width: '100%', maxWidth: 760, alignSelf: 'center', alignItems: 'flex-start', gap: themeTokens.layout.blockGap },
-  heading: { gap: themeTokens.spacing[2] },
-  title: { ...textStyles.title },
-  sectionTitle: { ...textStyles.section },
-  body: { ...textStyles.body },
-  caption: { ...textStyles.label },
-  banner: { width: '100%', borderWidth: 1, borderRadius: themeTokens.radius.md, padding: themeTokens.spacing[4], gap: themeTokens.spacing[3] }, bannerText: { ...textStyles.body },
-  empty: { width: '100%', borderWidth: 1, borderRadius: themeTokens.radius.lg, padding: themeTokens.layout.screenPadding, gap: themeTokens.spacing[2] },
-  cards: { width: '100%', flexDirection: 'row', flexWrap: 'wrap', gap: themeTokens.spacing[3] },
-  card: { flexGrow: 1, flexBasis: 260, borderWidth: 1, borderRadius: themeTokens.radius.lg, padding: themeTokens.spacing[4], gap: themeTokens.spacing[2] },
+  content: { flexGrow: 1, padding: themeTokens.layout.screenPadding, paddingBottom: themeTokens.spacing[12] },
+  page: { width: '100%', maxWidth: 760, alignSelf: 'center', gap: themeTokens.spacing[10] },
+  stack: { gap: themeTokens.spacing[3] },
+  hug: { alignSelf: 'flex-start' },
+  shrink: { flex: 1 },
+  strong: { fontWeight: '600' },
+  cards: { gap: themeTokens.spacing[3] },
+  card: { borderRadius: themeTokens.radius.lg, padding: themeTokens.spacing[4], gap: themeTokens.spacing[2] },
   cardHeading: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: themeTokens.spacing[2] },
   cardStats: { flexDirection: 'row', gap: themeTokens.spacing[4], paddingTop: themeTokens.spacing[1] },
-  cardStat: { gap: themeTokens.spacing[1] },
-  cardStatValue: { ...textStyles.amount },
-  badge: { borderRadius: themeTokens.radius.pill, paddingHorizontal: themeTokens.spacing[3], paddingVertical: themeTokens.spacing[1] },
-  badgeText: { ...textStyles.label, fontWeight: '600' as const },
-  tabs: { flexDirection: 'row', gap: themeTokens.spacing[2] },
-  tab: { minHeight: themeTokens.touchTarget.minimum, justifyContent: 'center', borderWidth: 1, borderRadius: themeTokens.radius.pill, paddingHorizontal: themeTokens.spacing[4] },
-  tabText: { ...textStyles.bodyStrong, fontWeight: '600' as const },
-  chart: { width: '100%', borderWidth: 1, borderRadius: themeTokens.radius.lg, padding: themeTokens.spacing[4], gap: themeTokens.spacing[4] },
+  cardStat: { flex: 1, gap: 2 },
   list: { gap: themeTokens.spacing[4] },
-  barRow: { gap: themeTokens.spacing[1] },
+  barRow: { gap: themeTokens.spacing[2] },
   barHeading: { flexDirection: 'row', justifyContent: 'space-between', gap: themeTokens.spacing[3] },
-  barName: { ...textStyles.body, flex: 1 },
-  barAmount: { ...textStyles.amount },
-  track: { height: 4, borderRadius: themeTokens.radius.pill, overflow: 'hidden' },
-  fill: { height: '100%', borderRadius: themeTokens.radius.pill },
-  button: { minHeight: themeTokens.touchTarget.minimum, minWidth: themeTokens.touchTarget.minimum, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderRadius: themeTokens.radius.md, paddingHorizontal: themeTokens.spacing[4] },
-  buttonText: { ...textStyles.action },
-  pressed: { opacity: 0.68 },
-  failure: { flex: 1, width: '100%', maxWidth: 480, alignSelf: 'center', justifyContent: 'center', alignItems: 'flex-start', padding: themeTokens.layout.screenPadding, gap: themeTokens.spacing[4] },
+  track: { height: 8, borderRadius: themeTokens.radius.sm, overflow: 'hidden' },
+  fill: { height: '100%', borderRadius: themeTokens.radius.sm },
   loading: { flex: 1, padding: themeTokens.layout.screenPadding, gap: themeTokens.spacing[6] },
-  loadingBars: { gap: themeTokens.spacing[5] },
   skeleton: { height: 24, maxWidth: '100%', borderRadius: themeTokens.radius.sm },
 })

@@ -1,20 +1,29 @@
 import { useTranslation } from 'react-i18next'
-import { RefreshControl, ScrollView, StyleSheet, Text, useColorScheme, View } from 'react-native'
-import { SafeAreaView } from 'react-native-safe-area-context'
+import { StyleSheet, View } from 'react-native'
 
-import { BackControl } from '@/components/ui/back-control'
-import { formatCategoryName } from '@/lib/formatters/category-name'
-import { formatCurrency } from '@/lib/formatters/financial'
-import { themeTokens } from '@/theme/tokens'
-import { textStyles } from '@/theme/typography'
+import { Amount } from '@/components/ui/amount'
+import { ProgressBar } from '@/components/ui/progress-bar'
+import { Text } from '@/components/ui/text'
+import { useFormatMoney } from '@/lib/formatters/money-display'
+import { themeTokens, type Palette } from '@/theme/tokens'
+import { usePalette } from '@/theme/use-palette'
 
 import type { ReportDatePreset } from './report-date-presets'
-import { ReportFilterPanel } from './report-filter-panel'
-import { ReportExportButton, ReportPresetBar, ReportSectionFailure, ReportSectionHeading, ReportSectionLoading, styles as sharedStyles } from './report-screen-parts'
+import { ReportFiltersBar } from './report-filters-bar'
+import {
+  ReportEmptyState,
+  ReportExportButton,
+  ReportSection,
+  ReportSectionFailure,
+  ReportSectionLoading,
+  ReportStandalonePage,
+  ReportTrend,
+  useReportCategoryName,
+} from './report-screen-parts'
 import type { ReportExportState } from './use-report-export'
 import type { useReportFilterOptions } from './use-report-filter-options'
 import type { useReportFilters } from './use-report-filters'
-import type { SpendingByCategoryReportViewModel } from './spending-by-category-report-view-model'
+import type { SpendingByCategoryBar, SpendingByCategoryReportViewModel } from './spending-by-category-report-view-model'
 
 export type SpendingByCategoryReportViewState =
   | { status: 'loading' }
@@ -39,130 +48,110 @@ export type SpendingByCategoryReportScreenProps = SpendingByCategoryReportBodyPr
   onBack: () => void
 }
 
+/**
+ * Web's `resolveCategoryColor`: the API hands back `#000000` for a category
+ * with no colour ("Uncategorized"), which painted the biggest bar a black slab.
+ * Treat it as no colour and fall back onto the chart ramp by position; "Other"
+ * is muted, as on web.
+ */
+function barColor(bar: SpendingByCategoryBar, index: number, palette: Palette): string {
+  if (bar.key === '__other__') return palette.mutedForeground
+  const color = bar.color?.trim().toLowerCase()
+  if (color && !/^#0{3}(?:0{3})?$/.test(color)) return bar.color
+  const ramp = [palette.chart1, palette.chart2, palette.chart3, palette.chart4, palette.chart5]
+  return ramp[index % ramp.length]!
+}
+
+/**
+ * Web's `SpendingByCategoryReport`: the header carries the export icon,
+ * "Total spent" and its amount, and the trend vs. the prior period (spending
+ * less is the good direction). The body is the top 12 categories as
+ * horizontal bars, the rest folded into "Other".
+ */
 export function SpendingByCategoryReportBody({ state, currencyCode, exportState, onExport, onRefresh }: SpendingByCategoryReportBodyProps) {
+  const formatMoney = useFormatMoney()
   const { t, i18n } = useTranslation()
-  const palette = themeTokens.colors[useColorScheme() === 'dark' ? 'dark' : 'light']
+  const palette = usePalette()
+  const categoryName = useReportCategoryName()
   const locale = i18n.resolvedLanguage ?? i18n.language ?? 'en'
-  const money = (value: number) => formatCurrency(value, { locale, currency: currencyCode })
-  const percent = (value: number) => new Intl.NumberFormat(locale, { style: 'percent', signDisplay: 'exceptZero', maximumFractionDigits: 1 }).format(value / 100)
-  const title = t('reports.spendingByCategory.title')
-  const helper = t('reports.spendingByCategory.subtitle')
+  const money = (value: number) => formatMoney(value, { locale, currency: currencyCode })
 
   if (state.status === 'access-transition') return null
 
+  const exportAction = <ReportExportButton onExport={onExport} status={exportState.status} />
+  let actions: React.ReactNode = exportAction
+  let content: React.ReactNode
+
   if (state.status === 'loading') {
-    return (
-      <View style={sharedStyles.section}>
-        <ReportSectionHeading title={title} helper={helper} palette={palette} />
-        <ReportSectionLoading label={t('reports.spendingByCategory.loading')} palette={palette} />
+    content = <ReportSectionLoading label={t('reports.spendingByCategory.loading')} />
+  } else if (state.status === 'error' || state.status === 'invalid-response') {
+    content = <ReportSectionFailure invalid={state.status === 'invalid-response'} onRetry={onRefresh} />
+  } else {
+    const { report, trendReady } = state
+    actions = (
+      <>
+        {exportAction}
+        <View accessible accessibilityLabel={`${t('reports.spendingByCategory.total')}, ${money(report.total)}`} style={styles.figure}>
+          <Text tone="muted" variant="label">{t('reports.spendingByCategory.total')}</Text>
+          <Amount currency={currencyCode} locale={locale} value={report.total} />
+        </View>
+        {trendReady ? (
+          <ReportTrend
+            direction="positive-is-down"
+            label={t('reports.trend.vsPriorPeriod')}
+            percentage={report.trend.percent === null ? undefined : Math.abs(report.trend.percent)}
+            value={report.trend.delta}
+          />
+        ) : null}
+      </>
+    )
+    content = report.bars.length === 0 ? (
+      <ReportEmptyState description={t('reports.spendingByCategory.emptyMessage')} icon="pie-chart" title={t('reports.spendingByCategory.emptyTitle')} />
+    ) : (
+      <View style={styles.list}>
+        {report.bars.map((bar, index) => {
+          const name = categoryName(bar.name)
+          return (
+            <View key={bar.key} accessible accessibilityLabel={`${name}, ${money(bar.amount)}`} style={styles.barRow}>
+              <View style={styles.barHeading}>
+                <Text numberOfLines={1} style={styles.barName} variant="meta">{name}</Text>
+                <Amount currency={currencyCode} locale={locale} value={bar.amount} />
+              </View>
+              <ProgressBar color={barColor(bar, index, palette)} testID={`spending-bar-${bar.key}`} value={bar.widthPercent} />
+            </View>
+          )
+        })}
       </View>
     )
   }
-
-  if (state.status === 'error' || state.status === 'invalid-response') {
-    return (
-      <View style={sharedStyles.section}>
-        <ReportSectionHeading title={title} helper={helper} palette={palette} />
-        <ReportSectionFailure
-          message={t(state.status === 'invalid-response' ? 'reports.invalidMessage' : 'reports.errorMessage')}
-          onRetry={onRefresh}
-          palette={palette}
-        />
-      </View>
-    )
-  }
-
-  const { report, trendReady } = state
-  // Spending trend is inverted vs. a typical gain: spending MORE than the prior period is the
-  // unwelcome direction (shown as negative), spending less is favorable (shown as positive).
-  const spendingUp = report.trend.delta > 0
-  const trendLabel = report.trend.percent === null
-    ? t('reports.spendingByCategory.trendNoBasis', { delta: money(Math.abs(report.trend.delta)) })
-    : t('reports.spendingByCategory.trend', { delta: money(Math.abs(report.trend.delta)), percent: percent(Math.abs(report.trend.percent)) })
 
   return (
-    <View style={sharedStyles.section}>
-      <ReportSectionHeading title={title} helper={helper} palette={palette} />
-      <ReportExportButton status={exportState.status} onExport={onExport} palette={palette} />
-
-      {report.bars.length === 0 ? (
-        <View style={[sharedStyles.empty, { borderColor: palette.border, backgroundColor: palette.card }]}>
-          <Text accessibilityRole="header" allowFontScaling style={[sharedStyles.emptyTitle, { color: palette.foreground }]}>
-            {t('reports.spendingByCategory.emptyTitle')}
-          </Text>
-          <Text allowFontScaling style={[sharedStyles.body, { color: palette.mutedForeground }]}>
-            {t('reports.spendingByCategory.emptyMessage')}
-          </Text>
-        </View>
-      ) : (
-        <>
-          <View style={styles.totalRow}>
-            <Text
-              accessible
-              accessibilityLabel={[
-                `${t('reports.spendingByCategory.total')}, ${money(report.total)}`,
-                trendReady && report.trend.delta !== 0 ? trendLabel : null,
-              ].filter(Boolean).join(', ')}
-              allowFontScaling
-              style={[styles.total, { color: palette.foreground }]}
-            >
-              {t('reports.spendingByCategory.total')}: {money(report.total)}
-            </Text>
-            {trendReady && report.trend.delta !== 0 ? (
-              <Text allowFontScaling style={[styles.trend, { color: report.trend.percent === null ? palette.mutedForeground : spendingUp ? palette.destructiveText : palette.successText }]}>
-                {trendLabel}
-              </Text>
-            ) : null}
-          </View>
-
-          <View style={styles.list}>
-            {report.bars.map((bar) => (
-              <View key={bar.key} accessible accessibilityLabel={`${formatCategoryName(bar.name)}, ${money(bar.amount)}`} style={styles.barRow}>
-                <View style={styles.barHeading}>
-                  <Text allowFontScaling style={[styles.barName, { color: palette.foreground }]}>{formatCategoryName(bar.name)}</Text>
-                  <Text allowFontScaling style={[styles.barAmount, { color: palette.foreground }]}>{money(bar.amount)}</Text>
-                </View>
-                <View style={[styles.track, { backgroundColor: palette.muted }]}>
-                  <View testID={`spending-bar-${bar.key}`} style={[styles.fill, { width: `${bar.widthPercent}%`, backgroundColor: bar.color }]} />
-                </View>
-              </View>
-            ))}
-          </View>
-        </>
-      )}
-    </View>
+    <ReportSection actions={actions} description={t('reports.spendingByCategory.subtitle')} testID="spending-by-category-report" title={t('reports.spendingByCategory.title')}>
+      {content}
+    </ReportSection>
   )
 }
 
 export function SpendingByCategoryReportScreen({ state, preset, currencyCode, filterState, filterOptions, exportState, onSelectPreset, onExport, onRefresh, onBack }: SpendingByCategoryReportScreenProps) {
-  const palette = themeTokens.colors[useColorScheme() === 'dark' ? 'dark' : 'light']
   if (state.status === 'access-transition') return null
   return (
-    <SafeAreaView style={[sharedStyles.safeArea, { backgroundColor: palette.background }]}>
-      <ScrollView
-        contentContainerStyle={sharedStyles.content}
-        refreshControl={<RefreshControl refreshing={Boolean(state.status === 'loaded' && state.refreshing)} onRefresh={() => void onRefresh()} tintColor={palette.primary} />}
-      >
-        <View style={sharedStyles.page}>
-          <BackControl fallback="/reports" onPress={onBack} color={palette.primary} />
-          <ReportPresetBar preset={preset} onSelectPreset={onSelectPreset} palette={palette} />
-          <ReportFilterPanel filterState={filterState} filterOptions={filterOptions} palette={palette} />
-          <SpendingByCategoryReportBody state={state} currencyCode={currencyCode} exportState={exportState} onExport={onExport} onRefresh={onRefresh} />
-        </View>
-      </ScrollView>
-    </SafeAreaView>
+    <ReportStandalonePage
+      controls={<ReportFiltersBar filterOptions={filterOptions} filterState={filterState} onSelectPreset={onSelectPreset} preset={preset} />}
+      onBack={onBack}
+      onRefresh={onRefresh}
+      refreshing={Boolean(state.status === 'loaded' && state.refreshing)}
+    >
+      <SpendingByCategoryReportBody currencyCode={currencyCode} exportState={exportState} onExport={onExport} onRefresh={onRefresh} state={state} />
+    </ReportStandalonePage>
   )
 }
 
 const styles = StyleSheet.create({
-  totalRow: { gap: themeTokens.spacing[1] },
-  total: { ...textStyles.amount },
-  trend: { ...textStyles.meta, fontWeight: '600' as const },
-  list: { gap: themeTokens.spacing[4] },
+  figure: { flexDirection: 'row', alignItems: 'center', gap: themeTokens.spacing[2] },
+  list: { gap: themeTokens.spacing[3] },
   barRow: { gap: themeTokens.spacing[1] },
-  barHeading: { flexDirection: 'row', justifyContent: 'space-between', gap: themeTokens.spacing[3] },
-  barName: { ...textStyles.body, flex: 1 },
-  barAmount: { ...textStyles.amount },
-  track: { height: 4, borderRadius: themeTokens.radius.pill, overflow: 'hidden' },
-  fill: { height: '100%', borderRadius: themeTokens.radius.pill },
+  barHeading: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: themeTokens.spacing[3] },
+  barName: { flex: 1 },
+  track: { height: 8, borderRadius: themeTokens.radius.sm, overflow: 'hidden' },
+  fill: { height: '100%', borderRadius: themeTokens.radius.sm },
 })

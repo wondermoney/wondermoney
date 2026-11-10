@@ -6,6 +6,10 @@ import { NextIntlClientProvider } from "next-intl";
 import { afterEach, test } from "vitest";
 
 import {
+  setStoredPrivacyMode,
+  WithPrivacyMode,
+} from "@/lib/privacy/privacy-test-utils";
+import {
   getAmountClassName,
   getDeltaClassName,
   getThresholdClassName,
@@ -105,4 +109,58 @@ test("a negative amount carries a true minus sign in every locale", () => {
     assert.ok(!text.includes("-"), `${locale}: ${text}`);
     cleanup();
   }
+});
+
+test("a zero carries no sign, even a negated zero or one that rounds to zero", () => {
+  for (const value of [-0, -0.001]) {
+    const text = renderAmount({ value, currency: "EUR" }).textContent ?? "";
+    assert.ok(!/[-−]/.test(text), `zero should be unsigned: ${text}`);
+    cleanup();
+  }
+});
+
+test("privacy mode masks the figure, keeps the symbol and speaks 'hidden'", () => {
+  setStoredPrivacyMode(true);
+  try {
+    const { container } = render(
+      <NextIntlClientProvider
+        locale="en"
+        messages={{ "privacy-mode": { "hidden-amount": "Hidden amount" } }}
+      >
+        <WithPrivacyMode hidden>
+          <Amount value={-11250.5} currency="EUR" tone="delta" signed />
+        </WithPrivacyMode>
+      </NextIntlClientProvider>,
+    );
+    const element = container.firstElementChild as HTMLElement;
+    const text = element.textContent ?? "";
+
+    assert.ok(!/\d/.test(text), `no digit may reach the DOM: ${text}`);
+    assert.ok(!/[−-]/.test(text), `the sign is hidden too: ${text}`);
+    assert.ok(
+      !element.className.includes("destructive"),
+      "a coloured mask would still give the sign away",
+    );
+
+    const visual = element.querySelector('[aria-hidden="true"]');
+    assert.ok(visual?.textContent?.includes("€"));
+    assert.ok(visual?.classList.contains("select-none"));
+    assert.equal(
+      element.querySelector(".sr-only")?.textContent,
+      "Hidden amount",
+    );
+  } finally {
+    setStoredPrivacyMode(false);
+  }
+});
+
+test("a missing value is still an em-dash in privacy mode", () => {
+  const { container } = render(
+    <NextIntlClientProvider locale="en" messages={{}}>
+      <WithPrivacyMode hidden>
+        <Amount value={null} />
+      </WithPrivacyMode>
+    </NextIntlClientProvider>,
+  );
+  assert.equal(container.textContent, "—");
 });

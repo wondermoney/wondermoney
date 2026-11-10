@@ -76,6 +76,9 @@ const httpUrl = (description: string) => z.string().trim().pipe(z.url(descriptio
 const positiveInt = (description: string) => z.string().trim()
   .refine((v) => /^\d+$/.test(v) && Number(v) > 0, `${description} (must be a positive integer)`);
 
+const wholeNumber = (description: string) => z.string().trim()
+  .refine((v) => /^\d+$/.test(v), `${description} (must be a whole number, 0 or more)`);
+
 const boolFlag = (description: string) => z.enum(['1', '0', 'true', 'false', 'on', 'off', 'yes', 'no'], {
   error: `${description} (must be one of 1/0/true/false/on/off/yes/no)`,
 });
@@ -89,6 +92,8 @@ const runtimeSchema = z.object({
   APP_URL: httpUrl('Web app base URL').optional(),
   CORS_ALLOWED_ORIGINS: z.string().trim().optional(),
   DEPLOY_ENV: z.string().trim().optional(),
+  // Minutes a due job may wait before `GET /v1/health/ready` reports the queue as backed up.
+  HEALTH_MAX_JOB_AGE_MINUTES: positiveInt('Readiness maximum job age').optional(),
   INSTANCE_NAME: z.string().trim().optional(),
   MIN_APP_VERSION: z.string().trim().regex(/^\d+\.\d+\.\d+$/u, 'MIN_APP_VERSION must be a semver version such as 2.1.0').optional(),
   NODE_ENV: z.enum(['development', 'production', 'staging', 'test']).default('development'),
@@ -192,8 +197,13 @@ const sharedSchema = z.object({
 const apiSchema = sharedSchema.extend({
   ...authSchema.shape,
   ADMIN_API_KEY: nonEmpty('Admin API key is required (admin routes fail closed without it)'),
+  AI_DAILY_LIMIT_ASSISTANT: wholeNumber('Daily assistant messages per household').optional(),
+  AI_DAILY_LIMIT_CSV_MAPPING: wholeNumber('Daily AI CSV column mappings per household').optional(),
+  AI_DAILY_LIMIT_OCR: wholeNumber('Daily receipt scans per household').optional(),
+  AI_REQUIRES_VERIFIED_EMAIL: boolFlag('AI verified-email requirement').optional(),
   INTERNAL_SERVICE_API_KEY: nonEmpty('Internal service key is required'),
   RECAPTCHA_SECRET_KEY: z.string().trim().optional(),
+  SPONSOR_URL: httpUrl('Sponsor page URL').optional(),
 });
 
 const workerSchema = sharedSchema.extend({

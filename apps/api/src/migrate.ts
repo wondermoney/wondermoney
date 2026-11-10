@@ -4,8 +4,10 @@ import { MikroORM } from '@mikro-orm/core';
 import type { PostgreSqlDriver } from '@mikro-orm/postgresql';
 import { Client } from 'pg';
 
+import { ensureInvestmentsAndSavingsCategory } from './database/seeders/InvestmentsAndSavingsCategorySeeder.js';
 import { hasReferenceData, ReferenceDataSeeder } from './database/seeders/ReferenceDataSeeder.js';
 import config from './mikro-orm.config.js';
+import { backfillAccountOpeningBalances } from './services/account/account-opening-balance.service.js';
 
 /**
  * Advisory-lock key for the migration runner.
@@ -69,7 +71,7 @@ const RELEASE_1_0_0_HEAD = [
  */
 const CHAIN_AFTER_1_0_0: readonly { name: string; sql: readonly string[] }[] = [
   {
-    // #194: the other row of a matched own-account transfer.
+    // The other row of a matched own-account transfer.
     name: 'Migration20261024092755',
     sql: [
       'alter table "transaction" add column if not exists "transfer_counterpart_key" int null',
@@ -85,7 +87,7 @@ const CHAIN_AFTER_1_0_0: readonly { name: string; sql: readonly string[] }[] = [
     ],
   },
   {
-    // #196: the settlement amount a transaction had before its first edit.
+    // The settlement amount a transaction had before its first edit.
     name: 'Migration20261024100000',
     sql: ['alter table "transaction" add column if not exists "unedited_settlement_amount" numeric(18,4) null'],
   },
@@ -237,10 +239,22 @@ async function main() {
           console.log(`[migrate] applied ${migration.name}`);
         }
       }
+      // Idempotent data step, not a migration (migrations are DDL only): accounts from before
+      // opening balances existed get one. It needs the whole schema, so it waits while any
+      // migration is held back.
+      if (plan.held.length === 0) {
+        const backfilled = await backfillAccountOpeningBalances(orm.em.fork());
+        if (backfilled > 0) console.log(`[migrate] recorded an opening balance for ${backfilled} account(s)`);
+      }
       if (shouldSeedReferenceData(await hasReferenceData(orm.em))) {
         console.log('[migrate] empty database: loading reference data');
         await orm.seeder.seed(ReferenceDataSeeder);
         console.log('[migrate] reference data loaded');
+      }
+      // Reference data added after a database was first seeded, idempotently (a seeder, not a
+      // migration: migrations are DDL only). It needs the current schema.
+      if (plan.held.length === 0 && await hasReferenceData(orm.em)) {
+        await ensureInvestmentsAndSavingsCategory(orm.em.fork());
       }
       const held = plan.held;
       if (held.length > 0) {

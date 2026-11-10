@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { NotFoundError } from '@utils/errors';
 
 const mocks = vi.hoisted(() => ({
+  find: vi.fn(),
   findOne: vi.fn(),
   flush: vi.fn(),
   getAppuserTenantByAppuser: vi.fn(),
@@ -13,6 +14,8 @@ const mocks = vi.hoisted(() => ({
 vi.mock('@app/app', () => ({
   DI: {
     em: {
+      // The household's "counts as spending" choices: none.
+      find: mocks.find,
       findOne: mocks.findOne,
       getRepository: vi.fn(() => ({ getAppuserTenantByAppuser: mocks.getAppuserTenantByAppuser })),
       persist: mocks.persist,
@@ -32,6 +35,7 @@ const tenant = { tenantKey: 7 };
 describe('category controller tenant authorization', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mocks.find.mockResolvedValue([]);
     mocks.flush.mockResolvedValue(undefined);
     mocks.getAppuserTenantByAppuser.mockResolvedValue({ tenantKey: tenant });
     mocks.persist.mockReturnValue({ flush: mocks.flush });
@@ -79,7 +83,7 @@ describe('category controller tenant authorization', () => {
     ['system', 31],
     ['foreign-tenant', 32],
     ['deleted', 33],
-  ])('rejects %s categories for update and delete', async (_kind, categoryId) => {
+  ])('rejects %s categories for an edit and delete', async (_kind, categoryId) => {
     mocks.zParse
       .mockResolvedValueOnce({ body: { name: 'Updated' }, params: { categoryId } })
       .mockResolvedValueOnce({ params: { categoryId } });
@@ -92,11 +96,14 @@ describe('category controller tenant authorization', () => {
 
     expect(updateNext).toHaveBeenCalledWith(expect.any(NotFoundError));
     expect(deleteNext).toHaveBeenCalledWith(expect.any(NotFoundError));
+    // An edit can reach a system category (only to set "counts as spending" for the household).
     expect(mocks.findOne).toHaveBeenNthCalledWith(1, Category, {
+      $or: [
+        { isSystemCategory: true, tenantKey: null },
+        { isSystemCategory: false, tenantKey: tenant },
+      ],
       categoryKey: categoryId,
       deletedAt: undefined,
-      isSystemCategory: false,
-      tenantKey: tenant,
     });
     expect(mocks.findOne).toHaveBeenNthCalledWith(2, Category, {
       categoryKey: categoryId,

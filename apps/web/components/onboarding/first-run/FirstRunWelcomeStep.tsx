@@ -7,7 +7,10 @@ import { useEffect } from "react";
 
 import { Button } from "@/components/ui/button";
 import { useRouter } from "@/i18n/navigation";
-import { getFirstRunStepRoute } from "@/lib/onboarding/firstRunOnboarding";
+import {
+  FIRST_RUN_RESTORE_ROUTE,
+  getFirstRunStepRoute,
+} from "@/lib/onboarding/firstRunOnboarding";
 
 import FirstRunIconTile, { type FirstRunIconTone } from "./FirstRunIconTile";
 import { useFirstRunOnboardingFooter } from "./FirstRunOnboardingRouteShell";
@@ -87,15 +90,28 @@ function FirstRunWelcomeFooter() {
   const router = useRouter();
 
   return (
-    <Button
-      type="button"
-      className="min-h-11 transition-transform duration-150 active:scale-[0.98] motion-reduce:transition-none motion-reduce:active:scale-100"
-      onClick={() => {
-        router.push(getFirstRunStepRoute("goals"));
-      }}
-    >
-      {t("welcome.cta")}
-      <ChevronRight className="ml-1 size-4" />
-    </Button>
+    <div className="flex flex-wrap items-center justify-end gap-2">
+      {/* Someone moving from another server, or back from an export, starts from their own data. */}
+      <Button
+        type="button"
+        variant="ghost"
+        className="min-h-11"
+        onClick={() => {
+          router.push(FIRST_RUN_RESTORE_ROUTE);
+        }}
+      >
+        {t("restore.cta")}
+      </Button>
+      <Button
+        type="button"
+        className="min-h-11 transition-transform duration-150 active:scale-[0.98] motion-reduce:transition-none motion-reduce:active:scale-100"
+        onClick={() => {
+          router.push(getFirstRunStepRoute("goals"));
+        }}
+      >
+        {t("welcome.cta")}
+        <ChevronRight className="ml-1 size-4" />
+      </Button>
+    </div>
   );
 }

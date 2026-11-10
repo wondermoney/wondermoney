@@ -7,11 +7,16 @@
       "accounts": "Accounts",
       "categories": "Categories",
       "merchants": "Merchants",
+      "tags": "Tags",
       "currency": "Currency",
       "dateRange": "Date range",
       "placeholder": {
         "search": "Search…",
-        "select": "Select…"
+        "allAccounts": "All accounts",
+        "allCategories": "All categories",
+        "allMerchants": "All merchants",
+        "allCurrencies": "All currencies",
+        "allTags": "All tags"
       },
       "noResults": "No results found.",
       "selected": "{count, plural, =1 {1 selected} other {# selected}}",
@@ -117,16 +122,19 @@
       },
       "portfolioPerformance": {
         "title": "Portfolio performance",
-        "subtitle": "Per-account balance movement for the period.",
-        "account": "Account",
-        "startBalance": "Start",
-        "endBalance": "End",
-        "return": "Change",
-        "contributions": "Contributions",
-        "startCaveat": "Start balance reflects the first transaction in the period; the change shown may include the effect of that transaction.",
+        "subtitle": "How each portfolio's value moved in the period, net of what went in and out.",
+        "portfolio": "Portfolio",
+        "startValue": "Start value",
+        "netContributions": "Net contributions",
+        "change": "Change",
+        "dividends": "Dividends",
+        "endValue": "End value",
+        "total": "Total",
+        "unknownValue": "No value recorded",
+        "noExchangeRate": "No exchange rate yet",
         "noData": {
-          "title": "No accounts to show",
-          "description": "Connect an account to see its performance here."
+          "title": "No portfolios to show",
+          "description": "Add a portfolio to see its performance here."
         }
       }
     },

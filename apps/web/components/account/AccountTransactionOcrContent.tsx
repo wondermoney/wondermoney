@@ -8,6 +8,8 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
 
+import AiAllowanceNotice from "@/components/assistant/AiAllowanceNotice";
+import EmailVerificationNotice from "@/components/auth/EmailVerificationNotice";
 import {
   Form,
   FormContent,
@@ -22,6 +24,10 @@ import { Text } from "@/components/ui/Typography";
 import useCreateTransactionOcr, {
   OCR_UPLOAD_MAX_BYTES,
 } from "@/lib/api/account/useCreateTransactionOcr";
+import {
+  isAiAllowanceExhaustedError,
+  isEmailVerificationRequiredError,
+} from "@/lib/api/errors";
 import { useRateLimitToast } from "@/lib/api/useRateLimitToast";
 import { cn } from "@/lib/utils";
 
@@ -80,6 +86,7 @@ const AccountTransactionOcrContent: React.FC<
   } = methods;
 
   const [isSubmitLoading, setIsSubmitLoading] = useState(false);
+  const [blockedBy, setBlockedBy] = useState<"allowance" | "verification" | null>(null);
 
   const createTransactionOcrMutation = useCreateTransactionOcr();
 
@@ -114,6 +121,14 @@ const AccountTransactionOcrContent: React.FC<
           if (notifyIfRateLimited(error)) return;
           setIsSubmitLoading(false);
           onOcrSubmitting(false);
+          if (isEmailVerificationRequiredError(error)) {
+            setBlockedBy("verification");
+            return;
+          }
+          if (isAiAllowanceExhaustedError(error)) {
+            setBlockedBy("allowance");
+            return;
+          }
           toast.error(t("toast-ocr-transaction-error"), {
             duration: 9000,
           });
@@ -140,6 +155,11 @@ const AccountTransactionOcrContent: React.FC<
         onSubmit={handleSubmit(onSubmit)}
         id="add-account-transaction-form"
       >
+        {blockedBy ? (
+          <div className="basis-full">
+            {blockedBy === "verification" ? <EmailVerificationNotice /> : <AiAllowanceNotice />}
+          </div>
+        ) : null}
         <FormField
           control={control}
           name="files"

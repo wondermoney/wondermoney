@@ -137,6 +137,31 @@ export async function findManualDuplicate(em: FindOneCapableEm, input: ManualDed
   });
 }
 
+/**
+ * For a file import: which of `ids` (each a line's own id, an OFX FITID or a statement line's
+ * fingerprint) are already on the account, and as which transaction. A file import stores a
+ * line's id both as `internalTransactionId` and as the account-unique
+ * `nordigenInternalTransactionId`, so either column matching is the same line. Hidden rows count:
+ * a hidden row is still the stored copy, and holds the unique id. One query per call.
+ */
+export async function findImportedTransactionIds(em: Pick<EntityManager, 'find'>, accountKey: number, ids: readonly string[]): Promise<Map<string, number>> {
+  const unique = [...new Set(ids.filter((id) => id.length > 0))];
+  if (unique.length === 0) return new Map();
+  const rows = await em.find(
+    Transaction,
+    { $or: [{ internalTransactionId: { $in: unique } }, { nordigenInternalTransactionId: { $in: unique } }], accountKey, deletedAt: undefined } as FilterQuery<Transaction>,
+    { fields: ['transactionKey', 'internalTransactionId', 'nordigenInternalTransactionId'], filters: { [HIDDEN_FILTER]: false }, orderBy: { transactionKey: 'asc' } },
+  );
+  const wanted = new Set(unique);
+  const found = new Map<string, number>();
+  for (const row of rows) {
+    for (const id of [row.nordigenInternalTransactionId, row.internalTransactionId]) {
+      if (id && wanted.has(id) && !found.has(id)) found.set(id, row.transactionKey);
+    }
+  }
+  return found;
+}
+
 /** Boolean convenience over {@link findManualDuplicate} for callers that only need the hint. */
 export async function isPossibleManualDuplicate(em: FindOneCapableEm, input: ManualDedupInput): Promise<boolean> {
   return (await findManualDuplicate(em, input)) !== null;

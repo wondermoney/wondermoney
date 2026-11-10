@@ -1,6 +1,7 @@
 import { z } from 'zod'
 
 import { readEndpoint, tolerantEnum, writeEndpoint } from '@/lib/api/runtime-schema'
+import { parseNumberInput } from '@/lib/formatters/decimal-input'
 
 const finiteNullable = z.number().finite().nullable()
 
@@ -17,7 +18,20 @@ const accountLinksSchema = z.array(z.object({
   }),
 }))
 
+// Debt-paydown goals carry a payoff projection (web `DebtProjection`). Optional, and dropped
+// rather than failing the goal when its shape is not what this build expects.
+const debtProjectionSchema = z.object({
+  currentBalance: z.number().finite(),
+  monthlyPayment: z.number().finite(),
+  months: z.number().int().nonnegative().nullable(),
+  payoffDate: z.string().nullable(),
+  paysOff: z.boolean(),
+  progressPercentage: z.number().finite(),
+  totalInterest: z.number().finite(),
+}).optional().catch(undefined)
+
 const goalSummarySchema = z.object({
+  debtProjection: debtProjectionSchema,
   assignedThisMonth: z.number().finite(),
   availableAmount: z.number().finite(),
   fundedHistorically: z.number().finite(),
@@ -40,6 +54,12 @@ export const goalListItemSchema = z.object({
   summary: goalSummarySchema,
   targetAmount: z.number().finite(),
   targetDate: z.iso.datetime().nullable(),
+  // Display-only fields web reads (goal type chip, description, debt figures). Optional and
+  // tolerant: a goal never fails to list because one of them is missing or malformed.
+  type: tolerantEnum(['debt_paydown', 'save_up'], 'unknown').optional().catch(undefined),
+  description: z.string().nullable().optional().catch(undefined),
+  currentBalance: z.number().finite().nullable().optional().catch(undefined),
+  annualInterestRateBps: z.number().finite().nullable().optional().catch(undefined),
 })
 
 export const goalsResponseSchema = z.object({ goals: z.array(goalListItemSchema) })
@@ -86,7 +106,7 @@ export const goalActivitySchema = z.object({
   occurredAt: z.iso.datetime(),
   note: z.string().nullable().optional(),
   currencyKey: activityCurrencySchema,
-  // #154: on a spent_from_goal entry whose transaction the bank has since dropped while this goal
+  // Set on a spent_from_goal entry whose transaction the bank has since dropped while this goal
   // still pays for it. Optional: older servers never send it.
   transactionExpired: z.boolean().optional(),
 }).transform(({ currencyKey, ...activity }) => ({
@@ -191,24 +211,10 @@ export type GoalMetadataWrite = z.infer<typeof goalMetadataWriteSchema>
 
 export const goalReserveWriteSchema = z.object({ amount: positiveMoneySchema }).strict()
 
-const escapeRegex = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-
+/** A typed goal amount, read in the app's language; `null` unless it is valid goal money. */
 export function parseLocalizedGoalMoney(value: string, locale: string): number | null {
-  // Hermes does not implement NumberFormat.prototype.formatToParts on all
-  // supported React Native runtimes. Infer the separators from the formatted
-  // sample instead of calling that optional API.
-  const sample = new Intl.NumberFormat(locale).format(12345.6)
-  const separators = sample.match(/[^0-9]/gu) ?? []
-  const decimal = separators[separators.length - 1] ?? '.'
-  const group = separators.length > 1 ? separators[0] : undefined
-  const decimalPattern = escapeRegex(decimal)
-  const groupPattern = group && /\s/u.test(group) ? '[\\s\\u00a0\\u202f]' : group ? escapeRegex(group) : null
-  const integerPattern = groupPattern ? `(?:\\d+|\\d{1,3}(?:${groupPattern}\\d{3})+)` : '\\d+'
-  const trimmed = value.trim()
-  if (!new RegExp(`^${integerPattern}(?:${decimalPattern}\\d{1,4})?$`, 'u').test(trimmed)) return null
-  const withoutGroups = groupPattern ? trimmed.replace(new RegExp(groupPattern, 'gu'), '') : trimmed
-  const normalized = decimal === '.' ? withoutGroups : withoutGroups.replace(decimal, '.')
-  const amount = Number(normalized)
+  const amount = parseNumberInput(value, locale)
+  if (amount === null) return null
   return goalReserveWriteSchema.safeParse({ amount }).success ? amount : null
 }
 

@@ -1,5 +1,5 @@
 import type { Rel } from '@mikro-orm/core';
-import { Entity, Filter, Index, ManyToOne, PrimaryKey, Property, Unique } from '@mikro-orm/decorators/legacy';
+import { Entity, Enum, Filter, Index, ManyToOne, PrimaryKey, Property, Unique } from '@mikro-orm/decorators/legacy';
 
 import { accountTenantCond, TENANT_FILTER } from '../filters/tenant-filter';
 
@@ -11,6 +11,7 @@ import { Currency } from './Currency';
 import { EnableBankingConnection } from './EnableBankingConnection';
 import { NordigenRequisition } from './NordigenRequisition';
 import { Tenant } from './Tenant';
+import { FxStatus } from './Transaction';
 
 @Entity()
 @Filter({ args: false, cond: accountTenantCond, default: true, name: TENANT_FILTER })
@@ -56,14 +57,31 @@ export class Account extends Base {
   @ManyToOne({ cascade: [], entity: () => AccountType, fieldName: 'account_type_key', nullable: true })
   accountTypeKey?: Rel<AccountType>;
 
+  /** The balance in the owner's currency. Null when no rate converts it (`fxStatus` `missing`). */
   @Property({ columnType: 'numeric(18, 4)', nullable: true })
-  appuserCurrencyBalance?: number;
+  appuserCurrencyBalance?: null | number;
 
   @Property({ default: false })
   closed = false;
 
+  /** How `appuserCurrencyBalance` was converted; see {@link FxStatus}. */
+  @Enum({ items: () => FxStatus, nullable: true })
+  fxStatus?: FxStatus | null;
+
   @Property({ length: 255, nullable: true })
   holderName?: string;
+
+  /**
+   * What the account held, in the account currency, before its first transaction: the balance
+   * typed when a manual account is created, or the provider's balance the first time a synced
+   * account is seen. Net worth history counts the account at this value from
+   * `openingBalanceDate` until a transaction carries a running balance. Null when unknown.
+   */
+  @Property({ columnType: 'numeric(18, 4)', nullable: true })
+  openingBalance?: number;
+
+  @Property({ columnType: 'timestamptz', nullable: true })
+  openingBalanceDate?: Date;
 
   /**
    * Per-account privacy within a household. Accounts are shared with the

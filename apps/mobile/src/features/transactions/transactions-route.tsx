@@ -4,17 +4,22 @@ import { useState } from 'react'
 import { useProductRuntime } from '@/components/providers/product-runtime-provider'
 import { mapCategories } from '@/features/categories/categories-view-model'
 import { useCategories } from '@/features/categories/use-categories'
+import { toTagsState, useCreateTagForPicker, useSetTransactionTags, useTags } from '@/features/tags/use-tags'
 import { ApiError } from '@/lib/api/errors'
 import { parseAccountId } from '@/features/accounts/accounts-contract'
 import { useAccounts } from '@/features/accounts/use-accounts'
 import { useTranslation } from 'react-i18next'
 
-import type { TransactionFilters } from './transactions-contract'
-import { TransactionsScreen, type ReviewResult, type TransactionsViewState } from './transactions-screen'
+import type { TransactionFilters, TransferEditDraft } from './transactions-contract'
+import { DEFAULT_RANGE_DAYS, presetRange } from './transactions-date-range'
+import { TransactionsScreen, type ReviewResult, type TransactionsFreshness, type TransactionsViewState } from './transactions-screen'
 import { mapTransactions } from './transactions-view-model'
 import { useEditTransactionAmount } from './use-edit-transaction-amount'
+import { useEditTransactionTransfer } from './use-edit-transaction-transfer'
 import { useTransactionBulkActions, type TransactionBulkAction } from './use-mark-reviewed'
 import { useTransactions } from './use-transactions'
+import { useTransactionsLead } from './use-transactions-lead'
+import { useTransferDestinations } from './use-transfer-destinations'
 
 function classifyResult(error: unknown, blockAccess: (state: 'mfa-required') => void): ReviewResult {
   if (!(error instanceof ApiError)) return 'error'
@@ -28,12 +33,19 @@ function classifyResult(error: unknown, blockAccess: (state: 'mfa-required') => 
 export function TransactionsRoute({ perAccount = false }: { perAccount?: boolean }) {
   const params = useLocalSearchParams<{ accountId?: string | string[] }>()
   const accountId = perAccount ? parseAccountId(params.accountId) : null
-  const [filters, setFilters] = useState<TransactionFilters>({})
+  // Web opens both ledgers on the last 60 days (`subDays(new Date(), 60)`).
+  const [filters, setFilters] = useState<TransactionFilters>(() => presetRange(DEFAULT_RANGE_DAYS))
   const query = useTransactions(filters, perAccount ? accountId : null)
   const accountsQuery = useAccounts()
+  const lead = useTransactionsLead({ fromDate: filters.fromDate, toDate: filters.toDate }, !perAccount)
   const categoriesQuery = useCategories()
   const mutation = useTransactionBulkActions()
   const amountMutation = useEditTransactionAmount()
+  const transferMutation = useEditTransactionTransfer()
+  const transferDestinations = useTransferDestinations(accountsQuery.data?.accounts)
+  const tagsQuery = useTags()
+  const tagsMutation = useSetTransactionTags()
+  const createTag = useCreateTagForPicker()
   const { blockAccess } = useProductRuntime()
   const { t, i18n } = useTranslation()
   const router = useRouter()
@@ -45,6 +57,21 @@ export function TransactionsRoute({ perAccount = false }: { perAccount?: boolean
   else if (query.isNotFound) state = { status: 'not-found' }
   else if (query.error instanceof ApiError && query.error.code === 'invalid-response') state = { status: 'invalid-response' }
   else state = { status: 'error' }
+
+  // Only a single-account list names its account. The all-accounts list used to
+  // take the first row's account and label the whole ledger with it.
+  const accountName = perAccount && accountId !== null
+    ? accountsQuery.data?.accounts.find((account) => account.accountKey === accountId)?.accountName
+      ?? ('transactions' in state ? state.transactions.find((row) => row.accountId === accountId)?.accountName : null)
+      ?? null
+    : null
+
+  const accounts = accountsQuery.data?.accounts ?? []
+  // Web's AccountsFreshness: the weakest link among the accounts that sync —
+  // the oldest refresh, since one stale account means the list is missing its days.
+  const refreshed = accounts.map((account) => account.refreshedAt).filter((value): value is string => Boolean(value) && Number.isFinite(Date.parse(value as string)))
+  const freshness: TransactionsFreshness = refreshed.length === 0 ? null : { kind: 'updated', at: refreshed.reduce((oldest, value) => Date.parse(value) < Date.parse(oldest) ? value : oldest) }
+  const leadCurrency = accounts[0]?.accountOwnerAppuserKey?.currencyKey.code ?? null
 
   const runAction = async (action: TransactionBulkAction): Promise<ReviewResult> => {
     try {
@@ -64,6 +91,24 @@ export function TransactionsRoute({ perAccount = false }: { perAccount?: boolean
     }
   }
 
+  const runSetTransfer = async (draft: TransferEditDraft): Promise<ReviewResult> => {
+    try {
+      await transferMutation.mutateAsync(draft)
+      return 'success'
+    } catch (error) {
+      return classifyResult(error, blockAccess)
+    }
+  }
+
+  const runSetTags = async (transactionId: number, tagIds: readonly number[]): Promise<ReviewResult> => {
+    try {
+      await tagsMutation.mutateAsync({ transactionId, tagIds })
+      return 'success'
+    } catch (error) {
+      return classifyResult(error, blockAccess)
+    }
+  }
+
   const categoryState = categoriesQuery.data
     ? { status: 'loaded' as const, categories: mapCategories(categoriesQuery.data, t, i18n.resolvedLanguage ?? i18n.language) }
     : categoriesQuery.isLoading
@@ -73,10 +118,16 @@ export function TransactionsRoute({ perAccount = false }: { perAccount?: boolean
   return <TransactionsScreen
     state={state}
     filters={filters}
+    total={query.data?.total ?? null}
+    hasMore={query.data?.hasMore}
     categories={categoryState}
     accountCount={accountsQuery.data?.accounts.length}
-    pending={mutation.isPending || amountMutation.isPending}
-    accountName={state.status === 'loaded' || state.status === 'refresh-error' ? state.transactions[0]?.accountName : null}
+    pending={mutation.isPending || amountMutation.isPending || transferMutation.isPending}
+    accountName={accountName}
+    perAccount={perAccount}
+    lead={perAccount ? undefined : lead}
+    leadCurrency={leadCurrency}
+    freshness={perAccount ? null : freshness}
     onBack={() => perAccount && accountId ? router.replace(`/accounts/${accountId}`) : router.replace('/accounts')}
     onCreate={() => router.push({ pathname: '/accounts/transactions/create', ...(accountId ? { params: { accountId: String(accountId) } } : {}) } as Href)}
     onImport={() => router.push({ pathname: '/accounts/transactions/import', ...(accountId ? { params: { accountId: String(accountId) } } : {}) } as Href)}
@@ -88,5 +139,10 @@ export function TransactionsRoute({ perAccount = false }: { perAccount?: boolean
     onAssignCategory={(transactionIds, categoryId) => runAction({ type: 'category', transactionIds, categoryId })}
     onSetHidden={(transactionIds, hidden) => runAction({ type: hidden ? 'hidden' : 'unhidden', transactionIds })}
     onEditAmount={runAmountEdit}
+    tags={toTagsState(tagsQuery)}
+    onSetTags={runSetTags}
+    onCreateTag={createTag}
+    onSetTransfer={runSetTransfer}
+    transferDestinations={transferDestinations}
   />
 }

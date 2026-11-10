@@ -1,6 +1,8 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Modal, Pressable, StyleSheet, View } from 'react-native'
 
+import { Icon } from '@/components/ui/icon'
 import { Text } from '@/components/ui/text'
 import { themeTokens, type Palette } from '@/theme/tokens'
 import { usePalette } from '@/theme/use-palette'
@@ -15,22 +17,35 @@ import { usePalette } from '@/theme/use-palette'
  * and the tab bar has already named the destination. The explanation stays
  * available; it stops being mandatory furniture.
  */
-function HelpControl({ helpText }: { helpText: string }) {
+function HelpControl({ helpText, showLabel }: { helpText: string; showLabel: boolean }) {
   const palette = usePalette()
+  const { t } = useTranslation()
   const [open, setOpen] = useState(false)
+  const [focused, setFocused] = useState(false)
 
+  // Web's help hint: a 14pt circle-help glyph and "Help" in muted 12px
+  // (`components/ui/help-hint.tsx`). The explanation opens on demand.
   return (
     <>
       <Pressable
         accessibilityLabel={helpText}
         accessibilityRole="button"
         hitSlop={12}
+        onBlur={() => setFocused(false)}
+        onFocus={() => setFocused(true)}
         onPress={() => setOpen(true)}
-        style={[styles.helpControl, { borderColor: palette.input }]}
+        style={({ pressed }) => [
+          styles.helpControl,
+          focused && { borderWidth: 2, borderColor: palette.ring },
+          pressed && { opacity: 0.72 },
+        ]}
       >
-        <Text variant="label" style={styles.helpGlyph} tone="muted">
-          ?
-        </Text>
+        <Icon color={palette.mutedForeground} name="circle-help" size={14} />
+        {showLabel ? (
+          <Text tone="muted" variant="label">
+            {t('navigation.help', { defaultValue: 'Help' })}
+          </Text>
+        ) : null}
       </Pressable>
       <Modal animationType="fade" onRequestClose={() => setOpen(false)} transparent visible={open}>
         <Pressable onPress={() => setOpen(false)} style={[styles.backdrop, { backgroundColor: palette.scrim }]}>
@@ -56,8 +71,23 @@ export type PageHeaderProps = {
    * provenance slot, and it is the only muted line the header may carry.
    */
   provenance?: string
-  /** Explanation, shown on demand behind a `?`. */
+  /** Explanation, shown on demand behind web's "(?) Help" hint. */
   helpText?: string
+  /** Show the word "Help" beside the glyph (default). `false` is web's icon-only hint (Portfolios). */
+  helpLabel?: boolean
+  /**
+   * Web's page description, muted 14px under the title — only where web shows
+   * one (Goals: "Set aside budgeted money for future plans."). Not a subtitle
+   * by another name: if web's page has none, pass none.
+   */
+  description?: string
+  /** Status chip(s) inline with the title. */
+  badge?: React.ReactNode
+  /**
+   * The page's controls, stacked full-width under the title as web does at
+   * phone width (`flex-col gap-2`): a `SelectTrigger`, then `Button block`s.
+   */
+  actions?: React.ReactNode
   /**
    * One line telling the person what this form does. **Flow family only** —
    * create, edit and import screens.
@@ -87,23 +117,40 @@ export type PageHeaderProps = {
 }
 
 /**
- * A screen is titled `Accounts` and nothing else.
- *
- * One treatment — 20/600 — matching the web half exactly, so every screen
- * title has the same size.
+ * The page title block — web's page `<h1>` (`text-2xl font-semibold
+ * tracking-tight`, 24/600) with its help hint, optional description and
+ * provenance, and the page's controls stacked beneath.
  */
-export function PageHeader({ title, provenance, instruction, helpText, action, testID }: PageHeaderProps) {
+export function PageHeader({
+  title,
+  provenance,
+  instruction,
+  helpText,
+  helpLabel = true,
+  description,
+  badge,
+  action,
+  actions,
+  testID,
+}: PageHeaderProps) {
   return (
-    <View style={styles.header} testID={testID}>
+    <View style={[styles.header, actions ? styles.withActions : null]} testID={testID}>
+      <View style={styles.header}>
       <View style={styles.titleRow}>
         <View style={styles.titleGroup}>
           <Text accessibilityRole="header" variant="title" style={styles.title}>
             {title}
           </Text>
-          {helpText ? <HelpControl helpText={helpText} /> : null}
+          {badge}
+          {helpText ? <HelpControl helpText={helpText} showLabel={helpLabel} /> : null}
         </View>
         {action}
       </View>
+      {description ? (
+        <Text tone="muted" variant="meta">
+          {description}
+        </Text>
+      ) : null}
       {provenance ? (
         <Text tone="muted" variant="label">
           {provenance}
@@ -114,6 +161,8 @@ export function PageHeader({ title, provenance, instruction, helpText, action, t
           {instruction}
         </Text>
       ) : null}
+      </View>
+      {actions ? <View style={styles.actions}>{actions}</View> : null}
     </View>
   )
 }
@@ -141,8 +190,11 @@ export function ObjectHeader({
   badge,
   figure,
   action,
+  leading,
   testID,
 }: {
+  /** The object's mark (`EntityMark`) before the title: an account's institution, a ticker's logo. */
+  leading?: React.ReactNode
   /** What kind of object this is. Muted, sentence case. */
   eyebrow?: string
   title: string
@@ -162,14 +214,15 @@ export function ObjectHeader({
           {eyebrow}
         </Text>
       ) : null}
-      <View style={styles.titleRow}>
-        <View style={styles.titleGroup}>
-          <Text accessibilityRole="header" numberOfLines={2} style={styles.title} variant="title">
+      <View style={styles.objectTitleRow}>
+        <View style={styles.objectTitleGroup}>
+          {leading}
+          <Text accessibilityRole="header" numberOfLines={3} style={styles.title} variant="title">
             {title}
           </Text>
           {badge}
         </View>
-        {action}
+        {action ? <View style={styles.objectAction}>{action}</View> : null}
       </View>
       {descriptor ? (
         <Text numberOfLines={2} tone="muted" variant="meta">
@@ -183,24 +236,34 @@ export function ObjectHeader({
 
 const styles = StyleSheet.create({
   header: { gap: themeTokens.spacing[1] },
+  withActions: { gap: themeTokens.spacing[4] },
+  actions: { gap: themeTokens.spacing[2] },
   instruction: { marginTop: themeTokens.spacing[1] },
+  // Wraps so the action drops under the title instead of being pushed past the
+  // right edge when a long title (or pt/es copy, or 200% type) fills the row.
   titleRow: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     alignItems: 'center',
     justifyContent: 'space-between',
-    gap: themeTokens.spacing[3],
+    columnGap: themeTokens.spacing[3],
+    rowGap: themeTokens.spacing[2],
   },
-  titleGroup: { flexDirection: 'row', alignItems: 'center', gap: themeTokens.spacing[2], flexShrink: 1 },
+  titleGroup: { flexDirection: 'row', alignItems: 'center', gap: themeTokens.spacing[2], flexShrink: 1, maxWidth: '100%' },
+  // An object's title row never wraps: the action stays at the end, centred on
+  // the title, and the title wraps (up to three lines) in the space left.
+  objectTitleRow: { flexDirection: 'row', alignItems: 'center', columnGap: themeTokens.spacing[3] },
+  objectTitleGroup: { flex: 1, minWidth: 0, flexDirection: 'row', alignItems: 'center', gap: themeTokens.spacing[2] },
+  objectAction: { flexShrink: 0 },
   title: { flexShrink: 1 },
   helpControl: {
-    width: 22,
-    height: 22,
-    borderRadius: themeTokens.radius.pill,
-    borderWidth: 1,
+    flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
+    gap: themeTokens.spacing[1],
+    minHeight: 24,
+    paddingHorizontal: 2,
+    borderRadius: themeTokens.radius.sm,
   },
-  helpGlyph: { fontWeight: '600', lineHeight: 14 },
   backdrop: {
     flex: 1,
     alignItems: 'center',

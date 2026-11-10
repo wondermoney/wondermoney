@@ -48,7 +48,7 @@ const category = {
   subRows: [],
 };
 
-function renderSheet() {
+function renderSheet(overrides: Partial<typeof category> & { rolloverEnabled?: boolean } = {}) {
   render(
     <QueryClientProvider client={new QueryClient()}>
       <NextIntlClientProvider locale="en" messages={enMessages}>
@@ -56,7 +56,7 @@ function renderSheet() {
           budgetKey={3}
           year={2026}
           month={5}
-          category={category}
+          category={{ ...category, ...overrides }}
           currency="EUR"
           open
           onOpenChange={() => {}}
@@ -74,14 +74,25 @@ async function submitAmount(value: string) {
   await userEvent.click(screen.getByRole("button", { name: enMessages.save }));
 }
 
-for (const [label, value] of [["blank", ""], ["zero", "0"]] as const) {
+for (const [label, value, error] of [
+  ["blank", "", "invalid-amount"],
+  ["unreadable", "1.2.3", "invalid-amount"],
+  ["zero", "0", "budget-amount-positive"],
+] as const) {
   test(`a ${label} amount shows an inline error and saves nothing`, async () => {
     await submitAmount(value);
 
-    await screen.findByText(enMessages["budget-amount-positive"]);
+    await screen.findByText(enMessages[error]);
     assert.equal(mocks.mutateAsync.mock.calls.length, 0);
   });
 }
+
+test("an English reader's 1.000 is one, not a thousand", async () => {
+  await submitAmount("1.000");
+
+  await vi.waitFor(() => assert.equal(mocks.mutateAsync.mock.calls.length, 1));
+  assert.equal((mocks.mutateAsync.mock.calls[0]?.[0] as { amount: number }).amount, 1);
+});
 
 test("a comma-decimal amount is saved as the number the user meant, then the page refreshes", async () => {
   await submitAmount("12,5");
@@ -94,6 +105,7 @@ test("a comma-decimal amount is saved as the number the user meant, then the pag
     categoryKey: 7,
     month: 5,
     recurrency: "MONTHLY",
+    rolloverEnabled: false,
     year: 2026,
   });
 });
@@ -106,4 +118,35 @@ test("the yearly preview reads a comma-decimal amount instead of showing NaN", a
   const sheet = screen.getByRole("dialog");
   assert.doesNotMatch(sheet.textContent ?? "", /NaN/);
   assert.match(sheet.textContent ?? "", /150/);
+});
+
+test("turning on rollover saves it for this and the following months", async () => {
+  renderSheet();
+  const toggle = screen.getByRole("switch", { name: enMessages["budget-rollover-toggle"] });
+  assert.equal(toggle.getAttribute("aria-checked"), "false");
+
+  await userEvent.click(toggle);
+  await userEvent.click(screen.getByRole("button", { name: enMessages.save }));
+
+  await vi.waitFor(() => assert.equal(mocks.mutateAsync.mock.calls.length, 1));
+  const sent = mocks.mutateAsync.mock.calls[0]?.[0] as Record<string, unknown>;
+  assert.equal(sent.rolloverEnabled, true);
+  assert.equal(sent.applyToFollowingMonths, true);
+});
+
+test("a category with rollover on opens with the switch on, and turning it off for this month only says so", async () => {
+  renderSheet({ rolloverEnabled: true });
+  const toggle = screen.getByRole("switch", { name: enMessages["budget-rollover-toggle"] });
+  assert.equal(toggle.getAttribute("aria-checked"), "true");
+
+  await userEvent.click(toggle);
+  await userEvent.click(
+    screen.getByRole("checkbox", { name: enMessages["apply-change-months"] }),
+  );
+  await userEvent.click(screen.getByRole("button", { name: enMessages.save }));
+
+  await vi.waitFor(() => assert.equal(mocks.mutateAsync.mock.calls.length, 1));
+  const sent = mocks.mutateAsync.mock.calls[0]?.[0] as Record<string, unknown>;
+  assert.equal(sent.rolloverEnabled, false);
+  assert.equal(sent.applyToFollowingMonths, false);
 });

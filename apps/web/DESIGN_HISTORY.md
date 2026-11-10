@@ -32,7 +32,7 @@ A live side-by-side audit — `web/` at a 390px viewport via `agent-browser`, `m
 
 | Where | Gap | Resolution |
 | --- | --- | --- |
-| `web/en/accounts` vs. `web/en/budgets` | The "Preview" empty-state badge rendered `PREVIEW` (uppercase) on Accounts and `Preview` (sentence-case) on Budgets — one screen apart, same concept. | **Fixed.** `BudgetsEmptyState.tsx` was the outlier — `AccountsEmptyStateV2.tsx` and `DashboardBudgetsEmptyState.tsx` had already converged on the uppercase bordered corner-tag treatment via RAD-647; `BudgetsEmptyState.tsx` never got updated. Converged onto that same existing pattern. |
+| `web/en/accounts` vs. `web/en/budgets` | The "Preview" empty-state badge rendered `PREVIEW` (uppercase) on Accounts and `Preview` (sentence-case) on Budgets — one screen apart, same concept. | **Fixed.** `BudgetsEmptyState.tsx` was the outlier — `AccountsEmptyStateV2.tsx` and `DashboardBudgetsEmptyState.tsx` had already converged on the uppercase bordered corner-tag treatment; `BudgetsEmptyState.tsx` never got updated. Converged onto that same existing pattern. |
 | `mobile/` Accounts screen | The same account (`AB Bank Acc EUR`) appeared twice on one screen: once as a stat row under "By currency" (Insights, period Inflow/Outflow), once as a full bordered card lower down (accounts list, current balance). | **Corrected characterization, then fixed.** Not a code bug — confirmed by reading `accounts-screen.tsx`: two intentionally different sections. The real defect was insufficient section framing. **Fixed** by adding a "Balances" heading above the accounts list, so Insights and Balances read as two named sections instead of one repeating itself. |
 | `mobile/` Accounts screen | Stacked 3+ independently-bordered elements directly against each other at the top of the screen (two action buttons, a third full-width button, then 3 bordered filter chips) with no shared container. | **Fixed.** `SegmentedControl` now uses one shared track border instead of a border per segment (fixes this pattern on 2 other screens too — portfolio performance chart, market asset price chart). "View transactions" and "Recurring bills and subscriptions" switched from bordered to `ghost` variant, leaving only "Add manual account" bordered/filled. |
 | `mobile/` Budgets vs. `web/` Budgets | Web showed budget categories (Housing/Food/Transportation) with progress bars directly on the Budgets screen; mobile's list screen showed only an aggregate (Remaining/Planned/Spent) with categories behind a chevron drill-in. | **Product decision made 2026-08-27: converge on web's shape.** `budgets-screen.tsx`'s `BudgetCard` now renders each `budget.categories` entry with its own progress bar directly on the list, below the existing aggregate hero figure — the category data was already computed (`BudgetViewModel.categories`), just not rendered at the list level. |
@@ -169,8 +169,8 @@ All shipped unless noted.
    connection, or an error) rather than the freshest, since the freshest
    would actively mislead about a list fed by several accounts. Manual
    accounts are excluded rather than counted as infinitely stale.
-7. **Filters carry their own counts — declined, Aug 2026.** Built (RAD-561),
-   then removed (RAD-576/578): 9 months of unread facet-count queries, 8
+7. **Filters carry their own counts — declined, Aug 2026.** Built,
+   then removed: 9 months of unread facet-count queries, 8
    extra `COUNT`s per request. Founder decision to delete rather than wire
    up. Revisit only as one grouped query through `applyFilters`, consumed the
    same day it's added.
@@ -195,7 +195,7 @@ All shipped unless noted.
 | Reference does | We do not | Why |
 | --- | --- | --- |
 | Money in the sans; mono for machine IDs only | Money stays in Geist Mono | The two-font split is the product's signature; Geist Mono is already load-bearing everywhere. Founder decision, Aug 2026. |
-| Two-tier top nav on data surfaces | The grouped side-rail stays | Buys ~240px of table width but is a full shell rebuild across every route and locale; the rail already works. |
+| Two-tier top nav on data surfaces | Adopted Nov 2026 (reversed) | Declined Aug 2026 as a full shell rebuild. The Direction A redesign (Nov 2026) adopted it: a top bar plus a section tab row, which gave every data surface the rail's ~240px of width. |
 | A "Pinned"/"Recent" block under the rail groups | Not adopted | Founder decision, Aug 2026. |
 | Accent at ~`oklch(0.55 0.24 272)` | Violet 290 stays | That indigo is Stripe's brand; ours is shared with `lp/`. Take the footprint discipline, not the hue. |
 
@@ -279,7 +279,7 @@ which was built and then deliberately reverted.
 | 2 | `<Amount>` primitive | Done, adopted everywhere money renders in the DOM |
 | 3 | Comparison beside headline figures | Done — `StatCard` |
 | 4 | Provenance line | Done — `AccountsFreshness` |
-| 5 | Counts on filters | Declined — built in RAD-561, deleted in RAD-576/578 |
+| 5 | Counts on filters | Declined — built, then deleted |
 | 6 | Row restructure | Done — 9 columns to 7, stacked left column |
 | 7 | Radius + unified page titles | Done |
 | 8 | Micro-labels; subtitles | Resolved — subtitles removed |
@@ -289,7 +289,7 @@ which was built and then deliberately reverted.
 | 12 | `FilterChip` + date-range picker | Done (see `DateRangePopover` note above) |
 | 13 | Real skeletons, per route | Done — all ten routes |
 
-## Planned: `ConsentBanner` (RAD-178 Task 6)
+## Planned: `ConsentBanner`
 
 Not implemented as of this writing — defined here ahead of implementation.
 

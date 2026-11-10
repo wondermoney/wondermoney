@@ -24,6 +24,20 @@ El hogar contiene las cuentas, las transacciones, las categorías, los objetivos
 
 Como ambos miembros leen los mismos datos, los cambios que hace un miembro aparecen en la vista del otro miembro.
 
+## Cuando los miembros usan monedas distintas
+
+Cada miembro elige su moneda y ve todos los totales en ella. El patrimonio neto, el flujo de caja, el gasto por categoría y el dinero disponible para asignar a objetivos convierten los saldos y las transacciones del otro miembro a tu moneda, al tipo de cambio del día, antes de sumarlos, para que el total signifique una sola cosa.
+
+Un presupuesto es la excepción: mantiene la moneda en la que se creó, porque sus importes planificados están en esa moneda. Ambos miembros ven el gasto del presupuesto en la moneda del presupuesto, con las transacciones del otro miembro convertidas a ella al tipo de cambio de su fecha. El pago de un préstamo cuenta por sus intereses y comisiones, que se convierten desde la moneda del préstamo al tipo de cambio de la fecha del pago. El informe de presupuesto vs realizado también sigue al presupuesto: sus importes están en la moneda del presupuesto, sea quien sea quien lo vea. El gasto por categoría, en su informe y en la página de cuentas, cuenta los pagos de préstamos de la misma forma, en tu moneda. Los ingresos por dividendos convierten cada dividendo a tu moneda al tipo de cambio del día en que se pagó.
+
+Cuando no existe un tipo de cambio para una moneda, los importes en ella se dejan fuera en lugar de sumarse por su valor nominal, y el total se muestra como incompleto. En los informes de gasto por categoría y de presupuesto vs realizado, en el gasto por categoría de la página de cuentas y en los ingresos por dividendos, una nota indica cuántos importes se dejaron fuera y en qué monedas.
+
+El gráfico del historial de la cartera funciona igual: el valor de la cartera de cada miembro en un día se convierte a tu moneda al tipo de cambio de ese día. En un día sin tipo de cambio, esa cartera se deja fuera del total del día y una nota bajo el gráfico indica que el historial es parcial.
+
+El historial del patrimonio neto y la rentabilidad del período en el panel de la cartera convierten los valores de la cartera de la misma forma, cada uno al tipo de cambio del día en que se registró el valor. Las compras y ventas hechas durante el período se convierten al tipo de cambio de su propia fecha. Un dividendo se convierte al tipo de cambio del día en que se pagó, incluido uno pagado en una moneda que no es la de ningún miembro. Un punto del patrimonio neto con un valor de cartera que no se puede convertir aparece como incompleto, y una rentabilidad del período cuyo valor inicial, o alguna de cuyas compras o ventas, no se puede convertir no se muestra.
+
+La rentabilidad anual, la volatilidad y la caída máxima de la cartera leen todas las compras, ventas y dividendos, y los valores diarios de la cartera, en tu moneda, convertidos de la misma forma. Cuando alguno de ellos no tiene tipo de cambio, esa cifra no se muestra en lugar de calcularse a partir de dos monedas.
+
 ## Qué se mantiene separado
 
 Las cuentas privadas se excluyen de la imagen compartida. No aparecen en las listas, los presupuestos ni el patrimonio neto del otro miembro, y no forman parte del contexto a nivel de hogar. Consulta [Privacidad de la cuenta](/es/docs/household/account-privacy) para saber cómo se configura.

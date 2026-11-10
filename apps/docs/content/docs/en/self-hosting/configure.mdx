@@ -49,6 +49,10 @@ AI_MODEL=llama3.1
 
 Set `AI_API_KEY` when the endpoint needs one. To use a different model for one feature, set `AI_MODEL_<FEATURE>`; for example, receipt scanning needs a model that reads images, set with `AI_MODEL_OCR`.
 
+If sign-up is open and you pay for the model, set `AI_REQUIRES_VERIFIED_EMAIL=true`. Accounts that sign up with email and password then get a verification link by email, and need to follow it before they can use the assistant, receipt scanning or AI column mapping. Google and Apple accounts count as verified. It needs email configured.
+
+To cap what each household can spend on the model per day, set `AI_DAILY_LIMIT_ASSISTANT` (assistant messages), `AI_DAILY_LIMIT_OCR` (receipt scans) and `AI_DAILY_LIMIT_CSV_MAPPING` (CSV imports the model maps). Members of a household share the limit, and it resets at midnight UTC. Leave them empty for no limit. Once a household reaches a limit, the app says so until the next day; CSV imports still work, with the columns mapped by hand.
+
 ## Market data
 
 Set `EODHD_API_KEY` to turn on ticker search, live prices and the Financial Markets module.
@@ -68,5 +72,37 @@ Set both `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` (from an OAuth client in 
 | `INSTANCE_NAME` | Your instance's name. The web app shows it in browser tab titles, link previews and the sign-in and sign-up pages, and in place of the WonderMoney logo when you change it. Every email uses it in the subject, copy and sign-off, and as the sender's name unless `EMAIL_FROM_NAME` is set; authenticator apps show it as the label. The web app reads it from the API, so set it on the API only; a change shows up in the web app within five minutes |
 | `SIGNUP_MODE` | `open`, `invite` or `closed` (see [Install](/en/docs/self-hosting/install)) |
 | `SUPPORT_EMAIL` | The inbox for the contact form, account alerts and in-app feedback, and the support address the app shows; leave empty to turn them off and hide the support links. The "Share Feedback" form also needs email configured; without it the form is hidden |
+| `SPONSOR_URL` | A page where your users can chip in towards running the instance (Open Collective, GitHub Sponsors, ...). The web app's FAQ links to it when set |
 | `NEXT_PUBLIC_TERMS_URL`, `NEXT_PUBLIC_PRIVACY_URL` | Your legal pages, linked from the sign-up page when both are set |
 | `PRIVACY_POLICY_URL` | Your privacy policy, linked from email footers. `{lang}` is replaced with the recipient's language (`en` or `pt`), for example `https://example.com/{lang}/privacy`. Defaults to the app's privacy settings |
+
+## Analytics
+
+Your instance loads no analytics or tag manager and records no usage events unless you turn one on. Each setting below switches on one tracker, sending to your own account with that service; leave them empty to keep everything off.
+
+| Setting | What it turns on |
+|---|---|
+| `NEXT_PUBLIC_GTM_ID` | Your Google Tag Manager container (`GTM-XXXXXXX`), loaded on every page of the web app |
+| `NEXT_PUBLIC_POSTHOG_KEY` | PostHog in the web app: page views, usage events and session recordings, linked to each user's email address |
+| `ANALYTICS_OUTBOX_MODE=live` with `POSTHOG_API_KEY` | Sign-up, login and bank sync events sent to PostHog by the API and the worker. Set both on the API and the worker; while the mode is off, no events are recorded |
+
+If you turn any of these on, tell your users in your privacy policy (`NEXT_PUBLIC_PRIVACY_URL`), and ask for consent where the law requires it.
+
+## What your instance sends
+
+Nothing is sent to the WonderMoney project. Each outside service your instance can contact, and what switches it on:
+
+| Service | Contacted by | Switched on by |
+|---|---|---|
+| European Central Bank | The worker, once a day, to download euro exchange rates. It sends no data about you or your users | Always on |
+| Email (your SMTP server or Resend) | The API and the worker, to send password resets, invites and notifications | `SMTP_HOST` or `RESEND_API_KEY` |
+| AI (your OpenAI-compatible endpoint) | The API and the worker, with the receipt, CSV columns, transactions or chat messages the feature needs | `AI_BASE_URL` and `AI_MODEL` |
+| Market data (EODHD) | The API and the worker, with ticker symbols, not user data | `EODHD_API_KEY` |
+| File storage (your S3-compatible store) | The API and browsers, for CSV imports and receipt copies | `S3_ENDPOINT` and `S3_BUCKET` |
+| Error tracking (Sentry) | The API, the worker and the web app, with error reports | `SENTRY_DSN` (API and worker), `NEXT_PUBLIC_SENTRY_DSN` (web app) |
+| Analytics (Google Tag Manager, PostHog) | See [Analytics](#analytics) | `NEXT_PUBLIC_GTM_ID`, `NEXT_PUBLIC_POSTHOG_KEY`, `ANALYTICS_OUTBOX_MODE=live` |
+| Bank sync (Enable Banking) | The API and the worker, for the users who connect a bank | Each user's own Enable Banking key, added in Settings |
+| Google sign-in | Browsers and the API, when a user chooses "Continue with Google" | `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` |
+| reCAPTCHA | Browsers on the contact form, and the web app to check the answer | `NEXT_PUBLIC_RECAPTCHA_SITE_KEY` and `RECAPTCHA_SECRET_KEY` |
+
+Browsers also load bank and exchange logos from the addresses stored in the bank and asset catalogue. The mobile app sends no analytics or error reports while it is connected to your server.

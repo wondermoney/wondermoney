@@ -8,6 +8,8 @@ export type PortfolioPerformanceViewModel = Readonly<{
   startDate: string | null
   endDate: string | null
   historyStatus: 'empty' | 'insufficient_history' | 'ready'
+  /** Some days left out a portfolio the API could not convert into the viewer's currency. */
+  currencyIncomplete?: boolean
 }>
 
 function toChartPoints(points: readonly PortfolioPerformancePoint[]): PortfolioPerformanceChartPoint[] {
@@ -23,5 +25,6 @@ export function mapPortfolioPerformance(response: PortfolioPerformanceResponseDt
     startDate: raw.length > 0 ? raw[0]!.date : null,
     endDate: raw.length > 0 ? raw[raw.length - 1]!.date : null,
     historyStatus: response.portfolioHistoryStatus ?? (raw.length > 0 ? 'ready' : 'empty'),
+    currencyIncomplete: response.completeness?.isComplete === false,
   }
 }

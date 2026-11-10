@@ -28,7 +28,7 @@ export function AccountMultiSelect({
       }))}
       selected={selected}
       onChange={onChange}
-      placeholder={t("placeholder.search")}
+      placeholder={t("placeholder.allAccounts")}
       className={className}
     />
   );

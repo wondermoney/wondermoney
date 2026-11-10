@@ -24,6 +24,8 @@ Each row shows a confidence indicator for the suggestion — high, medium, or lo
 
 Items you correct are used to learn the mapping for that merchant, so the next transaction from the same merchant is easier to categorize.
 
+If your household has rules, they run first on every new transaction, whether it comes from bank sync, a file import, a receipt or one you add by hand. A category a rule sets wins over the learned mapping, and such a transaction is not sent for an AI suggestion. Rules never change a category you chose yourself, nor a description or merchant you typed or edited, and they run once, when the transaction arrives: a later sync does not undo your changes. A transaction's activity history names the rule that changed it.
+
 ## Before you start
 
 Review the transaction list first so you can spot items that belong together. If a transaction is part of a recurring payment, decide whether it should use the same category every month.
@@ -39,13 +41,77 @@ Review the transaction list first so you can spot items that belong together. If
 
 When you apply a category to several transactions at once, the chosen category is written to each transaction and the merchant mapping is updated, so the choice persists and helps future suggestions. The same applies when you confirm a category for a receipt extracted with OCR: the category you select is the one that is written through.
 
+## Split a transaction
+
+Some payments cover more than one thing: a supermarket receipt with food and household items, or a pharmacy bill that is partly a gift. Splitting shares one transaction's amount over several categories, so each part counts in its own budget and report.
+
+1. Open the transaction's menu and choose **Edit**.
+2. Under **Category**, choose **Split**. You start with two lines: the current category with the full amount, and an empty line.
+3. Give each line a category and an amount. Type the amount as a figure or as a percentage of the transaction, such as `25%`. You can add a short note to any line.
+4. Watch **Remaining to assign** below the lines. Use **Fill remainder** on a line to put what is left on it, or **Split evenly** to share the amount equally. **Save** stays disabled until the lines add up exactly to the transaction's amount.
+
+Amounts are in the account's currency and you type them without a sign: every line takes the transaction's sign. A split needs at least two lines, and a line cannot be zero.
+
+In the transaction list, a split transaction shows **Split** with how many categories it uses instead of one category. Select it to see each line, or open the transaction's details to see the lines with their notes. A category filter matches a split transaction when any of its lines is in that category.
+
+To change a split, open **Edit** again and change the lines. To undo it, choose **Remove split** and confirm: the transaction goes back to a single category, the one of its largest line. Giving a split transaction a single category by any other route, such as bulk categorization, also removes the split, so WonderMoney asks you first.
+
+If the amount of a split transaction changes later, for example when a pending payment settles, the lines are rescaled to the new amount and the transaction is marked for review. A loan repayment cannot be split, because it already separates principal from interest.
+
+## Tags
+
+Tags label transactions across categories. A transaction has one category but can carry several tags, so a tag suits anything that cuts across categories: a trip, a home renovation, a work expense you will claim back. Tags belong to the household, so both members see and use the same list.
+
+### Add or remove tags
+
+- **On the web**, open a transaction's menu and choose **Edit**, then use the **Tags** field. Pick existing tags, or type a new name and choose **Create tag** to make it on the spot. The same field appears when you add a transaction by hand.
+- **In the mobile app**, tap a transaction to open its details and choose **Edit tags**, or use **Edit tags** from the row's menu. Type a name under **New tag** to create one. When you add a transaction by hand, the **Tags** row opens the same picker.
+
+A transaction can carry up to 50 tags. Tag names are unique in a household regardless of capitalization, so "Trip" and "trip" are the same tag.
+
+### See and filter by tag
+
+Tags appear as small chips after the category in the transaction list and in a transaction's details. Each chip shows the tag's name with its colour as a dot, so the name stays readable in light and dark themes.
+
+To show only tagged transactions, open **Filters** and choose one or more tags. A transaction matches when it carries any of the selected tags, and the filter covers the whole date range, not only the rows already loaded. On the web, the reports filter panel has the same tag filter.
+
+### Rename, recolour or delete tags
+
+On the web, go to **Settings → Tags**. From there you can rename a tag, change its colour, add a new one or delete one. Deleting a tag removes it from every transaction in the household; the transactions themselves are not changed.
+
+## Money that is not spending
+
+Moving money to a broker, a pension or a savings pot is not spending. WonderMoney keeps it out of spending totals in two ways.
+
+### Investments and savings
+
+Every household has the system category **Investments and savings**, with **Investments** and **Savings** under it. By default these categories do not count as spending: transactions in them are left out of reports, budgets and the cash flow on the home page. Nothing is moved into them for you; choose the category on the transactions it fits, as with any other category. When a transaction is split, only the parts in these categories are left out.
+
+Every category, system categories included, has a **Counts as spending** switch. It is on by default, except for Investments and savings. Turn it off for a category, such as a savings pot of your own, and its transactions leave spending too. Turn it on for Investments and savings if you want those transactions counted as spending. Switching a category also switches the categories under it, and a category under one that does not count as spending does not count either.
+
+The switch applies to your household only: both of you see the same setting, and no other household is affected.
+
+- **On the web**, go to **Settings → Categories** and use the **Counts as spending** switch on any row. For a category of your own, it is also in the form when you create or edit it.
+- **In the mobile app**, a system category has its **Counts as spending** switch on its row in **Settings → Categories**. For a category of your own, use **Counts as spending** when you create or edit it. Categories that do not count are labelled in the list.
+
+### Mark as transfer
+
+WonderMoney recognizes a transfer between two of your own accounts when it finds both sides: the money leaving one account and the same amount arriving on the other a few days later at most. Both rows are then left out of income and spending. A payment to a broker, or to an account you have not connected, has no other side, so it stays a payment until you mark it.
+
+- **On the web**, open the transaction's menu, choose **Edit** and turn on **Mark as transfer**.
+- **In the mobile app**, open the row's menu and choose **Mark as transfer**.
+
+For money going out you can also say where it went: another of your accounts, a portfolio or a goal. This is a note on the transaction; it does not add anything to the portfolio or the goal. To undo, turn the switch off on the web, or choose **Not a transfer** in the mobile app.
+
+A transaction you mark stays a transfer: automatic transfer matching never changes it back. If it later finds the other side on another of your accounts, it links the two.
+
 ## Review
 
 Check categories at the end of the week or month and correct anything that was guessed too quickly. Consistent categories make budget tracking and searches more reliable.
 
 ## Common issues
 
-- A single payment was split across more than one purpose.
+- A single payment covered more than one purpose: split it rather than picking the largest part.
 - The category is too broad to be useful.
 - Refunds or reversals were assigned the same category as the original charge.
 - Imported transactions inherited a category that does not fit your setup.

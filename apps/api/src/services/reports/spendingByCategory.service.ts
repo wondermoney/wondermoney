@@ -1,11 +1,12 @@
 import { DI } from '@app/database/di';
-import { LoanRepaymentLink } from '@entity/LoanRepaymentLink';
 import { Transaction } from '@entity/Transaction';
-import { calculateEffectiveSpendingAmount } from '@service/loan/loan-spending-adjustment.service';
-import { filterExpenseTransactions, getEffectiveAppuserAmount } from '@utils/account-amounts';
+import { CATEGORY_LINE_POPULATE, spendingLinesOf } from '@service/transaction/category-lines';
+import { loadCategorySpendingFlags } from '@service/transaction/category-spending';
+import { addMoney } from '@utils/money';
 
 import { round2, toCsv } from './csv';
-import { buildTransactionWhere, type ReportServiceInput, transactionMatchesCategoryKeys } from './report-filters';
+import { isMoneyOut, loadLoanRepaymentLinks, loadViewerCurrencyAmounts, REPORT_CURRENCY_POPULATE, type ReportResult } from './report-currency';
+import { buildTransactionWhere, lineMatchesCategoryKeys, type ReportServiceInput, transactionMatchesCategoryKeys } from './report-filters';
 
 export interface SpendingByCategoryRow {
   categoryKey: string;
@@ -34,71 +35,65 @@ export function buildSpendingByCategoryCsv(rows: SpendingByCategoryRow[]): strin
   return toCsv(header, body);
 }
 
-export async function getSpendingByCategoryReport(input: ReportServiceInput): Promise<SpendingByCategoryRow[]> {
+export async function getSpendingByCategoryReport(input: ReportServiceInput): Promise<ReportResult<SpendingByCategoryRow[]>> {
   const { filters, tenant, user } = input;
 
   const transactions = await DI.em.find(Transaction, buildTransactionWhere(filters, tenant, user), {
-    populate: [
-      'appuserTransactionCategories.categoryKey',
-      'appuserTransactionCategories.categoryKey.parentCategory',
-      'appuserCurrencyKey',
-    ],
+    populate: [...CATEGORY_LINE_POPULATE, ...REPORT_CURRENCY_POPULATE],
   });
-  if (transactions.length === 0) return [];
-
-  const loanRepaymentLinks = await DI.em.find(LoanRepaymentLink, {
-    deletedAt: undefined,
-    tenantKey: tenant,
-    transactionKey: { $in: transactions },
-  });
-  const loanRepaymentLinkMap = new Map<number, LoanRepaymentLink[]>();
-  for (const link of loanRepaymentLinks) {
-    const transactionKey = link.transactionKey.transactionKey;
-    const current = loanRepaymentLinkMap.get(transactionKey);
-    if (current) current.push(link);
-    else loanRepaymentLinkMap.set(transactionKey, [link]);
-  }
+  const repayments = await loadLoanRepaymentLinks(DI.em, tenant, transactions);
+  const amounts = await loadViewerCurrencyAmounts(DI.em, user, transactions, repayments);
+  const spendingFlags = await loadCategorySpendingFlags(DI.em, tenant.tenantKey);
+  const result = (data: SpendingByCategoryRow[]) => ({ completeness: amounts.completeness(), data });
+  if (transactions.length === 0) return result([]);
 
   const categoryKeys = filters.categoryKeys;
-  const expenseTransactions = filterExpenseTransactions(transactions).filter(
-    (transaction) => categoryKeys === undefined || transactionMatchesCategoryKeys(transaction, categoryKeys),
+  const expenseTransactions = transactions.filter(
+    (transaction) => isMoneyOut(transaction) && (categoryKeys === undefined || transactionMatchesCategoryKeys(transaction, categoryKeys)),
   );
-  if (expenseTransactions.length === 0) return [];
+  if (expenseTransactions.length === 0) return result([]);
 
   const byCategory = new Map<string, SpendingByCategoryRow>();
   for (const transaction of expenseTransactions) {
-    const effectiveAmount = calculateEffectiveSpendingAmount({
-      loanRepaymentLinks: loanRepaymentLinkMap.get(transaction.transactionKey) ?? [],
-      transactionAmount: getEffectiveAppuserAmount(transaction),
-    });
-    const assignedCategory = transaction.appuserTransactionCategories.getItems()[0]?.categoryKey;
-    const categoryKey = assignedCategory ? String(assignedCategory.categoryKey) : UNCATEGORIZED_KEY;
-    const parentKey = assignedCategory?.parentCategory ? String(assignedCategory.parentCategory.categoryKey) : null;
-    const name = assignedCategory?.name ?? 'Uncategorized';
-    const color = assignedCategory?.bgColor ?? UNCATEGORIZED_COLOR;
-
-    const current = byCategory.get(categoryKey);
-    if (current) {
-      current.totalAmount += Math.abs(effectiveAmount);
-      current.transactionCount += 1;
-      continue;
+    // A row none of whose lines the total would count (only in categories that are not spending,
+    // or outside the category filter) is neither added nor counted as left out.
+    if (!spendingLinesOf(transaction, null, spendingFlags).some((line) => lineMatchesCategoryKeys(line, categoryKeys))) continue;
+    // In the viewer's currency (a loan repayment by its interest and fees, from the loan's
+    // currency); a row with no converted amount, or no rate into the viewer's currency, is left out
+    // and counted once (a split's lines share its one converted amount).
+    const effectiveAmount = amounts.spendingAmountOf(transaction, repayments.get(transaction.transactionKey) ?? []);
+    if (effectiveAmount === null) continue;
+    // Each line of a split counts in its own category (and as one entry there), like a separate
+    // transaction; with a category filter, only the matching lines count. A line in a category that
+    // is not spending (investments, savings) is left out.
+    for (const line of spendingLinesOf(transaction, effectiveAmount, spendingFlags)) {
+      if (!lineMatchesCategoryKeys(line, categoryKeys)) continue;
+      const lineAmount = Math.abs(line.amount ?? 0);
+      const assignedCategory = line.category;
+      const categoryKey = assignedCategory ? String(assignedCategory.categoryKey) : UNCATEGORIZED_KEY;
+      const current = byCategory.get(categoryKey);
+      if (current) {
+        current.totalAmount = addMoney(current.totalAmount, lineAmount);
+        current.transactionCount += 1;
+        continue;
+      }
+      byCategory.set(categoryKey, {
+        categoryKey,
+        color: assignedCategory?.bgColor ?? UNCATEGORIZED_COLOR,
+        name: assignedCategory?.name ?? 'Uncategorized',
+        parentKey: assignedCategory?.parentCategory ? String(assignedCategory.parentCategory.categoryKey) : null,
+        percentOfTotal: 0,
+        totalAmount: lineAmount,
+        transactionCount: 1,
+      });
     }
-    byCategory.set(categoryKey, {
-      categoryKey,
-      color,
-      name,
-      parentKey,
-      percentOfTotal: 0,
-      totalAmount: Math.abs(effectiveAmount),
-      transactionCount: 1,
-    });
   }
 
   const rows = [...byCategory.values()];
   const grandTotal = rows.reduce((sum, row) => sum + row.totalAmount, 0);
   rows.sort((a, b) => b.totalAmount - a.totalAmount);
 
-  return rows.map((row) => ({
+  return result(rows.map((row) => ({
     categoryKey: row.categoryKey,
     color: row.color,
     name: row.name,
@@ -106,5 +101,5 @@ export async function getSpendingByCategoryReport(input: ReportServiceInput): Pr
     percentOfTotal: grandTotal > 0 ? round2((row.totalAmount / grandTotal) * 100) : 0,
     totalAmount: round2(row.totalAmount),
     transactionCount: row.transactionCount,
-  }));
+  })));
 }

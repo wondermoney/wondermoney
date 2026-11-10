@@ -1,9 +1,9 @@
 /**
- * RAD-577 — keep the Privacy Policy's sub-processor list and the running stack in sync.
+ * Keep the Privacy Policy's sub-processor list and the running stack in sync.
  *
- * The failure this guards against already happened. RAD-449 replaced Financial Modeling
- * Prep with EODHD on 2026-08-05; §12 went on naming FMP until RAD-573 noticed while
- * translating the policy into Spanish. For eleven weeks the policy disclosed processing
+ * The failure this guards against already happened. EODHD replaced Financial Modeling
+ * Prep on 2026-08-05; §12 went on naming FMP until it was noticed while translating the
+ * policy into Spanish. For eleven weeks the policy disclosed processing
  * that had stopped and omitted processing that had started, in all three locales, with a
  * green build the whole time — because nothing connected the dependency list to the legal
  * text.

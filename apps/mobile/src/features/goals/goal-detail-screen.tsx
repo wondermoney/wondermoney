@@ -1,18 +1,33 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Alert, BackHandler, Pressable, RefreshControl, ScrollView, StyleSheet, Text, TextInput, useColorScheme, View } from 'react-native'
-import { SafeAreaView } from 'react-native-safe-area-context'
+import { Alert, BackHandler, Pressable, RefreshControl, ScrollView, StyleSheet, TextInput, View } from 'react-native'
 
 import { BackControl } from '@/components/ui/back-control'
+import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { Card } from '@/components/ui/card'
+import { EntityMark } from '@/components/ui/entity-mark'
+import { HeadlineFigure } from '@/components/ui/headline-figure'
+import { Icon, type IconName } from '@/components/ui/icon'
+import { IconButton } from '@/components/ui/icon-button'
+import { Notice } from '@/components/ui/notice'
+import { ObjectHeader } from '@/components/ui/page-header'
+import { ProgressBar } from '@/components/ui/progress-bar'
+import { SafeAreaView } from '@/components/ui/screen-safe-area'
+import { Divider, Section } from '@/components/ui/section'
+import { Sheet } from '@/components/ui/sheet'
+import { Text } from '@/components/ui/text'
 import { ApiError } from '@/lib/api/errors'
-import { formatCurrency } from '@/lib/formatters/financial'
-import { themeTokens, type Palette } from '@/theme/tokens'
-import { textStyles } from '@/theme/typography'
+import { formatNumberInput } from '@/lib/formatters/decimal-input'
+import { useFormatMoney } from '@/lib/formatters/money-display'
+import { themeTokens } from '@/theme/tokens'
+import { usePalette } from '@/theme/use-palette'
 
 import type { GoalActivityViewModel, GoalDetailViewModel } from './goal-detail-view-model'
 import { buildGoalMetadataChanges } from './goal-detail-view-model'
+import { FigureStat } from './goal-ui'
 import { goalMetadataWriteSchema, parseLocalizedGoalMoney, type GoalMetadataWrite } from './goals-contract'
+import { formatGoalDate, goalStatusTone } from './goals-screen'
 import { classifyGoalWriteFailure, type GoalWriteFailure } from './use-goal-mutations'
 
 
@@ -66,24 +81,42 @@ export type GoalDetailScreenProps = Readonly<{
 
 export function GoalDetailScreen(props: GoalDetailScreenProps) {
   const { t, i18n } = useTranslation()
-  const palette = themeTokens.colors[useColorScheme() === 'dark' ? 'dark' : 'light']
   const locale = i18n.resolvedLanguage ?? i18n.language ?? 'en'
   const { state, onBack, onRefresh, onLogout } = props
 
   if (state.status === 'access-transition') return null
-  if (state.status === 'loading') return <LoadingState palette={palette} label={t('goalDetail.loading')} onBack={onBack} />
+  if (state.status === 'loading') return <LoadingState label={t('goalDetail.loading')} onBack={onBack} />
   if (state.status === 'error' || state.status === 'not-found' || state.status === 'invalid-id' || state.status === 'invalid-response') {
-    return <FailureState state={state.status} palette={palette} onBack={onBack} onRetry={onRefresh} onLogout={onLogout} />
+    return <FailureState state={state.status} onBack={onBack} onRetry={onRefresh} onLogout={onLogout} />
   }
 
-  return <LoadedGoalDetail {...props} state={state} locale={locale} palette={palette} />
+  return <LoadedGoalDetail {...props} state={state} locale={locale} />
 }
 
-function LoadedGoalDetail({ state, locale, palette, onBack, onRefresh, onLoadMore, accountContext, mutationPending, goalWriteUnknown, isGoalWriteBlocked, onSaveMetadata, onLinkAccount, onUnlinkAccount, onAssign, onMoveOut, onArchive }: GoalDetailScreenProps & { state: Extract<GoalDetailViewState, { status: 'loaded' | 'refresh-error' }>; locale: string; palette: Palette }) {
+type ReserveAction = 'assign' | 'move-out'
+type ReserveFailure = GoalWriteFailure | 'validation' | 'insufficient-reserve'
+type OpenSheet = null | 'assign' | 'move-out' | 'edit' | 'manage'
+
+/**
+ * Web's goal detail (`goals/[goalKey]/goal-detail-client.tsx`) at phone width, in the calm
+ * structure: "← Goals"; the goal's mark, name, status chip and description with "Manage goal"
+ * as the title row's ⋮; Available as the headline figure with how the goal is doing as its
+ * status line; Target amount, Progress and Target date over the progress bar; Assign money and
+ * Move money out as the one control row; then Monthly contribution (or the payoff plan for a
+ * debt), Activity, and Linked account as open sections. Web's dialogs are sheets here.
+ */
+function LoadedGoalDetail({ state, locale, onBack, onRefresh, onLoadMore, accountContext, mutationPending, goalWriteUnknown, isGoalWriteBlocked, onSaveMetadata, onLinkAccount, onUnlinkAccount, onAssign, onMoveOut, onArchive }: GoalDetailScreenProps & { state: Extract<GoalDetailViewState, { status: 'loaded' | 'refresh-error' }>; locale: string }) {
+  const formatMoney = useFormatMoney()
   const { t } = useTranslation()
+  const palette = usePalette()
   const { goal } = state.data
   const mutationDisabled = mutationPending || goalWriteUnknown
+  const [sheet, setSheet] = useState<OpenSheet>(null)
   const [metadataDirty, setMetadataDirty] = useState(false)
+  const [announcement, setAnnouncement] = useState('')
+  const [archiveFailure, setArchiveFailure] = useState<GoalWriteFailure | null>(null)
+  const money = (value: number) => formatMoney(value, { locale, currency: goal.currencyCode })
+
   const requestBack = () => {
     if (!metadataDirty) { onBack(); return }
     Alert.alert(t('goalDetail.editor.discardTitle'), t('goalDetail.editor.discardMessage'), [
@@ -91,13 +124,29 @@ function LoadedGoalDetail({ state, locale, palette, onBack, onRefresh, onLoadMor
       { text: t('goalDetail.editor.discard'), style: 'destructive', onPress: onBack },
     ])
   }
-  const money = (value: number) => formatCurrency(value, { locale, currency: goal.currencyCode })
-  const progress = goal.progressAvailable
-    ? new Intl.NumberFormat(locale, { style: 'percent', maximumFractionDigits: 1 }).format(goal.progressPercentage / 100)
-    : t('goals.progressUnavailable')
-  const date = goal.targetDate
-    ? new Intl.DateTimeFormat(locale, { dateStyle: 'long' }).format(new Date(goal.targetDate))
-    : t('goalDetail.noTargetDate')
+
+  const archive = () => {
+    setSheet(null)
+    if (mutationDisabled || isGoalWriteBlocked()) return
+    if (goal.availableAmount > 0) {
+      Alert.alert(t('goalDetail.archive.balanceTitle'), t('goalDetail.archive.balanceMessage'))
+      return
+    }
+    Alert.alert(t('goalDetail.archive.confirmTitle'), t('goalDetail.archive.confirmMessage'), [
+      { text: t('common.cancel'), style: 'cancel' },
+      {
+        text: t('goalDetail.archive.confirm'),
+        style: 'destructive',
+        onPress: () => {
+          setArchiveFailure(null)
+          void onArchive().catch((error) => setArchiveFailure(classifyGoalWriteFailure(error)))
+        },
+      },
+    ])
+  }
+
+  const progress = goal.displayProgress
+  const progressLabel = progress === null ? '—' : formatPercent(progress, locale)
 
   return (
     <SafeAreaView style={[styles.safeArea, { backgroundColor: palette.background }]}>
@@ -106,73 +155,167 @@ function LoadedGoalDetail({ state, locale, palette, onBack, onRefresh, onLoadMor
         refreshControl={<RefreshControl refreshing={Boolean(state.refreshing)} onRefresh={() => void onRefresh()} tintColor={palette.primary} />}
       >
         <View style={styles.page}>
-           <BackControl fallback="/goals" label={t('goalDetail.back')} onPress={requestBack} disabled={mutationPending} />
-          {state.status === 'refresh-error' ? <Banner text={t('goalDetail.stale')} palette={palette} /> : null}
-          {goalWriteUnknown ? <Banner text={t('goalDetail.reserve.unknown')} palette={palette} /> : null}
+          <View style={styles.header}>
+            <BackControl fallback="/goals" label={t('goalDetail.back')} onPress={requestBack} disabled={mutationPending} />
+            {state.status === 'refresh-error' ? <Notice title={t('goalDetail.stale')} /> : null}
+            {goalWriteUnknown ? <Notice tone="warning" title={t('goalDetail.reserve.unknown')} /> : null}
+            <ObjectHeader
+              action={goal.editable ? (
+                <IconButton
+                  accessibilityLabel={mutationPending ? t('goalDetail.archive.archiving') : t('goalDetail.manage')}
+                  disabled={mutationDisabled}
+                  icon="more-vertical"
+                  onPress={() => setSheet('manage')}
+                  style={styles.overflow}
+                />
+              ) : undefined}
+              badge={<Badge label={t(`goals.status.${goal.lifecycleStatus}`)} tone={goalStatusTone(goal.lifecycleStatus)} />}
+              descriptor={goal.description ?? undefined}
+              leading={<EntityMark glyph={goal.isDebt ? 'hand-coins' : 'target'} />}
+              title={goal.name}
+            />
+            {announcement ? <Text accessibilityLiveRegion="polite" tone="success" variant="meta">{announcement}</Text> : null}
+            {archiveFailure ? <Notice tone="destructive" title={t(`goalDetail.writeFailures.${archiveFailure}`)} /> : null}
+          </View>
 
-          <View style={styles.heading}>
-            <View style={styles.titleLine}>
-              <Text accessibilityRole="header" allowFontScaling style={[styles.title, { color: palette.foreground }]}>{goal.name}</Text>
-              <View style={[styles.status, { borderColor: palette.border }]}>
-                <View style={[styles.statusMarker, { backgroundColor: palette.mutedForeground }]} />
-                <Text allowFontScaling style={[styles.statusText, { color: palette.mutedForeground }]}>{t(`goals.status.${goal.status}`)}</Text>
+          <View style={styles.figureBlock}>
+            <HeadlineFigure
+              currency={goal.currencyCode}
+              label={t('goals.available')}
+              locale={locale}
+              size="md"
+              status={progressStatus(goal.status, t)}
+              value={goal.availableAmount}
+            />
+            <View style={styles.figureStats}>
+              <FigureStat label={t('goalDetail.targetAmount')} value={money(goal.targetAmount)} />
+              <FigureStat label={t('goalDetail.progress')} value={progressLabel} />
+              {goal.targetDate ? <FigureStat label={t('goalDetail.targetDateLabel')} value={formatGoalDate(goal.targetDate, locale)} /> : null}
+            </View>
+            <ProgressBar track="border" testID="goal-detail-progress-fill" value={progress ?? 0} />
+            {goal.editable ? (
+              <View style={styles.actionRow}>
+                <Button disabled={mutationDisabled} label={t('goalDetail.assignMoney')} onPress={() => setSheet('assign')} style={styles.flex} />
+                <Button disabled={mutationDisabled} label={t('goalDetail.moveMoneyOut')} onPress={() => setSheet('move-out')} style={styles.flex} variant="secondary" />
               </View>
-            </View>
-            <Text allowFontScaling style={[styles.date, { color: palette.mutedForeground }]}>{t('goalDetail.targetDate', { date })}</Text>
+            ) : null}
           </View>
 
-          <View style={[styles.hero, { borderColor: palette.border, backgroundColor: palette.muted }]}>
-            <Text allowFontScaling style={[styles.label, { color: palette.mutedForeground }]}>{t('goals.available')}</Text>
-            <Text allowFontScaling style={[styles.heroAmount, { color: palette.foreground }]}>{money(goal.availableAmount)}</Text>
-            <Text allowFontScaling style={[styles.target, { color: palette.mutedForeground }]}>{t('goals.ofTarget', { target: money(goal.targetAmount) })}</Text>
-            <View style={[styles.progressTrack, { backgroundColor: palette.card }]}>
-              <View testID="goal-detail-progress-fill" style={[styles.progressFill, { width: `${goal.meterPercentage}%`, backgroundColor: palette.chart1 }]} />
-            </View>
-            <Text allowFontScaling style={[styles.progressText, { color: palette.mutedForeground }]}>
-              {goal.progressAvailable ? t('goals.progressValue', { value: progress }) : progress}{goal.overTarget ? ` · ${t('goals.overTarget')}` : ''}
-            </Text>
-          </View>
+          {goal.isDebt && goal.debtProjection ? (
+            <DebtPayoffSection goal={goal} locale={locale} money={money} />
+          ) : (
+            <Section title={t('goalDetail.monthlyContribution')} variant="open">
+              <View style={styles.figureStats}>
+                <FigureStat label={t('goalDetail.assignedThisMonth')} value={money(goal.assignedThisMonth)} />
+                <FigureStat label={t('goalDetail.neededThisMonth')} value={goal.requiredMonthlyContribution === null ? '—' : money(goal.requiredMonthlyContribution)} />
+                <FigureStat label={t('goalDetail.shortBy')} value={goal.monthlyShortfall === null ? '—' : money(goal.monthlyShortfall)} />
+                {/* Mobile-only figures web leaves off this page, kept after web's three. */}
+                <FigureStat label={t('goals.remaining')} value={money(goal.remainingToTarget)} />
+                <FigureStat label={t('goals.spent')} value={money(goal.spentAmount)} />
+              </View>
+              <Text tone="muted" variant="meta">{t('goalDetail.budgetExplainer')}</Text>
+            </Section>
+          )}
 
-          <View style={styles.metrics}>
-            <Metric label={t('goals.remaining')} value={money(goal.remainingToTarget)} palette={palette} />
-            <Metric label={t('goals.assignedThisMonth')} value={money(goal.assignedThisMonth)} palette={palette} />
-            <Metric label={t('goalDetail.requiredContribution')} value={goal.requiredMonthlyContribution === null ? t('goalDetail.notCalculated') : money(goal.requiredMonthlyContribution)} palette={palette} />
-            <Metric label={t('goalDetail.shortfall')} value={goal.monthlyShortfall === null ? t('goalDetail.notCalculated') : money(goal.monthlyShortfall)} palette={palette} />
-            <Metric label={t('goals.spent')} value={money(goal.spentAmount)} palette={palette} />
-          </View>
+          <ActivitySection state={state} locale={locale} onLoadMore={onLoadMore} onRetry={onRefresh} />
 
-          {goal.editable ? <ReserveEditor goal={goal} locale={locale} pending={mutationPending} disabled={mutationDisabled} isGoalWriteBlocked={isGoalWriteBlocked} onAssign={onAssign} onMoveOut={onMoveOut} palette={palette} /> : null}
-          {goal.editable ? <MetadataEditor goal={goal} pending={mutationPending} disabled={mutationDisabled} onSave={onSaveMetadata} onDirtyChange={setMetadataDirty} palette={palette} /> : null}
-
-          <View style={styles.section}>
-            <Text accessibilityRole="header" allowFontScaling style={[styles.sectionTitle, { color: palette.foreground }]}>{t('goals.linkedAccounts')}</Text>
-            <Text allowFontScaling style={[styles.body, { color: palette.foreground }]}>
-              {goal.linkedAccounts.length > 0
-                ? goal.linkedAccounts.map(({ name }) => name ?? t('goals.unnamedAccount')).join(', ')
-                : t('goals.noLinkedAccounts')}
-            </Text>
-            <Text allowFontScaling style={[styles.note, { color: palette.mutedForeground }]}>{t('goalDetail.accountsContext')}</Text>
-            {goal.editable ? <AccountContextEditor goal={goal} state={accountContext} pending={mutationPending} disabled={mutationDisabled} isGoalWriteBlocked={isGoalWriteBlocked} onLink={onLinkAccount} onUnlink={onUnlinkAccount} palette={palette} /> : null}
-          </View>
-
-          {goal.editable ? <ArchiveSection goal={goal} pending={mutationPending} disabled={mutationDisabled} isGoalWriteBlocked={isGoalWriteBlocked} onArchive={onArchive} palette={palette} /> : null}
-
-          <ActivitySection state={state} locale={locale} palette={palette} onLoadMore={onLoadMore} onRetry={onRefresh} />
+          <Section title={t('goalDetail.linkedAccount')} variant="open">
+            <Text tone="muted" variant="meta">{t('goalDetail.accountContextNote')}</Text>
+            {goal.editable ? (
+              <AccountContextEditor goal={goal} state={accountContext} pending={mutationPending} disabled={mutationDisabled} isGoalWriteBlocked={isGoalWriteBlocked} onLink={onLinkAccount} onUnlink={onUnlinkAccount} />
+            ) : (
+              <Text variant="meta">
+                {goal.linkedAccounts.length > 0
+                  ? goal.linkedAccounts.map(({ name }) => name ?? t('goals.unnamedAccount')).join(', ')
+                  : t('goals.noLinkedAccounts')}
+              </Text>
+            )}
+          </Section>
         </View>
       </ScrollView>
+
+      {goal.editable ? (
+        <>
+          <Sheet closeLabel={t('common.cancel')} visible={sheet === 'assign' || sheet === 'move-out'} onClose={() => setSheet(null)} title={t(sheet === 'move-out' ? 'goalDetail.moveOutTitle' : 'goalDetail.assignTitle')}>
+            {sheet === 'assign' || sheet === 'move-out' ? (
+              <ReserveEditor
+                action={sheet}
+                goal={goal}
+                locale={locale}
+                pending={mutationPending}
+                disabled={mutationDisabled}
+                isGoalWriteBlocked={isGoalWriteBlocked}
+                onAssign={onAssign}
+                onMoveOut={onMoveOut}
+                onCancel={() => setSheet(null)}
+                onSuccess={(message) => { setAnnouncement(message); setSheet(null) }}
+              />
+            ) : null}
+          </Sheet>
+          <Sheet closeLabel={t('common.cancel')} visible={sheet === 'edit'} onClose={() => setSheet(null)} title={t('goalDetail.editTitle')}>
+            {sheet === 'edit' ? (
+              <MetadataEditor
+                goal={goal}
+                pending={mutationPending}
+                disabled={mutationDisabled}
+                onSave={async (value) => { await onSaveMetadata(value); setSheet(null) }}
+                onDirtyChange={setMetadataDirty}
+                onCancel={() => setSheet(null)}
+              />
+            ) : null}
+          </Sheet>
+          <Sheet closeLabel={t('common.cancel')} visible={sheet === 'manage'} onClose={() => setSheet(null)} title={t('goalDetail.manage')}>
+            <View>
+              <MenuItem icon="pencil" label={t('goalDetail.edit')} onPress={() => setSheet('edit')} disabled={mutationDisabled} />
+              <Divider />
+              <MenuItem destructive label={t('goalDetail.archive.action')} onPress={archive} disabled={mutationDisabled} />
+            </View>
+          </Sheet>
+        </>
+      ) : null}
     </SafeAreaView>
   )
 }
 
-function parseMoneyInput(value: string): number | null {
-  const normalized = value.trim().replace(',', '.')
-  if (!/^\d+(?:\.\d{1,4})?$/.test(normalized)) return null
-  const parsed = Number(normalized)
-  return Number.isFinite(parsed) && parsed > 0 ? parsed : null
+/** How the goal is doing, as the figure's status line: only where it says more than the chip. */
+function progressStatus(status: GoalDetailViewModel['status'], t: (key: string) => string): { label: string; tone: 'success' | 'warning' } | undefined {
+  if (status === 'on-track' || status === 'funded') return { label: t(`goals.status.${status}`), tone: 'success' }
+  if (status === 'behind') return { label: t('goals.status.behind'), tone: 'warning' }
+  return undefined
 }
 
-type ReserveAction = 'assign' | 'move-out'
-type ReserveFailure = GoalWriteFailure | 'validation' | 'insufficient-reserve'
+function formatPercent(value: number, locale: string) {
+  return new Intl.NumberFormat(locale, { style: 'percent', maximumFractionDigits: 0 }).format(value / 100)
+}
+
+function formatMonths(months: number, t: (key: string, values?: Record<string, unknown>) => string) {
+  const years = Math.floor(months / 12)
+  const remaining = months % 12
+  const parts: string[] = []
+  if (years > 0) parts.push(t('goals.debtStrategy.years', { count: years }))
+  if (remaining > 0 || years === 0) parts.push(t('goals.debtStrategy.months', { count: remaining }))
+  return parts.join(' ')
+}
+
+/** Web `DebtPayoffPanel`: the payoff plan's four figures (the balance chart is web-only for now). */
+function DebtPayoffSection({ goal, locale, money }: { goal: GoalDetailViewModel; locale: string; money: (value: number) => string }) {
+  const { t } = useTranslation()
+  const projection = goal.debtProjection!
+  const apr = goal.annualInterestRateBps === null
+    ? undefined
+    : `${new Intl.NumberFormat(locale, { style: 'percent', maximumFractionDigits: 2 }).format(goal.annualInterestRateBps / 10000)} ${t('goalDetail.apr')}`
+  return (
+    <Section aside={apr} title={t('goalDetail.payoffPlan')} variant="open">
+      {!projection.paysOff ? <Notice tone="destructive" title={t('goalDetail.neverPaysOffHint')} /> : null}
+      <View style={styles.figureStats}>
+        <FigureStat label={t('goalDetail.payoffDate')} value={projection.paysOff && projection.payoffDate ? formatGoalDate(projection.payoffDate, locale) : t('goalDetail.never')} />
+        <FigureStat label={t('goals.debtStrategy.timeToPayoff')} value={projection.paysOff && projection.months !== null ? formatMonths(projection.months, t) : '—'} />
+        <FigureStat label={t('goals.debtStrategy.totalInterest')} value={money(projection.totalInterest)} />
+        <FigureStat label={t('goalDetail.monthlyPayment')} value={money(projection.monthlyPayment)} />
+      </View>
+    </Section>
+  )
+}
 
 function classifyReserveFailure(error: unknown, action: ReserveAction): ReserveFailure {
   if (error instanceof ApiError && error.code === 'http' && error.status === 400) {
@@ -181,7 +324,8 @@ function classifyReserveFailure(error: unknown, action: ReserveAction): ReserveF
   return classifyGoalWriteFailure(error)
 }
 
-function ReserveEditor({ goal, locale, pending, disabled, isGoalWriteBlocked, onAssign, onMoveOut, palette }: {
+function ReserveEditor({ action, goal, locale, pending, disabled, isGoalWriteBlocked, onAssign, onMoveOut, onCancel, onSuccess }: {
+  action: ReserveAction
   goal: GoalDetailViewModel
   locale: string
   pending: boolean
@@ -189,21 +333,22 @@ function ReserveEditor({ goal, locale, pending, disabled, isGoalWriteBlocked, on
   isGoalWriteBlocked: GoalDetailScreenProps['isGoalWriteBlocked']
   onAssign: GoalDetailScreenProps['onAssign']
   onMoveOut: GoalDetailScreenProps['onMoveOut']
-  palette: Palette
+  onCancel: () => void
+  onSuccess: (announcement: string) => void
 }) {
+  const formatMoney = useFormatMoney()
   const { t } = useTranslation()
   const [amountInput, setAmountInput] = useState('')
   const [confirming, setConfirming] = useState(false)
   const [failure, setFailure] = useState<ReserveFailure | null>(null)
-  const [announcement, setAnnouncement] = useState('')
 
-  const requestConfirmation = (action: ReserveAction) => {
+  const requestConfirmation = () => {
     if (disabled || confirming) return
     const amount = parseLocalizedGoalMoney(amountInput, locale)
     if (amount === null) { setFailure('validation'); return }
     if (action === 'move-out' && amount > goal.availableAmount) { setFailure('insufficient-reserve'); return }
     const frozen = { action, amount }
-    const formattedAmount = formatCurrency(frozen.amount, { locale, currency: goal.currencyCode })
+    const formattedAmount = formatMoney(frozen.amount, { locale, currency: goal.currencyCode })
     setFailure(null)
     setConfirming(true)
     Alert.alert(
@@ -217,7 +362,7 @@ function ReserveEditor({ goal, locale, pending, disabled, isGoalWriteBlocked, on
           void write(frozen.amount).then(() => {
             setAmountInput('')
             setFailure(null)
-            setAnnouncement(t(`goalDetail.reserve.success.${frozen.action}`, { amount: formattedAmount, goal: goal.name }))
+            onSuccess(t(`goalDetail.reserve.success.${frozen.action}`, { amount: formattedAmount, goal: goal.name }))
           }).catch((error) => setFailure(classifyReserveFailure(error, frozen.action))).finally(() => setConfirming(false))
         } },
       ],
@@ -225,44 +370,40 @@ function ReserveEditor({ goal, locale, pending, disabled, isGoalWriteBlocked, on
     )
   }
 
-  return <View style={[styles.editor, { borderColor: palette.border, backgroundColor: palette.card }]}>
-    <Text accessibilityRole="header" style={[styles.sectionTitle, { color: palette.foreground }]}>{t('goalDetail.reserve.title')}</Text>
-    <Text style={[styles.note, { color: palette.mutedForeground }]}>{t('goalDetail.reserve.helper')}</Text>
-    {failure ? <Text accessibilityRole="alert" style={[styles.notice, { borderColor: palette.destructive, color: palette.foreground }]}>{t(`goalDetail.reserve.failures.${failure}`)}</Text> : null}
-    <Field label={t('goalDetail.reserve.amount')} hint={t('goalDetail.reserve.amountHint', { currency: goal.currencyCode })} value={amountInput} onChange={(value) => { setAmountInput(value); setFailure(null); setAnnouncement('') }} editable={!disabled && !confirming} money palette={palette} />
-    <View style={styles.inlineActions}>
-      <Button
-        disabled={disabled || confirming || amountInput.trim() === ''}
-        label={pending ? t('goalDetail.reserve.working') : t('goalDetail.reserve.assign')}
-        onPress={() => requestConfirmation('assign')}
-        palette={palette}
-        variant="primary"
-      />
-      <Button
-        disabled={disabled || confirming || amountInput.trim() === ''}
-        label={t('goalDetail.reserve.move-out')}
-        onPress={() => requestConfirmation('move-out')}
-        palette={palette}
-        variant="secondary"
-      />
+  return (
+    <View style={styles.form}>
+      <Text tone="muted" variant="meta">{t('goalDetail.reserve.helper')}</Text>
+      {action === 'move-out' ? <FigureStat label={t('goals.available')} value={formatMoney(goal.availableAmount, { locale, currency: goal.currencyCode })} /> : null}
+      {failure ? <Notice tone="destructive" title={t(`goalDetail.reserve.failures.${failure}`)} /> : null}
+      <Field label={t('goalDetail.reserve.amount')} hint={t('goalDetail.reserve.amountHint', { currency: goal.currencyCode })} value={amountInput} onChange={(value) => { setAmountInput(value); setFailure(null) }} editable={!disabled && !confirming} money invalid={failure === 'validation' || failure === 'insufficient-reserve'} />
+      <View style={styles.formActions}>
+        <Button
+          block
+          disabled={disabled || confirming || amountInput.trim() === ''}
+          label={pending ? t('goalDetail.reserve.working') : t(`goalDetail.reserve.${action}`)}
+          onPress={requestConfirmation}
+        />
+        <Button block label={t('common.cancel')} onPress={onCancel} variant="secondary" disabled={confirming} />
+      </View>
     </View>
-    {announcement ? <Text accessibilityLiveRegion="polite" style={[styles.note, { color: palette.foreground }]}>{announcement}</Text> : null}
-  </View>
+  )
 }
 
-function MetadataEditor({ goal, pending, disabled, onSave, onDirtyChange, palette }: { goal: GoalDetailViewModel; pending: boolean; disabled: boolean; onSave: GoalDetailScreenProps['onSaveMetadata']; onDirtyChange: (dirty: boolean) => void; palette: Palette }) {
-  const { t } = useTranslation()
+function MetadataEditor({ goal, pending, disabled, onSave, onDirtyChange, onCancel }: { goal: GoalDetailViewModel; pending: boolean; disabled: boolean; onSave: GoalDetailScreenProps['onSaveMetadata']; onDirtyChange: (dirty: boolean) => void; onCancel: () => void }) {
+  const { t, i18n } = useTranslation()
+  const locale = i18n.resolvedLanguage ?? i18n.language ?? 'en'
+  const inputOf = useCallback((value: number) => formatNumberInput(value, locale), [locale])
   const [name, setName] = useState(goal.name)
-  const [target, setTarget] = useState(String(goal.targetAmount))
-  const [monthly, setMonthly] = useState(goal.monthlyContributionTarget === null ? '' : String(goal.monthlyContributionTarget))
+  const [target, setTarget] = useState(inputOf(goal.targetAmount))
+  const [monthly, setMonthly] = useState(goal.monthlyContributionTarget === null ? '' : inputOf(goal.monthlyContributionTarget))
   const [failure, setFailure] = useState<GoalWriteFailure | 'validation' | null>(null)
   const authoritativeSignature = `${goal.name}\u0000${goal.targetAmount}\u0000${goal.monthlyContributionTarget ?? ''}`
   const previousAuthoritativeSignature = useRef(authoritativeSignature)
-  const canonicalTarget = String(goal.targetAmount)
-  const canonicalMonthly = goal.monthlyContributionTarget === null ? '' : String(goal.monthlyContributionTarget)
+  const canonicalTarget = inputOf(goal.targetAmount)
+  const canonicalMonthly = goal.monthlyContributionTarget === null ? '' : inputOf(goal.monthlyContributionTarget)
   const trimmedName = name.trim()
-  const candidateTarget = parseMoneyInput(target)
-  const candidateMonthly = monthly.trim() === '' ? null : parseMoneyInput(monthly)
+  const candidateTarget = parseLocalizedGoalMoney(target, locale)
+  const candidateMonthly = monthly.trim() === '' ? null : parseLocalizedGoalMoney(monthly, locale)
   const invalid = trimmedName.length < 1 || trimmedName.length > 100 || candidateTarget === null || (monthly.trim() !== '' && candidateMonthly === null)
   const candidate = invalid ? null : {
     name: trimmedName,
@@ -279,25 +420,28 @@ function MetadataEditor({ goal, pending, disabled, onSave, onDirtyChange, palett
     if (previousAuthoritativeSignature.current === authoritativeSignature) return
     previousAuthoritativeSignature.current = authoritativeSignature
     setName(goal.name)
-    setTarget(String(goal.targetAmount))
-    setMonthly(goal.monthlyContributionTarget === null ? '' : String(goal.monthlyContributionTarget))
+    setTarget(inputOf(goal.targetAmount))
+    setMonthly(goal.monthlyContributionTarget === null ? '' : inputOf(goal.monthlyContributionTarget))
     setFailure(null)
-  }, [authoritativeSignature, goal.monthlyContributionTarget, goal.name, goal.targetAmount])
+  }, [authoritativeSignature, goal.monthlyContributionTarget, goal.name, goal.targetAmount, inputOf])
 
   const discard = useCallback(() => {
-    setName(goal.name); setTarget(String(goal.targetAmount)); setMonthly(goal.monthlyContributionTarget === null ? '' : String(goal.monthlyContributionTarget)); setFailure(null)
-  }, [goal.monthlyContributionTarget, goal.name, goal.targetAmount])
+    setName(goal.name); setTarget(inputOf(goal.targetAmount)); setMonthly(goal.monthlyContributionTarget === null ? '' : inputOf(goal.monthlyContributionTarget)); setFailure(null)
+  }, [goal.monthlyContributionTarget, goal.name, goal.targetAmount, inputOf])
+  const confirmDiscard = useCallback((then?: () => void) => {
+    Alert.alert(t('goalDetail.editor.discardTitle'), t('goalDetail.editor.discardMessage'), [
+      { text: t('common.cancel'), style: 'cancel' },
+      { text: t('goalDetail.editor.discard'), style: 'destructive', onPress: () => { discard(); then?.() } },
+    ])
+  }, [discard, t])
   useEffect(() => {
     const subscription = BackHandler.addEventListener('hardwareBackPress', () => {
       if (!dirty || disabled) return false
-      Alert.alert(t('goalDetail.editor.discardTitle'), t('goalDetail.editor.discardMessage'), [
-        { text: t('common.cancel'), style: 'cancel' },
-        { text: t('goalDetail.editor.discard'), style: 'destructive', onPress: discard },
-      ])
+      confirmDiscard()
       return true
     })
     return () => subscription.remove()
-  }, [dirty, discard, disabled, t])
+  }, [confirmDiscard, dirty, disabled])
 
   const save = async () => {
     if (disabled || !rawChanged) return
@@ -308,23 +452,53 @@ function MetadataEditor({ goal, pending, disabled, onSave, onDirtyChange, palett
     try { await onSave(changes) } catch (error) { setFailure(classifyGoalWriteFailure(error)) }
   }
 
-  return <View style={[styles.editor, { borderColor: palette.border, backgroundColor: palette.card }]}>
-    <Text accessibilityRole="header" style={[styles.sectionTitle, { color: palette.foreground }]}>{t('goalDetail.editor.title')}</Text>
-    <Text style={[styles.note, { color: palette.mutedForeground }]}>{t('goalDetail.editor.helper')}</Text>
-    {failure ? <Text accessibilityRole="alert" style={[styles.notice, { borderColor: palette.destructive, color: palette.foreground }]}>{t(`goalDetail.writeFailures.${failure}`)}</Text> : null}
-    <Field label={t('goalDetail.editor.name')} value={name} onChange={(value) => { setName(value); setFailure(null) }} editable={!disabled} maxLength={100} palette={palette} />
-    <Field label={t('goalDetail.editor.target')} value={target} onChange={(value) => { setTarget(value); setFailure(null) }} editable={!disabled} money palette={palette} />
-    <Field label={t('goalDetail.editor.monthly')} hint={t('goalDetail.editor.monthlyHint')} value={monthly} onChange={(value) => { setMonthly(value); setFailure(null) }} editable={!disabled} money palette={palette} />
-    <View style={styles.inlineActions}><Action label={pending ? t('goalDetail.editor.saving') : t('goalDetail.editor.save')} onPress={save} palette={palette} primary disabled={!saveEnabled} /><Action label={t('goalDetail.editor.discard')} onPress={discard} palette={palette} disabled={!dirty || disabled} /></View>
-  </View>
+  return (
+    <View style={styles.form}>
+      <Text tone="muted" variant="meta">{t('goalDetail.editor.helper')}</Text>
+      {failure ? <Notice tone="destructive" title={t(`goalDetail.writeFailures.${failure}`)} /> : null}
+      <Field label={t('goalDetail.editor.name')} value={name} onChange={(value) => { setName(value); setFailure(null) }} editable={!disabled} maxLength={100} />
+      <Field label={t('goalDetail.editor.target')} value={target} onChange={(value) => { setTarget(value); setFailure(null) }} editable={!disabled} money invalid={failure === 'validation' && candidateTarget === null} />
+      <Field label={t('goalDetail.editor.monthly')} hint={t('goalDetail.editor.monthlyHint')} value={monthly} onChange={(value) => { setMonthly(value); setFailure(null) }} editable={!disabled} money />
+      <View style={styles.formActions}>
+        <Button block disabled={!saveEnabled} label={pending ? t('goalDetail.editor.saving') : t('goalDetail.editor.save')} loading={pending} onPress={save} />
+        <Button block label={t('common.cancel')} onPress={() => (dirty ? confirmDiscard(onCancel) : onCancel())} variant="secondary" />
+      </View>
+    </View>
+  )
 }
 
-function Field({ label, hint, value, onChange, editable, money = false, maxLength, palette }: { label: string; hint?: string; value: string; onChange: (value: string) => void; editable: boolean; money?: boolean; maxLength?: number; palette: Palette }) {
-  return <View style={styles.field}><Text style={[styles.fieldLabel, { color: palette.foreground }]}>{label}</Text><TextInput accessibilityLabel={label} accessibilityHint={hint} editable={editable} keyboardType={money ? 'decimal-pad' : 'default'} maxLength={maxLength} value={value} onChangeText={onChange} style={[styles.input, money && styles.moneyInput, { color: palette.foreground, borderColor: palette.border, backgroundColor: palette.background }]} />{hint ? <Text style={[styles.note, { color: palette.mutedForeground }]}>{hint}</Text> : null}</View>
+function Field({ label, hint, value, onChange, editable, money = false, maxLength, invalid = false }: { label: string; hint?: string; value: string; onChange: (value: string) => void; editable: boolean; money?: boolean; maxLength?: number; invalid?: boolean }) {
+  const palette = usePalette()
+  const [focused, setFocused] = useState(false)
+  return (
+    <View style={styles.field}>
+      <Text variant="metaStrong">{label}</Text>
+      <TextInput
+        accessibilityHint={hint}
+        accessibilityLabel={label}
+        editable={editable}
+        keyboardType={money ? 'decimal-pad' : 'default'}
+        maxLength={maxLength}
+        onBlur={() => setFocused(false)}
+        onChangeText={onChange}
+        onFocus={() => setFocused(true)}
+        placeholderTextColor={palette.mutedForeground}
+        style={[
+          styles.input,
+          money && styles.moneyInput,
+          { color: palette.foreground, borderColor: invalid ? palette.destructiveText : focused ? palette.ring : palette.input, borderWidth: focused || invalid ? 2 : 1 },
+          !editable && styles.inert,
+        ]}
+        value={value}
+      />
+      {hint ? <Text tone="muted" variant="label">{hint}</Text> : null}
+    </View>
+  )
 }
 
-function AccountContextEditor({ goal, state, pending, disabled, isGoalWriteBlocked, onLink, onUnlink, palette }: { goal: GoalDetailViewModel; state: GoalAccountContextState; pending: boolean; disabled: boolean; isGoalWriteBlocked: GoalDetailScreenProps['isGoalWriteBlocked']; onLink: GoalDetailScreenProps['onLinkAccount']; onUnlink: GoalDetailScreenProps['onUnlinkAccount']; palette: Palette }) {
+function AccountContextEditor({ goal, state, pending, disabled, isGoalWriteBlocked, onLink, onUnlink }: { goal: GoalDetailViewModel; state: GoalAccountContextState; pending: boolean; disabled: boolean; isGoalWriteBlocked: GoalDetailScreenProps['isGoalWriteBlocked']; onLink: GoalDetailScreenProps['onLinkAccount']; onUnlink: GoalDetailScreenProps['onUnlinkAccount'] }) {
   const { t } = useTranslation()
+  const palette = usePalette()
   const linkedIds = useMemo(() => new Set(goal.linkedAccounts.map(({ accountId }) => accountId)), [goal.linkedAccounts])
   const available = state.accounts.filter(({ accountId }) => accountId > 0 && !linkedIds.has(accountId))
   const [selected, setSelected] = useState<number | null>(null)
@@ -343,138 +517,227 @@ function AccountContextEditor({ goal, state, pending, disabled, isGoalWriteBlock
     } }],
   )
 
-  return <View style={[styles.accountEditor, { borderColor: palette.border }]}>
-    {failure ? <Text accessibilityRole="alert" style={[styles.notice, { borderColor: palette.destructive, color: palette.foreground }]}>{t(`goalDetail.writeFailures.${failure}`)}</Text> : null}
-    {goal.linkedAccounts.map((account) => <View key={account.accountId} style={styles.accountRow}><Text style={[styles.body, { color: palette.foreground }]}>{account.name ?? t('goals.unnamedAccount')}</Text><Action label={t('goalDetail.accounts.unlinkNamed', { account: account.name ?? t('goals.unnamedAccount') })} onPress={() => confirmUnlink(account)} palette={palette} disabled={disabled} /></View>)}
-    {state.status === 'loading' ? <Text accessibilityRole="progressbar" style={[styles.note, { color: palette.mutedForeground }]}>{t('goalDetail.accounts.loading')}</Text> : null}
-    {state.status === 'error' || state.status === 'invalid-response' ? <Text accessibilityRole="alert" style={[styles.note, { color: palette.mutedForeground }]}>{t(`goalDetail.accounts.${state.status}`)}</Text> : null}
-    {state.status === 'loaded' && available.length === 0 ? <Text style={[styles.note, { color: palette.mutedForeground }]}>{t('goalDetail.accounts.noneAvailable')}</Text> : null}
-    {available.map((account) => <Pressable key={account.accountId} accessible accessibilityRole="radio" accessibilityLabel={account.name ?? t('goals.unnamedAccount')} accessibilityState={{ selected: selected === account.accountId, disabled }} disabled={disabled} onPress={() => setSelected(account.accountId)} style={[styles.accountChoice, { borderColor: selected === account.accountId ? palette.primary : palette.border, backgroundColor: selected === account.accountId ? palette.primarySoft : palette.background }]}><Text style={[styles.body, { color: palette.foreground }]}>{account.name ?? t('goals.unnamedAccount')}</Text></Pressable>)}
-    {available.length > 0 ? <Action label={pending ? t('goalDetail.accounts.linking') : t('goalDetail.accounts.link')} onPress={link} palette={palette} primary disabled={selected === null || disabled} /> : null}
-  </View>
-}
-
-function ArchiveSection({ goal, pending, disabled, isGoalWriteBlocked, onArchive, palette }: { goal: GoalDetailViewModel; pending: boolean; disabled: boolean; isGoalWriteBlocked: GoalDetailScreenProps['isGoalWriteBlocked']; onArchive: GoalDetailScreenProps['onArchive']; palette: Palette }) {
-  const { t } = useTranslation()
-  const [failure, setFailure] = useState<GoalWriteFailure | null>(null)
-  const hasBalance = goal.availableAmount > 0
-
-  const archive = () => {
-    if (disabled || isGoalWriteBlocked()) return
-    if (hasBalance) {
-      Alert.alert(t('goalDetail.archive.balanceTitle'), t('goalDetail.archive.balanceMessage'))
-      return
-    }
-    Alert.alert(t('goalDetail.archive.confirmTitle'), t('goalDetail.archive.confirmMessage'), [
-      { text: t('common.cancel'), style: 'cancel' },
-      {
-        text: t('goalDetail.archive.confirm'),
-        style: 'destructive',
-        onPress: () => {
-          setFailure(null)
-          void onArchive().catch((error) => setFailure(classifyGoalWriteFailure(error)))
-        },
-      },
-    ])
-  }
-
   return (
-    <View style={[styles.section, styles.archiveSection, { borderColor: palette.destructive }]}>
-      <Text accessibilityRole="header" allowFontScaling style={[styles.sectionTitle, { color: palette.foreground }]}>{t('goalDetail.archive.title')}</Text>
-      <Text allowFontScaling style={[styles.note, { color: palette.mutedForeground }]}>{t('goalDetail.archive.helper')}</Text>
-      {failure ? <Text accessibilityRole="alert" style={[styles.notice, { borderColor: palette.destructive, color: palette.foreground }]}>{t(`goalDetail.writeFailures.${failure}`)}</Text> : null}
-      <Action label={pending ? t('goalDetail.archive.archiving') : t('goalDetail.archive.action')} onPress={archive} palette={palette} disabled={disabled} />
+    <View style={styles.accounts}>
+      {failure ? <Notice tone="destructive" title={t(`goalDetail.writeFailures.${failure}`)} /> : null}
+      {goal.linkedAccounts.length > 0 ? (
+        <Card>
+          {goal.linkedAccounts.map((account, index) => (
+            <View key={account.accountId}>
+              {index > 0 ? <Divider style={styles.cardDivider} /> : null}
+              <View style={styles.accountRow}>
+                <Text style={styles.shrink} variant="meta">{account.name ?? t('goals.unnamedAccount')}</Text>
+                <Button
+                  accessibilityLabel={t('goalDetail.accounts.unlinkNamed', { account: account.name ?? t('goals.unnamedAccount') })}
+                  disabled={disabled}
+                  label={t('goalDetail.accounts.unlink')}
+                  onPress={() => confirmUnlink(account)}
+                  size="sm"
+                  variant="ghost"
+                />
+              </View>
+            </View>
+          ))}
+        </Card>
+      ) : null}
+      {state.status === 'loading' ? <Text accessibilityRole="progressbar" tone="muted" variant="meta">{t('goalDetail.accounts.loading')}</Text> : null}
+      {state.status === 'error' || state.status === 'invalid-response' ? <Text accessibilityRole="alert" tone="muted" variant="meta">{t(`goalDetail.accounts.${state.status}`)}</Text> : null}
+      {state.status === 'loaded' && available.length === 0 && goal.linkedAccounts.length === 0 ? <Text tone="muted" variant="meta">{t('goalDetail.accounts.noneAvailable')}</Text> : null}
+      {available.length > 0 ? (
+        <View style={[styles.choices, { borderColor: palette.input }]}>
+          {available.map((account, index) => {
+            const isSelected = selected === account.accountId
+            return (
+              <Pressable
+                key={account.accountId}
+                accessible
+                accessibilityLabel={account.name ?? t('goals.unnamedAccount')}
+                accessibilityRole="radio"
+                accessibilityState={{ selected: isSelected, disabled }}
+                disabled={disabled}
+                onPress={() => setSelected(account.accountId)}
+                style={({ pressed }) => [
+                  styles.choice,
+                  index > 0 && { borderTopWidth: 1, borderTopColor: palette.border },
+                  isSelected && { backgroundColor: palette.primarySoft },
+                  pressed && { backgroundColor: palette.muted },
+                ]}
+              >
+                <Text style={styles.shrink} variant="meta">{account.name ?? t('goals.unnamedAccount')}</Text>
+                {isSelected ? <Icon color={palette.primary} name="check" size={themeTokens.size.iconSmall} /> : null}
+              </Pressable>
+            )
+          })}
+        </View>
+      ) : null}
+      {available.length > 0 ? (
+        <Button block disabled={selected === null || disabled} icon="link" label={pending ? t('goalDetail.accounts.linking') : t('goalDetail.accounts.link')} onPress={link} />
+      ) : null}
     </View>
   )
 }
 
-function ActivitySection({ state, locale, palette, onLoadMore, onRetry }: {
+/** Web `GoalActivityList` on its `Timeline`: a rail, one node per event, the newest filled. */
+function ActivitySection({ state, locale, onLoadMore, onRetry }: {
   state: LoadedState
   locale: string
-  palette: Palette
   onLoadMore: GoalDetailScreenProps['onLoadMore']
   onRetry: GoalDetailScreenProps['onRefresh']
 }) {
   const { t } = useTranslation()
+  const loaded = state.activityStatus === 'loaded'
   return (
-    <View style={styles.section}>
-      <View style={styles.sectionHeading}>
-        <Text accessibilityRole="header" allowFontScaling style={[styles.sectionTitle, { color: palette.foreground }]}>{t('goalDetail.activity')}</Text>
-        {state.activityStatus === 'loaded' ? <Text allowFontScaling style={[styles.count, { color: palette.mutedForeground }]}>{t('goalDetail.activityCount', { loaded: state.data.activities.length, total: state.data.totalActivities })}</Text> : null}
-      </View>
-      {state.activityStatus === 'loading' ? <Text accessibilityRole="progressbar" accessibilityLabel={t('goalDetail.activityLoading')} allowFontScaling style={[styles.empty, { color: palette.mutedForeground, borderColor: palette.border }]}>{t('goalDetail.activityLoading')}</Text> : null}
+    <Section
+      aside={loaded && state.data.totalActivities > 0 ? t('goalDetail.activityCount', { loaded: state.data.activities.length, total: state.data.totalActivities }) : undefined}
+      title={t('goalDetail.activity')}
+      variant="open"
+    >
+      {state.activityStatus === 'loading' ? <Text accessibilityLabel={t('goalDetail.activityLoading')} accessibilityRole="progressbar" tone="muted" variant="meta">{t('goalDetail.activityLoading')}</Text> : null}
       {state.activityStatus === 'error' ? (
-        <View style={[styles.empty, { borderColor: palette.border }]}>
-          <Text accessibilityRole="alert" allowFontScaling style={[styles.body, { color: palette.foreground }]}>{t('goalDetail.activityError')}</Text>
-          <Action label={t('common.retry')} onPress={onRetry} palette={palette} />
+        <View style={styles.activityError}>
+          <Text accessibilityRole="alert" tone="muted" variant="meta">{t('goalDetail.activityError')}</Text>
+          <Button label={t('common.retry')} onPress={onRetry} size="sm" variant="secondary" style={styles.hug} />
         </View>
       ) : null}
-      {state.activityStatus === 'loaded' && state.data.activities.length === 0 ? <Text allowFontScaling style={[styles.empty, { color: palette.mutedForeground, borderColor: palette.border }]}>{t('goalDetail.activityEmpty')}</Text> : null}
-      {state.activityStatus === 'loaded' && state.data.activities.length > 0 ? (
-        <View style={[styles.activityList, { borderColor: palette.border }]}>
-          {state.data.activities.map((activity) => <ActivityRow key={activity.id} activity={activity} locale={locale} palette={palette} />)}
+      {loaded && state.data.activities.length === 0 ? <Text tone="muted" variant="meta">{t('goalDetail.activityEmpty')}</Text> : null}
+      {loaded && state.data.activities.length > 0 ? (
+        <View>
+          {state.data.activities.map((activity, index) => (
+            <ActivityRow key={activity.id} activity={activity} emphasis={index === 0} last={index === state.data.activities.length - 1} locale={locale} />
+          ))}
         </View>
       ) : null}
-      {state.loadMoreError ? <Text accessibilityRole="alert" allowFontScaling style={[styles.note, { color: palette.destructive }]}>{t('goalDetail.loadMoreError')}</Text> : null}
-      {state.hasMore ? <Action label={state.loadingMore ? t('goalDetail.loadingMore') : t('goalDetail.loadMore')} onPress={onLoadMore} palette={palette} disabled={state.loadingMore} /> : null}
-    </View>
+      {state.loadMoreError ? <Text accessibilityRole="alert" tone="destructive" variant="meta">{t('goalDetail.loadMoreError')}</Text> : null}
+      {state.hasMore ? <Button disabled={state.loadingMore} label={state.loadingMore ? t('goalDetail.loadingMore') : t('goalDetail.loadMore')} onPress={async () => { await onLoadMore() }} style={styles.loadMore} variant="secondary" /> : null}
+    </Section>
   )
 }
 
-function ActivityRow({ activity, locale, palette }: { activity: GoalActivityViewModel; locale: string; palette: Palette }) {
+function ActivityRow({ activity, emphasis, last, locale }: { activity: GoalActivityViewModel; emphasis: boolean; last: boolean; locale: string }) {
+  const formatMoney = useFormatMoney()
   const { t } = useTranslation()
-  const date = new Intl.DateTimeFormat(locale, { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(activity.occurredAt))
-  const amount = activity.amount === null ? null : formatCurrency(activity.amount, { locale, currency: activity.currencyCode })
+  const palette = usePalette()
+  const date = formatGoalDate(activity.occurredAt, locale)
+  const amount = activity.amount === null ? null : formatMoney(activity.amount, { locale, currency: activity.currencyCode })
+  const title = t(`goalDetail.activityType.${activity.type}`)
   // Said in words, not colour alone. There is no reversal action in the app yet, so this only warns.
   const expiredWarning = activity.transactionExpired ? t('goalDetail.transactionExpired') : null
   return (
-    <View testID="goal-activity-row" accessible accessibilityLabel={[t(`goalDetail.activityType.${activity.type}`), date, amount, activity.note, expiredWarning].filter(Boolean).join(', ')} style={[styles.activityRow, { borderBottomColor: palette.border }]}>
-      <View style={styles.activityIdentity}>
-        <Text allowFontScaling style={[styles.activityType, { color: palette.foreground }]}>{t(`goalDetail.activityType.${activity.type}`)}</Text>
-        <Text allowFontScaling style={[styles.note, { color: palette.mutedForeground }]}>{date}</Text>
-        {activity.note ? <Text allowFontScaling style={[styles.note, { color: palette.mutedForeground }]}>{activity.note}</Text> : null}
-        {expiredWarning ? <Text allowFontScaling style={[styles.note, { color: palette.warningText }]}>{expiredWarning}</Text> : null}
+    <View testID="goal-activity-row" accessible accessibilityLabel={[title, date, amount, activity.note, expiredWarning].filter(Boolean).join(', ')} style={[styles.timelineItem, !last && styles.timelineGap]}>
+      <View style={styles.rail}>
+        <View style={[styles.node, { backgroundColor: emphasis ? palette.primary : palette.border }]} />
+        {!last ? <View style={[styles.railLine, { backgroundColor: palette.border }]} /> : null}
       </View>
-      {amount ? <Text allowFontScaling style={[styles.activityAmount, { color: palette.foreground }]}>{amount}</Text> : null}
+      <View style={styles.timelineBody}>
+        <View style={styles.shrink}>
+          <Text variant="metaStrong">{title}</Text>
+          {activity.note ? <Text tone="muted" variant="label">{activity.note}</Text> : null}
+          {expiredWarning ? (
+            <View style={styles.expired}>
+              <Icon color={palette.warningText} name="circle-help" size={12} />
+              <Text style={styles.shrink} tone="warning" variant="label">{expiredWarning}</Text>
+            </View>
+          ) : null}
+          <Text tone="muted" variant="label">{date}</Text>
+        </View>
+        {amount ? <Text variant="amount">{amount}</Text> : null}
+      </View>
     </View>
   )
 }
 
-function Metric({ label, value, palette }: { label: string; value: string; palette: Palette }) {
-  return <View accessible accessibilityLabel={`${label}, ${value}`} style={[styles.metric, { borderColor: palette.border, backgroundColor: palette.card }]}><Text allowFontScaling style={[styles.label, { color: palette.mutedForeground }]}>{label}</Text><Text allowFontScaling style={[styles.metricValue, { color: palette.foreground }]}>{value}</Text></View>
+function MenuItem({ icon, label, onPress, destructive = false, disabled = false }: { icon?: IconName; label: string; onPress: () => void; destructive?: boolean; disabled?: boolean }) {
+  const palette = usePalette()
+  const color = destructive ? palette.destructiveText : palette.foreground
+  return (
+    <Pressable
+      accessibilityLabel={label}
+      accessibilityRole="button"
+      accessibilityState={{ disabled }}
+      disabled={disabled}
+      onPress={onPress}
+      style={({ pressed }) => [styles.menuItem, pressed && { backgroundColor: palette.accent }, disabled && styles.inert]}
+    >
+      {icon ? <Icon color={color} name={icon} size={themeTokens.size.iconSmall} /> : null}
+      <Text style={{ color }} variant="meta">{label}</Text>
+    </Pressable>
+  )
 }
 
-function Banner({ text, palette }: { text: string; palette: Palette }) {
-  return <Text accessibilityRole="alert" allowFontScaling style={[styles.banner, { color: palette.foreground, borderColor: palette.border, backgroundColor: palette.muted }]}>{text}</Text>
-}
-
-function Action({ label, onPress, palette, primary = false, disabled = false }: { label: string; onPress: () => void | Promise<unknown>; palette: Palette; primary?: boolean; disabled?: boolean }) {
-  const [focused, setFocused] = useState(false)
-  return <Pressable accessibilityRole="button" accessibilityState={{ disabled, busy: disabled }} disabled={disabled} onFocus={() => setFocused(true)} onBlur={() => setFocused(false)} onPress={() => void onPress()} style={({ pressed }) => [styles.action, { borderColor: primary ? 'transparent' : palette.input, backgroundColor: primary ? palette.primary : 'transparent' }, focused && { borderWidth: 2, borderColor: palette.foreground }, (pressed || disabled) && styles.pressed]}><Text allowFontScaling style={[styles.actionLabel, { color: primary ? palette.primaryForeground : palette.foreground }]}>{label}</Text></Pressable>
-}
-
-function LoadingState({ palette, label, onBack }: { palette: Palette; label: string; onBack: () => void }) {
+function LoadingState({ label, onBack }: { label: string; onBack: () => void }) {
   const { t } = useTranslation()
-  return <SafeAreaView style={[styles.safeArea, { backgroundColor: palette.background }]}><View style={styles.loading}><BackControl fallback="/goals" label={t('goalDetail.back')} onPress={onBack} /><View accessible accessibilityRole="progressbar" accessibilityLabel={label} style={styles.loadingBlocks}>{[120, 240, 320].map((width) => <View key={width} style={[styles.skeleton, { width, backgroundColor: palette.muted }]} />)}</View></View></SafeAreaView>
+  const palette = usePalette()
+  return (
+    <SafeAreaView style={[styles.safeArea, { backgroundColor: palette.background }]}>
+      <View style={styles.loading}>
+        <BackControl fallback="/goals" label={t('goalDetail.back')} onPress={onBack} />
+        <View accessible accessibilityLabel={label} accessibilityRole="progressbar" style={styles.loadingBlocks}>
+          {[200, 320, 320].map((width, index) => <View key={index} style={[styles.skeleton, { width, backgroundColor: palette.muted }]} />)}
+        </View>
+      </View>
+    </SafeAreaView>
+  )
 }
 
-function FailureState({ state, palette, onBack, onRetry, onLogout }: { state: 'error' | 'not-found' | 'invalid-id' | 'invalid-response'; palette: Palette; onBack: () => void; onRetry: () => void | Promise<void>; onLogout: () => void | Promise<void> }) {
+function FailureState({ state, onBack, onRetry, onLogout }: { state: 'error' | 'not-found' | 'invalid-id' | 'invalid-response'; onBack: () => void; onRetry: () => void | Promise<void>; onLogout: () => void | Promise<void> }) {
   const { t } = useTranslation()
+  const palette = usePalette()
   const key = state === 'not-found' ? 'notFound' : state === 'invalid-id' ? 'invalidId' : state === 'invalid-response' ? 'invalidResponse' : 'error'
-  return <SafeAreaView style={[styles.safeArea, { backgroundColor: palette.background }]}><ScrollView contentContainerStyle={styles.centered}><View style={styles.failure}><View style={[styles.errorMarker, { backgroundColor: palette.destructive }]} /><Text accessibilityRole="header" allowFontScaling style={[styles.failureTitle, { color: palette.foreground }]}>{t(`goalDetail.${key}.title`)}</Text><Text allowFontScaling style={[styles.body, { color: palette.mutedForeground }]}>{t(`goalDetail.${key}.message`)}</Text><View style={styles.actions}><BackControl fallback="/goals" label={t('goalDetail.back')} onPress={onBack} />{state === 'error' || state === 'invalid-response' ? <Action label={t('common.retry')} onPress={onRetry} palette={palette} primary /> : null}<Action label={t('common.signOut')} onPress={onLogout} palette={palette} /></View></View></ScrollView></SafeAreaView>
+  return (
+    <SafeAreaView style={[styles.safeArea, { backgroundColor: palette.background }]}>
+      <ScrollView contentContainerStyle={styles.content}>
+        <View style={styles.page}>
+          <BackControl fallback="/goals" label={t('goalDetail.back')} onPress={onBack} />
+          <Card density="standalone">
+            <View style={styles.form}>
+              <Text accessibilityRole="header" variant="section">{t(`goalDetail.${key}.title`)}</Text>
+              <Text tone="muted" variant="meta">{t(`goalDetail.${key}.message`)}</Text>
+              <View style={styles.actionRow}>
+                {state === 'error' || state === 'invalid-response' ? <Button label={t('common.retry')} onPress={onRetry} /> : null}
+                <Button label={t('common.signOut')} onPress={onLogout} variant="secondary" />
+              </View>
+            </View>
+          </Card>
+        </View>
+      </ScrollView>
+    </SafeAreaView>
+  )
 }
 
 const styles = StyleSheet.create({
-  safeArea: { flex: 1 }, content: { flexGrow: 1, padding: themeTokens.layout.screenPadding }, page: { width: '100%', maxWidth: 760, alignSelf: 'center', alignItems: 'flex-start', gap: themeTokens.layout.blockGap },
-  heading: { width: '100%', gap: themeTokens.spacing[2] }, titleLine: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: themeTokens.spacing[3] }, title: { ...textStyles.title, flexShrink: 1 }, date: { ...textStyles.body },
-  status: { flexDirection: 'row', alignItems: 'center', gap: themeTokens.spacing[2], borderWidth: 1, borderRadius: themeTokens.radius.sm, paddingHorizontal: themeTokens.spacing[2], paddingVertical: themeTokens.spacing[1] }, statusMarker: { width: 6, height: 6, borderRadius: themeTokens.radius.pill }, statusText: { ...textStyles.meta, fontWeight: '500' as const },
-  hero: { width: '100%', borderWidth: 1, borderRadius: themeTokens.radius.xl, padding: themeTokens.spacing[4], gap: themeTokens.spacing[2] }, heroAmount: { ...textStyles.display }, target: { ...textStyles.body }, progressTrack: { width: '100%', height: 4, marginTop: themeTokens.spacing[2], borderRadius: themeTokens.radius.pill, overflow: 'hidden' }, progressFill: { height: '100%', borderRadius: themeTokens.radius.pill }, progressText: { ...textStyles.meta },
-  metrics: { width: '100%', flexDirection: 'row', flexWrap: 'wrap', gap: themeTokens.spacing[3] }, metric: { flexGrow: 1, flexBasis: 210, borderWidth: 1, borderRadius: themeTokens.radius.lg, padding: themeTokens.spacing[4], gap: themeTokens.spacing[1] }, label: { ...textStyles.meta }, metricValue: { ...textStyles.amount },
-  section: { width: '100%', gap: themeTokens.spacing[3] }, archiveSection: { borderWidth: 1, borderRadius: themeTokens.radius.lg, padding: themeTokens.spacing[4] }, sectionHeading: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'baseline', justifyContent: 'space-between', gap: themeTokens.spacing[2] }, sectionTitle: { ...textStyles.section }, count: { ...textStyles.amountSmall }, body: { ...textStyles.body }, note: { ...textStyles.label },
-  editor: { width: '100%', borderWidth: 1, borderRadius: themeTokens.radius.xl, padding: themeTokens.spacing[5], gap: themeTokens.spacing[4] }, field: { gap: themeTokens.spacing[2] }, fieldLabel: { ...textStyles.bodyStrong, fontWeight: '600' as const }, input: { ...textStyles.body, minHeight: themeTokens.touchTarget.minimum, borderWidth: 1, borderRadius: themeTokens.radius.md, paddingHorizontal: themeTokens.spacing[3] }, moneyInput: { fontFamily: themeTokens.typography.roles.data.fontFamily }, inlineActions: { flexDirection: 'row', flexWrap: 'wrap', gap: themeTokens.spacing[3] }, notice: { ...textStyles.body, borderWidth: 1, borderRadius: themeTokens.radius.md, padding: themeTokens.spacing[3] },
-  accountEditor: { borderWidth: 1, borderRadius: themeTokens.radius.lg, padding: themeTokens.spacing[4], gap: themeTokens.spacing[3] }, accountRow: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: themeTokens.spacing[3] }, accountChoice: { minHeight: themeTokens.touchTarget.minimum, justifyContent: 'center', borderWidth: 1, borderRadius: themeTokens.radius.md, paddingHorizontal: themeTokens.spacing[4] },
-  activityList: { width: '100%', borderWidth: 1, borderRadius: themeTokens.radius.lg, paddingHorizontal: themeTokens.spacing[4] }, activityRow: { minHeight: 72, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: themeTokens.spacing[3], borderBottomWidth: StyleSheet.hairlineWidth, paddingVertical: themeTokens.spacing[3] }, activityIdentity: { flex: 1, gap: themeTokens.spacing[1] }, activityType: { ...textStyles.action }, activityAmount: { ...textStyles.amount },
-  empty: { ...textStyles.body, width: '100%', borderWidth: 1, borderRadius: themeTokens.radius.lg, padding: themeTokens.spacing[5], gap: themeTokens.spacing[3] }, banner: { ...textStyles.body, width: '100%', borderWidth: 1, borderRadius: themeTokens.radius.md, padding: themeTokens.spacing[4] },
-  action: { minWidth: themeTokens.touchTarget.minimum, minHeight: themeTokens.touchTarget.minimum, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderRadius: themeTokens.radius.md, paddingHorizontal: themeTokens.spacing[4] }, actionLabel: { ...textStyles.action }, pressed: { opacity: 0.72 },
-  loading: { flex: 1, width: '100%', maxWidth: 760, alignSelf: 'center', padding: themeTokens.layout.screenPadding, gap: themeTokens.spacing[6] }, loadingBlocks: { gap: themeTokens.spacing[4] }, skeleton: { height: 72, maxWidth: '100%', borderRadius: themeTokens.radius.lg }, centered: { flexGrow: 1, justifyContent: 'center', padding: themeTokens.layout.screenPadding }, failure: { width: '100%', maxWidth: 480, alignSelf: 'center', gap: themeTokens.spacing[4] }, errorMarker: { width: 36, height: 2 }, failureTitle: { ...textStyles.title }, actions: { flexDirection: 'row', flexWrap: 'wrap', gap: themeTokens.spacing[3] },
+  safeArea: { flex: 1 },
+  content: { flexGrow: 1, padding: themeTokens.layout.screenPadding, paddingBottom: themeTokens.spacing[12] },
+  page: { width: '100%', maxWidth: 760, alignSelf: 'center', gap: themeTokens.spacing[10] },
+  overflow: { marginRight: -11, marginVertical: -6 },
+  flex: { flex: 1 },
+  header: { gap: themeTokens.spacing[4] },
+  hug: { alignSelf: 'flex-start' },
+  actionRow: { flexDirection: 'row', flexWrap: 'wrap', gap: themeTokens.spacing[2] },
+  figureBlock: { gap: themeTokens.spacing[4] },
+  figureStats: { gap: themeTokens.spacing[4] },
+  shrink: { flexShrink: 1 },
+  form: { gap: themeTokens.spacing[4] },
+  formActions: { gap: themeTokens.spacing[2] },
+  field: { gap: themeTokens.spacing[2] },
+  input: { ...themeTokens.typography.scale.body, minHeight: themeTokens.size.control, borderRadius: themeTokens.radius.md, paddingHorizontal: themeTokens.spacing[3] },
+  moneyInput: { fontFamily: themeTokens.typography.scale.amount.fontFamily },
+  inert: { opacity: 0.5 },
+  accounts: { gap: themeTokens.spacing[3] },
+  cardDivider: { marginVertical: themeTokens.spacing[2] },
+  accountRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: themeTokens.spacing[3] },
+  choices: { borderWidth: 1, borderRadius: themeTokens.radius.md, overflow: 'hidden' },
+  choice: { minHeight: themeTokens.touchTarget.minimum, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: themeTokens.spacing[3], paddingHorizontal: themeTokens.spacing[3] },
+  activityError: { gap: themeTokens.spacing[3] },
+  loadMore: { alignSelf: 'flex-start', minHeight: themeTokens.touchTarget.minimum },
+  timelineItem: { flexDirection: 'row', gap: themeTokens.spacing[3] },
+  timelineGap: { paddingBottom: themeTokens.spacing[4] },
+  rail: { width: 8, alignItems: 'center' },
+  node: { width: 8, height: 8, borderRadius: 4, marginTop: 6 },
+  railLine: { position: 'absolute', top: 16, bottom: -themeTokens.spacing[4] + 4, width: 1 },
+  timelineBody: { flex: 1, flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between', gap: themeTokens.spacing[4] },
+  expired: { flexDirection: 'row', alignItems: 'flex-start', gap: themeTokens.spacing[1] },
+  menuItem: { minHeight: themeTokens.touchTarget.minimum, flexDirection: 'row', alignItems: 'center', gap: themeTokens.spacing[2], paddingHorizontal: themeTokens.spacing[2], borderRadius: themeTokens.radius.sm },
+  loading: { flex: 1, padding: themeTokens.layout.screenPadding, gap: themeTokens.spacing[6] },
+  loadingBlocks: { gap: themeTokens.spacing[4] },
+  skeleton: { height: 48, maxWidth: '100%', borderRadius: themeTokens.radius.lg },
 })

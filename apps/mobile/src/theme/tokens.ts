@@ -191,36 +191,54 @@ export const themeTokens = {
   },
   typography: {
     /**
-     * One scale. The port collapsed 23 distinct literal `fontSize` values onto
-     * these nine roles; a screen that needs a size not listed here is telling
-     * you the role is missing, not that the scale is too small.
-     *
-     * Sizes are the web contract's, re-measured for a 375px column: the web
-     * half's 14px table cell assumes a wide table, while on a phone the row
-     * restructures into a stacked block (§ 9 rule 11) and the primary line has
-     * to stay scannable. `body` is therefore 15, not 14. `title` is the web
-     * value unchanged — 20/600, one treatment, no exceptions.
+     * One scale, read off the web app's Tailwind classes at phone width (web
+     * `DESIGN.md` is upstream): body 16, data-surface text 14 (`text-sm`),
+     * helper text 12 (`text-xs`), page title 24/600, ruled section head
+     * 18/600, and Geist Mono figures at 48 lead, 36 object, 24 stat, 18 and
+     * 16 secondary, 14 row and 12 small. A screen that needs a size not listed here is telling you a role
+     * is missing, not that the scale is too small.
      */
     scale: {
-      /** The one headline figure on a screen. Mono. */
-      display: { fontFamily: dataFontFamily, fontSize: 28, lineHeight: 34, letterSpacing: -0.4, fontWeight: '600' },
-      /** Page title. One per screen. */
-      title: { fontFamily: interfaceFontFamily, fontSize: 20, lineHeight: 26, letterSpacing: -0.5, fontWeight: '600' },
-      /** Section head. */
-      section: { fontFamily: interfaceFontFamily, fontSize: 16, lineHeight: 22, letterSpacing: -0.2, fontWeight: '600' },
-      /** Primary row line, paragraphs. */
-      body: { fontFamily: interfaceFontFamily, fontSize: 15, lineHeight: 21, letterSpacing: -0.1, fontWeight: '400' },
-      bodyStrong: { fontFamily: interfaceFontFamily, fontSize: 15, lineHeight: 21, letterSpacing: -0.1, fontWeight: '500' },
-      /** Muted secondary lines beneath a row's primary line. */
-      meta: { fontFamily: interfaceFontFamily, fontSize: 13, lineHeight: 18, letterSpacing: 0, fontWeight: '400' },
-      /** Micro-label. Muted, sentence case — never uppercase, never letterspaced. */
+      /** The page's lead figure (web `font-mono text-5xl font-medium tracking-tight`). Mono. */
+      display: { fontFamily: dataFontFamily, fontSize: 48, lineHeight: 60, letterSpacing: -1.2, fontWeight: '500' },
+      /** An object's key figure (web ObjectHeader `text-4xl`). Mono. */
+      figure: { fontFamily: dataFontFamily, fontSize: 36, lineHeight: 44, letterSpacing: -0.9, fontWeight: '500' },
+      /** A stat cell's value (web StatCard `text-2xl font-medium`). Mono. */
+      stat: { fontFamily: dataFontFamily, fontSize: 24, lineHeight: 32, letterSpacing: -0.6, fontWeight: '500' },
+      /** Page title (web `text-2xl font-semibold tracking-tight`). One per screen. */
+      title: { fontFamily: interfaceFontFamily, fontSize: 24, lineHeight: 32, letterSpacing: -0.6, fontWeight: '600' },
+      /**
+       * An open section's head (`Section variant="open"`): 20/600, full
+       * foreground. Space above it separates sections instead of a rule.
+       */
+      heading: { fontFamily: interfaceFontFamily, fontSize: 20, lineHeight: 28, letterSpacing: -0.4, fontWeight: '600' },
+      /** Ruled section head (web Section `text-lg font-semibold`). */
+      section: { fontFamily: interfaceFontFamily, fontSize: 18, lineHeight: 28, letterSpacing: -0.45, fontWeight: '600' },
+      /** A lead figure's name, a group title (web `text-base font-medium`). */
+      subheading: { fontFamily: interfaceFontFamily, fontSize: 16, lineHeight: 24, letterSpacing: 0, fontWeight: '500' },
+      /** Paragraphs and standalone copy (web body, 16px). */
+      body: { fontFamily: interfaceFontFamily, fontSize: 16, lineHeight: 24, letterSpacing: 0, fontWeight: '400' },
+      bodyStrong: { fontFamily: interfaceFontFamily, fontSize: 16, lineHeight: 24, letterSpacing: 0, fontWeight: '500' },
+      /** Data-surface text: stat labels, tab labels, descriptions (web `text-sm`). */
+      meta: { fontFamily: interfaceFontFamily, fontSize: 14, lineHeight: 20, letterSpacing: 0, fontWeight: '400' },
+      /** A list row's name, a small heading (web `text-sm font-medium`). */
+      metaStrong: { fontFamily: interfaceFontFamily, fontSize: 14, lineHeight: 20, letterSpacing: 0, fontWeight: '500' },
+      /** Helper lines, row meta, comparisons (web `text-xs`). Sentence case, never tracked. */
       label: { fontFamily: interfaceFontFamily, fontSize: 12, lineHeight: 16, letterSpacing: 0, fontWeight: '400' },
-      /** Control labels. */
-      action: { fontFamily: interfaceFontFamily, fontSize: 15, lineHeight: 20, letterSpacing: -0.1, fontWeight: '600' },
-      /** Figures inside a row. Mono. */
-      amount: { fontFamily: dataFontFamily, fontSize: 15, lineHeight: 21, letterSpacing: 0, fontWeight: '400' },
-      /** A figure on a secondary line. Mono. */
-      amountSmall: { fontFamily: dataFontFamily, fontSize: 13, lineHeight: 18, letterSpacing: 0, fontWeight: '400' },
+      /** Control labels (web button `text-sm font-medium`). */
+      action: { fontFamily: interfaceFontFamily, fontSize: 14, lineHeight: 20, letterSpacing: 0, fontWeight: '500' },
+      /**
+       * A secondary figure (web `font-mono text-lg`): home's You own / You owe and
+       * a budget's "left", a budget lead's Spent / Planned, portfolio metrics.
+       * Web's weight here runs 400–600 by page; mobile settles on 500. Mono.
+       */
+      amountLarge: { fontFamily: dataFontFamily, fontSize: 18, lineHeight: 28, letterSpacing: 0, fontWeight: '500' },
+      /** A change line under a lead figure (web NetWorthHero `font-mono text-base`). Mono. */
+      amountBase: { fontFamily: dataFontFamily, fontSize: 16, lineHeight: 24, letterSpacing: 0, fontWeight: '400' },
+      /** Figures inside a row (web `font-mono text-sm`). Mono. */
+      amount: { fontFamily: dataFontFamily, fontSize: 14, lineHeight: 20, letterSpacing: 0, fontWeight: '500' },
+      /** A figure on a secondary line or a comparison (web `font-mono text-xs`). Mono. */
+      amountSmall: { fontFamily: dataFontFamily, fontSize: 12, lineHeight: 16, letterSpacing: 0, fontWeight: '400' },
     },
     /**
      * Older role names, retuned onto the scale above so code reading `roles.*`
@@ -229,28 +247,59 @@ export const themeTokens = {
      * @deprecated use `typography.scale`
      */
     roles: {
-      interface: { fontFamily: interfaceFontFamily, fontSize: 15, lineHeight: 21, letterSpacing: -0.1 },
-      data: { fontFamily: dataFontFamily, fontSize: 15, lineHeight: 21, letterSpacing: 0 },
+      interface: { fontFamily: interfaceFontFamily, fontSize: 16, lineHeight: 24, letterSpacing: 0 },
+      data: { fontFamily: dataFontFamily, fontSize: 14, lineHeight: 20, letterSpacing: 0 },
       caption: { fontFamily: interfaceFontFamily, fontSize: 12, lineHeight: 16, letterSpacing: 0 },
-      pageTitle: { fontFamily: interfaceFontFamily, fontSize: 20, lineHeight: 26, letterSpacing: -0.5 },
-      sectionTitle: { fontFamily: interfaceFontFamily, fontSize: 16, lineHeight: 22, letterSpacing: -0.2 },
-      action: { fontFamily: interfaceFontFamily, fontSize: 15, lineHeight: 20, letterSpacing: -0.1 },
+      pageTitle: { fontFamily: interfaceFontFamily, fontSize: 24, lineHeight: 32, letterSpacing: -0.6 },
+      sectionTitle: { fontFamily: interfaceFontFamily, fontSize: 18, lineHeight: 28, letterSpacing: -0.45 },
+      action: { fontFamily: interfaceFontFamily, fontSize: 14, lineHeight: 20, letterSpacing: 0 },
     },
   },
   /**
-   * `minimum` is this app's working value and is deliberately 4px above the
-   * system's 44px floor: a pointer lands where it is aimed and a thumb does
-   * not, so the extra margin is bought on the platform that needs it.
+   * Web's `DESIGN.md` is upstream: every mobile target is at least 44pt (WCAG
+   * 2.2 AA and the platforms' own floor). The 48pt house value the port
+   * started with is retired — the phone now matches the web app at phone
+   * width, where controls draw at 40 and the bottom bar at 64.
    *
-   * `wcagFloor` is the WCAG 2.2 AA / web-half value, recorded as the line a
-   * control may not go under — not as something to design toward. Do not
-   * "simplify" a call site from `minimum` down to `wcagFloor`; three suites
-   * assert 48dp and they are asserting the right thing.
+   * A control drawn smaller than `minimum` (a 40pt button, a 32pt segment)
+   * makes up the difference with `hitSlop`; the tests assert drawn + slop.
    */
   touchTarget: {
-    minimum: 48,
+    minimum: 44,
     comfortable: 48,
     wcagFloor: 44,
+  },
+  /**
+   * Drawn sizes taken from web's Tailwind classes at phone width.
+   *
+   * `control` is web's `h-10` (buttons, selects, inputs); `controlSmall` its
+   * `h-9`. The shell values are `TopBar.tsx` (`h-16`, tabs `h-11`) and
+   * `BottomNav.tsx` (`h-16`).
+   */
+  size: {
+    control: 40,
+    controlSmall: 36,
+    topBar: 64,
+    sectionTab: 44,
+    bottomBar: 64,
+    /** Web's `size-8` avatar in the person menu trigger. */
+    avatar: 32,
+    /** lucide `size-4` / `size-5` equivalents for SF Symbols. */
+    iconSmall: 16,
+    icon: 20,
+  },
+  /**
+   * `EntityMark`: the leading square on a row that names a thing (a category,
+   * an account's institution, a ticker). `md` for list rows, `sm` for dense
+   * rows, option sheets and form values.
+   * `logoBacking` is deliberately the same white in both halves: third-party
+   * logos assume a light backing (many are a dark glyph on transparency), so
+   * web's `FinancialAssetLogo` forces `bg-white` and so does mobile.
+   */
+  mark: {
+    md: 36,
+    sm: 24,
+    logoBacking: '#ffffff',
   },
   motion: {
     /** Press, hover, focus — feedback, not animation. */
@@ -273,6 +322,17 @@ export const themeTokens = {
    * it; it takes a 1px border.
    */
   shadow: {
+    /**
+     * Web's `shadow-xs`: the selected segment of a segmented control only. It
+     * lifts the chosen segment off the muted track; it is not a card shadow.
+     */
+    xs: {
+      shadowColor: '#000000',
+      shadowOpacity: 0.06,
+      shadowRadius: 1,
+      shadowOffset: { width: 0, height: 1 },
+      elevation: 1,
+    },
     overlay: {
       shadowColor: '#000000',
       shadowOpacity: 0.18,

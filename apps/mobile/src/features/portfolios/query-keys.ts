@@ -3,8 +3,21 @@ export const portfolioCurrenciesKey = (epochId: number) => ['portfolio-create', 
 export const portfolioTransactionTypesKey = (epochId: number) => ['portfolio-transaction-create', epochId, 'transaction-types'] as const
 export const portfolioCreateUnknownKey = (epochId: number) => ['portfolio-create', epochId, 'unknown-outcome'] as const
 export const portfolioSettingsUnknownKey = (epochId: number, portfolioId: number) => ['portfolio-settings', epochId, portfolioId, 'unknown-outcome'] as const
-export const aggregatePortfolioDashboardKey = (epochId: number) => (
-  ['portfolio-dashboard', epochId, 'aggregate', 'YTD'] as const
+export const aggregatePortfolioDashboardKey = (epochId: number, period: string = 'YTD') => (
+  ['portfolio-dashboard', epochId, 'aggregate', period] as const
+)
+/** Every period of the aggregate dashboard, for invalidation. */
+export const aggregatePortfolioDashboardPrefix = (epochId: number) => (
+  ['portfolio-dashboard', epochId, 'aggregate'] as const
+)
+export const aggregatePortfolioHoldingsKey = (epochId: number) => (
+  ['portfolio-holdings', epochId, 'aggregate'] as const
+)
+export const portfolioAllocationKey = (epochId: number, portfolioId: number) => (
+  ['portfolio-analytics', epochId, portfolioId, 'allocation'] as const
+)
+export const portfolioTopMoversKey = (epochId: number, portfolioId: number | 'aggregate', period: string) => (
+  ['portfolio-top-movers', epochId, portfolioId, period, 5] as const
 )
 export const portfolioKey = (epochId: number, portfolioId: number) => (
   ['portfolio', epochId, portfolioId] as const
@@ -24,12 +37,12 @@ export const portfolioAnalyticsKey = (epochId: number, resource: 'allocation' | 
 export const portfolioDividendIncomeKey = (epochId: number, portfolioId: number) => (
   ['portfolio-analytics', epochId, portfolioId, 'dividend-income'] as const
 )
-export const portfolioPerformanceKey = (epochId: number, portfolioId: number, period: string) => (
+export const portfolioPerformanceKey = (epochId: number, portfolioId: number | 'aggregate', period: string) => (
   ['portfolio-performance', epochId, portfolioId, period] as const
 )
 
 const PORTFOLIO_CONTENT_QUERY_TAGS = new Set([
-  'portfolios', 'portfolio', 'portfolio-dashboard', 'portfolio-holdings', 'portfolio-activity', 'portfolio-analytics', 'portfolio-performance',
+  'portfolios', 'portfolio', 'portfolio-dashboard', 'portfolio-holdings', 'portfolio-activity', 'portfolio-analytics', 'portfolio-performance', 'portfolio-top-movers',
 ])
 
 /** Everything a transaction write can affect: quantities/values ripple through holdings, activity,

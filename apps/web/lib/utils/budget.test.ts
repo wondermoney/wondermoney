@@ -7,6 +7,9 @@ import {
   calculatePlannedAndSpentValue,
   convertBudgetTemplatesIntoRows,
   getBudgetRowMonthlyBudgetedTotal,
+  getBudgetRowProgress,
+  getBudgetRowRemaining,
+  getMonthlyAvailableValue,
 } from "./budget";
 
 test("budget row totals include top-level rows without children", () => {
@@ -231,4 +234,120 @@ test("a parent row plans what its children plan per month, yearly items spread o
     Math.round(getBudgetRowMonthlyBudgetedTotal(rows) * 100) / 100,
     Math.round(parent.budgeted * 100) / 100,
   );
+});
+
+/* ---------- rollover ---------- */
+
+const apiCategory = (
+  overrides: Partial<Parameters<typeof convertBudgetTemplatesIntoRows>[0][number]>,
+) => ({
+  child_category_name: null,
+  parent_category_name: "FOOD",
+  category_amount: 0,
+  category_recurrency: null,
+  category_budgeted_amount: 0,
+  child_category_icon: "tag",
+  child_category_text_color: "#000000",
+  child_category_bg_color: "#ffffff",
+  category_is_system_category: true,
+  category_icon: "tag",
+  category_text_color: "#000000",
+  category_bg_color: "#ffffff",
+  category_key: 1,
+  ...overrides,
+});
+
+test("a row with a carry has the plan plus the carry to spend, and remaining and progress measure against that", () => {
+  const surplus = { budgeted: 100, spent: 120, recurrency: 12, rolledOver: 40 };
+  assert.equal(getMonthlyAvailableValue(surplus), 140);
+  assert.equal(getBudgetRowRemaining(surplus), 20);
+  assert.equal(getBudgetRowProgress(surplus), 120 / 140);
+
+  // An overspend carried in leaves less than the plan.
+  const overspend = { budgeted: 100, spent: 80, recurrency: 12, rolledOver: -25 };
+  assert.equal(getMonthlyAvailableValue(overspend), 75);
+  assert.equal(getBudgetRowRemaining(overspend), -5);
+});
+
+test("without rollover, available is the plan as the Planned column shows it", () => {
+  const yearly = { budgeted: 1200, spent: 50, recurrency: 1 };
+  assert.equal(getMonthlyAvailableValue(yearly), 100);
+  assert.equal(getBudgetRowRemaining(yearly), 50);
+  assert.equal(getBudgetRowProgress({ budgeted: 0, spent: 10 }), 0);
+});
+
+test("the API's rollover fields reach the rows, and a parent keeps its subcategories' summed carry", () => {
+  const rows = convertBudgetTemplatesIntoRows([
+    apiCategory({
+      category_key: 1,
+      category_budgeted_amount: 300,
+      category_amount: 0,
+      category_rolled_over: 15,
+      category_available: 315,
+      category_rollover_enabled: true,
+      category_rollover_incomplete: true,
+    }),
+    apiCategory({
+      category_key: 2,
+      child_category_name: "GROCERIES",
+      category_recurrency: "MONTHLY",
+      category_budgeted_amount: 200,
+      category_rolled_over: 40,
+      category_available: 240,
+      category_rollover_enabled: true,
+      category_rollover_incomplete: true,
+    }),
+    apiCategory({
+      category_key: 3,
+      child_category_name: "CAFE_RESTAURANTS_BARS",
+      category_recurrency: "MONTHLY",
+      category_budgeted_amount: 100,
+      category_rolled_over: -25,
+      category_available: 75,
+      category_rollover_enabled: true,
+    }),
+  ]);
+
+  const [parent] = rows;
+  assert.equal(parent!.rolledOver, 15);
+  assert.equal(parent!.rolloverEnabled, true);
+  assert.equal(parent!.rolloverIncomplete, true);
+  assert.deepEqual(
+    parent!.subRows.map((child) => [child.rolledOver, getMonthlyAvailableValue(child)]),
+    [
+      [40, 240],
+      [-25, 75],
+    ],
+  );
+  assert.equal(getMonthlyAvailableValue(parent!), 315);
+});
+
+test("rows from an endpoint without rollover fields carry nothing", () => {
+  const [row] = convertBudgetTemplatesIntoRows([
+    apiCategory({ category_budgeted_amount: 50 }),
+  ]);
+  assert.equal(row!.rolledOver, 0);
+  assert.equal(row!.rolloverEnabled, false);
+  assert.equal(row!.rolloverIncomplete, false);
+});
+
+test("month totals keep the plan as planned and measure remaining against plan plus carry", () => {
+  const totals = calculatePlannedAndSpentValue([
+    {
+      key: 1,
+      name: "FOOD",
+      budgeted: 300,
+      spent: 330,
+      rolledOver: 15,
+      subRows: [
+        { key: 2, name: "GROCERIES", budgeted: 200, spent: 230, recurrency: 12, rolledOver: 40 },
+        { key: 3, name: "CAFES", budgeted: 100, spent: 100, recurrency: 12, rolledOver: -25 },
+      ],
+    },
+  ]);
+
+  assert.equal(totals.totalPlanned, 300);
+  assert.equal(totals.totalAvailable, 315);
+  assert.equal(totals.totalSpent, 330);
+  assert.equal(totals.totalPercentage, ((315 - 330) / 315) * 100);
 });

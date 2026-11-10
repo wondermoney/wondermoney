@@ -6,7 +6,7 @@ import { netWorthKey } from '@/features/net-worth/query-keys'
 import { ApiError, isPostDispatchCancellation } from '@/lib/api/errors'
 
 import { createPortfolioWriteEndpoint, portfolioCreateWriteSchema, type PortfolioCreateWrite } from './portfolios-contract'
-import { aggregatePortfolioDashboardKey, portfolioCreateUnknownKey, portfoliosKey } from './query-keys'
+import { aggregatePortfolioDashboardPrefix, portfolioCreateUnknownKey, portfoliosKey } from './query-keys'
 
 export type PortfolioCreateFailure = 'validation' | 'demo' | 'access' | 'mfa' | 'cancelled' | 'unknown' | 'request' | 'general'
 export type PortfolioCreateUnknown = Readonly<{ payload: Readonly<PortfolioCreateWrite> }>
@@ -54,7 +54,7 @@ export function useCreatePortfolio() {
             body: payload,
             commit: () => { void Promise.all([
               queryClient.invalidateQueries({ queryKey: portfoliosKey(runtime.epochId), exact: true }),
-              queryClient.invalidateQueries({ queryKey: aggregatePortfolioDashboardKey(runtime.epochId), exact: true }),
+              queryClient.invalidateQueries({ queryKey: aggregatePortfolioDashboardPrefix(runtime.epochId) }),
               queryClient.invalidateQueries({ queryKey: netWorthKey(runtime.epochId), exact: true }),
             ]) },
           })

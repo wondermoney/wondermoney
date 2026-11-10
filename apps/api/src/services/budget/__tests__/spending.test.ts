@@ -7,6 +7,7 @@ import { buildBudgetSpendingQuery } from '../spending';
 const { db } = kyselyDouble();
 const baseInput = {
   accountKeys: [202],
+  currency: { code: 'EUR', currencyKey: 1 },
   period: 'monthly' as const,
   templateKeys: [101],
   tenantKey: 17,
@@ -15,19 +16,21 @@ const baseInput = {
 
 describe('budget spending query', () => {
   it('keeps transaction visibility in the LEFT JOIN and scopes tenant/private accounts', () => {
-    const compiled = buildBudgetSpendingQuery(db, { ...baseInput, period: 'monthly' }).compile(db);
+    const compiled = buildBudgetSpendingQuery(db, { ...baseInput, period: 'monthly' }, []).compile(db);
     const bindings = compiled.parameters;
     const sql = compiled.sql.toLowerCase();
     const transactionJoin = sql.slice(sql.indexOf('left join "transaction"'), sql.indexOf('left join "loan_repayment_link"'));
 
     expect(transactionJoin).toContain('"transaction"."deleted_at" is null');
-    expect(transactionJoin).toContain('"appuser_transaction_category"."deleted_at" is null');
     expect(transactionJoin).toMatch(/"transaction"\."tenant_key" = \$\d+/);
     expect(transactionJoin).toMatch(/budget_account\.tenant_key = \$\d+/);
     expect(transactionJoin).toContain('budget_account.closed = false');
     expect(transactionJoin).toContain('budget_account.deleted_at is null');
     expect(transactionJoin).toMatch(/\(budget_account\.is_private = false or budget_account\.account_owner_appuser_key = \$\d+\)/);
-    expect(sql).toContain('left join "appuser_transaction_category"');
+    // Category lines (a split transaction's lines, or an unsplit one's assignment), live rows only.
+    expect(sql).toContain('as "category_line"');
+    expect(sql).toContain('a.deleted_at is null');
+    expect(sql).toContain('s.deleted_at is null');
     expect(sql).toContain('coalesce(category_budgeted_amount, 0) as category_budgeted_amount');
     expect(sql).toContain('union all');
     expect(bindings).toContain(17);
@@ -37,8 +40,8 @@ describe('budget spending query', () => {
   });
 
   it('preserves separate parent-budget recurrency for monthly and annual reads', () => {
-    const monthly = buildBudgetSpendingQuery(db, { ...baseInput, period: 'monthly' }).compile(db).sql.toLowerCase();
-    const annual = buildBudgetSpendingQuery(db, { ...baseInput, period: 'annual' }).compile(db).sql.toLowerCase();
+    const monthly = buildBudgetSpendingQuery(db, { ...baseInput, period: 'monthly' }, []).compile(db).sql.toLowerCase();
+    const annual = buildBudgetSpendingQuery(db, { ...baseInput, period: 'annual' }, []).compile(db).sql.toLowerCase();
 
     expect(monthly).toContain('sum(coalesce(child_category_amounts.category_budgeted_amount, 0))');
     expect(monthly).not.toContain("when 'monthly_14' then 14");

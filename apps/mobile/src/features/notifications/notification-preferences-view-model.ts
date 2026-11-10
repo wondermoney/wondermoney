@@ -15,12 +15,14 @@ export type NotificationStream =
   | 'budgetAlerts'
   | 'weeklyInsights'
   | 'accountRecovery'
+  | 'bankSyncAlerts'
 
 /** Fixed display order, matching the web Notifications screen. */
 export const NOTIFICATION_STREAMS: readonly NotificationStream[] = [
   'budgetAlerts',
   'weeklyInsights',
   'accountRecovery',
+  'bankSyncAlerts',
 ]
 
 export type NotificationPreferenceStatus = 'active' | 'paused' | 'off'
@@ -36,12 +38,14 @@ export type NotificationPreferenceViewState = Readonly<{
 const STREAM_PATCH_FIELD: Record<NotificationStream, keyof NotificationPreferencePatch> = {
   budgetAlerts: 'budgetAlertsEnabled',
   weeklyInsights: 'weeklyInsightsEnabled',
+  bankSyncAlerts: 'bankSyncAlertsEnabled',
   accountRecovery: 'accountRecoveryEnabled',
 }
 
 const STREAM_PREFERENCE: Record<NotificationStream, keyof Omit<NotificationPreferencesDto, 'marketingOptOut'>> = {
   budgetAlerts: 'budgetAlerts',
   weeklyInsights: 'weeklyInsights',
+  bankSyncAlerts: 'bankSyncAlerts',
   accountRecovery: 'accountRecovery',
 }
 
@@ -90,18 +94,23 @@ export type NotificationRowViewModel = Readonly<{
   view: NotificationPreferenceViewState
 }>
 
-/** Prepares the ordered rows plus the master marketing-opt-out state for rendering. */
+/**
+ * Prepares the ordered rows plus the master marketing-opt-out state for rendering.
+ * A category the server doesn't return (an older self-hosted API without
+ * `bankSyncAlerts`) gets no row.
+ */
 export function mapNotificationPreferences(preferences: NotificationPreferencesDto): Readonly<{
   rows: readonly NotificationRowViewModel[]
   marketingOptOut: boolean
 }> {
-  const rows = NOTIFICATION_STREAMS.map((stream) => {
+  const rows = NOTIFICATION_STREAMS.flatMap((stream) => {
     const preference = preferences[STREAM_PREFERENCE[stream]]
-    return {
+    if (!preference) return []
+    return [{
       stream,
       storedEnabled: preference.storedEnabled,
       view: getNotificationPreferenceViewState(preference, preferences.marketingOptOut),
-    }
+    }]
   })
   return { rows, marketingOptOut: preferences.marketingOptOut }
 }

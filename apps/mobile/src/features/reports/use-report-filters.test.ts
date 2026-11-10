@@ -10,6 +10,11 @@ describe('useReportFilters', () => {
     expect(hook.result.current.filters.accountKeys).toEqual([])
   })
 
+  it('states the device time zone, the calendar its date presets are in', async () => {
+    const hook = await renderHook(() => useReportFilters())
+    expect(hook.result.current.filters.timezone).toBe(Intl.DateTimeFormat().resolvedOptions().timeZone)
+  })
+
   it('updates each field independently and reflects it in the derived filters and count', async () => {
     const hook = await renderHook(() => useReportFilters())
     await act(async () => hook.result.current.setAccountKeys(['1', '2']))

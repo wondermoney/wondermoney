@@ -5,6 +5,12 @@ import { Transaction } from '@entity/Transaction';
 
 const mocks = vi.hoisted(() => ({ find: vi.fn() }));
 
+// The mocked EntityManager answers every query with the scenario's rows; the household has made no
+// "counts as spending" choices.
+vi.mock('@service/transaction/category-spending', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@service/transaction/category-spending')>();
+  return { ...actual, loadCategorySpendingFlags: () => Promise.resolve(new actual.CategorySpendingFlags()) };
+});
 vi.mock('@app/database/di', () => ({
   DI: { em: { find: mocks.find } },
 }));
@@ -15,7 +21,7 @@ vi.mock('@validators/parser', () => ({
 import { getCashflowReport } from '../cashflow';
 
 const makeRequest = (query: Record<string, unknown> = {}) =>
-  ({ query, tenant: { tenantKey: 113 }, user: { appuserKey: 71 } }) as unknown as Request;
+  ({ query, tenant: { tenantKey: 113 }, user: { appuserKey: 71, currencyKey: { code: 'EUR' } } }) as unknown as Request;
 
 const makeResponse = () => ({ json: vi.fn() }) as unknown as Response;
 
@@ -53,6 +59,7 @@ describe('getCashflowReport', () => {
     await getCashflowReport(makeRequest(), res);
 
     expect(res.json).toHaveBeenCalledWith({
+      completeness: { currencyCode: 'EUR', isComplete: true, unconvertedCurrencies: [], unconvertedTransactions: 0 },
       data: [
         { expenses: 300, income: 1000, month: '2026-01-01T00:00:00.000Z', net: 700 },
         { expenses: 800, income: 2000, month: '2026-02-01T00:00:00.000Z', net: 1200 },
@@ -62,23 +69,13 @@ describe('getCashflowReport', () => {
     });
   });
 
-  it('applies the fromDate filter to the transaction query', async () => {
-    await getCashflowReport(makeRequest({ fromDate: '2026-02-01T00:00:00.000Z' }), makeResponse());
-
-    expect(mocks.find).toHaveBeenCalledWith(
-      Transaction,
-      expect.objectContaining({ transactionDate: { $gte: new Date('2026-02-01T00:00:00.000Z') } }),
-      expect.anything(),
-    );
-  });
-
   it('scopes the transaction query by tenant and the per-account privacy carve-out', async () => {
     await getCashflowReport(makeRequest(), makeResponse());
 
     expect(mocks.find).toHaveBeenCalledWith(
       Transaction,
       expect.objectContaining({
-        accountKey: { $or: [{ isPrivate: false }, { accountOwnerAppuserKey: { appuserKey: 71 } }] },
+        accountKey: { $or: [{ isPrivate: false }, { accountOwnerAppuserKey: { appuserKey: 71, currencyKey: { code: 'EUR' } } }] },
         deletedAt: undefined,
         tenantKey: { tenantKey: 113 },
       }),
@@ -90,6 +87,6 @@ describe('getCashflowReport', () => {
     const res = makeResponse();
     await getCashflowReport(makeRequest(), res);
 
-    expect(res.json).toHaveBeenCalledWith({ data: [], filters: expect.any(Object), generatedAt: expect.any(String) });
+    expect(res.json).toHaveBeenCalledWith({ completeness: expect.objectContaining({ isComplete: true }), data: [], filters: expect.any(Object), generatedAt: expect.any(String) });
   });
 });

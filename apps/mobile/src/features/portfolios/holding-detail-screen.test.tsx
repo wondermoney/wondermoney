@@ -2,8 +2,12 @@ import { fireEvent, render } from '@testing-library/react-native'
 import { I18nextProvider } from 'react-i18next'
 
 import { initMobileI18n } from '@/lib/i18n'
+import { PRIVACY_MASK } from '@/lib/formatters/money-display'
+import { PrivacyModeProvider, renderedText } from '@/test/privacy-mode'
 
 import { HoldingDetailScreen, type HoldingDetailViewState } from './holding-detail-screen'
+
+jest.mock('expo-secure-store', () => ({ getItemAsync: jest.fn(async () => null), setItemAsync: jest.fn(async () => undefined) }))
 
 const holding = {
   allocation: 12.5, averageBuyPrice: 90, currency: 'EUR', currentPrice: 110, currentValue: 1100,
@@ -62,12 +66,36 @@ describe('HoldingDetailScreen', () => {
 
   it('lists this holding\'s own activity rows, including stock splits', async () => {
     const activity = [
-      { amount: 1100, currency: 'EUR', id: 't1', itemType: 'TRANSACTION' as const, name: 'Apple Inc.', notes: null, portfolioId: 3, portfolioName: 'Broker', quantity: 10, split: null, ticker: 'AAPL', timestamp: '2026-07-20T00:00:00.000Z', transactionKey: 1, type: 'BUY', unitPrice: 110 },
-      { amount: null, currency: null, id: 's1', itemType: 'STOCK_SPLIT' as const, name: 'Apple Inc.', notes: null, portfolioId: 3, portfolioName: 'Broker', quantity: null, split: { denominator: 1, numerator: 4, ratio: 4 }, ticker: 'AAPL', timestamp: '2026-07-21T00:00:00.000Z', transactionKey: null, type: null, unitPrice: null },
+      { amount: 1100, cashCurrency: null, currency: 'EUR', id: 't1', itemType: 'TRANSACTION' as const, name: 'Apple Inc.', notes: null, portfolioId: 3, portfolioName: 'Broker', quantity: 10, split: null, ticker: 'AAPL', timestamp: '2026-07-20T00:00:00.000Z', transactionKey: 1, type: 'BUY', typeLabel: 'Buy', unitPrice: 110 },
+      { amount: null, cashCurrency: null, currency: null, id: 's1', itemType: 'STOCK_SPLIT' as const, name: 'Apple Inc.', notes: null, portfolioId: 3, portfolioName: 'Broker', quantity: null, split: { denominator: 1, numerator: 4, ratio: 4 }, ticker: 'AAPL', timestamp: '2026-07-21T00:00:00.000Z', transactionKey: null, type: null, typeLabel: null, unitPrice: null },
     ]
     const { view } = await renderScreen({ status: 'loaded', holding, activity, refreshing: false })
     expect(view.getByText('Buy')).toBeOnTheScreen()
     expect(view.getAllByText('€1,100.00').length).toBeGreaterThanOrEqual(1)
     expect(view.getByText('Stock split')).toBeOnTheScreen()
+  })
+
+  describe('privacy mode', () => {
+    const position = { ...holding, quantity: 37.5 }
+    const buy = { amount: 4125, cashCurrency: null, currency: 'EUR', id: 't1', itemType: 'TRANSACTION' as const, name: 'Apple Inc.', notes: null, portfolioId: 3, portfolioName: 'Broker', quantity: 37.5, split: null, ticker: 'AAPL', timestamp: '2026-07-20T00:00:00.000Z', transactionKey: 1, type: 'BUY', typeLabel: 'Buy', unitPrice: 110 }
+    const state: HoldingDetailViewState = { status: 'loaded', holding: position, activity: [buy], refreshing: false }
+
+    async function renderWithPrivacy(hidden: boolean) {
+      const i18n = await initMobileI18n('en')
+      const props = { state, onBack: jest.fn(), onRefresh: jest.fn(), onLogout: jest.fn() }
+      return render(<I18nextProvider i18n={i18n}><PrivacyModeProvider hidden={hidden}><HoldingDetailScreen {...props} /></PrivacyModeProvider></I18nextProvider>)
+    }
+
+    it('shows the quantity with the mode off (the control for the test below)', async () => {
+      const view = await renderWithPrivacy(false)
+      expect(await view.findByText('Quantity 37.5')).toBeOnTheScreen()
+      expect(renderedText(view.toJSON())).toContain('37.5')
+    })
+
+    it('masks the held and traded quantity, since quantity times price is the value', async () => {
+      const view = await renderWithPrivacy(true)
+      expect(await view.findByText(`Quantity ${PRIVACY_MASK}`)).toBeOnTheScreen()
+      expect(renderedText(view.toJSON())).not.toMatch(/37[.,]5/)
+    })
   })
 })

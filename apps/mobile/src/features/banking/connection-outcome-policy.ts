@@ -28,8 +28,10 @@ export function tallyConnections(rows: readonly BankConnectionRow[]): Connection
   let connected = 0
   let failed = 0
   for (const row of rows) {
-    if (row.status === 'connected') connected += 1
-    if (row.status === 'error' || row.status === 'expired') failed += 1
+    // `expiring` is a working connection whose consent ends soon, and `revoked` an ended one: the
+    // API reported them as `connected` and `expired` before it told them apart.
+    if (row.status === 'connected' || row.status === 'expiring') connected += 1
+    if (row.status === 'error' || row.status === 'expired' || row.status === 'revoked') failed += 1
   }
   return Object.freeze({ connected, failed })
 }

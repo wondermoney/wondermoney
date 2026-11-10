@@ -32,7 +32,7 @@ export default function TransactionsList({
         return (
           <div
             key={tx.transactionKey}
-            className="flex items-center justify-between px-5 py-3"
+            className="flex items-center justify-between py-3"
           >
             <div className="flex items-center gap-3">
               <div className="bg-muted flex h-8 w-8 shrink-0 items-center justify-center rounded-lg">
@@ -56,11 +56,17 @@ export default function TransactionsList({
                   <span>{formatTxDate(tx.transactionDate)}</span>
                   {category && (
                     <>
-                      <span aria-hidden="true" className="bg-border h-3 w-px shrink-0" />
+                      <span
+                        aria-hidden="true"
+                        className="bg-border h-3 w-px shrink-0"
+                      />
                       <span>{t(getCategoryTranslationKey(category.name))}</span>
                     </>
                   )}
-                  <span aria-hidden="true" className="bg-border h-3 w-px shrink-0" />
+                  <span
+                    aria-hidden="true"
+                    className="bg-border h-3 w-px shrink-0"
+                  />
                   <span className="min-w-0 truncate">
                     {tx.accountKey.accountName}
                   </span>

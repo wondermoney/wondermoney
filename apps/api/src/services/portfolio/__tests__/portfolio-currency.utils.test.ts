@@ -72,4 +72,18 @@ describe('portfolio currency utils', () => {
       unrealizedGains: 6,
     });
   });
+
+  it('leaves a holding unvalued when no rate converts its currency, rather than pricing it at 1', () => {
+    for (const assetType of ['Stock', 'Cash']) {
+      expect(
+        resolveHoldingCurrentMetrics({
+          assetType,
+          averageBuyPrice: 120,
+          conversionRate: undefined,
+          quantity: 2,
+          rawCurrentPrice: 130,
+        }),
+      ).toMatchObject({ currentPrice: null, currentValue: null, unrealizedGains: null });
+    }
+  });
 });

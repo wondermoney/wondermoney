@@ -2,6 +2,7 @@ import { startOfYear, subDays, subMonths } from 'date-fns';
 import { describe, expect, it, vi } from 'vitest';
 
 const portfolioHoldingsServiceMock = vi.hoisted(() => ({
+  getInvestmentCashFlows: vi.fn().mockResolvedValue([]),
   getPortfolioHoldings: vi.fn(),
   getPortfoliosHoldings: vi.fn(),
   getRealizedGains: vi.fn(),
@@ -16,6 +17,8 @@ const snapshotServiceMock = vi.hoisted(() => ({
 }));
 
 vi.mock('@app/app', () => ({ DI: { em: {} } }));
+// The period measure reads snapshots through the database module: the same mocked `DI`.
+vi.mock('@app/database/di', async () => ({ DI: (await import('@app/app')).DI }));
 vi.mock('../portfolio-holdings.service', () => ({ default: portfolioHoldingsServiceMock }));
 vi.mock('../asset-price.service', () => ({ default: assetPriceServiceMock }));
 vi.mock('../portfolio-snapshot.service', () => ({ default: snapshotServiceMock }));
@@ -31,6 +34,10 @@ import portfolioTransactionService from '../portfolio-transaction.service';
 
 /** `getKysely` for a database that answers every query with `rows`. */
 const databaseReturning = (rows: unknown[]) => vi.fn(() => kyselyDouble(() => rows).db);
+
+/** `findOne` that finds the portfolio itself and no period-start snapshot. */
+const portfolioWithoutSnapshots = (portfolio: Record<string, unknown>) =>
+  vi.fn(async (_entity: unknown, where: { portfolioKey?: unknown }) => (typeof where.portfolioKey === 'number' ? portfolio : null));
 
 describe('portfolio dashboard service', () => {
   const service = new PortfolioDashboardService();
@@ -147,6 +154,117 @@ describe('portfolio dashboard service', () => {
     });
   });
 
+  describe('period return excludes money put in during the period', () => {
+    const yearStart = getPeriodStartDate('YTD');
+    const day = (offset: number) => new Date(yearStart.getTime() + offset * 86_400_000);
+    // Three monthly buys of €1,000 into a portfolio worth €10,000 when the year opened.
+    const monthlyBuys = [5, 35, 65].map((offset) => ({ amount: -1000, currencyCode: 'EUR', date: day(offset), kind: 'BUY' as const }));
+    const holdingWorth = (currentValue: number) => [
+      { allocation: 100, currentValue, financialAssetKey: 1, financialAssetSymbol: 'VWCE', unrealizedGains: 0, unrealizedGainsPercentage: 0 },
+    ];
+
+    function setupYear(currentValue: number) {
+      setupDashboardMocks();
+      portfolioHoldingsServiceMock.getPortfolioHoldings.mockResolvedValue(holdingWorth(currentValue));
+      portfolioHoldingsServiceMock.getPortfoliosHoldings.mockResolvedValue(holdingWorth(currentValue));
+      portfolioHoldingsServiceMock.getInvestmentCashFlows.mockResolvedValue(monthlyBuys);
+      const yearOpenSnapshot = { appuserCurrencyKey: { code: 'EUR' }, appuserCurrencyTotalValue: 10000, portfolioKey: { portfolioKey: 7, portfolioOwnerAppuserKey: { currencyKey: { code: 'EUR' } } }, snapshotDate: day(-1), totalValue: 10000 };
+      Object.assign(DI.em, {
+        find: vi.fn().mockResolvedValue([{ name: 'Long-term', portfolioKey: 7 }]),
+        findOne: vi.fn(async (_entity: unknown, where: { portfolioKey?: unknown }) =>
+          typeof where.portfolioKey === 'number' ? { name: 'Long-term', portfolioKey: 7 } : yearOpenSnapshot),
+      });
+    }
+
+    it('shows no return on a portfolio whose growth is only new money', async () => {
+      setupYear(13000);
+
+      const single = await service.getPortfolioDashboard(appuser, 7, 'YTD');
+      const aggregate = await service.getAggregateDashboard(appuser, 'YTD');
+
+      expect(single.summary.periodReturn).toBe(0);
+      expect(aggregate.summary.periodReturn).toBe(0);
+    });
+
+    it('measures the market move against what was held plus what was put in', async () => {
+      setupYear(13650);
+
+      const single = await service.getPortfolioDashboard(appuser, 7, 'YTD');
+      const aggregate = await service.getAggregateDashboard(appuser, 'YTD');
+
+      expect(single.summary.periodReturn).toBe(5);
+      expect(aggregate.summary.periodReturn).toBe(5);
+    });
+
+    describe('with the buys recorded in dollars by a household member', () => {
+      // Each $2,000 buy is €1,000 at 0.5, so the euro figures above still hold once converted.
+      const dollarBuys = monthlyBuys.map((flow) => ({ ...flow, amount: -2000, currencyCode: 'USD' }));
+
+      function setupDollarYear(currentValue: number, rate: null | number) {
+        setupYear(currentValue);
+        portfolioHoldingsServiceMock.getInvestmentCashFlows.mockResolvedValue(dollarBuys);
+        const { find, findOne } = DI.em as unknown as { find: (...args: unknown[]) => unknown; findOne: (...args: unknown[]) => unknown };
+        const isRate = (entity: unknown) => (entity as undefined | { name?: string })?.name === 'ExchangeRate';
+        Object.assign(DI.em, {
+          find: vi.fn((entity: unknown, ...rest: unknown[]) => (isRate(entity) ? Promise.resolve(rate == null ? [] : [{ date: day(-30), rate }]) : find(entity, ...rest))),
+          findOne: vi.fn((entity: unknown, ...rest: unknown[]) => (isRate(entity) ? Promise.resolve(null) : findOne(entity, ...rest))),
+        });
+      }
+
+      it('converts them into the viewer\'s currency at their dates', async () => {
+        setupDollarYear(13650, 0.5);
+
+        const single = await service.getPortfolioDashboard(appuser, 7, 'YTD');
+
+        expect(single.summary.periodReturn).toBe(5);
+      });
+
+      it('has no return when no rate converts them, never adding dollars to euros', async () => {
+        setupDollarYear(13650, null);
+
+        const single = await service.getPortfolioDashboard(appuser, 7, 'YTD');
+        const aggregate = await service.getAggregateDashboard(appuser, 'YTD');
+
+        expect(single.summary.periodReturn).toBeNull();
+        expect(aggregate.summary.periodReturn).toBeNull();
+      });
+    });
+  });
+
+  describe('household portfolios', () => {
+    it('counts and values every portfolio in the household, the partner\'s included', async () => {
+      setupDashboardMocks();
+      const find = vi.fn().mockResolvedValue([
+        { name: 'Long-term', portfolioKey: 7 },
+        { name: 'Tech picks', portfolioKey: 8 },
+      ]);
+      Object.assign(DI.em, { find, findOne: vi.fn().mockResolvedValue(null) });
+      portfolioHoldingsServiceMock.getPortfolioHoldings.mockImplementation((_appuser: Appuser, portfolioKey: number) => Promise.resolve(
+        portfolioKey === 7
+          ? [{ currentValue: 12535.86, financialAssetKey: 1 }]
+          : [{ currentValue: 2453.28, financialAssetKey: 2 }],
+      ));
+
+      const result = await service.getAggregateDashboard(appuser, 'YTD', 42);
+
+      expect(find.mock.calls[0]?.[1]).toEqual({ deletedAt: undefined, tenantKey: { tenantKey: 42 } });
+      expect(result.summary.portfolioCount).toBe(2);
+      expect(result.summary.totalValue).toBe(14989.14);
+      expect(result.portfolios.map((portfolio) => [portfolio.portfolioKey, portfolio.value])).toEqual([[7, 12535.86], [8, 2453.28]]);
+    });
+
+    it('opens a portfolio another household member owns', async () => {
+      setupDashboardMocks();
+      const findOne = vi.fn().mockResolvedValueOnce({ name: 'Tech picks', portfolioKey: 8 }).mockResolvedValue(null);
+      Object.assign(DI.em, { find: vi.fn().mockResolvedValue([]), findOne });
+
+      const result = await service.getPortfolioDashboard(appuser, 8, 'YTD', 42);
+
+      expect(findOne.mock.calls[0]?.[1]).toEqual({ deletedAt: undefined, portfolioKey: 8, tenantKey: { tenantKey: 42 } });
+      expect(result.summary.totalValue).toBe(280.42);
+    });
+  });
+
   describe('gain/loss composition', () => {
     it('includes realized gains in aggregate totalGainLoss while keeping unrealized gains separate', async () => {
       setupDashboardMocks();
@@ -173,7 +291,7 @@ describe('portfolio dashboard service', () => {
       setupDashboardMocks();
       Object.assign(DI.em, {
         find: vi.fn().mockResolvedValue([{ name: 'Main', portfolioKey: 1 }]),
-        findOne: vi.fn().mockResolvedValue({ name: 'Main', portfolioKey: 1 }),
+        findOne: portfolioWithoutSnapshots({ name: 'Main', portfolioKey: 1 }),
       });
       portfolioHoldingsServiceMock.getPortfolioHoldings.mockResolvedValue([
         {
@@ -221,7 +339,7 @@ describe('portfolio dashboard service', () => {
       setupDashboardMocks();
       Object.assign(DI.em, {
         find: vi.fn().mockResolvedValue([{ name: 'Main', portfolioKey: 1 }]),
-        findOne: vi.fn().mockResolvedValue({ name: 'Main', portfolioKey: 1 }),
+        findOne: portfolioWithoutSnapshots({ name: 'Main', portfolioKey: 1 }),
       });
     }
 
@@ -272,7 +390,7 @@ describe('portfolio dashboard service', () => {
     it('uses each holding historical price when computing top movers', async () => {
       Object.assign(DI.em, {
         find: vi.fn().mockResolvedValue([{ portfolioKey: 1 }]),
-        findOne: vi.fn().mockResolvedValue({ portfolioKey: 1 }),
+        findOne: portfolioWithoutSnapshots({ portfolioKey: 1 }),
       });
       portfolioHoldingsServiceMock.getPortfolioHoldings.mockResolvedValue([
         {
@@ -319,14 +437,11 @@ describe('portfolio dashboard service', () => {
   describe('performance data statuses', () => {
     it('marks one-point portfolio history as insufficient and waits for benchmark comparison', async () => {
       setupDashboardMocks();
-      const findMock = vi.fn((entity) => {
-        if (entity?.name === 'PortfolioSnapshot') {
-          return Promise.resolve([{ appuserCurrencyTotalValue: 100, snapshotDate: new Date('2024-01-01') }]);
-        }
-        return Promise.resolve([{ name: 'Main', portfolioKey: 1 }]);
-      });
+      const snapshotsQuery = databaseReturning([
+        { currency_code: 'EUR', snapshot_date: '2024-01-01', value: '100' },
+      ]);
       const findOneMock = vi.fn().mockResolvedValue({ benchmarkSymbol: 'SPY' });
-      Object.assign(DI.em, { find: findMock, findOne: findOneMock });
+      Object.assign(DI.em, { findOne: findOneMock, getKysely: snapshotsQuery });
 
       const result = await service.getPerformanceData(appuser, 1, 'YTD');
 
@@ -341,17 +456,12 @@ describe('portfolio dashboard service', () => {
 
     it('marks missing benchmark data when portfolio history is ready', async () => {
       setupDashboardMocks();
-      const findMock = vi.fn((entity) => {
-        if (entity?.name === 'PortfolioSnapshot') {
-          return Promise.resolve([
-            { appuserCurrencyTotalValue: 100, snapshotDate: new Date('2024-01-01') },
-            { appuserCurrencyTotalValue: 110, snapshotDate: new Date('2024-01-02') },
-          ]);
-        }
-        return Promise.resolve([{ name: 'Main', portfolioKey: 1 }]);
-      });
+      const snapshotsQuery = databaseReturning([
+        { currency_code: 'EUR', snapshot_date: '2024-01-01', value: '100' },
+        { currency_code: 'EUR', snapshot_date: '2024-01-02', value: '110' },
+      ]);
       const findOneMock = vi.fn().mockResolvedValue({ benchmarkSymbol: 'SPY' });
-      Object.assign(DI.em, { find: findMock, findOne: findOneMock });
+      Object.assign(DI.em, { findOne: findOneMock, getKysely: snapshotsQuery });
       assetPriceServiceMock.getBenchmarkHistoricalPrices.mockResolvedValueOnce([{ date: '2024-01-01', value: 100 }]);
 
       const result = await service.getPerformanceData(appuser, 1, 'YTD');
@@ -362,32 +472,24 @@ describe('portfolio dashboard service', () => {
 
     it('throws for missing or unowned single portfolios before querying snapshots', async () => {
       setupDashboardMocks();
-      const findMock = vi.fn((entity) => {
-        if (entity?.name === 'PortfolioSnapshot') {
-          return Promise.resolve([{ appuserCurrencyTotalValue: 100, snapshotDate: new Date('2024-01-01') }]);
-        }
-        return Promise.resolve([]);
-      });
+      const snapshotsQuery = databaseReturning([
+        { currency_code: 'EUR', snapshot_date: '2024-01-01', value: '100' },
+      ]);
       const findOneMock = vi.fn().mockResolvedValue(null);
-      Object.assign(DI.em, { find: findMock, findOne: findOneMock });
+      Object.assign(DI.em, { findOne: findOneMock, getKysely: snapshotsQuery });
 
       await expect(service.getPerformanceData(appuser, 1, 'YTD')).rejects.toThrow('Portfolio not found');
-      expect(findMock).not.toHaveBeenCalled();
+      expect(snapshotsQuery).not.toHaveBeenCalled();
     });
 
     it('marks benchmark ready when both histories are sufficient', async () => {
       setupDashboardMocks();
-      const findMock = vi.fn((entity) => {
-        if (entity?.name === 'PortfolioSnapshot') {
-          return Promise.resolve([
-            { appuserCurrencyTotalValue: 100, snapshotDate: new Date('2024-01-01') },
-            { appuserCurrencyTotalValue: 110, snapshotDate: new Date('2024-01-02') },
-          ]);
-        }
-        return Promise.resolve([{ name: 'Main', portfolioKey: 1 }]);
-      });
+      const snapshotsQuery = databaseReturning([
+        { currency_code: 'EUR', snapshot_date: '2024-01-01', value: '100' },
+        { currency_code: 'EUR', snapshot_date: '2024-01-02', value: '110' },
+      ]);
       const findOneMock = vi.fn().mockResolvedValue({ benchmarkSymbol: 'SPY' });
-      Object.assign(DI.em, { find: findMock, findOne: findOneMock });
+      Object.assign(DI.em, { findOne: findOneMock, getKysely: snapshotsQuery });
       assetPriceServiceMock.getBenchmarkHistoricalPrices.mockResolvedValueOnce([
         { date: '2024-01-01', value: 100 },
         { date: '2024-01-02', value: 101 },
@@ -402,7 +504,7 @@ describe('portfolio dashboard service', () => {
     it('returns null quick stats when allocation or gain percentages are missing', async () => {
       Object.assign(DI.em, {
         find: vi.fn().mockResolvedValue([{ name: 'Main', portfolioKey: 1 }]),
-        findOne: vi.fn().mockResolvedValue({ name: 'Main', portfolioKey: 1 }),
+        findOne: portfolioWithoutSnapshots({ name: 'Main', portfolioKey: 1 }),
       });
       portfolioHoldingsServiceMock.getPortfolioHoldings.mockResolvedValue([
         {
@@ -457,17 +559,12 @@ describe('portfolio dashboard service', () => {
 
     it('filters benchmark points before the first portfolio point before normalization', async () => {
       setupDashboardMocks();
-      const findMock = vi.fn((entity) => {
-        if (entity?.name === 'PortfolioSnapshot') {
-          return Promise.resolve([
-            { appuserCurrencyTotalValue: 100, snapshotDate: new Date('2024-01-10') },
-            { appuserCurrencyTotalValue: 110, snapshotDate: new Date('2024-01-11') },
-          ]);
-        }
-        return Promise.resolve([{ name: 'Main', portfolioKey: 1 }]);
-      });
+      const snapshotsQuery = databaseReturning([
+        { currency_code: 'EUR', snapshot_date: '2024-01-10', value: '100' },
+        { currency_code: 'EUR', snapshot_date: '2024-01-11', value: '110' },
+      ]);
       const findOneMock = vi.fn().mockResolvedValue({ benchmarkSymbol: 'SPY' });
-      Object.assign(DI.em, { find: findMock, findOne: findOneMock });
+      Object.assign(DI.em, { findOne: findOneMock, getKysely: snapshotsQuery });
       assetPriceServiceMock.getBenchmarkHistoricalPrices.mockResolvedValueOnce([
         { date: '2024-01-01', value: 90 },
         { date: '2024-01-10', value: 100 },
@@ -555,7 +652,7 @@ describe('portfolio dashboard service', () => {
 
     it('marks aggregate performance insufficient when snapshots have one point', async () => {
       setupDashboardMocks();
-      const snapshotRows = [{ snapshot_date: '2024-01-01', total_value: '100' }];
+      const snapshotRows = [{ currency_code: 'EUR', snapshot_date: '2024-01-01', value: '100' }];
       Object.assign(DI.em, {
         find: vi.fn().mockResolvedValue([{ portfolioKey: 1 }]),
         getKysely: databaseReturning(snapshotRows),
@@ -567,25 +664,9 @@ describe('portfolio dashboard service', () => {
       expect(result.benchmarkStatus).toBe('waiting_for_portfolio_history');
     });
 
-    it('uses the fallback snapshot total when the appuser total is null', async () => {
-      setupDashboardMocks();
-      const database = kyselyDouble(() => [
-        { appuser_currency_total_value: null, snapshot_date: '2024-01-01', total_value: '125' },
-      ]);
-      Object.assign(DI.em, {
-        find: vi.fn().mockResolvedValue([{ portfolioKey: 1 }]),
-        getKysely: vi.fn(() => database.db),
-      });
-
-      const result = await service.getPerformanceData(appuser, null, 'YTD');
-
-      expect(result.dataPoints).toEqual([{ date: '2024-01-01', value: 125 }]);
-      expect(database.queries[0]?.sql).toContain('SUM(COALESCE(ps.appuser_currency_total_value, ps.total_value)) as "total_value"');
-    });
-
     it('scopes aggregate snapshot totals to the requested tenant', async () => {
       setupDashboardMocks();
-      const database = kyselyDouble(() => [{ snapshot_date: '2024-01-01', total_value: '100' }]);
+      const database = kyselyDouble(() => [{ currency_code: 'EUR', snapshot_date: '2024-01-01', value: '100' }]);
       Object.assign(DI.em, {
         find: vi.fn().mockResolvedValue([{ portfolioKey: 1 }]),
         getKysely: vi.fn(() => database.db),
@@ -602,8 +683,8 @@ describe('portfolio dashboard service', () => {
     it('marks aggregate benchmark missing when history is ready but benchmark is short', async () => {
       setupDashboardMocks();
       const snapshotRows = [
-            { snapshot_date: '2024-01-01', total_value: '100' },
-            { snapshot_date: '2024-01-02', total_value: '110' },
+            { currency_code: 'EUR', snapshot_date: '2024-01-01', value: '100' },
+            { currency_code: 'EUR', snapshot_date: '2024-01-02', value: '110' },
           ];
       Object.assign(DI.em, {
         find: vi.fn().mockResolvedValue([{ portfolioKey: 1 }]),
@@ -620,8 +701,8 @@ describe('portfolio dashboard service', () => {
     it('filters aggregate benchmark points before the first portfolio point before normalization', async () => {
       setupDashboardMocks();
       const snapshotRows = [
-            { snapshot_date: '2024-01-10', total_value: '100' },
-            { snapshot_date: '2024-01-11', total_value: '110' },
+            { currency_code: 'EUR', snapshot_date: '2024-01-10', value: '100' },
+            { currency_code: 'EUR', snapshot_date: '2024-01-11', value: '110' },
           ];
       Object.assign(DI.em, {
         find: vi.fn().mockResolvedValue([{ portfolioKey: 1 }]),

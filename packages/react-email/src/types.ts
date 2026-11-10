@@ -142,6 +142,28 @@ export interface AccountConnectedEmailProps {
   dashboardUrl: string;
 }
 
+/** Which bank-connection problem a bank sync alert email is about. */
+export type BankSyncAlertKind = "consent_expiring_7d" | "consent_expiring_1d" | "consent_revoked" | "sync_failing";
+
+/** A bank connection needs the user's attention (consent ending, ended by the bank, or failing syncs). */
+export interface BankSyncAlertEmailProps {
+  /** Instance name (the API's `INSTANCE_NAME`); defaults to WonderMoney. */
+  brandName?: string;
+  language: TransactionalEmailLanguage;
+  firstName?: string;
+  kind: BankSyncAlertKind;
+  /** Display name of the bank. */
+  bankName: string;
+  /** The consent's end date, formatted in `language`. Required for the `consent_expiring_*` kinds. */
+  expiryDate?: string;
+  /** The first failed sync of the streak, formatted in `language`. Required for `sync_failing`. */
+  failingSinceDate?: string;
+  /** Absolute link to where the user reconnects the bank. */
+  reconnectUrl: string;
+  /** Absolute link to the notification settings, where these alerts are turned off. */
+  settingsUrl: string;
+}
+
 export interface InternalAlertDetail {
   label: string;
   value: string;

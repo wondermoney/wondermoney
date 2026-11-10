@@ -1,31 +1,39 @@
 import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { FlatList, Pressable, StyleSheet, Text, TextInput, View } from 'react-native'
+import { Pressable, StyleSheet, TextInput, View } from 'react-native'
 
+import { Button } from '@/components/ui/button'
+import { FormRow } from '@/components/ui/form-row'
+import { Icon } from '@/components/ui/icon'
+import { Sheet } from '@/components/ui/sheet'
+import { Text } from '@/components/ui/text'
 import { themeTokens, type Palette } from '@/theme/tokens'
 import { textStyles } from '@/theme/typography'
-
+import { usePalette } from '@/theme/use-palette'
 
 export type CanonicalValuePickerProps = Readonly<{
   label: string
   options: readonly string[]
   selected: string | null
   onSelect: (value: string | null) => void
-  palette: Palette
+  /** Kept for callers; the picker reads the palette itself. */
+  palette?: Palette
 }>
 
 const MAX_VISIBLE_RESULTS = 50
 
 /**
- * Reused across sector/industry/country/exchange (screener-canonical-lists.ts) — lists run from
- * 7 to 219 entries, so this is search-filterable and results are capped rather than rendering
- * every match, keeping the list responsive without pulling in a virtualization dependency beyond
- * FlatList (already part of react-native core).
+ * One screener filter over a long canonical list (sectors, industries,
+ * countries, exchanges) as a form row: the label left, the choice right ("Any"
+ * when there is none). Tapping it opens a sheet with a search field and the
+ * matching values (at most 50 drawn at once), plus "Clear" while a value is set.
  */
-export function CanonicalValuePicker({ label, options, selected, onSelect, palette }: CanonicalValuePickerProps) {
+export function CanonicalValuePicker({ label, options, selected, onSelect }: CanonicalValuePickerProps) {
   const { t } = useTranslation()
-  const [expanded, setExpanded] = useState(false)
+  const palette = usePalette()
+  const [open, setOpen] = useState(false)
   const [query, setQuery] = useState('')
+  const [focused, setFocused] = useState(false)
 
   const filtered = useMemo(() => {
     const trimmed = query.trim().toLowerCase()
@@ -33,74 +41,64 @@ export function CanonicalValuePicker({ label, options, selected, onSelect, palet
     return matches.slice(0, MAX_VISIBLE_RESULTS)
   }, [options, query])
 
-  return (
-    <View style={styles.field}>
-      <Pressable
-        accessibilityRole="button"
-        accessibilityLabel={label}
-        accessibilityState={{ expanded }}
-        onPress={() => setExpanded((value) => !value)}
-        style={[styles.summary, { borderColor: palette.border, backgroundColor: palette.card }]}
-      >
-        <Text allowFontScaling style={[styles.label, { color: palette.foreground }]}>{label}</Text>
-        <Text allowFontScaling style={[styles.summaryValue, { color: selected ? palette.foreground : palette.mutedForeground }]}>
-          {selected ?? t('screener.canonicalPicker.any')}
-        </Text>
-      </Pressable>
+  const close = () => { setOpen(false); setQuery('') }
+  const choose = (value: string | null) => { onSelect(value); close() }
 
-      {expanded ? (
-        <View style={[styles.panel, { borderColor: palette.border, backgroundColor: palette.card }]}>
-          {selected ? (
-            <Pressable
-              accessibilityRole="button"
-              onPress={() => { onSelect(null); setExpanded(false); setQuery('') }}
-              style={styles.clearRow}
-            >
-              <Text allowFontScaling style={[styles.clearLabel, { color: palette.primary }]}>{t('screener.canonicalPicker.clear')}</Text>
-            </Pressable>
-          ) : null}
+  return (
+    <>
+      <FormRow expanded={open} label={label} onPress={() => setOpen(true)} placeholder={t('screener.canonicalPicker.any')} value={selected} />
+      <Sheet closeLabel={t('common.close')} onClose={close} title={label} visible={open}>
+        <View style={styles.body}>
           <TextInput
             accessibilityLabel={t('screener.canonicalPicker.searchPlaceholder', { label })}
+            allowFontScaling
+            autoCapitalize="none"
+            autoCorrect={false}
+            onBlur={() => setFocused(false)}
             onChangeText={setQuery}
+            onFocus={() => setFocused(true)}
             placeholder={t('screener.canonicalPicker.searchPlaceholder', { label })}
             placeholderTextColor={palette.mutedForeground}
-            style={[styles.search, { color: palette.foreground, borderColor: palette.border }]}
+            style={[styles.search, { color: palette.foreground, borderColor: focused ? palette.ring : palette.input, borderWidth: focused ? 2 : 1 }]}
             value={query}
           />
-          <FlatList
-            data={filtered}
-            keyExtractor={(item) => item}
-            style={styles.list}
-            keyboardShouldPersistTaps="handled"
-            renderItem={({ item }) => (
-              <Pressable
-                accessibilityRole="button"
-                accessibilityState={{ selected: item === selected }}
-                onPress={() => { onSelect(item); setExpanded(false); setQuery('') }}
-                style={styles.optionRow}
-              >
-                <Text allowFontScaling style={[styles.optionLabel, { color: item === selected ? palette.primary : palette.foreground }]}>{item}</Text>
-              </Pressable>
-            )}
-            ListEmptyComponent={<Text allowFontScaling style={[styles.empty, { color: palette.mutedForeground }]}>{t('screener.canonicalPicker.noMatches')}</Text>}
-          />
+          {selected ? (
+            <View style={styles.clear}>
+              <Button label={t('screener.canonicalPicker.clear')} onPress={() => choose(null)} size="sm" variant="link" />
+            </View>
+          ) : null}
+          {filtered.length === 0 ? (
+            <Text style={styles.empty} tone="muted" variant="body">{t('screener.canonicalPicker.noMatches')}</Text>
+          ) : (
+            <View>
+              {filtered.map((item, index) => {
+                const checked = item === selected
+                return (
+                  <Pressable
+                    accessibilityRole="button"
+                    accessibilityState={{ selected: checked }}
+                    key={item}
+                    onPress={() => choose(item)}
+                    style={({ pressed }) => [styles.option, index > 0 && { borderTopWidth: 1, borderTopColor: palette.border }, pressed && { backgroundColor: palette.muted }]}
+                  >
+                    <Text style={styles.optionLabel} tone={checked ? 'primary' : 'default'} variant={checked ? 'bodyStrong' : 'body'}>{item}</Text>
+                    {checked ? <Icon color={palette.primary} name="check" size={16} /> : null}
+                  </Pressable>
+                )
+              })}
+            </View>
+          )}
         </View>
-      ) : null}
-    </View>
+      </Sheet>
+    </>
   )
 }
 
 const styles = StyleSheet.create({
-  field: { gap: themeTokens.spacing[2] },
-  summary: { minHeight: themeTokens.touchTarget.minimum, borderWidth: 1, borderRadius: themeTokens.radius.md, paddingHorizontal: themeTokens.spacing[3], paddingVertical: themeTokens.spacing[2], gap: themeTokens.spacing[1] },
-  label: { ...textStyles.bodyStrong, fontWeight: '600' as const },
-  summaryValue: { ...textStyles.body },
-  panel: { borderWidth: 1, borderRadius: themeTokens.radius.md, padding: themeTokens.spacing[3], gap: themeTokens.spacing[2], maxHeight: 320 },
-  clearRow: { minHeight: themeTokens.touchTarget.minimum, justifyContent: 'center' },
-  clearLabel: { ...textStyles.bodyStrong, fontWeight: '600' as const },
-  search: { ...textStyles.body, minHeight: themeTokens.touchTarget.minimum, borderWidth: 1, borderRadius: themeTokens.radius.sm, paddingHorizontal: themeTokens.spacing[3] },
-  list: { flexGrow: 0 },
-  optionRow: { minHeight: themeTokens.touchTarget.minimum, justifyContent: 'center', paddingHorizontal: themeTokens.spacing[1] },
-  optionLabel: { ...textStyles.body },
-  empty: { ...textStyles.body, paddingVertical: themeTokens.spacing[2] },
+  body: { gap: themeTokens.spacing[3], paddingBottom: themeTokens.spacing[4] },
+  search: { ...textStyles.body, minHeight: themeTokens.touchTarget.minimum, borderRadius: themeTokens.radius.md, paddingHorizontal: themeTokens.spacing[3] },
+  clear: { alignItems: 'flex-start' },
+  option: { minHeight: themeTokens.touchTarget.minimum, flexDirection: 'row', alignItems: 'center', gap: themeTokens.spacing[3], paddingVertical: themeTokens.spacing[3] },
+  optionLabel: { flex: 1 },
+  empty: { paddingVertical: themeTokens.spacing[2] },
 })

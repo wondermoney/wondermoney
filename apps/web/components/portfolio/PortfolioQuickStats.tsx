@@ -51,7 +51,10 @@ const PortfolioQuickStats: React.FC<PortfolioQuickStatsProps> = ({
       subValue:
         quickStats.bestPerformer?.change == null
           ? ""
-          : formatPercentage(quickStats.bestPerformer.change / 100, signedOneDecimal),
+          : formatPercentage(
+              quickStats.bestPerformer.change / 100,
+              signedOneDecimal,
+            ),
       tone:
         quickStats.bestPerformer?.change == null
           ? "neutral"
@@ -65,7 +68,10 @@ const PortfolioQuickStats: React.FC<PortfolioQuickStatsProps> = ({
       subValue:
         quickStats.worstPerformer?.change == null
           ? ""
-          : formatPercentage(quickStats.worstPerformer.change / 100, signedOneDecimal),
+          : formatPercentage(
+              quickStats.worstPerformer.change / 100,
+              signedOneDecimal,
+            ),
       tone:
         quickStats.worstPerformer?.change == null
           ? "neutral"
@@ -76,7 +82,7 @@ const PortfolioQuickStats: React.FC<PortfolioQuickStatsProps> = ({
   ];
 
   return (
-    <div className="p-4">
+    <div className="py-1">
       <div className="grid grid-cols-2 gap-4">
         {statItems.map((item) => (
           <div key={item.label} className="flex items-start">
@@ -84,9 +90,13 @@ const PortfolioQuickStats: React.FC<PortfolioQuickStatsProps> = ({
                 performer" showed a rising arrow even on a loss. The signed,
                 coloured figure carries the direction. */}
             <div className="flex flex-col">
-              <span className="text-xs text-muted-foreground">{item.label}</span>
+              <span className="text-muted-foreground text-xs">
+                {item.label}
+              </span>
               <div className="flex items-baseline gap-1">
-                <span className="text-sm font-semibold text-foreground">{item.value}</span>
+                <span className="text-foreground text-sm font-semibold">
+                  {item.value}
+                </span>
                 {item.subValue && (
                   <span
                     className={cn(

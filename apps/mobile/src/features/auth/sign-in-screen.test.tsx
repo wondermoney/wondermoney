@@ -4,6 +4,7 @@ import { StyleSheet, Text } from 'react-native'
 
 import { initMobileI18n } from '@/lib/i18n'
 
+import { touchHeight } from '@/test/touch-target'
 import { SignInScreen, SignInScreenProps } from './sign-in-screen'
 
 async function renderScreen(onSubmit = jest.fn(), extraProps: Partial<SignInScreenProps> = {}) {
@@ -42,13 +43,13 @@ describe('SignInScreen', () => {
     await waitFor(() => expect(view.getByRole('alert', { name: message })).toBeOnTheScreen())
   })
 
-  it('uses secure, scalable 48dp controls and exposes no forbidden auth paths', async () => {
+  it('uses secure, scalable 44pt-target controls and exposes no forbidden auth paths', async () => {
     const { view } = await renderScreen()
     const password = view.getByLabelText('Password')
     expect(password.props.secureTextEntry).toBe(true)
     expect(view.getByLabelText('Email').props.autoCapitalize).toBe('none')
     const button = view.getByRole('button', { name: 'Sign in' })
-    expect(StyleSheet.flatten(button.props.style).minHeight).toBeGreaterThanOrEqual(48)
+    expect(touchHeight(button)).toBeGreaterThanOrEqual(44)
     await fireEvent(button, 'focus')
     expect(StyleSheet.flatten(view.getByRole('button', { name: 'Sign in' }).props.style).borderWidth).toBe(2)
     expect(view.queryByText(/sign up|google|apple|magic|forgot|recover|bank|billing/i)).not.toBeOnTheScreen()

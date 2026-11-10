@@ -4,16 +4,19 @@ import { addMonths, format, subMonths } from "date-fns";
 import { useLocale, useTranslations } from "next-intl";
 import { useMemo } from "react";
 
+import {
+  BudgetMonthLead,
+  MeasureKey,
+} from "@/components/budget/BudgetMonthLead";
 import { BudgetMonthNavigator } from "@/components/budget/BudgetMonthNavigator";
 import BudgetOverviewTable from "@/components/budget/BudgetOverviewTable";
 import BudgetTableMonth from "@/components/budget/BudgetTable";
 import GoalsBudgetSection from "@/components/goals/GoalsBudgetSection";
-import { Amount } from "@/components/ui/Amount";
-import { Text } from "@/components/ui/Typography";
+import { UnconvertedAmountsNotice } from "@/components/ui/UnconvertedAmountsNotice";
 import { useRouter } from "@/i18n/navigation";
 import type { GetBudgetTemplateByYearResponse } from "@/lib/api/budget/useBudgetTemplateByYear";
 import type { GetBudgetTemplateByYearAndMonthResponse } from "@/lib/api/budget/useBudgetTemplateByYearAndMonth";
-import { cn } from "@/lib/utils";
+import { overPlanLines } from "@/lib/home/month-overview";
 import {
   calculatePlannedAndSpentValue,
   convertBudgetTemplatesIntoRows,
@@ -73,14 +76,19 @@ export default function BudgetMonthClient({
 
   const {
     totalPlanned,
+    totalAvailable,
     totalSpent,
     totalPercentage,
-  }: { totalPlanned?: number; totalSpent?: number; totalPercentage?: number } =
-    useMemo(() => {
-      if (!data) return {};
+  }: {
+    totalPlanned?: number;
+    totalAvailable?: number;
+    totalSpent?: number;
+    totalPercentage?: number;
+  } = useMemo(() => {
+    if (!data) return {};
 
-      return calculatePlannedAndSpentValue(data);
-    }, [data]);
+    return calculatePlannedAndSpentValue(data);
+  }, [data]);
 
   const yearlyData = useMemo(() => {
     if (!budgetCategoriesYearlyData) return null;
@@ -107,10 +115,13 @@ export default function BudgetMonthClient({
   const isTotalsDataReady =
     totalSpent !== undefined &&
     totalPlanned !== undefined &&
+    totalAvailable !== undefined &&
     totalPercentage !== undefined;
 
+  // Remaining is measured against what the month may spend: the plan plus
+  // what rollover carried in.
   const totalMonthlySavings = isTotalsDataReady
-    ? totalPlanned - totalSpent
+    ? totalAvailable - totalSpent
     : undefined;
 
   const overviewData = useMemo(() => {
@@ -126,8 +137,8 @@ export default function BudgetMonthClient({
         name: t("month"),
         spent: totalSpent,
         budgeted: totalPlanned,
-        remaining: totalPlanned - totalSpent,
-        remainingPercentage: (totalPlanned - totalSpent) / totalPlanned,
+        remaining: totalAvailable - totalSpent,
+        remainingPercentage: (totalAvailable - totalSpent) / totalAvailable,
       },
       {
         name: t("year"),
@@ -141,6 +152,7 @@ export default function BudgetMonthClient({
   }, [
     isTotalsDataReady,
     t,
+    totalAvailable,
     totalPlanned,
     totalSpent,
     totalYearlyPlanned,
@@ -153,46 +165,48 @@ export default function BudgetMonthClient({
 
   return (
     <>
-      <div className="bg-background my-4 rounded-xl">
-        <div className="flex flex-row items-center justify-between">
-          <BudgetMonthNavigator
-            label={
-              budgetDate
-                ? `${format(budgetDate, "LLL", { locale: getDateFnsLocale(locale) })} ${budgetDate.getFullYear()}`
-                : null
-            }
-            hasPreviousMonth={hasPreviousMonth}
-            hasNextMonth={hasNextMonth}
-            onPreviousMonth={navigateToPreviousMonth}
-            onNextMonth={navigateToNextMonth}
-          />
-          <div className="flex flex-col items-end p-4 pr-0">
-            <Text
-              variant="largeText"
-              className={cn(
-                "text-xl",
-                totalMonthlySavings < 0
-                  ? "text-destructive-text"
-                  : "text-success-text",
-              )}
-            >
-              <Amount value={totalMonthlySavings} currency={budgetCategoriesData.budget.currencyCode} />
-            </Text>
-            <Text variant="mutedText">
-              {totalMonthlySavings < 0
-                ? t("loss-monthly")
-                : t("remaining-monthly")}
-            </Text>
-          </div>
-        </div>
+      <div className="my-6 flex flex-col gap-6">
+        <BudgetMonthNavigator
+          label={
+            budgetDate
+              ? `${format(budgetDate, "LLLL", { locale: getDateFnsLocale(locale) })} ${budgetDate.getFullYear()}`
+              : null
+          }
+          hasPreviousMonth={hasPreviousMonth}
+          hasNextMonth={hasNextMonth}
+          onPreviousMonth={navigateToPreviousMonth}
+          onNextMonth={navigateToNextMonth}
+        />
+        <BudgetMonthLead
+          monthName={
+            budgetDate
+              ? format(budgetDate, "LLLL", { locale: getDateFnsLocale(locale) })
+              : ""
+          }
+          // Both are defined here: the early return above covers undefined.
+          planned={totalPlanned ?? 0}
+          available={totalAvailable ?? 0}
+          spent={totalSpent ?? 0}
+          overPlanCount={data ? overPlanLines(data).length : 0}
+          currency={budgetCategoriesData.budget.currencyCode}
+        />
+        <UnconvertedAmountsNotice
+          completeness={budgetCategoriesData.completeness}
+        />
+        {budgetCategoriesData.rolloverComplete === false ? (
+          <p role="note" className="text-muted-foreground text-sm">
+            {t("budgetPage.rollover-incomplete-month")}
+          </p>
+        ) : null}
       </div>
       <div className="flex flex-col gap-4">
-        <div className="bg-background flex min-h-96 flex-col justify-center">
+        <div className="border-foreground flex min-h-96 flex-col justify-center gap-3 border-t-2 pt-2">
           <BudgetTableMonth
             budget={data ?? []}
             budgetKey={budgetKey}
-            year={new Date().getFullYear()}
-            month={new Date().getMonth() + 1}
+            // Edits and deletes apply to the month on screen, which can be in next year.
+            year={year}
+            month={month}
             view="month"
             currency={budgetCategoriesData.budget.currencyCode}
             footerData={
@@ -211,6 +225,7 @@ export default function BudgetMonthClient({
                 : undefined
             }
           />
+          <MeasureKey />
         </div>
         <div className="bg-background flex min-h-36 flex-col justify-center">
           {overviewData && budgetCategoriesData ? (
@@ -219,6 +234,10 @@ export default function BudgetMonthClient({
               currency={budgetCategoriesData.budget.currencyCode}
             />
           ) : null}
+          <UnconvertedAmountsNotice
+            completeness={budgetCategoriesYearlyData?.completeness}
+            className="mt-2"
+          />
         </div>
         <GoalsBudgetSection />
       </div>

@@ -78,39 +78,71 @@ async function renderScreen(
 }
 
 describe('GoalsScreen', () => {
-  it('shows ordered non-interactive goal rows with locale currency and complete comparisons', async () => {
+  it('shows the goal ledger in order, each row with its status chip, figure, target and percentage', async () => {
     const { view } = await renderScreen({ status: 'loaded', data })
     const rows = view.getAllByTestId('goal-row')
     expect(rows).toHaveLength(3)
     expect(within(rows[0]).getByText('Emergency reserve')).toBeOnTheScreen()
     expect(within(rows[1]).getByText('Japan reserve')).toBeOnTheScreen()
     expect(within(rows[2]).getByText('Dollar reserve')).toBeOnTheScreen()
-    expect(view.getByLabelText(/Emergency reserve.*Behind.*€600\.00.*€1,000\.00.*€400\.00/)).toBeOnTheScreen()
-    expect(view.getByLabelText(/Japan reserve.*Paused.*¥0.*Progress unavailable/)).toBeOnTheScreen()
-    expect(view.getByLabelText(/Dollar reserve.*\$250\.00.*\$200\.00.*Over target/)).toBeOnTheScreen()
-    expect(within(rows[2]).getByText('Progress 125% · Over target')).toBeOnTheScreen()
-    expect(view.getByLabelText(/Dollar reserve.*Progress 125%.*Over target/)).toBeOnTheScreen()
+    expect(within(rows[0]).getByText('Active')).toBeOnTheScreen()
+    expect(within(rows[1]).getByText('Paused')).toBeOnTheScreen()
+    expect(within(rows[0]).getByText('of €1,000.00')).toBeOnTheScreen()
+    expect(within(rows[0]).getByText('60%')).toBeOnTheScreen()
+    expect(view.getByLabelText(/Emergency reserve.*Active.*Available, €600\.00.*of €1,000\.00.*60%/)).toBeOnTheScreen()
+    // Web clamps the bar and the figure to 100%.
+    expect(within(rows[2]).getByText('100%')).toBeOnTheScreen()
     expect(StyleSheet.flatten(view.getByTestId('goal-progress-fill-5').props.style).width).toBe('100%')
-    expect(within(rows[2]).getByText(/Monthly contribution.*\$0\.00/)).toBeOnTheScreen()
-    expect(within(rows[1]).queryByText(/Monthly contribution|Target date/)).not.toBeOnTheScreen()
     expect(view.queryAllByRole('link')).toHaveLength(0)
-    expect(rows[0].props.accessibilityRole).toBeUndefined()
+  })
+
+  it('leads with Funded of the target, then Target and Active, and does not sum goals held in different currencies', async () => {
+    const single = await renderScreen({ status: 'loaded', data: { goals: [data.goals[0]] } })
+    const summary = single.view.getByTestId('goals-summary')
+    expect(within(summary).getByText('Target')).toBeOnTheScreen()
+    expect(within(summary).getByText('€1,000.00')).toBeOnTheScreen()
+    expect(within(summary).getByText('€800.00')).toBeOnTheScreen()
+    expect(within(summary).getByText('of €1,000.00')).toBeOnTheScreen()
+    // Funded is the one headline; Target and Active follow it as columns.
+    const labels = within(summary).getAllByText(/^(Funded|Target|Active)$/).map((node) => node.props.children)
+    expect(labels).toEqual(['Funded', 'Target', 'Active'])
+
+    const mixed = await renderScreen({ status: 'loaded', data })
+    const mixedSummary = mixed.view.getByTestId('goals-summary')
+    expect(within(mixedSummary).getByText('Goals')).toBeOnTheScreen()
+    expect(within(mixedSummary).getAllByText('3')).toHaveLength(2)
+    expect(within(mixedSummary).queryByText(/€/)).not.toBeOnTheScreen()
+  })
+
+  it('shows a debt goal with its remaining balance, chip and payoff date', async () => {
+    const debt = mapGoalListItem({
+      ...goalFixture,
+      type: 'debt_paydown',
+      summary: { ...goalFixture.summary, debtProjection: { currentBalance: 9017.06, monthlyPayment: 250, months: 29, payoffDate: '2029-04-01T00:00:00.000Z', paysOff: true, progressPercentage: 0, totalInterest: 400 } },
+    })
+    const { view } = await renderScreen({ status: 'loaded', data: { goals: [debt] } })
+    const row = view.getByTestId('goal-row')
+    expect(within(row).getByText('Pay off debt')).toBeOnTheScreen()
+    expect(within(row).getByText('Remaining')).toBeOnTheScreen()
+    expect(within(row).getByText('Payoff by Apr 1, 2029')).toBeOnTheScreen()
   })
 
   it('does not aggregate goals or expose unrelated write, premium, or bank-transfer language', async () => {
     const { view } = await renderScreen({ status: 'loaded', data })
     expect(view.getByRole('button', { name: 'Create goal' })).toBeOnTheScreen()
-    expect(view.queryByText(/total|add|edit|delete|premium|upgrade|bank transfer|transfer|transaction/i)).not.toBeOnTheScreen()
+    expect(view.queryByText(/add|edit|delete|premium|upgrade|bank transfer|transfer|transaction/i)).not.toBeOnTheScreen()
     expect(view.queryByRole('image')).not.toBeOnTheScreen()
   })
 
-  it('explains on-track status without presenting it as a guarantee', async () => {
+  it('keeps the on-track caveat off the card and, like web, has no help hint beside the title', async () => {
     const onTrack = mapGoalListItem({
       ...goalFixture,
       summary: { ...goalFixture.summary, status: 'on_track', monthlyShortfall: null },
     })
     const { view } = await renderScreen({ status: 'loaded', data: { goals: [onTrack] } })
-    expect(view.getByText('On track means no calculable shortfall; it is not a guarantee')).toBeOnTheScreen()
+    expect(view.queryByText(/not a guarantee/)).not.toBeOnTheScreen()
+    expect(view.queryByRole('button', { name: /On track means no calculable shortfall/ })).not.toBeOnTheScreen()
+    expect(view.queryByText('Help')).not.toBeOnTheScreen()
   })
 
   it('formats progress with the active locale', async () => {
@@ -120,16 +152,18 @@ describe('GoalsScreen', () => {
     })
     const { view } = await renderScreen({ status: 'loaded', data: { goals: [localized] } }, 'pt-PT')
 
-    expect(view.getByText('Progresso 12,5%')).toBeOnTheScreen()
+    expect(view.getByText('99%')).toBeOnTheScreen()
+    expect(view.getAllByText('de 1000,00 €').length).toBeGreaterThan(0)
   })
 
   it('renders planning-reserve context, locale-aware preview data, and the deliberate create entry point when empty', async () => {
     const { view } = await renderScreen({ status: 'loaded', data: { goals: [] } })
-    expect(view.getByText('Set aside money for a specific purpose')).toBeOnTheScreen()
+    expect(view.getByText('Give your money a purpose')).toBeOnTheScreen()
     expect(view.getByText('Emergency fund')).toBeOnTheScreen()
     expect(view.getByText('€2,400.00')).toBeOnTheScreen()
     expect(view.getByText('€6,000.00')).toBeOnTheScreen()
     expect(view.getAllByText('40%')).toHaveLength(2)
+    expect(view.getAllByRole('button', { name: 'Create goal' })).toHaveLength(1)
     expect(view.getByText('Vacation')).toBeOnTheScreen()
     expect(view.getByText('€850.00')).toBeOnTheScreen()
     expect(view.getByText('€2,000.00')).toBeOnTheScreen()
@@ -140,33 +174,18 @@ describe('GoalsScreen', () => {
 
   it('shows the epoch unknown banner and disables another create', async () => {
     const { view, createGoal } = await renderScreen({ status: 'loaded', data }, 'en', true)
-    expect(view.getByRole('alert')).toHaveTextContent('Goal creation outcome unknown')
+    expect(view.getByRole('alert', { name: /Goal creation outcome unknown/ })).toBeOnTheScreen()
     expect(view.getByRole('button', { name: 'Create goal' })).toBeDisabled()
     await fireEvent.press(view.getByRole('button', { name: 'Create goal' }))
     expect(createGoal).not.toHaveBeenCalled()
   })
 
-  it('reveals secondary activity and linked-account context without implying money movement', async () => {
-    const { view } = await renderScreen({ status: 'loaded', data: { goals: [data.goals[0]] } })
-    const disclosure = view.getByRole('button', { name: 'Show details for Emergency reserve' })
-    expect(disclosure.props.accessibilityState).toMatchObject({ expanded: false })
-    expect(StyleSheet.flatten(disclosure.props.style).minHeight).toBeGreaterThanOrEqual(44)
-    expect(view.queryByLabelText('Assigned this month, €100.00')).not.toBeOnTheScreen()
-
-    await fireEvent.press(disclosure)
-    expect(view.getByRole('button', { name: 'Hide details for Emergency reserve' }).props.accessibilityState).toMatchObject({ expanded: true })
-    expect(view.getByLabelText('Assigned this month, €100.00')).toBeOnTheScreen()
-    expect(view.getByLabelText('Spent, €200.00')).toBeOnTheScreen()
-    expect(view.getByText('Current account')).toBeOnTheScreen()
-    expect(view.getByText("Linked account names provide context only and do not change the goal's available amount")).toBeOnTheScreen()
-  })
-
-  it('offers a separate accessible detail action without turning the row into a nested press target', async () => {
+  it('opens the goal from the whole row, as web does', async () => {
     const { view, viewGoal } = await renderScreen({ status: 'loaded', data: { goals: [data.goals[0]] } })
     const row = view.getByTestId('goal-row')
-    expect(row.props.accessibilityRole).toBeUndefined()
-    expect(within(row).getAllByRole('button')).toHaveLength(2)
-    await fireEvent.press(view.getByRole('button', { name: 'View Emergency reserve' }))
+    expect(row.props.accessibilityRole).toBe('button')
+    expect(within(row).queryAllByRole('button')).toHaveLength(0)
+    await fireEvent.press(row)
     expect(viewGoal).toHaveBeenCalledWith(3)
   })
 
@@ -212,14 +231,14 @@ describe('GoalsScreen', () => {
 
     it('shows a distinct empty state and no create-goal restriction on the archived tab', async () => {
       const { view } = await renderScreen({ status: 'loaded', data: { goals: [] } }, 'en', false, 'archived')
-      expect(view.getByText('Archived goals appear here')).toBeOnTheScreen()
+      expect(view.getByText('No archived goals.')).toBeOnTheScreen()
+      expect(view.getByRole('button', { name: 'Create goal' })).toBeOnTheScreen()
     })
 
     it('dims each archived row and restores it inline without navigating away', async () => {
       const archivedData: GoalsData = { goals: [mapGoalListItem({ ...goalFixture, status: 'archived' })] }
       const { view, restoreGoal, viewGoal } = await renderScreen({ status: 'loaded', data: archivedData }, 'en', false, 'archived')
-      const row = view.getByTestId('goal-row')
-      expect(StyleSheet.flatten(row.props.style).opacity).toBeLessThan(1)
+      expect(StyleSheet.flatten(view.getByTestId('goal-row-dimmed').props.style).opacity).toBeLessThan(1)
       await fireEvent.press(view.getByRole('button', { name: 'Restore' }))
       expect(restoreGoal).toHaveBeenCalledWith(goalFixture.goalKey)
       expect(viewGoal).not.toHaveBeenCalled()
@@ -255,8 +274,12 @@ describe('GoalsScreen', () => {
     })
   })
 
-  it('wires the debt payoff strategy link', async () => {
-    const { view, viewDebtStrategy } = await renderScreen({ status: 'loaded', data })
+  it('offers the debt payoff strategy only once there are two debts to compare, as web does', async () => {
+    const debt = (goalKey: number) => mapGoalListItem({ ...goalFixture, goalKey, type: 'debt_paydown' })
+    const none = await renderScreen({ status: 'loaded', data })
+    expect(none.view.queryByRole('button', { name: 'Debt payoff strategy' })).not.toBeOnTheScreen()
+
+    const { view, viewDebtStrategy } = await renderScreen({ status: 'loaded', data: { goals: [debt(1), debt(2)] } })
     fireEvent.press(view.getByRole('button', { name: 'Debt payoff strategy' }))
     expect(viewDebtStrategy).toHaveBeenCalled()
   })

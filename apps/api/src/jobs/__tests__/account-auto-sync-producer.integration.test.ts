@@ -27,7 +27,7 @@ function realIncidentHarness() {
     upsert: vi.fn(async (type: unknown, data: Record<string, unknown>) => { const row = Object.assign(new (type as new () => object)(), data) as Record<string, unknown>; incidents.push(row); return row; }),
   };
   const em = { findOne: tx.findOne, transactional: vi.fn(async (work: (transaction: typeof tx) => unknown) => work(tx)) };
-  const service = new BankSyncIncidentService({ em: em as unknown as IncidentEm, getDatabaseNow: vi.fn().mockResolvedValue(new Date('2026-07-16T10:00:00Z')), recordOutbox: async (manager, input) => { outbox(manager, input); await recordAnalyticsOutboxEvent(manager, input); }, transitionBackgroundOperation: vi.fn() });
+  const service = new BankSyncIncidentService({ em: em as unknown as IncidentEm, getDatabaseNow: vi.fn().mockResolvedValue(new Date('2026-07-16T10:00:00Z')), recordOutbox: async (manager, input) => { outbox(manager, input); await recordAnalyticsOutboxEvent(manager, input, { ANALYTICS_OUTBOX_MODE: 'live' }); }, transitionBackgroundOperation: vi.fn() });
   return { outbox, service, tx };
 }
 

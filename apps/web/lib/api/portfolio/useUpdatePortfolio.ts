@@ -1,5 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
+import type { PortfolioAccountLinkInput } from "@/lib/portfolio/account-link";
+
 import api from "../api";
 
 interface UpdatePortfolioRequest {
@@ -11,6 +13,7 @@ interface UpdatePortfolioRequest {
   favored?: boolean;
   benchmarkSymbol?: string;
   targetAllocation?: Record<string, number> | null;
+  accountLink?: PortfolioAccountLinkInput | null;
 }
 
 const useUpdatePortfolio = () => {
@@ -24,6 +27,9 @@ const useUpdatePortfolio = () => {
       queryClient.invalidateQueries({ queryKey: ["portfolio"] });
       queryClient.invalidateQueries({ queryKey: ["portfolio-dashboard"] });
       queryClient.invalidateQueries({ queryKey: ["portfolio-allocation"] });
+      // A link changes what net worth counts.
+      queryClient.invalidateQueries({ queryKey: ["net-worth"] });
+      queryClient.invalidateQueries({ queryKey: ["net-worth-history"] });
     },
   });
 };

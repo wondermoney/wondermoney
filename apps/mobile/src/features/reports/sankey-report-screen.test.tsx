@@ -47,7 +47,8 @@ describe('SankeyReportScreen', () => {
   it('switches presets and renders loading/error states', async () => {
     const onSelectPreset = jest.fn()
     const view = await renderWithI18n({ state: { status: 'loaded', report }, preset: 'last3Months', currencyCode: 'EUR', onSelectPreset, onRefresh: jest.fn(), onBack: jest.fn() })
-    await fireEvent.press(view.getByRole('button', { name: 'This month' }))
+    await fireEvent.press(view.getByRole('button', { name: 'Date range, Last 3 months' }))
+    await fireEvent.press(view.getByRole('radio', { name: 'This month' }))
     expect(onSelectPreset).toHaveBeenCalledWith('thisMonth')
 
     const loading = await renderWithI18n({ state: { status: 'loading' }, preset: 'last3Months', currencyCode: 'EUR', onSelectPreset: jest.fn(), onRefresh: jest.fn(), onBack: jest.fn() })

@@ -1,17 +1,22 @@
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Alert, BackHandler, Pressable, RefreshControl, ScrollView, StyleSheet, Text, useColorScheme, View } from 'react-native'
-import { SafeAreaView } from 'react-native-safe-area-context'
+import { Alert, BackHandler, Pressable, RefreshControl, ScrollView, StyleSheet, View } from 'react-native'
 
-import { Button } from '@/components/ui/button'
-import { formatCurrency } from '@/lib/formatters/financial'
-import { themeTokens, type Palette } from '@/theme/tokens'
-import { textStyles } from '@/theme/typography'
+import { FLOATING_ACTION_SIZE, FloatingActionButton } from '@/components/ui/floating-action-button'
+import { HeadlineFigure } from '@/components/ui/headline-figure'
+import { Icon } from '@/components/ui/icon'
+import { SafeAreaView } from '@/components/ui/screen-safe-area'
+import { Section } from '@/components/ui/section'
+import { Text } from '@/components/ui/text'
+import { useFormatMoney } from '@/lib/formatters/money-display'
+import { themeTokens } from '@/theme/tokens'
+import { usePalette } from '@/theme/use-palette'
 
 import { BudgetCategoryEditor } from './budget-category-editor'
-import type { BudgetCategoryWrite } from './budgets-contract'
-import type { BudgetCategoryChildViewModel, BudgetCategoryGroupViewModel, BudgetViewModel } from './budgets-view-model'
-import { Action, BudgetFailure, BudgetHeader, BudgetLoading, StaleBanner } from './budgets-screen'
+import { BudgetDetailHeader, BudgetLine, BudgetOverviewTable, MeasureKey, MonthNavigator, type BudgetView } from './budget-parts'
+import type { BudgetCategoryWrite, BudgetRecurrence } from './budgets-contract'
+import { budgetMeasureScale, overPlanLineCount, type BudgetCategoryChildViewModel, type BudgetCategoryGroupViewModel, type BudgetTotals, type BudgetViewModel } from './budgets-view-model'
+import { BudgetFailure, BudgetLoading, StaleBanner } from './budgets-screen'
 import { classifyBudgetCategoryDeleteFailure, type BudgetCategoryDeleteFailure, type BudgetCategoryRemovalScope } from './use-budget-category-delete-mutation'
 
 export type BudgetMonthViewState =
@@ -37,12 +42,14 @@ export type BudgetMonthScreenProps = {
   onRemoveCategory?: (categoryId: number, scope: BudgetCategoryRemovalScope) => Promise<void>
   onManageAccounts?: () => void
   onViewYear?: () => void
+  /** The budget's full-year totals, for web's Month / Year overview table. Omitted until loaded. */
+  yearTotals?: Pick<BudgetTotals, 'planned' | 'spent'> | null
 }
 
 
-export function BudgetMonthScreen({ state, onBack, onRetry, onPrevious, onNext, onEdit, onAddCategory, categoryPending = false, onSaveCategory, onRemoveCategory, onManageAccounts, onViewYear }: BudgetMonthScreenProps) {
+export function BudgetMonthScreen({ state, onBack, onRetry, onPrevious, onNext, onEdit, onAddCategory, categoryPending = false, onSaveCategory, onRemoveCategory, onManageAccounts, onViewYear, yearTotals }: BudgetMonthScreenProps) {
   const { t, i18n } = useTranslation()
-  const palette = themeTokens.colors[useColorScheme() === 'dark' ? 'dark' : 'light']
+  const palette = usePalette()
   const locale = i18n.resolvedLanguage ?? i18n.language ?? 'en'
   useEffect(() => {
     if (!categoryPending) return
@@ -56,84 +63,133 @@ export function BudgetMonthScreen({ state, onBack, onRetry, onPrevious, onNext, 
     return <BudgetFailure title={t(`budgetMonth.${copyKey}Title`)} message={t(`budgetMonth.${copyKey}Message`)} onRetry={state.status === 'invalid-route' ? undefined : onRetry} onBack={onBack} backLabel={t('budgetMonth.back')} palette={palette} />
   }
   const { budget } = state
-  const money = (value: number) => formatCurrency(value, { locale, currency: budget.currencyCode })
-  const period = new Intl.DateTimeFormat(locale, { month: 'long', year: 'numeric', timeZone: 'UTC' }).format(new Date(Date.UTC(budget.year, budget.month - 1, 15)))
+  const date = new Date(Date.UTC(budget.year, budget.month - 1, 15))
+  const monthName = new Intl.DateTimeFormat(locale, { month: 'long', timeZone: 'UTC' }).format(date)
+  const period = new Intl.DateTimeFormat(locale, { month: 'long', year: 'numeric', timeZone: 'UTC' }).format(date)
+  const scaleMax = budgetMeasureScale(budget.categories)
+  const onChangeView = onViewYear ? (view: BudgetView) => { if (view === 'year') onViewYear() } : undefined
   return (
+    <View style={styles.safeArea}>
     <SafeAreaView style={[styles.safeArea, { backgroundColor: palette.background }]}>
-      <ScrollView contentContainerStyle={styles.content} refreshControl={<RefreshControl enabled={!categoryPending} refreshing={Boolean(state.refreshing)} onRefresh={() => { if (!categoryPending) void onRetry() }} tintColor={palette.primary} />}>
+      <ScrollView contentContainerStyle={[styles.content, onAddCategory && styles.contentUnderButton]} refreshControl={<RefreshControl enabled={!categoryPending} refreshing={Boolean(state.refreshing)} onRefresh={() => { if (!categoryPending) void onRetry() }} tintColor={palette.primary} />}>
         <View style={styles.page}>
-          <BudgetHeader title={budget.name} provenance={period} backLabel={t('budgetMonth.back')} onBack={onBack} disabled={categoryPending} palette={palette} />
-          <View style={styles.headerActions}>{onAddCategory ? <Button disabled={categoryPending} label={t('budgetMonth.addCategory')} onPress={onAddCategory} palette={palette} variant="primary" /> : null}{onEdit ? <Action label={t('budgetMonth.edit')} onPress={onEdit} disabled={categoryPending} palette={palette} /> : null}{onViewYear ? <Action label={t('budgetMonth.viewYear')} onPress={onViewYear} disabled={categoryPending} palette={palette} /> : null}</View>
-          {state.status === 'refresh-error' ? <StaleBanner label={t('budgetMonth.stale')} palette={palette} /> : null}
-          <View style={[styles.summary, { backgroundColor: palette.card, borderColor: palette.border }]}>
-            <View style={styles.summaryHero}>
-              <Text allowFontScaling style={[styles.kicker, { color: palette.mutedForeground }]}>{t('budgets.remaining')}</Text>
-              <Text allowFontScaling style={[styles.summaryAmount, { color: palette.foreground }]}>{money(budget.totals.remaining)}</Text>
-              {budget.totals.overspent ? <Text allowFontScaling style={[styles.overspent, { color: palette.destructiveText }]}>{t('budgets.overspent')}</Text> : null}
+          <BudgetDetailHeader
+            accountCount={budget.accounts.length}
+            disabled={categoryPending}
+            figure={(
+              <>
+                {state.status === 'refresh-error' ? <StaleBanner label={t('budgetMonth.stale')} palette={palette} /> : null}
+                <MonthLead monthName={monthName} totals={budget.totals} overPlanCount={overPlanLineCount(budget.categories)} currency={budget.currencyCode} locale={locale} />
+              </>
+            )}
+            helpText={t('budgetMonth.help')}
+            lead={<MonthNavigator period={period} onPrevious={onPrevious} onNext={onNext} previousDisabled={categoryPending || !state.hasPrevious} nextDisabled={categoryPending || !state.hasNext} />}
+            name={budget.name}
+            onBack={onBack}
+            onChangeView={onChangeView}
+            onEdit={onEdit}
+            onManageAccounts={onManageAccounts}
+            view="month"
+          />
+          <Section title={t('budgetMonth.categories')} variant="open">
+            <View>
+              {budget.categories.length === 0 ? (
+                <View style={styles.empty}>
+                  <Text accessibilityRole="header" variant="subheading">{t('budgetMonth.noCategoriesTitle')}</Text>
+                  <Text tone="muted" variant="meta">{t('budgetMonth.noCategories')}</Text>
+                </View>
+              ) : budget.categories.map((category, index) => (
+                <CategoryGroup key={category.id} separated={index > 0} category={category} year={budget.year} month={budget.month} currency={budget.currencyCode} locale={locale} scaleMax={scaleMax} pending={categoryPending} onSaveCategory={onSaveCategory} onRemoveCategory={onRemoveCategory} />
+              ))}
+              <View style={styles.key}><MeasureKey /></View>
             </View>
-            <View style={styles.summaryMetrics}>
-              <SummaryMetric label={t('budgets.planned')} value={money(budget.totals.planned)} palette={palette} />
-              <SummaryMetric label={t('budgets.spent')} value={money(budget.totals.spent)} palette={palette} />
+          </Section>
+          <BudgetOverviewTable
+            currency={budget.currencyCode}
+            locale={locale}
+            rows={[
+              { name: t('budgetMonth.month'), spent: budget.totals.spent, budgeted: budget.totals.planned },
+              ...(yearTotals ? [{ name: t('budgetMonth.year'), spent: yearTotals.spent, budgeted: yearTotals.planned }] : []),
+            ]}
+          />
+          {/* Not on web's page: which accounts feed the figures. Kept, below the ledger. */}
+          <Section title={t('budgetMonth.accounts')} variant="open">
+            <View style={styles.accounts}>
+              <Text variant="body">{budget.accounts.length > 0 ? budget.accounts.map((account) => account.name ?? t('budgetMonth.unnamedAccount')).join(', ') : t('budgetMonth.noAccounts')}</Text>
+              <Text tone="muted" variant="meta">{onManageAccounts ? t('budgetMonth.accountsEditableNote') : t('budgetMonth.accountsNote')}</Text>
             </View>
-          </View>
-          <View style={styles.monthNav}>
-            <Action label={t('budgetMonth.previous')} onPress={onPrevious} disabled={categoryPending || !state.hasPrevious} palette={palette} />
-            <Text accessibilityLabel={t('budgetMonth.periodNavigation', { period })} allowFontScaling style={[styles.navPeriod, { color: palette.foreground }]}>{period}</Text>
-            <Action label={t('budgetMonth.next')} onPress={onNext} disabled={categoryPending || !state.hasNext} palette={palette} />
-          </View>
-          <View style={styles.sectionHeading}>
-            <Text accessibilityRole="header" allowFontScaling style={[styles.sectionTitle, { color: palette.foreground }]}>{t('budgetMonth.categories')}</Text>
-            <Text allowFontScaling style={[styles.sectionHelper, { color: palette.mutedForeground }]}>{t('budgetMonth.categoriesHelper')}</Text>
-          </View>
-          {budget.categories.length === 0 ? <View style={[styles.empty, { borderColor: palette.border, backgroundColor: palette.card }]}><Text accessibilityRole="header" allowFontScaling style={[styles.emptyTitle, { color: palette.foreground }]}>{t('budgetMonth.noCategoriesTitle')}</Text><Text allowFontScaling style={[styles.emptyText, { color: palette.mutedForeground }]}>{t('budgetMonth.noCategories')}</Text>{onAddCategory ? <Button disabled={categoryPending} label={t('budgetMonth.addCategory')} onPress={onAddCategory} palette={palette} variant="primary" /> : null}</View> : (
-            <View style={styles.categories}>{budget.categories.map((category) => <CategoryGroup key={category.id} category={category} year={budget.year} month={budget.month} currency={budget.currencyCode} locale={locale} pending={categoryPending} onSaveCategory={onSaveCategory} onRemoveCategory={onRemoveCategory} palette={palette} />)}</View>
-          )}
-          <View style={[styles.accounts, { borderColor: palette.border, backgroundColor: palette.muted }]}>
-            <Text accessibilityRole="header" allowFontScaling style={[styles.accountsTitle, { color: palette.foreground }]}>{t('budgetMonth.accounts')}</Text>
-            <Text allowFontScaling style={[styles.accountNames, { color: palette.foreground }]}>{budget.accounts.length > 0 ? budget.accounts.map((account) => account.name ?? t('budgetMonth.unnamedAccount')).join(', ') : t('budgetMonth.noAccounts')}</Text>
-            <Text allowFontScaling style={[styles.accountNote, { color: palette.mutedForeground }]}>{onManageAccounts ? t('budgetMonth.accountsEditableNote') : t('budgetMonth.accountsNote')}</Text>
-            {onManageAccounts ? <Action label={t('budgetMonth.manageAccounts')} onPress={onManageAccounts} disabled={categoryPending} palette={palette} /> : null}
-          </View>
+          </Section>
         </View>
       </ScrollView>
     </SafeAreaView>
-  )
-}
-
-function SummaryMetric({ label, value, palette }: { label: string; value: string; palette: Palette }) {
-  return <View accessible accessibilityLabel={`${label}, ${value}`} style={styles.summaryMetric}><Text allowFontScaling style={[styles.kicker, { color: palette.mutedForeground }]}>{label}</Text><Text allowFontScaling style={[styles.metricAmount, { color: palette.foreground }]}>{value}</Text></View>
-}
-
-function CategoryGroup({ category, year, month, currency, locale, pending, onSaveCategory, onRemoveCategory, palette }: { category: BudgetCategoryGroupViewModel; year: number; month: number; currency: string; locale: string; pending: boolean; onSaveCategory?: (categoryId: number, value: BudgetCategoryWrite) => Promise<void>; onRemoveCategory?: (categoryId: number, scope: BudgetCategoryRemovalScope) => Promise<void>; palette: Palette }) {
-  const { t } = useTranslation()
-  const [expanded, setExpanded] = useState(false)
-  const [editingId, setEditingId] = useState<number | null>(null)
-  const money = (value: number) => formatCurrency(value, { locale, currency })
-  const progress = (value: number | null) => value === null
-    ? t('budgets.progressUnavailable')
-    : t('budgets.progressValue', { value: new Intl.NumberFormat(locale, { style: 'percent', maximumFractionDigits: 0 }).format(value / 100) })
-  const remainingColor = palette.foreground
-  return (
-    <View style={[styles.category, { borderColor: palette.border, backgroundColor: palette.card }]}>
-      <Pressable accessibilityRole="button" accessibilityState={{ expanded, disabled: pending }} disabled={pending} accessibilityLabel={t(expanded ? 'budgetMonth.hideCategory' : 'budgetMonth.showCategory', { name: category.name })} onPress={() => setExpanded((value) => !value)} style={({ pressed }) => [styles.categoryButton, (pressed || pending) && styles.pressed]}>
-        <View style={styles.categoryTitleGroup}><Text allowFontScaling style={[styles.categoryName, { color: palette.foreground }]}>{category.name}</Text><Text allowFontScaling style={[styles.categoryCount, { color: palette.mutedForeground }]}>{t('budgetMonth.categoryCount', { count: category.children.length })}</Text></View>
-        <Text accessible={false} style={[styles.disclosure, { color: palette.primary }]}>{expanded ? '−' : '+'}</Text>
-      </Pressable>
-      <View style={styles.categoryMetrics}>
-        <CategoryMetric label={t('budgets.planned')} value={money(category.planned)} palette={palette} />
-        <CategoryMetric label={t('budgets.spent')} value={money(category.spent)} palette={palette} />
-        <CategoryMetric label={t('budgets.remaining')} value={money(category.remaining)} valueColor={remainingColor} palette={palette} />
-      </View>
-      {expanded ? <View style={[styles.children, { borderTopColor: palette.border }]}>{category.children.length === 0 ? <Text allowFontScaling style={[styles.noChildren, { color: palette.mutedForeground }]}>{t('budgetMonth.noSubcategories')}</Text> : category.children.map((child) => <ChildCategory key={child.id} child={child} year={year} month={month} currency={currency} locale={locale} progress={progress} editing={editingId === child.id} pending={pending} onEdit={onSaveCategory ? () => setEditingId(child.id) : undefined} onCancel={() => setEditingId(null)} onSave={onSaveCategory ? (value) => onSaveCategory(child.id, value) : undefined} onRemove={onRemoveCategory ? (scope) => onRemoveCategory(child.id, scope) : undefined} palette={palette} />)}</View> : null}
+    {onAddCategory ? <FloatingActionButton accessibilityLabel={t('budgetMonth.addCategory')} disabled={categoryPending} onPress={onAddCategory} testID="budget-add-category" /> : null}
     </View>
   )
 }
 
-function ChildCategory({ child, year, month, currency, locale, progress, editing, pending, onEdit, onCancel, onSave, onRemove, palette }: { child: BudgetCategoryChildViewModel; year: number; month: number; currency: string; locale: string; progress: (value: number | null) => string; editing: boolean; pending: boolean; onEdit?: () => void; onCancel: () => void; onSave?: (value: BudgetCategoryWrite) => Promise<void>; onRemove?: (scope: BudgetCategoryRemovalScope) => Promise<void>; palette: Palette }) {
+/** What is left (or how far over) this month, then Spent / Planned / Over plan in one row. */
+function MonthLead({ monthName, totals, overPlanCount, currency, locale }: { monthName: string; totals: BudgetTotals; overPlanCount: number; currency: string; locale: string }) {
+  const formatMoney = useFormatMoney()
   const { t } = useTranslation()
+  const left = totals.planned - totals.spent
+  const overspent = left < 0
+  const money = (value: number) => formatMoney(value, { locale, currency })
+  const label = overspent ? t('budgetMonth.overspentIn', { month: monthName }) : t('budgetMonth.leftIn', { month: monthName })
+  return (
+    <View style={styles.leadFigures}>
+      <HeadlineFigure
+        accessibilityLabel={`${label}, ${money(overspent ? -left : left)}`}
+        currency={currency}
+        label={label}
+        labelIsHeader
+        locale={locale}
+        size="md"
+        // Over plan says so in words beside a destructive dot, not by colour alone.
+        status={overspent ? { label: t('budgets.overspent'), tone: 'destructive' } : undefined}
+        value={overspent ? -left : left}
+      />
+      <View style={styles.leadStats}>
+        <LeadStat label={t('budgetMonth.spent')} value={money(totals.spent)} />
+        <LeadStat label={t('budgetMonth.planned')} value={money(totals.planned)} />
+        <View accessible accessibilityLabel={`${t('budgetMonth.overPlan')}, ${overPlanCount} ${t('budgetMonth.overPlanUnit', { count: overPlanCount })}`} style={styles.leadStat}>
+          <Text tone="muted" variant="meta">{t('budgetMonth.overPlan')}</Text>
+          <View style={styles.overPlan}>
+            <Text tone={overPlanCount > 0 ? 'destructive' : 'default'} variant="amountBase">{String(overPlanCount)}</Text>
+            <Text tone={overPlanCount > 0 ? 'destructive' : 'muted'} variant="label">{t('budgetMonth.overPlanUnit', { count: overPlanCount })}</Text>
+          </View>
+        </View>
+      </View>
+    </View>
+  )
+}
+
+function LeadStat({ label, value }: { label: string; value: string }) {
+  return (
+    <View accessible accessibilityLabel={`${label}, ${value}`} style={styles.leadStat}>
+      <Text tone="muted" variant="meta">{label}</Text>
+      <Text adjustsFontSizeToFit minimumFontScale={0.6} numberOfLines={1} variant="amountBase">{value}</Text>
+    </View>
+  )
+}
+
+function CategoryGroup({ category, separated, year, month, currency, locale, scaleMax, pending, onSaveCategory, onRemoveCategory }: { category: BudgetCategoryGroupViewModel; separated: boolean; year: number; month: number; currency: string; locale: string; scaleMax: number; pending: boolean; onSaveCategory?: (categoryId: number, value: BudgetCategoryWrite) => Promise<void>; onRemoveCategory?: (categoryId: number, scope: BudgetCategoryRemovalScope) => Promise<void> }) {
+  const [editingId, setEditingId] = useState<number | null>(null)
+  return (
+    <>
+      <BudgetLine category={category} currency={currency} locale={locale} scaleMax={scaleMax} separated={separated} view="month" />
+      {category.children.map((child) => <ChildCategory key={child.id} child={child} year={year} month={month} currency={currency} locale={locale} scaleMax={scaleMax} editing={editingId === child.id} pending={pending} onEdit={onSaveCategory ? () => setEditingId(child.id) : undefined} onCancel={() => setEditingId(null)} onSave={onSaveCategory ? (value) => onSaveCategory(child.id, value) : undefined} onRemove={onRemoveCategory ? (scope) => onRemoveCategory(child.id, scope) : undefined} />)}
+    </>
+  )
+}
+
+const OCCURRENCES: Readonly<Record<BudgetRecurrence, number>> = { MONTHLY_14: 14, MONTHLY: 12, QUARTERLY: 4, BI_ANNUALLY: 2, ANNUALLY: 1 }
+
+/** A subcategory line, indented under its parent, with its recurrence and the "…" menu. */
+function ChildCategory({ child, year, month, currency, locale, scaleMax, editing, pending, onEdit, onCancel, onSave, onRemove }: { child: BudgetCategoryChildViewModel; year: number; month: number; currency: string; locale: string; scaleMax: number; editing: boolean; pending: boolean; onEdit?: () => void; onCancel: () => void; onSave?: (value: BudgetCategoryWrite) => Promise<void>; onRemove?: (scope: BudgetCategoryRemovalScope) => Promise<void> }) {
+  const { t } = useTranslation()
+  const palette = usePalette()
   const [removing, setRemoving] = useState(false)
   const [removeFailure, setRemoveFailure] = useState<BudgetCategoryDeleteFailure | null>(null)
-  const money = (value: number) => formatCurrency(value, { locale, currency })
 
   const confirmRemoval = () => new Promise<BudgetCategoryRemovalScope | null>((resolve) => {
     Alert.alert(
@@ -163,28 +219,63 @@ function ChildCategory({ child, year, month, currency, locale, progress, editing
     }
   }
 
-  return <View style={styles.child}>
-    <View style={styles.childHeading}><Text allowFontScaling style={[styles.childName, { color: palette.foreground }]}>{child.name}</Text><Text allowFontScaling style={[styles.recurrence, { color: palette.mutedForeground }]}>{child.recurrence ? t(`budgetMonth.recurrence.${child.recurrence}`) : t('budgetMonth.recurrenceUnavailable')}</Text></View>
-    <View style={styles.categoryMetrics}><CategoryMetric label={t('budgets.planned')} value={money(child.planned)} palette={palette} /><CategoryMetric label={t('budgets.spent')} value={money(child.spent)} palette={palette} /><CategoryMetric label={t('budgets.remaining')} value={money(child.remaining)} valueColor={palette.foreground} palette={palette} /></View>
-    <View accessible accessibilityLabel={progress(child.progressPercentage)} style={styles.childProgress}><View style={[styles.progressTrack, { backgroundColor: palette.muted }]}><View testID={`budget-child-progress-${child.id}`} style={[styles.progressFill, { width: `${child.meterPercentage}%`, backgroundColor: child.overspent ? palette.destructiveText : palette.chart1 }]} /></View><Text allowFontScaling style={[styles.progressText, { color: child.overspent ? palette.destructiveText : palette.mutedForeground }]}>{progress(child.progressPercentage)}</Text></View>
-    {removeFailure ? <Text accessibilityRole="alert" style={[styles.removeFailure, { color: palette.foreground, borderColor: palette.destructive }]}>{t(`budgetMonth.removeCategory.failures.${removeFailure}`)}</Text> : null}
-    <View style={styles.childActions}>
-      {onEdit && !editing ? <Action label={t('budgetCategory.edit', { name: child.name })} disabled={pending} onPress={onEdit} palette={palette} /> : null}
-      {onRemove ? <Action label={removing ? t('budgetMonth.removeCategory.removing') : t('budgetMonth.removeCategory.action', { name: child.name })} disabled={pending || removing} onPress={removeCategory} palette={palette} /> : null}
-    </View>
-    {editing && onSave ? <BudgetCategoryEditor child={child} year={year} month={month} locale={locale} pending={pending} palette={palette} onSave={onSave} onCancel={onCancel} /> : null}
-  </View>
-}
+  // Web's `BudgetCategoryActionsMenu` behind the row's "…": edit, then remove.
+  const openActions = () => {
+    if (pending || removing) return
+    const buttons: { text: string; style?: 'cancel' | 'destructive'; onPress?: () => void }[] = []
+    if (onEdit && !editing) buttons.push({ text: t('budgetCategory.edit', { name: child.name }), onPress: onEdit })
+    if (onRemove) buttons.push({ text: t('budgetMonth.removeCategory.action', { name: child.name }), style: 'destructive', onPress: () => { void removeCategory() } })
+    buttons.push({ text: t('common.cancel'), style: 'cancel' })
+    Alert.alert(child.name, undefined, buttons, { cancelable: true })
+  }
+  const hasActions = Boolean((onEdit && !editing) || onRemove)
+  const recurrence = child.recurrence ? t('budgetMonth.timesPerYear', { count: OCCURRENCES[child.recurrence] }) : t('budgetMonth.recurrenceUnavailable')
 
-function CategoryMetric({ label, value, palette, valueColor }: { label: string; value: string; palette: Palette; valueColor?: string }) {
-  return <View accessible accessibilityLabel={`${label}, ${value}`} style={styles.categoryMetric}><Text allowFontScaling style={[styles.metricLabel, { color: palette.mutedForeground }]}>{label}</Text><Text allowFontScaling style={[styles.categoryAmount, { color: valueColor ?? palette.foreground }]}>{value}</Text></View>
+  return (
+    <BudgetLine
+      category={child}
+      currency={currency}
+      extraMeta={recurrence}
+      indented
+      locale={locale}
+      measureTestID={`budget-child-progress-${child.id}`}
+      scaleMax={scaleMax}
+      separated
+      trailing={hasActions ? (
+        <Pressable
+          accessibilityLabel={t('budgetMonth.categoryActions', { name: child.name })}
+          accessibilityRole="button"
+          accessibilityState={{ disabled: pending || removing, busy: removing }}
+          disabled={pending || removing}
+          hitSlop={6}
+          onPress={openActions}
+          style={({ pressed }) => [styles.more, pressed && { backgroundColor: palette.accent }, (pending || removing) && styles.disabled]}
+        >
+          <Icon color={palette.mutedForeground} name="more-horizontal" />
+        </Pressable>
+      ) : undefined}
+      view="month"
+    >
+      {removing ? <Text tone="muted" variant="label">{t('budgetMonth.removeCategory.removing')}</Text> : null}
+      {removeFailure ? <Text accessibilityRole="alert" style={[styles.removeFailure, { borderColor: palette.destructive }]} variant="meta">{t(`budgetMonth.removeCategory.failures.${removeFailure}`)}</Text> : null}
+      {editing && onSave ? <BudgetCategoryEditor child={child} year={year} month={month} locale={locale} pending={pending} palette={palette} onSave={onSave} onCancel={onCancel} /> : null}
+    </BudgetLine>
+  )
 }
 
 const styles = StyleSheet.create({
-  safeArea: { flex: 1 }, content: { flexGrow: 1, padding: themeTokens.layout.screenPadding }, page: { width: '100%', maxWidth: 760, alignSelf: 'center', gap: themeTokens.layout.blockGap }, headerActions: { flexDirection: 'row', flexWrap: 'wrap', gap: themeTokens.spacing[3] },
-  summary: { borderWidth: 1, borderRadius: themeTokens.radius.xl, padding: themeTokens.spacing[5], gap: themeTokens.spacing[5] }, summaryHero: { gap: themeTokens.spacing[1] }, kicker: { ...textStyles.label, fontWeight: '600' as const }, summaryAmount: { ...textStyles.display }, overspent: { ...textStyles.meta, fontWeight: '600' as const }, summaryMetrics: { flexDirection: 'row', gap: themeTokens.spacing[6] }, summaryMetric: { flex: 1, gap: themeTokens.spacing[1] }, metricAmount: { ...textStyles.amount },
-  monthNav: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: themeTokens.spacing[3] }, navPeriod: { ...textStyles.bodyStrong, fontWeight: '600' as const, flex: 1, textAlign: 'center', textTransform: 'capitalize' }, sectionHeading: { gap: themeTokens.spacing[1] }, sectionTitle: { ...textStyles.section }, sectionHelper: { ...textStyles.body }, categories: { gap: themeTokens.spacing[3] },
-  category: { borderWidth: 1, borderRadius: themeTokens.radius.lg, overflow: 'hidden' }, categoryButton: { minHeight: themeTokens.touchTarget.minimum, paddingHorizontal: themeTokens.spacing[4], paddingVertical: themeTokens.spacing[3], flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: themeTokens.spacing[3] }, categoryTitleGroup: { flex: 1, gap: themeTokens.spacing[1] }, categoryName: { ...textStyles.section }, categoryCount: { ...textStyles.label }, disclosure: { ...textStyles.title, fontWeight: '400' as const }, categoryMetrics: { flexDirection: 'row', paddingHorizontal: themeTokens.spacing[4], paddingBottom: themeTokens.spacing[4], gap: themeTokens.spacing[3] }, categoryMetric: { flex: 1, gap: themeTokens.spacing[1] }, metricLabel: { ...textStyles.label }, categoryAmount: { ...textStyles.amountSmall }, children: { borderTopWidth: 1, padding: themeTokens.spacing[4], gap: themeTokens.spacing[5] }, child: { gap: themeTokens.spacing[3] }, childHeading: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'baseline', justifyContent: 'space-between', gap: themeTokens.spacing[2] }, childName: { ...textStyles.action, flexShrink: 1 }, recurrence: { ...textStyles.label }, noChildren: { ...textStyles.body }, childProgress: { gap: themeTokens.spacing[2], paddingHorizontal: themeTokens.spacing[4] }, progressTrack: { height: 4, borderRadius: themeTokens.radius.pill, overflow: 'hidden' }, progressFill: { height: '100%', borderRadius: themeTokens.radius.pill }, progressText: { ...textStyles.label },
-  accounts: { borderWidth: 1, borderRadius: themeTokens.radius.lg, padding: themeTokens.spacing[4], gap: themeTokens.spacing[2] }, accountsTitle: { ...textStyles.section }, accountNames: { ...textStyles.body }, accountNote: { ...textStyles.label }, empty: { borderWidth: 1, borderRadius: themeTokens.radius.lg, padding: themeTokens.spacing[5], gap: themeTokens.spacing[3] }, emptyTitle: { ...textStyles.section }, emptyText: { ...textStyles.body }, pressed: { opacity: 0.68 },
-  childActions: { flexDirection: 'row', flexWrap: 'wrap', gap: themeTokens.spacing[3] }, removeFailure: { ...textStyles.meta, borderWidth: 1, borderRadius: themeTokens.radius.md, padding: themeTokens.spacing[3] },
+  safeArea: { flex: 1 },
+  content: { flexGrow: 1, padding: themeTokens.layout.screenPadding, paddingBottom: themeTokens.spacing[8] },
+  contentUnderButton: { paddingBottom: FLOATING_ACTION_SIZE + themeTokens.spacing[8] },
+  page: { width: '100%', maxWidth: 760, alignSelf: 'center', gap: themeTokens.spacing[10] },
+  leadFigures: { gap: themeTokens.spacing[4] },
+  accounts: { gap: themeTokens.spacing[1] },
+  leadStats: { flexDirection: 'row', gap: themeTokens.spacing[4] },
+  leadStat: { flex: 1, minWidth: 0 },
+  overPlan: { flexDirection: 'row', alignItems: 'baseline', gap: themeTokens.spacing[1] },
+  key: { paddingTop: themeTokens.spacing[3] },
+  empty: { gap: themeTokens.spacing[1], paddingVertical: themeTokens.spacing[6] },
+  more: { width: 32, height: 32, alignItems: 'center', justifyContent: 'center', borderRadius: themeTokens.radius.md },
+  disabled: { opacity: 0.5 },
+  removeFailure: { borderWidth: 1, borderRadius: themeTokens.radius.md, padding: themeTokens.spacing[3] },
 })

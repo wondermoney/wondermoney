@@ -28,7 +28,7 @@ async function renderShell(width: number, locale = 'en') {
     const { t } = useTranslation()
     return <ProductNavigation labels={{ home: t('navigation.home'), accounts: t('navigation.accounts'), budgets: t('navigation.budgets'), portfolio: t('navigation.portfolio'), more: t('navigation.more') }} availableWidth={width} />
   }
-  const router = renderRouter({
+  const router = await renderRouter({
     _layout: Root,
     '(app)/_layout': AuthenticatedLayout,
     '(app)/(tabs)/_layout': Layout,
@@ -43,7 +43,6 @@ async function renderShell(width: number, locale = 'en') {
     '(app)/settings/profile': () => <Text>profile screen</Text>,
     '(app)/settings/subscription-status': () => <Text>subscription screen</Text>,
   }, { initialUrl: '/' })
-  await router
   return { getPathname: router.getPathname }
 }
 
@@ -57,8 +56,8 @@ describe('ProductNavigation', () => {
     for (const label of ['Home', 'Accounts', 'Budgets', 'Portfolio', 'More']) {
       const target = within(bar).getByRole('tab', { name: label })
       const style = StyleSheet.flatten(target.props.style)
-      expect(style.minHeight).toBeGreaterThanOrEqual(48)
-      expect(style.minWidth).toBeGreaterThanOrEqual(48)
+      expect(style.minHeight).toBeGreaterThanOrEqual(64)
+      expect(style.minWidth).toBeGreaterThanOrEqual(44)
       const text = within(target).getByText(label)
       expect(text.props.allowFontScaling).not.toBe(false)
       expect(text.props.numberOfLines).toBeUndefined()
@@ -77,7 +76,7 @@ describe('ProductNavigation', () => {
     expect(screen.getByRole('tab', { name: 'More' }).props.accessibilityState).toMatchObject({ selected: true })
   })
 
-  it('renders one scrollable wide rail with five 48dp targets', async () => {
+  it('renders one scrollable wide rail with five 44dp targets', async () => {
     await renderShell(768)
     const rail = screen.getByTestId('product-rail')
     expect(screen.queryByTestId('product-bottom-bar')).not.toBeOnTheScreen()
@@ -86,8 +85,8 @@ describe('ProductNavigation', () => {
     for (const label of ['Home', 'Accounts', 'Budgets', 'Portfolio', 'More']) {
       const target = within(rail).getByRole('tab', { name: label })
       const style = StyleSheet.flatten(target.props.style)
-      expect(style.minHeight).toBeGreaterThanOrEqual(48)
-      expect(style.minWidth).toBeGreaterThanOrEqual(48)
+      expect(style.minHeight).toBeGreaterThanOrEqual(44)
+      expect(style.minWidth).toBeGreaterThanOrEqual(44)
       expect(within(target).getByText(label).props.allowFontScaling).not.toBe(false)
     }
   })

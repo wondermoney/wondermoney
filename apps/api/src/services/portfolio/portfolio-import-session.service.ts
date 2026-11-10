@@ -84,11 +84,12 @@ class PortfolioImportSessionService {
   }
 
   async createSession(input: CreatePortfolioImportSessionInput): Promise<PortfolioImportSession> {
+    // Any household member may import into any of the household's portfolios. The session
+    // itself stays the importer's own (`getOwnedSession`).
     const portfolio = await DI.em.findOne(Portfolio, {
       closedAt: undefined,
       deletedAt: undefined,
       portfolioKey: input.portfolioId,
-      portfolioOwnerAppuserKey: input.appuser,
       tenantKey: input.tenant,
     }, { populate: ['portfolioOwnerAppuserKey', 'tenantKey'] });
 

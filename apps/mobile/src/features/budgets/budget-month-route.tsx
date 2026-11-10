@@ -1,14 +1,14 @@
-import { useLocalSearchParams, useNavigation, useRouter } from 'expo-router'
-import { useEffect } from 'react'
+import { useLocalSearchParams, usePreventRemove, useRouter } from 'expo-router'
 
 import { ApiError } from '@/lib/api/errors'
 
 import { BudgetMonthScreen, type BudgetMonthViewState } from './budget-month-screen'
 import { parseBudgetId, parseBudgetPeriodPart } from './budgets-contract'
-import { adjacentBudgetPeriod, mapBudget } from './budgets-view-model'
+import { adjacentBudgetPeriod, mapBudget, mapBudgetYear } from './budgets-view-model'
 import { useBudgetCategoryDeleteMutation } from './use-budget-category-delete-mutation'
 import { useBudgetCategoryMutation } from './use-budget-category-mutation'
 import { useBudgetMonth } from './use-budget-month'
+import { useBudgetYear } from './use-budget-year'
 
 export function BudgetMonthRoute() {
   const params = useLocalSearchParams<{ budgetId?: string | string[]; year?: string | string[]; month?: string | string[] }>()
@@ -16,14 +16,14 @@ export function BudgetMonthRoute() {
   const year = parseBudgetPeriodPart(params.year)
   const month = parseBudgetPeriodPart(params.month)
   const query = useBudgetMonth(budgetId, year, month)
+  // Web's month page sets the month beside its year in an overview table; the year is the same
+  // read the year route makes (shared query key), so switching views reuses it.
+  const yearQuery = useBudgetYear(budgetId, year)
   const categoryMutation = useBudgetCategoryMutation()
   const categoryDeleteMutation = useBudgetCategoryDeleteMutation()
   const router = useRouter()
-  const navigation = useNavigation()
   const anyCategoryMutationPending = categoryMutation.isPending || categoryDeleteMutation.isPending
-  useEffect(() => navigation.addListener('beforeRemove', (event) => {
-    if (anyCategoryMutationPending) event.preventDefault()
-  }), [anyCategoryMutationPending, navigation])
+  usePreventRemove(anyCategoryMutationPending)
   let state: BudgetMonthViewState
   if (query.isInvalidRoute) state = { status: 'invalid-route' }
   else if (query.isAccessTransition) state = { status: 'access-transition' }
@@ -45,18 +45,20 @@ export function BudgetMonthRoute() {
     const next = adjacentBudgetPeriod(year, month, direction)
     router.replace({ pathname: '/budgets/[budgetId]/[year]/[month]', params: { budgetId: String(budgetId), year: String(next.year), month: String(next.month) } })
   }
+  const yearTotals = yearQuery.data && year !== null ? mapBudgetYear(yearQuery.data.budget, year).totals : null
   return <BudgetMonthScreen
     state={state}
+    yearTotals={yearTotals}
     categoryPending={anyCategoryMutationPending}
     onSaveCategory={async (categoryId, value) => { if (budgetId === null || year === null || month === null) return; await categoryMutation.mutateAsync({ budgetId, year, month, categoryId, value }) }}
     onRemoveCategory={async (categoryId, scope) => { if (budgetId === null || year === null || month === null) return; await categoryDeleteMutation.mutateAsync({ budgetId, categoryId, scope, year, month }) }}
      onBack={() => { if (router.canGoBack()) router.back(); else router.replace('/budgets') }}
-    onRetry={async () => { await query.refetch() }}
+    onRetry={async () => { await Promise.all([query.refetch(), yearQuery.refetch()]) }}
     onPrevious={() => navigate(-1)}
     onNext={() => navigate(1)}
     onAddCategory={() => { if (budgetId !== null) router.push({ pathname: '/budgets/[budgetId]/categories/add', params: { budgetId: String(budgetId) } }) }}
     onEdit={() => { if (budgetId !== null) router.push({ pathname: '/budgets/[budgetId]/edit', params: { budgetId: String(budgetId) } }) }}
     onManageAccounts={() => { if (budgetId !== null) router.push({ pathname: '/budgets/[budgetId]/accounts', params: { budgetId: String(budgetId) } }) }}
-    onViewYear={() => { if (budgetId !== null && year !== null) router.push({ pathname: '/budgets/[budgetId]/[year]', params: { budgetId: String(budgetId), year: String(year) } }) }}
+    onViewYear={() => { if (budgetId !== null && year !== null) router.replace({ pathname: '/budgets/[budgetId]/[year]', params: { budgetId: String(budgetId), year: String(year) } }) }}
   />
 }

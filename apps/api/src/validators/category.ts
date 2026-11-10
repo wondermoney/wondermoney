@@ -5,6 +5,8 @@ import { positiveIntId } from '@validators/shared';
 export const createCategoryRequestSchema = z.object({
   body: z.object({
     color: z.string().optional(),
+    /** Omitted: the parent's flag for a child category, else on. */
+    countsAsSpending: z.boolean().optional(),
     icon: z.string().optional(),
     name: z.string(),
     parentCategoryKey: z
@@ -17,6 +19,7 @@ export const createCategoryRequestSchema = z.object({
 export const updateCategoryRequestSchema = z.object({
   body: z.object({
     color: z.string().optional(),
+    countsAsSpending: z.boolean().optional(),
     icon: z.string().optional(),
     name: z.string().optional(),
   }),

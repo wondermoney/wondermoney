@@ -22,8 +22,9 @@ import {
 } from '@service/loan/loan-calculation.service';
 import { scoreLoanRepaymentCandidate } from '@service/loan/loan-repayment-matching.service';
 import { LoanAllocationSource, LoanPaymentFrequency, LoanRateType, LoanStatus } from '@service/loan/loan-types';
+import { isSplit } from '@service/transaction/transaction-split.service';
 import { excludeExpired } from '@service/transaction/transaction-status';
-import { BadRequestError, ConflictError } from '@utils/errors';
+import { BadRequestError, ConflictError, ERROR_CODE } from '@utils/errors';
 import { big, roundDisplay } from '@utils/money';
 import {
   createLoanSchema,
@@ -192,6 +193,9 @@ export async function linkLoanRepayment(req: Request, res: Response) {
   if (!transaction) return res.sendStatus(404);
   const duplicate = await DI.em.findOne(LoanRepaymentLink, { deletedAt: undefined, loanKey: loan, transactionKey: transaction });
   if (duplicate) throw new ConflictError('Repayment already linked');
+  // A split already shares the payment out over categories; counting its interest on top would
+  // count the payment twice. Remove the split first.
+  if (await isSplit(DI.em, transaction)) throw new ConflictError('A split transaction cannot be linked as a loan repayment', ERROR_CODE.TRANSACTION_IS_SPLIT);
   const existingRepayments = await DI.em.find(LoanRepaymentLink, { deletedAt: undefined, loanKey: loan });
   const outstandingPrincipal = calculateOutstandingPrincipalWithAdjustments({
     adjustments: [],

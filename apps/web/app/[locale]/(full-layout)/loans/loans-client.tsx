@@ -36,7 +36,7 @@ export default function LoansClient() {
     overviewData?.overview.totalOutstandingAmount ??
     overviewData?.overview.totalOutstandingDebt ??
     0;
-  // The API totals in the user's currency, converting loans held in another one (#200).
+  // The API totals in the user's currency, converting loans held in another one.
   const monthlyRepaymentTotal =
     overviewData?.overview.monthlyRepaymentTotal ??
     loans.reduce((sum, c) => sum + (c.regularPaymentAmount || 0), 0);
@@ -117,10 +117,10 @@ export default function LoansClient() {
   }
 
   return (
-    <div className="flex flex-col gap-4">
-      <div className="flex items-center justify-between">
+    <div className="flex flex-col gap-10">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h1 className="text-foreground text-xl font-semibold tracking-tight">
+          <h1 className="text-foreground text-2xl font-semibold tracking-tight lg:text-3xl">
             {t("page.title")}
           </h1>
           <p className="text-muted-foreground text-sm">
@@ -141,17 +141,17 @@ export default function LoansClient() {
         }
         totalOutstandingAmount={totalOutstanding}
         monthlyRepaymentTotal={monthlyRepaymentTotal}
+        // This month's interest and fees, which is what the label says. The
+        // lifetime `totalInterestAmount` used to take precedence when present.
         interestAndFeesThisMonth={
-          overviewData?.overview.totalInterestAmount ??
-          overviewData?.overview.interestFeesThisMonth ??
-          0
+          overviewData?.overview.interestFeesThisMonth ?? 0
         }
         netWorthImpact={netWorthImpact ?? 0}
         netWorthImpactLabel={netWorthImpactLabel}
+        // Repayments needing review, as labelled. `overdueLoansCount` (loans,
+        // not repayments) used to take precedence when present.
         repaymentsNeedingReview={
-          overviewData?.overview.overdueLoansCount ??
-          overviewData?.overview.repaymentsNeedingReviewCount ??
-          0
+          overviewData?.overview.repaymentsNeedingReviewCount ?? 0
         }
       />
       <LoansTable

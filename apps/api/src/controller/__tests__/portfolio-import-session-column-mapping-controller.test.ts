@@ -42,7 +42,7 @@ describe('portfolio import session column mapping controller', () => {
     mocked.suggestColumnMapping.mockResolvedValueOnce({ columnMapping: { columnMapping: {}, confidence: 0.9, transformations: { decimalSeparator: '.', thousandsSeparator: 'none' }, warnings: [] }, importSessionId: 11, mappingSource: 'llm', status: 'needs_column_mapping', warning: 'low confidence' });
     const status = vi.fn().mockReturnThis(); const json = vi.fn();
     await suggestPortfolioImportSessionColumnMapping(Object.assign(mockReq({ params: { importSessionId: '11' } }), { tenant: { tenantKey: 1 }, user: { appuserKey: 2 } }), mockRes({ json, status }));
-    expect(mocked.suggestColumnMapping).toHaveBeenCalledWith({ appuser: { appuserKey: 2 }, importSessionId: 11, tenant: { tenantKey: 1 } });
+    expect(mocked.suggestColumnMapping).toHaveBeenCalledWith({ allowModel: true, appuser: { appuserKey: 2 }, importSessionId: 11, spendModelCall: expect.any(Function), tenant: { tenantKey: 1 } });
     expect(status).toHaveBeenCalledWith(200);
     expect(json).toHaveBeenCalledWith({ columnMapping: expect.any(Object), importSessionId: 11, mappingSource: 'llm', status: 'needs_column_mapping', warning: 'low confidence' });
   });

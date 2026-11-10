@@ -5,8 +5,9 @@ import {
   createAggregateTransactionsEndpoint,
   createEditTransactionAmountEndpoint,
   freezeEditTransactionAmount,
-  parseTransactionDateRange,
 } from './transactions-contract'
+import { inTimeZone } from '@/test/time-zone'
+
 import { nullishTransactionFixture, transactionFixture } from './test-fixtures'
 
 const omitNullishWireContext = () => {
@@ -104,8 +105,24 @@ describe('transactions endpoint contracts', () => {
 
   it('builds actual aggregate and account URLs with server-side filters', () => {
     const filters = { fromDate: '2026-07-01T00:00:00.000Z', toDate: '2026-07-18T00:00:00.000Z', needsReview: true }
-    expect(createAggregateTransactionsEndpoint(filters).path).toBe('/v1/account/transaction?fromDate=1782864000000&toDate=1784332800000&unreviewedOnly=true')
-    expect(createAccountTransactionsEndpoint(7, filters).path).toBe('/v1/account/7/transaction?fromDate=1782864000000&toDate=1784332800000&unreviewedOnly=true&accountId=7')
+    expect(createAggregateTransactionsEndpoint(filters, 'Europe/Lisbon').path).toBe('/v1/account/transaction?fromDate=1782864000000&toDate=1784332800000&timezone=Europe%2FLisbon&unreviewedOnly=true')
+    expect(createAccountTransactionsEndpoint(7, filters, 'Europe/Lisbon').path).toBe('/v1/account/7/transaction?fromDate=1782864000000&toDate=1784332800000&timezone=Europe%2FLisbon&unreviewedOnly=true&accountId=7')
+  })
+
+  describe('in Tokyo', () => {
+    inTimeZone('Asia/Tokyo')
+
+    it('sends the device time zone with a date range, so the API counts a bank booking on its own date', () => {
+      const filters = { fromDate: '2026-07-31T15:00:00.000Z', toDate: '2026-08-31T14:59:59.999Z' }
+      const aggregate = new URLSearchParams(createAggregateTransactionsEndpoint(filters).path.split('?')[1])
+      const account = new URLSearchParams(createAccountTransactionsEndpoint(7, filters).path.split('?')[1])
+      expect(aggregate.get('timezone')).toBe('Asia/Tokyo')
+      expect(account.get('timezone')).toBe('Asia/Tokyo')
+    })
+
+    it('sends no time zone without a date range', () => {
+      expect(createAggregateTransactionsEndpoint({ needsReview: true }).path).toBe('/v1/account/transaction?unreviewedOnly=true')
+    })
   })
 
   it('includes includeHidden in the query string only when requested', () => {
@@ -121,39 +138,6 @@ describe('transactions endpoint contracts', () => {
     ] })
     expect(result.transactions[0]?.hidden).toBe(true)
     expect(result.transactions[1]).not.toHaveProperty('hidden')
-  })
-})
-
-describe('parseTransactionDateRange', () => {
-  it('resolves a valid range to an inclusive ISO fromDate/toDate pair', () => {
-    expect(parseTransactionDateRange('2026-07-01', '2026-07-18')).toEqual({
-      fromDate: '2026-07-01T00:00:00.000Z',
-      toDate: '2026-07-18T23:59:59.999Z',
-    })
-  })
-
-  it('accepts a single-day range', () => {
-    const result = parseTransactionDateRange('2026-07-01', '2026-07-01')
-    expect(result.fromDate).toBe('2026-07-01T00:00:00.000Z')
-    expect(result.toDate).toBe('2026-07-01T23:59:59.999Z')
-  })
-
-  it('returns a frozen object', () => {
-    expect(Object.isFrozen(parseTransactionDateRange('2026-07-01', '2026-07-18'))).toBe(true)
-  })
-
-  it.each([
-    ['empty from', '', '2026-07-18'],
-    ['empty to', '2026-07-01', ''],
-    ['wrong format', '01/07/2026', '2026-07-18'],
-    ['impossible calendar date', '2026-02-30', '2026-07-18'],
-    ['non-calendar month', '2026-13-01', '2026-07-18'],
-  ])('rejects %s', (_label, fromDate, toDate) => {
-    expect(() => parseTransactionDateRange(fromDate, toDate)).toThrow()
-  })
-
-  it('rejects a start date after the end date', () => {
-    expect(() => parseTransactionDateRange('2026-07-18', '2026-07-01')).toThrow('must not be after')
   })
 })
 

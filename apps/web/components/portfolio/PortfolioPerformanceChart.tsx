@@ -5,16 +5,15 @@ import React, { useMemo } from "react";
 
 import { Amount } from "@/components/ui/Amount";
 import { type ChartConfig, ChartTooltip } from "@/components/ui/chart";
-import {
-  AreaLineChartBase,
-  useChartFormatters,
-} from "@/components/ui/charts";
+import { AreaLineChartBase, useChartFormatters } from "@/components/ui/charts";
 import { Spinner } from "@/components/ui/Spinner";
 import type { Period } from "@/lib/api/portfolio/usePortfolioDashboard";
 import usePortfolioPerformance, {
   type PortfolioPerformanceReadinessStatus,
 } from "@/lib/api/portfolio/usePortfolioPerformance";
 import { useFormatCurrency } from "@/lib/utils/useFormatCurrency";
+
+import { PortfolioHistoryCurrencyNotice } from "./PortfolioHistoryCurrencyNotice";
 
 function getNiceStep(value: number) {
   if (!Number.isFinite(value) || value <= 0) return 1;
@@ -164,7 +163,9 @@ const PortfolioPerformanceChart: React.FC<PortfolioPerformanceChartProps> = ({
         : t("portfolio-performance-empty-state");
 
   const shouldShowChart =
-    chartData.length > 0 && status !== "empty" && status !== "insufficient_history";
+    chartData.length > 0 &&
+    status !== "empty" &&
+    status !== "insufficient_history";
 
   const renderTooltip: PerformanceTooltipProps = ({
     active,
@@ -195,7 +196,7 @@ const PortfolioPerformanceChart: React.FC<PortfolioPerformanceChartProps> = ({
   };
 
   return (
-    <div className="px-5 py-4">
+    <div className="py-1">
       {isLoading ? (
         <div className="flex h-[300px] items-center justify-center">
           <Spinner />
@@ -228,6 +229,9 @@ const PortfolioPerformanceChart: React.FC<PortfolioPerformanceChartProps> = ({
               showLegend={false}
             />
           </div>
+          <PortfolioHistoryCurrencyNotice
+            completeness={performanceData?.completeness}
+          />
         </div>
       )}
     </div>

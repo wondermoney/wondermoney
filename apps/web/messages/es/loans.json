@@ -10,7 +10,8 @@
       "delete": "Eliminar préstamo",
       "recordPayment": "Registrar pago",
       "linkRepayment": "Vincular pago",
-      "unlinkRepayment": "Desvincular pago"
+      "unlinkRepayment": "Desvincular pago",
+      "save": "Guardar cambios"
     },
     "fields": {
       "name": "Nombre del préstamo",
@@ -31,7 +32,12 @@
       "startDate": "Fecha de inicio",
       "dueDate": "Fecha de vencimiento",
       "linkedAccount": "Cuenta vinculada",
-      "linkedTransaction": "Pago vinculado"
+      "linkedTransaction": "Pago vinculado",
+      "namePlaceholder": "Ej.: Hipoteca",
+      "interestRatePlaceholder": "0,00",
+      "termMonthsPlaceholder": "Ej.: 360",
+      "startDatePlaceholder": "Elige la fecha de inicio",
+      "notesPlaceholder": "Algo que convenga recordar sobre este préstamo"
     },
     "types": {
       "personal": "Personal",
@@ -133,7 +139,9 @@
         "removeAssociation": "Eliminar asociación",
         "removeConfirm": "¿Eliminar esta asociación de pago?",
         "editAllocationLabel": "Editar asignación del pago",
-        "removeAssociationLabel": "Eliminar asociación del pago"
+        "removeAssociationLabel": "Eliminar asociación del pago",
+        "transaction": "Transacción bancaria",
+        "split": "<principal></principal> de capital, <interest></interest> de intereses, <fees></fees> de comisiones"
       },
       "amortization": {
         "title": "Vista previa de amortización",
@@ -154,7 +162,8 @@
       "progress": "Progreso",
       "progressLabel": "Progreso",
       "status": "Estado",
-      "actions": "Acciones"
+      "actions": "Acciones",
+      "nextPayment": "Próximo pago"
     },
     "emptyPreview": {
       "title": "Vista previa",

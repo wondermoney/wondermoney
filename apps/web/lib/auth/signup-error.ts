@@ -21,7 +21,8 @@ export type SignupErrorMessageKey =
   | "toast-signup-error-invite-invalid"
   | "toast-signup-error-invite-used"
   | "toast-signup-error-password-length"
-  | "toast-signup-error-rate-limited";
+  | "toast-signup-error-rate-limited"
+  | "toast-signup-error-reconnect-verify";
 
 const GENERIC: SignupErrorMessageKey = "toast-signup-error";
 
@@ -81,6 +82,11 @@ export function getSignupCallbackErrorKey(
 
   if (status === 429 || code === API_ERROR_CODE.RATE_LIMITED) {
     return "toast-signup-error-rate-limited";
+  }
+  // An account from before the sign-in change: the API emailed a verification
+  // link, and signing in after following it reconnects the account.
+  if (code === API_ERROR_CODE.ACCOUNT_RECONNECT_EMAIL_UNVERIFIED) {
+    return "toast-signup-error-reconnect-verify";
   }
   const inviteKey = code ? INVITE_CODE_KEYS[code] : undefined;
   if (inviteKey) return inviteKey;

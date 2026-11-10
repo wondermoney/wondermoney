@@ -22,6 +22,9 @@ describe('category management policy', () => {
     expect(reconcileCategoryWrite(categories, { type: 'edit', categoryId: 2, payload: { name: 'Lunch', color: '#123456', icon: 'coffee' } })).toBe('edit-applied')
     expect(reconcileCategoryWrite(categories, { type: 'edit', categoryId: 2, payload: { name: 'Dinner' } })).toBe('edit-not-applied')
     expect(reconcileCategoryWrite(categories, { type: 'edit', categoryId: 1, payload: { name: 'FOOD' } })).toBe('edit-not-found')
+    // A system category takes "counts as spending" (for this household) and nothing else.
+    expect(reconcileCategoryWrite(categories, { type: 'edit', categoryId: 1, payload: { countsAsSpending: true } })).toBe('edit-applied')
+    expect(reconcileCategoryWrite(categories, { type: 'edit', categoryId: 1, payload: { countsAsSpending: false } })).toBe('edit-not-applied')
     expect(reconcileCategoryWrite(categories, { type: 'edit', categoryId: 99, payload: { name: 'Gone' } })).toBe('edit-not-found')
   })
 })

@@ -1,6 +1,7 @@
 import { z } from 'zod'
 
 import { readEndpoint, writeEndpoint } from '@/lib/api/runtime-schema'
+import { parseNumberInput } from '@/lib/formatters/decimal-input'
 
 export const OFFLINE_ACCOUNT_BALANCE_MAX = 999_999_999_999
 
@@ -56,13 +57,10 @@ export const createOfflineAccountEndpoint = writeEndpoint({
   successStatuses: [201],
 })
 
-export function parsePositiveDecimal(value: string): number | null {
-  const normalized = value.trim().replace(',', '.')
-  if (!/^\d+(?:\.\d+)?$/.test(normalized)) return null
-  const amount = Number(normalized)
-  return Number.isFinite(amount) && amount > 0 && amount <= OFFLINE_ACCOUNT_BALANCE_MAX
-    ? amount
-    : null
+/** The typed balance, read in the app's language; `null` unless it is a positive amount. */
+export function parsePositiveDecimal(value: string, locale: string): number | null {
+  const amount = parseNumberInput(value, locale)
+  return amount !== null && amount > 0 && amount <= OFFLINE_ACCOUNT_BALANCE_MAX ? amount : null
 }
 
 export type OfflineAccountField = 'name' | 'balance' | 'currency'
@@ -74,10 +72,11 @@ export function invalidOfflineAccountFields(
   balance: string,
   currencyId: number | null,
   currencies: readonly AccountCurrencyDto[],
+  locale: string,
 ): ReadonlySet<OfflineAccountField> {
   const fields = new Set<OfflineAccountField>()
   if (name.trim().length === 0 || name.trim().length > 100) fields.add('name')
-  if (parsePositiveDecimal(balance) === null) fields.add('balance')
+  if (parsePositiveDecimal(balance, locale) === null) fields.add('balance')
   if (currencyId === null || !currencies.some((item) => item.currencyKey === currencyId)) fields.add('currency')
   return fields
 }

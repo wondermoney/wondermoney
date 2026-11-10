@@ -1,12 +1,12 @@
 import { useQueryClient } from '@tanstack/react-query'
-import { type Href, useNavigation, useRouter } from 'expo-router'
+import { type Href, usePreventRemove, useRouter } from 'expo-router'
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { StyleSheet, Text, useColorScheme, View } from 'react-native'
-import { SafeAreaView } from 'react-native-safe-area-context'
 
 import { BackControl } from '@/components/ui/back-control'
 import { useProductRuntime } from '@/components/providers/product-runtime-provider'
+import { SafeAreaView } from '@/components/ui/screen-safe-area'
 import type { AccountsResponseDto } from '@/features/accounts/accounts-contract'
 import { accountsKey } from '@/features/accounts/query-keys'
 import { ApiError } from '@/lib/api/errors'
@@ -23,15 +23,16 @@ import { usePortfolioCurrencies } from './use-portfolio-currencies'
 
 export function PortfolioCreateRoute() {
   const { runtime } = useProductRuntime(); if (!runtime) throw new Error('PortfolioCreateRoute requires an authenticated runtime')
-  const currencies = usePortfolioCurrencies(); const create = useCreatePortfolio(); const queryClient = useQueryClient(); const router = useRouter(); const navigation = useNavigation()
-  const submissionLock = useRef(false); const navigationLock = useRef(false); const navigationUnlocked = useRef(false); const detailLock = useRef(false); const didNavigate = useRef(false); const unknownRefreshAttempted = useRef(false); const confirmedPayload = useRef<Readonly<PortfolioCreateWrite> | null>(null)
+  const currencies = usePortfolioCurrencies(); const create = useCreatePortfolio(); const queryClient = useQueryClient(); const router = useRouter()
+  const submissionLock = useRef(false); const detailLock = useRef(false); const didNavigate = useRef(false); const unknownRefreshAttempted = useRef(false); const confirmedPayload = useRef<Readonly<PortfolioCreateWrite> | null>(null)
   const [failure, setFailure] = useState<PortfolioCreateFailure | null>(null); const [confirmedPortfolioId, setConfirmedPortfolioId] = useState<number | null>(null); const [detailState, setDetailState] = useState<'idle' | 'loading' | 'unavailable'>('idle'); const [refreshingList, setRefreshingList] = useState(false); const [listRefreshFailed, setListRefreshFailed] = useState(false)
-  useEffect(() => navigation.addListener('beforeRemove', (event) => { if ((navigationLock.current || create.isPending) && !navigationUnlocked.current) event.preventDefault() }), [create.isPending, navigation])
+  const [navigationLocked, setNavigationLocked] = useState(false); const [navigationUnlocked, setNavigationUnlocked] = useState(false)
+  const disablePrevention = usePreventRemove((navigationLocked || create.isPending) && !navigationUnlocked); const unlockNavigation = () => { setNavigationUnlocked(true); disablePrevention() }
   const refreshList = async () => { if (refreshingList) return; setRefreshingList(true); setListRefreshFailed(false); try { await queryClient.invalidateQueries({ queryKey: portfoliosKey(runtime.epochId), exact: true, refetchType: 'all' }); await queryClient.fetchQuery({ queryKey: portfoliosKey(runtime.epochId), queryFn: () => runtime.apiClient.read(portfoliosEndpoint), staleTime: 0 }) } catch { setListRefreshFailed(true) } finally { setRefreshingList(false) } }
   useEffect(() => { if (!create.unknownOutcome || unknownRefreshAttempted.current) return; unknownRefreshAttempted.current = true; void refreshList() })
-  const loadCanonicalDetail = async (portfolioId: number, payload: Readonly<PortfolioCreateWrite>) => { if (detailLock.current || didNavigate.current) return; detailLock.current = true; navigationLock.current = true; setDetailState('loading'); try { const response = await queryClient.fetchQuery({ queryKey: portfolioKey(runtime.epochId, portfolioId), queryFn: () => runtime.apiClient.read(createPortfolioEndpoint(portfolioId)), staleTime: 0 }); const expectedCurrency = currencies.data?.currencies.find((currency) => currency.currencyKey === payload.currencyId); if (response.portfolio.portfolioKey !== portfolioId || response.portfolio.name !== payload.name || !expectedCurrency || response.portfolio.currencyKey.code !== expectedCurrency.code) throw new ApiError('invalid-response'); didNavigate.current = true; navigationUnlocked.current = true; router.replace({ pathname: '/portfolio/[portfolioId]', params: { portfolioId: String(portfolioId) } } as Href) } catch { navigationLock.current = false; setDetailState('unavailable') } finally { detailLock.current = false } }
-  const submit = async (payload: PortfolioCreateWrite) => { if (submissionLock.current || create.isPending || create.unknownOutcome) return; submissionLock.current = true; navigationLock.current = true; confirmedPayload.current = payload; setFailure(null); try { const response = await create.mutateAsync(payload); setConfirmedPortfolioId(response.portfolioId); await loadCanonicalDetail(response.portfolioId, payload) } catch (error) { navigationLock.current = false; const kind = classifyPortfolioCreateFailure(error); setFailure(kind); if (kind !== 'unknown') { submissionLock.current = false; confirmedPayload.current = null } else await refreshList() } }
-  const back = () => { navigationUnlocked.current = true; router.replace('/portfolio' as Href) }
+  const loadCanonicalDetail = async (portfolioId: number, payload: Readonly<PortfolioCreateWrite>) => { if (detailLock.current || didNavigate.current) return; detailLock.current = true; setNavigationLocked(true); setDetailState('loading'); try { const response = await queryClient.fetchQuery({ queryKey: portfolioKey(runtime.epochId, portfolioId), queryFn: () => runtime.apiClient.read(createPortfolioEndpoint(portfolioId)), staleTime: 0 }); const expectedCurrency = currencies.data?.currencies.find((currency) => currency.currencyKey === payload.currencyId); if (response.portfolio.portfolioKey !== portfolioId || response.portfolio.name !== payload.name || !expectedCurrency || response.portfolio.currencyKey.code !== expectedCurrency.code) throw new ApiError('invalid-response'); didNavigate.current = true; unlockNavigation(); router.replace({ pathname: '/portfolio/[portfolioId]', params: { portfolioId: String(portfolioId) } } as Href) } catch { setNavigationLocked(false); setDetailState('unavailable') } finally { detailLock.current = false } }
+  const submit = async (payload: PortfolioCreateWrite) => { if (submissionLock.current || create.isPending || create.unknownOutcome) return; submissionLock.current = true; setNavigationLocked(true); confirmedPayload.current = payload; setFailure(null); try { const response = await create.mutateAsync(payload); setConfirmedPortfolioId(response.portfolioId); await loadCanonicalDetail(response.portfolioId, payload) } catch (error) { setNavigationLocked(false); const kind = classifyPortfolioCreateFailure(error); setFailure(kind); if (kind !== 'unknown') { submissionLock.current = false; confirmedPayload.current = null } else await refreshList() } }
+  const back = () => { unlockNavigation(); router.replace('/portfolio' as Href) }
   if (currencies.isAccessTransition) return null
   if (!currencies.data && !create.unknownOutcome) {
     const state = currencies.isPending ? 'loading' : currencies.isInvalidResponse ? 'invalid' : 'error'

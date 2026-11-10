@@ -22,8 +22,9 @@ import { listTransactions, type TransactionListRequest } from '../transaction-li
 
 const eur = { code: 'EUR' };
 
-function account(accountKey: number, opts: { linked?: boolean } = {}) {
+function account(accountKey: number, opts: { linked?: boolean; logoUrl?: null | string } = {}) {
   return {
+    accountFinancialInstitutionKey: opts.logoUrl === undefined ? undefined : { logoUrl: opts.logoUrl },
     accountKey,
     accountName: `Account ${accountKey}`,
     appuserCurrencyBalance: 50,
@@ -53,6 +54,7 @@ function transaction(transactionKey: number, accountKey: number) {
     settlementCurrencyKey: eur,
     transactionDate: new Date('2026-02-01T00:00:00.000Z'),
     transactionKey,
+    transactionTags: { getItems: () => [] },
     transactionTypeKey: { name: 'debit' },
   };
 }
@@ -151,10 +153,27 @@ describe('listTransactions', () => {
     const openingBalanceAccounts = (page: Awaited<ReturnType<typeof listTransactions>>) =>
       page.transactions.filter((row) => row.description === 'Initial balance').map((row) => row.accountKey?.accountKey);
 
-    it('adds one only for offline accounts with no transaction on the first page, and counts it', async () => {
+    /** Answers the per-account existence checks: these accounts have transactions, the rest none. Every other count is `total`. */
+    function transactionsExistFor(accountKeys: number[], total = 0) {
+      db.count.mockImplementation((_entity: unknown, where: { accountKey?: { accountKey?: number } }) => {
+        const accountKey = where.accountKey?.accountKey;
+        if (typeof accountKey === 'number') return Promise.resolve(accountKeys.includes(accountKey) ? 1 : 0);
+        return Promise.resolve(total);
+      });
+    }
+
+    function datedTransaction(transactionKey: number, accountKey: number, isoDate: string) {
+      return { ...transaction(transactionKey, accountKey), transactionDate: new Date(isoDate) };
+    }
+
+    function accountCreated(accountKey: number, isoDate: string) {
+      return { ...account(accountKey), createdAt: new Date(isoDate) };
+    }
+
+    it('adds one only for offline accounts with no transaction at all, and counts it', async () => {
       db.many.set(Account, [account(1), account(2), account(3, { linked: true })]);
       db.many.set(Transaction, [transaction(201, 1)]);
-      db.count.mockResolvedValue(1);
+      transactionsExistFor([1], 1);
 
       const page = await listTransactions(request());
 
@@ -162,11 +181,67 @@ describe('listTransactions', () => {
       expect(page.total).toBe(2);
     });
 
-    it('is never re-emitted on a later page, on either list', async () => {
+    it('leaves out an offline account whose transactions are all further down the list', async () => {
+      db.many.set(Account, [account(1), account(2)]);
+      db.many.set(Transaction, [transaction(201, 1)]);
+      transactionsExistFor([1, 2], 40);
+
+      expect(openingBalanceAccounts(await listTransactions(request()))).toEqual([]);
+    });
+
+    it('sits at its date among the real rows, newest first, with a stable key', async () => {
+      db.many.set(Account, [account(1, { linked: true }), accountCreated(2, '2026-02-15T00:00:00.000Z')]);
+      db.many.set(Transaction, [datedTransaction(301, 1, '2026-03-01T00:00:00.000Z'), datedTransaction(300, 1, '2026-02-01T00:00:00.000Z')]);
+
+      const page = await listTransactions(request());
+
+      expect(page.transactions.map((row) => row.transactionKey)).toEqual([301, -2, 300]);
+    });
+
+    it('waits for the page its date falls on, and appears exactly once', async () => {
+      db.many.set(Account, [account(1, { linked: true }), accountCreated(2, '2026-01-15T00:00:00.000Z')]);
+
+      db.many.set(Transaction, [datedTransaction(301, 1, '2026-03-01T00:00:00.000Z'), datedTransaction(300, 1, '2026-02-01T00:00:00.000Z')]);
+      transactionsExistFor([], 3);
+      const first = await listTransactions(request({ limit: 2 }));
+      expect(openingBalanceAccounts(first)).toEqual([]);
+      expect(first).toMatchObject({ hasMore: true, total: 4 });
+
+      db.many.set(Transaction, [datedTransaction(299, 1, '2026-01-01T00:00:00.000Z')]);
+      const second = await listTransactions(request({ cursor: first.nextCursor ?? undefined, limit: 2 }));
+      expect(second.transactions.map((row) => row.transactionKey)).toEqual([-2, 299]);
+    });
+
+    it('is left out when the date range excludes the day the account was created', async () => {
+      db.many.set(Account, [accountCreated(2, '2026-01-15T00:00:00.000Z')]);
+
+      const outside = await listTransactions(request({ filters: { fromDate: new Date('2026-02-01T00:00:00.000Z') } }));
+      const inside = await listTransactions(request({ filters: { fromDate: new Date('2026-01-01T00:00:00.000Z'), toDate: new Date('2026-01-31T00:00:00.000Z') } }));
+
+      expect(openingBalanceAccounts(outside)).toEqual([]);
+      expect(openingBalanceAccounts(inside)).toEqual([2]);
+    });
+
+    it("carries the account's institution logo, so the row can show whose balance it is", async () => {
+      db.many.set(Account, [account(1, { logoUrl: 'https://cdn.example/bank.png' }), account(2)]);
+
+      const page = await listTransactions(request());
+      const logos = page.transactions
+        .filter((row) => row.description === 'Initial balance')
+        .map((row) => [row.accountKey?.accountKey, row.accountKey?.accountFinancialInstitutionKey?.logoUrl ?? null]);
+
+      expect(logos).toEqual([
+        [1, 'https://cdn.example/bank.png'],
+        [2, null],
+      ]);
+    });
+
+    it('is not re-emitted on a page past its date, on either list', async () => {
       db.many.set(Account, [account(2)]);
       db.one.set(Account, account(2));
 
       for (const scope of ['all-accounts', { accountKey: 2 }] as const) {
+        // The cursor sits at the account's creation instant, so its row belonged to an earlier page.
         const page = await listTransactions(request({ cursor: '1767225600000_5', scope }));
 
         expect(openingBalanceAccounts(page)).toEqual([]);

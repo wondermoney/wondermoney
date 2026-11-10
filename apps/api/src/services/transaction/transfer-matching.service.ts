@@ -40,9 +40,10 @@ import { TransactionAuditService } from './transaction-audit.service';
  * - Never: a manual DEPOSIT or PAYMENT (the person said what it is), CARD_PAYMENT and every other
  *   type, and any row a user re-typed to something other than a transfer.
  *
- * A type is user-set when the audit log has a USER entry that changed `transactionTypeKey`. No edit
- * path changes a type today (a manual row's type is the one it was created with, which the anchor
- * rule respects); the check keeps a future edit from being undone here. A row created through
+ * A type is user-set when the audit log has a USER entry that changed `transactionTypeKey`: "mark as
+ * transfer" and its undo (`transaction-transfer.service.ts`) write one, so a row a user marked as a
+ * transfer is an anchor, and one a user marked as not a transfer never pairs and leaves any pair it
+ * was in (the pair is no longer valid once either row is not typed as a transfer). A row created through
  * `createTransaction` records its type that way, so a generic CSV row, which stores the file's id
  * like a synced row, keeps the type its file gave it.
  *
@@ -253,8 +254,15 @@ function isAnchor(row: TransferRow): boolean {
   return row.cents > 0 ? row.typeName === TRANSFER_IN : row.typeName === TRANSFER_OUT;
 }
 
+function isTransferType(row: TransferRow): boolean {
+  return row.typeName === TRANSFER_IN || row.typeName === TRANSFER_OUT;
+}
+
 function isValidPair(row: TransferRow, partner: TransferRow): boolean {
+  // Pairing types both rows as transfers; a row a user has since re-typed as something else
+  // (PATCH /transaction/:id, "not a transfer") has left the pair.
   return partner.counterpartKey === row.transactionKey
+    && isTransferType(row) && isTransferType(partner)
     && row.booked && partner.booked && !row.deleted && !partner.deleted
     && row.cents !== 0 && row.cents === -partner.cents
     && row.currencyKey !== null && row.currencyKey === partner.currencyKey

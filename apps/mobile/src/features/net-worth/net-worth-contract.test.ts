@@ -36,6 +36,11 @@ describe('net-worth contract', () => {
     expect(netWorthDtoSchema.safeParse({ ...fixture, currencyCode }).success).toBe(false)
   })
 
+  it('keeps the account a portfolio row is already counted in', () => {
+    const rows = [{ type: 'portfolios', id: 7, name: 'Shares', balance: 8000, countedInAccountId: 5 }]
+    expect(netWorthDtoSchema.parse({ ...fixture, rows }).rows).toEqual(rows)
+  })
+
   it('accepts zeros and empty rows', () => {
     expect(netWorthDtoSchema.safeParse({
       ...fixture,

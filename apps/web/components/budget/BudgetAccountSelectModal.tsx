@@ -1,10 +1,11 @@
 "use client";
 
-import { Link, Unlink } from "lucide-react";
+import { Link, Plus, Unlink } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 
+import { AccountMark } from "@/components/account/AccountMark";
 import OpenBankingNotice from "@/components/account/OpenBankingNotice";
 import {
   Form,
@@ -56,6 +57,10 @@ const BudgetAccountSelectModal = ({
   onAddOfflineAccountClick,
 }: BudgetAccountSelectModalProps) => {
   const t = useTranslations();
+  const hasAccounts = !!accounts && accounts.length > 0;
+  // Linking what already exists is the usual job here; adding a new account
+  // stays one click away instead of sharing the dialog with the list.
+  const [showAddAccount, setShowAddAccount] = useState(false);
   const methods = useForm<AccountTransactionFormData>({
     defaultValues: { selectedAccounts: [] },
   });
@@ -106,7 +111,10 @@ const BudgetAccountSelectModal = ({
   return (
     <DrawerDialog
       open={isOpen}
-      onOpenChange={setOpen}
+      onOpenChange={(open) => {
+        if (!open) setShowAddAccount(false);
+        setOpen(open);
+      }}
       title={t("link-account")}
       description={t("link-account-subtitle")}
       trigger={triggerButton}
@@ -158,8 +166,21 @@ const BudgetAccountSelectModal = ({
                                     />
                                     <Label
                                       htmlFor={controlId}
-                                      className="flex-1 cursor-pointer font-medium"
+                                      className="flex flex-1 cursor-pointer items-center gap-3 font-medium"
                                     >
+                                      <AccountMark
+                                        className="size-8"
+                                        logoUrl={
+                                          account.accountFinancialInstitutionKey
+                                            ?.logoUrl
+                                        }
+                                        label={
+                                          account.accountFinancialInstitutionKey
+                                            ?.displayName ??
+                                          account.accountName ??
+                                          t("unknown")
+                                        }
+                                      />
                                       {account.accountName ?? t("unknown")}
                                     </Label>
                                   </div>
@@ -186,69 +207,91 @@ const BudgetAccountSelectModal = ({
             </>
           )}
 
-          <Separator />
+          {hasAccounts && !showAddAccount ? (
+            <>
+              <Separator />
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={() => setShowAddAccount(true)}
+              >
+                <Plus className="size-4" aria-hidden="true" />
+                {t("add-new-account")}
+              </Button>
+            </>
+          ) : (
+            <>
+              <Separator />
 
-          <div className="space-y-4">
-            <Heading variant="h3" className="text-lg font-semibold">
-              {t("add-new-account")}
-            </Heading>
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-              <Button
-                className="flex h-full flex-1 flex-col items-center justify-start gap-4 p-4 whitespace-normal"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onAddSyncAccountClick();
-                }}
-              >
-                <div className="bg-background text-primary rounded-full p-2">
-                  <Link />
+              <div className="space-y-4">
+                <Heading variant="h3" className="text-lg font-semibold">
+                  {t("add-new-account")}
+                </Heading>
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                  <Button
+                    className="flex h-full flex-1 flex-col items-center justify-start gap-4 p-4 whitespace-normal"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onAddSyncAccountClick();
+                    }}
+                  >
+                    <div className="bg-background text-primary rounded-full p-2">
+                      <Link />
+                    </div>
+                    <Heading
+                      variant="h3"
+                      className="text-primary-foreground text-lg"
+                    >
+                      {t("linked")}
+                    </Heading>
+                    <Text
+                      variant="smallText"
+                      className="text-primary-foreground"
+                    >
+                      {t("add-linked-account-description")}
+                    </Text>
+                  </Button>
+                  <Button
+                    className="flex h-full flex-1 flex-col items-center justify-start gap-4 p-4 whitespace-normal"
+                    variant="outline"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onAddOfflineAccountClick();
+                    }}
+                  >
+                    <div className="bg-primary rounded-full p-2 text-white">
+                      <Unlink />
+                    </div>
+                    <Heading variant="h3" className="text-lg">
+                      {t("unlinked")}
+                    </Heading>
+                    <Text variant="smallText">
+                      {t("add-unlinked-account-description")}
+                    </Text>
+                  </Button>
                 </div>
-                <Heading
-                  variant="h3"
-                  className="text-primary-foreground text-lg"
+                <Accordion
+                  type="single"
+                  collapsible
+                  className="bg-background/80 mt-4 rounded-lg border px-3"
                 >
-                  {t("linked")}
-                </Heading>
-                <Text variant="smallText" className="text-primary-foreground">
-                  {t("add-linked-account-description")}
-                </Text>
-              </Button>
-              <Button
-                className="flex h-full flex-1 flex-col items-center justify-start gap-4 p-4 whitespace-normal"
-                variant="outline"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onAddOfflineAccountClick();
-                }}
-              >
-                <div className="bg-primary rounded-full p-2 text-white">
-                  <Unlink />
-                </div>
-                <Heading variant="h3" className="text-lg">
-                  {t("unlinked")}
-                </Heading>
-                <Text variant="smallText">
-                  {t("add-unlinked-account-description")}
-                </Text>
-              </Button>
-            </div>
-            <Accordion
-              type="single"
-              collapsible
-              className="bg-background/80 mt-4 rounded-lg border px-3"
-            >
-              <AccordionItem value="open-banking-info" className="border-b-0">
-                <AccordionTrigger className="text-left text-sm font-semibold">
-                  {t("faq-open-banking-title")}
-                </AccordionTrigger>
-                <AccordionContent className="text-foreground text-left">
-                  <div className="space-y-3">
-                    <OpenBankingNotice />
-                  </div>
-                </AccordionContent>
-              </AccordionItem>
-            </Accordion>
-          </div>
+                  <AccordionItem
+                    value="open-banking-info"
+                    className="border-b-0"
+                  >
+                    <AccordionTrigger className="text-left text-sm font-semibold">
+                      {t("faq-open-banking-title")}
+                    </AccordionTrigger>
+                    <AccordionContent className="text-foreground text-left">
+                      <div className="space-y-3">
+                        <OpenBankingNotice />
+                      </div>
+                    </AccordionContent>
+                  </AccordionItem>
+                </Accordion>
+              </div>
+            </>
+          )}
         </div>
       )}
     </DrawerDialog>

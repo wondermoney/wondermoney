@@ -11,6 +11,8 @@ const category = z.object({
   bgColor: z.string(),
   icon: z.string().nullable().optional(),
   isSystemCategory: z.boolean(),
+  // Whether its transactions count as spending. Absent on a server from before the flag: they do.
+  countsAsSpending: z.boolean().optional(),
 })
 
 export const categoriesResponseSchema = z.object({
@@ -37,12 +39,14 @@ export const categoryCreateWriteSchema = z.object({
   color: categoryColorSchema,
   icon: categoryIconSchema,
   parentCategoryKey: categoryParentKeySchema.optional(),
+  countsAsSpending: z.boolean().optional(),
 }).strict()
 
 export const categoryEditWriteSchema = z.object({
   name: categoryNameSchema.optional(),
   color: categoryColorSchema.optional(),
   icon: categoryIconSchema.optional(),
+  countsAsSpending: z.boolean().optional(),
 }).strict().refine((value) => Object.keys(value).length > 0, 'At least one changed field is required.')
 
 export type CategoryCreateWrite = z.infer<typeof categoryCreateWriteSchema>
@@ -55,6 +59,7 @@ const categoryWriteResponseSchema = z.object({
     // An icon this build can't draw reads as null; the form keeps showing the icon the user picked.
     icon: tolerantEnum(CATEGORY_ICONS, null).nullable(),
     bgColor: categoryColorSchema,
+    countsAsSpending: z.boolean().optional(),
   }),
 })
 
@@ -73,6 +78,14 @@ export const createCategoryEditEndpoint = (categoryId: number) => {
     schema: categoryWriteResponseSchema,
     successStatuses: [200],
   })
+}
+
+/**
+ * Whether a category's transactions count towards spending (reports, budgets, home cash flow).
+ * A category counts only when it and its main category both do; a missing flag counts.
+ */
+export function countsAsSpending(category: Pick<CategoryDto, 'countsAsSpending'>, parent?: Pick<CategoryDto, 'countsAsSpending'> | null): boolean {
+  return category.countsAsSpending !== false && parent?.countsAsSpending !== false
 }
 
 export function parseCategoryId(value: unknown): number | null {

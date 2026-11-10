@@ -18,7 +18,7 @@ async function renderScreen(onSubmit = jest.fn(), notice?: string) {
 describe('ForgotPasswordScreen', () => {
   it('validates the email locally', async () => {
     const { view, onSubmit } = await renderScreen()
-    await fireEvent.press(view.getByRole('button', { name: 'Send reset link' }))
+    await fireEvent.press(view.getByRole('button', { name: 'Send reset email' }))
     await waitFor(() => expect(view.getByText('Enter your email address')).toBeOnTheScreen())
     expect(onSubmit).not.toHaveBeenCalled()
   })
@@ -26,7 +26,7 @@ describe('ForgotPasswordScreen', () => {
   it('rejects an invalid email format', async () => {
     const { view, onSubmit } = await renderScreen()
     await fireEvent.changeText(view.getByLabelText('Email'), 'not-an-email')
-    await fireEvent.press(view.getByRole('button', { name: 'Send reset link' }))
+    await fireEvent.press(view.getByRole('button', { name: 'Send reset email' }))
     await waitFor(() => expect(view.getByText('Enter a valid email address')).toBeOnTheScreen())
     expect(onSubmit).not.toHaveBeenCalled()
   })
@@ -35,7 +35,7 @@ describe('ForgotPasswordScreen', () => {
     const onSubmit = jest.fn().mockResolvedValue('sent')
     const { view } = await renderScreen(onSubmit)
     await fireEvent.changeText(view.getByLabelText('Email'), '  a@b.co  ')
-    await fireEvent.press(view.getByRole('button', { name: 'Send reset link' }))
+    await fireEvent.press(view.getByRole('button', { name: 'Send reset email' }))
     await waitFor(() => expect(onSubmit).toHaveBeenCalledWith('a@b.co'))
     await waitFor(() => expect(view.getByText("If an account exists for that email, we've sent a reset link")).toBeOnTheScreen())
   })
@@ -47,7 +47,7 @@ describe('ForgotPasswordScreen', () => {
     const onSubmit = jest.fn().mockResolvedValue(outcome)
     const { view } = await renderScreen(onSubmit)
     await fireEvent.changeText(view.getByLabelText('Email'), 'a@b.co')
-    await fireEvent.press(view.getByRole('button', { name: 'Send reset link' }))
+    await fireEvent.press(view.getByRole('button', { name: 'Send reset email' }))
     await waitFor(() => expect(view.getByText(message)).toBeOnTheScreen())
   })
 
@@ -65,11 +65,11 @@ describe('ForgotPasswordScreen', () => {
     await fireEvent.changeText(view.getByLabelText('Email'), 'a@b.co')
 
     // First submission: success
-    await fireEvent.press(view.getByRole('button', { name: 'Send reset link' }))
+    await fireEvent.press(view.getByRole('button', { name: 'Send reset email' }))
     await waitFor(() => expect(view.getByText("If an account exists for that email, we've sent a reset link")).toBeOnTheScreen())
 
     // Second submission WITHOUT editing email: error
-    await fireEvent.press(view.getByRole('button', { name: 'Send reset link' }))
+    await fireEvent.press(view.getByRole('button', { name: 'Send reset email' }))
     await waitFor(() => expect(view.getByText('Sign in is unavailable. Try again')).toBeOnTheScreen())
 
     // Success text should no longer be visible; only error

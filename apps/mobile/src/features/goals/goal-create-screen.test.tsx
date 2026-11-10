@@ -28,15 +28,20 @@ async function renderScreen(props: Partial<GoalCreateScreenProps> = {}, locale =
 describe('GoalCreateScreen', () => {
   beforeEach(() => jest.clearAllMocks())
 
-  it('shows a per-field error under each missing required field and clears them as fixed', async () => {
+  it('keeps Review disabled until the required fields are filled and shows errors only for wrong input', async () => {
     const submit = jest.fn<Promise<void>, [GoalCreateWrite]>(async () => undefined)
     const view = await renderScreen({ onSubmit: submit })
-    await fireEvent.press(view.getByRole('button', { name: 'Review goal' }))
-    expect(await view.findByText('Enter a name up to 100 characters.')).toBeOnTheScreen()
+    expect(view.getByRole('button', { name: 'Review goal' })).toBeDisabled()
+    expect(view.queryByText('Enter a name up to 100 characters.')).not.toBeOnTheScreen()
+    await fireEvent.changeText(view.getByLabelText('Goal name'), '   ')
+    expect(view.getByText('Enter a name up to 100 characters.')).toBeOnTheScreen()
+    await fireEvent.changeText(view.getByLabelText('Target amount'), '1.2.3')
     expect(view.getByText('Enter a positive amount with up to 4 decimal places.')).toBeOnTheScreen()
-    expect(view.queryByText('Review and confirm')).not.toBeOnTheScreen()
     await fireEvent.changeText(view.getByLabelText('Goal name'), 'Home reserve')
     expect(view.queryByText('Enter a name up to 100 characters.')).not.toBeOnTheScreen()
+    expect(view.getByRole('button', { name: 'Review goal' })).toBeDisabled()
+    await fireEvent.changeText(view.getByLabelText('Target amount'), '100')
+    expect(view.getByRole('button', { name: 'Review goal' })).toBeEnabled()
     expect(submit).not.toHaveBeenCalled()
   })
 
@@ -45,8 +50,9 @@ describe('GoalCreateScreen', () => {
     await fireEvent.changeText(view.getByLabelText('Goal name'), 'Home reserve')
     await fireEvent.changeText(view.getByLabelText('Target amount'), '1000')
     await fireEvent.changeText(view.getByLabelText('Monthly contribution target'), 'not a number')
+    expect(view.getByText('Enter a positive amount with up to 4 decimal places.')).toBeOnTheScreen()
+    expect(view.getByRole('button', { name: 'Review goal' })).toBeDisabled()
     await fireEvent.press(view.getByRole('button', { name: 'Review goal' }))
-    expect(await view.findByText('Enter a positive amount with up to 4 decimal places.')).toBeOnTheScreen()
     expect(view.queryByText('Review and confirm')).not.toBeOnTheScreen()
   })
 
@@ -87,6 +93,13 @@ describe('GoalCreateScreen', () => {
     expect(view.getByRole('button', { name: 'Return to Goals' })).toBeOnTheScreen()
   })
 
+  it('closes through the form bar', async () => {
+    const back = jest.fn()
+    const view = await renderScreen({ onBack: back })
+    await fireEvent.press(view.getByRole('button', { name: 'Close' }))
+    expect(back).toHaveBeenCalledTimes(1)
+  })
+
   it('shows confirmed identity recovery without any create action', async () => {
     const retry = jest.fn(async () => undefined)
     const view = await renderScreen({ confirmedGoalId: 42, detailState: 'unavailable', onRetryDetails: retry })
@@ -101,8 +114,8 @@ describe('GoalCreateScreen', () => {
   })
 
   it.each([
-    ['pt-PT', 'Criar um objetivo', 'Rever objetivo'],
-    ['es', 'Crear un objetivo', 'Revisar objetivo'],
+    ['pt-PT', 'Criar objetivo', 'Rever objetivo'],
+    ['es', 'Crear objetivo', 'Revisar objetivo'],
   ])('exposes translated headings, fields, and accessible actions in %s', async (locale, title, review) => {
     const view = await renderScreen({}, locale)
     expect(view.getByText(title)).toBeOnTheScreen()

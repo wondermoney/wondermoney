@@ -23,12 +23,17 @@ import {
   type Table as TableType,
 } from "@/components/ui/Table/features";
 import { useRouter } from "@/i18n/navigation";
+import { dayBreaks, distinctMerchant, monthBreaks } from "@/lib/account/ledger";
+import { isTransferType } from "@/lib/account/transaction-transfer";
 import useEditTransaction from "@/lib/api/account/useEditTransaction";
 import type { Transaction } from "@/lib/api/account/useTransactions";
+import { isSplitTransaction } from "@/lib/api/account/useTransactionSplits";
 import type { Category } from "@/lib/api/category/useCategories";
 import { isDemoReadOnlyError } from "@/lib/api/errors";
+import useTags from "@/lib/api/tag/useTags";
 import { useRateLimitToast } from "@/lib/api/useRateLimitToast";
 import { cn } from "@/lib/utils";
+import { transactionDisplayDate } from "@/lib/utils/transaction-date";
 import { useFormatCurrency } from "@/lib/utils/useFormatCurrency";
 import { useFormatShortDate } from "@/lib/utils/useFormatShortDate";
 import { useBreakpoint } from "@/lib/utils/useTailwindBreakpoints";
@@ -39,6 +44,7 @@ import {
 } from "../../lib/utils/categories";
 import CategorySelect, { CategoryCellContent } from "../CategorySelect";
 import FundTransactionFromGoalDialog from "../goals/FundTransactionFromGoalDialog";
+import { TagChipList } from "../tags/TagChip";
 import { Amount } from "../ui/Amount";
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
@@ -74,7 +80,14 @@ import {
   AccountTransactionEditSheet,
   type FundGoalTransactionRequest,
 } from "./AccountTransactionEditSheet";
+import { LedgerDateCell, LedgerMonthLabel } from "./LedgerCells";
 import TransactionReviewControl from "./TransactionReviewControl";
+import {
+  TransactionSplitLinesList,
+  TransactionSplitSummary,
+  useSplitCategoryLabel,
+  useSplitSummaryLabel,
+} from "./TransactionSplitLines";
 
 interface AccountTransactionTableProps {
   transactions: Transaction[];
@@ -92,6 +105,14 @@ interface AccountTransactionTableProps {
   withRowActions?: boolean;
   footerActions?: React.ReactNode;
   sticky?: boolean;
+  /**
+   * `ledger` is the Direction A transactions page: a date column that marks
+   * each month's first row, the merchant folded into the description's second
+   * line, a "Needs review" word on unreviewed rows, and each account's running
+   * balance drawn as a line beside its figures. Filters, selection, review,
+   * editing and row actions are the same in both layouts.
+   */
+  layout?: "default" | "ledger";
   /**
    * `total` from the transactions endpoint: rows matching the filters
    * the *server* applied, before its `limit`.
@@ -117,6 +138,7 @@ interface AccountTransactionTableProps {
     accountKeys: string[];
     categoryKeys: string[];
     needsReview: boolean;
+    tagKeys: string[];
     transactionTypes: string[];
   }) => void;
 }
@@ -139,17 +161,21 @@ const AccountTransactionsTable: React.FC<AccountTransactionTableProps> =
       withRowActions = true,
       footerActions,
       sticky = true,
+      layout = "default",
       serverTotal,
       onServerFiltersChange,
     }) => {
       const t = useTranslations();
       const formatCurrency = useFormatCurrency();
       const formatShortDate = useFormatShortDate();
+      const splitSummaryLabel = useSplitSummaryLabel();
+      const splitCategoryLabel = useSplitCategoryLabel();
       const notifyIfRateLimited = useRateLimitToast();
       const router = useRouter();
       const posthog = usePostHog();
       const [resetPagination, setResetPagination] = useState(false);
       const isDesktop = useBreakpoint("md");
+      const isLedger = layout === "ledger";
 
       // Edit transaction modal
       const [transactionData, setTransactionData] =
@@ -202,6 +228,12 @@ const AccountTransactionsTable: React.FC<AccountTransactionTableProps> =
       ] = useState(false);
       const [needsReviewFilter, setNeedsReviewFilter] = useState(false);
 
+      // Tag filter: any-of, like the category filter. Options are the
+      // household's tags, not only those on loaded rows, because the server
+      // filters the whole range.
+      const [tagKeysFilter, setTagKeysFilter] = useState<string[]>([]);
+      const { data: tagsData } = useTags({ enabled: withFilters });
+
       /*
        * When the parent forwards filters to the endpoint, the rows arriving here are
        * already filtered across the whole range. Re-applying the same predicates would be
@@ -214,6 +246,7 @@ const AccountTransactionsTable: React.FC<AccountTransactionTableProps> =
           accountKeys: accountKeysFilter,
           categoryKeys: transactionCategoryKeysFilter,
           needsReview: needsReviewFilter,
+          tagKeys: tagKeysFilter,
           transactionTypes: transactionTypeFilter,
         });
       }, [
@@ -221,6 +254,7 @@ const AccountTransactionsTable: React.FC<AccountTransactionTableProps> =
         accountKeysFilter,
         transactionCategoryKeysFilter,
         needsReviewFilter,
+        tagKeysFilter,
         transactionTypeFilter,
       ]);
 
@@ -254,19 +288,29 @@ const AccountTransactionsTable: React.FC<AccountTransactionTableProps> =
         } else if (transactionCategoryKeysFilter.length > 0) {
           _filteredTransactions = _filteredTransactions.filter(
             (transaction) => {
-              // Check if "Uncategorized" is selected and transaction has no categories
+              // A split transaction matches through any of its lines, as the API's filter
+              // does: an uncategorized line matches "Uncategorized".
+              const splits = transaction.splits ?? [];
               const isUncategorizedMatch =
                 transactionCategoryKeysFilter.includes("__uncategorized__") &&
-                transaction.appuserTransactionCategories.length === 0;
+                (splits.length > 0
+                  ? splits.some((line) => line.category === null)
+                  : transaction.appuserTransactionCategories.length === 0);
 
               // Check if transaction matches any of the selected category keys (excluding "Uncategorized")
               const categoryKeysFilter = transactionCategoryKeysFilter.filter(
                 (key) => key !== "__uncategorized__",
               );
               const transactionCategoryKeys =
-                transaction.appuserTransactionCategories.map((category) =>
-                  category.categoryKey.toString(),
-                );
+                splits.length > 0
+                  ? splits.flatMap((line) =>
+                      line.category
+                        ? [line.category.categoryKey.toString()]
+                        : [],
+                    )
+                  : transaction.appuserTransactionCategories.map((category) =>
+                      category.categoryKey.toString(),
+                    );
               const isCategoryMatch =
                 categoryKeysFilter.length > 0 &&
                 transactionCategoryKeys.some((categoryKey) =>
@@ -283,10 +327,18 @@ const AccountTransactionsTable: React.FC<AccountTransactionTableProps> =
             (transaction) => !transaction.reviewed,
           );
         }
+        if (tagKeysFilter.length > 0) {
+          _filteredTransactions = _filteredTransactions.filter((transaction) =>
+            (transaction.tags ?? []).some((tag) =>
+              tagKeysFilter.includes(tag.tagKey.toString()),
+            ),
+          );
+        }
         return _filteredTransactions;
       }, [
         filtersAppliedByServer,
         accountKeysFilter,
+        tagKeysFilter,
         transactionCategoryKeysFilter,
         transactionTypeFilter,
         transactions,
@@ -324,6 +376,17 @@ const AccountTransactionsTable: React.FC<AccountTransactionTableProps> =
           });
           setTransactionCategoryKeysFilter(categoryKeys);
           setIsTransactionCategoryFilterDirty(true);
+          setResetPagination(true);
+        },
+        [posthog],
+      );
+
+      const onTagKeyFilterChange = useCallback(
+        (tagKeys: string[]) => {
+          posthog.capture("account_transaction_table_filter", {
+            filter: "transaction_tag",
+          });
+          setTagKeysFilter(tagKeys);
           setResetPagination(true);
         },
         [posthog],
@@ -431,9 +494,33 @@ const AccountTransactionsTable: React.FC<AccountTransactionTableProps> =
         [t, openEditTransactionModal],
       );
 
+      // Read lazily: the page of phone rows is computed further down.
+      const mobileMonthStarts = () =>
+        new Set(
+          isLedger
+            ? mobileTransactions
+                .filter(
+                  (_, index, list) =>
+                    monthBreaks(
+                      list.map((tx) =>
+                        transactionDisplayDate(tx.transactionDate),
+                      ),
+                    )[index],
+                )
+                .map((tx) => tx.transactionKey)
+            : [],
+        );
+
       const MobileTransactionsList = () => (
         <div className="md:hidden">
-          <div className="divide-border border-border bg-card divide-y rounded-md">
+          <div
+            className={cn(
+              "divide-border divide-y",
+              isLedger
+                ? "border-border border-b"
+                : "border-border bg-card rounded-md",
+            )}
+          >
             {mobileTransactions.length === 0 ? (
               <div className="flex min-h-32 items-center justify-center p-4">
                 <p className="text-muted-foreground text-sm">
@@ -446,17 +533,28 @@ const AccountTransactionsTable: React.FC<AccountTransactionTableProps> =
                 transaction.editedSettlementAmount ??
                 transaction.appuserSettlementAmount;
               const firstCategory = transaction.appuserTransactionCategories[0];
-              const categoryLabel = firstCategory
-                ? firstCategory.isSystemCategory
-                  ? t(getCategoryTranslationKey(firstCategory.name))
-                  : firstCategory.name
-                : null;
+              // A split row says so, with how many categories, instead of one category.
+              const categoryLabel = isSplitTransaction(transaction)
+                ? splitSummaryLabel(transaction.splits ?? [])
+                : firstCategory
+                  ? firstCategory.isSystemCategory
+                    ? t(getCategoryTranslationKey(firstCategory.name))
+                    : firstCategory.name
+                  : null;
 
               return (
                 <div
                   key={transaction.transactionKey}
-                  className={cn("p-4", { "opacity-50": transaction.hidden })}
+                  className={cn(isLedger ? "py-3" : "p-4", {
+                    "opacity-50": transaction.hidden,
+                  })}
                 >
+                  {isLedger &&
+                  mobileMonthStarts().has(transaction.transactionKey) ? (
+                    <p className="text-foreground -mt-1 mb-2 text-sm font-semibold">
+                      <LedgerMonthLabel date={transaction.transactionDate} />
+                    </p>
+                  ) : null}
                   {/* § 9 rules 10 and 11: the row stacks several facts with
                       the figure on the primary line, rather than pushing the
                       most important fact to a third line of its own. The
@@ -489,11 +587,19 @@ const AccountTransactionsTable: React.FC<AccountTransactionTableProps> =
                     <div className="min-w-0">
                       <p className="text-muted-foreground truncate text-xs">
                         {transaction.accountKey.accountName} ·{" "}
-                        {formatShortDate(transaction.transactionDate)}
+                        {formatShortDate(
+                          transactionDisplayDate(transaction.transactionDate),
+                        )}
                       </p>
                       {categoryLabel ? (
                         <p className="text-muted-foreground truncate text-xs">
                           {categoryLabel}
+                        </p>
+                      ) : null}
+                      <TagChipList tags={transaction.tags} className="mt-1" />
+                      {isLedger && transaction.reviewed === false ? (
+                        <p className="text-warning-text text-xs font-medium">
+                          {t("transaction-review-filter")}
                         </p>
                       ) : null}
                     </div>
@@ -565,39 +671,94 @@ const AccountTransactionsTable: React.FC<AccountTransactionTableProps> =
       );
       const columns: ColumnDef<Transaction, any>[] = useMemo(
         () => [
+          ...(isLedger
+            ? [
+                columnHelper.accessor("transactionDate", {
+                  id: "ledgerDate",
+                  header: t("date"),
+                  size: 64,
+                  cell: (info) => {
+                    const pageRows = info.table.getRowModel().rows;
+                    const position = pageRows.findIndex(
+                      (row) => row.id === info.row.id,
+                    );
+                    const dates = pageRows.map((row) =>
+                      transactionDisplayDate(row.original.transactionDate),
+                    );
+                    return (
+                      <LedgerDateCell
+                        date={info.getValue()}
+                        isMonthStart={monthBreaks(dates)[position] ?? false}
+                        isDayStart={dayBreaks(dates)[position] ?? true}
+                      />
+                    );
+                  },
+                }),
+              ]
+            : []),
           columnHelper.accessor("description", {
-            header: t("description"),
+            // The ledger row leads with the merchant; the default layout
+            // keeps a Merchant column of its own.
+            header: isLedger ? t("merchant") : t("description"),
             cell: (info) => {
               const description = info.getValue();
               const recurringSeries = info.row.original.recurringSeries;
-              const recurringLabel =
-                recurringSeries?.type === "subscription"
-                  ? t("recurring.subscription")
-                  : recurringSeries?.type === "bill"
-                    ? t("recurring.bill")
-                    : null;
-              const recurringStatusLabel = recurringSeries
-                ? recurringSeries.status === "confirmed"
-                  ? t("recurring.confirmed")
-                  : recurringSeries.status === "candidate"
-                    ? t("recurring.detected")
-                    : recurringSeries.status === "paused"
-                      ? t("recurring.paused")
-                      : recurringSeries.status === "dismissed"
-                        ? t("recurring.dismissed")
-                        : recurringSeries.status === "ended"
-                          ? t("recurring.ended")
-                          : null
+              const recurringBadge =
+                recurringSeries &&
+                (recurringSeries.type === "subscription" ||
+                  recurringSeries.type === "bill") &&
+                [
+                  "confirmed",
+                  "candidate",
+                  "paused",
+                  "dismissed",
+                  "ended",
+                ].includes(recurringSeries.status)
+                  ? t("recurring.seriesBadge", {
+                      type: recurringSeries.type,
+                      status:
+                        recurringSeries.status === "candidate"
+                          ? "detected"
+                          : recurringSeries.status,
+                    })
+                  : null;
+              // A transfer is left out of spending; say so, and where it went.
+              const transferDestination = info.row.original.transferDestination;
+              const transferBadge = isTransferType(
+                info.row.original.transactionTypeKey?.name,
+              )
+                ? transferDestination
+                  ? t("transferEdit.badge-to", {
+                      name: transferDestination.name,
+                    })
+                  : t("transferEdit.badge")
                 : null;
               const account = info.row.original.accountKey;
               const logoUrl =
                 account.accountFinancialInstitutionKey?.logoUrl ?? null;
+              const merchant = info.row.original.transactionMerchantKey?.name;
+              /*
+               * The ledger leads with the merchant, as the mobile list does:
+               * who was paid is what the eye looks for. The description
+               * moves to the muted line only when it says something else.
+               */
+              const title = isLedger
+                ? merchant || description
+                : description || merchant;
+              const detail = isLedger
+                ? [
+                    distinctMerchant(info.row.original) ? description : null,
+                    account.accountName,
+                  ]
+                    .filter(Boolean)
+                    .join(", ")
+                : null;
 
               /*
                * § 9 rule 10 — one row, several facts, no wrapping.
                *
                * Date and account are not columns of their own but
-               * a muted second line beneath the description: the eye scans a
+               * a muted second line beneath the title: the eye scans a
                * tight primary column and picks up the supporting facts only when
                * it stops. Category and amount stay as their own columns because
                * they carry interactive controls, not just facts.
@@ -606,48 +767,71 @@ const AccountTransactionsTable: React.FC<AccountTransactionTableProps> =
                 <div className="flex min-w-36 items-center justify-between gap-2">
                   <div className="flex min-w-0 flex-col gap-0.5">
                     <div className="flex min-w-0 items-center gap-2">
-                      {/* § 9 rule 3: an absent description is an em-dash, not
+                      {/* § 9 rule 3: an absent title is an em-dash, not
                           an empty cell. Returning null here would blank the
                           whole row, taking the account and date with it. */}
                       <span
                         className={cn(
-                          "truncate text-sm",
-                          description
-                            ? "text-foreground"
-                            : "text-muted-foreground",
+                          "truncate text-sm font-medium",
+                          title ? "text-foreground" : "text-muted-foreground",
                         )}
                       >
-                        {description ||
-                          info.row.original.transactionMerchantKey?.name ||
-                          "—"}
+                        {title || "—"}
                       </span>
                       {/* § 9 rule 8: the badge sits inline with the title, not
                           in a trailing column of its own. */}
-                      {recurringLabel && recurringStatusLabel ? (
+                      {recurringBadge ? (
                         <Badge
                           variant="secondary"
-                          className="text-muted-foreground h-5 shrink-0 rounded-full px-2 text-xs font-medium"
+                          className="text-muted-foreground h-5 shrink-0 rounded-full px-2 text-xs font-normal"
                         >
-                          {recurringLabel} · {recurringStatusLabel}
+                          {recurringBadge}
+                        </Badge>
+                      ) : null}
+                      {transferBadge ? (
+                        <Badge
+                          variant="secondary"
+                          className="text-muted-foreground h-5 shrink-0 rounded-full px-2 text-xs font-normal"
+                        >
+                          {transferBadge}
                         </Badge>
                       ) : null}
                     </div>
-                    <div className="text-muted-foreground flex min-w-0 items-center gap-1.5 text-xs">
+                    <div className="text-muted-foreground flex min-w-0 items-center gap-1 text-xs">
+                      {/* The account is supporting context: a small, desaturated
+                          logo so the bank's colours don't outshine the merchant. */}
                       {logoUrl ? (
                         <Image
                           src={logoUrl}
-                          height={14}
-                          width={14}
+                          height={12}
+                          width={12}
                           alt=""
-                          className="shrink-0 rounded-[2px]"
+                          className="shrink-0 rounded-[2px] opacity-70 grayscale"
                         />
                       ) : null}
-                      <span className="truncate">{account.accountName}</span>
-                      <span aria-hidden>·</span>
-                      <span className="shrink-0">
-                        {formatShortDate(info.row.original.transactionDate)}
-                      </span>
+                      {isLedger ? (
+                        <span className="truncate">{detail}</span>
+                      ) : (
+                        <>
+                          <span className="truncate">
+                            {account.accountName}
+                          </span>
+                          <span aria-hidden>·</span>
+                          <span className="shrink-0">
+                            {formatShortDate(
+                              transactionDisplayDate(
+                                info.row.original.transactionDate,
+                              ),
+                            )}
+                          </span>
+                        </>
+                      )}
                     </div>
+                    {isLedger && info.row.original.reviewed === false ? (
+                      <span className="text-warning-text text-xs font-medium">
+                        {t("transaction-review-filter")}
+                      </span>
+                    ) : null}
                   </div>
                   <TooltipProvider>
                     <Tooltip>
@@ -666,78 +850,98 @@ const AccountTransactionsTable: React.FC<AccountTransactionTableProps> =
               );
             },
           }),
-          columnHelper.accessor(
-            (row) => row.transactionMerchantKey?.name ?? null,
-            {
-              id: "transactionMerchant",
-              header: t("merchant"),
-              cell: (info) => {
-                const merchantName = info.getValue();
-                /*
-                 * § 9 rule 10 — one row, several facts. Not the same fact twice.
-                 *
-                 * The merchant is often byte-identical to the description
-                 * ("Spotify" / "Spotify"), so the column echoed the primary line
-                 * and bought nothing on those rows. It now renders only when it
-                 * adds something.
-                 *
-                 * Measured on production, 21,012 transactions: 41.7% of rows
-                 * have a merchant that differs from the description and is worth
-                 * the column — "Purchase Betano PT Lisboa" → "Betano PT",
-                 * "Transfer P2P Coinbase Irel" → "Coinbase". 20% echo it, 15%
-                 * have no merchant at all.
-                 *
-                 * Do not delete this column based on local data: the seeded
-                 * dataset is 100% echo, so it renders as a full column of
-                 * em-dashes there and looks dead. It is not.
-                 *
-                 * § 9 rule 3 supplies the rest: an absence — real or redundant —
-                 * is an em-dash, not "Not applicable", which was two words of
-                 * noise saying no more than the dash does.
-                 */
-                const description = info.row.original.description?.trim();
-                const isEcho =
-                  merchantName != null &&
-                  description != null &&
-                  merchantName.trim().toLowerCase() === description.toLowerCase();
-                if (!merchantName || isEcho) {
-                  return (
-                    <span className="text-muted-foreground text-sm whitespace-nowrap">
-                      —
-                    </span>
-                  );
-                }
-                return (
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <span className="text-foreground max-w-[12ch] truncate text-sm">
-                          {merchantName}
-                        </span>
-                      </TooltipTrigger>
-                      <TooltipContent>{merchantName}</TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                );
-              },
-            },
-          ),
+          ...(isLedger
+            ? []
+            : [
+                columnHelper.accessor(
+                  (row) => row.transactionMerchantKey?.name ?? null,
+                  {
+                    id: "transactionMerchant",
+                    header: t("merchant"),
+                    cell: (info) => {
+                      const merchantName = info.getValue();
+                      /*
+                       * § 9 rule 10 — one row, several facts. Not the same fact twice.
+                       *
+                       * The merchant is often byte-identical to the description
+                       * ("Spotify" / "Spotify"), so the column echoed the primary line
+                       * and bought nothing on those rows. It now renders only when it
+                       * adds something.
+                       *
+                       * Measured on production, 21,012 transactions: 41.7% of rows
+                       * have a merchant that differs from the description and is worth
+                       * the column — "Purchase Betano PT Lisboa" → "Betano PT",
+                       * "Transfer P2P Coinbase Irel" → "Coinbase". 20% echo it, 15%
+                       * have no merchant at all.
+                       *
+                       * Do not delete this column based on local data: the seeded
+                       * dataset is 100% echo, so it renders as a full column of
+                       * em-dashes there and looks dead. It is not.
+                       *
+                       * § 9 rule 3 supplies the rest: an absence — real or redundant —
+                       * is an em-dash, not "Not applicable", which was two words of
+                       * noise saying no more than the dash does.
+                       */
+                      const description = info.row.original.description?.trim();
+                      const isEcho =
+                        merchantName != null &&
+                        description != null &&
+                        merchantName.trim().toLowerCase() ===
+                          description.toLowerCase();
+                      if (!merchantName || isEcho) {
+                        return (
+                          <span className="text-muted-foreground text-sm whitespace-nowrap">
+                            —
+                          </span>
+                        );
+                      }
+                      return (
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <span className="text-foreground max-w-[12ch] truncate text-sm">
+                                {merchantName}
+                              </span>
+                            </TooltipTrigger>
+                            <TooltipContent>{merchantName}</TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      );
+                    },
+                  },
+                ),
+              ]),
           columnHelper.accessor("appuserTransactionCategories", {
             header: t("category"),
             cell: (info) =>
-              info.row.original.transactionKey > 0 ? (
-                <CategorySelect
-                  categories={categories}
-                  initialValue={info.getValue().at(0)?.categoryKey?.toString()}
-                  onChange={(value) => {
-                    onChangeCategory(info.row.original.transactionKey, value);
-                  }}
-                  loading={
-                    isPendingEditTransaction &&
-                    editTransactionVariables?.transactionKey ===
-                      info.row.original.transactionKey
-                  }
-                />
+              info.row.original.transactionKey > 0 &&
+              isSplitTransaction(info.row.original) ? (
+                // A split row shows its lines on demand rather than a picker: picking one
+                // category here would remove the split. Splits are edited in the edit sheet.
+                <div className="flex min-w-0 flex-col gap-1">
+                  <TransactionSplitSummary transaction={info.row.original} />
+                  <TagChipList tags={info.row.original.tags} />
+                </div>
+              ) : info.row.original.transactionKey > 0 ? (
+                <div className="flex min-w-0 flex-col gap-1">
+                  <CategorySelect
+                    categories={categories}
+                    initialValue={info
+                      .getValue()
+                      .at(0)
+                      ?.categoryKey?.toString()}
+                    onChange={(value) => {
+                      onChangeCategory(info.row.original.transactionKey, value);
+                    }}
+                    loading={
+                      isPendingEditTransaction &&
+                      editTransactionVariables?.transactionKey ===
+                        info.row.original.transactionKey
+                    }
+                  />
+                  {/* Tags sit small, after the category they qualify. */}
+                  <TagChipList tags={info.row.original.tags} />
+                </div>
               ) : (
                 // Same structure as the editable states, so all three of this
                 // column's cases share one left edge — the reserved icon slot
@@ -763,12 +967,21 @@ const AccountTransactionsTable: React.FC<AccountTransactionTableProps> =
                         </TooltipTrigger>
                         <TooltipContent>
                           {t("original-amount")}:{" "}
-                          <Amount value={info.getValue()} currency={info.row.original.appuserCurrencyKey.code} />
+                          <Amount
+                            value={info.getValue()}
+                            currency={info.row.original.appuserCurrencyKey.code}
+                          />
                         </TooltipContent>
                       </Tooltip>
                     )}
                     <span className="text-foreground font-mono text-sm font-semibold whitespace-nowrap">
-                      <Amount value={info.row.original.editedSettlementAmount ?? info.getValue()} currency={info.row.original.appuserCurrencyKey.code} />
+                      <Amount
+                        value={
+                          info.row.original.editedSettlementAmount ??
+                          info.getValue()
+                        }
+                        currency={info.row.original.appuserCurrencyKey.code}
+                      />
                     </span>
                   </div>
                 </TooltipProvider>
@@ -779,7 +992,9 @@ const AccountTransactionsTable: React.FC<AccountTransactionTableProps> =
                   <span className="text-muted-foreground max-w-56 text-right font-sans text-xs whitespace-normal">
                     {t.rich("linked-loan-repayment-context", {
                       figure: (chunks) => (
-                        <span className="font-mono whitespace-nowrap">{chunks}</span>
+                        <span className="font-mono whitespace-nowrap">
+                          {chunks}
+                        </span>
                       ),
                       loanName: info.row.original.loanRepayment.loanName,
                       expense: formatCurrency(
@@ -796,7 +1011,10 @@ const AccountTransactionsTable: React.FC<AccountTransactionTableProps> =
                 {info.row.original.appuserCurrencyKey.code !==
                 info.row.original.settlementCurrencyKey.code ? (
                   <span className="text-muted-foreground font-mono text-xs">
-                    <Amount value={info.row.original.settlementAmount} currency={info.row.original.settlementCurrencyKey.code} />
+                    <Amount
+                      value={info.row.original.settlementAmount}
+                      currency={info.row.original.settlementCurrencyKey.code}
+                    />
                   </span>
                 ) : null}
               </CellNumeric>
@@ -806,13 +1024,24 @@ const AccountTransactionsTable: React.FC<AccountTransactionTableProps> =
             header: () => <div className="text-right">{t("balance")}</div>,
             cell: (info) => (
               <CellNumeric className="flex flex-col items-end justify-center gap-2 text-right">
-                <span className="text-foreground font-mono text-sm whitespace-nowrap">
-                  <Amount value={info.getValue()} currency={info.row.original.appuserCurrencyKey.code} />
+                <span
+                  className={cn(
+                    "font-mono text-sm whitespace-nowrap",
+                    isLedger ? "text-muted-foreground" : "text-foreground",
+                  )}
+                >
+                  <Amount
+                    value={info.getValue()}
+                    currency={info.row.original.appuserCurrencyKey.code}
+                  />
                 </span>
                 {info.row.original.appuserCurrencyKey.code !==
                 info.row.original.settlementCurrencyKey.code ? (
                   <span className="text-muted-foreground font-mono text-xs">
-                    <Amount value={info.row.original.balance} currency={info.row.original.settlementCurrencyKey.code} />
+                    <Amount
+                      value={info.row.original.balance}
+                      currency={info.row.original.settlementCurrencyKey.code}
+                    />
                   </span>
                 ) : null}
               </CellNumeric>
@@ -831,6 +1060,7 @@ const AccountTransactionsTable: React.FC<AccountTransactionTableProps> =
           editTransactionVariables,
           isDesktop,
           desktopColumns,
+          isLedger,
         ],
       );
 
@@ -908,6 +1138,14 @@ const AccountTransactionsTable: React.FC<AccountTransactionTableProps> =
 
         return categoryOptions;
       }, [t, transactionsCategories, transactions]);
+      const tagOptions = useMemo(
+        () =>
+          (tagsData?.tags ?? []).map((tag) => ({
+            label: tag.name,
+            value: tag.tagKey.toString(),
+          })),
+        [tagsData],
+      );
       // Memoize expensive reduce operation
       const uniqueAccounts = useMemo(
         () =>
@@ -959,6 +1197,24 @@ const AccountTransactionsTable: React.FC<AccountTransactionTableProps> =
         [t, transactionTypes],
       );
 
+      // Which rows open a month, in list order, for the ledger's heavier rule.
+      // The first row never takes it: the header rule is already above it.
+      const ledgerMonthStarts = useMemo(() => {
+        if (!isLedger) return new Set<number>();
+        const breaks = monthBreaks(
+          filteredTransactions.map((tx) =>
+            transactionDisplayDate(tx.transactionDate),
+          ),
+        );
+        return new Set(
+          filteredTransactions
+            .filter((_, index) => index > 0 && breaks[index])
+            .map((tx) => tx.transactionKey),
+        );
+      }, [isLedger, filteredTransactions]);
+      const isLedgerMonthStart = (transaction: Transaction) =>
+        ledgerMonthStarts.has(transaction.transactionKey);
+
       const [selectedTransactions, setSelectedTransactions] = useState<
         Transaction[]
       >([]);
@@ -1007,12 +1263,14 @@ const AccountTransactionsTable: React.FC<AccountTransactionTableProps> =
         if (transactionTypeFilter.length > 0) count++;
         if (accountKeysFilter.length > 0) count++;
         if (transactionCategoryKeysFilter.length > 0) count++;
+        if (tagKeysFilter.length > 0) count++;
         if (needsReviewFilter) count++;
         return count;
       }, [
         transactionTypeFilter,
         accountKeysFilter,
         transactionCategoryKeysFilter,
+        tagKeysFilter,
         needsReviewFilter,
       ]);
 
@@ -1102,6 +1360,22 @@ const AccountTransactionsTable: React.FC<AccountTransactionTableProps> =
           }
         });
 
+        // Tag filters. A tag deleted meanwhile has no option and no chip.
+        tagKeysFilter.forEach((tagValue) => {
+          const option = tagOptions.find((opt) => opt.value === tagValue);
+          if (option) {
+            tags.push({
+              label: option.label,
+              onRemove: () =>
+                onTagKeyFilterChange(
+                  tagKeysFilter.filter((key) => key !== tagValue),
+                ),
+              dimension: t("transactionTags.label"),
+              type: "tag",
+            });
+          }
+        });
+
         if (needsReviewFilter) {
           tags.push({
             dimension: t("filters"),
@@ -1125,6 +1399,9 @@ const AccountTransactionsTable: React.FC<AccountTransactionTableProps> =
         onTransactionTypeFilterChange,
         onAccountKeyFilterChange,
         onCategoryKeyFilterChange,
+        tagKeysFilter,
+        tagOptions,
+        onTagKeyFilterChange,
         needsReviewFilter,
         t,
       ]);
@@ -1134,6 +1411,7 @@ const AccountTransactionsTable: React.FC<AccountTransactionTableProps> =
         onTransactionTypeFilterChange([]);
         onAccountKeyFilterChange([]);
         onCategoryKeyFilterChange([]);
+        onTagKeyFilterChange([]);
         setNeedsReviewFilter(false);
         onShowHiddenTransactionsChange?.(false);
         setResetPagination(true);
@@ -1141,6 +1419,7 @@ const AccountTransactionsTable: React.FC<AccountTransactionTableProps> =
         onTransactionTypeFilterChange,
         onAccountKeyFilterChange,
         onCategoryKeyFilterChange,
+        onTagKeyFilterChange,
         onShowHiddenTransactionsChange,
       ]);
 
@@ -1229,12 +1508,35 @@ const AccountTransactionsTable: React.FC<AccountTransactionTableProps> =
               placeholder={t("select-category")}
             />
           </div>
+
+          {/* Next to the category filter; hidden until the household has a tag. */}
+          {tagOptions.length > 0 || tagKeysFilter.length > 0 ? (
+            <div className="flex flex-col gap-2">
+              <span className="text-muted-foreground text-sm font-medium">
+                {t("transactionTags.label")}
+              </span>
+              <ComboBoxMulti
+                className="w-full"
+                key={`tag-${tagKeysFilter.join(",")}`}
+                onSelect={(options) => {
+                  onTagKeyFilterChange(
+                    options ? options.map((o) => o.value) : [],
+                  );
+                }}
+                defaultValue={tagKeysFilter}
+                options={tagOptions}
+                withSearch={tagOptions.length > 8}
+                closeOnSelect={false}
+                placeholder={t("transactionTags.filter-placeholder")}
+              />
+            </div>
+          ) : null}
         </div>
       );
 
       const renderFilterTrigger = () => (
-        <Button variant="secondary" size="sm" className="flex shrink-0 gap-2">
-          <Filter className="size-3.5" />
+        <Button variant="secondary" className="shrink-0">
+          <Filter className="size-4" />
           {t("filters")}
           {activeFiltersCount > 0 && (
             <Badge
@@ -1252,7 +1554,12 @@ const AccountTransactionsTable: React.FC<AccountTransactionTableProps> =
           {withFilters && (
             <>
               {/* Desktop filters */}
-              <div className="my-2 hidden flex-col gap-2 md:flex">
+              <div
+                className={cn(
+                  "my-2 hidden flex-col gap-2 md:flex",
+                  isLedger && "border-foreground my-0 border-t-2 pt-3 pb-1",
+                )}
+              >
                 <div className="flex items-center justify-between gap-3">
                   {transactionDateRange && onDateRangeFilterChange && (
                     <DatePickerRange
@@ -1306,8 +1613,13 @@ const AccountTransactionsTable: React.FC<AccountTransactionTableProps> =
               </div>
 
               {/* Mobile filters */}
-              <div className="flex flex-col gap-2 md:hidden">
-                <div className="flex flex-row items-center justify-between gap-2">
+              <div
+                className={cn(
+                  "flex flex-col gap-2 md:hidden",
+                  isLedger && "border-foreground border-t-2 pt-3",
+                )}
+              >
+                <div className="flex flex-row flex-wrap items-center justify-between gap-2">
                   {transactionDateRange && onDateRangeFilterChange && (
                     <DatePickerRange
                       onSelect={onDateRangeFilterChange}
@@ -1365,9 +1677,13 @@ const AccountTransactionsTable: React.FC<AccountTransactionTableProps> =
               serverTotal={serverTotalForFooter}
               tableRef={tableRef}
               onRowClick={(row) => setInspectedTransaction(row.original)}
+              variant={isLedger ? "ledger" : "default"}
               meta={{
                 getRowClasses: (row) => ({
                   "opacity-50": row.original.hidden,
+                  // A month's first row (after the first) opens on a heavier rule.
+                  "border-t-foreground/40 border-t-2":
+                    isLedger && isLedgerMonthStart(row.original),
                 }),
               }}
             />
@@ -1426,9 +1742,14 @@ const AccountTransactionsTable: React.FC<AccountTransactionTableProps> =
                     label: t("date"),
                     // The inspector is a detail surface, not a scanned column,
                     // so the year is always worth its characters here.
-                    value: formatShortDate(inspectedTransaction.transactionDate, {
-                      alwaysShowYear: true,
-                    }),
+                    value: formatShortDate(
+                      transactionDisplayDate(
+                        inspectedTransaction.transactionDate,
+                      ),
+                      {
+                        alwaysShowYear: true,
+                      },
+                    ),
                   },
                   {
                     key: "account",
@@ -1443,9 +1764,28 @@ const AccountTransactionsTable: React.FC<AccountTransactionTableProps> =
                   {
                     key: "category",
                     label: t("category"),
+                    value: isSplitTransaction(inspectedTransaction)
+                      ? splitSummaryLabel(inspectedTransaction.splits ?? [])
+                      : inspectedTransaction.appuserTransactionCategories[0]
+                        ? splitCategoryLabel(
+                            inspectedTransaction
+                              .appuserTransactionCategories[0],
+                          )
+                        : "—",
+                  },
+                  {
+                    key: "tags",
+                    label: t("transactionTags.label"),
                     value:
-                      inspectedTransaction.appuserTransactionCategories[0]
-                        ?.name ?? "—",
+                      inspectedTransaction.tags &&
+                      inspectedTransaction.tags.length > 0 ? (
+                        <TagChipList
+                          tags={inspectedTransaction.tags}
+                          max={50}
+                        />
+                      ) : (
+                        "—"
+                      ),
                   },
                   {
                     key: "balance",
@@ -1461,6 +1801,15 @@ const AccountTransactionsTable: React.FC<AccountTransactionTableProps> =
                 ]}
               />
             ) : null}
+            {inspectedTransaction &&
+            isSplitTransaction(inspectedTransaction) ? (
+              <section className="border-border mt-2 border-t pt-3">
+                <h3 className="text-muted-foreground text-sm">
+                  {t("transactionSplit.lines")}
+                </h3>
+                <TransactionSplitLinesList transaction={inspectedTransaction} />
+              </section>
+            ) : null}
           </InspectorDrawer>
 
           <MobileTransactionsList />
@@ -1474,6 +1823,7 @@ const AccountTransactionsTable: React.FC<AccountTransactionTableProps> =
             <>
               <AccountTransactionEditSheet
                 transaction={transactionData}
+                categories={categories}
                 isOpen={editTransactionModalIsOpen}
                 onFundGoal={(request) => {
                   setFundGoalTransaction(request);

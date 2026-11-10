@@ -1,5 +1,7 @@
 import { useCallback, useMemo, useState } from 'react'
 
+import { deviceTimeZone } from '@/lib/dates/transaction-date'
+
 import { DEFAULT_REPORT_DATE_PRESET, type ReportDatePreset, reportPresetDateRange } from './report-date-presets'
 import type { ReportFilters } from './reports-contract'
 
@@ -36,6 +38,8 @@ export function useReportFilters(initialPreset: ReportDatePreset = DEFAULT_REPOR
       currencyKey: fields.currencyKey,
       includePending: fields.includePending,
       includeTransfers: fields.includeTransfers,
+      // The calendar the presets are computed in, so months and bank bookings land on the same days.
+      timezone: deviceTimeZone(),
     }
   }, [preset, fields])
 

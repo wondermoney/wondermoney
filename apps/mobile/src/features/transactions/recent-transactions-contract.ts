@@ -4,8 +4,9 @@ import { readEndpoint, tolerantEnum } from '@/lib/api/runtime-schema'
 
 /**
  * The five-field least-privilege recent-transaction item served by
- * `GET /v1/account/:accountId/recent-transactions`. Fields outside these five are stripped,
- * so nothing extra reaches the view model. Nulls are explicit and never inferred. An entry
+ * `GET /v1/account/:accountId/recent-transactions`. Fields outside these are stripped,
+ * so nothing extra reaches the view model. `category` (icon and colours only) and `transfer`
+ * feed the row's mark; both are optional, so an older API still parses. Nulls are explicit and never inferred. An entry
  * type this build doesn't know reads as 'unknown' and renders as an ordinary transaction row.
  */
 const recentTransactionEntryTypeSchema = tolerantEnum([
@@ -20,6 +21,12 @@ export const recentTransactionSchema = z
     displayName: z.string().nullable(),
     amount: z.number().finite().nullable(),
     currencyCode: z.string().regex(/^[A-Z]{3}$/).nullable(),
+    category: z.object({
+      icon: z.string().nullable(),
+      bgColor: z.string().nullable(),
+      textColor: z.string().nullable(),
+    }).nullish().catch(null),
+    transfer: z.boolean().optional().catch(undefined),
   })
 
 export const recentTransactionsResponseSchema = z.object({

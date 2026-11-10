@@ -7,11 +7,16 @@
       "accounts": "Cuentas",
       "categories": "Categorías",
       "merchants": "Comercios",
+      "tags": "Etiquetas",
       "currency": "Moneda",
       "dateRange": "Periodo",
       "placeholder": {
         "search": "Buscar…",
-        "select": "Seleccionar…"
+        "allAccounts": "Todas las cuentas",
+        "allCategories": "Todas las categorías",
+        "allMerchants": "Todos los comercios",
+        "allCurrencies": "Todas las monedas",
+        "allTags": "Todas las etiquetas"
       },
       "noResults": "Sin resultados.",
       "selected": "{count, plural, =1 {1 seleccionado} other {# seleccionados}}",
@@ -117,16 +122,19 @@
       },
       "portfolioPerformance": {
         "title": "Rendimiento de la cartera",
-        "subtitle": "Variación de saldo por cuenta en el periodo.",
-        "account": "Cuenta",
-        "startBalance": "Inicio",
-        "endBalance": "Fin",
-        "return": "Variación",
-        "contributions": "Aportaciones",
-        "startCaveat": "El saldo inicial refleja la primera transacción del periodo; la variación mostrada puede incluir el efecto de esa transacción.",
+        "subtitle": "Cómo varió el valor de cada cartera en el periodo, descontando lo que entró y salió.",
+        "portfolio": "Cartera",
+        "startValue": "Valor inicial",
+        "netContributions": "Aportaciones netas",
+        "change": "Variación",
+        "dividends": "Dividendos",
+        "endValue": "Valor final",
+        "total": "Total",
+        "unknownValue": "Sin valor registrado",
+        "noExchangeRate": "Aún no hay tipo de cambio",
         "noData": {
-          "title": "Sin cuentas para mostrar",
-          "description": "Conecta una cuenta para ver su rendimiento aquí."
+          "title": "Sin carteras para mostrar",
+          "description": "Añade una cartera para ver su rendimiento aquí."
         }
       }
     },

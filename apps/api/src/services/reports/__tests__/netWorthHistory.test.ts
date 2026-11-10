@@ -99,4 +99,53 @@ describe('getNetWorthHistoryReport period filtering', () => {
 
     expect(rows[0]?.date).toBe('2026-08-01T00:00:00.000Z');
   });
+
+  it('returns one point per month, carrying the closing value of the month', async () => {
+    // The history service adds a point on every transaction day, so a busy
+    // month yields many points. The report is month-by-month: the month's last
+    // point is its closing net worth.
+    mocks.getNetWorthHistory.mockResolvedValue({
+      points: [
+        { accountsTotal: 900, date: '2026-07-31', loansTotal: 0, portfoliosTotal: 0, totalNetWorth: 900 },
+        { accountsTotal: 1000, date: '2026-08-03', loansTotal: 0, portfoliosTotal: 0, totalNetWorth: 1000 },
+        { accountsTotal: 1100, date: '2026-08-14', loansTotal: 50, portfoliosTotal: 200, totalNetWorth: 1250 },
+        { accountsTotal: 1300, date: '2026-08-31', loansTotal: 100, portfoliosTotal: 300, totalNetWorth: 1500 },
+        { accountsTotal: 1400, date: '2026-09-02', loansTotal: 100, portfoliosTotal: 300, totalNetWorth: 1600 },
+      ],
+    });
+
+    const rows = await getNetWorthHistoryReport(makeInput());
+
+    expect(rows).toEqual([
+      { breakdown: { assets: 900, liabilities: 0 }, date: '2026-07-01T00:00:00.000Z', netWorth: 900 },
+      { breakdown: { assets: 1600, liabilities: 100 }, date: '2026-08-01T00:00:00.000Z', netWorth: 1500 },
+      { breakdown: { assets: 1700, liabilities: 100 }, date: '2026-09-01T00:00:00.000Z', netWorth: 1600 },
+    ]);
+  });
+
+  it('takes the latest point of a month even when points arrive out of order', async () => {
+    mocks.getNetWorthHistory.mockResolvedValue({
+      points: [
+        { accountsTotal: 1500, date: '2026-08-31', loansTotal: 0, portfoliosTotal: 0, totalNetWorth: 1500 },
+        { accountsTotal: 1000, date: '2026-08-03', loansTotal: 0, portfoliosTotal: 0, totalNetWorth: 1000 },
+      ],
+    });
+
+    const rows = await getNetWorthHistoryReport(makeInput());
+
+    expect(rows.map((row) => row.netWorth)).toEqual([1500]);
+  });
+
+  it('closes a month on its latest complete point when the final point is incomplete', async () => {
+    mocks.getNetWorthHistory.mockResolvedValue({
+      points: [
+        { accountsTotal: 1000, date: '2026-08-03', loansTotal: 0, portfoliosTotal: 0, totalNetWorth: 1000 },
+        { accountsTotal: null, date: '2026-08-31', loansTotal: 0, portfoliosTotal: 0, totalNetWorth: null },
+      ],
+    });
+
+    const rows = await getNetWorthHistoryReport(makeInput());
+
+    expect(rows.map((row) => row.netWorth)).toEqual([1000]);
+  });
 });

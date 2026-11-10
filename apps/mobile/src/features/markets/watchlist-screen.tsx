@@ -1,15 +1,18 @@
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Pressable, ScrollView, StyleSheet, Text, useColorScheme, View } from 'react-native'
-import { SafeAreaView } from 'react-native-safe-area-context'
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet, View } from 'react-native'
 
-import { BackControl } from '@/components/ui/back-control'
 import { Button } from '@/components/ui/button'
+import { assetMark, EntityMark } from '@/components/ui/entity-mark'
 import { PageHeader } from '@/components/ui/page-header'
-import { formatCurrency, formatPercentagePoints } from '@/lib/formatters/financial'
+import { SafeAreaView } from '@/components/ui/screen-safe-area'
+import { Text } from '@/components/ui/text'
+import { formatPercentagePoints } from '@/lib/formatters/financial'
+import { useFormatMoney } from '@/lib/formatters/money-display'
 import { themeTokens } from '@/theme/tokens'
-import { textStyles } from '@/theme/typography'
+import { usePalette } from '@/theme/use-palette'
 
-import { MarketsFailure, MarketsLoading, marketsStyles, type Palette } from './markets-screen-parts'
+import { MarketsFailure, MarketsLoading, marketsStyles } from './markets-screen-parts'
 import { signPrefix, type WatchlistRow } from './markets-view-model'
 
 export type WatchlistScreenState =
@@ -23,6 +26,8 @@ export type WatchlistScreenState =
 export type WatchlistScreenProps = {
   state: WatchlistScreenState
   onBack: () => void
+  /** Web's empty state "Go to Explorer". Falls back to `onBack` when not supplied. */
+  onOpenExplorer?: () => void
   onRetry: () => void | Promise<void>
   onSelectSymbol: (symbol: string) => void
   onRemove: (symbol: string) => void
@@ -30,10 +35,14 @@ export type WatchlistScreenProps = {
   removingSymbol: string | null
 }
 
-export function WatchlistScreen({ state, onBack, onRetry, onSelectSymbol, onRemove, removingSymbol }: WatchlistScreenProps) {
-  const { t, i18n } = useTranslation()
-  const palette = themeTokens.colors[useColorScheme() === 'dark' ? 'dark' : 'light']
-  const locale = i18n.resolvedLanguage ?? i18n.language ?? 'en'
+/**
+ * Web's `FinancialMarketsWatchlist`: the title and its description, then the
+ * rows — the ticker's mark, symbol (16/500) and name (14 muted), the price with
+ * its day change, and a filled star that removes the ticker.
+ */
+export function WatchlistScreen({ state, onBack, onOpenExplorer, onRetry, onSelectSymbol, onRemove, removingSymbol }: WatchlistScreenProps) {
+  const { t } = useTranslation()
+  const palette = usePalette()
 
   if (state.status === 'access-transition') return null
 
@@ -57,38 +66,29 @@ export function WatchlistScreen({ state, onBack, onRetry, onSelectSymbol, onRemo
   }
 
   return (
-    <SafeAreaView style={[marketsStyles.safeArea, { backgroundColor: palette.background }]}>
+    <SafeAreaView edges={['left', 'right', 'bottom']} style={[marketsStyles.safeArea, { backgroundColor: palette.background }]}>
       <ScrollView contentContainerStyle={marketsStyles.content}>
         <View style={marketsStyles.page}>
-          <BackControl fallback="/more" label={t('watchlist.back')} onPress={onBack} />
-
-          <PageHeader palette={palette} title={t('watchlist.title')} />
+          <PageHeader description={t('watchlist.description')} title={t('navigation.watchlist')} />
 
           {state.status === 'empty' ? (
-            <View style={headingStyles.emptyGroup}>
-              <Text allowFontScaling style={[headingStyles.emptyTitle, { color: palette.foreground }]}>
-                {t('watchlist.empty.title')}
-              </Text>
-              <Text allowFontScaling style={[headingStyles.empty, { color: palette.mutedForeground }]}>
-                {t('watchlist.empty.message')}
-              </Text>
-              <Button label={t('watchlist.empty.searchAction')} onPress={onBack} palette={palette} variant="primary" />
+            <View style={styles.emptyGroup}>
+              <Text variant="bodyStrong">{t('watchlist.empty.title')}</Text>
+              <Text style={styles.emptyMessage} tone="muted" variant="meta">{t('watchlist.empty.message')}</Text>
+              <Button label={t('watchlist.empty.searchAction')} onPress={onOpenExplorer ?? onBack} variant="primary" />
             </View>
           ) : null}
 
           {state.status === 'loaded' ? (
-            <View style={marketsStyles.list}>
+            <View style={styles.list}>
               {state.rows.map((row, index) => (
                 <WatchlistRowView
                   key={row.symbol}
                   row={row}
-                  palette={palette}
-                  locale={locale}
                   separated={index > 0}
                   removing={removingSymbol === row.symbol}
                   onPress={() => onSelectSymbol(row.symbol)}
                   onRemove={() => onRemove(row.symbol)}
-                  t={t}
                 />
               ))}
             </View>
@@ -99,78 +99,102 @@ export function WatchlistScreen({ state, onBack, onRetry, onSelectSymbol, onRemo
   )
 }
 
-function WatchlistRowView({ row, palette, locale, separated, removing, onPress, onRemove, t }: {
+function WatchlistRowView({ row, separated, removing, onPress, onRemove }: {
   row: WatchlistRow
-  palette: Palette
-  locale: string
   separated: boolean
   removing: boolean
   onPress: () => void
   onRemove: () => void
-  t: (key: string, options?: Record<string, unknown>) => string
 }) {
-  const priceText = row.quoteStatus === 'loaded' && row.quote
-    ? (row.quote.price === null || row.quote.currency === null
-      ? null
-      : formatCurrency(row.quote.price, { locale, currency: row.quote.currency }))
-    : row.quoteStatus === 'error'
-      ? t('watchlist.quoteUnavailable')
-      : null
-  const changeText = row.quoteStatus === 'loaded' && row.quote && row.quote.change !== null && row.quote.currency !== null
-    ? `${signPrefix(row.quote.change)}${formatCurrency(row.quote.change, { locale, currency: row.quote.currency })}${
-      row.quote.changePercent === null ? '' : ` (${formatPercentagePoints(row.quote.changePercent, locale, { maximumFractionDigits: 2 })})`
-    }`
+  const { t, i18n } = useTranslation()
+  const palette = usePalette()
+  const locale = i18n.resolvedLanguage ?? i18n.language ?? 'en'
+  const [focused, setFocused] = useState(false)
+  const formatMoney = useFormatMoney()
+  const quote = row.quoteStatus === 'loaded' ? row.quote : null
+  const money = (value: number) => (quote?.currency ? formatMoney(value, { locale, currency: quote.currency }) : null)
+  const priceText = quote && quote.price !== null ? money(quote.price) : null
+  const changeText = quote && quote.change !== null && quote.currency !== null
+    ? `${signPrefix(quote.change)}${money(quote.change)}${quote.changePercent === null ? '' : ` (${formatPercentagePoints(quote.changePercent, locale, { maximumFractionDigits: 2 })})`}`
     : null
-  const tone = row.quoteStatus === 'loaded' && row.quote && row.quote.change !== null
-    ? (row.quote.change > 0 ? palette.successText : row.quote.change < 0 ? palette.destructiveText : palette.foreground)
-    : palette.mutedForeground
-  const label = [row.symbol, priceText, changeText].filter(Boolean).join(', ')
+  // Web shows the day change as a signed percentage beside a "1D" period label.
+  const dayChange = quote && quote.changePercent !== null
+    ? formatPercentagePoints(quote.changePercent, locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+    : quote && quote.change !== null && quote.currency !== null ? `${signPrefix(quote.change)}${money(quote.change)}` : null
+  const direction = quote?.changePercent ?? quote?.change ?? 0
+  const changeTone = direction > 0 ? 'success' : direction < 0 ? 'destructive' : 'muted'
+  const noLiveQuote = quote !== null && quote.price === null && quote.change === null
+  const label = [row.symbol, quote?.name ?? null, priceText, changeText, row.quoteStatus === 'error' ? t('watchlist.marketDataUnavailable') : null].filter(Boolean).join(', ')
 
   return (
     <View
       testID={`watchlist-row-${row.symbol}`}
-      style={[rowStyles.row, separated && { borderTopWidth: 1, borderTopColor: palette.border }]}
+      style={[styles.row, separated && { borderTopWidth: 1, borderTopColor: palette.border }]}
     >
       <Pressable
         accessibilityRole="button"
         accessibilityLabel={label}
+        onBlur={() => setFocused(false)}
+        onFocus={() => setFocused(true)}
         onPress={onPress}
-        style={({ pressed }) => [rowStyles.content, pressed && rowStyles.pressed]}
+        style={({ pressed }) => [styles.identity, focused && [styles.focused, { borderColor: palette.ring }], pressed && styles.pressed]}
       >
-        <Text allowFontScaling style={[rowStyles.symbol, { color: palette.foreground }]}>{row.symbol}</Text>
-        {priceText ? <Text allowFontScaling style={[rowStyles.price, { color: palette.foreground }]}>{priceText}</Text> : null}
-        {changeText ? <Text allowFontScaling style={[rowStyles.change, { color: tone }]}>{changeText}</Text> : null}
+        <EntityMark {...assetMark(row.symbol, row.logoUrl)} testID={`watchlist-mark-${row.symbol}`} />
+        <View style={styles.identityText}>
+          <Text numberOfLines={1} variant="bodyStrong">{row.symbol}</Text>
+          <Text numberOfLines={1} tone="muted" variant="meta">{quote?.name ?? '—'}</Text>
+        </View>
       </Pressable>
+
+      <View style={styles.quote}>
+        {row.quoteStatus === 'loading' ? (
+          <ActivityIndicator accessibilityLabel={t('watchlist.loading')} color={palette.primary} size="small" />
+        ) : row.quoteStatus === 'error' ? (
+          <Text tone="muted" variant="meta">{t('watchlist.marketDataUnavailable')}</Text>
+        ) : noLiveQuote ? (
+          <Text tone="muted" variant="meta">{t('watchlist.liveQuoteUnavailable')}</Text>
+        ) : (
+          <>
+            <Text align="right" tone={priceText ? 'default' : 'muted'} variant="amountBase">{priceText ?? '—'}</Text>
+            {dayChange ? (
+              <View style={styles.change}>
+                <Text tone="muted" variant="meta">{t('watchlist.period1d')}</Text>
+                <Text accessibilityLabel={`${t('watchlist.changeDay')}: ${dayChange}`} tone={changeTone} variant="amount">{dayChange}</Text>
+              </View>
+            ) : null}
+          </>
+        )}
+      </View>
+
       <Button
-        disabled={removing}
-        label={removing ? t('watchlist.removing') : t('watchlist.removeAction')}
+        icon="star-filled"
+        label={t('watchlist.remove', { symbol: row.symbol })}
+        loading={removing}
         onPress={onRemove}
-        palette={palette}
-        variant="secondary"
+        size="icon"
+        variant="ghost"
       />
     </View>
   )
 }
 
-const headingStyles = StyleSheet.create({
-  emptyGroup: { gap: themeTokens.spacing[2] },
-  emptyTitle: { ...textStyles.section },
-  empty: { ...textStyles.body },
-})
-
-const rowStyles = StyleSheet.create({
+const styles = StyleSheet.create({
+  // Flat rows with hairlines between them; no rule above the list.
+  list: { width: '100%' },
+  emptyGroup: { alignItems: 'flex-start', gap: themeTokens.spacing[3] },
+  emptyMessage: { maxWidth: 384 },
   row: {
     width: '100%',
     minHeight: themeTokens.touchTarget.minimum,
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    padding: themeTokens.spacing[4],
     gap: themeTokens.spacing[3],
+    paddingVertical: themeTokens.spacing[3],
   },
-  content: { flex: 1, gap: themeTokens.spacing[1] },
+  identity: { flex: 1, minWidth: 0, minHeight: themeTokens.touchTarget.minimum, flexDirection: 'row', alignItems: 'center', gap: themeTokens.spacing[3] },
+  identityText: { flex: 1, minWidth: 0, gap: 2 },
   pressed: { opacity: 0.72 },
-  symbol: { ...textStyles.amount },
-  price: { ...textStyles.amount },
-  change: { ...textStyles.amountSmall },
+  focused: { borderWidth: 2, borderRadius: themeTokens.radius.md },
+  quote: { alignItems: 'flex-end', flexShrink: 0, maxWidth: '45%' },
+  change: { flexDirection: 'row', alignItems: 'baseline', gap: themeTokens.spacing[1] },
 })

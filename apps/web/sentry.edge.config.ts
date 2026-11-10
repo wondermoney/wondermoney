@@ -20,6 +20,6 @@ Sentry.init({
 
   enabled: SENTRY_SERVER_ENABLED,
 
-  // What an event may carry: see lib/utils/sentry-data-collection.ts (issue #38).
+  // What an event may carry: see lib/utils/sentry-data-collection.ts.
   dataCollection: SENTRY_DATA_COLLECTION,
 });

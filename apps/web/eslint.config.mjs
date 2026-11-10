@@ -39,6 +39,49 @@ const moneyMarkupRules = [
 ];
 
 /*
+ * Privacy mode (Shift+P) masks every money figure. It can only do that for
+ * figures formatted through a privacy-aware path: <Amount>, useFormatCurrency(),
+ * useFormatCurrencyForScreenReader(), useFormatGoalCurrency() or the chart
+ * formatters. A currency formatted by hand in UI code would stay readable.
+ */
+const privacyRules = [
+  {
+    selector:
+      "NewExpression[callee.object.name='Intl'][callee.property.name='NumberFormat'] Property[key.name='style'][value.value='currency']",
+    message:
+      "Format money through <Amount> or useFormatCurrency() so privacy mode can hide it.",
+  },
+  {
+    selector:
+      "CallExpression[callee.property.name='toLocaleString'] Property[key.name='style'][value.value='currency']",
+    message:
+      "Format money through <Amount> or useFormatCurrency() so privacy mode can hide it.",
+  },
+];
+
+const PRIVACY_MESSAGE =
+  "Raw currency formatting ignores privacy mode. Use <Amount>, useFormatCurrency(), useFormatCurrencyForScreenReader(), useFormatGoalCurrency() or useChartFormatters().";
+
+/** The raw formatters, reachable only from the privacy-aware wrappers. */
+const rawMoneyImports = [
+  {
+    name: "@/lib/utils/formatCurrency",
+    importNames: ["formatCurrencyForLocale", "formatCurrencyForScreenReader"],
+    message: PRIVACY_MESSAGE,
+  },
+  {
+    name: "@/lib/goals/format",
+    importNames: ["formatGoalCurrency"],
+    message: PRIVACY_MESSAGE,
+  },
+  {
+    name: "@/components/ui/charts/chart-formatters",
+    importNames: ["formatCompactCurrency"],
+    message: PRIVACY_MESSAGE,
+  },
+];
+
+/*
  * Colour comes from the semantic theme tokens in theme/globals.css, so every
  * surface follows light/dark mode and keeps its contrast pairing. A raw
  * Tailwind palette class (any variant stack in front of it) bypasses both.
@@ -84,6 +127,13 @@ const LOCALE_BINDING_MODULES = [
   "components/ui/charts/chart-formatters.ts",
   "components/ui/charts/useChartFormatters.ts",
   "components/ui/Amount.tsx",
+  // The privacy-aware wrappers, which format raw only after checking the mode.
+  "lib/privacy/mask.ts",
+  "lib/privacy/format-money.ts",
+  "lib/goals/format.ts",
+  "lib/goals/useFormatGoalCurrency.ts",
+  // Reads the symbol off a formatted zero; no amount is displayed.
+  "lib/utils/currencySymbol.ts",
 ];
 
 /** Chart tooltips build their own markup from the chart's formatter strings. */
@@ -96,11 +146,17 @@ const CHART_TOOLTIPS = [
 const TESTS = ["**/*.test.ts", "**/*.test.tsx"];
 
 /** `no-restricted-syntax` does not merge across config objects, so each scope restates its list. */
-function restrictedSyntax({ locale = true, money = true, palette = true } = {}) {
+function restrictedSyntax({
+  locale = true,
+  money = true,
+  palette = true,
+  privacy = true,
+} = {}) {
   return [
     "error",
     ...(locale ? localeFormattingRules : []),
     ...(money ? moneyMarkupRules : []),
+    ...(privacy ? privacyRules : []),
     ...(palette ? paletteRules : []),
     ...popoverRules,
   ];
@@ -140,6 +196,28 @@ const config = [
     },
   },
   {
+    // UI code: money goes through a privacy-aware path. `lib/` holds the
+    // wrappers themselves, so the import ban covers app/ and components/.
+    files: ["app/**/*.{ts,tsx}", "components/**/*.{ts,tsx}"],
+    ignores: TESTS,
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        {
+          paths: [
+            {
+              name: "@/lib/utils/formatCurrency",
+              importNames: ["formatCurrency"],
+              message:
+                "formatCurrency formats in the runtime's locale. Use useFormatCurrency() in a Client Component.",
+            },
+            ...rawMoneyImports,
+          ],
+        },
+      ],
+    },
+  },
+  {
     // A test that reads source or config text off disk only fails when the code is
     // refactored, never when the behaviour breaks: render it or call it instead.
     // `scripts/` is ignored above, so its CSV-fixture test is unaffected.
@@ -160,7 +238,11 @@ const config = [
   {
     files: LOCALE_BINDING_MODULES,
     rules: {
-      "no-restricted-syntax": restrictedSyntax({ locale: false, money: false }),
+      "no-restricted-syntax": restrictedSyntax({
+        locale: false,
+        money: false,
+        privacy: false,
+      }),
       "no-restricted-imports": "off",
     },
   },

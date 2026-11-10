@@ -1,4 +1,4 @@
-import type { BudgetDto, BudgetYearDto } from './budgets-contract'
+import type { BudgetDto, BudgetRecurrence, BudgetYearDto } from './budgets-contract'
 
 export const parentRow = {
   category_amount: 120,
@@ -11,6 +11,10 @@ export const parentRow = {
   category_text_color: '#000',
   child_category_name: null,
   parent_category_name: 'Home',
+  category_available: 100,
+  category_rolled_over: 0,
+  category_rollover_enabled: false,
+  category_rollover_incomplete: false,
 } as const
 
 export const childRow = {
@@ -22,6 +26,15 @@ export const childRow = {
   child_category_name: 'Rent',
 }
 
+/** A subcategory with rollover on that carries `rolledOver` in from last month. */
+export const rolloverChildRow = (rolledOver: number, extra: Partial<Omit<typeof childRow, 'category_recurrency'>> & { category_recurrency?: BudgetRecurrence | null } = {}) => ({
+  ...childRow,
+  ...extra,
+  category_available: (extra.category_budgeted_amount ?? childRow.category_budgeted_amount) + rolledOver,
+  category_rolled_over: rolledOver,
+  category_rollover_enabled: true,
+})
+
 export const budgetFixture: BudgetDto = {
   accounts: [{ accountKey: 4, accountName: 'Daily account' }],
   budgetKey: 7,
@@ -31,6 +44,7 @@ export const budgetFixture: BudgetDto = {
   incomes: [{ amount: 2000, budgetTemplateIncomeKey: 2, name: 'Salary', recurrency: 'MONTHLY' }],
   month: 7,
   name: 'Household plan',
+  rolloverCarriesOverspend: true,
   year: 2026,
 }
 
@@ -38,8 +52,8 @@ export const budgetYearFixture: BudgetYearDto = {
   accounts: [{ accountKey: 4, accountName: 'Daily account' }],
   budgetKey: 7,
   categories: [
-    { ...parentRow, category_amount: 1_200, category_budgeted_amount: 1_200 },
-    { ...childRow, category_amount: 1_200, category_budgeted_amount: 1_200 },
+    { ...parentRow, category_amount: 1_200, category_budgeted_amount: 1_200, category_available: 1_200 },
+    { ...childRow, category_amount: 1_200, category_budgeted_amount: 1_200, category_available: 1_200 },
   ],
   currencyCode: 'EUR',
   description: null,

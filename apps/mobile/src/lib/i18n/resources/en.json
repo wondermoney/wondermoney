@@ -4,6 +4,10 @@
   "retry": "Retry",
   "common": {
     "back": "Back",
+    "selectDate": "Select a date",
+    "clearDate": "Clear date",
+    "done": "Done",
+    "dateNotSet": "Not set",
     "retry": "Retry",
     "refresh": "Refresh",
     "cancel": "Cancel",
@@ -11,14 +15,62 @@
     "preview": "Preview",
     "unavailable": "Not available",
     "mixedCurrencies_one": "{{count}} currency",
-    "mixedCurrencies_other": "{{count}} currencies"
+    "mixedCurrencies_other": "{{count}} currencies",
+    "relativeTime": {
+      "lessThanMinute": "less than a minute ago",
+      "minutes_one": "{{count}} minute ago",
+      "minutes_other": "{{count}} minutes ago",
+      "aboutHours_one": "about {{count}} hour ago",
+      "aboutHours_other": "about {{count}} hours ago",
+      "days_one": "{{count}} day ago",
+      "days_other": "{{count}} days ago",
+      "aboutMonths_one": "about {{count}} month ago",
+      "aboutMonths_other": "about {{count}} months ago",
+      "months_one": "{{count}} month ago",
+      "months_other": "{{count}} months ago",
+      "aboutYears_one": "about {{count}} year ago",
+      "aboutYears_other": "about {{count}} years ago",
+      "overYears_one": "over {{count}} year ago",
+      "overYears_other": "over {{count}} years ago",
+      "almostYears_one": "almost {{count}} year ago",
+      "almostYears_other": "almost {{count}} years ago",
+      "now": "now",
+      "seconds_one": "{{count}} second ago",
+      "seconds_other": "{{count}} seconds ago",
+      "hours_one": "{{count}} hour ago",
+      "hours_other": "{{count}} hours ago",
+      "yesterday": "yesterday",
+      "lastMonth": "last month",
+      "lastYear": "last year",
+      "years_one": "{{count}} year ago",
+      "years_other": "{{count}} years ago"
+    },
+    "close": "Close",
+    "moreActions": "More actions"
   },
   "navigation": {
     "home": "Home",
     "accounts": "Accounts",
     "budgets": "Budgets",
     "portfolio": "Portfolio",
-    "more": "More"
+    "more": "More",
+    "overview": "Overview",
+    "transactions": "Transactions",
+    "billsSubscriptions": "Bills & subscriptions",
+    "financialMarkets": "Financial Markets",
+    "explorer": "Explorer",
+    "watchlist": "Watchlist",
+    "goals": "Goals",
+    "loans": "Loans",
+    "reports": "Reports",
+    "help": "Help",
+    "settings": "Settings",
+    "appearance": "Appearance",
+    "mainNavigation": "Main navigation",
+    "openUserMenu": "Open user menu",
+    "darkMode": "Dark mode",
+    "lightMode": "Light mode",
+    "version": "v{{version}}"
   },
   "auth": {
     "title": "Sign in",
@@ -46,8 +98,8 @@
       "linkExpired": "This reset link has expired. Request a new one"
     },
     "signup": {
-      "title": "Create account",
-      "helper": "Start your WonderMoney account",
+      "title": "Create your account",
+      "helper": "Free and open source.",
       "confirmPassword": "Confirm password",
       "terms": "I agree to the Terms and Privacy Policy",
       "termsConsent": "I agree to the Terms and Privacy Policy",
@@ -55,11 +107,11 @@
       "termsLink": "Terms",
       "consentAnd": "and the",
       "privacyLink": "Privacy Policy",
-      "submit": "Create account",
+      "submit": "Join now",
       "submitting": "Creating account"
     },
     "social": {
-      "divider": "or",
+      "divider": "Or continue with",
       "apple": "Continue with Apple",
       "google": "Continue with Google",
       "signingIn": "Signing in",
@@ -68,9 +120,9 @@
       }
     },
     "forgotPassword": {
-      "title": "Reset your password",
+      "title": "Send reset email",
       "helper": "Enter your email and we'll send you a reset link",
-      "submit": "Send reset link",
+      "submit": "Send reset email",
       "submitting": "Sending",
       "sent": "If an account exists for that email, we've sent a reset link",
       "backToSignIn": "Back to sign in"
@@ -96,7 +148,7 @@
     },
     "haveAccount": "Already have an account? Sign in",
     "noAccount": "New here? Create an account",
-    "forgotPasswordLink": "Forgot password?",
+    "forgotPasswordLink": "Forgot your password?",
     "server": {
       "current": "Server: {{host}}",
       "change": "Use a different server",
@@ -111,7 +163,12 @@
         "notWonderMoney": "That address isn't a WonderMoney server.",
         "updateRequired": "This server needs app version {{version}} or newer. Update the app, then try again."
       }
-    }
+    },
+    "welcomeBack": "Welcome back",
+    "notMember": "Not a member?",
+    "createAccountLink": "Create an account",
+    "alreadyMember": "Already a member?",
+    "loginLink": "Login here"
   },
   "access": {
     "mfa": {
@@ -175,6 +232,120 @@
       "topCategory": "{{name}} — {{amount}} this month"
     },
     "helpText": "A quick overview of your accounts, portfolio, and liabilities."
+  },
+  "home": {
+    "netWorth": {
+      "title": "Net worth",
+      "since": "since the end of {{month}}",
+      "chartLabel": "Net worth at the close of each month, {{from}} to {{to}}",
+      "historyError": "The change over time didn’t load.",
+      "emptyTitle": "No accounts yet",
+      "emptyBody": "Add an account to see what you own and owe.",
+      "emptyAction": "Add an account",
+      "rangeLabel": "Chart range",
+      "ranges": {
+        "3m": "3M",
+        "6m": "6M",
+        "1y": "1Y"
+      }
+    },
+    "balancesUpdated": "Balances updated {{time}}",
+    "tryAgain": "Try again",
+    "errorTitle": "Error loading data",
+    "setup": {
+      "title": "Finish setting up your dashboard",
+      "count": "{{completed}} of {{total}} steps complete",
+      "nudgeOne": "You’re almost there: one more step unlocks a more useful overview.",
+      "nudgeMany": "Finish these steps to make your overview more useful.",
+      "viewSteps": "Show onboarding steps",
+      "hideSteps": "Hide onboarding steps",
+      "hideForNow": "Hide for now",
+      "complete": "Complete",
+      "incomplete": "Incomplete",
+      "steps": {
+        "account": "Connect or add your accounts",
+        "transactions": "Review your transactions",
+        "budget": "Build your first budget",
+        "portfolio": "Track your investments"
+      }
+    },
+    "month": {
+      "title": "This month",
+      "lastDay": "Last day of {{month}}",
+      "daysLeft_one": "{{count}} day of {{month}} to go",
+      "daysLeft_other": "{{count}} days of {{month}} to go",
+      "left": "left to spend",
+      "overspent": "over the plan",
+      "spentOf": "spent of",
+      "planned": "planned",
+      "overPlan_one": "{{count}} category over plan",
+      "overPlan_other": "{{count}} categories over plan",
+      "measureLabel": "{{name}}: {{spent}} spent of {{planned}} planned",
+      "rowError": "This month didn’t load.",
+      "emptyTitle": "No budget yet",
+      "emptyBody": "Set a monthly plan to see what is left to spend and what is over plan.",
+      "emptyAction": "Create a budget"
+    },
+    "sheet": {
+      "title": "Balance sheet",
+      "own": "You own",
+      "owe": "You owe",
+      "total": "Total",
+      "sideEmpty": "Nothing here.",
+      "groups": {
+        "accounts": "Accounts",
+        "portfolios": "Portfolios",
+        "loans": "Loans"
+      },
+      "countedIn": "Counted in {{account}}"
+    },
+    "cashflow": {
+      "title": "Net cash flow by month",
+      "listLabel": "Net cash flow, {{from}} to {{to}}",
+      "caption": "Money in less money out across your accounts.",
+      "emptyTitle": "No cash flow yet",
+      "emptyBody": "It appears once your accounts have transactions."
+    },
+    "loans": {
+      "title": "Next loan payments",
+      "left": "left",
+      "rate": "at {{rate}}",
+      "emptyTitle": "No loans",
+      "emptyBody": "Add a loan to see its next payments here.",
+      "noneDueTitle": "No loan payments due",
+      "noneDueBody": "Active loans with a next payment date appear here.",
+      "action": "Go to loans"
+    },
+    "latest": {
+      "title": "Latest transactions",
+      "review_one": "{{count}} needs review",
+      "review_other": "{{count}} need review",
+      "all": "All transactions",
+      "uncategorised": "Uncategorised",
+      "needsReview": "Needs review",
+      "emptyTitle": "No transactions yet",
+      "emptyBody": "Connect a bank or add a transaction to see it here.",
+      "action": "Go to accounts"
+    },
+    "bankAlerts": {
+      "unnamedBank": "Your bank",
+      "expiring_zero": "{{bank}}: access ends within a day",
+      "expiring_one": "{{bank}}: access ends in {{count}} day",
+      "expiring_other": "{{bank}}: access ends in {{count}} days",
+      "expiringSoon": "{{bank}}: access ends soon",
+      "revoked": "{{bank}} ended access early",
+      "failing": "{{bank}} hasn't updated since {{date}}",
+      "failingUnknownDate": "{{bank}} hasn't updated recently",
+      "hint": {
+        "consent_expiring": "Reconnect to keep your data syncing.",
+        "consent_revoked": "Reconnect to resume syncing.",
+        "sync_failing": "Reconnecting the bank usually fixes this."
+      },
+      "more_one": "And {{count}} more bank alert.",
+      "more_other": "And {{count}} more bank alerts.",
+      "reconnect": "Reconnect",
+      "dismiss": "Dismiss"
+    }
   },
   "netWorthHistory": {
     "back": "Back",
@@ -243,7 +414,7 @@
   },
   "offlineAccount": {
     "title": "Add manual account",
-    "helper": "Record a balance you will maintain yourself. This does not connect a bank or import transactions.",
+    "helper": "A balance you update yourself, with no bank connection.",
     "back": "Back to Accounts",
     "loading": "Loading account options",
     "optionsError": "Could not load account options",
@@ -383,23 +554,29 @@
     "needsReview": "Needs review",
     "showHidden": "Show hidden transactions",
     "customRange": "Custom date range",
-    "customRangeNote": "Enter a from and to date (YYYY-MM-DD) and apply to replace the preset date filter",
     "customRangeFrom": "Custom range from date",
     "customRangeTo": "Custom range to date",
     "customRangeDatePlaceholder": "YYYY-MM-DD",
     "customRangeApply": "Apply date range",
     "customRangeInvalid": "Enter a valid date range",
     "loadedScope": "Filters apply only to the loaded server window, with up to {{limit}} requested",
-    "load100": "Load up to 100",
-    "load500": "Load up to 500",
     "loadedFilters": "Filter loaded results",
-    "loadedFiltersNote": "These filters only change the currently loaded server window",
+    "loadedFiltersNote": "These narrow the transactions already loaded",
     "merchantFilter": "Filter loaded results by merchant",
     "merchantPlaceholder": "Merchant name",
     "allAccounts": "All accounts",
     "allCategories": "All categories",
     "allTypes": "All types",
-    "showMore": "Show {{count}} more loaded results",
+    "accountFilter": "Account",
+    "categoryFilter": "Category",
+    "typeFilter": "Type",
+    "dateRange": "Date range",
+    "importOrScan": "Import or scan",
+    "loadMore": "Load more",
+    "resultCount_one": "{{count}} transaction",
+    "resultCount_other": "{{count}} transactions",
+    "resultShowing": "Showing {{shown}} of {{total}}",
+    "showMore": "Show {{count}} more",
     "stale": "Could not refresh. Showing previously loaded transactions",
     "emptyTitle": "No matching transactions",
     "empty": {
@@ -440,6 +617,7 @@
     "markingReviewed": "Marking as reviewed",
     "editAmount": "Edit amount",
     "editAmountInput": "Transaction amount",
+    "editAmountInvalid": "Enter a number, like 12.50 or -12.50.",
     "editDescriptionInput": "Transaction description",
     "descriptionPlaceholder": "Description (optional)",
     "saveAmount": "Save amount",
@@ -449,7 +627,7 @@
     "bulkActions": "Actions for selected transactions",
     "selectedCount_one": "1 transaction selected",
     "selectedCount_other": "{{count}} transactions selected",
-    "selectionScope": "Selection includes only positive persisted transactions in this loaded server window",
+    "selectionScope": "Only transactions in this list can be selected. Opening balances can't be changed.",
     "reviewSelected": "Review selected",
     "chooseCategory": "Choose category",
     "hideSelected": "Hide selected",
@@ -503,11 +681,75 @@
       "network": "The request had an uncertain network result. Inspect the selected transactions before trying again",
       "error": "The selected transactions could not be changed. Try again"
     },
-    "resultBoundary_one": "{{loaded}} result loaded from a {{limit}}-result server window",
-    "resultBoundary_other": "{{loaded}} results loaded from a {{limit}}-result server window",
-    "moreFilters_zero": "More filters",
+    "moreFilters_zero": "Filters",
     "moreFilters_one": "{{count}} filter",
-    "moreFilters_other": "{{count}} filters"
+    "moreFilters_other": "{{count}} filters",
+    "help": "Track every financial movement across all your connected accounts in one organized view.",
+    "inView": "Transactions in view",
+    "moneyIn": "Money in",
+    "moneyOut": "Money out",
+    "reviewLink": "Review them",
+    "needReviewCount_one": "1 needs review",
+    "needReviewCount_other": "{{count}} need review",
+    "balancesUpdated": "Balances updated {{time}}",
+    "balancesStale": "Some connections need attention",
+    "last60Days": "Last 60 days",
+    "last90Days": "Last 90 days",
+    "filtersTitle": "Filters",
+    "clearAll": "Clear all",
+    "close": "Close",
+    "rowActions": "Actions for {{name}}",
+    "showDetails": "Show details",
+    "hideDetails": "Hide details",
+    "transfer": {
+      "mark": "Mark as transfer",
+      "unmark": "Not a transfer",
+      "chooseDestination": "Where it went",
+      "destinationTitle": "Where did this money go?",
+      "noDestination": "Not specified",
+      "destinationGroups": {
+        "account": "Accounts",
+        "portfolio": "Portfolios",
+        "goal": "Goals"
+      },
+      "label": "Transfer",
+      "to": "To {{name}}",
+      "excluded": "Between your own money: left out of spending and income",
+      "spendingLabel": "Spending",
+      "notSpending": "Its category does not count as spending"
+    }
+  },
+  "tags": {
+    "title": "Tags",
+    "optional": "Tags (optional)",
+    "none": "None",
+    "listLabel": "Tags: {{names}}",
+    "more_one": "+{{count}}",
+    "more_other": "+{{count}}",
+    "edit": "Edit tags",
+    "editFor": "Tags for {{name}}",
+    "save": "Save tags",
+    "saving": "Saving…",
+    "done": "Done",
+    "close": "Close",
+    "loading": "Loading tags…",
+    "unavailable": "Tags are not available right now.",
+    "empty": "No tags yet. Create one below.",
+    "limit": "A transaction can have up to {{max}} tags.",
+    "newTag": "New tag",
+    "newTagPlaceholder": "For example, Trip to Porto",
+    "create": "Create “{{name}}”",
+    "selectExisting": "Select “{{name}}”",
+    "filter": "Tags",
+    "filterNote": "Shows transactions with any of the selected tags, across the whole date range.",
+    "filterNamed": "Filter by {{name}}",
+    "result": {
+      "taken": "A tag with this name already exists.",
+      "demo": "Demo profiles are read-only. The tag was not created.",
+      "mfa": "Multi-factor authentication is required. The tag was not created.",
+      "network": "The request had an uncertain network result. Check your tags before trying again.",
+      "error": "The tag could not be created. Try again."
+    }
   },
   "recentTransactions": {
     "heading": "Recent transactions",
@@ -525,11 +767,12 @@
   },
   "transactionCreate": {
     "action": "Add transaction",
-    "title": "Add a transaction",
+    "title": "Add transaction",
     "helper": "Record one transaction manually. Nothing is saved until you review and confirm it.",
     "back": "Back",
     "loading": "Loading transaction details",
     "metadataError": "The accounts, transaction types, currencies, merchants, or categories could not be verified. Go back and try again later.",
+    "choose": "Choose",
     "account": "Account",
     "date": "Date",
     "datePlaceholder": "YYYY-MM-DD",
@@ -551,6 +794,8 @@
     "noCategory": "No category",
     "description": "Description",
     "descriptionOptional": "Description (optional)",
+    "note": "Note",
+    "noteOptional": "Note (optional)",
     "descriptionPlaceholder": "A short description",
     "validation": "Check every required field. Use a real date that is not in the future, an unsigned amount greater than zero, and one merchant.",
     "review": "Review transaction",
@@ -592,6 +837,21 @@
       "title": "The result is unknown",
       "message": "The request may have completed. This reviewed transaction cannot be submitted again. Refresh and inspect the matching account, date, amount, and merchant before taking any further action.",
       "inspect": "Refresh and inspect account"
+    },
+    "kindLabel": "Kind of transaction",
+    "kinds": {
+      "expense": "Expense",
+      "income": "Income",
+      "transfer": "Transfer"
+    },
+    "typeShort": "Type",
+    "currencyShort": "Currency",
+    "merchantRowPlaceholder": "Name or search",
+    "optional": "Optional",
+    "today": "Today",
+    "errors": {
+      "amount": "Enter an amount greater than zero, without a sign.",
+      "date": "Use a real date that is not in the future."
     }
   },
   "transactionImport": {
@@ -601,6 +861,7 @@
     "helper": "Add transactions to an account from a file.",
     "account": "Account",
     "accountsLoading": "Loading accounts",
+    "chooseAccount": "Choose an account",
     "noAccounts": "No accounts are available to import into",
     "bankFormat": "Upload the statement exactly as {{bank}} exported it, as CSV or Excel.",
     "yourBank": "your bank",
@@ -677,8 +938,22 @@
     "scanAnother": "Scan another receipt",
     "done": "Done",
     "tryAgain": "Try again",
+    "allowance": {
+      "title": "Today's receipt scans are used up",
+      "body": "Your household has used today's receipt-scanning allowance. It resets at midnight UTC. You can still add the transaction manually."
+    },
+    "verifyEmail": {
+      "title": "Verify your email to scan receipts",
+      "body": "Receipt scanning needs a verified email address. We sent a verification link to your email address. Open it, then try again.",
+      "resend": "Resend verification email",
+      "sending": "Sending…",
+      "sent": "Verification email sent. Check your inbox.",
+      "failed": "Could not send the verification email. Try again in a moment."
+    },
     "failures": {
       "demo": "Scanning receipts is unavailable in demo mode.",
+      "allowance": "Your household has used today's receipt-scanning allowance. It resets at midnight UTC.",
+      "unverified": "Verify your email address to use receipt scanning.",
       "access": "Your access changed. Try again.",
       "mfa": "Additional verification is required.",
       "cancelled": "The request was cancelled before it was sent.",
@@ -713,7 +988,7 @@
     "transactionCount_other": "{{count}} transactions"
   },
   "recurring": {
-    "title": "Recurring bills and subscriptions",
+    "title": "Bills & subscriptions",
     "helper": "Review and refine recurring activity identified from recorded transactions",
     "confirm": "Confirm",
     "dismiss": "Dismiss",
@@ -741,7 +1016,7 @@
       "title": "Check for recurring activity",
       "helper": "Run detection again using the transactions currently available",
       "action": "Scan again",
-      "scanning": "Scanning",
+      "scanning": "Scanning…",
       "confirmTitle": "Scan recurring activity again?",
       "confirmMessage": "This check may create new recurring candidates or update existing candidates.",
       "cancel": "Not now",
@@ -774,22 +1049,20 @@
       "amount": "Enter a non-negative amount",
       "range": "Minimum amount must not exceed maximum amount"
     },
-    "back": "Back to Accounts",
     "loading": "Loading recurring activity",
-    "lastChecked": "Last checked {{date}}",
+    "lastChecked": "Last checked {{time}}",
     "neverChecked": "No completed recurring check is available",
     "stale": "Could not refresh. Showing previously loaded recurring activity",
     "itemsUnavailable": "Recurring items could not be loaded. Other recurring information is still available",
     "summaryUnavailable": "The recurring summary could not be loaded. Available recurring items are still shown",
-    "monthlySummary": "Server monthly summary",
     "monthlyTotal": "Monthly total",
     "monthlyRange": "Expected monthly range",
+    "currencyCount_one": "{{count}} currency",
+    "currencyCount_other": "{{count}} currencies",
     "subscriptions": "Subscriptions",
     "bills": "Bills",
     "includedCount": "Included series",
     "reviewCount": "Needs review",
-    "summaryCurrencyNote": "Totals are supplied by WonderMoney. Currency totals remain separate below",
-    "acrossCurrencies": "{{value}} across currencies",
     "currencyTotal": "{{currency}} · {{count}} included",
     "currencyRange": "{{currency}} range",
     "amountUnavailable": "Amount unavailable",
@@ -811,7 +1084,7 @@
     },
     "cadence": {
       "weekly": "Weekly",
-      "biweekly": "Every two weeks",
+      "biweekly": "Biweekly",
       "monthly": "Monthly",
       "quarterly": "Quarterly",
       "yearly": "Yearly",
@@ -840,6 +1113,52 @@
     "noItems": {
       "title": "No recurring activity identified",
       "message": "WonderMoney has not identified recurring bills or subscriptions from the available transactions"
+    },
+    "subtitle": "Review subscriptions, bills, and repeating charges detected in your transactions.",
+    "monthlyEstimate": "Estimated monthly total",
+    "estimateHint": "Includes confirmed and high-confidence detected payments",
+    "reviewActionLabel": "Review detected recurring payments",
+    "needsReviewTitle": "Needs review",
+    "notRecurring": "Not recurring",
+    "markNotRecurring": "Mark not recurring",
+    "confirmMerchant": "Confirm {{merchant}}",
+    "notRecurringMerchant": "Not recurring: {{merchant}}",
+    "markNotRecurringMerchant": "Mark {{merchant}} as not recurring",
+    "restoreMerchant": "Restore {{merchant}}",
+    "usuallyPerCharge": "Usually {{amount}} per charge",
+    "cadenceBasedEstimate": "Estimated from the payment schedule",
+    "paymentsSeen_one": "{{{count}}} payment seen",
+    "paymentsSeen_other": "{{{count}}} payments seen",
+    "paymentCount_one": "{{{count}}} payment",
+    "paymentCount_other": "{{{count}}} payments",
+    "shareOfTotal": "{{percentage}}% of total",
+    "upcoming": "Upcoming",
+    "timelineDescription": "Upcoming expected payments.",
+    "categoryImpact": "Category impact",
+    "categoryImpactDescription": "Monthly impact by category.",
+    "paymentHistory": "Payment history",
+    "tableDescription": "Confirmed, detected, and dismissed recurring patterns.",
+    "reviewQueueDescription": "Review the detected subscriptions and bills before they are added to your recurring list.",
+    "upcomingEmpty": "No recurring payments found yet.",
+    "categoryImpactEmpty": "No category impact to show yet.",
+    "expectedAround": "Expected around",
+    "merchant": "Merchant",
+    "frequency": "Frequency",
+    "nextExpected": "Next expected",
+    "lastPaid": "Last paid",
+    "uncategorized": "Uncategorized",
+    "mixedCurrencyNote": "Multiple currencies detected. Amounts are shown per currency.",
+    "emptyTitle": "No recurring payments detected yet",
+    "emptyDescription": "Scan your recent transactions now. Future account syncs will check automatically.",
+    "emptyScannedDescription": "We checked your recent transactions and didn't find any recurring payments. New matches will appear here automatically.",
+    "detectRecurring": "Scan recurring payments",
+    "badge": {
+      "confirmed": "Confirmed",
+      "detected": "Detected",
+      "needsReview": "Needs review",
+      "paused": "Paused",
+      "ended": "Ended",
+      "dismissed": "Dismissed"
     }
   },
   "more": {
@@ -910,7 +1229,6 @@
       "pt-PT": "Português (Portugal)",
       "es": "Español"
     },
-    "sessionOnly": "These choices apply to this app session only and are not persisted.",
     "languageScope": "Language changes the app interface only. It does not change email or account profile language."
   },
   "categories": {
@@ -967,8 +1285,15 @@
       "health": "Health",
       "gym-and-sports": "Gym & Sports",
       "salary": "Salary",
+      "investments-and-savings": "Investments and savings",
+      "investments": "Investments",
+      "savings": "Savings",
       "unknown": "System category"
-    }
+    },
+    "notSpending": "Doesn't count as spending",
+    "countsAsSpendingNamed": "Counts as spending: {{name}}",
+    "toggleFailedTitle": "Couldn't update the category",
+    "toggleFailedMessage": "Check your connection and try again."
   },
   "categoryManage": {
     "icons": {
@@ -1007,6 +1332,7 @@
     "discardMessage": "Your reviewed category details will not be saved.",
     "discard": "Discard changes",
     "name": "Name",
+    "nameError": "Enter a visible name of 1–255 characters.",
     "color": "Color",
     "colorHint": "Use a six-digit hex color, for example #2563EB.",
     "colorPreview": "Selected color preview",
@@ -1056,7 +1382,12 @@
       "cancelled": "The request was cancelled before dispatch. Nothing changed and you may confirm again.",
       "unknown": "The result is unknown. Categories must be refreshed before another change.",
       "general": "The category could not be changed."
-    }
+    },
+    "countsAsSpending": "Counts as spending",
+    "countsAsSpendingHint": "Off for money you move to investments or savings: it is left out of reports, budgets and home cash flow.",
+    "countsAsSpendingParentOff": "Its main category does not count as spending, so neither does this one.",
+    "countsYes": "Yes",
+    "countsNo": "No"
   },
   "loans": {
     "title": "Loans",
@@ -1069,8 +1400,8 @@
     "errorMessage": "Check your connection and try again",
     "invalidTitle": "Could not verify loan data",
     "invalidMessage": "The loan data received could not be verified",
-    "emptyTitle": "No loans",
-    "emptyMessage": "No loans are available for this profile",
+    "emptyTitle": "No loans yet",
+    "emptyMessage": "Add your first loan to track balances and repayments.",
     "previewSubtitle": "Typical loan tracking view",
     "previewProvider": "Bank",
     "previewTermValue": "28y 4m",
@@ -1096,7 +1427,18 @@
       "CLOSED": "Closed",
       "PAID_OFF": "Paid off",
       "UNKNOWN": "Status unavailable"
-    }
+    },
+    "description": "Track loans, repayment plans, and balances in one place.",
+    "summary": {
+      "outstandingDebt": "Outstanding debt",
+      "monthlyRepayments": "Monthly repayments",
+      "interestFees": "Interest & fees",
+      "netWorthImpact": "Net worth impact",
+      "needReview": "Need review"
+    },
+    "progressRepaid": "{{value}}% repaid",
+    "nextPayment": "Next payment",
+    "rate": "Rate"
   },
   "loanDetail": {
     "back": "Back to loans",
@@ -1116,6 +1458,9 @@
     "interestRate": "Annual interest rate",
     "term": "Original term",
     "remainingTerm": "Estimated remaining term",
+    "remainingTermContract": "Remaining term",
+    "payoffBeyondContract_one": "At the current payment and rate, the balance takes {{count}} month to clear, longer than the term left on this loan. Check the payment and the rate.",
+    "payoffBeyondContract_other": "At the current payment and rate, the balance takes {{count}} months to clear, longer than the term left on this loan. Check the payment and the rate.",
     "monthCount_one": "{{count}} month",
     "monthCount_other": "{{count}} months",
     "progressValue": "{{value}} repaid against {{basis}}",
@@ -1151,7 +1496,18 @@
     "transactionAmountNoCurrency": "Recorded transaction amount {{value}}; transaction currency is not supplied by this endpoint",
     "transactionDate": "Transaction date {{date}}",
     "needsReview": "Allocation needs review",
-    "edit": "Edit loan details"
+    "edit": "Edit loan details",
+    "linkRepayment": "Link repayment",
+    "editLoan": "Edit loan",
+    "providerUnavailable": "Provider unavailable",
+    "annualRate": "Annual rate",
+    "repaymentProgress": "Repayment progress",
+    "assumptions": "Loan assumptions",
+    "lender": "Lender",
+    "loanType": "Loan type",
+    "statusLabel": "Status",
+    "description": "Description",
+    "repaymentsTitle": "Repayments"
   },
   "loanRepayment": {
     "title": "Repayment matching",
@@ -1232,6 +1588,13 @@
     "includeInNetWorth": "Include in estimated net worth",
     "notesOptional": "Notes (optional)",
     "notesPlaceholder": "Any other details worth keeping",
+    "choose": "Choose",
+    "optional": "Optional",
+    "provider": "Provider",
+    "installment": "Monthly installment",
+    "interestRate": "Interest rate, %",
+    "termMonths": "Term, months",
+    "notes": "Notes",
     "validation": "Enter a name, loan type, currency, opening balance, and start date.",
     "save": "Add loan",
     "saving": "Saving…",
@@ -1248,7 +1611,10 @@
       "type": "Choose a loan type.",
       "currency": "Choose a currency.",
       "principal": "Enter a starting balance greater than 0.",
-      "startDate": "Enter a valid start date (YYYY-MM-DD)."
+      "startDate": "Enter a valid start date (YYYY-MM-DD).",
+      "installment": "Enter an installment greater than 0.",
+      "interestRate": "Enter a rate from 0 to 100.",
+      "termMonths": "Enter a whole number of months greater than 0."
     }
   },
   "loanEdit": {
@@ -1320,8 +1686,8 @@
     "errorMessage": "Check your connection and try again",
     "invalidTitle": "Could not verify budget data",
     "invalidMessage": "The budget data received could not be verified",
-    "emptyTitle": "No current budget",
-    "emptyMessage": "Compare a monthly plan with what you actually spent",
+    "emptyTitle": "Budget with the envelope method",
+    "emptyMessage": "Assign money to categories and give every euro a job before you spend it.",
     "planned": "Planned",
     "spent": "Spent",
     "remaining": "Remaining",
@@ -1333,7 +1699,20 @@
     "preview": "Monthly plan",
     "previewHousing": "Housing",
     "previewFood": "Food",
-    "previewTransport": "Transportation"
+    "previewTransport": "Transportation",
+    "overviewTitle": "Budgets overview",
+    "name": "Name",
+    "progress": "Progress",
+    "rowIncomeSummary": "{{amount}} a month from {{sources}}",
+    "rowCategoryCount_one": "{{count}} category",
+    "rowCategoryCount_other": "{{count}} categories",
+    "rowAccountCount_one": "{{count}} account",
+    "rowAccountCount_other": "{{count}} accounts",
+    "nothingBudgeted": "Nothing budgeted yet",
+    "nothingSpent": "Nothing spent yet",
+    "createFirst": "Create your first budget",
+    "total": "Total",
+    "actionsFor": "Actions for {{name}}"
   },
   "budgetMonth": {
     "back": "Back to Budgets",
@@ -1392,7 +1771,47 @@
         "invalid": "This category could not be removed.",
         "general": "This category could not be removed."
       }
-    }
+    },
+    "help": "Stay on track with your spending goals and easily monitor your progress throughout the month.",
+    "viewBy": "View by:",
+    "viewByLabel": "View by",
+    "month": "Month",
+    "year": "Year",
+    "previousMonth": "Previous month",
+    "nextMonth": "Next month",
+    "leftIn": "Left in {{month}}",
+    "overspentIn": "Over plan in {{month}} by",
+    "spent": "Spent",
+    "planned": "Planned",
+    "overPlan": "Over plan",
+    "overPlanUnit_one": "line",
+    "overPlanUnit_other": "lines",
+    "monthlyRemaining": "Monthly remaining",
+    "annualRemaining": "Annual remaining",
+    "monthlySpent": "Monthly spent",
+    "annualSpent": "Annual spent",
+    "monthlyPlanned": "Monthly planned",
+    "annualPlanned": "Annual planned",
+    "progress": "Progress",
+    "recurrenceLabel": "Recurrence",
+    "timesPerYear": "{{count}}x per year",
+    "linkAccount": "Link account",
+    "accountsLinked_one": "Account linked",
+    "accountsLinked_other": "Accounts linked",
+    "measureLabel": "{{name}}: {{spent}} spent of {{planned}} planned",
+    "spentOfPlanned": "{{spent}} of {{planned}} spent",
+    "rolledOverSurplus": "+{{amount}} from last month",
+    "rolledOverOverspent": "−{{amount}} overspent last month",
+    "rolledOverIncomplete": "May be too high: some of last month’s spending could not be converted to this budget’s currency.",
+    "keyLabel": "How to read the bars",
+    "keyPlan": "Plan",
+    "keySpent": "Spent within plan",
+    "keyOver": "Spent past plan",
+    "overview": "Overview",
+    "budgeted": "Budgeted",
+    "remaining": "Remaining",
+    "inPercentage": "(in %)",
+    "categoryActions": "Actions for {{name}}"
   },
   "budgetCategory": {
     "edit": "Edit {{name}} budget",
@@ -1402,6 +1821,8 @@
     "amount": "Amount per occurrence",
     "amountHint": "Required positive amount",
     "recurrence": "Recurrence",
+    "rollover": "Roll over leftover to next month",
+    "rolloverHint": "What’s left at the end of the month is added to next month. Applies to the months chosen below.",
     "legacyRecurrence": "This category has no saved recurrence. Select one explicitly before saving.",
     "scope": "Apply change to",
     "scopeMonth": "Selected month only",
@@ -1446,7 +1867,9 @@
       "fieldErrors": {
         "household": "Household size must be between 1 and 10.",
         "dependents": "Dependents must be fewer than the household size."
-      }
+      },
+      "question": "How many people live in your household?",
+      "description": "Include kids and other dependents. This will help us create a budget that works for your whole family."
     },
     "income": {
       "title": "Income",
@@ -1494,7 +1917,16 @@
       },
       "candidate": "Budget candidate {{id}}",
       "noInference": "A candidate does not confirm how it was created"
-    }
+    },
+    "dependents": {
+      "question": "From your household, how many dependents do you have?",
+      "description": "Want a budget that truly fits your life? Sharing your family size helps us build a personalized financial plan."
+    },
+    "incomeStep": {
+      "question": "What is your total household income?",
+      "description": "It's important that you add your current income in order to have full visibility of your finances."
+    },
+    "progress": "Step {{current}} of {{total}}"
   },
   "budgetAddCategory": {
     "title": "Add existing category",
@@ -1574,7 +2006,8 @@
     "yearToDate": "Year to date",
     "fullYear": "Full year",
     "categories": "Categories",
-    "noCategories": "No categories are available for this year"
+    "noCategories": "No categories are available for this year",
+    "help": "Take control of your annual financial plan and manage less frequent expenses with confidence."
   },
   "budgetEdit": {
     "title": "Edit budget",
@@ -1586,6 +2019,8 @@
     "name": "Name",
     "nameHint": "Up to 100 characters",
     "description": "Description",
+    "carryOverspend": "Carry overspending into next month",
+    "carryOverspendHint": "Spending past a category’s amount is taken off next month. When off, only unspent money rolls over.",
     "descriptionHint": "Optional, up to 500 characters",
     "characterCount": "{{count}} / {{max}}",
     "saveDetails": "Save details",
@@ -1641,9 +2076,9 @@
     "tabActive": "Active",
     "tabArchived": "Archived",
     "loading": "Loading goals",
-    "empty": "Set aside money for a specific purpose",
-    "emptyTitle": "Start with your first goal",
-    "archivedEmpty": "Archived goals appear here",
+    "empty": "Create a goal to set aside budgeted money for something specific, like an emergency fund, vacation, taxes, or a house deposit.",
+    "emptyTitle": "Give your money a purpose",
+    "archivedEmpty": "No archived goals.",
     "archivedEmptyTitle": "Nothing archived yet",
     "restore": "Restore",
     "restoring": "Restoring…",
@@ -1664,6 +2099,8 @@
     "monthlyContributionValue": "Monthly contribution {{value}}",
     "targetDate": "Target date {{date}}",
     "onTrackNote": "On track means no calculable shortfall; it is not a guarantee",
+    "helpText": "Goals are internal reserves allocated by purpose. On track means no calculable shortfall; it is not a guarantee.",
+    "back": "Back to More",
     "showDetails": "Show details for {{name}}",
     "hideDetails": "Hide details for {{name}}",
     "showDetailsLabel": "Show details",
@@ -1684,7 +2121,8 @@
       "completed": "Completed",
       "archived": "Archived",
       "progress-unavailable": "Progress unavailable",
-      "unknown": "Status unavailable"
+      "unknown": "Status unavailable",
+      "active": "Active"
     },
     "debtStrategy": {
       "linkLabel": "Debt payoff strategy",
@@ -1712,11 +2150,18 @@
       "invalidMessage": "The debt payoff data received could not be verified",
       "ineligibleTitle": "Not enough debts to compare",
       "ineligibleMessage": "A payoff strategy comparison needs at least two debt goals."
-    }
+    },
+    "subtitle": "Set aside budgeted money for future plans.",
+    "typeDebt": "Pay off debt",
+    "debtRemaining": "Remaining",
+    "payoffBy": "Payoff by {{date}}",
+    "payoffTooLow": "Payment too low",
+    "payoffTimeline": "Payoff timeline",
+    "ofAmount": "of {{amount}}"
   },
   "goalCreate": {
-    "title": "Create a goal",
-    "helper": "Define the plan, then confirm the exact details before creating it",
+    "title": "Create goal",
+    "helper": "Reserve budgeted money for something specific.",
     "back": "Back to Goals",
     "name": "Goal name",
     "target": "Target amount",
@@ -1725,7 +2170,7 @@
     "date": "Target date",
     "optional": "Optional",
     "moneyHint": "Enter a positive amount with up to four decimal places",
-    "dateHint": "Optional. Use YYYY-MM-DD and choose a future date",
+    "dateHint": "Optional. Choose a date in the future",
     "currencyTitle": "Uses your profile currency",
     "currencyHelper": "There is no currency choice here. The server creates this goal in the currency of your authenticated profile",
     "validation": "Check every required field. Amounts must be positive with no more than four decimal places, and the optional date must be in the future",
@@ -1886,24 +2331,47 @@
       "message": "The goal data received could not be verified"
     },
     "activityType": {
-      "archived": "Archived",
-      "assigned": "Assigned",
-      "completed": "Completed",
+      "archived": "Goal archived",
+      "assigned": "Money assigned",
+      "completed": "Goal completed",
       "goal_created": "Goal created",
       "goal_updated": "Goal updated",
       "manual_adjustment": "Manual adjustment",
-      "moved_in": "Reallocated in",
-      "moved_out": "Reallocated out",
-      "paused": "Paused",
-      "resumed": "Resumed",
-      "spent_from_goal": "Applied to spending",
-      "transaction_funding_reversed": "Allocation restored",
+      "moved_in": "Money moved in",
+      "moved_out": "Money moved out",
+      "paused": "Goal paused",
+      "resumed": "Goal resumed",
+      "spent_from_goal": "Spent from goal",
+      "transaction_funding_reversed": "Funding reversed",
       "unknown": "Other activity"
     },
-    "transactionExpired": "Transaction expired — dropped by the bank. This goal still covers it."
+    "transactionExpired": "Transaction expired — dropped by the bank. This goal still covers it.",
+    "assignMoney": "Assign money",
+    "moveMoneyOut": "Move money out",
+    "manage": "Manage goal",
+    "edit": "Edit goal",
+    "progress": "Progress",
+    "targetDateLabel": "Target date",
+    "monthlyContribution": "Monthly contribution",
+    "assignedThisMonth": "Assigned this month",
+    "neededThisMonth": "Needed this month",
+    "shortBy": "Short by",
+    "budgetExplainer": "Assigning money to a goal changes what your money is for. Moving money between accounts changes where it is held.",
+    "linkedAccount": "Linked account",
+    "accountContextNote": "This helps you see where the money is held. It does not change your goal balance.",
+    "assignTitle": "Assign money to goal",
+    "moveOutTitle": "Move money out of goal",
+    "editTitle": "Edit goal",
+    "payoffPlan": "Payoff plan",
+    "apr": "APR",
+    "payoffDate": "Payoff date",
+    "never": "Never",
+    "monthlyPayment": "Monthly payment",
+    "neverPaysOffHint": "The monthly payment doesn't cover the interest, so this debt never gets paid off. Increase the minimum or extra payment.",
+    "targetAmount": "Target amount"
   },
   "portfolios": {
-    "title": "Portfolio",
+    "title": "Portfolios",
     "helper": "In your profile currency",
     "loading": "Loading portfolios",
     "errorTitle": "Could not load portfolios",
@@ -1926,7 +2394,21 @@
     "create": "Create portfolio",
     "previewValue": "Total value preview",
     "previewAllocation": "Example allocation",
-    "emptyMessage": "Portfolios and holdings appear here once added"
+    "emptyMessage": "Portfolios and holdings appear here once added",
+    "description": "This is a summary of your portfolios, including balance growth, latest transactions and insights.",
+    "helpHint": "Learn more about portfolios",
+    "period": "Timeframe",
+    "periods": {
+      "1M": "1 Month",
+      "3M": "3 Months",
+      "6M": "6 Months",
+      "YTD": "Year to Date",
+      "1Y": "1 Year",
+      "ALL": "All Time"
+    },
+    "addTransaction": "Add transaction",
+    "selectPortfolio": "Select portfolio",
+    "add": "Add"
   },
   "portfolioDetail": {
     "back": "Back to Portfolio",
@@ -1943,6 +2425,7 @@
       "error": "Could not load performance history",
       "empty": "No performance history is available yet",
       "insufficientHistory": "Not enough history yet to chart performance",
+      "currencyIncomplete": "Some days leave out a portfolio in a currency with no exchange rate for that day, so those totals are partial.",
       "totalReturn": "{{value}}%",
       "range": "{{start}} – {{end}}",
       "periods": {
@@ -2074,7 +2557,8 @@
       },
       "total": "Total: {{total}}%",
       "percent": "{{value}}%",
-      "cleared": "Target allocation removed"
+      "cleared": "Target allocation removed",
+      "invalid": "Enter a percentage of 0 or more."
     },
     "on": "On",
     "off": "Off",
@@ -2087,6 +2571,7 @@
     "confirm": "Confirm changes",
     "saving": "Saving changes",
     "validation": "Change at least one field and enter a valid name",
+    "nameError": "Enter a name up to 255 characters.",
     "descriptionCleared": "Remove the current description",
     "unknownTitle": "Save outcome unknown",
     "unknownMessage": "Your submitted values are retained. Authoritative portfolio details must be refreshed before another save",
@@ -2124,8 +2609,8 @@
   },
   "portfolioActivity": {
     "back": "Back",
-    "aggregateTitle": "Portfolio activity",
-    "portfolioTitle": "Portfolio activity",
+    "aggregateTitle": "Transactions",
+    "portfolioTitle": "Transactions",
     "scope": "Newest activity first. Results are read-only",
     "scopeEditable": "Newest activity first. Transactions can be edited or removed",
     "delete": "Delete",
@@ -2167,18 +2652,30 @@
     "splitReadOnly": "Stock split, read only",
     "splitRatio": "{{numerator}} for {{denominator}}",
     "splitRatioUnavailable": "Ratio details unavailable",
+    "cash": "Cash ({{currency}})",
+    "types": {
+      "BUY": "Buy",
+      "SELL": "Sell",
+      "DIVIDEND": "Dividend",
+      "DEPOSIT": "Deposit",
+      "WITHDRAWAL": "Withdrawal",
+      "OFFER": "Offer"
+    },
     "unknownType": "Transaction",
     "assetUnavailable": "Asset unavailable",
     "unavailable": "Timestamp unavailable",
     "quantityValue": "Quantity {{value}}",
     "portfolioContext": "Portfolio {{name}}",
     "filters": "Date filters",
-    "filterHint": "Optional calendar dates in YYYY-MM-DD format",
     "fromDate": "From date",
     "toDate": "To date",
-    "applyDates": "Apply dates",
-    "clearDates": "Clear dates",
     "invalidDates": "Enter valid calendar dates with the from date no later than the to date",
+    "filterType": "Transaction type",
+    "filterTicker": "Ticker",
+    "filterPortfolio": "Portfolio",
+    "allTickers": "All tickers",
+    "allPortfolios": "All portfolios",
+    "emptyFiltered": "No activity matches these filters",
     "rateLimitTitle": "Activity is temporarily limited",
     "rateLimitMessage": "Too many requests were made. Try again later",
     "rateLimitCached": "Activity could not be refreshed because requests are temporarily limited. Previously loaded activity remains visible",
@@ -2217,6 +2714,7 @@
     "risk": "Risk metrics",
     "riskReady": "The API reports sufficient history for risk metrics",
     "riskNotReady": "The API reports insufficient history. Risk values are not presented as ready",
+    "needsHistory": "Not enough history yet",
     "riskLevel": "Risk level",
     "volatility": "Volatility",
     "maxDrawdown": "Maximum drawdown",
@@ -2383,6 +2881,20 @@
         "auth-failed": "Could not confirm. Try again."
       }
     },
+    "dataExport": {
+      "heading": "Export your data",
+      "helper": "Download everything in your household that you can see (accounts, transactions, budgets, goals, loans and investments) as a zip of JSON and CSV files. Your partner's private accounts are not included.",
+      "start": "Export all data",
+      "download": "Download export",
+      "preparing": "Preparing your export. We will email you when it is ready.",
+      "readyUntil": "Available to download until {{date}}.",
+      "failed": "The export could not be finished. Please try again.",
+      "webOnly": "This server prepares exports as they download. Export your data from the web app, in Settings > Privacy.",
+      "errors": {
+        "limit": "You can export your data up to 3 times a day. Please try again later.",
+        "unknown": "The export could not be started. Check your connection and try again."
+      }
+    },
     "mfa": {
       "heading": "Two-factor authentication",
       "helper": "Adds a one-time code from an authenticator app when you sign in.",
@@ -2443,6 +2955,11 @@
       "description": "Alerts when a bank connection needs reconnecting, with steps to fix it.",
       "detail": "This does not include security alerts about your login, which are always sent."
     },
+    "bankSyncAlerts": {
+      "title": "Bank connection alerts",
+      "description": "Get an email when a bank's access is about to end (7 days and 1 day before), when a bank ends access early, or when a bank has failed to sync for more than 2 days.",
+      "detail": "Only the bank connections you set up are included."
+    },
     "marketingOptOut": {
       "title": "Unsubscribe from all marketing emails",
       "description": "Turn off every optional email above at once. You can turn it back on at any time.",
@@ -2483,12 +3000,12 @@
       "continue": "Continue",
       "welcome": {
         "headline": "Bring your financial plan together here.",
-        "description": "Accounts, budgets and investments in one place.",
+        "description": "Bring accounts, budgets, and supported investments together to see what you have, where it goes, and how it changes over time.",
         "cta": "Start setup"
       },
       "goals": {
         "headline": "What do you want to improve first?",
-        "description": "Pick one or two. You can change them later.",
+        "description": "We'll shape setup around the financial picture you want to build.",
         "options": {
           "all_in_one": "See everything in one place",
           "spending": "Understand where my money goes",
@@ -2497,7 +3014,16 @@
           "financial_freedom": "Plan for long-term goals",
           "exploring": "I'm just exploring"
         },
-        "cta": "Continue"
+        "cta": "Continue",
+        "maxSelected": "Choose up to 2 goals.",
+        "helpers": {
+          "all_in_one": "Bring accounts, budgets, and supported investments together.",
+          "spending": "See where money goes each month.",
+          "budget": "Turn spending into a simple plan.",
+          "investments_net_worth": "Keep cash, investments, and net worth together.",
+          "financial_freedom": "Stay focused on long-term goals.",
+          "exploring": "Take a quick look around first."
+        }
       },
       "privacy": {
         "headline": "Read-only means read-only.",
@@ -2512,6 +3038,26 @@
         "description": "One is enough to make the dashboard useful.",
         "cta": "Connect bank account",
         "manualCta": "Add account manually"
+      },
+      "stepLabels": {
+        "welcome": "Welcome",
+        "goals": "Your goals",
+        "privacy": "Privacy",
+        "account": "Connect"
+      },
+      "facts": {
+        "connected": {
+          "title": "Accounts, budgets, portfolio",
+          "description": "Your day-to-day spending and long-term wealth live in one workspace."
+        },
+        "readOnly": {
+          "title": "Read-only access",
+          "description": "WonderMoney cannot move money, make payments, or initiate transfers."
+        },
+        "netWorth": {
+          "title": "Net worth as the north star",
+          "description": "Accounts and investments combine into one number that helps you understand your position."
+        }
       }
     },
     "heading": "Welcome to WonderMoney",
@@ -2552,6 +3098,12 @@
       "title": "Could not verify the first-run journey",
       "message": "The journey received could not be verified. Try again to load a fresh copy."
     },
+    "completeFailure": {
+      "demo": "Demo profiles are read-only, so setup can't be marked complete. Nothing was changed.",
+      "network": "Could not finish setup. Check your connection and try again.",
+      "stale": "Setup changed since this screen opened. Go back and try again.",
+      "unknown": "Could not finish setup. Try again."
+    },
     "createAccount": {
       "back": "Back to onboarding",
       "invalidVersion": {
@@ -2563,7 +3115,7 @@
   "banking": {
     "connections": {
       "heading": "Bank connections",
-      "helper": "The banks you've linked. Renewing is still managed on the web; you can disconnect a bank here.",
+      "helper": "The banks you've linked. Reconnect a bank here when its consent ends, or disconnect it.",
       "loading": "Loading bank connections",
       "empty": "No active bank connections yet. Connect a bank on the web to see it here.",
       "emptyTitle": "No bank connections yet",
@@ -2575,12 +3127,15 @@
       "freshnessUnknown": "Data freshness unavailable",
       "unavailableDate": "unavailable",
       "unnamedInstitution": "Bank connection",
+      "providerConnection": "{{provider}} connection",
       "status": {
         "processing": "Processing",
         "connected": "Connected",
         "error": "Error",
         "expired": "Consent expired",
-        "unknown": "Status unavailable"
+        "unknown": "Status unavailable",
+        "expiring": "Expiring soon",
+        "revoked": "Ended by bank"
       },
       "error": {
         "title": "Could not load bank connections",
@@ -2625,6 +3180,18 @@
       "importStatement": {
         "action": "Import a statement instead",
         "actionLabel": "Import a statement for {{institution}} instead"
+      },
+      "consent": {
+        "expiring_zero": "Consent ends today. Reconnect to keep your data syncing.",
+        "expiring_one": "Consent ends in {{count}} day. Reconnect to keep your data syncing.",
+        "expiring_other": "Consent ends in {{count}} days. Reconnect to keep your data syncing.",
+        "revoked": "Your bank ended access early. Reconnect to resume syncing.",
+        "expired": "Consent has ended. Reconnect to resume syncing."
+      },
+      "reconnect": {
+        "action": "Reconnect",
+        "actionLabel": "Reconnect {{institution}}",
+        "starting": "Opening your bank…"
       }
     },
     "connect": {
@@ -2692,7 +3259,7 @@
     "title": "Markets",
     "helper": "Search stocks, ETFs, and other tickers.",
     "back": "Back",
-    "placeholder": "Search by name or symbol",
+    "placeholder": "Search for a ticker or company name, e.g. AAPL or Microsoft",
     "searchLabel": "Search tickers",
     "loading": "Searching",
     "empty": "No matches for \"{{term}}\"",
@@ -2706,7 +3273,15 @@
     },
     "watchlistLink": "Watchlist",
     "screenerLink": "Screener",
-    "emptyTitle": "No instrument found"
+    "emptyTitle": "No instrument found",
+    "exploreTitle": "Explore an asset",
+    "exploreDescription": "Search for a stock or ETF to view price history, company details, fundamentals, financials, and earnings.",
+    "previewCompany": "Sample asset",
+    "previewName": "Asset Name",
+    "previewChart": "Price history",
+    "previewFundamentals": "Fundamentals",
+    "previewFinancials": "Financials",
+    "previewEarnings": "Earnings"
   },
   "assetDetail": {
     "loading": "Loading quote",
@@ -2792,9 +3367,9 @@
     "back": "Back",
     "loading": "Loading watchlist",
     "empty": {
-      "title": "Your watchlist is empty",
-      "message": "Search for a ticker and add it to your watchlist to track it here.",
-      "searchAction": "Search instruments"
+      "title": "No tickers yet",
+      "message": "Search for a stock or ETF in the Explorer and tap the star to add it here.",
+      "searchAction": "Go to Explorer"
     },
     "error": {
       "title": "Could not load watchlist",
@@ -2812,7 +3387,12 @@
       "add": "Add to watchlist",
       "remove": "Remove from watchlist",
       "pending": "Updating…"
-    }
+    },
+    "description": "Keep an eye on the tickers you care about.",
+    "marketDataUnavailable": "Market data unavailable",
+    "liveQuoteUnavailable": "Live price not available",
+    "period1d": "1D",
+    "changeDay": "Change (day)"
   },
   "screener": {
     "title": "Screener",
@@ -2824,6 +3404,7 @@
     "priceLowerThanLabel": "Max price",
     "marketCapMoreThanLabel": "Min market cap",
     "marketCapLowerThanLabel": "Max market cap",
+    "numberInvalid": "Enter a number, like 1500 or 12.50.",
     "sectorLabel": "Sector",
     "industryLabel": "Industry",
     "countryLabel": "Country",
@@ -3010,7 +3591,7 @@
     },
     "portfolioPerformance": {
       "label": "Portfolio performance",
-      "description": "Per-account movement and return for the period"
+      "description": "Per-account balance movement for the period"
     },
     "netWorthHistory": {
       "label": "Net worth over time",
@@ -3065,11 +3646,12 @@
       "selectedCount": "{{count}} selected",
       "searchPlaceholder": "Search {{label}}",
       "noResults": "No results found",
-      "unknownAccount": "Unknown account"
+      "unknownAccount": "Unknown account",
+      "dateRange": "Date range"
     },
     "budgetVsActual": {
       "title": "Budget vs actual",
-      "subtitle": "Planned spending compared with what you actually spent, by category",
+      "subtitle": "How your spending tracked against your budget.",
       "loading": "Loading budget vs actual",
       "budgeted": "Budgeted",
       "actual": "Actual",
@@ -3077,35 +3659,41 @@
       "percentUsed": "% used",
       "overBudget": "Over budget",
       "emptyTitle": "No budgeted categories in range",
-      "emptyMessage": "Set up a budget or widen the date range to see this report"
+      "emptyMessage": "Set up a budget or widen the date range to see this report",
+      "category": "Category"
     },
     "portfolioPerformance": {
       "title": "Portfolio performance",
-      "subtitle": "Per-account movement and return for the period",
+      "subtitle": "How each portfolio's value moved in the period, net of what went in and out.",
       "loading": "Loading portfolio performance",
-      "aggregateReturn": "{{value}} combined return",
-      "startBalance": "Start",
-      "endBalance": "End",
-      "return": "Return",
-      "contributions": "Contributions",
-      "startCaveat": "Start balance reflects the first transaction in the period; returns may include the effect of that transaction.",
-      "emptyTitle": "No accounts to show",
-      "emptyMessage": "Connect an account to see its performance here"
+      "aggregateReturn": "{{value}} combined change",
+      "startValue": "Start value",
+      "netContributions": "Net contributions",
+      "change": "Change",
+      "dividends": "Dividends",
+      "endValue": "End value",
+      "unknownValue": "No value recorded",
+      "noExchangeRate": "No exchange rate yet",
+      "emptyTitle": "No portfolios to show",
+      "emptyMessage": "Add a portfolio to see its performance here",
+      "portfolio": "Portfolio",
+      "total": "Total"
     },
     "netWorthHistory": {
       "title": "Net worth over time",
-      "subtitle": "Your total assets minus liabilities, month by month",
+      "subtitle": "Your total assets minus liabilities, month by month.",
       "loading": "Loading net worth history",
       "trend": "{{delta}} ({{percent}}) since last month",
       "assets": "Assets",
       "liabilities": "Liabilities",
       "emptyTitle": "No history yet",
       "emptyMessage": "Net worth will populate as accounts report activity",
-      "trendNoBasis": "{{delta}} with no earlier month to compare"
+      "trendNoBasis": "{{delta}} with no earlier month to compare",
+      "netWorth": "Net worth"
     },
     "spendingByCategory": {
       "title": "Spending by category",
-      "subtitle": "Where your money went over the period",
+      "subtitle": "Where your money went over the period.",
       "loading": "Loading spending by category",
       "total": "Total spent",
       "trend": "{{delta}} ({{percent}}) vs. prior period",
@@ -3115,25 +3703,205 @@
     },
     "cashflow": {
       "title": "Cash flow",
-      "subtitle": "Income vs expenses over time",
+      "subtitle": "Income vs expenses over time.",
       "loading": "Loading cash flow",
       "income": "Income",
       "expenses": "Expenses",
       "net": "Net",
       "trailingNetAverage": "{{value}} trailing 3-month net average",
       "emptyTitle": "No cash flow yet",
-      "emptyMessage": "Once transactions are booked, your monthly cash flow will appear here"
+      "emptyMessage": "Once transactions are booked, your monthly cash flow will appear here",
+      "trailingNetAverageLabel": "Trailing 3-month net average"
     },
     "sankey": {
       "title": "Cash flow Sankey",
-      "subtitle": "From income, through categories, into accounts",
+      "subtitle": "From income, through categories, into accounts.",
       "loading": "Loading cash flow flows",
       "total": "{{value}} total inflow",
       "source": "Source",
       "target": "Target",
       "value": "Value",
       "emptyTitle": "Not enough activity",
-      "emptyMessage": "Add more transactions to see your money flow"
+      "emptyMessage": "Add more transactions to see your money flow",
+      "mobileNotice": "This chart is best viewed on a wider screen."
+    },
+    "trend": {
+      "up": "Up",
+      "down": "Down",
+      "flat": "Flat",
+      "vsPriorPeriod": "vs. prior period"
     }
+  },
+  "accountsOverview": {
+    "title": "Accounts overview",
+    "help": "This is a summary of your accounts, including balance growth, latest transactions and insights.",
+    "period": "Period",
+    "timeframes": {
+      "1M": "1 Month",
+      "3M": "3 Months",
+      "6M": "6 Months",
+      "YTD": "Year to Date",
+      "1Y": "1 Year",
+      "ALL": "All Time"
+    },
+    "addTransaction": "Add transaction",
+    "addAccount": "Add account",
+    "add": "Add",
+    "totalBalance": "Total balance",
+    "vsLastPeriod": "vs last period",
+    "balancesUpdated": "Balances updated {{time}}",
+    "balancesStale": "Some connections need attention",
+    "totalIncomplete": "Unavailable — some balances are missing",
+    "inflow": "Inflow",
+    "outflow": "Outflow",
+    "savingsRate": "Savings rate",
+    "netSavingsRate": "Net savings this period, {{rate}} of inflow",
+    "noMetrics": "No metrics to show",
+    "spendingByCategory": "Spending by category",
+    "emptyCategorySpending": "Category spending will appear here once you have categorized expenses in this period.",
+    "balanceGrowth": "Balance growth",
+    "emptyTransactions": "Your cashflow will appear here once transactions are available. Connect a bank account, add transactions manually, or import a bank statement to start tracking money in and out.",
+    "accounts": "Accounts",
+    "total": "Total",
+    "lastTransactions": "Last transactions",
+    "viewAll": "View all",
+    "cashflow": "Cashflow",
+    "accountBalance": "Account balance",
+    "available": "Available",
+    "private": "Private",
+    "sharedBy": "Shared by {{name}}",
+    "edit": "Edit",
+    "delete": "Delete",
+    "linked": "Linked",
+    "unlinked": "Unlinked",
+    "linkedDescription": "Automatically import cleared transactions for easy reconciliation.",
+    "unlinkedDescription": "Start with your current balance and take control by entering your own transactions.",
+    "importTransactions": "Import transactions",
+    "actionsFor": "Actions for {{name}}",
+    "justNow": "just now",
+    "editAccount": "Edit account",
+    "deleteAccount": "Delete account",
+    "accountDetails": "Account details",
+    "sectionUnavailable": "Could not load this section. Pull down to try again.",
+    "linkedAccount": "Link a bank account"
+  },
+  "settings": {
+    "title": "Settings",
+    "groups": {
+      "account": "Account",
+      "money": "Money",
+      "preferences": "Preferences"
+    },
+    "sections": {
+      "profile": "Profile",
+      "security": "Security",
+      "household": "Household",
+      "connections": "Connections",
+      "categories": "Categories",
+      "appearance": "Appearance",
+      "notifications": "Notifications"
+    },
+    "profile": {
+      "heading": "Personal information",
+      "email": "Email address"
+    },
+    "appearance": {
+      "heading": "Appearance",
+      "description": "Change the appearance of the app.",
+      "theme": "Theme",
+      "language": "Language"
+    },
+    "categories": {
+      "description": "Manage your categories"
+    },
+    "household": {
+      "description": "Share accounts, budgets, and goals with your partner."
+    },
+    "connections": {
+      "heading": "Bank connections",
+      "description": "Track your bank connections, renew or cancel them."
+    },
+    "security": {
+      "passwordDescription": "Update the password associated with your account."
+    }
+  },
+  "portfolioSections": {
+    "totalValue": "Total Value",
+    "portfolioCount_one": "{{count}} Portfolio",
+    "portfolioCount_other": "{{count}} Portfolios",
+    "totalGainLoss": "Total Gain/Loss",
+    "periodReturn": "{{period}} Return",
+    "unrealizedGains": "Unrealized Gains",
+    "realizedGains": "Realized Gains",
+    "needsHistory": "Needs more history",
+    "periodReturnUnavailable": "We need a period baseline before this can be shown.",
+    "noHoldings": "No holdings",
+    "emptyTitle": "No transactions yet",
+    "emptyDescription": "Add your first transaction to start tracking performance, allocation, and gains.",
+    "performance": "Performance",
+    "allocation": "Allocation",
+    "breakdown": "Portfolio Breakdown",
+    "topMovers": "Top Movers",
+    "dividendIncome": "Dividend Income",
+    "allHoldings": "All Holdings",
+    "holdings": "Holdings",
+    "quickStats": "Quick Stats",
+    "advancedMetrics": "Advanced metrics",
+    "advancedMetricsDescription": "Risk and return indicators appear once the history is long enough.",
+    "annualYield": "Annual yield",
+    "volatility": "Volatility",
+    "sharpeRatio": "Sharpe Ratio",
+    "maxDrawdown": "Max Drawdown",
+    "riskLevel": "Risk level",
+    "riskLevels": {
+      "Low": "Low",
+      "Medium": "Medium",
+      "High": "High"
+    },
+    "unavailable": {
+      "annualYield": "Needs a year of history",
+      "volatility": "Needs 3 months of price history",
+      "sharpeRatio": "Needs a year of history",
+      "maxDrawdown": "Needs a longer drawdown window",
+      "riskLevel": "Needs 3 months of history to score risk"
+    },
+    "readiness": {
+      "performance": "Performance history needs about a month of daily snapshots.",
+      "risk": "Risk metrics need more price history."
+    },
+    "byType": "By Type",
+    "bySector": "By Sector",
+    "byAsset": "By Asset",
+    "allocationView": "Allocation view",
+    "allocationEmpty": "Allocation appears after your holdings have prices.",
+    "allocationEmptyNote": "We need priced holdings before we can split the portfolio.",
+    "gainers": "Gainers",
+    "losers": "Losers",
+    "noGainers": "No gainers",
+    "noLosers": "No losers",
+    "topMoversEmpty": "Top movers appear once we have more than one priced holding or enough price history.",
+    "totalDividends": "Total Dividends",
+    "dividendsByAsset": "Dividends by Asset",
+    "noDividends": "No dividend income yet",
+    "assets": "assets",
+    "biggestPosition": "Biggest Position",
+    "bestPerformer": "Best Performer",
+    "worstPerformer": "Worst Performer",
+    "dataUnavailable": "Data unavailable",
+    "weight": "Weight",
+    "gain": "Gain",
+    "performanceInsufficient": "We need at least two snapshots to show a trend.",
+    "performanceWaiting": "Performance appears once snapshots are created.",
+    "loading": "Loading",
+    "sectionError": "Could not load this section. Pull down to try again.",
+    "more": "More for this portfolio",
+    "allocationShare": "{{label}}, {{percent}}"
+  },
+  "privacy": {
+    "hiddenAmount": "Hidden amount",
+    "hide": "Hide amounts",
+    "show": "Show amounts",
+    "setting": "Hide amounts",
+    "settingHelp": "Masks balances and amounts on this device, for when someone can see your screen. Percentages stay visible."
   }
 }

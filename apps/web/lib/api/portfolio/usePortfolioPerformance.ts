@@ -28,10 +28,22 @@ export interface PerformanceDataPoint {
   value: number;
 }
 
+/**
+ * Whether every portfolio's history could be converted into the viewer's
+ * currency. A day with no exchange rate for a portfolio leaves it out and is
+ * listed in `incompleteDates`. Absent from older APIs.
+ */
+export interface PerformanceCompleteness {
+  currencyCode: string;
+  incompleteDates: string[];
+  isComplete: boolean;
+}
+
 export interface PerformanceResponse {
   benchmarkDataPoints?: PerformanceDataPoint[];
   benchmarkStatus?: PortfolioBenchmarkReadinessStatus;
   benchmarkSymbol?: string;
+  completeness?: PerformanceCompleteness;
   readiness?: {
     benchmark?: PortfolioBenchmarkReadiness;
     performance?: PortfolioPerformanceReadiness;

@@ -7,6 +7,8 @@ import { Appuser } from '@entity/Appuser';
 import {
   AcknowledgedPostHogClient,
   deliverAnalyticsOutboxBatch,
+  handleAnalyticsOutboxJob,
+  purgeStaleAnalyticsOutboxRows,
 } from '../analytics-outbox.worker';
 
 const EXTERNAL_USER_ID = '1f8fab82-1cc1-427b-9f51-5b9fe416bd88';
@@ -219,5 +221,33 @@ describe('analytics outbox worker', () => {
     expect(result).toEqual({ blocked: 1, delivered: 0, scanned: 1 });
     expect(harness.posthog.captureBatch).not.toHaveBeenCalled();
     expect(harness.row.deletedAt).toBeInstanceOf(Date);
+  });
+
+  it('purges undelivered rows older than 30 days', async () => {
+    const nativeDelete = vi.fn().mockResolvedValue(3);
+    const now = new Date('2026-11-06T12:00:00Z');
+
+    await expect(purgeStaleAnalyticsOutboxRows({ em: { nativeDelete }, now: () => now })).resolves.toBe(3);
+
+    expect(nativeDelete).toHaveBeenCalledWith(AnalyticsOutbox, {
+      createdAt: { $lt: new Date('2026-10-07T12:00:00Z') },
+      sentAt: null,
+    });
+  });
+
+  // Rows written before delivery became opt-in would otherwise sit undelivered forever.
+  it('purges stale rows on every run, even while delivery is off', async () => {
+    const harness = makeHarness();
+    const nativeDelete = vi.fn().mockResolvedValue(0);
+
+    await expect(handleAnalyticsOutboxJob({
+      em: { ...harness.em, nativeDelete } as unknown as NonNullable<AnalyticsOutboxDeps>['em'],
+      env: { ANALYTICS_OUTBOX_MODE: 'off' },
+      logger: harness.logger,
+      posthogClient: harness.posthog,
+    })).resolves.toEqual({ blocked: 0, delivered: 0, purged: 0, scanned: 0 });
+
+    expect(nativeDelete).toHaveBeenCalledOnce();
+    expect(harness.em.transactional).not.toHaveBeenCalled();
   });
 });

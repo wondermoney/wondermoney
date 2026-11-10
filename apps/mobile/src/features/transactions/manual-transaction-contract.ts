@@ -1,5 +1,6 @@
 import { z } from 'zod'
 
+import { freezeTagIds } from '@/features/tags/tags-contract'
 import { readEndpoint, writeEndpoint } from '@/lib/api/runtime-schema'
 
 const positiveId = z.number().int().positive().safe()
@@ -70,7 +71,9 @@ export type ManualTransactionDraft = Readonly<{
   existingMerchantId?: number | null
   newMerchantName?: string
   categoryId?: number | null
+  tagIds?: readonly number[]
   description?: string
+  notes?: string
 }>
 
 export type ManualTransactionPayload = Readonly<{
@@ -81,7 +84,9 @@ export type ManualTransactionPayload = Readonly<{
   transactionMerchantId?: number
   transactionMerchantName?: string
   categoryId?: string
+  tagIds?: readonly number[]
   description?: string
+  notes?: string
 }>
 
 export type FrozenManualTransaction = Readonly<{
@@ -127,8 +132,11 @@ export function freezeManualTransaction(draft: ManualTransactionDraft, now = new
   if (!merchant) throw new Error('Choose an existing merchant or enter a new merchant name.')
 
   const categoryId = draft.categoryId == null ? null : positiveId.parse(draft.categoryId)
+  const tagIds = freezeTagIds(draft.tagIds ?? [])
   const description = draft.description?.trim() ?? ''
   if (description.length > 500) throw new Error('Description is too long.')
+  const notes = draft.notes?.trim() ?? ''
+  if (notes.length > 1000) throw new Error('Note is too long.')
 
   return Object.freeze({
     accountId,
@@ -139,7 +147,10 @@ export function freezeManualTransaction(draft: ManualTransactionDraft, now = new
       settlementCurrencyId: String(settlementCurrencyId),
       ...merchant,
       ...(categoryId === null ? {} : { categoryId: String(categoryId) }),
+      // Only when there are tags, so a server without tag support never sees the field.
+      ...(tagIds.length > 0 ? { tagIds } : {}),
       ...(description ? { description } : {}),
+      ...(notes ? { notes } : {}),
     }),
   })
 }

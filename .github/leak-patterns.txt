@@ -1,0 +1,23 @@
+# Text that must not land in this public repository: CI's leak check (.github/scripts/leak-check.sh)
+# fails when one of these matches a tracked file, or, in a pull request, a line one of its commits
+# adds or one of its commit messages. Perl-compatible regular expressions, one per line. A match
+# that is fully matched by an entry of leak-allow.txt is ignored. The maintainers keep a second,
+# private list (the LEAK_PATTERNS secret) for names that would be leaks themselves.
+
+# Internal issue tracker ids.
+\bRAD-[0-9]+\b
+# The private repository and the maintainers' private docs workspace.
+wondermoney-internal
+\bradix/wm\b
+# Personal machine paths and agent plans.
+/Users/[A-Za-z]
+~/dev/
+\.claude/plans
+# Images are published on GHCR; a Docker Hub reference outside the official images is a
+# personal namespace.
+\bdocker\.io/(?!library/)[a-z0-9_.-]+/
+\bhub\.docker\.com/(r|u|repository)/
+# IPv4 addresses. Loopback, private (RFC 1918) and documentation (RFC 5737) addresses are allowed
+# in leak-allow.txt; use an RFC 5737 address (192.0.2.x, 198.51.100.x, 203.0.113.x) in examples
+# and tests.
+(?<![0-9.])(?:(?:25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])\.){3}(?:25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])(?!\.?[0-9])

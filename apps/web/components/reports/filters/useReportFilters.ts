@@ -11,6 +11,7 @@ import { useSearchParams } from "next/navigation";
 import { useCallback, useMemo } from "react";
 
 import { useRouter } from "@/i18n/navigation";
+import { dateRangeParams } from "@/lib/api/date-range";
 import { resolveViewerTimeZone } from "@/lib/reports/viewer-timezone";
 
 /**
@@ -29,6 +30,8 @@ export interface ReportFilters {
   accountKeys: string[];
   categoryKeys: string[];
   merchantKeys: string[];
+  /** Any-of: a transaction counts when it carries one of these tags. */
+  tagKeys: string[];
   currencyKey?: string;
   includePending: boolean;
   includeTransfers: boolean;
@@ -48,6 +51,7 @@ const PARAM_TO = "to";
 const PARAM_ACCOUNTS = "accounts";
 const PARAM_CATEGORIES = "categories";
 const PARAM_MERCHANTS = "merchants";
+const PARAM_TAGS = "tags";
 const PARAM_CURRENCY = "currency";
 const PARAM_PENDING = "pending";
 const PARAM_TRANSFERS = "transfers";
@@ -85,6 +89,16 @@ function serializeDate(date: Date): string {
   return date.toISOString();
 }
 
+/** Writes a picked range to the URL as whole viewer-calendar days ({@link dateRangeParams}). */
+function setRangeParams(params: URLSearchParams, range: DateRangeValue) {
+  const { fromDate, toDate } = dateRangeParams({
+    fromDate: range.from,
+    toDate: range.to,
+  });
+  if (fromDate) params.set(PARAM_FROM, fromDate);
+  if (toDate) params.set(PARAM_TO, toDate);
+}
+
 /**
  * Assembles the request envelope from the navigable state plus the viewer's
  * calendar.
@@ -111,6 +125,7 @@ export function buildReportFilters(
     accountKeys: parseArrayParam(searchParams.get(PARAM_ACCOUNTS)),
     categoryKeys: parseArrayParam(searchParams.get(PARAM_CATEGORIES)),
     merchantKeys: parseArrayParam(searchParams.get(PARAM_MERCHANTS)),
+    tagKeys: parseArrayParam(searchParams.get(PARAM_TAGS)),
     currencyKey: searchParams.get(PARAM_CURRENCY) ?? undefined,
     includePending: parseBoolParam(searchParams.get(PARAM_PENDING)),
     includeTransfers: parseBoolParam(searchParams.get(PARAM_TRANSFERS)),
@@ -158,6 +173,7 @@ export function useReportFilters() {
     if (filters.accountKeys.length > 0) count += 1;
     if (filters.categoryKeys.length > 0) count += 1;
     if (filters.merchantKeys.length > 0) count += 1;
+    if (filters.tagKeys.length > 0) count += 1;
     if (filters.currencyKey) count += 1;
     if (filters.includePending) count += 1;
     if (filters.includeTransfers) count += 1;
@@ -176,10 +192,7 @@ export function useReportFilters() {
   const setDateRange = useCallback(
     (range: DateRangeValue | undefined) => {
       const nextRange = range ?? getDefaultDateRange();
-      updateParams((params) => {
-        params.set(PARAM_FROM, serializeDate(startOfDay(nextRange.from)));
-        params.set(PARAM_TO, serializeDate(endOfDay(nextRange.to)));
-      });
+      updateParams((params) => setRangeParams(params, nextRange));
     },
     [updateParams],
   );
@@ -217,6 +230,17 @@ export function useReportFilters() {
     [updateParams],
   );
 
+  const setTagKeys = useCallback(
+    (keys: string[]) => {
+      updateParams((params) => {
+        const serialized = serializeArray(keys);
+        if (serialized) params.set(PARAM_TAGS, serialized);
+        else params.delete(PARAM_TAGS);
+      });
+    },
+    [updateParams],
+  );
+
   const setCurrencyKey = useCallback(
     (key: string | undefined) => {
       updateParams((params) => {
@@ -249,12 +273,11 @@ export function useReportFilters() {
 
   const resetFilters = useCallback(() => {
     updateParams((params) => {
-      const defaultRange = getDefaultDateRange();
-      params.set(PARAM_FROM, serializeDate(startOfDay(defaultRange.from)));
-      params.set(PARAM_TO, serializeDate(endOfDay(defaultRange.to)));
+      setRangeParams(params, getDefaultDateRange());
       params.delete(PARAM_ACCOUNTS);
       params.delete(PARAM_CATEGORIES);
       params.delete(PARAM_MERCHANTS);
+      params.delete(PARAM_TAGS);
       params.delete(PARAM_CURRENCY);
       params.delete(PARAM_PENDING);
       params.delete(PARAM_TRANSFERS);
@@ -269,6 +292,7 @@ export function useReportFilters() {
     setAccountKeys,
     setCategoryKeys,
     setMerchantKeys,
+    setTagKeys,
     setCurrencyKey,
     setIncludePending,
     setIncludeTransfers,

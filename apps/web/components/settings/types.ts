@@ -18,6 +18,7 @@ export function transformCategoryToUI(
     bgColor: category.bgColor,
     icon: category.icon,
     isSystemCategory: category.isSystemCategory,
+    countsAsSpending: category.countsAsSpending,
     subRows:
       category.childCategory?.map((child) => ({
         ...child,

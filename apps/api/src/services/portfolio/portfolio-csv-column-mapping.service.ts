@@ -41,8 +41,12 @@ export interface ConfirmPortfolioColumnMappingInput {
 }
 
 export interface SuggestPortfolioColumnMappingInput {
+  /** False when this account may not use AI (unverified email, see `canUseAi`): no model fallback. */
+  allowModel?: boolean;
   appuser: Appuser;
   importSessionId: number;
+  /** Spends one call of the household's daily CSV-mapping allowance; false when it is used up. */
+  spendModelCall?: () => Promise<boolean>;
   tenant: { tenantKey: number };
 }
 
@@ -168,6 +172,15 @@ class PortfolioCsvColumnMappingService {
       }
     }
 
+    const leaveToUser = async () => {
+      session.columnMappingJson = { source: 'error', version: 1, warning: AUTOMATIC_COLUMN_MAPPING_UNAVAILABLE_WARNING };
+      session.summaryJson = { ...(session.summaryJson ?? {}), columnMappingWarning: AUTOMATIC_COLUMN_MAPPING_UNAVAILABLE_WARNING };
+      await DI.em.persist(session).flush();
+      return { importSessionId: session.portfolioImportSessionKey, mappingSource: 'disabled' as const, status: session.status, warning: AUTOMATIC_COLUMN_MAPPING_UNAVAILABLE_WARNING };
+    };
+    if (input.allowModel === false) return leaveToUser();
+    if (input.spendModelCall && !(await input.spendModelCall())) return leaveToUser();
+
     try {
       const promptInput = sanitizePortfolioColumnMappingPromptInput({
         headers,
@@ -180,11 +193,8 @@ class PortfolioCsvColumnMappingService {
       await DI.em.persist(session).flush();
       return { columnMapping: normalizedSuggestion, importSessionId: session.portfolioImportSessionKey, mappingSource: 'llm', status: session.status };
     } catch (error) {
-      session.columnMappingJson = { source: 'error', version: 1, warning: AUTOMATIC_COLUMN_MAPPING_UNAVAILABLE_WARNING };
-      session.summaryJson = { ...(session.summaryJson ?? {}), columnMappingWarning: AUTOMATIC_COLUMN_MAPPING_UNAVAILABLE_WARNING };
-      await DI.em.persist(session).flush();
       logger.warn({ error, importSessionId: session.portfolioImportSessionKey }, 'Portfolio CSV column mapping LLM suggestion failed');
-      return { importSessionId: session.portfolioImportSessionKey, mappingSource: 'disabled', status: session.status, warning: AUTOMATIC_COLUMN_MAPPING_UNAVAILABLE_WARNING };
+      return leaveToUser();
     }
   }
 

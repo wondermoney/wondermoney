@@ -20,6 +20,27 @@ Confirma se o mês está selecionado corretamente e se as transações recentes 
 3. Compara os gastos reais com o objetivo da categoria.
 4. Abre qualquer categoria que esteja acima ou abaixo do esperado.
 
+## Transitar o que sobra
+
+Uma categoria pode passar para o mês seguinte o que ficou por gastar, e também o que gastou a mais. Ativa **Transitar o que sobra para o mês seguinte** quando editas a categoria. Tal como um novo valor, a opção aplica-se ao mês que editas e aos meses seguintes.
+
+Com a transição ativa, cada mês mostra o que pode gastar: o seu orçamento mais o que sobrou do mês anterior. Uma linha por baixo do orçamento indica "+40 € do mês passado" ou "−25 € gastos a mais no mês passado", e o usado, o restante e o acima do orçamento passam a ser medidos face a esse valor. A transição continua enquanto meses seguidos a tiverem ativa, incluindo de dezembro para janeiro. Um mês sem transição começa do seu próprio orçamento e não passa nada adiante.
+
+- O valor transitado é calculado a partir dos gastos que o mês mostra, por isso editar ou recategorizar uma transação antiga atualiza-o de imediato.
+- Para transitar só o dinheiro por gastar, desativa **Transitar gastos a mais para o mês seguinte** nas definições do orçamento. Um excesso passa então como zero.
+- Se o mês anterior tiver uma transação numa moeda que ainda não tem taxa de câmbio, os gastos conhecidos continuam a transitar e o valor transitado fica assinalado como podendo estar acima do real até ser publicada uma taxa.
+- Os emails de alerta do orçamento comparam os gastos com o mesmo valor, orçamento mais transição.
+
+## Ver os próximos meses
+
+A página do ano do orçamento termina com uma **Previsão** deste mês e dos 3, 6 ou 12 meses seguintes. Para cada mês mostra o plano, o valor transitado, o que foi gasto até agora (só este mês), o que os pagamentos recorrentes devem levar, os gastos esperados, o rendimento previsto e o que sobra.
+
+- Só o **Gasto até agora** deste mês é gasto real, até à data que a previsão indica. Os meses seguintes não têm gastos e mostram um traço; todos os outros valores são projeções.
+- Os pagamentos recorrentes vêm de **Faturas e subscrições**: os confirmados e os detetados com confiança elevada, quando a categoria está no orçamento e são pagos por uma das contas do orçamento. Cada um é colocado nas datas que o seu calendário prevê, a partir de hoje. Um pagamento noutra moeda é convertido à taxa de câmbio mais recente; um sem taxa fica de fora e o mês é assinalado como incompleto.
+- Os **Gastos esperados** são o plano de cada categoria, ou mais quando o já gasto e os pagamentos recorrentes por vir já o ultrapassam. **Sobra** é o rendimento previsto menos esse valor.
+- Com a transição ligada, este mês começa com o valor que transita. Um mês que deva ultrapassar o plano passa o excesso para o seguinte quando o orçamento transita gastos acima do plano.
+- A previsão chega ao próximo ano com o orçamento desse ano, copiado de dezembro.
+
 ## Rever
 
 Procura padrões, não apenas picos isolados. Se uma categoria está sempre acima do objetivo, talvez precise de um limite mais alto ou de uma divisão diferente.
@@ -30,6 +51,7 @@ Procura padrões, não apenas picos isolados. Se uma categoria está sempre acim
 - O mês selecionado não corresponde ao período do extrato.
 - Um reembolso faz o total parecer mais baixo do que o esperado.
 - Uma transação grande esconde o padrão mensal normal.
+- Uma transação numa moeda que ainda não tem taxa de câmbio fica de fora dos totais. Uma nota por baixo dos totais, aqui e na página inicial, indica quantas transações ficaram de fora e em que moedas. Passam a contar assim que for publicada uma taxa.
 
 
 ## Ligações relacionadas

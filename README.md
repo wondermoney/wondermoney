@@ -9,15 +9,17 @@ and Android.
   app. See [apps/api/deploy/selfhost](apps/api/deploy/selfhost/README.md). The mobile app
   connects to any server from its sign-in screen.
 - **Hack on it:** read on, then [CONTRIBUTING.md](CONTRIBUTING.md).
+- **Help keep it running:** the hosted instance's servers, AI and market data cost money.
+  [Sponsor the project on GitHub](https://github.com/sponsors/wondermoney) if you'd like to chip in.
 
 ## What's in here
 
 | Path | What | Stack |
 |---|---|---|
-| [`apps/api`](apps/api) | REST API and background worker | Express 5, MikroORM, PostgreSQL, pg-boss, better-auth |
-| [`apps/web`](apps/web) | Web app | Next.js 16, React 19, Tailwind |
-| [`apps/mobile`](apps/mobile) | iOS and Android app | Expo, React Native |
-| [`apps/docs`](apps/docs) | User documentation ([docs.wonder.money](https://docs.wonder.money)) | Next.js, Fumadocs |
+| [`apps/api`](apps/api) | REST API and background worker | Express 5, MikroORM 7, PostgreSQL, pg-boss, better-auth |
+| [`apps/web`](apps/web) | Web app | Next.js 16, React 19, Tailwind 4 |
+| [`apps/mobile`](apps/mobile) | iOS and Android app | Expo SDK 58, React Native 0.88 |
+| [`apps/docs`](apps/docs) | User documentation ([docs.wonder.money](https://docs.wonder.money)) | Next.js 16, Fumadocs |
 | [`packages/shared`](packages/shared) | Market-data client and CSV parsers used by the API | TypeScript |
 | [`packages/react-email`](packages/react-email) | Email templates used by the API | React Email |
 
@@ -26,8 +28,10 @@ when configured and are hidden when not; the core app needs only Postgres.
 
 ## Develop
 
-Requirements: Node 26 (`.nvmrc`), pnpm via [corepack](https://github.com/nodejs/corepack)
-(`npm install -g corepack && corepack enable`; Node 26 no longer bundles it), and Docker for the local database.
+Requirements: Node 26 LTS (`.nvmrc`; the Expo tooling in `apps/mobile` stays on Node 24, see
+its `.nvmrc`), pnpm via [corepack](https://github.com/nodejs/corepack)
+(`npm install -g corepack && corepack enable`; Node 25+ no longer bundles it), and Docker for
+the local database.
 
 ```bash
 pnpm install

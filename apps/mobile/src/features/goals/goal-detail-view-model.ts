@@ -1,5 +1,5 @@
 import type { GoalActivityDto, GoalDetailResponseDto, GoalMetadataWrite } from './goals-contract'
-import type { GoalEffectiveStatus } from './goals-view-model'
+import { goalDisplayProgress, type GoalEffectiveStatus } from './goals-view-model'
 
 export type GoalActivityViewModel = Readonly<{
   id: number
@@ -8,7 +8,7 @@ export type GoalActivityViewModel = Readonly<{
   currencyCode: string
   occurredAt: string
   note: string | null
-  /** The funded transaction was dropped by the bank, but this goal still pays for it (#154). */
+  /** The funded transaction was dropped by the bank, but this goal still pays for it. */
   transactionExpired: boolean
 }>
 
@@ -33,6 +33,19 @@ export type GoalDetailViewModel = Readonly<{
   spentAmount: number
   linkedAccounts: readonly { accountId: number; name: string | null }[]
   editable: boolean
+  description: string | null
+  isDebt: boolean
+  /** Web's header progress: the API's percentage clamped 0..100 (`null` when unknowable). */
+  displayProgress: number | null
+  annualInterestRateBps: number | null
+  debtProjection: Readonly<{
+    currentBalance: number
+    monthlyPayment: number
+    months: number | null
+    payoffDate: string | null
+    paysOff: boolean
+    totalInterest: number
+  }> | null
 }>
 
 export function mapGoalDetail(response: GoalDetailResponseDto): GoalDetailViewModel {
@@ -63,6 +76,11 @@ export function mapGoalDetail(response: GoalDetailResponseDto): GoalDetailViewMo
     spentAmount: summary.spentAmount,
     linkedAccounts: goal.accountLinks.map((link) => ({ accountId: link.accountKey.accountKey, name: link.accountKey.accountName })),
     editable: goal.status === 'active' || goal.status === 'paused',
+    description: goal.description?.trim() ? goal.description : null,
+    isDebt: goal.type === 'debt_paydown',
+    displayProgress: goalDisplayProgress(goal.targetAmount, summary),
+    annualInterestRateBps: goal.annualInterestRateBps ?? null,
+    debtProjection: summary.debtProjection ?? null,
   }
 }
 

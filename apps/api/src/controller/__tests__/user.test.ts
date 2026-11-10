@@ -237,12 +237,44 @@ describe('user controller', () => {
         requisitions: [
           {
             ...connection,
+            consentStatus: expect.any(String),
+            daysUntilExpiry: expect.any(Number),
             expiresAt: accessValidUntil,
             institution: { country: 'PT', logoUrl: 'https://logo.example/test-bank.png', name: 'Test Bank' },
             provider: 'EnableBanking',
           },
         ],
       });
+    });
+
+    it('tells the web which Enable Banking consents are expiring and which the bank ended early', async () => {
+      vi.useFakeTimers();
+      vi.setSystemTime(new Date('2026-07-31T12:00:00.000Z'));
+      try {
+        const base = { accounts: [], appuserKey: 1, aspspCountry: 'PT', aspspName: 'Test Bank' };
+        mockFind({
+          accountFinancialInstitutions: [],
+          enableBankingConnections: [
+            { ...base, accessValidUntil: new Date('2026-08-05T12:00:00.000Z'), enableBankingConnectionKey: 7, status: 'linked' },
+            { ...base, accessValidUntil: new Date('2026-12-01T12:00:00.000Z'), enableBankingConnectionKey: 8, status: 'expired' },
+            { ...base, accessValidUntil: new Date('2026-12-01T12:00:00.000Z'), enableBankingConnectionKey: 9, status: 'linked' },
+          ],
+        });
+        const { getRequisitions } = await import('../user');
+        const json = vi.fn();
+
+        await getRequisitions(buildReq(), { json } as unknown as Response);
+
+        expect(json).toHaveBeenCalledWith({
+          requisitions: [
+            expect.objectContaining({ consentStatus: 'expiring', daysUntilExpiry: 5, enableBankingConnectionKey: 7 }),
+            expect.objectContaining({ consentStatus: 'revoked', daysUntilExpiry: 0, enableBankingConnectionKey: 8 }),
+            expect.objectContaining({ consentStatus: 'active', daysUntilExpiry: 123, enableBankingConnectionKey: 9 }),
+          ],
+        });
+      } finally {
+        vi.useRealTimers();
+      }
     });
 
     it('falls back to a null logo when no matching AccountFinancialInstitution row exists', async () => {

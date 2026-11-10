@@ -15,10 +15,10 @@ import { Link } from "@/components/ui/Link";
 import { ObjectHeader } from "@/components/ui/ObjectHeader";
 import type { Goal, GoalSummary } from "@/lib/api/goals/types";
 import {
-  formatGoalCurrency,
   formatGoalDate,
   formatGoalPercentage,
 } from "@/lib/goals/format";
+import { useFormatGoalCurrency } from "@/lib/goals/useFormatGoalCurrency";
 
 function getCurrency(goal: Goal) {
   return (
@@ -48,6 +48,7 @@ export default function GoalDetailHeader({
 }: GoalDetailHeaderProps) {
   const t = useTranslations();
   const locale = useLocale();
+  const formatGoalCurrency = useFormatGoalCurrency();
   const dialogOpenedFromMenu = useRef(false);
   const currency = getCurrency(goal);
   const progress = Math.min(100, Math.max(0, summary.progressPercentage ?? 0));

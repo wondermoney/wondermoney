@@ -25,26 +25,25 @@ import { Badge } from "../../ui/badge";
 import { Button } from "../../ui/button";
 import BankConnectionUnsyncModal from "../../user/BankConnectionUnsyncModal";
 
-/**
- * How close to (or past) `expiresAt` an Enable Banking connection has to be
- * before its row offers a "Reconnect" action (plan §5 — Enable Banking's
- * consent has a real expiry and no separate renew endpoint, so renewing
- * means starting a brand-new connection).
- */
-const RENEWAL_WINDOW_DAYS = 14;
-
 function isEnableBankingRequisition(
   requisition: Requisition,
 ): requisition is EnableBankingRequisition {
   return requisition.provider === "EnableBanking";
 }
 
+/**
+ * An Enable Banking row offers "Reconnect" when the API reads its consent as
+ * ending soon, ended, or ended early by the bank. Enable Banking's consent has
+ * a real expiry and no renew endpoint, so renewing means a brand-new
+ * connection; the API keeps the existing accounts when it links.
+ */
+const RECONNECTABLE_CONSENT = new Set<string>(["expiring", "expired", "revoked"]);
+
 function needsRenewal(requisition: Requisition): boolean {
-  if (!isEnableBankingRequisition(requisition) || !requisition.expiresAt) {
-    return false;
-  }
-  const msUntilExpiry = new Date(requisition.expiresAt).getTime() - Date.now();
-  return msUntilExpiry <= RENEWAL_WINDOW_DAYS * 24 * 60 * 60 * 1000;
+  return (
+    isEnableBankingRequisition(requisition) &&
+    RECONNECTABLE_CONSENT.has(requisition.consentStatus)
+  );
 }
 
 interface ConnectionsTableProps {
@@ -230,6 +229,23 @@ const ConnectionsTable: React.FC<ConnectionsTableProps> = ({ data }) => {
     columnHelper.accessor("status", {
       header: t("status"),
       cell: (info) => {
+        const requisition = info.row.original;
+        if (isEnableBankingRequisition(requisition)) {
+          if (requisition.consentStatus === "revoked") {
+            return (
+              <Badge variant="warning">{t("connection-consent-revoked")}</Badge>
+            );
+          }
+          if (requisition.consentStatus === "expiring") {
+            return (
+              <Badge variant="warning">
+                {t("connection-consent-expiring", {
+                  days: requisition.daysUntilExpiry ?? 0,
+                })}
+              </Badge>
+            );
+          }
+        }
         switch (info.getValue()) {
           case "created":
             return <Badge variant="secondary">{t("created")}</Badge>;

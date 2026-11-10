@@ -7,7 +7,10 @@ import { NextIntlClientProvider } from "next-intl";
 import type { ReactNode } from "react";
 import { afterEach, beforeAll, beforeEach, test, vi } from "vitest";
 
-import { instanceFeatures, queryClientWithInstance } from "@/lib/api/instance/instance-fixture";
+import {
+  instanceFeatures,
+  queryClientWithInstance,
+} from "@/lib/api/instance/instance-fixture";
 
 import enCommon from "../../messages/en/common.json";
 import enNavigation from "../../messages/en/navigation.json";
@@ -22,17 +25,32 @@ const route = vi.hoisted(() => ({ pathname: "/" }));
 vi.mock("@/i18n/navigation", () => ({
   usePathname: () => route.pathname,
   useRouter: () => ({ push: () => {}, replace: () => {}, refresh: () => {} }),
-  Link: ({ href, children, ...props }: { href: string; children: ReactNode }) => (
+  Link: ({
+    href,
+    children,
+    ...props
+  }: {
+    href: string;
+    children: ReactNode;
+  }) => (
     <a href={href} {...props}>
       {children}
     </a>
   ),
 }));
-vi.mock("posthog-js/react", () => ({ usePostHog: () => ({ reset: () => {} }) }));
-vi.mock("@/lib/auth/client", () => ({ authClient: { signOut: async () => {} } }));
-// An ordinary account: not on any staff domain, email unconfirmed.
+vi.mock("posthog-js/react", () => ({
+  usePostHog: () => ({ reset: () => {} }),
+}));
+vi.mock("@/lib/auth/client", () => ({
+  authClient: { signOut: async () => {} },
+}));
 vi.mock("@/lib/auth/user-context", () => ({
-  useUser: () => ({ id: "u1", email: "person@example.com", email_confirmed_at: null }),
+  useUser: () => ({
+    id: "u1",
+    email: "person@example.com",
+    name: "Person Example",
+    email_confirmed_at: null,
+  }),
 }));
 
 beforeAll(() => {
@@ -54,57 +72,160 @@ const locales = [
   { locale: "es", messages: { ...esCommon, ...esNavigation } },
 ] as const;
 
-function renderSidebar(client: QueryClient = queryClientWithInstance(), locale = 0) {
+function renderSidebar(
+  client: QueryClient = queryClientWithInstance(),
+  locale = 0,
+) {
   const { locale: code, messages } = locales[locale];
   const onError = vi.fn();
   render(
     <QueryClientProvider client={client}>
-      <NextIntlClientProvider locale={code} messages={messages} onError={onError}>
+      <NextIntlClientProvider
+        locale={code}
+        messages={messages}
+        onError={onError}
+      >
         <Sidebar />
       </NextIntlClientProvider>
     </QueryClientProvider>,
   );
-  return { nav: screen.getByRole("navigation"), onError };
+  const main = screen.getByRole("navigation", {
+    name: enNavigationLabel(locale),
+  });
+  return { main, onError };
+}
+
+function enNavigationLabel(locale: number) {
+  return locales[locale].messages.navigation["sidebar-nav"];
 }
 
 const nav = enNavigation.navigation;
 
 locales.forEach(({ locale }, index) => {
-  test(`every sidebar entry has a translated label (${locale})`, () => {
-    const { nav: rail, onError } = renderSidebar(queryClientWithInstance(), index);
+  test(`every sidebar destination and group has a translated label (${locale})`, () => {
+    route.pathname = "/accounts/transactions";
+    const { onError } = renderSidebar(queryClientWithInstance(), index);
+    const rail = screen.getByRole("complementary");
 
     // A missing key renders as its own path, e.g. "navigation.credits".
     assert.doesNotMatch(rail.textContent ?? "", /navigation\.[a-z-]+/);
-    assert.equal(onError.mock.calls.length, 0, String(onError.mock.calls[0]?.[0]));
+    assert.equal(
+      onError.mock.calls.length,
+      0,
+      String(onError.mock.calls[0]?.[0]),
+    );
   });
 });
 
-test("an ordinary account sees Loans, Goals and Financial Markets in the rail", () => {
-  const { nav: rail } = renderSidebar();
+test("an ordinary account reaches Loans, Goals and Financial Markets from the sidebar", () => {
+  const { main } = renderSidebar();
 
-  assert.equal(within(rail).getByRole("link", { name: nav.loans }).getAttribute("href"), "/loans");
-  assert.equal(within(rail).getByRole("link", { name: nav.goals }).getAttribute("href"), "/goals");
-  within(rail).getByRole("button", { name: nav["financial-markets"] });
+  assert.equal(
+    within(main).getByRole("link", { name: nav.loans }).getAttribute("href"),
+    "/loans",
+  );
+  assert.equal(
+    within(main).getByRole("link", { name: nav.goals }).getAttribute("href"),
+    "/goals",
+  );
+  assert.equal(
+    within(main)
+      .getByRole("link", { name: nav["financial-markets"] })
+      .getAttribute("href"),
+    "/financial-markets",
+  );
 });
 
-test("an ordinary account sees Bills & subscriptions under Accounts", () => {
-  route.pathname = "/accounts/recurring";
-  const { nav: rail } = renderSidebar();
+test("the destinations sit in the day-to-day, investments and planning groups", () => {
+  const { main } = renderSidebar();
 
-  const bills = within(rail).getByRole("link", { name: nav["bills-subscriptions"] });
-  assert.equal(bills.getAttribute("href"), "/accounts/recurring");
+  const dayToDay = within(main).getByRole("list", {
+    name: nav["group-day-to-day"],
+  });
+  within(dayToDay).getByRole("link", { name: nav.accounts });
+  within(dayToDay).getByRole("link", { name: nav.loans });
+  within(dayToDay).getByRole("link", { name: nav.budgets });
+  const investments = within(main).getByRole("list", {
+    name: nav["group-investments"],
+  });
+  within(investments).getByRole("link", { name: nav.portfolio });
+  const planning = within(main).getByRole("list", {
+    name: nav["group-planning"],
+  });
+  within(planning).getByRole("link", { name: nav.goals });
+  within(planning).getByRole("link", { name: nav.reports });
 });
 
 test("a server without market data drops Financial Markets and nothing else", () => {
-  const { nav: rail } = renderSidebar(queryClientWithInstance(instanceFeatures({ marketData: false })));
+  const { main } = renderSidebar(
+    queryClientWithInstance(instanceFeatures({ marketData: false })),
+  );
 
-  assert.equal(within(rail).queryByRole("button", { name: nav["financial-markets"] }), null);
-  within(rail).getByRole("link", { name: nav.loans });
-  within(rail).getByRole("link", { name: nav.goals });
+  assert.equal(
+    within(main).queryByRole("link", { name: nav["financial-markets"] }),
+    null,
+  );
+  within(main).getByRole("link", { name: nav.loans });
+  within(main).getByRole("link", { name: nav.goals });
 });
 
-test("the rail has no admin visibility control", () => {
-  const { nav: rail } = renderSidebar();
+test("the sidebar marks the destination you are in, and Home only on the home page", () => {
+  route.pathname = "/budgets/1/2026/11";
+  const { main } = renderSidebar();
 
-  assert.equal(within(rail).queryByRole("button", { name: /admin/i }), null);
+  assert.equal(
+    within(main)
+      .getByRole("link", { name: nav.budgets })
+      .getAttribute("aria-current"),
+    "page",
+  );
+  assert.equal(
+    within(main)
+      .getByRole("link", { name: nav.home })
+      .getAttribute("aria-current"),
+    null,
+  );
+});
+
+test("inside Accounts, its pages are listed under it with the current one marked", () => {
+  route.pathname = "/accounts/recurring";
+  const { main } = renderSidebar();
+  const pages = within(main).getByRole("list", { name: nav.accounts });
+
+  const bills = within(pages).getByRole("link", {
+    name: nav["bills-subscriptions"],
+  });
+  assert.equal(bills.getAttribute("href"), "/accounts/recurring");
+  assert.equal(bills.getAttribute("aria-current"), "page");
+  assert.equal(
+    within(pages)
+      .getByRole("link", { name: nav.overview })
+      .getAttribute("aria-current"),
+    null,
+  );
+});
+
+test("outside a section, its pages stay folded away", () => {
+  route.pathname = "/loans";
+  const { main } = renderSidebar();
+
+  assert.equal(within(main).queryByRole("list", { name: nav.accounts }), null);
+  assert.equal(within(main).queryByRole("list", { name: nav.portfolio }), null);
+});
+
+test("Settings and the person's menu sit at the foot, under their name", () => {
+  route.pathname = "/settings/profile";
+  renderSidebar();
+  const rail = screen.getByRole("complementary");
+
+  assert.equal(
+    within(rail)
+      .getByRole("link", { name: enCommon.settings })
+      .getAttribute("aria-current"),
+    "page",
+  );
+  const menu = within(rail).getByRole("button", {
+    name: enCommon["open-user-menu"],
+  });
+  assert.match(menu.textContent ?? "", /Person Example/);
 });

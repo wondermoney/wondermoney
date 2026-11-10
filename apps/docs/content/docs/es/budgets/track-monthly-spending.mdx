@@ -20,6 +20,27 @@ Asegúrate de que el mes está seleccionado correctamente y de que las transacci
 3. Compara el gasto real con el objetivo de la categoría.
 4. Profundiza en cualquier categoría que esté por encima o por debajo de lo esperado.
 
+## Traspasa lo que sobra
+
+Una categoría puede pasar al mes siguiente lo que dejó sin gastar, y también lo que gastó de más. Activa **Traspasar lo que sobra al mes siguiente** al editar la categoría. Igual que un nuevo importe, la opción se aplica al mes que editas y a los meses siguientes.
+
+Con el traspaso activo, cada mes muestra lo que puede gastar: su presupuesto más lo que sobró el mes anterior. Una línea debajo del presupuesto indica «+40 € del mes pasado» o «−25 € de más el mes pasado», y lo usado, lo restante y lo que está por encima del presupuesto se miden frente a ese importe. El traspaso continúa mientras haya meses seguidos con él activo, también de diciembre a enero. Un mes sin traspaso empieza desde su propio presupuesto y no pasa nada al siguiente.
+
+- El importe traspasado se calcula a partir del gasto que muestra el mes, así que editar o recategorizar una transacción antigua lo actualiza al momento.
+- Para traspasar solo el dinero sin gastar, desactiva **Traspasar el gasto de más al mes siguiente** en los ajustes del presupuesto. Un exceso se traspasa entonces como cero.
+- Si el mes anterior tiene una transacción en una moneda que aún no tiene tipo de cambio, el gasto conocido se sigue traspasando y el importe traspasado se marca como posiblemente más alto de lo real hasta que se publique un tipo.
+- Los correos de alerta del presupuesto comparan el gasto con ese mismo importe, presupuesto más traspaso.
+
+## Ver los próximos meses
+
+La página del año del presupuesto termina con una **Previsión** de este mes y de los 3, 6 o 12 meses siguientes. Para cada mes muestra el plan, el importe arrastrado, lo gastado hasta ahora (solo este mes), lo que se espera que se lleven los pagos recurrentes, el gasto esperado, los ingresos previstos y lo que sobra.
+
+- Solo el **Gastado hasta ahora** de este mes es gasto real, hasta la fecha que indica la previsión. Los meses siguientes no tienen gasto y muestran un guion; todas las demás cifras son proyecciones.
+- Los pagos recurrentes vienen de **Facturas y suscripciones**: los confirmados y los detectados con confianza alta, cuando su categoría está en el presupuesto y se pagan desde una de las cuentas del presupuesto. Cada uno se coloca en las fechas que prevé su calendario, a partir de hoy. Un pago en otra moneda se convierte al tipo de cambio más reciente; uno sin tipo se deja fuera y el mes se marca como incompleto.
+- El **Gasto esperado** es el plan de cada categoría, o más cuando lo gastado y los pagos recurrentes por venir ya lo superan. **Sobrante** son los ingresos previstos menos esa cifra.
+- Con el arrastre activado, este mes empieza con el importe que arrastra. Un mes que se espera que supere su plan pasa el exceso al siguiente cuando el presupuesto arrastra el gasto por encima del plan.
+- La previsión llega al año siguiente con el presupuesto de ese año, copiado de diciembre.
+
 ## Revisión
 
 Busca patrones, no solo picos puntuales. Si una categoría está siempre por encima del objetivo, el presupuesto puede necesitar un límite más alto o una división de categorías diferente.
@@ -30,6 +51,7 @@ Busca patrones, no solo picos puntuales. Si una categoría está siempre por enc
 - El mes seleccionado no coincide con el periodo del extracto.
 - Un reembolso hace que el total parezca más bajo de lo esperado.
 - Una transacción grande oculta el patrón mensual normal.
+- Una transacción en una moneda que aún no tiene tipo de cambio queda fuera de los totales. Una nota debajo de los totales, aquí y en la página de inicio, indica cuántas transacciones quedaron fuera y en qué monedas. Se cuentan en cuanto se publica un tipo.
 
 
 ## Enlaces relacionados

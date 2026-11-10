@@ -13,6 +13,10 @@ export class EmailNotificationPreference extends Base {
   @Unique({ name: 'email_notification_preference_appuser_key_unique' })
   appuserKey!: Rel<Appuser>;
 
+  /** Bank connection alerts: consent ending, ended by the bank, or syncs failing (`services/bank-sync-alerts`). */
+  @Property({ default: true })
+  bankSyncAlertsEnabled = true;
+
   @Property({ default: true })
   budgetAlertsEnabled = true;
 

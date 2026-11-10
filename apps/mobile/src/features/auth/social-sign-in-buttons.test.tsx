@@ -52,7 +52,7 @@ describe('SocialSignInButtons', () => {
     const google = StyleSheet.flatten(view.getByTestId('social-sign-in-google').props.style)
     expect(apple.height).toBe(google.height)
     expect(apple.width).toBe(google.width)
-    expect(apple.height).toBeGreaterThanOrEqual(48)
+    expect(apple.height).toBeGreaterThanOrEqual(44)
   })
 
   it('offers Google alone on platforms without Sign in with Apple', async () => {

@@ -7,11 +7,13 @@ import { mapPortfolioDividendIncome } from './portfolio-activity-view-model'
 import { PortfolioDetailScreen, type PortfolioDetailViewState, type PortfolioDividendIncomeSectionState } from './portfolio-detail-screen'
 import type { PortfolioPerformanceState } from './portfolio-performance-chart'
 import { mapPortfolioPerformance } from './portfolio-performance-view-model'
-import { parsePortfolioId, type PortfolioPerformancePeriod } from './portfolios-contract'
+import { createPortfolioAllocationEndpoint, createPortfolioTopMoversEndpoint, parsePortfolioId, type PortfolioPerformancePeriod } from './portfolios-contract'
 import { mapPortfolioDetail } from './portfolios-view-model'
 import { usePortfolioDetail } from './use-portfolio-detail'
 import { usePortfolioDividendIncome } from './use-portfolio-dividend-income'
 import { usePortfolioPerformance } from './use-portfolio-performance'
+import { portfolioAllocationKey, portfolioTopMoversKey } from './query-keys'
+import { usePortfolioResource } from './use-portfolio-resource'
 
 export function PortfolioDetailRoute() {
   const params = useLocalSearchParams<{ portfolioId?: string | string[] }>()
@@ -20,6 +22,9 @@ export function PortfolioDetailRoute() {
   const [period, setPeriod] = useState<PortfolioPerformancePeriod>('YTD')
   const performanceQuery = usePortfolioPerformance(portfolioId, period)
   const dividendIncomeQuery = usePortfolioDividendIncome(portfolioId)
+  const allocation = usePortfolioResource((epoch) => portfolioAllocationKey(epoch, portfolioId ?? 0), () => createPortfolioAllocationEndpoint(portfolioId!), portfolioId !== null)
+  // Web's detail page has no period select: its top movers, like its summary, are YTD.
+  const topMovers = usePortfolioResource((epoch) => portfolioTopMoversKey(epoch, portfolioId ?? 0, 'YTD'), () => createPortfolioTopMoversEndpoint(portfolioId!, 'YTD'), portfolioId !== null)
   const router = useRouter()
   const { signOut } = useProductRuntime()
   let state: PortfolioDetailViewState
@@ -52,13 +57,15 @@ export function PortfolioDetailRoute() {
     state={state}
     performance={{ state: performanceState, period, onSelectPeriod: setPeriod }}
     dividendIncome={dividendIncomeState}
-     onBack={() => { if (router.canGoBack()) router.back(); else router.replace('/portfolio') }}
+    allocation={allocation.state}
+    topMovers={topMovers.state}
+    onBack={() => { if (router.canGoBack()) router.back(); else router.replace('/portfolio') }}
     onOpenSettings={() => portfolioId !== null && router.push(`/portfolio/${portfolioId}/settings`)}
     onOpenActivity={() => portfolioId !== null && router.push(`/portfolio/${portfolioId}/activity`)}
     onOpenImport={() => portfolioId !== null && router.push(`/portfolio/${portfolioId}/import`)}
     onOpenAddTransaction={() => portfolioId !== null && router.push(`/portfolio/${portfolioId}/transaction-create`)}
     onOpenHolding={(assetId) => portfolioId !== null && router.push(`/portfolio/${portfolioId}/holding/${assetId}`)}
-    onRefresh={query.refetch}
+    onRefresh={async () => { await Promise.all([query.refetch(), allocation.refetch(), topMovers.refetch(), dividendIncomeQuery.refetch(), performanceQuery.refetch()]) }}
     onLogout={signOut}
   />
 }

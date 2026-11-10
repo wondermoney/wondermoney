@@ -62,6 +62,13 @@ describe('classifyBankSyncError', () => {
     expect(classifyBankSyncError(new Error('boom'), { permanentErrorNames: [] })).toEqual({ code: 'internal', isPermanent: false });
   });
 
+  it('classifies a provider rate limit as rate_limited, not permanent, and keeps Retry-After', () => {
+    const limited = Object.assign(new Error('slow down'), { name: 'TooManyRequestsError', retryAfter: 3600, status: 429 });
+    expect(classifyBankSyncError(limited, { permanentErrorNames: PERMANENT_AUTO })).toEqual({ code: 'rate_limited', isPermanent: false, retryAfterSeconds: 3600 });
+    const noHint = Object.assign(new Error('slow down'), { status: 429 });
+    expect(classifyBankSyncError(noHint, { permanentErrorNames: [] })).toEqual({ code: 'rate_limited', isPermanent: false });
+  });
+
   it('applies auto-sync extra codes for credential failures', () => {
     const credError = new Error('cred invalid');
     credError.name = 'EnableBankingCredentialInvalidError';
@@ -149,6 +156,50 @@ describe('runBankSyncPhases', () => {
       transactionService: h.transactionService,
     });
     expect(result.status).toBe('partial');
+  });
+
+  it('stops after a rate-limited account phase, even a partial one, and reports the rate limit', async () => {
+    const h = harness();
+    h.accountService.syncAccountsForRequisition.mockResolvedValueOnce({ rateLimited: { retryAfterSeconds: 120 }, status: 'partial' });
+    const result = await runBankSyncPhases({
+      accountService: h.accountService,
+      correlationId,
+      enableBankingConnectionKey: key,
+      fetchWindowDays: 5,
+      queueJobId,
+      transactionService: h.transactionService,
+    });
+    expect(result).toMatchObject({ failedAt: 'account', rateLimited: { retryAfterSeconds: 120 }, status: 'partial' });
+    expect(h.transactionService.syncTransactionsForRequisition).not.toHaveBeenCalled();
+  });
+
+  it('reports a rate-limited transaction phase', async () => {
+    const h = harness();
+    h.accountService.syncAccountsForRequisition.mockResolvedValueOnce({ status: 'completed' });
+    h.transactionService.syncTransactionsForRequisition.mockResolvedValueOnce({ rateLimited: {}, status: 'failed' });
+    const result = await runBankSyncPhases({
+      accountService: h.accountService,
+      correlationId,
+      enableBankingConnectionKey: key,
+      fetchWindowDays: 5,
+      queueJobId,
+      transactionService: h.transactionService,
+    });
+    expect(result).toMatchObject({ failedAt: 'transaction', rateLimited: {}, status: 'failed' });
+  });
+
+  it('reports when the failed phase had every account rejected', async () => {
+    const h = harness();
+    h.accountService.syncAccountsForRequisition.mockResolvedValueOnce({ everyAccountRejected: true, status: 'failed' });
+    const result = await runBankSyncPhases({
+      accountService: h.accountService,
+      correlationId,
+      enableBankingConnectionKey: key,
+      fetchWindowDays: 5,
+      queueJobId,
+      transactionService: h.transactionService,
+    });
+    expect(result).toMatchObject({ everyAccountRejected: true, failedAt: 'account', status: 'failed' });
   });
 
   it('runs prePhase before the account phase', async () => {

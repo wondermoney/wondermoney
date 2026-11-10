@@ -1,9 +1,14 @@
-import { useQuery, type UseQueryOptions } from "@tanstack/react-query";
+import {
+  useQueries,
+  useQuery,
+  type UseQueryOptions,
+} from "@tanstack/react-query";
 import type { AxiosInstance } from "axios";
 
 import type { SupportedCurrencyCodes } from "@/lib/utils/currencySymbol";
 
 import api from "../api";
+import type { AmountsCompleteness } from "../completeness";
 
 export interface BudgetCategory {
   child_category_name: string | null;
@@ -19,6 +24,23 @@ export interface BudgetCategory {
   category_text_color: string;
   category_bg_color: string;
   category_key: number;
+  /**
+   * Rollover fields: sent by the month endpoints (`/:year/:month`, `/full`),
+   * absent from the year endpoint.
+   *
+   * What last month left over (negative when it overspent); 0 when rollover is
+   * off or nothing carries. A parent row sums its subcategories'.
+   */
+  category_rolled_over?: number;
+  /** `category_budgeted_amount + category_rolled_over`, on the raw (entered) amount. */
+  category_available?: number;
+  /** Rollover is on (a parent row: for any of its subcategories). */
+  category_rollover_enabled?: boolean;
+  /**
+   * The carry rests on a month with spending that could not be converted to
+   * the budget's currency, so it may be too high.
+   */
+  category_rollover_incomplete?: boolean;
 }
 
 export type BudgetIncome = {
@@ -40,12 +62,18 @@ export interface TemplateBudget {
   }[];
   categories: BudgetCategory[];
   incomes: BudgetIncome[];
+  /** Overspending carries into the next month (off: only unspent money does). */
+  rolloverCarriesOverspend?: boolean;
 }
 
 export interface GetBudgetTemplateByYearAndMonthResponse {
   hasPreviousMonth: boolean;
   hasNextMonth: boolean;
   budget: TemplateBudget;
+  /** False when a carried amount rests on spending that could not be converted. */
+  rolloverComplete?: boolean;
+  /** Rows with no amount in the budget's currency, left out of the spending. */
+  completeness?: AmountsCompleteness;
 }
 
 export interface GetBudgetTemplateByYearAndMonthRequest {
@@ -64,6 +92,13 @@ export async function getBudgetTemplateByYearAndMonth(
   return data;
 }
 
+const budgetTemplateByYearAndMonthKey = ({
+  budgetKey,
+  month,
+  year,
+}: GetBudgetTemplateByYearAndMonthRequest) =>
+  ["budget-template-year-month", budgetKey, month, year] as const;
+
 export default function useBudgetTemplateByYearAndMonth<
   R = GetBudgetTemplateByYearAndMonthResponse,
 >(
@@ -74,13 +109,24 @@ export default function useBudgetTemplateByYearAndMonth<
   >,
 ) {
   return useQuery({
-    queryKey: [
-      "budget-template-year-month",
-      params.budgetKey,
-      params.month,
-      params.year,
-    ],
+    queryKey: budgetTemplateByYearAndMonthKey(params),
     queryFn: () => getBudgetTemplateByYearAndMonth(params),
     ...options,
+  });
+}
+
+/**
+ * One month of several budgets, fetched in parallel under the same keys as
+ * {@link useBudgetTemplateByYearAndMonth}, so a budget's month screen opens
+ * from the cache this fills. The results keep the order of `params`.
+ */
+export function useBudgetTemplatesByYearAndMonth(
+  params: GetBudgetTemplateByYearAndMonthRequest[],
+) {
+  return useQueries({
+    queries: params.map((request) => ({
+      queryKey: budgetTemplateByYearAndMonthKey(request),
+      queryFn: () => getBudgetTemplateByYearAndMonth(request),
+    })),
   });
 }

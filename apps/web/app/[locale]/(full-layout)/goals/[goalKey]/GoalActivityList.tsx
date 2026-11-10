@@ -2,18 +2,19 @@ import type { UseQueryResult } from "@tanstack/react-query";
 import { TriangleAlert } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 
-import { Card } from "@/components/ui/card";
 import { Timeline } from "@/components/ui/Timeline";
 import type {
   GetGoalActivityResponse,
   GoalActivity,
 } from "@/lib/api/goals/types";
-import { formatGoalCurrency, formatGoalDate } from "@/lib/goals/format";
+import { formatGoalDate } from "@/lib/goals/format";
+import { useFormatGoalCurrency } from "@/lib/goals/useFormatGoalCurrency";
 
 function formatActivityAmount(
   activity: GoalActivity,
   locale: string,
-  fallbackCurrencyCode?: string,
+  fallbackCurrencyCode: string | undefined,
+  formatGoalCurrency: ReturnType<typeof useFormatGoalCurrency>,
 ) {
   if (activity.amount == null) return null;
   const currency =
@@ -32,22 +33,23 @@ export default function GoalActivityList({
 }) {
   const t = useTranslations();
   const locale = useLocale();
+  const formatGoalCurrency = useFormatGoalCurrency();
   if (activityQuery.isLoading)
     return (
-      <Card className="text-muted-foreground p-6 text-sm">
+      <section className="border-foreground text-muted-foreground border-t-2 pt-4 text-sm">
         {t("goals.activity")}
-      </Card>
+      </section>
     );
   if (activityQuery.isError)
     return (
-      <Card className="text-muted-foreground p-6 text-sm">
+      <section className="border-foreground text-muted-foreground border-t-2 pt-4 text-sm">
         {t("server-error")}
-      </Card>
+      </section>
     );
   const activities = activityQuery.data?.activities ?? [];
   return (
-    <Card className="space-y-4 p-6">
-      <h2 className="text-foreground text-sm font-semibold">
+    <section className="border-foreground space-y-4 border-t-2 pt-4">
+      <h2 className="text-foreground text-lg font-semibold tracking-tight">
         {t("goals.activity")}
       </h2>
       {/* A rail rather than rules between rows: this is a sequence of things
@@ -61,7 +63,7 @@ export default function GoalActivityList({
             emphasis: index === 0,
             title: t(`goals.goal-activity-${activity.type}`),
             timestamp: formatGoalDate(activity.occurredAt, locale),
-            // #151: the funded transaction was retracted by the bank but the goal still pays
+            // The funded transaction was retracted by the bank but the goal still pays
             // for it. Text plus an icon, never colour alone. There is no reversal action in the
             // web UI yet, so this only warns.
             description: activity.transactionExpired ? (
@@ -78,6 +80,7 @@ export default function GoalActivityList({
                 activity,
                 locale,
                 currencyCode,
+                formatGoalCurrency,
               );
               return amount ? (
                 <p className="text-foreground font-mono text-sm whitespace-nowrap tabular-nums">
@@ -92,6 +95,6 @@ export default function GoalActivityList({
           {t("goals.activity-empty")}
         </p>
       )}
-    </Card>
+    </section>
   );
 }

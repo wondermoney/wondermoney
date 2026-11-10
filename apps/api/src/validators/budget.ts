@@ -12,8 +12,10 @@ const budgetCategoryAmountErrorMessage = `Amount must be ${MAX_BUDGET_CATEGORY_A
 export const updateBudgetRequestSchema = z.object({
   body: z.object({
     description: z.string().max(500).optional(),
-    name: z.string().min(1).max(100),
-  }),
+    // Optional so a settings toggle can be saved alone; with a name, the description is replaced too.
+    name: z.string().min(1).max(100).optional(),
+    rolloverCarriesOverspend: z.boolean().optional(),
+  }).refine((body) => body.name !== undefined || body.rolloverCarriesOverspend !== undefined, { message: 'Nothing to update' }),
   params: z.object({
     budgetKey: z.coerce.number().positive(),
   }),
@@ -75,6 +77,16 @@ export const updateBudgetTemplateRequestSchema = z.object({
   }),
 });
 
+/** A forecast covers the current month and the ones after it: 3 to 12 months in all. */
+export const getBudgetForecastRequestSchema = z.object({
+  params: z.object({
+    budgetKey: z.coerce.number().positive(),
+  }),
+  query: z.object({
+    months: z.coerce.number().int().min(3).max(12).default(6),
+  }),
+});
+
 export const getBudgetTemplateByYearAndMonthRequestSchema = z.object({
   params: z.object({
     budgetKey: z.coerce.number().positive(),
@@ -103,6 +115,7 @@ export const updateBudgetCategoryAmountRequestSchema = z.object({
     amount: z.coerce.number().positive().max(MAX_BUDGET_CATEGORY_AMOUNT, { message: budgetCategoryAmountErrorMessage }).optional(),
     applyToFollowingMonths: z.boolean().optional().default(true),
     recurrency: z.enum(Recurrency).optional(),
+    rolloverEnabled: z.boolean().optional(),
   }),
   params: z.object({
     budgetKey: z.coerce.number().positive(),

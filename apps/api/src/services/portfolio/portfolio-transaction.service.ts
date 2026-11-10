@@ -29,6 +29,7 @@ import historicalAssetPriceBackfillClient, { type HistoricalAssetPriceBackfillIt
 import { type HoldingTransactionTimelineItem, replayHoldingTimeline, type StockSplitTimelineItem } from './portfolio-holdings.utils.js';
 import portfolioSnapshotService from './portfolio-snapshot.service.js';
 import { applyUserCurrencyConversion, resolveUserCurrencyConversion } from './portfolio-transaction-conversion.js';
+import { portfolioWriteScope } from './portfolio-write-scope.js';
 import { syncStockSplitsForAsset } from './stock-split-sync.service.js';
 
 interface CreateTransactionParams {
@@ -376,16 +377,16 @@ class PortfolioTransactionService {
 
   private async validateTransactionTimelineDoesNotOversell(
     entityManager: EntityManager,
-    appuser: Appuser,
     portfolioId: number,
     financialAsset: FinancialAsset,
     proposedTransaction?: QuantityValidationTransaction,
     excludedTransactionKey?: number,
   ): Promise<void> {
+    // Every member's rows in the portfolio: the caller has already authorised the portfolio,
+    // and a household portfolio's holdings are the sum of what both members recorded.
     const existingTransactions = await entityManager.find(
       FinancialTransaction,
       {
-        appuserKey: appuser,
         deletedAt: undefined,
         financialAssetKey: financialAsset,
         portfolioKey: { portfolioKey: portfolioId },
@@ -520,26 +521,32 @@ class PortfolioTransactionService {
       unitPrice,
     } = params;
 
-    // Validate and fetch app user tenant
+    // Validate and fetch app user tenant. With a tenant, the writer must still be an active
+    // member of it (a partner who left keeps no write access, even from a queued import).
     const appUserTenantCriteria: Record<string, unknown> = { appuserKey: appuser, deletedAt: undefined };
-    if (tenantId !== undefined) appUserTenantCriteria['tenantKey'] = tenantId;
+    if (tenantId !== undefined) {
+      appUserTenantCriteria['tenantKey'] = tenantId;
+      appUserTenantCriteria['recordActive'] = true;
+    }
     const appUserTenant = await em.findOne(AppuserTenant, appUserTenantCriteria);
     if (!appUserTenant) {
       throw new NotFoundError('App user tenant not found');
     }
 
-    // Validate and fetch portfolio
-    const portfolioCriteria: Record<string, unknown> = {
+    // Validate and fetch portfolio: any of the household's with a tenant, else the writer's own.
+    const portfolio = await em.findOne(Portfolio, {
       closedAt: undefined,
       deletedAt: undefined,
       portfolioKey: portfolioId,
-      portfolioOwnerAppuserKey: appuser,
-    };
-    if (tenantId !== undefined) portfolioCriteria['tenantKey'] = tenantId;
-    const portfolio = await em.findOne(Portfolio, portfolioCriteria);
+      ...portfolioWriteScope(appuser, tenantId),
+    }, { populate: ['portfolioOwnerAppuserKey.currencyKey'] });
     if (!portfolio) {
       throw new NotFoundError('Portfolio not found');
     }
+    // A portfolio's transactions belong to its owner, whoever in the household records them:
+    // its converted amounts and snapshots are kept in the owner's currency, and the
+    // owner-scoped worker reads (snapshots, price refresh) must see every row.
+    const portfolioOwner = portfolio.portfolioOwnerAppuserKey;
 
     // Resolve financial asset — creates it on demand from EODHD if not yet in DB
     const financialAsset = providedFinancialAsset ?? await resolveOrCreateFinancialAsset(assetSymbol, { skipStockSplitSync: true, ...(entityManager ? { em } : {}) });
@@ -604,7 +611,7 @@ class PortfolioTransactionService {
 
     // Create transaction
     const financialTransaction = new FinancialTransaction();
-    financialTransaction.appuserKey = appuser;
+    financialTransaction.appuserKey = portfolioOwner;
     financialTransaction.tenantKey = appUserTenant.tenantKey;
     financialTransaction.portfolioKey = portfolio;
     financialTransaction.financialAssetKey = financialAsset;
@@ -647,13 +654,13 @@ class PortfolioTransactionService {
     }
 
     // Convert to the user's currency at the latest rate on or before the trade date.
-    applyUserCurrencyConversion(financialTransaction, await resolveUserCurrencyConversion(em, financialTransaction, appuser.currencyKey));
+    applyUserCurrencyConversion(financialTransaction, await resolveUserCurrencyConversion(em, financialTransaction, portfolioOwner.currencyKey));
 
     try {
       await em.transactional(async (txEm) => {
         if (financialTransactionType.financialTransactionTypeKey === FINANCIAL_TRANSACTION_TYPES.SELL) {
           await this.lockPortfolioAssetTransactionTimeline(txEm, portfolioId, financialAsset);
-          await this.validateTransactionTimelineDoesNotOversell(txEm, appuser, portfolioId, financialAsset, {
+          await this.validateTransactionTimelineDoesNotOversell(txEm, portfolioId, financialAsset, {
             financialTransactionTypeKey: financialTransactionType,
             quantity: normalizedQuantity,
             transactionDate,
@@ -711,7 +718,9 @@ class PortfolioTransactionService {
   }
 
   /**
-   * Update an existing portfolio transaction
+   * Update an existing portfolio transaction. With `tenantKey` (request paths) any household
+   * member may edit a transaction on any of the tenant's portfolios; without it, only on
+   * portfolios the user owns.
    */
   async updatePortfolioTransaction(
     appuser: Appuser,
@@ -719,16 +728,13 @@ class PortfolioTransactionService {
     transactionId: number,
     params: UpdateTransactionParams,
     deps: { enqueue: Enqueue },
+    tenantKey?: number,
   ): Promise<void> {
     // Fetch existing transaction
     const transaction = await DI.em.findOne(
       FinancialTransaction,
-      {
-        deletedAt: undefined,
-        portfolioKey: { portfolioKey: portfolioId },
-        transactionKey: transactionId,
-      },
-      { populate: ['financialAssetKey', 'financialTransactionTypeKey', 'portfolioKey'] },
+      this.writableTransactionCriteria(appuser, portfolioId, transactionId, tenantKey),
+      { populate: ['appuserKey.currencyKey', 'financialAssetKey', 'financialTransactionTypeKey', 'portfolioKey'] },
     );
 
     if (!transaction) {
@@ -858,15 +864,15 @@ class PortfolioTransactionService {
 
     // Recalculate user currency conversion if needed. With nothing to convert (settled in the
     // user's currency) or no rate, the converted amounts are cleared rather than left over from
-    // the transaction's previous currency, price or date.
-    applyUserCurrencyConversion(transaction, await resolveUserCurrencyConversion(DI.em, transaction, appuser.currencyKey));
+    // the transaction's previous currency, price or date. The amounts are in the currency of
+    // the row's own app user (holdings read them against it), not the editor's.
+    applyUserCurrencyConversion(transaction, await resolveUserCurrencyConversion(DI.em, transaction, transaction.appuserKey?.currencyKey ?? appuser.currencyKey));
 
     if (transaction.financialAssetKey) {
       await DI.em.transactional(async (entityManager) => {
         await this.lockPortfolioAssetTransactionTimeline(entityManager, portfolioId, transaction.financialAssetKey!);
         await this.validateTransactionTimelineDoesNotOversell(
           entityManager,
-          appuser,
           portfolioId,
           transaction.financialAssetKey!,
           {
@@ -921,16 +927,12 @@ class PortfolioTransactionService {
   }
 
   /**
-   * Delete (soft delete) a portfolio transaction
+   * Delete (soft delete) a portfolio transaction, scoped like `updatePortfolioTransaction`.
    */
-  async deletePortfolioTransaction(appuser: Appuser, portfolioId: number, transactionId: number): Promise<void> {
+  async deletePortfolioTransaction(appuser: Appuser, portfolioId: number, transactionId: number, tenantKey?: number): Promise<void> {
     const transaction = await DI.em.findOne(
       FinancialTransaction,
-      {
-        deletedAt: undefined,
-        portfolioKey: { portfolioKey: portfolioId },
-        transactionKey: transactionId,
-      },
+      this.writableTransactionCriteria(appuser, portfolioId, transactionId, tenantKey),
       { populate: ['financialAssetKey'] },
     );
 
@@ -943,7 +945,6 @@ class PortfolioTransactionService {
         await this.lockPortfolioAssetTransactionTimeline(entityManager, portfolioId, transaction.financialAssetKey!);
         await this.validateTransactionTimelineDoesNotOversell(
           entityManager,
-          appuser,
           portfolioId,
           transaction.financialAssetKey!,
           undefined,
@@ -959,6 +960,20 @@ class PortfolioTransactionService {
 
     // Update portfolio snapshots from the earliest transaction
     await this.refreshSnapshotsFromDate(portfolioId, transaction.transactionDate);
+  }
+
+  /**
+   * A live transaction on a portfolio the user may write to. The tenant is matched on both the
+   * transaction and its portfolio, as the holdings reads do, so a row with a stale tenant key
+   * is not writable from the other household.
+   */
+  private writableTransactionCriteria(appuser: Appuser, portfolioId: number, transactionId: number, tenantKey?: number) {
+    return {
+      deletedAt: undefined,
+      portfolioKey: { deletedAt: undefined, portfolioKey: portfolioId, ...portfolioWriteScope(appuser, tenantKey) },
+      transactionKey: transactionId,
+      ...(tenantKey == null ? {} : { tenantKey: { tenantKey } }),
+    };
   }
 }
 

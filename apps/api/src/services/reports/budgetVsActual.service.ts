@@ -3,13 +3,14 @@ import { startOfMonth } from 'date-fns';
 import { DI } from '@app/database/di';
 import { Budget } from '@entity/Budget';
 import { BudgetTemplateCategory } from '@entity/BudgetTemplateCategory';
-import { LoanRepaymentLink } from '@entity/LoanRepaymentLink';
 import { Transaction } from '@entity/Transaction';
-import { calculateEffectiveSpendingAmount } from '@service/loan/loan-spending-adjustment.service';
-import { filterExpenseTransactions, getEffectiveAppuserAmount } from '@utils/account-amounts';
+import { CATEGORY_LINE_POPULATE, spendingLinesOf } from '@service/transaction/category-lines';
+import { loadCategorySpendingFlags } from '@service/transaction/category-spending';
+import { addMoney } from '@utils/money';
 
 import { round2, toCsv } from './csv';
-import { buildTransactionWhere, type ReportServiceInput, transactionMatchesCategoryKeys } from './report-filters';
+import { isMoneyOut, loadLoanRepaymentLinks, loadReportCurrencyAmounts, loadViewerCurrencyAmounts, REPORT_CURRENCY_POPULATE, type ReportResult } from './report-currency';
+import { buildTransactionWhere, lineMatchesCategoryKeys, type ReportServiceInput } from './report-filters';
 import { getMonthKey, resolveReportTimeZone } from './report-months';
 
 export interface BudgetVsActualRow {
@@ -22,26 +23,23 @@ export interface BudgetVsActualRow {
   variance: number;
 }
 
-const CATEGORY_POPULATE = [
-  'appuserTransactionCategories.categoryKey',
-  'appuserTransactionCategories.categoryKey.parentCategory',
-  'appuserCurrencyKey',
-] as const;
+const CATEGORY_POPULATE = [...CATEGORY_LINE_POPULATE, ...REPORT_CURRENCY_POPULATE] as const;
 
-export async function getBudgetVsActualReport(input: ReportServiceInput): Promise<BudgetVsActualRow[]> {
+export async function getBudgetVsActualReport(input: ReportServiceInput): Promise<ReportResult<BudgetVsActualRow[]>> {
   const { filters, tenant, user } = input;
 
   // Budgets are household-shared: tenant-scoped.
-  const budgets = await DI.em.find(Budget, { deletedAt: undefined, tenantKey: tenant });
-  if (budgets.length === 0) return [];
+  const budgets = await DI.em.find(Budget, { deletedAt: undefined, tenantKey: tenant }, { populate: ['currencyKey'] });
   const budget = budgets[0];
+  if (!budget) return { completeness: (await loadViewerCurrencyAmounts(DI.em, user, [])).completeness(), data: [] };
+  const nothingToReport = async () => ({ completeness: (await loadReportCurrencyAmounts(DI.em, budget.currencyKey.code, [])).completeness(), data: [] });
 
   const templates = await DI.em.find(
     BudgetTemplateCategory,
     { budgetKey: budget },
     { populate: ['categoryKey', 'accounts'] },
   );
-  if (templates.length === 0) return [];
+  if (templates.length === 0) return nothingToReport();
 
   const fromDate = filters.fromDate ? new Date(filters.fromDate) : startOfMonth(new Date());
   const toDate = filters.toDate ? new Date(filters.toDate) : new Date();
@@ -64,7 +62,7 @@ export async function getBudgetVsActualReport(input: ReportServiceInput): Promis
   }
   // No budget rows overlap the requested period: return an empty dataset rather
   // than erroring, so the web layer can render its "set up a budget" empty state.
-  if (budgetedByCategory.size === 0) return [];
+  if (budgetedByCategory.size === 0) return nothingToReport();
 
   const where = buildTransactionWhere(filters, tenant, user);
   if (budgetAccountKeys.size > 0) {
@@ -73,33 +71,30 @@ export async function getBudgetVsActualReport(input: ReportServiceInput): Promis
   }
 
   const transactions = await DI.em.find(Transaction, where, { populate: CATEGORY_POPULATE });
-
-  const loanRepaymentLinks = await DI.em.find(LoanRepaymentLink, {
-    deletedAt: undefined,
-    tenantKey: tenant,
-    transactionKey: { $in: transactions },
-  });
-  const loanRepaymentLinkMap = new Map<number, LoanRepaymentLink[]>();
-  for (const link of loanRepaymentLinks) {
-    const transactionKey = link.transactionKey.transactionKey;
-    const current = loanRepaymentLinkMap.get(transactionKey);
-    if (current) current.push(link);
-    else loanRepaymentLinkMap.set(transactionKey, [link]);
-  }
+  const repayments = await loadLoanRepaymentLinks(DI.em, tenant, transactions);
+  // The budgeted amounts are in the budget's currency, so the actual spending is too, whoever views
+  // it (as on the budget pages).
+  const amounts = await loadReportCurrencyAmounts(DI.em, budget.currencyKey.code, transactions, repayments);
+  const spendingFlags = await loadCategorySpendingFlags(DI.em, tenant.tenantKey);
 
   const categoryKeysFilter = filters.categoryKeys;
   const actualByCategory = new Map<number, number>();
-  for (const transaction of filterExpenseTransactions(transactions)) {
-    if (categoryKeysFilter !== undefined && !transactionMatchesCategoryKeys(transaction, categoryKeysFilter)) continue;
-    const assignedCategory = transaction.appuserTransactionCategories.getItems()[0]?.categoryKey;
-    if (!assignedCategory) continue;
-    const budgetCategoryKey = resolveBudgetCategoryKey(budgetedByCategory, assignedCategory);
-    if (budgetCategoryKey === null) continue;
-    const effectiveAmount = calculateEffectiveSpendingAmount({
-      loanRepaymentLinks: loanRepaymentLinkMap.get(transaction.transactionKey) ?? [],
-      transactionAmount: getEffectiveAppuserAmount(transaction),
-    });
-    actualByCategory.set(budgetCategoryKey, (actualByCategory.get(budgetCategoryKey) ?? 0) + Math.abs(effectiveAmount));
+  for (const transaction of transactions.filter(isMoneyOut)) {
+    // Each line of a split counts towards its own category's budget; with a category filter, only
+    // the matching lines count. A line in a category that is not spending is left out.
+    const budgetedLines = spendingLinesOf(transaction, null, spendingFlags).filter((line) => line.category !== null && lineMatchesCategoryKeys(line, categoryKeysFilter) && resolveBudgetCategoryKey(budgetedByCategory, line.category) !== null);
+    if (budgetedLines.length === 0) continue;
+    // In the budget's currency (a loan repayment by its interest and fees, from the loan's
+    // currency); a row with no converted amount, or no rate into the budget's currency, is left
+    // out and counted.
+    const effectiveAmount = amounts.spendingAmountOf(transaction, repayments.get(transaction.transactionKey) ?? []);
+    if (effectiveAmount === null) continue;
+    for (const line of spendingLinesOf(transaction, effectiveAmount, spendingFlags)) {
+      if (line.category === null || !lineMatchesCategoryKeys(line, categoryKeysFilter)) continue;
+      const budgetCategoryKey = resolveBudgetCategoryKey(budgetedByCategory, line.category);
+      if (budgetCategoryKey === null) continue;
+      actualByCategory.set(budgetCategoryKey, addMoney(actualByCategory.get(budgetCategoryKey) ?? 0, Math.abs(line.amount ?? 0)));
+    }
   }
 
   const rows = [...budgetedByCategory.entries()]
@@ -119,7 +114,7 @@ export async function getBudgetVsActualReport(input: ReportServiceInput): Promis
     })
     .sort((a, b) => b.budgeted - a.budgeted);
 
-  return rows;
+  return { completeness: amounts.completeness(), data: rows };
 }
 
 /**

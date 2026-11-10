@@ -1,18 +1,28 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Pressable, ScrollView, StyleSheet, Text, TextInput, useColorScheme, View } from 'react-native'
-import { SafeAreaView } from 'react-native-safe-area-context'
+import { ActivityIndicator, ScrollView, StyleSheet, View } from 'react-native'
 
 import { BackControl } from '@/components/ui/back-control'
+import { Button } from '@/components/ui/button'
+import { DateField } from '@/components/ui/date-field'
+import { PageHeader } from '@/components/ui/page-header'
+import { SafeAreaView } from '@/components/ui/screen-safe-area'
+import { Text } from '@/components/ui/text'
 import type { AccountSummaryViewModel } from '@/features/accounts/accounts-view-model'
-import { themeTokens, type Palette } from '@/theme/tokens'
-import { textStyles } from '@/theme/typography'
+import { formatNumberInput, parseDecimalInput } from '@/lib/formatters/decimal-input'
+import { themeTokens } from '@/theme/tokens'
+import { usePalette } from '@/theme/use-palette'
+
+import { FormNotice, TextField } from './form-field'
 
 import type { SettlementCurrencyDto, TransactionTypeDto } from './manual-transaction-contract'
 import { formatManualTransactionType } from './manual-transaction-types'
+import { SelectField } from './select-field'
 import type { TransactionOcrScanDto } from './transaction-ocr-contract'
 import type { ConfirmTransactionOcrInput, TransactionOcrPhase } from './use-transaction-ocr'
 
+/** Progress of a "resend verification email" request made from the unverified-email failure. */
+export type VerificationResendStatus = 'idle' | 'sending' | 'sent' | 'failed'
 
 export type TransactionOcrScreenProps = Readonly<{
   state: TransactionOcrPhase
@@ -25,6 +35,8 @@ export type TransactionOcrScreenProps = Readonly<{
   onReject: () => void | Promise<void>
   onReset: () => void
   onBack: () => void
+  verificationResend: VerificationResendStatus
+  onResendVerification: () => void | Promise<void>
 }>
 
 const isoToDateOnly = (value: string): string => {
@@ -43,29 +55,29 @@ export function TransactionOcrScreen({
   onReject,
   onReset,
   onBack,
+  verificationResend,
+  onResendVerification,
 }: TransactionOcrScreenProps) {
   const { t } = useTranslation()
-  const palette = themeTokens.colors[useColorScheme() === 'dark' ? 'dark' : 'light']
+  const palette = usePalette()
   const reviewing = state.phase === 'review' || state.phase === 'confirming'
 
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: palette.background }]}>
       <ScrollView contentContainerStyle={styles.content}>
         <View style={styles.page}>
-          <View style={styles.header}>
-            <BackControl fallback="/accounts" label={t('transactionOcr.back')} onPress={onBack} disabled={state.phase === 'scanning' || state.phase === 'confirming'} />
-            <View style={styles.heading}>
-              <Text accessibilityRole="header" style={[styles.title, { color: palette.foreground }]}>{t('transactionOcr.title')}</Text>
-              <Text style={[styles.helper, { color: palette.mutedForeground }]}>{t('transactionOcr.helper')}</Text>
-            </View>
-          </View>
+          <BackControl fallback="/accounts/transactions" onPress={onBack} disabled={state.phase === 'scanning' || state.phase === 'confirming'} />
+          <PageHeader title={t('transactionOcr.title')} instruction={t('transactionOcr.helper')} />
 
           {state.phase === 'idle' ? (
-            <Button label={t('transactionOcr.chooseFile')} onPress={onPickFile} palette={palette} primary />
+            <Button block icon="receipt-text" label={t('transactionOcr.chooseFile')} onPress={onPickFile} />
           ) : null}
 
           {state.phase === 'scanning' ? (
-            <Text accessibilityRole="progressbar" accessibilityLabel={t('transactionOcr.scanning')} style={[styles.helper, { color: palette.mutedForeground }]}>{t('transactionOcr.scanning')}</Text>
+            <View accessible accessibilityRole="progressbar" accessibilityLabel={t('transactionOcr.scanning')} style={styles.progress}>
+              <ActivityIndicator color={palette.mutedForeground} size="small" />
+              <Text tone="muted" variant="meta">{t('transactionOcr.scanning')}</Text>
+            </View>
           ) : null}
 
           {reviewing ? (
@@ -80,29 +92,61 @@ export function TransactionOcrScreen({
               metadataLoading={metadataLoading}
               onConfirm={onConfirm}
               onReject={onReject}
-              palette={palette}
             />
           ) : null}
 
           {state.phase === 'succeeded' ? (
             <View style={styles.form}>
-              <Text accessibilityRole="alert" style={[styles.outcome, { color: palette.foreground }]}>{t('transactionOcr.succeeded')}</Text>
+              <Text accessibilityRole="alert" variant="bodyStrong">{t('transactionOcr.succeeded')}</Text>
               <View style={styles.actions}>
-                <Button label={t('transactionOcr.scanAnother')} onPress={onReset} palette={palette} />
-                <Button label={t('transactionOcr.done')} onPress={onBack} palette={palette} primary />
+                <Button block label={t('transactionOcr.done')} onPress={onBack} />
+                <Button block label={t('transactionOcr.scanAnother')} onPress={onReset} variant="outline" />
               </View>
             </View>
           ) : null}
 
-          {state.phase === 'error' ? (
+          {state.phase === 'error' && state.reason === 'unverified' ? (
+            <VerifyEmailPanel status={verificationResend} onResend={onResendVerification} onReset={onReset} />
+          ) : null}
+
+          {state.phase === 'error' && state.reason === 'allowance' ? (
+            <View style={styles.form} testID="transaction-ocr-allowance">
+              <Text accessibilityRole="header" variant="section">{t('transactionOcr.allowance.title')}</Text>
+              <Text tone="muted" variant="meta">{t('transactionOcr.allowance.body')}</Text>
+            </View>
+          ) : null}
+
+          {state.phase === 'error' && state.reason !== 'unverified' && state.reason !== 'allowance' ? (
             <View style={styles.form}>
-              <Text accessibilityRole="alert" style={[styles.outcome, { color: palette.destructive }]}>{t(`transactionOcr.failures.${state.reason}`)}</Text>
-              <Button label={t('transactionOcr.tryAgain')} onPress={onReset} palette={palette} primary />
+              <FormNotice tone="destructive">{t(`transactionOcr.failures.${state.reason}`)}</FormNotice>
+              <Button block label={t('transactionOcr.tryAgain')} onPress={onReset} />
             </View>
           ) : null}
         </View>
       </ScrollView>
     </SafeAreaView>
+  )
+}
+
+/**
+ * The API refuses receipt scanning for an email/password account whose address isn't verified
+ * yet. Informational rather than an error: the user can resend the link (it opens the web app)
+ * and retry once verified; leaving via Back still reaches manual entry as for any failure.
+ */
+function VerifyEmailPanel({ status, onResend, onReset }: { status: VerificationResendStatus; onResend: () => void | Promise<void>; onReset: () => void }) {
+  const { t } = useTranslation()
+  const sending = status === 'sending'
+  return (
+    <View style={styles.form} testID="transaction-ocr-verify-email">
+      <Text accessibilityRole="header" variant="section">{t('transactionOcr.verifyEmail.title')}</Text>
+      <Text tone="muted" variant="meta">{t('transactionOcr.verifyEmail.body')}</Text>
+      {status === 'sent' ? <FormNotice testID="transaction-ocr-verify-email-sent">{t('transactionOcr.verifyEmail.sent')}</FormNotice> : null}
+      {status === 'failed' ? <FormNotice testID="transaction-ocr-verify-email-failed" tone="destructive">{t('transactionOcr.verifyEmail.failed')}</FormNotice> : null}
+      <View style={styles.actions}>
+        <Button block label={sending ? t('transactionOcr.verifyEmail.sending') : t('transactionOcr.verifyEmail.resend')} onPress={onResend} loading={sending} />
+        <Button block label={t('transactionOcr.tryAgain')} onPress={onReset} disabled={sending} variant="outline" />
+      </View>
+    </View>
   )
 }
 
@@ -116,32 +160,36 @@ type ReviewFormProps = Readonly<{
   metadataLoading: boolean
   onConfirm: (input: ConfirmTransactionOcrInput) => void | Promise<void>
   onReject: () => void | Promise<void>
-  palette: Palette
 }>
 
 /** Keyed by scan.transactionOcrImportId in the parent so every field initializes directly from
  * the scan (no effect-driven prefill, matching this repo's key-remount convention for
  * loaded-data forms, e.g. account-edit-screen.tsx's AccountEditForm). */
-function ReviewForm({ scan, busy, confirmError, accounts, types, currencies, metadataLoading, onConfirm, onReject, palette }: ReviewFormProps) {
-  const { t } = useTranslation()
+function ReviewForm({ scan, busy, confirmError, accounts, types, currencies, metadataLoading, onConfirm, onReject }: ReviewFormProps) {
+  const { t, i18n } = useTranslation()
+  const locale = i18n.resolvedLanguage ?? i18n.language ?? 'en'
   const [accountId, setAccountId] = useState<number | null>(null)
   const [typeId, setTypeId] = useState<number | null>(null)
   const [currencyId, setCurrencyId] = useState<number | null>(scan.transactionInfo.settlementCurrencyId ?? null)
   const [date, setDate] = useState(isoToDateOnly(scan.transactionInfo.transactionDate))
-  const [amount, setAmount] = useState(String(scan.transactionInfo.settlementAmount))
+  const [amount, setAmount] = useState(() => formatNumberInput(scan.transactionInfo.settlementAmount, locale))
   const [merchantName, setMerchantName] = useState(scan.transactionInfo.transactionMerchantName)
   const [description, setDescription] = useState('')
 
   const merchantEdited = merchantName.trim() !== scan.transactionInfo.transactionMerchantName
-  const canConfirm = accountId !== null && typeId !== null && currencyId !== null && !busy
+  // Read in the app's language ("1.234,56" in pt and es) and sent as a dot decimal.
+  const parsedAmount = parseDecimalInput(amount, locale)
+  const settlementAmount = parsedAmount !== null && Number(parsedAmount) > 0 ? parsedAmount : null
+  const amountError = amount.trim() !== '' && settlementAmount === null ? t('transactionCreate.errors.amount') : null
+  const canConfirm = accountId !== null && typeId !== null && currencyId !== null && settlementAmount !== null && !busy
 
   const submit = () => {
-    if (!canConfirm || accountId === null || typeId === null || currencyId === null) return
+    if (!canConfirm || accountId === null || typeId === null || currencyId === null || settlementAmount === null) return
     void onConfirm({
       accountId,
       transactionTypeId: typeId,
       transactionDate: date,
-      settlementAmount: amount,
+      settlementAmount,
       settlementCurrencyId: currencyId,
       ...(merchantEdited || !scan.transactionInfo.transactionMerchantId
         ? { newMerchantName: merchantName }
@@ -152,73 +200,32 @@ function ReviewForm({ scan, busy, confirmError, accounts, types, currencies, met
 
   return (
     <View style={styles.form}>
-      <Text accessibilityRole="header" style={[styles.sectionTitle, { color: palette.foreground }]}>{t('transactionOcr.reviewTitle')}</Text>
-      {metadataLoading ? <Text accessibilityRole="progressbar" style={[styles.helper, { color: palette.mutedForeground }]}>{t('transactionOcr.metadataLoading')}</Text> : null}
-      <ChoiceField label={t('transactionOcr.account')} items={accounts.map((account) => ({ id: account.accountId, label: account.accountName ?? t('accounts.unnamed') }))} value={accountId} onChange={setAccountId} palette={palette} disabled={busy} />
-      <ChoiceField label={t('transactionOcr.type')} items={types.map((type) => ({ id: type.transactionTypeKey, label: formatManualTransactionType(t, type.name) }))} value={typeId} onChange={setTypeId} palette={palette} disabled={busy} />
-      <Field label={t('transactionOcr.date')} value={date} onChangeText={setDate} palette={palette} maxLength={10} editable={!busy} />
-      <Field label={t('transactionOcr.amount')} value={amount} onChangeText={setAmount} palette={palette} keyboardType="decimal-pad" editable={!busy} />
-      <ChoiceField label={t('transactionOcr.currency')} items={currencies.map((currency) => ({ id: currency.currencyKey, label: currency.code }))} value={currencyId} onChange={setCurrencyId} palette={palette} disabled={busy} />
-      <Field label={t('transactionOcr.merchant')} value={merchantName} onChangeText={setMerchantName} palette={palette} maxLength={200} editable={!busy} />
-      <Field label={t('transactionOcr.descriptionOptional')} value={description} onChangeText={setDescription} palette={palette} maxLength={500} editable={!busy} multiline />
+      <Text accessibilityRole="header" variant="section">{t('transactionOcr.reviewTitle')}</Text>
+      {metadataLoading ? <Text accessibilityRole="progressbar" tone="muted" variant="meta">{t('transactionOcr.metadataLoading')}</Text> : null}
+      <SelectField label={t('transactionOcr.account')} placeholder={t('transactionCreate.choose')} options={accounts.map((account) => ({ value: account.accountId, label: account.accountName ?? t('accounts.unnamed') }))} value={accountId} onChange={setAccountId} disabled={busy} />
+      <SelectField label={t('transactionOcr.type')} placeholder={t('transactionCreate.choose')} options={types.map((type) => ({ value: type.transactionTypeKey, label: formatManualTransactionType(t, type.name) }))} value={typeId} onChange={setTypeId} disabled={busy} />
+      <DateField label={t('transactionOcr.date')} value={date || null} onChange={(value) => setDate(value ?? '')} disabled={busy} testID="transaction-ocr-date" />
+      <TextField label={t('transactionOcr.amount')} value={amount} onChangeText={setAmount} keyboardType="decimal-pad" editable={!busy} invalid={amountError !== null} />
+      {amountError ? <FormNotice tone="destructive">{amountError}</FormNotice> : null}
+      <SelectField label={t('transactionOcr.currency')} placeholder={t('transactionCreate.choose')} options={currencies.map((currency) => ({ value: currency.currencyKey, label: currency.code }))} value={currencyId} onChange={setCurrencyId} disabled={busy} />
+      <TextField label={t('transactionOcr.merchant')} value={merchantName} onChangeText={setMerchantName} maxLength={200} editable={!busy} />
+      <TextField label={t('transactionOcr.descriptionOptional')} value={description} onChangeText={setDescription} maxLength={500} editable={!busy} multiline />
       {confirmError ? (
-        <Text accessibilityRole="alert" style={[styles.banner, { color: palette.destructive, borderColor: palette.destructive }]}>{t(`transactionOcr.failures.${confirmError}`)}</Text>
+        <FormNotice tone="destructive">{t(`transactionOcr.failures.${confirmError}`)}</FormNotice>
       ) : null}
       <View style={styles.actions}>
-        <Button label={t('transactionOcr.discard')} onPress={onReject} palette={palette} disabled={busy} />
-        <Button label={busy ? t('transactionOcr.confirming') : t('transactionOcr.confirm')} onPress={submit} palette={palette} primary disabled={!canConfirm} />
+        <Button block label={busy ? t('transactionOcr.confirming') : t('transactionOcr.confirm')} onPress={submit} disabled={!canConfirm} loading={busy} />
+        <Button block label={t('transactionOcr.discard')} onPress={onReject} disabled={busy} variant="outline" />
       </View>
     </View>
-  )
-}
-
-function Field({ label, palette, ...props }: { label: string; palette: Palette } & React.ComponentProps<typeof TextInput>) {
-  return <View style={styles.field}><Text style={[styles.label, { color: palette.foreground }]}>{label}</Text><TextInput accessibilityLabel={label} placeholderTextColor={palette.mutedForeground} style={[styles.input, { color: palette.foreground, borderColor: palette.border, backgroundColor: palette.card }]} {...props} /></View>
-}
-
-function ChoiceField({ label, items, value, onChange, palette, disabled = false }: { label: string; items: readonly { id: number; label: string }[]; value: number | null; onChange: (id: number) => void; palette: Palette; disabled?: boolean }) {
-  return (
-    <View style={styles.field}>
-      <Text style={[styles.label, { color: palette.foreground }]}>{label}</Text>
-      <View style={styles.filters}>
-        {items.map((item) => (
-          <Pressable key={item.id} accessibilityRole="button" accessibilityState={{ selected: value === item.id, disabled }} disabled={disabled} onPress={() => onChange(item.id)} style={({ pressed }) => [styles.filter, { borderColor: value === item.id ? palette.primary : palette.border, backgroundColor: value === item.id ? palette.primarySoft : 'transparent' }, (pressed || disabled) && styles.pressed]}>
-            <Text style={[styles.filterText, { color: value === item.id ? palette.primary : palette.foreground }]}>{item.label}</Text>
-          </Pressable>
-        ))}
-      </View>
-    </View>
-  )
-}
-
-function Button({ label, onPress, palette, primary = false, disabled = false }: { label: string; onPress: () => void | Promise<void>; palette: Palette; primary?: boolean; disabled?: boolean }) {
-  return (
-    <Pressable accessibilityRole="button" accessibilityState={{ disabled, busy: disabled }} disabled={disabled} onPress={() => void onPress()} style={({ pressed }) => [styles.button, { borderColor: primary ? 'transparent' : palette.input, backgroundColor: primary ? palette.primary : 'transparent' }, (pressed || disabled) && styles.pressed]}>
-      <Text style={[styles.buttonText, { color: primary ? palette.primaryForeground : palette.foreground }]}>{label}</Text>
-    </Pressable>
   )
 }
 
 const styles = StyleSheet.create({
   safe: { flex: 1 },
-  content: { flexGrow: 1, padding: themeTokens.layout.screenPadding },
-  page: { width: '100%', maxWidth: 680, alignSelf: 'center', gap: themeTokens.layout.blockGap },
-  header: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'flex-start', gap: themeTokens.spacing[4] },
-  heading: { flex: 1, minWidth: 220, gap: themeTokens.spacing[1] },
-  title: { ...textStyles.title, fontWeight: '700' as const },
-  helper: { ...textStyles.body },
-  sectionTitle: { ...textStyles.section },
-  outcome: { ...textStyles.action },
+  content: { flexGrow: 1, padding: themeTokens.layout.screenPadding, paddingBottom: themeTokens.spacing[8] },
+  page: { width: '100%', maxWidth: 680, alignSelf: 'center', gap: themeTokens.spacing[6] },
+  progress: { flexDirection: 'row', alignItems: 'center', gap: themeTokens.spacing[2] },
   form: { gap: themeTokens.spacing[4] },
-  field: { gap: themeTokens.spacing[2] },
-  label: { ...textStyles.bodyStrong },
-  input: { ...textStyles.body, minHeight: 48, borderWidth: 1, borderRadius: themeTokens.radius.md, paddingHorizontal: themeTokens.spacing[3] },
-  filters: { flexDirection: 'row', flexWrap: 'wrap', gap: themeTokens.spacing[2] },
-  filter: { minHeight: 44, justifyContent: 'center', borderWidth: 1, borderRadius: themeTokens.radius.pill, paddingHorizontal: themeTokens.spacing[4] },
-  filterText: { ...textStyles.bodyStrong },
-  banner: { ...textStyles.body, width: '100%', borderWidth: 1, borderRadius: themeTokens.radius.md, padding: themeTokens.spacing[4] },
-  actions: { flexDirection: 'row', flexWrap: 'wrap', gap: themeTokens.spacing[3] },
-  button: { minHeight: themeTokens.touchTarget.minimum, minWidth: themeTokens.touchTarget.minimum, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderRadius: themeTokens.radius.md, paddingHorizontal: themeTokens.spacing[4] },
-  buttonText: { ...textStyles.action },
-  pressed: { opacity: 0.65 },
+  actions: { gap: themeTokens.spacing[2] },
 })

@@ -10,8 +10,12 @@ import { Budget } from '@entity/Budget';
 import { BudgetTemplateCategory } from '@entity/BudgetTemplateCategory';
 import { BudgetTemplateIncome } from '@entity/BudgetTemplateIncome';
 import { Category } from '@entity/Category';
+import type { Currency } from '@entity/Currency';
 import { authedContext } from '@middleware/authed-context';
-import { getBudgetSpending } from '@service/budget/spending';
+import { getBudgetForecast as forecastBudget } from '@service/budget/budget-forecast.service';
+import { getMonthRollover, rolloverRowsOf, withRollover } from '@service/budget/budget-rollover.service';
+import { ensureBudgetYear } from '@service/budget/budget-year.service';
+import { type BudgetSpendingCategory, getBudgetSpending } from '@service/budget/spending';
 import { calculateAmountBudgeted } from '@utils/budget';
 import { BadRequestError, NotFoundError } from '@utils/errors';
 import {
@@ -19,6 +23,7 @@ import {
   createBudgetRequestSchema,
   deleteBudgetCategoryRequestSchema,
   deleteBudgetRequestSchema,
+  getBudgetForecastRequestSchema,
   getBudgetRequestSchema,
   getBudgetTemplateByYearAndMonthRequestSchema,
   getBudgetTemplateByYearRequestSchema,
@@ -63,17 +68,28 @@ export async function addBudgetCategory(req: Request, res: Response, next: NextF
     next(new BadRequestError('Category already exists in the budget template for this year')); return;
   }
 
-  // Create budget template categories for ALL 12 months of the year for complete year analysis
+  // Rows for all 12 months of this year, and of any later year the budget already has (next
+  // year exists from 1 December), unless the category is already in that year.
+  const laterYearRows = await DI.em.find(
+    BudgetTemplateCategory,
+    { budgetKey: budget, year: { $gt: currentYear } },
+    { fields: ['year', 'categoryKey'] },
+  );
+  const laterYears = [...new Set(laterYearRows.map((row) => row.year))].filter(
+    (year) => !laterYearRows.some((row) => row.year === year && row.categoryKey.categoryKey === category.categoryKey),
+  );
   const budgetTemplateCategories = [];
-  for (let month = 1; month <= 12; month++) {
-    const budgetTemplateCategory = new BudgetTemplateCategory();
-    budgetTemplateCategory.budgetKey = budget;
-    budgetTemplateCategory.categoryKey = category;
-    budgetTemplateCategory.amountBudgeted = amountBudgeted;
-    budgetTemplateCategory.recurrency = recurrency || category.recurrency;
-    budgetTemplateCategory.year = currentYear;
-    budgetTemplateCategory.month = month;
-    budgetTemplateCategories.push(budgetTemplateCategory);
+  for (const year of [currentYear, ...laterYears]) {
+    for (let month = 1; month <= 12; month++) {
+      const budgetTemplateCategory = new BudgetTemplateCategory();
+      budgetTemplateCategory.budgetKey = budget;
+      budgetTemplateCategory.categoryKey = category;
+      budgetTemplateCategory.amountBudgeted = amountBudgeted;
+      budgetTemplateCategory.recurrency = recurrency || category.recurrency;
+      budgetTemplateCategory.year = year;
+      budgetTemplateCategory.month = month;
+      budgetTemplateCategories.push(budgetTemplateCategory);
+    }
   }
 
   await DI.em.persist(budgetTemplateCategories).flush();
@@ -206,7 +222,7 @@ export async function deleteBudgetCategory(req: Request, res: Response, next: Ne
 
 export async function editBudget(req: Request, res: Response) {
   const {
-    body: { description, name },
+    body: { description, name, rolloverCarriesOverspend },
     params: { budgetKey },
   } = await zParse(updateBudgetRequestSchema, req);
   // A budget of another household is filtered out, so it reads as missing: 404, not a 500.
@@ -215,8 +231,11 @@ export async function editBudget(req: Request, res: Response) {
     deletedAt: undefined,
   });
   if (!budget) throw new NotFoundError('Budget not found');
-  budget.name = name;
-  budget.description = description;
+  if (name !== undefined) {
+    budget.name = name;
+    budget.description = description;
+  }
+  if (rolloverCarriesOverspend !== undefined) budget.rolloverCarriesOverspend = rolloverCarriesOverspend;
   await DI.em.persist(budget).flush();
   return res.sendStatus(StatusCodes.OK);
 }
@@ -242,6 +261,7 @@ export async function getBudget(req: Request, res: Response, next: NextFunction)
     budgetKey: budget.budgetKey,
     description: budget.description,
     name: budget.name,
+    rolloverCarriesOverspend: budget.rolloverCarriesOverspend,
   };
   return res.json({ budget: transformedData });
 }
@@ -259,10 +279,9 @@ export async function getBudgetAccounts(req: Request, res: Response, next: NextF
     {
       populate: ['budgetTemplatesCategory', 'budgetTemplatesCategory.accounts'],
       populateOrderBy: {
-        budgetTemplatesCategory: {
-          month: QueryOrder.DESC,
-          year: QueryOrder.DESC,
-        },
+        // Latest month first: order by year, then month.
+        // eslint-disable-next-line perfectionist/sort-objects -- the key order is the sort order
+        budgetTemplatesCategory: { year: QueryOrder.DESC, month: QueryOrder.DESC },
       },
       populateWhere: PopulateHint.INFER,
     },
@@ -284,6 +303,36 @@ export async function getBudgetAccounts(req: Request, res: Response, next: NextF
   const accounts = lastMonthBudgetTemplate.accounts.getItems();
 
   return res.json({ accounts });
+}
+
+/**
+ * The budget's forecast for the current month and the months after it (`months`, 3 to 12): what
+ * each month plans, has spent so far (the current month only), is expected to spend from its
+ * recurring items, and leaves of its planned income (`budget-forecast.service.ts`).
+ */
+export async function getBudgetForecast(req: Request, res: Response, next: NextFunction) {
+  const { tenant, user } = authedContext(req);
+  const {
+    params: { budgetKey },
+    query: { months },
+  } = await zParse(getBudgetForecastRequestSchema, req);
+  const now = new Date();
+  // A window that reaches into next year needs next year's rows, copied from December.
+  const lastMonth = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + months - 1, 1));
+  if (lastMonth.getUTCFullYear() > now.getUTCFullYear()) await extendBudgetIntoYear(budgetKey, tenant.tenantKey, lastMonth.getUTCFullYear());
+
+  const budget = await DI.em.findOne(
+    Budget,
+    { budgetKey, deletedAt: null },
+    { populate: ['currencyKey', 'budgetTemplatesCategory', 'budgetTemplatesCategory.accounts'] },
+  );
+  if (!budget) {
+    next(new NotFoundError('Budget not found')); return;
+  }
+  const incomes = await DI.em.find(BudgetTemplateIncome, { budgetKey: { budgetKey } });
+
+  const forecast = await forecastBudget(DI.em, { budget, incomes, months, now, tenantKey: tenant.tenantKey, viewerAppuserKey: user.appuserKey });
+  return res.json(forecast);
 }
 
 export async function getBudgets(_req: Request, res: Response) {
@@ -315,16 +364,29 @@ export async function getBudgetsFull(req: Request, res: Response) {
   const month = now.getMonth() + 1;
 
   // Fetch all budgets for the user
-  const budgets = await DI.em.find(
-    Budget,
-    {
+  const findBudgets = (refresh: boolean) =>
+    DI.em.find(
+      Budget,
+      {
         deletedAt: undefined,
-    },
-    {
-      populate: ['currencyKey', 'budgetTemplatesCategory', 'budgetTemplatesCategory.accounts'],
-      populateWhere: PopulateHint.INFER,
-    },
-  );
+      },
+      {
+        populate: ['currencyKey', 'budgetTemplatesCategory', 'budgetTemplatesCategory.accounts'],
+        populateWhere: PopulateHint.INFER,
+        refresh,
+      },
+    );
+  let budgets = await findBudgets(false);
+
+  // A budget with no rows for this year yet (the yearly extension has not reached it) starts the
+  // year from last December.
+  let extended = 0;
+  for (const budget of budgets) {
+    if (!budget.budgetTemplatesCategory.getItems().some((bt) => bt.year === year)) {
+      extended += await ensureBudgetYear(DI.em, { budgetKey: budget.budgetKey, tenantKey: tenant.tenantKey, year });
+    }
+  }
+  if (extended > 0) budgets = await findBudgets(true);
 
   if (!budgets.length) {
     return res.json({ budgets: [] });
@@ -362,13 +424,15 @@ export async function getBudgetsFull(req: Request, res: Response) {
 
     const accounts = currentMonthBudgetTemplates.flatMap((template) => template.accounts.getItems());
 
-    const budgetAmount = await getBudgetSpending({
+    const { categories, completeness } = await getBudgetSpending({
       accountKeys: accounts.map((account) => account.accountKey),
+      currency: budget.currencyKey,
       period: 'monthly',
       templateKeys: currentMonthBudgetTemplates.map((template) => template.budgetTemplateCategoryKey),
       tenantKey: tenant.tenantKey,
       viewerAppuserKey: user.appuserKey,
     });
+    const { categories: budgetAmount, rolloverComplete } = await monthWithRollover(budget, categories, { month, tenantKey: tenant.tenantKey, viewerAppuserKey: user.appuserKey, year });
 
     budgetsData.push({
       accounts: currentMonthBudgetTemplates[0]!.accounts.getItems().map((account) => ({
@@ -377,11 +441,14 @@ export async function getBudgetsFull(req: Request, res: Response) {
       })),
       budgetKey: budget.budgetKey,
       categories: budgetAmount,
+      completeness,
       currencyCode: budget.currencyKey.code,
       description: budget.description,
       incomes: budgetIncomes,
       month: currentMonthBudgetTemplates[0]!.month,
       name: budget.name,
+      rolloverCarriesOverspend: budget.rolloverCarriesOverspend,
+      rolloverComplete,
       year: currentMonthBudgetTemplates[0]!.year,
     });
   }
@@ -394,6 +461,7 @@ export async function getBudgetTemplateByYear(req: Request, res: Response, next:
   const {
     params: { budgetKey, year },
   } = await zParse(getBudgetTemplateByYearRequestSchema, req);
+  await extendBudgetIntoYear(budgetKey, tenant.tenantKey, year);
   const budget = await DI.em.findOne(
     Budget,
     {
@@ -422,7 +490,7 @@ export async function getBudgetTemplateByYear(req: Request, res: Response, next:
   }
   const accounts = budgetTemplates.flatMap((template) => template.accounts.getItems());
 
-  const budgetAmount = await getCategoriesDataForBudget(accounts, budgetTemplates, tenant.tenantKey, user.appuserKey);
+  const { budgetAmount, completeness } = await getCategoriesDataForBudget(accounts, budgetTemplates, tenant.tenantKey, user.appuserKey, budget.currencyKey);
   return res.json({
     budget: {
       accounts: budget.budgetTemplatesCategory[0]!.accounts.getItems().map((account) => ({
@@ -437,6 +505,7 @@ export async function getBudgetTemplateByYear(req: Request, res: Response, next:
       name: budget.name,
       year: budget.budgetTemplatesCategory[0]!.year,
     },
+    completeness,
   });
 }
 
@@ -445,6 +514,9 @@ export async function getBudgetTemplateByYearAndMonth(req: Request, res: Respons
   const {
     params: { budgetKey, month, year },
   } = await zParse(getBudgetTemplateByYearAndMonthRequestSchema, req);
+  await extendBudgetIntoYear(budgetKey, tenant.tenantKey, year);
+  // From December, the next month is in the next year: make sure it exists so it can be offered.
+  if (month === 12) await extendBudgetIntoYear(budgetKey, tenant.tenantKey, year + 1);
   const budget = await DI.em.findOne(
     Budget,
     {
@@ -474,22 +546,27 @@ export async function getBudgetTemplateByYearAndMonth(req: Request, res: Respons
   }
   const accounts = currentMonthBudgetTemplates.flatMap((template) => template.accounts.getItems());
 
-  const budgetAmount = await getBudgetSpending({
+  const spendingInput = {
     accountKeys: accounts.map((account) => account.accountKey),
-    period: 'monthly',
+    currency: budget.currencyKey,
+    period: 'monthly' as const,
     templateKeys: currentMonthBudgetTemplates.map((template) => template.budgetTemplateCategoryKey),
     tenantKey: tenant.tenantKey,
     viewerAppuserKey: user.appuserKey,
-  });
+  };
+  const { categories, completeness } = await getBudgetSpending(spendingInput);
+  const { categories: budgetAmount, rolloverComplete } = await monthWithRollover(budget, categories, { month, tenantKey: tenant.tenantKey, viewerAppuserKey: user.appuserKey, year });
 
   // Create a date object for the 15th of the month to avoid timezone edge cases
   const currentDate = new Date(year, month - 1, 15); // month - 1 because Date constructor expects 0-based month
   const nextMonth = addMonths(currentDate, 1);
   const previousMonth = subMonths(currentDate, 1);
 
+  // The budget holds every year's rows: describe the requested month from its own rows.
+  const monthTemplate = currentMonthBudgetTemplates[0]!;
   return res.json({
     budget: {
-      accounts: budget.budgetTemplatesCategory[0]!.accounts.getItems().map((account) => ({
+      accounts: monthTemplate.accounts.getItems().map((account) => ({
         accountKey: account.accountKey,
         accountName: account.accountName,
       })),
@@ -498,10 +575,12 @@ export async function getBudgetTemplateByYearAndMonth(req: Request, res: Respons
       currencyCode: budget.currencyKey.code,
       description: budget.description,
       incomes: budgetIncomes,
-      month: budget.budgetTemplatesCategory[0]!.month,
+      month: monthTemplate.month,
       name: budget.name,
-      year: budget.budgetTemplatesCategory[0]!.year,
+      rolloverCarriesOverspend: budget.rolloverCarriesOverspend,
+      year: monthTemplate.year,
     },
+    completeness,
     hasNextMonth: budgetTemplates.some(
       (budgetTemplate) =>
         budgetTemplate.month === nextMonth.getMonth() + 1 && budgetTemplate.year === nextMonth.getFullYear(),
@@ -510,6 +589,7 @@ export async function getBudgetTemplateByYearAndMonth(req: Request, res: Respons
       (budgetTemplate) =>
         budgetTemplate.month === previousMonth.getMonth() + 1 && budgetTemplate.year === previousMonth.getFullYear(),
     ),
+    rolloverComplete,
   });
 }
 
@@ -518,6 +598,7 @@ export async function getBudgetTemplateByYearUntilMonth(req: Request, res: Respo
   const {
     params: { budgetKey, month, year },
   } = await zParse(getBudgetTemplateByYearUntilMonthRequestSchema, req);
+  await extendBudgetIntoYear(budgetKey, tenant.tenantKey, year);
 
   const budget = await DI.em.findOne(
     Budget,
@@ -550,7 +631,7 @@ export async function getBudgetTemplateByYearUntilMonth(req: Request, res: Respo
   }
   const accounts = budgetTemplates.flatMap((template) => template.accounts.getItems());
 
-  const budgetAmount = await getCategoriesDataForBudget(accounts, budgetTemplates, tenant.tenantKey, user.appuserKey);
+  const { budgetAmount, completeness } = await getCategoriesDataForBudget(accounts, budgetTemplates, tenant.tenantKey, user.appuserKey, budget.currencyKey);
 
   return res.json({
     budget: {
@@ -566,6 +647,7 @@ export async function getBudgetTemplateByYearUntilMonth(req: Request, res: Respo
       name: budget.name,
       year: budget.budgetTemplatesCategory[0]!.year,
     },
+    completeness,
   });
 }
 
@@ -691,7 +773,7 @@ export async function updateBudgetAccounts(req: Request, res: Response, next: Ne
 
 export async function updateBudgetCategory(req: Request, res: Response, next: NextFunction) {
   const {
-    body: { amount, applyToFollowingMonths, recurrency },
+    body: { amount, applyToFollowingMonths, recurrency, rolloverEnabled },
     params: { budgetKey, categoryKey, month, year },
   } = await zParse(updateBudgetCategoryAmountRequestSchema, req);
   const budget = await DI.em.findOne(Budget, {
@@ -702,21 +784,19 @@ export async function updateBudgetCategory(req: Request, res: Response, next: Ne
     next(new NotFoundError('Budget not found')); return;
   }
 
+  // "Following months" are every stored month after this one, into later years too.
   const budgetTemplateCategories = await DI.em.find(BudgetTemplateCategory, {
     budgetKey: { budgetKey },
     categoryKey: {
       categoryKey,
     },
-    month: applyToFollowingMonths ? { $gte: month, $lte: 12 } : month,
-    year,
+    ...(applyToFollowingMonths
+      ? { $or: [{ month: { $gte: month }, year }, { year: { $gt: year } }] }
+      : { month, year }),
   });
-  const budgetTemplateCategory = budgetTemplateCategories.find((category) => category.month === month);
+  const budgetTemplateCategory = budgetTemplateCategories.find((category) => category.year === year && category.month === month);
   if (!budgetTemplateCategory) {
     next(new NotFoundError('Budget template category not found')); return;
-  }
-
-  if (applyToFollowingMonths && budgetTemplateCategories.length !== 13 - month) {
-    next(new NotFoundError('Budget template category for next months not found')); return;
   }
 
   for (const budgetTemplateCategory of budgetTemplateCategories) {
@@ -725,6 +805,9 @@ export async function updateBudgetCategory(req: Request, res: Response, next: Ne
     }
     if (recurrency !== undefined) {
       budgetTemplateCategory.recurrency = recurrency;
+    }
+    if (rolloverEnabled !== undefined) {
+      budgetTemplateCategory.rolloverEnabled = rolloverEnabled;
     }
   }
 
@@ -791,12 +874,43 @@ async function getCategoriesDataForBudget(
   budgetTemplates: BudgetTemplateCategory[],
   tenantKey: number,
   viewerAppuserKey: number,
+  currency: Currency,
 ) {
-  return getBudgetSpending({
+  const { categories: budgetAmount, completeness } = await getBudgetSpending({
     accountKeys: accounts.map((account) => account.accountKey),
+    currency,
     period: 'annual',
     templateKeys: budgetTemplates.map((template) => template.budgetTemplateCategoryKey),
     tenantKey,
     viewerAppuserKey,
   });
+  return { budgetAmount, completeness };
+}
+
+/**
+ * A budget month's spending rows with each category's rollover added (`category_rolled_over`,
+ * `category_available`, ...), and whether every carried amount rests on complete spending. `budget`
+ * has all its rows populated, with their accounts.
+ */
+async function monthWithRollover(
+  budget: Budget,
+  categories: BudgetSpendingCategory[],
+  scope: { month: number; tenantKey: number; viewerAppuserKey: number; year: number },
+) {
+  const rows = rolloverRowsOf(budget.budgetTemplatesCategory.getItems());
+  const rollover = await getMonthRollover({ ...scope, carryOverspend: budget.rolloverCarriesOverspend, currency: budget.currencyKey, rows });
+  return {
+    categories: withRollover(categories, rollover),
+    rolloverComplete: [...rollover.values()].every((category) => !category.rolledOverIncomplete),
+  };
+}
+
+/**
+ * Lazily start a year the budget does not have yet, from the December before: this year (should
+ * the yearly extension have missed it) or next year. Earlier and later years are left alone.
+ */
+async function extendBudgetIntoYear(budgetKey: number, tenantKey: number, year: number) {
+  const currentYear = new Date().getFullYear();
+  if (year < currentYear || year > currentYear + 1) return;
+  await ensureBudgetYear(DI.em, { budgetKey, tenantKey, year });
 }

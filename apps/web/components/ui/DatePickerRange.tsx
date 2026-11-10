@@ -90,9 +90,8 @@ const DatePickerWithRange: React.FC<DatePickerWithRangeProps> = ({
         <Button
           id="date"
           variant="secondary"
-          // `sm`, matching the page actions above it (Import/Add, Filters), so
-          // every control in the toolbar sits at one height.
-          size="sm"
+          // Default size, matching the page actions above it (Import/Add) and
+          // every other form control, so the toolbar sits at one height.
           className={cn(
             // Grows with the label: "27 de ago. de 2026 – 26 de out. de 2026" ran
             // past a fixed 270px in Portuguese.
@@ -100,7 +99,7 @@ const DatePickerWithRange: React.FC<DatePickerWithRangeProps> = ({
             !value && "text-muted-foreground",
           )}
         >
-          <CalendarIcon className="mr-2 size-4 shrink-0" />
+          <CalendarIcon className="size-4" />
           {value?.from ? (
             value.to ? (
               <>

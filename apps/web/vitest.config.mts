@@ -13,8 +13,10 @@ export default defineConfig({
     jsx: "automatic",
   },
   resolve: {
+    // No alias into another app's source: turbo's cache key for these tests
+    // covers this package and the workspace packages it depends on, so a
+    // test reading apps/api would replay a stale result after an API change.
     alias: [
-      { find: /^@api\/(.*)$/, replacement: path.resolve(rootDir, "../api/src/$1") },
       { find: /^@\/(.*)$/, replacement: path.resolve(rootDir, "./$1") },
     ],
   },

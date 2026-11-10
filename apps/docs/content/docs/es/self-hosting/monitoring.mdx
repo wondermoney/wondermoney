@@ -1,0 +1,59 @@
+---
+title: Monitorización
+description: Comprueba que tu instancia funciona y que las tareas en segundo plano siguen ejecutándose, con un monitor como Uptime Kuma.
+---
+
+Las sincronizaciones bancarias, las importaciones, las actualizaciones de precios y los emails programados se ejecutan en el worker, en segundo plano. Si el worker se detiene, la aplicación sigue abriéndose, así que nada en pantalla te avisa. La API tiene dos endpoints para vigilar.
+
+## Endpoints de salud
+
+| Endpoint | Responde | Para qué sirve |
+|---|---|---|
+| `GET /v1/health` | 200 siempre que el proceso de la API está en marcha | Comprobaciones de salud de los contenedores. Nunca consulta la base de datos, así que una base de datos lenta no reinicia la API |
+| `GET /v1/health/ready` | 200 cuando todo funciona, 503 cuando algo falla | Monitores de disponibilidad y alertas |
+
+Ambos son públicos y no necesitan clave. `/v1/health/ready` comprueba tres cosas, en paralelo y cada una en un máximo de 3 segundos:
+
+| Comprobación | Falla cuando |
+|---|---|
+| `database` | Postgres no responde a una consulta sencilla |
+| `queue` | No se puede leer la cola de tareas, o una tarea lleva esperando para empezar más de `HEALTH_MAX_JOB_AGE_MINUTES` (60 por defecto). Los lotes de emails programados, que se vacían a lo largo de unas horas a propósito, tienen más margen |
+| `worker` | El worker no ha terminado su tarea de heartbeat, que se ejecuta cada 5 minutos, en los últimos 15 minutos |
+
+Una respuesta correcta tiene este aspecto:
+
+```json
+{
+  "status": "ok",
+  "checks": {
+    "database": { "status": "ok" },
+    "queue": { "status": "ok" },
+    "worker": { "status": "ok", "lastHeartbeatAt": "2026-11-07T12:00:00.000Z" }
+  },
+  "version": "1.2.0",
+  "commit": "4f1c2e0..."
+}
+```
+
+Cuando algo falla, `status` es `degraded`, la respuesta es un 503 y la comprobación que falla indica un `reason` corto, como `timeout`, `unreachable`, `backlog` o `stale_heartbeat`. Los detalles están en los registros: `docker compose logs api` para la comprobación, `docker compose logs worker` para las tareas.
+
+Justo después de arrancar los contenedores, `worker` puede fallar durante unos segundos, hasta que termine el primer heartbeat del worker.
+
+`version` y `commit` indican la versión que ejecuta el servidor. `GET /v1/instance` también los muestra.
+
+## Uptime Kuma
+
+[Uptime Kuma](https://github.com/louislam/uptime-kuma) es un monitor que alojas tú mismo y que puede avisarte por email, Telegram, ntfy y muchos otros canales. Añade un monitor:
+
+- **Monitor type**: HTTP(s) - Keyword
+- **URL**: `https://api.money.example.com/v1/health/ready` (tu `API_URL` seguido de `/v1/health/ready`)
+- **Keyword**: `"status":"ok"`
+- **Heartbeat interval**: 60 segundos
+
+Cualquier monitor que compruebe un estado 200 funciona igual. El endpoint guarda su respuesta durante 5 segundos y acepta 300 peticiones cada 15 minutos desde la misma dirección, así que consúltalo como mucho cada 30 segundos.
+
+Si Uptime Kuma se ejecuta en el mismo proyecto de Compose, usa `http://api:3001/v1/health/ready`.
+
+## Contenedores
+
+`docker compose ps` muestra cada contenedor como sano (healthy) o no (unhealthy). El contenedor `worker` pasa a unhealthy cuando su ejecutor de tareas se ha detenido o no puede conectar con Postgres. No detecta una tarea bloqueada; `/v1/health/ready` sí.

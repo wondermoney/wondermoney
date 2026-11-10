@@ -2,7 +2,8 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Pressable, StyleSheet, Text, useColorScheme, View } from 'react-native'
 
-import { formatCurrency } from '@/lib/formatters/financial'
+import { formatTransactionDate } from '@/lib/dates/transaction-date'
+import { useFormatMoney } from '@/lib/formatters/money-display'
 import { themeTokens, type Palette } from '@/theme/tokens'
 import { textStyles } from '@/theme/typography'
 
@@ -74,11 +75,12 @@ function Row({ row, locale, separated, palette }: {
   separated: boolean
   palette: Palette
 }) {
+  const formatMoney = useFormatMoney()
   const { t } = useTranslation()
-  const dateText = row.occurredAt ? formatDate(row.occurredAt, locale) : t('recentTransactions.unavailableDate')
+  const dateText = row.occurredAt ? formatTransactionDate(row.occurredAt, locale) : t('recentTransactions.unavailableDate')
   const amountText = row.amount === null || row.currencyCode === null
     ? t('recentTransactions.unavailableAmount')
-    : formatCurrency(row.amount, { locale, currency: row.currencyCode })
+    : formatMoney(row.amount, { locale, currency: row.currencyCode })
 
   const title = row.kind === 'synthetic-initial-balance'
     ? t('recentTransactions.initialBalance')
@@ -123,13 +125,6 @@ function Retry({ label, onPress, palette }: { label: string; onPress: () => void
       <Text allowFontScaling style={[styles.retryLabel, { color: palette.primary }]}>{label}</Text>
     </Pressable>
   )
-}
-
-function formatDate(iso: string, locale: string): string {
-  const parsed = new Date(iso)
-  return Number.isNaN(parsed.getTime())
-    ? iso
-    : new Intl.DateTimeFormat(locale, { dateStyle: 'medium' }).format(parsed)
 }
 
 const styles = StyleSheet.create({

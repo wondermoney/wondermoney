@@ -37,7 +37,7 @@ export default function Stats({ stats }: StatsProps) {
 
   return (
     <div>
-      <dl className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+      <dl className="grid grid-cols-1 gap-x-8 gap-y-6 sm:grid-cols-3">
         {stats.map((item) => {
           let colorClass = "text-muted-foreground";
           let Icon = null;
@@ -71,7 +71,8 @@ export default function Stats({ stats }: StatsProps) {
           return (
             <div
               key={item.name}
-              className="border-border bg-card overflow-hidden rounded-lg border p-4"
+              // Direction A: a figure under a hairline, not a box.
+              className="border-border overflow-hidden border-t pt-3"
             >
               <dt className="text-muted-foreground flex justify-between truncate text-sm">
                 {item.name}
@@ -85,7 +86,7 @@ export default function Stats({ stats }: StatsProps) {
                 </div>
               </dt>
               <dd className="mt-2 space-y-1">
-                <div className="text-foreground font-mono text-xl font-semibold tracking-tight whitespace-nowrap md:text-2xl">
+                <div className="text-foreground font-mono text-2xl font-medium tracking-tight whitespace-nowrap">
                   {item.value != null ? (
                     <NumberFlow
                       value={item.value}

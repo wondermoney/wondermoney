@@ -1,6 +1,6 @@
 import type { TFunction } from 'i18next'
 
-import type { CategoriesResponse, CategoryDto } from './categories-contract'
+import { countsAsSpending, type CategoriesResponse, type CategoryDto } from './categories-contract'
 
 export type CategoryViewModel = Readonly<{
   id: number
@@ -9,6 +9,10 @@ export type CategoryViewModel = Readonly<{
   color: string | null
   glyph: string
   icon?: string | null
+  /** Whether its transactions count as spending: it and its main category both do. */
+  countsAsSpending: boolean
+  /** Its main category does not count as spending, so neither can it: its switch is locked off. */
+  lockedByParent?: boolean
   children: readonly CategoryViewModel[]
 }>
 
@@ -41,14 +45,16 @@ const stableSort = (items: readonly CategoryViewModel[], locale: string) => {
 }
 
 export const mapCategories = (response: CategoriesResponse, t: TFunction, locale: string): CategoryViewModel[] => {
-  const map = (category: CategoryDto & { childCategory?: readonly CategoryDto[] }): CategoryViewModel => ({
+  const map = (category: CategoryDto & { childCategory?: readonly CategoryDto[] }, parent: CategoryDto | null = null): CategoryViewModel => ({
     id: category.categoryKey,
     name: displayCategoryName(category, t),
     system: category.isSystemCategory,
     color: parseSafeCategoryColor(category.bgColor),
     glyph: resolveCategoryGlyph(category.icon),
     icon: category.icon ?? null,
-    children: stableSort((category.childCategory ?? []).map((child) => map(child)), locale),
+    countsAsSpending: countsAsSpending(category, parent),
+    lockedByParent: parent !== null && !countsAsSpending(parent),
+    children: stableSort((category.childCategory ?? []).map((child) => map(child, category)), locale),
   })
-  return stableSort(response.categories.map(map), locale)
+  return stableSort(response.categories.map((category) => map(category)), locale)
 }

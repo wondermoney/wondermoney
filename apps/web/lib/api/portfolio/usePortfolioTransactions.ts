@@ -1,8 +1,8 @@
 import { useQuery, type UseQueryOptions } from "@tanstack/react-query";
 import type { AxiosInstance } from "axios";
-import { endOfDay, startOfDay } from "date-fns";
 
 import api from "../api";
+import { dateRangeParams } from "../date-range";
 import type { PortfolioTransaction } from "./portfolioTransactionTypes";
 
 export interface GetPortfolioTransactionsResponse {
@@ -23,9 +23,8 @@ export async function getPortfolioTransactions(
   const { portfolioId, ...rest } = params;
   const _params = {
     ...rest,
-    ...(rest.fromDate && { fromDate: startOfDay(rest.fromDate).toISOString() }),
     ...(rest.limit && { limit: rest.limit }),
-    ...(rest.toDate && { toDate: endOfDay(rest.toDate).toISOString() }),
+    ...dateRangeParams(rest),
   };
   const { data } = await apiClient.get<GetPortfolioTransactionsResponse>(
     `/v1/portfolio/${portfolioId}/transactions`,

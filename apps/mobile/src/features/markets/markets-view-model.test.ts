@@ -94,6 +94,13 @@ describe('buildWatchlistRows', () => {
     expect(buildWatchlistRows([], [])).toEqual([])
   })
 
+  it("carries each symbol's logo from the API's items, and none when an older API sends symbols only", () => {
+    const pending = { data: undefined, isPending: true, isError: false }
+    const logos = new Map([['AAPL', 'https://cdn.example/aapl.png'], ['ZZZZ', null]])
+    expect(buildWatchlistRows(['AAPL', 'ZZZZ'], [pending, pending], logos).map((row) => row.logoUrl)).toEqual(['https://cdn.example/aapl.png', null])
+    expect(buildWatchlistRows(['AAPL'], [pending])[0]).not.toHaveProperty('logoUrl')
+  })
+
   it('marks a row loading while its quote query is pending', () => {
     const rows = buildWatchlistRows(['AAPL'], [{ data: undefined, isPending: true, isError: false }])
     expect(rows).toEqual([{ symbol: 'AAPL', quote: null, quoteStatus: 'loading' }])

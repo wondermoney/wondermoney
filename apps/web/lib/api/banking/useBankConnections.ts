@@ -7,12 +7,16 @@ import api from "@/lib/api/api";
  * `GET /v1/banking/connections` (apps/api `controller/banking-connections.ts`).
  * `processing` covers both "consent not finished" and "linked, but not every
  * account has been refreshed yet"; `connected` means the first import landed.
+ * `expiring`: the consent ends within 14 days. `revoked`: the bank ended it
+ * before its end date.
  */
 export type BankConnectionStatus =
   | "connected"
   | "error"
   | "expired"
-  | "processing";
+  | "expiring"
+  | "processing"
+  | "revoked";
 
 export interface BankConnection {
   accessType: "open_banking";

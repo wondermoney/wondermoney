@@ -46,6 +46,20 @@ export const getSelectableCategoriesForGroup = (
 export const getSelectableCategories = (categories: Category[]): Category[] =>
   categories.flatMap(getSelectableCategoriesForGroup);
 
+/**
+ * Whether rows in `category` count as spending in reports, budgets and the
+ * home cash flow: its own "Counts as spending" flag and its parent's must both
+ * be on. A missing flag (an older payload) reads as on.
+ */
+export function countsAsSpending(
+  category: { countsAsSpending?: boolean } | null | undefined,
+  parent?: { countsAsSpending?: boolean } | null,
+): boolean {
+  return (
+    category?.countsAsSpending !== false && parent?.countsAsSpending !== false
+  );
+}
+
 export const getCategoryTranslationKey = (category: Category["name"]) => {
   return `categories.${category
     .replaceAll(", ", "-")

@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import {
   getWeeklyInsightsPreheader,
   renderAccountConnectedEmail,
+  renderBankSyncAlertEmail,
   renderBudgetThresholdAlert,
   renderInternalAlertEmail,
   renderLifecycleEmail,
@@ -318,6 +319,43 @@ await assert.rejects(
   /dashboardUrl must be an absolute http\(s\) URL/,
 );
 
+// Bank sync alerts: every kind renders in both languages with the bank, its date and both links.
+{
+  const kinds = ["consent_expiring_7d", "consent_expiring_1d", "consent_revoked", "sync_failing"] as const;
+  const subjects = new Set<string>();
+  for (const language of ["en", "pt"] as const) {
+    for (const kind of kinds) {
+      const alert = await renderBankSyncAlertEmail({
+        language, firstName: "Ada", kind, bankName: "Banco Exemplo",
+        expiryDate: "14 November", failingSinceDate: "2 November",
+        reconnectUrl: "https://app.wonder.money/en/settings?tab=connections",
+        settingsUrl: "https://app.wonder.money/en/settings?tab=notifications",
+      });
+      assert.ok(alert.subject.includes("Banco Exemplo"), `bank-sync-alert ${kind} subject missing bank for ${language}`);
+      assert.ok(alert.text.includes("Banco Exemplo"), `bank-sync-alert ${kind} body missing bank for ${language}`);
+      assert.ok(alert.html.includes("tab=connections"), `bank-sync-alert ${kind} reconnect link missing for ${language}`);
+      assert.ok(alert.html.includes("tab=notifications"), `bank-sync-alert ${kind} settings link missing for ${language}`);
+      if (kind.startsWith("consent_expiring")) assert.ok(alert.text.includes("14 November"), `bank-sync-alert ${kind} missing expiry date`);
+      if (kind === "sync_failing") assert.ok(alert.text.includes("2 November"), "bank-sync-alert sync_failing missing failing-since date");
+      assert.ok(!/utm_/i.test(alert.html), "bank-sync-alert must not carry campaign tracking");
+      subjects.add(alert.subject);
+    }
+  }
+  assert.equal(subjects.size, kinds.length * 2, "each bank-sync-alert kind and language needs its own subject");
+  await assert.rejects(
+    renderBankSyncAlertEmail({ language: "en", kind: "consent_revoked", bankName: "X", reconnectUrl: "javascript:alert(1)", settingsUrl: "https://app.wonder.money/en/settings" }),
+    /reconnectUrl must be an absolute http\(s\) URL/,
+  );
+  await assert.rejects(
+    renderBankSyncAlertEmail({ language: "en", kind: "consent_expiring_7d", bankName: "X", reconnectUrl: "https://a.test/", settingsUrl: "https://a.test/" }),
+    /expiryDate is required/,
+  );
+  await assert.rejects(
+    renderBankSyncAlertEmail({ language: "en", kind: "sync_failing", bankName: "X", reconnectUrl: "https://a.test/", settingsUrl: "https://a.test/" }),
+    /failingSinceDate is required/,
+  );
+}
+
 // A self-hosted instance on a LAN address sends plain-http links.
 const lanConnected = await renderAccountConnectedEmail({ language: "en", bankName: "X", dashboardUrl: "http://192.168.1.10:3000/en/accounts" });
 assert.ok(lanConnected.html.includes("http://192.168.1.10:3000/en/accounts"), "http link must render");
@@ -337,6 +375,7 @@ assert.ok(lanConnected.html.includes("http://192.168.1.10:3000/en/accounts"), "h
     await renderBudgetThresholdAlert({ ...budgetProps([budgetItem("near")]), ...lan, language: "en", brandName }),
     await renderLifecycleNudgeEmail({ language: "en", subject: "s", heading: "h", body: ["b"], unsubscribeUrl: lan.unsubscribeUrl, brandName }),
     await renderLifecycleEmail({ campaign: "data_health", step: "consent_expiring", language: "en", ctaUrl: lan.ctaUrl, unsubscribeUrl: lan.unsubscribeUrl, brandName }),
+    await renderBankSyncAlertEmail({ language: "en", kind: "consent_revoked", bankName: "X", reconnectUrl: lan.ctaUrl, settingsUrl: lan.settingsUrl, brandName }),
   ];
   for (const email of selfHosted) {
     assert.ok(email.text.includes(brandName), "self-hosted email must name the instance");

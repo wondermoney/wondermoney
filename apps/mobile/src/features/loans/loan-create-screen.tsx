@@ -1,15 +1,20 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Switch, Text, TextInput, useColorScheme, View } from 'react-native'
-import { SafeAreaView } from 'react-native-safe-area-context'
+import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, View } from 'react-native'
 
-import { Button } from '@/components/ui/button'
-import { BackControl } from '@/components/ui/back-control'
-import { PageHeader } from '@/components/ui/page-header'
-import { themeTokens, type Palette } from '@/theme/tokens'
-import { textStyles } from '@/theme/typography'
+import { AmountEntry } from '@/components/ui/amount-entry'
+import { DateField } from '@/components/ui/date-field'
+import { FormBar } from '@/components/ui/form-bar'
+import { FormGroup, FormSelectRow, FormSwitchRow, FormTextRow } from '@/components/ui/form-row'
+import { Notice } from '@/components/ui/notice'
+import { SafeAreaView } from '@/components/ui/screen-safe-area'
+import { Text } from '@/components/ui/text'
+import { toWireDecimalInput } from '@/lib/formatters/decimal-input'
+import { themeTokens } from '@/theme/tokens'
+import { usePalette } from '@/theme/use-palette'
 
-import { buildLoanCreatePayload, type LoanCreateDraft, type LoanCreateField } from './loan-create-model'
+import { buildLoanCreatePayload, type LoanCreateDraft } from './loan-create-model'
+import { loanNumberErrors } from './loan-form-rows'
 import type { LoanCreateWrite, LoanType } from './loans-contract'
 import type { LoanCreateFailure } from './use-create-loan'
 
@@ -33,9 +38,16 @@ const localToday = () => {
   return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
 }
 
+/**
+ * Add loan, as a calm-structure flow: the form bar (close, save), the opening
+ * principal big and centred, then one group of rows. The ✓ stays disabled
+ * until the required fields are valid; an error shows under a row only for
+ * what was entered and is wrong.
+ */
 export function LoanCreateScreen({ currencies, loading, metadataError, pending, outcome, onBack, onCreate }: LoanCreateScreenProps) {
-  const { t } = useTranslation()
-  const palette = themeTokens.colors[useColorScheme() === 'dark' ? 'dark' : 'light']
+  const { t, i18n } = useTranslation()
+  const palette = usePalette()
+  const locale = i18n.resolvedLanguage ?? i18n.language ?? 'en'
   const [name, setName] = useState('')
   const [type, setType] = useState<LoanType | null>(null)
   const [currencyId, setCurrencyId] = useState<number | null>(null)
@@ -47,94 +59,100 @@ export function LoanCreateScreen({ currencies, loading, metadataError, pending, 
   const [termMonths, setTermMonths] = useState('')
   const [includeInNetWorth, setIncludeInNetWorth] = useState(true)
   const [notes, setNotes] = useState('')
-  const [invalidFields, setInvalidFields] = useState<ReadonlySet<LoanCreateField>>(new Set())
-  // A validation failure on a field the form doesn't render inline errors
-  // for (annualInterestRateBps, termMonths) has nowhere else to surface —
-  // fall back to the old generic banner only for that case.
-  const [unmappedError, setUnmappedError] = useState(false)
   const locked = pending
 
   if (loading) return <StatePage palette={palette} title={t('loanCreate.loading')} onBack={onBack} progress />
   if (metadataError) return <StatePage palette={palette} title={t('loanCreate.metadataError')} onBack={onBack} />
 
-  const submit = async () => {
-    setInvalidFields(new Set())
-    setUnmappedError(false)
-    const draft: LoanCreateDraft = {
-      name, type, currencyId, openingPrincipalBalance, openingBalanceDate, providerName, regularPaymentAmount, annualInterestRateBps, termMonths, includeInNetWorth, notes,
-    }
-    const result = buildLoanCreatePayload(draft)
-    if (!result.success) {
-      setInvalidFields(result.invalidFields)
-      setUnmappedError(result.invalidFields.size === 0)
-      return
-    }
-    await onCreate(result.payload)
+  // Read in the app's language ("1.234,56" in pt and es), then handed on as dot decimals.
+  const decimal = (value: string) => toWireDecimalInput(value, locale)
+  const draft: LoanCreateDraft = {
+    name,
+    type,
+    currencyId,
+    openingPrincipalBalance: decimal(openingPrincipalBalance),
+    openingBalanceDate,
+    providerName,
+    regularPaymentAmount: decimal(regularPaymentAmount),
+    annualInterestRateBps: decimal(annualInterestRateBps),
+    termMonths,
+    includeInNetWorth,
+    notes,
+  }
+  const result = buildLoanCreatePayload(draft)
+  const invalid = result.success ? new Set<string>() : result.invalidFields
+  const numbers = loanNumberErrors(draft as Required<LoanCreateDraft>)
+  const nameError = name.length > 0 && invalid.has('name') ? t('loanCreate.fieldErrors.name') : null
+  const principalError = numbers.principal ? t('loanCreate.fieldErrors.principal') : null
+  const dateError = openingBalanceDate.trim() !== '' && invalid.has('openingBalanceDate') ? t('loanCreate.fieldErrors.startDate') : undefined
+  const currency = currencies.find((item) => item.currencyKey === currencyId) ?? null
+
+  const submit = () => {
+    if (!result.success || locked) return
+    void onCreate(result.payload)
   }
 
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: palette.background }]}>
+      <FormBar
+        closeDisabled={locked}
+        closeLabel={t('common.close')}
+        onClose={onBack}
+        onSave={submit}
+        saveDisabled={!result.success || locked}
+        saveLabel={pending ? t('loanCreate.saving') : t('loanCreate.save')}
+        saving={pending}
+        title={t('loanCreate.title')}
+      />
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={styles.keyboard}>
         <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
           <View style={styles.page}>
-            <FormButton label={t('loanCreate.back')} onPress={onBack} palette={palette} disabled={locked} />
-            <PageHeader palette={palette}
-            instruction={t('loanCreate.helper')} title={t('loanCreate.title')} />
-
-            <View style={styles.form}>
-              <Field label={t('loanCreate.name')} value={name} onChangeText={setName} placeholder={t('loanCreate.namePlaceholder')} palette={palette} maxLength={255} editable={!locked} invalid={invalidFields.has('name')} errorText={invalidFields.has('name') ? t('loanCreate.fieldErrors.name') : undefined} />
-              <ChoiceField label={t('loanCreate.type')} items={CREDIT_TYPES.map((item) => ({ id: item, label: t(`loans.type.${item}`) }))} value={type} onChange={setType} palette={palette} invalid={invalidFields.has('type')} errorText={invalidFields.has('type') ? t('loanCreate.fieldErrors.type') : undefined} />
-              <ChoiceField label={t('loanCreate.currency')} items={currencies.map((item) => ({ id: item.currencyKey, label: `${item.code} · ${item.description}` }))} value={currencyId} onChange={setCurrencyId} palette={palette} invalid={invalidFields.has('currencyId')} errorText={invalidFields.has('currencyId') ? t('loanCreate.fieldErrors.currency') : undefined} />
-              <Field label={t('loanCreate.principal')} value={openingPrincipalBalance} onChangeText={setOpeningPrincipalBalance} placeholder="0.00" palette={palette} keyboardType="decimal-pad" editable={!locked} invalid={invalidFields.has('openingPrincipalBalance')} errorText={invalidFields.has('openingPrincipalBalance') ? t('loanCreate.fieldErrors.principal') : undefined} />
-              <Field label={t('loanCreate.startDate')} value={openingBalanceDate} onChangeText={setOpeningBalanceDate} placeholder={t('loanCreate.startDatePlaceholder')} palette={palette} maxLength={10} editable={!locked} invalid={invalidFields.has('openingBalanceDate')} errorText={invalidFields.has('openingBalanceDate') ? t('loanCreate.fieldErrors.startDate') : undefined} />
-              <Field label={t('loanCreate.providerOptional')} value={providerName} onChangeText={setProviderName} placeholder={t('loanCreate.providerPlaceholder')} palette={palette} maxLength={255} editable={!locked} />
-              <Field label={t('loanCreate.installmentOptional')} value={regularPaymentAmount} onChangeText={setRegularPaymentAmount} placeholder="0.00" palette={palette} keyboardType="decimal-pad" editable={!locked} />
-              <Field label={t('loanCreate.interestRateOptional')} value={annualInterestRateBps} onChangeText={setAnnualInterestRateBps} placeholder="0.00" palette={palette} keyboardType="decimal-pad" editable={!locked} />
-              <Field label={t('loanCreate.termMonthsOptional')} value={termMonths} onChangeText={setTermMonths} placeholder="360" palette={palette} keyboardType="number-pad" editable={!locked} />
-              <View style={styles.switchRow}>
-                <Text style={[styles.label, { color: palette.foreground }]}>{t('loanCreate.includeInNetWorth')}</Text>
-                <Switch accessibilityRole="switch" accessibilityLabel={t('loanCreate.includeInNetWorth')} accessibilityState={{ disabled: locked, checked: includeInNetWorth }} disabled={locked} value={includeInNetWorth} onValueChange={setIncludeInNetWorth} trackColor={{ false: palette.muted, true: palette.primary }} />
-              </View>
-              <Field label={t('loanCreate.notesOptional')} value={notes} onChangeText={setNotes} placeholder={t('loanCreate.notesPlaceholder')} palette={palette} maxLength={10_000} multiline editable={!locked} />
-            </View>
+            <AmountEntry
+              accessibilityLabel={t('loanCreate.principal')}
+              caption={t('loanCreate.principal')}
+              currency={currency?.code ?? null}
+              editable={!locked}
+              error={principalError}
+              locale={locale}
+              onChangeText={setOpeningPrincipalBalance}
+              value={openingPrincipalBalance}
+            />
+            <FormGroup>
+              <FormTextRow key="name" editable={!locked} error={nameError} label={t('loanCreate.name')} maxLength={255} onChangeText={setName} placeholder={t('loanCreate.namePlaceholder')} value={name} />
+              <FormSelectRow key="type" disabled={locked} label={t('loanCreate.type')} onChange={setType} options={CREDIT_TYPES.map((item) => ({ value: item, label: t(`loans.type.${item}`) }))} placeholder={t('loanCreate.choose')} value={type} />
+              <FormSelectRow key="currency" disabled={locked} label={t('loanCreate.currency')} onChange={setCurrencyId} options={currencies.map((item) => ({ value: item.currencyKey, label: `${item.code} · ${item.description}` }))} placeholder={t('loanCreate.choose')} value={currencyId} />
+              <DateField key="date" appearance="row" disabled={locked} error={dateError} label={t('loanCreate.startDate')} onChange={(value) => setOpeningBalanceDate(value ?? '')} value={openingBalanceDate || null} />
+              <FormTextRow key="provider" accessibilityLabel={t('loanCreate.providerOptional')} editable={!locked} label={t('loanCreate.provider')} maxLength={255} onChangeText={setProviderName} placeholder={t('loanCreate.optional')} value={providerName} />
+              <FormTextRow key="installment" accessibilityLabel={t('loanCreate.installmentOptional')} editable={!locked} error={numbers.installment ? t('loanCreate.fieldErrors.installment') : null} keyboardType="decimal-pad" label={t('loanCreate.installment')} onChangeText={setRegularPaymentAmount} placeholder={t('loanCreate.optional')} value={regularPaymentAmount} />
+              <FormTextRow key="rate" accessibilityLabel={t('loanCreate.interestRateOptional')} editable={!locked} error={numbers.rate ? t('loanCreate.fieldErrors.interestRate') : null} keyboardType="decimal-pad" label={t('loanCreate.interestRate')} onChangeText={setAnnualInterestRateBps} placeholder={t('loanCreate.optional')} value={annualInterestRateBps} />
+              <FormTextRow key="term" accessibilityLabel={t('loanCreate.termMonthsOptional')} editable={!locked} error={numbers.term ? t('loanCreate.fieldErrors.termMonths') : null} keyboardType="number-pad" label={t('loanCreate.termMonths')} onChangeText={setTermMonths} placeholder={t('loanCreate.optional')} value={termMonths} />
+              <FormSwitchRow key="net-worth" disabled={locked} label={t('loanCreate.includeInNetWorth')} onValueChange={setIncludeInNetWorth} value={includeInNetWorth} />
+              <FormTextRow key="notes" accessibilityLabel={t('loanCreate.notesOptional')} editable={!locked} label={t('loanCreate.notes')} maxLength={10_000} multiline onChangeText={setNotes} placeholder={t('loanCreate.notesPlaceholder')} value={notes} />
+            </FormGroup>
+            {outcome ? <Notice message={t(`loanCreate.failures.${outcome}`)} tone="destructive" /> : null}
           </View>
         </ScrollView>
-
-        <View style={[styles.footer, { borderTopColor: palette.border, backgroundColor: palette.background }]}>
-          {unmappedError ? <Text accessibilityRole="alert" style={[styles.banner, { color: palette.destructiveText, borderColor: palette.destructiveText }]}>{t('loanCreate.validation')}</Text> : null}
-          {outcome ? <Text accessibilityRole="alert" style={[styles.banner, { color: palette.foreground, borderColor: palette.border }]}>{t(`loanCreate.failures.${outcome}`)}</Text> : null}
-          <Button block disabled={locked} label={pending ? t('loanCreate.saving') : t('loanCreate.save')} onPress={submit} palette={palette} variant="primary" />
-        </View>
       </KeyboardAvoidingView>
     </SafeAreaView>
   )
 }
 
-function Field({ label, palette, invalid = false, errorText, ...props }: { label: string; palette: Palette; invalid?: boolean; errorText?: string } & React.ComponentProps<typeof TextInput>) {
-  return <View style={styles.field}><Text style={[styles.label, { color: palette.foreground }]}>{label}</Text><TextInput accessibilityLabel={label} placeholderTextColor={palette.mutedForeground} style={[styles.input, { color: palette.foreground, borderColor: invalid ? palette.destructiveText : palette.border, backgroundColor: palette.card }, invalid && styles.inputInvalid]} {...props} />{errorText ? <Text accessibilityRole="alert" style={[styles.fieldError, { color: palette.destructiveText }]}>{errorText}</Text> : null}</View>
-}
-
-function ChoiceField<T extends string | number>({ label, items, value, onChange, palette, invalid = false, errorText }: { label: string; items: readonly { id: T; label: string }[]; value: T | null; onChange: (id: T) => void; palette: Palette; invalid?: boolean; errorText?: string }) {
-  return <View style={styles.field}><Text style={[styles.label, { color: palette.foreground }]}>{label}</Text><View accessibilityRole="radiogroup" accessibilityLabel={label} style={styles.choices}>{items.map((item) => <Choice key={item.id} label={item.label} selected={value === item.id} onPress={() => onChange(item.id)} palette={palette} />)}</View>{errorText ? <Text accessibilityRole="alert" style={[styles.fieldError, { color: palette.destructiveText }]}>{errorText}</Text> : null}</View>
-}
-
-function Choice({ label, selected, onPress, palette }: { label: string; selected: boolean; onPress: () => void; palette: Palette }) {
-  // Unselected chips carry no border of their own — a dozen-plus currency
-  // options each individually boxed read as a wall of empty containers, not
-  // a set of choices. Only the selected chip earns a border/fill; the rest
-  // are plain text with a muted background wash for a touch target.
-  return <Pressable accessibilityRole="radio" hitSlop={{ top: 7, bottom: 7 }} accessibilityState={{ checked: selected }} onPress={onPress} style={[styles.choice, selected ? { borderColor: palette.primary, backgroundColor: palette.primarySoft } : { borderWidth: 0, backgroundColor: palette.muted }]}><Text style={[styles.choiceText, { color: selected ? palette.primary : palette.foreground }]}>{label}</Text></Pressable>
-}
-
-function FormButton({ label, accessibilityLabel, onPress, palette, primary = false, disabled = false, busy = false }: { label: string; accessibilityLabel?: string; onPress: () => void | Promise<void>; palette: Palette; primary?: boolean; disabled?: boolean; busy?: boolean }) {
-  return <Pressable accessibilityRole="button" accessibilityLabel={accessibilityLabel ?? label} accessibilityState={{ disabled, busy }} disabled={disabled} onPress={() => void onPress()} style={({ pressed }) => [styles.button, { borderColor: primary ? 'transparent' : palette.input, backgroundColor: primary ? palette.primary : 'transparent' }, (pressed || disabled) && styles.disabled]}><Text style={[styles.buttonText, { color: primary ? palette.primaryForeground : palette.foreground }]}>{label}</Text></Pressable>
-}
-
-function StatePage({ palette, title, onBack, progress = false }: { palette: Palette; title: string; onBack: () => void; progress?: boolean }) {
-  return <SafeAreaView style={[styles.safe, { backgroundColor: palette.background }]}><View style={styles.state}><BackControl fallback="/loans" onPress={onBack} color={palette.primary} /><Text accessibilityRole={progress ? 'progressbar' : 'alert'} style={[styles.body, { color: palette.foreground }]}>{title}</Text></View></SafeAreaView>
+function StatePage({ palette, title, onBack, progress = false }: { palette: ReturnType<typeof usePalette>; title: string; onBack: () => void; progress?: boolean }) {
+  const { t } = useTranslation()
+  return (
+    <SafeAreaView style={[styles.safe, { backgroundColor: palette.background }]}>
+      <FormBar closeLabel={t('common.close')} onClose={onBack} title={t('loanCreate.title')} />
+      <View style={styles.state}>
+        <Text accessibilityRole={progress ? 'progressbar' : 'alert'} tone={progress ? 'muted' : 'default'} variant="meta">{title}</Text>
+      </View>
+    </SafeAreaView>
+  )
 }
 
 const styles = StyleSheet.create({
   safe: { flex: 1 },
-  footer: { borderTopWidth: StyleSheet.hairlineWidth * 2, padding: themeTokens.layout.screenPadding, gap: themeTokens.spacing[2] }, keyboard: { flex: 1 }, content: { flexGrow: 1, padding: themeTokens.layout.screenPadding }, page: { width: '100%', maxWidth: 720, alignSelf: 'center', gap: themeTokens.layout.blockGap }, body: { ...textStyles.body }, form: { gap: themeTokens.spacing[5] }, field: { gap: themeTokens.spacing[2] }, label: { ...textStyles.bodyStrong, fontWeight: '600' as const }, input: { ...textStyles.body, minHeight: 50, borderWidth: 1, borderRadius: themeTokens.radius.md, paddingHorizontal: themeTokens.spacing[4], paddingVertical: themeTokens.spacing[3] }, inputInvalid: { borderWidth: 2 }, fieldError: { ...textStyles.meta }, choices: { flexDirection: 'row', flexWrap: 'wrap', gap: themeTokens.spacing[2] }, choice: { minHeight: 34, justifyContent: 'center', borderWidth: 1, borderRadius: themeTokens.radius.md, paddingHorizontal: themeTokens.spacing[3] }, choiceText: { ...textStyles.meta }, switchRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: themeTokens.spacing[3] }, button: { minHeight: 48, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderRadius: themeTokens.radius.md, paddingHorizontal: themeTokens.spacing[5] }, buttonText: { ...textStyles.action }, disabled: { opacity: 0.55 }, banner: { ...textStyles.body, borderWidth: 1, borderRadius: themeTokens.radius.md, padding: themeTokens.spacing[3] }, state: { flex: 1, justifyContent: 'center', alignItems: 'flex-start', padding: themeTokens.layout.screenPadding, gap: themeTokens.spacing[5] },
+  keyboard: { flex: 1 },
+  content: { flexGrow: 1, paddingHorizontal: themeTokens.layout.screenPadding, paddingBottom: themeTokens.spacing[10] },
+  page: { width: '100%', maxWidth: 720, alignSelf: 'center', gap: themeTokens.spacing[4] },
+  state: { flex: 1, alignItems: 'flex-start', padding: themeTokens.layout.screenPadding },
 })

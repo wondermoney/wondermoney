@@ -1,9 +1,9 @@
 import { useTranslation } from 'react-i18next'
 import { ScrollView, StyleSheet, Text, View } from 'react-native'
-import { SafeAreaView } from 'react-native-safe-area-context'
 
 import { BackControl } from '@/components/ui/back-control'
 import { PageHeader } from '@/components/ui/page-header'
+import { SafeAreaView } from '@/components/ui/screen-safe-area'
 import { themeTokens } from '@/theme/tokens'
 import { textStyles } from '@/theme/typography'
 
@@ -144,8 +144,8 @@ const styles = StyleSheet.create({
   safe: { flex: 1 },
   content: { flexGrow: 1, padding: themeTokens.layout.screenPadding },
   page: { width: '100%', maxWidth: 680, alignSelf: 'center', gap: themeTokens.layout.blockGap },
-  header: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'flex-start', gap: themeTokens.spacing[4] },
-  heading: { flex: 1, minWidth: 220, gap: themeTokens.spacing[1] },
+  header: { alignItems: 'flex-start', gap: themeTokens.spacing[2] },
+  heading: { alignSelf: 'stretch', gap: themeTokens.spacing[1] },
   helper: { ...textStyles.body },
   form: { gap: themeTokens.spacing[4] },
   card: { borderWidth: 1, borderRadius: themeTokens.radius.lg, padding: themeTokens.spacing[4], gap: themeTokens.spacing[2] },

@@ -1,20 +1,13 @@
 import { useTranslation } from 'react-i18next'
-import { ScrollView, useColorScheme, View } from 'react-native'
-import { SafeAreaView } from 'react-native-safe-area-context'
+import { StyleSheet, View } from 'react-native'
 
-import { BackControl } from '@/components/ui/back-control'
 import { Button } from '@/components/ui/button'
-import { PageHeader } from '@/components/ui/page-header'
+import { SettingsGroup, SettingsPage, SettingsSection, SettingsValueRow } from '@/features/more/settings-ui'
 import { themeTokens } from '@/theme/tokens'
+import { usePalette } from '@/theme/use-palette'
 
 import type { ProfileViewModel } from './self-view-models'
-import {
-  ReadOnlyRow,
-  SelfFailure,
-  SelfLoading,
-  SelfStaleBanner,
-  selfStyles,
-} from './self-screen-parts'
+import { SelfFailure, SelfLoading, SelfStaleBanner } from './self-screen-parts'
 
 export type ProfileViewState =
   | { status: 'loading' }
@@ -25,6 +18,11 @@ export type ProfileViewState =
   | { status: 'loaded'; data: ProfileViewModel; refreshing?: boolean }
   | { status: 'refresh-error'; data: ProfileViewModel; refreshing?: boolean }
 
+/**
+ * Settings › Profile (web `components/settings/Profile.tsx`): "Personal information"
+ * as one group of read-only rows (email, first and last name, label left and value
+ * right), with "Edit name" beneath; the MFA status lives in Security, as on web.
+ */
 export function ProfileScreen({ state, onBack, onRetry, onLogout, onEdit }: {
   state: ProfileViewState
   onBack: () => void
@@ -33,10 +31,10 @@ export function ProfileScreen({ state, onBack, onRetry, onLogout, onEdit }: {
   onEdit: () => void
 }) {
   const { t } = useTranslation()
-  const palette = themeTokens.colors[useColorScheme() === 'dark' ? 'dark' : 'light']
+  const palette = usePalette()
   if (state.status === 'access-transition') return null
   if (state.status === 'loading') {
-    return <SelfLoading label={t('profile.loading')} backLabel={t('self.back')} onBack={onBack} palette={palette} />
+    return <SelfLoading label={t('profile.loading')} backLabel={t('self.back')} onBack={onBack} palette={palette} section="profile" />
   }
   if (state.status === 'error' || state.status === 'invalid-response' || state.status === 'not-found') {
     const invalid = state.status === 'invalid-response'
@@ -52,29 +50,33 @@ export function ProfileScreen({ state, onBack, onRetry, onLogout, onEdit }: {
       onLogout={onLogout}
       palette={palette}
       retryable={!notFound}
+      section="profile"
     />
   }
 
   const missing = t('self.notProvided')
   return (
-    <SafeAreaView style={[selfStyles.safeArea, { backgroundColor: palette.background }]}>
-      <ScrollView contentContainerStyle={selfStyles.content}>
-        <View style={selfStyles.page}>
-          <BackControl fallback="/more" label={t('self.back')} onPress={onBack} />
-          {state.status === 'refresh-error' ? (
-            <SelfStaleBanner message={t('profile.stale')} retryLabel={t('common.retry')} refreshing={Boolean(state.refreshing)} onRetry={onRetry} palette={palette} />
-          ) : null}
-          <PageHeader palette={palette}
-            provenance={t('profile.helper')} title={t('profile.title')} />
-          <View style={[selfStyles.list, { borderColor: palette.border }]}>
-            <ReadOnlyRow label={t('profile.email')} value={state.data.emailAddress} palette={palette} />
-            <ReadOnlyRow label={t('profile.firstName')} value={state.data.firstName ?? missing} palette={palette} separated />
-            <ReadOnlyRow label={t('profile.lastName')} value={state.data.lastName ?? missing} palette={palette} separated />
-            <ReadOnlyRow label={t('profile.mfa')} value={t(state.data.mfaEnabled ? 'self.enabled' : 'self.notEnabled')} palette={palette} separated />
-          </View>
-          <Button label={t('profile.edit')} onPress={onEdit} palette={palette} variant="primary" />
+    <SettingsPage backLabel={t('self.back')} onBack={onBack} section="profile">
+      {state.status === 'refresh-error' ? (
+        <View style={styles.stale}>
+          <SelfStaleBanner message={t('profile.stale')} retryLabel={t('common.retry')} refreshing={Boolean(state.refreshing)} onRetry={onRetry} />
         </View>
-      </ScrollView>
-    </SafeAreaView>
+      ) : null}
+      <SettingsSection first title={t('settings.profile.heading')}>
+        <SettingsGroup>
+          <SettingsValueRow label={t('settings.profile.email')} value={state.data.emailAddress} />
+          <SettingsValueRow label={t('profile.firstName')} value={state.data.firstName} missing={missing} />
+          <SettingsValueRow label={t('profile.lastName')} value={state.data.lastName} missing={missing} />
+        </SettingsGroup>
+        <View style={styles.edit}>
+          <Button label={t('profile.edit')} onPress={onEdit} variant="outline" />
+        </View>
+      </SettingsSection>
+    </SettingsPage>
   )
 }
+
+const styles = StyleSheet.create({
+  stale: { marginBottom: themeTokens.spacing[6] },
+  edit: { alignItems: 'flex-start' },
+})

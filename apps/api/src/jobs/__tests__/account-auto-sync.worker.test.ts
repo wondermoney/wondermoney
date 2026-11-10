@@ -5,6 +5,7 @@ vi.mock('@service/account/account-initial-sync-transaction.service', () => ({ de
 vi.mock('@service/operations/background-operation.service', () => ({ default: {} }));
 vi.mock('@service/account/account-auto-sync-scheduler.service', () => ({ default: {} }));
 vi.mock('@service/enable-banking/enable-banking-credential.service', () => ({ enableBankingCredentialService: {} }));
+vi.mock('@service/enable-banking/enable-banking-connection-sync-state.service', () => ({ enableBankingConnectionSyncState: {} }));
 const em = vi.hoisted(() => ({ findOne: vi.fn() }));
 vi.mock('@app/database/di', () => ({ DI: { em } }));
 
@@ -20,7 +21,8 @@ function harness() {
   const transactionService = { syncTransactionsForRequisition: vi.fn().mockResolvedValue({ status: 'completed' }) };
   const backgroundOperationService = { attachQueueJob: vi.fn(), claimJobStart: vi.fn().mockResolvedValue(true), createQueuedOperation: vi.fn(), finishJob: vi.fn().mockResolvedValue(true), heartbeatJob: vi.fn().mockResolvedValue(true), markAttemptFailedForRetry: vi.fn().mockResolvedValue(true) };
   const enableBankingCredentialService = { getDecryptedCredential: vi.fn().mockResolvedValue({ applicationId: 'app-1', privateKeyPem: 'pem-1' }) };
-  return { accountService, backgroundOperationService, bankSyncIncidentService, enableBankingCredentialService, order, transactionService };
+  const connectionSyncState = { checkConsent: vi.fn().mockResolvedValue('active'), deferNextSync: vi.fn().mockResolvedValue(new Date()) };
+  return { accountService, backgroundOperationService, bankSyncIncidentService, connectionSyncState, enableBankingCredentialService, order, transactionService };
 }
 
 describe('scheduled bank sync producer contract worker', () => {
@@ -110,6 +112,64 @@ describe('scheduled bank sync producer contract worker', () => {
       await expect(handleAccountAutoSyncRequisitionJob(pgBossJob(ebPayload({ appuserKey: 8, connectionId: 'session-21', correlationId: 'account.auto-sync.requisition:run-1:21', enableBankingConnectionKey: '21' }), { id: 'eb-job-3', retryCount: 0, retryLimit: 3 }) as Parameters<typeof handleAccountAutoSyncRequisitionJob>[0], h as unknown as Parameters<typeof handleAccountAutoSyncRequisitionJob>[1])).resolves.toBe(false);
       expect(h.accountService.syncAccountsForRequisition).not.toHaveBeenCalled();
       expect(h.bankSyncIncidentService.finalizeAttempt).toHaveBeenCalledWith(expect.objectContaining({ errorCategory: 'authentication', errorCode: 'authentication', final: true }));
+    });
+
+    const run = (h: ReturnType<typeof harness>, id: string, retryCount = 0) => handleAccountAutoSyncRequisitionJob(pgBossJob(ebPayload(), { id, retryCount, retryLimit: 3 }) as Parameters<typeof handleAccountAutoSyncRequisitionJob>[0], h as unknown as Parameters<typeof handleAccountAutoSyncRequisitionJob>[1]);
+
+    it('records a thrown provider 429 as rate_limited, defers the connection and skips the pg-boss retry', async () => {
+      const h = harness();
+      h.accountService.syncAccountsForRequisition.mockRejectedValueOnce(Object.assign(new Error('Enable Banking rate limit reached'), { name: 'TooManyRequestsError', retryAfter: 1800, status: 429 }));
+      await expect(run(h, 'eb-429-thrown')).resolves.toBe(false);
+      expect(h.bankSyncIncidentService.finalizeAttempt).toHaveBeenCalledWith(expect.objectContaining({ errorCode: 'rate_limited', final: true, result: 'failed', retryAfterSeconds: 1800 }));
+      expect(h.connectionSyncState.deferNextSync).toHaveBeenCalledWith(20, 1800);
+    });
+
+    it('records a rate-limited account phase as rate_limited without running the transaction phase', async () => {
+      const h = harness();
+      h.accountService.syncAccountsForRequisition.mockResolvedValueOnce({ rateLimited: {}, status: 'failed' } as { status: string });
+      await expect(run(h, 'eb-429-phase')).resolves.toBe(false);
+      expect(h.transactionService.syncTransactionsForRequisition).not.toHaveBeenCalled();
+      expect(h.bankSyncIncidentService.finalizeAttempt).toHaveBeenCalledWith(expect.objectContaining({ errorCategory: 'provider', errorCode: 'rate_limited', final: true, result: 'failed' }));
+      expect(h.connectionSyncState.deferNextSync).toHaveBeenCalledWith(20, undefined);
+    });
+
+    it('still finalizes without a retry when the connection cannot be deferred', async () => {
+      const h = harness();
+      h.accountService.syncAccountsForRequisition.mockResolvedValueOnce({ rateLimited: { retryAfterSeconds: 60 }, status: 'failed' } as { status: string });
+      h.connectionSyncState.deferNextSync.mockRejectedValueOnce(new Error('db down'));
+      await expect(run(h, 'eb-429-defer-failed')).resolves.toBe(false);
+      expect(h.bankSyncIncidentService.finalizeAttempt).toHaveBeenCalledWith(expect.objectContaining({ errorCode: 'rate_limited', final: true }));
+    });
+
+    it('expires the connection and records consent_expired when every account is rejected and the session has ended', async () => {
+      const h = harness();
+      h.accountService.syncAccountsForRequisition.mockResolvedValueOnce({ everyAccountRejected: true, status: 'failed' } as { status: string });
+      h.connectionSyncState.checkConsent.mockResolvedValueOnce('ended');
+      await expect(run(h, 'eb-consent-ended')).resolves.toBe(false);
+      expect(h.connectionSyncState.checkConsent).toHaveBeenCalledWith(20);
+      expect(h.bankSyncIncidentService.finalizeAttempt).toHaveBeenCalledWith(expect.objectContaining({ errorCategory: 'consent', errorCode: 'consent_expired', final: true, result: 'failed' }));
+    });
+
+    it('keeps the ordinary retry when every account is rejected but the session is still authorized', async () => {
+      const h = harness();
+      h.accountService.syncAccountsForRequisition.mockResolvedValueOnce({ everyAccountRejected: true, status: 'failed' } as { status: string });
+      await expect(run(h, 'eb-consent-active')).rejects.toThrow('failed');
+      expect(h.bankSyncIncidentService.finalizeAttempt).toHaveBeenCalledWith(expect.objectContaining({ errorCode: 'account_phase_failed', final: false, result: 'failed' }));
+    });
+
+    it('keeps the ordinary retry when the session check itself fails', async () => {
+      const h = harness();
+      h.accountService.syncAccountsForRequisition.mockResolvedValueOnce({ everyAccountRejected: true, status: 'failed' } as { status: string });
+      h.connectionSyncState.checkConsent.mockRejectedValueOnce(new Error('db down'));
+      await expect(run(h, 'eb-consent-check-failed')).rejects.toThrow('failed');
+      expect(h.bankSyncIncidentService.finalizeAttempt).toHaveBeenCalledWith(expect.objectContaining({ errorCode: 'account_phase_failed', final: false }));
+    });
+
+    it('does not check the session when an account failed for another reason', async () => {
+      const h = harness();
+      h.accountService.syncAccountsForRequisition.mockResolvedValueOnce({ status: 'failed' });
+      await expect(run(h, 'eb-ordinary-failure')).rejects.toThrow('failed');
+      expect(h.connectionSyncState.checkConsent).not.toHaveBeenCalled();
     });
 
     it('does not let one connection credential failure affect a sibling job for a different connection', async () => {

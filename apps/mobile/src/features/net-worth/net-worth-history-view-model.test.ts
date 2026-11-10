@@ -39,4 +39,14 @@ describe('mapNetWorthHistory', () => {
     expect(vm.stats).toEqual({ earliest: null, latest: null, high: null, low: null, netChange: null })
     expect(vm.readiness).toBe('empty')
   })
+
+  it('keeps one point per month, the last one, when the server sends daily points', () => {
+    const summary: NetWorthHistorySummaryDto = {
+      currencyCode: 'EUR', granularity: 'monthly', readiness: 'ready',
+      points: [point('2026-05-31', 900), point('2026-06-03', 950), point('2026-06-17', 1000), point('2026-06-30', 1100), point('2026-07-02', 1200)],
+    }
+    const vm = mapNetWorthHistory(summary)
+    expect(vm.points.map((p) => p.date)).toEqual(['2026-05-31', '2026-06-30', '2026-07-02'])
+    expect(vm.points.map((p) => p.change)).toEqual([null, 200, 100])
+  })
 })

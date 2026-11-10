@@ -1,7 +1,8 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
+import { useMemo } from "react";
 import { SubmitHandler, useForm, useWatch } from "react-hook-form";
 import { z } from "zod";
 
@@ -18,6 +19,7 @@ import {
 } from "@/components/ui/Form";
 import { Input } from "@/components/ui/input";
 import { LearningTip } from "@/components/ui/learning-tip";
+import { MoneyInput } from "@/components/ui/MoneyInput";
 import {
   Select,
   SelectContent,
@@ -38,11 +40,12 @@ const recurrencyOptions = [
   { value: "BI_ANNUALLY", label: "recurrency_biannually" },
 ];
 
-export const schema = z
+const createIncomeSchema = (t: (key: string) => string, locale: string) =>
+  z
   .object({
     id: z.string(),
     name: z.string().min(1),
-    amount: zLocaleNumber.pipe(z.number().min(0)),
+    amount: zLocaleNumber(locale, t("invalid-amount")).pipe(z.number().min(0)),
     isRecurrent: z.boolean(),
     recurrency: z
       .enum(["MONTHLY", "MONTHLY_14", "QUARTERLY", "ANNUALLY", "BI_ANNUALLY"])
@@ -62,7 +65,9 @@ export const schema = z
     },
   );
 
-export type IncomeData = z.infer<typeof schema> & { id: string };
+export type IncomeData = z.infer<ReturnType<typeof createIncomeSchema>> & {
+  id: string;
+};
 
 type Props = {
   open: boolean;
@@ -80,6 +85,8 @@ const IncomeNewEditDialog: React.FC<Props> = ({
   onIncomeEdited,
 }) => {
   const t = useTranslations();
+  const locale = useLocale();
+  const schema = useMemo(() => createIncomeSchema(t, locale), [t, locale]);
   const methods = useForm({
     resolver: zodResolver(schema),
     defaultValues: {
@@ -213,14 +220,9 @@ const IncomeNewEditDialog: React.FC<Props> = ({
               <FormItem>
                 <FormLabel required>{t("amount")}</FormLabel>
                 <FormControl>
-                  <Input
+                  <MoneyInput
                     type="tel"
-                    placeholder={t("amount")}
-                    startAdornment={
-                      <Text variant="mutedText" className="px-4">
-                        €
-                      </Text>
-                    }
+                    currency="EUR"
                     {...field}
                   />
                 </FormControl>

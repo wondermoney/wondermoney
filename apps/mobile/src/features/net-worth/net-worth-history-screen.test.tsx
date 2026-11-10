@@ -7,6 +7,11 @@ import { mapNetWorthHistory } from './net-worth-history-view-model'
 import { NetWorthHistoryScreen, type NetWorthHistoryViewState } from './net-worth-history-screen'
 import type { NetWorthHistorySummaryDto } from './net-worth-contract'
 
+// The Skia canvas needs a native backend jest doesn't have; the chart's own logic is the axis
+// labels beside it, which render as React Native text.
+jest.mock('victory-native', () => ({ CartesianChart: () => null, Area: () => null, Line: () => null }))
+
+
 const summary = (readiness: NetWorthHistorySummaryDto['readiness'], points: NetWorthHistorySummaryDto['points']): NetWorthHistorySummaryDto => ({
   currencyCode: 'EUR', granularity: 'monthly', readiness, points,
 })

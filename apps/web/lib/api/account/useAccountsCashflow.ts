@@ -4,9 +4,10 @@ import {
   type UseQueryOptions,
 } from "@tanstack/react-query";
 import type { AxiosInstance } from "axios";
-import { format } from "date-fns";
 
 import api from "../api";
+import type { AmountsCompleteness } from "../completeness";
+import { transactionDateRangeParams } from "../date-range";
 
 export interface AccountCashflow {
   date: string;
@@ -19,15 +20,16 @@ export interface GetAccountsCashflowRequest {
 
 export type GetAccountsCashflowResponse = {
   cashflow: AccountCashflow[];
+  /** Rows with no amount in the user's currency, left out of `cashflow`. */
+  completeness?: AmountsCompleteness;
 };
 
-async function getAccountsCashflow(
+export async function getAccountsCashflow(
   params: GetAccountsCashflowRequest,
   apiClient: AxiosInstance = api,
 ): Promise<GetAccountsCashflowResponse> {
-  const _params = params.fromDate
-    ? { fromDate: format(params.fromDate, "yyyy-MM-dd") }
-    : {};
+  // The endpoint takes a start only: months run to the latest transaction.
+  const _params = transactionDateRangeParams({ fromDate: params.fromDate });
   const { data } = await apiClient.get<GetAccountsCashflowResponse>(
     "/v1/account/cashflow",
     {

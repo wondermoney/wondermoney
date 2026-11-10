@@ -10,7 +10,7 @@ const mockUseBudgetAccounts = jest.fn()
 const mockUseAccounts = jest.fn()
 const mockMutation = { isPending: false, mutateAsync: jest.fn() }
 
-jest.mock('expo-router', () => ({ useLocalSearchParams: () => mockParams, useRouter: () => ({ replace: mockReplace }), useNavigation: () => ({ addListener: jest.fn(() => jest.fn()) }) }))
+jest.mock('expo-router', () => ({ useLocalSearchParams: () => mockParams, useRouter: () => ({ replace: mockReplace }), usePreventRemove: () => jest.fn() }))
 jest.mock('./use-budget-accounts', () => ({ useBudgetAccounts: (...args: unknown[]) => mockUseBudgetAccounts(...args) }))
 jest.mock('@/features/accounts/use-accounts', () => ({ useAccounts: () => mockUseAccounts() }))
 jest.mock('./use-budget-accounts-mutation', () => {

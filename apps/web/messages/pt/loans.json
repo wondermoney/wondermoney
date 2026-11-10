@@ -10,7 +10,8 @@
       "delete": "Eliminar empréstimo",
       "recordPayment": "Registar pagamento",
       "linkRepayment": "Associar pagamento",
-      "unlinkRepayment": "Desassociar pagamento"
+      "unlinkRepayment": "Desassociar pagamento",
+      "save": "Guardar alterações"
     },
     "fields": {
       "name": "Nome do empréstimo",
@@ -31,7 +32,12 @@
       "startDate": "Data de início",
       "dueDate": "Data de vencimento",
       "linkedAccount": "Conta associada",
-      "linkedTransaction": "Pagamento associado"
+      "linkedTransaction": "Pagamento associado",
+      "namePlaceholder": "Ex.: Crédito habitação",
+      "interestRatePlaceholder": "0,00",
+      "termMonthsPlaceholder": "Ex.: 360",
+      "startDatePlaceholder": "Escolha a data de início",
+      "notesPlaceholder": "Algo que valha a pena lembrar sobre este empréstimo"
     },
     "types": {
       "personal": "Pessoal",
@@ -133,7 +139,9 @@
         "removeAssociation": "Remover associação",
         "removeConfirm": "Remover esta associação de pagamento?",
         "editAllocationLabel": "Editar alocação do pagamento",
-        "removeAssociationLabel": "Remover associação do pagamento"
+        "removeAssociationLabel": "Remover associação do pagamento",
+        "transaction": "Transação bancária",
+        "split": "<principal></principal> de capital, <interest></interest> de juros, <fees></fees> de comissões"
       },
       "amortization": {
         "title": "Pré-visualização de amortização",
@@ -154,7 +162,8 @@
       "progress": "Progresso",
       "progressLabel": "Progresso",
       "status": "Estado",
-      "actions": "Ações"
+      "actions": "Ações",
+      "nextPayment": "Próximo pagamento"
     },
     "emptyPreview": {
       "title": "Pré-visualização",

@@ -2,6 +2,8 @@ import { useTranslation } from 'react-i18next'
 import { StyleSheet, Text, View } from 'react-native'
 import { BarGroup, CartesianChart } from 'victory-native'
 
+import { Section } from '@/components/ui/section'
+import { useFormatCompactMoney } from '@/lib/formatters/money-display'
 import { themeTokens } from '@/theme/tokens'
 import { textStyles } from '@/theme/typography'
 
@@ -21,14 +23,12 @@ export type TickerFinancialsPanelProps = Readonly<{
 /** Revenue/net income are provider figures reported in USD regardless of the ticker's trading currency, matching the web client. */
 const STATEMENT_CURRENCY = 'USD'
 
-function compactAmountText(value: number, locale: string): string {
-  return new Intl.NumberFormat(locale, { notation: 'compact', style: 'currency', currency: STATEMENT_CURRENCY, maximumFractionDigits: 1 }).format(value)
-}
-
 function FinancialsSummaryRow({ point, locale, unavailable, palette }: { point: FinancialsChartPoint; locale: string; unavailable: string; palette: Palette }) {
   const { t } = useTranslation()
-  const revenueText = point.revenue === null ? unavailable : compactAmountText(point.revenue, locale)
-  const netIncomeText = point.netIncome === null ? unavailable : compactAmountText(point.netIncome, locale)
+  const formatCompactMoney = useFormatCompactMoney()
+  const compactAmountText = (value: number) => formatCompactMoney(value, { locale, currency: STATEMENT_CURRENCY })
+  const revenueText = point.revenue === null ? unavailable : compactAmountText(point.revenue)
+  const netIncomeText = point.netIncome === null ? unavailable : compactAmountText(point.netIncome)
   return (
     <Text allowFontScaling style={[styles.summaryRow, { color: palette.foreground }]}>
       {t('assetDetail.financials.row', { period: point.period || unavailable, revenue: revenueText, netIncome: netIncomeText })}
@@ -42,17 +42,14 @@ export function TickerFinancialsPanel({ state, palette }: TickerFinancialsPanelP
   const unavailable = t('assetDetail.unavailable')
 
   return (
-    <View style={[styles.card, { borderColor: palette.border, backgroundColor: palette.muted }]}>
-      <Text accessibilityRole="header" allowFontScaling style={[styles.title, { color: palette.foreground }]}>
-        {t('assetDetail.financials.heading')}
-      </Text>
+    <Section title={t('assetDetail.financials.heading')} variant="open">
 
       {state.status === 'loading' ? (
         <Text accessibilityRole="progressbar" accessibilityLabel={t('assetDetail.financials.loading')} allowFontScaling style={[styles.helper, { color: palette.mutedForeground }]}>
           {t('assetDetail.financials.loading')}
         </Text>
       ) : state.status === 'error' ? (
-        <Text accessibilityRole="alert" allowFontScaling style={[styles.helper, { color: palette.destructive }]}>
+        <Text accessibilityRole="alert" allowFontScaling style={[styles.helper, { color: palette.destructiveText }]}>
           {t('assetDetail.financials.error')}
         </Text>
       ) : state.points.length === 0 ? (
@@ -97,14 +94,12 @@ export function TickerFinancialsPanel({ state, palette }: TickerFinancialsPanelP
           </View>
         </>
       )}
-    </View>
+    </Section>
   )
 }
 
 const styles = StyleSheet.create({
-  card: { width: '100%', borderWidth: 1, borderRadius: themeTokens.radius.xl, padding: themeTokens.spacing[4], gap: themeTokens.spacing[3] },
-  title: { ...textStyles.section },
-  helper: { ...textStyles.body },
+  helper: { ...textStyles.meta },
   legend: { flexDirection: 'row', flexWrap: 'wrap', gap: themeTokens.spacing[4] },
   legendItem: { flexDirection: 'row', alignItems: 'center', gap: themeTokens.spacing[2] },
   legendSwatch: { width: 10, height: 10, borderRadius: themeTokens.radius.sm },

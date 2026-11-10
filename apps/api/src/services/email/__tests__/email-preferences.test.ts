@@ -6,6 +6,7 @@ describe('EMAIL_CATEGORY_FLAG', () => {
   it('maps each category to its own preference flag', () => {
     expect(EMAIL_CATEGORY_FLAG).toEqual({
       [EmailCategory.ACCOUNT_RECOVERY]: 'accountRecoveryEnabled',
+      [EmailCategory.BANK_SYNC_ALERTS]: 'bankSyncAlertsEnabled',
       [EmailCategory.BUDGET_ALERTS]: 'budgetAlertsEnabled',
       [EmailCategory.GROWTH]: 'growthEmailsEnabled',
       [EmailCategory.WEEKLY_INSIGHTS]: 'weeklyInsightsEnabled',

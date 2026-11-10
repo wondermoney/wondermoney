@@ -3,7 +3,7 @@ import type * as Sentry from "@sentry/nextjs";
 type DataCollection = NonNullable<Parameters<typeof Sentry.init>[0]["dataCollection"]>;
 
 /**
- * What a Sentry event from the web app may carry (issue #38). Every web init —
+ * What a Sentry event from the web app may carry. Every web init —
  * browser (`sentry-client.ts`), server and edge — passes this object, because
  * Sentry 11 collects everything by default when `dataCollection` is left unset:
  * request/response bodies, cookies, all headers, query strings, user info,

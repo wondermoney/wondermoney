@@ -1,0 +1,47 @@
+{
+  "budgetPage": {
+    "left-in": "Left in {month}",
+    "overspent-in": "Over plan in {month} by",
+    "spent": "Spent",
+    "planned": "Planned",
+    "over-plan": "Over plan",
+    "over-plan-unit": "{count, plural, =0 {lines} one {line} other {lines}}",
+    "measure-header": "Spent against plan",
+    "measure-label": "{name}: {spent} spent of {planned} planned",
+    "key-label": "How to read the bars",
+    "key-plan": "Plan",
+    "key-spent": "Spent within plan",
+    "key-over": "Spent past plan",
+    "rolled-over-surplus": "<money>+{amount}</money> from last month",
+    "rolled-over-overspend": "<money>−{amount}</money> overspent last month",
+    "rollover-incomplete": "Some of last month's spending couldn't be converted, so this may be too high",
+    "rollover-incomplete-month": "Some earlier spending couldn't be converted, so a carried amount may be too high."
+  },
+  "budgetForecast": {
+    "title": "Forecast",
+    "months-label": "Months to show",
+    "months-option": "{count} mo",
+    "basis": "From this month on. This month's spending is actual up to {date}; everything else is a projection from the budget's plan, its planned income and {count, plural, =0 {no recurring items} one {# recurring item} other {# recurring items}}, not money spent.",
+    "incomplete": "Some amounts {count, plural, =0 {couldn't be converted} other {in {currencies} couldn't be converted}} into the budget's currency, so the months marked are left short.",
+    "chart-caption": "Planned income against expected spending per month. Expected spending is each category's plan, or more where spending so far plus upcoming recurring items already exceed it.",
+    "month": "Month",
+    "planned": "Planned",
+    "carried": "Carried in",
+    "spent-so-far": "Spent so far",
+    "recurring-projected": "Recurring (projected)",
+    "expected-spending": "Expected spending",
+    "planned-income": "Planned income",
+    "net": "Left over",
+    "kind-current": "Actual so far, then projected",
+    "kind-future": "Projected",
+    "month-incomplete": "incomplete",
+    "recurring-items": "{count, plural, one {# recurring item} other {# recurring items}} in this forecast",
+    "cadence": {
+      "weekly": "weekly",
+      "biweekly": "every two weeks",
+      "monthly": "monthly",
+      "quarterly": "quarterly",
+      "yearly": "yearly"
+    }
+  }
+}

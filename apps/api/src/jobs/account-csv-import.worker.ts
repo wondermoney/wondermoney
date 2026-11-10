@@ -2,6 +2,7 @@ import type { Job } from 'pg-boss';
 
 import { BackgroundOperationStatus } from '@entity/BackgroundOperation';
 import AccountCsvImportService from '@service/account/account-csv-import.service';
+import { statementMappingSchema } from '@service/account/account-statement-mapping.schema';
 import backgroundOperationService from '@service/operations/background-operation.service';
 import type { Enqueue } from '@service/queue/enqueue';
 
@@ -11,15 +12,18 @@ interface WorkerDeps {
   importService?: Pick<AccountCsvImportService, 'importAccountCsv'>;
 }
 
-export const handleAccountCsvImportJob = async (job: Job<{ accountKey?: number; bankName?: string; bucket?: string; correlationId?: string; key?: string; }>, deps: WorkerDeps = {}) => {
+export const handleAccountCsvImportJob = async (job: Job<{ accountKey?: number; bankName?: string; bucket?: string; correlationId?: string; key?: string; mapping?: unknown }>, deps: WorkerDeps = {}) => {
   const bg = deps.backgroundOperationService ?? backgroundOperationService;
   const svc = deps.importService ?? new AccountCsvImportService();
   const { accountKey, bankName, bucket, correlationId, key } = job.data;
+  // The mapping was validated when the import started; a payload that no longer parses is dropped and the worker finds the columns itself.
+  const parsedMapping = job.data.mapping === undefined ? undefined : statementMappingSchema.safeParse(job.data.mapping);
+  const mapping = parsedMapping?.success ? parsedMapping.data : undefined;
   if (!accountKey || !bucket || !correlationId || !key) return false;
   if (!(await bg.claimJobStart(correlationId, job.id))) return false;
 
   try {
-    const result = await svc.importAccountCsv({ accountKey, bankName, bucket, key }, { enqueue: deps.enqueue });
+    const result = await svc.importAccountCsv({ accountKey, bankName, bucket, key, mapping }, { enqueue: deps.enqueue });
     const stage = 'account.csv-import:complete';
     if (!(await bg.heartbeatJob(correlationId, job.id, { progress: result as unknown as Record<string, unknown>, stage }))) throw new Error('account.csv-import job failed heartbeat');
     const status = result.failed > 0 ? (result.imported > 0 || result.skipped > 0 ? BackgroundOperationStatus.PARTIAL : BackgroundOperationStatus.FAILED) : BackgroundOperationStatus.SUCCEEDED;

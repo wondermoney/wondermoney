@@ -157,6 +157,8 @@ describe('API client', () => {
 
   it.each([
     [{ code: 'demo_read_only', message: 'Demo account is read-only' }, 'demo-forbidden'],
+    [{ code: 'email_verification_required', message: 'Verify your email address first.' }, 'email-verification-required'],
+    [{ code: 'ai_allowance_exhausted', message: 'Daily allowance used up.' }, 'ai-allowance-exhausted'],
     // The code decides, never the prose: an unlabelled or unknown 403 is a plain http error.
     [{ message: 'Demo account is read-only' }, 'http'],
     [{ code: 'household_owner_required', message: 'Only the household owner can manage the household.' }, 'http'],

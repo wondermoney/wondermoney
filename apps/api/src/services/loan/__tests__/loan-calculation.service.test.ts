@@ -58,6 +58,20 @@ describe('calculateOutstandingPrincipalWithAdjustments', () => {
       ],
     })).toBe(950);
   });
+
+  it('subtracts repayments exactly, without float drift', () => {
+    expect(calculateOutstandingPrincipalWithAdjustments({
+      adjustments: [],
+      openingPrincipalBalance: 171_400,
+      principalRepayments: [
+        { amount: 251.39, effectiveDate: new Date('2025-12-01') },
+        { amount: 252.15, effectiveDate: new Date('2026-01-01') },
+        { amount: 252.9, effectiveDate: new Date('2026-02-01') },
+        { amount: 0.1, effectiveDate: new Date('2026-03-01') },
+        { amount: 0.2, effectiveDate: new Date('2026-04-01') },
+      ],
+    })).toBe(170_643.26);
+  });
 });
 
 describe('calculateLoanProgress', () => {
@@ -160,6 +174,31 @@ describe('calculateRemainingTermMonths', () => {
         regularPaymentAmount: 100,
       }),
     ).toBeNull();
+  });
+
+  it('runs past the contract when the stored payment is below the annuity payment', () => {
+    // The seeded mortgage: EUR 168,382.33 at 3.6% needs about EUR 848.54 a month to clear in
+    // the 302 months left to its maturity, so at EUR 742.18 it takes 381.03 payments. The
+    // estimate is right for its inputs; it exceeds the 360-month original term because the
+    // inputs disagree with the contract, which the client flags instead of capping.
+    expect(
+      calculateRemainingTermMonths({
+        annualInterestRateBps: 360,
+        outstandingPrincipal: 168_382.33,
+        regularPaymentAmount: 742.18,
+      }),
+    ).toBe(382);
+  });
+
+  it('matches the contract when the payment is the annuity payment', () => {
+    // EUR 185,000 at 3.6% over 360 months is EUR 841.0939 a month; the bank rounds the payment up to EUR 841.10.
+    expect(
+      calculateRemainingTermMonths({
+        annualInterestRateBps: 360,
+        outstandingPrincipal: 185_000,
+        regularPaymentAmount: 841.1,
+      }),
+    ).toBe(360);
   });
 });
 

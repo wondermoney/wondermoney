@@ -43,7 +43,7 @@ export default function Security() {
   return (
     <div className="divide-border divide-y">
       {user && hasPasswordAccount && (
-        <div className="grid max-w-7xl grid-cols-1 gap-x-8 gap-y-10 px-4 py-16 sm:px-6 md:grid-cols-3 lg:px-8">
+        <div className="grid max-w-7xl grid-cols-1 gap-x-8 gap-y-10 py-10 md:grid-cols-3">
           <div>
             <Heading variant="h2">{t("change-password")}</Heading>
             <Text variant="lead" className="mt-1 text-sm">
@@ -55,7 +55,7 @@ export default function Security() {
         </div>
       )}
 
-      <div className="grid max-w-7xl grid-cols-1 gap-x-8 gap-y-10 px-4 py-16 sm:px-6 md:grid-cols-3 lg:px-8">
+      <div className="grid max-w-7xl grid-cols-1 gap-x-8 gap-y-10 py-10 md:grid-cols-3">
         <div>
           <Heading variant="h2">{t("mfa-title")}</Heading>
           <Text variant="lead" className="mt-1 text-sm">
@@ -66,7 +66,7 @@ export default function Security() {
         <TwoFactorAuth />
       </div>
 
-      {/* <div className="grid max-w-7xl grid-cols-1 gap-x-8 gap-y-10 px-4 py-16 sm:px-6 md:grid-cols-3 lg:px-8">
+      {/* <div className="grid max-w-7xl grid-cols-1 gap-x-8 gap-y-10 py-10 md:grid-cols-3">
         <div>
           <Heading variant="h2" className="text-base font-semibold leading-7 ">
             Log out other sessions

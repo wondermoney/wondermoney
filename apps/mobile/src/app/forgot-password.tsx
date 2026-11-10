@@ -1,22 +1,25 @@
 import { Link, useLocalSearchParams } from 'expo-router'
-import { Text, useColorScheme } from 'react-native'
 import { useTranslation } from 'react-i18next'
 
 import { usePasswordRecovery } from '@/components/providers/password-recovery-provider'
+import { AuthLink, AuthLead } from '@/features/auth/auth-form-styles'
 import { ForgotPasswordScreen } from '@/features/auth/forgot-password-screen'
-import { themeTokens } from '@/theme/tokens'
 
 export default function ForgotPasswordRoute() {
   const { t } = useTranslation()
   const { requestReset } = usePasswordRecovery()
   const params = useLocalSearchParams<{ notice?: string }>()
-  const colorScheme = useColorScheme()
-  const palette = themeTokens.colors[colorScheme === 'dark' ? 'dark' : 'light']
   return (
     <ForgotPasswordScreen
       notice={params.notice === 'expired' ? t('auth.errors.linkExpired') : undefined}
       onSubmit={async (email) => (await requestReset(email)).status}
-      footer={<Link href="/sign-in"><Text style={{ color: palette.primary }}>{t('auth.forgotPassword.backToSignIn')}</Text></Link>}
+      lead={(
+        <AuthLead
+          link={<Link asChild href="/sign-up"><AuthLink label={t('auth.createAccountLink')} strong /></Link>}
+          text={t('auth.notMember')}
+        />
+      )}
+      footer={<Link asChild href="/sign-in"><AuthLink label={t('auth.forgotPassword.backToSignIn')} /></Link>}
     />
   )
 }

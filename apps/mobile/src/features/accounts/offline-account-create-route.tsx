@@ -1,9 +1,9 @@
-import { type Href, useNavigation, useRouter } from 'expo-router'
-import { useEffect, useRef } from 'react'
+import { type Href, usePreventRemove, useRouter } from 'expo-router'
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Pressable, StyleSheet, Text, useColorScheme, View } from 'react-native'
-import { SafeAreaView } from 'react-native-safe-area-context'
 
+import { SafeAreaView } from '@/components/ui/screen-safe-area'
 import { ApiError } from '@/lib/api/errors'
 import { themeTokens } from '@/theme/tokens'
 import { textStyles } from '@/theme/typography'
@@ -16,12 +16,9 @@ export function OfflineAccountCreateRoute() {
   const options = useOfflineAccountOptions()
   const create = useCreateOfflineAccount()
   const router = useRouter()
-  const navigation = useNavigation()
-  const navigationUnlocked = useRef(false)
-
-  useEffect(() => navigation.addListener('beforeRemove', (event) => {
-    if (create.isPending && !navigationUnlocked.current) event.preventDefault()
-  }), [create.isPending, navigation])
+  const [navigationUnlocked, setNavigationUnlocked] = useState(false)
+  const disablePrevention = usePreventRemove(create.isPending && !navigationUnlocked)
+  const unlockNavigation = () => { setNavigationUnlocked(true); disablePrevention() }
 
   if (options.isAccessTransition) return null
   if ((!options.currencies.data || !options.institutions.data) && !create.unknownGuard) {
@@ -38,7 +35,7 @@ export function OfflineAccountCreateRoute() {
     onConfirm={async (payload) => {
       try {
         await create.mutateAsync(payload)
-        navigationUnlocked.current = true
+        unlockNavigation()
         router.replace('/accounts' as Href)
         return null
       } catch (error) {

@@ -72,6 +72,6 @@ describe('DebtStrategyScreen', () => {
 
   it('falls back to a plain number when no currency code is available', async () => {
     const { view } = await renderScreen({ status: 'loaded', data: eligible, refreshing: false }, null)
-    expect(view.getByText('1850')).toBeOnTheScreen()
+    expect(view.getByText('1,850.00')).toBeOnTheScreen()
   })
 })

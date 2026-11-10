@@ -1,58 +1,64 @@
 import { mapPortfolioPerformanceReport } from './portfolio-performance-report-view-model'
+import type { PortfolioPerformanceReportRow } from './reports-contract'
 
-const row = (overrides: Partial<{ accountKey: string; name: string; currency: string; startBalance: number; endBalance: number; return: number; contributions: number }> = {}) => ({
-  accountKey: 'acc-1',
-  name: 'Broker',
+const row = (overrides: Partial<PortfolioPerformanceReportRow> = {}): PortfolioPerformanceReportRow => ({
+  portfolioKey: '7',
+  name: 'Long-term',
   currency: 'EUR',
-  startBalance: 1000,
-  endBalance: 1100,
-  return: 100,
-  contributions: 0,
+  startValue: 1000,
+  netContributions: 0,
+  change: 100,
+  changePercent: 10,
+  dividends: 0,
+  endValue: 1100,
   ...overrides,
 })
 
 describe('portfolio-performance report view model', () => {
-  it('flags non-negative returns as gaining and negative returns as not', () => {
-    const result = mapPortfolioPerformanceReport({
-      data: [row({ accountKey: 'a', return: 50 }), row({ accountKey: 'b', return: -20 }), row({ accountKey: 'c', return: 0 })],
-      generatedAt: '2026-08-11T00:00:00.000Z',
-    })
-    expect(result.rows.find((r) => r.accountKey === 'a')?.gaining).toBe(true)
-    expect(result.rows.find((r) => r.accountKey === 'b')?.gaining).toBe(false)
-    expect(result.rows.find((r) => r.accountKey === 'c')?.gaining).toBe(true)
-  })
-
-  it('sorts rows by absolute return descending, regardless of sign', () => {
+  it('sorts rows by absolute change descending, regardless of sign, with unknown changes last', () => {
     const result = mapPortfolioPerformanceReport({
       data: [
-        row({ accountKey: 'small', return: 5 }),
-        row({ accountKey: 'bigLoss', return: -200 }),
-        row({ accountKey: 'medium', return: 50 }),
+        row({ portfolioKey: 'small', change: 5 }),
+        row({ portfolioKey: 'unknown', change: null }),
+        row({ portfolioKey: 'bigLoss', change: -200 }),
+        row({ portfolioKey: 'medium', change: 50 }),
       ],
       generatedAt: '2026-08-11T00:00:00.000Z',
     })
-    expect(result.rows.map((r) => r.accountKey)).toEqual(['bigLoss', 'medium', 'small'])
+    expect(result.rows.map((r) => r.portfolioKey)).toEqual(['bigLoss', 'medium', 'small', 'unknown'])
   })
 
-  it('keeps each row currency as an informational label, distinct per account', () => {
+  it('sums the change across portfolios exactly, since amounts are already in one shared currency server-side', () => {
     const result = mapPortfolioPerformanceReport({
-      data: [row({ accountKey: 'usd', currency: 'USD' }), row({ accountKey: 'eur', currency: 'EUR' })],
+      data: [row({ portfolioKey: 'a', change: 100.1 }), row({ portfolioKey: 'b', change: -30.2 })],
       generatedAt: '2026-08-11T00:00:00.000Z',
     })
-    expect(result.rows.find((r) => r.accountKey === 'usd')?.currency).toBe('USD')
-    expect(result.rows.find((r) => r.accountKey === 'eur')?.currency).toBe('EUR')
+    expect(result.aggregateChange).toBe(69.9)
   })
 
-  it('sums return across rows into aggregateReturn, since amounts are already in one shared currency server-side', () => {
+  it('leaves the combined change unknown when any portfolio has no start value', () => {
     const result = mapPortfolioPerformanceReport({
-      data: [row({ accountKey: 'a', return: 100 }), row({ accountKey: 'b', return: -30 })],
+      data: [row({ portfolioKey: 'a' }), row({ portfolioKey: 'b', startValue: null, change: null, changePercent: null })],
       generatedAt: '2026-08-11T00:00:00.000Z',
     })
-    expect(result.aggregateReturn).toBe(70)
+    expect(result.aggregateChange).toBeNull()
+  })
+
+  it('leaves contributions and dividends unknown when a portfolio\'s trades had no exchange rate', () => {
+    const result = mapPortfolioPerformanceReport({
+      data: [row({ portfolioKey: 'a', netContributions: 100, dividends: 5 }), row({ portfolioKey: 'b', netContributions: null, change: null, changePercent: null, dividends: null })],
+      generatedAt: '2026-08-11T00:00:00.000Z',
+    })
+    expect(result.totals).toMatchObject({ netContributions: null, dividends: null, change: null, changePercent: null, startValue: 2000 })
   })
 
   it('passes generatedAt through and returns an empty list with a zero aggregate for no rows', () => {
     const result = mapPortfolioPerformanceReport({ data: [], generatedAt: '2026-08-11T00:00:00.000Z' })
-    expect(result).toEqual({ rows: [], generatedAt: '2026-08-11T00:00:00.000Z', aggregateReturn: 0 })
+    expect(result).toEqual({
+      rows: [],
+      generatedAt: '2026-08-11T00:00:00.000Z',
+      aggregateChange: 0,
+      totals: { startValue: 0, netContributions: 0, change: 0, changePercent: null, dividends: 0, endValue: 0 },
+    })
   })
 })

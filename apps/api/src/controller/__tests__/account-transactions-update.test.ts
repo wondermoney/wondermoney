@@ -14,6 +14,11 @@ const mocked = vi.hoisted(() => ({
   persist: vi.fn().mockReturnThis(),
 }));
 
+// Splits are covered by transaction-split.test.ts; none of these transactions is split.
+vi.mock('@service/transaction/transaction-split.service', () => ({
+  reconcileSplitsWithAmount: vi.fn().mockResolvedValue('none'),
+  removeSplitsBeforeCategorizing: vi.fn().mockResolvedValue(undefined),
+}));
 vi.mock('@validators/parser', () => ({
   zParse: vi.fn((_schema, req: unknown) => Promise.resolve(req)),
 }));

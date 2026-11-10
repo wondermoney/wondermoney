@@ -18,7 +18,13 @@ const Slide = ({
     classname,
   );
 
-  return <div className={slideClasses}>{children}</div>;
+  // Closed, the panel sits below the viewport but stays mounted; inert keeps its
+  // controls out of the tab order and the accessibility tree.
+  return (
+    <div className={slideClasses} inert={!isOpen}>
+      {children}
+    </div>
+  );
 };
 
 export default Slide;

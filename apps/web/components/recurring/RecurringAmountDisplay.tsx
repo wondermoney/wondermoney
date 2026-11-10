@@ -1,3 +1,5 @@
+"use client";
+
 import type { ReactNode } from "react";
 
 import type {
@@ -5,7 +7,10 @@ import type {
   RecurringItem,
 } from "@/lib/api/recurring/useRecurringItems";
 import { cn } from "@/lib/utils";
-import { formatCurrencyForScreenReader } from "@/lib/utils/formatCurrency";
+import {
+  useFormatCurrency,
+  useFormatCurrencyForScreenReader,
+} from "@/lib/utils/useFormatCurrency";
 
 type RecurringAmountSource = Pick<
   RecurringItem,
@@ -26,6 +31,7 @@ export interface RecurringAmountDisplayProps {
   averageAmount?: number | null;
   lastAmount?: number | null;
   currencyCode?: string;
+  /** Unused: the formatters read the route locale. Kept for callers. */
   locale?: string;
   fallback?: ReactNode;
   className?: string;
@@ -37,21 +43,8 @@ const isFiniteNumber = (value: unknown): value is number =>
 const isCurrencyCode = (value: unknown): value is string =>
   typeof value === "string" && /^[A-Z]{3}$/.test(value);
 
-const formatMoney = (value: number, currencyCode?: string, locale?: string) => {
-  if (!isCurrencyCode(currencyCode)) {
-    return new Intl.NumberFormat(locale, {
-      notation: "standard",
-      maximumFractionDigits: 2,
-    }).format(value);
-  }
-
-  return new Intl.NumberFormat(locale, {
-    style: "currency",
-    notation: "standard",
-    maximumFractionDigits: 2,
-    currency: currencyCode,
-  }).format(value);
-};
+type FormatMoney = ReturnType<typeof useFormatCurrency>;
+type FormatSpoken = ReturnType<typeof useFormatCurrencyForScreenReader>;
 
 function getSourceValue(
   source: Partial<RecurringAmountSource> | undefined,
@@ -63,9 +56,11 @@ function getSourceValue(
 
 function getDisplayNode(
   source: Partial<RecurringAmountSource>,
+  format: FormatMoney,
   currencyCode?: string,
-  locale?: string,
 ): ReactNode | null {
+  // A non-ISO code formats as a plain number, as it always has here.
+  const formatMoney = (value: number) => format(value, currencyCode ?? "");
   const exact = getSourceValue(source, "expectedAmount");
   const min = getSourceValue(source, "expectedAmountMin");
   const max = getSourceValue(source, "expectedAmountMax");
@@ -81,20 +76,20 @@ function getDisplayNode(
 
   if (amountType === "fixed") {
     const value = exact ?? average ?? last;
-    return value === null ? null : formatMoney(value, currencyCode, locale);
+    return value === null ? null : formatMoney(value);
   }
 
   const rangeValues = [min, max].filter(isFiniteNumber);
   if (rangeValues.length === 2) {
     const low = Math.min(rangeValues[0], rangeValues[1]);
     const high = Math.max(rangeValues[0], rangeValues[1]);
-    if (low === high) return formatMoney(low, currencyCode, locale);
+    if (low === high) return formatMoney(low);
 
     return (
       <span className="inline-flex items-center gap-1">
-        <span>{formatMoney(low, currencyCode, locale)}</span>
+        <span>{formatMoney(low)}</span>
         <span className="text-muted-foreground">–</span>
-        <span>{formatMoney(high, currencyCode, locale)}</span>
+        <span>{formatMoney(high)}</span>
       </span>
     );
   }
@@ -102,13 +97,13 @@ function getDisplayNode(
   const fallbackValue = average ?? last;
   return fallbackValue === null
     ? null
-    : formatMoney(fallbackValue, currencyCode, locale);
+    : formatMoney(fallbackValue);
 }
 
 function getAccessibleLabel(
   source: Partial<RecurringAmountSource>,
+  formatSpoken: FormatSpoken,
   currencyCode?: string,
-  locale?: string,
 ) {
   const exact = getSourceValue(source, "expectedAmount");
   const min = getSourceValue(source, "expectedAmountMin");
@@ -123,11 +118,7 @@ function getAccessibleLabel(
         ? "fixed"
         : null);
   const accessibleMoney = (value: number) =>
-    formatCurrencyForScreenReader(
-      value,
-      isCurrencyCode(currencyCode) ? currencyCode : "EUR",
-      locale ?? "en",
-    );
+    formatSpoken(value, isCurrencyCode(currencyCode) ? currencyCode : "EUR");
 
   if (amountType === "fixed") {
     const value = exact ?? average ?? last;
@@ -156,10 +147,12 @@ export function RecurringAmountDisplay({
   averageAmount,
   lastAmount,
   currencyCode,
-  locale,
   fallback,
   className,
 }: RecurringAmountDisplayProps) {
+  // Both read the route locale and privacy mode themselves.
+  const formatMoney = useFormatCurrency();
+  const formatSpoken = useFormatCurrencyForScreenReader();
   const source = {
       amountType: item?.amountType ?? amountType,
       expectedAmount: item?.expectedAmount ?? expectedAmount,
@@ -168,8 +161,8 @@ export function RecurringAmountDisplay({
       averageAmount: item?.averageAmount ?? averageAmount,
       lastAmount: item?.lastAmount ?? lastAmount,
     };
-  const displayNode = getDisplayNode(source, currencyCode, locale);
-  const accessibleLabel = getAccessibleLabel(source, currencyCode, locale);
+  const displayNode = getDisplayNode(source, formatMoney, currencyCode);
+  const accessibleLabel = getAccessibleLabel(source, formatSpoken, currencyCode);
 
   if (displayNode === null) {
     return (

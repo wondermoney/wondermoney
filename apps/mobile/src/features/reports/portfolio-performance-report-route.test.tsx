@@ -10,7 +10,7 @@ const mockReplace = jest.fn()
 const mockRefetch = jest.fn()
 
 const responseData = {
-  data: [{ accountKey: 'a', name: 'Broker', currency: 'EUR', startBalance: 1000, endBalance: 1100, return: 100, contributions: 0 }],
+  data: [{ portfolioKey: '7', name: 'Long-term', currency: 'EUR', startValue: 1000, netContributions: 0, change: 100, changePercent: 10, dividends: 0, endValue: 1100 }],
   generatedAt: '2026-08-11T00:00:00.000Z',
   filters: {},
 }
@@ -22,7 +22,6 @@ let mockQuery: { data?: unknown; isLoading: boolean; isFetching: boolean; isAcce
 jest.mock('expo-router', () => ({ useRouter: () => ({ replace: mockReplace }) }))
 jest.mock('./use-portfolio-performance-report', () => ({ usePortfolioPerformanceReport: (...args: unknown[]) => mockUsePortfolioPerformanceReport(...args) }))
 jest.mock('./use-reports-currency', () => ({ useReportsCurrency: () => 'EUR' }))
-jest.mock('./use-report-filter-options', () => ({ useReportFilterOptions: () => ({ accounts: [], categories: [], merchants: [], currencies: [] }) }))
 jest.mock('./use-report-export', () => ({ useReportExport: () => ({ state: { status: 'idle' }, exportCsv: jest.fn() }) }))
 
 const mockUsePortfolioPerformanceReport = jest.fn((..._args: unknown[]) => mockQuery)
@@ -41,7 +40,7 @@ describe('PortfolioPerformanceReportRoute', () => {
 
   it('maps a loaded response into the screen', async () => {
     const view = await renderRoute()
-    expect(view.getByText('Broker')).toBeOnTheScreen()
+    expect(view.getByText('Long-term')).toBeOnTheScreen()
   })
 
   it('surfaces invalid-response distinctly and navigates back to the reports hub', async () => {

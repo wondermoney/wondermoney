@@ -1,9 +1,5 @@
 export type LoanType =
-  | "MORTGAGE"
-  | "AUTO_LOAN"
-  | "PERSONAL_LOAN"
-  | "STUDENT_LOAN"
-  | "OTHER";
+  "MORTGAGE" | "AUTO_LOAN" | "PERSONAL_LOAN" | "STUDENT_LOAN" | "OTHER";
 
 export type LoanStatus = "ACTIVE" | "PAID_OFF" | "CLOSED";
 
@@ -72,6 +68,13 @@ export interface LoanRepayment {
   totalPaymentAmount: number;
   paymentDate: string;
   needsReview?: boolean;
+  /** The bank transaction the repayment is linked to, as the API sends it. */
+  transaction?: {
+    transactionKey: number;
+    description?: string | null;
+    settlementAmount?: number;
+    transactionDate?: string;
+  } | null;
 }
 
 export interface LoanRepaymentCandidate {

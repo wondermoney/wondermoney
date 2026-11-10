@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { DI } from '@app/database/di';
 import { AnalyticsOutbox } from '@entity/AnalyticsOutbox';
 import { Appuser, SupportedLanguages } from '@entity/Appuser';
+import { isAnalyticsOutboxEnabled } from '@service/analytics/analytics-outbox.service';
 import { ERROR } from '@utils/constants';
 
 const SIGNUP_EVENT_ID_PREFIX = 'signup.v1:';
@@ -30,7 +31,7 @@ export type SignupRecordResult = Readonly<{
  * flush hits the unique external-id constraint, and it re-reads the winner's row.
  *
  * The `signup` analytics event commits in the same transaction, so it exists exactly when the
- * appuser does. It carries no email or name.
+ * appuser does (and only while analytics delivery is on). It carries no email or name.
  */
 export async function recordSignup(input: SignupRecordInput): Promise<SignupRecordResult> {
   const externalUserId = externalUserIdSchema.parse(input.externalUserId);
@@ -49,18 +50,20 @@ export async function recordSignup(input: SignupRecordInput): Promise<SignupReco
         lastName: input.lastName,
         receiveUpdates: false,
       });
-      const eventId = `${SIGNUP_EVENT_ID_PREFIX}${externalUserId}`;
-      const outbox = new AnalyticsOutbox();
-      outbox.distinctId = externalUserId;
-      outbox.eventId = eventId;
-      outbox.eventName = 'signup';
-      outbox.properties = {
-        $insert_id: eventId,
-        appuser_key: appuser.appuserKey.toString(),
-        locale: appuser.language,
-        method: input.method,
-      };
-      em.persist(outbox);
+      if (isAnalyticsOutboxEnabled()) {
+        const eventId = `${SIGNUP_EVENT_ID_PREFIX}${externalUserId}`;
+        const outbox = new AnalyticsOutbox();
+        outbox.distinctId = externalUserId;
+        outbox.eventId = eventId;
+        outbox.eventName = 'signup';
+        outbox.properties = {
+          $insert_id: eventId,
+          appuser_key: appuser.appuserKey.toString(),
+          locale: appuser.language,
+          method: input.method,
+        };
+        em.persist(outbox);
+      }
       await em.flush();
 
       return { appuser, created: true };

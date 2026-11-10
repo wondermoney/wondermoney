@@ -5,6 +5,7 @@ import { StyleSheet } from 'react-native'
 import { initMobileI18n } from '@/lib/i18n'
 
 import { ProfileScreen } from './profile-screen'
+import { touchHeight } from '@/test/touch-target'
 
 async function renderScreen(state: React.ComponentProps<typeof ProfileScreen>['state']) {
   const i18n = await initMobileI18n('en')
@@ -31,10 +32,9 @@ describe('ProfileScreen', () => {
         mfaEnabled: false,
       },
     })
-    expect(view.getByLabelText('Email, person@example.com')).toBeOnTheScreen()
+    expect(view.getByLabelText('Email address, person@example.com')).toBeOnTheScreen()
     expect(view.getByLabelText('First name, Not provided')).toBeOnTheScreen()
     expect(view.getByLabelText('Last name, Silva')).toBeOnTheScreen()
-    expect(view.getByLabelText('Multi-factor authentication, Not enabled')).toBeOnTheScreen()
     expect(view.queryByText(/delete|provider|referral|tenant|currency|phone|avatar|user id/i)).not.toBeOnTheScreen()
   })
 
@@ -47,12 +47,13 @@ describe('ProfileScreen', () => {
     expect(edit).toHaveBeenCalledTimes(1)
   })
 
-  it('shows enabled MFA and safe loading/stale/error/access states', async () => {
+  it('leaves MFA to Security and shows safe loading/stale/error/access states', async () => {
     const enabled = await renderScreen({
       status: 'loaded',
       data: { emailAddress: 'a@b.com', firstName: 'Ada', lastName: null, mfaEnabled: true },
     })
-    expect(enabled.view.getByLabelText('Multi-factor authentication, Enabled')).toBeOnTheScreen()
+    expect(enabled.view.getByLabelText('First name, Ada')).toBeOnTheScreen()
+    expect(enabled.view.queryByText(/multi-factor/i)).not.toBeOnTheScreen()
 
     const loading = await renderScreen({ status: 'loading' })
     expect(loading.view.getByRole('progressbar', { name: 'Loading profile' })).toBeOnTheScreen()
@@ -62,13 +63,13 @@ describe('ProfileScreen', () => {
       data: { emailAddress: 'a@b.com', firstName: 'Ada', lastName: null, mfaEnabled: true },
     })
     expect(stale.view.getByRole('alert', { name: 'Could not refresh. Showing previously loaded profile' })).toBeOnTheScreen()
-    expect(stale.view.getByLabelText('Email, a@b.com')).toBeOnTheScreen()
+    expect(stale.view.getByLabelText('Email address, a@b.com')).toBeOnTheScreen()
     await fireEvent.press(stale.view.getByRole('button', { name: 'Retry' }))
     expect(stale.retry).toHaveBeenCalledTimes(1)
 
     const invalid = await renderScreen({ status: 'invalid-response' })
     expect(invalid.view.queryByText('a@b.com')).not.toBeOnTheScreen()
-    expect(invalid.view.getByRole('button', { name: 'Back' })).toBeOnTheScreen()
+    expect(invalid.view.getByRole('button', { name: 'Back to More' })).toBeOnTheScreen()
 
     const access = await renderScreen({ status: 'access-transition' })
     expect(access.view.toJSON()).toBeNull()
@@ -90,17 +91,17 @@ describe('ProfileScreen', () => {
     })
     const retry = view.getByRole('button', { name: 'Retry' })
     expect(retry.props.accessibilityState).toMatchObject({ busy: true, disabled: true })
-    expect(StyleSheet.flatten(retry.props.style).minHeight).toBeGreaterThanOrEqual(44)
+    expect(touchHeight(retry)).toBeGreaterThanOrEqual(44)
   })
 
   it('keeps actions scalable and at least 44pt', async () => {
     const { view } = await renderScreen({ status: 'error' })
-    for (const name of ['Back', 'Retry', 'Sign out']) {
+    for (const [name, text] of [['Back to More', 'More'], ['Retry', 'Retry'], ['Sign out', 'Sign out']] as const) {
       const action = view.getByRole('button', { name })
-      expect(StyleSheet.flatten(action.props.style).minHeight).toBeGreaterThanOrEqual(44)
-      expect(within(action).getByText(name).props.allowFontScaling).not.toBe(false)
+      expect(touchHeight(action)).toBeGreaterThanOrEqual(44)
+      expect(within(action).getByText(text).props.allowFontScaling).not.toBe(false)
     }
-    await fireEvent(view.getByRole('button', { name: 'Back' }), 'focus')
-    expect(StyleSheet.flatten(view.getByRole('button', { name: 'Back' }).props.style).borderWidth).toBe(2)
+    await fireEvent(view.getByRole('button', { name: 'Back to More' }), 'focus')
+    expect(StyleSheet.flatten(view.getByRole('button', { name: 'Back to More' }).props.style).borderWidth).toBe(2)
   })
 })

@@ -56,10 +56,13 @@ export const budgetAddCategoryWriteSchema = z.object({
 }).strict()
 export type BudgetAddCategoryWrite = z.input<typeof budgetAddCategoryWriteSchema>
 
+// `name` (with `description`, which is replaced along with it) and `rolloverCarriesOverspend` can
+// each be sent alone; the API needs at least one of them.
 export const budgetMetadataWriteSchema = z.object({
-  name: z.string().min(1).max(100),
+  name: z.string().min(1).max(100).optional(),
   description: z.string().max(500).optional(),
-}).strict()
+  rolloverCarriesOverspend: z.boolean().optional(),
+}).strict().refine((value) => value.name !== undefined || value.rolloverCarriesOverspend !== undefined, { path: ['name'] })
 
 export type BudgetMetadataWrite = z.input<typeof budgetMetadataWriteSchema>
 
@@ -67,6 +70,8 @@ export const budgetCategoryWriteSchema = z.object({
   amount: z.number().finite().positive(),
   recurrency: z.enum(['MONTHLY_14', 'MONTHLY', 'QUARTERLY', 'BI_ANNUALLY', 'ANNUALLY']),
   applyToFollowingMonths: z.boolean(),
+  /** Sent only when the switch changed, so a forward amount edit never rewrites later months' rollover. */
+  rolloverEnabled: z.boolean().optional(),
 }).strict()
 
 export type BudgetCategoryWrite = z.input<typeof budgetCategoryWriteSchema>
@@ -75,6 +80,8 @@ const budgetDetailSchema = z.object({
   budgetKey: positiveSafeIdSchema,
   description: z.string().max(500).nullable().optional(),
   name: z.string().min(1).max(100),
+  /** Absent from servers without rollover: the setting is then not offered. */
+  rolloverCarriesOverspend: z.boolean().optional(),
 })
 
 export const budgetDetailResponseSchema = z.object({
@@ -106,17 +113,35 @@ const budgetCategoryRowFields = {
   parent_category_name: z.string(),
 }
 
+// Rollover fields (budget rollover). Optional so a server without rollover still parses: nothing
+// rolled over, available equals budgeted, rollover off, nothing incomplete.
+const budgetCategoryRolloverFields = {
+  category_available: moneySchema.optional(),
+  category_rolled_over: moneySchema.default(0),
+  category_rollover_enabled: z.boolean().default(false),
+  category_rollover_incomplete: z.boolean().default(false),
+}
+
+const withAvailableDefault = <Row extends { category_available?: number; category_budgeted_amount: number; category_rolled_over: number }>(
+  { category_available, ...row }: Row,
+): Omit<Row, 'category_available'> & { category_available: number } => ({
+  ...row,
+  category_available: category_available ?? row.category_budgeted_amount + row.category_rolled_over,
+})
+
 export const budgetCategoryRowSchema = z.union([
   z.object({
     ...budgetCategoryRowFields,
+    ...budgetCategoryRolloverFields,
     category_recurrency: z.null(),
     child_category_name: z.null(),
-  }),
+  }).transform(withAvailableDefault),
   z.object({
     ...budgetCategoryRowFields,
+    ...budgetCategoryRolloverFields,
     category_recurrency: budgetRecurrenceResponseSchema.nullable(),
     child_category_name: z.string(),
-  }),
+  }).transform(withAvailableDefault),
 ])
 
 const budgetAccountSchema = z.object({
@@ -142,6 +167,10 @@ export const budgetSchema = z.object({
   incomes: z.array(budgetIncomeSchema),
   month: monthSchema,
   name: z.string(),
+  /** Off: only unspent money rolls over, an overspend is dropped. The API's default is on. */
+  rolloverCarriesOverspend: z.boolean().default(true),
+  /** `/v1/budget/full` only; the month endpoint reports it at the top level. */
+  rolloverComplete: z.boolean().optional(),
   year: yearSchema,
 })
 
@@ -153,6 +182,8 @@ export const budgetMonthResponseSchema = z.object({
   budget: budgetSchema,
   hasNextMonth: z.boolean(),
   hasPreviousMonth: z.boolean(),
+  /** False when some carried amount rests on spending that could not be converted. */
+  rolloverComplete: z.boolean().default(true),
 })
 
 // The year and year-until-month endpoints return the same shape as a month, minus `month` — the

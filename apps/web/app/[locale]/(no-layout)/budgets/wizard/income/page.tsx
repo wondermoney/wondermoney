@@ -36,14 +36,15 @@ import {
   replaceIncomeById,
   toBudgetCreateIncomes,
 } from "@/lib/utils/budget-wizard";
-import { formatCurrencyForLocale } from "@/lib/utils/formatCurrency";
 import { convertRecurrencyIntoMonthsInYear } from "@/lib/utils/recurrency";
+import { useFormatCurrency } from "@/lib/utils/useFormatCurrency";
 
 import { type IncomeData, incomeSchema, useBudgetWizardStore } from "../store";
 
 export default function IncomePage() {
   const t = useTranslations();
   const locale = useLocale();
+  const formatAmountText = useFormatCurrency();
   const router = useRouter();
 
   const { setIncome, income, household, dependents, budgetId, setBudgetId } =
@@ -94,7 +95,7 @@ export default function IncomePage() {
 
   const averageMonthlyIncome = calculateAverageMonthlyIncome(incomes);
   const formatMoney = (amount: number) =>
-    formatCurrencyForLocale(amount, "EUR", locale);
+    formatAmountText(amount, "EUR");
   const [isIncomeDialogOpen, setIsIncomeDialogOpen] = useState(false);
   const [editIncome, setEditIncome] = useState<SingleIncomeData>();
 

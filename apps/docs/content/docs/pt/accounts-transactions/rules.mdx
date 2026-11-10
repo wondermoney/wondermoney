@@ -1,0 +1,66 @@
+---
+title: Regras
+description: Categorize, renomeie, etiquete ou oculte transações automaticamente, veja o que uma regra apanha antes de a guardar, e aplique-a às transações que já tem.
+---
+
+Uma regra diz ao WonderMoney o que fazer com transações de um certo tipo: por exemplo, "quando a descrição contém NETFLIX, definir a categoria Entretenimento". As regras pertencem ao agregado, por isso ambos os membros veem e gerem a mesma lista.
+
+## Onde as encontrar
+
+Na web, vá a **Definições → Regras**. A lista mostra todas as regras pela ordem em que correm, com um resumo numa linha, como "Descrição contém NETFLIX, definir categoria Entretenimento", e um interruptor para ligar ou desligar cada regra.
+
+- **Pesquise** pelo nome, ou **filtre** pela categoria que a regra define, para encontrar uma regra depressa.
+- **Reordene** arrastando uma regra, ou com as setas para cima e para baixo. Limpe primeiro a pesquisa e o filtro: a ordem abrange sempre a lista inteira.
+- **Edite** ou **elimine** uma regra a partir da sua linha. Eliminar uma regra não desfaz o que ela já alterou.
+
+## Criar uma regra
+
+Escolha **Criar regra**, ou comece a partir de uma transação: abra o menu da transação, escolha **Editar** e depois **Criar regra**. Começar a partir de uma transação preenche o comerciante (ou a descrição, quando não tem comerciante) e a categoria atual.
+
+Uma regra tem:
+
+- **Condições.** Cada uma compara um campo da transação:
+  - **Descrição** ou **Comerciante**: contém, não contém, é, começa por, termina em. A comparação ignora maiúsculas, acentos e espaços a mais. Na descrição pode comparar o texto como é mostrado ou o texto original do banco.
+  - **Montante**: é, é maior que, é pelo menos, é menor que, é no máximo, ou está entre dois montantes. Os montantes são comparados sem sinal; acrescente uma condição de **Sentido** (entrada ou saída de dinheiro) para os distinguir.
+  - **Conta**, **Categoria** (incluindo "Sem categoria"), **Tipo de transação** e **Moeda**: é uma de, ou não é nenhuma de, os valores que escolher.
+- **Cumprir todas as condições ou qualquer condição.** Uma regra pode ter até 20 condições.
+- **Ações**: definir a categoria, definir o comerciante (escolha um ou escreva um nome novo), renomear a descrição, adicionar notas (só onde as notas estão vazias), adicionar etiquetas, marcar como revista ou ocultar a transação. Cada tipo de ação só pode aparecer uma vez numa regra.
+- **Parar depois desta regra.** Quando a regra se aplica a uma transação, as regras abaixo não correm sobre essa transação.
+
+Um agregado pode ter até 200 regras.
+
+## Pré-visualizar antes de guardar
+
+Enquanto edita, a pré-visualização ao lado do formulário mostra quantas das suas transações a regra apanha, quantas delas mudaria, e as 50 correspondências mais recentes com a alteração que cada uma receberia. Atualiza-se pouco depois de parar de escrever.
+
+A pré-visualização avalia a regra sozinha e abrange as transações do agregado que pode ver, incluindo as ocultas. Nunca mostra as contas privadas do outro membro. Uma correspondência pode aparecer como **Sem alteração** quando a transação já tem esses valores, ou quando foi o próprio a definir esse valor (ver abaixo).
+
+Guardar uma regra não altera as transações que já tem. Para as alterar também, aplique a regra (ver abaixo).
+
+## Aplicar regras às transações existentes
+
+Depois de guardar uma regra ativa, o WonderMoney verifica quantas das suas transações existentes ela alteraria. Se houver alguma, propõe **Aplicar a N transações**. Confirme para a aplicar, ou escolha **Agora não** para as deixar como estão.
+
+Para correr todas as regras ativas sobre as transações que já tem (por exemplo, depois de as reordenar), escolha **Aplicar às transações existentes** no topo de **Definições → Regras**. As regras correm então de cima para baixo, como nas transações novas.
+
+- O número que confirma é exatamente o que a aplicação altera.
+- A aplicação corre em segundo plano: a janela mostra o progresso, e pode fechá-la enquanto corre. Quando termina, uma mensagem diz quantas transações mudaram.
+- Abrange as transações do agregado que pode ver, incluindo as ocultas, mas não as eliminadas nem as contas privadas do outro membro. Tudo o que está em "O que as regras nunca alteram" continua a valer.
+- Aplicar a mesma regra outra vez não altera mais nada. Cada alteração fica registada na atividade da transação.
+- Só uma aplicação de cada vez por agregado: espere que uma termine antes de começar outra.
+
+## O que as regras nunca alteram
+
+- O que definiu à mão: uma categoria que escolheu, um comerciante ou uma descrição que editou, e notas que escreveu. A regra continua a contar como correspondência, mas deixa esses campos como estão.
+- O tipo de transação. Só a deteção de transferências marca uma transação como transferência.
+- Transações nas contas privadas do outro membro. Uma regra atua em nome do membro que alterou por último as suas condições ou ações, e só sobre transações que esse membro pode ver.
+
+## Ordem
+
+As regras correm de cima para baixo. Cada regra olha para a transação como chegou, não como as regras anteriores a deixaram. Quando duas regras definem o mesmo campo, ganha a de baixo; as etiquetas de várias regras somam-se. Ligue **Parar depois desta regra** para impedir que as regras abaixo corram sobre o que ela apanhou.
+
+## Ligações relacionadas
+
+- [Categorizar transações](/pt/docs/accounts-transactions/categorize-transactions)
+- [Compreender as transações](/pt/docs/accounts-transactions/understand-transactions)
+- [Gerir categorias](/pt/docs/settings-security-privacy/manage-categories)

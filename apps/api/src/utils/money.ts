@@ -1,5 +1,8 @@
 import { Big } from 'big.js';
 
+import { IS_PRODUCTION_LIKE } from '@config/env';
+import logger from '@utils/logger';
+
 /**
  * The single arithmetic surface for money in this application.
  *
@@ -105,5 +108,100 @@ export function roundDisplay(value: Numeric): number {
  */
 export function moneyEquals(a: Numeric, b: Numeric, scale: number = MONEY_SCALE): boolean {
   return big(a).round(scale).eq(big(b).round(scale));
+}
+
+/**
+ * Arithmetic on amounts in two different currencies. Adding 10 USD to 10 EUR gives a number
+ * that means nothing, so the `Money` operations refuse it instead.
+ */
+export class CurrencyMismatchError extends Error {
+  constructor(readonly operation: string, readonly left: string, readonly right: string) {
+    super(`Cannot ${operation} ${left} and ${right} amounts without converting one of them`);
+    this.name = 'CurrencyMismatchError';
+  }
+}
+
+/**
+ * An amount together with its ISO currency code.
+ *
+ * The numeric helpers above stay for single-currency internals (a running balance, one row's
+ * rounding). Anything that totals amounts that may belong to different household members, or to
+ * accounts in different currencies, goes through `Money`: adding two currencies throws, and
+ * crossing currencies takes an explicit rate.
+ */
+export interface Money {
+  readonly amount: Big;
+  readonly currency: string;
+}
+
+function assertSameCurrency(operation: string, left: Money, right: Money | string) {
+  const rightCurrency = typeof right === 'string' ? right : right.currency;
+  if (left.currency !== rightCurrency) throw new CurrencyMismatchError(operation, left.currency, rightCurrency);
+}
+
+export const Money = {
+  add(left: Money, right: Money): Money {
+    assertSameCurrency('add', left, right);
+    return { amount: left.amount.plus(right.amount), currency: left.currency };
+  },
+
+  /** Convert at an explicit rate. Within one currency only a rate of 1 makes sense. */
+  convert(value: Money, conversion: { rate: Numeric; to: string }): Money {
+    const rate = big(conversion.rate);
+    if (value.currency === conversion.to && !rate.eq(1)) {
+      throw new RangeError(`A ${value.currency} amount cannot be converted to ${conversion.to} at ${rate.toString()}`);
+    }
+    return { amount: value.amount.times(rate), currency: conversion.to };
+  },
+
+  of(amount: Numeric, currency: string): Money {
+    return { amount: big(amount), currency };
+  },
+
+  subtract(left: Money, right: Money): Money {
+    assertSameCurrency('subtract', left, right);
+    return { amount: left.amount.minus(right.amount), currency: left.currency };
+  },
+
+  /** Exact total in `currency`. Every value must already be in it. */
+  sum(values: Money[], currency: string): Money {
+    let total: Money = { amount: new Big(0), currency };
+    for (const value of values) {
+      assertSameCurrency('sum', total, value);
+      total = { amount: total.amount.plus(value.amount), currency };
+    }
+    return total;
+  },
+
+  /** Round to `scale` and return a JS number, like {@link toNumber}. */
+  toNumber(value: Money, scale: number = MONEY_SCALE): number {
+    return toNumber(value.amount, scale);
+  },
+};
+
+/**
+ * Run a computation that may hit a {@link CurrencyMismatchError}.
+ *
+ * A mismatch is a bug in the caller: it summed before converting. Outside production it throws so
+ * a test or a developer sees it. In production it is logged with where it happened, the operation
+ * and both currency codes, and `fallback` supplies the result (an incomplete total) so one bad row
+ * does not take down a page.
+ */
+export function guardCurrencyMismatch<T>(
+  where: string,
+  compute: () => T,
+  fallback: () => T,
+  options: { log?: (context: Record<string, string>) => void; rethrow?: boolean } = {},
+): T {
+  try {
+    return compute();
+  } catch (error) {
+    const rethrow = options.rethrow ?? !IS_PRODUCTION_LIKE;
+    if (!(error instanceof CurrencyMismatchError) || rethrow) throw error;
+    const context = { left: error.left, operation: error.operation, right: error.right, where };
+    if (options.log) options.log(context);
+    else logger.error(context, 'Currency mismatch in money arithmetic; reporting the result as incomplete');
+    return fallback();
+  }
 }
 

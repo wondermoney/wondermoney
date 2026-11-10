@@ -17,7 +17,7 @@ import { buttonVariants } from "@/components/ui/button";
 import { useRouter } from "@/i18n/navigation";
 import { isDemoReadOnlyError } from "@/lib/api/errors";
 import useDeleteGoal from "@/lib/api/goals/useDeleteGoal";
-import { formatGoalCurrency } from "@/lib/goals/format";
+import { useFormatGoalCurrency } from "@/lib/goals/useFormatGoalCurrency";
 
 type ArchiveGoalDialogProps = {
   readonly availableAmount: number;
@@ -38,6 +38,7 @@ export default function ArchiveGoalDialog({
 }: ArchiveGoalDialogProps) {
   const t = useTranslations();
   const locale = useLocale();
+  const formatGoalCurrency = useFormatGoalCurrency();
   const router = useRouter();
   const mutation = useDeleteGoal(goalKey);
   const hasBalance = availableAmount > 0;

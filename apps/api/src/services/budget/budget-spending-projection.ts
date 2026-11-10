@@ -1,6 +1,6 @@
 import Big from 'big.js';
 
-import { floorMoney } from './aggregation-classifier';
+import { classifyBudgetThreshold, floorMoney } from './aggregation-classifier';
 import type { CategorizedTransaction, ClassifiedThreshold } from './aggregation-classifier';
 import type { BudgetAllocationRow } from './aggregation-types';
 import { accountKeysForAllocation } from './tenant-budget-eligibility';
@@ -33,6 +33,20 @@ export function spendForAllocation(
       )
       .reduce((sum, transaction) => sum.plus(transaction.amount), new Big(0)),
   );
+}
+
+/** What an allocation may spend this month: its budget plus any rollover carried in. */
+export function availableForAllocation(allocation: BudgetAllocationRow): Big {
+  return new Big(allocation.amountAvailable ?? allocation.amountBudgeted);
+}
+
+/**
+ * The threshold an allocation's spend has reached against what it may spend. A month that a
+ * carried overspend left with nothing (or less than nothing) is over as soon as it spends.
+ */
+export function classifyAvailableThreshold(spent: Big, available: Big): ClassifiedThreshold | null {
+  if (available.gt(0)) return classifyBudgetThreshold(spent, available);
+  return spent.gt(0) ? { claimThresholds: [80, 100], state: 'over', threshold: 100 } : null;
 }
 
 /**

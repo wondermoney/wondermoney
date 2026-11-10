@@ -14,9 +14,43 @@ import {
   ReportLoadingSkeleton,
 } from "@/components/reports/primitives";
 import { useReportsCurrency } from "@/components/reports/ReportsCurrencyContext";
+import type {
+  SankeyNode,
+  SankeyNodeIcon,
+} from "@/components/reports/sankey/sankey-layout";
 import { SankeyChart } from "@/components/reports/sankey/SankeyChart";
+import useAccounts, { type Account } from "@/lib/api/account/useAccounts";
+import type { ChildCategory } from "@/lib/api/category/useCategories";
+import useConfigs from "@/lib/api/configs/useConfigs";
 import useSankey, { getSankey } from "@/lib/api/reports/sankey";
+import type { SankeyNode as SankeyApiNode } from "@/lib/api/reports/types";
 import { getCategoryDisplayName } from "@/lib/utils/categories";
+
+// The API builds node ids from the row behind each node: `income-<categoryKey>`,
+// `expense-<categoryKey>`, `account-<accountKey>`. Overflow buckets
+// (`__other_income` and the like) match none of these and get no icon.
+const NODE_ID_PATTERN = /^(income|expense|account)-(.+)$/;
+const UNCATEGORIZED_KEY = "uncategorized";
+
+function nodeIcon(
+  node: SankeyApiNode,
+  categories: Map<string, Pick<ChildCategory, "icon" | "name">>,
+  accounts: Map<string, Account>,
+): SankeyNodeIcon | undefined {
+  const match = NODE_ID_PATTERN.exec(node.id);
+  if (!match) return undefined;
+  const key = match[2];
+
+  if (node.kind === "account") {
+    const logoUrl =
+      accounts.get(key)?.accountFinancialInstitutionKey?.logoUrl ?? null;
+    return logoUrl ? { type: "logo", url: logoUrl } : { type: "wallet" };
+  }
+  if (key === UNCATEGORIZED_KEY) return { type: "category", icon: "question" };
+  const category = categories.get(key);
+  if (!category) return undefined;
+  return { type: "category", icon: category.icon, category: category.name };
+}
 
 export function SankeyReport() {
   const t = useTranslations("reports.reports.sankey");
@@ -26,6 +60,36 @@ export function SankeyReport() {
   const locale = useLocale();
   const { currencyKey } = useReportsCurrency();
   const { data, isPending, error, refetch } = useSankey(filters);
+  // Node icons join on data the app already holds: categories from configs
+  // (system and the person's own), accounts for their bank's logo.
+  const { data: configs } = useConfigs();
+  const { data: accountsData } = useAccounts();
+
+  const categoriesByKey = useMemo(() => {
+    const map = new Map<string, Pick<ChildCategory, "icon" | "name">>();
+    for (const category of configs?.categories ?? []) {
+      map.set(String(category.categoryKey), category);
+      for (const child of category.childCategory ?? []) {
+        // A subcategory without an icon of its own borrows its parent's.
+        map.set(String(child.categoryKey), {
+          name: child.name,
+          icon: child.icon ?? category.icon,
+        });
+      }
+    }
+    return map;
+  }, [configs]);
+
+  const accountsByKey = useMemo(
+    () =>
+      new Map(
+        (accountsData?.accounts ?? []).map((account) => [
+          String(account.accountKey),
+          account,
+        ]),
+      ),
+    [accountsData],
+  );
 
   // The API sends income/expense node labels as the raw category name
   // (`CAFE_RESTAURANTS_BARS` for system categories) — the same shape
@@ -35,13 +99,16 @@ export function SankeyReport() {
     if (!data?.data) return undefined;
     return {
       ...data.data,
-      nodes: data.data.nodes.map((node) =>
-        node.kind === "account"
-          ? node
-          : { ...node, label: getCategoryDisplayName(tCategories, node.label) },
-      ),
+      nodes: data.data.nodes.map((node): SankeyNode => ({
+        ...node,
+        label:
+          node.kind === "account"
+            ? node.label
+            : getCategoryDisplayName(tCategories, node.label),
+        icon: nodeIcon(node, categoriesByKey, accountsByKey),
+      })),
     };
-  }, [data, tCategories]);
+  }, [data, tCategories, categoriesByKey, accountsByKey]);
 
   const filename = useMemo(
     () => `reports/sankey-${format(new Date(), "yyyy-MM-dd")}`,

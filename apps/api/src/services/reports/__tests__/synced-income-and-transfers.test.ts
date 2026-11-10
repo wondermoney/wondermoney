@@ -68,13 +68,13 @@ describe('a synced salary is income; an own-account transfer is not', () => {
   it('cash flow: income is the salary, expenses the groceries', async () => {
     const { household } = await seed(inJuly);
 
-    expect(await getCashflowReport(reportInput(household))).toEqual([expect.objectContaining({ expenses: 40, income: 2000, net: 1960 })]);
+    expect((await getCashflowReport(reportInput(household))).data).toEqual([expect.objectContaining({ expenses: 40, income: 2000, net: 1960 })]);
   });
 
   it('Sankey: the salary is the only income node, groceries the only expense', async () => {
     const { household } = await seed(inJuly);
 
-    const { nodes } = await getSankeyReport(reportInput(household));
+    const { nodes } = (await getSankeyReport(reportInput(household))).data;
 
     expect(nodes.filter((node) => node.kind === 'income').map((node) => [node.label, node.value])).toEqual([['Salary', 2000]]);
     expect(nodes.filter((node) => node.kind === 'expense').map((node) => [node.label, node.value])).toEqual([['Groceries', 40]]);

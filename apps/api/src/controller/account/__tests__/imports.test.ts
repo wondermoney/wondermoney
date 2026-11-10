@@ -70,7 +70,7 @@ describe('account CSV import authorization', () => {
 
   it('enqueues only an active account owned by the current user and tenant', async () => {
     const requestEnqueue = { send: vi.fn(), sendAfter: vi.fn() };
-    mocks.findOne.mockResolvedValueOnce({ accountFinancialInstitutionKey: { name: 'bcp' } });
+    mocks.findOne.mockResolvedValueOnce({ accountFinancialInstitutionKey: null });
     mocks.enqueue.mockResolvedValueOnce({ correlationId: 'csv-1', status: 'queued' });
     const json = vi.fn();
     const status = vi.fn(() => ({ json }));

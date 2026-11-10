@@ -5,6 +5,12 @@ import { cleanup, render } from "@testing-library/react";
 import { NextIntlClientProvider } from "next-intl";
 import { afterAll, afterEach, beforeAll, test } from "vitest";
 
+import { useChartFormatters } from "@/components/ui/charts/useChartFormatters";
+import {
+  setStoredPrivacyMode,
+  WithPrivacyMode,
+} from "@/lib/privacy/privacy-test-utils";
+
 import { ChartContainer, ChartTooltipContent } from "./chart";
 
 const originalRect = HTMLElement.prototype.getBoundingClientRect;
@@ -92,4 +98,47 @@ test("a tooltip still lists a series whose value is zero", () => {
   );
   assert.ok(values.includes("0"), `rendered values: ${values.join(", ")}`);
   assert.ok(values.includes((1200).toLocaleString("en")));
+});
+
+function PrivateTooltip({ formatted }: { formatted: boolean }) {
+  const { formatCompactCurrency } = useChartFormatters();
+  return (
+    <ChartContainer config={{ balance: { label: "Balance" } }}>
+      <ChartTooltipContent
+        active
+        valueFormatter={
+          formatted
+            ? (value) => formatCompactCurrency(Number(value), "EUR")
+            : undefined
+        }
+        payload={[
+          {
+            dataKey: "balance",
+            name: "balance",
+            value: 48250.75,
+            payload: {},
+            graphicalItemId: "item",
+          },
+        ]}
+      />
+    </ChartContainer>
+  );
+}
+
+test("privacy mode masks tooltip values, formatted or not", () => {
+  setStoredPrivacyMode(true);
+  for (const formatted of [true, false]) {
+    const { container } = render(
+      <NextIntlClientProvider locale="en" messages={{}}>
+        <WithPrivacyMode hidden>
+          <PrivateTooltip formatted={formatted} />
+        </WithPrivacyMode>
+      </NextIntlClientProvider>,
+    );
+    const text = container.textContent ?? "";
+    assert.ok(text.includes("Balance"), text);
+    assert.ok(!/\d/.test(text), `formatted=${formatted}: ${text}`);
+    cleanup();
+  }
+  setStoredPrivacyMode(false);
 });

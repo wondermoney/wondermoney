@@ -5,3 +5,6 @@ export const bankConnectionsKey = (epochId: number) =>
 
 export const bankInstitutionsKey = (epochId: number, countryCode?: string) =>
   [...bankingRootKey(epochId), 'institutions', countryCode ?? 'auto'] as const
+
+export const bankAlertsKey = (epochId: number) =>
+  [...bankingRootKey(epochId), 'alerts'] as const

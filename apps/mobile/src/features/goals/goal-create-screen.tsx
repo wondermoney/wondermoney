@@ -1,13 +1,21 @@
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { BackHandler, Pressable, ScrollView, StyleSheet, Text, TextInput, useColorScheme, View } from 'react-native'
-import { SafeAreaView } from 'react-native-safe-area-context'
+import { BackHandler, ScrollView, StyleSheet, View } from 'react-native'
 
-import { BackControl } from '@/components/ui/back-control'
-import { themeTokens, type Palette } from '@/theme/tokens'
-import { textStyles } from '@/theme/typography'
+import { AmountEntry } from '@/components/ui/amount-entry'
+import { Button } from '@/components/ui/button'
+import { DateField, formatIsoDate } from '@/components/ui/date-field'
+import { FormBar } from '@/components/ui/form-bar'
+import { FormGroup, FormTextRow } from '@/components/ui/form-row'
+import { Notice } from '@/components/ui/notice'
+import { SafeAreaView } from '@/components/ui/screen-safe-area'
+import { Text } from '@/components/ui/text'
+import { formatNumberInput } from '@/lib/formatters/decimal-input'
+import { themeTokens } from '@/theme/tokens'
+import { useFormatMoney } from '@/lib/formatters/money-display'
+import { usePalette } from '@/theme/use-palette'
 
-import { goalCreateWriteSchema, invalidGoalCreateFields, parseGoalTargetDate, parseLocalizedGoalMoney, type GoalCreateField, type GoalCreateWrite } from './goals-contract'
+import { goalCreateWriteSchema, invalidGoalCreateFields, parseGoalTargetDate, parseLocalizedGoalMoney, type GoalCreateWrite } from './goals-contract'
 import type { GoalCreateFailure } from './use-create-goal'
 
 
@@ -25,17 +33,28 @@ export type GoalCreateScreenProps = Readonly<{
   onRetryDetails: () => Promise<void>
 }>
 
+/** The earliest target date the API accepts: goals are dated in the future. */
+function tomorrow(): string {
+  const now = new Date()
+  return formatIsoDate(new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1))
+}
+
+/**
+ * Create goal, as a calm-structure flow: the form bar (close, save), the
+ * target big and centred, then one group of rows. Save reviews first: the ✓
+ * freezes the details, and the ✓ on the review creates the goal.
+ */
 export function GoalCreateScreen(props: GoalCreateScreenProps) {
+  const formatMoney = useFormatMoney()
   const { t, i18n } = useTranslation()
-  const palette = themeTokens.colors[useColorScheme() === 'dark' ? 'dark' : 'light']
+  const palette = usePalette()
   const locale = i18n.resolvedLanguage ?? i18n.language ?? 'en'
   const [name, setName] = useState(props.unknownPayload?.name ?? '')
-  const [target, setTarget] = useState(props.unknownPayload ? String(props.unknownPayload.targetAmount) : '')
+  const [target, setTarget] = useState(props.unknownPayload ? formatNumberInput(props.unknownPayload.targetAmount, locale) : '')
   const [description, setDescription] = useState(props.unknownPayload?.description ?? '')
-  const [monthly, setMonthly] = useState(props.unknownPayload?.monthlyContributionTarget ? String(props.unknownPayload.monthlyContributionTarget) : '')
+  const [monthly, setMonthly] = useState(props.unknownPayload?.monthlyContributionTarget ? formatNumberInput(props.unknownPayload.monthlyContributionTarget, locale) : '')
   const [targetDate, setTargetDate] = useState(props.unknownPayload?.targetDate?.slice(0, 10) ?? '')
   const [reviewed, setReviewed] = useState<Readonly<GoalCreateWrite> | null>(props.unknownPayload)
-  const [submitted, setSubmitted] = useState(false)
   const unknown = props.unknownPayload !== null
   const effectiveReviewed = props.unknownPayload ?? reviewed
 
@@ -45,82 +64,145 @@ export function GoalCreateScreen(props: GoalCreateScreenProps) {
     return () => subscription.remove()
   }, [props.pending])
 
-  const buildCandidate = () => {
-    const targetAmountValue = parseLocalizedGoalMoney(target, locale)
-    const monthlyAmount = monthly.trim() ? parseLocalizedGoalMoney(monthly, locale) : undefined
-    const targetDateValue = targetDate.trim() ? parseGoalTargetDate(targetDate) : undefined
-    const candidate = {
-      name,
-      targetAmount: targetAmountValue,
-      ...(description.length ? { description } : {}),
-      ...(monthlyAmount === undefined ? {} : { monthlyContributionTarget: monthlyAmount }),
-      ...(targetDateValue === undefined ? {} : { targetDate: targetDateValue }),
-    }
-    return { targetAmountValue, monthlyAmount, targetDateValue, candidate }
+  const targetAmountValue = parseLocalizedGoalMoney(target, locale)
+  const monthlyAmount = monthly.trim() ? parseLocalizedGoalMoney(monthly, locale) : undefined
+  const targetDateValue = targetDate.trim() ? parseGoalTargetDate(targetDate) : undefined
+  const candidate = {
+    name,
+    targetAmount: targetAmountValue,
+    ...(description.length ? { description } : {}),
+    ...(monthlyAmount === undefined ? {} : { monthlyContributionTarget: monthlyAmount }),
+    ...(targetDateValue === undefined ? {} : { targetDate: targetDateValue }),
   }
-
-  // Re-derived on every render (not stored) so a field's error clears the
-  // moment it's fixed, not only on the next submit attempt.
-  const { targetAmountValue, monthlyAmount, targetDateValue, candidate } = buildCandidate()
-  const shown = submitted
-    ? invalidGoalCreateFields({ name, targetAmount: targetAmountValue, monthlyRaw: monthly, monthlyAmount, targetDateRaw: targetDate, targetDate: targetDateValue, candidate })
-    : new Set<GoalCreateField>()
+  // Re-derived on every render so an error clears the moment it's fixed. A
+  // field not filled yet only keeps the ✓ disabled; an error shows for what
+  // was entered and is wrong.
+  const invalid = invalidGoalCreateFields({ name, targetAmount: targetAmountValue, monthlyRaw: monthly, monthlyAmount, targetDateRaw: targetDate, targetDate: targetDateValue, candidate })
+  const ready = invalid.size === 0
+  const nameError = invalid.has('name') && name.length > 0 ? t('goalCreate.fieldErrors.name') : null
+  const targetError = invalid.has('target') && target.trim() !== '' ? t('goalCreate.fieldErrors.target') : null
+  const monthlyError = invalid.has('monthly') ? t('goalCreate.fieldErrors.monthly') : null
+  const dateError = invalid.has('date') ? t('goalCreate.fieldErrors.date') : undefined
 
   const stageReview = () => {
-    setSubmitted(true)
-    if (invalidGoalCreateFields({ name, targetAmount: targetAmountValue, monthlyRaw: monthly, monthlyAmount, targetDateRaw: targetDate, targetDate: targetDateValue, candidate }).size > 0) return
+    if (!ready) return
     const result = goalCreateWriteSchema.safeParse(candidate)
     if (!result.success) return
-    setSubmitted(false)
     setReviewed(Object.freeze(result.data))
   }
 
-  const amount = (value: number) => new Intl.NumberFormat(locale, { maximumFractionDigits: 4 }).format(value)
+  const amount = (value: number) => formatMoney(value, { locale, currency: null, minimumFractionDigits: 0, maximumFractionDigits: 4 })
   const date = effectiveReviewed?.targetDate ? new Intl.DateTimeFormat(locale, { dateStyle: 'long', timeZone: 'UTC' }).format(new Date(effectiveReviewed.targetDate)) : null
+  const confirming = effectiveReviewed !== null && !unknown && props.confirmedGoalId === null
 
-  return <SafeAreaView style={[styles.safe, { backgroundColor: palette.background }]}><ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={styles.content}><View style={styles.page}>
-    <View style={styles.header}><BackControl fallback="/goals" label={t('goalCreate.back')} onPress={props.onBack} disabled={props.pending} /><View style={styles.heading}><Text accessibilityRole="header" style={[styles.title, { color: palette.foreground }]}>{t('goalCreate.title')}</Text><Text style={[styles.lead, { color: palette.mutedForeground }]}>{t('goalCreate.helper')}</Text></View></View>
-    {!effectiveReviewed ? <View style={styles.form}>
-      <Field label={t('goalCreate.name')} required count={`${name.length}/100`} errorText={shown.has('name') ? t('goalCreate.fieldErrors.name') : undefined} palette={palette}><TextInput accessibilityLabel={t('goalCreate.name')} autoCapitalize="sentences" maxLength={100} value={name} onChangeText={setName} style={[styles.input, { color: palette.foreground, borderColor: shown.has('name') ? palette.destructive : palette.border, backgroundColor: palette.card }, shown.has('name') && styles.inputInvalid]} /></Field>
-      <Field label={t('goalCreate.target')} required hint={t('goalCreate.moneyHint')} errorText={shown.has('target') ? t('goalCreate.fieldErrors.target') : undefined} palette={palette}><TextInput accessibilityLabel={t('goalCreate.target')} keyboardType="decimal-pad" value={target} onChangeText={setTarget} placeholder="0.00" placeholderTextColor={palette.mutedForeground} style={[styles.input, styles.money, { color: palette.foreground, borderColor: shown.has('target') ? palette.destructive : palette.border, backgroundColor: palette.card }, shown.has('target') && styles.inputInvalid]} /></Field>
-      <Field label={t('goalCreate.description')} count={`${description.length}/500`} palette={palette}><TextInput accessibilityLabel={t('goalCreate.description')} maxLength={500} multiline value={description} onChangeText={setDescription} style={[styles.input, styles.multiline, { color: palette.foreground, borderColor: palette.border, backgroundColor: palette.card }]} /></Field>
-      <Field label={t('goalCreate.monthly')} hint={t('goalCreate.moneyHint')} errorText={shown.has('monthly') ? t('goalCreate.fieldErrors.monthly') : undefined} palette={palette}><TextInput accessibilityLabel={t('goalCreate.monthly')} keyboardType="decimal-pad" value={monthly} onChangeText={setMonthly} placeholder={t('goalCreate.optional')} placeholderTextColor={palette.mutedForeground} style={[styles.input, styles.money, { color: palette.foreground, borderColor: shown.has('monthly') ? palette.destructive : palette.border, backgroundColor: palette.card }, shown.has('monthly') && styles.inputInvalid]} /></Field>
-      <Field label={t('goalCreate.date')} hint={t('goalCreate.dateHint')} errorText={shown.has('date') ? t('goalCreate.fieldErrors.date') : undefined} palette={palette}><TextInput accessibilityLabel={t('goalCreate.date')} autoCapitalize="none" keyboardType="numbers-and-punctuation" value={targetDate} onChangeText={setTargetDate} placeholder="YYYY-MM-DD" placeholderTextColor={palette.mutedForeground} style={[styles.input, styles.money, { color: palette.foreground, borderColor: shown.has('date') ? palette.destructive : palette.border, backgroundColor: palette.card }, shown.has('date') && styles.inputInvalid]} /></Field>
-      <View style={[styles.currencyNote, { backgroundColor: palette.primarySoft }]}><Text style={[styles.noteTitle, { color: palette.foreground }]}>{t('goalCreate.currencyTitle')}</Text><Text style={[styles.helper, { color: palette.mutedForeground }]}>{t('goalCreate.currencyHelper')}</Text></View>
-      <Action label={t('goalCreate.review')} onPress={stageReview} palette={palette} />
-    </View> : <View style={styles.reviewSection}>
-      <Text accessibilityRole="header" style={[styles.sectionTitle, { color: palette.foreground }]}>{t('goalCreate.reviewTitle')}</Text>
-      <Text style={[styles.helper, { color: palette.mutedForeground }]}>{t('goalCreate.reviewHelper')}</Text>
-      <View style={[styles.reviewCard, { borderColor: palette.border, backgroundColor: palette.card }]}>
-        <ReviewRow label={t('goalCreate.name')} value={effectiveReviewed.name} palette={palette} />
-        <ReviewRow label={t('goalCreate.target')} value={amount(effectiveReviewed.targetAmount)} palette={palette} data />
-        <ReviewRow label={t('goalCreate.description')} value={effectiveReviewed.description || t('goalCreate.notSet')} palette={palette} />
-        <ReviewRow label={t('goalCreate.monthly')} value={effectiveReviewed.monthlyContributionTarget ? amount(effectiveReviewed.monthlyContributionTarget) : t('goalCreate.notSet')} palette={palette} data={Boolean(effectiveReviewed.monthlyContributionTarget)} />
-        <ReviewRow label={t('goalCreate.date')} value={date ?? t('goalCreate.notSet')} palette={palette} />
-        <ReviewRow label={t('goalCreate.currency')} value={t('goalCreate.profileCurrency')} palette={palette} />
-      </View>
-      {props.failure && !unknown ? <Text accessibilityRole="alert" style={[styles.alert, { color: palette.destructive }]}>{t(`goalCreate.failures.${props.failure}`)}</Text> : null}
-      {unknown ? <View style={[styles.unknown, { borderColor: palette.destructive, backgroundColor: palette.muted }]}>
-        <Text accessibilityRole="header" style={[styles.sectionTitle, { color: palette.foreground }]}>{t('goalCreate.unknownTitle')}</Text>
-        <Text accessibilityRole="alert" style={[styles.helper, { color: palette.mutedForeground }]}>{t('goalCreate.unknownMessage')}</Text>
-        <Text style={[styles.helper, { color: palette.mutedForeground }]}>{props.refreshingGoals ? t('goalCreate.reconciling') : props.goalsRefreshFailed ? t('goalCreate.refreshFailed') : t('goalCreate.reviewGoals')}</Text>
-        <Text style={[styles.helper, { color: palette.mutedForeground }]}>{t('goalCreate.noInference')}</Text>
-        <View style={styles.actions}><Action label={t('goalCreate.returnGoals')} onPress={props.onBack} palette={palette} secondary /><Action label={props.refreshingGoals ? t('goalCreate.refreshingGoals') : t('goalCreate.refreshGoals')} onPress={props.onRefreshGoals} palette={palette} disabled={props.refreshingGoals} busy={props.refreshingGoals} /></View>
-      </View> : props.confirmedGoalId !== null ? <View style={[styles.unknown, { borderColor: palette.border, backgroundColor: palette.muted }]}>
-        <Text accessibilityRole="header" style={[styles.sectionTitle, { color: palette.foreground }]}>{props.detailState === 'loading' ? t('goalCreate.detailLoading') : t('goalCreate.detailUnavailableTitle')}</Text>
-        <Text accessibilityRole={props.detailState === 'unavailable' ? 'alert' : undefined} style={[styles.helper, { color: palette.mutedForeground }]}>{props.detailState === 'loading' ? t('goalCreate.detailLoadingMessage', { id: props.confirmedGoalId }) : t('goalCreate.detailUnavailableMessage', { id: props.confirmedGoalId })}</Text>
-        {props.detailState === 'unavailable' ? <View style={styles.actions}><Action label={t('goalCreate.returnGoals')} onPress={props.onBack} palette={palette} secondary /><Action label={t('goalCreate.retryDetails')} onPress={props.onRetryDetails} palette={palette} /></View> : null}
-      </View> : <View style={styles.actions}><Action label={t('goalCreate.edit')} onPress={() => setReviewed(null)} palette={palette} secondary disabled={props.pending} /><Action label={props.pending ? t('goalCreate.creating') : t('goalCreate.confirm')} onPress={() => props.onSubmit(effectiveReviewed)} palette={palette} disabled={props.pending} busy={props.pending} /></View>}
-    </View>}
-  </View></ScrollView></SafeAreaView>
+  return (
+    <SafeAreaView style={[styles.safe, { backgroundColor: palette.background }]}>
+      <FormBar
+        closeDisabled={props.pending}
+        closeLabel={t('common.close')}
+        onClose={props.onBack}
+        onSave={!effectiveReviewed ? stageReview : confirming ? () => void props.onSubmit(effectiveReviewed) : undefined}
+        saveDisabled={!effectiveReviewed ? !ready : props.pending}
+        saveLabel={!effectiveReviewed ? t('goalCreate.review') : props.pending ? t('goalCreate.creating') : t('goalCreate.confirm')}
+        saving={confirming && props.pending}
+        title={t('goalCreate.title')}
+      />
+      <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
+        <View style={styles.page}>
+          {!effectiveReviewed ? (
+            <View style={styles.form}>
+              <AmountEntry
+                accessibilityLabel={t('goalCreate.target')}
+                caption={t('goalCreate.currencyTitle')}
+                currency={null}
+                error={targetError}
+                locale={locale}
+                onChangeText={setTarget}
+                value={target}
+              />
+              <FormGroup>
+                <FormTextRow key="name" autoCapitalize="sentences" error={nameError} label={t('goalCreate.name')} maxLength={100} onChangeText={setName} value={name} />
+                <FormTextRow key="monthly" error={monthlyError} keyboardType="decimal-pad" label={t('goalCreate.monthly')} onChangeText={setMonthly} placeholder={t('goalCreate.optional')} value={monthly} />
+                <DateField key="date" appearance="row" error={dateError} label={t('goalCreate.date')} minimumDate={tomorrow()} onChange={(value) => setTargetDate(value ?? '')} optional value={targetDate || null} />
+                <FormTextRow key="description" label={t('goalCreate.description')} maxLength={500} multiline onChangeText={setDescription} placeholder={t('goalCreate.optional')} value={description} />
+              </FormGroup>
+              <Text tone="muted" variant="meta">{t('goalCreate.currencyHelper')}</Text>
+            </View>
+          ) : (
+            <View style={styles.form}>
+              <View style={styles.reviewHead}>
+                <Text accessibilityRole="header" variant="heading">{t('goalCreate.reviewTitle')}</Text>
+                <Text tone="muted" variant="meta">{t('goalCreate.reviewHelper')}</Text>
+              </View>
+              <View style={[styles.reviewList, { borderColor: palette.border }]}>
+                <ReviewRow first label={t('goalCreate.name')} value={effectiveReviewed.name} />
+                <ReviewRow data label={t('goalCreate.target')} value={amount(effectiveReviewed.targetAmount)} />
+                <ReviewRow label={t('goalCreate.description')} value={effectiveReviewed.description || t('goalCreate.notSet')} />
+                <ReviewRow data={Boolean(effectiveReviewed.monthlyContributionTarget)} label={t('goalCreate.monthly')} value={effectiveReviewed.monthlyContributionTarget ? amount(effectiveReviewed.monthlyContributionTarget) : t('goalCreate.notSet')} />
+                <ReviewRow label={t('goalCreate.date')} value={date ?? t('goalCreate.notSet')} />
+                <ReviewRow label={t('goalCreate.currency')} value={t('goalCreate.profileCurrency')} />
+              </View>
+              {props.failure && !unknown ? <Notice message={t(`goalCreate.failures.${props.failure}`)} tone="destructive" /> : null}
+              {unknown ? (
+                <View style={styles.state}>
+                  <Notice message={t('goalCreate.unknownMessage')} title={t('goalCreate.unknownTitle')} tone="destructive" />
+                  <Text tone="muted" variant="meta">{props.refreshingGoals ? t('goalCreate.reconciling') : props.goalsRefreshFailed ? t('goalCreate.refreshFailed') : t('goalCreate.reviewGoals')}</Text>
+                  <Text tone="muted" variant="meta">{t('goalCreate.noInference')}</Text>
+                  <View style={styles.actions}>
+                    <Button label={t('goalCreate.returnGoals')} onPress={props.onBack} variant="secondary" />
+                    <Button disabled={props.refreshingGoals} label={props.refreshingGoals ? t('goalCreate.refreshingGoals') : t('goalCreate.refreshGoals')} loading={props.refreshingGoals} onPress={() => void props.onRefreshGoals()} />
+                  </View>
+                </View>
+              ) : props.confirmedGoalId !== null ? (
+                <View style={styles.state}>
+                  {props.detailState === 'unavailable'
+                    ? <Notice message={t('goalCreate.detailUnavailableMessage', { id: props.confirmedGoalId })} title={t('goalCreate.detailUnavailableTitle')} />
+                    : (
+                      <View style={styles.reviewHead}>
+                        <Text accessibilityRole="header" variant="bodyStrong">{t('goalCreate.detailLoading')}</Text>
+                        <Text accessibilityRole="progressbar" tone="muted" variant="meta">{t('goalCreate.detailLoadingMessage', { id: props.confirmedGoalId })}</Text>
+                      </View>
+                    )}
+                  {props.detailState === 'unavailable' ? (
+                    <View style={styles.actions}>
+                      <Button label={t('goalCreate.returnGoals')} onPress={props.onBack} variant="secondary" />
+                      <Button label={t('goalCreate.retryDetails')} onPress={() => void props.onRetryDetails()} />
+                    </View>
+                  ) : null}
+                </View>
+              ) : (
+                <View style={styles.actions}>
+                  <Button disabled={props.pending} label={t('goalCreate.edit')} onPress={() => setReviewed(null)} variant="secondary" />
+                </View>
+              )}
+            </View>
+          )}
+        </View>
+      </ScrollView>
+    </SafeAreaView>
+  )
 }
 
-function Field({ label, required = false, count, hint, errorText, palette, children }: { label: string; required?: boolean; count?: string; hint?: string; errorText?: string; palette: Palette; children: React.ReactNode }) {
-  return <View style={styles.field}><View style={styles.labelRow}><Text style={[styles.label, { color: palette.foreground }]}>{label}{required ? ' *' : ''}</Text>{count ? <Text style={[styles.counter, { color: palette.mutedForeground }]}>{count}</Text> : null}</View>{children}{errorText ? <Text accessibilityRole="alert" style={[styles.helper, { color: palette.destructive }]}>{errorText}</Text> : hint ? <Text style={[styles.helper, { color: palette.mutedForeground }]}>{hint}</Text> : null}</View>
+function ReviewRow({ label, value, data = false, first = false }: { label: string; value: string; data?: boolean; first?: boolean }) {
+  const palette = usePalette()
+  return (
+    <View accessible accessibilityLabel={`${label}: ${value}`} style={[styles.reviewRow, !first && { borderTopWidth: 1, borderTopColor: palette.border }]}>
+      <Text style={styles.reviewLabel} variant="body">{label}</Text>
+      <Text style={styles.reviewValue} variant={data ? 'amountBase' : 'body'}>{value}</Text>
+    </View>
+  )
 }
-function ReviewRow({ label, value, data = false, palette }: { label: string; value: string; data?: boolean; palette: Palette }) { return <View accessible accessibilityLabel={`${label}: ${value}`} style={styles.reviewRow}><Text style={[styles.helper, { color: palette.mutedForeground }]}>{label}</Text><Text style={[data ? styles.dataValue : styles.value, { color: palette.foreground }]}>{value}</Text></View> }
-function Action({ label, onPress, palette, secondary = false, disabled = false, busy = false }: { label: string; onPress: () => void | Promise<void>; palette: Palette; secondary?: boolean; disabled?: boolean; busy?: boolean }) { return <Pressable accessibilityRole="button" accessibilityLabel={label} accessibilityState={{ disabled, busy }} disabled={disabled} onPress={() => void onPress()} style={({ pressed }) => [styles.button, { borderColor: palette.primary, backgroundColor: secondary ? 'transparent' : palette.primary }, (pressed || disabled) && styles.pressed]}><Text style={[styles.buttonText, { color: secondary ? palette.primary : palette.background }]}>{label}</Text></Pressable> }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1 }, content: { flexGrow: 1, padding: themeTokens.layout.screenPadding }, page: { width: '100%', maxWidth: 680, alignSelf: 'center', gap: themeTokens.layout.blockGap }, header: { flexDirection: 'row', alignItems: 'flex-start', flexWrap: 'wrap', gap: themeTokens.spacing[4] }, heading: { flex: 1, minWidth: 220, gap: themeTokens.spacing[1] }, title: { ...textStyles.title, fontWeight: '700' as const }, lead: { ...textStyles.body }, form: { gap: themeTokens.spacing[4] }, field: { gap: themeTokens.spacing[2] }, labelRow: { flexDirection: 'row', justifyContent: 'space-between', gap: themeTokens.spacing[3] }, label: { ...textStyles.bodyStrong, fontWeight: '600' as const }, counter: { ...textStyles.amountSmall }, input: { ...textStyles.body, minHeight: themeTokens.touchTarget.minimum, borderWidth: 1, borderRadius: themeTokens.radius.md, paddingHorizontal: themeTokens.spacing[3], paddingVertical: themeTokens.spacing[2] }, inputInvalid: { borderWidth: 2 }, multiline: { minHeight: 112, textAlignVertical: 'top' }, money: { fontFamily: themeTokens.typography.roles.data.fontFamily }, helper: { ...textStyles.body }, currencyNote: { borderRadius: themeTokens.radius.lg, padding: themeTokens.spacing[4], gap: themeTokens.spacing[1] }, noteTitle: { ...textStyles.action }, alert: { ...textStyles.body }, reviewSection: { gap: themeTokens.spacing[4] }, sectionTitle: { ...textStyles.section }, reviewCard: { borderWidth: 1, borderRadius: themeTokens.radius.xl, padding: themeTokens.spacing[5], gap: themeTokens.spacing[4] }, reviewRow: { gap: themeTokens.spacing[1] }, value: { ...textStyles.body }, dataValue: { ...textStyles.amount }, actions: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'flex-end', gap: themeTokens.spacing[3] }, unknown: { borderWidth: 1, borderRadius: themeTokens.radius.lg, padding: themeTokens.spacing[5], gap: themeTokens.spacing[3] }, candidate: { borderTopWidth: 1, paddingTop: themeTokens.spacing[3], gap: themeTokens.spacing[1] }, candidateName: { ...textStyles.action }, button: { minHeight: themeTokens.touchTarget.minimum, minWidth: themeTokens.touchTarget.minimum, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderRadius: themeTokens.radius.md, paddingHorizontal: themeTokens.spacing[4] }, buttonText: { ...textStyles.action }, pressed: { opacity: 0.68 },
+  safe: { flex: 1 },
+  content: { flexGrow: 1, paddingHorizontal: themeTokens.layout.screenPadding, paddingBottom: themeTokens.spacing[10] },
+  page: { width: '100%', maxWidth: 720, alignSelf: 'center' },
+  form: { gap: themeTokens.spacing[4] },
+  reviewHead: { gap: themeTokens.spacing[2], paddingTop: themeTokens.spacing[4] },
+  reviewList: { borderWidth: 1, borderRadius: themeTokens.radius.xl },
+  reviewRow: { minHeight: 56, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: themeTokens.spacing[4], paddingHorizontal: themeTokens.spacing[4], paddingVertical: themeTokens.spacing[3] },
+  reviewLabel: { flexShrink: 0, maxWidth: '50%' },
+  reviewValue: { flexShrink: 1, textAlign: 'right' },
+  state: { gap: themeTokens.spacing[3] },
+  actions: { flexDirection: 'row', flexWrap: 'wrap', gap: themeTokens.spacing[2] },
 })

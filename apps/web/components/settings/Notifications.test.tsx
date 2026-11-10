@@ -50,6 +50,7 @@ const preferences: EmailNotificationPreferencesResponse = {
   weeklyInsights: { storedEnabled: false, effectiveEnabled: false, deliverySupported: true },
   growth: { storedEnabled: true, effectiveEnabled: false },
   accountRecovery: { storedEnabled: true, effectiveEnabled: false },
+  bankSyncAlerts: { storedEnabled: true, effectiveEnabled: false },
   marketingOptOut: true,
 };
 
@@ -62,7 +63,7 @@ function renderPanel(query: Record<string, unknown>) {
   );
 }
 
-function streamSwitch(titleKey: "budgetAlerts.title" | "weeklyInsights.title" | "accountRecovery.title", on: boolean) {
+function streamSwitch(titleKey: "budgetAlerts.title" | "weeklyInsights.title" | "accountRecovery.title" | "bankSyncAlerts.title", on: boolean) {
   return screen.getByRole("switch", {
     name: t(on ? "toggleOffLabel" : "toggleOnLabel", { name: t(titleKey) }),
   });
@@ -74,6 +75,7 @@ test("each switch shows what the user chose, not whether mail is currently deliv
   assert.equal(streamSwitch("budgetAlerts.title", true).getAttribute("aria-checked"), "true");
   assert.equal(streamSwitch("weeklyInsights.title", false).getAttribute("aria-checked"), "false");
   assert.equal(streamSwitch("accountRecovery.title", true).getAttribute("aria-checked"), "true");
+  assert.equal(streamSwitch("bankSyncAlerts.title", true).getAttribute("aria-checked"), "true");
 });
 
 test("turning one category off sends only that category", async () => {
@@ -98,7 +100,7 @@ test("a failed refresh keeps the saved controls on screen with a warning", () =>
   renderPanel({ data: preferences, isError: true });
 
   screen.getByText(t("refreshWarning.title"));
-  assert.equal(screen.getAllByRole("switch").length, 4);
+  assert.equal(screen.getAllByRole("switch").length, 5);
 });
 
 test("a first load that fails offers a retry instead of the controls", () => {

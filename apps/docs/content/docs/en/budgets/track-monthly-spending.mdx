@@ -28,6 +28,27 @@ Make sure the month is selected correctly and that recent transactions have been
   height={900}
 />
 
+## Roll over what is left
+
+A category can carry what it left unspent into the next month, and what it overspent as well. Turn on **Roll over leftover to next month** when you edit the category. Like a new amount, the setting applies to the month you edit and the months after it.
+
+With rollover on, each month shows what it may spend: its budget plus last month's leftover. A line under the budget says "+€40 from last month" or "−€25 overspent last month", and used, remaining and over budget are measured against that amount. The carry keeps going for as long as consecutive months have rollover on, December into January included. A month with rollover off starts from its own budget and passes nothing on.
+
+- The carried amount is worked out from the spending the month shows, so editing or recategorizing an old transaction updates it straight away.
+- To carry only unspent money, turn off **Carry overspending into next month** in the budget's settings. An overspend then rolls over as zero.
+- If last month has a transaction in a currency with no exchange rate yet, its known spending is still carried and the carried amount is marked as possibly too high until a rate is published.
+- Budget alert emails compare spending with the same amount, budget plus rollover.
+
+## See the months ahead
+
+The budget's year page ends with a **Forecast** of this month and the next 3, 6 or 12 months. For each month it shows the plan, any amount carried in, what was spent so far (this month only), what recurring payments are expected to take, the expected spending, the planned income and what is left over.
+
+- Only this month's **Spent so far** is real spending, up to the date the forecast names. Later months have none and show a dash; every other figure is a projection.
+- Recurring payments come from **Bills & subscriptions**: confirmed ones and those detected with high confidence, when their category is in the budget and they are paid from one of the budget's accounts. Each is placed on the dates its schedule expects, from today on. A payment in another currency is converted at the latest exchange rate; one with no rate yet is left out and the month is marked incomplete.
+- **Expected spending** is each category's plan, or more where spending so far plus the upcoming recurring payments already exceed it. **Left over** is the planned income less that.
+- With rollover on, this month starts from the amount it carries in. A month expected to go over its plan passes the overspend on to the next one when the budget carries overspending.
+- The forecast reaches into next year with next year's budget, copied from December.
+
 ## Review
 
 Look for patterns, not just one-off spikes. If a category is always above target, the budget may need a higher limit or a different category split.
@@ -38,6 +59,7 @@ Look for patterns, not just one-off spikes. If a category is always above target
 - The selected month does not match the statement period.
 - A refund makes the total look lower than expected.
 - One large transaction hides the normal monthly pattern.
+- A transaction in a currency with no exchange rate yet is left out of the totals. A note under the totals, here and on the home page, says how many transactions were left out and in which currencies. They are counted once a rate is published.
 
 
 ## Related links

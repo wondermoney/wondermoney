@@ -252,7 +252,6 @@
           "cashLabel": "Dinheiro acompanhado",
           "cashValue": "€8.420",
           "netWorthLabel": "Património líquido",
-          "netWorthValue": "€42.680",
           "budgetLabel": "Orçamento usado",
           "budgetValue": "64%"
         },
@@ -268,13 +267,9 @@
         },
         "syncValue": {
           "balancesLabel": "Os saldos começam a sincronizar",
-          "balancesValue": "€8.420",
           "transactionsLabel": "As transações recentes começam a aparecer",
-          "transactionsValue": "18",
           "netWorthSyncLabel": "O património líquido torna-se mensurável",
-          "netWorthSyncValue": "€42.680",
-          "budgetSyncLabel": "Progresso do orçamento",
-          "budgetSyncValue": "64%"
+          "budgetSyncLabel": "Progresso do orçamento"
         },
         "completion": {
           "profileStarted": "Perfil financeiro iniciado",
@@ -302,9 +297,10 @@
           "savingsValue": "€12.450",
           "creditCardLabel": "Cartão de crédito",
           "creditCardValue": "-€1.180",
-          "totalLabel": "Saldo total",
-          "totalValue": "€16.090"
-        }
+          "totalLabel": "Saldo total"
+        },
+        "exampleCaption": "Valores de exemplo. Os seus aparecem quando o banco terminar a sincronização.",
+        "exampleValue": "Exemplo: {value}"
       },
       "stepLabels": {
         "welcome": "Bem-vindo",
@@ -313,6 +309,13 @@
         "account": "Ligar",
         "sync_value": "O teu panorama",
         "completion": "Tudo pronto"
+      },
+      "restore": {
+        "cta": "Restaurar a partir de uma exportação",
+        "headline": "Restaura os teus dados",
+        "description": "Já usas o WonderMoney noutro servidor, ou guardaste uma exportação? Carrega-a aqui e continua onde ficaste.",
+        "done": "Ir para o painel",
+        "back": "Configurar do zero"
       }
     },
     "dashboard": {

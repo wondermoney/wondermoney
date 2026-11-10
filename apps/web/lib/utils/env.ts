@@ -21,6 +21,8 @@ export const env = createEnv({
    */
   client: {
     NEXT_PUBLIC_POSTHOG_KEY: z.string().optional(),
+    // Google Tag Manager container (GTM-XXXXXXX). Unset: no tag manager loads.
+    NEXT_PUBLIC_GTM_ID: z.string().optional(),
     NEXT_PUBLIC_ENABLE_ANALYTICS: z.literal("1").optional(),
     NEXT_PUBLIC_ENABLE_SENTRY: z.literal("1").optional(),
     NEXT_PUBLIC_APP_URL: z.url().optional(),
@@ -52,6 +54,7 @@ export const env = createEnv({
       process.env.SENTRY_IGNORE_API_RESOLUTION_ERROR,
     ENABLE_SENTRY: process.env.ENABLE_SENTRY,
     NEXT_PUBLIC_POSTHOG_KEY: process.env.NEXT_PUBLIC_POSTHOG_KEY,
+    NEXT_PUBLIC_GTM_ID: process.env.NEXT_PUBLIC_GTM_ID,
     NEXT_PUBLIC_ENABLE_ANALYTICS: process.env.NEXT_PUBLIC_ENABLE_ANALYTICS,
     NEXT_PUBLIC_ENABLE_SENTRY: process.env.NEXT_PUBLIC_ENABLE_SENTRY,
     NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL,

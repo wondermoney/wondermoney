@@ -15,7 +15,8 @@ export type NotificationPreferencePauseReason =
 export type NotificationStream =
   | "budgetAlerts"
   | "weeklyInsights"
-  | "accountRecovery";
+  | "accountRecovery"
+  | "bankSyncAlerts";
 
 /** `budgetAlerts`/`weeklyInsights` carry `deliverySupported`; the other categories don't gate on deliverability. */
 export type NotificationPreference =
@@ -36,6 +37,7 @@ const STREAM_PATCH_FIELD: Record<
   budgetAlerts: "budgetAlertsEnabled",
   weeklyInsights: "weeklyInsightsEnabled",
   accountRecovery: "accountRecoveryEnabled",
+  bankSyncAlerts: "bankSyncAlertsEnabled",
 };
 
 export function getNotificationPreferenceViewState(

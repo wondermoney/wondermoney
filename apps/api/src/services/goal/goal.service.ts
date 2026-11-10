@@ -11,10 +11,13 @@ import { GoalTransactionFunding } from '@entity/GoalTransactionFunding';
 import { Loan } from '@entity/Loan';
 import { Tenant } from '@entity/Tenant';
 import { Transaction } from '@entity/Transaction';
+import { ACCOUNT_BALANCE_POPULATE, accountBalanceIn, loadAccountRates } from '@service/currency/account-balance';
+import { loadRateTable } from '@service/currency/exchange-rate';
 import { EXPIRED_TRANSACTION_STATUS, isExpiredStatusName } from '@service/transaction/transaction-status';
 import { getEffectiveAppuserAmount } from '@utils/account-amounts';
 import { getRef } from '@utils/em-helpers';
 import { BadRequestError, ERROR_CODE, NotFoundError } from '@utils/errors';
+import { Money } from '@utils/money';
 
 import { compareStrategies } from './debt-projection.service';
 import { buildGoalSummary } from './goal-summary.service';
@@ -156,21 +159,47 @@ export class GoalService {
    * only and don't reserve balance).
    */
   async getAvailableToAssign(input: GoalContext, em: EntityManager = this.em): Promise<number> {
+    return (await this.getAvailableToAssignSummary(input, em)).availableToAssign;
+  }
+
+  /**
+   * {@link getAvailableToAssign} with how complete it is: an account no rate converts into the
+   * viewer's currency is left out and counted, never added at its face value.
+   */
+  async getAvailableToAssignSummary(input: GoalContext, em: EntityManager = this.em): Promise<{ availableToAssign: number; isComplete: boolean; unconvertedAccounts: number }> {
+    // Counted in the viewer's currency. Household members each keep their own, so every account
+    // balance and every goal's assigned money is converted into it before anything is added.
+    const viewer = await em.findOneOrFail(Appuser, { appuserKey: input.appuserKey }, { populate: ['currencyKey'] });
+    const viewerCurrency = viewer.currencyKey.code;
+    const asOf = new Date();
+
     const accounts = await em.find(Account, {
       closed: false,
       deletedAt: undefined,
       tenantKey: getRef(em, Tenant, input.tenantKey),
-    });
-    const totalAccountBalance = accounts.reduce((sum, account) => sum.plus(account.appuserCurrencyBalance ?? account.balance ?? 0), new Big(0));
-
+    }, { populate: ACCOUNT_BALANCE_POPULATE });
     const activities = await em.find(GoalActivity, {
       deletedAt: undefined,
       tenantKey: getRef(em, Tenant, input.tenantKey),
-    });
-    const totalAssigned = this.getBalance(activities);
+    }, { populate: ['currencyKey'] });
 
-    const available = totalAccountBalance.minus(totalAssigned);
-    return available.lt(0) ? 0 : available.toNumber();
+    const accountRates = await loadAccountRates(em, accounts, viewerCurrency, asOf);
+    const activityCurrency = (activity: GoalActivity) => activity.currencyKey?.code ?? viewerCurrency;
+    const activityRates = await loadRateTable(em, activities.map((activity) => ({ from: activityCurrency(activity), to: viewerCurrency })), { from: asOf, to: asOf });
+
+    // An account no rate converts cannot be assigned in this currency, so it is left out.
+    const converted = accounts.map((account) => accountBalanceIn(account, viewerCurrency, accountRates, asOf));
+    const balances = converted.filter((value): value is Money => value !== null);
+    const unconvertedAccounts = converted.length - balances.length;
+    // Goal money in a currency with no stored rate cannot be valued either; it is left out too.
+    const assigned = activities.flatMap((activity) => {
+      const delta = Money.of(this.activityDelta(activity), activityCurrency(activity));
+      const rate = activityRates.rateOn(delta.currency, viewerCurrency, asOf);
+      return rate == null ? [] : [Money.convert(delta, { rate, to: viewerCurrency })];
+    });
+
+    const available = Money.subtract(Money.sum(balances, viewerCurrency), Money.sum(assigned, viewerCurrency));
+    return { availableToAssign: available.amount.lt(0) ? 0 : Money.toNumber(available), isComplete: unconvertedAccounts === 0, unconvertedAccounts };
   }
 
   async getGoal(input: GetGoalInput) {

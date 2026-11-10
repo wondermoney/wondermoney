@@ -1,9 +1,10 @@
 import { act, fireEvent, render, waitFor } from '@testing-library/react-native'
 import { I18nextProvider } from 'react-i18next'
-import { StyleSheet, Text } from 'react-native'
+import { Text } from 'react-native'
 
 import { initMobileI18n } from '@/lib/i18n'
 
+import { touchHeight } from '@/test/touch-target'
 import { SignUpScreen } from './sign-up-screen'
 
 async function renderScreen(onSubmit = jest.fn()) {
@@ -26,7 +27,7 @@ async function fillValidForm(view: Awaited<ReturnType<typeof render>>) {
 describe('SignUpScreen', () => {
   it('validates required fields locally', async () => {
     const { view, onSubmit } = await renderScreen()
-    await fireEvent.press(view.getByRole('button', { name: 'Create account' }))
+    await fireEvent.press(view.getByRole('button', { name: 'Join now' }))
     await waitFor(() => expect(view.getByText('Enter your email address')).toBeOnTheScreen())
     expect(view.getByText('Enter your password')).toBeOnTheScreen()
     expect(onSubmit).not.toHaveBeenCalled()
@@ -38,7 +39,7 @@ describe('SignUpScreen', () => {
     await fireEvent.changeText(view.getByLabelText('Email'), 'a@b.co')
     await fireEvent.changeText(view.getByLabelText('Password'), 'pw12345678')
     await fireEvent.changeText(view.getByLabelText('Confirm password'), 'different')
-    await fireEvent.press(view.getByRole('button', { name: 'Create account' }))
+    await fireEvent.press(view.getByRole('button', { name: 'Join now' }))
     expect(onSubmit).not.toHaveBeenCalled()
     expect(view.getByText('Passwords do not match')).toBeOnTheScreen()
   })
@@ -49,7 +50,7 @@ describe('SignUpScreen', () => {
     await fireEvent.changeText(view.getByLabelText('Email'), 'a@b.co')
     await fireEvent.changeText(view.getByLabelText('Password'), 'pw12345678')
     await fireEvent.changeText(view.getByLabelText('Confirm password'), 'pw12345678')
-    await fireEvent.press(view.getByRole('button', { name: 'Create account' }))
+    await fireEvent.press(view.getByRole('button', { name: 'Join now' }))
     expect(onSubmit).not.toHaveBeenCalled()
     expect(view.getByText('Accept the Terms to continue')).toBeOnTheScreen()
   })
@@ -61,7 +62,7 @@ describe('SignUpScreen', () => {
     await fireEvent.changeText(view.getByLabelText('Password'), 'short1')
     await fireEvent.changeText(view.getByLabelText('Confirm password'), 'short1')
     await fireEvent.press(view.getByLabelText('I agree to the Terms and Privacy Policy'))
-    await fireEvent.press(view.getByRole('button', { name: 'Create account' }))
+    await fireEvent.press(view.getByRole('button', { name: 'Join now' }))
     expect(onSubmit).not.toHaveBeenCalled()
   })
 
@@ -69,7 +70,7 @@ describe('SignUpScreen', () => {
     const onSubmit = jest.fn().mockResolvedValue('accepted')
     const { view } = await renderScreen(onSubmit)
     await fillValidForm(view)
-    await fireEvent.press(view.getByRole('button', { name: 'Create account' }))
+    await fireEvent.press(view.getByRole('button', { name: 'Join now' }))
     await waitFor(() => expect(onSubmit).toHaveBeenCalledWith('a@b.co', 'pw12345678'))
   })
 
@@ -81,7 +82,7 @@ describe('SignUpScreen', () => {
     const onSubmit = jest.fn().mockResolvedValue(outcome)
     const { view } = await renderScreen(onSubmit)
     await fillValidForm(view)
-    await fireEvent.press(view.getByRole('button', { name: 'Create account' }))
+    await fireEvent.press(view.getByRole('button', { name: 'Join now' }))
     await waitFor(() => expect(view.getByRole('alert', { name: message })).toBeOnTheScreen())
   })
 
@@ -103,8 +104,8 @@ describe('SignUpScreen', () => {
     const confirm = view.getByLabelText('Confirm password')
     expect(confirm.props.secureTextEntry).toBe(true)
     expect(view.getByLabelText('Email').props.autoCapitalize).toBe('none')
-    const button = view.getByRole('button', { name: 'Create account' })
-    expect(StyleSheet.flatten(button.props.style).minHeight).toBeGreaterThanOrEqual(48)
+    const button = view.getByRole('button', { name: 'Join now' })
+    expect(touchHeight(button)).toBeGreaterThanOrEqual(44)
   })
 
   it('prevents a second submit while loading', async () => {
@@ -112,7 +113,7 @@ describe('SignUpScreen', () => {
     const onSubmit = jest.fn(() => new Promise<'accepted'>((done) => { resolve = done }))
     const { view } = await renderScreen(onSubmit)
     await fillValidForm(view)
-    await fireEvent.press(view.getByRole('button', { name: 'Create account' }))
+    await fireEvent.press(view.getByRole('button', { name: 'Join now' }))
     await waitFor(() => expect(view.getByRole('button', { name: 'Creating account' })).toBeDisabled())
     await fireEvent.press(view.getByRole('button', { name: 'Creating account' }))
     expect(onSubmit).toHaveBeenCalledTimes(1)
@@ -162,7 +163,7 @@ describe('SignUpScreen', () => {
     await fireEvent.changeText(view.getByLabelText('Password'), 'pw12345678')
     await fireEvent.changeText(view.getByLabelText('Confirm password'), 'pw12345678')
     await fireEvent.press(view.getByLabelText('I agree to the Terms and Privacy Policy'))
-    await fireEvent.press(view.getByRole('button', { name: 'Create account' }))
+    await fireEvent.press(view.getByRole('button', { name: 'Join now' }))
     await waitFor(() => expect(onSubmit).toHaveBeenCalledWith('partner@example.com', 'pw12345678'))
   })
 })

@@ -10,6 +10,7 @@ import {
   type MfaTotpEnrollOutcome,
   type MfaUnenrollOutcome,
   type MfaVerifyOutcome,
+  type SendVerificationEmailOutcome,
   type SignInOutcome,
   type SignUpOutcome,
 } from './app-auth'
@@ -48,6 +49,7 @@ export type BetterAuthClientPort = Readonly<{
     email: (input: { email: string; password: string; name?: string }) => Promise<AuthResult<Record<string, unknown>>>
   }>
   signOut: () => Promise<AuthResult<unknown>>
+  sendVerificationEmail: (input: { email: string }) => Promise<AuthResult<unknown>>
   changePassword: (input: {
     currentPassword: string
     newPassword: string
@@ -173,12 +175,28 @@ export function createAppAuthAdapter(client: BetterAuthClientPort): AppAuthAdapt
       if (!store) {
         return { data: { subscription: { unsubscribe: () => undefined } } }
       }
+      // better-auth's `$store.listen` is a nanostores `subscribe`, which calls the
+      // listener once, synchronously, with the current value. That call is not a
+      // session change: the lifecycle's own bootstrap `getSession` owns the
+      // initial state (and maps a failure to a retryable error). Reacting to it
+      // here raced the bootstrap and, because any auth event supersedes the
+      // bootstrap result, decided the cold-start state from this path instead.
+      let subscribed = false
       const listener = () => {
+        if (!subscribed) return
         void sessionResult()
-          .then(({ data }) => callback('SESSION_CHANGED', data))
+          .then(({ data, error }) => {
+            // A failed lookup (offline, server down, keychain read failure) says
+            // nothing about the session. Reporting it as `null` signed the user
+            // out on any transient error; keep the current state instead and let
+            // a real signal or the next request decide.
+            if (error) return
+            callback('SESSION_CHANGED', data)
+          })
           .catch(() => undefined)
       }
       store.listen('$sessionSignal', listener)
+      subscribed = true
       return {
         data: {
           subscription: {
@@ -399,6 +417,15 @@ export function createAppAuthAdapter(client: BetterAuthClientPort): AppAuthAdapt
         }
         await client.getSession({ query: { disableCookieCache: true } }).catch(() => undefined)
         return { status: 'updated' }
+      } catch {
+        return { status: 'unavailable' }
+      }
+    },
+
+    sendVerificationEmail: async (email): Promise<SendVerificationEmailOutcome> => {
+      try {
+        const { error } = await client.sendVerificationEmail({ email })
+        return error ? { status: 'unavailable' } : { status: 'sent' }
       } catch {
         return { status: 'unavailable' }
       }

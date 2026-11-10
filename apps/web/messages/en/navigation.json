@@ -29,6 +29,8 @@
     "review": "Review",
     "home": "Home",
     "categories": "Categories",
+    "tags": "Tags",
+    "rules": "Rules",
     "household": "Household",
     "appearance": "Appearance",
     "profile": "Profile",
@@ -47,5 +49,17 @@
     "settings-group-account": "Account",
     "settings-group-money": "Money",
     "settings-group-preferences": "Preferences"
+  },
+  "top-bar": {
+    "dark-mode": "Dark mode",
+    "light-mode": "Light mode"
+  },
+  "privacy-mode": {
+    "hide-amounts": "Hide amounts",
+    "show-amounts": "Show amounts",
+    "hidden-amount": "Hidden amount",
+    "amounts-hidden": "Amounts hidden",
+    "amounts-shown": "Amounts shown",
+    "shortcut-hint": "Shortcut: Shift+P"
   }
 }

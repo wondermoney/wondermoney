@@ -5,7 +5,7 @@ import { useProductRuntime } from '@/components/providers/product-runtime-provid
 import { ApiError, isPostDispatchCancellation } from '@/lib/api/errors'
 
 import { createPortfolioSettingsEndpoint, portfolioSettingsWriteSchema, type PortfolioSettingsWrite } from './portfolios-contract'
-import { aggregatePortfolioDashboardKey, portfolioKey, portfolioSettingsUnknownKey, portfoliosKey } from './query-keys'
+import { aggregatePortfolioDashboardPrefix, portfolioKey, portfolioSettingsUnknownKey, portfoliosKey } from './query-keys'
 
 export type PortfolioSettingsFailure = 'validation' | 'demo' | 'access' | 'mfa' | 'not-found' | 'cancelled' | 'unknown' | 'request' | 'general'
 export type PortfolioSettingsUnknown = Readonly<{ payload: Readonly<PortfolioSettingsWrite> }>
@@ -51,7 +51,7 @@ export function usePortfolioSettings(portfolioId: number) {
             commit: () => { void Promise.all([
               queryClient.invalidateQueries({ queryKey: portfoliosKey(runtime.epochId), exact: true }),
               queryClient.invalidateQueries({ queryKey: portfolioKey(runtime.epochId, portfolioId), exact: true }),
-              queryClient.invalidateQueries({ queryKey: aggregatePortfolioDashboardKey(runtime.epochId), exact: true }),
+              queryClient.invalidateQueries({ queryKey: aggregatePortfolioDashboardPrefix(runtime.epochId) }),
             ]) },
           })
           if (response.portfolio.portfolioKey !== portfolioId) throw new ApiError('invalid-response')

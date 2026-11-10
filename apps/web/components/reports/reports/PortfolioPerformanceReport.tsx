@@ -27,40 +27,85 @@ import {
 import usePortfolioPerformance, {
   getPortfolioPerformance,
 } from "@/lib/api/reports/portfolioPerformance";
-import type { PortfolioPerformanceRow } from "@/lib/api/reports/types";
-import { cn } from "@/lib/utils";
 
-function sortByAbsoluteReturnDesc(
-  a: PortfolioPerformanceRow,
-  b: PortfolioPerformanceRow,
-) {
-  return Math.abs(b.return) - Math.abs(a.return);
+import {
+  portfolioPerformanceFilters,
+  sortByAbsoluteChangeDesc,
+  totalPortfolioPerformance,
+} from "./portfolio-performance";
+
+/** A value the API could not know (no snapshot) reads as an em dash, never 0. */
+function OptionalAmount({
+  value,
+  currencyKey,
+  unknownLabel,
+}: {
+  value: number | null;
+  currencyKey: string;
+  unknownLabel: string;
+}) {
+  if (value === null) {
+    return (
+      <span className="text-muted-foreground" aria-label={unknownLabel}>
+        —
+      </span>
+    );
+  }
+  return <ReportAmount value={value} currencyKey={currencyKey} />;
 }
 
-function formatSignedCurrency(
-  value: number,
-  currencyKey: string,
-  className?: string,
-) {
-  const sign = value > 0 ? "+" : "";
+function ChangeCell({
+  change,
+  changePercent,
+  currencyKey,
+  unknownLabel,
+}: {
+  change: number | null;
+  changePercent: number | null;
+  currencyKey: string;
+  unknownLabel: string;
+}) {
+  if (change === null) {
+    return (
+      <OptionalAmount
+        value={null}
+        currencyKey={currencyKey}
+        unknownLabel={unknownLabel}
+      />
+    );
+  }
   return (
-    <span className={cn("font-mono whitespace-nowrap tabular-nums", className)}>
-      {sign}
-      <ReportAmount value={value} currencyKey={currencyKey} />
-    </span>
+    <div className="flex flex-col items-end gap-0.5">
+      <span className="font-mono whitespace-nowrap tabular-nums">
+        {change > 0 ? "+" : ""}
+        <ReportAmount value={change} currencyKey={currencyKey} />
+      </span>
+      <ReportTrendIndicator
+        value={change}
+        percentage={changePercent ?? undefined}
+        className="text-xs"
+      />
+    </div>
   );
 }
 
 export function PortfolioPerformanceReport() {
   const t = useTranslations("reports.reports.portfolioPerformance");
   const tCommon = useTranslations("reports.common");
-  const { filters } = useReportFilters();
+  const { filters: reportFilters } = useReportFilters();
+  const filters = useMemo(
+    () => portfolioPerformanceFilters(reportFilters),
+    [reportFilters],
+  );
   const { data, isLoading, error, refetch } = usePortfolioPerformance(filters);
   const { currencyKey } = useReportsCurrency();
 
   const rows = data?.data ?? [];
-  const sortedRows = [...rows].sort(sortByAbsoluteReturnDesc);
-  const aggregateReturn = rows.reduce((sum, row) => sum + row.return, 0);
+  const sortedRows = [...rows].sort(sortByAbsoluteChangeDesc);
+  const totals = totalPortfolioPerformance(rows);
+  const unknownLabel = t("unknownValue");
+  // Contributions and dividends are unknown only when a trade or payout has no exchange rate.
+  const noRateLabel = t("noExchangeRate");
   const csvFilename = `reports/portfolio-performance-${format(new Date(), "yyyy-MM-dd")}`;
 
   const requestCsv = useMemo(
@@ -135,55 +180,101 @@ export function PortfolioPerformanceReport() {
         <SimpleTable>
           <TableHeader>
             <TableRow>
-              <TableHead>{t("account")}</TableHead>
-              <TableHead className="text-right">{t("startBalance")}</TableHead>
-              <TableHead className="text-right">{t("contributions")}</TableHead>
-              <TableHead className="text-right">{t("return")}</TableHead>
-              <TableHead className="text-right">{t("endBalance")}</TableHead>
+              <TableHead>{t("portfolio")}</TableHead>
+              <TableHead className="text-right">{t("startValue")}</TableHead>
+              <TableHead className="text-right">
+                {t("netContributions")}
+              </TableHead>
+              <TableHead className="text-right">{t("change")}</TableHead>
+              <TableHead className="text-right">{t("dividends")}</TableHead>
+              <TableHead className="text-right">{t("endValue")}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {sortedRows.map((row) => (
-              <TableRow key={row.accountKey}>
-                <TableCell>
-                  <div className="flex flex-col">
-                    <span>{row.name}</span>
-                    <span className="text-muted-foreground text-xs">
-                      {row.currency}
-                    </span>
-                  </div>
-                </TableCell>
+              <TableRow key={row.portfolioKey}>
+                <TableCell>{row.name}</TableCell>
                 <TableCell className="text-right font-mono">
-                  <ReportAmount
-                    value={row.startBalance}
+                  <OptionalAmount
+                    value={row.startValue}
                     currencyKey={currencyKey}
+                    unknownLabel={unknownLabel}
                   />
                 </TableCell>
                 <TableCell className="text-right font-mono">
-                  <ReportAmount
-                    value={row.contributions}
+                  <OptionalAmount
+                    value={row.netContributions}
                     currencyKey={currencyKey}
+                    unknownLabel={noRateLabel}
                   />
                 </TableCell>
                 <TableCell className="text-right">
-                  {formatSignedCurrency(row.return, currencyKey)}
+                  <ChangeCell
+                    change={row.change}
+                    changePercent={row.changePercent}
+                    currencyKey={currencyKey}
+                    unknownLabel={unknownLabel}
+                  />
                 </TableCell>
                 <TableCell className="text-right font-mono">
-                  <ReportAmount
-                    value={row.endBalance}
+                  <OptionalAmount
+                    value={row.dividends}
                     currencyKey={currencyKey}
+                    unknownLabel={noRateLabel}
+                  />
+                </TableCell>
+                <TableCell className="text-right font-mono">
+                  <OptionalAmount
+                    value={row.endValue}
+                    currencyKey={currencyKey}
+                    unknownLabel={unknownLabel}
                   />
                 </TableCell>
               </TableRow>
             ))}
+            {rows.length > 1 && (
+              <TableRow className="font-medium">
+                <TableCell>{t("total")}</TableCell>
+                <TableCell className="text-right font-mono">
+                  <OptionalAmount
+                    value={totals.startValue}
+                    currencyKey={currencyKey}
+                    unknownLabel={unknownLabel}
+                  />
+                </TableCell>
+                <TableCell className="text-right font-mono">
+                  <OptionalAmount
+                    value={totals.netContributions}
+                    currencyKey={currencyKey}
+                    unknownLabel={noRateLabel}
+                  />
+                </TableCell>
+                <TableCell className="text-right">
+                  <ChangeCell
+                    change={totals.change}
+                    changePercent={totals.changePercent}
+                    currencyKey={currencyKey}
+                    unknownLabel={unknownLabel}
+                  />
+                </TableCell>
+                <TableCell className="text-right font-mono">
+                  <OptionalAmount
+                    value={totals.dividends}
+                    currencyKey={currencyKey}
+                    unknownLabel={noRateLabel}
+                  />
+                </TableCell>
+                <TableCell className="text-right font-mono">
+                  <OptionalAmount
+                    value={totals.endValue}
+                    currencyKey={currencyKey}
+                    unknownLabel={unknownLabel}
+                  />
+                </TableCell>
+              </TableRow>
+            )}
           </TableBody>
         </SimpleTable>
-      </div>
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-        <p className="text-muted-foreground max-w-xl text-xs">
-          {t("startCaveat")}
-        </p>
-        <ReportTrendIndicator value={aggregateReturn} />
       </div>
     </ReportCard>
   );

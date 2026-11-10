@@ -1,7 +1,9 @@
 "use client";
 
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 
+import { maskMoneyParts } from "@/lib/privacy/mask";
+import { usePrivacyMode } from "@/lib/privacy/usePrivacyMode";
 import { cn } from "@/lib/utils";
 import {
   FINANCIAL_VALUE_LAYOUT,
@@ -30,6 +32,12 @@ import { TRUE_MINUS } from "@/lib/utils/formatPercentage";
  * Position is **not** hardcoded: the symbol prefixes in `en` (`€11,250.00`)
  * and suffixes in `pt` (`11 250,00 €`), so the parts are rendered in the order
  * the locale returns them.
+ *
+ * 3. **Privacy mode masks it.** While privacy mode is on the figure is replaced
+ *    by a fixed `•••••` beside the symbol. The real value is not in the DOM,
+ *    the mask is hidden from assistive tech and cannot be selected, and a
+ *    screen reader hears "Hidden amount" instead. The tone falls back to
+ *    `level`, since a red or green mask would still give the sign away.
  */
 
 export type AmountTone = "level" | "delta" | "threshold";
@@ -81,6 +89,28 @@ export function Amount({
 }: AmountProps) {
   const contextLocale = useLocale();
   const locale = normalizeFinancialLocale(localeProp ?? contextLocale);
+  const { hidden } = usePrivacyMode();
+  const t = useTranslations("privacy-mode");
+
+  if (hidden && value !== null && value !== undefined && !Number.isNaN(value)) {
+    return (
+      <span className={cn(getAmountClassName(), className)} data-amount-hidden="">
+        <span aria-hidden="true" className="select-none">
+          {maskMoneyParts(isCurrencyCode(currency) ? currency : null, locale).map(
+            (part, index) =>
+              part.type === "currency" ? (
+                <span key={index} className="text-muted-foreground">
+                  {part.value}
+                </span>
+              ) : (
+                part.value
+              ),
+          )}
+        </span>
+        <span className="sr-only">{t("hidden-amount")}</span>
+      </span>
+    );
+  }
 
   if (value === null || value === undefined || Number.isNaN(value)) {
     return (
@@ -96,19 +126,24 @@ export function Amount({
     );
   }
 
+  const fractionDigits = maximumFractionDigits ?? 2;
+  // A zero shown with a minus ("−€0.00") reads as money out: a negated 0, or an
+  // amount smaller than the last digit shown, displays as an unsigned zero.
+  const shown =
+    Math.round(Math.abs(value) * 10 ** fractionDigits) === 0 ? 0 : value;
+
   const parts = new Intl.NumberFormat(locale, {
     ...(isCurrencyCode(currency)
       ? { style: "currency" as const, currency }
       : { style: "decimal" as const }),
     minimumFractionDigits:
-      minimumFractionDigits ??
-      Math.min(2, maximumFractionDigits ?? 2),
-    maximumFractionDigits: maximumFractionDigits ?? 2,
+      minimumFractionDigits ?? Math.min(2, fractionDigits),
+    maximumFractionDigits: fractionDigits,
     signDisplay: signed ? ("exceptZero" as const) : ("auto" as const),
-  }).formatToParts(value);
+  }).formatToParts(shown);
 
   return (
-    <span className={cn(TONE_CLASS[tone](value), className)}>
+    <span className={cn(TONE_CLASS[tone](shown), className)}>
       {parts.map((part, index) =>
         part.type === "minusSign" ? (
           // U+2212, not the hyphen-minus Intl returns: a minus sign is as wide

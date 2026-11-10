@@ -51,7 +51,9 @@ export function classifyTransactions(
   for (const transactionRows of byTransaction.values()) {
     const first = transactionRows[0];
     if (!first) continue;
-    diagnostics.duplicateTransactionRows += Math.max(0, transactionRows.length - 1);
+    // A split transaction has one row per line by design; only rows beyond that are duplicates.
+    const splitLineCount = new Set(transactionRows.flatMap((row) => (row.splitKey == null ? [] : [row.splitKey]))).size;
+    diagnostics.duplicateTransactionRows += Math.max(0, transactionRows.length - Math.max(1, splitLineCount));
     if (
       first.appuserKey !== appuserKey ||
       first.tenantKey !== tenantKey ||
@@ -97,20 +99,47 @@ export function classifyTransactions(
       amount = new Big(first.effectiveAmount).times(-1);
     }
 
+    const countableCategory = (row: TransactionAggregationRow) =>
+      row.assignmentAppuserKey === appuserKey &&
+      row.categoryKey != null &&
+      !row.categoryDeleted &&
+      !row.categoryHasActiveChildren &&
+      row.parentCategoryKey != null &&
+      !row.parentCategoryDeleted &&
+      (row.categorySystem === true || row.categoryOwnerAppuserKey === appuserKey) &&
+      (row.parentCategorySystem === true || row.parentCategoryOwnerAppuserKey === appuserKey);
+
+    // A split transaction counts each line in its own category, with the line's share of the
+    // amount; a line that is uncategorized (or in a category this member cannot count) is left
+    // out like an uncategorized transaction. A loan repayment is never split.
+    // A line in a category that is not spending (investments, savings) is left out altogether.
+    const splitLines = uniqueBy(transactionRows.filter((row) => row.splitKey != null), (row) => row.splitKey ?? 0);
+    if (splitLines.length > 0 && loanLinks.length === 0) {
+      const spendingLines = splitLines.filter((row) => row.countsAsSpending !== false);
+      if (spendingLines.length === 0) {
+        diagnostics.excludedNonSpending += 1;
+        continue;
+      }
+      const counted = spendingLines.filter(countableCategory);
+      if (counted.length < spendingLines.length) diagnostics.uncategorizedTransactions += 1;
+      for (const line of counted) {
+        if (line.categoryKey == null || line.categoryName == null || line.lineAmount == null) continue;
+        transactions.push({
+          accountKey: first.accountKey,
+          amount: new Big(line.lineAmount).times(-1),
+          categoryKey: line.categoryKey,
+          categoryName: line.categoryName,
+          parentCategoryKey: line.parentCategoryKey,
+          parentCategoryName: line.parentCategoryName,
+          transactionDate: first.transactionDate,
+          transactionKey: first.transactionKey,
+        });
+      }
+      continue;
+    }
+
     const assignments = uniqueBy(
-      transactionRows.filter(
-        (row) =>
-          row.assignmentKey != null &&
-          !row.assignmentDeleted &&
-          row.assignmentAppuserKey === appuserKey &&
-          row.categoryKey != null &&
-          !row.categoryDeleted &&
-          !row.categoryHasActiveChildren &&
-          row.parentCategoryKey != null &&
-          !row.parentCategoryDeleted &&
-          (row.categorySystem === true || row.categoryOwnerAppuserKey === appuserKey) &&
-          (row.parentCategorySystem === true || row.parentCategoryOwnerAppuserKey === appuserKey),
-      ),
+      transactionRows.filter((row) => row.splitKey == null && row.assignmentKey != null && !row.assignmentDeleted && countableCategory(row)),
       (row) => row.categoryKey ?? 0,
     );
     if (assignments.length === 0) {
@@ -123,6 +152,10 @@ export function classifyTransactions(
     }
     const assignment = assignments[0];
     if (assignment?.categoryKey == null || assignment.categoryName == null) continue;
+    if (assignment.countsAsSpending === false) {
+      diagnostics.excludedNonSpending += 1;
+      continue;
+    }
     transactions.push({
       accountKey: first.accountKey,
       amount,
@@ -141,6 +174,7 @@ export function createDiagnostics(): AggregationDiagnostics {
   return {
     ambiguousCategoryAssignments: 0,
     duplicateTransactionRows: 0,
+    excludedNonSpending: 0,
     excludedTransfers: 0,
     invalidAccounts: 0,
     invalidLoanLinks: 0,

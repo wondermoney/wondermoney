@@ -34,14 +34,10 @@ const MoverItem: React.FC<MoverItemProps> = ({ mover, isGainer, currency }) => {
   return (
     <div className="flex items-center justify-between py-1">
       <div className="flex items-center gap-2">
-        {mover.logoUrl ? (
-          <FinancialAssetLogo symbol={mover.ticker} logoUrl={mover.logoUrl} />
-        ) : (
-          <div className="flex h-6 w-6 items-center justify-center rounded-full bg-muted text-xs font-medium text-muted-foreground">
-            {mover.ticker.charAt(0)}
-          </div>
-        )}
-        <span className="text-sm font-medium text-foreground">{mover.ticker}</span>
+        <FinancialAssetLogo symbol={mover.ticker} logoUrl={mover.logoUrl} />
+        <span className="text-foreground text-sm font-medium">
+          {mover.ticker}
+        </span>
       </div>
       <div className="flex flex-col items-end">
         <div
@@ -64,8 +60,14 @@ const MoverItem: React.FC<MoverItemProps> = ({ mover, isGainer, currency }) => {
           </span>
         </div>
         {mover.contribution !== 0 && (
-          <span className={cn("text-xs", isGainer ? "text-success-text" : "text-destructive-text")}>
-            {mover.contribution > 0 ? "+" : ""}<Amount value={mover.contribution} currency={currency} />
+          <span
+            className={cn(
+              "text-xs",
+              isGainer ? "text-success-text" : "text-destructive-text",
+            )}
+          >
+            {mover.contribution > 0 ? "+" : ""}
+            <Amount value={mover.contribution} currency={currency} />
           </span>
         )}
       </div>
@@ -92,36 +94,43 @@ const PortfolioTopMovers: React.FC<PortfolioTopMoversProps> = ({
   const hasData = hasGainers || hasLosers;
 
   return (
-    <div className="p-4">
+    <div className="py-1">
       {isLoading ? (
         <div className="flex h-[200px] items-center justify-center">
           <Spinner />
         </div>
       ) : !hasData ? (
-        <div className="flex h-[200px] items-center justify-center px-6 text-center text-sm text-muted-foreground">
+        <div className="text-muted-foreground flex h-[200px] items-center justify-center px-6 text-center text-sm">
           {t("portfolio-top-movers-empty-state")}
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-4">
+        <div className="grid grid-cols-1 gap-2 md:grid-cols-2 md:gap-4">
           {/* Gainers Column */}
           <div>
-            <div className="mb-2 flex items-center gap-1 text-sm font-medium text-success-text">
+            <div className="text-success-text mb-2 flex items-center gap-1 text-sm font-medium">
               <TrendingUp className="h-4 w-4" />
               {t("gainers")}
             </div>
             <div className="space-y-1">
               {topMoversData?.gainers?.map((mover) => (
-                <MoverItem key={mover.ticker} mover={mover} isGainer currency={currency} />
+                <MoverItem
+                  key={mover.ticker}
+                  mover={mover}
+                  isGainer
+                  currency={currency}
+                />
               ))}
               {!hasGainers && (
-                <span className="text-sm text-muted-foreground">{t("no-gainers")}</span>
+                <span className="text-muted-foreground text-sm">
+                  {t("no-gainers")}
+                </span>
               )}
             </div>
           </div>
 
           {/* Losers Column */}
           <div>
-            <div className="mb-2 flex items-center gap-1 text-sm font-medium text-destructive-text">
+            <div className="text-destructive-text mb-2 flex items-center gap-1 text-sm font-medium">
               <TrendingDown className="h-4 w-4" />
               {t("losers")}
             </div>
@@ -135,7 +144,9 @@ const PortfolioTopMovers: React.FC<PortfolioTopMoversProps> = ({
                 />
               ))}
               {!hasLosers && (
-                <span className="text-sm text-muted-foreground">{t("no-losers")}</span>
+                <span className="text-muted-foreground text-sm">
+                  {t("no-losers")}
+                </span>
               )}
             </div>
           </div>

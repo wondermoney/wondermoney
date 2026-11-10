@@ -19,6 +19,7 @@ import {
 import { useReportsCurrency } from "@/components/reports/ReportsCurrencyContext";
 import type { ChartConfig } from "@/components/ui/chart";
 import { BarChartBase } from "@/components/ui/charts";
+import { UnconvertedAmountsNotice } from "@/components/ui/UnconvertedAmountsNotice";
 import useCategories from "@/lib/api/category/useCategories";
 import useSpendingByCategory, {
   getSpendingByCategory,
@@ -30,7 +31,7 @@ import {
   getCategoryTranslationKey,
 } from "@/lib/utils/categories";
 import { resolveCategoryColor } from "@/lib/utils/categoryColor";
-import { formatCurrencyForLocale } from "@/lib/utils/formatCurrency";
+import { useFormatCurrency } from "@/lib/utils/useFormatCurrency";
 
 const TOP_CATEGORY_COUNT = 12;
 // `hsl(var(--muted-foreground))` — but this project's tokens are complete
@@ -61,6 +62,7 @@ export function SpendingByCategoryReport() {
   const tRoot = useTranslations();
   const { filters } = useReportFilters();
   const locale = useLocale();
+  const formatAmountText = useFormatCurrency();
   const { currencyKey } = useReportsCurrency();
   const shouldReduceMotion = useReducedMotion();
 
@@ -216,7 +218,7 @@ export function SpendingByCategoryReport() {
           isAnimationActive={!shouldReduceMotion}
           getBarColor={(row) => row.fill}
           yFormatter={(value) =>
-            formatCurrencyForLocale(Number(value), currencyKey, locale, {
+            formatAmountText(Number(value), currencyKey, {
               notation: "compact",
               maximumFractionDigits: 0,
             })
@@ -226,6 +228,12 @@ export function SpendingByCategoryReport() {
           )}
         />
       )}
+      {!isPending && !error ? (
+        <UnconvertedAmountsNotice
+          completeness={data?.completeness}
+          className="mt-3 max-w-prose"
+        />
+      ) : null}
     </ReportCard>
   );
 }

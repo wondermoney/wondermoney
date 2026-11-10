@@ -128,6 +128,8 @@ export function mapEarningsChart(entries: readonly EarningsEntryDto[]): readonly
  */
 export type WatchlistRow = Readonly<{
   symbol: string
+  /** The ticker's logo when a known asset has one; letters stand in otherwise. */
+  logoUrl?: string | null
   quote: QuoteViewModel | null
   quoteStatus: 'loading' | 'loaded' | 'error'
 }>
@@ -141,12 +143,14 @@ export type WatchlistQuoteResult = Readonly<{
 export function buildWatchlistRows(
   symbols: readonly string[],
   quoteResults: readonly WatchlistQuoteResult[],
+  logos?: ReadonlyMap<string, string | null>,
 ): readonly WatchlistRow[] {
   return symbols.map((symbol, index) => {
     const result = quoteResults[index]
-    if (!result || result.isPending) return { symbol, quote: null, quoteStatus: 'loading' }
-    if (result.data) return { symbol, quote: mapQuote(result.data), quoteStatus: 'loaded' }
-    return { symbol, quote: null, quoteStatus: 'error' }
+    const logo = logos?.has(symbol) ? { logoUrl: logos.get(symbol) ?? null } : {}
+    if (!result || result.isPending) return { symbol, ...logo, quote: null, quoteStatus: 'loading' }
+    if (result.data) return { symbol, ...logo, quote: mapQuote(result.data), quoteStatus: 'loaded' }
+    return { symbol, ...logo, quote: null, quoteStatus: 'error' }
   })
 }
 

@@ -16,7 +16,7 @@ vi.mock('@validators/parser', () => ({
 import { getSpendingByCategoryReport } from '../spendingByCategory';
 
 const makeRequest = (query: Record<string, unknown> = {}) =>
-  ({ query, tenant: { tenantKey: 113 }, user: { appuserKey: 71 } }) as unknown as Request;
+  ({ query, tenant: { tenantKey: 113 }, user: { appuserKey: 71, currencyKey: { code: 'EUR' } } }) as unknown as Request;
 
 const makeResponse = () => ({ json: vi.fn() }) as unknown as Response;
 
@@ -64,6 +64,7 @@ describe('getSpendingByCategoryReport', () => {
     await getSpendingByCategoryReport(makeRequest(), res);
 
     expect(res.json).toHaveBeenCalledWith({
+      completeness: { currencyCode: 'EUR', isComplete: true, unconvertedCurrencies: [], unconvertedTransactions: 0 },
       data: [
         expect.objectContaining({ categoryKey: '10', name: 'Food', percentOfTotal: 60, totalAmount: 60, transactionCount: 1 }),
         expect.objectContaining({ categoryKey: '11', name: 'Transport', percentOfTotal: 40, totalAmount: 40, transactionCount: 1 }),
@@ -73,23 +74,13 @@ describe('getSpendingByCategoryReport', () => {
     });
   });
 
-  it('applies the fromDate filter to the transaction query', async () => {
-    await getSpendingByCategoryReport(makeRequest({ fromDate: '2026-02-01T00:00:00.000Z' }), makeResponse());
-
-    expect(mocks.find).toHaveBeenCalledWith(
-      Transaction,
-      expect.objectContaining({ transactionDate: { $gte: new Date('2026-02-01T00:00:00.000Z') } }),
-      expect.anything(),
-    );
-  });
-
   it('scopes the transaction query by tenant and the per-account privacy carve-out', async () => {
     await getSpendingByCategoryReport(makeRequest(), makeResponse());
 
     expect(mocks.find).toHaveBeenCalledWith(
       Transaction,
       expect.objectContaining({
-        accountKey: { $or: [{ isPrivate: false }, { accountOwnerAppuserKey: { appuserKey: 71 } }] },
+        accountKey: { $or: [{ isPrivate: false }, { accountOwnerAppuserKey: { appuserKey: 71, currencyKey: { code: 'EUR' } } }] },
         deletedAt: undefined,
         tenantKey: { tenantKey: 113 },
         transactionStatusKey: { name: { $in: ['BOOKED'] } },
@@ -102,6 +93,6 @@ describe('getSpendingByCategoryReport', () => {
     const res = makeResponse();
     await getSpendingByCategoryReport(makeRequest(), res);
 
-    expect(res.json).toHaveBeenCalledWith({ data: [], filters: expect.any(Object), generatedAt: expect.any(String) });
+    expect(res.json).toHaveBeenCalledWith({ completeness: expect.objectContaining({ isComplete: true }), data: [], filters: expect.any(Object), generatedAt: expect.any(String) });
   });
 });

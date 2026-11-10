@@ -13,7 +13,7 @@ export interface EmailNotificationStreamState {
 }
 
 /**
- * `growth`/`accountRecovery` are gated only on the stored toggle and
+ * `growth`/`accountRecovery`/`bankSyncAlerts` are gated only on the stored toggle and
  * the global marketing opt-out — no deliverability gate.
  */
 export interface EmailCategoryPreferenceState {
@@ -27,6 +27,8 @@ export interface EmailNotificationPreferencesResponse {
   /** Still returned by the API, but no email is sent in this category any more, so it has no toggle. */
   growth: EmailCategoryPreferenceState;
   accountRecovery: EmailCategoryPreferenceState;
+  /** Bank connection alerts: consent ending (7 days and 1 day before), ended early by the bank, or syncs failing for over 2 days. On by default. */
+  bankSyncAlerts: EmailCategoryPreferenceState;
   /** Global unsubscribe: when true, every category's `effectiveEnabled` is false regardless of `storedEnabled`. */
   marketingOptOut: boolean;
 }
@@ -36,6 +38,7 @@ export interface UpdateEmailNotificationPreferencesInput {
   weeklyInsightsEnabled?: boolean;
   growthEmailsEnabled?: boolean;
   accountRecoveryEnabled?: boolean;
+  bankSyncAlertsEnabled?: boolean;
   marketingOptOut?: boolean;
 }
 

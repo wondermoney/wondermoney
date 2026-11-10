@@ -1,5 +1,5 @@
 import { fireEvent, render } from '@testing-library/react-native'
-import { StyleSheet } from 'react-native'
+import { StyleSheet, View } from 'react-native'
 
 import { themeTokens } from '@/theme/tokens'
 
@@ -32,5 +32,13 @@ describe('PageHeader', () => {
   it('carries provenance, which is not a description', async () => {
     const view = await render(<PageHeader provenance="Updated 3:28 PM · 4 of 24" title="Accounts" />)
     expect(view.getByText('Updated 3:28 PM · 4 of 24')).toBeTruthy()
+  })
+
+  it('wraps the title row so an action is never pushed off-screen', async () => {
+    const view = await render(<PageHeader action={<View testID="action" />} testID="header" title="A very long account name that fills the row" />)
+    // The nearest ancestor laid out as a row is the title row.
+    let node = view.getByTestId('action').parent
+    while (node && StyleSheet.flatten(node.props.style)?.flexDirection !== 'row') node = node.parent
+    expect(StyleSheet.flatten(node?.props.style).flexWrap).toBe('wrap')
   })
 })

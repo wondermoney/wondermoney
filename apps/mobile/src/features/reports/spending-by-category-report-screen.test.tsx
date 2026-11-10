@@ -2,6 +2,7 @@ import { fireEvent, render, renderHook } from '@testing-library/react-native'
 import { I18nextProvider } from 'react-i18next'
 
 import { initMobileI18n } from '@/lib/i18n'
+import { themeTokens } from '@/theme/tokens'
 
 import { mapSpendingByCategoryReport } from './spending-by-category-report-view-model'
 import { SpendingByCategoryReportScreen } from './spending-by-category-report-screen'
@@ -27,9 +28,23 @@ describe('SpendingByCategoryReportScreen', () => {
   it('shows the total, each bar, and a trend once the prior period is ready', async () => {
     const report = mapSpendingByCategoryReport({ data: [row('a', 150, 'Groceries')] }, { data: [row('a', 100)] }, 'Other')
     const view = await renderWithI18n({ state: { status: 'loaded', report, trendReady: true }, preset: 'last3Months', currencyCode: 'EUR', onSelectPreset: jest.fn(), onRefresh: jest.fn(), onBack: jest.fn() })
-    expect(view.getByText('Total spent: €150.00')).toBeOnTheScreen()
+    expect(view.getByLabelText('Total spent, €150.00')).toBeTruthy()
     expect(view.getByLabelText('Groceries, €150.00')).toBeTruthy()
-    expect(view.getByText(/vs\. prior period/)).toBeOnTheScreen()
+    expect(view.getByText('vs. prior period')).toBeOnTheScreen()
+  })
+
+  it('signs a rise in spending and marks it destructive', async () => {
+    const report = mapSpendingByCategoryReport({ data: [row('a', 150, 'Groceries')] }, { data: [row('a', 100)] }, 'Other')
+    const view = await renderWithI18n({ state: { status: 'loaded', report, trendReady: true }, preset: 'last3Months', currencyCode: 'EUR', onSelectPreset: jest.fn(), onRefresh: jest.fn(), onBack: jest.fn() })
+    expect(view.getByLabelText('vs. prior period +50%')).toBeTruthy()
+    expect(view.getByText('vs. prior period')).toHaveStyle({ color: themeTokens.colors.light.destructiveText })
+  })
+
+  it('signs a fall in spending and marks it as success', async () => {
+    const report = mapSpendingByCategoryReport({ data: [row('a', 75, 'Groceries')] }, { data: [row('a', 100)] }, 'Other')
+    const view = await renderWithI18n({ state: { status: 'loaded', report, trendReady: true }, preset: 'last3Months', currencyCode: 'EUR', onSelectPreset: jest.fn(), onRefresh: jest.fn(), onBack: jest.fn() })
+    expect(view.getByLabelText('vs. prior period \u221225%')).toBeTruthy()
+    expect(view.getByText('vs. prior period')).toHaveStyle({ color: themeTokens.colors.light.successText })
   })
 
   it('hides the trend line until the prior period has actually loaded', async () => {
@@ -48,7 +63,8 @@ describe('SpendingByCategoryReportScreen', () => {
     const report = mapSpendingByCategoryReport({ data: [row('a', 100)] }, undefined, 'Other')
     const onSelectPreset = jest.fn()
     const view = await renderWithI18n({ state: { status: 'loaded', report, trendReady: true }, preset: 'last3Months', currencyCode: 'EUR', onSelectPreset, onRefresh: jest.fn(), onBack: jest.fn() })
-    await fireEvent.press(view.getByRole('button', { name: 'This month' }))
+    await fireEvent.press(view.getByRole('button', { name: 'Date range, Last 3 months' }))
+    await fireEvent.press(view.getByRole('radio', { name: 'This month' }))
     expect(onSelectPreset).toHaveBeenCalledWith('thisMonth')
 
     const loading = await renderWithI18n({ state: { status: 'loading' }, preset: 'last3Months', currencyCode: 'EUR', onSelectPreset: jest.fn(), onRefresh: jest.fn(), onBack: jest.fn() })

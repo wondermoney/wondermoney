@@ -26,10 +26,12 @@ jest.mock('./use-account', () => ({ useAccount: (id: number | null) => mockUseAc
 jest.mock('@/features/account-insights/use-account-insights', () => ({ useAccountInsights: () => mockUseInsights() }))
 jest.mock('@/features/account-insights/use-account-metrics', () => ({ useAccountMetrics: (...args: unknown[]) => mockUseAccountMetrics(...args) }))
 jest.mock('@/features/transactions/use-recent-transactions', () => ({ useRecentTransactions: (...args: unknown[]) => mockUseRecentTransactions(...args) }))
+jest.mock('@/features/transactions/use-transactions', () => ({ useTransactions: () => ({ data: { transactions: [] }, isAccessTransition: false, isLoading: false, isRefreshing: false, isRefreshFailure: false, error: null, refetch: jest.fn() }) }))
 jest.mock('./accounts-screen', () => ({
-  AccountsScreen: ({ onSelectAccount, onCreateAccount, onViewTransactions, onViewRecurring }: { onSelectAccount: (id: number) => void; onCreateAccount: () => void; onViewTransactions: () => void; onViewRecurring: () => void }) => {
+  AccountsScreen: ({ onSelectAccount, onCreateAccount, onViewTransactions, onConnectBank, onCreateTransaction, onEditAccount }: { onSelectAccount: (id: number) => void; onCreateAccount: () => void; onViewTransactions: () => void; onConnectBank: () => void; onCreateTransaction: () => void; onEditAccount: (id: number) => void }) => {
     const Native = jest.requireActual<typeof import('react-native')>('react-native')
-    return <><Native.Pressable accessibilityRole="button" accessibilityLabel="Account row" onPress={() => onSelectAccount(42)}><Native.Text>Account row</Native.Text></Native.Pressable><Native.Pressable accessibilityRole="button" accessibilityLabel="Create" onPress={onCreateAccount}><Native.Text>Create</Native.Text></Native.Pressable><Native.Pressable accessibilityRole="button" accessibilityLabel="Transactions" onPress={onViewTransactions}><Native.Text>Transactions</Native.Text></Native.Pressable><Native.Pressable accessibilityRole="button" accessibilityLabel="Recurring" onPress={onViewRecurring}><Native.Text>Recurring</Native.Text></Native.Pressable></>
+    const item = (label: string, onPress: () => void) => <Native.Pressable key={label} accessibilityRole="button" accessibilityLabel={label} onPress={onPress}><Native.Text>{label}</Native.Text></Native.Pressable>
+    return <>{[item('Account row', () => onSelectAccount(42)), item('Create', onCreateAccount), item('Transactions', onViewTransactions), item('Connect', onConnectBank), item('Add transaction', onCreateTransaction), item('Edit', () => onEditAccount(42))]}</>
   },
 }))
 jest.mock('./account-detail-screen', () => ({
@@ -103,13 +105,15 @@ describe('accounts route adapters', () => {
     expect(mockPush).toHaveBeenCalledWith({ pathname: '/accounts/[accountId]/transactions', params: { accountId: '42' } })
   })
 
-  it('opens recurring immediately after Transactions without adding a tab', async () => {
+  it('opens bank connection, transaction creation and account editing from Accounts', async () => {
     mockUseAccounts.mockReturnValue({ isAccessTransition: false, isLoading: true, refetch: jest.fn() })
     const view = await render(<AccountsRoute />)
-    const buttons = view.getAllByRole('button')
-    expect(buttons.map((button) => button.props.accessibilityLabel)).toEqual(['Account row', 'Create', 'Transactions', 'Recurring'])
-    await fireEvent.press(view.getByRole('button', { name: 'Recurring' }))
-    expect(mockPush).toHaveBeenCalledWith('/accounts/recurring')
+    await fireEvent.press(view.getByRole('button', { name: 'Connect' }))
+    expect(mockPush).toHaveBeenCalledWith('/more/banking/connect')
+    await fireEvent.press(view.getByRole('button', { name: 'Add transaction' }))
+    expect(mockPush).toHaveBeenCalledWith('/accounts/transactions/create')
+    await fireEvent.press(view.getByRole('button', { name: 'Edit' }))
+    expect(mockPush).toHaveBeenCalledWith({ pathname: '/accounts/[accountId]/edit', params: { accountId: '42' } })
   })
 
   it('maps Back to Accounts rather than exposing a third tab', async () => {

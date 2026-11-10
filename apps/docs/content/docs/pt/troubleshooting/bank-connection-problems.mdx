@@ -21,7 +21,8 @@ Antes de repetir a ligação, confirma:
 
 - Se tens uma chave da Enable Banking válida guardada em Definições → Fornecedor bancário — sem ela, nenhuma ligação bancária arranca
 - Se o banco está com manutenção
-- Se a autenticação expirou
+- Se a autenticação expirou. Quando nenhuma conta responde, a WonderMoney pergunta ao banco se o teu consentimento ainda está ativo. Se o banco o terminou mais cedo, a ligação aparece como terminada pelo banco e deixa de atualizar até a voltares a ligar. Vê Duração do consentimento e voltar a ligar, mais abaixo
+- Se o banco está a limitar as atualizações. Os bancos podem permitir só algumas atualizações automáticas por dia. Quando um banco pede à WonderMoney para abrandar, a próxima atualização automática espera até à hora indicada pelo banco, ou cerca de um dia se não indicar nenhuma
 - Se a conta correta está a ser ligada
 - Se permitiste o acesso necessário
 
@@ -33,6 +34,18 @@ Tenta estes passos:
 2. Volta a autenticar no banco.
 3. Remove a ligação e cria-a novamente.
 4. Verifica se o problema acontece também noutro navegador.
+
+## Duração do consentimento e voltar a ligar
+
+Os bancos dão à WonderMoney acesso apenas de leitura durante um tempo limitado. Ao abrigo da PSD2, um consentimento dura no máximo 180 dias, e cada banco define o seu próprio limite, muitas vezes 90 ou 180 dias. A lista de ligações nas Definições mostra quando termina cada consentimento.
+
+- **Expira em breve.** Nos últimos 14 dias antes de um consentimento terminar, a ligação mostra quantos dias faltam e oferece **Voltar a ligar**, na web e na app móvel.
+- **Consentimento expirado.** O consentimento chegou ao fim. Os dados deixam de atualizar até voltares a ligar.
+- **Terminada pelo banco.** O banco terminou o consentimento antes do prazo, por exemplo depois de alterares a palavra-passe do homebanking ou retirares o acesso na app do banco. Os dados deixam de atualizar até voltares a ligar.
+
+A WonderMoney também te envia um email cerca de 7 dias antes e outro no último dia antes de um consentimento terminar, e quando o banco o termina mais cedo. Vê [Preferências de email](/pt/docs/settings-security-privacy/email-preferences) para desligar estes alertas.
+
+Voltar a ligar inicia um novo consentimento com o mesmo banco. Quando termina, a WonderMoney associa as contas do banco às que já tens pelo número de conta (IBAN) e pela moeda, por isso as tuas contas, saldos e histórico de transações mantêm-se. A ligação antiga sai da lista quando todas as suas contas passam para a nova. Uma conta que removeste não volta, e uma conta que o banco partilhe sem número de conta pode aparecer como conta nova.
 
 ## Problemas com a chave da Enable Banking
 

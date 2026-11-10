@@ -4,13 +4,14 @@ import { z } from 'zod';
 import { DI } from '@app/app';
 import { Appuser } from '@entity/Appuser';
 import { AppuserTenant } from '@entity/AppuserTenant';
-import { AppuserTransactionCategory } from '@entity/AppuserTransactionCategory';
 import { AssistantAuditEventType } from '@entity/AssistantAuditLog';
 import { Budget } from '@entity/Budget';
 import { BudgetTemplateCategory } from '@entity/BudgetTemplateCategory';
 import { Tenant } from '@entity/Tenant';
 import { Transaction } from '@entity/Transaction';
 import { resolveAiRoute } from '@service/ai/ai-provider';
+import { CATEGORY_LINE_POPULATE, spendingLinesOf } from '@service/transaction/category-lines';
+import { loadCategorySpendingFlags } from '@service/transaction/category-spending';
 import { excludeExpired } from '@service/transaction/transaction-status';
 import { getEffectiveAppuserAmount } from '@utils/account-amounts';
 import { getRef } from '@utils/em-helpers';
@@ -62,26 +63,9 @@ export class AssistantToolsService {
         }, { populate: ['categoryKey'] });
         const budgeted = budgetRows.reduce((sum, row) => sum + toNumber(row.amountBudgeted), 0);
         const budgetCategories = budgetRows.map((row) => row.categoryKey);
-        const categoryLinks = budgetCategories.length
-          ? await DI.em.find(AppuserTransactionCategory, {
-            appuserKey: appuserRef(context.appuserKey),
-            categoryKey: { $in: budgetCategories, deletedAt: undefined },
-            deletedAt: undefined,
-            transactionKey: excludeExpired({
-              accountKey: { closed: false, deletedAt: undefined },
-              appuserKey: appuserRef(context.appuserKey),
-              deletedAt: undefined,
-              tenantKey: tenantRef(context.tenantKey),
-              transactionDate: { $gte: resolved.start, $lte: resolved.end },
-            }),
-          }, { populate: ['transactionKey', 'transactionKey.transactionTypeKey'] })
-          : [];
-        const spent = categoryLinks.reduce((sum, link) => {
-          const transaction = link.transactionKey;
-          if (isTransfer(transaction)) return sum;
-          const amount = getEffectiveAmount(transaction);
-          return amount < 0 ? sum + Math.abs(amount) : sum;
-        }, 0);
+        const budgetCategoryKeys = new Set(budgetCategories.map((category) => category.categoryKey));
+        const spendingLines = budgetCategories.length ? await findOwnSpendingLines(context, resolved) : [];
+        const spent = spendingLines.reduce((sum, line) => (line.category && budgetCategoryKeys.has(line.category.categoryKey) ? sum + Math.abs(line.amount ?? 0) : sum), 0);
         const remaining = budgeted - spent;
         return { data: { budgeted, currency: budget.currencyKey.code, remaining, spent, status: budgetRows.length ? 'active' : 'empty' }, dataUsed: { granularity: 'budget_status', period: resolved.key, recordCount: budgetRows.length, source: 'database' } };
       }),
@@ -108,26 +92,11 @@ export class AssistantToolsService {
       get_recurring_payments_summary: createTool('get_recurring_payments_summary', 'Read-only recurring payments summary.', context, z.object({ period: periodSchema.optional() }), () => Promise.resolve({ data: { currency, recurringPayments: [] as { amount: number }[] }, dataUsed: { granularity: 'summary', period: 'current', source: 'stub' } })),
       get_spending_by_category: createTool('get_spending_by_category', 'Read-only, privacy-minimizing spending breakdown by category.', context, z.object({ period: periodSchema.default('current_month') }), async ({ period }: { period: PeriodInput }) => {
         const resolved = AssistantPeriodService.resolve(period);
-        const categoryLinks = await DI.em.find(AppuserTransactionCategory, {
-          appuserKey: appuserRef(context.appuserKey),
-          categoryKey: { deletedAt: undefined },
-          deletedAt: undefined,
-          transactionKey: excludeExpired({
-            accountKey: { closed: false, deletedAt: undefined },
-            appuserKey: appuserRef(context.appuserKey),
-            deletedAt: undefined,
-            tenantKey: tenantRef(context.tenantKey),
-            transactionDate: { $gte: resolved.start, $lte: resolved.end },
-          }),
-        }, { populate: ['categoryKey', 'transactionKey', 'transactionKey.transactionTypeKey'] });
+        const categoryLinks = (await findOwnSpendingLines(context, resolved)).filter((line) => line.category !== null);
         const totalsByCategory = new Map<string, number>();
-        for (const link of categoryLinks) {
-          const transaction = link.transactionKey;
-          if (isTransfer(transaction)) continue;
-          const amount = getEffectiveAmount(transaction);
-          if (amount >= 0) continue;
-          const categoryName = link.categoryKey.name;
-          totalsByCategory.set(categoryName, (totalsByCategory.get(categoryName) ?? 0) + Math.abs(amount));
+        for (const line of categoryLinks) {
+          const categoryName = line.category!.name;
+          totalsByCategory.set(categoryName, (totalsByCategory.get(categoryName) ?? 0) + Math.abs(line.amount ?? 0));
         }
         const categories = Array.from(totalsByCategory.entries())
           .map(([category, amount]) => ({ amount, category }))
@@ -211,6 +180,27 @@ async function findScopedTransactions(context: AssistantToolContext, period: Ret
     tenantKey: tenantRef(context.tenantKey),
     transactionDate: { $gte: period.start, $lte: period.end },
   }), { populate: ['transactionTypeKey'] });
+}
+
+/**
+ * The category lines (`category-lines.ts`) of the member's own spending in the period: money out,
+ * no transfers, not expired, no line in a category that is not spending. A split transaction gives one line per split line, each with its
+ * share; an unsplit one its single category (or none) for its whole amount.
+ */
+async function findOwnSpendingLines(context: AssistantToolContext, period: ReturnType<typeof AssistantPeriodService.resolve>) {
+  const transactions = await DI.em.find(Transaction, excludeExpired({
+    accountKey: { closed: false, deletedAt: undefined },
+    appuserKey: appuserRef(context.appuserKey),
+    deletedAt: undefined,
+    tenantKey: tenantRef(context.tenantKey),
+    transactionDate: { $gte: period.start, $lte: period.end },
+  }), { populate: [...CATEGORY_LINE_POPULATE, 'transactionTypeKey'] });
+  const spendingFlags = await loadCategorySpendingFlags(DI.em, context.tenantKey);
+  return transactions.flatMap((transaction) => {
+    if (isTransfer(transaction)) return [];
+    const amount = getEffectiveAmount(transaction);
+    return amount < 0 ? spendingLinesOf(transaction, amount, spendingFlags) : [];
+  });
 }
 
 function getEffectiveAmount(transaction: TransactionLike): number {

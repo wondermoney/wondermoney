@@ -3,6 +3,10 @@ import {
   FinancialTransactionType,
   type FinancialTransactionsParserResult,
 } from './types';
+import { type ParserNumberFormat, requireNumber } from '../number';
+
+// Coinbase exports use "." for decimals, sometimes with a currency symbol ("€40000.50").
+const COINBASE_FORMAT: ParserNumberFormat = { decimalSeparator: '.' };
 
 type CoinbaseTransactionType =
   | 'Send'
@@ -14,10 +18,11 @@ type CoinbaseTransactionType =
 const coinbaseParser = (
   data: string[][]
 ): FinancialTransactionsParserResult => {
-  return data.slice(7).map((r) => {
+  return data.slice(7).map((r, index) => {
     const row = r[0]!.split(',');
+    const where = (column: string) => `Coinbase row ${index + 8}, ${column}`;
     const timestamp = row[0]!;
-    const quantityParsed = Number.parseFloat(row[3]!);
+    const quantityParsed = requireNumber(row[3], COINBASE_FORMAT, where('quantity'));
     let quantity = quantityParsed;
     let financialTransactionType: FinancialTransactionType | undefined =
       undefined;
@@ -45,14 +50,14 @@ const coinbaseParser = (
     let totalLocalPrice;
     let totalPrice;
     let feeAmount;
-    const unitPrice = Number.parseFloat(row[5]!);
+    const unitPrice = requireNumber(row[5], COINBASE_FORMAT, where('price'));
     if (
       financialTransactionType === FinancialTransactionType.SELL ||
       financialTransactionType === FinancialTransactionType.BUY
     ) {
-      totalLocalPrice = Number.parseFloat(row[7]!);
-      totalPrice = Number.parseFloat(row[7]!);
-      feeAmount = Number.parseFloat(row[8]!);
+      totalPrice = requireNumber(row[7], COINBASE_FORMAT, where('total'));
+      totalLocalPrice = totalPrice;
+      feeAmount = requireNumber(row[8], COINBASE_FORMAT, where('fees'));
     } else {
       totalLocalPrice = quantityParsed * unitPrice;
       totalPrice = quantityParsed * unitPrice;

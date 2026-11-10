@@ -1,5 +1,5 @@
-import { useLocalSearchParams, useNavigation, useRouter } from 'expo-router'
-import { useEffect, useState } from 'react'
+import { useLocalSearchParams, usePreventRemove, useRouter } from 'expo-router'
+import { useState } from 'react'
 
 import { useAccounts } from '@/features/accounts/use-accounts'
 
@@ -16,10 +16,7 @@ export function BudgetAccountsRoute() {
   const mutation = useBudgetAccountsMutation()
   const [failure, setFailure] = useState<BudgetAccountsWriteFailure | null>(null)
   const router = useRouter()
-  const navigation = useNavigation()
-  useEffect(() => navigation.addListener('beforeRemove', (event) => {
-    if (mutation.isPending) event.preventDefault()
-  }), [mutation.isPending, navigation])
+  usePreventRemove(mutation.isPending)
 
   const invalid = budgetId === null || linked.isInvalidRoute || linked.isAccessTransition || accounts.isAccessTransition
   const status = invalid || linked.isLoading || accounts.isLoading ? 'loading' : (!linked.data || !accounts.data || linked.isError || accounts.isError) ? 'error' : 'ready'

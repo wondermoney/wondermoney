@@ -9,7 +9,7 @@ import { i18n, locales } from '@/lib/i18n';
 // text "lang", and `/{lang}/docs` would match only `/lang/docs` or `/docs`),
 // and `{/*path}` is an optional wildcard. `/en/docs.md` therefore maps to
 // `/llms.mdx/docs/en/content.md` and `/en/docs/a/b.md` to
-// `/llms.mdx/docs/en/a/b/content.md` (#91).
+// `/llms.mdx/docs/en/a/b/content.md`.
 const { rewrite: rewriteDocs } = rewritePath(
   `/:lang${docsRoute}{/*path}`,
   `${docsContentRoute}/:lang{/*path}/content.md`,
@@ -23,7 +23,7 @@ const i18nMiddleware = createI18nMiddleware(i18n);
 
 // The legal pages are route groups, not Fumadocs content: English lives at the
 // unprefixed /about/<page> (app/(legal)), pt and es under their locale prefix
-// (app/(legal-pt), app/(legal-es) — RAD-573). They must reach Next directly
+// (app/(legal-pt), app/(legal-es)). They must reach Next directly
 // rather than being handed to the i18n middleware, which would prefix the
 // English ones with /en/ and 404.
 const legalPages = [
@@ -40,7 +40,7 @@ const legalPaths = new Set(
 
 // /en/about/<page> is what a `{lang}` URL template (the API's
 // PRIVACY_POLICY_URL, for one) produces for English. The canonical English URL
-// has no prefix, so redirect there (#45).
+// has no prefix, so redirect there.
 const englishLegalPaths = new Set(legalPages.map((page) => `/en/about/${page}`));
 
 function hasSupportedLocale(pathname: string) {

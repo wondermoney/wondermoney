@@ -35,11 +35,23 @@ describe('BudgetYearScreen', () => {
     expect(view.getByText('Full year')).toBeOnTheScreen()
   })
 
-  it('expands a category to show its children on request', async () => {
+  it('lists each category with its subcategories and annual figures, as web does', async () => {
     const { view } = await renderScreen({ status: 'loaded', year: full, toDate })
-    expect(view.queryByText('Rent')).not.toBeOnTheScreen()
-    await fireEvent.press(view.getByRole('button', { name: 'Show subcategories for Home' }))
+    expect(view.getByText('Home')).toBeOnTheScreen()
     expect(view.getByText('Rent')).toBeOnTheScreen()
+    expect(view.getAllByLabelText(/^Annual remaining, /).length).toBeGreaterThan(0)
+  })
+
+  it('switches to the month view from the View by control and links accounts', async () => {
+    const i18n = await initMobileI18n('en')
+    const onViewMonth = jest.fn()
+    const onManageAccounts = jest.fn()
+    const view = await render(<I18nextProvider i18n={i18n}><BudgetYearScreen state={{ status: 'loaded', year: full, toDate }} onBack={jest.fn()} onRetry={jest.fn()} onViewMonth={onViewMonth} onManageAccounts={onManageAccounts} /></I18nextProvider>)
+    expect(view.getByRole('tab', { name: 'Year' }).props.accessibilityState.selected).toBe(true)
+    await fireEvent.press(view.getByRole('tab', { name: 'Month' }))
+    expect(onViewMonth).toHaveBeenCalledTimes(1)
+    await fireEvent.press(view.getByRole('button', { name: 'Account linked' }))
+    expect(onManageAccounts).toHaveBeenCalledTimes(1)
   })
 
   it('shows a stale banner after a refresh failure while keeping data visible', async () => {

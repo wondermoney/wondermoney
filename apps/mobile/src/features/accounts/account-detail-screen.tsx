@@ -1,20 +1,43 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Pressable, ScrollView, StyleSheet, Text, useColorScheme, View } from 'react-native'
-import { SafeAreaView } from 'react-native-safe-area-context'
+import { ScrollView, StyleSheet, View } from 'react-native'
 
-import { formatCurrency } from '@/lib/formatters/financial'
-import { themeTokens, type Palette } from '@/theme/tokens'
-import { textStyles } from '@/theme/typography'
+import { Amount } from '@/components/ui/amount'
 import { BackControl } from '@/components/ui/back-control'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { accountMark, EntityMark, type EntityMarkSource } from '@/components/ui/entity-mark'
+import { FLOATING_ACTION_SIZE, FloatingActionButton } from '@/components/ui/floating-action-button'
+import { HeadlineFigure } from '@/components/ui/headline-figure'
+import { IconButton } from '@/components/ui/icon-button'
+import { List, ListRow } from '@/components/ui/list-row'
+import { Notice } from '@/components/ui/notice'
 import { ObjectHeader } from '@/components/ui/page-header'
-import type { MetricRow } from '@/features/account-insights/insights-view-model'
+import { SafeAreaView } from '@/components/ui/screen-safe-area'
+import { Section } from '@/components/ui/section'
+import { OptionSheet } from '@/components/ui/sheet'
+import { Text } from '@/components/ui/text'
+import { formatTransactionDate } from '@/lib/dates/transaction-date'
+import { useFormatMoney } from '@/lib/formatters/money-display'
+import { themeTokens } from '@/theme/tokens'
+import { usePalette } from '@/theme/use-palette'
+import type { BalancePoint } from '@/features/account-insights/balance-growth'
+import { BalanceGrowthChart } from '@/features/account-insights/balance-growth-chart'
+import { MetricsStats, type MetricsSectionState } from '@/features/account-insights/metrics-stats'
+import type { RecentTransactionsSectionState } from '@/features/transactions/recent-transactions-section'
+import type { RecentTransactionRow } from '@/features/transactions/recent-transactions-view-model'
 
-import { RecentTransactionsSection, type RecentTransactionsSectionState } from '@/features/transactions/recent-transactions-section'
+import { accountFreshness } from './account-freshness'
+import type { AccountDetailViewModel } from './account-detail-view-model'
+import type { SectionState } from './accounts-screen'
+import { freshnessStatus } from './balances-provenance'
+import { FailureState, LoadingState, SectionMessage } from './screen-states'
 
-import { formatAccountFreshness, type AccountDetailViewModel } from './account-detail-view-model'
-
-export type AccountDetailData = AccountDetailViewModel & { metrics?: readonly MetricRow[]; metricsFromDate?: string }
+export type AccountDetailData = AccountDetailViewModel & {
+  /** Inflow / outflow / savings for the API's default period, as web's account page shows. */
+  metrics?: MetricsSectionState
+  balance?: SectionState<readonly BalancePoint[]>
+}
 export type AccountDetailViewState =
   | { status: 'loading' }
   | { status: 'error' }
@@ -34,339 +57,202 @@ export type AccountDetailScreenProps = {
   onLogout: () => void | Promise<void>
   onViewTransactions: () => void
   onCreateTransaction?: () => void
+  onImportTransactions?: () => void
   onEdit: () => void
 }
 
+const LAST_TRANSACTIONS = 5
 
-export function AccountDetailScreen({ state, recentTransactions, onBack, onRetry, onRetryRecent, onLogout, onViewTransactions, onCreateTransaction, onEdit }: AccountDetailScreenProps) {
+/**
+ * Web's account page (`accounts/[accountId]/account-client.tsx`) at phone
+ * width, in the calm structure: "← Accounts", the account's mark and name
+ * with its institution beneath and one overflow glyph (edit, import), the
+ * Account balance figure with its freshness as the status line, Inflow /
+ * Outflow / Savings rate, then Balance growth and Last transactions as open
+ * sections. Adding a transaction is the floating "+".
+ */
+export function AccountDetailScreen({ state, recentTransactions, onBack, onRetry, onRetryRecent, onLogout, onViewTransactions, onCreateTransaction, onImportTransactions, onEdit }: AccountDetailScreenProps) {
+  const formatMoney = useFormatMoney()
   const { t, i18n } = useTranslation()
-  const palette = themeTokens.colors[useColorScheme() === 'dark' ? 'dark' : 'light']
+  const palette = usePalette()
   const locale = i18n.resolvedLanguage ?? i18n.language ?? 'en'
+  const back = <BackControl fallback="/accounts" onPress={onBack} />
+  const [moreOpen, setMoreOpen] = useState(false)
 
   if (state.status === 'access-transition') return null
-
-  if (state.status === 'loading') {
+  if (state.status === 'loading') return <LoadingState header={<View style={styles.back}>{back}</View>} label={t('accountDetail.loading')} />
+  if (state.status === 'error' || state.status === 'not-found' || state.status === 'invalid-id' || state.status === 'invalid-response') {
+    const key = state.status === 'not-found' ? 'notFound' : state.status === 'invalid-id' ? 'invalidId' : state.status === 'invalid-response' ? 'invalidResponse' : 'error'
+    const retryable = state.status === 'error' || state.status === 'invalid-response'
     return (
-      <SafeAreaView style={[styles.safeArea, { backgroundColor: palette.background }]}>
-        <View style={styles.loadingHeader}>
-          <BackControl fallback="/accounts" onPress={onBack} color={palette.primary} />
-        </View>
-        <View
-          accessible
-          accessibilityRole="progressbar"
-          accessibilityLabel={t('accountDetail.loading')}
-          style={styles.loading}
-        >
-          {[220, 320, 240].map((width, index) => (
-            <View
-              key={index}
-              style={[styles.skeleton, { width, backgroundColor: palette.muted }]}
-            />
-          ))}
-        </View>
-      </SafeAreaView>
-    )
-  }
-
-  if (
-    state.status === 'error'
-    || state.status === 'not-found'
-    || state.status === 'invalid-id'
-    || state.status === 'invalid-response'
-  ) {
-    const messageKey = state.status === 'not-found'
-      ? 'notFound'
-      : state.status === 'invalid-id'
-        ? 'invalidId'
-        : state.status === 'invalid-response'
-          ? 'invalidResponse'
-          : 'error'
-    return (
-      <SafeAreaView style={[styles.safeArea, { backgroundColor: palette.background }]}>
-        <ScrollView contentContainerStyle={styles.centered}>
-          <View style={styles.failure}>
-            <BackControl fallback="/accounts" onPress={onBack} color={palette.primary} />
-            <View style={[styles.errorMarker, { backgroundColor: palette.destructive }]} />
-            <Text
-              accessibilityRole="header"
-              allowFontScaling
-              style={[styles.failureTitle, { color: palette.foreground }]}
-            >
-              {t(`accountDetail.${messageKey}.title`)}
-            </Text>
-            <Text allowFontScaling style={[styles.body, { color: palette.mutedForeground }]}>
-              {t(`accountDetail.${messageKey}.message`)}
-            </Text>
-            <View style={styles.actions}>
-              {state.status === 'error' || state.status === 'invalid-response' ? (
-                <Action label={t('common.retry')} onPress={onRetry} palette={palette} primary />
-              ) : null}
-              <Action label={t('common.signOut')} onPress={onLogout} palette={palette} />
-            </View>
-          </View>
-        </ScrollView>
-      </SafeAreaView>
+      <FailureState
+        header={<View style={styles.back}>{back}</View>}
+        message={t(`accountDetail.${key}.message`)}
+        onLogout={onLogout}
+        onRetry={retryable ? onRetry : undefined}
+        title={t(`accountDetail.${key}.title`)}
+      />
     )
   }
 
   const data = state.data
   const name = data.accountName ?? t('accounts.unnamed')
-  const source = t(`accounts.source.${data.source === 'open_banking' ? 'openBanking' : data.source}`)
-  const original = data.originalBalance === null
+  const multiCurrency = data.originalCurrencyCode !== data.primaryCurrencyCode
+  // Web leads with the balance in the reader's currency when the account is in another one.
+  const primaryValue = multiCurrency ? data.convertedBalance : data.originalBalance
+  const primaryCurrency = multiCurrency ? data.primaryCurrencyCode : data.originalCurrencyCode
+  const primaryText = primaryValue === null
     ? t('accounts.balanceUnavailable')
-    : formatCurrency(data.originalBalance, { locale, currency: data.originalCurrencyCode })
-  const differs = data.originalCurrencyCode !== data.primaryCurrencyCode
-  const converted = differs && data.convertedBalance !== null
-    ? formatCurrency(data.convertedBalance, { locale, currency: data.primaryCurrencyCode })
-    : null
-  const refreshed = formatAccountFreshness(data.refreshedAt, locale)
+    : formatMoney(primaryValue, { locale, currency: primaryCurrency })
+  const mark = accountMark({ logoUrl: data.institutionLogoUrl, institutionName: data.institutionDisplayName, type: data.accountType })
+  const shared = !data.isOwnedByViewer && data.ownerFirstName ? t('accountsOverview.sharedBy', { name: data.ownerFirstName }) : null
+
+  const moreActions = [
+    { value: 'edit' as const, label: t('accountDetail.edit') },
+    ...(onImportTransactions ? [{ value: 'import' as const, label: t('accountsOverview.importTransactions') }] : []),
+  ]
 
   return (
+    <View style={styles.safeArea}>
     <SafeAreaView style={[styles.safeArea, { backgroundColor: palette.background }]}>
-      <ScrollView contentContainerStyle={styles.content}>
+      <ScrollView contentContainerStyle={[styles.content, onCreateTransaction && styles.contentUnderButton]}>
         <View style={styles.page}>
-            <BackControl fallback="/accounts" onPress={onBack} color={palette.primary} />
+          <View style={styles.headerBlock}>
+            {back}
+            <ObjectHeader
+              action={moreActions.length > 1 ? (
+                <IconButton accessibilityLabel={t('common.moreActions')} icon="more-vertical" onPress={() => setMoreOpen(true)} style={styles.overflow} />
+              ) : (
+                <IconButton accessibilityLabel={t('accountDetail.edit')} icon="pencil" onPress={onEdit} style={styles.overflow} />
+              )}
+              badge={data.isPrivate || shared ? (
+                <View style={styles.badges}>
+                  {data.isPrivate ? <Badge label={t('accountsOverview.private')} tone="outline" /> : null}
+                  {shared ? <Text tone="muted" variant="label">{shared}</Text> : null}
+                </View>
+              ) : undefined}
+              descriptor={data.institutionDisplayName ?? undefined}
+              leading={<EntityMark {...mark} testID="account-detail-mark" />}
+              title={name}
+            />
+          </View>
 
           {state.status === 'refresh-error' ? (
-            <View style={[styles.banner, { backgroundColor: palette.muted, borderColor: palette.border }]}><Text
-              accessible
-              accessibilityRole="alert"
-              accessibilityLabel={t('accountDetail.stale')}
-              allowFontScaling
-              style={[
-                styles.banner,
-                {
-                  color: palette.foreground,
-                  backgroundColor: palette.muted,
-                  borderColor: palette.border,
-                },
-              ]}
-            >
-              {t('accountDetail.stale')}
-            </Text><Action label={t('common.retry')} onPress={onRetry} palette={palette} /></View>
+            <Notice action={<Button label={t('common.retry')} onPress={onRetry} size="sm" variant="outline" />} message={t('accountDetail.stale')} />
           ) : null}
 
-          <ObjectHeader
-            action={<Action label={t('accountDetail.edit')} onPress={onEdit} palette={palette} />}
-            descriptor={[data.institutionDisplayName, source].filter(Boolean).join(' · ')}
-            figure={
-              <Text
-                accessibilityLabel={`${t('accountDetail.originalBalance')}, ${original}${data.originalBalance === null ? '' : `, ${data.originalCurrencyCode}`}`}
-                accessible
-                allowFontScaling
-                style={[styles.balance, { color: data.originalBalance === null ? palette.mutedForeground : palette.foreground }]}
-              >
-                {original}
-              </Text>
-            }
-            title={name}
-          />
+          <View style={styles.lead}>
+            <HeadlineFigure
+              accessibilityLabel={`${t('accountsOverview.accountBalance')}, ${primaryText}`}
+              currency={primaryCurrency}
+              footer={primaryValue === null ? <Text tone="muted" variant="label">{t('accounts.balanceUnavailable')}</Text> : undefined}
+              label={t('accountsOverview.accountBalance')}
+              locale={locale}
+              secondary={multiCurrency ? { value: data.originalBalance, currency: data.originalCurrencyCode } : null}
+              size="md"
+              status={data.source === 'open_banking' ? freshnessStatus(accountFreshness(data), t) : undefined}
+              testID="account-balance"
+              value={primaryValue}
+            />
+            {data.metrics ? <MetricsStats currency={data.primaryCurrencyCode} locale={locale} state={data.metrics} testID="account-metrics" /> : null}
+          </View>
 
-          {differs ? (
-            <View style={[styles.values, { borderTopColor: palette.border }]}>
-              <ValueRow
-                label={t('accounts.convertedBalance')}
-                value={converted ?? t('accountDetail.convertedUnavailable')}
-                currency={converted ? data.primaryCurrencyCode : null}
-                palette={palette}
-                unavailable={converted === null}
-              />
-            </View>
+          {data.balance ? (
+            <Section title={t('accountsOverview.balanceGrowth')} variant="open">
+              {data.balance.status === 'loaded'
+                ? <BalanceGrowthChart locale={locale} points={data.balance.data} testID="account-balance-chart" />
+                : <SectionMessage loading={data.balance.status === 'loading'} />}
+            </Section>
           ) : null}
 
-          <Action label={t('accountDetail.viewTransactions')} onPress={onViewTransactions} palette={palette} primary />
-          {onCreateTransaction ? <Action label={t('transactionCreate.action')} onPress={onCreateTransaction} palette={palette} /> : null}
-
-          {data.source === 'open_banking' ? (
-            <Text allowFontScaling style={[styles.freshness, { color: palette.mutedForeground }]}>
-              {refreshed
-                ? t('accountDetail.lastUpdated', { date: refreshed })
-                : t('accountDetail.updateUnavailable')}
-            </Text>
-          ) : null}
-
-          <RecentTransactionsSection state={recentTransactions} onRetry={onRetryRecent} />
-
-          {data.metrics && data.metricsFromDate ? <View style={[styles.values, { borderTopColor: palette.border }]}>
-            <Text style={[styles.metricsTitle, { color: palette.foreground }]}>{t('insights.accountMetrics')}</Text>
-            <Text style={[styles.metricsNote, { color: palette.mutedForeground }]}>{t('insights.accountMetricsRange', { date: new Intl.DateTimeFormat(locale, { dateStyle: 'medium' }).format(new Date(data.metricsFromDate)) })}</Text>
-            {data.metrics.length ? data.metrics.map((metric) => <View key={metric.accountId} style={styles.metricPair}>
-              <ValueRow label={t('insights.inflow')} value={metric.inflow === null ? t('insights.unavailable') : metric.currency ? formatCurrency(metric.inflow, { locale, currency: metric.currency }) : t('insights.currencyUnavailable')} currency={metric.inflow === null ? null : metric.currency} palette={palette} unavailable={metric.inflow === null || metric.currency === null} />
-              <ValueRow label={t('insights.outflow')} value={metric.outflow === null ? t('insights.unavailable') : metric.currency ? formatCurrency(metric.outflow, { locale, currency: metric.currency }) : t('insights.currencyUnavailable')} currency={metric.outflow === null ? null : metric.currency} palette={palette} unavailable={metric.outflow === null || metric.currency === null} separated />
-            </View>) : <Text style={[styles.metricsNote, { color: palette.mutedForeground }]}>{t('insights.noMetrics')}</Text>}
-          </View> : null}
+          <Section
+            action={<Button label={t('accountsOverview.viewAll')} onPress={onViewTransactions} size="sm" variant="link" />}
+            title={t('accountsOverview.lastTransactions')}
+            variant="open"
+          >
+            <RecentRows accountMark={mark} locale={locale} onCreateTransaction={onCreateTransaction} onRetry={onRetryRecent} state={recentTransactions} />
+          </Section>
         </View>
       </ScrollView>
+      <OptionSheet
+        mode="menu"
+        onClose={() => setMoreOpen(false)}
+        onSelect={(value) => { if (value === 'edit') onEdit(); else onImportTransactions?.() }}
+        options={moreActions}
+        title={name}
+        visible={moreOpen}
+      />
     </SafeAreaView>
-  )
-}
-
-function ValueRow({
-  label,
-  value,
-  currency,
-  palette,
-  unavailable,
-  separated = false,
-}: {
-  label: string
-  value: string
-  currency: string | null
-  palette: Palette
-  unavailable: boolean
-  separated?: boolean
-}) {
-  return (
-    <View
-      accessible
-      accessibilityLabel={[label, value, currency].filter(Boolean).join(', ')}
-      style={[
-        styles.valueRow,
-        separated && { borderTopWidth: 1, borderTopColor: palette.border },
-      ]}
-    >
-      <Text allowFontScaling style={[styles.valueLabel, { color: palette.mutedForeground }]}>
-        {label}
-      </Text>
-      <Text
-        allowFontScaling
-        style={[styles.value, { color: unavailable ? palette.mutedForeground : palette.foreground }]}
-      >
-        {value}
-      </Text>
+    {onCreateTransaction ? <FloatingActionButton accessibilityLabel={t('accountsOverview.addTransaction')} onPress={onCreateTransaction} testID="account-add-transaction" /> : null}
     </View>
   )
 }
 
-function Action({
-  label,
-  onPress,
-  palette,
-  primary = false,
-}: {
-  label: string
-  onPress: () => void | Promise<void>
-  palette: Palette
-  primary?: boolean
-}) {
-  const [focused, setFocused] = useState(false)
+function RecentRows({ state, locale, onRetry, onCreateTransaction, accountMark: openingMark }: { state: RecentTransactionsSectionState; locale: string; onRetry: () => void | Promise<void>; onCreateTransaction?: () => void; accountMark: EntityMarkSource }) {
+  const { t } = useTranslation()
+  if (state.status === 'loading') return <SectionMessage loading />
+  if (state.status === 'error' || state.status === 'invalid-response') {
+    return (
+      <Notice
+        action={<Button label={t('common.retry')} onPress={onRetry} size="sm" variant="outline" />}
+        message={t(state.status === 'invalid-response' ? 'recentTransactions.invalidResponse' : 'recentTransactions.error')}
+      />
+    )
+  }
+  if (state.rows.length === 0) {
+    return (
+      <View style={styles.empty}>
+        <Text style={styles.center} tone="muted" variant="meta">{t('accountsOverview.emptyTransactions')}</Text>
+        {onCreateTransaction ? <Button icon="plus" label={t('accountsOverview.addTransaction')} onPress={onCreateTransaction} /> : null}
+      </View>
+    )
+  }
   return (
-    <Pressable
-      accessibilityRole="button"
-      onBlur={() => setFocused(false)}
-      onFocus={() => setFocused(true)}
-      onPress={() => void onPress()}
-      style={({ pressed }) => [
-        styles.action,
-        {
-          borderColor: primary ? 'transparent' : palette.input,
-          backgroundColor: primary ? palette.primary : 'transparent',
-        },
-        focused && { borderWidth: 2, borderColor: palette.foreground },
-        pressed && styles.pressed,
-      ]}
-    >
-      <Text
-        allowFontScaling
-        style={[
-          styles.actionLabel,
-          { color: primary ? palette.primaryForeground : palette.foreground },
-        ]}
-      >
-        {label}
-      </Text>
-    </Pressable>
+    <View style={styles.rows}>
+      {state.stale ? <Text accessibilityRole="alert" tone="muted" variant="label">{t('recentTransactions.stale')}</Text> : null}
+      <List>
+        {state.rows.slice(0, LAST_TRANSACTIONS).map((row, index) => <RecentRow accountMark={openingMark} index={index} key={index} locale={locale} row={row} />)}
+      </List>
+    </View>
+  )
+}
+
+function RecentRow({ row, locale, index, accountMark: openingMark }: { row: RecentTransactionRow; locale: string; index: number; accountMark: EntityMarkSource }) {
+  const formatMoney = useFormatMoney()
+  const { t } = useTranslation()
+  const title = row.kind === 'synthetic-initial-balance'
+    ? t('recentTransactions.initialBalance')
+    : row.displayName ?? t('recentTransactions.unavailableName')
+  const date = row.occurredAt && Number.isFinite(Date.parse(row.occurredAt))
+    ? formatTransactionDate(row.occurredAt, locale)
+    : t('recentTransactions.unavailableDate')
+  const amount = row.amount === null || row.currencyCode === null
+    ? t('recentTransactions.unavailableAmount')
+    : formatMoney(row.amount, { locale, currency: row.currencyCode })
+  return (
+    <ListRow
+      accessibilityLabel={[title, date, amount].join(', ')}
+      figure={<Amount currency={row.currencyCode} locale={locale} value={row.currencyCode === null ? null : row.amount} />}
+      // The opening balance is the account itself, so it wears the account's mark.
+      leading={<EntityMark {...(row.kind === 'synthetic-initial-balance' ? openingMark : row.mark ?? { glyph: 'tag' })} />}
+      meta={[date]}
+      separated={index > 0}
+      title={title}
+    />
   )
 }
 
 const styles = StyleSheet.create({
   safeArea: { flex: 1 },
-  content: { flexGrow: 1, padding: themeTokens.layout.screenPadding },
-  page: {
-    width: '100%',
-    maxWidth: 680,
-    alignSelf: 'center',
-    alignItems: 'flex-start',
-    gap: themeTokens.layout.blockGap,
-  },
-  heading: { gap: themeTokens.spacing[2] },
-  headingRow: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: themeTokens.spacing[3] },
-  title: { ...textStyles.title },
-  balance: { ...textStyles.display },
-  institution: { ...textStyles.body },
-  values: {
-    width: '100%',
-    borderTopWidth: StyleSheet.hairlineWidth * 2,
-    paddingTop: themeTokens.spacing[3],
-    gap: themeTokens.spacing[2],
-  },
-  valueRow: {
-    flex: 1,
-    minHeight: themeTokens.layout.rowMinHeight,
-    paddingVertical: themeTokens.spacing[2],
-    gap: 2,
-  },
-  // Inflow and outflow are one comparison, not two readings.
-  metricPair: { flexDirection: 'row', gap: themeTokens.spacing[6] },
-  valueLabel: { ...textStyles.meta },
-  value: { ...textStyles.amount },
-  freshness: { ...textStyles.body },
-  banner: { ...textStyles.body, width: '100%', borderWidth: 1, borderRadius: themeTokens.radius.md, padding: themeTokens.spacing[4] },
-  action: {
-    minWidth: themeTokens.touchTarget.minimum,
-    minHeight: themeTokens.touchTarget.minimum,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 1,
-    borderRadius: themeTokens.radius.md,
-    paddingHorizontal: themeTokens.spacing[4],
-  },
-  actionLabel: {
-    fontFamily: themeTokens.typography.roles.interface.fontFamily,
-    fontSize: themeTokens.typography.roles.interface.fontSize,
-    lineHeight: themeTokens.typography.roles.interface.lineHeight,
-    fontWeight: '600',
-  },
-  pressed: { opacity: 0.72 },
-  loadingHeader: { padding: themeTokens.layout.screenPadding, alignItems: 'flex-start' },
-  loading: {
-    flex: 1,
-    width: '100%',
-    maxWidth: 680,
-    alignSelf: 'center',
-    padding: themeTokens.layout.screenPadding,
-    gap: themeTokens.spacing[5],
-  },
-  skeleton: {
-    maxWidth: '100%',
-    height: themeTokens.spacing[6],
-    borderRadius: themeTokens.radius.sm,
-  },
-  centered: {
-    flexGrow: 1,
-    justifyContent: 'center',
-    padding: themeTokens.layout.screenPadding,
-  },
-  failure: {
-    width: '100%',
-    maxWidth: 480,
-    alignSelf: 'center',
-    alignItems: 'flex-start',
-    gap: themeTokens.spacing[4],
-  },
-  errorMarker: { width: 36, height: 2 },
-  failureTitle: { ...textStyles.title },
-  body: {
-    fontFamily: themeTokens.typography.roles.interface.fontFamily,
-    fontSize: themeTokens.typography.roles.interface.fontSize,
-    lineHeight: 24,
-  },
-  actions: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: themeTokens.spacing[3],
-  },
-  metricsTitle: { ...textStyles.section, paddingHorizontal: themeTokens.spacing[4], paddingTop: themeTokens.spacing[4] },
-  metricsNote: { ...textStyles.meta, paddingHorizontal: themeTokens.spacing[4], paddingBottom: themeTokens.spacing[3] },
-  metricDetail: { width: '100%' },
+  content: { flexGrow: 1, padding: themeTokens.layout.screenPadding, paddingBottom: themeTokens.spacing[12] },
+  contentUnderButton: { paddingBottom: FLOATING_ACTION_SIZE + themeTokens.spacing[8] },
+  page: { width: '100%', maxWidth: 760, alignSelf: 'center', gap: themeTokens.spacing[10] },
+  back: { alignItems: 'flex-start' },
+  headerBlock: { gap: themeTokens.spacing[4] },
+  badges: { flexDirection: 'row', alignItems: 'center', gap: themeTokens.spacing[2] },
+  overflow: { marginRight: -11, marginVertical: -6 },
+  lead: { gap: themeTokens.spacing[6] },
+  rows: { gap: themeTokens.spacing[2] },
+  empty: { alignItems: 'center', gap: themeTokens.spacing[3], paddingVertical: themeTokens.spacing[6] },
+  center: { textAlign: 'center' },
 })

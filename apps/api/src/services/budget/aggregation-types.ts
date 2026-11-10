@@ -3,6 +3,8 @@ import type { InstantRange, LisbonBudgetPeriod, LisbonWeeklyPeriod } from './agg
 export interface AggregationDiagnostics {
   ambiguousCategoryAssignments: number;
   duplicateTransactionRows: number;
+  /** Transactions left out because every line is in a category that is not spending. */
+  excludedNonSpending: number;
   excludedTransfers: number;
   invalidAccounts: number;
   invalidLoanLinks: number;
@@ -38,6 +40,11 @@ export interface BudgetAllocationRow {
   accountKey: null | number;
   accountOwnerAppuserKey: null | number;
   accountTenantKey: null | number;
+  /**
+   * What the month may spend: `amountBudgeted` plus the rollover carried in from last month
+   * (`budget-rollover.service.ts`). Absent when the row has rollover off.
+   */
+  amountAvailable?: string;
   amountBudgeted: string;
   budgetKey: number;
   budgetName: string;
@@ -76,6 +83,7 @@ export type BudgetSuppressionReason =
 
 export interface BudgetThresholdFact {
   actualPercentage: string;
+  /** The month's available amount: its budget, plus last month's rollover when that is on. */
   amountBudgeted: string;
   amountSpent: string;
   budgetKey: number;
@@ -192,7 +200,11 @@ export interface TransactionAggregationRow {
   categoryName: null | string;
   categoryOwnerAppuserKey: null | number;
   categorySystem: boolean | null;
+  /** False for a line in a category that is not spending (its flag or its parent's is off). */
+  countsAsSpending?: boolean | null;
   effectiveAmount: null | string;
+  /** This category line's share of `effectiveAmount` (the whole of it for an unsplit transaction). */
+  lineAmount?: null | string;
   loanFeeAmount: null | string;
   loanInterestAmount: null | string;
   loanLinkDeleted: boolean | null;
@@ -204,6 +216,8 @@ export interface TransactionAggregationRow {
   parentCategoryName: null | string;
   parentCategoryOwnerAppuserKey: null | number;
   parentCategorySystem: boolean | null;
+  /** Set on the rows of a split transaction's lines; null for an unsplit transaction. */
+  splitKey?: null | number;
   tenantKey: number;
   transactionDate: Date | null;
   transactionKey: number;

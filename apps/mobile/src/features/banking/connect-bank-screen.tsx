@@ -1,14 +1,16 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Pressable, ScrollView, StyleSheet, Text, TextInput, useColorScheme, View } from 'react-native'
-import { SafeAreaView } from 'react-native-safe-area-context'
 
+import { BackControl } from '@/components/ui/back-control'
+import { PageHeader } from '@/components/ui/page-header'
+import { SafeAreaView } from '@/components/ui/screen-safe-area'
 import { themeTokens, type Palette } from '@/theme/tokens'
 import { textStyles } from '@/theme/typography'
 
 import type { BankInstitutionRow } from './institutions-view-model'
 import { filterBankInstitutions } from './institutions-view-model'
-import type { StartBankConnectionFailure } from './use-start-bank-connection'
+import { startBankConnectionFailureMessageKey, type StartBankConnectionFailure } from './use-start-bank-connection'
 
 
 export type ConnectBankScreenState =
@@ -41,30 +43,13 @@ export function ConnectBankScreen({ state, pendingBankId, startFailure, onBack, 
     <SafeAreaView style={[styles.safeArea, { backgroundColor: palette.background }]}>
       <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
         <View style={styles.page}>
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel={t('banking.connect.back')}
-            onPress={() => void onBack()}
-            style={({ pressed }) => [styles.back, pressed && styles.pressed]}
-          >
-            <Text allowFontScaling style={[styles.backLabel, { color: palette.foreground }]}>
-              {t('banking.connect.back')}
-            </Text>
-          </Pressable>
-
-          <View style={styles.heading}>
-            <Text accessibilityRole="header" allowFontScaling style={[styles.title, { color: palette.foreground }]}>
-              {t('banking.connect.heading')}
-            </Text>
-            <Text allowFontScaling style={[styles.helper, { color: palette.mutedForeground }]}>
-              {t('banking.connect.helper')}
-            </Text>
-          </View>
+          <BackControl fallback="/more/banking" label={t('banking.connect.back')} onPress={onBack} />
+          <PageHeader palette={palette} title={t('banking.connect.heading')} instruction={t('banking.connect.helper')} />
 
           {startFailure ? (
             <View style={[styles.notice, { borderColor: palette.border, backgroundColor: palette.muted }]}>
               <Text accessibilityRole="alert" allowFontScaling style={[styles.noticeBody, { color: palette.foreground }]}>
-                {t(`banking.connect.startError.${startFailure}`)}
+                {t(startBankConnectionFailureMessageKey(startFailure))}
               </Text>
             </View>
           ) : null}

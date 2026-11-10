@@ -81,6 +81,43 @@ describe('portfolio csv column mapping service', () => {
     expect(mocked.requestPortfolioColumnMappingSuggestion).toHaveBeenCalled();
   });
 
+  it('leaves the mapping to the user, without calling the model, for an account that may not use AI', async () => {
+    mocked.getOwnedSession.mockResolvedValue(buildSession());
+    mocked.getLimitedCsvObjectText.mockResolvedValue('csv');
+    mocked.parseCsvRows.mockReturnValue([{ Date: '2024-01-01', Foo: 'bar' }]);
+    mocked.findActiveSpecForShape.mockResolvedValue(undefined);
+
+    const { default: service } = await import('../portfolio-csv-column-mapping.service');
+    await expect(service.suggestColumnMapping({ allowModel: false, appuser: { appuserKey: 1 } as Appuser, importSessionId: 11, tenant: { tenantKey: 2 } }, { getObjectText: () => Promise.resolve('csv'), parseCsvRows: mocked.parseCsvRows })).resolves.toMatchObject({ importSessionId: 11, mappingSource: 'disabled', warning: expect.any(String) });
+    expect(mocked.requestPortfolioColumnMappingSuggestion).not.toHaveBeenCalled();
+  });
+
+  it('leaves the mapping to the user, without calling the model, once the household has used today\'s allowance', async () => {
+    mocked.getOwnedSession.mockResolvedValue(buildSession());
+    mocked.getLimitedCsvObjectText.mockResolvedValue('csv');
+    mocked.parseCsvRows.mockReturnValue([{ Date: '2024-01-01', Foo: 'bar' }]);
+    mocked.findActiveSpecForShape.mockResolvedValue(undefined);
+    const spendModelCall = vi.fn().mockResolvedValue(false);
+
+    const { default: service } = await import('../portfolio-csv-column-mapping.service');
+    await expect(service.suggestColumnMapping({ appuser: { appuserKey: 1 } as Appuser, importSessionId: 11, spendModelCall, tenant: { tenantKey: 2 } }, { getObjectText: () => Promise.resolve('csv'), parseCsvRows: mocked.parseCsvRows })).resolves.toMatchObject({ mappingSource: 'disabled', warning: expect.any(String) });
+    expect(spendModelCall).toHaveBeenCalledTimes(1);
+    expect(mocked.requestPortfolioColumnMappingSuggestion).not.toHaveBeenCalled();
+  });
+
+  it('spends no allowance when a saved spec or heuristic answers without the model', async () => {
+    mocked.getOwnedSession.mockResolvedValue(buildSession());
+    mocked.getLimitedCsvObjectText.mockResolvedValue('csv');
+    mocked.parseCsvRows.mockReturnValue([{ Asset: 'ACME', Currency: 'EUR', Date: '2024-01-01', Price: '2', Qty: '1', Type: 'BUY' }]);
+    mocked.findActiveSpecForShape.mockResolvedValue({ portfolioImportParserSpecKey: 77, specJson: { columns: { assetName: { normalizedHeader: 'asset' }, currency: { normalizedHeader: 'currency' }, quantity: { normalizedHeader: 'qty' }, transactionDate: { normalizedHeader: 'date' }, transactionType: { normalizedHeader: 'type' }, unitPrice: { normalizedHeader: 'price' } }, derivedValues: {}, fixedValueOrigins: {}, fixedValues: {}, layout: { dataStartRowIndex: 2, headerRowIndex: 1 }, parser: 'column-mapping-v2', transformations: { dateFormat: 'yyyy-MM-dd' } } });
+    mocked.resolveSpecColumnMapping.mockReturnValue(completeResolvedMapping);
+    const spendModelCall = vi.fn().mockResolvedValue(true);
+
+    const { default: service } = await import('../portfolio-csv-column-mapping.service');
+    await expect(service.suggestColumnMapping({ appuser: { appuserKey: 1 } as Appuser, importSessionId: 11, spendModelCall, tenant: { tenantKey: 2 } }, { getObjectText: () => Promise.resolve('csv'), parseCsvRows: mocked.parseCsvRows })).resolves.toMatchObject({ mappingSource: 'saved_spec' });
+    expect(spendModelCall).not.toHaveBeenCalled();
+  });
+
   it('uses active parser spec without llm after resolving columns', async () => {
     mocked.getOwnedSession.mockResolvedValue(buildSession());
     mocked.getLimitedCsvObjectText.mockResolvedValue('csv');

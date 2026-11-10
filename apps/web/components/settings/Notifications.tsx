@@ -37,12 +37,18 @@ const streamConfig = {
     descriptionKey: "accountRecovery.description",
     detailKey: "accountRecovery.detail",
   },
+  bankSyncAlerts: {
+    titleKey: "bankSyncAlerts.title",
+    descriptionKey: "bankSyncAlerts.description",
+    detailKey: "bankSyncAlerts.detail",
+  },
 } as const;
 
 const NOTIFICATION_STREAMS = [
   "budgetAlerts",
   "weeklyInsights",
   "accountRecovery",
+  "bankSyncAlerts",
 ] as const satisfies readonly NotificationStream[];
 
 type MutationTarget = NotificationStream | "marketingOptOut" | null;
@@ -54,6 +60,7 @@ function getMutationTarget(
   if (input.budgetAlertsEnabled !== undefined) return "budgetAlerts";
   if (input.weeklyInsightsEnabled !== undefined) return "weeklyInsights";
   if (input.accountRecoveryEnabled !== undefined) return "accountRecovery";
+  if (input.bankSyncAlertsEnabled !== undefined) return "bankSyncAlerts";
   if (input.marketingOptOut !== undefined) return "marketingOptOut";
   return null;
 }
@@ -94,8 +101,8 @@ export default function Notifications() {
   };
 
   return (
-    <div className="divide-y divide-border">
-      <div className="grid max-w-7xl grid-cols-1 gap-x-8 gap-y-10 px-4 py-16 sm:px-6 md:grid-cols-3 lg:px-8">
+    <div className="divide-border divide-y">
+      <div className="grid max-w-7xl grid-cols-1 gap-x-8 gap-y-10 py-10 md:grid-cols-3">
         <div>
           <Heading variant="h2">{t("title")}</Heading>
           <Text variant="lead" className="mt-1 text-sm">
@@ -140,7 +147,7 @@ export default function Notifications() {
                 onRetry={retryUpdate}
               />
 
-              <div className="rounded-lg border border-border bg-card px-5">
+              <div className="border-border bg-card rounded-lg border px-5">
                 {NOTIFICATION_STREAMS.map((stream, index) => (
                   <NotificationPreferenceControl
                     key={stream}
@@ -169,7 +176,7 @@ export default function Notifications() {
                 ))}
               </div>
 
-              <Text className="px-1 text-sm text-muted-foreground">
+              <Text className="text-muted-foreground px-1 text-sm">
                 {t("dataContext")}
               </Text>
             </div>
@@ -219,7 +226,7 @@ function NotificationPreferenceControl({
 
   return (
     <section
-      className={cn("py-5", !isFirst && "border-t border-border")}
+      className={cn("py-5", !isFirst && "border-border border-t")}
       aria-labelledby={`${switchId}-title`}
     >
       <div className="flex items-start justify-between gap-5">
@@ -227,22 +234,25 @@ function NotificationPreferenceControl({
           <div className="flex flex-wrap items-center gap-2">
             <h3
               id={`${switchId}-title`}
-              className="text-sm font-semibold text-foreground"
+              className="text-foreground text-sm font-semibold"
             >
               {t(config.titleKey)}
             </h3>
-            <span
-              className="inline-flex items-center gap-1.5 rounded-md border border-border bg-muted px-2 py-1 text-xs font-medium text-foreground"
-            >
+            <span className="border-border bg-muted text-foreground inline-flex items-center gap-1.5 rounded-md border px-2 py-1 text-xs font-medium">
               <StatusIcon status={viewState.status} />
               {t(`status.${viewState.status}`)}
             </span>
           </div>
 
-          <Text id={descriptionId} className="text-sm text-muted-foreground">
+          {/* `Text` renders inline: as two inline runs the detail line ran on
+              from the description with no space ("…amount.At most one…"). */}
+          <Text
+            id={descriptionId}
+            className="text-muted-foreground block text-sm"
+          >
             {t(config.descriptionKey)}
           </Text>
-          <Text className="text-xs text-muted-foreground">
+          <Text className="text-muted-foreground mt-1 block text-xs">
             {t(config.detailKey)}
           </Text>
         </div>
@@ -270,31 +280,25 @@ function NotificationPreferenceControl({
 
       <div id={feedbackId} className="mt-3" aria-live="polite">
         {viewState.pauseReason ? (
-          <Text className="text-xs text-muted-foreground">
+          <Text className="text-muted-foreground text-xs">
             {t(getPauseReasonKey(viewState.pauseReason))}
           </Text>
         ) : null}
 
         {isThisStreamPending ? (
-          <Text className="text-xs text-muted-foreground">
-            {t("saving")}
-          </Text>
+          <Text className="text-muted-foreground text-xs">{t("saving")}</Text>
         ) : null}
 
         {isMutationSuccess ? (
-          <Text className="text-xs text-muted-foreground">{t("saved")}</Text>
+          <Text className="text-muted-foreground text-xs">{t("saved")}</Text>
         ) : null}
 
         {isMutationError ? (
           <div className="flex flex-wrap items-center gap-3" role="alert">
-            <Text className="text-xs text-destructive-text">
+            <Text className="text-destructive-text text-xs">
               {t("saveError")}
             </Text>
-            <Button
-              className="min-h-11 px-2"
-              variant="link"
-              onClick={onRetry}
-            >
+            <Button className="min-h-11 px-2" variant="link" onClick={onRetry}>
               {t("retry")}
             </Button>
           </div>
@@ -328,26 +332,23 @@ function MarketingOptOutControl({
 
   return (
     <section
-      className="rounded-lg border border-border bg-muted/40 px-5 py-5"
+      className="border-border bg-muted/40 rounded-lg border px-5 py-5"
       aria-labelledby={`${switchId}-title`}
     >
       <div className="flex items-start justify-between gap-5">
         <div className="flex min-w-0 items-start gap-3">
           <BellOff
-            className="mt-0.5 size-4 shrink-0 text-muted-foreground"
+            className="text-muted-foreground mt-0.5 size-4 shrink-0"
             aria-hidden="true"
           />
           <div className="min-w-0 space-y-1">
             <h3
               id={`${switchId}-title`}
-              className="text-sm font-semibold text-foreground"
+              className="text-foreground text-sm font-semibold"
             >
               {t("marketingOptOut.title")}
             </h3>
-            <Text
-              id={descriptionId}
-              className="text-sm text-muted-foreground"
-            >
+            <Text id={descriptionId} className="text-muted-foreground text-sm">
               {t("marketingOptOut.description")}
             </Text>
           </div>
@@ -377,25 +378,19 @@ function MarketingOptOutControl({
 
       <div id={feedbackId} className="mt-3" aria-live="polite">
         {isMutationPending ? (
-          <Text className="text-xs text-muted-foreground">
-            {t("saving")}
-          </Text>
+          <Text className="text-muted-foreground text-xs">{t("saving")}</Text>
         ) : null}
 
         {isMutationSuccess ? (
-          <Text className="text-xs text-muted-foreground">{t("saved")}</Text>
+          <Text className="text-muted-foreground text-xs">{t("saved")}</Text>
         ) : null}
 
         {isMutationError ? (
           <div className="flex flex-wrap items-center gap-3" role="alert">
-            <Text className="text-xs text-destructive-text">
+            <Text className="text-destructive-text text-xs">
               {t("saveError")}
             </Text>
-            <Button
-              className="min-h-11 px-2"
-              variant="link"
-              onClick={onRetry}
-            >
+            <Button className="min-h-11 px-2" variant="link" onClick={onRetry}>
               {t("retry")}
             </Button>
           </div>
@@ -439,9 +434,9 @@ function NotificationPreferencesLoadError({
   const t = useTranslations("notificationPreferences");
 
   return (
-    <div className="rounded-lg border border-border bg-card p-5" role="alert">
+    <div className="border-border bg-card rounded-lg border p-5" role="alert">
       <Heading variant="h4">{t("loadError.title")}</Heading>
-      <Text className="mt-2 text-sm text-muted-foreground">
+      <Text className="text-muted-foreground mt-2 text-sm">
         {t("loadError.description")}
       </Text>
       <Button
@@ -467,15 +462,15 @@ function NotificationPreferencesRefreshWarning({
 
   return (
     <div
-      className="flex flex-col gap-3 rounded-lg border border-border bg-muted p-4 sm:flex-row sm:items-center sm:justify-between"
+      className="border-border bg-muted flex flex-col gap-3 rounded-lg border p-4 sm:flex-row sm:items-center sm:justify-between"
       role="status"
       aria-live="polite"
     >
       <div>
-        <Text className="text-sm font-medium text-foreground">
+        <Text className="text-foreground text-sm font-medium">
           {t("refreshWarning.title")}
         </Text>
-        <Text className="mt-1 text-sm text-muted-foreground">
+        <Text className="text-muted-foreground mt-1 text-sm">
           {t("refreshWarning.description")}
         </Text>
       </div>
@@ -497,10 +492,15 @@ function NotificationPreferencesSkeleton({
   loadingLabel: string;
 }) {
   return (
-    <div className="space-y-4" role="status" aria-live="polite" aria-busy="true">
+    <div
+      className="space-y-4"
+      role="status"
+      aria-live="polite"
+      aria-busy="true"
+    >
       <span className="sr-only">{loadingLabel}</span>
 
-      <div className="rounded-lg border border-border bg-muted/40 px-5 py-5">
+      <div className="border-border bg-muted/40 rounded-lg border px-5 py-5">
         <div className="flex items-start justify-between gap-5">
           <div className="w-full max-w-lg space-y-3">
             <Skeleton className="h-5 w-56" />
@@ -510,11 +510,11 @@ function NotificationPreferencesSkeleton({
         </div>
       </div>
 
-      <div className="rounded-lg border border-border bg-card px-5">
+      <div className="border-border bg-card rounded-lg border px-5">
         {NOTIFICATION_STREAMS.map((stream, index) => (
           <div
             key={stream}
-            className={cn("py-5", index > 0 && "border-t border-border")}
+            className={cn("py-5", index > 0 && "border-border border-t")}
           >
             <div className="flex items-start justify-between gap-5">
               <div className="w-full max-w-lg space-y-3">

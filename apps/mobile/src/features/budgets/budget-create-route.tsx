@@ -1,5 +1,5 @@
-import { useNavigation, useRouter } from 'expo-router'
-import { useEffect, useRef, useState } from 'react'
+import { usePreventRemove, useRouter } from 'expo-router'
+import { useRef, useState } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { useColorScheme } from 'react-native'
@@ -24,13 +24,12 @@ export function BudgetCreateRoute() {
   const { t } = useTranslation()
   const palette = themeTokens.colors[useColorScheme() === 'dark' ? 'dark' : 'light']
   const router = useRouter()
-  const navigation = useNavigation()
   const [failure, setFailure] = useState<CreateBudgetFailure | null>(null)
   const submissionGate = useRef(false)
   const [generation, setGeneration] = useState(0)
   const [candidates, setCandidates] = useState<readonly { id: number; name: string }[] | null>(null)
   const [reconciliationFailed, setReconciliationFailed] = useState(false)
-  useEffect(() => navigation.addListener('beforeRemove', (event) => { if (mutation.isPending) event.preventDefault() }), [mutation.isPending, navigation])
+  usePreventRemove(mutation.isPending)
 
   const submit = async (payload: BudgetCreateWrite) => {
     if (submissionGate.current || mutation.isPending || failure === 'unknown' || candidates !== null || reconciliationFailed) return

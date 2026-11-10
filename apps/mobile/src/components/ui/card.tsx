@@ -5,7 +5,12 @@ import { Text } from '@/components/ui/text'
 import { themeTokens, type Palette } from '@/theme/tokens'
 import { usePalette } from '@/theme/use-palette'
 
-function Card({
+/**
+ * A container, per web's `Card`: 1pt hairline border, 8pt radius, the canvas
+ * colour, no shadow. 16pt padding on a data card, 24pt standalone. Never put a
+ * Card (or any bordered box) inside a Card — use spacing or a `Divider`.
+ */
+export function Card({
   children,
   style,
   /** 16px on a data card; 24px for a standalone unit. */
@@ -61,6 +66,9 @@ export type StatCardProps = {
 }
 
 /**
+ * @deprecated Web's stats are ruled cells, not boxes. Use `Stat` inside a
+ * `StatList` (`@/components/ui/stat`). Kept so existing screens compile.
+ *
  * A headline figure and its comparison.
  *
  * The previous version coloured the *value* by a `tone` prop and painted its
@@ -75,7 +83,7 @@ export function StatCard({ label, value, currency, locale, comparison, delta, he
         {label}
       </Text>
       <View style={styles.valueRow}>
-        <Amount currency={currency} locale={locale} size="display" value={value} />
+        <Amount currency={currency} locale={locale} size="stat" value={value} />
         {delta !== null && delta !== undefined ? (
           <Amount currency={currency} delta locale={locale} size="amountSmall" value={delta} />
         ) : null}
