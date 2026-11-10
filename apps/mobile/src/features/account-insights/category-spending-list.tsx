@@ -3,6 +3,8 @@ import { StyleSheet, View } from 'react-native'
 
 import { Amount } from '@/components/ui/amount'
 import { Text } from '@/components/ui/text'
+import { UnconvertedAmountsNote } from '@/components/ui/unconverted-amounts-note'
+import type { AmountsCompleteness } from '@/lib/api/completeness'
 import { formatCategoryName } from '@/lib/formatters/category-name'
 import { themeTokens, type Palette } from '@/theme/tokens'
 import { usePalette } from '@/theme/use-palette'
@@ -17,11 +19,17 @@ export const chartSlot = (palette: Palette, index: number) =>
  * Web's accounts "Spending by category": each category's name and amount, a
  * thin share bar under it and the percentage at its end, hairlines between.
  */
-export function CategorySpendingList({ rows, currency, locale }: { rows: readonly CategoryRow[]; currency: string; locale: string }) {
+export function CategorySpendingList({ rows, currency, locale, completeness }: { rows: readonly CategoryRow[]; currency: string; locale: string; completeness?: AmountsCompleteness }) {
   const { t } = useTranslation()
   const palette = usePalette()
+  const note = <UnconvertedAmountsNote completeness={completeness} testID="category-spending-unconverted" />
   if (rows.length === 0) {
-    return <Text style={styles.empty} tone="muted" variant="meta">{t('accountsOverview.emptyCategorySpending')}</Text>
+    return (
+      <View>
+        <Text style={styles.empty} tone="muted" variant="meta">{t('accountsOverview.emptyCategorySpending')}</Text>
+        {note}
+      </View>
+    )
   }
   const total = rows.reduce((sum, row) => sum + Math.abs(row.amount), 0)
   return (
@@ -50,6 +58,7 @@ export function CategorySpendingList({ rows, currency, locale }: { rows: readonl
           </View>
         )
       })}
+      {note}
     </View>
   )
 }

@@ -17,9 +17,35 @@ const dataExportSchema = z.object({
   downloadUrl: z.string().nullable(),
   expiresAt: z.string().nullable(),
   fileName: z.string(),
+  /** Whether the archive is password protected (a WinZip AES-256 zip). Older servers omit it. */
+  encrypted: z.boolean().optional(),
 })
 
 export type DataExport = z.infer<typeof dataExportSchema>
+
+/**
+ * The password limits the API enforces (`EXPORT_PASSWORD_MIN_LENGTH` / `_MAX_LENGTH`), in
+ * characters as it counts them: Unicode code points, so "é" is one.
+ */
+export const DATA_EXPORT_PASSWORD_MIN_LENGTH = 16
+export const DATA_EXPORT_PASSWORD_MAX_LENGTH = 256
+
+export function dataExportPasswordLength(password: string): number {
+  return [...password].length
+}
+
+export type DataExportPasswordProblem = 'too-short' | 'mismatch'
+
+/** What is wrong with a password and its confirmation before it is sent, or null when nothing is. */
+export function dataExportPasswordProblem(password: string, confirmation: string): DataExportPasswordProblem | null {
+  if (dataExportPasswordLength(password) < DATA_EXPORT_PASSWORD_MIN_LENGTH) return 'too-short'
+  return password === confirmation ? null : 'mismatch'
+}
+
+/** The request body: a password only when the member asked for one, never an empty string. */
+export function startDataExportBody(password: string | undefined): { password?: string } {
+  return password === undefined ? {} : { password }
+}
 
 export const startDataExportEndpoint = writeEndpoint({
   method: 'POST',

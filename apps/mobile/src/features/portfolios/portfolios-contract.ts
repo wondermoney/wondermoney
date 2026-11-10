@@ -1,5 +1,6 @@
 import { z } from 'zod'
 
+import { amountsCompletenessSchema } from '@/lib/api/completeness'
 import { readEndpoint, tolerantEnum, writeEndpoint } from '@/lib/api/runtime-schema'
 
 const currencyCodeSchema = z.string().regex(/^[A-Z]{3}$/)
@@ -301,9 +302,12 @@ export const portfolioAllocationResponseSchema = z.object({
   guidanceText: z.string().nullable().optional(),
   unclassifiedHoldings: z.array(unclassifiedHoldingSchema),
 })
+// The totals are in the viewer's currency, which `completeness` names; a dividend with no exchange
+// rate is left out of them and counted there.
 export const portfolioDividendIncomeResponseSchema = z.object({
   byAsset: z.array(z.object({ financialAssetKey: z.number().int().positive(), symbol: z.string(), totalDividends: finite })),
   totalDividends: finite,
+  completeness: amountsCompletenessSchema.optional(),
 })
 // Values this build doesn't know read as "not ready yet", which the screens already handle.
 const historyStatusSchema = tolerantEnum(['empty', 'insufficient_history', 'ready'], 'insufficient_history')

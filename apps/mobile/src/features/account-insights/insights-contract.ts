@@ -1,5 +1,6 @@
 import { z } from 'zod'
 
+import { amountsCompletenessSchema } from '@/lib/api/completeness'
 import { readEndpoint, tolerantEnum } from '@/lib/api/runtime-schema'
 import { deviceTimeZone } from '@/lib/dates/transaction-date'
 
@@ -49,7 +50,8 @@ export const categorySpendingSchema = z.object({
   ...categoryShape,
   childCategories: z.array(childCategorySchema),
 })
-export const categorySpendingResponseSchema = z.object({ categorySpending: z.array(categorySpendingSchema) })
+// A transaction with no exchange rate to the viewer's currency is left out and counted in `completeness`.
+export const categorySpendingResponseSchema = z.object({ categorySpending: z.array(categorySpendingSchema), completeness: amountsCompletenessSchema.optional() })
 
 export type InsightPeriod = 'month' | '30-days' | '90-days'
 export type AccountMetricDto = z.infer<typeof accountMetricSchema>

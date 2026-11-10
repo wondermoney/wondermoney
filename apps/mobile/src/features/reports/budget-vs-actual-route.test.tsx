@@ -53,6 +53,18 @@ describe('BudgetVsActualRoute', () => {
     expect(view.queryAllByText(/€/)).toHaveLength(0)
   })
 
+  it('says when spending in a currency with no exchange rate was left out of the report', async () => {
+    mockQuery = { ...mockQuery, data: { ...responseData, completeness: { currencyCode: 'EUR', isComplete: false, unconvertedTransactions: 2, unconvertedCurrencies: ['USD'] } } }
+    const view = await renderRoute()
+    expect(view.getByTestId('budget-vs-actual-report-unconverted')).toHaveTextContent(/2 transactions in USD are left out/)
+  })
+
+  it('says nothing more when every amount was converted', async () => {
+    mockQuery = { ...mockQuery, data: { ...responseData, completeness: { currencyCode: 'EUR', isComplete: true, unconvertedTransactions: 0, unconvertedCurrencies: [] } } }
+    const view = await renderRoute()
+    expect(view.queryByTestId('budget-vs-actual-report-unconverted')).not.toBeOnTheScreen()
+  })
+
   it('wires the export button to useReportExport', async () => {
     const view = await renderRoute()
     await fireEvent.press(view.getByRole('button', { name: 'Export CSV' }))

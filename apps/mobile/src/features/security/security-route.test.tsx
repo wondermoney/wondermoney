@@ -133,6 +133,29 @@ describe('SecurityRoute', () => {
       expect(mockStartExport).toHaveBeenCalledTimes(1)
     })
 
+    it('sends the chosen password with the export request', async () => {
+      mockStartExport.mockResolvedValue({ id: 'e1' })
+      const view = await renderRoute()
+      await fireEvent.press(view.getByRole('switch', { name: 'Protect the file with a password' }))
+      await fireEvent.changeText(view.getByLabelText('Password'), 'correct horse battery staple')
+      await fireEvent.changeText(view.getByLabelText('Repeat password'), 'correct horse battery staple')
+      await fireEvent.press(view.getByRole('button', { name: 'Export all data' }))
+      await waitFor(() => expect(mockStartExport).toHaveBeenCalledWith({ password: 'correct horse battery staple' }))
+    })
+
+    it.each([
+      [409, /another export is still in progress/i],
+      [400, /did not accept this password/i],
+    ])('explains a %i from the server', async (status, message) => {
+      mockStartExport.mockRejectedValue(new ApiError('http', status))
+      const view = await renderRoute()
+      await fireEvent.press(view.getByRole('switch', { name: 'Protect the file with a password' }))
+      await fireEvent.changeText(view.getByLabelText('Password'), 'correct horse battery staple')
+      await fireEvent.changeText(view.getByLabelText('Repeat password'), 'correct horse battery staple')
+      await fireEvent.press(view.getByRole('button', { name: 'Export all data' }))
+      await waitFor(() => expect(view.getByText(message)).toBeOnTheScreen())
+    })
+
     it('opens the short-lived link of a ready export', async () => {
       mockLatestExport = { id: 'e1', status: 'ready', delivery: 'storage', downloadUrl: 'https://files.example.test/export.zip?signed', expiresAt: '2026-11-09T10:00:00.000Z', fileName: 'wondermoney-export-2026-11-08.zip' }
       const view = await renderRoute()

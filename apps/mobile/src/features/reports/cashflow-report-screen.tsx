@@ -4,6 +4,8 @@ import { CartesianChart, Line } from 'victory-native'
 
 import { Amount } from '@/components/ui/amount'
 import { Text } from '@/components/ui/text'
+import { UnconvertedAmountsNote } from '@/components/ui/unconverted-amounts-note'
+import type { AmountsCompleteness } from '@/lib/api/completeness'
 import { useFormatMoney } from '@/lib/formatters/money-display'
 import { themeTokens } from '@/theme/tokens'
 import { usePalette } from '@/theme/use-palette'
@@ -29,7 +31,7 @@ export type CashflowReportViewState =
   | { status: 'error' }
   | { status: 'invalid-response' }
   | { status: 'access-transition' }
-  | { status: 'loaded'; report: CashflowReportViewModel; refreshing?: boolean }
+  | { status: 'loaded'; report: CashflowReportViewModel; refreshing?: boolean; completeness?: AmountsCompleteness }
 
 export type CashflowReportBodyProps = {
   state: CashflowReportViewState
@@ -115,6 +117,7 @@ export function CashflowReportBody({ state, currencyCode, exportState, onExport,
   return (
     <ReportSection actions={actions} description={t('reports.cashflow.subtitle')} testID="cashflow-report" title={title}>
       {content}
+      {state.status === 'loaded' ? <UnconvertedAmountsNote completeness={state.completeness} testID="cashflow-report-unconverted" /> : null}
     </ReportSection>
   )
 }

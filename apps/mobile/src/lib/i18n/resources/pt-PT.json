@@ -2885,6 +2885,11 @@
       "heading": "Exportar os teus dados",
       "helper": "Descarrega tudo o que vês no teu agregado (contas, transações, orçamentos, objetivos, empréstimos e investimentos) num zip com ficheiros JSON e CSV. As contas privadas do teu parceiro não são incluídas.",
       "start": "Exportar todos os dados",
+      "protect": "Proteger o ficheiro com uma palavra-passe",
+      "password": "Palavra-passe",
+      "passwordConfirm": "Repetir palavra-passe",
+      "passwordHint": "Pelo menos {{min}} caracteres; uma frase longa é o ideal. Vais precisar dela para abrir o ficheiro com o 7-Zip, o Keka ou o WinRAR. Uma palavra-passe esquecida não pode ser recuperada.",
+      "protected": "Esta exportação está protegida por palavra-passe.",
       "download": "Descarregar exportação",
       "preparing": "A preparar a tua exportação. Enviamos-te um email quando estiver pronta.",
       "readyUntil": "Disponível para descarregar até {{date}}.",
@@ -2892,7 +2897,11 @@
       "webOnly": "Este servidor cria as exportações enquanto são descarregadas. Exporta os teus dados na aplicação web, em Definições > Privacidade.",
       "errors": {
         "limit": "Podes exportar os teus dados até 3 vezes por dia. Tenta novamente mais tarde.",
-        "unknown": "Não foi possível iniciar a exportação. Verifica a tua ligação e tenta novamente."
+        "unknown": "Não foi possível iniciar a exportação. Verifica a tua ligação e tenta novamente.",
+        "too-short": "Usa pelo menos {{min}} caracteres.",
+        "mismatch": "As palavras-passe não coincidem.",
+        "password": "O servidor não aceitou esta palavra-passe. Usa entre {{min}} e {{max}} caracteres.",
+        "in-progress": "Há outra exportação em curso. Descarrega-a ou espera que termine e tenta novamente."
       }
     },
     "mfa": {
@@ -3500,6 +3509,12 @@
     "holdingLabel": "Taxas excluídas",
     "holding": "Algumas taxas desta posição não puderam ser convertidas para a sua moeda, por isso foram excluídas do custo e do ganho.",
     "gains": "Algumas taxas de transações não puderam ser convertidas para a sua moeda, por isso foram excluídas destes ganhos."
+  },
+  "unconvertedAmounts": {
+    "withCurrencies_one": "Alguns valores estão noutras moedas: {{count}} transação em {{currencies}} fica de fora deste total até haver uma taxa de câmbio.",
+    "withCurrencies_other": "Alguns valores estão noutras moedas: {{count}} transações em {{currencies}} ficam de fora deste total até haver uma taxa de câmbio.",
+    "noCurrency_one": "Alguns valores estão noutras moedas: {{count}} transação fica de fora deste total até haver uma taxa de câmbio.",
+    "noCurrency_other": "Alguns valores estão noutras moedas: {{count}} transações ficam de fora deste total até haver uma taxa de câmbio."
   },
   "portfolioTickerSearch": {
     "placeholder": "ex. AAPL",

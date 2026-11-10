@@ -1,3 +1,5 @@
+import type { AmountsCompleteness } from '@/lib/api/completeness'
+
 import type {
   PortfolioActivityItemDto,
   PortfolioAllocationDto,
@@ -115,7 +117,10 @@ export type PortfolioAnalyticsViewModel = Readonly<{
   totalDividends: number
 }>
 
-export type PortfolioDividendIncomeViewModel = Pick<PortfolioAnalyticsViewModel, 'currency' | 'dividends' | 'totalDividends'>
+export type PortfolioDividendIncomeViewModel = Pick<PortfolioAnalyticsViewModel, 'currency' | 'dividends' | 'totalDividends'> & Readonly<{
+  /** Dividends left out of the totals for want of an exchange rate. */
+  completeness?: AmountsCompleteness
+}>
 
 /** Shared by both the aggregate analytics panel and the per-portfolio detail screen —
  * same dividend-income response shape, just scoped to a different endpoint. */
@@ -123,11 +128,14 @@ export function mapPortfolioDividendIncome(
   dividends: PortfolioDividendIncomeDto,
   reportingCurrency: string | null,
 ): PortfolioDividendIncomeViewModel {
-  const currency = reportingCurrency !== null && /^[A-Z]{3}$/.test(reportingCurrency) ? reportingCurrency : null
+  // The totals are in the currency the API names, as on web; the reporting currency is the fallback.
+  const named = dividends.completeness?.currencyCode ?? reportingCurrency
+  const currency = named !== null && /^[A-Z]{3}$/.test(named) ? named : null
   return {
     currency,
     dividends: dividends.byAsset.map((item) => ({ symbol: item.symbol, value: item.totalDividends })),
     totalDividends: dividends.totalDividends,
+    ...(dividends.completeness ? { completeness: dividends.completeness } : {}),
   }
 }
 
