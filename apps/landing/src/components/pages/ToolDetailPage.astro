@@ -1,0 +1,106 @@
+---
+import "@/styles/globals.css";
+import ContentLayout from "@/layouts/ContentLayout.astro";
+import CompoundInterestCalculatorComp from "@/components/calculators/CompoundInterestCalculatorComp";
+import NetWorthCalculatorComp from "@/components/calculators/NetWorthCalculatorComp";
+import SavingsRateCalculatorComp from "@/components/calculators/SavingsRateCalculatorComp";
+import InvestmentReturnCalculatorComp from "@/components/calculators/InvestmentReturnCalculatorComp";
+import CTABanner from "@/components/shared/CTABanner";
+import FinancialDisclaimer from "@/components/shared/FinancialDisclaimer";
+import RelatedContent from "@/components/shared/RelatedContent";
+import { buildAlternateLinks, toLocalizedPath, type Lang } from "@/lib/routes";
+import { getTranslations } from "@/lib/translations";
+import type { ToolRouteId } from "@/lib/pageStaticPaths";
+
+interface Props {
+  locale: Lang;
+  routeId: ToolRouteId;
+}
+
+const { locale, routeId } = Astro.props;
+const t = getTranslations(locale);
+
+const relatedByRouteId: Record<ToolRouteId, ToolRouteId[]> = {
+  toolCompoundInterest: ["toolNetWorth", "toolSavingsRate", "toolInvestmentReturn"],
+  toolNetWorth: ["toolCompoundInterest", "toolSavingsRate", "toolInvestmentReturn"],
+  toolSavingsRate: ["toolCompoundInterest", "toolNetWorth", "toolInvestmentReturn"],
+  toolInvestmentReturn: ["toolCompoundInterest", "toolNetWorth", "toolSavingsRate"],
+};
+
+const toolKeyByRouteId: Record<ToolRouteId, string> = {
+  toolCompoundInterest: "compoundInterest",
+  toolNetWorth: "netWorth",
+  toolSavingsRate: "savingsRate",
+  toolInvestmentReturn: "investmentReturn",
+};
+
+const relatedItems = relatedByRouteId[routeId].map((relatedRouteId) => {
+  const key = toolKeyByRouteId[relatedRouteId];
+
+  return {
+    title: t(`tools.${key}.title`),
+    description: t(`tools.${key}.description`),
+    href: toLocalizedPath(relatedRouteId, locale),
+    type: "calculator" as const,
+  };
+});
+
+const key = toolKeyByRouteId[routeId];
+const alternateLinks = buildAlternateLinks(routeId);
+const pageTitle = t(`tools.${key}.pageTitle`);
+const pageDescription = t(`tools.${key}.pageDescription`);
+const sectionTitle = t(`tools.${key}.title`);
+const sectionSubtitle = t(`tools.${key}.subtitle`);
+const toolsHubHref = `/${locale}/tools`;
+
+const schema = {
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  name: pageTitle,
+  url: `https://wonder.money${toLocalizedPath(routeId, locale)}`,
+  applicationCategory: "FinanceApplication",
+  operatingSystem: "Web",
+  offers: {
+    "@type": "Offer",
+    price: "0",
+    priceCurrency: "EUR",
+  },
+};
+---
+
+<ContentLayout
+  title={pageTitle}
+  description={pageDescription}
+  alternateLinks={alternateLinks}
+  breadcrumbs={[
+    { label: t("header.tools"), href: toolsHubHref },
+    { label: sectionTitle, href: toolsHubHref },
+  ]}
+  locale={locale}
+  structuredData={schema}
+>
+  <section>
+    <h1 class="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
+      {sectionTitle}
+    </h1>
+    <p class="mt-3 max-w-3xl text-lg text-muted-foreground">{sectionSubtitle}</p>
+  </section>
+
+  <div class="mt-8">
+    {routeId === "toolCompoundInterest" && <CompoundInterestCalculatorComp locale={locale} client:load />}
+    {routeId === "toolNetWorth" && <NetWorthCalculatorComp locale={locale} client:load />}
+    {routeId === "toolSavingsRate" && <SavingsRateCalculatorComp locale={locale} client:load />}
+    {routeId === "toolInvestmentReturn" && (
+      <InvestmentReturnCalculatorComp locale={locale} client:load />
+    )}
+  </div>
+
+  <div class="mt-8">
+    <FinancialDisclaimer locale={locale} client:idle />
+  </div>
+
+  <RelatedContent locale={locale} client:idle items={relatedItems} />
+  <div class="mt-8">
+    <CTABanner locale={locale} client:idle />
+  </div>
+</ContentLayout>

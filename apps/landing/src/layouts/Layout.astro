@@ -1,0 +1,100 @@
+---
+import "@fontsource-variable/geist/index.css";
+import "@fontsource-variable/geist-mono/index.css";
+import faviconSrc from "@/assets/favicon.png";
+import { ConsentBanner } from "@/components/shared/ConsentBanner";
+import PivotAnnouncementBanner from "@/components/shared/PivotAnnouncementBanner";
+import StickyMobileCta from "@/components/shared/StickyMobileCta";
+import SEO from "@/components/shared/SEO.astro";
+import StructuredData from "@/components/shared/StructuredData.astro";
+import type { Lang } from "@/lib/i18nLocale";
+
+const organizationSchema = {
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  name: "WonderMoney",
+  url: "https://wonder.money",
+  logo: "https://wonder.money/logo.png",
+  description: "The central financial hub for Europeans",
+  sameAs: ["https://discord.gg/9qKZ7gEaAP"],
+};
+
+interface Props {
+  title: string;
+  description: string;
+  ogImage?: string;
+  ogType?: string;
+  canonicalUrl?: string;
+  noindex?: boolean;
+  noindexFollow?: boolean;
+  alternateLinks?: Array<{ hrefLang: string; href: string }>;
+  locale: Lang;
+}
+
+const {
+  title,
+  description,
+  ogImage,
+  ogType,
+  canonicalUrl,
+  noindex = false,
+  noindexFollow = false,
+  alternateLinks,
+  locale,
+} = Astro.props;
+const enableReactDevTools =
+  import.meta.env.DEV && import.meta.env.PUBLIC_DISABLE_REACT_DEVTOOLS !== "1";
+---
+
+<!doctype html>
+<html lang={locale}>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" type="image/png" href={faviconSrc.src} />
+    <link rel="preconnect" href="https://cdn.sanity.io" crossorigin />
+    <link
+      rel="preconnect"
+      href="https://www.googletagmanager.com"
+      crossorigin
+    />
+    <link rel="preconnect" href="https://eu.posthog.com" crossorigin />
+    <meta name="generator" content={Astro.generator} />
+    {
+      enableReactDevTools && (
+        <>
+          <script
+            crossorigin="anonymous"
+            src="//unpkg.com/react-grab/dist/index.global.js"
+            is:inline
+          />
+          <script
+            crossorigin="anonymous"
+            src="//unpkg.com/react-scan/dist/auto.global.js"
+            is:inline
+          />
+        </>
+      )
+    }
+    <SEO
+      title={title}
+      description={description}
+      ogImage={ogImage}
+      ogType={ogType}
+      canonicalUrl={canonicalUrl}
+      noindex={noindex}
+      noindexFollow={noindexFollow}
+      alternateLinks={alternateLinks}
+      locale={locale}
+    />
+  </head>
+  <body>
+    <PivotAnnouncementBanner locale={locale} client:load />
+    <div class="pb-16 md:pb-0">
+      <slot />
+    </div>
+    <ConsentBanner locale={locale} client:load />
+    <StickyMobileCta locale={locale} client:idle />
+    <StructuredData data={organizationSchema} />
+  </body>
+</html>

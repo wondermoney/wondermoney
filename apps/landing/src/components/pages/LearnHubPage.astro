@@ -1,0 +1,178 @@
+---
+import { toIntlLocale } from "@/lib/numberFormat";
+import "@/styles/globals.css";
+import ContentLayout from "@/layouts/ContentLayout.astro";
+import ContentSearch from "@/components/shared/ContentSearch";
+import { sanityClient } from "sanity:client";
+import { getTranslations } from "@/lib/translations";
+import type { Lang } from "@/lib/i18nLocale";
+import { buildAlternateLinksForPath } from "@/lib/routes";
+
+type GuideEntry = {
+  title: string;
+  slug: string;
+  category?: string;
+  excerpt?: string;
+  publishedAt?: string;
+  market?: string;
+  topicKey?: string;
+};
+
+interface Props {
+  locale: Lang;
+}
+
+const { locale } = Astro.props;
+const t = getTranslations(locale);
+const alternateLinks = buildAlternateLinksForPath((lang) => `/${lang}/learn`);
+
+const guides = await sanityClient.fetch<GuideEntry[]>(
+  `*[_type == "guide" && locale == $locale] | order(publishedAt desc) { title, "slug": slug.current, category, excerpt, publishedAt, market, topicKey }`,
+  { locale },
+);
+
+const rankGuideForRouteSelection = (guide: GuideEntry): number => (guide.market ? 0 : 1);
+
+const dedupedGuides = Array.from(
+  guides
+    .reduce((acc, guide, index) => {
+      const key = guide.topicKey || guide.slug || `guide-${index}`;
+      const current = acc.get(key);
+
+      if (!current || rankGuideForRouteSelection(guide) > rankGuideForRouteSelection(current)) {
+        acc.set(key, guide);
+      }
+
+      return acc;
+    }, new Map<string, GuideEntry>())
+    .values(),
+);
+
+const grouped: Record<string, typeof dedupedGuides> = {};
+for (const guide of dedupedGuides) {
+  const cat = guide.category || t("learn.hub.defaultCategory");
+  if (!grouped[cat]) {
+    grouped[cat] = [];
+  }
+  grouped[cat].push(guide);
+}
+
+const categories = Object.keys(grouped).sort();
+const learnPrefix = `/${locale}/learn`;
+const monthlyPrefix = `${learnPrefix}/monthly`;
+const dateLocale = toIntlLocale(locale);
+
+const searchItems = dedupedGuides.map((g) => ({
+  title: g.title,
+  description: g.excerpt,
+  href: `${learnPrefix}/${g.slug}`,
+  category: g.category || t("learn.hub.defaultCategory"),
+}));
+
+const itemListSchema = {
+  "@context": "https://schema.org",
+  "@type": "ItemList",
+  name: t("learn.hub.title"),
+  description: t("learn.hub.pageDescription"),
+  url: `https://wonder.money${learnPrefix}`,
+  numberOfItems: dedupedGuides.length,
+  itemListElement: dedupedGuides.map((g, index: number) => ({
+    "@type": "ListItem",
+    position: index + 1,
+    name: g.title,
+    url: `https://wonder.money${learnPrefix}/${g.slug}`,
+  })),
+};
+---
+
+<ContentLayout
+  title={t("learn.hub.pageTitle")}
+  description={t("learn.hub.pageDescription")}
+  alternateLinks={alternateLinks}
+  breadcrumbs={[{ label: t("header.learn"), href: "#" }]}
+  locale={locale}
+  structuredData={itemListSchema}
+>
+  <section>
+    <h1 class="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
+      {t("learn.hub.title")}
+    </h1>
+    <p class="mt-3 max-w-3xl text-lg text-muted-foreground">
+      {t("learn.hub.description")}
+    </p>
+  </section>
+
+  <section class="mt-8">
+    <a
+      href={monthlyPrefix}
+      class="group block rounded-card border border-info/30 bg-info/5 p-6 transition-colors hover:border-info/30"
+    >
+      <h2 class="text-xl font-semibold text-foreground group-hover:text-info-text">
+        <span class="mb-2 block text-sm tracking-normal">{t("learn.monthlySeries.badge")}</span>{" "}
+        {t("learn.monthlySeries.title")}
+      </h2>
+      <p class="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground">
+        {t("learn.monthlySeries.description")}
+      </p>
+      <span class="mt-4 inline-block text-sm font-medium text-info-text underline underline-offset-4 decoration-info-text/40">
+        {t("learn.monthlySeries.cta")}
+      </span>
+    </a>
+  </section>
+
+  <ContentSearch
+    locale={locale}
+    client:load
+    items={searchItems}
+    placeholder={t("learn.hub.searchPlaceholder")}
+  />
+
+  {
+    dedupedGuides.length === 0 ? (
+      <div class="mt-12 rounded-card border border-border bg-paper-2 p-12 text-center">
+        <p class="text-lg text-muted-foreground">
+          {t("learn.hub.comingSoon")}
+        </p>
+      </div>
+    ) : (
+      <div class="mt-10 space-y-12">
+        {categories.map((category) => (
+          <section>
+            <h2 class="border-b border-border pb-2 text-2xl font-bold text-foreground">
+              {t(`category.${category}`, { defaultValue: category })}
+            </h2>
+            <div class="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {grouped[category].map((guide) => (
+                <a
+                  href={`${learnPrefix}/${guide.slug}`}
+                  class="group rounded-card border border-border p-6 transition-colors hover:border-primary/40 hover:bg-accent"
+                >
+                  <h3 class="text-lg font-semibold text-foreground group-hover:text-primary">
+                    {guide.title}
+                  </h3>
+                  {guide.excerpt && (
+                    <p class="mt-2 line-clamp-3 text-sm leading-6 text-muted-foreground">
+                      {guide.excerpt}
+                    </p>
+                  )}
+                  {guide.publishedAt && (
+                    <p class="mt-3 text-xs text-muted-foreground">
+                      {new Date(guide.publishedAt).toLocaleDateString(dateLocale, {
+                        year: "numeric",
+                        month: "long",
+                        day: "numeric",
+                      })}
+                    </p>
+                  )}
+                  <span class="mt-4 inline-block text-sm font-medium text-primary underline underline-offset-4 decoration-primary/40 group-hover:opacity-80">
+                    {t("learn.hub.readGuide")}
+                  </span>
+                </a>
+              ))}
+            </div>
+          </section>
+        ))}
+      </div>
+    )
+  }
+</ContentLayout>

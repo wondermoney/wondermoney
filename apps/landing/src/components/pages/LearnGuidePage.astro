@@ -1,0 +1,184 @@
+---
+import { toIntlLocale } from "@/lib/numberFormat";
+import "@/styles/globals.css";
+import ContentLayout from "@/layouts/ContentLayout.astro";
+import CTABanner from "@/components/shared/CTABanner";
+import EmailCaptureForm from "@/components/shared/EmailCaptureForm";
+import RelatedContent from "@/components/shared/RelatedContent";
+import GuideSections from "@/components/learning/GuideSections.astro";
+import {
+  normalizeGuideSections,
+  type GuideSection,
+  type PortableTextBlock,
+} from "@/lib/learningContent";
+import {
+  resolveToolRouteIdFromLegacy,
+  toLocalizedPath,
+  toToolsHubPath,
+  type Lang,
+} from "@/lib/routes";
+import { getTranslations } from "@/lib/translations";
+import type { GuideEntry } from "@/lib/pageStaticPaths";
+
+interface Props {
+  locale: Lang;
+  guide: GuideEntry;
+  alternateLinks: Array<{ hrefLang: string; href: string }>;
+}
+
+const { guide, locale, alternateLinks } = Astro.props;
+const t = getTranslations(locale);
+
+const canonicalPath = `/${locale}/learn/${guide.slug}`;
+const canonicalUrl = `${Astro.url.origin}${canonicalPath}`;
+
+const learnPrefix = `/${locale}/learn`;
+const glossaryPrefix = `/${locale}/glossary`;
+const toolsHubPrefix = toToolsHubPath(locale);
+
+const relatedItems: {
+  title: string;
+  description: string;
+  href: string;
+  type: "calculator" | "guide" | "glossary";
+}[] = [];
+
+if (guide.relatedCalculators) {
+  for (const calc of guide.relatedCalculators) {
+    const routeId = resolveToolRouteIdFromLegacy(calc, locale);
+
+    relatedItems.push({
+      title: calc,
+      description: "",
+      href: routeId ? toLocalizedPath(routeId, locale) : toolsHubPrefix,
+      type: "calculator",
+    });
+  }
+}
+
+if (guide.relatedTerms) {
+  for (const term of guide.relatedTerms) {
+    if (term.slug && term.locale === locale) {
+      relatedItems.push({
+        title: term.term,
+        description: "",
+        href: `${glossaryPrefix}/${term.slug}`,
+        type: "glossary",
+      });
+    }
+  }
+}
+
+const formattedDate = guide.publishedAt
+  ? new Date(guide.publishedAt).toLocaleDateString(toIntlLocale(locale), {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    })
+  : null;
+
+const formatMetadataDate = (dateValue?: string) => {
+  if (!dateValue) {
+    return null;
+  }
+
+  return new Date(dateValue).toLocaleDateString(toIntlLocale(locale), {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
+};
+
+const reviewedDate = formatMetadataDate(guide.lastReviewedAt);
+const freshnessLabel = reviewedDate ? `${t("learn.guide.reviewed")}: ${reviewedDate}` : undefined;
+
+const guideSections = (guide.sections ?? []) as GuideSection[];
+const guideBodyBlocks = (guide.body ?? []) as PortableTextBlock[];
+
+const normalizedSections = normalizeGuideSections({
+  sections: guideSections,
+  body: guideBodyBlocks,
+});
+
+const articleSchema = {
+  "@context": "https://schema.org",
+  "@type": "Article",
+  headline: guide.title,
+  description: guide.seoDescription || guide.excerpt,
+  url: canonicalUrl,
+  datePublished: guide.publishedAt,
+  publisher: {
+    "@type": "Organization",
+    name: "WonderMoney",
+    url: "https://wonder.money",
+  },
+  ...(guide.ogImageUrl && { image: guide.ogImageUrl }),
+};
+---
+
+<ContentLayout
+  title={guide.seoTitle || `${guide.title} — WonderMoney`}
+  description={guide.seoDescription || guide.excerpt || ""}
+  ogImage={guide.ogImageUrl}
+  ogType="article"
+  canonicalUrl={canonicalUrl}
+  breadcrumbs={[
+    { label: t("header.learn"), href: learnPrefix },
+    { label: guide.title, href: "#" },
+  ]}
+  freshnessLabel={freshnessLabel}
+  locale={locale}
+  alternateLinks={alternateLinks}
+  structuredData={articleSchema}
+>
+  <article>
+    <section>
+      <h1 class="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
+        {guide.title}
+      </h1>
+      {guide.category && (
+        <p class="mt-2 text-sm text-muted-foreground">{guide.category}</p>
+      )}
+      {guide.excerpt && (
+        <p class="mt-4 text-lg leading-8 text-muted-foreground">
+          {guide.excerpt}
+        </p>
+      )}
+      {formattedDate && <p class="mt-4 text-sm text-muted-foreground">{formattedDate}</p>}
+    </section>
+
+    {normalizedSections.length > 0 && (
+      <GuideSections locale={locale} sections={normalizedSections} references={guide.references ?? []} />
+    )}
+
+    {guide.relatedTerms && guide.relatedTerms.length > 0 && (
+      <div class="mt-10">
+        <h2 class="text-xl font-bold text-foreground">
+          {t("learn.guide.glossaryTerms")}
+        </h2>
+        <div class="mt-4 flex flex-wrap gap-2">
+          {guide.relatedTerms
+            .filter((r) => r.slug && r.locale === locale)
+            .map((term) => (
+              <a
+                href={`${glossaryPrefix}/${term.slug}`}
+                class="rounded-full border border-border px-4 py-2 text-sm font-medium text-muted-foreground transition-colors hover:border-primary/40 hover:bg-accent hover:text-primary"
+              >
+                {term.term}
+              </a>
+            ))}
+        </div>
+      </div>
+    )}
+  </article>
+
+  <div class="mt-10">
+    <EmailCaptureForm locale={locale} source="guide-page" variant="inline" client:idle />
+  </div>
+
+  {relatedItems.length > 0 && <RelatedContent locale={locale} client:idle items={relatedItems} />}
+
+  <div class="mt-8">
+    <CTABanner locale={locale} client:idle />
+  </div>
+</ContentLayout>

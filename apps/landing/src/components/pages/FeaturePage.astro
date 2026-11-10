@@ -1,0 +1,398 @@
+---
+import "@/styles/globals.css";
+import Header from "@/components/shared/Header";
+import Footer from "@/components/shared/Footer";
+import Layout from "@/layouts/Layout.astro";
+import StructuredData from "@/components/shared/StructuredData.astro";
+import FeatureAccounts from "@/components/landing/FeatureAccounts";
+import FeatureBudgeting from "@/components/landing/FeatureBudgeting";
+import FeatureCategorization from "@/components/landing/FeatureCategorization";
+import FeatureCredits from "@/components/landing/FeatureCredits";
+import FeatureFinancialMarkets from "@/components/landing/FeatureFinancialMarkets";
+import FeatureGoals from "@/components/landing/FeatureGoals";
+import FeatureNetWorth from "@/components/landing/FeatureNetWorth";
+import FeaturePrivacy from "@/components/landing/FeaturePrivacy";
+import FeaturePortfolio from "@/components/landing/FeaturePortfolio";
+import FeatureReports from "@/components/landing/FeatureReports";
+import { buildAlternateLinks, toLocalizedPath, type Lang } from "@/lib/routes";
+import { getTranslations } from "@/lib/translations";
+import type { FeatureRouteId } from "@/lib/pageStaticPaths";
+import FinancialDisclaimer from "@/components/shared/FinancialDisclaimer";
+
+interface Props {
+  locale: Lang;
+  routeId: FeatureRouteId;
+}
+
+const { locale, routeId } = Astro.props;
+const t = getTranslations(locale);
+
+const pageMeta: Record<FeatureRouteId, { title: string; description: string }> = {
+  featureAccounts: {
+    title: t("lp.featureAccounts.metaTitle"),
+    description: t("lp.featureAccounts.metaDescription"),
+  },
+  featureBudgeting: {
+    title: t("lp.featureBudgeting.metaTitle"),
+    description: t("lp.featureBudgeting.metaDescription"),
+  },
+  featureCategorization: {
+    title: t("lp.featureCategorization.metaTitle"),
+    description: t("lp.featureCategorization.metaDescription"),
+  },
+  featureCredits: {
+    title: t("lp.featureCredits.metaTitle"),
+    description: t("lp.featureCredits.metaDescription"),
+  },
+  featureFinancialMarkets: {
+    title: t("lp.featureFinancialMarkets.metaTitle"),
+    description: t("lp.featureFinancialMarkets.metaDescription"),
+  },
+  featureGoals: {
+    title: t("lp.featureGoals.metaTitle"),
+    description: t("lp.featureGoals.metaDescription"),
+  },
+  featureNetWorth: {
+    title: t("lp.featureNetWorth.metaTitle"),
+    description: t("lp.featureNetWorth.metaDescription"),
+  },
+  featurePrivacy: {
+    title: t("lp.featurePrivacy.metaTitle"),
+    description: t("lp.featurePrivacy.metaDescription"),
+  },
+  featurePortfolio: {
+    title: t("lp.featurePortfolio.metaTitle"),
+    description: t("lp.featurePortfolio.metaDescription"),
+  },
+  featureReports: {
+    title: t("lp.featureReports.metaTitle"),
+    description: t("lp.featureReports.metaDescription"),
+  },
+};
+
+const pageMetaSelected = pageMeta[routeId];
+const alternateLinks = buildAlternateLinks(routeId);
+const FINANCIAL_DISCLAIMER_ROUTE_IDS = new Set<FeatureRouteId>([
+  "featurePortfolio",
+  "featureNetWorth",
+]);
+const showFinancialDisclaimer = FINANCIAL_DISCLAIMER_ROUTE_IDS.has(routeId);
+
+const structuredDataByRouteId: Record<FeatureRouteId, Record<string, unknown>[]> = {
+  featureAccounts: [
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      name: "WonderMoney Bank Account Sync",
+      url: `https://wonder.money${toLocalizedPath(routeId, locale)}`,
+      applicationCategory: "FinanceApplication",
+      operatingSystem: "Web",
+      description:
+        "Connect bank accounts through read-only Open Banking via Enable Banking. Connected data updates when banks and providers supply it.",
+    },
+  ],
+  featureBudgeting: [
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      name: "WonderMoney Envelope Budgeting",
+      url: `https://wonder.money${toLocalizedPath(routeId, locale)}`,
+      applicationCategory: "FinanceApplication",
+      operatingSystem: "Web",
+      description:
+        "WonderMoney brings envelope budgeting to Europe. Allocate every euro to a purpose, sync with your bank accounts automatically, and always know where your money is going.",
+    },
+  ],
+  featureCategorization: [
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      name: "WonderMoney Transaction Categorisation",
+      url: `https://wonder.money${toLocalizedPath(routeId, locale)}`,
+      applicationCategory: "FinanceApplication",
+      operatingSystem: "Web",
+      description:
+        "WonderMoney automatically categorises your bank transactions using AI. Spend less time on data entry and more time understanding your spending habits.",
+    },
+  ],
+  featureCredits: [
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      name: t("lp.featureCredits.schemaName"),
+      url: `https://wonder.money${toLocalizedPath(routeId, locale)}`,
+      applicationCategory: "FinanceApplication",
+      operatingSystem: "Web",
+      description: t("lp.featureCredits.schemaDescription"),
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      mainEntity: [
+        {
+          "@type": "Question",
+          name: t("lp.featureCredits.faq1Q"),
+          acceptedAnswer: {
+            "@type": "Answer",
+            text: t("lp.featureCredits.faq1A"),
+          },
+        },
+        {
+          "@type": "Question",
+          name: t("lp.featureCredits.faq2Q"),
+          acceptedAnswer: {
+            "@type": "Answer",
+            text: t("lp.featureCredits.faq2A"),
+          },
+        },
+        {
+          "@type": "Question",
+          name: t("lp.featureCredits.faq3Q"),
+          acceptedAnswer: {
+            "@type": "Answer",
+            text: t("lp.featureCredits.faq3A"),
+          },
+        },
+      ],
+    },
+  ],
+  featureFinancialMarkets: [
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      name: t("lp.featureFinancialMarkets.schemaName"),
+      url: `https://wonder.money${toLocalizedPath(routeId, locale)}`,
+      applicationCategory: "FinanceApplication",
+      operatingSystem: "Web",
+      description: t("lp.featureFinancialMarkets.schemaDescription"),
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      mainEntity: [
+        {
+          "@type": "Question",
+          name: t("lp.featureFinancialMarkets.faq1Q"),
+          acceptedAnswer: {
+            "@type": "Answer",
+            text: t("lp.featureFinancialMarkets.faq1A"),
+          },
+        },
+        {
+          "@type": "Question",
+          name: t("lp.featureFinancialMarkets.faq2Q"),
+          acceptedAnswer: {
+            "@type": "Answer",
+            text: t("lp.featureFinancialMarkets.faq2A"),
+          },
+        },
+        {
+          "@type": "Question",
+          name: t("lp.featureFinancialMarkets.faq3Q"),
+          acceptedAnswer: {
+            "@type": "Answer",
+            text: t("lp.featureFinancialMarkets.faq3A"),
+          },
+        },
+      ],
+    },
+  ],
+  featureGoals: [
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      name: t("lp.featureGoals.schemaName"),
+      url: `https://wonder.money${toLocalizedPath(routeId, locale)}`,
+      applicationCategory: "FinanceApplication",
+      operatingSystem: "Web",
+      description: t("lp.featureGoals.schemaDescription"),
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      mainEntity: [
+        {
+          "@type": "Question",
+          name: t("lp.featureGoals.faq1Q"),
+          acceptedAnswer: {
+            "@type": "Answer",
+            text: t("lp.featureGoals.faq1A"),
+          },
+        },
+        {
+          "@type": "Question",
+          name: t("lp.featureGoals.faq2Q"),
+          acceptedAnswer: {
+            "@type": "Answer",
+            text: t("lp.featureGoals.faq2A"),
+          },
+        },
+        {
+          "@type": "Question",
+          name: t("lp.featureGoals.faq3Q"),
+          acceptedAnswer: {
+            "@type": "Answer",
+            text: t("lp.featureGoals.faq3A"),
+          },
+        },
+      ],
+    },
+  ],
+  featureNetWorth: [
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      name: t("lp.featureNetWorth.schemaName"),
+      url: `https://wonder.money${toLocalizedPath(routeId, locale)}`,
+      applicationCategory: "FinanceApplication",
+      operatingSystem: "Web",
+      description: t("lp.featureNetWorth.schemaDescription"),
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      mainEntity: [
+        {
+          "@type": "Question",
+          name: t("lp.featureNetWorth.faq1Q"),
+          acceptedAnswer: {
+            "@type": "Answer",
+            text: t("lp.featureNetWorth.faq1A"),
+          },
+        },
+        {
+          "@type": "Question",
+          name: t("lp.featureNetWorth.faq2Q"),
+          acceptedAnswer: {
+            "@type": "Answer",
+            text: t("lp.featureNetWorth.faq2A"),
+          },
+        },
+        {
+          "@type": "Question",
+          name: t("lp.featureNetWorth.faq3Q"),
+          acceptedAnswer: {
+            "@type": "Answer",
+            text: t("lp.featureNetWorth.faq3A"),
+          },
+        },
+      ],
+    },
+  ],
+  featurePrivacy: [
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      name: "WonderMoney",
+      url: "https://wonder.money",
+      description:
+        "WonderMoney uses read-only Open Banking through Enable Banking. It cannot initiate transfers, and credentials are entered with the bank or provider rather than WonderMoney.",
+    },
+  ],
+  featurePortfolio: [
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      name: t("lp.featurePortfolio.schemaName"),
+      url: `https://wonder.money${toLocalizedPath(routeId, locale)}`,
+      applicationCategory: "FinanceApplication",
+      operatingSystem: "Web",
+      description: t("lp.featurePortfolio.schemaDescription"),
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      mainEntity: [
+        {
+          "@type": "Question",
+          name: t("lp.featurePortfolio.faq1Q"),
+          acceptedAnswer: {
+            "@type": "Answer",
+            text: t("lp.featurePortfolio.faq1A"),
+          },
+        },
+        {
+          "@type": "Question",
+          name: t("lp.featurePortfolio.faq2Q"),
+          acceptedAnswer: {
+            "@type": "Answer",
+            text: t("lp.featurePortfolio.faq2A"),
+          },
+        },
+        {
+          "@type": "Question",
+          name: t("lp.featurePortfolio.faq3Q"),
+          acceptedAnswer: {
+            "@type": "Answer",
+            text: t("lp.featurePortfolio.faq3A"),
+          },
+        },
+      ],
+    },
+  ],
+  featureReports: [
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      name: t("lp.featureReports.schemaName"),
+      url: `https://wonder.money${toLocalizedPath(routeId, locale)}`,
+      applicationCategory: "FinanceApplication",
+      operatingSystem: "Web",
+      description: t("lp.featureReports.schemaDescription"),
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      mainEntity: [
+        {
+          "@type": "Question",
+          name: t("lp.featureReports.faq1Q"),
+          acceptedAnswer: {
+            "@type": "Answer",
+            text: t("lp.featureReports.faq1A"),
+          },
+        },
+        {
+          "@type": "Question",
+          name: t("lp.featureReports.faq2Q"),
+          acceptedAnswer: {
+            "@type": "Answer",
+            text: t("lp.featureReports.faq2A"),
+          },
+        },
+        {
+          "@type": "Question",
+          name: t("lp.featureReports.faq3Q"),
+          acceptedAnswer: {
+            "@type": "Answer",
+            text: t("lp.featureReports.faq3A"),
+          },
+        },
+      ],
+    },
+  ],
+};
+---
+
+<Layout locale={locale} title={pageMetaSelected.title} description={pageMetaSelected.description} alternateLinks={alternateLinks}>
+  <Header locale={locale} client:load />
+  <main class="relative">
+    {routeId === "featureAccounts" && <FeatureAccounts locale={locale} client:idle />}
+    {routeId === "featureBudgeting" && <FeatureBudgeting locale={locale} client:idle />}
+    {routeId === "featureCategorization" && <FeatureCategorization locale={locale} client:idle />}
+    {routeId === "featureCredits" && <FeatureCredits locale={locale} />}
+    {routeId === "featureFinancialMarkets" && <FeatureFinancialMarkets locale={locale} />}
+    {routeId === "featureGoals" && <FeatureGoals locale={locale} />}
+    {routeId === "featureNetWorth" && <FeatureNetWorth locale={locale} />}
+    {routeId === "featurePrivacy" && <FeaturePrivacy locale={locale} client:idle />}
+    {routeId === "featurePortfolio" && <FeaturePortfolio locale={locale} />}
+    {routeId === "featureReports" && <FeatureReports locale={locale} />}
+    {showFinancialDisclaimer && (
+      <div class="mx-auto max-w-7xl px-6 py-16 lg:px-8">
+        <FinancialDisclaimer locale={locale} client:idle />
+      </div>
+    )}
+  </main>
+  <Footer locale={locale} client:idle />
+  <StructuredData data={structuredDataByRouteId[routeId]} />
+</Layout>

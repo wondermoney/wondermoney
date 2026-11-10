@@ -1,0 +1,50 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import { buildAlternateLinksForPath } from "@/lib/routes";
+
+const alternateLinks = buildAlternateLinksForPath((lang) => `/${lang}`);
+---
+
+<Layout
+  locale="en"
+  title="Page not found — WonderMoney"
+  description="The page you were looking for does not exist."
+  noindex={true}
+  alternateLinks={alternateLinks}
+>
+  <main class="relative min-h-[60vh] flex items-center">
+    <div class="mx-auto max-w-2xl px-6 py-24 text-center lg:px-8">
+      <h1 class="text-4xl font-semibold tracking-tight text-foreground sm:text-5xl [text-wrap:balance]">
+        <span class="mb-3 block text-xl tracking-normal text-foreground">404</span>
+        Page not found
+      </h1>
+      <p class="mt-5 text-lg leading-8 text-muted-foreground">
+        The page you were looking for does not exist or has been moved.
+      </p>
+      <div class="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
+        <a
+          href="/en"
+          class="inline-flex items-center justify-center rounded-md bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground hover:bg-primary/90"
+        >
+          Back to homepage
+        </a>
+        <a
+          href="https://app.wonder.money/auth/signup"
+          class="inline-flex items-center justify-center rounded-md border border-border bg-background px-5 py-2.5 text-sm font-semibold text-foreground hover:bg-accent"
+        >
+          Start free
+        </a>
+      </div>
+      <div class="mt-12 text-sm text-muted-foreground">
+        <p class="font-semibold text-foreground mb-2">Popular pages</p>
+        <ul class="space-y-1">
+          <li><a href="/en/ynab-alternative" class="hover:text-primary">YNAB alternative</a></li>
+          <li><a href="/en/net-worth-tracker" class="hover:text-primary">Net worth tracker</a></li>
+          <li><a href="/en/portfolio-tracker" class="hover:text-primary">Portfolio tracker</a></li>
+          <li><a href="/en/fire-calculator" class="hover:text-primary">FIRE calculator</a></li>
+          <li><a href="/en/learn" class="hover:text-primary">Learn</a></li>
+        </ul>
+      </div>
+    </div>
+  </main>
+</Layout>

@@ -1,0 +1,179 @@
+---
+import "@/styles/globals.css";
+import ContentLayout from "@/layouts/ContentLayout.astro";
+import ContentSearch from "@/components/shared/ContentSearch";
+import { sanityClient } from "sanity:client";
+import { getTranslations } from "@/lib/translations";
+import type { Lang } from "@/lib/i18nLocale";
+import { buildAlternateLinksForPath } from "@/lib/routes";
+
+type GlossaryTermEntry = {
+  term: string;
+  slug: string;
+  definition: string;
+  category?: string;
+  market?: string;
+  topicKey?: string;
+};
+
+interface Props {
+  locale: Lang;
+}
+
+const { locale } = Astro.props;
+const t = getTranslations(locale);
+const alternateLinks = buildAlternateLinksForPath((lang) => `/${lang}/glossary`);
+
+const terms = await sanityClient.fetch<GlossaryTermEntry[]>(
+  `*[_type == "glossaryTerm" && locale == $locale] | order(term asc) { term, "slug": slug.current, definition, category, market, topicKey }`,
+  { locale },
+);
+
+const rankTermForRouteSelection = (term: GlossaryTermEntry): number => (term.market ? 0 : 1);
+
+const dedupedTerms = Array.from(
+  terms
+    .reduce((acc, term, index) => {
+      const key = term.topicKey || term.slug || `term-${index}`;
+      const current = acc.get(key);
+
+      if (!current || rankTermForRouteSelection(term) > rankTermForRouteSelection(current)) {
+        acc.set(key, term);
+      }
+
+      return acc;
+    }, new Map<string, GlossaryTermEntry>())
+    .values(),
+);
+
+function normalizeLetter(value: string): string {
+  const firstChar = value.charAt(0).toUpperCase();
+  const normalized = firstChar.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+
+  if (normalized >= "A" && normalized <= "Z") {
+    return normalized;
+  }
+
+  return "#";
+}
+
+const grouped: Record<string, typeof dedupedTerms> = {};
+const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
+const glossarySections = [...alphabet, "#"];
+
+for (const term of dedupedTerms) {
+  const letter = normalizeLetter(term.term);
+  if (!grouped[letter]) {
+    grouped[letter] = [];
+  }
+  grouped[letter].push(term);
+}
+
+const glossaryPrefix = `/${locale}/glossary`;
+
+const searchItems = dedupedTerms.map((term) => ({
+  title: term.term,
+  description: term.definition,
+  href: `${glossaryPrefix}/${term.slug}`,
+  category: term.category,
+}));
+
+const definedTermSetSchema = {
+  "@context": "https://schema.org",
+  "@type": "DefinedTermSet",
+  name: t("glossary.hub.title"),
+  description: t("glossary.hub.schemaDescription"),
+  url: `https://wonder.money${glossaryPrefix}`,
+  hasDefinedTerm: dedupedTerms.map((term) => ({
+    "@type": "DefinedTerm",
+    name: term.term,
+    description: term.definition,
+    url: `https://wonder.money${glossaryPrefix}/${term.slug}`,
+  })),
+};
+---
+
+<ContentLayout
+  title={t("glossary.hub.pageTitle")}
+  description={t("glossary.hub.pageDescription")}
+  alternateLinks={alternateLinks}
+  breadcrumbs={[{ label: t("header.glossary"), href: "#" }]}
+  locale={locale}
+  structuredData={definedTermSetSchema}
+>
+  <section>
+    <h1 class="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
+      {t("glossary.hub.title")}
+    </h1>
+    <p class="mt-3 max-w-3xl text-lg text-muted-foreground">
+      {t("glossary.hub.description")}
+    </p>
+  </section>
+
+  <ContentSearch
+    locale={locale}
+    client:load
+    items={searchItems}
+    placeholder={t("glossary.hub.searchPlaceholder")}
+  />
+
+  <nav class="mt-8 flex flex-wrap gap-2" aria-label="Alphabetical navigation">
+    {
+      glossarySections.map((letter) => {
+        const hasTerms = !!grouped[letter];
+        return hasTerms ? (
+          <a
+            href={`#letter-${letter}`}
+            class="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 text-sm font-semibold text-primary transition-colors hover:bg-primary/20"
+          >
+            {letter}
+          </a>
+        ) : (
+          <span class="flex h-9 w-9 items-center justify-center rounded-lg bg-paper-2 text-sm font-medium text-muted-foreground">
+            {letter}
+          </span>
+        );
+      })
+    }
+  </nav>
+
+  {
+    dedupedTerms.length === 0 ? (
+      <div class="mt-12 rounded-card border border-border bg-paper-2 p-12 text-center">
+        <p class="text-lg text-muted-foreground">
+          {t("glossary.hub.comingSoon")}
+        </p>
+      </div>
+    ) : (
+      <div class="mt-10 space-y-12">
+        {glossarySections
+          .filter((letter) => grouped[letter])
+          .map((letter) => (
+            <section id={`letter-${letter}`}>
+              <h2 class="border-b border-border pb-2 text-2xl font-bold text-foreground">
+                {letter}
+              </h2>
+              <div class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {grouped[letter].map((term) => (
+                  <a
+                    href={`${glossaryPrefix}/${term.slug}`}
+                    class="group rounded-card border border-border p-5 transition-colors hover:border-primary/40 hover:bg-accent"
+                  >
+                    <h3 class="text-lg font-semibold text-foreground group-hover:text-primary">
+                      {term.term}
+                    </h3>
+                    {term.category && (
+                      <p class="mt-1 text-sm text-muted-foreground">{t(`category.${term.category}`, { defaultValue: term.category })}</p>
+                    )}
+                    <p class="mt-1 line-clamp-2 text-sm leading-6 text-muted-foreground">
+                      {term.definition}
+                    </p>
+                  </a>
+                ))}
+              </div>
+            </section>
+          ))}
+      </div>
+    )
+  }
+</ContentLayout>

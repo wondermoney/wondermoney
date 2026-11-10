@@ -128,9 +128,9 @@ jobs:
           - id: web
             name: web
             filter: '@wondermoney/web'
-          # Docs, the email templates and the API.
+          # Docs, the email templates, the marketing site and the API.
           - id: rest
-            name: docs, email, API
+            name: docs, email, landing, API
             filter: '!@wondermoney/web'
     steps:
       - uses: actions/checkout@v7

@@ -1,0 +1,95 @@
+---
+import Layout from "./Layout.astro";
+import Header from "@/components/shared/Header";
+import Footer from "@/components/shared/Footer";
+import StructuredData from "@/components/shared/StructuredData.astro";
+import { getTranslations } from "@/lib/translations";
+import type { Lang } from "@/lib/i18nLocale";
+
+interface BreadcrumbItem {
+	label: string;
+	href: string;
+}
+
+interface Props {
+	title: string;
+	description: string;
+	ogImage?: string;
+	ogType?: string;
+	canonicalUrl?: string;
+	alternateLinks?: Array<{ hrefLang: string; href: string }>;
+	structuredData?: Record<string, unknown> | Record<string, unknown>[];
+	breadcrumbs?: BreadcrumbItem[];
+	freshnessLabel?: string;
+	locale: Lang;
+}
+
+const {
+	title,
+	description,
+	ogImage,
+	ogType,
+	canonicalUrl,
+	alternateLinks,
+	structuredData,
+	breadcrumbs,
+	freshnessLabel,
+	locale,
+} =
+	Astro.props;
+
+const translate = getTranslations(locale);
+const homeHref = `/${locale}`;
+const homeLabel = translate("nav.home");
+---
+
+<Layout
+	title={title}
+	description={description}
+	ogImage={ogImage}
+	ogType={ogType}
+	canonicalUrl={canonicalUrl}
+	alternateLinks={alternateLinks}
+	locale={locale}
+>
+	<Header locale={locale} client:load />
+	{
+		breadcrumbs && breadcrumbs.length > 0 && (
+			<nav aria-label="Breadcrumb" class="mx-auto max-w-7xl px-6 pt-4 lg:px-8">
+				<ol class="flex items-center gap-2 text-sm text-muted-foreground">
+					<li>
+						<a href={homeHref} class="hover:text-foreground">
+							{homeLabel}
+						</a>
+					</li>
+					{breadcrumbs.map((crumb, index) => (
+						<li class="flex items-center gap-2">
+							<span aria-hidden="true">/</span>
+							{index === breadcrumbs.length - 1 ? (
+								<span class="text-foreground font-medium">{crumb.label}</span>
+							) : (
+								<a href={crumb.href} class="hover:text-foreground">
+									{crumb.label}
+								</a>
+							)}
+						</li>
+					))}
+				</ol>
+			</nav>
+		)
+	}
+	{
+		freshnessLabel && (
+			<div class="mx-auto max-w-7xl px-6 pt-3 lg:px-8">
+				<span class="inline-flex items-center rounded-full border border-info/30 bg-info/5 px-3 py-1 text-xs font-medium text-info-text">
+					{freshnessLabel}
+				</span>
+			</div>
+		)
+	}
+	<main class="mx-auto max-w-7xl px-6 py-8 lg:px-8">
+		<slot />
+	</main>
+	<Footer locale={locale} client:idle />
+	{structuredData && <StructuredData data={structuredData} />}
+</Layout>

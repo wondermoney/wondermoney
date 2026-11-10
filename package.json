@@ -18,6 +18,7 @@
     "dev:web": "pnpm --filter @wondermoney/web dev",
     "dev:mobile": "pnpm --filter @wondermoney/mobile start",
     "dev:docs": "pnpm --filter @wondermoney/docs dev",
+    "dev:landing": "pnpm --filter @wondermoney/landing dev",
     "prepare": "husky",
     "knip": "knip"
   },

@@ -1,0 +1,37 @@
+---
+interface Props {
+	title?: string
+	columns?: ReadonlyArray<string>
+	rows?: ReadonlyArray<ReadonlyArray<string>>
+}
+
+const { title, columns = [], rows = [] } = Astro.props
+---
+
+<section class="rounded-card border border-border bg-background p-5">
+	{title && <h3 class="text-lg font-semibold text-foreground">{title}</h3>}
+	<div class="mt-4 overflow-x-auto">
+		<table class="min-w-full border-collapse text-left text-sm text-muted-foreground">
+			{
+				columns.length > 0 && (
+					<thead>
+						<tr class="border-b border-border text-foreground">
+							{columns.map((column) => (
+								<th class="px-3 py-2 font-semibold">{column}</th>
+							))}
+						</tr>
+					</thead>
+				)
+			}
+			<tbody>
+				{rows.map((row) => (
+					<tr class="border-b border-border-2">
+						{row.map((cell) => (
+							<td class="px-3 py-2">{cell}</td>
+						))}
+					</tr>
+				))}
+			</tbody>
+		</table>
+	</div>
+</section>

@@ -1,0 +1,121 @@
+---
+import "@/styles/globals.css";
+import Header from "@/components/shared/Header";
+import Layout from "@/layouts/Layout.astro";
+import Footer from "@/components/shared/Footer";
+import AlternativaExcelSection from "@/components/landing/AlternativaExcel";
+import AppFinancasPortugalSection from "@/components/landing/AppFinancasPortugal";
+import ControloGastosSection from "@/components/landing/ControloGastos";
+import GestaoFinanceiraSection from "@/components/landing/GestaoFinanceira";
+import AdNetWorthSection from "@/components/landing/AdNetWorth";
+import AdFragmentationSection from "@/components/landing/AdFragmentation";
+import AdOpenBankingSection from "@/components/landing/AdOpenBanking";
+import StructuredData from "@/components/shared/StructuredData.astro";
+import { getTranslations } from "@/lib/translations";
+import type { Lang } from "@/lib/i18nLocale";
+import { buildAlternateLinksForPath, toLocalizedPath } from "@/lib/routes";
+
+type StandaloneLandingPageId =
+  | "alternativaExcel"
+  | "appFinancasPortugal"
+  | "controloGastos"
+  | "gestaoFinanceira"
+  | "adNetWorth"
+  | "adFragmentation"
+  | "adOpenBanking";
+
+interface Props {
+  locale: Lang;
+  pageId: StandaloneLandingPageId;
+}
+
+const { locale, pageId } = Astro.props as Props;
+const t = getTranslations(locale);
+
+// Paid-traffic ad landing pages: message-matched to Meta ad angles,
+// never indexed so they don't compete with the equivalent SEO pages, but
+// still `follow`-able so link equity flows normally to the rest of the site.
+const AD_LANDING_PAGE_IDS = new Set<StandaloneLandingPageId>([
+  "adNetWorth",
+  "adFragmentation",
+  "adOpenBanking",
+]);
+const isAdLandingPage = AD_LANDING_PAGE_IDS.has(pageId);
+
+const alternateLinks = buildAlternateLinksForPath(
+  (lang) => toLocalizedPath(pageId, lang),
+);
+const localizedUrl = `https://wonder.money${toLocalizedPath(pageId, locale)}`;
+
+const localizedSchema = (description: string, extra: Record<string, unknown> = {}) => ({
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  name: "WonderMoney",
+  url: localizedUrl,
+  applicationCategory: "FinanceApplication",
+  operatingSystem: "Web",
+  description,
+  ...extra,
+});
+
+const metaByPageId = {
+  alternativaExcel: {
+    title: t("lp.alternativaExcel.metaTitle"),
+    description: t("lp.alternativaExcel.metaDescription"),
+    schema: localizedSchema(t("lp.alternativaExcel.metaDescription")),
+  },
+  appFinancasPortugal: {
+    title: t("lp.appFinancasPortugal.metaTitle"),
+    description: t("lp.appFinancasPortugal.metaDescription"),
+    schema: localizedSchema(t("lp.appFinancasPortugal.metaDescription"), { availableCountry: "PT" }),
+  },
+  controloGastos: {
+    title: t("lp.controloGastos.metaTitle"),
+    description: t("lp.controloGastos.metaDescription"),
+    schema: localizedSchema(t("lp.controloGastos.metaDescription")),
+  },
+  gestaoFinanceira: {
+    title: t("lp.gestaoFinanceira.metaTitle"),
+    description: t("lp.gestaoFinanceira.metaDescription"),
+    schema: localizedSchema(t("lp.gestaoFinanceira.metaDescription")),
+  },
+  adNetWorth: {
+    title: t("lp.adNetWorth.metaTitle"),
+    description: t("lp.adNetWorth.metaDescription"),
+    schema: localizedSchema(t("lp.adNetWorth.metaDescription")),
+  },
+  adFragmentation: {
+    title: t("lp.adFragmentation.metaTitle"),
+    description: t("lp.adFragmentation.metaDescription"),
+    schema: localizedSchema(t("lp.adFragmentation.metaDescription")),
+  },
+  adOpenBanking: {
+    title: t("lp.adOpenBanking.metaTitle"),
+    description: t("lp.adOpenBanking.metaDescription"),
+    schema: localizedSchema(t("lp.adOpenBanking.metaDescription")),
+  },
+} as const;
+
+const meta = metaByPageId[pageId];
+---
+
+<Layout
+  locale={locale}
+  title={meta.title}
+  description={meta.description}
+  alternateLinks={alternateLinks}
+  noindexFollow={isAdLandingPage}
+>
+  <Header locale={locale} client:load />
+  <main class="relative">
+    {pageId === "alternativaExcel" && <AlternativaExcelSection locale={locale} client:idle />}
+    {pageId === "appFinancasPortugal" && <AppFinancasPortugalSection locale={locale} client:idle />}
+    {pageId === "controloGastos" && <ControloGastosSection locale={locale} client:idle />}
+    {pageId === "gestaoFinanceira" && <GestaoFinanceiraSection locale={locale} client:idle />}
+    {pageId === "adNetWorth" && <AdNetWorthSection locale={locale} client:idle />}
+    {pageId === "adFragmentation" && <AdFragmentationSection locale={locale} client:idle />}
+    {pageId === "adOpenBanking" && <AdOpenBankingSection locale={locale} client:idle />}
+  </main>
+  <Footer locale={locale} client:idle />
+  {!isAdLandingPage && <StructuredData data={[meta.schema]} />}
+</Layout>

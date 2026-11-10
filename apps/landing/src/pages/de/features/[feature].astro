@@ -1,0 +1,21 @@
+---
+import FeaturePage from "@/components/pages/FeaturePage.astro";
+import { getFeatureStaticPaths, type FeatureRouteId } from "@/lib/pageStaticPaths";
+
+export const prerender = true;
+
+export function getStaticPaths() {
+  return getFeatureStaticPaths("de");
+}
+
+const { routeId, redirectTo } = Astro.props as {
+  routeId: FeatureRouteId;
+  redirectTo?: string;
+};
+
+if (redirectTo) {
+  return Astro.redirect(`/de/features/${redirectTo}`, 301);
+}
+---
+
+<FeaturePage locale="de" routeId={routeId} />

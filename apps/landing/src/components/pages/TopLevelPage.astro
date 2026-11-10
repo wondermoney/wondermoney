@@ -1,0 +1,251 @@
+---
+import "@/styles/globals.css";
+import Header from "@/components/shared/Header";
+import Footer from "@/components/shared/Footer";
+import Layout from "@/layouts/Layout.astro";
+import StructuredData from "@/components/shared/StructuredData.astro";
+import AboutHero from "@/components/about/Hero";
+import Values from "@/components/about/Values";
+import BottomCTA from "@/components/about/BottomCTA";
+import Vision from "@/components/about/Vision";
+import Mission from "@/components/about/Mission";
+import Story from "@/components/about/Story";
+import EtfTracker from "@/components/landing/EtfTracker";
+import PortfolioTracker from "@/components/landing/PortfolioTracker";
+import NetWorthTracker from "@/components/landing/NetWorthTracker";
+import YnabAlternative from "@/components/landing/YnabAlternative";
+import FireCalculator from "@/components/landing/FireCalculator";
+import HowToCalculateNetWorth from "@/components/landing/HowToCalculateNetWorth";
+import PersonalFinanceApp from "@/components/landing/PersonalFinanceApp";
+import OpenBankingApp from "@/components/landing/OpenBankingApp";
+import BudgetApp from "@/components/landing/BudgetApp";
+import FinancialDisclaimer from "@/components/shared/FinancialDisclaimer";
+import NotABank from "@/components/shared/NotABank";
+import RelatedSeoPages from "@/components/landing/sections/RelatedSeoPages";
+import type { Lang } from "@/lib/i18nLocale";
+import { getTranslations } from "@/lib/translations";
+import { buildAlternateLinks, toLocalizedPath, type RouteId } from "@/lib/routes";
+import type { TopLevelRouteId } from "@/lib/pageStaticPaths";
+
+interface Props {
+  locale: Lang;
+  routeId: TopLevelRouteId;
+}
+
+const { locale, routeId } = Astro.props;
+const t = getTranslations(locale);
+
+const localizedUrl = (route: RouteId): string =>
+  `https://wonder.money${toLocalizedPath(route, locale)}`;
+
+const softwareSchemas: Partial<Record<RouteId, Record<string, unknown>>> = {
+  pageEtfTracker: {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    name: `WonderMoney — ${t("lp.etfTracker.metaTitle").split("—")[0].trim()}`,
+    url: localizedUrl("pageEtfTracker"),
+    applicationCategory: "FinanceApplication",
+    operatingSystem: "Web",
+    description: t("lp.etfTracker.metaDescription"),
+  },
+  pagePortfolioTracker: {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    name: `WonderMoney — ${t("lp.portfolioTracker.metaTitle").split("—")[0].trim()}`,
+    url: localizedUrl("pagePortfolioTracker"),
+    applicationCategory: "FinanceApplication",
+    operatingSystem: "Web",
+    description: t("lp.portfolioTracker.metaDescription"),
+  },
+  pageNetWorthTracker: {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    name: `WonderMoney — ${t("lp.netWorthTracker.metaTitle").split("—")[0].trim()}`,
+    url: localizedUrl("pageNetWorthTracker"),
+    applicationCategory: "FinanceApplication",
+    operatingSystem: "Web",
+    description: t("lp.netWorthTracker.metaDescription"),
+  },
+  pageYnabAlternative: {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    name: `WonderMoney — ${t("lp.ynabAlternative.metaTitle").split("—")[0].trim()}`,
+    url: localizedUrl("pageYnabAlternative"),
+    applicationCategory: "FinanceApplication",
+    operatingSystem: "Web",
+    description: t("lp.ynabAlternative.metaDescription"),
+  },
+  pageFireCalculator: {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    name: `WonderMoney — ${t("lp.fireCalculator.metaTitle").split("—")[0].trim()}`,
+    url: localizedUrl("pageFireCalculator"),
+    applicationCategory: "FinanceApplication",
+    operatingSystem: "Web",
+    description: t("lp.fireCalculator.metaDescription"),
+  },
+  pagePersonalFinanceApp: {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    name: `WonderMoney — ${t("lp.personalFinanceApp.metaTitle").split("—")[0].trim()}`,
+    url: localizedUrl("pagePersonalFinanceApp"),
+    applicationCategory: "FinanceApplication",
+    operatingSystem: "Web",
+    description: t("lp.personalFinanceApp.metaDescription"),
+  },
+  pageOpenBankingApp: {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    name: `WonderMoney — ${t("lp.openBankingApp.metaTitle").split("—")[0].trim()}`,
+    url: localizedUrl("pageOpenBankingApp"),
+    applicationCategory: "FinanceApplication",
+    operatingSystem: "Web",
+    description: t("lp.openBankingApp.metaDescription"),
+  },
+  pageBudgetApp: {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    name: `WonderMoney — ${t("lp.budgetApp.metaTitle").split("—")[0].trim()}`,
+    url: localizedUrl("pageBudgetApp"),
+    applicationCategory: "FinanceApplication",
+    operatingSystem: "Web",
+    description: t("lp.budgetApp.metaDescription"),
+  },
+};
+
+const FAQ_ROUTE_IDS: Partial<Record<RouteId, string>> = {
+  pagePersonalFinanceApp: "lp.personalFinanceApp",
+  pageOpenBankingApp: "lp.openBankingApp",
+  pageBudgetApp: "lp.budgetApp",
+};
+
+const faqSchemas: Partial<Record<RouteId, Record<string, unknown>>> = Object.fromEntries(
+  Object.entries(FAQ_ROUTE_IDS).map(([routeId, keyPrefix]) => [
+    routeId,
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      mainEntity: [1, 2, 3, 4].map((n) => ({
+        "@type": "Question",
+        name: t(`${keyPrefix}.faq${n}Q`),
+        acceptedAnswer: {
+          "@type": "Answer",
+          text: t(`${keyPrefix}.faq${n}A`),
+        },
+      })),
+    },
+  ]),
+);
+
+const pageMeta: Record<TopLevelRouteId, { title: string; description: string }> = {
+  pageAbout: {
+    title: t("lp.about.metaTitle"),
+    description: t("lp.about.metaDescription"),
+  },
+  pageEtfTracker: {
+    title: t("lp.etfTracker.metaTitle"),
+    description: t("lp.etfTracker.metaDescription"),
+  },
+  pagePortfolioTracker: {
+    title: t("lp.portfolioTracker.metaTitle"),
+    description: t("lp.portfolioTracker.metaDescription"),
+  },
+  pageNetWorthTracker: {
+    title: t("lp.netWorthTracker.metaTitle"),
+    description: t("lp.netWorthTracker.metaDescription"),
+  },
+  pageYnabAlternative: {
+    title: t("lp.ynabAlternative.metaTitle"),
+    description: t("lp.ynabAlternative.metaDescription"),
+  },
+  pageFireCalculator: {
+    title: t("lp.fireCalculator.metaTitle"),
+    description: t("lp.fireCalculator.metaDescription"),
+  },
+  pageHowToCalculateNetWorth: {
+    title: t("lp.howToCalculateNetWorth.metaTitle"),
+    description: t("lp.howToCalculateNetWorth.metaDescription"),
+  },
+  pagePersonalFinanceApp: {
+    title: t("lp.personalFinanceApp.metaTitle"),
+    description: t("lp.personalFinanceApp.metaDescription"),
+  },
+  pageOpenBankingApp: {
+    title: t("lp.openBankingApp.metaTitle"),
+    description: t("lp.openBankingApp.metaDescription"),
+  },
+  pageBudgetApp: {
+    title: t("lp.budgetApp.metaTitle"),
+    description: t("lp.budgetApp.metaDescription"),
+  },
+};
+
+const meta = pageMeta[routeId];
+const alternateLinks = buildAlternateLinks(routeId);
+const FINANCIAL_DISCLAIMER_ROUTE_IDS = new Set<TopLevelRouteId>([
+  "pageFireCalculator",
+  "pagePortfolioTracker",
+  "pageNetWorthTracker",
+  "pageHowToCalculateNetWorth",
+]);
+const showFinancialDisclaimer = FINANCIAL_DISCLAIMER_ROUTE_IDS.has(routeId);
+const NOT_A_BANK_ROUTE_IDS = new Set<TopLevelRouteId>([
+  "pageFireCalculator",
+  "pagePortfolioTracker",
+  "pageEtfTracker",
+  "pageNetWorthTracker",
+  "pageYnabAlternative",
+  "pageHowToCalculateNetWorth",
+  "pageAbout",
+  "pagePersonalFinanceApp",
+  "pageOpenBankingApp",
+  "pageBudgetApp",
+]);
+const showNotABank = NOT_A_BANK_ROUTE_IDS.has(routeId);
+const structuredData = softwareSchemas[routeId]
+  ? [softwareSchemas[routeId], faqSchemas[routeId]].filter(
+      (item): item is Record<string, unknown> => Boolean(item),
+    )
+  : null;
+---
+
+<Layout locale={locale} title={meta.title} description={meta.description} alternateLinks={alternateLinks}>
+  <Header locale={locale} client:load />
+  <main class="relative">
+    {routeId === "pageAbout" && (
+      <>
+        <AboutHero locale={locale} client:idle />
+        <Mission locale={locale} />
+        <Story locale={locale} client:idle />
+        <Vision locale={locale} />
+        <BottomCTA locale={locale} />
+        <Values locale={locale} />
+      </>
+    )}
+
+    {routeId === "pageEtfTracker" && <EtfTracker locale={locale} client:idle />}
+    {routeId === "pagePortfolioTracker" && <PortfolioTracker locale={locale} client:idle />}
+    {routeId === "pageNetWorthTracker" && <NetWorthTracker locale={locale} client:idle />}
+    {routeId === "pageYnabAlternative" && <YnabAlternative locale={locale} client:idle />}
+    {routeId === "pageFireCalculator" && <FireCalculator locale={locale} client:idle />}
+    {routeId === "pageHowToCalculateNetWorth" && (
+      <HowToCalculateNetWorth locale={locale} client:idle />
+    )}
+    {routeId === "pagePersonalFinanceApp" && <PersonalFinanceApp locale={locale} client:idle />}
+    {routeId === "pageOpenBankingApp" && <OpenBankingApp locale={locale} client:idle />}
+    {routeId === "pageBudgetApp" && <BudgetApp locale={locale} client:idle />}
+    {showFinancialDisclaimer && (
+      <div class="mx-auto max-w-7xl px-6 py-16 lg:px-8">
+        <FinancialDisclaimer locale={locale} client:idle />
+      </div>
+    )}
+    {showNotABank && !showFinancialDisclaimer && (
+      <div class="mx-auto max-w-7xl px-6 py-16 lg:px-8">
+        <NotABank locale={locale} client:idle />
+      </div>
+    )}
+    <RelatedSeoPages locale={locale} routeId={routeId} client:idle />
+  </main>
+  <Footer locale={locale} client:idle />
+  {structuredData && <StructuredData data={structuredData} />}
+</Layout>

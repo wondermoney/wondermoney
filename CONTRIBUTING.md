@@ -29,15 +29,15 @@ documentation and features.
 
 ## Getting set up
 
-This is one repository for everything: the API, the web and mobile apps, the docs site and
-two small packages (see the [README](README.md)). You need Node 26, pnpm (`npm install -g
-corepack && corepack enable`; Node 26 no longer bundles corepack) and Docker.
+This is one repository for everything: the API, the web and mobile apps, the docs and
+marketing sites and two small packages (see the [README](README.md)). You need Node 26, pnpm
+(`npm install -g corepack && corepack enable`; Node 26 no longer bundles corepack) and Docker.
 
 ```bash
 pnpm install
 pnpm build:lib                          # the workspace packages the API imports
 pnpm --filter @wondermoney/api bootstrap  # local .env, Postgres in Docker, migrations, seed data
-pnpm dev:api                            # then pnpm dev:web, dev:mobile or dev:docs
+pnpm dev:api                            # then pnpm dev:web, dev:mobile, dev:docs or dev:landing
 ```
 
 Before opening a pull request, run the checks. Turborepo only re-runs what your change

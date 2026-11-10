@@ -8,12 +8,14 @@ Free, open-source, self-hostable personal finance. One pnpm workspace with Turbo
 | `apps/web` | Next.js 16 web app | Builds with webpack (`next build --webpack`) |
 | `apps/mobile` | Expo SDK 58 app | React Native 0.88 needs React exactly 19.3.0 |
 | `apps/docs` | Fumadocs site (docs.wonder.money) | en, pt and es pages must stay in step |
+| `apps/landing` | Astro marketing site (wonder.money) | pt, en, es, fr, de and it route trees must stay in step |
 | `packages/shared` | EODHD client, CSV/broker parsers | Private workspace package, `build:lib` |
 | `packages/react-email` | Email templates the API renders | Private workspace package, `build:lib` |
 
 Each app and package has its own agent guide (`CLAUDE.md` in `apps/api`, `AGENTS.md`
 elsewhere, with the other file pointing to it); it applies inside that directory. Visual and
-interaction rules for the clients are in `apps/web/DESIGN.md` and `apps/mobile/DESIGN.md`;
+interaction rules for the clients are in `apps/web/DESIGN.md` and `apps/mobile/DESIGN.md` (the
+marketing site's, which follows web's, in `apps/landing/DESIGN.md`);
 issues and pull requests are on GitHub (`CONTRIBUTING.md`).
 
 ## Commands

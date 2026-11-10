@@ -1,0 +1,273 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": "astro",
+  "installCommand": "pnpm install --frozen-lockfile",
+  "buildCommand": "pnpm build",
+  "ignoreCommand": "git diff --quiet HEAD^ HEAD -- . ../../pnpm-lock.yaml",
+  "redirects": [
+    {
+      "source": "/:locale/net-worth-app",
+      "has": [
+        {
+          "type": "host",
+          "value": "wonder.money"
+        }
+      ],
+      "destination": "/:locale/net-worth-tracker",
+      "statusCode": 301
+    },
+    {
+      "source": "/en/pricing",
+      "has": [
+        {
+          "type": "host",
+          "value": "wonder.money"
+        }
+      ],
+      "destination": "https://app.wonder.money/faq",
+      "statusCode": 301
+    },
+    {
+      "source": "/pt/precos",
+      "has": [
+        {
+          "type": "host",
+          "value": "wonder.money"
+        }
+      ],
+      "destination": "https://app.wonder.money/faq",
+      "statusCode": 301
+    },
+    {
+      "source": "/pt/pricing",
+      "has": [
+        {
+          "type": "host",
+          "value": "wonder.money"
+        }
+      ],
+      "destination": "https://app.wonder.money/faq",
+      "statusCode": 301
+    },
+    {
+      "source": "/es/precios",
+      "has": [
+        {
+          "type": "host",
+          "value": "wonder.money"
+        }
+      ],
+      "destination": "https://app.wonder.money/faq",
+      "statusCode": 301
+    },
+    {
+      "source": "/es/pricing",
+      "has": [
+        {
+          "type": "host",
+          "value": "wonder.money"
+        }
+      ],
+      "destination": "https://app.wonder.money/faq",
+      "statusCode": 301
+    },
+    {
+      "source": "/fr/tarifs",
+      "has": [
+        {
+          "type": "host",
+          "value": "wonder.money"
+        }
+      ],
+      "destination": "https://app.wonder.money/faq",
+      "statusCode": 301
+    },
+    {
+      "source": "/fr/pricing",
+      "has": [
+        {
+          "type": "host",
+          "value": "wonder.money"
+        }
+      ],
+      "destination": "https://app.wonder.money/faq",
+      "statusCode": 301
+    },
+    {
+      "source": "/de/preise",
+      "has": [
+        {
+          "type": "host",
+          "value": "wonder.money"
+        }
+      ],
+      "destination": "https://app.wonder.money/faq",
+      "statusCode": 301
+    },
+    {
+      "source": "/de/pricing",
+      "has": [
+        {
+          "type": "host",
+          "value": "wonder.money"
+        }
+      ],
+      "destination": "https://app.wonder.money/faq",
+      "statusCode": 301
+    },
+    {
+      "source": "/it/prezzi",
+      "has": [
+        {
+          "type": "host",
+          "value": "wonder.money"
+        }
+      ],
+      "destination": "https://app.wonder.money/faq",
+      "statusCode": 301
+    },
+    {
+      "source": "/it/pricing",
+      "has": [
+        {
+          "type": "host",
+          "value": "wonder.money"
+        }
+      ],
+      "destination": "https://app.wonder.money/faq",
+      "statusCode": 301
+    },
+    {
+      "source": "/en/refer",
+      "has": [
+        {
+          "type": "host",
+          "value": "wonder.money"
+        }
+      ],
+      "destination": "https://app.wonder.money/faq",
+      "statusCode": 301
+    },
+    {
+      "source": "/en/affiliates",
+      "has": [
+        {
+          "type": "host",
+          "value": "wonder.money"
+        }
+      ],
+      "destination": "https://app.wonder.money/faq",
+      "statusCode": 301
+    },
+    {
+      "source": "/pt/indicacoes",
+      "has": [
+        {
+          "type": "host",
+          "value": "wonder.money"
+        }
+      ],
+      "destination": "https://app.wonder.money/faq",
+      "statusCode": 301
+    },
+    {
+      "source": "/pt/afiliados",
+      "has": [
+        {
+          "type": "host",
+          "value": "wonder.money"
+        }
+      ],
+      "destination": "https://app.wonder.money/faq",
+      "statusCode": 301
+    },
+    {
+      "source": "/es/referidos",
+      "has": [
+        {
+          "type": "host",
+          "value": "wonder.money"
+        }
+      ],
+      "destination": "https://app.wonder.money/faq",
+      "statusCode": 301
+    },
+    {
+      "source": "/es/afiliados",
+      "has": [
+        {
+          "type": "host",
+          "value": "wonder.money"
+        }
+      ],
+      "destination": "https://app.wonder.money/faq",
+      "statusCode": 301
+    },
+    {
+      "source": "/fr/parrainage",
+      "has": [
+        {
+          "type": "host",
+          "value": "wonder.money"
+        }
+      ],
+      "destination": "https://app.wonder.money/faq",
+      "statusCode": 301
+    },
+    {
+      "source": "/fr/affiliation",
+      "has": [
+        {
+          "type": "host",
+          "value": "wonder.money"
+        }
+      ],
+      "destination": "https://app.wonder.money/faq",
+      "statusCode": 301
+    },
+    {
+      "source": "/de/empfehlungen",
+      "has": [
+        {
+          "type": "host",
+          "value": "wonder.money"
+        }
+      ],
+      "destination": "https://app.wonder.money/faq",
+      "statusCode": 301
+    },
+    {
+      "source": "/de/partnerprogramm",
+      "has": [
+        {
+          "type": "host",
+          "value": "wonder.money"
+        }
+      ],
+      "destination": "https://app.wonder.money/faq",
+      "statusCode": 301
+    },
+    {
+      "source": "/it/referral",
+      "has": [
+        {
+          "type": "host",
+          "value": "wonder.money"
+        }
+      ],
+      "destination": "https://app.wonder.money/faq",
+      "statusCode": 301
+    },
+    {
+      "source": "/it/affiliazione",
+      "has": [
+        {
+          "type": "host",
+          "value": "wonder.money"
+        }
+      ],
+      "destination": "https://app.wonder.money/faq",
+      "statusCode": 301
+    }
+  ]
+}

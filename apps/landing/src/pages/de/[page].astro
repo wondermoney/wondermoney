@@ -1,0 +1,21 @@
+---
+import TopLevelPage from "@/components/pages/TopLevelPage.astro";
+import { getTopLevelPageStaticPaths, type TopLevelRouteId } from "@/lib/pageStaticPaths";
+
+export const prerender = true;
+
+export function getStaticPaths() {
+  return getTopLevelPageStaticPaths("de");
+}
+
+const { routeId, redirectTo } = Astro.props as {
+  routeId: TopLevelRouteId;
+  redirectTo?: string;
+};
+
+if (redirectTo) {
+  return Astro.redirect(`/de/${redirectTo}`, 301);
+}
+---
+
+<TopLevelPage locale="de" routeId={routeId} />
