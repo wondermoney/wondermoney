@@ -1,0 +1,14 @@
+---
+import StandaloneLandingPage from "@/components/pages/StandaloneLandingPage.astro";
+import { getAdLandingStaticPaths, type AdLandingRouteId } from "@/lib/pageStaticPaths";
+
+export const prerender = true;
+
+export function getStaticPaths() {
+  return getAdLandingStaticPaths("es");
+}
+
+const { routeId } = Astro.props as { routeId: AdLandingRouteId };
+---
+
+<StandaloneLandingPage locale="es" pageId={routeId} />

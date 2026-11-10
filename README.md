@@ -20,6 +20,7 @@ and Android.
 | [`apps/web`](apps/web) | Web app | Next.js 16, React 19, Tailwind 4 |
 | [`apps/mobile`](apps/mobile) | iOS and Android app | Expo SDK 58, React Native 0.88 |
 | [`apps/docs`](apps/docs) | User documentation ([docs.wonder.money](https://docs.wonder.money)) | Next.js 16, Fumadocs |
+| [`apps/landing`](apps/landing) | Marketing site ([wonder.money](https://wonder.money)) | Astro 5, React 19, Tailwind 4 |
 | [`packages/shared`](packages/shared) | Market-data client and CSV parsers used by the API | TypeScript |
 | [`packages/react-email`](packages/react-email) | Email templates used by the API | React Email |
 
@@ -41,7 +42,7 @@ pnpm dev:api                                   # http://localhost:3001
 pnpm dev:web                                   # http://localhost:3000
 ```
 
-`pnpm dev:worker`, `pnpm dev:mobile` and `pnpm dev:docs` start the rest. Each app's README
+`pnpm dev:worker`, `pnpm dev:mobile`, `pnpm dev:docs` and `pnpm dev:landing` start the rest. Each app's README
 has the details.
 
 Checks, across every package (Turborepo runs only what changed):

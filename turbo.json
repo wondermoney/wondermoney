@@ -14,6 +14,7 @@
       ],
       "outputs": [
         "dist/**",
+        ".vercel/output/**",
         ".next/**",
         "!.next/cache/**",
         ".react-email/.next/**",

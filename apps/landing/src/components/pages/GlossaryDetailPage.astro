@@ -1,0 +1,261 @@
+---
+import "@/styles/globals.css";
+import ContentLayout from "@/layouts/ContentLayout.astro";
+import CTABanner from "@/components/shared/CTABanner";
+import RelatedContent from "@/components/shared/RelatedContent";
+import GlossaryFormula from "@/components/learning/GlossaryFormula.astro";
+import DataTable from "@/components/learning/DataTable.astro";
+import ReferenceList from "@/components/learning/ReferenceList.astro";
+import { PortableText } from "astro-portabletext";
+import type { PortableTextProps } from "astro-portabletext/types";
+import {
+  resolveToolRouteIdFromLegacy,
+  toLocalizedPath,
+  toToolsHubPath,
+  type Lang,
+} from "@/lib/routes";
+import { getTranslations } from "@/lib/translations";
+import type { GlossaryTermEntry } from "@/lib/pageStaticPaths";
+
+interface Props {
+  locale: Lang;
+  term: GlossaryTermEntry;
+  alternateLinks: Array<{ hrefLang: string; href: string }>;
+}
+
+const { term, locale, alternateLinks } = Astro.props as Props;
+const t = getTranslations(locale);
+
+const canonicalPath = `/${locale}/glossary/${term.slug}`;
+const canonicalUrl = `${Astro.url.origin}${canonicalPath}`;
+
+const glossaryPrefix = `/${locale}/glossary`;
+const learnPrefix = `/${locale}/learn`;
+const toolsHubPrefix = toToolsHubPath(locale);
+const primaryDefinition = term.plainDefinition || term.definition;
+const technicalDefinition = term.technicalDefinition;
+const whyItMatters = term.whyItMatters;
+const miniExample = term.miniExample;
+const hasStructuredExample = Boolean(miniExample);
+
+const miniTableColumns =
+  (Array.isArray(term.miniTable?.columns) && term.miniTable.columns) ||
+  (Array.isArray(term.miniTable?.headers) && term.miniTable.headers) ||
+  [];
+
+const miniTableRows = (Array.isArray(term.miniTable?.rows) ? term.miniTable.rows : [])
+  .map((row: unknown) => {
+    if (Array.isArray(row)) {
+      return row.map((cell) => String(cell ?? ""));
+    }
+
+    if (row && typeof row === "object") {
+      const record = row as Record<string, unknown>;
+      if (miniTableColumns.length > 0) {
+        return miniTableColumns.map((column: string) => String(record[column] ?? ""));
+      }
+
+      return Object.values(record).map((cell) => String(cell ?? ""));
+    }
+
+    return [];
+  })
+  .filter((row: string[]) => row.length > 0);
+
+const normalizedReferences: Array<{ title?: string; url?: string; publisher?: string }> =
+  (Array.isArray(term.references) ? term.references : []).reduce((acc, item) => {
+    if (!item || typeof item !== "object") {
+      return acc;
+    }
+
+    const record = item as Record<string, unknown>;
+    const normalized = {
+      title: typeof record.title === "string" ? record.title : undefined,
+      url: typeof record.url === "string" ? record.url : undefined,
+      publisher: typeof record.publisher === "string" ? record.publisher : undefined,
+    };
+
+    if (normalized.title || normalized.url || normalized.publisher) {
+      acc.push(normalized);
+    }
+
+    return acc;
+  }, [] as Array<{ title?: string; url?: string; publisher?: string }>);
+
+const relatedItems: {
+  title: string;
+  description: string;
+  href: string;
+  type: "calculator" | "guide" | "glossary";
+}[] = [];
+
+if (term.relatedTerms) {
+  for (const related of term.relatedTerms) {
+    if (related.slug && related.locale === locale) {
+      relatedItems.push({
+        title: related.term,
+        description: "",
+        href: `${glossaryPrefix}/${related.slug}`,
+        type: "glossary",
+      });
+    }
+  }
+}
+
+if (term.relatedCalculator) {
+  const routeId = resolveToolRouteIdFromLegacy(term.relatedCalculator, locale);
+
+  relatedItems.push({
+    title: term.relatedCalculator,
+    description: "",
+    href: routeId ? toLocalizedPath(routeId, locale) : toolsHubPrefix,
+    type: "calculator",
+  });
+}
+
+if (term.relatedGuideSlug) {
+  relatedItems.push({
+    title: term.relatedGuideTitle || "Related Guide",
+    description: "",
+    href: `${learnPrefix}/${term.relatedGuideSlug}`,
+    type: "guide",
+  });
+}
+
+const definedTermSchema = {
+  "@context": "https://schema.org",
+  "@type": "DefinedTerm",
+  name: term.term,
+  description: primaryDefinition,
+  url: `https://wonder.money${glossaryPrefix}/${term.slug}`,
+  inDefinedTermSet: {
+    "@type": "DefinedTermSet",
+    name: t("glossary.hub.title"),
+    url: `https://wonder.money${glossaryPrefix}`,
+  },
+};
+
+const explanationValue = term.explanation;
+---
+
+<ContentLayout
+  title={term.seoTitle || `${term.term} — WonderMoney`}
+  description={term.seoDescription || primaryDefinition}
+  canonicalUrl={canonicalUrl}
+  breadcrumbs={[
+    { label: t("header.glossary"), href: glossaryPrefix },
+    { label: term.term, href: "#" },
+  ]}
+  locale={locale}
+  alternateLinks={alternateLinks}
+  structuredData={definedTermSchema}
+>
+  <article>
+    <section>
+      <h1 class="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
+        {term.term}
+      </h1>
+      {term.category && (
+        <p class="mt-2 text-sm text-muted-foreground">{term.category}</p>
+      )}
+      {primaryDefinition && (
+        <p class="mt-4 text-lg leading-8 text-muted-foreground">
+          {primaryDefinition}
+        </p>
+      )}
+    </section>
+
+    {whyItMatters && (
+      <div class="mt-10 rounded-card border border-warning/30 bg-warning/5 p-6">
+        <h2 class="text-lg font-semibold text-warning-text">
+          {t("glossary.term.whyItMatters")}
+        </h2>
+        <p class="mt-2 text-warning-text">{whyItMatters}</p>
+      </div>
+    )}
+
+    {technicalDefinition && (
+      <div class="prose mx-auto mt-10 lg:prose-lg">
+        <h2>
+          {t("glossary.term.technicalDefinition")}
+        </h2>
+        <p>{technicalDefinition}</p>
+      </div>
+    )}
+
+    {term.formula && (
+      <div class="mt-10">
+        <GlossaryFormula formula={term.formula} title={t("glossary.term.formula")} />
+      </div>
+    )}
+
+    {hasStructuredExample && (
+      <div class="mt-10 rounded-card border border-success/30 bg-success/5 p-6">
+        <h2 class="text-lg font-semibold text-success-text">
+          {t("glossary.term.miniExample")}
+        </h2>
+        <p class="mt-2 text-success-text">{miniExample}</p>
+      </div>
+    )}
+
+    {miniTableRows.length > 0 && (
+      <div class="mt-10">
+        <DataTable
+          title={term.miniTable?.title || t("glossary.term.miniTable")}
+          columns={miniTableColumns}
+          rows={miniTableRows}
+        />
+      </div>
+    )}
+
+    {normalizedReferences.length > 0 && (
+      <div class="mt-10">
+        <ReferenceList title={t("glossary.term.references")} references={normalizedReferences} />
+      </div>
+    )}
+
+    {!technicalDefinition && term.explanation && (
+      <div class="prose mx-auto mt-10 lg:prose-lg">
+        <h2>
+          {t("glossary.term.explanation")}
+        </h2>
+        <PortableText value={explanationValue as PortableTextProps["value"]} />
+      </div>
+    )}
+
+    {!hasStructuredExample && term.example && (
+      <div class="mt-10 rounded-card border border-success/30 bg-success/5 p-6">
+        <h2 class="text-lg font-semibold text-success-text">
+          {t("glossary.term.example")}
+        </h2>
+        <p class="mt-2 text-success-text">{term.example}</p>
+      </div>
+    )}
+
+    {term.relatedTerms && term.relatedTerms.length > 0 && (
+      <div class="mt-10">
+        <h2 class="text-xl font-bold text-foreground">
+          {t("glossary.term.relatedTerms")}
+        </h2>
+        <div class="mt-4 flex flex-wrap gap-2">
+          {term.relatedTerms
+            .filter((related) => related.slug && related.locale === locale)
+            .map((related) => (
+              <a
+                href={`${glossaryPrefix}/${related.slug}`}
+                class="rounded-full border border-border px-4 py-2 text-sm font-medium text-muted-foreground transition-colors hover:border-primary/40 hover:bg-accent hover:text-primary"
+              >
+                {related.term}
+              </a>
+            ))}
+        </div>
+      </div>
+    )}
+  </article>
+
+  {relatedItems.length > 0 && <RelatedContent locale={locale} client:idle items={relatedItems} />}
+
+  <div class="mt-8">
+    <CTABanner locale={locale} client:idle />
+  </div>
+</ContentLayout>

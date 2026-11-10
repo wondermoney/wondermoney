@@ -1,0 +1,17 @@
+---
+import LearnGuidePage from "@/components/pages/LearnGuidePage.astro";
+import { getLearnGuideStaticPaths, type GuideEntry } from "@/lib/pageStaticPaths";
+
+export const prerender = true;
+
+export async function getStaticPaths() {
+  return getLearnGuideStaticPaths("pt");
+}
+
+const { guide, alternateLinks } = Astro.props as {
+  guide: GuideEntry;
+  alternateLinks: Array<{ hrefLang: string; href: string }>;
+};
+---
+
+<LearnGuidePage locale="pt" guide={guide} alternateLinks={alternateLinks} />

@@ -1,0 +1,61 @@
+---
+type FormulaVariable = {
+	label?: string
+	name?: string
+	symbol?: string
+	meaning?: string
+	value?: string | number
+}
+
+type FormulaInput = {
+	title?: string
+	expression?: string
+	variables?: ReadonlyArray<FormulaVariable>
+	notes?: string
+}
+
+interface Props {
+	formula?: FormulaInput | null
+	title?: string
+}
+
+const { formula, title = "Formula" } = Astro.props
+
+const formulaExpression = formula?.expression?.trim() ?? ""
+const variables = formula?.variables ?? []
+const notes = formula?.notes?.trim() ?? ""
+const hasContent = formulaExpression.length > 0 || variables.length > 0 || notes.length > 0
+---
+
+{
+	hasContent && (
+		<section class="rounded-card border border-border bg-paper-2 p-6">
+			<h2 class="text-xl font-semibold text-foreground">{formula?.title || title}</h2>
+			{formulaExpression && (
+				<p class="mt-3 rounded-md border border-border bg-background px-4 py-3 font-mono text-foreground">
+					{formulaExpression}
+				</p>
+			)}
+			{
+				variables.length > 0 && (
+					<ul class="mt-4 space-y-2 text-sm text-muted-foreground">
+						{variables.map((variable) => (
+							<li>
+								<strong class="font-mono text-foreground">
+									{variable.symbol || variable.label || variable.name || "-"}
+								</strong>
+								{(variable.meaning || variable.value) && (
+									<span>
+										{" "}
+										- {variable.meaning || variable.value}
+									</span>
+								)}
+							</li>
+						))}
+					</ul>
+				)
+			}
+			{notes && <p class="mt-4 text-sm text-muted-foreground">{notes}</p>}
+		</section>
+	)
+}

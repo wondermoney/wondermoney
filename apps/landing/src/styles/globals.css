@@ -1,0 +1,215 @@
+/* Hallmark · redesign: full · 2026-11-04 · genre: modern-minimal · shape: Feature Stack, from draw a14651 · scope: the homepage (6 locales) plus the shared Header and Footer (every route)
+ * job: sign up, the action in the bar, the hero and the closing band · hero: Stage (swapped from the draw's Counter: the action is one link to sign-up, nothing to set large)
+ * nav: edge-aligned sticky bar (was the floating pill) · footer: index columns (was the mast) · theme: custom, locked (DESIGN.md) · system: unchanged tokens, aligned to the product app's Direction A
+ * signature: the net worth card, where bank accounts plus investments minus the credit card add up to the headline figure
+ * sections: Hero (net worth card, grid pattern) · Feature Stack (accounts, categorisation, budgets, goals, portfolio, sticky index; net worth is the hero's) · How it works (three steps, then the bank and broker marks; dot pattern) · Privacy statement (grid pattern) · Free and open source (hosted or self-hosted) · Questions · Closing band with the not-a-bank note (dot pattern) · Footer
+ * patterns: grid and dot fields behind four sections at the user's request, in the hairline ink, masked to fade (.pattern-* below, BackgroundPattern.tsx)
+ * material: real: the product previews built in code with sample figures, the institutions' own marks, the relaunch facts (free, open source, hosted or self-hosted) · absent: logos as partners, quotes, metrics
+ * copy: relaunch wording (the user's call): sign-ups open, "Start free" to app sign-up sitewide, no bring-your-own-keys for the hosted version; every changed line is in the six common.json diffs
+ * finish-review: subagent, verdict fix · 7 findings, 7 resolved (duplicate net worth card, sparse hero, preview shadows, uneven logo wall, tall goals card, gap above the footer, crowded FAQ head) · How it works restored from its old-page-did-better list
+ * kept: links 19/19, fields 3/3 · dropped from the homepage: TrustBar, Features (FeaturePreviewList), SecondaryFeatures, WhyWondermoney: their facts moved into the stack, works-with, privacy and open-source sections; "Made in Portugal" lives on in the footer description; the hero's accounts and portfolio mini-cards (their figures repeat in the stack's previews); bottomCta.pretitle (an eyebrow, 54)
+ * v2.0.0
+ */
+/* Hallmark · pre-emit critique: P4 H4 E4 S4 R4 V4 · weakest: the open-source section is two text columns with no picture; kept as text because the two paths are links, not a product view */
+/* Hallmark · waive 39b · app UI at 40px, the shared Button and Input primitives · inputs and buttons stand 40px, the product app's control height, so the newsletter and calculator fields match the app they lead into */
+/* Hallmark · waive 49b · a real phrase that cannot shorten · the footer links are the legal documents' own titles (Refund & Cancellation Policy), which cannot be reworded */
+/* Hallmark · waive 85 · a form whose button sends the download · the footer form sends the 10-minute net worth check-in guide, a download, not a mailing-list sign-up */
+/* Hallmark · answered F19 · four weights is the shared system: body 400, button 500, section heads 600, display 700, as in the product app */
+/* Hallmark · answered F1 · the quotes GuideSections.astro:50 flags are JavaScript string literals in a template expression, not prose */
+/* Hallmark · on the record, Floor, not waived · 50 and 34 (ContentLayout): the linter scopes CSS by directory, so h1-h3 overflow-wrap and html/body overflow-x: clip in this file read as missing for pages under src/pages and src/layouts; every page imports this file and the render tier finds no overflow */
+/* Hallmark · on the record, Floor, not waived · 58 (words on one screen at the page foot): the closing band, the not-a-bank disclaimer and the footer share the last screen; the disclaimer is legal text and is never cut · 58 (hero text blocks): the linter counts the net worth card's labels as hero copy; the hero's copy is one head, one line and the action · 26a/26b on component files: the focus ring and states live in this file's :focus-visible rule and the Button primitive, which the linter scopes out by directory */
+/* Hallmark · waive 44c · the hero visual's gap is measured from the 28rem paragraph, not the column; the columns sit 40px apart on the 12-column grid */
+/* Hallmark · waive 77 · the open-source section is two paths with their links, a set of two across, and adding a picture would invent one */
+/* Hallmark · dismissed 29 · the sticky bar's blur sits over a 95% canvas, never behind text */
+/* Hallmark · dismissed F20 · the orphan (2 + 2 + 1) is the goals preview's five sample goals, a product mockup */
+/* Hallmark · 2026-11-03 homepage trim · footer: redesign full · homepage: polish · dropped MidCTA, HighlightFeatures, MobileWaitlist from the homepage (HighlightFeatures and MobileWaitlist since deleted; MidCTA stays, the feature pages use it) · MidCTA repeated BottomCTA, HighlightFeatures restated Features, and the mobile waitlist is obsolete now the app is on Google Play · added: category icons in the budgets preview, institution marks (banks via Enable Banking, brokers via file import) beside "Stop jumping between apps" */
+@import "tailwindcss";
+@config "../../tailwind.config.mjs";
+
+@layer base {
+  :root {
+    color-scheme: light;
+
+    --background: 98.5% 0.006 290;
+    --foreground: 14.5% 0 0;
+
+    --card: 98.5% 0.006 290;
+    --card-foreground: 14.5% 0 0;
+
+    --popover: 98.5% 0.006 290;
+    --popover-foreground: 14.5% 0 0;
+
+    --primary: 48% 0.17 290;
+    --primary-foreground: 98.6% 0.005 235.46;
+
+    --secondary: 97% 0.007 290;
+    --secondary-foreground: 20.5% 0 0;
+
+    --muted: 97% 0.007 290;
+    --muted-foreground: 53% 0.012 290;
+
+    --accent: 97% 0.007 290;
+    --accent-foreground: 20.5% 0 0;
+
+    /* Semantic fills, each paired with its own -foreground (>= 4.5:1). */
+    --destructive: 54% 0.245 27.325;
+    --destructive-foreground: 97.1% 0.013 17.38;
+    --warning: 70% 0.15 75;
+    --warning-foreground: 27% 0.05 75;
+    --info: 48% 0.2 240;
+    --info-foreground: 98% 0.01 240;
+    --success: 72% 0.16 150;
+    --success-foreground: 27% 0.05 150;
+
+    /* Semantic colours legible as TEXT on the canvas and on a 10% tint of
+       themselves. Fill tokens are not safe as text; -text tokens are not
+       safe as fills (the app's Fill-vs-Text Rule). */
+    --destructive-text: 53% 0.2 27.325;
+    --warning-text: 52% 0.115 75;
+    --info-text: 51% 0.12 240;
+    --success-text: 50% 0.145 150;
+
+    --overlay: 14.5% 0.012 290;
+
+    /* Hairline divider (decoration, may be faint) vs. the boundary of a
+       form control (WCAG 1.4.11, 3:1). */
+    --border: 92.2% 0.008 290;
+    --input: 64% 0.012 290;
+
+    /* Background patterns: the line and dot ink, and the opaque stop their fade masks need. */
+    --pattern-line: 92.2% 0.008 290;
+    --pattern-dot: 80% 0.02 290;
+    --mask-solid: 0% 0 0;
+    --ring: 54% 0.2 290;
+
+    /* Chart series, hue fixed per slot: violet 290 · amber 70 ·
+       bluish-green 170 · vermillion 30 · sky 235. Assign in order. */
+    --chart-1: 52% 0.17 290;
+    --chart-2: 62% 0.14 70;
+    --chart-3: 50% 0.13 170;
+    --chart-4: 58% 0.19 30;
+    --chart-5: 54% 0.13 235;
+
+    --radius: 0.5rem;
+
+    /* Additive, marketing-only. See DESIGN.md. */
+    --paper-2: 97% 0.007 290;
+    --paper-3: 92.5% 0.008 290;
+    --ink-2: 37% 0 0;
+    --border-2: 95% 0.006 290;
+    --radius-card: 0.5rem;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+  /* Every focusable element gets a visible, instant ring, including links
+     and native controls that set none of their own. Components that draw a
+     focus-visible:ring-* opt out with outline-none. */
+  :focus-visible {
+    outline: 2px solid oklch(var(--ring));
+    outline-offset: 2px;
+  }
+  /* Display and section heads never push a long localized word (de, fr)
+     past the viewport. */
+  h1,
+  h2,
+  h3 {
+    overflow-wrap: break-word;
+    min-width: 0;
+    text-wrap: balance;
+  }
+  p {
+    text-wrap: pretty;
+  }
+  /* Geist Mono is reserved for financial figures, so a mono run is always a
+     number: tabular figures keep digits aligned down a column. */
+  .font-mono {
+    font-variant-numeric: tabular-nums;
+  }
+  input::placeholder,
+  textarea::placeholder {
+    color: oklch(var(--muted-foreground));
+  }
+}
+
+html,
+body {
+  overflow-x: clip;
+}
+
+/* Section background patterns (BackgroundPattern.tsx): a quiet grid or dot
+ * field in the hairline ink, faded out by a mask so it never reaches text at
+ * full strength. Painted on an aria-hidden layer behind the section. */
+@layer components {
+  .pattern-grid {
+    background-image:
+      linear-gradient(to right, oklch(var(--pattern-line)) 1px, transparent 1px),
+      linear-gradient(to bottom, oklch(var(--pattern-line)) 1px, transparent 1px);
+    background-size: 56px 56px;
+  }
+  .pattern-dots {
+    background-image: radial-gradient(oklch(var(--pattern-dot)) 1px, transparent 1.5px);
+    background-size: 22px 22px;
+  }
+  .pattern-fade-top {
+    mask-image: radial-gradient(ellipse 80% 70% at 50% 0%, oklch(var(--mask-solid)) 35%, transparent 100%);
+  }
+  .pattern-fade-right {
+    mask-image: radial-gradient(ellipse 60% 80% at 100% 50%, oklch(var(--mask-solid)) 20%, transparent 100%);
+  }
+  .pattern-fade-center {
+    mask-image: radial-gradient(ellipse 60% 70% at 50% 50%, oklch(var(--mask-solid)) 10%, transparent 100%);
+  }
+}
+
+::selection {
+  background-color: oklch(var(--primary) / 0.22);
+  color: oklch(var(--foreground));
+}
+html {
+  caret-color: oklch(var(--primary));
+  scrollbar-color: oklch(var(--input)) transparent;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    animation-duration: 1ms !important;
+    animation-delay: 0ms !important;
+    transition-duration: 1ms !important;
+    transition-delay: 0ms !important;
+    scroll-behavior: auto !important;
+  }
+  .animate-spin {
+    animation-duration: 1.5s !important;
+  }
+}
+
+/* Unlayered on purpose — wins over the Typography plugin's own :where()-scoped
+ * .prose-gray rules regardless of import order, so long-form content (glossary,
+ * guides) reads in the same token system as the rest of the site. */
+.prose {
+  --tw-prose-body: oklch(var(--muted-foreground));
+  --tw-prose-headings: oklch(var(--foreground));
+  --tw-prose-lead: oklch(var(--muted-foreground));
+  --tw-prose-links: oklch(var(--primary));
+  --tw-prose-bold: oklch(var(--foreground));
+  --tw-prose-counters: oklch(var(--muted-foreground));
+  --tw-prose-bullets: oklch(var(--muted-foreground));
+  --tw-prose-hr: oklch(var(--border));
+  --tw-prose-quotes: oklch(var(--foreground));
+  --tw-prose-quote-borders: oklch(var(--border));
+  --tw-prose-captions: oklch(var(--muted-foreground));
+  --tw-prose-code: oklch(var(--foreground));
+  --tw-prose-pre-code: oklch(var(--background));
+  --tw-prose-pre-bg: oklch(var(--foreground));
+  --tw-prose-th-borders: oklch(var(--border));
+  --tw-prose-td-borders: oklch(var(--border-2));
+}

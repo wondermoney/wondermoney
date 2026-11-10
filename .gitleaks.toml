@@ -24,3 +24,11 @@ regexes = ['''^-----BEGIN PRIVATE KEY-----decrypted-----END PRIVATE KEY-----'\)'
 description = "Hosted instance's public PostHog project key"
 targetRules = ["generic-api-key"]
 regexes = ['''^phc_KlDfjBgreGCfTKJnwwP5W9I2PEGJsboIKFoedyTHGg4$''']
+
+# The marketing site's ad landing pages pass translation keys in props named `bodyKey`,
+# `competitorKey` and `wmKey`; the rule reads the key name as a secret's. Only `lp.<page>.<key>`
+# translation keys are allowed.
+[[allowlists]]
+description = "Translation keys in the marketing site's landing pages"
+targetRules = ["generic-api-key"]
+regexes = ['''^lp\.[a-zA-Z]+\.[a-zA-Z0-9]+$''']

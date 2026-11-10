@@ -1,0 +1,21 @@
+---
+import ToolDetailPage from "@/components/pages/ToolDetailPage.astro";
+import { getToolStaticPaths, type ToolRouteId } from "@/lib/pageStaticPaths";
+
+export const prerender = true;
+
+export function getStaticPaths() {
+  return getToolStaticPaths("pt");
+}
+
+const { routeId, redirectTo } = Astro.props as {
+  routeId: ToolRouteId;
+  redirectTo?: string;
+};
+
+if (redirectTo) {
+  return Astro.redirect(`/pt/tools/${redirectTo}`, 301);
+}
+---
+
+<ToolDetailPage locale="pt" routeId={routeId} />

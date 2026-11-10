@@ -1,0 +1,186 @@
+---
+import { toIntlLocale } from "@/lib/numberFormat";
+import "@/styles/globals.css";
+import { PortableText } from "astro-portabletext";
+import ContentLayout from "@/layouts/ContentLayout.astro";
+import ReferenceList from "@/components/learning/ReferenceList.astro";
+import DataTable from "@/components/learning/DataTable.astro";
+import type { Lang } from "@/lib/i18nLocale";
+import type { MonthlyContent } from "@/lib/pageStaticPaths";
+
+interface Props {
+  locale: Lang;
+  item: MonthlyContent;
+}
+
+const { locale, item: monthlyItem } = Astro.props;
+const learnPrefix = `/${locale}/learn`;
+const monthlyPrefix = `${learnPrefix}/monthly`;
+
+const monthYearLabel = (() => {
+  if (!monthlyItem.year || !monthlyItem.month) {
+    return null;
+  }
+
+  return new Date(monthlyItem.year, monthlyItem.month - 1, 1).toLocaleDateString(toIntlLocale(locale), {
+    year: "numeric",
+    month: "long",
+  });
+})();
+
+const publishedLabel = monthlyItem.publishedAt
+  ? new Date(monthlyItem.publishedAt).toLocaleDateString(toIntlLocale(locale), {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    })
+  : null;
+
+const chartSummary = monthlyItem.trendChartConfig?.series ?? [];
+const deltaRows = (monthlyItem.changeVsPrevious ?? []).filter((entry) => Boolean(entry.metric));
+const references = monthlyItem.references ?? monthlyItem.dataSources ?? [];
+
+const articleSchema = {
+  "@context": "https://schema.org",
+  "@type": "Article",
+  headline: monthlyItem.title,
+  description: monthlyItem.seoDescription || monthlyItem.excerpt,
+  url: `https://wonder.money${monthlyPrefix}/${monthlyItem.slug}`,
+  datePublished: monthlyItem.publishedAt,
+  publisher: {
+    "@type": "Organization",
+    name: "WonderMoney",
+    url: "https://wonder.money",
+  },
+  ...(monthlyItem.ogImageUrl ? { image: monthlyItem.ogImageUrl } : {}),
+};
+---
+
+<ContentLayout
+  title={monthlyItem.seoTitle || `${monthlyItem.title || "Monthly update"} - WonderMoney`}
+  description={monthlyItem.seoDescription || monthlyItem.excerpt || ""}
+  ogImage={monthlyItem.ogImageUrl}
+  ogType="article"
+  breadcrumbs={[
+    { label: locale === "pt" ? "Aprenda" : "Learn", href: learnPrefix },
+    { label: locale === "pt" ? "Mensal" : "Monthly", href: monthlyPrefix },
+    { label: monthlyItem.title || (locale === "pt" ? "Atualizacao" : "Update"), href: "#" },
+  ]}
+  locale={locale}
+  structuredData={articleSchema}
+>
+  <article class="mx-auto max-w-3xl">
+    <section>
+      {monthYearLabel && (
+        <p class="text-sm text-muted-foreground"><time datetime={`${monthlyItem.year}-${String(monthlyItem.month).padStart(2, "0")}`}>{monthYearLabel}</time></p>
+      )}
+      <h1 class="mt-2 text-3xl font-bold tracking-tight text-foreground sm:text-4xl">{monthlyItem.title}</h1>
+      {monthlyItem.excerpt && <p class="mt-4 text-lg leading-8 text-muted-foreground">{monthlyItem.excerpt}</p>}
+      {publishedLabel && <p class="mt-4 text-sm text-muted-foreground">{publishedLabel}</p>}
+    </section>
+
+    {monthlyItem.methodology && (
+      <section class="mt-10 rounded-card border border-info/30 bg-info/5 p-5">
+        <h2 class="text-xl font-semibold text-info-text">
+          {locale === "pt" ? "Metodologia" : "Methodology"}
+        </h2>
+        <p class="mt-3 text-sm leading-7 text-info-text">{monthlyItem.methodology}</p>
+      </section>
+    )}
+
+    {monthlyItem.snapshotTable && (
+      <div class="mt-8">
+        <DataTable
+          title={monthlyItem.snapshotTable.title || (locale === "pt" ? "Tabela de snapshot" : "Snapshot table")}
+          columns={monthlyItem.snapshotTable.columns ?? []}
+          rows={monthlyItem.snapshotTable.rows ?? []}
+        />
+      </div>
+    )}
+
+    {deltaRows.length > 0 && (
+      <section class="mt-8 rounded-card border border-success/30 bg-success/5 p-5">
+        <h2 class="text-xl font-semibold text-success-text">
+          {locale === "pt" ? "Mudanca face ao periodo anterior" : "Change vs previous period"}
+        </h2>
+        <ul class="mt-3 space-y-2 text-sm text-success-text">
+          {deltaRows.map((entry) => (
+            <li>
+              <span class="font-semibold">{entry.metric}:</span>{" "}
+              {entry.delta ?? 0}
+              {entry.unit ? ` ${entry.unit}` : ""}
+              {entry.note ? ` - ${entry.note}` : ""}
+            </li>
+          ))}
+        </ul>
+      </section>
+    )}
+
+    {monthlyItem.whatChanged && monthlyItem.whatChanged.length > 0 && (
+      <section class="mt-8 rounded-card border border-border bg-background p-5">
+        <h2 class="text-xl font-semibold text-foreground">
+          {locale === "pt" ? "O que mudou" : "What changed"}
+        </h2>
+        <div class="mt-3 space-y-3">
+          {monthlyItem.whatChanged.map((change) => (
+            <div class="rounded-md border border-border p-3">
+              {change.title && <h3 class="font-medium text-foreground">{change.title}</h3>}
+              {change.detail && <p class="mt-1 text-sm text-muted-foreground">{change.detail}</p>}
+            </div>
+          ))}
+        </div>
+      </section>
+    )}
+
+    {monthlyItem.whoShouldCare && monthlyItem.whoShouldCare.length > 0 && (
+      <section class="mt-8 rounded-card border border-warning/30 bg-warning/5 p-5">
+        <h2 class="text-xl font-semibold text-warning-text">
+          {locale === "pt" ? "Quem deve prestar atencao" : "Who should care"}
+        </h2>
+        <ul class="mt-3 list-disc space-y-2 pl-5 text-sm text-warning-text">
+          {monthlyItem.whoShouldCare.map((item) => (
+            <li>{item}</li>
+          ))}
+        </ul>
+      </section>
+    )}
+
+    {chartSummary.length > 0 && (
+      <section class="mt-8 rounded-card border border-border bg-paper-2 p-5">
+        <h2 class="text-xl font-semibold text-foreground">
+          {monthlyItem.trendChartConfig?.title || (locale === "pt" ? "Tendencia" : "Trend chart")}
+        </h2>
+        <p class="mt-2 text-sm text-muted-foreground">
+          {locale === "pt" ? "Tipo de grafico" : "Chart type"}: {monthlyItem.trendChartConfig?.chartType || "line"}
+        </p>
+        <ul class="mt-3 space-y-1 text-sm text-muted-foreground">
+          {chartSummary.map((series) => (
+            <li>
+              <span class="font-medium text-foreground">{series.label}:</span>{" "}
+              {(series.values ?? []).join(", ")}
+            </li>
+          ))}
+        </ul>
+      </section>
+    )}
+
+    {Array.isArray(monthlyItem.body) && monthlyItem.body.length > 0 && (
+      <section class="prose mt-10 lg:prose-lg">
+        <PortableText value={monthlyItem.body} />
+      </section>
+    )}
+
+    <div class="mt-10">
+      <ReferenceList title={locale === "pt" ? "Referencias" : "References"} references={references} />
+    </div>
+
+    {monthlyItem.dataSources && monthlyItem.dataSources.length > 0 && (
+      <div class="mt-8">
+        <ReferenceList
+          title={locale === "pt" ? "Fontes de dados" : "Data sources"}
+          references={monthlyItem.dataSources}
+        />
+      </div>
+    )}
+  </article>
+</ContentLayout>

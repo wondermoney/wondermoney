@@ -1,0 +1,14 @@
+---
+import MonthlyDetailPage from "@/components/pages/MonthlyDetailPage.astro";
+import { getMonthlyStaticPaths, type MonthlyContent } from "@/lib/pageStaticPaths";
+
+export const prerender = true;
+
+export async function getStaticPaths() {
+  return getMonthlyStaticPaths("es");
+}
+
+const { item } = Astro.props as { item: MonthlyContent };
+---
+
+<MonthlyDetailPage locale="es" item={item} />

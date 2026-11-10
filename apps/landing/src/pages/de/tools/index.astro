@@ -1,0 +1,92 @@
+---
+import "@/styles/globals.css";
+import ContentLayout from "@/layouts/ContentLayout.astro";
+import { buildAlternateLinksForPath, toLocalizedPath, toToolsHubPath } from "@/lib/routes";
+import { getTranslations } from "@/lib/translations";
+
+export const prerender = true;
+
+const lang = "de" as const;
+const t = getTranslations(lang);
+const toolsHubHref = `/${lang}/tools`;
+const alternateLinks = buildAlternateLinksForPath((l) => toToolsHubPath(l));
+
+const calculators = [
+  { key: "compoundInterest", routeId: "toolCompoundInterest", available: true },
+  { key: "netWorth", routeId: "toolNetWorth", available: true },
+  { key: "savingsRate", routeId: "toolSavingsRate", available: true },
+  { key: "investmentReturn", routeId: "toolInvestmentReturn", available: true },
+] as const;
+
+const calculatorsWithHref = calculators.map((calc) => ({
+  ...calc,
+  href: toLocalizedPath(calc.routeId, lang),
+}));
+
+const itemListSchema = {
+  "@context": "https://schema.org",
+  "@type": "ItemList",
+  name: t("tools.hub.title"),
+  description: t("tools.hub.description"),
+  url: `https://wonder.money${toolsHubHref}`,
+  numberOfItems: calculatorsWithHref.length,
+  itemListElement: calculatorsWithHref.map((calc, index) => ({
+    "@type": "ListItem",
+    position: index + 1,
+    name: t(`tools.${calc.key}.title`),
+    url: `https://wonder.money${calc.href}`,
+  })),
+};
+---
+
+<ContentLayout
+  title={t("tools.hub.pageTitle")}
+  description={t("tools.hub.pageDescription")}
+  alternateLinks={alternateLinks}
+  breadcrumbs={[{ label: t("header.tools"), href: toolsHubHref }]}
+  locale={lang}
+  structuredData={itemListSchema}
+>
+  <section>
+    <h1 class="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
+      {t("tools.hub.title")}
+    </h1>
+    <p class="mt-3 max-w-3xl text-lg text-muted-foreground">
+      {t("tools.hub.description")}
+    </p>
+  </section>
+
+  <div class="mt-10 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+    {
+      calculatorsWithHref.map((calc) => (
+        <a
+          href={calc.available ? calc.href : undefined}
+          class:list={[
+            "group relative rounded-card border p-6 transition-colors",
+            calc.available
+              ? "border-border hover:border-primary/40 hover:bg-accent"
+              : "pointer-events-none border-border bg-paper-2 opacity-70",
+          ]}
+        >
+          <h2 class="text-lg font-semibold text-foreground group-hover:text-primary">
+            <span class="mb-1 block text-sm tracking-normal">{t("tools.hub.badge")}</span>{" "}
+            {t(`tools.${calc.key}.title`)}
+          </h2>
+          {!calc.available && (
+            <span class="mt-2 inline-block rounded-full bg-paper-3 px-3 py-1 text-xs font-medium text-muted-foreground" role="status">
+              {t("tools.hub.comingSoon")}
+            </span>
+          )}
+          <p class="mt-2 text-sm leading-6 text-muted-foreground">
+            {t(`tools.${calc.key}.description`)}
+          </p>
+          {calc.available && (
+            <span class="mt-4 inline-block text-sm font-medium text-primary underline underline-offset-4 decoration-primary/40 group-hover:opacity-80">
+              {t("tools.hub.openCalculator")}
+            </span>
+          )}
+        </a>
+      ))
+    }
+  </div>
+</ContentLayout>

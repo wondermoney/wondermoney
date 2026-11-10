@@ -1,0 +1,31 @@
+---
+type FormulaVariable = {
+	symbol: string
+	meaning: string
+}
+
+interface Props {
+	title?: string
+	expression?: string
+	variables?: ReadonlyArray<FormulaVariable>
+}
+
+const { title, expression, variables = [] } = Astro.props
+---
+
+<section class="rounded-card border border-border bg-paper-2 p-5">
+	{title && <h3 class="text-lg font-semibold text-foreground">{title}</h3>}
+	{expression && <p class="mt-2 font-mono text-base text-foreground">{expression}</p>}
+	{
+		variables.length > 0 && (
+			<ul class="mt-4 space-y-2 text-sm text-muted-foreground">
+				{variables.map((variable) => (
+					<li>
+						<strong class="font-mono text-foreground">{variable.symbol}</strong>
+						: {variable.meaning}
+					</li>
+				))}
+			</ul>
+		)
+	}
+</section>

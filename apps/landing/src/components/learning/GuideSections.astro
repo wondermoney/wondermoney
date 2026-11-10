@@ -1,0 +1,154 @@
+---
+import { PortableText } from "astro-portabletext"
+import FormulaCard from "./FormulaCard.astro"
+import DataTable from "./DataTable.astro"
+import ReferenceList from "./ReferenceList.astro"
+import type { GuideSection } from "@/lib/learningContent"
+import type { Lang } from "@/lib/i18nLocale"
+import { getTranslations } from "@/lib/translations"
+
+type ReferenceItem = {
+	title?: string
+	url?: string
+	publisher?: string
+}
+
+interface Props {
+	locale: Lang
+	sections?: ReadonlyArray<GuideSection>
+	references?: ReadonlyArray<ReferenceItem>
+}
+
+const { locale, sections = [], references = [] } = Astro.props
+const t = getTranslations(locale)
+
+const referenceItems = references.filter((reference) => Boolean(reference.title || reference.url))
+
+const hasReferenceListSection = sections.some(
+	(section) => section._type === "referenceList",
+)
+
+const tableRowsFromSection = (section: GuideSection): ReadonlyArray<ReadonlyArray<string>> => {
+	if (section._type !== "table" || !section.rows) {
+		return []
+	}
+
+	return section.rows.map((row) => {
+		if (Array.isArray(row)) {
+			return row
+		}
+
+		const candidate = row as { cells?: ReadonlyArray<string> }
+		return candidate.cells ?? []
+	})
+}
+---
+
+<div class="mt-10 space-y-8">
+	{
+		sections.map((section) => {
+			if (section._type === "concept" && section.body && section.body.length > 0) {
+				return (
+					<section class="prose max-w-none lg:prose-lg">
+						{section.title && <h2>{section.title}</h2>}
+						<PortableText value={[...section.body]} />
+					</section>
+				)
+			}
+
+			if (section._type === "formula") {
+				return (
+					<FormulaCard
+						title={section.title}
+						expression={section.expression}
+						variables={section.variables}
+					/>
+				)
+			}
+
+			if (section._type === "table") {
+				return (
+					<DataTable
+						title={section.title}
+						columns={section.columns}
+						rows={tableRowsFromSection(section)}
+					/>
+				)
+			}
+
+			if (section._type === "workedExample") {
+				return (
+					<section class="rounded-card border border-success/30 bg-success/5 p-5">
+						{section.title && <h3 class="text-lg font-semibold text-success-text">{section.title}</h3>}
+						{section.steps && section.steps.length > 0 && (
+							<ol class="mt-3 list-decimal space-y-2 pl-5 text-sm text-success-text">
+								{section.steps.map((step) => (
+									<li>{step}</li>
+								))}
+							</ol>
+						)}
+						{section.result && <p class="mt-3 text-sm font-medium text-success-text">{t("learn.guide.result")}: {section.result}</p>}
+					</section>
+				)
+			}
+
+			if (section._type === "chart") {
+				return (
+					<section class="rounded-card border border-border bg-paper-2 p-5">
+						{section.title && <h3 class="text-lg font-semibold text-foreground">{section.title}</h3>}
+						<p class="mt-2 text-sm text-muted-foreground">
+							Chart type: {section.chartType || "line"}
+						</p>
+						{section.series && section.series.length > 0 && (
+							<ul class="mt-3 space-y-1 text-sm text-muted-foreground">
+								{section.series.map((serie) => (
+									<li>
+										<span class="font-medium text-foreground">{serie.label}:</span>{" "}
+										{serie.values.join(", ")}
+									</li>
+								))}
+							</ul>
+						)}
+					</section>
+				)
+			}
+
+			if (section._type === "referenceList") {
+				return <ReferenceList title={section.title} references={referenceItems} />
+			}
+
+			if (section._type === "faq" && section.items && section.items.length > 0) {
+				return (
+					<section class="rounded-card border border-border bg-background p-5">
+						{section.title && <h3 class="text-lg font-semibold text-foreground">{section.title}</h3>}
+						<div class="mt-3 space-y-3">
+							{section.items.map((item) => (
+								<details class="rounded-lg border border-border p-3">
+									<summary class="cursor-pointer font-medium text-foreground">{item.question}</summary>
+									<p class="mt-2 text-sm text-muted-foreground">{item.answer}</p>
+								</details>
+							))}
+						</div>
+					</section>
+				)
+			}
+
+			if (section._type === "warning") {
+				return (
+					<section class="rounded-card border border-warning/30 bg-warning/5 p-5">
+						{section.title && <h3 class="text-lg font-semibold text-warning-text">{section.title}</h3>}
+						{section.body && <p class="mt-2 text-sm text-warning-text">{section.body}</p>}
+					</section>
+				)
+			}
+
+			return null
+		})
+	}
+
+	{
+		!hasReferenceListSection && referenceItems.length > 0 && (
+			<ReferenceList references={referenceItems} />
+		)
+	}
+</div>

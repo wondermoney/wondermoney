@@ -1,0 +1,59 @@
+---
+import { toOgLocale } from "../../lib/ogLocale";
+import type { Lang } from "@/lib/i18nLocale";
+
+interface Props {
+  title: string;
+  description: string;
+  ogImage?: string;
+  ogType?: string;
+  canonicalUrl?: string;
+  noindex?: boolean;
+  /** Paid-traffic pages: excluded from the index but still crawlable outward (`noindex, follow`). Takes precedence over `noindex`. */
+  noindexFollow?: boolean;
+  alternateLinks?: Array<{ hrefLang: string; href: string }>;
+  locale: Lang;
+}
+
+const SITE_URL = "https://wonder.money";
+const SITE_NAME = "WonderMoney";
+
+const {
+  title,
+  description,
+  ogImage = "/og-default.png",
+  ogType = "website",
+  canonicalUrl,
+  noindex = false,
+  noindexFollow = false,
+  alternateLinks = [],
+  locale,
+} = Astro.props;
+
+const effectiveOgImage = ogImage ?? "/og-default.png";
+const resolvedOgImage = effectiveOgImage.startsWith("http") ? effectiveOgImage : `${SITE_URL}${effectiveOgImage}`;
+const resolvedCanonicalUrl = canonicalUrl ?? Astro.url.href;
+const ogLocale = toOgLocale(locale);
+---
+
+<title>{title}</title>
+<meta name="description" content={description} />
+<link rel="canonical" href={resolvedCanonicalUrl} />
+{alternateLinks.map((link) => <link rel="alternate" hreflang={link.hrefLang} href={link.href} />)}
+{noindexFollow && <meta name="robots" content="noindex, follow" />}
+{!noindexFollow && noindex && <meta name="robots" content="noindex, nofollow" />}
+
+<!-- Open Graph -->
+<meta property="og:type" content={ogType} />
+<meta property="og:title" content={title} />
+<meta property="og:description" content={description} />
+<meta property="og:image" content={resolvedOgImage} />
+<meta property="og:url" content={resolvedCanonicalUrl} />
+<meta property="og:site_name" content={SITE_NAME} />
+<meta property="og:locale" content={ogLocale} />
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content={title} />
+<meta name="twitter:description" content={description} />
+<meta name="twitter:image" content={resolvedOgImage} />

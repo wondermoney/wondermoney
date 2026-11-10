@@ -1,0 +1,17 @@
+---
+import GlossaryDetailPage from "@/components/pages/GlossaryDetailPage.astro";
+import { getGlossaryTermStaticPaths, type GlossaryTermEntry } from "@/lib/pageStaticPaths";
+
+export const prerender = true;
+
+export async function getStaticPaths() {
+  return getGlossaryTermStaticPaths("de");
+}
+
+const { term, alternateLinks } = Astro.props as {
+  term: GlossaryTermEntry;
+  alternateLinks: Array<{ hrefLang: string; href: string }>;
+};
+---
+
+<GlossaryDetailPage locale="de" term={term} alternateLinks={alternateLinks} />

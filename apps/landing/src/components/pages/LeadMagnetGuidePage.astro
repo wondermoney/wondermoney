@@ -1,0 +1,95 @@
+---
+import "@/styles/globals.css";
+import ContentLayout from "@/layouts/ContentLayout.astro";
+import CTABanner from "@/components/shared/CTABanner";
+import { getTranslations } from "@/lib/translations";
+import { buildAlternateLinks, toLocalizedPath } from "@/lib/routes";
+import type { Lang } from "@/lib/i18nLocale";
+import { leadMagnetGuide } from "@/content/leadMagnetGuide";
+
+interface Props {
+	locale: Lang;
+}
+
+const { locale } = Astro.props;
+const t = getTranslations(locale);
+
+const canonicalPath = toLocalizedPath("guideMoneyCheckin", locale);
+const canonicalUrl = `${Astro.url.origin}${canonicalPath}`;
+const alternateLinks = buildAlternateLinks("guideMoneyCheckin");
+
+const articleSchema = {
+	"@context": "https://schema.org",
+	"@type": "Article",
+	headline: leadMagnetGuide.title,
+	description: t("leadMagnetGuide.metaDescription"),
+	url: canonicalUrl,
+	publisher: {
+		"@type": "Organization",
+		name: "WonderMoney",
+		url: "https://wonder.money",
+	},
+};
+---
+
+<ContentLayout
+	title={t("leadMagnetGuide.metaTitle")}
+	description={t("leadMagnetGuide.metaDescription")}
+	canonicalUrl={canonicalUrl}
+	alternateLinks={alternateLinks}
+	locale={locale}
+	breadcrumbs={[{ label: t("leadMagnetGuide.breadcrumbLabel"), href: "#" }]}
+	structuredData={articleSchema}
+>
+	<article>
+		<section>
+			<span class="inline-block rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
+				{t("leadMagnetGuide.breadcrumbLabel")}
+			</span>
+			<h1 class="mt-3 text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
+				{leadMagnetGuide.title}
+			</h1>
+			<p class="mt-4 text-lg leading-8 text-muted-foreground">
+				{leadMagnetGuide.subtitle}
+			</p>
+		</section>
+
+		<div class="prose mt-8 lg:prose-lg">
+			{leadMagnetGuide.intro.map((paragraph) => <p>{paragraph}</p>)}
+		</div>
+
+		<section class="mt-8 rounded-card border border-border bg-paper-2 p-5">
+			<h2 class="text-lg font-semibold text-foreground">
+				{t("leadMagnetGuide.keyTakeawaysTitle")}
+			</h2>
+			<ul class="mt-3 list-disc space-y-2 pl-5 text-sm text-muted-foreground">
+				{leadMagnetGuide.keyTakeaways.map((item) => <li>{item}</li>)}
+			</ul>
+		</section>
+
+		<div class="mt-10 space-y-8">
+			{leadMagnetGuide.sections.map((section) => (
+				<section class="prose lg:prose-lg">
+					<h2>{section.heading}</h2>
+					{section.paragraphs.map((paragraph) => <p>{paragraph}</p>)}
+				</section>
+			))}
+		</div>
+
+		<section class="mt-10 rounded-card border border-border bg-background p-5">
+			<h2 class="text-lg font-semibold text-foreground">{t("leadMagnetGuide.faqTitle")}</h2>
+			<div class="mt-3 space-y-3">
+				{leadMagnetGuide.faqs.map((item) => (
+					<details class="rounded-md border border-border p-3">
+						<summary class="cursor-pointer font-medium text-foreground">{item.question}</summary>
+						<p class="mt-2 text-sm text-muted-foreground">{item.answer}</p>
+					</details>
+				))}
+			</div>
+		</section>
+	</article>
+
+	<div class="mt-8">
+		<CTABanner locale={locale} client:idle />
+	</div>
+</ContentLayout>

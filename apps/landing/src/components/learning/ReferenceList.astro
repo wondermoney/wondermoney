@@ -1,0 +1,63 @@
+---
+type ReferenceItem = {
+	title?: string
+	url?: string
+	publisher?: string
+}
+
+interface Props {
+	title?: string
+	references?: ReadonlyArray<ReferenceItem>
+}
+
+const { title = "References", references = [] } = Astro.props
+
+function getSafeExternalUrl(url?: string): string | null {
+	if (!url) {
+		return null
+	}
+
+	try {
+		const parsed = new URL(url)
+		if (parsed.protocol === "http:" || parsed.protocol === "https:") {
+			return parsed.toString()
+		}
+	} catch {
+		return null
+	}
+
+	return null
+}
+---
+
+<section class="rounded-card border border-border bg-background p-5">
+	<h3 class="text-lg font-semibold text-foreground">{title}</h3>
+	{
+		references.length > 0 ? (
+			<ol class="mt-4 list-decimal space-y-2 pl-5 text-sm text-muted-foreground">
+				{references.map((item) => {
+					const safeUrl = getSafeExternalUrl(item.url)
+
+					return (
+					<li>
+						{safeUrl ? (
+							<a
+								href={safeUrl}
+								target="_blank"
+								rel="noopener noreferrer"
+								class="text-primary underline-offset-2 hover:underline"
+							>
+								{item.title || safeUrl}
+							</a>
+						) : (
+							<span>{item.title || "Untitled reference"}</span>
+						)}
+						{item.publisher && <span class="ml-2 text-muted-foreground">({item.publisher})</span>}
+					</li>
+				)})}
+			</ol>
+		) : (
+			<p class="mt-3 text-sm text-muted-foreground">No references provided.</p>
+		)
+	}
+</section>
