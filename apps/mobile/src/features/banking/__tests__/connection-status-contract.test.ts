@@ -77,6 +77,19 @@ describe('banking connection-status contract', () => {
     expect(parsed.connections).toEqual([])
   })
 
+  it('reads the newest failure for a connection, and accepts a row without one', () => {
+    expect(
+      bankConnectionSchema.parse({ ...newConnection, lastError: { code: 'rate_limited', occurredAt: '2026-07-30T10:00:00.000Z' } }).lastError,
+    ).toEqual({ code: 'rate_limited', occurredAt: '2026-07-30T10:00:00.000Z' })
+    expect(bankConnectionSchema.parse({ ...newConnection, lastError: null }).lastError).toBeNull()
+    expect(bankConnectionSchema.parse(newConnection).lastError).toBeUndefined()
+  })
+
+  it('rejects a lastError without a code or a real timestamp', () => {
+    expect(bankConnectionSchema.safeParse({ ...newConnection, lastError: { code: '', occurredAt: '2026-07-30T10:00:00.000Z' } }).success).toBe(false)
+    expect(bankConnectionSchema.safeParse({ ...newConnection, lastError: { code: 'timeout', occurredAt: 'yesterday' } }).success).toBe(false)
+  })
+
   it('accepts connectionId as a positive int, null, or absent (forward-compatible)', () => {
     expect(bankConnectionSchema.parse({ ...newConnection, connectionId: 42 }).connectionId).toBe(42)
     expect(bankConnectionSchema.parse({ ...newConnection, connectionId: null }).connectionId).toBeNull()
@@ -96,10 +109,10 @@ describe('banking connection-status contract', () => {
     expect(isValidBankConnectionId(1.5)).toBe(false)
   })
 
-  it('exposes the disconnect write endpoint at DELETE /v1/banking/connections/:connectionId', () => {
+  it('exposes the disconnect write endpoint at DELETE /v1/banking/requisition/:connectionId', () => {
     const endpoint = createDisconnectBankConnectionEndpoint(42)
     expect(endpoint.method).toBe('DELETE')
-    expect(endpoint.path).toBe('/v1/banking/connections/42')
+    expect(endpoint.path).toBe('/v1/banking/requisition/42')
   })
 
   it('refuses to build a disconnect endpoint for an invalid connection id', () => {

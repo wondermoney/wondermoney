@@ -1,7 +1,7 @@
 "use client";
 
 import { intlFormatDistance } from "date-fns";
-import { Loader2, RefreshCw, RefreshCwOff } from "lucide-react";
+import { History, Loader2, RefreshCw, RefreshCwOff } from "lucide-react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -24,6 +24,7 @@ import GoCardlessBlackLogo from "@/public/gocardless-black.svg";
 import { Badge } from "../../ui/badge";
 import { Button } from "../../ui/button";
 import BankConnectionUnsyncModal from "../../user/BankConnectionUnsyncModal";
+import SyncHistoryDrawer from "./SyncHistoryDrawer";
 
 function isEnableBankingRequisition(
   requisition: Requisition,
@@ -54,6 +55,10 @@ const ConnectionsTable: React.FC<ConnectionsTableProps> = ({ data }) => {
   const t = useTranslations();
   const [isUnsyncAccountModalOpen, setIsUnsyncAccountModalOpen] =
     useState(false);
+  const [historyConnection, setHistoryConnection] = useState<{
+    connectionId: number;
+    institutionName: string | null;
+  } | null>(null);
   const [selectedRequisitionData, setSelectedRequisitionData] = useState<{
     id: number | null;
     daysLeft: number | null;
@@ -275,6 +280,23 @@ const ConnectionsTable: React.FC<ConnectionsTableProps> = ({ data }) => {
 
         return (
           <div className="flex items-center gap-2">
+            {isEnableBankingRequisition(requisition) ? (
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="gap-1.5"
+                onClick={() =>
+                  setHistoryConnection({
+                    connectionId: requisition.enableBankingConnectionKey,
+                    institutionName: requisition.institution.name,
+                  })
+                }
+              >
+                <History className="size-4" aria-hidden="true" />
+                {t("bank-sync.history.action")}
+              </Button>
+            ) : null}
             {showReconnect ? (
               <Button
                 type="button"
@@ -322,6 +344,14 @@ const ConnectionsTable: React.FC<ConnectionsTableProps> = ({ data }) => {
           }
         />
       ) : null}
+      <SyncHistoryDrawer
+        open={historyConnection !== null}
+        onOpenChange={(open) => {
+          if (!open) setHistoryConnection(null);
+        }}
+        connectionId={historyConnection?.connectionId ?? null}
+        institutionName={historyConnection?.institutionName ?? null}
+      />
     </>
   );
 };

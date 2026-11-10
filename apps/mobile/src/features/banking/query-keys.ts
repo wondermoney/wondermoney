@@ -8,3 +8,6 @@ export const bankInstitutionsKey = (epochId: number, countryCode?: string) =>
 
 export const bankAlertsKey = (epochId: number) =>
   [...bankingRootKey(epochId), 'alerts'] as const
+
+export const bankSyncHistoryKey = (epochId: number, connectionId: number) =>
+  [...bankingRootKey(epochId), 'sync-history', connectionId] as const

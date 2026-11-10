@@ -2,6 +2,8 @@ import * as csv from './csv';
 import * as transactionImport from './import';
 export { csv, transactionImport };
 
+export * from './bank-sync';
+
 // EODHD exports
 export {
   default as Eodhd,

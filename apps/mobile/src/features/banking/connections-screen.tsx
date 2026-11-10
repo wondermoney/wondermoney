@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next'
 import { Alert, RefreshControl, StyleSheet, View } from 'react-native'
+import { bankSyncErrorCopy } from '@wondermoney/shared/bank-sync'
 
 import { Badge, type BadgeTone } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -47,6 +48,8 @@ export type ConnectionsScreenProps = {
   disconnectingConnectionId?: null | number
   disconnectFailure?: ConnectionDisconnectFailureState | null
   onImportStatement?: () => void
+  /** Opens the last 20 sync runs for a connection. */
+  onViewHistory?: (connectionId: number, institutionName: null | string) => void
   /** Starts a new connection to the row's bank; the API keeps the existing accounts. */
   onReconnect?: (bankId: string) => void
   reconnectingBankId?: null | string
@@ -59,7 +62,7 @@ export type ConnectionsScreenProps = {
  * status badge, expiry, freshness, its actions), flat on the canvas with hairlines.
  * Mobile keeps its read-only note, the connect button and the callback notices.
  */
-export function ConnectionsScreen({ state, justStarted, connectionResult, refreshing, onBack, onRetry, onRefresh, onConnectBank, onDisconnect, disconnectingConnectionId, disconnectFailure, onImportStatement, onReconnect, reconnectingBankId, reconnectFailure }: ConnectionsScreenProps) {
+export function ConnectionsScreen({ state, justStarted, connectionResult, refreshing, onBack, onRetry, onRefresh, onConnectBank, onDisconnect, disconnectingConnectionId, disconnectFailure, onImportStatement, onReconnect, onViewHistory, reconnectingBankId, reconnectFailure }: ConnectionsScreenProps) {
   const { t } = useTranslation()
   const palette = usePalette()
 
@@ -134,6 +137,7 @@ export function ConnectionsScreen({ state, justStarted, connectionResult, refres
                   failure={row.connectionId !== null && disconnectFailure?.connectionId === row.connectionId ? disconnectFailure.failure : null}
                   onImportStatement={onImportStatement}
                   onReconnect={onReconnect}
+                  onViewHistory={onViewHistory}
                   reconnecting={row.bankId !== null && row.bankId === reconnectingBankId}
                   reconnectBlocked={Boolean(reconnectingBankId)}
                   reconnectFailure={row.bankId !== null && reconnectFailure?.bankId === row.bankId ? reconnectFailure.failure : null}
@@ -157,7 +161,7 @@ const STATUS_TONE: Record<BankConnectionRow['status'], BadgeTone> = {
   unknown: 'outline',
 }
 
-function ConnectionRow({ row, palette, separated, onDisconnect, disconnecting, failure, onImportStatement, onReconnect, reconnecting, reconnectBlocked, reconnectFailure }: {
+function ConnectionRow({ row, palette, separated, onDisconnect, disconnecting, failure, onImportStatement, onReconnect, onViewHistory, reconnecting, reconnectBlocked, reconnectFailure }: {
   row: BankConnectionRow
   palette: Palette
   separated: boolean
@@ -166,6 +170,7 @@ function ConnectionRow({ row, palette, separated, onDisconnect, disconnecting, f
   failure: BankConnectionDisconnectFailure | null
   onImportStatement?: () => void
   onReconnect?: (bankId: string) => void
+  onViewHistory?: (connectionId: number, institutionName: null | string) => void
   reconnecting: boolean
   reconnectBlocked: boolean
   reconnectFailure: StartBankConnectionFailure | null
@@ -185,6 +190,7 @@ function ConnectionRow({ row, palette, separated, onDisconnect, disconnecting, f
   const connectionId = row.connectionId
   const bankId = row.bankId
   const canReconnect = onReconnect !== undefined && canReconnectRow(row)
+  const canViewHistory = onViewHistory !== undefined && connectionId !== null && row.provider === 'EnableBanking'
   const consentNotice = row.status === 'expiring'
     ? t('banking.connections.consent.expiring', { count: row.daysUntilExpiry ?? 0 })
     : row.status === 'revoked'
@@ -229,6 +235,10 @@ function ConnectionRow({ row, palette, separated, onDisconnect, disconnecting, f
       {/* Outside the summary, whose accessibility label would hide it from screen readers. */}
       {consentNotice ? <Text variant="label">{consentNotice}</Text> : null}
 
+      {row.lastError ? (
+        <Text tone="muted" variant="label">{t(bankSyncErrorCopy(row.lastError.code).messageKey)}</Text>
+      ) : null}
+
       {reconnectFailure ? (
         <Text accessibilityRole="alert" tone="destructive" variant="meta">
           {t(startBankConnectionFailureMessageKey(reconnectFailure))}
@@ -241,8 +251,17 @@ function ConnectionRow({ row, palette, separated, onDisconnect, disconnecting, f
         </Text>
       ) : null}
 
-      {(row.status === 'error' && onImportStatement) || canDisconnect || canReconnect ? (
+      {(row.status === 'error' && onImportStatement) || canDisconnect || canReconnect || canViewHistory ? (
         <View style={styles.actions}>
+          {canViewHistory && connectionId !== null ? (
+            <Button
+              accessibilityLabel={t('bank-sync.history.actionLabel', { institution })}
+              label={t('bank-sync.history.action')}
+              onPress={() => onViewHistory(connectionId, row.institutionName)}
+              size="sm"
+              variant="ghost"
+            />
+          ) : null}
           {canReconnect && bankId !== null ? (
             <Button
               accessibilityLabel={t('banking.connections.reconnect.actionLabel', { institution })}

@@ -203,10 +203,12 @@ describe('DTO mapping (forbidden identifiers are never present)', () => {
       }),
     ];
     const dto = mapRequisition({ ...req, accounts: { getItems: () => accounts } });
-    expect(Object.keys(dto).sort()).toEqual(['accessType', 'bankId', 'dataFreshAsOf', 'daysUntilExpiry', 'expiresAt', 'institutionName', 'provider', 'status']);
+    expect(Object.keys(dto).sort()).toEqual(['accessType', 'bankId', 'connectionId', 'dataFreshAsOf', 'daysUntilExpiry', 'expiresAt', 'institutionName', 'lastError', 'provider', 'status']);
     expect(dto.daysUntilExpiry).toBe(30);
     expect(dto.provider).toBe('GoCardless');
     expect(dto.accessType).toBe('open_banking');
+    expect(dto.connectionId).toBeNull();
+    expect(dto.lastError).toBeNull();
     expect(dto.status).toBe('connected');
     expect(dto.institutionName).toBe('Real Bank');
     expect(dto.expiresAt).toBe(new Date('2026-08-30T12:00:00.000Z').toISOString());
@@ -224,11 +226,14 @@ describe('DTO mapping (forbidden identifiers are never present)', () => {
   });
 });
 
-const baseEnableBankingConnection = (overrides: Partial<{ accessValidUntil: Date | null; aspspName: null | string; status: EnableBankingConnectionStatus }> = {}): EnableBankingInput => ({
+const baseEnableBankingConnection = (overrides: Partial<{ accessValidUntil: Date | null; aspspName: null | string; enableBankingConnectionKey: number; sessionId: null | string; state: string; status: EnableBankingConnectionStatus }> = {}): EnableBankingInput => ({
   accessValidUntil: overrides.accessValidUntil ?? null,
   accounts: { getItems: () => [] as BankingAccount[] },
   aspspCountry: 'PT',
   aspspName: 'aspspName' in overrides ? overrides.aspspName ?? null : 'Test Bank',
+  enableBankingConnectionKey: overrides.enableBankingConnectionKey ?? 42,
+  sessionId: overrides.sessionId ?? 'session-42',
+  state: overrides.state ?? 'state-42',
   status: overrides.status ?? EnableBankingConnectionStatus.LINKED,
 });
 
@@ -299,10 +304,12 @@ describe('Enable Banking DTO mapping', () => {
       status: EnableBankingConnectionStatus.LINKED,
     });
     const dto = mapEnableBankingConnection({ ...connection, accounts: { getItems: () => accounts } });
-    expect(Object.keys(dto).sort()).toEqual(['accessType', 'bankId', 'dataFreshAsOf', 'daysUntilExpiry', 'expiresAt', 'institutionName', 'provider', 'status']);
+    expect(Object.keys(dto).sort()).toEqual(['accessType', 'bankId', 'connectionId', 'dataFreshAsOf', 'daysUntilExpiry', 'expiresAt', 'institutionName', 'lastError', 'provider', 'status']);
     expect(dto.daysUntilExpiry).toBe(30);
     expect(dto.provider).toBe('EnableBanking');
     expect(dto.accessType).toBe('open_banking');
+    expect(dto.connectionId).toBe(42);
+    expect(dto.lastError).toBeNull();
     expect(dto.status).toBe('connected');
     expect(dto.institutionName).toBe('Real Bank');
     expect(dto.expiresAt).toBe(new Date('2026-08-30T12:00:00.000Z').toISOString());
@@ -379,13 +386,11 @@ describe('getBankConnections', () => {
   });
 
   it('includes an Enable Banking connection with correctly mapped fields', async () => {
-    const connection: EnableBankingInput = {
+    const connection = baseEnableBankingConnection({
       accessValidUntil: new Date('2026-08-30T12:00:00.000Z'),
-      accounts: { getItems: () => [] },
-      aspspCountry: 'PT',
       aspspName: 'Enable Bank',
       status: EnableBankingConnectionStatus.LINKED,
-    };
+    });
     mockFind({ enableBankingConnections: [connection] });
     const json = vi.fn();
 
@@ -396,10 +401,12 @@ describe('getBankConnections', () => {
         {
           accessType: 'open_banking',
           bankId: encodeEnableBankingInstitutionId({ country: 'PT', name: 'Enable Bank' }),
+          connectionId: 42,
           dataFreshAsOf: null,
           daysUntilExpiry: 30,
           expiresAt: new Date('2026-08-30T12:00:00.000Z').toISOString(),
           institutionName: 'Enable Bank',
+          lastError: null,
           provider: 'EnableBanking',
           status: 'processing',
         },
@@ -413,12 +420,11 @@ describe('getBankConnections', () => {
       expiresAt: new Date('2026-08-30T12:00:00.000Z'),
       status: NordigenRequisitionStatus.LN,
     };
-    const connection: EnableBankingInput = {
+    const connection = baseEnableBankingConnection({
       accessValidUntil: new Date('2026-08-30T12:00:00.000Z'),
-      accounts: { getItems: () => [] },
       aspspName: 'Enable Bank',
       status: EnableBankingConnectionStatus.LINKED,
-    };
+    });
     mockFind({ enableBankingConnections: [connection], nordigenRequisitions: [requisition] });
     const json = vi.fn();
 

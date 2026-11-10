@@ -13,6 +13,7 @@ const row = (status: BankConnectionRow['status']): BankConnectionRow => ({
   daysUntilExpiry: null,
   expiresAt: null,
   institutionName: 'Test Bank',
+  lastError: null,
   provider: 'GoCardless',
   status,
 })

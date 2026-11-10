@@ -26,6 +26,7 @@ describe('mapBankConnections', () => {
         daysUntilExpiry: null,
         expiresAt: '2026-08-30T12:00:00.000Z',
         institutionName: 'Real Bank',
+        lastError: null,
         provider: 'GoCardless',
         status: 'connected',
       },
@@ -37,6 +38,7 @@ describe('mapBankConnections', () => {
         daysUntilExpiry: null,
         expiresAt: '2026-08-30T12:00:00.000Z',
         institutionName: null,
+        lastError: null,
         provider: 'GoCardless',
         status: 'error',
       },
@@ -65,5 +67,10 @@ describe('mapBankConnections', () => {
   it('normalizes an explicit null connectionId to null', () => {
     const [row] = mapBankConnections([dto({ connectionId: null })])
     expect(row!.connectionId).toBeNull()
+  })
+
+  it('carries the newest failure so the row can say what went wrong', () => {
+    const [row] = mapBankConnections([dto({ lastError: { code: 'rate_limited', occurredAt: '2026-07-30T10:00:00.000Z' } })])
+    expect(row!.lastError).toEqual({ code: 'rate_limited', occurredAt: '2026-07-30T10:00:00.000Z' })
   })
 })

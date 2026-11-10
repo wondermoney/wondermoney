@@ -1,9 +1,12 @@
 import { QueryOrder } from '@mikro-orm/core';
 import type { Request, Response } from 'express';
 
+import { bankConnectionSyncsRequestSchema } from '@app/validators/banking';
+import { zParse } from '@app/validators/parser';
 import { EnableBankingConnection, EnableBankingConnectionStatus } from '@entity/EnableBankingConnection';
 import { NordigenRequisition, NordigenRequisitionStatus } from '@entity/NordigenRequisition';
 import { authedUser } from '@middleware/authed-context';
+import { BankSyncHistoryService, type BankSyncLastError, connectionRequisitionId } from '@service/bank-sync/bank-sync-history.service';
 import { daysUntil, enableBankingConsentOf } from '@service/enable-banking/enable-banking-consent';
 import { encodeEnableBankingInstitutionId } from '@utils/enable-banking-institution-id';
 import { InternalServerError } from '@utils/errors';
@@ -31,11 +34,18 @@ interface BankConnectionDto {
    * longer be connected.
    */
   bankId: null | string;
+  /**
+   * The local connection id `GET /v1/banking/connections/:connectionId/syncs` takes. Null for the
+   * legacy provider, whose history is not exposed.
+   */
+  connectionId: null | number;
   dataFreshAsOf: null | string;
   /** Whole days until the consent ends, 0 once it has ended, null when there is no end date. */
   daysUntilExpiry: null | number;
   expiresAt: null | string;
   institutionName: null | string;
+  /** The newest failure for this connection, or null when it has never failed. */
+  lastError: BankSyncLastError | null;
   provider: typeof ENABLE_BANKING_PROVIDER | typeof PROVIDER;
   status: ConnectionStatus;
 }
@@ -51,6 +61,9 @@ interface OwnedEnableBankingConnection {
   accounts: { getItems: () => AccountWithInstitution[] };
   aspspCountry?: null | string;
   aspspName?: null | string;
+  enableBankingConnectionKey: number;
+  sessionId?: null | string;
+  state: string;
   status: EnableBankingConnectionStatus;
 }
 
@@ -192,15 +205,17 @@ function computeEnableBankingStatus(connection: OwnedEnableBankingConnection, ac
   }
 }
 
-function mapRequisition(req: OwnedRequisition, viewerAppuserKey?: number): BankConnectionDto {
+function mapRequisition(req: OwnedRequisition & { requisitionId?: null | string }, viewerAppuserKey?: number, lastError: BankSyncLastError | null = null): BankConnectionDto {
   const accounts = req.accounts.getItems();
   return {
     accessType: ACCESS_TYPE,
     bankId: null,
+    connectionId: null,
     dataFreshAsOf: computeFreshnessAsOf(accounts),
     daysUntilExpiry: req.status === NordigenRequisitionStatus.LN ? daysUntil(req.expiresAt) : null,
     expiresAt: toIso(req.expiresAt),
     institutionName: resolveInstitutionName(accounts, viewerAppuserKey),
+    lastError,
     provider: PROVIDER,
     status: computeStatus(req, accounts),
   };
@@ -214,17 +229,19 @@ function mapRequisition(req: OwnedRequisition, viewerAppuserKey?: number): BankC
  * own registry, not a raw upstream id, so a direct (blank-guarded) mapping is
  * enough.
  */
-function mapEnableBankingConnection(connection: OwnedEnableBankingConnection): BankConnectionDto {
+function mapEnableBankingConnection(connection: OwnedEnableBankingConnection, lastError: BankSyncLastError | null = null): BankConnectionDto {
   const accounts = connection.accounts.getItems();
   return {
     accessType: ACCESS_TYPE,
     bankId: connection.aspspCountry && !isNullOrBlank(connection.aspspName)
       ? encodeEnableBankingInstitutionId({ country: connection.aspspCountry, name: connection.aspspName ?? '' })
       : null,
+    connectionId: connection.enableBankingConnectionKey,
     dataFreshAsOf: computeFreshnessAsOf(accounts),
     daysUntilExpiry: enableBankingConsentOf(connection).daysUntilExpiry,
     expiresAt: toIso(connection.accessValidUntil),
     institutionName: isNullOrBlank(connection.aspspName) ? null : (connection.aspspName?.trim() ?? null),
+    lastError,
     provider: ENABLE_BANKING_PROVIDER,
     status: computeEnableBankingStatus(connection, accounts),
   };
@@ -240,9 +257,11 @@ function toIso(value: Date | null | undefined): null | string {
  * Read-only, tenant-safe bank-connection status collection.
  *
  * Scopes by `req.tenant + req.user + deletedAt: undefined`, newest-first
- * within each provider's own query. The DTO is the *only* output: no entity
- * identifiers, no provider status payload, no nested entities. Empty list is
- * a 200.
+ * within each provider's own query. The DTO is the *only* output: no provider
+ * status payload and no nested entities. `connectionId` is the caller's own
+ * Enable Banking connection key, needed to open its sync history (and, on
+ * mobile, to disconnect it); it is not a provider identifier. Empty list is a
+ * 200.
  *
  * Like `getRequisitions` in `controller/user.ts`, surfaces `EnableBankingConnection`
  * rows alongside legacy `NordigenRequisition` rows, discriminated by the DTO's
@@ -282,9 +301,43 @@ export async function getBankConnections(req: Request, res: Response) {
       },
     ),
   ]);
+  const history = new BankSyncHistoryService(DI.em);
+  const lastErrorByRequisitionId = await history
+    .getLastErrorByRequisitionId(user, [
+      ...requisitions.map((requisition) => requisition.requisitionId).filter((id): id is string => Boolean(id)),
+      ...enableBankingConnections.map((connection) => connectionRequisitionId(connection)),
+    ])
+    .catch(() => new Map<string, BankSyncLastError>());
   return res.json({
-    connections: [...requisitions.map((requisition) => mapRequisition(requisition, user.appuserKey)), ...enableBankingConnections.map(mapEnableBankingConnection)],
+    connections: [
+      ...requisitions.map((requisition) => mapRequisition(
+        requisition,
+        user.appuserKey,
+        requisition.requisitionId ? lastErrorByRequisitionId.get(requisition.requisitionId) ?? null : null,
+      )),
+      ...enableBankingConnections.map((connection) => mapEnableBankingConnection(
+        connection,
+        lastErrorByRequisitionId.get(connectionRequisitionId(connection)) ?? null,
+      )),
+    ],
   });
+}
+
+/**
+ * The last 20 runs of one bank connection, newest first.
+ *
+ * Owner-only: a connection is per-user, so a partner's connection — or one from
+ * another household — is a 404, not an empty history. See
+ * `BankSyncHistoryService.getConnectionHistory`.
+ */
+export async function getBankConnectionSyncs(req: Request, res: Response) {
+  const user = authedUser(req);
+  if (!req.tenant || !Number.isInteger(req.tenant.tenantKey) || req.tenant.tenantKey <= 0) {
+    throw new InternalServerError('Authenticated tenant is required to read bank sync history');
+  }
+  const { params: { connectionId } } = await zParse(bankConnectionSyncsRequestSchema, req);
+  const syncs = await new BankSyncHistoryService(DI.em).getConnectionHistory(connectionId, user, req.tenant);
+  return res.json({ syncs });
 }
 
 // Test-only helper: exposes the decision rules so the status matrix can be

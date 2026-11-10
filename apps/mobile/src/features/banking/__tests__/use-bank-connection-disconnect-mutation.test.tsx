@@ -25,7 +25,7 @@ describe('useBankConnectionDisconnectMutation', () => {
     const hook = await renderHook(() => useBankConnectionDisconnectMutation(), { wrapper })
     await act(async () => { await hook.result.current.mutateAsync(42) })
     expect(mockWrite).toHaveBeenCalledTimes(1)
-    expect(mockWrite.mock.calls[0][0]).toMatchObject({ method: 'DELETE', path: '/v1/banking/connections/42' })
+    expect(mockWrite.mock.calls[0][0]).toMatchObject({ method: 'DELETE', path: '/v1/banking/requisition/42' })
     expect(mockWrite.mock.calls[0][1].body).toBeUndefined()
     expect(invalidate).toHaveBeenCalledWith({ queryKey: ['banking', 8, 'connections'], exact: true })
     await hook.unmount(); client.clear()

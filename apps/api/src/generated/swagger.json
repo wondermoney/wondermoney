@@ -764,6 +764,26 @@
         }
       }
     },
+    "/v1/banking/connections/{connectionId}/syncs": {
+      "get": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "connectionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/v1/banking/sync/{incidentId}/status": {
       "get": {
         "description": "",

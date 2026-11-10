@@ -4084,5 +4084,54 @@
       "hint": "Convertido à taxa de {{date}}, a mais recente disponível. É atualizado quando chegar uma taxa mais recente.",
       "hintNoDate": "Convertido a uma taxa mais antiga, a mais recente disponível. É atualizado quando chegar uma taxa mais recente."
     }
+  },
+  "bank-sync": {
+    "errors": {
+      "account-phase-failed": "O teu banco não enviou a lista de contas.",
+      "authentication": "O acesso ao teu banco tem de ser configurado novamente.",
+      "cancelled": "A ligação ao banco foi cancelada antes de terminar.",
+      "consent-expired": "O teu acesso a este banco expirou.",
+      "data-validation": "O teu banco enviou dados que não conseguimos ler.",
+      "institution-unavailable": "O teu banco não está disponível neste momento.",
+      "internal": "Algo falhou do nosso lado.",
+      "invalid-requisition": "Esta ligação ao banco já não é válida.",
+      "provider-unavailable": "O teu banco não respondeu.",
+      "queue-unavailable": "Não foi possível iniciar a sincronização.",
+      "rate-limited": "O banco limitou a frequência com que podemos sincronizar.",
+      "timeout": "O teu banco demorou demasiado a responder.",
+      "transaction-phase-failed": "O teu banco não enviou as transações.",
+      "unknown": "A sincronização falhou."
+    },
+    "actions": {
+      "contact-support": "Contactar o suporte",
+      "reconnect": "Voltar a ligar o banco",
+      "wait": "Vamos tentar novamente automaticamente"
+    },
+    "history": {
+      "action": "Histórico de sincronizações",
+      "actionLabel": "Histórico de sincronizações de {{institution}}",
+      "title": "Histórico de sincronizações",
+      "description": "As últimas 20 tentativas de sincronização desta ligação.",
+      "loading": "A carregar o histórico de sincronizações",
+      "error": "Não foi possível carregar o histórico de sincronizações.",
+      "empty": "Ainda não há sincronizações.",
+      "started": "Início",
+      "finished": "Fim",
+      "inProgress": "Em curso",
+      "accounts_one": "{{count}} conta",
+      "accounts_other": "{{count}} contas",
+      "rows_one": "{{count}} transação nova",
+      "rows_other": "{{count}} transações novas",
+      "nextAttempt": "Próxima tentativa {{date}}",
+      "flow": {
+        "initial-add": "Primeira sincronização",
+        "scheduled-refresh": "Sincronização agendada"
+      },
+      "result": {
+        "failed": "Falhou",
+        "full_success": "Concluída",
+        "partial": "Parcialmente concluída"
+      }
+    }
   }
 }
