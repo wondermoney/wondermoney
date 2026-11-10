@@ -51,8 +51,9 @@ Turborepo runs a task only in packages that define it. `build` depends on `build
 ## Branches
 
 - `develop` is the default branch: open pull requests against it. `main` is the release
-  branch; maintainers promote `develop` to it once CI has passed on `develop`'s head. Never
-  push to `main` directly.
+  branch and changes only through the release pull request from `develop`, which
+  `.github/workflows/release-pr.yml` keeps open and current. Merge it with a merge commit
+  (squash and rebase are blocked); merging deploys production. Never push to `main` directly.
 - The API applies pending migrations when it starts. Take a database backup before
   releasing a constraint-changing or destructive migration.
 - Maintainers deploy the hosted instance separately; its hostnames, resource names and

@@ -53,7 +53,7 @@ schema only (data goes in seeders), and `.env` must point at a local database.
 ## Making a change
 
 1. Fork the repository and create a branch from `develop`, the default branch. Open the
-   pull request against `develop` too: `main` only receives promotions from `develop`.
+   pull request against `develop` too: `main` only receives release pull requests from `develop`.
 2. Keep the change focused: one fix or feature per pull request.
 3. Add or update tests for behaviour you change. A good test fails for a reason a user
    would care about; it asserts outcomes, not implementation details.
@@ -65,6 +65,18 @@ schema only (data goes in seeders), and `.env` must point at a local database.
 User-facing text goes through the translation files (English, Portuguese and Spanish);
 please don't hardcode strings. If you can't translate, add the English text and say so
 in the pull request.
+
+## Releasing (maintainers)
+
+1. Use the open pull request titled "Release: develop → main". A workflow
+   (`.github/workflows/release-pr.yml`) opens it on a push to `develop` and keeps its list of
+   changes current; if there is none, open one from `develop` into `main`.
+2. Its required check comes from CI's run on `develop`'s head commit. If it is missing, run CI
+   on `develop` again (Actions, CI, Run workflow).
+3. Merge it with a merge commit; squash and rebase merges are blocked on `main`. Merging
+   deploys production.
+4. Optionally, tag the release to publish the self-hosting images and notes:
+   `gh release create vX.Y.Z --target main --generate-notes`.
 
 ## Leak check
 
