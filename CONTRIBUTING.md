@@ -23,9 +23,22 @@ documentation and features.
   are small and self-contained, a good way to learn the codebase.
 - Issues labelled [`help wanted`](https://github.com/wondermoney/wondermoney/issues?q=is%3Aissue%20is%3Aopen%20label%3A%22help%20wanted%22)
   are well defined and ready for anyone to pick up.
-- Comment on the issue before you start, so two people don't do the same work, and ask
-  there if anything is unclear. If an issue has gone quiet after someone claimed it, feel
-  free to ask whether it is still being worked on.
+- Issues labelled [`ready-for-agent`](https://github.com/wondermoney/wondermoney/issues?q=is%3Aissue%20is%3Aopen%20label%3Aready-for-agent)
+  are fully specified, so you can start straight away, by hand or with AI help (see
+  [Using AI](#using-ai)). Issues labelled [`ready-for-human`](https://github.com/wondermoney/wondermoney/issues?q=is%3Aissue%20is%3Aopen%20label%3Aready-for-human)
+  need a person's judgment, such as a product decision or a third-party account.
+- To claim an issue, comment on it before you start, so two people don't do the same work,
+  and ask there if anything is unclear. If an issue has gone quiet after someone claimed it,
+  feel free to ask whether it is still being worked on.
+
+## Before large or core changes
+
+Some areas hold everyone's data: accounts, transactions, budgets, bank sync, households,
+auth and database migrations. A change there needs an issue with an agreed approach before
+you write code. Open the issue, or comment on an existing one, and wait for a maintainer to
+agree. This saves you a rewrite.
+
+Small fixes, documentation and translations don't need this. Open the pull request directly.
 
 ## Getting set up
 
@@ -61,10 +74,39 @@ schema only (data goes in seeders), and `.env` must point at a local database.
 5. Use a [Conventional Commits](https://www.conventionalcommits.org) subject, such as
    `fix(budget): keep rollover when a category is renamed`.
 6. Open a pull request describing what changed and why, with screenshots for UI changes.
+   The [pull request template](.github/pull_request_template.md) lists what to include.
+
+If `develop` moves on while you work, rebase your branch onto it and force-push:
+`git fetch upstream && git rebase upstream/develop`, where `upstream` is this repository.
 
 User-facing text goes through the translation files (English, Portuguese and Spanish);
 please don't hardcode strings. If you can't translate, add the English text and say so
 in the pull request.
+
+## Using AI
+
+You may use AI tools. We review your contribution, not the tool, and you own it:
+
+- You chose the approach and understand it.
+- You ran the change and the checks yourself.
+- It stays within the issue's scope.
+- You can answer review questions about it.
+
+The same goes for issues. Describe what you did and what you saw. Don't paste a model's scan
+of the code, or findings you haven't checked yourself.
+
+## Money, tenancy and auth
+
+A bug here can get someone's money wrong or show it to the wrong person, so the bar is higher.
+
+- **Write the failing test first**, then the fix. This covers amounts and balances, household
+  scoping, account privacy and sign-in.
+- **Use the existing amount helpers.** In the API, money arithmetic goes through
+  [`apps/api/src/utils/money.ts`](apps/api/src/utils/money.ts); typed or imported amounts are
+  read with `@wondermoney/shared/decimal`. Don't add or round amounts as plain numbers.
+- **Scope every query to the household.** ORM queries get the household filter
+  automatically. Raw SQL, Kysely and query-builder queries skip it, so they need explicit
+  household and account-privacy conditions. Add a test that another household's data stays out.
 
 ## Releasing (maintainers)
 
