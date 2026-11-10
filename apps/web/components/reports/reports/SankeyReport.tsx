@@ -19,6 +19,7 @@ import type {
   SankeyNodeIcon,
 } from "@/components/reports/sankey/sankey-layout";
 import { SankeyChart } from "@/components/reports/sankey/SankeyChart";
+import { UnconvertedAmountsNotice } from "@/components/ui/UnconvertedAmountsNotice";
 import useAccounts, { type Account } from "@/lib/api/account/useAccounts";
 import type { ChildCategory } from "@/lib/api/category/useCategories";
 import useConfigs from "@/lib/api/configs/useConfigs";
@@ -171,6 +172,12 @@ export function SankeyReport() {
           height={chartHeight}
         />
       )}
+      {!isPending && !error ? (
+        <UnconvertedAmountsNotice
+          completeness={data?.completeness}
+          className="mt-3 max-w-prose"
+        />
+      ) : null}
     </ReportCard>
   );
 }
