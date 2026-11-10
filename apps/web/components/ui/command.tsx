@@ -103,6 +103,19 @@ const CommandGroup = React.forwardRef<
 
 CommandGroup.displayName = CommandPrimitive.Group.displayName;
 
+const CommandLoading = React.forwardRef<
+  React.ElementRef<typeof CommandPrimitive.Loading>,
+  React.ComponentPropsWithoutRef<typeof CommandPrimitive.Loading>
+>(({ className, ...props }, ref) => (
+  <CommandPrimitive.Loading
+    ref={ref}
+    className={cn("text-muted-foreground px-3 py-6 text-center text-sm", className)}
+    {...props}
+  />
+));
+
+CommandLoading.displayName = CommandPrimitive.Loading.displayName;
+
 const CommandSeparator = React.forwardRef<
   React.ElementRef<typeof CommandPrimitive.Separator>,
   React.ComponentPropsWithoutRef<typeof CommandPrimitive.Separator>
@@ -155,6 +168,7 @@ export {
   CommandInput,
   CommandItem,
   CommandList,
+  CommandLoading,
   CommandSeparator,
   CommandShortcut,
 };

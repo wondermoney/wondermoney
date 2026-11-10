@@ -1,6 +1,6 @@
 "use client";
 
-import { HelpCircleIcon, SettingsIcon } from "lucide-react";
+import { HelpCircleIcon, SearchIcon, SettingsIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import { Link } from "@/components/ui/Link";
@@ -9,6 +9,7 @@ import { instanceConfig } from "@/lib/instance";
 import { cn } from "@/lib/utils";
 
 import AccountMenu from "./AccountMenu";
+import { openCommandPalette } from "./command-palette-store";
 import Logo from "./Logo";
 import {
   currentChild,
@@ -135,6 +136,22 @@ export default function Sidebar() {
         })}
       </nav>
       <div className="border-border flex flex-col gap-0.5 border-t p-3">
+        <button
+          type="button"
+          onClick={(event) => openCommandPalette(event.currentTarget)}
+          aria-label={`${t("command-palette.footer-cta")} (${t("command-palette.shortcut")})`}
+          aria-keyshortcuts="Meta+K Control+K"
+          className={cn(rowClass, idleRowClass)}
+        >
+          <SearchIcon className="size-5" strokeWidth={1.75} aria-hidden="true" />
+          {t("command-palette.footer-cta")}
+          <span
+            className="text-muted-foreground ml-auto text-xs"
+            aria-hidden="true"
+          >
+            {t("command-palette.shortcut")}
+          </span>
+        </button>
         <Link
           href="/settings"
           aria-current={isWithin(pathname, "/settings") ? "page" : undefined}
