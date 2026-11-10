@@ -86,7 +86,7 @@
     "react-colorful": "^5.6.1",
     "react-day-picker": "^10.0.2",
     "react-dom": "19.3.0",
-    "react-dropzone": "^14.3.8",
+    "react-dropzone": "^20.2.0",
     "react-flagkit": "^2.0.4",
     "react-google-recaptcha-v3": "^1.11.0",
     "react-hook-form": "7.91.0",
