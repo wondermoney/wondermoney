@@ -56,6 +56,11 @@ updates:
       # (typescript-eslint/typescript-eslint#10940). 6.x updates still come through.
       - dependency-name: typescript
         versions: ['7.x']
+      # SheetJS stopped publishing to npm at 0.18.5; fixed releases are only on its CDN, so
+      # packages/shared installs xlsx from a cdn.sheetjs.com tarball URL, which Dependabot can't
+      # update. Bump it by hand: https://cdn.sheetjs.com/ lists releases, and
+      # https://docs.sheetjs.com/docs/getting-started/installation/nodejs the install line.
+      - dependency-name: xlsx
       # React Native's renderer needs its exact React version; both move with the Expo SDK.
       - dependency-name: react
       - dependency-name: react-dom

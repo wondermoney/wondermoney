@@ -37,7 +37,7 @@
     "big.js": "^6.2.1",
     "csv-parse": "^7.0.3",
     "eodhd": "^1.0.1",
-    "xlsx": "^0.18.5"
+    "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz"
   },
   "devDependencies": {
     "@eslint/js": "9.39.5",
