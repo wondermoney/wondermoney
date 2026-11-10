@@ -12,6 +12,7 @@ import { LoanRepaymentLink } from '@entity/LoanRepaymentLink';
 import { Tenant } from '@entity/Tenant';
 import { Transaction } from '@entity/Transaction';
 import { convertAtLatestRate, rateScope } from '@service/currency/exchange-rate';
+import { addMonthsClamped, buildAmortizationSchedule } from '@service/loan/amortization-schedule';
 import {
   calculateLoanProgress,
   calculateNextPaymentDate,
@@ -21,10 +22,10 @@ import {
   validateRepaymentAllocation,
 } from '@service/loan/loan-calculation.service';
 import { scoreLoanRepaymentCandidate } from '@service/loan/loan-repayment-matching.service';
-import { LoanAllocationSource, LoanPaymentFrequency, LoanRateType, LoanStatus } from '@service/loan/loan-types';
+import { LoanAllocationSource, LoanAmortizationMethod, LoanPaymentFrequency, LoanRateType, LoanStatus } from '@service/loan/loan-types';
 import { isSplit } from '@service/transaction/transaction-split.service';
 import { excludeExpired } from '@service/transaction/transaction-status';
-import { BadRequestError, ConflictError, ERROR_CODE } from '@utils/errors';
+import { BadRequestError, ConflictError, ERROR_CODE, UnprocessableEntityError } from '@utils/errors';
 import { big, roundDisplay } from '@utils/money';
 import {
   createLoanSchema,
@@ -40,7 +41,9 @@ import { zParse } from '@validators/parser';
 const TRANSACTION_OUTFLOW_TOLERANCE = 0.01;
 
 interface LoanPatchInput {
+  amortizationMethod?: LoanAmortizationMethod;
   annualInterestRateBps?: number;
+  firstPaymentDate?: Date;
   includeInNetWorth?: boolean;
   maturityDate?: Date;
   name?: string;
@@ -74,7 +77,7 @@ export function assertPrincipalWithinOutstanding(principalAmount: number, outsta
 export function buildLoanUpdatePatch(body: LoanPatchInput) {
   const patch: Record<string, unknown> = {};
   for (const key of [
-    'annualInterestRateBps', 'includeInNetWorth', 'maturityDate', 'name', 'notes', 'openingBalanceDate',
+    'amortizationMethod', 'annualInterestRateBps', 'firstPaymentDate', 'includeInNetWorth', 'maturityDate', 'name', 'notes', 'openingBalanceDate',
     'openingPrincipalBalance', 'originalPrincipal', 'paymentDayOfMonth', 'paymentFrequency', 'providerName',
     'rateType', 'regularPaymentAmount', 'status', 'termMonths', 'type',
   ]) {
@@ -90,8 +93,10 @@ export async function createLoan(req: Request, res: Response) {
   const currency = await DI.em.findOne(Currency, { currencyKey: body.currencyKey });
   if (!currency) throw new BadRequestError('Currency not found');
   const loan = DI.em.create(Loan, {
+    amortizationMethod: body.amortizationMethod ?? LoanAmortizationMethod.FRENCH,
     annualInterestRateBps: body.annualInterestRateBps,
     currencyKey: currency,
+    firstPaymentDate: body.firstPaymentDate,
     includeInNetWorth: body.includeInNetWorth,
     maturityDate: body.maturityDate,
     name: body.name,
@@ -172,6 +177,59 @@ export async function getLoanOverview(req: Request, res: Response) {
       repaymentsNeedingReviewCount: 0,
       totalOutstandingDebt: sum(totals, 'outstandingPrincipal'),
       unconvertedLoanCount: converted.length - totals.length,
+    },
+  });
+}
+
+export async function getLoanSchedule(req: Request, res: Response) {
+  const { params: { loanId } } = await zParse(loanIdParamSchema, req);
+  const { appuser, tenant } = await getLoanRequestContext(req);
+  const loan = await loadOwnedLoan(loanId, appuser, tenant);
+  if (!loan) return res.sendStatus(404);
+
+  // The contract schedule is for the amount originally borrowed; a loan added
+  // part-way through its life still shows the whole contract.
+  const principal = loan.originalPrincipal ?? loan.openingPrincipalBalance;
+  const annualInterestRateBps = loan.annualInterestRateBps;
+  const termMonths = loan.termMonths;
+  const missing = (reason: string) =>
+    new UnprocessableEntityError(
+      'The loan needs a principal, an interest rate and a term to build a schedule',
+      ERROR_CODE.LOAN_SCHEDULE_UNAVAILABLE,
+      { reason },
+    );
+  if (annualInterestRateBps == null) throw missing('MISSING_INTEREST_RATE');
+  if (termMonths == null) throw missing('MISSING_TERM');
+  if (!(principal > 0)) throw missing('MISSING_PRINCIPAL');
+
+  const firstPaymentDate =
+    loan.firstPaymentDate ??
+    addMonthsClamped(loan.openingBalanceDate, 1, loan.paymentDayOfMonth ?? loan.openingBalanceDate.getUTCDate());
+  const schedule = buildAmortizationSchedule({
+    annualInterestRateBps,
+    firstPaymentDate,
+    method: loan.amortizationMethod,
+    principal,
+    termMonths,
+  });
+
+  // A row is paid when a linked repayment falls inside its period: from its own
+  // due date up to (but not including) the next row's.
+  const repayments = await DI.em.find(LoanRepaymentLink, { deletedAt: undefined, loanKey: loan });
+  const rows = schedule.rows.map((row, index) => {
+    const next = schedule.rows[index + 1];
+    const periodEnd = next ? next.date : addMonthsClamped(row.date, 1, row.date.getUTCDate());
+    const paid = repayments.some(
+      (repayment) => repayment.paymentDate.getTime() >= row.date.getTime() && repayment.paymentDate.getTime() < periodEnd.getTime(),
+    );
+    return { ...row, date: row.date.toISOString(), paid };
+  });
+
+  return res.json({
+    schedule: {
+      rows,
+      totalInterest: schedule.totalInterest,
+      totalPaid: schedule.totalPaid,
     },
   });
 }
@@ -365,8 +423,10 @@ export function validateMergedLoanUpdate(
 function buildLoanDto(loan: Loan, computed: Record<string, unknown> = {}) {
   const currency = loan.currencyKey as Currency | undefined;
   return {
+    amortizationMethod: loan.amortizationMethod,
     annualInterestRateBps: loan.annualInterestRateBps,
     currency: currency ? { code: currency.code, currencyKey: currency.currencyKey } : undefined,
+    firstPaymentDate: loan.firstPaymentDate,
     includeInNetWorth: loan.includeInNetWorth,
     loanKey: loan.loanKey,
     maturityDate: loan.maturityDate,

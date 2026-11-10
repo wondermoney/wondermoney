@@ -29,6 +29,8 @@
       "interestRate": "Interest rate",
       "installment": "Monthly installment",
       "termMonths": "Term (months)",
+      "amortizationMethod": "Amortization method",
+      "amortizationMethodHint": "French keeps the payment level; constant principal pays the same principal each month, so the payment falls.",
       "startDate": "Start date",
       "dueDate": "Due date",
       "linkedAccount": "Linked account",
@@ -45,6 +47,10 @@
       "auto": "Auto",
       "student": "Student",
       "other": "Other"
+    },
+    "methods": {
+      "french": "French (level payment)",
+      "constantPrincipal": "Constant principal (SAC)"
     },
     "statuses": {
       "active": "Active",
@@ -144,8 +150,29 @@
         "split": "<principal></principal> principal, <interest></interest> interest, <fees></fees> fees"
       },
       "amortization": {
-        "title": "Amortization preview",
-        "unavailable": "Amortization preview is unavailable with the current API response."
+        "title": "Amortization schedule",
+        "subtitle": "Each payment split into interest and principal, and the balance left after it.",
+        "unavailable": "The amortization schedule is unavailable right now.",
+        "missingInputs": "Add the interest rate and term to see the contract schedule.",
+        "empty": "No schedule rows to show.",
+        "totalInterest": "Total interest",
+        "totalPaid": "Total paid",
+        "principal": "Principal",
+        "interest": "Interest",
+        "balance": "Balance",
+        "paid": "Paid",
+        "scheduled": "Scheduled",
+        "rowLabel": "Payment {number}",
+        "split": "<principal></principal> principal, <interest></interest> interest",
+        "columns": {
+          "number": "#",
+          "date": "Date",
+          "payment": "Payment",
+          "principal": "Principal",
+          "interest": "Interest",
+          "balance": "Balance",
+          "status": "Status"
+        }
       },
       "adjustment": {
         "unavailableTitle": "Balance adjustment unavailable",

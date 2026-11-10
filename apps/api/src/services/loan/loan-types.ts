@@ -13,6 +13,13 @@ export enum LoanAllocationSource {
   MANUAL = 'MANUAL',
 }
 
+export enum LoanAmortizationMethod {
+  /** Constant principal each month; the payment falls as interest falls (SAC). */
+  CONSTANT_PRINCIPAL = 'CONSTANT_PRINCIPAL',
+  /** Level payment; the interest share falls and the principal share rises (Price). */
+  FRENCH = 'FRENCH',
+}
+
 export enum LoanPaymentFrequency {
   MONTHLY = 'MONTHLY',
 }

@@ -6,6 +6,7 @@ import {
   deleteLoanRepayment,
   getLoan,
   getLoanOverview,
+  getLoanSchedule,
   getLoanSummary,
   linkLoanRepayment,
   listLoanRepaymentCandidates,
@@ -21,6 +22,7 @@ router.get('/overview', getLoanOverview);
 router.get('/', listLoans);
 router.post('/', createLoan);
 router.get('/:loanId/summary', getLoanSummary);
+router.get('/:loanId/schedule', getLoanSchedule);
 router.get('/:loanId/repayments', listLoanRepayments);
 router.get('/:loanId/repayment-candidates', listLoanRepaymentCandidates);
 router.post('/:loanId/repayments/link', linkLoanRepayment);
