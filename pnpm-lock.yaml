@@ -365,8 +365,8 @@ importers:
         specifier: ^5.0.1
         version: 5.0.1(express@5.3.0(supports-color@8.1.1))
       uuid:
-        specifier: ^13.0.2
-        version: 13.0.2
+        specifier: ^14.0.3
+        version: 14.0.3
       yazl:
         specifier: ^3.3.1
         version: 3.3.1
@@ -608,7 +608,7 @@ importers:
         version: 1.5.0(@types/react@19.3.0)(react@19.3.0)
       '@sanity/astro':
         specifier: ^3.2.11
-        version: 3.6.1(@sanity/client@7.28.0)(@types/react@19.3.0)(astro@5.18.2(@types/node@26.6.6)(@vercel/functions@2.2.13(@aws-sdk/credential-provider-web-identity@3.972.81))(jiti@2.7.0)(lightningcss@1.33.0)(rollup@4.64.12)(supports-color@8.1.1)(terser@5.51.2)(tsx@4.23.15)(typescript@5.9.3)(yaml@2.9.1))(react-dom@19.3.0(react@19.3.0))(react-is@19.2.4)(react@19.3.0)(styled-components@6.6.0(react-dom@19.3.0(react@19.3.0))(react-native@0.88.1(@babel/core@7.29.7(supports-color@8.1.1))(@types/react@19.3.0)(react@19.3.0)(supports-color@8.1.1))(react@19.3.0))(typescript@5.9.3)(vitest@5.0.5)
+        version: 3.6.0(@sanity/client@7.28.0)(@types/react@19.3.0)(astro@5.18.2(@types/node@26.6.6)(@vercel/functions@2.2.13(@aws-sdk/credential-provider-web-identity@3.972.81))(jiti@2.7.0)(lightningcss@1.33.0)(rollup@4.64.12)(supports-color@8.1.1)(terser@5.51.2)(tsx@4.23.15)(typescript@5.9.3)(yaml@2.9.1))(react-dom@19.3.0(react@19.3.0))(react-is@19.2.4)(react@19.3.0)(styled-components@6.6.0(react-dom@19.3.0(react@19.3.0))(react-native@0.88.1(@babel/core@7.29.7(supports-color@8.1.1))(@types/react@19.3.0)(react@19.3.0)(supports-color@8.1.1))(react@19.3.0))(typescript@5.9.3)(vitest@5.0.5)
       '@sanity/client':
         specifier: ^7.16.0
         version: 7.28.0
@@ -6292,8 +6292,8 @@ packages:
   '@rtsao/scc@1.1.0':
     resolution: {integrity: sha512-zt6OdqaDoOnJ1ZYsCYGt9YmWzDXl4vQdKTyJev62gFhRGKdx7mcT54V9KIjg+d2wi9EXsPvAPKe7i7WjfVWB8g==}
 
-  '@sanity/astro@3.6.1':
-    resolution: {integrity: sha512-scbIRjToheB1aqHFi48a2v1EloAS4tgMMQCXSE0z+lFYRo9YbL9WSUARjt8rXWO1armDWX9/mX7rr7IH8uRI3Q==}
+  '@sanity/astro@3.6.0':
+    resolution: {integrity: sha512-ZP1W0DZMFDTm2yMx7K1LndAUjkknmnG/l9AtdONImAo13kkX2LIm2Gb/1RLJ0Y87jp8PtaIUGBMGwQfFBxPPBQ==}
     engines: {node: '>=20.19.0 || >=22.12.0'}
     peerDependencies:
       '@sanity/client': ^7.28.0 || ^8.11.0
@@ -10061,8 +10061,8 @@ packages:
     resolution: {integrity: sha512-IzUmBGPR3+oUG9dUeXynyNmf91/3zUSJg1lCktzKw47OXuhco54U3r9B7O4XX+Rb1Itm9OZ2b0RkTs10bICOxA==}
     engines: {node: '>=12.0.0'}
 
-  eventsource@5.1.5:
-    resolution: {integrity: sha512-Z41ZPzy7CM1NgAKgrG6pzPdOSimaly20ZY3+6opMQw/VEso+xhPWX4asJT2WAX8zPyFitV3C1+WJMWSLKSlAWg==}
+  eventsource@5.1.4:
+    resolution: {integrity: sha512-awkjURTcaMUKjtEqM/78nMtFSfGcgGST6EbXGV2/E7LJXzWwnNaByn1zACiX9VluWzokVeHpjRdzo3nZr9zhMg==}
     engines: {node: '>=22.12.0'}
 
   execa@4.1.0:
@@ -15136,10 +15136,6 @@ packages:
     resolution: {integrity: sha512-vIYxrBCC/N/K+Js3qSN88go7kIfNPssr/hHCesKCQNAjmgvYS2oqr69kIufEG+O4+PfezOH4EbIeHCfFov8ZgQ==}
     hasBin: true
 
-  uuid@13.0.2:
-    resolution: {integrity: sha512-vzi9uRZ926x4XV73S/4qQaTwPXM2JBj6/6lI/byHH1jOpCzb0zDbfytgA9LcN/hzb2l7WQSQnxITOVx5un/wGw==}
-    hasBin: true
-
   uuid@14.0.3:
     resolution: {integrity: sha512-Sc5u1VVln93y1Xnz4R+CunOZc7R9LUcTmhj7Rc7Eg3HVcf7rVn2FOoa812fe0W8p3jD7xeoGSYbfqCGGH2B6xw==}
     hasBin: true
@@ -15704,8 +15700,8 @@ packages:
   xmlchars@2.2.0:
     resolution: {integrity: sha512-JZnDKK8B0RCDw84FNdDAIpZK+JuJw+s7Lz8nksI7SIuU3UXJJslUthsi+uWBUYOwPFwW7W7PRLRfUKpxjtjFCw==}
 
-  xstate@5.33.4:
-    resolution: {integrity: sha512-eGNMu3BNqU0Z85P+ouYG5OCZqIABU+QsW6vUieFt9p9gOGs3C+BL10Exg7XdRPSXPQKlP6XoYpYf93r9VmW8mQ==}
+  xstate@5.33.3:
+    resolution: {integrity: sha512-AnDRjS/GyKHmbA1PyhVCYBqYsA7EGe3KGgeD0ht3NFsXzoz7leX/HQDFX9QlHFJ/ltLHPsgChJYwPzRvB/0b4g==}
 
   xtend@4.0.2:
     resolution: {integrity: sha512-LKYU1iAXJXUgAXn9URjiu+MWhyUXHsvfp7mcuYm9dSUKK0/CjtrUwFAxD82/mCWbtLsGjFIad0wIsod4zrTAEQ==}
@@ -16277,7 +16273,7 @@ snapshots:
       '@aws-sdk/core': 3.980.1
       '@aws-sdk/types': 3.975.0
       '@smithy/core': 3.39.0
-      '@smithy/types': 4.19.0
+      '@smithy/types': 4.20.0
       tslib: 2.8.1
 
   '@aws-sdk/credential-provider-http@3.972.84':
@@ -16287,7 +16283,7 @@ snapshots:
       '@smithy/core': 3.39.0
       '@smithy/fetch-http-handler': 5.8.0
       '@smithy/node-http-handler': 4.14.2
-      '@smithy/types': 4.19.0
+      '@smithy/types': 4.20.0
       tslib: 2.8.1
 
   '@aws-sdk/credential-provider-ini@3.973.27':
@@ -16303,7 +16299,7 @@ snapshots:
       '@aws-sdk/types': 3.975.0
       '@smithy/core': 3.39.0
       '@smithy/credential-provider-imds': 4.5.2
-      '@smithy/types': 4.19.0
+      '@smithy/types': 4.20.0
       tslib: 2.8.1
 
   '@aws-sdk/credential-provider-login@3.972.89':
@@ -16312,7 +16308,7 @@ snapshots:
       '@aws-sdk/nested-clients': 3.998.1
       '@aws-sdk/types': 3.975.0
       '@smithy/core': 3.39.0
-      '@smithy/types': 4.19.0
+      '@smithy/types': 4.20.0
       tslib: 2.8.1
 
   '@aws-sdk/credential-provider-node@3.972.87':
@@ -16349,7 +16345,7 @@ snapshots:
       '@aws-sdk/core': 3.980.1
       '@aws-sdk/types': 3.975.0
       '@smithy/core': 3.39.0
-      '@smithy/types': 4.19.0
+      '@smithy/types': 4.20.0
       tslib: 2.8.1
 
   '@aws-sdk/credential-provider-sso@3.973.26':
@@ -16359,7 +16355,7 @@ snapshots:
       '@aws-sdk/token-providers': 3.1164.0
       '@aws-sdk/types': 3.975.0
       '@smithy/core': 3.39.0
-      '@smithy/types': 4.19.0
+      '@smithy/types': 4.20.0
       tslib: 2.8.1
 
   '@aws-sdk/credential-provider-web-identity@3.972.81':
@@ -16378,7 +16374,7 @@ snapshots:
       '@aws-sdk/nested-clients': 3.998.1
       '@aws-sdk/types': 3.975.0
       '@smithy/core': 3.39.0
-      '@smithy/types': 4.19.0
+      '@smithy/types': 4.20.0
       tslib: 2.8.1
 
   '@aws-sdk/middleware-sdk-s3@3.972.87':
@@ -16398,7 +16394,7 @@ snapshots:
       '@smithy/core': 3.39.0
       '@smithy/fetch-http-handler': 5.8.0
       '@smithy/node-http-handler': 4.14.2
-      '@smithy/types': 4.19.0
+      '@smithy/types': 4.20.0
       tslib: 2.8.1
 
   '@aws-sdk/s3-request-presigner@3.1164.0':
@@ -16423,7 +16419,7 @@ snapshots:
       '@aws-sdk/nested-clients': 3.998.1
       '@aws-sdk/types': 3.975.0
       '@smithy/core': 3.39.0
-      '@smithy/types': 4.19.0
+      '@smithy/types': 4.20.0
       tslib: 2.8.1
 
   '@aws-sdk/types@3.975.0':
@@ -20558,7 +20554,7 @@ snapshots:
 
   '@rtsao/scc@1.1.0': {}
 
-  '@sanity/astro@3.6.1(@sanity/client@7.28.0)(@types/react@19.3.0)(astro@5.18.2(@types/node@26.6.6)(@vercel/functions@2.2.13(@aws-sdk/credential-provider-web-identity@3.972.81))(jiti@2.7.0)(lightningcss@1.33.0)(rollup@4.64.12)(supports-color@8.1.1)(terser@5.51.2)(tsx@4.23.15)(typescript@5.9.3)(yaml@2.9.1))(react-dom@19.3.0(react@19.3.0))(react-is@19.2.4)(react@19.3.0)(styled-components@6.6.0(react-dom@19.3.0(react@19.3.0))(react-native@0.88.1(@babel/core@7.29.7(supports-color@8.1.1))(@types/react@19.3.0)(react@19.3.0)(supports-color@8.1.1))(react@19.3.0))(typescript@5.9.3)(vitest@5.0.5)':
+  '@sanity/astro@3.6.0(@sanity/client@7.28.0)(@types/react@19.3.0)(astro@5.18.2(@types/node@26.6.6)(@vercel/functions@2.2.13(@aws-sdk/credential-provider-web-identity@3.972.81))(jiti@2.7.0)(lightningcss@1.33.0)(rollup@4.64.12)(supports-color@8.1.1)(terser@5.51.2)(tsx@4.23.15)(typescript@5.9.3)(yaml@2.9.1))(react-dom@19.3.0(react@19.3.0))(react-is@19.2.4)(react@19.3.0)(styled-components@6.6.0(react-dom@19.3.0(react@19.3.0))(react-native@0.88.1(@babel/core@7.29.7(supports-color@8.1.1))(@types/react@19.3.0)(react@19.3.0)(supports-color@8.1.1))(react@19.3.0))(typescript@5.9.3)(vitest@5.0.5)':
     dependencies:
       '@sanity/client': 7.28.0
       '@sanity/visual-editing': 6.2.0(@sanity/client@7.28.0)(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(styled-components@6.6.0(react-dom@19.3.0(react@19.3.0))(react-native@0.88.1(@babel/core@7.29.7(supports-color@8.1.1))(@types/react@19.3.0)(react@19.3.0)(supports-color@8.1.1))(react@19.3.0))(typescript@5.9.3)(vitest@5.0.5)
@@ -20583,7 +20579,7 @@ snapshots:
 
   '@sanity/client@8.15.0(vitest@5.0.5)':
     dependencies:
-      eventsource: 5.1.5
+      eventsource: 5.1.4
       get-it: 9.7.0(vitest@5.0.5)
       obug: 3.0.0
       rxjs: 7.8.2
@@ -20596,7 +20592,7 @@ snapshots:
     dependencies:
       rxjs: 7.8.2
       uuid: 14.0.3
-      xstate: 5.33.4
+      xstate: 5.33.3
 
   '@sanity/diff-match-patch@3.2.1': {}
 
@@ -20619,7 +20615,7 @@ snapshots:
     dependencies:
       '@sanity/types': 6.22.0(@types/react@19.3.0)(vitest@5.0.5)
 
-  '@sanity/mutate@0.18.2(vitest@5.0.5)(xstate@5.33.4)':
+  '@sanity/mutate@0.18.2(vitest@5.0.5)(xstate@5.33.3)':
     dependencies:
       '@isaacs/ttlcache': 2.1.5
       '@sanity/client': 8.15.0(vitest@5.0.5)
@@ -20631,7 +20627,7 @@ snapshots:
       nanoid: 5.1.16
       rxjs: 7.8.2
     optionalDependencies:
-      xstate: 5.33.4
+      xstate: 5.33.3
     transitivePeerDependencies:
       - vitest
 
@@ -20640,7 +20636,7 @@ snapshots:
       '@sanity/client': 7.28.0
       '@sanity/comlink': 4.0.3
       '@sanity/visual-editing-types': 2.1.1(@sanity/client@7.28.0)(@sanity/types@6.22.0(@types/react@19.3.0)(vitest@5.0.5))
-      xstate: 5.33.4
+      xstate: 5.33.3
     transitivePeerDependencies:
       - '@sanity/types'
 
@@ -20702,7 +20698,7 @@ snapshots:
     dependencies:
       '@sanity/comlink': 4.0.3
       '@sanity/icons': 5.3.0(react@19.3.0)
-      '@sanity/mutate': 0.18.2(vitest@5.0.5)(xstate@5.33.4)
+      '@sanity/mutate': 0.18.2(vitest@5.0.5)(xstate@5.33.3)
       '@sanity/presentation-comlink': 2.2.3(@sanity/types@6.22.0(@types/react@19.3.0)(vitest@5.0.5))
       '@sanity/preview-url-secret': 4.1.5(@sanity/client@7.28.0)
       '@sanity/types': 6.22.0(@types/react@19.3.0)(vitest@5.0.5)
@@ -20718,7 +20714,7 @@ snapshots:
       rxjs: 7.8.2
       scroll-into-view-if-needed: 3.1.0
       styled-components: 6.6.0(react-dom@19.3.0(react@19.3.0))(react-native@0.88.1(@babel/core@7.29.7(supports-color@8.1.1))(@types/react@19.3.0)(react@19.3.0)(supports-color@8.1.1))(react@19.3.0)
-      xstate: 5.33.4
+      xstate: 5.33.3
     optionalDependencies:
       '@sanity/client': 7.28.0
     transitivePeerDependencies:
@@ -21187,8 +21183,8 @@ snapshots:
 
   '@smithy/credential-provider-imds@4.5.2':
     dependencies:
-      '@smithy/core': 3.36.0
-      '@smithy/types': 4.19.0
+      '@smithy/core': 3.39.0
+      '@smithy/types': 4.20.0
       tslib: 2.8.1
 
   '@smithy/fetch-http-handler@5.8.0':
@@ -25025,7 +25021,7 @@ snapshots:
 
   eventsource@2.0.2: {}
 
-  eventsource@5.1.5:
+  eventsource@5.1.4:
     dependencies:
       eventsource-parser: 4.1.3
 
@@ -31311,8 +31307,6 @@ snapshots:
 
   uuid@11.1.1: {}
 
-  uuid@13.0.2: {}
-
   uuid@14.0.3: {}
 
   uuid@7.0.3: {}
@@ -31981,7 +31975,7 @@ snapshots:
 
   xmlchars@2.2.0: {}
 
-  xstate@5.33.4: {}
+  xstate@5.33.3: {}
 
   xtend@4.0.2: {}
 

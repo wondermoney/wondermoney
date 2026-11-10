@@ -109,7 +109,7 @@
     "posthog-node": "^5.28.0",
     "resend": "^6.34.1",
     "swagger-ui-express": "^5.0.1",
-    "uuid": "^13.0.2",
+    "uuid": "^14.0.3",
     "yazl": "^3.3.1",
     "zod": "^4.6.7",
     "zod-validation-error": "^5.0.0"
