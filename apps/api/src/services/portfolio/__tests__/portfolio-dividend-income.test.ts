@@ -15,6 +15,7 @@ vi.mock('@app/app', async () => ({ DI: (await import('@app/database/di')).DI }))
 vi.mock('../stock-split-sync.service', async (importOriginal) => ({ ...(await importOriginal<object>()), syncStockSplitsForAsset: vi.fn() }));
 
 import portfolioHoldingsService from '../portfolio-holdings.service';
+import { loadCashFlowsInViewerCurrency } from '../portfolio-period-performance';
 import portfolioTransactionService from '../portfolio-transaction.service';
 
 /*
@@ -156,6 +157,50 @@ describe('portfolio dividend income', () => {
       expect(income.totalDividends).toBe(30);
       expect(income.byAsset).toEqual([expect.objectContaining({ symbol: 'AAPL', totalDividends: 30 })]);
       expect(income.completeness).toEqual({ currencyCode: 'EUR', isComplete: false, unconvertedCurrencies: ['USD'], unconvertedTransactions: 1 });
+    });
+
+    describe('as investment cash flows (money-weighted returns, period performance)', () => {
+      /** The dividends' cash flows in the viewer's currency, summed as the returns read them (NaN if one has no rate). */
+      async function dividendFlowTotal(viewer: Appuser, household: Household) {
+        const recorded = await portfolioHoldingsService.getInvestmentCashFlows(viewer, household.tenant.tenantKey);
+        const flows = await loadCashFlowsInViewerCurrency(recorded, viewer.currencyKey.code, new Date(0));
+        return flows.filter((flow) => flow.kind === 'DIVIDEND').reduce((sum, flow) => sum + (flow.amount ?? Number.NaN), 0);
+      }
+
+      it('count each dividend at the same amount as dividend income, for the partner in dollars', async () => {
+        const { em, eur, household, partner, usd, ...setup } = await mixedHousehold();
+        const gbp = await em.findOne(Currency, { code: 'GBP' }) ?? em.create(Currency, { code: 'GBP', num: '826' }, { partial: true });
+        await em.flush();
+        await addExchangeRate(em, gbp, usd, '2026-07-15', 1.3);
+        await addExchangeRate(em, eur, usd, '2026-07-15', 1.2);
+        // The owner's: 50 USD stored as 45 EUR (exact: 50, not 54); 10 GBP stored as 11 EUR (13, not
+        // 13.2); 15 EUR (18). The partner's own: 20 USD.
+        await addDividend(em, household, { em, usd, ...setup }, { amount: 50, day: '2026-07-15', member: setup.appuser, memberAmount: 45, settlement: usd });
+        await addDividend(em, household, { em, usd, ...setup }, { amount: 10, day: '2026-07-15', member: setup.appuser, memberAmount: 11, settlement: gbp });
+        await addDividend(em, household, { em, usd, ...setup }, { amount: 15, day: '2026-07-15', member: setup.appuser, settlement: eur });
+        await addDividend(em, household, { em, usd, ...setup }, { amount: 20, day: '2026-07-15', member: partner, settlement: usd });
+
+        const income = await portfolioHoldingsService.getDividendIncome(partner, undefined, household.tenant.tenantKey);
+        const flowTotal = await dividendFlowTotal(partner, household);
+
+        expect(income.totalDividends).toBe(101);
+        expect(flowTotal).toBeCloseTo(101, 8);
+      });
+
+      it('count each dividend at the same amount as dividend income, for the owner in euros', async () => {
+        const { em, eur, household, partner, usd, ...setup } = await mixedHousehold();
+        await addExchangeRate(em, usd, eur, '2026-07-15', 0.9);
+        // The partner's 100 USD, the owner's 50 USD stored as 45 EUR, the owner's 30 EUR.
+        await addDividend(em, household, { em, usd, ...setup }, { amount: 100, day: '2026-07-15', member: partner, settlement: usd });
+        await addDividend(em, household, { em, usd, ...setup }, { amount: 50, day: '2026-07-15', member: setup.appuser, memberAmount: 45, settlement: usd });
+        await addDividend(em, household, { em, usd, ...setup }, { amount: 30, day: '2026-07-15', member: setup.appuser, settlement: eur });
+
+        const income = await portfolioHoldingsService.getDividendIncome(setup.appuser, undefined, household.tenant.tenantKey);
+        const flowTotal = await dividendFlowTotal(setup.appuser, household);
+
+        expect(income.totalDividends).toBe(165);
+        expect(flowTotal).toBeCloseTo(165, 8);
+      });
     });
 
     it('converts a foreign dividend stored with no converted amount from its settlement currency', async () => {

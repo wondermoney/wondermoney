@@ -8,6 +8,7 @@ import { RecurringOccurrence } from '@entity/RecurringOccurrence';
 import { RecurringSeries } from '@entity/RecurringSeries';
 import { Tenant } from '@entity/Tenant';
 import { Transaction } from '@entity/Transaction';
+import { isDateOnlyTransactionDate } from '@service/transaction/transaction-date-range';
 import { excludeExpired } from '@service/transaction/transaction-status';
 
 import { classifyAmountType, detectCadence, inferRecurringSeriesType, normalizeRecurringMerchant, scoreRecurringCandidate } from './recurring-detection.utils';
@@ -69,6 +70,7 @@ interface TransactionWithDate extends TransactionLike {
 }
 
 const RECENT_DAYS_THRESHOLD = 60;
+const DAY_MS = 24 * 60 * 60 * 1000;
 
 export function buildRecurringCandidatesFromTransactions(transactions: TransactionLike[], options: BuildRecurringCandidatesOptions = {}): RecurringCandidate[] {
   const referenceDate = options.referenceDate ?? new Date();
@@ -110,7 +112,7 @@ export function buildRecurringCandidatesFromTransactions(transactions: Transacti
     const firstSeenAt = firstTransaction.transactionDate;
     const lastSeenAt = lastTransaction.transactionDate;
     const transactionKeys = sorted.map((transaction) => transaction.transactionKey);
-    const seenRecently = referenceDate.getTime() - lastSeenAt.getTime() <= RECENT_DAYS_THRESHOLD * 24 * 60 * 60 * 1000;
+    const seenRecently = referenceDate.getTime() - lastSeenAt.getTime() <= RECENT_DAYS_THRESHOLD * DAY_MS;
     const confidenceScore = scoreRecurringCandidate({
       amountType,
       hasKnownCadence: true,
@@ -394,9 +396,17 @@ function getNextCadenceDate(lastSeenAt: Date, cadence: RecurringCadence): Date {
   }
 }
 
+/**
+ * The first cadence date after `lastSeenAt` that is not over at `referenceDate`. A date-only
+ * booking (UTC midnight, see `transaction-date-range.ts`) recurs as a date: the cadence steps in
+ * UTC days and months, so it stays on its date, and an expected date stays the next one until that
+ * whole date has passed (in UTC: detection runs with no viewer's calendar), not from its first
+ * instant. Any other date is over once its instant has passed.
+ */
 function getNextExpectedAt(lastSeenAt: Date, cadence: RecurringCadence, referenceDate: Date): Date {
+  const isOver = (date: Date) => (isDateOnlyTransactionDate(date) ? date.getTime() + DAY_MS <= referenceDate.getTime() : date.getTime() < referenceDate.getTime());
   let next = getNextCadenceDate(lastSeenAt, cadence);
-  while (next.getTime() < referenceDate.getTime()) {
+  while (isOver(next)) {
     next = getNextCadenceDate(next, cadence);
   }
   return next;

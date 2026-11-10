@@ -3,6 +3,10 @@ import type { ReactNode } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import type { RecurringItem } from "@/lib/api/recurring/useRecurringItems";
 import { cn } from "@/lib/utils";
+import {
+  transactionDateEnd,
+  transactionDisplayDate,
+} from "@/lib/utils/transaction-date";
 
 import { RecurringAmountDisplay } from "./RecurringAmountDisplay";
 import {
@@ -31,10 +35,10 @@ export interface RecurringUpcomingTimelineProps {
 
 const compareDate = (left: RecurringItem, right: RecurringItem) => {
   const leftTime = left.nextExpectedAt
-    ? new Date(left.nextExpectedAt).getTime()
+    ? transactionDisplayDate(left.nextExpectedAt).getTime()
     : Number.POSITIVE_INFINITY;
   const rightTime = right.nextExpectedAt
-    ? new Date(right.nextExpectedAt).getTime()
+    ? transactionDisplayDate(right.nextExpectedAt).getTime()
     : Number.POSITIVE_INFINITY;
   return leftTime - rightTime;
 };
@@ -55,10 +59,12 @@ export function RecurringUpcomingTimeline({
   referenceTime = Number.NEGATIVE_INFINITY,
   className,
 }: RecurringUpcomingTimelineProps) {
+  // Still to come: a date-only expected date (a bank booking's) until its own day is over on the
+  // viewer's calendar, any other until its instant.
   const orderedItems = items
     .filter((item) => {
       if (!item.nextExpectedAt) return false;
-      const timestamp = new Date(item.nextExpectedAt).getTime();
+      const timestamp = transactionDateEnd(item.nextExpectedAt).getTime();
       return Number.isFinite(timestamp) && timestamp > referenceTime;
     })
     .sort(compareDate);
@@ -75,7 +81,7 @@ export function RecurringUpcomingTimeline({
         <ul className="space-y-0">
           {orderedItems.map((item, index) => {
             const nextExpectedAt = item.nextExpectedAt
-              ? new Date(item.nextExpectedAt)
+              ? transactionDisplayDate(item.nextExpectedAt)
               : null;
             const dateLabel = nextExpectedAt ? formatDate(nextExpectedAt) : "—";
 

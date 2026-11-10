@@ -94,6 +94,47 @@ describe('recurring detection service', () => {
     expect(candidate?.nextExpectedAt).toEqual(new Date('2026-08-05'));
   });
 
+  describe('a date-only booking (a bank date, stored at UTC midnight)', () => {
+    const monthlyBookings = [
+      tx({ transactionDate: new Date('2026-08-05T00:00:00.000Z'), transactionKey: 1 }),
+      tx({ transactionDate: new Date('2026-09-05T00:00:00.000Z'), transactionKey: 2 }),
+      tx({ transactionDate: new Date('2026-10-05T00:00:00.000Z'), transactionKey: 3 }),
+    ];
+
+    it('is expected again on its own date while that day lasts, not skipped to the next cadence', () => {
+      const [candidate] = buildRecurringCandidatesFromTransactions(monthlyBookings, { referenceDate: new Date('2026-11-05T15:00:00.000Z') });
+
+      expect(candidate?.lastSeenAt).toEqual(new Date('2026-10-05T00:00:00.000Z'));
+      expect(candidate?.nextExpectedAt).toEqual(new Date('2026-11-05T00:00:00.000Z'));
+    });
+
+    it('moves on once its expected day is over', () => {
+      const [candidate] = buildRecurringCandidatesFromTransactions(monthlyBookings, { referenceDate: new Date('2026-11-06T00:30:00.000Z') });
+
+      expect(candidate?.nextExpectedAt).toEqual(new Date('2026-12-05T00:00:00.000Z'));
+    });
+
+    it('keeps the series on its date when an update rolls it forward', async () => {
+      const existing = { cadence: RecurringCadence.monthly, nextExpectedAt: new Date('2026-10-05T00:00:00.000Z'), recurringSeriesKey: 9, status: RecurringSeriesStatus.confirmed };
+      mocks.find.mockResolvedValueOnce(monthlyBookings);
+      mocks.findOne.mockResolvedValue(existing);
+
+      await detectRecurringCandidatesForTenant(1, { referenceDate: new Date('2026-11-05T23:00:00.000Z') });
+
+      expect(existing.nextExpectedAt).toEqual(new Date('2026-11-05T00:00:00.000Z'));
+    });
+  });
+
+  it('rolls a booking with a real time forward once its expected instant has passed', () => {
+    const [candidate] = buildRecurringCandidatesFromTransactions([
+      tx({ transactionDate: new Date('2026-08-05T09:00:00.000Z'), transactionKey: 1 }),
+      tx({ transactionDate: new Date('2026-09-05T09:00:00.000Z'), transactionKey: 2 }),
+      tx({ transactionDate: new Date('2026-10-05T09:00:00.000Z'), transactionKey: 3 }),
+    ], { referenceDate: new Date('2026-11-05T10:00:00.000Z') });
+
+    expect(candidate?.nextExpectedAt).toEqual(new Date('2026-12-05T09:00:00.000Z'));
+  });
+
   it('uses appuser amount with appuser currency when present', () => {
     const candidates = buildRecurringCandidatesFromTransactions([
       { appuserCurrencyKey: { currencyKey: 3 }, appuserSettlementAmount: -9.99, description: 'Spotify', settlementAmount: -10.99, settlementCurrencyKey: { currencyKey: 2 }, transactionDate: new Date('2026-01-05'), transactionKey: 1 },
