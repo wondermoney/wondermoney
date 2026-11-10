@@ -170,7 +170,7 @@ class PortfolioMetricsService {
     // metrics that read it unknown.
     const hasInvalidHoldings = currentHoldings.some((holding) => holding.isInvalid);
     const viewerCurrency = await resolveViewerCurrency(appuser);
-    const recorded = hasInvalidHoldings ? [] : await portfolioHoldingsService.getInvestmentCashFlows(appuser.appuserKey, tenantKey);
+    const recorded = hasInvalidHoldings ? [] : await portfolioHoldingsService.getInvestmentCashFlows(appuser, tenantKey);
     const cashFlows = await loadCashFlowsInViewerCurrency(recorded, viewerCurrency, new Date(0));
 
     // Annual yield: money-weighted over every dated buy, sale and dividend, so later

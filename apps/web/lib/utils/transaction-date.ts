@@ -31,3 +31,15 @@ export function transactionDisplayDate(value: Date | string): Date {
   if (!isDateOnlyTransactionDate(date)) return date;
   return new Date(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate());
 }
+
+/**
+ * The last instant a transaction date covers, in local time: the end of its own day for a
+ * date-only booking, its instant otherwise. For "still to come" checks, so a payment expected on
+ * a date stays upcoming all that day. An invalid date for a value that is not one.
+ */
+export function transactionDateEnd(value: Date | string): Date {
+  const date = transactionDisplayDate(value);
+  if (!isDateOnlyTransactionDate(value)) return date;
+  date.setHours(23, 59, 59, 999);
+  return date;
+}

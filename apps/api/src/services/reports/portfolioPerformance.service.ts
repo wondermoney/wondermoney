@@ -75,7 +75,7 @@ export async function getPortfolioPerformanceReport(input: ReportServiceInput, n
 
   const rows: PortfolioPerformanceRow[] = [];
   for (const portfolio of portfolios) {
-    const recorded = await portfolioHoldingsService.getInvestmentCashFlows(user.appuserKey, tenant.tenantKey, portfolio.portfolioKey);
+    const recorded = await portfolioHoldingsService.getInvestmentCashFlows(user, tenant.tenantKey, portfolio.portfolioKey);
     const startSnapshot = await findSnapshotPointOnOrBefore(portfolio.portfolioKey, fromDate, currency);
     const flows = await loadCashFlowsInViewerCurrency(recorded, currency, periodFlowsSince(fromDate, startSnapshot));
     const endSnapshot = liveValues ? null : await findSnapshotPointOnOrBefore(portfolio.portfolioKey, toDate, currency);
