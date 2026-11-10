@@ -240,6 +240,29 @@
     "unconvertedCurrencies": "Ainda não há taxa de câmbio para {{currencies}}."
   },
   "home": {
+    "customize": {
+      "action": "Personalizar",
+      "title": "Personalizar início",
+      "description": "Escolha o que aparece no seu início e em que ordem.",
+      "back": "Voltar ao início",
+      "sections": {
+        "net-worth": "Património",
+        "this-month": "Este mês",
+        "balance-sheet": "Balanço",
+        "cashflow": "Fluxo de caixa líquido",
+        "loans": "Empréstimos",
+        "latest-transactions": "Últimas transações"
+      },
+      "moveUp": "Mover {{section}} para cima",
+      "moveDown": "Mover {{section}} para baixo",
+      "pinned": "Aparece sempre primeiro",
+      "reset": "Repor predefinição",
+      "saving": "A guardar…",
+      "saveError": "Não foi possível guardar. Tente novamente.",
+      "retry": "Tentar novamente",
+      "loadError": "Não foi possível carregar o seu início.",
+      "loading": "A carregar o seu início"
+    },
     "netWorth": {
       "title": "Património",
       "since": "desde o fim de {{month}}",

@@ -12,3 +12,4 @@ export * as EodhdTypes from './services/eodhd/types';
 
 export * from './entities';
 export * from './decimal';
+export * from './dashboard-layout';

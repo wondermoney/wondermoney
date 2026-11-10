@@ -48,6 +48,25 @@ jest.mock('@/features/banking/use-bank-alerts', () => ({
   useBankAlertBanner: () => ({ banner: mockBankAlertBanner, dismiss: mockDismissBankAlert, refetch: jest.fn() }),
 }))
 jest.mock('./use-setup-checklist-dismissal', () => ({ useSetupChecklistDismissal: () => ({ dismissed: mockDismissed, dismiss: mockDismiss }) }))
+jest.mock('@/features/preferences/use-dashboard-layout', () => ({
+  useDashboardLayout: () => ({
+    layout: [
+      { id: 'net-worth', hidden: false },
+      { id: 'this-month', hidden: false },
+      { id: 'balance-sheet', hidden: false },
+      { id: 'cashflow', hidden: false },
+      { id: 'loans', hidden: false },
+      { id: 'latest-transactions', hidden: false },
+    ],
+    storedLayout: [],
+    isLoading: false,
+    isLoadError: false,
+    isSaving: false,
+    saveError: false,
+    retryLoad: jest.fn(),
+    save: jest.fn(),
+  }),
+}))
 
 async function renderRoute() {
   const i18n = await initMobileI18n('en')

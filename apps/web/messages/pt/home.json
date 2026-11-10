@@ -1,5 +1,27 @@
 {
   "homeOverview": {
+    "customize": {
+      "action": "Personalizar",
+      "title": "Personalizar início",
+      "description": "Escolha o que aparece no seu início e em que ordem.",
+      "sections": {
+        "net-worth": "Património",
+        "this-month": "Este mês",
+        "balance-sheet": "Balanço",
+        "cashflow": "Fluxo de caixa líquido",
+        "loans": "Empréstimos",
+        "latest-transactions": "Últimas transações"
+      },
+      "moveUp": "Mover {section} para cima",
+      "moveDown": "Mover {section} para baixo",
+      "pinned": "Aparece sempre primeiro",
+      "reset": "Repor predefinição",
+      "saving": "A guardar…",
+      "saveError": "Não foi possível guardar. Tente novamente.",
+      "retry": "Tentar novamente",
+      "loadError": "Não foi possível carregar o seu início.",
+      "done": "Concluído"
+    },
     "bank-alerts": {
       "label": "Alertas de ligações bancárias",
       "consent-expiring": "{days, plural, =0 {O acesso a {bank} termina em menos de um dia.} one {O acesso a {bank} termina daqui a # dia.} other {O acesso a {bank} termina daqui a # dias.}} Volte a ligar para manter as transações atualizadas.",

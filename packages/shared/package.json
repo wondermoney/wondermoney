@@ -22,6 +22,7 @@
       "require": "./dist/index.js"
     },
     "./decimal": "./lib/decimal/index.ts",
+    "./dashboard-layout": "./lib/dashboard-layout/index.ts",
     "./package.json": "./package.json"
   },
   "scripts": {

@@ -63,7 +63,7 @@ describe('usePreviewFeatures', () => {
       expect.objectContaining({ method: 'PATCH', path: '/v1/user/me/preferences' }),
       expect.objectContaining({ body: { previewFeatures: true }, commit: expect.any(Function) }),
     )
-    expect(client.getQueryData(['preview-features', 9])).toEqual({ previewFeatures: true })
+    expect(client.getQueryData(['user-preferences', 9])).toEqual({ previewFeatures: true })
     await hook.unmount()
     client.clear()
   })
