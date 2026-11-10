@@ -1,9 +1,10 @@
 name: CI
 
 # Runs on every pull request (forks included: no secrets needed) and on the long-lived
-# branches. Turbo runs each task only in the packages that have it. Jobs run on the runner the
-# CI_RUNS_ON repository variable names, and on GitHub-hosted runners where it is unset (forks
-# included).
+# branches, on GitHub-hosted runners (free for public repositories). Turbo runs each task only in
+# the packages that have it. Pushes and manual runs check everything; a pull request that changes
+# only apps/ and packages/ checks the packages it affects and skips the jobs of the apps it does
+# not (.github/scripts/ci-scope.sh, the "Affected apps" job).
 on:
   pull_request:
   push:
@@ -24,8 +25,52 @@ concurrency:
 env:
   # Where turbo keeps its local cache, which the jobs below carry between runs.
   TURBO_CACHE_DIR: .turbo/cache
+  # What `turbo run --affected` compares against: on a pull request's merge commit, the base
+  # branch (ci-scope.sh passes --affected only on pull requests).
+  TURBO_SCM_BASE: HEAD^1
 
 jobs:
+  # Which apps a pull request affects, for the jobs that don't run through turbo (the API, web
+  # E2E and mobile extras): every app on a full run, otherwise the ones `turbo ls --affected`
+  # lists (an app is affected by its own changes and by those of the packages it depends on).
+  changes:
+    name: Affected apps
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    outputs:
+      api: ${{ steps.apps.outputs.api }}
+      web: ${{ steps.apps.outputs.web }}
+      mobile: ${{ steps.apps.outputs.mobile }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 2
+          persist-credentials: false
+      - id: scope
+        run: .github/scripts/ci-scope.sh
+      - if: steps.scope.outputs.affected != ''
+        uses: pnpm/action-setup@v6
+      - if: steps.scope.outputs.affected != ''
+        uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - if: steps.scope.outputs.affected != ''
+        run: pnpm install --frozen-lockfile --ignore-scripts
+      - id: apps
+        env:
+          AFFECTED: ${{ steps.scope.outputs.affected }}
+        run: |
+          if [ -z "$AFFECTED" ]; then
+            packages='["@wondermoney/api","@wondermoney/web","@wondermoney/mobile"]'
+          else
+            packages=$(pnpm turbo ls --affected --output=json | sed -n '/^{/,$p' | jq -c '[.packages.items[].name]')
+          fi
+          echo "Affected: $packages"
+          for app in api web mobile; do
+            echo "$app=$(jq -r --arg p "@wondermoney/$app" 'index($p) != null' <<<"$packages")" >> "$GITHUB_OUTPUT"
+          done
+
   # Type-check, lint, the tests of every package but the API, and the builds run as parallel jobs;
   # "Type-check, lint, test and build", further down, gathers them under the one check name they
   # used to share as a single job.
@@ -35,14 +80,19 @@ jobs:
   # A task whose inputs did not change replays its logs and outputs instead of running. Turbo's
   # hash covers the package's files, the hashes of the workspace packages it depends on (a change
   # to packages/shared re-runs everything that uses it), its locked dependencies and the
-  # globalDependencies in turbo.json (a lockfile or workspace change re-runs everything). The
-  # prune step then drops the entries this run did not use, so the cache does not grow.
+  # globalDependencies in turbo.json (a lockfile or workspace change re-runs everything). On a
+  # full run the prune step then drops the entries this run did not use, so the cache does not
+  # grow; an affected-only pull request run keeps them all, as it used only some.
   lint:
     name: Type-check and lint
-    runs-on: ${{ vars.CI_RUNS_ON || 'ubuntu-latest' }}
+    runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v7
+        with:
+          fetch-depth: 2
+      - id: scope
+        run: .github/scripts/ci-scope.sh
       - uses: pnpm/action-setup@v6
       - id: node
         uses: actions/setup-node@v7
@@ -55,19 +105,24 @@ jobs:
           path: .turbo/cache
           key: turbo-lint-${{ runner.os }}-node${{ steps.node.outputs.node-version }}-${{ github.sha }}
           restore-keys: turbo-lint-${{ runner.os }}-node${{ steps.node.outputs.node-version }}-
-      # Two at a time on two vCPUs: the API's type-check and typed lint each need up to 4 GB.
-      - run: pnpm turbo run type-check lint --concurrency=2 --summarize
-      - run: .github/scripts/prune-turbo-cache.sh
+      # Two at a time: the API's type-check and typed lint each need up to 4 GB.
+      - run: pnpm turbo run type-check lint ${{ steps.scope.outputs.affected }} --concurrency=2 --summarize
+      - if: steps.scope.outputs.affected == ''
+        run: .github/scripts/prune-turbo-cache.sh
 
   # The tests of every package but the API (the "API tests" jobs, on runners of their own:
-  # sharing two vCPUs with other packages' tests pushed some past their timeouts) and the mobile
+  # sharing a runner with other packages' tests pushed some past their timeouts) and the mobile
   # app (the next job).
   test:
     name: Tests
-    runs-on: ${{ vars.CI_RUNS_ON || 'ubuntu-latest' }}
+    runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v7
+        with:
+          fetch-depth: 2
+      - id: scope
+        run: .github/scripts/ci-scope.sh
       - uses: pnpm/action-setup@v6
       - id: node
         uses: actions/setup-node@v7
@@ -80,17 +135,22 @@ jobs:
           path: .turbo/cache
           key: turbo-test-${{ runner.os }}-node${{ steps.node.outputs.node-version }}-${{ github.sha }}
           restore-keys: turbo-test-${{ runner.os }}-node${{ steps.node.outputs.node-version }}-
-      # Vitest's default is one worker fewer than the cores: on two vCPUs, one test file at a time
-      # while the main process mostly waits. A worker per core nearly halves the web suite.
-      - run: VITEST_MAX_WORKERS=$(nproc) pnpm turbo run test --filter='!@wondermoney/api' --filter='!@wondermoney/mobile' --summarize
-      - run: .github/scripts/prune-turbo-cache.sh
+      # Vitest's default is one worker fewer than the cores, while the main process mostly waits:
+      # a worker per core is faster on a runner that runs nothing else.
+      - run: VITEST_MAX_WORKERS=$(nproc) pnpm turbo run test ${{ steps.scope.outputs.affected }} --filter='!@wondermoney/api' --filter='!@wondermoney/mobile' --summarize
+      - if: steps.scope.outputs.affected == ''
+        run: .github/scripts/prune-turbo-cache.sh
 
   mobile-test:
     name: Mobile tests
-    runs-on: ${{ vars.CI_RUNS_ON || 'ubuntu-latest' }}
+    runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v7
+        with:
+          fetch-depth: 2
+      - id: scope
+        run: .github/scripts/ci-scope.sh
       - uses: pnpm/action-setup@v6
       - id: node
         uses: actions/setup-node@v7
@@ -111,16 +171,17 @@ jobs:
           path: apps/mobile/node_modules/.cache/jest
           key: jest-mobile-${{ runner.os }}-node${{ steps.node.outputs.node-version }}-${{ hashFiles('pnpm-lock.yaml') }}-${{ github.sha }}
           restore-keys: jest-mobile-${{ runner.os }}-node${{ steps.node.outputs.node-version }}-${{ hashFiles('pnpm-lock.yaml') }}-
-      # jest.config.js's maxWorkers (25%, for a busy development machine) is one worker on two
-      # vCPUs; this runner runs nothing else.
-      - run: pnpm turbo run test --filter=@wondermoney/mobile --summarize -- --maxWorkers=$(nproc) --cacheDirectory=node_modules/.cache/jest
-      - run: .github/scripts/prune-turbo-cache.sh
+      # jest.config.js's maxWorkers (25%, for a busy development machine) is one worker on a
+      # four-vCPU runner; this runner runs nothing else.
+      - run: pnpm turbo run test ${{ steps.scope.outputs.affected }} --filter=@wondermoney/mobile --summarize -- --maxWorkers="$(nproc)" --cacheDirectory=node_modules/.cache/jest
+      - if: steps.scope.outputs.affected == ''
+        run: .github/scripts/prune-turbo-cache.sh
 
   # The web app on one runner, everything else on another: on one runner the Next.js builds and the
   # API compile had to run one at a time, as they don't fit in memory together.
   build:
     name: Build (${{ matrix.name }})
-    runs-on: ${{ vars.CI_RUNS_ON || 'ubuntu-latest' }}
+    runs-on: ubuntu-latest
     timeout-minutes: 20
     strategy:
       fail-fast: false
@@ -135,6 +196,10 @@ jobs:
             filter: '!@wondermoney/web'
     steps:
       - uses: actions/checkout@v7
+        with:
+          fetch-depth: 2
+      - id: scope
+        run: .github/scripts/ci-scope.sh
       - uses: pnpm/action-setup@v6
       - id: node
         uses: actions/setup-node@v7
@@ -148,11 +213,12 @@ jobs:
           key: turbo-build-${{ matrix.id }}-${{ runner.os }}-node${{ steps.node.outputs.node-version }}-${{ github.sha }}
           restore-keys: turbo-build-${{ matrix.id }}-${{ runner.os }}-node${{ steps.node.outputs.node-version }}-
       - name: Build
-        run: pnpm turbo run build --filter='${{ matrix.filter }}' --concurrency=1 --summarize
+        run: pnpm turbo run build ${{ steps.scope.outputs.affected }} --filter='${{ matrix.filter }}' --concurrency=1 --summarize
         env:
           SKIP_ENV_VALIDATION: '1'
           NEXT_PUBLIC_SITE_URL: https://docs.wonder.money
-      - run: .github/scripts/prune-turbo-cache.sh
+      - if: steps.scope.outputs.affected == ''
+        run: .github/scripts/prune-turbo-cache.sh
 
   # Secrets and text that must not be published in this public repository. gitleaks checks a pull
   # request's commits (a push: the whole tree) against the default rules and the allowlist in
@@ -162,7 +228,7 @@ jobs:
   # LEAK_PATTERNS secret. CONTRIBUTING.md, "Leak check", covers false positives.
   leak-check:
     name: Leak check
-    runs-on: ${{ vars.CI_RUNS_ON || 'ubuntu-latest' }}
+    runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v7
@@ -208,12 +274,13 @@ jobs:
 
   # The single check these jobs replaced, kept so anything that looks for it by name still finds
   # it: it passes only when every one of them passed. It gathers the leak check too, so the
-  # required check covers it.
+  # required check covers it, and "Affected apps", so a failure there can't pass by skipping the
+  # app jobs that depend on it.
   checks:
     name: Type-check, lint, test and build
-    needs: [lint, test, mobile-test, build, leak-check]
+    needs: [changes, lint, test, mobile-test, build, leak-check]
     if: always()
-    runs-on: ${{ vars.CI_RUNS_ON || 'ubuntu-latest' }}
+    runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
       - name: Require every check job to have passed
@@ -225,7 +292,9 @@ jobs:
 
   api:
     name: API extras
-    runs-on: ${{ vars.CI_RUNS_ON || 'ubuntu-latest' }}
+    needs: changes
+    if: needs.changes.outputs.api == 'true'
+    runs-on: ubuntu-latest
     # Typically 2-3 minutes; the timeout is there to catch a hang.
     timeout-minutes: 10
     defaults:
@@ -292,7 +361,9 @@ jobs:
   # suite (vitest.config.ts: a shard's own coverage is partial, so it checks none).
   api-tests:
     name: API tests (${{ matrix.shard }}/3)
-    runs-on: ${{ vars.CI_RUNS_ON || 'ubuntu-latest' }}
+    needs: changes
+    if: needs.changes.outputs.api == 'true'
+    runs-on: ubuntu-latest
     # A shard typically takes 3-4 minutes, setup included; the timeout is there to catch a hang.
     timeout-minutes: 12
     strategy:
@@ -340,7 +411,7 @@ jobs:
   api-coverage:
     name: API coverage
     needs: api-tests
-    runs-on: ${{ vars.CI_RUNS_ON || 'ubuntu-latest' }}
+    runs-on: ubuntu-latest
     timeout-minutes: 10
     defaults:
       run:
@@ -370,7 +441,9 @@ jobs:
   # of it the install and the first webpack compile.
   web-e2e:
     name: Web E2E smoke
-    runs-on: ${{ vars.CI_RUNS_ON || 'ubuntu-latest' }}
+    needs: changes
+    if: needs.changes.outputs.web == 'true'
+    runs-on: ubuntu-latest
     timeout-minutes: 15
     defaults:
       run:
@@ -408,7 +481,9 @@ jobs:
 
   mobile:
     name: Mobile extras
-    runs-on: ${{ vars.CI_RUNS_ON || 'ubuntu-latest' }}
+    needs: changes
+    if: needs.changes.outputs.mobile == 'true'
+    runs-on: ubuntu-latest
     timeout-minutes: 15
     defaults:
       run:

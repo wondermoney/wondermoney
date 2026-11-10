@@ -54,6 +54,12 @@ RUN pnpm --filter @wondermoney/shared --filter @wondermoney/react-email run buil
 RUN --mount=type=cache,id=pnpm,target=/root/.local/share/pnpm/store \
   pnpm --filter @wondermoney/api deploy --prod --ignore-scripts /out
 
+# The compiled API alone (with its source maps and Sentry debug IDs), exported by the deploy
+# workflows with `--target dist --output type=local,dest=apps/api/dist` to upload the source
+# maps of exactly the files the image runs. Not part of any image.
+FROM scratch AS dist
+COPY --from=builder /repo/apps/api/dist /
+
 # node-prune strips docs/tests/typings out of node_modules.
 #
 # This is a third-party Docker Hub image that is handed the entire production

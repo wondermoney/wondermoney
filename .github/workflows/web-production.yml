@@ -15,15 +15,13 @@ concurrency:
 permissions: {}
 jobs:
   deploy-prod:
-    # Deploys only from the main repository, never from a fork. Until the move to the public
-    # repository, the private one deploys too: its DEPLOY_REPO variable names it. Delete that
-    # variable at the cutover and only the public repository deploys.
+    # Deploys only from the main repository, never from a fork.
     # Production deploys only from main, whichever way the run started; the production
-    # environment's branch rule and required reviewer gate it again.
-    if: >-
-      (github.repository == 'wondermoney/wondermoney' || github.repository == vars.DEPLOY_REPO)
-      && github.ref == 'refs/heads/main'
-    runs-on: blacksmith-2vcpu-ubuntu-2404
+    # environment's branch rule gates it again.
+    if: github.repository == 'wondermoney/wondermoney' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    # Typically 5-10 minutes.
+    timeout-minutes: 30
     environment: production
     permissions:
       contents: read
