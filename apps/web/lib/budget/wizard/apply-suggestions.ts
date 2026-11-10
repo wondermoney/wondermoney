@@ -91,3 +91,26 @@ export function applyBudgetStarterProfileToBudgetRows<T extends BudgetStarterCat
   const suggestions = getBudgetStarterCategorySuggestions({ profileKey, averageMonthlyIncome, householdSize, dependentCount });
   return { suggestions, ...applyBudgetStarterCategorySuggestionsToBudgetRows(rows, suggestions) };
 }
+
+/**
+ * Set the given leaf rows' monthly amounts, recomputing each parent from its children. A
+ * suggestion for a category the table does not show is ignored.
+ */
+export function applyBudgetAmountSuggestionsToBudgetRows<
+  T extends BudgetStarterCategoryRowLike,
+>(rows: T[], suggestions: { amount: number; categoryKey: number }[]): T[] {
+  if (suggestions.length === 0 || rows.length === 0) return rows;
+  const amountByKey = new Map(suggestions.map((suggestion) => [suggestion.categoryKey, suggestion.amount]));
+
+  const mapRows = (nextRows: T[]): T[] => nextRows.map((row) => {
+    const hasChildren = !!row.subRows?.length;
+    if (hasChildren) {
+      const subRows = mapRows(row.subRows as T[]);
+      return { ...row, budgeted: calculateParentBudgetedFromSubRows(subRows), subRows };
+    }
+    const amount = amountByKey.get(row.key);
+    return amount === undefined ? row : { ...row, budgeted: amount };
+  });
+
+  return mapRows(rows);
+}

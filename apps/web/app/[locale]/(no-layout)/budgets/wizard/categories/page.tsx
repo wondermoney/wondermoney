@@ -14,6 +14,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { useShallow } from "zustand/react/shallow";
 
+import { BudgetSuggestionsCard } from "@/components/budget/BudgetSuggestionsCard";
 import BudgetTableNew, {
   type BudgetRow,
   type BudgetSubRow,
@@ -46,6 +47,7 @@ import {
   getMonthlyBudgetedValue,
 } from "@/lib/utils/budget";
 import {
+  applyBudgetAmountSuggestionsToBudgetRows,
   applyBudgetStarterProfileToBudgetRows,
   BUDGET_STARTER_PROFILES,
   type BudgetStarterProfileKey,
@@ -381,6 +383,49 @@ export default function CategoriesPage() {
     selectedStarterSuggestions,
   );
 
+  const onApplySuggestions = async (
+    updates: { amount: number; categoryKey: number }[],
+  ) => {
+    if (!currentBudgetRows || !budgetId || updates.length === 0) return;
+    const year = new Date().getFullYear();
+    const month = new Date().getMonth() + 1;
+    const budgetKey = Number(budgetId);
+    try {
+      await Promise.all(
+        updates.map(({ amount, categoryKey }) =>
+          editBudgetCategoryMutation.mutateAsync({
+            amount,
+            budgetKey,
+            categoryKey,
+            month,
+            year,
+          }),
+        ),
+      );
+      setBudgetRows(
+        applyBudgetAmountSuggestionsToBudgetRows(currentBudgetRows, updates),
+      );
+      void Promise.all([
+        queryClient.invalidateQueries({
+          queryKey: ["budget-template-year-month", budgetKey, month, year],
+        }),
+        queryClient.invalidateQueries({
+          queryKey: ["budget", budgetKey],
+        }),
+      ]).catch(() => undefined);
+      toast.success(t("budget-suggestions-applied"));
+    } catch (error) {
+      if (isDemoReadOnlyError(error)) {
+        toast.error(t("demo-read-only-title"), {
+          description: t("demo-read-only-description"),
+          duration: 9000,
+        });
+        return;
+      }
+      toast.error(t("server-error"));
+    }
+  };
+
   const onBudgetComplete = () => {
     // This wizard's store isn't route-scoped or persisted — it's a
     // module-level Zustand store that otherwise keeps household/dependents/
@@ -621,6 +666,15 @@ export default function CategoriesPage() {
               )}
             </CardContent>
           </Card>
+
+          <BudgetSuggestionsCard
+            budgetKey={Number(budgetId)}
+            currency={budgetTemplateData.budget.currencyCode}
+            month={new Date().getMonth() + 1}
+            onApply={onApplySuggestions}
+            rows={currentBudgetRows ?? []}
+            year={new Date().getFullYear()}
+          />
 
           {/* One banner on this screen, not two. "Click any amount to edit…"
               was a second full-width outlined `Alert` carrying a tooltip's

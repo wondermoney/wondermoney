@@ -11,6 +11,7 @@ import * as z from "zod";
 import { Amount } from "@/components/ui/Amount";
 import Text from "@/components/ui/Typography/Text";
 import { useRouter } from "@/i18n/navigation";
+import useBudgetSuggestions from "@/lib/api/budget/useBudgetSuggestions";
 import useEditBudgetCategory from "@/lib/api/budget/useEditBudgetCategory";
 import { isDemoReadOnlyError } from "@/lib/api/errors";
 import {
@@ -134,6 +135,13 @@ export function BudgetCategoryEditSheet({
   const queryClient = useQueryClient();
   const router = useRouter();
   const formatCurrency = useFormatCurrency();
+  const { data: suggestions } = useBudgetSuggestions(
+    { budgetKey, month, year },
+    { enabled: open, staleTime: 60_000 },
+  );
+  const suggestion = suggestions?.categories.find(
+    (item) => item.categoryKey === category.key,
+  );
 
   const onSubmit: SubmitHandler<FormSchema> = async (values) => {
     try {
@@ -273,6 +281,31 @@ export function BudgetCategoryEditSheet({
                 );
               }}
             />
+            {suggestion?.hasEnoughData && suggestion.suggested !== null ? (
+              <div className="flex flex-col gap-2 rounded-md border p-3 sm:flex-row sm:items-center sm:justify-between">
+                <Text variant="smallText">
+                  {t("budget-suggestion-label", {
+                    amount: formatCurrency(suggestion.suggested, currency),
+                  })}
+                </Text>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() =>
+                    form.setValue("budgeted", suggestion.suggested!, {
+                      shouldValidate: true,
+                    })
+                  }
+                >
+                  {t("budget-suggestion-apply")}
+                </Button>
+              </div>
+            ) : suggestion ? (
+              <Text variant="smallText" className="text-muted-foreground">
+                {t("budget-suggestion-not-enough-data")}
+              </Text>
+            ) : null}
             <FormField
               control={form.control}
               name="rolloverEnabled"

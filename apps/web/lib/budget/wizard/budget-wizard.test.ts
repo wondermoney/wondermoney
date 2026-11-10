@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { test } from "vitest";
 
 import {
+  applyBudgetAmountSuggestionsToBudgetRows,
   applyBudgetStarterCategorySuggestionsToBudgetRows,
   applyBudgetStarterProfileToBudgetRows,
   calculateAverageMonthlyIncome,
@@ -415,4 +416,34 @@ test("starter profile application updates editable rows and preserves metadata",
   assert.equal(result.rows[0].subRows?.[0].icon, "house");
   assert.equal(result.rows[0].subRows?.[0].budgeted, 1400);
   assert.equal(result.rows[1].subRows?.[0].budgeted, 560);
+});
+
+test("applying spending suggestions sets leaf amounts and recomputes their parent", () => {
+  const rows = [
+    {
+      key: 1,
+      name: "Housing",
+      budgeted: 1000,
+      subRows: [
+        { key: 10, name: "Rent", budgeted: 800 },
+        { key: 11, name: "Utilities", budgeted: 200 },
+      ],
+    },
+    { key: 2, name: "Groceries", budgeted: 300, subRows: [] },
+  ];
+
+  const updated = applyBudgetAmountSuggestionsToBudgetRows(rows, [
+    { amount: 900, categoryKey: 10 },
+    { amount: 350, categoryKey: 2 },
+  ]);
+
+  assert.equal(updated[0].subRows?.[0].budgeted, 900);
+  assert.equal(updated[0].subRows?.[1].budgeted, 200);
+  assert.equal(updated[0].budgeted, 1100);
+  assert.equal(updated[1].budgeted, 350);
+  // A suggestion for a category the table does not show changes nothing.
+  assert.deepEqual(
+    applyBudgetAmountSuggestionsToBudgetRows(rows, [{ amount: 1, categoryKey: 99 }]),
+    rows,
+  );
 });

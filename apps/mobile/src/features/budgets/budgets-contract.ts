@@ -76,6 +76,25 @@ export const budgetCategoryWriteSchema = z.object({
 
 export type BudgetCategoryWrite = z.input<typeof budgetCategoryWriteSchema>
 
+export const budgetSuggestionSchema = z.object({
+  average: moneySchema,
+  categoryKey: positiveSafeIdSchema,
+  categoryName: z.string(),
+  hasEnoughData: z.boolean(),
+  median: moneySchema,
+  monthsWithData: z.number().int().nonnegative(),
+  suggested: moneySchema.nullable(),
+})
+
+export const budgetSuggestionsResponseSchema = z.object({
+  categories: z.array(budgetSuggestionSchema),
+  currencyCode: currencyCodeSchema,
+  months: z.number().int().positive(),
+  targetMonth: z.object({ month: monthSchema, year: yearSchema }),
+})
+
+export type BudgetSuggestionDto = z.infer<typeof budgetSuggestionSchema>
+
 const budgetDetailSchema = z.object({
   budgetKey: positiveSafeIdSchema,
   description: z.string().max(500).nullable().optional(),
@@ -278,6 +297,17 @@ export function createBudgetMonthEndpoint(budgetId: number, year: number, month:
     method: 'GET',
     path: `/v1/budget/${budgetId}/${year}/${month}`,
     schema: budgetMonthResponseSchema,
+  })
+}
+
+export function createBudgetSuggestionsEndpoint(budgetId: number, year: number, month: number, months: 3 | 6 | 12 = 3) {
+  if (!isValidBudgetId(budgetId) || !isValidBudgetPeriod(year, month)) {
+    throw new Error('A positive safe budget id and valid budget period are required.')
+  }
+  return readEndpoint({
+    method: 'GET',
+    path: `/v1/budget/${budgetId}/suggestions?year=${year}&month=${month}&months=${months}`,
+    schema: budgetSuggestionsResponseSchema,
   })
 }
 

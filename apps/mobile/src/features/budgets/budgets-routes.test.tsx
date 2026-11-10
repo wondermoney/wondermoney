@@ -16,6 +16,7 @@ jest.mock('expo-router', () => ({ useRouter: () => ({ push: mockPush, replace: m
 jest.mock('./use-budgets', () => ({ useBudgets: () => mockUseBudgets() }))
 jest.mock('./use-budget-month', () => ({ useBudgetMonth: (...args: unknown[]) => mockUseBudgetMonth(...args) }))
 jest.mock('./use-budget-year', () => ({ useBudgetYear: () => ({ data: undefined, refetch: jest.fn() }) }))
+jest.mock('./use-budget-suggestions', () => ({ useBudgetSuggestions: () => ({ data: undefined }) }))
 jest.mock('./use-budget-category-mutation', () => ({ useBudgetCategoryMutation: () => mockCategoryMutation }))
 jest.mock('./use-budget-category-delete-mutation', () => ({ useBudgetCategoryDeleteMutation: () => mockCategoryDeleteMutation }))
 jest.mock('./budgets-screen', () => ({
