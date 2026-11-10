@@ -19,11 +19,6 @@ import InternalAlertEmail, {
 import LifecycleNudgeEmail, {
   getLifecycleNudgePreheader,
 } from "./templates/lifecycle-nudge.js";
-import LifecycleCampaignEmail from "./templates/lifecycle-campaign.js";
-import { DEFAULT_BRAND_NAME, resolveBrandName } from "./components/Brand.js";
-import { MetricsPanel, StatusPanel, StepFlow } from "./components/LifecycleVisuals.js";
-import { getLifecycleCopy, type LifecycleLanguage } from "./lifecycle-copy.js";
-import { buildDynamicVisual, type LifecycleDynamicData } from "./lifecycle-dynamic.js";
 import WeeklyInsights, {
   getWeeklyInsightsSubject,
 } from "./templates/weekly-insights.js";
@@ -44,10 +39,7 @@ import { getWeeklyInsightsPreheader } from "./weekly-insights-preheader.js";
 
 export type { AccountConnectedEmailProps, BankSyncAlertEmailProps, BankSyncAlertKind, BudgetThresholdAlertProps, BudgetThresholdItem, InternalAlertDetail, InternalAlertEmailProps, LifecycleNudgeEmailProps, MonthlyStoryCategoryDelta, MonthlyStoryDataSufficientProps, MonthlyStoryInsufficientDataProps, MonthlyStoryMetric, MonthlyStoryProps, MonthlyStoryRecurringChange, TransactionalEmailLanguage, WeeklyBudgetSummary, WeeklyInsightsProps } from "./types.js";
 export { getWeeklyInsightsPreheader } from "./weekly-insights-preheader.js";
-export { LIFECYCLE_COPY, getLifecycleCopy } from "./lifecycle-copy.js";
 export { DEFAULT_BRAND_NAME, resolveBrandName } from "./components/Brand.js";
-export type { LifecycleLanguage, LifecycleStepCopy } from "./lifecycle-copy.js";
-export type { LifecycleDynamicData } from "./lifecycle-dynamic.js";
 
 export interface RenderedEmail {
   subject: string;
@@ -194,70 +186,6 @@ export async function renderLifecycleNudgeEmail(
   return {
     subject: props.subject,
     preheader: getLifecycleNudgePreheader(props),
-    ...output,
-  };
-}
-
-export async function renderLifecycleEmail(props: {
-  campaign: string;
-  step: string;
-  language: LifecycleLanguage;
-  firstName?: string;
-  ctaUrl: string;
-  unsubscribeUrl: string;
-  settingsUrl?: string;
-  /** Real per-user figures for campaigns whose visual needs live data (net worth, spend, dates, prices). */
-  data?: LifecycleDynamicData;
-  /** Instance name (the API's `INSTANCE_NAME`); defaults to WonderMoney. */
-  brandName?: string;
-}): Promise<RenderedEmail> {
-  assertWebUrl("ctaUrl", props.ctaUrl);
-  assertWebUrl("unsubscribeUrl", props.unsubscribeUrl);
-  if (props.settingsUrl !== undefined) {
-    assertWebUrl("settingsUrl", props.settingsUrl);
-  }
-
-  const brand = resolveBrandName(props.brandName);
-  // The campaign copy names the product as WonderMoney; another instance's copy carries its name.
-  const branded = (text: string) => (brand === DEFAULT_BRAND_NAME ? text : text.replaceAll(DEFAULT_BRAND_NAME, brand));
-  const baseCopy = getLifecycleCopy(props.campaign, props.step, props.language);
-  const copy = {
-    ...baseCopy,
-    body: baseCopy.body.map(branded),
-    heading: branded(baseCopy.heading),
-    preheader: branded(baseCopy.preheader),
-    subject: branded(baseCopy.subject),
-  };
-
-  const visual =
-    buildDynamicVisual(props.campaign, props.step, props.language, props.data) ??
-    (copy.steps
-      ? createElement(StepFlow, { steps: copy.steps })
-      : copy.status
-        ? createElement(StatusPanel, copy.status)
-        : copy.metrics
-          ? createElement(MetricsPanel, copy.metrics)
-          : undefined);
-
-  const output = await renderElement(
-    createElement(LifecycleCampaignEmail, {
-      language: props.language,
-      firstName: props.firstName,
-      heading: copy.heading,
-      body: copy.body,
-      visual,
-      ctaLabel: copy.ctaLabel,
-      ctaUrl: props.ctaUrl,
-      unsubscribeUrl: props.unsubscribeUrl,
-      settingsUrl: props.settingsUrl,
-      preheader: copy.preheader,
-      brandName: brand,
-    }),
-  );
-
-  return {
-    subject: copy.subject,
-    preheader: copy.preheader,
     ...output,
   };
 }

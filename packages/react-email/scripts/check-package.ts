@@ -32,8 +32,6 @@ try {
   assert.deepEqual(distFiles, [
     "index.d.ts",
     "index.js",
-    "lifecycle-copy.d.ts",
-    "lifecycle-dynamic.d.ts",
     "types.d.ts",
     "weekly-insights-preheader.d.ts",
   ]);
@@ -55,8 +53,6 @@ try {
     "README.md",
     "dist/index.d.ts",
     "dist/index.js",
-    "dist/lifecycle-copy.d.ts",
-    "dist/lifecycle-dynamic.d.ts",
     "dist/types.d.ts",
     "dist/weekly-insights-preheader.d.ts",
     "package.json",
