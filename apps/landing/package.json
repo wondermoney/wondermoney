@@ -40,7 +40,7 @@
     "@sanity/image-url": "^2.0.3",
     "@tailwindcss/typography": "^0.5.19",
     "@tailwindcss/vite": "^4.1.13",
-    "astro": "^5.18.0",
+    "astro": "^7.4.7",
     "astro-gtm": "^1.1.0",
     "astro-portabletext": "^0.13.0",
     "class-variance-authority": "^0.7.1",
