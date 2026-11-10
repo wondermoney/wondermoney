@@ -27,7 +27,9 @@ export enum TransactionImportSessionStatus {
 /**
  * One staged import of a transaction file (`services/transaction-import/`): the uploaded file, how
  * to read it, which WonderMoney account each of its source accounts goes to, and its rows
- * (`TransactionImportRow`). Nothing reaches `transaction` until it is committed.
+ * (`TransactionImportRow`). Nothing reaches `transaction` until it is committed. Seven days after a
+ * commit the daily sweep deletes its rows and file and keeps only a summary: the status, the dates
+ * and the row counts (`rowCounts`, `detailsDeletedAt`).
  *
  * Owner-scoped: only the member who started it sees it, not their partner (the filter, and an
  * explicit `appuserKey` in every query the service builds). Its rows carry no tenant of their own
@@ -55,9 +57,17 @@ export class TransactionImportSession extends Base {
   @Property({ default: false })
   autoCommit = false;
 
+  /** When the commit finished (the outcome was set). Unset on sessions committed before it was recorded. */
+  @Property({ columnType: 'timestamptz', nullable: true })
+  committedAt?: Date;
+
   /** The background operation of the job working on the session now, or last. */
   @Property({ length: 255, nullable: true })
   correlationId?: string;
+
+  /** When the sweep deleted the committed session's rows and file; only the summary is left. */
+  @Property({ columnType: 'timestamptz', nullable: true })
+  detailsDeletedAt?: Date;
 
   /** Why parsing or the commit stopped, as a short code. */
   @Property({ length: 100, nullable: true })
@@ -79,6 +89,10 @@ export class TransactionImportSession extends Base {
 
   @OneToMany({ cascade: [], entity: () => TransactionImportRow, mappedBy: 'transactionImportSessionKey' })
   rows = new Collection<TransactionImportRow>(this);
+
+  /** The rows by status, kept when the sweep deletes the rows themselves. */
+  @Property({ columnType: 'jsonb', nullable: true, type: 'json' })
+  rowCounts?: transactionImport.ImportRowCounts;
 
   @Property({ fieldName: 's3_bucket', length: 255 })
   s3Bucket!: string;

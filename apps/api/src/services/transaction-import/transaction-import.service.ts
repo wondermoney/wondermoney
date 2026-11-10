@@ -51,9 +51,10 @@ import { statementImportAdapter, StatementUnreadableError, toStatementLine } fro
  * and the household (and the entity's owner filter does too), so another household, and the
  * person's own partner, get not found. Target accounts are accounts the person owns.
  *
- * An uncommitted session expires after {@link SESSION_TTL_MS}; a person's expired sessions (and
- * their rows) are deleted when they start another, and a daily sweep deletes the rest in every
- * household with their uploaded files (`transaction-import-sweep.ts`).
+ * An uncommitted session expires after {@link SESSION_TTL_MS}. A daily sweep, in every household
+ * (`transaction-import-sweep.ts`), deletes expired sessions with their rows and uploaded files, and
+ * seven days after a commit deletes the committed session's rows and file, keeping its summary
+ * (status, dates, row counts) for the person's history.
  */
 export const TRANSACTION_IMPORT_OPERATION = 'transaction-import';
 const CHUNK_SIZE = 500;
@@ -124,11 +125,15 @@ export interface TransactionImportSessionView {
   canCommit: boolean;
   /** Whether a parse or commit whose job stopped can be started again (it resumes). */
   canRetry: boolean;
+  /** When the commit finished; null before it has (and on sessions committed before it was recorded). */
+  committedAt: null | string;
   correlationId: null | string;
   counts: transactionImport.ImportRowCounts;
   createdAt: string;
   /** Rows that will import and rows that will be skipped, among those not yet committed. */
   decisions: Record<transactionImport.ImportDecision, number>;
+  /** Set once the sweep has deleted a committed session's rows and file: `counts` is then the summary kept, and there are no rows to list. */
+  detailsDeletedAt: null | string;
   errorCode: null | string;
   expiresAt: string;
   format: transactionImport.ImportFormat;
@@ -226,7 +231,6 @@ export class TransactionImportService {
       key = presigned.key;
       upload = { key, url: presigned.presignedUrl };
     }
-    await this.purgeExpired(scope);
     const institution = account.accountFinancialInstitutionKey?.name;
     const format = resolveAccountCsvImportFormat(institution);
     const session = this.em.create(TransactionImportSession, {
@@ -611,6 +615,7 @@ export class TransactionImportService {
       const counts = await this.countRows(tx, sessionKey);
       const totals: CommitTotals = { failed: counts.statuses.failed + counts.statuses.invalid, imported: counts.statuses.imported, skipped: counts.statuses.skipped, totalRows: Object.values(counts.statuses).reduce((sum, count) => sum + count, 0) };
       locked.status = OUTCOME_OF[transactionImport.commitOutcome({ failed: counts.statuses.failed, imported: counts.statuses.imported })];
+      locked.committedAt = this.now;
       await tx.flush();
       return { accounts, totals };
     });
@@ -662,14 +667,12 @@ export class TransactionImportService {
     return false;
   }
 
-  /** Delete the person's sessions past their expiry that are not being committed (their rows go with them). */
-  private async purgeExpired(scope: TransactionImportScope): Promise<void> {
-    await this.em.nativeDelete(TransactionImportSession, { appuserKey: { appuserKey: scope.appuserKey }, expiresAt: { $lte: this.now }, status: { $ne: SESSION_STATUS.IMPORTING }, tenantKey: { tenantKey: scope.tenantKey } });
-  }
-
   private async sessionView(session: TransactionImportSession): Promise<TransactionImportSessionView> {
     const status: transactionImport.ImportSessionStatus = this.isExpired(session) ? 'expired' : session.status;
-    const { decisions, statuses } = await this.countRows(this.em, session.transactionImportSessionKey);
+    // A cleared session's rows are gone: its counts are the summary the sweep kept.
+    const { decisions, statuses } = session.detailsDeletedAt
+      ? { decisions: { import: 0, skip: 0 }, statuses: { ...transactionImport.countRows([]), ...session.rowCounts } }
+      : await this.countRows(this.em, session.transactionImportSessionKey);
     const working = status === 'parsing' || status === 'importing';
     const canRetry = working && !(await this.jobIsLive(session));
     const mappingComplete = transactionImport.isMappingComplete(session.sourceAccounts ?? [], session.accountMapping ?? {});
@@ -678,10 +681,12 @@ export class TransactionImportService {
       accountMapping: session.accountMapping ?? {},
       canCommit: status === 'ready' && mappingComplete,
       canRetry,
+      committedAt: session.committedAt?.toISOString() ?? null,
       correlationId: session.correlationId ?? null,
       counts: statuses,
       createdAt: session.createdAt.toISOString(),
       decisions,
+      detailsDeletedAt: session.detailsDeletedAt?.toISOString() ?? null,
       errorCode: session.errorCode ?? null,
       expiresAt: session.expiresAt.toISOString(),
       format: session.format,

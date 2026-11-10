@@ -4,7 +4,7 @@ import type { Logger } from 'pino';
 
 import { DI } from '@app/database/di';
 import type { Enqueue } from '@service/queue/enqueue';
-import { sweepExpiredTransactionImportSessions, type TransactionImportSweepStorage } from '@service/transaction-import/transaction-import-sweep';
+import { sweepTransactionImportSessions, type TransactionImportSweepStorage } from '@service/transaction-import/transaction-import-sweep';
 import { TransactionImportService } from '@service/transaction-import/transaction-import.service';
 import logger from '@utils/logger';
 
@@ -22,11 +22,11 @@ export const handleTransactionImportJob = async (job: Job<{ correlationId?: unkn
   return service.run(correlationId, job.id, mode);
 };
 
-/** The daily sweep of expired, uncommitted imports in every household. */
+/** The daily sweep of imports in every household: expired, uncommitted ones, and the rows and files of ones committed over 7 days ago. */
 export const handleTransactionImportSweepJob = async (deps: { em?: EntityManager; logger?: Pick<Logger, 'info' | 'warn'>; now?: Date; storage?: TransactionImportSweepStorage } = {}) => {
-  const result = await sweepExpiredTransactionImportSessions({ em: deps.em ?? DI.em, now: deps.now ?? new Date(), storage: deps.storage });
+  const result = await sweepTransactionImportSessions({ em: deps.em ?? DI.em, now: deps.now ?? new Date(), storage: deps.storage });
   const log = deps.logger ?? logger;
-  log.info({ ...result, queue: 'transaction-import.sweep' }, 'Expired import sweep finished');
-  if (result.fileErrors > 0) log.warn({ fileErrors: result.fileErrors, queue: 'transaction-import.sweep' }, 'Expired import sweep could not remove some uploaded files');
+  log.info({ ...result, queue: 'transaction-import.sweep' }, 'Import sweep finished');
+  if (result.fileErrors > 0) log.warn({ fileErrors: result.fileErrors, queue: 'transaction-import.sweep' }, 'Import sweep could not remove some uploaded files');
   return result;
 };

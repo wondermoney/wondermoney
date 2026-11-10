@@ -2500,6 +2500,7 @@
   "import-review-mapping-save": "Save accounts",
   "import-review-done": "{imported, plural, one {# transaction imported} other {# transactions imported}}, {skipped} skipped.",
   "import-review-done-failed": "{failed, plural, one {# row couldn't be imported} other {# rows couldn't be imported}}.",
+  "import-review-details-deleted": "The row-by-row details of this import are no longer kept: they are deleted 7 days after an import. The imported transactions stay in the account.",
   "portfolioAccountLink": {
     "account-label": "Account that holds this portfolio",
     "not-linked": "Not linked",

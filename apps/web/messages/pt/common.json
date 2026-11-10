@@ -2500,6 +2500,7 @@
   "import-review-mapping-save": "Guardar contas",
   "import-review-done": "{imported, plural, one {# transação importada} other {# transações importadas}}, {skipped} ignoradas.",
   "import-review-done-failed": "{failed, plural, one {# linha não pôde ser importada} other {# linhas não puderam ser importadas}}.",
+  "import-review-details-deleted": "Os detalhes linha a linha desta importação já não são guardados: são eliminados 7 dias depois de uma importação. As transações importadas continuam na conta.",
   "portfolioAccountLink": {
     "account-label": "Conta onde está este portefólio",
     "not-linked": "Sem ligação",
