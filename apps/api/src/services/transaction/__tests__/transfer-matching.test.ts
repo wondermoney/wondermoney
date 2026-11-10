@@ -1,10 +1,12 @@
 import type { EntityManager } from '@mikro-orm/postgresql';
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { addAccount, addTransaction, type Household, seedHousehold, type StatusName } from '@app/__tests__/__helpers__/finance-fixtures';
+import { addAccount, addPartner, addTransaction, currencyFor, type Household, seedHousehold, type StatusName } from '@app/__tests__/__helpers__/finance-fixtures';
 import { useTestDatabase } from '@app/__tests__/__helpers__/pg-test-db';
 import type { Account } from '@entity/Account';
+import type { Appuser } from '@entity/Appuser';
 import { Currency } from '@entity/Currency';
+import { ExchangeRate } from '@entity/ExchangeRate';
 import { Transaction } from '@entity/Transaction';
 import { TransactionAuditActorType, TransactionAuditEventType, TransactionAuditLog } from '@entity/TransactionAuditLog';
 import { TransactionType } from '@entity/TransactionType';
@@ -35,7 +37,7 @@ describe('transfer matching', () => {
   }
 
   type TypeName = 'DEPOSIT' | 'PAYMENT' | 'TRANSFER_IN' | 'TRANSFER_OUT';
-  interface RowInput { account: Account; amount: number; date: string; hidden?: boolean; manual?: boolean; status?: StatusName; type?: TypeName }
+  interface RowInput { account: Account; amount: number; appuser?: Appuser; date: string; hidden?: boolean; manual?: boolean; status?: StatusName; type?: TypeName }
 
   /** A row as the sync stores it (provider id set, DEPOSIT for a credit, PAYMENT for a debit), unless `manual`. */
   async function row(ctx: Awaited<ReturnType<typeof household>>, input: RowInput, target: Household = ctx.household): Promise<Transaction> {
@@ -43,6 +45,9 @@ describe('transfer matching', () => {
     return addTransaction(ctx.em, target, {
       account: input.account,
       amount: input.amount,
+      appuser: input.appuser,
+      // A row settles in its account's currency.
+      currency: input.account.currencyKey,
       date: day(input.date),
       enableBankingTransactionId: input.manual ? undefined : `eb-${++sequence}`,
       hidden: input.hidden,
@@ -152,7 +157,7 @@ describe('transfer matching', () => {
   });
 
   it('resolves a tie once the closer match of one of its rows is taken', () => {
-    const base = { booked: true, counterpartKey: null, currencyKey: 1, deleted: false, hidden: false, synced: true, userTyped: false };
+    const base = { booked: true, counterpartKey: null, currencyKey: 1, deleted: false, hidden: false, privateTo: null, synced: true, transferRate: null, userTyped: false };
     const rows: TransferRow[] = [
       { ...base, accountKey: 1, cents: -10_000, day: 3, transactionKey: 1, typeName: 'PAYMENT' },
       { ...base, accountKey: 2, cents: 10_000, day: 3, transactionKey: 2, typeName: 'DEPOSIT' },
@@ -303,5 +308,245 @@ describe('transfer matching', () => {
     await reconcile(ctx.household.tenant.tenantKey, { from: day('2026-07-01') });
 
     expect((await stored(oldOut, oldIn, newOut, newIn)).map((r) => r.type)).toEqual(['PAYMENT', 'DEPOSIT', 'TRANSFER_OUT', 'TRANSFER_IN']);
+  });
+
+  /*
+   * Money sent from a EUR account to a USD account leaves as one amount and arrives as another. The
+   * two halves pair when the outgoing amount, converted at the stored rate for its day, lands within
+   * the tolerance of the incoming amount (2 percent unless TRANSFER_MATCH_FX_TOLERANCE says
+   * otherwise), on two accounts the same people can see.
+   */
+  describe('across currencies', () => {
+    afterEach(() => { vi.unstubAllEnvs(); });
+
+    async function multiCurrencyHousehold() {
+      const ctx = await household();
+      const usd = await currencyFor(ctx.em, 'USD');
+      const dollars = await addAccount(ctx.em, ctx.household, { currency: usd, name: 'Dollars' });
+      return { ...ctx, dollars, eur: ctx.household.currency, usd };
+    }
+
+    /** A stored rate: one `from` buys `rate` of `to`, published on `date`. */
+    async function rate(ctx: Awaited<ReturnType<typeof multiCurrencyHousehold>>, date: string, value: number, from = ctx.eur, to = ctx.usd) {
+      ctx.em.create(ExchangeRate, { date: day(date), fromCurrency: from, rate: value, toCurrency: to }, { partial: true });
+      await ctx.em.flush();
+    }
+
+    /** Type, counterpart and stored implied rate of each row, read fresh. */
+    async function storedWithRate(...rows: Transaction[]) {
+      const found = await db.em().find(Transaction, { transactionKey: { $in: rows.map((r) => r.transactionKey) } }, { filters: false, populate: ['transactionTypeKey'] });
+      const byKey = new Map(found.map((t) => [t.transactionKey, t]));
+      return rows.map((r) => {
+        const t = byKey.get(r.transactionKey);
+        return { counterpart: t?.transferCounterpartKey?.transactionKey ?? null, rate: t?.transferExchangeRate ?? null, type: t?.transactionTypeKey?.name };
+      });
+    }
+
+    it('pairs EUR 100 out with USD 108 in a day later at that day\'s rate of 1.08, and stores the implied rate on both rows', async () => {
+      const ctx = await multiCurrencyHousehold();
+      await rate(ctx, '2026-07-03', 1.08);
+      const out = await row(ctx, { account: ctx.current, amount: -100, date: '2026-07-03' });
+      const into = await row(ctx, { account: ctx.dollars, amount: 108, date: '2026-07-04' });
+
+      const result = await reconcile(ctx.household.tenant.tenantKey);
+
+      expect(result).toMatchObject({ pairsMatched: 1 });
+      expect(await storedWithRate(out, into)).toEqual([
+        { counterpart: into.transactionKey, rate: 1.08, type: 'TRANSFER_OUT' },
+        { counterpart: out.transactionKey, rate: 1.08, type: 'TRANSFER_IN' },
+      ]);
+    });
+
+    it('pairs a transfer a bank spread or fee moved within the tolerance, and not one moved beyond it', async () => {
+      const ctx = await multiCurrencyHousehold();
+      await rate(ctx, '2026-07-01', 1.08);
+      // 100 EUR is 108 USD; 106.50 arrived (1.4 percent off).
+      const spreadOut = await row(ctx, { account: ctx.current, amount: -100, date: '2026-07-01' });
+      const spreadIn = await row(ctx, { account: ctx.dollars, amount: 106.5, date: '2026-07-01' });
+      // 101 EUR left, 1 of it a fee: 109.08 USD at the rate, 108 arrived (1 percent off).
+      const feeOut = await row(ctx, { account: ctx.current, amount: -101, date: '2026-07-10' });
+      const feeIn = await row(ctx, { account: ctx.dollars, amount: 108, date: '2026-07-11' });
+      // 200 EUR is 216 USD; 210 arrived (2.9 percent off): not the same money.
+      const farOut = await row(ctx, { account: ctx.current, amount: -200, date: '2026-07-20' });
+      const farIn = await row(ctx, { account: ctx.dollars, amount: 210, date: '2026-07-20' });
+
+      await reconcile(ctx.household.tenant.tenantKey);
+
+      expect((await stored(spreadOut, spreadIn, feeOut, feeIn, farOut, farIn)).map((r) => r.type)).toEqual(['TRANSFER_OUT', 'TRANSFER_IN', 'TRANSFER_OUT', 'TRANSFER_IN', 'PAYMENT', 'DEPOSIT']);
+      expect((await storedWithRate(spreadIn))[0]?.rate).toBe(1.065);
+    });
+
+    it('takes the tolerance from TRANSFER_MATCH_FX_TOLERANCE', async () => {
+      vi.stubEnv('TRANSFER_MATCH_FX_TOLERANCE', '0.005');
+      const ctx = await multiCurrencyHousehold();
+      await rate(ctx, '2026-07-01', 1.08);
+      const out = await row(ctx, { account: ctx.current, amount: -100, date: '2026-07-01' });
+      const into = await row(ctx, { account: ctx.dollars, amount: 106.5, date: '2026-07-01' });
+
+      await reconcile(ctx.household.tenant.tenantKey);
+
+      expect((await stored(out, into)).map((r) => r.type)).toEqual(['PAYMENT', 'DEPOSIT']);
+    });
+
+    it('leaves the pair unpaired when no rate is stored for the day, never assuming one', async () => {
+      const ctx = await multiCurrencyHousehold();
+      // Only a rate published after the transfer, and one for the opposite direction's currency
+      // pair: neither converts EUR to USD on 3 July.
+      await rate(ctx, '2026-07-06', 1.08);
+      await rate(ctx, '2026-07-01', 0.925, ctx.usd, ctx.eur);
+      const out = await row(ctx, { account: ctx.current, amount: -100, date: '2026-07-03' });
+      const into = await row(ctx, { account: ctx.dollars, amount: 108, date: '2026-07-04' });
+      // Same digits, no rate at all: a 1.0 fallback would pair these.
+      const sameDigitsOut = await row(ctx, { account: ctx.current, amount: -50, date: '2026-07-03' });
+      const sameDigitsIn = await row(ctx, { account: ctx.dollars, amount: 50, date: '2026-07-03' });
+
+      const result = await reconcile(ctx.household.tenant.tenantKey);
+
+      expect(result).toMatchObject({ pairsMatched: 0, rowsChanged: 0 });
+      expect((await stored(out, into, sameDigitsOut, sameDigitsIn)).map((r) => r.type)).toEqual(['PAYMENT', 'DEPOSIT', 'PAYMENT', 'DEPOSIT']);
+    });
+
+    it('pairs at the latest earlier rate, however old (a provisional rate)', async () => {
+      const ctx = await multiCurrencyHousehold();
+      await rate(ctx, '2026-06-01', 1.08);
+      const out = await row(ctx, { account: ctx.current, amount: -100, date: '2026-07-03' });
+      const into = await row(ctx, { account: ctx.dollars, amount: 108, date: '2026-07-03' });
+
+      await reconcile(ctx.household.tenant.tenantKey);
+
+      expect((await stored(out, into)).map((r) => r.type)).toEqual(['TRANSFER_OUT', 'TRANSFER_IN']);
+    });
+
+    it('never pairs into a partner\'s private account, nor a shared account with a private one', async () => {
+      const ctx = await multiCurrencyHousehold();
+      await rate(ctx, '2026-07-01', 1.08);
+      const partner = await addPartner(ctx.em, ctx.household);
+      const partnersPrivate = await addAccount(ctx.em, ctx.household, { currency: ctx.usd, isPrivate: true, name: 'Partner dollars', owner: partner });
+      const ownPrivate = await addAccount(ctx.em, ctx.household, { currency: ctx.usd, isPrivate: true, name: 'My dollars' });
+      const toPartner = await row(ctx, { account: ctx.current, amount: -100, date: '2026-07-01' });
+      const partnerIn = await row(ctx, { account: partnersPrivate, amount: 108, appuser: partner, date: '2026-07-01' });
+      // The partner sees the shared EUR account but not the private USD one.
+      const toOwnPrivate = await row(ctx, { account: ctx.current, amount: -200, date: '2026-07-10' });
+      const ownPrivateIn = await row(ctx, { account: ownPrivate, amount: 216, date: '2026-07-10' });
+
+      await reconcile(ctx.household.tenant.tenantKey);
+
+      expect((await stored(toPartner, partnerIn, toOwnPrivate, ownPrivateIn)).map((r) => r.type)).toEqual(['PAYMENT', 'DEPOSIT', 'PAYMENT', 'DEPOSIT']);
+    });
+
+    it('pairs two private accounts of the same member', async () => {
+      const ctx = await multiCurrencyHousehold();
+      await rate(ctx, '2026-07-01', 1.08);
+      const privateEuros = await addAccount(ctx.em, ctx.household, { isPrivate: true, name: 'My euros' });
+      const privateDollars = await addAccount(ctx.em, ctx.household, { currency: ctx.usd, isPrivate: true, name: 'My dollars' });
+      const out = await row(ctx, { account: privateEuros, amount: -100, date: '2026-07-01' });
+      const into = await row(ctx, { account: privateDollars, amount: 108, date: '2026-07-01' });
+
+      await reconcile(ctx.household.tenant.tenantKey);
+
+      expect((await stored(out, into)).map((r) => r.type)).toEqual(['TRANSFER_OUT', 'TRANSFER_IN']);
+    });
+
+    it('never pairs rows of two different households', async () => {
+      const ctx = await multiCurrencyHousehold();
+      await rate(ctx, '2026-07-01', 1.08);
+      const other = await seedHousehold(ctx.em);
+      const theirDollars = await addAccount(ctx.em, other, { currency: ctx.usd });
+      const out = await row(ctx, { account: ctx.current, amount: -100, date: '2026-07-01' });
+      const into = await row(ctx, { account: theirDollars, amount: 108, date: '2026-07-01' }, other);
+
+      await reconcile(ctx.household.tenant.tenantKey);
+      await reconcile(other.tenant.tenantKey);
+
+      expect((await stored(out, into)).map((r) => r.type)).toEqual(['PAYMENT', 'DEPOSIT']);
+    });
+
+    it('leaves ambiguous candidates unpaired: two incoming rows within the tolerance, equally close', async () => {
+      const ctx = await multiCurrencyHousehold();
+      await rate(ctx, '2026-07-01', 1.08);
+      const moreDollars = await addAccount(ctx.em, ctx.household, { currency: ctx.usd, name: 'More dollars' });
+      const out = await row(ctx, { account: ctx.current, amount: -100, date: '2026-07-01' });
+      const a = await row(ctx, { account: ctx.dollars, amount: 108, date: '2026-07-02' });
+      const b = await row(ctx, { account: moreDollars, amount: 107, date: '2026-07-02' });
+
+      await reconcile(ctx.household.tenant.tenantKey);
+
+      expect((await stored(out, a, b)).map((r) => r.type)).toEqual(['PAYMENT', 'DEPOSIT', 'DEPOSIT']);
+    });
+
+    it('never pairs outside the matching window', async () => {
+      const ctx = await multiCurrencyHousehold();
+      await rate(ctx, '2026-07-01', 1.08);
+      const out = await row(ctx, { account: ctx.current, amount: -100, date: '2026-07-01' });
+      const into = await row(ctx, { account: ctx.dollars, amount: 108, date: '2026-07-05' });
+
+      await reconcile(ctx.household.tenant.tenantKey);
+
+      expect((await stored(out, into)).map((r) => r.type)).toEqual(['PAYMENT', 'DEPOSIT']);
+    });
+
+    it('keeps an exact same-currency match ahead of a cross-currency one', async () => {
+      const ctx = await multiCurrencyHousehold();
+      await rate(ctx, '2026-07-01', 1.08);
+      const out = await row(ctx, { account: ctx.current, amount: -100, date: '2026-07-03' });
+      const euros = await row(ctx, { account: ctx.savings, amount: 100, date: '2026-07-04' });
+      const dollars = await row(ctx, { account: ctx.dollars, amount: 108, date: '2026-07-04' });
+
+      await reconcile(ctx.household.tenant.tenantKey);
+
+      expect(await storedWithRate(out, euros, dollars)).toEqual([
+        { counterpart: euros.transactionKey, rate: null, type: 'TRANSFER_OUT' },
+        { counterpart: out.transactionKey, rate: null, type: 'TRANSFER_IN' },
+        { counterpart: null, rate: null, type: 'DEPOSIT' },
+      ]);
+    });
+
+    it('is idempotent: a second run keeps the pair and writes nothing', async () => {
+      const ctx = await multiCurrencyHousehold();
+      await rate(ctx, '2026-07-03', 1.08);
+      const out = await row(ctx, { account: ctx.current, amount: -100, date: '2026-07-03' });
+      const into = await row(ctx, { account: ctx.dollars, amount: 107.2, date: '2026-07-04' });
+      await reconcile(ctx.household.tenant.tenantKey);
+      const auditRows = await db.em().count(TransactionAuditLog, {});
+
+      const second = await reconcile(ctx.household.tenant.tenantKey);
+
+      expect(second).toMatchObject({ pairsDissolved: 0, pairsMatched: 0, rowsChanged: 0 });
+      expect(await db.em().count(TransactionAuditLog, {})).toBe(auditRows);
+      expect((await storedWithRate(out, into)).map((r) => [r.type, r.rate])).toEqual([['TRANSFER_OUT', 1.072], ['TRANSFER_IN', 1.072]]);
+    });
+
+    it('dissolves a cross-currency pair once an amount moves beyond the tolerance', async () => {
+      const ctx = await multiCurrencyHousehold();
+      await rate(ctx, '2026-07-03', 1.08);
+      const out = await row(ctx, { account: ctx.current, amount: -100, date: '2026-07-03' });
+      const into = await row(ctx, { account: ctx.dollars, amount: 108, date: '2026-07-03' });
+      await reconcile(ctx.household.tenant.tenantKey);
+      const em = db.em();
+      const resettled = await em.findOneOrFail(Transaction, { transactionKey: into.transactionKey });
+      resettled.settlementAmount = 90;
+      await em.flush();
+
+      const result = await reconcile(ctx.household.tenant.tenantKey);
+
+      expect(result.pairsDissolved).toBe(1);
+      expect(await storedWithRate(out, into)).toEqual([{ counterpart: null, rate: null, type: 'PAYMENT' }, { counterpart: null, rate: null, type: 'DEPOSIT' }]);
+    });
+
+    it('accepts a difference of exactly the tolerance and nothing more', () => {
+      const base = { booked: true, counterpartKey: null, deleted: false, hidden: false, privateTo: null, synced: true, transferRate: null, userTyped: false };
+      const rows: TransferRow[] = [
+        { ...base, accountKey: 1, cents: -10_000, currencyKey: 1, day: 3, transactionKey: 1, typeName: 'PAYMENT' },
+        // 100.00 at 1.02 is 102.00, exactly 2 percent of the 100.00 that arrived.
+        { ...base, accountKey: 2, cents: 10_000, currencyKey: 2, day: 3, transactionKey: 2, typeName: 'DEPOSIT' },
+        { ...base, accountKey: 1, cents: -20_000, currencyKey: 1, day: 10, transactionKey: 3, typeName: 'PAYMENT' },
+        // 200.00 at 1.02 is 204.00, 4.01 away from 199.99: just over 2 percent of it.
+        { ...base, accountKey: 2, cents: 19_999, currencyKey: 2, day: 10, transactionKey: 4, typeName: 'DEPOSIT' },
+      ];
+
+      const plan = planTransfers(rows, { fxTolerance: 0.02, rateOn: () => 1.02 });
+
+      expect(plan.changes.map((change) => [change.transactionKey, change.counterpartKey.to])).toEqual([[1, 2], [2, 1]]);
+    });
   });
 });

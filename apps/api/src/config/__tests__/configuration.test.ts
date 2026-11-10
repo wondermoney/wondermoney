@@ -75,6 +75,15 @@ describe('loadConfiguration', () => {
     expect(() => loadConfiguration('api', { ...validApi, TRUST_PROXY: '1' })).not.toThrow();
   });
 
+  it('takes the cross-currency transfer tolerance as a fraction and refuses a percentage', () => {
+    expect(() => loadConfiguration('worker', { ...validShared, TRANSFER_MATCH_FX_TOLERANCE: '0.02' })).not.toThrow();
+    expect(() => loadConfiguration('api', { ...validApi, TRANSFER_MATCH_FX_TOLERANCE: '0' })).not.toThrow();
+    // "2" meant as 2 percent would accept any amount within 200 percent: refused at boot.
+    expect(() => loadConfiguration('worker', { ...validShared, TRANSFER_MATCH_FX_TOLERANCE: '2' })).toThrow(/TRANSFER_MATCH_FX_TOLERANCE/);
+    expect(() => loadConfiguration('api', { ...validApi, TRANSFER_MATCH_FX_TOLERANCE: '2%' })).toThrow(/TRANSFER_MATCH_FX_TOLERANCE/);
+    expect(() => loadConfiguration('api', { ...validApi, TRANSFER_MATCH_FX_TOLERANCE: '-0.01' })).toThrow(/TRANSFER_MATCH_FX_TOLERANCE/);
+  });
+
   it('parses worker roles with worker-only fields', () => {
     const worker = loadConfiguration('worker', {
       ...validShared,

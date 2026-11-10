@@ -167,6 +167,7 @@ const ALLOWED_CHANGE_FIELDS = new Set([
   'transactionStatusKey',
   'transactionTypeKey',
   'transferCounterpartKey',
+  'transferExchangeRate',
 ]);
 
 function sanitizeChanges(changes: TransactionAuditLogInput['changes']): TransactionAuditLogInput['changes'] {

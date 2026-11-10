@@ -151,8 +151,10 @@ Every integration is optional and fails closed: unconfigured, its feature report
 - **Synced transaction types.** A credit syncs as `DEPOSIT`, a debit as `PAYMENT`.
   `services/transaction/transfer-matching.service.ts` then pairs opposite rows on two accounts
   of one tenant (same amount and currency, at most 3 days apart, unique closest match) as
-  `TRANSFER_OUT`/`TRANSFER_IN`. A user-set type is never overwritten; the file header has the
-  full rule.
+  `TRANSFER_OUT`/`TRANSFER_IN`. Across currencies it converts the outgoing amount at the stored
+  rate for its day (no rate, no pair) and accepts it within `TRANSFER_MATCH_FX_TOLERANCE`
+  (default 0.02), only between accounts the same members can see. A user-set type is never
+  overwritten; the file header has the full rule.
 - **Market data: EODHD** (`EODHD_API_KEY`, read by the API and the worker's price jobs).
   `services/market-data/eodhd.service.ts` builds the client lazily and maps every failure
   through `handleEodhdError`: 404 → 404, `rate_limit` → 429 with the provider's `retryAfter`
