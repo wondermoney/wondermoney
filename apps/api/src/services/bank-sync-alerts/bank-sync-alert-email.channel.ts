@@ -5,8 +5,7 @@ import { instanceName } from '@config/instance-name';
 import { SupportedLanguages } from '@entity/Appuser';
 import { type RenderedEmailInput, type RenderedEmailOutcome, sendRenderedEmail } from '@service/email/email';
 import { EmailGlobalOptOutService } from '@service/email/email-global-opt-out.service';
-import { categoryEnabled, EmailCategory } from '@service/email/email-preferences';
-import { isRecipientReachable } from '@service/lifecycle/lifecycle-consent';
+import { categoryEnabled, EmailCategory, isRecipientReachable } from '@service/email/email-preferences';
 import { BACKEND_URL, FRONTEND_URL } from '@utils/constants';
 
 import type { BankSyncAlertChannelHandler, BankSyncAlertChannelOutcome, BankSyncAlertMessage } from './bank-sync-alert-channel';

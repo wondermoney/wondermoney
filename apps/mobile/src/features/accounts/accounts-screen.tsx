@@ -18,6 +18,7 @@ import { EmptyState, Section } from '@/components/ui/section'
 import { SelectTrigger } from '@/components/ui/select-trigger'
 import { OptionSheet } from '@/components/ui/sheet'
 import { Text } from '@/components/ui/text'
+import type { AmountsCompleteness } from '@/lib/api/completeness'
 import { formatCategoryName } from '@/lib/formatters/category-name'
 import { useFormatMoney } from '@/lib/formatters/money-display'
 import { formatRelativeTime } from '@/lib/formatters/relative-time'
@@ -44,6 +45,8 @@ export type AccountsInsights = Readonly<{
   timeframe: AccountsTimeframe
   metrics: MetricsSectionState
   categories: SectionState<readonly CategoryRow[]>
+  /** Category spending left out for want of an exchange rate, when the API says so. */
+  categoriesCompleteness?: AmountsCompleteness
   balance: SectionState<readonly BalancePoint[]>
   transactions: SectionState<readonly TransactionViewModel[]>
   cashflow: SectionState<readonly CashflowRow[]>
@@ -310,7 +313,7 @@ export function AccountsScreen({
 
           {insights ? (
             <Section title={t('accountsOverview.spendingByCategory')} variant="open">
-              <SectionBody state={insights.categories} render={(rows) => <CategorySpendingList currency={currency} locale={locale} rows={rows} />} />
+              <SectionBody state={insights.categories} render={(rows) => <CategorySpendingList completeness={insights.categoriesCompleteness} currency={currency} locale={locale} rows={rows} />} />
             </Section>
           ) : null}
 

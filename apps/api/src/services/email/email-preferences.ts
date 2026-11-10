@@ -57,3 +57,23 @@ export function categoryEnabled(prefs: EmailCategoryFlagsSource, category: Email
 export function canSendOptionalEmail(appuser: MarketingOptOutAppuser, prefs: EmailCategoryFlagsSource, category: EmailCategory): boolean {
   return !appuser.marketingOptOut && categoryEnabled(prefs, category);
 }
+
+/** The subset of `Appuser` that `isRecipientReachable` reads. Structural, so a raw-SQL projection also satisfies it. */
+export interface EmailRecipient {
+  deletedAt?: Date | null;
+  emailAddress?: null | string;
+  recordActive?: boolean;
+}
+
+/**
+ * True when the account can receive mail of any kind. Deletion scrubs the
+ * address to an internal one and flips `recordActive`, so this is not a consent
+ * question — the mailbox is gone. It therefore applies to transactional mail
+ * too, and is checked before the opt-out: deletion sets `marketingOptOut` as a
+ * side effect, and reporting that as the cause would misattribute it.
+ */
+export function isRecipientReachable<T extends EmailRecipient>(recipient: null | T | undefined): recipient is T {
+  if (!recipient?.emailAddress) return false;
+  if (recipient.deletedAt) return false;
+  return recipient.recordActive !== false;
+}

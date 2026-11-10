@@ -17,6 +17,7 @@ import { ProgressBar } from '@/components/ui/progress-bar'
 import { SafeAreaView } from '@/components/ui/screen-safe-area'
 import { EmptyState, Section } from '@/components/ui/section'
 import { Text } from '@/components/ui/text'
+import { formatTransactionDate, transactionDateEnd } from '@/lib/dates/transaction-date'
 import { formatCategoryName } from '@/lib/formatters/category-name'
 import { formatNumberInput, parseNumberInput } from '@/lib/formatters/decimal-input'
 import { formatMoneyForDisplay } from '@/lib/formatters/money-display'
@@ -293,9 +294,10 @@ function formatRange(min: number, max: number, currency: string | null, locale: 
   return low === high ? money(low, currency, locale, hidden) : `${money(low, currency, locale, hidden)}–${money(high, currency, locale, hidden)}`
 }
 
+/** A recurring date as the transaction it comes from is shown: a date-only booking on its own date. */
 function formatDate(value: string | null, locale: string) {
   if (!value || !Number.isFinite(Date.parse(value))) return '—'
-  return new Intl.DateTimeFormat(locale, { dateStyle: 'medium' }).format(new Date(value))
+  return formatTransactionDate(value, locale)
 }
 
 /** Web's `RecurringAmountDisplay`: the fixed amount, the min–max range, or the average / last charge. */
@@ -425,13 +427,16 @@ function SummaryFigure({ children, muted = false }: { children: React.ReactNode;
   return <Text align="right" numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7} tone={muted ? 'muted' : 'default'} variant="amount">{children}</Text>
 }
 
-/** Web's `RecurringUpcomingTimeline`: included series due after now, soonest first, on a dotted rail. */
+/**
+ * Web's `RecurringUpcomingTimeline`: included series still to come, soonest first, on a dotted
+ * rail. A date-only expected date stays until its own day is over on the device's calendar.
+ */
 function Upcoming({ rows, currencyOf, locale, now }: { rows: readonly RecurringRowViewModel[]; currencyOf: (row: RecurringRowViewModel) => string | null; locale: string; now: number }) {
   const { hidden } = usePrivacyMode()
   const { t } = useTranslation()
   const palette = usePalette()
   const upcoming = rows
-    .filter((row) => row.nextExpectedAt && Date.parse(row.nextExpectedAt) > now)
+    .filter((row) => row.nextExpectedAt && transactionDateEnd(row.nextExpectedAt).getTime() > now)
     .sort((a, b) => Date.parse(a.nextExpectedAt!) - Date.parse(b.nextExpectedAt!))
   if (upcoming.length === 0) return <Text style={styles.emptyLine} tone="muted" variant="meta">{t('recurring.upcomingEmpty')}</Text>
   return (

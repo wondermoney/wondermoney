@@ -3,6 +3,8 @@ import { StyleSheet, View } from 'react-native'
 
 import { Amount } from '@/components/ui/amount'
 import { Text } from '@/components/ui/text'
+import { UnconvertedAmountsNote } from '@/components/ui/unconverted-amounts-note'
+import type { AmountsCompleteness } from '@/lib/api/completeness'
 import { useFormatMoney } from '@/lib/formatters/money-display'
 import { themeTokens } from '@/theme/tokens'
 
@@ -28,7 +30,7 @@ export type SankeyReportViewState =
   | { status: 'error' }
   | { status: 'invalid-response' }
   | { status: 'access-transition' }
-  | { status: 'loaded'; report: SankeyReportViewModel; refreshing?: boolean }
+  | { status: 'loaded'; report: SankeyReportViewModel; refreshing?: boolean; completeness?: AmountsCompleteness }
 
 export type SankeyReportBodyProps = {
   state: SankeyReportViewState
@@ -106,6 +108,7 @@ export function SankeyReportBody({ state, currencyCode, exportState, onExport, o
       title={t('reports.sankey.title')}
     >
       {content}
+      {state.status === 'loaded' ? <UnconvertedAmountsNote completeness={state.completeness} testID="sankey-report-unconverted" /> : null}
     </ReportSection>
   )
 }

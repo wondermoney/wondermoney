@@ -5,6 +5,7 @@ import type { ReactNode } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import type { RecurringItem } from "@/lib/api/recurring/useRecurringItems";
 import { cn } from "@/lib/utils";
+import { transactionDisplayDate } from "@/lib/utils/transaction-date";
 
 import { RecurringAmountDisplay } from "./RecurringAmountDisplay";
 import { RecurringItemActions } from "./RecurringItemActions";
@@ -58,21 +59,25 @@ const defaultDateFormatter = (date: Date, locale?: string) =>
 const sortByNextExpected = (items: RecurringItem[]) =>
   [...items].sort((left, right) => {
     const leftTime = left.nextExpectedAt
-      ? new Date(left.nextExpectedAt).getTime()
+      ? transactionDisplayDate(left.nextExpectedAt).getTime()
       : Number.POSITIVE_INFINITY;
     const rightTime = right.nextExpectedAt
-      ? new Date(right.nextExpectedAt).getTime()
+      ? transactionDisplayDate(right.nextExpectedAt).getTime()
       : Number.POSITIVE_INFINITY;
     return leftTime - rightTime;
   });
 
+/**
+ * A recurring date (last paid, next expected) as the transaction it comes from is shown: a
+ * date-only booking on its own date, anything else on its local day.
+ */
 const formatDateValue = (
   value: string | null | undefined,
   formatter: (date: Date) => string,
 ) => {
   if (!value) return "—";
 
-  const date = new Date(value);
+  const date = transactionDisplayDate(value);
   return Number.isNaN(date.getTime()) ? "—" : formatter(date);
 };
 

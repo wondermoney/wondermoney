@@ -30,6 +30,17 @@ export function transactionDisplayDate(value: string | Date): Date {
 }
 
 /**
+ * The last instant a transaction date covers, in local time: the end of its own day for a
+ * date-only booking, its instant otherwise. For "still to come" checks, so a payment expected on
+ * a date stays upcoming all that day. An invalid date for a value that is not one.
+ */
+export function transactionDateEnd(value: string | Date): Date {
+  const date = transactionDisplayDate(value)
+  if (isDateOnlyTransactionDate(value)) date.setHours(23, 59, 59, 999)
+  return date
+}
+
+/**
  * A transaction date in `locale` (`dateStyle: 'medium'` by default): its own date for a date-only
  * booking, the local day otherwise. A value that is not a date comes back as it is.
  */

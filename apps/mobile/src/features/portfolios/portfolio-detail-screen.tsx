@@ -22,6 +22,7 @@ import { PortfolioPerformanceChart, type PortfolioPerformanceChartProps } from '
 import { PortfolioFailure, PortfolioLoading } from './portfolio-screen-parts'
 import {
   DividendIncomeBody,
+  hasDividendIncome,
   HoldingsList,
   PortfolioAllocationSection,
   PortfolioQuickStatsSection,
@@ -124,7 +125,7 @@ export function PortfolioDetailScreen({ state, performance, dividendIncome = { s
               {allocation ? <PortfolioAllocationSection locale={locale} state={allocation} title={t('portfolioSections.allocation')} /> : null}
               {topMovers ? <PortfolioTopMoversSection currency={data.currency} locale={locale} state={topMovers} /> : null}
               <PortfolioQuickStatsSection bestPerformer={data.bestPerformer} biggestPosition={data.biggestPosition} holdingsCount={data.holdingsCount} locale={locale} worstPerformer={data.worstPerformer} />
-              {dividendIncome.status === 'loaded' && dividendIncome.data.totalDividends > 0 ? (
+              {dividendIncome.status === 'loaded' && hasDividendIncome(dividendIncome.data) ? (
                 <Section title={t('portfolioSections.dividendIncome')} variant="open">
                   <DividendIncomeBody data={dividendIncome.data} locale={locale} />
                 </Section>

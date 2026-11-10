@@ -28,6 +28,7 @@ export function SpendingByCategoryReportRoute() {
       status: 'loaded',
       report: mapSpendingByCategoryReport(query.data, query.priorData, t('reports.other')),
       trendReady: query.priorReady,
+      completeness: query.data.completeness,
       refreshing: query.isFetching,
     }
   } else if (query.error instanceof ApiError && query.error.code === 'invalid-response') state = { status: 'invalid-response' }

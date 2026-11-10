@@ -1,8 +1,9 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
 import { useProductRuntime } from '@/components/providers/product-runtime-provider'
+import { ApiError } from '@/lib/api/errors'
 
-import { type DataExport, listDataExportsEndpoint, startDataExportEndpoint } from './data-export-contract'
+import { type DataExport, listDataExportsEndpoint, startDataExportBody, startDataExportEndpoint } from './data-export-contract'
 import { dataExportsKey } from './query-keys'
 
 const POLL_INTERVAL_MS = 3000
@@ -26,7 +27,25 @@ export function useLatestDataExport(enabled: boolean) {
   })
 }
 
-/** Start an export, or get back the one already in progress. Never replayed automatically. */
+export type DataExportFailure = 'limit' | 'in-progress' | 'password' | 'unknown'
+
+/**
+ * Why starting an export failed, from the status the API answered with: 429 is the daily limit,
+ * 409 another export of the other kind (protected or not) still running, and 400 a password the
+ * server rejected (its message is never shown: it is in English and the request log's wording).
+ */
+export function classifyDataExportFailure(error: unknown): DataExportFailure {
+  if (!(error instanceof ApiError) || error.code !== 'http') return 'unknown'
+  if (error.status === 429) return 'limit'
+  if (error.status === 409) return 'in-progress'
+  if (error.status === 400) return 'password'
+  return 'unknown'
+}
+
+/**
+ * Start an export, or get back the one already in progress. Never replayed automatically. With a
+ * password the server encrypts the archive with it; it goes in the request body only.
+ */
 export function useStartDataExport() {
   const { runtime } = useProductRuntime()
   if (!runtime) throw new Error('useStartDataExport requires an authenticated runtime')
@@ -34,7 +53,9 @@ export function useStartDataExport() {
 
   return useMutation({
     retry: false,
-    mutationFn: async () => (await runtime.apiClient.write(startDataExportEndpoint, { body: {}, commit: () => undefined })).export,
+    mutationFn: async (options: { password?: string } = {}) => (
+      await runtime.apiClient.write(startDataExportEndpoint, { body: startDataExportBody(options.password), commit: () => undefined })
+    ).export,
     onSuccess: (dataExport) => {
       queryClient.setQueryData<DataExport[]>(dataExportsKey(runtime.epochId), (current) => [
         dataExport,

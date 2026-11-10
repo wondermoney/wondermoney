@@ -3,5 +3,6 @@
   "framework": "nextjs",
   "installCommand": "pnpm install --frozen-lockfile",
   "buildCommand": "pnpm build",
-  "outputDirectory": ".react-email/.next"
+  "outputDirectory": ".react-email/.next",
+  "ignoreCommand": "bash ../../scripts/vercel-ignore-build.sh . ../../pnpm-lock.yaml"
 }

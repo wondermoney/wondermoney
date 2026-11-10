@@ -434,23 +434,25 @@ class PortfolioHoldingsService {
   }
 
   /**
-   * Every buy, sale and dividend as a dated cash flow in the user's currency (see
-   * InvestmentCashFlow), oldest first, for money-weighted returns. Trades are priced exactly as the
-   * holdings and realized gains price them: a buy at its quantity times its unit amount plus its
-   * converted fee, a sale at its proceeds less its fee. A dividend counts at its converted amount,
-   * or at its settlement amount in the settlement currency when it has none. Each flow carries its
-   * currency (`currencyCode`) for the reader to convert. With `portfolioKey`, only that portfolio's
-   * flows.
+   * Every buy, sale and dividend as a dated cash flow for `viewer` (see InvestmentCashFlow), oldest
+   * first, for money-weighted returns. Trades are priced exactly as the holdings and realized gains
+   * price them: a buy at its quantity times its unit amount plus its converted fee, a sale at its
+   * proceeds less its fee. A dividend counts at the stored amount dividend income reads it at
+   * ({@link dividendSourceAmount}), so the two agree for every member. Each flow carries its
+   * currency (`currencyCode`) for the reader to convert into the viewer's. With `tenantKey`, the
+   * household's flows, otherwise the viewer's own; with `portfolioKey`, only that portfolio's.
    */
-  async getInvestmentCashFlows(appuserKey: number, tenantKey?: number, portfolioKey?: number): Promise<InvestmentCashFlow[]> {
+  async getInvestmentCashFlows(viewer: Appuser, tenantKey?: number, portfolioKey?: number): Promise<InvestmentCashFlow[]> {
+    const appuserKey = viewer.appuserKey;
     const { transactionRows } = await this.getPortfolioTransactionRows(appuserKey, portfolioKey, tenantKey);
+    const dividend = dividendSourceAmount(viewer.currencyKey.currencyKey);
     const dividendRows = (await sqlQuery(DI.em)
       .selectFrom('financial_transaction as ft')
       .innerJoin('portfolio as p', 'ft.portfolio_key', 'p.portfolio_key')
       .leftJoin('appuser as au', 'ft.appuser_key', 'au.appuser_key')
-      .leftJoin('currency as appuser_c', 'au.currency_key', 'appuser_c.currency_key')
+      .leftJoin('currency as member_c', 'au.currency_key', 'member_c.currency_key')
       .leftJoin('currency as settlement_c', 'ft.settlement_currency_key', 'settlement_c.currency_key')
-      .select(['ft.transaction_date', 'ft.appuser_settlement_amount', 'ft.settlement_amount', 'appuser_c.code as appuser_currency_code', 'settlement_c.code as settlement_currency_code'])
+      .select(['ft.transaction_date', dividend.amount.as('amount'), dividend.currencyCode.as('currency_code')])
       .where('ft.financial_transaction_type_key', '=', FINANCIAL_TRANSACTION_TYPES.DIVIDEND)
       // Household scope when a tenant is supplied (raw SQL bypasses the filter), on both the
       // transaction and its portfolio as for trades; otherwise appuser scope.
@@ -482,46 +484,29 @@ class PortfolioHoldingsService {
         flows.push({ amount: proceeds - fee, currencyCode, date, kind: 'SELL' });
       }
     }
-    // A dividend likewise: one with no converted amount (settled in the member's own currency, or
-    // in another with no rate when it was recorded) counts at its settlement amount in the
-    // settlement currency, for the reader to convert or report as unknown; it is never dropped.
+    // A dividend in the currency of the amount it is read at, for the reader to convert or report
+    // as unknown; it is never dropped.
     for (const row of dividendRows) {
-      const converted = row['appuser_settlement_amount'] != null;
-      const amount = converted ? row['appuser_settlement_amount'] : row['settlement_amount'];
-      if (amount == null) continue;
-      const currencyCode = codeOf(converted ? row['appuser_currency_code'] : row['settlement_currency_code']);
-      flows.push({ amount: Math.abs(Number(amount)), currencyCode, date: new Date(String(row['transaction_date'])), kind: 'DIVIDEND' });
+      if (row['amount'] == null) continue;
+      flows.push({ amount: Math.abs(Number(row['amount'])), currencyCode: codeOf(row['currency_code']), date: new Date(String(row['transaction_date'])), kind: 'DIVIDEND' });
     }
     return flows.toSorted((a, b) => a.date.getTime() - b.date.getTime());
   }
 
   /**
    * Every dividend received, per asset and in total, in the viewer's currency. A dividend counts at
-   * the stored amount that is already in the viewer's currency when there is one (its settlement
-   * amount, or the amount converted into its member's currency), so it is exact; otherwise at its
-   * settlement amount, converted into the viewer's currency at the rate of the dividend's UTC day
-   * (the member amount only when no settlement amount or currency is recorded). One with no rate is left out of both totals and counted in
-   * `completeness`, never added at face value. With `tenantKey`, the household's dividends;
-   * otherwise the viewer's own (worker path). With `portfolioId`, that portfolio's only.
+   * the stored amount {@link dividendSourceAmount} picks: exact when one is already in the viewer's
+   * currency, otherwise converted into it at the rate of the dividend's UTC day. One with no rate is
+   * left out of both totals and counted in `completeness`, never added at face value. With
+   * `tenantKey`, the household's dividends; otherwise the viewer's own (worker path). With
+   * `portfolioId`, that portfolio's only.
    */
   async getDividendIncome(viewer: Appuser, portfolioId?: number, tenantKey?: number): Promise<DividendIncome> {
     if (!viewer.currencyKey.code) await DI.em.populate(viewer, ['currencyKey']);
     const viewerCurrency = viewer.currencyKey.code;
     // Summed per asset, currency and UTC day (rates are daily), so each day's sum is converted once.
     const day = sql<string>`to_char(ft.transaction_date AT TIME ZONE 'UTC', 'YYYY-MM-DD')`;
-    // Inlined (not bound) so the select and the group-by repeat the same text.
-    const viewerCurrencyKey = sql.raw(currencyKeySql(viewer.currencyKey.currencyKey));
-    // Which stored amount a dividend is read at: one already in the viewer's currency when there is
-    // one (exact, no conversion), else its settlement amount, converted once. The amount stored in
-    // its member's currency is read only when the settlement amount is missing, or when the
-    // settlement records no currency and the member amount does.
-    const fromSettlement = sql<boolean>`(CASE
-      WHEN ft.settlement_amount IS NOT NULL AND ft.settlement_currency_key = ${viewerCurrencyKey} THEN TRUE
-      WHEN ft.appuser_settlement_amount IS NOT NULL AND au.currency_key = ${viewerCurrencyKey} THEN FALSE
-      ELSE ft.settlement_amount IS NOT NULL AND (ft.settlement_currency_key IS NOT NULL OR ft.appuser_settlement_amount IS NULL)
-    END)`;
-    const currencyCode = sql<null | string>`CASE WHEN ${fromSettlement} THEN settlement_c.code ELSE member_c.code END`;
-    const amount = sql<string>`CASE WHEN ${fromSettlement} THEN ft.settlement_amount ELSE ft.appuser_settlement_amount END`;
+    const { amount, currencyCode } = dividendSourceAmount(viewer.currencyKey.currencyKey);
     const rows = (await sqlQuery(DI.em)
       .selectFrom('financial_transaction as ft')
       .innerJoin('financial_asset as fa', 'ft.financial_asset_key', 'fa.financial_asset_key')
@@ -694,6 +679,29 @@ async function convertFeeToAccountingCurrency(row: Record<string, unknown>, db: 
     .executeTakeFirst() as undefined | { rate?: number | string };
   if (!isValidFeeExchangeRate(rateRow?.rate)) return { reason: `missing historical exchange rate from ${feeCode} to ${accountingCode}` };
   return { amount: fee * Number(rateRow?.rate) };
+}
+
+/**
+ * Which stored amount a dividend is read at for a viewer whose currency is `viewerCurrencyKey`,
+ * and the currency that amount is in. One already in the viewer's currency when there is one
+ * (exact, no conversion), else its settlement amount, converted once. The amount stored in its
+ * member's currency is read only when the settlement amount is missing, or when the settlement
+ * records no currency and the member amount does. Dividend income and the investment cash flows
+ * both read it, so the two agree. The query joins `ft` (financial_transaction), `au` (its
+ * member), `member_c` (the member's currency) and `settlement_c` (the settlement currency). The
+ * key is inlined (not bound) so a select and a group-by repeat the same text.
+ */
+function dividendSourceAmount(viewerCurrencyKey: number) {
+  const viewerKey = sql.raw(currencyKeySql(viewerCurrencyKey));
+  const fromSettlement = sql<boolean>`(CASE
+    WHEN ft.settlement_amount IS NOT NULL AND ft.settlement_currency_key = ${viewerKey} THEN TRUE
+    WHEN ft.appuser_settlement_amount IS NOT NULL AND au.currency_key = ${viewerKey} THEN FALSE
+    ELSE ft.settlement_amount IS NOT NULL AND (ft.settlement_currency_key IS NOT NULL OR ft.appuser_settlement_amount IS NULL)
+  END)`;
+  return {
+    amount: sql<null | string>`CASE WHEN ${fromSettlement} THEN ft.settlement_amount ELSE ft.appuser_settlement_amount END`,
+    currencyCode: sql<null | string>`CASE WHEN ${fromSettlement} THEN settlement_c.code ELSE member_c.code END`,
+  };
 }
 
 function getFeeConversionIncompleteAssetKeys(transactionRows: Record<string, unknown>[]): number[] {

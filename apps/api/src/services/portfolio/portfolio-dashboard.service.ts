@@ -205,7 +205,7 @@ export class PortfolioDashboardService {
   private async measurePeriod(appuser: Appuser, portfolioKey: number, periodStartDate: Date, liveValue: number, tenantKey?: number): Promise<PortfolioPeriodMeasure> {
     const viewerCurrency = await resolveViewerCurrency(appuser);
     const [recorded, startSnapshot] = await Promise.all([
-      portfolioHoldingsService.getInvestmentCashFlows(appuser.appuserKey, tenantKey, portfolioKey),
+      portfolioHoldingsService.getInvestmentCashFlows(appuser, tenantKey, portfolioKey),
       findSnapshotPointOnOrBefore(portfolioKey, periodStartDate, viewerCurrency),
     ]);
     const flows = await loadCashFlowsInViewerCurrency(recorded, viewerCurrency, periodFlowsSince(periodStartDate, startSnapshot));

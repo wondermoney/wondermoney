@@ -52,6 +52,7 @@ export function AccountsRoute() {
         timeframe,
         metrics,
         categories: section(insights.categories, (data) => mapCategorySpending(data.categorySpending, 6)),
+        categoriesCompleteness: insights.categories.data?.completeness,
         cashflow: section(insights.cashflow, (data) => mapCashflow(data.cashflow, currency)),
         transactions: mappedTransactions,
         balance: mappedTransactions.status === 'loaded'

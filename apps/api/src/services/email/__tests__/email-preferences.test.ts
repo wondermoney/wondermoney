@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { canSendOptionalEmail, categoryEnabled, EMAIL_CATEGORY_FLAG, EmailCategory } from '../email-preferences';
+import { canSendOptionalEmail, categoryEnabled, EMAIL_CATEGORY_FLAG, EmailCategory, isRecipientReachable } from '../email-preferences';
 
 describe('EMAIL_CATEGORY_FLAG', () => {
   it('maps each category to its own preference flag', () => {
@@ -61,5 +61,33 @@ describe('canSendOptionalEmail', () => {
     const prefs = { [flag]: true };
     expect(canSendOptionalEmail({ marketingOptOut: undefined }, prefs, category)).toBe(true);
     expect(canSendOptionalEmail({ marketingOptOut: undefined }, { [flag]: false }, category)).toBe(false);
+  });
+});
+
+describe('isRecipientReachable', () => {
+  const LIVE = { deletedAt: null, emailAddress: 'a@b.com', recordActive: true };
+  // A soft-deleted account: address scrubbed to an internal one, record deactivated.
+  const DELETED = { deletedAt: new Date('2026-07-20'), emailAddress: 'deleted+215@deleted.invalid', recordActive: false };
+
+  it('accepts a live account', () => {
+    expect(isRecipientReachable(LIVE)).toBe(true);
+  });
+
+  it('rejects a soft-deleted account', () => {
+    expect(isRecipientReachable(DELETED)).toBe(false);
+  });
+
+  it('rejects a deactivated account even when the address survives', () => {
+    expect(isRecipientReachable({ ...LIVE, recordActive: false })).toBe(false);
+  });
+
+  it('rejects a missing user and a missing address', () => {
+    expect(isRecipientReachable(null)).toBe(false);
+    expect(isRecipientReachable(undefined)).toBe(false);
+    expect(isRecipientReachable({ ...LIVE, emailAddress: null })).toBe(false);
+  });
+
+  it('treats an absent recordActive as active, so a partial projection is not silently muted', () => {
+    expect(isRecipientReachable({ emailAddress: 'a@b.com' })).toBe(true);
   });
 });

@@ -41,10 +41,14 @@ export interface TransactionImportSession {
   accountMapping: Record<string, number>;
   canCommit: boolean;
   canRetry: boolean;
+  /** When the commit finished. */
+  committedAt: string | null;
   correlationId: string | null;
   counts: Record<ImportRowStatus, number>;
   createdAt: string;
   decisions: Record<ImportDecision, number>;
+  /** Set 7 days after a commit, when the rows and file are deleted: only the summary (`counts`) is left. */
+  detailsDeletedAt: string | null;
   errorCode: string | null;
   expiresAt: string;
   format: "statement";

@@ -17,7 +17,10 @@ import {
   SelectValue,
 } from "@/components/ui/Select";
 import useAccounts from "@/lib/api/account/useAccounts";
-import { getApiErrorCode } from "@/lib/api/errors";
+import {
+  getPortfolioLinkHolderName,
+  isPortfolioLinkRefusal,
+} from "@/lib/api/errors";
 import usePortfolios from "@/lib/api/portfolio/usePortfolios";
 import useUpdatePortfolio from "@/lib/api/portfolio/useUpdatePortfolio";
 import {
@@ -29,8 +32,9 @@ import { useDismissibleActivation } from "@/lib/utils/useDismissibleActivation";
 const DISMISSAL_MS = 365 * 24 * 60 * 60 * 1000;
 
 /**
- * "Is this the same money?": shown on net worth when the household has an investment account and
- * a portfolio with no link (the API decides, `suggestPortfolioLink`). Amounts are not compared.
+ * "Is this the same money?": shown on net worth when the viewer can see an investment account no
+ * portfolio is linked to and the household has a portfolio with no link (the API decides,
+ * `suggestPortfolioLink`). Amounts are not compared.
  * Dismissing it hides it on this browser for a year.
  */
 export function PortfolioLinkSuggestion({ suggested }: { suggested: boolean }) {
@@ -61,10 +65,13 @@ export function PortfolioLinkSuggestion({ suggested }: { suggested: boolean }) {
       toast.success(t("saved"));
       setOpen(false);
     } catch (error) {
+      const holder = getPortfolioLinkHolderName(error);
       toast.error(
-        getApiErrorCode(error) === "forbidden"
-          ? t("managed-by-partner")
-          : tCommon("server-error"),
+        holder
+          ? t("already-linked-by", { name: holder })
+          : isPortfolioLinkRefusal(error)
+            ? t("managed-by-partner")
+            : tCommon("server-error"),
       );
     }
   };

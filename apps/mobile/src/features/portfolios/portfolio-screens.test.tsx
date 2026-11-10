@@ -134,6 +134,17 @@ describe('portfolio screens', () => {
     expect(empty.queryByText('Dividend Income')).not.toBeOnTheScreen()
   })
 
+  it('says which dividends were left out of the total, even when none could be counted', async () => {
+    const completeness = { currencyCode: 'EUR', isComplete: false, unconvertedTransactions: 1, unconvertedCurrencies: ['GBP'] }
+    const partial = await provider(<PortfolioDetailScreen state={{ status: 'loaded', data: detail }} performance={performanceProps} dividendIncome={{ status: 'loaded', data: { currency: 'EUR', dividends: [{ symbol: 'AAPL', value: 4 }], totalDividends: 4, completeness } }} onBack={jest.fn()} onOpenActivity={jest.fn()} onRefresh={jest.fn()} onLogout={jest.fn()} />)
+    expect(partial.getByTestId('dividend-income-unconverted')).toHaveTextContent(/1 transaction in GBP is left out/)
+    partial.unmount()
+
+    const allLeftOut = await provider(<PortfolioDetailScreen state={{ status: 'loaded', data: detail }} performance={performanceProps} dividendIncome={{ status: 'loaded', data: { currency: 'EUR', dividends: [], totalDividends: 0, completeness } }} onBack={jest.fn()} onOpenActivity={jest.fn()} onRefresh={jest.fn()} onLogout={jest.fn()} />)
+    expect(allLeftOut.getByText('Dividend Income')).toBeOnTheScreen()
+    expect(allLeftOut.getByTestId('dividend-income-unconverted')).toBeOnTheScreen()
+  })
+
   it('never lets a loading or failed dividend read hold up the rest of the page', async () => {
     const loading = await provider(<PortfolioDetailScreen state={{ status: 'loaded', data: detail }} performance={performanceProps} dividendIncome={{ status: 'loading' }} onBack={jest.fn()} onOpenActivity={jest.fn()} onRefresh={jest.fn()} onLogout={jest.fn()} />)
     expect(loading.getAllByText('Holdings').length).toBeGreaterThan(0)

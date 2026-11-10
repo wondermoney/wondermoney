@@ -61,6 +61,7 @@ interface TransactionImportReviewProps {
  * in the account, unreadable), each included or skipped, in bulk or one by
  * one; an account per source account when the file holds several; then the
  * commit, which runs in the background and can be retried where it stopped.
+ * Seven days after a commit only its summary is kept, and the outcome says so.
  */
 export default function TransactionImportReview({
   importId,
@@ -441,6 +442,11 @@ function Outcome({
       {session.counts.failed > 0 ? (
         <p className="text-muted-foreground">
           {t("import-review-done-failed", { failed: session.counts.failed })}
+        </p>
+      ) : null}
+      {session.detailsDeletedAt ? (
+        <p className="text-muted-foreground">
+          {t("import-review-details-deleted")}
         </p>
       ) : null}
     </div>

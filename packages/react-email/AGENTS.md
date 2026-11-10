@@ -11,7 +11,7 @@ template so it does not duplicate an existing send.
 
 ## Layout
 
-- `src/`: the library the API imports (`src/templates/`, render functions, lifecycle copy).
+- `src/`: the library the API imports (`src/templates/`, render functions).
 - `emails/`: preview entries for the playground (`pnpm dev`).
 - `scripts/`: render, handoff and package checks.
 

@@ -22,7 +22,7 @@ export function CashflowReportRoute() {
   if (query.isAccessTransition) state = { status: 'access-transition' }
   else if (query.isLoading) state = { status: 'loading' }
   else if (query.data) {
-    state = { status: 'loaded', report: mapCashflowReport(query.data), refreshing: query.isFetching }
+    state = { status: 'loaded', report: mapCashflowReport(query.data), completeness: query.data.completeness, refreshing: query.isFetching }
   } else if (query.error instanceof ApiError && query.error.code === 'invalid-response') state = { status: 'invalid-response' }
   else state = { status: 'error' }
 

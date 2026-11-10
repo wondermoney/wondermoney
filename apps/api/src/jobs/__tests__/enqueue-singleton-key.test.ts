@@ -1,7 +1,5 @@
 import { describe, expect, it } from 'vitest';
 
-import { LifecycleCampaign } from '@service/lifecycle/lifecycle-types';
-
 import { enqueueAccountAutoSyncRequisitionJob } from '../account-auto-sync.queue';
 import { enqueueAccountCsvImportJob } from '../account-csv-import.queue';
 import { enqueueAccountInitialSyncJob } from '../account-initial-sync.queue';
@@ -11,7 +9,6 @@ import { enqueueDataRestoreCleanupJob, enqueueDataRestoreJob } from '../data-res
 import { enqueueDemoDataRefreshJob } from '../demo-data-refresh.queue';
 import { enqueueFinancialEmailCoordinator, enqueueFinancialEmailUser } from '../financial-emails.queue';
 import { enqueueFxReconvertJob } from '../fx-reconvert.queue';
-import { enqueueLifecycleSend } from '../lifecycle-send.queue';
 import { enqueuePortfolioCsvImportConfirmedJob } from '../portfolio-csv-import-confirmed.queue';
 import { enqueuePortfolioCsvParsePreviewJob } from '../portfolio-csv-parse-preview.queue';
 import { enqueuePortfolioSnapshotManualJob } from '../portfolio-snapshot.queue';
@@ -172,15 +169,6 @@ const ENQUEUE_HELPERS: { invoke: (recorder: Recorder) => Promise<unknown>; name:
   {
     invoke: (r) => Promise.resolve(enqueueFoundationJob({ correlationId: 'foundation-1' }, asEnqueueDeps(r))),
     name: 'enqueueFoundationJob',
-  },
-  {
-    invoke: (r) =>
-      enqueueLifecycleSend(
-        { appuserKey: 11, campaign: LifecycleCampaign.DATA_HEALTH, step: 'consent_expiring', templateVersion: 'v1' },
-        asEnqueueDeps(r),
-        SCHEDULED_FOR,
-      ),
-    name: 'enqueueLifecycleSend',
   },
   {
     invoke: (r) => enqueuePortfolioCsvImportConfirmedJob({ correlationId: 'corr-1', importSessionId: 9 }, asEnqueueDeps(r)),

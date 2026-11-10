@@ -1,6 +1,7 @@
 import { z } from 'zod'
 
 import type { RawReadEndpoint } from '../../lib/api/client'
+import { amountsCompletenessSchema } from '../../lib/api/completeness'
 import { readEndpoint, tolerantEnum } from '../../lib/api/runtime-schema'
 
 /**
@@ -46,11 +47,16 @@ const reportFiltersEchoSchema = z.object({
   toDate: z.string().optional(),
 })
 
+/**
+ * `completeness` names the currency the amounts are in and counts the rows left out of the totals
+ * for want of an exchange rate. The spending, cash flow, flow and budget reports send it.
+ */
 function reportResponseSchema<T extends z.ZodTypeAny>(dataSchema: T) {
   return z.object({
     data: dataSchema,
     generatedAt: z.string(),
     filters: reportFiltersEchoSchema,
+    completeness: amountsCompletenessSchema.optional(),
   })
 }
 
@@ -123,9 +129,7 @@ export const budgetVsActualRowSchema = z.object({
 })
 
 // The report names the currency its amounts are in: the budget's, which need not be the viewer's.
-export const budgetVsActualResponseSchema = reportResponseSchema(z.array(budgetVsActualRowSchema)).extend({
-  completeness: z.object({ currencyCode: z.string() }).optional(),
-})
+export const budgetVsActualResponseSchema = reportResponseSchema(z.array(budgetVsActualRowSchema))
 export type BudgetVsActualRow = z.infer<typeof budgetVsActualRowSchema>
 
 /**

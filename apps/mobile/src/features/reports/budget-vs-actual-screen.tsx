@@ -3,6 +3,8 @@ import { StyleSheet, View } from 'react-native'
 
 import { Amount } from '@/components/ui/amount'
 import { Text } from '@/components/ui/text'
+import { UnconvertedAmountsNote } from '@/components/ui/unconverted-amounts-note'
+import type { AmountsCompleteness } from '@/lib/api/completeness'
 import { useFormatMoney } from '@/lib/formatters/money-display'
 import { themeTokens } from '@/theme/tokens'
 
@@ -28,7 +30,7 @@ export type BudgetVsActualViewState =
   | { status: 'error' }
   | { status: 'invalid-response' }
   | { status: 'access-transition' }
-  | { status: 'loaded'; report: BudgetVsActualReportViewModel; refreshing?: boolean }
+  | { status: 'loaded'; report: BudgetVsActualReportViewModel; refreshing?: boolean; completeness?: AmountsCompleteness }
 
 export type BudgetVsActualBodyProps = {
   state: BudgetVsActualViewState
@@ -121,6 +123,7 @@ export function BudgetVsActualBody({ state, currencyCode, exportState, onExport,
       title={t('reports.budgetVsActual.title')}
     >
       {content}
+      {state.status === 'loaded' ? <UnconvertedAmountsNote completeness={state.completeness} testID="budget-vs-actual-report-unconverted" /> : null}
     </ReportSection>
   )
 }

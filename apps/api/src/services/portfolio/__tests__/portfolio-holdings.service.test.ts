@@ -968,6 +968,8 @@ describe('portfolio holdings service', () => {
 });
 
 describe('investment cash flows', () => {
+  const viewer = { appuserKey: 1, currencyKey: { code: 'EUR', currencyKey: 2 } } as Appuser;
+
   it('prices buys with their fees as money in and sales net of fees as money out, in the user currency', async () => {
     const rawRows = [
       // 2 x 80 EUR plus a 10 USD fee at the stored 0.8: 168 EUR invested.
@@ -977,7 +979,7 @@ describe('investment cash flows', () => {
     ];
     Object.assign(DI.em, { getKysely: makeDatabaseMock({ rawRows }) });
 
-    const flows = await portfolioHoldingsService.getInvestmentCashFlows(1);
+    const flows = await portfolioHoldingsService.getInvestmentCashFlows(viewer);
 
     expect(flows).toHaveLength(2);
     expect(flows[0]).toMatchObject({ date: new Date('2024-01-01T00:00:00Z'), kind: 'BUY' });
@@ -986,19 +988,21 @@ describe('investment cash flows', () => {
     expect(flows[1]!.amount).toBeCloseTo(133.2, 8);
   });
 
+  // Which stored amount a dividend is read at is chosen in SQL: portfolio-dividend-income.test.ts
+  // runs it on a real database. Here each row carries the amount the query picked.
   it('counts dividends as money out, each in the currency its amount is in, in date order', async () => {
     const rawRows = [
       makeTransactionRow({ appuser_currency_code: 'EUR', appuser_unit_amount: 100, quantity: 10, transaction_date: new Date('2024-01-01T00:00:00Z') }),
-      // Settled in another currency: its converted amount.
-      { appuser_currency_code: 'EUR', appuser_currency_key: 2, appuser_settlement_amount: 9, financial_asset_key: 1, financial_transaction_type_key: FINANCIAL_TRANSACTION_TYPES.DIVIDEND, portfolio_key: 7, settlement_amount: 10, settlement_currency_key: 1, transaction_date: new Date('2024-06-01T00:00:00Z'), transaction_key: 3 },
-      // Settled in the user's own currency: its settlement amount.
-      { appuser_currency_code: 'EUR', appuser_currency_key: 2, appuser_settlement_amount: null, financial_asset_key: 1, financial_transaction_type_key: FINANCIAL_TRANSACTION_TYPES.DIVIDEND, portfolio_key: 7, settlement_amount: 12, settlement_currency_code: 'EUR', settlement_currency_key: 2, transaction_date: new Date('2024-03-01T00:00:00Z'), transaction_key: 4 },
-      // Another currency with no converted amount: in that currency, for the reader to convert.
-      { appuser_currency_code: 'EUR', appuser_currency_key: 2, appuser_settlement_amount: null, financial_asset_key: 1, financial_transaction_type_key: FINANCIAL_TRANSACTION_TYPES.DIVIDEND, portfolio_key: 7, settlement_amount: 50, settlement_currency_code: 'USD', settlement_currency_key: 3, transaction_date: new Date('2024-04-01T00:00:00Z'), transaction_key: 5 },
+      { amount: 9, currency_code: 'EUR', financial_asset_key: 1, financial_transaction_type_key: FINANCIAL_TRANSACTION_TYPES.DIVIDEND, portfolio_key: 7, transaction_date: new Date('2024-06-01T00:00:00Z'), transaction_key: 3 },
+      { amount: 12, currency_code: 'EUR', financial_asset_key: 1, financial_transaction_type_key: FINANCIAL_TRANSACTION_TYPES.DIVIDEND, portfolio_key: 7, transaction_date: new Date('2024-03-01T00:00:00Z'), transaction_key: 4 },
+      // In another currency, for the reader to convert.
+      { amount: 50, currency_code: 'USD', financial_asset_key: 1, financial_transaction_type_key: FINANCIAL_TRANSACTION_TYPES.DIVIDEND, portfolio_key: 7, transaction_date: new Date('2024-04-01T00:00:00Z'), transaction_key: 5 },
+      // No stored amount at all: nothing to count.
+      { amount: null, currency_code: null, financial_asset_key: 1, financial_transaction_type_key: FINANCIAL_TRANSACTION_TYPES.DIVIDEND, portfolio_key: 7, transaction_date: new Date('2024-05-01T00:00:00Z'), transaction_key: 6 },
     ];
     Object.assign(DI.em, { getKysely: makeDatabaseMock({ rawRows }) });
 
-    const flows = await portfolioHoldingsService.getInvestmentCashFlows(1);
+    const flows = await portfolioHoldingsService.getInvestmentCashFlows(viewer);
 
     expect(flows).toEqual([
       { amount: -1000, currencyCode: 'EUR', date: new Date('2024-01-01T00:00:00Z'), kind: 'BUY' },
@@ -1017,7 +1021,7 @@ describe('investment cash flows', () => {
     ];
     Object.assign(DI.em, { getKysely: makeDatabaseMock({ rawRows }) });
 
-    const flows = await portfolioHoldingsService.getInvestmentCashFlows(1);
+    const flows = await portfolioHoldingsService.getInvestmentCashFlows(viewer);
 
     expect(flows.map((flow) => [flow.amount, flow.currencyCode])).toEqual([[-90, 'EUR'], [-100, 'USD'], [45, 'EUR'], [50, 'USD']]);
   });
@@ -1026,12 +1030,12 @@ describe('investment cash flows', () => {
     const rawRows = [
       makeTransactionRow({ portfolio_key: 7, quantity: 1 }),
       makeTransactionRow({ portfolio_key: 8, quantity: 3, transaction_key: 2 }),
-      { appuser_currency_key: 2, appuser_settlement_amount: 5, financial_asset_key: 1, financial_transaction_type_key: FINANCIAL_TRANSACTION_TYPES.DIVIDEND, portfolio_key: 7, settlement_amount: 5, settlement_currency_key: 2, transaction_date: new Date('2024-03-01T00:00:00Z'), transaction_key: 3 },
-      { appuser_currency_key: 2, appuser_settlement_amount: 6, financial_asset_key: 1, financial_transaction_type_key: FINANCIAL_TRANSACTION_TYPES.DIVIDEND, portfolio_key: 8, settlement_amount: 6, settlement_currency_key: 2, transaction_date: new Date('2024-03-01T00:00:00Z'), transaction_key: 4 },
+      { amount: 5, currency_code: 'EUR', financial_asset_key: 1, financial_transaction_type_key: FINANCIAL_TRANSACTION_TYPES.DIVIDEND, portfolio_key: 7, transaction_date: new Date('2024-03-01T00:00:00Z'), transaction_key: 3 },
+      { amount: 6, currency_code: 'EUR', financial_asset_key: 1, financial_transaction_type_key: FINANCIAL_TRANSACTION_TYPES.DIVIDEND, portfolio_key: 8, transaction_date: new Date('2024-03-01T00:00:00Z'), transaction_key: 4 },
     ];
     Object.assign(DI.em, { getKysely: makeDatabaseMock({ rawRows }) });
 
-    const flows = await portfolioHoldingsService.getInvestmentCashFlows(1, 7, 8);
+    const flows = await portfolioHoldingsService.getInvestmentCashFlows(viewer, 7, 8);
 
     expect(flows.map((flow) => flow.amount)).toEqual([-300, 6]);
   });
@@ -1041,12 +1045,12 @@ describe('investment cash flows', () => {
     const rawRows = [
       makeTransactionRow({ portfolio_tenant_key: 7, tenant_key: 7 }),
       makeTransactionRow({ portfolio_tenant_key: 8, tenant_key: 8, transaction_key: 2 }),
-      { appuser_currency_key: 2, appuser_settlement_amount: 5, financial_asset_key: 1, financial_transaction_type_key: FINANCIAL_TRANSACTION_TYPES.DIVIDEND, portfolio_key: 7, portfolio_tenant_key: 7, settlement_amount: 5, settlement_currency_key: 2, tenant_key: 7, transaction_date: new Date('2024-03-01T00:00:00Z'), transaction_key: 3 },
-      { appuser_currency_key: 2, appuser_settlement_amount: 6, financial_asset_key: 1, financial_transaction_type_key: FINANCIAL_TRANSACTION_TYPES.DIVIDEND, portfolio_key: 8, portfolio_tenant_key: 8, settlement_amount: 6, settlement_currency_key: 2, tenant_key: 8, transaction_date: new Date('2024-03-01T00:00:00Z'), transaction_key: 4 },
+      { amount: 5, currency_code: 'EUR', financial_asset_key: 1, financial_transaction_type_key: FINANCIAL_TRANSACTION_TYPES.DIVIDEND, portfolio_key: 7, portfolio_tenant_key: 7, tenant_key: 7, transaction_date: new Date('2024-03-01T00:00:00Z'), transaction_key: 3 },
+      { amount: 6, currency_code: 'EUR', financial_asset_key: 1, financial_transaction_type_key: FINANCIAL_TRANSACTION_TYPES.DIVIDEND, portfolio_key: 8, portfolio_tenant_key: 8, tenant_key: 8, transaction_date: new Date('2024-03-01T00:00:00Z'), transaction_key: 4 },
     ];
     Object.assign(DI.em, { getKysely: makeDatabaseMock({ queryLog, rawRows }) });
 
-    const flows = await portfolioHoldingsService.getInvestmentCashFlows(1, 7);
+    const flows = await portfolioHoldingsService.getInvestmentCashFlows(viewer, 7);
 
     expect(flows.map((flow) => flow.amount)).toEqual([-100, 5]);
     const transactionQueries = queryLog.filter((query) => query.sql.includes('from "financial_transaction" as "ft"'));

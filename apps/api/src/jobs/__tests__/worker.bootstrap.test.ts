@@ -256,8 +256,6 @@ describe('createWorker', () => {
       'email.weekly.user',
       'email.monthly_story.coordinator',
       'email.monthly_story.user',
-      'lifecycle.send',
-      'lifecycle.cron',
       'bank-sync-alert.sweep',
       'transaction-import.sweep',
       'bank-sync-alert.send',
@@ -320,8 +318,6 @@ describe('createWorker', () => {
       'portfolio.snapshot.manual',
       'certificado-aforro.rate-sync',
       'budget.year-extension',
-      'lifecycle.send',
-      'lifecycle.cron',
       'bank-sync-alert.sweep',
       'transaction-import.sweep',
       'bank-sync-alert.send',
@@ -382,6 +378,9 @@ describe('createWorker', () => {
     expect(unscheduleMock).toHaveBeenCalledWith('card-expiry.warning', 'card-expiry.warning');
     expect(unscheduleMock).toHaveBeenCalledWith('referral-reward.sweep', 'referral-reward.sweep');
     expect(deleteQueueMock).toHaveBeenCalledWith('trial-lifecycle.send');
+    // The generic lifecycle send path is gone: its daily cron and queues are torn down, not re-registered.
+    expect(unscheduleMock).toHaveBeenCalledWith('lifecycle.cron', 'lifecycle.cron.v1');
+    expect(deleteQueueMock).toHaveBeenCalledWith('lifecycle.send');
     expect(callNames(scheduleMock.mock.calls)).not.toEqual(expect.arrayContaining(['card-expiry.warning']));
     // No exact count: scheduling is append-only, so a new cron would otherwise fail this test for
     // no behavioural reason. What matters is asserted above and below — which schedules exist,
@@ -399,7 +398,6 @@ describe('createWorker', () => {
       'portfolio.snapshot.auto',
       'certificado-aforro.rate-sync',
       'budget.year-extension',
-      'lifecycle.cron',
       'bank-sync-alert.sweep',
       'transaction-import.sweep',
       // Monthly Money Story is paused as part of the free/BYOK pivot too — the scheduler owner

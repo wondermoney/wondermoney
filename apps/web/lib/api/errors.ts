@@ -31,6 +31,8 @@ export const API_ERROR_CODE = {
   INVITE_EXPIRED: "invite_expired",
   INVITE_INVALID: "invite_invalid",
   NOT_FOUND: "not_found",
+  /** The portfolio is linked to an account only the other member can see; `details.linkedBy` names them (403). */
+  PORTFOLIO_LINK_HELD_BY_MEMBER: "portfolio_link_held_by_member",
   /**
    * Grandfathered SCREAMING_CASE, deliberately unlike its neighbours.
    * `lib/api/rate-limit.ts` branches on this literal and the API keeps emitting
@@ -58,6 +60,7 @@ interface ApiErrorResponse {
     status?: unknown;
     data?: {
       code?: unknown;
+      details?: unknown;
       message?: unknown;
     };
   };
@@ -126,6 +129,33 @@ export function isEmailVerificationRequiredError(error: unknown): boolean {
  */
 export function isAiAllowanceExhaustedError(error: unknown): boolean {
   return aiRouteErrorCode(error) === API_ERROR_CODE.AI_ALLOWANCE_EXHAUSTED;
+}
+
+/**
+ * The display name of the member who holds a portfolio's link to their private
+ * account, when the error is that refusal; only that member can change the link.
+ */
+export function getPortfolioLinkHolderName(error: unknown): string | undefined {
+  if (!hasCode(error, API_ERROR_CODE.PORTFOLIO_LINK_HELD_BY_MEMBER)) {
+    return undefined;
+  }
+  const details = (error as ApiErrorResponse).response?.data?.details as
+    | { linkedBy?: unknown }
+    | undefined;
+  const name = details?.linkedBy;
+  return typeof name === "string" && name.trim().length > 0 ? name : undefined;
+}
+
+/**
+ * Changing a portfolio's link was refused because the other member holds it:
+ * the named refusal, or the plain 403 an older API sends for the same case.
+ */
+export function isPortfolioLinkRefusal(error: unknown): boolean {
+  const code = getApiErrorCode(error);
+  return (
+    code === API_ERROR_CODE.PORTFOLIO_LINK_HELD_BY_MEMBER ||
+    code === API_ERROR_CODE.FORBIDDEN
+  );
 }
 
 /** A household route a member reached but only the owner may use. */

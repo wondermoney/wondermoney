@@ -24,10 +24,11 @@ import useAccounts from "@/lib/api/account/useAccounts";
 import useConfigs from "@/lib/api/configs/useConfigs";
 import { isDemoReadOnlyError } from "@/lib/api/errors";
 import useCreatePortfolio from "@/lib/api/portfolio/useCreatePortfolio";
+import usePortfolios from "@/lib/api/portfolio/usePortfolios";
 import { useRateLimitToast } from "@/lib/api/useRateLimitToast";
 import {
   draftFromLink,
-  isInvestmentAccount,
+  hasUnlinkedInvestmentAccount,
   linkInputFromDraft,
 } from "@/lib/portfolio/account-link";
 import { getCurrencySymbol } from "@/lib/utils/currencySymbol";
@@ -93,6 +94,7 @@ const PortfolioCreateDialog: React.FC<PortfolioCreateDialogProps> = ({
   const queryClient = useQueryClient();
   const { data: configsData } = useConfigs();
   const { data: accountsData } = useAccounts();
+  const { data: portfoliosData } = usePortfolios();
 
   // Default currency to user's currency (from any account)
   useEffect(() => {
@@ -112,8 +114,8 @@ const PortfolioCreateDialog: React.FC<PortfolioCreateDialogProps> = ({
 
   const mutation = useCreatePortfolio();
 
-  // "Is this the same money?": with an investment account in the household, offer to link the
-  // new portfolio to the account that holds it. No amounts are compared.
+  // "Is this the same money?": with an investment account no portfolio is linked to yet, offer to
+  // link the new portfolio to the account that holds it. No amounts are compared.
   const [link, setLink] = useState(draftFromLink(null));
   const linkSuggestion = useDismissibleActivation(
     "portfolio-create-link-suggestion",
@@ -121,7 +123,9 @@ const PortfolioCreateDialog: React.FC<PortfolioCreateDialogProps> = ({
   );
   const accounts = accountsData?.accounts ?? [];
   const showLinkSuggestion =
-    !linkSuggestion.isDismissed && accounts.some(isInvestmentAccount);
+    !linkSuggestion.isDismissed &&
+    portfoliosData !== undefined &&
+    hasUnlinkedInvestmentAccount(accounts, portfoliosData.portfolios);
 
   const onSubmit = async (data: FormProps) => {
     const accountLink = showLinkSuggestion ? linkInputFromDraft(link) : null;

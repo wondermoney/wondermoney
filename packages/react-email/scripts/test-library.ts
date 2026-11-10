@@ -6,7 +6,6 @@ import {
   renderBankSyncAlertEmail,
   renderBudgetThresholdAlert,
   renderInternalAlertEmail,
-  renderLifecycleEmail,
   renderLifecycleNudgeEmail,
   renderMonthlyStory,
   renderWeeklyInsights,
@@ -374,7 +373,6 @@ assert.ok(lanConnected.html.includes("http://192.168.1.10:3000/en/accounts"), "h
     await renderAccountConnectedEmail({ language: "pt", bankName: "X", dashboardUrl: "http://192.168.1.10:3000/pt/accounts", brandName }),
     await renderBudgetThresholdAlert({ ...budgetProps([budgetItem("near")]), ...lan, language: "en", brandName }),
     await renderLifecycleNudgeEmail({ language: "en", subject: "s", heading: "h", body: ["b"], unsubscribeUrl: lan.unsubscribeUrl, brandName }),
-    await renderLifecycleEmail({ campaign: "data_health", step: "consent_expiring", language: "en", ctaUrl: lan.ctaUrl, unsubscribeUrl: lan.unsubscribeUrl, brandName }),
     await renderBankSyncAlertEmail({ language: "en", kind: "consent_revoked", bankName: "X", reconnectUrl: lan.ctaUrl, settingsUrl: lan.settingsUrl, brandName }),
   ];
   for (const email of selfHosted) {

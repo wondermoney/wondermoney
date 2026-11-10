@@ -4,6 +4,8 @@ import { StyleSheet, View } from 'react-native'
 import { Amount } from '@/components/ui/amount'
 import { ProgressBar } from '@/components/ui/progress-bar'
 import { Text } from '@/components/ui/text'
+import { UnconvertedAmountsNote } from '@/components/ui/unconverted-amounts-note'
+import type { AmountsCompleteness } from '@/lib/api/completeness'
 import { useFormatMoney } from '@/lib/formatters/money-display'
 import { themeTokens, type Palette } from '@/theme/tokens'
 import { usePalette } from '@/theme/use-palette'
@@ -30,7 +32,7 @@ export type SpendingByCategoryReportViewState =
   | { status: 'error' }
   | { status: 'invalid-response' }
   | { status: 'access-transition' }
-  | { status: 'loaded'; report: SpendingByCategoryReportViewModel; trendReady: boolean; refreshing?: boolean }
+  | { status: 'loaded'; report: SpendingByCategoryReportViewModel; trendReady: boolean; refreshing?: boolean; completeness?: AmountsCompleteness }
 
 export type SpendingByCategoryReportBodyProps = {
   state: SpendingByCategoryReportViewState
@@ -128,6 +130,7 @@ export function SpendingByCategoryReportBody({ state, currencyCode, exportState,
   return (
     <ReportSection actions={actions} description={t('reports.spendingByCategory.subtitle')} testID="spending-by-category-report" title={t('reports.spendingByCategory.title')}>
       {content}
+      {state.status === 'loaded' ? <UnconvertedAmountsNote completeness={state.completeness} testID="spending-by-category-report-unconverted" /> : null}
     </ReportSection>
   )
 }

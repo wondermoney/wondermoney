@@ -59,6 +59,13 @@ describe('SpendingByCategoryReportScreen', () => {
     expect(view.getByText('No spending in this period')).toBeOnTheScreen()
   })
 
+  it('says when spending in a currency with no exchange rate was left out, even of an empty period', async () => {
+    const report = mapSpendingByCategoryReport({ data: [] }, undefined, 'Other')
+    const completeness = { currencyCode: 'EUR', isComplete: false, unconvertedTransactions: 1, unconvertedCurrencies: ['CHF'] }
+    const view = await renderWithI18n({ state: { status: 'loaded', report, trendReady: true, completeness }, preset: 'last3Months', currencyCode: 'EUR', onSelectPreset: jest.fn(), onRefresh: jest.fn(), onBack: jest.fn() })
+    expect(view.getByTestId('spending-by-category-report-unconverted')).toHaveTextContent(/1 transaction in CHF is left out/)
+  })
+
   it('switches presets and renders loading/error states', async () => {
     const report = mapSpendingByCategoryReport({ data: [row('a', 100)] }, undefined, 'Other')
     const onSelectPreset = jest.fn()
