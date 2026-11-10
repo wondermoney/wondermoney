@@ -2,6 +2,7 @@ import { type Expression, type Kysely, sql, type SqlBool } from 'kysely';
 
 import { DI } from '@app/app';
 import { anyOf, type SqlDatabase, sqlQuery } from '@app/database/sql';
+import { rateScope } from '@service/currency/exchange-rate';
 import { completenessFromCounts, loadDailyRates, needsRateSql, type ReportCompleteness, transactionDaySql, type UnconvertedCount } from '@service/reports/report-currency';
 import { categoryLinesSql } from '@service/transaction/category-lines';
 import { type TransactionScope, transactionScopeExpression } from '@service/transaction/transaction-scope';
@@ -264,7 +265,7 @@ export async function getBudgetSpending(input: BudgetSpendingInput): Promise<Bud
   const db = sqlQuery(DI.em);
   const [foreignDays, repaymentDays, missing] = await Promise.all([foreignCurrencyDays(db, input), foreignLoanRepaymentDays(db, input), missingAmountCounts(db, input)]);
   const groups = [...foreignDays, ...repaymentDays];
-  const rateFor = await loadDailyRates(DI.em, input.currency.code, groups);
+  const rateFor = await loadDailyRates(DI.em, input.currency.code, groups, rateScope(input.tenantKey));
 
   // One row per currency and day: the spending query joins on them, so a repeat would double a row.
   const rates = new Map<string, BudgetDayRate>();
@@ -292,7 +293,7 @@ export async function getBudgetRowSpending(input: BudgetRowsInput): Promise<Map<
   const db = sqlQuery(DI.em);
   const [foreignDays, repaymentDays, missing] = await Promise.all([foreignCurrencyDays(db, input, true), foreignLoanRepaymentDays(db, input, true), missingAmountCounts(db, input, true)]);
   const groups = [...foreignDays, ...repaymentDays];
-  const rateFor = await loadDailyRates(DI.em, input.currency.code, groups);
+  const rateFor = await loadDailyRates(DI.em, input.currency.code, groups, rateScope(input.tenantKey));
 
   const incomplete = new Set<number>(missing.map((row) => Number(row.templateKey)));
   // One row per currency and day: the spending query joins on them, so a repeat would double a row.

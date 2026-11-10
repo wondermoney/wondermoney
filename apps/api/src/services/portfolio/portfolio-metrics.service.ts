@@ -3,7 +3,7 @@ import { sql } from 'kysely';
 import { DI } from '@app/app';
 import { sqlQuery } from '@app/database/sql';
 import type { Appuser } from '@entity/Appuser';
-import { loadRateTable } from '@service/currency/exchange-rate';
+import { FEED_RATES_ONLY, loadRateTable } from '@service/currency/exchange-rate';
 
 import { historyInViewerCurrency, historyRatePairs, type PortfolioSnapshotValue } from './portfolio-history-currency';
 import portfolioHoldingsService from './portfolio-holdings.service';
@@ -137,7 +137,7 @@ class PortfolioMetricsService {
     const last = stored.at(-1);
     if (!first || !last) return { complete: true, days, snapshots: [] };
     const window = { from: new Date(`${first.date}T00:00:00Z`), to: new Date(`${last.date}T23:59:59.999Z`) };
-    const rates = await loadRateTable(DI.em, historyRatePairs(stored, viewerCurrency), window);
+    const rates = await loadRateTable(DI.em, historyRatePairs(stored, viewerCurrency), window, FEED_RATES_ONLY);
     const { dataPoints, incompleteDates } = historyInViewerCurrency(stored, viewerCurrency, rates);
     return { complete: incompleteDates.length === 0, days, snapshots: dataPoints.map((point) => ({ day: point.date, totalValue: point.value })) };
   }

@@ -5,7 +5,7 @@ import { DI } from '@app/app';
 import { anyOf, sqlQuery, toDate } from '@app/database/sql';
 import type { Appuser } from '@entity/Appuser';
 import { Portfolio } from '@entity/Portfolio';
-import { loadRateTable } from '@service/currency/exchange-rate';
+import { FEED_RATES_ONLY, loadRateTable } from '@service/currency/exchange-rate';
 import { sumMoney } from '@utils/money';
 
 import assetPriceService from './asset-price.service';
@@ -538,7 +538,7 @@ export class PortfolioDashboardService {
       date: format(toDate(row.snapshot_date), 'yyyy-MM-dd'),
       value: row.value == null ? 0 : Number(row.value),
     }));
-    const rates = await loadRateTable(DI.em, historyRatePairs(snapshots, viewerCurrency), { from: periodStartDate, to: new Date() });
+    const rates = await loadRateTable(DI.em, historyRatePairs(snapshots, viewerCurrency), { from: periodStartDate, to: new Date() }, FEED_RATES_ONLY);
     const { dataPoints, incompleteDates } = historyInViewerCurrency(snapshots, viewerCurrency, rates);
     return { completeness: { currencyCode: viewerCurrency, incompleteDates, isComplete: incompleteDates.length === 0 }, dataPoints };
   }

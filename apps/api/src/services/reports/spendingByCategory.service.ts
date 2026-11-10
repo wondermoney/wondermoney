@@ -1,5 +1,6 @@
 import { DI } from '@app/database/di';
 import { Transaction } from '@entity/Transaction';
+import { rateScope } from '@service/currency/exchange-rate';
 import { CATEGORY_LINE_POPULATE, spendingLinesOf } from '@service/transaction/category-lines';
 import { loadCategorySpendingFlags } from '@service/transaction/category-spending';
 import { addMoney } from '@utils/money';
@@ -42,7 +43,7 @@ export async function getSpendingByCategoryReport(input: ReportServiceInput): Pr
     populate: [...CATEGORY_LINE_POPULATE, ...REPORT_CURRENCY_POPULATE],
   });
   const repayments = await loadLoanRepaymentLinks(DI.em, tenant, transactions);
-  const amounts = await loadViewerCurrencyAmounts(DI.em, user, transactions, repayments);
+  const amounts = await loadViewerCurrencyAmounts(DI.em, user, rateScope(tenant), transactions, repayments);
   const spendingFlags = await loadCategorySpendingFlags(DI.em, tenant.tenantKey);
   const result = (data: SpendingByCategoryRow[]) => ({ completeness: amounts.completeness(), data });
   if (transactions.length === 0) return result([]);

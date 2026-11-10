@@ -9,7 +9,7 @@ import { AppuserTenant } from '@entity/AppuserTenant';
 import { BackgroundOperation, BackgroundOperationStatus } from '@entity/BackgroundOperation';
 import type { Transaction } from '@entity/Transaction';
 import { TransactionAuditActorType, TransactionAuditEventType } from '@entity/TransactionAuditLog';
-import { convertWithStatus } from '@service/currency/exchange-rate';
+import { convertWithStatus, rateScope } from '@service/currency/exchange-rate';
 import { reconvertAccountRows } from '@service/currency/fx-reconvert.service';
 import backgroundOperationService from '@service/operations/background-operation.service';
 import type { Enqueue } from '@service/queue/enqueue';
@@ -291,7 +291,7 @@ function moved(was: null | number, now: null | number): boolean {
 async function refreshOwnerCurrencyBalance(em: EntityManager, account: Account, now: Date): Promise<void> {
   const ownerCurrency = account.accountOwnerAppuserKey?.currencyKey;
   if (account.balance == null || !ownerCurrency) return;
-  const converted = await convertWithStatus(em, account.balance, account.currencyKey, ownerCurrency, now);
+  const converted = await convertWithStatus(em, account.balance, account.currencyKey, ownerCurrency, now, rateScope(account.tenantKey));
   if (converted.amount == null) return;
   account.appuserCurrencyBalance = converted.amount;
   account.fxStatus = converted.fxStatus;

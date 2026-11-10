@@ -17,7 +17,7 @@ import { computeAvailableBalance } from '@service/account/account-available-bala
 import { resolveAccountCsvImportFormat } from '@service/account/account-csv-import-format';
 import { startAccountRecalculation } from '@service/account/account-recalculation.service';
 import { computeSyncStatus } from '@service/account/account-sync-status.service';
-import { convertWithStatus } from '@service/currency/exchange-rate';
+import { convertWithStatus, rateScope } from '@service/currency/exchange-rate';
 import { isManualAccount } from '@service/transaction/balance-chain.service';
 import { BadRequestError, ERROR_CODE, ForbiddenError, InternalServerError, NotFoundError } from '@utils/errors';
 
@@ -69,7 +69,7 @@ export async function createOfflineAccount(req: Request, res: Response, next: Ne
   account.openingBalanceDate = new Date();
   // The balance in the owner's currency, through the one rate resolver. With no rate none is
   // stored (`missing`), so totals report the account as unconverted rather than at face value.
-  const converted = await convertWithStatus(DI.em, account.balance, accountCurrency, user.currencyKey, new Date());
+  const converted = await convertWithStatus(DI.em, account.balance, accountCurrency, user.currencyKey, new Date(), rateScope(appUserTenant.tenantKey));
   account.appuserCurrencyBalance = converted.amount;
   account.fxStatus = converted.fxStatus;
   account.accountOwnerAppuserKey = appUserTenant.appuserKey;

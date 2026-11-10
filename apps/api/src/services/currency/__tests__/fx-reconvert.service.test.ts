@@ -20,10 +20,11 @@ import { Account } from '@entity/Account';
 import { Appuser } from '@entity/Appuser';
 import type { Currency } from '@entity/Currency';
 import { ExchangeRate } from '@entity/ExchangeRate';
+import { ExchangeRateOverride } from '@entity/ExchangeRateOverride';
 import { FxStatus, Transaction } from '@entity/Transaction';
 import { TransactionAuditEventType, TransactionAuditLog } from '@entity/TransactionAuditLog';
 
-import { reconvertFx } from '../fx-reconvert.service';
+import { reconvertFx, reconvertFxForOverride } from '../fx-reconvert.service';
 
 /*
  * Rows stored without a usable rate are converted again once one exists, and every
@@ -278,6 +279,173 @@ describe('re-converting amounts when rates arrive', () => {
     expect(await reload(row.transactionKey)).toMatchObject({ appuserSettlementAmount: null, fxStatus: FxStatus.MISSING });
     expect(await reloadAccount(setup)).toMatchObject({ appuserCurrencyBalance: 800 });
     expect(await db.em().count(TransactionAuditLog, {})).toBe(0);
+  });
+});
+
+/*
+ * When a household adds, changes or deletes an override, every stored amount of that household in
+ * that pair is converted again at whatever the resolver now says, including back to the feed rate
+ * or to `missing` once the override is gone. Nothing of another household moves.
+ */
+describe('re-converting a household pair after an override changes', () => {
+  const db = useTestDatabase();
+  const day = (iso: string) => new Date(`${iso}T00:00:00Z`);
+  const NOW = day('2026-03-10');
+
+  interface Side {
+    account: Account;
+    household: Household;
+  }
+
+  async function world() {
+    const em = db.em();
+    const xof = await currencyFor(em, 'XOF');
+    const usd = await currencyFor(em, 'USD');
+    const home = await seedHousehold(em);
+    const neighbour = await seedHousehold(em);
+    const mine: Side = { account: await addAccount(em, home, { balance: 100_000, currency: xof, name: 'Francs' }), household: home };
+    const theirs: Side = { account: await addAccount(em, neighbour, { balance: 100_000, currency: xof, name: 'Their francs' }), household: neighbour };
+    return { em, eur: home.currency, home, mine, neighbour, theirs, usd, xof };
+  }
+
+  async function addRow(em: EntityManager, side: Side, input: { amount: number; appuserAmount?: null | number; date: string; fxStatus: FxStatus | null; rate?: number }): Promise<Transaction> {
+    const row = em.create(Transaction, {
+      accountKey: side.account,
+      appuserCurrencyExchangeRate: input.rate,
+      appuserCurrencyKey: side.household.currency,
+      appuserKey: side.household.appuser,
+      appuserSettlementAmount: input.appuserAmount ?? null,
+      fxStatus: input.fxStatus,
+      settlementAmount: input.amount,
+      settlementCurrencyKey: side.account.currencyKey,
+      tenantKey: side.household.tenant,
+      transactionDate: day(input.date),
+      transactionStatusKey: side.household.statuses.BOOKED,
+      transactionTypeKey: side.household.types.cardPayment,
+    }, { partial: true });
+    await em.flush();
+    return row;
+  }
+
+  async function setOverride(em: EntityManager, household: Household, from: Currency, to: Currency, date: string, rate: number) {
+    const override = em.create(ExchangeRateOverride, { date: day(date), fromCurrency: from, rate, tenantKey: household.tenant, toCurrency: to }, { partial: true });
+    await em.flush();
+    return override;
+  }
+
+  async function addRate(em: EntityManager, from: Currency, to: Currency, date: string, rate: number) {
+    em.create(ExchangeRate, { date: day(date), fromCurrency: from, rate, toCurrency: to }, { partial: true });
+    await em.flush();
+  }
+
+  const reload = (key: number) => db.em().findOneOrFail(Transaction, { transactionKey: key }, { filters: false });
+  const reloadAccount = (account: Account) => db.em().findOneOrFail(Account, { accountKey: account.accountKey }, { filters: false });
+  const pairOf = (household: Household, from: string, to = 'EUR') => ({ fromCurrency: from, tenantKey: household.tenant.tenantKey, toCurrency: to });
+
+  it('converts the household rows and balance of a pair the feed does not cover', async () => {
+    const { em, eur, home, mine, xof } = await world();
+    const row = await addRow(em, mine, { amount: -10_000, date: '2026-03-04', fxStatus: FxStatus.MISSING });
+    await setOverride(em, home, xof, eur, '2026-03-02', 0.0015);
+
+    const result = await reconvertFxForOverride(db.em(), pairOf(home, 'XOF'), { now: NOW });
+
+    expect(await reload(row.transactionKey)).toMatchObject({ appuserCurrencyExchangeRate: 0.0015, appuserSettlementAmount: -15, fxStatus: FxStatus.EXACT });
+    expect(await reloadAccount(mine.account)).toMatchObject({ appuserCurrencyBalance: 150, fxStatus: FxStatus.PROVISIONAL });
+    expect(result).toMatchObject({ accountsRebuilt: 1, accountsRevalued: 1, transactionsReconverted: 1 });
+  });
+
+  it('leaves another household with the same pair untouched', async () => {
+    const { em, eur, home, mine, theirs, xof } = await world();
+    await addRow(em, mine, { amount: -10_000, date: '2026-03-04', fxStatus: FxStatus.MISSING });
+    const theirRow = await addRow(em, theirs, { amount: -10_000, date: '2026-03-04', fxStatus: FxStatus.MISSING });
+    await setOverride(em, home, xof, eur, '2026-03-02', 0.0015);
+
+    await reconvertFxForOverride(db.em(), pairOf(home, 'XOF'), { now: NOW });
+    // The global pass, too, converts each household with its own overrides only.
+    await reconvertFx(db.em(), { now: NOW });
+
+    expect(await reload(theirRow.transactionKey)).toMatchObject({ appuserSettlementAmount: null, fxStatus: FxStatus.MISSING });
+    expect(await reloadAccount(theirs.account)).toMatchObject({ appuserCurrencyBalance: null });
+    expect(await db.em().count(TransactionAuditLog, { tenantKey: { tenantKey: theirs.household.tenant.tenantKey } })).toBe(0);
+  });
+
+  it('rewrites rows converted at the feed rate on the override day, and only those', async () => {
+    const { em, eur, home, usd } = await world();
+    const dollars: Side = { account: await addAccount(em, home, { appuserCurrencyBalance: 900, balance: 1000, currency: usd, name: 'Dollars' }), household: home };
+    await addRate(em, usd, eur, '2026-03-02', 0.9);
+    await addRate(em, usd, eur, '2026-03-03', 0.91);
+    const onTheDay = await addRow(em, dollars, { amount: -100, appuserAmount: -90, date: '2026-03-02', fxStatus: FxStatus.EXACT, rate: 0.9 });
+    const dayAfter = await addRow(em, dollars, { amount: -100, appuserAmount: -91, date: '2026-03-03', fxStatus: FxStatus.EXACT, rate: 0.91 });
+    await setOverride(em, home, usd, eur, '2026-03-02', 0.95);
+
+    const result = await reconvertFxForOverride(db.em(), pairOf(home, 'USD'), { now: NOW });
+
+    expect(await reload(onTheDay.transactionKey)).toMatchObject({ appuserCurrencyExchangeRate: 0.95, appuserSettlementAmount: -95, fxStatus: FxStatus.EXACT });
+    expect(await reload(dayAfter.transactionKey)).toMatchObject({ appuserCurrencyExchangeRate: 0.91, appuserSettlementAmount: -91 });
+    expect(result.transactionsReconverted).toBe(1);
+  });
+
+  it('falls back to the feed rate, or to missing, once the override is deleted', async () => {
+    const { em, eur, home, mine, usd, xof } = await world();
+    const dollars: Side = { account: await addAccount(em, home, { balance: 1000, currency: usd, name: 'Dollars' }), household: home };
+    await addRate(em, usd, eur, '2026-03-02', 0.9);
+    const franc = await addRow(em, mine, { amount: -10_000, date: '2026-03-04', fxStatus: FxStatus.MISSING });
+    const dollar = await addRow(em, dollars, { amount: -100, date: '2026-03-02', fxStatus: FxStatus.MISSING });
+    const xofOverride = await setOverride(em, home, xof, eur, '2026-03-02', 0.0015);
+    const usdOverride = await setOverride(em, home, usd, eur, '2026-03-02', 0.95);
+    await reconvertFxForOverride(db.em(), pairOf(home, 'XOF'), { now: NOW });
+    await reconvertFxForOverride(db.em(), pairOf(home, 'USD'), { now: NOW });
+    expect(await reload(dollar.transactionKey)).toMatchObject({ appuserSettlementAmount: -95 });
+
+    for (const override of [xofOverride, usdOverride]) override.deletedAt = new Date();
+    await em.flush();
+    await reconvertFxForOverride(db.em(), pairOf(home, 'XOF'), { now: NOW });
+    await reconvertFxForOverride(db.em(), pairOf(home, 'USD'), { now: NOW });
+
+    expect(await reload(franc.transactionKey)).toMatchObject({ appuserCurrencyExchangeRate: null, appuserSettlementAmount: null, fxStatus: FxStatus.MISSING });
+    expect(await reloadAccount(mine.account)).toMatchObject({ appuserCurrencyBalance: null, fxStatus: FxStatus.MISSING });
+    expect(await reload(dollar.transactionKey)).toMatchObject({ appuserCurrencyExchangeRate: 0.9, appuserSettlementAmount: -90, fxStatus: FxStatus.EXACT });
+  });
+
+  it('records each change as a system edit from the override', async () => {
+    const { em, eur, home, mine, xof } = await world();
+    const row = await addRow(em, mine, { amount: -10_000, date: '2026-03-04', fxStatus: FxStatus.MISSING });
+    await setOverride(em, home, xof, eur, '2026-03-02', 0.0015);
+
+    await reconvertFxForOverride(db.em(), pairOf(home, 'XOF'), { now: NOW });
+
+    const audits = await db.em().find(TransactionAuditLog, { transactionKey: { transactionKey: row.transactionKey } });
+    expect(audits).toHaveLength(1);
+    expect(audits[0]).toMatchObject({ eventType: TransactionAuditEventType.SYSTEM_EDIT, source: 'fx-override' });
+  });
+
+  it('changes nothing when run a second time', async () => {
+    const { em, eur, home, mine, xof } = await world();
+    await addRow(em, mine, { amount: -10_000, date: '2026-03-04', fxStatus: FxStatus.MISSING });
+    await addRow(em, mine, { amount: -5_000, appuserAmount: -5_000, date: '2026-03-05', fxStatus: null });
+    await setOverride(em, home, xof, eur, '2026-03-02', 0.0015);
+    await reconvertFxForOverride(db.em(), pairOf(home, 'XOF'), { now: NOW });
+    const before = await db.em().find(Transaction, {}, { filters: false, orderBy: { transactionKey: 'asc' } });
+    const auditsBefore = await db.em().count(TransactionAuditLog, {});
+
+    const second = await reconvertFxForOverride(db.em(), pairOf(home, 'XOF'), { now: NOW });
+
+    const after = await db.em().find(Transaction, {}, { filters: false, orderBy: { transactionKey: 'asc' } });
+    expect(second).toMatchObject({ accountsRebuilt: 0, accountsRevalued: 0, transactionsReconverted: 0 });
+    expect(after.map(snapshot)).toEqual(before.map(snapshot));
+    expect(await db.em().count(TransactionAuditLog, {})).toBe(auditsBefore);
+  });
+
+  it('leaves rows in other currencies alone', async () => {
+    const { em, eur, home, usd, xof } = await world();
+    const dollars: Side = { account: await addAccount(em, home, { balance: 1000, currency: usd, name: 'Dollars' }), household: home };
+    const dollar = await addRow(em, dollars, { amount: -100, appuserAmount: -100, date: '2026-03-04', fxStatus: null });
+    await setOverride(em, home, xof, eur, '2026-03-02', 0.0015);
+
+    const result = await reconvertFxForOverride(db.em(), pairOf(home, 'XOF'), { now: NOW });
+
+    expect(await reload(dollar.transactionKey)).toMatchObject({ appuserSettlementAmount: -100, fxStatus: null });
+    expect(result.accountsScanned).toBe(1);
   });
 });
 

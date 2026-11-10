@@ -12,7 +12,7 @@ import { Loan } from '@entity/Loan';
 import { Tenant } from '@entity/Tenant';
 import { Transaction } from '@entity/Transaction';
 import { ACCOUNT_BALANCE_POPULATE, accountBalanceIn, loadAccountRates } from '@service/currency/account-balance';
-import { loadRateTable } from '@service/currency/exchange-rate';
+import { loadRateTable, rateScope } from '@service/currency/exchange-rate';
 import { EXPIRED_TRANSACTION_STATUS, isExpiredStatusName } from '@service/transaction/transaction-status';
 import { getEffectiveAppuserAmount } from '@utils/account-amounts';
 import { getRef } from '@utils/em-helpers';
@@ -183,9 +183,9 @@ export class GoalService {
       tenantKey: getRef(em, Tenant, input.tenantKey),
     }, { populate: ['currencyKey'] });
 
-    const accountRates = await loadAccountRates(em, accounts, viewerCurrency, asOf);
+    const accountRates = await loadAccountRates(em, accounts, viewerCurrency, asOf, rateScope(input.tenantKey));
     const activityCurrency = (activity: GoalActivity) => activity.currencyKey?.code ?? viewerCurrency;
-    const activityRates = await loadRateTable(em, activities.map((activity) => ({ from: activityCurrency(activity), to: viewerCurrency })), { from: asOf, to: asOf });
+    const activityRates = await loadRateTable(em, activities.map((activity) => ({ from: activityCurrency(activity), to: viewerCurrency })), { from: asOf, to: asOf }, rateScope(input.tenantKey));
 
     // An account no rate converts cannot be assigned in this currency, so it is left out.
     const converted = accounts.map((account) => accountBalanceIn(account, viewerCurrency, accountRates, asOf));

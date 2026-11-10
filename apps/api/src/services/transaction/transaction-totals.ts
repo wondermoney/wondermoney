@@ -1,6 +1,7 @@
 import type { EntityManager } from '@mikro-orm/core';
 import type { Big } from 'big.js';
 
+import { rateScope } from '@service/currency/exchange-rate';
 import { amountInCurrencySql, completenessFromCounts, loadDailyRates, needsRateSql, type ReportCompleteness, transactionDaySql, type UnconvertedCount } from '@service/reports/report-currency';
 import { big, toNumber } from '@utils/money';
 
@@ -98,7 +99,7 @@ export async function getTransactionTotals(em: EntityManager, query: Transaction
 
   const unconverted: UnconvertedCount[] = groups.filter((group: TotalGroup) => group.missing);
   const converted = groups.filter((group: TotalGroup) => !group.missing);
-  const rateFor = await loadDailyRates(em, currency.code, converted);
+  const rateFor = await loadDailyRates(em, currency.code, converted, rateScope(tenantKey));
   // Insertion order keeps the query's newest-month-first order.
   const totals = new Map<string, { in: Big; out: Big }>();
   let count = 0;

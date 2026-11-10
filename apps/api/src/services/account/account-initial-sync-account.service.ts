@@ -9,7 +9,7 @@ import { Currency } from '@entity/Currency';
 import { EnableBankingConnection, EnableBankingConnectionStatus } from '@entity/EnableBankingConnection';
 import { FxStatus } from '@entity/Transaction';
 import { isProviderRejection, type ProviderRateLimit, providerRateLimitOf } from '@service/bank-sync-run/provider-failure';
-import { convertWithStatus, type FxConversion } from '@service/currency/exchange-rate';
+import { convertWithStatus, type FxConversion, rateScope } from '@service/currency/exchange-rate';
 import { createEnableBankingSyncAdapter } from '@service/enable-banking/enable-banking-sync-adapter';
 import backgroundOperationService from '@service/operations/background-operation.service';
 import { sanitizeProviderResponse } from '@utils/error-sanitizer';
@@ -377,7 +377,7 @@ function isUniqueConstraintError(error: unknown) {
 async function resolveAppuserCurrencyBalance(em: NonNullable<Deps['em']>, accountCurrency: Currency, tenant: AppuserTenant, balance: number): Promise<FxConversion> {
   const appuserCurrency = (tenant.appuserKey as unknown as undefined | { currencyKey?: Currency })?.currencyKey;
   if (!appuserCurrency) return { amount: null, fxStatus: FxStatus.MISSING, rate: null };
-  return convertWithStatus(em as unknown as EntityManager, balance, accountCurrency, appuserCurrency, new Date());
+  return convertWithStatus(em as unknown as EntityManager, balance, accountCurrency, appuserCurrency, new Date(), rateScope(tenant.tenantKey));
 }
 
 function sanitizeError(error: unknown) {

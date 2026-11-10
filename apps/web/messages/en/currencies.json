@@ -1,0 +1,37 @@
+{
+  "exchangeRates": {
+    "title": "Exchange rates",
+    "description": "Set your own rate for a currency pair on a given day, for a currency the rate feed does not cover or a day it got wrong. Both members of a household share these rates.",
+    "how-it-applies": "A rate applies from its day until the feed, or another of your rates, has a newer one. On its own day it replaces the feed's rate. Amounts already stored are converted again in the background.",
+    "table-label": "Your exchange rates",
+    "pair": "Pair",
+    "date": "Day",
+    "rate": "Rate",
+    "from": "From",
+    "to": "To",
+    "rate-hint": "1 {from} = ? {to}",
+    "rate-reading": "1 {from} = {rate} {to}",
+    "empty": "No exchange rates of your own yet. Conversions use the rate feed.",
+    "load-error": "Your exchange rates could not be loaded.",
+    "currencies-load-error": "The currency list could not be loaded.",
+    "add": "Add rate",
+    "save-error": "The rate could not be saved.",
+    "created": "Rate added. Amounts are being converted again.",
+    "updated": "Rate updated. Amounts are being converted again.",
+    "deleted": "Rate deleted. Amounts are being converted again.",
+    "edit-named": "Edit the {pair} rate for {date}",
+    "delete-named": "Delete the {pair} rate for {date}",
+    "delete": "Delete rate",
+    "delete-title": "Delete the {pair} rate for {date}?",
+    "delete-description": "Conversions that used it go back to the rate feed, or show as not converted when the feed has no rate for this pair.",
+    "select-currency": "Select a currency",
+    "errors": {
+      "currency-required": "Pick both currencies.",
+      "same-currency": "Pick two different currencies.",
+      "date-required": "Enter a day.",
+      "date-future": "The day cannot be in the future.",
+      "rate-invalid": "Enter a rate greater than zero.",
+      "exists": "You already have a rate for this pair on this day. Edit that one instead."
+    }
+  }
+}

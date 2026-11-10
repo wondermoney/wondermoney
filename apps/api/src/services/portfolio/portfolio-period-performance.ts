@@ -3,7 +3,7 @@ import { QueryOrder } from '@mikro-orm/core';
 import { DI } from '@app/database/di';
 import type { Appuser } from '@entity/Appuser';
 import { PortfolioSnapshot } from '@entity/PortfolioSnapshot';
-import { loadRateTable, type RateTable } from '@service/currency/exchange-rate';
+import { FEED_RATES_ONLY, loadRateTable, type RateTable } from '@service/currency/exchange-rate';
 import { big, Money, roundDisplay, sumMoney } from '@utils/money';
 
 import { historyRatePairs, snapshotInViewerCurrency, storedSnapshotValue } from './portfolio-history-currency';
@@ -100,7 +100,7 @@ export async function loadCashFlowsInViewerCurrency(flows: InvestmentCashFlow[],
   const foreign = needed.filter((flow) => flow.currencyCode && flow.currencyCode !== viewerCurrency);
   const times = foreign.map((flow) => flow.date.getTime());
   const window = times.length === 0 ? { from: since, to: since } : { from: new Date(Math.min(...times)), to: new Date(Math.max(...times)) };
-  const rates = await loadRateTable(DI.em, foreign.map((flow) => ({ from: flow.currencyCode ?? '', to: viewerCurrency })), window);
+  const rates = await loadRateTable(DI.em, foreign.map((flow) => ({ from: flow.currencyCode ?? '', to: viewerCurrency })), window, FEED_RATES_ONLY);
   const converted = cashFlowsInViewerCurrency(needed, viewerCurrency, rates);
   const earlier = flows.filter((flow) => flow.date.getTime() < since.getTime()).map((flow) => ({ amount: null, date: flow.date, kind: flow.kind }));
   return [...earlier, ...converted];
@@ -155,7 +155,7 @@ export async function findSnapshotPointOnOrBefore(portfolioKey: number, date: Da
 
   const stored = storedSnapshotValue(snapshot, snapshot.portfolioKey.portfolioOwnerAppuserKey.currencyKey.code);
   const day = new Date(`${stored.date}T00:00:00.000Z`);
-  const rates = await loadRateTable(DI.em, historyRatePairs([stored], viewerCurrency), { from: day, to: startOfNextUtcDay(day) });
+  const rates = await loadRateTable(DI.em, historyRatePairs([stored], viewerCurrency), { from: day, to: startOfNextUtcDay(day) }, FEED_RATES_ONLY);
   return { day: stored.date, value: snapshotInViewerCurrency(stored, viewerCurrency, rates) };
 }
 

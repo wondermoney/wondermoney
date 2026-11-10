@@ -1,6 +1,6 @@
 import type { EntityManager } from '@mikro-orm/core';
 
-import { type CurrencyPair, loadRateTable, type RateTable } from '@service/currency/exchange-rate';
+import { type CurrencyPair, loadRateTable, type RateScope, type RateTable } from '@service/currency/exchange-rate';
 import { Money } from '@utils/money';
 
 /**
@@ -34,8 +34,8 @@ export function accountBalanceIn(account: ConvertibleAccount, viewerCurrency: st
   return Money.convert(Money.of(account.balance, accountCurrency), { rate, to: viewerCurrency });
 }
 
-/** Load the rates {@link accountBalanceIn} needs for these accounts on `date`. */
-export async function loadAccountRates(em: EntityManager, accounts: ConvertibleAccount[], viewerCurrency: string, date: Date): Promise<RateTable> {
+/** Load the rates {@link accountBalanceIn} needs for these accounts on `date`, with the household's overrides. */
+export async function loadAccountRates(em: EntityManager, accounts: ConvertibleAccount[], viewerCurrency: string, date: Date, scope: RateScope): Promise<RateTable> {
   const pairs: CurrencyPair[] = [];
   for (const account of accounts) {
     const accountCurrency = account.currencyKey?.code;
@@ -43,7 +43,7 @@ export async function loadAccountRates(em: EntityManager, accounts: ConvertibleA
     if (ownerCurrencyOf(account) === viewerCurrency && account.appuserCurrencyBalance != null) continue;
     pairs.push({ from: accountCurrency, to: viewerCurrency });
   }
-  return loadRateTable(em, pairs, { from: date, to: date });
+  return loadRateTable(em, pairs, { from: date, to: date }, scope);
 }
 
 function ownerCurrencyOf(account: ConvertibleAccount): string | undefined {

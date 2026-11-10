@@ -4,6 +4,7 @@ import type { Budget } from '@entity/Budget';
 import type { BudgetTemplateCategory } from '@entity/BudgetTemplateCategory';
 import type { BudgetTemplateIncome } from '@entity/BudgetTemplateIncome';
 import { RecurringSeries } from '@entity/RecurringSeries';
+import { rateScope } from '@service/currency/exchange-rate';
 import { expectedOccurrenceAmount, isExpectedRecurring } from '@service/recurring/recurring-expectation';
 import { RecurringSeriesStatus } from '@service/recurring/recurring-types';
 import { loadDailyRates, type ReportCompleteness } from '@service/reports/report-currency';
@@ -114,7 +115,7 @@ export async function getBudgetForecast(em: EntityManager, input: BudgetForecast
     if (!isExpectedRecurring(item) || !flags.countsAsSpending(category)) return [];
     return [{ accountKey: account.accountKey, categoryKey: category.categoryKey, currencyCode: itemCurrency?.code ?? null, item, originalAmount }];
   });
-  const rateFor = await loadDailyRates(em, currency.code, expected.flatMap(({ currencyCode }) => (currencyCode ? [{ currencyCode, day: asOf }] : [])));
+  const rateFor = await loadDailyRates(em, currency.code, expected.flatMap(({ currencyCode }) => (currencyCode ? [{ currencyCode, day: asOf }] : [])), rateScope(tenantKey));
   // Each valued in the budget's currency at the latest rate: null with no rate (or no currency), never 1.
   const valued = expected.map((entry) => {
     const rate = entry.currencyCode ? rateFor({ currencyCode: entry.currencyCode, day: asOf }) : null;

@@ -4,7 +4,7 @@ import type { Appuser } from '@entity/Appuser';
 import { LoanRepaymentLink } from '@entity/LoanRepaymentLink';
 import type { Tenant } from '@entity/Tenant';
 import type { Transaction } from '@entity/Transaction';
-import { loadRateTable, type RateTable } from '@service/currency/exchange-rate';
+import { loadRateTable, type RateScope, type RateTable } from '@service/currency/exchange-rate';
 import { big, Money } from '@utils/money';
 
 /**
@@ -109,14 +109,14 @@ export function completenessFromCounts(currencyCode: string, counts: Unconverted
   return { currencyCode, isComplete: unconvertedTransactions === 0, unconvertedCurrencies, unconvertedTransactions };
 }
 
-export async function loadDailyRates(em: EntityManager, targetCurrency: string, groups: DailyCurrencyGroup[]): Promise<DailyRateLookup> {
+export async function loadDailyRates(em: EntityManager, targetCurrency: string, groups: DailyCurrencyGroup[], scope: RateScope): Promise<DailyRateLookup> {
   const dayOf = (day: string) => new Date(`${day}T00:00:00Z`);
   const foreign = groups.flatMap((group) => (group.currencyCode != null && group.currencyCode !== targetCurrency && group.day != null ? [{ currencyCode: group.currencyCode, day: group.day }] : []));
   let rates: null | RateTable = null;
   if (foreign.length > 0) {
     const days = foreign.map((group) => group.day).sort();
     const window = { from: dayOf(days[0] ?? ''), to: dayOf(days.at(-1) ?? '') };
-    rates = await loadRateTable(em, foreign.map((group) => ({ from: group.currencyCode, to: targetCurrency })), window);
+    rates = await loadRateTable(em, foreign.map((group) => ({ from: group.currencyCode, to: targetCurrency })), window, scope);
   }
   return (group) => {
     if (group.currencyCode == null || group.currencyCode === targetCurrency) return 1;
@@ -228,16 +228,16 @@ export class ReportCurrencyAmounts {
  * Load the rates needed to show `transactions` to `viewer`, in the viewer's currency. The report's
  * query populates {@link REPORT_CURRENCY_POPULATE}.
  */
-export async function loadViewerCurrencyAmounts(em: EntityManager, viewer: Appuser, transactions: ReportTransaction[], repayments: ReadonlyMap<number, readonly ReportLoanRepayment[]> = new Map()): Promise<ReportCurrencyAmounts> {
+export async function loadViewerCurrencyAmounts(em: EntityManager, viewer: Appuser, scope: RateScope, transactions: ReportTransaction[], repayments: ReadonlyMap<number, readonly ReportLoanRepayment[]> = new Map()): Promise<ReportCurrencyAmounts> {
   if (!viewer.currencyKey.code) await em.populate(viewer, ['currencyKey']);
-  return loadReportCurrencyAmounts(em, viewer.currencyKey.code, transactions, repayments);
+  return loadReportCurrencyAmounts(em, viewer.currencyKey.code, transactions, scope, repayments);
 }
 
 /**
  * Load the rates that convert `transactions` (and the interest and fees of their loan repayments,
  * keyed by transaction) into `currencyCode`, at each transaction's date.
  */
-export async function loadReportCurrencyAmounts(em: EntityManager, currencyCode: string, transactions: ReportTransaction[], repayments: ReadonlyMap<number, readonly ReportLoanRepayment[]> = new Map()): Promise<ReportCurrencyAmounts> {
+export async function loadReportCurrencyAmounts(em: EntityManager, currencyCode: string, transactions: ReportTransaction[], scope: RateScope, repayments: ReadonlyMap<number, readonly ReportLoanRepayment[]> = new Map()): Promise<ReportCurrencyAmounts> {
   let earliest = Number.POSITIVE_INFINITY;
   let latest = Number.NEGATIVE_INFINITY;
   const pairs = [];
@@ -251,7 +251,7 @@ export async function loadReportCurrencyAmounts(em: EntityManager, currencyCode:
     latest = Math.max(latest, transaction.transactionDate.getTime());
   }
   const window = pairs.length === 0 ? { from: new Date(), to: new Date() } : { from: new Date(earliest), to: new Date(latest) };
-  return new ReportCurrencyAmounts(currencyCode, await loadRateTable(em, pairs, window));
+  return new ReportCurrencyAmounts(currencyCode, await loadRateTable(em, pairs, window, scope));
 }
 
 /**

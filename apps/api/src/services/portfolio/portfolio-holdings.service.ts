@@ -5,6 +5,7 @@ import { DI } from '@app/app';
 import { FINANCIAL_TRANSACTION_TYPES } from '@app/constants/financial-transaction-types';
 import { anyOf, type SqlDatabase, sqlQuery } from '@app/database/sql';
 import type { Appuser } from '@entity/Appuser';
+import { FEED_RATES_ONLY } from '@service/currency/exchange-rate';
 import { completenessFromCounts, currencyKeySql, loadDailyRates, type ReportCompleteness, type UnconvertedCount } from '@service/reports/report-currency';
 import logger from '@utils/logger';
 import { big, roundDisplay, sumMoney } from '@utils/money';
@@ -532,7 +533,7 @@ class PortfolioHoldingsService {
       .orderBy('fa.financial_asset_key')
       .execute()) as { amount: string; currency_code: null | string; day: string; financial_asset_key: number; symbol: string; transactions: string }[];
 
-    const rateFor = await loadDailyRates(DI.em, viewerCurrency, rows.flatMap((row) => (row.currency_code == null ? [] : [{ currencyCode: row.currency_code, day: row.day }])));
+    const rateFor = await loadDailyRates(DI.em, viewerCurrency, rows.flatMap((row) => (row.currency_code == null ? [] : [{ currencyCode: row.currency_code, day: row.day }])), FEED_RATES_ONLY);
     const unconverted: UnconvertedCount[] = [];
     const byAssetKey = new Map<number, { financialAssetKey: number; symbol: string; total: Big }>();
     for (const row of rows) {

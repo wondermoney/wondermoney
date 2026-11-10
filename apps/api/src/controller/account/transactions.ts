@@ -15,7 +15,7 @@ import { TransactionAuditActorType, TransactionAuditEventType, TransactionAuditL
 import { TransactionMerchant } from '@entity/TransactionMerchant';
 import { TransactionType } from '@entity/TransactionType';
 import { authedContext, authedUser } from '@middleware/authed-context';
-import { convertWithStatus } from '@service/currency/exchange-rate';
+import { convertWithStatus, rateScope } from '@service/currency/exchange-rate';
 import { loadLoanRepaymentLinks, loadViewerCurrencyAmounts, REPORT_CURRENCY_POPULATE } from '@service/reports/report-currency';
 import { recalculateChainFromAccountBalance } from '@service/transaction/balance-chain.service';
 import { CATEGORY_LINE_POPULATE, spendingLinesOf } from '@service/transaction/category-lines';
@@ -187,7 +187,7 @@ export async function getCategorySpending(req: Request, res: Response, _next: Ne
   // Members keep their own currencies: every amount, and a loan repayment's interest and fees (in
   // the loan's currency), is converted into the viewer's at the rate of the transaction's date. A
   // row with no rate is left out and counted in `completeness`, never added at face value.
-  const amounts = await loadViewerCurrencyAmounts(DI.em, user, expenseTransactions, repayments);
+  const amounts = await loadViewerCurrencyAmounts(DI.em, user, rateScope(tenant), expenseTransactions, repayments);
   const viewerCurrency = amounts.currencyCode;
   // Keyed by top-level category name. Every expense adds to its top-level entry, whether it sits
   // on that category directly or on one of its children.
@@ -471,7 +471,7 @@ export async function updateTransaction(req: Request, res: Response, next: NextF
       lockedTransaction.editedSettlementAmount = updatedAmount;
       // Through the one rate resolver and `convertMoney`: with no rate, no converted amount is
       // stored (`missing`), never the amount in the settlement currency.
-      const converted = await convertWithStatus(em, updatedAmount, lockedTransaction.settlementCurrencyKey!, lockedTransaction.appuserCurrencyKey!, lockedTransaction.transactionDate ?? new Date());
+      const converted = await convertWithStatus(em, updatedAmount, lockedTransaction.settlementCurrencyKey!, lockedTransaction.appuserCurrencyKey!, lockedTransaction.transactionDate ?? new Date(), rateScope(tenant));
       lockedTransaction.appuserSettlementAmount = converted.amount;
       lockedTransaction.appuserCurrencyExchangeRate = converted.rate ?? undefined;
       lockedTransaction.fxStatus = converted.fxStatus;

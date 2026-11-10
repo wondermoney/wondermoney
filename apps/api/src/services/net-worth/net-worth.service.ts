@@ -12,7 +12,7 @@ import { Portfolio } from '@entity/Portfolio';
 import { PortfolioSnapshot } from '@entity/PortfolioSnapshot';
 import { Transaction } from '@entity/Transaction';
 import { ACCOUNT_BALANCE_POPULATE, accountBalanceIn, loadAccountRates } from '@service/currency/account-balance';
-import { type CurrencyPair, loadRateTable, type RateTable } from '@service/currency/exchange-rate';
+import { type CurrencyPair, loadRateTable, rateScope, type RateTable } from '@service/currency/exchange-rate';
 import { calculateOutstandingPrincipalWithAdjustments } from '@service/loan/loan-calculation.service';
 import { portfolioCountedInAccount, type PortfolioLinkFields, shouldSuggestPortfolioLink } from '@service/portfolio/portfolio-account-link';
 import { type PortfolioSnapshotValue, snapshotInViewerCurrency, historyRatePairs as snapshotRatePairs, storedSnapshotValue } from '@service/portfolio/portfolio-history-currency';
@@ -139,7 +139,7 @@ export class NetWorthService {
     // owner's. Convert every account into the viewer's currency; one that cannot be converted is
     // left out and counted, never added in a foreign currency.
     const asOf = new Date();
-    const rates = await loadAccountRates(DI.em, accounts, currencyCode, asOf);
+    const rates = await loadAccountRates(DI.em, accounts, currencyCode, asOf, rateScope(resolveTenantKeyNumber(appuserTenant.tenantKey)));
     const accountRows: NetWorthInputRow[] = [];
     let unconvertedAccounts = 0;
     for (const account of accounts) {
@@ -196,7 +196,7 @@ export class NetWorthService {
     // snapshot is in its owner's currency, converted at the rate at the end of its own day.
     const snapshots = [...snapshotsByPoint.values()].flatMap((byPortfolio) => [...byPortfolio.values()]);
     const ratesFrom = minDate([pointDates[0] ?? toDate, ...snapshots.map((snapshot) => new Date(`${snapshot.date}T00:00:00.000Z`))]);
-    const rates = await loadRateTable(DI.em, [...historyRatePairs(accounts, currencyCode), ...snapshotRatePairs(snapshots, currencyCode)], { from: ratesFrom, to: nextUtcDay(toDate) });
+    const rates = await loadRateTable(DI.em, [...historyRatePairs(accounts, currencyCode), ...snapshotRatePairs(snapshots, currencyCode)], { from: ratesFrom, to: nextUtcDay(toDate) }, rateScope(resolveTenantKeyNumber(appuserTenant.tenantKey)));
     const toViewer = historyBalanceConverter(currencyCode, rates);
 
     // Today's point is the figure Home shows: `getNetWorth` values portfolios live, while

@@ -91,6 +91,10 @@ export const ERROR_CODE = {
   TRANSACTION_EXPIRED: 'transaction_expired',
   /** Creating or renaming a tag: the household already has a tag with this name, ignoring case (409). */
   TAG_NAME_TAKEN: 'tag_name_taken',
+  /** Adding an exchange-rate override: the household already has one for this pair and day (409). Change that one instead. */
+  EXCHANGE_RATE_OVERRIDE_EXISTS: 'exchange_rate_override_exists',
+  /** An exchange-rate override names a currency WonderMoney does not offer (400). */
+  UNKNOWN_CURRENCY: 'unknown_currency',
   /**
    * Reordering rules: the list is not exactly the household's live rules (one was added or
    * deleted meanwhile, or a key is not the household's) (409). Reload the rules and try again.

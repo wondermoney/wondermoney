@@ -38,6 +38,7 @@ const UserCategoriesTable = dynamic(
 );
 const Tags = dynamic(() => import("@/components/settings/Tags"));
 const Rules = dynamic(() => import("@/components/settings/Rules"));
+const Currencies = dynamic(() => import("@/components/settings/Currencies"));
 const Household = dynamic(() => import("@/components/settings/Household"));
 const Notifications = dynamic(
   () => import("@/components/settings/Notifications"),
@@ -70,6 +71,11 @@ const tabs = [
   },
   { name: "tags", label: "navigation.tags", Component: Tags },
   { name: "rules", label: "navigation.rules", Component: Rules },
+  {
+    name: "currencies",
+    label: "navigation.currencies",
+    Component: Currencies,
+  },
   { name: "household", label: "navigation.household", Component: Household },
   {
     name: "notifications",
@@ -96,7 +102,14 @@ const TAB_GROUPS: readonly { label: string; tabs: readonly string[] }[] = [
   },
   {
     label: "navigation.settings-group-money",
-    tabs: ["bank-provider", "connections", "categories", "tags", "rules"],
+    tabs: [
+      "bank-provider",
+      "connections",
+      "categories",
+      "tags",
+      "rules",
+      "currencies",
+    ],
   },
   {
     label: "navigation.settings-group-preferences",

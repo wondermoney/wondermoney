@@ -17,7 +17,7 @@ import { TransactionMerchant } from '@entity/TransactionMerchant';
 import { TransactionStatus } from '@entity/TransactionStatus';
 import { TransactionType } from '@entity/TransactionType';
 import { isProviderRejection, type ProviderRateLimit, providerRateLimitOf } from '@service/bank-sync-run/provider-failure';
-import { resolveExchangeRate } from '@service/currency/exchange-rate';
+import { rateScope, resolveExchangeRate } from '@service/currency/exchange-rate';
 import { createEnableBankingSyncAdapter, type StableIdFields } from '@service/enable-banking/enable-banking-sync-adapter';
 import backgroundOperationService from '@service/operations/background-operation.service';
 import type { Enqueue } from '@service/queue/enqueue';
@@ -314,7 +314,7 @@ class AccountInitialSyncTransactionService {
     const appuserCurrencyCode = appuserCurrency.code;
     const sameCurrency = appuserCurrencyCode === currency.code;
     // The one resolver picks the rate; with none, no converted amount is stored (never the raw one).
-    const resolvedRate = await resolveExchangeRate(em, currency, appuserCurrency, date);
+    const resolvedRate = await resolveExchangeRate(em, currency, appuserCurrency, date, rateScope(tenant.tenantKey));
     const toAppuserCurrency = (value: number): null | number => (resolvedRate ? (sameCurrency ? value : convertMoney(value, resolvedRate.rate)) : null);
     const fxStatus = resolvedRate ? resolvedRate.status : FxStatus.MISSING;
     const settlementExchangeRate = tx.currencyExchange?.exchangeRate != null ? Number(tx.currencyExchange.exchangeRate) : undefined;
