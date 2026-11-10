@@ -61,7 +61,17 @@
       "list-label": "Fluxo de caixa líquido, de {from} a {to}",
       "caption": "Entradas menos saídas em todas as suas contas.",
       "empty-title": "Ainda sem fluxo de caixa",
-      "empty-body": "Aparece quando as suas contas tiverem transações."
+      "empty-body": "Aparece quando as suas contas tiverem transações.",
+      "this-month": "Este mês",
+      "income": "Entradas",
+      "spending": "Saídas",
+      "savings-rate": "Taxa de poupança",
+      "change": "<amount></amount> {vs}",
+      "rate-change": "<points></points> {vs}",
+      "points": "{points} p.p.",
+      "vs": "vs {month}",
+      "vs-same-point": "vs o mesmo ponto do mês passado",
+      "formula": "A taxa de poupança é o rendimento menos as despesas, dividido pelo rendimento. É — quando o rendimento é zero."
     },
     "loans": {
       "title": "Próximos pagamentos de empréstimos",

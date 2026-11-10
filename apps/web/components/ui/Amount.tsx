@@ -57,6 +57,13 @@ export interface AmountProps {
   currency?: string;
   /** How the figure earns (or does not earn) colour. Defaults to `level`. */
   tone?: AmountTone;
+  /**
+   * The value whose sign decides the tone, when that is not the displayed
+   * value. Spending is the case: a fall is good, so a negative delta takes the
+   * success tone. Ignored in privacy mode, where every tone falls back to
+   * `level`.
+   */
+  toneValue?: number;
   /** Append the ISO code in muted ink — for multi-currency surfaces. */
   showCode?: boolean;
   /** Force a leading `+` on positives. Deltas usually want this. */
@@ -80,6 +87,7 @@ export function Amount({
   value,
   currency = "EUR",
   tone = "level",
+  toneValue,
   showCode = false,
   signed = false,
   className,
@@ -143,7 +151,7 @@ export function Amount({
   }).formatToParts(shown);
 
   return (
-    <span className={cn(TONE_CLASS[tone](shown), className)}>
+    <span className={cn(TONE_CLASS[tone](toneValue ?? shown), className)}>
       {parts.map((part, index) =>
         part.type === "minusSign" ? (
           // U+2212, not the hyphen-minus Intl returns: a minus sign is as wide

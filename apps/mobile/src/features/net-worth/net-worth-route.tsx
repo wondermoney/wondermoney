@@ -13,11 +13,21 @@ import { useLoans } from '@/features/loans/use-loans'
 import { useTransactions } from '@/features/transactions/use-transactions'
 import { ApiError } from '@/lib/api/errors'
 
-import { cashflowScale, monthSummary, oldestRefresh, upcomingLoanPayments, type ResolvedHistoryPoint } from './home-model'
+import {
+  cashflowScale,
+  isCurrentCashflowMonth,
+  monthComparisonRange,
+  monthSummary,
+  monthTotalsOf,
+  oldestRefresh,
+  savingsSummary,
+  upcomingLoanPayments,
+  type ResolvedHistoryPoint,
+} from './home-model'
 import type { BudgetMonthRow, SectionState } from './home-sections'
 import { monthlyHistoryPoints } from './net-worth-history-view-model'
 import { NetWorthScreen, type HomeSections, type InsightState, type NetWorthViewState } from './net-worth-screen'
-import { useHomeBudgetMonths, useHomeCashflow, useHomePortfolios } from './use-home-data'
+import { useHomeBudgetMonths, useHomeCashflow, useHomeCashflowComparison, useHomePortfolios } from './use-home-data'
 import { useNetWorth } from './use-net-worth'
 import { useNetWorthHistory } from './use-net-worth-history'
 import { mapNetWorthSummary } from './net-worth-view-model'
@@ -54,6 +64,8 @@ export function NetWorthRoute() {
   const budgetList = useMemo(() => budgets.data?.budgets ?? [], [budgets.data])
   const budgetMonths = useHomeBudgetMonths(budgetList.map((budget) => budget.budgetKey), year, month)
   const cashflow = useHomeCashflow(today)
+  const cashflowComparison = useHomeCashflowComparison(today)
+  const comparisonRange = useMemo(() => monthComparisonRange(today), [today])
   const loans = useLoans()
   const latest = useTransactions(ALL_TRANSACTIONS)
   const unreviewed = useTransactions(UNREVIEWED)
@@ -139,7 +151,14 @@ export function NetWorthRoute() {
     setup,
     bankAlert: bankAlerts.banner,
     month: monthRows,
-    cashflow: sectionOf(cashflow, (data) => cashflowScale(data.cashflow)),
+    cashflow: sectionOf(cashflow, (data) => ({
+      ...cashflowScale(data.cashflow),
+      summary: savingsSummary(
+        monthTotalsOf(data.cashflow.find((row) => isCurrentCashflowMonth(row.date, today))),
+        monthTotalsOf(cashflowComparison.data?.cashflow[0]),
+        comparisonRange,
+      ),
+    })),
     loans: loansState,
     latest: latestState,
     insight: insightState,
@@ -161,6 +180,7 @@ export function NetWorthRoute() {
           budgets.refetch(),
           ...budgetMonths.map((monthQuery) => monthQuery.refetch()),
           cashflow.refetch(),
+          cashflowComparison.refetch(),
           loans.refetch(),
           latest.refetch(),
           unreviewed.refetch(),
@@ -168,7 +188,10 @@ export function NetWorthRoute() {
         ])
       }}
       onRetryBudgets={() => void budgets.refetch()}
-      onRetryCashflow={() => void cashflow.refetch()}
+      onRetryCashflow={() => {
+        void cashflow.refetch()
+        void cashflowComparison.refetch()
+      }}
       onRetryHistory={() => void history.refetch()}
       onRetryLatest={() => void latest.refetch()}
       onRetryLoans={() => void loans.refetch()}

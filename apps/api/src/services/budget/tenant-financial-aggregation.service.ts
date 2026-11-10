@@ -1,5 +1,7 @@
 import Big from 'big.js';
 
+import { savingsRatePercent } from '@utils/savings-rate';
+
 import {
   classifyBudgetThreshold,
   classifyTransactions,
@@ -266,9 +268,10 @@ export class TenantFinancialAggregationService {
           Number(new Big(left.subjectAmount).minus(left.baselineAmount).abs()),
       );
 
-    const savingsRate = (income: Big, spending: Big) => (income.gt(0) ? income.minus(spending).div(income).times(100) : null);
-    const savingsRateSubject = savingsRate(subjectTotals.income, subjectTotals.spending);
-    const savingsRateBaseline = savingsRate(incomeBaseline, spendingBaseline);
+    // The same helper the cash-flow report uses, so the email and the dashboard
+    // state the same rate for the same month.
+    const savingsRateSubject = savingsRatePercent(subjectTotals.income, subjectTotals.spending);
+    const savingsRateBaseline = savingsRatePercent(incomeBaseline, spendingBaseline);
 
     const budgetPressure = await this.monthlyBudgetPressure(
       input.appuserKey,
@@ -286,8 +289,8 @@ export class TenantFinancialAggregationService {
         incomeBaseline: money(incomeBaseline),
         incomeSubject: money(subjectTotals.income),
         recurringChanges: [],
-        savingsRateBaseline: savingsRateBaseline?.toFixed(2) ?? null,
-        savingsRateSubject: savingsRateSubject?.toFixed(2) ?? null,
+        savingsRateBaseline,
+        savingsRateSubject,
         spendingBaseline: money(spendingBaseline),
         spendingSubject: money(subjectTotals.spending),
       },

@@ -48,9 +48,12 @@ describe('account insight contracts', () => {
       expect(query(createAccountMetricsEndpoint(2, scope.fromDate).path).get('timezone')).toBe(zone)
     })
 
-    it('sends none when no start bounds the period', () => {
+    it('sends none when no start bounds the period, and keeps a bounded end', () => {
       expect(createAccountMetricsEndpoint(2).path).toBe('/v1/account/2/metrics')
-      expect(createCashflowEndpoint({ toDate: scope.toDate }).path).toBe('/v1/account/cashflow')
+      const bounded = createCashflowEndpoint({ toDate: scope.toDate }).path
+      expect(query(bounded).get('fromDate')).toBeNull()
+      expect(query(bounded).get('toDate')).toBe(String(Date.parse(scope.toDate)))
+      expect(query(bounded).get('timezone')).toBe(zone)
     })
   })
 })

@@ -13,7 +13,7 @@ import { conservativePortfolioQueryOptions } from '@/features/portfolios/query-s
 import { ApiError } from '@/lib/api/errors'
 import { useGuardedQuery } from '@/lib/api/use-guarded-query'
 
-import { cashflowFromDate } from './home-model'
+import { cashflowFromDate, monthComparisonRange } from './home-model'
 
 /** Months the cash-flow list shows, as web's home does. */
 export const CASHFLOW_MONTHS = 6
@@ -61,10 +61,24 @@ export function useHomeBudgetMonths(budgetIds: readonly number[], year: number, 
 export function useHomeCashflow(today: Date) {
   const scope = useMemo<DateScope>(() => ({
     fromDate: cashflowFromDate(today, CASHFLOW_MONTHS).toISOString(),
-    toDate: new Date(today.getFullYear(), today.getMonth() + 1, 0, 23, 59, 59, 999).toISOString(),
+    // Month-to-date: a future-dated row must not make this month's figures
+    // claim more than has happened.
+    toDate: new Date(today.getFullYear(), today.getMonth(), today.getDate(), 23, 59, 59, 999).toISOString(),
   }), [today])
   const { runtime } = useProductRuntime()
   if (!runtime) throw new Error('useHomeCashflow requires an authenticated runtime')
+  return useInsightQuery(createCashflowEndpoint(scope), cashflowKey(runtime.epochId, scope))
+}
+
+/** The same days of last month, for this month's change figures. */
+export function useHomeCashflowComparison(today: Date) {
+  const range = useMemo(() => monthComparisonRange(today), [today])
+  const scope = useMemo<DateScope>(() => ({
+    fromDate: range.from.toISOString(),
+    toDate: range.to.toISOString(),
+  }), [range])
+  const { runtime } = useProductRuntime()
+  if (!runtime) throw new Error('useHomeCashflowComparison requires an authenticated runtime')
   return useInsightQuery(createCashflowEndpoint(scope), cashflowKey(runtime.epochId, scope))
 }
 

@@ -234,6 +234,36 @@ describe('NetWorthScreen (Home)', () => {
     expect(view.getByRole('button', { name: 'All transactions' })).toBeOnTheScreen()
   })
 
+  it('shows this month’s income, spending and savings rate with the change from last month', async () => {
+    const { view } = await renderScreen({}, {
+      cashflow: { status: 'loaded', data: {
+        zero: 0,
+        bars: [{ date: '2026-11-01T00:00:00.000Z', amount: 600, width: 100 }],
+        summary: {
+          income: 2000,
+          spending: 1400,
+          savingsRate: 0.3,
+          comparison: { expenses: 1520, income: 1880, savingsRate: 0.1915, month: new Date(2026, 9, 1), samePoint: true },
+          incomeDelta: 120,
+          spendingDelta: -120,
+          savingsRateDelta: 10.85,
+        },
+      } },
+    })
+
+    const text = renderedText(view.toJSON())
+    expect(text).toContain('This month')
+    expect(text).toContain('Income')
+    expect(text).toContain('€2,000.00')
+    expect(text).toContain('Spending')
+    expect(text).toContain('€1,400.00')
+    expect(text).toContain('Savings rate')
+    expect(text).toContain('30%')
+    expect(text).toContain('+10.9 pts')
+    expect(text).toContain('vs same point last month')
+    expect(text).toContain('Savings rate is income minus spending')
+  })
+
   describe.each(['America/New_York', 'Asia/Tokyo'])('for a viewer in %s', (zone) => {
     inTimeZone(zone)
 
@@ -299,6 +329,29 @@ describe('NetWorthScreen (Home)', () => {
       for (const figure of ['1,200', '1,825', '625', '100.00', '300.00', '321.45', '410', '250']) expect(tree).not.toContain(figure)
       expect(view.getByLabelText(/^Net worth, Hidden amount, EUR/)).toBeOnTheScreen()
       expect(view.getByLabelText('You own, Hidden amount')).toBeOnTheScreen()
+    })
+
+    it('keeps the savings rate visible while the amounts are hidden', async () => {
+      const { view } = await renderScreen({}, {
+        cashflow: { status: 'loaded', data: {
+          zero: 0,
+          bars: [{ date: '2026-11-01T00:00:00.000Z', amount: 600, width: 100 }],
+          summary: {
+            income: 2000,
+            spending: 1400,
+            savingsRate: 0.3,
+            comparison: { expenses: 1520, income: 1880, savingsRate: 0.1915, month: new Date(2026, 9, 1), samePoint: true },
+            incomeDelta: 120,
+            spendingDelta: -120,
+            savingsRateDelta: 10.85,
+          },
+        } },
+      }, memoryPreferenceStorage(true))
+
+      const text = renderedText(view.toJSON())
+      expect(text).toContain('30%')
+      expect(text).toContain('+10.9 pts')
+      expect(text).not.toMatch(MONEY)
     })
 
     it('toggles from the home header and remembers the choice on the device', async () => {

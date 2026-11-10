@@ -1,5 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { savingsRatePercent } from '@utils/savings-rate';
+
 import { getLisbonBudgetPeriod } from '../aggregation-periods';
 import type { BudgetAllocationRow, TransactionAggregationRow } from '../aggregation-types';
 import { TenantFinancialAggregationService } from '../tenant-financial-aggregation.service';
@@ -429,7 +431,8 @@ describe('TenantFinancialAggregationService', () => {
       );
       await expect(service.aggregateMonthlyStory(input)).resolves.toMatchObject({
         facts: {
-          savingsRateBaseline: '60.00', // (1000 - 400) / 1000 * 100
+          // The email states the same rate the cash-flow report does, through one helper.
+          savingsRateBaseline: savingsRatePercent('1000', '400'),
           savingsRateSubject: null, // income is zero -> savings rate is undefined, not Infinity/NaN
         },
         status: 'ok',

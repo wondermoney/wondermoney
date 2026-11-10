@@ -311,7 +311,15 @@
       "listLabel": "Net cash flow, {{from}} to {{to}}",
       "caption": "Money in less money out across your accounts.",
       "emptyTitle": "No cash flow yet",
-      "emptyBody": "It appears once your accounts have transactions."
+      "emptyBody": "It appears once your accounts have transactions.",
+      "thisMonth": "This month",
+      "income": "Income",
+      "spending": "Spending",
+      "savingsRate": "Savings rate",
+      "vs": "vs {{month}}",
+      "vsSamePoint": "vs same point last month",
+      "points": "{{points}} pts",
+      "formula": "Savings rate is income minus spending, divided by income. It is — when income is zero."
     },
     "loans": {
       "title": "Next loan payments",

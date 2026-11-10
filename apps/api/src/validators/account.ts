@@ -168,4 +168,4 @@ export const startAccountCsvImportRequestSchema = z.object({ body: z.object({ ba
 export const previewAccountCsvImportRequestSchema = z.object({ body: z.object({ key: z.string().min(1), mapping: statementMappingSchema.optional() }), params: z.object({ accountId: positiveIntId }) });
 export const getCategorySpendingRequestSchema = z.object({ query: z.object({ fromDate: validDate.optional(), limit: boundedLimit({ defaultValue: 100, max: 500 }).optional().default(100), timezone: viewerTimeZone, toDate: validDate.optional() }) });
 export const getAccountRequestSchema = z.object({ params: z.object({ accountId: positiveIntId }) });
-export const getAccountsCashflowRequestSchema = z.object({ query: z.object({ fromDate: validDate.optional(), timezone: viewerTimeZone }) });
+export const getAccountsCashflowRequestSchema = z.object({ query: z.object({ fromDate: validDate.optional(), timezone: viewerTimeZone, toDate: validDate.optional() }) });

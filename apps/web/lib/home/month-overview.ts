@@ -312,7 +312,118 @@ export function netWorthChanges(
   };
 }
 
-export interface CashflowBar extends AccountCashflow {
+export interface MonthTotals {
+  income: number;
+  expenses: number;
+  savingsRate: number | null;
+}
+
+export interface MonthComparisonRange {
+  /** First day of the previous month, local. */
+  from: Date;
+  /** End of the comparison day, local. */
+  to: Date;
+  /** The previous month's first day, for the label. */
+  month: Date;
+  /** True when the range ends on the same day of the month, not the month's end. */
+  samePoint: boolean;
+}
+
+/**
+ * The period to compare this month against. While the month is still running,
+ * a full previous month would compare a part with a whole, so the range ends
+ * on the same day of the previous month (clamped to its length). On the last
+ * day it is the whole previous month.
+ */
+export function monthComparisonRange(today: Date): MonthComparisonRange {
+  const month = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+  const daysInPreviousMonth = new Date(
+    today.getFullYear(),
+    today.getMonth(),
+    0,
+  ).getDate();
+  const daysInCurrentMonth = new Date(
+    today.getFullYear(),
+    today.getMonth() + 1,
+    0,
+  ).getDate();
+  const samePoint = today.getDate() < daysInCurrentMonth;
+  const day = samePoint
+    ? Math.min(today.getDate(), daysInPreviousMonth)
+    : daysInPreviousMonth;
+
+  return {
+    from: month,
+    month,
+    samePoint,
+    to: new Date(
+      today.getFullYear(),
+      today.getMonth() - 1,
+      day,
+      23,
+      59,
+      59,
+      999,
+    ),
+  };
+}
+
+export interface SavingsSummary {
+  income: number;
+  spending: number;
+  savingsRate: number | null;
+  /** The same figures for the comparison period; null when it has no data. */
+  comparison: (MonthTotals & { month: Date; samePoint: boolean }) | null;
+  incomeDelta: number | null;
+  spendingDelta: number | null;
+  /** Percentage points, e.g. 3 for +3 pts. */
+  savingsRateDelta: number | null;
+}
+
+/**
+ * This month's income, spending and savings rate beside the comparison
+ * period's. A figure the comparison period has no data for has no delta, not
+ * a zero one.
+ */
+export function savingsSummary(
+  current: MonthTotals | undefined,
+  previous: MonthTotals | undefined,
+  range: MonthComparisonRange,
+): SavingsSummary | null {
+  if (
+    !current ||
+    typeof current.income !== "number" ||
+    typeof current.expenses !== "number"
+  ) {
+    return null;
+  }
+
+  const currentRate =
+    typeof current.savingsRate === "number" ? current.savingsRate : null;
+  const previousRate =
+    previous && typeof previous.savingsRate === "number"
+      ? previous.savingsRate
+      : null;
+
+  return {
+    income: current.income,
+    spending: current.expenses,
+    savingsRate: currentRate,
+    comparison: previous
+      ? { ...previous, month: range.month, samePoint: range.samePoint }
+      : null,
+    incomeDelta: previous ? current.income - previous.income : null,
+    spendingDelta: previous ? current.expenses - previous.expenses : null,
+    savingsRateDelta:
+      previous && currentRate !== null && previousRate !== null
+        ? (currentRate - previousRate) * 100
+        : null,
+  };
+}
+
+export interface CashflowBar {
+  date: string;
+  amount: number;
   /** Percentage of the track, measured from the zero line. */
   width: number;
 }
@@ -327,7 +438,9 @@ export interface CashflowScale {
  * Monthly net cash flow as bars diverging from one zero line: outflows to the
  * left, inflows to the right, both on the same scale. Oldest month first.
  */
-export function cashflowScale(points: AccountCashflow[]): CashflowScale {
+export function cashflowScale(
+  points: Array<Pick<AccountCashflow, "date" | "amount">>,
+): CashflowScale {
   const sorted = [...points].sort((a, b) => a.date.localeCompare(b.date));
   const mostOut = Math.max(0, ...sorted.map((point) => -point.amount));
   const mostIn = Math.max(0, ...sorted.map((point) => point.amount));

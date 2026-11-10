@@ -25,12 +25,15 @@ import {
   calendarDay,
   daysLeftInMonth,
   formatMonthName,
+  formatPercentagePoints,
+  formatSavingsRate,
   formatShortDate,
   measureGeometry,
   type BalanceSheet,
   type BalanceSheetGroup,
-  type CashflowScale,
+  type CashflowView,
   type MonthSummary,
+  type SavingsSummary,
 } from './home-model'
 
 /** A Home section loads, fails and retries on its own, as on web. */
@@ -371,8 +374,68 @@ function SheetSide({ title, groups, total, currency, locale, liability = false, 
 
 // ── Net cash flow by month (web CashflowSection) ──────────────────────────
 
+function CashflowSummary({ summary, currency, locale }: { summary: SavingsSummary; currency: string; locale: string }) {
+  const { t } = useTranslation()
+  const palette = usePalette()
+  const comparison = summary.comparison
+  const vs = comparison
+    ? comparison.samePoint
+      ? t('home.cashflow.vsSamePoint')
+      : t('home.cashflow.vs', { month: formatMonthName(comparison.month, locale) })
+    : null
+  const change = (delta: number | null, goodWhenNegative: boolean) =>
+    delta === null || vs === null ? null : (
+      <View style={styles.summaryChange}>
+        <Amount currency={currency} delta locale={locale} size="amountSmall" toneValue={goodWhenNegative ? -delta : delta} value={delta} />
+        <Text tone="muted" variant="label">{vs}</Text>
+      </View>
+    )
+  const rateTone = summary.savingsRateDelta === null
+    ? 'muted'
+    : summary.savingsRateDelta > 0
+      ? 'success'
+      : summary.savingsRateDelta < 0
+        ? 'destructive'
+        : 'muted'
+
+  return (
+    <View style={[styles.summary, { borderBottomColor: palette.border }]}>
+      <Text accessibilityRole="header" variant="bodyStrong">{t('home.cashflow.thisMonth')}</Text>
+      <View style={styles.summaryRow}>
+        <Text tone="muted" variant="meta">{t('home.cashflow.income')}</Text>
+        <View style={styles.summaryFigure}>
+          <Amount currency={currency} locale={locale} size="amountLarge" value={summary.income} />
+          {change(summary.incomeDelta, false)}
+        </View>
+      </View>
+      <View style={styles.summaryRow}>
+        <Text tone="muted" variant="meta">{t('home.cashflow.spending')}</Text>
+        <View style={styles.summaryFigure}>
+          <Amount currency={currency} locale={locale} size="amountLarge" value={summary.spending} />
+          {change(summary.spendingDelta, true)}
+        </View>
+      </View>
+      <View style={styles.summaryRow}>
+        <Text tone="muted" variant="meta">{t('home.cashflow.savingsRate')}</Text>
+        <View style={styles.summaryFigure}>
+          <Text variant="amountLarge">{formatSavingsRate(summary.savingsRate, locale)}</Text>
+          {summary.savingsRateDelta === null || vs === null ? null : (
+            <View style={styles.summaryChange}>
+              <Text tone={rateTone} variant="label">
+                {t('home.cashflow.points', { points: formatPercentagePoints(summary.savingsRateDelta, locale) })}
+              </Text>
+              <Text tone="muted" variant="label">{vs}</Text>
+            </View>
+          )}
+        </View>
+      </View>
+      <Text style={styles.caption} tone="muted" variant="meta">{t('home.cashflow.formula')}</Text>
+    </View>
+  )
+}
+
 export function CashflowSection({ state, currency, today, locale, onRetry }: {
-  state: SectionState<CashflowScale>
+  state: SectionState<CashflowView>
   currency: string
   today: Date
   locale: string
@@ -384,7 +447,7 @@ export function CashflowSection({ state, currency, today, locale, onRetry }: {
   const title = t('home.cashflow.title')
   if (state.status === 'loading') return <Section title={title} variant="open"><RowsSkeleton label={title} rows={6} /></Section>
   if (state.status === 'error') return <Section title={title} variant="open"><SectionError onRetry={onRetry} /></Section>
-  const { bars, zero } = state.data
+  const { bars, zero, summary } = state.data
   if (bars.length === 0) {
     return <Section title={title} variant="open"><SectionEmpty body={t('home.cashflow.emptyBody')} title={t('home.cashflow.emptyTitle')} /></Section>
   }
@@ -395,6 +458,7 @@ export function CashflowSection({ state, currency, today, locale, onRetry }: {
   }
   return (
     <Section title={title} variant="open" testID="home-cashflow">
+      {summary ? <CashflowSummary currency={currency} locale={locale} summary={summary} /> : null}
       <View accessibilityLabel={t('home.cashflow.listLabel', { from: label(bars[0].date), to: label(bars[bars.length - 1].date) })}>
         {bars.map((bar) => {
           const current = isCurrent(bar.date)
@@ -636,6 +700,11 @@ const styles = StyleSheet.create({
   sheetRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: themeTokens.spacing[4], paddingVertical: themeTokens.spacing[2], borderBottomWidth: 1 },
   sheetLabel: { flex: 1, minWidth: 0, flexDirection: 'row', alignItems: 'center', gap: themeTokens.spacing[3] },
   sheetTotal: { flexDirection: 'row', justifyContent: 'space-between', gap: themeTokens.spacing[4], paddingTop: themeTokens.spacing[3] },
+
+  summary: { gap: themeTokens.spacing[3], paddingBottom: themeTokens.spacing[4], marginBottom: themeTokens.spacing[4], borderBottomWidth: 1 },
+  summaryRow: { flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between', gap: themeTokens.spacing[4] },
+  summaryFigure: { alignItems: 'flex-end', gap: 2, flexShrink: 1 },
+  summaryChange: { flexDirection: 'row', alignItems: 'baseline', flexWrap: 'wrap', justifyContent: 'flex-end', columnGap: themeTokens.spacing[1] },
 
   cashRow: { minHeight: themeTokens.touchTarget.minimum, flexDirection: 'row', alignItems: 'center', gap: themeTokens.spacing[4], borderBottomWidth: 1 },
   cashMonth: { width: 48 },
