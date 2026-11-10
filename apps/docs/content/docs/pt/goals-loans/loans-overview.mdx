@@ -54,6 +54,18 @@ Usa as ligações quando for necessário:
   height={900}
 />
 
+## Métodos de amortização
+
+O plano de um empréstimo mostra cada prestação: quanto é juro, quanto reduz o capital e o saldo que resta depois.
+As linhas com um reembolso associado ficam marcadas como pagas, para veres se o empréstimo está adiantado ou atrasado face ao contrato.
+
+O WonderMoney suporta dois métodos comuns:
+
+- **Francês (prestação constante).** A prestação mantém-se igual durante todo o prazo. No início, a maior parte é juro; no fim, a maior parte é capital.
+- **Capital constante (SAC).** O mesmo capital é reembolsado todos os meses. Os juros descem com o saldo, por isso a prestação começa mais alta e desce ao longo do tempo.
+
+Escolhe o método ao adicionar ou editar um empréstimo. O plano usa o valor original do empréstimo, a taxa de juro e o prazo; se faltar algum, a página indica o que adicionar.
+
 ## O que isto não faz
 
 WonderMoney não é um credor e não substitui o contrato de empréstimo, o aviso de reembolso ou o extrato oficial.

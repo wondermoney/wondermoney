@@ -66,6 +66,8 @@ type Props<TData extends object = object> = {
   yAxisWidth?: number;
   /** Recharts bar layout. `vertical` renders horizontal bars (category on Y). */
   layout?: "horizontal" | "vertical";
+  /** Stack the series on top of each other (principal + interest = payment). */
+  stacked?: boolean;
   /** Disable Recharts entrance animations for users who prefer reduced motion. */
   isAnimationActive?: boolean;
 };
@@ -90,6 +92,7 @@ export function BarChartBase<TData extends object = object>({
   yTicks,
   yAxisWidth,
   layout = "horizontal",
+  stacked = false,
   isAnimationActive = true,
 }: Props<TData>) {
   // A value axis with no formatter of its own is assumed to be money while
@@ -214,6 +217,7 @@ export function BarChartBase<TData extends object = object>({
             fill={`var(--color-${key})`}
             radius={radius}
             barSize={barSize}
+            stackId={stacked ? "stack" : undefined}
             isAnimationActive={isAnimationActive}
             // Per-bar colours go through `shape` rather than the `<Cell>`
             // children Recharts 3 deprecated (removed in 4.0; see

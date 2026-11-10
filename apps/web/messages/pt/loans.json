@@ -29,6 +29,8 @@
       "interestRate": "Taxa de juro",
       "installment": "Prestação mensal",
       "termMonths": "Prazo (meses)",
+      "amortizationMethod": "Método de amortização",
+      "amortizationMethodHint": "O francês mantém a prestação constante; o de capital constante paga o mesmo capital todos os meses, por isso a prestação desce.",
       "startDate": "Data de início",
       "dueDate": "Data de vencimento",
       "linkedAccount": "Conta associada",
@@ -45,6 +47,10 @@
       "auto": "Automóvel",
       "student": "Estudantil",
       "other": "Outro"
+    },
+    "methods": {
+      "french": "Francês (prestação constante)",
+      "constantPrincipal": "Capital constante (SAC)"
     },
     "statuses": {
       "active": "Ativo",
@@ -144,8 +150,29 @@
         "split": "<principal></principal> de capital, <interest></interest> de juros, <fees></fees> de comissões"
       },
       "amortization": {
-        "title": "Pré-visualização de amortização",
-        "unavailable": "A pré-visualização de amortização não está disponível com a resposta atual da API."
+        "title": "Plano de amortização",
+        "subtitle": "Cada pagamento dividido em juros e capital, e o saldo que resta depois.",
+        "unavailable": "O plano de amortização está indisponível neste momento.",
+        "missingInputs": "Adicione a taxa de juro e o prazo para ver o plano contratual.",
+        "empty": "Não há linhas de amortização para mostrar.",
+        "totalInterest": "Juros totais",
+        "totalPaid": "Total pago",
+        "principal": "Capital",
+        "interest": "Juros",
+        "balance": "Saldo",
+        "paid": "Pago",
+        "scheduled": "Previsto",
+        "rowLabel": "Pagamento {number}",
+        "split": "<principal></principal> de capital, <interest></interest> de juros",
+        "columns": {
+          "number": "#",
+          "date": "Data",
+          "payment": "Pagamento",
+          "principal": "Capital",
+          "interest": "Juros",
+          "balance": "Saldo",
+          "status": "Estado"
+        }
       },
       "adjustment": {
         "unavailableTitle": "Ajuste de saldo indisponível",

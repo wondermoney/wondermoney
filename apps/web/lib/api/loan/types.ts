@@ -3,6 +3,8 @@ export type LoanType =
 
 export type LoanStatus = "ACTIVE" | "PAID_OFF" | "CLOSED";
 
+export type LoanAmortizationMethod = "FRENCH" | "CONSTANT_PRINCIPAL";
+
 export interface LoanCurrencyDto {
   currencyKey: number;
   code: string;
@@ -13,6 +15,7 @@ export interface LoanListItem {
   name: string;
   type: LoanType;
   status: LoanStatus;
+  amortizationMethod?: LoanAmortizationMethod | null;
   currency: LoanCurrencyDto;
   openingPrincipalBalance: number;
   originalPrincipal?: number | null;
@@ -32,10 +35,27 @@ export interface LoanListItem {
 
 export interface LoanDetail extends LoanListItem {
   openingBalanceDate?: string | null;
+  firstPaymentDate?: string | null;
   paymentFrequency?: string;
   rateType?: string;
   remainingTermMonthsEstimated?: number | null;
   description?: string | null;
+}
+
+export interface LoanScheduleRow {
+  number: number;
+  date: string;
+  payment: number;
+  interest: number;
+  principal: number;
+  endingBalance: number;
+  paid: boolean;
+}
+
+export interface LoanSchedule {
+  rows: LoanScheduleRow[];
+  totalInterest: number;
+  totalPaid: number;
 }
 
 export interface LoanOverview {
@@ -104,6 +124,8 @@ export interface CreateLoanRequest {
   name: string;
   type: LoanType;
   currencyKey: number;
+  amortizationMethod?: LoanAmortizationMethod;
+  firstPaymentDate?: string | null;
   openingPrincipalBalance: number;
   openingBalanceDate: string;
   originalPrincipal?: number | null;

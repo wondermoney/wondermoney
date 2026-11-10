@@ -101,7 +101,7 @@ export default function LoanDetailClient({ loanId }: { loanId: string }) {
       />
       <div className="grid gap-10 xl:grid-cols-[minmax(0,1fr)_380px] xl:gap-12">
         <div className="min-w-0">
-          <LoanAmortizationPreview loan={loan} repayments={repayments} />
+          <LoanAmortizationPreview loan={loan} />
         </div>
         <div className="min-w-0">
           {/* Linking a repayment and editing the loan sit in the header; the

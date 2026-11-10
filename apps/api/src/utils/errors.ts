@@ -123,6 +123,8 @@ export const ERROR_CODE = {
   SPLIT_INVALID: 'split_invalid',
   /** Splitting a transaction linked as a loan repayment, which already splits principal from interest (409). */
   TRANSACTION_HAS_LOAN_REPAYMENT: 'transaction_has_loan_repayment',
+  /** A loan schedule needs a principal, an interest rate and a term (422). */
+  LOAN_SCHEDULE_UNAVAILABLE: 'loan_schedule_unavailable',
   /** Linking a split transaction as a loan repayment; remove the split first (409). */
   TRANSACTION_IS_SPLIT: 'transaction_is_split',
   /**
@@ -224,6 +226,18 @@ export class NotFoundError extends ApplicationError {
   constructor(message?: string, code: ErrorCode = ERROR_CODE.NOT_FOUND) {
     super(message, StatusCodes.NOT_FOUND, code);
     logger.warn({ error: this }, `NotFoundError: ${message}`);
+  }
+}
+
+/**
+ * The request is well formed but the resource cannot answer it (422): a loan
+ * without the rate, term or principal a schedule needs, for example.
+ */
+export class UnprocessableEntityError extends ApplicationError {
+  constructor(message?: string, code: ErrorCode = ERROR_CODE.VALIDATION_FAILED, details?: Record<string, string>) {
+    super(message, StatusCodes.UNPROCESSABLE_ENTITY, code);
+    if (details) this.details = details;
+    logger.warn({ error: this }, `UnprocessableEntityError: ${message}`);
   }
 }
 

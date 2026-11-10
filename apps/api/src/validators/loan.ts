@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 import { validateRepaymentAllocation } from '@service/loan/loan-calculation.service';
-import { LoanPaymentFrequency, LoanRateType, LoanStatus, LoanType } from '@service/loan/loan-types';
+import { LoanAmortizationMethod, LoanPaymentFrequency, LoanRateType, LoanStatus, LoanType } from '@service/loan/loan-types';
 import { finiteAmount, positiveIntId, validDate } from '@validators/shared';
 
 const dateSchema = validDate;
@@ -9,8 +9,10 @@ const dateSchema = validDate;
 const booleanLike = z.union([z.boolean(), z.string()]).transform((val) => (typeof val === 'string' ? val.toLowerCase() === 'true' : val));
 
 const baseLoanSchema = z.object({
+  amortizationMethod: z.enum(LoanAmortizationMethod).optional(),
   annualInterestRateBps: z.coerce.number().int().min(0).max(10_000).refine(Number.isSafeInteger).optional(),
   currencyKey: positiveIntId,
+  firstPaymentDate: dateSchema.optional(),
   includeInNetWorth: booleanLike.optional().default(true),
   maturityDate: dateSchema.optional(),
   name: z.string().min(1).max(255),

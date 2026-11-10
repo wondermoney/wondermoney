@@ -34,6 +34,7 @@ import useCurrencies from "@/lib/api/account/useCurrencies";
 import { getApiErrorMessage, isDemoReadOnlyError } from "@/lib/api/errors";
 import type {
   CreateLoanRequest,
+  LoanAmortizationMethod,
   LoanDetail,
   LoanListItem,
   LoanType,
@@ -107,6 +108,7 @@ function buildBaseSchema(
       "STUDENT_LOAN",
       "OTHER",
     ]),
+    amortizationMethod: z.enum(["FRENCH", "CONSTANT_PRINCIPAL"]),
     providerName: z.string().optional(),
     currencyKey: z.coerce.number<number>().int().positive(),
     openingPrincipalBalance: amount().pipe(z.number().min(0)),
@@ -152,6 +154,7 @@ export default function LoanFormDrawer({
     () => ({
       name: loan?.name ?? "",
       type: loan?.type ?? "PERSONAL_LOAN",
+      amortizationMethod: loan?.amortizationMethod ?? "FRENCH",
       providerName: loan?.providerName ?? "",
       currencyKey: loan?.currency.currencyKey ?? 1,
       openingPrincipalBalance: loan?.openingPrincipalBalance ?? 0,
@@ -216,6 +219,7 @@ export default function LoanFormDrawer({
     const payload: CreateLoanRequest = {
       name: values.name,
       type: values.type,
+      amortizationMethod: values.amortizationMethod,
       providerName: values.providerName || undefined,
       currencyKey: values.currencyKey,
       openingPrincipalBalance: values.openingPrincipalBalance,
@@ -321,6 +325,41 @@ export default function LoanFormDrawer({
                     ))}
                   </SelectContent>
                 </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="amortizationMethod"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>{t("fields.amortizationMethod")}</FormLabel>
+                <Select
+                  onValueChange={field.onChange}
+                  defaultValue={field.value}
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {(
+                      [
+                        "FRENCH",
+                        "CONSTANT_PRINCIPAL",
+                      ] satisfies LoanAmortizationMethod[]
+                    ).map((v) => (
+                      <SelectItem key={v} value={v}>
+                        {t(`methods.${v === "FRENCH" ? "french" : "constantPrincipal"}`)}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormDescription>
+                  {t("fields.amortizationMethodHint")}
+                </FormDescription>
                 <FormMessage />
               </FormItem>
             )}

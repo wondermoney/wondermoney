@@ -53,6 +53,8 @@ export const API_ERROR_CODE = {
   TAG_NAME_TAKEN: "tag_name_taken",
   /** A loan repayment already splits principal from interest, so it cannot be split (409). */
   TRANSACTION_HAS_LOAN_REPAYMENT: "transaction_has_loan_repayment",
+  /** The loan lacks the principal, rate or term a contract schedule needs (422). */
+  LOAN_SCHEDULE_UNAVAILABLE: "loan_schedule_unavailable",
   /** A split transaction cannot be linked as a loan repayment until its split is removed (409). */
   TRANSACTION_IS_SPLIT: "transaction_is_split",
   UNAUTHORIZED: "unauthorized",
