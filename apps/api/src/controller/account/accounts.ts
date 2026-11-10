@@ -17,7 +17,7 @@ import { computeAvailableBalance } from '@service/account/account-available-bala
 import { resolveAccountCsvImportFormat } from '@service/account/account-csv-import-format';
 import { startAccountRecalculation } from '@service/account/account-recalculation.service';
 import { computeSyncStatus } from '@service/account/account-sync-status.service';
-import { convertWithStatus, rateScope } from '@service/currency/exchange-rate';
+import { convertWithStatus, type RateScope, rateScope } from '@service/currency/exchange-rate';
 import { describeFx, type FxDisplay, UNKNOWN_FX } from '@service/currency/fx-display';
 import { isManualAccount } from '@service/transaction/balance-chain.service';
 import { BadRequestError, ERROR_CODE, ForbiddenError, InternalServerError, NotFoundError } from '@utils/errors';
@@ -145,7 +145,7 @@ export async function getAccount(req: Request, res: Response) {
   const [openIncidentRequisitionIds, pendingSumsByAccount, [fx]] = await Promise.all([
     loadOpenIncidentRequisitionIds(req.user),
     loadPendingSumsByAccount([account.accountKey]),
-    describeAccountsFx([account]),
+    describeAccountsFx([account], rateScope(req.tenant)),
   ]);
   return res.json({ account: mapAccountSummary(account, { now: new Date(), openIncidentRequisitionIds, pendingSumsByAccount, viewerAppuserKey: req.user.appuserKey }, fx) });
 }
@@ -191,7 +191,7 @@ export async function getAccounts(req: Request, res: Response) {
   const [openIncidentRequisitionIds, pendingSumsByAccount, fx] = await Promise.all([
     loadOpenIncidentRequisitionIds(req.user),
     loadPendingSumsByAccount(accounts.map((account) => account.accountKey)),
-    describeAccountsFx(accounts),
+    describeAccountsFx(accounts, rateScope(req.tenant)),
   ]);
   const syncContext = { now: new Date(), openIncidentRequisitionIds, pendingSumsByAccount, viewerAppuserKey: req.user.appuserKey };
   const transformedData = accounts.map((account, index) => mapAccountSummary(account, syncContext, fx[index]));
@@ -246,11 +246,12 @@ export interface AccountSyncContext {
  * How each account's balance in its owner's currency was converted. Balances are revalued at the
  * latest rate (`fx-reconvert.service.ts`), so a provisional one is dated by today's latest rate.
  */
-function describeAccountsFx(accounts: Account[]): Promise<FxDisplay[]> {
+function describeAccountsFx(accounts: Account[], scope: RateScope): Promise<FxDisplay[]> {
   const now = new Date();
   return describeFx(
     DI.em,
     accounts.map((account) => ({ converted: account.appuserCurrencyBalance, date: now, from: account.currencyKey, status: account.fxStatus, to: account.accountOwnerAppuserKey?.currencyKey })),
+    scope,
   );
 }
 

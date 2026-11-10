@@ -3,6 +3,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { addTransaction, currencyFor, type Household, seedHousehold } from '@app/__tests__/__helpers__/finance-fixtures';
 import { useTestDatabase } from '@app/__tests__/__helpers__/pg-test-db';
 import { ExchangeRate } from '@entity/ExchangeRate';
+import { ExchangeRateOverride } from '@entity/ExchangeRateOverride';
 import { FxStatus, Transaction } from '@entity/Transaction';
 
 vi.mock('@app/app', async () => ({ DI: (await import('@app/database/di')).DI }));
@@ -61,6 +62,21 @@ describe('transaction list and how each row was converted', () => {
     const page = await list(household);
 
     expect(page.transactions[0]).toMatchObject({ fxRateDate: '2026-07-01', fxStatus: 'provisional' });
+  });
+
+  it("dates a provisional row by the household's own override, never another household's", async () => {
+    const em = db.em();
+    const household = await seedHousehold(em);
+    const neighbour = await seedHousehold(em);
+    const { jpy } = await aForeignRow(household, { amount: -60, date: new Date(Date.UTC(2026, 6, 20)), fxStatus: FxStatus.PROVISIONAL });
+    em.create(ExchangeRate, { date: new Date(Date.UTC(2026, 6, 1)), fromCurrency: jpy, rate: 0.006, toCurrency: household.currency }, { partial: true });
+    em.create(ExchangeRateOverride, { date: new Date(Date.UTC(2026, 6, 8)), fromCurrency: jpy, rate: 0.0061, tenantKey: household.tenant, toCurrency: household.currency }, { partial: true });
+    em.create(ExchangeRateOverride, { date: new Date(Date.UTC(2026, 6, 10)), fromCurrency: jpy, rate: 0.0062, tenantKey: neighbour.tenant, toCurrency: household.currency }, { partial: true });
+    await em.flush();
+
+    const page = await list(household);
+
+    expect(page.transactions[0]).toMatchObject({ fxRateDate: '2026-07-08', fxStatus: 'provisional' });
   });
 
   it('marks a row in the viewer currency as exact, with no rate date', async () => {

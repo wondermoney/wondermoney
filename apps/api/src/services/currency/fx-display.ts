@@ -2,7 +2,7 @@ import type { EntityManager } from '@mikro-orm/core';
 
 import type { Currency } from '@entity/Currency';
 import { FxStatus } from '@entity/Transaction';
-import { resolveExchangeRate } from '@service/currency/exchange-rate';
+import { type RateScope, resolveExchangeRate } from '@service/currency/exchange-rate';
 
 /**
  * How an amount shown in the user's currency was converted, for clients to say so: `missing`
@@ -30,9 +30,10 @@ export interface FxSubject {
 /**
  * Describe how each subject was converted. A provisional one gets the date of the rate the one
  * resolver picks for it today (`resolveExchangeRate`), looked up once per pair and day, so only
- * provisional rows cost a query.
+ * provisional rows cost a query. `scope` is the household that holds the amounts, whose overrides
+ * that resolver takes into account.
  */
-export async function describeFx(em: EntityManager, subjects: FxSubject[]): Promise<FxDisplay[]> {
+export async function describeFx(em: EntityManager, subjects: FxSubject[], scope: RateScope): Promise<FxDisplay[]> {
   const statuses = subjects.map(effectiveStatus);
   const rateDates = new Map<string, Promise<null | string>>();
   return Promise.all(
@@ -43,7 +44,7 @@ export async function describeFx(em: EntityManager, subjects: FxSubject[]): Prom
       const key = `${from.currencyKey}>${to.currencyKey}@${isoDay(subject.date)}`;
       let rateDate = rateDates.get(key);
       if (!rateDate) {
-        rateDate = resolveExchangeRate(em, from, to, subject.date).then((resolved) => (resolved ? isoDay(resolved.rateDate) : null));
+        rateDate = resolveExchangeRate(em, from, to, subject.date, scope).then((resolved) => (resolved ? isoDay(resolved.rateDate) : null));
         rateDates.set(key, rateDate);
       }
       return { fxRateDate: await rateDate, fxStatus };
