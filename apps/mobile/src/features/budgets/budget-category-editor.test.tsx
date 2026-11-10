@@ -14,7 +14,7 @@ const child = mapBudget(budgetFixture).categories[0].children[0]
 
 const renderEditor = async (overrides: Partial<React.ComponentProps<typeof BudgetCategoryEditor>> = {}) => {
   const i18n = await initMobileI18n('en')
-  const props: React.ComponentProps<typeof BudgetCategoryEditor> = { child, year: 2026, month: 4, locale: 'en', pending: false, palette: themeTokens.colors.light, onSave: jest.fn().mockResolvedValue(undefined), onCancel: jest.fn(), ...overrides }
+  const props: React.ComponentProps<typeof BudgetCategoryEditor> = { child, currency: 'EUR', year: 2026, month: 4, locale: 'en', pending: false, palette: themeTokens.colors.light, onSave: jest.fn().mockResolvedValue(undefined), onCancel: jest.fn(), ...overrides }
   return { props, view: await render(<I18nextProvider i18n={i18n}><BudgetCategoryEditor {...props} /></I18nextProvider>) }
 }
 
@@ -100,5 +100,19 @@ describe('budget child-category editor', () => {
     expect(parseRawBudgetAmount('1.234,56', 'pt-PT')).toBe(1234.56)
     expect(parseRawBudgetAmount('1.000', 'es')).toBe(1000)
     expect(parseRawBudgetAmount('1.000', 'en')).toBe(1)
+  })
+
+  it('shows the spending suggestion and applies it to the amount', async () => {
+    const { view } = await renderEditor({ suggestion: { average: 100, categoryKey: child.id, categoryName: child.name, hasEnoughData: true, median: 100, monthsWithData: 3, suggested: 105 } })
+
+    expect(view.getByText(/Suggested from your spending/)).toBeOnTheScreen()
+    await fireEvent.press(view.getByRole('button', { name: 'Apply' }))
+    expect(view.getByLabelText('Amount per occurrence').props.value).toBe('105')
+  })
+
+  it('says when there is not enough history for a suggestion', async () => {
+    const { view } = await renderEditor({ suggestion: { average: 100, categoryKey: child.id, categoryName: child.name, hasEnoughData: false, median: 100, monthsWithData: 1, suggested: null } })
+
+    expect(view.getByText(/Not enough history yet for a suggestion/)).toBeOnTheScreen()
   })
 })

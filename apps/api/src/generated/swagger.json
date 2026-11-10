@@ -986,6 +986,26 @@
         }
       }
     },
+    "/v1/budget/{budgetKey}/suggestions": {
+      "get": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "budgetKey",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/v1/budget/{budgetKey}/{year}/{month}": {
       "get": {
         "description": "",

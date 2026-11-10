@@ -18,6 +18,26 @@ const mocks = vi.hoisted(() => ({
 vi.mock("@/lib/api/budget/useEditBudgetCategory", () => ({
   default: () => ({ mutateAsync: mocks.mutateAsync }),
 }));
+vi.mock("@/lib/api/budget/useBudgetSuggestions", () => ({
+  default: () => ({
+    data: {
+      categories: [
+        {
+          average: 100,
+          categoryKey: 7,
+          categoryName: "Groceries",
+          hasEnoughData: true,
+          median: 100,
+          monthsWithData: 3,
+          suggested: 105,
+        },
+      ],
+      currencyCode: "EUR",
+      months: 3,
+      targetMonth: { month: 5, year: 2026 },
+    },
+  }),
+}));
 vi.mock("@/i18n/navigation", () => ({ useRouter: () => ({ refresh: mocks.refresh }) }));
 vi.mock("posthog-js/react", () => ({ usePostHog: () => ({ capture: () => {} }) }));
 vi.mock("sonner", () => ({ toast: { error: vi.fn(), success: vi.fn() } }));
@@ -149,4 +169,17 @@ test("a category with rollover on opens with the switch on, and turning it off f
   const sent = mocks.mutateAsync.mock.calls[0]?.[0] as Record<string, unknown>;
   assert.equal(sent.rolloverEnabled, false);
   assert.equal(sent.applyToFollowingMonths, false);
+});
+
+test("applying the spending suggestion fills the amount and saves it", async () => {
+  renderSheet();
+
+  const applySuggestion = await screen.findByRole("button", {
+    name: enMessages["budget-suggestion-apply"],
+  });
+  await userEvent.click(applySuggestion);
+  await userEvent.click(screen.getByRole("button", { name: enMessages.save }));
+
+  await vi.waitFor(() => assert.equal(mocks.mutateAsync.mock.calls.length, 1));
+  assert.equal((mocks.mutateAsync.mock.calls[0]?.[0] as { amount: number }).amount, 105);
 });

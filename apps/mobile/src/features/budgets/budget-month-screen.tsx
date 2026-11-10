@@ -14,7 +14,7 @@ import { usePalette } from '@/theme/use-palette'
 
 import { BudgetCategoryEditor } from './budget-category-editor'
 import { BudgetDetailHeader, BudgetLine, BudgetOverviewTable, MeasureKey, MonthNavigator, type BudgetView } from './budget-parts'
-import type { BudgetCategoryWrite, BudgetRecurrence } from './budgets-contract'
+import type { BudgetCategoryWrite, BudgetRecurrence, BudgetSuggestionDto } from './budgets-contract'
 import { budgetMeasureScale, overPlanLineCount, type BudgetCategoryChildViewModel, type BudgetCategoryGroupViewModel, type BudgetTotals, type BudgetViewModel } from './budgets-view-model'
 import { BudgetFailure, BudgetLoading, StaleBanner } from './budgets-screen'
 import { classifyBudgetCategoryDeleteFailure, type BudgetCategoryDeleteFailure, type BudgetCategoryRemovalScope } from './use-budget-category-delete-mutation'
@@ -44,10 +44,12 @@ export type BudgetMonthScreenProps = {
   onViewYear?: () => void
   /** The budget's full-year totals, for web's Month / Year overview table. Omitted until loaded. */
   yearTotals?: Pick<BudgetTotals, 'planned' | 'spent'> | null
+  /** Suggested amounts from the household's spending, by category key. */
+  suggestions?: ReadonlyMap<number, BudgetSuggestionDto>
 }
 
 
-export function BudgetMonthScreen({ state, onBack, onRetry, onPrevious, onNext, onEdit, onAddCategory, categoryPending = false, onSaveCategory, onRemoveCategory, onManageAccounts, onViewYear, yearTotals }: BudgetMonthScreenProps) {
+export function BudgetMonthScreen({ state, onBack, onRetry, onPrevious, onNext, onEdit, onAddCategory, categoryPending = false, onSaveCategory, onRemoveCategory, onManageAccounts, onViewYear, yearTotals, suggestions }: BudgetMonthScreenProps) {
   const { t, i18n } = useTranslation()
   const palette = usePalette()
   const locale = i18n.resolvedLanguage ?? i18n.language ?? 'en'
@@ -99,7 +101,7 @@ export function BudgetMonthScreen({ state, onBack, onRetry, onPrevious, onNext, 
                   <Text tone="muted" variant="meta">{t('budgetMonth.noCategories')}</Text>
                 </View>
               ) : budget.categories.map((category, index) => (
-                <CategoryGroup key={category.id} separated={index > 0} category={category} year={budget.year} month={budget.month} currency={budget.currencyCode} locale={locale} scaleMax={scaleMax} pending={categoryPending} onSaveCategory={onSaveCategory} onRemoveCategory={onRemoveCategory} />
+                <CategoryGroup key={category.id} separated={index > 0} category={category} year={budget.year} month={budget.month} currency={budget.currencyCode} locale={locale} scaleMax={scaleMax} pending={categoryPending} suggestions={suggestions} onSaveCategory={onSaveCategory} onRemoveCategory={onRemoveCategory} />
               ))}
               <View style={styles.key}><MeasureKey /></View>
             </View>
@@ -172,12 +174,12 @@ function LeadStat({ label, value }: { label: string; value: string }) {
   )
 }
 
-function CategoryGroup({ category, separated, year, month, currency, locale, scaleMax, pending, onSaveCategory, onRemoveCategory }: { category: BudgetCategoryGroupViewModel; separated: boolean; year: number; month: number; currency: string; locale: string; scaleMax: number; pending: boolean; onSaveCategory?: (categoryId: number, value: BudgetCategoryWrite) => Promise<void>; onRemoveCategory?: (categoryId: number, scope: BudgetCategoryRemovalScope) => Promise<void> }) {
+function CategoryGroup({ category, separated, year, month, currency, locale, scaleMax, pending, suggestions, onSaveCategory, onRemoveCategory }: { category: BudgetCategoryGroupViewModel; separated: boolean; year: number; month: number; currency: string; locale: string; scaleMax: number; pending: boolean; suggestions?: ReadonlyMap<number, BudgetSuggestionDto>; onSaveCategory?: (categoryId: number, value: BudgetCategoryWrite) => Promise<void>; onRemoveCategory?: (categoryId: number, scope: BudgetCategoryRemovalScope) => Promise<void> }) {
   const [editingId, setEditingId] = useState<number | null>(null)
   return (
     <>
       <BudgetLine category={category} currency={currency} locale={locale} scaleMax={scaleMax} separated={separated} view="month" />
-      {category.children.map((child) => <ChildCategory key={child.id} child={child} year={year} month={month} currency={currency} locale={locale} scaleMax={scaleMax} editing={editingId === child.id} pending={pending} onEdit={onSaveCategory ? () => setEditingId(child.id) : undefined} onCancel={() => setEditingId(null)} onSave={onSaveCategory ? (value) => onSaveCategory(child.id, value) : undefined} onRemove={onRemoveCategory ? (scope) => onRemoveCategory(child.id, scope) : undefined} />)}
+      {category.children.map((child) => <ChildCategory key={child.id} child={child} year={year} month={month} currency={currency} locale={locale} scaleMax={scaleMax} editing={editingId === child.id} pending={pending} suggestion={suggestions?.get(child.id)} onEdit={onSaveCategory ? () => setEditingId(child.id) : undefined} onCancel={() => setEditingId(null)} onSave={onSaveCategory ? (value) => onSaveCategory(child.id, value) : undefined} onRemove={onRemoveCategory ? (scope) => onRemoveCategory(child.id, scope) : undefined} />)}
     </>
   )
 }
@@ -185,7 +187,7 @@ function CategoryGroup({ category, separated, year, month, currency, locale, sca
 const OCCURRENCES: Readonly<Record<BudgetRecurrence, number>> = { MONTHLY_14: 14, MONTHLY: 12, QUARTERLY: 4, BI_ANNUALLY: 2, ANNUALLY: 1 }
 
 /** A subcategory line, indented under its parent, with its recurrence and the "…" menu. */
-function ChildCategory({ child, year, month, currency, locale, scaleMax, editing, pending, onEdit, onCancel, onSave, onRemove }: { child: BudgetCategoryChildViewModel; year: number; month: number; currency: string; locale: string; scaleMax: number; editing: boolean; pending: boolean; onEdit?: () => void; onCancel: () => void; onSave?: (value: BudgetCategoryWrite) => Promise<void>; onRemove?: (scope: BudgetCategoryRemovalScope) => Promise<void> }) {
+function ChildCategory({ child, year, month, currency, locale, scaleMax, editing, pending, suggestion, onEdit, onCancel, onSave, onRemove }: { child: BudgetCategoryChildViewModel; year: number; month: number; currency: string; locale: string; scaleMax: number; editing: boolean; pending: boolean; suggestion?: BudgetSuggestionDto; onEdit?: () => void; onCancel: () => void; onSave?: (value: BudgetCategoryWrite) => Promise<void>; onRemove?: (scope: BudgetCategoryRemovalScope) => Promise<void> }) {
   const { t } = useTranslation()
   const palette = usePalette()
   const [removing, setRemoving] = useState(false)
@@ -258,7 +260,7 @@ function ChildCategory({ child, year, month, currency, locale, scaleMax, editing
     >
       {removing ? <Text tone="muted" variant="label">{t('budgetMonth.removeCategory.removing')}</Text> : null}
       {removeFailure ? <Text accessibilityRole="alert" style={[styles.removeFailure, { borderColor: palette.destructive }]} variant="meta">{t(`budgetMonth.removeCategory.failures.${removeFailure}`)}</Text> : null}
-      {editing && onSave ? <BudgetCategoryEditor child={child} year={year} month={month} locale={locale} pending={pending} palette={palette} onSave={onSave} onCancel={onCancel} /> : null}
+      {editing && onSave ? <BudgetCategoryEditor child={child} currency={currency} year={year} month={month} locale={locale} pending={pending} palette={palette} suggestion={suggestion} onSave={onSave} onCancel={onCancel} /> : null}
     </BudgetLine>
   )
 }

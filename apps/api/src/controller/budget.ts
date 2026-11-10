@@ -14,6 +14,7 @@ import type { Currency } from '@entity/Currency';
 import { authedContext } from '@middleware/authed-context';
 import { getBudgetForecast as forecastBudget } from '@service/budget/budget-forecast.service';
 import { getMonthRollover, rolloverRowsOf, withRollover } from '@service/budget/budget-rollover.service';
+import { suggestBudgetAmounts } from '@service/budget/budget-suggestions.service';
 import { ensureBudgetYear } from '@service/budget/budget-year.service';
 import { type BudgetSpendingCategory, getBudgetSpending } from '@service/budget/spending';
 import { calculateAmountBudgeted } from '@utils/budget';
@@ -25,6 +26,7 @@ import {
   deleteBudgetRequestSchema,
   getBudgetForecastRequestSchema,
   getBudgetRequestSchema,
+  getBudgetSuggestionsRequestSchema,
   getBudgetTemplateByYearAndMonthRequestSchema,
   getBudgetTemplateByYearRequestSchema,
   getBudgetTemplateByYearUntilMonthRequestSchema,
@@ -335,6 +337,11 @@ export async function getBudgetForecast(req: Request, res: Response, next: NextF
   return res.json(forecast);
 }
 
+/**
+ * Suggested monthly limits from the household's own spending, per budget category. The window is
+ * the `months` complete months before the requested month; a category with too little history is
+ * returned flagged rather than suggested.
+ */
 export async function getBudgets(_req: Request, res: Response) {
   const budgets = await DI.em.find(
     Budget,
@@ -454,6 +461,35 @@ export async function getBudgetsFull(req: Request, res: Response) {
   }
 
   return res.json({ budgets: budgetsData });
+}
+
+export async function getBudgetSuggestions(req: Request, res: Response, next: NextFunction) {
+  const { tenant, user } = authedContext(req);
+  const {
+    params: { budgetKey },
+    query: { month, months, year },
+  } = await zParse(getBudgetSuggestionsRequestSchema, req);
+  const budget = await DI.em.findOne(Budget, { budgetKey, deletedAt: null });
+  if (!budget) {
+    next(new NotFoundError('Budget not found')); return;
+  }
+  // The budget's own accounts when it has any; the service falls back to every visible account.
+  const templates = await DI.em.find(
+    BudgetTemplateCategory,
+    { budgetKey: { budgetKey }, month, year },
+    { populate: ['accounts'] },
+  );
+  const accountKeys = [...new Set(templates.flatMap((template) => template.accounts.getItems().map((account) => account.accountKey)))];
+
+  const suggestions = await suggestBudgetAmounts({
+    accountKeys,
+    budgetKey,
+    months,
+    targetMonth: { month, year },
+    tenantKey: tenant.tenantKey,
+    viewerAppuserKey: user.appuserKey,
+  });
+  return res.json(suggestions);
 }
 
 export async function getBudgetTemplateByYear(req: Request, res: Response, next: NextFunction) {

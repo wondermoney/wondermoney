@@ -24,9 +24,13 @@ export const budgetYearToDateKey = (epochId: number, budgetId: number, year: num
   ['budgets', 'year-to-date', epochId, budgetId, year, month] as const
 )
 
+export const budgetSuggestionsKey = (epochId: number, budgetId: number, year: number, month: number) => (
+  ['budgets', 'suggestions', epochId, budgetId, year, month] as const
+)
+
 export const isBudgetQueryForEpoch = (queryKey: readonly unknown[], epochId: number): boolean => (
   queryKey[0] === 'budgets'
-  && (queryKey[1] === 'list' || queryKey[1] === 'inventory' || queryKey[1] === 'detail' || queryKey[1] === 'month' || queryKey[1] === 'accounts' || queryKey[1] === 'year' || queryKey[1] === 'year-to-date')
+  && (queryKey[1] === 'list' || queryKey[1] === 'inventory' || queryKey[1] === 'detail' || queryKey[1] === 'month' || queryKey[1] === 'accounts' || queryKey[1] === 'year' || queryKey[1] === 'year-to-date' || queryKey[1] === 'suggestions')
   && queryKey[2] === epochId
 )
 

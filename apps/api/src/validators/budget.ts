@@ -87,6 +87,18 @@ export const getBudgetForecastRequestSchema = z.object({
   }),
 });
 
+/** Suggestions use complete months only: 3, 6 or 12 before the requested month. */
+export const getBudgetSuggestionsRequestSchema = z.object({
+  params: z.object({
+    budgetKey: z.coerce.number().positive(),
+  }),
+  query: z.object({
+    month: z.coerce.number().int().min(1).max(12),
+    months: z.coerce.number().pipe(z.union([z.literal(3), z.literal(6), z.literal(12)])).default(3),
+    year: z.coerce.number().int().positive(),
+  }),
+});
+
 export const getBudgetTemplateByYearAndMonthRequestSchema = z.object({
   params: z.object({
     budgetKey: z.coerce.number().positive(),
