@@ -9,6 +9,7 @@ import { resolveAccountCsvImportFormat } from '@service/account/account-csv-impo
 import { detectStatement, toStatementPreview } from '@service/account/account-statement-detection.service';
 import { getLimitedCsvObjectBuffer, validateCsvObjectKey } from '@service/account/csv-upload-boundary.service';
 import { spendAiAllowance } from '@service/ai/ai-allowance.service';
+import { isAiHidden } from '@service/ai/ai-availability';
 import s3Service from '@service/storage/s3';
 import { TransactionImportService } from '@service/transaction-import/transaction-import.service';
 import { BadRequestError, NotFoundError } from '@utils/errors';
@@ -115,7 +116,7 @@ export async function previewAccountCsvImport(req: Request, res: Response, next:
       bankName: importFormat.format === 'bank' ? importFormat.bankName : undefined,
       buffer,
       mapping,
-      model: { allowed: canUseAi(req), spend: () => spendAiAllowance(DI.em, tenant.tenantKey, 'csvMapping') },
+      model: { allowed: canUseAi(req) && !isAiHidden(req.user), spend: () => spendAiAllowance(DI.em, tenant.tenantKey, 'csvMapping') },
     });
     res.json(toStatementPreview(detection, account.currencyKey.code));
   } catch (error) {

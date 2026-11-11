@@ -9,6 +9,7 @@ import {
 describe('userPreferencesSchema', () => {
   it('defaults preview features off and the layout to the default order for an empty document', () => {
     expect(userPreferencesSchema.parse({})).toEqual({
+      aiHidden: false,
       dashboardLayout: [],
       previewFeatures: false,
     });
@@ -16,9 +17,16 @@ describe('userPreferencesSchema', () => {
 
   it('keeps a stored boolean', () => {
     expect(userPreferencesSchema.parse({ previewFeatures: true })).toEqual({
+      aiHidden: false,
       dashboardLayout: [],
       previewFeatures: true,
     });
+  });
+
+  it('keeps the AI-hidden choice and defaults it off', () => {
+    expect(userPreferencesSchema.parse({ aiHidden: true })).toMatchObject({ aiHidden: true });
+    expect(userPreferencesSchema.parse({}).aiHidden).toBe(false);
+    expect(userPreferencesSchema.safeParse({ aiHidden: 'yes' }).success).toBe(false);
   });
 
   it('keeps a stored layout in order', () => {
@@ -34,6 +42,7 @@ describe('userPreferencesSchema', () => {
 
   it('drops keys this release does not know', () => {
     expect(userPreferencesSchema.parse({ futureToggle: 'on', previewFeatures: true })).toEqual({
+      aiHidden: false,
       dashboardLayout: [],
       previewFeatures: true,
     });
@@ -107,6 +116,13 @@ describe('patchUserPreferencesSchema', () => {
 
     expect(result.success).toBe(true);
     expect(result.data?.body).toEqual({ previewFeatures });
+  });
+
+  it.each([true, false])('accepts aiHidden: %s', (aiHidden) => {
+    const result = parseBody({ aiHidden });
+
+    expect(result.success).toBe(true);
+    expect(result.data?.body).toEqual({ aiHidden });
   });
 
   it('accepts a layout patch and deduplicates it', () => {

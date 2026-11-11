@@ -1853,6 +1853,19 @@
   "add-first-account": "Añade tu primera cuenta",
   "your-accounts": "Tus cuentas",
   "preview": "Vista previa",
+  "aiFeatures": {
+    "title": "Funciones de IA",
+    "description": "Desactiva todas las funciones de IA en tu cuenta.",
+    "toggleLabel": "Ocultar funciones de IA",
+    "toggleOnLabel": "Ocultar funciones de IA",
+    "toggleOffLabel": "Mostrar funciones de IA",
+    "hint": "Desactiva el asistente, la lectura de recibos, la asignación de columnas con IA y el texto del resumen mensual escrito por IA. Las transacciones dejan de enviarse a un modelo para categorizarlas.",
+    "loadError": "No se pudieron cargar tus preferencias.",
+    "saving": "Guardando…",
+    "saved": "Guardado",
+    "saveError": "No se pudo guardar. Inténtalo de nuevo.",
+    "retry": "Reintentar"
+  },
   "previewFeatures": {
     "title": "Funciones en vista previa",
     "description": "Prueba funciones antes de que estén listas para todos.",

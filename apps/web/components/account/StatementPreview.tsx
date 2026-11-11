@@ -34,6 +34,11 @@ interface StatementPreviewProps {
   mapping?: StatementMapping;
   onMappingChange: (mapping: StatementMapping) => void;
   disabled?: boolean;
+  /**
+   * The person hid AI. A preview cached from before the switch may still say the
+   * columns were found with AI; hide that hint rather than name a feature they turned off.
+   */
+  aiHidden?: boolean;
 }
 
 /**
@@ -47,6 +52,7 @@ export default function StatementPreview({
   mapping,
   onMappingChange,
   disabled,
+  aiHidden,
 }: StatementPreviewProps) {
   const t = useTranslations();
   const formatDate = useFormatShortDate();
@@ -74,13 +80,15 @@ export default function StatementPreview({
               : null}
           </p>
         ) : null}
-        <p className="text-muted-foreground">
-          {preview.source === "bank"
-            ? t("import-statement-source-bank", {
-                bank: preview.bankName ?? t("unknown"),
-              })
-            : t(`import-statement-source-${preview.source}`)}
-        </p>
+        {preview.source === "model" && aiHidden ? null : (
+          <p className="text-muted-foreground">
+            {preview.source === "bank"
+              ? t("import-statement-source-bank", {
+                  bank: preview.bankName ?? t("unknown"),
+                })
+              : t(`import-statement-source-${preview.source}`)}
+          </p>
+        )}
         {preview.invalidRows > 0 ? (
           <p className="text-muted-foreground">
             {t("import-statement-invalid-rows", { count: preview.invalidRows })}

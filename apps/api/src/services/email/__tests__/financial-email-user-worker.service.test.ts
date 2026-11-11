@@ -134,7 +134,7 @@ describe('financial email per-user fan-in', () => {
 
       expect(outcome).toMatchObject({ counts: { memberships: 1 }, result: 'accepted' });
       expect(em.findOneOrFail).toHaveBeenCalledWith(expect.anything(), { appuserKey: 7 });
-      expect(narrative.generate).toHaveBeenCalledWith(expect.objectContaining({ ...monthlyFacts, recurringChanges: [] }), { baseline: '1000', subject: '1500' }, 'August 2026', 'en');
+      expect(narrative.generate).toHaveBeenCalledWith(expect.objectContaining({ ...monthlyFacts, recurringChanges: [] }), { baseline: '1000', subject: '1500' }, 'August 2026', 'en', { allowModel: true });
       expect(rendering.renderMonthlyStory).toHaveBeenCalledWith(expect.objectContaining({
         currencyCode: 'EUR',
         monthLabel: 'August 2026',
@@ -143,8 +143,26 @@ describe('financial email per-user fan-in', () => {
       }));
     });
 
-    it('routes to the low-data path when aggregateMonthlyStory reports insufficient_data', async () => {
+    it('still delivers the story with the deterministic text when the person hid AI', async () => {
+      netWorthMocks.getNetWorth.mockResolvedValue({ totalNetWorth: 1500 });
+      netWorthMocks.getNetWorthHistory.mockResolvedValue({ points: [{ isComplete: true, totalNetWorth: 1000 }, { isComplete: true, totalNetWorth: 1500 }] });
       const execute = vi.fn().mockResolvedValueOnce([{ tenantKey: 1 }]).mockResolvedValueOnce([{ tenantKey: 1 }]);
+      const aggregation = { aggregateMonthlyStory: vi.fn().mockResolvedValue({ appuserKey: 7, diagnostics, facts: monthlyFacts, period: monthlyPeriod, status: 'ok', tenantKey: 1 } satisfies MonthlyStoryAggregationResult) };
+      const rendering = { renderMonthlyStory: vi.fn().mockResolvedValue({ headers: {}, html: '<html/>', subject: 'Your August story', text: 'text' }) };
+      const orchestration = { deliverMonthlyStory: vi.fn().mockImplementation(async (input: { render: () => Promise<unknown> }) => { await input.render(); return { result: 'accepted' }; }) };
+      const preferences = { getFreshWorkerEligibility: vi.fn().mockResolvedValue({ currencyCode: 'EUR', deliverySupported: true, effectiveEnabled: true, emailAddress: 'user@example.com', firstName: 'User', language: SupportedLanguages.EN }) };
+      const narrative = { generate: vi.fn().mockResolvedValue({ sentences: ['You spent less than usual this month.'], source: 'skeleton' }) };
+      const em = { count: vi.fn().mockResolvedValue(1), find: vi.fn().mockResolvedValue([]), findOneOrFail: vi.fn().mockResolvedValue({ appuserKey: 7, preferences: { aiHidden: true } }), getConnection: () => ({ execute }) };
+      const service = new FinancialEmailUserWorkerService({ aggregation: aggregation as unknown as Dep<'aggregation'>, em: em as unknown as Dep<'em'>, narrative: narrative as unknown as Dep<'narrative'>, now: () => new Date('2026-08-01T09:00:00Z'), orchestration: orchestration as unknown as Dep<'orchestration'>, preferences: preferences as unknown as Dep<'preferences'>, rendering: rendering as unknown as Dep<'rendering'> });
+
+      const outcome = await service.process({ appuserKey: 7, scheduledFor: '2026-08-01T09:00:00Z', stream: 'monthlyStory' });
+
+      expect(outcome).toMatchObject({ result: 'accepted' });
+      expect(narrative.generate).toHaveBeenCalledWith(expect.anything(), expect.anything(), 'August 2026', 'en', { allowModel: false });
+      expect(rendering.renderMonthlyStory).toHaveBeenCalledWith(expect.objectContaining({ narrativeSentences: ['You spent less than usual this month.'] }));
+    });
+
+    it('routes to the low-data path when aggregateMonthlyStory reports insufficient_data', async () => {      const execute = vi.fn().mockResolvedValueOnce([{ tenantKey: 1 }]).mockResolvedValueOnce([{ tenantKey: 1 }]);
       const aggregation = { aggregateMonthlyStory: vi.fn().mockResolvedValue({ appuserKey: 7, monthsAvailable: 1, monthsNeeded: 3, period: monthlyPeriod, reason: 'insufficient_history', status: 'insufficient_data', tenantKey: 1 } satisfies MonthlyStoryInsufficientResult) };
       const rendering = { renderMonthlyStory: vi.fn(), renderMonthlyStoryInsufficient: vi.fn().mockResolvedValue({ headers: {}, html: '<html/>', subject: 'Almost there', text: 'text' }) };
       const orchestration = { deliverMonthlyStory: vi.fn().mockImplementation(async (input: { render: () => Promise<unknown> }) => { await input.render(); return { result: 'accepted' }; }) };

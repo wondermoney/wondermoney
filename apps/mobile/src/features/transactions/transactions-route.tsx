@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useProductRuntime } from '@/components/providers/product-runtime-provider'
 import { mapCategories } from '@/features/categories/categories-view-model'
 import { useCategories } from '@/features/categories/use-categories'
+import { useAiHiddenPreference } from '@/features/preferences/use-ai-hidden'
 import { toTagsState, useCreateTagForPicker, useSetTransactionTags, useTags } from '@/features/tags/use-tags'
 import { ApiError } from '@/lib/api/errors'
 import { parseAccountId } from '@/features/accounts/accounts-contract'
@@ -50,6 +51,7 @@ export function TransactionsRoute({ perAccount = false }: { perAccount?: boolean
   const tagsMutation = useSetTransactionTags()
   const createTag = useCreateTagForPicker()
   const { blockAccess } = useProductRuntime()
+  const aiHidden = useAiHiddenPreference()
   const { t, i18n } = useTranslation()
   const router = useRouter()
   let state: TransactionsViewState
@@ -134,7 +136,7 @@ export function TransactionsRoute({ perAccount = false }: { perAccount?: boolean
     onBack={() => perAccount && accountId ? router.replace(`/accounts/${accountId}`) : router.replace('/accounts')}
     onCreate={() => router.push({ pathname: '/accounts/transactions/create', ...(accountId ? { params: { accountId: String(accountId) } } : {}) } as Href)}
     onImport={() => router.push({ pathname: '/accounts/transactions/import', ...(accountId ? { params: { accountId: String(accountId) } } : {}) } as Href)}
-    onScanReceipt={() => router.push('/accounts/transactions/scan' as Href)}
+    onScanReceipt={aiHidden ? undefined : () => router.push('/accounts/transactions/scan' as Href)}
     onFiltersChange={setFilters}
     onRefresh={async () => { await query.refetch() }}
     onMarkReviewed={(transactionId) => runAction({ type: 'review', transactionIds: [transactionId] })}

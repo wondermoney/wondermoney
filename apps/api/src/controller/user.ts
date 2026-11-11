@@ -13,6 +13,7 @@ import { NordigenRequisition } from '@entity/NordigenRequisition';
 import { Onboarding } from '@entity/Onboarding';
 import { authedUser } from '@middleware/authed-context';
 import { deleteWonderMoneyAccount } from '@service/account/account-deletion.service';
+import { effectiveAiCapabilities } from '@service/ai/ai-availability';
 import { enableBankingConsentOf } from '@service/enable-banking/enable-banking-consent';
 import { ERROR } from '@utils/constants';
 import { buildEnableBankingInstitutionRecordId } from '@utils/enable-banking-institution-id';
@@ -49,6 +50,9 @@ export function getCurrentUserProfile(req: Request, res: Response) {
   return res.json({
     profile: {
       ...profile,
+      // The effective per-user AI capabilities: every feature off once this person hid AI, so a
+      // client can gate on the profile alone instead of combining it with `/v1/instance`.
+      ai: effectiveAiCapabilities(req.user),
       // better-auth is the source of truth for MFA state; `getAuthSession` copies
       // `twoFactorEnabled` onto `req.authUser`. The `Appuser` row has no MFA column.
       mfaEnabled: req.authUser?.user.twoFactorEnabled ?? false,

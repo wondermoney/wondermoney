@@ -4047,6 +4047,15 @@
       "heading": "Informação pessoal",
       "email": "Endereço de email"
     },
+    "ai": {
+      "heading": "Funcionalidades de IA",
+      "description": "Desativa todas as funcionalidades de IA na tua conta.",
+      "label": "Ocultar funcionalidades de IA",
+      "hint": "Desativa o assistente, a leitura de recibos, o mapeamento de colunas com IA e o texto do resumo mensal escrito por IA. As transações deixam de ser enviadas a um modelo para categorização.",
+      "saving": "A guardar…",
+      "saveError": "Não foi possível guardar. Tenta novamente.",
+      "loadError": "Não foi possível carregar as tuas preferências."
+    },
     "appearance": {
       "heading": "Aparência",
       "description": "Altere a aparência da aplicação.",

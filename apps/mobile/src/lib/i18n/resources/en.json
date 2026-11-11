@@ -4047,6 +4047,15 @@
       "heading": "Personal information",
       "email": "Email address"
     },
+    "ai": {
+      "heading": "AI features",
+      "description": "Turn off every AI feature for your account.",
+      "label": "Hide AI features",
+      "hint": "Turns off the assistant, receipt scanning, AI column mapping and the AI-written monthly story text. Transactions are no longer sent to a model for categorization.",
+      "saving": "Saving…",
+      "saveError": "Could not save. Try again.",
+      "loadError": "Could not load your preferences."
+    },
     "appearance": {
       "heading": "Appearance",
       "description": "Change the appearance of the app.",

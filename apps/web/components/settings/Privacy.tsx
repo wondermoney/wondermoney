@@ -10,6 +10,7 @@ import { useDataRestoreOverview } from "@/lib/api/user/useDataRestore";
 import { Button } from "../ui/button";
 import { Heading, Text } from "../ui/Typography";
 import UserAccountDelete from "../user/UserAccountDelete";
+import AiFeatures from "./AiFeatures";
 import DataExport from "./DataExport";
 import DataRestore, { shouldOfferRestore } from "./DataRestore";
 
@@ -24,6 +25,8 @@ export default function Privacy() {
 
   return (
     <div className="divide-border divide-y">
+      <AiFeatures />
+
       <div className="grid max-w-7xl grid-cols-1 gap-x-8 gap-y-10 py-10 md:grid-cols-3">
         <div>
           <Heading variant="h2">{t("privacy-data-sharing-title")}</Heading>

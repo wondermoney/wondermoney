@@ -29,9 +29,11 @@ export class MonthlyStoryNarrativeService {
     this.client = { promptWithText: deps.promptWithText ?? OpenAI.promptWithText.bind(OpenAI) };
   }
 
-  async generate(facts: MonthlyStoryFacts, netWorth: NetWorthDriverInput | null, monthLabel: string, language: NarrativeLanguage): Promise<{ sentences: string[]; source: 'llm' | 'skeleton' }> {
+  async generate(facts: MonthlyStoryFacts, netWorth: NetWorthDriverInput | null, monthLabel: string, language: NarrativeLanguage, options: { allowModel?: boolean } = {}): Promise<{ sentences: string[]; source: 'llm' | 'skeleton' }> {
     const skeleton = buildNarrativeSkeleton(facts, netWorth, monthLabel, language);
     if (skeleton.sentences.length === 0) return { sentences: skeleton.sentences, source: 'skeleton' };
+    // The person hid AI: the email still goes out, with the deterministic sentences only.
+    if (options.allowModel === false) return { sentences: skeleton.sentences, source: 'skeleton' };
 
     try {
       const response = await this.client.promptWithText({

@@ -26,6 +26,7 @@ import {
   type TransactionImportSession,
   useCreateTransactionImport,
 } from "@/lib/api/transaction-import/useTransactionImport";
+import useAiHidden from "@/lib/api/user-preferences/useAiHidden";
 import { useRateLimitToast } from "@/lib/api/useRateLimitToast";
 import {
   invalidateAccounts,
@@ -64,6 +65,7 @@ const AccountTransactionImportModal: React.FC<
   const t = useTranslations();
   const notifyIfRateLimited = useRateLimitToast();
   const canImportFiles = useFeature((features) => features.fileStorage);
+  const aiHidden = useAiHidden();
 
   const posthog = usePostHog();
   const [isSubmitButtonLoading, setIsSubmitButtonLoading] = useState(false);
@@ -401,6 +403,7 @@ const AccountTransactionImportModal: React.FC<
           ) : null}
           {preview ? (
             <StatementPreview
+              aiHidden={aiHidden}
               disabled={isReading || isLoading}
               mapping={mapping}
               onMappingChange={onMappingChange}

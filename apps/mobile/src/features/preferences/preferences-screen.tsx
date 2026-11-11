@@ -13,6 +13,7 @@ import { themeTokens } from '@/theme/tokens'
 import { usePalette } from '@/theme/use-palette'
 import { SettingsField, SettingsPage, SettingsSection } from '@/features/more/settings-ui'
 
+import { AiHiddenSection } from './ai-hidden-section'
 import { PreviewFeaturesSection } from './preview-features-section'
 
 const THEMES: readonly ThemePreference[] = ['system', 'light', 'dark']
@@ -66,6 +67,8 @@ export function PreferencesScreen() {
       </SettingsSection>
 
       <PreviewFeaturesSection />
+
+      <AiHiddenSection />
     </SettingsPage>
   )
 }

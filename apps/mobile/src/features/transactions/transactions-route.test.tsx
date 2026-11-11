@@ -14,9 +14,11 @@ const mockBlockAccess = jest.fn()
 const mockPush = jest.fn()
 const mockUseAccounts = jest.fn()
 let mockCapturedProps: Record<string, unknown> = {}
+let mockAiHidden = false
 jest.mock('expo-router', () => ({ useLocalSearchParams: () => mockParams, useRouter: () => ({ replace: jest.fn(), push: mockPush }) }))
 jest.mock('react-i18next', () => ({ useTranslation: () => ({ t: (key: string) => key, i18n: { language: 'en', resolvedLanguage: 'en' } }) }))
 jest.mock('@/components/providers/product-runtime-provider', () => ({ useProductRuntime: () => ({ blockAccess: mockBlockAccess }) }))
+jest.mock('@/features/preferences/use-ai-hidden', () => ({ useAiHiddenPreference: () => mockAiHidden }))
 jest.mock('@/features/categories/use-categories', () => ({ useCategories: () => ({ isLoading: true }) }))
 const mockSetTags = jest.fn()
 jest.mock('@/features/tags/use-tags', () => ({
@@ -35,7 +37,7 @@ jest.mock('./use-transfer-destinations', () => ({ useTransferDestinations: () =>
 jest.mock('./transactions-screen', () => ({ TransactionsScreen: (props: { state: { status: string } }) => { mockCapturedProps = props; const Native = jest.requireActual<typeof import('react-native')>('react-native'); return <Native.Text>{props.state.status}</Native.Text> } }))
 
 describe('TransactionsRoute', () => {
-  beforeEach(() => { mockParams = {}; mockCapturedProps = {}; mockBlockAccess.mockReset(); mockUseTransactions.mockReset(); mockUseAccounts.mockReset(); mockUseAccounts.mockReturnValue({ data: { accounts: [] } }); mockMutateAsync.mockReset(); mockMutateAmountAsync.mockReset(); mockPush.mockReset() })
+  beforeEach(() => { mockParams = {}; mockCapturedProps = {}; mockAiHidden = false; mockBlockAccess.mockReset(); mockUseTransactions.mockReset(); mockUseAccounts.mockReset(); mockUseAccounts.mockReturnValue({ data: { accounts: [] } }); mockMutateAsync.mockReset(); mockMutateAmountAsync.mockReset(); mockPush.mockReset() })
 
   it('navigates to the import screen, carrying the current account id when present', async () => {
     mockUseTransactions.mockReturnValue({ isInvalidAccountId: false, isAccessTransition: false, isLoading: true, refetch: jest.fn() })
@@ -53,6 +55,12 @@ describe('TransactionsRoute', () => {
     await render(<TransactionsRoute />)
     ;(mockCapturedProps.onScanReceipt as () => void)()
     expect(mockPush).toHaveBeenCalledWith('/accounts/transactions/scan')
+  })
+  it('hides the receipt-scan action when the person hid AI', async () => {
+    mockAiHidden = true
+    mockUseTransactions.mockReturnValue({ isInvalidAccountId: false, isAccessTransition: false, isLoading: true, refetch: jest.fn() })
+    await render(<TransactionsRoute />)
+    expect(mockCapturedProps.onScanReceipt).toBeUndefined()
   })
   it('names no account on the all-accounts list, whatever account the first row is on', async () => {
     mockUseTransactions.mockReturnValue({ isInvalidAccountId: false, isAccessTransition: false, isLoading: false, data: { transactions: [transactionFixture], total: 1, hasMore: false }, refetch: jest.fn() })

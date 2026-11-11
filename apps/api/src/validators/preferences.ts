@@ -42,8 +42,11 @@ export const dashboardLayoutSchema = z
  * see `middleware/preview-features.ts`. `dashboardLayout` is the home sections'
  * order and visibility, shared by web and mobile. An empty layout means the
  * default order, so sections added later reach everyone without a migration.
+ * `aiHidden` turns every AI feature off for this person, whatever the instance
+ * has configured; see `services/ai/ai-availability.ts`.
  */
 export const userPreferencesSchema = z.object({
+  aiHidden: z.boolean().default(false),
   dashboardLayout: dashboardLayoutSchema.default([]),
   previewFeatures: z.boolean().default(false),
 });
@@ -59,6 +62,7 @@ export type UserPreferences = z.infer<typeof userPreferencesSchema>;
 export const patchUserPreferencesSchema = z.object({
   body: z
     .object({
+      aiHidden: z.boolean().optional(),
       dashboardLayout: dashboardLayoutSchema.optional(),
       previewFeatures: z.boolean().optional(),
     })

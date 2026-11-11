@@ -13,8 +13,8 @@ describe('preferences contract', () => {
   })
 
   it('accepts the document the API returns', () => {
-    expect(userPreferencesSchema.parse({ previewFeatures: true })).toEqual({ previewFeatures: true, dashboardLayout: [] })
-    expect(userPreferencesSchema.parse({ previewFeatures: false })).toEqual({ previewFeatures: false, dashboardLayout: [] })
+    expect(userPreferencesSchema.parse({ previewFeatures: true })).toEqual({ aiHidden: false, previewFeatures: true, dashboardLayout: [] })
+    expect(userPreferencesSchema.parse({ previewFeatures: false })).toEqual({ aiHidden: false, previewFeatures: false, dashboardLayout: [] })
   })
 
   it('accepts a saved home layout in order', () => {
@@ -33,7 +33,13 @@ describe('preferences contract', () => {
   })
 
   it('strips keys a newer API adds', () => {
-    expect(userPreferencesSchema.parse({ previewFeatures: true, futureToggle: 'on' })).toEqual({ previewFeatures: true, dashboardLayout: [] })
+    expect(userPreferencesSchema.parse({ previewFeatures: true, futureToggle: 'on' })).toEqual({ aiHidden: false, previewFeatures: true, dashboardLayout: [] })
+  })
+
+  it('keeps the AI-hidden choice, defaulting it off for an older API', () => {
+    expect(userPreferencesSchema.parse({ previewFeatures: false }).aiHidden).toBe(false)
+    expect(userPreferencesSchema.parse({ aiHidden: true, previewFeatures: false }).aiHidden).toBe(true)
+    expect(userPreferencesSchema.safeParse({ aiHidden: 'yes', previewFeatures: false }).success).toBe(false)
   })
 
   it('rejects a non-boolean flag or a malformed layout', () => {

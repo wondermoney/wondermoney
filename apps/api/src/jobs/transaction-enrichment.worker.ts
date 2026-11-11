@@ -17,6 +17,7 @@ import { Tenant } from '@entity/Tenant';
 import { CategorizationConfidence, Transaction } from '@entity/Transaction';
 import { TransactionCategoryStats, Source as TransactionCategoryStatsSource } from '@entity/TransactionCategoryStats';
 import { TransactionEnrichment, TransactionEnrichmentStatus } from '@entity/TransactionEnrichment';
+import { isAiHidden } from '@service/ai/ai-availability';
 import { estimateTransactionEnrichmentCostUsd } from '@service/transaction-enrichment/cost';
 import { requestTransactionEnrichmentSuggestion } from '@service/transaction-enrichment/deepseek';
 import { reserveTransactionEnrichmentBudget } from '@service/transaction-enrichment/transaction-enrichment-budget.service';
@@ -94,10 +95,21 @@ export async function handleTransactionEnrichmentGptJob(
     const tenantKey = resolveTenantKey(enrichment.tenantKey);
     const transactionKey = resolveTransactionKey(enrichment.transactionKey);
 
-    const transaction = await em.findOne(Transaction, { transactionKey }, { populate: ['transactionMerchantKey', 'accountKey'] });
+    const transaction = await em.findOne(Transaction, { transactionKey }, { populate: ['transactionMerchantKey', 'accountKey', 'accountKey.accountOwnerAppuserKey'] });
     if (!transaction) {
       log.warn({ jobId: job.id, queue: TRANSACTION_ENRICHMENT_GPT_QUEUE }, 'Transaction enrichment target transaction not found');
       return false;
+    }
+
+    // The person who owns the account may have hidden AI after this job was enqueued. Nothing
+    // from their accounts goes to a model; the deterministic categorizers are unaffected.
+    const accountOwner = resolveAccountOwner(transaction);
+    if (accountOwner && isAiHidden(accountOwner)) {
+      enrichment.status = TransactionEnrichmentStatus.SKIPPED;
+      enrichment.eligibilityReason = 'ai_hidden';
+      await em.flush();
+      log.info({ jobId: job.id, queue: TRANSACTION_ENRICHMENT_GPT_QUEUE }, 'Transaction enrichment skipped: account owner hid AI');
+      return true;
     }
 
     const categories = await loadCandidateCategories(em, tenantKey, resolveAccountOwnerKey(transaction));
@@ -322,9 +334,13 @@ async function loadPersonalizedCandidateCategories(
     .map(([categoryKey, { label }]) => ({ categoryKey, label }));
 }
 
+function resolveAccountOwner(transaction: Transaction): undefined | { preferences?: Record<string, unknown> } {
+  const account = transaction.accountKey as unknown as undefined | { accountOwnerAppuserKey?: undefined | { preferences?: Record<string, unknown> } };
+  return account?.accountOwnerAppuserKey ?? undefined;
+}
+
 function resolveAccountOwnerKey(transaction: Transaction): number | undefined {
-  const account = transaction.accountKey as unknown as undefined | { accountOwnerAppuserKey?: undefined | { appuserKey?: number } };
-  const owner = account?.accountOwnerAppuserKey;
+  const owner = resolveAccountOwner(transaction) as undefined | { appuserKey?: number };
   return owner && typeof owner.appuserKey === 'number' ? owner.appuserKey : undefined;
 }
 

@@ -50,7 +50,9 @@ function makeEm(candidates: unknown[], enrichedRows: Record<string, unknown>[] =
     pendingPersist.push(row);
     return { flush };
   });
-  return { createQueryBuilder, em: { createQueryBuilder, find, flush, getReference: (_entity: unknown, tenantKey: number) => Object.assign(new Tenant(), { tenantKey }), persist } as unknown as EnqueueEm, find, flush, persist, qb };
+  // No account owner hid AI in these fixtures, so the hidden-account lookup returns nothing.
+  const getConnection = () => ({ execute: vi.fn().mockResolvedValue([]) });
+  return { createQueryBuilder, em: { createQueryBuilder, find, flush, getConnection, getReference: (_entity: unknown, tenantKey: number) => Object.assign(new Tenant(), { tenantKey }), persist } as unknown as EnqueueEm, find, flush, persist, qb };
 }
 
 describe('enqueueTransactionEnrichmentForTenant', () => {
@@ -180,7 +182,7 @@ describe('enqueueTransactionEnrichmentForTenant', () => {
     await expect(
       enqueueTransactionEnrichmentForTenant(7, 'account-initial-sync', {
         config: shadowConfig,
-        em: { createQueryBuilder, find, getReference: (_entity: unknown, tenantKey: number) => Object.assign(new Tenant(), { tenantKey }) } as unknown as EnqueueEm,
+        em: { createQueryBuilder, find, getConnection: () => ({ execute: vi.fn().mockResolvedValue([]) }), getReference: (_entity: unknown, tenantKey: number) => Object.assign(new Tenant(), { tenantKey }) } as unknown as EnqueueEm,
         enqueue: { send: vi.fn(), sendAfter: vi.fn() } as unknown as EnqueuePort,
         logger: logger as unknown as EnqueueLogger,
       }),
