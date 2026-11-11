@@ -9,7 +9,7 @@ import api from "../api";
  * the display prefix and metadata; the server stores a SHA-256 hash and cannot return the
  * token again.
  */
-export type ApiTokenScope = "read" | "write";
+export type ApiTokenScope = "read" | "write" | "calendar:read";
 
 export interface ApiToken {
   createdAt: string;

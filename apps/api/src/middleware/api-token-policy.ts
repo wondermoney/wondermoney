@@ -57,6 +57,8 @@ export const API_TOKEN_FORBIDDEN_MOUNTS: ReadonlySet<string> = new Set([
   '/v1/admin',
   '/v1/auth',
   '/v1/banking',
+  // Reachable only with a `calendar:read` token in the query string, never as a bearer.
+  '/v1/calendar',
   '/v1/feedback',
   '/v1/household',
   '/v1/support',

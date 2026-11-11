@@ -1298,6 +1298,16 @@
         }
       }
     },
+    "/v1/calendar/bills.ics": {
+      "get": {
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/v1/operations/{operationId}": {
       "get": {
         "description": "",
@@ -3563,6 +3573,32 @@
             }
           }
         ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        }
+      }
+    },
+    "/v1/user/calendar-feed-token": {
+      "get": {
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "post": {
+        "description": "",
+        "responses": {
+          "201": {
+            "description": "Created"
+          }
+        }
+      },
+      "delete": {
+        "description": "",
         "responses": {
           "204": {
             "description": "No Content"

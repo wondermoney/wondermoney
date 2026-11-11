@@ -14,9 +14,16 @@ import { Tenant } from './Tenant';
  * `write` allows create/update on transactions, accounts, categories, budgets and goals,
  * and implies `read` on those same routes: a script that writes a transaction almost always
  * needs to read it back. Neither scope can delete anything.
+ * `calendar:read` reaches only the read-only ICS feed (`GET /v1/calendar/bills.ics`), where the
+ * token travels in the query because calendar apps cannot send an Authorization header. It is
+ * issued by the calendar-link endpoints, never picked by hand, and grants nothing on the bearer
+ * routes.
  */
-export const API_TOKEN_SCOPES = ['read', 'write'] as const;
+export const API_TOKEN_SCOPES = ['read', 'write', 'calendar:read'] as const;
 export type ApiTokenScope = (typeof API_TOKEN_SCOPES)[number];
+
+/** The scopes a person may choose when creating a general-purpose token. */
+export const API_TOKEN_CREATABLE_SCOPES = ['read', 'write'] as const;
 
 /**
  * A personal access token for scripts, spreadsheets, dashboards and AI tools.

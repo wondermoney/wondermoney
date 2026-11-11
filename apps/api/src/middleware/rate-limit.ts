@@ -59,7 +59,8 @@ interface RateLimitFamily {
    * falls back to IP.
    * `ip` always keys on the source address — correct for unauthenticated/credential surfaces.
    * `token` keys on the personal API token's row id, so one token cannot exhaust another's
-   * budget and a token's traffic never competes with the owner's browser session.
+   * budget and a token's traffic never competes with the owner's browser session. The calendar
+   * feed's token is resolved before its limiter and keys the same way.
    */
   scope: 'identity' | 'ip' | 'token';
   windowMs: number;
@@ -95,6 +96,13 @@ export const RATE_LIMIT_FAMILIES = {
    * and unaffected by the non-production multiplier.
    */
   authExchange: { limit: 30, relaxable: false, scope: 'ip', windowMs: QUARTER_HOUR_MS },
+
+  /**
+   * `GET /v1/calendar/bills.ics`. The feed token is resolved before the limiter, so the bucket is
+   * keyed on its row: Google and Apple fetch every subscriber's feed from their own infrastructure,
+   * and an IP-keyed bucket would put every subscriber behind one address into the same allowance.
+   */
+  calendarFeed: { limit: 120, relaxable: true, scope: 'token', windowMs: QUARTER_HOUR_MS },
 
   /**
    * Starting and downloading a full data export (`/v1/user/me/exports`): each one reads the whole
@@ -373,6 +381,9 @@ export const supportRateLimit = (): RequestHandler => createRateLimiter({ family
 
 /** Unauthenticated reads with no secret in them. */
 export const publicReadRateLimit = (): RequestHandler => createRateLimiter({ family: 'publicRead' });
+
+/** `/v1/calendar/bills.ics` — the feed token is resolved first, so the bucket is keyed on its row. */
+export const calendarFeedRateLimit = (): RequestHandler => createRateLimiter({ family: 'calendarFeed' });
 
 /** `/v1/assistant` — cheap GETs on the ordinary read budget, LLM calls on their own. */
 export const assistantRateLimit = (): RequestHandler => createMethodScopedRateLimiter('read', 'assistant');

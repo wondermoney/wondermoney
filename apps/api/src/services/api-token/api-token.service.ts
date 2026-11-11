@@ -16,6 +16,16 @@ const BASE62 = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
 /** Update `lastUsedAt` at most once a minute, so a busy script does not write on every request. */
 export const API_TOKEN_LAST_USED_WRITE_INTERVAL_MS = 60 * 1000;
 
+/**
+ * The calendar feed's credential.
+ *
+ * A subscription that silently expires would stop a person's calendar, so it lasts ten years.
+ * It is still revocable, and "reset link" rotates it in one action.
+ */
+export const CALENDAR_FEED_TOKEN_SCOPE: ApiTokenScope = 'calendar:read';
+export const CALENDAR_FEED_TOKEN_NAME = 'Calendar feed';
+export const CALENDAR_FEED_TOKEN_EXPIRY_DAYS = 3650;
+
 export interface AuthenticatedApiToken {
   apiToken: ApiToken;
   appuser: Appuser;
@@ -54,7 +64,7 @@ export function hashApiToken(token: string): string {
 /** The display fragment stored beside the hash: `wm_pat_` plus the first eight random characters. */
 export interface CreateApiTokenInput {
   appuser: Appuser;
-  expiresInDays: 30 | 90 | 365;
+  expiresInDays: number;
   name: string;
   scopes: ApiTokenScope[];
   tenant: Tenant;
@@ -166,4 +176,62 @@ export function toApiTokenDto(apiToken: ApiToken): ApiTokenDto {
     revokedAt: apiToken.revokedAt?.toISOString() ?? null,
     scopes: apiToken.scopes,
   };
+}
+
+/** The member's active calendar feed token, or `null` when they have none. */
+export async function findActiveCalendarFeedToken(
+  appuser: Appuser,
+  em: EntityManager = DI.em,
+): Promise<ApiToken | null> {
+  const tokens = await em.find(
+    ApiToken,
+    { appuserKey: appuser, deletedAt: null, revokedAt: null },
+    { orderBy: { createdAt: 'desc' } },
+  );
+  return tokens.find((token) => token.scopes.includes(CALENDAR_FEED_TOKEN_SCOPE)) ?? null;
+}
+
+/**
+ * Revoke every active calendar feed token of a member, optionally sparing one row.
+ *
+ * `exceptKey` lets a rotation create the replacement first and then retire the old links, so a
+ * failure between the two leaves the previous link working instead of locking the person out of
+ * their own calendar.
+ */
+export async function revokeCalendarFeedTokens(
+  appuser: Appuser,
+  options: { exceptKey?: number; now?: Date } = {},
+  em: EntityManager = DI.em,
+): Promise<number> {
+  const tokens = await em.find(ApiToken, { appuserKey: appuser, deletedAt: null, revokedAt: null });
+  const revokedAt = options.now ?? new Date();
+  const calendarTokens = tokens.filter(
+    (token) => token.scopes.includes(CALENDAR_FEED_TOKEN_SCOPE) && token.apiTokenKey !== options.exceptKey,
+  );
+  for (const token of calendarTokens) token.revokedAt = revokedAt;
+  if (calendarTokens.length > 0) await em.flush();
+  return calendarTokens.length;
+}
+
+/**
+ * Issue a fresh calendar link and retire the previous one in the same action.
+ *
+ * The plain token is returned once; the settings page can copy the link only now.
+ */
+export async function rotateCalendarFeedToken(
+  input: { appuser: Appuser; tenant: Tenant },
+  em: EntityManager = DI.em,
+): Promise<CreatedApiToken> {
+  const created = await createApiToken(
+    {
+      appuser: input.appuser,
+      expiresInDays: CALENDAR_FEED_TOKEN_EXPIRY_DAYS,
+      name: CALENDAR_FEED_TOKEN_NAME,
+      scopes: [CALENDAR_FEED_TOKEN_SCOPE],
+      tenant: input.tenant,
+    },
+    em,
+  );
+  await revokeCalendarFeedTokens(input.appuser, { exceptKey: created.apiToken.apiTokenKey }, em);
+  return created;
 }

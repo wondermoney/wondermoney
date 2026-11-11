@@ -13,6 +13,7 @@
     "scopes": "Permissions",
     "scope-read": "Read",
     "scope-write": "Write",
+    "scope-calendar-read": "Calendar feed",
     "scope-write-hint": "Write also allows reading, and covers creating and updating transactions, accounts, categories, budgets and goals. Tokens can never delete anything.",
     "expiry": "Expires",
     "expiry-days": "{days} days",

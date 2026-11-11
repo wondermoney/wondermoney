@@ -13,6 +13,7 @@
     "scopes": "Permissões",
     "scope-read": "Leitura",
     "scope-write": "Escrita",
+    "scope-calendar-read": "Feed de calendário",
     "scope-write-hint": "A escrita também permite ler, e abrange criar e atualizar transações, contas, categorias, orçamentos e objetivos. Os tokens nunca podem apagar nada.",
     "expiry": "Expira",
     "expiry-days": "{days} dias",

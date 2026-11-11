@@ -25,6 +25,7 @@ import { useHydrated } from "@/lib/utils/useHydrated";
 
 const Security = dynamic(() => import("@/components/settings/Security"));
 const ApiTokens = dynamic(() => import("@/components/settings/ApiTokens"));
+const CalendarFeed = dynamic(() => import("@/components/settings/CalendarFeed"));
 const Privacy = dynamic(() => import("@/components/settings/Privacy"));
 const Connections = dynamic(
   () => import("@/components/settings/Connections/Connections"),
@@ -49,6 +50,11 @@ const tabs = [
   { name: "profile", label: "navigation.profile", Component: Profile },
   { name: "security", label: "navigation.security", Component: Security },
   { name: "api-tokens", label: "navigation.api-tokens", Component: ApiTokens },
+  {
+    name: "calendar-feed",
+    label: "navigation.calendar-feed",
+    Component: CalendarFeed,
+  },
   { name: "privacy", label: "navigation.privacy", Component: Privacy },
   {
     name: "bank-provider",
@@ -100,7 +106,7 @@ const tabs = [
 const TAB_GROUPS: readonly { label: string; tabs: readonly string[] }[] = [
   {
     label: "navigation.settings-group-account",
-    tabs: ["profile", "security", "api-tokens", "privacy", "household"],
+    tabs: ["profile", "security", "api-tokens", "calendar-feed", "privacy", "household"],
   },
   {
     label: "navigation.settings-group-money",

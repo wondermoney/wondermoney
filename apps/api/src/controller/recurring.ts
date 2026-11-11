@@ -4,12 +4,11 @@ import type { Request, Response } from 'express';
 import { DI } from '@app/app';
 import { Appuser } from '@entity/Appuser';
 import { AppuserTenant } from '@entity/AppuserTenant';
-import { RecurringOccurrence } from '@entity/RecurringOccurrence';
 import { RecurringSeries } from '@entity/RecurringSeries';
 import { Tenant } from '@entity/Tenant';
 import { detectRecurringCandidatesForTenant } from '@service/recurring/recurring-detection.service';
 import { isExpectedRecurring } from '@service/recurring/recurring-expectation';
-import { buildRecurringSchedule } from '@service/recurring/recurring-schedule';
+import { loadRecurringSchedule } from '@service/recurring/recurring-schedule.service';
 import { RecurringAmountType, RecurringCadence, RecurringSeriesStatus, RecurringSeriesType } from '@service/recurring/recurring-types';
 import { findAssignableCategory } from '@service/transaction/household-category';
 import { BadRequestError, NotFoundError } from '@utils/errors';
@@ -21,12 +20,6 @@ interface AuthedRequest extends Request {
   tenant?: Tenant;
   user?: Appuser;
 }
-
-/**
- * How far outside the requested range occurrences are read, so a payment a few days before or
- * after its expected date still settles that cycle. Wider than the schedule's ten-day window.
- */
-const OCCURRENCE_MATCH_WINDOW_MS = 11 * 86_400_000;
 
 interface SummaryTotals {
   billMaxTotal: number;
@@ -92,44 +85,7 @@ export async function getRecurringOccurrences(req: AuthedRequest, res: Response)
     query: { from, to },
   } = await zParse(recurringOccurrencesQuerySchema, req);
   const tenantKey = await resolveTenantKey(req);
-  const series = await DI.em.find(
-    RecurringSeries,
-    buildRecurringWhere(tenantKey, { status: RecurringSeriesStatus.confirmed }),
-    { populate: ['currencyKey'] },
-  );
-  const seriesKeys = series.map((item) => item.recurringSeriesKey);
-  const occurrences = seriesKeys.length === 0
-    ? []
-    : await DI.em.find(
-      RecurringOccurrence,
-      {
-        deletedAt: null,
-        occurrenceDate: { $gte: new Date(from.getTime() - OCCURRENCE_MATCH_WINDOW_MS), $lte: new Date(to.getTime() + OCCURRENCE_MATCH_WINDOW_MS) },
-        recurringSeriesKey: { $in: series },
-      },
-      { populate: ['currencyKey'] },
-    );
-  const entries = buildRecurringSchedule(
-    series.map((item) => ({
-      amountType: item.amountType,
-      averageAmount: item.averageAmount,
-      cadence: item.cadence,
-      currency: item.currencyKey?.code ?? null,
-      displayName: item.displayName,
-      expectedAmount: item.expectedAmount,
-      expectedAmountMax: item.expectedAmountMax,
-      nextExpectedAt: item.nextExpectedAt,
-      recurringSeriesKey: item.recurringSeriesKey,
-    })),
-    occurrences.map((occurrence) => ({
-      amount: occurrence.amount,
-      currency: occurrence.currencyKey?.code ?? null,
-      date: occurrence.occurrenceDate,
-      matchStatus: occurrence.matchStatus,
-      seriesKey: occurrence.recurringSeriesKey.recurringSeriesKey,
-    })),
-    { from, to },
-  );
+  const entries = await loadRecurringSchedule({ from, tenantKey, to });
   return res.json({
     items: entries.map((entry) => ({
       currency: entry.currency,
