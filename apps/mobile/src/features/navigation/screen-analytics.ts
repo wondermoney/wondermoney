@@ -91,6 +91,7 @@ const routePatterns: readonly RoutePattern[] = [
   [['reports'], 'reports'],
   [['reports', 'budget-vs-actual'], 'report_budget_vs_actual'],
   [['reports', 'cashflow'], 'report_cashflow'],
+  [['reports', 'month-comparison'], 'report_month_comparison'],
   [['reports', 'net-worth-history'], 'report_net_worth_history'],
   [['reports', 'portfolio-performance'], 'report_portfolio_performance'],
   [['reports', 'sankey'], 'report_sankey'],

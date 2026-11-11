@@ -31,6 +31,11 @@ export const cashflowReportKey = (epochId: number, filters: ReportFilters) => (
   ['reports', epochId, 'cashflow', ...filtersTuple(filters)] as const
 )
 
+/** The comparison's two months are part of its identity, unlike the shared date range. */
+export const monthComparisonReportKey = (epochId: number, filters: ReportFilters) => (
+  ['reports', epochId, 'month-comparison', ...filtersTuple(filters), filters.base ?? null, filters.compare ?? null] as const
+)
+
 export const sankeyReportKey = (epochId: number, filters: ReportFilters) => (
   ['reports', epochId, 'sankey', ...filtersTuple(filters)] as const
 )

@@ -1,5 +1,6 @@
 export { BudgetVsActualReport } from "./BudgetVsActualReport";
 export { CashflowReport } from "./CashflowReport";
+export { MonthComparisonReport } from "./MonthComparisonReport";
 export { NetWorthHistoryReport } from "./NetWorthHistoryReport";
 export { PortfolioPerformanceReport } from "./PortfolioPerformanceReport";
 export { SankeyReport } from "./SankeyReport";

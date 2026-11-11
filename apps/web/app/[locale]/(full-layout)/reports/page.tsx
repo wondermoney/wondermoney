@@ -10,6 +10,7 @@ import { ReportEmptyState } from "@/components/reports/primitives";
 import {
   BudgetVsActualReport,
   CashflowReport,
+  MonthComparisonReport,
   NetWorthHistoryReport,
   PortfolioPerformanceReport,
   SankeyReport,
@@ -57,6 +58,9 @@ export default function ReportsPage() {
               <CashflowReport />
               <SpendingByCategoryReport />
             </div>
+
+            {/* Two named months, category by category */}
+            <MonthComparisonReport />
 
             {/* Net worth over time — full width for the trend */}
             <NetWorthHistoryReport />

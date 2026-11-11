@@ -8,6 +8,7 @@ import { usePalette } from '@/theme/use-palette'
 
 import { BudgetVsActualBody, type BudgetVsActualBodyProps } from './budget-vs-actual-screen'
 import { CashflowReportBody, type CashflowReportBodyProps } from './cashflow-report-screen'
+import { MonthComparisonReportBody, type MonthComparisonReportBodyProps } from './month-comparison-report-screen'
 import { NetWorthHistoryReportBody, type NetWorthHistoryReportBodyProps } from './net-worth-history-report-screen'
 import { PortfolioPerformanceReportBody, type PortfolioPerformanceReportBodyProps } from './portfolio-performance-report-screen'
 import type { ReportDatePreset } from './report-date-presets'
@@ -28,6 +29,7 @@ export type ReportsHubScreenProps = {
   sankey: SankeyReportBodyProps
   cashflow: CashflowReportBodyProps
   spendingByCategory: SpendingByCategoryReportBodyProps
+  monthComparison: MonthComparisonReportBodyProps
   netWorthHistory: NetWorthHistoryReportBodyProps
   budgetVsActual: BudgetVsActualBodyProps
   portfolioPerformance: PortfolioPerformanceReportBodyProps
@@ -36,8 +38,8 @@ export type ReportsHubScreenProps = {
 /**
  * Web's `/reports` at phone width: the "Reports" title, one filter row (period
  * select, Filters, reset), then every report as an open section in web's order
- * — Sankey, cash flow, spending by category, net worth, budget vs actual,
- * portfolio performance. Each section keeps its own query, export and
+ * — Sankey, cash flow, spending by category, month comparison, net worth,
+ * budget vs actual, portfolio performance. Each section keeps its own query, export and
  * load/error state, so one failing report doesn't block the rest. Reports is
  * a destination (the bottom bar's More), so there is no back link, as on web.
  */
@@ -51,6 +53,7 @@ export function ReportsHubScreen({
   sankey,
   cashflow,
   spendingByCategory,
+  monthComparison,
   netWorthHistory,
   budgetVsActual,
   portfolioPerformance,
@@ -74,6 +77,7 @@ export function ReportsHubScreen({
             <SankeyReportBody {...sankey} />
             <CashflowReportBody {...cashflow} />
             <SpendingByCategoryReportBody {...spendingByCategory} />
+            <MonthComparisonReportBody {...monthComparison} />
             <NetWorthHistoryReportBody {...netWorthHistory} />
             <BudgetVsActualBody {...budgetVsActual} />
             <PortfolioPerformanceReportBody {...portfolioPerformance} />

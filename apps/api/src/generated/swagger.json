@@ -3194,6 +3194,26 @@
         }
       }
     },
+    "/v1/reports/month-comparison": {
+      "get": {
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/v1/reports/month-comparison.csv": {
+      "get": {
+        "description": "",
+        "responses": {
+          "default": {
+            "description": ""
+          }
+        }
+      }
+    },
     "/v1/reports/sankey": {
       "get": {
         "description": "",

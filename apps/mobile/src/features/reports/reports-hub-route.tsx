@@ -6,6 +6,8 @@ import { mapBudgetVsActualReport } from './budget-vs-actual-view-model'
 import type { BudgetVsActualViewState } from './budget-vs-actual-screen'
 import { mapCashflowReport } from './cashflow-report-view-model'
 import type { CashflowReportViewState } from './cashflow-report-screen'
+import { mapMonthComparisonReport } from './month-comparison-report-view-model'
+import type { MonthComparisonReportViewState } from './month-comparison-report-screen'
 import { mapNetWorthHistoryReport } from './net-worth-history-report-view-model'
 import type { NetWorthHistoryReportViewState } from './net-worth-history-report-screen'
 import { mapPortfolioPerformanceReport } from './portfolio-performance-report-view-model'
@@ -17,6 +19,7 @@ import { mapSpendingByCategoryReport } from './spending-by-category-report-view-
 import type { SpendingByCategoryReportViewState } from './spending-by-category-report-screen'
 import { useBudgetVsActualReport } from './use-budget-vs-actual'
 import { useCashflowReport } from './use-cashflow-report'
+import { useMonthComparisonMonths, useMonthComparisonReport } from './use-month-comparison-report'
 import { useNetWorthHistoryReport } from './use-net-worth-history-report'
 import { usePortfolioPerformanceReport } from './use-portfolio-performance-report'
 import { useReportExport } from './use-report-export'
@@ -26,7 +29,7 @@ import { useReportsCurrency } from './use-reports-currency'
 import { useSankeyReport } from './use-sankey-report'
 import { useSpendingByCategoryReport } from './use-spending-by-category-report'
 
-/** All six reports composed on one page (RAD audit — mobile linked each one
+/** All seven reports composed on one page (RAD audit — mobile linked each one
  * out to its own screen while web always showed them inline, the biggest
  * cross-platform IA gap found). One shared filter/date-range state drives
  * every section's query, matching web's single ReportFiltersBar; each
@@ -46,6 +49,9 @@ export function ReportsHubRoute() {
   const cashflowExport = useReportExport('cashflow', filters, today)
   const spendingQuery = useSpendingByCategoryReport(filters)
   const spendingExport = useReportExport('spending-by-category', filters, today)
+  const comparisonMonths = useMonthComparisonMonths()
+  const comparisonQuery = useMonthComparisonReport(filters, comparisonMonths)
+  const comparisonExport = useReportExport('month-comparison', { ...filters, base: comparisonMonths.base, compare: comparisonMonths.compare }, today)
   const netWorthQuery = useNetWorthHistoryReport(filters)
   const netWorthExport = useReportExport('net-worth-history', filters, today)
   const budgetQuery = useBudgetVsActualReport(filters)
@@ -81,6 +87,14 @@ export function ReportsHubRoute() {
   } else if (spendingQuery.error instanceof ApiError && spendingQuery.error.code === 'invalid-response') spendingState = { status: 'invalid-response' }
   else spendingState = { status: 'error' }
 
+  let comparisonState: MonthComparisonReportViewState
+  if (comparisonQuery.isAccessTransition) comparisonState = { status: 'access-transition' }
+  else if (comparisonQuery.isLoading) comparisonState = { status: 'loading' }
+  else if (comparisonQuery.data) {
+    comparisonState = { status: 'loaded', report: mapMonthComparisonReport(comparisonQuery.data), completeness: comparisonQuery.data.completeness, refreshing: comparisonQuery.isFetching }
+  } else if (comparisonQuery.error instanceof ApiError && comparisonQuery.error.code === 'invalid-response') comparisonState = { status: 'invalid-response' }
+  else comparisonState = { status: 'error' }
+
   let netWorthState: NetWorthHistoryReportViewState
   if (netWorthQuery.isAccessTransition) netWorthState = { status: 'access-transition' }
   else if (netWorthQuery.isLoading) netWorthState = { status: 'loading' }
@@ -102,10 +116,10 @@ export function ReportsHubRoute() {
   else if (portfolioQuery.error instanceof ApiError && portfolioQuery.error.code === 'invalid-response') portfolioState = { status: 'invalid-response' }
   else portfolioState = { status: 'error' }
 
-  const refreshing = [sankeyQuery, cashflowQuery, spendingQuery, netWorthQuery, budgetQuery, portfolioQuery].some((query) => query.isFetching)
+  const refreshing = [sankeyQuery, cashflowQuery, spendingQuery, comparisonQuery, netWorthQuery, budgetQuery, portfolioQuery].some((query) => query.isFetching)
   const refreshAll = async () => {
     await Promise.all([
-      sankeyQuery.refetch(), cashflowQuery.refetch(), spendingQuery.refetch(),
+      sankeyQuery.refetch(), cashflowQuery.refetch(), spendingQuery.refetch(), comparisonQuery.refetch(),
       netWorthQuery.refetch(), budgetQuery.refetch(), portfolioQuery.refetch(),
     ])
   }
@@ -121,6 +135,7 @@ export function ReportsHubRoute() {
       sankey={{ state: sankeyState, currencyCode, exportState: sankeyExport.state, onExport: sankeyExport.exportCsv, onRefresh: async () => { await sankeyQuery.refetch() } }}
       cashflow={{ state: cashflowState, currencyCode, exportState: cashflowExport.state, onExport: cashflowExport.exportCsv, onRefresh: async () => { await cashflowQuery.refetch() } }}
       spendingByCategory={{ state: spendingState, currencyCode, exportState: spendingExport.state, onExport: spendingExport.exportCsv, onRefresh: async () => { await spendingQuery.refetch() } }}
+      monthComparison={{ state: comparisonState, currencyCode, months: comparisonMonths, exportState: comparisonExport.state, onExport: comparisonExport.exportCsv, onRefresh: async () => { await comparisonQuery.refetch() } }}
       netWorthHistory={{ state: netWorthState, currencyCode, exportState: netWorthExport.state, onExport: netWorthExport.exportCsv, onRefresh: async () => { await netWorthQuery.refetch() } }}
       budgetVsActual={{ state: budgetState, currencyCode, exportState: budgetExport.state, onExport: budgetExport.exportCsv, onRefresh: async () => { await budgetQuery.refetch() } }}
       portfolioPerformance={{ state: portfolioState, currencyCode, exportState: portfolioExport.state, onExport: portfolioExport.exportCsv, onRefresh: async () => { await portfolioQuery.refetch() } }}

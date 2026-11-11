@@ -137,6 +137,25 @@
           "title": "No portfolios to show",
           "description": "Add a portfolio to see its performance here."
         }
+      },
+      "monthComparison": {
+        "title": "Compare months",
+        "subtitle": "What changed between two months, category by category.",
+        "baseMonth": "Month",
+        "compareMonth": "Compared with",
+        "metric": "Metric",
+        "income": "Income",
+        "expenses": "Expenses",
+        "net": "Net",
+        "savingsRate": "Savings rate",
+        "change": "Change",
+        "category": "Category",
+        "viewTransactions": "See the transactions behind this amount",
+        "largestChanges": "The chart shows the {count} largest changes; the table lists every category.",
+        "noData": {
+          "title": "No spending in either month",
+          "description": "Try two other months, or check that accounts are connected."
+        }
       }
     },
     "common": {

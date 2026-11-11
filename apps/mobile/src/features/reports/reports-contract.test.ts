@@ -2,6 +2,7 @@ import {
   budgetVsActualResponseSchema,
   createBudgetVsActualEndpoint,
   createCashflowEndpoint,
+  createMonthComparisonEndpoint,
   createNetWorthHistoryReportEndpoint,
   createPortfolioPerformanceReportEndpoint,
   createReportCsvEndpoint,
@@ -59,6 +60,7 @@ describe('reports contract', () => {
   it.each([
     ['spending-by-category', createSpendingByCategoryEndpoint],
     ['cashflow', createCashflowEndpoint],
+    ['month-comparison', createMonthComparisonEndpoint],
     ['sankey', createSankeyEndpoint],
     ['net-worth-history', createNetWorthHistoryReportEndpoint],
     ['budget-vs-actual', createBudgetVsActualEndpoint],
@@ -66,6 +68,12 @@ describe('reports contract', () => {
   ] as const)('points %s at its own endpoint path', (segment, createEndpoint) => {
     const endpoint = createEndpoint(baseFilters)
     expect(endpoint.path.startsWith(`/v1/reports/${segment}?`)).toBe(true)
+  })
+
+  it('sends the two months the comparison asks for', () => {
+    const query = new URLSearchParams(createMonthComparisonEndpoint({ ...baseFilters, base: '2026-08', compare: '2026-07' }).path.split('?')[1])
+    expect(query.get('base')).toBe('2026-08')
+    expect(query.get('compare')).toBe('2026-07')
   })
 
   it('parses the report envelope and pins the budget-vs-actual fixture', () => {

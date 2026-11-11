@@ -104,6 +104,7 @@ export const featureScreens = [
   'reports',
   'report_budget_vs_actual',
   'report_cashflow',
+  'report_month_comparison',
   'report_net_worth_history',
   'report_portfolio_performance',
   'report_sankey',

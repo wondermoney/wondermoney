@@ -3822,6 +3822,10 @@
     "sankey": {
       "label": "Sankey de flujo de caja",
       "description": "Desde los ingresos, por las categorías, hasta las cuentas"
+    },
+    "monthComparison": {
+      "label": "Comparar meses",
+      "description": "Qué cambió entre dos meses, categoría a categoría"
     }
   },
   "reports": {
@@ -3950,6 +3954,22 @@
       "down": "Baja",
       "flat": "Sin cambios",
       "vsPriorPeriod": "vs. periodo anterior"
+    },
+    "monthComparison": {
+      "title": "Comparar meses",
+      "subtitle": "Qué cambió entre dos meses, categoría a categoría.",
+      "baseMonth": "Mes",
+      "compareMonth": "Comparado con",
+      "metric": "Indicador",
+      "income": "Ingresos",
+      "expenses": "Gastos",
+      "net": "Neto",
+      "savingsRate": "Tasa de ahorro",
+      "change": "Cambio",
+      "category": "Categoría",
+      "loading": "Cargando la comparación de meses",
+      "emptyTitle": "Sin gastos en ninguno de los meses",
+      "emptyMessage": "Prueba con otros dos meses o comprueba que las cuentas estén conectadas."
     }
   },
   "accountsOverview": {

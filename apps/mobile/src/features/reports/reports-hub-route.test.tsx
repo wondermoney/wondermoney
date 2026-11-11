@@ -28,6 +28,7 @@ let mockSpendingQuery: MockQuery = { ...idleQuery(), priorData: undefined, prior
 let mockNetWorthQuery = idleQuery()
 let mockBudgetQuery = idleQuery()
 let mockPortfolioQuery = idleQuery()
+let mockComparisonQuery = idleQuery()
 
 jest.mock('./use-sankey-report', () => ({ useSankeyReport: () => mockSankeyQuery }))
 jest.mock('./use-cashflow-report', () => ({ useCashflowReport: () => mockCashflowQuery }))
@@ -35,6 +36,10 @@ jest.mock('./use-spending-by-category-report', () => ({ useSpendingByCategoryRep
 jest.mock('./use-net-worth-history-report', () => ({ useNetWorthHistoryReport: () => mockNetWorthQuery }))
 jest.mock('./use-budget-vs-actual', () => ({ useBudgetVsActualReport: () => mockBudgetQuery }))
 jest.mock('./use-portfolio-performance-report', () => ({ usePortfolioPerformanceReport: () => mockPortfolioQuery }))
+jest.mock('./use-month-comparison-report', () => ({
+  useMonthComparisonMonths: () => ({ base: '2026-08', compare: '2026-07', setBase: jest.fn(), setCompare: jest.fn() }),
+  useMonthComparisonReport: () => mockComparisonQuery,
+}))
 
 async function renderRoute() {
   const i18n = await initMobileI18n('en')
@@ -50,6 +55,7 @@ describe('ReportsHubRoute', () => {
     mockNetWorthQuery = idleQuery()
     mockBudgetQuery = idleQuery()
     mockPortfolioQuery = idleQuery()
+    mockComparisonQuery = idleQuery()
   })
 
   it('shows a loading state per section while every report is still loading', async () => {

@@ -75,3 +75,17 @@ export const reportsQuerySchema = z.object({
 });
 
 export type ReportFilters = z.infer<typeof reportFiltersSchema>;
+
+/** A calendar month key, `YYYY-MM`, as the month-comparison report's pickers send it. */
+const monthKeySchema = z.string().regex(/^\d{4}-(?:0[1-9]|1[0-2])$/, { message: 'Month must be YYYY-MM' });
+
+/**
+ * The month-comparison envelope: the shared report filters (accounts, currency,
+ * timezone, tags, ...) plus the two months to compare. The months replace the
+ * date range, so `fromDate`/`toDate` are accepted but ignored by the report.
+ */
+export const monthComparisonQuerySchema = z.object({
+  query: reportFiltersSchema.extend({ base: monthKeySchema, compare: monthKeySchema }),
+});
+
+export type MonthComparisonFilters = z.infer<typeof monthComparisonQuerySchema>['query'];
