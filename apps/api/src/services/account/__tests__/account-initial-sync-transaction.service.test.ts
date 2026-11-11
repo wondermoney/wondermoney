@@ -628,7 +628,7 @@ describe('Enable Banking amounts through the real adapter', () => {
     const em = Object.assign(createEm({ accounts: oneAccount, pendings: [storedPending] }), { getReference: vi.fn((_entity: unknown, key: unknown) => ({ key })) });
     const tipped: RawRow = { booking_date: '2026-03-02', credit_debit_indicator: 'DBIT', creditor: { name: 'Cafe Central' }, status: 'BOOK', transaction_amount: { amount: '22.00', currency: 'EUR' }, transaction_id: 'eb-tipped-1' };
 
-    await service.syncTransactionsForRequisition({ enableBankingConnectionKey: 1 }, { em: asEm(em), enableBankingSyncAdapterFactory: enableBankingAdapter([tipped]) });
+    await service.syncTransactionsForRequisition({ connection: conn(1) }, { em: asEm(em), provider: enableBankingAdapter([tipped]) });
 
     expect(storedPending['enableBankingTransactionId']).toBe('eb-tipped-1');
     const audits = em.persist.mock.calls.map(([entity]) => entity as Record<string, unknown>).filter((entity) => entity['eventType'] === 'pending_promoted');
@@ -653,7 +653,7 @@ describe('Enable Banking amounts through the real adapter', () => {
     const em = createEm({ accounts: oneAccount, pendings: [first, second] });
     const tipped: RawRow = { booking_date: bookingDate, credit_debit_indicator: 'DBIT', creditor: { name: 'Cafe Central' }, status: 'BOOK', transaction_amount: { amount: '22.00', currency: 'EUR' }, transaction_id: 'eb-tipped-1' };
 
-    await service.syncTransactionsForRequisition({ enableBankingConnectionKey: 1 }, { em: asEm(em), enableBankingSyncAdapterFactory: enableBankingAdapter([tipped]) });
+    await service.syncTransactionsForRequisition({ connection: conn(1) }, { em: asEm(em), provider: enableBankingAdapter([tipped]) });
 
     expect(first['enableBankingTransactionId']).toBe('eb-pending-1');
     expect(second.enableBankingTransactionId).toBe('eb-pending-2');
