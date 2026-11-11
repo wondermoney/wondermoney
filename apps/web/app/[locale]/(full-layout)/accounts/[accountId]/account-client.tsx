@@ -13,6 +13,7 @@ import AccountForecastCallout from "@/components/account/AccountForecastCallout"
 import AccountTransactionAddModal from "@/components/account/AccountTransactionAddModal";
 import AccountTransactionImportModal from "@/components/account/AccountTransactionImportModal";
 import AccountTransactionsTable from "@/components/account/AccountTransactionsTable";
+import CreditCardStatementSummary from "@/components/account/CreditCardStatementSummary";
 import MetricsCards from "@/components/account/MetricsCards";
 import ProjectedTransactions from "@/components/account/ProjectedTransactions";
 import { clampSyncedAt } from "@/components/account/sync-time";
@@ -290,6 +291,15 @@ export default function AccountClient({
           <p className="text-muted-foreground text-sm">{t("no-metrics")}</p>
         )}
       </section>
+
+      {/* Credit card statement */}
+      {account.creditCard ? (
+        <CreditCardStatementSummary
+          accountKey={account.accountKey}
+          creditCard={account.creditCard}
+          currency={account.currencyKey.code}
+        />
+      ) : null}
 
       {/* Balance chart */}
       <Section id="balance-growth-heading" title={t("balance-growth")}>

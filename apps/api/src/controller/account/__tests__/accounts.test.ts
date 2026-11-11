@@ -106,8 +106,7 @@ describe('getAccount', () => {
   });
 
   it('returns the exact shared account summary without leaking entity fields', async () => {
-    mocks.findOne.mockResolvedValue(
-      account({
+    const fixture = account({
         accountFinancialInstitutionKey: { displayName: null, logoUrl: 'https://legacy.example/logo.svg' },
         accountKey: 41,
         accountName: undefined,
@@ -119,7 +118,10 @@ describe('getAccount', () => {
         nordigenRequisitionKey: { nordigenRequisitionKey: 9 },
         refreshedAt: new Date('2026-07-18T10:15:00.000Z'),
         tenantKey: { tenantKey: 113 },
-      }),
+    });
+    // The card lookup is a second `findOne`; this account is not a card.
+    mocks.findOne.mockImplementation((entity: unknown) =>
+      (entity as { name?: string }).name === 'CreditCardDetail' ? null : fixture,
     );
     mocks.find.mockResolvedValue([]);
     const res = makeResponse();
@@ -147,6 +149,7 @@ describe('getAccount', () => {
         appuserCurrencyBalance: null,
         availableBalance: 0,
         balance: 0,
+        creditCard: null,
         csvImportFormat: 'generic',
         currencyKey: { code: 'GBP' },
         // A foreign balance with no converted amount was not converted.
@@ -312,6 +315,7 @@ describe('getAccounts', () => {
           appuserCurrencyBalance: 0,
           availableBalance: 0,
           balance: 0,
+          creditCard: null,
           csvImportFormat: 'generic',
           currencyKey: { code: 'EUR' },
           fxRateDate: null,
@@ -333,6 +337,7 @@ describe('getAccounts', () => {
           appuserCurrencyBalance: null,
           availableBalance: null,
           balance: null,
+          creditCard: null,
           csvImportFormat: 'generic',
           currencyKey: { code: 'EUR' },
           fxRateDate: null,

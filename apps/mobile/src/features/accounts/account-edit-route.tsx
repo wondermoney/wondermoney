@@ -7,12 +7,14 @@ import { parseAccountId } from './accounts-contract'
 import { useAccount } from './use-account'
 import { useAccountDeleteMutation } from './use-account-delete-mutation'
 import { useAccountMetadataMutation } from './use-account-metadata-mutation'
+import { useCreditCardMutation } from './use-credit-card-mutation'
 
 export function AccountEditRoute() {
   const params = useLocalSearchParams<{ accountId?: string | string[] }>()
   const accountId = parseAccountId(params.accountId)
   const detail = useAccount(accountId)
   const mutation = useAccountMetadataMutation()
+  const creditCardMutation = useCreditCardMutation()
   const deleteMutation = useAccountDeleteMutation()
   const router = useRouter()
   let state: AccountEditViewState
@@ -28,6 +30,7 @@ export function AccountEditRoute() {
         name: detail.data.account.accountName ?? '',
         isPrivate: detail.data.account.isPrivate,
         isOwnedByViewer: detail.data.account.isOwnedByViewer,
+        creditCard: detail.data.account.creditCard ?? null,
       },
       refreshing: detail.isRefreshing,
     }
@@ -44,8 +47,10 @@ export function AccountEditRoute() {
     onBack={back}
     onRetry={async () => { await detail.refetch() }}
     pending={mutation.isPending}
+    creditCardPending={creditCardMutation.isPending}
     deletePending={deleteMutation.isPending}
     onSaveAccount={async (value) => { if (accountId === null) return; await mutation.mutateAsync({ accountId, value }) }}
+    onSaveCreditCard={async (value) => { if (accountId === null) return; await creditCardMutation.mutateAsync({ accountId, value }) }}
     onDeleteAccount={async () => { if (accountId === null) return; await deleteMutation.mutateAsync(accountId); router.replace('/accounts' as Href) }}
   />
 }

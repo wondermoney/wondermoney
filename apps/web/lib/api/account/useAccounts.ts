@@ -51,9 +51,22 @@ export interface Account {
   fxStatus?: FxStatus | null;
   /** The date of the old rate a `provisional` balance was converted at. */
   fxRateDate?: string | null;
+  /** The card's cycle and limit, or null when the account is not a credit card. */
+  creditCard?: CreditCardSettings | null;
 }
 
 export type AccountCsvImportFormat = "bank" | "generic";
+
+/**
+ * A credit card's cycle and limit, as the API stores it. Present only on an account the user (or
+ * the bank's own cash account type) marked as a card.
+ */
+export interface CreditCardSettings {
+  statementCloseDay: number;
+  paymentDueDay: number;
+  creditLimit: number | null;
+  minimumPaymentPercent: number | null;
+}
 
 export interface GetAccountsResponse {
   accounts: Account[];
@@ -129,8 +142,7 @@ const VALID_STALENESS = new Set<SyncStaleness>([
 
 // Lenient: these fields are additive, so an old/partial payload degrades to null rather than
 // failing the whole accounts response.
-function normalizeSyncStatus(value: unknown): SyncStatus | null {
-  if (!isRecord(value)) return null;
+function normalizeSyncStatus(value: unknown): SyncStatus | null {  if (!isRecord(value)) return null;
   const staleness = value.staleness;
   if (
     typeof staleness !== "string" ||
@@ -143,6 +155,40 @@ function normalizeSyncStatus(value: unknown): SyncStatus | null {
     lastSyncedAt:
       typeof value.lastSyncedAt === "string" ? value.lastSyncedAt : null,
     hasOpenIncident: value.hasOpenIncident === true,
+  };
+}
+
+function normalizeCreditCardSettings(
+  value: unknown,
+): CreditCardSettings | null {
+  if (!isRecord(value)) return null;
+  const close = value.statementCloseDay;
+  const due = value.paymentDueDay;
+  if (
+    typeof close !== "number" ||
+    !Number.isInteger(close) ||
+    close < 1 ||
+    close > 31 ||
+    typeof due !== "number" ||
+    !Number.isInteger(due) ||
+    due < 1 ||
+    due > 31
+  ) {
+    return null;
+  }
+  return {
+    statementCloseDay: close,
+    paymentDueDay: due,
+    creditLimit:
+      typeof value.creditLimit === "number" &&
+      Number.isFinite(value.creditLimit)
+        ? value.creditLimit
+        : null,
+    minimumPaymentPercent:
+      typeof value.minimumPaymentPercent === "number" &&
+      Number.isFinite(value.minimumPaymentPercent)
+        ? value.minimumPaymentPercent
+        : null,
   };
 }
 
@@ -236,6 +282,7 @@ function normalizeAccount(account: unknown): Account {
       : null,
     fxRateDate:
       typeof account.fxRateDate === "string" ? account.fxRateDate : null,
+    creditCard: normalizeCreditCardSettings(account.creditCard),
   };
 }
 

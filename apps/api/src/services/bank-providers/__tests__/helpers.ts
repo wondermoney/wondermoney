@@ -6,7 +6,7 @@ import type { BankConnectionRef, BankProvider, BankProviderBalance, BankProvider
 /** A linked connection ref for the sync-service tests. */
 interface FakeAccountClient {
   getBalances?: () => Promise<{ balances?: BankProviderBalance[] }>;
-  getDetails?: () => Promise<{ account?: { currency?: string; name?: string; ownerName?: string } }>;
+  getDetails?: () => Promise<{ account?: { cashAccountType?: string; currency?: string; name?: string; ownerName?: string } }>;
   getMetadata?: () => Promise<{ iban?: string; institution_id?: string }>;
   getTransactions?: (input?: { country?: string; dateFrom?: string; dateTo?: string }) => Promise<BankProviderTransactions | { transactions?: BankProviderTransactions }>;
 }
@@ -52,6 +52,7 @@ export function providerFromClient(client: FakeClient): BankProvider {
         const details = (await account.getDetails?.()) ?? { account: undefined };
         const metadata = (await account.getMetadata?.()) ?? { iban: undefined, institution_id: undefined };
         return {
+          cashAccountType: details.account?.cashAccountType,
           currency: details.account?.currency,
           externalId: accountId,
           iban: metadata.iban,

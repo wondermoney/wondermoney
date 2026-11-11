@@ -245,3 +245,34 @@ describe('AccountDetailScreen', () => {
     }
   })
 })
+
+describe('credit card statement', () => {
+  const statement = {
+    periodStart: '2026-01-01',
+    periodEnd: '2026-01-31',
+    dueDate: '2026-02-10',
+    charges: 300,
+    payments: 100,
+    balance: 200,
+    availableCredit: 800,
+    isCurrent: true,
+  }
+
+  it('shows the current statement balance, due date and available credit', async () => {
+    const { view } = await renderScreen(
+      { status: 'loaded', data: { ...openBanking, creditCard: { statementCloseDay: 31, paymentDueDay: 10, creditLimit: 1000, minimumPaymentPercent: null }, creditCardStatement: { status: 'loaded', statement, creditLimit: 1000 } } },
+    )
+    expect(view.getByTestId('credit-card-statement')).toBeOnTheScreen()
+    expect(view.getByText('Statement balance')).toBeOnTheScreen()
+    expect(view.getByText(formatCurrency(200, { locale: 'en', currency: 'USD' }))).toBeOnTheScreen()
+    expect(view.getByText('Due date')).toBeOnTheScreen()
+    expect(view.getByText(/Feb 10, 2026/)).toBeOnTheScreen()
+    expect(view.getByText('Available credit')).toBeOnTheScreen()
+    expect(view.getByText(formatCurrency(800, { locale: 'en', currency: 'USD' }))).toBeOnTheScreen()
+  })
+
+  it('omits the section for an account that is not a card', async () => {
+    const { view } = await renderScreen({ status: 'loaded', data: openBanking })
+    expect(view.queryByTestId('credit-card-statement')).not.toBeOnTheScreen()
+  })
+})

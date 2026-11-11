@@ -30,6 +30,19 @@ export const syncStatusSchema = z.object({
   lastSyncedAt: z.iso.datetime().nullish().catch(null),
 })
 
+/**
+ * A credit card's cycle and limit. Optional and lenient on read: an older API does not send it,
+ * and a malformed one must not fail the whole accounts list.
+ */
+export const creditCardSettingsSchema = z.object({
+  statementCloseDay: z.number().int().min(1).max(31),
+  paymentDueDay: z.number().int().min(1).max(31),
+  creditLimit: z.number().finite().nullish().catch(null),
+  minimumPaymentPercent: z.number().finite().nullish().catch(null),
+})
+
+export type CreditCardSettingsDto = z.infer<typeof creditCardSettingsSchema>
+
 export const accountSummarySchema = z.object({
   accountFinancialInstitutionKey: z.object({
     displayName: z.string().max(255).nullable(),
@@ -61,6 +74,9 @@ export const accountSummarySchema = z.object({
   // How `appuserCurrencyBalance` was converted; optional, an older API doesn't send them.
   fxStatus: fxStatusSchema,
   fxRateDate: fxRateDateSchema,
+  // The card's cycle and limit, or null when the account is not a credit card. Optional: an
+  // older API does not send it.
+  creditCard: creditCardSettingsSchema.nullish().catch(null),
 })
 
 export const accountUpdateWriteSchema = z.object({
@@ -75,6 +91,40 @@ export const reorderAccountsWriteSchema = z.object({
 
 export type AccountUpdateWrite = z.input<typeof accountUpdateWriteSchema>
 export type ReorderAccountsWrite = z.input<typeof reorderAccountsWriteSchema>
+
+/** The card settings the edit screen sends. Strict, because this builds a request body. */
+export const creditCardWriteSchema = z.object({
+  statementCloseDay: z.number().int().min(1).max(31),
+  paymentDueDay: z.number().int().min(1).max(31),
+  creditLimit: z.number().finite().min(0).nullable().optional(),
+  minimumPaymentPercent: z.number().finite().min(0).max(100).nullable().optional(),
+}).strict()
+
+export type CreditCardWrite = z.input<typeof creditCardWriteSchema>
+
+export const creditCardSettingsResponseSchema = z.object({
+  creditCard: creditCardSettingsSchema,
+})
+
+const statementDateSchema = z.string().regex(/^\d{4}-\d{2}-\d{2}$/)
+
+/** One statement's totals, as `GET /v1/account/:id/statements` reports them. */
+export const creditCardStatementSchema = z.object({
+  periodStart: statementDateSchema,
+  periodEnd: statementDateSchema,
+  dueDate: statementDateSchema,
+  charges: z.number().finite(),
+  payments: z.number().finite(),
+  balance: z.number().finite(),
+  availableCredit: z.number().finite().nullable(),
+  isCurrent: z.boolean(),
+})
+
+export type CreditCardStatementDto = z.infer<typeof creditCardStatementSchema>
+
+export const creditCardStatementsResponseSchema = z.object({
+  statements: z.array(creditCardStatementSchema),
+})
 
 export const accountsResponseSchema = z.object({
   accounts: z.array(accountSummarySchema),
@@ -128,6 +178,32 @@ export function createReorderAccountsEndpoint() {
     method: 'PUT',
     path: '/v1/account/order',
     schema: emptyWriteResponseSchema,
+  })
+}
+
+export function createUpdateCreditCardEndpoint(accountId: number) {
+  if (!isValidAccountId(accountId)) throw new Error('A positive safe account id is required.')
+  return writeEndpoint({
+    method: 'PUT',
+    path: `/v1/account/${accountId}/credit-card`,
+    schema: creditCardSettingsResponseSchema,
+  })
+}
+
+/**
+ * The card's statements. `from`/`to` are optional calendar days (`YYYY-MM-DD`); without them the
+ * API answers with its default window (the last three months).
+ */
+export function createCreditCardStatementsEndpoint(accountId: number, range: { from?: string; to?: string } = {}) {
+  if (!isValidAccountId(accountId)) throw new Error('A positive safe account id is required.')
+  const params = new URLSearchParams()
+  if (range.from) params.set('from', range.from)
+  if (range.to) params.set('to', range.to)
+  const query = params.toString()
+  return readEndpoint({
+    method: 'GET',
+    path: `/v1/account/${accountId}/statements${query ? `?${query}` : ''}`,
+    schema: creditCardStatementsResponseSchema,
   })
 }
 

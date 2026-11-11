@@ -26,6 +26,7 @@ jest.mock('./use-reorder-accounts', () => ({ useReorderAccounts: () => ({ mutate
 jest.mock('./use-account', () => ({ useAccount: (id: number | null) => mockUseAccount(id) }))
 jest.mock('./use-account-recalculation', () => ({ useAccountRecalculation: () => ({ state: { phase: 'idle' }, start: jest.fn(), reset: jest.fn() }) }))
 jest.mock('./use-account-forecast', () => ({ useAccountForecast: () => ({ data: undefined, isAccessTransition: false, isLoading: false, refetch: jest.fn() }) }))
+jest.mock('./use-credit-card-statements', () => ({ useCreditCardStatements: () => ({ data: undefined, error: null, isAccessTransition: false, isLoading: false, refetch: jest.fn() }) }))
 jest.mock('@/features/account-insights/use-account-insights', () => ({ useAccountInsights: () => mockUseInsights() }))
 jest.mock('@/features/account-insights/use-account-metrics', () => ({ useAccountMetrics: (...args: unknown[]) => mockUseAccountMetrics(...args) }))
 jest.mock('@/features/transactions/use-recent-transactions', () => ({ useRecentTransactions: (...args: unknown[]) => mockUseRecentTransactions(...args) }))

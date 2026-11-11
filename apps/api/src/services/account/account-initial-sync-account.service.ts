@@ -4,6 +4,7 @@ import * as Sentry from '@sentry/node';
 import { DI } from '@app/database/di';
 import { Account } from '@entity/Account';
 import { AccountFinancialInstitution, AccountFinancialInstitutionProvider } from '@entity/AccountFinancialInstitution';
+import { AccountType } from '@entity/AccountType';
 import { AppuserTenant } from '@entity/AppuserTenant';
 import { BankConnectionStatus } from '@entity/BankConnection';
 import { Currency } from '@entity/Currency';
@@ -224,6 +225,12 @@ class AccountInitialSyncAccountService {
       account.tenantKey = tenant.tenantKey;
       account.holderName ||= providerAccount.ownerName;
       account.refreshedAt = new Date();
+      // The provider's ISO 20022 cash account type is the one authority on whether this is a card.
+      // A provider that says nothing leaves the type as it was, so a user's choice is not cleared.
+      if (providerAccount.cashAccountType === 'CARD') {
+        const creditCardType = await em.findOne(AccountType, { description: 'CREDIT_CARD' });
+        if (creditCardType) account.accountTypeKey = creditCardType;
+      }
       if (existingDeleted) existingDeleted.deletedAt = undefined;
       try {
         await em.persist(account).flush();
@@ -233,6 +240,7 @@ class AccountInitialSyncAccountService {
         if (!reloaded) throw error;
         reloaded.accountName = account.accountName;
         reloaded.accountNumber = account.accountNumber;
+        reloaded.accountTypeKey = account.accountTypeKey;
         reloaded.balance = account.balance;
         reloaded.appuserCurrencyBalance = account.appuserCurrencyBalance;
         reloaded.fxStatus = account.fxStatus;

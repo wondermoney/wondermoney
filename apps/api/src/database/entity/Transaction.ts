@@ -67,6 +67,15 @@ export class Transaction extends Base {
   @Property({ columnType: 'timestamptz', nullable: true })
   transactionDate?: Date;
 
+  /**
+   * Moves this row to the credit-card statement that contains this date, instead of the one its
+   * `transactionDate` falls in — for when the bank's own statement disagrees. Read only by the
+   * statement totals (`services/account/credit-card-statement.service.ts`); null means the
+   * transaction date decides.
+   */
+  @Property({ columnType: 'date', nullable: true })
+  statementDateOverride?: Date;
+
   @PrimaryKey()
   transactionKey!: number;
 

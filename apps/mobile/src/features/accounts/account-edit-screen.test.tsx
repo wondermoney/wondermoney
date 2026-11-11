@@ -5,7 +5,7 @@ import { Alert } from 'react-native'
 import { ApiError } from '@/lib/api/errors'
 import { initMobileI18n } from '@/lib/i18n'
 
-import { AccountEditScreen, createAccountMetadataChanges, type AccountEditModel } from './account-edit-screen'
+import { AccountEditScreen, createAccountMetadataChanges, createCreditCardChanges, type AccountEditModel } from './account-edit-screen'
 import { classifyAccountWriteFailure } from './use-account-metadata-mutation'
 
 const ownedModel: AccountEditModel = { id: 12, name: 'Everyday', isPrivate: false, isOwnedByViewer: true }
@@ -18,8 +18,10 @@ const renderEditor = async (overrides: Partial<React.ComponentProps<typeof Accou
     onBack: jest.fn(),
     onRetry: jest.fn(),
     onSaveAccount: jest.fn().mockResolvedValue(undefined),
+    onSaveCreditCard: jest.fn().mockResolvedValue(undefined),
     onDeleteAccount: jest.fn().mockResolvedValue(undefined),
     pending: false,
+    creditCardPending: false,
     deletePending: false,
     ...overrides,
   }
@@ -51,7 +53,7 @@ describe('account metadata editor', () => {
 
   it('hides the privacy switch entirely for a non-owned shared account', async () => {
     const { view } = await renderEditor({ state: { status: 'loaded', model: sharedModel } })
-    expect(view.queryByRole('switch')).not.toBeOnTheScreen()
+    expect(view.queryByRole('switch', { name: 'Private account' })).not.toBeOnTheScreen()
   })
 
   it('preserves input and explains ambiguous network failure without retrying it', async () => {
@@ -144,5 +146,73 @@ describe('createAccountMetadataChanges', () => {
     expect(createAccountMetadataChanges(ownedModel, { name: 'Everyday', isPrivate: false })).toBeNull()
     expect(createAccountMetadataChanges(ownedModel, { name: 'Everyday', isPrivate: true })).toEqual({ isPrivate: true })
     expect(createAccountMetadataChanges(ownedModel, { name: 'Renamed', isPrivate: true })).toEqual({ accountName: 'Renamed', isPrivate: true })
+  })
+})
+
+describe('createCreditCardChanges', () => {
+  const form = (overrides: Partial<Parameters<typeof createCreditCardChanges>[1]> = {}) => ({
+    enabled: true,
+    statementCloseDay: '31',
+    paymentDueDay: '10',
+    creditLimit: '1000',
+    minimumPaymentPercent: '',
+    ...overrides,
+  })
+
+  it('sends the cycle when an account is being marked as a card', () => {
+    expect(createCreditCardChanges(null, form())).toEqual({
+      statementCloseDay: 31,
+      paymentDueDay: 10,
+      creditLimit: 1000,
+      minimumPaymentPercent: null,
+    })
+  })
+
+  it('sends nothing when the cycle is unchanged', () => {
+    const original = { statementCloseDay: 31, paymentDueDay: 10, creditLimit: 1000, minimumPaymentPercent: null }
+    expect(createCreditCardChanges(original, form())).toBeNull()
+  })
+
+  it('sends only when a day or the limit moves', () => {
+    const original = { statementCloseDay: 31, paymentDueDay: 10, creditLimit: 1000, minimumPaymentPercent: null }
+    expect(createCreditCardChanges(original, form({ statementCloseDay: '28' }))).toMatchObject({ statementCloseDay: 28 })
+    expect(createCreditCardChanges(original, form({ creditLimit: '' }))).toMatchObject({ creditLimit: null })
+  })
+
+  it('sends nothing when the switch is off', () => {
+    expect(createCreditCardChanges(null, form({ enabled: false }))).toBeNull()
+  })
+})
+
+describe('credit card settings in the editor', () => {
+  it('reveals the cycle fields once the card switch is on', async () => {
+    const { view } = await renderEditor()
+    const toggle = view.getByRole('switch', { name: 'Credit card account' })
+    expect(toggle.props.accessibilityState.checked).toBe(false)
+    expect(view.queryByLabelText('Statement closes on (1–31)')).not.toBeOnTheScreen()
+    await fireEvent(toggle, 'valueChange', true)
+    expect(view.getByLabelText('Statement closes on (1–31)')).toBeOnTheScreen()
+    expect(view.getByLabelText('Payment due on (1–31)')).toBeOnTheScreen()
+    expect(view.getByLabelText('Credit limit')).toBeOnTheScreen()
+  })
+
+  it('saves the card settings before the account metadata', async () => {
+    const saveCard = jest.fn().mockResolvedValue(undefined)
+    const save = jest.fn().mockResolvedValue(undefined)
+    const { view } = await renderEditor({ onSaveCreditCard: saveCard, onSaveAccount: save })
+    await fireEvent(view.getByRole('switch', { name: 'Credit card account' }), 'valueChange', true)
+    await fireEvent.changeText(view.getByLabelText('Statement closes on (1–31)'), '31')
+    await fireEvent.changeText(view.getByLabelText('Payment due on (1–31)'), '10')
+    await fireEvent.press(view.getByRole('button', { name: 'Save details' }))
+    await waitFor(() => expect(saveCard).toHaveBeenCalledWith({ statementCloseDay: 31, paymentDueDay: 10, creditLimit: null, minimumPaymentPercent: null }))
+    expect(save).not.toHaveBeenCalled()
+  })
+
+  it('locks the card toggle once the account is a card', async () => {
+    const { view } = await renderEditor({ state: { status: 'loaded', model: { ...ownedModel, creditCard: { statementCloseDay: 25, paymentDueDay: 10, creditLimit: 1500, minimumPaymentPercent: null } } } })
+    const toggle = view.getByRole('switch', { name: 'Credit card account' })
+    expect(toggle.props.accessibilityState.checked).toBe(true)
+    expect(toggle.props.accessibilityState.disabled).toBe(true)
+    expect(view.getByLabelText('Statement closes on (1–31)').props.value).toBe('25')
   })
 })

@@ -355,7 +355,7 @@ export async function getTransactionTypes(_req: Request, res: Response) {
 
 export async function updateTransaction(req: Request, res: Response, next: NextFunction) {
   const {
-    body: { categoryKey, transactionType, transferDestination, updatedAmount },
+    body: { categoryKey, statementDateOverride, transactionType, transferDestination, updatedAmount },
     params: { transactionId },
   } = await zParse(updateTransactionRequestSchema, req);
   // Authorize before any database access — a missing user or unresolved tenant must never
@@ -533,9 +533,17 @@ export async function updateTransaction(req: Request, res: Response, next: NextF
     });
   }
 
+  // A statement override moves the row between credit-card statements without touching its date,
+  // its amount or any balance. `null` clears it, so the transaction date decides again.
+  if (statementDateOverride !== undefined) {
+    transaction.statementDateOverride = statementDateOverride ?? undefined;
+    await DI.em.persist(transaction).flush();
+  }
+
   const transformedData = pick(transaction, [
     'transactionKey',
     'transactionDate',
+    'statementDateOverride',
     'transactionTypeKey.name',
     'accountKey.accountKey',
     'accountKey.accountName',
