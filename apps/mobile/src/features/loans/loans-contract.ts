@@ -116,6 +116,31 @@ export const loanRepaymentSchema = z.object({
 
 export const loanRepaymentsResponseSchema = z.object({ repayments: z.array(loanRepaymentSchema) })
 
+const loanProjectionPointSchema = z.object({
+  baselineBalance: finiteMoney,
+  date: z.iso.datetime(),
+  month: z.number().int().nonnegative(),
+  withExtraBalance: finiteMoney,
+})
+
+export const loanProjectionSchema = z.object({
+  aheadOrBehindMonths: z.number().int().nullable(),
+  contractInterest: finiteMoney,
+  contractMonths: z.number().int().nonnegative(),
+  interestSaved: finiteMoney,
+  months: z.number().int().nonnegative().nullable(),
+  monthsSaved: z.number().int().nonnegative(),
+  payoffDate: z.iso.date().nullable(),
+  paysOff: z.boolean(),
+  reason: z.string().nullable(),
+  series: z.array(loanProjectionPointSchema),
+  totalInterest: finiteMoney,
+})
+
+export const loanProjectionResponseSchema = z.object({ projection: loanProjectionSchema })
+
+export type LoanProjectionDto = z.infer<typeof loanProjectionSchema>
+
 export const loanRepaymentAllocationSchema = z.object({
   feeAmount: z.number().finite().nonnegative(),
   interestAmount: z.number().finite().nonnegative(),
@@ -225,6 +250,12 @@ export function createLoanWriteEndpoint(loanId: number) {
 export function createLoanRepaymentsEndpoint(loanId: number) {
   if (!isValidLoanId(loanId)) throw new Error('A positive safe loan id is required.')
   return readEndpoint({ method: 'GET', path: `/v1/loan/${loanId}/repayments`, schema: loanRepaymentsResponseSchema })
+}
+
+export function createLoanProjectionEndpoint(loanId: number, extra?: number) {
+  if (!isValidLoanId(loanId)) throw new Error('A positive safe loan id is required.')
+  const query = extra !== undefined && extra > 0 ? `?extra=${extra}` : ''
+  return readEndpoint({ method: 'GET', path: `/v1/loan/${loanId}/projection${query}`, schema: loanProjectionResponseSchema })
 }
 
 export function createLoanRepaymentCandidatesEndpoint(loanId: number) {

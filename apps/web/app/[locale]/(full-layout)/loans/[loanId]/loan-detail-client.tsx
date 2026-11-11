@@ -10,6 +10,7 @@ import LoanAssumptionsCard from "@/components/loan/LoanAssumptionsCard";
 import LoanDetailHeader from "@/components/loan/LoanDetailHeader";
 import LoanDetailSummaryCards from "@/components/loan/LoanDetailSummaryCards";
 import LoanFormDrawer from "@/components/loan/LoanFormDrawer";
+import LoanPayoffSection from "@/components/loan/LoanPayoffSection";
 import LoanRepaymentsTable from "@/components/loan/LoanRepaymentsTable";
 import RepaymentCandidateDrawer from "@/components/loan/RepaymentCandidateDrawer";
 import { Button } from "@/components/ui/button";
@@ -117,6 +118,7 @@ export default function LoanDetailClient({ loanId }: { loanId: string }) {
           />
         </div>
       </div>
+      <LoanPayoffSection loan={loan} />
       <RepaymentCandidateDrawer
         loan={loan}
         open={candidatesOpen}

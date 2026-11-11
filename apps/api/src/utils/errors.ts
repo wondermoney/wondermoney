@@ -133,6 +133,8 @@ export const ERROR_CODE = {
   TRANSACTION_HAS_LOAN_REPAYMENT: 'transaction_has_loan_repayment',
   /** A loan schedule needs a principal, an interest rate and a term (422). */
   LOAN_SCHEDULE_UNAVAILABLE: 'loan_schedule_unavailable',
+  /** A loan payoff projection needs a principal, an interest rate and a term (422). */
+  LOAN_PROJECTION_UNAVAILABLE: 'loan_projection_unavailable',
   /** Linking a split transaction as a loan repayment; remove the split first (409). */
   TRANSACTION_IS_SPLIT: 'transaction_is_split',
   /**

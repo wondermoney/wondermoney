@@ -1590,7 +1590,14 @@
     "loanType": "Tipo de empréstimo",
     "statusLabel": "Estado",
     "description": "Descrição",
-    "repaymentsTitle": "Pagamentos"
+    "repaymentsTitle": "Pagamentos",
+    "payoff": "Projeção de quitação",
+    "payoffDate": "Quitação prevista",
+    "monthsSaved": "Meses poupados",
+    "interestSaved": "Juros poupados",
+    "never": "Não fica liquidado",
+    "payoffLoading": "A carregar a projeção de quitação",
+    "payoffUnavailable": "A projeção de quitação está indisponível neste momento."
   },
   "loanRepayment": {
     "title": "Correspondência de reembolsos",

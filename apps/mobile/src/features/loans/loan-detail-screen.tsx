@@ -18,7 +18,7 @@ import { useFormatMoney } from '@/lib/formatters/money-display'
 import { themeTokens } from '@/theme/tokens'
 import { usePalette } from '@/theme/use-palette'
 
-import type { LoanRepaymentViewModel, LoanViewModel } from './loans-view-model'
+import type { LoanProjectionViewModel, LoanRepaymentViewModel, LoanViewModel } from './loans-view-model'
 import { Alert, Failure, formatDate, Header, Loading, LoanProgress } from './loans-screen'
 import { LoanRepaymentWorkflow, type CandidateState } from './loan-repayment-workflow'
 import type { FrozenRepaymentWrite } from './loan-repayment-allocation'
@@ -31,6 +31,11 @@ type HistoryState =
   | { status: 'loaded'; repayments: readonly LoanRepaymentViewModel[] }
   | { status: 'refresh-error'; repayments: readonly LoanRepaymentViewModel[] }
 
+export type ProjectionState =
+  | { status: 'loading' }
+  | { status: 'error' }
+  | { status: 'loaded'; projection: LoanProjectionViewModel }
+
 export type LoanDetailViewState =
   | { status: 'loading' }
   | { status: 'error' }
@@ -38,8 +43,8 @@ export type LoanDetailViewState =
   | { status: 'not-found' }
   | { status: 'invalid-id' }
   | { status: 'access-transition' }
-  | { status: 'loaded'; loan: LoanViewModel; history: HistoryState; refreshing?: boolean }
-  | { status: 'refresh-error'; loan: LoanViewModel; history: HistoryState; refreshing?: boolean }
+  | { status: 'loaded'; loan: LoanViewModel; history: HistoryState; projection?: ProjectionState; refreshing?: boolean }
+  | { status: 'refresh-error'; loan: LoanViewModel; history: HistoryState; projection?: ProjectionState; refreshing?: boolean }
 
 type RepaymentWorkflowProps = { candidates: CandidateState; pending: boolean; refreshRequired: boolean; onWrite: (write: FrozenRepaymentWrite) => Promise<RepaymentWriteFailure | 'success'>; onRefreshCandidates: () => void | Promise<void>; onResolveUnknown: () => Promise<boolean> }
 
@@ -126,6 +131,8 @@ export function LoanDetailScreen({ state, onBack, onEdit = () => {}, onRefresh, 
             />
           </StatList>
 
+          {state.projection ? <PayoffSection state={state.projection} currency={loan.currencyCode} locale={locale} /> : null}
+
           <RepaymentHistory state={state.history} currency={loan.currencyCode} locale={locale} />
 
           {repaymentWorkflow ? (
@@ -164,6 +171,28 @@ function DetailRow({ label, value, figure = false, first = false }: { label: str
       <Text style={styles.detailLabel} tone="muted" variant="meta">{label}</Text>
       <Text style={styles.detailValue} variant={figure ? 'amount' : 'meta'}>{value}</Text>
     </View>
+  )
+}
+
+/** Web `LoanPayoffSection` at phone width: the projected payoff and what it saves against the contract. */
+function PayoffSection({ state, currency, locale }: { state: ProjectionState; currency: string; locale: string }) {
+  const { t } = useTranslation()
+  const formatMoney = useFormatMoney()
+  const money = (value: number) => formatMoney(value, { locale, currency })
+  return (
+    <Section title={t('loanDetail.payoff')} variant="open">
+      {state.status === 'loading' ? (
+        <Text accessible accessibilityLabel={t('loanDetail.payoffLoading')} accessibilityRole="progressbar" tone="muted" variant="meta">{t('loanDetail.payoffLoading')}</Text>
+      ) : state.status === 'error' ? (
+        <Text tone="muted" variant="meta">{t('loanDetail.payoffUnavailable')}</Text>
+      ) : (
+        <View>
+          <DetailRow first label={t('loanDetail.payoffDate')} value={state.projection.paysOff && state.projection.payoffDate ? formatDate(state.projection.payoffDate, locale) : t('loanDetail.never')} />
+          <DetailRow label={t('loanDetail.monthsSaved')} value={state.projection.monthsSaved > 0 ? t('loanDetail.monthCount', { count: state.projection.monthsSaved }) : '—'} />
+          <DetailRow label={t('loanDetail.interestSaved')} value={state.projection.interestSaved > 0 ? money(state.projection.interestSaved) : '—'} figure />
+        </View>
+      )}
+    </Section>
   )
 }
 

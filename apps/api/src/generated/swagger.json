@@ -1425,6 +1425,29 @@
         }
       }
     },
+    "/v1/loan/{loanId}/projection": {
+      "get": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "loanId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      }
+    },
     "/v1/loan/{loanId}/schedule": {
       "get": {
         "description": "",

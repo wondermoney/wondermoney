@@ -174,6 +174,25 @@
           "status": "Status"
         }
       },
+      "payoff": {
+        "title": "Payoff projection",
+        "subtitle": "When the loan clears at the contract payment, and how much sooner an extra monthly payment gets you there.",
+        "extraLabel": "Extra monthly payment",
+        "extraPlaceholder": "0",
+        "extraHelper": "Added to the contract payment. Leave empty to see the contract-only payoff.",
+        "baseline": "Contract payment",
+        "withExtra": "With extra",
+        "payoffDate": "Projected payoff",
+        "monthsSaved": "Months saved",
+        "interestSaved": "Interest saved",
+        "monthCount": "{count, plural, one {# month} other {# months}}",
+        "noSavings": "—",
+        "never": "Does not pay off",
+        "neverBody": "At this payment the balance never clears: the payment does not cover the monthly interest. Raise the payment or add an extra.",
+        "missingInputs": "Add the interest rate and term to project the payoff.",
+        "unavailable": "The payoff projection is unavailable right now.",
+        "empty": "No projection to show."
+      },
       "adjustment": {
         "unavailableTitle": "Balance adjustment unavailable",
         "unavailableDescription": "This action is not wired to an API yet.",

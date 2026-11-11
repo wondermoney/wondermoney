@@ -88,7 +88,7 @@ export function addMonthsClamped(date: Date, months: number, dayOfMonth: number)
 }
 
 /*
- * Kept separate from `projectPayoff` in the goal service on purpose: that walk
+ * Kept separate from `projectPayoff` in `payoff-projection.ts` on purpose: that walk
  * pays a fixed amount until the balance reaches zero (a projection), while this
  * one has a fixed contractual term and two methods, and its last row is an
  * adjustment. Sharing the loop would couple goal projections to loan contract
