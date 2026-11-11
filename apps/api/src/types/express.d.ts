@@ -1,5 +1,6 @@
 import type { ApiTokenScope } from '@entity/ApiToken';
 import type { AuthContext } from '@service/auth/better-auth';
+import type { McpRequestIdentity } from '@service/mcp/mcp-types';
 import { Appuser } from '../database/entity/Appuser';
 import { Tenant } from '../database/entity/Tenant';
 import type { Enqueue } from '@service/queue/enqueue';
@@ -21,6 +22,8 @@ declare global {
       user?: User;
       tenant?: Tenant;
       enqueue?: Enqueue;
+      /** The token and household behind an MCP request, set by `requireMcpToken`. */
+      mcpIdentity?: McpRequestIdentity;
     }
     // interface Session extends SessionContainerInterface {}
     // interface Request {

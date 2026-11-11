@@ -15,6 +15,8 @@
     "scope-write": "Write",
     "scope-calendar-read": "Calendar feed",
     "scope-write-hint": "Write also allows reading, and covers creating and updating transactions, accounts, categories, budgets and goals. Tokens can never delete anything.",
+    "scope-mcp-read": "AI client (MCP)",
+    "scope-mcp-read-hint": "The AI client scope reaches only the read-only MCP endpoint. It cannot read the ordinary data routes, and a read token cannot reach MCP.",
     "expiry": "Expires",
     "expiry-days": "{days} days",
     "totp": "Authenticator code",

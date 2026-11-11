@@ -14,6 +14,7 @@
     "change-password",
     "two-factor-authentication",
     "api-tokens",
+    "connect-ai-client",
     "read-only-bank-access",
     "data-privacy",
     "delete-account"

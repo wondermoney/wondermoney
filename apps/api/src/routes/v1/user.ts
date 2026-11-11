@@ -6,6 +6,7 @@ import { downloadDataExport, getDataExport, listDataExports, startDataExport } f
 import { commitDataRestore, getDataRestore, listDataRestores, startDataRestore, validateDataRestore } from '@controller/data-restore';
 import { getEmailNotificationPreferences, patchEmailNotificationPreferences } from '@controller/email-notifications';
 import { deleteEnableBankingCredential, getEnableBankingCredential, saveEnableBankingCredential } from '@controller/enable-banking-credential';
+import { listMcpCalls } from '@controller/mcp';
 import { createPairingCodeController, listDevices, revokeDevice } from '@controller/mobile-pairing';
 import { completeOnboarding, getOnboardingBootstrap } from '@controller/onboarding';
 import {
@@ -32,6 +33,9 @@ router.get('/me/profile', getCurrentUserProfile);
 router.get('/api-tokens', listApiTokens);
 router.post('/api-tokens', requireSensitiveSession, createApiTokenController);
 router.delete('/api-tokens/:id', revokeApiToken);
+// Recent calls made by an MCP client with one of the member's tokens. Read-only, and like the
+// rest of `/v1/user` it is never reachable with a token.
+router.get('/mcp-calls', listMcpCalls);
 // The calendar feed's own credential. Same mount and the same sensitive-session gate for the
 // reset, which both mints and revokes; the feed itself lives at `/v1/calendar/bills.ics`.
 router.get('/calendar-feed-token', getCalendarFeedToken);

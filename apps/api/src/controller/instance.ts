@@ -1,6 +1,7 @@
 import type { Request, Response } from 'express';
 
 import { instanceName } from '@config/instance-name';
+import { isMcpEnabled } from '@config/mcp';
 import { aiCapabilities } from '@service/ai/ai-provider';
 import { resolveSignupMode } from '@service/auth/signup-policy';
 import { isGoogleSignInConfigured } from '@service/auth/social-sign-in';
@@ -39,6 +40,8 @@ export function getInstance(_req: Request, res: Response) {
       fileStorage: resolveStorageConfig() !== null,
       googleSignIn: isGoogleSignInConfigured(),
       marketData: isMarketDataEnabled(),
+      // The read-only MCP server at `POST /v1/mcp` (`MCP_ENABLED`, on by default).
+      mcp: isMcpEnabled(),
     },
     minAppVersion: process.env['MIN_APP_VERSION']?.trim() || null,
     name: instanceName(),

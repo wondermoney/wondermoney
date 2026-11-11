@@ -25,6 +25,9 @@ import { useHydrated } from "@/lib/utils/useHydrated";
 
 const Security = dynamic(() => import("@/components/settings/Security"));
 const ApiTokens = dynamic(() => import("@/components/settings/ApiTokens"));
+const ConnectAiClient = dynamic(
+  () => import("@/components/settings/ConnectAiClient"),
+);
 const CalendarFeed = dynamic(() => import("@/components/settings/CalendarFeed"));
 const Privacy = dynamic(() => import("@/components/settings/Privacy"));
 const Connections = dynamic(
@@ -275,7 +278,17 @@ const SettingsPage = () => {
         </div>
         {visibleTabs.map((tab) => (
           <TabsContent key={tab.name} value={tab.name} className="pt-6">
-            {tab.name === selectedTab ? <SelectedComponent /> : null}
+            {tab.name === selectedTab ? (
+              tab.name === "api-tokens" ? (
+                <div className="flex flex-col gap-10">
+                  <SelectedComponent />
+                  {/* The MCP panel lives beside API tokens: it mints a token of its own. */}
+                  <ConnectAiClient />
+                </div>
+              ) : (
+                <SelectedComponent />
+              )
+            ) : null}
           </TabsContent>
         ))}
       </Tabs>

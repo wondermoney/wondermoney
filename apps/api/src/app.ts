@@ -61,6 +61,7 @@ import instanceRoutes from '@route/instance';
 import loanRoutes from '@route/loan';
 import manualAssetRoutes from '@route/manual-asset';
 import marketingRoutes from '@route/marketing';
+import mcpRoutes from '@route/mcp';
 import netWorthRoutes from '@route/net-worth';
 import portfolioRoutes from '@route/portfolio';
 import portfolioImportSessionRoutes from '@route/portfolio-import-session';
@@ -230,6 +231,10 @@ export default class Application {
       this.host.use('/v1/instance', instanceRoutes);
       this.host.use('/v1/manual-assets', ...authedTenant(), manualAssetRoutes);
       this.host.use('/v1/marketing', publicMarketingRateLimit(), marketingRoutes);
+      // The read-only MCP server. Deliberately outside `authedTenant`: an MCP client is a
+      // machine credential, so the route accepts only a personal API token with `mcp:read`
+      // and never a session cookie (see `middleware/mcp-auth.ts`).
+      this.host.use('/v1/mcp', mcpRoutes);
       // Net worth is protected at mount level; route stays auth-agnostic.
       this.host.use('/v1/net-worth', ...authedTenant(), netWorthRoutes);
       this.host.use('/v1/portfolio', ...authedTenant(), portfolioRoutes);

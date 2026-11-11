@@ -190,6 +190,12 @@ describe('API token scope policy', () => {
     }
   });
 
+  it('gives mcp:read exactly the MCP endpoint, and keeps it off the data routes', () => {
+    expect(apiTokenScopesForRequest('/v1/mcp', 'POST', '/')).toEqual(['mcp:read']);
+    expect(apiTokenScopesForRequest('/v1/mcp', 'GET', '/')).toEqual([]);
+    expect(apiTokenScopesForRequest('/v1/account', 'GET', '/')).not.toContain('mcp:read');
+  });
+
   it('does not allow an unknown mount by accident', () => {
     expect(apiTokenScopesForRequest('/v1/something-new', 'GET', '/')).toEqual([]);
     expect(apiTokenScopesForRequest('/v1/something-new', 'POST', '/')).toEqual([]);

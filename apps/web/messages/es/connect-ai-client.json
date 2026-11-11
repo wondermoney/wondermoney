@@ -1,0 +1,30 @@
+{
+  "connectAiClient": {
+    "title": "Conectar un cliente de IA",
+    "description": "Permite que Claude Desktop, Cursor u otro cliente MCP pregunte por tus finanzas. Recibe un token de solo lectura propio: puede leer los mismos datos que ves tú, incluidas tus cuentas privadas, y nunca puede cambiar nada.",
+    "endpoint": "Endpoint MCP",
+    "endpoint-hint": "El cliente envía un token de API personal con el ámbito mcp:read en una cabecera Authorization. Aquí nunca se acepta una cookie de sesión del navegador.",
+    "copy": "Copiar",
+    "copied": "Copiado",
+    "copy-failed": "No se pudo copiar. Selecciona el texto y cópialo manualmente.",
+    "create-token": "Crear un token de cliente de IA",
+    "totp": "Código del autenticador",
+    "totp-hint": "Solo es necesario si usas autenticación de dos factores.",
+    "token-created-title": "Tu token de cliente de IA",
+    "token-created-description": "Cópialo ahora y pégalo en la configuración del cliente de abajo. Solo se guarda como hash, así que esta es la única vez que se muestra.",
+    "token-done": "Ya lo he copiado",
+    "config-title": "Configuración del cliente",
+    "config-description": "Pega el token donde el ejemplo muestra YOUR_TOKEN. El primer bloque es para Claude Desktop, que conecta con servidores remotos mediante mcp-remote; el segundo es la forma HTTP directa que usan Cursor y otros clientes.",
+    "config-claude": "Claude Desktop",
+    "config-http": "Cursor y otros clientes HTTP",
+    "calls-title": "Llamadas recientes del cliente de IA",
+    "calls-description": "Cada herramienta que llama un cliente MCP se registra con su nombre y la hora. Los importes y las descripciones nunca se escriben en el registro.",
+    "calls-loading": "Cargando llamadas…",
+    "calls-empty": "Ningún cliente de IA ha llamado todavía al servidor.",
+    "calls-unknown-tool": "Herramienta desconocida",
+    "error-create": "No se pudo crear el token. Inténtalo de nuevo.",
+    "error-totp-required": "Introduce el código del autenticador para crear un token.",
+    "error-invalid-totp": "Ese código del autenticador no es válido.",
+    "error-session-not-fresh": "Vuelve a iniciar sesión antes de crear un token."
+  }
+}
