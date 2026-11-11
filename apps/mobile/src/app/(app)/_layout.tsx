@@ -56,6 +56,7 @@ export default function AuthenticatedLayout() {
           <Stack.Screen name="settings/categories" />
           <Stack.Screen name="settings/categories/create" />
           <Stack.Screen name="settings/categories/[categoryId]/edit" />
+          <Stack.Screen name="settings/rules" />
           <Stack.Screen name="settings/notifications" />
           <Stack.Screen name="settings/security" />
           </Stack>

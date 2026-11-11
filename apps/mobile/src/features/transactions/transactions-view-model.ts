@@ -26,6 +26,8 @@ export type TransactionViewModel = Readonly<{
   convertedBalance: number | null
   convertedBalanceCurrency: string | null
   category: string | null
+  /** The category's key, for pre-filling a rule's "set category" action. */
+  categoryId: number | null
   /** False when the row's category is one that does not count as spending (investments, savings). */
   categoryCountsAsSpending: boolean
   /** Typed as a transfer between the household's own money: left out of spending and income. */
@@ -98,6 +100,7 @@ export function mapTransactions(input: { transactions: readonly TransactionDto[]
       convertedBalance: transaction.appuserCurrencyBalance ?? null,
       convertedBalanceCurrency: transaction.appuserCurrencyKey?.code ?? null,
       category: transaction.appuserTransactionCategories[0]?.name ?? null,
+      categoryId: transaction.appuserTransactionCategories[0]?.categoryKey ?? null,
       categoryCountsAsSpending: transaction.appuserTransactionCategories[0]?.countsAsSpending !== false,
       isTransfer: isTransferType(type),
       transferDestination: transaction.transferDestination ?? null,

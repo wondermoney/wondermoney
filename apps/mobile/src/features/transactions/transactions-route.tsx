@@ -5,6 +5,10 @@ import { useProductRuntime } from '@/components/providers/product-runtime-provid
 import { mapCategories } from '@/features/categories/categories-view-model'
 import { useCategories } from '@/features/categories/use-categories'
 import { useAiHiddenPreference } from '@/features/preferences/use-ai-hidden'
+import { RuleApplyOffer } from '@/features/rules/rule-apply-offer'
+import { RuleEditorSheet } from '@/features/rules/rule-editor-sheet'
+import type { RuleDto } from '@/features/rules/rules-contract'
+import { seedRuleFromTransaction, type RuleEditorForm } from '@/features/rules/rules-view-model'
 import { toTagsState, useCreateTagForPicker, useSetTransactionTags, useTags } from '@/features/tags/use-tags'
 import { ApiError } from '@/lib/api/errors'
 import { parseAccountId } from '@/features/accounts/accounts-contract'
@@ -54,6 +58,9 @@ export function TransactionsRoute({ perAccount = false }: { perAccount?: boolean
   const aiHidden = useAiHiddenPreference()
   const { t, i18n } = useTranslation()
   const router = useRouter()
+  // "Create rule" from a row: the pre-filled form, then the saved rule's apply offer.
+  const [ruleSeed, setRuleSeed] = useState<RuleEditorForm | null>(null)
+  const [savedRule, setSavedRule] = useState<RuleDto | null>(null)
   let state: TransactionsViewState
   if (query.isInvalidAccountId) state = { status: 'invalid-account' }
   else if (query.isAccessTransition) state = { status: 'access-transition' }
@@ -120,7 +127,12 @@ export function TransactionsRoute({ perAccount = false }: { perAccount?: boolean
       ? { status: 'loading' as const }
       : { status: 'error' as const }
 
-  return <TransactionsScreen
+  const ruleCategories = categoryState.status === 'loaded'
+    ? categoryState.categories.flatMap((category) => [category, ...category.children]).map((category) => ({ id: category.id, name: category.name }))
+    : []
+
+  return <>
+  <TransactionsScreen
     state={state}
     filters={filters}
     total={query.data?.total ?? null}
@@ -149,5 +161,16 @@ export function TransactionsRoute({ perAccount = false }: { perAccount?: boolean
     onCreateTag={createTag}
     onSetTransfer={runSetTransfer}
     transferDestinations={transferDestinations}
+    onCreateRule={(row) => setRuleSeed(seedRuleFromTransaction({ merchant: row.merchant, description: row.description, categoryId: row.categoryId }))}
   />
+  <RuleEditorSheet
+    categories={ruleCategories}
+    onClose={() => setRuleSeed(null)}
+    onSaved={(rule) => { setRuleSeed(null); setSavedRule(rule) }}
+    rule={null}
+    seed={ruleSeed}
+    visible={ruleSeed !== null}
+  />
+  {savedRule ? <RuleApplyOffer key={savedRule.ruleKey} onApplied={() => { void query.refetch() }} onClose={() => setSavedRule(null)} rule={savedRule} /> : null}
+  </>
 }
