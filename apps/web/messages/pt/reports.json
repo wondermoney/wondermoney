@@ -137,6 +137,25 @@
           "title": "Sem carteiras para mostrar",
           "description": "Adicione uma carteira para ver a sua performance aqui."
         }
+      },
+      "monthComparison": {
+        "title": "Comparar meses",
+        "subtitle": "O que mudou entre dois meses, categoria a categoria.",
+        "baseMonth": "Mês",
+        "compareMonth": "Comparado com",
+        "metric": "Indicador",
+        "income": "Receitas",
+        "expenses": "Despesas",
+        "net": "Saldo",
+        "savingsRate": "Taxa de poupança",
+        "change": "Variação",
+        "category": "Categoria",
+        "viewTransactions": "Ver os movimentos por trás deste valor",
+        "largestChanges": "O gráfico mostra as {count} maiores variações; a tabela lista todas as categorias.",
+        "noData": {
+          "title": "Sem despesas em nenhum dos meses",
+          "description": "Experimente outros dois meses ou verifique se as contas estão ligadas."
+        }
       }
     },
     "common": {

@@ -20,6 +20,10 @@ export type ReportFilters = Readonly<{
   includeTransfers?: boolean
   /** IANA time zone the period's days and months are in; the API's default when absent. */
   timezone?: string
+  /** Month-comparison only: the month examined (`YYYY-MM`). */
+  base?: string
+  /** Month-comparison only: the month it is compared against (`YYYY-MM`). */
+  compare?: string
 }>
 
 function reportQuery(filters: ReportFilters): string {
@@ -33,6 +37,8 @@ function reportQuery(filters: ReportFilters): string {
   if (filters.includePending) params.set('includePending', 'true')
   if (filters.includeTransfers) params.set('includeTransfers', 'true')
   if (filters.timezone) params.set('timezone', filters.timezone)
+  if (filters.base) params.set('base', filters.base)
+  if (filters.compare) params.set('compare', filters.compare)
   return params.toString()
 }
 
@@ -154,6 +160,37 @@ export const portfolioPerformanceReportRowSchema = z.object({
 const portfolioPerformanceReportResponseSchema = reportResponseSchema(z.array(portfolioPerformanceReportRowSchema))
 export type PortfolioPerformanceReportRow = z.infer<typeof portfolioPerformanceReportRowSchema>
 
+/** One month's totals in the month-comparison report. */
+export const monthComparisonTotalsSchema = z.object({
+  month: z.string(),
+  income: z.number().finite(),
+  expenses: z.number().finite(),
+  net: z.number().finite(),
+  savingsRate: z.number().finite().nullable(),
+})
+export type MonthComparisonTotals = z.infer<typeof monthComparisonTotalsSchema>
+
+/** One category's spending in both months, with the change between them. */
+export const monthComparisonCategoryRowSchema = z.object({
+  categoryKey: z.string(),
+  name: z.string(),
+  color: z.string(),
+  base: z.number().finite(),
+  compare: z.number().finite(),
+  delta: z.number().finite(),
+  deltaPct: z.number().finite().nullable(),
+})
+export type MonthComparisonCategoryRow = z.infer<typeof monthComparisonCategoryRowSchema>
+
+export const monthComparisonDataSchema = z.object({
+  base: monthComparisonTotalsSchema,
+  compare: monthComparisonTotalsSchema,
+  categories: z.array(monthComparisonCategoryRowSchema),
+})
+export type MonthComparisonData = z.infer<typeof monthComparisonDataSchema>
+
+const monthComparisonResponseSchema = reportResponseSchema(monthComparisonDataSchema)
+
 export function createSpendingByCategoryEndpoint(filters: ReportFilters) {
   return readEndpoint({
     method: 'GET',
@@ -167,6 +204,14 @@ export function createCashflowEndpoint(filters: ReportFilters) {
     method: 'GET',
     path: `/v1/reports/cashflow?${reportQuery(filters)}`,
     schema: cashflowResponseSchema,
+  })
+}
+
+export function createMonthComparisonEndpoint(filters: ReportFilters) {
+  return readEndpoint({
+    method: 'GET',
+    path: `/v1/reports/month-comparison?${reportQuery(filters)}`,
+    schema: monthComparisonResponseSchema,
   })
 }
 
@@ -210,7 +255,7 @@ export function createPortfolioPerformanceReportEndpoint(filters: ReportFilters)
   })
 }
 
-export type ReportSlug = 'spending-by-category' | 'cashflow' | 'sankey' | 'net-worth-history' | 'budget-vs-actual' | 'portfolio-performance'
+export type ReportSlug = 'spending-by-category' | 'cashflow' | 'month-comparison' | 'sankey' | 'net-worth-history' | 'budget-vs-actual' | 'portfolio-performance'
 
 /** Mirrors the API's dedicated `<report>.csv` routes (api/src/routes/v1/reports.ts) — same filter
  * query params, server-generated CSV body. Not a schema-validated JSON endpoint, so it's built for

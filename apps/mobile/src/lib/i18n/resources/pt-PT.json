@@ -3824,6 +3824,10 @@
     "sankey": {
       "label": "Sankey de fluxo de caixa",
       "description": "Do rendimento, através das categorias, até às contas"
+    },
+    "monthComparison": {
+      "label": "Comparar meses",
+      "description": "O que mudou entre dois meses, categoria a categoria"
     }
   },
   "reports": {
@@ -3952,6 +3956,22 @@
       "down": "Desceu",
       "flat": "Estável",
       "vsPriorPeriod": "vs. período anterior"
+    },
+    "monthComparison": {
+      "title": "Comparar meses",
+      "subtitle": "O que mudou entre dois meses, categoria a categoria.",
+      "baseMonth": "Mês",
+      "compareMonth": "Comparado com",
+      "metric": "Indicador",
+      "income": "Receitas",
+      "expenses": "Despesas",
+      "net": "Saldo",
+      "savingsRate": "Taxa de poupança",
+      "change": "Variação",
+      "category": "Categoria",
+      "loading": "A carregar a comparação de meses",
+      "emptyTitle": "Sem despesas em nenhum dos meses",
+      "emptyMessage": "Experimente outros dois meses ou verifique se as contas estão ligadas."
     }
   },
   "accountsOverview": {

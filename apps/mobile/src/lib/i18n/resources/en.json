@@ -3824,6 +3824,10 @@
     "sankey": {
       "label": "Cash flow Sankey",
       "description": "From income, through categories, into accounts"
+    },
+    "monthComparison": {
+      "label": "Compare months",
+      "description": "What changed between two months, category by category"
     }
   },
   "reports": {
@@ -3952,6 +3956,22 @@
       "down": "Down",
       "flat": "Flat",
       "vsPriorPeriod": "vs. prior period"
+    },
+    "monthComparison": {
+      "title": "Compare months",
+      "subtitle": "What changed between two months, category by category.",
+      "baseMonth": "Month",
+      "compareMonth": "Compared with",
+      "metric": "Metric",
+      "income": "Income",
+      "expenses": "Expenses",
+      "net": "Net",
+      "savingsRate": "Savings rate",
+      "change": "Change",
+      "category": "Category",
+      "loading": "Loading month comparison",
+      "emptyTitle": "No spending in either month",
+      "emptyMessage": "Try two other months, or check that accounts are connected."
     }
   },
   "accountsOverview": {

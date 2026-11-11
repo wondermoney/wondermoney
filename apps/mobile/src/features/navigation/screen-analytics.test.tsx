@@ -27,6 +27,7 @@ describe('resolveFeatureScreen', () => {
     ['/more/banking', 'bank_connections'],
     ['/more/banking/connect', 'bank_connect'],
     ['/reports/spending-by-category', 'report_spending_by_category'],
+    ['/reports/month-comparison', 'report_month_comparison'],
     ['/settings/profile/edit', 'settings_profile_edit'],
     ['/net-worth/history', 'net_worth_history'],
   ])('maps the static route %p to %p', (pathname, screen) => {

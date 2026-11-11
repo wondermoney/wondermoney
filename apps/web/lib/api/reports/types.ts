@@ -77,6 +77,45 @@ export interface CashflowPoint {
   savingsRate?: number | null;
 }
 
+/** One month's totals in `GET /v1/reports/month-comparison`. */
+export interface MonthComparisonTotals {
+  /** `YYYY-MM`. */
+  month: string;
+  income: number;
+  expenses: number;
+  net: number;
+  /** `(income - expenses) / income`; null when the month has no income. */
+  savingsRate: number | null;
+}
+
+/** One category's spending in both months. */
+export interface MonthComparisonCategoryRow {
+  categoryKey: string;
+  name: string;
+  color: string;
+  /** Spending in the base month. */
+  base: number;
+  /** Spending in the compare month. */
+  compare: number;
+  /** `base - compare`: positive when the category grew. */
+  delta: number;
+  /** `delta / compare` as a percentage; null when the compare month had no spending there. */
+  deltaPct: number | null;
+}
+
+/** Body of `GET /v1/reports/month-comparison`. */
+export interface MonthComparisonData {
+  base: MonthComparisonTotals;
+  compare: MonthComparisonTotals;
+  categories: MonthComparisonCategoryRow[];
+}
+
+/** The two months a comparison asks for, as `YYYY-MM` keys. */
+export interface MonthComparisonMonths {
+  base: string;
+  compare: string;
+}
+
 /** Graph shape for `GET /v1/reports/sankey`. */
 export interface SankeyData {
   nodes: SankeyNode[];

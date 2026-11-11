@@ -1,4 +1,4 @@
-import type { ReportFilters } from "./types";
+import type { MonthComparisonMonths, ReportFilters } from "./types";
 
 /**
  * Central query-key vocabulary for the reports domain.
@@ -12,6 +12,8 @@ export const reportsKeys = {
     [...reportsKeys.all, "spending-by-category", params] as const,
   cashflow: (params: ReportFilters) =>
     [...reportsKeys.all, "cashflow", params] as const,
+  monthComparison: (params: ReportFilters & MonthComparisonMonths) =>
+    [...reportsKeys.all, "month-comparison", params] as const,
   sankey: (params: ReportFilters) =>
     [...reportsKeys.all, "sankey", params] as const,
   netWorthHistory: (params: ReportFilters) =>
