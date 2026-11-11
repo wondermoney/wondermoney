@@ -10,6 +10,7 @@ let mockParams: { loanId?: string | string[] } = {}
 const mockUseLoans = jest.fn()
 const mockUseLoan = jest.fn()
 const mockUseRepayments = jest.fn()
+const mockUseProjection = jest.fn()
 const mockUseCandidates = jest.fn()
 const mockMutate = jest.fn()
 const mockMarkAuthoritative = jest.fn()
@@ -18,13 +19,14 @@ jest.mock('./use-loans', () => ({ useLoans: () => mockUseLoans() }))
 jest.mock('./use-loan-overview', () => ({ useLoanOverview: () => ({ data: undefined, refetch: jest.fn() }) }))
 jest.mock('./use-loan', () => ({ useLoan: (id: number | null) => mockUseLoan(id) }))
 jest.mock('./use-loan-repayments', () => ({ useLoanRepayments: (id: number | null) => mockUseRepayments(id) }))
+jest.mock('./use-loan-projection', () => ({ useLoanProjection: (id: number | null) => mockUseProjection(id) }))
 jest.mock('./use-loan-repayment-candidates', () => ({ useLoanRepaymentCandidates: (id: number | null) => mockUseCandidates(id) }))
 jest.mock('./use-loan-repayment-mutation', () => ({ classifyRepaymentWriteFailure: () => 'general', useLoanRepaymentMutation: () => ({ mutateAsync: mockMutate, isLoanPending: () => false, requiresAuthoritativeRefresh: () => false, markAuthoritativeRefresh: mockMarkAuthoritative }) }))
 jest.mock('./loans-screen', () => ({ LoansScreen: ({ onOpenLoan, onCreateLoan }: { onOpenLoan: (id: number) => void; onCreateLoan: () => void }) => { const Native = jest.requireActual<typeof import('react-native')>('react-native'); return <><Native.Pressable accessibilityRole="button" accessibilityLabel="Loan row" onPress={() => onOpenLoan(7)}><Native.Text>Loan row</Native.Text></Native.Pressable><Native.Pressable accessibilityRole="button" accessibilityLabel="Add" onPress={onCreateLoan}><Native.Text>Add</Native.Text></Native.Pressable></> } }))
 jest.mock('./loan-detail-screen', () => ({ LoanDetailScreen: ({ state, onBack, onEdit, repaymentWorkflow }: { state: { status: string; history?: { repayments?: { id: number }[] } }; onBack: () => void; onEdit: () => void; repaymentWorkflow?: { candidates: { status: string }; onResolveUnknown: () => Promise<boolean> } }) => { const Native = jest.requireActual<typeof import('react-native')>('react-native'); return <><Native.Text>{`${state.status}:${state.history?.repayments?.map((item) => item.id).join(',') ?? '-'}`}</Native.Text><Native.Text>{`candidates:${repaymentWorkflow?.candidates.status ?? '-'}`}</Native.Text><Native.Pressable accessibilityRole="button" accessibilityLabel="Back" onPress={onBack}><Native.Text>Back</Native.Text></Native.Pressable><Native.Pressable accessibilityRole="button" accessibilityLabel="Edit" onPress={onEdit}><Native.Text>Edit</Native.Text></Native.Pressable><Native.Pressable accessibilityRole="button" accessibilityLabel="Resolve repayment unknown" onPress={() => void repaymentWorkflow?.onResolveUnknown()} /></> } }))
 
 describe('loan routes', () => {
-  beforeEach(() => { mockPush.mockReset(); mockReplace.mockReset(); mockUseLoans.mockReset(); mockUseLoan.mockReset(); mockUseRepayments.mockReset(); mockUseCandidates.mockReset(); mockMutate.mockReset(); mockMarkAuthoritative.mockReset(); mockUseCandidates.mockReturnValue({ isAccessTransition: false, isLoading: false, data: { candidates: [] }, isRefreshFailure: false, refetch: jest.fn() }); mockParams = {} })
+  beforeEach(() => { mockPush.mockReset(); mockReplace.mockReset(); mockUseLoans.mockReset(); mockUseLoan.mockReset(); mockUseRepayments.mockReset(); mockUseProjection.mockReset(); mockUseCandidates.mockReset(); mockMutate.mockReset(); mockMarkAuthoritative.mockReset(); mockUseProjection.mockReturnValue({ isAccessTransition: false, isLoading: false, data: undefined, isRefreshFailure: false, isRefreshing: false, refetch: jest.fn() }); mockUseCandidates.mockReturnValue({ isAccessTransition: false, isLoading: false, data: { candidates: [] }, isRefreshFailure: false, refetch: jest.fn() }); mockParams = {} })
 
   it('opens nested loan detail from the More-owned list', async () => {
     mockUseLoans.mockReturnValue({ isAccessTransition: false, isLoading: false, data: { loans: [loanFixture] }, isRefreshFailure: false, refetch: jest.fn() })

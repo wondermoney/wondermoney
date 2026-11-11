@@ -58,6 +58,35 @@ export interface LoanSchedule {
   totalPaid: number;
 }
 
+export type LoanProjectionFrequency = "monthly" | "one-off";
+
+export interface LoanProjectionPoint {
+  month: number;
+  date: string;
+  baselineBalance: number;
+  withExtraBalance: number;
+}
+
+export interface LoanProjection {
+  paysOff: boolean;
+  reason: "PAYMENT_BELOW_INTEREST" | null;
+  payoffDate: string | null;
+  months: number | null;
+  totalInterest: number;
+  interestSaved: number;
+  monthsSaved: number;
+  aheadOrBehindMonths: number | null;
+  contractInterest: number;
+  contractMonths: number;
+  series: LoanProjectionPoint[];
+}
+
+export interface LoanProjectionFilters {
+  extra?: number;
+  frequency?: LoanProjectionFrequency;
+  startDate?: string;
+}
+
 export interface LoanOverview {
   totalOutstandingDebt: number;
   monthlyRepaymentTotal: number;

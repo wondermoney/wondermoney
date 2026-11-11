@@ -1,4 +1,4 @@
-import { createLoanEndpoint, createLoanRepaymentCandidatesEndpoint, createLoanRepaymentsEndpoint, createLoanWriteEndpoint, createDeleteLoanRepaymentEndpoint, createLinkLoanRepaymentEndpoint, createUpdateLoanRepaymentEndpoint, loanCreateEndpoint, loanCreateWriteSchema, loanRepaymentAllocationSchema, loanRepaymentCandidatesResponseSchema, loanRepaymentMutationResponseSchema, loanRepaymentsResponseSchema, loanResponseSchema, loansEndpoint, loansResponseSchema, loanWriteSchema, parseLoanId } from './loans-contract'
+import { createLoanEndpoint, createLoanProjectionEndpoint, createLoanRepaymentCandidatesEndpoint, createLoanRepaymentsEndpoint, createLoanWriteEndpoint, createDeleteLoanRepaymentEndpoint, createLinkLoanRepaymentEndpoint, createUpdateLoanRepaymentEndpoint, loanCreateEndpoint, loanCreateWriteSchema, loanProjectionResponseSchema, loanRepaymentAllocationSchema, loanRepaymentCandidatesResponseSchema, loanRepaymentMutationResponseSchema, loanRepaymentsResponseSchema, loanResponseSchema, loansEndpoint, loansResponseSchema, loanWriteSchema, parseLoanId } from './loans-contract'
 import { loanFixture, repaymentCandidateFixture, repaymentFixture } from './test-fixtures'
 
 describe('loan contracts', () => {
@@ -7,6 +7,25 @@ describe('loan contracts', () => {
     expect(createLoanEndpoint(7)).toMatchObject({ method: 'GET', path: '/v1/loan/7' })
     expect(createLoanRepaymentsEndpoint(7)).toMatchObject({ method: 'GET', path: '/v1/loan/7/repayments' })
     expect(JSON.stringify([loansEndpoint, createLoanEndpoint(7), createLoanRepaymentsEndpoint(7)])).not.toContain('overview')
+  })
+
+  it('pins the payoff projection endpoint and parses its response', () => {
+    expect(createLoanProjectionEndpoint(7)).toMatchObject({ method: 'GET', path: '/v1/loan/7/projection' })
+    expect(createLoanProjectionEndpoint(7, 100)).toMatchObject({ method: 'GET', path: '/v1/loan/7/projection?extra=100' })
+    const projection = {
+      aheadOrBehindMonths: 4,
+      contractInterest: 100,
+      contractMonths: 12,
+      interestSaved: 40,
+      months: 8,
+      monthsSaved: 4,
+      payoffDate: '2027-05-15',
+      paysOff: true,
+      reason: null,
+      series: [{ baselineBalance: 1000, date: '2026-01-15T00:00:00.000Z', month: 0, withExtraBalance: 1000 }],
+      totalInterest: 60,
+    }
+    expect(loanProjectionResponseSchema.parse({ projection })).toEqual({ projection })
   })
 
   it('pins the descriptive PATCH to the canonical loan response', () => {

@@ -55,6 +55,8 @@ export const API_ERROR_CODE = {
   TRANSACTION_HAS_LOAN_REPAYMENT: "transaction_has_loan_repayment",
   /** The loan lacks the principal, rate or term a contract schedule needs (422). */
   LOAN_SCHEDULE_UNAVAILABLE: "loan_schedule_unavailable",
+  /** The loan lacks the principal, rate or term a payoff projection needs (422). */
+  LOAN_PROJECTION_UNAVAILABLE: "loan_projection_unavailable",
   /** A split transaction cannot be linked as a loan repayment until its split is removed (409). */
   TRANSACTION_IS_SPLIT: "transaction_is_split",
   UNAUTHORIZED: "unauthorized",

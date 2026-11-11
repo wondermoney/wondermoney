@@ -2,10 +2,11 @@ import { type Href, useLocalSearchParams, usePreventRemove, useRouter } from 'ex
 
 import { ApiError } from '@/lib/api/errors'
 
-import { LoanDetailScreen, type LoanDetailViewState } from './loan-detail-screen'
+import { LoanDetailScreen, type LoanDetailViewState, type ProjectionState } from './loan-detail-screen'
 import { parseLoanId } from './loans-contract'
-import { mapLoan, mapRepayments } from './loans-view-model'
+import { mapLoan, mapLoanProjection, mapRepayments } from './loans-view-model'
 import { useLoan } from './use-loan'
+import { useLoanProjection } from './use-loan-projection'
 import { useLoanRepayments } from './use-loan-repayments'
 import { useLoanRepaymentCandidates } from './use-loan-repayment-candidates'
 import { classifyRepaymentWriteFailure, useLoanRepaymentMutation } from './use-loan-repayment-mutation'
@@ -15,6 +16,7 @@ export function LoanDetailRoute() {
   const loanId = parseLoanId(params.loanId)
   const loanQuery = useLoan(loanId)
   const repaymentsQuery = useLoanRepayments(loanId)
+  const projectionQuery = useLoanProjection(loanId)
   const candidatesQuery = useLoanRepaymentCandidates(loanId)
   const repaymentMutation = useLoanRepaymentMutation()
   const router = useRouter()
@@ -22,7 +24,7 @@ export function LoanDetailRoute() {
   usePreventRemove(repaymentPending)
   let state: LoanDetailViewState
   if (loanQuery.isInvalidId) state = { status: 'invalid-id' }
-  else if (loanQuery.isAccessTransition || repaymentsQuery.isAccessTransition || candidatesQuery.isAccessTransition) state = { status: 'access-transition' }
+  else if (loanQuery.isAccessTransition || repaymentsQuery.isAccessTransition || projectionQuery.isAccessTransition || candidatesQuery.isAccessTransition) state = { status: 'access-transition' }
   else if (loanQuery.isLoading) state = { status: 'loading' }
   else if (loanQuery.data) {
     let history: Extract<LoanDetailViewState, { status: 'loaded' }>['history']
@@ -30,11 +32,16 @@ export function LoanDetailRoute() {
     else if (repaymentsQuery.data) history = { status: repaymentsQuery.isRefreshFailure ? 'refresh-error' : 'loaded', repayments: mapRepayments(repaymentsQuery.data) }
     else if (repaymentsQuery.error instanceof ApiError && repaymentsQuery.error.code === 'invalid-response') history = { status: 'invalid-response' }
     else history = { status: 'error' }
+    let projection: ProjectionState
+    if (projectionQuery.isLoading) projection = { status: 'loading' }
+    else if (projectionQuery.data) projection = { status: 'loaded', projection: mapLoanProjection(projectionQuery.data.projection) }
+    else projection = { status: 'error' }
     state = {
       status: loanQuery.isRefreshFailure ? 'refresh-error' : 'loaded',
       loan: mapLoan(loanQuery.data.loan),
       history,
-      refreshing: loanQuery.isRefreshing || repaymentsQuery.isRefreshing,
+      projection,
+      refreshing: loanQuery.isRefreshing || repaymentsQuery.isRefreshing || projectionQuery.isRefreshing,
     }
   } else if (loanQuery.isNotFound) state = { status: 'not-found' }
   else if (loanQuery.error instanceof ApiError && loanQuery.error.code === 'invalid-response') state = { status: 'invalid-response' }
@@ -50,7 +57,7 @@ export function LoanDetailRoute() {
     if (authoritative && loanId !== null) repaymentMutation.markAuthoritativeRefresh(loanId)
     return authoritative
   }
-  return <LoanDetailScreen state={state} onBack={() => router.replace('/loans')} onEdit={() => { if (loanId !== null) router.push({ pathname: '/loans/[loanId]/edit', params: { loanId: String(loanId) } } as Href) }} onRefresh={async () => { await Promise.all([loanQuery.refetch(), repaymentsQuery.refetch(), candidatesQuery.refetch()]) }} repaymentWorkflow={{
+  return <LoanDetailScreen state={state} onBack={() => router.replace('/loans')} onEdit={() => { if (loanId !== null) router.push({ pathname: '/loans/[loanId]/edit', params: { loanId: String(loanId) } } as Href) }} onRefresh={async () => { await Promise.all([loanQuery.refetch(), repaymentsQuery.refetch(), projectionQuery.refetch(), candidatesQuery.refetch()]) }} repaymentWorkflow={{
     candidates,
     pending: repaymentPending,
     refreshRequired: loanId !== null && repaymentMutation.requiresAuthoritativeRefresh(loanId),

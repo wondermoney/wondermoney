@@ -21,6 +21,7 @@ import {
   estimateRepaymentAllocation,
   validateRepaymentAllocation,
 } from '@service/loan/loan-calculation.service';
+import { buildLoanProjection } from '@service/loan/loan-projection.service';
 import { scoreLoanRepaymentCandidate } from '@service/loan/loan-repayment-matching.service';
 import { LoanAllocationSource, LoanAmortizationMethod, LoanPaymentFrequency, LoanRateType, LoanStatus } from '@service/loan/loan-types';
 import { isSplit } from '@service/transaction/transaction-split.service';
@@ -32,6 +33,7 @@ import {
   deleteLoanRepaymentSchema,
   linkLoanRepaymentSchema,
   loanIdParamSchema,
+  loanProjectionSchema,
   repaymentCandidatesSchema,
   updateLoanRepaymentSchema,
   updateLoanSchema,
@@ -179,6 +181,48 @@ export async function getLoanOverview(req: Request, res: Response) {
       unconvertedLoanCount: converted.length - totals.length,
     },
   });
+}
+
+export async function getLoanProjection(req: Request, res: Response) {
+  const { params: { loanId }, query } = await zParse(loanProjectionSchema, req);
+  const { appuser, tenant } = await getLoanRequestContext(req);
+  const loan = await loadOwnedLoan(loanId, appuser, tenant);
+  if (!loan) return res.sendStatus(404);
+
+  // The contract terms the schedule and the projection both need.
+  const principal = loan.originalPrincipal ?? loan.openingPrincipalBalance;
+  const annualInterestRateBps = loan.annualInterestRateBps;
+  const termMonths = loan.termMonths;
+  const missing = (reason: string) =>
+    new UnprocessableEntityError(
+      'The loan needs a principal, an interest rate and a term to project a payoff',
+      ERROR_CODE.LOAN_PROJECTION_UNAVAILABLE,
+      { reason },
+    );
+  if (annualInterestRateBps == null) throw missing('MISSING_INTEREST_RATE');
+  if (termMonths == null) throw missing('MISSING_TERM');
+  if (!(principal > 0)) throw missing('MISSING_PRINCIPAL');
+
+  const firstPaymentDate =
+    loan.firstPaymentDate ??
+    addMonthsClamped(loan.openingBalanceDate, 1, loan.paymentDayOfMonth ?? loan.openingBalanceDate.getUTCDate());
+
+  const now = new Date();
+  const projection = buildLoanProjection({
+    amortizationMethod: loan.amortizationMethod,
+    annualInterestRateBps,
+    contractPayment: loan.regularPaymentAmount ?? undefined,
+    extraPayment: query.extra,
+    firstPaymentDate,
+    frequency: query.frequency,
+    now,
+    originalPrincipal: principal,
+    outstandingPrincipal: await currentOutstandingPrincipal(loan),
+    startDate: query.startDate ?? now,
+    termMonths,
+  });
+
+  return res.json({ projection });
 }
 
 export async function getLoanSchedule(req: Request, res: Response) {
@@ -460,17 +504,21 @@ function buildSuggestedAllocation(totalPaymentAmount: number, loan: Loan, outsta
   };
 }
 
-async function enrichLoan(loan: Loan) {
+async function currentOutstandingPrincipal(loan: Loan): Promise<number> {
   const [repaymentLinks, adjustments] = await Promise.all([
     DI.em.find(LoanRepaymentLink, { deletedAt: undefined, loanKey: loan }),
     DI.em.find(LoanAdjustment, { deletedAt: undefined, loanKey: loan }),
   ]);
 
-  const outstandingPrincipal = calculateOutstandingPrincipalWithAdjustments({
+  return calculateOutstandingPrincipalWithAdjustments({
     adjustments: adjustments.map((adj) => ({ amount: adj.amount, effectiveDate: adj.effectiveDate, type: adj.type })),
     openingPrincipalBalance: loan.openingPrincipalBalance,
     principalRepayments: repaymentLinks.map((link) => ({ amount: link.principalAmount, effectiveDate: link.paymentDate })),
   });
+}
+
+async function enrichLoan(loan: Loan) {
+  const outstandingPrincipal = await currentOutstandingPrincipal(loan);
 
   const progress = calculateLoanProgress({
     openingPrincipalBalance: loan.openingPrincipalBalance,

@@ -1590,7 +1590,14 @@
     "loanType": "Loan type",
     "statusLabel": "Status",
     "description": "Description",
-    "repaymentsTitle": "Repayments"
+    "repaymentsTitle": "Repayments",
+    "payoff": "Payoff projection",
+    "payoffDate": "Projected payoff",
+    "monthsSaved": "Months saved",
+    "interestSaved": "Interest saved",
+    "never": "Does not pay off",
+    "payoffLoading": "Loading payoff projection",
+    "payoffUnavailable": "The payoff projection is unavailable right now."
   },
   "loanRepayment": {
     "title": "Repayment matching",

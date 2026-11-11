@@ -67,6 +67,17 @@ export const loanIdParamSchema = z.object({
   }),
 });
 
+export const loanProjectionSchema = z.object({
+  params: z.object({
+    loanId: positiveIntId,
+  }),
+  query: z.object({
+    extra: finiteAmount.refine((value) => value >= 0).optional().default(0),
+    frequency: z.enum(['monthly', 'one-off']).optional().default('monthly'),
+    startDate: dateSchema.optional(),
+  }),
+});
+
 const repaymentAllocationSchema = z.object({
   feeAmount: finiteAmount.refine((value) => value >= 0),
   interestAmount: finiteAmount.refine((value) => value >= 0),

@@ -1590,7 +1590,14 @@
     "loanType": "Tipo de préstamo",
     "statusLabel": "Estado",
     "description": "Descripción",
-    "repaymentsTitle": "Pagos"
+    "repaymentsTitle": "Pagos",
+    "payoff": "Proyección de liquidación",
+    "payoffDate": "Liquidación prevista",
+    "monthsSaved": "Meses ahorrados",
+    "interestSaved": "Intereses ahorrados",
+    "never": "No se liquida",
+    "payoffLoading": "Cargando la proyección de liquidación",
+    "payoffUnavailable": "La proyección de liquidación no está disponible en este momento."
   },
   "loanRepayment": {
     "title": "Correspondencia de pagos",

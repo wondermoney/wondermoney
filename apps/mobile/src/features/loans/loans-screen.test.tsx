@@ -98,6 +98,29 @@ describe('loan screens', () => {
     expect(view.getByTestId('loan-payoff-beyond-contract')).toHaveTextContent(/382 months/)
   })
 
+  it('shows the projected payoff, months saved and interest saved', async () => {
+    const loan = mapLoan(loanFixture)
+    const view = await renderScreen(
+      <LoanDetailScreen
+        state={{
+          status: 'loaded',
+          loan,
+          history: { status: 'loaded', repayments: [] },
+          projection: {
+            status: 'loaded',
+            projection: { paysOff: true, payoffDate: '2027-09-15', monthsSaved: 4, interestSaved: 1234.56 },
+          },
+        }}
+        onBack={jest.fn()}
+        onRefresh={jest.fn()}
+      />,
+    )
+    expect(view.getByText('Payoff projection')).toBeOnTheScreen()
+    expect(view.getByText('Sep 15, 2027')).toBeOnTheScreen()
+    expect(view.getByText('4 months')).toBeOnTheScreen()
+    expect(view.getByText('€1,234.56')).toBeOnTheScreen()
+  })
+
   it('does not offer a dead retry for an invalid route id', async () => {
     const view = await renderScreen(<LoanDetailScreen state={{ status: 'invalid-id' }} onBack={jest.fn()} onRefresh={jest.fn()} />)
     expect(view.queryByRole('button', { name: 'Retry' })).not.toBeOnTheScreen()
