@@ -1,0 +1,46 @@
+---
+title: Tokens de API
+description: Da a un script, hoja de cálculo o panel acceso de lectura o escritura a tus finanzas sin compartir tu contraseña.
+---
+
+Un token de API permite que un script, una hoja de cálculo, un panel doméstico o una herramienta de IA use la API de WonderMoney como tú. Es una alternativa a iniciar sesión con contraseña: la herramienta envía el token en una cabecera `Authorization: Bearer`.
+
+Un token no es una cuenta separada. Ve los mismos datos del hogar que tu sesión —incluidas tus cuentas privadas, y solo las que tú puedes ver— y queda ligado al hogar en el que se creó.
+
+## Crear un token
+
+1. Abre **Ajustes → Tokens de API**.
+2. Dale un nombre que reconozcas más tarde, como «Panel de casa».
+3. Elige los permisos y cuánto tiempo debe durar.
+4. Selecciona **Crear token** y copia el valor inmediatamente.
+
+El token se muestra una sola vez. WonderMoney guarda solo un hash SHA-256, así que nadie —incluido el soporte— puede mostrarlo de nuevo. Si lo pierdes, revócalo y crea otro.
+
+Crear un token exige un inicio de sesión reciente. Si usas autenticación de dos factores, introduce también el código del autenticador.
+
+## Permisos
+
+- **Lectura** permite `GET` en las rutas de datos: cuentas, transacciones, categorías, presupuestos, objetivos, informes, patrimonio neto, carteras y las demás superficies de lectura.
+- **Escritura** permite crear y actualizar transacciones, cuentas, categorías, presupuestos y objetivos. La escritura también permite leer esos recursos, porque un script que escribe una transacción normalmente la lee después.
+
+Ningún permiso permite borrar, importar, recalcular, gestionar el hogar o la conexión bancaria, ni gestionar tokens de API. Un token nunca llega a `/api/auth`, `/v1/admin`, `/v1/user`, `/v1/household` ni `/v1/banking`.
+
+## Caducidad
+
+Todos los tokens caducan. Elige 30, 90 o 365 días. Si el correo está configurado en el servidor, WonderMoney envía un recordatorio siete días antes de que caduque un token. Un token caducado se rechaza con `401 Unauthorized`.
+
+## Revocar un token
+
+Selecciona **Revocar** junto al token en **Ajustes → Tokens de API**. La revocación es inmediata: la siguiente petición con ese token recibe `401 Unauthorized`.
+
+Revoca un token cuando un script ya no lo necesite, cuando se pierda un portátil o dispositivo, o cuando sospeches que el valor quedó expuesto.
+
+## Límites de peticiones
+
+El tráfico de tokens tiene su propio presupuesto, contado por token. Una petición por encima del límite recibe `429 Too Many Requests` con una cabecera `Retry-After`. El presupuesto es independiente de tu sesión en el navegador, así que un script ocupado no ralentiza la aplicación para ti.
+
+## Páginas relacionadas
+
+- [Autenticación de dos factores](/es/docs/settings-security-privacy/two-factor-authentication)
+- [Privacidad de datos](/es/docs/settings-security-privacy/data-privacy)
+- [Ajustes, seguridad y privacidad](/es/docs/settings-security-privacy)

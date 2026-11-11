@@ -3441,6 +3441,44 @@
         }
       }
     },
+    "/v1/user/api-tokens": {
+      "get": {
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "post": {
+        "description": "",
+        "responses": {
+          "201": {
+            "description": "Created"
+          }
+        }
+      }
+    },
+    "/v1/user/api-tokens/{id}": {
+      "delete": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        }
+      }
+    },
     "/v1/user/me/email-notification-preferences": {
       "get": {
         "description": "",
@@ -3810,12 +3848,20 @@
         "in": "header",
         "name": "x-api-key",
         "description": "Admin API key for admin endpoints"
+      },
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Personal API token (`wm_pat_...`) from Settings → API tokens"
       }
     }
   },
   "security": [
     {
       "cookieAuth": []
+    },
+    {
+      "bearerAuth": []
     }
   ]
 }

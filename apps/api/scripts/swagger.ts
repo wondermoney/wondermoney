@@ -49,9 +49,14 @@ const doc = {
         name: 'x-api-key',
         description: 'Admin API key for admin endpoints',
       },
+      bearerAuth: {
+        type: 'http',
+        scheme: 'bearer',
+        description: 'Personal API token (`wm_pat_...`) from Settings → API tokens',
+      },
     },
   },
-  security: [{ cookieAuth: [] }],
+  security: [{ cookieAuth: [] }, { bearerAuth: [] }],
 };
 
 const outputFile = './src/generated/swagger.json';

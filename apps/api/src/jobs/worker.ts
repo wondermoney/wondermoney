@@ -34,6 +34,12 @@ import {
 } from '@app/jobs/analytics-outbox.queue';
 import { handleAnalyticsOutboxJob } from '@app/jobs/analytics-outbox.worker';
 import {
+  API_TOKEN_EXPIRY_CRON,
+  API_TOKEN_EXPIRY_QUEUE,
+  ensureApiTokenExpiryQueue,
+  scheduleApiTokenExpiryJob,
+} from '@app/jobs/api-token-expiry.queue';
+import {
   ASSET_PRICE_REFRESH_CRON,
   ASSET_PRICE_REFRESH_QUEUE,
   ensureAssetPriceRefreshQueue,
@@ -337,6 +343,7 @@ export const createWorker = (deps: WorkerDeps = {}) => {
     await ensureHistoricalAssetPriceBackfillQueue(boss);
     await ensureCertificadoAforroRateSyncQueue(boss);
     await ensureBudgetYearExtensionQueue(boss);
+    await ensureApiTokenExpiryQueue(boss);
     await ensureWorkerHeartbeatQueue(boss);
     await ensureInstanceHeartbeatQueue(boss);
     // monthlyStory ships unconditionally (no feature flag), so its queues must always exist —
@@ -378,6 +385,7 @@ export const createWorker = (deps: WorkerDeps = {}) => {
       await schedulePortfolioSnapshotAutoJob(boss);
       await scheduleCertificadoAforroRateSyncAutoJob(boss);
       await scheduleBudgetYearExtensionJob(boss);
+      await scheduleApiTokenExpiryJob(boss);
       // Unschedule-then-conditionally-schedule keeps the schedule from drifting
       // when the heartbeat URL is added or removed between deploys.
       await unscheduleWorkerHeartbeatJob(boss);
@@ -669,6 +677,18 @@ export const createWorker = (deps: WorkerDeps = {}) => {
         async (job) => {
           const { handleBudgetYearExtensionJob } = await import('@app/jobs/budget-year-extension.worker');
           await runInRequestContext(() => handleBudgetYearExtensionJob(job, { logger: log }));
+        },
+      ),
+    );
+
+    await boss.work<Record<string, never>>(
+      API_TOKEN_EXPIRY_QUEUE,
+      workCronJobs<Job<Record<string, never>>>(
+        API_TOKEN_EXPIRY_QUEUE,
+        { checkinMarginMinutes: 120, maxRuntimeMinutes: 30, monitorSlug: API_TOKEN_EXPIRY_QUEUE, schedule: API_TOKEN_EXPIRY_CRON },
+        async (job) => {
+          const { handleApiTokenExpiryReminderJob } = await import('@app/jobs/api-token-expiry.worker');
+          await runInRequestContext(() => handleApiTokenExpiryReminderJob(job, { logger: log }));
         },
       ),
     );

@@ -55,6 +55,17 @@ export function tenantHttp(mountPath: string, router: Router, options: { enqueue
         put: (path: string) => agent.put(path).set(TEST_USER_HEADER, id),
       };
     },
+    /** A personal API token bearer, resolved by the real `requireAuth` against the database. */
+    asToken(token: string) {
+      const auth = { Authorization: `Bearer ${token}` };
+      return {
+        delete: (path: string) => agent.delete(path).set(auth),
+        get: (path: string) => agent.get(path).set(auth),
+        patch: (path: string) => agent.patch(path).set(auth),
+        post: (path: string) => agent.post(path).set(auth),
+        put: (path: string) => agent.put(path).set(auth),
+      };
+    },
   };
 }
 

@@ -24,6 +24,7 @@ import { useFeature } from "@/lib/api/instance/useInstance";
 import { useHydrated } from "@/lib/utils/useHydrated";
 
 const Security = dynamic(() => import("@/components/settings/Security"));
+const ApiTokens = dynamic(() => import("@/components/settings/ApiTokens"));
 const Privacy = dynamic(() => import("@/components/settings/Privacy"));
 const Connections = dynamic(
   () => import("@/components/settings/Connections/Connections"),
@@ -47,6 +48,7 @@ const Notifications = dynamic(
 const tabs = [
   { name: "profile", label: "navigation.profile", Component: Profile },
   { name: "security", label: "navigation.security", Component: Security },
+  { name: "api-tokens", label: "navigation.api-tokens", Component: ApiTokens },
   { name: "privacy", label: "navigation.privacy", Component: Privacy },
   {
     name: "bank-provider",
@@ -98,7 +100,7 @@ const tabs = [
 const TAB_GROUPS: readonly { label: string; tabs: readonly string[] }[] = [
   {
     label: "navigation.settings-group-account",
-    tabs: ["profile", "security", "privacy", "household"],
+    tabs: ["profile", "security", "api-tokens", "privacy", "household"],
   },
   {
     label: "navigation.settings-group-money",

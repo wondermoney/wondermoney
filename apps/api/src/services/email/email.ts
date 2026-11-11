@@ -304,6 +304,43 @@ export async function sendAccountSyncEmail(to: { email: string; name?: string },
   return sendRenderedEmail({ headers: {}, html: rendered.html, subject: rendered.subject, text: rendered.text, to });
 }
 
+const API_TOKEN_EXPIRY_COPY = {
+  EN: {
+    body: (name: string, tokenName: string, expiresOn: string, brand: string) =>
+      `Hi ${name},<p>The API token <strong>${tokenName}</strong> you created in ${brand} expires on ${expiresOn}.</p><p>If a script, spreadsheet or dashboard uses it, create a replacement in Settings → API tokens before then. The old token stops working on its expiry date.</p><p>If you no longer need it, you can revoke it now in the same place.</p>`,
+    subject: (brand: string) => `Your ${brand} API token expires soon`,
+    text: (name: string, tokenName: string, expiresOn: string, brand: string) =>
+      `Hi ${name},\n\nThe API token "${tokenName}" you created in ${brand} expires on ${expiresOn}.\n\nIf a script, spreadsheet or dashboard uses it, create a replacement in Settings -> API tokens before then. The old token stops working on its expiry date.\n\nIf you no longer need it, you can revoke it now in the same place.`,
+  },
+  PT: {
+    body: (name: string, tokenName: string, expiresOn: string, brand: string) =>
+      `Olá ${name},<p>O token de API <strong>${tokenName}</strong> que criou na ${brand} expira a ${expiresOn}.</p><p>Se um script, folha de cálculo ou dashboard o utiliza, crie um substituto em Definições → Tokens de API antes dessa data. O token antigo deixa de funcionar no dia em que expira.</p><p>Se já não precisa dele, pode revogá-lo agora no mesmo sítio.</p>`,
+    subject: (brand: string) => `O seu token de API da ${brand} expira em breve`,
+    text: (name: string, tokenName: string, expiresOn: string, brand: string) =>
+      `Olá ${name},\n\nO token de API "${tokenName}" que criou na ${brand} expira a ${expiresOn}.\n\nSe um script, folha de cálculo ou dashboard o utiliza, crie um substituto em Definições -> Tokens de API antes dessa data. O token antigo deixa de funcionar no dia em que expira.\n\nSe já não precisa dele, pode revogá-lo agora no mesmo sítio.`,
+  },
+} as const;
+
+/** Seven-day warning that a personal API token is about to expire. */
+export function sendApiTokenExpiryEmail(
+  to: { email: string; name?: string },
+  data: { expiresAt: Date; language: LANGUAGE; tokenName: string },
+) {
+  const brand = instanceName();
+  const lang = toRenderLang(data.language);
+  const copy = API_TOKEN_EXPIRY_COPY[lang === 'pt' ? 'PT' : 'EN'];
+  const name = to.name ?? to.email.split('@')[0] ?? '';
+  const tokenName = escapeHtml(data.tokenName);
+  const expiresOn = data.expiresAt.toISOString().slice(0, 10);
+  return sendRenderedEmail({
+    headers: {},
+    html: copy.body(escapeHtml(name), tokenName, expiresOn, escapeHtml(brand)),
+    subject: copy.subject(brand),
+    text: copy.text(name, data.tokenName, expiresOn, brand),
+    to,
+  });
+}
+
 export function sendPasswordResetEmail(to: { email: string; name?: string }, resetUrl: string) {
   const name = to.name ?? to.email.split('@')[0] ?? '';
   const brand = instanceName();

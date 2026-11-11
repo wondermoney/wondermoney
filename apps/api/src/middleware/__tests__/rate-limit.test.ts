@@ -33,14 +33,25 @@ const openServers: Server[] = [];
  * Mount `limiter` on a throwaway app and start listening. These cases fire hundreds of
  * requests, so each app gets one long-lived server rather than one per request.
  */
-function buildApp(limiter: RequestHandler, authenticateAs?: string): Server {
+function buildApp(
+  limiter: RequestHandler,
+  authenticateAs?: string,
+  apiToken?: { apiTokenKey: number; scopes: ('read' | 'write')[] },
+): Server {
   const app = express();
   // Mirrors app.ts, and lets the tests drive `req.ip` through X-Forwarded-For.
   app.set('trust proxy', true);
+  if (apiToken !== undefined) {
+    // Stands in for `requireAuth`'s personal-token branch.
+    app.use((req, _res, next) => {
+      req.apiToken = apiToken;
+      next();
+    });
+  }
   if (authenticateAs !== undefined) {
     // Stands in for `requireAuth`: only a verified better-auth session ever populates this.
     app.use((req, _res, next) => {
-      req.authUser = { session: { id: authenticateAs }, user: { email: `${authenticateAs}@example.com`, emailVerified: true, id: authenticateAs } };
+      req.authUser = { session: { createdAt: new Date(), id: authenticateAs }, user: { email: `${authenticateAs}@example.com`, emailVerified: true, id: authenticateAs } };
       next();
     });
   }
@@ -156,6 +167,61 @@ describe('rate-limit families', () => {
 
       // Same limiter instance, same source IP, different verified subject.
       await request(quiet).post('/thing').expect(200);
+    });
+  });
+
+  describe('personal API tokens', () => {
+    it('has its own token-scoped family', async () => {
+      const { RATE_LIMIT_FAMILIES } = await loadRateLimitModule(PRODUCTION_ENV);
+
+      expect(RATE_LIMIT_FAMILIES.apiToken.scope).toBe('token');
+      expect(RATE_LIMIT_FAMILIES.apiToken.relaxable).toBe(true);
+    });
+
+    it('keys the bucket on the token, not the owner or the address', async () => {
+      const { buildRateLimitKey } = await loadRateLimitModule(PRODUCTION_ENV);
+      const req = {
+        apiToken: { apiTokenKey: 7, scopes: ['read'] },
+        authUser: { user: { id: 'sub-123' } },
+        ip: '203.0.113.5',
+      } as unknown as Request;
+
+      expect(buildRateLimitKey(req, 'token')).toBe('t:7');
+    });
+
+    it('returns 429 with Retry-After once a token exhausts its budget', async () => {
+      const { createRateLimiter, RATE_LIMIT_FAMILIES } = await loadRateLimitModule(PRODUCTION_ENV);
+      // The family ceiling is a code constant sized for real traffic; lower it for this test.
+      const families = RATE_LIMIT_FAMILIES as unknown as Record<string, { limit: number }>;
+      const apiTokenFamily = families['apiToken'];
+      if (!apiTokenFamily) throw new Error('apiToken family is missing');
+      apiTokenFamily.limit = 2;
+      const limiter = createRateLimiter({ family: 'apiToken' });
+      const app = buildApp(limiter, undefined, { apiTokenKey: 7, scopes: ['read'] });
+
+      await request(app).get('/thing').expect(200);
+      await request(app).get('/thing').expect(200);
+      const blocked = await request(app).get('/thing').expect(429);
+
+      expect(blocked.headers['retry-after']).toBeDefined();
+      expect(Number(blocked.headers['retry-after'])).toBeGreaterThan(0);
+      expect(blocked.body).toMatchObject({ family: 'apiToken' });
+    });
+
+    it('gives a second token its own budget', async () => {
+      const { createRateLimiter, RATE_LIMIT_FAMILIES } = await loadRateLimitModule(PRODUCTION_ENV);
+      const families = RATE_LIMIT_FAMILIES as unknown as Record<string, { limit: number }>;
+      const apiTokenFamily = families['apiToken'];
+      if (!apiTokenFamily) throw new Error('apiToken family is missing');
+      apiTokenFamily.limit = 2;
+      const limiter = createRateLimiter({ family: 'apiToken' });
+
+      const first = buildApp(limiter, undefined, { apiTokenKey: 1, scopes: ['read'] });
+      const second = buildApp(limiter, undefined, { apiTokenKey: 2, scopes: ['read'] });
+
+      await drain(first, 3);
+      const response = await request(second).get('/thing');
+      expect(response.status).toBe(200);
     });
   });
 

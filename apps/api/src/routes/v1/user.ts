@@ -1,5 +1,6 @@
 import express from 'express';
 
+import { createApiTokenController, listApiTokens, revokeApiToken } from '@controller/api-token';
 import { downloadDataExport, getDataExport, listDataExports, startDataExport } from '@controller/data-export';
 import { commitDataRestore, getDataRestore, listDataRestores, startDataRestore, validateDataRestore } from '@controller/data-restore';
 import { getEmailNotificationPreferences, patchEmailNotificationPreferences } from '@controller/email-notifications';
@@ -17,11 +18,18 @@ import {
 } from '@controller/user';
 import { getPreferences, patchPreferences } from '@controller/user-preferences';
 import { dataExportRateLimit, dataRestoreRateLimit } from '@middleware/rate-limit';
+import { requireSensitiveSession } from '@middleware/sensitive-session';
 
 const router = express.Router();
 
 router.delete('/me', deleteCurrentUserAccount);
 router.get('/me/profile', getCurrentUserProfile);
+// Personal API tokens. Registered before `/:userId` (single path segment, would otherwise
+// shadow it). Tokens themselves can never reach this mount: the API-token scope allowlist
+// excludes `/v1/user`, and `requireSensitiveSession` rejects a token bearer explicitly.
+router.get('/api-tokens', listApiTokens);
+router.post('/api-tokens', requireSensitiveSession, createApiTokenController);
+router.delete('/api-tokens/:id', revokeApiToken);
 router.get('/me/email-notification-preferences', getEmailNotificationPreferences);
 router.patch('/me/email-notification-preferences', patchEmailNotificationPreferences);
 router.get('/me/preferences', getPreferences);

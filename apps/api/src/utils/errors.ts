@@ -64,6 +64,14 @@ export const ERROR_CODE = {
   DEMO_READ_ONLY: 'demo_read_only',
   /** A per-user Enable Banking credential is missing, invalid or undecryptable. */
   BANK_CREDENTIAL_INVALID: 'bank_credential_invalid',
+  /** A personal API token lacks the scope this route needs (403). */
+  API_TOKEN_SCOPE_REQUIRED: 'api_token_scope_required',
+  /** Creating a personal API token from a session older than the freshness window (403). Sign in again. */
+  SESSION_NOT_FRESH: 'session_not_fresh',
+  /** Creating a personal API token for a user with TOTP enabled, without a code (403). */
+  TOTP_REQUIRED: 'totp_required',
+  /** The submitted TOTP code was wrong or expired (403). */
+  INVALID_TOTP: 'invalid_totp',
   /** Route is household-owner-only and the caller is a member. */
   HOUSEHOLD_OWNER_REQUIRED: 'household_owner_required',
   /** Joining a household: it already has its two members (409). */

@@ -227,6 +227,18 @@ const auth = betterAuth({
 export const authHandler = toNodeHandler(auth);
 
 /**
+ * Re-verify the signed-in user's TOTP code.
+ *
+ * better-auth's `/two-factor/verify-totp` endpoint accepts a full session as well as the
+ * intermediate sign-in cookie: with a session it checks the submitted code against the
+ * stored secret and rejects it with an `UNAUTHORIZED` APIError when wrong. That is exactly
+ * the revalidation a sensitive action needs, so we reuse it instead of re-implementing TOTP.
+ */
+export const verifyTotpForSession = async (headers: IncomingHttpHeaders, code: string): Promise<void> => {
+  await auth.api.verifyTOTP({ body: { code }, headers: fromNodeHeaders(headers) });
+};
+
+/**
  * Portable-typed shape for the authenticated user, decoupled from better-auth's
  * internal (non-portable) inferred session type — see the module comment above.
  */
@@ -236,6 +248,8 @@ export interface AuthContext {
 }
 
 export interface AuthedSession {
+  /** better-auth session creation time; `requireSensitiveSession` uses it as the freshness clock. */
+  createdAt: Date;
   id: string;
 }
 
@@ -261,7 +275,7 @@ export const getAuthSession = async (headers: IncomingHttpHeaders): Promise<Auth
   const result = await auth.api.getSession({ headers: fromNodeHeaders(headers) });
   if (!result) return null;
   return {
-    session: { id: result.session.id },
+    session: { createdAt: result.session.createdAt, id: result.session.id },
     user: {
       email: result.user.email,
       emailVerified: result.user.emailVerified,

@@ -58,8 +58,10 @@ interface RateLimitFamily {
    * `identity` keys on the authenticated better-auth user id (or the app user key) and only
    * falls back to IP.
    * `ip` always keys on the source address — correct for unauthenticated/credential surfaces.
+   * `token` keys on the personal API token's row id, so one token cannot exhaust another's
+   * budget and a token's traffic never competes with the owner's browser session.
    */
-  scope: 'identity' | 'ip';
+  scope: 'identity' | 'ip' | 'token';
   windowMs: number;
 }
 
@@ -70,6 +72,14 @@ export const RATE_LIMIT_FAMILIES = {
    * Five attempts per quarter hour per IP against an `x-api-key` compare — never relaxed.
    */
   adminApi: { limit: 5, relaxable: false, scope: 'ip', windowMs: QUARTER_HOUR_MS },
+
+  /**
+   * Personal API token traffic. A token gets its own budget, keyed by the token row, so a
+   * script cannot drain the owner's browser allowance and two tokens cannot starve each
+   * other. Sized like the ordinary read family: a dashboard polling every minute stays far
+   * below it, while a runaway loop is still bounded.
+   */
+  apiToken: { limit: 1200, relaxable: true, scope: 'token', windowMs: QUARTER_HOUR_MS },
 
   /**
    * `/v1/assistant` mutations — the LLM calls that cost money per request. Well above any
@@ -173,6 +183,13 @@ export function resolveFamilyLimit(name: RateLimitFamilyName): number {
  * Requests that carry no verified identity fall back to the source IP.
  */
 export function buildRateLimitKey(req: Request, scope: RateLimitFamily['scope']): string {
+  if (scope === 'token') {
+    const apiTokenKey = req.apiToken?.apiTokenKey;
+    if (apiTokenKey !== undefined) {
+      return `t:${apiTokenKey}`;
+    }
+    return `ip:${ipKeyGenerator(req.ip ?? 'unknown')}`;
+  }
   if (scope === 'identity') {
     const subject = req.authUser?.user.id ?? req.user?.appuserKey;
     if (subject !== undefined && String(subject).length > 0) {
@@ -368,6 +385,17 @@ export const marketDataRateLimit = (): RequestHandler => createRateLimiter({ fam
 
 /**
  * The default for an authenticated product mount. Must be mounted *after* `requireAuth` so
- * that `req.supabaseUser` carries a verified subject to key on. Called per mount.
+ * that `req.authUser` (or `req.apiToken`) carries a verified subject to key on. Called per
+ * mount.
+ *
+ * Token traffic gets the `apiToken` family instead of the session read/write budgets: a
+ * script's ceiling belongs to the token, not to the person's browser session.
  */
-export const productDataRateLimit = (): RequestHandler => createMethodScopedRateLimiter('read', 'write');
+export const productDataRateLimit = (): RequestHandler => {
+  const sessionLimiter = createMethodScopedRateLimiter('read', 'write');
+  const tokenLimiter = createRateLimiter({ family: 'apiToken' });
+  return (req, res, next) => {
+    const limiter = req.apiToken ? tokenLimiter : sessionLimiter;
+    limiter(req, res, next);
+  };
+};
