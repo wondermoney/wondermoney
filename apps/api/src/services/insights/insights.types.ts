@@ -80,6 +80,11 @@ export interface SpendingVsNormalInput {
   daysElapsed: number;
   fromDate: string;
   month: number;
+  /**
+   * The calendar the day-of-month cutoff is read in. Defaults to `Europe/Lisbon`, the calendar the
+   * home insight has always used; a report passes the caller's `timezone` filter.
+   */
+  timeZone?: string;
   toDate: string;
   year: number;
 }

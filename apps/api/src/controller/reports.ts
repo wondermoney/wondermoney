@@ -5,3 +5,4 @@ export * from './reports/netWorthHistory.js';
 export * from './reports/portfolioPerformance.js';
 export * from './reports/sankey.js';
 export * from './reports/spendingByCategory.js';
+export * from './reports/spendingVsNormal.js';

@@ -156,6 +156,28 @@
           "title": "No spending in either month",
           "description": "Try two other months, or check that accounts are connected."
         }
+      },
+      "spendingVsNormal": {
+        "title": "Spending vs normal",
+        "subtitle": "Where this month's money went, and which categories ran above or below their three-month normal.",
+        "month": "Month",
+        "category": "Category",
+        "spent": "Spent",
+        "normal": "Normal",
+        "change": "Change vs normal",
+        "noBaseline": "No baseline",
+        "baselineTooSmall": "Too small to compare",
+        "aboveNormal": "above normal",
+        "belowNormal": "below normal",
+        "nearNormal": "near normal",
+        "hoverHint": "Point at a tile, or use the table, to see its spend, normal and change.",
+        "tableCaption": "Spending by category in {month}, compared with the same days of the previous three months.",
+        "subcategoryOf": "Subcategory of {parent}",
+        "viewTransactions": "See the transactions behind this amount",
+        "noData": {
+          "title": "No spending this month",
+          "description": "Try another month, or check that accounts are connected."
+        }
       }
     },
     "common": {

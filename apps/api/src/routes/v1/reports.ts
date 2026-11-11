@@ -15,12 +15,14 @@ import {
   getSankeyReportCsv,
   getSpendingByCategoryReport,
   getSpendingByCategoryReportCsv,
+  getSpendingVsNormalReport,
 } from '@controller/reports';
 
 const router = express.Router();
 
 router.get('/spending-by-category', getSpendingByCategoryReport);
 router.get('/spending-by-category.csv', getSpendingByCategoryReportCsv);
+router.get('/spending-vs-normal', getSpendingVsNormalReport);
 router.get('/cashflow', getCashflowReport);
 router.get('/cashflow.csv', getCashflowReportCsv);
 router.get('/month-comparison', getMonthComparisonReport);
