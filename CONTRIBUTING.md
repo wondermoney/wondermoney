@@ -133,7 +133,10 @@ A bug here can get someone's money wrong or show it to the wrong person, so the 
 3. Merge it with a merge commit; squash and rebase merges are blocked on `main`. Merging
    deploys production.
 4. Optionally, tag the release to publish the self-hosting images and notes:
-   `gh release create vX.Y.Z --target main --generate-notes`.
+   `gh release create vX.Y.Z --target main --generate-notes`. The tag also runs
+   `.github/workflows/publish-images.yml`, which builds the images and attaches `install.sh` and
+   its SHA-256 checksum to the release: that is what the one-line install in
+   `apps/api/deploy/selfhost/README.md` downloads.
 
 ## Leak check
 

@@ -33,6 +33,8 @@ jobs:
   # Which apps a pull request affects, for the jobs that don't run through turbo (the API, web
   # E2E and mobile extras): every app on a full run, otherwise the ones `turbo ls --affected`
   # lists (an app is affected by its own changes and by those of the packages it depends on).
+  # It also reports whether the self-hosting files changed, for the shellcheck and install jobs:
+  # those build images, so they stay off an unrelated change.
   changes:
     name: Affected apps
     runs-on: ubuntu-latest
@@ -41,6 +43,7 @@ jobs:
       api: ${{ steps.apps.outputs.api }}
       web: ${{ steps.apps.outputs.web }}
       mobile: ${{ steps.apps.outputs.mobile }}
+      selfhost: ${{ steps.apps.outputs.selfhost }}
     steps:
       - uses: actions/checkout@v7
         with:
@@ -70,6 +73,18 @@ jobs:
           for app in api web mobile; do
             echo "$app=$(jq -r --arg p "@wondermoney/$app" 'index($p) != null' <<<"$packages")" >> "$GITHUB_OUTPUT"
           done
+
+          # The self-hosting files the installer and the compose file live in, and the two
+          # workflows that ship them. A run with no base commit to compare against runs the jobs.
+          selfhost=false
+          if changed=$(git diff --name-only HEAD^1 HEAD 2>/dev/null); then
+            if grep -qE '^(apps/api/deploy/selfhost/|\.github/workflows/(ci|publish-images)\.yml$)' <<<"$changed"; then
+              selfhost=true
+            fi
+          else
+            selfhost=true
+          fi
+          echo "selfhost=$selfhost" >> "$GITHUB_OUTPUT"
 
   # Type-check, lint, the tests of every package but the API, and the builds run as parallel jobs;
   # "Type-check, lint, test and build", further down, gathers them under the one check name they
@@ -109,6 +124,22 @@ jobs:
       - run: pnpm turbo run type-check lint ${{ steps.scope.outputs.affected }} --concurrency=2 --summarize
       - if: steps.scope.outputs.affected == ''
         run: .github/scripts/prune-turbo-cache.sh
+
+  # The self-hosting scripts are shell, which no turbo task covers: apps/api/deploy/selfhost is
+  # not a package. install.sh is what a new instance runs first, so it is checked as POSIX sh.
+  shellcheck:
+    name: Shellcheck
+    needs: changes
+    if: needs.changes.outputs.selfhost == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+      # The runner image ships shellcheck; the fallback is for the day it stops.
+      - name: Install shellcheck if the runner lacks it
+        run: command -v shellcheck >/dev/null || { sudo apt-get update && sudo apt-get install -y shellcheck; }
+      - name: shellcheck
+        run: shellcheck -s sh apps/api/deploy/selfhost/install.sh apps/api/deploy/selfhost/generate-env.sh
 
   # The tests of every package but the API (the "API tests" jobs, on runners of their own:
   # sharing a runner with other packages' tests pushed some past their timeouts) and the mobile
@@ -219,6 +250,75 @@ jobs:
           NEXT_PUBLIC_SITE_URL: https://docs.wonder.money
       - if: steps.scope.outputs.affected == ''
         run: .github/scripts/prune-turbo-cache.sh
+
+  # The installer, end to end: builds the three images from this commit, runs install.sh --yes
+  # against them (the --source flag copies the compose file and generate-env.sh from the
+  # checkout instead of a release tag), waits for the health endpoint, then runs it again and
+  # checks that .env is unchanged. Gated on the self-hosting files: the image build is the
+  # expensive part, and nothing else in the tree can break the compose contract.
+  install:
+    name: Install script
+    needs: changes
+    if: needs.changes.outputs.selfhost == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    env:
+      VERSION: ci
+    steps:
+      - uses: actions/checkout@v7
+      # The Dockerfiles use `RUN --mount=type=cache`, which the classic builder does not support.
+      - uses: docker/setup-buildx-action@v4
+      - name: Build the images the installer starts
+        run: |
+          set -euo pipefail
+          for target in api worker; do
+            docker buildx build --load --target "$target" \
+              --build-arg WM_VERSION="$VERSION" \
+              -t "ghcr.io/wondermoney/wondermoney-$target:$VERSION" .
+          done
+          docker buildx build --load --target runner \
+            --build-arg WM_VERSION="$VERSION" \
+            -t "ghcr.io/wondermoney/wondermoney-web:$VERSION" .
+      - name: Install
+        env:
+          DIR: ${{ runner.temp }}/wondermoney
+          # A runner's first boot is slower than a real host's; the installer's own default is
+          # 180 seconds.
+          WM_HEALTH_TIMEOUT: '300'
+        run: |
+          sh apps/api/deploy/selfhost/install.sh --yes --version "$VERSION" \
+            --source apps/api/deploy/selfhost --dir "$DIR"
+          curl -fsS "http://127.0.0.1:3001/v1/health"
+      - name: Re-running leaves .env alone
+        env:
+          DIR: ${{ runner.temp }}/wondermoney
+        run: |
+          set -euo pipefail
+          before=$(sha256sum "$DIR/.env")
+          sh apps/api/deploy/selfhost/install.sh --yes --version "$VERSION" \
+            --source apps/api/deploy/selfhost --dir "$DIR"
+          after=$(sha256sum "$DIR/.env")
+          if [ "$before" != "$after" ]; then
+            echo "::error::.env changed on a re-run: $before -> $after"
+            exit 1
+          fi
+          echo "Re-run left .env byte-for-byte unchanged."
+      - name: Compose logs
+        if: failure()
+        env:
+          DIR: ${{ runner.temp }}/wondermoney
+        run: |
+          if [ -f "$DIR/docker-compose.yml" ]; then
+            docker compose -f "$DIR/docker-compose.yml" logs --tail 100
+          fi
+      - name: Stop
+        if: always()
+        env:
+          DIR: ${{ runner.temp }}/wondermoney
+        run: |
+          if [ -f "$DIR/docker-compose.yml" ]; then
+            docker compose -f "$DIR/docker-compose.yml" down -v
+          fi
 
   # Secrets and text that must not be published in this public repository. gitleaks checks a pull
   # request's commits (a push: the whole tree) against the default rules and the allowlist in

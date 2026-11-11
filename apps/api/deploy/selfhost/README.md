@@ -6,10 +6,49 @@ optional and switched on in `.env`; features whose integration is not configured
 
 ## Install
 
-Requirements: Docker with the Compose plugin, `openssl`, and about 2 GB of RAM.
+Requirements: Docker with the Compose plugin, `openssl`, and about 2 GB of RAM. The installer
+checks for them and stops with instructions if one is missing; it never installs Docker itself.
 
 ```sh
-git clone --depth 1 https://github.com/wondermoney/wondermoney.git
+curl -fsSLO https://github.com/wondermoney/wondermoney/releases/latest/download/install.sh
+curl -fsSLO https://github.com/wondermoney/wondermoney/releases/latest/download/install.sh.sha256
+sha256sum -c install.sh.sha256
+sh install.sh
+```
+
+It downloads `docker-compose.yml`, `.env.example` and `generate-env.sh` from the release tag (not
+from `main`), writes `.env` with fresh secrets, pins `WM_VERSION` to that release, starts the
+stack and waits up to three minutes for the API. It asks for the web app and the API address;
+`--yes` takes the defaults, `http://localhost:3000` and `http://localhost:3001`.
+
+| Flag | What it does |
+|---|---|
+| `--version 1.4.0` | Install a specific release instead of the latest |
+| `--dir /srv/wondermoney` | Where to install (default `./wondermoney`) |
+| `--yes` | No questions: default addresses, and upgrade an existing install |
+| `--app-url`, `--api-url` | The addresses the web app and the API are served at |
+
+Re-running it on an existing install never rewrites `.env`: it offers to upgrade to the latest
+release, and only the `WM_VERSION` line changes when it does. With `--yes` it upgrades without
+asking.
+
+On macOS, `shasum -a 256 -c install.sh.sha256` checks the download instead of `sha256sum`.
+
+### Read it first
+
+The installer is a short POSIX `sh` script. Download it, read it, then run it:
+
+```sh
+curl -fsSLO https://github.com/wondermoney/wondermoney/releases/latest/download/install.sh
+less install.sh
+sh install.sh
+```
+
+Or do the same steps by hand, from the release tag:
+
+```sh
+# v1.4.0 here: the release you want
+git clone --depth 1 --branch v1.4.0 https://github.com/wondermoney/wondermoney.git
 cd wondermoney/apps/api/deploy/selfhost
 ./generate-env.sh        # writes .env with fresh secrets (refuses to overwrite an existing one)
 docker compose up -d
@@ -161,8 +200,10 @@ docker compose pull
 docker compose up -d
 ```
 
-The API applies any new database migrations when it starts. To stay on a release, set
-`WM_VERSION` (e.g. `WM_VERSION=1.4`) instead of `latest`.
+`./install.sh --dir .` does the same for the latest release and pins `WM_VERSION` to it; the
+installer leaves a copy of itself in the directory. The API applies any new database migrations
+when it starts. To stay on a release, set `WM_VERSION` (e.g. `WM_VERSION=1.4`) instead of
+`latest`.
 
 ## Monitor
 
