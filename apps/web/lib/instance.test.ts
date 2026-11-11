@@ -40,6 +40,26 @@ describe("resolveInstanceConfig", () => {
   });
 
   it("uses a host-only cookie on localhost", () => {
-    expect(resolveInstanceConfig({ NEXT_PUBLIC_API_URL: "http://localhost:3001", NEXT_PUBLIC_APP_URL: "http://localhost:3000" }).cookieDomain).toBe("localhost");
+    expect(resolveInstanceConfig({ NEXT_PUBLIC_API_URL: "http://localhost:3001", NEXT_PUBLIC_APP_URL: "http://localhost:3000" }).cookieDomain).toBeUndefined();
+  });
+
+  it("needs no cookie domain when the web app and the API share a hostname", () => {
+    // One-hostname self-hosting: a host-only cookie already reaches every path on that host.
+    expect(
+      resolveInstanceConfig({
+        NEXT_PUBLIC_API_URL: "https://money.example.com",
+        NEXT_PUBLIC_APP_URL: "https://money.example.com",
+        NEXT_PUBLIC_AUTH_COOKIE_DOMAIN: ".example.com",
+      }).cookieDomain,
+    ).toBeUndefined();
+  });
+
+  it("applies the configured domain when the API has its own hostname", () => {
+    expect(
+      resolveInstanceConfig({
+        ...SELF_HOSTED,
+        NEXT_PUBLIC_AUTH_COOKIE_DOMAIN: ".example.com",
+      }).cookieDomain,
+    ).toBe(".example.com");
   });
 });

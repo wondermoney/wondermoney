@@ -52,7 +52,7 @@ Everything lives in `.env`; it is commented section by section. After editing it
 To read outgoing mail without a real provider, add `mail` to `COMPOSE_PROFILES` and set
 `SMTP_HOST=mailpit`, `SMTP_PORT=1025`; mail appears at http://localhost:8025.
 
-`COMPOSE_PROFILES` (e.g. `storage,mail`) switches on the optional services for every
+`COMPOSE_PROFILES` (e.g. `proxy,storage,mail`) switches on the optional services for every
 `docker compose` command, so `up`, `pull` and `down` all include them.
 
 ### What your instance sends
@@ -67,13 +67,63 @@ Banking, once a user adds their key). The docs site's self-hosting guide lists e
 ### The mobile app
 
 The WonderMoney app for iOS and Android works with your server: on the sign-in screen, tap
-**Use a different server** and enter your API address (`API_URL`). It must be reachable from
-the phone, over HTTPS in practice.
+**Use a different server** and enter your server's address, the `API_URL` from your `.env`. With
+one hostname that is the same address as the web app, e.g. `money.example.com`. It must be
+reachable from the phone, over HTTPS in practice.
 
 ## HTTPS
 
-Put a reverse proxy in front and give the web app and the API their own hostnames. With
-[Caddy](https://caddyserver.com), which fetches certificates automatically:
+One hostname is enough. The bundled proxy (the `proxy` profile) serves the web app and the API
+on the same address: `/v1/*` and `/api/auth/*` go to the API, everything else to the web app. It
+is [Caddy](https://caddyserver.com), so it fetches and renews the certificate itself.
+
+In `.env`:
+
+```
+APP_URL=https://money.example.com
+API_URL=https://money.example.com
+COMPOSE_PROFILES=proxy
+TRUST_PROXY=1
+BIND_ADDRESS=127.0.0.1
+```
+
+Then `docker compose up -d`, point the hostname's DNS at this machine, and open
+https://money.example.com. Ports 80 and 443 must be reachable from the internet: Caddy answers
+the certificate challenge on 80. `PROXY_HTTP_PORT` and `PROXY_HTTPS_PORT` change the published
+ports.
+
+`BIND_ADDRESS=127.0.0.1` keeps the plain-HTTP ports (the web app, the API, and the optional
+storage and Mailpit) on this machine, so only the proxy is reachable from outside.
+
+No cookie domain is needed: the session cookie belongs to the one hostname, so
+`AUTH_COOKIE_DOMAIN` and `NEXT_PUBLIC_AUTH_COOKIE_DOMAIN` stay empty. If they are set, the API
+ignores them.
+
+To try the proxy locally, set `APP_URL=http://localhost` and `API_URL=http://localhost`. It then
+serves plain HTTP on port 80, with no certificate.
+
+### Another reverse proxy
+
+Any other reverse proxy works: give it one hostname and route the same two path prefixes to the
+API. With Caddy on the host:
+
+```
+money.example.com {
+  handle /v1/* {
+    reverse_proxy localhost:3001
+  }
+  handle /api/auth/* {
+    reverse_proxy localhost:3001
+  }
+  handle {
+    reverse_proxy localhost:3000
+  }
+}
+```
+
+### Two hostnames
+
+A hostname for each still works. Give the web app and the API their own name:
 
 ```
 money.example.com {
@@ -95,15 +145,14 @@ NEXT_PUBLIC_AUTH_COOKIE_DOMAIN=.example.com
 TRUST_PROXY=1
 ```
 
-The cookie domain lets the web app read the sign-in session the API sets, because they are
-on different subdomains. With the proxy on the same machine, also set `BIND_ADDRESS=127.0.0.1`
-so the plain-HTTP ports (and the optional storage and Mailpit) are reachable only through it.
+The cookie domain lets the web app read the sign-in session the API sets, because they are on
+different subdomains. The bundled `proxy` profile serves one hostname only; leave it off.
 
-`TRUST_PROXY` is how many proxies sit in front of the API: `1` for one reverse proxy (Caddy,
-nginx, Traefik, a Cloudflare Tunnel), `2` with Cloudflare's proxy in front of yours, or a
-comma-separated list of the proxies' addresses. The API uses it to tell visitors apart for its
-sign-in limits. Leave it empty when browsers reach the API port directly; set to anything else
-there, it would let a visitor fake their address in `X-Forwarded-For`.
+`TRUST_PROXY` is how many proxies sit in front of the API: `1` for one reverse proxy (the
+bundled `proxy` profile, Caddy, nginx, Traefik, a Cloudflare Tunnel), `2` with Cloudflare's proxy
+in front of yours, or a comma-separated list of the proxies' addresses. The API uses it to tell
+visitors apart for its sign-in limits. Leave it empty when browsers reach the API port directly;
+set to anything else there, it would let a visitor fake their address in `X-Forwarded-For`.
 
 ## Upgrade
 
@@ -124,9 +173,10 @@ its 5-minute heartbeat job in the last 15 minutes, and 503 with the failing chec
 also reports the server's `version` and `commit`.
 
 With [Uptime Kuma](https://github.com/louislam/uptime-kuma), add an "HTTP(s) - Keyword"
-monitor for `https://api.money.example.com/v1/health/ready` with the keyword `"status":"ok"`
-and a 60-second interval. `docker compose ps` also shows the `worker` container as unhealthy
-when its job runner stops or it loses Postgres.
+monitor for `https://money.example.com/v1/health/ready` (your `APP_URL` followed by
+`/v1/health/ready`) with the keyword `"status":"ok"` and a 60-second interval.
+`docker compose ps` also shows the `worker` container as unhealthy when its job runner stops or
+it loses Postgres.
 
 ## Back up
 
@@ -138,7 +188,7 @@ bundled store.
 docker compose exec -T postgres pg_dump -U wondermoney -Fc wondermoney > wondermoney-$(date +%F).dump
 
 # Restore: stop the app, recreate the database, load the dump, start again
-docker compose stop api worker web
+docker compose stop proxy api worker web
 docker compose exec -T postgres dropdb -U wondermoney wondermoney
 docker compose exec -T postgres createdb -U wondermoney wondermoney
 docker compose exec -T postgres pg_restore -U wondermoney -d wondermoney < wondermoney-2026-10-04.dump

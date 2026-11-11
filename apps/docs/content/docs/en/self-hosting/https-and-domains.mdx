@@ -1,13 +1,53 @@
 ---
 title: HTTPS and domains
-description: Put your instance behind a reverse proxy with HTTPS and its own domain names.
+description: Serve your instance over HTTPS on one hostname, or give the web app and the API a domain each.
 ---
 
-Before using your instance outside your own network, serve it over HTTPS. Give the web app and the API a hostname each, and put a reverse proxy in front of them.
+Before using your instance outside your own network, serve it over HTTPS. One hostname is enough: the bundled proxy serves the web app and the API on the same address.
 
-## With Caddy
+## One hostname
 
-[Caddy](https://caddyserver.com) fetches and renews certificates automatically. With the web app and the API on the same machine:
+Add `proxy` to `COMPOSE_PROFILES` in `.env` and set both addresses to the same hostname:
+
+```sh
+APP_URL=https://money.example.com
+API_URL=https://money.example.com
+COMPOSE_PROFILES=proxy
+TRUST_PROXY=1
+BIND_ADDRESS=127.0.0.1
+```
+
+Then run `docker compose up -d` and point the hostname's DNS at the machine. The proxy is [Caddy](https://caddyserver.com): it fetches and renews the certificate itself, sends `/v1/*` and `/api/auth/*` to the API, and everything else to the web app.
+
+Ports 80 and 443 must be reachable from the internet, because Caddy answers the certificate challenge on 80. `PROXY_HTTP_PORT` and `PROXY_HTTPS_PORT` change the published ports.
+
+No cookie domain is needed: the sign-in cookie belongs to that one hostname. Leave `AUTH_COOKIE_DOMAIN` and `NEXT_PUBLIC_AUTH_COOKIE_DOMAIN` empty.
+
+`BIND_ADDRESS=127.0.0.1` keeps the plain-HTTP ports (the web app, the API, and the optional storage and Mailpit) on the machine, so only the proxy is reachable from outside.
+
+To try it locally, set `APP_URL=http://localhost` and `API_URL=http://localhost`: the proxy then serves plain HTTP on port 80.
+
+## Another reverse proxy
+
+Any other reverse proxy works: give it one hostname and route the same two path prefixes to the API. With Caddy on the host:
+
+```
+money.example.com {
+  handle /v1/* {
+    reverse_proxy localhost:3001
+  }
+  handle /api/auth/* {
+    reverse_proxy localhost:3001
+  }
+  handle {
+    reverse_proxy localhost:3000
+  }
+}
+```
+
+## Two hostnames
+
+A hostname for each still works. Give the web app and the API their own name:
 
 ```
 money.example.com {
@@ -19,9 +59,7 @@ api.money.example.com {
 }
 ```
 
-Any other reverse proxy works the same way, such as nginx, Traefik or a Cloudflare Tunnel.
-
-## Update `.env`
+Then in `.env`:
 
 ```sh
 APP_URL=https://money.example.com
@@ -31,7 +69,7 @@ NEXT_PUBLIC_AUTH_COOKIE_DOMAIN=.example.com
 TRUST_PROXY=1
 ```
 
-Then run `docker compose up -d` again. The cookie domain lets the web app read the sign-in session the API sets, because they are on different subdomains of the same domain.
+The cookie domain lets the web app read the sign-in session the API sets, because they are on different subdomains of the same domain. The bundled `proxy` profile serves one hostname only; leave it off.
 
 ## Tell the API about the proxy
 
@@ -40,7 +78,7 @@ The API limits how often each visitor can try to sign in, and tells visitors apa
 | Setup | `TRUST_PROXY` |
 |---|---|
 | No proxy: browsers connect straight to the API port | leave it empty |
-| One reverse proxy (Caddy, nginx, Traefik, a Cloudflare Tunnel) | `1` |
+| One reverse proxy (the bundled `proxy` profile, Caddy, nginx, Traefik, a Cloudflare Tunnel) | `1` |
 | Cloudflare's proxy in front of your own reverse proxy | `2` |
 
 You can also give the proxies' addresses instead of a count, as a comma-separated list of IP addresses or ranges (for example `172.16.0.0/12`).

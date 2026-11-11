@@ -15,12 +15,14 @@ import { IS_PROD, IS_PRODUCTION_LIKE } from '@config/env';
 import { instanceName } from '@config/instance-name';
 import { BETTER_AUTH_IP_ADDRESS_OPTIONS } from '@middleware/client-ip';
 import { configuredAppleOptions } from '@service/auth/apple-options';
+import { resolveAuthCookieDomain } from '@service/auth/cookie-domain';
 import { resolveAuthCookiePrefix } from '@service/auth/cookie-prefix';
 import { aiRequiresVerifiedEmail, verificationLinkLandingOnApp } from '@service/auth/email-verification-policy';
 import { isSignupAllowed, type SignupPolicyDeps } from '@service/auth/signup-policy';
 import { TWO_FACTOR_COOKIE_MAX_AGE_SECONDS, twoFactorOAuthGuard } from '@service/auth/two-factor-oauth-guard';
 import { sendEmailVerificationEmail, sendPasswordResetEmail } from '@service/email/email';
 import { BACKEND_URL, BETTER_AUTH_TRUSTED_ORIGINS, FRONTEND_URL } from '@utils/constants';
+import logger from '@utils/logger';
 
 // Validated better-auth / social sign-in env, resolved through the configuration module so
 // every key is shape-checked once and read from a single place. `assertEnv('api')` in the
@@ -92,7 +94,15 @@ const appleOptions = configuredAppleOptions(authConfig);
 // Set in staging/prod (e.g. `.wonder.money`) so the session cookie set by
 // api.wonder.money is readable by app.wonder.money. Left unset locally, where a
 // host-only cookie on localhost is correct — a `.wonder.money` domain would break it.
-const cookieDomain = authConfig.cookieDomain;
+// Ignored when the API and the web app share a hostname (one-hostname self-hosting): the
+// cookie is host-only there, so no domain needs configuring.
+const cookieDomain = resolveAuthCookieDomain(authConfig.cookieDomain, { apiUrl: BACKEND_URL, appUrl: FRONTEND_URL });
+if (authConfig.cookieDomain && !cookieDomain) {
+  logger.warn(
+    { cookieDomain: authConfig.cookieDomain },
+    'AUTH_COOKIE_DOMAIN is ignored: the web app and the API share a hostname, so the session cookie is host-only',
+  );
+}
 
 /**
  * Legacy-bcrypt password shim. Existing bcrypt hashes (`$2a$`/`$2b$`/`$2y$` prefixes)

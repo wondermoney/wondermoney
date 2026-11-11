@@ -44,14 +44,31 @@ function hostOf(url: null | string): string {
   }
 }
 
+function hostnameOf(url: null | string): null | string {
+  if (!url) return null;
+  try {
+    return new URL(url).hostname.toLowerCase();
+  } catch {
+    return null;
+  }
+}
+
 export function resolveInstanceConfig(env: Env): InstanceConfig {
   const apiUrl = read(env, "NEXT_PUBLIC_API_URL");
   const appUrl = read(env, "NEXT_PUBLIC_APP_URL");
-  const isLocal = hostOf(appUrl ?? apiUrl).startsWith("localhost");
+  const apiHostname = hostnameOf(apiUrl);
+  const appHostname = hostnameOf(appUrl);
+  // One hostname for the web app and the API (the self-hosting `proxy` profile): the session
+  // cookie is host-only, so a configured domain is ignored rather than widening it to sibling
+  // subdomains. With two hostnames the domain is what lets the web app read the API's cookie.
+  const sameHostname =
+    apiHostname !== null && appHostname !== null && apiHostname === appHostname;
 
   return {
     appHost: hostOf(appUrl),
-    cookieDomain: read(env, "NEXT_PUBLIC_AUTH_COOKIE_DOMAIN") ?? (isLocal ? "localhost" : undefined),
+    cookieDomain: sameHostname
+      ? undefined
+      : read(env, "NEXT_PUBLIC_AUTH_COOKIE_DOMAIN") ?? undefined,
     demoEmail: read(env, "NEXT_PUBLIC_DEMO_EMAIL"),
     docsUrl: read(env, "NEXT_PUBLIC_DOCS_URL") ?? PUBLIC_DOCS_URL,
     privacyUrl: read(env, "NEXT_PUBLIC_PRIVACY_URL"),
