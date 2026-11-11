@@ -22,6 +22,7 @@ import {
   getS3PresignedUrlForCsvUpload,
   getTransactionHistory,
   getTransactionMerchants,
+  getTransactionReviewSummary,
   getTransactions,
   getTransactionTypes,
   previewAccountCsvImport,
@@ -44,6 +45,7 @@ const router = express.Router();
 router.get('/', getAccounts);
 router.post('/offline', createOfflineAccount);
 router.get('/transaction/category-spending', getCategorySpending);
+router.get('/transaction/review-summary', getTransactionReviewSummary);
 router.patch('/transaction', updateTransactions);
 router.patch('/transaction/:transactionId', updateTransaction);
 router.get('/transaction/:transactionId/history', getTransactionHistory);

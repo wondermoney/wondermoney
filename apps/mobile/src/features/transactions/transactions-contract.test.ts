@@ -5,6 +5,8 @@ import {
   createAggregateTransactionsEndpoint,
   createEditTransactionAmountEndpoint,
   freezeEditTransactionAmount,
+  transactionReviewSummaryEndpoint,
+  transactionReviewSummarySchema,
 } from './transactions-contract'
 import { inTimeZone } from '@/test/time-zone'
 
@@ -213,5 +215,18 @@ describe('createEditTransactionAmountEndpoint', () => {
   it('rejects a non-positive transaction id', () => {
     expect(() => createEditTransactionAmountEndpoint(0)).toThrow()
     expect(() => createEditTransactionAmountEndpoint(-3)).toThrow()
+  })
+})
+
+describe('the review summary', () => {
+  it('reads the count, the amount at stake and its currency', () => {
+    expect(transactionReviewSummarySchema.parse({ count: 3, totalAbs: 1240, currency: 'EUR' })).toEqual({ count: 3, totalAbs: 1240, currency: 'EUR' })
+    expect(transactionReviewSummarySchema.safeParse({ count: -1, totalAbs: 0, currency: 'EUR' }).success).toBe(false)
+    expect(transactionReviewSummarySchema.safeParse({ count: 0, totalAbs: 0, currency: 'euro' }).success).toBe(false)
+  })
+
+  it('asks for it at its own path', () => {
+    expect(transactionReviewSummaryEndpoint.method).toBe('GET')
+    expect(transactionReviewSummaryEndpoint.path).toBe('/v1/account/transaction/review-summary')
   })
 })

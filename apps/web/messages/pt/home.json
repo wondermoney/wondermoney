@@ -107,7 +107,9 @@
     },
     "latest": {
       "title": "Últimas transações",
-      "review": "{count, plural, one {# por rever} other {# por rever}}",
+      "review-summary": "{count, plural, one {# transação por rever} other {# transações por rever}} · {amount} no total",
+      "review-now": "Rever agora",
+      "all-caught-up": "Tudo em dia",
       "all": "Todas as transações",
       "caption": "{count, plural, one {A transação mais recente} other {As # transações mais recentes}}",
       "date": "Data",

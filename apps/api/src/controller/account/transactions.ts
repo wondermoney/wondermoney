@@ -26,6 +26,7 @@ import { TransactionAuditService } from '@service/transaction/transaction-audit.
 import { transactionCreationService } from '@service/transaction/transaction-creation.service';
 import { findManualDuplicate } from '@service/transaction/transaction-dedup.service';
 import { listTransactions } from '@service/transaction/transaction-list.service';
+import { getTransactionReviewSummary as getReviewSummary } from '@service/transaction/transaction-review-summary.service';
 import { dashboardScope, transactionScopeWhere } from '@service/transaction/transaction-scope';
 import { reconcileSplitsWithAmount } from '@service/transaction/transaction-split.service';
 import { retypeTransaction, TRANSFER_DESTINATION_POPULATE, transferDestinationOf } from '@service/transaction/transaction-transfer.service';
@@ -331,6 +332,12 @@ export async function getTransactions(req: Request, res: Response) {
     viewerAppuserKey: user.appuserKey,
   });
   return res.json(page);
+}
+
+/** The home's review status: the review inbox's count and the amount at stake. */
+export async function getTransactionReviewSummary(req: Request, res: Response) {
+  const { tenant, user } = authedContext(req);
+  return res.json(await getReviewSummary({ tenantKey: tenant.tenantKey, viewerAppuserKey: user.appuserKey }));
 }
 
 export async function getTransactionTypes(_req: Request, res: Response) {

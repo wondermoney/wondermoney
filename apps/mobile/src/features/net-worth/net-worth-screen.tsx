@@ -48,7 +48,7 @@ import { balanceSheet, formatMonthName, netWorthChanges, type CashflowView, type
 import type { NetWorthRowDto } from './net-worth-contract'
 import { NetWorthChart } from './net-worth-chart'
 import type { LoanDto } from '@/features/loans/loans-contract'
-import type { TransactionDto } from '@/features/transactions/transactions-contract'
+import type { TransactionDto, TransactionReviewSummaryDto } from '@/features/transactions/transactions-contract'
 
 export type NetWorthData = {
   primaryCurrency: string
@@ -89,7 +89,7 @@ export type HomeSections = {
   month: SectionState<readonly BudgetMonthRow[]>
   cashflow: SectionState<CashflowView>
   loans: SectionState<{ upcoming: readonly LoanDto[]; hasLoans: boolean }>
-  latest: SectionState<{ transactions: readonly TransactionDto[]; unreviewedCount: number }>
+  latest: SectionState<{ review: TransactionReviewSummaryDto | null; transactions: readonly TransactionDto[] }>
   insight: InsightState
   /** Each account's mark for the balance sheet, by account key; absent until the accounts load. */
   accountMarks?: ReadonlyMap<number, EntityMarkSource>

@@ -357,8 +357,10 @@
     },
     "latest": {
       "title": "Latest transactions",
-      "review_one": "{{count}} needs review",
-      "review_other": "{{count}} need review",
+      "reviewSummary_one": "{{count}} transaction to review · {{amount}} in total",
+      "reviewSummary_other": "{{count}} transactions to review · {{amount}} in total",
+      "reviewNow": "Review now",
+      "allCaughtUp": "All caught up",
       "all": "All transactions",
       "uncategorised": "Uncategorised",
       "needsReview": "Needs review",

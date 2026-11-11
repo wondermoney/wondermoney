@@ -33,7 +33,10 @@ jest.mock('@/features/accounts/use-accounts', () => ({ useAccounts: () => mocks.
 jest.mock('@/features/budgets/use-budgets', () => ({ useBudgets: () => mocks.budgets }))
 jest.mock('@/features/loans/use-loans', () => ({ useLoans: () => mocks.loans }))
 jest.mock('@/features/transactions/use-transactions', () => ({
-  useTransactions: (filters: { needsReview?: boolean }) => (filters.needsReview ? mocks.unreviewed : mocks.latest),
+  useTransactions: () => mocks.latest,
+}))
+jest.mock('@/features/transactions/use-transaction-review-summary', () => ({
+  useTransactionReviewSummary: () => mocks.reviewSummary,
 }))
 jest.mock('@/features/account-insights/use-top-spending-category', () => ({ useTopSpendingCategory: () => mocks.insight }))
 jest.mock('./use-home-data', () => ({
@@ -92,7 +95,7 @@ describe('NetWorthRoute', () => {
       budgets: loaded({ budgets: [] }),
       loans: loaded({ loans: [] }),
       latest: loaded({ transactions: [] }),
-      unreviewed: loaded({ transactions: [], total: 0 }),
+      reviewSummary: loaded({ count: 0, currency: 'EUR', totalAbs: 0 }),
       insight: loaded({ categorySpending: [] }),
       cashflow: loaded({ cashflow: [] }),
       cashflowComparison: loaded({ cashflow: [] }),
@@ -105,6 +108,16 @@ describe('NetWorthRoute', () => {
     expect(view.getByLabelText(/^Net worth, €1,200\.00, EUR/)).toBeOnTheScreen()
     expect(view.getByText('Balances updated 1 day ago')).toBeOnTheScreen()
     expect(view.queryByTestId('home-bank-alert')).toBeNull()
+  })
+
+  it('shows the review status from the summary endpoint', async () => {
+    mocks.latest = loaded({ transactions: [{
+      transactionKey: 1, transactionDate: '2026-11-03T10:00:00.000Z', accountKey: { accountKey: 1, accountName: 'Checking', currencyKey: { code: 'EUR' } },
+      description: 'Coffee shop', appuserSettlementAmount: -4.5, appuserCurrencyKey: { code: 'EUR' }, reviewed: false, appuserTransactionCategories: [], recurringSeries: null,
+    }] })
+    mocks.reviewSummary = loaded({ count: 2, currency: 'EUR', totalAbs: 90 })
+    const view = await renderRoute()
+    expect(view.getByText('2 transactions to review · €90.00 in total')).toBeOnTheScreen()
   })
 
   it('shows a bank alert that reconnects through the bank connections screen and dismisses', async () => {

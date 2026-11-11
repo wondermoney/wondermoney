@@ -124,6 +124,16 @@
         }
       }
     },
+    "/v1/account/transaction/review-summary": {
+      "get": {
+        "description": "",
+        "responses": {
+          "default": {
+            "description": ""
+          }
+        }
+      }
+    },
     "/v1/account/transaction": {
       "patch": {
         "description": "",

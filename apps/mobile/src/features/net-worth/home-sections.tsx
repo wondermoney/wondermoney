@@ -13,7 +13,7 @@ import { Section } from '@/components/ui/section'
 import { Text } from '@/components/ui/text'
 import type { LoanDto } from '@/features/loans/loans-contract'
 import { transactionMark } from '@/features/transactions/transaction-mark'
-import type { TransactionDto } from '@/features/transactions/transactions-contract'
+import type { TransactionDto, TransactionReviewSummaryDto } from '@/features/transactions/transactions-contract'
 import { resolveFxState } from '@/lib/api/fx-status'
 import { transactionDisplayDate } from '@/lib/dates/transaction-date'
 import { formatCategoryName } from '@/lib/formatters/category-name'
@@ -557,8 +557,41 @@ export function LoansSection({ state, locale, onNavigate, onRetry }: {
 
 // ── Latest transactions (web LatestTransactionsSection) ───────────────────
 
+/**
+ * The review inbox at a glance, above the latest transactions: how many rows are
+ * waiting, what they add up to, and the way in. With nothing waiting it says so.
+ * It belongs to the latest-transactions section, not to the customizable layout.
+ */
+function ReviewStatusRow({ review, locale, onNavigate }: {
+  review: TransactionReviewSummaryDto
+  locale: string
+  onNavigate: Navigate
+}) {
+  const { t } = useTranslation()
+  const palette = usePalette()
+  const formatMoney = useFormatMoney()
+  if (review.count === 0) {
+    return (
+      <View style={[styles.reviewStatus, { borderBottomColor: palette.border }]}>
+        <View style={styles.reviewCaughtUp}>
+          <Icon color={palette.successText} name="check" size={16} />
+          <Text tone="success" variant="meta">{t('home.latest.allCaughtUp')}</Text>
+        </View>
+      </View>
+    )
+  }
+  return (
+    <View style={[styles.reviewStatus, { borderBottomColor: palette.border }]}>
+      <Text style={styles.flex} tone="muted" variant="meta">
+        {t('home.latest.reviewSummary', { amount: formatMoney(review.totalAbs, { currency: review.currency, locale }), count: review.count })}
+      </Text>
+      <Button label={t('home.latest.reviewNow')} onPress={() => onNavigate('/accounts/transactions?filter=unreviewed')} variant="secondary" />
+    </View>
+  )
+}
+
 export function LatestTransactionsSection({ state, locale, onNavigate, onRetry }: {
-  state: SectionState<{ transactions: readonly TransactionDto[]; unreviewedCount: number }>
+  state: SectionState<{ review: TransactionReviewSummaryDto | null; transactions: readonly TransactionDto[] }>
   locale: string
   onNavigate: Navigate
   onRetry: () => void
@@ -568,7 +601,7 @@ export function LatestTransactionsSection({ state, locale, onNavigate, onRetry }
   const title = t('home.latest.title')
   if (state.status === 'loading') return <Section title={title} variant="open"><RowsSkeleton label={title} rows={6} /></Section>
   if (state.status === 'error') return <Section title={title} variant="open"><SectionError onRetry={onRetry} /></Section>
-  const { transactions, unreviewedCount } = state.data
+  const { review, transactions } = state.data
   if (transactions.length === 0) {
     return (
       <Section title={title} variant="open">
@@ -580,12 +613,13 @@ export function LatestTransactionsSection({ state, locale, onNavigate, onRetry }
       </Section>
     )
   }
-  const reviewLink = unreviewedCount > 0 ? (
-    <Button label={t('home.latest.review', { count: unreviewedCount })} onPress={() => onNavigate('/accounts/transactions')} variant="link" />
-  ) : undefined
+  // An offline account with only its opening balance has no real transaction (that row's key is
+  // negative), so the review status stays out of it, exactly as for an empty account.
+  const hasTransactions = transactions.some((transaction) => transaction.transactionKey > 0)
   return (
-    <Section action={reviewLink} title={title} variant="open" testID="home-latest-transactions">
+    <Section title={title} variant="open" testID="home-latest-transactions">
       <View>
+        {hasTransactions && review ? <ReviewStatusRow locale={locale} onNavigate={onNavigate} review={review} /> : null}
         <List divided>
           {transactions.map((transaction) => {
             const category = transaction.appuserTransactionCategories[0]
@@ -721,5 +755,7 @@ const styles = StyleSheet.create({
 
   categoryLine: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', columnGap: themeTokens.spacing[3], rowGap: themeTokens.spacing[1] },
   uncategorised: { borderWidth: 1, borderStyle: 'dashed', borderRadius: themeTokens.radius.sm, paddingHorizontal: 6 },
+  reviewStatus: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: themeTokens.spacing[3], paddingBottom: themeTokens.spacing[4], marginBottom: themeTokens.spacing[4], borderBottomWidth: 1 },
+  reviewCaughtUp: { flexDirection: 'row', alignItems: 'center', gap: themeTokens.spacing[2] },
   allLink: { marginTop: themeTokens.spacing[4], alignItems: 'flex-start' },
 })

@@ -42,7 +42,7 @@ const sections: HomeSections = {
   month: { status: 'loaded', data: [] },
   cashflow: { status: 'loaded', data: { zero: 0, bars: [] } },
   loans: { status: 'loaded', data: { upcoming: [], hasLoans: false } },
-  latest: { status: 'loaded', data: { transactions: [], unreviewedCount: 0 } },
+  latest: { status: 'loaded', data: { review: null, transactions: [] } },
   insight: { status: 'hidden' },
 }
 
@@ -142,7 +142,7 @@ describe('NetWorthScreen (Home)', () => {
   })
 
   it('shows a latest transaction with no exchange rate in its own currency, marked, and an estimated one with its rate date', async () => {
-    const { view } = await renderScreen({}, { latest: { status: 'loaded', data: { unreviewedCount: 0, transactions: [unconvertedTransactionFixture, estimatedTransactionFixture, transactionFixture] } } })
+    const { view } = await renderScreen({}, { latest: { status: 'loaded', data: { review: null, transactions: [unconvertedTransactionFixture, estimatedTransactionFixture, transactionFixture] } } })
     const labels = view.getAllByTestId('home-transaction-fx-status')
     expect(labels).toHaveLength(2)
     expect(labels[0]).toHaveTextContent('Not converted')
@@ -217,7 +217,7 @@ describe('NetWorthScreen (Home)', () => {
         progressBasis: 'OPENING_BALANCE', progressPercentage: 25, rateType: 'FIXED', regularPaymentAmount: 900, remainingTermMonthsEstimated: 200,
         status: 'ACTIVE', type: 'MORTGAGE', annualInterestRateBps: 350, providerName: 'Bank',
       }] } },
-      latest: { status: 'loaded', data: { unreviewedCount: 3, transactions: [{
+      latest: { status: 'loaded', data: { review: { count: 3, currency: 'EUR', totalAbs: 1240 }, transactions: [{
         transactionKey: 1, transactionDate: '2026-11-03T10:00:00.000Z', accountKey: { accountKey: 1, accountName: 'Checking', currencyKey: { code: 'EUR' } },
         description: 'Coffee shop', appuserSettlementAmount: -4.5, appuserCurrencyKey: { code: 'EUR' }, reviewed: false, appuserTransactionCategories: [], recurringSeries: null,
       }] } },
@@ -230,8 +230,57 @@ describe('NetWorthScreen (Home)', () => {
     expect(view.getByText('Coffee shop')).toBeOnTheScreen()
     expect(view.getByText('Uncategorised')).toBeOnTheScreen()
     expect(view.getByText('Needs review')).toBeOnTheScreen()
-    expect(view.getByRole('button', { name: '3 need review' })).toBeOnTheScreen()
+    expect(view.getByText('3 transactions to review · €1,240.00 in total')).toBeOnTheScreen()
+    expect(view.getByRole('button', { name: 'Review now' })).toBeOnTheScreen()
     expect(view.getByRole('button', { name: 'All transactions' })).toBeOnTheScreen()
+  })
+
+  describe('the review status', () => {
+    const latestTransaction = {
+      transactionKey: 1, transactionDate: '2026-11-03T10:00:00.000Z', accountKey: { accountKey: 1, accountName: 'Checking', currencyKey: { code: 'EUR' } },
+      description: 'Coffee shop', appuserSettlementAmount: -4.5, appuserCurrencyKey: { code: 'EUR' }, reviewed: true, appuserTransactionCategories: [], recurringSeries: null,
+    }
+
+    it('opens the ledger filtered to unreviewed transactions', async () => {
+      const { view, props } = await renderScreen({}, {
+        latest: { status: 'loaded', data: { review: { count: 3, currency: 'EUR', totalAbs: 1240 }, transactions: [latestTransaction] } },
+      })
+      await fireEvent.press(view.getByRole('button', { name: 'Review now' }))
+      expect(props.onNavigate).toHaveBeenCalledWith('/accounts/transactions?filter=unreviewed')
+    })
+
+    it('says all caught up when nothing is waiting', async () => {
+      const { view } = await renderScreen({}, {
+        latest: { status: 'loaded', data: { review: { count: 0, currency: 'EUR', totalAbs: 0 }, transactions: [latestTransaction] } },
+      })
+      expect(view.getByText('All caught up')).toBeOnTheScreen()
+      expect(view.queryByRole('button', { name: 'Review now' })).toBeNull()
+    })
+
+    it('shows nothing for an account with no transactions', async () => {
+      const { view } = await renderScreen({}, {
+        latest: { status: 'loaded', data: { review: { count: 0, currency: 'EUR', totalAbs: 0 }, transactions: [] } },
+      })
+      expect(view.queryByText('All caught up')).toBeNull()
+      expect(view.queryByRole('button', { name: 'Review now' })).toBeNull()
+    })
+
+    it('shows nothing for an account with only an opening balance', async () => {
+      const { view } = await renderScreen({}, {
+        latest: { status: 'loaded', data: { review: { count: 0, currency: 'EUR', totalAbs: 0 }, transactions: [{ ...latestTransaction, transactionKey: -1, description: 'Initial balance' }] } },
+      })
+      expect(view.queryByText('All caught up')).toBeNull()
+    })
+
+    it('masks the amount at stake in privacy mode, but not the count', async () => {
+      const { view } = await renderScreen({}, {
+        latest: { status: 'loaded', data: { review: { count: 3, currency: 'EUR', totalAbs: 1240 }, transactions: [latestTransaction] } },
+      }, memoryPreferenceStorage(true))
+      const text = renderedText(view.toJSON())
+      expect(text).toContain('3 transactions to review')
+      expect(text).toContain('•')
+      expect(text).not.toContain('1,240')
+    })
   })
 
   it('shows this month’s income, spending and savings rate with the change from last month', async () => {
@@ -269,7 +318,7 @@ describe('NetWorthScreen (Home)', () => {
 
     it('dates a date-only bank booking in the latest transactions on its own date', async () => {
       const { view } = await renderScreen({}, {
-        latest: { status: 'loaded', data: { unreviewedCount: 0, transactions: [{
+        latest: { status: 'loaded', data: { review: null, transactions: [{
           transactionKey: 1, transactionDate: '2026-08-01T00:00:00.000Z', accountKey: { accountKey: 1, accountName: 'Checking', currencyKey: { code: 'EUR' } },
           description: 'Coffee shop', appuserSettlementAmount: -4.5, appuserCurrencyKey: { code: 'EUR' }, reviewed: true, appuserTransactionCategories: [], recurringSeries: null,
         }] } },

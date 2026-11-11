@@ -107,7 +107,9 @@
     },
     "latest": {
       "title": "Latest transactions",
-      "review": "{count, plural, one {# needs review} other {# need review}}",
+      "review-summary": "{count, plural, one {# transaction to review} other {# transactions to review}} · {amount} in total",
+      "review-now": "Review now",
+      "all-caught-up": "All caught up",
       "all": "All transactions",
       "caption": "{count, plural, one {The most recent transaction} other {The # most recent transactions}}",
       "date": "Date",
