@@ -526,6 +526,13 @@
       "message": "Não foi possível verificar os dados da conta recebidos"
     }
   },
+  "accountForecast": {
+    "title": "Previsão",
+    "lowPoint": "Ponto mais baixo nos próximos {{days}} dias",
+    "unavailable": "Ainda não há dados suficientes para prever esta conta.",
+    "next": "Próximos pagamentos previstos",
+    "notCounted": "Não conta nos relatórios"
+  },
   "accountRecalculate": {
     "action": "Recalcular saldos",
     "confirmTitle": "Recalcular os saldos?",

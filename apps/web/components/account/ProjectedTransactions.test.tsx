@@ -1,0 +1,71 @@
+// @vitest-environment jsdom
+import assert from "node:assert/strict";
+
+import { cleanup, render, screen } from "@testing-library/react";
+import { NextIntlClientProvider } from "next-intl";
+import { afterEach, describe, it } from "vitest";
+
+import { formatShortDateForLocale } from "@/lib/utils/formatDate";
+import { transactionDisplayDate } from "@/lib/utils/transaction-date";
+
+import commonMessages from "../../messages/en/common.json";
+import ProjectedTransactions from "./ProjectedTransactions";
+
+afterEach(cleanup);
+
+const occurrences = [
+  {
+    accountKey: 1,
+    amount: 100,
+    currency: "EUR",
+    date: "2026-03-06",
+    name: "Rent",
+    seriesKey: 10,
+  },
+  {
+    accountKey: 1,
+    amount: 12.5,
+    currency: "EUR",
+    date: "2026-03-08",
+    name: "Streaming",
+    seriesKey: 11,
+  },
+];
+
+function renderRows(items = occurrences) {
+  return render(
+    <NextIntlClientProvider locale="en" messages={commonMessages}>
+      <ProjectedTransactions occurrences={items} />
+    </NextIntlClientProvider>,
+  );
+}
+
+describe("ProjectedTransactions", () => {
+  it("renders projected rows above the ledger, clearly marked as projections", () => {
+    const { container } = renderRows();
+
+    assert.ok(
+      screen.getByRole("region", { name: "Projected transactions" }),
+    );
+    assert.match(container.textContent ?? "", /Not counted in reports/);
+    assert.match(container.textContent ?? "", /Rent/);
+    assert.match(container.textContent ?? "", /Streaming/);
+    assert.equal(screen.getAllByText("Projected").length, 2);
+    assert.match(
+      container.textContent ?? "",
+      new RegExp(
+        formatShortDateForLocale(
+          transactionDisplayDate("2026-03-06T00:00:00.000Z"),
+          "en",
+        ),
+      ),
+    );
+    assert.match(container.textContent ?? "", /100\.00/);
+    assert.match(container.textContent ?? "", /12\.50/);
+  });
+
+  it("renders nothing when there is no projection", () => {
+    const { container } = renderRows([]);
+    assert.equal(container.innerHTML, "");
+  });
+});

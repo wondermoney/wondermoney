@@ -169,3 +169,14 @@ export const previewAccountCsvImportRequestSchema = z.object({ body: z.object({ 
 export const getCategorySpendingRequestSchema = z.object({ query: z.object({ fromDate: validDate.optional(), limit: boundedLimit({ defaultValue: 100, max: 500 }).optional().default(100), timezone: viewerTimeZone, toDate: validDate.optional() }) });
 export const getAccountRequestSchema = z.object({ params: z.object({ accountId: positiveIntId }) });
 export const getAccountsCashflowRequestSchema = z.object({ query: z.object({ fromDate: validDate.optional(), timezone: viewerTimeZone, toDate: validDate.optional() }) });
+/**
+ * `GET /v1/account/forecast`: the next `days` days of projected balances. The window is bounded
+ * (30..90) so one request cannot expand years of a weekly series; `accountKeys` is filtered by the
+ * caller's privacy scope in the service, never trusted as-is.
+ */
+export const getAccountsForecastRequestSchema = z.object({
+  query: z.object({
+    accountKeys: csvIntList,
+    days: z.coerce.number().int().min(30).max(90).optional().default(30),
+  }),
+});

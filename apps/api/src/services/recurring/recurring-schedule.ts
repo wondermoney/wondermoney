@@ -50,6 +50,12 @@ export interface RecurringScheduleRange {
   to: Date;
   /** The day the statuses are judged against. Defaults to now. */
   today?: Date;
+  /**
+   * What one occurrence of a series is expected to take. Defaults to
+   * `expectedOccurrenceAmount` (a variable series' maximum); a caller that projects a balance
+   * passes its own rule (for example a variable bill's average).
+   */
+  amountFor?: (series: RecurringScheduleSeries) => null | number;
 }
 
 /**
@@ -103,17 +109,13 @@ export function buildRecurringSchedule(
   const today = startOfUtcDay(range.today ?? new Date());
   const paidBySeries = groupPaidOccurrences(occurrences);
   const entries: RecurringScheduleEntry[] = [];
+  const amountFor = range.amountFor ?? defaultOccurrenceAmount;
 
   for (const series of seriesList) {
     const paid = paidBySeries.get(series.recurringSeriesKey) ?? [];
     const used = new Set<number>();
     const window = matchWindowDays(series.cadence) * DAY_MS;
-    const expectedAmount = expectedOccurrenceAmount({
-      amountType: series.amountType,
-      averageAmount: series.averageAmount ?? undefined,
-      expectedAmount: series.expectedAmount ?? undefined,
-      expectedAmountMax: series.expectedAmountMax ?? undefined,
-    });
+    const expectedAmount = amountFor(series);
 
     for (const expected of expandRecurringSchedule(series, range.from, range.to)) {
       const match = nearestUnusedPayment(paid, used, expected, window);
@@ -143,6 +145,15 @@ export function buildRecurringSchedule(
     left.date.getTime() - right.date.getTime()
     || left.name.localeCompare(right.name)
     || left.seriesKey - right.seriesKey);
+}
+
+function defaultOccurrenceAmount(series: RecurringScheduleSeries): null | number {
+  return expectedOccurrenceAmount({
+    amountType: series.amountType,
+    averageAmount: series.averageAmount ?? undefined,
+    expectedAmount: series.expectedAmount ?? undefined,
+    expectedAmountMax: series.expectedAmountMax ?? undefined,
+  });
 }
 
 function endOfUtcDay(date: Date): Date {

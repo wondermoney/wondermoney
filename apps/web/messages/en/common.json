@@ -1173,6 +1173,7 @@
   "balance-growth": "Balance growth",
   "account-overview": "Account overview",
   "account-balance": "Account balance",
+  "projected-balance": "Projected balance",
   "all-transactions": "All transactions",
   "account-overview-description": "This is a summary of your account, including balance growth, latest transactions and insights.",
   "accounts-overview": "Accounts overview",
@@ -2238,6 +2239,13 @@
     "saving": "Saving change…",
     "saved": "Change saved.",
     "saveError": "This change could not be confirmed. Your preferences are being refreshed from the server."
+  },
+  "forecast": {
+    "lowPoint": "Low point in the next {days} days",
+    "notCounted": "Not counted in reports",
+    "projected": "Projected",
+    "projectedTransactions": "Projected transactions",
+    "unavailable": "Not enough data to project this account yet."
   },
   "recurring": {
     "title": "Bills & subscriptions",
