@@ -12,6 +12,7 @@ import { useBudgets } from '@/features/budgets/use-budgets'
 import { useLoans } from '@/features/loans/use-loans'
 import { useDashboardLayout } from '@/features/preferences/use-dashboard-layout'
 import { useTransactions } from '@/features/transactions/use-transactions'
+import { useTransactionReviewSummary } from '@/features/transactions/use-transaction-review-summary'
 import { ApiError } from '@/lib/api/errors'
 
 import {
@@ -39,7 +40,6 @@ const HOME_HISTORY_MONTHS = 12
 /** Web's latest-transactions section shows a fixed six. */
 const LATEST_SHOWN = 6
 const ALL_TRANSACTIONS = {} as const
-const UNREVIEWED = { needsReview: true } as const
 
 type QueryLike<T> = { isLoading: boolean; data?: T; error?: unknown }
 
@@ -69,7 +69,7 @@ export function NetWorthRoute() {
   const comparisonRange = useMemo(() => monthComparisonRange(today), [today])
   const loans = useLoans()
   const latest = useTransactions(ALL_TRANSACTIONS)
-  const unreviewed = useTransactions(UNREVIEWED)
+  const reviewSummary = useTransactionReviewSummary()
   const portfolios = useHomePortfolios()
   const insight = useTopSpendingCategory()
   const setupDismissal = useSetupChecklistDismissal()
@@ -117,8 +117,7 @@ export function NetWorthRoute() {
   }))
 
   const loansState = sectionOf(loans, (data) => ({ upcoming: upcomingLoanPayments(data.loans, today), hasLoans: data.loans.length > 0 }))
-  const unreviewedCount = unreviewed.data ? (unreviewed.data.total ?? unreviewed.data.transactions.length) : 0
-  const latestState = sectionOf(latest, (data) => ({ transactions: data.transactions.slice(0, LATEST_SHOWN), unreviewedCount }))
+  const latestState = sectionOf(latest, (data) => ({ review: reviewSummary.data ?? null, transactions: data.transactions.slice(0, LATEST_SHOWN) }))
 
   const accountMarks = useMemo(() => new Map((accounts.data?.accounts ?? []).map((account) => [
     account.accountKey,
@@ -134,7 +133,7 @@ export function NetWorthRoute() {
   const setupReady = accounts.data !== undefined && !setupDismissal.dismissed
   const setup = setupReady ? {
     account: accounts.data!.accounts.length > 0,
-    transactions: Boolean(latest.data?.transactions.length) && unreviewed.data !== undefined && unreviewed.data.transactions.length === 0,
+    transactions: Boolean(latest.data?.transactions.length) && reviewSummary.data !== undefined && reviewSummary.data.count === 0,
     budget: budgetList.length > 0,
     portfolio: (portfolios.data?.portfolios.length ?? 0) > 0,
   } : null
@@ -185,7 +184,7 @@ export function NetWorthRoute() {
           cashflowComparison.refetch(),
           loans.refetch(),
           latest.refetch(),
-          unreviewed.refetch(),
+          reviewSummary.refetch(),
           bankAlerts.refetch(),
         ])
       }}

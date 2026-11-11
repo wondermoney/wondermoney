@@ -1,5 +1,6 @@
 "use client";
 
+import { Check } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import { TransactionAmount } from "@/components/account/TransactionAmount";
@@ -11,17 +12,18 @@ import {
   Section,
   SectionEmpty,
 } from "@/components/ui/RuledSection";
+import useTransactionReviewSummary from "@/lib/api/account/useTransactionReviewSummary";
 import useTransactions, {
   type Transaction,
 } from "@/lib/api/account/useTransactions";
 import { cn } from "@/lib/utils";
 import { getCategoryDisplayName } from "@/lib/utils/categories";
 import { transactionDisplayDate } from "@/lib/utils/transaction-date";
+import { useFormatCurrency } from "@/lib/utils/useFormatCurrency";
 import { useFormatShortDate } from "@/lib/utils/useFormatShortDate";
 
 const SHOWN = 6;
 const LATEST = { limit: SHOWN } as const;
-const UNREVIEWED = { limit: 1, unreviewedOnly: true } as const;
 
 function TransactionRow({ transaction }: { transaction: Transaction }) {
   const t = useTranslations();
@@ -93,22 +95,53 @@ function TransactionRow({ transaction }: { transaction: Transaction }) {
   );
 }
 
+/**
+ * The review inbox at a glance, above the latest transactions: how many rows are
+ * waiting, what they add up to, and the way in. With nothing waiting it says so
+ * instead of showing an empty action. It is not a dashboard section of its own —
+ * it belongs to the latest-transactions block, so hiding that block hides it too.
+ *
+ * The amount goes through `useFormatCurrency()`, which masks it in privacy mode.
+ */
+function ReviewStatusRow() {
+  const t = useTranslations("homeOverview.latest");
+  const formatCurrency = useFormatCurrency();
+  const summary = useTransactionReviewSummary();
+  const review = summary.data;
+
+  // Still loading, or the summary failed: the section's rows stand on their own.
+  if (!review) return null;
+
+  if (review.count === 0) {
+    return (
+      <p className="border-border text-success-text mb-4 flex items-center gap-2 border-b pb-4 text-sm">
+        <Check aria-hidden className="size-4" />
+        {t("all-caught-up")}
+      </p>
+    );
+  }
+
+  return (
+    <div className="border-border mb-4 flex flex-wrap items-center justify-between gap-x-4 gap-y-2 border-b pb-4">
+      <p className="text-muted-foreground text-sm">
+        {t("review-summary", {
+          amount: formatCurrency(review.totalAbs, review.currency),
+          count: review.count,
+        })}
+      </p>
+      <Link
+        href="/accounts/transactions/review"
+        className={buttonVariants({ size: "sm", variant: "secondary" })}
+      >
+        {t("review-now")}
+      </Link>
+    </div>
+  );
+}
+
 export function LatestTransactionsSection() {
   const t = useTranslations("homeOverview.latest");
   const latest = useTransactions(LATEST);
-  const unreviewed = useTransactions(UNREVIEWED);
-  const unreviewedCount =
-    unreviewed.data?.total ?? unreviewed.data?.transactions.length;
-
-  const reviewLink =
-    unreviewedCount && unreviewedCount > 0 ? (
-      <Link
-        href="/accounts/transactions/review"
-        className={cn(buttonVariants({ variant: "link" }), "h-auto p-0")}
-      >
-        {t("review", { count: unreviewedCount })}
-      </Link>
-    ) : undefined;
 
   if (latest.isPending) {
     return (
@@ -131,6 +164,11 @@ export function LatestTransactionsSection() {
 
   // The API may return more than asked for; the section shows a fixed six.
   const transactions = latest.data.transactions.slice(0, SHOWN);
+  // An offline account with only its opening balance has no real transaction (that row's key is
+  // negative), so the review status stays out of it, exactly as for an empty account.
+  const hasTransactions = transactions.some(
+    (transaction) => transaction.transactionKey > 0,
+  );
 
   if (transactions.length === 0) {
     return (
@@ -152,7 +190,8 @@ export function LatestTransactionsSection() {
   }
 
   return (
-    <Section id="latest-heading" title={t("title")} aside={reviewLink}>
+    <Section id="latest-heading" title={t("title")}>
+      {hasTransactions ? <ReviewStatusRow /> : null}
       <table className="w-full border-collapse">
         <caption className="sr-only">
           {t("caption", { count: transactions.length })}

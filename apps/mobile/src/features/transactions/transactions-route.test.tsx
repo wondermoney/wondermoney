@@ -9,7 +9,7 @@ const mockUseTransactions = jest.fn()
 const mockMutateAsync = jest.fn()
 const mockMutateAmountAsync = jest.fn()
 const mockMutateTransferAsync = jest.fn()
-let mockParams: { accountId?: string } = {}
+let mockParams: { accountId?: string; filter?: string } = {}
 const mockBlockAccess = jest.fn()
 const mockPush = jest.fn()
 const mockUseAccounts = jest.fn()
@@ -89,6 +89,13 @@ describe('TransactionsRoute', () => {
     expect(mockUseTransactions).toHaveBeenCalledWith({ fromDate: expect.any(String), toDate: expect.any(String) }, null)
     const [{ fromDate, toDate }] = mockUseTransactions.mock.calls[0] as [{ fromDate: string; toDate: string }]
     expect(Math.round((Date.parse(toDate) - Date.parse(fromDate)) / 86_400_000)).toBe(61)
+  })
+  it('opens already filtered to the review inbox when Home asks for it', async () => {
+    mockParams = { filter: 'unreviewed' }
+    mockUseTransactions.mockReturnValue({ isInvalidAccountId: false, isAccessTransition: false, isLoading: true, refetch: jest.fn() })
+    await render(<TransactionsRoute />)
+    // No date range: an unreviewed row older than the list's 60-day default must still show.
+    expect(mockUseTransactions).toHaveBeenCalledWith({ limit: 100, needsReview: true }, null)
   })
   it('passes the validated nested account id and maps not found', async () => {
     mockParams = { accountId: '7' }

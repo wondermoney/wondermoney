@@ -31,10 +31,13 @@ function classifyResult(error: unknown, blockAccess: (state: 'mfa-required') => 
 }
 
 export function TransactionsRoute({ perAccount = false }: { perAccount?: boolean }) {
-  const params = useLocalSearchParams<{ accountId?: string | string[] }>()
+  const params = useLocalSearchParams<{ accountId?: string | string[]; filter?: string | string[] }>()
   const accountId = perAccount ? parseAccountId(params.accountId) : null
+  // Home's "Review now" opens the ledger already narrowed to the review inbox, with no date
+  // range: an unreviewed row from last year must not be hidden by the list's 60-day default.
+  const reviewOnly = !perAccount && (Array.isArray(params.filter) ? params.filter[0] : params.filter) === 'unreviewed'
   // Web opens both ledgers on the last 60 days (`subDays(new Date(), 60)`).
-  const [filters, setFilters] = useState<TransactionFilters>(() => presetRange(DEFAULT_RANGE_DAYS))
+  const [filters, setFilters] = useState<TransactionFilters>(() => reviewOnly ? { limit: 100, needsReview: true } : presetRange(DEFAULT_RANGE_DAYS))
   const query = useTransactions(filters, perAccount ? accountId : null)
   const accountsQuery = useAccounts()
   const lead = useTransactionsLead({ fromDate: filters.fromDate, toDate: filters.toDate }, !perAccount)

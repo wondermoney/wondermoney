@@ -357,8 +357,10 @@
     },
     "latest": {
       "title": "Últimas transacciones",
-      "review_one": "{{count}} por revisar",
-      "review_other": "{{count}} por revisar",
+      "reviewSummary_one": "{{count}} transacción por revisar · {{amount}} en total",
+      "reviewSummary_other": "{{count}} transacciones por revisar · {{amount}} en total",
+      "reviewNow": "Revisar ahora",
+      "allCaughtUp": "Todo al día",
       "all": "Todas las transacciones",
       "uncategorised": "Sin categoría",
       "needsReview": "Por revisar",

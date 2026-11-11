@@ -107,6 +107,18 @@ export const accountTransactionsResponseSchema = z.object({
   ...pageFacts,
 })
 
+/**
+ * The home's review status: how many transactions await review and what their
+ * absolute amounts add up to in the reader's base currency. `count` is the
+ * list's `total` for `unreviewedOnly=true`; the API computes both from one query.
+ */
+export const transactionReviewSummarySchema = z.object({
+  count: z.number().int().nonnegative(),
+  totalAbs: money,
+  currency: z.string().regex(/^[A-Z]{3}$/),
+})
+export type TransactionReviewSummaryDto = z.infer<typeof transactionReviewSummarySchema>
+
 export type TransactionFilters = Readonly<{
   fromDate?: string
   toDate?: string
@@ -152,6 +164,12 @@ export function createAccountTransactionsEndpoint(accountId: number, filters: Tr
     schema: accountTransactionsResponseSchema,
   })
 }
+
+export const transactionReviewSummaryEndpoint = readEndpoint({
+  method: 'GET',
+  path: '/v1/account/transaction/review-summary',
+  schema: transactionReviewSummarySchema,
+})
 
 export const updateTransactionsEndpoint = writeEndpoint({
   method: 'PATCH',
