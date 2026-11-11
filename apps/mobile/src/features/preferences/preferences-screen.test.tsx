@@ -9,6 +9,7 @@ import { PreferencesScreen } from './preferences-screen'
 
 jest.mock('expo-router', () => ({ useRouter: () => ({ back: jest.fn() }) }))
 jest.mock('./preview-features-section', () => ({ PreviewFeaturesSection: () => null }))
+jest.mock('./ai-hidden-section', () => ({ AiHiddenSection: () => null }))
 
 describe('PreferencesScreen: privacy mode', () => {
   it('switches amounts off and on, and saves each choice on the device', async () => {

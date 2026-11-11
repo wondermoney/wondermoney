@@ -130,6 +130,23 @@ describe('handleTransactionEnrichmentGptJob', () => {
     expect(requestSuggestion).not.toHaveBeenCalled();
   });
 
+  it('skips without a model call when the account owner hid AI after the job was enqueued', async () => {
+    const row = enrichmentRow();
+    findOne
+      .mockResolvedValueOnce(row)
+      .mockResolvedValueOnce(transactionRow({ accountKey: { accountOwnerAppuserKey: { appuserKey: 1, preferences: { aiHidden: true } } } }));
+    const requestSuggestion = vi.fn();
+    const reserveBudget = vi.fn().mockResolvedValue(true);
+
+    const result = await handleTransactionEnrichmentGptJob(job(validPayload), { config: shadowConfig, logger, requestSuggestion, reserveBudget });
+
+    expect(result).toBe(true);
+    expect(requestSuggestion).not.toHaveBeenCalled();
+    expect(reserveBudget).not.toHaveBeenCalled();
+    expect(row.status).toBe(TransactionEnrichmentStatus.SKIPPED);
+    expect((row as { eligibilityReason?: string }).eligibilityReason).toBe('ai_hidden');
+  });
+
   it('skips with budget_exhausted and does not call the model when the budget is spent', async () => {
     const row = enrichmentRow();
     findOne.mockResolvedValueOnce(row).mockResolvedValueOnce(transactionRow());

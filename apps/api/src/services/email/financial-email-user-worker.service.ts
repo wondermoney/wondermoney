@@ -4,6 +4,7 @@ import Big from 'big.js';
 import { DI } from '@app/database/di';
 import { BUDGET_EMAIL_MAX_AGE_SECONDS, MONTHLY_STORY_EMAIL_MAX_AGE_SECONDS, WEEKLY_EMAIL_MAX_AGE_SECONDS } from '@app/jobs/financial-emails.queue';
 import { Appuser, SupportedLanguages } from '@entity/Appuser';
+import { isAiHidden } from '@service/ai/ai-availability';
 import type { LisbonWeeklyPeriod } from '@service/budget/aggregation-periods';
 import type { AggregationSuppressedResult, BudgetAggregationResult, MonthlyStoryAggregationResult, MonthlyStoryFacts, MonthlyStoryInsufficientResult, WeeklyAggregationResult, WeeklyInsightFacts } from '@service/budget/aggregation-types';
 import type { NarrativeLanguage, NetWorthDriverInput } from '@service/budget/monthly-story-narrative-skeleton';
@@ -115,7 +116,7 @@ export class FinancialEmailUserWorkerService {
       const factsWithRecurring: MonthlyStoryFacts = { ...combined.facts, recurringChanges };
       const monthLabel = monthLabelFor(combined.period, fresh.language);
       const narrativeLanguage: NarrativeLanguage = fresh.language === SupportedLanguages.PT ? 'pt' : 'en';
-      const narrative = await this.narrative.generate(factsWithRecurring, netWorthInput, monthLabel, narrativeLanguage);
+      const narrative = await this.narrative.generate(factsWithRecurring, netWorthInput, monthLabel, narrativeLanguage, { allowModel: !isAiHidden(appuser) });
 
       const delivered = await this.orchestration.deliverMonthlyStory({
         appuserKey: input.appuserKey,

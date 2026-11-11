@@ -47,6 +47,9 @@ vi.mock("@/lib/api/instance/useInstance", () => ({
 vi.mock("@/lib/api/useRateLimitToast", () => ({
   useRateLimitToast: () => () => false,
 }));
+vi.mock("@/lib/api/user-preferences/useAiHidden", () => ({
+  default: () => false,
+}));
 vi.mock("posthog-js/react", () => ({
   usePostHog: () => ({ capture: () => {} }),
 }));

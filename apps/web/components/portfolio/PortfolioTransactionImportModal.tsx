@@ -35,6 +35,7 @@ import usePortfolioImportSessionPreview from "@/lib/api/portfolio/usePortfolioIm
 import usePortfolios from "@/lib/api/portfolio/usePortfolios";
 import useSuggestPortfolioImportColumnMapping from "@/lib/api/portfolio/useSuggestPortfolioImportColumnMapping";
 import useTriggerPortfolioImportSessionParse from "@/lib/api/portfolio/useTriggerPortfolioImportSessionParse";
+import useAiHidden from "@/lib/api/user-preferences/useAiHidden";
 import {
   extractPortfolioImportCsvColumns,
   getPortfolioImportAvailableColumns,
@@ -242,6 +243,7 @@ const PortfolioTransactionImportModal: React.FC<
 > = ({ defaultPortfolioId, isOpen, setOpen, trigger }) => {
   const t = useTranslations();
   const canImportFiles = useFeature((features) => features.fileStorage);
+  const aiHidden = useAiHidden();
   const posthog = usePostHog();
   const methods = useForm<FormProps>({
     resolver: zodResolver(formSchema),
@@ -662,6 +664,7 @@ const PortfolioTransactionImportModal: React.FC<
 
   useEffect(() => {
     if (
+      aiHidden ||
       !shouldSuggestPortfolioImportColumnMapping({
         hasSuggestion: Boolean(previewColumnMapping?.suggestion),
         hasWarning: Boolean(previewColumnMapping?.warning),
@@ -678,6 +681,7 @@ const PortfolioTransactionImportModal: React.FC<
     void requestColumnMappingSuggestion();
   }, [
     activeImportSessionId,
+    aiHidden,
     isSuggestingPortfolioImportColumnMapping,
     preview?.status,
     previewColumnMapping?.suggestion,

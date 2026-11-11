@@ -13,7 +13,7 @@ import { tenantHttp, useRequestContextEm } from '@app/__tests__/__helpers__/tena
 import { Appuser } from '@entity/Appuser';
 import userRoutes from '@route/user';
 
-const DEFAULT_PREFERENCES = { dashboardLayout: [], previewFeatures: false };
+const DEFAULT_PREFERENCES = { aiHidden: false, dashboardLayout: [], previewFeatures: false };
 
 /*
  * `/v1/user/me/preferences` is self-scoped: the handler reads the appuser from the
@@ -42,6 +42,16 @@ describe('/v1/user/me/preferences', () => {
       ...DEFAULT_PREFERENCES,
       previewFeatures: true,
     });
+  });
+
+  it('persists the AI-hidden choice and reads it back', async () => {
+    const owner = await seedHousehold(db.em());
+
+    const patched = await http.as(owner.appuser).patch('/v1/user/me/preferences').send({ aiHidden: true });
+
+    expect(patched.status).toBe(200);
+    expect(patched.body.aiHidden).toBe(true);
+    expect((await http.as(owner.appuser).get('/v1/user/me/preferences')).body.aiHidden).toBe(true);
   });
 
   it('persists the dashboard layout in order and reads it back', async () => {

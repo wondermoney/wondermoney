@@ -65,6 +65,10 @@ export async function enqueueTransactionEnrichmentForTenant(
     const enqueue = deps.enqueue;
     if (!enqueue) throw new Error('Transaction enrichment requires an enqueue dependency when enabled');
 
+    // Accounts whose owner hid AI: nothing from them may reach a model. The deterministic
+    // categorizers still run; only this model-backed pipeline skips them.
+    const hiddenAiAccountKeys = await hiddenAiAccountKeysForTenant(em, tenantKey);
+
     // Exclude transactions that already have an enrichment row. Shadow mode never changes
     // categorizationConfidence, so enriched rows stay in the NONE/LOW pool forever; without this
     // exclusion (plus a deterministic ORDER BY) a tenant with >LIMIT low-confidence txns would keep
@@ -105,6 +109,9 @@ export async function enqueueTransactionEnrichmentForTenant(
         deletedAt: undefined,
         tenantKey,
         transactionMerchantKey: { $ne: null },
+        ...(hiddenAiAccountKeys.length > 0
+          ? { $or: [{ accountKey: { $nin: hiddenAiAccountKeys } }, { accountKey: null }] }
+          : {}),
         ...(enrichedTransactionKeys.length > 0 ? { transactionKey: { $nin: enrichedTransactionKeys } } : {}),
       } as FilterQuery<Transaction>,
       { limit: CANDIDATE_BATCH_LIMIT, orderBy: { transactionKey: 'ASC' } },
@@ -123,6 +130,7 @@ export async function enqueueTransactionEnrichmentForTenant(
       {
         candidates: candidates.length,
         enriched: enrichedTransactionKeys.length,
+        hiddenAiAccounts: hiddenAiAccountKeys.length,
         skippedUncategorisable,
         source,
         tenantKey,
@@ -165,4 +173,22 @@ export async function enqueueTransactionEnrichmentForTenant(
       'Transaction enrichment enqueue failed',
     );
   } finally { /* fail-open producer never owns the queue lifecycle */ }
+}
+
+/**
+ * The accounts in this household whose owner hid AI.
+ *
+ * Raw SQL because the preference is a jsonb document; the tenant and the soft delete are named
+ * explicitly, as every raw query that bypasses the ORM filter must be.
+ */
+async function hiddenAiAccountKeysForTenant(em: EntityManager, tenantKey: number): Promise<number[]> {
+  const rows = await em.getConnection().execute<{ accountKey: number | string }[]>(
+    `select account."account_key" as "accountKey"
+       from "account" account
+       join "appuser" owner on owner."appuser_key" = account."account_owner_appuser_key"
+      where account."tenant_key" = ? and account."deleted_at" is null
+        and owner."preferences"->>'aiHidden' = 'true'`,
+    [tenantKey],
+  );
+  return rows.map((row) => Number(row.accountKey)).filter((key) => Number.isInteger(key));
 }

@@ -7,6 +7,7 @@ import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import useAssistantConsent from "@/lib/api/assistant/useAssistantConsent";
+import useAiHidden from "@/lib/api/user-preferences/useAiHidden";
 
 const AssistantPanel = dynamic(() => import("./AssistantPanel"), {
   ssr: false,
@@ -16,10 +17,11 @@ export default function AssistantLauncher() {
   const t = useTranslations("assistant");
   const [open, setOpen] = useState(false);
   const { data: consent } = useAssistantConsent();
+  const aiHidden = useAiHidden();
 
-  // The only thing that hides the launcher now is the person's own choice to
-  // dismiss it. The module itself is available to everyone.
-  if (consent?.launcherHidden) {
+  // Hiding AI turns the launcher and the panel off; the person's own choice to
+  // dismiss the launcher hides it while the assistant stays available.
+  if (aiHidden || consent?.launcherHidden) {
     return null;
   }
 

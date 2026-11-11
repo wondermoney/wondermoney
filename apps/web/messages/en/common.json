@@ -1859,6 +1859,19 @@
   "add-first-account": "Add Your First Account",
   "your-accounts": "Your Accounts",
   "preview": "Preview",
+  "aiFeatures": {
+    "title": "AI features",
+    "description": "Turn off every AI feature for your account.",
+    "toggleLabel": "Hide AI features",
+    "toggleOnLabel": "Hide AI features",
+    "toggleOffLabel": "Show AI features",
+    "hint": "Turns off the assistant, receipt scanning, AI column mapping and the AI-written monthly story text. Transactions are no longer sent to a model for categorization.",
+    "loadError": "Could not load your preferences.",
+    "saving": "Saving…",
+    "saved": "Saved",
+    "saveError": "Could not save. Try again.",
+    "retry": "Retry"
+  },
   "previewFeatures": {
     "title": "Preview features",
     "description": "Try features before they are ready for everyone.",

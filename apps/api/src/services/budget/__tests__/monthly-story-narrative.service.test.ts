@@ -37,6 +37,14 @@ describe('MonthlyStoryNarrativeService', () => {
     expect(result.source).toBe('skeleton');
   });
 
+  it('returns the deterministic skeleton without calling the model when AI is hidden', async () => {
+    const result = await service.generate(factsWithOneDriver(), null, 'julho de 2026', 'pt', { allowModel: false });
+
+    expect(promptWithText).not.toHaveBeenCalled();
+    expect(result.source).toBe('skeleton');
+    expect(result.sentences.length).toBeGreaterThan(0);
+  });
+
   it('never returns an empty sentence list even on total LLM failure', async () => {
     promptWithText.mockRejectedValue(new Error('boom'));
     const result = await service.generate(factsWithOneDriver(), null, 'julho de 2026', 'pt');

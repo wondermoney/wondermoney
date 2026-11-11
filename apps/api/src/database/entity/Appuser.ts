@@ -87,7 +87,7 @@ export class Appuser extends Base {
   onboardingCompletedVersion?: number;
 
   /**
-   * Per-user preferences (`{ previewFeatures, dashboardLayout }` today). A JSON document
+   * Per-user preferences (`{ aiHidden, previewFeatures, dashboardLayout }` today). A JSON document
    * rather than a column per setting, so a new preference does not need a
    * migration. `@validators/preferences` validates it on every read and write and
    * drops unknown keys.

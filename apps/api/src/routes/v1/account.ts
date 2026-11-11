@@ -37,6 +37,7 @@ import {
 import { setTransactionTags } from '@controller/tag';
 import { removeTransactionSplits, setTransactionSplits } from '@controller/transaction-split';
 import { requireAiAllowance } from '@middleware/ai-allowance';
+import { requireAiAllowed } from '@middleware/ai-enabled';
 import { requireVerifiedEmailForAi } from '@middleware/email-verification';
 import multerSingleFile from '@middleware/multer';
 
@@ -61,7 +62,7 @@ router.get('/transaction-types', cache('1 day'), getTransactionTypes);
 router.get('/transaction-merchants', getTransactionMerchants);
 router.get('/financial-institutions', cache('1 day'), getAccountFinancialInstitutions);
 router.get('/account-types', cache('1 day'), getAccountTypes);
-router.post('/transaction/ocr', requireVerifiedEmailForAi, requireAiAllowance('ocr'), multerSingleFile, createTransactionOCRImport);
+router.post('/transaction/ocr', requireVerifiedEmailForAi, requireAiAllowed('ocr'), requireAiAllowance('ocr'), multerSingleFile, createTransactionOCRImport);
 router.put('/transaction/ocr/:transactionOCRImportId/confirm', confirmTransactionOCRImportAndCreateTransaction);
 router.put('/transaction/ocr/:transactionOCRImportId/reject', rejectTransactionOCRImport);
 router.get('/cashflow', getAccountsCashflow);
