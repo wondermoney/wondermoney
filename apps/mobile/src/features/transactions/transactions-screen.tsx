@@ -20,6 +20,7 @@ import { Divider } from '@/components/ui/section'
 import { OptionSheet, Sheet } from '@/components/ui/sheet'
 import { Text } from '@/components/ui/text'
 import type { CategoryViewModel } from '@/features/categories/categories-view-model'
+import { displayCategoryName } from '@/features/categories/categories-view-model'
 import { TagChips, TagDot } from '@/features/tags/tag-chip'
 import { TagPickerSheet, type CreateTagOutcome, type TagsState } from '@/features/tags/tag-picker-sheet'
 import { formatTransactionDate, localCalendarDay, localDayRange } from '@/lib/dates/transaction-date'
@@ -33,9 +34,11 @@ import { usePalette } from '@/theme/use-palette'
 
 import { FormNotice, TextField } from './form-field'
 import { SelectField } from './select-field'
-import { type TransactionFilters, type TransferDestinationType, type TransferEditDraft } from './transactions-contract'
+import { TransactionSplitScreen } from './transaction-split-screen'
+import { type TransactionFilters, type TransactionSplitLineRequest, type TransferDestinationType, type TransferEditDraft } from './transactions-contract'
 import { formatMonth, formatRange, formatShortDate, monthKey, presetFor, presetRange, RANGE_PRESETS, type RangePreset } from './transactions-date-range'
 import { TransactionsLead } from './transactions-lead'
+import { canSplitTransaction, splitCategoryCount } from './transactions-split-view-model'
 import type { TransactionViewModel } from './transactions-view-model'
 import type { TransactionsLeadData } from './use-transactions-lead'
 
@@ -102,6 +105,10 @@ type Props = Readonly<{
   transferDestinations?: TransferDestinationOptions
   /** Pre-fill a new rule from a row ("always do this"). Omitted, the action is not offered. */
   onCreateRule?: (transaction: TransactionViewModel) => void
+  /** Replace a transaction's split lines. Omitted, the Split action is not offered. */
+  onSaveSplit?: (transactionId: number, lines: readonly TransactionSplitLineRequest[]) => Promise<ReviewResult>
+  /** Remove a transaction's split. Omitted, the editor hides Remove split. */
+  onRemoveSplit?: (transactionId: number) => Promise<ReviewResult>
 }>
 
 export function TransactionsScreen(props: Props) {
@@ -157,6 +164,8 @@ function TransactionsContent({
   onSetTransfer,
   transferDestinations = { accounts: [], portfolios: [], goals: [] },
   onCreateRule,
+  onSaveSplit,
+  onRemoveSplit,
   filtersOpen,
   onFiltersOpenChange: setFiltersOpen,
 }: Props & Readonly<{ filtersOpen: boolean; onFiltersOpenChange: (open: boolean) => void }>) {
@@ -196,6 +205,9 @@ function TransactionsContent({
   const [tagNotice, setTagNotice] = useState<string | null>(null)
   const [destinationId, setDestinationId] = useState<number | null>(null)
   const [transferPending, setTransferPending] = useState(false)
+  const [splitId, setSplitId] = useState<number | null>(null)
+  const [splitSaving, setSplitSaving] = useState(false)
+  const [splitError, setSplitError] = useState<string | null>(null)
   const [confirmation, setConfirmation] = useState<FrozenBulkAction | null>(null)
   const [submittedAction, setSubmittedAction] = useState<FrozenBulkAction | null>(null)
   const loaded = useMemo(() => 'transactions' in state ? state.transactions : [], [state])
@@ -430,6 +442,33 @@ function TransactionsContent({
     void runTransferEdit({ transactionId: destinationRow.id, direction: 'debit', transfer: true, destination })
   }
 
+  const splitRow = splitId === null ? null : loaded.find((row) => row.id === splitId) ?? null
+  const openSplit = (id: number) => { setSplitError(null); setSplitId(id) }
+  const saveSplit = async (lines: readonly TransactionSplitLineRequest[]) => {
+    if (!onSaveSplit || splitId === null) return
+    setSplitSaving(true)
+    setSplitError(null)
+    try {
+      const result = await onSaveSplit(splitId, lines)
+      if (result === 'success') setSplitId(null)
+      else setSplitError(t(`transactions.reviewResult.${result}`))
+    } finally {
+      setSplitSaving(false)
+    }
+  }
+  const removeSplit = async () => {
+    if (!onRemoveSplit || splitId === null) return
+    setSplitSaving(true)
+    setSplitError(null)
+    try {
+      const result = await onRemoveSplit(splitId)
+      if (result === 'success') setSplitId(null)
+      else setSplitError(t(`transactions.reviewResult.${result}`))
+    } finally {
+      setSplitSaving(false)
+    }
+  }
+
   const editingBundle: EditingBundle | null = editingAmountId === null ? null : {
     transactionId: editingAmountId,
     amountDraft,
@@ -466,6 +505,8 @@ function TransactionsContent({
       onStartEditAmount={startEditAmount}
       onOpenMenu={openRowMenu}
       onCreateRule={onCreateRule}
+      onSplit={openSplit}
+      canSplit={Boolean(onSaveSplit) && categories.status === 'loaded'}
       palette={palette}
       locale={locale}
     />
@@ -801,6 +842,18 @@ function TransactionsContent({
       ) : null}
     </SafeAreaView>
     {showCreate && onCreate ? <FloatingActionButton accessibilityLabel={t('transactionCreate.action')} onPress={onCreate} testID="transactions-create" /> : null}
+    {splitRow ? (
+      <TransactionSplitScreen
+        categories={categoryChoices}
+        error={splitError}
+        locale={locale}
+        onClose={() => { if (!splitSaving) setSplitId(null) }}
+        onRemove={onRemoveSplit ? removeSplit : undefined}
+        onSave={saveSplit}
+        pending={splitSaving}
+        transaction={splitRow}
+      />
+    ) : null}
     </View>
   )
 }
@@ -828,6 +881,10 @@ type TransactionRowProps = Readonly<{
   onStartEditAmount: (item: TransactionViewModel) => void
   onOpenMenu: (id: number) => void
   onCreateRule?: (item: TransactionViewModel) => void
+  /** Opens the full-screen split editor for this row. */
+  onSplit?: (id: number) => void
+  /** Whether the Split action is offered at all (the route provides a handler). */
+  canSplit: boolean
   palette: Palette
   locale: string
 }>
@@ -861,6 +918,8 @@ const TransactionRow = memo(function TransactionRow({
   onStartEditAmount,
   onOpenMenu,
   onCreateRule,
+  onSplit,
+  canSplit,
   palette,
   locale,
 }: TransactionRowProps) {
@@ -885,6 +944,9 @@ const TransactionRow = memo(function TransactionRow({
   const account = item.accountName ?? t('transactions.accountUnavailable')
   const selectable = selecting && isSelectable(item)
   const editable = isSelectable(item)
+  // A split row shows its count in place of the one category, as web's ledger does.
+  const splitLabel = item.isSplit ? t('transactions.split.summary', { count: splitCategoryCount(item.splits) }) : null
+  const categoryLabel = item.category ? formatCategoryName(item.category) : null
   const figure = shownValue !== null && shownCurrency !== null
     ? <Amount currency={shownCurrency} locale={locale} size="amountBase" value={shownValue} />
     : <Text variant="amountBase">{amount}</Text>
@@ -894,7 +956,7 @@ const TransactionRow = memo(function TransactionRow({
     <View style={[!monthStart && { borderTopWidth: 1, borderTopColor: palette.border }, item.hidden && styles.hiddenRow]}>
       {monthStart ? <ListGroupHeading first={isFirst} title={formatMonth(item.date, locale)} variant="heading" /> : null}
       <ListRow
-        accessibilityLabel={[title, account, signedAmount, direction, fullDate, fxCopy ? `${fxCopy.label}. ${fxCopy.hint}` : null].filter(Boolean).join(', ')}
+        accessibilityLabel={[title, account, signedAmount, direction, fullDate, splitLabel, fxCopy ? `${fxCopy.label}. ${fxCopy.hint}` : null].filter(Boolean).join(', ')}
         density="comfortable"
         figure={figure}
         leading={selectable ? (
@@ -910,7 +972,7 @@ const TransactionRow = memo(function TransactionRow({
             {selected ? <Icon color={palette.primaryForeground} name="check" size={14} weight="bold" /> : null}
           </Pressable>
         ) : <EntityMark {...(item.mark ?? { glyph: 'tag' })} testID="transaction-mark" />}
-        meta={[`${account} · ${formatShortDate(item.date, locale)}`, item.category ? formatCategoryName(item.category) : null]}
+        meta={[`${account} · ${formatShortDate(item.date, locale)}`, splitLabel ?? categoryLabel]}
         moreAccessibilityLabel={t('transactions.rowActions', { name: title })}
         onMorePress={() => onOpenMenu(item.id)}
         // While selecting, the row is the checkbox's larger target; it never
@@ -936,6 +998,27 @@ const TransactionRow = memo(function TransactionRow({
           {item.isTransfer ? <Detail label={t('transactions.transfer.label')} value={transferDetail(item, t)} /> : null}
           {!item.isTransfer && !item.categoryCountsAsSpending ? <Detail label={t('transactions.transfer.spendingLabel')} value={t('transactions.transfer.notSpending')} /> : null}
           {item.recurring ? <Detail label={t('transactions.recurring')} value={`${item.recurring.displayName} · ${t(`transactions.recurringType.${item.recurring.type}`)}`} /> : null}
+          {item.isSplit ? (
+            <View style={styles.detail}>
+              <Text tone="muted" variant="label">{t('transactions.split.lines')}</Text>
+              <View style={styles.splitLines}>
+                {item.splits.map((line) => (
+                  <View key={line.transactionSplitKey} style={styles.splitLine}>
+                    <View style={styles.flex}>
+                      <Text variant="meta">{line.category ? displayCategoryName(line.category, t) : t('transactions.split.uncategorized')}</Text>
+                      {line.notes ? <Text tone="muted" variant="label">{line.notes}</Text> : null}
+                    </View>
+                    <Amount
+                      currency={line.appuserAmount != null ? item.currency : item.settlementCurrency}
+                      locale={locale}
+                      size="amountSmall"
+                      value={line.appuserAmount ?? line.amount}
+                    />
+                  </View>
+                ))}
+              </View>
+            </View>
+          ) : null}
           {item.tags.length > 0 ? (
             <View style={styles.detail}>
               <Text tone="muted" variant="label">{t('tags.title')}</Text>
@@ -990,6 +1073,9 @@ const TransactionRow = memo(function TransactionRow({
               ) : null}
               {editable && onCreateRule ? (
                 <UiButton disabled={mutationPending} icon="sliders-horizontal" label={t('rules.createFromTransaction')} onPress={() => onCreateRule(item)} size="sm" variant="secondary" />
+              ) : null}
+              {editable && canSplit && onSplit && canSplitTransaction(item) ? (
+                <UiButton disabled={mutationPending} icon="split" label={item.isSplit ? t('transactions.split.edit') : t('transactions.split.action')} onPress={() => onSplit(item.id)} size="sm" variant="secondary" />
               ) : null}
             </View>
           )}
@@ -1080,6 +1166,8 @@ const styles = StyleSheet.create({
   checkbox: { width: 20, height: 20, borderWidth: 1, borderRadius: themeTokens.radius.sm, alignItems: 'center', justifyContent: 'center' },
   details: { padding: themeTokens.spacing[4], borderRadius: themeTokens.radius.lg, marginBottom: themeTokens.spacing[3], gap: themeTokens.spacing[3] },
   detail: { gap: 2 },
+  splitLines: { gap: themeTokens.spacing[2] },
+  splitLine: { flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between', gap: themeTokens.spacing[3] },
   amountEdit: { width: '100%', gap: themeTokens.spacing[3] },
   inlineActions: { flexDirection: 'row', flexWrap: 'wrap', gap: themeTokens.spacing[2] },
   empty: { width: '100%', alignItems: 'flex-start', paddingVertical: themeTokens.spacing[6], gap: themeTokens.spacing[2] },

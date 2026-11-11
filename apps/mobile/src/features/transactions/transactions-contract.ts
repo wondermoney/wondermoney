@@ -30,6 +30,23 @@ const transferDestination = z.object({
   name: z.string().max(1000).nullish(),
 })
 
+/**
+ * One line of a split transaction, as the list and the split endpoints return it. A split shares
+ * one transaction's amount over several categories; the lines always add up to that amount, each
+ * with its sign. A row that is not split has no lines.
+ */
+const transactionSplitLine = z.object({
+  transactionSplitKey: positiveId,
+  /** In the transaction's settlement (account) currency, signed. */
+  amount: money,
+  /** The line's share in the owner's currency; null when the transaction has no converted amount. */
+  appuserAmount: money.nullable().optional(),
+  /** Null for an uncategorized line. */
+  category: category.nullable().optional(),
+  notes: z.string().max(500).nullable().optional(),
+  position: z.number().int().nonnegative(),
+})
+
 const recurringSeries = z.object({
   recurringSeriesKey: positiveId,
   displayName: z.string().min(1).max(255),
@@ -68,6 +85,8 @@ const transactionBaseShape = {
   appuserTransactionCategories: z.array(category),
   // Optional: a server from before tags omits the field, and the row reads as untagged.
   tags: z.array(tagSchema).optional(),
+  // Optional: a server from before splits omits the field, and the row reads as unsplit.
+  splits: z.array(transactionSplitLine).optional(),
   recurringSeries: recurringSeries.nullable(),
   // Optional: a server from before transfer destinations omits it. A destination of a type this
   // build does not know reads as none rather than failing the list.
@@ -260,5 +279,87 @@ export function freezeTransferEdit(draft: TransferEditDraft): FrozenTransferEdit
   return Object.freeze({
     transactionId,
     payload: Object.freeze(destination === undefined || !draft.transfer || !outgoing ? { transactionType } : { transactionType, transferDestination: destination }),
+  })
+}
+
+/** One line of a split transaction, as the list and the split endpoints return it. */
+export type TransactionSplitLineDto = z.infer<typeof transactionSplitLine>
+
+/** One line of a `PUT .../splits` request. */
+export type TransactionSplitLineRequest = Readonly<{
+  /** Null for an uncategorized line. */
+  categoryId: number | null
+  /** A dot decimal in the settlement currency, with the transaction's sign ("-12.5"). */
+  amount: string
+  notes: string | null
+}>
+
+export type SetTransactionSplitsDraft = Readonly<{
+  transactionId: number
+  lines: readonly TransactionSplitLineRequest[]
+}>
+export type FrozenSetTransactionSplits = Readonly<{
+  transactionId: number
+  payload: readonly TransactionSplitLineRequest[]
+}>
+
+/** The API stores line amounts with four decimals and takes at most this many lines. */
+const SPLIT_LINE_AMOUNT = /^-?(?:\d+(?:\.\d{1,4})?|\.\d{1,4})$/
+export const MAX_SPLIT_LINES = 50
+
+const splitLineRequest = z.object({
+  categoryId: positiveId.nullable(),
+  amount: z.string().trim().regex(SPLIT_LINE_AMOUNT),
+  notes: z.string().trim().max(500).nullable(),
+}).strict()
+
+/**
+ * Resolves the editor's lines into the exact `PUT .../splits` body. The API checks the rules that
+ * need the transaction (at least two lines, the signs, the sum); this only guarantees the shape.
+ */
+export function freezeSetTransactionSplits(draft: SetTransactionSplitsDraft): FrozenSetTransactionSplits {
+  const transactionId = positiveId.parse(draft.transactionId)
+  if (draft.lines.length < 2) throw new Error('A split needs at least two lines.')
+  if (draft.lines.length > MAX_SPLIT_LINES) throw new Error(`A split takes at most ${MAX_SPLIT_LINES} lines.`)
+  const lines = draft.lines.map((line) => {
+    const parsed = splitLineRequest.parse({
+      categoryId: line.categoryId,
+      amount: line.amount,
+      notes: line.notes === null ? null : line.notes.trim() === '' ? null : line.notes,
+    })
+    return Object.freeze({
+      categoryId: parsed.categoryId,
+      amount: parsed.amount,
+      notes: parsed.notes,
+    })
+  })
+  return Object.freeze({ transactionId, payload: Object.freeze(lines) })
+}
+
+/** `PUT /v1/account/transaction/:id/splits`: replace every line of the transaction's split. */
+export function createSetTransactionSplitsEndpoint(transactionId: number) {
+  return writeEndpoint({
+    method: 'PUT',
+    path: `/v1/account/transaction/${positiveId.parse(transactionId)}/splits`,
+    schema: z.object({
+      transaction: z.object({
+        transactionKey: z.number().int(),
+        splits: z.array(transactionSplitLine),
+      }).passthrough(),
+    }),
+  })
+}
+
+/** `DELETE /v1/account/transaction/:id/splits`: remove the split, keeping the largest line's category. */
+export function createRemoveTransactionSplitsEndpoint(transactionId: number) {
+  return writeEndpoint({
+    method: 'DELETE',
+    path: `/v1/account/transaction/${positiveId.parse(transactionId)}/splits`,
+    schema: z.object({
+      transaction: z.object({
+        transactionKey: z.number().int(),
+        splits: z.array(transactionSplitLine),
+      }).passthrough(),
+    }),
   })
 }

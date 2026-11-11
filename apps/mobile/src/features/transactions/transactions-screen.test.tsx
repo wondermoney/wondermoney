@@ -95,6 +95,28 @@ describe('TransactionsScreen', () => {
     expect(onCreateRule).toHaveBeenCalledWith(expect.objectContaining({ id: 41, merchant: 'Corner shop', categoryId: 3 }))
   })
 
+  it('labels a split row with the number of categories it is shared over', async () => {
+    const splits = [
+      { transactionSplitKey: 1, amount: -6.25, appuserAmount: -6.25, category: { categoryKey: 3, name: 'Groceries', isSystemCategory: true }, notes: null, position: 0 },
+      { transactionSplitKey: 2, amount: -6.25, appuserAmount: -6.25, category: { categoryKey: 4, name: 'Household', isSystemCategory: false }, notes: null, position: 1 },
+    ]
+    const { view } = await renderLoaded([{ ...transactionFixture, splits }])
+    expect(view.getByText('Split · 2 categories')).toBeOnTheScreen()
+    // The lines are in the row's detail, with the note when there is one.
+    await fireEvent.press(view.getByRole('button', { name: row('Corner shop') }))
+    expect(view.getByText('Split lines')).toBeOnTheScreen()
+    expect(view.getByText('Household')).toBeOnTheScreen()
+  })
+
+  it('opens the split editor from a row’s detail', async () => {
+    const onSaveSplit = jest.fn().mockResolvedValue('success')
+    const { view } = await renderLoaded([transactionFixture], {}, { onSaveSplit })
+    await fireEvent.press(view.getByRole('button', { name: row('Corner shop') }))
+    await fireEvent.press(view.getByRole('button', { name: 'Split' }))
+    expect(view.getByRole('header', { name: 'Split transaction' })).toBeOnTheScreen()
+    expect(view.getByTestId('transaction-split-save')).toBeDisabled()
+  })
+
   it('offers create, import, and scan-receipt actions when handlers are provided, and omits them when not', async () => {
     const i18n = await initMobileI18n('en')
     const onCreate = jest.fn()

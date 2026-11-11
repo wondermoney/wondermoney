@@ -228,6 +228,18 @@ describe('mobile product i18n', () => {
     expect(i18n.t('netWorth.unsupportedLoan', { count: 2 })).toBe(plural)
   })
 
+  it('keeps split copy in every locale', async () => {
+    const enI18n = await initMobileI18n('en')
+    const pt = await initMobileI18n('pt-PT')
+    const esI18n = await initMobileI18n('es')
+    expect(enI18n.t('transactions.split.summary', { count: 1 })).toBe('Split · 1 category')
+    expect(enI18n.t('transactions.split.summary', { count: 2 })).toBe('Split · 2 categories')
+    expect(pt.t('transactions.split.remaining')).toBe('Falta atribuir')
+    expect(pt.t('transactions.split.summary', { count: 3 })).toBe('Dividida · 3 categorias')
+    expect(esI18n.t('transactions.split.saveBlocked')).toContain('antes de guardar')
+    expect(esI18n.t('transactions.split.remaining')).toBe('Falta asignar')
+  })
+
   it('normalizes supported variants and falls back safely', async () => {
     await expect(initMobileI18n('pt-BR')).resolves.toMatchObject({ language: 'pt-PT' })
     await expect(initMobileI18n('es-MX')).resolves.toMatchObject({ language: 'es' })

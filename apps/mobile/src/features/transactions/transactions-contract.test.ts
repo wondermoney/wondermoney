@@ -4,7 +4,11 @@ import {
   createAccountTransactionsEndpoint,
   createAggregateTransactionsEndpoint,
   createEditTransactionAmountEndpoint,
+  createRemoveTransactionSplitsEndpoint,
+  createSetTransactionSplitsEndpoint,
   freezeEditTransactionAmount,
+  freezeSetTransactionSplits,
+  MAX_SPLIT_LINES,
   transactionReviewSummaryEndpoint,
   transactionReviewSummarySchema,
 } from './transactions-contract'
@@ -228,5 +232,93 @@ describe('the review summary', () => {
   it('asks for it at its own path', () => {
     expect(transactionReviewSummaryEndpoint.method).toBe('GET')
     expect(transactionReviewSummaryEndpoint.path).toBe('/v1/account/transaction/review-summary')
+  })
+})
+
+describe('split transactions', () => {
+  const splitLine = {
+    transactionSplitKey: 5,
+    amount: -7.5,
+    appuserAmount: -7.5,
+    category: { categoryKey: 3, name: 'Groceries', isSystemCategory: true },
+    notes: 'Food',
+    position: 0,
+  }
+
+  it('reads the lines a list row carries, and treats a row without them as unsplit', () => {
+    const [split, plain] = aggregateTransactionsResponseSchema.parse({ transactions: [
+      { ...transactionFixture, splits: [splitLine, { ...splitLine, transactionSplitKey: 6, amount: -2.5, appuserAmount: -2.5, category: null, notes: null, position: 1 }] },
+      transactionFixture,
+    ] }).transactions
+    expect(split!.splits).toEqual([
+      { transactionSplitKey: 5, amount: -7.5, appuserAmount: -7.5, category: { categoryKey: 3, name: 'Groceries', isSystemCategory: true }, notes: 'Food', position: 0 },
+      { transactionSplitKey: 6, amount: -2.5, appuserAmount: -2.5, category: null, notes: null, position: 1 },
+    ])
+    expect(plain).not.toHaveProperty('splits')
+  })
+
+  it('accepts a line with no converted amount, and drops fields this build does not know', () => {
+    const [row] = aggregateTransactionsResponseSchema.parse({ transactions: [
+      { ...transactionFixture, splits: [{ ...splitLine, appuserAmount: null, sentiment: 'positive' }] },
+    ] }).transactions
+    expect(row!.splits?.[0]).not.toHaveProperty('sentiment')
+    expect(row!.splits?.[0]?.appuserAmount).toBeNull()
+  })
+
+  it('rejects a line without a finite amount or with a non-positive key', () => {
+    expect(aggregateTransactionsResponseSchema.safeParse({ transactions: [{ ...transactionFixture, splits: [{ ...splitLine, amount: Number.NaN }] }] }).success).toBe(false)
+    expect(aggregateTransactionsResponseSchema.safeParse({ transactions: [{ ...transactionFixture, splits: [{ ...splitLine, transactionSplitKey: 0 }] }] }).success).toBe(false)
+  })
+
+  describe('freezeSetTransactionSplits', () => {
+    it('trims notes, keeps nulls, and freezes the payload', () => {
+      const frozen = freezeSetTransactionSplits({
+        transactionId: 41,
+        lines: [
+          { categoryId: 3, amount: '-7.5', notes: '  Food  ' },
+          { categoryId: null, amount: '-2.5', notes: '   ' },
+        ],
+      })
+      expect(frozen.transactionId).toBe(41)
+      expect(frozen.payload).toEqual([
+        { categoryId: 3, amount: '-7.5', notes: 'Food' },
+        { categoryId: null, amount: '-2.5', notes: null },
+      ])
+      expect(Object.isFrozen(frozen)).toBe(true)
+      expect(Object.isFrozen(frozen.payload)).toBe(true)
+    })
+
+    it('needs at least two lines and no more than the API takes', () => {
+      expect(() => freezeSetTransactionSplits({ transactionId: 41, lines: [{ categoryId: null, amount: '-10', notes: null }] })).toThrow()
+      const many = Array.from({ length: MAX_SPLIT_LINES + 1 }, () => ({ categoryId: null, amount: '-1', notes: null }))
+      expect(() => freezeSetTransactionSplits({ transactionId: 41, lines: many })).toThrow()
+    })
+
+    it.each([
+      ['five decimals', '-1.23456'],
+      ['text', 'ten'],
+      ['empty', ''],
+    ])('rejects a %s amount', (_label, amount) => {
+      expect(() => freezeSetTransactionSplits({ transactionId: 41, lines: [{ categoryId: null, amount, notes: null }, { categoryId: null, amount: '-1', notes: null }] })).toThrow()
+    })
+
+    it('rejects a non-positive transaction or category id', () => {
+      expect(() => freezeSetTransactionSplits({ transactionId: 0, lines: [{ categoryId: null, amount: '-1', notes: null }, { categoryId: null, amount: '-1', notes: null }] })).toThrow()
+      expect(() => freezeSetTransactionSplits({ transactionId: 41, lines: [{ categoryId: -1, amount: '-1', notes: null }, { categoryId: null, amount: '-1', notes: null }] })).toThrow()
+    })
+  })
+
+  it('builds the PUT and DELETE paths, rejecting a bad id', () => {
+    expect(createSetTransactionSplitsEndpoint(41)).toMatchObject({ method: 'PUT', path: '/v1/account/transaction/41/splits' })
+    expect(createRemoveTransactionSplitsEndpoint(41)).toMatchObject({ method: 'DELETE', path: '/v1/account/transaction/41/splits' })
+    expect(() => createSetTransactionSplitsEndpoint(0)).toThrow()
+    expect(() => createRemoveTransactionSplitsEndpoint(-1)).toThrow()
+  })
+
+  it('reads the transaction the split endpoints return', () => {
+    const endpoint = createSetTransactionSplitsEndpoint(41)
+    expect(endpoint.schema.parse({
+      transaction: { transactionKey: 41, splits: [splitLine], reviewed: false, appuserSettlementAmount: -10 },
+    })).toEqual({ transaction: { transactionKey: 41, splits: [splitLine], reviewed: false, appuserSettlementAmount: -10 } })
   })
 })
