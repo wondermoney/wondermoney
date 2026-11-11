@@ -2332,7 +2332,18 @@
     "biweekly": "Biweekly",
     "monthly": "Monthly",
     "quarterly": "Quarterly",
-    "yearly": "Yearly"
+    "yearly": "Yearly",
+    "calendar": "Calendar",
+    "calendarDescription": "Which bills fall on which day this month.",
+    "calendarPreviousMonth": "Previous month",
+    "calendarNextMonth": "Next month",
+    "calendarToday": "Today",
+    "calendarEmptyDay": "No recurring payments on this day.",
+    "calendarLoading": "Loading this month's payments…",
+    "calendarStatusPaid": "Paid",
+    "calendarStatusDue": "Due",
+    "calendarStatusOverdue": "Overdue",
+    "calendarStatusProjected": "Projected"
   },
   "analytics-consent": {
     "title": "Your privacy choices",

@@ -2332,7 +2332,18 @@
     "biweekly": "Quinzenal",
     "monthly": "Mensal",
     "quarterly": "Trimestral",
-    "yearly": "Anual"
+    "yearly": "Anual",
+    "calendar": "Calendário",
+    "calendarDescription": "Que contas caem em cada dia deste mês.",
+    "calendarPreviousMonth": "Mês anterior",
+    "calendarNextMonth": "Mês seguinte",
+    "calendarToday": "Hoje",
+    "calendarEmptyDay": "Sem pagamentos recorrentes neste dia.",
+    "calendarLoading": "A carregar os pagamentos deste mês…",
+    "calendarStatusPaid": "Pago",
+    "calendarStatusDue": "A vencer",
+    "calendarStatusOverdue": "Em atraso",
+    "calendarStatusProjected": "Previsto"
   },
   "analytics-consent": {
     "title": "As suas escolhas de privacidade",

@@ -1219,6 +1219,19 @@
       "paused": "Paused",
       "ended": "Ended",
       "dismissed": "Dismissed"
+    },
+    "calendar": "Calendar",
+    "calendarDescription": "Which bills fall on which day this month",
+    "calendarPreviousMonth": "Previous month",
+    "calendarNextMonth": "Next month",
+    "calendarEmpty": "No recurring payments this month",
+    "calendarLoading": "Loading this month's payments…",
+    "calendarUnavailable": "This month's payments are unavailable",
+    "occurrenceStatus": {
+      "paid": "Paid",
+      "due": "Due",
+      "overdue": "Overdue",
+      "projected": "Projected"
     }
   },
   "more": {
