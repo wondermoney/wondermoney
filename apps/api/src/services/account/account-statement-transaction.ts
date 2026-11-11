@@ -16,6 +16,7 @@ import type { Enqueue } from '@service/queue/enqueue';
 import { triggerRecurringDetectionAfterTransactionIngestion } from '@service/recurring/post-transaction-ingestion-detection.service';
 import { applyRulesToNewTransactions } from '@service/rules/rule-application.service';
 import { enqueueTransactionEnrichmentForTenant } from '@service/transaction-enrichment/transaction-enrichment-enqueue.service';
+import { applyBayesCategorization, prepareBayesCategorization } from '@service/transaction/bayes-categorization.service';
 import { applyCategorizationOutcome } from '@service/transaction/categorization-confidence';
 import { transactionTypeForSignedAmount } from '@service/transaction/transaction-direction';
 import { reconcileTransfers } from '@service/transaction/transfer-matching.service';
@@ -169,13 +170,28 @@ export async function settleStatementImport(em: EM, account: Account, existing: 
 
 /**
  * After the import's transaction commits: pair the imported halves of transfers between the
- * household's own accounts, then queue recurring detection and (dormant by default) enrichment.
- * Best-effort: none of it fails an import whose rows are stored.
+ * household's own accounts, run the local Bayes pass over the imported rows, then queue recurring
+ * detection and (dormant by default) enrichment. Best-effort: none of it fails an import whose
+ * rows are stored.
  */
-export async function followUpStatementImport(em: EM, account: Account, importedDates: Date[], deps: { enqueue?: Enqueue } = {}): Promise<void> {
+export async function followUpStatementImport(em: EM, account: Account, importedDates: Date[], deps: { enqueue?: Enqueue; transactions?: Transaction[] } = {}): Promise<void> {
   await matchTransfersAfterImport(em, account, importedDates);
   const tenantKey = tenantKeyOf(account);
   if (importedDates.length === 0 || tenantKey === undefined) return;
+  // Local and token-free, so it runs before enrichment regardless of AI settings: a row it labels
+  // is never enqueued for a model.
+  const viewerAppuserKey = account.accountOwnerAppuserKey?.appuserKey;
+  if (viewerAppuserKey !== undefined && deps.transactions && deps.transactions.length > 0) {
+    try {
+      const batch = await prepareBayesCategorization(em, { tenantKey, viewerAppuserKey });
+      if (batch) {
+        const assigned = await applyBayesCategorization(em, batch, deps.transactions);
+        if (assigned > 0) logger.info({ assigned, tenantKey }, 'Bayes categorized imported transactions');
+      }
+    } catch (error) {
+      logger.warn({ error: error instanceof Error ? error.message : String(error), tenantKey }, 'Bayes categorization failed');
+    }
+  }
   await triggerRecurringDetectionAfterTransactionIngestion(tenantKey, 'transaction-import');
   await enqueueTransactionEnrichmentForTenant(tenantKey, 'transaction-import', { enqueue: deps.enqueue });
 }

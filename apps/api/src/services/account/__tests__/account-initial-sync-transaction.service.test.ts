@@ -4,12 +4,17 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const { heartbeatJob } = vi.hoisted(() => ({ heartbeatJob: vi.fn().mockResolvedValue(true) }));
 const { categorizeTransactionDeterministically } = vi.hoisted(() => ({ categorizeTransactionDeterministically: vi.fn().mockResolvedValue({ assigned: true, reason: 'user_mapping' }) }));
+const { applyBayesCategorization, prepareBayesCategorization } = vi.hoisted(() => ({
+  applyBayesCategorization: vi.fn().mockResolvedValue(0),
+  prepareBayesCategorization: vi.fn().mockResolvedValue(null),
+}));
 const { triggerRecurringDetectionAfterTransactionIngestion } = vi.hoisted(() => ({ triggerRecurringDetectionAfterTransactionIngestion: vi.fn().mockResolvedValue(undefined) }));
 const sentry = vi.hoisted(() => ({ captureException: vi.fn() }));
 vi.mock('@app/database/di', () => ({ DI: { em: {} } }));
 vi.mock('@sentry/node', () => ({ captureException: sentry.captureException }));
 vi.mock('@service/operations/background-operation.service', () => ({ default: { finishJob: vi.fn(), heartbeatJob } }));
 vi.mock('@service/transaction/transaction-deterministic-categorization.service', () => ({ default: { categorizeTransactionDeterministically } }));
+vi.mock('@service/transaction/bayes-categorization.service', () => ({ applyBayesCategorization, prepareBayesCategorization }));
 vi.mock('@service/recurring/post-transaction-ingestion-detection.service', () => ({ triggerRecurringDetectionAfterTransactionIngestion }));
 // Transfer matching reads and writes through its own queries; it has its own tests on a real database.
 vi.mock('@service/transaction/transfer-matching.service', () => ({ reconcileTransfers: vi.fn().mockResolvedValue({ pairsDissolved: 0, pairsMatched: 0, retypedAsIncome: 0, rowsChanged: 0 }) }));
@@ -87,6 +92,15 @@ describe('account initial sync transaction service', () => {
     expect(em.persist).toHaveBeenCalled();
     expect(triggerRecurringDetectionAfterTransactionIngestion).toHaveBeenCalledWith(3, 'account-initial-sync');
     expect(getTransactionsMock).toHaveBeenCalledWith('acc-1', expect.objectContaining({ country: '', dateFrom: expect.any(String), dateTo: expect.any(String) }));
+  });
+
+  it('trains the local categorizer once and applies it before enrichment', async () => {
+    const batch = { model: {}, thresholds: { minMargin: 0.2, minPosterior: 0.8 }, viewerAppuserKey: 9 };
+    prepareBayesCategorization.mockResolvedValueOnce(batch);
+    const em = createEm();
+    await service.syncTransactionsForRequisition({ connection: conn(1) }, { em: asEm(em), provider: bankSyncFactory() });
+    expect(prepareBayesCategorization).toHaveBeenCalledWith(em, { tenantKey: 3, viewerAppuserKey: 9 });
+    expect(applyBayesCategorization).toHaveBeenCalledWith(em, batch, expect.any(Array));
   });
 
   it('maps bank ids for booked and pending rows', async () => {

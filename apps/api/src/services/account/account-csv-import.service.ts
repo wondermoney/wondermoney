@@ -103,7 +103,7 @@ export default class AccountCsvImportService {
     const transactional = Reflect.get(input.em, 'transactional') as unknown;
     // Called on the EntityManager: `transactional` reads its own context, so a detached call throws.
     if (typeof transactional === 'function') await (transactional as (fn: typeof runInTransaction) => Promise<void>).call(input.em, runInTransaction); else await runInTransaction(input.em);
-    await followUpStatementImport(input.em, input.account, importedTransactions.flatMap((transaction) => (transaction.transactionDate ? [transaction.transactionDate] : [])), { enqueue: input.enqueue });
+    await followUpStatementImport(input.em, input.account, importedTransactions.flatMap((transaction) => (transaction.transactionDate ? [transaction.transactionDate] : [])), { enqueue: input.enqueue, transactions: importedTransactions });
     return result;
   }
 
