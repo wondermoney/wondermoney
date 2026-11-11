@@ -247,7 +247,23 @@
       "title": "Información",
       "loading": "Cargando información",
       "error": "No se pudo cargar la información",
-      "topCategory": "{{name}} — {{amount}} este mes"
+      "topCategory": "{{name}} — {{amount}} este mes",
+      "severity": {
+        "critical": "Requiere atención",
+        "warning": "Vale la pena mirar",
+        "info": "Buena noticia"
+      },
+      "spending": {
+        "above": "{{category}} está un {{percent}}% por encima de su ritmo habitual.",
+        "below": "{{category}} está un {{percent}}% por debajo de su ritmo habitual.",
+        "figures": "{{current}} hasta ahora, normalmente {{baseline}} a estas alturas.",
+        "link": "Ver transacciones"
+      },
+      "budget": {
+        "pace": "{{category}} va camino de superar su presupuesto.",
+        "figures": "{{projected}} previstos frente a {{budgeted}} planificados.",
+        "link": "Ver presupuesto"
+      }
     },
     "helpText": "Un resumen rápido de tus cuentas, cartera y pasivos.",
     "unsupportedAccount_one": "No se incluye {{count}} saldo de cuenta",

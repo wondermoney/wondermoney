@@ -10,6 +10,8 @@ import { BudgetTemplateCategory } from '@entity/BudgetTemplateCategory';
 import { Tenant } from '@entity/Tenant';
 import { Transaction } from '@entity/Transaction';
 import { resolveAiRoute } from '@service/ai/ai-provider';
+import { MikroOrmTenantAggregationRepository } from '@service/budget/tenant-aggregation.repository';
+import { InsightsService } from '@service/insights/insights.service';
 import { CATEGORY_LINE_POPULATE, spendingLinesOf } from '@service/transaction/category-lines';
 import { loadCategorySpendingFlags } from '@service/transaction/category-spending';
 import { excludeExpired } from '@service/transaction/transaction-status';
@@ -23,6 +25,7 @@ import { AssistantRedactionService } from './assistant-redaction.service';
 import type { AssistantToolContext, AssistantToolResult } from './assistant-tool-types';
 
 const periodSchema = z.enum(['current_month', 'previous_month', 'last_90_days', 'year_to_date', 'last_12_months']);
+const monthSchema = z.string().regex(/^\d{4}-(?:0[1-9]|1[0-2])$/, { message: 'Month must be YYYY-MM' });
 type PeriodInput = z.infer<typeof periodSchema>;
 
 type ToolName = (typeof DEFAULT_ALLOWED_TOOLS)[number];
@@ -85,6 +88,16 @@ export class AssistantToolsService {
         return { data: { currency, ...totals }, dataUsed: { granularity: resolved.granularity, period: resolved.key, recordCount: transactions.length, source: 'database' } };
       }),
       get_goal_progress_summary: createTool('get_goal_progress_summary', 'Read-only goal progress summary.', context, z.object({ period: periodSchema.optional() }), () => Promise.resolve({ data: { currency, goals: [] as { progress: number }[] }, dataUsed: { granularity: 'summary', period: 'current', source: 'stub' } })),
+      get_insights: createTool('get_insights', 'Read-only deterministic spending and budget-pace insights for a month.', context, z.object({ month: monthSchema.optional() }), async ({ month }: { month?: string }) => {
+        // The same service the home cards read, so an answer in chat matches what the person sees.
+        const result = await new InsightsService(new MikroOrmTenantAggregationRepository(DI.em)).getInsights({
+          appuserKey: context.appuserKey,
+          currency,
+          month,
+          tenantKey: context.tenantKey,
+        });
+        return { data: { currency, insights: result.insights }, dataUsed: { granularity: 'insights', period: month ?? 'current_month', recordCount: result.insights.length, source: 'database' } };
+      }),
       get_large_transactions_summary: createTool('get_large_transactions_summary', 'Read-only summary of large transactions.', context, z.object({ period: periodSchema.optional() }), () => Promise.resolve({ data: { currency, transactions: [] as { amount: number }[] }, dataUsed: { granularity: 'summary', period: 'current', source: 'stub' } })),
       get_net_worth_summary: createTool('get_net_worth_summary', 'Read-only, privacy-minimizing summary of current net worth.', context, z.object({ period: periodSchema.optional() }), () => Promise.resolve({ data: { currency, netWorth: null }, dataUsed: { granularity: 'summary', period: 'current', source: 'stub' } })),
       get_portfolio_income_summary: createTool('get_portfolio_income_summary', 'Read-only portfolio income summary.', context, z.object({ period: periodSchema.optional() }), () => Promise.resolve({ data: { currency, income: null }, dataUsed: { granularity: 'summary', period: 'current', source: 'stub' } })),

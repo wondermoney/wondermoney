@@ -29,6 +29,7 @@ const doc = {
     { name: 'Configs', description: 'Configuration endpoints' },
     { name: 'Financial Markets', description: 'Financial market data' },
     { name: 'Health', description: 'Health check' },
+    { name: 'Insights', description: 'Deterministic spending and budget insights' },
     { name: 'Marketing', description: 'Marketing operations' },
     { name: 'Portfolio', description: 'Investment portfolio management' },
     { name: 'Support', description: 'Support and feedback' },

@@ -86,7 +86,7 @@ describe('CustomizeHomeScreen', () => {
   it('cannot move the second section up past net worth', async () => {
     const { view } = await renderScreen()
 
-    expect(view.getByTestId('customize-up-this-month').props.accessibilityState.disabled).toBe(true)
+    expect(view.getByTestId('customize-up-insights').props.accessibilityState.disabled).toBe(true)
     expect(view.getByTestId('customize-down-latest-transactions').props.accessibilityState.disabled).toBe(true)
   })
 

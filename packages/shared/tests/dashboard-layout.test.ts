@@ -37,8 +37,9 @@ describe('mergeDashboardLayout', () => {
       'latest-transactions',
       'balance-sheet',
       'cashflow',
+      'insights',
     ]);
-    expect(visible(merged)).toEqual(['net-worth', 'loans', 'latest-transactions', 'cashflow']);
+    expect(visible(merged)).toEqual(['net-worth', 'loans', 'latest-transactions', 'cashflow', 'insights']);
   });
 
   it('drops ids this release cannot render', () => {
@@ -51,6 +52,7 @@ describe('mergeDashboardLayout', () => {
 
     expect(ids(merged)).toEqual([
       'net-worth',
+      'insights',
       'cashflow',
       'this-month',
       'balance-sheet',
@@ -68,6 +70,7 @@ describe('mergeDashboardLayout', () => {
     expect(ids(merged)).toEqual([
       'net-worth',
       'cashflow',
+      'insights',
       'this-month',
       'balance-sheet',
       'loans',
@@ -88,6 +91,7 @@ describe('mergeDashboardLayout', () => {
       'net-worth',
       'loans',
       'cashflow',
+      'insights',
       'this-month',
       'balance-sheet',
       'latest-transactions',
@@ -124,6 +128,7 @@ describe('moveDashboardSection', () => {
 
     expect(ids(moveDashboardSection(layout, 'cashflow', 'up'))).toEqual([
       'net-worth',
+      'insights',
       'this-month',
       'cashflow',
       'balance-sheet',
@@ -132,6 +137,7 @@ describe('moveDashboardSection', () => {
     ]);
     expect(ids(moveDashboardSection(layout, 'this-month', 'down'))).toEqual([
       'net-worth',
+      'insights',
       'balance-sheet',
       'this-month',
       'cashflow',
@@ -144,14 +150,14 @@ describe('moveDashboardSection', () => {
     const layout = defaultDashboardLayout();
 
     expect(ids(moveDashboardSection(layout, 'net-worth', 'down'))).toEqual(ids(layout));
-    expect(ids(moveDashboardSection(layout, 'this-month', 'up'))).toEqual(ids(layout));
+    expect(ids(moveDashboardSection(layout, 'insights', 'up'))).toEqual(ids(layout));
   });
 
   it('does nothing at the ends or for an unknown id', () => {
     const layout = defaultDashboardLayout();
 
     expect(ids(moveDashboardSection(layout, 'latest-transactions', 'down'))).toEqual(ids(layout));
-    expect(ids(moveDashboardSection(layout, 'insights', 'up'))).toEqual(ids(layout));
+    expect(ids(moveDashboardSection(layout, 'review-status', 'up'))).toEqual(ids(layout));
   });
 });
 

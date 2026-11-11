@@ -11,6 +11,7 @@ import { Icon } from '@/components/ui/icon'
 import { List, ListRow } from '@/components/ui/list-row'
 import { Section } from '@/components/ui/section'
 import { Text } from '@/components/ui/text'
+import type { InsightDto, SpendingVsNormalFactsDto } from '@/features/insights/insights-contract'
 import type { LoanDto } from '@/features/loans/loans-contract'
 import { transactionMark } from '@/features/transactions/transaction-mark'
 import type { TransactionDto, TransactionReviewSummaryDto } from '@/features/transactions/transactions-contract'
@@ -671,26 +672,120 @@ export function LatestTransactionsSection({ state, locale, onNavigate, onRetry }
   )
 }
 
-/** Mobile's "Spent most on" line; web's home has no equivalent, so it closes the page. */
-export function InsightSection({ state, fallbackCurrency, locale }: {
-  state: { status: 'hidden' } | SectionState<{ name: string; amount: number; currency: string | null }>
+/**
+ * The home's deterministic insights, in the same words and figures as web. "Spent most on" stays
+ * as the fallback when no insight fires, so the section is never empty on an ordinary month.
+ */
+export type InsightsState =
+  | { status: 'hidden' }
+  | SectionState<{
+      fallback: { amount: number; currency: string | null; name: string } | null
+      insights: readonly InsightDto[]
+    }>
+
+export function InsightsSection({ state, fallbackCurrency, locale, onNavigate }: {
+  state: InsightsState
   fallbackCurrency: string
   locale: string
+  onNavigate: Navigate
 }) {
   const formatMoney = useFormatMoney()
   const { t } = useTranslation()
   if (state.status === 'hidden') return null
   const title = t('netWorth.insights.title')
-  if (state.status === 'loading') return <Section title={title} variant="open"><RowsSkeleton label={t('netWorth.insights.loading')} rows={1} /></Section>
+  if (state.status === 'loading') return <Section title={title} variant="open"><RowsSkeleton label={t('netWorth.insights.loading')} rows={2} /></Section>
   if (state.status === 'error') {
     return <Section title={title} variant="open"><Text tone="muted" variant="meta">{t('netWorth.insights.error')}</Text></Section>
   }
-  const amount = formatMoney(state.data.amount, { locale, currency: state.data.currency ?? fallbackCurrency })
+  const { fallback, insights } = state.data
+  if (insights.length === 0) {
+    if (!fallback) return null
+    const amount = formatMoney(fallback.amount, { locale, currency: fallback.currency ?? fallbackCurrency })
+    return (
+      <Section title={title} variant="open">
+        <Text variant="meta">{t('netWorth.insights.topCategory', { name: formatCategoryName(fallback.name), amount })}</Text>
+      </Section>
+    )
+  }
   return (
-    <Section title={title} variant="open">
-      <Text variant="meta">{t('netWorth.insights.topCategory', { name: formatCategoryName(state.data.name), amount })}</Text>
+    <Section title={title} variant="open" testID="home-insights">
+      <View>
+        {insights.map((insight) => (
+          <InsightRow insight={insight} key={insight.id} locale={locale} onNavigate={onNavigate} />
+        ))}
+      </View>
     </Section>
   )
+}
+
+function InsightRow({ insight, locale, onNavigate }: { insight: InsightDto; locale: string; onNavigate: Navigate }) {
+  const formatMoney = useFormatMoney()
+  const { t } = useTranslation()
+  const palette = usePalette()
+  const severity = t(`netWorth.insights.severity.${insight.severity}`)
+  const tone = insight.severity === 'critical' ? 'destructive' : insight.severity === 'warning' ? 'warning' : 'success'
+  const rowStyle = [styles.insightRow, { borderBottomColor: palette.border }]
+
+  if (insight.type === 'spending_vs_normal') {
+    const facts = insight.facts
+    const percent = Math.round(Math.abs(Number(facts.deviationPercent)))
+    const money = (value: string) => formatMoney(Number(value), { locale, currency: facts.currency })
+    return (
+      <View style={rowStyle} testID={`home-insight-${insight.id}`}>
+        <View style={styles.insightHead}>
+          <Text style={styles.flex} variant="bodyStrong">
+            {t(`netWorth.insights.spending.${facts.direction}`, { category: formatCategoryName(facts.categoryName), percent })}
+          </Text>
+          <Text tone={tone} variant="label">{severity}</Text>
+        </View>
+        <Text tone="muted" variant="meta">
+          {t('netWorth.insights.spending.figures', { baseline: money(facts.baselineAmount), current: money(facts.currentAmount) })}
+        </Text>
+        <View style={styles.insightAction}>
+          <Button
+            label={t('netWorth.insights.spending.link')}
+            onPress={() => onNavigate(spendingInsightHref(facts))}
+            trailingIcon="chevron-right"
+            variant="link"
+          />
+        </View>
+      </View>
+    )
+  }
+
+  const facts = insight.facts
+  const category = facts.parentCategoryName ? `${facts.parentCategoryName} / ${facts.categoryName}` : facts.categoryName
+  const [year, month] = insight.period.split('-')
+  const money = (value: string) => formatMoney(Number(value), { locale, currency: facts.currencyCode })
+  return (
+    <View style={rowStyle} testID={`home-insight-${insight.id}`}>
+      <View style={styles.insightHead}>
+        <Text style={styles.flex} variant="bodyStrong">{t('netWorth.insights.budget.pace', { category: formatCategoryName(category) })}</Text>
+        <Text tone={tone} variant="label">{severity}</Text>
+      </View>
+      <Text tone="muted" variant="meta">
+        {t('netWorth.insights.budget.figures', { budgeted: money(facts.amountBudgeted), projected: money(facts.projectedAmount) })}
+      </Text>
+      <View style={styles.insightAction}>
+        <Button
+          label={t('netWorth.insights.budget.link')}
+          onPress={() => onNavigate(`/budgets/${facts.budgetKey}/${year}/${Number(month)}`)}
+          trailingIcon="chevron-right"
+          variant="link"
+        />
+      </View>
+    </View>
+  )
+}
+
+/** The ledger opened on exactly the rows the card counted. */
+function spendingInsightHref(facts: SpendingVsNormalFactsDto): string {
+  const params = [
+    `fromDate=${encodeURIComponent(facts.fromDate)}`,
+    `toDate=${encodeURIComponent(facts.toDate)}`,
+    `categoryKeys=${encodeURIComponent(facts.categoryKeys.join(','))}`,
+  ]
+  return `/accounts/transactions?${params.join('&')}`
 }
 
 const styles = StyleSheet.create({
@@ -752,6 +847,10 @@ const styles = StyleSheet.create({
   loanDate: { width: 56 },
   loanMain: { flex: 1, minWidth: 0, gap: themeTokens.spacing[1] },
   loanTitle: { flexDirection: 'row', alignItems: 'baseline', justifyContent: 'space-between', gap: themeTokens.spacing[4] },
+
+  insightRow: { gap: themeTokens.spacing[2], paddingVertical: themeTokens.spacing[3], borderBottomWidth: 1 },
+  insightHead: { flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between', gap: themeTokens.spacing[3] },
+  insightAction: { alignItems: 'flex-start' },
 
   categoryLine: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', columnGap: themeTokens.spacing[3], rowGap: themeTokens.spacing[1] },
   uncategorised: { borderWidth: 1, borderStyle: 'dashed', borderRadius: themeTokens.radius.sm, paddingHorizontal: 6 },

@@ -35,14 +35,45 @@ function classifyResult(error: unknown, blockAccess: (state: 'mfa-required') => 
   return 'error'
 }
 
+/** The first value of a search param, which expo-router may hand back as an array. */
+const firstParam = (value?: string | string[]) => (Array.isArray(value) ? value[0] : value)
+
+/**
+ * The list's opening filters. A home insight links here with its own date range and categories,
+ * so the ledger opens on exactly the rows the card counted; otherwise the last 60 days.
+ */
+function initialFilters(
+  params: { categoryKeys?: string | string[]; filter?: string | string[]; fromDate?: string | string[]; toDate?: string | string[] },
+  reviewOnly: boolean,
+): TransactionFilters {
+  if (reviewOnly) return { limit: 100, needsReview: true }
+  const fromDate = firstParam(params.fromDate)
+  const toDate = firstParam(params.toDate)
+  const categoryIds = (firstParam(params.categoryKeys) ?? '')
+    .split(',')
+    .map(Number)
+    .filter((value) => Number.isSafeInteger(value) && value > 0)
+  if (!fromDate && !toDate && categoryIds.length === 0) return presetRange(DEFAULT_RANGE_DAYS)
+  return {
+    ...(fromDate ? { fromDate } : {}),
+    ...(toDate ? { toDate } : {}),
+    ...(categoryIds.length > 0 ? { categoryIds } : {}),
+    direction: 'out',
+    excludeNonSpending: true,
+    excludeTransfers: true,
+    limit: 100,
+    statuses: ['BOOKED', 'PENDING'],
+  }
+}
+
 export function TransactionsRoute({ perAccount = false }: { perAccount?: boolean }) {
-  const params = useLocalSearchParams<{ accountId?: string | string[]; filter?: string | string[] }>()
+  const params = useLocalSearchParams<{ accountId?: string | string[]; categoryKeys?: string | string[]; filter?: string | string[]; fromDate?: string | string[]; toDate?: string | string[] }>()
   const accountId = perAccount ? parseAccountId(params.accountId) : null
   // Home's "Review now" opens the ledger already narrowed to the review inbox, with no date
   // range: an unreviewed row from last year must not be hidden by the list's 60-day default.
-  const reviewOnly = !perAccount && (Array.isArray(params.filter) ? params.filter[0] : params.filter) === 'unreviewed'
+  const reviewOnly = !perAccount && firstParam(params.filter) === 'unreviewed'
   // Web opens both ledgers on the last 60 days (`subDays(new Date(), 60)`).
-  const [filters, setFilters] = useState<TransactionFilters>(() => reviewOnly ? { limit: 100, needsReview: true } : presetRange(DEFAULT_RANGE_DAYS))
+  const [filters, setFilters] = useState<TransactionFilters>(() => initialFilters(params, reviewOnly))
   const query = useTransactions(filters, perAccount ? accountId : null)
   const accountsQuery = useAccounts()
   const lead = useTransactionsLead({ fromDate: filters.fromDate, toDate: filters.toDate }, !perAccount)

@@ -247,7 +247,23 @@
       "title": "Estatísticas",
       "loading": "A carregar estatísticas",
       "error": "Não foi possível carregar as estatísticas",
-      "topCategory": "{{name}} — {{amount}} este mês"
+      "topCategory": "{{name}} — {{amount}} este mês",
+      "severity": {
+        "critical": "Requer atenção",
+        "warning": "Vale a pena ver",
+        "info": "Boa notícia"
+      },
+      "spending": {
+        "above": "{{category}} está {{percent}}% acima do ritmo habitual.",
+        "below": "{{category}} está {{percent}}% abaixo do ritmo habitual.",
+        "figures": "{{current}} até agora, normalmente {{baseline}} a esta altura.",
+        "link": "Ver transações"
+      },
+      "budget": {
+        "pace": "{{category}} está a caminho de exceder o orçamento.",
+        "figures": "{{projected}} previstos face a {{budgeted}} planeados.",
+        "link": "Ver orçamento"
+      }
     },
     "helpText": "Uma visão geral rápida das suas contas, portefólio e passivos.",
     "unsupportedAccount_one": "{{count}} saldo de conta não está incluído",

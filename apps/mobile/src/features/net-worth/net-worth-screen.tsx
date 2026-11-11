@@ -34,7 +34,8 @@ import {
   BalanceSheetSection,
   type BudgetMonthRow,
   CashflowSection,
-  InsightSection,
+  InsightsSection,
+  type InsightsState,
   LatestTransactionsSection,
   LoansSection,
   SectionEmpty,
@@ -90,6 +91,9 @@ export type HomeSections = {
   cashflow: SectionState<CashflowView>
   loans: SectionState<{ upcoming: readonly LoanDto[]; hasLoans: boolean }>
   latest: SectionState<{ review: TransactionReviewSummaryDto | null; transactions: readonly TransactionDto[] }>
+  /** Deterministic insights, with "Spent most on" as the fallback when none fires. */
+  insights: InsightsState
+  /** The "Spent most on" fallback's own query. */
   insight: InsightState
   /** Each account's mark for the balance sheet, by account key; absent until the accounts load. */
   accountMarks?: ReadonlyMap<number, EntityMarkSource>
@@ -152,6 +156,7 @@ export function NetWorthScreen(props: NetWorthScreenProps) {
   // One node per configurable section; the layout decides which render, and in
   // what order. Net worth is rendered above, pinned first.
   const sectionNodes: Record<Exclude<DashboardSectionId, 'net-worth'>, ReactNode> = {
+    insights: <InsightsSection fallbackCurrency={currency} locale={locale} onNavigate={props.onNavigate} state={sections.insights} />,
     'this-month': <ThisMonthSection locale={locale} onNavigate={props.onNavigate} onRetry={props.onRetryBudgets} state={sections.month} today={today} />,
     'balance-sheet': sheet && hasSheet ? <BalanceSheetSection accountMarks={sections.accountMarks} portfolioMarks={sections.portfolioMarks} currency={currency} locale={locale} sheet={sheet} /> : null,
     cashflow: <CashflowSection currency={currency} locale={locale} onRetry={props.onRetryCashflow} state={sections.cashflow} today={today} />,
@@ -197,8 +202,6 @@ export function NetWorthScreen(props: NetWorthScreenProps) {
             .map((entry) => (
               <View key={entry.id}>{sectionNodes[entry.id as Exclude<DashboardSectionId, 'net-worth'>]}</View>
             ))}
-
-          <InsightSection fallbackCurrency={currency} locale={locale} state={sections.insight} />
         </View>
       </ScrollView>
     </SafeAreaView>

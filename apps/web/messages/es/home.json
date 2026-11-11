@@ -6,6 +6,7 @@
       "description": "Elige qué aparece en tu inicio y en qué orden.",
       "sections": {
         "net-worth": "Patrimonio neto",
+        "insights": "Información",
         "this-month": "Este mes",
         "balance-sheet": "Balance",
         "cashflow": "Flujo de caja neto",
@@ -21,6 +22,29 @@
       "retry": "Reintentar",
       "loadError": "No se pudo cargar tu inicio.",
       "done": "Hecho"
+    },
+    "insights": {
+      "title": "Información",
+      "empty": {
+        "title": "Nada fuera de lo normal este mes",
+        "body": "El gasto sigue su ritmo habitual y ningún presupuesto va camino de superar su límite."
+      },
+      "severity": {
+        "critical": "Requiere atención",
+        "warning": "Vale la pena mirar",
+        "info": "Buena noticia"
+      },
+      "spending": {
+        "above": "{category} está un {percent}% por encima de su ritmo habitual.",
+        "below": "{category} está un {percent}% por debajo de su ritmo habitual.",
+        "figures": "<current></current> hasta ahora, normalmente <baseline></baseline> a estas alturas.",
+        "link": "Ver transacciones"
+      },
+      "budget": {
+        "pace": "{category} va camino de superar su presupuesto.",
+        "figures": "<projected></projected> previstos frente a <budgeted></budgeted> planificados.",
+        "link": "Ver presupuesto"
+      }
     },
     "bank-alerts": {
       "label": "Alertas de conexiones bancarias",

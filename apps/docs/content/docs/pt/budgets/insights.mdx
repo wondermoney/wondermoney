@@ -1,0 +1,36 @@
+---
+title: Estatísticas
+description: Avisos antecipados quando uma categoria acelera ou um orçamento vai exceder o limite.
+---
+
+As estatísticas aparecem na página inicial, por baixo do património líquido. São determinísticas: o mesmo mês e as mesmas transações produzem sempre os mesmos cartões. Não é usado nenhum modelo de IA, por isso funcionam mesmo sem um fornecedor de IA configurado.
+
+## Gastos face ao habitual
+
+Para cada categoria de topo, compara o que já gastou este mês com os mesmos dias dos três meses completos anteriores.
+
+- Começa no dia 7 do mês. Antes disso não há mês suficiente para comparar.
+- Precisa de três meses completos de histórico. Uma casa nova não vê nada até lá.
+- O gasto habitual da categoria tem de ser pelo menos 20 na sua moeda. Abaixo disso, alguns euros fazem a percentagem oscilar muito.
+- Dispara quando o gasto está 25% ou mais acima ou abaixo dessa base.
+- Aparecem no máximo três cartões, ordenados pelo desvio.
+
+O cartão mostra o valor até agora, o valor habitual a esta altura e uma ligação para as transações correspondentes.
+
+## Ritmo do orçamento
+
+Para cada categoria do orçamento, projeta o que já gastou para o mês inteiro ao ritmo atual.
+
+- Começa no dia 7 do mês.
+- Dispara quando a projeção para o fim do mês é superior ao valor que a categoria pode gastar, incluindo o saldo transitado.
+- O cartão mostra o gasto, a projeção e o valor planeado, com uma ligação para o mês do orçamento.
+
+## O que fica de fora
+
+As transferências entre as suas próprias contas e o dinheiro em categorias que não são gasto (investimentos e poupança) ficam de fora, como nos totais dos orçamentos e dos relatórios. Os valores estão na sua moeda base.
+
+## Ligações relacionadas
+
+- [Acompanhar os gastos mensais](/pt/docs/budgets/track-monthly-spending)
+- [Criar o primeiro orçamento](/pt/docs/budgets/create-first-budget)
+- [Comparar meses](/pt/docs/budgets/compare-months)

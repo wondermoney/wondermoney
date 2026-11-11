@@ -39,6 +39,7 @@ jest.mock('@/features/transactions/use-transaction-review-summary', () => ({
   useTransactionReviewSummary: () => mocks.reviewSummary,
 }))
 jest.mock('@/features/account-insights/use-top-spending-category', () => ({ useTopSpendingCategory: () => mocks.insight }))
+jest.mock('@/features/insights/use-insights', () => ({ useInsights: () => mocks.insights }))
 jest.mock('./use-home-data', () => ({
   useHomeBudgetMonths: () => mockMonths,
   useHomeCashflow: () => mocks.cashflow,
@@ -55,6 +56,7 @@ jest.mock('@/features/preferences/use-dashboard-layout', () => ({
   useDashboardLayout: () => ({
     layout: [
       { id: 'net-worth', hidden: false },
+      { id: 'insights', hidden: false },
       { id: 'this-month', hidden: false },
       { id: 'balance-sheet', hidden: false },
       { id: 'cashflow', hidden: false },
@@ -97,6 +99,7 @@ describe('NetWorthRoute', () => {
       latest: loaded({ transactions: [] }),
       reviewSummary: loaded({ count: 0, currency: 'EUR', totalAbs: 0 }),
       insight: loaded({ categorySpending: [] }),
+      insights: loaded({ insights: [] }),
       cashflow: loaded({ cashflow: [] }),
       cashflowComparison: loaded({ cashflow: [] }),
       portfolios: loaded({ portfolios: [] }),

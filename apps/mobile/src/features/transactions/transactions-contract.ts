@@ -126,6 +126,16 @@ export type TransactionFilters = Readonly<{
   includeHidden?: boolean
   /** Tag keys; the server returns rows carrying any of them. */
   tagIds?: readonly number[]
+  /** Category keys; the server returns rows assigned to any of them. */
+  categoryIds?: readonly number[]
+  /** Money in or money out only. */
+  direction?: 'in' | 'out'
+  /** Leave out transfers between the household's own accounts. */
+  excludeTransfers?: boolean
+  /** Leave out rows wholly in categories that are not spending. */
+  excludeNonSpending?: boolean
+  /** The statuses that count; omitted leaves the API's default. */
+  statuses?: readonly ('BOOKED' | 'PENDING')[]
   limit?: 100 | 500
 }>
 export type TransactionDto = z.infer<typeof aggregateTransactionSchema>
@@ -142,6 +152,11 @@ const encodeFilters = (filters: TransactionFilters, timeZone: string | undefined
   if (filters.needsReview) values.push('unreviewedOnly=true')
   if (filters.includeHidden) values.push('includeHidden=true')
   if (filters.tagIds && filters.tagIds.length > 0) values.push(`tagKeys=${encodeURIComponent(filters.tagIds.join(','))}`)
+  if (filters.categoryIds && filters.categoryIds.length > 0) values.push(`categoryKeys=${encodeURIComponent(filters.categoryIds.join(','))}`)
+  if (filters.direction) values.push(`direction=${filters.direction}`)
+  if (filters.excludeTransfers) values.push('excludeTransfers=true')
+  if (filters.excludeNonSpending) values.push('excludeNonSpending=true')
+  if (filters.statuses && filters.statuses.length > 0) values.push(`statuses=${encodeURIComponent(filters.statuses.join(','))}`)
   if (filters.limit) values.push(`limit=${filters.limit}`)
   return values.length ? `?${values.join('&')}` : ''
 }

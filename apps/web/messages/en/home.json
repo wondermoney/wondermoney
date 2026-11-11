@@ -6,6 +6,7 @@
       "description": "Choose what appears on your home and in what order.",
       "sections": {
         "net-worth": "Net worth",
+        "insights": "Insights",
         "this-month": "This month",
         "balance-sheet": "Balance sheet",
         "cashflow": "Net cash flow",
@@ -21,6 +22,29 @@
       "retry": "Try again",
       "loadError": "Could not load your home layout.",
       "done": "Done"
+    },
+    "insights": {
+      "title": "Insights",
+      "empty": {
+        "title": "Nothing unusual this month",
+        "body": "Spending is tracking its usual pace and no budget is on course to overrun."
+      },
+      "severity": {
+        "critical": "Needs attention",
+        "warning": "Worth a look",
+        "info": "Good news"
+      },
+      "spending": {
+        "above": "{category} is {percent}% above its usual pace.",
+        "below": "{category} is {percent}% below its usual pace.",
+        "figures": "<current></current> so far, normally <baseline></baseline> by this point.",
+        "link": "View transactions"
+      },
+      "budget": {
+        "pace": "{category} is on course to overrun its budget.",
+        "figures": "<projected></projected> projected against <budgeted></budgeted> planned.",
+        "link": "View budget"
+      }
     },
     "bank-alerts": {
       "label": "Bank connection alerts",

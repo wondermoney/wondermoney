@@ -1,5 +1,5 @@
 {
-  "title": "Or\u00e7amentos",
+  "title": "Orçamentos",
   "pages": [
     "index",
     "envelope-method",
@@ -7,6 +7,7 @@
     "household-size-dependents",
     "choose-budget-categories",
     "track-monthly-spending",
+    "insights",
     "compare-months",
     "adjust-delete-budget"
   ]

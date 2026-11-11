@@ -1,7 +1,12 @@
 import { describe, expect, it, vi } from 'vitest';
 
 const mocked = vi.hoisted(() => ({
-  em: { find: vi.fn(), findOne: vi.fn(), getReference: vi.fn((entity, id) => ({ entity, id })) },
+  em: {
+    find: vi.fn(),
+    findOne: vi.fn(),
+    getConnection: vi.fn(() => ({ execute: vi.fn().mockResolvedValue([]) })),
+    getReference: vi.fn((entity, id) => ({ entity, id })),
+  },
   log: vi.fn(),
 }));
 
