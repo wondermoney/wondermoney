@@ -1,0 +1,46 @@
+---
+title: API Tokens
+description: Give a script, spreadsheet or dashboard read or write access to your own finances without sharing your password.
+---
+
+An API token lets a script, spreadsheet, home dashboard or AI tool use the WonderMoney API as you. It is an alternative to signing in with your password: the tool sends the token in an `Authorization: Bearer` header.
+
+A token is not a separate account. It sees the same household data your session sees — including your private accounts, and only those you can see — and it is bound to the household it was created in.
+
+## Create a token
+
+1. Open **Settings → API tokens**.
+2. Give it a name you will recognise later, such as "Home dashboard".
+3. Choose its permissions and how long it should last.
+4. Select **Create token** and copy the value immediately.
+
+The token is shown once. WonderMoney stores only a SHA-256 hash, so nobody — including support — can show it again. If you lose it, revoke it and create a new one.
+
+Creating a token needs a recent sign-in. If you use two-factor authentication, enter your authenticator code as well.
+
+## Permissions
+
+- **Read** allows `GET` on the data routes: accounts, transactions, categories, budgets, goals, reports, net worth, portfolios and the other read surfaces.
+- **Write** allows creating and updating transactions, accounts, categories, budgets and goals. Write also allows reading those resources, because a script that writes a transaction usually reads it back.
+
+Neither permission allows deleting, importing, recalculating, managing the household or the bank connection, or managing API tokens. A token can never reach `/api/auth`, `/v1/admin`, `/v1/user`, `/v1/household` or `/v1/banking`.
+
+## Expiry
+
+Every token expires. Choose 30, 90 or 365 days. If email is configured on the server, WonderMoney sends a reminder seven days before a token expires. An expired token is rejected with `401 Unauthorized`.
+
+## Revoke a token
+
+Select **Revoke** next to the token in **Settings → API tokens**. Revocation is immediate: the next request with that token gets `401 Unauthorized`.
+
+Revoke a token when a script no longer needs it, when a laptop or device is lost, or when you suspect the value was exposed.
+
+## Rate limits
+
+Token traffic has its own budget, counted per token. A request over the limit gets `429 Too Many Requests` with a `Retry-After` header. The budget is separate from your browser session, so a busy script does not slow down the app for you.
+
+## Related pages
+
+- [Two-factor authentication](/en/docs/settings-security-privacy/two-factor-authentication)
+- [Data privacy](/en/docs/settings-security-privacy/data-privacy)
+- [Settings, security, and privacy](/en/docs/settings-security-privacy)

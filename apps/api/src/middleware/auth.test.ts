@@ -33,7 +33,7 @@ vi.mock('@utils/logger', () => ({
 }));
 
 const sessionContext = {
-  session: { id: 'session-1' },
+  session: { createdAt: new Date(), id: 'session-1' },
   user: {
     email: 'user@example.com',
     emailVerified: true,

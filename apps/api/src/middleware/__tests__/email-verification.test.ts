@@ -11,7 +11,7 @@ function appFor(emailVerified: boolean | undefined) {
   const app = express();
   app.use((req: Request, _res, next) => {
     if (emailVerified !== undefined) {
-      req.authUser = { session: { id: 's' }, user: { email: 'a@example.test', emailVerified, id: 'u' } };
+      req.authUser = { session: { createdAt: new Date(), id: 's' }, user: { email: 'a@example.test', emailVerified, id: 'u' } };
     }
     next();
   });

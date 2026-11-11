@@ -48,6 +48,15 @@ export function resolveEmailDriver(env: Env = process.env): EmailDriver {
 }
 
 /**
+ * Whether a real provider is configured. The `log` driver is the self-hosted fallback: it
+ * writes the whole message to the API log. Background reminders that nobody asked for are
+ * skipped there — the log is not an inbox.
+ */
+export function isEmailConfigured(env: Env = process.env): boolean {
+  return resolveEmailDriver(env) !== 'log';
+}
+
+/**
  * The product's sender: `EMAIL_FROM`/`EMAIL_FROM_NAME`. The name defaults to the instance's own
  * (`INSTANCE_NAME`), so a self-hosted instance's mail does not arrive from "WonderMoney".
  *

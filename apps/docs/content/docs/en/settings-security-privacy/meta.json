@@ -13,6 +13,7 @@
     "ai-assistant-consent",
     "change-password",
     "two-factor-authentication",
+    "api-tokens",
     "read-only-bank-access",
     "data-privacy",
     "delete-account"

@@ -10,7 +10,8 @@ export function mockAuthSession() {
     authHandler: (_req: unknown, res: { sendStatus: (status: number) => unknown }) => res.sendStatus(404),
     getAuthSession: (headers: Record<string, string | string[] | undefined>) => {
       const id = headers[TEST_USER_HEADER];
-      return Promise.resolve(typeof id === 'string' ? { session: { id: `session-${id}`, userId: id }, user: { email: `${id}@example.test`, id } } : null);
+      return Promise.resolve(typeof id === 'string' ? { session: { createdAt: new Date(), id: `session-${id}`, userId: id }, user: { email: `${id}@example.test`, id } } : null);
     },
+    verifyTotpForSession: () => Promise.resolve(),
   };
 }
