@@ -56,7 +56,7 @@ describe('provider balance selection', () => {
 interface Client {
   account: (accountId: string) => {
     getBalances: () => Promise<{ balances: { balanceAmount: { amount: string } }[] }>;
-    getDetails: () => Promise<{ account?: { currency: string; name: string; ownerName: string } }>;
+    getDetails: () => Promise<{ account?: { cashAccountType?: string; currency: string; name: string; ownerName: string } }>;
     getMetadata: () => Promise<{ iban?: string; institution_id: string }>;
   };
   requisition: { getRequisitionById: (id: string) => Promise<{ accounts: string[]; institution_id?: string }> };
@@ -69,10 +69,10 @@ interface Tenant { appuserKey: { appuserKey: number; currencyKey?: Currency }; t
 const tenant = (): Tenant => ({ appuserKey: { appuserKey: 9 }, tenantKey: { tenantKey: 3 } });
 const currency = (): Currency => ({ code: 'EUR' });
 
-const client = (opts: { accounts?: string[]; balance?: string; fail?: string; failWith?: Error } = {}): Client => ({
+const client = (opts: { accounts?: string[]; balance?: string; cashAccountType?: string; fail?: string; failWith?: Error } = {}): Client => ({
   account: (accountId: string) => ({
     getBalances: () => opts.fail === accountId ? Promise.reject(opts.failWith ?? new Error('balances failed')) : Promise.resolve({ balances: [{ balanceAmount: { amount: opts.balance ?? '10' } }] }),
-    getDetails: () => Promise.resolve({ account: { currency: 'EUR', name: `Name ${accountId}`, ownerName: 'Owner' } }),
+    getDetails: () => Promise.resolve({ account: { cashAccountType: opts.cashAccountType, currency: 'EUR', name: `Name ${accountId}`, ownerName: 'Owner' } }),
     getMetadata: () => Promise.resolve({ iban: 'DE123', institution_id: 'bank-1' }),
   }),
   requisition: { getRequisitionById: () => Promise.resolve({ accounts: opts.accounts ?? ['acc-1'] }) },
@@ -82,7 +82,7 @@ const client = (opts: { accounts?: string[]; balance?: string; fail?: string; fa
 const axiosLikeError = (status: number, data: unknown) =>
   Object.assign(new Error(`Request failed with status code ${status}`), { isAxiosError: true, name: 'AxiosError', response: { data, status } });
 
-const createEm = (overrides: Partial<{ currency: Currency | null; deletedAccount: unknown; exchangeRate: unknown; existingAccount: unknown; institution: unknown; tenant: null | Tenant }> = {}) => ({
+const createEm = (overrides: Partial<{ accountType: unknown; currency: Currency | null; deletedAccount: unknown; exchangeRate: unknown; existingAccount: unknown; institution: unknown; tenant: null | Tenant }> = {}) => ({
   create: vi.fn((_entity: unknown, data: unknown) => data),
   findOne: vi.fn((entity: unknown, where: Record<string, unknown>) => {
     const name = (entity as { name?: string }).name;
@@ -90,6 +90,7 @@ const createEm = (overrides: Partial<{ currency: Currency | null; deletedAccount
     if (name === 'Currency') return Object.hasOwn(overrides, 'currency') ? overrides.currency : currency();
     if (name === 'ExchangeRate') return Object.hasOwn(overrides, 'exchangeRate') ? overrides.exchangeRate : null;
     if (name === 'AccountFinancialInstitution') return Object.hasOwn(overrides, 'institution') ? overrides.institution : null;
+    if (name === 'AccountType') return Object.hasOwn(overrides, 'accountType') ? overrides.accountType : null;
     if (name === 'Account') return Object.hasOwn(where, 'deletedAt') ? (Object.hasOwn(overrides, 'deletedAccount') ? overrides.deletedAccount : null) : (Object.hasOwn(overrides, 'existingAccount') ? overrides.existingAccount : null);
     return null;
   }),
@@ -149,6 +150,21 @@ describe('account initial sync account service', () => {
     const created = (em.create as unknown as { mock: { calls: [unknown, Record<string, unknown>][] } }).mock.calls.find(([, data]) => data['accountId'] === 'acc-1')?.[1];
     expect(created?.['appuserCurrencyBalance']).toBeNull();
     expect(created?.['fxStatus']).toBe('missing');
+  });
+
+  it('types an account the provider reports as a card', async () => {
+    const creditCardType = { description: 'CREDIT_CARD' };
+    const em = createEm({ accountType: creditCardType });
+    await service.syncAccountsForRequisition({ connection: conn(1) }, { em: asEm(em), provider: providerFromClient(client({ cashAccountType: 'CARD' })) });
+    const created = (em.create as unknown as { mock: { calls: [unknown, Record<string, unknown>][] } }).mock.calls.find(([, data]) => data['accountId'] === 'acc-1')?.[1];
+    expect(created?.['accountTypeKey']).toBe(creditCardType);
+  });
+
+  it('leaves the account type alone when the provider reports no card', async () => {
+    const em = createEm({ accountType: { description: 'CREDIT_CARD' } });
+    await service.syncAccountsForRequisition({ connection: conn(1) }, { em: asEm(em), provider: providerFromClient(client({ cashAccountType: 'CACC' })) });
+    const created = (em.create as unknown as { mock: { calls: [unknown, Record<string, unknown>][] } }).mock.calls.find(([, data]) => data['accountId'] === 'acc-1')?.[1];
+    expect(created?.['accountTypeKey']).toBeUndefined();
   });
 
   it('returns partial when one account fails', async () => {

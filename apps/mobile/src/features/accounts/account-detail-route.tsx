@@ -18,6 +18,24 @@ import { parseAccountId } from './accounts-contract'
 import { useAccount } from './use-account'
 import { useAccountForecast } from './use-account-forecast'
 import { useAccountRecalculation } from './use-account-recalculation'
+import { useCreditCardStatements } from './use-credit-card-statements'
+
+function creditCardStatementState(
+  creditCard: NonNullable<ReturnType<typeof mapAccountDetail>['creditCard']> | null,
+  statements: ReturnType<typeof useCreditCardStatements>,
+): AccountDetailData['creditCardStatement'] {
+  if (!creditCard) return undefined
+  if (statements.data) {
+    const list = statements.data.statements
+    const current = list.find((statement) => statement.isCurrent) ?? list[list.length - 1]
+    return current
+      ? { status: 'loaded', statement: current, creditLimit: creditCard.creditLimit ?? null }
+      : { status: 'empty' }
+  }
+  if (statements.error && statements.error instanceof ApiError && statements.error.code === 'invalid-response') return { status: 'invalid-response' }
+  if (statements.error) return { status: 'error' }
+  return { status: 'loading' }
+}
 
 export function AccountDetailRoute() {
   const params = useLocalSearchParams<{ accountId?: string | string[] }>()
@@ -33,6 +51,8 @@ export function AccountDetailRoute() {
   const noFilters = useMemo(() => ({}), [])
   const ledger = useTransactions(noFilters, accountId ?? 0)
   const recalculation = useAccountRecalculation()
+  const creditCard = query.data?.account.creditCard ?? null
+  const statements = useCreditCardStatements(accountId, Boolean(creditCard))
   const router = useRouter()
   const { signOut } = useProductRuntime()
   let state: AccountDetailViewState
@@ -54,6 +74,7 @@ export function AccountDetailRoute() {
       forecast: forecastSeries
         ? { status: 'loaded', series: forecastSeries }
         : forecast.isLoading ? { status: 'loading' } : forecast.data ? { status: 'unavailable' } : { status: 'error' },
+      creditCardStatement: creditCardStatementState(creditCard, statements),
     }
     state = query.isRefreshFailure ? { status: 'refresh-error', data } : { status: 'loaded', data }
   } else if (query.isNotFound) state = { status: 'not-found' }

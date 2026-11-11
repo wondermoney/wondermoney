@@ -39,6 +39,7 @@ test("normalizes omitted legacy fields and derives source when omitted", () => {
     syncStatus: null,
     fxStatus: null,
     fxRateDate: null,
+    creditCard: null,
   });
   assert.equal(response.accounts[1].source, "open_banking");
 });

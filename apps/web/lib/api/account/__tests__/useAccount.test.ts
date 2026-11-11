@@ -130,5 +130,6 @@ test("supports finalized detail payloads", async () => {
     syncStatus: null,
     fxStatus: null,
     fxRateDate: null,
+    creditCard: null,
   });
 });

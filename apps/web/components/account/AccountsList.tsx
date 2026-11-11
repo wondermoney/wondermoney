@@ -86,7 +86,14 @@ export default function AccountsList({
     key: number | null;
     isPrivate: boolean;
     isOwnedByViewer: boolean;
-  }>({ name: null, key: null, isPrivate: false, isOwnedByViewer: false });
+    creditCard: Account["creditCard"];
+  }>({
+    name: null,
+    key: null,
+    isPrivate: false,
+    isOwnedByViewer: false,
+    creditCard: null,
+  });
   const [editAccModalIsOpen, setEditAccModalIsOpen] = useState(false);
   const [deleteAccModalIsOpen, setDeleteAccModalIsOpen] = useState(false);
   const [recalculating, setRecalculating] = useState<{
@@ -158,6 +165,7 @@ export default function AccountsList({
         key: account.accountKey,
         isPrivate: account.isPrivate,
         isOwnedByViewer: account.isOwnedByViewer,
+        creditCard: account.creditCard ?? null,
       });
       setEditAccModalIsOpen(true);
       posthog.capture("edit_account_modal", { action: "opened" });
@@ -172,6 +180,7 @@ export default function AccountsList({
         key: account.accountKey,
         isPrivate: account.isPrivate,
         isOwnedByViewer: account.isOwnedByViewer,
+        creditCard: account.creditCard ?? null,
       });
       setDeleteAccModalIsOpen(true);
       posthog.capture("delete_account_modal", { action: "opened" });
@@ -536,6 +545,7 @@ export default function AccountsList({
             isOpen={editAccModalIsOpen}
             isOwnedByViewer={accountData.isOwnedByViewer}
             isPrivate={accountData.isPrivate}
+            creditCard={accountData.creditCard}
             onOpenChange={(open) => {
               if (!open) {
                 setEditAccModalIsOpen(false);
@@ -544,6 +554,7 @@ export default function AccountsList({
                   key: null,
                   isPrivate: false,
                   isOwnedByViewer: false,
+                  creditCard: null,
                 });
                 posthog.capture("edit_account_modal", { action: "closed" });
               }
@@ -558,6 +569,7 @@ export default function AccountsList({
                 key: null,
                 isPrivate: false,
                 isOwnedByViewer: false,
+                creditCard: null,
               });
               posthog.capture("delete_account_modal", { action: "closed" });
             }}

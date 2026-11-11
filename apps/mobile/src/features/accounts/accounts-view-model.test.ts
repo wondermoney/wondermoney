@@ -37,6 +37,7 @@ describe('accounts view model', () => {
       lastSyncedAt: null,
       institutionLogoUrl: null,
       accountType: null,
+      creditCard: null,
       fx: { status: 'exact' },
     })
     expect('logoUrl' in result).toBe(false)

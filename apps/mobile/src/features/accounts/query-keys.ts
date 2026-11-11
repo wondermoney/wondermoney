@@ -9,3 +9,6 @@ export const accountForecastKey = (epochId: number, accountId: number, days: num
 export const accountCurrenciesKey = (epochId: number) => ['account-create', epochId, 'currencies'] as const
 export const accountInstitutionsKey = (epochId: number) => ['account-create', epochId, 'institutions'] as const
 export const offlineAccountCreateGuardKey = (epochId: number) => ['account-create', epochId, 'unknown-outcome'] as const
+export const accountCreditCardStatementsKey = (epochId: number, accountId: number) => (
+  ['account', epochId, accountId, 'credit-card-statements'] as const
+)

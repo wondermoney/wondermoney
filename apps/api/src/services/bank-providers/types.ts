@@ -80,6 +80,11 @@ export interface BankProviderAccount {
   institutionId?: string;
   name?: string;
   ownerName?: string;
+  /**
+   * The provider's ISO 20022 cash account type, when it reports one. `CARD` marks a credit card;
+   * the sync types the account `CREDIT_CARD` from it.
+   */
+  cashAccountType?: string;
 }
 
 export interface BankProviderBalance {

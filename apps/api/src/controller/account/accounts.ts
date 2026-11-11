@@ -11,6 +11,7 @@ import { Appuser } from '@entity/Appuser';
 import { AppuserAccountPosition } from '@entity/AppuserAccountPosition';
 import { AppuserTenant } from '@entity/AppuserTenant';
 import { BankSyncFinality, BankSyncIncident } from '@entity/BankSyncIncident';
+import { CreditCardDetail } from '@entity/CreditCardDetail';
 import { Currency } from '@entity/Currency';
 import { Transaction } from '@entity/Transaction';
 import { TransactionStatus } from '@entity/TransactionStatus';
@@ -18,6 +19,7 @@ import { computeAvailableBalance } from '@service/account/account-available-bala
 import { resolveAccountCsvImportFormat } from '@service/account/account-csv-import-format';
 import { startAccountRecalculation } from '@service/account/account-recalculation.service';
 import { computeSyncStatus } from '@service/account/account-sync-status.service';
+import { mapCreditCardDetail } from '@service/account/credit-card-statement.service';
 import type { BankSyncLastError } from '@service/bank-sync/bank-sync-history.service';
 import { convertWithStatus, type RateScope, rateScope } from '@service/currency/exchange-rate';
 import { describeFx, type FxDisplay, UNKNOWN_FX } from '@service/currency/fx-display';
@@ -150,7 +152,8 @@ export async function getAccount(req: Request, res: Response) {
     loadPendingSumsByAccount([account.accountKey]),
     describeAccountsFx([account], rateScope(req.tenant)),
   ]);
-  return res.json({ account: mapAccountSummary(account, { ...syncIncidentContext, now: new Date(), pendingSumsByAccount, viewerAppuserKey: req.user.appuserKey }, fx) });
+  const creditCard = await DI.em.findOne(CreditCardDetail, { accountKey: { accountKey: account.accountKey }, deletedAt: undefined });
+  return res.json({ account: mapAccountSummary(account, { ...syncIncidentContext, now: new Date(), pendingSumsByAccount, viewerAppuserKey: req.user.appuserKey }, fx, creditCard ? mapCreditCardDetail(creditCard) : null) });
 }
 
 export async function getAccountFinancialInstitutions(_req: Request, res: Response) {
@@ -206,8 +209,9 @@ export async function getAccounts(req: Request, res: Response) {
   // `sort` is stable, so the name order above survives among accounts with the same place.
   // An account this member has not placed (a new one) sorts after every placed one.
   accounts.sort((a, b) => (positionByAccount.get(a.accountKey) ?? Number.MAX_SAFE_INTEGER) - (positionByAccount.get(b.accountKey) ?? Number.MAX_SAFE_INTEGER));
+  const creditCards = await loadCreditCardDetailsByAccount(accounts.map((account) => account.accountKey));
   const syncContext = { ...syncIncidentContext, now: new Date(), pendingSumsByAccount, viewerAppuserKey: req.user.appuserKey };
-  const transformedData = accounts.map((account, index) => mapAccountSummary(account, syncContext, fx[index]));
+  const transformedData = accounts.map((account, index) => mapAccountSummary(account, syncContext, fx[index], creditCards.get(account.accountKey) ?? null));
   return res.json({ accounts: transformedData });
 }
 
@@ -309,7 +313,7 @@ function describeAccountsFx(accounts: Account[], scope: RateScope): Promise<FxDi
 }
 
 /** `fx` says how the balance was converted; without it the account reports no FX status. */
-export function mapAccountSummary(account: Account, syncContext?: AccountSyncContext, fx: FxDisplay = UNKNOWN_FX) {
+export function mapAccountSummary(account: Account, syncContext?: AccountSyncContext, fx: FxDisplay = UNKNOWN_FX, creditCard: null | ReturnType<typeof mapCreditCardDetail> = null) {
   const currencyCode = resolveRequiredCurrencyCode(account.currencyKey.code, 'account');
   const ownerCurrencyCode = resolveRequiredCurrencyCode(
     account.accountOwnerAppuserKey?.currencyKey.code,
@@ -333,11 +337,14 @@ export function mapAccountSummary(account: Account, syncContext?: AccountSyncCon
     // client can pick a glyph for an account with no institution logo. Null when none was set.
     accountOwnerAppuserKey: { currencyKey: { code: ownerCurrencyCode } },
     accountType: account.accountTypeKey?.description ?? null,
+    // The card's cycle and limit, or null for a non-card account. Drives the card settings and the
+    // statement summary on web and mobile.
     appuserCurrencyAvailableBalance:
       account.appuserCurrencyBalance == null && !pending ? null : computeAvailableBalance(account.appuserCurrencyBalance, [pending?.appuserSettlement]),
     appuserCurrencyBalance: account.appuserCurrencyBalance ?? null,
     availableBalance: account.balance == null && !pending ? null : computeAvailableBalance(account.balance, [pending?.settlement]),
     balance: account.balance ?? null,
+    creditCard,
     // Which file the account's CSV import reads: the bank's statement export, or the generic format.
     csvImportFormat: resolveAccountCsvImportFormat(institution?.name).format,
     currencyKey: { code: currencyCode },
@@ -442,6 +449,21 @@ export async function recalculateAccount(req: Request, res: Response) {
   if (!account) throw new NotFoundError(`Account not found: ${accountId}`);
   const { operationId } = await startAccountRecalculation(DI.em, { accountKey: account.accountKey, appuserKey: user.appuserKey, tenantKey: account.tenantKey.tenantKey }, { enqueue: req.enqueue });
   return res.status(StatusCodes.ACCEPTED).json({ operationId });
+}
+
+/**
+ * Card settings per account, for the account list and detail. One query for the whole list; an
+ * account with no row is simply not a card.
+ */
+async function loadCreditCardDetailsByAccount(accountKeys: number[]): Promise<Map<number, ReturnType<typeof mapCreditCardDetail>>> {
+  const cards = new Map<number, ReturnType<typeof mapCreditCardDetail>>();
+  if (accountKeys.length === 0) return cards;
+  const details = await DI.em.find(CreditCardDetail, { accountKey: { accountKey: { $in: accountKeys } }, deletedAt: undefined });
+  for (const detail of details) {
+    const accountKey = detail.accountKey.accountKey;
+    if (accountKey) cards.set(accountKey, mapCreditCardDetail(detail));
+  }
+  return cards;
 }
 
 /**

@@ -37,6 +37,8 @@ export const updateTransactionRequestSchema = z.object({
     transactionType: z.enum(USER_SETTABLE_TYPES).optional(),
     /** Where an outgoing transfer went; null clears it. */
     transferDestination: z.object({ key: positiveIntId, type: z.enum(TRANSFER_DESTINATION_TYPES) }).nullable().optional(),
+    /** Moves the row to the credit-card statement containing this date; null uses the transaction date. */
+    statementDateOverride: validDate.nullable().optional(),
     updatedAmount: finiteAmount.optional(),
   }),
   params: z.object({ transactionId: positiveIntId }),
@@ -168,6 +170,25 @@ export const reorderAccountsRequestSchema = z.object({
       .max(1000)
       .refine((keys) => new Set(keys).size === keys.length, { message: 'Each account may appear only once' }),
   }),
+});
+/**
+ * `PUT /v1/account/:accountId/credit-card`: the card's cycle. Close and due days are 1–31 and the
+ * cycle service clamps them to a short month's end. A null limit or minimum clears it.
+ */
+const dayOfMonth = z.number().int().min(1).max(31);
+const nonNegativeAmount = finiteAmount.refine((value) => value >= 0, { message: 'Must not be negative' });
+export const updateCreditCardRequestSchema = z.object({
+  body: z.object({
+    creditLimit: nonNegativeAmount.refine((value) => value <= 999_999_999_999, { message: 'creditLimit is too large' }).nullable().optional(),
+    minimumPaymentPercent: finiteAmount.refine((value) => value >= 0 && value <= 100, { message: 'Must be between 0 and 100' }).nullable().optional(),
+    paymentDueDay: dayOfMonth,
+    statementCloseDay: dayOfMonth,
+  }),
+  params: z.object({ accountId: positiveIntId }),
+});
+export const getCreditCardStatementsRequestSchema = z.object({
+  params: z.object({ accountId: positiveIntId }),
+  query: z.object({ from: validDate.optional(), to: validDate.optional() }),
 });
 export const recalculateAccountRequestSchema = z.object({ params: z.object({ accountId: positiveIntId }) });
 export const deleteAccountRequestSchema = z.object({ params: z.object({ accountId: positiveIntId }) });

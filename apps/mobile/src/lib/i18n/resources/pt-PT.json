@@ -610,7 +610,14 @@
       "not-foundMessage": "Esta conta pode ter sido removida.",
       "invalid-idTitle": "Conta indisponível",
       "invalid-idMessage": "Volte a Contas e escolha uma conta disponível."
-    }
+    },
+    "creditCardTitle": "Conta de cartão de crédito",
+    "creditCardHelper": "Acompanhe o ciclo do extrato deste cartão: quando fecha, quando vence e quanto crédito resta.",
+    "statementCloseDay": "O extrato fecha a (1–31)",
+    "paymentDueDay": "O pagamento vence a (1–31)",
+    "creditLimit": "Limite de crédito",
+    "minimumPaymentPercent": "Pagamento mínimo (% do saldo)",
+    "optional": "Opcional"
   },
   "transactions": {
     "title": "Transações",
@@ -4258,5 +4265,19 @@
     "save": "Guardar",
     "saving": "A guardar…",
     "delete": "Eliminar modelo"
+  },
+  "creditCardStatement": {
+    "title": "Extrato atual",
+    "loading": "A carregar o extrato…",
+    "error": "Não foi possível carregar este extrato. Atualize para tentar novamente.",
+    "invalidResponse": "O extrato não pôde ser verificado, por isso não é mostrado.",
+    "empty": "Ainda não há extrato para este período.",
+    "balance": "Saldo do extrato",
+    "period": "{{start}} – {{end}}",
+    "dueDate": "Data de vencimento",
+    "dueHelper": "Pague até este dia para evitar juros.",
+    "availableCredit": "Crédito disponível",
+    "limitOf": "De {{limit}}",
+    "limitNotSet": "Sem limite de crédito definido"
   }
 }

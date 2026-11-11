@@ -30,6 +30,7 @@ import type { RecentTransactionRow } from '@/features/transactions/recent-transa
 
 import { accountFreshness } from './account-freshness'
 import type { AccountDetailViewModel } from './account-detail-view-model'
+import { CreditCardStatementSection, type CreditCardStatementState } from './credit-card-statement-section'
 import { ForecastCard, type AccountForecastState } from './forecast-card'
 import type { AccountRecalculationState } from './use-account-recalculation'
 import type { SectionState } from './accounts-screen'
@@ -42,6 +43,8 @@ export type AccountDetailData = AccountDetailViewModel & {
   balance?: SectionState<readonly BalancePoint[]>
   /** The projected low point and the recurring payments still to come. */
   forecast?: AccountForecastState
+  /** The current credit-card statement, when the account is a card. */
+  creditCardStatement?: CreditCardStatementState
 }
 export type AccountDetailViewState =
   | { status: 'loading' }
@@ -183,6 +186,10 @@ export function AccountDetailScreen({ state, recentTransactions, onBack, onRetry
             />
             {data.metrics ? <MetricsStats currency={data.primaryCurrencyCode} locale={locale} state={data.metrics} testID="account-metrics" /> : null}
           </View>
+
+          {data.creditCardStatement ? (
+            <CreditCardStatementSection currency={data.originalCurrencyCode} locale={locale} state={data.creditCardStatement} />
+          ) : null}
 
           {data.balance ? (
             <Section title={t('accountsOverview.balanceGrowth')} variant="open">

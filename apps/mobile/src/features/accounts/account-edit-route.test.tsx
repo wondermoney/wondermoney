@@ -14,6 +14,7 @@ jest.mock('expo-router', () => ({ useLocalSearchParams: () => mockParams, useRou
 jest.mock('./use-account', () => ({ useAccount: (...args: unknown[]) => mockUseAccount(...args) }))
 jest.mock('./use-account-metadata-mutation', () => ({ useAccountMetadataMutation: () => mockMutation }))
 jest.mock('./use-account-delete-mutation', () => ({ useAccountDeleteMutation: () => mockDeleteMutation }))
+jest.mock('./use-credit-card-mutation', () => ({ useCreditCardMutation: () => ({ isPending: false, mutateAsync: jest.fn() }) }))
 jest.mock('./account-edit-screen', () => ({
   AccountEditScreen: ({ state, onSaveAccount, onDeleteAccount }: { state: { status: string; model?: { name: string } }; onSaveAccount: (value: { accountName?: string; isPrivate?: boolean }) => Promise<void>; onDeleteAccount: () => Promise<void> }) => {
     const Native = jest.requireActual<typeof import('react-native')>('react-native')

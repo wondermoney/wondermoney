@@ -610,7 +610,14 @@
       "not-foundMessage": "This account may have been removed.",
       "invalid-idTitle": "Account not available",
       "invalid-idMessage": "Return to Accounts and choose an available account."
-    }
+    },
+    "creditCardTitle": "Credit card account",
+    "creditCardHelper": "Track this card's statement cycle: when it closes, when it is due and how much credit is left.",
+    "statementCloseDay": "Statement closes on (1–31)",
+    "paymentDueDay": "Payment due on (1–31)",
+    "creditLimit": "Credit limit",
+    "minimumPaymentPercent": "Minimum payment (% of balance)",
+    "optional": "Optional"
   },
   "transactions": {
     "title": "Transactions",
@@ -4258,5 +4265,19 @@
     "save": "Save",
     "saving": "Saving…",
     "delete": "Delete template"
+  },
+  "creditCardStatement": {
+    "title": "Current statement",
+    "loading": "Loading statement…",
+    "error": "Could not load this statement. Pull to refresh to try again.",
+    "invalidResponse": "The statement could not be verified, so it is not shown.",
+    "empty": "No statement for this period yet.",
+    "balance": "Statement balance",
+    "period": "{{start}} – {{end}}",
+    "dueDate": "Due date",
+    "dueHelper": "Pay by this day to avoid interest.",
+    "availableCredit": "Available credit",
+    "limitOf": "Of {{limit}}",
+    "limitNotSet": "No credit limit set"
   }
 }

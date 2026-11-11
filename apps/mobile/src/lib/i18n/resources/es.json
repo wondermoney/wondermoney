@@ -610,7 +610,14 @@
       "not-foundMessage": "Es posible que esta cuenta se haya eliminado.",
       "invalid-idTitle": "Cuenta no disponible",
       "invalid-idMessage": "Vuelve a Cuentas y elige una cuenta disponible."
-    }
+    },
+    "creditCardTitle": "Cuenta de tarjeta de crédito",
+    "creditCardHelper": "Sigue el ciclo del extracto de esta tarjeta: cuándo cierra, cuándo vence y cuánto crédito queda.",
+    "statementCloseDay": "El extracto cierra el (1–31)",
+    "paymentDueDay": "El pago vence el (1–31)",
+    "creditLimit": "Límite de crédito",
+    "minimumPaymentPercent": "Pago mínimo (% del saldo)",
+    "optional": "Opcional"
   },
   "transactions": {
     "title": "Transacciones",
@@ -4258,5 +4265,19 @@
     "save": "Guardar",
     "saving": "Guardando…",
     "delete": "Eliminar plantilla"
+  },
+  "creditCardStatement": {
+    "title": "Extracto actual",
+    "loading": "Cargando el extracto…",
+    "error": "No se pudo cargar este extracto. Actualiza para volver a intentarlo.",
+    "invalidResponse": "El extracto no se pudo verificar, por lo que no se muestra.",
+    "empty": "Todavía no hay extracto para este período.",
+    "balance": "Saldo del extracto",
+    "period": "{{start}} – {{end}}",
+    "dueDate": "Fecha de vencimiento",
+    "dueHelper": "Paga antes de este día para evitar intereses.",
+    "availableCredit": "Crédito disponible",
+    "limitOf": "De {{limit}}",
+    "limitNotSet": "Sin límite de crédito definido"
   }
 }

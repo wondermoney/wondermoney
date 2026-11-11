@@ -11,7 +11,13 @@ import { Text as UiText } from '@/components/ui/text'
 import { themeTokens, type Palette } from '@/theme/tokens'
 import { usePalette } from '@/theme/use-palette'
 
-import { accountUpdateWriteSchema, type AccountUpdateWrite } from './accounts-contract'
+import {
+  accountUpdateWriteSchema,
+  creditCardWriteSchema,
+  type AccountUpdateWrite,
+  type CreditCardSettingsDto,
+  type CreditCardWrite,
+} from './accounts-contract'
 import { LoadingState } from './screen-states'
 import { classifyAccountDeleteFailure, type AccountDeleteFailure } from './use-account-delete-mutation'
 import { classifyAccountWriteFailure, type AccountWriteFailure } from './use-account-metadata-mutation'
@@ -21,6 +27,8 @@ export type AccountEditModel = Readonly<{
   name: string
   isPrivate: boolean
   isOwnedByViewer: boolean
+  /** The card's cycle and limit, or null when the account is not a credit card. */
+  creditCard?: CreditCardSettingsDto | null
 }>
 
 export type AccountEditViewState =
@@ -33,11 +41,51 @@ type Props = Readonly<{
   onBack: () => void
   onRetry: () => void | Promise<void>
   onSaveAccount: (value: AccountUpdateWrite) => Promise<void>
+  onSaveCreditCard: (value: CreditCardWrite) => Promise<void>
   onDeleteAccount: () => Promise<void>
   pending: boolean
+  creditCardPending: boolean
   deletePending: boolean
 }>
 
+
+export type CreditCardForm = Readonly<{
+  enabled: boolean
+  statementCloseDay: string
+  paymentDueDay: string
+  creditLimit: string
+  minimumPaymentPercent: string
+}>
+
+const optionalNumber = (value: string): null | number => {
+  const trimmed = value.trim()
+  if (trimmed === '') return null
+  const parsed = Number(trimmed)
+  return Number.isFinite(parsed) ? parsed : Number.NaN
+}
+
+/**
+ * The card settings to send, or null when there is nothing to change. A card cannot be un-marked:
+ * there is no endpoint that removes the cycle, so turning the switch off sends nothing.
+ */
+export function createCreditCardChanges(
+  original: CreditCardSettingsDto | null,
+  form: CreditCardForm,
+): CreditCardWrite | null {
+  if (!form.enabled) return null
+  const next: CreditCardWrite = {
+    statementCloseDay: Number(form.statementCloseDay),
+    paymentDueDay: Number(form.paymentDueDay),
+    creditLimit: optionalNumber(form.creditLimit),
+    minimumPaymentPercent: optionalNumber(form.minimumPaymentPercent),
+  }
+  if (!original) return next
+  const unchanged = original.statementCloseDay === next.statementCloseDay
+    && original.paymentDueDay === next.paymentDueDay
+    && (original.creditLimit ?? null) === (next.creditLimit ?? null)
+    && (original.minimumPaymentPercent ?? null) === (next.minimumPaymentPercent ?? null)
+  return unchanged ? null : next
+}
 
 export function createAccountMetadataChanges(
   original: Pick<AccountEditModel, 'name' | 'isPrivate' | 'isOwnedByViewer'>,
@@ -65,16 +113,23 @@ export function AccountEditScreen(props: Props) {
   return <AccountEditForm key={props.state.model.id} {...props} model={props.state.model} stale={props.state.status === 'refresh-error'} palette={palette} />
 }
 
-function AccountEditForm({ model, stale, onBack, onSaveAccount, onDeleteAccount, pending, deletePending, palette }: Omit<Props, 'state' | 'onRetry'> & { model: AccountEditModel; stale: boolean; palette: Palette }) {
+function AccountEditForm({ model, stale, onBack, onSaveAccount, onSaveCreditCard, onDeleteAccount, pending, creditCardPending, deletePending, palette }: Omit<Props, 'state' | 'onRetry'> & { model: AccountEditModel; stale: boolean; palette: Palette }) {
   const { t } = useTranslation()
   const [saved, setSaved] = useState(model)
   const [name, setName] = useState(model.name)
   const [isPrivate, setIsPrivate] = useState(model.isPrivate)
+  const [cardEnabled, setCardEnabled] = useState(Boolean(model.creditCard))
+  const [statementCloseDay, setStatementCloseDay] = useState(String(model.creditCard?.statementCloseDay ?? 1))
+  const [paymentDueDay, setPaymentDueDay] = useState(String(model.creditCard?.paymentDueDay ?? 1))
+  const [creditLimit, setCreditLimit] = useState(model.creditCard?.creditLimit == null ? '' : String(model.creditCard.creditLimit))
+  const [minimumPaymentPercent, setMinimumPaymentPercent] = useState(model.creditCard?.minimumPaymentPercent == null ? '' : String(model.creditCard.minimumPaymentPercent))
   const [failure, setFailure] = useState<AccountWriteFailure | null>(null)
   const [deleteFailure, setDeleteFailure] = useState<AccountDeleteFailure | null>(null)
   const changes = createAccountMetadataChanges(saved, { name, isPrivate })
-  const dirty = changes !== null
-  const locked = pending || deletePending
+  const cardForm: CreditCardForm = { creditLimit, enabled: cardEnabled, minimumPaymentPercent, paymentDueDay, statementCloseDay }
+  const cardChanges = createCreditCardChanges(saved.creditCard ?? null, cardForm)
+  const dirty = changes !== null || cardChanges !== null
+  const locked = pending || creditCardPending || deletePending
 
   const deleteAccount = async () => {
     if (locked) return
@@ -101,12 +156,26 @@ function AccountEditForm({ model, stale, onBack, onSaveAccount, onDeleteAccount,
   })
 
   const saveAccount = async () => {
-    if (!changes || locked) return
-    if (!accountUpdateWriteSchema.safeParse(changes).success) { setFailure('invalid'); return }
+    if (!dirty || locked) return
+    if (changes && !accountUpdateWriteSchema.safeParse(changes).success) { setFailure('invalid'); return }
+    if (cardChanges && !creditCardWriteSchema.safeParse(cardChanges).success) { setFailure('invalid'); return }
     setFailure(null)
     try {
-      await onSaveAccount(changes)
-      setSaved((current) => ({ ...current, name, isPrivate }))
+      if (cardChanges) await onSaveCreditCard(cardChanges)
+      if (changes) await onSaveAccount(changes)
+      setSaved((current) => ({
+        ...current,
+        name,
+        isPrivate,
+        creditCard: cardChanges
+          ? {
+              statementCloseDay: cardChanges.statementCloseDay,
+              paymentDueDay: cardChanges.paymentDueDay,
+              creditLimit: cardChanges.creditLimit ?? null,
+              minimumPaymentPercent: cardChanges.minimumPaymentPercent ?? null,
+            }
+          : current.creditCard,
+      }))
     } catch (error) {
       setFailure(classifyAccountWriteFailure(error))
     }
@@ -120,8 +189,8 @@ function AccountEditForm({ model, stale, onBack, onSaveAccount, onDeleteAccount,
         onClose={() => void requestExit()}
         onSave={() => void saveAccount()}
         saveDisabled={!dirty || locked}
-        saveLabel={pending ? t('accountEdit.saving') : t('accountEdit.saveDetails')}
-        saving={pending}
+        saveLabel={pending || creditCardPending ? t('accountEdit.saving') : t('accountEdit.saveDetails')}
+        saving={pending || creditCardPending}
         title={t('accountEdit.title')}
       />
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={styles.keyboard}>
@@ -153,6 +222,62 @@ function AccountEditForm({ model, stale, onBack, onSaveAccount, onDeleteAccount,
                   onValueChange={setIsPrivate}
                   value={isPrivate}
                 />
+              ) : null}
+            </FormGroup>
+            <FormGroup>
+              <FormSwitchRow
+                key="credit-card"
+                accessibilityHint={t('accountEdit.creditCardHelper')}
+                accessibilityLabel={t('accountEdit.creditCardTitle')}
+                disabled={locked || Boolean(model.creditCard)}
+                hint={t('accountEdit.creditCardHelper')}
+                label={t('accountEdit.creditCardTitle')}
+                onValueChange={setCardEnabled}
+                value={cardEnabled}
+              />
+              {cardEnabled ? (
+                <>
+                  <FormTextRow
+                    key="close-day"
+                    accessibilityLabel={t('accountEdit.statementCloseDay')}
+                    editable={!locked}
+                    keyboardType="number-pad"
+                    label={t('accountEdit.statementCloseDay')}
+                    maxLength={2}
+                    onChangeText={setStatementCloseDay}
+                    value={statementCloseDay}
+                  />
+                  <FormTextRow
+                    key="due-day"
+                    accessibilityLabel={t('accountEdit.paymentDueDay')}
+                    editable={!locked}
+                    keyboardType="number-pad"
+                    label={t('accountEdit.paymentDueDay')}
+                    maxLength={2}
+                    onChangeText={setPaymentDueDay}
+                    value={paymentDueDay}
+                  />
+                  <FormTextRow
+                    key="limit"
+                    accessibilityLabel={t('accountEdit.creditLimit')}
+                    editable={!locked}
+                    keyboardType="decimal-pad"
+                    label={t('accountEdit.creditLimit')}
+                    onChangeText={setCreditLimit}
+                    placeholder={t('accountEdit.optional')}
+                    value={creditLimit}
+                  />
+                  <FormTextRow
+                    key="minimum"
+                    accessibilityLabel={t('accountEdit.minimumPaymentPercent')}
+                    editable={!locked}
+                    keyboardType="decimal-pad"
+                    label={t('accountEdit.minimumPaymentPercent')}
+                    onChangeText={setMinimumPaymentPercent}
+                    placeholder={t('accountEdit.optional')}
+                    value={minimumPaymentPercent}
+                  />
+                </>
               ) : null}
             </FormGroup>
             <View style={styles.danger}>

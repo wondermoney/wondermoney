@@ -466,6 +466,46 @@
         }
       }
     },
+    "/v1/account/{accountId}/credit-card": {
+      "put": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "accountId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/v1/account/{accountId}/statements": {
+      "get": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "accountId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/v1/account/{accountId}/recalculate": {
       "post": {
         "description": "",

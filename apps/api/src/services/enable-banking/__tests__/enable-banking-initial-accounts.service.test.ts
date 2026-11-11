@@ -15,7 +15,7 @@ const connection = (overrides: { tenantKey?: unknown } = {}) => ({
   ...overrides,
 }) as unknown as EnableBankingConnection;
 
-function createEm(overrides: Partial<{ currency: unknown; existingAccount: unknown; existingDeleted: unknown; institution: unknown; persistRejects: unknown[] }> = {}) {
+function createEm(overrides: Partial<{ accountType: unknown; currency: unknown; existingAccount: unknown; existingDeleted: unknown; institution: unknown; persistRejects: unknown[] }> = {}) {
   const flush = vi.fn();
   for (const rejection of overrides.persistRejects ?? []) flush.mockRejectedValueOnce(rejection);
   flush.mockResolvedValue(undefined);
@@ -26,6 +26,7 @@ function createEm(overrides: Partial<{ currency: unknown; existingAccount: unkno
     findOne: vi.fn((entity: unknown, where: Record<string, unknown>) => {
       const name = (entity as { name?: string }).name;
       if (name === 'AccountFinancialInstitution') return Object.hasOwn(overrides, 'institution') ? overrides.institution : null;
+      if (name === 'AccountType') return Object.hasOwn(overrides, 'accountType') ? overrides.accountType : null;
       if (name === 'Currency') return Object.hasOwn(overrides, 'currency') ? overrides.currency : { code: 'EUR' };
       if (name === 'Account') return Object.hasOwn(where, 'deletedAt') && (where['deletedAt'] as Record<string, unknown> | undefined)?.['$ne'] !== undefined
         ? (Object.hasOwn(overrides, 'existingDeleted') ? overrides.existingDeleted : null)
@@ -56,6 +57,19 @@ describe('createInitialEnableBankingAccounts', () => {
     expect(result.accounts[0]).toMatchObject({ accountId: 'acc-1', accountName: 'Checking', accountNumber: 'PT50000000000000000000000' });
     expect(result.accounts[0]?.enableBankingConnectionKey).toEqual(connection());
     expect(result.accounts[0]?.tenantKey).toEqual({ tenantKey: 3 });
+  });
+
+  it('types a session account the provider reports as a card', async () => {
+    const accountType = { description: 'CREDIT_CARD' };
+    const em = createEm({ accountType });
+    const result = await createInitialEnableBankingAccounts(em as unknown as EntityManager, connection(), [{ cash_account_type: 'CARD', currency: 'EUR', uid: 'acc-1' }]);
+    expect(result.accounts[0]?.accountTypeKey).toBe(accountType);
+  });
+
+  it('leaves the type unset when the provider reports a non-card account', async () => {
+    const em = createEm({ accountType: { description: 'CREDIT_CARD' } });
+    const result = await createInitialEnableBankingAccounts(em as unknown as EntityManager, connection(), [{ cash_account_type: 'CACC', currency: 'EUR', uid: 'acc-1' }]);
+    expect(result.accounts[0]?.accountTypeKey).toBeUndefined();
   });
 
   it('skips a session account with no uid, without failing the batch', async () => {
