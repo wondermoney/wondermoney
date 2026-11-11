@@ -101,5 +101,26 @@
       "description": "{total, plural, one {This transaction is split over several categories. Giving it one category removes the split.} other {{count, plural, one {# of these transactions is} other {# of these transactions are}} split over several categories. Giving them one category removes the split.}}",
       "confirm": "Use one category"
     }
+  },
+  "transactionTemplates": {
+    "menu": "Templates",
+    "new-template": "New template",
+    "new-template-description": "Save the fields of an entry you make often. Using it fills the form; it never creates a transaction.",
+    "name": "Name",
+    "name-placeholder": "Weekly groceries",
+    "name-required": "Give the template a name.",
+    "direction": "Direction",
+    "direction-out": "Money out",
+    "direction-in": "Money in",
+    "amount": "Amount",
+    "amount-placeholder": "Optional",
+    "amount-invalid": "Enter an amount greater than zero.",
+    "description": "Description",
+    "notes": "Notes",
+    "created": "Template saved",
+    "save-failed": "The template could not be saved.",
+    "save-as-template": "Save as template",
+    "save-as-template-description": "Copies this transaction's fields. Using it later fills the add form; it never creates a transaction.",
+    "save-as-template-hint": "Make this entry reusable."
   }
 }

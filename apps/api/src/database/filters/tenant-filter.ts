@@ -44,6 +44,13 @@ export const tenantScopedCond = (args?: TenantFilterArgs): Dictionary => (hasTen
  */
 export const ownerScopedCond = (args?: TenantFilterArgs): Dictionary => (hasTenant(args) ? { appuserKey: args.appuserKey, tenantKey: args.tenantKey } : {});
 
+/**
+ * tenantKey = current tenant AND ownerAppuserKey = current member. For records only their owner
+ * sees, not the rest of the household (a saved transaction template).
+ */
+export const ownerAppuserScopedCond = (args?: TenantFilterArgs): Dictionary =>
+  hasTenant(args) ? { ownerAppuserKey: args.appuserKey, tenantKey: args.tenantKey } : {};
+
 /** tenantKey = current tenant OR NULL — NULL-tenant rows are global/system and shared across tenants. */
 export const tenantOrGlobalCond = (args?: TenantFilterArgs): Dictionary =>
   hasTenant(args) ? { $or: [{ tenantKey: args.tenantKey }, { tenantKey: null }] } : {};

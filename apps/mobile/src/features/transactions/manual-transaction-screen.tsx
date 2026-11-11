@@ -15,7 +15,10 @@ import type { AccountSummaryViewModel } from '@/features/accounts/accounts-view-
 import type { CategoryViewModel } from '@/features/categories/categories-view-model'
 import { TagPickerSheet, type CreateTagOutcome, type TagsState } from '@/features/tags/tag-picker-sheet'
 import type { TagDto } from '@/features/tags/tags-contract'
-import { parseAmountInput } from '@/lib/formatters/decimal-input'
+import type { TransactionTemplateDto, TransactionTemplateInput } from '@/features/transaction-templates/templates-contract'
+import { TemplateChips } from '@/features/transaction-templates/template-chips'
+import { TemplateEditorSheet } from '@/features/transaction-templates/template-editor-sheet'
+import { formatNumberInput, parseAmountInput } from '@/lib/formatters/decimal-input'
 import { useFormatMoney } from '@/lib/formatters/money-display'
 import { themeTokens, type Palette } from '@/theme/tokens'
 import { usePalette } from '@/theme/use-palette'
@@ -45,6 +48,13 @@ export type ManualTransactionScreenProps = Readonly<{
   /** Household tags. Not loaded (or an older server), the Tags row stays hidden. */
   tags?: TagsState
   onCreateTag?: (name: string) => Promise<CreateTagOutcome>
+  /** The member's saved entries. Not loaded (or an older server), the chips stay hidden. */
+  templates?: readonly TransactionTemplateDto[]
+  templatesStatus?: 'loading' | 'error' | 'loaded'
+  templatesPending?: boolean
+  onCreateTemplate?: (input: TransactionTemplateInput) => void
+  onUpdateTemplate?: (transactionTemplateId: number, input: TransactionTemplateInput) => void
+  onDeleteTemplate?: (transactionTemplateId: number) => void
   types: readonly TransactionTypeDto[]
   currencies: readonly SettlementCurrencyDto[]
   merchants: readonly TransactionMerchantDto[]
@@ -98,6 +108,12 @@ export function ManualTransactionScreen({
   categories,
   tags = { status: 'loading' },
   onCreateTag,
+  templates = [],
+  templatesStatus = 'error',
+  templatesPending = false,
+  onCreateTemplate,
+  onUpdateTemplate,
+  onDeleteTemplate,
   types,
   currencies,
   merchants,
@@ -135,7 +151,30 @@ export function ManualTransactionScreen({
   const [notes, setNotes] = useState('')
   const [frozen, setFrozen] = useState<FrozenManualTransaction | null>(null)
   const [validationError, setValidationError] = useState(false)
+  const [editingTemplate, setEditingTemplate] = useState<TransactionTemplateDto | null>(null)
+  const [templateEditorOpen, setTemplateEditorOpen] = useState(false)
   const allCategories = useMemo(() => categories.flatMap((category) => [category, ...category.children]), [categories])
+
+  /**
+   * Choosing a template fills the form and dates it today; nothing is sent until the person
+   * reviews and confirms. An account it names is used only while that account is visible.
+   */
+  const applyTemplate = (template: TransactionTemplateDto) => {
+    if (template.account && accounts.some((item) => item.accountId === template.account?.accountKey)) {
+      setAccountId(template.account.accountKey)
+    }
+    setDate(localToday())
+    const nextKind: ManualTransactionKind = template.direction === 'out' ? 'expense' : 'income'
+    setKind(nextKind)
+    setTypeId(defaultTypeOfKind(types, nextKind)?.transactionTypeKey ?? null)
+    setAmount(template.amount === null ? '' : formatNumberInput(template.amount, locale))
+    setDescription(template.description ?? '')
+    setNotes(template.notes ?? '')
+    setCategoryId(template.category?.categoryKey ?? null)
+    setSelectedExistingMerchant(template.transactionMerchant)
+    setMerchantName(template.transactionMerchant?.name ?? '')
+    setCreateMerchantIntent(false)
+  }
 
   const account = accounts.find((item) => item.accountId === accountId)
   const accountOptions = useMemo(() => accounts.map((item) => ({
@@ -268,6 +307,14 @@ export function ManualTransactionScreen({
             </View>
           ) : (
             <View style={styles.form}>
+              {templatesStatus === 'loaded' ? (
+                <TemplateChips
+                  onCreate={() => { setEditingTemplate(null); setTemplateEditorOpen(true) }}
+                  onManage={(template) => { setEditingTemplate(template); setTemplateEditorOpen(true) }}
+                  onUse={applyTemplate}
+                  templates={templates}
+                />
+              ) : null}
               <AmountEntry
                 accessibilityLabel={t('transactionCreate.amount')}
                 allowExpressions
@@ -355,6 +402,20 @@ export function ManualTransactionScreen({
           ) : null}
         </View>
       </ScrollView>
+      <TemplateEditorSheet
+        onClose={() => setTemplateEditorOpen(false)}
+        onDelete={editingTemplate && onDeleteTemplate
+          ? () => { onDeleteTemplate(editingTemplate.transactionTemplateKey); setTemplateEditorOpen(false) }
+          : undefined}
+        onSave={(input) => {
+          if (editingTemplate) onUpdateTemplate?.(editingTemplate.transactionTemplateKey, input)
+          else onCreateTemplate?.(input)
+          setTemplateEditorOpen(false)
+        }}
+        pending={templatesPending}
+        template={editingTemplate}
+        visible={templateEditorOpen}
+      />
     </SafeAreaView>
   )
 }

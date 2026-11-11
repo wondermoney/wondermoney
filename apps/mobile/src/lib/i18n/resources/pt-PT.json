@@ -4237,5 +4237,26 @@
         "partial": "Parcialmente concluída"
       }
     }
+  },
+  "transactionTemplates": {
+    "newTemplate": "Novo modelo",
+    "use": "Usar modelo {{name}}",
+    "longPressHint": "Prima sem soltar para editar ou eliminar",
+    "newTitle": "Novo modelo",
+    "editTitle": "Editar modelo",
+    "name": "Nome",
+    "namePlaceholder": "Compras semanais",
+    "nameRequired": "Dê um nome ao modelo.",
+    "amount": "Montante",
+    "amountInvalid": "Introduza um montante maior do que zero.",
+    "optional": "Opcional",
+    "description": "Descrição",
+    "notes": "Notas",
+    "direction": "Sentido",
+    "directionOut": "Dinheiro a sair",
+    "directionIn": "Dinheiro a entrar",
+    "save": "Guardar",
+    "saving": "A guardar…",
+    "delete": "Eliminar modelo"
   }
 }

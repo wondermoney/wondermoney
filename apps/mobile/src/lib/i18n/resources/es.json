@@ -4237,5 +4237,26 @@
         "partial": "Completada en parte"
       }
     }
+  },
+  "transactionTemplates": {
+    "newTemplate": "Nueva plantilla",
+    "use": "Usar plantilla {{name}}",
+    "longPressHint": "Mantén pulsado para editar o eliminar",
+    "newTitle": "Nueva plantilla",
+    "editTitle": "Editar plantilla",
+    "name": "Nombre",
+    "namePlaceholder": "Compra semanal",
+    "nameRequired": "Ponle un nombre a la plantilla.",
+    "amount": "Importe",
+    "amountInvalid": "Introduce un importe mayor que cero.",
+    "optional": "Opcional",
+    "description": "Descripción",
+    "notes": "Notas",
+    "direction": "Sentido",
+    "directionOut": "Dinero que sale",
+    "directionIn": "Dinero que entra",
+    "save": "Guardar",
+    "saving": "Guardando…",
+    "delete": "Eliminar plantilla"
   }
 }

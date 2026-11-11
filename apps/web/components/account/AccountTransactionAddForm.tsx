@@ -34,10 +34,12 @@ import {
   type TransactionFormValues,
 } from "@/lib/account/transaction-form-schema";
 import { createNewMerchantSelection } from "@/lib/account/transaction-merchant";
+import { transactionTemplatePrefill } from "@/lib/account/transaction-template";
 import useAccounts, { Account } from "@/lib/api/account/useAccounts";
 import { TransactionOCRInfo } from "@/lib/api/account/useCreateTransactionOcr";
 import useTransactionMerchants from "@/lib/api/account/useTransactionMerchants";
 import useConfigs from "@/lib/api/configs/useConfigs";
+import type { TransactionTemplate } from "@/lib/api/transaction-template/useTransactionTemplates";
 import { cn } from "@/lib/utils";
 import {
   buildCurrencyOptions,
@@ -47,6 +49,8 @@ import { getCurrencySymbol } from "@/lib/utils/currencySymbol";
 
 import { CategoryComboBoxForm } from "../CategoryComboBoxForm";
 import { TagPicker } from "../tags/TagPicker";
+import { TransactionTemplateDialog } from "./TransactionTemplateDialog";
+import { TransactionTemplatesMenu } from "./TransactionTemplatesMenu";
 
 interface AccountTransactionAddFormProps {
   accounts: Account[];
@@ -101,7 +105,8 @@ const AccountTransactionAddForm: React.FC<AccountTransactionAddFormProps> = ({
     },
   });
 
-  const { control, register, handleSubmit, setValue, getValues } = form;
+  const { control, register, handleSubmit, resetField, setValue, getValues } =
+    form;
 
   useEffect(() => {
     register("settlementCurrencyId");
@@ -127,6 +132,7 @@ const AccountTransactionAddForm: React.FC<AccountTransactionAddFormProps> = ({
   });
 
   const [isOtherDetailsOpen, setIsOtherDetailsOpen] = useState(false);
+  const [isTemplateDialogOpen, setIsTemplateDialogOpen] = useState(false);
   const [newMerchantNames, setNewMerchantNames] = useState<string[]>([]);
   const [merchantSearch, setMerchantSearch] = useState("");
   const [debouncedMerchantSearch, setDebouncedMerchantSearch] = useState("");
@@ -219,6 +225,43 @@ const AccountTransactionAddForm: React.FC<AccountTransactionAddFormProps> = ({
     }),
   );
 
+  /**
+   * Choosing a template only fills the form; the person still reviews and submits it. The date
+   * is today, and an account it names is used only while that account is still selectable.
+   */
+  const applyTemplate = (template: TransactionTemplate) => {
+    const prefill = transactionTemplatePrefill(
+      template,
+      configsData?.transactionTypes ?? [],
+    );
+    if (
+      prefill.accountId &&
+      selectableAccounts.some(
+        (account) => account.accountKey.toString() === prefill.accountId,
+      )
+    ) {
+      setValue("accountId", prefill.accountId);
+    }
+    setValue("transactionDate", prefill.transactionDate);
+    if (prefill.settlementAmount === undefined) {
+      resetField("settlementAmount");
+    } else {
+      setValue("settlementAmount", prefill.settlementAmount);
+    }
+    setValue("description", prefill.description);
+    setValue("notes", prefill.notes);
+    setValue("categoryId", prefill.categoryId);
+    setValue("transactionMerchantId", prefill.transactionMerchantId ?? "");
+    setValue("transactionMerchantName", prefill.transactionMerchantName);
+    if (prefill.transactionTypeId) {
+      setValue("transactionTypeId", prefill.transactionTypeId);
+    }
+    setValue("hasOriginalAmount", false);
+    setValue("originalAmount", undefined);
+    setValue("originalCurrencyId", undefined);
+    setValue("exchangeRate", undefined);
+  };
+
   const currenciesOptions = configsData?.currencies.map((currency) => ({
     shortLabel: getCurrencySymbol(currency.code),
     label: `${currency.code} (${currency.description})`,
@@ -266,29 +309,38 @@ const AccountTransactionAddForm: React.FC<AccountTransactionAddFormProps> = ({
   ]);
 
   return (
-    <Form {...form}>
-      <FormContent
-        className="grid grid-cols-1 gap-2 md:grid-cols-2 md:gap-4"
-        onSubmit={handleSubmit(onSubmit)}
-        id="add-account-transaction-form"
-      >
-        <FormField
-          control={control}
-          name="accountId"
-          rules={{ required: true }}
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel required>{t("account")}</FormLabel>
-              <ComboBoxForm
-                field={field}
-                onSelect={(opt) => {
-                  setValue(field.name, opt?.value || "");
-                }}
-                placeholder={t("transaction-account-placeholder")}
-                options={accountsOptions}
+    <>
+      <Form {...form}>
+        <FormContent
+          className="grid grid-cols-1 gap-2 md:grid-cols-2 md:gap-4"
+          onSubmit={handleSubmit(onSubmit)}
+          id="add-account-transaction-form"
+        >
+          {!ocrData ? (
+            <div className="col-span-2 flex flex-wrap items-center gap-2">
+              <TransactionTemplatesMenu
+                onCreate={() => setIsTemplateDialogOpen(true)}
+                onSelect={applyTemplate}
               />
-              <FormMessage />
-            </FormItem>
+            </div>
+          ) : null}
+          <FormField
+            control={control}
+            name="accountId"
+            rules={{ required: true }}
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel required>{t("account")}</FormLabel>
+                <ComboBoxForm
+                  field={field}
+                  onSelect={(opt) => {
+                    setValue(field.name, opt?.value || "");
+                  }}
+                  placeholder={t("transaction-account-placeholder")}
+                  options={accountsOptions}
+                />
+                <FormMessage />
+              </FormItem>
           )}
         />
         <FormField
@@ -564,8 +616,15 @@ const AccountTransactionAddForm: React.FC<AccountTransactionAddFormProps> = ({
             </div>
           </CollapsibleContent>
         </Collapsible>
-      </FormContent>
-    </Form>
+        </FormContent>
+      </Form>
+      {isTemplateDialogOpen ? (
+        <TransactionTemplateDialog
+          open
+          onOpenChange={setIsTemplateDialogOpen}
+        />
+      ) : null}
+    </>
   );
 };
 

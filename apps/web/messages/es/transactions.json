@@ -101,5 +101,26 @@
       "description": "{total, plural, one {Esta transacción está dividida entre varias categorías. Darle una sola categoría quita la división.} other {{count, plural, one {# de estas transacciones está dividida} other {# de estas transacciones están divididas}} entre varias categorías. Darles una sola categoría quita la división.}}",
       "confirm": "Usar una categoría"
     }
+  },
+  "transactionTemplates": {
+    "menu": "Plantillas",
+    "new-template": "Nueva plantilla",
+    "new-template-description": "Guarda los campos de un registro que haces a menudo. Usarla rellena el formulario; nunca crea una transacción.",
+    "name": "Nombre",
+    "name-placeholder": "Compra semanal",
+    "name-required": "Ponle un nombre a la plantilla.",
+    "direction": "Sentido",
+    "direction-out": "Dinero que sale",
+    "direction-in": "Dinero que entra",
+    "amount": "Importe",
+    "amount-placeholder": "Opcional",
+    "amount-invalid": "Introduce un importe mayor que cero.",
+    "description": "Descripción",
+    "notes": "Notas",
+    "created": "Plantilla guardada",
+    "save-failed": "No se pudo guardar la plantilla.",
+    "save-as-template": "Guardar como plantilla",
+    "save-as-template-description": "Copia los campos de esta transacción. Usarla más tarde rellena el formulario de alta; nunca crea una transacción.",
+    "save-as-template-hint": "Haz que este registro se pueda reutilizar."
   }
 }
