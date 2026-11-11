@@ -4,10 +4,10 @@ import type { CsvImportFormat } from '../accounts/accounts-contract'
 import type { ImportRowCounts } from './transaction-import-contract'
 
 /**
- * The generic CSV format the API reads for an account whose bank has no statement parser
- * (`AccountCsvImportService.importAccountCsv` without a bank name). The header names are fixed and
- * the API rejects any other column, so the template carries exactly these. Same spec as web's
- * lib/account/account-csv-generic-format.ts (apps never share source, so it is restated here).
+ * The generic CSV format the API reads for an account whose bank has no statement parser (the
+ * staged import's `generic-csv` adapter). The header names are fixed, so the template carries
+ * exactly these. Same spec as web's generic template (apps never share source, so it is restated
+ * here).
  */
 export const GENERIC_CSV_COLUMNS = [
   'date',

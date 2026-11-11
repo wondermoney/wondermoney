@@ -1,6 +1,5 @@
 import { DI } from '@app/database/di';
 import { ensureAccountAutoSyncRequisitionQueue, ensureAccountAutoSyncScheduleQueue } from '@app/jobs/account-auto-sync.queue';
-import { ensureAccountCsvImportQueue } from '@app/jobs/account-csv-import.queue';
 import { ensureAccountInitialSyncQueue } from '@app/jobs/account-initial-sync.queue';
 import { ASSET_PRICE_REFRESH_QUEUE, ASSET_PRICE_REFRESH_SINGLETON_KEY, ensureAssetPriceRefreshQueue } from '@app/jobs/asset-price-refresh.queue';
 import { ensureFoundationQueue } from '@app/jobs/queue';
@@ -10,7 +9,7 @@ import { bankSyncEnvironment, canonicalBankSyncDistinctId } from '@service/bank-
 import type { RecoveryTransport } from '@service/queue/recovery-transport';
 import { ConflictError } from '@utils/errors';
 
-export const BACKGROUND_OPERATION_RETRY_TYPES = ['foundation.health-check', 'account.auto-sync.schedule', 'account.auto-sync.requisition', 'account.initial-sync', 'account.csv-import', 'asset-price.refresh'] as const;
+export const BACKGROUND_OPERATION_RETRY_TYPES = ['foundation.health-check', 'account.auto-sync.schedule', 'account.auto-sync.requisition', 'account.initial-sync', 'asset-price.refresh'] as const;
 
 export type BackgroundOperationRetryType = typeof BACKGROUND_OPERATION_RETRY_TYPES[number];
 
@@ -25,7 +24,6 @@ const FOUNDATION_QUEUE = 'foundation.health-check';
 const ACCOUNT_QUEUE = 'account.initial-sync';
 const AUTO_ACCOUNT_SCHEDULE_QUEUE = 'account.auto-sync.schedule';
 const AUTO_ACCOUNT_QUEUE = 'account.auto-sync.requisition';
-const ACCOUNT_CSV_QUEUE = 'account.csv-import';
 const buildFoundationPayload: RetrySpec['buildPayload'] = (operation) => Promise.resolve({ correlationId: operation.correlationId });
 
 function resolveSync<T>(callback: () => T): Promise<T> {
@@ -78,28 +76,9 @@ const buildAccountAutoSyncSingletonKey: NonNullable<RetrySpec['buildSingletonKey
   return `account.auto-sync.connection:${match[1]}`;
 });
 
-const buildAccountCsvImportPayload: RetrySpec['buildPayload'] = (operation) => resolveSync(() => {
-  if (!operation.resourceId) throw new ConflictError('Operation resource is malformed');
-  const match = /^account-csv-import:(\d+):([^:]*):([^:]+):(.+)$/.exec(operation.resourceId);
-  if (!match) throw new ConflictError('Operation resource is malformed');
-  const bankName = safeDecodeURIComponent(match[2] ?? '');
-  return { accountKey: Number(match[1]), bankName, bucket: match[3], correlationId: operation.correlationId, key: match[4] };
-});
-
-
-function safeDecodeURIComponent(value: string) {
-  if (!value) return undefined;
-  try {
-    return decodeURIComponent(value);
-  } catch {
-    throw new ConflictError('Operation resource is malformed');
-  }
-}
-
 const specs: Record<BackgroundOperationRetryType, RetrySpec> = {
   'account.auto-sync.requisition': { buildPayload: buildAccountAutoSyncPayload, buildSingletonKey: buildAccountAutoSyncSingletonKey, ensureQueue: ensureAccountAutoSyncRequisitionQueue, queueName: AUTO_ACCOUNT_QUEUE },
   'account.auto-sync.schedule': { buildPayload: buildAccountAutoSyncSchedulePayload, ensureQueue: ensureAccountAutoSyncScheduleQueue, queueName: AUTO_ACCOUNT_SCHEDULE_QUEUE },
-  'account.csv-import': { buildPayload: buildAccountCsvImportPayload, ensureQueue: ensureAccountCsvImportQueue, queueName: ACCOUNT_CSV_QUEUE },
   'account.initial-sync': { buildPayload: buildAccountInitialSyncPayload, ensureQueue: ensureAccountInitialSyncQueue, queueName: ACCOUNT_QUEUE },
   'asset-price.refresh': {
     buildPayload: (operation) => Promise.resolve({ correlationId: operation.correlationId }),

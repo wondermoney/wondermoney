@@ -74,12 +74,6 @@ describe('background operation retry registry', () => {
     expect(getBackgroundOperationRetrySpec('unknown.type')).toBeNull();
   });
 
-  it('builds account csv import payload', async () => {
-    const spec = getBackgroundOperationRetrySpec('account.csv-import');
-    if (!spec) throw new Error('missing spec');
-    await expect(spec.buildPayload({ correlationId: 'cid', operationType: 'account.csv-import', resourceId: 'account-csv-import:12:bcp:bucket:key.csv' })).resolves.toEqual({ accountKey: 12, bankName: 'bcp', bucket: 'bucket', correlationId: 'cid', key: 'key.csv' });
-  });
-
   it('builds asset price refresh payload and singleton key', async () => {
     const spec = getBackgroundOperationRetrySpec('asset-price.refresh');
     if (!spec) throw new Error('missing spec');

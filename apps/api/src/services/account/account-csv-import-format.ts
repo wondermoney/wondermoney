@@ -3,8 +3,8 @@ import { csv } from '@wondermoney/shared';
 /**
  * Which file an account's CSV import reads. An account at one of the supported banks reads that
  * bank's statement export; every other account (an unsupported bank, or a manual account with no
- * financial institution) reads the generic CSV format, whose columns are fixed by
- * `AccountCsvImportService.importAccountCsv`.
+ * financial institution) reads the generic CSV format, whose columns are fixed by the template
+ * (`@wondermoney/shared`'s `genericCsvImportAdapter`).
  *
  * `bankName` is a name `csv.getBankParser` accepts. Institution names are matched ignoring case
  * and spaces, because the same bank is listed under more than one spelling: the seeded institution

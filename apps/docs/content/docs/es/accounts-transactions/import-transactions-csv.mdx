@@ -13,7 +13,7 @@ OFX y QFX son los formatos que la mayoría de los bancos y Quicken ofrecen para 
 
 Para Millennium BCP, ActivoBank, Bankinter, Banco BPI y Montepio, WonderMoney lee el formato del propio banco cuando la cuenta tiene ese banco como institución financiera. Para cualquier otro archivo, encuentra las columnas de fecha, descripción e importe por sus nombres, y deduce el formato de fecha y el separador decimal a partir de los valores. Cuando los nombres no bastan, un modelo de IA indica qué columna es cada una: ve los nombres de las columnas y el tipo de valores de cada una (fechas, números, texto), nunca tus descripciones, importes ni fechas. Eso gasta una de las llamadas diarias de mapeo de CSV de tu hogar; en una instancia sin IA, o cuando se acaban las llamadas del día, eliges tú las columnas.
 
-Un archivo en la antigua plantilla CSV de WonderMoney (con las columnas `internalTransactionId` y `transactionTypeKey`) se sigue importando como antes.
+Un archivo en la antigua plantilla CSV de WonderMoney (con las columnas `internalTransactionId` y `transactionTypeKey`) pasa por la misma revisión; la columna de tipo decide si cada fila es dinero que entra o que sale.
 
 En una instancia autoalojada, las importaciones también necesitan [almacenamiento de archivos](/es/docs/self-hosting/configure#almacenamiento-de-archivos).
 

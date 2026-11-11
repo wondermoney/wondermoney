@@ -5,7 +5,6 @@ import type { NextFunction, Request, Response } from 'express';
 import { Account } from '@entity/Account';
 import { authedContext } from '@middleware/authed-context';
 import { canUseAi } from '@middleware/email-verification';
-import AccountCsvImportEnqueueService from '@service/account/account-csv-import-enqueue.service';
 import { resolveAccountCsvImportFormat } from '@service/account/account-csv-import-format';
 import { detectStatement, toStatementPreview } from '@service/account/account-statement-detection.service';
 import { getLimitedCsvObjectBuffer, validateCsvObjectKey } from '@service/account/csv-upload-boundary.service';
@@ -45,14 +44,15 @@ export async function getS3PresignedUrlForCsvUpload(req: Request, res: Response,
 /**
  * The one-step import: a statement read by its bank's parser or with the columns the person
  * confirmed runs as a staged session that commits itself with the default decisions (new rows in,
- * duplicates out), so it resumes like any staged import. An OFX/QFX file, recognized by its
- * content, runs the same way with the OFX adapter. A file with neither (the generic CSV template)
- * still runs the older one-job import.
+ * duplicates out), so it resumes like any staged import. The file, not the account, decides the
+ * format: an OFX/QFX file is read by the OFX adapter, and the older WonderMoney CSV template (with
+ * `internalTransactionId` and `transactionTypeKey` columns) by its own. Anything else is a
+ * statement.
  */
 export async function startAccountCsvImport(req: Request, res: Response, next: NextFunction) {
   const { appuserKey, tenant, tenantKey, user } = authedContext(req);
   const {
-    body: { correlationId, key, mapping },
+    body: { key, mapping },
     params: { accountId },
   } = await zParse(startAccountCsvImportRequestSchema, req);
   const normalizedAccountId = typeof accountId === 'number' ? accountId : Number.parseInt(accountId, 10);
@@ -69,28 +69,17 @@ export async function startAccountCsvImport(req: Request, res: Response, next: N
     next(new BadRequestError('Invalid CSV object key'));
     return;
   }
-  // OFX/QFX is read by its own adapter, whatever the account's bank. The file, not the account,
-  // decides: the client uploads the same way for every format.
-  let isOfx = false;
+  // The client uploads the same way for every format; the file's own content picks the reader.
+  let format: transactionImport.ImportFormat = 'statement';
   try {
-    const buffer = await getLimitedCsvObjectBuffer({ bucket: s3Service.getAccountCsvBucketName(), key });
-    isOfx = transactionImport.isOfxFile(new Uint8Array(buffer));
+    const bytes = new Uint8Array(await getLimitedCsvObjectBuffer({ bucket: s3Service.getAccountCsvBucketName(), key }));
+    if (transactionImport.isOfxFile(bytes)) format = 'ofx';
+    else if (transactionImport.isGenericCsvTemplate(bytes)) format = 'generic-csv';
   } catch {
     // The worker reports an unreadable file; the statement path below keeps its own behaviour.
   }
-  if (isOfx) {
-    const session = await new TransactionImportService(DI.em, { enqueue: req.enqueue }).create({ appuserKey, tenantKey }, { accountId: normalizedAccountId, autoCommit: true, format: 'ofx', key });
-    return res.status(202).json({ correlationId: session.correlationId, importId: session.id, status: 'queued' });
-  }
-  const importFormat = resolveAccountCsvImportFormat(account.accountFinancialInstitutionKey?.name);
-  const supportedBankName = importFormat.format === 'bank' ? importFormat.bankName : undefined;
-  if (supportedBankName || mapping) {
-    const session = await new TransactionImportService(DI.em, { enqueue: req.enqueue }).create({ appuserKey, tenantKey }, { accountId: normalizedAccountId, autoCommit: true, format: 'statement', key, options: mapping ? { mapping } : undefined });
-    return res.status(202).json({ correlationId: session.correlationId, importId: session.id, status: 'queued' });
-  }
-  const service = new AccountCsvImportEnqueueService();
-  const operation = await service.enqueue({ accountKey: normalizedAccountId, bankName: supportedBankName, bucket: s3Service.getAccountCsvBucketName(), correlationId, key, mapping }, { enqueue: req.enqueue });
-  return res.status(202).json({ correlationId: operation.correlationId, status: (operation as { status?: string }).status ?? 'queued' });
+  const session = await new TransactionImportService(DI.em, { enqueue: req.enqueue }).create({ appuserKey, tenantKey }, { accountId: normalizedAccountId, autoCommit: true, format, key, options: mapping ? { mapping } : undefined });
+  return res.status(202).json({ correlationId: session.correlationId, importId: session.id, status: 'queued' });
 }
 
 /**
