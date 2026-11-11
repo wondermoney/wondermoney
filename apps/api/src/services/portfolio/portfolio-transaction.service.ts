@@ -7,6 +7,7 @@ import { pick } from 'lodash-es';
 
 import { DI } from '@app/app';
 import { FINANCIAL_TRANSACTION_TYPES } from '@app/constants/financial-transaction-types';
+import { PortfolioCostBasisMethod } from '@app/constants/portfolio-cost-basis';
 import type { Appuser } from '@entity/Appuser';
 import { AppuserTenant } from '@entity/AppuserTenant';
 import { CertificadoAforroSubscriptionDetail } from '@entity/CertificadoAforroSubscriptionDetail';
@@ -382,6 +383,10 @@ class PortfolioTransactionService {
     proposedTransaction?: QuantityValidationTransaction,
     excludedTransactionKey?: number,
   ): Promise<void> {
+    // The method does not change which quantities are available, but it is the same replay the
+    // holdings and gains use, so pass the portfolio's method rather than assuming FIFO.
+    const portfolio = await entityManager.findOne(Portfolio, { portfolioKey: portfolioId }, { fields: ['costBasisMethod'] });
+    const costBasisMethod = portfolio?.costBasisMethod ?? PortfolioCostBasisMethod.FIFO;
     // Every member's rows in the portfolio: the caller has already authorised the portfolio,
     // and a household portfolio's holdings are the sum of what both members recorded.
     const existingTransactions = await entityManager.find(
@@ -413,7 +418,7 @@ class PortfolioTransactionService {
     const replayResult = replayHoldingTimeline([
       ...timeline.map((transaction) => this.toHoldingTimelineTransaction(transaction, portfolioId, financialAsset)),
       ...stockSplits.map((split) => this.toStockSplitTimelineItem(split, financialAsset.financialAssetKey)),
-    ]);
+    ], costBasisMethod);
 
     if (replayResult.oversoldByPortfolioAsset.has(`${portfolioId}:${financialAsset.financialAssetKey}`)) {
       throw new BadRequestError(SELL_QUANTITY_EXCEEDS_HOLDINGS_MESSAGE);

@@ -136,6 +136,7 @@ export const updatePortfolioRequestSchema = z.object({
   body: z.object({
     accountLink: portfolioAccountLinkSchema.optional(),
     benchmarkSymbol: z.string().max(20).optional(),
+    costBasisMethod: z.enum(['FIFO', 'AVERAGE']).optional(),
     currencyId: positiveIntId.optional(),
     description: z.string().max(500).nullable().optional(),
     excluded: z.boolean().optional(),
@@ -182,6 +183,13 @@ export const getPortfolioTransactionRequestSchema = z.object({
 
 export const getPortfolioHoldingsRequestSchema = z.object({
   params: z.object({
+    portfolioId: positiveIntId,
+  }),
+});
+
+export const getPortfolioHoldingLotsRequestSchema = z.object({
+  params: z.object({
+    financialAssetKey: positiveIntId,
     portfolioId: positiveIntId,
   }),
 });

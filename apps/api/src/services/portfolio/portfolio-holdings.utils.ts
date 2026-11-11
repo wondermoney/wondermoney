@@ -1,6 +1,7 @@
 import type { Big as BigType } from 'big.js';
 
 import { FINANCIAL_TRANSACTION_TYPES } from '@app/constants/financial-transaction-types';
+import { PortfolioCostBasisMethod } from '@app/constants/portfolio-cost-basis';
 import { big } from '@utils/money';
 
 export interface CertificadoAforroHoldingDetail {
@@ -18,6 +19,14 @@ export interface CertificadoAforroLotDetail {
   transactionKey: number;
   yearsHeld: number;
 }
+
+/**
+ * A portfolio's cost basis method, or a lookup for a replay that spans portfolios (the
+ * aggregate holdings read). A single method is used for every portfolio in the first case.
+ */
+export type CostBasisMethodResolver =
+  | ((portfolioKey: number) => PortfolioCostBasisMethod)
+  | PortfolioCostBasisMethod;
 
 export interface HoldingBatch {
   fee_amount?: number;
@@ -100,6 +109,15 @@ export interface StockSplitTimelineItem {
   split_ratio?: NumericInput;
 }
 
+interface AveragePool {
+  assetKey: number;
+  /** All-in remaining cost, fees included. */
+  cost: BigType;
+  /** The fee share still attached to the open position. */
+  fees: BigType;
+  quantity: BigType;
+}
+
 type NumericInput = number | string;
 
 export function filterValidHoldings(holdings: PortfolioHolding[]): PortfolioHolding[] {
@@ -149,7 +167,8 @@ function toHoldingBatch(transaction: HoldingTransactionTimelineItem, quantity: n
 /**
  * Aggregate transaction batches into portfolio assets.
  * Combines remaining quantities from multiple lots into a single holding per asset.
- * Calculates weighted average buy price from remaining FIFO lots.
+ * Calculates the weighted average buy price of the remaining lots (under AVERAGE those lots
+ * already carry the pooled unit cost).
  */
 export function aggregateBatchesIntoAssets(batches: HoldingBatch[]): PortfolioAsset[] {
   const totalBasisByAsset = new Map<number, BigType>();
@@ -184,14 +203,36 @@ export function aggregateBatchesIntoAssets(batches: HoldingBatch[]): PortfolioAs
     }, []);
 }
 
-export function buildSplitAdjustedHoldingBatches(items: HoldingTimelineItem[]): HoldingBatch[] {
-  return replayHoldingTimeline(items).openBatches;
+export function buildSplitAdjustedHoldingBatches(
+  items: HoldingTimelineItem[],
+  method: CostBasisMethodResolver = PortfolioCostBasisMethod.FIFO,
+): HoldingBatch[] {
+  return replayHoldingTimeline(items, method).openBatches;
 }
 
-export function replayHoldingTimeline(items: HoldingTimelineItem[]): HoldingReplayResult {
+/**
+ * Replays buys, sells and splits per portfolio and asset into open lots and realized cost basis.
+ *
+ * `FIFO` consumes the oldest lots first: a sale relieves each lot's own unit cost plus its share
+ * of that lot's fee. `AVERAGE` relieves cost at the running average of the open position, and the
+ * sale leaves that average unchanged; fees paid on a buy join the pool and are relieved with it.
+ * Splits scale quantity and unit cost inversely in both methods, so the cost basis is unchanged.
+ *
+ * Under `AVERAGE` the returned open lots still carry one row per purchase (their quantities are
+ * consumed oldest-first, as in FIFO) but their unit costs are rewritten to the pooled average, so
+ * `aggregateBatchesIntoAssets` reports the pooled `averageBuyPrice`. Closed lots keep the cost
+ * they were bought at.
+ */
+export function replayHoldingTimeline(
+  items: HoldingTimelineItem[],
+  method: CostBasisMethodResolver = PortfolioCostBasisMethod.FIFO,
+): HoldingReplayResult {
+  const methodFor = typeof method === 'function' ? method : () => method;
   const allBatches: HoldingBatch[] = [];
   const oversoldByPortfolioAsset = new Map<string, number>();
   const realizedCostBasisBigByPortfolioAsset = new Map<string, BigType>();
+  // Running pooled position per `portfolio:asset`, only for AVERAGE portfolios.
+  const averagePools = new Map<string, AveragePool>();
   const sorted = [...items].sort((a, b) => {
     const dateKeyA = toDateKey('date' in a ? a.date : a.transaction_date);
     const dateKeyB = toDateKey('date' in b ? b.date : b.transaction_date);
@@ -220,6 +261,11 @@ export function replayHoldingTimeline(items: HoldingTimelineItem[]): HoldingRepl
         batch.unit_settlement_amount /= ratio;
         if (batch.unit_appuser_amount != null) batch.unit_appuser_amount /= ratio;
       }
+      // A split scales the pooled position's quantity, never its cost: the average per unit
+      // falls by the same ratio.
+      for (const pool of averagePools.values()) {
+        if (pool.assetKey === item.financial_asset_key) pool.quantity = pool.quantity.times(big(ratio));
+      }
       continue;
     }
 
@@ -230,18 +276,29 @@ export function replayHoldingTimeline(items: HoldingTimelineItem[]): HoldingRepl
     if (!Number.isFinite(normalizedQuantity) || normalizedQuantity === 0) continue;
     const absoluteQuantity = Math.abs(normalizedQuantity);
     const assetKey = `${transaction.portfolio_key}:${transaction.financial_asset_key}`;
+    const isAverage = methodFor(transaction.portfolio_key) === PortfolioCostBasisMethod.AVERAGE;
 
     if (normalizedTransactionTypeKey === FINANCIAL_TRANSACTION_TYPES.BUY) {
       const normalizedUnitSettlementAmount = Number(transaction.unit_settlement_amount);
       const normalizedUnitAppuserAmount = transaction.unit_appuser_amount == null ? transaction.unit_appuser_amount : Number(transaction.unit_appuser_amount);
       if (!Number.isFinite(normalizedUnitSettlementAmount)) continue;
       if (normalizedUnitAppuserAmount != null && !Number.isFinite(normalizedUnitAppuserAmount)) continue;
-      allBatches.push({
+      const batch = {
         ...toHoldingBatch(transaction, absoluteQuantity),
         financial_transaction_type_key: normalizedTransactionTypeKey,
         unit_appuser_amount: normalizedUnitAppuserAmount,
         unit_settlement_amount: normalizedUnitSettlementAmount,
-      });
+      };
+      allBatches.push(batch);
+      if (isAverage) {
+        const unitAmount = normalizedUnitAppuserAmount ?? normalizedUnitSettlementAmount;
+        const fee = big(batch.fee_amount ?? 0);
+        const pool = averagePools.get(assetKey) ?? { assetKey: transaction.financial_asset_key, cost: big(0), fees: big(0), quantity: big(0) };
+        pool.quantity = pool.quantity.plus(big(absoluteQuantity));
+        pool.cost = pool.cost.plus(big(absoluteQuantity).times(big(unitAmount))).plus(fee);
+        pool.fees = pool.fees.plus(fee);
+        averagePools.set(assetKey, pool);
+      }
       continue;
     }
 
@@ -261,16 +318,36 @@ export function replayHoldingTimeline(items: HoldingTimelineItem[]): HoldingRepl
         ? big(feeRemaining)
         : big(feeRemaining).times(big(consumed)).div(big(available));
       batch.remaining_fee_amount = Number(big(feeRemaining).minus(feeAllocated).toString());
-      const realizedCostBasis = (realizedCostBasisBigByPortfolioAsset.get(assetKey) ?? big(0))
-        .plus(big(consumed).times(big(batchUnitAmount)))
-        .plus(feeAllocated);
-      realizedCostBasisBigByPortfolioAsset.set(assetKey, realizedCostBasis);
+      if (!isAverage) {
+        const realizedCostBasis = (realizedCostBasisBigByPortfolioAsset.get(assetKey) ?? big(0))
+          .plus(big(consumed).times(big(batchUnitAmount)))
+          .plus(feeAllocated);
+        realizedCostBasisBigByPortfolioAsset.set(assetKey, realizedCostBasis);
+      }
       sellRemaining -= consumed;
     }
     if (sellRemaining > 1e-9) {
       oversoldByPortfolioAsset.set(assetKey, (oversoldByPortfolioAsset.get(assetKey) ?? 0) + sellRemaining);
     }
+    if (isAverage) {
+      const pool = averagePools.get(assetKey);
+      if (pool?.quantity.gt(0)) {
+        // The quantity actually relieved from the lots above; an oversell relieves no cost.
+        const soldQuantity = big(absoluteQuantity - sellRemaining);
+        const relievedQuantity = soldQuantity.gt(pool.quantity) ? pool.quantity : soldQuantity;
+        const averageCost = pool.cost.div(pool.quantity);
+        const feeShare = pool.fees.times(relievedQuantity).div(pool.quantity);
+        const realizedCostBasis = (realizedCostBasisBigByPortfolioAsset.get(assetKey) ?? big(0))
+          .plus(relievedQuantity.times(averageCost));
+        realizedCostBasisBigByPortfolioAsset.set(assetKey, realizedCostBasis);
+        pool.cost = pool.cost.minus(relievedQuantity.times(averageCost));
+        pool.fees = pool.fees.minus(feeShare);
+        pool.quantity = pool.quantity.minus(relievedQuantity);
+      }
+    }
   }
+
+  if (averagePools.size > 0) applyAveragePoolToOpenBatches(allBatches, averagePools);
 
   return {
     allBatches,
@@ -280,6 +357,30 @@ export function replayHoldingTimeline(items: HoldingTimelineItem[]): HoldingRepl
       [...realizedCostBasisBigByPortfolioAsset].map(([key, value]) => [key, Number(value.toString())]),
     ),
   };
+}
+
+/**
+ * Rewrites the open lots of an AVERAGE portfolio so their aggregate is the pooled position:
+ * every open lot carries the pooled ex-fee unit cost, and the pool's remaining fee is spread
+ * across them by remaining quantity. `aggregateBatchesIntoAssets` then reports the pooled
+ * `averageBuyPrice` and the same total cost basis the pool holds.
+ */
+function applyAveragePoolToOpenBatches(allBatches: HoldingBatch[], averagePools: Map<string, AveragePool>): void {
+  for (const [key, pool] of averagePools) {
+    if (!pool.quantity.gt(0)) continue;
+    const openBatches = allBatches.filter(
+      (batch) => `${batch.portfolio_key}:${batch.financial_asset_key}` === key && batch.remaining_batch != null && batch.remaining_batch > 0,
+    );
+    const totalRemaining = openBatches.reduce((sum, batch) => sum.plus(big(batch.remaining_batch ?? 0)), big(0));
+    if (!totalRemaining.gt(0)) continue;
+    const unitCost = pool.cost.minus(pool.fees).div(pool.quantity);
+    for (const batch of openBatches) {
+      const share = big(batch.remaining_batch ?? 0).div(totalRemaining);
+      if (batch.unit_appuser_amount != null) batch.unit_appuser_amount = Number(unitCost.toString());
+      else batch.unit_settlement_amount = Number(unitCost.toString());
+      batch.remaining_fee_amount = Number(pool.fees.times(share).toString());
+    }
+  }
 }
 
 function isFinitePositiveRatio(numerator: NumericInput, denominator: NumericInput): boolean {

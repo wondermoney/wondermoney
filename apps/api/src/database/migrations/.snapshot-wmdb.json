@@ -15568,6 +15568,26 @@
           "enumItems": [],
           "mappedType": "datetime"
         },
+        "cost_basis_method": {
+          "name": "cost_basis_method",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": "'FIFO'",
+          "comment": null,
+          "collation": null,
+          "enumItems": [
+            "AVERAGE",
+            "FIFO"
+          ],
+          "mappedType": "enum"
+        },
         "created_at": {
           "name": "created_at",
           "type": "timestamptz(6)",
@@ -15825,6 +15845,12 @@
           "expression": "\"account_balance_mode\" in ('cash_only', 'includes_holdings')",
           "definition": "check (\"account_balance_mode\" in ('cash_only', 'includes_holdings'))",
           "columnName": "account_balance_mode"
+        },
+        {
+          "name": "portfolio_cost_basis_method_check",
+          "expression": "\"cost_basis_method\" in ('AVERAGE', 'FIFO')",
+          "definition": "check (\"cost_basis_method\" in ('AVERAGE', 'FIFO'))",
+          "columnName": "cost_basis_method"
         }
       ],
       "triggers": [],

@@ -2,6 +2,7 @@ import type { Big as BigType } from 'big.js';
 import { isAfter } from 'date-fns';
 
 import { FINANCIAL_TRANSACTION_TYPES } from '@app/constants/financial-transaction-types';
+import { PortfolioCostBasisMethod } from '@app/constants/portfolio-cost-basis';
 import { DI } from '@app/database/di';
 import { anyOf, toDate as parseDatabaseDate, sqlQuery } from '@app/database/sql';
 import { Appuser } from '@entity/Appuser';
@@ -190,19 +191,23 @@ class PortfolioSnapshotService {
             }
             holding.lots.push({ quantity: tx.quantity, totalCost: settlementCost.plus(feeCost) });
           } else if (typeName === 'SELL' && holding.lots.length > 0) {
-            let sellQuantity = Math.abs(tx.quantity);
-            while (sellQuantity > 0 && holding.lots.length > 0) {
-              const lot = holding.lots[0];
-              if (!lot) break;
-              const consumed = Math.min(sellQuantity, lot.quantity);
-              const available = lot.quantity;
-              const lotCostPerShare = lot.totalCost.div(big(lot.quantity));
-              lot.quantity = available - consumed;
-              lot.totalCost = consumed === available
-                ? big(0)
-                : lot.totalCost.minus(lotCostPerShare.times(big(consumed)));
-              sellQuantity -= consumed;
-              if (lot.quantity <= 0) holding.lots.shift();
+            if (portfolio.costBasisMethod === PortfolioCostBasisMethod.AVERAGE) {
+              relieveAtAverageCost(holding.lots, Math.abs(tx.quantity));
+            } else {
+              let sellQuantity = Math.abs(tx.quantity);
+              while (sellQuantity > 0 && holding.lots.length > 0) {
+                const lot = holding.lots[0];
+                if (!lot) break;
+                const consumed = Math.min(sellQuantity, lot.quantity);
+                const available = lot.quantity;
+                const lotCostPerShare = lot.totalCost.div(big(lot.quantity));
+                lot.quantity = available - consumed;
+                lot.totalCost = consumed === available
+                  ? big(0)
+                  : lot.totalCost.minus(lotCostPerShare.times(big(consumed)));
+                sellQuantity -= consumed;
+                if (lot.quantity <= 0) holding.lots.shift();
+              }
             }
           }
           holdings.set(assetKey, holding);
@@ -359,7 +364,7 @@ class PortfolioSnapshotService {
   }
 
   /**
-   * Calculate portfolio value and cost basis using FIFO holdings
+   * Calculate portfolio value and cost basis from holdings (under the portfolio's method).
    */
   private async calculatePortfolioMetrics(
     appuser: Appuser,
@@ -394,8 +399,9 @@ class PortfolioSnapshotService {
     // Ensure fresh prices
     await this.ensureFreshPricesForPortfolio(portfolioId);
 
-    // Calculate metrics using FIFO holdings. Holdings are valued in the owner's currency, so
-    // these are the user-currency figures; the portfolio-currency ones are converted from them.
+    // Calculate metrics from holdings under the portfolio's cost basis method. Holdings are
+    // valued in the owner's currency, so these are the user-currency figures; the
+    // portfolio-currency ones are converted from them.
     // Converting them again, portfolio to owner, counted a foreign-currency portfolio twice, and
     // an exact-date rate lookup valued it at nothing on days without a rate.
     const { costBasis: appuserCurrencyCostBasis, totalValue: appuserCurrencyTotalValue } = await this.calculatePortfolioMetrics(
@@ -461,6 +467,26 @@ function addUtcDays(date: Date | string, days: number): Date {
 
 function isValidFeeExchangeRate(rate: unknown): rate is number {
   return typeof rate === 'number' && Number.isFinite(rate) && rate > 0;
+}
+
+/**
+ * Relieves `quantity` from the lots at the running average of the open position, which the sale
+ * leaves unchanged: scaling every lot's quantity and cost by the same factor keeps each lot's
+ * cost per unit (and so the pool's average) constant. Only the totals are read afterwards.
+ */
+function relieveAtAverageCost(lots: { quantity: number; totalCost: BigType }[], quantity: number): void {
+  const totalQuantity = lots.reduce((sum, lot) => sum + lot.quantity, 0);
+  if (totalQuantity <= 0) return;
+  const consumed = Math.min(Math.abs(quantity), totalQuantity);
+  if (consumed <= 0) return;
+  const factor = big(totalQuantity - consumed).div(big(totalQuantity));
+  for (const lot of lots) {
+    lot.quantity *= Number(factor.toString());
+    lot.totalCost = lot.totalCost.times(factor);
+  }
+  for (let index = lots.length - 1; index >= 0; index--) {
+    if ((lots[index]?.quantity ?? 0) <= 1e-12) lots.splice(index, 1);
+  }
 }
 
 function startOfUtcDay(date: Date | string): Date {
