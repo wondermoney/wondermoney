@@ -6,6 +6,8 @@ import { useSyncExternalStore } from "react";
 /** `GET /v1/instance`: what this server offers. See the API's `controller/instance.ts`. */
 export interface InstanceDescription {
   apiVersion: number;
+  /** The commit the server was built from; null for a local build. */
+  commit?: null | string;
   features: {
     ai: { assistant: boolean; csvMapping: boolean; enrichment: boolean; monthlyStory: boolean; ocr: boolean };
     bankSync: boolean;
@@ -28,6 +30,8 @@ export interface InstanceDescription {
   sponsorUrl?: null | string;
   /** The operator's `SUPPORT_EMAIL`; null when the instance has no support inbox. */
   supportEmail: null | string;
+  /** The release version the server runs (`dev` for a local build); absent on an older API. */
+  version?: string;
 }
 
 const apiBaseUrl = () => process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
@@ -100,4 +104,18 @@ export function useSponsorUrl(): null | string {
   const { data } = useInstance();
   const hydrated = useHydrated();
   return hydrated ? (data?.sponsorUrl ?? null) : null;
+}
+
+/**
+ * Which build the server runs, for the version line in the account menu. Null until the
+ * description arrives, and on an older API that does not report a version.
+ */
+export function useServerBuildInfo(): {
+  commit: null | string;
+  version: null | string;
+} {
+  const { data } = useInstance();
+  const hydrated = useHydrated();
+  if (!hydrated || !data?.version) return { commit: null, version: null };
+  return { commit: data.commit ?? null, version: data.version };
 }

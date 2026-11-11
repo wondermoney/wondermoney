@@ -37,3 +37,12 @@ export function useConfirmedFeature(select: (features: Features) => boolean | un
   const { data } = useInstance()
   return data ? select(data.features) === true : false
 }
+
+/**
+ * Which build the connected server runs, for the More screen's version line. Null until the
+ * description arrives, and on an older server that does not report a version.
+ */
+export function useServerBuildInfo(): { commit: string | null; version: string | null } {
+  const { data } = useInstance()
+  return { commit: data?.commit ?? null, version: data?.version ?? null }
+}

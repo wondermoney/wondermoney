@@ -41,6 +41,9 @@ export function normalizeServerUrl(input: string): string | null {
 
 const instanceSchema = z.object({
   apiVersion: z.number().int().positive(),
+  // Which build the server runs. Optional so an older server that doesn't report them still
+  // parses; the More screen leaves the server line out then.
+  commit: z.string().nullable().optional(),
   features: z.object({
     ai: z.object({ assistant: z.boolean(), csvMapping: z.boolean(), enrichment: z.boolean(), monthlyStory: z.boolean(), ocr: z.boolean() }),
     bankSync: z.boolean(),
@@ -57,6 +60,8 @@ const instanceSchema = z.object({
   // A mode this build doesn't know reads as 'unknown' instead of rejecting the server as
   // "not WonderMoney".
   signupMode: tolerantEnum(['open', 'invite', 'closed'], 'unknown'),
+  // The release version (`dev` for a local build); absent on an older server.
+  version: z.string().optional(),
 })
 
 export type InstanceDescription = z.infer<typeof instanceSchema>

@@ -23,6 +23,9 @@ jest.mock('@/components/providers/product-runtime-provider', () => ({
 jest.mock('@/features/self/use-self-resource', () => ({
   useProfile: () => ({ data: { profile: { emailAddress: 'person@wonder.money' } } }),
 }))
+jest.mock('@/lib/server/use-instance', () => ({
+  useServerBuildInfo: () => ({ commit: 'abc1234', version: '1.1.0' }),
+}))
 
 describe('MoreRoute', () => {
   beforeEach(() => {

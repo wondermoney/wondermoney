@@ -1,3 +1,4 @@
+import * as Clipboard from 'expo-clipboard'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ScrollView, StyleSheet, View } from 'react-native'
@@ -15,11 +16,14 @@ import { usePalette } from '@/theme/use-palette'
 import { FeedbackDialog } from './feedback-dialog'
 import { SettingsGroup, SettingsNavRow } from './settings-ui'
 import type { AppDisplayInfo, FeedbackCategory } from './link-policy'
+import { formatBuild, formatVersionInfo } from './version-info'
 
 type MoreAction = 'privacy' | 'terms' | 'support' | 'help' | 'whatsNew'
 
 export type MoreScreenProps = {
   appInfo: AppDisplayInfo | null
+  /** The connected server's build (`GET /v1/instance`); null while it loads or on an older server. */
+  serverInfo?: { commit: string | null; version: string | null } | null
   email?: string | null
   onOpenHelp: () => Promise<void>
   /**
@@ -54,6 +58,7 @@ export type MoreScreenProps = {
  */
 export function MoreScreen({
   appInfo,
+  serverInfo,
   email,
   onOpenHelp,
   onOpenWhatsNew,
@@ -79,6 +84,24 @@ export function MoreScreen({
   const [feedbackOpen, setFeedbackOpen] = useState(false)
   const [feedbackPending, setFeedbackPending] = useState(false)
   const [feedbackFailed, setFeedbackFailed] = useState(false)
+  const [versionCopy, setVersionCopy] = useState<'copied' | 'failed' | 'idle'>('idle')
+  const serverBuild = serverInfo?.version
+    ? { commit: serverInfo.commit, version: serverInfo.version }
+    : null
+
+  const copyVersionInfo = async () => {
+    try {
+      await Clipboard.setStringAsync(
+        formatVersionInfo({
+          app: appInfo ? { commit: null, version: appInfo.version } : null,
+          server: serverBuild,
+        }),
+      )
+      setVersionCopy('copied')
+    } catch {
+      setVersionCopy('failed')
+    }
+  }
   const actions: Partial<Record<MoreAction, () => Promise<void>>> = {
     help: onOpenHelp,
     whatsNew: onOpenWhatsNew,
@@ -181,6 +204,23 @@ export function MoreScreen({
                   {t('more.environment', { environment: t(`more.environments.${appInfo.environment}`) })}
                 </Text>
               </View>
+            ) : null}
+            {serverBuild ? (
+              <Text align="center" tone="muted" variant="meta">
+                {t('more.serverVersion', { version: formatBuild(serverBuild) })}
+              </Text>
+            ) : null}
+            <Button
+              label={t('more.copyVersionInfo')}
+              onPress={() => void copyVersionInfo()}
+              size="sm"
+              variant="link"
+            />
+            {versionCopy === 'copied' ? (
+              <Text align="center" tone="muted" variant="meta">{t('more.versionInfoCopied')}</Text>
+            ) : null}
+            {versionCopy === 'failed' ? (
+              <Text align="center" tone="destructive" variant="meta">{t('more.versionInfoCopyFailed')}</Text>
             ) : null}
           </View>
         </View>

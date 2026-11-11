@@ -17,9 +17,12 @@ RUN --mount=type=cache,id=pnpm,target=/root/.local/share/pnpm/store \
 COPY apps/web apps/web
 # The web app imports @wondermoney/shared/decimal as TypeScript source (no build step).
 COPY packages/shared packages/shared
-# Shown next to the version in the app (next.config.ts); publish-images passes it.
+# Shown next to the version in the app (next.config.ts); publish-images passes both.
+# WM_VERSION is the release tag's version (1.2.0 for v1.2.0); unset, the build reports "dev".
 ARG GIT_COMMIT_SHA=""
-ENV NEXT_TELEMETRY_DISABLED=1 \
+ARG WM_VERSION=""
+ENV WM_VERSION=$WM_VERSION \
+    NEXT_TELEMETRY_DISABLED=1 \
     NEXT_OUTPUT=standalone \
     NODE_ENV=production \
     NEXT_PUBLIC_API_URL=https://wm-runtime-next-public-api-url.invalid \
