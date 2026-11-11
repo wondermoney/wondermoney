@@ -204,7 +204,7 @@ const defaultStorage: TransactionImportStorage = {
 
 export class TransactionImportService {
   private get adapters(): Partial<Record<transactionImport.ImportFormat, transactionImport.ImportAdapter<never>>> {
-    return this.deps.adapters ?? { statement: statementImportAdapter };
+    return this.deps.adapters ?? { ofx: transactionImport.ofxImportAdapter, statement: statementImportAdapter };
   }
 
   private get now(): Date {
@@ -239,7 +239,7 @@ export class TransactionImportService {
       autoCommit: input.autoCommit ?? false,
       expiresAt: new Date(this.now.getTime() + SESSION_TTL_MS),
       format: input.format,
-      options: { ...(format.format === 'bank' ? { bankName: format.bankName } : {}), ...(input.options?.mapping ? { mapping: input.options.mapping } : {}) },
+      options: { ...(input.format === 'statement' && format.format === 'bank' ? { bankName: format.bankName } : {}), ...(input.options?.mapping ? { mapping: input.options.mapping } : {}) },
       publicId: randomUUID(),
       s3Bucket: this.storage.getAccountCsvBucketName(),
       s3Key: key,
@@ -380,11 +380,13 @@ export class TransactionImportService {
 
   private async parseFile(session: TransactionImportSession): Promise<void> {
     const account = await this.em.findOneOrFail(Account, { accountKey: keyOf(session.accountKey, 'accountKey')! }, { filters: false, populate: ['currencyKey'] });
-    const adapter = this.adapters[session.format];
     let result: transactionImport.ImportParseResult;
     try {
-      if (!adapter) throw new StatementUnreadableError('unreadable');
       const buffer = await getLimitedCsvObjectBuffer({ bucket: session.s3Bucket, key: session.s3Key }, { getObjectBuffer: (bucket, key) => this.storage.getObjectBuffer(bucket, key), getObjectSize: (bucket, key) => this.storage.getObjectSize(bucket, key) });
+      // The file decides too: an OFX/QFX upload read as a statement is still OFX.
+      if (session.format === 'statement' && transactionImport.isOfxFile(new Uint8Array(buffer))) session.format = 'ofx';
+      const adapter = this.adapters[session.format];
+      if (!adapter) throw new StatementUnreadableError('unreadable');
       const options = { accountCurrency: account.currencyKey.code, ...(session.options ?? {}) };
       result = await (adapter as transactionImport.ImportAdapter<typeof options>).parse(new Uint8Array(buffer), options);
     } catch (error) {
@@ -576,7 +578,8 @@ export class TransactionImportService {
           continue;
         }
         try {
-          const transaction = await buildStatementTransaction(tx, context, toStatementLine(normalized, row.sourceRow, context.account.currencyKey.code), { trustedId: row.status === ROW_STATUS.NEW });
+          const trustedId = row.status === ROW_STATUS.NEW && normalized.externalIdTrusted !== false;
+          const transaction = await buildStatementTransaction(tx, context, toStatementLine(normalized, row.sourceRow, context.account.currencyKey.code), { trustedId });
           tx.persist(transaction);
           row.importedTransactionKey = transaction;
           row.status = ROW_STATUS.IMPORTED;

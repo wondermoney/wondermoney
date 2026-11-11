@@ -6,6 +6,7 @@ import {
   GENERIC_CSV_COLUMNS,
   importFlowForAccount,
   isCsvFileName,
+  isOfxFileName,
   rowsFailedCounts,
 } from './generic-csv-format'
 
@@ -61,6 +62,11 @@ describe('buildGenericCsvTemplate', () => {
 describe('isCsvFileName', () => {
   it.each(['a.csv', 'A.CSV', 'statement.csv '])('accepts %s', (name) => expect(isCsvFileName(name)).toBe(true))
   it.each(['a.xlsx', 'a.csv.txt', 'csv'])('refuses %s', (name) => expect(isCsvFileName(name)).toBe(false))
+})
+
+describe('isOfxFileName', () => {
+  it.each(['a.ofx', 'A.OFX', 'statement.qfx', 'statement.qfx '])('accepts %s', (name) => expect(isOfxFileName(name)).toBe(true))
+  it.each(['a.csv', 'a.ofx.txt', 'ofx'])('refuses %s', (name) => expect(isOfxFileName(name)).toBe(false))
 })
 
 describe('rowsFailedCounts', () => {

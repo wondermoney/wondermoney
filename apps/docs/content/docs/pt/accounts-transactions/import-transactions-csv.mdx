@@ -1,13 +1,15 @@
 ---
-title: Importar transações por CSV
-description: Importa o histórico de transações a partir de um ficheiro CSV quando não houver sincronização bancária.
+title: Importar transações por CSV ou OFX
+description: Importa o histórico de transações a partir de um ficheiro CSV, Excel, OFX ou QFX quando não houver sincronização bancária.
 ---
 
 A importação por CSV traz um extrato bancário para uma conta quando não há ligação ao banco, ou acrescenta o histórico anterior ao início da ligação.
 
 ## Antes de começar
 
-Serve o extrato exportado por qualquer banco, em CSV (com qualquer separador) ou Excel (`.xls`, `.xlsx`). Descarrega-o no site do teu banco e deixa-o tal como o banco o gerou: linhas antes dos nomes das colunas e totais depois das transações não são problema.
+Serve o extrato exportado por qualquer banco, em CSV (com qualquer separador), Excel (`.xls`, `.xlsx`) ou OFX/QFX (`.ofx`, `.qfx`). Descarrega-o no site do teu banco e deixa-o tal como o banco o gerou: linhas antes dos nomes das colunas e totais depois das transações não são problema.
+
+OFX e QFX são os formatos que a maioria dos bancos e o Quicken oferecem para descarregar. O WonderMoney lê OFX 1.x (SGML) e OFX 2.x (XML), e descodifica o ficheiro pela codificação que ele declara, por isso os nomes dos comerciantes com acentos ficam intactos mesmo quando o banco escreveu Windows-1252 ou ISO-8859-1. O identificador bancário de cada transação (`FITID`) é o que a marca como já importada, pelo que reimportar o mesmo ficheiro não acrescenta nada. Uma transação sem identificador, ou com um identificador que outra linha do ficheiro repete, usa a data e o montante como alternativa. Um ficheiro com várias contas pergunta para qual das tuas contas vai cada uma. Os extratos de investimento (`INVSTMTRS`) e os extratos que só têm um saldo são ignorados, com uma nota na importação.
 
 Para Millennium BCP, ActivoBank, Bankinter, Banco BPI e Montepio, o WonderMoney lê o formato do próprio banco quando a conta tem esse banco como instituição financeira. Para qualquer outro ficheiro, encontra as colunas da data, descrição e montante pelos nomes, e deduz o formato da data e o separador decimal a partir dos valores. Quando os nomes não chegam, um modelo de IA indica qual é cada coluna: vê os nomes das colunas e o tipo de valores de cada uma (datas, números, texto), nunca as tuas descrições, montantes ou datas. Isso gasta uma das chamadas diárias de mapeamento de CSV do teu agregado; numa instância sem IA, ou depois de gastas as chamadas do dia, escolhes tu as colunas.
 
@@ -17,9 +19,9 @@ Numa instância alojada por ti, as importações também precisam de [armazename
 
 ## Passos
 
-1. Descarrega o extrato do teu banco em CSV ou Excel.
+1. Descarrega o extrato do teu banco em CSV, Excel, OFX ou QFX.
 2. Abre a conta e escolhe **Importar transações**.
-3. Adiciona o ficheiro (até 5 MB). O WonderMoney lê-o logo e mostra quantas transações encontrou, as datas que abrangem e as primeiras linhas.
+3. Adiciona o ficheiro (até 5 MB). O WonderMoney lê-o logo e mostra quantas transações encontrou, as datas que abrangem e as primeiras linhas. Um ficheiro OFX/QFX não tem colunas para pré-visualizar: vai diretamente para a revisão.
 4. Confirma as linhas. Se uma coluna estiver errada, abre **Ajustar colunas** e escolhe a certa, ou muda o formato da data, o formato dos números, ou se as despesas aparecem com valor positivo (como em alguns extratos de cartão de crédito). A pré-visualização atualiza-se à medida que alteras.
 5. Escolhe **Rever transações**. O WonderMoney lê todas as linhas do ficheiro e mostra-as, sem importar nada ainda:
    - **Novas**: ainda não estão na conta. Estão incluídas.
@@ -28,14 +30,14 @@ Numa instância alojada por ti, as importações também precisam de [armazename
 6. Confirma a lista. Desmarca uma linha para a ignorar, ou marca-a para a incluir. Mostra um tipo de linha e escolhe **Incluir todas** ou **Ignorar todas** para decidir todas de uma vez.
 7. Escolhe **Importar**, que mostra quantas transações vai adicionar. A importação corre em segundo plano e mostra o progresso. Se parar a meio (por exemplo, se o servidor reiniciar), escolhe **Tentar novamente**: continua onde parou, e nada é importado duas vezes.
 
-Um ficheiro com várias contas pergunta para qual das tuas contas vai cada uma antes de poder ser importado.
+Um ficheiro com várias contas pergunta para qual das tuas contas vai cada uma antes de poder ser importado. Num ficheiro OFX/QFX, cada conta é identificada pelo número de conta do banco (`ACCTID`).
 
 Uma importação que não termines expira ao fim de sete dias. Sete dias depois de uma importação, o WonderMoney elimina o ficheiro que carregaste e a lista linha a linha; a importação guarda apenas quantas transações foram importadas e ignoradas, e as transações importadas continuam na conta. Na aplicação móvel a importação faz-se num só passo: as transações novas são importadas e as que já estão na conta são ignoradas.
 
 <DocsImage
   src="/images/docs/accounts-transactions/import-transactions-csv-import-modal.png"
   alt="Janela de importação de transações com uma área para arrastar o ficheiro."
-  caption="A janela de importação aceita um ficheiro CSV ou Excel até 5 MB."
+  caption="A janela de importação aceita um ficheiro CSV, Excel, OFX ou QFX até 5 MB."
   width={1440}
   height={900}
 />
@@ -52,6 +54,7 @@ As linhas importadas são categorizadas com o mesmo categorizador determinista d
 - Os valores usam o separador decimal errado.
 - Os débitos e créditos ficaram trocados.
 - Os mesmos dados já foram importados de outra fonte.
+- O ficheiro OFX/QFX é um extrato de investimento, ou só tem um saldo. O WonderMoney ignora-o e indica-o na importação.
 
 
 ## Ligações relacionadas

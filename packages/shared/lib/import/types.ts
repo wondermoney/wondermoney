@@ -10,7 +10,7 @@
  */
 
 /** The file formats a session can read. Each one is an {@link ImportAdapter}. */
-export const IMPORT_FORMATS = ['statement'] as const;
+export const IMPORT_FORMATS = ['statement', 'ofx'] as const;
 export type ImportFormat = (typeof IMPORT_FORMATS)[number];
 
 /**
@@ -56,6 +56,12 @@ export interface NormalizedImportRow {
    * statement reference). Stable across exports of the same line, so a re-import finds it.
    */
   externalId: string;
+  /**
+   * Whether `externalId` is the source's own id, or a fingerprint derived from the row. A
+   * fingerprint still matches a re-import, but is never stored as a provider's unique id: a
+   * collision must not skip a distinct transaction. Absent means trusted (the existing formats).
+   */
+  externalIdTrusted?: boolean;
   merchant?: string;
   /** The amount in the currency it was charged in, when that differs (a card payment abroad). */
   originalAmount?: number;

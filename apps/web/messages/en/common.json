@@ -2527,8 +2527,9 @@
   "aiAllowance": {
     "message": "Your household has used today's allowance for this feature. It resets at {time}."
   },
-  "import-statement-hint": "Export the statement from your bank's website as CSV or Excel. We'll work out the columns.",
+  "import-statement-hint": "Export the statement from your bank's website as CSV, Excel, OFX or QFX. We'll work out the columns.",
   "import-statement-reading": "Reading your file…",
+  "import-ofx-ready": "OFX/QFX file ready. Choose Review transactions to read its rows.",
   "import-statement-found": "{count, plural, one {# transaction} other {# transactions}}",
   "import-statement-range": "{from} to {to}",
   "import-statement-source-bank": "Read as a {bank} statement.",
