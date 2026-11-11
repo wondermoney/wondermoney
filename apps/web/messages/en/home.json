@@ -44,6 +44,17 @@
         "pace": "{category} is on course to overrun its budget.",
         "figures": "<projected></projected> projected against <budgeted></budgeted> planned.",
         "link": "View budget"
+      },
+      "ask": {
+        "link": "Ask the assistant",
+        "prompt": {
+          "spending": {
+            "above": "Why is my {category} spending {percent} above normal this month?",
+            "below": "Why is my {category} spending {percent} below normal this month?"
+          },
+          "budget": "Why is my {category} budget projected at {projected} against {budgeted} planned this month?",
+          "budgetHidden": "Why is my {category} budget on course to overrun this month?"
+        }
       }
     },
     "bank-alerts": {

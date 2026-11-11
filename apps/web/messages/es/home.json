@@ -44,6 +44,17 @@
         "pace": "{category} va camino de superar su presupuesto.",
         "figures": "<projected></projected> previstos frente a <budgeted></budgeted> planificados.",
         "link": "Ver presupuesto"
+      },
+      "ask": {
+        "link": "Preguntar al asistente",
+        "prompt": {
+          "spending": {
+            "above": "¿Por qué mi gasto en {category} está {percent} por encima de lo normal este mes?",
+            "below": "¿Por qué mi gasto en {category} está {percent} por debajo de lo normal este mes?"
+          },
+          "budget": "¿Por qué mi presupuesto de {category} está previsto en {projected} frente a {budgeted} planificados este mes?",
+          "budgetHidden": "¿Por qué mi presupuesto de {category} va camino de superarse este mes?"
+        }
       }
     },
     "bank-alerts": {

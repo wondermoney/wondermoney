@@ -6,6 +6,7 @@ import { X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useEffect, useRef } from "react";
 
+import { useAssistantPrompt } from "@/components/assistant/assistant-store";
 import AssistantChat from "@/components/assistant/AssistantChat";
 import AssistantConsentScreen from "@/components/assistant/AssistantConsentScreen";
 import { Button } from "@/components/ui/button";
@@ -125,6 +126,7 @@ export default function AssistantPanel({ open, onOpenChange }: Props) {
     isLoading: consentIsLoading,
   } = useAssistantConsent();
   const stopRef = useRef<(() => Promise<void>) | null>(null);
+  const initialPrompt = useAssistantPrompt();
 
   const assistantEnabled = consent?.assistantEnabled ?? false;
 
@@ -171,7 +173,10 @@ export default function AssistantPanel({ open, onOpenChange }: Props) {
       {t("panel.error")}
     </div>
   ) : assistantEnabled ? (
-    <AssistantChat onStopChange={(stop) => (stopRef.current = stop)} />
+    <AssistantChat
+      initialPrompt={initialPrompt}
+      onStopChange={(stop) => (stopRef.current = stop)}
+    />
   ) : (
     <AssistantConsentScreen
       onEnable={enableAssistant}

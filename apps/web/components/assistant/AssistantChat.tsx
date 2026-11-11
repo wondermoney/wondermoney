@@ -7,6 +7,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import AiAllowanceNotice from "@/components/assistant/AiAllowanceNotice";
+import { clearAssistantPrompt } from "@/components/assistant/assistant-store";
 import AssistantDataUsedDisclosure from "@/components/assistant/AssistantDataUsedDisclosure";
 import EmailVerificationNotice from "@/components/auth/EmailVerificationNotice";
 import { Button } from "@/components/ui/button";
@@ -20,10 +21,12 @@ import {
 import { cn } from "@/lib/utils";
 
 type Props = {
+  /** A question to start from, placed in the input but never sent. */
+  initialPrompt?: null | string;
   onStopChange?: (stop: (() => Promise<void>) | null) => void;
 };
 
-export default function AssistantChat({ onStopChange }: Props) {
+export default function AssistantChat({ initialPrompt, onStopChange }: Props) {
   const t = useTranslations("assistant");
   // The API formats amounts and replies in the locale on screen.
   const locale = useLocale();
@@ -51,8 +54,18 @@ export default function AssistantChat({ onStopChange }: Props) {
   );
 
   const { messages, sendMessage, status, stop, error } = useChat({ transport });
-  const [input, setInput] = useState("");
+  const [input, setInput] = useState(initialPrompt ?? "");
   const endRef = useRef<HTMLDivElement | null>(null);
+  const consumedPrompt = useRef(false);
+
+  // The panel keeps the question while the consent screen is up; once the chat
+  // takes it, drop it so reopening from the launcher starts empty.
+  useEffect(() => {
+    if (initialPrompt && !consumedPrompt.current) {
+      consumedPrompt.current = true;
+      clearAssistantPrompt();
+    }
+  }, [initialPrompt]);
 
   useEffect(() => {
     onStopChange?.(stop);
@@ -124,7 +137,7 @@ export default function AssistantChat({ onStopChange }: Props) {
                   <button
                     key={suggestion}
                     type="button"
-                    className="hover:bg-accent/70 focus-visible:ring-ring text-left text-sm leading-6 rounded-lg border border-border bg-background px-4 py-3 transition-colors duration-[var(--duration-micro)] ease-out focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-hidden disabled:cursor-not-allowed disabled:opacity-50"
+                    className="hover:bg-accent/70 focus-visible:ring-ring border-border bg-background rounded-lg border px-4 py-3 text-left text-sm leading-6 transition-colors duration-[var(--duration-micro)] ease-out focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-hidden disabled:cursor-not-allowed disabled:opacity-50"
                     onClick={() => void handleSend(suggestion)}
                     disabled={isBusy}
                   >
@@ -157,14 +170,14 @@ export default function AssistantChat({ onStopChange }: Props) {
                       return (
                         <div
                           key={`${message.id}-${index}`}
-                          className="whitespace-pre-wrap break-words"
+                          className="break-words whitespace-pre-wrap"
                         >
                           {part.text}
                         </div>
                       );
                     })}
                     {message.role === "assistant" ? (
-                      <div className="mt-3 border-t border-border/60 pt-3">
+                      <div className="border-border/60 mt-3 border-t pt-3">
                         <AssistantDataUsedDisclosure className="border-0 bg-transparent p-0" />
                       </div>
                     ) : null}
@@ -180,7 +193,7 @@ export default function AssistantChat({ onStopChange }: Props) {
           ) : error && isAiAllowanceExhaustedError(error) ? (
             <AiAllowanceNotice />
           ) : error ? (
-            <div className="rounded-lg border border-destructive-text/30 px-4 py-3 text-sm text-destructive-text">
+            <div className="border-destructive-text/30 text-destructive-text rounded-lg border px-4 py-3 text-sm">
               {t("chat.error")}
             </div>
           ) : null}
@@ -203,7 +216,7 @@ export default function AssistantChat({ onStopChange }: Props) {
           }}
           aria-label={t("chat.placeholder")}
           placeholder={t("chat.placeholder")}
-          className="min-h-24 resize-none rounded-md bg-background"
+          className="bg-background min-h-24 resize-none rounded-md"
         />
 
         <div className="flex items-center justify-between gap-3">
@@ -216,7 +229,11 @@ export default function AssistantChat({ onStopChange }: Props) {
             size="sm"
             disabled={isBusy || input.trim().length === 0}
           >
-            {isBusy ? <RefreshCw className="size-4 animate-spin" /> : <ArrowUp className="size-4" />}
+            {isBusy ? (
+              <RefreshCw className="size-4 animate-spin" />
+            ) : (
+              <ArrowUp className="size-4" />
+            )}
             {t("chat.send")}
           </Button>
         </div>
