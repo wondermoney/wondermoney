@@ -8,6 +8,7 @@ import { Account } from '@entity/Account';
 import { AccountFinancialInstitution } from '@entity/AccountFinancialInstitution';
 import { AccountType } from '@entity/AccountType';
 import { Appuser } from '@entity/Appuser';
+import { AppuserAccountPosition } from '@entity/AppuserAccountPosition';
 import { AppuserTenant } from '@entity/AppuserTenant';
 import { BankSyncFinality, BankSyncIncident } from '@entity/BankSyncIncident';
 import { Currency } from '@entity/Currency';
@@ -33,7 +34,7 @@ import { BadRequestError, ERROR_CODE, ForbiddenError, InternalServerError, NotFo
  */
 import { authedUser } from '@middleware/authed-context';
 import { getFullName } from '@utils/misc';
-import { createOfflineAccountRequestSchema, deleteAccountRequestSchema, getAccountRequestSchema, recalculateAccountRequestSchema, updateAccountRequestSchema } from '@validators/account';
+import { createOfflineAccountRequestSchema, deleteAccountRequestSchema, getAccountRequestSchema, recalculateAccountRequestSchema, reorderAccountsRequestSchema, updateAccountRequestSchema } from '@validators/account';
 import { zParse } from '@validators/parser';
 
 import { DI } from '../../app.js';
@@ -196,9 +197,56 @@ export async function getAccounts(req: Request, res: Response) {
     loadPendingSumsByAccount(accounts.map((account) => account.accountKey)),
     describeAccountsFx(accounts, rateScope(req.tenant)),
   ]);
+  const positions = await DI.em.find(AppuserAccountPosition, { appuserKey: req.user });
+  const positionByAccount = new Map<number, number>();
+  for (const position of positions) {
+    const accountKey = relationAccountKey(position.accountKey);
+    if (accountKey != null) positionByAccount.set(accountKey, position.position);
+  }
+  // `sort` is stable, so the name order above survives among accounts with the same place.
+  // An account this member has not placed (a new one) sorts after every placed one.
+  accounts.sort((a, b) => (positionByAccount.get(a.accountKey) ?? Number.MAX_SAFE_INTEGER) - (positionByAccount.get(b.accountKey) ?? Number.MAX_SAFE_INTEGER));
   const syncContext = { ...syncIncidentContext, now: new Date(), pendingSumsByAccount, viewerAppuserKey: req.user.appuserKey };
   const transformedData = accounts.map((account, index) => mapAccountSummary(account, syncContext, fx[index]));
   return res.json({ accounts: transformedData });
+}
+
+/**
+ * `PUT /v1/account/order`: this member's accounts in their new display order, each once. Every
+ * id must be an account they can see — another household's, or the other member's private one,
+ * is refused (400) rather than silently ordered. A closed account is skipped: it keeps no place
+ * and does not fail the request. Positions are per member, so a household's orders never collide.
+ */
+export async function reorderAccounts(req: Request, res: Response) {
+  const user = authedUser(req);
+  const {
+    body: { accountIds },
+  } = await zParse(reorderAccountsRequestSchema, req);
+
+  await DI.em.transactional(async (txEm) => {
+    const accounts = await txEm.find(Account, { accountKey: { $in: accountIds }, deletedAt: undefined });
+    const byKey = new Map(accounts.map((account) => [account.accountKey, account]));
+    if (accountIds.some((accountKey) => !byKey.has(accountKey))) {
+      throw new BadRequestError('Every account in the order must be one you can see');
+    }
+    const ordered = accountIds.flatMap((accountKey) => {
+      const account = byKey.get(accountKey);
+      return account && !account.closed ? [account] : [];
+    });
+    const existing = await txEm.find(AppuserAccountPosition, { appuserKey: user });
+    const existingByAccount = new Map<number, AppuserAccountPosition>();
+    for (const position of existing) {
+      const accountKey = relationAccountKey(position.accountKey);
+      if (accountKey != null) existingByAccount.set(accountKey, position);
+    }
+    ordered.forEach((account, index) => {
+      const position = existingByAccount.get(account.accountKey);
+      if (position) position.position = index;
+      else txEm.create(AppuserAccountPosition, { accountKey: account, appuserKey: user, position: index }, { partial: true });
+    });
+    await txEm.flush();
+  });
+  return res.sendStatus(200);
 }
 
 /** Read-only lookup so the web "Add account" form can populate a real type dropdown. */
@@ -461,4 +509,10 @@ function resolveRequiredCurrencyCode(code: string | undefined, relation: string)
     throw new InternalServerError(`Required ${relation} currency relation is unavailable`);
   }
   return code;
+}
+
+/** The account key of an `Account` relation that was not populated, read without loading the row. */
+function relationAccountKey(value: unknown): number | undefined {
+  const accountKey = (value as undefined | { accountKey?: unknown })?.accountKey;
+  return typeof accountKey === 'number' ? accountKey : undefined;
 }

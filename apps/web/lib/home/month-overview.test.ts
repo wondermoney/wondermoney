@@ -337,6 +337,25 @@ test("the balance sheet totals what is owned and owed, and they net to net worth
   );
 });
 
+test("accounts in the balance sheet follow the member's account order", () => {
+  const sheet = balanceSheet(
+    {
+      netWorth: 300,
+      rows: [
+        { key: "accounts:1", recordId: 1, label: "Alpha", amount: 100 },
+        { key: "accounts:2", recordId: 2, label: "Beta", amount: 100 },
+        { key: "accounts:3", recordId: 3, label: "Gamma", amount: 100 },
+      ],
+    },
+    [3, 1],
+  );
+
+  assert.deepEqual(
+    sheet.own[0]?.rows.map((row) => row.label),
+    ["Gamma", "Alpha", "Beta"],
+  );
+});
+
 test("an account with a negative balance is owed, not owned", () => {
   const sheet = balanceSheet({
     netWorth: 400,

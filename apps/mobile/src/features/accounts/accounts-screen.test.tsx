@@ -1,4 +1,4 @@
-import { fireEvent, render } from '@testing-library/react-native'
+import { fireEvent, render, waitFor } from '@testing-library/react-native'
 import { I18nextProvider } from 'react-i18next'
 
 import { formatCurrency } from '@/lib/formatters/financial'
@@ -228,6 +228,34 @@ describe('AccountsScreen', () => {
   it('uses pull-to-refresh instead of a persistent refresh button', async () => {
     const { view } = await renderScreen({ status: 'loaded', data, refreshing: true })
     expect(view.queryByRole('button', { name: 'Refresh' })).not.toBeOnTheScreen()
+  })
+
+  it('reorders accounts with the up and down buttons and saves the new order', async () => {
+    const onReorderAccounts = jest.fn().mockResolvedValue(undefined)
+    const { view } = await renderScreen({ status: 'loaded', data }, { onReorderAccounts })
+
+    await fireEvent.press(view.getByRole('button', { name: 'Reorder' }))
+    expect(view.getByRole('button', { name: 'Move Current account up' })).toBeDisabled()
+    expect(view.getByRole('button', { name: 'Move Yen savings down' })).toBeDisabled()
+
+    await fireEvent.press(view.getByRole('button', { name: 'Move Current account down' }))
+    expect(onReorderAccounts).toHaveBeenCalledWith([2, 1, 3])
+    // The list follows the new order immediately.
+    expect(view.getAllByTestId('account-row')[1]!.props.accessibilityLabel).toMatch(/^Current account/)
+
+    await fireEvent.press(view.getByRole('button', { name: 'Done' }))
+    expect(view.queryByRole('button', { name: 'Move Current account up' })).not.toBeOnTheScreen()
+  })
+
+  it('puts the order back when the API refuses it', async () => {
+    const onReorderAccounts = jest.fn().mockRejectedValue(new Error('refused'))
+    const { view } = await renderScreen({ status: 'loaded', data }, { onReorderAccounts })
+
+    await fireEvent.press(view.getByRole('button', { name: 'Reorder' }))
+    await fireEvent.press(view.getByRole('button', { name: 'Move Current account down' }))
+
+    await waitFor(() => expect(view.getByText('The new order could not be saved.')).toBeOnTheScreen())
+    expect(view.getAllByTestId('account-row')[0]!.props.accessibilityLabel).toMatch(/^Current account/)
   })
 })
 

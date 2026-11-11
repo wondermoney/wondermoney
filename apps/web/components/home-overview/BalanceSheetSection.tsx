@@ -133,7 +133,10 @@ export function BalanceSheetSection() {
 
   const netWorth = data.netWorth;
   const currency = netWorth.currencyCode ?? "EUR";
-  const sheet = balanceSheet(netWorth);
+  const sheet = balanceSheet(
+    netWorth,
+    (accountsData?.accounts ?? []).map((account) => account.accountKey),
+  );
   const accountsByKey = new Map(
     (accountsData?.accounts ?? []).map((account) => [
       account.accountKey,

@@ -68,7 +68,13 @@ export const accountUpdateWriteSchema = z.object({
   isPrivate: z.boolean().optional(),
 }).strict()
 
+/** The member's accounts in their new display order, each once. */
+export const reorderAccountsWriteSchema = z.object({
+  accountIds: z.array(z.number().int().positive()).min(1).max(1000),
+}).strict()
+
 export type AccountUpdateWrite = z.input<typeof accountUpdateWriteSchema>
+export type ReorderAccountsWrite = z.input<typeof reorderAccountsWriteSchema>
 
 export const accountsResponseSchema = z.object({
   accounts: z.array(accountSummarySchema),
@@ -112,6 +118,15 @@ export function createUpdateAccountEndpoint(accountId: number) {
   return writeEndpoint({
     method: 'PATCH',
     path: `/v1/account/${accountId}`,
+    schema: emptyWriteResponseSchema,
+  })
+}
+
+/** The account order is per member; the API answers 400 when an id is not one the caller can see. */
+export function createReorderAccountsEndpoint() {
+  return writeEndpoint({
+    method: 'PUT',
+    path: '/v1/account/order',
     schema: emptyWriteResponseSchema,
   })
 }

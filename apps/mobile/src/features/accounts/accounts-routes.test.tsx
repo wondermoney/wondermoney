@@ -22,6 +22,7 @@ jest.mock('@/components/providers/product-runtime-provider', () => ({
   useProductRuntime: () => ({ signOut: jest.fn() }),
 }))
 jest.mock('./use-accounts', () => ({ useAccounts: () => mockUseAccounts() }))
+jest.mock('./use-reorder-accounts', () => ({ useReorderAccounts: () => ({ mutateAsync: jest.fn() }) }))
 jest.mock('./use-account', () => ({ useAccount: (id: number | null) => mockUseAccount(id) }))
 jest.mock('./use-account-recalculation', () => ({ useAccountRecalculation: () => ({ state: { phase: 'idle' }, start: jest.fn(), reset: jest.fn() }) }))
 jest.mock('./use-account-forecast', () => ({ useAccountForecast: () => ({ data: undefined, isAccessTransition: false, isLoading: false, refetch: jest.fn() }) }))

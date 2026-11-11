@@ -15,6 +15,7 @@ import { useTransactions } from '@/features/transactions/use-transactions'
 import { AccountsScreen, type AccountsInsights, type AccountsViewState, type SectionState } from './accounts-screen'
 import { mapAccounts } from './accounts-view-model'
 import { useAccounts } from './use-accounts'
+import { useReorderAccounts } from './use-reorder-accounts'
 
 type Resource<T> = { data?: T; isLoading?: boolean; error?: unknown }
 
@@ -26,6 +27,7 @@ function section<T, R>(query: Resource<T>, map: (data: T) => R): SectionState<R>
 
 export function AccountsRoute() {
   const query = useAccounts()
+  const reorderAccounts = useReorderAccounts()
   const [timeframe, setTimeframe] = useState<AccountsTimeframe>(DEFAULT_ACCOUNTS_TIMEFRAME)
   // Memoized per timeframe: the scope's `now` is part of every query key.
   const scope = useMemo(() => getAccountsTimeframeScope(timeframe), [timeframe])
@@ -77,6 +79,7 @@ export function AccountsRoute() {
       onEditAccount={(accountId) => router.push({ pathname: '/accounts/[accountId]/edit', params: { accountId: String(accountId) } } as unknown as Href)}
       onLogout={signOut}
       onRefresh={async () => { await Promise.all([query.refetch(), ...insightQueries.map((item) => item.refetch())]) }}
+      onReorderAccounts={async (accountIds) => { await reorderAccounts.mutateAsync(accountIds) }}
       onSelectAccount={(accountId) => router.push({
         pathname: '/accounts/[accountId]',
         params: { accountId: String(accountId) },
