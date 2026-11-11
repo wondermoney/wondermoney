@@ -12,6 +12,8 @@ import homeMessages from "../../messages/en/home.json";
 import { InsightsSection } from "./InsightsSection";
 
 const state = vi.hoisted(() => ({
+  aiHidden: false,
+  assistantAvailable: true,
   query: {} as Record<string, unknown>,
 }));
 
@@ -24,6 +26,12 @@ vi.mock("@/i18n/navigation", () => ({
 }));
 vi.mock("@/lib/api/insights/useInsights", () => ({
   default: () => state.query,
+}));
+vi.mock("@/lib/api/instance/useInstance", () => ({
+  useFeature: () => state.assistantAvailable,
+}));
+vi.mock("@/lib/api/user-preferences/useAiHidden", () => ({
+  default: () => state.aiHidden,
 }));
 
 const messages = { ...commonMessages, ...homeMessages };
@@ -79,10 +87,18 @@ function renderSection() {
   );
 }
 
-afterEach(cleanup);
+afterEach(() => {
+  cleanup();
+  state.aiHidden = false;
+  state.assistantAvailable = true;
+});
 
 test("renders a spending card with its sentence, figures and filtered transactions link", () => {
-  state.query = { data: { insights: [spending] }, error: null, isPending: false };
+  state.query = {
+    data: { insights: [spending] },
+    error: null,
+    isPending: false,
+  };
   renderSection();
 
   assert.ok(screen.getByText("Food is 50% above its usual pace."));
@@ -124,4 +140,48 @@ test("shows a retry when the request fails", () => {
   renderSection();
 
   assert.ok(screen.getByRole("button", { name: /try again/i }));
+});
+
+test("offers the assistant on each card when the server has it", () => {
+  state.query = {
+    data: { insights: [spending, budget] },
+    error: null,
+    isPending: false,
+  };
+  renderSection();
+
+  assert.equal(
+    screen.getAllByRole("button", { name: "Ask the assistant" }).length,
+    2,
+  );
+});
+
+test("hides the assistant link when the server has no assistant", () => {
+  state.assistantAvailable = false;
+  state.query = {
+    data: { insights: [spending] },
+    error: null,
+    isPending: false,
+  };
+  renderSection();
+
+  assert.equal(
+    screen.queryByRole("button", { name: "Ask the assistant" }),
+    null,
+  );
+});
+
+test("hides the assistant link when the person turned AI off", () => {
+  state.aiHidden = true;
+  state.query = {
+    data: { insights: [spending] },
+    error: null,
+    isPending: false,
+  };
+  renderSection();
+
+  assert.equal(
+    screen.queryByRole("button", { name: "Ask the assistant" }),
+    null,
+  );
 });

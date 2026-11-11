@@ -44,6 +44,17 @@
         "pace": "{category} está a caminho de exceder o orçamento.",
         "figures": "<projected></projected> previstos face a <budgeted></budgeted> planeados.",
         "link": "Ver orçamento"
+      },
+      "ask": {
+        "link": "Perguntar ao assistente",
+        "prompt": {
+          "spending": {
+            "above": "Porque é que os meus gastos em {category} estão {percent} acima do normal este mês?",
+            "below": "Porque é que os meus gastos em {category} estão {percent} abaixo do normal este mês?"
+          },
+          "budget": "Porque é que o meu orçamento de {category} está previsto em {projected} face a {budgeted} planeados este mês?",
+          "budgetHidden": "Porque é que o meu orçamento de {category} está a caminho de exceder o limite este mês?"
+        }
       }
     },
     "bank-alerts": {
