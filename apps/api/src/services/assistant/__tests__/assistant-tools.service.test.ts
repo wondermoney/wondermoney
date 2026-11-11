@@ -21,6 +21,8 @@ vi.mock('../assistant-audit.service', () => ({
   },
 }));
 
+import { InsightsService } from '@service/insights/insights.service';
+
 import { DEFAULT_ALLOWED_TOOLS } from '../assistant-policy.service';
 import { AssistantToolsService } from '../assistant-tools.service';
 
@@ -91,6 +93,24 @@ describe('AssistantToolsService', () => {
       toolName: 'get_cashflow_summary',
     }));
     expect(JSON.stringify(mocked.log.mock.calls[0]?.[1] ?? {})).not.toContain('conversation-secret');
+  });
+
+  it('returns the same deterministic insights the home cards show', async () => {
+    const insight = {
+      facts: { baselineAmount: '100', categoryKey: 9, categoryKeys: [10], categoryName: 'Food', currency: 'EUR', currentAmount: '150', daysElapsed: 10, deviationPercent: '50.00', direction: 'above' as const, fromDate: '2026-11-01T00:00:00.000Z', toDate: '2026-11-10T12:00:00.000Z' },
+      id: 'stable-id',
+      period: '2026-11',
+      severity: 'warning' as const,
+      type: 'spending_vs_normal' as const,
+    };
+    const spy = vi.spyOn(InsightsService.prototype, 'getInsights').mockResolvedValue({ insights: [insight] });
+
+    const tools = AssistantToolsService.createTools({ appuserKey: 1, consentVersion: 1, conversationId: 'conversation-1', currency: 'EUR', tenantKey: 2 });
+    const result = await (tools.get_insights as unknown as { execute: (input: { month?: string }, options: unknown) => Promise<{ data: { currency: string; insights: unknown[] } }> }).execute({ month: '2026-11' }, {});
+
+    expect(result.data).toEqual({ currency: 'EUR', insights: [insight] });
+    expect(spy).toHaveBeenCalledWith(expect.objectContaining({ appuserKey: 1, currency: 'EUR', month: '2026-11', tenantKey: 2 }));
+    spy.mockRestore();
   });
 
   it('keeps filtered tools unavailable', () => {

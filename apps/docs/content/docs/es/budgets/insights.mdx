@@ -1,0 +1,36 @@
+---
+title: Información
+description: Avisos tempranos cuando una categoría se acelera o un presupuesto va a superar su límite.
+---
+
+La información aparece en la página de inicio, debajo del patrimonio neto. Es determinista: el mismo mes y las mismas transacciones producen siempre las mismas tarjetas. No interviene ningún modelo de IA, así que funciona aunque no haya un proveedor de IA configurado.
+
+## Gasto frente a lo habitual
+
+Para cada categoría de nivel superior, compara lo que ha gastado hasta ahora este mes con los mismos días de los tres meses completos anteriores.
+
+- Empieza el día 7 del mes. Antes no hay mes suficiente para comparar.
+- Necesita tres meses completos de historial. Un hogar nuevo no verá nada hasta entonces.
+- El gasto habitual de la categoría debe ser al menos 20 en su moneda. Por debajo, unos pocos euros hacen oscilar mucho el porcentaje.
+- Se activa cuando el gasto está un 25% o más por encima o por debajo de esa base.
+- Aparecen como máximo tres tarjetas, ordenadas por desviación.
+
+La tarjeta muestra el importe hasta ahora, el importe habitual a estas alturas y un enlace a las transacciones correspondientes.
+
+## Ritmo del presupuesto
+
+Para cada categoría del presupuesto, proyecta lo gastado hasta ahora al mes completo al ritmo actual.
+
+- Empieza el día 7 del mes.
+- Se activa cuando la proyección de gasto a fin de mes supera el importe que la categoría puede gastar, incluido el saldo arrastrado.
+- La tarjeta muestra lo gastado, la proyección y el importe planificado, con un enlace al mes del presupuesto.
+
+## Qué queda fuera
+
+Las transferencias entre sus propias cuentas y el dinero en categorías que no son gasto (inversiones y ahorro) quedan fuera, como en los totales de presupuestos e informes. Los importes están en su moneda base.
+
+## Enlaces relacionados
+
+- [Seguir el gasto mensual](/es/docs/budgets/track-monthly-spending)
+- [Crear su primer presupuesto](/es/docs/budgets/create-first-budget)
+- [Comparar meses](/es/docs/budgets/compare-months)

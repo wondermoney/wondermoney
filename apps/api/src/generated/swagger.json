@@ -53,6 +53,10 @@
       "description": "Health check"
     },
     {
+      "name": "Insights",
+      "description": "Deterministic spending and budget insights"
+    },
+    {
       "name": "Marketing",
       "description": "Marketing operations"
     },
@@ -2365,6 +2369,16 @@
         "responses": {
           "default": {
             "description": ""
+          }
+        }
+      }
+    },
+    "/v1/insights/": {
+      "get": {
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "OK"
           }
         }
       }

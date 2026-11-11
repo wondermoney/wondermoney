@@ -43,6 +43,7 @@ const sections: HomeSections = {
   cashflow: { status: 'loaded', data: { zero: 0, bars: [] } },
   loans: { status: 'loaded', data: { upcoming: [], hasLoans: false } },
   latest: { status: 'loaded', data: { review: null, transactions: [] } },
+  insights: { status: 'hidden' },
   insight: { status: 'hidden' },
 }
 
@@ -350,10 +351,27 @@ describe('NetWorthScreen (Home)', () => {
     expect(props.onRetryCashflow).toHaveBeenCalled()
   })
 
-  it('keeps the top spending category last, as web has no equivalent', async () => {
-    const { view } = await renderScreen({}, { insight: { status: 'loaded', data: { name: 'Groceries', amount: 420, currency: 'EUR' } } })
+  it('keeps the top spending category as the fallback when no insight fires', async () => {
+    const { view } = await renderScreen({}, { insights: { status: 'loaded', data: { fallback: { name: 'Groceries', amount: 420, currency: 'EUR' }, insights: [] } } })
     expect(view.getByRole('header', { name: 'Insights' })).toBeOnTheScreen()
     expect(view.getByText('Groceries — €420.00 this month')).toBeOnTheScreen()
+  })
+
+  it('renders an insight card with its figures and a link to the underlying rows', async () => {
+    const insight = {
+      facts: {
+        baselineAmount: '100', categoryKey: 9, categoryKeys: [10, 11], categoryName: 'Food',
+        currency: 'EUR', currentAmount: '150', daysElapsed: 10, deviationPercent: '50.00',
+        direction: 'above' as const, fromDate: '2026-11-01T00:00:00.000Z', toDate: '2026-11-10T12:00:00.000Z',
+      },
+      id: 'spending-1', period: '2026-11', severity: 'warning' as const, type: 'spending_vs_normal' as const,
+    }
+    const { view, props } = await renderScreen({}, { insights: { status: 'loaded', data: { fallback: null, insights: [insight] } } })
+
+    expect(view.getByText('Food is 50% above its usual pace.')).toBeOnTheScreen()
+    expect(view.getByText(/€150\.00 so far, normally €100\.00 by this point\./)).toBeOnTheScreen()
+    fireEvent.press(view.getByRole('button', { name: 'View transactions' }))
+    expect(props.onNavigate).toHaveBeenCalledWith(expect.stringContaining('/accounts/transactions?fromDate='))
   })
 
   describe('privacy mode', () => {
@@ -361,7 +379,7 @@ describe('NetWorthScreen (Home)', () => {
     const MONEY = /€\s?[\d−-]|\d\s?€/
     const loadedSections: Partial<HomeSections> = {
       cashflow: { status: 'loaded', data: { zero: 0, bars: [{ date: '2026-10-31', amount: -250 }, { date: '2026-11-30', amount: 410 }] } as never },
-      insight: { status: 'loaded', data: { name: 'Groceries', amount: 321.45, currency: 'EUR' } } as never,
+      insights: { status: 'loaded', data: { fallback: { name: 'Groceries', amount: 321.45, currency: 'EUR' }, insights: [] } } as never,
     }
 
     it('shows the same sections\' amounts with the mode off (the control for the test below)', async () => {

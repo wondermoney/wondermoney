@@ -9,8 +9,8 @@
  *
  * Ids are stable strings, not an enum of what this release renders: a layout
  * saved by a newer client keeps its unknown ids, and this module ignores them
- * until the section exists here. `insights` and `review-status` are reserved
- * for the sections that will follow.
+ * until the section exists here. `review-status` is reserved for the section
+ * that will follow.
  *
  * This module has no dependencies so web and mobile can import it directly
  * (`@wondermoney/shared/dashboard-layout`).
@@ -19,6 +19,7 @@
 /** Every section this release can render, in the default order. */
 export const DASHBOARD_SECTION_IDS = [
   'net-worth',
+  'insights',
   'this-month',
   'balance-sheet',
   'cashflow',

@@ -24,6 +24,7 @@ import { BalanceSheetSection } from "./BalanceSheetSection";
 import { BankAlertsBanner } from "./BankAlertsBanner";
 import { CashflowSection } from "./CashflowSection";
 import { CustomizeHomeSheet } from "./CustomizeHomeSheet";
+import { InsightsSection } from "./InsightsSection";
 import { LatestTransactionsSection } from "./LatestTransactionsSection";
 import { LoansSection } from "./LoansSection";
 import { NetWorthHero } from "./NetWorthHero";
@@ -120,6 +121,7 @@ export function HomeOverview() {
     Exclude<DashboardSectionId, "net-worth">,
     ReactNode
   > = {
+    insights: <InsightsSection />,
     "this-month": <ThisMonthSection />,
     "balance-sheet": <BalanceSheetSection />,
     cashflow: <CashflowSection />,

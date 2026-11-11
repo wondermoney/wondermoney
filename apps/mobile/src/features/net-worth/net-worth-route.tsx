@@ -6,6 +6,7 @@ import { accountMark, portfolioMark } from '@/components/ui/entity-mark'
 import { mapCategorySpending } from '@/features/account-insights/insights-view-model'
 import { useTopSpendingCategory } from '@/features/account-insights/use-top-spending-category'
 import { useAccounts } from '@/features/accounts/use-accounts'
+import { useInsights } from '@/features/insights/use-insights'
 import { useBankAlertBanner } from '@/features/banking/use-bank-alerts'
 import { mapBudget } from '@/features/budgets/budgets-view-model'
 import { useBudgets } from '@/features/budgets/use-budgets'
@@ -26,7 +27,7 @@ import {
   upcomingLoanPayments,
   type ResolvedHistoryPoint,
 } from './home-model'
-import type { BudgetMonthRow, SectionState } from './home-sections'
+import type { BudgetMonthRow, InsightsState, SectionState } from './home-sections'
 import { monthlyHistoryPoints } from './net-worth-history-view-model'
 import { NetWorthScreen, type HomeSections, type InsightState, type NetWorthViewState } from './net-worth-screen'
 import { useHomeBudgetMonths, useHomeCashflow, useHomeCashflowComparison, useHomePortfolios } from './use-home-data'
@@ -72,6 +73,7 @@ export function NetWorthRoute() {
   const reviewSummary = useTransactionReviewSummary()
   const portfolios = useHomePortfolios()
   const insight = useTopSpendingCategory()
+  const insights = useInsights()
   const setupDismissal = useSetupChecklistDismissal()
   const bankAlerts = useBankAlertBanner()
   const dashboardLayout = useDashboardLayout()
@@ -146,6 +148,13 @@ export function NetWorthRoute() {
   } else if (insight.error) insightState = { status: 'error' }
   else insightState = { status: 'hidden' }
 
+  const fallback = insightState.status === 'loaded' ? insightState.data : null
+  let insightsState: InsightsState
+  if (insights.isLoading) insightsState = { status: 'loading' }
+  else if (insights.data) insightsState = { status: 'loaded', data: { fallback, insights: insights.data.insights } }
+  else if (insights.error) insightsState = { status: 'error' }
+  else insightsState = { status: 'hidden' }
+
   const sections: HomeSections = {
     history: historyState,
     freshness,
@@ -162,6 +171,7 @@ export function NetWorthRoute() {
     })),
     loans: loansState,
     latest: latestState,
+    insights: insightsState,
     insight: insightState,
     accountMarks,
     portfolioMarks,
@@ -185,6 +195,7 @@ export function NetWorthRoute() {
           loans.refetch(),
           latest.refetch(),
           reviewSummary.refetch(),
+          insights.refetch(),
           bankAlerts.refetch(),
         ])
       }}

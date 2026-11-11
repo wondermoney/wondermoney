@@ -6,6 +6,7 @@
       "description": "Escolha o que aparece no seu início e em que ordem.",
       "sections": {
         "net-worth": "Património",
+        "insights": "Estatísticas",
         "this-month": "Este mês",
         "balance-sheet": "Balanço",
         "cashflow": "Fluxo de caixa líquido",
@@ -21,6 +22,29 @@
       "retry": "Tentar novamente",
       "loadError": "Não foi possível carregar o seu início.",
       "done": "Concluído"
+    },
+    "insights": {
+      "title": "Estatísticas",
+      "empty": {
+        "title": "Nada fora do normal este mês",
+        "body": "Os gastos seguem o ritmo habitual e nenhum orçamento está a caminho de exceder o limite."
+      },
+      "severity": {
+        "critical": "Requer atenção",
+        "warning": "Vale a pena ver",
+        "info": "Boa notícia"
+      },
+      "spending": {
+        "above": "{category} está {percent}% acima do ritmo habitual.",
+        "below": "{category} está {percent}% abaixo do ritmo habitual.",
+        "figures": "<current></current> até agora, normalmente <baseline></baseline> a esta altura.",
+        "link": "Ver transações"
+      },
+      "budget": {
+        "pace": "{category} está a caminho de exceder o orçamento.",
+        "figures": "<projected></projected> previstos face a <budgeted></budgeted> planeados.",
+        "link": "Ver orçamento"
+      }
     },
     "bank-alerts": {
       "label": "Alertas de ligações bancárias",

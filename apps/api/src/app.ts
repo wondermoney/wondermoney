@@ -56,6 +56,7 @@ import financialMarketsRoutes from '@route/financial-markets';
 import goalRoutes from '@route/goal';
 import healthRoutes from '@route/health';
 import householdRoutes from '@route/household';
+import insightsRoutes from '@route/insights';
 import instanceRoutes from '@route/instance';
 import loanRoutes from '@route/loan';
 import manualAssetRoutes from '@route/manual-asset';
@@ -225,6 +226,7 @@ export default class Application {
       this.host.use('/v1/household', ...authedTenant(), householdRoutes);
       this.host.use('/v1/financial-markets', ...authedTenant(), financialMarketsRoutes);
       // Public: clients read it before sign-in (feature flags, signup mode, server identity).
+      this.host.use('/v1/insights', ...authedTenant(), insightsRoutes);
       this.host.use('/v1/instance', instanceRoutes);
       this.host.use('/v1/manual-assets', ...authedTenant(), manualAssetRoutes);
       this.host.use('/v1/marketing', publicMarketingRateLimit(), marketingRoutes);

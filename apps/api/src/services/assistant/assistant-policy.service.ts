@@ -4,6 +4,7 @@ const DEFAULT_ALLOWED_TOOLS = [
   'get_budget_status',
   'get_cashflow_summary',
   'get_goal_progress_summary',
+  'get_insights',
   'get_large_transactions_summary',
   'get_net_worth_summary',
   'get_portfolio_income_summary',

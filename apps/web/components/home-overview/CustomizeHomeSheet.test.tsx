@@ -68,6 +68,7 @@ test("lists every section in the saved order, net worth first", () => {
     "home-section-latest-transactions",
     "home-section-balance-sheet",
     "home-section-cashflow",
+    "home-section-insights",
   ]);
   assert.equal(
     screen.getByRole("switch", { name: "This month" }).getAttribute(
@@ -90,6 +91,7 @@ test("moves a section down and saves the whole layout", async () => {
     {
       dashboardLayout: [
         { id: "net-worth", hidden: false },
+        { id: "insights", hidden: false },
         { id: "balance-sheet", hidden: false },
         { id: "this-month", hidden: false },
         { id: "cashflow", hidden: false },
@@ -109,6 +111,7 @@ test("hides a section with its visibility switch", async () => {
     {
       dashboardLayout: [
         { id: "net-worth", hidden: false },
+        { id: "insights", hidden: false },
         { id: "this-month", hidden: false },
         { id: "balance-sheet", hidden: false },
         { id: "cashflow", hidden: false },
@@ -159,7 +162,7 @@ test("a failed save offers a retry with the same layout", async () => {
 
   await userEvent.click(screen.getByRole("button", { name: "Try again" }));
 
-  assert.equal(state.mutate.mock.calls[0]?.[0].dashboardLayout.length, 6);
+  assert.equal(state.mutate.mock.calls[0]?.[0].dashboardLayout.length, 7);
 });
 
 test("a failed load explains itself and offers a retry", async () => {

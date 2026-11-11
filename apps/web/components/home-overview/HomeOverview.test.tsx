@@ -43,6 +43,9 @@ vi.mock("@/lib/api/portfolio/usePortfolios", () => ({
 vi.mock("./NetWorthHero", () => ({
   NetWorthHero: () => <div data-testid="section-net-worth">net-worth</div>,
 }));
+vi.mock("./InsightsSection", () => ({
+  InsightsSection: () => <div data-testid="section-insights">insights</div>,
+}));
 vi.mock("./ThisMonthSection", () => ({
   ThisMonthSection: () => <div data-testid="section-this-month">this-month</div>,
 }));
@@ -88,6 +91,7 @@ test("renders the default order when nothing is saved", () => {
 
   assert.deepEqual(renderedSections(), [
     "net-worth",
+    "insights",
     "this-month",
     "balance-sheet",
     "cashflow",
@@ -105,11 +109,12 @@ test("renders the saved order and skips hidden sections", () => {
     { id: "balance-sheet", hidden: true },
   ]);
 
-  // The saved layout predates cashflow, so it is appended, visible.
+  // The saved layout predates insights and cashflow, so they are appended, visible.
   assert.deepEqual(renderedSections(), [
     "net-worth",
     "loans",
     "latest-transactions",
+    "insights",
     "cashflow",
   ]);
 });

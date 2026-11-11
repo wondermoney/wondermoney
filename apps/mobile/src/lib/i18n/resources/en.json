@@ -247,7 +247,23 @@
       "title": "Insights",
       "loading": "Loading insights",
       "error": "Could not load insights",
-      "topCategory": "{{name}} — {{amount}} this month"
+      "topCategory": "{{name}} — {{amount}} this month",
+      "severity": {
+        "critical": "Needs attention",
+        "warning": "Worth a look",
+        "info": "Good news"
+      },
+      "spending": {
+        "above": "{{category}} is {{percent}}% above its usual pace.",
+        "below": "{{category}} is {{percent}}% below its usual pace.",
+        "figures": "{{current}} so far, normally {{baseline}} by this point.",
+        "link": "View transactions"
+      },
+      "budget": {
+        "pace": "{{category}} is on course to overrun its budget.",
+        "figures": "{{projected}} projected against {{budgeted}} planned.",
+        "link": "View budget"
+      }
     },
     "helpText": "A quick overview of your accounts, portfolio, and liabilities.",
     "unsupportedAccount_one": "{{count}} account balance is not included",
