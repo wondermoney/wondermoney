@@ -28,12 +28,32 @@
  * A caller outside that zone should send `timezone` to be exactly right.
  */
 
+import { fromZonedTime } from 'date-fns-tz';
+
 /**
  * Calendar assumed when a caller does not send `timezone`.
  *
  * Matches `FINANCIAL_EMAIL_TIME_ZONE` and the budget aggregation periods.
  */
 export const REPORT_DEFAULT_TIME_ZONE = 'Europe/Lisbon';
+
+/** A `YYYY-MM` month key. */
+export const MONTH_KEY = /^\d{4}-(?:0[1-9]|1[0-2])$/;
+
+/**
+ * The instants a `YYYY-MM` month covers in `timeZone`: the first instant of its
+ * first day through the last instant of its last day, as the report filters carry
+ * them. `fromZonedTime` owns the offset rules, so a DST change inside the month is
+ * handled without a fixed-offset approximation.
+ */
+export function monthRange(monthKey: string, timeZone: string): { fromDate: string; toDate: string } {
+  if (!MONTH_KEY.test(monthKey)) throw new RangeError(`Not a YYYY-MM month: ${monthKey}`);
+  const [year, month] = monthKey.split('-').map(Number) as [number, number];
+  const nextMonth = month === 12 ? `${year + 1}-01` : `${year}-${String(month + 1).padStart(2, '0')}`;
+  const start = fromZonedTime(`${monthKey}-01T00:00:00`, timeZone);
+  const end = new Date(fromZonedTime(`${nextMonth}-01T00:00:00`, timeZone).getTime() - 1);
+  return { fromDate: start.toISOString(), toDate: end.toISOString() };
+}
 
 const monthFormatters = new Map<string, Intl.DateTimeFormat>();
 

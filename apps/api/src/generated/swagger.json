@@ -3377,6 +3377,16 @@
         }
       }
     },
+    "/v1/reports/spending-vs-normal": {
+      "get": {
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/v1/reports/cashflow": {
       "get": {
         "description": "",

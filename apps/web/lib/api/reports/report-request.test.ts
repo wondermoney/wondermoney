@@ -19,6 +19,7 @@ import { getCashflow } from "./cashflow";
 import { getNetWorthHistory } from "./netWorthHistory";
 import { getSankey } from "./sankey";
 import { getSpendingByCategory } from "./spendingByCategory";
+import { getSpendingVsNormal } from "./spendingVsNormal";
 
 interface CapturedRequest {
   url: string;
@@ -116,4 +117,19 @@ test("an unknown calendar is absent from the query string, never invalid", async
   // The rest of the envelope still travels, so the report is only missing its
   // calendar hint — the API then applies its documented default.
   assert.match(queryStringOf(calls[0]), /accountKeys=acc-1&accountKeys=acc-2/);
+});
+
+test("the spending-vs-normal request names its month and the viewer's calendar", async () => {
+  const { calls, client } = stubClient();
+  await getSpendingVsNormal(
+    { ...buildReportFilters(PERIOD, "Europe/Madrid"), month: "2026-08" },
+    client,
+  );
+
+  assert.equal(calls[0].url, "/v1/reports/spending-vs-normal");
+  assert.equal(calls[0].params.month, "2026-08");
+  assert.equal(calls[0].params.timezone, "Europe/Madrid");
+  // The month replaces the date range, so the page's range must not travel.
+  assert.equal(calls[0].params.fromDate, undefined);
+  assert.equal(calls[0].params.toDate, undefined);
 });

@@ -156,6 +156,28 @@
           "title": "Sin gastos en ninguno de los meses",
           "description": "Prueba con otros dos meses o comprueba que las cuentas estén conectadas."
         }
+      },
+      "spendingVsNormal": {
+        "title": "Gasto vs normal",
+        "subtitle": "Adónde fue el dinero de este mes y qué categorías quedaron por encima o por debajo de su normal trimestral.",
+        "month": "Mes",
+        "category": "Categoría",
+        "spent": "Gastado",
+        "normal": "Normal",
+        "change": "Cambio vs normal",
+        "noBaseline": "Sin base de comparación",
+        "baselineTooSmall": "Demasiado pequeño para comparar",
+        "aboveNormal": "por encima de lo normal",
+        "belowNormal": "por debajo de lo normal",
+        "nearNormal": "cerca de lo normal",
+        "hoverHint": "Señala un bloque, o usa la tabla, para ver el gasto, el normal y el cambio.",
+        "tableCaption": "Gasto por categoría en {month}, comparado con los mismos días de los tres meses anteriores.",
+        "subcategoryOf": "Subcategoría de {parent}",
+        "viewTransactions": "Ver las transacciones detrás de este importe",
+        "noData": {
+          "title": "Sin gastos este mes",
+          "description": "Prueba otro mes o comprueba que las cuentas estén conectadas."
+        }
       }
     },
     "common": {

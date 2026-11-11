@@ -14,6 +14,8 @@ export const reportsKeys = {
     [...reportsKeys.all, "cashflow", params] as const,
   monthComparison: (params: ReportFilters & MonthComparisonMonths) =>
     [...reportsKeys.all, "month-comparison", params] as const,
+  spendingVsNormal: (params: ReportFilters & { month: string }) =>
+    [...reportsKeys.all, "spending-vs-normal", params] as const,
   sankey: (params: ReportFilters) =>
     [...reportsKeys.all, "sankey", params] as const,
   netWorthHistory: (params: ReportFilters) =>

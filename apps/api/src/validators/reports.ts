@@ -89,3 +89,14 @@ export const monthComparisonQuerySchema = z.object({
 });
 
 export type MonthComparisonFilters = z.infer<typeof monthComparisonQuerySchema>['query'];
+
+/**
+ * The spending-vs-normal envelope: the shared report filters plus the one month to read. The
+ * month replaces the date range (accepted but ignored), and the report's calendar is the
+ * `timezone` filter, so the same month means the same days for both the report and its links.
+ */
+export const spendingVsNormalQuerySchema = z.object({
+  query: reportFiltersSchema.extend({ month: monthKeySchema }),
+});
+
+export type SpendingVsNormalFilters = z.infer<typeof spendingVsNormalQuerySchema>['query'];

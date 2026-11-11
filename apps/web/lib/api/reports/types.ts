@@ -116,6 +116,28 @@ export interface MonthComparisonMonths {
   compare: string;
 }
 
+/** One category's spend against its three-month normal, in `GET /v1/reports/spending-vs-normal`. */
+export interface SpendingVsNormalRow {
+  categoryKey: string;
+  name: string;
+  /** The top-level category this row breaks down; null for a top-level row. */
+  parentKey: string | null;
+  /** Spend this period, in the viewer's currency. */
+  total: number;
+  /** The normal for the same days of the previous three months; null without a usable baseline. */
+  normal: number | null;
+  /** `total / normal`; null without a usable baseline (the row is neutral). */
+  ratio: number | null;
+}
+
+/** Body of `GET /v1/reports/spending-vs-normal`. */
+export interface SpendingVsNormalData {
+  /** `YYYY-MM`. */
+  month: string;
+  /** Top-level rows, each followed by its subcategory rows. */
+  rows: SpendingVsNormalRow[];
+}
+
 /** Graph shape for `GET /v1/reports/sankey`. */
 export interface SankeyData {
   nodes: SankeyNode[];
