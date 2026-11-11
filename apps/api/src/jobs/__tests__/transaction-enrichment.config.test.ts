@@ -29,6 +29,12 @@ describe('transaction enrichment config', () => {
     expect(config.modelVersion).toBe('qwen2.5');
   });
 
+  it('records the Anthropic model when that is the provider', () => {
+    const config = buildTransactionEnrichmentConfig({ AI_MODEL_ENRICHMENT: 'claude-haiku-4-5', AI_PROVIDER: 'anthropic', ANTHROPIC_API_KEY: 'sk-ant-test' });
+    expect(config.enabled).toBe(true);
+    expect(config.modelVersion).toBe('claude-haiku-4-5');
+  });
+
   describe('operational controls that must stay overridable', () => {
     it('honours the emergency kill switch without a redeploy', () => {
       expect(buildTransactionEnrichmentConfig({ ...FOUNDRY, TRANSACTION_ENRICHMENT_GPT_ENABLED: 'false' }).enabled).toBe(false);
@@ -39,7 +45,7 @@ describe('transaction enrichment config', () => {
     });
 
     it('lets the model be swapped, because the value is the model actually called', () => {
-      // `deepseek.ts` passes this straight through as `model:` — it selects, it does not label.
+      // `suggestion.ts` passes this straight through as `model:` — it selects, it does not label.
       expect(buildTransactionEnrichmentConfig({ TRANSACTION_ENRICHMENT_GPT_MODEL_VERSION: 'gpt-5.4-nano' }).modelVersion).toBe('gpt-5.4-nano');
     });
 

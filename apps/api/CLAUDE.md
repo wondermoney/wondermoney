@@ -166,8 +166,11 @@ Every integration is optional and fails closed: unconfigured, its feature report
   entry fails loud; nothing serves stale data.
 - **AI** (`services/ai/ai-provider.ts`): per feature (assistant, CSV mapping, enrichment,
   monthly story, OCR), Azure when `AZURE_OPENAI_*` (or `AZURE_AI_FOUNDRY_*` for enrichment) is
-  complete, else any OpenAI-compatible endpoint via `AI_BASE_URL`, `AI_API_KEY`, `AI_MODEL`
-  and `AI_MODEL_<FEATURE>`, else disabled. A half-configured provider counts as absent.
+  complete, else Anthropic when `AI_PROVIDER=anthropic` and `ANTHROPIC_API_KEY` are set, else any
+  OpenAI-compatible endpoint via `AI_BASE_URL`, `AI_API_KEY`, `AI_MODEL` and
+  `AI_MODEL_<FEATURE>`, else disabled. A half-configured provider counts as absent. The assistant
+  streams through `services/ai/ai-model.ts`; every other feature calls `completeJson` in
+  `services/ai/complete-json.ts` (`generateObject`).
 - **Email** (`services/email/email-transport.ts`): Resend when `RESEND_API_KEY` is set, SMTP
   when `SMTP_HOST` is, otherwise the log driver writes the whole message, links included, to
   the log. `EMAIL_DRIVER` overrides; `EMAIL_FROM`/`EMAIL_FROM_NAME` set the sender (`RESEND_FROM_*`

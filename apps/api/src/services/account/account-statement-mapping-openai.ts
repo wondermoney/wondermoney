@@ -1,6 +1,7 @@
+import { jsonSchema, type JSONSchema7 } from 'ai';
 import { z } from 'zod';
 
-import OpenAI from '@service/ai/openai';
+import { completeJson } from '@service/ai/complete-json';
 
 import type { StatementColumnField, StatementColumns } from './account-statement-mapping.schema';
 import type { StatementColumnProfile } from './account-statement-reader';
@@ -25,7 +26,7 @@ const answerSchema = z.object({
   spendingIsPositive: z.boolean(),
 });
 
-const jsonSchema = {
+const STATEMENT_MAPPING_JSON_SCHEMA: JSONSchema7 = {
   additionalProperties: false,
   properties: {
     columns: {
@@ -39,7 +40,7 @@ const jsonSchema = {
   },
   required: ['columns', 'headerRowIndex', 'spendingIsPositive'],
   type: 'object',
-} as const;
+};
 
 const SYSTEM_PROMPT = [
   'You map the columns of a bank or credit-card statement export to transaction fields.',
@@ -52,20 +53,19 @@ const SYSTEM_PROMPT = [
 ].join(' ');
 
 export async function requestStatementMapping(input: StatementMappingPromptInput): Promise<{ columns: Partial<StatementColumns>; headerRowIndex: number; spendingIsPositive: boolean }> {
-  const { answer } = await OpenAI.promptWithText({
+  const { object } = await completeJson({
     feature: 'csvMapping',
-    messages: [
-      { content: SYSTEM_PROMPT, role: 'system' },
-      { content: JSON.stringify(sanitize(input)), role: 'user' },
-    ],
-    model: 'gpt-5.4-nano',
-    responseFormat: { json_schema: { name: 'statement_column_mapping', schema: jsonSchema, strict: true }, type: 'json_schema' },
+    schema: jsonSchema(STATEMENT_MAPPING_JSON_SCHEMA),
+    schemaName: 'statement_column_mapping',
+    system: SYSTEM_PROMPT,
+    user: JSON.stringify(sanitize(input)),
+    // The Azure deployment. Off Azure, `AI_MODEL_CSV_MAPPING` decides.
+    azureDeployment: 'gpt-5.4-nano',
   });
-  if (!answer?.trim()) throw new Error('statement mapping response missing');
 
   let parsed: z.infer<typeof answerSchema>;
   try {
-    parsed = answerSchema.parse(JSON.parse(answer));
+    parsed = answerSchema.parse(object);
   } catch {
     throw new Error('statement mapping invalid response');
   }

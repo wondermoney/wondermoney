@@ -49,6 +49,16 @@ AI_MODEL=llama3.1
 
 Set `AI_API_KEY` when the endpoint needs one. To use a different model for one feature, set `AI_MODEL_<FEATURE>`; for example, receipt scanning needs a model that reads images, set with `AI_MODEL_OCR`.
 
+To use Anthropic with your own API key, choose it explicitly:
+
+```sh
+AI_PROVIDER=anthropic
+ANTHROPIC_API_KEY=sk-ant-...
+AI_MODEL=claude-sonnet-4-5
+```
+
+`AI_MODEL`, or `AI_MODEL_<FEATURE>` for one feature, is required: there is no built-in default model. Receipt scanning needs a model that reads images, so set `AI_MODEL_OCR` if your default does not. Anthropic wins over `AI_BASE_URL`, but a complete Azure setup still takes precedence.
+
 If sign-up is open and you pay for the model, set `AI_REQUIRES_VERIFIED_EMAIL=true`. Accounts that sign up with email and password then get a verification link by email, and need to follow it before they can use the assistant, receipt scanning or AI column mapping. Google and Apple accounts count as verified. It needs email configured.
 
 To cap what each household can spend on the model per day, set `AI_DAILY_LIMIT_ASSISTANT` (assistant messages), `AI_DAILY_LIMIT_OCR` (receipt scans) and `AI_DAILY_LIMIT_CSV_MAPPING` (CSV imports the model maps). Members of a household share the limit, and it resets at midnight UTC. Leave them empty for no limit. Once a household reaches a limit, the app says so until the next day; CSV imports still work, with the columns mapped by hand.
@@ -99,7 +109,7 @@ Nothing is sent to the WonderMoney project. Each outside service your instance c
 |---|---|---|
 | European Central Bank | The worker, once a day, to download euro exchange rates. It sends no data about you or your users | Always on |
 | Email (your SMTP server or Resend) | The API and the worker, to send password resets, invites and notifications | `SMTP_HOST` or `RESEND_API_KEY` |
-| AI (your OpenAI-compatible endpoint) | The API and the worker, with the receipt, CSV columns, transactions or chat messages the feature needs | `AI_BASE_URL` and `AI_MODEL` |
+| AI (your OpenAI-compatible endpoint or Anthropic) | The API and the worker, with the receipt, CSV columns, transactions or chat messages the feature needs | `AI_BASE_URL` and `AI_MODEL`, or `AI_PROVIDER=anthropic`, `ANTHROPIC_API_KEY` and `AI_MODEL` |
 | Market data (EODHD) | The API and the worker, with ticker symbols, not user data | `EODHD_API_KEY` |
 | File storage (your S3-compatible store) | The API and browsers, for CSV imports and receipt copies | `S3_ENDPOINT` and `S3_BUCKET` |
 | Error tracking (Sentry) | The API, the worker and the web app, with error reports | `SENTRY_DSN` (API and worker), `NEXT_PUBLIC_SENTRY_DSN` (web app) |

@@ -19,7 +19,7 @@ import { TransactionCategoryStats, Source as TransactionCategoryStatsSource } fr
 import { TransactionEnrichment, TransactionEnrichmentStatus } from '@entity/TransactionEnrichment';
 import { isAiHidden } from '@service/ai/ai-availability';
 import { estimateTransactionEnrichmentCostUsd } from '@service/transaction-enrichment/cost';
-import { requestTransactionEnrichmentSuggestion } from '@service/transaction-enrichment/deepseek';
+import { requestTransactionEnrichmentSuggestion } from '@service/transaction-enrichment/suggestion';
 import { reserveTransactionEnrichmentBudget } from '@service/transaction-enrichment/transaction-enrichment-budget.service';
 import { getRef } from '@utils/em-helpers';
 import logger from '@utils/logger';
@@ -41,7 +41,7 @@ interface TransactionEnrichmentWorkerDependencies {
 }
 
 /**
- * Worker for the DeepSeek transaction-enrichment pipeline.
+ * Worker for the AI transaction-enrichment pipeline.
  *
  * Runs post-sync/non-critical. Fail-safe and idempotent: the ONLY path that triggers a pg-boss
  * retry is a `throw` on a transient transport error (429 / >=500); every other outcome returns a
@@ -76,7 +76,7 @@ export async function handleTransactionEnrichmentGptJob(
   const reserveBudget = dependencies.reserveBudget ?? reserveTransactionEnrichmentBudget;
 
   // One try/catch guards ALL DB + model work. Only a genuine transient transport failure
-  // (DeepSeekHttpError 429/>=500) rethrows to trigger a pg-boss retry. Everything else — DB errors
+  // (AiCompletionError 429/>=500) rethrows to trigger a pg-boss retry. Everything else — DB errors
   // from findOne/find/flush, parse/validation, terminal 4xx — is deterministic: mark the row FAILED
   // and consume the job, so a guaranteed-to-fail input never re-reserves budget or re-calls the
   // model across the retry limit.
@@ -123,7 +123,7 @@ export async function handleTransactionEnrichmentGptJob(
     // and flushed on the retryable-transport path, so a value above 1 means this job
     // already holds a reservation from a previous attempt — re-reserving would charge a
     // 3-retry job four units of the tenant's daily cap for one enrichment, and could
-    // exhaust a tenant's budget on a DeepSeek outage without producing a single result.
+    // exhaust a tenant's budget on a model outage without producing a single result.
     const alreadyReserved = enrichment.attemptCount > 1;
     if (tenantKey === undefined || (!alreadyReserved && !(await reserveBudget(em, tenantKey, utcDay(now()), config.dailyTenantBudget)))) {
       enrichment.status = TransactionEnrichmentStatus.SKIPPED;

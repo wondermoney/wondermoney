@@ -49,6 +49,16 @@ AI_MODEL=llama3.1
 
 Define `AI_API_KEY` quando o endpoint exigir uma chave. Para usares um modelo diferente numa funcionalidade, define `AI_MODEL_<FUNCIONALIDADE>`; por exemplo, a leitura de recibos precisa de um modelo que leia imagens, definido com `AI_MODEL_OCR`.
 
+Para usares a Anthropic com a tua própria chave de API, escolhe-a explicitamente:
+
+```sh
+AI_PROVIDER=anthropic
+ANTHROPIC_API_KEY=sk-ant-...
+AI_MODEL=claude-sonnet-4-5
+```
+
+`AI_MODEL`, ou `AI_MODEL_<FUNCIONALIDADE>` para uma funcionalidade, é obrigatório: não há modelo predefinido. A leitura de recibos precisa de um modelo que leia imagens, por isso define `AI_MODEL_OCR` se o teu modelo predefinido não o fizer. A Anthropic tem prioridade sobre `AI_BASE_URL`, mas uma configuração Azure completa continua a ter precedência.
+
 Se o registo estiver aberto e pagares pelo modelo, define `AI_REQUIRES_VERIFIED_EMAIL=true`. As contas criadas com email e palavra-passe recebem então um link de verificação por email, e têm de o seguir antes de poderem usar o assistente, a leitura de recibos ou o mapeamento de colunas com IA. As contas Google e Apple contam como verificadas. É preciso ter o email configurado.
 
 Para limitar o que cada agregado pode gastar no modelo por dia, define `AI_DAILY_LIMIT_ASSISTANT` (mensagens ao assistente), `AI_DAILY_LIMIT_OCR` (leituras de recibos) e `AI_DAILY_LIMIT_CSV_MAPPING` (importações CSV mapeadas pelo modelo). Os membros de um agregado partilham o limite, que é reposto à meia-noite UTC. Deixa-os vazios para não haver limite. Quando um agregado chega a um limite, a aplicação avisa até ao dia seguinte; as importações CSV continuam a funcionar, com as colunas mapeadas à mão.
@@ -99,7 +109,7 @@ Nada é enviado para o projeto WonderMoney. Cada serviço externo que a tua inst
 |---|---|---|
 | Banco Central Europeu | O worker, uma vez por dia, para descarregar as taxas de câmbio do euro. Não envia dados sobre ti nem sobre os teus utilizadores | Sempre ligado |
 | Email (o teu servidor SMTP ou o Resend) | A API e o worker, para enviar redefinições de palavra-passe, convites e notificações | `SMTP_HOST` ou `RESEND_API_KEY` |
-| IA (o teu endpoint compatível com OpenAI) | A API e o worker, com o recibo, as colunas do CSV, as transações ou as mensagens de chat de que a funcionalidade precisa | `AI_BASE_URL` e `AI_MODEL` |
+| IA (o teu endpoint compatível com OpenAI ou a Anthropic) | A API e o worker, com o recibo, as colunas do CSV, as transações ou as mensagens de chat de que a funcionalidade precisa | `AI_BASE_URL` e `AI_MODEL`, ou `AI_PROVIDER=anthropic`, `ANTHROPIC_API_KEY` e `AI_MODEL` |
 | Dados de mercado (EODHD) | A API e o worker, com símbolos de cotação, não dados de utilizadores | `EODHD_API_KEY` |
 | Armazenamento de ficheiros (o teu armazenamento compatível com S3) | A API e os navegadores, para importações de CSV e cópias de recibos | `S3_ENDPOINT` e `S3_BUCKET` |
 | Registo de erros (Sentry) | A API, o worker e a aplicação web, com relatórios de erros | `SENTRY_DSN` (API e worker), `NEXT_PUBLIC_SENTRY_DSN` (aplicação web) |

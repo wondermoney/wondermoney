@@ -1,3 +1,4 @@
+import type { JSONSchema7 } from 'ai';
 import { z } from 'zod';
 
 export const portfolioColumnMappingFields = ['transactionDate', 'transactionType', 'assetName', 'isin', 'ticker', 'brokerExchange', 'quantity', 'unitPrice', 'totalAmount', 'currency', 'feeAmount', 'externalTransactionId'] as const;
@@ -62,7 +63,7 @@ export const portfolioColumnMappingSuggestionSchema = z.object({
   warnings: z.array(z.string().max(240)).default([]),
 }).strict();
 
-export const portfolioColumnMappingJsonSchema = {
+export const portfolioColumnMappingJsonSchema: JSONSchema7 = {
   additionalProperties: false,
   properties: {
     columnMapping: {
@@ -100,7 +101,7 @@ export const portfolioColumnMappingJsonSchema = {
   },
   required: ['confidence', 'columnMapping', 'detectedBroker', 'layout', 'transformations', 'warnings'],
   type: 'object',
-} as const;
+};
 
 export type PortfolioColumnMapping = z.infer<typeof portfolioColumnMappingSchema>;
 export type PortfolioColumnMappingSuggestion = z.infer<typeof portfolioColumnMappingSuggestionSchema>;
@@ -109,10 +110,14 @@ export type PortfolioCsvLayout = z.infer<typeof portfolioCsvLayoutSchema>;
 export type PortfolioImportDerivedValues = z.infer<typeof portfolioImportDerivedValuesSchema>;
 export type PortfolioImportFixedValues = z.infer<typeof portfolioImportFixedValuesSchema>;
 
+export function parsePortfolioColumnMappingSuggestion(value: unknown) {
+  return portfolioColumnMappingSuggestionSchema.parse(value);
+}
+
 export function parsePortfolioColumnMappingSuggestionJson(value: string) {
   let parsed: unknown;
   try { parsed = JSON.parse(value); } catch { throw new Error('portfolio column mapping malformed json'); }
-  return portfolioColumnMappingSuggestionSchema.parse(parsed);
+  return parsePortfolioColumnMappingSuggestion(parsed);
 }
 
 export function validateConfirmedPortfolioColumnMapping(input: { columnMapping: PortfolioColumnMapping; derivedValues?: PortfolioImportDerivedValues; fixedValues?: PortfolioImportFixedValues; transformations: PortfolioColumnMappingTransformations }) {

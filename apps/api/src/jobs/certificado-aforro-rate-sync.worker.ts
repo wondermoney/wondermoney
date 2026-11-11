@@ -1,11 +1,12 @@
 import * as Sentry from '@sentry/node';
+import { jsonSchema } from 'ai';
 import type { Kysely } from 'kysely';
 import type { Job } from 'pg-boss';
 
 import { DI } from '@app/database/di';
 import { type SqlDatabase, sqlQuery } from '@app/database/sql';
 import { CertificadoAforroRateSource } from '@entity/CertificadoAforroRatePeriod';
-import OpenAI, { type PromptResponseFormat } from '@service/ai/openai';
+import { completeJson } from '@service/ai/complete-json';
 import { CERTIFICADO_AFORRO_SERIES_CONSTANTS } from '@service/portfolio/certificado-aforro-calculation.service';
 import { convertPDFToImage, extractPDFTextLayer } from '@utils/documents';
 import logger from '@utils/logger';
@@ -400,27 +401,20 @@ function sanityMaxBpsFor(symbol: string): number {
 // ---------------------------------------------------------------------------
 
 /**
- * ⚠️ UNVERIFIED AGAINST REAL AZURE — see the TODO at the `promptWithImages` call site below.
+ * ⚠️ UNVERIFIED AGAINST REAL AZURE — see the TODO at the `completeJson` call site below.
  *
- * Typed as the SDK's own `response_format` parameter type (rather than cast away), so a schema
- * that the SDK would reject is a compile error here instead of a runtime 400 in production.
+ * `additionalProperties: false` and an all-required property list keep the schema inside OpenAI's
+ * strict structured-output rules.
  */
-const RATE_TABLE_RESPONSE_FORMAT: PromptResponseFormat = {
-  json_schema: {
-    name: 'certificado_aforro_rate_table',
-    schema: {
-      additionalProperties: false,
-      properties: {
-        grossRatesPercent: { items: { type: 'number' }, type: 'array' },
-        uncertain: { type: 'boolean' },
-      },
-      required: ['grossRatesPercent', 'uncertain'],
-      type: 'object',
-    },
-    strict: true,
+const RATE_TABLE_SCHEMA = jsonSchema({
+  additionalProperties: false,
+  properties: {
+    grossRatesPercent: { items: { type: 'number' }, type: 'array' },
+    uncertain: { type: 'boolean' },
   },
-  type: 'json_schema',
-};
+  required: ['grossRatesPercent', 'uncertain'],
+  type: 'object',
+});
 
 /**
  * Deliberately asks for an explicit "uncertain" flag instead of a best guess: a misread digit
@@ -722,11 +716,11 @@ export const handleCertificadoAforroRateSyncAutoJob = async (
   const extractPdfText = deps.extractPdfText ?? extractPDFTextLayer;
   const ocr =
     deps.ocr ??
-    ((input: { images: string[]; prompt: string }) =>
+    (async (input: { images: string[]; prompt: string }) => {
       // Verified against production Azure: the vision deployment (AZURE_OPENAI_OCR_DEPLOYMENT,
       // `gpt-5.4-nano`) accepts `json_schema` at `strict: true` and returns schema-conforming
-      // bodies. Keep `strict: true`: a non-strict schema would be a weaker guarantee on
-      // money-critical output.
+      // bodies. `completeJson` keeps that strictness: a non-strict schema would be a weaker
+      // guarantee on money-critical output.
       //
       // What is unreliable is the model's *reading*: it does not honour the prompt's
       // "only rows matching desde <month>" filter and mixes in other quarters' rows. That is why
@@ -734,12 +728,15 @@ export const handleCertificadoAforroRateSyncAutoJob = async (
       // untested by CI (every test injects `deps.ocr`), which is acceptable only because the
       // deterministic path above is the one that actually runs, and that one is covered against the
       // real PDFs in `certificado-aforro-rate-table.test.ts`.
-      OpenAI.promptWithImages({
-        images: input.images,
-        mimeType: 'image/png',
-        prompt: input.prompt,
-        responseFormat: RATE_TABLE_RESPONSE_FORMAT,
-      }));
+      const { object } = await completeJson({
+        feature: 'ocr',
+        images: input.images.map((data) => ({ data, mediaType: 'image/png' })),
+        schema: RATE_TABLE_SCHEMA,
+        schemaName: 'certificado_aforro_rate_table',
+        user: input.prompt,
+      });
+      return { answer: JSON.stringify(object) };
+    });
   const store = deps.store ?? createRateSyncStore(sqlQuery(DI.em), () => now);
   const written: string[] = [];
 

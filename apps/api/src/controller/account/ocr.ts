@@ -1,3 +1,4 @@
+import { jsonSchema } from 'ai';
 import dotenv from 'dotenv';
 import type { NextFunction, Request, Response } from 'express';
 
@@ -9,7 +10,7 @@ import { TransactionMerchant } from '@entity/TransactionMerchant';
 import { TransactionOCRImport, TransactionOCRImportStatus } from '@entity/TransactionOCRImport';
 import { authedUser } from '@middleware/authed-context';
 import { aiCapabilities } from '@service/ai/ai-provider';
-import OpenAI from '@service/ai/openai';
+import { completeJson } from '@service/ai/complete-json';
 import s3Service from '@service/storage/s3';
 import { normalizeMerchantName } from '@service/transaction/merchant-normalization';
 import { transactionCreationService } from '@service/transaction/transaction-creation.service';
@@ -29,6 +30,23 @@ import { DI } from '../../app.js';
 dotenv.config({ quiet: true });
 
 const MAX_LLM_RESPONSE_LENGTH = 1024;
+
+/**
+ * What the vision model must return for a receipt. `additionalProperties: false` keeps it inside
+ * OpenAI's strict structured-output rules; the controller validates the same shape with
+ * `transactionOCRModelOutputSchema`, which is stricter still (currency code, date, length).
+ */
+const RECEIPT_RESPONSE_SCHEMA = jsonSchema({
+  additionalProperties: false,
+  properties: {
+    settlementAmount: { type: 'number' },
+    settlementCurrency: { type: 'string' },
+    transactionDate: { type: 'string' },
+    transactionMerchantName: { type: 'string' },
+  },
+  required: ['settlementAmount', 'settlementCurrency', 'transactionDate', 'transactionMerchantName'],
+  type: 'object',
+});
 
 export async function confirmTransactionOCRImportAndCreateTransaction(req: Request, res: Response, next: NextFunction) {
   const user = authedUser(req);
@@ -157,35 +175,24 @@ export async function createTransactionOCRImport(req: Request, res: Response, ne
   }
 
   try {
-    const response = await OpenAI.processReceipt(images, mimetype);
+    const { object, tokens } = await completeJson({
+      feature: 'ocr',
+      images: images.map((data) => ({ data, mediaType: mimetype })),
+      schema: RECEIPT_RESPONSE_SCHEMA,
+      schemaName: 'transaction_information',
+      user: 'Extract the transaction information from the receipt image',
+    });
 
-    if (!response.answer) {
-      transactionOCRImport.tokensSpent = response.tokens ?? 0;
-      await DI.em.persist(transactionOCRImport).flush();
-      throw new InternalServerError('Error getting an answer from OpenAI');
-    }
-
-    let transactionInfo;
-    try {
-      const parsedResponse = JSON.parse(response.answer);
-      transactionInfo = transactionOCRModelOutputSchema.safeParse(parsedResponse);
-    } catch {
-      transactionOCRImport.llmResponse = sanitizeLlmResponse(response.answer);
-      transactionOCRImport.tokensSpent = response.tokens ?? 0;
-      await DI.em.persist(transactionOCRImport).flush();
-      throw new BadRequestError('Answer returned from OpenAI is not a valid JSON');
-    }
-
-    if (!transactionInfo.success) {
-      transactionOCRImport.llmResponse = sanitizeLlmResponse(response.answer);
-      transactionOCRImport.tokensSpent = response.tokens ?? 0;
-      await DI.em.persist(transactionOCRImport).flush();
-      throw new BadRequestError('Answer returned from OpenAI is invalid');
-    }
-
-    transactionOCRImport.llmResponse = sanitizeLlmResponse(response.answer);
-    transactionOCRImport.tokensSpent = response.tokens ?? 0;
+    // The model's answer is kept as an audit trail, and the tokens it cost are recorded even when
+    // the shape turns out to be wrong.
+    transactionOCRImport.llmResponse = sanitizeLlmResponse(JSON.stringify(object));
+    transactionOCRImport.tokensSpent = tokens.totalTokens;
     await DI.em.persist(transactionOCRImport).flush();
+
+    const transactionInfo = transactionOCRModelOutputSchema.safeParse(object);
+    if (!transactionInfo.success) {
+      throw new BadRequestError('Answer returned from the model is invalid');
+    }
 
     const currency = transactionInfo.data.settlementCurrency
       ? await DI.em.findOne(Currency, { code: transactionInfo.data.settlementCurrency })

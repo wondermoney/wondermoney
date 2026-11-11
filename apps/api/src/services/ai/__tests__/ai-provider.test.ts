@@ -49,4 +49,29 @@ describe('resolveAiRoute', () => {
     const env = { AZURE_OPENAI_API_KEY: 'azure-key', AZURE_OPENAI_ENDPOINT: 'https://example.openai.azure.com' };
     expect(resolveAiRoute('csvMapping', env)).toEqual({ kind: 'disabled' });
   });
+
+  it('routes every feature to Anthropic when AI_PROVIDER names it and a key is set', () => {
+    const env = { AI_MODEL: 'claude-sonnet-4-5', AI_PROVIDER: 'anthropic', ANTHROPIC_API_KEY: 'sk-ant-test' };
+    expect(resolveAiRoute('assistant', env)).toEqual({ apiKey: 'sk-ant-test', kind: 'anthropic', model: 'claude-sonnet-4-5' });
+    expect(aiCapabilities(env)).toEqual({ assistant: true, csvMapping: true, enrichment: true, monthlyStory: true, ocr: true });
+  });
+
+  it('lets a per-feature model override the Anthropic default', () => {
+    const env = { AI_MODEL: 'claude-sonnet-4-5', AI_MODEL_OCR: 'claude-haiku-4-5', AI_PROVIDER: 'anthropic', ANTHROPIC_API_KEY: 'sk-ant-test' };
+    expect(resolveAiRoute('ocr', env)).toEqual({ apiKey: 'sk-ant-test', kind: 'anthropic', model: 'claude-haiku-4-5' });
+    expect(resolveAiRoute('assistant', env)).toMatchObject({ model: 'claude-sonnet-4-5' });
+  });
+
+  it('leaves Anthropic off without a key or a model, rather than guessing one', () => {
+    expect(resolveAiRoute('assistant', { AI_MODEL: 'claude-sonnet-4-5', AI_PROVIDER: 'anthropic' })).toEqual({ kind: 'disabled' });
+    expect(resolveAiRoute('assistant', { AI_PROVIDER: 'anthropic', ANTHROPIC_API_KEY: 'sk-ant-test' })).toEqual({ kind: 'disabled' });
+    // The key alone does not opt in; AI_PROVIDER is the switch.
+    expect(resolveAiRoute('assistant', { AI_MODEL: 'claude-sonnet-4-5', ANTHROPIC_API_KEY: 'sk-ant-test' })).toEqual({ kind: 'disabled' });
+  });
+
+  it('keeps Azure ahead of Anthropic, and Anthropic ahead of an OpenAI-compatible endpoint', () => {
+    const anthropic = { AI_MODEL: 'claude-sonnet-4-5', AI_PROVIDER: 'anthropic', ANTHROPIC_API_KEY: 'sk-ant-test' };
+    expect(resolveAiRoute('assistant', { ...AZURE_OPENAI, ...anthropic }).kind).toBe('azure-openai');
+    expect(resolveAiRoute('assistant', { ...anthropic, AI_BASE_URL: 'http://localhost:11434/v1' }).kind).toBe('anthropic');
+  });
 });
