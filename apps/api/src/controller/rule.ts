@@ -2,6 +2,8 @@ import type { Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
 
 import { authedContext } from '@middleware/authed-context';
+import { exportRules as exportRulesService } from '@service/rules/rule-export.service';
+import { importRules as importRulesService } from '@service/rules/rule-import.service';
 import { previewRule as previewRuleService } from '@service/rules/rule-preview.service';
 import { countRuleRun, type RuleRunScope, startRuleRun } from '@service/rules/rule-run.service';
 import {
@@ -12,7 +14,7 @@ import {
   updateRule as updateRuleService,
 } from '@service/rules/rule.service';
 import { zParse } from '@validators/parser';
-import { applyAllRulesRequestSchema, applyRuleRequestSchema, createRuleRequestSchema, deleteRuleRequestSchema, previewRuleRequestSchema, reorderRulesRequestSchema, updateRuleRequestSchema } from '@validators/rule';
+import { applyAllRulesRequestSchema, applyRuleRequestSchema, createRuleRequestSchema, deleteRuleRequestSchema, importRulesRequestSchema, previewRuleRequestSchema, reorderRulesRequestSchema, updateRuleRequestSchema } from '@validators/rule';
 
 import { DI } from '../app';
 
@@ -35,6 +37,31 @@ export async function deleteRule(req: Request, res: Response) {
 export async function getRules(req: Request, res: Response) {
   const { tenantKey } = authedContext(req);
   return res.json({ rules: await listRules(DI.em, tenantKey) });
+}
+
+/**
+ * `GET /v1/rule/export`: the household's rules as a portable `wondermoney-rules` JSON file,
+ * downloaded. Names replace internal ids, so the file can move to another instance.
+ */
+export async function exportRules(req: Request, res: Response) {
+  const { appuserKey, tenantKey } = authedContext(req);
+  const file = await exportRulesService(DI.em, { appuserKey, tenantKey });
+  res.setHeader('Cache-Control', 'no-store');
+  res.setHeader('Content-Disposition', 'attachment; filename="wondermoney-rules.json"');
+  res.setHeader('Content-Type', 'application/json; charset=utf-8');
+  return res.json(file);
+}
+
+/**
+ * `POST /v1/rule/import`: validate a `wondermoney-rules` file and, unless `dryRun`, create its
+ * rules. The dry run answers what would be created, which rules are duplicates and which
+ * references could not be resolved, without writing.
+ */
+export async function importRules(req: Request, res: Response) {
+  const { appuserKey, tenantKey } = authedContext(req);
+  const { body } = await zParse(importRulesRequestSchema, req);
+  const result = await importRulesService(DI.em, { appuserKey, tenantKey }, body.file, body);
+  return res.json(result);
 }
 
 export async function updateRule(req: Request, res: Response) {

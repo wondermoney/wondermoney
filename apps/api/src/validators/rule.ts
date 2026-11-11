@@ -51,6 +51,21 @@ export const applyAllRulesRequestSchema = z.object({ body: applyRulesBody });
 
 export const deleteRuleRequestSchema = z.object({ params: ruleIdParams });
 
+/**
+ * `POST /v1/rule/import`: the uploaded file (already parsed, or its JSON text), the mode, and
+ * whether this is a dry run. `confirm` acknowledges that replace mode removes the household's
+ * existing rules; `createCategories` acknowledges creating the custom categories the file names.
+ */
+export const importRulesRequestSchema = z.object({
+  body: z.object({
+    confirm: z.boolean().default(false),
+    createCategories: z.boolean().default(false),
+    dryRun: z.boolean().default(true),
+    file: z.union([z.string(), z.record(z.string(), z.unknown())]),
+    mode: z.enum(['append', 'replace']).default('append'),
+  }),
+});
+
 /** The household's full rule list, in the new run order, each rule once. */
 export const reorderRulesRequestSchema = z.object({
   body: z.object({

@@ -32,14 +32,14 @@ import { TEST_USER_HEADER } from './auth-session-double';
 export { TEST_USER_HEADER } from '@app/__tests__/__helpers__/auth-session-double';
 
 /** `enqueue`: the queue seam each request carries (`req.enqueue`), for routes that start jobs. */
-export function tenantHttp(mountPath: string, router: Router, options: { enqueue?: Enqueue } = {}) {
+export function tenantHttp(mountPath: string, router: Router, options: { enqueue?: Enqueue; jsonLimit?: string } = {}) {
   const app = express();
   app.use((req, _res, next) => {
     if (!DI.orm) throw new Error('Test database is not started');
     if (options.enqueue) req.enqueue = options.enqueue;
     RequestContext.create(DI.orm.em, next);
   });
-  app.use(express.json());
+  app.use(express.json(options.jsonLimit ? { limit: options.jsonLimit } : {}));
   app.use(mountPath, ...authedTenant(), router);
   app.use(errorHandler);
   const agent = request(app);

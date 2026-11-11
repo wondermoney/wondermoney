@@ -159,6 +159,43 @@
     },
     "from-transaction": "Crear regla",
     "from-transaction-hint": "Gestionar automáticamente transacciones como esta.",
+    "export": {
+      "action": "Exportar",
+      "hint": "Descargar las reglas de este hogar en un archivo JSON.",
+      "done": "Reglas exportadas",
+      "error": "No se pudieron exportar las reglas."
+    },
+    "import": {
+      "action": "Importar",
+      "title": "Importar reglas",
+      "description": "Elige un archivo de reglas de WonderMoney. Nada cambia hasta que confirmes.",
+      "file-label": "Archivo de reglas",
+      "file-hint": "Un archivo JSON exportado de WonderMoney, de hasta 1 MB.",
+      "file-invalid": "Ese archivo no es JSON válido.",
+      "file-too-large": "El archivo supera 1 MB.",
+      "mode-label": "Qué hacer con las reglas que ya hay",
+      "mode-append": "Conservarlas y añadir las reglas importadas",
+      "mode-replace": "Sustituirlas por las reglas importadas",
+      "replace-warning": "{count, plural, =0 {No hay reglas que sustituir.} one {Esto elimina la regla que ya hay.} other {Esto elimina las # reglas que ya hay.}}",
+      "reviewing": "Revisando el archivo…",
+      "review-error": "No se pudo revisar el archivo.",
+      "summary-title": "Qué va a pasar",
+      "creates": "{count, plural, =0 {No se creará ninguna regla} one {Se creará # regla} other {Se crearán # reglas}}",
+      "duplicates": "{count, plural, =0 {Sin duplicados} one {# regla ya existe y se omitirá} other {# reglas ya existen y se omitirán}}",
+      "unresolved": "{count, plural, =0 {Se encontraron todas las referencias} one {# referencia no se encontró} other {# referencias no se encontraron}}",
+      "unresolved-hint": "Una regla que nombra una cuenta que este hogar no tiene se importa desactivada. Una regla que nombra una categoría o etiqueta que falta se omite.",
+      "create-categories": "Crear las categorías que faltan: {names}",
+      "nothing": "Nada que importar.",
+      "confirm": "{count, plural, one {Importar # regla} other {Importar # reglas}}",
+      "replace": "{count, plural, one {Sustituir por # regla} other {Sustituir por # reglas}}",
+      "done": "{count, plural, =0 {Ninguna regla importada} one {# regla importada} other {# reglas importadas}}",
+      "error": "No se pudieron importar las reglas.",
+      "kind": {
+        "account": "Cuenta",
+        "category": "Categoría",
+        "tag": "Etiqueta"
+      }
+    },
     "apply": {
       "action-all": "Aplicar a las transacciones existentes",
       "action-all-hint": "Ejecuta todas las reglas activas sobre las transacciones que ya tienes.",

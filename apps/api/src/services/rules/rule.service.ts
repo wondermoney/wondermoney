@@ -27,7 +27,7 @@ import { RULE_DEFINITION_VERSION, type RuleAction, type RuleCondition, type Rule
  */
 
 /** Bounds the rules evaluated per transaction. */
-const MAX_RULES_PER_HOUSEHOLD = 200;
+export const MAX_RULES_PER_HOUSEHOLD = 200;
 const CREATE_ATTEMPTS = 3;
 
 export interface Actor {

@@ -265,3 +265,70 @@ export function useApplyRules() {
     },
   });
 }
+
+/** `append` keeps the rules already here; `replace` removes them once the file validates. */
+export type RuleImportMode = "append" | "replace";
+export type RuleImportUnresolvedKind = "account" | "category" | "tag";
+
+export interface RuleImportUnresolved {
+  kind: RuleImportUnresolvedKind;
+  /** The name (or `system:<key>`) that could not be resolved. */
+  reference: string;
+  ruleName: string;
+}
+
+/** What a dry run answers, and what an import reports once it has written. */
+export interface RuleImportResult {
+  /** Custom category names the file needs that the household does not have. */
+  categoriesToCreate: string[];
+  creates: { active: boolean; name: string }[];
+  dryRun: boolean;
+  duplicates: { name: string }[];
+  imported: number;
+  mode: RuleImportMode;
+  /** Existing rules replace mode removes (or would remove). */
+  removed: number;
+  unresolved: RuleImportUnresolved[];
+}
+
+export interface RuleImportRequest {
+  /** The parsed file, or its JSON text. */
+  file: unknown;
+  mode?: RuleImportMode;
+  dryRun?: boolean;
+  /** Replace mode needs this to be true. */
+  confirm?: boolean;
+  /** Create the custom categories the file names. */
+  createCategories?: boolean;
+}
+
+export async function importRules(
+  request: RuleImportRequest,
+  apiClient: AxiosInstance = api,
+): Promise<RuleImportResult> {
+  const { data } = await apiClient.post<RuleImportResult>(
+    "/v1/rule/import",
+    request,
+  );
+  return data;
+}
+
+export function useImportRules() {
+  return useMutation({
+    mutationFn: (request: RuleImportRequest) => importRules(request),
+  });
+}
+
+/** The export as a blob, ready to save as a file. */
+export async function downloadRulesExport(
+  apiClient: AxiosInstance = api,
+): Promise<Blob> {
+  const { data } = await apiClient.get<Blob>("/v1/rule/export", {
+    responseType: "blob",
+  });
+  return data;
+}
+
+export function useExportRules() {
+  return useMutation({ mutationFn: () => downloadRulesExport() });
+}
