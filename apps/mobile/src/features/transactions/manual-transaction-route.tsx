@@ -10,6 +10,7 @@ import { useAccounts } from '@/features/accounts/use-accounts'
 import { mapCategories } from '@/features/categories/categories-view-model'
 import { useCategories } from '@/features/categories/use-categories'
 import { toTagsState, useCreateTagForPicker, useTags } from '@/features/tags/use-tags'
+import { useCreateTransactionTemplate, useDeleteTransactionTemplate, useTransactionTemplates, useUpdateTransactionTemplate } from '@/features/transaction-templates/use-templates'
 import { ApiError } from '@/lib/api/errors'
 
 import type { FrozenManualTransaction } from './manual-transaction-contract'
@@ -28,6 +29,10 @@ export function ManualTransactionRoute() {
   const categories = useCategories()
   const tagsQuery = useTags()
   const createTag = useCreateTagForPicker()
+  const templatesQuery = useTransactionTemplates()
+  const createTemplate = useCreateTransactionTemplate()
+  const updateTemplate = useUpdateTransactionTemplate()
+  const deleteTemplate = useDeleteTransactionTemplate()
   const [merchantSearch, setMerchantSearch] = useState('')
   const metadata = useManualTransactionMetadata(merchantSearch)
   const mutation = useCreateManualTransaction()
@@ -61,6 +66,12 @@ export function ManualTransactionRoute() {
     categories={categories.data ? mapCategories(categories.data, t, locale) : []}
     tags={toTagsState(tagsQuery)}
     onCreateTag={createTag}
+    templates={templatesQuery.data?.templates ?? []}
+    templatesStatus={templatesQuery.data ? 'loaded' : templatesQuery.isLoading ? 'loading' : 'error'}
+    templatesPending={createTemplate.isPending || updateTemplate.isPending || deleteTemplate.isPending}
+    onCreateTemplate={(input) => createTemplate.mutate(input)}
+    onUpdateTemplate={(transactionTemplateId, input) => updateTemplate.mutate({ transactionTemplateId, input })}
+    onDeleteTemplate={(transactionTemplateId) => deleteTemplate.mutate(transactionTemplateId)}
     types={metadata.types.data?.transactionTypes ?? []}
     currencies={metadata.currencies.data?.currencies ?? []}
     merchants={metadata.merchants.data?.transactionMerchants ?? []}

@@ -9,6 +9,7 @@ import { SubmitHandler, useForm, useWatch } from "react-hook-form";
 import { toast } from "sonner";
 import * as z from "zod";
 
+import { SaveTransactionAsTemplateDialog } from "@/components/account/SaveTransactionAsTemplateDialog";
 import TransactionActivity from "@/components/account/TransactionActivity";
 import {
   splitSaveErrorKey,
@@ -174,6 +175,7 @@ export function AccountTransactionEditSheet({
   );
   const [tagKeys, setTagKeys] = useState<number[]>(initialTagKeys);
   const [creatingRule, setCreatingRule] = useState(false);
+  const [savingAsTemplate, setSavingAsTemplate] = useState(false);
   const [applyingRule, setApplyingRule] = useState<Rule | null>(null);
   const closeApplyingRule = useCallback(() => setApplyingRule(null), []);
   const initialTransfer = isTransferType(transaction.transactionTypeKey?.name);
@@ -435,6 +437,25 @@ export function AccountTransactionEditSheet({
             />
           </form>
         </Form>
+        <div className="bg-muted mb-6 flex flex-wrap items-center justify-between gap-3 rounded-md p-4">
+          <p className="text-muted-foreground text-sm">
+            {t("transactionTemplates.save-as-template-hint")}
+          </p>
+          <Button
+            type="button"
+            variant="secondary"
+            onClick={() => setSavingAsTemplate(true)}
+          >
+            {t("transactionTemplates.save-as-template")}
+          </Button>
+        </div>
+        {savingAsTemplate ? (
+          <SaveTransactionAsTemplateDialog
+            transaction={transaction}
+            open
+            onOpenChange={setSavingAsTemplate}
+          />
+        ) : null}
         <div className="bg-muted mb-6 flex flex-wrap items-center justify-between gap-3 rounded-md p-4">
           <p className="text-muted-foreground text-sm">
             {t("rules.from-transaction-hint")}

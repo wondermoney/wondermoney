@@ -25490,6 +25490,365 @@
       "comment": null
     },
     {
+      "name": "transaction_template",
+      "schema": "public",
+      "columns": {
+        "account_key": {
+          "name": "account_key",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "integer"
+        },
+        "amount": {
+          "name": "amount",
+          "type": "numeric(18,4)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "unique": false,
+          "length": null,
+          "precision": 18,
+          "scale": 4,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "decimal"
+        },
+        "category_key": {
+          "name": "category_key",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "integer"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamptz(6)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": 6,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "datetime"
+        },
+        "deleted_at": {
+          "name": "deleted_at",
+          "type": "timestamptz(6)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "unique": false,
+          "length": 6,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "datetime"
+        },
+        "description": {
+          "name": "description",
+          "type": "varchar(500)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "unique": false,
+          "length": 500,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "string"
+        },
+        "direction": {
+          "name": "direction",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [
+            "in",
+            "out"
+          ],
+          "mappedType": "enum"
+        },
+        "name": {
+          "name": "name",
+          "type": "varchar(120)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": 120,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "string"
+        },
+        "notes": {
+          "name": "notes",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "text"
+        },
+        "owner_appuser_key": {
+          "name": "owner_appuser_key",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "integer"
+        },
+        "position": {
+          "name": "position",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": "0",
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "integer"
+        },
+        "tenant_key": {
+          "name": "tenant_key",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "integer"
+        },
+        "transaction_merchant_key": {
+          "name": "transaction_merchant_key",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "integer"
+        },
+        "transaction_template_key": {
+          "name": "transaction_template_key",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": true,
+          "primary": true,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "integer"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamptz(6)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": 6,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "datetime"
+        }
+      },
+      "indexes": [
+        {
+          "columnNames": [
+            "tenant_key",
+            "owner_appuser_key",
+            "position"
+          ],
+          "composite": true,
+          "constraint": false,
+          "keyName": "transaction_template_owner_position_idx",
+          "primary": false,
+          "unique": false
+        },
+        {
+          "columnNames": [
+            "transaction_template_key"
+          ],
+          "composite": false,
+          "constraint": true,
+          "keyName": "transaction_template_pkey",
+          "primary": true,
+          "unique": true
+        }
+      ],
+      "checks": [
+        {
+          "name": "transaction_template_direction_check",
+          "expression": "\"direction\" in ('in', 'out')",
+          "definition": "check (\"direction\" in ('in', 'out'))",
+          "columnName": "direction"
+        }
+      ],
+      "triggers": [],
+      "foreignKeys": {
+        "transaction_template_account_key_foreign": {
+          "columnNames": [
+            "account_key"
+          ],
+          "constraintName": "transaction_template_account_key_foreign",
+          "localTableName": "public.transaction_template",
+          "referencedColumnNames": [
+            "account_key"
+          ],
+          "referencedTableName": "public.account",
+          "deleteRule": "set null"
+        },
+        "transaction_template_category_key_foreign": {
+          "columnNames": [
+            "category_key"
+          ],
+          "constraintName": "transaction_template_category_key_foreign",
+          "localTableName": "public.transaction_template",
+          "referencedColumnNames": [
+            "category_key"
+          ],
+          "referencedTableName": "public.category",
+          "deleteRule": "set null"
+        },
+        "transaction_template_owner_appuser_key_foreign": {
+          "columnNames": [
+            "owner_appuser_key"
+          ],
+          "constraintName": "transaction_template_owner_appuser_key_foreign",
+          "localTableName": "public.transaction_template",
+          "referencedColumnNames": [
+            "appuser_key"
+          ],
+          "referencedTableName": "public.appuser",
+          "deleteRule": "cascade"
+        },
+        "transaction_template_tenant_key_foreign": {
+          "columnNames": [
+            "tenant_key"
+          ],
+          "constraintName": "transaction_template_tenant_key_foreign",
+          "localTableName": "public.transaction_template",
+          "referencedColumnNames": [
+            "tenant_key"
+          ],
+          "referencedTableName": "public.tenant"
+        },
+        "transaction_template_transaction_merchant_key_foreign": {
+          "columnNames": [
+            "transaction_merchant_key"
+          ],
+          "constraintName": "transaction_template_transaction_merchant_key_foreign",
+          "localTableName": "public.transaction_template",
+          "referencedColumnNames": [
+            "transaction_merchant_key"
+          ],
+          "referencedTableName": "public.transaction_merchant",
+          "deleteRule": "set null"
+        }
+      },
+      "comment": null
+    },
+    {
       "name": "transaction_type",
       "schema": "public",
       "columns": {

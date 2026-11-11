@@ -4228,5 +4228,26 @@
         "partial": "Partly succeeded"
       }
     }
+  },
+  "transactionTemplates": {
+    "newTemplate": "New template",
+    "use": "Use template {{name}}",
+    "longPressHint": "Long press to edit or delete",
+    "newTitle": "New template",
+    "editTitle": "Edit template",
+    "name": "Name",
+    "namePlaceholder": "Weekly groceries",
+    "nameRequired": "Give the template a name.",
+    "amount": "Amount",
+    "amountInvalid": "Enter an amount greater than zero.",
+    "optional": "Optional",
+    "description": "Description",
+    "notes": "Notes",
+    "direction": "Direction",
+    "directionOut": "Money out",
+    "directionIn": "Money in",
+    "save": "Save",
+    "saving": "Saving…",
+    "delete": "Delete template"
   }
 }

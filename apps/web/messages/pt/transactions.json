@@ -101,5 +101,26 @@
       "description": "{total, plural, one {Esta transação está dividida por várias categorias. Dar-lhe uma só categoria remove a divisão.} other {{count, plural, one {# destas transações está dividida} other {# destas transações estão divididas}} por várias categorias. Dar-lhes uma só categoria remove a divisão.}}",
       "confirm": "Usar uma categoria"
     }
+  },
+  "transactionTemplates": {
+    "menu": "Modelos",
+    "new-template": "Novo modelo",
+    "new-template-description": "Guarde os campos de um lançamento que faz muitas vezes. Usá-lo preenche o formulário; nunca cria uma transação.",
+    "name": "Nome",
+    "name-placeholder": "Compras semanais",
+    "name-required": "Dê um nome ao modelo.",
+    "direction": "Sentido",
+    "direction-out": "Dinheiro a sair",
+    "direction-in": "Dinheiro a entrar",
+    "amount": "Montante",
+    "amount-placeholder": "Opcional",
+    "amount-invalid": "Introduza um montante maior do que zero.",
+    "description": "Descrição",
+    "notes": "Notas",
+    "created": "Modelo guardado",
+    "save-failed": "Não foi possível guardar o modelo.",
+    "save-as-template": "Guardar como modelo",
+    "save-as-template-description": "Copia os campos desta transação. Usá-lo mais tarde preenche o formulário de adição; nunca cria uma transação.",
+    "save-as-template-hint": "Torne este lançamento reutilizável."
   }
 }
