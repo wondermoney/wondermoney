@@ -81,6 +81,19 @@ describe("parseSplitLineAmount", () => {
     );
   });
 
+  test("evaluates a typed expression, in the reader's locale", () => {
+    assert.equal(
+      parseSplitLineAmount("25+35", total, "en").units,
+      units("-60"),
+    );
+    assert.equal(
+      parseSplitLineAmount("25,00+35,00", total, "pt-PT").units,
+      units("-60"),
+    );
+    assert.equal(parseSplitLineAmount("1/0", total, "en").error, "invalid");
+    assert.equal(parseSplitLineAmount("2+", total, "en").error, "invalid");
+  });
+
   test("blank is not an error yet; garbage, zero and five decimals are", () => {
     assert.deepEqual(parseSplitLineAmount("  ", total, "en"), {
       units: null,

@@ -97,6 +97,32 @@ test("reads amounts in the user's locale", () => {
   );
 });
 
+test("evaluates an arithmetic expression typed into the amount", () => {
+  assert.equal(
+    buildRequest({ ...formInput, settlementAmount: "12,40+3,15" }, "pt")
+      .settlementAmount,
+    "15.55",
+  );
+  assert.equal(
+    buildRequest({ ...formInput, settlementAmount: "12.40+3.15" }, "en")
+      .settlementAmount,
+    "15.55",
+  );
+  assert.equal(
+    buildRequest(
+      {
+        ...formInput,
+        exchangeRate: "1,2",
+        hasOriginalAmount: true,
+        originalAmount: "100+27",
+        originalCurrencyId: "47",
+      },
+      "pt",
+    ).originalAmount,
+    "127",
+  );
+});
+
 test("an unreadable or blank amount is a form error, not another number", () => {
   for (const settlementAmount of ["12,,5", "1.2.3", "abc", ""]) {
     const result = createTransactionFormSchema(t, "pt").safeParse({

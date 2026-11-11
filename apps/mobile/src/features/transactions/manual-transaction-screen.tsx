@@ -15,7 +15,7 @@ import type { AccountSummaryViewModel } from '@/features/accounts/accounts-view-
 import type { CategoryViewModel } from '@/features/categories/categories-view-model'
 import { TagPickerSheet, type CreateTagOutcome, type TagsState } from '@/features/tags/tag-picker-sheet'
 import type { TagDto } from '@/features/tags/tags-contract'
-import { parseDecimalInput } from '@/lib/formatters/decimal-input'
+import { parseAmountInput } from '@/lib/formatters/decimal-input'
 import { useFormatMoney } from '@/lib/formatters/money-display'
 import { themeTokens, type Palette } from '@/theme/tokens'
 import { usePalette } from '@/theme/use-palette'
@@ -68,7 +68,7 @@ const localToday = () => {
 
 /** The typed amount as the API takes it (a dot decimal), read in the app's language; `null` unless it is positive. */
 const positiveAmount = (value: string, locale: string) => {
-  const parsed = parseDecimalInput(value, locale)
+  const parsed = parseAmountInput(value, locale)
   return parsed !== null && Number(parsed) > 0 ? parsed : null
 }
 
@@ -270,6 +270,7 @@ export function ManualTransactionScreen({
             <View style={styles.form}>
               <AmountEntry
                 accessibilityLabel={t('transactionCreate.amount')}
+                allowExpressions
                 currency={selectedCurrency?.code ?? null}
                 editable={!pending}
                 error={amountError}

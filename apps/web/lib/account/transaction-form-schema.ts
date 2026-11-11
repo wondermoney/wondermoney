@@ -31,7 +31,9 @@ export const createTransactionFormSchema = (
       // transactionTypeId for direction, but a YNAB/Monarch-style user
       // naturally types an expense as e.g. "-127.53". Normalize the sign
       // instead of rejecting it — the type field already conveys direction.
-      originalAmount: zOptionalLocaleNumber(locale, t("invalid-amount"))
+      originalAmount: zOptionalLocaleNumber(locale, t("invalid-amount"), {
+        expressions: true,
+      })
         .optional()
         .transform((val) =>
           val === undefined || val === 0 ? undefined : Math.abs(val),
@@ -41,7 +43,9 @@ export const createTransactionFormSchema = (
         .optional()
         .pipe(z.number().min(0).optional())
         .transform((val) => (val === 0 ? undefined : val)),
-      settlementAmount: zLocaleNumber(locale, t("invalid-amount"))
+      settlementAmount: zLocaleNumber(locale, t("invalid-amount"), {
+        expressions: true,
+      })
         .transform((val) => Math.abs(val))
         .pipe(z.number().min(0, t("invalid-value"))),
       settlementCurrencyId: z.string().min(1, t("invalid-value")),

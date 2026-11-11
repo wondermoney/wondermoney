@@ -393,6 +393,7 @@ const AccountTransactionAddForm: React.FC<AccountTransactionAddFormProps> = ({
                   step="0.01"
                   min="0"
                   {...field}
+                  onEvaluated={field.onChange}
                   currencySlot={
                     <ComboBoxForm
                       triggerClassName={CURRENCY_TRIGGER_CLASS}
@@ -494,6 +495,7 @@ const AccountTransactionAddForm: React.FC<AccountTransactionAddFormProps> = ({
                           step="0.01"
                           min="0"
                           {...field}
+                          onEvaluated={field.onChange}
                           currencySlot={
                             <ComboBoxForm
                               triggerClassName={CURRENCY_TRIGGER_CLASS}

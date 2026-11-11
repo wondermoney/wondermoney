@@ -1,6 +1,6 @@
 "use client";
 
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import * as React from "react";
 
 import { Input, type InputProps } from "@/components/ui/input";
@@ -13,7 +13,10 @@ import {
 } from "@/components/ui/Select";
 import { cn } from "@/lib/utils";
 import { useAmountPlaceholder } from "@/lib/utils/currency-field";
-import { formatLocaleNumberInput } from "@/lib/utils/number";
+import {
+  amountExpressionResult,
+  formatLocaleNumberInput,
+} from "@/lib/utils/number";
 
 interface CurrencyPicker {
   value?: string;
@@ -33,6 +36,14 @@ export interface MoneyInputProps extends Omit<InputProps, "startAdornment"> {
    * currency combobox the transaction forms bind to their form state.
    */
   currencySlot?: React.ReactElement;
+  /**
+   * Turns on arithmetic in the field: while the text is an expression the field
+   * shows its result quietly below ("= 15,55"), and on blur or Enter the text is
+   * replaced by that result. Called with the locale-formatted result so the form
+   * can store it. Omit it for fields that are not money amounts (a quantity or a
+   * unit price), where rounding to cents would lose precision.
+   */
+  onEvaluated?: (value: string) => void;
 }
 
 /**
@@ -44,6 +55,10 @@ export interface MoneyInputProps extends Omit<InputProps, "startAdornment"> {
  * A stored number (a form's default value) is shown with the reader's decimal
  * separator, so a pt reader sees 1.234 as "1,234" and editing it cannot turn it
  * into 1234. Parse what comes back with `zLocaleNumber` / `parseLocaleNumber`.
+ *
+ * With `onEvaluated`, the field also accepts a small arithmetic expression
+ * ("12.40+3.15"), the same parser mobile uses, and settles it on blur or Enter.
+ * A plain number behaves exactly as before.
  *
  * The picker is a plain Select rather than a form-bound combobox, so the
  * field's label and `FormControl` id stay on the amount input.
@@ -57,12 +72,27 @@ const MoneyInput = React.forwardRef<HTMLInputElement, MoneyInputProps>(
       className,
       placeholder,
       value,
+      onBlur,
+      onKeyDown,
+      onEvaluated,
       ...props
     },
     ref,
   ) => {
     const amountPlaceholder = useAmountPlaceholder();
     const locale = useLocale();
+
+    // Only a string can be an expression; a stored number is already a figure.
+    const result =
+      onEvaluated && typeof value === "string"
+        ? amountExpressionResult(value, locale)
+        : null;
+
+    const settle = React.useCallback(() => {
+      if (!onEvaluated || result === null) return false;
+      onEvaluated(formatLocaleNumberInput(result, locale));
+      return true;
+    }, [locale, onEvaluated, result]);
 
     const adornment = currencySlot ? (
       currencySlot
@@ -89,7 +119,7 @@ const MoneyInput = React.forwardRef<HTMLInputElement, MoneyInputProps>(
       <span className="font-mono">{currency}</span>
     ) : undefined;
 
-    return (
+    const input = (
       <Input
         ref={ref}
         inputMode="decimal"
@@ -100,6 +130,19 @@ const MoneyInput = React.forwardRef<HTMLInputElement, MoneyInputProps>(
           currencyPicker || currencySlot ? "pl-2" : undefined
         }
         {...props}
+        onBlur={(event) => {
+          onBlur?.(event);
+          settle();
+        }}
+        onKeyDown={(event) => {
+          // Enter settles the expression instead of submitting the form; a
+          // second Enter (now a plain number) submits as usual.
+          if (event.key === "Enter" && settle()) {
+            event.preventDefault();
+            return;
+          }
+          onKeyDown?.(event);
+        }}
         value={
           typeof value === "number"
             ? formatLocaleNumberInput(value, locale)
@@ -107,8 +150,46 @@ const MoneyInput = React.forwardRef<HTMLInputElement, MoneyInputProps>(
         }
       />
     );
+
+    // Without evaluation the field is exactly the bare input it always was, so
+    // existing layouts (a narrow split line, a grid cell) do not move.
+    if (!onEvaluated) return input;
+
+    return (
+      <div className="flex flex-col gap-1">
+        {input}
+        <AmountExpressionHint locale={locale} value={String(value ?? "")} />
+      </div>
+    );
   },
 );
 MoneyInput.displayName = "MoneyInput";
 
-export { MoneyInput };
+/**
+ * The quiet "= 15,55" line under an amount field while the text is an
+ * expression. Renders nothing for a plain number, a blank field or an
+ * expression that cannot be read.
+ */
+function AmountExpressionHint({
+  value,
+  locale,
+}: {
+  value: string;
+  locale: string;
+}) {
+  const t = useTranslations();
+  const result = amountExpressionResult(value, locale);
+  if (result === null) return null;
+  const hint = formatLocaleNumberInput(result, locale);
+  return (
+    <p
+      aria-label={t("amount-expression-result", { amount: hint })}
+      aria-live="polite"
+      className="text-muted-foreground text-right font-mono text-xs tabular-nums"
+    >
+      = {hint}
+    </p>
+  );
+}
+
+export { AmountExpressionHint, MoneyInput };

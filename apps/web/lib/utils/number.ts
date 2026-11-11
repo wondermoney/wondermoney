@@ -1,3 +1,4 @@
+import { evaluateAmountExpression } from "@wondermoney/shared/amount-expression";
 import {
   decimalSeparatorForLocale,
   parseDecimalNumber,
@@ -13,6 +14,32 @@ import { z } from "zod";
  */
 export function parseLocaleNumber(value: string, locale: string): number | null {
   return parseDecimalNumber(value, { locale });
+}
+
+/**
+ * An amount the user typed: a plain locale number, or an arithmetic expression evaluated to
+ * cents ("12.40+3.15" is 15.55). A plain number is returned exactly as `parseLocaleNumber`
+ * reads it, so nothing that worked before changes.
+ */
+export function parseAmountInput(value: string, locale: string): number | null {
+  const plain = parseLocaleNumber(value, locale);
+  if (plain !== null) return plain;
+  return evaluateAmountExpression(value, locale);
+}
+
+/**
+ * The result an amount field shows as its quiet "= 15,55" hint while the user types: the
+ * expression's value, or null when the text is a plain number (which needs no hint) or not
+ * an expression at all.
+ */
+export function amountExpressionResult(
+  value: string,
+  locale: string,
+): number | null {
+  if (value.trim() === "" || parseLocaleNumber(value, locale) !== null) {
+    return null;
+  }
+  return evaluateAmountExpression(value, locale);
 }
 
 /**
@@ -62,13 +89,16 @@ function toNumber(
   locale: string,
   message: string,
   ctx: z.RefinementCtx,
+  expressions = false,
 ): number {
   const parsed =
     typeof value === "number"
       ? Number.isFinite(value)
         ? value
         : null
-      : parseLocaleNumber(value, locale);
+      : expressions
+        ? parseAmountInput(value, locale)
+        : parseLocaleNumber(value, locale);
   if (parsed === null) {
     ctx.addIssue({ code: "custom", message });
     return z.NEVER;
@@ -76,23 +106,41 @@ function toNumber(
   return parsed;
 }
 
+export interface LocaleNumberOptions {
+  /**
+   * Also accept an arithmetic expression, evaluated to cents ("12.40+3.15"). Use it for money
+   * amounts, not for rates or quantities that need more than two decimals.
+   */
+  expressions?: boolean;
+}
+
 /**
  * A required number field typed in the user's locale. Blank or unreadable input is an error
  * carrying `message`; it never becomes 0 or another number.
  */
-export function zLocaleNumber(locale: string, message: string) {
+export function zLocaleNumber(
+  locale: string,
+  message: string,
+  options: LocaleNumberOptions = {},
+) {
   return z
     .union([z.string(), z.number()])
-    .transform((value, ctx): number => toNumber(value, locale, message, ctx));
+    .transform((value, ctx): number =>
+      toNumber(value, locale, message, ctx, options.expressions),
+    );
 }
 
 /** An optional number field typed in the user's locale: blank is undefined. */
-export function zOptionalLocaleNumber(locale: string, message: string) {
+export function zOptionalLocaleNumber(
+  locale: string,
+  message: string,
+  options: LocaleNumberOptions = {},
+) {
   return z
     .union([z.string(), z.number(), z.undefined()])
     .transform((value, ctx): number | undefined =>
       isBlank(value)
         ? undefined
-        : toNumber(value as string | number, locale, message, ctx),
+        : toNumber(value as string | number, locale, message, ctx, options.expressions),
     );
 }

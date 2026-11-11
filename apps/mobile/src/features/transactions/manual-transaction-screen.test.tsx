@@ -70,6 +70,20 @@ describe('manual transaction screen', () => {
     view.unmount()
   })
 
+  it('evaluates an arithmetic expression typed into the amount', async () => {
+    const submit = jest.fn().mockResolvedValue(undefined)
+    const { view } = await renderScreen({ onSubmit: submit })
+    await choose(view, 'Transaction type', 'Payment')
+    await fireEvent.changeText(view.getByLabelText('Settlement amount'), '12.40+3.15')
+    expect(view.getByText('= 15.55')).toBeOnTheScreen()
+    await choose(view, 'Settlement currency', /EUR/)
+    await choose(view, 'Existing merchant', 'Cafe')
+    await fireEvent.press(view.getByRole('button', { name: 'Review transaction' }))
+    await fireEvent.press(view.getByRole('button', { name: 'Confirm and record' }))
+    expect(submit).toHaveBeenCalledWith(expect.objectContaining({ payload: expect.objectContaining({ settlementAmount: '15.55' }) }))
+    view.unmount()
+  })
+
   it('tags a new transaction, creating a tag inline, and shows the tags in the review', async () => {
     const submit = jest.fn().mockResolvedValue(undefined)
     const onCreateTag = jest.fn().mockResolvedValue({ tag: { tagKey: 12, name: 'Holiday', color: '#94a3b8' } })
