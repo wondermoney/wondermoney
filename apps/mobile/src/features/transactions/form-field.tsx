@@ -17,9 +17,10 @@ export function TextField({
   invalid = false,
   multiline = false,
   editable = true,
+  hint,
   style,
   ...props
-}: { label: string; invalid?: boolean } & React.ComponentProps<typeof TextInput>) {
+}: { label: string; invalid?: boolean; hint?: string | null } & React.ComponentProps<typeof TextInput>) {
   const palette = usePalette()
   const [focused, setFocused] = useState(false)
   return (
@@ -47,6 +48,11 @@ export function TextField({
         ]}
         {...props}
       />
+      {hint ? (
+        <Text accessibilityLiveRegion="polite" style={styles.hint} tone="muted" variant="meta">
+          {hint}
+        </Text>
+      ) : null}
     </View>
   )
 }
@@ -78,5 +84,6 @@ const styles = StyleSheet.create({
   },
   multiline: { minHeight: 80, textAlignVertical: 'top' },
   disabled: { opacity: 0.5 },
+  hint: { textAlign: 'right' },
   notice: { borderWidth: 1, borderRadius: themeTokens.radius.md, padding: themeTokens.spacing[3] },
 })

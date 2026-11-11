@@ -1,4 +1,5 @@
 import { decimalSeparatorForLocale, parseDecimal, parseDecimalNumber } from '@wondermoney/shared/decimal'
+import { evaluateAmountExpression } from '@wondermoney/shared/amount-expression'
 
 /**
  * Numbers people type into the app (amounts, prices, quantities, rates), read in the app's
@@ -15,6 +16,33 @@ export function parseDecimalInput(value: string, locale: string): string | null 
 /** What was typed, as a number, or `null`. */
 export function parseNumberInput(value: string, locale: string): number | null {
   return parseDecimalNumber(value, { locale })
+}
+
+/**
+ * An amount the person typed: a plain locale number, or a small arithmetic expression
+ * evaluated to cents ("12,40+3,15" is 15.55). A plain number is returned exactly as
+ * `parseDecimalInput` reads it, so nothing that worked before changes. The result is the
+ * dot-decimal string the API takes.
+ */
+export function parseAmountInput(value: string, locale: string): string | null {
+  const plain = parseDecimal(value, { locale })
+  if (plain !== null) return plain
+  const result = evaluateAmountExpression(value, locale)
+  return result === null ? null : formatExpressionResult(result)
+}
+
+/**
+ * The result an amount field shows as its quiet "= 15,55" hint while the text is an
+ * expression, or `null` when it is a plain number (which needs no hint) or not readable.
+ */
+export function amountExpressionResult(value: string, locale: string): number | null {
+  if (value.trim() === '' || parseDecimal(value, { locale }) !== null) return null
+  return evaluateAmountExpression(value, locale)
+}
+
+/** A rounded amount as the dot-decimal text the API takes ("15.55", "100"). */
+function formatExpressionResult(value: number): string {
+  return value.toFixed(2).replace(/\.?0+$/, '')
 }
 
 /**

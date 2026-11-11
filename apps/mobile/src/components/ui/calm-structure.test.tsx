@@ -1,4 +1,5 @@
 import { act, fireEvent, render } from '@testing-library/react-native'
+import { useState } from 'react'
 import { I18nextProvider } from 'react-i18next'
 import { StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native'
 
@@ -142,9 +143,32 @@ describe('FormSwitchRow', () => {
 })
 
 describe('AmountEntry', () => {
+  function ControlledEntry({
+    locale = 'en',
+    onChange = () => {},
+  }: {
+    locale?: string
+    onChange?: (value: string) => void
+  }) {
+    const [value, setValue] = useState('')
+    return (
+      <AmountEntry
+        accessibilityLabel="Amount"
+        allowExpressions
+        currency="EUR"
+        locale={locale}
+        onChangeText={(next) => {
+          setValue(next)
+          onChange(next)
+        }}
+        value={value}
+      />
+    )
+  }
+
   it('takes the amount on a decimal keypad, with the currency where the locale puts it', async () => {
     const change = jest.fn()
-    const en = await render(<AmountEntry accessibilityLabel="Amount" currency="EUR" locale="en" onChangeText={change} value="" />)
+    const en = await renderLocalised(<AmountEntry accessibilityLabel="Amount" currency="EUR" locale="en" onChangeText={change} value="" />)
     const input = en.getByLabelText('Amount')
     expect(input.props.keyboardType).toBe('decimal-pad')
     expect(input.props.placeholder).toBe('0')
@@ -152,6 +176,30 @@ describe('AmountEntry', () => {
     await fireEvent.changeText(input, '12,5a')
     expect(change).toHaveBeenCalledWith('12,5')
     expect(en.getByText('€')).toBeOnTheScreen()
+  })
+
+  it('accepts an expression when asked, shows its result and settles it on blur', async () => {
+    const change = jest.fn()
+    const en = await renderLocalised(<ControlledEntry onChange={change} />)
+    const input = en.getByLabelText('Amount')
+    expect(input.props.keyboardType).toBe('numbers-and-punctuation')
+
+    await fireEvent.changeText(input, '12.40+3.15')
+    expect(change).toHaveBeenLastCalledWith('12.40+3.15')
+    expect(en.getByText('= 15.55')).toBeOnTheScreen()
+
+    await fireEvent(input, 'blur')
+    expect(change).toHaveBeenLastCalledWith('15.55')
+  })
+
+  it('keeps a plain number as typed and shows no hint', async () => {
+    const change = jest.fn()
+    const pt = await renderLocalised(<ControlledEntry locale="pt-PT" onChange={change} />, 'pt-PT')
+    const input = pt.getByLabelText('Amount')
+    await fireEvent.changeText(input, '12,50')
+    expect(pt.queryByText(/^= /)).toBeNull()
+    await fireEvent(input, 'blur')
+    expect(change).toHaveBeenLastCalledWith('12,50')
   })
 })
 

@@ -33,6 +33,7 @@
   "invalid-method": "Método inválido",
   "invalid-card": "Cartão inválido",
   "invalid-amount": "Montante inválido",
+  "amount-expression-result": "Resultado da expressão: {amount}",
   "invalid-state": "Estado inválido",
   "invalid-mobilenumber": "Número de telemóvel inválido",
   "invalid-currency": "Moeda inválida",

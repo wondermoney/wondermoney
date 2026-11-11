@@ -1,8 +1,10 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  amountExpressionResult,
   formatLocaleNumberInput,
   formatWireDecimalInput,
+  parseAmountInput,
   parseLocaleNumber,
   zLocaleNumber,
   zOptionalLocaleNumber,
@@ -121,5 +123,66 @@ describe("zOptionalLocaleNumber", () => {
     const result = schema.safeParse("12,,5");
     expect(result.success).toBe(false);
     expect(result.error?.issues[0]?.message).toBe(INVALID);
+  });
+});
+
+describe("parseAmountInput", () => {
+  it("reads a plain number exactly as before", () => {
+    expect(parseAmountInput("1.234,56", "pt")).toBe(1234.56);
+    expect(parseAmountInput("1.000", "pt")).toBe(1000);
+    expect(parseAmountInput("1.000", "en")).toBe(1);
+    expect(parseAmountInput("-12,50", "es")).toBe(-12.5);
+    expect(parseAmountInput("42", "en")).toBe(42);
+  });
+
+  it("evaluates an expression in the reader's locale", () => {
+    expect(parseAmountInput("12.40+3.15", "en")).toBe(15.55);
+    expect(parseAmountInput("12,40+3,15", "pt")).toBe(15.55);
+    expect(parseAmountInput("12,40+3,15", "es")).toBe(15.55);
+    expect(parseAmountInput("2+3*4", "en")).toBe(14);
+  });
+
+  it("rejects what is neither a number nor a usable expression", () => {
+    for (const input of ["", "abc", "1.2.3", "2+", "(2+3", "1/0"]) {
+      expect(parseAmountInput(input, "en")).toBeNull();
+    }
+  });
+});
+
+describe("amountExpressionResult", () => {
+  it("has no hint for a plain number", () => {
+    expect(amountExpressionResult("12.50", "en")).toBeNull();
+    expect(amountExpressionResult("-12,50", "pt")).toBeNull();
+    expect(amountExpressionResult("", "en")).toBeNull();
+  });
+
+  it("returns the result while the text is an expression", () => {
+    expect(amountExpressionResult("12.40+3.15", "en")).toBe(15.55);
+    expect(amountExpressionResult("12,40+3,15", "pt")).toBe(15.55);
+    expect(amountExpressionResult("12,40+", "pt")).toBeNull();
+  });
+});
+
+describe("zLocaleNumber with expressions", () => {
+  const schema = zLocaleNumber("pt", INVALID, { expressions: true });
+
+  it("accepts an expression and keeps plain numbers unchanged", () => {
+    expect(schema.parse("12,40+3,15")).toBe(15.55);
+    expect(schema.parse("1.000")).toBe(1000);
+    expect(schema.parse("1.234,56")).toBe(1234.56);
+  });
+
+  it("still rejects what cannot be read", () => {
+    for (const input of ["abc", "2+", "(2+3", "1/0"]) {
+      const result = schema.safeParse(input);
+      expect(result.success).toBe(false);
+      expect(result.error?.issues[0]?.message).toBe(INVALID);
+    }
+  });
+
+  it("is opt-in: without the option an expression is still invalid", () => {
+    expect(zLocaleNumber("pt", INVALID).safeParse("12,40+3,15").success).toBe(
+      false,
+    );
   });
 });

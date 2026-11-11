@@ -14,6 +14,7 @@
     "signOut": "Cerrar sesión",
     "preview": "Vista previa",
     "unavailable": "No disponible",
+    "expressionResult": "Resultado de la expresión: {{amount}}",
     "mixedCurrencies_one": "{{count}} moneda",
     "mixedCurrencies_other": "{{count}} monedas",
     "relativeTime": {

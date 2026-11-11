@@ -39,8 +39,9 @@ import { invalidateTags, useSetTransactionTags } from "@/lib/api/tag/useTags";
 import { useRateLimitToast } from "@/lib/api/useRateLimitToast";
 import { formFromTransaction } from "@/lib/rules/rule-draft";
 import {
+  amountExpressionResult,
   formatLocaleNumberInput,
-  parseLocaleNumber,
+  parseAmountInput,
   zLocaleNumber,
 } from "@/lib/utils/number";
 import { invalidateSpendingTotals } from "@/lib/utils/queryInvalidation";
@@ -57,6 +58,7 @@ import {
 } from "../ui/Form";
 import { Input } from "../ui/input";
 import { Label } from "../ui/Label";
+import { AmountExpressionHint } from "../ui/MoneyInput";
 import {
   Sheet,
   SheetContent,
@@ -100,7 +102,9 @@ export function AccountTransactionEditSheet({
 
   const locale = useLocale();
   const formSchema = z.object({
-    updatedAmount: zLocaleNumber(locale, t("invalid-amount")),
+    updatedAmount: zLocaleNumber(locale, t("invalid-amount"), {
+      expressions: true,
+    }),
     description: z.string().optional(),
   });
 
@@ -124,7 +128,7 @@ export function AccountTransactionEditSheet({
   const transactionAmount = useMemo(
     () =>
       typeof watchedAmount === "string"
-        ? (parseLocaleNumber(watchedAmount, locale) ?? Number.NaN)
+        ? (parseAmountInput(watchedAmount, locale) ?? Number.NaN)
         : Number(
             watchedAmount ??
               transaction.editedSettlementAmount ??
@@ -147,7 +151,7 @@ export function AccountTransactionEditSheet({
   const splitTotalUnits = useMemo(() => {
     const typed =
       typeof watchedAmount === "string"
-        ? parseLocaleNumber(watchedAmount, locale)
+        ? parseAmountInput(watchedAmount, locale)
         : Number(watchedAmount ?? transaction.settlementAmount);
     return amountToUnits(
       typed !== null && Number.isFinite(typed) && typed !== 0
@@ -305,27 +309,52 @@ export function AccountTransactionEditSheet({
               control={form.control}
               name="updatedAmount"
               defaultValue={transaction.settlementAmount}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>{t("amount")}</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="tel"
-                      inputMode="decimal"
-                      {...field}
-                      value={formatLocaleNumberInput(field.value, locale)}
+              render={({ field }) => {
+                const settleExpression = () => {
+                  const result = amountExpressionResult(
+                    String(field.value ?? ""),
+                    locale,
+                  );
+                  if (result === null) return false;
+                  field.onChange(formatLocaleNumberInput(result, locale));
+                  return true;
+                };
+                return (
+                  <FormItem>
+                    <FormLabel>{t("amount")}</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="tel"
+                        inputMode="decimal"
+                        {...field}
+                        value={formatLocaleNumberInput(field.value, locale)}
+                        onBlur={() => {
+                          field.onBlur();
+                          settleExpression();
+                        }}
+                        onKeyDown={(event) => {
+                          // Enter settles the expression; a second Enter submits.
+                          if (event.key === "Enter" && settleExpression()) {
+                            event.preventDefault();
+                          }
+                        }}
+                      />
+                    </FormControl>
+                    <AmountExpressionHint
+                      locale={locale}
+                      value={String(field.value ?? "")}
                     />
-                  </FormControl>
-                  <FormDescription>
-                    {t("original-settlement-amount")}:{" "}
-                    <Amount
-                      value={transaction.settlementAmount}
-                      currency={transaction.settlementCurrencyKey.code}
-                    />
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
+                    <FormDescription>
+                      {t("original-settlement-amount")}:{" "}
+                      <Amount
+                        value={transaction.settlementAmount}
+                        currency={transaction.settlementCurrencyKey.code}
+                      />
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                );
+              }}
             />
             {/* Its category, or the lines of its split. */}
             <TransactionSplitField

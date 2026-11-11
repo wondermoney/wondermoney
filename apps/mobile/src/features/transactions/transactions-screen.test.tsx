@@ -192,6 +192,19 @@ describe('TransactionsScreen', () => {
       expect(editAmount).toHaveBeenCalledWith(41, '-1234.56', 'Card purchase')
     })
 
+    it('evaluates an expression typed into the amount editor', async () => {
+      const { view, editAmount } = await renderLoaded()
+      await fireEvent.press(view.getByRole('button', { name: row('Corner shop') }))
+      await fireEvent.press(view.getByRole('button', { name: 'Edit amount' }))
+      const input = view.getByLabelText('Transaction amount')
+      await fireEvent.changeText(input, '12.40+3.15')
+      expect(view.getByText('= 15.55')).toBeOnTheScreen()
+      await fireEvent(input, 'blur')
+      expect(view.getByLabelText('Transaction amount').props.value).toBe('15.55')
+      await fireEvent.press(view.getByRole('button', { name: 'Save amount' }))
+      expect(editAmount).toHaveBeenCalledWith(41, '15.55', 'Card purchase')
+    })
+
     it('shows an error and does not submit an amount it cannot read', async () => {
       const { view, editAmount } = await renderLoaded()
       await fireEvent.press(view.getByRole('button', { name: row('Corner shop') }))

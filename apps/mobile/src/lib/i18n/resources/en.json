@@ -14,6 +14,7 @@
     "signOut": "Sign out",
     "preview": "Preview",
     "unavailable": "Not available",
+    "expressionResult": "Expression result: {{amount}}",
     "mixedCurrencies_one": "{{count}} currency",
     "mixedCurrencies_other": "{{count}} currencies",
     "relativeTime": {

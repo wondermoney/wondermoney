@@ -24,7 +24,7 @@ import { TagChips, TagDot } from '@/features/tags/tag-chip'
 import { TagPickerSheet, type CreateTagOutcome, type TagsState } from '@/features/tags/tag-picker-sheet'
 import { formatTransactionDate, localCalendarDay, localDayRange } from '@/lib/dates/transaction-date'
 import { formatCategoryName } from '@/lib/formatters/category-name'
-import { formatNumberInput, parseDecimalInput } from '@/lib/formatters/decimal-input'
+import { amountExpressionResult, formatNumberInput, parseAmountInput } from '@/lib/formatters/decimal-input'
 import { formatMoneyForDisplay, PRIVACY_MASK } from '@/lib/formatters/money-display'
 import { formatRelativeTime } from '@/lib/formatters/relative-time'
 import { usePrivacyMode } from '@/lib/privacy/privacy-mode'
@@ -236,7 +236,7 @@ function TransactionsContent({
     setDescriptionDraft('')
   }, [])
   // Read in the app's language ("-1.234,56" in pt and es) and sent as a dot decimal.
-  const amountWire = parseDecimalInput(amountDraft, locale)
+  const amountWire = parseAmountInput(amountDraft, locale)
   const saveEditAmount = useCallback((id: number) => {
     if (!onEditAmount || amountWire === null) return
     void (async () => {
@@ -868,6 +868,13 @@ const TransactionRow = memo(function TransactionRow({
   const fxCopy = describeFxState(item.fx, t, locale)
   const direction = t(`transactions.${item.direction === 'unknown' ? 'amount' : item.direction}`)
   const fullDate = formatTransactionDate(item.date, locale)
+  // The quiet "= 15,55" under the amount while the draft is an expression.
+  const amountExpressionHint = editing
+    ? (() => {
+        const result = amountExpressionResult(editing.amountDraft, locale)
+        return result === null ? null : `= ${formatNumberInput(result, locale)}`
+      })()
+    : null
   const title = item.title ?? t('transactions.unnamed')
   const account = item.accountName ?? t('transactions.accountUnavailable')
   const selectable = selecting && isSelectable(item)
@@ -934,9 +941,14 @@ const TransactionRow = memo(function TransactionRow({
             <View style={styles.amountEdit}>
               <TextField
                 editable={!editing.amountSubmitting}
+                hint={amountExpressionHint}
                 keyboardType="numbers-and-punctuation"
                 label={t('transactions.editAmountInput')}
                 invalid={editing.amountInvalid}
+                onBlur={() => {
+                  const result = amountExpressionResult(editing.amountDraft, locale)
+                  if (result !== null) editing.onAmountChange(formatNumberInput(result, locale))
+                }}
                 onChangeText={editing.onAmountChange}
                 value={editing.amountDraft}
               />

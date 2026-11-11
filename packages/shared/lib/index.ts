@@ -14,4 +14,5 @@ export * as EodhdTypes from './services/eodhd/types';
 
 export * from './entities';
 export * from './decimal';
+export * from './amount-expression';
 export * from './dashboard-layout';

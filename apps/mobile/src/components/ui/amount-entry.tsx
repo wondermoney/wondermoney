@@ -1,7 +1,9 @@
 import { useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Pressable, StyleSheet, TextInput, View, type TextInputInstance } from 'react-native'
 
 import { Text } from '@/components/ui/text'
+import { amountExpressionResult, formatNumberInput } from '@/lib/formatters/decimal-input'
 import { themeTokens } from '@/theme/tokens'
 import { textStyles } from '@/theme/typography'
 import { usePalette } from '@/theme/use-palette'
@@ -14,6 +16,10 @@ import { usePalette } from '@/theme/use-palette'
  * Strings in, strings out, as typed (digits and separators only): the caller
  * parses in the app's language with `@/lib/formatters/decimal-input`
  * ("1.234,56" in pt and es). An empty value shows a muted `0`.
+ *
+ * With `allowExpressions` the field also takes a small arithmetic expression
+ * ("12,40+3,15"), the keyboard offers the operators, and leaving the field
+ * settles it to its result. A plain number behaves exactly as before.
  */
 export function AmountEntry({
   value,
@@ -25,6 +31,7 @@ export function AmountEntry({
   error,
   editable = true,
   autoFocus = false,
+  allowExpressions = false,
   testID,
 }: {
   value: string
@@ -39,12 +46,21 @@ export function AmountEntry({
   error?: string | null
   editable?: boolean
   autoFocus?: boolean
+  /** Accept a small arithmetic expression and settle it on blur. */
+  allowExpressions?: boolean
   testID?: string
 }) {
   const palette = usePalette()
+  const { t } = useTranslation()
   const ref = useRef<TextInputInstance>(null)
   const [focused, setFocused] = useState(false)
   const symbol = currency ? currencySymbol(currency, locale) : null
+  const expressionResult = allowExpressions ? amountExpressionResult(value, locale) : null
+  const hint = expressionResult === null ? null : formatNumberInput(expressionResult, locale)
+  const settle = () => {
+    if (expressionResult === null) return
+    onChangeText(formatNumberInput(expressionResult, locale))
+  }
   const symbolText = symbol ? (
     <Text accessible={false} style={styles.symbol} tone="muted" variant="display">
       {symbol.text}
@@ -66,10 +82,19 @@ export function AmountEntry({
           accessibilityState={{ disabled: !editable }}
           autoFocus={autoFocus}
           editable={editable}
-          keyboardType="decimal-pad"
-          maxLength={16}
-          onBlur={() => setFocused(false)}
-          onChangeText={(text) => onChangeText(text.replace(/[^\d.,]/g, ''))}
+          keyboardType={allowExpressions ? 'numbers-and-punctuation' : 'decimal-pad'}
+          maxLength={allowExpressions ? 64 : 16}
+          onBlur={() => {
+            setFocused(false)
+            settle()
+          }}
+          onChangeText={(text) =>
+            onChangeText(
+              allowExpressions
+                ? text.replace(/[^\d.,+\-*/() ]/g, '')
+                : text.replace(/[^\d.,]/g, ''),
+            )
+          }
           onFocus={() => setFocused(true)}
           placeholder="0"
           placeholderTextColor={palette.mutedForeground}
@@ -80,6 +105,17 @@ export function AmountEntry({
         />
         {symbol && !symbol.before ? symbolText : null}
       </Pressable>
+      {hint ? (
+        <Text
+          accessibilityLabel={t('common.expressionResult', { amount: hint })}
+          accessibilityLiveRegion="polite"
+          align="center"
+          tone="muted"
+          variant="meta"
+        >
+          = {hint}
+        </Text>
+      ) : null}
       {caption ? (
         <Text align="center" tone="muted" variant="meta">
           {caption}
