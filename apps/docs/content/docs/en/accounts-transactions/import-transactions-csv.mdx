@@ -1,17 +1,19 @@
 ---
-title: Import transactions from CSV, OFX or QIF
-description: Import transaction history from a CSV, Excel, OFX, QFX or QIF file when bank sync is not available.
+title: Import transactions from CSV, OFX, QIF or CAMT.053
+description: Import transaction history from a CSV, Excel, OFX, QFX, QIF or CAMT.053 XML file when bank sync is not available.
 ---
 
 CSV import brings a bank statement into an account when a bank connection is not available, or adds history from before the connection started.
 
 ## Before you start
 
-Any bank's statement export works, as CSV (any delimiter), Excel (`.xls`, `.xlsx`), OFX/QFX (`.ofx`, `.qfx`) or QIF (`.qif`). Download it from your bank's website and leave it as the bank wrote it: rows above the column names and totals below the transactions are fine.
+Any bank's statement export works, as CSV (any delimiter), Excel (`.xls`, `.xlsx`), OFX/QFX (`.ofx`, `.qfx`), QIF (`.qif`) or CAMT.053 (`.xml`). Download it from your bank's website and leave it as the bank wrote it: rows above the column names and totals below the transactions are fine.
 
 OFX and QFX are the formats most banks and Quicken offer as a download. WonderMoney reads both OFX 1.x (SGML) and OFX 2.x (XML), and decodes the file by the encoding it declares, so accented payee names stay intact even when the bank wrote Windows-1252 or ISO-8859-1. Each transaction's bank id (`FITID`) is what marks it as already imported, so re-importing the same file adds nothing. A transaction with no id, or with an id another row in the file repeats, falls back to its date and amount. A file with several accounts asks which of your accounts each one goes to. Investment statements (`INVSTMTRS`) and statements that hold only a balance are skipped, with a note in the import.
 
 QIF is the format Quicken, Microsoft Money and GnuCash export. WonderMoney reads bank, credit-card, cash and other QIF files, and keeps each record's sign: money out is negative, money in positive. A record with split lines imports as one transaction with the record's own total; the breakdown goes into the transaction's description. QIF has no transaction id, so a re-import of the same file finds each row by its date and amount. QIF dates have no standard format either: WonderMoney reads every date in the file to tell day first from month first, and when the file cannot say (every day and month is 12 or less) it asks you to choose before importing. A category in the file (`L`) is kept with the row, and a transfer to another account (`L[Account]`) imports as a transfer. A file with several accounts (`!Account` blocks) asks which of your accounts each one goes to. Investment records (`!Type:Invst`) are skipped, with a note in the import.
+
+CAMT.053 is the ISO 20022 end-of-day statement that SEPA banks are replacing MT940 with, and the most reliable file a European bank offers. WonderMoney reads the statements of a `BkToCstmrStmt` document: each entry's booking date (`BookgDt`, or its value date when the bank writes no booking date) is the transaction date, and `CdtDbtInd` decides the direction, so a debit is negative and a credit positive. The counterparty name and the remittance information become the merchant and the description. An entry's `AcctSvcrRef`, then its `NtryRef`, is what marks it as already imported; an entry with neither falls back to its date and amount. A batch booking that holds several transactions imports as one row per transaction when they add up to the entry's amount, and as the single entry otherwise. Entries the bank has not booked yet (`Sts` other than `BOOK`) are skipped, with a note in the import. Each statement is labelled by its IBAN, and a file with several asks which of your accounts each one goes to, pre-filled when one of your accounts holds that IBAN as its account number. A file that declares a document type (`DOCTYPE`) is refused: a bank statement never has one, and it is how an XML file tries to read data it should not.
 
 For Millennium BCP, ActivoBank, Bankinter, Banco BPI and Montepio, WonderMoney reads the bank's own format when the account has that bank as its financial institution. For every other file, it finds the date, description and amount columns from their names, and works out the date format and the decimal separator from the values. When the names don't settle it, an AI model is asked which column is which: it sees the column names and what kind of values each column holds (dates, numbers, text), never your descriptions, amounts or dates. That uses one of your household's daily CSV mapping calls; on an instance without AI, or once the day's calls are used, you pick the columns yourself.
 
@@ -21,9 +23,9 @@ On a self-hosted instance, imports also need [file storage](/en/docs/self-hostin
 
 ## Steps
 
-1. Download the statement from your bank as CSV, Excel, OFX, QFX or QIF.
+1. Download the statement from your bank as CSV, Excel, OFX, QFX, QIF or CAMT.053 XML.
 2. Open the account and choose **Import transactions**.
-3. Add the file (up to 5 MB). WonderMoney reads it straight away and shows how many transactions it found, the dates they cover, and the first few rows. An OFX/QFX or QIF file has no columns to preview: it goes straight to the review.
+3. Add the file (up to 5 MB). WonderMoney reads it straight away and shows how many transactions it found, the dates they cover, and the first few rows. An OFX/QFX, QIF or CAMT.053 file has no columns to preview: it goes straight to the review.
 4. Check the rows. If a column is wrong, open **Adjust columns** and pick the right one, or change the date format, the number format, or whether spending is shown as a positive amount (as on some credit card statements). The preview updates as you change them.
 5. Choose **Review transactions**. WonderMoney reads every row of the file and lists them, with nothing imported yet:
    - **New**: not in the account yet. These are included.
@@ -32,7 +34,7 @@ On a self-hosted instance, imports also need [file storage](/en/docs/self-hostin
 6. Check the list. Untick a row to skip it, or tick one to include it. Show one kind of row and choose **Include all** or **Skip all** to decide them together.
 7. Choose **Import**, which shows how many transactions it will add. The import runs in the background and shows its progress. If it stops part way (for example, the server restarts), choose **Try again**: it carries on from where it stopped, and nothing is imported twice.
 
-A file that holds several accounts asks which of your accounts each one goes to before it can be imported. In an OFX/QFX file each account is labelled by the bank's own account id (`ACCTID`); in a QIF file, by its `!Account` name.
+A file that holds several accounts asks which of your accounts each one goes to before it can be imported. In an OFX/QFX file each account is labelled by the bank's own account id (`ACCTID`); in a QIF file, by its `!Account` name; in a CAMT.053 file, by its IBAN, with the mapping pre-filled when one of your accounts holds that IBAN.
 
 A QIF file whose dates could be day first or month first shows the choice in the review: pick the order the file uses and the rows are read again before you import.
 
@@ -41,7 +43,7 @@ An import you don't finish expires after seven days. Seven days after an import,
 <DocsImage
   src="/images/docs/accounts-transactions/import-transactions-csv-import-modal.png"
   alt="Import Transactions modal with a drag-and-drop file upload area."
-  caption="The import modal accepts a CSV, Excel, OFX, QFX or QIF file of up to 5 MB."
+  caption="The import modal accepts a CSV, Excel, OFX, QFX, QIF or CAMT.053 file of up to 5 MB."
   width={1440}
   height={900}
 />
@@ -61,6 +63,7 @@ Imported rows are categorized using the same deterministic categorizer as synced
 - The OFX/QFX file is an investment statement, or holds only a balance. WonderMoney skips it and says so in the import.
 - The QIF file's dates could be day first or month first, and the import asks which before it can go on.
 - The QIF file is an investment export (`!Type:Invst`). WonderMoney skips those records and says so in the import.
+- The CAMT.053 file declares a document type (`DOCTYPE`). WonderMoney refuses the file instead of reading it.
 
 ## Related links
 

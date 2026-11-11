@@ -2548,10 +2548,11 @@
   "aiAllowance": {
     "message": "Tu hogar ya ha usado el límite diario de esta función. Se reinicia a las {time}."
   },
-  "import-statement-hint": "Exporta el extracto desde la web de tu banco, en CSV, Excel, OFX, QFX o QIF. Nosotros identificamos las columnas.",
+  "import-statement-hint": "Exporta el extracto desde la web de tu banco, en CSV, Excel, OFX, QFX, QIF o CAMT.053 XML. Nosotros identificamos las columnas.",
   "import-statement-reading": "Leyendo el archivo…",
   "import-ofx-ready": "Archivo OFX/QFX listo. Elige Revisar transacciones para leer sus filas.",
   "import-qif-ready": "Archivo QIF listo. Elige Revisar transacciones para leer sus filas.",
+  "import-camt-ready": "Archivo CAMT.053 listo. Elige Revisar transacciones para leer sus filas.",
   "import-statement-found": "{count, plural, one {# transacción} other {# transacciones}}",
   "import-statement-range": "del {from} al {to}",
   "import-statement-source-bank": "Leído como extracto de {bank}.",

@@ -215,7 +215,7 @@ const defaultStorage: TransactionImportStorage = {
 
 export class TransactionImportService {
   private get adapters(): Partial<Record<transactionImport.ImportFormat, transactionImport.ImportAdapter<never>>> {
-    return this.deps.adapters ?? { 'generic-csv': transactionImport.genericCsvImportAdapter, ofx: transactionImport.ofxImportAdapter, qif: transactionImport.qifImportAdapter, statement: statementImportAdapter };
+    return this.deps.adapters ?? { camt053: transactionImport.camt053ImportAdapter, 'generic-csv': transactionImport.genericCsvImportAdapter, ofx: transactionImport.ofxImportAdapter, qif: transactionImport.qifImportAdapter, statement: statementImportAdapter };
   }
 
   private get now(): Date {
@@ -394,25 +394,30 @@ export class TransactionImportService {
     let result: transactionImport.ImportParseResult;
     try {
       const buffer = await getLimitedCsvObjectBuffer({ bucket: session.s3Bucket, key: session.s3Key }, { getObjectBuffer: (bucket, key) => this.storage.getObjectBuffer(bucket, key), getObjectSize: (bucket, key) => this.storage.getObjectSize(bucket, key) });
-      // The file decides too: an OFX/QFX upload read as a statement is still OFX, and the older
-      // WonderMoney CSV template (whose columns no bank export has) is read by its own adapter.
+      // The file decides too: an OFX/QFX upload read as a statement is still OFX, a CAMT.053
+      // export is still CAMT.053, and the older WonderMoney CSV template (whose columns no bank
+      // export has) is read by its own adapter.
       const bytes = new Uint8Array(buffer);
       if (session.format === 'statement' && transactionImport.isOfxFile(bytes)) session.format = 'ofx';
       else if (session.format === 'statement' && transactionImport.isGenericCsvTemplate(bytes)) session.format = 'generic-csv';
       else if (session.format === 'statement' && transactionImport.isQifFile(bytes)) session.format = 'qif';
+      else if (session.format === 'statement' && transactionImport.isCamt053File(bytes)) session.format = 'camt053';
+      // A `.xml` upload can be either XML format; the content decides.
+      else if (session.format === 'camt053' && transactionImport.isOfxFile(bytes)) session.format = 'ofx';
       const adapter = this.adapters[session.format];
       if (!adapter) throw new StatementUnreadableError('unreadable');
       const options = { accountCurrency: account.currencyKey.code, ...(session.format === 'generic-csv' ? await this.genericCsvOptions() : {}), ...(session.options ?? {}) };
       result = await (adapter as transactionImport.ImportAdapter<typeof options>).parse(bytes, options);
     } catch (error) {
       session.status = SESSION_STATUS.FAILED;
-      session.errorCode = error instanceof StatementUnreadableError || error instanceof transactionImport.QifUnreadableError ? error.code : 'unreadable';
+      session.errorCode = error instanceof StatementUnreadableError || error instanceof transactionImport.QifUnreadableError || error instanceof transactionImport.Camt053UnreadableError ? error.code : 'unreadable';
       await this.em.flush();
       return;
     }
 
     // Read again from the start: whatever an earlier read stored goes.
     await this.em.nativeDelete(TransactionImportRow, { transactionImportSessionKey: bySession(session.transactionImportSessionKey) });
+    await this.suggestSourceAccounts(keyOf(session.appuserKey, 'appuserKey'), keyOf(session.tenantKey, 'tenantKey'), result.sourceAccounts);
     const mapping = Object.fromEntries(Object.entries(session.accountMapping ?? {}).filter(([label]) => result.sourceAccounts.some((source) => source.label === label)));
     const targetOf = (row: transactionImport.ParsedImportRow): null | number => {
       if (result.sourceAccounts.length === 0) return account.accountKey;
@@ -460,6 +465,32 @@ export class TransactionImportService {
       currencies: Object.fromEntries(currencies.map((currency) => [String(currency.currencyKey), currency.code])),
       transactionTypes: Object.fromEntries(types.map((type) => [String(type.transactionTypeKey), type.name])),
     };
+  }
+
+  /**
+   * The account the file's own identifier points at, for the mapping step. A CAMT.053 statement is
+   * labelled by its IBAN, so an account of the person's whose `accountNumber` holds that IBAN is
+   * suggested; the person still confirms the mapping. The adapter is pure, so the session matches
+   * the labels against its accounts here.
+   */
+  private async suggestSourceAccounts(appuserId: null | number, tenantId: null | number, sourceAccounts: transactionImport.ImportSourceAccount[]): Promise<void> {
+    if (appuserId === null || tenantId === null) return;
+    const wanted = new Set(sourceAccounts.flatMap((source) => {
+      const iban = transactionImport.normalizeIban(source.label);
+      return iban === undefined ? [] : [iban];
+    }));
+    if (wanted.size === 0) return;
+    const accounts = await this.em.find(Account, { accountOwnerAppuserKey: { appuserKey: appuserId }, deletedAt: null, tenantKey: { tenantKey: tenantId } }, { fields: ['accountKey', 'accountNumber'] });
+    const byIban = new Map<string, number>();
+    for (const account of accounts) {
+      const iban = transactionImport.normalizeIban(account.accountNumber);
+      if (iban !== undefined && wanted.has(iban) && !byIban.has(iban)) byIban.set(iban, account.accountKey);
+    }
+    for (const source of sourceAccounts) {
+      const iban = transactionImport.normalizeIban(source.label);
+      const accountKey = iban === undefined ? undefined : byIban.get(iban);
+      if (accountKey !== undefined) source.suggestedAccountId = accountKey;
+    }
   }
 
   /**

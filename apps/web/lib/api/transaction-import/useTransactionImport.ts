@@ -51,9 +51,15 @@ export interface TransactionImportSession {
   detailsDeletedAt: string | null;
   errorCode: string | null;
   expiresAt: string;
-  format: "statement" | "ofx" | "qif" | "generic-csv";
+  format: "camt053" | "generic-csv" | "ofx" | "qif" | "statement";
   id: string;
-  sourceAccounts: { currency?: string; label: string; rowCount: number }[];
+  sourceAccounts: {
+    currency?: string;
+    label: string;
+    rowCount: number;
+    /** The account whose number holds this statement's IBAN, to pre-fill the mapping. */
+    suggestedAccountId?: number;
+  }[];
   status: ImportSessionStatus;
   upload: { key: string; url: string } | null;
   warnings: { code: string; detail?: string; sourceRow?: number }[];
@@ -152,8 +158,8 @@ export function useTransactionImport(
 
 export interface CreateTransactionImportRequest {
   accountId: number | string;
-  /** The format the file is read in; `statement` unless the file is OFX/QFX or QIF. */
-  format?: "ofx" | "qif" | "statement";
+  /** The format the file is read in; `statement` unless the file is OFX/QFX, QIF or CAMT.053. */
+  format?: "camt053" | "ofx" | "qif" | "statement";
   /** The file, already uploaded for this account. */
   key: string;
   /** The columns confirmed in the preview; absent when the bank's own parser reads the file. */

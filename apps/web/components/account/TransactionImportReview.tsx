@@ -536,9 +536,20 @@ function AccountMapping({
   onSave: (mapping: Record<string, number>) => void;
 }) {
   const t = useTranslations();
-  const [mapping, setMapping] = useState<Record<string, number>>(
-    session.accountMapping,
-  );
+  const [mapping, setMapping] = useState<Record<string, number>>(() => {
+    // The file's own identifier pre-fills the mapping where the server matched it (a CAMT.053
+    // statement's IBAN against the account's number); the person still confirms it.
+    const initial: Record<string, number> = { ...session.accountMapping };
+    for (const source of session.sourceAccounts) {
+      if (
+        initial[source.label] === undefined &&
+        source.suggestedAccountId !== undefined
+      ) {
+        initial[source.label] = source.suggestedAccountId;
+      }
+    }
+    return initial;
+  });
   const complete = session.sourceAccounts.every(
     (source) => mapping[source.label] !== undefined,
   );

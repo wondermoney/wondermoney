@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Document xmlns="urn:iso:std:iso:20022:tech:xsd:camt.053.001.08">
+  <BkToCstmrStmt>
+    <GrpHdr>
+      <MsgId>DE-2026-03-0001</MsgId>
+      <CreDtTm>2026-04-01T05:30:00+02:00</CreDtTm>
+    </GrpHdr>
+    <Stmt>
+      <Id>DE-STMT-2026-03</Id>
+      <Acct>
+        <Id>
+          <IBAN>DE89370400440532013000</IBAN>
+        </Id>
+        <Ccy>EUR</Ccy>
+      </Acct>
+      <Ntry>
+        <NtryRef>DE-ENTRY-1</NtryRef>
+        <Amt Ccy="EUR">100.00</Amt>
+        <CdtDbtInd>DBIT</CdtDbtInd>
+        <Sts>
+          <Cd>BOOK</Cd>
+        </Sts>
+        <BookgDt>
+          <DtTm>2026-03-02T09:15:00+01:00</DtTm>
+        </BookgDt>
+        <AcctSvcrRef>DE-BATCH-1</AcctSvcrRef>
+        <NtryDtls>
+          <TxDtls>
+            <Refs>
+              <AcctSvcrRef>DE-BATCH-1-1</AcctSvcrRef>
+            </Refs>
+            <Amt Ccy="EUR">60.00</Amt>
+            <CdtDbtInd>DBIT</CdtDbtInd>
+            <RltdPties>
+              <Cdtr>
+                <Pty>
+                  <Nm>STADTWERKE MUENCHEN</Nm>
+                </Pty>
+              </Cdtr>
+            </RltdPties>
+            <RmtInf>
+              <Ustrd>ABSCHLAG STROM</Ustrd>
+            </RmtInf>
+          </TxDtls>
+          <TxDtls>
+            <Refs>
+              <AcctSvcrRef>DE-BATCH-1-2</AcctSvcrRef>
+            </Refs>
+            <Amt Ccy="EUR">40.00</Amt>
+            <CdtDbtInd>DBIT</CdtDbtInd>
+            <RltdPties>
+              <Cdtr>
+                <Pty>
+                  <Nm>STADTWERKE MUENCHEN</Nm>
+                </Pty>
+              </Cdtr>
+            </RltdPties>
+            <RmtInf>
+              <Ustrd>ABSCHLAG WASSER</Ustrd>
+            </RmtInf>
+          </TxDtls>
+        </NtryDtls>
+      </Ntry>
+      <Ntry>
+        <NtryRef>DE-ENTRY-2</NtryRef>
+        <Amt Ccy="EUR">50.00</Amt>
+        <CdtDbtInd>DBIT</CdtDbtInd>
+        <Sts>
+          <Cd>BOOK</Cd>
+        </Sts>
+        <BookgDt>
+          <Dt>2026-03-04</Dt>
+        </BookgDt>
+        <AcctSvcrRef>DE-BATCH-2</AcctSvcrRef>
+        <NtryDtls>
+          <TxDtls>
+            <Amt Ccy="EUR">20.00</Amt>
+            <CdtDbtInd>DBIT</CdtDbtInd>
+            <RltdPties>
+              <Cdtr>
+                <Pty>
+                  <Nm>KIOSK AM MARKT</Nm>
+                </Pty>
+              </Cdtr>
+            </RltdPties>
+            <RmtInf>
+              <Ustrd>ZEITSCHRIFT</Ustrd>
+            </RmtInf>
+          </TxDtls>
+          <TxDtls>
+            <Amt Ccy="EUR">20.00</Amt>
+            <CdtDbtInd>DBIT</CdtDbtInd>
+            <RltdPties>
+              <Cdtr>
+                <Pty>
+                  <Nm>KIOSK AM MARKT</Nm>
+                </Pty>
+              </Cdtr>
+            </RltdPties>
+            <RmtInf>
+              <Ustrd>SUESSIGKEITEN</Ustrd>
+            </RmtInf>
+          </TxDtls>
+        </NtryDtls>
+      </Ntry>
+      <Ntry>
+        <NtryRef>DE-ENTRY-3</NtryRef>
+        <Amt Ccy="EUR">2500.00</Amt>
+        <CdtDbtInd>CRDT</CdtDbtInd>
+        <Sts>
+          <Cd>BOOK</Cd>
+        </Sts>
+        <BookgDt>
+          <Dt>2026-03-31</Dt>
+        </BookgDt>
+        <AcctSvcrRef>DE-ENTRY-3</AcctSvcrRef>
+        <NtryDtls>
+          <TxDtls>
+            <RltdPties>
+              <Dbtr>
+                <Pty>
+                  <Nm>MUSTER GMBH</Nm>
+                </Pty>
+              </Dbtr>
+            </RltdPties>
+            <RmtInf>
+              <Ustrd>GEHALT MAERZ</Ustrd>
+            </RmtInf>
+          </TxDtls>
+        </NtryDtls>
+      </Ntry>
+    </Stmt>
+  </BkToCstmrStmt>
+</Document>
