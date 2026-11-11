@@ -9,7 +9,7 @@ import type { AccountConnectedEmailProps } from "../types";
 
 export type { AccountConnectedEmailProps } from "../types";
 
-const COPY = {
+export const COPY = {
   en: {
     subject: (bank: string, brand: string) => `${bank} is connected to ${brand}`,
     preheader: (bank: string) => `${bank} is now linked — your accounts will start syncing.`,

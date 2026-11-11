@@ -7,7 +7,7 @@ import type { BudgetThresholdAlertProps, BudgetThresholdItem, TransactionalEmail
 
 export type { BudgetThresholdAlertProps, BudgetThresholdItem } from "../types";
 
-const COPY = {
+export const COPY = {
   en: {
     subject: {
       empty: "An update on your budgets",

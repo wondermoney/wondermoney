@@ -30,10 +30,11 @@
     "build:preview": "email build --dir emails",
     "export": "tsx scripts/render-handoff.ts",
     "check:lib": "tsx scripts/test-library.ts",
+    "check:copy": "tsx scripts/check-copy-parity.ts",
     "check:package": "tsx scripts/check-package.ts",
-    "check": "tsc --noEmit && tsx scripts/render-handoff.ts --check && pnpm check:lib",
+    "check": "tsc --noEmit && tsx scripts/render-handoff.ts --check && pnpm check:copy && pnpm check:lib",
     "type-check": "tsc --noEmit",
-    "test": "tsx scripts/render-handoff.ts --check && pnpm check:lib"
+    "test": "tsx scripts/render-handoff.ts --check && pnpm check:copy && pnpm check:lib"
   },
   "dependencies": {
     "@react-email/render": "2.2.0",

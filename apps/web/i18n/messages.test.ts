@@ -43,6 +43,71 @@ function valueAt(messages: Messages, path: string) {
   }, messages);
 }
 
+/*
+ * The ICU arguments in a message, as `name` or `name:type`: `{name}` and the
+ * argument of a plural, select or number (`{count, plural, …}`). A translator
+ * may rewrite everything inside the branches — `one {line} other {lines}` is
+ * copy, not an argument — but the arguments themselves are the contract. A
+ * `{name}` that becomes a literal leaves a raw placeholder in front of the
+ * reader, and a plural that loses its argument stops formatting the number.
+ * Arguments nested in a branch (a plural that mentions `{currencies}`) count
+ * too, so branch bodies are parsed rather than skipped.
+ */
+function icuArguments(message: string) {
+  const found = new Set<string>();
+  const header = /^\s*([A-Za-z_][\w-]*)\s*(?:,\s*([A-Za-z]+))?\s*(?:,|$)/;
+
+  const matchingBrace = (text: string, open: number) => {
+    let depth = 0;
+    for (let index = open; index < text.length; index += 1) {
+      if (text[index] === "{") depth += 1;
+      if (text[index] === "}") {
+        depth -= 1;
+        if (depth === 0) return index;
+      }
+    }
+    return text.length - 1;
+  };
+
+  const readMessage = (text: string, start: number, end: number) => {
+    let index = start;
+    while (index < end) {
+      if (text[index] !== "{") {
+        index += 1;
+        continue;
+      }
+
+      const close = matchingBrace(text, index);
+      const inner = text.slice(index + 1, close);
+      const match = header.exec(inner);
+
+      // A brace that does not open an argument is literal text (a stray `{`).
+      if (match) {
+        const [, name, type] = match;
+        found.add(type ? `${name}:${type}` : name);
+
+        if (type === "plural" || type === "select" || type === "selectordinal") {
+          let branch = index + 1 + match[0].length;
+          while (branch < close) {
+            if (text[branch] === "{") {
+              const branchClose = matchingBrace(text, branch);
+              readMessage(text, branch + 1, branchClose);
+              branch = branchClose + 1;
+            } else {
+              branch += 1;
+            }
+          }
+        }
+      }
+
+      index = close + 1;
+    }
+  };
+
+  readMessage(message, 0, message.length);
+  return [...found].sort();
+}
+
 async function loadedMessages(locale: string) {
   const config = await (
     getRequestConfig as unknown as (params: {
@@ -114,16 +179,51 @@ for (const locale of otherLocales) {
       const expectedKeys = new Set(leafKeys(messages));
       const actualKeys = new Set(leafKeys(translated.messages));
 
-      assert.deepEqual(
-        [...expectedKeys].filter((key) => !actualKeys.has(key)),
-        [],
-        `${locale}/${name} is missing keys`,
-      );
-      assert.deepEqual(
-        [...actualKeys].filter((key) => !expectedKeys.has(key)),
-        [],
-        `${locale}/${name} has keys ${defaultLocale} does not`,
-      );
+      for (const key of expectedKeys) {
+        assert.ok(
+          actualKeys.has(key),
+          `${locale}/${name}: "${key}" is missing — add it to apps/web/messages/${locale}/${name} (English: apps/web/messages/${defaultLocale}/${name})`,
+        );
+      }
+      for (const key of actualKeys) {
+        assert.ok(
+          expectedKeys.has(key),
+          `${locale}/${name}: "${key}" does not exist in ${defaultLocale}/${name} — add it there or remove it from ${locale}/${name}`,
+        );
+      }
+    }
+  });
+}
+
+/*
+ * A key can exist in every locale and still render wrongly: a translation that
+ * drops `{name}` or turns a plural into plain text gives that locale's reader a
+ * different message. The words are free; the ICU arguments are not.
+ */
+for (const locale of otherLocales) {
+  test(`${locale} keeps every ${defaultLocale} message's ICU arguments`, () => {
+    for (const { name, messages } of filesFor(defaultLocale)) {
+      const translated = filesFor(locale).find((file) => file.name === name);
+      assert.ok(translated, `${locale} is missing ${name}`);
+
+      for (const key of leafKeys(messages)) {
+        const source = valueAt(messages, key);
+        const target = valueAt(translated.messages, key);
+        // Key parity and the non-empty-string test report a missing or
+        // non-string message; there is nothing to compare here.
+        if (typeof source !== "string" || typeof target !== "string") continue;
+
+        const expected = icuArguments(source);
+        const actual = icuArguments(target);
+        const missing = expected.filter((argument) => !actual.includes(argument));
+        const extra = actual.filter((argument) => !expected.includes(argument));
+
+        assert.deepEqual(
+          { missing, extra },
+          { missing: [], extra: [] },
+          `${locale}/${name}: "${key}" has different ICU arguments from ${defaultLocale} — missing: ${missing.join(", ") || "none"}; not in ${defaultLocale}: ${extra.join(", ") || "none"}`,
+        );
+      }
     }
   });
 }

@@ -80,8 +80,12 @@ If `develop` moves on while you work, rebase your branch onto it and force-push:
 `git fetch upstream && git rebase upstream/develop`, where `upstream` is this repository.
 
 User-facing text goes through the translation files (English, Portuguese and Spanish);
-please don't hardcode strings. If you can't translate, add the English text and say so
-in the pull request.
+please don't hardcode strings. Every key must exist in all three locales with the same
+ICU placeholders (`{name}`, plural and select arguments), and every documentation page
+and `meta.json` entry must exist in `en`, `pt` and `es`. CI enforces this: the web and
+mobile i18n tests, the transactional-email copy check and the docs locale-parity check
+fail with the locale, file and key to fix. If you can't translate, add the English text
+to all three locales and say so in the pull request.
 
 ## Shipping a feature behind preview features
 

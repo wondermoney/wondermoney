@@ -5,10 +5,62 @@ import ptPT from './resources/pt-PT.json'
 
 const resources = { en, 'pt-PT': ptPT, es } as const
 
+type LocaleResource = Record<string, unknown>
+
+const leafValues = (value: unknown, prefix = ''): [string, string][] => {
+  if (typeof value === 'string') return [[prefix, value]]
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return []
+  return Object.entries(value as LocaleResource).flatMap(([key, child]) =>
+    leafValues(child, prefix ? `${prefix}.${key}` : key),
+  )
+}
+
+/*
+ * i18next interpolates `{{name}}` (and `{{count, number}}`). A translation that
+ * drops or renames one renders a literal `{{name}}` to that locale's reader, so
+ * every locale must keep the English message's placeholders.
+ */
+const placeholders = (message: string): string[] => [
+  ...new Set(
+    [...message.matchAll(/\{\{\s*([\w.-]+)(?:\s*,\s*[\w]+)?\s*\}\}/g)].map((match) => match[1]),
+  ),
+].sort()
+
 describe('mobile product i18n', () => {
   it('keeps exact locale and key parity', () => {
     expect(Object.keys(foundationResources).sort()).toEqual(['en', 'es', 'pt-PT'])
     expect(validateFoundationResources(resources)).toBe(true)
+  })
+
+  it('keeps every locale’s interpolation placeholders in step with English', () => {
+    const reference = new Map(leafValues(en))
+
+    for (const [locale, resource] of [
+      ['pt-PT', ptPT],
+      ['es', es],
+    ] as const) {
+      const translated = new Map(leafValues(resource))
+
+      for (const [key, source] of reference) {
+        const target = translated.get(key)
+        // Key parity above reports a missing key; there is nothing to compare.
+        if (target === undefined) continue
+
+        const expected = placeholders(source)
+        const actual = placeholders(target)
+        const missing = expected.filter((name) => !actual.includes(name))
+        const extra = actual.filter((name) => !expected.includes(name))
+        const file = `resources/${locale}.json`
+
+        expect({ file, locale, key, missing, extra }).toEqual({
+          file,
+          locale,
+          key,
+          missing: [],
+          extra: [],
+        })
+      }
+    }
   })
 
   it('provides exact estimated net worth semantics in every locale', async () => {

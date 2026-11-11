@@ -10,8 +10,9 @@
     "type-check": "fumadocs-mdx && next typegen && tsc --noEmit",
     "types:check": "fumadocs-mdx && next typegen && tsc --noEmit",
     "postinstall": "fumadocs-mdx",
-    "lint": "eslint && node scripts/check-sub-processors.mjs",
-    "check:sub-processors": "node scripts/check-sub-processors.mjs"
+    "lint": "eslint && node scripts/check-sub-processors.mjs && node scripts/check-locale-parity.mjs",
+    "check:sub-processors": "node scripts/check-sub-processors.mjs",
+    "check:locale-parity": "node scripts/check-locale-parity.mjs"
   },
   "dependencies": {
     "fumadocs-core": "16.18.1",

@@ -1,6 +1,6 @@
 import type { TransactionalEmailLanguage, WeeklyBudgetSummary } from "./types.js";
 
-const COPY = {
+export const COPY = {
   en: {
     withBudget: "Spending, top category and budget status for the completed week.",
     withoutBudget: "Spending and top category for the completed week.",

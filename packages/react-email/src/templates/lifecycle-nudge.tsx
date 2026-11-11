@@ -22,7 +22,7 @@ import type { LifecycleNudgeEmailProps, TransactionalEmailLanguage } from "../ty
 
 export type { LifecycleNudgeEmailProps } from "../types";
 
-const FOOTER = {
+export const FOOTER = {
   en: { note: (brand: string) => `You're receiving this as part of your ${brand} account.`, unsubscribe: "Unsubscribe", settings: "Notification settings" },
   pt: { note: (brand: string) => `Recebes este email por teres uma conta ${brand}.`, unsubscribe: "Cancelar subscrição", settings: "Definições de notificações" },
 } as const satisfies Record<TransactionalEmailLanguage, Record<string, unknown>>;

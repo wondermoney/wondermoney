@@ -8,7 +8,7 @@ import type { MonthlyStoryDataSufficientProps, MonthlyStoryInsufficientDataProps
 
 export type { MonthlyStoryCategoryDelta, MonthlyStoryDataSufficientProps, MonthlyStoryInsufficientDataProps, MonthlyStoryMetric, MonthlyStoryProps, MonthlyStoryRecurringChange } from "../types";
 
-const COPY = {
+export const COPY = {
   en: {
     heading: "Your money story this month",
     insufficientHeading: "Building your money story",
