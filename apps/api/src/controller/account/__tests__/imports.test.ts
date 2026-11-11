@@ -5,10 +5,11 @@ import { Account } from '@entity/Account';
 import { NotFoundError } from '@utils/errors';
 
 const mocks = vi.hoisted(() => ({
-  enqueue: vi.fn(),
+  createSession: vi.fn(),
   findOne: vi.fn(),
   generatePresignedUrlForAccountCsv: vi.fn(),
   getAccountCsvBucketName: vi.fn(),
+  getLimitedCsvObjectBuffer: vi.fn(),
   zParse: vi.fn(),
 }));
 
@@ -19,10 +20,14 @@ vi.mock('../../../app.js', () => ({
     },
   },
 }));
-vi.mock('@service/account/account-csv-import-enqueue.service', () => ({
-  default: class AccountCsvImportEnqueueService {
-    enqueue = mocks.enqueue;
+vi.mock('@service/transaction-import/transaction-import.service', () => ({
+  TransactionImportService: class TransactionImportService {
+    create = mocks.createSession;
   },
+}));
+vi.mock('@service/account/csv-upload-boundary.service', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@service/account/csv-upload-boundary.service')>()),
+  getLimitedCsvObjectBuffer: mocks.getLimitedCsvObjectBuffer,
 }));
 vi.mock('@service/storage/s3', () => ({
   default: {
@@ -45,12 +50,26 @@ const makeRequest = (overrides: Record<string, unknown> = {}) => ({
   ...overrides,
 }) as unknown as Request;
 
+const GENERIC_TEMPLATE = 'date,amount,merchant,internalTransactionId,transactionTypeKey,description\n2026-01-15,23.40,Grocery store,example-1,3,Weekly shop';
+const BANK_STATEMENT = 'Data mov.;Descrição;Débito;Crédito\n02-09-2026;CONTINENTE;42,50;';
+const OFX = 'OFXHEADER:100\nDATA:OFXSGML\n\n<OFX><BANKMSGSRSV1></BANKMSGSRSV1></OFX>';
+
 describe('account CSV import authorization', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mocks.zParse.mockImplementation((_schema: unknown, req: Request) => Promise.resolve(req));
     mocks.getAccountCsvBucketName.mockReturnValue('account-transactions-excel-dev');
+    mocks.getLimitedCsvObjectBuffer.mockResolvedValue(Buffer.from(GENERIC_TEMPLATE, 'utf8'));
+    mocks.createSession.mockResolvedValue({ correlationId: 'import:parse:1', id: 'session-1' });
   });
+
+  const startImport = async (body: Record<string, unknown>, accountId = '41') => {
+    const json = vi.fn();
+    const status = vi.fn(() => ({ json }));
+    const next = vi.fn();
+    await startAccountCsvImport(makeRequest({ body, params: { accountId } }), { status } as unknown as Response, next);
+    return { json, next, status };
+  };
 
   it('presigns only an active account owned by the current user and tenant', async () => {
     mocks.findOne.mockResolvedValueOnce({ accountFinancialInstitutionKey: { name: 'bcp' } });
@@ -68,26 +87,22 @@ describe('account CSV import authorization', () => {
     expect(json).toHaveBeenCalledWith(expect.objectContaining({ key: 'account-41-upload.csv' }));
   });
 
-  it('enqueues only an active account owned by the current user and tenant', async () => {
-    const requestEnqueue = { send: vi.fn(), sendAfter: vi.fn() };
+  it('stages a self-committing import only for an active account owned by the current user and tenant', async () => {
     mocks.findOne.mockResolvedValueOnce({ accountFinancialInstitutionKey: null });
-    mocks.enqueue.mockResolvedValueOnce({ correlationId: 'csv-1', status: 'queued' });
-    const json = vi.fn();
-    const status = vi.fn(() => ({ json }));
 
-    await startAccountCsvImport(
-      makeRequest({ body: { key: 'account-41-upload.csv' }, enqueue: requestEnqueue }),
-      { status } as unknown as Response,
-      vi.fn(),
-    );
+    const { json, status } = await startImport({ key: 'account-41-upload.csv' });
 
     expect(mocks.findOne).toHaveBeenCalledWith(
       Account,
       { accountKey: 41, accountOwnerAppuserKey: user, deletedAt: undefined, tenantKey: tenant },
       { populate: ['accountFinancialInstitutionKey'] },
     );
-    expect(mocks.enqueue).toHaveBeenCalledWith(expect.objectContaining({ accountKey: 41, key: 'account-41-upload.csv' }), { enqueue: requestEnqueue });
+    expect(mocks.createSession).toHaveBeenCalledWith(
+      { appuserKey: user.appuserKey, tenantKey: tenant.tenantKey },
+      expect.objectContaining({ accountId: 41, autoCommit: true, key: 'account-41-upload.csv' }),
+    );
     expect(status).toHaveBeenCalledWith(202);
+    expect(json).toHaveBeenCalledWith({ correlationId: 'import:parse:1', importId: 'session-1', status: 'queued' });
   });
 
   it('presigns a manual account with no financial institution for the generic CSV format', async () => {
@@ -112,22 +127,46 @@ describe('account CSV import authorization', () => {
     expect(json).toHaveBeenCalledWith(expect.objectContaining({ csvImportFormat: 'bank', isSupportedBank: true }));
   });
 
+  it('reads the older generic CSV template with its own adapter, whatever the account bank', async () => {
+    mocks.findOne.mockResolvedValueOnce({ accountFinancialInstitutionKey: { name: '1822direkt' } });
+
+    const { next, status } = await startImport({ key: 'account-41-generic-id.csv' });
+
+    expect(next).not.toHaveBeenCalled();
+    expect(mocks.createSession).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ autoCommit: true, format: 'generic-csv', key: 'account-41-generic-id.csv' }));
+    expect(status).toHaveBeenCalledWith(202);
+  });
+
   it.each([
     ['no financial institution', null],
     ['an unsupported bank', { name: '1822direkt' }],
-  ])('starts a generic CSV import for an account with %s', async (_kind, institution) => {
+  ])('stages a statement import for an account with %s and a bank export', async (_kind, institution) => {
     mocks.findOne.mockResolvedValueOnce({ accountFinancialInstitutionKey: institution });
-    mocks.enqueue.mockResolvedValueOnce({ correlationId: 'csv-2', status: 'queued' });
-    const json = vi.fn();
-    const status = vi.fn(() => ({ json }));
-    const next = vi.fn();
+    mocks.getLimitedCsvObjectBuffer.mockResolvedValueOnce(Buffer.from(BANK_STATEMENT, 'utf8'));
 
-    await startAccountCsvImport(makeRequest({ body: { key: 'account-41-generic-id.csv' } }), { status } as unknown as Response, next);
+    const { status } = await startImport({ key: 'account-41-statement.csv' });
 
-    expect(next).not.toHaveBeenCalled();
-    expect(mocks.enqueue).toHaveBeenCalledWith(expect.objectContaining({ accountKey: 41, bankName: undefined, key: 'account-41-generic-id.csv' }), expect.anything());
+    expect(mocks.createSession).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ autoCommit: true, format: 'statement' }));
     expect(status).toHaveBeenCalledWith(202);
-    expect(json).toHaveBeenCalledWith({ correlationId: 'csv-2', status: 'queued' });
+  });
+
+  it('reads an OFX file with the OFX adapter by its content', async () => {
+    mocks.findOne.mockResolvedValueOnce({ accountFinancialInstitutionKey: null });
+    mocks.getLimitedCsvObjectBuffer.mockResolvedValueOnce(Buffer.from(OFX, 'utf8'));
+
+    const { status } = await startImport({ key: 'account-41-statement.csv' });
+
+    expect(mocks.createSession).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ autoCommit: true, format: 'ofx' }));
+    expect(status).toHaveBeenCalledWith(202);
+  });
+
+  it('stages an import the worker reports unreadable when the file cannot be read here', async () => {
+    mocks.findOne.mockResolvedValueOnce({ accountFinancialInstitutionKey: null });
+    mocks.getLimitedCsvObjectBuffer.mockRejectedValueOnce(new Error('NoSuchKey'));
+
+    await startImport({ key: 'account-41-missing.csv' });
+
+    expect(mocks.createSession).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ format: 'statement' }));
   });
 
   it.each([
@@ -154,7 +193,7 @@ describe('account CSV import authorization', () => {
     ['partner/shared', 51],
     ['foreign-tenant', 52],
     ['deleted', 53],
-  ])('rejects a %s account before enqueueing', async (_kind, accountId) => {
+  ])('rejects a %s account before staging an import', async (_kind, accountId) => {
     mocks.findOne.mockResolvedValueOnce(null);
     const next = vi.fn();
 
@@ -166,7 +205,7 @@ describe('account CSV import authorization', () => {
 
     expect(next).toHaveBeenCalledWith(expect.objectContaining({ message: 'Account not found' }));
     expect(next.mock.calls[0]?.[0]).toBeInstanceOf(NotFoundError);
-    expect(mocks.enqueue).not.toHaveBeenCalled();
+    expect(mocks.createSession).not.toHaveBeenCalled();
     expect(mocks.findOne).toHaveBeenCalledWith(
       Account,
       { accountKey: accountId, accountOwnerAppuserKey: user, deletedAt: undefined, tenantKey: tenant },

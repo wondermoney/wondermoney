@@ -15,11 +15,6 @@ import {
   handleAccountAutoSyncScheduleJob,
 } from '@app/jobs/account-auto-sync.worker';
 import {
-  ACCOUNT_CSV_IMPORT_QUEUE,
-  type AccountCsvImportJobPayload,
-  ensureAccountCsvImportQueue,
-} from '@app/jobs/account-csv-import.queue';
-import {
   ACCOUNT_INITIAL_SYNC_QUEUE,
   type AccountInitialSyncJobPayload,
   ensureAccountInitialSyncQueue,
@@ -319,7 +314,6 @@ export const createWorker = (deps: WorkerDeps = {}) => {
     await ensureAccountInitialSyncQueue(boss);
     await ensureBankRecoveryQueue(boss);
     await ensureBankRecoveryDispatchQueue(boss);
-    await ensureAccountCsvImportQueue(boss);
     await ensureDataExportQueue(boss);
     await ensureDataExportCleanupQueue(boss);
     await ensureDataRestoreQueue(boss);
@@ -458,16 +452,6 @@ export const createWorker = (deps: WorkerDeps = {}) => {
     await boss.work(BANK_RECOVERY_DISPATCH_QUEUE, workJobs<Job<unknown>>(BANK_RECOVERY_DISPATCH_QUEUE, () =>
       runInRequestContext(() => handleBankRecoveryDispatchJob(boss)),
     ));
-
-    await boss.work<AccountCsvImportJobPayload>(
-      ACCOUNT_CSV_IMPORT_QUEUE,
-      workJobs<Job<AccountCsvImportJobPayload>>(ACCOUNT_CSV_IMPORT_QUEUE, async (job) => {
-        const { handleAccountCsvImportJob } = await import('@app/jobs/account-csv-import.worker');
-        await runInRequestContext(() =>
-          handleAccountCsvImportJob(job, { backgroundOperationService: backgroundOperationServiceImpl, enqueue }),
-        );
-      }),
-    );
 
     await boss.work<DataExportJobPayload>(
       DATA_EXPORT_QUEUE,

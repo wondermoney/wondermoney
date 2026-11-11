@@ -14,6 +14,7 @@ import { Account } from '@entity/Account';
 import { BackgroundOperation, BackgroundOperationStatus } from '@entity/BackgroundOperation';
 import { Transaction } from '@entity/Transaction';
 import { TransactionType } from '@entity/TransactionType';
+import type { StatementMapping } from '@service/account/account-statement-mapping.schema';
 import type { Enqueue } from '@service/queue/enqueue';
 import { ConflictError, NotFoundError } from '@utils/errors';
 
@@ -91,9 +92,9 @@ describe('staged transaction import', () => {
   }
 
   /** Start an import of `text` on the household's account and read it, as the parse job does. */
-  async function staged(ctx: ReturnType<typeof setup>, text: string) {
+  async function staged(ctx: ReturnType<typeof setup>, text: string, options?: { mapping?: StatementMapping }) {
     const key = ctx.upload(household.account, text);
-    const created = await ctx.service().create(ownerScope(), { accountId: household.account.accountKey, format: 'statement', key });
+    const created = await ctx.service().create(ownerScope(), { accountId: household.account.accountKey, format: 'statement', key, ...(options ? { options } : {}) });
     await ctx.runLastJob();
     return ctx.service().get(ownerScope(), created.id, {});
   }
@@ -173,6 +174,27 @@ describe('staged transaction import', () => {
     await commitAndRun(ctx, view.session.id);
     expect(await storedTransactions()).toHaveLength(5);
     expect((await ctx.service().get(ownerScope(), view.session.id, {})).session.counts).toMatchObject({ imported: 5, invalid: 1 });
+  });
+
+  it('reads the file with the columns the person confirmed in the preview', async () => {
+    const ctx = setup();
+    const view = await staged(ctx, ['c1;c2;c3', '02-09-2026;CONTINENTE MATOSINHOS;-42,50', '05-09-2026;SALARIO ACME LDA;1.500,00'].join('\n'), {
+      mapping: { columns: { amount: 2, date: 0, description: 1 }, dateFormat: 'DMY', decimalSeparator: ',', headerRowIndex: 0, invertAmounts: false },
+    });
+
+    expect(view.session.status).toBe('ready');
+    expect(view.rows.items.map((row) => ({ amount: row.normalized?.amount, date: row.normalized?.date.slice(0, 10), merchant: row.normalized?.merchant }))).toEqual([
+      { amount: -42.5, date: '2026-09-02', merchant: 'CONTINENTE MATOSINHOS' },
+      { amount: 1500, date: '2026-09-05', merchant: 'SALARIO ACME LDA' },
+    ]);
+  });
+
+  it('ends the session as failed when the columns cannot be found', async () => {
+    const ctx = setup();
+    const view = await staged(ctx, ['a;b;c', 'foo;bar;baz'].join('\n'));
+
+    expect(view.session).toMatchObject({ errorCode: 'columns_not_found', status: 'failed' });
+    expect(view.session.counts).toMatchObject({ new: 0 });
   });
 
   it('pages and filters the rows by status', async () => {

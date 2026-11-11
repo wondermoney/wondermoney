@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mocked = vi.hoisted(() => ({
   count: vi.fn(() => Promise.resolve(0)),
-  csvImportEnqueue: vi.fn(),
+  createImportSession: vi.fn(),
   find: vi.fn(),
   findOne: vi.fn(),
   getAccountCsvBucketName: vi.fn().mockReturnValue('account-transactions-excel-dev'),
@@ -42,7 +42,11 @@ vi.mock('@app/database/di', () => ({
   },
 }));
 
-vi.mock('@service/account/account-csv-import-enqueue.service', () => ({ default: class AccountCsvImportEnqueueService { enqueue = mocked.csvImportEnqueue; } }));
+vi.mock('@service/transaction-import/transaction-import.service', () => ({
+  TransactionImportService: class TransactionImportService {
+    create = mocked.createImportSession;
+  },
+}));
 
 vi.mock('@service/storage/s3', () => ({
   default: {
@@ -64,7 +68,7 @@ describe('account controller scenarios', () => {
   beforeEach(() => {
     mocked.find.mockReset();
     mocked.findOne.mockReset();
-    mocked.csvImportEnqueue.mockReset();
+    mocked.createImportSession.mockReset().mockResolvedValue({ correlationId: 'import:parse:1', id: 'session-1' });
     mocked.getAccountCsvBucketName.mockReset().mockReturnValue('account-transactions-excel-dev');
     mocked.presignedUrl.mockReset();
   });
@@ -77,25 +81,22 @@ describe('account controller scenarios', () => {
     expect(mocked.find).not.toHaveBeenCalled();
   });
 
-  it('enqueues undefined bank name for unsupported server-derived banks', async () => {
+  it('stages an import for an account whose bank has no parser of its own', async () => {
     const requestEnqueue = { send: vi.fn(), sendAfter: vi.fn() };
     mocked.findOne.mockResolvedValueOnce({ accountFinancialInstitutionKey: { name: 'Bank XYZ' }, accountKey: 1 });
-    mocked.csvImportEnqueue.mockResolvedValueOnce({ correlationId: 'csv-corr', status: 'queued' });
-    const json = vi.fn();
-    const status = vi.fn(() => ({ json }));
     const next = vi.fn();
 
     await startAccountCsvImport(
       Object.assign(mockReq({ body: { bankName: 'Custom Bank', key: 'account-1-bank-file.csv' }, params: { accountId: '1' } }), { enqueue: requestEnqueue, tenant: { tenantKey: 7 }, user: { appuserKey: 1 } }),
-      mockRes({ status }),
+      mockRes({ status: vi.fn(() => ({ json: vi.fn() })) }),
       next,
     );
 
     expect(next).not.toHaveBeenCalled();
-    expect(mocked.csvImportEnqueue).toHaveBeenCalledWith(expect.objectContaining({ bankName: undefined }), { enqueue: requestEnqueue });
+    expect(mocked.createImportSession).toHaveBeenCalledWith({ appuserKey: 1, tenantKey: 7 }, expect.objectContaining({ accountId: 1, autoCommit: true, key: 'account-1-bank-file.csv' }));
   });
 
-  it('rejects unsafe csv import object keys before enqueueing', async () => {
+  it('rejects unsafe csv import object keys before staging an import', async () => {
     mocked.findOne.mockResolvedValueOnce({ accountKey: 1 });
     const next = vi.fn();
 
@@ -105,7 +106,7 @@ describe('account controller scenarios', () => {
       next,
     );
 
-    expect(mocked.csvImportEnqueue).not.toHaveBeenCalled();
+    expect(mocked.createImportSession).not.toHaveBeenCalled();
     expect(next).toHaveBeenCalledWith(expect.objectContaining({ message: 'Invalid CSV object key' }));
   });
 

@@ -10,7 +10,7 @@
  */
 
 /** The file formats a session can read. Each one is an {@link ImportAdapter}. */
-export const IMPORT_FORMATS = ['statement', 'ofx'] as const;
+export const IMPORT_FORMATS = ['statement', 'ofx', 'generic-csv'] as const;
 export type ImportFormat = (typeof IMPORT_FORMATS)[number];
 
 /**
@@ -70,6 +70,12 @@ export interface NormalizedImportRow {
   sourceAccountLabel?: string;
   /** A type the source suggests (`PAYMENT`, `CARD_PAYMENT`); the sign still decides direction. */
   typeHint?: string;
+  /**
+   * The file states the type itself, rather than a reader guessing it from the description: the
+   * generic CSV template's `transactionTypeKey` column. The commit records it as a type the person
+   * chose, so transfer matching never re-types the row.
+   */
+  typeIsUserSet?: boolean;
 }
 
 /** One line of the file: what it said, and how it reads (or why it does not). */

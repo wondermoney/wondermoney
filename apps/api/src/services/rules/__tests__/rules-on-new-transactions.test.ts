@@ -19,6 +19,7 @@ vi.mock('@service/rules/rule-engine', async (importOriginal) => {
 
 import { addAccount, addPartner, type Household, seedHousehold } from '@app/__tests__/__helpers__/finance-fixtures';
 import { useTestDatabase } from '@app/__tests__/__helpers__/pg-test-db';
+import { DI } from '@app/database/di';
 import type { Account } from '@entity/Account';
 import type { Appuser } from '@entity/Appuser';
 import { AppuserMerchantCategory, Source as MappingSource } from '@entity/AppuserMerchantCategory';
@@ -34,10 +35,11 @@ import { TransactionEnrichment } from '@entity/TransactionEnrichment';
 import { TransactionMerchant } from '@entity/TransactionMerchant';
 import { TransactionTag } from '@entity/TransactionTag';
 import { TransactionType } from '@entity/TransactionType';
-import AccountCsvImportService from '@service/account/account-csv-import.service';
 import syncService, { type BankSyncTransaction } from '@service/account/account-initial-sync-transaction.service';
 import { connectionRef as conn, providerFromClient } from '@service/bank-providers/__tests__/helpers';
+import type { Enqueue } from '@service/queue/enqueue';
 import type { RuleAction, RuleCondition } from '@service/rules/rule-schema';
+import { TransactionImportService, type TransactionImportStorage } from '@service/transaction-import/transaction-import.service';
 import { applyUserCategorization } from '@service/transaction/user-categorization.service';
 
 /*
@@ -279,11 +281,47 @@ describe('rules on new transactions', () => {
       await em.flush();
     });
 
-    function importStatement(text: string) {
-      return new AccountCsvImportService().importAccountCsv(
-        { accountKey: household.account.accountKey, bucket: 'bucket', key: 'statement.csv', mapping: { columns: { amount: 2, date: 0, description: 1 }, dateFormat: 'YMD', decimalSeparator: ',', headerRowIndex: 0, invertAmounts: false } },
-        { em: db.em(), getObjectBuffer: () => Promise.resolve(Buffer.from(text)), getObjectSize: () => Promise.resolve(undefined), getObjectText: () => Promise.resolve(text) },
-      );
+    /** A staged import of `text`, read and committed as the worker does, reporting what it did. */
+    async function importFile(text: string, format: 'generic-csv' | 'statement' = 'statement') {
+      const objects = new Map<string, Buffer>();
+      const storage: TransactionImportStorage = {
+        getAccountCsvBucketName: () => 'bucket',
+        getObjectBuffer: (_bucket, key) => {
+          const object = objects.get(key);
+          return object ? Promise.resolve(object) : Promise.reject(new Error('NoSuchKey'));
+        },
+        getObjectSize: (_bucket, key) => Promise.resolve(objects.get(key)?.length),
+        presignAccountUpload: (accountKey) => Promise.resolve({ key: `account-${accountKey}-import-${objects.size + 1}.csv`, presignedUrl: 'https://files.example.test/upload' }),
+      };
+      const sent: { data: { correlationId: string; mode: 'commit' | 'parse' }; queue: string }[] = [];
+      const enqueue: Enqueue = {
+        send: (queue, data) => {
+          sent.push({ data: data as (typeof sent)[number]['data'], queue });
+          return Promise.resolve(`job-${sent.length}`);
+        },
+        sendAfter: () => Promise.resolve(null),
+      };
+      const service = () => new TransactionImportService(DI.em.fork(), { enqueue, storage });
+      const runLastJob = () => {
+        const index = sent.length - 1;
+        const job = sent[index];
+        if (!job) throw new Error('no job queued');
+        return service().run(job.data.correlationId, `job-${index + 1}`, job.data.mode);
+      };
+      const key = `account-${household.account.accountKey}-import-${objects.size + 1}.csv`;
+      objects.set(key, Buffer.from(text, 'utf8'));
+      const scope = { appuserKey: household.appuser.appuserKey, tenantKey: household.tenant.tenantKey };
+      const created = await service().create(scope, {
+        accountId: household.account.accountKey,
+        format,
+        key,
+        ...(format === 'statement' ? { options: { mapping: { columns: { amount: 2, date: 0, description: 1 }, dateFormat: 'YMD' as const, decimalSeparator: ',', headerRowIndex: 0, invertAmounts: false } } } : {}),
+      });
+      await runLastJob();
+      await service().commit(scope, created.id);
+      await runLastJob();
+      const view = await service().get(scope, created.id, {});
+      return { failed: view.session.counts.failed + view.session.counts.invalid, imported: view.session.counts.imported, skipped: view.session.counts.skipped };
     }
 
     const statement = ['date;description;amount', '2026-09-02;NETFLIX.COM;-12,99', '2026-09-03;CONTINENTE MATOSINHOS;-42,50'].join('\n');
@@ -296,7 +334,7 @@ describe('rules on new transactions', () => {
       await learnMapping(household, 'CONTINENTE MATOSINHOS', groceries);
       const rule = await addRule(household, household.appuser, [{ categoryId: streaming.categoryKey, type: 'set_category' }]);
 
-      await expect(importStatement(statement)).resolves.toMatchObject({ failed: 0, imported: 2 });
+      await expect(importFile(statement)).resolves.toMatchObject({ failed: 0, imported: 2 });
 
       const [netflixRow, groceriesRow] = await storedRows();
       expect(netflixRow).toMatchObject({ categorizationConfidence: CategorizationConfidence.HIGH, categorizationReason: `rule:${rule.ruleKey}` });
@@ -308,11 +346,11 @@ describe('rules on new transactions', () => {
 
     it('does not apply rules to the rows a re-import skips', async () => {
       await addRule(household, household.appuser, [{ type: 'set_notes', value: 'from a rule' }]);
-      await importStatement(statement);
+      await importFile(statement);
       const [row] = await storedRows();
       await db.em().nativeUpdate(Transaction, { transactionKey: row!.transactionKey }, { notes: 'mine' });
 
-      await expect(importStatement(statement)).resolves.toMatchObject({ imported: 0, skipped: 2 });
+      await expect(importFile(statement)).resolves.toMatchObject({ imported: 0, skipped: 2 });
 
       expect((await storedRows())[0]).toMatchObject({ notes: 'mine' });
       expect(await ruleAudits(row!)).toHaveLength(1);
@@ -322,7 +360,7 @@ describe('rules on new transactions', () => {
       await addRule(household, household.appuser, [{ type: 'set_notes', value: 'never written' }]);
       engineFault.on = true;
 
-      await expect(importStatement(statement)).resolves.toMatchObject({ failed: 0, imported: 2 });
+      await expect(importFile(statement)).resolves.toMatchObject({ failed: 0, imported: 2 });
 
       expect((await storedRows()).map((row) => row.notes ?? null)).toEqual([null, null]);
     });
@@ -330,12 +368,9 @@ describe('rules on new transactions', () => {
     it('runs the rules on rows of the generic CSV template', async () => {
       const cardPayment = await db.em().findOneOrFail(TransactionType, { name: 'CARD_PAYMENT' });
       await addRule(household, household.appuser, [{ type: 'set_notes', value: 'from a rule' }]);
-      const text = ['date,amount,currencyKey,merchant,description,internalTransactionId,transactionTypeKey', `2026-09-01,12.99,,Netflix,,generic-1,${cardPayment.transactionTypeKey}`, `2026-09-02,40,,Continente,,generic-2,${cardPayment.transactionTypeKey}`].join('\n');
+      const text = ['date,amount,merchant,internalTransactionId,transactionTypeKey,description', `2026-09-01,12.99,Netflix,generic-1,${cardPayment.transactionTypeKey},`, `2026-09-02,40,Continente,generic-2,${cardPayment.transactionTypeKey},`].join('\n');
 
-      await expect(new AccountCsvImportService().importAccountCsv(
-        { accountKey: household.account.accountKey, bucket: 'bucket', key: 'generic.csv' },
-        { em: db.em(), getObjectBuffer: () => Promise.resolve(Buffer.from(text)), getObjectSize: () => Promise.resolve(undefined), getObjectText: () => Promise.resolve(text) },
-      )).resolves.toMatchObject({ failed: 0, imported: 2 });
+      await expect(importFile(text, 'generic-csv')).resolves.toMatchObject({ failed: 0, imported: 2 });
 
       expect((await storedRows()).map((row) => [row.transactionMerchantKey?.name, row.notes ?? null])).toEqual([['Netflix', 'from a rule'], ['Continente', null]]);
     });

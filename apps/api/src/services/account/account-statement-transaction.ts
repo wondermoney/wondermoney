@@ -23,8 +23,8 @@ import { reconcileTransfers } from '@service/transaction/transfer-matching.servi
 import logger from '@utils/logger';
 
 /**
- * Writing bank statement lines as transactions, in three steps both statement imports share (the
- * one-step `AccountCsvImportService` and the staged `transaction-import` commit):
+ * Writing imported lines as transactions, in the three steps the staged `transaction-import`
+ * commit uses:
  *
  *   build    one line → one unsaved `Transaction`, signed as the file states it
  *   settle   the account's balance chain, the household's rules and learned categories, inside
@@ -87,13 +87,18 @@ export async function statementWriteContext(em: EM, account: Account): Promise<S
  * `trustedId: false` stores the line's id as its fingerprint only, not as its unique provider id:
  * for a line the person imports although the same id is already on the account (or earlier in the
  * file), which the account's unique `nordigenInternalTransactionId` would refuse.
+ *
+ * `trustedType: true` keeps the line's type as stated, without making it agree with the amount's
+ * sign: the generic CSV template's type is the person's word, and its amount is already signed by
+ * that type. A statement's type is only a guess from the description, so it is adjusted instead.
  */
-export async function buildStatementTransaction(em: EM, context: StatementWriteContext, line: StatementLine, options: { trustedId?: boolean } = {}): Promise<Transaction> {
+export async function buildStatementTransaction(em: EM, context: StatementWriteContext, line: StatementLine, options: { trustedId?: boolean; trustedType?: boolean } = {}): Promise<Transaction> {
   const validated = statementLineSchema.parse(line);
   // The bank file states the direction in the amount's sign; the type guessed from the
   // description is only a label, so it is made to agree with the sign rather than the reverse.
   const signedAmount = validated.settlementAmount;
-  const transactionType = await cached(context.types, transactionTypeForSignedAmount(resolveTransactionTypeName(validated.transactionType), signedAmount), (name) => em.findOne(TransactionType, { name }));
+  const statedType = resolveTransactionTypeName(validated.transactionType);
+  const transactionType = await cached(context.types, options.trustedType === true ? statedType : transactionTypeForSignedAmount(statedType, signedAmount), (name) => em.findOne(TransactionType, { name }));
   if (!transactionType) throw new Error(`TransactionType not found: ${line.transactionType}`);
   const currency = await cached(context.currencies, validated.settlementCurrency, (code) => em.findOne(Currency, { code }));
   if (!currency) throw new Error(`Currency not found: ${line.settlementCurrency}`);

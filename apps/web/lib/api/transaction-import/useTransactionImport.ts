@@ -51,7 +51,7 @@ export interface TransactionImportSession {
   detailsDeletedAt: string | null;
   errorCode: string | null;
   expiresAt: string;
-  format: "statement" | "ofx";
+  format: "statement" | "ofx" | "generic-csv";
   id: string;
   sourceAccounts: { currency?: string; label: string; rowCount: number }[];
   status: ImportSessionStatus;

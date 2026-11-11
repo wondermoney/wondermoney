@@ -1,7 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
 import { enqueueAccountAutoSyncRequisitionJob } from '../account-auto-sync.queue';
-import { enqueueAccountCsvImportJob } from '../account-csv-import.queue';
 import { enqueueAccountInitialSyncJob } from '../account-initial-sync.queue';
 import { enqueueAccountRecalculateJob } from '../account-recalculate.queue';
 import { enqueueBankRecoveryAfter } from '../bank-recovery.queue';
@@ -101,14 +100,6 @@ const ENQUEUE_HELPERS: { invoke: (recorder: Recorder) => Promise<unknown>; name:
         asDeps(r),
       ),
     name: 'enqueueAccountAutoSyncRequisitionJob',
-  },
-  {
-    invoke: (r) =>
-      enqueueAccountCsvImportJob(
-        { accountKey: 7, bucket: 'bucket', correlationId: 'account.csv-import:7:abc', key: 'uploads/a.csv' },
-        asDeps(r),
-      ),
-    name: 'enqueueAccountCsvImportJob',
   },
   {
     invoke: (r) =>

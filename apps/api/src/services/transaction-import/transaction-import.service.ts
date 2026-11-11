@@ -9,10 +9,13 @@ import { enqueueTransactionImportJob, type TransactionImportJobMode } from '@app
 import { Account } from '@entity/Account';
 import { Appuser } from '@entity/Appuser';
 import { BackgroundOperation, BackgroundOperationStatus } from '@entity/BackgroundOperation';
+import { Currency } from '@entity/Currency';
 import { Tenant } from '@entity/Tenant';
 import { Transaction } from '@entity/Transaction';
+import { TransactionAuditActorType, TransactionAuditEventType } from '@entity/TransactionAuditLog';
 import { TransactionImportRow, TransactionImportRowDecision, TransactionImportRowStatus } from '@entity/TransactionImportRow';
 import { TransactionImportSession, TransactionImportSessionStatus } from '@entity/TransactionImportSession';
+import { TransactionType } from '@entity/TransactionType';
 import { resolveAccountCsvImportFormat } from '@service/account/account-csv-import-format';
 import type { StatementMapping } from '@service/account/account-statement-mapping.schema';
 import { buildStatementTransaction, followUpStatementImport, settleStatementImport, type StatementWriteContext, statementWriteContext } from '@service/account/account-statement-transaction';
@@ -20,6 +23,7 @@ import { getLimitedCsvObjectBuffer, validateCsvObjectKey } from '@service/accoun
 import backgroundOperationService from '@service/operations/background-operation.service';
 import type { Enqueue } from '@service/queue/enqueue';
 import s3Service from '@service/storage/s3';
+import { TransactionAuditService } from '@service/transaction/transaction-audit.service';
 import { findImportedTransactionIds } from '@service/transaction/transaction-dedup.service';
 import { BadRequestError, ConflictError, NotFoundError } from '@utils/errors';
 import logger from '@utils/logger';
@@ -204,7 +208,7 @@ const defaultStorage: TransactionImportStorage = {
 
 export class TransactionImportService {
   private get adapters(): Partial<Record<transactionImport.ImportFormat, transactionImport.ImportAdapter<never>>> {
-    return this.deps.adapters ?? { ofx: transactionImport.ofxImportAdapter, statement: statementImportAdapter };
+    return this.deps.adapters ?? { 'generic-csv': transactionImport.genericCsvImportAdapter, ofx: transactionImport.ofxImportAdapter, statement: statementImportAdapter };
   }
 
   private get now(): Date {
@@ -383,12 +387,15 @@ export class TransactionImportService {
     let result: transactionImport.ImportParseResult;
     try {
       const buffer = await getLimitedCsvObjectBuffer({ bucket: session.s3Bucket, key: session.s3Key }, { getObjectBuffer: (bucket, key) => this.storage.getObjectBuffer(bucket, key), getObjectSize: (bucket, key) => this.storage.getObjectSize(bucket, key) });
-      // The file decides too: an OFX/QFX upload read as a statement is still OFX.
-      if (session.format === 'statement' && transactionImport.isOfxFile(new Uint8Array(buffer))) session.format = 'ofx';
+      // The file decides too: an OFX/QFX upload read as a statement is still OFX, and the older
+      // WonderMoney CSV template (whose columns no bank export has) is read by its own adapter.
+      const bytes = new Uint8Array(buffer);
+      if (session.format === 'statement' && transactionImport.isOfxFile(bytes)) session.format = 'ofx';
+      else if (session.format === 'statement' && transactionImport.isGenericCsvTemplate(bytes)) session.format = 'generic-csv';
       const adapter = this.adapters[session.format];
       if (!adapter) throw new StatementUnreadableError('unreadable');
-      const options = { accountCurrency: account.currencyKey.code, ...(session.options ?? {}) };
-      result = await (adapter as transactionImport.ImportAdapter<typeof options>).parse(new Uint8Array(buffer), options);
+      const options = { accountCurrency: account.currencyKey.code, ...(session.format === 'generic-csv' ? await this.genericCsvOptions() : {}), ...(session.options ?? {}) };
+      result = await (adapter as transactionImport.ImportAdapter<typeof options>).parse(bytes, options);
     } catch (error) {
       session.status = SESSION_STATUS.FAILED;
       session.errorCode = error instanceof StatementUnreadableError ? error.code : 'unreadable';
@@ -430,6 +437,21 @@ export class TransactionImportService {
     session.warnings = result.warnings;
     session.status = transactionImport.isMappingComplete(result.sourceAccounts, mapping) ? SESSION_STATUS.READY : SESSION_STATUS.NEEDS_MAPPING;
     await this.em.flush();
+  }
+
+  /**
+   * The generic CSV template names its transaction types and currencies by number. The adapter is
+   * pure, so the session resolves them here, once per read, and hands it the names and codes.
+   */
+  private async genericCsvOptions(): Promise<{ currencies: Record<string, string>; transactionTypes: Record<string, string> }> {
+    const [types, currencies] = await Promise.all([
+      this.em.find(TransactionType, {}, { fields: ['transactionTypeKey', 'name'] }),
+      this.em.find(Currency, {}, { fields: ['currencyKey', 'code'] }),
+    ]);
+    return {
+      currencies: Object.fromEntries(currencies.map((currency) => [String(currency.currencyKey), currency.code])),
+      transactionTypes: Object.fromEntries(types.map((type) => [String(type.transactionTypeKey), type.name])),
+    };
   }
 
   /**
@@ -579,7 +601,7 @@ export class TransactionImportService {
         }
         try {
           const trustedId = row.status === ROW_STATUS.NEW && normalized.externalIdTrusted !== false;
-          const transaction = await buildStatementTransaction(tx, context, toStatementLine(normalized, row.sourceRow, context.account.currencyKey.code), { trustedId });
+          const transaction = await buildStatementTransaction(tx, context, toStatementLine(normalized, row.sourceRow, context.account.currencyKey.code), { trustedId, trustedType: normalized.typeIsUserSet === true });
           tx.persist(transaction);
           row.importedTransactionKey = transaction;
           row.status = ROW_STATUS.IMPORTED;
@@ -602,7 +624,7 @@ export class TransactionImportService {
     return this.em.fork().transactional(async (tx) => {
       const locked = await tx.findOne(TransactionImportSession, { transactionImportSessionKey: sessionKey }, { filters: false, lockMode: LockMode.PESSIMISTIC_WRITE });
       if (locked?.status !== SESSION_STATUS.IMPORTING || locked.correlationId !== correlationId) return null;
-      const importedRows = await tx.find(TransactionImportRow, { status: ROW_STATUS.IMPORTED, transactionImportSessionKey: bySession(sessionKey) }, { fields: ['importedTransactionKey', 'targetAccountKey'] });
+      const importedRows = await tx.find(TransactionImportRow, { status: ROW_STATUS.IMPORTED, transactionImportSessionKey: bySession(sessionKey) }, { fields: ['importedTransactionKey', 'normalized', 'targetAccountKey'] });
       const importedKeys = new Set(importedRows.flatMap((row) => (keyOf(row.importedTransactionKey, 'transactionKey') === null ? [] : [keyOf(row.importedTransactionKey, 'transactionKey')!])));
       const accountKeys = [...new Set(importedRows.flatMap((row) => (keyOf(row.targetAccountKey, 'accountKey') === null ? [] : [keyOf(row.targetAccountKey, 'accountKey')!])))];
       const accounts: { account: Account; dates: Date[] }[] = [];
@@ -612,6 +634,7 @@ export class TransactionImportService {
         const imported = all.filter((transaction) => importedKeys.has(transaction.transactionKey));
         const existing = all.filter((transaction) => !importedKeys.has(transaction.transactionKey));
         await settleStatementImport(tx, account, existing, imported);
+        await this.recordFileSetTypes(tx, account, importedRows.filter((row) => keyOf(row.targetAccountKey, 'accountKey') === accountKey));
         accounts.push({ account, dates: imported.flatMap((transaction) => (transaction.transactionDate ? [transaction.transactionDate] : [])) });
       }
       await tx.nativeUpdate(TransactionImportRow, { status: { $in: WRITABLE_ROW_STATUSES }, transactionImportSessionKey: bySession(sessionKey) }, { status: ROW_STATUS.SKIPPED, updatedAt: this.now });
@@ -628,6 +651,34 @@ export class TransactionImportService {
 
   private assertReviewable(session: TransactionImportSession): void {
     if (this.isExpired(session) || (session.status !== SESSION_STATUS.READY && session.status !== SESSION_STATUS.NEEDS_MAPPING)) throw new ConflictError('This import is not waiting for review');
+  }
+
+  /**
+   * A row the file typed itself (the generic CSV template's `transactionTypeKey`) keeps that type
+   * through later transfer matching, as a type the person chose: the matcher reads a USER audit
+   * entry that changed `transactionTypeKey` and never re-types such a row. A statement's type is a
+   * guess from the description, so it is not recorded and the matcher may still pair it.
+   */
+  private async recordFileSetTypes(tx: EntityManager, account: Account, rows: Pick<TransactionImportRow, 'importedTransactionKey' | 'normalized'>[]): Promise<void> {
+    const ownerKey = keyOf(account.accountOwnerAppuserKey, 'appuserKey');
+    const tenantKey = keyOf(account.tenantKey, 'tenantKey');
+    if (ownerKey === null || tenantKey === null) return;
+    for (const row of rows) {
+      const typeName = row.normalized?.typeIsUserSet === true ? row.normalized.typeHint : undefined;
+      const transactionKey = keyOf(row.importedTransactionKey, 'transactionKey');
+      if (!typeName || transactionKey === null) continue;
+      await TransactionAuditService.log(tx, {
+        accountKey: account.accountKey,
+        actorAppuserKey: ownerKey,
+        actorType: TransactionAuditActorType.USER,
+        appuserKey: ownerKey,
+        changes: { transactionTypeKey: { from: null, to: typeName } },
+        eventType: TransactionAuditEventType.CREATED,
+        source: 'transaction-import',
+        tenantKey,
+        transactionKey,
+      }, { flush: false });
+    }
   }
 
   /** Rows by status and, among those not committed yet, by decision. Scoped by the session's key alone: only an owner-checked session reaches it. */
