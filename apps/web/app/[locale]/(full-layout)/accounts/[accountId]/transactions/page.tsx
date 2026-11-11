@@ -2,6 +2,7 @@ import { endOfDay, startOfDay, subDays } from "date-fns";
 import { notFound } from "next/navigation";
 
 import { getAccount } from "@/lib/api/account/useAccount";
+import { getAccountForecast } from "@/lib/api/account/useAccountForecast";
 import { getAccountTransactions } from "@/lib/api/account/useAccountTransactions";
 import { getServerApi } from "@/lib/api/api-server";
 import { getConfigs } from "@/lib/api/configs/useConfigs";
@@ -35,8 +36,13 @@ export default async function AccountTransactionsPage({
     to: endOfDay(new Date()),
   };
 
-  const [accountData, transactionsData, anyTransactionsData, configsData] =
-    await Promise.all([
+  const [
+    accountData,
+    transactionsData,
+    anyTransactionsData,
+    configsData,
+    forecastData,
+  ] = await Promise.all([
       getAccount(accountId, api),
       getAccountTransactions(
         {
@@ -49,6 +55,7 @@ export default async function AccountTransactionsPage({
       ),
       getAccountTransactions({ accountId, limit: 1 }, api),
       getConfigs(api),
+      getAccountForecast({ accountKeys: [accountId], days: 30 }, api),
     ]);
 
   return (
@@ -59,6 +66,7 @@ export default async function AccountTransactionsPage({
       initialAccountData={accountData}
       initialTransactionsData={transactionsData}
       initialConfigsData={configsData}
+      initialForecastData={forecastData}
       hasAnyTransactions={(anyTransactionsData.transactions?.length ?? 0) > 0}
       defaultDateRange={defaultDateRange}
     />

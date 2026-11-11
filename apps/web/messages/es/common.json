@@ -1254,6 +1254,7 @@
   "balance-growth": "Evolución del saldo",
   "account-overview": "Resumen de la cuenta",
   "account-balance": "Saldo de la cuenta",
+  "projected-balance": "Saldo previsto",
   "all-transactions": "Todas las transacciones",
   "account-overview-description": "Este es un resumen de tu cuenta, incluyendo evolución del saldo, últimas transacciones e insights.",
   "accounts-overview": "Resumen de cuentas",
@@ -2238,6 +2239,13 @@
     "saving": "Guardando cambio…",
     "saved": "Cambio guardado.",
     "saveError": "No se pudo confirmar este cambio. Tus preferencias se están actualizando desde el servidor."
+  },
+  "forecast": {
+    "lowPoint": "Punto más bajo en los próximos {days} días",
+    "notCounted": "No cuenta en los informes",
+    "projected": "Previsto",
+    "projectedTransactions": "Transacciones previstas",
+    "unavailable": "Aún no hay datos suficientes para prever esta cuenta."
   },
   "recurring": {
     "title": "Facturas y suscripciones",

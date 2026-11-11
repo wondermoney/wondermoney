@@ -169,6 +169,51 @@ describe('AccountDetailScreen', () => {
     expect(unavailable.view.getAllByText('Balance unavailable').length).toBeGreaterThan(0)
   })
 
+  it('shows the forecast card with the low point and the next projected payments', async () => {
+    const low = formatCurrency(880, { locale: 'en', currency: 'USD' })
+    const projected = formatCurrency(-120, { locale: 'en', currency: 'USD' })
+    const { view } = await renderScreen({
+      status: 'loaded',
+      data: {
+        ...openBanking,
+        forecast: {
+          status: 'loaded',
+          series: {
+            accountKey: 42,
+            complete: true,
+            currency: 'USD',
+            lowPoint: { balance: 880, date: '2026-03-06' },
+            openingBalance: 1000,
+            points: [
+              { balance: 1000, date: '2026-03-01' },
+              { balance: 880, date: '2026-03-06' },
+            ],
+            projected: [
+              { accountKey: 42, amount: 120, currency: 'USD', date: '2026-03-06', name: 'Rent', seriesKey: 1 },
+            ],
+          },
+        },
+      },
+    })
+
+    expect(view.getByRole('header', { name: 'Forecast' })).toBeOnTheScreen()
+    expect(view.getByText('Low point in the next 30 days')).toBeOnTheScreen()
+    expect(view.getByLabelText(low)).toBeOnTheScreen()
+    expect(view.getByText('Rent')).toBeOnTheScreen()
+    expect(view.getByLabelText(projected)).toBeOnTheScreen()
+    expect(view.getByText('Not counted in reports')).toBeOnTheScreen()
+  })
+
+  it('says the account cannot be projected yet instead of showing a zero', async () => {
+    const { view } = await renderScreen({
+      status: 'loaded',
+      data: { ...openBanking, forecast: { status: 'unavailable' } },
+    })
+
+    expect(view.getByText('Not enough data to project this account yet.')).toBeOnTheScreen()
+    expect(view.queryByText('Low point in the next 30 days')).not.toBeOnTheScreen()
+  })
+
   it('shows inflow, outflow and savings rate with last period beside each', async () => {
     const { view } = await renderScreen({ status: 'loaded', data: { ...openBanking, metrics: { status: 'loaded', summary: { inflowCurrent: 100, inflowPast: 50, outflowCurrent: 40, outflowPast: 20, inflowPct: 1, outflowPct: 1, netSavings: 60, netSavingsPast: 30, savingsRate: 0.6 } } } })
     for (const label of ['Inflow', 'Outflow', 'Savings rate']) expect(view.getByText(label)).toBeOnTheScreen()

@@ -1,7 +1,6 @@
 "use client";
 
 import * as changeCase from "change-case";
-import { startOfMonth } from "date-fns";
 import { useTranslations } from "next-intl";
 import React, { useMemo } from "react";
 
@@ -11,7 +10,9 @@ import {
   useChartFormatters,
 } from "@/components/ui/charts";
 import { getAccountChartCurrencyCode } from "@/lib/account/account-display-logic";
+import { mergeForecastIntoChartData } from "@/lib/account/account-forecast-chart-data";
 import { buildAccountTransactionsChartData } from "@/lib/account/account-transactions-chart-data";
+import type { ForecastPoint } from "@/lib/api/account/useAccountForecast";
 import type { Transaction } from "@/lib/api/account/useTransactions";
 import { useFormatCurrency } from "@/lib/utils/useFormatCurrency";
 
@@ -19,6 +20,8 @@ import type { ChartConfig } from "../ui/chart";
 
 interface AccountTransactionsLineChartProps {
   currencyCode?: string;
+  /** The account's projected daily balances; drawn dashed after today when in the chart's currency. */
+  forecast?: { currency: string; points: ForecastPoint[] } | null;
   transactions: Transaction[];
   fromDate?: Date;
   toDate?: Date;
@@ -26,15 +29,10 @@ interface AccountTransactionsLineChartProps {
 
 const AccountTransactionsChart: React.FC<AccountTransactionsLineChartProps> =
   React.memo(
-    ({ currencyCode: displayCurrencyCode, transactions, fromDate, toDate }) => {
+    ({ currencyCode: displayCurrencyCode, forecast, transactions, fromDate, toDate }) => {
       const t = useTranslations();
       const { formatChartDate } = useChartFormatters();
       const formatCurrency = useFormatCurrency();
-      const chartData = useMemo(
-        () =>
-          buildAccountTransactionsChartData({ transactions, fromDate, toDate }),
-        [transactions, fromDate, toDate],
-      );
       const currencyCode = useMemo(
         () =>
           getAccountChartCurrencyCode(
@@ -43,11 +41,24 @@ const AccountTransactionsChart: React.FC<AccountTransactionsLineChartProps> =
           ),
         [displayCurrencyCode, transactions],
       );
+      const chartData = useMemo(
+        () =>
+          mergeForecastIntoChartData(
+            buildAccountTransactionsChartData({ transactions, fromDate, toDate }),
+            forecast,
+            currencyCode,
+          ),
+        [transactions, fromDate, toDate, forecast, currencyCode],
+      );
 
       const chartConfig: ChartConfig = useMemo(
         () => ({
           balance: {
             label: t("balance"),
+            color: "var(--chart-1)",
+          },
+          projectedBalance: {
+            label: t("projected-balance"),
             color: "var(--chart-1)",
           },
           dailyAmount: {
@@ -64,6 +75,8 @@ const AccountTransactionsChart: React.FC<AccountTransactionsLineChartProps> =
           areaKeys={["balance"]}
           barKeys={["dailyAmount"]}
           signedBarKeys={["dailyAmount"]}
+          lineKeys={["projectedBalance"]}
+          dashedLineKeys={["projectedBalance"]}
           data={chartData}
           config={chartConfig}
           className="h-[300px] md:h-[400px]"

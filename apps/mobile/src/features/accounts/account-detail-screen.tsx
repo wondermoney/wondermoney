@@ -30,6 +30,7 @@ import type { RecentTransactionRow } from '@/features/transactions/recent-transa
 
 import { accountFreshness } from './account-freshness'
 import type { AccountDetailViewModel } from './account-detail-view-model'
+import { ForecastCard, type AccountForecastState } from './forecast-card'
 import type { AccountRecalculationState } from './use-account-recalculation'
 import type { SectionState } from './accounts-screen'
 import { freshnessStatus } from './balances-provenance'
@@ -39,6 +40,8 @@ export type AccountDetailData = AccountDetailViewModel & {
   /** Inflow / outflow / savings for the API's default period, as web's account page shows. */
   metrics?: MetricsSectionState
   balance?: SectionState<readonly BalancePoint[]>
+  /** The projected low point and the recurring payments still to come. */
+  forecast?: AccountForecastState
 }
 export type AccountDetailViewState =
   | { status: 'loading' }
@@ -186,6 +189,12 @@ export function AccountDetailScreen({ state, recentTransactions, onBack, onRetry
               {data.balance.status === 'loaded'
                 ? <BalanceGrowthChart locale={locale} points={data.balance.data} testID="account-balance-chart" />
                 : <SectionMessage loading={data.balance.status === 'loading'} />}
+            </Section>
+          ) : null}
+
+          {data.forecast ? (
+            <Section title={t('accountForecast.title')} variant="open">
+              <ForecastCard days={30} locale={locale} state={data.forecast} />
             </Section>
           ) : null}
 

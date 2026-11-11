@@ -9,10 +9,12 @@ import { useMemo, useState } from "react";
 import { DateRange } from "react-day-picker";
 
 import { accountDisplayBalance } from "@/components/account/AccountBalance";
+import AccountForecastCallout from "@/components/account/AccountForecastCallout";
 import AccountTransactionAddModal from "@/components/account/AccountTransactionAddModal";
 import AccountTransactionImportModal from "@/components/account/AccountTransactionImportModal";
 import AccountTransactionsTable from "@/components/account/AccountTransactionsTable";
 import MetricsCards from "@/components/account/MetricsCards";
+import ProjectedTransactions from "@/components/account/ProjectedTransactions";
 import { clampSyncedAt } from "@/components/account/sync-time";
 import { Button } from "@/components/ui/button";
 import { DataProvenance } from "@/components/ui/DataProvenance";
@@ -23,6 +25,8 @@ import { Section } from "@/components/ui/RuledSection";
 import { Spinner } from "@/components/ui/Spinner";
 import type { GetAccountResponse } from "@/lib/api/account/useAccount";
 import useAccount from "@/lib/api/account/useAccount";
+import type { GetAccountForecastResponse } from "@/lib/api/account/useAccountForecast";
+import useAccountForecast from "@/lib/api/account/useAccountForecast";
 import type { GetAccountMetricsResponse } from "@/lib/api/account/useAccountMetrics";
 import useAccountMetrics from "@/lib/api/account/useAccountMetrics";
 import type { GetAccountsResponse } from "@/lib/api/account/useAccounts";
@@ -50,6 +54,7 @@ interface AccountClientProps {
   initialTransactionsData: GetAccountTransactionsResponse;
   initialConfigsData: GetConfigsResponse;
   initialAccountMetricsData: GetAccountMetricsResponse;
+  initialForecastData: GetAccountForecastResponse;
 }
 
 export default function AccountClient({
@@ -60,6 +65,7 @@ export default function AccountClient({
   initialTransactionsData,
   initialConfigsData,
   initialAccountMetricsData,
+  initialForecastData,
 }: AccountClientProps) {
   const t = useTranslations();
   const posthog = usePostHog();
@@ -102,6 +108,19 @@ export default function AccountClient({
     enabled: !!accountId && !Number.isNaN(accountId),
     ...serverSeed(initialAccountMetricsData, serverRenderedAt),
   });
+
+  const forecastDays = 30;
+  const { data: forecastData } = useAccountForecast(
+    { accountKeys: [accountId], days: forecastDays },
+    {
+      enabled: !!accountId && !Number.isNaN(accountId),
+      ...serverSeed(initialForecastData, serverRenderedAt),
+    },
+  );
+  const accountForecast =
+    forecastData?.accounts.find(
+      (series) => series.accountKey === accountId,
+    ) ?? null;
 
   // Table stuff
   const [transactionDateRange, setTransactionDateRange] = useState<
@@ -281,10 +300,28 @@ export default function AccountClient({
             </div>
           ) : transactionsData?.transactions &&
             transactionsData.transactions.length > 0 ? (
-            <AccountTransactionsChart
-              currencyCode={currency}
-              transactions={transactionsData.transactions}
-            />
+            <>
+              <AccountTransactionsChart
+                currencyCode={currency}
+                forecast={
+                  accountForecast
+                    ? {
+                        currency: accountForecast.currency,
+                        points: accountForecast.points,
+                      }
+                    : null
+                }
+                transactions={transactionsData.transactions}
+              />
+              {accountForecast ? (
+                <div className="mt-4">
+                  <AccountForecastCallout
+                    days={forecastDays}
+                    series={accountForecast}
+                  />
+                </div>
+              ) : null}
+            </>
           ) : (
             <div className="flex h-50 flex-col items-center justify-center gap-3 px-5 text-center">
               <p className="text-muted-foreground text-sm">
@@ -315,19 +352,24 @@ export default function AccountClient({
             </div>
           ) : transactionsData?.transactions &&
             transactionsData.transactions.length > 0 ? (
-            <AccountTransactionsTable
-              layout="ledger"
-              transactions={transactionsForTable ?? []}
-              categories={configsData?.categories ?? []}
-              withAccountFilter={false}
-              withFilters={false}
-              withPagination={false}
-              sticky={false}
-              transactionDateRange={transactionDateRange}
-              setTransactionDateRange={(dataRange) =>
-                setTransactionDateRange(dataRange)
-              }
-            />
+            <div className="flex flex-col gap-4">
+              <ProjectedTransactions
+                occurrences={accountForecast?.projected ?? []}
+              />
+              <AccountTransactionsTable
+                layout="ledger"
+                transactions={transactionsForTable ?? []}
+                categories={configsData?.categories ?? []}
+                withAccountFilter={false}
+                withFilters={false}
+                withPagination={false}
+                sticky={false}
+                transactionDateRange={transactionDateRange}
+                setTransactionDateRange={(dataRange) =>
+                  setTransactionDateRange(dataRange)
+                }
+              />
+            </div>
           ) : (
             <div className="flex h-50 flex-col items-center justify-center gap-3 px-5 text-center">
               <p className="text-muted-foreground text-sm">

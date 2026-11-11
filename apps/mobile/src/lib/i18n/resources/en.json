@@ -526,6 +526,13 @@
       "message": "The account data received could not be verified"
     }
   },
+  "accountForecast": {
+    "title": "Forecast",
+    "lowPoint": "Low point in the next {{days}} days",
+    "unavailable": "Not enough data to project this account yet.",
+    "next": "Next expected payments",
+    "notCounted": "Not counted in reports"
+  },
   "accountRecalculate": {
     "action": "Recalculate balances",
     "confirmTitle": "Recalculate balances?",

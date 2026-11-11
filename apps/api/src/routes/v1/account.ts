@@ -12,6 +12,7 @@ import {
   getAccountMetrics,
   getAccounts,
   getAccountsCashflow,
+  getAccountsForecast,
   getAccountsMetrics,
   getAccountTransactions,
   getAccountTypes,
@@ -60,6 +61,7 @@ router.post('/transaction/ocr', requireVerifiedEmailForAi, requireAiAllowance('o
 router.put('/transaction/ocr/:transactionOCRImportId/confirm', confirmTransactionOCRImportAndCreateTransaction);
 router.put('/transaction/ocr/:transactionOCRImportId/reject', rejectTransactionOCRImport);
 router.get('/cashflow', getAccountsCashflow);
+router.get('/forecast', getAccountsForecast);
 router.patch('/:accountId', updateAccount);
 router.delete('/:accountId', deleteAccount);
 router.get('/:accountId/metrics', getAccountMetrics);

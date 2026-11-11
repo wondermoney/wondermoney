@@ -16,6 +16,7 @@ import { AccountDetailScreen, type AccountDetailData, type AccountDetailViewStat
 import { mapAccountDetail } from './account-detail-view-model'
 import { parseAccountId } from './accounts-contract'
 import { useAccount } from './use-account'
+import { useAccountForecast } from './use-account-forecast'
 import { useAccountRecalculation } from './use-account-recalculation'
 
 export function AccountDetailRoute() {
@@ -26,6 +27,8 @@ export function AccountDetailRoute() {
   // comparison. (A fresh `new Date()` here would also churn the query key.)
   const metrics = useAccountMetrics(accountId)
   const recent = useRecentTransactions(accountId)
+  // The projected low point and the recurring payments still to come.
+  const forecast = useAccountForecast(accountId)
   // The account's ledger feeds the Balance growth chart, as on web.
   const noFilters = useMemo(() => ({}), [])
   const ledger = useTransactions(noFilters, accountId ?? 0)
@@ -35,10 +38,11 @@ export function AccountDetailRoute() {
   let state: AccountDetailViewState
 
   if (query.isInvalidId) state = { status: 'invalid-id' }
-  else if (query.isAccessTransition || metrics.isAccessTransition || ledger.isAccessTransition) state = { status: 'access-transition' }
+  else if (query.isAccessTransition || metrics.isAccessTransition || ledger.isAccessTransition || forecast.isAccessTransition) state = { status: 'access-transition' }
   else if (query.isLoading) state = { status: 'loading' }
   else if (query.data) {
     const ledgerRows = ledger.data ? mapTransactions(ledger.data) : null
+    const forecastSeries = forecast.data?.accounts.find((series) => series.accountKey === accountId) ?? null
     const data: AccountDetailData = {
       ...mapAccountDetail(query.data.account),
       metrics: metrics.data
@@ -47,6 +51,9 @@ export function AccountDetailRoute() {
       balance: ledgerRows
         ? { status: 'loaded', data: buildBalanceSeries(ledgerRows) }
         : ledger.isLoading ? { status: 'loading' } : { status: 'error' },
+      forecast: forecastSeries
+        ? { status: 'loaded', series: forecastSeries }
+        : forecast.isLoading ? { status: 'loading' } : forecast.data ? { status: 'unavailable' } : { status: 'error' },
     }
     state = query.isRefreshFailure ? { status: 'refresh-error', data } : { status: 'loaded', data }
   } else if (query.isNotFound) state = { status: 'not-found' }
@@ -69,7 +76,7 @@ export function AccountDetailRoute() {
       state={state}
       recentTransactions={recentTransactions}
        onBack={() => { if (router.canGoBack()) router.back(); else router.replace('/accounts') }}
-      onRetry={async () => { await Promise.all([query.refetch(), metrics.refetch(), ledger.refetch()]) }}
+      onRetry={async () => { await Promise.all([query.refetch(), metrics.refetch(), ledger.refetch(), forecast.refetch()]) }}
       onRetryRecent={async () => { await recent.refetch() }}
       onLogout={signOut}
       onViewTransactions={() => router.push({

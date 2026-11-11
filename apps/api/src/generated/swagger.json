@@ -360,6 +360,16 @@
         }
       }
     },
+    "/v1/account/forecast": {
+      "get": {
+        "description": "",
+        "responses": {
+          "default": {
+            "description": ""
+          }
+        }
+      }
+    },
     "/v1/account/{accountId}": {
       "patch": {
         "description": "",
