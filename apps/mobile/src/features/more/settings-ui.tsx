@@ -37,6 +37,7 @@ export type SettingsSectionId =
   | 'household'
   | 'connections'
   | 'categories'
+  | 'rules'
   | 'appearance'
   | 'notifications'
 
@@ -46,6 +47,7 @@ export const SETTINGS_HREF: Record<SettingsSectionId, string> = {
   household: '/settings/household',
   connections: '/more/banking',
   categories: '/settings/categories',
+  rules: '/settings/rules',
   appearance: '/settings/preferences',
   notifications: '/settings/notifications',
 }
@@ -53,7 +55,7 @@ export const SETTINGS_HREF: Record<SettingsSectionId, string> = {
 /** Web's `TAB_GROUPS`, minus the sections this app has no screen for (Privacy, Bank Provider, Assistant). */
 const SETTINGS_GROUPS: readonly { key: 'account' | 'money' | 'preferences'; sections: readonly SettingsSectionId[] }[] = [
   { key: 'account', sections: ['profile', 'security', 'household'] },
-  { key: 'money', sections: ['connections', 'categories'] },
+  { key: 'money', sections: ['connections', 'categories', 'rules'] },
   { key: 'preferences', sections: ['appearance', 'notifications'] },
 ]
 

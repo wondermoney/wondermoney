@@ -100,6 +100,8 @@ type Props = Readonly<{
   /** Mark a row as a transfer (or not). Omitted, the actions are not offered. */
   onSetTransfer?: (draft: TransferEditDraft) => Promise<ReviewResult>
   transferDestinations?: TransferDestinationOptions
+  /** Pre-fill a new rule from a row ("always do this"). Omitted, the action is not offered. */
+  onCreateRule?: (transaction: TransactionViewModel) => void
 }>
 
 export function TransactionsScreen(props: Props) {
@@ -154,6 +156,7 @@ function TransactionsContent({
   onCreateTag,
   onSetTransfer,
   transferDestinations = { accounts: [], portfolios: [], goals: [] },
+  onCreateRule,
   filtersOpen,
   onFiltersOpenChange: setFiltersOpen,
 }: Props & Readonly<{ filtersOpen: boolean; onFiltersOpenChange: (open: boolean) => void }>) {
@@ -462,6 +465,7 @@ function TransactionsContent({
       onMarkReviewed={markReviewed}
       onStartEditAmount={startEditAmount}
       onOpenMenu={openRowMenu}
+      onCreateRule={onCreateRule}
       palette={palette}
       locale={locale}
     />
@@ -823,6 +827,7 @@ type TransactionRowProps = Readonly<{
   onMarkReviewed: (id: number) => void
   onStartEditAmount: (item: TransactionViewModel) => void
   onOpenMenu: (id: number) => void
+  onCreateRule?: (item: TransactionViewModel) => void
   palette: Palette
   locale: string
 }>
@@ -855,6 +860,7 @@ const TransactionRow = memo(function TransactionRow({
   onMarkReviewed,
   onStartEditAmount,
   onOpenMenu,
+  onCreateRule,
   palette,
   locale,
 }: TransactionRowProps) {
@@ -981,6 +987,9 @@ const TransactionRow = memo(function TransactionRow({
               ) : null}
               {editable && canEditTags ? (
                 <UiButton disabled={mutationPending} icon="tag" label={t('tags.edit')} onPress={() => onEditTags(item.id)} size="sm" variant="secondary" />
+              ) : null}
+              {editable && onCreateRule ? (
+                <UiButton disabled={mutationPending} icon="sliders-horizontal" label={t('rules.createFromTransaction')} onPress={() => onCreateRule(item)} size="sm" variant="secondary" />
               ) : null}
             </View>
           )}

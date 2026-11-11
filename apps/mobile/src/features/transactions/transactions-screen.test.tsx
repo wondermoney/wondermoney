@@ -87,6 +87,14 @@ describe('TransactionsScreen', () => {
     expect(view.queryByRole('checkbox')).not.toBeOnTheScreen()
   })
 
+  it('offers to create a rule from a row, pre-filled from the transaction', async () => {
+    const onCreateRule = jest.fn()
+    const { view } = await renderLoaded([transactionFixture], {}, { onCreateRule })
+    await fireEvent.press(view.getByRole('button', { name: row('Corner shop') }))
+    await fireEvent.press(view.getByRole('button', { name: 'Create rule' }))
+    expect(onCreateRule).toHaveBeenCalledWith(expect.objectContaining({ id: 41, merchant: 'Corner shop', categoryId: 3 }))
+  })
+
   it('offers create, import, and scan-receipt actions when handlers are provided, and omits them when not', async () => {
     const i18n = await initMobileI18n('en')
     const onCreate = jest.fn()
