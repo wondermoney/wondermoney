@@ -64,6 +64,8 @@ const ICONS = {
   'file-down': { ios: 'arrow.down.doc', android: 'file_download', web: 'file_download' },
   'rotate-ccw': { ios: 'arrow.counterclockwise', android: 'restart_alt', web: 'restart_alt' },
   'arrow-left-right': { ios: 'arrow.left.arrow.right', android: 'swap_horiz', web: 'swap_horiz' },
+  // A transaction's amount shared over several categories (web's lucide `Split`).
+  split: { ios: 'arrow.triangle.branch', android: 'call_split', web: 'call_split' },
   'alert-circle': { ios: 'exclamationmark.circle', android: 'error', web: 'error' },
   'alert-triangle': { ios: 'exclamationmark.triangle', android: 'warning', web: 'warning' },
   'chevron-up': { ios: 'chevron.up', android: 'keyboard_arrow_up', web: 'keyboard_arrow_up' },

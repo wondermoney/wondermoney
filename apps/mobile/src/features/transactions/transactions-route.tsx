@@ -15,13 +15,14 @@ import { parseAccountId } from '@/features/accounts/accounts-contract'
 import { useAccounts } from '@/features/accounts/use-accounts'
 import { useTranslation } from 'react-i18next'
 
-import type { TransactionFilters, TransferEditDraft } from './transactions-contract'
+import type { TransactionFilters, TransactionSplitLineRequest, TransferEditDraft } from './transactions-contract'
 import { DEFAULT_RANGE_DAYS, presetRange } from './transactions-date-range'
 import { TransactionsScreen, type ReviewResult, type TransactionsFreshness, type TransactionsViewState } from './transactions-screen'
 import { mapTransactions } from './transactions-view-model'
 import { useEditTransactionAmount } from './use-edit-transaction-amount'
 import { useEditTransactionTransfer } from './use-edit-transaction-transfer'
 import { useTransactionBulkActions, type TransactionBulkAction } from './use-mark-reviewed'
+import { useRemoveTransactionSplits, useSetTransactionSplits } from './use-transaction-splits'
 import { useTransactions } from './use-transactions'
 import { useTransactionsLead } from './use-transactions-lead'
 import { useTransferDestinations } from './use-transfer-destinations'
@@ -81,6 +82,8 @@ export function TransactionsRoute({ perAccount = false }: { perAccount?: boolean
   const mutation = useTransactionBulkActions()
   const amountMutation = useEditTransactionAmount()
   const transferMutation = useEditTransactionTransfer()
+  const setSplits = useSetTransactionSplits()
+  const removeSplits = useRemoveTransactionSplits()
   const transferDestinations = useTransferDestinations(accountsQuery.data?.accounts)
   const tagsQuery = useTags()
   const tagsMutation = useSetTransactionTags()
@@ -143,6 +146,24 @@ export function TransactionsRoute({ perAccount = false }: { perAccount?: boolean
     }
   }
 
+  const runSaveSplit = async (transactionId: number, lines: readonly TransactionSplitLineRequest[]): Promise<ReviewResult> => {
+    try {
+      await setSplits.mutateAsync({ transactionId, lines })
+      return 'success'
+    } catch (error) {
+      return classifyResult(error, blockAccess)
+    }
+  }
+
+  const runRemoveSplit = async (transactionId: number): Promise<ReviewResult> => {
+    try {
+      await removeSplits.mutateAsync(transactionId)
+      return 'success'
+    } catch (error) {
+      return classifyResult(error, blockAccess)
+    }
+  }
+
   const runSetTags = async (transactionId: number, tagIds: readonly number[]): Promise<ReviewResult> => {
     try {
       await tagsMutation.mutateAsync({ transactionId, tagIds })
@@ -170,7 +191,7 @@ export function TransactionsRoute({ perAccount = false }: { perAccount?: boolean
     hasMore={query.data?.hasMore}
     categories={categoryState}
     accountCount={accountsQuery.data?.accounts.length}
-    pending={mutation.isPending || amountMutation.isPending || transferMutation.isPending}
+    pending={mutation.isPending || amountMutation.isPending || transferMutation.isPending || setSplits.isPending || removeSplits.isPending}
     accountName={accountName}
     perAccount={perAccount}
     lead={perAccount ? undefined : lead}
@@ -193,6 +214,8 @@ export function TransactionsRoute({ perAccount = false }: { perAccount?: boolean
     onSetTransfer={runSetTransfer}
     transferDestinations={transferDestinations}
     onCreateRule={(row) => setRuleSeed(seedRuleFromTransaction({ merchant: row.merchant, description: row.description, categoryId: row.categoryId }))}
+    onSaveSplit={runSaveSplit}
+    onRemoveSplit={runRemoveSplit}
   />
   <RuleEditorSheet
     categories={ruleCategories}

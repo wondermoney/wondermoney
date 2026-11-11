@@ -9,6 +9,8 @@ const mockUseTransactions = jest.fn()
 const mockMutateAsync = jest.fn()
 const mockMutateAmountAsync = jest.fn()
 const mockMutateTransferAsync = jest.fn()
+const mockSetSplitsAsync = jest.fn()
+const mockRemoveSplitsAsync = jest.fn()
 let mockParams: { accountId?: string; filter?: string } = {}
 const mockBlockAccess = jest.fn()
 const mockPush = jest.fn()
@@ -33,11 +35,12 @@ jest.mock('./use-transactions-lead', () => ({ useTransactionsLead: () => ({ flow
 jest.mock('./use-mark-reviewed', () => ({ useTransactionBulkActions: () => ({ mutateAsync: mockMutateAsync, isPending: false }) }))
 jest.mock('./use-edit-transaction-amount', () => ({ useEditTransactionAmount: () => ({ mutateAsync: mockMutateAmountAsync, isPending: false }) }))
 jest.mock('./use-edit-transaction-transfer', () => ({ useEditTransactionTransfer: () => ({ mutateAsync: mockMutateTransferAsync, isPending: false }) }))
+jest.mock('./use-transaction-splits', () => ({ useSetTransactionSplits: () => ({ mutateAsync: mockSetSplitsAsync, isPending: false }), useRemoveTransactionSplits: () => ({ mutateAsync: mockRemoveSplitsAsync, isPending: false }) }))
 jest.mock('./use-transfer-destinations', () => ({ useTransferDestinations: () => ({ accounts: [], portfolios: [{ key: 3, name: 'ETFs' }], goals: [] }) }))
 jest.mock('./transactions-screen', () => ({ TransactionsScreen: (props: { state: { status: string } }) => { mockCapturedProps = props; const Native = jest.requireActual<typeof import('react-native')>('react-native'); return <Native.Text>{props.state.status}</Native.Text> } }))
 
 describe('TransactionsRoute', () => {
-  beforeEach(() => { mockParams = {}; mockCapturedProps = {}; mockAiHidden = false; mockBlockAccess.mockReset(); mockUseTransactions.mockReset(); mockUseAccounts.mockReset(); mockUseAccounts.mockReturnValue({ data: { accounts: [] } }); mockMutateAsync.mockReset(); mockMutateAmountAsync.mockReset(); mockPush.mockReset() })
+  beforeEach(() => { mockParams = {}; mockCapturedProps = {}; mockAiHidden = false; mockBlockAccess.mockReset(); mockUseTransactions.mockReset(); mockUseAccounts.mockReset(); mockUseAccounts.mockReturnValue({ data: { accounts: [] } }); mockMutateAsync.mockReset(); mockMutateAmountAsync.mockReset(); mockSetSplitsAsync.mockReset(); mockRemoveSplitsAsync.mockReset(); mockPush.mockReset() })
 
   it('navigates to the import screen, carrying the current account id when present', async () => {
     mockUseTransactions.mockReturnValue({ isInvalidAccountId: false, isAccessTransition: false, isLoading: true, refetch: jest.fn() })
@@ -201,5 +204,21 @@ describe('TransactionsRoute', () => {
     await expect(setTransfer(draft)).resolves.toBe('success')
     expect(mockMutateTransferAsync).toHaveBeenCalledWith(draft)
     await expect(setTransfer(draft)).resolves.toBe('demo')
+  })
+
+  it('maps a saved split and a removed split to their results', async () => {
+    mockUseTransactions.mockReturnValue({ isInvalidAccountId: false, isAccessTransition: false, isLoading: true, refetch: jest.fn() })
+    mockSetSplitsAsync.mockResolvedValueOnce(undefined).mockRejectedValueOnce(new ApiError('demo-forbidden'))
+    mockRemoveSplitsAsync.mockResolvedValueOnce(undefined).mockRejectedValueOnce(new ApiError('network'))
+    await render(<TransactionsRoute />)
+    const saveSplit = mockCapturedProps.onSaveSplit as (id: number, lines: readonly object[]) => Promise<string>
+    const removeSplit = mockCapturedProps.onRemoveSplit as (id: number) => Promise<string>
+    const lines = [{ categoryId: 3, amount: '-60', notes: null }, { categoryId: null, amount: '-40', notes: null }]
+    await expect(saveSplit(41, lines)).resolves.toBe('success')
+    expect(mockSetSplitsAsync).toHaveBeenCalledWith({ transactionId: 41, lines })
+    await expect(saveSplit(41, lines)).resolves.toBe('demo')
+    await expect(removeSplit(41)).resolves.toBe('success')
+    expect(mockRemoveSplitsAsync).toHaveBeenCalledWith(41)
+    await expect(removeSplit(41)).resolves.toBe('network')
   })
 })

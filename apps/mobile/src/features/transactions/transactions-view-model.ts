@@ -3,7 +3,7 @@ import type { TagDto } from '@/features/tags/tags-contract'
 import { type FxState, resolveFxState } from '@/lib/api/fx-status'
 
 import { transactionMark } from './transaction-mark'
-import { isTransferType, type TransactionDto } from './transactions-contract'
+import { isTransferType, type TransactionDto, type TransactionSplitLineDto } from './transactions-contract'
 
 export type TransactionViewModel = Readonly<{
   id: number
@@ -36,6 +36,10 @@ export type TransactionViewModel = Readonly<{
   transferDestination: NonNullable<TransactionDto['transferDestination']> | null
   /** The household tags on the row, by name; empty when the server sent none. */
   tags: readonly TagDto[]
+  /** The split's lines, in the API's order; empty when the row is not split. */
+  splits: readonly TransactionSplitLineDto[]
+  /** The row's amount is shared over several categories. */
+  isSplit: boolean
   reviewed: boolean
   hidden: boolean
   recurring: TransactionDto['recurringSeries']
@@ -105,6 +109,8 @@ export function mapTransactions(input: { transactions: readonly TransactionDto[]
       isTransfer: isTransferType(type),
       transferDestination: transaction.transferDestination ?? null,
       tags: transaction.tags ?? [],
+      splits: transaction.splits ?? [],
+      isSplit: (transaction.splits?.length ?? 0) > 0,
       reviewed: transaction.reviewed,
       hidden: transaction.hidden ?? false,
       recurring: transaction.recurringSeries,
