@@ -75,6 +75,8 @@ export interface Transaction extends FxFields {
   transactionMerchantKey?: { name: string };
   description: string;
   descriptionDirty: string;
+  /** How many live attachments the row has; absent on an older API, read as zero. */
+  attachmentCount?: number;
   reviewed: boolean;
   hidden: boolean;
   categorizationConfidence?: "high" | "medium" | "low" | "none" | null;

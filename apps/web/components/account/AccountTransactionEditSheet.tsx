@@ -11,6 +11,7 @@ import * as z from "zod";
 
 import { SaveTransactionAsTemplateDialog } from "@/components/account/SaveTransactionAsTemplateDialog";
 import TransactionActivity from "@/components/account/TransactionActivity";
+import { TransactionAttachments } from "@/components/account/TransactionAttachments";
 import {
   splitSaveErrorKey,
   TransactionSplitField,
@@ -390,6 +391,11 @@ export function AccountTransactionEditSheet({
                 setIsTransfer(transfer);
                 if (!transfer) setTransferDestination(null);
               }}
+            />
+            {/* Receipts, invoices and warranties kept with the purchase. */}
+            <TransactionAttachments
+              disabled={isSubmitting}
+              transactionKey={transaction.transactionKey}
             />
             <div className="bg-muted space-y-3 rounded-md p-4">
               <div className="space-y-1">

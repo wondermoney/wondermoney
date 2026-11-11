@@ -36,7 +36,7 @@ S3_PUBLIC_ENDPOINT=http://localhost:9000
 S3_BUCKET=wondermoney
 ```
 
-As duas chaves passam a ser as credenciais do armazenamento, que não arranca sem elas. O `S3_PUBLIC_ENDPOINT` é o endereço que os navegadores usam para chegar ao armazenamento; atrás de um proxy, dá-lhe um nome próprio com HTTPS que encaminhe para a porta 9000. Qualquer serviço compatível com S3 também funciona, como Cloudflare R2, Backblaze B2 ou AWS S3.
+As duas chaves passam a ser as credenciais do armazenamento, que não arranca sem elas. O `S3_PUBLIC_ENDPOINT` é o endereço que os navegadores usam para chegar ao armazenamento; atrás de um proxy, dá-lhe um nome próprio com HTTPS que encaminhe para a porta 9000. Qualquer serviço compatível com S3 também funciona, como Cloudflare R2, Backblaze B2 ou AWS S3. Os anexos das transações usam o mesmo armazenamento: sem ele, a secção de anexos fica oculta e os seus endpoints respondem 503.
 
 ## Funcionalidades de IA
 

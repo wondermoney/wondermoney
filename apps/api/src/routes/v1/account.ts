@@ -2,11 +2,14 @@ import apicache from 'apicache';
 import express from 'express';
 
 import {
+  confirmTransactionAttachment,
   confirmTransactionOCRImportAndCreateTransaction,
   createOfflineAccount,
   createTransaction,
+  createTransactionAttachmentUploadUrl,
   createTransactionOCRImport,
   deleteAccount,
+  deleteTransactionAttachment,
   getAccount,
   getAccountFinancialInstitutions,
   getAccountMetrics,
@@ -20,6 +23,7 @@ import {
   getCurrencies,
   getRecentTransactions,
   getS3PresignedUrlForCsvUpload,
+  getTransactionAttachments,
   getTransactionHistory,
   getTransactionMerchants,
   getTransactionReviewSummary,
@@ -66,6 +70,10 @@ router.get('/account-types', cache('1 day'), getAccountTypes);
 router.post('/transaction/ocr', requireVerifiedEmailForAi, requireAiAllowed('ocr'), requireAiAllowance('ocr'), multerSingleFile, createTransactionOCRImport);
 router.put('/transaction/ocr/:transactionOCRImportId/confirm', confirmTransactionOCRImportAndCreateTransaction);
 router.put('/transaction/ocr/:transactionOCRImportId/reject', rejectTransactionOCRImport);
+router.post('/transaction/:transactionId/attachments/upload-url', createTransactionAttachmentUploadUrl);
+router.post('/transaction/:transactionId/attachments', confirmTransactionAttachment);
+router.get('/transaction/:transactionId/attachments', getTransactionAttachments);
+router.delete('/transaction/:transactionId/attachments/:attachmentId', deleteTransactionAttachment);
 router.get('/cashflow', getAccountsCashflow);
 router.get('/forecast', getAccountsForecast);
 router.patch('/:accountId', updateAccount);

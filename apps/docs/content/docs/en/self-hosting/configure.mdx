@@ -36,7 +36,7 @@ S3_PUBLIC_ENDPOINT=http://localhost:9000
 S3_BUCKET=wondermoney
 ```
 
-The two keys become the store's credentials, and it won't start without them. `S3_PUBLIC_ENDPOINT` is the address browsers use to reach the storage; behind a proxy, give it its own HTTPS hostname that forwards to port 9000. Any S3-compatible service works too, such as Cloudflare R2, Backblaze B2 or AWS S3.
+The two keys become the store's credentials, and it won't start without them. `S3_PUBLIC_ENDPOINT` is the address browsers use to reach the storage; behind a proxy, give it its own HTTPS hostname that forwards to port 9000. Any S3-compatible service works too, such as Cloudflare R2, Backblaze B2 or AWS S3. Transaction attachments use the same storage: without it, the attachments section is hidden and its endpoints answer 503.
 
 ## AI features
 

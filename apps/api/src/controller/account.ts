@@ -1,4 +1,5 @@
 export * from './account/accounts.js';
+export * from './account/attachments.js';
 export * from './account/cashflow.js';
 export * from './account/forecast.js';
 export * from './account/imports.js';

@@ -24,3 +24,7 @@ export const recentTransactionsKey = (epochId: number, accountId: number) => (
 export const transactionReviewSummaryKey = (epochId: number) => (
   [...transactionsRootKey(epochId), 'review-summary'] as const
 )
+
+export const transactionAttachmentsKey = (epochId: number, transactionId: number) => (
+  [...transactionsRootKey(epochId), 'attachments', transactionId] as const
+)

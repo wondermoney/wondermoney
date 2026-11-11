@@ -6,16 +6,9 @@ import { CategorizationConfidence } from '@entity/Transaction';
 import { statementMappingSchema } from '@service/account/account-statement-mapping.schema';
 import { isSupportedTimeZone } from '@service/reports/report-months';
 import { TRANSFER_DESTINATION_TYPES, USER_SETTABLE_TYPES } from '@service/transaction/transaction-transfer.service';
+import { bytesMatchContentType } from '@utils/file-signature';
 import { boundedLimit, finiteAmount, positiveIntId, validDate } from '@validators/shared';
 import { tagIdList } from '@validators/tag';
-
-const MAGIC_BYTES: Record<string, readonly number[]> = {
-  'application/pdf': [0x25, 0x50, 0x44, 0x46],
-  'image/jpeg': [0xff, 0xd8, 0xff],
-  'image/jpg': [0xff, 0xd8, 0xff],
-  'image/png': [0x89, 0x50, 0x4e, 0x47],
-  'image/webp': [0x52, 0x49, 0x46, 0x46],
-};
 
 /**
  * The viewer's IANA time zone, sent with a date range so the API can match a bank booking (a date
@@ -25,9 +18,7 @@ const viewerTimeZone = z.string().refine(isSupportedTimeZone, { message: 'timezo
 
 function magicByteMatches(buffer: unknown, mimetype: string): boolean {
   if (!Buffer.isBuffer(buffer)) return false;
-  const signature = MAGIC_BYTES[mimetype];
-  if (!signature || buffer.length < signature.length) return false;
-  return signature.every((byte, idx) => buffer[idx] === byte);
+  return bytesMatchContentType(buffer, mimetype);
 }
 
 export const updateTransactionRequestSchema = z.object({

@@ -114,6 +114,16 @@ export class S3Service {
   }
 
   /**
+   * A short-lived link that shows an object inline in the browser (an image or a PDF), signed
+   * for the endpoint browsers reach. Transaction attachments are private: the link is the only
+   * way in, and it expires in minutes.
+   */
+  async generatePresignedViewUrl(bucket: string, key: string, contentType: string, expiresInSeconds: number): Promise<string> {
+    const command = new GetObjectCommand({ Bucket: bucket, Key: key, ResponseContentDisposition: 'inline', ResponseContentType: contentType });
+    return getSignedUrl(this.presignClient(), command, { expiresIn: expiresInSeconds });
+  }
+
+  /**
    * A short-lived link a browser PUTs one file of exactly `contentLength` bytes to, signed for the
    * endpoint browsers reach. Used for restore uploads, which are private.
    */

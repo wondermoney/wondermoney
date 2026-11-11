@@ -865,6 +865,21 @@
       "excluded": "Between your own money: left out of spending and income",
       "spendingLabel": "Spending",
       "notSpending": "Its category does not count as spending"
+    },
+    "attachments": {
+      "title": "Attachments",
+      "empty": "No files yet.",
+      "addPhoto": "Add photo",
+      "chooseFiles": "Choose files",
+      "open": "Open {{name}}",
+      "delete": "Delete {{name}}",
+      "uploading": "Uploading…",
+      "limit": "A transaction can have at most 10 attachments.",
+      "size": "The file is larger than 10 MB.",
+      "type": "That file type is not supported.",
+      "access": "Verify your session and try again.",
+      "network": "Check your connection and try again.",
+      "general": "Could not finish that. Try again."
     }
   },
   "tags": {

@@ -34,6 +34,7 @@ import { usePalette } from '@/theme/use-palette'
 
 import { FormNotice, TextField } from './form-field'
 import { SelectField } from './select-field'
+import { TransactionAttachmentsSection } from './transaction-attachments-section'
 import { TransactionSplitScreen } from './transaction-split-screen'
 import { type TransactionFilters, type TransactionSplitLineRequest, type TransferDestinationType, type TransferEditDraft } from './transactions-contract'
 import { formatMonth, formatRange, formatShortDate, monthKey, presetFor, presetRange, RANGE_PRESETS, type RangePreset } from './transactions-date-range'
@@ -1026,6 +1027,7 @@ const TransactionRow = memo(function TransactionRow({
             </View>
           ) : null}
           {item.repayment ? <Detail label={t('transactions.repayment')} value={t('transactions.repaymentValue', { name: item.repayment.loanName, amount: formatAvailableMoney(item.repayment.spendingAmount, item.currency, locale, t, amountsHidden) })} /> : null}
+          {editable ? <TransactionAttachmentsSection transactionId={item.id} /> : null}
           {editable && canEditAmount && editing ? (
             <View style={styles.amountEdit}>
               <TextField
