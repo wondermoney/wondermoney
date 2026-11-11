@@ -5,7 +5,7 @@ import { expo } from '@better-auth/expo';
 import bcrypt from 'bcryptjs';
 import { betterAuth } from 'better-auth';
 import { APIError } from 'better-auth/api';
-import { hashPassword, verifyPassword } from 'better-auth/crypto';
+import { hashPassword, makeSignature, verifyPassword } from 'better-auth/crypto';
 import { fromNodeHeaders, toNodeHandler } from 'better-auth/node';
 import { bearer, jwt, twoFactor } from 'better-auth/plugins';
 import { Pool } from 'pg';
@@ -319,6 +319,90 @@ export const betterAuthUserExists = async (userId: string): Promise<boolean> => 
     [userId],
   );
   return rows[0]?.exists === true;
+};
+
+/**
+ * A better-auth session created for a paired mobile device, with everything the app needs to
+ * adopt it: the signed session-cookie value (the same value better-auth would have set on a
+ * sign-in response) and the cookie's name for this deployment.
+ *
+ * The app cannot mint this itself — the value is signed with `BETTER_AUTH_SECRET` — so the
+ * pairing exchange hands it over once, over HTTPS, instead of the app re-implementing the
+ * cookie format.
+ */
+export interface PairedSession {
+  /** The cookie's name, including any `__Secure-`/prefix decoration this deployment uses. */
+  cookieName: string;
+  /** URL-encoded signed cookie value (`token.signature`), ready to store as-is. */
+  cookieValue: string;
+  expiresAt: Date;
+  sessionId: string;
+  /** The raw session token. Never logged. */
+  token: string;
+}
+
+/** The session fields the device list shows. */
+export interface AuthSessionSummary {
+  createdAt: Date;
+  expiresAt: Date;
+  id: string;
+  ipAddress?: null | string;
+  updatedAt: Date;
+  userAgent?: null | string;
+}
+
+/**
+ * Create a full better-auth session for `userId` without a password or a second factor.
+ *
+ * Only the QR pairing exchange calls this, and only after it has claimed a single-use pairing
+ * code that a signed-in web session created — that session already satisfied MFA, which is why
+ * a 2FA account needs no TOTP here. The session is stamped with the phone's user agent so the
+ * device list has something to show.
+ */
+export const createPairedSession = async (input: {
+  ipAddress?: null | string;
+  userAgent?: null | string;
+  userId: string;
+}): Promise<PairedSession> => {
+  const context = await auth.$context;
+  const session = await context.internalAdapter.createSession(input.userId, false, {
+    ipAddress: input.ipAddress ?? '',
+    userAgent: input.userAgent ?? '',
+  });
+  const cookie = context.authCookies.sessionToken;
+  const signature = await makeSignature(session.token, context.secret);
+  return {
+    cookieName: cookie.name,
+    cookieValue: encodeURIComponent(`${session.token}.${signature}`),
+    expiresAt: session.expiresAt,
+    sessionId: session.id,
+    token: session.token,
+  };
+};
+
+/** Session rows for the device list, newest first. Unknown ids are simply absent. */
+export const listAuthSessions = async (sessionIds: string[]): Promise<AuthSessionSummary[]> => {
+  if (sessionIds.length === 0) return [];
+  const { rows } = await betterAuthPool.query<{
+    createdAt: Date;
+    expiresAt: Date;
+    id: string;
+    ipAddress: null | string;
+    updatedAt: Date;
+    userAgent: null | string;
+  }>(
+    `select id, "createdAt", "updatedAt", "expiresAt", "ipAddress", "userAgent"
+       from "${BETTER_AUTH_SCHEMA}"."session"
+      where id = any($1::text[])
+      order by "createdAt" desc`,
+    [sessionIds],
+  );
+  return rows;
+};
+
+/** Delete one better-auth session by id. The next request with its cookie gets 401. */
+export const deleteAuthSession = async (sessionId: string): Promise<void> => {
+  await betterAuthPool.query(`delete from "${BETTER_AUTH_SCHEMA}"."session" where id = $1`, [sessionId]);
 };
 
 /**

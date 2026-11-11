@@ -6,6 +6,7 @@ import { downloadDataExport, getDataExport, listDataExports, startDataExport } f
 import { commitDataRestore, getDataRestore, listDataRestores, startDataRestore, validateDataRestore } from '@controller/data-restore';
 import { getEmailNotificationPreferences, patchEmailNotificationPreferences } from '@controller/email-notifications';
 import { deleteEnableBankingCredential, getEnableBankingCredential, saveEnableBankingCredential } from '@controller/enable-banking-credential';
+import { createPairingCodeController, listDevices, revokeDevice } from '@controller/mobile-pairing';
 import { completeOnboarding, getOnboardingBootstrap } from '@controller/onboarding';
 import {
   completeOnboardingStep,
@@ -36,6 +37,11 @@ router.delete('/api-tokens/:id', revokeApiToken);
 router.get('/calendar-feed-token', getCalendarFeedToken);
 router.post('/calendar-feed-token', requireSensitiveSession, resetCalendarFeedToken);
 router.delete('/calendar-feed-token', revokeCalendarFeedToken);
+// QR pairing with the mobile app. Minting a code hands out a session, so it needs a fresh
+// session and TOTP when the account has it — the phone then skips the second factor.
+router.post('/pairing-codes', requireSensitiveSession, createPairingCodeController);
+router.get('/devices', listDevices);
+router.delete('/devices/:sessionId', revokeDevice);
 router.get('/me/email-notification-preferences', getEmailNotificationPreferences);
 router.patch('/me/email-notification-preferences', patchEmailNotificationPreferences);
 router.get('/me/preferences', getPreferences);

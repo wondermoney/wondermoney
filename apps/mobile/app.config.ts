@@ -129,6 +129,10 @@ const config: ExpoConfig = {
     'expo-image',
     'expo-web-browser',
     'expo-sharing',
+    // The QR pairing scanner. The plugin writes iOS's NSCameraUsageDescription and Android's
+    // CAMERA permission; without it the camera module has no usage string and iOS rejects the
+    // request at runtime.
+    ['expo-camera', { cameraPermission: 'Allow WonderMoney to scan the QR code that connects this phone to your server.' }],
   ],
   experiments: {
     typedRoutes: true,

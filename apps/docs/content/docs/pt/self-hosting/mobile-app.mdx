@@ -5,7 +5,19 @@ description: Liga a aplicação WonderMoney para iOS e Android ao teu próprio s
 
 A aplicação WonderMoney funciona com qualquer servidor WonderMoney, não apenas com o wonder.money.
 
-## Ligar a aplicação
+## Ligar a aplicação com um código QR
+
+A forma mais rápida de ligar a aplicação é ler um código a partir da aplicação web do teu servidor, sem escrever nada no teclado do telemóvel.
+
+1. Na aplicação web, abre **Definições → Segurança**.
+2. Em **Ligar a aplicação móvel**, toca em **Mostrar código QR**.
+3. No ecrã de início de sessão da aplicação, toca em **Ler código QR** e aponta a câmara para o código.
+
+O código funciona uma vez e expira ao fim de dois minutos; se expirar, mostra um novo. Se a autenticação de dois fatores estiver ativa na tua conta, introduz o código do autenticador na web antes de o QR aparecer — o telemóvel não o pede, porque a sessão web já o validou.
+
+Também podes ler o código com a aplicação de câmara do telemóvel: o código é uma ligação `wondermoney://` que abre a aplicação. A aplicação verifica o endereço antes de ligar, por isso um código de outra aplicação ou de um servidor que não seja WonderMoney é recusado.
+
+## Ligar a aplicação manualmente
 
 1. Abre a aplicação e vai ao ecrã de início de sessão.
 2. Toca em **Usar outro servidor**.
@@ -13,6 +25,10 @@ A aplicação WonderMoney funciona com qualquer servidor WonderMoney, não apena
 4. Toca em **Ligar** e inicia sessão com a tua conta nesse servidor.
 
 A aplicação verifica o endereço antes de o guardar. Se não conseguir chegar ao servidor, se não for um servidor WonderMoney ou se precisar de uma versão mais recente da aplicação, a aplicação avisa-te e mantém o servidor anterior.
+
+## Dispositivos ligados
+
+**Definições → Segurança → Dispositivos** lista os telemóveis ligados à tua conta, com a última vez que cada um foi visto. **Revogar** termina a sessão desse telemóvel de imediato; tem de ler um novo código para se ligar outra vez.
 
 ## Requisitos
 

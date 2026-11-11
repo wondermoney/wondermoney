@@ -13,5 +13,17 @@ export function mockAuthSession() {
       return Promise.resolve(typeof id === 'string' ? { session: { createdAt: new Date(), id: `session-${id}`, userId: id }, user: { email: `${id}@example.test`, id } } : null);
     },
     verifyTotpForSession: () => Promise.resolve(),
+    // QR pairing's session operations. Inert here: a test that exercises pairing replaces
+    // them (see `controller/__tests__/mobile-pairing.http.test.ts`), and every other route
+    // only needs the module to resolve.
+    createPairedSession: () => Promise.resolve({
+      cookieName: 'better-auth.session_token',
+      cookieValue: 'paired-token.signature',
+      expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+      sessionId: 'paired-session-id',
+      token: 'paired-token',
+    }),
+    deleteAuthSession: () => Promise.resolve(),
+    listAuthSessions: () => Promise.resolve([]),
   };
 }

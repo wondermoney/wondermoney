@@ -5,7 +5,19 @@ description: Conecta la aplicación de WonderMoney para iOS y Android a tu propi
 
 La aplicación de WonderMoney funciona con cualquier servidor de WonderMoney, no solo con wonder.money.
 
-## Conectar la aplicación
+## Conectar la aplicación con un código QR
+
+La forma más rápida de conectar la aplicación es escanear un código desde la aplicación web de tu servidor, sin escribir nada en el teclado del teléfono.
+
+1. En la aplicación web, abre **Ajustes → Seguridad**.
+2. En **Conectar la aplicación móvil**, toca **Mostrar código QR**.
+3. En la pantalla de inicio de sesión de la aplicación, toca **Escanear código QR** y apunta la cámara al código.
+
+El código funciona una vez y caduca a los dos minutos; si caduca, muestra uno nuevo. Si la autenticación en dos pasos está activa en tu cuenta, introduce el código del autenticador en la web antes de que aparezca el QR: el teléfono no lo pide, porque la sesión web ya lo validó.
+
+También puedes escanear el código con la aplicación de cámara del teléfono: el código es un enlace `wondermoney://` que abre la aplicación. La aplicación comprueba la dirección antes de conectar, así que un código de otra aplicación o de un servidor que no sea WonderMoney se rechaza.
+
+## Conectar la aplicación a mano
 
 1. Abre la aplicación y ve a la pantalla de inicio de sesión.
 2. Toca **Usar otro servidor**.
@@ -13,6 +25,10 @@ La aplicación de WonderMoney funciona con cualquier servidor de WonderMoney, no
 4. Toca **Conectar** e inicia sesión con tu cuenta en ese servidor.
 
 La aplicación comprueba la dirección antes de guardarla. Si no puede llegar al servidor, si no es un servidor de WonderMoney o si necesita una versión más reciente de la aplicación, te avisa y mantiene el servidor anterior.
+
+## Dispositivos conectados
+
+**Ajustes → Seguridad → Dispositivos** muestra los teléfonos conectados a tu cuenta, con la última vez que se vio cada uno. **Revocar** cierra la sesión de ese teléfono de inmediato; tiene que escanear un código nuevo para volver a conectarse.
 
 ## Requisitos
 

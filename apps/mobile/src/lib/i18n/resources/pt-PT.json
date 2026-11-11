@@ -170,7 +170,21 @@
     "notMember": "Não é membro?",
     "createAccountLink": "Crie uma conta",
     "alreadyMember": "Já é membro?",
-    "loginLink": "Iniciar sessão"
+    "loginLink": "Iniciar sessão",
+    "pairing": {
+      "scanButton": "Ler código QR",
+      "scanTitle": "Lê o código QR",
+      "scanHint": "Aponta a câmara para o código em Definições → Segurança na web.",
+      "cameraPermission": "Permite o acesso à câmara para ler o código de emparelhamento.",
+      "grantCamera": "Permitir câmara",
+      "cancel": "Cancelar",
+      "connecting": "A ligar ao servidor…",
+      "invalidCode": "Este não é um código de emparelhamento WonderMoney.",
+      "errors": {
+        "invalidCode": "Esse código expirou ou já foi usado. Mostra um novo na web.",
+        "unavailable": "Não foi possível ligar a esse servidor. Tenta novamente."
+      }
+    }
   },
   "access": {
     "mfa": {

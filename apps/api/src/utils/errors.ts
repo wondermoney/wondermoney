@@ -72,6 +72,11 @@ export const ERROR_CODE = {
   TOTP_REQUIRED: 'totp_required',
   /** The submitted TOTP code was wrong or expired (403). */
   INVALID_TOTP: 'invalid_totp',
+  /**
+   * QR pairing: the code is unknown, already used, or past its two-minute lifetime (404).
+   * Deliberately one code for all three — the phone's only useful response is "scan a new QR".
+   */
+  PAIRING_CODE_INVALID: 'pairing_code_invalid',
   /** Route is household-owner-only and the caller is a member. */
   HOUSEHOLD_OWNER_REQUIRED: 'household_owner_required',
   /** Joining a household: it already has its two members (409). */
