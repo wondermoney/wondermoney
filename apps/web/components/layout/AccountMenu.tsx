@@ -34,6 +34,7 @@ import { useHydrated } from "@/lib/utils/useHydrated";
 
 import { openCommandPalette } from "./command-palette-store";
 import Feedback from "./Feedback";
+import VersionInfo from "./VersionInfo";
 
 const CHANGELOG_URL = "https://wondermoney.canny.io/changelog";
 
@@ -235,9 +236,9 @@ export default function AccountMenu({
           <LogOut className="size-4 shrink-0" aria-hidden="true" />
           {t("logout")}
         </button>
-        <p className="text-muted-foreground px-3 pt-1 text-right text-xs">
-          v{process.env.PKG_VERSION}
-        </p>
+        <div className="px-3 pt-1">
+          <VersionInfo />
+        </div>
       </PopoverContent>
     </Popover>
   );

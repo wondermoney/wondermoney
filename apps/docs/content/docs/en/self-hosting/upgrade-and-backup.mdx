@@ -12,6 +12,8 @@ docker compose up -d
 
 The API applies any database changes when it starts. To stay on a specific release instead of the latest, set `WM_VERSION` in `.env`, for example `WM_VERSION=1.4`.
 
+To check which version an instance runs, open the account menu in the web app (or **More** in the mobile app): it shows the web app's version and the server's, with the commit each was built from. `GET /v1/instance` also reports `version` and `commit`.
+
 ## Back up
 
 Everything that matters is in the Postgres database, plus the `storage-data` volume if you use the bundled storage.

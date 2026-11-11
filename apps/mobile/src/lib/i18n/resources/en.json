@@ -1286,6 +1286,10 @@
     },
     "appInformation": "App information",
     "version": "Version {{version}}",
+    "serverVersion": "Server {{version}}",
+    "copyVersionInfo": "Copy version info",
+    "versionInfoCopied": "Version info copied",
+    "versionInfoCopyFailed": "Could not copy the version info. Try again.",
     "environment": "Environment {{environment}}",
     "environments": {
       "local": "Local",

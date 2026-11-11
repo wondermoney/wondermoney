@@ -2704,5 +2704,13 @@
         "partial": "Partly succeeded"
       }
     }
+  },
+  "version": {
+    "app": "WonderMoney {version}",
+    "server": "Server {version}",
+    "mismatch": "This web app and the server are running different versions. Update the one that is behind.",
+    "copy": "Copy version info",
+    "copied": "Version info copied",
+    "copy-failed": "Could not copy the version info. Try again."
   }
 }

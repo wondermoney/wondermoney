@@ -2,13 +2,14 @@
 // https://nextjs.org/docs/api-reference/next.config.js/introduction
 // https://docs.sentry.io/platforms/javascript/guides/nextjs/
 
+import { execSync } from "node:child_process";
+
 import type { SentryBuildOptions } from "@sentry/nextjs/config";
 import { NextConfig } from "next";
 import createNextIntlPlugin from "next-intl/plugin";
 import path from "path";
 
 import { isSentryEnabled } from "./lib/utils/sentry-enabled";
-import { version } from "./package.json";
 
 const withBundleAnalyzer = require("@next/bundle-analyzer")({
   enabled: process.env.ANALYZE === "true",
@@ -17,23 +18,43 @@ const withBundleAnalyzer = require("@next/bundle-analyzer")({
 const withNextIntl = createNextIntlPlugin();
 
 /**
- * The version shown in the app. package.json carries the release version, changed by hand in a
- * normal PR when cutting a release (nothing commits version bumps); the build
- * appends the commit it was built from, so staging and production builds are told apart without
- * committing anything. The SHA comes from GitHub Actions, Vercel's own git builds, or the
- * GIT_COMMIT_SHA build argument of the self-hosting image.
+ * The version shown in the app. It is the release tag (`WM_VERSION`, passed by
+ * `publish-images.yml` as a build argument), so the web app and the API report the same
+ * number for the same release. A build that is not from a release (local dev, a branch
+ * preview) reports `dev`; the commit it was built from is shown beside it. The SHA comes
+ * from GitHub Actions, Vercel's own git builds, or the GIT_COMMIT_SHA build argument of the
+ * self-hosting image.
  */
 function buildVersion(): string {
+  return process.env.WM_VERSION?.trim() || "dev";
+}
+
+function buildCommit(): string {
   const sha = (
     process.env.GIT_COMMIT_SHA ||
     process.env.VERCEL_GIT_COMMIT_SHA ||
     process.env.GITHUB_SHA ||
-    ""
+    localGitCommit()
   ).trim();
-  return /^[0-9a-f]{7,40}$/i.test(sha) ? `${version}+${sha.slice(0, 7)}` : version;
+  return /^[0-9a-f]{7,40}$/i.test(sha) ? sha.slice(0, 7) : "";
 }
 
-const publicEnv: NextConfig["env"] = { PKG_VERSION: buildVersion() };
+/** A local `next dev` has no CI commit variable; read the checkout's HEAD when there is one. */
+function localGitCommit(): string {
+  try {
+    return execSync("git rev-parse --short HEAD", {
+      encoding: "utf8",
+      stdio: ["ignore", "pipe", "ignore"],
+    }).trim();
+  } catch {
+    return "";
+  }
+}
+
+const publicEnv: NextConfig["env"] = {
+  PKG_COMMIT: buildCommit(),
+  PKG_VERSION: buildVersion(),
+};
 
 const nextConfig: NextConfig = {
   // The self-hosting image (Dockerfile) builds a standalone server; Vercel builds as before.

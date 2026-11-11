@@ -33,6 +33,7 @@ import { Separator } from "../ui/separator";
 import { Text } from "../ui/Typography";
 import Feedback from "./Feedback";
 import { mobileMoreAccountsItems } from "./mobile-more-nav-items";
+import VersionInfo from "./VersionInfo";
 
 type Props = {
   open: boolean;
@@ -232,9 +233,7 @@ export default function BottomNavMoreSheet({ open, onOpenChange }: Props) {
             </button>
           </li>
           <li className="px-6 py-1">
-            <Text variant="mutedText" className="text-right text-xs">
-              v{process.env.PKG_VERSION}
-            </Text>
+            <VersionInfo />
           </li>
         </ul>
       </SheetContent>

@@ -12,6 +12,8 @@ docker compose up -d
 
 La API aplica los cambios en la base de datos al arrancar. Para quedarte en una versión concreta en lugar de la más reciente, define `WM_VERSION` en el `.env`, por ejemplo `WM_VERSION=1.4`.
 
+Para comprobar qué versión ejecuta una instancia, abre el menú de la cuenta en la aplicación web (o **Más** en la aplicación móvil): muestra la versión de la aplicación web y la del servidor, con el commit de cada una. `GET /v1/instance` también devuelve `version` y `commit`.
+
 ## Hacer una copia de seguridad
 
 Todo lo importante está en la base de datos Postgres, además del volumen `storage-data` si usas el almacenamiento incluido.
