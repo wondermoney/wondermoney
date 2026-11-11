@@ -4,17 +4,20 @@ import { useQueryClient } from "@tanstack/react-query";
 import {
   ArrowDown,
   ArrowUp,
+  Download,
   GripVertical,
   ListChecks,
   Pencil,
   Plus,
   Trash,
+  Upload,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { type DragEvent, useCallback, useMemo, useState } from "react";
 import { toast } from "sonner";
 
 import { ApplyRulesDialog } from "@/components/rules/ApplyRulesDialog";
+import { ImportRulesDialog } from "@/components/rules/ImportRulesDialog";
 import { RuleEditorDialog } from "@/components/rules/RuleEditorDialog";
 import { useRuleLookups } from "@/components/rules/useRuleLookups";
 import {
@@ -52,6 +55,7 @@ import useRules, {
   type RuleApplyTarget,
   rulesKey,
   useDeleteRule,
+  useExportRules,
   useReorderRules,
   useUpdateRule,
 } from "@/lib/api/rule/useRules";
@@ -89,6 +93,7 @@ export default function Rules() {
   const updateRule = useUpdateRule();
   const deleteRule = useDeleteRule();
   const reorderRules = useReorderRules();
+  const exportRules = useExportRules();
 
   const [search, setSearch] = useState("");
   const [categoryFilter, setCategoryFilter] = useState(ALL_CATEGORIES);
@@ -96,6 +101,7 @@ export default function Rules() {
     null,
   );
   const [deleting, setDeleting] = useState<Rule | null>(null);
+  const [importing, setImporting] = useState(false);
   const [applying, setApplying] = useState<{
     key: string;
     offer: boolean;
@@ -189,6 +195,21 @@ export default function Rules() {
     }
   };
 
+  const onExport = async () => {
+    try {
+      const blob = await exportRules.mutateAsync();
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "wondermoney-rules.json";
+      link.click();
+      URL.revokeObjectURL(url);
+      toast.success(t("export.done"));
+    } catch (error) {
+      notifyError(error, t("export.error"));
+    }
+  };
+
   const onDrop = (event: DragEvent, target: Rule) => {
     event.preventDefault();
     if (dragging === null) return;
@@ -211,6 +232,20 @@ export default function Rules() {
           </Text>
         </div>
         <div className="flex shrink-0 flex-wrap gap-2">
+          <Button
+            variant="ghost"
+            title={t("export.hint")}
+            loading={exportRules.isPending}
+            disabled={rules.length === 0 || exportRules.isPending}
+            onClick={() => void onExport()}
+          >
+            <Download className="size-4" />
+            {t("export.action")}
+          </Button>
+          <Button variant="ghost" onClick={() => setImporting(true)}>
+            <Upload className="size-4" />
+            {t("import.action")}
+          </Button>
           {rules.some((rule) => rule.active) ? (
             <Button
               variant="secondary"
@@ -444,6 +479,12 @@ export default function Rules() {
           onClose={closeApplying}
         />
       ) : null}
+
+      <ImportRulesDialog
+        open={importing}
+        onOpenChange={setImporting}
+        onImported={() => void invalidateRules(queryClient)}
+      />
 
       <AlertDialog
         open={deleting !== null}

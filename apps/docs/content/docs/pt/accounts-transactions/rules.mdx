@@ -59,6 +59,51 @@ Para correr todas as regras ativas sobre as transações que já tem (por exempl
 
 As regras correm de cima para baixo. Cada regra olha para a transação como chegou, não como as regras anteriores a deixaram. Quando duas regras definem o mesmo campo, ganha a de baixo; as etiquetas de várias regras somam-se. Ligue **Parar depois desta regra** para impedir que as regras abaixo corram sobre o que ela apanhou.
 
+## Exportar e importar regras
+
+Escolha **Exportar** no topo de **Definições → Regras** para descarregar as regras do agregado num ficheiro JSON. Escolha **Importar** para carregar um: o WonderMoney verifica primeiro o ficheiro e mostra o que vai acontecer antes de alterar alguma coisa.
+
+O ficheiro não tem identificadores internos. Uma regra nomeia aquilo a que se refere: contas, comerciantes e etiquetas pelo nome, uma categoria de sistema pela sua chave (o nome semeado, como `FOOD`) e uma categoria sua pelo nome. É isso que lhe permite mudar de instância.
+
+```json
+{
+  "format": "wondermoney-rules",
+  "version": 1,
+  "rules": [
+    {
+      "name": "Streaming",
+      "active": true,
+      "match": "all",
+      "stopProcessing": false,
+      "conditions": [
+        { "field": "merchant", "operator": "contains", "value": "netflix" },
+        { "field": "account", "operator": "in", "values": ["Current account"] },
+        { "field": "category", "operator": "in", "values": [{ "system": "ENTERTAINMENT" }] }
+      ],
+      "actions": [
+        { "type": "set_category", "category": { "name": "Streaming" } },
+        { "type": "set_merchant", "merchant": "Netflix" },
+        { "type": "add_tags", "tags": ["Subscriptions"] }
+      ]
+    }
+  ]
+}
+```
+
+- Uma categoria é `{ "system": "FOOD" }` para uma categoria de sistema, `{ "name": "Streaming" }` para uma sua, ou `"uncategorized"`.
+- Os nomes de contas, comerciantes e etiquetas têm de corresponder aos nomes do agregado para onde importa.
+- O ficheiro pode ter até 1.000 regras e no máximo 1 MB. O limite de 200 regras por agregado continua a aplicar-se.
+
+**Modos de importação.** *Acrescentar* mantém as regras que já existem e junta as do ficheiro a seguir. *Substituir* remove as regras existentes e fica só com as do ficheiro, depois de o ficheiro inteiro ser validado; uma importação falhada deixa a lista como estava. Ambos os modos pedem confirmação.
+
+**O ensaio.** Antes de escrever seja o que for, a importação mostra as regras que vai criar, as que vai ignorar por já existir uma regra com o mesmo nome, e as referências que não encontrou. Depois:
+
+- Uma categoria personalizada em falta pode ser criada, se marcar a caixa.
+- Uma regra que nomeia uma conta que este agregado não tem é importada desligada, sem essa condição de conta.
+- Uma regra que nomeia uma categoria de sistema ou etiqueta em falta é ignorada.
+
+Um ficheiro que não seja uma exportação de regras do WonderMoney, tenha mais de 1 MB, ou tenha mais de 1.000 regras é recusado com uma mensagem a explicar porquê.
+
 ## Ligações relacionadas
 
 - [Categorizar transações](/pt/docs/accounts-transactions/categorize-transactions)

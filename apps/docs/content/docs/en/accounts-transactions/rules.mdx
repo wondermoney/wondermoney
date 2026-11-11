@@ -59,6 +59,51 @@ To run every active rule over the transactions you already have (for example aft
 
 Rules run from top to bottom. Each rule looks at the transaction as it arrived, not as earlier rules left it. When two rules set the same field, the lower one wins; tags from several rules add up. Turn on **Stop after this rule** to keep the rules below from running on what it matched.
 
+## Export and import rules
+
+Choose **Export** at the top of **Settings → Rules** to download the household's rules as a JSON file. Choose **Import** to load one: WonderMoney checks the file first and shows what would happen before anything changes.
+
+The file has no internal ids. A rule names what it refers to: accounts, merchants and tags by name, a system category by its key (the seeded name, such as `FOOD`), and one of your own categories by its name. That is what lets it move to another instance.
+
+```json
+{
+  "format": "wondermoney-rules",
+  "version": 1,
+  "rules": [
+    {
+      "name": "Streaming",
+      "active": true,
+      "match": "all",
+      "stopProcessing": false,
+      "conditions": [
+        { "field": "merchant", "operator": "contains", "value": "netflix" },
+        { "field": "account", "operator": "in", "values": ["Current account"] },
+        { "field": "category", "operator": "in", "values": [{ "system": "ENTERTAINMENT" }] }
+      ],
+      "actions": [
+        { "type": "set_category", "category": { "name": "Streaming" } },
+        { "type": "set_merchant", "merchant": "Netflix" },
+        { "type": "add_tags", "tags": ["Subscriptions"] }
+      ]
+    }
+  ]
+}
+```
+
+- A category is `{ "system": "FOOD" }` for a system category, `{ "name": "Streaming" }` for one of yours, or `"uncategorized"`.
+- Account, merchant and tag names must match the names in the household you import into.
+- The file may hold up to 1,000 rules and be at most 1 MB. The household's 200-rule limit still applies.
+
+**Import modes.** *Append* keeps the rules already here and adds the file's rules after them. *Replace* removes the existing rules and keeps only the file's, once the whole file has validated; a failed import leaves the list as it was. Both modes ask you to confirm.
+
+**The dry run.** Before anything is written, the import shows the rules it will create, the rules it will skip because a rule with that name already exists, and the references it could not find. Then:
+
+- A missing custom category can be created, if you tick the box.
+- A rule naming an account this household does not have is imported switched off, without that account condition.
+- A rule naming a missing system category or tag is skipped.
+
+A file that is not a WonderMoney rules export, is over 1 MB, or holds more than 1,000 rules is refused with a message saying why.
+
 ## Related links
 
 - [Categorize transactions](/en/docs/accounts-transactions/categorize-transactions)

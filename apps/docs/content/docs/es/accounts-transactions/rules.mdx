@@ -59,6 +59,51 @@ Para ejecutar todas las reglas activas sobre las transacciones que ya tienes (po
 
 Las reglas se ejecutan de arriba abajo. Cada regla mira la transacción tal como llegó, no como la dejaron las reglas anteriores. Cuando dos reglas asignan el mismo campo, gana la de abajo; las etiquetas de varias reglas se suman. Activa **Detenerse tras esta regla** para que las reglas de debajo no se ejecuten sobre lo que coincidió con ella.
 
+## Exportar e importar reglas
+
+Elige **Exportar** arriba en **Configuración → Reglas** para descargar las reglas del hogar en un archivo JSON. Elige **Importar** para cargar uno: WonderMoney revisa primero el archivo y muestra qué va a pasar antes de cambiar nada.
+
+El archivo no contiene identificadores internos. Una regla nombra aquello a lo que se refiere: cuentas, comercios y etiquetas por su nombre, una categoría del sistema por su clave (el nombre sembrado, como `FOOD`) y una categoría tuya por su nombre. Eso es lo que le permite moverse a otra instancia.
+
+```json
+{
+  "format": "wondermoney-rules",
+  "version": 1,
+  "rules": [
+    {
+      "name": "Streaming",
+      "active": true,
+      "match": "all",
+      "stopProcessing": false,
+      "conditions": [
+        { "field": "merchant", "operator": "contains", "value": "netflix" },
+        { "field": "account", "operator": "in", "values": ["Current account"] },
+        { "field": "category", "operator": "in", "values": [{ "system": "ENTERTAINMENT" }] }
+      ],
+      "actions": [
+        { "type": "set_category", "category": { "name": "Streaming" } },
+        { "type": "set_merchant", "merchant": "Netflix" },
+        { "type": "add_tags", "tags": ["Subscriptions"] }
+      ]
+    }
+  ]
+}
+```
+
+- Una categoría es `{ "system": "FOOD" }` para una categoría del sistema, `{ "name": "Streaming" }` para una tuya, o `"uncategorized"`.
+- Los nombres de cuentas, comercios y etiquetas deben coincidir con los del hogar al que importas.
+- El archivo puede contener hasta 1.000 reglas y ocupar como máximo 1 MB. El límite de 200 reglas por hogar sigue aplicándose.
+
+**Modos de importación.** *Añadir* conserva las reglas que ya hay y añade las del archivo después. *Sustituir* elimina las reglas existentes y deja solo las del archivo, una vez validado el archivo entero; una importación fallida deja la lista como estaba. Ambos modos piden confirmación.
+
+**La simulación.** Antes de escribir nada, la importación muestra las reglas que creará, las que omitirá porque ya existe una regla con ese nombre, y las referencias que no encontró. Después:
+
+- Una categoría personalizada que falta se puede crear, si marcas la casilla.
+- Una regla que nombra una cuenta que este hogar no tiene se importa desactivada, sin esa condición de cuenta.
+- Una regla que nombra una categoría del sistema o una etiqueta que falta se omite.
+
+Un archivo que no sea una exportación de reglas de WonderMoney, supere 1 MB o contenga más de 1.000 reglas se rechaza con un mensaje que explica por qué.
+
 ## Enlaces relacionados
 
 - [Categorizar transacciones](/es/docs/accounts-transactions/categorize-transactions)
