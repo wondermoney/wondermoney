@@ -3,6 +3,7 @@ import { type Kysely, sql } from 'kysely';
 
 import { DI } from '@app/app';
 import { FINANCIAL_TRANSACTION_TYPES } from '@app/constants/financial-transaction-types';
+import { PortfolioCostBasisMethod } from '@app/constants/portfolio-cost-basis';
 import { anyOf, type SqlDatabase, sqlQuery } from '@app/database/sql';
 import type { Appuser } from '@entity/Appuser';
 import { FEED_RATES_ONLY } from '@service/currency/exchange-rate';
@@ -16,6 +17,7 @@ import { resolveHoldingCurrentMetrics } from './portfolio-currency.utils';
 import {
   aggregateBatchesIntoAssets,
   buildSplitAdjustedHoldingBatches,
+  type CostBasisMethodResolver,
   getPortfolioAssetInvalidKey,
   type HoldingBatch,
   type HoldingTimelineItem,
@@ -46,13 +48,43 @@ export interface DividendIncome {
   totalDividends: number;
 }
 
+/** One purchase lot as the holding-detail lots view reads it. */
+export interface HoldingLot {
+  /** The purchase date, ISO 8601. For an AVERAGE pool, the earliest open lot's date. */
+  date: string;
+  /** The fee recorded on the purchase (split does not change it). */
+  fees: number;
+  /** The lot's quantity at purchase, split-adjusted. */
+  quantity: number;
+  /** What is still open from this lot. */
+  remainingQuantity: number;
+  status: 'CLOSED' | 'OPEN';
+  /** The buy that created the lot; null for the single AVERAGE pooled position. */
+  transactionKey: null | number;
+  /** Per-unit cost excluding fees; with `fees`, this is the lot's cost basis. */
+  unitCost: number;
+}
+
+export interface HoldingLots {
+  /** All-in cost per open unit (fees included), matching the holding's `averageBuyPrice`. */
+  averageUnitCost: null | number;
+  costBasisMethod: PortfolioCostBasisMethod;
+  lots: HoldingLot[];
+  /** Cost basis of the open position, fees included. */
+  openCostBasis: number;
+  openQuantity: number;
+  /** Cost relieved by sales so far, under this portfolio's method. */
+  realizedCostBasis: number;
+}
+
 type FeeConversion = { amount: number } | { reason: string };
 
 /**
- * Service for calculating portfolio holdings using FIFO batch tracking.
+ * Service for calculating portfolio holdings from purchase lots.
  *
- * FIFO (First In, First Out) means when selling, the oldest purchase lots are sold first.
- * This is the standard method for tax calculation in Portugal and many other jurisdictions.
+ * A portfolio's `costBasisMethod` decides how a sale relieves cost. FIFO (First In, First Out)
+ * sells the oldest lots first, the standard method in Portugal and Spain. AVERAGE relieves the
+ * running average of the open position, as in Brazil. Both run through `replayHoldingTimeline`.
  */
 class PortfolioHoldingsService {
   private async getPortfolioTransactionRows(appuserKey: number, portfolioId?: number, tenantKey?: number): Promise<{
@@ -100,6 +132,7 @@ class PortfolioHoldingsService {
         'fat.name as financial_asset_type_name',
         'fa.logo_url as financial_asset_logo_url',
         'fa.esg_score as financial_asset_esg_score',
+        'p.cost_basis_method as cost_basis_method',
         'p.name as portfolio_name',
       ])
       // Household scope when a tenant is supplied (request path, raw SQL bypasses
@@ -173,9 +206,17 @@ class PortfolioHoldingsService {
   private getFinancialTransactionBatchesFromRows(
     transactionRows: Record<string, unknown>[],
     splitRows: Record<string, unknown>[],
+    costBasisMethod: CostBasisMethodResolver,
   ): HoldingBatch[] {
+    return buildSplitAdjustedHoldingBatches(this.buildTimelineFromRows(transactionRows, splitRows), costBasisMethod);
+  }
 
-    const timeline: HoldingTimelineItem[] = [
+  /** The replay timeline for a set of transaction and split rows. */
+  private buildTimelineFromRows(
+    transactionRows: Record<string, unknown>[],
+    splitRows: Record<string, unknown>[],
+  ): HoldingTimelineItem[] {
+    return [
       ...transactionRows.map((row) => ({
         fee_amount: Number(row['fee_accounting_amount'] ?? 0),
         financial_asset_currency_code: row['financial_asset_currency_code'] as string | undefined,
@@ -203,14 +244,33 @@ class PortfolioHoldingsService {
         split_ratio: row['split_ratio'] == null ? undefined : Number(row['split_ratio']),
       })),
     ];
+  }
 
-    return buildSplitAdjustedHoldingBatches(timeline);
+  /**
+   * The portfolio's method per row, so one replay can span portfolios with different methods
+   * (the aggregate holdings read). Rows carry the portfolio's `cost_basis_method`; a missing
+   * value (legacy/partial fixtures) is FIFO.
+   */
+  private costBasisMethodFromRows(transactionRows: Record<string, unknown>[]): (portfolioKey: number) => PortfolioCostBasisMethod {
+    const byPortfolio = new Map<number, PortfolioCostBasisMethod>();
+    for (const row of transactionRows) {
+      const portfolioKey = Number(row['portfolio_key']);
+      if (byPortfolio.has(portfolioKey)) continue;
+      byPortfolio.set(
+        portfolioKey,
+        row['cost_basis_method'] === PortfolioCostBasisMethod.AVERAGE
+          ? PortfolioCostBasisMethod.AVERAGE
+          : PortfolioCostBasisMethod.FIFO,
+      );
+    }
+    return (portfolioKey) => byPortfolio.get(portfolioKey) ?? PortfolioCostBasisMethod.FIFO;
   }
 
   private getInvalidHoldingsFromRows(
     transactionRows: Record<string, unknown>[],
     splitRows: Record<string, unknown>[],
     currency: string,
+    costBasisMethod: CostBasisMethodResolver,
   ): PortfolioHolding[] {
 
     const holdingsByKey = new Map<string, { assetCurrencyCode?: string; assetKey: number; assetLogoUrl?: string; assetName: string; assetSymbol: string; assetType: string; portfolioKey: number; portfolioName: string; relatedTransactionKeys: number[]; timeline: HoldingTimelineItem[] }>();
@@ -264,7 +324,7 @@ class PortfolioHoldingsService {
 
     const invalidHoldings: PortfolioHolding[] = [];
     for (const entry of holdingsByKey.values()) {
-      const { oversoldByPortfolioAsset } = replayHoldingTimeline(entry.timeline);
+      const { oversoldByPortfolioAsset } = replayHoldingTimeline(entry.timeline, costBasisMethod);
       const oversold = oversoldByPortfolioAsset.get(getPortfolioAssetInvalidKey(entry.portfolioKey, entry.assetKey)) ?? 0;
 
       if (oversold <= 0) continue;
@@ -395,8 +455,9 @@ class PortfolioHoldingsService {
   async getPortfolioHoldings(appuser: Appuser, portfolioId: number, tenantKey?: number): Promise<PortfolioHolding[]> {
     const { splitRows, transactionRows } = await this.getPortfolioTransactionRows(appuser.appuserKey, portfolioId, tenantKey);
     const currency = appuser.currencyKey.code || 'EUR';
-    const batches = this.getFinancialTransactionBatchesFromRows(transactionRows, splitRows);
-    const invalidHoldings = this.getInvalidHoldingsFromRows(transactionRows, splitRows, currency);
+    const costBasisMethod = this.costBasisMethodFromRows(transactionRows);
+    const batches = this.getFinancialTransactionBatchesFromRows(transactionRows, splitRows, costBasisMethod);
+    const invalidHoldings = this.getInvalidHoldingsFromRows(transactionRows, splitRows, currency, costBasisMethod);
     const invalidKeys = new Set(
       invalidHoldings.map((holding) => getPortfolioAssetInvalidKey(holding.portfolioKey!, holding.financialAssetKey)),
     );
@@ -405,7 +466,8 @@ class PortfolioHoldingsService {
 
   private async getInvalidHoldings(appuserKey: number, currency: string, portfolioId?: number): Promise<PortfolioHolding[]> {
     const { splitRows, transactionRows } = await this.getPortfolioTransactionRows(appuserKey, portfolioId);
-    return this.getInvalidHoldingsFromRows(transactionRows, splitRows, currency);
+    const costBasisMethod = this.costBasisMethodFromRows(transactionRows);
+    return this.getInvalidHoldingsFromRows(transactionRows, splitRows, currency, costBasisMethod);
   }
 
   /**
@@ -414,12 +476,88 @@ class PortfolioHoldingsService {
   async getPortfoliosHoldings(appuser: Appuser, tenantKey?: number): Promise<PortfolioHolding[]> {
     const { splitRows, transactionRows } = await this.getPortfolioTransactionRows(appuser.appuserKey, undefined, tenantKey);
     const currency = appuser.currencyKey.code || 'EUR';
-    const batches = this.getFinancialTransactionBatchesFromRows(transactionRows, splitRows);
-    const invalidHoldings = this.getInvalidHoldingsFromRows(transactionRows, splitRows, currency);
+    const costBasisMethod = this.costBasisMethodFromRows(transactionRows);
+    const batches = this.getFinancialTransactionBatchesFromRows(transactionRows, splitRows, costBasisMethod);
+    const invalidHoldings = this.getInvalidHoldingsFromRows(transactionRows, splitRows, currency, costBasisMethod);
     const invalidKeys = new Set(
       invalidHoldings.map((holding) => getPortfolioAssetInvalidKey(holding.portfolioKey!, holding.financialAssetKey)),
     );
     return flagIncompleteFeeConversions(await this.buildHoldingsFromOpenBatches(batches, invalidHoldings, invalidKeys, currency), transactionRows);
+  }
+
+  /**
+   * The open and closed purchase lots of one holding, under the portfolio's cost basis method.
+   * Under AVERAGE the open lots are one pooled position: its quantity, average unit cost and
+   * remaining fees. Null when the portfolio has no trades in this asset (the caller 404s).
+   */
+  async getHoldingLots(
+    appuser: Appuser,
+    portfolioId: number,
+    financialAssetKey: number,
+    tenantKey?: number,
+  ): Promise<HoldingLots | null> {
+    const { splitRows, transactionRows } = await this.getPortfolioTransactionRows(appuser.appuserKey, portfolioId, tenantKey);
+    const assetRows = transactionRows.filter((row) => Number(row['financial_asset_key']) === financialAssetKey);
+    if (assetRows.length === 0) return null;
+    const method = this.costBasisMethodFromRows(assetRows)(portfolioId);
+    const replay = replayHoldingTimeline(
+      this.buildTimelineFromRows(
+        assetRows,
+        splitRows.filter((row) => Number(row['financial_asset_key']) === financialAssetKey),
+      ),
+      method,
+    );
+    const realizedCostBasis = replay.realizedCostBasisByPortfolioAsset.get(getPortfolioAssetInvalidKey(portfolioId, financialAssetKey)) ?? 0;
+    const openBatches = replay.openBatches;
+    const openQuantity = openBatches.reduce((sum, batch) => sum + (batch.remaining_batch ?? 0), 0);
+    const openFees = openBatches.reduce((sum, batch) => sum + (batch.remaining_fee_amount ?? 0), 0);
+    const openUnitCosts = openBatches.reduce(
+      (sum, batch) => sum + (batch.unit_appuser_amount ?? batch.unit_settlement_amount) * (batch.remaining_batch ?? 0),
+      0,
+    );
+    const openCostBasis = openUnitCosts + openFees;
+
+    if (method === PortfolioCostBasisMethod.AVERAGE) {
+      const firstDate = openBatches.reduce<Date | null>(
+        (earliest, batch) => (!earliest || batch.transaction_date < earliest ? batch.transaction_date : earliest),
+        null,
+      );
+      return {
+        averageUnitCost: openQuantity > 0 ? openCostBasis / openQuantity : null,
+        costBasisMethod: method,
+        lots: openQuantity > 0 && firstDate
+          ? [{
+            date: firstDate.toISOString(),
+            fees: openFees,
+            quantity: openQuantity,
+            remainingQuantity: openQuantity,
+            status: 'OPEN',
+            transactionKey: null,
+            unitCost: openQuantity > 0 ? openUnitCosts / openQuantity : 0,
+          }]
+          : [],
+        openCostBasis,
+        openQuantity,
+        realizedCostBasis,
+      };
+    }
+
+    return {
+      averageUnitCost: openQuantity > 0 ? openCostBasis / openQuantity : null,
+      costBasisMethod: method,
+      lots: replay.allBatches.map((batch) => ({
+        date: batch.transaction_date.toISOString(),
+        fees: batch.fee_amount ?? 0,
+        quantity: batch.quantity,
+        remainingQuantity: batch.remaining_batch ?? 0,
+        status: (batch.remaining_batch ?? 0) > 0 ? 'OPEN' : 'CLOSED',
+        transactionKey: batch.transaction_key,
+        unitCost: batch.unit_appuser_amount ?? batch.unit_settlement_amount,
+      })),
+      openCostBasis,
+      openQuantity,
+      realizedCostBasis,
+    };
   }
 
   /**
@@ -569,8 +707,8 @@ class PortfolioHoldingsService {
   }
 
   /**
-   * Calculate realized gains from FIFO sell transactions.
-   * Compares total sell proceeds against cost basis of fully sold FIFO lots.
+   * Calculate realized gains from sell transactions.
+   * Compares total sell proceeds against the cost basis the portfolio's method relieved.
    */
   async getRealizedGains(
     appuserKey: number,
@@ -578,7 +716,8 @@ class PortfolioHoldingsService {
     tenantKey?: number,
   ): Promise<RealizedGains> {
     const { splitRows, transactionRows } = await this.getPortfolioTransactionRows(appuserKey, portfolioId, tenantKey);
-    const invalidHoldings = this.getInvalidHoldingsFromRows(transactionRows, splitRows, 'EUR');
+    const costBasisMethod = this.costBasisMethodFromRows(transactionRows);
+    const invalidHoldings = this.getInvalidHoldingsFromRows(transactionRows, splitRows, 'EUR', costBasisMethod);
     const invalidKeys = new Set(
       invalidHoldings.map((holding) => getPortfolioAssetInvalidKey(holding.portfolioKey!, holding.financialAssetKey)),
     );
@@ -619,7 +758,7 @@ class PortfolioHoldingsService {
         split_ratio: row['split_ratio'] == null ? undefined : Number(row['split_ratio']),
       })),
     ];
-    const costBasisOfSold = [...replayHoldingTimeline(timeline).realizedCostBasisByPortfolioAsset.entries()]
+    const costBasisOfSold = [...replayHoldingTimeline(timeline, costBasisMethod).realizedCostBasisByPortfolioAsset.entries()]
       .filter(([key]) => !invalidKeys.has(key))
       .reduce((sum, [, value]) => sum + value, 0);
 

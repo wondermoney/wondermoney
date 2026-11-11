@@ -39,6 +39,29 @@ Novas compras, vendas, transferências e custos de compra registados.
 ### Má interpretação comum
 Preço de custo não é o mesmo que valor atual.
 
+## Método de custo: FIFO e custo médio
+
+### O que significa
+O método de custo decide que custo de compra é consumido por uma venda. FIFO (primeiro a entrar, primeiro a sair) vende primeiro os lotes mais antigos. O custo médio consome a média corrente de tudo o que ainda deténs, e uma venda não altera essa média.
+
+### Onde aparece
+Nas definições da carteira, onde escolhes o método, e na secção de lotes dos detalhes de uma posição, que lista cada lote de compra com a data, quantidade, quantidade restante, custo unitário e comissões.
+
+### Como ler
+Escolhe o método que as tuas regras fiscais usam. Portugal e Espanha usam FIFO; o Brasil e outras jurisdições usam o custo médio. Alterar o método recalcula os ganhos realizados da carteira e reconstrói o histórico diário com o novo custo.
+
+### Exemplo
+Compra 10 unidades a 100 e 10 unidades a 200 e vende 10.
+
+- FIFO consome o primeiro lote: custo realizado de 1 000 e as 10 unidades restantes mantêm um custo médio de 200.
+- O custo médio consome metade dos 3 000 totais: custo realizado de 1 500 e as 10 unidades restantes mantêm um custo médio de 150.
+
+### O que o pode alterar
+Alterar o método nas definições da carteira, novas compras e vendas, splits, comissões e correções de transações.
+
+### Má interpretação comum
+O método altera o custo e os ganhos realizados, não o valor de mercado do que deténs. Uma venda nunca altera o custo médio por unidade no método do custo médio.
+
 ## Valor de mercado
 
 ### O que significa

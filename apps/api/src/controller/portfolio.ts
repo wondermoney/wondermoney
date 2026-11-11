@@ -4,6 +4,7 @@ import { format } from 'date-fns';
 import type { Request, Response } from 'express';
 import { pick } from 'lodash-es';
 
+import { PortfolioCostBasisMethod } from '@app/constants/portfolio-cost-basis';
 import { enqueuePortfolioSnapshotManualJob } from '@app/jobs/portfolio-snapshot.queue';
 import { zParse } from '@app/validators/parser';
 import {
@@ -20,6 +21,7 @@ import {
   getPortfolioAllocationRequestSchema,
   getPortfolioDashboardRequestSchema,
   getPortfolioHistoryStatusRequestSchema,
+  getPortfolioHoldingLotsRequestSchema,
   getPortfolioHoldingsRequestSchema,
   getPortfolioPerformanceRequestSchema,
   getPortfolioRequestSchema,
@@ -44,6 +46,7 @@ import { latestImportBrokers } from '@service/portfolio/portfolio-brokers';
 import portfolioImportSessionService from '@service/portfolio/portfolio-import-session.service';
 import s3Service from '@service/storage/s3';
 import { BadRequestError, InternalServerError, NotFoundError } from '@utils/errors';
+import logger from '@utils/logger';
 
 import { DI } from '../app.js';
 import portfolioDashboardService from '../services/portfolio/portfolio-dashboard.service.js';
@@ -231,6 +234,7 @@ export async function getPortfolio(req: Request, res: Response) {
   const transformedData = {
     ...pick(portfolio, ['portfolioKey', 'name', 'description', 'targetAllocation']),
     accountLink: links.get(portfolio.portfolioKey) ?? null,
+    costBasisMethod: portfolio.costBasisMethod,
     currencyKey: { code: portfolio.currencyKey.code },
   };
   return res.json({ portfolio: transformedData });
@@ -252,6 +256,24 @@ export async function getPortfolioHistoryStatus(req: Request, res: Response) {
   } = await zParse(getPortfolioHistoryStatusRequestSchema, req);
   const status = await portfolioHistoryStatusService.getPortfolioHistoryStatus(user, portfolioId, tenant.tenantKey);
   return res.status(200).json(status);
+}
+
+export async function getPortfolioHoldingLots(req: Request, res: Response) {
+  const { tenant, user } = authedContext(req);
+  const {
+    params: { financialAssetKey, portfolioId },
+  } = await zParse(getPortfolioHoldingLotsRequestSchema, req);
+  // Scoped to the household: another household's portfolio is indistinguishable from a missing
+  // one, as everywhere else on this router.
+  const portfolio = await DI.em.findOne(Portfolio, {
+    deletedAt: undefined,
+    portfolioKey: portfolioId,
+    tenantKey: { tenantKey: tenant.tenantKey },
+  });
+  if (!portfolio) throw new NotFoundError('Portfolio not found');
+  const lots = await portfolioHoldingsService.getHoldingLots(user, portfolioId, financialAssetKey, tenant.tenantKey);
+  if (!lots) throw new NotFoundError('Holding not found');
+  return res.json(lots);
 }
 
 export async function getPortfolioHoldings(req: Request, res: Response) {
@@ -336,40 +358,16 @@ export async function getTransactionTypes(_req: Request, res: Response) {
 
 export async function rebuildPortfolioSnapshot(req: Request, res: Response) {
   const { params: { portfolioId } } = await zParse(getPortfolioRequestSchema, req);
-  const numericPortfolioId = portfolioId;
   const portfolio = await DI.em.findOne(Portfolio, { deletedAt: undefined, portfolioKey: portfolioId }, { populate: ['tenantKey'] });
   if (!portfolio) throw new NotFoundError('Portfolio not found');
-  const correlationId = randomUUID();
-  await backgroundOperationService.createQueuedOperation({
-    appuserKey: portfolio.portfolioOwnerAppuserKey,
-    correlationId,
-    operationType: 'portfolio.snapshot',
-    resourceId: `portfolio:${portfolioId}`,
-    retryable: false,
-    tenantKey: portfolio.tenantKey.tenantKey,
-  });
-  try {
-    const jobId = await enqueuePortfolioSnapshotManualJob({ correlationId, portfolioId: numericPortfolioId }, { enqueue: req.enqueue, singletonKey: correlationId });
-    if (!jobId) {
-      await backgroundOperationService.markNeedsAction(correlationId, 'portfolio.snapshot:enqueue-null', 'portfolio.snapshot:queueing');
-      throw new InternalServerError('Portfolio snapshot queue returned no job id');
-    }
-    const attached = await backgroundOperationService.attachQueueJob(correlationId, String(jobId));
-    if (!attached) {
-      await backgroundOperationService.markNeedsAction(correlationId, 'portfolio.snapshot:attach-false', 'portfolio.snapshot:queueing');
-      throw new InternalServerError('Portfolio snapshot job accepted but could not be attached');
-    }
-  } catch (error) {
-    if (!(error instanceof InternalServerError)) await backgroundOperationService.markNeedsAction(correlationId, 'portfolio.snapshot:queue-error', 'portfolio.snapshot:queueing');
-    throw error;
-  }
+  const correlationId = await queuePortfolioSnapshotRebuild(req, portfolio, portfolioId, portfolio.tenantKey.tenantKey);
   return res.status(202).json({ correlationId, status: 'queued' });
 }
 
 export async function updatePortfolio(req: Request, res: Response) {
   const { appuserKey, tenantKey } = authedContext(req);
   const {
-    body: { accountLink, benchmarkSymbol, currencyId, description, excluded, favored, name, targetAllocation },
+    body: { accountLink, benchmarkSymbol, costBasisMethod, currencyId, description, excluded, favored, name, targetAllocation },
     params: { portfolioId },
   } = await zParse(updatePortfolioRequestSchema, req);
 
@@ -383,11 +381,18 @@ export async function updatePortfolio(req: Request, res: Response) {
     throw new NotFoundError('Portfolio not found');
   }
 
+  const nextCostBasisMethod = costBasisMethod === undefined
+    ? undefined
+    : costBasisMethod === 'AVERAGE'
+      ? PortfolioCostBasisMethod.AVERAGE
+      : PortfolioCostBasisMethod.FIFO;
+  const costBasisMethodChanged = nextCostBasisMethod !== undefined && portfolio.costBasisMethod !== nextCostBasisMethod;
   if (name !== undefined) portfolio.name = name;
   if (description !== undefined) portfolio.description = description ?? undefined;
   if (excluded !== undefined) portfolio.excluded = excluded;
   if (favored !== undefined) portfolio.favored = favored;
   if (benchmarkSymbol !== undefined) portfolio.benchmarkSymbol = benchmarkSymbol;
+  if (costBasisMethodChanged) portfolio.costBasisMethod = nextCostBasisMethod;
   if (targetAllocation !== undefined && targetAllocation !== null) {
     const assetClasses = await DI.em.find(AssetClass, {});
     const validNames = new Set(assetClasses.map((assetClass) => assetClass.name));
@@ -409,7 +414,20 @@ export async function updatePortfolio(req: Request, res: Response) {
 
   await DI.em.flush();
 
-  return res.json({ portfolio: pick(portfolio, ['portfolioKey', 'name', 'description', 'currencyKey.code', 'excluded', 'favored', 'benchmarkSymbol', 'targetAllocation']) });
+  // Every historical snapshot's cost basis was computed under the old method. Reuse the manual
+  // rebuild path; the change itself is already saved, so a queue hiccup must not fail the request.
+  if (costBasisMethodChanged) {
+    try {
+      await queuePortfolioSnapshotRebuild(req, portfolio, portfolio.portfolioKey, tenantKey);
+    } catch (error) {
+      logger.warn(
+        { error, portfolioId: portfolio.portfolioKey },
+        'Portfolio cost basis method changed but its snapshot rebuild could not be queued',
+      );
+    }
+  }
+
+  return res.json({ portfolio: pick(portfolio, ['portfolioKey', 'name', 'description', 'currencyKey.code', 'excluded', 'favored', 'benchmarkSymbol', 'targetAllocation', 'costBasisMethod']) });
 }
 
 export async function updatePortfolioTransaction(req: Request, res: Response) {
@@ -422,6 +440,44 @@ export async function updatePortfolioTransaction(req: Request, res: Response) {
   await portfolioTransactionService.updatePortfolioTransaction(user, portfolioId, transactionId, body, { enqueue: req.enqueue }, tenantKey);
 
   return res.sendStatus(200);
+}
+
+/**
+ * Queues the full snapshot rebuild behind `POST /:portfolioId/snapshot/rebuild`. A cost-basis
+ * method change reuses it: every historical snapshot's cost basis was computed under the old
+ * method.
+ */
+async function queuePortfolioSnapshotRebuild(
+  req: Request,
+  portfolio: Portfolio,
+  portfolioId: number,
+  tenantKey: number,
+): Promise<string> {
+  const correlationId = randomUUID();
+  await backgroundOperationService.createQueuedOperation({
+    appuserKey: portfolio.portfolioOwnerAppuserKey,
+    correlationId,
+    operationType: 'portfolio.snapshot',
+    resourceId: `portfolio:${portfolio.portfolioKey}`,
+    retryable: false,
+    tenantKey,
+  });
+  try {
+    const jobId = await enqueuePortfolioSnapshotManualJob({ correlationId, portfolioId }, { enqueue: req.enqueue, singletonKey: correlationId });
+    if (!jobId) {
+      await backgroundOperationService.markNeedsAction(correlationId, 'portfolio.snapshot:enqueue-null', 'portfolio.snapshot:queueing');
+      throw new InternalServerError('Portfolio snapshot queue returned no job id');
+    }
+    const attached = await backgroundOperationService.attachQueueJob(correlationId, String(jobId));
+    if (!attached) {
+      await backgroundOperationService.markNeedsAction(correlationId, 'portfolio.snapshot:attach-false', 'portfolio.snapshot:queueing');
+      throw new InternalServerError('Portfolio snapshot job accepted but could not be attached');
+    }
+  } catch (error) {
+    if (!(error instanceof InternalServerError)) await backgroundOperationService.markNeedsAction(correlationId, 'portfolio.snapshot:queue-error', 'portfolio.snapshot:queueing');
+    throw error;
+  }
+  return correlationId;
 }
 
 // Dashboard endpoints - Aggregate (all portfolios)

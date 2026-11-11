@@ -2958,6 +2958,34 @@
         }
       }
     },
+    "/v1/portfolio/{portfolioId}/holding/{financialAssetKey}/lots": {
+      "get": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "portfolioId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "financialAssetKey",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": ""
+          }
+        }
+      }
+    },
     "/v1/portfolio/{portfolioId}/dividend-income": {
       "get": {
         "description": "",

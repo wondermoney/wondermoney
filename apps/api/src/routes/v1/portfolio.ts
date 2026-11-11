@@ -19,6 +19,7 @@ import {
   getPortfolioDashboard,
   getPortfolioDividendIncome,
   getPortfolioHistoryStatus,
+  getPortfolioHoldingLots,
   getPortfolioHoldings,
   getPortfolioPerformance,
   getPortfolios,
@@ -80,6 +81,7 @@ router.post('/:portfolioId/transaction', createPortfolioTransaction);
 router.put('/:portfolioId/transaction/:transactionId', updatePortfolioTransaction);
 router.delete('/:portfolioId/transaction/:transactionId', deletePortfolioTransaction);
 router.get('/:portfolioId/holdings', marketDataLimiter, getPortfolioHoldings);
+router.get('/:portfolioId/holding/:financialAssetKey/lots', getPortfolioHoldingLots);
 router.get('/:portfolioId/dividend-income', marketDataLimiter, getPortfolioDividendIncome);
 router.post('/', createPortfolio);
 
