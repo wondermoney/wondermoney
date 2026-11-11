@@ -128,6 +128,14 @@ export function apiTokenScopesForRequest(mount: string, method: string, path: st
   const normalisedMount = normalisePath(mount);
   const normalisedMethod = method.toUpperCase();
 
+  /*
+   * The MCP endpoint is mounted outside `requireAuth` and resolves its own token
+   * (`middleware/mcp-auth.ts`), so this branch is documentation as much as policy: the only
+   * credential that reaches it is a token carrying `mcp:read`, and a plain `read` token does
+   * not. Keeping it here means the scope map stays one place.
+   */
+  if (normalisedMount === '/v1/mcp' && normalisedMethod === 'POST') return ['mcp:read'];
+
   if (normalisedMethod === 'GET' || normalisedMethod === 'HEAD') {
     if (!API_TOKEN_READ_MOUNTS.has(normalisedMount)) return [];
     // `write` implies `read` only on the resources it can change, not on every read surface.

@@ -398,6 +398,12 @@ export const calendarFeedRateLimit = (): RequestHandler => createRateLimiter({ f
 /** `/v1/assistant` — cheap GETs on the ordinary read budget, LLM calls on their own. */
 export const assistantRateLimit = (): RequestHandler => createMethodScopedRateLimiter('read', 'assistant');
 
+/**
+ * `/v1/mcp` — always a personal-token request, so always the token's own budget. Mount after
+ * `requireMcpToken` so the bucket is keyed on the token's row rather than the source address.
+ */
+export const apiTokenRateLimit = (): RequestHandler => createRateLimiter({ family: 'apiToken' });
+
 /** `/v1/portfolio-import-sessions` and `/v1/transaction-import-sessions` — polling on the read budget, mutations on their own. */
 export const importSessionRateLimit = (): RequestHandler => createMethodScopedRateLimiter('read', 'importSession');
 

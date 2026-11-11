@@ -22,6 +22,8 @@ export interface InstanceDescription {
     /** Both Google OAuth credentials are set, so "Continue with Google" works. */
     googleSignIn: boolean;
     marketData: boolean;
+    /** The read-only MCP server at `POST /v1/mcp` (`MCP_ENABLED`). */
+    mcp?: boolean;
   };
   minAppVersion: null | string;
   name: string;

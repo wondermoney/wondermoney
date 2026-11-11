@@ -18,12 +18,15 @@ import { Tenant } from './Tenant';
  * token travels in the query because calendar apps cannot send an Authorization header. It is
  * issued by the calendar-link endpoints, never picked by hand, and grants nothing on the bearer
  * routes.
+ * `mcp:read` reaches only the read-only MCP server (`POST /v1/mcp`), where an MCP client sends
+ * the token as a bearer. It grants nothing on the ordinary data routes, and `read` grants
+ * nothing on `/v1/mcp`: the two surfaces are separate credentials on purpose.
  */
-export const API_TOKEN_SCOPES = ['read', 'write', 'calendar:read'] as const;
+export const API_TOKEN_SCOPES = ['read', 'write', 'calendar:read', 'mcp:read'] as const;
 export type ApiTokenScope = (typeof API_TOKEN_SCOPES)[number];
 
 /** The scopes a person may choose when creating a general-purpose token. */
-export const API_TOKEN_CREATABLE_SCOPES = ['read', 'write'] as const;
+export const API_TOKEN_CREATABLE_SCOPES = ['read', 'write', 'mcp:read'] as const;
 
 /**
  * A personal access token for scripts, spreadsheets, dashboards and AI tools.

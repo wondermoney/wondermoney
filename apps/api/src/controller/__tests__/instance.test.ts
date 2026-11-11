@@ -34,6 +34,7 @@ describe('GET /v1/instance', () => {
         fileStorage: false,
         googleSignIn: false,
         marketData: false,
+        mcp: true,
       },
       minAppVersion: null,
       name: 'WonderMoney',
@@ -76,6 +77,15 @@ describe('GET /v1/instance', () => {
     expect(describeInstance()).toMatchObject({
       features: { ai: { assistant: true, csvMapping: true, enrichment: true, monthlyStory: true, ocr: true } },
     });
+  });
+
+  it('reports the read-only MCP server, and hides it when MCP_ENABLED is false', () => {
+    for (const key of INTEGRATION_KEYS) vi.stubEnv(key, '');
+    vi.stubEnv('MCP_ENABLED', '');
+    expect(describeInstance()).toMatchObject({ features: { mcp: true } });
+
+    vi.stubEnv('MCP_ENABLED', 'false');
+    expect(describeInstance()).toMatchObject({ features: { mcp: false } });
   });
 
   it('offers Google sign-in only when both of its credentials are set', () => {

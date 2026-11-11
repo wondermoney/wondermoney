@@ -1,123 +1,41 @@
 import { tool } from 'ai';
-import { z } from 'zod';
+import type { z } from 'zod';
 
 import { DI } from '@app/app';
-import { Appuser } from '@entity/Appuser';
-import { AppuserTenant } from '@entity/AppuserTenant';
 import { AssistantAuditEventType } from '@entity/AssistantAuditLog';
-import { Budget } from '@entity/Budget';
-import { BudgetTemplateCategory } from '@entity/BudgetTemplateCategory';
-import { Tenant } from '@entity/Tenant';
-import { Transaction } from '@entity/Transaction';
+import { type AiToolContext, type AiToolDefinition, type AiToolName, executeAiTool } from '@service/ai-tools/ai-tool-types';
+import { AI_TOOL_DEFINITIONS, AI_TOOL_NAMES } from '@service/ai-tools/ai-tools.service';
 import { resolveAiRoute } from '@service/ai/ai-provider';
-import { MikroOrmTenantAggregationRepository } from '@service/budget/tenant-aggregation.repository';
-import { InsightsService } from '@service/insights/insights.service';
-import { CATEGORY_LINE_POPULATE, spendingLinesOf } from '@service/transaction/category-lines';
-import { loadCategorySpendingFlags } from '@service/transaction/category-spending';
-import { excludeExpired } from '@service/transaction/transaction-status';
-import { getEffectiveAppuserAmount } from '@utils/account-amounts';
-import { getRef } from '@utils/em-helpers';
 
 import { AssistantAuditService } from './assistant-audit.service';
-import { AssistantPeriodService } from './assistant-period.service';
 import { AssistantPolicyService, DEFAULT_ALLOWED_TOOLS } from './assistant-policy.service';
 import { AssistantRedactionService } from './assistant-redaction.service';
-import type { AssistantToolContext, AssistantToolResult } from './assistant-tool-types';
+import type { AssistantToolContext } from './assistant-tool-types';
 
-const periodSchema = z.enum(['current_month', 'previous_month', 'last_90_days', 'year_to_date', 'last_12_months']);
-const monthSchema = z.string().regex(/^\d{4}-(?:0[1-9]|1[0-2])$/, { message: 'Month must be YYYY-MM' });
-type PeriodInput = z.infer<typeof periodSchema>;
-
-type ToolName = (typeof DEFAULT_ALLOWED_TOOLS)[number];
-type TransactionLike = Pick<Transaction, 'appuserSettlementAmount' | 'editedSettlementAmount' | 'transactionTypeKey'>;
-
+/**
+ * The assistant's view of the shared read-only tool layer (`services/ai-tools`).
+ *
+ * The MCP server exposes the same definitions; this class only adds what is specific to the
+ * in-app chat: the `ASSISTANT_ALLOWED_TOOLS` policy, the AI SDK `tool()` wrapper and the
+ * assistant audit entries.
+ */
 // eslint-disable-next-line @typescript-eslint/no-extraneous-class
 export class AssistantToolsService {
   static createTools(context: AssistantToolContext) {
     /*
-     * Every amount below is a bare number, and a bare number reads as dollars to the model
-     *. So each result names its ISO 4217 currency: aggregates are summed from the
-     * user-currency columns (`appuserSettlementAmount`) and so are in the base currency, a
-     * budget is in its own currency, and per-account figures carry the account's.
+     * Every amount the shared layer returns is a bare number, and a bare number reads as dollars
+     * to the model. So each result names its ISO 4217 currency: aggregates are summed from the
+     * user-currency columns and so are in the base currency, a budget is in its own currency, and
+     * per-account figures carry the account's.
      */
-    const { currency } = context;
-    const tools = {
-      compare_budget_periods: createTool('compare_budget_periods', 'Read-only comparison of budget periods.', context, z.object({ period: periodSchema.optional() }), () => Promise.resolve({ data: { comparison: [] as { period: string }[], currency }, dataUsed: { granularity: 'summary', period: 'current', source: 'stub' } })),
-      get_account_balance_summary: createTool('get_account_balance_summary', 'Read-only, privacy-minimizing summary of account balances.', context, z.object({ period: periodSchema.optional() }), () => Promise.resolve({ data: { accounts: [] as { balance: number; currency: string; name: string }[], currency }, dataUsed: { granularity: 'summary', period: 'current', source: 'stub' } })),
-      get_budget_status: createTool('get_budget_status', 'Read-only, privacy-minimizing budget status summary.', context, z.object({ period: periodSchema.default('current_month') }), async ({ period }: { period: PeriodInput }) => {
-        const resolved = AssistantPeriodService.resolve(period);
-        const tenantMembership = await DI.em.findOne(AppuserTenant, {
-          appuserKey: appuserRef(context.appuserKey),
-          deletedAt: undefined,
-          recordActive: true,
-          tenantKey: tenantRef(context.tenantKey),
-        });
-        if (!tenantMembership) {
-          return { data: { budgeted: 0, currency, remaining: 0, spent: 0, status: 'no_tenant_access' }, dataUsed: { granularity: 'budget_status', period: resolved.key, recordCount: 0, source: 'database' } };
-        }
-        const budget = await DI.em.findOne(Budget, { deletedAt: undefined }, { populate: ['currencyKey'] });
-        if (!budget) {
-          return { data: { budgeted: 0, currency, remaining: 0, spent: 0, status: 'no_budget' }, dataUsed: { granularity: 'budget_status', period: resolved.key, recordCount: 0, source: 'database' } };
-        }
-        const budgetRows = await DI.em.find(BudgetTemplateCategory, {
-          $or: getPeriodMonths(resolved),
-          budgetKey: budget,
-          categoryKey: { deletedAt: undefined },
-        }, { populate: ['categoryKey'] });
-        const budgeted = budgetRows.reduce((sum, row) => sum + toNumber(row.amountBudgeted), 0);
-        const budgetCategories = budgetRows.map((row) => row.categoryKey);
-        const budgetCategoryKeys = new Set(budgetCategories.map((category) => category.categoryKey));
-        const spendingLines = budgetCategories.length ? await findOwnSpendingLines(context, resolved) : [];
-        const spent = spendingLines.reduce((sum, line) => (line.category && budgetCategoryKeys.has(line.category.categoryKey) ? sum + Math.abs(line.amount ?? 0) : sum), 0);
-        const remaining = budgeted - spent;
-        return { data: { budgeted, currency: budget.currencyKey.code, remaining, spent, status: budgetRows.length ? 'active' : 'empty' }, dataUsed: { granularity: 'budget_status', period: resolved.key, recordCount: budgetRows.length, source: 'database' } };
-      }),
-      get_cashflow_summary: createTool('get_cashflow_summary', 'Read-only, privacy-minimizing cashflow summary.', context, z.object({ period: periodSchema.default('current_month') }), async ({ period }: { period: PeriodInput }) => {
-        const resolved = AssistantPeriodService.resolve(period);
-        const transactions = (await findScopedTransactions(context, resolved)).filter((transaction) => !isTransfer(transaction));
-        const totals = transactions.reduce(
-          (acc, transaction) => {
-            const amount = getEffectiveAmount(transaction);
-            if (amount > 0) acc.inflow += amount;
-            if (amount < 0) acc.outflow += Math.abs(amount);
-            acc.net += amount;
-            return acc;
-          },
-          { inflow: 0, net: 0, outflow: 0 },
-        );
-        return { data: { currency, ...totals }, dataUsed: { granularity: resolved.granularity, period: resolved.key, recordCount: transactions.length, source: 'database' } };
-      }),
-      get_goal_progress_summary: createTool('get_goal_progress_summary', 'Read-only goal progress summary.', context, z.object({ period: periodSchema.optional() }), () => Promise.resolve({ data: { currency, goals: [] as { progress: number }[] }, dataUsed: { granularity: 'summary', period: 'current', source: 'stub' } })),
-      get_insights: createTool('get_insights', 'Read-only deterministic spending and budget-pace insights for a month.', context, z.object({ month: monthSchema.optional() }), async ({ month }: { month?: string }) => {
-        // The same service the home cards read, so an answer in chat matches what the person sees.
-        const result = await new InsightsService(new MikroOrmTenantAggregationRepository(DI.em)).getInsights({
-          appuserKey: context.appuserKey,
-          currency,
-          month,
-          tenantKey: context.tenantKey,
-        });
-        return { data: { currency, insights: result.insights }, dataUsed: { granularity: 'insights', period: month ?? 'current_month', recordCount: result.insights.length, source: 'database' } };
-      }),
-      get_large_transactions_summary: createTool('get_large_transactions_summary', 'Read-only summary of large transactions.', context, z.object({ period: periodSchema.optional() }), () => Promise.resolve({ data: { currency, transactions: [] as { amount: number }[] }, dataUsed: { granularity: 'summary', period: 'current', source: 'stub' } })),
-      get_net_worth_summary: createTool('get_net_worth_summary', 'Read-only, privacy-minimizing summary of current net worth.', context, z.object({ period: periodSchema.optional() }), () => Promise.resolve({ data: { currency, netWorth: null }, dataUsed: { granularity: 'summary', period: 'current', source: 'stub' } })),
-      get_portfolio_income_summary: createTool('get_portfolio_income_summary', 'Read-only portfolio income summary.', context, z.object({ period: periodSchema.optional() }), () => Promise.resolve({ data: { currency, income: null }, dataUsed: { granularity: 'summary', period: 'current', source: 'stub' } })),
-      get_portfolio_summary: createTool('get_portfolio_summary', 'Read-only portfolio summary.', context, z.object({ period: periodSchema.optional() }), () => Promise.resolve({ data: { currency, portfolioValue: null }, dataUsed: { granularity: 'summary', period: 'current', source: 'stub' } })),
-      get_recurring_payments_summary: createTool('get_recurring_payments_summary', 'Read-only recurring payments summary.', context, z.object({ period: periodSchema.optional() }), () => Promise.resolve({ data: { currency, recurringPayments: [] as { amount: number }[] }, dataUsed: { granularity: 'summary', period: 'current', source: 'stub' } })),
-      get_spending_by_category: createTool('get_spending_by_category', 'Read-only, privacy-minimizing spending breakdown by category.', context, z.object({ period: periodSchema.default('current_month') }), async ({ period }: { period: PeriodInput }) => {
-        const resolved = AssistantPeriodService.resolve(period);
-        const categoryLinks = (await findOwnSpendingLines(context, resolved)).filter((line) => line.category !== null);
-        const totalsByCategory = new Map<string, number>();
-        for (const line of categoryLinks) {
-          const categoryName = line.category!.name;
-          totalsByCategory.set(categoryName, (totalsByCategory.get(categoryName) ?? 0) + Math.abs(line.amount ?? 0));
-        }
-        const categories = Array.from(totalsByCategory.entries())
-          .map(([category, amount]) => ({ amount, category }))
-          .sort((a, b) => b.amount - a.amount);
-        return { data: { categories, currency }, dataUsed: { granularity: 'category_totals', period: resolved.key, recordCount: categoryLinks.length, source: 'database' } };
-      }),
-      get_spending_trend: createTool('get_spending_trend', 'Read-only spending trend summary.', context, z.object({ period: periodSchema.optional() }), () => Promise.resolve({ data: { currency, trend: [] as number[] }, dataUsed: { granularity: 'summary', period: 'current', source: 'stub' } })),
+    const toolContext: AiToolContext = {
+      appuserKey: context.appuserKey,
+      currency: context.currency,
+      tenantKey: context.tenantKey,
     };
+    const tools = Object.fromEntries(
+      AI_TOOL_DEFINITIONS.map((definition) => [definition.name, createTool(definition, context, toolContext)]),
+    );
 
     return Object.fromEntries(
       Object.entries(tools).filter(([toolName]) => {
@@ -139,28 +57,31 @@ export class AssistantToolsService {
         }
         return policy.allowed;
       }),
-    ) as typeof tools;
+    ) as unknown as Record<AiToolName, ReturnType<typeof tool>>;
   }
 
-  static getToolNames(): ToolName[] { return [...DEFAULT_ALLOWED_TOOLS]; }
+  static getToolNames() {
+    return [...DEFAULT_ALLOWED_TOOLS];
+  }
+
+  /** The shared tool names, for callers that only need the catalogue. */
+  static get allToolNames() {
+    return [...AI_TOOL_NAMES];
+  }
 }
 
 /** Which model the audit log records a tool event against. */
-function appuserRef(appuserKey: number) {
-  return getRef(DI.em, Appuser, appuserKey);
-}
-
 function assistantAuditModel(): { model: string | undefined; provider: string } {
   const route = resolveAiRoute('assistant');
   if (route.kind === 'openai-compatible') return { model: route.model, provider: 'openai-compatible' };
   return { model: route.kind === 'azure-openai' ? route.model ?? undefined : undefined, provider: 'azure' };
 }
 
-function createTool<TInput, TData>(toolName: ToolName, description: string, context: AssistantToolContext, inputSchema: z.ZodType<TInput>, execute: (input: TInput) => Promise<AssistantToolResult<TData>>) {
+function createTool(definition: AiToolDefinition<never>, context: AssistantToolContext, toolContext: AiToolContext) {
   return tool({
-    description,
-    execute: async (input) => {
-      const result = AssistantRedactionService.redact(await execute(input));
+    description: definition.description,
+    execute: async (input: unknown) => {
+      const result = AssistantRedactionService.redact(await executeAiTool(definition, input, toolContext));
       const dataUsed = result.dataUsed;
       await AssistantAuditService.log(DI.em, {
         appuserKey: context.appuserKey,
@@ -173,79 +94,14 @@ function createTool<TInput, TData>(toolName: ToolName, description: string, cont
           recordCount: dataUsed.recordCount,
           source: dataUsed.source,
           status: 'completed',
-          toolName,
+          toolName: definition.name,
         },
         ...assistantAuditModel(),
         tenantKey: context.tenantKey,
-        toolName,
+        toolName: definition.name,
       });
       return result;
     },
-    inputSchema,
+    inputSchema: definition.inputSchema as unknown as z.ZodType,
   });
-}
-
-async function findScopedTransactions(context: AssistantToolContext, period: ReturnType<typeof AssistantPeriodService.resolve>) {
-  // EXPIRED rows never moved money; PENDING still counts, as it always has here.
-  return DI.em.find(Transaction, excludeExpired({
-    accountKey: { closed: false, deletedAt: undefined },
-    deletedAt: undefined,
-    tenantKey: tenantRef(context.tenantKey),
-    transactionDate: { $gte: period.start, $lte: period.end },
-  }), { populate: ['transactionTypeKey'] });
-}
-
-/**
- * The category lines (`category-lines.ts`) of the member's own spending in the period: money out,
- * no transfers, not expired, no line in a category that is not spending. A split transaction gives one line per split line, each with its
- * share; an unsplit one its single category (or none) for its whole amount.
- */
-async function findOwnSpendingLines(context: AssistantToolContext, period: ReturnType<typeof AssistantPeriodService.resolve>) {
-  const transactions = await DI.em.find(Transaction, excludeExpired({
-    accountKey: { closed: false, deletedAt: undefined },
-    appuserKey: appuserRef(context.appuserKey),
-    deletedAt: undefined,
-    tenantKey: tenantRef(context.tenantKey),
-    transactionDate: { $gte: period.start, $lte: period.end },
-  }), { populate: [...CATEGORY_LINE_POPULATE, 'transactionTypeKey'] });
-  const spendingFlags = await loadCategorySpendingFlags(DI.em, context.tenantKey);
-  return transactions.flatMap((transaction) => {
-    if (isTransfer(transaction)) return [];
-    const amount = getEffectiveAmount(transaction);
-    return amount < 0 ? spendingLinesOf(transaction, amount, spendingFlags) : [];
-  });
-}
-
-function getEffectiveAmount(transaction: TransactionLike): number {
-  return toNumber(getEffectiveAppuserAmount(transaction));
-}
-
-function getPeriodMonths(period: ReturnType<typeof AssistantPeriodService.resolve>) {
-  const months: { month: number; year: number }[] = [];
-  const cursor = new Date(period.start.getFullYear(), period.start.getMonth(), 1);
-  const end = new Date(period.end.getFullYear(), period.end.getMonth(), 1);
-
-  while (cursor <= end) {
-    months.push({ month: cursor.getMonth() + 1, year: cursor.getFullYear() });
-    cursor.setMonth(cursor.getMonth() + 1);
-  }
-
-  return months;
-}
-
-function isTransfer(transaction: TransactionLike): boolean {
-  const transactionType = transaction.transactionTypeKey;
-  if (!transactionType) return false;
-  const typeName = transactionType.name.toLowerCase();
-  return typeName === 'transfer_in' || typeName === 'transfer_out' || typeName === 'transfer';
-}
-
-function tenantRef(tenantKey: number) {
-  return getRef(DI.em, Tenant, tenantKey);
-}
-
-function toNumber(value: unknown): number {
-  if (typeof value === 'number') return value;
-  if (typeof value === 'string') return Number(value);
-  return 0;
 }

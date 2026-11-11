@@ -2984,6 +2984,23 @@
       "name": "assistant_audit_log",
       "schema": "public",
       "columns": {
+        "api_token_key": {
+          "name": "api_token_key",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "integer"
+        },
         "appuser_key": {
           "name": "appuser_key",
           "type": "int",
@@ -3159,6 +3176,26 @@
           "enumItems": [],
           "mappedType": "string"
         },
+        "source": {
+          "name": "source",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": "'assistant'",
+          "comment": null,
+          "collation": null,
+          "enumItems": [
+            "assistant",
+            "mcp"
+          ],
+          "mappedType": "enum"
+        },
         "tenant_key": {
           "name": "tenant_key",
           "type": "int",
@@ -3234,6 +3271,18 @@
         },
         {
           "columnNames": [
+            "source",
+            "appuser_key",
+            "created_at"
+          ],
+          "composite": true,
+          "constraint": false,
+          "keyName": "assistant_audit_log_source_appuser_key_created_at_index",
+          "primary": false,
+          "unique": false
+        },
+        {
+          "columnNames": [
             "tenant_key",
             "appuser_key",
             "created_at"
@@ -3251,10 +3300,28 @@
           "expression": "\"event_type\" in ('error', 'response_completed', 'tool_called', 'tool_denied')",
           "definition": "check (\"event_type\" in ('error', 'response_completed', 'tool_called', 'tool_denied'))",
           "columnName": "event_type"
+        },
+        {
+          "name": "assistant_audit_log_source_check",
+          "expression": "\"source\" in ('assistant', 'mcp')",
+          "definition": "check (\"source\" in ('assistant', 'mcp'))",
+          "columnName": "source"
         }
       ],
       "triggers": [],
       "foreignKeys": {
+        "assistant_audit_log_api_token_key_foreign": {
+          "columnNames": [
+            "api_token_key"
+          ],
+          "constraintName": "assistant_audit_log_api_token_key_foreign",
+          "localTableName": "public.assistant_audit_log",
+          "referencedColumnNames": [
+            "api_token_key"
+          ],
+          "referencedTableName": "public.api_token",
+          "deleteRule": "set null"
+        },
         "assistant_audit_log_appuser_key_foreign": {
           "columnNames": [
             "appuser_key"
