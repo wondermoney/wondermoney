@@ -273,10 +273,12 @@ jobs:
           set -euo pipefail
           for target in api worker; do
             docker buildx build --load --target "$target" \
+              -f apps/api/Dockerfile \
               --build-arg WM_VERSION="$VERSION" \
               -t "ghcr.io/wondermoney/wondermoney-$target:$VERSION" .
           done
           docker buildx build --load --target runner \
+            -f apps/web/Dockerfile \
             --build-arg WM_VERSION="$VERSION" \
             -t "ghcr.io/wondermoney/wondermoney-web:$VERSION" .
       - name: Install
