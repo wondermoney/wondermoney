@@ -53,6 +53,7 @@ const makeRequest = (overrides: Record<string, unknown> = {}) => ({
 const GENERIC_TEMPLATE = 'date,amount,merchant,internalTransactionId,transactionTypeKey,description\n2026-01-15,23.40,Grocery store,example-1,3,Weekly shop';
 const BANK_STATEMENT = 'Data mov.;Descrição;Débito;Crédito\n02-09-2026;CONTINENTE;42,50;';
 const OFX = 'OFXHEADER:100\nDATA:OFXSGML\n\n<OFX><BANKMSGSRSV1></BANKMSGSRSV1></OFX>';
+const QIF = '!Type:Bank\nD15/01/2026\nT-42,50\nPCONTINENTE\n^';
 
 describe('account CSV import authorization', () => {
   beforeEach(() => {
@@ -157,6 +158,16 @@ describe('account CSV import authorization', () => {
     const { status } = await startImport({ key: 'account-41-statement.csv' });
 
     expect(mocks.createSession).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ autoCommit: true, format: 'ofx' }));
+    expect(status).toHaveBeenCalledWith(202);
+  });
+
+  it('reads a QIF file with the QIF adapter by its content', async () => {
+    mocks.findOne.mockResolvedValueOnce({ accountFinancialInstitutionKey: null });
+    mocks.getLimitedCsvObjectBuffer.mockResolvedValueOnce(Buffer.from(QIF, 'utf8'));
+
+    const { status } = await startImport({ key: 'account-41-statement.csv' });
+
+    expect(mocks.createSession).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ autoCommit: true, format: 'qif' }));
     expect(status).toHaveBeenCalledWith(202);
   });
 

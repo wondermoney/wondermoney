@@ -1019,7 +1019,7 @@
       "unsupported-bank": "Este formato de banco ainda não é suportado.",
       "general": "Não foi possível concluir a importação. Verifique a sua ligação e tente novamente.",
       "unknown-format": "Esta versão da app não consegue importar para esta conta. Atualize a app ou importe na web.",
-      "csv-only": "Esta conta importa um ficheiro CSV no formato indicado. Escolha um ficheiro .csv."
+      "csv-only": "Esta conta importa um ficheiro CSV no formato indicado. Escolha um ficheiro .csv, .ofx, .qfx ou .qif."
     }
   },
   "transactionOcr": {

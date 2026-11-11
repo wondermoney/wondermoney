@@ -45,8 +45,12 @@ import {
 import StatementPreview from "./StatementPreview";
 import TransactionImportReview from "./TransactionImportReview";
 
-/** OFX/QFX is read by its own adapter, without the column preview a CSV statement needs. */
+/** OFX/QFX and QIF are read by their own adapters, without the column preview a CSV statement needs. */
 const isOfxFileName = (name: string) => /\.(ofx|qfx)$/i.test(name.trim());
+const isQifFileName = (name: string) => /\.qif$/i.test(name.trim());
+
+/** A file whose own format the API reads: no columns to preview. */
+type FileFormat = "ofx" | "qif";
 
 interface AccountTransactionImportModalProps {
   isOpen: boolean;
@@ -85,7 +89,7 @@ const AccountTransactionImportModal: React.FC<
   const [files, setFiles] = useState<File[]>([]);
   // The uploaded file, how it reads, and the columns as the person last set them.
   const [uploadedKey, setUploadedKey] = useState<string | undefined>();
-  const [isOfx, setIsOfx] = useState(false);
+  const [fileFormat, setFileFormat] = useState<FileFormat | null>(null);
   const [preview, setPreview] = useState<Preview | undefined>();
   const [mapping, setMapping] = useState<StatementMapping | undefined>();
   const [isReading, setIsReading] = useState(false);
@@ -124,7 +128,7 @@ const AccountTransactionImportModal: React.FC<
     readSequenceRef.current += 1;
     setFiles([]);
     setUploadedKey(undefined);
-    setIsOfx(false);
+    setFileFormat(null);
     setPreview(undefined);
     setMapping(undefined);
     setIsReading(false);
@@ -161,14 +165,14 @@ const AccountTransactionImportModal: React.FC<
 
   /** Uploads the chosen file at once, so its preview is ready before the person presses Import. */
   const uploadAndRead = (file: File, accountId: string) => {
-    const ofx = isOfxFileName(file.name);
+    const kind: FileFormat | null = isOfxFileName(file.name) ? "ofx" : isQifFileName(file.name) ? "qif" : null;
     const sequence = ++readSequenceRef.current;
     setIsReading(true);
     setReadError(undefined);
     setPreview(undefined);
     setMapping(undefined);
     setUploadedKey(undefined);
-    setIsOfx(ofx);
+    setFileFormat(kind);
     useCreateAccountTransactionsCsvUrlMutation.mutate(
       { accountId },
       {
@@ -176,13 +180,18 @@ const AccountTransactionImportModal: React.FC<
           try {
             await axios.put(uploadResponse.data.presignedUrl, file, {
               headers: {
-                "Content-Type": ofx ? "application/x-ofx" : "text/csv",
+                "Content-Type":
+                  kind === "ofx"
+                    ? "application/x-ofx"
+                    : kind === "qif"
+                      ? "application/x-qif"
+                      : "text/csv",
               },
             });
           } catch {
             if (sequence !== readSequenceRef.current) return;
             setIsReading(false);
-            setIsOfx(false);
+            setFileFormat(null);
             setReadError(t("toast-import-transactions-error"));
             posthog.capture("account-transactions-import-failure", {
               reason: "s3_upload_failed",
@@ -191,8 +200,8 @@ const AccountTransactionImportModal: React.FC<
           }
           if (sequence !== readSequenceRef.current) return;
           setUploadedKey(uploadResponse.data.key);
-          // OFX/QFX has no columns to preview: the review reads it.
-          if (ofx) {
+          // OFX/QFX and QIF have no columns to preview: the review reads them.
+          if (kind) {
             setIsReading(false);
             return;
           }
@@ -201,7 +210,7 @@ const AccountTransactionImportModal: React.FC<
         onError: (error) => {
           if (sequence !== readSequenceRef.current) return;
           setIsReading(false);
-          setIsOfx(false);
+          setFileFormat(null);
           if (!notifyIfRateLimited(error))
             setReadError(t("toast-import-transactions-error"));
           posthog.capture("account-transactions-import-failure", {
@@ -213,7 +222,7 @@ const AccountTransactionImportModal: React.FC<
   };
 
   const onMappingChange = (nextMapping: StatementMapping) => {
-    if (isOfx) return;
+    if (fileFormat) return;
     setMapping(nextMapping);
     if (uploadedKey && isStatementMappingComplete(nextMapping)) {
       void readFile(selectedAccountId, uploadedKey, nextMapping);
@@ -230,7 +239,7 @@ const AccountTransactionImportModal: React.FC<
   const canImport =
     !!uploadedKey &&
     !isReading &&
-    (isOfx ||
+    (fileFormat !== null ||
       (!!preview &&
         preview.totalRows > 0 &&
         (preview.source === "bank" || isStatementMappingComplete(mapping))));
@@ -250,14 +259,15 @@ const AccountTransactionImportModal: React.FC<
     try {
       const session = await createImport.mutateAsync({
         accountId: data.accountId,
-        format: isOfx ? "ofx" : "statement",
+        format: fileFormat ?? "statement",
         key: uploadedKey,
         // The bank's own parser needs no columns; any other file reads as previewed.
-        mapping: isOfx || preview?.source === "bank" ? undefined : mapping,
+        mapping:
+          fileFormat || preview?.source === "bank" ? undefined : mapping,
       });
       posthog.capture("account-transactions-import-started", {
         kind: "account",
-        source: isOfx ? "ofx" : preview?.source,
+        source: fileFormat ?? preview?.source,
       });
       setImportId(session.id);
     } catch (error) {
@@ -394,14 +404,16 @@ const AccountTransactionImportModal: React.FC<
                       }}
                       accept={{
                         "text/csv": [".csv"],
-                        "text/plain": [".txt"],
+                        "text/plain": [".txt", ".qif"],
                         "application/vnd.ms-excel": [".xls"],
                         "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet":
                           [".xlsx"],
                         "application/x-ofx": [".ofx", ".qfx"],
+                        "application/qif": [".qif"],
+                        "application/x-qif": [".qif"],
                         "application/xml": [".ofx", ".qfx"],
                         "text/xml": [".ofx", ".qfx"],
-                        "application/octet-stream": [".ofx", ".qfx"],
+                        "application/octet-stream": [".ofx", ".qfx", ".qif"],
                       }}
                       maxFileCount={1}
                       // The API reads at most 5 MB (DEFAULT_CSV_UPLOAD_LIMITS); a larger file would upload and then fail.
@@ -419,9 +431,11 @@ const AccountTransactionImportModal: React.FC<
               {t("import-statement-reading")}
             </p>
           ) : null}
-          {isOfx && !isReading ? (
+          {fileFormat && !isReading ? (
             <p className="text-muted-foreground text-sm" aria-live="polite">
-              {t("import-ofx-ready")}
+              {fileFormat === "qif"
+                ? t("import-qif-ready")
+                : t("import-ofx-ready")}
             </p>
           ) : null}
           {readError ? (

@@ -10,7 +10,7 @@
  */
 
 /** The file formats a session can read. Each one is an {@link ImportAdapter}. */
-export const IMPORT_FORMATS = ['statement', 'ofx', 'generic-csv'] as const;
+export const IMPORT_FORMATS = ['statement', 'ofx', 'qif', 'generic-csv'] as const;
 export type ImportFormat = (typeof IMPORT_FORMATS)[number];
 
 /**
@@ -68,6 +68,11 @@ export interface NormalizedImportRow {
   originalCurrency?: string;
   /** Which account in the file the row belongs to, when the file holds several. */
   sourceAccountLabel?: string;
+  /**
+   * The other account a transfer names (a QIF `L[Account]` category), for the review to show and
+   * for a later step to match. The transfer itself is stated through {@link typeHint}.
+   */
+  transferAccountLabel?: string;
   /** A type the source suggests (`PAYMENT`, `CARD_PAYMENT`); the sign still decides direction. */
   typeHint?: string;
   /**

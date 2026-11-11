@@ -51,7 +51,7 @@ export interface TransactionImportSession {
   detailsDeletedAt: string | null;
   errorCode: string | null;
   expiresAt: string;
-  format: "statement" | "ofx" | "generic-csv";
+  format: "statement" | "ofx" | "qif" | "generic-csv";
   id: string;
   sourceAccounts: { currency?: string; label: string; rowCount: number }[];
   status: ImportSessionStatus;
@@ -71,11 +71,13 @@ export interface TransactionImportRow {
   } | null;
   normalized: {
     amount: number;
+    categoryLabel?: string;
     currency?: string;
     date: string;
     description: string;
     merchant?: string;
     sourceAccountLabel?: string;
+    transferAccountLabel?: string;
   } | null;
   sourceRow: number;
   status: ImportRowStatus;
@@ -150,8 +152,8 @@ export function useTransactionImport(
 
 export interface CreateTransactionImportRequest {
   accountId: number | string;
-  /** The format the file is read in; `statement` unless the file is OFX/QFX. */
-  format?: "ofx" | "statement";
+  /** The format the file is read in; `statement` unless the file is OFX/QFX or QIF. */
+  format?: "ofx" | "qif" | "statement";
   /** The file, already uploaded for this account. */
   key: string;
   /** The columns confirmed in the preview; absent when the bank's own parser reads the file. */
@@ -206,6 +208,16 @@ export function useDecideTransactionImportRows() {
 export function useMapTransactionImportAccounts() {
   return useSessionMutation((id: string, mapping: Record<string, number>) =>
     api.patch(`${base}/${id}/account-mapping`, { mapping }),
+  );
+}
+
+/** Read the file again with corrected reader options: a QIF file's date order. */
+export function useParseTransactionImport() {
+  return useSessionMutation(
+    (
+      id: string,
+      input: { dateOrder: "day-first" | "month-first" } | undefined,
+    ) => api.post(`${base}/${id}/parse`, input ? { options: input } : {}),
   );
 }
 

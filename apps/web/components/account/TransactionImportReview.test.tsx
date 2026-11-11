@@ -19,6 +19,7 @@ const mocks = vi.hoisted(() => ({
   commit: vi.fn(async () => ({})),
   decide: vi.fn(async () => ({})),
   map: vi.fn(async () => ({})),
+  parse: vi.fn(async () => ({})),
   view: { current: undefined as TransactionImportView | undefined },
   queries: [] as unknown[],
 }));
@@ -40,6 +41,7 @@ vi.mock("@/lib/api/transaction-import/useTransactionImport", () => {
     useCommitTransactionImport: mutation(mocks.commit),
     useDecideTransactionImportRows: mutation(mocks.decide),
     useMapTransactionImportAccounts: mutation(mocks.map),
+    useParseTransactionImport: mutation(mocks.parse),
     useTransactionImport: (_id: string, query: unknown) => {
       mocks.queries.push(query);
       return { data: mocks.view.current };
@@ -55,7 +57,7 @@ beforeAll(() => {
   Element.prototype.scrollIntoView ??= () => {};
 });
 beforeEach(() => {
-  for (const fn of [mocks.cancel, mocks.commit, mocks.decide, mocks.map])
+  for (const fn of [mocks.cancel, mocks.commit, mocks.decide, mocks.map, mocks.parse])
     fn.mockClear();
   mocks.queries.length = 0;
 });
@@ -244,6 +246,32 @@ test("cannot commit until each account in the file has an account", () => {
       .hasAttribute("disabled"),
     true,
   );
+});
+
+test("asks for the date order of a QIF file whose dates are all ambiguous", async () => {
+  renderReview({
+    rows,
+    session: session({
+      format: "qif",
+      warnings: [{ code: "date_order_ambiguous", detail: "day-first" }],
+    }),
+  });
+  const user = userEvent.setup();
+
+  assert.ok(
+    screen.getByText(messages["import-review-date-order-title"], {
+      selector: "p",
+    }),
+  );
+  await user.click(
+    screen.getByRole("button", {
+      name: messages["import-statement-date-mdy"],
+    }),
+  );
+  await waitFor(() => assert.equal(mocks.parse.mock.calls.length, 1));
+  assert.deepEqual(mocks.parse.mock.calls[0], [
+    { id: "import-1", input: { dateOrder: "month-first" } },
+  ]);
 });
 
 test("offers to carry on a commit whose job stopped", async () => {

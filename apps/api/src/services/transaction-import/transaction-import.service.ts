@@ -84,7 +84,7 @@ export interface TransactionImportCreateInput {
   format: transactionImport.ImportFormat;
   /** A file already uploaded for this account; absent, the response carries an upload link. */
   key?: string;
-  options?: { mapping?: StatementMapping };
+  options?: TransactionImportOptions;
 }
 
 export interface TransactionImportDeps {
@@ -99,6 +99,13 @@ export interface TransactionImportDeps {
   storage?: TransactionImportStorage;
 }
 
+/** The reader options a session keeps and hands to its adapter, beyond the account's currency. */
+export interface TransactionImportOptions {
+  /** How a QIF date whose day and month are both 12 or less reads. */
+  dateOrder?: transactionImport.QifDateOrder;
+  mapping?: StatementMapping;
+}
+
 export interface TransactionImportRowQuery {
   page?: number;
   pageSize?: number;
@@ -110,7 +117,7 @@ export interface TransactionImportRowView {
   error: null | string;
   id: number;
   matchedTransaction: null | { amount: null | number; date: null | string; description: null | string; id: number };
-  normalized: null | Pick<transactionImport.NormalizedImportRow, 'amount' | 'currency' | 'date' | 'description' | 'merchant' | 'sourceAccountLabel'>;
+  normalized: null | Pick<transactionImport.NormalizedImportRow, 'amount' | 'categoryLabel' | 'currency' | 'date' | 'description' | 'merchant' | 'sourceAccountLabel' | 'transferAccountLabel'>;
   raw: Record<string, unknown>;
   sourceRow: number;
   status: transactionImport.ImportRowStatus;
@@ -208,7 +215,7 @@ const defaultStorage: TransactionImportStorage = {
 
 export class TransactionImportService {
   private get adapters(): Partial<Record<transactionImport.ImportFormat, transactionImport.ImportAdapter<never>>> {
-    return this.deps.adapters ?? { 'generic-csv': transactionImport.genericCsvImportAdapter, ofx: transactionImport.ofxImportAdapter, statement: statementImportAdapter };
+    return this.deps.adapters ?? { 'generic-csv': transactionImport.genericCsvImportAdapter, ofx: transactionImport.ofxImportAdapter, qif: transactionImport.qifImportAdapter, statement: statementImportAdapter };
   }
 
   private get now(): Date {
@@ -243,7 +250,7 @@ export class TransactionImportService {
       autoCommit: input.autoCommit ?? false,
       expiresAt: new Date(this.now.getTime() + SESSION_TTL_MS),
       format: input.format,
-      options: { ...(input.format === 'statement' && format.format === 'bank' ? { bankName: format.bankName } : {}), ...(input.options?.mapping ? { mapping: input.options.mapping } : {}) },
+      options: { ...(input.format === 'statement' && format.format === 'bank' ? { bankName: format.bankName } : {}), ...input.options },
       publicId: randomUUID(),
       s3Bucket: this.storage.getAccountCsvBucketName(),
       s3Key: key,
@@ -299,13 +306,13 @@ export class TransactionImportService {
   }
 
   /** Read (or read again, with corrected options) the uploaded file. */
-  async parse(scope: TransactionImportScope, id: string, input: { options?: { mapping?: StatementMapping } }): Promise<TransactionImportSessionView> {
+  async parse(scope: TransactionImportScope, id: string, input: { options?: TransactionImportOptions }): Promise<TransactionImportSessionView> {
     const session = await this.find(scope, id);
     const view = await this.sessionView(session);
     const restartable = view.status === 'parsing' && view.canRetry;
     if (!restartable && !['failed', 'needs_mapping', 'ready', 'waiting_for_upload'].includes(view.status)) throw new ConflictError('This import cannot be read again now');
     if (view.status === 'waiting_for_upload' && (await this.storage.getObjectSize(session.s3Bucket, session.s3Key).catch(() => undefined)) === undefined) throw new ConflictError('The file has not been uploaded');
-    if (input.options?.mapping) session.options = { ...(session.options ?? {}), mapping: input.options.mapping };
+    if (input.options) session.options = { ...(session.options ?? {}), ...input.options };
     session.status = SESSION_STATUS.PARSING;
     session.errorCode = undefined;
     await this.em.flush();
@@ -392,13 +399,14 @@ export class TransactionImportService {
       const bytes = new Uint8Array(buffer);
       if (session.format === 'statement' && transactionImport.isOfxFile(bytes)) session.format = 'ofx';
       else if (session.format === 'statement' && transactionImport.isGenericCsvTemplate(bytes)) session.format = 'generic-csv';
+      else if (session.format === 'statement' && transactionImport.isQifFile(bytes)) session.format = 'qif';
       const adapter = this.adapters[session.format];
       if (!adapter) throw new StatementUnreadableError('unreadable');
       const options = { accountCurrency: account.currencyKey.code, ...(session.format === 'generic-csv' ? await this.genericCsvOptions() : {}), ...(session.options ?? {}) };
       result = await (adapter as transactionImport.ImportAdapter<typeof options>).parse(bytes, options);
     } catch (error) {
       session.status = SESSION_STATUS.FAILED;
-      session.errorCode = error instanceof StatementUnreadableError ? error.code : 'unreadable';
+      session.errorCode = error instanceof StatementUnreadableError || error instanceof transactionImport.QifUnreadableError ? error.code : 'unreadable';
       await this.em.flush();
       return;
     }
@@ -802,7 +810,7 @@ function rowView(row: TransactionImportRow): TransactionImportRowView {
     error: row.error ?? null,
     id: row.transactionImportRowKey,
     matchedTransaction: matched ? { amount: loaded?.settlementAmount ?? null, date: loaded?.transactionDate?.toISOString() ?? null, description: loaded?.description ?? loaded?.descriptionDirty ?? null, id: matched.transactionKey } : null,
-    normalized: normalized ? { amount: normalized.amount, currency: normalized.currency, date: normalized.date, description: normalized.description, merchant: normalized.merchant, sourceAccountLabel: normalized.sourceAccountLabel } : null,
+    normalized: normalized ? { amount: normalized.amount, categoryLabel: normalized.categoryLabel, currency: normalized.currency, date: normalized.date, description: normalized.description, merchant: normalized.merchant, sourceAccountLabel: normalized.sourceAccountLabel, transferAccountLabel: normalized.transferAccountLabel } : null,
     raw: row.raw,
     sourceRow: row.sourceRow,
     status: row.status,

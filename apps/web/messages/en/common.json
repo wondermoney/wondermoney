@@ -2548,9 +2548,10 @@
   "aiAllowance": {
     "message": "Your household has used today's allowance for this feature. It resets at {time}."
   },
-  "import-statement-hint": "Export the statement from your bank's website as CSV, Excel, OFX or QFX. We'll work out the columns.",
+  "import-statement-hint": "Export the statement from your bank's website as CSV, Excel, OFX, QFX or QIF. We'll work out the columns.",
   "import-statement-reading": "Reading your file…",
   "import-ofx-ready": "OFX/QFX file ready. Choose Review transactions to read its rows.",
+  "import-qif-ready": "QIF file ready. Choose Review transactions to read its rows.",
   "import-statement-found": "{count, plural, one {# transaction} other {# transactions}}",
   "import-statement-range": "{from} to {to}",
   "import-statement-source-bank": "Read as a {bank} statement.",
@@ -2609,6 +2610,9 @@
   "import-review-mapping-title": "This file holds several accounts. Choose where each one goes.",
   "import-review-mapping-source": "{label} ({count, plural, one {# row} other {# rows}})",
   "import-review-mapping-save": "Save accounts",
+  "import-review-date-order-title": "These dates could be day first or month first.",
+  "import-review-date-order-hint-day-first": "The file doesn't say, so they were read day first (15/01/2026 is 15 January). Choose the other order if that's wrong.",
+  "import-review-date-order-hint-month-first": "The file doesn't say, so they were read month first (01/15/2026 is 15 January). Choose the other order if that's wrong.",
   "import-review-done": "{imported, plural, one {# transaction imported} other {# transactions imported}}, {skipped} skipped.",
   "import-review-done-failed": "{failed, plural, one {# row couldn't be imported} other {# rows couldn't be imported}}.",
   "import-review-details-deleted": "The row-by-row details of this import are no longer kept: they are deleted 7 days after an import. The imported transactions stay in the account.",
