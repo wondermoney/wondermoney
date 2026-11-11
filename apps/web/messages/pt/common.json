@@ -2514,8 +2514,9 @@
   "aiAllowance": {
     "message": "O seu agregado já usou a quota diária desta funcionalidade. É reposta às {time}."
   },
-  "import-statement-hint": "Exporte o extrato no site do seu banco, em CSV ou Excel. Nós identificamos as colunas.",
+  "import-statement-hint": "Exporte o extrato no site do seu banco, em CSV, Excel, OFX ou QFX. Nós identificamos as colunas.",
   "import-statement-reading": "A ler o ficheiro…",
+  "import-ofx-ready": "Ficheiro OFX/QFX pronto. Escolha Rever transações para ler as linhas.",
   "import-statement-found": "{count, plural, one {# transação} other {# transações}}",
   "import-statement-range": "de {from} a {to}",
   "import-statement-source-bank": "Lido como extrato {bank}.",

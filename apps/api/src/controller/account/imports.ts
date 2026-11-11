@@ -1,3 +1,4 @@
+import { transactionImport } from '@wondermoney/shared';
 import dotenv from 'dotenv';
 import type { NextFunction, Request, Response } from 'express';
 
@@ -43,8 +44,9 @@ export async function getS3PresignedUrlForCsvUpload(req: Request, res: Response,
 /**
  * The one-step import: a statement read by its bank's parser or with the columns the person
  * confirmed runs as a staged session that commits itself with the default decisions (new rows in,
- * duplicates out), so it resumes like any staged import. A file with neither (the generic CSV
- * template) still runs the older one-job import.
+ * duplicates out), so it resumes like any staged import. An OFX/QFX file, recognized by its
+ * content, runs the same way with the OFX adapter. A file with neither (the generic CSV template)
+ * still runs the older one-job import.
  */
 export async function startAccountCsvImport(req: Request, res: Response, next: NextFunction) {
   const { appuserKey, tenant, tenantKey, user } = authedContext(req);
@@ -65,6 +67,19 @@ export async function startAccountCsvImport(req: Request, res: Response, next: N
   if (!validateCsvObjectKey({ key, maxLength: 170, prefix: `account-${normalizedAccountId}-` })) {
     next(new BadRequestError('Invalid CSV object key'));
     return;
+  }
+  // OFX/QFX is read by its own adapter, whatever the account's bank. The file, not the account,
+  // decides: the client uploads the same way for every format.
+  let isOfx = false;
+  try {
+    const buffer = await getLimitedCsvObjectBuffer({ bucket: s3Service.getAccountCsvBucketName(), key });
+    isOfx = transactionImport.isOfxFile(new Uint8Array(buffer));
+  } catch {
+    // The worker reports an unreadable file; the statement path below keeps its own behaviour.
+  }
+  if (isOfx) {
+    const session = await new TransactionImportService(DI.em, { enqueue: req.enqueue }).create({ appuserKey, tenantKey }, { accountId: normalizedAccountId, autoCommit: true, format: 'ofx', key });
+    return res.status(202).json({ correlationId: session.correlationId, importId: session.id, status: 'queued' });
   }
   const importFormat = resolveAccountCsvImportFormat(account.accountFinancialInstitutionKey?.name);
   const supportedBankName = importFormat.format === 'bank' ? importFormat.bankName : undefined;

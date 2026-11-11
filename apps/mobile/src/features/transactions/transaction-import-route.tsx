@@ -22,10 +22,17 @@ const IMPORT_MIME_TYPES = [
   'text/comma-separated-values',
   'application/vnd.ms-excel',
   'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  'application/x-ofx',
+  'application/ofx',
+  'application/vnd.intu.qfx',
+  'application/xml',
+  'text/xml',
+  'application/octet-stream',
 ]
-// The generic format reads only CSV. Some Android providers label a .csv as text/plain, so that is
-// accepted too; the import hook still checks the file name before uploading.
-const GENERIC_MIME_TYPES = ['text/csv', 'text/comma-separated-values', 'text/plain']
+// The generic format reads CSV, and the API reads OFX/QFX by its own adapter. Some Android
+// providers label a .csv as text/plain, so that is accepted too; the import hook still checks
+// the file name before uploading.
+const GENERIC_MIME_TYPES = ['text/csv', 'text/comma-separated-values', 'text/plain', 'application/x-ofx', 'application/ofx', 'application/vnd.intu.qfx', 'application/xml', 'text/xml', 'application/octet-stream']
 const BLOCKING_PHASES = new Set(['uploading', 'starting', 'processing'])
 
 export function TransactionImportRoute() {

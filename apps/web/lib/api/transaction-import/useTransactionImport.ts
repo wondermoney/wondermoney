@@ -51,7 +51,7 @@ export interface TransactionImportSession {
   detailsDeletedAt: string | null;
   errorCode: string | null;
   expiresAt: string;
-  format: "statement";
+  format: "statement" | "ofx";
   id: string;
   sourceAccounts: { currency?: string; label: string; rowCount: number }[];
   status: ImportSessionStatus;
@@ -150,6 +150,8 @@ export function useTransactionImport(
 
 export interface CreateTransactionImportRequest {
   accountId: number | string;
+  /** The format the file is read in; `statement` unless the file is OFX/QFX. */
+  format?: "ofx" | "statement";
   /** The file, already uploaded for this account. */
   key: string;
   /** The columns confirmed in the preview; absent when the bank's own parser reads the file. */
@@ -158,11 +160,16 @@ export interface CreateTransactionImportRequest {
 
 export function useCreateTransactionImport() {
   return useMutation({
-    mutationFn: ({ accountId, key, mapping }: CreateTransactionImportRequest) =>
+    mutationFn: ({
+      accountId,
+      format = "statement",
+      key,
+      mapping,
+    }: CreateTransactionImportRequest) =>
       api
         .post<{ session: TransactionImportSession }>(base, {
           accountId: Number(accountId),
-          format: "statement",
+          format,
           key,
           ...(mapping ? { options: { mapping } } : {}),
         })
