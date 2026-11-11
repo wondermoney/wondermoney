@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE Document [
+  <!ENTITY xxe SYSTEM "file:///etc/passwd">
+]>
+<Document xmlns="urn:iso:std:iso:20022:tech:xsd:camt.053.001.02">
+  <BkToCstmrStmt>
+    <Stmt>
+      <Id>XXE-2026-01</Id>
+      <Acct>
+        <Id>
+          <IBAN>PT50000201231234567890154</IBAN>
+        </Id>
+        <Ccy>EUR</Ccy>
+      </Acct>
+      <Ntry>
+        <Amt Ccy="EUR">1.00</Amt>
+        <CdtDbtInd>DBIT</CdtDbtInd>
+        <Sts>BOOK</Sts>
+        <BookgDt>
+          <Dt>2026-01-15</Dt>
+        </BookgDt>
+        <NtryDtls>
+          <TxDtls>
+            <RmtInf>
+              <Ustrd>&xxe;</Ustrd>
+            </RmtInf>
+          </TxDtls>
+        </NtryDtls>
+      </Ntry>
+    </Stmt>
+  </BkToCstmrStmt>
+</Document>

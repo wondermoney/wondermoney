@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Document xmlns="urn:iso:std:iso:20022:tech:xsd:camt.053.001.02">
+  <BkToCstmrStmt>
+    <GrpHdr>
+      <MsgId>OTHER-ID-2026-01</MsgId>
+      <CreDtTm>2026-02-01T07:00:00</CreDtTm>
+    </GrpHdr>
+    <Stmt>
+      <Id>OTHER-ID-2026-01</Id>
+      <Acct>
+        <Id>
+          <Othr>
+            <Id>000123456789</Id>
+          </Othr>
+        </Id>
+        <Ccy>EUR</Ccy>
+      </Acct>
+      <Ntry>
+        <NtryRef>OTHER-1</NtryRef>
+        <Amt Ccy="EUR">9.90</Amt>
+        <CdtDbtInd>DBIT</CdtDbtInd>
+        <Sts>BOOK</Sts>
+        <BookgDt>
+          <Dt>2026-01-15</Dt>
+        </BookgDt>
+        <AcctSvcrRef>OTHER-1</AcctSvcrRef>
+        <NtryDtls>
+          <TxDtls>
+            <RltdPties>
+              <Cdtr>
+                <Nm>LIVRARIA</Nm>
+              </Cdtr>
+            </RltdPties>
+            <RmtInf>
+              <Ustrd>LIVRO</Ustrd>
+            </RmtInf>
+          </TxDtls>
+        </NtryDtls>
+      </Ntry>
+    </Stmt>
+  </BkToCstmrStmt>
+</Document>

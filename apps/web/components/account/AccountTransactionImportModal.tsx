@@ -45,12 +45,13 @@ import {
 import StatementPreview from "./StatementPreview";
 import TransactionImportReview from "./TransactionImportReview";
 
-/** OFX/QFX and QIF are read by their own adapters, without the column preview a CSV statement needs. */
+/** OFX/QFX, QIF and CAMT.053 are read by their own adapters, without the column preview a CSV statement needs. */
 const isOfxFileName = (name: string) => /\.(ofx|qfx)$/i.test(name.trim());
 const isQifFileName = (name: string) => /\.qif$/i.test(name.trim());
+const isCamtFileName = (name: string) => /\.xml$/i.test(name.trim());
 
 /** A file whose own format the API reads: no columns to preview. */
-type FileFormat = "ofx" | "qif";
+type FileFormat = "ofx" | "qif" | "camt053";
 
 interface AccountTransactionImportModalProps {
   isOpen: boolean;
@@ -165,7 +166,7 @@ const AccountTransactionImportModal: React.FC<
 
   /** Uploads the chosen file at once, so its preview is ready before the person presses Import. */
   const uploadAndRead = (file: File, accountId: string) => {
-    const kind: FileFormat | null = isOfxFileName(file.name) ? "ofx" : isQifFileName(file.name) ? "qif" : null;
+    const kind: FileFormat | null = isOfxFileName(file.name) ? "ofx" : isQifFileName(file.name) ? "qif" : isCamtFileName(file.name) ? "camt053" : null;
     const sequence = ++readSequenceRef.current;
     setIsReading(true);
     setReadError(undefined);
@@ -185,7 +186,9 @@ const AccountTransactionImportModal: React.FC<
                     ? "application/x-ofx"
                     : kind === "qif"
                       ? "application/x-qif"
-                      : "text/csv",
+                      : kind === "camt053"
+                        ? "application/xml"
+                        : "text/csv",
               },
             });
           } catch {
@@ -200,7 +203,7 @@ const AccountTransactionImportModal: React.FC<
           }
           if (sequence !== readSequenceRef.current) return;
           setUploadedKey(uploadResponse.data.key);
-          // OFX/QFX and QIF have no columns to preview: the review reads them.
+          // OFX/QFX, QIF and CAMT.053 have no columns to preview: the review reads them.
           if (kind) {
             setIsReading(false);
             return;
@@ -411,9 +414,9 @@ const AccountTransactionImportModal: React.FC<
                         "application/x-ofx": [".ofx", ".qfx"],
                         "application/qif": [".qif"],
                         "application/x-qif": [".qif"],
-                        "application/xml": [".ofx", ".qfx"],
-                        "text/xml": [".ofx", ".qfx"],
-                        "application/octet-stream": [".ofx", ".qfx", ".qif"],
+                        "application/xml": [".ofx", ".qfx", ".xml"],
+                        "text/xml": [".ofx", ".qfx", ".xml"],
+                        "application/octet-stream": [".ofx", ".qfx", ".qif", ".xml"],
                       }}
                       maxFileCount={1}
                       // The API reads at most 5 MB (DEFAULT_CSV_UPLOAD_LIMITS); a larger file would upload and then fail.
@@ -435,7 +438,9 @@ const AccountTransactionImportModal: React.FC<
             <p className="text-muted-foreground text-sm" aria-live="polite">
               {fileFormat === "qif"
                 ? t("import-qif-ready")
-                : t("import-ofx-ready")}
+                : fileFormat === "camt053"
+                  ? t("import-camt-ready")
+                  : t("import-ofx-ready")}
             </p>
           ) : null}
           {readError ? (

@@ -13,7 +13,7 @@ import {
   readImportRowCounts,
   type TerminalTransactionImportStatus,
 } from './transaction-import-contract'
-import { decideUpload, isCsvFileName, isOfxFileName, isQifFileName } from './generic-csv-format'
+import { decideUpload, isCamtFileName, isCsvFileName, isOfxFileName, isQifFileName } from './generic-csv-format'
 import { uploadTransactionImportFile } from './transaction-import-upload'
 import { isManualTransactionAffectedQuery } from './use-create-manual-transaction'
 
@@ -90,7 +90,7 @@ export function useTransactionImport(options: UseTransactionImportOptions = {}) 
         setState({ phase: 'error', reason: decision.reason })
         return
       }
-      if (decision.format === 'generic' && !isCsvFileName(file.name) && !isOfxFileName(file.name) && !isQifFileName(file.name)) {
+      if (decision.format === 'generic' && !isCsvFileName(file.name) && !isOfxFileName(file.name) && !isQifFileName(file.name) && !isCamtFileName(file.name)) {
         setState({ phase: 'error', reason: 'csv-only' })
         return
       }

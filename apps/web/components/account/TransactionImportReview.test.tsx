@@ -6,6 +6,7 @@ import userEvent from "@testing-library/user-event";
 import { NextIntlClientProvider } from "next-intl";
 import { afterEach, beforeAll, beforeEach, test, vi } from "vitest";
 
+import type { Account } from "@/lib/api/account/useAccounts";
 import type {
   TransactionImportSession,
   TransactionImportView,
@@ -152,12 +153,16 @@ const rows: TransactionImportView["rows"] = {
   total: 3,
 };
 
-function renderReview(view: TransactionImportView, onFinished = vi.fn()) {
+function renderReview(
+  view: TransactionImportView,
+  onFinished = vi.fn(),
+  accounts: Account[] = [],
+) {
   mocks.view.current = view;
   render(
     <NextIntlClientProvider locale="en" messages={messages}>
       <TransactionImportReview
-        accounts={[]}
+        accounts={accounts}
         importId="import-1"
         onCancelled={vi.fn()}
         onFinished={onFinished}
@@ -245,6 +250,36 @@ test("cannot commit until each account in the file has an account", () => {
       .getByRole("button", { name: messages["import-review-mapping-save"] })
       .hasAttribute("disabled"),
     true,
+  );
+});
+
+test("pre-fills the mapping with the account the file's IBAN matched", () => {
+  renderReview(
+    {
+      rows,
+      session: session({
+        canCommit: false,
+        sourceAccounts: [
+          {
+            label: "PT50000201231234567890154",
+            rowCount: 2,
+            suggestedAccountId: 7,
+          },
+        ],
+        status: "needs_mapping",
+      }),
+    },
+    vi.fn(),
+    [{ accountKey: 7, accountName: "Checking" } as Account],
+  );
+
+  assert.ok(screen.getByText("Checking"));
+  assert.equal(
+    screen
+      .getByRole("button", { name: messages["import-review-mapping-save"] })
+      .hasAttribute("disabled"),
+    false,
+    "the suggested account completes the mapping",
   );
 });
 

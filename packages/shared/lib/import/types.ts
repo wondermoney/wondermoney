@@ -10,7 +10,7 @@
  */
 
 /** The file formats a session can read. Each one is an {@link ImportAdapter}. */
-export const IMPORT_FORMATS = ['statement', 'ofx', 'qif', 'generic-csv'] as const;
+export const IMPORT_FORMATS = ['statement', 'ofx', 'qif', 'generic-csv', 'camt053'] as const;
 export type ImportFormat = (typeof IMPORT_FORMATS)[number];
 
 /**
@@ -99,6 +99,12 @@ export interface ImportSourceAccount {
   currency?: string;
   label: string;
   rowCount: number;
+  /**
+   * The account the file's own identifier points at, when the session can tell: a CAMT.053
+   * statement is labelled by its IBAN, so an account whose `accountNumber` holds that IBAN is
+   * suggested. The person still confirms the mapping.
+   */
+  suggestedAccountId?: number;
 }
 
 export interface ImportWarning {

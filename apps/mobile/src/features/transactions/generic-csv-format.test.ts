@@ -5,6 +5,7 @@ import {
   decideUpload,
   GENERIC_CSV_COLUMNS,
   importFlowForAccount,
+  isCamtFileName,
   isCsvFileName,
   isOfxFileName,
   isQifFileName,
@@ -73,6 +74,11 @@ describe('isOfxFileName', () => {
 describe('isQifFileName', () => {
   it.each(['a.qif', 'A.QIF', 'statement.qif '])('accepts %s', (name) => expect(isQifFileName(name)).toBe(true))
   it.each(['a.csv', 'a.qif.txt', 'qif'])('refuses %s', (name) => expect(isQifFileName(name)).toBe(false))
+})
+
+describe('isCamtFileName', () => {
+  it.each(['a.xml', 'A.XML', 'statement.xml '])('accepts %s', (name) => expect(isCamtFileName(name)).toBe(true))
+  it.each(['a.csv', 'a.xml.txt', 'xml'])('refuses %s', (name) => expect(isCamtFileName(name)).toBe(false))
 })
 
 describe('rowsFailedCounts', () => {
