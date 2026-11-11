@@ -53,6 +53,9 @@ export const isCsvFileName = (name: string) => /\.csv$/i.test(name.trim())
 /** OFX/QFX: read by the API's OFX adapter, not the generic CSV columns. */
 export const isOfxFileName = (name: string) => /\.(ofx|qfx)$/i.test(name.trim())
 
+/** QIF: read by the API's QIF adapter, not the generic CSV columns. */
+export const isQifFileName = (name: string) => /\.qif$/i.test(name.trim())
+
 /**
  * The flow the import screen offers for an account. `legacy` is an older API that doesn't
  * report a format: the screen shows the old bank-statement copy and the upload response's

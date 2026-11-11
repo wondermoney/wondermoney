@@ -7,6 +7,7 @@ import {
   importFlowForAccount,
   isCsvFileName,
   isOfxFileName,
+  isQifFileName,
   rowsFailedCounts,
 } from './generic-csv-format'
 
@@ -67,6 +68,11 @@ describe('isCsvFileName', () => {
 describe('isOfxFileName', () => {
   it.each(['a.ofx', 'A.OFX', 'statement.qfx', 'statement.qfx '])('accepts %s', (name) => expect(isOfxFileName(name)).toBe(true))
   it.each(['a.csv', 'a.ofx.txt', 'ofx'])('refuses %s', (name) => expect(isOfxFileName(name)).toBe(false))
+})
+
+describe('isQifFileName', () => {
+  it.each(['a.qif', 'A.QIF', 'statement.qif '])('accepts %s', (name) => expect(isQifFileName(name)).toBe(true))
+  it.each(['a.csv', 'a.qif.txt', 'qif'])('refuses %s', (name) => expect(isQifFileName(name)).toBe(false))
 })
 
 describe('rowsFailedCounts', () => {

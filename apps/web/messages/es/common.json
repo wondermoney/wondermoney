@@ -2548,9 +2548,10 @@
   "aiAllowance": {
     "message": "Tu hogar ya ha usado el límite diario de esta función. Se reinicia a las {time}."
   },
-  "import-statement-hint": "Exporta el extracto desde la web de tu banco, en CSV, Excel, OFX o QFX. Nosotros identificamos las columnas.",
+  "import-statement-hint": "Exporta el extracto desde la web de tu banco, en CSV, Excel, OFX, QFX o QIF. Nosotros identificamos las columnas.",
   "import-statement-reading": "Leyendo el archivo…",
   "import-ofx-ready": "Archivo OFX/QFX listo. Elige Revisar transacciones para leer sus filas.",
+  "import-qif-ready": "Archivo QIF listo. Elige Revisar transacciones para leer sus filas.",
   "import-statement-found": "{count, plural, one {# transacción} other {# transacciones}}",
   "import-statement-range": "del {from} al {to}",
   "import-statement-source-bank": "Leído como extracto de {bank}.",
@@ -2609,6 +2610,9 @@
   "import-review-mapping-title": "Este archivo tiene varias cuentas. Elige adónde va cada una.",
   "import-review-mapping-source": "{label} ({count, plural, one {# fila} other {# filas}})",
   "import-review-mapping-save": "Guardar cuentas",
+  "import-review-date-order-title": "Estas fechas pueden ser día primero o mes primero.",
+  "import-review-date-order-hint-day-first": "El archivo no lo indica, así que se leyeron con el día primero (15/01/2026 es el 15 de enero). Elige el otro orden si es incorrecto.",
+  "import-review-date-order-hint-month-first": "El archivo no lo indica, así que se leyeron con el mes primero (01/15/2026 es el 15 de enero). Elige el otro orden si es incorrecto.",
   "import-review-done": "{imported, plural, one {# transacción importada} other {# transacciones importadas}}, {skipped} omitidas.",
   "import-review-done-failed": "{failed, plural, one {# fila no se pudo importar} other {# filas no se pudieron importar}}.",
   "import-review-details-deleted": "Los detalles fila a fila de esta importación ya no se conservan: se eliminan 7 días después de una importación. Las transacciones importadas siguen en la cuenta.",

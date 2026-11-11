@@ -45,9 +45,9 @@ export async function getS3PresignedUrlForCsvUpload(req: Request, res: Response,
  * The one-step import: a statement read by its bank's parser or with the columns the person
  * confirmed runs as a staged session that commits itself with the default decisions (new rows in,
  * duplicates out), so it resumes like any staged import. The file, not the account, decides the
- * format: an OFX/QFX file is read by the OFX adapter, and the older WonderMoney CSV template (with
- * `internalTransactionId` and `transactionTypeKey` columns) by its own. Anything else is a
- * statement.
+ * format: an OFX/QFX file is read by the OFX adapter, a QIF file by the QIF adapter, and the older
+ * WonderMoney CSV template (with `internalTransactionId` and `transactionTypeKey` columns) by its
+ * own. Anything else is a statement.
  */
 export async function startAccountCsvImport(req: Request, res: Response, next: NextFunction) {
   const { appuserKey, tenant, tenantKey, user } = authedContext(req);
@@ -75,6 +75,7 @@ export async function startAccountCsvImport(req: Request, res: Response, next: N
     const bytes = new Uint8Array(await getLimitedCsvObjectBuffer({ bucket: s3Service.getAccountCsvBucketName(), key }));
     if (transactionImport.isOfxFile(bytes)) format = 'ofx';
     else if (transactionImport.isGenericCsvTemplate(bytes)) format = 'generic-csv';
+    else if (transactionImport.isQifFile(bytes)) format = 'qif';
   } catch {
     // The worker reports an unreadable file; the statement path below keeps its own behaviour.
   }

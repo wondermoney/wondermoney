@@ -6,7 +6,13 @@ import { MAX_PAGE_SIZE } from '@service/transaction-import/transaction-import.se
 import { positiveIntId } from '@validators/shared';
 
 const sessionParams = z.object({ importId: z.uuid() });
-const options = z.object({ mapping: statementMappingSchema.optional() }).strict();
+const options = z
+  .object({
+    /** How a QIF date whose day and month are both 12 or less reads. */
+    dateOrder: z.enum(['day-first', 'month-first']).optional(),
+    mapping: statementMappingSchema.optional(),
+  })
+  .strict();
 
 /** `POST /v1/transaction-import-sessions`: the account, the format, and the file when it is already uploaded for that account. */
 export const createTransactionImportSchema = z.object({

@@ -1,0 +1,19 @@
+!Type:Bank
+D15/01/2026
+T-42,50
+PCONTINENTE MATOSINHOS
+MGroceries
+LFood:Groceries
+N1234
+^
+D31/01/2026
+T1500,00
+PSALARIO ACME LDA
+MJanuary salary
+LSalary
+^
+D02/03/2026
+T-12,30
+PFARMACIA CENTRAL
+MPharmacy
+^

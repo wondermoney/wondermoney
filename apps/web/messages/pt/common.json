@@ -2548,9 +2548,10 @@
   "aiAllowance": {
     "message": "O seu agregado já usou a quota diária desta funcionalidade. É reposta às {time}."
   },
-  "import-statement-hint": "Exporte o extrato no site do seu banco, em CSV, Excel, OFX ou QFX. Nós identificamos as colunas.",
+  "import-statement-hint": "Exporte o extrato no site do seu banco, em CSV, Excel, OFX, QFX ou QIF. Nós identificamos as colunas.",
   "import-statement-reading": "A ler o ficheiro…",
   "import-ofx-ready": "Ficheiro OFX/QFX pronto. Escolha Rever transações para ler as linhas.",
+  "import-qif-ready": "Ficheiro QIF pronto. Escolha Rever transações para ler as linhas.",
   "import-statement-found": "{count, plural, one {# transação} other {# transações}}",
   "import-statement-range": "de {from} a {to}",
   "import-statement-source-bank": "Lido como extrato {bank}.",
@@ -2609,6 +2610,9 @@
   "import-review-mapping-title": "Este ficheiro tem várias contas. Escolha para onde vai cada uma.",
   "import-review-mapping-source": "{label} ({count, plural, one {# linha} other {# linhas}})",
   "import-review-mapping-save": "Guardar contas",
+  "import-review-date-order-title": "Estas datas podem ser dia primeiro ou mês primeiro.",
+  "import-review-date-order-hint-day-first": "O ficheiro não o indica, por isso foram lidas com o dia primeiro (15/01/2026 é 15 de janeiro). Escolha a outra ordem se estiver errado.",
+  "import-review-date-order-hint-month-first": "O ficheiro não o indica, por isso foram lidas com o mês primeiro (01/15/2026 é 15 de janeiro). Escolha a outra ordem se estiver errado.",
   "import-review-done": "{imported, plural, one {# transação importada} other {# transações importadas}}, {skipped} ignoradas.",
   "import-review-done-failed": "{failed, plural, one {# linha não pôde ser importada} other {# linhas não puderam ser importadas}}.",
   "import-review-details-deleted": "Os detalhes linha a linha desta importação já não são guardados: são eliminados 7 dias depois de uma importação. As transações importadas continuam na conta.",

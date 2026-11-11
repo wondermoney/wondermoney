@@ -259,6 +259,32 @@ test("an OFX/QFX file skips the column preview and is staged as an OFX import", 
   ]);
 });
 
+test("a QIF file skips the column preview and is staged as a QIF import", async () => {
+  presignAnswers(false);
+  renderModal(manualAccount);
+
+  const user = await pickFile("statement.qif");
+
+  assert.equal(mocks.preview.mock.calls.length, 0);
+  assert.ok(screen.getByText(messages["import-qif-ready"]));
+  assert.equal(
+    (
+      mocks.put.mock.calls[0] as unknown as
+        | [unknown, unknown, { headers?: Record<string, string> }]
+        | undefined
+    )?.[2]?.headers?.["Content-Type"],
+    "application/x-qif",
+  );
+
+  await user.click(
+    screen.getByRole("button", { name: messages["import-review-start"] }),
+  );
+  await waitFor(() => assert.equal(mocks.createImport.mock.calls.length, 1));
+  assert.deepEqual(mocks.createImport.mock.calls[0], [
+    { accountId: "3", format: "qif", key: "account-3-upload.csv", mapping: undefined },
+  ]);
+});
+
 test("a file whose columns could not be found cannot be imported until they are picked", async () => {
   presignAnswers(false);
   mocks.preview.mockResolvedValue(

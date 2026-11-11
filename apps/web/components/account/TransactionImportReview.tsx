@@ -25,6 +25,7 @@ import {
   useCommitTransactionImport,
   useDecideTransactionImportRows,
   useMapTransactionImportAccounts,
+  useParseTransactionImport,
   useTransactionImport,
 } from "@/lib/api/transaction-import/useTransactionImport";
 import { useRateLimitToast } from "@/lib/api/useRateLimitToast";
@@ -39,6 +40,14 @@ const DECIDABLE: ReadonlySet<ImportRowStatus> = new Set<ImportRowStatus>([
   "duplicate",
   "possible_duplicate",
 ]);
+
+/** A QIF file whose dates the reader could not order: it read them day-first and asks. */
+const dateOrderAmbiguous = (session: TransactionImportSession) =>
+  session.warnings.some(
+    (warning) =>
+      warning.code === "date_order_ambiguous" ||
+      warning.code === "date_order_conflict",
+  );
 
 /** A row date (an ISO timestamp) as its calendar day, wherever the reader is. */
 const calendarDay = (iso: string) => {
@@ -81,6 +90,7 @@ export default function TransactionImportReview({
   });
   const decide = useDecideTransactionImportRows();
   const mapAccounts = useMapTransactionImportAccounts();
+  const parse = useParseTransactionImport();
   const commit = useCommitTransactionImport();
   const cancel = useCancelTransactionImport();
   const session = query.data?.session;
@@ -106,6 +116,7 @@ export default function TransactionImportReview({
   const busy =
     decide.isPending ||
     mapAccounts.isPending ||
+    parse.isPending ||
     commit.isPending ||
     cancel.isPending;
   const onError = (error: unknown) => {
@@ -148,6 +159,16 @@ export default function TransactionImportReview({
           session={session}
           onSave={(mapping) =>
             void run(mapAccounts.mutateAsync({ id: importId, input: mapping }))
+          }
+        />
+      ) : null}
+
+      {dateOrderAmbiguous(session) ? (
+        <DateOrder
+          disabled={busy}
+          session={session}
+          onChoose={(dateOrder) =>
+            void run(parse.mutateAsync({ id: importId, input: { dateOrder } }))
           }
         />
       ) : null}
@@ -450,6 +471,56 @@ function Outcome({
         </p>
       ) : null}
     </div>
+  );
+}
+
+/**
+ * A QIF file whose dates could be day first or month first: the reader read them day-first and
+ * asks. Choosing reads the file again, so the rows below are the ones that will import.
+ */
+function DateOrder({
+  disabled,
+  session,
+  onChoose,
+}: {
+  disabled: boolean;
+  session: TransactionImportSession;
+  onChoose: (dateOrder: "day-first" | "month-first") => void;
+}) {
+  const t = useTranslations();
+  const assumed = session.warnings.find(
+    (warning) => warning.code === "date_order_ambiguous",
+  )?.detail;
+  return (
+    <fieldset className="bg-muted flex flex-col gap-3 rounded-md p-4">
+      <legend className="sr-only">{t("import-review-date-order-title")}</legend>
+      <p className="font-medium">{t("import-review-date-order-title")}</p>
+      <p className="text-muted-foreground">
+        {assumed === "month-first"
+          ? t("import-review-date-order-hint-month-first")
+          : t("import-review-date-order-hint-day-first")}
+      </p>
+      <div className="flex flex-wrap gap-2">
+        <Button
+          type="button"
+          size="sm"
+          variant="outline"
+          disabled={disabled}
+          onClick={() => onChoose("day-first")}
+        >
+          {t("import-statement-date-dmy")}
+        </Button>
+        <Button
+          type="button"
+          size="sm"
+          variant="outline"
+          disabled={disabled}
+          onClick={() => onChoose("month-first")}
+        >
+          {t("import-statement-date-mdy")}
+        </Button>
+      </div>
+    </fieldset>
   );
 }
 
