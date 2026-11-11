@@ -96,7 +96,7 @@ export const buildTransactionEnrichmentConfig = (env: EnvLike = process.env): Tr
   enabled: parseBoolean('TRANSACTION_ENRICHMENT_GPT_ENABLED', env['TRANSACTION_ENRICHMENT_GPT_ENABLED'], true) && route.kind !== 'disabled',
   expirationSeconds: JOB_EXPIRATION_SECONDS,
   mode: parseMode('TRANSACTION_ENRICHMENT_GPT_MODE', env['TRANSACTION_ENRICHMENT_GPT_MODE'], 'write'),
-  modelVersion: env['TRANSACTION_ENRICHMENT_GPT_MODEL_VERSION'] ?? (route.kind === 'openai-compatible' ? route.model : 'DeepSeek-V4-Flash'),
+  modelVersion: env['TRANSACTION_ENRICHMENT_GPT_MODEL_VERSION'] ?? (route.kind === 'openai-compatible' || route.kind === 'anthropic' ? route.model : 'DeepSeek-V4-Flash'),
   promptVersion: PROMPT_VERSION,
   retentionSeconds: JOB_RETENTION_SECONDS,
   retryDelaySeconds: JOB_RETRY_DELAY_SECONDS,

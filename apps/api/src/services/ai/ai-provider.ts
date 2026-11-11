@@ -3,6 +3,8 @@
  *
  * - **Azure** when its settings are present: Azure OpenAI for the chat-completion features and
  *   Azure AI Foundry for transaction enrichment. This is the hosted instance's setup, unchanged.
+ * - Otherwise **Anthropic** when `AI_PROVIDER=anthropic` and `ANTHROPIC_API_KEY` are set. It is
+ *   an explicit choice, so it wins over the generic OpenAI-compatible endpoint below.
  * - Otherwise an **OpenAI-compatible endpoint** (`AI_BASE_URL`, optional `AI_API_KEY`): OpenAI,
  *   Ollama, LM Studio, OpenRouter, vLLM... `AI_MODEL` is the default model and
  *   `AI_MODEL_<FEATURE>` overrides it per feature.
@@ -19,6 +21,7 @@ export type AiRoute =
   | { apiKey: null | string; baseURL: string; kind: 'openai-compatible'; model: string }
   | { apiKey: string; apiVersion: string; endpoint: string; kind: 'azure-foundry' }
   | { apiKey: string; apiVersion: string; endpoint: string; kind: 'azure-openai'; model: null | string }
+  | { apiKey: string; kind: 'anthropic'; model: string }
   | { kind: 'disabled' };
 
 type Env = Readonly<Record<string, string | undefined>>;
@@ -36,21 +39,38 @@ const FEATURE_MODEL_ENV: Record<AiFeature, string> = {
 const read = (env: Env, key: string): null | string => env[key]?.trim() || null;
 
 /**
- * The Azure OpenAI deployment a feature calls by default. CSV mapping and the monthly story
- * name their deployment at the call site, so they have none here.
+ * Which features this instance can run, for `GET /v1/instance` and the client-side gates.
  */
 export function aiCapabilities(env: Env = process.env): Record<AiFeature, boolean> {
   return Object.fromEntries(AI_FEATURES.map((feature) => [feature, resolveAiRoute(feature, env).kind !== 'disabled'])) as Record<AiFeature, boolean>;
 }
 
 export function resolveAiRoute(feature: AiFeature, env: Env = process.env): AiRoute {
-  return resolveAzure(feature, env) ?? resolveOpenAiCompatible(feature, env) ?? { kind: 'disabled' };
+  return resolveAzure(feature, env) ?? resolveAnthropic(feature, env) ?? resolveOpenAiCompatible(feature, env) ?? { kind: 'disabled' };
 }
 
+/**
+ * The Azure OpenAI deployment a feature calls by default. CSV mapping and the monthly story
+ * name their deployment at the call site, so they have none here.
+ */
 function azureDeployment(feature: AiFeature, env: Env): null | string {
   if (feature === 'ocr') return read(env, 'AZURE_OPENAI_OCR_DEPLOYMENT');
   if (feature === 'assistant') return read(env, 'AZURE_OPENAI_DEPLOYMENT');
   return null;
+}
+
+/**
+ * Anthropic is opt-in: `AI_PROVIDER=anthropic` names it explicitly, so a leftover `AI_BASE_URL`
+ * from an earlier setup does not shadow it. The model comes from `AI_MODEL`, or
+ * `AI_MODEL_<FEATURE>` for one feature; there is no built-in default, so a missing model leaves
+ * the feature off rather than guessing a name that may not exist on the account.
+ */
+function resolveAnthropic(feature: AiFeature, env: Env): AiRoute | null {
+  if (read(env, 'AI_PROVIDER')?.toLowerCase() !== 'anthropic') return null;
+  const apiKey = read(env, 'ANTHROPIC_API_KEY');
+  const model = read(env, FEATURE_MODEL_ENV[feature]) ?? read(env, 'AI_MODEL');
+  if (!apiKey || !model) return null;
+  return { apiKey, kind: 'anthropic', model };
 }
 
 function resolveAzure(feature: AiFeature, env: Env): AiRoute | null {

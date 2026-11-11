@@ -199,6 +199,9 @@ importers:
 
   apps/api:
     dependencies:
+      '@ai-sdk/anthropic':
+        specifier: ^4.0.99
+        version: 4.0.99(zod@4.6.7)
       '@ai-sdk/azure':
         specifier: ^4.0.110
         version: 4.0.119(zod@4.6.7)
@@ -331,9 +334,6 @@ importers:
       nodemailer:
         specifier: 10.3.1
         version: 10.3.1
-      openai:
-        specifier: ^7.42.0
-        version: 7.53.0(@aws-sdk/credential-provider-node@3.972.87)(@smithy/signature-v4@5.7.4)(undici@8.12.4)(ws@8.21.1)(zod@4.6.7)
       pdf-to-img:
         specifier: ^7.0.1
         version: 7.0.2
@@ -1331,6 +1331,12 @@ packages:
       typescript:
         optional: true
 
+  '@ai-sdk/anthropic@4.0.99':
+    resolution: {integrity: sha512-N5VA8soxdvb+eX5jKs7g+a0RahCXNnvnzT96/Hiqm+LxoLFO2U8dSYhWKrQjG1i04LM/itp8vCVl7RCn6Kvohg==}
+    engines: {node: '>=22'}
+    peerDependencies:
+      zod: ^3.25.76 || ^4.1.8
+
   '@ai-sdk/azure@4.0.119':
     resolution: {integrity: sha512-8HZsSqhuIpNUakRHvaI7SY3BqMQ5iv0zOfK/uk+idcJREvJPCNvGa7Rn5vMlxlYi2zcALdAKQ9GgysDMMh3J6w==}
     engines: {node: '>=22'}
@@ -1599,10 +1605,6 @@ packages:
 
   '@aws-sdk/credential-provider-login@3.972.89':
     resolution: {integrity: sha512-5kcIZkMMs6eYvU6psqZkmeWsS3EGES53S6xUJFCC6eoJak3BQCCaF8yLU1bN6LTAOr2a9RWw+m1XBGen7Jcq+Q==}
-    engines: {node: '>=20.0.0'}
-
-  '@aws-sdk/credential-provider-node@3.972.87':
-    resolution: {integrity: sha512-TKj2C0x4IMPSSOAlmeryX8fCPvvPS2pFJz2ikV9IGqyh6Ehsg4leMalCTVfV2rvMTrlGAe7X7nK0HZ3P0KZR9g==}
     engines: {node: '>=20.0.0'}
 
   '@aws-sdk/credential-provider-node@3.972.94':
@@ -6784,10 +6786,6 @@ packages:
 
   '@smithy/node-http-handler@4.14.2':
     resolution: {integrity: sha512-i1uORV1v3qBqP43ayRKzIdm1q5x14tf8N4Dd06/QUX1Szm6VxHMrTsu20X5E63UFsaNZCRjI4SXG0jDmqYa+3w==}
-    engines: {node: '>=18.0.0'}
-
-  '@smithy/signature-v4@5.7.4':
-    resolution: {integrity: sha512-tHy0K0VtqNd5Y7Y41h0a0Lhh0L1GzC08dTWg0F7vRJWFtTENg7IZikf3wQkanYIRdb7ngoIPMTmqgUi401fEeQ==}
     engines: {node: '>=18.0.0'}
 
   '@smithy/signature-v4@5.7.5':
@@ -12758,33 +12756,6 @@ packages:
     resolution: {integrity: sha512-7x81NCL719oNbsq/3mh+hVrAWmFuEYUqrq/Iw3kUzH8ReypT9QQ0BLoJS7/G9k6N81XjW4qHWtjWwe/9eLy1EQ==}
     engines: {node: '>=12'}
 
-  openai@7.53.0:
-    resolution: {integrity: sha512-PXiIZraFYMb2QYgTtWqDA16Oszj4fWRZNn7qLIAddmiJxM5uQPWBFaxp9O8MhLfTUOQ+iQsnFSRJhLPecsGovQ==}
-    engines: {node: '>=22.0.0'}
-    peerDependencies:
-      '@aws-sdk/credential-provider-node': '>=3.972.0 <4'
-      '@smithy/hash-node': '>=4.3.0 <5'
-      '@smithy/signature-v4': '>=5.4.0 <6'
-      google-auth-library: '>=9.15.1 <12'
-      undici: '>=5 <9'
-      ws: ^8.21.0
-      zod: ^3.25 || ^4.0
-    peerDependenciesMeta:
-      '@aws-sdk/credential-provider-node':
-        optional: true
-      '@smithy/hash-node':
-        optional: true
-      '@smithy/signature-v4':
-        optional: true
-      google-auth-library:
-        optional: true
-      undici:
-        optional: true
-      ws:
-        optional: true
-      zod:
-        optional: true
-
   opener@1.5.2:
     resolution: {integrity: sha512-ur5UIdyw5Y7yEj9wLzhqXiy6GZ3Mwx0yGI+5sMn2r0N0v3cKJvUmFH5yPP+WXh9e0xfyzyJX95D8l088DNFj7A==}
     hasBin: true
@@ -15835,6 +15806,12 @@ snapshots:
     optionalDependencies:
       typescript: 6.0.3
 
+  '@ai-sdk/anthropic@4.0.99(zod@4.6.7)':
+    dependencies:
+      '@ai-sdk/provider': 4.0.37
+      '@ai-sdk/provider-utils': 5.0.76(zod@4.6.7)
+      zod: 4.6.7
+
   '@ai-sdk/azure@4.0.119(zod@4.6.7)':
     dependencies:
       '@ai-sdk/deepseek': 3.0.81(zod@4.6.7)
@@ -16299,21 +16276,6 @@ snapshots:
       '@smithy/core': 3.39.0
       '@smithy/types': 4.20.0
       tslib: 2.8.1
-
-  '@aws-sdk/credential-provider-node@3.972.87':
-    dependencies:
-      '@aws-sdk/credential-provider-env': 3.972.82
-      '@aws-sdk/credential-provider-http': 3.972.84
-      '@aws-sdk/credential-provider-ini': 3.973.27
-      '@aws-sdk/credential-provider-process': 3.972.82
-      '@aws-sdk/credential-provider-sso': 3.973.26
-      '@aws-sdk/credential-provider-web-identity': 3.972.88
-      '@aws-sdk/types': 3.975.0
-      '@smithy/core': 3.39.0
-      '@smithy/credential-provider-imds': 4.5.2
-      '@smithy/types': 4.20.0
-      tslib: 2.8.1
-    optional: true
 
   '@aws-sdk/credential-provider-node@3.972.94':
     dependencies:
@@ -21210,13 +21172,6 @@ snapshots:
       '@smithy/core': 3.39.0
       '@smithy/types': 4.20.0
       tslib: 2.8.1
-
-  '@smithy/signature-v4@5.7.4':
-    dependencies:
-      '@smithy/core': 3.39.0
-      '@smithy/types': 4.20.0
-      tslib: 2.8.1
-    optional: true
 
   '@smithy/signature-v4@5.7.5':
     dependencies:
@@ -28539,14 +28494,6 @@ snapshots:
       define-lazy-prop: 2.0.0
       is-docker: 2.2.1
       is-wsl: 2.2.0
-
-  openai@7.53.0(@aws-sdk/credential-provider-node@3.972.87)(@smithy/signature-v4@5.7.4)(undici@8.12.4)(ws@8.21.1)(zod@4.6.7):
-    optionalDependencies:
-      '@aws-sdk/credential-provider-node': 3.972.87
-      '@smithy/signature-v4': 5.7.4
-      undici: 8.12.4
-      ws: 8.21.1
-      zod: 4.6.7
 
   opener@1.5.2: {}
 

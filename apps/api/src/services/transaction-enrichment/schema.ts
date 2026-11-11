@@ -1,3 +1,4 @@
+import type { JSONSchema7 } from 'ai';
 import { z } from 'zod';
 
 import { sanitizeMerchantSuggestion } from './privacy';
@@ -19,7 +20,7 @@ export const transactionEnrichmentResponseSchema = z.object({
   reasonCode: z.enum(transactionEnrichmentReasonCodes),
 }).strict();
 
-export const transactionEnrichmentResponseJsonSchema = {
+export const transactionEnrichmentResponseJsonSchema: JSONSchema7 = {
   additionalProperties: false,
   properties: {
     categorySuggestionKey: { anyOf: [{ minimum: 1, type: 'integer' }, { type: 'null' }] },
@@ -30,7 +31,7 @@ export const transactionEnrichmentResponseJsonSchema = {
   },
   required: ['inputId', 'merchantSuggestion', 'categorySuggestionKey', 'confidence', 'reasonCode'],
   type: 'object',
-} as const;
+};
 
 export type TransactionEnrichmentResponse = z.infer<typeof transactionEnrichmentResponseSchema>;
 

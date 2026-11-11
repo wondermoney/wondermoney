@@ -165,7 +165,7 @@ const sharedSchema = z.object({
 
   S3_REGION: z.string().trim().optional(),
 
-  // AI: Azure (see services/ai/ai-provider.ts) or any OpenAI-compatible endpoint.
+  // AI: Azure, Anthropic or any OpenAI-compatible endpoint (see services/ai/ai-provider.ts).
   AI_API_KEY: z.string().trim().optional(),
   AI_BASE_URL: httpUrl('AI base URL').optional(),
   AI_MODEL: z.string().trim().optional(),
@@ -174,6 +174,8 @@ const sharedSchema = z.object({
   AI_MODEL_ENRICHMENT: z.string().trim().optional(),
   AI_MODEL_MONTHLY_STORY: z.string().trim().optional(),
   AI_MODEL_OCR: z.string().trim().optional(),
+  AI_PROVIDER: z.string().trim().toLowerCase().pipe(z.enum(['anthropic'])).optional(),
+  ANTHROPIC_API_KEY: z.string().trim().optional(),
   AZURE_AI_FOUNDRY_API_KEY: z.string().trim().optional(),
   AZURE_AI_FOUNDRY_API_VERSION: z.string().trim().optional(),
   AZURE_AI_FOUNDRY_ENDPOINT: httpUrl('Azure AI Foundry endpoint').optional(),

@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mocks = vi.hoisted(() => ({
   aiCapabilities: vi.fn(),
+  completeJson: vi.fn(),
   createTransaction: vi.fn(),
   findOne: vi.fn(),
   flush: vi.fn().mockResolvedValue(undefined),
@@ -10,7 +11,6 @@ const mocks = vi.hoisted(() => ({
   getFilesBucketName: vi.fn().mockReturnValue('example-files-bucket'),
   isStorageEnabled: vi.fn(),
   persist: vi.fn(),
-  processReceipt: vi.fn(),
   uploadFile: vi.fn(),
 }));
 
@@ -38,8 +38,8 @@ vi.mock('@service/storage/s3', () => ({
 
 vi.mock('@service/ai/ai-provider', () => ({ aiCapabilities: mocks.aiCapabilities }));
 
-vi.mock('@service/ai/openai', () => ({
-  default: { processReceipt: mocks.processReceipt },
+vi.mock('@service/ai/complete-json', () => ({
+  completeJson: mocks.completeJson,
 }));
 
 vi.mock('@service/transaction/transaction-creation.service', () => ({
@@ -61,7 +61,10 @@ describe('createTransactionOCRImport', () => {
     mocks.isStorageEnabled.mockReturnValue(true);
     mocks.uploadFile.mockResolvedValue('https://example-files-bucket.s3.eu-west-2.amazonaws.com/wmocr/transaction_ocr_ext-user-1.123.png');
     // Short-circuit the flow right after upload so the test stays focused on the storage call.
-    mocks.processReceipt.mockResolvedValue({ answer: null, tokens: 0 });
+    mocks.completeJson.mockResolvedValue({
+      object: { settlementAmount: 12.5, settlementCurrency: 'EUR', transactionDate: '2026-07-01', transactionMerchantName: 'Shop' },
+      tokens: { completionTokens: 5, promptTokens: 20, totalTokens: 25 },
+    });
   });
 
   it('uploads the receipt to the S3 files bucket under the OCR prefix', async () => {
@@ -101,7 +104,7 @@ describe('createTransactionOCRImport', () => {
 
     expect(next).toHaveBeenCalledWith(expect.objectContaining({ code: 'feature_disabled' }));
     expect(mocks.uploadFile).not.toHaveBeenCalled();
-    expect(mocks.processReceipt).not.toHaveBeenCalled();
+    expect(mocks.completeJson).not.toHaveBeenCalled();
   });
 
   it('still scans the receipt when file storage is not configured, recording no file', async () => {
@@ -110,7 +113,7 @@ describe('createTransactionOCRImport', () => {
     await createTransactionOCRImport(receiptRequest(), makeResponse(), vi.fn() as NextFunction);
 
     expect(mocks.uploadFile).not.toHaveBeenCalled();
-    expect(mocks.processReceipt).toHaveBeenCalled();
+    expect(mocks.completeJson).toHaveBeenCalled();
     expect((mocks.persist.mock.calls[0]?.[0] as { fileUrl?: string }).fileUrl).toBe('');
   });
 });

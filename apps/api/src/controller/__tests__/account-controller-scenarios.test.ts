@@ -57,10 +57,6 @@ vi.mock('@service/storage/s3', () => ({
   },
 }));
 
-vi.mock('../../services/ai/openai', () => ({
-  default: {},
-}));
-
 import { mockReq, mockRes } from '../../__tests__/__helpers__/mock-request';
 import { getCategorySpending, getS3PresignedUrlForCsvUpload, sanitizeLlmResponse, startAccountCsvImport } from '../account';
 

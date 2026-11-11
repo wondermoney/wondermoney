@@ -5,7 +5,7 @@ import { buildInfo } from '@utils/constants';
 
 import { getInstance } from '../instance';
 
-const INTEGRATION_KEYS = ['AI_BASE_URL', 'AI_MODEL', 'AWS_ACCESS_KEY_ID', 'AWS_SECRET_ACCESS_KEY', 'AZURE_AI_FOUNDRY_API_KEY', 'AZURE_OPENAI_API_KEY', 'EMAIL_DRIVER', 'EODHD_API_KEY', 'GOOGLE_CLIENT_ID', 'GOOGLE_CLIENT_SECRET', 'INSTANCE_NAME', 'MIN_APP_VERSION', 'RESEND_API_KEY', 'SIGNUP_MODE', 'SMTP_HOST', 'SPONSOR_URL', 'SUPPORT_EMAIL'];
+const INTEGRATION_KEYS = ['AI_BASE_URL', 'AI_MODEL', 'AI_PROVIDER', 'ANTHROPIC_API_KEY', 'AWS_ACCESS_KEY_ID', 'AWS_SECRET_ACCESS_KEY', 'AZURE_AI_FOUNDRY_API_KEY', 'AZURE_OPENAI_API_KEY', 'EMAIL_DRIVER', 'EODHD_API_KEY', 'GOOGLE_CLIENT_ID', 'GOOGLE_CLIENT_SECRET', 'INSTANCE_NAME', 'MIN_APP_VERSION', 'RESEND_API_KEY', 'SIGNUP_MODE', 'SMTP_HOST', 'SPONSOR_URL', 'SUPPORT_EMAIL'];
 
 describe('GET /v1/instance', () => {
   afterEach(() => {
@@ -64,6 +64,17 @@ describe('GET /v1/instance', () => {
       signupMode: 'invite',
       sponsorUrl: 'https://opencollective.com/example',
       supportEmail: 'help@example.com',
+    });
+  });
+
+  it('reports the AI features as enabled for an Anthropic setup', () => {
+    for (const key of INTEGRATION_KEYS) vi.stubEnv(key, '');
+    vi.stubEnv('AI_PROVIDER', 'anthropic');
+    vi.stubEnv('ANTHROPIC_API_KEY', 'sk-ant-test');
+    vi.stubEnv('AI_MODEL', 'claude-sonnet-4-5');
+
+    expect(describeInstance()).toMatchObject({
+      features: { ai: { assistant: true, csvMapping: true, enrichment: true, monthlyStory: true, ocr: true } },
     });
   });
 
