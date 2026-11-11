@@ -151,6 +151,13 @@ export const RATE_LIMIT_FAMILIES = {
    */
   marketData: { limit: 600, relaxable: true, scope: 'identity', windowMs: QUARTER_HOUR_MS },
 
+  /**
+   * `POST /v1/auth/pair` — public, and takes a pairing code that is a credential. Codes are
+   * 256-bit, single-use and short-lived, so guessing one is not realistic, but this is still
+   * the unauthenticated edge of the session exchange: IP-keyed, strict, never relaxed.
+   */
+  pairing: { limit: 10, relaxable: false, scope: 'ip', windowMs: QUARTER_HOUR_MS },
+
   /** `/v1/marketing` — unauthenticated opt-out/lead endpoints. Unchanged from the previous rule. */
   publicMarketing: { limit: 50, relaxable: false, scope: 'ip', windowMs: QUARTER_HOUR_MS },
 
@@ -363,6 +370,9 @@ export const authExchangeRateLimit = (): RequestHandler => createRateLimiter({ f
 
 /** `/v1/household/invites/validate` — public invite-token lookup. */
 export const inviteLookupRateLimit = (): RequestHandler => createRateLimiter({ family: 'inviteLookup' });
+
+/** `POST /v1/auth/pair` — public session exchange for a QR pairing code. */
+export const pairingRateLimit = (): RequestHandler => createRateLimiter({ family: 'pairing' });
 
 /** `/v1/marketing` — public opt-out and lead endpoints. */
 export const publicMarketingRateLimit = (): RequestHandler => createRateLimiter({ family: 'publicMarketing' });

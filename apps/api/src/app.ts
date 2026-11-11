@@ -32,6 +32,7 @@ import {
   globalBackstopRateLimit,
   importSessionRateLimit,
   inviteLookupRateLimit,
+  pairingRateLimit,
   publicMarketingRateLimit,
   publicReadRateLimit,
   supportRateLimit,
@@ -193,6 +194,9 @@ export default class Application {
       this.host.use('/v1/account', ...authedTenant(), accountRoutes);
       this.host.use('/v1/admin', adminApiRateLimit(), adminAuth, adminRoutes);
       this.host.use('/v1/health', healthRoutes);
+      // QR pairing's public exchange. Its own strict, IP-keyed family: the code it accepts is a
+      // credential, even though it is single-use and short-lived.
+      this.host.use('/v1/auth/pair', pairingRateLimit());
       // Credential surface: strict, per-IP, and never relaxed outside production.
       this.host.use('/v1/auth', authExchangeRateLimit(), optionalAuth, getUserOptional, authRoutes);
       this.host.use('/v1/banking', ...authedTenant(), bankingRoutes);

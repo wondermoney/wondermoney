@@ -9,6 +9,7 @@ import { useUser } from "@/lib/auth/user-context";
 import { Heading, Text } from "../ui/Typography";
 import TwoFactorAuth from "./Security/2FA";
 import ChangePasswordForm from "./Security/ChangePasswordForm";
+import MobilePairing from "./Security/MobilePairing";
 
 export default function Security() {
   const t = useTranslations();
@@ -65,6 +66,8 @@ export default function Security() {
 
         <TwoFactorAuth />
       </div>
+
+      <MobilePairing />
 
       {/* <div className="grid max-w-7xl grid-cols-1 gap-x-8 gap-y-10 py-10 md:grid-cols-3">
         <div>

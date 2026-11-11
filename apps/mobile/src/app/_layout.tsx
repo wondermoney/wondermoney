@@ -117,6 +117,10 @@ export function RootRuntime({
   locale: string
 }) {
   const [currentDependencies, setCurrentDependencies] = useState(dependencies)
+  // Bumped on every server switch so the providers rebuild even when the address did not
+  // change: pairing a phone on the current server writes a fresh session cookie, and the
+  // bootstrap only re-reads it when the runtime is rebuilt.
+  const [generation, setGeneration] = useState(0)
   useEffect(() => {
     if (currentDependencies.status === 'unavailable') hideNativeSplash()
   }, [currentDependencies.status])
@@ -133,6 +137,7 @@ export function RootRuntime({
       resetErrorReporting()
     }
     setCurrentDependencies(next)
+    setGeneration((current) => current + 1)
   }, [])
 
   const serverSwitch = useMemo(
@@ -148,9 +153,9 @@ export function RootRuntime({
 
   return currentDependencies.status === 'available' && serverSwitch ? (
     <ServerSwitchProvider value={serverSwitch}>
-       {/* Keyed on the server so every provider rebuilds its runtime when it changes. */}
+       {/* Keyed on the server (and the switch count) so every provider rebuilds its runtime. */}
        <AppProviders
-       key={serverSwitch.apiBaseUrl}
+       key={`${serverSwitch.apiBaseUrl}#${generation}`}
        locale={locale}
        createSessionLifecycle={currentDependencies.dependencies.createSessionLifecycle}
       onReady={hideNativeSplash}

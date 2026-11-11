@@ -37,6 +37,35 @@ export const createBetterAuthUser = vi
   .fn<(input: { email: string; name?: string; password: string }) => Promise<{ id: string }>>()
   .mockResolvedValue({ id: 'test-better-auth-user-id' });
 
+export const createPairedSession = vi
+  .fn<(input: { ipAddress?: null | string; userAgent?: null | string; userId: string; }) => Promise<{
+    cookieName: string;
+    cookieValue: string;
+    expiresAt: Date;
+    sessionId: string;
+    token: string;
+  }>>()
+  .mockResolvedValue({
+    cookieName: 'better-auth.session_token',
+    cookieValue: 'paired-token.signature',
+    expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+    sessionId: 'paired-session-id',
+    token: 'paired-token',
+  });
+
+export const listAuthSessions = vi
+  .fn<(sessionIds: string[]) => Promise<{
+    createdAt: Date;
+    expiresAt: Date;
+    id: string;
+    ipAddress?: null | string;
+    updatedAt: Date;
+    userAgent?: null | string;
+  }[]>>()
+  .mockResolvedValue([]);
+
+export const deleteAuthSession = vi.fn<(sessionId: string) => Promise<void>>().mockResolvedValue(undefined);
+
 export const deleteBetterAuthUser = vi.fn<(userId: string) => Promise<void>>().mockResolvedValue(undefined);
 
 export const deleteBetterAuthUserByEmail = vi.fn<(email: string) => Promise<void>>().mockResolvedValue(undefined);

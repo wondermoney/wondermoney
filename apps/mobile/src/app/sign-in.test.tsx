@@ -8,12 +8,18 @@ import SignInRoute from './sign-in'
 
 const mockSignInWithPassword = jest.fn()
 const mockClearActivationError = jest.fn()
+const mockParams: { notice?: string; pairCode?: string; pairServer?: string } = {}
+const mockPair = jest.fn()
 jest.mock('@/lib/telemetry/analytics', () => ({ captureAnalyticsEvent: jest.fn() }))
 const captured = jest.mocked(captureAnalyticsEvent)
 
 jest.mock('expo-router', () => ({
-  useLocalSearchParams: () => ({}),
+  useLocalSearchParams: () => mockParams,
   Link: ({ children }: { children: React.ReactNode }) => children,
+}))
+
+jest.mock('@/features/auth/use-pairing', () => ({
+  usePairing: () => ({ minAppVersion: null, pair: mockPair, reset: jest.fn(), status: 'idle' }),
 }))
 
 jest.mock('@/components/providers/product-runtime-provider', () => ({
@@ -47,6 +53,10 @@ describe('SignInRoute', () => {
   beforeEach(() => {
     captured.mockClear()
     mockSignInWithPassword.mockReset()
+    mockPair.mockReset()
+    delete mockParams.notice
+    delete mockParams.pairCode
+    delete mockParams.pairServer
   })
 
   it('captures sign_in_completed with the channel only once the session is accepted', async () => {
@@ -80,5 +90,22 @@ describe('SignInRoute', () => {
     expect(view.getByRole('link', { name: 'Forgot your password?' })).toBeOnTheScreen()
     expect(view.getByText('Not a member?')).toBeOnTheScreen()
     expect(view.getByRole('link', { name: 'Create an account' })).toBeOnTheScreen()
+  })
+
+  it('offers to scan a pairing QR code', async () => {
+    const view = await renderRoute()
+
+    expect(view.getByRole('button', { name: 'Scan QR code' })).toBeOnTheScreen()
+  })
+
+  it('exchanges a pairing code that arrived as a deep link, once', async () => {
+    mockParams.pairServer = 'https://api.example.test'
+    mockParams.pairCode = 'abcdefghijklmnop'
+    mockPair.mockResolvedValue('paired')
+
+    await renderRoute()
+
+    await waitFor(() => expect(mockPair).toHaveBeenCalledTimes(1))
+    expect(mockPair).toHaveBeenCalledWith({ code: 'abcdefghijklmnop', server: 'https://api.example.test' })
   })
 })

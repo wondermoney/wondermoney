@@ -170,7 +170,21 @@
     "notMember": "Not a member?",
     "createAccountLink": "Create an account",
     "alreadyMember": "Already a member?",
-    "loginLink": "Login here"
+    "loginLink": "Login here",
+    "pairing": {
+      "scanButton": "Scan QR code",
+      "scanTitle": "Scan the QR code",
+      "scanHint": "Point your camera at the code in Settings → Security on the web.",
+      "cameraPermission": "Allow camera access to scan the pairing code.",
+      "grantCamera": "Allow camera",
+      "cancel": "Cancel",
+      "connecting": "Connecting to the server…",
+      "invalidCode": "That isn't a WonderMoney pairing code.",
+      "errors": {
+        "invalidCode": "That code has expired or was already used. Show a new one on the web.",
+        "unavailable": "Couldn't connect to that server. Try again."
+      }
+    }
   },
   "access": {
     "mfa": {

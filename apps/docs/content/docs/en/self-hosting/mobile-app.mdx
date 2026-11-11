@@ -5,7 +5,19 @@ description: Point the WonderMoney app for iOS and Android at your own server.
 
 The WonderMoney app works with any WonderMoney server, not only wonder.money.
 
-## Connect the app
+## Connect the app with a QR code
+
+The fastest way to connect the app is to scan a code from your server's web app, so nothing has to be typed on a phone keyboard.
+
+1. On the web app, open **Settings → Security**.
+2. Under **Connect the mobile app**, tap **Show QR code**.
+3. In the app's sign-in screen, tap **Scan QR code** and point the camera at the code.
+
+The code works once and expires after two minutes; if it runs out, show a new one. When two-factor authentication is on for your account, enter your authenticator code on the web before the QR appears — the phone does not ask for it, because the web session already passed it.
+
+Scanning with the phone's own camera app works too: the code is a `wondermoney://` link that opens the app. The app checks the address before it connects, so a code from another app or a server that isn't WonderMoney is refused.
+
+## Connect the app by hand
 
 1. Open the app and go to the sign-in screen.
 2. Tap **Use a different server**.
@@ -13,6 +25,10 @@ The WonderMoney app works with any WonderMoney server, not only wonder.money.
 4. Tap **Connect**, then sign in with your account on that server.
 
 The app checks the address before saving it. If the server can't be reached, isn't a WonderMoney server or needs a newer version of the app, the app tells you and keeps the previous server.
+
+## Paired devices
+
+**Settings → Security → Devices** lists the phones connected to your account, with when each was last seen. **Revoke** signs that phone out immediately; it has to scan a new code to connect again.
 
 ## Requirements
 
