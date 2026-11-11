@@ -38,6 +38,8 @@ jest.mock('expo-router', () => ({ useRouter: () => ({ back: mockBack }) }))
 // atomicity under test is the Appearance radios, so the section stays out of this tree
 // (as in preferences-screen.test.tsx).
 jest.mock('@/features/preferences/preview-features-section', () => ({ PreviewFeaturesSection: () => null }))
+// The AI-hidden section reads the account through the product runtime; same treatment as above.
+jest.mock('@/features/preferences/ai-hidden-section', () => ({ AiHiddenSection: () => null }))
 
 function useTestColorScheme() {
   return useSyncExternalStore(
