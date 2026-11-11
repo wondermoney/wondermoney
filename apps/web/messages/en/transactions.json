@@ -122,5 +122,19 @@
     "save-as-template": "Save as template",
     "save-as-template-description": "Copies this transaction's fields. Using it later fills the add form; it never creates a transaction.",
     "save-as-template-hint": "Make this entry reusable."
+  },
+  "transactionAttachments": {
+    "label": "Attachments",
+    "description": "Receipts, invoices and warranties, kept with this transaction.",
+    "drop-title": "Drag files here, or click to choose",
+    "drop-hint": "{count, plural, one {# file left} other {# files left}}, up to {maxSize} each. JPEG, PNG, WebP, HEIC or PDF.",
+    "uploading": "Uploading…",
+    "limit-reached": "10 attachments is the limit",
+    "too-large": "{name} is larger than 10 MB.",
+    "unsupported": "{name} is not a supported file type.",
+    "upload-failed": "Could not upload the file.",
+    "delete-failed": "Could not delete the attachment.",
+    "delete": "Delete {name}",
+    "count": "{count, plural, one {# attachment} other {# attachments}}"
   }
 }

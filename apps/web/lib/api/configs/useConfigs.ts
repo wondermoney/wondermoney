@@ -13,6 +13,8 @@ export interface GetConfigsResponse {
   categories: Category[];
   transactionTypes: TransactionType[];
   currencies: Currency[];
+  /** The server has S3-compatible storage, so transaction attachments are available. */
+  fileStorage?: boolean;
   financialInstitutions: FinancialInstitution[];
   brokers: FinancialBroker[];
   financialTransactionTypes: FinancialTransactionType[];

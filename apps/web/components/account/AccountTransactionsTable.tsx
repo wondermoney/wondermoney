@@ -1,6 +1,6 @@
 "use client";
 import { useQueryClient } from "@tanstack/react-query";
-import { Filter, Info, MoreHorizontal, Pencil, X } from "lucide-react";
+import { Filter, Info, MoreHorizontal, Paperclip, Pencil, X } from "lucide-react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { usePostHog } from "posthog-js/react";
@@ -793,6 +793,24 @@ const AccountTransactionsTable: React.FC<AccountTransactionTableProps> =
                         >
                           {transferBadge}
                         </Badge>
+                      ) : null}
+                      {/* A receipt or invoice is attached: the row says so without opening it. */}
+                      {(info.row.original.attachmentCount ?? 0) > 0 ? (
+                        <span
+                          aria-label={t("transactionAttachments.count", {
+                            count: info.row.original.attachmentCount ?? 0,
+                          })}
+                          className="text-muted-foreground inline-flex shrink-0 items-center gap-0.5"
+                          role="img"
+                          title={t("transactionAttachments.count", {
+                            count: info.row.original.attachmentCount ?? 0,
+                          })}
+                        >
+                          <Paperclip className="size-3" aria-hidden="true" />
+                          <span className="text-xs">
+                            {info.row.original.attachmentCount}
+                          </span>
+                        </span>
                       ) : null}
                     </div>
                     <div className="text-muted-foreground flex min-w-0 items-center gap-1 text-xs">

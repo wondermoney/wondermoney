@@ -56,6 +56,8 @@ const ICONS = {
   'bar-chart': { ios: 'chart.bar.xaxis', android: 'bar_chart', web: 'bar_chart' },
   'candlestick-chart': { ios: 'chart.bar.xaxis', android: 'candlestick_chart', web: 'candlestick_chart' },
   upload: { ios: 'square.and.arrow.up', android: 'upload', web: 'upload' },
+  camera: { ios: 'camera', android: 'photo_camera', web: 'photo_camera' },
+  paperclip: { ios: 'paperclip', android: 'attach_file', web: 'attach_file' },
   'external-link': { ios: 'arrow.up.right.square', android: 'open_in_new', web: 'open_in_new' },
   star: { ios: 'star', android: 'star', web: 'star' },
   'star-filled': { ios: 'star.fill', android: 'star', web: 'star' },

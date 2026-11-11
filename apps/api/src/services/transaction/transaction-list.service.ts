@@ -9,6 +9,7 @@ import type { Currency } from '@entity/Currency';
 import { LoanRepaymentLink } from '@entity/LoanRepaymentLink';
 import { RecurringOccurrence } from '@entity/RecurringOccurrence';
 import { Transaction } from '@entity/Transaction';
+import { TransactionAttachment } from '@entity/TransactionAttachment';
 import { type RateScope, rateScope } from '@service/currency/exchange-rate';
 import { describeFx, type FxDisplay, UNKNOWN_FX } from '@service/currency/fx-display';
 import { completenessFromCounts } from '@service/reports/report-currency';
@@ -99,10 +100,16 @@ export async function listTransactions(request: TransactionListRequest) {
   });
 
   const loanRepayments = await loadLoanRepayments(transactions);
+  const attachmentCounts = await loadAttachmentCounts(transactions);
   const spendingFlags = await loadCategorySpendingFlags(DI.em, tenantKey);
   const fx = await describeTransactionsFx(transactions, rateScope(tenantKey));
   const rows = transactions.map((transaction, index) => {
-    const row = { ...toTransactionRow(transaction, viewerAppuserKey, spendingFlags), ...(fx[index] ?? UNKNOWN_FX) };
+    const row = {
+      ...toTransactionRow(transaction, viewerAppuserKey, spendingFlags),
+      ...(fx[index] ?? UNKNOWN_FX),
+      // The ledger shows a paperclip only when there is something behind it.
+      attachmentCount: attachmentCounts.get(transaction.transactionKey) ?? 0,
+    };
     const loanRepayment = summarizeLoanRepayments(loanRepayments.get(transaction.transactionKey) ?? []);
     return loanRepayment ? { ...row, loanRepayment } : row;
   });
@@ -168,6 +175,25 @@ async function loadLoanRepayments(transactions: Transaction[]): Promise<Map<numb
     else byTransaction.set(transactionKey, [link]);
   }
   return byTransaction;
+}
+
+/**
+ * How many live attachments each row has, in one query for the page. The tenant filter scopes the
+ * count; the explicit transaction list keeps it to this page.
+ */
+async function loadAttachmentCounts(transactions: Transaction[]): Promise<Map<number, number>> {
+  if (transactions.length === 0) return new Map();
+  const rows = await DI.em.find(
+    TransactionAttachment,
+    { deletedAt: undefined, transactionKey: { $in: transactions } },
+    { fields: ['transactionKey'] },
+  );
+  const counts = new Map<number, number>();
+  for (const row of rows) {
+    const key = row.transactionKey.transactionKey;
+    counts.set(key, (counts.get(key) ?? 0) + 1);
+  }
+  return counts;
 }
 
 /** The accounts the list covers: the household's, a private one only for its owner. Explicit, so it holds with no tenant filter set too. */
@@ -354,6 +380,7 @@ async function syntheticOpeningBalanceRows(accounts: Account[], filters: Transac
       appuserCurrencyKey: { code: viewerCurrencyCode } as Currency,
       appuserSettlementAmount: account.appuserCurrencyBalance,
       appuserTransactionCategories: [],
+      attachmentCount: 0,
       balance: account.balance,
       description: 'Initial balance',
       descriptionDirty: 'This is a fake transaction to reflect the initial balance of the account',

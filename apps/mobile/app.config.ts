@@ -103,6 +103,12 @@ const config: ExpoConfig = {
     // `requireAuthentication: false`), so the same real copy is accurate for both.
     ['expo-secure-store', { faceIDPermission: 'Allow WonderMoney to use Face ID to unlock the app.' }],
     ['expo-local-authentication', { faceIDPermission: 'Allow WonderMoney to use Face ID to unlock the app.' }],
+    // Transaction attachments: a photo of a receipt or document. The picker is also used to
+    // choose an existing image, so both usage strings are set.
+    ['expo-image-picker', {
+      cameraPermission: 'Allow WonderMoney to take a photo of a receipt or document.',
+      photosPermission: 'Allow WonderMoney to choose a photo of a receipt or document.',
+    }],
     'expo-apple-authentication',
     // Registers the reversed iOS client ID as a URL scheme so Google's SDK can hand the
     // sign-in result back to the app. Android needs no scheme (Credential Manager).

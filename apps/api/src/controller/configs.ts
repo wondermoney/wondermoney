@@ -9,6 +9,7 @@ import { Currency } from '@entity/Currency';
 import { FinancialBroker } from '@entity/FinancialBroker';
 import { FinancialTransactionType } from '@entity/FinancialTransactionType';
 import { TransactionType } from '@entity/TransactionType';
+import s3Service from '@service/storage/s3';
 
 interface CategoryChildItem {
   bgColor: string;
@@ -74,6 +75,8 @@ export async function getConfigs(req: Request, res: Response) {
     brokers: staticConfigs.brokers,
     categories: categoriesData,
     currencies: staticConfigs.currencies,
+    // Transaction attachments need an S3-compatible store; without one the clients hide them.
+    fileStorage: s3Service.isEnabled(),
     financialInstitutions: staticConfigs.accountFinancialInstitutions,
     financialTransactionTypes: staticConfigs.financialTransactionTypes,
     transactionTypes: staticConfigs.transactionTypes,

@@ -122,5 +122,19 @@
     "save-as-template": "Guardar como modelo",
     "save-as-template-description": "Copia os campos desta transação. Usá-lo mais tarde preenche o formulário de adição; nunca cria uma transação.",
     "save-as-template-hint": "Torne este lançamento reutilizável."
+  },
+  "transactionAttachments": {
+    "label": "Anexos",
+    "description": "Recibos, faturas e garantias, guardados com esta transação.",
+    "drop-title": "Arraste ficheiros para aqui, ou clique para escolher",
+    "drop-hint": "{count, plural, one {Falta # ficheiro} other {Faltam # ficheiros}}, até {maxSize} cada. JPEG, PNG, WebP, HEIC ou PDF.",
+    "uploading": "A carregar…",
+    "limit-reached": "O limite é de 10 anexos",
+    "too-large": "{name} tem mais de 10 MB.",
+    "unsupported": "{name} não é um tipo de ficheiro suportado.",
+    "upload-failed": "Não foi possível carregar o ficheiro.",
+    "delete-failed": "Não foi possível eliminar o anexo.",
+    "delete": "Eliminar {name}",
+    "count": "{count, plural, one {# anexo} other {# anexos}}"
   }
 }

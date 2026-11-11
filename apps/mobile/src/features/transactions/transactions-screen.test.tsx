@@ -9,6 +9,8 @@ import { mapTransactions } from './transactions-view-model'
 import { estimatedTransactionFixture, nullishTransactionFixture, transactionFixture, unconvertedTransactionFixture } from './test-fixtures'
 
 jest.mock('@/components/ui/date-field', () => jest.requireActual('./test-date-field'))
+// The attachments section has its own tests; the screen test does not mount a query/runtime provider.
+jest.mock('./transaction-attachments-section', () => ({ TransactionAttachmentsSection: () => null }))
 
 type View = Awaited<ReturnType<typeof renderLoaded>>['view']
 

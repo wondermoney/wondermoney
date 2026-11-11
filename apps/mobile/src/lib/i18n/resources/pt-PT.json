@@ -865,6 +865,21 @@
       "excluded": "Entre o seu próprio dinheiro: fica fora das despesas e receitas",
       "spendingLabel": "Despesa",
       "notSpending": "A categoria não conta como despesa"
+    },
+    "attachments": {
+      "title": "Anexos",
+      "empty": "Ainda não há ficheiros.",
+      "addPhoto": "Tirar foto",
+      "chooseFiles": "Escolher ficheiros",
+      "open": "Abrir {{name}}",
+      "delete": "Eliminar {{name}}",
+      "uploading": "A carregar…",
+      "limit": "Uma transação pode ter no máximo 10 anexos.",
+      "size": "O ficheiro tem mais de 10 MB.",
+      "type": "Esse tipo de ficheiro não é suportado.",
+      "access": "Verifique a sessão e tente novamente.",
+      "network": "Verifique a ligação e tente novamente.",
+      "general": "Não foi possível concluir. Tente novamente."
     }
   },
   "tags": {

@@ -10,6 +10,7 @@ const mocks = vi.hoisted(() => ({
   getAppuserTenantByAppuser: vi.fn(),
   getFilesBucketName: vi.fn().mockReturnValue('example-files-bucket'),
   isStorageEnabled: vi.fn(),
+  linkReceiptAttachment: vi.fn(),
   persist: vi.fn(),
   uploadFile: vi.fn(),
 }));
@@ -44,6 +45,10 @@ vi.mock('@service/ai/complete-json', () => ({
 
 vi.mock('@service/transaction/transaction-creation.service', () => ({
   transactionCreationService: { createTransaction: mocks.createTransaction },
+}));
+
+vi.mock('@service/transaction/transaction-attachment.service', () => ({
+  linkReceiptAttachment: mocks.linkReceiptAttachment,
 }));
 
 import { confirmTransactionOCRImportAndCreateTransaction, createTransactionOCRImport } from '../ocr';
@@ -143,6 +148,7 @@ describe('confirmTransactionOCRImportAndCreateTransaction', () => {
     const req = {
       body: { ...baseBody, categoryIds: [27, 28] },
       params: { transactionOCRImportId: 5 },
+      tenant: { tenantKey: 42 },
       user: { appuserKey: 1 },
     } as unknown as Request;
     const sendStatus = vi.fn();
@@ -165,6 +171,7 @@ describe('confirmTransactionOCRImportAndCreateTransaction', () => {
     const req = {
       body: { ...baseBody },
       params: { transactionOCRImportId: 5 },
+      tenant: { tenantKey: 42 },
       user: { appuserKey: 1 },
     } as unknown as Request;
     const res = makeResponse();
@@ -174,5 +181,44 @@ describe('confirmTransactionOCRImportAndCreateTransaction', () => {
 
     expect(next).not.toHaveBeenCalled();
     expect(mocks.createTransaction).toHaveBeenCalledWith(expect.objectContaining({ categoryId: undefined }));
+  });
+
+  it('links the stored receipt to the created transaction as its first attachment', async () => {
+    mocks.findOne
+      .mockResolvedValueOnce({ fileKey: 'wmocr/transaction_ocr_ext-user-1.123.png', transactionOCRImportKey: 5 })
+      .mockResolvedValueOnce({ accountKey: 3 });
+
+    const req = {
+      body: { ...baseBody },
+      params: { transactionOCRImportId: 5 },
+      tenant: { tenantKey: 42 },
+      user: { appuserKey: 1 },
+    } as unknown as Request;
+
+    await confirmTransactionOCRImportAndCreateTransaction(req, makeResponse(), vi.fn() as NextFunction);
+
+    expect(mocks.linkReceiptAttachment).toHaveBeenCalledWith({
+      key: 'wmocr/transaction_ocr_ext-user-1.123.png',
+      tenantKey: 42,
+      transactionKey: 99,
+      uploadedByAppuserKey: 1,
+    });
+  });
+
+  it('does not try to link a receipt when no copy was kept', async () => {
+    mocks.findOne
+      .mockResolvedValueOnce({ transactionOCRImportKey: 5 })
+      .mockResolvedValueOnce({ accountKey: 3 });
+
+    const req = {
+      body: { ...baseBody },
+      params: { transactionOCRImportId: 5 },
+      tenant: { tenantKey: 42 },
+      user: { appuserKey: 1 },
+    } as unknown as Request;
+
+    await confirmTransactionOCRImportAndCreateTransaction(req, makeResponse(), vi.fn() as NextFunction);
+
+    expect(mocks.linkReceiptAttachment).not.toHaveBeenCalled();
   });
 });

@@ -122,5 +122,19 @@
     "save-as-template": "Guardar como plantilla",
     "save-as-template-description": "Copia los campos de esta transacción. Usarla más tarde rellena el formulario de alta; nunca crea una transacción.",
     "save-as-template-hint": "Haz que este registro se pueda reutilizar."
+  },
+  "transactionAttachments": {
+    "label": "Adjuntos",
+    "description": "Recibos, facturas y garantías, guardados con esta transacción.",
+    "drop-title": "Arrastra archivos aquí, o haz clic para elegir",
+    "drop-hint": "{count, plural, one {Queda # archivo} other {Quedan # archivos}}, hasta {maxSize} cada uno. JPEG, PNG, WebP, HEIC o PDF.",
+    "uploading": "Subiendo…",
+    "limit-reached": "El límite es de 10 adjuntos",
+    "too-large": "{name} supera los 10 MB.",
+    "unsupported": "{name} no es un tipo de archivo compatible.",
+    "upload-failed": "No se pudo subir el archivo.",
+    "delete-failed": "No se pudo eliminar el adjunto.",
+    "delete": "Eliminar {name}",
+    "count": "{count, plural, one {# adjunto} other {# adjuntos}}"
   }
 }

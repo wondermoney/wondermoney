@@ -865,6 +865,21 @@
       "excluded": "Entre tu propio dinero: queda fuera de gastos e ingresos",
       "spendingLabel": "Gasto",
       "notSpending": "Su categoría no cuenta como gasto"
+    },
+    "attachments": {
+      "title": "Adjuntos",
+      "empty": "Todavía no hay archivos.",
+      "addPhoto": "Hacer foto",
+      "chooseFiles": "Elegir archivos",
+      "open": "Abrir {{name}}",
+      "delete": "Eliminar {{name}}",
+      "uploading": "Subiendo…",
+      "limit": "Una transacción puede tener como máximo 10 adjuntos.",
+      "size": "El archivo supera los 10 MB.",
+      "type": "Ese tipo de archivo no es compatible.",
+      "access": "Verifica tu sesión e inténtalo de nuevo.",
+      "network": "Comprueba la conexión e inténtalo de nuevo.",
+      "general": "No se pudo completar. Inténtalo de nuevo."
     }
   },
   "tags": {

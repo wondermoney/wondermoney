@@ -8,11 +8,12 @@ import { AppuserTenant } from '@entity/AppuserTenant';
 import { Currency } from '@entity/Currency';
 import { TransactionMerchant } from '@entity/TransactionMerchant';
 import { TransactionOCRImport, TransactionOCRImportStatus } from '@entity/TransactionOCRImport';
-import { authedUser } from '@middleware/authed-context';
+import { authedContext, authedUser } from '@middleware/authed-context';
 import { aiCapabilities } from '@service/ai/ai-provider';
 import { completeJson } from '@service/ai/complete-json';
 import s3Service from '@service/storage/s3';
 import { normalizeMerchantName } from '@service/transaction/merchant-normalization';
+import { linkReceiptAttachment } from '@service/transaction/transaction-attachment.service';
 import { transactionCreationService } from '@service/transaction/transaction-creation.service';
 import { STORAGE_OCR_PREFIX } from '@utils/constants';
 import { convertPDFToImage } from '@utils/documents';
@@ -50,6 +51,7 @@ const RECEIPT_RESPONSE_SCHEMA = jsonSchema({
 
 export async function confirmTransactionOCRImportAndCreateTransaction(req: Request, res: Response, next: NextFunction) {
   const user = authedUser(req);
+  const { tenantKey } = authedContext(req);
   const {
     body: {
       accountId,
@@ -112,6 +114,12 @@ export async function confirmTransactionOCRImportAndCreateTransaction(req: Reque
     transactionOCRImport.status = TransactionOCRImportStatus.SUCCESS;
     await DI.em.persist(transactionOCRImport).flush();
 
+    // The scanned receipt becomes the transaction's first attachment, so the image the person
+    // uploaded is where they expect it. Best-effort: the transaction is already created.
+    if (transactionOCRImport.fileKey) {
+      await linkReceiptAttachment({ key: transactionOCRImport.fileKey, tenantKey, transactionKey: transaction.transactionKey, uploadedByAppuserKey: user.appuserKey });
+    }
+
     return res.sendStatus(201);
   } catch (err) {
     next(err);
@@ -143,11 +151,13 @@ export async function createTransactionOCRImport(req: Request, res: Response, ne
   // Keeping a copy of the receipt is an audit trail, not a requirement: without file storage the
   // scan still runs and the import records no file.
   let fileUrl = '';
+  let fileKey: string | undefined;
   if (s3Service.isEnabled()) {
     try {
       const fileExtension = fromMimetypeToExtension(file.mimetype);
       const fileName = `transaction_ocr_${appuser.externalUserId}.${Date.now()}.${fileExtension}`;
-      fileUrl = await s3Service.uploadFile(s3Service.getFilesBucketName(), `${STORAGE_OCR_PREFIX}/${fileName}`, file.buffer, file.mimetype);
+      fileKey = `${STORAGE_OCR_PREFIX}/${fileName}`;
+      fileUrl = await s3Service.uploadFile(s3Service.getFilesBucketName(), fileKey, file.buffer, file.mimetype);
     } catch (err) {
       next(new InternalServerError(`Error uploading file into storage. Error: ${err}`));
       return;
@@ -158,6 +168,7 @@ export async function createTransactionOCRImport(req: Request, res: Response, ne
   transactionOCRImport.tenantKey = appUserTenant.tenantKey;
   transactionOCRImport.appuserKey = appuser;
   transactionOCRImport.fileUrl = fileUrl;
+  transactionOCRImport.fileKey = fileKey;
 
   // Convert PDF to images if necessary
   let images = [];
