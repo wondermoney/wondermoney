@@ -3,7 +3,9 @@ import { expect, it, vi } from 'vitest';
 vi.mock('@service/account/account-initial-sync-account.service', () => ({ default: {} }));
 vi.mock('@service/account/account-initial-sync-transaction.service', () => ({ default: {} }));
 vi.mock('@service/operations/background-operation.service', () => ({ default: {} }));
-vi.mock('@app/database/di', () => ({ DI: { em: {} } }));
+const provider = { id: 'enable_banking', preflight: vi.fn().mockResolvedValue(undefined) };
+vi.mock('@service/bank-providers/registry', () => ({ bankConnectionRef: (c: { bankConnectionKey: number; externalId?: string; provider: string; status: string }) => ({ appuserId: 7, bankConnectionKey: c.bankConnectionKey, externalId: c.externalId ?? 'req', provider: c.provider, status: c.status }), getBankProvider: () => provider }));
+vi.mock('@app/database/di', () => ({ DI: { em: { findOne: vi.fn().mockResolvedValue({ appuserKey: { appuserKey: 7 }, bankConnectionKey: 12, externalId: 'req-12', provider: 'enable_banking', status: 'linked', tenantKey: { tenantKey: 1 } }) } } }));
 
 import { handleAccountInitialSyncJob } from '@app/jobs/account-initial-sync.worker';
 import { BankSyncIncidentAttempt } from '@entity/BankSyncIncidentAttempt';
@@ -42,7 +44,7 @@ it('runs an initial producer through the real deterministic contract and outbox 
   const service = new BankSyncIncidentService({ em: em as unknown as IncidentEm, getDatabaseNow: vi.fn().mockResolvedValue(new Date('2026-07-16T10:00:00Z')), recordOutbox: async (manager, input) => { outbox(manager, input); await recordAnalyticsOutboxEvent(manager, input, { ANALYTICS_OUTBOX_MODE: 'live' }); }, transitionBackgroundOperation: vi.fn() });
   const allocated = await service.allocateIncident({ appuserKey: 7, correlationId: 'account.initial-sync:12', distinctId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa', environment: 'development', flow: 'initial-add', producer: 'pgboss-initial', requisitionId: 'req-12', userVisible: true });
 
-  await expect(handleAccountInitialSyncJob({ data: { connectionId: 'req-12', correlationId: allocated.correlationId, enableBankingConnectionKey: '12', incidentId: allocated.incidentId, provider: 'enable_banking' }, id: 'job-real', retryCount: 0, retryLimit: 3 } as unknown as InitialSyncJob, {
+  await expect(handleAccountInitialSyncJob({ data: { bankConnectionKey: '12', connectionId: 'req-12', correlationId: allocated.correlationId, incidentId: allocated.incidentId, provider: 'enable_banking' }, id: 'job-real', retryCount: 0, retryLimit: 3 } as unknown as InitialSyncJob, {
     accountInitialSyncAccountService: { syncAccountsForRequisition: vi.fn().mockResolvedValue({ status: 'completed' }) } as unknown as AccountSyncSvc,
     accountInitialSyncTransactionService: { syncTransactionsForRequisition: vi.fn().mockResolvedValue({ status: 'completed' }) } as unknown as TransactionSyncSvc,
     backgroundOperationService: { claimJobStart: vi.fn().mockResolvedValue(true), markAttemptFailedForRetry: vi.fn().mockResolvedValue(true) },
@@ -67,7 +69,7 @@ it('runs a controlled initial failure through one safe deterministic outbox row'
   const em = { findOne: tx.findOne, transactional: vi.fn(async (work: (transaction: typeof tx) => unknown) => work(tx)) };
   const service = new BankSyncIncidentService({ em: em as unknown as IncidentEm, getDatabaseNow: vi.fn().mockResolvedValue(new Date('2026-07-16T10:00:00Z')), recordOutbox: async (manager, input) => { outbox(manager, input); await recordAnalyticsOutboxEvent(manager, input, { ANALYTICS_OUTBOX_MODE: 'live' }); }, transitionBackgroundOperation: vi.fn() });
   const allocated = await service.allocateIncident({ appuserKey: 7, correlationId: 'account.initial-sync:13', distinctId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa', environment: 'development', flow: 'initial-add', producer: 'pgboss-initial', requisitionId: 'raw-connection-secret', userVisible: true });
-  await expect(handleAccountInitialSyncJob({ data: { connectionId: 'raw-connection-secret', correlationId: allocated.correlationId, enableBankingConnectionKey: '13', incidentId: allocated.incidentId, provider: 'enable_banking' }, id: 'job-failed', retryCount: 3, retryLimit: 3 } as unknown as InitialSyncJob, {
+  await expect(handleAccountInitialSyncJob({ data: { bankConnectionKey: '13', connectionId: 'raw-connection-secret', correlationId: allocated.correlationId, incidentId: allocated.incidentId, provider: 'enable_banking' }, id: 'job-failed', retryCount: 3, retryLimit: 3 } as unknown as InitialSyncJob, {
     accountInitialSyncAccountService: { syncAccountsForRequisition: vi.fn().mockResolvedValue({ accountsTotal: 1, institutionIds: ['safe-bank'], status: 'failed' }) } as unknown as AccountSyncSvc,
     accountInitialSyncTransactionService: { syncTransactionsForRequisition: vi.fn() } as unknown as TransactionSyncSvc,
     backgroundOperationService: { claimJobStart: vi.fn().mockResolvedValue(true), markAttemptFailedForRetry: vi.fn().mockResolvedValue(true) }, bankSyncIncidentService: service,

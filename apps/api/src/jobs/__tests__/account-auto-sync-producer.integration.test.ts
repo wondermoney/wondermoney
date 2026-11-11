@@ -4,7 +4,9 @@ vi.mock('@service/account/account-initial-sync-account.service', () => ({ defaul
 vi.mock('@service/account/account-initial-sync-transaction.service', () => ({ default: {} }));
 vi.mock('@service/operations/background-operation.service', () => ({ default: {} }));
 vi.mock('@service/account/account-auto-sync-scheduler.service', () => ({ default: {} }));
-vi.mock('@app/database/di', () => ({ DI: { em: {} } }));
+const provider = { id: 'enable_banking', preflight: vi.fn().mockResolvedValue(undefined) };
+vi.mock('@service/bank-providers/registry', () => ({ bankConnectionRef: (c: { bankConnectionKey: number; externalId?: string; provider: string; status: string }) => ({ appuserId: 7, bankConnectionKey: c.bankConnectionKey, externalId: c.externalId ?? 'req', provider: c.provider, status: c.status }), getBankProvider: () => provider }));
+vi.mock('@app/database/di', () => ({ DI: { em: { findOne: vi.fn().mockResolvedValue({ appuserKey: { appuserKey: 7 }, bankConnectionKey: 12, externalId: 'req-12', provider: 'enable_banking', status: 'linked', tenantKey: { tenantKey: 1 } }) } } }));
 
 import { handleAccountAutoSyncRequisitionJob } from '@app/jobs/account-auto-sync.worker';
 import { BankSyncIncidentAttempt } from '@entity/BankSyncIncidentAttempt';
@@ -38,7 +40,7 @@ it.each([
   const h = realIncidentHarness();
   const correlationId = `account.auto-sync.requisition:run-real-${status}:12`;
   const incident = await h.service.allocateIncident({ appuserKey: 7, correlationId, distinctId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa', environment: 'development', flow: 'scheduled-refresh', producer: 'pgboss-scheduled', requisitionId: 'raw-connection-secret', userVisible: false });
-  const run = handleAccountAutoSyncRequisitionJob(pgBossJob({ appuserKey: 7, connectionId: 'raw-connection-secret', correlationId, enableBankingConnectionKey: '12', incidentId: incident.incidentId, provider: 'enable_banking', scheduleRunId: `run-real-${status}` }, { id: `job-${status}`, retryCount: status === 'failed' ? 3 : 0, retryLimit: 3 }) as unknown as Parameters<typeof handleAccountAutoSyncRequisitionJob>[0], {
+  const run = handleAccountAutoSyncRequisitionJob(pgBossJob({ appuserKey: 7, bankConnectionKey: '12', connectionId: 'raw-connection-secret', correlationId, incidentId: incident.incidentId, provider: 'enable_banking', scheduleRunId: `run-real-${status}` }, { id: `job-${status}`, retryCount: status === 'failed' ? 3 : 0, retryLimit: 3 }) as unknown as Parameters<typeof handleAccountAutoSyncRequisitionJob>[0], {
     accountService: { syncAccountsForRequisition: vi.fn().mockResolvedValue({ accountsTotal: 2, institutionIds: ['safe-bank'], status }) },
     backgroundOperationService: { claimJobStart: vi.fn().mockResolvedValue(true), markAttemptFailedForRetry: vi.fn().mockResolvedValue(true) },
     bankSyncIncidentService: h.service,

@@ -5,12 +5,12 @@ import { DI } from '@app/database/di';
 import { Account } from '@entity/Account';
 import { AccountFinancialInstitution, AccountFinancialInstitutionProvider } from '@entity/AccountFinancialInstitution';
 import { AppuserTenant } from '@entity/AppuserTenant';
+import { BankConnectionStatus } from '@entity/BankConnection';
 import { Currency } from '@entity/Currency';
-import { EnableBankingConnection, EnableBankingConnectionStatus } from '@entity/EnableBankingConnection';
 import { FxStatus } from '@entity/Transaction';
+import type { BankConnectionRef, BankProvider } from '@service/bank-providers/types';
 import { isProviderRejection, type ProviderRateLimit, providerRateLimitOf } from '@service/bank-sync-run/provider-failure';
 import { convertWithStatus, type FxConversion, rateScope } from '@service/currency/exchange-rate';
-import { createEnableBankingSyncAdapter } from '@service/enable-banking/enable-banking-sync-adapter';
 import backgroundOperationService from '@service/operations/background-operation.service';
 import { sanitizeProviderResponse } from '@utils/error-sanitizer';
 import { ConflictError, InternalServerError, NotFoundError } from '@utils/errors';
@@ -58,18 +58,6 @@ interface AccountBalanceResponseLike { balances?: { balanceAmount?: { amount?: s
  */
 const BALANCE_TYPE_PREFERENCE = ['closingBooked', 'interimBooked', 'openingBooked', 'expected', 'interimAvailable', 'forwardAvailable', 'nonInvoiced'] as const;
 
-interface BankSyncAccountBalancesResponse { balances?: { balanceAmount?: { amount?: string } }[] }
-
-interface BankSyncAccountDetailsResponse { account?: { currency?: string; name?: string; ownerName?: string } }
-interface BankSyncAccountMetadataResponse { iban?: string; institution_id?: string }
-interface BankSyncClient {
-  account: (accountId: string) => {
-    getBalances: () => Promise<BankSyncAccountBalancesResponse>;
-    getDetails: () => Promise<BankSyncAccountDetailsResponse>;
-    getMetadata: () => Promise<BankSyncAccountMetadataResponse>;
-  };
-  requisition: { getRequisitionById: (id: string) => Promise<{ accounts?: string[]; institution_id?: string }> };
-}
 interface Deps {
   backgroundOperationService?: typeof backgroundOperationService;
   em?: {
@@ -79,11 +67,12 @@ interface Deps {
     findOneOrFail<T>(entityClass: new (...args: never[]) => T, where: Record<string, unknown>): Promise<T>;
     persist(entity: unknown): { flush(): Promise<void> };
   };
-  // Constructs the Enable Banking shape-adapter (`createEnableBankingSyncAdapter`,
-  // already satisfying `BankSyncClient` structurally) for a given connection. Injectable so tests
-  // never need a real Enable Banking client/credential.
-  enableBankingSyncAdapterFactory?: (connection: EnableBankingConnection) => Promise<BankSyncClient>;
   logger?: Pick<typeof logger, 'error' | 'info' | 'warn'>;
+  /**
+   * The aggregator to sync through. Tests inject a fake provider; production callers get it
+   * from the registry (`bank-providers/registry.ts`).
+   */
+  provider?: BankProvider;
 }
 
 /**
@@ -103,9 +92,9 @@ export function selectProviderBalanceAmount(response: AccountBalanceResponseLike
 const DUPLICATE_ERROR_CODES = new Set(['23505']);
 
 interface SyncTarget {
-  appuserRef: unknown;
-  client: BankSyncClient;
-  connection?: EnableBankingConnection;
+  appuserRef: number;
+  client: BankProvider;
+  connection: BankConnectionRef;
   provider: AccountFinancialInstitutionProvider;
   requisitionId: string;
   requisitionKey: number;
@@ -113,40 +102,36 @@ interface SyncTarget {
 
 class AccountInitialSyncAccountService {
   async syncAccountsForRequisition(
-    input: { correlationId?: string; enableBankingConnectionKey: number; queueJobId?: string },
+    input: { connection: BankConnectionRef; correlationId?: string; queueJobId?: string },
     deps: Deps = {},
   ): Promise<AccountInitialSyncAccountsResult> {
     const em: NonNullable<Deps['em']> = deps.em ?? DI.em;
     const log = deps.logger ?? logger;
     const bg = deps.backgroundOperationService ?? backgroundOperationService;
 
-    const target = await this.resolveSyncTarget(em, input, deps);
-    const { appuserRef, client, provider, requisitionId, requisitionKey } = target;
+    const target = this.resolveSyncTarget(input, deps);
+    const { appuserRef, client, connection, provider, requisitionId, requisitionKey } = target;
 
     const tenant = await em.findOne(AppuserTenant, { appuserKey: appuserRef, deletedAt: undefined, recordActive: true }, { populate: ['appuserKey.currencyKey'] });
     if (!tenant) throw new NotFoundError('Active tenant not found for requisition');
 
-    const requisitionData = await client.requisition.getRequisitionById(requisitionId);
-    const accountIds = requisitionData.accounts ?? [];
-    // The requisition itself already carries `institution_id` (it's required to create one), so it's
-    // known even when every account below fails before its own getMetadata() call, and
+    const providerAccounts = await client.listAccounts(connection);
+    const accountIds = providerAccounts.accounts.map((account) => account.externalId);
+    // The connection itself already carries `institutionId` (it's required to create one), so it's
+    // known even when every account below fails before its own balances call, and
     // bank_sync_incident.institution_id is set on account-phase failures too.
     const institutionIds = new Set<string>();
-    if (requisitionData.institution_id) institutionIds.add(requisitionData.institution_id);
+    if (providerAccounts.institutionId) institutionIds.add(providerAccounts.institutionId);
     if (accountIds.length === 0) {
       // Reported, not returned silently, so "the provider returned zero accounts for a requisition
       // our own database still shows as linked" is distinguishable from a per-account fetch failure
-      // below. `status` isn't in the local requisition
-      // type (only `accounts`/`institution_id` are declared), but the real Berlin Group response
-      // carries richer values than our simplified CR/LN (e.g. a bank-required re-authentication
-      // state) — read it defensively since it may be the only signal telling us why.
-      const rawStatus = (requisitionData as { status?: unknown }).status;
+      // below. The provider's raw status may be the only signal telling us why.
       log.warn(
-        { institutionId: requisitionData.institution_id, providerStatus: typeof rawStatus === 'string' ? rawStatus : undefined, requisitionId },
+        { institutionId: providerAccounts.institutionId, providerStatus: providerAccounts.providerStatus, requisitionId },
         'Account initial sync: provider returned zero accounts for a linked requisition',
       );
       Sentry.captureMessage('Account initial sync: provider returned zero accounts for a linked requisition', {
-        extra: { institutionId: requisitionData.institution_id, providerStatus: typeof rawStatus === 'string' ? rawStatus : undefined },
+        extra: { institutionId: providerAccounts.institutionId, providerStatus: providerAccounts.providerStatus },
         level: 'warning',
         tags: { requisitionId, stage: 'account-phase' },
       });
@@ -169,20 +154,16 @@ class AccountInitialSyncAccountService {
     const failedAccountIds: string[] = [];
     let rateLimited: ProviderRateLimit | undefined;
     let rejectedCount = 0;
-    for (const [index, accountId] of accountIds.entries()) {
+    for (const [index, providerAccount] of providerAccounts.accounts.entries()) {
+      const accountId = providerAccount.externalId;
       try {
-      const [detailsResponse, metadata, balances] = await Promise.all([
-        client.account(accountId).getDetails(),
-        client.account(accountId).getMetadata(),
-        client.account(accountId).getBalances(),
-      ]);
-      const details = detailsResponse.account as { currency?: string; name?: string; ownerName?: string };
-      const metadataInfo = metadata as Partial<{ iban?: string; institution_id?: string }>;
-      const institutionId = metadataInfo.institution_id ?? '';
+      const balances = await client.getBalances(connection, accountId);
+      const institutionId = providerAccount.institutionId ?? providerAccounts.institutionId ?? '';
       institutionIds.add(institutionId);
-      if (!details.currency) throw new InternalServerError(`Currency not found: ${accountId}`);
-      const currency = await em.findOne(Currency, { code: details.currency });
-      if (!currency) throw new InternalServerError(`Currency not found: ${details.currency}`);
+      const currencyCode = providerAccount.currency;
+      if (!currencyCode) throw new InternalServerError(`Currency not found: ${accountId}`);
+      const currency = await em.findOne(Currency, { code: currencyCode });
+      if (!currency) throw new InternalServerError(`Currency not found: ${currencyCode}`);
 
       let institution = await em.findOne(AccountFinancialInstitution, { deletedAt: undefined, id: institutionId });
       if (!institution) {
@@ -195,7 +176,7 @@ class AccountInitialSyncAccountService {
         }
       }
 
-      const balanceAmount = selectProviderBalanceAmount(balances);
+      const balanceAmount = selectProviderBalanceAmount({ balances });
       if (balanceAmount === undefined) throw new InternalServerError(`Provider returned no balance for account: ${accountId}`);
       const balance = Number(balanceAmount);
       if (!Number.isFinite(balance)) throw new InternalServerError(`Invalid balance for account: ${accountId}`);
@@ -211,10 +192,10 @@ class AccountInitialSyncAccountService {
       // new one, so the later session's sync collapses onto the first account instead of
       // duplicating it. Deliberately scoped to non-deleted accounts only — an account the user
       // explicitly unlinked must not be silently revived by an IBAN match.
-      if (!existingActive && metadataInfo.iban) {
+      if (!existingActive && providerAccount.iban) {
         existingActive = await em.findOne(Account, {
           accountFinancialInstitutionKey: institution,
-          accountNumber: metadataInfo.iban,
+          accountNumber: providerAccount.iban,
           accountOwnerAppuserKey: tenant.appuserKey,
           deletedAt: undefined,
         });
@@ -223,8 +204,8 @@ class AccountInitialSyncAccountService {
       const wasExisting = Boolean(existingActive);
       account.accountId = accountId;
       account.accountOwnerAppuserKey = tenant.appuserKey;
-      account.accountName ||= details.name ?? institutionId;
-      account.accountNumber ||= metadataInfo.iban ?? undefined;
+      account.accountName ||= providerAccount.name ?? institutionId;
+      account.accountNumber ||= providerAccount.iban ?? undefined;
       // The first balance the provider reports is what the account held when it was linked. Net
       // worth history counts it from then until a transaction carries a running balance. An account
       // that already had a balance before opening balances existed gets one from the startup
@@ -239,9 +220,9 @@ class AccountInitialSyncAccountService {
       account.fxStatus = converted.fxStatus;
       account.currencyKey = currency;
       account.accountFinancialInstitutionKey = institution;
-      account.enableBankingConnectionKey = target.connection;
+      account.bankConnectionKey = connection.bankConnectionKey as unknown as Account['bankConnectionKey'];
       account.tenantKey = tenant.tenantKey;
-      account.holderName ||= details.ownerName;
+      account.holderName ||= providerAccount.ownerName;
       account.refreshedAt = new Date();
       if (existingDeleted) existingDeleted.deletedAt = undefined;
       try {
@@ -257,7 +238,7 @@ class AccountInitialSyncAccountService {
         reloaded.fxStatus = account.fxStatus;
         reloaded.currencyKey = account.currencyKey;
         reloaded.accountFinancialInstitutionKey = account.accountFinancialInstitutionKey;
-        reloaded.enableBankingConnectionKey = account.enableBankingConnectionKey;
+        reloaded.bankConnectionKey = account.bankConnectionKey;
         reloaded.tenantKey = account.tenantKey;
         reloaded.holderName = account.holderName;
         reloaded.refreshedAt = account.refreshedAt;
@@ -310,51 +291,21 @@ class AccountInitialSyncAccountService {
   }
 
   /**
-   * Client-construction seam: the only place that branches on which provider owns this
-   * sync. Everything below this point in `syncAccountsForRequisition` reads only the normalized
-   * `SyncTarget` fields (plus the two provider-specific FK assignments explicitly called out
-   * inline), never `NordigenRequisition`/`EnableBankingConnection` directly — see
-   * `enable-banking-sync-adapter.ts`'s module docblock for why the client itself never has to
-   * change shape.
+   * The provider seam. Everything below this point in `syncAccountsForRequisition` reads only
+   * the normalized `SyncTarget` fields, never a provider name or entity.
    */
-  private async resolveSyncTarget(
-    em: NonNullable<Deps['em']>,
-    input: { enableBankingConnectionKey?: number },
-    deps: Deps,
-  ): Promise<SyncTarget> {
-    if (input.enableBankingConnectionKey == null) throw new ConflictError('Bank sync requires an Enable Banking connection');
-    {
-      const connection = await em.findOne(EnableBankingConnection, { deletedAt: undefined, enableBankingConnectionKey: input.enableBankingConnectionKey });
-      if (!connection) throw new NotFoundError('Enable Banking connection not found');
-      if (connection.status !== EnableBankingConnectionStatus.LINKED) throw new ConflictError('Enable Banking connection is not linked');
-      const client = await (deps.enableBankingSyncAdapterFactory ?? defaultEnableBankingSyncAdapterFactory)(connection);
-      return {
-        appuserRef: connection.appuserKey,
-        client,
-        connection,
-        provider: AccountFinancialInstitutionProvider.ENABLE_BANKING,
-        // Enable Banking has no requisition-style opaque id post-link; `sessionId` is the closest
-        // provider-issued identity, falling back to the pre-link correlation `state` if a sync is
-        // somehow attempted before a session exists (defensive — shouldn't happen, see
-        // `EnableBankingConnectionStatus.LINKED` guard above).
-        requisitionId: connection.sessionId ?? connection.state,
-        requisitionKey: connection.enableBankingConnectionKey,
-      };
-    }
-
+  private resolveSyncTarget(input: { connection: BankConnectionRef }, deps: Deps): SyncTarget {
+    if (!deps.provider) throw new InternalServerError('Bank sync provider is not configured');
+    if (input.connection.status !== BankConnectionStatus.LINKED) throw new ConflictError('Bank connection is not linked');
+    return {
+      appuserRef: input.connection.appuserId,
+      client: deps.provider,
+      connection: input.connection,
+      provider: deps.provider.institutionProvider,
+      requisitionId: input.connection.externalId,
+      requisitionKey: input.connection.bankConnectionKey,
+    };
   }
-}
-
-/**
- * Lazily decrypts the connection's own credential and builds the client chain.
- * The cast is a shape-compatibility formality, not a behavioral one: `EnableBankingSyncClient`
- * and this file's local `BankSyncClient` describe the same runtime contract (see
- * `enable-banking-sync-adapter.ts`'s docblock) but were declared independently, so their optional
- * fields don't structurally unify.
- */
-
-function defaultEnableBankingSyncAdapterFactory(connection: EnableBankingConnection): Promise<BankSyncClient> {
-  return Promise.resolve(createEnableBankingSyncAdapter(connection) as unknown as BankSyncClient);
 }
 
 function getAppuserKey(appuserKey?: unknown): number {

@@ -1,0 +1,101 @@
+---
+title: Add a bank provider
+description: Implement a new bank aggregator behind the BankProvider interface, register it, and keep sync provider-agnostic.
+---
+
+WonderMoney syncs bank accounts through a provider interface, so adding an aggregator does not
+touch the sync services. Enable Banking is the first implementation; this page is the checklist
+for a second one.
+
+## The seam
+
+Everything lives in `apps/api/src/services/bank-providers/`:
+
+- `types.ts` — the `BankProvider` interface, the connection reference the sync path reads, and
+  the normalized account/balance/transaction shapes.
+- `errors.ts` — the typed failures a provider throws: `RateLimitedError`, `ConsentExpiredError`,
+  `UserActionRequiredError`, `UnavailableError`. They map to the bank-sync incident codes
+  (`rate_limited`, `consent_expired`, `authentication`, `provider_unavailable`), so the sync
+  services and the incident record never learn your provider's error shape.
+- `registry.ts` — the compiled-in providers and the `BANK_PROVIDERS` enablement filter.
+- `enable-banking.provider.ts` — the reference implementation.
+
+The sync services (`account-initial-sync-account.service.ts`,
+`account-initial-sync-transaction.service.ts`) import only `types.ts`. They never import a
+provider's client or entity, and they never branch on a provider name.
+
+## 1. Implement `BankProvider`
+
+Create `my-provider.provider.ts` and implement:
+
+| Method | What the sync path needs |
+|---|---|
+| `listInstitutions` | The bank picker: a stable id, a display name, country and logo. |
+| `startConnection` | Start the consent flow and return the URL the browser opens. Persist your connection row here. |
+| `completeConnection` | Exchange the callback code, mark the connection linked, and persist its accounts. Return `bankConnectionKey`, `accountsCreated` and where the browser should go. |
+| `getSessionStatus` | Whether the consent still holds (`active`, `ended`, `unknown`), used after every account was rejected. |
+| `listAccounts` | The connection's accounts with currency, IBAN, holder name and institution id. |
+| `getBalances` | The account's balances, with a `balanceType` the sync's preference list understands (`closingBooked`, `interimBooked`, `expected`, …). |
+| `getTransactions` | The full window, already split into `booked`, `pending` and `voided`. Page internally; the sync calls this once per account. |
+
+Also declare two capabilities:
+
+- `transactionIdentity` — which `Transaction` column stores your provider id and the stable-id
+  prefix for rows without one. A new provider should use its own column; the two existing
+  columns are Enable Banking's and the legacy GoCardless one.
+- `institutionProvider` — the `AccountFinancialInstitution.provider` value your accounts use.
+  `other` exists for new providers.
+
+Throw the typed errors from `errors.ts` from every provider call. Do not leak your SDK's error
+shape: the sync path's rate-limit and consent checks read the typed errors (and the `status`
+they carry).
+
+## 2. Register it
+
+Add the provider to `PROVIDERS` in `registry.ts` and export its id. The operator enables it with
+a comma-separated environment variable:
+
+```bash
+BANK_PROVIDERS=enable_banking,my_provider
+```
+
+Unset means every compiled-in provider. `GET /v1/instance` reports the enabled list in
+`features.bankSyncProviders`, and `features.bankSync` is false when none is enabled. Clients hide
+the feature from that list, so keep the ids stable.
+
+## 3. Persist the connection
+
+The sync path reads `BankConnection` (the provider-agnostic row: provider, external id, status,
+`accessValidUntil`, credential reference, sync timestamps). Keep provider-specific fields
+(ASPSP name, credential FK, session id) on your own detail row and link it one-to-one through
+`bankConnectionKey`, as `EnableBankingConnection` does.
+
+Migrations in this repository are **DDL only**. If existing rows must move onto a new table or
+column, write an idempotent, transactional start-up backfill (see
+`bank-connection-backfill.service.ts` and its call in `migrate.ts`), not a data migration. It
+must be safe to run on every boot and a second run must change nothing.
+
+## 4. Test the seam
+
+- Unit-test the provider's mapping and error translation.
+- Run a full sync through the interface with a fake provider:
+  `services/bank-providers/__tests__/fake-provider-sync.test.ts` seeds a connection, calls
+  `runBankSyncPhases`, and asserts the account and transaction rows.
+- If you add a backfill, test it on real-shaped fixtures and assert that a second run is a no-op
+  (`bank-connection-backfill.service.test.ts`).
+
+Run the affected tests with a throwaway Postgres:
+
+```bash
+cd apps/api
+TEST_POSTGRES_URL=postgres://user:pass@localhost:5432/wmdb pnpm vitest run src/services/bank-providers
+```
+
+## Checklist
+
+- [ ] `BankProvider` implemented, typed errors thrown.
+- [ ] Registered in `registry.ts`; `BANK_PROVIDERS` documented.
+- [ ] `BankConnection` + detail row written by `startConnection`/`completeConnection`.
+- [ ] Accounts carry `bankConnectionKey`.
+- [ ] DDL migration + snapshot; any data move is an idempotent runtime backfill.
+- [ ] Fake-provider full-sync test and backfill test pass.

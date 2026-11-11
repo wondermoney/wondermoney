@@ -133,6 +133,7 @@ export async function createInitialEnableBankingAccounts(
     account.currencyKey = currency;
     account.accountFinancialInstitutionKey = institution;
     account.enableBankingConnectionKey = connection;
+    if (connection.bankConnectionKey) account.bankConnectionKey = connection.bankConnectionKey;
     account.tenantKey = tenantKey;
     if (existingDeleted) existingDeleted.deletedAt = undefined;
 
@@ -147,6 +148,7 @@ export async function createInitialEnableBankingAccounts(
       reloaded.currencyKey = account.currencyKey;
       reloaded.accountFinancialInstitutionKey = account.accountFinancialInstitutionKey;
       reloaded.enableBankingConnectionKey = account.enableBankingConnectionKey;
+      reloaded.bankConnectionKey = account.bankConnectionKey;
       reloaded.tenantKey = account.tenantKey;
       await em.persist(reloaded).flush();
       accounts.push(reloaded);

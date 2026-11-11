@@ -4,6 +4,7 @@ import { instanceName } from '@config/instance-name';
 import { aiCapabilities } from '@service/ai/ai-provider';
 import { resolveSignupMode } from '@service/auth/signup-policy';
 import { isGoogleSignInConfigured } from '@service/auth/social-sign-in';
+import { bankSyncFeatures } from '@service/bank-providers/registry';
 import { feedbackInbox, resolveEmailDriver, supportInbox } from '@service/email/email-transport';
 import { isMarketDataEnabled } from '@service/market-data/eodhd.service';
 import { resolveStorageConfig } from '@service/storage/s3';
@@ -20,13 +21,16 @@ import { buildInfo } from '@utils/constants';
  */
 export function getInstance(_req: Request, res: Response) {
   const { commit, version } = buildInfo();
+  const bankSync = bankSyncFeatures();
   return res.json({
     apiVersion: 1,
     commit,
     features: {
       ai: aiCapabilities(),
       // Enable Banking is bring-your-own-key: each user adds their own credentials.
-      bankSync: true,
+      bankSync: bankSync.bankSync,
+      /** The providers this instance enabled through `BANK_PROVIDERS`. */
+      bankSyncProviders: bankSync.bankSyncProviders,
       contactForm: supportInbox() !== null,
       // False when mail only goes to the log.
       email: resolveEmailDriver() !== 'log',

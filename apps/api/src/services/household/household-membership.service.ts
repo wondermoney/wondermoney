@@ -2,6 +2,7 @@ import type { EntityManager } from '@mikro-orm/core';
 
 import { Appuser } from '@entity/Appuser';
 import { AppuserTenant } from '@entity/AppuserTenant';
+import { BankConnection } from '@entity/BankConnection';
 import { EnableBankingConnection } from '@entity/EnableBankingConnection';
 import { NordigenRequisition } from '@entity/NordigenRequisition';
 import { Tenant } from '@entity/Tenant';
@@ -23,7 +24,8 @@ async function revokeRequisitionsFor(em: EntityManager, tenant: Tenant, targetAp
   const owner = { appuserKey: { appuserKey: targetAppuserKey }, deletedAt: undefined, tenantKey: tenant };
   const requisitions = await em.find(NordigenRequisition, owner);
   const connections = await em.find(EnableBankingConnection, owner);
-  for (const revoked of [...requisitions, ...connections]) {
+  const bankConnections = await em.find(BankConnection, owner);
+  for (const revoked of [...requisitions, ...connections, ...bankConnections]) {
     revoked.deletedAt = now;
   }
 }

@@ -5,8 +5,10 @@ import { normalizeBankSyncError } from '@app/analytics/bank-sync-contract';
 import { DI } from '@app/database/di';
 import { type AccountInitialSyncJobPayload, buildAccountInitialSyncCorrelationId } from '@app/jobs/account-initial-sync.queue';
 import { enqueueBankRecoveryAfter } from '@app/jobs/bank-recovery.queue';
+import { BankConnection } from '@entity/BankConnection';
 import accountInitialSyncAccountService from '@service/account/account-initial-sync-account.service';
 import accountInitialSyncTransactionService from '@service/account/account-initial-sync-transaction.service';
+import { bankConnectionRef, getBankProvider } from '@service/bank-providers/registry';
 import {
   classifyBankSyncError,
   runBankSyncPhases,
@@ -62,15 +64,28 @@ export const handleAccountInitialSyncJob = async (job: JobWithMetadata<AccountIn
   // index different tables, so falling back would resolve the wrong entity whenever the two
   // happen to share a number.
   const jobData = job.data;
-  const isEnableBanking = jobData.provider === 'enable_banking';
-  const syncTargetKeyRaw = isEnableBanking ? jobData.enableBankingConnectionKey : undefined;
-  const requisitionId = isEnableBanking ? jobData.connectionId : undefined;
+  const isBankProviderJob = jobData.provider !== undefined && 'bankConnectionKey' in jobData;
+  const syncTargetKeyRaw = isBankProviderJob ? jobData.bankConnectionKey : undefined;
+  const requisitionId = isBankProviderJob ? jobData.connectionId : undefined;
   const key = Number(syncTargetKeyRaw);
-  if (!isEnableBanking || !correlationId || !requisitionId || !syncTargetKeyRaw || !Number.isSafeInteger(key) || key <= 0
+  if (!isBankProviderJob || !correlationId || !requisitionId || !syncTargetKeyRaw || !Number.isSafeInteger(key) || key <= 0
     || correlationId !== buildAccountInitialSyncCorrelationId(syncTargetKeyRaw)) {
     log.warn({ jobId: job.id, provider: jobData.provider ?? 'legacy', queue: 'account.initial-sync' }, 'Account initial sync job payload is invalid');
     return false;
   }
+  // Resolve the generic connection and its provider. Everything below reads only the
+  // provider-agnostic ref; no branch on a provider name remains in this worker.
+  const connection = await DI.em.findOne(BankConnection, { bankConnectionKey: key, deletedAt: undefined });
+  if (!connection) {
+    log.warn({ bankConnectionKey: key, jobId: job.id }, 'Account initial sync job references a missing bank connection');
+    return false;
+  }
+  const provider = getBankProvider(connection.provider);
+  if (!provider) {
+    log.warn({ bankConnectionKey: key, jobId: job.id, provider: connection.provider }, 'Account initial sync job references a disabled bank provider');
+    return false;
+  }
+  const connectionRef = bankConnectionRef(connection);
   const incidents = deps.bankSyncIncidentService ?? new BankSyncIncidentService({
     em: DI.em,
     transitionBackgroundOperation: async (em, context) => {
@@ -141,10 +156,11 @@ export const handleAccountInitialSyncJob = async (job: JobWithMetadata<AccountIn
   try {
     const phases = await runBankSyncPhases({
       accountService: deps.accountInitialSyncAccountService ?? accountInitialSyncAccountService,
+      connection: connectionRef,
       correlationId,
-      enableBankingConnectionKey: key,
       enqueue: deps.enqueue,
       fetchWindowDays: 365,
+      provider,
       queueJobId: job.id,
       transactionService: deps.accountInitialSyncTransactionService ?? accountInitialSyncTransactionService,
     });

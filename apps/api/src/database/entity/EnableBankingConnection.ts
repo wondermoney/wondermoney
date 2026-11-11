@@ -8,6 +8,7 @@ import { EnableBankingConnectionRepository } from '../repositories/EnableBanking
 
 import { Account } from './Account';
 import { Appuser } from './Appuser';
+import { BankConnection } from './BankConnection';
 import { Base } from './BaseEntity';
 import { EnableBankingCredential } from './EnableBankingCredential';
 import { Tenant } from './Tenant';
@@ -47,6 +48,10 @@ export class EnableBankingConnection extends Base {
   @ManyToOne({ cascade: [], entity: () => Appuser, fieldName: 'appuser_key', nullable: false })
   appuserKey!: Rel<Appuser>;
 
+  /**
+   * The provider-agnostic connection this Enable Banking row backs. One-to-one; a row linked
+   * before the `BankProvider` interface existed gets one from the start-up backfill.
+   */
   @Property({ length: 2 })
   aspspCountry!: string;
 
@@ -55,6 +60,10 @@ export class EnableBankingConnection extends Base {
 
   @Property({ length: 255, nullable: true })
   authorizationId?: string;
+
+  @ManyToOne({ cascade: [], entity: () => BankConnection, fieldName: 'bank_connection_key', nullable: true })
+  @Unique({ name: 'enable_banking_connection_bank_connection_uindex' })
+  bankConnectionKey?: Rel<BankConnection>;
 
   @PrimaryKey()
   enableBankingConnectionKey!: number;

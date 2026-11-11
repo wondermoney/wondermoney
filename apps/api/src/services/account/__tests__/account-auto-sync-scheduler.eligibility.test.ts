@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from 'vitest';
 
 import { addAccount, type Household, seedHousehold } from '@app/__tests__/__helpers__/finance-fixtures';
 import { useTestDatabase } from '@app/__tests__/__helpers__/pg-test-db';
+import { BankConnection, BankConnectionStatus } from '@entity/BankConnection';
 import { EnableBankingConnection, EnableBankingConnectionStatus } from '@entity/EnableBankingConnection';
 import { EnableBankingCredential } from '@entity/EnableBankingCredential';
 import type { BankSyncIncidentService } from '@service/bank-sync/bank-sync-incident.service';
@@ -49,10 +50,23 @@ describe('scheduled bank sync eligibility', () => {
       status: EnableBankingConnectionStatus.LINKED,
       tenantKey: household.tenant,
     }, { partial: true });
-    const account = await addAccount(em, household);
-    em.assign(account, { enableBankingConnectionKey: created, refreshedAt: input.refreshedAt });
+    const bankConnection = em.create(BankConnection, {
+      accessValidUntil: new Date(NOW.getTime() + 30 * 24 * HOUR_MS),
+      appuserKey: household.appuser,
+      externalId: `session-${sequence}`,
+      lastSyncAttemptAt: input.lastSyncAttemptAt,
+      nextEligibleSyncAt: input.nextEligibleSyncAt,
+      provider: 'enable_banking',
+      state: `state-${sequence}`,
+      status: BankConnectionStatus.LINKED,
+      tenantKey: household.tenant,
+    }, { partial: true });
     await em.flush();
-    return created;
+    created.bankConnectionKey = bankConnection;
+    const account = await addAccount(em, household);
+    em.assign(account, { bankConnectionKey: bankConnection, refreshedAt: input.refreshedAt });
+    await em.flush();
+    return bankConnection;
   }
 
   async function scan() {
@@ -63,7 +77,7 @@ describe('scheduled bank sync eligibility', () => {
       now: NOW,
       send,
     });
-    const enqueuedConnectionKeys = send.mock.calls.map(([, data]) => (data as { enableBankingConnectionKey: string }).enableBankingConnectionKey);
+    const enqueuedConnectionKeys = send.mock.calls.map(([, data]) => (data as { bankConnectionKey: string }).bankConnectionKey);
     return { enqueuedConnectionKeys, result };
   }
 
@@ -74,7 +88,7 @@ describe('scheduled bank sync eligibility', () => {
     const { enqueuedConnectionKeys, result } = await scan();
 
     expect(result).toMatchObject({ enqueued: 1, failed: 0 });
-    expect(enqueuedConnectionKeys).toEqual([String(eligible.enableBankingConnectionKey)]);
+    expect(enqueuedConnectionKeys).toEqual([String(eligible.bankConnectionKey)]);
   });
 
   it('waits out the interval after a failed attempt, even when the last success is much older', async () => {
@@ -98,7 +112,7 @@ describe('scheduled bank sync eligibility', () => {
       const { enqueuedConnectionKeys, result } = await scan();
 
       expect(result).toMatchObject({ enqueued: 1 });
-      expect(enqueuedConnectionKeys).toEqual([String(eligible.enableBankingConnectionKey)]);
+      expect(enqueuedConnectionKeys).toEqual([String(eligible.bankConnectionKey)]);
     } finally {
       vi.unstubAllEnvs();
     }
@@ -121,7 +135,7 @@ describe('scheduled bank sync eligibility', () => {
     const { enqueuedConnectionKeys, result } = await scan();
 
     expect(result).toMatchObject({ enqueued: 1 });
-    expect(enqueuedConnectionKeys).toEqual([String(eligible.enableBankingConnectionKey)]);
+    expect(enqueuedConnectionKeys).toEqual([String(eligible.bankConnectionKey)]);
   });
 
   it('leaves a recently synced connection alone when it has no recorded attempt', async () => {
@@ -141,6 +155,6 @@ describe('scheduled bank sync eligibility', () => {
     const { enqueuedConnectionKeys, result } = await scan();
 
     expect(result).toMatchObject({ enqueued: 1 });
-    expect(enqueuedConnectionKeys).toEqual([String(eligible.enableBankingConnectionKey)]);
+    expect(enqueuedConnectionKeys).toEqual([String(eligible.bankConnectionKey)]);
   });
 });

@@ -12,6 +12,7 @@ import { EnableBankingCredential } from '@entity/EnableBankingCredential';
 import { Transaction } from '@entity/Transaction';
 import { TransactionType } from '@entity/TransactionType';
 import service, { type BankSyncTransaction } from '@service/account/account-initial-sync-transaction.service';
+import { connectionRef as conn, providerFromClient } from '@service/bank-providers/__tests__/helpers';
 
 import { transactionCreationService } from '../transaction-creation.service';
 
@@ -41,7 +42,7 @@ describe('transactions on the same account, day and amount', () => {
     const { connection } = await linkedHousehold();
     const client = { account: () => ({ getTransactions: () => Promise.resolve({ transactions: { booked: [coffee('coffee-1'), coffee('coffee-2')], pending: [] } }) }) };
 
-    const result = await service.syncTransactionsForRequisition({ enableBankingConnectionKey: connection.enableBankingConnectionKey, fetchWindowDays: 3650 }, { em: db.em(), enableBankingSyncAdapterFactory: () => Promise.resolve(client) });
+    const result = await service.syncTransactionsForRequisition({ connection: conn(connection.enableBankingConnectionKey, { appuserId: connection.appuserKey.appuserKey }), fetchWindowDays: 3650 }, { em: db.em(), provider: providerFromClient(client) });
 
     expect(result).toMatchObject({ transactionsCreated: 2, transactionsSkipped: 0 });
     const stored = await db.em().find(Transaction, {}, { filters: false });

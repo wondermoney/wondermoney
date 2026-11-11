@@ -43,19 +43,19 @@ const ACCOUNT_AUTO_SYNC_PROVIDER_QUEUE_OPTIONS = {
  * at all; it stays in the type so `account-auto-sync.worker.ts` can recognise such a payload and
  * reject it rather than coerce it.
  */
-export type AccountAutoSyncRequisitionJobPayload = AccountAutoSyncRequisitionJobPayloadEnableBanking | AccountAutoSyncRequisitionJobPayloadGoCardless;
+export type AccountAutoSyncRequisitionJobPayload = AccountAutoSyncRequisitionJobPayloadBank | AccountAutoSyncRequisitionJobPayloadGoCardless;
 
-export interface AccountAutoSyncRequisitionJobPayloadEnableBanking {
+/** Any provider behind the `BankProvider` interface. */
+export interface AccountAutoSyncRequisitionJobPayloadBank {
   // Included (unlike the initial-sync payload) because this job's handler needs to resolve the
-  // owning appuser's *current* `EnableBankingCredential` before syncing — the
-  // connection itself doesn't carry that identity in a way the worker can cheaply re-derive
-  // without an extra DB round trip per job.
+  // owning appuser's credential before syncing.
   appuserKey: number;
+  /** `BankConnection.bankConnectionKey`, the provider-agnostic key. */
+  bankConnectionKey: string;
   connectionId: string;
   correlationId: string;
-  enableBankingConnectionKey: string;
   incidentId: string;
-  provider: 'enable_banking';
+  provider: string;
   scheduleRunId: string;
 }
 
@@ -63,8 +63,8 @@ export interface AccountAutoSyncRequisitionJobPayloadGoCardless {
   correlationId: string;
   incidentId: string;
   nordigenRequisitionKey: string;
-  // Declared only so `job.provider === 'enable_banking'` discriminates the union at the type
-  // level — never actually present on the wire (see the module docblock above).
+  // Declared only so `job.provider !== undefined` discriminates the union at the type level —
+  // never actually present on the wire (see the module docblock above).
   provider?: undefined;
   requisitionId: string;
   scheduleRunId: string;

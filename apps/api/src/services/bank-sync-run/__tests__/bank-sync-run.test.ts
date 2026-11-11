@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { connectionRef, providerFromClient } from '@service/bank-providers/__tests__/helpers';
 import {
   classifyBankSyncError,
   runBankSyncPhases,
@@ -81,6 +82,8 @@ describe('runBankSyncPhases', () => {
   const correlationId = 'corr-1';
   const queueJobId = 'job-1';
   const key = 12;
+  const connection = connectionRef(key);
+  const provider = providerFromClient({ account: () => ({}) });
 
   function harness() {
     return {
@@ -98,17 +101,18 @@ describe('runBankSyncPhases', () => {
     h.transactionService.syncTransactionsForRequisition.mockResolvedValueOnce({ status: 'completed' });
     const result = await runBankSyncPhases({
       accountService: h.accountService,
+      connection,
       correlationId,
-      enableBankingConnectionKey: key,
       enqueue,
       fetchWindowDays: 365,
+      provider,
       queueJobId,
       transactionService: h.transactionService,
     });
     expect(result.status).toBe('full_success');
     expect(result.account).toEqual({ accountsTotal: 3, institutionIds: ['inst-1'], status: 'full_success' });
     expect(result.failedAt).toBeUndefined();
-    expect(h.transactionService.syncTransactionsForRequisition).toHaveBeenCalledWith(expect.any(Object), { enqueue });
+    expect(h.transactionService.syncTransactionsForRequisition).toHaveBeenCalledWith(expect.any(Object), { enqueue, provider });
   });
 
   it('returns failed at the account phase without running transaction', async () => {
@@ -116,9 +120,10 @@ describe('runBankSyncPhases', () => {
     h.accountService.syncAccountsForRequisition.mockResolvedValueOnce({ status: 'failed' });
     const result = await runBankSyncPhases({
       accountService: h.accountService,
+      connection,
       correlationId,
-      enableBankingConnectionKey: key,
       fetchWindowDays: 365,
+      provider,
       queueJobId,
       transactionService: h.transactionService,
     });
@@ -133,9 +138,10 @@ describe('runBankSyncPhases', () => {
     h.transactionService.syncTransactionsForRequisition.mockResolvedValueOnce({ status: 'failed' });
     const result = await runBankSyncPhases({
       accountService: h.accountService,
+      connection,
       correlationId,
-      enableBankingConnectionKey: key,
       fetchWindowDays: 365,
+      provider,
       queueJobId,
       transactionService: h.transactionService,
     });
@@ -149,9 +155,10 @@ describe('runBankSyncPhases', () => {
     h.transactionService.syncTransactionsForRequisition.mockResolvedValueOnce({ status: 'partial' });
     const result = await runBankSyncPhases({
       accountService: h.accountService,
+      connection,
       correlationId,
-      enableBankingConnectionKey: key,
       fetchWindowDays: 365,
+      provider,
       queueJobId,
       transactionService: h.transactionService,
     });
@@ -163,9 +170,10 @@ describe('runBankSyncPhases', () => {
     h.accountService.syncAccountsForRequisition.mockResolvedValueOnce({ rateLimited: { retryAfterSeconds: 120 }, status: 'partial' });
     const result = await runBankSyncPhases({
       accountService: h.accountService,
+      connection,
       correlationId,
-      enableBankingConnectionKey: key,
       fetchWindowDays: 5,
+      provider,
       queueJobId,
       transactionService: h.transactionService,
     });
@@ -179,9 +187,10 @@ describe('runBankSyncPhases', () => {
     h.transactionService.syncTransactionsForRequisition.mockResolvedValueOnce({ rateLimited: {}, status: 'failed' });
     const result = await runBankSyncPhases({
       accountService: h.accountService,
+      connection,
       correlationId,
-      enableBankingConnectionKey: key,
       fetchWindowDays: 5,
+      provider,
       queueJobId,
       transactionService: h.transactionService,
     });
@@ -193,9 +202,10 @@ describe('runBankSyncPhases', () => {
     h.accountService.syncAccountsForRequisition.mockResolvedValueOnce({ everyAccountRejected: true, status: 'failed' });
     const result = await runBankSyncPhases({
       accountService: h.accountService,
+      connection,
       correlationId,
-      enableBankingConnectionKey: key,
       fetchWindowDays: 5,
+      provider,
       queueJobId,
       transactionService: h.transactionService,
     });
@@ -209,10 +219,11 @@ describe('runBankSyncPhases', () => {
     h.transactionService.syncTransactionsForRequisition.mockImplementationOnce(async () => { order.push('transaction'); return { status: 'completed' }; });
     await runBankSyncPhases({
       accountService: h.accountService,
+      connection,
       correlationId,
-      enableBankingConnectionKey: key,
       fetchWindowDays: 5,
       prePhase: async () => { order.push('pre'); },
+      provider,
       queueJobId,
       transactionService: h.transactionService,
     });

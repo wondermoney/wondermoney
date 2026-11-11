@@ -1,5 +1,3 @@
-import { randomUUID } from 'node:crypto';
-
 import type { NextFunction, Request, Response } from 'express';
 
 import {
@@ -11,12 +9,11 @@ import {
 import { zParse } from '@app/validators/parser';
 import { EnableBankingConnection } from '@entity/EnableBankingConnection';
 import { authedUser } from '@middleware/authed-context';
+import { toHttpError } from '@service/bank-providers/http-errors';
+import { ENABLE_BANKING_PROVIDER_ID, requireBankProvider } from '@service/bank-providers/registry';
 import { BankSyncStatusService } from '@service/bank-sync/bank-sync-status.service';
-import { createEnableBankingClient } from '@service/enable-banking/enable-banking-client.service';
-import { enableBankingCredentialService } from '@service/enable-banking/enable-banking-credential.service';
 import { ENABLE_BANKING_CALLBACK_URL } from '@utils/constants';
-import { decodeEnableBankingInstitutionId, encodeEnableBankingInstitutionId } from '@utils/enable-banking-institution-id';
-import { BadRequestError, InternalServerError, NotFoundError } from '@utils/errors';
+import { InternalServerError, NotFoundError } from '@utils/errors';
 
 import { DI } from '../app';
 
@@ -28,28 +25,14 @@ export async function getBankList(req: Request, res: Response) {
 
   // BYOK: each user's own Enable Banking application, not a shared WonderMoney
   // credential — a user who hasn't registered one in Settings yet can't list banks.
-  const credential = await enableBankingCredentialService.getDecryptedCredential(user.appuserKey);
-  if (!credential) {
-    throw new BadRequestError('No Enable Banking credential configured');
+  let institutions;
+  try {
+    institutions = await requireBankProvider(ENABLE_BANKING_PROVIDER_ID).listInstitutions({ appuserId: user.appuserKey, country });
+  } catch (error) {
+    throw toHttpError(error);
   }
 
-  const client = createEnableBankingClient(credential);
-  // Any provider failure here is already one of this app's typed errors (see
-  // `enable-banking-client.service.ts`'s `request()` helper) — propagate as-is
-  // rather than re-wrapping.
-  const institutions = await client.listInstitutions({ country });
-
-  // Enable Banking has no opaque institution id — it identifies a
-  // bank by `{name, country}`, so synthesize a stable one for the frontend to hand
-  // back on `startBankConnection`. See @utils/enable-banking-institution-id.
-  return res.json(
-    institutions.map((institution) => ({
-      country: institution.country,
-      id: encodeEnableBankingInstitutionId({ country: institution.country, name: institution.name }),
-      logo: institution.logo ?? '',
-      name: institution.name,
-    })),
-  );
+  return res.json(institutions);
 }
 
 export async function getBankSyncStatus(req: Request, res: Response) {
@@ -72,51 +55,20 @@ export async function startBankConnection(req: Request, res: Response) {
     throw new InternalServerError('Authenticated tenant is required to start a bank connection');
   }
 
-  const institutionRef = decodeEnableBankingInstitutionId(bankId);
-  if (!institutionRef) {
-    throw new BadRequestError('Invalid institution id');
+  let redirectUrl: string;
+  try {
+    ({ redirectUrl } = await requireBankProvider(ENABLE_BANKING_PROVIDER_ID).startConnection({
+      appuserId: user.appuserKey,
+      institutionId: bankId,
+      redirectUrl: ENABLE_BANKING_CALLBACK_URL,
+      returnTo: returnTo ?? null,
+      tenantId: req.tenant.tenantKey,
+    }));
+  } catch (error) {
+    throw toHttpError(error);
   }
 
-  // BYOK: resolve *this user's* Enable Banking application. `getActiveCredentialEntity`
-  // (not the decrypted DTO) is what we need here — `EnableBankingConnection` stores a
-  // FK to the credential row, not the key material.
-  const credentialEntity = await enableBankingCredentialService.getActiveCredentialEntity(user.appuserKey);
-  if (!credentialEntity) {
-    throw new BadRequestError('No Enable Banking credential configured');
-  }
-  const credential = enableBankingCredentialService.decryptCredentialEntity(credentialEntity);
-  const client = createEnableBankingClient(credential);
-
-  // `maximum_consent_validity` varies per bank and is never hardcoded — look
-  // it up fresh, server-side, rather than trusting a client-supplied value from the
-  // earlier `getBankList` response.
-  const institutions = await client.listInstitutions({ country: institutionRef.country });
-  const institution = institutions.find((candidate) => candidate.name === institutionRef.name);
-  if (!institution) {
-    throw new NotFoundError('Institution not found');
-  }
-  const maxConsentValiditySeconds = institution.maximum_consent_validity;
-  if (!maxConsentValiditySeconds) {
-    throw new InternalServerError('Enable Banking did not return a maximum consent validity for this institution');
-  }
-  const validUntil = new Date(Date.now() + maxConsentValiditySeconds * 1000).toISOString();
-
-  // The correlation value Enable Banking's callback echoes back.
-  const state = randomUUID();
-
-  const authorization = await client.startAuthorization({
-    aspsp: { country: institutionRef.country, name: institutionRef.name },
-    psuType: 'personal',
-    redirectUrl: ENABLE_BANKING_CALLBACK_URL,
-    state,
-    validUntil,
-  });
-
-  await DI.em
-    .getRepository(EnableBankingConnection)
-    .createConnection(user, req.tenant, credentialEntity, state, institutionRef.name, institutionRef.country, maxConsentValiditySeconds, returnTo ?? null);
-
-  return res.json({ redirectUrl: authorization.url });
+  return res.json({ redirectUrl });
 }
 
 /**
