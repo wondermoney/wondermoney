@@ -9,7 +9,7 @@ import { getWeeklyInsightsPreheader } from "../weekly-insights-preheader";
 export type { WeeklyBudgetSummary, WeeklyInsightsProps } from "../types";
 export { getWeeklyInsightsPreheader } from "../weekly-insights-preheader";
 
-const COPY = {
+export const COPY = {
   en: {
     subject: "Your weekly money summary",
     heading: "Your weekly money summary",

@@ -943,7 +943,7 @@
   "rate-limited-announcement": "Demasiados pedidos. Isto volta a carregar sozinho dentro de cerca de {seconds, plural, one {# segundo} other {# segundos}}.",
   "rate-limited-announcement-wait": "Demasiados pedidos. Isto fica disponível outra vez dentro de cerca de {seconds, plural, one {# segundo} other {# segundos}}.",
   "app-error-auth-title": "A sua sessão precisa de atenção",
-  "app-error-auth-description": "Não foi possível confirmar o acesso a esta área.",
+  "app-error-auth-description": "Não foi possível confirmar o acesso a {section}.",
   "app-error-auth-next-step": "Volte à página inicial ou inicie sessão novamente se o problema continuar.",
   "app-error-not-found-title": "Esta página não está disponível",
   "app-error-not-found-description": "A página ou os dados de {section} já não estão disponíveis.",

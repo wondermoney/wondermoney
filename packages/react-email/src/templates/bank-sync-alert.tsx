@@ -21,7 +21,7 @@ interface LanguageCopy {
   footer: (brand: string) => string;
 }
 
-const COPY: Record<"en" | "pt", LanguageCopy> = {
+export const COPY: Record<"en" | "pt", LanguageCopy> = {
   en: {
     kinds: {
       consent_expiring_7d: {
