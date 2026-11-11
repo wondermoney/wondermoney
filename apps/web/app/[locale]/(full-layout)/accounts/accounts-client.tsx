@@ -226,6 +226,7 @@ export default function AccountsClient({
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
   const [pendingCsvImport, setPendingCsvImport] = useState(false);
   const [isRecoveryCsvImport, setIsRecoveryCsvImport] = useState(false);
+  const [reorderingAccounts, setReorderingAccounts] = useState(false);
   const formatCurrency = useFormatCurrency();
 
   const onAddSyncAccountClick = () => {
@@ -750,8 +751,26 @@ export default function AccountsClient({
       <div className="grid gap-10 lg:grid-cols-5 lg:gap-12">
         {/* Accounts list */}
         <div className="min-w-0 lg:col-span-2">
-          <Section id="accounts-list-heading" title={t("accounts")}>
-            <AccountsList accounts={accountsData?.accounts ?? []} />
+          <Section
+            id="accounts-list-heading"
+            title={t("accounts")}
+            aside={
+              accountsData?.accounts && accountsData.accounts.length > 1 ? (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  aria-pressed={reorderingAccounts}
+                  onClick={() => setReorderingAccounts((value) => !value)}
+                >
+                  {reorderingAccounts ? t("done") : t("reorder-accounts")}
+                </Button>
+              ) : undefined
+            }
+          >
+            <AccountsList
+              accounts={accountsData?.accounts ?? []}
+              reordering={reorderingAccounts}
+            />
           </Section>
         </div>
 

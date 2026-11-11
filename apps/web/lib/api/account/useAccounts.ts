@@ -1,8 +1,9 @@
-import { useQuery, type UseQueryOptions } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient, type UseQueryOptions } from "@tanstack/react-query";
 import type { AxiosInstance } from "axios";
 
 import type { FxStatus } from "@/lib/fx/fx-status";
 import type { SupportedCurrencyCodes } from "@/lib/utils/currencySymbol";
+import { invalidateAccounts } from "@/lib/utils/queryInvalidation";
 
 import api from "../api";
 
@@ -280,5 +281,20 @@ export default function useAccounts<R = GetAccountsResponse>(
     queryKey: ["accounts"],
     queryFn: () => getAccounts(),
     ...options,
+  });
+}
+
+/**
+ * Saves this member's account order. The order is per member, so it never changes what the
+ * other household member sees. The list is refetched because the API sorts unordered accounts
+ * after the placed ones by name.
+ */
+export function useReorderAccounts() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (accountIds: number[]) => {
+      await api.put("/v1/account/order", { accountIds });
+    },
+    onSuccess: () => invalidateAccounts(queryClient),
   });
 }

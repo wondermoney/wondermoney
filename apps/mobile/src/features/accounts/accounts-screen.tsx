@@ -81,6 +81,8 @@ export type AccountsScreenProps = {
   onTimeframeChange?: (timeframe: AccountsTimeframe) => void
   /** Import a bank statement; listed behind the title row's overflow menu. */
   onImportTransactions?: () => void
+  /** Saves this member's account order. Absent, the reorder control is hidden. */
+  onReorderAccounts?: (accountIds: number[]) => void | Promise<void>
 }
 
 const LAST_TRANSACTIONS = 8
@@ -105,6 +107,7 @@ export function AccountsScreen({
   onViewTransactions,
   onTimeframeChange,
   onImportTransactions,
+  onReorderAccounts,
 }: AccountsScreenProps) {
   const formatMoney = useFormatMoney()
   const { t, i18n } = useTranslation()
@@ -115,6 +118,10 @@ export function AccountsScreen({
   const [addOpen, setAddOpen] = useState(false)
   const [moreOpen, setMoreOpen] = useState(false)
   const [menuAccount, setMenuAccount] = useState<AccountSummaryViewModel | null>(null)
+  // Reorder mode: the list is local until a move is saved, and a refused save puts it back.
+  const [reorderOpen, setReorderOpen] = useState(false)
+  const [order, setOrder] = useState<number[] | null>(null)
+  const [reorderFailed, setReorderFailed] = useState(false)
   // The spinner belongs to the gesture: background refetches (an invalidation,
   // a period change) must not pin it, and on iOS a RefreshControl mounted with
   // `refreshing` already true sticks and pushes the title down.
@@ -146,6 +153,27 @@ export function AccountsScreen({
   const hasAccounts = accounts.length > 0
   const currency = accounts[0]?.primaryCurrencyCode ?? 'EUR'
   const timeframe = insights?.timeframe ?? 'YTD'
+  // Reorder mode: the saved order, then any account created since it was opened.
+  const reorderKeys = reorderOpen ? (order ?? accounts.map((account) => account.accountId)) : null
+  const displayAccounts = reorderKeys
+    ? reorderKeys.flatMap((accountId) => accounts.find((account) => account.accountId === accountId) ?? [])
+    : accounts
+  const moveAccount = async (from: number, to: number) => {
+    if (!reorderKeys || to < 0 || to >= reorderKeys.length || from === to) return
+    const next = [...reorderKeys]
+    const [moved] = next.splice(from, 1)
+    if (!moved) return
+    next.splice(to, 0, moved)
+    const previous = reorderKeys
+    setOrder(next)
+    setReorderFailed(false)
+    try {
+      await onReorderAccounts?.(next)
+    } catch {
+      setOrder(previous)
+      setReorderFailed(true)
+    }
+  }
   // The floating "+" holds both add actions (account and transaction). With
   // no accounts, or no transaction route, it is Add account itself.
   const canAddTransaction = hasAccounts && Boolean(onCreateTransaction)
@@ -324,16 +352,38 @@ export function AccountsScreen({
             </Section>
           ) : null}
 
-          <Section title={t('accountsOverview.accounts')} variant="open">
+          <Section
+            action={onReorderAccounts && accounts.length > 1 ? (
+              <Button
+                label={reorderOpen ? t('accountsOverview.done') : t('accountsOverview.reorder')}
+                onPress={() => {
+                  setReorderOpen((open) => !open)
+                  setOrder(null)
+                  setReorderFailed(false)
+                }}
+                size="sm"
+                variant="link"
+              />
+            ) : undefined}
+            title={t('accountsOverview.accounts')}
+            variant="open"
+          >
             <View>
+              {reorderFailed ? <Notice message={t('accountsOverview.reorderError')} /> : null}
               <List>
-                {accounts.map((account, index) => (
+                {displayAccounts.map((account, index) => (
                   <AccountRow
                     account={account}
                     key={account.accountId}
                     locale={locale}
-                    onMore={onEditAccount ? setMenuAccount : undefined}
-                    onSelect={selectAccount}
+                    onMore={reorderOpen || !onEditAccount ? undefined : setMenuAccount}
+                    onSelect={reorderOpen ? undefined : selectAccount}
+                    reorder={reorderOpen ? {
+                      canMoveDown: index < displayAccounts.length - 1,
+                      canMoveUp: index > 0,
+                      onMoveDown: () => void moveAccount(index, index + 1),
+                      onMoveUp: () => void moveAccount(index, index - 1),
+                    } : undefined}
                     separated={index > 0}
                   />
                 ))}
@@ -398,12 +448,18 @@ function SectionBody<T>({ state, render }: { state: SectionState<T>; render: (da
  * differ, and the "…" menu. Memoized so a period change doesn't re-format
  * every row.
  */
-const AccountRow = memo(function AccountRow({ account, separated, locale, onSelect, onMore }: {
+const AccountRow = memo(function AccountRow({ account, separated, locale, onSelect, onMore, reorder }: {
   account: AccountSummaryViewModel
   separated: boolean
   locale: string
-  onSelect: (accountId: number) => void
+  onSelect?: (accountId: number) => void
   onMore?: (account: AccountSummaryViewModel) => void
+  reorder?: {
+    canMoveDown: boolean
+    canMoveUp: boolean
+    onMoveDown: () => void
+    onMoveUp: () => void
+  }
 }) {
   const { t } = useTranslation()
   const formatMoney = useFormatMoney()
@@ -455,12 +511,30 @@ const AccountRow = memo(function AccountRow({ account, separated, locale, onSele
       meta={[metaLine || null]}
       moreAccessibilityLabel={t('accountsOverview.actionsFor', { name })}
       onMorePress={onMore ? () => onMore(account) : undefined}
-      onPress={() => onSelect(account.accountId)}
+      onPress={onSelect ? () => onSelect(account.accountId) : undefined}
       separated={separated}
       testID="account-row"
       title={name}
     >
       {fxCopy ? <FxStatusLabel locale={locale} state={fx} testID="account-fx-status" /> : null}
+      {reorder ? (
+        <View style={styles.reorder}>
+          <IconButton
+            accessibilityLabel={t('accountsOverview.moveUp', { name })}
+            disabled={!reorder.canMoveUp}
+            icon="chevron-up"
+            onPress={reorder.onMoveUp}
+            testID="account-move-up"
+          />
+          <IconButton
+            accessibilityLabel={t('accountsOverview.moveDown', { name })}
+            disabled={!reorder.canMoveDown}
+            icon="chevron-down"
+            onPress={reorder.onMoveDown}
+            testID="account-move-down"
+          />
+        </View>
+      ) : null}
     </ListRow>
   )
 })
@@ -524,6 +598,7 @@ const styles = StyleSheet.create({
   total: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: themeTokens.spacing[3], borderTopWidth: 1, paddingVertical: themeTokens.spacing[3] },
   totalFigure: { fontWeight: '600' },
   figureMeta: { alignItems: 'flex-end' },
+  reorder: { flexDirection: 'row', alignItems: 'center', gap: themeTokens.spacing[1], marginTop: themeTokens.spacing[1] },
   emptyBlock: { alignItems: 'center', gap: themeTokens.spacing[3], paddingVertical: themeTokens.spacing[6] },
   center: { textAlign: 'center' },
   preview: { borderWidth: 1, borderRadius: themeTokens.radius.lg, paddingHorizontal: themeTokens.spacing[4] },

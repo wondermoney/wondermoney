@@ -28,6 +28,7 @@ import {
   previewAccountCsvImport,
   recalculateAccount,
   rejectTransactionOCRImport,
+  reorderAccounts,
   startAccountCsvImport,
   updateAccount,
   updateTransaction,
@@ -43,6 +44,7 @@ const cache = apicache.middleware;
 const router = express.Router();
 
 router.get('/', getAccounts);
+router.put('/order', reorderAccounts);
 router.post('/offline', createOfflineAccount);
 router.get('/transaction/category-spending', getCategorySpending);
 router.get('/transaction/review-summary', getTransactionReviewSummary);

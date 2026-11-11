@@ -104,6 +104,16 @@
         }
       }
     },
+    "/v1/account/order": {
+      "put": {
+        "description": "",
+        "responses": {
+          "default": {
+            "description": ""
+          }
+        }
+      }
+    },
     "/v1/account/offline": {
       "post": {
         "description": "",

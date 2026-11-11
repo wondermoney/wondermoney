@@ -160,6 +160,15 @@ export const updateAccountRequestSchema = z.object({
   }),
   params: z.object({ accountId: positiveIntId }),
 });
+/** The caller's account list in its new display order, each account once. */
+export const reorderAccountsRequestSchema = z.object({
+  body: z.object({
+    accountIds: z
+      .array(positiveIntId)
+      .max(1000)
+      .refine((keys) => new Set(keys).size === keys.length, { message: 'Each account may appear only once' }),
+  }),
+});
 export const recalculateAccountRequestSchema = z.object({ params: z.object({ accountId: positiveIntId }) });
 export const deleteAccountRequestSchema = z.object({ params: z.object({ accountId: positiveIntId }) });
 export const getRecentTransactionsRequestSchema = z.object({ params: z.object({ accountId: positiveIntId }) });

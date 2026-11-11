@@ -215,14 +215,17 @@ function rowType(key: string): BalanceSheetType {
     : "other";
 }
 
-function groupRows(rows: BalanceSheetRow[]): BalanceSheetGroup[] {
+function groupRows(
+  rows: BalanceSheetRow[],
+  accountOrder: number[],
+): BalanceSheetGroup[] {
   return GROUP_ORDER.flatMap((type) => {
     const members = rows.filter((row) => rowType(row.key) === type);
     if (members.length === 0) return [];
     return [
       {
         type,
-        rows: members,
+        rows: type === "accounts" ? inAccountOrder(members, accountOrder) : members,
         total: totalOf(members),
       },
     ];
@@ -230,11 +233,33 @@ function groupRows(rows: BalanceSheetRow[]): BalanceSheetGroup[] {
 }
 
 /**
+ * The accounts group in the member's own account order (`GET /v1/account`). An account the
+ * order does not name keeps its place after the named ones, so the sheet never drops a row.
+ */
+function inAccountOrder(
+  rows: BalanceSheetRow[],
+  accountOrder: number[],
+): BalanceSheetRow[] {
+  if (accountOrder.length === 0) return rows;
+  const place = new Map(accountOrder.map((accountKey, index) => [accountKey, index]));
+  return [...rows].sort(
+    (a, b) =>
+      (place.get(a.recordId ?? -1) ?? Number.MAX_SAFE_INTEGER) -
+      (place.get(b.recordId ?? -1) ?? Number.MAX_SAFE_INTEGER),
+  );
+}
+
+/**
  * Net worth as two sides: what is owned and what is owed, grouped by kind,
  * and each side's total. A negative account balance
  * is debt, so it moves to the owed side (as `useNetWorth` already flags it).
+ * `accountOrder` is the member's account list, so the accounts group reads in
+ * the same order as the accounts page.
  */
-export function balanceSheet(netWorth: NetWorth): BalanceSheet {
+export function balanceSheet(
+  netWorth: NetWorth,
+  accountOrder: number[] = [],
+): BalanceSheet {
   const rows = netWorth.rows ?? [];
   const owned = rows
     .filter((row) => !row.isLiability)
@@ -258,8 +283,8 @@ export function balanceSheet(netWorth: NetWorth): BalanceSheet {
   const oweTotal = totalOf(owed);
 
   return {
-    own: groupRows(owned),
-    owe: groupRows(owed),
+    own: groupRows(owned, accountOrder),
+    owe: groupRows(owed, accountOrder),
     ownTotal,
     oweTotal,
   };
