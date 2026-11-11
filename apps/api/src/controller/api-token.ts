@@ -3,7 +3,7 @@ import { z } from 'zod';
 
 import { DI } from '@app/database/di';
 import { zParse } from '@app/validators/parser';
-import { API_TOKEN_SCOPES, ApiToken } from '@entity/ApiToken';
+import { API_TOKEN_CREATABLE_SCOPES, ApiToken } from '@entity/ApiToken';
 import { authedContext } from '@middleware/authed-context';
 import { createApiToken, toApiTokenDto } from '@service/api-token/api-token.service';
 import { NotFoundError } from '@utils/errors';
@@ -13,7 +13,7 @@ const createApiTokenSchema = z.object({
   body: z.object({
     expiresInDays: z.union([z.literal(30), z.literal(90), z.literal(365)]),
     name: z.string().trim().min(1).max(80),
-    scopes: z.array(z.enum(API_TOKEN_SCOPES)).min(1).max(API_TOKEN_SCOPES.length),
+    scopes: z.array(z.enum(API_TOKEN_CREATABLE_SCOPES)).min(1).max(API_TOKEN_CREATABLE_SCOPES.length),
   }),
 });
 

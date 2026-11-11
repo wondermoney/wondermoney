@@ -26,6 +26,7 @@ export default getRequestConfig(async ({ requestLocale }) => {
     ...(await import(`../messages/${locale}/currencies.json`)).default,
     ...(await import(`../messages/${locale}/command-palette.json`)).default,
     ...(await import(`../messages/${locale}/api-tokens.json`)).default,
+    ...(await import(`../messages/${locale}/calendar-feed.json`)).default,
   };
 
   return { locale, messages };

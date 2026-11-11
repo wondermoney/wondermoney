@@ -19,6 +19,7 @@ import { APP_ENV, IS_PRODUCTION_LIKE, NODE_ENV, TRUST_PROXY } from '@config/env'
 import { enableBankingCallback } from '@controller/enable-banking-callback';
 import { validateInviteController } from '@controller/household';
 import { adminAuth, optionalAuth } from '@middleware/auth';
+import { requireCalendarFeedToken } from '@middleware/calendar-feed';
 import { configureClientIp } from '@middleware/client-ip';
 import { csrfOriginProtection } from '@middleware/csrf-origin';
 import { errorHandler } from '@middleware/error-handler';
@@ -26,6 +27,7 @@ import {
   adminApiRateLimit,
   assistantRateLimit,
   authExchangeRateLimit,
+  calendarFeedRateLimit,
   feedbackRateLimit,
   globalBackstopRateLimit,
   importSessionRateLimit,
@@ -44,6 +46,7 @@ import authRoutes from '@route/auth';
 import backgroundOperationRoutes from '@route/background-operation';
 import bankingRoutes from '@route/banking';
 import budgetRoutes from '@route/budget';
+import calendarRoutes from '@route/calendar';
 import categoryRoutes from '@route/category';
 import configsRoutes from '@route/configs';
 import currencyRoutes from '@route/currency';
@@ -193,6 +196,11 @@ export default class Application {
       this.host.use('/v1/auth', authExchangeRateLimit(), optionalAuth, getUserOptional, authRoutes);
       this.host.use('/v1/banking', ...authedTenant(), bankingRoutes);
       this.host.use('/v1/budget', ...authedTenant(), budgetRoutes);
+      // A read-only ICS feed of upcoming bills. Calendar apps cannot send an Authorization
+      // header, so the token travels in the query: `requireCalendarFeedToken` resolves it before
+      // the limiter, which then keys its bucket on the token's own row. This mount is
+      // deliberately outside `requireAuth`, and no bearer token can reach it.
+      this.host.use('/v1/calendar', requireCalendarFeedToken, calendarFeedRateLimit(), calendarRoutes);
       // `resolveTenantForRequest`/`assertTenantResolved` are here for the same fail-loud invariant
       // every other authenticated data mount holds: without them this router ran on an EM with no
       // tenant context, so the global tenant filter stayed in system-bypass mode for the whole

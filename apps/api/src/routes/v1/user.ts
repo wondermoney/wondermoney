@@ -1,6 +1,7 @@
 import express from 'express';
 
 import { createApiTokenController, listApiTokens, revokeApiToken } from '@controller/api-token';
+import { getCalendarFeedToken, resetCalendarFeedToken, revokeCalendarFeedToken } from '@controller/calendar';
 import { downloadDataExport, getDataExport, listDataExports, startDataExport } from '@controller/data-export';
 import { commitDataRestore, getDataRestore, listDataRestores, startDataRestore, validateDataRestore } from '@controller/data-restore';
 import { getEmailNotificationPreferences, patchEmailNotificationPreferences } from '@controller/email-notifications';
@@ -30,6 +31,11 @@ router.get('/me/profile', getCurrentUserProfile);
 router.get('/api-tokens', listApiTokens);
 router.post('/api-tokens', requireSensitiveSession, createApiTokenController);
 router.delete('/api-tokens/:id', revokeApiToken);
+// The calendar feed's own credential. Same mount and the same sensitive-session gate for the
+// reset, which both mints and revokes; the feed itself lives at `/v1/calendar/bills.ics`.
+router.get('/calendar-feed-token', getCalendarFeedToken);
+router.post('/calendar-feed-token', requireSensitiveSession, resetCalendarFeedToken);
+router.delete('/calendar-feed-token', revokeCalendarFeedToken);
 router.get('/me/email-notification-preferences', getEmailNotificationPreferences);
 router.patch('/me/email-notification-preferences', patchEmailNotificationPreferences);
 router.get('/me/preferences', getPreferences);

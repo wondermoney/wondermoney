@@ -1,0 +1,54 @@
+---
+title: Calendar feed
+description: Subscribe to your upcoming bills in Google Calendar, Apple Calendar or any iCal app.
+---
+
+WonderMoney can publish your confirmed recurring payments as a read-only calendar feed. Subscribe once and your bills appear as all-day events in the calendar app you already use.
+
+## Before you start
+
+The feed shows confirmed recurring payments only. Confirm the series you want to see under **Bills & subscriptions** first; a series still under review is not included.
+
+## Create the link
+
+1. Open **Settings → Calendar feed**.
+2. Select **Create link**.
+3. Copy the link and paste it into your calendar app.
+4. Select **I have copied it**.
+
+The link contains a token, so treat it like a password. It is shown once. If you lose it, select **Reset link** to create a new one; the previous one stops working.
+
+Creating a link needs a recent sign-in. If you use two-factor authentication, enter your authenticator code as well.
+
+## Subscribe
+
+- **Google Calendar**: **Other calendars → From URL**, paste the link and add the calendar.
+- **Apple Calendar**: **File → New Calendar Subscription**, paste the link and choose how often to refresh.
+
+Other apps that support iCal or webcal subscriptions work the same way.
+
+## What the feed contains
+
+- One all-day event per projected occurrence in the next 90 days.
+- The event title is the series name and its expected amount, formatted in the language the link was created in.
+- No balances, account names or account numbers.
+
+The feed follows the same privacy rules as the app: a bill on a private account appears only in that account owner's feed.
+
+## Refresh and revoke
+
+The feed advertises a 12-hour refresh interval, but your calendar app decides when to fetch it. A change to a series appears after the next refresh.
+
+To stop the feed, select **Revoke link** in **Settings → Calendar feed**. The link stops working immediately; a calendar app that already subscribed keeps showing the last events it fetched until you remove the subscription.
+
+## Common issues
+
+- **No events**: the series may still be unconfirmed, or the next occurrence may fall beyond 90 days.
+- **Wrong language**: the link carries the language it was created in. Select **Reset link** after changing your language.
+- **The link stopped working**: it was revoked or replaced. Create a new link and subscribe again.
+
+## Related links
+
+- [Recurring payments](/en/docs/accounts-transactions/recurring-payments)
+- [API tokens](/en/docs/settings-security-privacy/api-tokens)
+- [Data privacy](/en/docs/settings-security-privacy/data-privacy)

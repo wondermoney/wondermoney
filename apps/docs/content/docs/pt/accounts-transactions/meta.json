@@ -11,6 +11,7 @@
     "categorize-transactions",
     "rules",
     "recurring-payments",
+    "calendar-feed",
     "missing-duplicate-transactions"
   ]
 }

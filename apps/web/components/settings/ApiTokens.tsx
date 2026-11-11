@@ -41,7 +41,14 @@ const EXPIRY_OPTIONS = [30, 90, 365] as const;
 type ExpiryDays = (typeof EXPIRY_OPTIONS)[number];
 
 function scopeLabel(t: ReturnType<typeof useTranslations>, scope: ApiTokenScope) {
-  return scope === "read" ? t("scope-read") : t("scope-write");
+  switch (scope) {
+    case "calendar:read":
+      return t("scope-calendar-read");
+    case "write":
+      return t("scope-write");
+    default:
+      return t("scope-read");
+  }
 }
 
 /**
