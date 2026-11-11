@@ -27,6 +27,7 @@ describe('GET /v1/instance', () => {
       features: {
         ai: { assistant: false, csvMapping: false, enrichment: false, monthlyStory: false, ocr: false },
         bankSync: true,
+        bankSyncProviders: ['enable_banking'],
         contactForm: false,
         email: false,
         feedback: false,

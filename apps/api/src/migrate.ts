@@ -8,6 +8,7 @@ import { ensureInvestmentsAndSavingsCategory } from './database/seeders/Investme
 import { hasReferenceData, ReferenceDataSeeder } from './database/seeders/ReferenceDataSeeder.js';
 import config from './mikro-orm.config.js';
 import { backfillAccountOpeningBalances } from './services/account/account-opening-balance.service.js';
+import { backfillBankConnections } from './services/bank-providers/bank-connection-backfill.service.js';
 
 /**
  * Advisory-lock key for the migration runner.
@@ -245,6 +246,13 @@ async function main() {
       if (plan.held.length === 0) {
         const backfilled = await backfillAccountOpeningBalances(orm.em.fork());
         if (backfilled > 0) console.log(`[migrate] recorded an opening balance for ${backfilled} account(s)`);
+        // Idempotent data step, not a migration: existing Enable Banking connections move onto
+        // the provider-agnostic `bank_connection` table so they keep syncing through the
+        // `BankProvider` interface. A second run changes nothing.
+        const bankConnections = await backfillBankConnections(orm.em.fork());
+        if (bankConnections.connectionsCreated > 0 || bankConnections.accountsStamped > 0) {
+          console.log(`[migrate] moved ${bankConnections.connectionsCreated} bank connection(s) and stamped ${bankConnections.accountsStamped} account(s)`);
+        }
       }
       if (shouldSeedReferenceData(await hasReferenceData(orm.em))) {
         console.log('[migrate] empty database: loading reference data');

@@ -19,22 +19,24 @@ const ACCOUNT_INITIAL_SYNC_QUEUE_OPTIONS = {
  * at all (not even a provider name); it stays in the type so `account-initial-sync.worker.ts` can
  * recognise such a payload and reject it rather than coerce it.
  */
-export type AccountInitialSyncJobPayload = AccountInitialSyncJobPayloadEnableBanking | AccountInitialSyncJobPayloadGoCardless;
+export type AccountInitialSyncJobPayload = AccountInitialSyncJobPayloadBank | AccountInitialSyncJobPayloadGoCardless;
 
-export interface AccountInitialSyncJobPayloadEnableBanking {
+/** Any provider behind the `BankProvider` interface. */
+export interface AccountInitialSyncJobPayloadBank {
+  /** `BankConnection.bankConnectionKey`, the provider-agnostic key. */
+  bankConnectionKey: string;
   connectionId: string;
   correlationId: string;
-  enableBankingConnectionKey: string;
   incidentId: string;
-  provider: 'enable_banking';
+  provider: string;
 }
 
 export interface AccountInitialSyncJobPayloadGoCardless {
   correlationId: string;
   incidentId: string;
   nordigenRequisitionKey: string;
-  // Declared only so `job.provider === 'enable_banking'` discriminates the union at the type
-  // level — never actually present on the wire (see the module docblock above).
+  // Declared only so `job.provider !== undefined` discriminates the union at the type level —
+  // never actually present on the wire (see the module docblock above).
   provider?: undefined;
   requisitionId: string;
 }
@@ -52,8 +54,8 @@ export const enqueueAccountInitialSyncJob = async (
   job: AccountInitialSyncJobPayload,
   deps: { enqueue: Enqueue },
 ) => {
-  const data = job.provider === 'enable_banking'
-    ? { connectionId: job.connectionId, correlationId: job.correlationId, enableBankingConnectionKey: job.enableBankingConnectionKey, incidentId: job.incidentId, provider: job.provider }
+  const data = job.provider !== undefined
+    ? { bankConnectionKey: job.bankConnectionKey, connectionId: job.connectionId, correlationId: job.correlationId, incidentId: job.incidentId, provider: job.provider }
     : { correlationId: job.correlationId, incidentId: job.incidentId, nordigenRequisitionKey: job.nordigenRequisitionKey, requisitionId: job.requisitionId };
 
   return deps.enqueue.send(ACCOUNT_INITIAL_SYNC_QUEUE, data, { singletonKey: job.correlationId });

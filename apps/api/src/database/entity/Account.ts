@@ -6,6 +6,7 @@ import { accountTenantCond, TENANT_FILTER } from '../filters/tenant-filter';
 import { AccountFinancialInstitution } from './AccountFinancialInstitution';
 import { AccountType } from './AccountType';
 import { Appuser } from './Appuser';
+import { BankConnection } from './BankConnection';
 import { Base } from './BaseEntity';
 import { Currency } from './Currency';
 import { EnableBankingConnection } from './EnableBankingConnection';
@@ -90,6 +91,12 @@ export class Account extends Base {
    */
   @Property({ default: false })
   isPrivate = false;
+
+  // The provider-agnostic connection. New sync paths read this; `enableBankingConnectionKey`
+  // and `nordigenRequisitionKey` stay for rows linked before the provider interface existed.
+  @Index()
+  @ManyToOne({ cascade: [], entity: () => BankConnection, fieldName: 'bank_connection_key', nullable: true })
+  bankConnectionKey?: Rel<BankConnection>;
 
   // Enable Banking connection. `nordigenRequisitionKey` stays alongside it for accounts linked
   // through the legacy provider.

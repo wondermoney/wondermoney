@@ -7,6 +7,7 @@ import { addAccount, addPartner, type Household, seedHousehold } from '@app/__te
 import { type TestDatabase, useTestDatabase } from '@app/__tests__/__helpers__/pg-test-db';
 import { tenantHttp, useRequestContextEm } from '@app/__tests__/__helpers__/tenant-http';
 import type { Appuser } from '@entity/Appuser';
+import { BankConnection, BankConnectionStatus } from '@entity/BankConnection';
 import { EnableBankingConnection, EnableBankingConnectionStatus } from '@entity/EnableBankingConnection';
 import { EnableBankingCredential } from '@entity/EnableBankingCredential';
 import householdRoutes from '@route/household';
@@ -28,9 +29,14 @@ async function linkBank(db: TestDatabase, household: Household, member: Appuser)
     enableBankingCredentialKey: credential, sessionId: `session-${member.appuserKey}`, state: `state-${member.appuserKey}`,
     status: EnableBankingConnectionStatus.LINKED, tenantKey: household.tenant,
   }, { partial: true });
+  const bankConnection = em.create(BankConnection, {
+    accessValidUntil: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), appuserKey: member, externalId: `session-${member.appuserKey}`,
+    provider: 'enable_banking', status: BankConnectionStatus.LINKED, tenantKey: household.tenant,
+  }, { partial: true });
   await em.flush();
+  connection.bankConnectionKey = bankConnection;
   const account = await addAccount(em, household, { name: 'Partner bank account', owner: member });
-  account.enableBankingConnectionKey = connection;
+  account.bankConnectionKey = bankConnection;
   await em.flush();
   return connection;
 }

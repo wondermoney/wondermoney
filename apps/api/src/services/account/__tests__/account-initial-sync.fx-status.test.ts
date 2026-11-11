@@ -12,6 +12,7 @@ import { EnableBankingCredential } from '@entity/EnableBankingCredential';
 import { ExchangeRate } from '@entity/ExchangeRate';
 import { FxStatus, Transaction } from '@entity/Transaction';
 import { TransactionType } from '@entity/TransactionType';
+import { connectionRef as conn, providerFromClient } from '@service/bank-providers/__tests__/helpers';
 
 import service, { type BankSyncTransaction } from '../account-initial-sync-transaction.service';
 
@@ -21,10 +22,12 @@ import service, { type BankSyncTransaction } from '../account-initial-sync-trans
  */
 describe('bank sync: rows in a currency with no exchange rate', () => {
   const db = useTestDatabase();
+  let testAppuserId = 0;
 
   async function linkedAccount(currencyCode: string, opts: { rate?: number } = {}) {
     const em = db.em();
     const household = await seedHousehold(em);
+    testAppuserId = household.appuser.appuserKey;
     for (const name of ['DEPOSIT', 'PAYMENT', 'CARD_PAYMENT', 'TRANSFER_IN', 'TRANSFER_OUT']) {
       if (!(await em.findOne(TransactionType, { name }))) em.create(TransactionType, { displayName: name, name }, { partial: true });
     }
@@ -45,7 +48,7 @@ describe('bank sync: rows in a currency with no exchange rate', () => {
   async function sync(connectionKey: number, currencyCode: string) {
     const feed: BankSyncTransaction[] = [{ bookingDate: '2026-07-02', creditDebitIndicator: 'debit', entryReference: 'ramen', transactionAmount: { amount: '-10000', currency: currencyCode } }];
     const client = { account: () => ({ getTransactions: () => Promise.resolve({ transactions: { booked: feed, pending: [] } }) }) };
-    await service.syncTransactionsForRequisition({ enableBankingConnectionKey: connectionKey, fetchWindowDays: 3650 }, { em: db.em(), enableBankingSyncAdapterFactory: () => Promise.resolve(client) });
+    await service.syncTransactionsForRequisition({ connection: conn(connectionKey, { appuserId: testAppuserId }), fetchWindowDays: 3650 }, { em: db.em(), provider: providerFromClient(client) });
     return db.em().findOneOrFail(Transaction, { enableBankingTransactionId: { $ne: null } }, { filters: false });
   }
 

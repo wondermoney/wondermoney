@@ -12,6 +12,7 @@ import { EnableBankingConnection, EnableBankingConnectionStatus } from '@entity/
 import { EnableBankingCredential } from '@entity/EnableBankingCredential';
 import { Transaction } from '@entity/Transaction';
 import { TransactionType } from '@entity/TransactionType';
+import { connectionRef as conn, providerFromClient } from '@service/bank-providers/__tests__/helpers';
 import { getCashflowReport } from '@service/reports/cashflow.service';
 import { reportFiltersSchema } from '@validators/reports';
 
@@ -23,11 +24,13 @@ import service, { type BankSyncTransaction } from '../account-initial-sync-trans
  */
 describe('bank sync: incoming money is income unless it is an own-account transfer', () => {
   const db = useTestDatabase();
+  let testAppuserId = 0;
   const JULY = { fromDate: '2026-07-01T00:00:00Z', toDate: '2026-07-31T23:59:59Z' };
 
   async function linkedHousehold() {
     const em = db.em();
     const household = await seedHousehold(em);
+    testAppuserId = household.appuser.appuserKey;
     for (const name of ['DEPOSIT', 'PAYMENT', 'CARD_PAYMENT', 'TRANSFER_IN', 'TRANSFER_OUT']) {
       if (!(await em.findOne(TransactionType, { name }))) em.create(TransactionType, { displayName: name, name }, { partial: true });
     }
@@ -57,7 +60,7 @@ describe('bank sync: incoming money is income unless it is an own-account transf
   async function sync(connectionKey: number) {
     const client = { account: (accountId: string) => ({ getTransactions: () => Promise.resolve({ transactions: { booked: feed[accountId] ?? [], pending: [] } }) }) };
     // A ten-year fetch window, so the fixed July 2026 rows stay inside it whenever this runs.
-    return service.syncTransactionsForRequisition({ enableBankingConnectionKey: connectionKey, fetchWindowDays: 3650 }, { em: db.em(), enableBankingSyncAdapterFactory: () => Promise.resolve(client) });
+    return service.syncTransactionsForRequisition({ connection: conn(connectionKey, { appuserId: testAppuserId }), fetchWindowDays: 3650 }, { em: db.em(), provider: providerFromClient(client) });
   }
 
   async function typesByReference(): Promise<Record<string, string | undefined>> {

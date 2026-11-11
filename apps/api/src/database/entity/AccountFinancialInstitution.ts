@@ -5,6 +5,8 @@ import { Base } from './BaseEntity';
 export enum AccountFinancialInstitutionProvider {
   ENABLE_BANKING = 'enable_banking',
   GOCARDLESS = 'gocardless',
+  /** A provider added through the `BankProvider` interface that is neither of the above. */
+  OTHER = 'other',
 }
 
 /**

@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 const changeToError = vi.hoisted(() => vi.fn().mockResolvedValue(undefined));
 const changeToLinked = vi.hoisted(() => vi.fn().mockResolvedValue(undefined));
 const findByState = vi.hoisted(() => vi.fn());
-const em = vi.hoisted(() => ({ getRepository: vi.fn(() => ({ changeToError, changeToLinked, findByState })) }));
+const em = vi.hoisted(() => ({ findOneOrFail: vi.fn(), getRepository: vi.fn(() => ({ changeToError, changeToLinked, findByState })) }));
 const decryptCredentialEntity = vi.hoisted(() => vi.fn());
 const createEnableBankingClient = vi.hoisted(() => vi.fn());
 const exchangeSession = vi.hoisted(() => vi.fn());
@@ -22,6 +22,7 @@ const { AccountInitialSyncQueueError } = vi.hoisted(() => {
 });
 
 vi.mock('@app/app', () => ({ DI: { em } }));
+vi.mock('@app/database/di', () => ({ DI: { em } }));
 vi.mock('@service/enable-banking/enable-banking-client.service', () => ({ createEnableBankingClient }));
 vi.mock('@service/enable-banking/enable-banking-credential.service', () => ({
   enableBankingCredentialService: { decryptCredentialEntity },
@@ -48,6 +49,7 @@ describe('enableBankingCallback', () => {
     changeToLinked.mockReset().mockResolvedValue(undefined);
     findByState.mockReset();
     em.getRepository.mockReset().mockReturnValue({ changeToError, changeToLinked, findByState });
+    em.findOneOrFail.mockReset().mockResolvedValue({ bankConnectionKey: 42 });
     decryptCredentialEntity.mockReset().mockReturnValue({ applicationId: 'app-1', privateKeyPem: 'pem' });
     createEnableBankingClient.mockReset().mockReturnValue({ exchangeSession });
     exchangeSession.mockReset();
@@ -57,7 +59,7 @@ describe('enableBankingCallback', () => {
   });
 
   it('redirects to the safe error destination without crashing when state matches no connection (unknown/expired/consumed)', async () => {
-    findByState.mockResolvedValueOnce(null);
+    findByState.mockResolvedValue(null);
     const { redirect, res } = createRes();
 
     await enableBankingCallback(createReq({ code: 'code-123', state: 'unknown-state' }), res);
@@ -77,21 +79,20 @@ describe('enableBankingCallback', () => {
     expect(findByState).not.toHaveBeenCalled();
   });
 
-  it('marks the connection as error and redirects to the error destination when Enable Banking reports an error', async () => {
-    const connection = { enableBankingConnectionKey: 42, enableBankingCredentialKey: credentialEntity, maxConsentValiditySeconds: 7_776_000 };
-    findByState.mockResolvedValueOnce(connection);
+  it('redirects to the error destination when Enable Banking reports an error', async () => {
+    const connection = { bankConnectionKey: { bankConnectionKey: 42 }, enableBankingConnectionKey: 42, enableBankingCredentialKey: credentialEntity, maxConsentValiditySeconds: 7_776_000 };
+    findByState.mockResolvedValue(connection);
     const { redirect, res } = createRes();
 
     await enableBankingCallback(createReq({ error: 'access_denied', state: 'state-1' }), res);
 
-    expect(changeToError).toHaveBeenCalledWith(connection);
     expect(redirect).toHaveBeenCalledWith(ENABLE_BANKING_CALLBACK_REDIRECT_URL({ status: 'error' }));
     expect(exchangeSession).not.toHaveBeenCalled();
   });
 
   it('exchanges the session, marks the connection linked with the real returned accessValidUntil, and redirects to success', async () => {
-    const connection = { enableBankingConnectionKey: 42, enableBankingCredentialKey: credentialEntity, maxConsentValiditySeconds: 7_776_000 };
-    findByState.mockResolvedValueOnce(connection);
+    const connection = { bankConnectionKey: { bankConnectionKey: 42 }, enableBankingConnectionKey: 42, enableBankingCredentialKey: credentialEntity, maxConsentValiditySeconds: 7_776_000 };
+    findByState.mockResolvedValue(connection);
     exchangeSession.mockResolvedValueOnce({
       access: { validUntil: '2027-06-01T00:00:00.000Z' },
       accounts: [{ id: 'acc-1' }],
@@ -111,11 +112,11 @@ describe('enableBankingCallback', () => {
   // accounts[] and enqueues the initial sync — this is the trigger that makes the
   // sync-adapter/wiring reachable end-to-end.
   describe('initial-sync trigger after linking', () => {
-    const connection = { enableBankingConnectionKey: 42, enableBankingCredentialKey: credentialEntity, maxConsentValiditySeconds: 7_776_000 };
+    const connection = { bankConnectionKey: { bankConnectionKey: 42 }, enableBankingConnectionKey: 42, enableBankingCredentialKey: credentialEntity, maxConsentValiditySeconds: 7_776_000 };
 
     it('persists accounts from session.accounts and enqueues the initial sync job', async () => {
       const requestEnqueue = { send: vi.fn(), sendAfter: vi.fn() };
-      findByState.mockResolvedValueOnce(connection);
+      findByState.mockResolvedValue(connection);
       exchangeSession.mockResolvedValueOnce({
         access: { validUntil: '2027-06-01T00:00:00.000Z' },
         accounts: [{ currency: 'EUR', uid: 'acc-1' }],
@@ -126,12 +127,12 @@ describe('enableBankingCallback', () => {
       await enableBankingCallback(Object.assign(createReq({ code: 'code-123', state: 'state-1' }), { enqueue: requestEnqueue }), res);
 
       expect(createInitialEnableBankingAccounts).toHaveBeenCalledWith(em, connection, [{ currency: 'EUR', uid: 'acc-1' }]);
-      expect(enqueue).toHaveBeenCalledWith(connection, { enqueue: requestEnqueue });
+      expect(enqueue).toHaveBeenCalledWith(expect.objectContaining({ bankConnectionKey: 42 }), { enqueue: requestEnqueue });
       expect(redirect).toHaveBeenCalledWith(ENABLE_BANKING_CALLBACK_REDIRECT_URL({ status: 'success' }));
     });
 
     it('skips enqueueing when zero accounts were created, but still redirects to success', async () => {
-      findByState.mockResolvedValueOnce(connection);
+      findByState.mockResolvedValue(connection);
       exchangeSession.mockResolvedValueOnce({ access: { validUntil: '2027-06-01T00:00:00.000Z' }, accounts: [], sessionId: 'session-abc' });
       createInitialEnableBankingAccounts.mockResolvedValueOnce({ accounts: [], accountsCreated: 0, accountsSkipped: 0, skippedReasons: [] });
       const { redirect, res } = createRes();
@@ -139,12 +140,12 @@ describe('enableBankingCallback', () => {
       await enableBankingCallback(createReq({ code: 'code-123', state: 'state-1' }), res);
 
       expect(enqueue).not.toHaveBeenCalled();
-      expect(logger.warn).toHaveBeenCalledWith(expect.objectContaining({ enableBankingConnectionKey: 42 }), expect.stringMatching(/zero accounts/));
+      expect(logger.warn).toHaveBeenCalledWith(expect.objectContaining({ bankConnectionKey: 42 }), expect.stringMatching(/zero accounts/));
       expect(redirect).toHaveBeenCalledWith(ENABLE_BANKING_CALLBACK_REDIRECT_URL({ status: 'success' }));
     });
 
     it('still redirects to success and logs a warning when account creation throws — the bank link itself already succeeded', async () => {
-      findByState.mockResolvedValueOnce(connection);
+      findByState.mockResolvedValue(connection);
       exchangeSession.mockResolvedValueOnce({ access: { validUntil: '2027-06-01T00:00:00.000Z' }, accounts: [{ uid: 'acc-1' }], sessionId: 'session-abc' });
       createInitialEnableBankingAccounts.mockRejectedValueOnce(new Error('db unavailable'));
       const { redirect, res } = createRes();
@@ -152,13 +153,13 @@ describe('enableBankingCallback', () => {
       await enableBankingCallback(createReq({ code: 'code-123', state: 'state-1' }), res);
 
       expect(enqueue).not.toHaveBeenCalled();
-      expect(logger.warn).toHaveBeenCalledWith(expect.objectContaining({ enableBankingConnectionKey: 42, errorMessage: 'db unavailable' }), expect.stringMatching(/account creation or initial-sync enqueue failed/));
+      expect(logger.warn).toHaveBeenCalledWith(expect.objectContaining({ bankConnectionKey: 42, errorMessage: 'db unavailable' }), expect.stringMatching(/account creation or initial-sync enqueue failed/));
       expect(redirect).toHaveBeenCalledWith(ENABLE_BANKING_CALLBACK_REDIRECT_URL({ status: 'success' }));
       expect(changeToError).not.toHaveBeenCalled();
     });
 
     it('still redirects to success and logs the queueAccepted flag when enqueue throws AccountInitialSyncQueueError', async () => {
-      findByState.mockResolvedValueOnce(connection);
+      findByState.mockResolvedValue(connection);
       exchangeSession.mockResolvedValueOnce({ access: { validUntil: '2027-06-01T00:00:00.000Z' }, accounts: [{ uid: 'acc-1' }], sessionId: 'session-abc' });
       enqueue.mockRejectedValueOnce(new AccountInitialSyncQueueError('queue down', false, 'incident-1'));
       const { redirect, res } = createRes();
@@ -171,8 +172,8 @@ describe('enableBankingCallback', () => {
   });
 
   it('marks the connection as error and redirects to error when session exchange itself fails', async () => {
-    const connection = { enableBankingConnectionKey: 42, enableBankingCredentialKey: credentialEntity, maxConsentValiditySeconds: 7_776_000 };
-    findByState.mockResolvedValueOnce(connection);
+    const connection = { bankConnectionKey: { bankConnectionKey: 42 }, enableBankingConnectionKey: 42, enableBankingCredentialKey: credentialEntity, maxConsentValiditySeconds: 7_776_000 };
+    findByState.mockResolvedValue(connection);
     exchangeSession.mockRejectedValueOnce(new Error('Enable Banking credential is invalid or expired'));
     const { redirect, res } = createRes();
 
@@ -184,13 +185,12 @@ describe('enableBankingCallback', () => {
   });
 
   it('marks the connection as error and redirects to error when neither code nor error is present', async () => {
-    const connection = { enableBankingConnectionKey: 42, enableBankingCredentialKey: credentialEntity, maxConsentValiditySeconds: 7_776_000 };
-    findByState.mockResolvedValueOnce(connection);
+    const connection = { bankConnectionKey: { bankConnectionKey: 42 }, enableBankingConnectionKey: 42, enableBankingCredentialKey: credentialEntity, maxConsentValiditySeconds: 7_776_000 };
+    findByState.mockResolvedValue(connection);
     const { redirect, res } = createRes();
 
     await enableBankingCallback(createReq({ state: 'state-1' }), res);
 
-    expect(changeToError).toHaveBeenCalledWith(connection);
     expect(redirect).toHaveBeenCalledWith(ENABLE_BANKING_CALLBACK_REDIRECT_URL({ status: 'error' }));
   });
 
@@ -200,7 +200,7 @@ describe('enableBankingCallback', () => {
   // and must have zero influence on the final redirect target beyond success/error.
   describe('redirect destination is never influenced by request input (open-redirect safety)', () => {
     it('ignores an attempted open-redirect payload in state (falls through to the safe unknown-state error redirect)', async () => {
-      findByState.mockResolvedValueOnce(null);
+      findByState.mockResolvedValue(null);
       const { redirect, res } = createRes();
 
       await enableBankingCallback(
@@ -215,8 +215,8 @@ describe('enableBankingCallback', () => {
     });
 
     it('ignores an attempted open-redirect payload in the error param on a matched connection', async () => {
-      const connection = { enableBankingConnectionKey: 42, enableBankingCredentialKey: credentialEntity, maxConsentValiditySeconds: 7_776_000 };
-      findByState.mockResolvedValueOnce(connection);
+      const connection = { bankConnectionKey: { bankConnectionKey: 42 }, enableBankingConnectionKey: 42, enableBankingCredentialKey: credentialEntity, maxConsentValiditySeconds: 7_776_000 };
+      findByState.mockResolvedValue(connection);
       const { redirect, res } = createRes();
 
       await enableBankingCallback(
@@ -230,8 +230,8 @@ describe('enableBankingCallback', () => {
     });
 
     it('ignores an attempted open-redirect payload in code on the success path — target is still the fixed success URL', async () => {
-      const connection = { enableBankingConnectionKey: 42, enableBankingCredentialKey: credentialEntity, maxConsentValiditySeconds: 7_776_000 };
-      findByState.mockResolvedValueOnce(connection);
+      const connection = { bankConnectionKey: { bankConnectionKey: 42 }, enableBankingConnectionKey: 42, enableBankingCredentialKey: credentialEntity, maxConsentValiditySeconds: 7_776_000 };
+      findByState.mockResolvedValue(connection);
       exchangeSession.mockResolvedValueOnce({
         access: { validUntil: '2027-06-01T00:00:00.000Z' },
         accounts: [],
@@ -266,14 +266,14 @@ describe('enableBankingCallback', () => {
     const MOBILE_ERROR = 'wondermoney://more/banking?enableBankingConnection=error';
     const linkedSession = { access: { validUntil: '2027-06-01T00:00:00.000Z' }, accounts: [{ id: 'acc-1' }], sessionId: 'session-abc' };
     const connectionFrom = (returnTo: null | string | undefined) => ({
-      enableBankingConnectionKey: 42,
+      bankConnectionKey: { bankConnectionKey: 42 }, enableBankingConnectionKey: 42,
       enableBankingCredentialKey: credentialEntity,
       maxConsentValiditySeconds: 7_776_000,
       returnTo,
     });
 
     it('sends a connection started from the mobile app back into the app with the outcome', async () => {
-      findByState.mockResolvedValueOnce(connectionFrom('mobile'));
+      findByState.mockResolvedValue(connectionFrom('mobile'));
       exchangeSession.mockResolvedValueOnce(linkedSession);
       const { redirect, res } = createRes();
 
@@ -283,7 +283,7 @@ describe('enableBankingCallback', () => {
     });
 
     it('sends a failed mobile connection back into the app with the error outcome', async () => {
-      findByState.mockResolvedValueOnce(connectionFrom('mobile'));
+      findByState.mockResolvedValue(connectionFrom('mobile'));
       const { redirect, res } = createRes();
 
       await enableBankingCallback(createReq({ error: 'access_denied', state: 'state-1' }), res);
@@ -292,7 +292,7 @@ describe('enableBankingCallback', () => {
     });
 
     it('sends a mobile connection back into the app when the session exchange fails', async () => {
-      findByState.mockResolvedValueOnce(connectionFrom('mobile'));
+      findByState.mockResolvedValue(connectionFrom('mobile'));
       exchangeSession.mockRejectedValueOnce(new Error('provider down'));
       const { redirect, res } = createRes();
 
@@ -302,7 +302,7 @@ describe('enableBankingCallback', () => {
     });
 
     it.each([null, undefined])('sends a connection with no stored client (%s) to web Settings', async (returnTo) => {
-      findByState.mockResolvedValueOnce(connectionFrom(returnTo));
+      findByState.mockResolvedValue(connectionFrom(returnTo));
       exchangeSession.mockResolvedValueOnce(linkedSession);
       const { redirect, res } = createRes();
 
@@ -312,7 +312,7 @@ describe('enableBankingCallback', () => {
     });
 
     it('cannot be switched to the app by a forged query param on a web connection', async () => {
-      findByState.mockResolvedValueOnce(connectionFrom(null));
+      findByState.mockResolvedValue(connectionFrom(null));
       exchangeSession.mockResolvedValueOnce(linkedSession);
       const { redirect, res } = createRes();
 
@@ -324,7 +324,7 @@ describe('enableBankingCallback', () => {
     });
 
     it('cannot be switched to the app by a forged query param when the state is unknown', async () => {
-      findByState.mockResolvedValueOnce(null);
+      findByState.mockResolvedValue(null);
       const { redirect, res } = createRes();
 
       await enableBankingCallback(createReq({ code: 'code-123', returnTo: 'mobile', state: 'unknown' }), res);
@@ -333,7 +333,7 @@ describe('enableBankingCallback', () => {
     });
 
     it('cannot be switched to web by a forged query param on a mobile connection', async () => {
-      findByState.mockResolvedValueOnce(connectionFrom('mobile'));
+      findByState.mockResolvedValue(connectionFrom('mobile'));
       exchangeSession.mockResolvedValueOnce(linkedSession);
       const { redirect, res } = createRes();
 

@@ -3,11 +3,15 @@ import type { JobWithMetadata } from 'pg-boss';
 import type { Logger } from 'pino';
 
 import { normalizeBankSyncError } from '@app/analytics/bank-sync-contract';
+import { DI } from '@app/database/di';
 import { type AccountAutoSyncRequisitionJobPayload, buildAccountAutoSyncRequisitionCorrelationId } from '@app/jobs/account-auto-sync.queue';
 import { BackgroundOperationStatus } from '@entity/BackgroundOperation';
+import { BankConnection } from '@entity/BankConnection';
 import schedulerService from '@service/account/account-auto-sync-scheduler.service';
 import accountInitialSyncAccountService from '@service/account/account-initial-sync-account.service';
 import accountInitialSyncTransactionService from '@service/account/account-initial-sync-transaction.service';
+import { bankConnectionSyncState } from '@service/bank-providers/bank-connection-sync-state.service';
+import { bankConnectionRef, getBankProvider } from '@service/bank-providers/registry';
 import {
   classifyBankSyncError,
   runBankSyncPhases,
@@ -15,8 +19,6 @@ import {
   safeInstitutionId,
 } from '@service/bank-sync-run/bank-sync-run';
 import { BankSyncIncidentService } from '@service/bank-sync/bank-sync-incident.service';
-import { enableBankingConnectionSyncState } from '@service/enable-banking/enable-banking-connection-sync-state.service';
-import { enableBankingCredentialService } from '@service/enable-banking/enable-banking-credential.service';
 import backgroundOperationService from '@service/operations/background-operation.service';
 import type { Enqueue } from '@service/queue/enqueue';
 import type { PgBossLike } from '@service/queue/pgboss-client';
@@ -33,9 +35,9 @@ interface BgDeps {
 }
 
 interface ConnectionSyncStateDeps {
-  checkConsent: (enableBankingConnectionKey: number) => Promise<'active' | 'ended' | 'unknown'>;
-  deferNextSync: (enableBankingConnectionKey: number, retryAfterSeconds?: number) => Promise<Date | undefined>;
-  markAttempt: (enableBankingConnectionKey: number) => Promise<Date | undefined>;
+  checkConsent: (bankConnectionKey: number) => Promise<'active' | 'ended' | 'unknown'>;
+  deferNextSync: (bankConnectionKey: number, retryAfterSeconds?: number) => Promise<Date | undefined>;
+  markAttempt: (bankConnectionKey: number) => Promise<Date | undefined>;
 }
 
 interface IncidentDeps {
@@ -61,22 +63,25 @@ const AUTO_SYNC_EXTRA_ERROR_CODES = [
   { code: 'authentication', match: (error: unknown) => error instanceof Error && error.name === 'EnableBankingCredentialInvalidError' },
 ] as const;
 
-export const handleAccountAutoSyncRequisitionJob = async (job: JobWithMetadata<AccountAutoSyncRequisitionJobPayload>, deps: { accountService?: typeof accountInitialSyncAccountService; analyticsOutbox?: unknown; backgroundOperationService?: BgDeps; bankSyncIncidentService?: IncidentDeps; connectionSyncState?: ConnectionSyncStateDeps; enableBankingCredentialService?: Pick<typeof enableBankingCredentialService, 'getDecryptedCredential'>; enqueue?: Enqueue; logger?: Pick<Logger, 'info' | 'warn'>; transactionService?: typeof accountInitialSyncTransactionService } = {}) => {
+export const handleAccountAutoSyncRequisitionJob = async (job: JobWithMetadata<AccountAutoSyncRequisitionJobPayload>, deps: { accountService?: typeof accountInitialSyncAccountService; analyticsOutbox?: unknown; backgroundOperationService?: BgDeps; bankSyncIncidentService?: IncidentDeps; connectionSyncState?: ConnectionSyncStateDeps; enqueue?: Enqueue; logger?: Pick<Logger, 'info' | 'warn'>; transactionService?: typeof accountInitialSyncTransactionService } = {}) => {
   const bg = deps.backgroundOperationService ?? backgroundOperationService;
   const jobData = job.data;
-  // `provider === 'enable_banking'` is the only branch point in this file, as in
-  // `account-initial-sync.worker.ts`. `syncTargetKeyRaw`/`requisitionId` are the same opaque
-  // provider-agnostic identity fields used there. Enable Banking is the only provider: a payload
-  // without `provider: 'enable_banking'` is a legacy requisition job and is rejected rather than
-  // coerced, since the two key fields index different tables.
-  const isEnableBanking = jobData.provider === 'enable_banking';
-  const syncTargetKeyRaw = isEnableBanking ? jobData.enableBankingConnectionKey : undefined;
-  const requisitionId = isEnableBanking ? jobData.connectionId : undefined;
+  // A payload with a provider and a `bankConnectionKey` is a `BankProvider` job. Anything else is
+  // a legacy requisition job and is rejected rather than coerced, since the two key fields index
+  // different tables.
+  const isBankProviderJob = jobData.provider !== undefined && 'bankConnectionKey' in jobData;
+  const syncTargetKeyRaw = isBankProviderJob ? jobData.bankConnectionKey : undefined;
+  const requisitionId = isBankProviderJob ? jobData.connectionId : undefined;
   const { correlationId } = jobData;
   const key = Number(syncTargetKeyRaw);
   const scheduleRunId = jobData.scheduleRunId || (syncTargetKeyRaw ? scheduleRunIdFromCorrelation(correlationId, syncTargetKeyRaw) : undefined);
-  if (!isEnableBanking || !correlationId || !requisitionId || !scheduleRunId || !syncTargetKeyRaw || !Number.isSafeInteger(key) || key <= 0
+  if (!isBankProviderJob || !correlationId || !requisitionId || !scheduleRunId || !syncTargetKeyRaw || !Number.isSafeInteger(key) || key <= 0
     || correlationId !== buildAccountAutoSyncRequisitionCorrelationId(scheduleRunId, syncTargetKeyRaw)) throw new Error('Account auto sync payload is invalid');
+  const connection = await DI.em.findOne(BankConnection, { bankConnectionKey: key, deletedAt: undefined });
+  if (!connection) throw new Error('Account auto sync job references a missing bank connection');
+  const provider = getBankProvider(connection.provider);
+  if (!provider) throw new Error('Account auto sync job references a disabled bank provider');
+  const connectionRef = bankConnectionRef(connection);
   const incidents = deps.bankSyncIncidentService ?? new BankSyncIncidentService({
     em: (await import('@app/database/di')).DI.em,
     transitionBackgroundOperation: async (em, context) => {
@@ -119,7 +124,7 @@ export const handleAccountAutoSyncRequisitionJob = async (job: JobWithMetadata<A
     return final;
   };
   const log = deps.logger ?? logger;
-  const syncState = deps.connectionSyncState ?? enableBankingConnectionSyncState;
+  const syncState = deps.connectionSyncState ?? bankConnectionSyncState;
   // Recorded before the provider call, so a failure also waits out
   // `BANK_SYNC_MIN_INTERVAL_HOURS` instead of spending another of the bank's daily calls. A
   // failed write must not stop a sync that is otherwise fine: the next scan may re-enqueue the
@@ -128,7 +133,7 @@ export const handleAccountAutoSyncRequisitionJob = async (job: JobWithMetadata<A
     try {
       await syncState.markAttempt(key);
     } catch (error) {
-      log.warn({ enableBankingConnectionKey: key, error: error instanceof Error ? error.message : String(error) }, 'Could not record the bank sync attempt time');
+      log.warn({ bankConnectionKey: key, error: error instanceof Error ? error.message : String(error) }, 'Could not record the bank sync attempt time');
     }
   };
   // A rate limit is final for this run: a pg-boss retry a minute later would only spend more of a
@@ -138,7 +143,7 @@ export const handleAccountAutoSyncRequisitionJob = async (job: JobWithMetadata<A
     try {
       await syncState.deferNextSync(key, retryAfterSeconds);
     } catch (error) {
-      log.warn({ enableBankingConnectionKey: key, error: error instanceof Error ? error.message : String(error) }, 'Could not defer the next sync after a rate limit');
+      log.warn({ bankConnectionKey: key, error: error instanceof Error ? error.message : String(error) }, 'Could not defer the next sync after a rate limit');
     }
     await finalize(result, 'rate_limited', true, accountResult, retryAfterSeconds);
     return false;
@@ -149,34 +154,28 @@ export const handleAccountAutoSyncRequisitionJob = async (job: JobWithMetadata<A
     try {
       return await syncState.checkConsent(key) === 'ended';
     } catch (error) {
-      log.warn({ enableBankingConnectionKey: key, error: error instanceof Error ? error.message : String(error) }, 'Enable Banking consent check failed');
+      log.warn({ bankConnectionKey: key, error: error instanceof Error ? error.message : String(error) }, 'Bank consent check failed');
       return false;
     }
   };
   try {
     await recordAttempt();
-    // Resolve the owning appuser's own Enable Banking BYOK credential as an *earlier failure
-    // point* inside this same try/catch, so it shares the error handling below. A missing/inactive/undecryptable credential becomes `EnableBankingCredentialInvalidError`,
-    // which `classifyBankSyncError` below treats as non-retryable (a per-user secret that pg-boss
-    // backoff can never fix on its own), classified via the existing `authentication` bank-sync
-    // error category/code (see `safeThrownErrorCode`) rather than a new one.
+    // The provider's own pre-flight (the Enable Banking BYOK credential check) runs as an
+    // *earlier failure point* inside this same try/catch, so it shares the error handling below.
+    // A provider throws `UserActionRequiredError`, which `classifyBankSyncError` treats as the
+    // permanent `authentication` incident code.
     const phases = await runBankSyncPhases({
       accountService: deps.accountService ?? accountInitialSyncAccountService,
+      connection: connectionRef,
       correlationId,
-      enableBankingConnectionKey: key,
       enqueue: deps.enqueue,
       fetchWindowDays: 5,
       prePhase: async () => {
         const { appuserKey } = jobData;
-        if (!Number.isSafeInteger(appuserKey) || appuserKey <= 0) throw new EnableBankingCredentialInvalidError('Enable Banking auto sync job has no valid owning appuser');
-        let credential: Awaited<ReturnType<typeof enableBankingCredentialService.getDecryptedCredential>>;
-        try {
-          credential = await (deps.enableBankingCredentialService ?? enableBankingCredentialService).getDecryptedCredential(appuserKey);
-        } catch (error) {
-          throw new EnableBankingCredentialInvalidError(error instanceof Error ? error.message : 'Enable Banking credential could not be decrypted');
-        }
-        if (!credential) throw new EnableBankingCredentialInvalidError('Enable Banking credential is missing or inactive for this appuser');
+        if (!Number.isSafeInteger(appuserKey) || appuserKey <= 0) throw new EnableBankingCredentialInvalidError('Bank auto sync job has no valid owning appuser');
+        await provider.preflight?.(connectionRef);
       },
+      provider,
       queueJobId: job.id,
       transactionService: deps.transactionService ?? accountInitialSyncTransactionService,
     });

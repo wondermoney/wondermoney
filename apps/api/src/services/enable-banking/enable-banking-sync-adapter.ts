@@ -246,7 +246,13 @@ export function createEnableBankingSyncAdapter(connection: EnableBankingConnecti
   // those would re-run the same "accounts for this connection" query.
   let accountsPromise: Promise<Account[]> | undefined;
   async function loadAccounts(): Promise<Account[]> {
-    accountsPromise ??= em.find<Account>(await loadAccountEntity(), { deletedAt: undefined, enableBankingConnectionKey: connection }, { populate: ['currencyKey'] });
+    // New rows carry the provider-agnostic key; rows linked before the interface existed (and
+    // not yet backfilled) still carry only the Enable Banking key.
+    const bankConnectionKey = (connection.bankConnectionKey as unknown as undefined | { bankConnectionKey?: number })?.bankConnectionKey;
+    const where = bankConnectionKey
+      ? { bankConnectionKey, deletedAt: undefined }
+      : { deletedAt: undefined, enableBankingConnectionKey: connection };
+    accountsPromise ??= em.find<Account>(await loadAccountEntity(), where, { populate: ['currencyKey'] });
     return accountsPromise;
   }
 

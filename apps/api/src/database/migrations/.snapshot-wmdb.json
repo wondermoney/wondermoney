@@ -161,6 +161,23 @@
           "enumItems": [],
           "mappedType": "decimal"
         },
+        "bank_connection_key": {
+          "name": "bank_connection_key",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "integer"
+        },
         "closed": {
           "name": "closed",
           "type": "boolean",
@@ -456,6 +473,16 @@
         },
         {
           "columnNames": [
+            "bank_connection_key"
+          ],
+          "composite": false,
+          "constraint": false,
+          "keyName": "account_bank_connection_key_index",
+          "primary": false,
+          "unique": false
+        },
+        {
+          "columnNames": [
             "account_key"
           ],
           "composite": false,
@@ -509,6 +536,18 @@
             "account_type_key"
           ],
           "referencedTableName": "public.account_type",
+          "deleteRule": "set null"
+        },
+        "account_bank_connection_key_foreign": {
+          "columnNames": [
+            "bank_connection_key"
+          ],
+          "constraintName": "account_bank_connection_key_foreign",
+          "localTableName": "public.account",
+          "referencedColumnNames": [
+            "bank_connection_key"
+          ],
+          "referencedTableName": "public.bank_connection",
           "deleteRule": "set null"
         },
         "account_currency_key_foreign": {
@@ -699,7 +738,8 @@
           "collation": null,
           "enumItems": [
             "enable_banking",
-            "gocardless"
+            "gocardless",
+            "other"
           ],
           "mappedType": "enum"
         },
@@ -747,8 +787,8 @@
       "checks": [
         {
           "name": "account_financial_institution_provider_check",
-          "expression": "\"provider\" in ('enable_banking', 'gocardless')",
-          "definition": "check (\"provider\" in ('enable_banking', 'gocardless'))",
+          "expression": "\"provider\" in ('enable_banking', 'gocardless', 'other')",
+          "definition": "check (\"provider\" in ('enable_banking', 'gocardless', 'other'))",
           "columnName": "provider"
         }
       ],
@@ -3478,6 +3518,349 @@
           ],
           "referencedTableName": "public.tenant",
           "deleteRule": "set null"
+        }
+      },
+      "comment": null
+    },
+    {
+      "name": "bank_connection",
+      "schema": "public",
+      "columns": {
+        "access_valid_until": {
+          "name": "access_valid_until",
+          "type": "timestamptz(6)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "unique": false,
+          "length": 6,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "datetime"
+        },
+        "appuser_key": {
+          "name": "appuser_key",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "integer"
+        },
+        "bank_connection_key": {
+          "name": "bank_connection_key",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": true,
+          "primary": true,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "integer"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamptz(6)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": 6,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "datetime"
+        },
+        "credential_reference": {
+          "name": "credential_reference",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "unique": false,
+          "length": 255,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "string"
+        },
+        "deleted_at": {
+          "name": "deleted_at",
+          "type": "timestamptz(6)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "unique": false,
+          "length": 6,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "datetime"
+        },
+        "external_id": {
+          "name": "external_id",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "unique": false,
+          "length": 255,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "string"
+        },
+        "last_sync_attempt_at": {
+          "name": "last_sync_attempt_at",
+          "type": "timestamptz(6)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "unique": false,
+          "length": 6,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "datetime"
+        },
+        "max_consent_validity_seconds": {
+          "name": "max_consent_validity_seconds",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "integer"
+        },
+        "next_eligible_sync_at": {
+          "name": "next_eligible_sync_at",
+          "type": "timestamptz(6)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "unique": false,
+          "length": 6,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "datetime"
+        },
+        "provider": {
+          "name": "provider",
+          "type": "varchar(64)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": true,
+          "length": 64,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "string"
+        },
+        "state": {
+          "name": "state",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "unique": true,
+          "length": 255,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "string"
+        },
+        "status": {
+          "name": "status",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": "'created'",
+          "comment": null,
+          "collation": null,
+          "enumItems": [
+            "authorized",
+            "created",
+            "error",
+            "expired",
+            "linked"
+          ],
+          "mappedType": "enum"
+        },
+        "tenant_key": {
+          "name": "tenant_key",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "integer"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamptz(6)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": 6,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "datetime"
+        }
+      },
+      "indexes": [
+        {
+          "columnNames": [
+            "bank_connection_key"
+          ],
+          "composite": false,
+          "constraint": true,
+          "keyName": "bank_connection_pkey",
+          "primary": true,
+          "unique": true
+        },
+        {
+          "columnNames": [
+            "provider",
+            "external_id"
+          ],
+          "composite": true,
+          "constraint": true,
+          "keyName": "bank_connection_provider_external_id_unique",
+          "primary": false,
+          "unique": true
+        },
+        {
+          "columnNames": [
+            "state"
+          ],
+          "composite": false,
+          "constraint": true,
+          "keyName": "bank_connection_state_uindex",
+          "primary": false,
+          "unique": true
+        },
+        {
+          "columnNames": [],
+          "composite": false,
+          "constraint": false,
+          "keyName": "bank_connection_tenant_appuser_status_created_at_idx",
+          "primary": false,
+          "unique": false,
+          "expression": "CREATE INDEX bank_connection_tenant_appuser_status_created_at_idx ON bank_connection (tenant_key, appuser_key, status, created_at DESC) WHERE deleted_at IS NULL AND tenant_key IS NOT NULL"
+        }
+      ],
+      "checks": [
+        {
+          "name": "bank_connection_status_check",
+          "expression": "\"status\" in ('authorized', 'created', 'error', 'expired', 'linked')",
+          "definition": "check (\"status\" in ('authorized', 'created', 'error', 'expired', 'linked'))",
+          "columnName": "status"
+        }
+      ],
+      "triggers": [],
+      "foreignKeys": {
+        "bank_connection_appuser_key_foreign": {
+          "columnNames": [
+            "appuser_key"
+          ],
+          "constraintName": "bank_connection_appuser_key_foreign",
+          "localTableName": "public.bank_connection",
+          "referencedColumnNames": [
+            "appuser_key"
+          ],
+          "referencedTableName": "public.appuser"
+        },
+        "bank_connection_tenant_key_foreign": {
+          "columnNames": [
+            "tenant_key"
+          ],
+          "constraintName": "bank_connection_tenant_key_foreign",
+          "localTableName": "public.bank_connection",
+          "referencedColumnNames": [
+            "tenant_key"
+          ],
+          "referencedTableName": "public.tenant"
         }
       },
       "comment": null
@@ -7483,6 +7866,23 @@
           "enumItems": [],
           "mappedType": "string"
         },
+        "bank_connection_key": {
+          "name": "bank_connection_key",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "unique": true,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "integer"
+        },
         "created_at": {
           "name": "created_at",
           "type": "timestamptz(6)",
@@ -7716,6 +8116,16 @@
       "indexes": [
         {
           "columnNames": [
+            "bank_connection_key"
+          ],
+          "composite": false,
+          "constraint": true,
+          "keyName": "enable_banking_connection_bank_connection_uindex",
+          "primary": false,
+          "unique": true
+        },
+        {
+          "columnNames": [
             "enable_banking_connection_key"
           ],
           "composite": false,
@@ -7770,6 +8180,18 @@
             "appuser_key"
           ],
           "referencedTableName": "public.appuser"
+        },
+        "enable_banking_connection_bank_connection_key_foreign": {
+          "columnNames": [
+            "bank_connection_key"
+          ],
+          "constraintName": "enable_banking_connection_bank_connection_key_foreign",
+          "localTableName": "public.enable_banking_connection",
+          "referencedColumnNames": [
+            "bank_connection_key"
+          ],
+          "referencedTableName": "public.bank_connection",
+          "deleteRule": "set null"
         },
         "enable_banking_connection_enable_banking_credential_key_foreign": {
           "columnNames": [

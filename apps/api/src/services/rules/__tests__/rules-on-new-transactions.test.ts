@@ -36,6 +36,7 @@ import { TransactionTag } from '@entity/TransactionTag';
 import { TransactionType } from '@entity/TransactionType';
 import AccountCsvImportService from '@service/account/account-csv-import.service';
 import syncService, { type BankSyncTransaction } from '@service/account/account-initial-sync-transaction.service';
+import { connectionRef as conn, providerFromClient } from '@service/bank-providers/__tests__/helpers';
 import type { RuleAction, RuleCondition } from '@service/rules/rule-schema';
 import { applyUserCategorization } from '@service/transaction/user-categorization.service';
 
@@ -113,7 +114,7 @@ describe('rules on new transactions', () => {
 
     function sync(connection: EnableBankingConnection, feed: Record<string, BankSyncTransaction[]>) {
       const client = { account: (accountId: string) => ({ getTransactions: () => Promise.resolve({ transactions: { booked: feed[accountId] ?? [], pending: [] } }) }) };
-      return syncService.syncTransactionsForRequisition({ enableBankingConnectionKey: connection.enableBankingConnectionKey, fetchWindowDays: 3650 }, { em: db.em(), enableBankingSyncAdapterFactory: () => Promise.resolve(client) });
+      return syncService.syncTransactionsForRequisition({ connection: conn(connection.enableBankingConnectionKey, { appuserId: connection.appuserKey.appuserKey }), fetchWindowDays: 3650 }, { em: db.em(), provider: providerFromClient(client) });
     }
 
     async function syncedHousehold() {

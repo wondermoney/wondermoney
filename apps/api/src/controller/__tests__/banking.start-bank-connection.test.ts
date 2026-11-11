@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const createConnection = vi.hoisted(() => vi.fn().mockResolvedValue(undefined));
-const em = vi.hoisted(() => ({ getRepository: vi.fn(() => ({ createConnection })) }));
+const em = vi.hoisted(() => ({ findOne: vi.fn(), findOneOrFail: vi.fn(), getRepository: vi.fn(() => ({ createConnection })) }));
 const getActiveCredentialEntity = vi.hoisted(() => vi.fn());
 const decryptCredentialEntity = vi.hoisted(() => vi.fn());
 const createEnableBankingClient = vi.hoisted(() => vi.fn());
@@ -9,6 +9,7 @@ const listInstitutions = vi.hoisted(() => vi.fn());
 const startAuthorization = vi.hoisted(() => vi.fn());
 
 vi.mock('@app/app', () => ({ DI: { em } }));
+vi.mock('@app/database/di', () => ({ DI: { em } }));
 vi.mock('@service/enable-banking/enable-banking-client.service', () => ({ createEnableBankingClient }));
 vi.mock('@service/enable-banking/enable-banking-credential.service', () => ({
   enableBankingCredentialService: { decryptCredentialEntity, getActiveCredentialEntity },
@@ -32,6 +33,8 @@ describe('startBankConnection (Enable Banking)', () => {
   beforeEach(() => {
     createConnection.mockReset().mockResolvedValue(undefined);
     em.getRepository.mockReset().mockReturnValue({ createConnection });
+    em.findOne.mockReset().mockResolvedValue({ tenantKey: 113 });
+    em.findOneOrFail.mockReset().mockResolvedValue({ appuserKey: 1 });
     getActiveCredentialEntity.mockReset().mockResolvedValue(credentialEntity);
     decryptCredentialEntity.mockReset().mockReturnValue(decryptedCredential);
     createEnableBankingClient.mockReset().mockReturnValue({ listInstitutions, startAuthorization });
