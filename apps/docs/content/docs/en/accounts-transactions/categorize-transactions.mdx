@@ -24,6 +24,14 @@ Each row shows a confidence indicator for the suggestion — high, medium, or lo
 
 Items you correct are used to learn the mapping for that merchant, so the next transaction from the same merchant is easier to categorize.
 
+## Local suggestions
+
+WonderMoney can suggest a category without sending anything to an AI service. It learns from the categories you have already confirmed — the ones you chose yourself and the ones it was sure about — and compares a new transaction's merchant, description, account, direction and amount range with that history. When the match is clear it fills in the category and marks it with medium confidence, so the transaction still appears in the Review Inbox for you to approve or change.
+
+It only suggests a category when it is confident; otherwise it stays quiet and the transaction is left for you to categorize or, if AI is configured, for an AI suggestion. The local suggestion runs before any AI step and needs no AI provider. It never sends your data anywhere, so it also runs when you have hidden AI in your settings. Withdrawals and transfers are never labelled this way, because their description does not say what the money was for.
+
+The more transactions you confirm, the better the local suggestions get. A household member's private accounts never train another member's suggestions.
+
 If your household has rules, they run first on every new transaction, whether it comes from bank sync, a file import, a receipt or one you add by hand. A category a rule sets wins over the learned mapping, and such a transaction is not sent for an AI suggestion. Rules never change a category you chose yourself, nor a description or merchant you typed or edited, and they run once, when the transaction arrives: a later sync does not undo your changes. A transaction's activity history names the rule that changed it.
 
 ## Before you start

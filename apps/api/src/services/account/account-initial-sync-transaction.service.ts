@@ -31,6 +31,7 @@ import { triggerRecurringDetectionAfterTransactionIngestion } from '@service/rec
 import { applyRulesToNewTransactions } from '@service/rules/rule-application.service';
 import { enqueueTransactionEnrichmentForTenant } from '@service/transaction-enrichment/transaction-enrichment-enqueue.service';
 import { recalculateChainFromAccountBalance } from '@service/transaction/balance-chain.service';
+import { applyBayesCategorization, prepareBayesCategorization } from '@service/transaction/bayes-categorization.service';
 import { applyCategorizationOutcome } from '@service/transaction/categorization-confidence';
 import { DEFAULT_PENDING_GRACE_DAYS, logDryRunExpirations, planPendingExpirations } from '@service/transaction/pending-expiry.service';
 import { getReconciliationMode, logDryRunPromotions, planPromotions } from '@service/transaction/pending-reconciliation.service';
@@ -99,8 +100,16 @@ class AccountInitialSyncTransactionService {
     const transactionTypes = await this.loadTransactionTypes(em);
     const settledStatusByName = { BOOKED: txnStatusBooked, PENDING: txnStatusPending };
 
+    // Train the viewer's local model once for this sync; every row the sync creates reuses it.
+    // Best-effort: a training failure leaves the batch null and the sync untouched.
+    const bayesBatch = await prepareBayesCategorization(em, { tenantKey: tenant.tenantKey.tenantKey, viewerAppuserKey: tenant.appuserKey.appuserKey }).catch((error: unknown) => {
+      log.warn({ error: sanitizeError(error) }, 'Bayes categorization training failed');
+      return null;
+    });
+
     let transactionsCreated = 0; let transactionsCategorized = 0; let transactionsFetched = 0; let transactionsFailed = 0; let transactionsSkipped = 0;
     const failedAccountIds: string[] = []; const processedAccountIds = new Set<string>(); const affectedTenantKeys = new Set<number>();
+    const createdTransactions: Transaction[] = [];
     // See `account-initial-sync-account.service.ts`: a rate limit stops the loop, and a 400/401 on
     // every account is reported so the worker can check whether the consent ended.
     let rateLimited: ProviderRateLimit | undefined; let rejectedCount = 0;
@@ -140,12 +149,12 @@ class AccountInitialSyncTransactionService {
         }
         const rows: { pending: boolean; row: BankSyncTransaction }[] = [...pending.map((row) => ({ pending: true, row })), ...booked.map((row) => ({ pending: false, row }))];
         transactionsFetched += rows.length;
-        const createdTransactions: Transaction[] = [];
+        const accountTransactionsStart = createdTransactions.length;
         for (const item of rows) {
           const mapped = await this.persistTransaction(em, account, tenant, item.row, item.pending, settledStatusByName, transactionTypes, metadataEnrichmentEnabled, enableBanking);
           accountCreated += mapped.created; accountSkipped += mapped.skipped; accountFailed += mapped.failed; if (mapped.createdTransaction) createdTransactions.push(mapped.createdTransaction); if (mapped.created > 0 && mapped.tenantKey) affectedTenantKeys.add(mapped.tenantKey);
         }
-        transactionsCategorized += await this.categorizeNewTransactions(em, tenant, createdTransactions);
+        transactionsCategorized += await this.categorizeNewTransactions(em, tenant, createdTransactions.slice(accountTransactionsStart));
         await this.auditMissingOccurrences(em, account, tenant, booked, enableBanking);
         // The running balance is a chain over the whole account, not a per-batch suffix.
         // Persisting the batch above leaves the newly created rows without a balance and the rows it
@@ -217,6 +226,16 @@ class AccountInitialSyncTransactionService {
       }
     }
 
+    // The local, token-free pass runs after the deterministic categorizer and before any AI
+    // enqueue, so a row it labels never reaches a model. Best-effort; it never fails the sync.
+    if (bayesBatch && createdTransactions.length > 0) {
+      try {
+        const assigned = await applyBayesCategorization(em, bayesBatch, createdTransactions);
+        if (assigned > 0) log.info({ assigned, tenantKey: tenant.tenantKey.tenantKey }, 'Bayes categorized transactions');
+      } catch (error) {
+        log.warn({ error: sanitizeError(error) }, 'Bayes categorization failed');
+      }
+    }
     for (const tenantKey of affectedTenantKeys) await triggerRecurringDetectionAfterTransactionIngestion(tenantKey, 'account-initial-sync');
     // Best-effort, fail-open shadow enrichment enqueue. Dormant by default; never blocks sync.
     for (const tenantKey of affectedTenantKeys) await enqueueTransactionEnrichmentForTenant(tenantKey, 'account-initial-sync', { enqueue: deps.enqueue });

@@ -109,6 +109,11 @@ const runtimeSchema = z.object({
   PRIVACY_POLICY_URL: z.string().trim().optional(),
   PUBLIC_DIAGNOSTICS_ENABLED: boolFlag('Public diagnostics flag').optional(),
   SIGNUP_MODE: z.enum(['open', 'invite', 'closed']).optional(),
+  // The local, token-free categorizer (`services/transaction/bayes-categorizer.ts`). On unless
+  // explicitly disabled; it sends nothing to a model, so it also runs for a person who hid AI.
+  TRANSACTION_BAYES_CATEGORIZATION_ENABLED: boolFlag('Local Bayes categorization flag').optional(),
+  TRANSACTION_BAYES_MIN_MARGIN: fraction('Local Bayes minimum posterior margin', 1).optional(),
+  TRANSACTION_BAYES_MIN_POSTERIOR: fraction('Local Bayes minimum posterior', 1).optional(),
   // How far the converted outgoing half of a cross-currency transfer may be from the incoming half
   // (`services/transaction/transfer-matching.service.ts`). Read by the API and the worker.
   TRANSFER_MATCH_FX_TOLERANCE: fraction('Cross-currency transfer matching tolerance', 0.25).optional(),

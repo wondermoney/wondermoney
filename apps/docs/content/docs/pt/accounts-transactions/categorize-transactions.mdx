@@ -16,6 +16,14 @@ Cada linha mostra um indicador de confiança para a sugestão — alta, média o
 
 Os itens que corriges são usados para aprender a associação com esse comerciante, pelo que a próxima transação do mesmo comerciante será mais fácil de categorizar.
 
+## Sugestões locais
+
+O WonderMoney pode sugerir uma categoria sem enviar nada para um serviço de IA. Aprende com as categorias que já confirmaste — as que escolheste e as que o sistema atribuiu com confiança — e compara o comerciante, a descrição, a conta, o sentido e a ordem de grandeza do montante de uma transação nova com esse histórico. Quando a correspondência é clara, preenche a categoria e marca-a com confiança média, por isso a transação continua na Bandeja de revisão para aprovares ou alterares.
+
+Só sugere uma categoria quando está segura; caso contrário, fica calado e a transação fica para categorizares tu ou, se a IA estiver configurada, para uma sugestão por IA. A sugestão local corre antes de qualquer passo de IA e não precisa de nenhum fornecedor de IA. Nunca envia os teus dados para lado nenhum, por isso também corre quando escondeste a IA nas definições. Levantamentos e transferências nunca são categorizados assim, porque a descrição não diz para que serviu o dinheiro.
+
+Quanto mais transações confirmares, melhores ficam as sugestões locais. As contas privadas de um membro do agregado nunca treinam as sugestões de outro membro.
+
 Se o teu agregado tiver regras, elas correm primeiro em cada transação nova, venha ela da sincronização bancária, de um ficheiro importado, de um recibo ou de uma que adicionas à mão. Uma categoria definida por uma regra prevalece sobre a associação aprendida, e essa transação não é enviada para sugestão por IA. As regras nunca alteram uma categoria que escolheste, nem uma descrição ou comerciante que escreveste ou editaste, e correm uma só vez, quando a transação chega: uma sincronização posterior não desfaz as tuas alterações. O histórico de atividade da transação indica a regra que a alterou.
 
 ## Antes de começar

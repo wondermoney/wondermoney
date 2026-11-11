@@ -92,6 +92,15 @@ describe('loadConfiguration', () => {
     }
   });
 
+  it('takes the local Bayes thresholds as fractions and refuses anything outside 0 to 1', () => {
+    expect(() => loadConfiguration('api', { ...validApi, TRANSACTION_BAYES_CATEGORIZATION_ENABLED: 'false', TRANSACTION_BAYES_MIN_MARGIN: '0.2', TRANSACTION_BAYES_MIN_POSTERIOR: '0.8' })).not.toThrow();
+    expect(() => loadConfiguration('worker', { ...validShared, TRANSACTION_BAYES_CATEGORIZATION_ENABLED: 'maybe' })).toThrow(/TRANSACTION_BAYES_CATEGORIZATION_ENABLED/);
+    for (const value of ['2', '-0.1', '80%']) {
+      expect(() => loadConfiguration('api', { ...validApi, TRANSACTION_BAYES_MIN_POSTERIOR: value })).toThrow(/TRANSACTION_BAYES_MIN_POSTERIOR/);
+      expect(() => loadConfiguration('api', { ...validApi, TRANSACTION_BAYES_MIN_MARGIN: value })).toThrow(/TRANSACTION_BAYES_MIN_MARGIN/);
+    }
+  });
+
   it('parses worker roles with worker-only fields', () => {
     const worker = loadConfiguration('worker', {
       ...validShared,

@@ -10,6 +10,7 @@ describe('categorizationConfidenceFor', () => {
     expect(categorizationConfidenceFor('user_mapping')).toBe(CategorizationConfidence.HIGH);
     expect(categorizationConfidenceFor('stats_default')).toBe(CategorizationConfidence.MEDIUM);
     expect(categorizationConfidenceFor('stats_top_count')).toBe(CategorizationConfidence.MEDIUM);
+    expect(categorizationConfidenceFor('bayes_suggested')).toBe(CategorizationConfidence.MEDIUM);
     expect(categorizationConfidenceFor('merchant_ambiguous')).toBe(CategorizationConfidence.LOW);
     expect(categorizationConfidenceFor('stats_tie')).toBe(CategorizationConfidence.LOW);
     expect(categorizationConfidenceFor('category_invalid')).toBe(CategorizationConfidence.LOW);
