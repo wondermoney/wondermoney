@@ -2107,6 +2107,60 @@
         ],
         "additionalProperties": {}
       },
+      "LoanAdjustment": {
+        "type": "object",
+        "properties": {
+          "amount": {
+            "type": "number"
+          },
+          "effectiveDate": {
+            "type": "string"
+          },
+          "loanAdjustmentKey": {
+            "type": "integer"
+          },
+          "reason": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "BALANCE_CORRECTION",
+              "CAPITALIZED_INTEREST",
+              "FEE",
+              "PRINCIPAL_DECREASE",
+              "PRINCIPAL_INCREASE",
+              "WRITE_OFF"
+            ]
+          }
+        },
+        "required": [
+          "amount",
+          "effectiveDate",
+          "loanAdjustmentKey",
+          "reason",
+          "type"
+        ],
+        "additionalProperties": {}
+      },
+      "LoanAdjustmentList": {
+        "type": "object",
+        "properties": {
+          "adjustments": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LoanAdjustment"
+            }
+          }
+        },
+        "required": [
+          "adjustments"
+        ],
+        "additionalProperties": {}
+      },
       "LoanList": {
         "type": "object",
         "properties": {
@@ -2119,6 +2173,41 @@
         },
         "required": [
           "loans"
+        ],
+        "additionalProperties": {}
+      },
+      "LoanRatePeriod": {
+        "type": "object",
+        "properties": {
+          "annualInterestRateBps": {
+            "type": "integer"
+          },
+          "effectiveDate": {
+            "type": "string"
+          },
+          "loanRatePeriodKey": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "annualInterestRateBps",
+          "effectiveDate",
+          "loanRatePeriodKey"
+        ],
+        "additionalProperties": {}
+      },
+      "LoanRatePeriodList": {
+        "type": "object",
+        "properties": {
+          "ratePeriods": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LoanRatePeriod"
+            }
+          }
+        },
+        "required": [
+          "ratePeriods"
         ],
         "additionalProperties": {}
       },
@@ -11700,6 +11789,93 @@
         }
       }
     },
+    "/v1/loan/{loanId}/adjustments": {
+      "get": {
+        "description": "**Required scope:** `read`.\n\nLender balance corrections, fees, capitalized interest and other principal changes, oldest first. A balance correction sets the balance from its date on.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "List a loan’s balance adjustments",
+        "tags": [
+          "Loans"
+        ],
+        "x-required-scopes": [
+          "read"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "string",
+                  "pattern": "^[1-9]\\d*$"
+                }
+              ]
+            },
+            "required": true,
+            "name": "loanId",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoanAdjustmentList"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "The token is missing, malformed or revoked.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The token does not carry a scope this operation accepts.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "The request did not match the endpoint’s validator.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "A rate limit was exceeded. Honour the `Retry-After` header.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v1/loan/{loanId}/projection": {
       "get": {
         "description": "**Required scope:** `read`.",
@@ -11802,6 +11978,93 @@
                     "projection"
                   ],
                   "additionalProperties": {}
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "The token is missing, malformed or revoked.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The token does not carry a scope this operation accepts.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "The request did not match the endpoint’s validator.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "A rate limit was exceeded. Honour the `Retry-After` header.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/loan/{loanId}/rate-periods": {
+      "get": {
+        "description": "**Required scope:** `read`.\n\nEach rate applies from its effective date until the next one; before the first, the loan’s own rate applies.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "List a loan’s rate changes",
+        "tags": [
+          "Loans"
+        ],
+        "x-required-scopes": [
+          "read"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "string",
+                  "pattern": "^[1-9]\\d*$"
+                }
+              ]
+            },
+            "required": true,
+            "name": "loanId",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoanRatePeriodList"
                 }
               }
             }

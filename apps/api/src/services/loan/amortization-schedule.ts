@@ -3,6 +3,7 @@ import type { Big } from 'big.js';
 import { big, roundDisplay } from '@utils/money';
 
 import { LoanAmortizationMethod } from './loan-types';
+import { type LoanRatePeriodInput, resolveLoanRate } from './rate-resolver';
 
 /**
  * Contract amortization schedules for a loan.
@@ -37,6 +38,13 @@ export interface AmortizationScheduleInput {
   method: LoanAmortizationMethod;
   /** The amount the contract amortizes, normally `originalPrincipal`. */
   principal: number;
+  /**
+   * Dated rate changes. A month's interest uses the rate in force when its period opened (one
+   * month before its due date); a French payment is resized, from the opening balance over the
+   * months left, only when the rate in force on a due date differs from the previous due date's.
+   * Before the first period, `annualInterestRateBps` applies.
+   */
+  ratePeriods?: readonly LoanRatePeriodInput[];
   termMonths: number;
 }
 
@@ -76,6 +84,31 @@ function frenchLevelPayment(principal: number, annualInterestRateBps: number, te
 }
 
 /**
+ * The level payment that clears `balance` over `monthsLeft` instalments when the first of them
+ * is charged at `openingRateBps` (the rate in force when its period opened) and every later one
+ * at `paymentRateBps` (the rate in force on its due date, which then opens the next period).
+ * With one rate this is the French level payment. Rounded to 2dp.
+ *
+ * Sizing the change month at the new rate too would overpay it: its interest is charged at the
+ * opening rate, so the balance runs ahead and the schedule clears early, leaving negative rows.
+ */
+export function resizedLevelPayment(balance: number, openingRateBps: number, paymentRateBps: number, monthsLeft: number): number {
+  if (openingRateBps === paymentRateBps) return frenchLevelPayment(balance, paymentRateBps, monthsLeft);
+  const firstMonthGrowth = big(openingRateBps).div(MONTHLY_RATE_DIVISOR).plus(1);
+  const later = monthsLeft - 1;
+  if (later === 0) return roundDisplay(big(balance).times(firstMonthGrowth));
+  // balance·(1+i₀) = P + P·a(later, i), with a(k, i) the annuity factor (1 − (1+i)^−k) / i.
+  const annuityFactor = paymentRateBps === 0
+    ? big(later)
+    : (() => {
+        const rate = big(paymentRateBps).div(MONTHLY_RATE_DIVISOR);
+        const growth = rate.plus(1).pow(later);
+        return growth.minus(1).div(rate.times(growth));
+      })();
+  return roundDisplay(big(balance).times(firstMonthGrowth).div(annuityFactor.plus(1)));
+}
+
+/**
  * A calendar month later, keeping the original day of month where the target
  * month is long enough and clamping to its last day otherwise (31 Jan → 28/29
  * Feb, then 31 Mar again).
@@ -106,7 +139,14 @@ export function buildAmortizationSchedule(input: AmortizationScheduleInput): Amo
   // A level payment rounded up by half a cent can clear the loan one month
   // early on a tiny balance. Step it down a cent until every non-final row
   // still leaves a positive balance, so the last row is the only adjustment.
-  let levelPayment = frenchLevelPayment(input.principal, input.annualInterestRateBps, input.termMonths);
+  const periods = input.ratePeriods ?? [];
+  const firstOpening = addMonthsClamped(input.firstPaymentDate, -1, input.firstPaymentDate.getUTCDate());
+  let levelPayment = resizedLevelPayment(
+    input.principal,
+    resolveLoanRate(periods, firstOpening, input.annualInterestRateBps),
+    resolveLoanRate(periods, input.firstPaymentDate, input.annualInterestRateBps),
+    input.termMonths,
+  );
   let result = walkFrench(input, levelPayment);
   let attempts = 0;
   while (result.rows.some((row, index) => index < result.rows.length - 1 && row.endingBalance < 0) && attempts < 100) {
@@ -127,7 +167,8 @@ function walkConstantPrincipal(input: AmortizationScheduleInput): WalkResult {
   let totalPaid = big(0);
 
   for (let number = 1; number <= input.termMonths; number += 1) {
-    const interest = monthlyInterest(balance, input.annualInterestRateBps);
+    const periodOpen = addMonthsClamped(input.firstPaymentDate, number - 2, firstDay);
+    const interest = monthlyInterest(balance, resolveLoanRate(input.ratePeriods ?? [], periodOpen, input.annualInterestRateBps));
     const isLast = number === input.termMonths;
     // The last row takes the remaining balance, which is the residue of
     // rounding the constant principal to 2dp.
@@ -152,15 +193,28 @@ function walkConstantPrincipal(input: AmortizationScheduleInput): WalkResult {
   return { rows, totalInterest: roundDisplay(totalInterest), totalPaid: roundDisplay(totalPaid) };
 }
 
-function walkFrench(input: AmortizationScheduleInput, levelPayment: number): WalkResult {
+function walkFrench(input: AmortizationScheduleInput, firstLevelPayment: number): WalkResult {
   const rows: AmortizationScheduleRow[] = [];
   const firstDay = input.firstPaymentDate.getUTCDate();
+  const periods = input.ratePeriods ?? [];
   let balance = big(input.principal);
+  let levelPayment = firstLevelPayment;
+  let previousPaymentRate: null | number = null;
   let totalInterest = big(0);
   let totalPaid = big(0);
 
   for (let number = 1; number <= input.termMonths; number += 1) {
-    const interest = monthlyInterest(balance, input.annualInterestRateBps);
+    const date = addMonthsClamped(input.firstPaymentDate, number - 1, firstDay);
+    const periodOpen = addMonthsClamped(input.firstPaymentDate, number - 2, firstDay);
+    const openingRate = resolveLoanRate(periods, periodOpen, input.annualInterestRateBps);
+    const interest = monthlyInterest(balance, openingRate);
+    // The payment changes only when the rate in force on a due date actually changes: a
+    // repeated rate, or one dated after maturity, leaves every row as the fixed-rate schedule.
+    const paymentRate = resolveLoanRate(periods, date, input.annualInterestRateBps);
+    if (previousPaymentRate !== null && paymentRate !== previousPaymentRate) {
+      levelPayment = resizedLevelPayment(roundDisplay(balance), openingRate, paymentRate, input.termMonths - number + 1);
+    }
+    previousPaymentRate = paymentRate;
     const isLast = number === input.termMonths;
     // The last row takes the remaining balance, which is where every earlier
     // row's rounding lands.
@@ -168,14 +222,7 @@ function walkFrench(input: AmortizationScheduleInput, levelPayment: number): Wal
     const payment = isLast ? roundDisplay(big(principal).plus(interest)) : levelPayment;
     const endingBalance = roundDisplay(balance.minus(principal));
 
-    rows.push({
-      date: addMonthsClamped(input.firstPaymentDate, number - 1, firstDay),
-      endingBalance,
-      interest,
-      number,
-      payment,
-      principal,
-    });
+    rows.push({ date, endingBalance, interest, number, payment, principal });
 
     balance = big(endingBalance);
     totalInterest = totalInterest.plus(interest);

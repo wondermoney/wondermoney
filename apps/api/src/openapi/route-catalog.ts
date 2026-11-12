@@ -60,7 +60,7 @@ import {
   moveGoalMoneyOutRequestSchema,
   updateGoalRequestSchema,
 } from '@validators/goal';
-import { loanIdParamSchema, loanProjectionSchema, repaymentCandidatesSchema } from '@validators/loan';
+import { loanAdjustmentListSchema, loanIdParamSchema, loanProjectionSchema, loanRatePeriodsSchema, repaymentCandidatesSchema } from '@validators/loan';
 import { manualAssetParamsSchema } from '@validators/manual-asset';
 import { netWorthHistoryQuerySchema } from '@validators/net-worth';
 import {
@@ -121,6 +121,8 @@ import {
   importSessionSchema,
   itemResponse,
   listResponse,
+  loanAdjustmentSchema,
+  loanRatePeriodSchema,
   loanRepaymentSchema,
   loanScheduleEntrySchema,
   loanSchema,
@@ -621,6 +623,20 @@ export const OPERATIONS: Record<string, OperationDefinition> = {
     summary: 'Get a loan repayment schedule',
     request: loanIdParamSchema,
     response: listResponse('LoanScheduleList', 'schedule', loanScheduleEntrySchema),
+  },
+  'GET /v1/loan/:loanId/adjustments': {
+    tag: 'Loans',
+    summary: 'List a loan’s balance adjustments',
+    description: 'Lender balance corrections, fees, capitalized interest and other principal changes, oldest first. A balance correction sets the balance from its date on.',
+    request: loanAdjustmentListSchema,
+    response: listResponse('LoanAdjustmentList', 'adjustments', loanAdjustmentSchema),
+  },
+  'GET /v1/loan/:loanId/rate-periods': {
+    tag: 'Loans',
+    summary: 'List a loan’s rate changes',
+    description: 'Each rate applies from its effective date until the next one; before the first, the loan’s own rate applies.',
+    request: loanRatePeriodsSchema,
+    response: listResponse('LoanRatePeriodList', 'ratePeriods', loanRatePeriodSchema),
   },
   'GET /v1/loan/:loanId/repayments': {
     tag: 'Loans',

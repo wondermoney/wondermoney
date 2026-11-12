@@ -285,6 +285,7 @@ class HouseholdExport {
       { format: 'json', path: 'data/goal-transaction-fundings.json', rows: () => this.goalFundings() },
       { format: 'json', path: 'data/loans.json', rows: () => this.loanJson() },
       { format: 'json', path: 'data/loan-adjustments.json', rows: () => this.loanAdjustments() },
+      { format: 'json', path: 'data/loan-rate-periods.json', rows: () => this.loanRatePeriods() },
       { format: 'json', path: 'data/loan-repayments.json', rows: () => this.loanRepayments() },
       { format: 'json', path: 'data/manual-assets.json', rows: () => this.manualAssetJson() },
       { format: 'json', path: 'data/manual-asset-valuations.json', rows: () => this.manualAssetValuations() },
@@ -811,6 +812,13 @@ class HouseholdExport {
         type: str(row['type']),
       };
     }
+  }
+
+  private async* loanRatePeriods() {
+    const rows = await rowsOf(this.db, sql`
+      select loan_key, ${sql.raw(dx('effective_date'))} as effective_date, annual_interest_rate_bps from loan_rate_period
+      where deleted_at is null and loan_key = any(${this.loans.keys()}) order by loan_key, effective_date`);
+    for (const row of rows) yield { annualInterestRateBps: int(row['annual_interest_rate_bps']), effectiveDate: str(row['effective_date']), loanId: this.loans.get(row['loan_key']) };
   }
 
   private async* loanRepayments() {

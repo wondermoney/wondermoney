@@ -15,6 +15,10 @@ export class Loan extends Base {
   @Enum({ default: LoanAmortizationMethod.FRENCH, items: () => LoanAmortizationMethod })
   amortizationMethod: LoanAmortizationMethod = LoanAmortizationMethod.FRENCH;
 
+  /**
+   * The rate the loan was entered with, in basis points. It applies until the first
+   * `LoanRatePeriod`; the rate in force on a date comes from `resolveLoanRate`.
+   */
   @Property({ columnType: 'int', nullable: true })
   annualInterestRateBps?: number;
 

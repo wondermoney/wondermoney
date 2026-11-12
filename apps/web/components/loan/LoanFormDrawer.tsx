@@ -37,10 +37,15 @@ import type {
   LoanAmortizationMethod,
   LoanDetail,
   LoanListItem,
+  LoanRateType,
   LoanType,
 } from "@/lib/api/loan/types";
 import useCreateLoan from "@/lib/api/loan/useCreateLoan";
 import useUpdateLoan from "@/lib/api/loan/useUpdateLoan";
+import {
+  formatDateInputValue,
+  parseDateInputValue,
+} from "@/lib/loans/calendar-day";
 import { LOAN_TYPE_LABEL_KEY } from "@/lib/loans/loan-labels";
 import {
   formatLocaleNumberInput,
@@ -48,22 +53,14 @@ import {
   zOptionalLocaleNumber,
 } from "@/lib/utils/number";
 
-/**
- * Convert a `yyyy-mm-dd` string into a local Date, avoiding the UTC-midnight
- * parsing of `new Date("yyyy-mm-dd")` that can shift the day in negative-offset zones.
- */
-function parseDateInputValue(value: string | undefined): Date | undefined {
-  if (!value) return undefined;
-  const match = /^(\d{4})-(\d{2})-(\d{2})/.exec(value);
-  if (!match) return undefined;
-  const [, year, month, day] = match;
-  return new Date(Number(year), Number(month) - 1, Number(day));
-}
-
-/** Format a Date back into the `yyyy-mm-dd` string the API expects. */
-function formatDateInputValue(date: Date | undefined): string {
-  if (!date) return "";
-  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+/** The loan's own rate (before any rate change); older payloads only carry today's. */
+function initialRateBps(
+  loan: LoanListItem | LoanDetail | null | undefined,
+): number | null | undefined {
+  if (!loan) return undefined;
+  return loan.initialAnnualInterestRateBps !== undefined
+    ? loan.initialAnnualInterestRateBps
+    : loan.annualInterestRateBps;
 }
 
 /**
@@ -126,6 +123,7 @@ function buildBaseSchema(
     interestRatePercent: optionalAmount().pipe(
       z.number().min(0).max(100).optional(),
     ),
+    rateType: z.enum(["FIXED", "VARIABLE", "UNKNOWN"]),
     paymentDayOfMonth: z.coerce.number<number>().min(1).max(31).optional(),
     termMonths: z.coerce.number<number>().int().positive().optional(),
     includeInNetWorth: z.boolean(),
@@ -150,8 +148,9 @@ export default function LoanFormDrawer({
   const updateMutation = useUpdateLoan();
   const { data: currenciesData } = useCurrencies({ enabled: open });
   const currencies = currenciesData?.currencies ?? [];
-  const defaultValues = useMemo<FormInput>(
-    () => ({
+  const defaultValues = useMemo<FormInput>(() => {
+    const initialRate = initialRateBps(loan);
+    return {
       name: loan?.name ?? "",
       type: loan?.type ?? "PERSONAL_LOAN",
       amortizationMethod: loan?.amortizationMethod ?? "FRENCH",
@@ -170,17 +169,17 @@ export default function LoanFormDrawer({
       // annualInterestRateBps is stored server-side as basis points; the
       // form field is a percentage, so convert on the way in (divide by
       // 100) and back on the way out (multiply by 100, see `submit()`).
-      interestRatePercent:
-        loan?.annualInterestRateBps != null
-          ? loan.annualInterestRateBps / 100
-          : undefined,
+      // The field is the loan's own rate, which applies until its first
+      // rate change; `annualInterestRateBps` is today's, and saving it here
+      // would rewrite the rate before every change.
+      interestRatePercent: initialRate != null ? initialRate / 100 : undefined,
+      rateType: (loan as LoanDetail | undefined)?.rateType ?? "FIXED",
       paymentDayOfMonth: loan?.paymentDayOfMonth ?? 1,
       termMonths: loan?.termMonths ?? undefined,
       includeInNetWorth: loan?.includeInNetWorth ?? true,
       notes: loan?.notes ?? "",
-    }),
-    [loan],
-  );
+    };
+  }, [loan]);
   const schema = useMemo(
     () =>
       buildBaseSchema(t, locale, tCommon("invalid-amount")).superRefine(
@@ -231,6 +230,7 @@ export default function LoanFormDrawer({
         values.interestRatePercent != null
           ? Math.round(values.interestRatePercent * 100)
           : undefined,
+      rateType: values.rateType,
       paymentDayOfMonth: values.paymentDayOfMonth ?? undefined,
       termMonths: values.termMonths ?? undefined,
       // No maturityDate input exists in this form yet; derive it from the
@@ -352,7 +352,9 @@ export default function LoanFormDrawer({
                       ] satisfies LoanAmortizationMethod[]
                     ).map((v) => (
                       <SelectItem key={v} value={v}>
-                        {t(`methods.${v === "FRENCH" ? "french" : "constantPrincipal"}`)}
+                        {t(
+                          `methods.${v === "FRENCH" ? "french" : "constantPrincipal"}`,
+                        )}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -443,6 +445,37 @@ export default function LoanFormDrawer({
                     value={formatLocaleNumberInput(field.value, locale)}
                   />
                 </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="rateType"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>{t("fields.rateType")}</FormLabel>
+                <Select onValueChange={field.onChange} value={field.value}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {(
+                      ["FIXED", "VARIABLE", "UNKNOWN"] satisfies LoanRateType[]
+                    ).map((rate) => (
+                      <SelectItem key={rate} value={rate}>
+                        {t(`rateTypes.${rate}`)}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {field.value === "VARIABLE" ? (
+                  <FormDescription>
+                    {t("fields.rateTypeVariableHelp")}
+                  </FormDescription>
+                ) : null}
                 <FormMessage />
               </FormItem>
             )}

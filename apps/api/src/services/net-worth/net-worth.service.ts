@@ -130,15 +130,17 @@ export class NetWorthService {
       ),
     ]);
 
+    const asOf = new Date();
     const loanRows = await Promise.all(
       loans.map(async (loan) => {
         const [repayments, adjustments] = await Promise.all([
-          DI.em.find(LoanRepaymentLink, { deletedAt: undefined, loanKey: loan }),
-          DI.em.find(LoanAdjustment, { deletedAt: undefined, loanKey: loan }),
+          DI.em.find(LoanRepaymentLink, { deletedAt: undefined, loanKey: loan, paymentDate: { $lte: asOf } }),
+          DI.em.find(LoanAdjustment, { deletedAt: undefined, effectiveDate: { $lte: asOf }, loanKey: loan }),
         ]);
 
         const outstandingPrincipal = calculateOutstandingPrincipalWithAdjustments({
           adjustments: adjustments.map((adj) => ({ amount: adj.amount, effectiveDate: adj.effectiveDate, type: adj.type })),
+          asOfDate: asOf,
           openingPrincipalBalance: loan.openingPrincipalBalance,
           principalRepayments: repayments.map((repayment) => ({ amount: repayment.principalAmount, effectiveDate: repayment.paymentDate })),
         });
@@ -152,7 +154,6 @@ export class NetWorthService {
     // Each member keeps their own currency, and an account's stored user-currency balance is in its
     // owner's. Convert every account into the viewer's currency; one that cannot be converted is
     // left out and counted, never added in a foreign currency.
-    const asOf = new Date();
     const rates = await loadAccountRates(DI.em, accounts, currencyCode, asOf, rateScope(resolveTenantKeyNumber(appuserTenant.tenantKey)));
     const accountRows: NetWorthInputRow[] = [];
     let unconvertedAccounts = 0;
@@ -400,13 +401,15 @@ export function resolveHistoryToDate(requestedDate: Date | undefined, now: Date)
 
 export function resolveLoanHistoryTotal(loans: { adjustments?: NetWorthHistoryLoanLike[]; currencyCode: string; openingBalanceDate: Date; openingPrincipalBalance: number; repayments?: NetWorthHistoryLoanLike[] }[], currencyCode: string, pointDate: Date): { complete: boolean; total: null | number } {
   let total = 0;
+  const asOfDate = new Date(nextUtcDay(pointDate).getTime() - 1);
   for (const loan of loans) {
     if (loan.currencyCode !== currencyCode) return { complete: false, total: null };
     if (loan.openingBalanceDate.getTime() > pointDate.getTime()) continue;
     total = addMoney(total, calculateOutstandingPrincipalWithAdjustments({
-      adjustments: (loan.adjustments ?? []).filter((item) => item.effectiveDate == null || item.effectiveDate.getTime() <= pointDate.getTime()).map((item) => ({ amount: item.amount, effectiveDate: item.effectiveDate, type: 'PRINCIPAL_INCREASE' })),
+      adjustments: (loan.adjustments ?? []).filter((item) => item.effectiveDate == null || item.effectiveDate.getTime() <= asOfDate.getTime()).map((item) => ({ amount: item.amount, effectiveDate: item.effectiveDate, type: 'PRINCIPAL_INCREASE' })),
+      asOfDate,
       openingPrincipalBalance: loan.openingPrincipalBalance,
-      principalRepayments: (loan.repayments ?? []).filter((item) => item.effectiveDate == null || item.effectiveDate.getTime() <= pointDate.getTime()).map((item) => ({ amount: item.amount, effectiveDate: item.effectiveDate })),
+      principalRepayments: (loan.repayments ?? []).filter((item) => item.effectiveDate == null || item.effectiveDate.getTime() <= asOfDate.getTime()).map((item) => ({ amount: item.amount, effectiveDate: item.effectiveDate })),
     }));
   }
   return { complete: true, total };
@@ -534,6 +537,7 @@ interface HistoryBalanceConverter {
 
 async function calculateLoansHistoryTotal(loans: Loan[], currencyCode: string, pointDate: Date): Promise<[null | number, boolean]> {
   let total = 0;
+  const asOfDate = new Date(nextUtcDay(pointDate).getTime() - 1);
   for (const loan of loans) {
     if (loan.currencyKey.code !== currencyCode) return [null, false];
     if (loan.openingBalanceDate > pointDate) continue;
@@ -541,7 +545,7 @@ async function calculateLoansHistoryTotal(loans: Loan[], currencyCode: string, p
       DI.em.find(LoanAdjustment, { deletedAt: undefined, effectiveDate: { $lt: nextUtcDay(pointDate) }, loanKey: loan }, { orderBy: { effectiveDate: 'ASC', loanAdjustmentKey: 'ASC' } }),
       DI.em.find(LoanRepaymentLink, { deletedAt: undefined, loanKey: loan, paymentDate: { $lt: nextUtcDay(pointDate) } }, { orderBy: { loanRepaymentLinkKey: 'ASC', paymentDate: 'ASC' } }),
     ]);
-    total = addMoney(total, calculateOutstandingPrincipalWithAdjustments({ adjustments: adjustments.map((adj) => ({ amount: adj.amount, effectiveDate: adj.effectiveDate, type: adj.type })), openingPrincipalBalance: loan.openingPrincipalBalance, principalRepayments: repayments.map((repayment) => ({ amount: repayment.principalAmount, effectiveDate: repayment.paymentDate })) }));
+    total = addMoney(total, calculateOutstandingPrincipalWithAdjustments({ adjustments: adjustments.map((adj) => ({ amount: adj.amount, effectiveDate: adj.effectiveDate, type: adj.type })), asOfDate, openingPrincipalBalance: loan.openingPrincipalBalance, principalRepayments: repayments.map((repayment) => ({ amount: repayment.principalAmount, effectiveDate: repayment.paymentDate })) }));
   }
   return [total, true];
 }

@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import { buildGoalSummary } from '@service/goal/goal-summary.service';
+import { roundDisplay } from '@utils/money';
 
 import { buildAmortizationSchedule } from '../amortization-schedule';
 import { buildLoanProjection, type LoanProjectionInput } from '../loan-projection.service';
@@ -128,6 +129,58 @@ describe('buildLoanProjection', () => {
     expect(projection.months).toBeNull();
     expect(projection.payoffDate).toBeNull();
     expect(projection.series).toEqual([]);
+  });
+
+  describe('a variable-rate loan whose rate rises from 5% to 10% after a year', () => {
+    const ratePeriods = [{ annualInterestRateBps: 1000, effectiveDate: day('2027-02-01') }];
+    const variable = (overrides: Partial<LoanProjectionInput> = {}) => terms({
+      annualInterestRateBps: 500,
+      firstPaymentDate: day('2026-02-01'),
+      now: day('2026-01-01'),
+      originalPrincipal: 100_000,
+      outstandingPrincipal: 100_000,
+      ratePeriods,
+      startDate: day('2026-01-01'),
+      termMonths: 360,
+      ...overrides,
+    });
+
+    it('with no extra pays the contract schedule\'s resized instalments and matures on time', () => {
+      const contract = buildAmortizationSchedule({
+        annualInterestRateBps: 500,
+        firstPaymentDate: day('2026-02-01'),
+        method: LoanAmortizationMethod.FRENCH,
+        principal: 100_000,
+        ratePeriods,
+        termMonths: 360,
+      });
+      expect(contract.rows[11]?.payment).toBe(536.82);
+      expect(contract.rows[12]?.payment).toBe(865.86);
+
+      const projection = buildLoanProjection(variable());
+
+      expect(projection.paysOff).toBe(true);
+      expect(projection.reason).toBeNull();
+      expect(projection.payoffDate).toBe('2056-01-01');
+      expect(projection.aheadOrBehindMonths).toBe(0);
+      // Month 13 is the first one paid at the resized instalment.
+      const [before, after] = [projection.series[12], projection.series[13]];
+      expect(roundDisplay((before?.baselineBalance ?? 0) - (after?.baselineBalance ?? 0))).toBeGreaterThan(869.46 - 820);
+    });
+
+    it('resizes the stored payment when the rate changes rather than holding it below the new interest', () => {
+      const projection = buildLoanProjection(variable({ contractPayment: 536.82 }));
+
+      expect(projection.paysOff).toBe(true);
+      expect(projection.payoffDate).toBe('2056-01-01');
+    });
+
+    it('holds an explicit fixed payment when no rate change is ahead, so one below the interest never pays off', () => {
+      const projection = buildLoanProjection(variable({ contractPayment: 400, ratePeriods: [] }));
+
+      expect(projection.paysOff).toBe(false);
+      expect(projection.reason).toBe('PAYMENT_BELOW_INTEREST');
+    });
   });
 
   it('compares the projected payoff with the contract maturity', () => {

@@ -39,7 +39,9 @@
       "interestRatePlaceholder": "0.00",
       "termMonthsPlaceholder": "e.g. 360",
       "startDatePlaceholder": "Pick the start date",
-      "notesPlaceholder": "Anything worth remembering about this loan"
+      "notesPlaceholder": "Anything worth remembering about this loan",
+      "rateType": "Rate type",
+      "rateTypeVariableHelp": "Enter the rate the loan started with. Add each later change under Rate history on the loan page."
     },
     "types": {
       "personal": "Personal",
@@ -194,9 +196,66 @@
         "empty": "No projection to show."
       },
       "adjustment": {
-        "unavailableTitle": "Balance adjustment unavailable",
-        "unavailableDescription": "This action is not wired to an API yet.",
-        "unavailableBody": "The adjustment form is hidden until the API is available."
+        "title": "Adjust balance",
+        "editTitle": "Edit adjustment",
+        "description": "Record your lender's balance or another change to the loan. The balance, schedule and payoff projection follow it from its date.",
+        "type": "Adjustment type",
+        "date": "Effective date",
+        "amount": "Amount",
+        "balanceAmount": "Balance on this date",
+        "reason": "Reason (optional)",
+        "history": "Balance adjustments",
+        "loadError": "Could not load adjustments.",
+        "saveError": "Could not save this change.",
+        "empty": "No balance adjustments",
+        "emptyBody": "When your lender's balance differs from the one shown here, record their figure. It replaces the modelled balance from its date on, and later repayments reduce it from there.",
+        "add": "Add adjustment",
+        "save": "Save adjustment",
+        "edit": "Edit adjustment",
+        "delete": "Delete adjustment",
+        "deleteConfirm": "Delete this adjustment? The balance is worked out again without it.",
+        "invalidAmount": "Enter a valid amount.",
+        "amountPositive": "Enter an amount greater than zero.",
+        "invalidDate": "Pick the date it takes effect.",
+        "setTo": "Set to <amount></amount>",
+        "increases": "Increases the balance by",
+        "decreases": "Reduces the balance by",
+        "types": {
+          "BALANCE_CORRECTION": "Correct balance",
+          "FEE": "Fee",
+          "CAPITALIZED_INTEREST": "Capitalized interest",
+          "PRINCIPAL_INCREASE": "Principal increase",
+          "PRINCIPAL_DECREASE": "Principal decrease",
+          "WRITE_OFF": "Write-off"
+        },
+        "typeHelp": {
+          "BALANCE_CORRECTION": "Sets the balance to your lender's figure on this date. Zero is allowed.",
+          "FEE": "Adds a fee charged to the loan to the balance.",
+          "CAPITALIZED_INTEREST": "Adds unpaid interest to the balance.",
+          "PRINCIPAL_INCREASE": "Adds borrowed money to the balance.",
+          "PRINCIPAL_DECREASE": "Reduces the balance outside a linked repayment.",
+          "WRITE_OFF": "Reduces the balance by an amount the lender forgave."
+        }
+      },
+      "rateHistory": {
+        "title": "Rate history",
+        "description": "Each rate applies from its date until the next one. Rates are not fetched or predicted: add each change as your lender announces it.",
+        "effectiveDate": "Effective date",
+        "apr": "Annual interest rate (APR)",
+        "loadError": "Could not load rate history.",
+        "saveError": "Could not save this rate.",
+        "empty": "No rate changes yet.",
+        "emptyWithRate": "No rate changes yet: {rate} applies throughout.",
+        "from": "From {date}: <rate></rate>",
+        "add": "Add rate change",
+        "save": "Save rate change",
+        "cancel": "Cancel",
+        "edit": "Edit rate change",
+        "delete": "Delete rate change",
+        "deleteConfirm": "Delete this rate change?",
+        "invalidRate": "Enter a valid rate.",
+        "maxRate": "Rate must be between 0 and 100%.",
+        "invalidDate": "Pick the date it takes effect."
       }
     },
     "table": {
@@ -218,6 +277,11 @@
       "sampleProvider": "Bank",
       "sampleStatus": "Active",
       "sampleTerm": "28y 4m"
+    },
+    "rateTypes": {
+      "FIXED": "Fixed",
+      "VARIABLE": "Variable",
+      "UNKNOWN": "Not sure"
     }
   }
 }

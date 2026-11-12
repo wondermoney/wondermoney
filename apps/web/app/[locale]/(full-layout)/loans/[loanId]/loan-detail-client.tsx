@@ -5,18 +5,20 @@ import { useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 
 import LoanAdjustmentDialog from "@/components/loan/LoanAdjustmentDialog";
+import LoanAdjustmentHistory from "@/components/loan/LoanAdjustmentHistory";
 import LoanAmortizationPreview from "@/components/loan/LoanAmortizationPreview";
 import LoanAssumptionsCard from "@/components/loan/LoanAssumptionsCard";
 import LoanDetailHeader from "@/components/loan/LoanDetailHeader";
 import LoanDetailSummaryCards from "@/components/loan/LoanDetailSummaryCards";
 import LoanFormDrawer from "@/components/loan/LoanFormDrawer";
 import LoanPayoffSection from "@/components/loan/LoanPayoffSection";
+import LoanRateHistory from "@/components/loan/LoanRateHistory";
 import LoanRepaymentsTable from "@/components/loan/LoanRepaymentsTable";
 import RepaymentCandidateDrawer from "@/components/loan/RepaymentCandidateDrawer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useRouter } from "@/i18n/navigation";
-import type { LoanRepayment } from "@/lib/api/loan/types";
+import type { LoanAdjustment, LoanRepayment } from "@/lib/api/loan/types";
 import useDeleteLoanRepayment from "@/lib/api/loan/useDeleteLoanRepayment";
 import useLoan from "@/lib/api/loan/useLoan";
 import useLoanRepayments from "@/lib/api/loan/useLoanRepayments";
@@ -28,6 +30,8 @@ export default function LoanDetailClient({ loanId }: { loanId: string }) {
   const [candidatesOpen, setCandidatesOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
   const [adjustOpen, setAdjustOpen] = useState(false);
+  const [editingAdjustment, setEditingAdjustment] =
+    useState<LoanAdjustment | null>(null);
   const [editingRepayment, setEditingRepayment] =
     useState<LoanRepayment | null>(null);
   const deleteMutation = useDeleteLoanRepayment();
@@ -100,6 +104,17 @@ export default function LoanDetailClient({ loanId }: { loanId: string }) {
           });
         }}
       />
+      <LoanAdjustmentHistory
+        loan={loan}
+        onAdd={() => {
+          setEditingAdjustment(null);
+          setAdjustOpen(true);
+        }}
+        onEdit={(adjustment) => {
+          setEditingAdjustment(adjustment);
+          setAdjustOpen(true);
+        }}
+      />
       <div className="grid gap-10 xl:grid-cols-[minmax(0,1fr)_380px] xl:gap-12">
         <div className="min-w-0">
           <LoanAmortizationPreview loan={loan} />
@@ -110,12 +125,24 @@ export default function LoanDetailClient({ loanId }: { loanId: string }) {
           <LoanAssumptionsCard
             loan={loan}
             action={
-              <Button variant="secondary" onClick={() => setAdjustOpen(true)}>
+              <Button
+                variant="secondary"
+                onClick={() => {
+                  setEditingAdjustment(null);
+                  setAdjustOpen(true);
+                }}
+              >
                 <RefreshCw className="mr-2 size-4" />
                 {t("detail.actions.adjustBalance")}
               </Button>
             }
           />
+          {/* Rate changes reshape the schedule beside them; a fixed loan has none. */}
+          {loan.rateType === "VARIABLE" ? (
+            <div className="mt-10">
+              <LoanRateHistory loan={loan} />
+            </div>
+          ) : null}
         </div>
       </div>
       <LoanPayoffSection loan={loan} />
@@ -133,6 +160,7 @@ export default function LoanDetailClient({ loanId }: { loanId: string }) {
         open={adjustOpen}
         onOpenChange={setAdjustOpen}
         loan={loan}
+        adjustment={editingAdjustment}
       />
     </div>
   );

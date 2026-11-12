@@ -1651,7 +1651,8 @@
     },
     "rateType": {
       "FIXED": "Taxa fixa",
-      "UNKNOWN": "Tipo de taxa indisponível"
+      "UNKNOWN": "Tipo de taxa indisponível",
+      "VARIABLE": "Taxa variável"
     },
     "loanDetails": "Detalhes do empréstimo",
     "openingDate": "Data do saldo inicial",

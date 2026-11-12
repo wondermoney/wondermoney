@@ -39,7 +39,9 @@
       "interestRatePlaceholder": "0,00",
       "termMonthsPlaceholder": "Ex.: 360",
       "startDatePlaceholder": "Escolha a data de início",
-      "notesPlaceholder": "Algo que valha a pena lembrar sobre este empréstimo"
+      "notesPlaceholder": "Algo que valha a pena lembrar sobre este empréstimo",
+      "rateType": "Tipo de taxa",
+      "rateTypeVariableHelp": "Introduza a taxa com que o empréstimo começou. Adicione cada alteração posterior no histórico de taxas, na página do empréstimo."
     },
     "types": {
       "personal": "Pessoal",
@@ -194,9 +196,66 @@
         "empty": "Não há projeção para mostrar."
       },
       "adjustment": {
-        "unavailableTitle": "Ajuste de saldo indisponível",
-        "unavailableDescription": "Esta ação ainda não está ligada a uma API.",
-        "unavailableBody": "O formulário de ajuste fica oculto até a API estar disponível."
+        "title": "Ajustar saldo",
+        "editTitle": "Editar ajuste",
+        "description": "Registe o saldo indicado pelo credor ou outra alteração do empréstimo. O saldo, o plano e a projeção de liquidação seguem-no a partir da sua data.",
+        "type": "Tipo de ajuste",
+        "date": "Data de efeito",
+        "amount": "Montante",
+        "balanceAmount": "Saldo nesta data",
+        "reason": "Motivo (opcional)",
+        "history": "Ajustes de saldo",
+        "loadError": "Não foi possível carregar os ajustes.",
+        "saveError": "Não foi possível guardar esta alteração.",
+        "empty": "Sem ajustes de saldo",
+        "emptyBody": "Quando o saldo do credor for diferente do apresentado aqui, registe o valor dele. Substitui o saldo calculado a partir da sua data, e os pagamentos seguintes reduzem-no a partir daí.",
+        "add": "Adicionar ajuste",
+        "save": "Guardar ajuste",
+        "edit": "Editar ajuste",
+        "delete": "Eliminar ajuste",
+        "deleteConfirm": "Eliminar este ajuste? O saldo é recalculado sem ele.",
+        "invalidAmount": "Introduza um montante válido.",
+        "amountPositive": "Introduza um montante superior a zero.",
+        "invalidDate": "Escolha a data em que entra em vigor.",
+        "setTo": "Definido para <amount></amount>",
+        "increases": "Aumenta o saldo em",
+        "decreases": "Reduz o saldo em",
+        "types": {
+          "BALANCE_CORRECTION": "Corrigir saldo",
+          "FEE": "Comissão",
+          "CAPITALIZED_INTEREST": "Juros capitalizados",
+          "PRINCIPAL_INCREASE": "Aumento de capital",
+          "PRINCIPAL_DECREASE": "Redução de capital",
+          "WRITE_OFF": "Anulação"
+        },
+        "typeHelp": {
+          "BALANCE_CORRECTION": "Define o saldo para o valor do credor nesta data. Zero é permitido.",
+          "FEE": "Soma ao saldo uma comissão cobrada no empréstimo.",
+          "CAPITALIZED_INTEREST": "Soma ao saldo juros não pagos.",
+          "PRINCIPAL_INCREASE": "Soma ao saldo dinheiro emprestado.",
+          "PRINCIPAL_DECREASE": "Reduz o saldo fora de um pagamento associado.",
+          "WRITE_OFF": "Reduz o saldo num montante perdoado pelo credor."
+        }
+      },
+      "rateHistory": {
+        "title": "Histórico de taxas",
+        "description": "Cada taxa aplica-se desde a sua data até à seguinte. As taxas não são obtidas nem previstas: adicione cada alteração quando o credor a anunciar.",
+        "effectiveDate": "Data de efeito",
+        "apr": "Taxa de juro anual (TAEG)",
+        "loadError": "Não foi possível carregar o histórico de taxas.",
+        "saveError": "Não foi possível guardar esta taxa.",
+        "empty": "Ainda não há alterações de taxa.",
+        "emptyWithRate": "Ainda não há alterações de taxa: aplica-se {rate} durante todo o prazo.",
+        "from": "Desde {date}: <rate></rate>",
+        "add": "Adicionar alteração de taxa",
+        "save": "Guardar alteração de taxa",
+        "cancel": "Cancelar",
+        "edit": "Editar alteração de taxa",
+        "delete": "Eliminar alteração de taxa",
+        "deleteConfirm": "Eliminar esta alteração de taxa?",
+        "invalidRate": "Introduza uma taxa válida.",
+        "maxRate": "A taxa deve estar entre 0 e 100%.",
+        "invalidDate": "Escolha a data em que entra em vigor."
       }
     },
     "table": {
@@ -218,6 +277,11 @@
       "sampleProvider": "Banco",
       "sampleStatus": "Ativo",
       "sampleTerm": "28a 4m"
+    },
+    "rateTypes": {
+      "FIXED": "Fixa",
+      "VARIABLE": "Variável",
+      "UNKNOWN": "Não sei"
     }
   }
 }

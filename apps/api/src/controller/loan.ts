@@ -1,5 +1,5 @@
 import type { FilterQuery, RequiredEntityData } from '@mikro-orm/core';
-import { QueryOrder } from '@mikro-orm/core';
+import { QueryOrder, UniqueConstraintViolationException } from '@mikro-orm/core';
 import type { Request, Response } from 'express';
 
 import { DI } from '@app/app';
@@ -8,6 +8,7 @@ import { AppuserTenant } from '@entity/AppuserTenant';
 import { Currency } from '@entity/Currency';
 import { Loan } from '@entity/Loan';
 import { LoanAdjustment } from '@entity/LoanAdjustment';
+import { LoanRatePeriod } from '@entity/LoanRatePeriod';
 import { LoanRepaymentLink } from '@entity/LoanRepaymentLink';
 import { Tenant } from '@entity/Tenant';
 import { Transaction } from '@entity/Transaction';
@@ -23,18 +24,25 @@ import {
 } from '@service/loan/loan-calculation.service';
 import { buildLoanProjection } from '@service/loan/loan-projection.service';
 import { scoreLoanRepaymentCandidate } from '@service/loan/loan-repayment-matching.service';
-import { LoanAllocationSource, LoanAmortizationMethod, LoanPaymentFrequency, LoanRateType, LoanStatus } from '@service/loan/loan-types';
+import { LoanAdjustmentType, LoanAllocationSource, LoanAmortizationMethod, LoanPaymentFrequency, LoanRateType, LoanStatus } from '@service/loan/loan-types';
+import { type LoanRatePeriodInput, resolveLoanRate } from '@service/loan/rate-resolver';
 import { isSplit } from '@service/transaction/transaction-split.service';
 import { excludeExpired } from '@service/transaction/transaction-status';
 import { BadRequestError, ConflictError, ERROR_CODE, UnprocessableEntityError } from '@utils/errors';
 import { big, roundDisplay } from '@utils/money';
 import {
+  createLoanAdjustmentSchema,
+  createLoanRatePeriodSchema,
   createLoanSchema,
+  deleteLoanAdjustmentSchema,
+  deleteLoanRatePeriodSchema,
   deleteLoanRepaymentSchema,
   linkLoanRepaymentSchema,
   loanIdParamSchema,
   loanProjectionSchema,
   repaymentCandidatesSchema,
+  updateLoanAdjustmentSchema,
+  updateLoanRatePeriodSchema,
   updateLoanRepaymentSchema,
   updateLoanSchema,
 } from '@validators/loan';
@@ -121,6 +129,32 @@ export async function createLoan(req: Request, res: Response) {
   return res.status(201).json({ loan: await enrichLoan(loan) });
 }
 
+export async function createLoanAdjustment(req: Request, res: Response) {
+  const { body, params: { loanId } } = await zParse(createLoanAdjustmentSchema, req);
+  const { appuser, tenant } = await getLoanRequestContext(req);
+  const loan = await loadOwnedLoan(loanId, appuser, tenant);
+  if (!loan) return res.sendStatus(404);
+  const adjustment = DI.em.create(LoanAdjustment, { ...body, createdByAppuserKey: appuser, loanKey: loan, tenantKey: tenant } as RequiredEntityData<LoanAdjustment>);
+  await DI.em.persist(adjustment).flush();
+  return res.status(201).json({ adjustment: serializeAdjustment(adjustment), outstandingPrincipal: await currentOutstandingPrincipal(loan, new Date()) });
+}
+
+export async function createLoanRatePeriod(req: Request, res: Response) {
+  const { body, params: { loanId } } = await zParse(createLoanRatePeriodSchema, req);
+  const { appuser, tenant } = await getLoanRequestContext(req);
+  const loan = await loadOwnedLoan(loanId, appuser, tenant);
+  if (!loan) return res.sendStatus(404);
+  await assertUniqueRateDate(loan, body.effectiveDate);
+  const ratePeriod = DI.em.create(LoanRatePeriod, { ...body, loanKey: loan, tenantKey: tenant } as RequiredEntityData<LoanRatePeriod>);
+  try {
+    await DI.em.persist(ratePeriod).flush();
+  } catch (error) {
+    if (error instanceof UniqueConstraintViolationException) throw new ConflictError('A rate period already exists for this effective date');
+    throw error;
+  }
+  return res.status(201).json({ annualInterestRateBps: await currentLoanRate(loan, new Date()), ratePeriod: serializeRatePeriod(ratePeriod) });
+}
+
 export async function deleteLoan(req: Request, res: Response) {
   const { params: { loanId } } = await zParse(loanIdParamSchema, req);
   const { appuser, tenant } = await getLoanRequestContext(req);
@@ -129,6 +163,30 @@ export async function deleteLoan(req: Request, res: Response) {
   loan.deletedAt = new Date();
   await DI.em.persist(loan).flush();
   return res.sendStatus(204);
+}
+
+export async function deleteLoanAdjustment(req: Request, res: Response) {
+  const { params: { adjustmentId, loanId } } = await zParse(deleteLoanAdjustmentSchema, req);
+  const { appuser, tenant } = await getLoanRequestContext(req);
+  const loan = await loadOwnedLoan(loanId, appuser, tenant);
+  if (!loan) return res.sendStatus(404);
+  const adjustment = await DI.em.findOne(LoanAdjustment, { deletedAt: undefined, loanAdjustmentKey: adjustmentId, loanKey: loan, tenantKey: tenant });
+  if (!adjustment) return res.sendStatus(404);
+  adjustment.deletedAt = new Date();
+  await DI.em.persist(adjustment).flush();
+  return res.status(200).json({ outstandingPrincipal: await currentOutstandingPrincipal(loan, new Date()) });
+}
+
+export async function deleteLoanRatePeriod(req: Request, res: Response) {
+  const { params: { loanId, ratePeriodId } } = await zParse(deleteLoanRatePeriodSchema, req);
+  const { appuser, tenant } = await getLoanRequestContext(req);
+  const loan = await loadOwnedLoan(loanId, appuser, tenant);
+  if (!loan) return res.sendStatus(404);
+  const ratePeriod = await DI.em.findOne(LoanRatePeriod, { deletedAt: undefined, loanKey: loan, loanRatePeriodKey: ratePeriodId, tenantKey: tenant });
+  if (!ratePeriod) return res.sendStatus(404);
+  ratePeriod.deletedAt = new Date();
+  await DI.em.persist(ratePeriod).flush();
+  return res.status(200).json({ annualInterestRateBps: await currentLoanRate(loan, new Date()) });
 }
 
 export async function deleteLoanRepayment(req: Request, res: Response) {
@@ -217,7 +275,8 @@ export async function getLoanProjection(req: Request, res: Response) {
     frequency: query.frequency,
     now,
     originalPrincipal: principal,
-    outstandingPrincipal: await currentOutstandingPrincipal(loan),
+    outstandingPrincipal: await currentOutstandingPrincipal(loan, now),
+    ratePeriods: await loadRatePeriods(loan),
     startDate: query.startDate ?? now,
     termMonths,
   });
@@ -254,6 +313,7 @@ export async function getLoanSchedule(req: Request, res: Response) {
     firstPaymentDate,
     method: loan.amortizationMethod,
     principal,
+    ratePeriods: await loadRatePeriods(loan),
     termMonths,
   });
 
@@ -298,13 +358,10 @@ export async function linkLoanRepayment(req: Request, res: Response) {
   // A split already shares the payment out over categories; counting its interest on top would
   // count the payment twice. Remove the split first.
   if (await isSplit(DI.em, transaction)) throw new ConflictError('A split transaction cannot be linked as a loan repayment', ERROR_CODE.TRANSACTION_IS_SPLIT);
-  const existingRepayments = await DI.em.find(LoanRepaymentLink, { deletedAt: undefined, loanKey: loan });
-  const outstandingPrincipal = calculateOutstandingPrincipalWithAdjustments({
-    adjustments: [],
-    openingPrincipalBalance: loan.openingPrincipalBalance,
-    principalRepayments: existingRepayments.map((r) => ({ amount: r.principalAmount, effectiveDate: r.paymentDate })),
-  });
-  assertPrincipalWithinOutstanding(body.principalAmount, outstandingPrincipal);
+  const paymentDate = transaction.transactionDate ?? new Date();
+  // The principal is checked against the balance on the payment's own date, not today's: a
+  // later lender correction must not block recording a repayment made before it.
+  assertPrincipalWithinOutstanding(body.principalAmount, await currentOutstandingPrincipal(loan, paymentDate));
   assertAllocationWithinTransactionAmount(body.totalPaymentAmount, transaction);
   const allocation = validateRepaymentAllocation(body);
   if (!allocation.valid) throw new BadRequestError(allocation.reason);
@@ -314,7 +371,7 @@ export async function linkLoanRepayment(req: Request, res: Response) {
     interestAmount: body.interestAmount,
     linkedByAppuserKey: appuser,
     loanKey: loan,
-    paymentDate: transaction.transactionDate ?? new Date(),
+    paymentDate,
     principalAmount: body.principalAmount,
     tenantKey: tenant,
     totalPaymentAmount: body.totalPaymentAmount,
@@ -322,6 +379,24 @@ export async function linkLoanRepayment(req: Request, res: Response) {
   } as RequiredEntityData<LoanRepaymentLink>);
   await DI.em.persist(repayment).flush();
   return res.status(201).json({ repayment: serializeRepayment(repayment, transaction) });
+}
+
+export async function listLoanAdjustments(req: Request, res: Response) {
+  const { params: { loanId } } = await zParse(loanIdParamSchema, req);
+  const { appuser, tenant } = await getLoanRequestContext(req);
+  const loan = await loadOwnedLoan(loanId, appuser, tenant);
+  if (!loan) return res.sendStatus(404);
+  const adjustments = await DI.em.find(LoanAdjustment, { deletedAt: undefined, loanKey: loan, tenantKey: tenant }, { orderBy: { effectiveDate: QueryOrder.ASC, loanAdjustmentKey: QueryOrder.ASC } });
+  return res.json({ adjustments: adjustments.map(serializeAdjustment) });
+}
+
+export async function listLoanRatePeriods(req: Request, res: Response) {
+  const { params: { loanId } } = await zParse(loanIdParamSchema, req);
+  const { appuser, tenant } = await getLoanRequestContext(req);
+  const loan = await loadOwnedLoan(loanId, appuser, tenant);
+  if (!loan) return res.sendStatus(404);
+  const ratePeriods = await DI.em.find(LoanRatePeriod, { deletedAt: undefined, loanKey: loan, tenantKey: tenant }, { orderBy: { effectiveDate: QueryOrder.ASC } });
+  return res.json({ ratePeriods: ratePeriods.map(serializeRatePeriod) });
 }
 
 export async function listLoanRepaymentCandidates(req: Request, res: Response) {
@@ -339,12 +414,8 @@ export async function listLoanRepaymentCandidates(req: Request, res: Response) {
     ...(query.endDate || query.startDate ? { transactionDate: { ...(query.startDate ? { $gte: query.startDate } : {}), ...(query.endDate ? { $lte: query.endDate } : {}) } } : {}),
   } as FilterQuery<Transaction>), { orderBy: { transactionDate: QueryOrder.DESC }, populate: ['transactionMerchantKey'] });
 
-  const repayments = await DI.em.find(LoanRepaymentLink, { deletedAt: undefined, loanKey: loan });
-  const outstandingPrincipal = calculateOutstandingPrincipalWithAdjustments({
-    adjustments: [],
-    openingPrincipalBalance: loan.openingPrincipalBalance,
-    principalRepayments: repayments.map((repayment) => ({ amount: repayment.principalAmount, effectiveDate: repayment.paymentDate })),
-  });
+  const outstandingPrincipal = await currentOutstandingPrincipal(loan, new Date());
+  const ratePeriods = await loadRatePeriods(loan);
 
   return res.json({
     candidates: candidates.map((transaction) => {
@@ -365,7 +436,7 @@ export async function listLoanRepaymentCandidates(req: Request, res: Response) {
         confidence: score.confidence,
         outstandingPrincipal,
         reasons: score.reasons,
-        suggestedAllocation: buildSuggestedAllocation(amount, loan, outstandingPrincipal),
+        suggestedAllocation: buildSuggestedAllocation(amount, loan, outstandingPrincipal, ratePeriods, transaction.transactionDate ?? new Date()),
         transaction: summarizeTransaction(transaction),
       };
     }),
@@ -417,6 +488,39 @@ export async function updateLoan(req: Request, res: Response) {
   return res.json({ loan: await enrichLoan(loan) });
 }
 
+export async function updateLoanAdjustment(req: Request, res: Response) {
+  const { body, params: { adjustmentId, loanId } } = await zParse(updateLoanAdjustmentSchema, req);
+  const { appuser, tenant } = await getLoanRequestContext(req);
+  const loan = await loadOwnedLoan(loanId, appuser, tenant);
+  if (!loan) return res.sendStatus(404);
+  const adjustment = await DI.em.findOne(LoanAdjustment, { deletedAt: undefined, loanAdjustmentKey: adjustmentId, loanKey: loan, tenantKey: tenant });
+  if (!adjustment) return res.sendStatus(404);
+  const type = body.type ?? adjustment.type;
+  const amount = body.amount ?? adjustment.amount;
+  if (type === LoanAdjustmentType.BALANCE_CORRECTION ? amount < 0 : amount <= 0) throw new BadRequestError('Invalid adjustment amount');
+  DI.em.assign(adjustment, body);
+  await DI.em.persist(adjustment).flush();
+  return res.json({ adjustment: serializeAdjustment(adjustment), outstandingPrincipal: await currentOutstandingPrincipal(loan, new Date()) });
+}
+
+export async function updateLoanRatePeriod(req: Request, res: Response) {
+  const { body, params: { loanId, ratePeriodId } } = await zParse(updateLoanRatePeriodSchema, req);
+  const { appuser, tenant } = await getLoanRequestContext(req);
+  const loan = await loadOwnedLoan(loanId, appuser, tenant);
+  if (!loan) return res.sendStatus(404);
+  const ratePeriod = await DI.em.findOne(LoanRatePeriod, { deletedAt: undefined, loanKey: loan, loanRatePeriodKey: ratePeriodId, tenantKey: tenant });
+  if (!ratePeriod) return res.sendStatus(404);
+  if (body.effectiveDate) await assertUniqueRateDate(loan, body.effectiveDate, ratePeriod);
+  DI.em.assign(ratePeriod, body);
+  try {
+    await DI.em.persist(ratePeriod).flush();
+  } catch (error) {
+    if (error instanceof UniqueConstraintViolationException) throw new ConflictError('A rate period already exists for this effective date');
+    throw error;
+  }
+  return res.json({ annualInterestRateBps: await currentLoanRate(loan, new Date()), ratePeriod: serializeRatePeriod(ratePeriod) });
+}
+
 export async function updateLoanRepayment(req: Request, res: Response) {
   const { body, params: { loanId, repaymentLinkId } } = await zParse(updateLoanRepaymentSchema, req);
   const { appuser, tenant } = await getLoanRequestContext(req);
@@ -433,13 +537,9 @@ export async function updateLoanRepayment(req: Request, res: Response) {
   const validation = validateRepaymentAllocation(mergedAllocation);
   if (!validation.valid) throw new BadRequestError(validation.reason);
   assertAllocationWithinTransactionAmount(mergedAllocation.totalPaymentAmount, repayment.transactionKey);
-  const otherRepayments = await DI.em.find(LoanRepaymentLink, { deletedAt: undefined, loanKey: loan, loanRepaymentLinkKey: { $ne: repayment.loanRepaymentLinkKey } });
-  const outstandingPrincipal = calculateOutstandingPrincipalWithAdjustments({
-    adjustments: [],
-    openingPrincipalBalance: loan.openingPrincipalBalance,
-    principalRepayments: otherRepayments.map((link) => ({ amount: link.principalAmount, effectiveDate: link.paymentDate })),
-  });
-  assertPrincipalWithinOutstanding(mergedAllocation.principalAmount, outstandingPrincipal + repayment.principalAmount);
+  // The balance on the repayment's own date, without the repayment being edited.
+  const outstandingPrincipal = await currentOutstandingPrincipal(loan, repayment.paymentDate, repayment);
+  assertPrincipalWithinOutstanding(mergedAllocation.principalAmount, outstandingPrincipal);
   DI.em.assign(repayment, body);
   repayment.linkedByAppuserKey = appuser;
   await DI.em.persist(repayment).flush();
@@ -462,6 +562,11 @@ export function validateMergedLoanUpdate(
   if (mergedMaturityDate != null && mergedMaturityDate <= mergedOpeningBalanceDate) {
     throw new BadRequestError('maturityDate must be after openingBalanceDate');
   }
+}
+
+async function assertUniqueRateDate(loan: Loan, effectiveDate: Date, except?: LoanRatePeriod) {
+  const existing = await DI.em.findOne(LoanRatePeriod, { deletedAt: undefined, effectiveDate, loanKey: loan, tenantKey: loan.tenantKey });
+  if (existing && existing.loanRatePeriodKey !== except?.loanRatePeriodKey) throw new ConflictError('A rate period already exists for this effective date');
 }
 
 function buildLoanDto(loan: Loan, computed: Record<string, unknown> = {}) {
@@ -491,9 +596,9 @@ function buildLoanDto(loan: Loan, computed: Record<string, unknown> = {}) {
   };
 }
 
-function buildSuggestedAllocation(totalPaymentAmount: number, loan: Loan, outstandingPrincipal: number) {
+function buildSuggestedAllocation(totalPaymentAmount: number, loan: Loan, outstandingPrincipal: number, ratePeriods: readonly LoanRatePeriodInput[], paymentDate: Date) {
   const annualInterestRateBps = loan.annualInterestRateBps ?? 0;
-  const estimate = estimateRepaymentAllocation({ annualInterestRateBps, outstandingPrincipal, totalPaymentAmount });
+  const estimate = estimateRepaymentAllocation({ annualInterestRateBps, outstandingPrincipal, paymentDate, ratePeriods, totalPaymentAmount });
   return {
     feeAmount: estimate.feeAmount,
     interestAmount: estimate.interestAmount,
@@ -504,21 +609,34 @@ function buildSuggestedAllocation(totalPaymentAmount: number, loan: Loan, outsta
   };
 }
 
-async function currentOutstandingPrincipal(loan: Loan): Promise<number> {
+/**
+ * The outstanding principal on `asOfDate` (today, or a repayment's own date): events dated after
+ * it are left out, so a future-dated correction does not change today's debt. `except` leaves out
+ * the repayment being edited.
+ */
+async function currentOutstandingPrincipal(loan: Loan, asOfDate: Date, except?: LoanRepaymentLink): Promise<number> {
   const [repaymentLinks, adjustments] = await Promise.all([
-    DI.em.find(LoanRepaymentLink, { deletedAt: undefined, loanKey: loan }),
-    DI.em.find(LoanAdjustment, { deletedAt: undefined, loanKey: loan }),
+    DI.em.find(LoanRepaymentLink, {
+      deletedAt: undefined,
+      loanKey: loan,
+      paymentDate: { $lte: asOfDate },
+      ...(except ? { loanRepaymentLinkKey: { $ne: except.loanRepaymentLinkKey } } : {}),
+    }),
+    DI.em.find(LoanAdjustment, { deletedAt: undefined, effectiveDate: { $lte: asOfDate }, loanKey: loan }),
   ]);
 
   return calculateOutstandingPrincipalWithAdjustments({
     adjustments: adjustments.map((adj) => ({ amount: adj.amount, effectiveDate: adj.effectiveDate, type: adj.type })),
+    asOfDate,
     openingPrincipalBalance: loan.openingPrincipalBalance,
     principalRepayments: repaymentLinks.map((link) => ({ amount: link.principalAmount, effectiveDate: link.paymentDate })),
   });
 }
 
 async function enrichLoan(loan: Loan) {
-  const outstandingPrincipal = await currentOutstandingPrincipal(loan);
+  const now = new Date();
+  const outstandingPrincipal = await currentOutstandingPrincipal(loan, now);
+  const currentRate = await currentLoanRate(loan, now);
 
   const progress = calculateLoanProgress({
     openingPrincipalBalance: loan.openingPrincipalBalance,
@@ -527,17 +645,20 @@ async function enrichLoan(loan: Loan) {
   });
 
   const remainingTermMonthsEstimated =
-    loan.annualInterestRateBps != null && loan.regularPaymentAmount != null
+    currentRate != null && loan.regularPaymentAmount != null
       ? calculateRemainingTermMonths({
-          annualInterestRateBps: loan.annualInterestRateBps,
+          annualInterestRateBps: currentRate,
           outstandingPrincipal,
           regularPaymentAmount: loan.regularPaymentAmount,
         })
       : null;
 
-  const nextPaymentDate = loan.paymentDayOfMonth ? calculateNextPaymentDate(new Date(), loan.paymentDayOfMonth) : null;
+  const nextPaymentDate = loan.paymentDayOfMonth ? calculateNextPaymentDate(now, loan.paymentDayOfMonth) : null;
 
   return buildLoanDto(loan, {
+    // The rate in force today; the stored rate is the one before any rate change.
+    annualInterestRateBps: currentRate,
+    initialAnnualInterestRateBps: loan.annualInterestRateBps ?? null,
     nextPaymentDate,
     outstandingPrincipal,
     progressBasis: progress.progressBasis,
@@ -593,5 +714,39 @@ function summarizeTransaction(transaction: Transaction) {
     settlementAmount: transaction.settlementAmount,
     transactionDate: transaction.transactionDate,
     transactionKey: transaction.transactionKey,
+  };
+}
+
+/**
+ * The rate in force on `date`: the latest rate period effective on or before it, else the
+ * loan's stored rate. An unknown stored rate stays unknown (null) until a period takes effect;
+ * nothing is assumed to be 0%.
+ */
+async function currentLoanRate(loan: Loan, date: Date): Promise<null | number> {
+  const periods = await DI.em.find(LoanRatePeriod, { deletedAt: undefined, effectiveDate: { $lte: date }, loanKey: loan, tenantKey: loan.tenantKey }, { orderBy: { effectiveDate: QueryOrder.DESC } });
+  if (loan.annualInterestRateBps == null) return periods[0]?.annualInterestRateBps ?? null;
+  return resolveLoanRate(periods, date, loan.annualInterestRateBps);
+}
+
+async function loadRatePeriods(loan: Loan): Promise<LoanRatePeriodInput[]> {
+  const periods = await DI.em.find(LoanRatePeriod, { deletedAt: undefined, loanKey: loan, tenantKey: loan.tenantKey }, { orderBy: { effectiveDate: QueryOrder.ASC } });
+  return periods.map(({ annualInterestRateBps, effectiveDate }) => ({ annualInterestRateBps, effectiveDate }));
+}
+
+function serializeAdjustment(adjustment: LoanAdjustment) {
+  return {
+    amount: adjustment.amount,
+    effectiveDate: adjustment.effectiveDate,
+    loanAdjustmentKey: adjustment.loanAdjustmentKey,
+    reason: adjustment.reason ?? null,
+    type: adjustment.type,
+  };
+}
+
+function serializeRatePeriod(ratePeriod: LoanRatePeriod) {
+  return {
+    annualInterestRateBps: ratePeriod.annualInterestRateBps,
+    effectiveDate: ratePeriod.effectiveDate,
+    loanRatePeriodKey: ratePeriod.loanRatePeriodKey,
   };
 }
