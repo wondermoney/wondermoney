@@ -422,6 +422,8 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm --filter @wondermoney/shared --filter @wondermoney/react-email run build:lib
+      - name: Check the public token OpenAPI document is current
+        run: pnpm run openapi -- --check
       - name: Check the OpenAPI spec is not stale
         run: |
           pnpm run swagger

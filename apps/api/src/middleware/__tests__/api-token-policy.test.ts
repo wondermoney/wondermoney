@@ -182,6 +182,12 @@ describe('API token scope policy', () => {
     }
   });
 
+  it('keeps MCP token authority at the upstream-defined POST mount scope', () => {
+    expect(apiTokenScopesForRequest('/v1/mcp', 'POST', '/')).toEqual(['mcp:read']);
+    expect(apiTokenScopesForRequest('/v1/mcp', 'POST', '/other')).toEqual(['mcp:read']);
+    expect(apiTokenScopesForRequest('/v1/mcp', 'GET', '/')).toEqual([]);
+  });
+
   it('never lets a token reach a forbidden mount, whatever the method', () => {
     for (const mount of API_TOKEN_FORBIDDEN_MOUNTS) {
       for (const method of ['GET', 'POST', 'PATCH', 'PUT', 'DELETE']) {

@@ -19,6 +19,7 @@ export default defineConfig({
       '@controller': path.resolve(__dirname, 'src/controller'),
       '@entity': path.resolve(__dirname, 'src/database/entity'),
       '@middleware': path.resolve(__dirname, 'src/middleware'),
+      '@openapi': path.resolve(__dirname, 'src/openapi'),
       '@route': path.resolve(__dirname, 'src/routes/v1'),
       '@service': path.resolve(__dirname, 'src/services'),
       '@utils': path.resolve(__dirname, 'src/utils'),
