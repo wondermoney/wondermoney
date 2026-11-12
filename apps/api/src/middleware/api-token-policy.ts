@@ -63,6 +63,9 @@ export const API_TOKEN_READ_MOUNTS: ReadonlySet<string> = new Set([
 export const API_TOKEN_FORBIDDEN_MOUNTS: ReadonlySet<string> = new Set([
   '/api/auth',
   '/v1/admin',
+  // Instance-wide sync health. Mounted outside `requireAuth`; `requireInstanceAdmin` answers a
+  // token with 404 itself, whatever its scopes or whose it is.
+  '/v1/admin/bank-sync',
   '/v1/auth',
   '/v1/banking',
   // Reachable only with a `calendar:read` token in the query string, never as a bearer.

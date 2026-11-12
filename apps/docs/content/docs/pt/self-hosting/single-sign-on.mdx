@@ -81,6 +81,8 @@ As contas novas seguem `SIGNUP_MODE` como qualquer outro registo: com `invite` s
 
 Com `OIDC_ADMIN_GROUPS=wondermoney-admins`, os membros desse grupo são administradores da instância. O WonderMoney lê os grupos em cada início de sessão através do fornecedor e dá ou retira a administração em conformidade, por isso tirar alguém do grupo retira-lhe a administração no início de sessão seguinte. Só essa resposta de sim ou não é guardada; o WonderMoney não guarda os tokens do fornecedor nem a lista de grupos. Sem `OIDC_ADMIN_GROUPS`, o início de sessão não mexe na administração.
 
+Os administradores podem abrir a página do [estado da sincronização bancária](/pt/docs/self-hosting/bank-sync-health). Essa página explica também como tornar alguém administrador sem início de sessão único.
+
 ## Endereços de email e contas existentes
 
 O token de ID tem de dizer que o endereço está verificado (`email_verified: true`); caso contrário, o início de sessão é recusado. Se o teu fornecedor não verifica endereços, `OIDC_ALLOW_UNVERIFIED_EMAIL=true` deixa entrar essas pessoas, como contas novas com o endereço por verificar.

@@ -1,3 +1,5 @@
+import type { EntityManager } from '@mikro-orm/postgresql';
+
 import type { AccountFinancialInstitutionProvider } from '@entity/AccountFinancialInstitution';
 import { BankConnectionStatus } from '@entity/BankConnection';
 
@@ -61,6 +63,14 @@ export interface BankConnectionRef {
   status: BankConnectionStatus;
   /** The owning `Tenant.tenantKey`, when the connection was made inside a household. */
   tenantId?: number;
+}
+
+/** The institution behind a stored connection, for instance-wide reporting. */
+export interface BankConnectionInstitution {
+  country?: string;
+  /** The same id the sync records on its attempts (`BankAccountsResult.institutionId`). */
+  id: string;
+  name: string;
 }
 
 export interface BankInstitution {
@@ -162,6 +172,14 @@ export interface BankProvider {
 
   /** `listInstitutions` / `startConnection` / `completeConnection` are the consent flow. */
   completeConnection(input: BankCompleteConnectionInput): Promise<BankCompleteConnectionResult>;
+
+  /**
+   * The institution behind each of these `BankConnection` keys, read from the provider's own
+   * stored detail without calling the provider. Used by the admin sync-health view; a key left
+   * out of the result has no known institution. Deleted connections are described too, so their
+   * past attempts still count for their bank.
+   */
+  describeInstitutions?(em: EntityManager, bankConnectionKeys: number[]): Promise<Map<number, BankConnectionInstitution>>;
 
   getBalances(connection: BankConnectionRef, accountId: string): Promise<BankProviderBalance[]>;
 

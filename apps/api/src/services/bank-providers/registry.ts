@@ -35,6 +35,14 @@ export function enabledBankProviderIds(): BankProviderId[] {
   return requested.filter((id) => PROVIDERS[id] !== undefined);
 }
 
+/**
+ * A compiled-in provider whether or not the operator enabled it. For reading what is already
+ * stored (instance-wide reporting), never for reaching a bank.
+ */
+export function compiledBankProvider(id: BankProviderId): BankProvider | undefined {
+  return Object.hasOwn(PROVIDERS, id) ? PROVIDERS[id] : undefined;
+}
+
 export function getBankProvider(id: BankProviderId): BankProvider | undefined {
   return isBankProviderEnabled(id) ? PROVIDERS[id] : undefined;
 }

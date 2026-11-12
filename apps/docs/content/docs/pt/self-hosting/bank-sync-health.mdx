@@ -1,0 +1,65 @@
+---
+title: Estado da sincronização bancária
+description: Vê que bancos falham a sincronização na tua instância antes de quem a usa reparar, numa página de administração ou num script.
+---
+
+Quando um banco muda alguma coisa ou um consentimento expira, as sincronizações começam a falhar sem alarido: a aplicação continua a mostrar os últimos saldos que obteve. A página do estado da sincronização bancária mostra, para toda a instância, quantas ligações estão em cada estado, que erros as sincronizações encontram e que bancos estão a falhar. Só os administradores da instância a podem abrir.
+
+## Tornar alguém administrador
+
+**Com início de sessão único**, define `OIDC_ADMIN_GROUPS`: os membros desses grupos são administradores, verificado em cada início de sessão. Vê [Início de sessão único](/pt/docs/self-hosting/single-sign-on#administradores).
+
+**Sem início de sessão único**, corre o comando `instance-admin` no contentor da API. A pessoa tem de ter conta primeiro.
+
+```bash
+docker compose exec api node dist/database/scripts/instance-admin.js grant tu@example.com
+docker compose exec api node dist/database/scripts/instance-admin.js list
+docker compose exec api node dist/database/scripts/instance-admin.js revoke tu@example.com
+```
+
+No Kubernetes, corre o mesmo comando com `kubectl -n wondermoney exec deploy/wondermoney-api -- node dist/database/scripts/instance-admin.js grant tu@example.com`.
+
+A alteração aplica-se ao pedido seguinte; ninguém precisa de voltar a iniciar sessão. Com `OIDC_ADMIN_GROUPS` definido, o início de sessão seguinte da pessoa através do fornecedor volta a definir a administração a partir dos grupos, por isso gere os administradores num só sítio.
+
+Um administrador inicia sessão como qualquer outra pessoa, com as mesmas regras de dois fatores: uma conta com autenticação de dois fatores introduz o código antes de ter sessão. Ativa a [autenticação de dois fatores](/pt/docs/settings-security-privacy/two-factor-authentication) nas contas de administração.
+
+## Abrir a página
+
+Vai ao teu `APP_URL` seguido de `/pt/admin/bank-sync` (ou `/en/` ou `/es/`), por exemplo `https://money.example.com/pt/admin/bank-sync`. Não há ligação para ela nos menus. Quem não é administrador recebe o mesmo "página não encontrada" que num endereço que não existe.
+
+## O que mostra
+
+| Secção | Mostra |
+|---|---|
+| Ligações | Todas as ligações bancárias por estado: ligada, expirada, erro, autorizada, iniciada mas nunca ligada. E quantas estão com falhas há mais de 48 horas |
+| Instituições | Para cada banco, as sincronizações dos últimos 7 dias, quantas falharam, a taxa de sucesso e quantas das suas ligações estão com falhas. Os bancos que precisam de atenção aparecem primeiro |
+| Erros | Sincronizações por código de erro, nas últimas 24 horas e nos últimos 7 dias |
+| Com falhas há mais de 48 horas | Uma linha por ligação com falhas: o banco, o último código de erro, o estado da ligação, quando começaram as falhas e a última sincronização bem-sucedida |
+
+Um banco **precisa de atenção** quando duas ou mais das suas ligações estão com falhas há mais de 48 horas, ou quando menos de metade de pelo menos três sincronizações dos últimos 7 dias correu bem.
+
+Uma ligação está **com falhas** quando a última sincronização falhou e as falhas começaram há mais de 48 horas. A contagem começa na primeira falha depois da última sincronização que trouxe dados; uma sincronização parcial, em que algumas contas sincronizaram, recomeça-a. Uma ligação que alguém removeu não aparece.
+
+### Códigos de erro
+
+| Código | Normalmente significa |
+|---|---|
+| `consent_expired`, `authentication`, `invalid_requisition`, `cancelled` | O banco já não aceita o consentimento. A pessoa tem de voltar a ligar o banco em **Definições → Ligações** |
+| `rate_limited` | O banco limitou a frequência dos pedidos. As sincronizações retomam quando o limite passar |
+| `provider_unavailable`, `institution_unavailable`, `timeout` | O agregador ou o banco esteve em baixo ou lento. Normalmente resolve-se sozinho |
+| `account_phase_failed`, `transaction_phase_failed`, `data_validation`, `internal`, `unknown` | Algo falhou neste servidor. O registo do worker (`docker compose logs worker`) tem os detalhes |
+
+## O que não mostra
+
+A página e os endpoints por trás dela devolvem apenas contagens, bancos, estados, códigos de erro e datas. Nunca incluem um nome, um endereço de email, um agregado familiar, o nome ou o número de uma conta, nem uma transação, e não trazem nenhum identificador de ligação. Não podes alterar nem repetir uma ligação a partir daqui; quem a tem volta a ligá-la nas suas definições.
+
+## A partir de um script
+
+Os mesmos dados estão disponíveis em JSON com a chave de API de administração (`ADMIN_API_KEY`):
+
+```bash
+curl -H "x-api-key: $ADMIN_API_KEY" https://money.example.com/v1/admin/bank-sync/health
+curl -H "x-api-key: $ADMIN_API_KEY" https://money.example.com/v1/admin/bank-sync/failing
+```
+
+Um token de API pessoal não os consegue ler, nem o de um administrador: a API responde 404. Estes endpoints não fazem parte da [referência pública da API](/pt/docs/api/reference).
