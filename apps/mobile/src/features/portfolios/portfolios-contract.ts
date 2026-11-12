@@ -580,10 +580,18 @@ export const PORTFOLIO_PERFORMANCE_PERIODS = ['1M', '3M', '6M', 'YTD', '1Y', 'AL
 export type PortfolioPerformancePeriod = typeof PORTFOLIO_PERFORMANCE_PERIODS[number]
 
 const performancePointSchema = z.object({ date: dateOnly, value: finite })
+/**
+ * A value-series day. `netContribution` is sent only on days with a buy or sale: positive is money
+ * put in, negative money taken out, null a trade with no amount in the viewer's currency. Optional,
+ * since older APIs do not send it.
+ */
+const performanceValuePointSchema = performancePointSchema.extend({ netContribution: finiteNullable.optional() })
 const performanceReadinessSchema = z.object({ status: z.string(), note: z.string().nullable().optional() })
 
 export const portfolioPerformanceResponseSchema = z.object({
-  dataPoints: z.array(performancePointSchema),
+  dataPoints: z.array(performanceValuePointSchema),
+  // The cumulative time-weighted return, % since the first day: money put in or taken out leaves
+  // it flat. A day that could not be measured has no point, so its dates are a subset of dataPoints'.
   normalizedDataPoints: z.array(performancePointSchema).optional(),
   benchmarkDataPoints: z.array(performancePointSchema).optional(),
   normalizedBenchmarkDataPoints: z.array(performancePointSchema).optional(),
@@ -606,6 +614,7 @@ export const portfolioPerformanceResponseSchema = z.object({
 })
 export type PortfolioPerformanceResponseDto = z.infer<typeof portfolioPerformanceResponseSchema>
 export type PortfolioPerformancePoint = z.infer<typeof performancePointSchema>
+export type PortfolioPerformanceValuePoint = z.infer<typeof performanceValuePointSchema>
 
 /** `null` is the household aggregate (`/v1/portfolio/performance`), as web's chart on /portfolio. */
 export const createPortfolioPerformanceEndpoint = (portfolioId: number | null, period: PortfolioPerformancePeriod = 'YTD') => readEndpoint({

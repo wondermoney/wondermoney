@@ -121,7 +121,7 @@ export function PortfolioDetailScreen({ state, performance, dividendIncome = { s
               <Section title={t('portfolioSections.holdings')} variant="open">
                 <HoldingsList holdings={data.holdings} locale={locale} onOpen={(holding) => onOpenHolding(holding.id)} />
               </Section>
-              <PortfolioPerformanceChart {...performance} palette={palette} />
+              <PortfolioPerformanceChart {...performance} currency={data.currency} palette={palette} />
               {allocation ? <PortfolioAllocationSection locale={locale} state={allocation} title={t('portfolioSections.allocation')} /> : null}
               {topMovers ? <PortfolioTopMoversSection currency={data.currency} locale={locale} state={topMovers} /> : null}
               <PortfolioQuickStatsSection bestPerformer={data.bestPerformer} biggestPosition={data.biggestPosition} holdingsCount={data.holdingsCount} locale={locale} worstPerformer={data.worstPerformer} />

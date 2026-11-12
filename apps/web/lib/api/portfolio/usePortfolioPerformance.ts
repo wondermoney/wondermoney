@@ -28,6 +28,16 @@ export interface PerformanceDataPoint {
   value: number;
 }
 
+/** A point of the value series (`dataPoints`). */
+export interface PerformanceValueDataPoint extends PerformanceDataPoint {
+  /**
+   * Buys minus sales that day, in the viewer's currency: positive is money put
+   * in, negative money taken out, null a trade with no amount in that
+   * currency. Present only on days with a trade.
+   */
+  netContribution?: number | null;
+}
+
 /**
  * Whether every portfolio's history could be converted into the viewer's
  * currency. A day with no exchange rate for a portfolio leaves it out and is
@@ -48,9 +58,16 @@ export interface PerformanceResponse {
     benchmark?: PortfolioBenchmarkReadiness;
     performance?: PortfolioPerformanceReadiness;
   };
-  dataPoints: PerformanceDataPoint[];
+  dataPoints: PerformanceValueDataPoint[];
   minDataPointsForComparison: number;
+  /** Benchmark price, % since the portfolio's first day: no flows, so the same basis. */
   normalizedBenchmarkDataPoints?: PerformanceDataPoint[];
+  /**
+   * Cumulative time-weighted return, % since the first day: a deposit or
+   * withdrawal with flat prices leaves it flat. A day that could not be
+   * measured (no snapshot) has no point, so its dates are a subset of
+   * `dataPoints`'.
+   */
   normalizedDataPoints?: PerformanceDataPoint[];
   period: string;
   portfolioHistoryStatus?: PortfolioPerformanceReadinessStatus;

@@ -6,7 +6,7 @@ import { anyOf, sqlQuery } from '@app/database/sql';
 import type { Appuser } from '@entity/Appuser';
 import { Portfolio } from '@entity/Portfolio';
 import { FEED_RATES_ONLY, loadRateTable } from '@service/currency/exchange-rate';
-import { sumMoney } from '@utils/money';
+import { roundDisplay, sumMoney } from '@utils/money';
 
 import assetPriceService from './asset-price.service';
 import { type AssetClassDrift, computeAllocationDrift, generateGuidanceText } from './portfolio-allocation-drift';
@@ -15,7 +15,9 @@ import { historyInViewerCurrency, historyRatePairs } from './portfolio-history-c
 import portfolioHoldingsService from './portfolio-holdings.service';
 import { filterValidHoldings } from './portfolio-holdings.utils';
 import {
+  calculateTimeWeightedReturn,
   combinePeriodMeasures,
+  combineReturnSeries,
   findSnapshotPointOnOrBefore,
   loadCashFlowsInViewerCurrency,
   loadPortfolioSnapshotValues,
@@ -27,6 +29,7 @@ import {
   periodReturnsOf,
   type PortfolioPeriodMeasure,
   resolveViewerCurrency,
+  type ReturnSeries,
   type SnapshotPoint,
   snapshotSeriesInViewerCurrency,
   utcDay,
@@ -95,6 +98,15 @@ interface PerformanceDataPoint {
 }
 
 /**
+ * A day of the value history. `netContribution` is set only on a day with a buy or a sale: the
+ * money put in (negative when taken out), so a chart can mark a deposit or a withdrawal; null when
+ * a trade that day has no amount in the viewer's currency.
+ */
+interface ValueDataPoint extends PerformanceDataPoint {
+  netContribution?: null | number;
+}
+
+/**
  * Whether every snapshot could be valued in the viewer's currency. A day that left one out
  * (no exchange rate) is listed; its point counts only what could be converted.
  */
@@ -110,9 +122,14 @@ interface PerformanceResponse {
   benchmarkSymbol?: string;
   /** Absent only when the history is empty because a holding is invalid. */
   completeness?: PerformanceCompleteness;
-  dataPoints: PerformanceDataPoint[];
+  dataPoints: ValueDataPoint[];
   minDataPointsForComparison: number;
+  /** The benchmark's price as a % change since the first portfolio day: a return with no flows. */
   normalizedBenchmarkDataPoints?: PerformanceDataPoint[];
+  /**
+   * The cumulative time-weighted return (%) since the first day, so money put in or taken out
+   * does not move it. A day it could not measure (a missing snapshot) has no point.
+   */
   normalizedDataPoints?: PerformanceDataPoint[];
   period: string;
   portfolioHistoryStatus: PortfolioHistoryStatus;
@@ -209,6 +226,22 @@ function getPortfolioHistoryStatus(dataPoints: PerformanceDataPoint[]): Portfoli
   return 'ready';
 }
 
+/**
+ * The money put in on each day with a buy or a sale: buys (with fees) less sales (net of fees).
+ * Null for a day with a trade that has no amount in the viewer's currency.
+ */
+function netContributionsByDay(flows: PeriodCashFlow[]): Map<string, null | number> {
+  const byDay = new Map<string, null | number>();
+  for (const flow of flows) {
+    const day = utcDay(flow.date);
+    if (flow.kind === 'DIVIDEND') continue;
+    const sum = byDay.has(day) ? byDay.get(day) : 0;
+    byDay.set(day, sum == null || flow.amount == null ? null : roundDisplay(sum - flow.amount));
+  }
+  return byDay;
+}
+
+/** Prices as a % change since the first: the benchmark has no flows, so this is its return. */
 function normalizeToPercentReturns(dataPoints: PerformanceDataPoint[]): PerformanceDataPoint[] {
   if (!dataPoints.length) return [];
   const firstValue = dataPoints[0]!.value;
@@ -523,7 +556,7 @@ export class PortfolioDashboardService {
       this.loadHistoryInViewerCurrency(appuser, portfolioIds, periodStartDate, tenantKey),
       benchmarkPromise,
     ]);
-    const { completeness, dataPoints } = history;
+    const { completeness, dataPoints, normalizedDataPoints } = history;
     const portfolioHistoryStatus = getPortfolioHistoryStatus(dataPoints);
     const filteredBenchmarkPrices = filterBenchmarkToPortfolioRange(benchmarkPrices, dataPoints);
     const benchmarkStatus = getBenchmarkStatus(portfolioHistoryStatus, filteredBenchmarkPrices);
@@ -536,7 +569,7 @@ export class PortfolioDashboardService {
       dataPoints,
       minDataPointsForComparison: MIN_PERFORMANCE_DATA_POINTS,
       normalizedBenchmarkDataPoints: normalizeToPercentReturns(filteredBenchmarkPrices),
-      normalizedDataPoints: normalizeToPercentReturns(dataPoints),
+      normalizedDataPoints,
       period,
       portfolioHistoryStatus,
       readiness: {
@@ -547,18 +580,38 @@ export class PortfolioDashboardService {
   }
 
   /**
-   * The portfolios' daily history in the viewer's currency. Each snapshot is read in the currency
-   * it was stored in (its owner's, or the portfolio's when no owner-currency value was stored) and
-   * converted at its day's rate; see `historyInViewerCurrency`.
+   * The portfolios' daily history in the viewer's currency, and its time-weighted return. Each
+   * snapshot is read in the currency it was stored in (its owner's, or the portfolio's when no
+   * owner-currency value was stored) and converted at its day's rate; see `historyInViewerCurrency`.
+   * The return is measured as the period returns are (`combineReturnSeries`), from the first day,
+   * with each portfolio's own buys and sales as flows; each day with a trade is marked.
    */
-  private async loadHistoryInViewerCurrency(appuser: Appuser, portfolioIds: number[], periodStartDate: Date, tenantKey?: number): Promise<{ completeness: PerformanceCompleteness; dataPoints: PerformanceDataPoint[] }> {
+  private async loadHistoryInViewerCurrency(appuser: Appuser, portfolioIds: number[], periodStartDate: Date, tenantKey?: number): Promise<{ completeness: PerformanceCompleteness; dataPoints: ValueDataPoint[]; normalizedDataPoints: PerformanceDataPoint[] }> {
     const viewerCurrency = await resolveViewerCurrency(appuser);
-    if (portfolioIds.length === 0) return { completeness: { currencyCode: viewerCurrency, incompleteDates: [], isComplete: true }, dataPoints: [] };
+    if (portfolioIds.length === 0) return { completeness: { currencyCode: viewerCurrency, incompleteDates: [], isComplete: true }, dataPoints: [], normalizedDataPoints: [] };
 
-    const snapshots = await loadPortfolioSnapshotValues(portfolioIds, periodStartDate, tenantKey);
-    const rates = await loadRateTable(DI.em, historyRatePairs(snapshots, viewerCurrency), { from: periodStartDate, to: new Date() }, FEED_RATES_ONLY);
+    const window = { from: periodStartDate, to: new Date() };
+    const [snapshots, recordedFlows] = await Promise.all([
+      loadPortfolioSnapshotValues(portfolioIds, periodStartDate, tenantKey),
+      Promise.all(portfolioIds.map((portfolioKey) => portfolioHoldingsService.getInvestmentCashFlows(appuser, tenantKey, portfolioKey))),
+    ]);
+    const rates = await loadRateTable(DI.em, historyRatePairs(snapshots, viewerCurrency), window, FEED_RATES_ONLY);
     const { dataPoints, incompleteDates } = historyInViewerCurrency(snapshots, viewerCurrency, rates);
-    return { completeness: { currencyCode: viewerCurrency, incompleteDates, isComplete: incompleteDates.length === 0 }, dataPoints };
+    const completeness = { currencyCode: viewerCurrency, incompleteDates, isComplete: incompleteDates.length === 0 };
+    const firstDay = dataPoints[0]?.date;
+    if (!firstDay) return { completeness, dataPoints, normalizedDataPoints: [] };
+
+    const flowsByPortfolio = new Map(await Promise.all(portfolioIds.map(async (portfolioKey, index) =>
+      [portfolioKey, await loadCashFlowsInViewerCurrency(recordedFlows[index] ?? [], viewerCurrency, new Date(`${utcDay(periodStartDate)}T00:00:00.000Z`))] as const)));
+    const valuesByPortfolio = await snapshotSeriesInViewerCurrency(snapshots, viewerCurrency, window);
+    const series: ReturnSeries[] = [...valuesByPortfolio].map(([portfolioKey, points]) => ({ flows: flowsByPortfolio.get(portfolioKey) ?? [], snapshots: points }));
+    const combined = combineReturnSeries(series, firstDay);
+    const days = new Set(dataPoints.map((point) => point.date));
+    const normalizedDataPoints = calculateTimeWeightedReturn(combined.snapshots, combined.flows).index.filter((point) => days.has(point.date));
+
+    const contributions = netContributionsByDay([...flowsByPortfolio.values()].flat());
+    const marked = dataPoints.map((point) => (contributions.has(point.date) ? { ...point, netContribution: contributions.get(point.date) ?? null } : point));
+    return { completeness, dataPoints: marked, normalizedDataPoints };
   }
 
   /**

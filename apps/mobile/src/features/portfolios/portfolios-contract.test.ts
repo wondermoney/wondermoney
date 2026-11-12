@@ -121,6 +121,23 @@ describe('portfolio endpoint contracts', () => {
     expect(portfolioPerformanceResponseSchema.safeParse({ ...response, dataPoints: [{ date: '2026/07/01', value: 1000 }] }).success).toBe(false)
   })
 
+  it('reads the money put in or taken out on a value day, and still parses days and APIs without it', () => {
+    const base = { minDataPointsForComparison: 2, period: 'YTD' }
+    const dataPoints = [
+      { date: '2026-07-01', value: 1000 },
+      { date: '2026-07-02', value: 1500, netContribution: 500 },
+      { date: '2026-07-03', value: 1200, netContribution: -300 },
+      { date: '2026-07-04', value: 1200, netContribution: null },
+    ]
+    // The time-weighted series may skip a day it could not measure.
+    const normalizedDataPoints = [{ date: '2026-07-01', value: 0 }, { date: '2026-07-02', value: 0 }, { date: '2026-07-04', value: 0.5 }]
+    const parsed = portfolioPerformanceResponseSchema.parse({ ...base, dataPoints, normalizedDataPoints })
+    expect(parsed.dataPoints.map((point) => point.netContribution)).toEqual([undefined, 500, -300, null])
+    expect(parsed.normalizedDataPoints).toEqual(normalizedDataPoints)
+    expect(portfolioPerformanceResponseSchema.parse({ ...base, dataPoints: [{ date: '2026-07-01', value: 1000, netContribution: 5, extra: 1 }] }).dataPoints[0]).toEqual({ date: '2026-07-01', value: 1000, netContribution: 5 })
+    expect(portfolioPerformanceResponseSchema.safeParse({ ...base, dataPoints: [{ date: '2026-07-01', value: 1000, netContribution: '500' }] }).success).toBe(false)
+  })
+
   it('compares target allocations by asset-class membership and percentage, not key order', () => {
     expect(portfolioTargetAllocationsEqual(null, null)).toBe(true)
     expect(portfolioTargetAllocationsEqual(null, { 'Equities': 100 })).toBe(false)

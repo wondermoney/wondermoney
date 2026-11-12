@@ -729,6 +729,93 @@ describe('portfolio dashboard service', () => {
     });
   });
 
+  describe('performance chart on the time-weighted return', () => {
+    const row = (portfolioKey: number, date: string, value: number) => ({ currency_code: 'EUR', portfolio_key: portfolioKey, snapshot_date: date, value: String(value) });
+    const trade = (kind: 'BUY' | 'SELL', date: string, amount: number) => ({ amount: kind === 'BUY' ? -amount : amount, currencyCode: 'EUR', date: new Date(`${date}T10:00:00.000Z`), kind });
+
+    function setupHistory(rows: ReturnType<typeof row>[], flowsByPortfolio: Record<number, ReturnType<typeof trade>[]>) {
+      setupDashboardMocks();
+      Object.assign(DI.em, {
+        find: vi.fn().mockResolvedValue(Object.keys(flowsByPortfolio).map((key) => ({ portfolioKey: Number(key) }))),
+        findOne: vi.fn().mockResolvedValue({ benchmarkSymbol: 'SPY' }),
+        getKysely: databaseReturning(rows),
+      });
+      portfolioHoldingsServiceMock.getInvestmentCashFlows.mockImplementation((_appuser: Appuser, _tenantKey: number, portfolioKey: number) =>
+        Promise.resolve(flowsByPortfolio[portfolioKey] ?? []));
+    }
+
+    afterEach(() => {
+      portfolioHoldingsServiceMock.getInvestmentCashFlows.mockReset().mockResolvedValue([]);
+    });
+
+    it('stays flat through a large deposit when prices do not move, and marks the deposit day', async () => {
+      setupHistory(
+        [row(1, '2024-01-01', 1000), row(1, '2024-01-02', 1000), row(1, '2024-01-03', 11_000), row(1, '2024-01-04', 11_000)],
+        { 1: [trade('BUY', '2024-01-03', 10_000)] },
+      );
+
+      const result = await service.getPerformanceData(appuser, 1, 'ALL');
+
+      expect(result.normalizedDataPoints?.map((point) => point.value)).toEqual([0, 0, 0, 0]);
+      expect(result.dataPoints.map((point) => point.value)).toEqual([1000, 1000, 11_000, 11_000]);
+      expect(result.dataPoints.map((point) => point.netContribution)).toEqual([undefined, undefined, 10_000, undefined]);
+    });
+
+    it('stays flat through a withdrawal when prices do not move, and marks it as money taken out', async () => {
+      setupHistory(
+        [row(1, '2024-01-01', 10_000), row(1, '2024-01-02', 4000), row(1, '2024-01-03', 4000)],
+        { 1: [trade('SELL', '2024-01-02', 6000)] },
+      );
+
+      const result = await service.getPerformanceData(appuser, 1, 'ALL');
+
+      expect(result.normalizedDataPoints?.map((point) => point.value)).toEqual([0, 0, 0]);
+      expect(result.dataPoints[1]?.netContribution).toBe(-6000);
+    });
+
+    it('is the % change since the first day when nothing was put in or taken out', async () => {
+      const values = [1000, 1100, 1050, 1210.5];
+      setupHistory(values.map((value, day) => row(1, `2024-01-0${day + 1}`, value)), { 1: [] });
+
+      const result = await service.getPerformanceData(appuser, 1, 'ALL');
+
+      const sinceFirst = values.map((value) => ((value - 1000) / 1000) * 100);
+      expect(result.normalizedDataPoints).toHaveLength(values.length);
+      result.normalizedDataPoints?.forEach((point, index) => { expect(point.value).toBeCloseTo(sinceFirst[index] ?? Number.NaN, 10); });
+      expect(result.dataPoints.every((point) => point.netContribution === undefined)).toBe(true);
+    });
+
+    it('measures the household the same way, a second portfolio opened in the period a deposit rather than a gain', async () => {
+      setupHistory(
+        [
+          row(1, '2024-01-01', 1000), row(1, '2024-01-02', 1000), row(1, '2024-01-03', 1000),
+          row(2, '2024-01-02', 5000), row(2, '2024-01-03', 5000),
+        ],
+        { 1: [], 2: [trade('BUY', '2024-01-02', 5000)] },
+      );
+
+      const result = await service.getPerformanceData(appuser, null, 'ALL');
+
+      expect(result.dataPoints.map((point) => point.value)).toEqual([1000, 6000, 6000]);
+      expect(result.normalizedDataPoints?.map((point) => point.value)).toEqual([0, 0, 0]);
+      expect(result.dataPoints[1]?.netContribution).toBe(5000);
+    });
+
+    it('keeps the household flat when a portfolio is sold out and has no more snapshots', async () => {
+      setupHistory(
+        [
+          row(1, '2024-01-01', 1000), row(1, '2024-01-02', 1000), row(1, '2024-01-03', 1000),
+          row(2, '2024-01-01', 3000), row(2, '2024-01-02', 3000),
+        ],
+        { 1: [], 2: [trade('SELL', '2024-01-03', 3000)] },
+      );
+
+      const result = await service.getPerformanceData(appuser, null, 'ALL');
+
+      expect(result.normalizedDataPoints?.map((point) => point.value)).toEqual([0, 0, 0]);
+    });
+  });
+
   describe('period returns on request', () => {
     const now = new Date();
     const dayOffset = (days: number) => format(subDays(now, days), 'yyyy-MM-dd');
