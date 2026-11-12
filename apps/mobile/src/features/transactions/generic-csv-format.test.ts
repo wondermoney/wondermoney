@@ -9,7 +9,6 @@ import {
   isCsvFileName,
   isOfxFileName,
   isQifFileName,
-  rowsFailedCounts,
 } from './generic-csv-format'
 
 describe('importFlowForAccount', () => {
@@ -79,19 +78,4 @@ describe('isQifFileName', () => {
 describe('isCamtFileName', () => {
   it.each(['a.xml', 'A.XML', 'statement.xml '])('accepts %s', (name) => expect(isCamtFileName(name)).toBe(true))
   it.each(['a.csv', 'a.xml.txt', 'xml'])('refuses %s', (name) => expect(isCamtFileName(name)).toBe(false))
-})
-
-describe('rowsFailedCounts', () => {
-  const rows = { failed: 1, total: 2 }
-
-  it.each(['partial', 'failed'])('reports the rejected rows of a %s generic import', (outcome) => {
-    expect(rowsFailedCounts('generic', outcome, rows)).toEqual(rows)
-  })
-
-  it('says nothing for a bank import, a succeeded import, no rejected rows, or no counts', () => {
-    expect(rowsFailedCounts('bank', 'partial', rows)).toBeNull()
-    expect(rowsFailedCounts('generic', 'succeeded', rows)).toBeNull()
-    expect(rowsFailedCounts('generic', 'failed', { failed: 0, total: 2 })).toBeNull()
-    expect(rowsFailedCounts('generic', 'partial', null)).toBeNull()
-  })
 })

@@ -1082,21 +1082,12 @@
       "templateFailed": "No se pudo compartir la plantilla en este dispositivo.",
       "typeCodes": "Códigos de tipo",
       "showTypeCodes": "Mostrar códigos de tipo",
-      "hideTypeCodes": "Ocultar códigos de tipo",
-      "rowsFailed": "No se pudieron importar {{failed}} de {{total}} filas. Revisa sus columnas, fechas, importes y códigos de tipo con el formato."
+      "hideTypeCodes": "Ocultar códigos de tipo"
     },
     "chooseFile": "Elegir archivo",
     "phases": {
       "uploading": "Subiendo archivo…",
-      "starting": "Iniciando importación…",
-      "processing": "Procesando tu extracto…"
-    },
-    "outcomes": {
-      "succeeded": "Importación completa. Se añadieron nuevas transacciones.",
-      "partial": "Importación completa. Algunas filas no se pudieron importar.",
-      "needs_action": "Esta importación necesita revisión manual. Termínala en wonder.money en la web.",
-      "stale": "Esta importación no se pudo completar a tiempo. Inténtalo de nuevo.",
-      "failed": "No se pudo importar este archivo."
+      "starting": "Iniciando importación…"
     },
     "importAnother": "Importar otro archivo",
     "done": "Listo",
@@ -1111,7 +1102,65 @@
       "unsupported-bank": "Este formato de banco aún no es compatible.",
       "general": "No se pudo completar la importación. Comprueba tu conexión e inténtalo de nuevo.",
       "unknown-format": "Esta versión de la app no puede importar en esta cuenta. Actualiza la app o importa en la web.",
-      "csv-only": "Esta cuenta importa un archivo CSV con el formato indicado. Elige un archivo .csv, .ofx, .qfx, .qif o .xml."
+      "csv-only": "Esta cuenta importa un archivo CSV con el formato indicado. Elige un archivo .csv, .ofx, .qfx, .qif o .xml.",
+      "conflict": "Esta importación cambió mientras tanto. Revísala e inténtalo de nuevo."
+    },
+    "review": {
+      "reading": "Leyendo el archivo…",
+      "readStalled": "La lectura del archivo se detuvo antes de terminar. Vuelve a intentarlo para leerlo de nuevo.",
+      "importing": "Importando… {{imported}} de {{total}} transacciones hasta ahora.",
+      "stalled": "La importación se detuvo antes de terminar. Vuelve a intentarlo para seguir donde se quedó; nada se importa dos veces.",
+      "readFailed": "No pudimos leer este archivo. Elige una exportación del extracto en CSV o Excel.",
+      "expired": "Esta importación caducó antes de terminar. Empieza de nuevo con el archivo.",
+      "unsupported": "Esta versión de la app no puede mostrar esta importación. Actualiza la app o termínala en la web.",
+      "needsWeb": "Este archivo tiene sus propias categorías para asociar, algo que la app aún no hace. No se importó nada: cancela esta importación e importa el archivo en la web.",
+      "loadFailed": "No se pudo cargar esta importación. Comprueba tu conexión e inténtalo de nuevo.",
+      "unnamed": "Importación del {{date}}",
+      "summary": "No se importa nada hasta que confirmes. Las transacciones nuevas están incluidas; las que ya están en la cuenta se omiten.",
+      "filter": "Mostrar",
+      "filters": {
+        "all": "Todas ({{count}})",
+        "new": "Nuevas ({{count}})",
+        "duplicate": "Ya en la cuenta ({{count}})",
+        "possible_duplicate": "Posibles duplicados ({{count}})",
+        "invalid": "No se pudieron leer ({{count}})"
+      },
+      "status": {
+        "new": "Nueva",
+        "duplicate": "Ya en la cuenta",
+        "possible_duplicate": "Posible duplicado",
+        "invalid": "No se pudo leer",
+        "imported": "Importada",
+        "skipped": "Omitida",
+        "failed": "No se pudo importar"
+      },
+      "row": "Fila {{row}}",
+      "includeRow": "Importar la fila {{row}}",
+      "includeAll": "Incluir todas",
+      "skipAll": "Omitir todas",
+      "commit_one": "Importar {{count}} transacción",
+      "commit_other": "Importar {{count}} transacciones",
+      "commitNothing": "Nada que importar",
+      "cancel": "Cancelar importación",
+      "page": "Página {{page}} de {{pages}}",
+      "previous": "Anterior",
+      "next": "Siguiente",
+      "empty": "No hay filas aquí.",
+      "mappingTitle": "Este archivo tiene varias cuentas. Elige adónde va cada una.",
+      "mappingSource_one": "{{label}} ({{count}} fila)",
+      "mappingSource_other": "{{label}} ({{count}} filas)",
+      "mappingChoose": "Elige una cuenta",
+      "mappingSave": "Guardar cuentas",
+      "dateOrderTitle": "Estas fechas pueden ser día primero o mes primero.",
+      "dateOrderHintDayFirst": "El archivo no lo indica, así que se leyeron con el día primero (15/01/2026 es el 15 de enero). Elige el otro orden si es incorrecto.",
+      "dateOrderHintMonthFirst": "El archivo no lo indica, así que se leyeron con el mes primero (01/15/2026 es el 15 de enero). Elige el otro orden si es incorrecto.",
+      "dayFirst": "Día primero (31/01/2026)",
+      "monthFirst": "Mes primero (01/31/2026)",
+      "done_one": "{{count}} transacción importada, {{skipped}} omitidas.",
+      "done_other": "{{count}} transacciones importadas, {{skipped}} omitidas.",
+      "doneFailed_one": "{{count}} fila no se pudo importar.",
+      "doneFailed_other": "{{count}} filas no se pudieron importar.",
+      "detailsDeleted": "Los detalles fila a fila de esta importación ya no se conservan: se eliminan 7 días después de una importación. Las transacciones importadas siguen en la cuenta."
     }
   },
   "transactionOcr": {

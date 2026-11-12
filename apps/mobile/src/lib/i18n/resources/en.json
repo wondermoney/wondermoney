@@ -1082,21 +1082,12 @@
       "templateFailed": "Could not share the template on this device.",
       "typeCodes": "Type codes",
       "showTypeCodes": "Show type codes",
-      "hideTypeCodes": "Hide type codes",
-      "rowsFailed": "{{failed}} of {{total}} rows couldn't be imported. Check their columns, dates, amounts and type codes against the format."
+      "hideTypeCodes": "Hide type codes"
     },
     "chooseFile": "Choose file",
     "phases": {
       "uploading": "Uploading file…",
-      "starting": "Starting import…",
-      "processing": "Processing your statement…"
-    },
-    "outcomes": {
-      "succeeded": "Import complete. New transactions were added.",
-      "partial": "Import complete. Some rows could not be imported.",
-      "needs_action": "This import needs manual review. Finish it on wonder.money on the web.",
-      "stale": "This import could not be completed in time. Try again.",
-      "failed": "This file could not be imported."
+      "starting": "Starting import…"
     },
     "importAnother": "Import another file",
     "done": "Done",
@@ -1111,7 +1102,65 @@
       "unsupported-bank": "This bank format is not supported yet.",
       "general": "Could not complete the import. Check your connection and try again.",
       "unknown-format": "This version of the app can't import into this account. Update the app, or import on the web.",
-      "csv-only": "This account imports a CSV file in the format shown. Choose a .csv, .ofx, .qfx, .qif or .xml file."
+      "csv-only": "This account imports a CSV file in the format shown. Choose a .csv, .ofx, .qfx, .qif or .xml file.",
+      "conflict": "This import changed in the meantime. Check it and try again."
+    },
+    "review": {
+      "reading": "Reading your file…",
+      "readStalled": "Reading the file stopped before it finished. Try again to read it again.",
+      "importing": "Importing… {{imported}} of {{total}} transactions so far.",
+      "stalled": "The import stopped before it finished. Try again to carry on from where it stopped; nothing is imported twice.",
+      "readFailed": "We couldn't read this file. Choose a CSV or Excel export of your statement.",
+      "expired": "This import expired before it was finished. Start again with the file.",
+      "unsupported": "This version of the app can't show this import. Update the app, or finish it on the web.",
+      "needsWeb": "This file has its own categories to match, which the app can't do yet. Nothing was imported: cancel this import and import the file on the web.",
+      "loadFailed": "Could not load this import. Check your connection and try again.",
+      "unnamed": "Import of {{date}}",
+      "summary": "Nothing is imported until you confirm. New transactions are included; ones already in the account are skipped.",
+      "filter": "Show",
+      "filters": {
+        "all": "All ({{count}})",
+        "new": "New ({{count}})",
+        "duplicate": "Already in the account ({{count}})",
+        "possible_duplicate": "Possible duplicates ({{count}})",
+        "invalid": "Couldn't be read ({{count}})"
+      },
+      "status": {
+        "new": "New",
+        "duplicate": "Already in the account",
+        "possible_duplicate": "Possible duplicate",
+        "invalid": "Couldn't be read",
+        "imported": "Imported",
+        "skipped": "Skipped",
+        "failed": "Couldn't be imported"
+      },
+      "row": "Row {{row}}",
+      "includeRow": "Import row {{row}}",
+      "includeAll": "Include all",
+      "skipAll": "Skip all",
+      "commit_one": "Import {{count}} transaction",
+      "commit_other": "Import {{count}} transactions",
+      "commitNothing": "Nothing to import",
+      "cancel": "Cancel import",
+      "page": "Page {{page}} of {{pages}}",
+      "previous": "Previous",
+      "next": "Next",
+      "empty": "No rows here.",
+      "mappingTitle": "This file holds several accounts. Choose where each one goes.",
+      "mappingSource_one": "{{label}} ({{count}} row)",
+      "mappingSource_other": "{{label}} ({{count}} rows)",
+      "mappingChoose": "Choose an account",
+      "mappingSave": "Save accounts",
+      "dateOrderTitle": "These dates could be day first or month first.",
+      "dateOrderHintDayFirst": "The file doesn't say, so they were read day first (15/01/2026 is 15 January). Choose the other order if that's wrong.",
+      "dateOrderHintMonthFirst": "The file doesn't say, so they were read month first (01/15/2026 is 15 January). Choose the other order if that's wrong.",
+      "dayFirst": "Day first (31/01/2026)",
+      "monthFirst": "Month first (01/31/2026)",
+      "done_one": "{{count}} transaction imported, {{skipped}} skipped.",
+      "done_other": "{{count}} transactions imported, {{skipped}} skipped.",
+      "doneFailed_one": "{{count}} row couldn't be imported.",
+      "doneFailed_other": "{{count}} rows couldn't be imported.",
+      "detailsDeleted": "The row-by-row details of this import are no longer kept: they are deleted 7 days after an import. The imported transactions stay in the account."
     }
   },
   "transactionOcr": {
