@@ -3,7 +3,7 @@ import { z } from 'zod';
 
 import { statementMappingSchema } from '@service/account/account-statement-mapping.schema';
 import { MAX_PAGE_SIZE } from '@service/transaction-import/transaction-import.service';
-import { positiveIntId } from '@validators/shared';
+import { importFileNameInput, positiveIntId } from '@validators/shared';
 
 const sessionParams = z.object({ importId: z.uuid() });
 const options = z
@@ -14,10 +14,11 @@ const options = z
   })
   .strict();
 
-/** `POST /v1/transaction-import-sessions`: the account, the format, and the file when it is already uploaded for that account. */
+/** `POST /v1/transaction-import-sessions`: the account, the format, and the file when it is already uploaded for that account (with the name it had). */
 export const createTransactionImportSchema = z.object({
   body: z.object({
     accountId: positiveIntId,
+    fileName: importFileNameInput.optional(),
     format: z.enum(transactionImport.IMPORT_FORMATS),
     key: z.string().min(1).max(170).optional(),
     options: options.optional(),

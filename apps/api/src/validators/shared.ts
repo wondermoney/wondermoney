@@ -54,3 +54,10 @@ export function boundedLimit(options: { defaultValue: number; max: number; min?:
     .refine((v) => Number.isInteger(v) && Number.isSafeInteger(v) && v >= min && v <= options.max, { message: `Must be between ${min} and ${options.max}` })
     .default(options.defaultValue);
 }
+
+/**
+ * The name an uploaded import file had on the person's device. A longer one than the session keeps
+ * is cut short there (`services/transaction-import/import-file-name.ts`), not refused; this bound
+ * only keeps the request small.
+ */
+export const importFileNameInput = z.string().max(2048);

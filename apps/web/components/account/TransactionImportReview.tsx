@@ -70,7 +70,8 @@ interface TransactionImportReviewProps {
  * in the account, unreadable), each included or skipped, in bulk or one by
  * one; an account per source account when the file holds several; then the
  * commit, which runs in the background and can be retried where it stopped.
- * Seven days after a commit only its summary is kept, and the outcome says so.
+ * Seven days after a commit only its summary is kept, and the outcome says so;
+ * the file's name stays with it.
  */
 export default function TransactionImportReview({
   importId,
@@ -126,18 +127,26 @@ export default function TransactionImportReview({
 
   if (session.status === "parsing" || session.status === "importing") {
     return (
-      <Working
-        session={session}
-        disabled={busy}
-        onRetry={() =>
-          void run(commit.mutateAsync({ id: importId, input: undefined }))
-        }
-      />
+      <div className="flex flex-col gap-3">
+        <ImportName session={session} />
+        <Working
+          session={session}
+          disabled={busy}
+          onRetry={() =>
+            void run(commit.mutateAsync({ id: importId, input: undefined }))
+          }
+        />
+      </div>
     );
   }
 
   if (FINISHED_IMPORT_STATUSES.has(session.status)) {
-    return <Outcome status={session.status} session={session} />;
+    return (
+      <div className="flex flex-col gap-3">
+        <ImportName session={session} />
+        <Outcome status={session.status} session={session} />
+      </div>
+    );
   }
 
   const pages = Math.max(1, Math.ceil(rows.total / rows.pageSize));
@@ -150,6 +159,7 @@ export default function TransactionImportReview({
       data-testid="transaction-import-review"
       aria-live="polite"
     >
+      <ImportName session={session} />
       <p className="text-muted-foreground">{t("import-review-summary")}</p>
 
       {session.status === "needs_mapping" ? (
@@ -323,6 +333,27 @@ export default function TransactionImportReview({
         </Button>
       </div>
     </section>
+  );
+}
+
+/**
+ * Which import this is: the name the file had, or for an import started before names were kept,
+ * the day it was started.
+ */
+function ImportName({ session }: { session: TransactionImportSession }) {
+  const t = useTranslations();
+  const formatDate = useFormatShortDate();
+  return (
+    <p
+      className="truncate text-sm font-medium"
+      data-testid="transaction-import-name"
+      title={session.fileName ?? undefined}
+    >
+      {session.fileName ??
+        t("import-review-unnamed", {
+          date: formatDate(session.createdAt, { alwaysShowYear: true }),
+        })}
+    </p>
   );
 }
 

@@ -16,7 +16,7 @@ import { TransactionImportService } from '@service/transaction-import/transactio
 describe('transaction import sessions over HTTP', () => {
   const db = useTestDatabase();
   useRequestContextEm(db);
-  const http = tenantHttp('/v1/transaction-import-sessions', transactionImportRoutes);
+  const http = tenantHttp('/v1/transaction-import-sessions', transactionImportRoutes, { enqueue: { send: () => Promise.resolve('job-1'), sendAfter: () => Promise.resolve(null) } });
 
   async function startedSession() {
     const household = await seedHousehold(db.em());
@@ -52,6 +52,16 @@ describe('transaction import sessions over HTTP', () => {
       expect((await agent.post(`/v1/transaction-import-sessions/${session.id}/commit`)).status).toBe(404);
       expect((await agent.post(`/v1/transaction-import-sessions/${session.id}/cancel`)).status).toBe(404);
     }
+  });
+
+  it('keeps the name of the file the person uploaded, and shows it with the session', async () => {
+    const household = await seedHousehold(db.em());
+    const accountKey = household.account.accountKey;
+    const agent = http.as(household.appuser);
+    const created = await agent.post('/v1/transaction-import-sessions').send({ accountId: accountKey, fileName: 'Extrato de março 🏦.csv', format: 'statement', key: `account-${accountKey}-import-1.csv` });
+    expect(created.status).toBe(201);
+    expect(created.body.session.fileName).toBe('Extrato de março 🏦.csv');
+    expect((await agent.get(`/v1/transaction-import-sessions/${created.body.session.id}`)).body.session.fileName).toBe('Extrato de março 🏦.csv');
   });
 
   it('cannot be started on an account of another household', async () => {

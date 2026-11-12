@@ -262,6 +262,7 @@ const AccountTransactionImportModal: React.FC<
     try {
       const session = await createImport.mutateAsync({
         accountId: data.accountId,
+        fileName: files[0].name,
         format: fileFormat ?? "statement",
         key: uploadedKey,
         // The bank's own parser needs no columns; any other file reads as previewed.

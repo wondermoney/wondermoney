@@ -2586,6 +2586,7 @@
   "import-review-stalled": "The import stopped before it finished. Try again to carry on from where it stopped; nothing is imported twice.",
   "import-review-read-failed": "We couldn't read this file. Choose a CSV or Excel export of your statement.",
   "import-review-expired": "This import expired before it was finished. Start again with the file.",
+  "import-review-unnamed": "Import of {date}",
   "import-review-summary": "Nothing is imported until you confirm. New transactions are included; ones already in the account are skipped.",
   "import-review-filter": "Show",
   "import-review-filter-all": "All ({count})",

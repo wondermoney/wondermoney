@@ -52,7 +52,7 @@ export async function getS3PresignedUrlForCsvUpload(req: Request, res: Response,
 export async function startAccountCsvImport(req: Request, res: Response, next: NextFunction) {
   const { appuserKey, tenant, tenantKey, user } = authedContext(req);
   const {
-    body: { key, mapping },
+    body: { fileName, key, mapping },
     params: { accountId },
   } = await zParse(startAccountCsvImportRequestSchema, req);
   const normalizedAccountId = typeof accountId === 'number' ? accountId : Number.parseInt(accountId, 10);
@@ -80,7 +80,7 @@ export async function startAccountCsvImport(req: Request, res: Response, next: N
   } catch {
     // The worker reports an unreadable file; the statement path below keeps its own behaviour.
   }
-  const session = await new TransactionImportService(DI.em, { enqueue: req.enqueue }).create({ appuserKey, tenantKey }, { accountId: normalizedAccountId, autoCommit: true, format, key, options: mapping ? { mapping } : undefined });
+  const session = await new TransactionImportService(DI.em, { enqueue: req.enqueue }).create({ appuserKey, tenantKey }, { accountId: normalizedAccountId, autoCommit: true, fileName, format, key, options: mapping ? { mapping } : undefined });
   return res.status(202).json({ correlationId: session.correlationId, importId: session.id, status: 'queued' });
 }
 
