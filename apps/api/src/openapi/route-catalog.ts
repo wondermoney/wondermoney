@@ -358,7 +358,7 @@ export const OPERATIONS: Record<string, OperationDefinition> = {
   'PATCH /v1/account/transaction': {
     tag: 'Transactions',
     summary: 'Bulk update transactions',
-    description: 'Categorise, hide or mark reviewed up to 500 transactions in one request.',
+    description: 'Categorise, hide or unhide, mark reviewed, or add and remove tags on many transactions in one request. Select them with `transactionIds`, or with `filter`, the filters of `GET /v1/account/transaction` (every matching row, hidden ones only with `includeHidden`). At most 5,000 transactions; a filter matching more is refused with `bulk_selection_too_large`. A filter key the list does not take is an error.',
     request: updateTransactionsRequestSchema,
     noContent: true,
   },

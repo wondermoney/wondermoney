@@ -71,11 +71,11 @@ describe('balance chain — membership', () => {
     expect(isSettledStatusName(undefined)).toBe(false);
   });
 
-  it('loads settled rows only, hidden rows included, in chain order', async () => {
+  it('loads live settled rows only, hidden rows included, in chain order', async () => {
     const em = { find: vi.fn().mockResolvedValue([]), flush: vi.fn() };
     await loadChainRows(em, { accountKey: 11 } as unknown as Account, { transactionDate: { $ne: null } });
     const [, where, options] = em.find.mock.calls[0] ?? [];
-    expect(where).toMatchObject({ accountKey: { accountKey: 11 }, transactionDate: { $ne: null }, transactionStatusKey: { name: { $in: ['BOOKED'] } } });
+    expect(where).toMatchObject({ accountKey: { accountKey: 11 }, deletedAt: null, transactionDate: { $ne: null }, transactionStatusKey: { name: { $in: ['BOOKED'] } } });
     expect(options).toMatchObject({ filters: { hidden: false }, orderBy: { transactionDate: 'ASC', transactionKey: 'ASC' } });
   });
 });

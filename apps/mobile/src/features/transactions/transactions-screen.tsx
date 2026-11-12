@@ -36,7 +36,7 @@ import { FormNotice, TextField } from './form-field'
 import { SelectField } from './select-field'
 import { TransactionAttachmentsSection } from './transaction-attachments-section'
 import { TransactionSplitScreen } from './transaction-split-screen'
-import { type TransactionFilters, type TransactionSplitLineRequest, type TransferDestinationType, type TransferEditDraft } from './transactions-contract'
+import { BULK_TRANSACTION_LIMIT, type TransactionFilters, type TransactionSplitLineRequest, type TransferDestinationType, type TransferEditDraft } from './transactions-contract'
 import { formatMonth, formatRange, formatShortDate, monthKey, presetFor, presetRange, RANGE_PRESETS, type RangePreset } from './transactions-date-range'
 import { TransactionsLead } from './transactions-lead'
 import { canSplitTransaction, splitCategoryCount } from './transactions-split-view-model'
@@ -47,10 +47,21 @@ export type ReviewResult = 'success' | 'demo' | 'mfa' | 'cancelled' | 'network' 
 export type TransactionCategoryState =
   | { status: 'loading' | 'error' }
   | { status: 'loaded'; categories: readonly CategoryViewModel[] }
+/**
+ * What a bulk action covers: the selected loaded rows, or `'matching'` — every row the list's
+ * server filters match, which the route sends as the list's filter ("select all matching").
+ */
+export type BulkScope = readonly number[] | 'matching'
+/** What a bulk delete came to: how many rows went, and the bank rows it skipped (to offer hiding them). */
+export type BulkDeleteOutcome = Readonly<{ result: ReviewResult; deletedCount?: number; skippedIds?: readonly number[] }>
+/** A single delete; `bank-synced` when the bank sent the row, which is never deleted. */
+export type DeleteOneResult = ReviewResult | 'bank-synced'
 type FrozenBulkAction =
-  | Readonly<{ type: 'review'; transactionIds: readonly number[] }>
-  | Readonly<{ type: 'category'; transactionIds: readonly number[]; category: CategoryViewModel }>
-  | Readonly<{ type: 'hidden'; transactionIds: readonly number[]; hidden: boolean }>
+  | Readonly<{ type: 'review'; transactionIds: BulkScope; count: number }>
+  | Readonly<{ type: 'category'; transactionIds: BulkScope; count: number; category: CategoryViewModel }>
+  | Readonly<{ type: 'hidden'; transactionIds: BulkScope; count: number; hidden: boolean }>
+  | Readonly<{ type: 'delete'; transactionIds: BulkScope; count: number; synced: readonly number[] | null }>
+  | Readonly<{ type: 'tag'; transactionIds: BulkScope; count: number }>
 const LARGE_BULK_THRESHOLD = 10
 export type TransactionsViewState =
   | { status: 'loading' }
@@ -92,9 +103,15 @@ type Props = Readonly<{
   onMarkReviewed: (transactionId: number) => Promise<ReviewResult>
   categories?: TransactionCategoryState
   pending?: boolean
-  onBulkReview?: (transactionIds: readonly number[]) => Promise<ReviewResult>
-  onAssignCategory?: (transactionIds: readonly number[], categoryId: number) => Promise<ReviewResult>
-  onSetHidden?: (transactionIds: readonly number[], hidden: boolean) => Promise<ReviewResult>
+  onBulkReview?: (transactionIds: BulkScope) => Promise<ReviewResult>
+  onAssignCategory?: (transactionIds: BulkScope, categoryId: number) => Promise<ReviewResult>
+  onSetHidden?: (transactionIds: BulkScope, hidden: boolean) => Promise<ReviewResult>
+  /** Add or remove one household tag on the selection. Omitted, "Tag" is not offered. */
+  onBulkTag?: (transactionIds: BulkScope, tagId: number, mode: 'add' | 'remove') => Promise<ReviewResult>
+  /** Delete the selection (bank rows are skipped). Omitted, "Delete" is not offered. */
+  onBulkDelete?: (transactionIds: BulkScope) => Promise<BulkDeleteOutcome>
+  /** Delete one row from its menu. Omitted, the action is not offered. */
+  onDeleteOne?: (transactionId: number) => Promise<DeleteOneResult>
   onEditAmount?: (transactionId: number, updatedAmount: string, description?: string) => Promise<ReviewResult>
   /** The household's tags, for the filter and the picker. Omitted or failed, both stay hidden. */
   tags?: TagsState
@@ -158,6 +175,9 @@ function TransactionsContent({
   onBulkReview,
   onAssignCategory,
   onSetHidden,
+  onBulkTag,
+  onBulkDelete,
+  onDeleteOne,
   onEditAmount,
   tags = { status: 'loading' },
   onSetTags,
@@ -211,6 +231,14 @@ function TransactionsContent({
   const [splitError, setSplitError] = useState<string | null>(null)
   const [confirmation, setConfirmation] = useState<FrozenBulkAction | null>(null)
   const [submittedAction, setSubmittedAction] = useState<FrozenBulkAction | null>(null)
+  // The selection is every row the server filters match, not only the loaded ones.
+  const [allMatching, setAllMatching] = useState(false)
+  const [bulkTagOpen, setBulkTagOpen] = useState(false)
+  // What the last bulk delete did, with the bank rows it skipped (offered for hiding).
+  const [deleteNotice, setDeleteNotice] = useState<Readonly<{ deleted: number; skippedIds: readonly number[] }> | null>(null)
+  const [deleteRowId, setDeleteRowId] = useState<number | null>(null)
+  const [deleteRowPending, setDeleteRowPending] = useState(false)
+  const [deleteRowError, setDeleteRowError] = useState<string | null>(null)
   const loaded = useMemo(() => 'transactions' in state ? state.transactions : [], [state])
   const accountOptions = useMemo(() => [...new Map(loaded.map((row) => [row.accountId, row.accountName])).entries()], [loaded])
   const categoryOptions = useMemo(() => [...new Set(loaded.map((row) => row.category).filter((value): value is string => Boolean(value)))], [loaded])
@@ -225,6 +253,7 @@ function TransactionsContent({
     setExpandedId((current) => (current === id ? null : id))
   }, [])
   const toggleSelect = useCallback((id: number) => {
+    setAllMatching(false)
     setSelectedIds((current) => {
       const next = new Set(current)
       if (next.has(id)) next.delete(id); else next.add(id)
@@ -290,7 +319,7 @@ function TransactionsContent({
     )
   }
 
-  const bulkAvailable = Boolean(onBulkReview || onAssignCategory || onSetHidden) && loaded.some(isSelectable)
+  const bulkAvailable = Boolean(onBulkReview || onAssignCategory || onSetHidden || onBulkTag || onBulkDelete) && loaded.some(isSelectable)
   const resultMessage = reviewResult && reviewResult !== 'success'
     ? t(`transactions.reviewResult.${reviewResult}`) : null
   const filtered = loaded.filter((row) => (accountFilter === null || row.accountId === accountFilter)
@@ -311,8 +340,18 @@ function TransactionsContent({
   const loadedIds = new Set(loaded.filter(isSelectable).map((row) => row.id))
   const selected = [...selectedIds].filter((id) => loadedIds.has(id)).sort((left, right) => left - right)
   const selectedRows = loaded.filter((row) => selectedIds.has(row.id))
-  const allSelectedVisible = selectedRows.length > 0 && selectedRows.every((row) => !row.hidden)
-  const allSelectedHidden = selectedRows.length > 0 && selectedRows.every((row) => row.hidden)
+  // "Select all N matching" acts on the server's filters, so it is offered only while every
+  // filter in force is one the server applies: a filter over the loaded rows (account, category,
+  // type, merchant) would not be in the request, and the action would reach rows it hides.
+  const localFiltersActive = accountFilter !== null || categoryFilter !== null || typeFilter !== null || merchantFilter.trim() !== ''
+  const everyLoadedSelected = loadedIds.size > 0 && [...loadedIds].every((id) => selectedIds.has(id))
+  const matchingAvailable = !localFiltersActive && everyLoadedSelected && total !== null && total > loadedIds.size
+  const matchingSelected = allMatching && matchingAvailable
+  const scope: BulkScope = matchingSelected ? 'matching' : selected
+  const scopeCount = matchingSelected && total !== null ? total : selected.length
+  const allSelectedVisible = matchingSelected || (selectedRows.length > 0 && selectedRows.every((row) => !row.hidden))
+  const allSelectedHidden = matchingSelected ? filters.includeHidden === true : selectedRows.length > 0 && selectedRows.every((row) => row.hidden)
+  const selectedSynced = selectedRows.filter((row) => row.bankSynced).map((row) => row.id)
   const mutationPending = pending || submittedAction !== null || transferPending
   const scopeLocked = mutationPending || confirmation !== null
   const completeAction = async (submitted: FrozenBulkAction, action: () => Promise<ReviewResult>) => {
@@ -323,17 +362,20 @@ function TransactionsContent({
       setReviewResult(result)
       if (result === 'success') {
         setSelectedIds(new Set())
+        setAllMatching(false)
         setPickerOpen(false)
+        setBulkTagOpen(false)
         setConfirmation(null)
       }
     } finally {
       setSubmittedAction(null)
     }
   }
+  const frozenScope = (): BulkScope => (scope === 'matching' ? 'matching' : [...scope])
   const reviewSelected = async () => {
     if (!onBulkReview) return
-    const frozen: FrozenBulkAction = { type: 'review', transactionIds: [...selected] }
-    if (frozen.transactionIds.length >= LARGE_BULK_THRESHOLD) {
+    const frozen: FrozenBulkAction = { type: 'review', transactionIds: frozenScope(), count: scopeCount }
+    if (frozen.count >= LARGE_BULK_THRESHOLD) {
       setConfirmation(frozen)
       return
     }
@@ -341,8 +383,8 @@ function TransactionsContent({
   }
   const assignCategory = async (category: CategoryViewModel) => {
     if (!onAssignCategory) return
-    const frozen: FrozenBulkAction = { type: 'category', transactionIds: [...selected], category }
-    if (frozen.transactionIds.length >= LARGE_BULK_THRESHOLD) {
+    const frozen: FrozenBulkAction = { type: 'category', transactionIds: frozenScope(), count: scopeCount, category }
+    if (frozen.count >= LARGE_BULK_THRESHOLD) {
       setConfirmation(frozen)
       return
     }
@@ -350,15 +392,48 @@ function TransactionsContent({
   }
   const setHiddenSelected = async (hidden: boolean) => {
     if (!onSetHidden) return
-    const frozen: FrozenBulkAction = { type: 'hidden', transactionIds: [...selected], hidden }
-    if (frozen.transactionIds.length >= LARGE_BULK_THRESHOLD) {
+    const frozen: FrozenBulkAction = { type: 'hidden', transactionIds: frozenScope(), count: scopeCount, hidden }
+    if (frozen.count >= LARGE_BULK_THRESHOLD) {
       setConfirmation(frozen)
       return
     }
     await completeAction(frozen, () => onSetHidden(frozen.transactionIds, hidden))
   }
+  const tagSelected = async (value: string) => {
+    setBulkTagOpen(false)
+    if (!onBulkTag) return
+    const [mode, key] = value.split(':')
+    const tagId = Number(key)
+    const frozen: FrozenBulkAction = { type: 'tag', transactionIds: frozenScope(), count: scopeCount }
+    await completeAction(frozen, () => onBulkTag(frozen.transactionIds, tagId, mode === 'remove' ? 'remove' : 'add'))
+  }
+  // A delete always asks first, with the count and the bank rows it will skip.
+  const deleteSelected = () => {
+    if (!onBulkDelete) return
+    setConfirmation({ type: 'delete', transactionIds: frozenScope(), count: scopeCount, synced: matchingSelected ? null : [...selectedSynced] })
+  }
+  const hideIds = async (ids: readonly number[]) => {
+    if (!onSetHidden || ids.length === 0) return
+    const frozen: FrozenBulkAction = { type: 'hidden', transactionIds: [...ids], count: ids.length, hidden: true }
+    await completeAction(frozen, () => onSetHidden(frozen.transactionIds, true))
+    setDeleteNotice(null)
+  }
+  const runDelete = async (frozen: Extract<FrozenBulkAction, { type: 'delete' }>) => {
+    if (!onBulkDelete) return
+    setDeleteNotice(null)
+    await completeAction(frozen, async () => {
+      const outcome = await onBulkDelete(frozen.transactionIds)
+      if (outcome.result === 'success') setDeleteNotice({ deleted: outcome.deletedCount ?? 0, skippedIds: outcome.skippedIds ?? [] })
+      return outcome.result
+    })
+  }
   const confirmBulkAction = async () => {
     if (!confirmation) return
+    if (confirmation.type === 'delete') {
+      await runDelete(confirmation)
+      return
+    }
+    if (confirmation.type === 'tag') return
     if (confirmation.type === 'review') {
       if (onBulkReview) await completeAction(confirmation, () => onBulkReview(confirmation.transactionIds))
       return
@@ -513,7 +588,37 @@ function TransactionsContent({
     />
   )
 
-  const clearSelection = () => { setSelectedIds(new Set()); setPickerOpen(false); setConfirmation(null) }
+  const clearSelection = () => { setSelectedIds(new Set()); setAllMatching(false); setPickerOpen(false); setBulkTagOpen(false); setConfirmation(null) }
+  const selectAllLoaded = () => { setSelectedIds(new Set(loadedIds)); setAllMatching(false) }
+  const bulkTagGroups = tags.status === 'loaded' ? [
+    { label: t('transactions.bulk.addTag'), options: tags.tags.map((tag) => ({ value: `add:${tag.tagKey}`, label: tag.name })) },
+    { label: t('transactions.bulk.removeTag'), options: tags.tags.filter((tag) => matchingSelected || selectedRows.some((row) => row.tags.some((carried) => carried.tagKey === tag.tagKey))).map((tag) => ({ value: `remove:${tag.tagKey}`, label: tag.name })) },
+  ].filter((group) => group.options.length > 0) : []
+  const deleteRow = deleteRowId === null ? null : loaded.find((row) => row.id === deleteRowId) ?? null
+  const openDeleteRow = (id: number) => { setDeleteRowError(null); setDeleteRowId(id) }
+  const confirmDeleteRow = async () => {
+    if (!onDeleteOne || deleteRow === null) return
+    setDeleteRowPending(true)
+    setDeleteRowError(null)
+    try {
+      const result = await onDeleteOne(deleteRow.id)
+      if (result === 'success') setDeleteRowId(null)
+      else setDeleteRowError(result === 'bank-synced' ? t('transactions.bulk.deleteOnlySynced', { count: 1 }) : t(`transactions.reviewResult.${result}`))
+    } finally {
+      setDeleteRowPending(false)
+    }
+  }
+  const hideDeleteRow = async () => {
+    if (!onSetHidden || deleteRow === null) return
+    setDeleteRowPending(true)
+    try {
+      const result = await onSetHidden([deleteRow.id], true)
+      if (result === 'success') setDeleteRowId(null)
+      else setDeleteRowError(t(`transactions.reviewResult.${result}`))
+    } finally {
+      setDeleteRowPending(false)
+    }
+  }
   const secondaryActions = [
     ...(onImport ? [{ value: 'import' as const, label: t('transactionImport.action') }] : []),
     ...(onScanReceipt ? [{ value: 'scan' as const, label: t('transactionOcr.action') }] : []),
@@ -525,7 +630,7 @@ function TransactionsContent({
 
   const menuRow = rowMenuId === null ? null : loaded.find((row) => row.id === rowMenuId) ?? null
   const menuEditable = menuRow ? isSelectable(menuRow) : false
-  type RowAction = 'details' | 'review' | 'edit' | 'tags' | 'transfer' | 'notTransfer' | 'destination' | 'select'
+  type RowAction = 'details' | 'review' | 'edit' | 'tags' | 'transfer' | 'notTransfer' | 'destination' | 'select' | 'delete'
   const canRetype = Boolean(onSetTransfer) && menuRow !== null && menuEditable && menuRow.direction !== 'unknown' && !mutationPending
   const rowActions: { value: RowAction; label: string }[] = menuRow ? [
     { value: 'details', label: expandedId === menuRow.id ? t('transactions.hideDetails') : t('transactions.showDetails') },
@@ -536,6 +641,7 @@ function TransactionsContent({
     ...(canRetype && menuRow.isTransfer && menuRow.direction === 'debit' ? [{ value: 'destination' as const, label: t('transactions.transfer.chooseDestination') }] : []),
     ...(canRetype && menuRow.isTransfer ? [{ value: 'notTransfer' as const, label: t('transactions.transfer.unmark') }] : []),
     ...(menuEditable && bulkAvailable && !scopeLocked ? [{ value: 'select' as const, label: t('transactions.select') }] : []),
+    ...(menuEditable && onDeleteOne && !mutationPending ? [{ value: 'delete' as const, label: t('transactions.bulk.deleteOne') }] : []),
   ] : []
   const runRowAction = (action: RowAction) => {
     if (!menuRow) return
@@ -548,7 +654,8 @@ function TransactionsContent({
     else if (action === 'transfer') void runTransferEdit({ transactionId: menuRow.id, direction: 'credit', transfer: true })
     else if (action === 'destination') setDestinationId(menuRow.id)
     else if (action === 'notTransfer' && menuRow.direction !== 'unknown') void runTransferEdit({ transactionId: menuRow.id, direction: menuRow.direction, transfer: false })
-    else { setSelecting(true); setSelectedIds((current) => new Set(current).add(menuRow.id)) }
+    else if (action === 'delete') openDeleteRow(menuRow.id)
+    else { setSelecting(true); setAllMatching(false); setSelectedIds((current) => new Set(current).add(menuRow.id)) }
   }
 
   const freshnessLine = freshness === null ? undefined
@@ -623,6 +730,18 @@ function TransactionsContent({
           </View>
         ) : null}
         {resultMessage ? <Text accessibilityRole="alert" style={[styles.notice, { borderColor: palette.border }]} variant="meta">{resultMessage}</Text> : null}
+        {deleteNotice ? (
+          <View accessibilityRole="alert" style={[styles.notice, { borderColor: palette.border }]}>
+            <Text variant="meta">{t('transactions.bulk.deleted', { count: deleteNotice.deleted })}</Text>
+            {deleteNotice.skippedIds.length > 0 ? (
+              <>
+                <Text variant="meta">{t('transactions.bulk.skipped', { count: deleteNotice.skippedIds.length })}</Text>
+                {onSetHidden ? <UiButton disabled={mutationPending} label={t('transactions.bulk.hideSkipped')} onPress={() => void hideIds(deleteNotice.skippedIds)} size="sm" variant="outline" /> : null}
+              </>
+            ) : null}
+            <UiButton label={t('transactions.close')} onPress={() => setDeleteNotice(null)} size="sm" variant="ghost" />
+          </View>
+        ) : null}
       </View>
 
       <Sheet
@@ -794,14 +913,22 @@ function TransactionsContent({
         // Web's TransactionReviewControl: a bar pinned under the list while rows are selected.
         <View accessibilityRole="toolbar" accessibilityLabel={t('transactions.bulkActions')} style={[styles.bulkBar, { borderTopColor: palette.border, backgroundColor: palette.popover }, themeTokens.shadow.overlay]}>
           <View style={styles.sectionHead}>
-            <Text accessibilityRole="header" variant="metaStrong">{t('transactions.selectedCount', { count: selected.length })}</Text>
-            <Text tone="muted" variant="label">{t('transactions.selectionScope')}</Text>
+            <Text accessibilityRole="header" variant="metaStrong">{matchingSelected ? t('transactions.bulk.allMatchingSelected', { count: scopeCount }) : t('transactions.selectedCount', { count: selected.length })}</Text>
+            <Text tone="muted" variant="label">{matchingSelected ? t('transactions.bulk.matchingScope') : t('transactions.selectionScope')}</Text>
           </View>
+          {!everyLoadedSelected && loadedIds.size > 1 ? <UiButton disabled={scopeLocked} label={t('transactions.bulk.selectLoaded', { count: loadedIds.size })} onPress={selectAllLoaded} size="sm" variant="ghost" /> : null}
+          {matchingAvailable && !matchingSelected && total !== null ? (
+            total > BULK_TRANSACTION_LIMIT
+              ? <Text tone="muted" variant="label">{t('transactions.bulk.tooManyMatching', { max: BULK_TRANSACTION_LIMIT })}</Text>
+              : <UiButton disabled={scopeLocked} label={t('transactions.bulk.selectAllMatching', { count: total })} onPress={() => setAllMatching(true)} size="sm" variant="outline" />
+          ) : null}
           <UiButton block disabled={scopeLocked || noneSelected || !onBulkReview} label={mutationPending ? t('transactions.updating') : t('transactions.reviewSelected')} onPress={reviewSelected} />
           <View style={styles.bulkSecondary}>
             <UiButton disabled={scopeLocked || noneSelected || !onAssignCategory} label={t('transactions.chooseCategory')} onPress={() => setPickerOpen((open) => !open)} size="sm" variant="secondary" />
             {allSelectedVisible ? <UiButton disabled={scopeLocked || !onSetHidden} label={t('transactions.hideSelected')} onPress={() => void setHiddenSelected(true)} size="sm" variant="secondary" /> : null}
             {allSelectedHidden ? <UiButton disabled={scopeLocked || !onSetHidden} label={t('transactions.unhideSelected')} onPress={() => void setHiddenSelected(false)} size="sm" variant="secondary" /> : null}
+            {onBulkTag && bulkTagGroups.length > 0 ? <UiButton disabled={scopeLocked || noneSelected} label={t('transactions.bulk.tag')} onPress={() => setBulkTagOpen(true)} size="sm" variant="secondary" /> : null}
+            {onBulkDelete ? <UiButton disabled={scopeLocked || noneSelected} label={t('transactions.bulk.delete')} onPress={deleteSelected} size="sm" variant="secondary" /> : null}
             {noneSelected ? null : <UiButton disabled={scopeLocked} label={t('transactions.clearSelection')} onPress={clearSelection} size="sm" variant="ghost" />}
             <UiButton disabled={scopeLocked} label={t('common.done')} onPress={() => { clearSelection(); setSelecting(false) }} size="sm" variant="ghost" />
           </View>
@@ -825,14 +952,23 @@ function TransactionsContent({
               )) : null}
             </ScrollView>
           ) : null}
-          {confirmation ? (
+          {confirmation?.type === 'delete' ? (
+            <DeleteConfirmation
+              confirmation={confirmation}
+              pending={mutationPending}
+              palette={palette}
+              onCancel={() => setConfirmation(null)}
+              onConfirm={() => void confirmBulkAction()}
+              onHideSynced={onSetHidden && confirmation.synced && confirmation.synced.length > 0 ? () => { const ids = confirmation.synced ?? []; setConfirmation(null); void hideIds(ids) } : undefined}
+            />
+          ) : confirmation ? (
             <View accessible accessibilityRole="alert" style={[styles.confirmation, { borderTopColor: palette.border }]}>
               <Text accessibilityRole="header" variant="metaStrong">{t(confirmation.type === 'category' ? 'transactions.confirmCategoryTitle' : confirmation.type === 'hidden' ? (confirmation.hidden ? 'transactions.confirmHideTitle' : 'transactions.confirmUnhideTitle') : 'transactions.confirmReviewTitle')}</Text>
               <Text variant="meta">{confirmation.type === 'category'
-                ? t('transactions.confirmCategoryMessage', { count: confirmation.transactionIds.length, category: confirmation.category.name })
+                ? t('transactions.confirmCategoryMessage', { count: confirmation.count, category: confirmation.category.name })
                 : confirmation.type === 'hidden'
-                  ? t(confirmation.hidden ? 'transactions.confirmHideMessage' : 'transactions.confirmUnhideMessage', { count: confirmation.transactionIds.length })
-                  : t('transactions.confirmReviewMessage', { count: confirmation.transactionIds.length })}</Text>
+                  ? t(confirmation.hidden ? 'transactions.confirmHideMessage' : 'transactions.confirmUnhideMessage', { count: confirmation.count })
+                  : t('transactions.confirmReviewMessage', { count: confirmation.count })}</Text>
               <View style={styles.inlineActions}>
                 <UiButton disabled={mutationPending} label={t('transactions.cancel')} onPress={() => setConfirmation(null)} variant="secondary" />
                 <UiButton disabled={mutationPending} label={mutationPending ? t('transactions.updating') : t(confirmation.type === 'category' ? 'transactions.confirmCategory' : confirmation.type === 'hidden' ? (confirmation.hidden ? 'transactions.confirmHide' : 'transactions.confirmUnhide') : 'transactions.confirmReview')} onPress={confirmBulkAction} />
@@ -842,6 +978,36 @@ function TransactionsContent({
         </View>
       ) : null}
     </SafeAreaView>
+    <OptionSheet
+      groups={bulkTagGroups}
+      mode="menu"
+      onClose={() => setBulkTagOpen(false)}
+      onSelect={(value: string) => void tagSelected(value)}
+      title={t('transactions.bulk.tagTitle', { count: scopeCount })}
+      visible={bulkTagOpen}
+    />
+    {deleteRow ? (
+      <Sheet
+        closeLabel={t('transactions.close')}
+        footer={(
+          <View style={styles.inlineActions}>
+            <UiButton disabled={deleteRowPending} label={t('transactions.cancel')} onPress={() => setDeleteRowId(null)} variant="secondary" />
+            {deleteRow.bankSynced
+              ? (onSetHidden && !deleteRow.hidden ? <UiButton disabled={deleteRowPending} label={t('transactions.bulk.hideInstead', { count: 1 })} onPress={() => void hideDeleteRow()} /> : null)
+              : <UiButton disabled={deleteRowPending} label={deleteRowPending ? t('transactions.updating') : t('transactions.bulk.confirmDelete', { count: 1 })} onPress={() => void confirmDeleteRow()} variant="destructive" />}
+          </View>
+        )}
+        onClose={() => { if (!deleteRowPending) setDeleteRowId(null) }}
+        title={deleteRow.bankSynced ? t('transactions.bulk.onlySyncedTitle', { count: 1 }) : t('transactions.bulk.deleteTitle', { count: 1 })}
+        visible
+      >
+        <View style={styles.sheetSection}>
+          <Text variant="meta">{deleteRow.title ?? t('transactions.unnamed')}</Text>
+          <Text tone="muted" variant="meta">{deleteRow.bankSynced ? t('transactions.bulk.deleteOnlySynced', { count: 1 }) : t('transactions.bulk.deleteMessage')}</Text>
+          {deleteRowError ? <Text accessibilityRole="alert" tone="destructive" variant="meta">{deleteRowError}</Text> : null}
+        </View>
+      </Sheet>
+    ) : null}
     {showCreate && onCreate ? <FloatingActionButton accessibilityLabel={t('transactionCreate.action')} onPress={onCreate} testID="transactions-create" /> : null}
     {splitRow ? (
       <TransactionSplitScreen
@@ -855,6 +1021,38 @@ function TransactionsContent({
         transaction={splitRow}
       />
     ) : null}
+    </View>
+  )
+}
+
+/**
+ * The bulk delete's confirmation: the count, and why rows the bank sent are skipped (the next
+ * sync would send them again), with hiding offered for them. With every matching row selected the
+ * bank rows among them are not known, so it says they are skipped without counting them.
+ */
+function DeleteConfirmation({ confirmation, pending, palette, onCancel, onConfirm, onHideSynced }: Readonly<{
+  confirmation: Extract<FrozenBulkAction, { type: 'delete' }>
+  pending: boolean
+  palette: Palette
+  onCancel: () => void
+  onConfirm: () => void
+  onHideSynced?: () => void
+}>) {
+  const { t } = useTranslation()
+  const syncedCount = confirmation.synced?.length ?? null
+  const deletable = syncedCount === null ? confirmation.count : confirmation.count - syncedCount
+  const onlySynced = syncedCount !== null && syncedCount > 0 && deletable === 0
+  return (
+    <View accessible accessibilityRole="alert" style={[styles.confirmation, { borderTopColor: palette.border }]}>
+      <Text accessibilityRole="header" variant="metaStrong">{onlySynced ? t('transactions.bulk.onlySyncedTitle', { count: confirmation.count }) : t('transactions.bulk.deleteTitle', { count: deletable })}</Text>
+      <Text variant="meta">{onlySynced ? t('transactions.bulk.deleteOnlySynced', { count: confirmation.count }) : t('transactions.bulk.deleteMessage')}</Text>
+      {!onlySynced && syncedCount !== null && syncedCount > 0 ? <Text variant="meta">{t('transactions.bulk.syncedNote', { count: syncedCount })}</Text> : null}
+      {syncedCount === null ? <Text variant="meta">{t('transactions.bulk.matchingSyncedNote')}</Text> : null}
+      <View style={styles.inlineActions}>
+        <UiButton disabled={pending} label={t('transactions.cancel')} onPress={onCancel} variant="secondary" />
+        {onHideSynced && syncedCount !== null && syncedCount > 0 ? <UiButton disabled={pending} label={t('transactions.bulk.hideInstead', { count: syncedCount })} onPress={onHideSynced} variant="outline" /> : null}
+        {onlySynced ? null : <UiButton disabled={pending} label={pending ? t('transactions.updating') : t('transactions.bulk.confirmDelete', { count: deletable })} onPress={onConfirm} variant="destructive" />}
+      </View>
     </View>
   )
 }

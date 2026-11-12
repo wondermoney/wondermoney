@@ -157,6 +157,14 @@
           }
         }
       },
+      "delete": {
+        "description": "",
+        "responses": {
+          "default": {
+            "description": ""
+          }
+        }
+      },
       "get": {
         "description": "",
         "responses": {
@@ -168,6 +176,24 @@
     },
     "/v1/account/transaction/{transactionId}": {
       "patch": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "transactionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": ""
+          }
+        }
+      },
+      "delete": {
         "description": "",
         "parameters": [
           {

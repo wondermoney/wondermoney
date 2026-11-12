@@ -23,19 +23,15 @@
  * green while the behaviour changed underneath it — false confidence on precisely the
  * change that most needs real coverage.
  *
- * Two paths are already known to depend on seeing soft-deleted rows, and both are
- * load-bearing:
+ * One path is already known to depend on seeing soft-deleted rows, and it is load-bearing:
  *
- *   1. **The balance chain.** `loadChainRows` includes soft-deleted rows deliberately —
- *      "hidden in the UI does not mean the money did not move". Filtering them out silently
- *      changes every stored running balance.
- *   2. **Account resurrection.** `account-initial-sync-account.service.ts:191` searches for
+ *   1. **Account resurrection.** `account-initial-sync-account.service.ts:191` searches for
  *      `deletedAt: { $ne: null }` to revive a soft-deleted account instead of
  *      re-inserting it into a unique violation. Under a default-on filter that predicate
  *      ANDs with `deleted_at IS NULL`, always returns empty, and every re-sync of a
  *      soft-deleted account fails on the unique constraint.
  *
- * Both are handled below. The blocker is the ones that are *not* yet enumerated.
+ * It is handled below. The blocker is the ones that are *not* yet enumerated.
  *
  * ## Adoption path
  *
@@ -77,7 +73,8 @@ export const softDeleteFilter = (options: { default?: boolean } = {}) => ({
  * await em.find(Transaction, where, { ...withDeleted(), orderBy });
  * ```
  *
- * This mirrors the escape hatch `loadChainRows` already uses for `HIDDEN_FILTER`, so the
- * two read the same way at a call site.
+ * This mirrors the escape hatch `loadChainRows` uses for `HIDDEN_FILTER`, so the two read the
+ * same way at a call site. (The balance chain itself leaves soft-deleted rows out explicitly: a
+ * deleted transaction is money that did not move.)
  */
 export const withDeleted = () => ({ filters: { [SOFT_DELETE_FILTER]: false } });

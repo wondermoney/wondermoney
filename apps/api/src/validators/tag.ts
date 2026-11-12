@@ -13,10 +13,13 @@ const tagColor = z
   .regex(/^#[0-9a-f]{6}$/i, 'Color must be a #rrggbb hex value')
   .transform((value) => value.toLowerCase());
 
+/** The most tags one transaction may carry. */
+export const MAX_TAGS_PER_TRANSACTION = 50;
+
 /** A list of tag keys, each at most once. Bounded so one request cannot fan out without limit. */
 export const tagIdList = z
   .array(positiveIntId)
-  .max(50, 'At most 50 tags per transaction')
+  .max(MAX_TAGS_PER_TRANSACTION, `At most ${MAX_TAGS_PER_TRANSACTION} tags per transaction`)
   .transform((keys) => [...new Set(keys)]);
 
 export const createTagRequestSchema = z.object({

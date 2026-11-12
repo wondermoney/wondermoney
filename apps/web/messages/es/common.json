@@ -354,7 +354,6 @@
   "edit-transaction": "Editar transacción",
   "delete-transaction": "Eliminar transacción",
   "delete-transaction-confirmation": "¿Seguro que quieres eliminar esta transacción?",
-  "delete-transaction-description": "Esta acción no se puede deshacer.",
   "transaction-deleted": "Transacción eliminada.",
   "error-deleting-transaction": "Error al eliminar la transacción.",
   "autofill-transaction": "Autocompletar con factura",

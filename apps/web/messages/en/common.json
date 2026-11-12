@@ -338,7 +338,6 @@
   "edit-transaction": "Edit Transaction",
   "delete-transaction": "Delete Transaction",
   "delete-transaction-confirmation": "Are you sure you want to delete this transaction?",
-  "delete-transaction-description": "This action cannot be undone.",
   "transaction-deleted": "Transaction deleted.",
   "error-deleting-transaction": "Error deleting transaction.",
   "autofill-transaction": "Auto-fill using invoice",

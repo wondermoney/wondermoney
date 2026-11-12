@@ -9,7 +9,9 @@ import {
   createTransactionAttachmentUploadUrl,
   createTransactionOCRImport,
   deleteAccount,
+  deleteTransaction,
   deleteTransactionAttachment,
+  deleteTransactions,
   getAccount,
   getAccountFinancialInstitutions,
   getAccountMetrics,
@@ -55,7 +57,9 @@ router.post('/offline', createOfflineAccount);
 router.get('/transaction/category-spending', getCategorySpending);
 router.get('/transaction/review-summary', getTransactionReviewSummary);
 router.patch('/transaction', updateTransactions);
+router.delete('/transaction', deleteTransactions);
 router.patch('/transaction/:transactionId', updateTransaction);
+router.delete('/transaction/:transactionId', deleteTransaction);
 router.get('/transaction/:transactionId/history', getTransactionHistory);
 router.put('/transaction/:transactionId/tags', setTransactionTags);
 router.put('/transaction/:transactionId/splits', setTransactionSplits);

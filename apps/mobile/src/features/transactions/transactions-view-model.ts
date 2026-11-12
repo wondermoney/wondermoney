@@ -42,6 +42,8 @@ export type TransactionViewModel = Readonly<{
   isSplit: boolean
   reviewed: boolean
   hidden: boolean
+  /** The bank sent it: it can be hidden, never deleted. */
+  bankSynced: boolean
   recurring: TransactionDto['recurringSeries']
   repayment: TransactionDto['loanRepayment']
   synthetic: boolean
@@ -113,6 +115,7 @@ export function mapTransactions(input: { transactions: readonly TransactionDto[]
       isSplit: (transaction.splits?.length ?? 0) > 0,
       reviewed: transaction.reviewed,
       hidden: transaction.hidden ?? false,
+      bankSynced: transaction.bankSynced === true,
       recurring: transaction.recurringSeries,
       repayment: transaction.loanRepayment,
       synthetic: transaction.transactionKey < 0,

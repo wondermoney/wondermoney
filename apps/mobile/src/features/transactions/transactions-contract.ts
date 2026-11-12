@@ -82,6 +82,8 @@ const transactionBaseShape = {
   transactionMerchantKey: z.object({ name: z.string().min(1).max(200) }).nullable().optional(),
   reviewed: z.boolean(),
   hidden: z.boolean().optional(),
+  // The bank sent the row, so it can be hidden but not deleted. Optional: an older API omits it.
+  bankSynced: z.boolean().optional(),
   appuserTransactionCategories: z.array(category),
   // Optional: a server from before tags omits the field, and the row reads as untagged.
   tags: z.array(tagSchema).optional(),
@@ -163,19 +165,29 @@ export type TransactionDto = z.infer<typeof aggregateTransactionSchema>
  * The query for `filters`. A date range goes with the device's time zone (`timeZone`), so the API
  * counts a bank booking (a date with no time) on the calendar day the range was picked in.
  */
+/**
+ * The list's server filters as the API names them, without paging: the query of the list, and the
+ * `filter` a bulk change or delete takes for "every matching row". Unset filters are left out
+ * (the API refuses a key it does not know, so nothing extra is sent).
+ */
+export const transactionFilterParams = (filters: TransactionFilters, timeZone: string | undefined = deviceTimeZone()): Record<string, string> => {
+  const values: Record<string, string> = {}
+  if (filters.fromDate) values.fromDate = String(Date.parse(filters.fromDate))
+  if (filters.toDate) values.toDate = String(Date.parse(filters.toDate))
+  if ((filters.fromDate || filters.toDate) && timeZone) values.timezone = timeZone
+  if (filters.needsReview) values.unreviewedOnly = 'true'
+  if (filters.includeHidden) values.includeHidden = 'true'
+  if (filters.tagIds && filters.tagIds.length > 0) values.tagKeys = filters.tagIds.join(',')
+  if (filters.categoryIds && filters.categoryIds.length > 0) values.categoryKeys = filters.categoryIds.join(',')
+  if (filters.direction) values.direction = filters.direction
+  if (filters.excludeTransfers) values.excludeTransfers = 'true'
+  if (filters.excludeNonSpending) values.excludeNonSpending = 'true'
+  if (filters.statuses && filters.statuses.length > 0) values.statuses = filters.statuses.join(',')
+  return values
+}
+
 const encodeFilters = (filters: TransactionFilters, timeZone: string | undefined): string => {
-  const values: string[] = []
-  if (filters.fromDate) values.push(`fromDate=${encodeURIComponent(String(Date.parse(filters.fromDate)))}`)
-  if (filters.toDate) values.push(`toDate=${encodeURIComponent(String(Date.parse(filters.toDate)))}`)
-  if ((filters.fromDate || filters.toDate) && timeZone) values.push(`timezone=${encodeURIComponent(timeZone)}`)
-  if (filters.needsReview) values.push('unreviewedOnly=true')
-  if (filters.includeHidden) values.push('includeHidden=true')
-  if (filters.tagIds && filters.tagIds.length > 0) values.push(`tagKeys=${encodeURIComponent(filters.tagIds.join(','))}`)
-  if (filters.categoryIds && filters.categoryIds.length > 0) values.push(`categoryKeys=${encodeURIComponent(filters.categoryIds.join(','))}`)
-  if (filters.direction) values.push(`direction=${filters.direction}`)
-  if (filters.excludeTransfers) values.push('excludeTransfers=true')
-  if (filters.excludeNonSpending) values.push('excludeNonSpending=true')
-  if (filters.statuses && filters.statuses.length > 0) values.push(`statuses=${encodeURIComponent(filters.statuses.join(','))}`)
+  const values = Object.entries(transactionFilterParams(filters, timeZone)).map(([key, value]) => `${key}=${encodeURIComponent(value)}`)
   if (filters.limit) values.push(`limit=${filters.limit}`)
   return values.length ? `?${values.join('&')}` : ''
 }
@@ -210,6 +222,31 @@ export const updateTransactionsEndpoint = writeEndpoint({
   path: '/v1/account/transaction',
   schema: z.unknown(),
 })
+
+/** The API's cap on one bulk change or delete, by ids or by filter. */
+export const BULK_TRANSACTION_LIMIT = 5000
+
+/**
+ * What a bulk delete did. Rows the bank sent are never deleted (the next sync would send them
+ * again); they come back as skipped, with their ids, so the app can offer to hide them.
+ */
+export const deleteTransactionsResponseSchema = z.object({
+  deletedTransactionIds: z.array(positiveId),
+  skipped: z.array(z.object({ reason: z.string(), transactionIds: z.array(positiveId) })),
+})
+export type DeleteTransactionsResult = z.infer<typeof deleteTransactionsResponseSchema>
+
+export const deleteTransactionsEndpoint = writeEndpoint({
+  method: 'DELETE',
+  path: '/v1/account/transaction',
+  schema: deleteTransactionsResponseSchema,
+})
+
+/** One row: 204, or 409 for a row the bank sent. */
+export function createDeleteTransactionEndpoint(transactionId: number) {
+  if (!Number.isSafeInteger(transactionId) || transactionId <= 0) throw new Error('A positive safe transaction id is required.')
+  return writeEndpoint({ method: 'DELETE', path: `/v1/account/transaction/${transactionId}`, schema: z.undefined(), successStatuses: [204] })
+}
 
 export type EditTransactionAmountDraft = Readonly<{ transactionId: number; updatedAmount: string; description?: string }>
 export type FrozenEditTransactionAmount = Readonly<{
