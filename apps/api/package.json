@@ -45,6 +45,7 @@
     "setup:test": "NODE_ENV=development NODE_OPTIONS='--import=tsx' node src/database/scripts/setup-test-user.ts",
     "start": "NODE_ENV=production node dist/server.js",
     "swagger": "tsx scripts/swagger.ts",
+    "openapi": "tsx scripts/openapi.ts",
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
     "test:watch": "vitest watch",
@@ -117,6 +118,7 @@
     "zod-validation-error": "^5.0.0"
   },
   "devDependencies": {
+    "@asteasolutions/zod-to-openapi": "^9.1.0",
     "@electric-sql/pglite": "0.5.15",
     "@electric-sql/pglite-socket": "0.2.18",
     "@eslint-community/eslint-plugin-eslint-comments": "^4.7.1",

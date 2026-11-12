@@ -1,0 +1,46 @@
+---
+title: Guia da API
+description: Autentique-se na API REST do WonderMoney, escolha o acesso do token e trate as respostas.
+---
+
+A API REST do WonderMoney permite que integrações leiam ou alterem dados de uma conta. A [referência da API](/pt/docs/api/reference) lista as operações disponíveis, o acesso necessário, os parâmetros e os esquemas de resposta.
+
+## URL base
+
+A URL base da API hospedada é `https://api.wonder.money`. Se você hospeda sua própria instância do WonderMoney, use a origem dela; a referência permite configurar a URL do servidor. Os caminhos são relativos a essa origem.
+
+## Criar um token
+
+No WonderMoney, acesse **Configurações → Tokens da API** e crie um token pessoal. Escolha somente o acesso necessário para sua integração. O token é exibido uma única vez: copie-o e guarde-o como segredo. Os tokens começam com `wm_pat_`.
+
+Cada operação na referência informa o escopo necessário. A maioria usa `read` ou `write`; o endpoint MCP usa `mcp:read`. Algumas operações aceitam `read` ou `write`. O token só pode acessar rotas abrangidas por seus escopos. Não inclua o token em código de navegador, URLs, controle de versão ou logs.
+
+## Autenticação
+
+Envie o token no cabeçalho HTTP `Authorization` usando o esquema Bearer:
+
+```bash
+export WONDERMONEY_API_TOKEN='wm_pat_substitua-pelo-seu-token'
+curl --fail-with-body \
+  -H "Authorization: Bearer $WONDERMONEY_API_TOKEN" \
+  -H 'Accept: application/json' \
+  https://api.wonder.money/v1/account
+```
+
+O exemplo solicita contas; consulte [Contas na referência](/pt/docs/api/reference#accounts). Guarde o token em um gerenciador de segredos ou variável de ambiente, em vez de inseri-lo no aplicativo.
+
+## Limites de requisição
+
+Quando uma requisição excede o limite, a API retorna `429`. Aguarde o período indicado no cabeçalho `Retry-After` antes de tentar novamente. Evite ciclos de repetição imediata; limite as tentativas.
+
+## Erros
+
+A referência documenta códigos e esquemas de resposta por operação. Falhas de autenticação e permissão podem retornar `401` ou `403`; verifique se o token é válido e inclui o escopo indicado para a operação. `422` indica que a solicitação não passou pela validação. Para `429`, siga `Retry-After`. Consulte o esquema de resposta da operação, sem presumir que todos os erros têm o mesmo corpo.
+
+## Paginação
+
+Use paginação somente nos endpoints que a documentam. Nas respostas paginadas por chave, envie o valor retornado em `nextCursor` como `cursor` na próxima solicitação; pare quando não houver próximo cursor. O tamanho da página e o suporte a cursor variam por operação: use os parâmetros e o esquema de resposta correspondentes na [referência](/pt/docs/api/reference).
+
+## Referência da API
+
+Consulte a [referência da API](/pt/docs/api/reference) para ver operações e esquemas de solicitação e resposta. As descrições das operações estão atualmente em inglês em todos os idiomas.

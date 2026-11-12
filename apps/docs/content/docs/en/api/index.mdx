@@ -1,0 +1,46 @@
+---
+title: API guide
+description: Authenticate to the WonderMoney REST API, choose token access, and handle responses.
+---
+
+The WonderMoney REST API is for integrations that need to read or change data in a WonderMoney account. The [API reference](/en/docs/api/reference) lists the available operations, required token access, parameters, and response schemas.
+
+## Base URL
+
+The hosted API base URL is `https://api.wonder.money`. Use the origin of your own WonderMoney instance when self-hosting; the API reference lets you set a server URL. Paths in the reference are relative to that origin.
+
+## Create a token
+
+In WonderMoney, open **Settings → API tokens** and create a personal API token. Choose only the access needed by your integration. The token is displayed once; copy it then and store it as a secret. Tokens begin with `wm_pat_`.
+
+Every operation in the reference states its required scope. Most operations use `read` or `write`; the MCP endpoint uses `mcp:read`. Some operations accept either `read` or `write`. A token is limited to routes covered by its scopes. Do not put a token in browser code, a URL, source control, or logs.
+
+## Authenticate
+
+Send the token in the HTTP `Authorization` header using the Bearer scheme:
+
+```bash
+export WONDERMONEY_API_TOKEN='wm_pat_replace-with-your-token'
+curl --fail-with-body \
+  -H "Authorization: Bearer $WONDERMONEY_API_TOKEN" \
+  -H 'Accept: application/json' \
+  https://api.wonder.money/v1/account
+```
+
+The example requests accounts; see [Accounts in the reference](/en/docs/api/reference#accounts). Keep the token in a secret manager or environment variable rather than embedding it in an application.
+
+## Rate limits
+
+If a request is rate limited, the API returns `429`. Honour the `Retry-After` response header before retrying. Avoid immediate retry loops; use a bounded retry policy.
+
+## Errors
+
+The reference documents response codes and schemas per operation. Authentication and permission failures can return `401` or `403`; check that the token is valid and includes the operation's stated scope. A `422` indicates the request did not pass validation. For `429`, follow `Retry-After`. Use the operation-specific response schema instead of assuming every error has the same body.
+
+## Pagination
+
+Only endpoints that document pagination should be paged. For keyset-paginated responses, pass the returned `nextCursor` value as the next request's `cursor`; stop when there is no next cursor. Page size and cursor support vary by operation, so use that operation's parameters and response schema in the [reference](/en/docs/api/reference).
+
+## API reference
+
+Browse the [API reference](/en/docs/api/reference) for operations and their request and response schemas. Operation descriptions are currently in English in every locale.
