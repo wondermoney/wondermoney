@@ -969,6 +969,16 @@ class HouseholdRestore {
     await insertRows(this.db, 'loan_adjustment', adjustments);
     this.count('loan-adjustments', adjustments.length);
 
+    const ratePeriods = this.rows['loan-rate-periods'].map((row) => ({
+      annual_interest_rate_bps: row.annualInterestRateBps,
+      effective_date: row.effectiveDate,
+      loan_key: this.loans.get(row.loanId),
+      tenant_key: this.target.tenantKey,
+      ...this.stamp(),
+    }));
+    await insertRows(this.db, 'loan_rate_period', ratePeriods);
+    this.count('loan-rate-periods', ratePeriods.length);
+
     const repayments = this.rows['loan-repayments'].map((row) => ({
       allocation_source: row.allocationSource,
       fee_amount: row.feeAmount,

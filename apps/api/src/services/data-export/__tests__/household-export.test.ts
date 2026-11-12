@@ -308,7 +308,7 @@ describe('household export', () => {
 
       const archive = await exportFor(scopeOf(owner));
 
-      expect(archive.manifest.formatVersion).toBe('1.1');
+      expect(archive.manifest.formatVersion).toBe('1.2');
       const paths = Object.keys(archive.entries).filter((path) => path !== 'manifest.json').sort();
       expect(archive.manifest.files.map((file) => file.path).sort()).toEqual(paths);
       for (const file of archive.manifest.files) {

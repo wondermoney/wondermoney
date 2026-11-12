@@ -31,6 +31,7 @@ import { GoalActivity, GoalActivityType } from '@entity/GoalActivity';
 import { GoalTransactionFunding } from '@entity/GoalTransactionFunding';
 import { Loan } from '@entity/Loan';
 import { LoanAdjustment } from '@entity/LoanAdjustment';
+import { LoanRatePeriod } from '@entity/LoanRatePeriod';
 import { LoanRepaymentLink } from '@entity/LoanRepaymentLink';
 import { ManualAsset } from '@entity/ManualAsset';
 import { ManualAssetValuation } from '@entity/ManualAssetValuation';
@@ -138,7 +139,8 @@ export async function richHousehold(em: EntityManager) {
   line.accounts.add([current, savings]);
   em.create(BudgetTemplateIncome, { amount: 2000, budgetKey: budget, name: 'Salary' }, { partial: true });
 
-  const loan = em.create(Loan, { currencyKey: eur, name: 'Car loan', openingBalanceDate: new Date('2026-01-01'), openingPrincipalBalance: 8000, ownerAppuserKey: owner.appuser, paymentFrequency: LoanPaymentFrequency.MONTHLY, rateType: LoanRateType.FIXED, status: LoanStatus.ACTIVE, tenantKey: owner.tenant, type: LoanType.AUTO_LOAN }, { partial: true });
+  const loan = em.create(Loan, { currencyKey: eur, name: 'Car loan', openingBalanceDate: new Date('2026-01-01'), openingPrincipalBalance: 8000, ownerAppuserKey: owner.appuser, paymentFrequency: LoanPaymentFrequency.MONTHLY, rateType: LoanRateType.VARIABLE, status: LoanStatus.ACTIVE, tenantKey: owner.tenant, type: LoanType.AUTO_LOAN }, { partial: true });
+  em.create(LoanRatePeriod, { annualInterestRateBps: 475, effectiveDate: new Date('2026-04-01'), loanKey: loan, tenantKey: owner.tenant }, { partial: true });
   em.create(LoanAdjustment, { amount: 100, createdByAppuserKey: owner.appuser, effectiveDate: new Date('2026-01-15'), loanKey: loan, reason: 'fee', tenantKey: owner.tenant, type: LoanAdjustmentType.FEE }, { partial: true });
   em.create(LoanRepaymentLink, { allocationSource: LoanAllocationSource.MANUAL, feeAmount: 0, interestAmount: 2.5, linkedByAppuserKey: owner.appuser, loanKey: loan, paymentDate: new Date('2026-02-03'), principalAmount: 40, tenantKey: owner.tenant, totalPaymentAmount: 42.5, transactionKey: groceryRun }, { partial: true });
 
@@ -199,7 +201,7 @@ export function dataFiles(bytes: Uint8Array): Record<string, Record<string, unkn
 }
 
 /** Tables a restore writes, with the column that says which household a row is in. */
-const TENANT_TABLES = ['account', 'budget', 'category', 'financial_transaction', 'goal', 'goal_account_link', 'goal_activity', 'goal_transaction_funding', 'loan', 'loan_adjustment', 'loan_repayment_link', 'manual_asset', 'manual_asset_valuation', 'portfolio', 'recurring_series', 'rule', 'tag', 'tenant_category_setting', 'transaction', 'transaction_merchant', 'transaction_split', 'transaction_tag', 'watchlist'] as const;
+const TENANT_TABLES = ['account', 'budget', 'category', 'financial_transaction', 'goal', 'goal_account_link', 'goal_activity', 'goal_transaction_funding', 'loan', 'loan_adjustment', 'loan_rate_period', 'loan_repayment_link', 'manual_asset', 'manual_asset_valuation', 'portfolio', 'recurring_series', 'rule', 'tag', 'tenant_category_setting', 'transaction', 'transaction_merchant', 'transaction_split', 'transaction_tag', 'watchlist'] as const;
 
 /** How many rows of each household table belong to `tenantKey`. */
 export async function householdRowCounts(em: EntityManager, tenantKey: number): Promise<Record<string, number>> {

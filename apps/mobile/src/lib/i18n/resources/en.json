@@ -1651,7 +1651,8 @@
     },
     "rateType": {
       "FIXED": "Fixed rate",
-      "UNKNOWN": "Rate type unavailable"
+      "UNKNOWN": "Rate type unavailable",
+      "VARIABLE": "Variable rate"
     },
     "loanDetails": "Loan details",
     "openingDate": "Opening balance date",

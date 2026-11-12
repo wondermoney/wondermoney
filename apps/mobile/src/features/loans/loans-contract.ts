@@ -19,7 +19,7 @@ export const loanTypeSchema = z.enum(LOAN_TYPES)
 const loanTypeResponseSchema = tolerantEnum(LOAN_TYPES, 'OTHER')
 const loanStatusSchema = tolerantEnum(['ACTIVE', 'CLOSED', 'PAID_OFF'], 'UNKNOWN')
 const loanPaymentFrequencySchema = tolerantEnum(['MONTHLY'], 'UNKNOWN')
-const loanRateTypeSchema = tolerantEnum(['FIXED', 'UNKNOWN'], 'UNKNOWN')
+const loanRateTypeSchema = tolerantEnum(['FIXED', 'UNKNOWN', 'VARIABLE'], 'UNKNOWN')
 const loanAllocationSourceSchema = tolerantEnum(['AMORTIZATION_ESTIMATE', 'AUTO_MATCHED', 'MANUAL'], 'UNKNOWN')
 
 export const loanSchema = z.object({

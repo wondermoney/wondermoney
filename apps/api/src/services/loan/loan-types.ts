@@ -27,6 +27,7 @@ export enum LoanPaymentFrequency {
 export enum LoanRateType {
   FIXED = 'FIXED',
   UNKNOWN = 'UNKNOWN',
+  VARIABLE = 'VARIABLE',
 }
 
 export enum LoanStatus {

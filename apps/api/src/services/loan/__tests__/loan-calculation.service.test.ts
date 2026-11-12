@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
+import { buildAmortizationSchedule } from '../amortization-schedule';
 import {
   calculateLoanProgress,
   calculateNextPaymentDate,
@@ -9,6 +10,7 @@ import {
   estimateRepaymentAllocation,
   validateRepaymentAllocation,
 } from '../loan-calculation.service';
+import { LoanAmortizationMethod } from '../loan-types';
 
 describe('calculateOutstandingPrincipal', () => {
   it('subtracts linked principal repayments from the opening balance', () => {
@@ -59,6 +61,18 @@ describe('calculateOutstandingPrincipalWithAdjustments', () => {
     })).toBe(950);
   });
 
+  it('replaces the balance on correction date and applies that date repayment only once', () => {
+    expect(calculateOutstandingPrincipalWithAdjustments({
+      adjustments: [{ amount: 700, effectiveDate: new Date('2026-01-10'), type: 'BALANCE_CORRECTION' }],
+      openingPrincipalBalance: 1000,
+      principalRepayments: [
+        { amount: 100, effectiveDate: new Date('2026-01-09') },
+        { amount: 50, effectiveDate: new Date('2026-01-10') },
+        { amount: 25, effectiveDate: new Date('2026-01-11') },
+      ],
+    })).toBe(625);
+  });
+
   it('subtracts repayments exactly, without float drift', () => {
     expect(calculateOutstandingPrincipalWithAdjustments({
       adjustments: [],
@@ -71,6 +85,60 @@ describe('calculateOutstandingPrincipalWithAdjustments', () => {
         { amount: 0.2, effectiveDate: new Date('2026-04-01') },
       ],
     })).toBe(170_643.26);
+  });
+
+  it('filters dated events after the cutoff while retaining undated events and chronology', () => {
+    expect(calculateOutstandingPrincipalWithAdjustments({
+      adjustments: [
+        { amount: 100, effectiveDate: new Date('2026-03-01'), type: 'PRINCIPAL_INCREASE' },
+        { amount: 20, type: 'FEE' },
+        { amount: 50, effectiveDate: new Date('2026-01-15'), type: 'BALANCE_CORRECTION' },
+      ],
+      asOfDate: new Date('2026-02-01T00:00:00.000Z'),
+      openingPrincipalBalance: 1000,
+      principalRepayments: [
+        { amount: 5 },
+        { amount: 10, effectiveDate: new Date('2026-01-10') },
+        { amount: 25, effectiveDate: new Date('2026-02-02') },
+      ],
+    })).toBe(65);
+  });
+
+  it('leaves a future correction out until the as-of date reaches it, then counts later repayments once', () => {
+    const balanceOn = (asOfDate: string) => calculateOutstandingPrincipalWithAdjustments({
+      adjustments: [{ amount: 500, effectiveDate: new Date('2100-01-01T00:00:00Z'), type: 'BALANCE_CORRECTION' }],
+      asOfDate: new Date(`${asOfDate}T23:59:59.999Z`),
+      openingPrincipalBalance: 1000,
+      principalRepayments: [
+        { amount: 100, effectiveDate: new Date('2026-06-01T00:00:00Z') },
+        { amount: 50, effectiveDate: new Date('2100-02-01T00:00:00Z') },
+      ],
+    });
+
+    expect(balanceOn('2026-11-12')).toBe(900);
+    expect(balanceOn('2099-12-31')).toBe(900);
+    expect(balanceOn('2100-01-01')).toBe(500);
+    expect(balanceOn('2100-03-01')).toBe(450);
+  });
+
+  it('a correction to zero dated in the future does not clear today\'s balance', () => {
+    expect(calculateOutstandingPrincipalWithAdjustments({
+      adjustments: [{ amount: 0, effectiveDate: new Date('2100-01-01T00:00:00Z'), type: 'BALANCE_CORRECTION' }],
+      asOfDate: new Date('2026-11-12T10:00:00Z'),
+      openingPrincipalBalance: 1000,
+    })).toBe(1000);
+  });
+
+  it('applies same-date dated events after the baseline correction', () => {
+    expect(calculateOutstandingPrincipalWithAdjustments({
+      adjustments: [
+        { amount: 900, effectiveDate: new Date('2026-01-15T10:00:00.000Z'), type: 'BALANCE_CORRECTION' },
+        { amount: 100, effectiveDate: new Date('2026-01-15T12:00:00.000Z'), type: 'PRINCIPAL_INCREASE' },
+      ],
+      asOfDate: new Date('2026-01-15T23:59:59.999Z'),
+      openingPrincipalBalance: 1000,
+      principalRepayments: [{ amount: 25, effectiveDate: new Date('2026-01-15T18:00:00.000Z') }],
+    })).toBe(975);
   });
 });
 
@@ -111,6 +179,55 @@ describe('estimateRepaymentAllocation', () => {
       principalAmount: 200,
       totalPaymentAmount: 500,
     });
+  });
+
+  it('uses the period-opening rate from the shared history resolver', () => {
+    expect(estimateRepaymentAllocation({
+      annualInterestRateBps: 300,
+      outstandingPrincipal: 12_000,
+      paymentDate: new Date('2026-02-01'),
+      ratePeriods: [{ annualInterestRateBps: 600, effectiveDate: new Date('2026-02-01') }],
+      totalPaymentAmount: 100,
+    }).interestAmount).toBe(30);
+  });
+
+  it('charges the rate in force when the period opened, matching the schedule row it pays', () => {
+    const ratePeriods = [{ annualInterestRateBps: 2400, effectiveDate: new Date('2026-03-01T00:00:00Z') }];
+    const schedule = buildAmortizationSchedule({
+      annualInterestRateBps: 1200,
+      firstPaymentDate: new Date('2026-02-01T00:00:00Z'),
+      method: LoanAmortizationMethod.FRENCH,
+      principal: 1200,
+      ratePeriods,
+      termMonths: 3,
+    });
+    const [february, march] = schedule.rows;
+    const split = (periodOpeningDate?: Date) => estimateRepaymentAllocation({
+      annualInterestRateBps: 1200,
+      outstandingPrincipal: february?.endingBalance ?? 0,
+      paymentDate: march?.date,
+      periodOpeningDate,
+      ratePeriods,
+      totalPaymentAmount: march?.payment ?? 0,
+    });
+
+    // 803.97 at 12% for the period opened on 1 Feb, not at the 24% in force on 1 Mar (16.08).
+    expect(february?.endingBalance).toBe(803.97);
+    expect(split(new Date('2026-02-01T00:00:00Z')).interestAmount).toBe(8.04);
+    expect(split().interestAmount).toBe(8.04);
+    expect(split()).toMatchObject({ interestAmount: march?.interest, principalAmount: march?.principal });
+  });
+
+  it('derives a clamped prior-month opening when only paymentDate is supplied', () => {
+    expect(estimateRepaymentAllocation({
+      annualInterestRateBps: 1200,
+      outstandingPrincipal: 1000,
+      paymentDate: new Date('2026-03-31T00:00:00Z'),
+      ratePeriods: [
+        { annualInterestRateBps: 2400, effectiveDate: new Date('2026-03-01T00:00:00Z') },
+      ],
+      totalPaymentAmount: 100,
+    }).interestAmount).toBe(10);
   });
 
   it('flags negative amortization when payment is below estimated interest', () => {

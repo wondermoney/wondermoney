@@ -83,6 +83,19 @@ describe('NetWorthService portfolios', () => {
     expect(result.assets.portfolios).toBe(100);
     expect(result.unsupportedCurrencies.portfolios).toBe(1);
   });
+
+  it('keeps future loan corrections out of current net worth', async () => {
+    emMocks.populate.mockResolvedValue(undefined);
+    emMocks.find.mockImplementation((entity: { name?: string }) => Promise.resolve(entity.name === 'Loan'
+      ? [{ currencyKey: { code: 'EUR' }, loanKey: 90, name: 'Mortgage', openingBalanceDate: new Date('2020-01-01T00:00:00Z'), openingPrincipalBalance: 1000 }]
+      : entity.name === 'LoanAdjustment'
+        ? [{ amount: 0, effectiveDate: new Date('2100-01-01T00:00:00Z'), type: 'BALANCE_CORRECTION' }]
+        : []));
+
+    const result = await new NetWorthService().getNetWorth({ currencyKey: { code: 'EUR' } } as Appuser);
+
+    expect(result.liabilities.loans).toBe(1000);
+  });
 });
 
 describe('NetWorthService history: today is the live net worth', () => {

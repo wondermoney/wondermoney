@@ -31,6 +31,66 @@ function schedule(input: {
  * SAC interest total is 75,207.73 when each row's interest is rounded to 2dp.
  */
 describe('buildAmortizationSchedule', () => {
+  it('charges each month of a two-period variable loan at the rate its period opened with', () => {
+    const schedule = buildAmortizationSchedule({
+      annualInterestRateBps: 1200,
+      firstPaymentDate: new Date('2026-02-01T00:00:00Z'),
+      method: LoanAmortizationMethod.FRENCH,
+      principal: 1200,
+      ratePeriods: [
+        { annualInterestRateBps: 1200, effectiveDate: new Date('2026-01-01T00:00:00Z') },
+        { annualInterestRateBps: 2400, effectiveDate: new Date('2026-03-01T00:00:00Z') },
+      ],
+      termMonths: 3,
+    });
+
+    // March's period opened on 1 Feb at 12%: 803.97 × 1% = 8.04. April's opened at 24%.
+    expect(schedule.rows.map(({ endingBalance, interest, payment }) => ({ endingBalance, interest, payment }))).toEqual([
+      { endingBalance: 803.97, interest: 12, payment: 408.03 },
+      { endingBalance: 401.99, interest: 8.04, payment: 410.02 },
+      { endingBalance: 0, interest: 8.04, payment: 410.03 },
+    ]);
+  });
+
+  it('clears a long loan at maturity after a rate rise, with no row overpaying it early', () => {
+    const result = buildAmortizationSchedule({
+      annualInterestRateBps: 500,
+      firstPaymentDate: day('2026-02-01'),
+      method: LoanAmortizationMethod.FRENCH,
+      principal: 100_000,
+      ratePeriods: [{ annualInterestRateBps: 1000, effectiveDate: day('2027-02-01') }],
+      termMonths: 360,
+    });
+
+    expect(result.rows[11]?.payment).toBe(536.82);
+    expect(result.rows[12]?.payment).toBe(865.86);
+    expect(result.rows.slice(0, -1).every((row) => row.endingBalance > 0)).toBe(true);
+    expect(result.rows.at(-1)?.endingBalance).toBe(0);
+    // Only the cent rounding of the resized level payment lands on the last row.
+    expect(Math.abs((result.rows.at(-1)?.payment ?? 0) - 865.86)).toBeLessThan(15);
+  });
+
+  it.each([
+    ['2026-03-29', '2026-02-28'],
+    ['2026-03-30', '2026-02-28'],
+    ['2026-03-31', '2026-02-28'],
+    ['2028-03-29', '2028-02-29'],
+    ['2028-03-30', '2028-02-29'],
+    ['2028-03-31', '2028-02-29'],
+  ])('clamps the first period opening for %s', (firstPaymentDate) => {
+    for (const method of [LoanAmortizationMethod.FRENCH, LoanAmortizationMethod.CONSTANT_PRINCIPAL]) {
+      const result = buildAmortizationSchedule({
+        annualInterestRateBps: 1200,
+        firstPaymentDate: day(firstPaymentDate),
+        method,
+        principal: 1000,
+        ratePeriods: [{ annualInterestRateBps: 2400, effectiveDate: day(firstPaymentDate.slice(0, 4) + '-03-01') }],
+        termMonths: 2,
+      });
+
+      expect(result.rows[0]?.interest).toBe(10);
+    }
+  });
   describe('French (level payment)', () => {
     it('matches the reference schedule for 100,000 at 5% over 360 months', () => {
       const result = schedule({ method: LoanAmortizationMethod.FRENCH });
@@ -182,6 +242,31 @@ describe('buildAmortizationSchedule', () => {
       '2028-03-31',
     ]);
   });
+
+  it.each([LoanAmortizationMethod.FRENCH, LoanAmortizationMethod.CONSTANT_PRINCIPAL])(
+    'leaves every %s row as the fixed-rate schedule when the history never changes the effective rate',
+    (method) => {
+      const baseline = schedule({ method });
+      const withHistory = buildAmortizationSchedule({
+        annualInterestRateBps: 500,
+        firstPaymentDate: day('2026-01-15'),
+        method,
+        principal: 100_000,
+        ratePeriods: [
+          { annualInterestRateBps: 500, effectiveDate: day('2026-01-15') },
+          { annualInterestRateBps: 500, effectiveDate: day('2030-06-01') },
+          { annualInterestRateBps: 500, effectiveDate: day('2041-03-15') },
+          // After the last instalment (2055-12-15): it never applies.
+          { annualInterestRateBps: 2100, effectiveDate: day('2100-01-01') },
+        ],
+        termMonths: 360,
+      });
+
+      expect(withHistory.rows).toEqual(baseline.rows);
+      expect(withHistory.totalInterest).toBe(baseline.totalInterest);
+      expect(withHistory.totalPaid).toBe(baseline.totalPaid);
+    },
+  );
 
   it('rejects a non-positive principal or term', () => {
     expect(() => schedule({ principal: 0 })).toThrow(RangeError);

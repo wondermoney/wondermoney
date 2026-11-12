@@ -129,13 +129,18 @@ describe('loan contracts', () => {
       ...loanFixture,
       type: 'CARD',
       status: 'OVERDUE',
-      rateType: 'VARIABLE',
+      rateType: 'INDEXED',
       paymentFrequency: 'WEEKLY',
       progressBasis: 'CURRENT_BALANCE',
       overviewTotal: 123,
     }] }).loans
     expect(loan).toMatchObject({ type: 'OTHER', status: 'UNKNOWN', rateType: 'UNKNOWN', paymentFrequency: 'UNKNOWN', progressBasis: 'UNKNOWN' })
     expect(loan).not.toHaveProperty('overviewTotal')
+  })
+
+  it('reads a variable-rate loan as variable', () => {
+    const [loan] = loansResponseSchema.parse({ loans: [{ ...loanFixture, rateType: 'VARIABLE' }] }).loans
+    expect(loan?.rateType).toBe('VARIABLE')
   })
 
   it.each([

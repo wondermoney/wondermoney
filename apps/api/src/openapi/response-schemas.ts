@@ -275,6 +275,20 @@ export const loanScheduleEntrySchema = open('LoanScheduleEntry', {
   principal: nullableNumber,
 });
 
+export const loanAdjustmentSchema = open('LoanAdjustment', {
+  amount: money,
+  effectiveDate: dateTime,
+  loanAdjustmentKey: id,
+  reason: nullableString,
+  type: z.enum(['BALANCE_CORRECTION', 'CAPITALIZED_INTEREST', 'FEE', 'PRINCIPAL_DECREASE', 'PRINCIPAL_INCREASE', 'WRITE_OFF']),
+});
+
+export const loanRatePeriodSchema = open('LoanRatePeriod', {
+  annualInterestRateBps: z.number().int(),
+  effectiveDate: dateTime,
+  loanRatePeriodKey: id,
+});
+
 export const loanRepaymentSchema = open('LoanRepayment', {
   amount: money,
   paidAt: nullableString,

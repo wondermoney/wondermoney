@@ -1651,7 +1651,8 @@
     },
     "rateType": {
       "FIXED": "Tipo fijo",
-      "UNKNOWN": "Tipo no disponible"
+      "UNKNOWN": "Tipo no disponible",
+      "VARIABLE": "Tipo variable"
     },
     "loanDetails": "Detalles del préstamo",
     "openingDate": "Fecha del saldo inicial",
