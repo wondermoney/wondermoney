@@ -16,8 +16,8 @@ sha256sum -c install.sh.sha256
 sh install.sh
 ```
 
-It downloads `docker-compose.yml`, `.env.example` and `generate-env.sh` from the release tag (not
-from `main`), writes `.env` with fresh secrets, pins `WM_VERSION` to that release, starts the
+It downloads `docker-compose.yml`, `.env.example`, `generate-env.sh` and `backup/backup.sh` from
+the release tag (not from `main`), writes `.env` with fresh secrets, pins `WM_VERSION` to that release, starts the
 stack and waits up to three minutes for the API. It asks for the web app and the API address;
 `--yes` takes the defaults, `http://localhost:3000` and `http://localhost:3001`.
 
@@ -99,9 +99,9 @@ To read outgoing mail without a real provider, add `mail` to `COMPOSE_PROFILES` 
 Nothing leaves your server for the WonderMoney project. Without configuration, the only
 outside call is the worker's daily download of euro exchange rates from the European Central
 Bank. Everything else is switched on by its setting: email (SMTP or Resend), AI (`AI_BASE_URL` or
-`ANTHROPIC_API_KEY`), market data (EODHD), file storage (S3), error tracking (`SENTRY_DSN`,
-`NEXT_PUBLIC_SENTRY_DSN`), analytics (above), Google sign-in, reCAPTCHA, and bank sync (Enable
-Banking, once a user adds their key). The docs site's self-hosting guide lists each one.
+`ANTHROPIC_API_KEY`), market data (EODHD), file storage (S3), off-site backups
+(`BACKUP_DESTINATION`), error tracking (`SENTRY_DSN`, `NEXT_PUBLIC_SENTRY_DSN`), analytics
+(above), Google sign-in, reCAPTCHA, and bank sync (Enable Banking, once a user adds their key). The docs site's self-hosting guide lists each one.
 
 ### The mobile app
 
@@ -222,7 +222,98 @@ it loses Postgres.
 ## Back up
 
 Everything that matters is the Postgres database, plus the `storage-data` volume if you use the
-bundled store.
+bundled store. Keep `.env` somewhere other than the server as well (a password manager is a good
+place): `CREDENTIAL_ENCRYPTION_KEY_V1` is needed to read users' stored bank credentials, a restored
+database is of little use without it, and the backups below never include it.
+
+### Scheduled backups
+
+Add `backup` to `COMPOSE_PROFILES` in `.env` (e.g. `COMPOSE_PROFILES=proxy,backup`) and run
+`docker compose up -d`. Every day at 02:00 the `backup` service writes a folder to `./backups`:
+
+```
+backups/2026-11-12T020000Z/
+  wondermoney.dump    pg_dump -Fc of the database
+  storage.tar.gz      the storage-data volume (empty unless you use the bundled store)
+  SHA256SUMS
+```
+
+Folders older than seven days are deleted after each successful backup. A backup is written to a
+hidden `.tmp-` folder and renamed only once it is complete, so an interrupted run never leaves a
+folder that looks finished; the next run removes what it left. The folders and files are readable
+by root only.
+
+| Setting | Default | |
+|---|---|---|
+| `BACKUP_DIR` | `./backups` | Where the folders go on this machine |
+| `BACKUP_SCHEDULE` | `0 2 * * *` | A cron expression: minute, hour, day, month, weekday |
+| `BACKUP_KEEP_DAYS` | `7` | Days to keep; `0` keeps every backup |
+| `BACKUP_TZ` | `UTC` | Time zone of the schedules, e.g. `Europe/Lisbon` (folder names stay UTC) |
+
+The same service runs one-off commands, with or without the profile:
+
+```sh
+docker compose run --rm backup now     # take a backup now
+docker compose run --rm backup list    # the backups in BACKUP_DIR
+docker compose logs backup             # what the scheduled runs did
+```
+
+A file stored in an outside S3 service (R2, B2, AWS) is not in these backups: use the provider's
+own versioning or replication for the bucket.
+
+### Off-site copies
+
+A backup on the same disk does not survive the disk. The `backup-offsite` service copies the
+finished backup folders to any [rclone](https://rclone.org/overview/) remote (S3, Backblaze B2,
+SFTP, Google Drive and many more) every day at 02:30:
+
+```sh
+docker compose run --rm backup-offsite config    # set up a remote; saved in ./rclone/rclone.conf
+```
+
+Then in `.env`:
+
+```
+COMPOSE_PROFILES=backup,backup-offsite
+BACKUP_DESTINATION=b2:my-bucket/wondermoney
+```
+
+and `docker compose up -d`. `docker compose run --rm backup-offsite now` copies at once, and
+`list` shows what is at the destination. It copies (it never mirrors deletions), so a backup
+deleted locally stays off-site until it is older than `BACKUP_OFFSITE_KEEP_DAYS` (30 by default,
+`0` keeps everything); `BACKUP_OFFSITE_SCHEDULE` (`30 2 * * *`) sets when it runs. Only the
+timestamped folders are copied: nothing else in `BACKUP_DIR`, and never `.env`, which the service
+cannot see.
+
+### Restore
+
+Restore stops if the API, the worker or the bundled store is running, so stop them first:
+
+```sh
+docker compose stop proxy web worker api storage
+docker compose run --rm backup restore 2026-11-12T020000Z    # or: restore latest
+docker compose up -d
+```
+
+It checks the files against `SHA256SUMS`, asks to confirm (`--yes` skips the question), loads the
+dump into a new database and swaps it in only once it loaded completely, then replaces the
+contents of `storage-data` with `storage.tar.gz`. Restore with the same release or a newer one:
+the API applies newer migrations on start, but cannot undo them.
+
+To restore from the off-site copy, on a new server for example, fetch the folder into
+`BACKUP_DIR` first (with `.env` and `./rclone/rclone.conf` back in place):
+
+```sh
+docker compose run --rm backup-offsite fetch latest    # or a folder name from `list`
+```
+
+Restoring replaces everything that is in the database now. If you might want it back, run
+`docker compose run --rm backup now` first, and then restore the folder by name, not `latest`.
+
+### By hand
+
+Without the profile, `pg_dump` and `pg_restore` in the postgres container do the same for the
+database:
 
 ```sh
 # Back up
@@ -237,6 +328,3 @@ docker compose up -d
 ```
 
 Use your own `POSTGRES_USER`/`POSTGRES_DB` if you changed them.
-
-Keep `.env` with your backups: `CREDENTIAL_ENCRYPTION_KEY_V1` is needed to read users' stored
-bank credentials, and a restored database is useless without it.

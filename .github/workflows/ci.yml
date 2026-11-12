@@ -126,7 +126,8 @@ jobs:
         run: .github/scripts/prune-turbo-cache.sh
 
   # The self-hosting scripts are shell, which no turbo task covers: apps/api/deploy/selfhost is
-  # not a package. install.sh is what a new instance runs first, so it is checked as POSIX sh.
+  # not a package. install.sh is what a new instance runs first, and backup/backup.sh runs on the
+  # Alpine (busybox) images of the backup services, so all of them are checked as POSIX sh.
   shellcheck:
     name: Shellcheck
     needs: changes
@@ -139,7 +140,7 @@ jobs:
       - name: Install shellcheck if the runner lacks it
         run: command -v shellcheck >/dev/null || { sudo apt-get update && sudo apt-get install -y shellcheck; }
       - name: shellcheck
-        run: shellcheck -s sh apps/api/deploy/selfhost/install.sh apps/api/deploy/selfhost/generate-env.sh
+        run: shellcheck -s sh apps/api/deploy/selfhost/install.sh apps/api/deploy/selfhost/generate-env.sh apps/api/deploy/selfhost/backup/backup.sh
 
   # The tests of every package but the API (the "API tests" jobs, on runners of their own:
   # sharing a runner with other packages' tests pushed some past their timeouts) and the mobile
@@ -305,6 +306,37 @@ jobs:
             exit 1
           fi
           echo "Re-run left .env byte-for-byte unchanged."
+      # The backup services' one-off commands on the installed stack (README.md, "Back up"): a
+      # marker table survives backup now, a drop and restore; restore refuses while the API runs;
+      # backup-offsite copies the backup to a local path (a valid rclone destination).
+      - name: Backup, restore and off-site copy
+        env:
+          DIR: ${{ runner.temp }}/wondermoney
+        run: |
+          set -euo pipefail
+          cd "$DIR"
+          sql() {
+            docker compose exec -T postgres psql -U wondermoney -d wondermoney -XAtq -v ON_ERROR_STOP=1 -c "$1"
+          }
+          sql "CREATE TABLE ci_backup_marker (v text); INSERT INTO ci_backup_marker VALUES ('kept')"
+          docker compose run --rm -T backup now
+          stamp=$(docker compose run --rm -T backup list | awk 'END { print $1 }')
+          sql "DROP TABLE ci_backup_marker"
+          if docker compose run --rm -T backup restore latest --yes; then
+            echo "::error::restore ran while the API was running"
+            exit 1
+          fi
+          docker compose stop web worker api
+          docker compose run --rm -T backup restore "$stamp" --yes
+          test "$(sql 'SELECT v FROM ci_backup_marker')" = kept
+          docker compose up -d
+          curl -fsS --retry 60 --retry-delay 5 --retry-all-errors -o /dev/null "http://127.0.0.1:3001/v1/health"
+
+          docker compose run --rm -T -v "$RUNNER_TEMP/offsite:/offsite" \
+            -e BACKUP_DESTINATION=/offsite/wondermoney backup-offsite now
+          docker compose run --rm -T -v "$RUNNER_TEMP/offsite:/offsite" \
+            -e BACKUP_DESTINATION=/offsite/wondermoney backup-offsite list | grep -qx "$stamp"
+          sudo test -s "$RUNNER_TEMP/offsite/wondermoney/$stamp/wondermoney.dump"
       - name: Compose logs
         if: failure()
         env:

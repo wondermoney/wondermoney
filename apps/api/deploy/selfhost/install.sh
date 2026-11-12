@@ -366,9 +366,27 @@ for file in docker-compose.yml .env.example generate-env.sh; do
   fi
 done
 
+# The script of the optional backup services, for the releases whose compose file has them.
+if grep -q 'backup/backup.sh' "$tmp/docker-compose.yml"; then
+  mkdir -p "$tmp/backup"
+  if [ -n "$SOURCE" ]; then
+    [ -f "$SOURCE/backup/backup.sh" ] || die "$SOURCE/backup/backup.sh is missing."
+    cp "$SOURCE/backup/backup.sh" "$tmp/backup/backup.sh"
+  else
+    curl -fsSL "$base/backup/backup.sh" -o "$tmp/backup/backup.sh" ||
+      die "Could not download backup/backup.sh from $base" \
+        "Check that the release $TAG exists, or pass another --version."
+  fi
+fi
+
 mkdir -p "$DIR"
 cp "$tmp/docker-compose.yml" "$tmp/.env.example" "$tmp/generate-env.sh" "$DIR/"
 chmod +x "$DIR/generate-env.sh"
+if [ -f "$tmp/backup/backup.sh" ]; then
+  mkdir -p "$DIR/backup"
+  cp "$tmp/backup/backup.sh" "$DIR/backup/backup.sh"
+  chmod +x "$DIR/backup/backup.sh"
+fi
 
 # Keep a copy beside the install, so the update line in the summary works. A run through
 # `curl | sh` has no file to copy; the line then points at a fresh download instead.

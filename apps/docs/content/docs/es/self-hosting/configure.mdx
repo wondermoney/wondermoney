@@ -115,6 +115,7 @@ No se envía nada al proyecto WonderMoney. Cada servicio externo que tu instanci
 | IA (tu endpoint compatible con OpenAI o Anthropic) | La API y el worker, con el recibo, las columnas del CSV, las transacciones o los mensajes de chat que necesita la función | `AI_BASE_URL` y `AI_MODEL`, o `AI_PROVIDER=anthropic`, `ANTHROPIC_API_KEY` y `AI_MODEL` |
 | Datos de mercado (EODHD) | La API y el worker, con símbolos bursátiles, no datos de usuarios | `EODHD_API_KEY` |
 | Almacenamiento de archivos (tu almacenamiento compatible con S3) | La API y los navegadores, para importaciones de CSV y copias de recibos | `S3_ENDPOINT` y `S3_BUCKET` |
+| Copias de seguridad fuera del servidor (tu destino de rclone) | El servicio `backup-offsite`, una vez al día, con las copias de la base de datos y de los archivos | El perfil `backup-offsite` y `BACKUP_DESTINATION` ([Actualizaciones y copias de seguridad](/es/docs/self-hosting/upgrade-and-backup#copias-fuera-del-servidor)) |
 | Registro de errores (Sentry) | La API, el worker y la aplicación web, con informes de errores | `SENTRY_DSN` (API y worker), `NEXT_PUBLIC_SENTRY_DSN` (aplicación web) |
 | Analítica (Google Tag Manager, PostHog) | Consulta [Analítica](#analítica) | `NEXT_PUBLIC_GTM_ID`, `NEXT_PUBLIC_POSTHOG_KEY`, `ANALYTICS_OUTBOX_MODE=live` |
 | Sincronización bancaria (Enable Banking) | La API y el worker, para los usuarios que conectan un banco | La clave de Enable Banking de cada usuario, añadida en Ajustes |
