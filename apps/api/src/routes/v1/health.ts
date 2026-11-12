@@ -5,6 +5,7 @@ import { DI } from '@app/app';
 import { adminAuth } from '@middleware/auth';
 import { publicReadRateLimit } from '@middleware/rate-limit';
 import { checkReadiness, type ReadinessReport } from '@service/health/readiness.service';
+import { marketDataProviderStatus } from '@service/market-data/registry';
 import { GITHUB_SHA, IS_PROD } from '@utils/constants';
 
 const router = express.Router();
@@ -57,6 +58,8 @@ const detailedHealthHandler = async (_req: express.Request, res: express.Respons
       connected: await DI.em.getConnection().isConnected(),
     },
     gitCommitHash: GITHUB_SHA,
+    // The market-data providers `MARKET_DATA_PROVIDERS` lists, in order, and whether each is set up.
+    marketData: { providers: marketDataProviderStatus() },
     status: 'ok',
     timestampInISO: new Date().toISOString(),
     uptimeInSeconds: process.uptime(),

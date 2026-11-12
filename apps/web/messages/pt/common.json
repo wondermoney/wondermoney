@@ -2952,6 +2952,7 @@
   "holding-price-manual-legend": "Os preços manuais estão assinalados com um ponto contornado.",
   "holding-price-inherited-manual": "O preço nesta data vem de um preço manual anterior.",
   "holding-price-demo-readonly": "Esta conta de demonstração é só de leitura. Não é possível alterar preços manuais.",
+  "holding-price-market-sources": "Preços de mercado de {providers}.",
   "passkeys-title": "Chaves de acesso",
   "passkeys-description": "Inicie sessão com a impressão digital, o rosto ou o PIN do dispositivo em vez da palavra-passe. Um início de sessão com chave de acesso não pede o código do autenticador.",
   "passkeys-loading": "A carregar chaves de acesso…",

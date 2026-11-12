@@ -25,8 +25,9 @@ export interface PortfolioSetup {
   usd: Currency;
 }
 
-export async function addAssetPrice(em: EntityManager, asset: FinancialAsset, day: string, price: number): Promise<void> {
-  em.create(FinancialAssetPrice, { date: new Date(`${day}T00:00:00Z`), financialAssetKey: asset, price, volume: 0 });
+/** A stored market price; `source` is the provider that supplied it (none by default, as before sources were recorded). */
+export async function addAssetPrice(em: EntityManager, asset: FinancialAsset, day: string, price: number, source?: string): Promise<void> {
+  em.create(FinancialAssetPrice, { date: new Date(`${day}T00:00:00Z`), financialAssetKey: asset, price, source, volume: 0 });
   await em.flush();
 }
 

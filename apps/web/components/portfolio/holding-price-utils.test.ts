@@ -4,12 +4,12 @@ import { test } from "vitest";
 
 import type { HoldingPricePoint } from "@/lib/api/portfolio/useHoldingPriceOverrides";
 
-import { getManualPriceDates, isIsoCalendarDate, parsePositivePrice, toHoldingPriceChartRows } from "./holding-price-utils";
+import { getManualPriceDates, getMarketPriceProviderNames, isIsoCalendarDate, parsePositivePrice, toHoldingPriceChartRows } from "./holding-price-utils";
 
 const points: HoldingPricePoint[] = [
-  { date: "2026-01-01", price: 10, source: "market" },
-  { date: "2026-01-02", price: 12, source: "manual" },
-  { date: "2026-01-03", price: 11, source: "market" },
+  { date: "2026-01-01", price: 10, provider: "eodhd", source: "market" },
+  { date: "2026-01-02", price: 12, provider: null, source: "manual" },
+  { date: "2026-01-03", price: 11, provider: "stooq", source: "market" },
 ];
 
 test("accepts real calendar dates and rejects malformed or impossible dates", () => {
@@ -36,4 +36,9 @@ test("the chart's manual series carries a value on manual days only", () => {
     { date: "2026-01-02", manual: 12, price: 12 },
     { date: "2026-01-03", manual: null, price: 11 },
   ]);
+});
+
+test("names the providers of the market prices, newest first, once each", () => {
+  assert.deepEqual(getMarketPriceProviderNames([...points, { date: "2026-01-04", price: 12, provider: "stooq", source: "market" }]), ["Stooq", "EODHD"]);
+  assert.deepEqual(getMarketPriceProviderNames([{ date: "2026-01-01", price: 10, provider: null, source: "market" }]), []);
 });

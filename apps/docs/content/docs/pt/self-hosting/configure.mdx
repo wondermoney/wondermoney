@@ -80,6 +80,20 @@ Para limitar o que cada agregado pode gastar no modelo por dia, define `AI_DAILY
 
 Define `EODHD_API_KEY` para ligar a pesquisa de tickers, as cotações em tempo real e o módulo de Mercados Financeiros.
 
+`MARKET_DATA_PROVIDERS` indica os fornecedores de dados de mercado a consultar, por ordem, separados por vírgulas. Vazio significa só `eodhd`. Quando um fornecedor falha ou não tem nada para um título, é consultado o seguinte da lista, e uma funcionalidade que nenhum fornecedor da lista oferece fica escondida. Um fornecedor desconhecido ou repetido impede a API e o worker de arrancar. Define-o em ambos.
+
+| Fornecedor | O que dá | Precisa de |
+|---|---|---|
+| `eodhd` | Pesquisa, últimas cotações, histórico diário, dividendos e desdobramentos, na maioria das bolsas | `EODHD_API_KEY` |
+| `stooq` | O último fecho diário e o histórico diário de títulos cotados nos EUA, em Londres, na Xetra e em Tóquio, e dos principais índices dos EUA. Sem pesquisa, dividendos nem desdobramentos | Nada |
+| `coingecko` | Pesquisa de criptomoedas, últimas cotações e até um ano de histórico diário, para pares escritos como `BTC-USD` | Nada |
+
+`MARKET_DATA_PROVIDERS=eodhd,stooq,coingecko` consulta primeiro a EODHD e os fornecedores gratuitos quando esta não consegue responder. `MARKET_DATA_PROVIDERS=stooq,coingecko` dá cotações às posições sem chave da EODHD; os títulos passam a ser encontrados só pela pesquisa de criptomoedas da CoinGecko, por isso as ações têm de já estar no teu catálogo.
+
+A Stooq e a CoinGecko são serviços externos com os seus próprios termos de utilização, e ficam desligados até os pores na lista. Lê os termos antes de o fazeres: és responsável por cumpri-los, incluindo eventuais limites de pedidos e de uso comercial. O serviço alojado da WonderMoney não os usa.
+
+Cada cotação guardada regista o fornecedor de onde veio. O histórico de cotações de uma posição mostra-o, e os administradores veem os fornecedores e as cotações recentes de cada um em `GET /v1/admin/market-data/sources`.
+
 ## Logótipos de comerciantes
 
 Os logótipos de comerciantes estão desligados por omissão. Cada comerciante mostra então a primeira letra do nome num círculo de cor, e nada sobre os comerciantes dos teus utilizadores sai do servidor.
@@ -162,6 +176,8 @@ Nada é enviado para o projeto WonderMoney. Cada serviço externo que a tua inst
 | Email (o teu servidor SMTP ou o Resend) | A API e o worker, para enviar redefinições de palavra-passe, convites e notificações | `SMTP_HOST` ou `RESEND_API_KEY` |
 | IA (o teu endpoint compatível com OpenAI ou a Anthropic) | A API e o worker, com o recibo, as colunas do CSV, as páginas do extrato, as transações ou as mensagens de chat de que a funcionalidade precisa | `AI_BASE_URL` e `AI_MODEL`, ou `AI_PROVIDER=anthropic`, `ANTHROPIC_API_KEY` e `AI_MODEL` |
 | Dados de mercado (EODHD) | A API e o worker, com símbolos de cotação, não dados de utilizadores | `EODHD_API_KEY` |
+| Dados de mercado (Stooq) | A API e o worker, com símbolos de cotação, não dados de utilizadores | `stooq` em `MARKET_DATA_PROVIDERS` |
+| Dados de mercado (CoinGecko) | A API e o worker, com símbolos de moedas e texto de pesquisa, não dados de utilizadores | `coingecko` em `MARKET_DATA_PROVIDERS` |
 | Logótipos de comerciantes (o serviço que escolheres) | A API, com o domínio do site de um comerciante, não dados de utilizadores ([Logótipos de comerciantes](#logótipos-de-comerciantes)) | `MERCHANT_LOGO_URL_TEMPLATE` |
 | Armazenamento de ficheiros (o teu armazenamento compatível com S3) | A API e os navegadores, para importações de CSV e cópias de recibos | `S3_ENDPOINT` e `S3_BUCKET` |
 | Cópias de segurança fora do servidor (o teu destino rclone) | O serviço `backup-offsite`, uma vez por dia, com as cópias da base de dados e dos ficheiros | O perfil `backup-offsite` e `BACKUP_DESTINATION` ([Atualizações e cópias de segurança](/pt/docs/self-hosting/upgrade-and-backup#cópias-fora-do-servidor)) |

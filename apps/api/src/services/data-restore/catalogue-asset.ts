@@ -1,4 +1,4 @@
-import { isMarketDataEnabled } from '@service/market-data/eodhd.service';
+import { isMarketDataEnabled } from '@service/market-data/registry';
 import { resolveOrCreateFinancialAsset } from '@service/portfolio/financial-asset.service';
 import logger from '@utils/logger';
 

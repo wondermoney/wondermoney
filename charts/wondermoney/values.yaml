@@ -114,7 +114,10 @@ config:
   STATEMENT_IMPORT_MAX_PAGES: ""
 
   # ─── Market data (optional) ──────────────────────────────────────────────────
-  # EODHD_API_KEY goes in `secrets`.
+  # EODHD_API_KEY goes in `secrets`. The providers to ask, in order, comma-separated: eodhd,
+  # stooq, coingecko. Empty means eodhd alone. Stooq and CoinGecko are free and keyless, and off
+  # until listed; their terms of use are yours to follow.
+  MARKET_DATA_PROVIDERS: ""
 
   # ─── Merchant logos (optional, off by default) ───────────────────────────────
   # An https logo service address with {domain}, such as https://logos.example.com/{domain}.png.

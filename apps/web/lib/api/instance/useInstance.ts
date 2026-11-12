@@ -22,6 +22,10 @@ export interface InstanceDescription {
     /** Both Google OAuth credentials are set, so "Continue with Google" works. */
     googleSignIn: boolean;
     marketData: boolean;
+    /** What this server's market-data providers can be asked (`search`, `quote`, `dailyHistory`, `dividends`, `splits`). Absent on an older API. */
+    marketDataCapabilities?: string[];
+    /** The set-up market-data providers, in the order the server asks them. Absent on an older API. */
+    marketDataProviders?: string[];
     /** The read-only MCP server at `POST /v1/mcp` (`MCP_ENABLED`). */
     mcp?: boolean;
     /**

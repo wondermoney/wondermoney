@@ -2952,6 +2952,7 @@
   "holding-price-manual-legend": "Manual prices are marked with an outlined dot.",
   "holding-price-inherited-manual": "The price on this date comes from an earlier manual price.",
   "holding-price-demo-readonly": "This demo account is read-only. Manual prices cannot be changed.",
+  "holding-price-market-sources": "Market prices from {providers}.",
   "passkeys-title": "Passkeys",
   "passkeys-description": "Sign in with your fingerprint, face or device PIN instead of your password. A passkey sign-in doesn't ask for an authenticator code.",
   "passkeys-loading": "Loading passkeys…",

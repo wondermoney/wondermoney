@@ -90,7 +90,7 @@
       "id": "eodhd",
       "heading": { "en": "EODHD", "pt": "EODHD", "es": "EODHD" },
       "purpose": "Market price lookups for investment holdings.",
-      "evidence": "api services/eodhd.service.ts (EODHD_API_KEY).",
+      "evidence": "api services/market-data/eodhd.service.ts (EODHD_API_KEY), the default and only provider in services/market-data/registry.ts unless MARKET_DATA_PROVIDERS lists others.",
       "personalData": "None — ticker symbols only.",
       "location": "European Union",
       "notes": "Replaced Financial Modeling Prep on 2026-08-05."
@@ -184,6 +184,14 @@
     {
       "id": "aws-s3-growth",
       "reason": "A separate bucket holds public marketing images only. The customer-document buckets are the aws-s3 entry above."
+    },
+    {
+      "id": "stooq",
+      "reason": "Free market-data fallback (api services/market-data/providers/stooq.provider.ts), off unless a self-hosting operator lists it in MARKET_DATA_PROVIDERS. The hosted instance does not enable it. It would receive ticker symbols only, no personal data. Add it to the policy before ever enabling it on the hosted instance."
+    },
+    {
+      "id": "coingecko",
+      "reason": "Free crypto market-data fallback (api services/market-data/providers/coingecko.provider.ts), off unless a self-hosting operator lists it in MARKET_DATA_PROVIDERS. The hosted instance does not enable it. It would receive coin symbols and search text only, no personal data. Add it to the policy before ever enabling it on the hosted instance."
     }
   ]
 }

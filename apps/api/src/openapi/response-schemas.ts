@@ -5,6 +5,7 @@ import './zod-openapi';
 
 import { z } from 'zod';
 
+import { MARKET_DATA_PROVIDER_IDS } from '@config/market-data-providers';
 import {
   companyInformationResponseSchema,
   earningsResponseSchema,
@@ -413,10 +414,12 @@ export const holdingSchema = open('Holding', {
 });
 
 const priceSource = z.enum(['manual', 'market']);
+/** The market-data provider of a market price; null for a manual price or one stored before sources were recorded. */
+const priceProvider = z.enum(MARKET_DATA_PROVIDER_IDS).nullable();
 
 export const assetPriceHistorySchema = open('AssetPriceHistory', {
   currency: nullableString,
-  prices: z.array(open('AssetPricePoint', { date, price: z.number(), source: priceSource })),
+  prices: z.array(open('AssetPricePoint', { date, price: z.number(), provider: priceProvider, source: priceSource })),
 });
 
 export const assetPriceOnDaySchema = open('AssetPriceOnDay', {
@@ -424,6 +427,7 @@ export const assetPriceOnDaySchema = open('AssetPriceOnDay', {
   date,
   override: open('AssetPriceOverride', { note: nullableString, price: z.number() }).nullable(),
   price: nullableNumber,
+  provider: priceProvider,
   source: priceSource.nullable(),
 });
 

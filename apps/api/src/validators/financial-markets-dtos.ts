@@ -1,5 +1,7 @@
 import { z } from 'zod'
 
+import { MARKET_DATA_PROVIDER_IDS } from '@config/market-data-providers'
+
 /**
  * Stable DTOs for the Financial Markets module.
  *
@@ -26,11 +28,14 @@ const finiteNumberSchema = z.number()
 // otherwise malformed provider URL is coerced to null upstream, never rendered.
 const nullableHttpsUrlSchema = z.url().startsWith('https://').nullable()
 
-/** Provider metadata. Always present so the mobile UI can show "as of when". */
+/**
+ * Provider metadata. Always present so the mobile UI can show "as of when" and from where: the
+ * market-data provider that answered (`MARKET_DATA_PROVIDERS`; EODHD by default).
+ */
 const sourceMetadataSchema = z
   .object({
     asOf: nullableIsoDateTimeSchema,
-    provider: z.literal('eodhd'),
+    provider: z.enum(MARKET_DATA_PROVIDER_IDS),
   })
   .strict()
 

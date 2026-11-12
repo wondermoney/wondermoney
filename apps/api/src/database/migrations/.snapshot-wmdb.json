@@ -11617,6 +11617,23 @@
           "enumItems": [],
           "mappedType": "decimal"
         },
+        "source": {
+          "name": "source",
+          "type": "varchar(32)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "unique": false,
+          "length": 32,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "string"
+        },
         "volume": {
           "name": "volume",
           "type": "numeric(10,0)",

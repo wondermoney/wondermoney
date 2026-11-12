@@ -36,7 +36,7 @@ describe('fetchAndSaveAssetPrice', () => {
     vi.clearAllMocks();
   });
 
-  it('upserts price data and returns the upserted entity', async () => {
+  it('upserts price data, recording the provider that supplied it, and returns the upserted entity', async () => {
     const returned = { ok: true } as unknown as FinancialAssetPrice;
     mockedGetQuote.mockResolvedValueOnce({
       change: 1.11,
@@ -60,6 +60,7 @@ describe('fetchAndSaveAssetPrice', () => {
       date: new Date(1714521600 * 1000),
       financialAssetKey: financialAsset,
       price: 123.45,
+      source: 'eodhd',
       volume: 6789,
     });
     expect(result).toBe(returned);
@@ -107,12 +108,14 @@ describe('fetchAndSaveAssetPrice', () => {
       date: new Date(1714521600 * 1000),
       financialAssetKey: financialAsset,
       price: 123.45,
+      source: 'eodhd',
       volume: 6789,
     });
     expect(mockedEm.upsert).toHaveBeenNthCalledWith(2, FinancialAssetPrice, {
       date: new Date(1714521600 * 1000),
       financialAssetKey: financialAsset,
       price: 222.33,
+      source: 'eodhd',
       volume: 4444,
     });
   });
@@ -178,6 +181,7 @@ describe('fetchAndSaveAssetPrice', () => {
       date: new Date(1714521600 * 1000),
       financialAssetKey: financialAsset,
       price: 50,
+      source: 'eodhd',
       volume: 0,
     });
   });

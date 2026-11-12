@@ -160,7 +160,10 @@ Every integration is optional and fails closed: unconfigured, its feature report
   rate for its day (no rate, no pair) and accepts it within `TRANSFER_MATCH_FX_TOLERANCE`
   (default 0.02), only between accounts the same members can see. A user-set type is never
   overwritten; the file header has the full rule.
-- **Market data: EODHD** (`EODHD_API_KEY`, read by the API and the worker's price jobs).
+- **Market data** goes through one registry (`services/market-data/registry.ts`) over the ordered
+  `MARKET_DATA_PROVIDERS` (default `eodhd`; `stooq` and `coingecko` are opt-in for operators). It
+  falls through per capability and per symbol, and stored prices record their `source`.
+  **EODHD** (`EODHD_API_KEY`, read by the API and the worker's price jobs):
   `services/market-data/eodhd.service.ts` builds the client lazily and maps every failure
   through `handleEodhdError`: 404 → 404, `rate_limit` → 429 with the provider's `retryAfter`
   (default 60 s), `auth_error` → 500 (our credential; it should alert), or 502 when the status is

@@ -5,6 +5,7 @@ import type { EntityManager } from '@mikro-orm/postgresql';
 
 import { sqlQuery } from '@app/database/sql';
 import { enqueuePortfolioSnapshotManualJob } from '@app/jobs/portfolio-snapshot.queue';
+import type { MarketDataProviderId } from '@config/market-data-providers';
 import { Appuser } from '@entity/Appuser';
 import { FinancialAsset } from '@entity/FinancialAsset';
 import { FinancialAssetPriceOverride } from '@entity/FinancialAssetPriceOverride';
@@ -14,7 +15,7 @@ import { getRef } from '@utils/em-helpers';
 import { BadRequestError, ConflictError, NotFoundError } from '@utils/errors';
 import logger from '@utils/logger';
 
-import assetPriceService, { priceDay } from './asset-price.service';
+import assetPriceService, { priceDay, priceProvider } from './asset-price.service';
 
 /**
  * A household's manual prices for a security (`FinancialAssetPriceOverride`): read the price
@@ -40,6 +41,8 @@ export interface AssetPriceOnDay {
   override: null | { note: null | string; price: number };
   /** The price in effect on the day: the latest on or before it, an override winning its own day. */
   price: null | number;
+  /** The market-data provider of that price; null for a manual price or one stored before sources were recorded. */
+  provider: MarketDataProviderId | null;
   source: null | PriceSource;
 }
 
@@ -47,6 +50,8 @@ export interface AssetPricePoint {
   /** `YYYY-MM-DD`. */
   date: string;
   price: number;
+  /** The market-data provider of a market price, when recorded; null for a manual price. */
+  provider: MarketDataProviderId | null;
   source: PriceSource;
 }
 
@@ -71,7 +76,7 @@ export async function getAssetPriceHistory(em: EntityManager, tenantKey: number,
   const db = sqlQuery(em);
   const [marketRows, overrideRows] = await Promise.all([
     db.selectFrom('financial_asset_price')
-      .select(['date', 'price'])
+      .select(['date', 'price', 'source'])
       .where('financial_asset_key', '=', financialAssetKey)
       .$if(range.from !== undefined, (query) => query.where('date', '>=', startOfDay(range.from ?? '')))
       .$if(range.to !== undefined, (query) => query.where('date', '<=', endOfDay(range.to ?? '')))
@@ -88,13 +93,13 @@ export async function getAssetPriceHistory(em: EntityManager, tenantKey: number,
       .execute(),
   ]);
   const byDay = new Map<string, AssetPricePoint>();
-  for (const row of marketRows as { date: Date | string; price: number }[]) {
+  for (const row of marketRows as { date: Date | string; price: number; source: null | string }[]) {
     const date = priceDay(row.date);
-    byDay.set(date, { date, price: row.price, source: 'market' });
+    byDay.set(date, { date, price: row.price, provider: priceProvider(row.source), source: 'market' });
   }
   for (const row of overrideRows as { date: Date | string; price: number }[]) {
     const date = priceDay(row.date);
-    byDay.set(date, { date, price: row.price, source: 'manual' });
+    byDay.set(date, { date, price: row.price, provider: null, source: 'manual' });
   }
   return { currency: asset.currencyKey?.code ?? null, prices: [...byDay.values()].sort((a, b) => a.date.localeCompare(b.date)) };
 }
@@ -111,6 +116,7 @@ export async function getAssetPriceOnDay(em: EntityManager, tenantKey: number, f
     date: day,
     override: override ? { note: override.note ?? null, price: override.price } : null,
     price: price?.price ?? null,
+    provider: price?.provider ?? null,
     source: price?.source ?? null,
   };
 }

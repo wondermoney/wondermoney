@@ -14,8 +14,8 @@ const state = vi.hoisted(() => ({
   history: {
     currency: "USD",
     prices: [
-      { date: "2026-01-02", price: 12, source: "manual" },
-      { date: "2026-01-03", price: 13, source: "market" },
+      { date: "2026-01-02", price: 12, provider: null, source: "manual" },
+      { date: "2026-01-03", price: 13, provider: "stooq", source: "market" },
     ],
   } as History,
   remove: vi.fn(),
@@ -26,8 +26,8 @@ vi.mock("@/lib/api/portfolio/useHoldingPriceOverrides", () => ({
   useHoldingPriceHistory: () => ({ data: state.history, isError: false, isLoading: false }),
   useHoldingPriceOnDay: (_asset: number, date: string) => ({
     data: date === "2026-01-02"
-      ? { currency: "USD", date, override: { note: "manual note", price: 12 }, price: 12, source: "manual" }
-      : { currency: "USD", date, override: null, price: 13, source: date > "2026-01-02" ? "manual" : "market" },
+      ? { currency: "USD", date, override: { note: "manual note", price: 12 }, price: 12, provider: null, source: "manual" }
+      : { currency: "USD", date, override: null, price: 13, provider: null, source: date > "2026-01-02" ? "manual" : "market" },
   }),
   useSaveHoldingPriceOverride: () => ({ isPending: false, mutateAsync: state.save }),
 }));
@@ -62,6 +62,11 @@ test("charts every price and marks only the manual days", () => {
   assert.equal(chart.dataset["points"], "2");
   assert.equal(chart.dataset["manual"], "1");
   assert.equal(screen.getAllByRole("button", { name: "Edit" }).length, 1);
+});
+
+test("says which provider the market prices came from", () => {
+  mount();
+  assert.ok(screen.getByText("Market prices from Stooq."));
 });
 
 test("saves a dated price in the security's currency, not the viewer's", async () => {

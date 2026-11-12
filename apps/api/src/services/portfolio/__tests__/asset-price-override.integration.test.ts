@@ -172,7 +172,7 @@ describe('household price overrides', () => {
 
     expect((await http.as(userB).delete(pricePath('2026-01-02'))).status).toBe(404);
     expect((await http.as(userB).get(`/v1/portfolio/holding/${asset.financialAssetKey}/prices`)).body.prices)
-      .toEqual([{ date: '2026-01-01', price: 10, source: 'market' }, { date: '2026-01-02', price: 11, source: 'market' }]);
+      .toEqual([{ date: '2026-01-01', price: 10, provider: null, source: 'market' }, { date: '2026-01-02', price: 11, provider: null, source: 'market' }]);
 
     // Household B's own override for the same day leaves household A's alone.
     expect((await http.as(userB).put(pricePath('2026-01-02')).send({ currency: 'USD', price: 50 })).status).toBe(200);
@@ -189,13 +189,13 @@ describe('household price overrides', () => {
     expect(history.body).toEqual({
       currency: 'USD',
       prices: [
-        { date: '2026-01-01', price: 10, source: 'market' },
-        { date: '2026-01-02', price: 30, source: 'manual' },
-        { date: '2026-01-05', price: 33, source: 'manual' },
+        { date: '2026-01-01', price: 10, provider: null, source: 'market' },
+        { date: '2026-01-02', price: 30, provider: null, source: 'manual' },
+        { date: '2026-01-05', price: 33, provider: null, source: 'manual' },
       ],
     });
     const ranged = await http.as(userA).get(`/v1/portfolio/holding/${asset.financialAssetKey}/prices?from=2026-01-02&to=2026-01-04`);
-    expect(ranged.body.prices).toEqual([{ date: '2026-01-02', price: 30, source: 'manual' }]);
+    expect(ranged.body.prices).toEqual([{ date: '2026-01-02', price: 30, provider: null, source: 'manual' }]);
   });
 
   it('rejects a price in another currency, a future day, a non-positive price and an unknown security', async () => {

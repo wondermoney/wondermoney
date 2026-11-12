@@ -5,6 +5,7 @@ import express, { type NextFunction, type Request, type Response, type Router } 
 import { buildPgBossConfig } from '@app/jobs/pgboss.config';
 import { getAdminBackgroundOperation, getAdminBackgroundOperationSummary, listAdminBackgroundOperations, PGBOSS_DASHBOARD_BASE_PATH, retryAdminBackgroundOperation } from '@controller/admin/background-operation';
 import { triggerDemoDataRefresh } from '@controller/admin/demo-data';
+import { getAdminMarketDataSources } from '@controller/admin/market-data';
 import { listDedupSkippedAudit, listRemediationAudit } from '@controller/admin/transaction-audit';
 import { getTransactionEnrichmentAcceptanceRate } from '@controller/admin/transaction-enrichment';
 
@@ -52,6 +53,9 @@ router.get('/operations/:operationId', getAdminBackgroundOperation);
 router.post('/operations/:operationId/retry', retryAdminBackgroundOperation);
 
 router.post('/demo-data/refresh', triggerDemoDataRefresh);
+
+// Which market-data providers are listed and set up, and which stored the recent prices.
+router.get('/market-data/sources', getAdminMarketDataSources);
 
 // Transaction audit-log monitoring reads (cross-tenant, hence admin-gated rather than on
 // the user-facing /v1/transactions/* surface). newest-first, offset-paginated.
