@@ -117,7 +117,7 @@
     "@types/react-dom": "19.3.0",
     "@welldone-software/why-did-you-render": "^10.0.1",
     "cypress": "^16.1.1",
-    "eslint": "9.39.5",
+    "eslint": "10.14.0",
     "eslint-config-next": "16.4.5",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-simple-import-sort": "^14.0.0",

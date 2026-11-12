@@ -57,9 +57,11 @@ updates:
       # by hand together with the runtime.
       - dependency-name: '@types/node'
         update-types: ['version-update:semver-major']
-      # ESLint 10 is blocked upstream: eslint-plugin-react, eslint-plugin-import and
-      # eslint-plugin-jsx-a11y (pulled in by eslint-config-next and eslint-config-expo) have no
-      # ESLint 10 release, and eslint-plugin-react crashes under it.
+      # apps/mobile stays on ESLint 9; everything else is on 10. eslint-config-expo loads
+      # eslint-plugin-react, which has no ESLint 10 release and crashes under it
+      # (`contextOrFilename.getFilename is not a function`). eslint-config-next wraps the same
+      # plugin in a context shim, which is why web and docs run on 10. Drop these two ignores once
+      # eslint-config-expo works on 10.
       - dependency-name: eslint
         update-types: ['version-update:semver-major']
       - dependency-name: '@eslint/js'
