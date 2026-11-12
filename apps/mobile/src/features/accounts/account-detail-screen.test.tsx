@@ -8,6 +8,11 @@ import { initMobileI18n } from '@/lib/i18n'
 import { AccountDetailScreen, type AccountDetailData } from './account-detail-screen'
 import { touchHeight } from '@/test/touch-target'
 
+const mockStatementDetail = jest.fn()
+jest.mock('./use-credit-card-statement-detail', () => ({
+  useCreditCardStatementDetail: () => mockStatementDetail(),
+}))
+
 const openBanking: AccountDetailData = {
   accountId: 42,
   accountName: 'Everyday',
@@ -256,19 +261,40 @@ describe('credit card statement', () => {
     balance: 200,
     availableCredit: 800,
     isCurrent: true,
+    status: 'closed' as const,
   }
+
+  beforeEach(() => {
+    mockStatementDetail.mockReturnValue({ isLoading: false, error: null, data: { statement: { ...statement, transactions: [{ transactionKey: 1, amount: 42, description: 'Cafe', merchantName: 'North Cafe', transactionDate: '2026-01-12' }] } }, refetch: jest.fn() })
+  })
 
   it('shows the current statement balance, due date and available credit', async () => {
     const { view } = await renderScreen(
-      { status: 'loaded', data: { ...openBanking, creditCard: { statementCloseDay: 31, paymentDueDay: 10, creditLimit: 1000, minimumPaymentPercent: null }, creditCardStatement: { status: 'loaded', statement, creditLimit: 1000 } } },
+      { status: 'loaded', data: { ...openBanking, creditCard: { statementCloseDay: 31, paymentDueDay: 10, creditLimit: 1000, minimumPaymentPercent: null }, creditCardStatement: { status: 'loaded', statement, statements: [statement], creditLimit: 1000 } } },
     )
     expect(view.getByTestId('credit-card-statement')).toBeOnTheScreen()
     expect(view.getByText('Statement balance')).toBeOnTheScreen()
-    expect(view.getByText(formatCurrency(200, { locale: 'en', currency: 'USD' }))).toBeOnTheScreen()
+    expect(view.getAllByText(formatCurrency(200, { locale: 'en', currency: 'USD' })).length).toBeGreaterThan(0)
     expect(view.getByText('Due date')).toBeOnTheScreen()
-    expect(view.getByText(/Feb 10, 2026/)).toBeOnTheScreen()
+    expect(view.getAllByText(/Feb 10, 2026/).length).toBeGreaterThan(0)
     expect(view.getByText('Available credit')).toBeOnTheScreen()
-    expect(view.getByText(formatCurrency(800, { locale: 'en', currency: 'USD' }))).toBeOnTheScreen()
+    expect(view.getAllByText(formatCurrency(800, { locale: 'en', currency: 'USD' })).length).toBeGreaterThan(0)
+    expect(view.getByTestId('credit-card-statement-history')).toBeOnTheScreen()
+    expect(view.getByTestId('credit-card-statement-row-2026-01-31')).toBeOnTheScreen()
+    expect(view.getByText('North Cafe')).toBeOnTheScreen()
+  })
+
+  it('opens a chosen statement and shows a recoverable detail error without leaking rows', async () => {
+    mockStatementDetail.mockReturnValue({ isLoading: false, error: new Error('offline'), data: undefined, refetch: jest.fn() })
+    const older = { ...statement, periodStart: '2025-12-01', periodEnd: '2025-12-31', isCurrent: false, status: 'paid' as const }
+    const { view } = await renderScreen({ status: 'loaded', data: { ...openBanking, creditCardStatement: { status: 'loaded', statement, statements: [older, statement], creditLimit: null } } })
+    expect(view.getByTestId('credit-card-statement-row-2026-01-31').props.accessibilityState).toEqual({ selected: true })
+    await fireEvent.press(view.getByTestId('credit-card-statement-row-2025-12-31'))
+    expect(view.getByTestId('credit-card-statement-row-2025-12-31').props.accessibilityState).toEqual({ selected: true })
+    expect(view.getByTestId('credit-card-statement-row-2026-01-31').props.accessibilityState).toEqual({ selected: false })
+    expect(view.getByText('Could not load these transactions. Try again.')).toBeOnTheScreen()
+    expect(view.queryByText('North Cafe')).not.toBeOnTheScreen()
+    expect(view.getByRole('button', { name: 'Retry' })).toBeOnTheScreen()
   })
 
   it('omits the section for an account that is not a card', async () => {

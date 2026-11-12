@@ -11,6 +11,7 @@ import {
   getAccountsMetricsRequestSchema,
   getAccountTransactionsRequestSchema,
   getCategorySpendingRequestSchema,
+  getCreditCardStatementDetailRequestSchema,
   getCreditCardStatementsRequestSchema,
   getRecentTransactionsRequestSchema,
   getTransactionHistoryRequestSchema,
@@ -101,6 +102,7 @@ import {
   cashflowSchema,
   categorySchema,
   configSchema,
+  creditCardStatementDetailSchema,
   creditCardStatementSchema,
   csvFileSchema,
   currencyRatesSchema,
@@ -249,6 +251,12 @@ export const OPERATIONS: Record<string, OperationDefinition> = {
     summary: 'List an account’s credit-card statements',
     request: getCreditCardStatementsRequestSchema,
     response: listResponse('CreditCardStatementList', 'statements', creditCardStatementSchema),
+  },
+  'GET /v1/account/:accountId/statements/:statementDate': {
+    tag: 'Accounts',
+    summary: 'Get one credit-card statement and its transactions',
+    request: getCreditCardStatementDetailRequestSchema,
+    response: itemResponse('CreditCardStatementResponse', 'statement', creditCardStatementDetailSchema),
   },
   'GET /v1/account/:accountId/transaction': {
     tag: 'Transactions',

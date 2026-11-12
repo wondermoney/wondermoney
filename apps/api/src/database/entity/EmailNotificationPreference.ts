@@ -20,6 +20,10 @@ export class EmailNotificationPreference extends Base {
   @Property({ default: true })
   budgetAlertsEnabled = true;
 
+  /** Payment-due reminders for credit-card statements (`services/account/credit-card-due-reminder.service.ts`). */
+  @Property({ default: true })
+  creditCardDueRemindersEnabled = true;
+
   @PrimaryKey()
   emailNotificationPreferenceKey!: number;
 

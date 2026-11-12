@@ -872,46 +872,113 @@
       "CreditCardStatement": {
         "type": "object",
         "properties": {
-          "dueDate": {
-            "type": [
-              "string",
-              "null"
-            ]
-          },
-          "minimumPayment": {
+          "availableCredit": {
             "type": [
               "number",
               "null"
             ]
+          },
+          "balance": {
+            "type": "number"
+          },
+          "charges": {
+            "type": "number"
+          },
+          "dueDate": {
+            "type": "string"
+          },
+          "isCurrent": {
+            "type": "boolean"
+          },
+          "payments": {
+            "type": "number"
           },
           "periodEnd": {
-            "type": [
-              "string",
-              "null"
-            ]
+            "type": "string"
           },
           "periodStart": {
-            "type": [
-              "string",
-              "null"
-            ]
+            "type": "string"
           },
-          "statementKey": {
-            "type": "integer"
-          },
-          "total": {
-            "type": [
-              "number",
-              "null"
+          "status": {
+            "type": "string",
+            "enum": [
+              "closed",
+              "open",
+              "overdue",
+              "paid"
             ]
           }
         },
         "required": [
+          "availableCredit",
+          "balance",
+          "charges",
           "dueDate",
-          "minimumPayment",
+          "isCurrent",
+          "payments",
           "periodEnd",
           "periodStart",
-          "total"
+          "status"
+        ],
+        "additionalProperties": {}
+      },
+      "CreditCardStatementDetail": {
+        "type": "object",
+        "properties": {
+          "availableCredit": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "balance": {
+            "type": "number"
+          },
+          "charges": {
+            "type": "number"
+          },
+          "dueDate": {
+            "type": "string"
+          },
+          "isCurrent": {
+            "type": "boolean"
+          },
+          "payments": {
+            "type": "number"
+          },
+          "periodEnd": {
+            "type": "string"
+          },
+          "periodStart": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "closed",
+              "open",
+              "overdue",
+              "paid"
+            ]
+          },
+          "transactions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CreditCardStatementTransaction"
+            }
+          }
+        },
+        "required": [
+          "availableCredit",
+          "balance",
+          "charges",
+          "dueDate",
+          "isCurrent",
+          "payments",
+          "periodEnd",
+          "periodStart",
+          "status",
+          "transactions"
         ],
         "additionalProperties": {}
       },
@@ -927,6 +994,58 @@
         },
         "required": [
           "statements"
+        ],
+        "additionalProperties": {}
+      },
+      "CreditCardStatementResponse": {
+        "type": "object",
+        "properties": {
+          "statement": {
+            "$ref": "#/components/schemas/CreditCardStatementDetail"
+          }
+        },
+        "required": [
+          "statement"
+        ],
+        "additionalProperties": {}
+      },
+      "CreditCardStatementTransaction": {
+        "type": "object",
+        "properties": {
+          "amount": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "description": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "merchantName": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "transactionDate": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "transactionKey": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "amount",
+          "description",
+          "merchantName",
+          "transactionDate",
+          "transactionKey"
         ],
         "additionalProperties": {}
       },
@@ -6151,6 +6270,103 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/CreditCardStatementList"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "The token is missing, malformed or revoked.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The token does not carry a scope this operation accepts.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "The request did not match the endpoint’s validator.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "A rate limit was exceeded. Honour the `Retry-After` header.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/account/{accountId}/statements/{statementDate}": {
+      "get": {
+        "description": "**Required scope:** any of `read`, `write`.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Get one credit-card statement and its transactions",
+        "tags": [
+          "Accounts"
+        ],
+        "x-required-scopes": [
+          "read",
+          "write"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "string",
+                  "pattern": "^[1-9]\\d*$"
+                }
+              ]
+            },
+            "required": true,
+            "name": "accountId",
+            "in": "path"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^\\d{4}-\\d{2}-\\d{2}$/u"
+            },
+            "required": true,
+            "name": "statementDate",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreditCardStatementResponse"
                 }
               }
             }

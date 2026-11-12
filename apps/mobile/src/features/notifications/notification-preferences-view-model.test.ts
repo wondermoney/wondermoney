@@ -43,6 +43,7 @@ describe('mapNotificationPreferences', () => {
     accountRecovery: { effectiveEnabled: true, storedEnabled: true },
     bankSyncAlerts: { effectiveEnabled: false, storedEnabled: true },
     budgetAlerts: { deliverySupported: true, effectiveEnabled: false, storedEnabled: true },
+    creditCardDueReminders: { effectiveEnabled: true, storedEnabled: true },
     growth: { effectiveEnabled: false, storedEnabled: false },
     marketingOptOut: true,
     weeklyInsights: { deliverySupported: false, effectiveEnabled: false, storedEnabled: false },
@@ -63,6 +64,15 @@ describe('mapNotificationPreferences', () => {
   it('omits the bank connection alerts row when an older server does not return it', () => {
     const { bankSyncAlerts: _omitted, ...older } = preferences
     const mapped = mapNotificationPreferences(older)
-    expect(mapped.rows.map((row) => row.stream)).toEqual(['budgetAlerts', 'weeklyInsights', 'accountRecovery'])
+    expect(mapped.rows.map((row) => row.stream)).toEqual(['budgetAlerts', 'weeklyInsights', 'accountRecovery', 'creditCardDueReminders'])
+  })
+
+  it('shows no card reminder row when the server predates the preference', () => {
+    const { creditCardDueReminders: _omitted, ...older } = preferences
+    expect(mapNotificationPreferences(older).rows.map((row) => row.stream)).not.toContain('creditCardDueReminders')
+  })
+
+  it('builds the card reminder patch', () => {
+    expect(buildNotificationPreferencePatch('creditCardDueReminders', false)).toEqual({ creditCardDueRemindersEnabled: false })
   })
 })

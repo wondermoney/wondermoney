@@ -4,9 +4,9 @@ import { DI } from '@app/app';
 import { AccountType } from '@entity/AccountType';
 import { CreditCardDetail } from '@entity/CreditCardDetail';
 import { authedContext } from '@middleware/authed-context';
-import { findTenantCardAccount, getCreditCardStatements, mapCreditCardDetail } from '@service/account/credit-card-statement.service';
+import { findTenantCardAccount, getCreditCardStatementDetail, getCreditCardStatements, mapCreditCardDetail } from '@service/account/credit-card-statement.service';
 import { BadRequestError } from '@utils/errors';
-import { getCreditCardStatementsRequestSchema, updateCreditCardRequestSchema } from '@validators/account';
+import { getCreditCardStatementDetailRequestSchema, getCreditCardStatementsRequestSchema, updateCreditCardRequestSchema } from '@validators/account';
 import { zParse } from '@validators/parser';
 
 /**
@@ -69,4 +69,28 @@ export async function getCreditCardStatementsHandler(req: Request, res: Response
     today,
   });
   return res.json({ statements });
+}
+
+/**
+ * `GET /v1/account/:accountId/statements/:statementDate`: one statement (named by its close day)
+ * with the transactions it counts. The account is found through the tenant filter, so another
+ * household's card is a 404; a date that is not one of this card's close days is a 400.
+ */
+export async function getCreditCardStatementDetailHandler(req: Request, res: Response) {
+  const { tenantKey } = authedContext(req);
+  const {
+    params: { accountId, statementDate },
+  } = await zParse(getCreditCardStatementDetailRequestSchema, req);
+
+  const account = await findTenantCardAccount(DI.em, accountId, tenantKey);
+  const detail = await DI.em.findOne(CreditCardDetail, { accountKey: { accountKey: account.accountKey }, deletedAt: undefined });
+  if (!detail) throw new BadRequestError('Account is not a credit card');
+
+  const statement = await getCreditCardStatementDetail(DI.em, {
+    accountKey: account.accountKey,
+    creditLimit: detail.creditLimit,
+    cycle: { paymentDueDay: detail.paymentDueDay, statementCloseDay: detail.statementCloseDay },
+    statementDate,
+  });
+  return res.json({ statement });
 }

@@ -145,6 +145,28 @@ export interface AccountConnectedEmailProps {
 /** Which bank-connection problem a bank sync alert email is about. */
 export type BankSyncAlertKind = "consent_expiring_7d" | "consent_expiring_1d" | "consent_revoked" | "sync_failing";
 
+/** A credit-card statement is due in a few days and still has a balance. Optional email. */
+export interface CreditCardDueReminderEmailProps {
+  /** Display name of the card account, as the person named it. */
+  accountName: string;
+  /** What is still to pay, formatted in `language` and the card's currency. */
+  amountDue: string;
+  /** Instance name (the API's `INSTANCE_NAME`); defaults to WonderMoney. */
+  brandName?: string;
+  /** The due date, formatted in `language`. */
+  dueDate: string;
+  /** Days from today to the due date; 1 reads as "tomorrow". */
+  daysUntilDue: number;
+  firstName?: string;
+  language: "en" | "pt" | "es";
+  /** The statement's period, formatted in `language` (for example "1 – 31 October"). */
+  periodLabel: string;
+  /** Absolute link to the notification settings, where reminders are turned off. */
+  settingsUrl: string;
+  /** Absolute link to the card's statements. */
+  statementUrl: string;
+}
+
 /** A bank connection needs the user's attention (consent ending, ended by the bank, or failing syncs). */
 export interface BankSyncAlertEmailProps {
   /** Instance name (the API's `INSTANCE_NAME`); defaults to WonderMoney. */

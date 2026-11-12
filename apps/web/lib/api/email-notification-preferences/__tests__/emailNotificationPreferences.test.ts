@@ -37,6 +37,7 @@ const response: EmailNotificationPreferencesResponse = {
     storedEnabled: true,
     effectiveEnabled: true,
   },
+  creditCardDueReminders: { storedEnabled: true, effectiveEnabled: true },
   marketingOptOut: false,
 };
 
@@ -63,14 +64,14 @@ test("sends only the supplied preference through the injectable PATCH client", a
   } as EmailNotificationPreferencesPatchClient;
 
   await updateEmailNotificationPreferences(
-    { weeklyInsightsEnabled: true },
+    { creditCardDueRemindersEnabled: false },
     client,
   );
 
   assert.deepEqual(calls, [
     {
       url: "/v1/user/me/email-notification-preferences",
-      input: { weeklyInsightsEnabled: true },
+      input: { creditCardDueRemindersEnabled: false },
     },
   ]);
 });

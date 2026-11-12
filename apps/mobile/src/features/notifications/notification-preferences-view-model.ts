@@ -16,6 +16,7 @@ export type NotificationStream =
   | 'weeklyInsights'
   | 'accountRecovery'
   | 'bankSyncAlerts'
+  | 'creditCardDueReminders'
 
 /** Fixed display order, matching the web Notifications screen. */
 export const NOTIFICATION_STREAMS: readonly NotificationStream[] = [
@@ -23,6 +24,7 @@ export const NOTIFICATION_STREAMS: readonly NotificationStream[] = [
   'weeklyInsights',
   'accountRecovery',
   'bankSyncAlerts',
+  'creditCardDueReminders',
 ]
 
 export type NotificationPreferenceStatus = 'active' | 'paused' | 'off'
@@ -40,6 +42,7 @@ const STREAM_PATCH_FIELD: Record<NotificationStream, keyof NotificationPreferenc
   weeklyInsights: 'weeklyInsightsEnabled',
   bankSyncAlerts: 'bankSyncAlertsEnabled',
   accountRecovery: 'accountRecoveryEnabled',
+  creditCardDueReminders: 'creditCardDueRemindersEnabled',
 }
 
 const STREAM_PREFERENCE: Record<NotificationStream, keyof Omit<NotificationPreferencesDto, 'marketingOptOut'>> = {
@@ -47,6 +50,7 @@ const STREAM_PREFERENCE: Record<NotificationStream, keyof Omit<NotificationPrefe
   weeklyInsights: 'weeklyInsights',
   bankSyncAlerts: 'bankSyncAlerts',
   accountRecovery: 'accountRecovery',
+  creditCardDueReminders: 'creditCardDueReminders',
 }
 
 type Preference = CategoryStateDto | StreamStateDto
@@ -97,7 +101,7 @@ export type NotificationRowViewModel = Readonly<{
 /**
  * Prepares the ordered rows plus the master marketing-opt-out state for rendering.
  * A category the server doesn't return (an older self-hosted API without
- * `bankSyncAlerts`) gets no row.
+ * `bankSyncAlerts` or `creditCardDueReminders`) gets no row.
  */
 export function mapNotificationPreferences(preferences: NotificationPreferencesDto): Readonly<{
   rows: readonly NotificationRowViewModel[]

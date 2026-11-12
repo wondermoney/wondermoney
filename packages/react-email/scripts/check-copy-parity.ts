@@ -18,6 +18,7 @@
 import { COPY as accountConnected } from "../src/templates/account-connected";
 import { COPY as bankSyncAlert } from "../src/templates/bank-sync-alert";
 import { COPY as budgetThresholdAlert } from "../src/templates/budget-threshold-alert";
+import { COPY as creditCardDueReminder } from "../src/templates/credit-card-due-reminder";
 import { FOOTER as lifecycleNudge } from "../src/templates/lifecycle-nudge";
 import { COPY as monthlyStory } from "../src/templates/monthly-story";
 import { COPY as weeklyInsights } from "../src/templates/weekly-insights";
@@ -29,6 +30,7 @@ const templates: Array<{ file: string; copy: CopyTable }> = [
   { file: "src/templates/account-connected.tsx", copy: accountConnected },
   { file: "src/templates/bank-sync-alert.tsx", copy: bankSyncAlert },
   { file: "src/templates/budget-threshold-alert.tsx", copy: budgetThresholdAlert },
+  { file: "src/templates/credit-card-due-reminder.tsx", copy: creditCardDueReminder },
   { file: "src/templates/lifecycle-nudge.tsx", copy: lifecycleNudge },
   { file: "src/templates/monthly-story.tsx", copy: monthlyStory },
   { file: "src/templates/weekly-insights.tsx", copy: weeklyInsights },

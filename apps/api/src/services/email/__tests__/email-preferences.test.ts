@@ -8,6 +8,7 @@ describe('EMAIL_CATEGORY_FLAG', () => {
       [EmailCategory.ACCOUNT_RECOVERY]: 'accountRecoveryEnabled',
       [EmailCategory.BANK_SYNC_ALERTS]: 'bankSyncAlertsEnabled',
       [EmailCategory.BUDGET_ALERTS]: 'budgetAlertsEnabled',
+      [EmailCategory.CREDIT_CARD_DUE_REMINDERS]: 'creditCardDueRemindersEnabled',
       [EmailCategory.GROWTH]: 'growthEmailsEnabled',
       [EmailCategory.WEEKLY_INSIGHTS]: 'weeklyInsightsEnabled',
     });

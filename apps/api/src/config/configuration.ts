@@ -227,6 +227,9 @@ const workerSchema = sharedSchema.extend({
   // (`services/account/account-auto-sync-scheduler.service.ts`). PSD2 lets a bank cap
   // unattended access at four calls a day per account, so 6 or more keeps one app inside it.
   BANK_SYNC_MIN_INTERVAL_HOURS: positiveNumber('Minimum unattended bank sync interval').optional(),
+  // Days before a credit-card statement's due date its payment reminder goes out
+  // (`services/account/credit-card-due-reminder.service.ts`).
+  CREDIT_CARD_DUE_REMINDER_DAYS: wholeNumber('Credit card due reminder lead days').optional(),
   ENABLE_PGBOSS_DEMO_DATA_REFRESH: boolFlag('Demo-data refresh flag (worker only)').optional(),
   HETRIX_WORKER_HEARTBEAT_URL: z.string().trim().optional(),
   PGBOSS_QUEUE_DEPTH_MONITOR_ENABLED: boolFlag('Queue depth monitor flag').optional(),

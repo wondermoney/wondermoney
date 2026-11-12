@@ -38,7 +38,7 @@ import {
   updateTransaction,
   updateTransactions,
 } from '@controller/account';
-import { getCreditCardStatementsHandler, putCreditCardSettings } from '@controller/account/credit-card';
+import { getCreditCardStatementDetailHandler, getCreditCardStatementsHandler, putCreditCardSettings } from '@controller/account/credit-card';
 import { setTransactionTags } from '@controller/tag';
 import { removeTransactionSplits, setTransactionSplits } from '@controller/transaction-split';
 import { requireAiAllowance } from '@middleware/ai-allowance';
@@ -81,6 +81,7 @@ router.delete('/:accountId', deleteAccount);
 router.get('/:accountId/metrics', getAccountMetrics);
 router.put('/:accountId/credit-card', putCreditCardSettings);
 router.get('/:accountId/statements', getCreditCardStatementsHandler);
+router.get('/:accountId/statements/:statementDate', getCreditCardStatementDetailHandler);
 router.post('/:accountId/recalculate', recalculateAccount);
 router.get('/:accountId/recent-transactions', getRecentTransactions);
 router.get('/:accountId/transaction', getAccountTransactions);

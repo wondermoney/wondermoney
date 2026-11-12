@@ -3274,6 +3274,11 @@
       "description": "Receba um email quando o acesso a um banco estiver prestes a terminar (7 dias e 1 dia antes), quando um banco terminar o acesso antes do prazo ou quando um banco não sincronizar há mais de 2 dias.",
       "detail": "Inclui apenas as ligações bancárias que configurou."
     },
+    "creditCardDueReminders": {
+      "title": "Lembretes de pagamento do cartão",
+      "description": "Receba um email alguns dias antes do vencimento de um extrato de cartão de crédito fechado, se ainda tiver saldo por pagar.",
+      "detail": "Enviado apenas por email. No máximo um lembrete por extrato."
+    },
     "marketingOptOut": {
       "title": "Cancelar subscrição de todos os emails de marketing",
       "description": "Desative todos os emails opcionais acima de uma só vez. Pode reativá-los a qualquer momento.",
@@ -4369,7 +4374,22 @@
     "dueHelper": "Pague até este dia para evitar juros.",
     "availableCredit": "Crédito disponível",
     "limitOf": "De {{limit}}",
-    "limitNotSet": "Sem limite de crédito definido"
+    "limitNotSet": "Sem limite de crédito definido",
+    "historyTitle": "Histórico de extratos",
+    "historyDue": "Vence a {{date}}",
+    "historyRow": "Extrato de {{start}} a {{end}}, saldo {{balance}}, {{status}}",
+    "status": {
+      "open": "Aberto",
+      "closed": "Fechado",
+      "paid": "Pago",
+      "overdue": "Em atraso"
+    },
+    "transactionsTitle": "Transações do extrato",
+    "transactionsLoading": "A carregar as transações do extrato…",
+    "transactionsError": "Não foi possível carregar estas transações. Tenta novamente.",
+    "transactionsInvalid": "Estas transações não puderam ser verificadas e não são apresentadas.",
+    "transactionsEmpty": "Não há transações neste extrato.",
+    "transactionUnavailable": "Detalhes da transação indisponíveis"
   },
   "rules": {
     "title": "Regras",

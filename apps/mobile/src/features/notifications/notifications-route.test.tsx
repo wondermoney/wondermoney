@@ -35,6 +35,7 @@ const preferences: NotificationPreferencesDto = {
   accountRecovery: { effectiveEnabled: true, storedEnabled: true },
   bankSyncAlerts: { effectiveEnabled: true, storedEnabled: true },
   budgetAlerts: { deliverySupported: true, effectiveEnabled: true, storedEnabled: true },
+  creditCardDueReminders: { effectiveEnabled: true, storedEnabled: true },
   growth: { effectiveEnabled: false, storedEnabled: false },
   marketingOptOut: false,
   weeklyInsights: { deliverySupported: true, effectiveEnabled: true, storedEnabled: true },
@@ -66,6 +67,16 @@ describe('NotificationsRoute', () => {
     const view = await renderRoute()
     await fireEvent.press(view.getByRole('switch', { name: 'Turn off Budget alerts' }))
     await waitFor(() => expect(mockMutateAsync).toHaveBeenCalledWith({ budgetAlertsEnabled: false }))
+  })
+
+  it('persists card reminder opt-out and preserves the saved value after failure', async () => {
+    mockMutateAsync.mockRejectedValue(new ApiError('network'))
+    const view = await renderRoute()
+    await fireEvent.press(view.getByRole('switch', { name: 'Turn off Card payment reminders' }))
+    await waitFor(() => expect(mockMutateAsync).toHaveBeenCalledWith({ creditCardDueRemindersEnabled: false }))
+    await waitFor(() => expect(view.getByRole('alert')).toBeOnTheScreen())
+    expect(view.getByRole('switch', { name: 'Turn off Card payment reminders' }).props.accessibilityState.checked).toBe(true)
+    expect(mockRefetch).toHaveBeenCalled()
   })
 
   it('shows a save failure and resyncs from the server when a toggle is rejected', async () => {

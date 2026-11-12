@@ -12,3 +12,6 @@ export const offlineAccountCreateGuardKey = (epochId: number) => ['account-creat
 export const accountCreditCardStatementsKey = (epochId: number, accountId: number) => (
   ['account', epochId, accountId, 'credit-card-statements'] as const
 )
+export const accountCreditCardStatementDetailKey = (epochId: number, accountId: number, statementDate: string) => (
+  ['account', epochId, accountId, 'credit-card-statement', statementDate] as const
+)

@@ -11,6 +11,7 @@ const preferences: NotificationPreferencesDto = {
   accountRecovery: { effectiveEnabled: false, storedEnabled: false },
   bankSyncAlerts: { effectiveEnabled: true, storedEnabled: true },
   budgetAlerts: { deliverySupported: true, effectiveEnabled: true, storedEnabled: true },
+  creditCardDueReminders: { effectiveEnabled: true, storedEnabled: true },
   growth: { effectiveEnabled: false, storedEnabled: false },
   marketingOptOut: false,
   weeklyInsights: { deliverySupported: false, effectiveEnabled: false, storedEnabled: true },
@@ -50,6 +51,7 @@ describe('NotificationsScreen', () => {
     expect(view.queryByRole('switch', { name: /Product update emails/ })).toBeNull()
     expect(view.getByRole('switch', { name: 'Unsubscribe from all marketing emails' })).toBeOnTheScreen()
     expect(view.getByRole('switch', { name: 'Turn off Bank connection alerts' })).toBeOnTheScreen()
+    expect(view.getByRole('switch', { name: 'Turn off Card payment reminders' })).toBeOnTheScreen()
     expect(view.getByText(/7 days and 1 day before/)).toBeOnTheScreen()
   })
 
@@ -81,6 +83,17 @@ describe('NotificationsScreen', () => {
     expect(props.onToggleStream).toHaveBeenCalledWith('budgetAlerts', false)
     await fireEvent.press(view.getByRole('switch', { name: 'Turn on Account recovery emails' }))
     expect(props.onToggleStream).toHaveBeenCalledWith('accountRecovery', true)
+  })
+
+  it('toggles card payment reminders like any other category, and shows them paused by the global unsubscribe', async () => {
+    const { view, props } = await renderScreen()
+    await fireEvent.press(view.getByRole('switch', { name: 'Turn off Card payment reminders' }))
+    expect(props.onToggleStream).toHaveBeenCalledWith('creditCardDueReminders', false)
+
+    const optedOut = mapNotificationPreferences({ ...preferences, creditCardDueReminders: { effectiveEnabled: false, storedEnabled: true }, marketingOptOut: true })
+    const paused = await renderScreen({ state: { status: 'loaded', rows: optedOut.rows, marketingOptOut: true, refreshFailed: false, refreshing: false } })
+    expect(paused.view.getByRole('switch', { name: 'Turn off Card payment reminders' })).toBeOnTheScreen()
+    expect(paused.view.getAllByText(/paused/i).length).toBeGreaterThan(0)
   })
 
   it('disables every control and announces progress while saving', async () => {

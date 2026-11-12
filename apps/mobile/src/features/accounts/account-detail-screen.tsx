@@ -188,7 +188,7 @@ export function AccountDetailScreen({ state, recentTransactions, onBack, onRetry
           </View>
 
           {data.creditCardStatement ? (
-            <CreditCardStatementSection currency={data.originalCurrencyCode} locale={locale} state={data.creditCardStatement} />
+            <CreditCardStatementSection accountId={data.accountId} currency={data.originalCurrencyCode} locale={locale} state={data.creditCardStatement} />
           ) : null}
 
           {data.balance ? (

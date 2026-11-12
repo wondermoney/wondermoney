@@ -25,6 +25,9 @@ export const notificationPreferencesSchema = z.object({
   accountRecovery: categoryStateSchema,
   bankSyncAlerts: categoryStateSchema.optional(),
   budgetAlerts: streamStateSchema,
+  // Older self-hosted servers may not expose card reminders yet; the UI then
+  // reflects the documented default-on behavior without breaking other settings.
+  creditCardDueReminders: categoryStateSchema.optional(),
   growth: categoryStateSchema,
   marketingOptOut: z.boolean(),
   weeklyInsights: streamStateSchema,
@@ -39,6 +42,7 @@ export type NotificationPreferencePatch = Readonly<{
   accountRecoveryEnabled?: boolean
   bankSyncAlertsEnabled?: boolean
   budgetAlertsEnabled?: boolean
+  creditCardDueRemindersEnabled?: boolean
   growthEmailsEnabled?: boolean
   marketingOptOut?: boolean
   weeklyInsightsEnabled?: boolean

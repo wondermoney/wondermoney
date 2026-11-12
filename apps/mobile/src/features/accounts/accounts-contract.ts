@@ -118,6 +118,14 @@ export const creditCardStatementSchema = z.object({
   balance: z.number().finite(),
   availableCredit: z.number().finite().nullable(),
   isCurrent: z.boolean(),
+  status: z.enum(['open', 'closed', 'paid', 'overdue']),
+})
+
+export const creditCardStatementDetailSchema = creditCardStatementSchema.extend({
+  transactions: z.array(z.object({
+    amount: z.number().finite().nullable(), description: z.string().nullable(),
+    merchantName: z.string().nullable(), transactionDate: statementDateSchema.nullable(), transactionKey: z.number().int(),
+  })),
 })
 
 export type CreditCardStatementDto = z.infer<typeof creditCardStatementSchema>
@@ -205,6 +213,11 @@ export function createCreditCardStatementsEndpoint(accountId: number, range: { f
     path: `/v1/account/${accountId}/statements${query ? `?${query}` : ''}`,
     schema: creditCardStatementsResponseSchema,
   })
+}
+
+export function createCreditCardStatementDetailEndpoint(accountId: number, date: string) {
+  if (!isValidAccountId(accountId) || !/^\d{4}-\d{2}-\d{2}$/.test(date)) throw new Error('A valid account and statement date are required.')
+  return readEndpoint({ method: 'GET', path: `/v1/account/${accountId}/statements/${date}`, schema: z.object({ statement: creditCardStatementDetailSchema }) })
 }
 
 export function createDeleteAccountEndpoint(accountId: number) {
