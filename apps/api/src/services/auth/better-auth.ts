@@ -18,6 +18,7 @@ import { configuredAppleOptions } from '@service/auth/apple-options';
 import { resolveAuthCookieDomain } from '@service/auth/cookie-domain';
 import { resolveAuthCookiePrefix } from '@service/auth/cookie-prefix';
 import { aiRequiresVerifiedEmail, verificationLinkLandingOnApp } from '@service/auth/email-verification-policy';
+import { passkeyPlugins } from '@service/auth/passkey';
 import { isSignupAllowed, type SignupPolicyDeps } from '@service/auth/signup-policy';
 import { TWO_FACTOR_COOKIE_MAX_AGE_SECONDS, twoFactorOAuthGuard } from '@service/auth/two-factor-oauth-guard';
 import { sendEmailVerificationEmail, sendPasswordResetEmail } from '@service/email/email';
@@ -208,10 +209,13 @@ const auth = betterAuth({
   // session verification), and bearer (Authorization: Bearer) support.
   // twoFactorOAuthGuard extends 2FA enforcement to Google/OAuth sign-in (better-auth
   // only gates credential sign-ins by default — see that module + the 2FA docs).
+  // Passkeys belong to the web app's hostname, and a passkey sign-in is a full session
+  // even for a 2FA account (see services/auth/passkey.ts).
   plugins: [
     // The label authenticator apps show next to the code.
     twoFactor({ issuer: instanceName(), twoFactorCookieMaxAge: TWO_FACTOR_COOKIE_MAX_AGE_SECONDS }),
     twoFactorOAuthGuard(),
+    ...passkeyPlugins({ appName: instanceName(), appUrl: FRONTEND_URL }),
     jwt(),
     bearer(),
     expo(),
@@ -312,12 +316,12 @@ export const getPrimaryAuthProvider = async (userId: string): Promise<string> =>
   return !providerId || providerId === 'credential' ? 'email' : providerId;
 };
 
-/** Admin delete: removes a better-auth user (account/session/twoFactor rows cascade via FKs). */
+/** Admin delete: removes a better-auth user (account/session/twoFactor/passkey rows cascade via FKs). */
 export const deleteBetterAuthUser = async (userId: string): Promise<void> => {
   await betterAuthPool.query(`delete from "${BETTER_AUTH_SCHEMA}"."user" where id = $1`, [userId]);
 };
 
-/** Remove any better-auth user with this email (idempotent seed/test helper). Cascades to account/session/twoFactor. */
+/** Remove any better-auth user with this email (idempotent seed/test helper). Cascades to account/session/twoFactor/passkey. */
 export const deleteBetterAuthUserByEmail = async (email: string): Promise<void> => {
   await betterAuthPool.query(`delete from "${BETTER_AUTH_SCHEMA}"."user" where email = $1`, [email]);
 };

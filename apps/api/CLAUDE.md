@@ -104,9 +104,11 @@ Coverage thresholds in `vitest.config.ts` are enforced in CI (`pnpm test:coverag
 ## Auth, users and tenancy
 
 - **better-auth** is mounted at `/api/auth` (before `express.json()`), with its tables in the
-  `better_auth` schema and the twoFactor/jwt/bearer plugins. `getAuthSession()` reads the
+  `better_auth` schema and the twoFactor/jwt/bearer/passkey plugins. `getAuthSession()` reads the
   session cookie or `Authorization: Bearer` and sets `req.authUser`. MFA is implicit: no full
-  session exists until 2FA completes. Middleware: `requireAuth`, `optionalAuth`,
+  session exists until 2FA completes; a passkey sign-in (user verification required) counts as
+  both factors. better-auth tables have no MikroORM entities: change them with hand-written DDL
+  migrations that leave `.snapshot-wmdb.json` alone. Middleware: `requireAuth`, `optionalAuth`,
   `requireBearerAuth` (the auth callback); `adminAuth`/`serviceAuth` are API-key auth.
 - `getUser` sets **`req.user`** (the `Appuser`); `resolveTenantForRequest` sets **`req.tenant`**
   and arms the tenant filter. Keep the two distinct. Authed data routes use the `authedTenant`

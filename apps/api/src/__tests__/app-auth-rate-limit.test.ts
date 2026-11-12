@@ -140,6 +140,48 @@ describe('Auth endpoint rate limiting', () => {
     expect(overLimit.status).toBe(429);
   });
 
+  it('rate-limits passkey sign-in on the auth budget', async () => {
+    const app = await loadApp();
+
+    for (let i = 0; i < AUTH_LIMIT; i += 1) {
+      const res = await request(app.host).post('/api/auth/passkey/verify-authentication').send({ response: {} });
+      expect(res.status).not.toBe(429);
+    }
+
+    const overLimit = await request(app.host).get('/api/auth/passkey/generate-authenticate-options');
+    expect(overLimit.status).toBe(429);
+  });
+
+  it('rate-limits adding, renaming and deleting passkeys on the auth budget', async () => {
+    const app = await loadApp();
+
+    for (let i = 0; i < AUTH_LIMIT; i += 1) {
+      await request(app.host).post('/api/auth/passkey/delete-passkey').send({ id: 'passkey' });
+    }
+
+    for (const path of ['/api/auth/passkey/generate-register-options', '/api/auth/passkey/verify-registration', '/api/auth/passkey/update-passkey']) {
+      const res = path.includes('generate') ? await request(app.host).get(path) : await request(app.host).post(path).send({});
+      expect(res.status).toBe(429);
+    }
+  });
+
+  it('keeps passkey traffic out of the password sign-in budget, and the passkey list off both', async () => {
+    const app = await loadApp();
+
+    // The login page asks for passkey options on every visit (autofill); that must not use
+    // up the attempts a password sign-in gets.
+    for (let i = 0; i < AUTH_LIMIT; i += 1) {
+      await request(app.host).get('/api/auth/passkey/generate-authenticate-options');
+    }
+    const passwordSignIn = await request(app.host).post('/api/auth/sign-in/email').send({ email: 'a@b.com', password: 'x' });
+    expect(passwordSignIn.status).not.toBe(429);
+
+    for (let i = 0; i < AUTH_LIMIT + 5; i += 1) {
+      const res = await request(app.host).get('/api/auth/passkey/list-user-passkeys');
+      expect(res.status).not.toBe(429);
+    }
+  });
+
   it('does not apply the strict auth limit to non-sensitive auth paths', async () => {
     const app = await loadApp();
 

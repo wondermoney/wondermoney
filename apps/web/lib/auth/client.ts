@@ -1,3 +1,4 @@
+import { passkeyClient } from "@better-auth/passkey/client";
 import { twoFactorClient } from "better-auth/client/plugins";
 import { createAuthClient } from "better-auth/react";
 
@@ -17,5 +18,5 @@ const API_URL = env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
 export const authClient = createAuthClient({
   baseURL: API_URL,
   cookiePrefix: getBetterAuthCookiePrefix(API_URL),
-  plugins: [twoFactorClient()],
+  plugins: [twoFactorClient(), passkeyClient()],
 });

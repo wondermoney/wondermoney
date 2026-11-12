@@ -3,7 +3,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -12,6 +12,13 @@ import { Link } from "@/i18n/navigation";
 import { useConfirmedFeature } from "@/lib/api/instance/useInstance";
 import { authClient } from "@/lib/auth/client";
 import { completeAuthAndRedirect } from "@/lib/auth/complete-auth";
+import { markPasskeyOfferPending } from "@/lib/auth/passkey-offer";
+import {
+  browserSupportsPasskeyAutofill,
+  browserSupportsPasskeys,
+  isPasskeyCancelled,
+  signInWithPasskey,
+} from "@/lib/auth/passkeys";
 import { getSafeNextPath, withNextParam } from "@/lib/auth/safe-next-path";
 import { getCallbackURL } from "@/lib/utils/url";
 
@@ -49,6 +56,12 @@ export default function LoginForm({ nextParam }: LoginFormProps = {}) {
   const t = useTranslations();
   // Without Google credentials on the API the sign-in call fails with PROVIDER_NOT_FOUND.
   const googleSignIn = useConfirmedFeature((features) => features.googleSignIn);
+  // An API older than passkeys has no passkey endpoints. False until hydrated, so reading the
+  // browser's support below never differs between the server and the first client render.
+  const passkeyServer = useConfirmedFeature(
+    (features) => features.passkey === true,
+  );
+  const passkeySignIn = passkeyServer && browserSupportsPasskeys();
   const [isNavigating, setIsNavigating] = useState(false);
   const form = useForm({
     resolver: zodResolver(formSchema),
@@ -63,6 +76,54 @@ export default function LoginForm({ nextParam }: LoginFormProps = {}) {
   // unsafe value is dropped here rather than carried into MFA or OAuth.
   const getNext = () => getSafeNextPath(nextParam, window.location.origin);
 
+  // A passkey sign-in is a full session, two-factor accounts included (the passkey is both
+  // factors), so it goes straight to provisioning: no MFA step.
+  const finishPasskeySignIn = async () => {
+    setIsNavigating(true);
+    const completed = await completeAuthAndRedirect(
+      locale,
+      {},
+      "auth_complete",
+      getNext(),
+    );
+    if (!completed.ok) {
+      setIsNavigating(false);
+      toast.error(t("toast-login-error"));
+    }
+  };
+
+  const onPasskeySignIn = async () => {
+    try {
+      await signInWithPasskey();
+    } catch (error) {
+      if (!isPasskeyCancelled(error)) toast.error(t("passkeys-sign-in-error"));
+      return;
+    }
+    await finishPasskeySignIn();
+  };
+
+  // Conditional UI: the browser offers saved passkeys in the email field's suggestions and
+  // the request waits until the user picks one. The passkey button starts a fresh request,
+  // which aborts this one; that and any other failure here stay silent.
+  useEffect(() => {
+    if (!passkeySignIn) return;
+    let active = true;
+    void (async () => {
+      if (!(await browserSupportsPasskeyAutofill()) || !active) return;
+      try {
+        await signInWithPasskey({ autoFill: true });
+      } catch {
+        return;
+      }
+      if (active) await finishPasskeySignIn();
+    })();
+    return () => {
+      active = false;
+    };
+    // Started once per mount; `finishPasskeySignIn` reads the current props when it runs.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [passkeySignIn]);
+
   const onSubmit: SubmitHandler<FormSchema> = async (values, e) => {
     e?.preventDefault();
     form.clearErrors();
@@ -76,6 +137,10 @@ export default function LoginForm({ nextParam }: LoginFormProps = {}) {
       toast.error(t("toast-login-error"));
       return;
     }
+
+    // The password was right: the first page after sign-in (after MFA, when it applies)
+    // offers once to add a passkey.
+    markPasskeyOfferPending();
 
     // A pending 2FA challenge means the credential session better-auth
     // briefly created was deleted server-side — no full session exists yet.
@@ -130,7 +195,8 @@ export default function LoginForm({ nextParam }: LoginFormProps = {}) {
                     type="email"
                     placeholder={t("email")}
                     required
-                    autoComplete="email"
+                    // `webauthn` lets the browser offer saved passkeys here.
+                    autoComplete="username webauthn"
                     autoFocus
                     className="bg-card"
                     {...field}
@@ -180,6 +246,17 @@ export default function LoginForm({ nextParam }: LoginFormProps = {}) {
           >
             {t("log-in")}
           </Button>
+          {passkeySignIn && (
+            <Button
+              type="button"
+              variant="secondary"
+              className="w-full font-semibold"
+              disabled={isLoading}
+              onClick={() => void onPasskeySignIn()}
+            >
+              {t("passkeys-sign-in")}
+            </Button>
+          )}
         </form>
       </Form>
 

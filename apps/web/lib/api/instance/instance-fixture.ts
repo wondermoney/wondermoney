@@ -15,6 +15,7 @@ export function instanceFeatures(
     fileStorage: true,
     googleSignIn: true,
     marketData: true,
+    passkey: true,
     ...overrides,
   };
 }

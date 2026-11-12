@@ -35,6 +35,7 @@ describe('GET /v1/instance', () => {
         googleSignIn: false,
         marketData: false,
         mcp: true,
+        passkey: true,
       },
       minAppVersion: null,
       name: 'WonderMoney',

@@ -13,6 +13,7 @@
     "ai-assistant-consent",
     "change-password",
     "two-factor-authentication",
+    "passkeys",
     "api-tokens",
     "connect-ai-client",
     "read-only-bank-access",

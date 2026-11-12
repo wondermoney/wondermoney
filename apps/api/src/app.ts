@@ -33,6 +33,7 @@ import {
   importSessionRateLimit,
   inviteLookupRateLimit,
   pairingRateLimit,
+  passkeyRateLimit,
   publicMarketingRateLimit,
   publicReadRateLimit,
   supportRateLimit,
@@ -162,6 +163,8 @@ export default class Application {
         ['/api/auth/sign-in', '/api/auth/forget-password', '/api/auth/reset-password', '/api/auth/two-factor'],
         authExchangeRateLimit(),
       );
+      // Passkey sign-in and passkey management: the same family, its own store (see the factory).
+      this.host.use('/api/auth/passkey', passkeyRateLimit());
 
       // better-auth runs embedded in `api`. Mount its handler BEFORE express.json
       // (it reads the raw request body itself — express.json would consume it and

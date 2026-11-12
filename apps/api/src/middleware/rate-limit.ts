@@ -368,6 +368,16 @@ export const adminApiRateLimit = (): RequestHandler => createRateLimiter({ famil
 /** `/v1/auth` — Supabase token exchange. */
 export const authExchangeRateLimit = (): RequestHandler => createRateLimiter({ family: 'authExchange' });
 
+/**
+ * `/api/auth/passkey/*` — passkey sign-in and adding, renaming or deleting a passkey, on the
+ * `authExchange` family with a store of its own. The login page asks for passkey options on
+ * every visit (the email field offers saved passkeys), so sharing the password sign-in store
+ * would spend a password attempt each time. Listing passkeys is an ordinary read and is not
+ * counted.
+ */
+export const passkeyRateLimit = (): RequestHandler =>
+  createRateLimiter({ family: 'authExchange', skip: (req) => req.method === 'GET' && req.path === '/list-user-passkeys' });
+
 /** `/v1/household/invites/validate` — public invite-token lookup. */
 export const inviteLookupRateLimit = (): RequestHandler => createRateLimiter({ family: 'inviteLookup' });
 

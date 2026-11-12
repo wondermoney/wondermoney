@@ -79,6 +79,14 @@ The worker syncs each bank connection at most once every `BANK_SYNC_MIN_INTERVAL
 
 Set both `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` (from an OAuth client in Google Cloud, with `<API_URL>/api/auth/callback/google` as its authorised redirect URI) to offer "Continue with Google" on the login and sign-up pages. Without both, the button is hidden.
 
+## Passkeys
+
+Passkeys need no environment variable. They belong to the hostname in `APP_URL`, the web app's address, and the browser only offers them on that hostname. This works the same whether the web app and the API share one hostname or use two, such as `money.example.com` and `api.money.example.com`.
+
+Browsers only allow passkeys over HTTPS, or on `http://localhost`. An IP address such as `http://192.168.1.10:3000` won't work: give the web app a hostname with HTTPS (see [HTTPS and domains](/en/docs/self-hosting/https-and-domains)).
+
+If the web app moves to another hostname, existing passkeys stop working and your users have to add them again. Their passwords still work. `GET /v1/instance` reports `features.passkey: true`.
+
 ## Your instance
 
 | Setting | What it does |

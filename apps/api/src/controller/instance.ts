@@ -42,6 +42,8 @@ export function getInstance(_req: Request, res: Response) {
       marketData: isMarketDataEnabled(),
       // The read-only MCP server at `POST /v1/mcp` (`MCP_ENABLED`, on by default).
       mcp: isMcpEnabled(),
+      // Passkey sign-in on the web app (better-auth's passkey plugin, always on).
+      passkey: true,
     },
     minAppVersion: process.env['MIN_APP_VERSION']?.trim() || null,
     name: instanceName(),
