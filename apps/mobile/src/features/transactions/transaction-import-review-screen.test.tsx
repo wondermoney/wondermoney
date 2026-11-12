@@ -241,10 +241,20 @@ describe('TransactionImportReviewScreen', () => {
 
   it('sends a file with categories to map to the web, offering only to cancel it', async () => {
     const onCancel = jest.fn()
-    const { view } = await renderScreen({ stage: { kind: 'needs-web' }, onCancel })
+    const { view } = await renderScreen({ stage: { kind: 'needs-web', reason: 'categories' }, onCancel })
     expect(view.getByText(/import the file on the web/)).toBeOnTheScreen()
     expect(view.queryByRole('button', { name: /^Import \d/ })).not.toBeOnTheScreen()
     expect(view.queryByRole('checkbox')).not.toBeOnTheScreen()
+    await fireEvent.press(view.getByRole('button', { name: 'Cancel import' }))
+    expect(onCancel).toHaveBeenCalled()
+  })
+
+  it('sends a PDF statement to the web, offering only to cancel it', async () => {
+    const onCancel = jest.fn()
+    const { view } = await renderScreen({ stage: { kind: 'needs-web', reason: 'pdf' }, onCancel })
+    expect(view.getByText(/PDF statement/)).toBeOnTheScreen()
+    expect(view.queryByText(/categories/)).not.toBeOnTheScreen()
+    expect(view.queryByRole('button', { name: /^Import \d/ })).not.toBeOnTheScreen()
     await fireEvent.press(view.getByRole('button', { name: 'Cancel import' }))
     expect(onCancel).toHaveBeenCalled()
   })

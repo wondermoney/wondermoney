@@ -84,6 +84,16 @@ describe('loadConfiguration', () => {
     expect(() => loadConfiguration('api', { ...validApi, TRANSFER_MATCH_FX_TOLERANCE: '-0.01' })).toThrow(/TRANSFER_MATCH_FX_TOLERANCE/);
   });
 
+  it('takes the PDF statement limits as positive whole numbers, on the API and the worker', () => {
+    expect(() => loadConfiguration('api', { ...validApi, STATEMENT_IMPORT_MAX_BYTES: '5242880', STATEMENT_IMPORT_MAX_PAGES: '5' })).not.toThrow();
+    expect(() => loadConfiguration('worker', { ...validShared, STATEMENT_IMPORT_MAX_PAGES: '40' })).not.toThrow();
+    for (const value of ['0', '-1', '10MB', '2.5', 'many']) {
+      expect(() => loadConfiguration('api', { ...validApi, STATEMENT_IMPORT_MAX_BYTES: value })).toThrow(/STATEMENT_IMPORT_MAX_BYTES/);
+      expect(() => loadConfiguration('worker', { ...validShared, STATEMENT_IMPORT_MAX_PAGES: value })).toThrow(/STATEMENT_IMPORT_MAX_PAGES/);
+    }
+    expect(() => loadConfiguration('api', { ...validApi, AI_DAILY_LIMIT_STATEMENT_IMPORT: 'lots' })).toThrow(/AI_DAILY_LIMIT_STATEMENT_IMPORT/);
+  });
+
   it('takes the minimum unattended sync interval in hours and refuses anything that is not a positive number', () => {
     expect(() => loadConfiguration('worker', { ...validShared, BANK_SYNC_MIN_INTERVAL_HOURS: '6' })).not.toThrow();
     expect(() => loadConfiguration('worker', { ...validShared, BANK_SYNC_MIN_INTERVAL_HOURS: '0.5' })).not.toThrow();

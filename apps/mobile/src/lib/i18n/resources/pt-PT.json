@@ -1121,6 +1121,7 @@
       "expired": "Esta importação expirou antes de terminar. Comece outra vez com o ficheiro.",
       "unsupported": "Esta versão da app não consegue mostrar esta importação. Atualize a app ou termine-a na web.",
       "needsWeb": "Este ficheiro tem categorias próprias para associar, o que a app ainda não faz. Nada foi importado: cancele esta importação e importe o ficheiro na web.",
+      "needsWebPdf": "É um extrato em PDF, cujos saldos a app ainda não consegue verificar. Nada foi importado: cancele esta importação e reveja o extrato na web.",
       "loadFailed": "Não foi possível carregar esta importação. Verifique a sua ligação e tente novamente.",
       "unnamed": "Importação de {{date}}",
       "summary": "Nada é importado até confirmar. As transações novas estão incluídas; as que já estão na conta são ignoradas.",

@@ -5,6 +5,7 @@ import type { EntityManager } from '@mikro-orm/postgresql';
 import * as Sentry from '@sentry/node';
 import { transactionImport } from '@wondermoney/shared';
 
+import { statementImportLimits, type StatementImportLimits } from '@app/config/statement-import';
 import { HIDDEN_FILTER } from '@app/database/filters/tenant-filter';
 import { enqueueTransactionImportJob, type TransactionImportJobMode } from '@app/jobs/transaction-import.queue';
 import { Account } from '@entity/Account';
@@ -17,7 +18,7 @@ import { Tenant } from '@entity/Tenant';
 import { Transaction } from '@entity/Transaction';
 import { TransactionAuditActorType, TransactionAuditEventType } from '@entity/TransactionAuditLog';
 import { TransactionImportRow, TransactionImportRowDecision, TransactionImportRowStatus } from '@entity/TransactionImportRow';
-import { TransactionImportSession, TransactionImportSessionStatus } from '@entity/TransactionImportSession';
+import { type StatementExtraction, TransactionImportSession, TransactionImportSessionStatus } from '@entity/TransactionImportSession';
 import { TransactionType } from '@entity/TransactionType';
 import { resolveAccountCsvImportFormat } from '@service/account/account-csv-import-format';
 import type { StatementMapping } from '@service/account/account-statement-mapping.schema';
@@ -31,13 +32,14 @@ import { markUserCategorized } from '@service/transaction/categorization-confide
 import { findAssignableCategory } from '@service/transaction/household-category';
 import { TransactionAuditService } from '@service/transaction/transaction-audit.service';
 import { findImportedTransactionIds } from '@service/transaction/transaction-dedup.service';
-import { BadRequestError, ConflictError, NotFoundError } from '@utils/errors';
+import { BadRequestError, ConflictError, ERROR_CODE, FeatureDisabledError, NotFoundError } from '@utils/errors';
 import logger from '@utils/logger';
 import { getFullName } from '@utils/misc';
 
 import { importFileName } from './import-file-name';
 import { findLikelyDuplicateCandidates } from './likely-duplicate-candidates';
 import { type LikelyDuplicateRow, matchLikelyDuplicates } from './likely-duplicate-match';
+import { type OpenPdf, PdfStatementError, readPdfStatement, type ReadStatementPage } from './pdf-statement/pdf-statement-reader';
 import { statementImportAdapter, StatementUnreadableError, toStatementLine } from './statement-import-adapter';
 
 /**
@@ -68,6 +70,13 @@ import { statementImportAdapter, StatementUnreadableError, toStatementLine } fro
  *            accounts once (balance chain, rules, learned categories) and sets the outcome; then
  *            transfer matching, recurring detection and enrichment follow. The job heartbeats
  *            between chunks, and on a timer through the settling and follow-ups.
+ *
+ * A PDF statement (`format: pdf`, `createPdf`) is read by the `statementImport` vision model, page
+ * by page, in the parse job (`pdf-statement/pdf-statement-reader.ts`): the session records each
+ * page read (`statementExtraction`), can be cancelled between pages, and keeps whether the
+ * statement's balances add up. The PDF is deleted from storage as soon as the read ends, however
+ * it ends, so a PDF session cannot be read again. A commit of a statement whose balances do not add
+ * up needs the person to acknowledge the difference. No PDF session commits on its own.
  *
  * Only `commit` writes transactions. A session is its starter's alone: queries carry the person
  * and the household (and the entity's owner filter does too), so another household, and the
@@ -118,7 +127,16 @@ export interface TransactionImportDeps {
   now?: () => Date;
   /** Called before each commit chunk, with its index from 0 (a seam for tests that stop a commit part way). */
   onChunk?: (index: number) => Promise<void> | void;
+  /** How a PDF statement is opened and read; the real renderer and the configured model by default. */
+  pdfStatement?: { limits?: StatementImportLimits; open?: OpenPdf; readPage?: ReadStatementPage; sleep?: (ms: number) => Promise<void> };
   storage?: TransactionImportStorage;
+}
+
+export interface TransactionImportPdfInput {
+  accountId: number;
+  /** The size of the PDF the person is about to upload; the upload link is signed for exactly this. */
+  contentLength: number;
+  fileName?: string;
 }
 
 /** The reader options a session keeps and hands to its adapter, beyond the account's currency. */
@@ -182,17 +200,23 @@ export interface TransactionImportSessionView {
   /** The file's categories, for the category-mapping step; empty for a format that maps none. */
   sourceCategories: transactionImport.ImportSourceCategory[];
   status: transactionImport.ImportSessionStatus;
+  /** A PDF statement's pages read so far and, once read, whether its balances add up; null for other formats. */
+  statementExtraction: null | StatementExtraction;
   /** Where to PUT the file, while it is awaited. */
   upload: null | { key: string; url: string };
   warnings: transactionImport.ImportWarning[];
 }
 
 export interface TransactionImportStorage {
+  /** Removes an uploaded file; a PDF statement is deleted once it is read. */
+  deleteObject?(bucket: string, key: string): Promise<void>;
   getAccountCsvBucketName(): string;
   getObjectBuffer(bucket: string, key: string): Promise<Buffer>;
   getObjectSize(bucket: string, key: string): Promise<number | undefined>;
   /** A link to PUT a file for `accountKey` to, and the key it lands at. */
   presignAccountUpload(accountKey: number): Promise<{ key: string; presignedUrl: string }>;
+  /** A link to PUT one PDF of exactly `contentLength` bytes for `accountKey` to, and the key it lands at. */
+  presignAccountPdfUpload?(accountKey: number, contentLength: number): Promise<{ key: string; presignedUrl: string }>;
 }
 
 export interface TransactionImportView {
@@ -238,9 +262,11 @@ const OUTCOME_OF: Readonly<Record<ReturnType<typeof transactionImport.commitOutc
 const decisionOf = (decision: null | transactionImport.ImportDecision) => (decision === null ? null : DECISION_OF[decision]);
 
 const defaultStorage: TransactionImportStorage = {
+  deleteObject: (bucket, key) => s3Service.deleteObject(bucket, key),
   getAccountCsvBucketName: () => s3Service.getAccountCsvBucketName(),
   getObjectBuffer: (bucket, key) => s3Service.getObjectBuffer(bucket, key),
   getObjectSize: (bucket, key) => s3Service.getObjectSize(bucket, key),
+  presignAccountPdfUpload: (accountKey, contentLength) => s3Service.generatePresignedUrlForAccountPdf(accountKey, contentLength),
   presignAccountUpload: (accountKey) => s3Service.generatePresignedUrlForAccountCsv(accountKey, 'import'),
 };
 
@@ -253,6 +279,10 @@ export class TransactionImportService {
     return this.deps.now?.() ?? new Date();
   }
 
+  private get pdfLimits(): StatementImportLimits {
+    return this.deps.pdfStatement?.limits ?? statementImportLimits();
+  }
+
   private get storage(): TransactionImportStorage {
     return this.deps.storage ?? defaultStorage;
   }
@@ -262,7 +292,8 @@ export class TransactionImportService {
   // --- the person's side ---
 
   async create(scope: TransactionImportScope, input: TransactionImportCreateInput): Promise<TransactionImportSessionView> {
-    if (!this.adapters[input.format]) throw new BadRequestError('Unsupported import format');
+    // A PDF statement goes to a model, behind its own checks: `createPdf`.
+    if (input.format === 'pdf' || !this.adapters[input.format]) throw new BadRequestError('Unsupported import format');
     const account = await this.writableAccount(scope, input.accountId);
     let upload: null | { key: string; url: string } = null;
     let key = input.key;
@@ -292,6 +323,35 @@ export class TransactionImportService {
     await this.em.flush();
     if (session.status === SESSION_STATUS.PARSING) await this.startJob(session, 'parse');
     return { ...(await this.sessionView(session)), upload };
+  }
+
+  /**
+   * Start a PDF statement import on an account the person owns: the response carries a link to PUT
+   * the PDF to, signed for exactly `contentLength` bytes, and `parse` starts the read once it is
+   * uploaded. The caller has checked that the person may use the `statementImport` model and spent
+   * the household's allowance for it. A PDF over the size limit is refused before any link exists.
+   */
+  async createPdf(scope: TransactionImportScope, input: TransactionImportPdfInput): Promise<TransactionImportSessionView> {
+    const account = await this.writableAccount(scope, input.accountId);
+    if (input.contentLength > this.pdfLimits.maxBytes) throw new BadRequestError(`The statement is larger than ${this.pdfLimits.maxBytes} bytes`, ERROR_CODE.STATEMENT_TOO_LARGE);
+    if (!this.storage.presignAccountPdfUpload) throw new FeatureDisabledError('File storage');
+    const presigned = await this.storage.presignAccountPdfUpload(account.accountKey, input.contentLength);
+    const session = this.em.create(TransactionImportSession, {
+      accountKey: account,
+      appuserKey: appuserRef(this.em, scope.appuserKey),
+      autoCommit: false,
+      expiresAt: new Date(this.now.getTime() + SESSION_TTL_MS),
+      fileName: importFileName(input.fileName),
+      format: 'pdf',
+      options: {},
+      publicId: randomUUID(),
+      s3Bucket: this.storage.getAccountCsvBucketName(),
+      s3Key: presigned.key,
+      status: SESSION_STATUS.WAITING_FOR_UPLOAD,
+      tenantKey: tenantRef(this.em, scope.tenantKey),
+    }, { partial: true });
+    await this.em.flush();
+    return { ...(await this.sessionView(session)), upload: { key: presigned.key, url: presigned.presignedUrl } };
   }
 
   async get(scope: TransactionImportScope, id: string, query: TransactionImportRowQuery): Promise<TransactionImportView> {
@@ -368,9 +428,11 @@ export class TransactionImportService {
     const session = await this.find(scope, id);
     const view = await this.sessionView(session);
     const restartable = view.status === 'parsing' && view.canRetry;
-    if (!restartable && !['failed', 'needs_mapping', 'ready', 'waiting_for_upload'].includes(view.status)) throw new ConflictError('This import cannot be read again now');
+    // A PDF is deleted once it has been read: it is read once, or again only after its job stopped part way.
+    const readable = session.format === 'pdf' ? ['waiting_for_upload'] : ['failed', 'needs_mapping', 'ready', 'waiting_for_upload'];
+    if (!restartable && !readable.includes(view.status)) throw new ConflictError('This import cannot be read again now');
     if (view.status === 'waiting_for_upload' && (await this.storage.getObjectSize(session.s3Bucket, session.s3Key).catch(() => undefined)) === undefined) throw new ConflictError('The file has not been uploaded');
-    if (input.options) session.options = { ...(session.options ?? {}), ...input.options };
+    if (input.options && session.format !== 'pdf') session.options = { ...(session.options ?? {}), ...input.options };
     session.status = SESSION_STATUS.PARSING;
     session.errorCode = undefined;
     await this.em.flush();
@@ -378,8 +440,11 @@ export class TransactionImportService {
     return this.sessionView(session);
   }
 
-  /** Write the rows decided `import` (in the worker). Asked again after its job stopped, it resumes. */
-  async commit(scope: TransactionImportScope, id: string): Promise<TransactionImportSessionView> {
+  /**
+   * Write the rows decided `import` (in the worker). Asked again after its job stopped, it resumes.
+   * A PDF statement whose balances do not add up commits only with `acknowledgeMismatch`.
+   */
+  async commit(scope: TransactionImportScope, id: string, input: { acknowledgeMismatch?: boolean } = {}): Promise<TransactionImportSessionView> {
     const session = await this.find(scope, id);
     const view = await this.sessionView(session);
     if (view.status === 'importing' && view.canRetry) {
@@ -388,21 +453,29 @@ export class TransactionImportService {
     }
     if (view.status === 'needs_mapping') throw new ConflictError('Choose an account for each account in the file first');
     if (!view.canCommit) throw new ConflictError('This import cannot be committed now');
+    if (session.statementExtraction?.reconciliation?.status === 'mismatch' && input.acknowledgeMismatch !== true) {
+      throw new ConflictError("The statement's balances do not add up; acknowledge the difference to import it anyway", ERROR_CODE.STATEMENT_RECONCILIATION_UNACKNOWLEDGED);
+    }
     session.status = SESSION_STATUS.IMPORTING;
     await this.em.flush();
     await this.startJob(session, 'commit');
     return this.sessionView(session);
   }
 
-  /** Close a session that is waiting for the person; its rows are deleted. */
+  /**
+   * Close a session that is waiting for the person; its rows are deleted. A PDF statement can also
+   * be cancelled while it is being read: the job stops after the page it is on, and the PDF goes.
+   */
   async cancel(scope: TransactionImportScope, id: string): Promise<TransactionImportSessionView> {
     const session = await this.find(scope, id);
     if (session.status === SESSION_STATUS.CANCELLED) return this.sessionView(session);
     const view = await this.sessionView(session);
-    if (!['expired', 'failed', 'needs_mapping', 'ready', 'waiting_for_upload'].includes(view.status) && !(view.status === 'parsing' && view.canRetry)) throw new ConflictError('This import cannot be cancelled now');
+    const stoppable = view.status === 'parsing' && (view.canRetry || session.format === 'pdf');
+    if (!['expired', 'failed', 'needs_mapping', 'ready', 'waiting_for_upload'].includes(view.status) && !stoppable) throw new ConflictError('This import cannot be cancelled now');
     session.status = SESSION_STATUS.CANCELLED;
     await this.em.nativeDelete(TransactionImportRow, { transactionImportSessionKey: bySession(session.transactionImportSessionKey) });
     await this.em.flush();
+    if (session.format === 'pdf') await this.deleteFile(session);
     return this.sessionView(session);
   }
 
@@ -419,7 +492,7 @@ export class TransactionImportService {
     if (!session) return false;
     if (!(await backgroundOperationService.claimJobStartOrResume(correlationId, queueJobId))) return false;
     try {
-      if (mode === 'parse' && session.status === SESSION_STATUS.PARSING) await this.parseFile(session);
+      if (mode === 'parse' && session.status === SESSION_STATUS.PARSING) await this.parseFile(session, correlationId, queueJobId);
       const committing = session.status === SESSION_STATUS.IMPORTING || (mode === 'parse' && session.autoCommit && session.status === SESSION_STATUS.READY);
       if (!committing) {
         await backgroundOperationService.finishJob(correlationId, queueJobId, {
@@ -447,33 +520,12 @@ export class TransactionImportService {
 
   // --- parse ---
 
-  private async parseFile(session: TransactionImportSession): Promise<void> {
+  private async parseFile(session: TransactionImportSession, correlationId: string, queueJobId: string): Promise<void> {
     const account = await this.em.findOneOrFail(Account, { accountKey: keyOf(session.accountKey, 'accountKey')! }, { filters: false, populate: ['currencyKey'] });
-    let result: transactionImport.ImportParseResult;
-    try {
-      const buffer = await getLimitedCsvObjectBuffer({ bucket: session.s3Bucket, key: session.s3Key }, { getObjectBuffer: (bucket, key) => this.storage.getObjectBuffer(bucket, key), getObjectSize: (bucket, key) => this.storage.getObjectSize(bucket, key) });
-      // The file decides too: an OFX/QFX upload read as a statement is still OFX, a CAMT.053
-      // export is still CAMT.053, and the older WonderMoney CSV template (whose columns no bank
-      // export has) is read by its own adapter.
-      const bytes = new Uint8Array(buffer);
-      if (session.format === 'statement' && transactionImport.isOfxFile(bytes)) session.format = 'ofx';
-      else if (session.format === 'statement' && transactionImport.isGenericCsvTemplate(bytes)) session.format = 'generic-csv';
-      else if (session.format === 'statement' && transactionImport.isQifFile(bytes)) session.format = 'qif';
-      else if (session.format === 'statement' && transactionImport.isCamt053File(bytes)) session.format = 'camt053';
-      else if (session.format === 'statement' && transactionImport.isYnabFile(bytes)) session.format = 'ynab';
-      else if (session.format === 'statement' && transactionImport.isActualFile(bytes)) session.format = 'actual';
-      // A `.xml` upload can be either XML format; the content decides.
-      else if (session.format === 'camt053' && transactionImport.isOfxFile(bytes)) session.format = 'ofx';
-      const adapter = this.adapters[session.format];
-      if (!adapter) throw new StatementUnreadableError('unreadable');
-      const options = { accountCurrency: account.currencyKey.code, ...(session.format === 'generic-csv' ? await this.genericCsvOptions() : {}), ...(session.options ?? {}) };
-      result = await (adapter as transactionImport.ImportAdapter<typeof options>).parse(bytes, options);
-    } catch (error) {
-      session.status = SESSION_STATUS.FAILED;
-      session.errorCode = error instanceof StatementUnreadableError || error instanceof transactionImport.QifUnreadableError || error instanceof transactionImport.Camt053UnreadableError || error instanceof transactionImport.YnabUnreadableError || error instanceof transactionImport.ActualUnreadableError ? error.code : 'unreadable';
-      await this.em.flush();
-      return;
-    }
+    // A PDF is read by the model; any other file by its format's adapter. Null: the read failed (the
+    // session records why) or, for a PDF, the person cancelled it.
+    const result = session.format === 'pdf' ? await this.readPdf(session, account.currencyKey.code, correlationId, queueJobId) : await this.readFile(session, account.currencyKey.code);
+    if (!result || (session.format === 'pdf' && (await this.isCancelled(session)))) return;
 
     // Read again from the start: whatever an earlier read stored goes.
     await this.em.nativeDelete(TransactionImportRow, { transactionImportSessionKey: bySession(session.transactionImportSessionKey) });
@@ -519,8 +571,107 @@ export class TransactionImportService {
     session.sourceCategories = result.sourceCategories === undefined ? undefined : sourceCategories;
     session.categoryMapping = Object.fromEntries(Object.entries(session.categoryMapping ?? {}).filter(([label]) => sourceCategories.some((source) => source.label === label)));
     session.warnings = result.warnings;
+    // A PDF read is long: the person may have cancelled while its rows were stored.
+    if (session.format === 'pdf' && (await this.isCancelled(session))) {
+      await this.em.nativeDelete(TransactionImportRow, { transactionImportSessionKey: bySession(session.transactionImportSessionKey) });
+      return;
+    }
     session.status = transactionImport.isMappingComplete(result.sourceAccounts, mapping) ? SESSION_STATUS.READY : SESSION_STATUS.NEEDS_MAPPING;
     await this.em.flush();
+  }
+
+  /** Read an uploaded file with its format's adapter. Null when it cannot be read; the session then records why. */
+  private async readFile(session: TransactionImportSession, accountCurrency: string): Promise<null | transactionImport.ImportParseResult> {
+    try {
+      const buffer = await getLimitedCsvObjectBuffer({ bucket: session.s3Bucket, key: session.s3Key }, { getObjectBuffer: (bucket, key) => this.storage.getObjectBuffer(bucket, key), getObjectSize: (bucket, key) => this.storage.getObjectSize(bucket, key) });
+      // The file decides too: an OFX/QFX upload read as a statement is still OFX, a CAMT.053
+      // export is still CAMT.053, and the older WonderMoney CSV template (whose columns no bank
+      // export has) is read by its own adapter.
+      const bytes = new Uint8Array(buffer);
+      if (session.format === 'statement' && transactionImport.isOfxFile(bytes)) session.format = 'ofx';
+      else if (session.format === 'statement' && transactionImport.isGenericCsvTemplate(bytes)) session.format = 'generic-csv';
+      else if (session.format === 'statement' && transactionImport.isQifFile(bytes)) session.format = 'qif';
+      else if (session.format === 'statement' && transactionImport.isCamt053File(bytes)) session.format = 'camt053';
+      else if (session.format === 'statement' && transactionImport.isYnabFile(bytes)) session.format = 'ynab';
+      else if (session.format === 'statement' && transactionImport.isActualFile(bytes)) session.format = 'actual';
+      // A `.xml` upload can be either XML format; the content decides.
+      else if (session.format === 'camt053' && transactionImport.isOfxFile(bytes)) session.format = 'ofx';
+      const adapter = this.adapters[session.format];
+      if (!adapter) throw new StatementUnreadableError('unreadable');
+      const options = { accountCurrency, ...(session.format === 'generic-csv' ? await this.genericCsvOptions() : {}), ...(session.options ?? {}) };
+      return await (adapter as transactionImport.ImportAdapter<typeof options>).parse(bytes, options);
+    } catch (error) {
+      session.status = SESSION_STATUS.FAILED;
+      session.errorCode = error instanceof StatementUnreadableError || error instanceof transactionImport.QifUnreadableError || error instanceof transactionImport.Camt053UnreadableError || error instanceof transactionImport.YnabUnreadableError || error instanceof transactionImport.ActualUnreadableError ? error.code : 'unreadable';
+      await this.em.flush();
+      return null;
+    }
+  }
+
+  /**
+   * Read a PDF statement with the vision model, page by page, recording each page read and
+   * stopping between pages once the person cancels. The PDF is deleted from storage when the read
+   * ends, however it ends. Null when the read failed (the session then records why) or stopped.
+   */
+  private async readPdf(session: TransactionImportSession, accountCurrency: string, correlationId: string, queueJobId: string): Promise<null | transactionImport.ImportParseResult> {
+    const limits = this.pdfLimits;
+    const fail = async (code: string) => {
+      session.status = SESSION_STATUS.FAILED;
+      session.errorCode = code;
+      await this.em.flush();
+      return null;
+    };
+    try {
+      const size = await this.storage.getObjectSize(session.s3Bucket, session.s3Key).catch(() => undefined);
+      if (size === undefined) return await fail('unreadable');
+      if (size > limits.maxBytes) return await fail('too_large');
+      const buffer = await this.storage.getObjectBuffer(session.s3Bucket, session.s3Key);
+      if (buffer.byteLength > limits.maxBytes) return await fail('too_large');
+      const reading = await this.keptAlive(correlationId, queueJobId, () => readPdfStatement(new Uint8Array(buffer), {
+        accountCurrency,
+        maxPages: limits.maxPages,
+        onProgress: async (progress) => {
+          session.statementExtraction = { pageCount: progress.pageCount, pagesRead: progress.pagesRead };
+          await this.em.flush();
+          await backgroundOperationService.heartbeatJob(correlationId, queueJobId, { progress: { ...progress }, stage: `${TRANSACTION_IMPORT_OPERATION}:parsing` });
+          return !(await this.isCancelled(session));
+        },
+        open: this.deps.pdfStatement?.open,
+        readPage: this.deps.pdfStatement?.readPage,
+        sleep: this.deps.pdfStatement?.sleep,
+      }), 'parsing');
+      if (reading === 'cancelled') return null;
+      session.statementExtraction = { pageCount: reading.pageCount, pagesRead: reading.pageCount, reconciliation: reading.reconciliation };
+      return reading.result;
+    } catch (error) {
+      if (error instanceof PdfStatementError) {
+        if (error.code === 'extraction_failed') logger.warn({ correlationId, error: error.cause }, 'PDF statement page could not be read');
+        return await fail(error.code);
+      }
+      // Anything else (storage, the database) ends the read too: the PDF is gone, so a retry could not read it.
+      logger.error({ correlationId, error }, 'PDF statement read failed');
+      Sentry.captureException(error, { tags: { job: TRANSACTION_IMPORT_OPERATION } });
+      return await fail('extraction_failed');
+    } finally {
+      await this.deleteFile(session);
+    }
+  }
+
+  /** Whether the person cancelled the session since it was loaded; read past this unit of work's copy. */
+  private async isCancelled(session: TransactionImportSession): Promise<boolean> {
+    const current = await this.em.fork().findOne(TransactionImportSession, { transactionImportSessionKey: session.transactionImportSessionKey }, { fields: ['status'], filters: false });
+    if (current?.status !== SESSION_STATUS.CANCELLED) return false;
+    session.status = SESSION_STATUS.CANCELLED;
+    return true;
+  }
+
+  /** Delete the session's uploaded file. A failure is logged; the daily sweep deletes it with the session. */
+  private async deleteFile(session: TransactionImportSession): Promise<void> {
+    try {
+      await this.storage.deleteObject?.(session.s3Bucket, session.s3Key);
+    } catch (error) {
+      logger.warn({ error, session: session.publicId }, 'Could not delete an uploaded import file');
+    }
   }
 
   /**
@@ -724,9 +875,9 @@ export class TransactionImportService {
    * Run `work`, marking the job's operation alive every {@link KEEP_ALIVE_MS} until it ends, so a
    * long step without chunks is not taken for a stopped job. A heartbeat that fails is only logged.
    */
-  private async keptAlive<T>(correlationId: string, queueJobId: string, work: () => Promise<T>): Promise<T> {
+  private async keptAlive<T>(correlationId: string, queueJobId: string, work: () => Promise<T>, stage: 'importing' | 'parsing' = 'importing'): Promise<T> {
     const timer = setInterval(() => {
-      backgroundOperationService.heartbeatJob(correlationId, queueJobId, { stage: `${TRANSACTION_IMPORT_OPERATION}:importing` }).catch((error: unknown) => { logger.warn({ correlationId, error }, 'Transaction import heartbeat failed'); });
+      backgroundOperationService.heartbeatJob(correlationId, queueJobId, { stage: `${TRANSACTION_IMPORT_OPERATION}:${stage}` }).catch((error: unknown) => { logger.warn({ correlationId, error }, 'Transaction import heartbeat failed'); });
     }, KEEP_ALIVE_MS);
     try {
       return await work();
@@ -980,6 +1131,7 @@ export class TransactionImportService {
       id: session.publicId,
       sourceAccounts: session.sourceAccounts ?? [],
       sourceCategories: session.sourceCategories ?? [],
+      statementExtraction: session.statementExtraction ?? null,
       status,
       upload: null,
       warnings: session.warnings ?? [],

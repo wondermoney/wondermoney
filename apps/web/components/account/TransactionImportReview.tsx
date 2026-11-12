@@ -22,6 +22,7 @@ import {
   type ImportRowStatus,
   type ImportSessionStatus,
   type ImportSourceCategory,
+  type StatementReconciliation,
   type TransactionImportAccountMapping,
   type TransactionImportRow,
   type TransactionImportSession,
@@ -63,6 +64,15 @@ const dateOrderAmbiguous = (session: TransactionImportSession) =>
       warning.code === "date_order_conflict",
   );
 
+/** Why a PDF statement could not be read, as the session records it; anything else reads as `unreadable`. */
+const PDF_FAILURES = [
+  "too_large",
+  "too_many_pages",
+  "extraction_failed",
+  "no_rows",
+  "unreadable",
+] as const;
+
 /** A row date (an ISO timestamp) as its calendar day, wherever the reader is. */
 const calendarDay = (iso: string) => {
   const [year, month, day] = iso.slice(0, 10).split("-").map(Number);
@@ -100,6 +110,8 @@ export default function TransactionImportReview({
   const formatDate = useFormatShortDate();
   const notifyIfRateLimited = useRateLimitToast();
   const [filter, setFilter] = useState<Filter>("all");
+  // The person confirmed they checked a PDF statement whose balances do not add up.
+  const [mismatchAcknowledged, setMismatchAcknowledged] = useState(false);
   const [page, setPage] = useState(1);
   const query = useTransactionImport(importId, {
     page,
@@ -180,6 +192,24 @@ export default function TransactionImportReview({
             void run(commit.mutateAsync({ id: importId, input: undefined }))
           }
         />
+        {/* A PDF statement is read page by page, and can be stopped between pages. */}
+        {session.status === "parsing" && session.format === "pdf" ? (
+          <Button
+            type="button"
+            variant="ghost"
+            className="self-end"
+            disabled={busy}
+            onClick={() =>
+              void run(
+                cancel
+                  .mutateAsync({ id: importId, input: undefined })
+                  .then(onCancelled),
+              )
+            }
+          >
+            {t("import-review-cancel")}
+          </Button>
+        ) : null}
       </div>
     );
   }
@@ -194,6 +224,13 @@ export default function TransactionImportReview({
   }
 
   const pages = Math.max(1, Math.ceil(rows.total / rows.pageSize));
+
+  const reconciliation = session.statementExtraction?.reconciliation;
+  const mismatch = reconciliation?.status === "mismatch";
+  const otherCurrencies = session.warnings
+    .filter((warning) => warning.code === "pdf_currency_differs")
+    .map((warning) => warning.detail)
+    .filter((currency): currency is string => !!currency);
 
   /** Commit, with the category step's choices saved first: every file category, picked or as suggested. */
   const commitWithCategories = async () => {
@@ -211,7 +248,10 @@ export default function TransactionImportReview({
         ),
       });
     }
-    await commit.mutateAsync({ id: importId, input: undefined });
+    await commit.mutateAsync({
+      id: importId,
+      input: { acknowledgeMismatch: mismatch && mismatchAcknowledged },
+    });
   };
   const reviewable =
     session.status === "ready" || session.status === "needs_mapping";
@@ -224,6 +264,20 @@ export default function TransactionImportReview({
     >
       <ImportName session={session} />
       <p className="text-muted-foreground">{t("import-review-summary")}</p>
+
+      {reconciliation ? (
+        <BalanceCheck
+          acknowledged={mismatchAcknowledged}
+          disabled={busy}
+          reconciliation={reconciliation}
+          onAcknowledge={setMismatchAcknowledged}
+        />
+      ) : null}
+      {otherCurrencies.map((currency) => (
+        <p key={currency} className="text-muted-foreground">
+          {t("import-review-pdf-currency-differs", { currency })}
+        </p>
+      ))}
 
       {session.status === "needs_mapping" ? (
         <AccountMapping
@@ -400,7 +454,9 @@ export default function TransactionImportReview({
           type="button"
           size="lg"
           loading={commit.isPending}
-          disabled={busy || !session.canCommit}
+          disabled={
+            busy || !session.canCommit || (mismatch && !mismatchAcknowledged)
+          }
           onClick={() => void run(commitWithCategories())}
         >
           {t("import-review-commit", { count: session.decisions.import })}
@@ -596,7 +652,14 @@ function Working({
       aria-live="polite"
     >
       {session.status === "parsing"
-        ? t("import-review-reading")
+        ? session.format === "pdf"
+          ? session.statementExtraction?.pageCount
+            ? t("import-review-pdf-progress", {
+                pages: session.statementExtraction.pageCount,
+                read: session.statementExtraction.pagesRead,
+              })
+            : t("import-review-pdf-opening")
+          : t("import-review-reading")
         : t("import-review-importing", {
             imported,
             total: imported + session.decisions.import,
@@ -622,9 +685,13 @@ function Outcome({
   }
   // A file that could not be read ends the session with a code; a commit whose rows failed does not.
   if (status === "failed" && session.errorCode) {
+    const pdfFailure =
+      PDF_FAILURES.find((code) => code === session.errorCode) ?? "unreadable";
     return (
       <p className="text-destructive-text text-sm" role="alert">
-        {t("import-review-read-failed")}
+        {session.format === "pdf"
+          ? t(`import-review-pdf-failed-${pdfFailure}`)
+          : t("import-review-read-failed")}
       </p>
     );
   }
@@ -648,6 +715,98 @@ function Outcome({
         <p className="text-muted-foreground">
           {t("import-review-details-deleted")}
         </p>
+      ) : null}
+    </div>
+  );
+}
+
+/**
+ * A PDF statement's own check: its opening balance plus the transactions read is its closing
+ * balance. When it is not, the difference shows and the commit waits for the person to say they
+ * checked the rows; when the statement prints no balances, it says nothing could be checked.
+ */
+function BalanceCheck({
+  acknowledged,
+  disabled,
+  reconciliation,
+  onAcknowledge,
+}: {
+  acknowledged: boolean;
+  disabled: boolean;
+  reconciliation: StatementReconciliation;
+  onAcknowledge: (acknowledged: boolean) => void;
+}) {
+  const t = useTranslations();
+  const currency = reconciliation.currency ?? undefined;
+  const mismatch = reconciliation.status === "mismatch";
+  const lines = [
+    {
+      label: t("import-review-reconcile-opening"),
+      value: reconciliation.openingBalance,
+    },
+    {
+      label: t("import-review-reconcile-rows"),
+      value: reconciliation.rowsTotal,
+    },
+    {
+      label: t("import-review-reconcile-closing"),
+      value: reconciliation.closingBalance,
+    },
+    ...(mismatch
+      ? [
+          {
+            label: t("import-review-reconcile-difference"),
+            value: reconciliation.difference,
+          },
+        ]
+      : []),
+  ];
+  return (
+    <div
+      className={
+        mismatch
+          ? "border-warning-text/50 flex flex-col gap-3 rounded-md border p-4"
+          : "bg-muted flex flex-col gap-3 rounded-md p-4"
+      }
+      data-testid="statement-balance-check"
+      role={mismatch ? "alert" : "status"}
+    >
+      <p className="font-medium">{t("import-review-reconcile-title")}</p>
+      <p className={mismatch ? "text-warning-text" : "text-muted-foreground"}>
+        {mismatch
+          ? t("import-review-reconcile-mismatch")
+          : reconciliation.status === "matched"
+            ? t("import-review-reconcile-matched")
+            : t("import-review-reconcile-unavailable")}
+      </p>
+      {reconciliation.status !== "unavailable" ? (
+        <dl className="grid grid-cols-[1fr_auto] gap-x-4 gap-y-1">
+          {lines.map((line) => (
+            <div key={line.label} className="contents">
+              <dt className="text-muted-foreground">{line.label}</dt>
+              <dd
+                className="text-right"
+                data-testid={
+                  line.label === t("import-review-reconcile-difference")
+                    ? "statement-difference"
+                    : undefined
+                }
+              >
+                <Amount value={line.value} currency={currency} />
+              </dd>
+            </div>
+          ))}
+        </dl>
+      ) : null}
+      {mismatch ? (
+        <label className="flex items-start gap-2">
+          <Checkbox
+            checked={acknowledged}
+            disabled={disabled}
+            onCheckedChange={(checked) => onAcknowledge(checked === true)}
+          />
+          <span>{t("import-review-reconcile-acknowledge")}</span>
+        </label>
       ) : null}
     </div>
   );

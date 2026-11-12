@@ -1121,6 +1121,7 @@
       "expired": "Esta importación caducó antes de terminar. Empieza de nuevo con el archivo.",
       "unsupported": "Esta versión de la app no puede mostrar esta importación. Actualiza la app o termínala en la web.",
       "needsWeb": "Este archivo tiene sus propias categorías para asociar, algo que la app aún no hace. No se importó nada: cancela esta importación e importa el archivo en la web.",
+      "needsWebPdf": "Es un extracto en PDF, cuyos saldos la app aún no puede comprobar. No se importó nada: cancela esta importación y revisa el extracto en la web.",
       "loadFailed": "No se pudo cargar esta importación. Comprueba tu conexión e inténtalo de nuevo.",
       "unnamed": "Importación del {{date}}",
       "summary": "No se importa nada hasta que confirmes. Las transacciones nuevas están incluidas; las que ya están en la cuenta se omiten.",

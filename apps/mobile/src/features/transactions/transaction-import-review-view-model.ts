@@ -46,11 +46,13 @@ export type TransactionImportStage =
   /** Closed without a commit: it expired (after seven days) or was cancelled. */
   | Readonly<{ kind: 'expired' }>
   /**
-   * A file with its own categories to map (a YNAB or Actual Budget export). The app has no category step, and a
-   * commit without one would import every row uncategorised, so it does not commit it: the
-   * person cancels and imports the file on the web.
+   * A session the app cannot review, so it does not commit it: the person cancels and imports the
+   * file on the web. `categories`: a file with its own categories to map (a YNAB or Actual Budget
+   * export); the app has no category step, and a commit without one would import every row
+   * uncategorised. `pdf`: a PDF statement read by the vision model; the app has no balance check,
+   * and a statement whose balances do not add up needs the person to acknowledge the difference.
    */
-  | Readonly<{ kind: 'needs-web' }>
+  | Readonly<{ kind: 'needs-web'; reason: 'categories' | 'pdf' }>
   /** A status this build does not know. */
   | Readonly<{ kind: 'unsupported' }>
 
@@ -63,7 +65,8 @@ export function importStage(session: TransactionImportSessionDto): TransactionIm
       return { kind: 'reading', stalled: session.canRetry }
     case 'ready':
     case 'needs_mapping':
-      if (needsCategoryMapping(session)) return { kind: 'needs-web' }
+      if (session.format === 'pdf') return { kind: 'needs-web', reason: 'pdf' }
+      if (needsCategoryMapping(session)) return { kind: 'needs-web', reason: 'categories' }
       return { kind: 'review', needsMapping: session.status === 'needs_mapping' }
     case 'importing': {
       const imported = session.counts.imported

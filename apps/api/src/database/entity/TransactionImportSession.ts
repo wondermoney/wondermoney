@@ -24,6 +24,21 @@ export enum TransactionImportSessionStatus {
   WAITING_FOR_UPLOAD = 'waiting_for_upload',
 }
 
+/** A PDF statement's progress and balance check (`services/transaction-import/pdf-statement/reconcile.ts`). */
+export interface StatementExtraction {
+  /** Null until the PDF is opened. */
+  pageCount: null | number;
+  pagesRead: number;
+  reconciliation?: {
+    closingBalance: null | number;
+    currency: null | string;
+    difference: null | number;
+    openingBalance: null | number;
+    rowsTotal: number;
+    status: 'matched' | 'mismatch' | 'unavailable';
+  };
+}
+
 /**
  * One staged import of a transaction file (`services/transaction-import/`): the uploaded file, how
  * to read it, which WonderMoney account each of its source accounts goes to (and, for a file with
@@ -123,6 +138,14 @@ export class TransactionImportSession extends Base {
   /** The file's categories, for the category-mapping step; unset for a format that maps none. */
   @Property({ columnType: 'jsonb', nullable: true, type: 'json' })
   sourceCategories?: transactionImport.ImportSourceCategory[];
+
+  /**
+   * A PDF statement's read (`format: pdf`): its pages, how many the model has read so far, and once
+   * all are read, whether its balances add up. The only part of the model's answer kept beyond the
+   * staged rows. Unset for every other format.
+   */
+  @Property({ columnType: 'jsonb', nullable: true, type: 'json' })
+  statementExtraction?: StatementExtraction;
 
   @Enum(() => TransactionImportSessionStatus)
   status: TransactionImportSessionStatus = TransactionImportSessionStatus.WAITING_FOR_UPLOAD;

@@ -9,8 +9,12 @@
  * without changing the session, the review or the commit.
  */
 
-/** The file formats a session can read. Each one is an {@link ImportAdapter}. */
-export const IMPORT_FORMATS = ['statement', 'ofx', 'qif', 'generic-csv', 'camt053', 'ynab', 'actual'] as const;
+/**
+ * The file formats a session can read. Each one is an {@link ImportAdapter}, except `pdf`: a PDF
+ * bank statement read page by page by a vision model, which the API runs itself because it calls
+ * the model (`services/transaction-import/pdf-statement/`).
+ */
+export const IMPORT_FORMATS = ['statement', 'ofx', 'qif', 'generic-csv', 'camt053', 'ynab', 'actual', 'pdf'] as const;
 export type ImportFormat = (typeof IMPORT_FORMATS)[number];
 
 /**

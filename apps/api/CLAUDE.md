@@ -170,10 +170,12 @@ Every integration is optional and fails closed: unconfigured, its feature report
   that stores only 2xx responses; watchlist routes are uncached. A failed call with no cached
   entry fails loud; nothing serves stale data.
 - **AI** (`services/ai/ai-provider.ts`): per feature (assistant, CSV mapping, enrichment,
-  monthly story, OCR), Azure when `AZURE_OPENAI_*` (or `AZURE_AI_FOUNDRY_*` for enrichment) is
+  monthly story, OCR, PDF statement import), Azure when `AZURE_OPENAI_*` (or `AZURE_AI_FOUNDRY_*` for enrichment) is
   complete, else Anthropic when `AI_PROVIDER=anthropic` and `ANTHROPIC_API_KEY` are set, else any
   OpenAI-compatible endpoint via `AI_BASE_URL`, `AI_API_KEY`, `AI_MODEL` and
-  `AI_MODEL_<FEATURE>`, else disabled. A half-configured provider counts as absent. The assistant
+  `AI_MODEL_<FEATURE>`, else disabled. A half-configured provider counts as absent. PDF statement import sends page
+  images, so it needs a model named for it (`AI_MODEL_STATEMENT_IMPORT`) on an OpenAI-compatible
+  endpoint. The assistant
   streams through `services/ai/ai-model.ts`; every other feature calls `completeJson` in
   `services/ai/complete-json.ts` (`generateObject`).
 - **Email** (`services/email/email-transport.ts`): Resend when `RESEND_API_KEY` is set, SMTP

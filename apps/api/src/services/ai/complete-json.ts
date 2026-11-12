@@ -34,7 +34,9 @@ const DEFAULT_MAX_RETRIES = 2;
  * before the call and classifies 429/5xx itself, so retrying inside the job would hide the
  * failure from the queue's backoff and spend the reservation window on one outage.
  */
-const MAX_RETRIES: Partial<Record<AiFeature, number>> = { enrichment: 0 };
+const MAX_RETRIES: Partial<Record<AiFeature, number>> = { enrichment: 0, statementImport: 0 };
+/** The features that send images. */
+const VISION_FEATURES: ReadonlySet<AiFeature> = new Set<AiFeature>(['ocr', 'statementImport']);
 
 export interface CompleteJsonImage {
   /** Base64-encoded bytes, without a `data:` prefix. */
@@ -113,7 +115,7 @@ export async function completeJson<SCHEMA extends FlexibleSchema>(input: Complet
     // `generateText` with an output setting, which is the same call behind a different entry point.
     // eslint-disable-next-line @typescript-eslint/no-deprecated
     const result = await generateObject({
-      abortSignal: AbortSignal.timeout(input.timeoutMs ?? (input.feature === 'ocr' ? VISION_TIMEOUT_MS : TEXT_TIMEOUT_MS)),
+      abortSignal: AbortSignal.timeout(input.timeoutMs ?? (VISION_FEATURES.has(input.feature) ? VISION_TIMEOUT_MS : TEXT_TIMEOUT_MS)),
       maxRetries: MAX_RETRIES[input.feature] ?? DEFAULT_MAX_RETRIES,
       messages: [{ content, role: 'user' }],
       model: resolveCompletionModel(route, { azureDeployment: input.azureDeployment, model: input.model }),

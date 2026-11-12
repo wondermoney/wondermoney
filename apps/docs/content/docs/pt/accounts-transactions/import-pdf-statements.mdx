@@ -1,0 +1,61 @@
+---
+title: Importar extratos bancários em PDF
+description: Transforma um extrato bancário em PDF em transações com um modelo de IA que lê cada página, e revê as linhas e verifica os saldos antes de importar o que quer que seja.
+---
+
+Muitos bancos só disponibilizam os extratos em PDF. A importação de extratos em PDF põe um modelo de IA a ler o extrato página a página e lista as transações que encontrou para as reveres. Nada é importado até confirmares.
+
+## Antes de começar
+
+- A instância precisa de um modelo de IA que leia imagens, configurado para esta funcionalidade, e de armazenamento de ficheiros. Numa instância alojada por ti, vê [Configurar a tua instância](/pt/docs/self-hosting/configure#funcionalidades-de-ia). Quando falta algum deles, a opção **Importar extrato em PDF** não aparece.
+- Se ativaste **Definições > Privacidade > Ocultar funcionalidades de IA**, a importação fica oculta e o servidor recusa-a na tua conta.
+- O extrato tem de ser um PDF com até 10 MB e 20 páginas, a não ser que quem gere a instância tenha definido outros limites; a janela de importação mostra-os. Cada extrato conta como uma das importações de extratos diárias do teu agregado quando quem gere a instância definiu um limite diário.
+- Foi pensada para extratos de contas à ordem. Extratos de investimentos e de cartões de crédito com outro formato podem não ser bem lidos.
+
+## O que é enviado e o que fica guardado
+
+Cada página do extrato é transformada numa imagem e enviada, uma página de cada vez, ao fornecedor de IA que a instância usa. A janela de importação diz qual é esse fornecedor antes de carregares o que quer que seja; num servidor que usa o seu próprio endpoint compatível com OpenAI, diz que as páginas vão para o fornecedor de IA configurado no servidor. As páginas são dados teus, enviados para que o modelo leia as transações: a data, a descrição, o valor e, quando impressos, a moeda e o saldo de cada linha, e os saldos inicial e final do extrato.
+
+O PDF e as imagens das páginas são eliminados assim que o extrato é lido, quer a leitura corra bem quer não. As imagens das páginas nunca são gravadas em disco. O WonderMoney guarda apenas as linhas que encontrou, para as reveres, e os saldos do extrato para a verificação abaixo. Uma importação que não termines expira ao fim de sete dias, como qualquer [importação](/pt/docs/accounts-transactions/import-transactions-csv).
+
+## Passos
+
+1. Abre a conta e escolhe **Importar transações** e depois **Importar extrato em PDF**.
+2. Lê para que fornecedor vão as páginas e adiciona o PDF.
+3. Escolhe **Rever transações**. O extrato é carregado e o modelo lê-o página a página; a revisão mostra quantas páginas já foram lidas. Escolhe **Cancelar importação** para a parar: a importação para depois da página em que está, e o PDF é eliminado.
+4. Vê a verificação do saldo no topo da revisão (mais abaixo).
+5. Compara as linhas com o extrato, como em qualquer importação: as linhas novas são incluídas, as que já estão na conta são ignoradas e os possíveis duplicados são ignorados a menos que os incluas. Uma linha que o modelo não conseguiu ler bem aparece como **Não foi possível ler**, com o motivo, e nunca é importada.
+6. Escolhe **Importar**. A importação corre em segundo plano.
+
+## A verificação do saldo
+
+Um extrato traz a sua própria verificação: o saldo inicial mais todas as transações dá o saldo final. O WonderMoney soma as linhas que o modelo leu, ao cêntimo, e mostra o resultado:
+
+- **Os saldos batem certo.** O saldo inicial e as linhas lidas somam o saldo final.
+- **Os saldos não batem certo.** A revisão mostra o saldo inicial, as linhas lidas, o saldo final e a diferença. Uma diferença quer normalmente dizer que uma transação ficou de fora, foi lida duas vezes ou foi mal lida. Compara as linhas com o extrato: desmarca uma linha errada, e adiciona à mão uma que falte depois da importação. O botão de importar fica desligado até marcares **Verifiquei as linhas e quero importá-las mesmo assim**.
+- **Nada para verificar.** O extrato não mostra o saldo inicial e o saldo final, por isso não foi possível verificar as linhas. Compara-as com o extrato antes de importar.
+
+As linhas que ignoras não mudam a verificação: ela diz respeito ao que o extrato diz, não ao que importas.
+
+## Duplicados
+
+Um extrato em PDF não tem identificadores de transação, por isso cada linha é reconhecida pela data e pelo valor dentro da conta. Importar de novo o mesmo extrato encontra as linhas já na conta e ignora-as, mesmo quando o modelo escreve uma descrição de outra forma. Uma linha com o mesmo valor que uma transação que já está na conta, com até 3 dias de diferença (uma que veio da sincronização bancária, por exemplo), é um [possível duplicado](/pt/docs/accounts-transactions/import-transactions-csv#possíveis-duplicados): é ignorada a menos que a incluas.
+
+## Na aplicação móvel
+
+A aplicação móvel não inicia importações de extratos em PDF. Uma importação iniciada na web é revista e importada na web, onde está a verificação do saldo.
+
+## Problemas comuns
+
+- O extrato tem mais páginas do que a instância lê. Descarrega do banco um período mais curto, ou divide o PDF.
+- O PDF está protegido por palavra-passe. Descarrega uma cópia sem palavra-passe.
+- Não foram encontradas transações. O PDF pode ser uma digitalização demasiado ténue para ler, ou não ser um extrato bancário.
+- O modelo não conseguiu ler uma página depois de algumas tentativas. Nada é importado e o PDF é eliminado; tenta mais tarde.
+- Algumas linhas estão noutra moeda que não a da conta. A revisão avisa; confirma que os valores são os que foram cobrados na conta.
+
+## Ligações relacionadas
+
+- [Importar transações por CSV, OFX, QIF ou CAMT.053](/pt/docs/accounts-transactions/import-transactions-csv)
+- [Privacidade dos dados](/pt/docs/settings-security-privacy/data-privacy)
+- [Configurar a tua instância](/pt/docs/self-hosting/configure#funcionalidades-de-ia)
+- [Problemas na importação de transações](/pt/docs/troubleshooting/transaction-import-problems)

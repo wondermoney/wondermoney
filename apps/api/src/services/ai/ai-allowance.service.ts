@@ -3,7 +3,8 @@ import type { EntityManager } from '@mikro-orm/postgresql';
 /**
  * Daily per-household allowances for the AI features a person triggers directly. Each feature
  * reads its own limit (`AI_DAILY_LIMIT_ASSISTANT`, `AI_DAILY_LIMIT_OCR`,
- * `AI_DAILY_LIMIT_CSV_MAPPING`); unset means unlimited, so a self-hosted install is not capped.
+ * `AI_DAILY_LIMIT_CSV_MAPPING`, `AI_DAILY_LIMIT_STATEMENT_IMPORT`, one per PDF statement however
+ * many pages it has); unset means unlimited, so a self-hosted install is not capped.
  * The hosted instance sets them because it pays for every model call.
  *
  * Household members share one allowance: the counter is keyed on the tenant, the same unit the
@@ -12,7 +13,7 @@ import type { EntityManager } from '@mikro-orm/postgresql';
  * Enrichment keeps its own budget (`TRANSACTION_ENRICHMENT_GPT_DAILY_TENANT_BUDGET`), and the
  * monthly story runs once a month per person, so neither is counted here.
  */
-export type AllowanceFeature = 'assistant' | 'csvMapping' | 'ocr';
+export type AllowanceFeature = 'assistant' | 'csvMapping' | 'ocr' | 'statementImport';
 
 type Env = Readonly<Record<string, string | undefined>>;
 
@@ -20,6 +21,7 @@ const LIMIT_VARIABLE: Record<AllowanceFeature, string> = {
   assistant: 'AI_DAILY_LIMIT_ASSISTANT',
   csvMapping: 'AI_DAILY_LIMIT_CSV_MAPPING',
   ocr: 'AI_DAILY_LIMIT_OCR',
+  statementImport: 'AI_DAILY_LIMIT_STATEMENT_IMPORT',
 };
 
 /** The feature's daily limit, or `null` for unlimited. A malformed value counts as unset. */

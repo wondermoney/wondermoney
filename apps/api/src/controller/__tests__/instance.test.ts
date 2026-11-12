@@ -5,7 +5,7 @@ import { buildInfo } from '@utils/constants';
 
 import { getInstance } from '../instance';
 
-const INTEGRATION_KEYS = ['AI_BASE_URL', 'AI_MODEL', 'AI_PROVIDER', 'ANTHROPIC_API_KEY', 'AWS_ACCESS_KEY_ID', 'AWS_SECRET_ACCESS_KEY', 'AZURE_AI_FOUNDRY_API_KEY', 'AZURE_OPENAI_API_KEY', 'EMAIL_DRIVER', 'EODHD_API_KEY', 'GOOGLE_CLIENT_ID', 'GOOGLE_CLIENT_SECRET', 'INSTANCE_NAME', 'MIN_APP_VERSION', 'RESEND_API_KEY', 'SIGNUP_MODE', 'SMTP_HOST', 'SPONSOR_URL', 'SUPPORT_EMAIL'];
+const INTEGRATION_KEYS = ['AI_API_KEY', 'AI_BASE_URL', 'AI_MODEL', 'AI_MODEL_STATEMENT_IMPORT', 'AI_PROVIDER', 'ANTHROPIC_API_KEY', 'AWS_ACCESS_KEY_ID', 'AWS_SECRET_ACCESS_KEY', 'AZURE_AI_FOUNDRY_API_KEY', 'AZURE_AI_FOUNDRY_API_VERSION', 'AZURE_AI_FOUNDRY_ENDPOINT', 'AZURE_OPENAI_API_KEY', 'AZURE_OPENAI_API_VERSION', 'AZURE_OPENAI_DEPLOYMENT', 'AZURE_OPENAI_ENDPOINT', 'AZURE_OPENAI_OCR_DEPLOYMENT', 'AZURE_OPENAI_STATEMENT_IMPORT_DEPLOYMENT', 'EMAIL_DRIVER', 'EODHD_API_KEY', 'GOOGLE_CLIENT_ID', 'GOOGLE_CLIENT_SECRET', 'INSTANCE_NAME', 'MIN_APP_VERSION', 'RESEND_API_KEY', 'SIGNUP_MODE', 'SMTP_HOST', 'SPONSOR_URL', 'STATEMENT_IMPORT_MAX_BYTES', 'STATEMENT_IMPORT_MAX_PAGES', 'SUPPORT_EMAIL'];
 
 describe('GET /v1/instance', () => {
   afterEach(() => {
@@ -25,7 +25,7 @@ describe('GET /v1/instance', () => {
       apiVersion: 1,
       ...buildInfo(),
       features: {
-        ai: { assistant: false, csvMapping: false, enrichment: false, monthlyStory: false, ocr: false },
+        ai: { assistant: false, csvMapping: false, enrichment: false, monthlyStory: false, ocr: false, statementImport: false },
         bankSync: true,
         bankSyncProviders: ['enable_banking'],
         contactForm: false,
@@ -38,6 +38,7 @@ describe('GET /v1/instance', () => {
         oidc: null,
         passkey: true,
         passwordSignIn: true,
+        statementImport: null,
       },
       minAppVersion: null,
       name: 'WonderMoney',
@@ -78,8 +79,35 @@ describe('GET /v1/instance', () => {
     vi.stubEnv('AI_MODEL', 'claude-sonnet-4-5');
 
     expect(describeInstance()).toMatchObject({
-      features: { ai: { assistant: true, csvMapping: true, enrichment: true, monthlyStory: true, ocr: true } },
+      features: { ai: { assistant: true, csvMapping: true, enrichment: true, monthlyStory: true, ocr: true, statementImport: true } },
     });
+  });
+
+  it('names who reads PDF statements, and the largest one taken, once a model for it is set', () => {
+    for (const key of INTEGRATION_KEYS) vi.stubEnv(key, '');
+    vi.stubEnv('AI_BASE_URL', 'https://api.openai.com/v1');
+    vi.stubEnv('AI_MODEL', 'gpt-4.1-mini');
+    expect(describeInstance()).toMatchObject({ features: { ai: { statementImport: false }, statementImport: null } });
+
+    vi.stubEnv('AI_MODEL_STATEMENT_IMPORT', 'gpt-4o');
+    vi.stubEnv('STATEMENT_IMPORT_MAX_PAGES', '5');
+    expect(describeInstance()).toMatchObject({
+      features: { ai: { statementImport: true }, statementImport: { maxBytes: 10 * 1024 * 1024, maxPages: 5, providerKind: 'openai-compatible' } },
+    });
+  });
+
+  it.each([
+    ['an OpenAI-compatible endpoint on an internal host', { AI_API_KEY: 'sk-internal-secret', AI_BASE_URL: 'http://ollama.lan.internal:11434/v1', AI_MODEL: 'llama3.1', AI_MODEL_STATEMENT_IMPORT: 'qwen2.5vl' }, ['ollama.lan.internal', '11434', 'sk-internal-secret', 'qwen2.5vl', 'llama3.1']],
+    ['Anthropic', { AI_MODEL: 'claude-sonnet-4-5', AI_PROVIDER: 'anthropic', ANTHROPIC_API_KEY: 'sk-ant-secret' }, ['anthropic.com', 'sk-ant-secret', 'claude-sonnet-4-5']],
+    ['Azure', { AZURE_AI_FOUNDRY_API_KEY: 'foundry-secret', AZURE_AI_FOUNDRY_API_VERSION: '2024-05-01-preview', AZURE_AI_FOUNDRY_ENDPOINT: 'https://foundry-host.services.ai.azure.com', AZURE_OPENAI_API_KEY: 'azure-secret', AZURE_OPENAI_API_VERSION: '2024-08-01-preview', AZURE_OPENAI_DEPLOYMENT: 'assistant-deployment', AZURE_OPENAI_ENDPOINT: 'https://private-resource.openai.azure.com', AZURE_OPENAI_OCR_DEPLOYMENT: 'ocr-deployment', AZURE_OPENAI_STATEMENT_IMPORT_DEPLOYMENT: 'statements-deployment' }, ['private-resource', 'foundry-host', 'azure.com', 'azure-secret', 'foundry-secret', 'statements-deployment']],
+  ])('never names the address, key or model of the AI provider (%s)', (_name, env, secrets) => {
+    for (const key of INTEGRATION_KEYS) vi.stubEnv(key, '');
+    for (const [key, value] of Object.entries(env)) vi.stubEnv(key, value);
+    const body = describeInstance();
+    expect(body).toMatchObject({ features: { ai: { statementImport: true } } });
+    const text = JSON.stringify(body);
+    expect(text).not.toMatch(/:\/\/|https?:/u);
+    for (const secret of secrets) expect(text).not.toContain(secret);
   });
 
   it('reports the read-only MCP server, and hides it when MCP_ENABLED is false', () => {

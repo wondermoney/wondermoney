@@ -3,12 +3,14 @@
 import { useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import { ArrowLeft, Download } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { useFormatter, useTranslations } from "next-intl";
 import { usePostHog } from "posthog-js/react";
 import { useCallback, useRef, useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { toast } from "sonner";
 
+import AiAllowanceNotice from "@/components/assistant/AiAllowanceNotice";
+import EmailVerificationNotice from "@/components/auth/EmailVerificationNotice";
 import { DrawerDialog } from "@/components/ui/dialog-responsive";
 import { FileUploader } from "@/components/ui/FileUploader";
 import { Form, FormField, FormItem } from "@/components/ui/Form";
@@ -21,11 +23,21 @@ import usePreviewAccountCsvImport, {
   type StatementMapping,
   type StatementPreview as Preview,
 } from "@/lib/api/account/usePreviewAccountCsvImport";
-import { useFeature } from "@/lib/api/instance/useInstance";
+import {
+  API_ERROR_CODE,
+  getApiErrorCode,
+  isAiAllowanceExhaustedError,
+  isEmailVerificationRequiredError,
+} from "@/lib/api/errors";
+import { useFeature, useStatementImport } from "@/lib/api/instance/useInstance";
 import {
   type TransactionImportSession,
+  useCancelTransactionImport,
+  useCreatePdfTransactionImport,
   useCreateTransactionImport,
+  useStartTransactionImportRead,
 } from "@/lib/api/transaction-import/useTransactionImport";
+import useStatementImportProvider from "@/lib/api/user/useStatementImportProvider";
 import useAiHidden from "@/lib/api/user-preferences/useAiHidden";
 import { useRateLimitToast } from "@/lib/api/useRateLimitToast";
 import {
@@ -53,11 +65,14 @@ const isCamtFileName = (name: string) => /\.xml$/i.test(name.trim());
 /** A file whose own format the API reads: no columns to preview. */
 type FileFormat = "ofx" | "qif" | "camt053" | "ynab" | "actual";
 
-/** Where the file comes from: a bank's statement (any format), a YNAB register or an Actual Budget export. */
-type ImportSource = "statement" | "ynab" | "actual";
+/**
+ * Where the file comes from: a bank's statement (any format), a YNAB register, an Actual Budget
+ * export, or a PDF statement read by the vision model.
+ */
+type ImportSource = "statement" | "ynab" | "actual" | "pdf";
 
 /** A budgeting app's export: its own entry, guide and wording. */
-type AppSource = Exclude<ImportSource, "statement">;
+type AppSource = Exclude<ImportSource, "statement" | "pdf">;
 
 /** The copy each app's entry uses. */
 const APP_COPY = {
@@ -78,7 +93,7 @@ const APP_COPY = {
 } as const satisfies Record<AppSource, Record<string, string>>;
 
 const isAppSource = (source: ImportSource): source is AppSource =>
-  source !== "statement";
+  source === "ynab" || source === "actual";
 
 interface AccountTransactionImportModalProps {
   isOpen: boolean;
@@ -101,6 +116,15 @@ const AccountTransactionImportModal: React.FC<
   const notifyIfRateLimited = useRateLimitToast();
   const canImportFiles = useFeature((features) => features.fileStorage);
   const aiHidden = useAiHidden();
+  // PDF statements go to the vision model: offered only when the server has one for them and the
+  // person has not hidden AI.
+  const statementImport = useStatementImport();
+  const pdfStatement = aiHidden ? null : statementImport;
+  const format = useFormatter();
+  // An AI gate the PDF import ran into: verify the email first, or wait for tomorrow's allowance.
+  const [blockedBy, setBlockedBy] = useState<
+    "allowance" | "verification" | null
+  >(null);
 
   const posthog = usePostHog();
   const [isSubmitButtonLoading, setIsSubmitButtonLoading] = useState(false);
@@ -116,6 +140,10 @@ const AccountTransactionImportModal: React.FC<
   });
   const [files, setFiles] = useState<File[]>([]);
   const [source, setSource] = useState<ImportSource>("statement");
+  // Who the pages go to, from the signed-in profile: the public instance description never names it.
+  const pdfProvider = useStatementImportProvider(
+    source === "pdf" && !!pdfStatement,
+  );
   // The uploaded file, how it reads, and the columns as the person last set them.
   const [uploadedKey, setUploadedKey] = useState<string | undefined>();
   const [fileFormat, setFileFormat] = useState<FileFormat | null>(null);
@@ -130,6 +158,9 @@ const AccountTransactionImportModal: React.FC<
   const useCreateAccountTransactionsCsvUrlMutation =
     useCreateAccountTransactionsCsvUrl();
   const createImport = useCreateTransactionImport();
+  const createPdfImport = useCreatePdfTransactionImport();
+  const startRead = useStartTransactionImportRead();
+  const cancelImport = useCancelTransactionImport();
 
   /** The review's import ended: say how, and refresh what it changed. */
   const onImportFinished = useCallback(
@@ -162,6 +193,7 @@ const AccountTransactionImportModal: React.FC<
     setMapping(undefined);
     setIsReading(false);
     setReadError(undefined);
+    setBlockedBy(null);
   };
 
   /** Reads the uploaded file, as found or with the person's columns, and shows the result. */
@@ -285,12 +317,61 @@ const AccountTransactionImportModal: React.FC<
   };
 
   const canImport =
-    !!uploadedKey &&
-    !isReading &&
-    (fileFormat !== null ||
-      (!!preview &&
-        preview.totalRows > 0 &&
-        (preview.source === "bank" || isStatementMappingComplete(mapping))));
+    source === "pdf"
+      ? !!files[0] && !!pdfStatement && files[0].size <= pdfStatement.maxBytes
+      : !!uploadedKey &&
+        !isReading &&
+        (fileFormat !== null ||
+          (!!preview &&
+            preview.totalRows > 0 &&
+            (preview.source === "bank" ||
+              isStatementMappingComplete(mapping))));
+
+  /**
+   * A PDF statement: start its import (which spends one of the household's statement imports),
+   * upload the PDF to the link it carries, and start the read. The review then shows each page as
+   * the model reads it.
+   */
+  const startPdfImport = async (accountId: string, file: File) => {
+    let session: TransactionImportSession;
+    try {
+      session = await createPdfImport.mutateAsync({
+        accountId,
+        contentLength: file.size,
+        fileName: file.name,
+      });
+    } catch (error) {
+      if (notifyIfRateLimited(error)) return;
+      if (isEmailVerificationRequiredError(error)) setBlockedBy("verification");
+      else if (isAiAllowanceExhaustedError(error)) setBlockedBy("allowance");
+      else if (getApiErrorCode(error) === API_ERROR_CODE.STATEMENT_TOO_LARGE)
+        setReadError(t("import-pdf-too-large"));
+      else setReadError(t("toast-import-transactions-error"));
+      return;
+    }
+    try {
+      if (!session.upload) throw new Error("No upload link");
+      await axios.put(session.upload.url, file, {
+        headers: { "Content-Type": "application/pdf" },
+      });
+      await startRead.mutateAsync(session.id);
+    } catch {
+      // Nothing was read: close the import rather than leave it waiting.
+      void cancelImport
+        .mutateAsync({ id: session.id, input: undefined })
+        .catch(() => undefined);
+      setReadError(t("import-pdf-upload-failed"));
+      posthog.capture("account-transactions-import-failure", {
+        reason: "pdf_upload_failed",
+      });
+      return;
+    }
+    posthog.capture("account-transactions-import-started", {
+      kind: "account",
+      source: "pdf",
+    });
+    setImportId(session.id);
+  };
 
   /** Stage the uploaded file as an import and open its review; nothing is imported yet. */
   const onSubmit = async (data: FormProps) => {
@@ -299,6 +380,17 @@ const AccountTransactionImportModal: React.FC<
         type: "required",
         message: t("toast-import-transactions-error-no-file"),
       });
+      return;
+    }
+    if (source === "pdf") {
+      if (!canImport) return;
+      setIsSubmitButtonLoading(true);
+      setReadError(undefined);
+      try {
+        await startPdfImport(data.accountId, files[0]);
+      } finally {
+        setIsSubmitButtonLoading(false);
+      }
       return;
     }
     if (!canImport || !uploadedKey) return;
@@ -330,7 +422,10 @@ const AccountTransactionImportModal: React.FC<
     }
   };
 
-  const isLoading = isSubmitButtonLoading || createImport.isPending;
+  const isLoading =
+    isSubmitButtonLoading ||
+    createImport.isPending ||
+    createPdfImport.isPending;
   const reviewAccounts = accounts.filter(
     (account) => account.isOwnedByViewer !== false,
   );
@@ -361,7 +456,9 @@ const AccountTransactionImportModal: React.FC<
       title={
         isAppSource(source)
           ? t(APP_COPY[source].title)
-          : t("import-transactions")
+          : source === "pdf"
+            ? t("import-pdf-title")
+            : t("import-transactions")
       }
       footer={
         importId ? undefined : (
@@ -405,8 +502,9 @@ const AccountTransactionImportModal: React.FC<
                         value={field.value}
                         onValueChange={(value) => {
                           field.onChange(value);
-                          // The upload belongs to the account it was made for.
-                          if (files[0]) uploadAndRead(files[0], value);
+                          // The upload belongs to the account it was made for. A PDF uploads only on import.
+                          if (files[0] && source !== "pdf")
+                            uploadAndRead(files[0], value);
                         }}
                         disabled={accounts.length === 1}
                       >
@@ -444,12 +542,40 @@ const AccountTransactionImportModal: React.FC<
                     <FormLabel required>
                       {isAppSource(source)
                         ? t(APP_COPY[source].file)
-                        : t("upload-transaction-file")}
+                        : source === "pdf"
+                          ? t("import-pdf-file")
+                          : t("upload-transaction-file")}
                     </FormLabel>
                     {source === "ynab" ? (
                       <YnabExportGuide />
                     ) : source === "actual" ? (
                       <ActualExportGuide />
+                    ) : source === "pdf" && pdfStatement ? (
+                      <div
+                        className="text-muted-foreground flex flex-col gap-1 text-sm"
+                        data-testid="pdf-statement-consent"
+                      >
+                        <p>
+                          {pdfProvider.data?.name
+                            ? t("import-pdf-consent", {
+                                provider: pdfProvider.data.name,
+                              })
+                            : t("import-pdf-consent-configured")}
+                        </p>
+                        <p>
+                          {t("import-pdf-limits", {
+                            pages: pdfStatement.maxPages,
+                            size: format.number(
+                              pdfStatement.maxBytes / (1024 * 1024),
+                              {
+                                maximumFractionDigits: 1,
+                                style: "unit",
+                                unit: "megabyte",
+                              },
+                            ),
+                          })}
+                        </p>
+                      </div>
                     ) : (
                       <p className="text-muted-foreground text-sm">
                         {t("import-statement-hint")}
@@ -465,16 +591,25 @@ const AccountTransactionImportModal: React.FC<
                         }
                         setFiles(nextFiles);
                         clearErrors("files");
-                        uploadAndRead(nextFiles[0], selectedAccountId);
+                        setReadError(undefined);
+                        if (source !== "pdf")
+                          uploadAndRead(nextFiles[0], selectedAccountId);
                       }}
                       accept={
                         isAppSource(source)
                           ? APP_EXPORT_ACCEPT
-                          : STATEMENT_ACCEPT
+                          : source === "pdf"
+                            ? PDF_ACCEPT
+                            : STATEMENT_ACCEPT
                       }
                       maxFileCount={1}
-                      // The API reads at most 5 MB (DEFAULT_CSV_UPLOAD_LIMITS); a larger file would upload and then fail.
-                      maxSize={1024 * 1024 * 5}
+                      // The API reads at most 5 MB (DEFAULT_CSV_UPLOAD_LIMITS); a larger file would upload and then
+                      // fail. A PDF statement's limit is the server's own.
+                      maxSize={
+                        source === "pdf" && pdfStatement
+                          ? pdfStatement.maxBytes
+                          : 1024 * 1024 * 5
+                      }
                     />
                     <FormMessage />
                   </FormItem>
@@ -483,7 +618,15 @@ const AccountTransactionImportModal: React.FC<
             </form>
           </Form>
 
-          {isAppSource(source) ? (
+          {blockedBy ? (
+            blockedBy === "verification" ? (
+              <EmailVerificationNotice />
+            ) : (
+              <AiAllowanceNotice />
+            )
+          ) : null}
+
+          {source !== "statement" ? (
             <Button
               type="button"
               variant="link"
@@ -496,6 +639,17 @@ const AccountTransactionImportModal: React.FC<
             </Button>
           ) : (
             <div className="flex flex-wrap gap-x-4">
+              {pdfStatement ? (
+                <Button
+                  type="button"
+                  variant="link"
+                  size="sm"
+                  className="px-0"
+                  onClick={() => chooseSource("pdf")}
+                >
+                  {t("import-pdf-entry")}
+                </Button>
+              ) : null}
               {(["ynab", "actual"] as const).map((app) => (
                 <Button
                   key={app}
@@ -562,6 +716,9 @@ const STATEMENT_ACCEPT = {
   "text/xml": [".ofx", ".qfx", ".xml"],
   "application/octet-stream": [".ofx", ".qfx", ".qif", ".xml"],
 };
+
+/** A PDF bank statement, read by the vision model. */
+const PDF_ACCEPT = { "application/pdf": [".pdf"] };
 
 /** A YNAB register or Actual Budget export is a CSV (some systems label it plain text). */
 const APP_EXPORT_ACCEPT = {
