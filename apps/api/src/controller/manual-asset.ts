@@ -9,6 +9,7 @@ import {
   deleteManualAsset as deleteManualAssetService,
   deleteValuation,
   getManualAsset as getManualAssetService,
+  importManualAssets as importManualAssetsService,
   listManualAssets as listManualAssetsService,
   listValuations,
   updateManualAsset as updateManualAssetService,
@@ -17,6 +18,7 @@ import {
 import {
   createManualAssetSchema,
   createValuationSchema,
+  importManualAssetsSchema,
   manualAssetParamsSchema,
   updateManualAssetSchema,
   updateValuationSchema,
@@ -54,6 +56,13 @@ export async function deleteManualAssetValuation(req: Request, res: Response) {
 export async function getManualAsset(req: Request, res: Response) {
   const { params: { manualAssetId } } = await zParse(manualAssetParamsSchema, req);
   return res.json(await getManualAssetService(DI.em, await viewerOf(req), manualAssetId));
+}
+
+/** A manual-assets file, parsed by the client: every row becomes an asset with its valuation, or none does. */
+export async function importManualAssets(req: Request, res: Response) {
+  const { body: { assets } } = await zParse(importManualAssetsSchema, req);
+  const result = await importManualAssetsService(DI.em, await viewerOf(req), assets);
+  return res.status(StatusCodes.CREATED).json(result);
 }
 
 export async function listManualAssets(req: Request, res: Response) {

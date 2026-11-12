@@ -11,8 +11,10 @@ import useConfirmPortfolioImportSession from "@/lib/api/portfolio/useConfirmPort
 import {
   canConfirmPortfolioImport,
   getPortfolioImportLedgerCounts,
+  hasHeldBackPositionRows,
 } from "@/lib/portfolio/import-session-flow";
 
+import { PortfolioImportExistingTradesPanel } from "./PortfolioImportExistingTradesPanel";
 import { PortfolioImportUnsupportedAssetsAlert } from "./PortfolioImportUnsupportedAssetsAlert";
 
 interface PortfolioImportConfirmStepProps {
@@ -20,6 +22,8 @@ interface PortfolioImportConfirmStepProps {
   isFinalizing?: boolean;
   onChooseAnotherFile: () => void;
   onConfirmed: () => void | Promise<void>;
+  /** Reloads the preview after a row is included or skipped again (positions files). */
+  onPreviewRefetch?: () => Promise<unknown>;
   preview?: PortfolioImportSessionPreviewResponse;
   recovery?: ReactNode;
 }
@@ -38,6 +42,7 @@ export function PortfolioImportConfirmStep({
   isFinalizing = false,
   onChooseAnotherFile,
   onConfirmed,
+  onPreviewRefetch,
   preview,
   recovery,
 }: PortfolioImportConfirmStepProps) {
@@ -77,7 +82,11 @@ export function PortfolioImportConfirmStep({
           {t("portfolio-import-confirm-title")}
         </h3>
         <p className="text-muted-foreground max-w-2xl text-sm leading-6">
-          {t("portfolio-import-confirm-description")}
+          {t(
+            preview?.importType === "positions"
+              ? "portfolio-import-positions-confirm-description"
+              : "portfolio-import-confirm-description",
+          )}
         </p>
       </div>
 
@@ -102,9 +111,24 @@ export function PortfolioImportConfirmStep({
         unsupportedAssets={preview?.summary.unsupportedAssets}
       />
 
+      {/* Only a positions file holds rows back for existing trades. */}
+      {preview?.importType === "positions" && (preview.rows.existingTrades?.length ?? 0) > 0 ? (
+        <PortfolioImportExistingTradesPanel
+          importSessionId={importSessionId}
+          onPreviewRefetch={onPreviewRefetch ?? (() => Promise.resolve())}
+          preview={preview}
+        />
+      ) : null}
+
       {!canConfirm ? (
         <Alert variant="warning" className="py-3">
-          <AlertDescription>{t("portfolio-import-confirm-blocked")}</AlertDescription>
+          <AlertDescription>
+            {t(
+              hasHeldBackPositionRows(preview?.summary) && counts.ready === 0
+                ? "portfolio-import-existing-trades-nothing-left"
+                : "portfolio-import-confirm-blocked",
+            )}
+          </AlertDescription>
         </Alert>
       ) : null}
 

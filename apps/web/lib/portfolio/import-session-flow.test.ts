@@ -304,3 +304,25 @@ test("surfaces human readable terminal failure reasons", () => {
     undefined,
   );
 });
+
+test("keeps a positions file whose rows are all held back for existing trades on the confirm step", () => {
+  const heldBack = {
+    totalRows: 2,
+    readyRows: 0,
+    duplicateRows: 0,
+    invalidRows: 0,
+    needsAssetReviewRows: 0,
+    skippedRows: 2,
+    existingTradeSkippedRows: 2,
+    importedRows: 0,
+    failedRows: 0,
+    canConfirm: false,
+  };
+  // Without the held-back rows, the same counts read as a finished duplicate-only import.
+  assert.equal(resolvePortfolioImportVisibleStep({ status: "partial", summary: { ...heldBack, existingTradeSkippedRows: 0 } }), "terminal");
+  assert.equal(resolvePortfolioImportVisibleStep({ status: "partial", summary: heldBack }), "confirm");
+  assert.equal(
+    resolvePortfolioImportVisibleStep({ status: "partial", summary: { ...heldBack, terminalKind: "partial_success", importedRows: 1 } }),
+    "terminal",
+  );
+});

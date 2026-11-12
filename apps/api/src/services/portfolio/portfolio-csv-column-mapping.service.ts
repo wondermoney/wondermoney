@@ -18,6 +18,7 @@ import { buildPortfolioColumnMappingPromptInput, generatePortfolioImportInternal
 import { applyPortfolioCsvLayout, normalizeCsvHeader, parseRawCsvRowsForLayout } from './portfolio-csv-layout.utils';
 import type { PortfolioImportAssetResolutionResult } from './portfolio-import-asset-resolution.service';
 import portfolioImportParserSpecService, { buildPortfolioImportParserSpecPayload, hashPortfolioImportParserSpecPayload, parsePortfolioImportParserSpecPayload, resolveSpecColumnMapping } from './portfolio-import-parser-spec.service';
+import { buildPositionsHeuristicSuggestion, isPositionsSession, OPENING_POSITION_NOTE, validateConfirmedPositionsColumnMapping } from './portfolio-import-positions';
 import { canConfirm, recomputeImportSessionStatus } from './portfolio-import-session-state';
 import portfolioImportSessionService from './portfolio-import-session.service';
 
@@ -31,6 +32,8 @@ export interface ConfirmPortfolioColumnMappingDeps {
 
 export interface ConfirmPortfolioColumnMappingInput {
   appuser: Appuser;
+  /** Positions files: the day a row without an acquisition date is bought on (`YYYY-MM-DD`). */
+  asOfDate?: string;
   columnMapping: PortfolioColumnMapping;
   derivedValues?: PortfolioImportDerivedValues;
   fixedValues?: PortfolioImportFixedValues;
@@ -63,7 +66,10 @@ class PortfolioCsvColumnMappingService {
     const session = await portfolioImportSessionService.getOwnedSession({ appuser: input.appuser, importSessionId: input.importSessionId, tenant: input.tenant });
     if (session.status !== PortfolioImportSessionStatus.NEEDS_COLUMN_MAPPING) throw new ConflictError('Import session does not need column mapping');
 
-    const confirmed = validateConfirmedPortfolioColumnMapping({ columnMapping: input.columnMapping, derivedValues: input.derivedValues, fixedValues: input.fixedValues, transformations: input.transformations });
+    const positions = isPositionsSession(session);
+    const confirmed = positions
+      ? validateConfirmedPositionsColumnMapping({ asOfDate: input.asOfDate, columnMapping: input.columnMapping, fixedValues: input.fixedValues, transformations: input.transformations })
+      : validateConfirmedPortfolioColumnMapping({ columnMapping: input.columnMapping, derivedValues: input.derivedValues, fixedValues: input.fixedValues, transformations: input.transformations });
     let parsed: { rawRows?: string[][]; rows: Record<string, string>[] };
     try {
       parsed = await parseColumnMappingRows({ bucket: session.s3Bucket, key: session.s3Key, layout: input.layout }, deps);
@@ -86,7 +92,9 @@ class PortfolioCsvColumnMappingService {
       const rowNumber = index + 1;
       const normalizedJson = { ...rawRow } as Record<string, unknown>;
       try {
-        const normalized = this.normalizeConfirmedRow(rawRow, confirmed.columnMapping, effectiveTransformations, context, confirmed.fixedValues, confirmed.derivedValues);
+        const normalized = positions
+          ? this.normalizeConfirmedPositionRow(rawRow, confirmed.columnMapping, effectiveTransformations, context, confirmed.fixedValues, input.asOfDate)
+          : this.normalizeConfirmedRow(rawRow, confirmed.columnMapping, effectiveTransformations, context, confirmed.fixedValues, confirmed.derivedValues);
         const internalTransactionId = normalized['internalTransactionId'] as string;
         if (seenInternalTransactionIds.has(internalTransactionId)) {
           duplicateRows++;
@@ -113,7 +121,7 @@ class PortfolioCsvColumnMappingService {
 
     const appliedParserSpecKey = session.columnMappingJson?.['parserSpecKey'];
     const appliedParserSpecContentHash = session.columnMappingJson?.['parserSpecContentHash'];
-    session.columnMappingJson = { ...(typeof appliedParserSpecKey === 'number' ? { appliedParserSpecKey } : {}), ...(typeof appliedParserSpecContentHash === 'string' ? { appliedParserSpecContentHash } : {}), confirmed: { columnMapping: confirmed.columnMapping, confirmedAt: new Date().toISOString(), derivedValues: confirmed.derivedValues, fixedValues: confirmed.fixedValues, layout: input.layout, transformations: effectiveTransformations }, source: 'user', suggestion: (session.columnMappingJson)?.['suggestion'], version: 1 };
+    session.columnMappingJson = { ...(typeof appliedParserSpecKey === 'number' ? { appliedParserSpecKey } : {}), ...(typeof appliedParserSpecContentHash === 'string' ? { appliedParserSpecContentHash } : {}), confirmed: { ...(positions && input.asOfDate ? { asOfDate: input.asOfDate } : {}), columnMapping: confirmed.columnMapping, confirmedAt: new Date().toISOString(), derivedValues: confirmed.derivedValues, fixedValues: confirmed.fixedValues, layout: input.layout, transformations: effectiveTransformations }, source: 'user', suggestion: (session.columnMappingJson)?.['suggestion'], version: 1 };
     const userSkippedRows = 0;
     const blockingRows = duplicateRows + invalidRows;
     // Consolidated: canonical status derivation + transitions confirm rule live in
@@ -132,18 +140,18 @@ class PortfolioCsvColumnMappingService {
         session.status = resolution.status === PortfolioImportSessionStatus.READY_TO_IMPORT && (duplicateRows > 0 || invalidRows > 0) ? PortfolioImportSessionStatus.PARTIAL : resolution.status;
         session.summaryJson = { ...(session.summaryJson ?? {}), status: session.status };
         await DI.em.persist(session).flush();
-        await this.saveConfirmedParserSpecIfPossible({ appuser: input.appuser, confirmed: { ...confirmed, transformations: effectiveTransformations }, confirmedInput: input, invalidRows, rawRows, readyRows, rows, session, suggestionSource });
+        await this.saveConfirmedParserSpecIfPossible({ appuser: input.appuser, confirmed: { ...confirmed, transformations: effectiveTransformations }, confirmedInput: input, invalidRows, positions, rawRows, readyRows, rows, session, suggestionSource });
         return resolveConfirmColumnMappingResult(session, { blockingRows, canConfirm: confirmable, duplicateRows, invalidRows, readyRows, skippedRows: userSkippedRows, totalRows: rows.length });
       } catch (error) {
         const message = error instanceof Error ? error.message : 'Unknown error';
         session.status = PortfolioImportSessionStatus.NEEDS_ASSET_REVIEW;
         session.summaryJson = { ...(session.summaryJson ?? {}), assetResolutionError: { code: 'ASSET_RESOLUTION_FAILED', message }, blockingRows, canConfirm: confirmable, duplicateRows, importableRows: readyRows, invalidRows, readyRows, skippedRows: userSkippedRows, status: session.status, totalRows: rows.length, userSkippedRows };
         await DI.em.persist(session).flush();
-        await this.saveConfirmedParserSpecIfPossible({ appuser: input.appuser, confirmed: { ...confirmed, transformations: effectiveTransformations }, confirmedInput: input, invalidRows, rawRows, readyRows, rows, session, suggestionSource });
+        await this.saveConfirmedParserSpecIfPossible({ appuser: input.appuser, confirmed: { ...confirmed, transformations: effectiveTransformations }, confirmedInput: input, invalidRows, positions, rawRows, readyRows, rows, session, suggestionSource });
         return resolveConfirmColumnMappingResult(session, { blockingRows, canConfirm: confirmable, duplicateRows, invalidRows, readyRows, skippedRows: userSkippedRows, totalRows: rows.length });
       }
     }
-    if (invalidRows > 0) await this.saveConfirmedParserSpecIfPossible({ appuser: input.appuser, confirmed: { ...confirmed, transformations: effectiveTransformations }, confirmedInput: input, invalidRows, rawRows, readyRows, rows, session, suggestionSource });
+    if (invalidRows > 0) await this.saveConfirmedParserSpecIfPossible({ appuser: input.appuser, confirmed: { ...confirmed, transformations: effectiveTransformations }, confirmedInput: input, invalidRows, positions, rawRows, readyRows, rows, session, suggestionSource });
     return resolveConfirmColumnMappingResult(session, { blockingRows, canConfirm: confirmable, duplicateRows, invalidRows, readyRows, skippedRows: userSkippedRows, totalRows: rows.length });
   }
 
@@ -154,6 +162,7 @@ class PortfolioCsvColumnMappingService {
 
     const { rawRows, rows } = await parseColumnMappingSuggestionRows({ bucket: session.s3Bucket, key: session.s3Key }, deps);
     const headers = rows[0] ? Object.keys(rows[0]) : [];
+    if (isPositionsSession(session)) return this.suggestPositionsColumnMapping(session, rawRows, headers);
     for (const candidate of buildCandidateLayouts(rawRows, headers)) {
       const activeSpec = await portfolioImportParserSpecService.findActiveSpecForShape({ appuser: input.appuser, broker: session.financialBrokerKey, headers: candidate.headers, layout: candidate.layout, tenant: input.tenant });
       const specSuggestion = await this.buildValidatedSpecSuggestion({ activeSpec, headers: candidate.headers });
@@ -304,6 +313,80 @@ class PortfolioCsvColumnMappingService {
     return normalized;
   }
 
+  private async suggestPositionsColumnMapping(session: Awaited<ReturnType<typeof portfolioImportSessionService.getOwnedSession>>, rawRows: string[][], headers: string[]): Promise<SuggestPortfolioColumnMappingResult> {
+    // Saved specs and the model describe trade histories; a positions file is mapped locally or by the person.
+    for (const candidate of buildCandidateLayouts(rawRows, headers)) {
+      const suggestion = buildPositionsHeuristicSuggestion(candidate.headers);
+      if (!suggestion) continue;
+      const normalizedSuggestion = normalizePortfolioColumnMappingSuggestion({ ...suggestion, layout: candidate.layout }, candidate.headers);
+      session.columnMappingJson = { source: 'spec', suggestion: normalizedSuggestion, version: 1 };
+      await DI.em.persist(session).flush();
+      return { columnMapping: normalizedSuggestion, importSessionId: session.portfolioImportSessionKey, mappingSource: 'local_heuristic', status: session.status };
+    }
+    session.columnMappingJson = { source: 'error', version: 1, warning: AUTOMATIC_COLUMN_MAPPING_UNAVAILABLE_WARNING };
+    await DI.em.persist(session).flush();
+    return { importSessionId: session.portfolioImportSessionKey, mappingSource: 'disabled', status: session.status, warning: AUTOMATIC_COLUMN_MAPPING_UNAVAILABLE_WARNING };
+  }
+
+  /**
+   * One positions row as an opening BUY: on its acquisition date, or on `asOfDate` when the row
+   * has none, at the average unit cost (the unit cost column, else total cost over quantity).
+   */
+  private normalizeConfirmedPositionRow(row: Record<string, string>, columnMapping: PortfolioColumnMapping, transformations: PortfolioColumnMappingTransformations, context: { brokerId?: number; portfolioId: number; tenantId: number }, fixedValues: PortfolioImportFixedValues = {}, asOfDate?: string) {
+    const get = (key: keyof PortfolioColumnMapping) => columnMapping[key] ? row[columnMapping[key]] : undefined;
+    const dateCell = this.trimCell(get('transactionDate'));
+    let date: string;
+    if (dateCell) date = this.parseDate(dateCell, transformations.dateFormat);
+    else if (asOfDate) date = new Date(`${asOfDate}T00:00:00.000Z`).toISOString();
+    else throw new Error('Missing acquisition date');
+    if (new Date(date).getTime() > Date.now() + 86_400_000) throw new Error('Acquisition date is in the future');
+
+    const quantityRaw = this.trimCell(get('quantity'));
+    if (!quantityRaw) throw new Error('Missing required quantity');
+    const quantity = parseMappedNumber(quantityRaw, transformations);
+    if (!Number.isFinite(quantity) || quantity <= 0) throw new Error('Quantity must be greater than zero');
+
+    const unitCost = this.parseOptionalMappedNumber(get('unitPrice'), transformations);
+    const totalCost = this.parseOptionalMappedNumber(get('totalAmount'), transformations);
+    // A broker may show what was paid as a negative cash amount; the cost is its size.
+    const unitPrice = unitCost === undefined ? (totalCost === undefined ? undefined : Math.abs(totalCost) / quantity) : Math.abs(unitCost);
+    if (unitPrice === undefined) throw new Error('Missing required average cost or total cost');
+    if (!Number.isFinite(unitPrice) || unitPrice <= 0) throw new Error('Cost must be greater than zero');
+
+    const assetName = this.trimCell(get('assetName')); const ticker = this.trimCell(get('ticker')); const isin = this.trimCell(get('isin'));
+    const currency = this.resolveCurrencyValue(get('currency'), columnMapping.currency, fixedValues.currency);
+    if (!currency) throw new Error('Missing required currency');
+    if (!assetName && !ticker && !isin) throw new Error('Missing required asset identity');
+
+    const normalized: Record<string, unknown> = {
+      assetName,
+      assetSymbol: ticker ?? isin ?? assetName,
+      date,
+      isin,
+      notes: OPENING_POSITION_NOTE,
+      openingPosition: true,
+      quantity,
+      settlementCurrencyCode: currency,
+      ticker,
+      transactionType: 'BUY',
+      unitPrice,
+      ...(totalCost === undefined ? {} : { totalAmount: Math.abs(totalCost) }),
+    };
+    normalized['internalTransactionId'] = generatePortfolioImportInternalTransactionId({
+      assetIdentity: { assetName, assetSymbol: normalized['assetSymbol'] as string | undefined, isin, ticker },
+      brokerId: context.brokerId,
+      portfolioId: context.portfolioId,
+      quantity,
+      settlementCurrency: currency,
+      tenantId: context.tenantId,
+      totalAmount: totalCost === undefined ? undefined : Math.abs(totalCost),
+      transactionDate: date,
+      transactionType: 'BUY',
+      unitPrice,
+    });
+    return normalized;
+  }
+
   private normalizeDateFormat(dateFormat?: string) {
     const normalized = dateFormat?.trim();
     if (!normalized) return undefined;
@@ -409,8 +492,10 @@ class PortfolioCsvColumnMappingService {
     return { ...transformations, dateFormat: 'dd/MM/yyyy' };
   }
 
-  private async saveConfirmedParserSpecIfPossible(input: { appuser: Appuser; confirmed: { columnMapping: PortfolioColumnMapping; derivedValues: PortfolioImportDerivedValues; fixedValues: PortfolioImportFixedValues; transformations: PortfolioColumnMappingTransformations }; confirmedInput: ConfirmPortfolioColumnMappingInput; invalidRows: number; rawRows: string[][] | undefined; readyRows: number; rows: Record<string, string>[]; session: { columnMappingJson?: Record<string, unknown>; financialBrokerKey?: { financialBrokerKey: number } }; suggestionSource: 'llm' | 'spec' | 'user' }) {
+  private async saveConfirmedParserSpecIfPossible(input: { appuser: Appuser; confirmed: { columnMapping: PortfolioColumnMapping; derivedValues: PortfolioImportDerivedValues; fixedValues: PortfolioImportFixedValues; transformations: PortfolioColumnMappingTransformations }; confirmedInput: ConfirmPortfolioColumnMappingInput; invalidRows: number; positions?: boolean; rawRows: string[][] | undefined; readyRows: number; rows: Record<string, string>[]; session: { columnMappingJson?: Record<string, unknown>; financialBrokerKey?: { financialBrokerKey: number } }; suggestionSource: 'llm' | 'spec' | 'user' }) {
     if (input.readyRows <= 0 && input.invalidRows <= 0) return;
+    // A saved spec is a trade-history layout; a positions mapping must never be offered for one.
+    if (input.positions) return;
     try {
       const headers = input.rawRows ? (input.rawRows[input.confirmedInput.layout.headerRowIndex ?? 0] ?? []) : Object.keys(input.rows[0] ?? {});
       const payload = buildPortfolioImportParserSpecPayload({ columnMapping: input.confirmed.columnMapping, derivedValues: input.confirmed.derivedValues, fixedValues: input.confirmed.fixedValues, headers, layout: input.confirmedInput.layout, transformations: input.confirmed.transformations });

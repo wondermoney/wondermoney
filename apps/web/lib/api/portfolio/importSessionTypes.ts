@@ -14,6 +14,12 @@ export type PortfolioImportSessionStatus =
 
 export const PORTFOLIO_IMPORT_DEFAULT_MAX_UPLOAD_SIZE_BYTES = 5 * 1024 * 1024;
 
+/**
+ * What a portfolio file holds: a trade history, or the positions held today (each row becomes
+ * one opening buy at its average cost).
+ */
+export type PortfolioImportType = "trades" | "positions";
+
 export interface PortfolioImportSessionCreateResponse {
   correlationId: string;
   importSessionId: number;
@@ -27,6 +33,7 @@ export interface PortfolioImportSessionCreateResponse {
   maxUploadSizeBytes?: number;
   expiresAt?: string;
   broker?: { id: number; name: string };
+  importType?: PortfolioImportType;
 }
 
 export const PORTFOLIO_IMPORT_SUPPORTED_CURRENCIES = [
@@ -110,6 +117,8 @@ export interface PortfolioColumnMappingSuggestion {
   warning?: string;
   warnings?: string[];
   confirmedAt?: unknown;
+  /** Positions files: the day rows without an acquisition date were bought on. */
+  asOfDate?: string;
 }
 
 export interface PortfolioImportColumnMappingPreview {
@@ -219,10 +228,14 @@ export interface PortfolioImportSessionPreviewResponse {
   broker?: { id: number; name: string };
   columnMapping?: PortfolioImportColumnMappingPreview;
   importSessionId: number;
+  /** Absent on APIs that predate positions files, which only import trades. */
+  importType?: PortfolioImportType;
   limits: { rowsPerBucket: number };
   portfolioId: number;
   rows: {
     duplicate: PortfolioImportPreviewRow[];
+    /** Positions files: rows whose asset already has trades in the portfolio, skipped or included. */
+    existingTrades?: PortfolioImportPreviewRow[];
     /** Rows that failed while a confirmed import ran; absent on APIs that predate the bucket. */
     failed?: PortfolioImportPreviewRow[];
     invalid: PortfolioImportPreviewRow[];
@@ -242,6 +255,10 @@ export interface PortfolioImportSessionPreviewResponse {
     };
     blockingRows?: number;
     duplicateRows: number;
+    /** Positions files: rows whose asset already has trades in the portfolio. */
+    existingTradeRows?: number;
+    /** Of those, the rows still skipped. */
+    existingTradeSkippedRows?: number;
     failureReason?: string;
     failedRows?: number;
     canConfirm?: boolean;
@@ -260,6 +277,7 @@ export interface PortfolioImportSessionPreviewResponse {
 export interface PortfolioImportSessionCreateRequest {
   portfolioId: string | number;
   brokerId?: string | number;
+  importType?: PortfolioImportType;
 }
 
 export interface PortfolioImportSessionParseRequest {
@@ -272,6 +290,8 @@ export interface PortfolioImportSessionSuggestColumnMappingRequest {
 
 export interface PortfolioImportSessionConfirmColumnMappingRequest {
   importSessionId: string | number;
+  /** Positions files: `YYYY-MM-DD`, the day rows without an acquisition date are bought on. */
+  asOfDate?: string;
   columnMapping: PortfolioColumnMapping;
   derivedValues?: PortfolioImportColumnMappingDerivedValues;
   layout?: PortfolioCsvLayout;
@@ -292,4 +312,20 @@ export interface PortfolioImportSessionConfirmAssetMappingsRequest {
 
 export interface PortfolioImportSessionConfirmRequest {
   importSessionId: string | number;
+}
+
+export interface PortfolioImportRowInclusionDecision {
+  rowId: number;
+  include: boolean;
+}
+
+export interface PortfolioImportSessionRowInclusionRequest {
+  importSessionId: string | number;
+  rows: PortfolioImportRowInclusionDecision[];
+}
+
+export interface PortfolioImportSessionRowInclusionResponse {
+  importSessionId: number;
+  status: PortfolioImportSessionStatus;
+  summary: Record<string, unknown>;
 }

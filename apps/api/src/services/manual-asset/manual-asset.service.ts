@@ -193,33 +193,40 @@ export function assetValueFor(loaded: LoadedManualAsset, viewerCurrency: string,
 export async function createManualAsset(em: EntityManager, viewer: AssetViewer, input: CreateManualAssetInput, now = new Date()): Promise<ManualAssetDto> {
   const currency = await em.findOne(Currency, { currencyKey: input.currencyKey });
   if (!currency) throw new BadRequestError('Currency not found');
-
-  const asset = new ManualAsset();
-  asset.currencyKey = currency;
-  asset.growthAnnualRatePercent = input.growthRule?.annualRatePercent ?? null;
-  asset.growthStartDate = input.growthRule?.startDate ?? null;
-  asset.isPrivate = input.isPrivate ?? false;
-  asset.kind = input.kind;
-  asset.name = input.name;
-  asset.notes = input.notes ?? null;
-  asset.ownerAppuserKey = await em.findOneOrFail(Appuser, { appuserKey: viewer.appuserKey });
-  asset.purchaseDate = input.purchaseDate ?? null;
-  asset.purchasePrice = input.purchasePrice ?? null;
-  asset.tenantKey = getRef(em, Tenant, viewer.tenantKey);
-  em.persist(asset);
-
-  const valuationDate = input.valuationDate ?? utcDayOf(now);
-  const valuations = [newValuation(em, asset, valuationDate, input.value)];
-  // The purchase is the asset's first known value, so its history starts there and not at today.
-  if (input.purchaseDate && input.purchasePrice != null && utcDayOf(input.purchaseDate).getTime() < utcDayOf(valuationDate).getTime()) {
-    valuations.push(newValuation(em, asset, input.purchaseDate, input.purchasePrice));
-  }
+  const owner = await em.findOneOrFail(Appuser, { appuserKey: viewer.appuserKey });
+  const loaded = newManualAsset(em, viewer, owner, currency, input, now);
   await em.flush();
-  return describeAsset(em, viewer, { asset, valuations }, now);
+  return describeAsset(em, viewer, loaded, now);
 }
 
+/** One row of a manual-assets file: an asset and its value on a day, in a currency named by its code. */
+export interface ImportManualAssetRow extends Omit<CreateManualAssetInput, 'currencyKey' | 'growthRule' | 'purchaseDate' | 'purchasePrice'> {
+  currencyCode: string;
+}
+
+/**
+ * Creates every row as a manual asset with its initial valuation, all or none. Each asset is the
+ * importer's, in their household, shared with the other member unless the row is private:
+ * exactly what creating them one by one does. A row whose currency is unknown fails the batch.
+ */
 export function currentAssetValueFor(loaded: LoadedManualAsset, viewerCurrency: string, rates: RateTable, now: Date): null | ViewerAssetValue {
   return assetValueFor(loaded, viewerCurrency, rates, { rateDate: now, valueDate: currentValueDate(loaded, now) });
+}
+
+export async function importManualAssets(em: EntityManager, viewer: AssetViewer, rows: ImportManualAssetRow[], now = new Date()): Promise<{ assets: { manualAssetKey: number; name: string }[] }> {
+  const codes = [...new Set(rows.map((row) => row.currencyCode.toUpperCase()))];
+  const currencies = await em.find(Currency, { code: { $in: codes } });
+  const byCode = new Map(currencies.map((currency) => [currency.code.toUpperCase(), currency]));
+  const resolved = rows.map((row) => ({ currency: byCode.get(row.currencyCode.toUpperCase()), row }));
+  const unknownRows = resolved.flatMap(({ currency }, index) => (currency ? [] : [index + 1]));
+  if (unknownRows.length > 0) throw new BadRequestError(`Unknown currency on rows ${unknownRows.join(', ')}`);
+
+  return em.transactional(async (tx) => {
+    const owner = await tx.findOneOrFail(Appuser, { appuserKey: viewer.appuserKey });
+    const created = resolved.flatMap(({ currency, row }) => (currency ? [newManualAsset(tx, viewer, owner, currency, row, now)] : []));
+    await tx.flush();
+    return { assets: created.map(({ asset }) => ({ manualAssetKey: asset.manualAssetKey, name: asset.name })) };
+  });
 }
 
 /**
@@ -441,6 +448,31 @@ async function loadAssetOrThrow(em: EntityManager, viewer: AssetViewer, manualAs
   const [loaded] = await loadVisibleManualAssets(em, viewer, { manualAssetKey });
   if (!loaded) throw new NotFoundError('Asset not found');
   return loaded;
+}
+
+/** A new asset of the viewer's, in their household, with its first valuation (and its purchase, when earlier). Persisted, not flushed. */
+function newManualAsset(em: EntityManager, viewer: Pick<AssetViewer, 'tenantKey'>, owner: Appuser, currency: Currency, input: Omit<CreateManualAssetInput, 'currencyKey'>, now: Date): LoadedManualAsset {
+  const asset = new ManualAsset();
+  asset.currencyKey = currency;
+  asset.growthAnnualRatePercent = input.growthRule?.annualRatePercent ?? null;
+  asset.growthStartDate = input.growthRule?.startDate ?? null;
+  asset.isPrivate = input.isPrivate ?? false;
+  asset.kind = input.kind;
+  asset.name = input.name;
+  asset.notes = input.notes ?? null;
+  asset.ownerAppuserKey = owner;
+  asset.purchaseDate = input.purchaseDate ?? null;
+  asset.purchasePrice = input.purchasePrice ?? null;
+  asset.tenantKey = getRef(em, Tenant, viewer.tenantKey);
+  em.persist(asset);
+
+  const valuationDate = input.valuationDate ?? utcDayOf(now);
+  const valuations = [newValuation(em, asset, valuationDate, input.value)];
+  // The purchase is the asset's first known value, so its history starts there and not at today.
+  if (input.purchaseDate && input.purchasePrice != null && utcDayOf(input.purchaseDate).getTime() < utcDayOf(valuationDate).getTime()) {
+    valuations.push(newValuation(em, asset, input.purchaseDate, input.purchasePrice));
+  }
+  return { asset, valuations };
 }
 
 function newValuation(em: EntityManager, asset: ManualAsset, date: Date, value: number, note?: null | string): ManualAssetValuation {

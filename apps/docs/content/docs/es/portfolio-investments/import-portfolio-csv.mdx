@@ -1,23 +1,15 @@
 ---
 title: Importar cartera por CSV
-description: Importa posiciones y transacciones de cartera desde un archivo CSV.
+description: Importa un historial de operaciones, las posiciones que tienes hoy o tus bienes manuales desde un archivo CSV, XLS o XLSX.
 ---
 
-La importación de CSV es la forma más rápida de cargar datos del bróker en WonderMoney.
+Importar un archivo es la forma más rápida de cargar datos del bróker en WonderMoney. La ventana de importación pregunta primero qué contiene el archivo:
 
-## Qué puedes importar
+- **Historial de operaciones**: cada compra y venta, con su fecha.
+- **Posiciones actuales**: lo que tienes hoy, una fila por posición, sin las operaciones que llevaron hasta ahí.
+- **Bienes manuales**: viviendas, vehículos y objetos de valor, cada uno con un valor en un día.
 
-- Posiciones
-- Transacciones
-- Posiciones actuales, cuando tu exportación las incluya
-
-## Cómo importar
-
-1. Exporta los datos desde tu bróker.
-2. Abre la cartera que quieras actualizar.
-3. Sube el archivo CSV.
-4. Espera a que la importación se procese.
-5. Corrige cualquier problema de mapeo o filas sin resolver si se notifican.
+Ábrela desde una cartera con **Importar transacciones** y elige el modo.
 
 <DocsImage
   src="/images/docs/es/portfolio-investments/import-portfolio-csv-import-modal.png"
@@ -27,22 +19,88 @@ La importación de CSV es la forma más rápida de cargar datos del bróker en W
   height={900}
 />
 
+## Importar un historial de operaciones
+
+1. Exporta tus operaciones desde el bróker.
+2. Elige **Historial de operaciones**, la cartera y, si quieres, el bróker.
+3. Sube el archivo y elige **Analizar archivo**.
+4. Asocia las columnas del archivo con los campos de la operación: fecha, tipo (compra o venta), cantidad, precio unitario o importe total, moneda y el activo (ISIN, ticker o nombre). La comisión y el ID de la operación en el bróker son opcionales.
+5. Resuelve los activos que WonderMoney no pudo asociar (consulta [Revisión antes de guardar](#revisión-antes-de-guardar)).
+6. Revisa el resumen y elige **Confirmar importación**.
+
+## Importar posiciones actuales
+
+Usa este modo cuando partes de lo que tienes hoy y no de años de historial. Cada fila es una posición:
+
+| Columna | Obligatoria | Notas |
+| --- | --- | --- |
+| Símbolo o ISIN | Sí | El nombre del activo también sirve, pero el ISIN asocia con más seguridad. |
+| Cantidad | Sí | Mayor que cero. |
+| Coste medio unitario o coste total | Sí | Con ambos, se usa el coste medio unitario. El coste total se divide entre la cantidad. |
+| Moneda | Sí | Una columna, o una moneda para todo el archivo. |
+| Fecha de adquisición | No | Las filas sin fecha usan la fecha de referencia. |
+
+1. Elige **Posiciones actuales**, la cartera y, si quieres, el bróker. **Descargar la plantilla de posiciones** te da un archivo con estas columnas, que se asocia solo.
+2. Sube el archivo y elige **Analizar archivo**.
+3. Asocia las columnas y elige la **fecha de referencia**: el día en que se compra una fila sin fecha de adquisición. Por defecto es hoy.
+4. Resuelve los activos sin asociar y revisa las filas de activos con los que la cartera ya opera (más abajo).
+5. Elige **Confirmar importación**.
+
+### En qué se convierte una posición
+
+Cada fila se convierte en una **compra de apertura**: una compra normal de esa cantidad al coste medio unitario, en su fecha de adquisición o en la fecha de referencia, marcada como "Opening position" en sus notas. Como es una compra corriente, la cartera la trata exactamente igual que una que registraras a mano:
+
+- Con FIFO es un lote; con coste medio entra en la media. Una venta posterior libera su coste y muestra la ganancia realizada, con cualquier [método de coste](/es/docs/portfolio-investments/portfolio-metrics-explained#método-de-coste-fifo-y-coste-medio).
+- Cuenta como dinero aportado a la cartera en su fecha para las [rentabilidades ponderadas por tiempo y por dinero](/es/docs/portfolio-investments/portfolio-metrics-explained#rentabilidad-ponderada-por-tiempo-y-por-dinero). Las rentabilidades se miden desde ese día: lo que pasó antes no forma parte de ellas.
+- El coste base es lo que el archivo dice que pagaste, así que revísalo: la ganancia no realizada se mide frente a él.
+
+### Activos que ya tienen operaciones
+
+Si la cartera ya tiene compras o ventas de un activo del archivo, una compra de apertura encima contaría la posición dos veces. Esas filas aparecen con un aviso y se **omiten por defecto**. Activa una fila para importarla igualmente, por ejemplo cuando las operaciones existentes son de una posición que vendiste antes de volver a comprar. Las filas de activos sin operaciones se importan con normalidad.
+
+Importar dos veces el mismo archivo de posiciones se detecta como duplicado.
+
+## Importar bienes manuales
+
+Los bienes manuales no forman parte de una cartera: cuentan en tu patrimonio a un valor que tú fijas. Consulta [Viviendas, vehículos y otros bienes](/es/docs/portfolio-investments/manual-assets).
+
+1. Elige **Bienes manuales** en la ventana de importación, o **Importar CSV** en la página Bienes.
+2. **Descarga la plantilla** y rellena una fila por bien:
+
+| Columna | Obligatoria | Notas |
+| --- | --- | --- |
+| Name | Sí | El nombre del bien. |
+| Kind | Sí | `property`, `vehicle`, `valuable` u `other`. |
+| Value | Sí | En la moneda del bien. |
+| Valuation date | No | `AAAA-MM-DD`. Vacía significa hoy. |
+| Currency | Sí | Un código de tres letras, como `EUR`. |
+| Private | No | `yes` mantiene el bien solo para ti; vacío o `no` lo comparte con tu hogar. |
+
+3. Sube el archivo. WonderMoney comprueba cada fila e indica, por línea, las que hay que corregir.
+4. Elige **Importar**. Cada bien se crea con ese valor como primera valoración y es tuyo, exactamente como si lo hubieras añadido a mano. Si alguna fila no se puede importar, no se importa ninguna.
+
+La plantilla de bienes manuales lee un archivo CSV de hasta 500 bienes.
+
+## Revisión antes de guardar
+
+No se añade nada a una cartera hasta que eliges **Confirmar importación**. Antes:
+
+- **Asociación de columnas.** WonderMoney sugiere una asociación a partir de las cabeceras del archivo; revísala y completa lo que falte.
+- **Revisión de activos.** Una fila cuyo activo no se asoció con confianza pasa a la revisión de activos. Elige el valor correcto entre las sugerencias, busca otro símbolo u omite el grupo.
+- **Resumen.** Las filas no válidas (sin cantidad, con una fecha ilegible) o duplicadas de filas ya importadas se cuentan y se dejan fuera.
+
 ## Para obtener los mejores resultados
 
 - Usa una exportación reciente del bróker.
 - Mantén una cartera por cuenta del bróker cuando sea posible.
-- Revisa los tickers, las cantidades, las fechas y las monedas de la exportación del bróker antes de subirla.
-- Si algunas filas necesitan resolución de activos, sigue las indicaciones notificadas después de la importación.
-
-## Comportamiento actual
-
-WonderMoney procesa los archivos CSV subidos después de la carga. No existe un paso de revisión de filas antes de guardar.
+- Prefiere los ISIN: identifican un único valor, mientras que un ticker puede existir en varias bolsas.
+- Revisa cantidades, fechas, costes y monedas en el archivo antes de subirlo.
 
 ## Errores comunes
 
-- Subir un tipo de archivo incorrecto.
-- Importar filas duplicadas de una exportación anterior.
-- Dejar la columna de moneda vacía cuando la exportación del bróker incluye varias monedas.
+- Importar un archivo de posiciones en una cartera que ya tiene las mismas operaciones: el aviso lo detecta, pero solo para los activos del archivo.
+- Importar un historial de operaciones como posiciones actuales, o al revés.
+- Dejar la columna de moneda vacía cuando el archivo incluye varias monedas.
 - Dar por hecho que todos los brókers usan los mismos nombres de columna.
 
 ## Páginas relacionadas
@@ -50,5 +108,6 @@ WonderMoney procesa los archivos CSV subidos después de la carga. No existe un 
 - [Inversiones de cartera](/es/docs/portfolio-investments)
 - [Crear una cartera](/es/docs/portfolio-investments/create-portfolio)
 - [Añadir transacciones de cartera](/es/docs/portfolio-investments/add-portfolio-transactions)
-- [Ciclo de vida de los datos de la cartera](/es/docs/portfolio-investments/portfolio-data-lifecycle)
-- [Distribución de posiciones](/es/docs/portfolio-investments/holdings-allocation)
+- [Métricas de cartera explicadas](/es/docs/portfolio-investments/portfolio-metrics-explained)
+- [Viviendas, vehículos y otros bienes](/es/docs/portfolio-investments/manual-assets)
+- [Resolver problemas de importación de cartera](/es/docs/portfolio-investments/troubleshoot-portfolio-imports)

@@ -16,6 +16,7 @@ import {
   extractPortfolioImportAssetIdentity,
   scorePortfolioImportAssetCandidate,
 } from './portfolio-import-asset-resolution.utils';
+import { applyExistingTradesRule, countExistingTradeRows, isPositionsSession, resetExistingTradesSkips } from './portfolio-import-positions';
 import { buildImportSessionSummary, canConfirm } from './portfolio-import-session-state';
 
 export interface AssetSearchCandidate {
@@ -83,6 +84,7 @@ class PortfolioImportAssetResolutionService {
 
     const rows = await DI.em.find(PortfolioImportRow, { deletedAt: undefined, portfolioImportSessionKey: session }, { populate: ['assetGroupKey', 'financialAssetKey'] });
 
+    resetExistingTradesSkips(rows);
     const cleanedRows = new Set<PortfolioImportRow>();
     for (const row of rows) {
       if (row.status === PortfolioImportRowStatus.SKIPPED && row.skipReason === UNSUPPORTED_ASSET_REASON) {
@@ -285,13 +287,21 @@ class PortfolioImportAssetResolutionService {
     }
 
     const totalGroups = groupedRows.size;
+    // Positions: an opening buy for an asset the portfolio already trades waits for the person.
+    await applyExistingTradesRule(DI.em, session, rows);
+    const existingTrades = isPositionsSession(session) ? countExistingTradeRows(rows) : undefined;
+    for (const row of rows) {
+      if (!persisted.includes(row)) persisted.push(row);
+    }
     // Consolidated: row counts come from the shared session-state helper.
     const { duplicateRows, invalidRows, needsAssetReviewRows, readyRows, skippedRows } = buildImportSessionSummary(rows, []);
-    const allUnsupported = readyRows === 0 && needsAssetReviewRows === 0 && unsupportedAssets.length > 0;
+    const allUnsupported = readyRows === 0 && needsAssetReviewRows === 0 && unsupportedAssets.length > 0 && !existingTrades?.existingTradeSkippedRows;
     if (session.status !== PortfolioImportSessionStatus.FAILED) {
       if (hasNeedsReview) session.status = PortfolioImportSessionStatus.NEEDS_ASSET_REVIEW;
       else if (readyRows > 0 && skippedRows > 0) session.status = PortfolioImportSessionStatus.PARTIAL;
       else if (readyRows > 0) session.status = PortfolioImportSessionStatus.READY_TO_IMPORT;
+      // Every importable row is held back for existing trades: the person may still include them.
+      else if (existingTrades?.existingTradeSkippedRows) session.status = PortfolioImportSessionStatus.PARTIAL;
       else session.status = PortfolioImportSessionStatus.FAILED;
     }
 
@@ -302,6 +312,7 @@ class PortfolioImportAssetResolutionService {
       canConfirm: false,
       duplicateRows,
       ...(allUnsupported ? { failureReason: 'No supported assets were found', terminalKind: 'failed' } : {}),
+      ...(existingTrades ?? {}),
       importableRows: readyRows,
       invalidRows,
       needsAssetReviewRows,

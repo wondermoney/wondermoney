@@ -5,7 +5,7 @@ import type { Appuser } from '@entity/Appuser';
 import { FinancialBroker } from '@entity/FinancialBroker';
 import { Portfolio } from '@entity/Portfolio';
 import { PortfolioImportRow, PortfolioImportRowStatus } from '@entity/PortfolioImportRow';
-import { PortfolioImportSession, PortfolioImportSessionStatus } from '@entity/PortfolioImportSession';
+import { PortfolioImportSession, PortfolioImportSessionStatus, PortfolioImportSessionType } from '@entity/PortfolioImportSession';
 import { NotFoundError } from '@utils/errors';
 
 const PORTFOLIO_IMPORT_SESSION_TTL_MS = 7 * 24 * 60 * 60 * 1000;
@@ -31,6 +31,7 @@ export interface CreatePortfolioImportSessionInput {
   columnMappingJson?: Record<string, unknown>;
   correlationId: string;
   expiresAt?: Date;
+  importType?: PortfolioImportSessionType;
   objectEtag?: string;
   portfolioId: number;
   s3Bucket: string;
@@ -105,6 +106,7 @@ class PortfolioImportSessionService {
       correlationId: input.correlationId,
       expiresAt: input.expiresAt ?? new Date(Date.now() + PORTFOLIO_IMPORT_SESSION_TTL_MS),
       financialBrokerKey: broker,
+      importType: input.importType ?? PortfolioImportSessionType.TRADES,
       objectEtag: input.objectEtag,
       portfolioKey: portfolio,
       s3Bucket: input.s3Bucket,

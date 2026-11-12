@@ -14,6 +14,7 @@ import {
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/Alert";
 import { Button } from "@/components/ui/button";
 import { ComboBoxForm } from "@/components/ui/combobox";
+import DatePicker from "@/components/ui/DatePicker";
 import type {
   PortfolioColumnMapping,
   PortfolioColumnMappingTransformations,
@@ -21,7 +22,9 @@ import type {
   PortfolioImportColumnMappingDerivedValues,
   PortfolioImportColumnMappingFixedValues,
   PortfolioImportSupportedCurrencyCode,
+  PortfolioImportType,
 } from "@/lib/api/portfolio/importSessionTypes";
+import { calendarDay, dayString } from "@/lib/manual-assets/asset-view";
 import {
   getPortfolioImportColumnFieldsNeedingAttention,
   normalizePortfolioImportColumnValue,
@@ -37,6 +40,10 @@ type FieldKind = "csv" | "currency" | "transactionType";
 
 interface PortfolioImportColumnMappingStepProps {
   availableColumns: string[];
+  /** Positions files: the as-of day a previous mapping used. Defaults to today. */
+  initialAsOfDate?: string;
+  /** What the file holds; a positions file maps holdings instead of trades. */
+  importType?: PortfolioImportType;
   initialMapping?: Partial<PortfolioColumnMapping>;
   initialFixedValues?: PortfolioImportColumnMappingFixedValues;
   initialDerivedValues?: PortfolioImportColumnMappingDerivedValues;
@@ -46,6 +53,7 @@ interface PortfolioImportColumnMappingStepProps {
   hasWarning: boolean;
   recovery?: ReactNode;
   onSubmit: (input: {
+    asOfDate?: string;
     columnMapping: PortfolioColumnMapping;
     derivedValues?: PortfolioImportColumnMappingDerivedValues;
     fixedValues?: PortfolioImportColumnMappingFixedValues;
@@ -150,6 +158,61 @@ const MAPPING_FIELDS: MappingFieldConfig[] = [
     fieldKey: "externalTransactionId",
     kind: "csv",
     labelKey: "portfolio-import-column-external-transaction-id",
+    required: false,
+  },
+];
+
+/**
+ * A positions file maps holdings: quantity, a cost (average unit cost or total cost), currency,
+ * the asset, and an optional acquisition date. Every row is an opening buy, so there is no type.
+ */
+const POSITION_MAPPING_FIELDS: MappingFieldConfig[] = [
+  {
+    fieldKey: "quantity",
+    kind: "csv",
+    labelKey: "portfolio-import-column-quantity",
+    required: true,
+  },
+  {
+    fieldKey: "currency",
+    kind: "currency",
+    labelKey: "portfolio-import-column-currency",
+    required: true,
+  },
+  {
+    fieldKey: "unitPrice",
+    kind: "csv",
+    labelKey: "portfolio-import-column-average-cost",
+    required: false,
+  },
+  {
+    fieldKey: "totalAmount",
+    kind: "csv",
+    labelKey: "portfolio-import-column-total-cost",
+    required: false,
+  },
+  {
+    fieldKey: "isin",
+    kind: "csv",
+    labelKey: "portfolio-import-column-isin",
+    required: false,
+  },
+  {
+    fieldKey: "ticker",
+    kind: "csv",
+    labelKey: "portfolio-import-column-ticker",
+    required: false,
+  },
+  {
+    fieldKey: "assetName",
+    kind: "csv",
+    labelKey: "portfolio-import-column-asset-name",
+    required: false,
+  },
+  {
+    fieldKey: "transactionDate",
+    kind: "csv",
+    labelKey: "portfolio-import-column-acquisition-date",
     required: false,
   },
 ];
@@ -421,6 +484,8 @@ function MappingFieldRow({
 
 export function PortfolioImportColumnMappingStep({
   availableColumns,
+  importType = "trades",
+  initialAsOfDate,
   initialMapping,
   initialFixedValues,
   initialDerivedValues,
@@ -432,9 +497,14 @@ export function PortfolioImportColumnMappingStep({
   onSubmit,
 }: PortfolioImportColumnMappingStepProps) {
   const t = useTranslations();
+  const positions = importType === "positions";
+  const mappingFields = positions ? POSITION_MAPPING_FIELDS : MAPPING_FIELDS;
   const [validationMessageKeys, setValidationMessageKeys] = useState<
     PortfolioImportColumnMappingValidationIssue["messageKey"][]
   >([]);
+  const [asOfDate, setAsOfDate] = useState<string>(
+    () => initialAsOfDate ?? dayString(new Date()),
+  );
 
   const availableColumnsByNormalizedValue = useMemo(
     () =>
@@ -474,18 +544,19 @@ export function PortfolioImportColumnMappingStep({
     () =>
       getPortfolioImportColumnFieldsNeedingAttention({
         columnMapping: splitWatchedValues.columnMapping,
-        fieldKeys: MAPPING_FIELDS.map((field) => field.fieldKey),
+        fieldKeys: mappingFields.map((field) => field.fieldKey),
         fixedValues: splitWatchedValues.fixedValues,
         derivedValues: splitWatchedValues.derivedValues,
+        importType,
         transformations: initialTransformations,
       }),
-    [initialTransformations, splitWatchedValues],
+    [importType, initialTransformations, mappingFields, splitWatchedValues],
   );
 
-  const attentionFields = MAPPING_FIELDS.filter((field) =>
+  const attentionFields = mappingFields.filter((field) =>
     fieldsNeedingAttention.has(field.fieldKey),
   );
-  const matchedFields = MAPPING_FIELDS.filter(
+  const matchedFields = mappingFields.filter(
     (field) => !fieldsNeedingAttention.has(field.fieldKey),
   );
 
@@ -501,12 +572,26 @@ export function PortfolioImportColumnMappingStep({
       ]),
     ) as Record<MappingField, string>;
 
-    const splitValues = splitColumnMappingSources(normalizedColumnMapping);
+    const positionFieldKeys = new Set(
+      POSITION_MAPPING_FIELDS.map((field) => field.fieldKey),
+    );
+    // A positions file keeps only the fields it maps, so a stale trade-only mapping never reaches the API.
+    const splitValues = splitColumnMappingSources(
+      positions
+        ? (Object.fromEntries(
+            Object.entries(normalizedColumnMapping).filter(([key]) =>
+              positionFieldKeys.has(key as MappingField),
+            ),
+          ) as Record<MappingField, string>)
+        : normalizedColumnMapping,
+    );
 
     const validation = validatePortfolioImportColumnMapping({
+      asOfDate: positions ? asOfDate : undefined,
       columnMapping: splitValues.columnMapping,
       fixedValues: splitValues.fixedValues,
       derivedValues: splitValues.derivedValues,
+      importType,
       transformations: initialTransformations,
     });
 
@@ -520,6 +605,7 @@ export function PortfolioImportColumnMappingStep({
     setValidationMessageKeys([]);
 
     await onSubmit({
+      ...(positions && asOfDate ? { asOfDate } : {}),
       columnMapping: splitValues.columnMapping,
       fixedValues:
         Object.keys(splitValues.fixedValues).length > 0
@@ -546,9 +632,33 @@ export function PortfolioImportColumnMappingStep({
           {t("portfolio-import-column-mapping-title")}
         </h3>
         <p className="text-muted-foreground max-w-2xl text-sm leading-6">
-          {t("portfolio-import-column-mapping-description")}
+          {t(
+            positions
+              ? "portfolio-import-positions-mapping-description"
+              : "portfolio-import-column-mapping-description",
+          )}
         </p>
       </div>
+
+      {positions ? (
+        <div className="flex flex-col gap-1.5 rounded-md border px-3 py-3">
+          <div className="text-foreground text-sm font-medium leading-5">
+            {t("portfolio-import-positions-as-of-label")}
+          </div>
+          <p className="text-muted-foreground text-xs leading-5">
+            {t("portfolio-import-positions-as-of-hint")}
+          </p>
+          <div>
+            <DatePicker
+              inModal
+              disabled={{ after: new Date() }}
+              value={asOfDate ? calendarDay(asOfDate) : undefined}
+              onSelect={(date) => setAsOfDate(dayString(date))}
+              placeholder={t("portfolio-import-positions-as-of-label")}
+            />
+          </div>
+        </div>
+      ) : null}
 
       {hasWarning ? (
         <Alert>

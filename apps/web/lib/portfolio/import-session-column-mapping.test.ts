@@ -3,9 +3,11 @@ import assert from "node:assert/strict";
 import { test } from "vitest";
 
 import {
+  buildPortfolioPositionsTemplateCsv,
   extractPortfolioImportCsvColumns,
   getPortfolioImportAvailableColumns,
   getPortfolioImportColumnFieldsNeedingAttention,
+  getPortfolioPositionsTemplateMapping,
   validatePortfolioImportColumnMapping,
 } from "./import-session-column-mapping";
 
@@ -235,4 +237,41 @@ test("field classification: a blank mapping leaves no fields eligible to collaps
   });
 
   assert.deepEqual([...needsAttention], [...fieldKeys]);
+});
+
+test("a positions mapping needs no transaction type, and an acquisition date or an as-of date", () => {
+  const holdings = { currency: "Currency", isin: "ISIN", quantity: "Qty", unitPrice: "Average cost" };
+
+  assert.deepEqual(
+    validatePortfolioImportColumnMapping({ columnMapping: holdings, importType: "positions", asOfDate: "2024-12-31" }),
+    { isValid: true, missingIssues: [] },
+  );
+  assert.deepEqual(
+    validatePortfolioImportColumnMapping({ columnMapping: { ...holdings, transactionDate: "Acquired" }, importType: "positions" }).isValid,
+    true,
+  );
+  assert.deepEqual(
+    validatePortfolioImportColumnMapping({ columnMapping: holdings, importType: "positions" }).missingIssues.map((issue) => issue.key),
+    ["asOfDate"],
+  );
+  // The same columns are not a trade history: it needs dates and a direction.
+  assert.deepEqual(
+    validatePortfolioImportColumnMapping({ columnMapping: holdings }).missingIssues.map((issue) => issue.key),
+    ["transactionDate", "transactionTypeOrDirectionRule"],
+  );
+});
+
+test("a positions template maps itself, and another file does not", () => {
+  const columns = buildPortfolioPositionsTemplateCsv().split("\n")[0].split(",");
+
+  assert.deepEqual(getPortfolioPositionsTemplateMapping(columns), {
+    currency: "Currency",
+    isin: "ISIN",
+    quantity: "Quantity",
+    ticker: "Symbol",
+    totalAmount: "Total cost",
+    transactionDate: "Acquisition date",
+    unitPrice: "Average cost",
+  });
+  assert.equal(getPortfolioPositionsTemplateMapping(["Symbol", "Quantity"]), undefined);
 });
