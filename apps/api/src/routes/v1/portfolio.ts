@@ -4,10 +4,13 @@ import {
   createPortfolio,
   createPortfolioImportSession,
   createPortfolioTransaction,
+  deleteAssetPriceOverride,
   deletePortfolio,
   deletePortfolioTransaction,
   getAggregateDashboard,
   getAllocation,
+  getAssetPriceHistory,
+  getAssetPriceOverride,
   getBrokers,
   getDividendIncome,
   getHoldingAnalystData,
@@ -30,6 +33,7 @@ import {
   getPortfolioTransactions,
   getTopMovers,
   getTransactionTypes,
+  putAssetPriceOverride,
   rebuildPortfolioSnapshot,
   updatePortfolio,
   updatePortfolioTransaction,
@@ -64,6 +68,11 @@ router.get('/dividend-income', getDividendIncome);
 // Holding-level market-data endpoints (analyst/valuation stubbed — not covered by the EODHD plan)
 router.get('/holding/:symbol/analyst', marketDataLimiter, getHoldingAnalystData);
 router.get('/holding/:symbol/valuation', marketDataLimiter, getHoldingValuation);
+// A household's manual prices for a security, over the shared market prices
+router.get('/holding/:financialAssetKey/prices', getAssetPriceHistory);
+router.get('/holding/:financialAssetKey/prices/:date', getAssetPriceOverride);
+router.put('/holding/:financialAssetKey/prices/:date', putAssetPriceOverride);
+router.delete('/holding/:financialAssetKey/prices/:date', deleteAssetPriceOverride);
 
 // Individual portfolio endpoints
 router.put('/:portfolioId', updatePortfolio);

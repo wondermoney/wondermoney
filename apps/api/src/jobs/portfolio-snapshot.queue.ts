@@ -5,6 +5,7 @@ export const PORTFOLIO_SNAPSHOT_AUTO_CRON = '0 3 * * *';
 export interface PortfolioSnapshotManualJobPayload {
   correlationId: string;
   portfolioId: number;
+  startDate?: string;
 }
 
 /** Continuation payload for the paged nightly sweep. `cursor` is the last `portfolioKey` snapshotted. */

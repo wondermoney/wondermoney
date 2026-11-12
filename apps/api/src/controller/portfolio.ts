@@ -17,6 +17,8 @@ import {
   getAggregateDashboardRequestSchema,
   getAggregatePerformanceRequestSchema,
   getAggregateTopMoversRequestSchema,
+  getAssetPriceHistoryRequestSchema,
+  getAssetPriceOverrideRequestSchema,
   getHoldingMarketDataRequestSchema,
   getPortfolioAllocationRequestSchema,
   getPortfolioDashboardRequestSchema,
@@ -29,6 +31,7 @@ import {
   getPortfoliosTransactionRequestSchema,
   getPortfolioTopMoversRequestSchema,
   getPortfolioTransactionRequestSchema,
+  putAssetPriceOverrideRequestSchema,
   updatePortfolioRequestSchema,
   updatePortfolioTransactionRequestSchema,
 } from '@app/validators/portfolio';
@@ -49,6 +52,7 @@ import { BadRequestError, InternalServerError, NotFoundError } from '@utils/erro
 import logger from '@utils/logger';
 
 import { DI } from '../app.js';
+import * as assetPriceOverrideService from '../services/portfolio/asset-price-override.service.js';
 import portfolioDashboardService from '../services/portfolio/portfolio-dashboard.service.js';
 import portfolioHistoryStatusService from '../services/portfolio/portfolio-history-status.service.js';
 import portfolioHoldingsService from '../services/portfolio/portfolio-holdings.service.js';
@@ -168,6 +172,31 @@ export async function createPortfolioTransaction(req: Request, res: Response) {
   }, undefined, { enqueue: req.enqueue });
 
   return res.sendStatus(201);
+}
+
+export async function deleteAssetPriceOverride(req: Request, res: Response) {
+  const { appuserKey, tenantKey } = authedContext(req);
+  const { params: { date, financialAssetKey } } = await zParse(getAssetPriceOverrideRequestSchema, req);
+  await assetPriceOverrideService.deleteAssetPriceOverride(DI.em, { appuserKey, tenantKey }, financialAssetKey, date, { enqueue: req.enqueue });
+  return res.sendStatus(204);
+}
+
+export async function getAssetPriceHistory(req: Request, res: Response) {
+  const { tenantKey } = authedContext(req);
+  const { params: { financialAssetKey }, query } = await zParse(getAssetPriceHistoryRequestSchema, req);
+  return res.json(await assetPriceOverrideService.getAssetPriceHistory(DI.em, tenantKey, financialAssetKey, query));
+}
+
+export async function getAssetPriceOverride(req: Request, res: Response) {
+  const { tenantKey } = authedContext(req);
+  const { params: { date, financialAssetKey } } = await zParse(getAssetPriceOverrideRequestSchema, req);
+  return res.json(await assetPriceOverrideService.getAssetPriceOnDay(DI.em, tenantKey, financialAssetKey, date));
+}
+
+export async function putAssetPriceOverride(req: Request, res: Response) {
+  const { appuserKey, tenantKey } = authedContext(req);
+  const { body, params: { date, financialAssetKey } } = await zParse(putAssetPriceOverrideRequestSchema, req);
+  return res.json(await assetPriceOverrideService.setAssetPriceOverride(DI.em, { appuserKey, tenantKey }, financialAssetKey, date, body, { enqueue: req.enqueue }));
 }
 
 /**

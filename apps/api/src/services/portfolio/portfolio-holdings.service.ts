@@ -358,8 +358,8 @@ class PortfolioHoldingsService {
   /**
    * Add current prices and calculate gains/allocation for holdings
    */
-  private async enrichHoldingsWithPrices(portfolioAssets: PortfolioAsset[], currency = 'USD'): Promise<PortfolioHolding[]> {
-    const assetsCurrentPrice = await assetPriceService.getCurrentAssetPrices();
+  private async enrichHoldingsWithPrices(portfolioAssets: PortfolioAsset[], currency = 'USD', tenantKey?: number): Promise<PortfolioHolding[]> {
+    const assetsCurrentPrice = await assetPriceService.getCurrentAssetPrices(tenantKey);
 
     const assetCurrencyCodes = [...new Set(portfolioAssets.map((p) => p.financialAssetCurrencyCode).filter(Boolean))] as string[];
     const exchangeRateRows = assetCurrencyCodes.length > 0
@@ -435,6 +435,7 @@ class PortfolioHoldingsService {
     invalidHoldings: PortfolioHolding[],
     invalidKeys: Set<string>,
     currency: string,
+    tenantKey?: number,
   ): Promise<PortfolioHolding[]> {
     const openBatches = batches.filter((batch) => !invalidKeys.has(getPortfolioAssetInvalidKey(batch.portfolio_key, batch.financial_asset_key)));
     const savingsCertificateBatches = openBatches.filter(isSavingsCertificateBatch);
@@ -442,7 +443,7 @@ class PortfolioHoldingsService {
 
     const portfolioAssets = aggregateBatchesIntoAssets(otherBatches);
     const [enrichedOther, enrichedSavingsCertificates] = await Promise.all([
-      this.enrichHoldingsWithPrices(portfolioAssets, currency),
+      this.enrichHoldingsWithPrices(portfolioAssets, currency, tenantKey),
       enrichSavingsCertificateHoldings(savingsCertificateBatches, currency),
     ]);
     const combined = recomputeAllocation([...enrichedOther, ...enrichedSavingsCertificates]);
@@ -450,9 +451,11 @@ class PortfolioHoldingsService {
   }
 
   /**
-   * Get holdings for a specific portfolio
+   * Get holdings for a specific portfolio. `tenantKey` scopes the trades to the household (else
+   * the appuser's own) and prices them with the household's price overrides; `priceTenantKey`
+   * applies a household's overrides without changing the trade scope (the snapshot worker).
    */
-  async getPortfolioHoldings(appuser: Appuser, portfolioId: number, tenantKey?: number): Promise<PortfolioHolding[]> {
+  async getPortfolioHoldings(appuser: Appuser, portfolioId: number, tenantKey?: number, priceTenantKey = tenantKey): Promise<PortfolioHolding[]> {
     const { splitRows, transactionRows } = await this.getPortfolioTransactionRows(appuser.appuserKey, portfolioId, tenantKey);
     const currency = appuser.currencyKey.code || 'EUR';
     const costBasisMethod = this.costBasisMethodFromRows(transactionRows);
@@ -461,7 +464,7 @@ class PortfolioHoldingsService {
     const invalidKeys = new Set(
       invalidHoldings.map((holding) => getPortfolioAssetInvalidKey(holding.portfolioKey!, holding.financialAssetKey)),
     );
-    return flagIncompleteFeeConversions(await this.buildHoldingsFromOpenBatches(batches, invalidHoldings, invalidKeys, currency), transactionRows);
+    return flagIncompleteFeeConversions(await this.buildHoldingsFromOpenBatches(batches, invalidHoldings, invalidKeys, currency, priceTenantKey), transactionRows);
   }
 
   private async getInvalidHoldings(appuserKey: number, currency: string, portfolioId?: number): Promise<PortfolioHolding[]> {
@@ -482,7 +485,7 @@ class PortfolioHoldingsService {
     const invalidKeys = new Set(
       invalidHoldings.map((holding) => getPortfolioAssetInvalidKey(holding.portfolioKey!, holding.financialAssetKey)),
     );
-    return flagIncompleteFeeConversions(await this.buildHoldingsFromOpenBatches(batches, invalidHoldings, invalidKeys, currency), transactionRows);
+    return flagIncompleteFeeConversions(await this.buildHoldingsFromOpenBatches(batches, invalidHoldings, invalidKeys, currency, tenantKey), transactionRows);
   }
 
   /**
