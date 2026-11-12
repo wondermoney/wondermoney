@@ -1,0 +1,19 @@
+apiVersion: v2
+name: wondermoney
+description: Free, open-source personal finance. The WonderMoney API, its background worker and the web app, with an optional bundled Postgres.
+type: application
+# A release tag packages the chart with the tag's version as both `version` and `appVersion`
+# (.github/workflows/publish-images.yml), so a published chart runs the images of its own
+# release. From a checkout, the values below apply: the images default to `latest`, the newest
+# release.
+version: 0.0.0
+appVersion: latest
+kubeVersion: '>=1.27.0-0'
+home: https://wonder.money
+icon: https://www.wonder.money/favicon.svg
+sources:
+  - https://github.com/wondermoney/wondermoney
+keywords:
+  - personal-finance
+  - budgeting
+  - self-hosted

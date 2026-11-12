@@ -1,0 +1,170 @@
+---
+title: Kubernetes (Helm)
+description: Instala WonderMoney en un clúster de Kubernetes con el chart de Helm, con tu propio Postgres o con el incluido.
+---
+
+El chart de Helm usa las mismas imágenes que la instalación con Docker Compose: la API, su worker de tareas en segundo plano y la aplicación web, con un Ingress opcional. Por defecto, el Postgres es el tuyo; hay uno incluido para instalaciones pequeñas. Cada versión publica el chart junto a sus imágenes, con el mismo número de versión.
+
+Necesitas un clúster con Kubernetes 1.27 o posterior y Helm 3.8 o posterior.
+
+## Instalar
+
+Con el Postgres incluido:
+
+```sh
+helm install wondermoney oci://ghcr.io/wondermoney/charts/wondermoney \
+  --version 1.4.0 \
+  --namespace wondermoney --create-namespace \
+  --set postgresql.enabled=true
+```
+
+El chart 1.4.0 usa las imágenes 1.4.0; `image.tag` elige otras. En el primer arranque, la API crea la base de datos y carga los datos de referencia, lo que tarda uno o dos minutos. Sin Ingress, llega a ella con un port forward:
+
+```sh
+kubectl -n wondermoney port-forward svc/wondermoney-web 3000:3000 &
+kubectl -n wondermoney port-forward svc/wondermoney-api 3001:3001 &
+```
+
+Después abre http://localhost:3000 y crea tu cuenta. La primera cuenta siempre puede registrarse; a partir de ahí, `SIGNUP_MODE` decide quién más puede.
+
+Para ver todos los ajustes:
+
+```sh
+helm show values oci://ghcr.io/wondermoney/charts/wondermoney --version 1.4.0
+```
+
+## Tu propio Postgres
+
+Deja `postgresql.enabled` desactivado e indica tu base de datos en un archivo de valores:
+
+```yaml
+database:
+  host: postgres.example.com
+  name: wondermoney
+  user: wondermoney
+  # Un Secret creado por ti, con la contraseña en la clave `password`
+  existingSecret: wondermoney-db
+```
+
+O da una cadena de conexión en `database.url` (añade `?sslmode=require` para TLS), o una guardada en tu Secret con `database.existingSecretUrlKey`. El chart se niega a instalar sin ninguna base de datos.
+
+## Un solo nombre de host
+
+Con un Ingress, un solo nombre de host sirve todo: `/v1` y `/api/auth` van a la API, todo lo demás a la aplicación web. No hace falta dominio de cookie.
+
+```yaml
+ingress:
+  enabled: true
+  className: traefik        # o nginx, o vacío para el del clúster
+  host: money.example.com
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt
+  tls:
+    - secretName: wondermoney-tls
+      hosts: [money.example.com]
+```
+
+`APP_URL` y `API_URL` siguen al Ingress (aquí `https://money.example.com`, en https porque `tls` está definido), y `TRUST_PROXY` pasa a `1` por el ingress controller. Defínelos en `config` si tu configuración es distinta, por ejemplo `TRUST_PROXY: "2"` con un balanceador de carga delante del controller que reenvía la dirección del visitante.
+
+## Dos nombres de host
+
+Define `ingress.apiHost` para dar a la API su propio nombre de host. Ambos necesitan entonces el dominio de cookie compartido, como en la instalación con Compose:
+
+```yaml
+ingress:
+  enabled: true
+  host: money.example.com
+  apiHost: api.money.example.com
+  tls:
+    - secretName: wondermoney-tls
+      hosts: [money.example.com, api.money.example.com]
+config:
+  AUTH_COOKIE_DOMAIN: .example.com
+  NEXT_PUBLIC_AUTH_COOKIE_DOMAIN: .example.com
+```
+
+El chart se niega a usar dos nombres de host sin el dominio de cookie, porque el inicio de sesión no funcionaría.
+
+## Configurar
+
+El mapa `config` acepta los ajustes de [Configurar tu instancia](/es/docs/self-hosting/configure), con los mismos nombres y en las mismas secciones que `.env`. Las credenciales van en `secrets`, que el chart guarda en un Secret. Todo lo demás va en `extraEnv`.
+
+```yaml
+config:
+  INSTANCE_NAME: Nuestro dinero
+  SIGNUP_MODE: invite
+  EMAIL_FROM: money@example.com
+  SMTP_HOST: smtp.example.com
+  SMTP_USER: money@example.com
+secrets:
+  SMTP_PASSWORD: change-me
+```
+
+La aplicación web recibe solo las direcciones, los ajustes `NEXT_PUBLIC_` y `RECAPTCHA_SECRET_KEY`, nunca la contraseña de la base de datos ni los secretos de la API. Para dejar las credenciales fuera de los archivos de valores, ponlas en un Secret gestionado por ti e indícalo en `existingSecret`; sus claves prevalecen sobre todo lo demás.
+
+## La clave de cifrado
+
+La API se niega a arrancar sin cinco secretos: `BETTER_AUTH_SECRET`, `CREDENTIAL_ENCRYPTION_KEY_V1`, `EMAIL_OPT_OUT_SIGNING_SECRET`, `ADMIN_API_KEY` e `INTERNAL_SERVICE_API_KEY`. El chart los genera en la primera instalación, junto con la contraseña del Postgres incluido, en el Secret `wondermoney-generated` (para una release llamada `wondermoney`; las notas de la instalación muestran el nombre). Cada actualización los conserva, y Helm deja ese Secret en su sitio cuando desinstalas.
+
+`CREDENTIAL_ENCRYPTION_KEY_V1` cifra las credenciales bancarias guardadas de cada usuario. Sin ella son ilegibles, y una base de datos restaurada no sirve de nada. Cópiala a un lugar seguro, aparte de las copias de seguridad de la base de datos:
+
+```sh
+kubectl -n wondermoney get secret wondermoney-generated \
+  -o jsonpath='{.data.CREDENTIAL_ENCRYPTION_KEY_V1}' | base64 -d; echo
+```
+
+Generarlos requiere que Helm lea el clúster. Las herramientas que generan el chart sin clúster, como Argo CD, generarían secretos nuevos en cada sincronización. Con ellas, define `generatedSecrets.enabled: false` y proporciona los cinco en `existingSecret`. Crea la clave con `openssl rand -base64 32` y los demás con `openssl rand -hex 32`.
+
+## El worker
+
+El worker ejecuta las tareas en segundo plano y sus programaciones (sincronizaciones de bancos y precios, importaciones, correos programados), así que siempre hay exactamente uno. El chart no tiene ajuste de réplicas para él y rechaza `worker.replicas`, y una actualización detiene el worker antiguo antes de iniciar el nuevo. La API y la aplicación web escalan con `api.replicas` y `web.replicas`.
+
+## Salud
+
+Las sondas de la API usan `GET /v1/health`, las de la aplicación web `/health` y las del worker `/health` en el puerto 3002. `GET /v1/health/ready` comprueba la instancia entera, incluidos el worker y la cola de tareas: úsalo en un monitor de disponibilidad (consulta [Monitorización](/es/docs/self-hosting/monitoring)) y no como sonda, porque un worker con retraso dejaría toda la aplicación fuera de servicio. `helm test` hace las mismas comprobaciones desde dentro del clúster:
+
+```sh
+helm test wondermoney -n wondermoney --logs
+```
+
+## Actualizar
+
+```sh
+helm upgrade wondermoney oci://ghcr.io/wondermoney/charts/wondermoney \
+  --version 1.5.0 -n wondermoney --reuse-values
+```
+
+La API aplica las nuevas migraciones de la base de datos al arrancar, y los secretos generados se quedan como están.
+
+## Copia de seguridad
+
+Las copias de seguridad programadas de la instalación con Compose (el perfil `backup`) no forman parte del chart. Con tu propio Postgres, haz la copia como la haces en ese servidor. Con el incluido, haz un volcado, a mano o desde un CronJob propio:
+
+```sh
+# Copia de seguridad
+kubectl -n wondermoney exec wondermoney-postgresql-0 -- \
+  pg_dump -U wondermoney -Fc wondermoney > wondermoney-$(date +%F).dump
+
+# Restaurar: detén la aplicación, carga la copia en una base de datos nueva, vuelve a iniciar la aplicación
+kubectl -n wondermoney scale deploy wondermoney-api wondermoney-worker wondermoney-web --replicas 0
+kubectl -n wondermoney exec wondermoney-postgresql-0 -- dropdb -U wondermoney wondermoney
+kubectl -n wondermoney exec wondermoney-postgresql-0 -- createdb -U wondermoney wondermoney
+kubectl -n wondermoney exec -i wondermoney-postgresql-0 -- \
+  pg_restore -U wondermoney -d wondermoney < wondermoney-2026-10-04.dump
+kubectl -n wondermoney scale deploy wondermoney-api wondermoney-worker wondermoney-web --replicas 1
+```
+
+Guarda la clave de cifrado con tus copias de seguridad.
+
+## Desinstalar
+
+```sh
+helm uninstall wondermoney -n wondermoney
+```
+
+Esto conserva los secretos generados y el volumen del Postgres incluido, así que reinstalar con el mismo nombre en el mismo namespace encuentra tus datos y claves. Para eliminarlos también:
+
+```sh
+kubectl -n wondermoney delete secret wondermoney-generated
+kubectl -n wondermoney delete pvc data-wondermoney-postgresql-0
+```

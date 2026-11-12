@@ -1,0 +1,170 @@
+---
+title: Kubernetes (Helm)
+description: Install WonderMoney on a Kubernetes cluster with the Helm chart, with your own Postgres or the bundled one.
+---
+
+The Helm chart runs the same images as the Docker Compose install: the API, its background worker and the web app, with an optional Ingress. Postgres is your own by default; a bundled one is available for small installs. Each release publishes the chart next to its images, with the same version number.
+
+You need a cluster running Kubernetes 1.27 or newer and Helm 3.8 or newer.
+
+## Install
+
+With the bundled Postgres:
+
+```sh
+helm install wondermoney oci://ghcr.io/wondermoney/charts/wondermoney \
+  --version 1.4.0 \
+  --namespace wondermoney --create-namespace \
+  --set postgresql.enabled=true
+```
+
+Chart 1.4.0 runs the 1.4.0 images; `image.tag` picks others. On the first start, the API creates the database and loads the reference data, which takes a minute or two. Without an Ingress, reach it with a port forward:
+
+```sh
+kubectl -n wondermoney port-forward svc/wondermoney-web 3000:3000 &
+kubectl -n wondermoney port-forward svc/wondermoney-api 3001:3001 &
+```
+
+Then open http://localhost:3000 and create your account. The first account can always sign up; after that, `SIGNUP_MODE` decides who else can.
+
+To see every setting:
+
+```sh
+helm show values oci://ghcr.io/wondermoney/charts/wondermoney --version 1.4.0
+```
+
+## Your own Postgres
+
+Leave `postgresql.enabled` off and point the chart at your database in a values file:
+
+```yaml
+database:
+  host: postgres.example.com
+  name: wondermoney
+  user: wondermoney
+  # A Secret you created, with the password under the key `password`
+  existingSecret: wondermoney-db
+```
+
+Or give a connection string in `database.url` (add `?sslmode=require` for TLS), or one stored in your Secret with `database.existingSecretUrlKey`. The chart refuses to install with no database at all.
+
+## One hostname
+
+With an Ingress, one hostname serves everything: `/v1` and `/api/auth` go to the API, everything else to the web app. No cookie domain is needed.
+
+```yaml
+ingress:
+  enabled: true
+  className: traefik        # or nginx, or empty for the cluster's default
+  host: money.example.com
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt
+  tls:
+    - secretName: wondermoney-tls
+      hosts: [money.example.com]
+```
+
+`APP_URL` and `API_URL` follow the Ingress (`https://money.example.com` here, https because `tls` is set), and `TRUST_PROXY` becomes `1` for the ingress controller. Set them in `config` if your setup differs, for example `TRUST_PROXY: "2"` with a load balancer in front of the controller that forwards the visitor's address.
+
+## Two hostnames
+
+Set `ingress.apiHost` to give the API its own hostname. Both then need the shared cookie domain, as in the Compose install:
+
+```yaml
+ingress:
+  enabled: true
+  host: money.example.com
+  apiHost: api.money.example.com
+  tls:
+    - secretName: wondermoney-tls
+      hosts: [money.example.com, api.money.example.com]
+config:
+  AUTH_COOKIE_DOMAIN: .example.com
+  NEXT_PUBLIC_AUTH_COOKIE_DOMAIN: .example.com
+```
+
+The chart refuses two hostnames without the cookie domain, because sign-in would not work.
+
+## Configure
+
+The `config` map takes the settings of [Configure your instance](/en/docs/self-hosting/configure), by the same names and in the same sections as `.env`. Credentials go in `secrets` instead, which the chart stores in a Secret. Anything else goes in `extraEnv`.
+
+```yaml
+config:
+  INSTANCE_NAME: Our money
+  SIGNUP_MODE: invite
+  EMAIL_FROM: money@example.com
+  SMTP_HOST: smtp.example.com
+  SMTP_USER: money@example.com
+secrets:
+  SMTP_PASSWORD: change-me
+```
+
+The web app gets only the addresses, the `NEXT_PUBLIC_` settings and `RECAPTCHA_SECRET_KEY`, never the database password or the API's secrets. To keep credentials out of values files altogether, put them in a Secret you manage and name it in `existingSecret`; its keys win over everything else.
+
+## The encryption key
+
+The API refuses to start without five secrets: `BETTER_AUTH_SECRET`, `CREDENTIAL_ENCRYPTION_KEY_V1`, `EMAIL_OPT_OUT_SIGNING_SECRET`, `ADMIN_API_KEY` and `INTERNAL_SERVICE_API_KEY`. The chart generates them on the first install, together with the bundled Postgres password, in the Secret `wondermoney-generated` (for a release named `wondermoney`; the install notes print its name). Every upgrade keeps them, and Helm leaves that Secret in place when you uninstall.
+
+`CREDENTIAL_ENCRYPTION_KEY_V1` encrypts every user's stored bank credentials. Without it they are unreadable, and a restored database is useless. Copy it somewhere safe, apart from your database backups:
+
+```sh
+kubectl -n wondermoney get secret wondermoney-generated \
+  -o jsonpath='{.data.CREDENTIAL_ENCRYPTION_KEY_V1}' | base64 -d; echo
+```
+
+Generating them needs Helm to read the cluster. Tools that render the chart without a cluster, such as Argo CD, would generate new secrets on every sync. With those, set `generatedSecrets.enabled: false` and provide all five in `existingSecret`. Create the key with `openssl rand -base64 32` and the others with `openssl rand -hex 32`.
+
+## The worker
+
+The worker runs the background jobs and their schedules (bank and price syncs, imports, scheduled emails), so there is always exactly one. The chart has no replica setting for it and refuses `worker.replicas`, and an upgrade stops the old worker before starting the new one. The API and the web app scale with `api.replicas` and `web.replicas`.
+
+## Health
+
+The API's probes use `GET /v1/health`, the web app's `/health` and the worker's `/health` on port 3002. `GET /v1/health/ready` checks the whole instance, the worker and the job queue included: use it for an uptime monitor (see [Monitoring](/en/docs/self-hosting/monitoring)) rather than as a probe, since a late worker would otherwise take the whole app offline. `helm test` runs the same checks from inside the cluster:
+
+```sh
+helm test wondermoney -n wondermoney --logs
+```
+
+## Upgrade
+
+```sh
+helm upgrade wondermoney oci://ghcr.io/wondermoney/charts/wondermoney \
+  --version 1.5.0 -n wondermoney --reuse-values
+```
+
+The API applies new database migrations when it starts, and the generated secrets stay as they are.
+
+## Back up
+
+The Compose install's scheduled backups (the `backup` profile) are not part of the chart. With your own Postgres, back it up as you back up that server. With the bundled one, take a dump, by hand or from a CronJob of your own:
+
+```sh
+# Back up
+kubectl -n wondermoney exec wondermoney-postgresql-0 -- \
+  pg_dump -U wondermoney -Fc wondermoney > wondermoney-$(date +%F).dump
+
+# Restore: stop the app, load the dump into a fresh database, start the app again
+kubectl -n wondermoney scale deploy wondermoney-api wondermoney-worker wondermoney-web --replicas 0
+kubectl -n wondermoney exec wondermoney-postgresql-0 -- dropdb -U wondermoney wondermoney
+kubectl -n wondermoney exec wondermoney-postgresql-0 -- createdb -U wondermoney wondermoney
+kubectl -n wondermoney exec -i wondermoney-postgresql-0 -- \
+  pg_restore -U wondermoney -d wondermoney < wondermoney-2026-10-04.dump
+kubectl -n wondermoney scale deploy wondermoney-api wondermoney-worker wondermoney-web --replicas 1
+```
+
+Keep the encryption key with your backups.
+
+## Uninstall
+
+```sh
+helm uninstall wondermoney -n wondermoney
+```
+
+This keeps the generated secrets and the bundled Postgres volume, so reinstalling under the same name in the same namespace finds your data and keys. To remove them too:
+
+```sh
+kubectl -n wondermoney delete secret wondermoney-generated
+kubectl -n wondermoney delete pvc data-wondermoney-postgresql-0
+```

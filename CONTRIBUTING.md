@@ -136,7 +136,8 @@ A bug here can get someone's money wrong or show it to the wrong person, so the 
    `gh release create vX.Y.Z --target main --generate-notes`. The tag also runs
    `.github/workflows/publish-images.yml`, which builds the images and attaches `install.sh` and
    its SHA-256 checksum to the release: that is what the one-line install in
-   `apps/api/deploy/selfhost/README.md` downloads.
+   `apps/api/deploy/selfhost/README.md` downloads. It also publishes the Helm chart, with the
+   release's version, to `oci://ghcr.io/wondermoney/charts/wondermoney`.
 
 ## Leak check
 

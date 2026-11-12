@@ -1,0 +1,50 @@
+{{- $fullname := include "wondermoney.fullname" . -}}
+{{- $generated := include "wondermoney.generatedSecretName" . -}}
+WonderMoney {{ include "wondermoney.imageTag" (dict "root" . "image" dict) }} is {{ if .Release.IsInstall }}installing{{ else }}upgrading{{ end }} as {{ .Release.Name }} in {{ .Release.Namespace }}.
+
+On a new database the API creates the schema and loads the reference data first, which takes a
+minute or two. To follow it:
+
+  kubectl -n {{ .Release.Namespace }} logs -f deploy/{{ include "wondermoney.componentName" (dict "root" . "component" "api") }}
+
+{{- if .Values.ingress.enabled }}
+
+Open {{ include "wondermoney.appUrl" . }} and create your account.
+{{- else }}
+
+Without an Ingress, reach it from this machine:
+
+  kubectl -n {{ .Release.Namespace }} port-forward svc/{{ include "wondermoney.componentName" (dict "root" . "component" "web") }} 3000:3000 &
+  kubectl -n {{ .Release.Namespace }} port-forward svc/{{ include "wondermoney.componentName" (dict "root" . "component" "api") }} 3001:3001 &
+
+Then open {{ include "wondermoney.appUrl" . }} and create your account.
+{{- end }}
+
+The first account can always sign up; afterwards SIGNUP_MODE ({{ .Values.config.SIGNUP_MODE | default "open" }}) decides who else can.
+
+BACK UP YOUR ENCRYPTION KEY
+{{- if .Values.generatedSecrets.enabled }}
+
+CREDENTIAL_ENCRYPTION_KEY_V1 encrypts every user's stored bank credentials. Without it they are
+unreadable, and a restored database is useless. It is in the Secret {{ $generated }}{{ if or .Values.existingSecret .Values.secrets.CREDENTIAL_ENCRYPTION_KEY_V1 }} (unless your
+own secret sets it){{ end }}. Copy it somewhere safe, apart from your database backups:
+
+  kubectl -n {{ .Release.Namespace }} get secret {{ $generated }} -o jsonpath='{.data.CREDENTIAL_ENCRYPTION_KEY_V1}' | base64 -d; echo
+
+Helm keeps {{ $generated }} on upgrade and on uninstall. Never change or delete the key once in use.
+{{- else }}
+
+CREDENTIAL_ENCRYPTION_KEY_V1, in {{ .Values.existingSecret | default "your secret" }}, encrypts every user's stored bank
+credentials. Without it they are unreadable, and a restored database is useless. Keep a copy apart
+from your database backups, and never change it once in use.
+{{- end }}
+
+The worker runs as exactly one pod: it runs the schedules. Check the whole instance, worker
+included, with `helm test {{ .Release.Name }} -n {{ .Release.Namespace }}` or an uptime monitor on
+{{ include "wondermoney.apiUrl" . }}/v1/health/ready.
+{{- if .Values.postgresql.enabled }}
+
+The bundled Postgres keeps its data in the volume of {{ include "wondermoney.componentName" (dict "root" . "component" "postgresql") }}-0. Back it up:
+
+  kubectl -n {{ .Release.Namespace }} exec {{ include "wondermoney.componentName" (dict "root" . "component" "postgresql") }}-0 -- pg_dump -U {{ .Values.postgresql.auth.username }} -Fc {{ .Values.postgresql.auth.database }} > wondermoney-$(date +%F).dump
+{{- end }}

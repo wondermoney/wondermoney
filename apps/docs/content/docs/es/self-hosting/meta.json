@@ -3,6 +3,7 @@
   "pages": [
     "index",
     "install",
+    "kubernetes",
     "configure",
     "https-and-domains",
     "mobile-app",
