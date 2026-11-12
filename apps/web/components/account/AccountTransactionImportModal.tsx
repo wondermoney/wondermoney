@@ -51,10 +51,34 @@ const isQifFileName = (name: string) => /\.qif$/i.test(name.trim());
 const isCamtFileName = (name: string) => /\.xml$/i.test(name.trim());
 
 /** A file whose own format the API reads: no columns to preview. */
-type FileFormat = "ofx" | "qif" | "camt053" | "ynab";
+type FileFormat = "ofx" | "qif" | "camt053" | "ynab" | "actual";
 
-/** Where the file comes from: a bank's statement (any format), or a YNAB register export. */
-type ImportSource = "statement" | "ynab";
+/** Where the file comes from: a bank's statement (any format), a YNAB register or an Actual Budget export. */
+type ImportSource = "statement" | "ynab" | "actual";
+
+/** A budgeting app's export: its own entry, guide and wording. */
+type AppSource = Exclude<ImportSource, "statement">;
+
+/** The copy each app's entry uses. */
+const APP_COPY = {
+  actual: {
+    accountHint: "import-actual-account-hint",
+    entry: "import-actual-entry",
+    file: "import-actual-file",
+    ready: "import-actual-ready",
+    title: "import-actual-title",
+  },
+  ynab: {
+    accountHint: "import-ynab-account-hint",
+    entry: "import-ynab-entry",
+    file: "import-ynab-file",
+    ready: "import-ynab-ready",
+    title: "import-ynab-title",
+  },
+} as const satisfies Record<AppSource, Record<string, string>>;
+
+const isAppSource = (source: ImportSource): source is AppSource =>
+  source !== "statement";
 
 interface AccountTransactionImportModalProps {
   isOpen: boolean;
@@ -170,17 +194,16 @@ const AccountTransactionImportModal: React.FC<
 
   /** Uploads the chosen file at once, so its preview is ready before the person presses Import. */
   const uploadAndRead = (file: File, accountId: string) => {
-    // A YNAB export is a CSV whose columns the API knows: no columns to preview either.
-    const kind: FileFormat | null =
-      source === "ynab"
-        ? "ynab"
-        : isOfxFileName(file.name)
-          ? "ofx"
-          : isQifFileName(file.name)
-            ? "qif"
-            : isCamtFileName(file.name)
-              ? "camt053"
-              : null;
+    // A YNAB or Actual Budget export is a CSV whose columns the API knows: no columns to preview either.
+    const kind: FileFormat | null = isAppSource(source)
+      ? source
+      : isOfxFileName(file.name)
+        ? "ofx"
+        : isQifFileName(file.name)
+          ? "qif"
+          : isCamtFileName(file.name)
+            ? "camt053"
+            : null;
     const sequence = ++readSequenceRef.current;
     setIsReading(true);
     setReadError(undefined);
@@ -246,7 +269,7 @@ const AccountTransactionImportModal: React.FC<
     }
   };
 
-  /** Switch between a bank statement and a YNAB export; a file picked for the other is let go. */
+  /** Switch between a bank statement and an app's export; a file picked for another is let go. */
   const chooseSource = (next: ImportSource) => {
     clearFile();
     methods.setValue("files", []);
@@ -336,7 +359,9 @@ const AccountTransactionImportModal: React.FC<
         )
       }
       title={
-        source === "ynab" ? t("import-ynab-title") : t("import-transactions")
+        isAppSource(source)
+          ? t(APP_COPY[source].title)
+          : t("import-transactions")
       }
       footer={
         importId ? undefined : (
@@ -406,9 +431,9 @@ const AccountTransactionImportModal: React.FC<
                   </FormItem>
                 )}
               />
-              {source === "ynab" ? (
+              {isAppSource(source) ? (
                 <p className="text-muted-foreground -mt-2 text-sm">
-                  {t("import-ynab-account-hint")}
+                  {t(APP_COPY[source].accountHint)}
                 </p>
               ) : null}
               <FormField
@@ -417,12 +442,14 @@ const AccountTransactionImportModal: React.FC<
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel required>
-                      {source === "ynab"
-                        ? t("import-ynab-file")
+                      {isAppSource(source)
+                        ? t(APP_COPY[source].file)
                         : t("upload-transaction-file")}
                     </FormLabel>
                     {source === "ynab" ? (
                       <YnabExportGuide />
+                    ) : source === "actual" ? (
+                      <ActualExportGuide />
                     ) : (
                       <p className="text-muted-foreground text-sm">
                         {t("import-statement-hint")}
@@ -441,7 +468,9 @@ const AccountTransactionImportModal: React.FC<
                         uploadAndRead(nextFiles[0], selectedAccountId);
                       }}
                       accept={
-                        source === "ynab" ? YNAB_ACCEPT : STATEMENT_ACCEPT
+                        isAppSource(source)
+                          ? APP_EXPORT_ACCEPT
+                          : STATEMENT_ACCEPT
                       }
                       maxFileCount={1}
                       // The API reads at most 5 MB (DEFAULT_CSV_UPLOAD_LIMITS); a larger file would upload and then fail.
@@ -454,7 +483,7 @@ const AccountTransactionImportModal: React.FC<
             </form>
           </Form>
 
-          {source === "ynab" ? (
+          {isAppSource(source) ? (
             <Button
               type="button"
               variant="link"
@@ -463,18 +492,23 @@ const AccountTransactionImportModal: React.FC<
               onClick={() => chooseSource("statement")}
             >
               <ArrowLeft className="size-4" aria-hidden />
-              {t("import-ynab-back")}
+              {t("import-statement-back")}
             </Button>
           ) : (
-            <Button
-              type="button"
-              variant="link"
-              size="sm"
-              className="self-start px-0"
-              onClick={() => chooseSource("ynab")}
-            >
-              {t("import-ynab-entry")}
-            </Button>
+            <div className="flex flex-wrap gap-x-4">
+              {(["ynab", "actual"] as const).map((app) => (
+                <Button
+                  key={app}
+                  type="button"
+                  variant="link"
+                  size="sm"
+                  className="px-0"
+                  onClick={() => chooseSource(app)}
+                >
+                  {t(APP_COPY[app].entry)}
+                </Button>
+              ))}
+            </div>
           )}
 
           {isReading && !preview ? (
@@ -484,8 +518,8 @@ const AccountTransactionImportModal: React.FC<
           ) : null}
           {fileFormat && !isReading ? (
             <p className="text-muted-foreground text-sm" aria-live="polite">
-              {fileFormat === "ynab"
-                ? t("import-ynab-ready")
+              {fileFormat === "ynab" || fileFormat === "actual"
+                ? t(APP_COPY[fileFormat].ready)
                 : fileFormat === "qif"
                   ? t("import-qif-ready")
                   : fileFormat === "camt053"
@@ -529,8 +563,8 @@ const STATEMENT_ACCEPT = {
   "application/octet-stream": [".ofx", ".qfx", ".qif", ".xml"],
 };
 
-/** A YNAB register export is a CSV (some systems label it plain text). */
-const YNAB_ACCEPT = {
+/** A YNAB register or Actual Budget export is a CSV (some systems label it plain text). */
+const APP_EXPORT_ACCEPT = {
   "text/csv": [".csv"],
   "text/plain": [".csv"],
   "application/vnd.ms-excel": [".csv"],
@@ -547,6 +581,21 @@ function YnabExportGuide() {
       <li>{t("import-ynab-guide-export")}</li>
       <li>{t("import-ynab-guide-unzip")}</li>
       <li>{t("import-ynab-guide-mapping")}</li>
+    </ol>
+  );
+}
+
+/** How to get the transactions out of Actual Budget, in three short steps. */
+function ActualExportGuide() {
+  const t = useTranslations();
+  return (
+    <ol
+      className="text-muted-foreground list-decimal space-y-1 pl-5 text-sm"
+      data-testid="actual-export-guide"
+    >
+      <li>{t("import-actual-guide-export")}</li>
+      <li>{t("import-actual-guide-file")}</li>
+      <li>{t("import-actual-guide-mapping")}</li>
     </ol>
   );
 }

@@ -152,6 +152,15 @@ describe('TransactionImportReviewRoute', () => {
     client.clear()
   })
 
+  it('never commits an Actual Budget export, which needs its categories mapped on the web', async () => {
+    const server = fakeServer({ format: 'actual' })
+    const { view, client } = await renderReview()
+    expect(await view.findByText(/import the file on the web/)).toBeOnTheScreen()
+    expect(view.queryByRole('button', { name: /^Import \d/ })).not.toBeOnTheScreen()
+    expect(server.writes()).toEqual([])
+    client.clear()
+  })
+
   it('includes a whole status at once', async () => {
     const server = fakeServer()
     const { view, client } = await renderReview()

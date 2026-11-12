@@ -1,0 +1,50 @@
+---
+title: Importar do Actual Budget
+description: Traz o histórico de transações do Actual Budget para o WonderMoney, com cada conta e categoria do Actual associada às tuas.
+---
+
+A importação do Actual Budget lê o CSV de transações que o Actual exporta e importa as transações de cada conta do Actual para uma conta tua. Exportado a partir de **All accounts**, um só ficheiro tem todas as contas. Os valores orçamentados, os agendamentos e as regras não são importados, nem o ficheiro completo do orçamento do Actual (o zip com a base de dados) ou o servidor de sincronização.
+
+## Antes de começar
+
+Exporta as transações no Actual Budget:
+
+1. Abre **All accounts**, para que o ficheiro tenha todas as contas e os dois lados de cada transferência. Para importar só uma conta, abre essa conta.
+2. Limpa qualquer pesquisa ou filtro: o Actual exporta as transações que está a mostrar.
+3. Abre o menu acima das transações e escolhe **Export**. O Actual guarda um ficheiro CSV.
+
+Numa instância alojada por ti, as importações também precisam de [armazenamento de ficheiros](/pt/docs/self-hosting/configure#file-storage).
+
+## Passos
+
+1. Abre qualquer conta e escolhe **Importar transações** e depois **Importar do Actual Budget**. As contas que criares nos passos seguintes usam a moeda da conta de onde começas.
+2. Adiciona o ficheiro CSV (até 5 MB) e escolhe **Rever transações**.
+3. Escolhe para onde vai cada conta do Actual. Todas as contas do ficheiro aparecem, com o número de linhas de cada uma, e uma conta tua com o mesmo nome já vem preenchida. Para uma conta que ainda não tens, escolhe **Nova conta manual**: o WonderMoney cria uma conta manual com o nome da conta do Actual, a abrir com o saldo com que o ficheiro termina para ela. Escolhe **Guardar contas**.
+4. Escolhe uma categoria para cada categoria do Actual. Uma categoria do Actual cujo nome corresponde a uma das tuas, no teu idioma, já vem preenchida; maiúsculas e acentos não contam. As restantes ficam sem categoria, a menos que escolhas uma.
+5. Revê as linhas, como em qualquer [importação](/pt/docs/accounts-transactions/import-transactions-csv): as linhas novas ficam incluídas e as que já estão na conta são ignoradas.
+6. Escolhe **Importar**. A importação corre em segundo plano e mostra quantas transações já escreveu, e as escolhas de categorias são guardadas com ela.
+
+Na app móvel, uma exportação do Actual para antes de importar o que quer que seja, porque as categorias precisam do passo das categorias: cancela-a aí e importa o ficheiro na web.
+
+## Como são importadas as linhas do Actual
+
+- **Valores e datas.** O Actual escreve valores com sinal (o dinheiro que sai é negativo) e datas ISO (`2026-01-31`). Um ficheiro que abriste e voltaste a guardar numa folha de cálculo pode ter outro separador, formato de números ou ordem das datas; o WonderMoney lê-os do próprio ficheiro e pede-te que escolhas entre dia primeiro e mês primeiro quando as datas não o dizem.
+- **Transferências.** O Actual dá ao beneficiário de uma transferência o nome da outra conta, por isso uma linha cujo beneficiário é outra conta do ficheiro é um lado de uma transferência, tal como um beneficiário escrito `Transfer: <Conta>`. Os dois lados são importados como transferências e, quando as duas contas são importadas, as duas linhas ficam ligadas como uma só transferência, que os relatórios deixam fora das receitas e despesas.
+- **Divisões.** Uma transação dividida é importada como uma só transação pelo seu total. A categoria, o valor e a nota de cada parte ficam nas notas da transação. Quando todas as partes têm a mesma categoria, a transação fica com ela; caso contrário, fica sem categoria.
+- **Categorias.** Uma categoria que associaste fica na linha como escolha tua, por isso a categorização aprendida mais tarde não a substitui. Uma regra do agregado que corresponda à linha continua a aplicar-se, como em qualquer transação nova.
+- **Duplicados.** A exportação do Actual não tem identificadores de transação, por isso cada linha é reconhecida pela data e pelo valor dentro da sua conta. Importar a mesma exportação outra vez encontra as linhas já na conta e ignora-as. Uma linha com o mesmo valor que uma transação já na conta, até 3 dias de diferença (uma que a sincronização bancária trouxe, por exemplo), é um [possível duplicado](/pt/docs/accounts-transactions/import-transactions-csv#possíveis-duplicados): é ignorada a menos que a incluas.
+- **Ficheiros grandes.** A importação escreve as linhas em lotes, por isso um ficheiro com milhares de transações é importado em minutos, e a revisão mostra o progresso enquanto corre.
+
+## Problemas comuns
+
+- Uma transferência é importada como um pagamento ou depósito normal. O ficheiro foi exportado a partir de uma só conta, por isso a outra conta não está nele: exporta a partir de **All accounts**.
+- Faltam algumas transações. O Actual exportou só as transações que estava a mostrar: limpa a pesquisa ou o filtro e exporta outra vez.
+- Duas transferências entre as mesmas contas no mesmo dia, pelo mesmo valor, são ambas importadas como transferências, mas não ficam ligadas uma à outra: o WonderMoney não consegue saber qual corresponde a qual.
+
+## Ligações relacionadas
+
+- [Importar transações por CSV, OFX, QIF ou CAMT.053](/pt/docs/accounts-transactions/import-transactions-csv)
+- [Importar do YNAB](/pt/docs/accounts-transactions/import-from-ynab)
+- [Conta offline manual](/pt/docs/accounts-transactions/manual-offline-account)
+- [Categorizar transações](/pt/docs/accounts-transactions/categorize-transactions)
+- [Problemas na importação de transações](/pt/docs/troubleshooting/transaction-import-problems)

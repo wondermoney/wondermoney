@@ -430,6 +430,74 @@ test("pre-fills each YNAB category with the category of the same name, and saves
   ]);
 });
 
+test("names Actual Budget in the account and category steps of an Actual export, pre-fills matching categories, and saves its accounts", async () => {
+  mocks.categories.current = [
+    { categoryKey: 5, isSystemCategory: false, name: "Groceries" },
+    { categoryKey: 6, isSystemCategory: false, name: "Utilities" },
+  ];
+  renderReview(
+    {
+      rows,
+      session: session({
+        canCommit: false,
+        format: "actual",
+        sourceAccounts: [
+          { label: "Checking", rowCount: 5, suggestedAccountId: 7 },
+          { label: "Savings", rowCount: 2 },
+        ],
+        sourceCategories: [
+          { label: "Groceries", name: "Groceries", rowCount: 2 },
+          { label: "Electricity", name: "Electricity", rowCount: 1 },
+        ],
+        status: "needs_mapping",
+      }),
+    },
+    vi.fn(),
+    [{ accountKey: 7, accountName: "Everyday" } as Account],
+  );
+  const user = userEvent.setup();
+
+  assert.ok(
+    screen.getByText(messages["import-review-mapping-title-actual"], {
+      selector: "p",
+    }),
+  );
+  assert.ok(
+    screen.getByText(messages["import-review-categories-title-actual"], {
+      selector: "p",
+    }),
+  );
+  assert.ok(screen.getByText(messages["import-review-categories-hint-actual"]));
+  assert.equal(
+    screen.queryByText(messages["import-review-categories-hint"]),
+    null,
+    "no YNAB wording",
+  );
+  assert.equal(
+    screen.getByRole("combobox", { name: "Groceries" }).textContent,
+    "Groceries",
+  );
+  await user.click(screen.getByRole("combobox", { name: "Savings" }));
+  await user.click(
+    await screen.findByRole("option", {
+      name: "New manual account “Savings”",
+    }),
+  );
+  await user.click(
+    screen.getByRole("button", {
+      name: messages["import-review-mapping-save"],
+    }),
+  );
+
+  await waitFor(() => assert.equal(mocks.map.mock.calls.length, 1));
+  assert.deepEqual(mocks.map.mock.calls[0], [
+    {
+      id: "import-1",
+      input: { create: ["Savings"], mapping: { Checking: 7 } },
+    },
+  ]);
+});
+
 test("keeps a category the person left uncategorised, even when its name matches", () => {
   mocks.categories.current = [
     { categoryKey: 5, isSystemCategory: false, name: "Groceries" },

@@ -240,6 +240,7 @@ export default function TransactionImportReview({
         <CategoryMapping
           choiceOf={categoryChoice}
           disabled={busy}
+          format={session.format}
           options={categoryOptions}
           sources={sourceCategories}
           onChoose={(label, value) =>
@@ -739,7 +740,9 @@ function AccountMapping({
   const title =
     session.format === "ynab"
       ? t("import-review-mapping-title-ynab")
-      : t("import-review-mapping-title");
+      : session.format === "actual"
+        ? t("import-review-mapping-title-actual")
+        : t("import-review-mapping-title");
   const save = () => {
     const chosen: Record<string, number> = {};
     const create: string[] = [];
@@ -849,30 +852,38 @@ function initialCategoryChoice(
 }
 
 /**
- * The file's categories (YNAB), each with the category its rows import as. A category whose name
+ * The file's categories (YNAB, Actual Budget), each with the category its rows import as. A category whose name
  * matches one of the household's is pre-filled; the rest stay uncategorised unless the person
  * picks one. The choices are saved with the commit.
  */
 function CategoryMapping({
   choiceOf,
   disabled,
+  format,
   options,
   sources,
   onChoose,
 }: {
   choiceOf: (source: ImportSourceCategory) => string;
   disabled: boolean;
+  format: TransactionImportSession["format"];
   options: CategoryOption[];
   sources: ImportSourceCategory[];
   onChoose: (label: string, value: string) => void;
 }) {
   const t = useTranslations();
+  const title =
+    format === "actual"
+      ? t("import-review-categories-title-actual")
+      : t("import-review-categories-title");
   return (
     <fieldset className="bg-muted flex flex-col gap-3 rounded-md p-4">
-      <legend className="sr-only">{t("import-review-categories-title")}</legend>
-      <p className="font-medium">{t("import-review-categories-title")}</p>
+      <legend className="sr-only">{title}</legend>
+      <p className="font-medium">{title}</p>
       <p className="text-muted-foreground">
-        {t("import-review-categories-hint")}
+        {format === "actual"
+          ? t("import-review-categories-hint-actual")
+          : t("import-review-categories-hint")}
       </p>
       {sources.map((source) => (
         <label key={source.label} className="flex flex-col gap-1">

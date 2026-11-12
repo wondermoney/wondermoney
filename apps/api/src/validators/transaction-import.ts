@@ -8,7 +8,7 @@ import { importFileNameInput, positiveIntId } from '@validators/shared';
 const sessionParams = z.object({ importId: z.uuid() });
 const options = z
   .object({
-    /** How a QIF or YNAB date whose day and month are both 12 or less reads. */
+    /** How a QIF, YNAB or Actual Budget date whose day and month are both 12 or less reads. */
     dateOrder: z.enum(['day-first', 'month-first']).optional(),
     mapping: statementMappingSchema.optional(),
   })

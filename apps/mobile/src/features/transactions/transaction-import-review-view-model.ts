@@ -46,7 +46,7 @@ export type TransactionImportStage =
   /** Closed without a commit: it expired (after seven days) or was cancelled. */
   | Readonly<{ kind: 'expired' }>
   /**
-   * A file with its own categories to map (a YNAB export). The app has no category step, and a
+   * A file with its own categories to map (a YNAB or Actual Budget export). The app has no category step, and a
    * commit without one would import every row uncategorised, so it does not commit it: the
    * person cancels and imports the file on the web.
    */
@@ -84,8 +84,11 @@ export function importStage(session: TransactionImportSessionDto): TransactionIm
   }
 }
 
+/** Formats whose sessions always map the file's categories (a YNAB or Actual Budget export). */
+const CATEGORY_MAPPED_FORMATS: ReadonlySet<string> = new Set(['actual', 'ynab'])
+
 const needsCategoryMapping = (session: TransactionImportSessionDto): boolean => (
-  session.format === 'ynab' || session.sourceCategories.length > 0
+  CATEGORY_MAPPED_FORMATS.has(session.format) || session.sourceCategories.length > 0
 )
 
 function doneStage(session: TransactionImportSessionDto, outcome: 'succeeded' | 'partial' | 'failed'): TransactionImportStage {

@@ -10,7 +10,7 @@
  */
 
 /** The file formats a session can read. Each one is an {@link ImportAdapter}. */
-export const IMPORT_FORMATS = ['statement', 'ofx', 'qif', 'generic-csv', 'camt053', 'ynab'] as const;
+export const IMPORT_FORMATS = ['statement', 'ofx', 'qif', 'generic-csv', 'camt053', 'ynab', 'actual'] as const;
 export type ImportFormat = (typeof IMPORT_FORMATS)[number];
 
 /**
@@ -58,7 +58,8 @@ export interface NormalizedImportRow {
   /** Signed: negative is money leaving the account. */
   amount: number;
   /**
-   * The category the source app gave it (`Group: Category` for a YNAB export). A file whose
+   * The category the source app gave it (`Group: Category` for a YNAB export, the category's
+   * name for an Actual Budget export). A file whose
    * categories the session maps lists them in {@link ImportParseResult.sourceCategories}.
    */
   categoryLabel?: string;
@@ -79,6 +80,11 @@ export interface NormalizedImportRow {
    */
   externalIdTrusted?: boolean;
   merchant?: string;
+  /**
+   * A note the commit stores on the transaction beside its description (at most 255 characters):
+   * the parts of an Actual Budget split, which imports as one transaction for its total.
+   */
+  notes?: string;
   /** The amount in the currency it was charged in, when that differs (a card payment abroad). */
   originalAmount?: number;
   originalCurrency?: string;
@@ -149,7 +155,7 @@ export interface ImportParseResult {
   rows: ParsedImportRow[];
   /** Empty when the file is for one account only (the one the import was started on). */
   sourceAccounts: ImportSourceAccount[];
-  /** The categories to map, for a format whose categories the session maps (YNAB). Absent otherwise. */
+  /** The categories to map, for a format whose categories the session maps (YNAB, Actual Budget). Absent otherwise. */
   sourceCategories?: ImportSourceCategory[];
   warnings: ImportWarning[];
 }
