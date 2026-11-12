@@ -60,26 +60,10 @@ describe('TransactionImportScreen', () => {
     expect(view.getByText('No accounts are available to import into')).toBeOnTheScreen()
   })
 
-  it.each(['uploading', 'starting', 'processing'] as const)('announces the %s phase and disables back', async (phase) => {
+  it.each(['uploading', 'starting'] as const)('announces the %s phase and disables back', async (phase) => {
     const { view } = await renderScreen({ phase })
     expect(view.getByRole('progressbar')).toBeOnTheScreen()
     expect(view.getByRole('button', { name: 'Back' })).toBeDisabled()
-  })
-
-  it('shows the succeeded outcome and offers import-another or done', async () => {
-    const onReset = jest.fn()
-    const onBack = jest.fn()
-    const { view } = await renderScreen({ phase: 'done', outcome: 'succeeded', format: 'bank', rows: null }, { onReset, onBack })
-    expect(view.getByText('Import complete. New transactions were added.')).toBeOnTheScreen()
-    await fireEvent.press(view.getByRole('button', { name: 'Import another file' }))
-    expect(onReset).toHaveBeenCalled()
-    await fireEvent.press(view.getByRole('button', { name: 'Done' }))
-    expect(onBack).toHaveBeenCalled()
-  })
-
-  it.each(['partial', 'needs_action', 'stale', 'failed'] as const)('shows the %s outcome message', async (outcome) => {
-    const { view } = await renderScreen({ phase: 'done', outcome, format: 'bank', rows: null })
-    expect(view.getByRole('alert')).toBeOnTheScreen()
   })
 
   it('explains the generic columns and shares the template for an account without a supported bank', async () => {
@@ -120,14 +104,9 @@ describe('TransactionImportScreen', () => {
     expect(view.queryByTestId('transaction-import-generic-format')).not.toBeOnTheScreen()
   })
 
-  it('says how many rows of a partial generic import could not be imported', async () => {
-    const { view } = await renderScreen({ phase: 'done', outcome: 'partial', format: 'generic', rows: { failed: 1, total: 2 } })
-    expect(view.getByText(/^1 of 2 rows couldn't be imported/)).toBeOnTheScreen()
-  })
-
-  it('gives no row count for a bank import', async () => {
-    const { view } = await renderScreen({ phase: 'done', outcome: 'partial', format: 'bank', rows: { failed: 1, total: 2 } })
-    expect(view.queryByText(/rows couldn't be imported/)).not.toBeOnTheScreen()
+  it('keeps the file picker off while it looks for an unfinished import', async () => {
+    const { view } = await renderScreen({ phase: 'idle' }, { selectedAccountId: 7, checkingResume: true })
+    expect(view.getByRole('button', { name: 'Choose file' })).toBeDisabled()
   })
 
   it('shows a failure reason and retries via onReset', async () => {

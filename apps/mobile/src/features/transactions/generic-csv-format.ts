@@ -1,7 +1,6 @@
 import Papa from 'papaparse'
 
 import type { CsvImportFormat } from '../accounts/accounts-contract'
-import type { ImportRowCounts } from './transaction-import-contract'
 
 /**
  * The generic CSV format the API reads for an account whose bank has no statement parser (the
@@ -85,17 +84,4 @@ export function decideUpload(upload: Readonly<{ csvImportFormat?: CsvImportForma
     case undefined:
       return upload.isSupportedBank ? { action: 'import', format: 'bank' } : { action: 'stop', reason: 'unsupported-bank' }
   }
-}
-
-/**
- * The "{failed} of {total} rows couldn't be imported" counts, shown (as on web) for a generic
- * import that ended partial or failed with at least one rejected row.
- */
-export function rowsFailedCounts(
-  format: 'bank' | 'generic',
-  outcome: string,
-  rows: ImportRowCounts | null,
-): ImportRowCounts | null {
-  if (format !== 'generic' || (outcome !== 'partial' && outcome !== 'failed')) return null
-  return rows && rows.failed > 0 ? rows : null
 }
