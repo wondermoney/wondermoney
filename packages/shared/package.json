@@ -25,6 +25,7 @@
     "./decimal": "./lib/decimal/index.ts",
     "./amount-expression": "./lib/amount-expression/index.ts",
     "./dashboard-layout": "./lib/dashboard-layout/index.ts",
+    "./name-match": "./lib/import/name-match.ts",
     "./package.json": "./package.json"
   },
   "scripts": {

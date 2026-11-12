@@ -2,7 +2,7 @@
 
 import { useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
-import { Download } from "lucide-react";
+import { ArrowLeft, Download } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { usePostHog } from "posthog-js/react";
 import { useCallback, useRef, useState } from "react";
@@ -51,7 +51,10 @@ const isQifFileName = (name: string) => /\.qif$/i.test(name.trim());
 const isCamtFileName = (name: string) => /\.xml$/i.test(name.trim());
 
 /** A file whose own format the API reads: no columns to preview. */
-type FileFormat = "ofx" | "qif" | "camt053";
+type FileFormat = "ofx" | "qif" | "camt053" | "ynab";
+
+/** Where the file comes from: a bank's statement (any format), or a YNAB register export. */
+type ImportSource = "statement" | "ynab";
 
 interface AccountTransactionImportModalProps {
   isOpen: boolean;
@@ -88,6 +91,7 @@ const AccountTransactionImportModal: React.FC<
     name: "accountId",
   });
   const [files, setFiles] = useState<File[]>([]);
+  const [source, setSource] = useState<ImportSource>("statement");
   // The uploaded file, how it reads, and the columns as the person last set them.
   const [uploadedKey, setUploadedKey] = useState<string | undefined>();
   const [fileFormat, setFileFormat] = useState<FileFormat | null>(null);
@@ -166,7 +170,17 @@ const AccountTransactionImportModal: React.FC<
 
   /** Uploads the chosen file at once, so its preview is ready before the person presses Import. */
   const uploadAndRead = (file: File, accountId: string) => {
-    const kind: FileFormat | null = isOfxFileName(file.name) ? "ofx" : isQifFileName(file.name) ? "qif" : isCamtFileName(file.name) ? "camt053" : null;
+    // A YNAB export is a CSV whose columns the API knows: no columns to preview either.
+    const kind: FileFormat | null =
+      source === "ynab"
+        ? "ynab"
+        : isOfxFileName(file.name)
+          ? "ofx"
+          : isQifFileName(file.name)
+            ? "qif"
+            : isCamtFileName(file.name)
+              ? "camt053"
+              : null;
     const sequence = ++readSequenceRef.current;
     setIsReading(true);
     setReadError(undefined);
@@ -232,9 +246,17 @@ const AccountTransactionImportModal: React.FC<
     }
   };
 
+  /** Switch between a bank statement and a YNAB export; a file picked for the other is let go. */
+  const chooseSource = (next: ImportSource) => {
+    clearFile();
+    methods.setValue("files", []);
+    setSource(next);
+  };
+
   const resetAll = () => {
     reset();
     clearFile();
+    setSource("statement");
     setIsSubmitButtonLoading(false);
     setImportId(undefined);
   };
@@ -266,8 +288,7 @@ const AccountTransactionImportModal: React.FC<
         format: fileFormat ?? "statement",
         key: uploadedKey,
         // The bank's own parser needs no columns; any other file reads as previewed.
-        mapping:
-          fileFormat || preview?.source === "bank" ? undefined : mapping,
+        mapping: fileFormat || preview?.source === "bank" ? undefined : mapping,
       });
       posthog.capture("account-transactions-import-started", {
         kind: "account",
@@ -314,7 +335,9 @@ const AccountTransactionImportModal: React.FC<
           </Button>
         )
       }
-      title={t("import-transactions")}
+      title={
+        source === "ynab" ? t("import-ynab-title") : t("import-transactions")
+      }
       footer={
         importId ? undefined : (
           <Button
@@ -383,17 +406,28 @@ const AccountTransactionImportModal: React.FC<
                   </FormItem>
                 )}
               />
+              {source === "ynab" ? (
+                <p className="text-muted-foreground -mt-2 text-sm">
+                  {t("import-ynab-account-hint")}
+                </p>
+              ) : null}
               <FormField
                 control={methods.control}
                 name="files"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel required>
-                      {t("upload-transaction-file")}
+                      {source === "ynab"
+                        ? t("import-ynab-file")
+                        : t("upload-transaction-file")}
                     </FormLabel>
-                    <p className="text-muted-foreground text-sm">
-                      {t("import-statement-hint")}
-                    </p>
+                    {source === "ynab" ? (
+                      <YnabExportGuide />
+                    ) : (
+                      <p className="text-muted-foreground text-sm">
+                        {t("import-statement-hint")}
+                      </p>
+                    )}
                     <FileUploader
                       value={files}
                       onValueChange={(nextFiles) => {
@@ -406,19 +440,9 @@ const AccountTransactionImportModal: React.FC<
                         clearErrors("files");
                         uploadAndRead(nextFiles[0], selectedAccountId);
                       }}
-                      accept={{
-                        "text/csv": [".csv"],
-                        "text/plain": [".txt", ".qif"],
-                        "application/vnd.ms-excel": [".xls"],
-                        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet":
-                          [".xlsx"],
-                        "application/x-ofx": [".ofx", ".qfx"],
-                        "application/qif": [".qif"],
-                        "application/x-qif": [".qif"],
-                        "application/xml": [".ofx", ".qfx", ".xml"],
-                        "text/xml": [".ofx", ".qfx", ".xml"],
-                        "application/octet-stream": [".ofx", ".qfx", ".qif", ".xml"],
-                      }}
+                      accept={
+                        source === "ynab" ? YNAB_ACCEPT : STATEMENT_ACCEPT
+                      }
                       maxFileCount={1}
                       // The API reads at most 5 MB (DEFAULT_CSV_UPLOAD_LIMITS); a larger file would upload and then fail.
                       maxSize={1024 * 1024 * 5}
@@ -430,6 +454,29 @@ const AccountTransactionImportModal: React.FC<
             </form>
           </Form>
 
+          {source === "ynab" ? (
+            <Button
+              type="button"
+              variant="link"
+              size="sm"
+              className="self-start px-0"
+              onClick={() => chooseSource("statement")}
+            >
+              <ArrowLeft className="size-4" aria-hidden />
+              {t("import-ynab-back")}
+            </Button>
+          ) : (
+            <Button
+              type="button"
+              variant="link"
+              size="sm"
+              className="self-start px-0"
+              onClick={() => chooseSource("ynab")}
+            >
+              {t("import-ynab-entry")}
+            </Button>
+          )}
+
           {isReading && !preview ? (
             <p className="text-muted-foreground text-sm" aria-live="polite">
               {t("import-statement-reading")}
@@ -437,11 +484,13 @@ const AccountTransactionImportModal: React.FC<
           ) : null}
           {fileFormat && !isReading ? (
             <p className="text-muted-foreground text-sm" aria-live="polite">
-              {fileFormat === "qif"
-                ? t("import-qif-ready")
-                : fileFormat === "camt053"
-                  ? t("import-camt-ready")
-                  : t("import-ofx-ready")}
+              {fileFormat === "ynab"
+                ? t("import-ynab-ready")
+                : fileFormat === "qif"
+                  ? t("import-qif-ready")
+                  : fileFormat === "camt053"
+                    ? t("import-camt-ready")
+                    : t("import-ofx-ready")}
             </p>
           ) : null}
           {readError ? (
@@ -463,5 +512,43 @@ const AccountTransactionImportModal: React.FC<
     </DrawerDialog>
   );
 };
+
+/** A bank statement: CSV, Excel, OFX/QFX, QIF or CAMT.053 XML. */
+const STATEMENT_ACCEPT = {
+  "text/csv": [".csv"],
+  "text/plain": [".txt", ".qif"],
+  "application/vnd.ms-excel": [".xls"],
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": [
+    ".xlsx",
+  ],
+  "application/x-ofx": [".ofx", ".qfx"],
+  "application/qif": [".qif"],
+  "application/x-qif": [".qif"],
+  "application/xml": [".ofx", ".qfx", ".xml"],
+  "text/xml": [".ofx", ".qfx", ".xml"],
+  "application/octet-stream": [".ofx", ".qfx", ".qif", ".xml"],
+};
+
+/** A YNAB register export is a CSV (some systems label it plain text). */
+const YNAB_ACCEPT = {
+  "text/csv": [".csv"],
+  "text/plain": [".csv"],
+  "application/vnd.ms-excel": [".csv"],
+};
+
+/** How to get the register out of YNAB, in three short steps. */
+function YnabExportGuide() {
+  const t = useTranslations();
+  return (
+    <ol
+      className="text-muted-foreground list-decimal space-y-1 pl-5 text-sm"
+      data-testid="ynab-export-guide"
+    >
+      <li>{t("import-ynab-guide-export")}</li>
+      <li>{t("import-ynab-guide-unzip")}</li>
+      <li>{t("import-ynab-guide-mapping")}</li>
+    </ol>
+  );
+}
 
 export default AccountTransactionImportModal;

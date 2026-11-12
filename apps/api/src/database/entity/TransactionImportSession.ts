@@ -26,7 +26,8 @@ export enum TransactionImportSessionStatus {
 
 /**
  * One staged import of a transaction file (`services/transaction-import/`): the uploaded file, how
- * to read it, which WonderMoney account each of its source accounts goes to, and its rows
+ * to read it, which WonderMoney account each of its source accounts goes to (and, for a file with
+ * categories, which category each of its categories goes to), and its rows
  * (`TransactionImportRow`). Nothing reaches `transaction` until it is committed. Seven days after a
  * commit the daily sweep deletes its rows and file and keeps only a summary: the file's name, the
  * status, the dates and the row counts (`rowCounts`, `detailsDeletedAt`).
@@ -52,6 +53,13 @@ export class TransactionImportSession extends Base {
 
   @ManyToOne({ cascade: [], entity: () => Appuser, fieldName: 'appuser_key' })
   appuserKey!: Rel<Appuser>;
+
+  /**
+   * Source category label → `categoryKey`, or null to leave its rows uncategorised, for files whose
+   * categories are mapped (`sourceCategories`). A label it does not name takes its suggestion.
+   */
+  @Property({ columnType: 'jsonb', nullable: true, type: 'json' })
+  categoryMapping?: Record<string, null | number>;
 
   /** Commit as soon as the file is read, with the default decisions (the one-step import). */
   @Property({ default: false })
@@ -111,6 +119,10 @@ export class TransactionImportSession extends Base {
   /** The file's accounts, for the mapping step; empty for a one-account file. */
   @Property({ columnType: 'jsonb', nullable: true, type: 'json' })
   sourceAccounts?: transactionImport.ImportSourceAccount[];
+
+  /** The file's categories, for the category-mapping step; unset for a format that maps none. */
+  @Property({ columnType: 'jsonb', nullable: true, type: 'json' })
+  sourceCategories?: transactionImport.ImportSourceCategory[];
 
   @Enum(() => TransactionImportSessionStatus)
   status: TransactionImportSessionStatus = TransactionImportSessionStatus.WAITING_FOR_UPLOAD;

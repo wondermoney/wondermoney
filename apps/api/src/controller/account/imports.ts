@@ -46,8 +46,10 @@ export async function getS3PresignedUrlForCsvUpload(req: Request, res: Response,
  * confirmed runs as a staged session that commits itself with the default decisions (new rows in,
  * duplicates out), so it resumes like any staged import. The file, not the account, decides the
  * format: an OFX/QFX file is read by the OFX adapter, a CAMT.053 export by the CAMT.053 adapter, a
- * QIF file by the QIF adapter, and the older WonderMoney CSV template (with `internalTransactionId`
- * and `transactionTypeKey` columns) by its own. Anything else is a statement.
+ * QIF file by the QIF adapter, a YNAB register export by the YNAB adapter, and the older WonderMoney
+ * CSV template (with `internalTransactionId` and `transactionTypeKey` columns) by its own. Anything
+ * else is a statement. A file that names one account imports into this one; one that names several
+ * is not committed, and waits for its accounts to be mapped.
  */
 export async function startAccountCsvImport(req: Request, res: Response, next: NextFunction) {
   const { appuserKey, tenant, tenantKey, user } = authedContext(req);
@@ -77,6 +79,7 @@ export async function startAccountCsvImport(req: Request, res: Response, next: N
     else if (transactionImport.isGenericCsvTemplate(bytes)) format = 'generic-csv';
     else if (transactionImport.isQifFile(bytes)) format = 'qif';
     else if (transactionImport.isCamt053File(bytes)) format = 'camt053';
+    else if (transactionImport.isYnabFile(bytes)) format = 'ynab';
   } catch {
     // The worker reports an unreadable file; the statement path below keeps its own behaviour.
   }

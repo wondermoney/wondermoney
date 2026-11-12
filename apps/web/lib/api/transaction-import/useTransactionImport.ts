@@ -36,11 +36,29 @@ export type ImportSessionStatus =
   | "succeeded"
   | "waiting_for_upload";
 
+/** The file formats a session reads. */
+export type ImportFormat =
+  "camt053" | "generic-csv" | "ofx" | "qif" | "statement" | "ynab";
+
+/** A category the file uses (YNAB), for the category-mapping step. */
+export interface ImportSourceCategory {
+  /** The group the source app files it under. */
+  group?: string;
+  label: string;
+  /** The category's own name, without its group. */
+  name: string;
+  rowCount: number;
+  /** The household category whose stored name matches, when exactly one does. */
+  suggestedCategoryId?: number;
+}
+
 export interface TransactionImportSession {
   accountId: number | null;
   accountMapping: Record<string, number>;
   canCommit: boolean;
   canRetry: boolean;
+  /** The person's choices: a file category's label to a category id, or null for uncategorised. */
+  categoryMapping: Record<string, number | null>;
   /** When the commit finished. */
   committedAt: string | null;
   correlationId: string | null;
@@ -53,15 +71,17 @@ export interface TransactionImportSession {
   expiresAt: string;
   /** The name the file had on the person's device; null on imports started before it was kept. */
   fileName: string | null;
-  format: "camt053" | "generic-csv" | "ofx" | "qif" | "statement";
+  format: ImportFormat;
   id: string;
   sourceAccounts: {
     currency?: string;
     label: string;
     rowCount: number;
-    /** The account whose number holds this statement's IBAN, to pre-fill the mapping. */
+    /** The account whose number holds this statement's IBAN, or whose name matches, to pre-fill the mapping. */
     suggestedAccountId?: number;
   }[];
+  /** The file's categories, for the category-mapping step; empty for a format that maps none. */
+  sourceCategories: ImportSourceCategory[];
   status: ImportSessionStatus;
   upload: { key: string; url: string } | null;
   warnings: { code: string; detail?: string; sourceRow?: number }[];
@@ -162,8 +182,8 @@ export interface CreateTransactionImportRequest {
   accountId: number | string;
   /** The name the file had on the person's device, kept for the import's history. */
   fileName?: string;
-  /** The format the file is read in; `statement` unless the file is OFX/QFX, QIF or CAMT.053. */
-  format?: "camt053" | "ofx" | "qif" | "statement";
+  /** The format the file is read in; `statement` unless the file is OFX/QFX, QIF, CAMT.053 or a YNAB export. */
+  format?: "camt053" | "ofx" | "qif" | "statement" | "ynab";
   /** The file, already uploaded for this account. */
   key: string;
   /** The columns confirmed in the preview; absent when the bank's own parser reads the file. */
@@ -217,13 +237,32 @@ export function useDecideTransactionImportRows() {
   );
 }
 
+export interface TransactionImportAccountMapping {
+  /** The file's account labels to the person's account ids. */
+  mapping: Record<string, number>;
+  /** The file's account labels to import into a new manual account each, named after it. */
+  create?: string[];
+}
+
 export function useMapTransactionImportAccounts() {
-  return useSessionMutation((id: string, mapping: Record<string, number>) =>
-    api.patch(`${base}/${id}/account-mapping`, { mapping }),
+  return useSessionMutation(
+    (id: string, { create, mapping }: TransactionImportAccountMapping) =>
+      api.patch(`${base}/${id}/account-mapping`, {
+        mapping,
+        ...(create && create.length > 0 ? { create } : {}),
+      }),
   );
 }
 
-/** Read the file again with corrected reader options: a QIF file's date order. */
+/** The file's category labels to category ids, or null to leave their rows uncategorised. */
+export function useMapTransactionImportCategories() {
+  return useSessionMutation(
+    (id: string, mapping: Record<string, number | null>) =>
+      api.patch(`${base}/${id}/category-mapping`, { mapping }),
+  );
+}
+
+/** Read the file again with corrected reader options: a QIF or YNAB file's date order. */
 export function useParseTransactionImport() {
   return useSessionMutation(
     (

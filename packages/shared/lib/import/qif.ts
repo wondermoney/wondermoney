@@ -1,3 +1,4 @@
+import { type DateOrder, parseOrderedDate, resolveDateOrder } from './date-order';
 import type { ImportAdapter, ImportParseResult, ImportSourceAccount, ImportWarning, NormalizedImportRow, ParsedImportRow } from './types';
 
 /**
@@ -28,8 +29,8 @@ import type { ImportAdapter, ImportParseResult, ImportSourceAccount, ImportWarni
  * more than one asks for a mapping.
  */
 
-/** How a QIF date whose day and month are both 12 or less reads. */
-export type QifDateOrder = 'day-first' | 'month-first';
+/** How a QIF date whose day and month are both 12 or less reads (`date-order.ts`). */
+export type QifDateOrder = DateOrder;
 
 export interface QifAdapterOptions {
   /** How an ambiguous date reads. Absent, the file's own dates decide, and the reader asks. */
@@ -270,13 +271,9 @@ function scan(text: string): { groups: QifGroup[]; sawHeader: boolean; warnings:
 // ---------------------------------------------------------------------------------------------
 
 function buildResult(groups: QifGroup[], warnings: ImportWarning[], options: QifAdapterOptions): ImportParseResult {
-  const kinds = new Set<QifDateKind>();
-  for (const group of groups) for (const record of group.records) if (record.date !== undefined) kinds.add(classifyQifDate(record.date));
-  const { ambiguous, conflict, order } = chooseDateOrder(kinds, options.dateOrder);
-  if (options.dateOrder === undefined) {
-    if (conflict) warnings.push({ code: 'date_order_conflict', detail: order });
-    else if (ambiguous) warnings.push({ code: 'date_order_ambiguous', detail: order });
-  }
+  const dates = groups.flatMap((group) => group.records.flatMap((record) => (record.date === undefined ? [] : [record.date])));
+  const { order, warning } = resolveDateOrder(dates, options.dateOrder);
+  if (warning) warnings.push(warning);
 
   const multiple = groups.length > 1;
   const rows: ParsedImportRow[] = [];
@@ -306,7 +303,7 @@ function rowFor(record: QifRecord, context: RowContext): ParsedImportRow {
     payee: record.payee ?? '',
     splits: record.splits.map((split) => ({ amount: split.amount ?? '', category: split.category ?? '', memo: split.memo ?? '' })),
   };
-  const date = record.date === undefined ? undefined : parseQifDate(record.date, context.order);
+  const date = record.date === undefined ? undefined : parseOrderedDate(record.date, context.order);
   const amount = parseQifAmount(record.amount ?? record.amountAlt ?? '');
   if (!date) return { error: 'Unreadable date', raw, sourceRow: record.line };
   if (amount === undefined) return { error: 'Unreadable amount', raw, sourceRow: record.line };
@@ -372,76 +369,6 @@ function clean(value: string | undefined, maxLength: number): string | undefined
 
 function truncate(value: string, maxLength: number): string {
   return value.length > maxLength ? value.slice(0, maxLength) : value;
-}
-
-// ---------------------------------------------------------------------------------------------
-// Dates
-// ---------------------------------------------------------------------------------------------
-
-type QifDateKind = 'ambiguous' | 'day-first' | 'month-first' | 'unreadable' | 'year-first';
-
-type QifDateShape = { day: number; kind: 'year-first'; month: number; year: number } | { first: number; kind: 'two-part'; second: number; year: number };
-
-/** The three numbers of a date, with the year resolved; `undefined` when it is not a date at all. */
-function shapeOf(value: string): QifDateShape | undefined {
-  const parts = value
-    .trim()
-    .split(/['\-/.]/)
-    .map((part) => part.trim());
-  if (parts.length !== 3) return undefined;
-  const [first, second, third] = parts;
-  if (!/^\d{1,4}$/.test(first ?? '') || !/^\d{1,4}$/.test(second ?? '') || !/^\d{1,4}$/.test(third ?? '')) return undefined;
-  const a = Number(first);
-  const b = Number(second);
-  const c = Number(third);
-  // A four-digit first part is a year: the file is ISO-ordered (year, month, day).
-  if ((first ?? '').length === 4) return { day: c, kind: 'year-first', month: b, year: a };
-  const year = expandYear(c, (third ?? '').length);
-  return year === undefined ? undefined : { first: a, kind: 'two-part', second: b, year };
-}
-
-/** Quicken's two-digit years: 00-49 are 2000-2049, 50-99 are 1950-1999. */
-function expandYear(value: number, digits: number): number | undefined {
-  if (digits >= 3) return value;
-  if (value > 99) return undefined;
-  return value < 50 ? 2000 + value : 1900 + value;
-}
-
-function classifyQifDate(value: string): QifDateKind {
-  const shape = shapeOf(value);
-  if (!shape) return 'unreadable';
-  if (shape.kind === 'year-first') return toDate(shape.year, shape.month, shape.day) ? 'year-first' : 'unreadable';
-  if (shape.first > 12 && shape.second > 12) return 'unreadable';
-  if (shape.first > 12) return 'day-first';
-  if (shape.second > 12) return 'month-first';
-  return 'ambiguous';
-}
-
-function parseQifDate(value: string, order: QifDateOrder): Date | undefined {
-  const shape = shapeOf(value);
-  if (!shape) return undefined;
-  if (shape.kind === 'year-first') return toDate(shape.year, shape.month, shape.day);
-  const dayFirst = order === 'day-first';
-  return toDate(shape.year, dayFirst ? shape.second : shape.first, dayFirst ? shape.first : shape.second);
-}
-
-function toDate(year: number, month: number, day: number): Date | undefined {
-  if (!Number.isInteger(year) || month < 1 || month > 12 || day < 1 || day > 31) return undefined;
-  const date = new Date(Date.UTC(year, month - 1, day));
-  return date.getUTCFullYear() === year && date.getUTCMonth() === month - 1 && date.getUTCDate() === day ? date : undefined;
-}
-
-/**
- * The order the file reads in. A date with a part above 12 settles it; when every date is
- * ambiguous the file cannot say, and `ambiguous` asks the person (reading day-first meanwhile).
- */
-function chooseDateOrder(kinds: ReadonlySet<QifDateKind>, option: QifDateOrder | undefined): { ambiguous: boolean; conflict: boolean; order: QifDateOrder } {
-  if (option !== undefined) return { ambiguous: false, conflict: false, order: option };
-  const dayFirst = kinds.has('day-first');
-  const monthFirst = kinds.has('month-first');
-  if (dayFirst && monthFirst) return { ambiguous: false, conflict: true, order: 'day-first' };
-  if (monthFirst) return { ambiguous: false, conflict: false, order: 'month-first' };
-  return { ambiguous: !dayFirst && kinds.has('ambiguous'), conflict: false, order: 'day-first' };
 }
 
 // ---------------------------------------------------------------------------------------------

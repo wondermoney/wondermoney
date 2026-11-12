@@ -57,8 +57,9 @@ import { TransactionAuditService } from './transaction-audit.service';
  *   its direction, DEPOSIT for money in and PAYMENT for money out, whose type no user changed. Pairing
  *   re-types it.
  * - **Anchor**: a row a person typed as a transfer, unpaired: a manual row typed TRANSFER_IN /
- *   TRANSFER_OUT, or a synced row a user re-typed so. Pairing links it but never changes its type.
- * - A pair needs at least one re-typeable row. Two anchors are already both transfers.
+ *   TRANSFER_OUT (a file that states its transfers, such as both sides of a YNAB or QIF transfer,
+ *   imports them so), or a synced row a user re-typed so. Pairing links it but never changes its
+ *   type. Two anchors pair too: both are already transfers, so the pair only links them.
  * - Never: a manual DEPOSIT or PAYMENT (the person said what it is), CARD_PAYMENT and every other
  *   type, and any row a user re-typed to something other than a transfer.
  *
@@ -441,7 +442,6 @@ function matchPairs(candidates: TransferRow[], options: TransferPlanOptions): [T
   for (const out of outgoing) {
     for (const into of incoming) {
       if (into.accountKey === out.accountKey) continue;
-      if (!isRetypeable(out) && !isRetypeable(into)) continue;
       const distance = Math.abs((into.day ?? 0) - (out.day ?? 0));
       if (distance > TRANSFER_MATCH_WINDOW_DAYS) continue;
       const exact = into.currencyKey === out.currencyKey;

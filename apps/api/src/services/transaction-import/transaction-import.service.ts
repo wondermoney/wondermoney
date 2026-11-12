@@ -8,7 +8,9 @@ import { transactionImport } from '@wondermoney/shared';
 import { enqueueTransactionImportJob, type TransactionImportJobMode } from '@app/jobs/transaction-import.queue';
 import { Account } from '@entity/Account';
 import { Appuser } from '@entity/Appuser';
+import { AppuserTransactionCategory, Source as CategorySource } from '@entity/AppuserTransactionCategory';
 import { BackgroundOperation, BackgroundOperationStatus } from '@entity/BackgroundOperation';
+import { Category } from '@entity/Category';
 import { Currency } from '@entity/Currency';
 import { Tenant } from '@entity/Tenant';
 import { Transaction } from '@entity/Transaction';
@@ -20,13 +22,17 @@ import { resolveAccountCsvImportFormat } from '@service/account/account-csv-impo
 import type { StatementMapping } from '@service/account/account-statement-mapping.schema';
 import { buildStatementTransaction, followUpStatementImport, settleStatementImport, type StatementWriteContext, statementWriteContext } from '@service/account/account-statement-transaction';
 import { getLimitedCsvObjectBuffer, validateCsvObjectKey } from '@service/account/csv-upload-boundary.service';
+import { convertWithStatus, rateScope } from '@service/currency/exchange-rate';
 import backgroundOperationService from '@service/operations/background-operation.service';
 import type { Enqueue } from '@service/queue/enqueue';
 import s3Service from '@service/storage/s3';
+import { markUserCategorized } from '@service/transaction/categorization-confidence';
+import { findAssignableCategory } from '@service/transaction/household-category';
 import { TransactionAuditService } from '@service/transaction/transaction-audit.service';
 import { findImportedTransactionIds } from '@service/transaction/transaction-dedup.service';
 import { BadRequestError, ConflictError, NotFoundError } from '@utils/errors';
 import logger from '@utils/logger';
+import { getFullName } from '@utils/misc';
 
 import { importFileName } from './import-file-name';
 import { statementImportAdapter, StatementUnreadableError, toStatementLine } from './statement-import-adapter';
@@ -44,11 +50,15 @@ import { statementImportAdapter, StatementUnreadableError, toStatementLine } fro
  *            `invalid`. New rows default to import, duplicates to skip. A file with several
  *            accounts waits in `needs_mapping` until each has an account.
  *   review   the person pages through the rows by status and includes or skips them, by row or
- *            in bulk (`decide`), and maps the file's accounts (`setAccountMapping`).
+ *            in bulk (`decide`), and maps the file's accounts (`setAccountMapping`, which can also
+ *            create a manual account for one) and, for a file with categories (YNAB), its
+ *            categories (`setCategoryMapping`; a category left out takes the one its name
+ *            matched, or none).
  *   commit   a worker job writes the rows decided `import` in chunks of {@link CHUNK_SIZE}. Each
  *            chunk is one database transaction, under a lock on the session, that writes its
  *            transactions and flips its rows to `imported`, so a job that stops part way resumes
- *            where it stopped and never writes a row twice. After the last chunk it settles the
+ *            where it stopped and never writes a row twice. A row whose file category maps to a
+ *            category is written with it, as the person's choice. After the last chunk it settles the
  *            accounts once (balance chain, rules, learned categories) and sets the outcome; then
  *            transfer matching, recurring detection and enrichment follow.
  *
@@ -104,8 +114,8 @@ export interface TransactionImportDeps {
 
 /** The reader options a session keeps and hands to its adapter, beyond the account's currency. */
 export interface TransactionImportOptions {
-  /** How a QIF date whose day and month are both 12 or less reads. */
-  dateOrder?: transactionImport.QifDateOrder;
+  /** How a QIF or YNAB date whose day and month are both 12 or less reads. */
+  dateOrder?: transactionImport.DateOrder;
   mapping?: StatementMapping;
 }
 
@@ -139,6 +149,8 @@ export interface TransactionImportSessionView {
   canCommit: boolean;
   /** Whether a parse or commit whose job stopped can be started again (it resumes). */
   canRetry: boolean;
+  /** Source category label → category id, or null for uncategorised: the person's choices so far. */
+  categoryMapping: Record<string, null | number>;
   /** When the commit finished; null before it has (and on sessions committed before it was recorded). */
   committedAt: null | string;
   correlationId: null | string;
@@ -155,6 +167,8 @@ export interface TransactionImportSessionView {
   format: transactionImport.ImportFormat;
   id: string;
   sourceAccounts: transactionImport.ImportSourceAccount[];
+  /** The file's categories, for the category-mapping step; empty for a format that maps none. */
+  sourceCategories: transactionImport.ImportSourceCategory[];
   status: transactionImport.ImportSessionStatus;
   /** Where to PUT the file, while it is awaited. */
   upload: null | { key: string; url: string };
@@ -220,7 +234,7 @@ const defaultStorage: TransactionImportStorage = {
 
 export class TransactionImportService {
   private get adapters(): Partial<Record<transactionImport.ImportFormat, transactionImport.ImportAdapter<never>>> {
-    return this.deps.adapters ?? { camt053: transactionImport.camt053ImportAdapter, 'generic-csv': transactionImport.genericCsvImportAdapter, ofx: transactionImport.ofxImportAdapter, qif: transactionImport.qifImportAdapter, statement: statementImportAdapter };
+    return this.deps.adapters ?? { camt053: transactionImport.camt053ImportAdapter, 'generic-csv': transactionImport.genericCsvImportAdapter, ofx: transactionImport.ofxImportAdapter, qif: transactionImport.qifImportAdapter, statement: statementImportAdapter, ynab: transactionImport.ynabImportAdapter };
   }
 
   private get now(): Date {
@@ -291,15 +305,23 @@ export class TransactionImportService {
     return this.sessionView(session);
   }
 
-  /** Choose the account each of the file's accounts imports into; duplicates are then checked on it. */
-  async setAccountMapping(scope: TransactionImportScope, id: string, mapping: Record<string, number>): Promise<TransactionImportSessionView> {
+  /**
+   * Choose the account each of the file's accounts imports into; duplicates are then checked on it.
+   * `create` lists accounts of the file to import into a new manual account each, named after
+   * it, in the currency of the account the import was started on, opening at the balance the file
+   * ends on for it.
+   */
+  async setAccountMapping(scope: TransactionImportScope, id: string, mapping: Record<string, number>, options: { create?: string[] } = {}): Promise<TransactionImportSessionView> {
     const session = await this.find(scope, id);
     this.assertReviewable(session);
     const labels = new Set((session.sourceAccounts ?? []).map((source) => source.label));
-    const unknown = Object.keys(mapping).filter((label) => !labels.has(label));
+    const create = [...new Set(options.create ?? [])];
+    const unknown = [...Object.keys(mapping), ...create].filter((label) => !labels.has(label));
     if (unknown.length > 0) throw new BadRequestError('The file has no such account');
+    if (create.some((label) => mapping[label] !== undefined)) throw new BadRequestError('Choose an account or a new one, not both');
     for (const accountId of new Set(Object.values(mapping))) await this.writableAccount(scope, accountId);
-    session.accountMapping = { ...(session.accountMapping ?? {}), ...mapping };
+    const created = create.length > 0 ? await this.createManualAccounts(scope, session, create) : {};
+    session.accountMapping = { ...(session.accountMapping ?? {}), ...mapping, ...created };
     const rows = await this.em.find(TransactionImportRow, { status: { $in: WRITABLE_ROW_STATUSES }, transactionImportSessionKey: bySession(session.transactionImportSessionKey) }, { orderBy: { sourceRow: 'asc' } });
     for (const row of rows) {
       const label = row.normalized?.sourceAccountLabel;
@@ -307,6 +329,23 @@ export class TransactionImportService {
     }
     await this.classifyStored(rows);
     session.status = transactionImport.isMappingComplete(session.sourceAccounts ?? [], session.accountMapping) ? SESSION_STATUS.READY : SESSION_STATUS.NEEDS_MAPPING;
+    await this.em.flush();
+    return this.sessionView(session);
+  }
+
+  /**
+   * Choose the category each of the file's categories imports as, or null to leave its rows
+   * uncategorised. A category the mapping does not name keeps its suggestion.
+   */
+  async setCategoryMapping(scope: TransactionImportScope, id: string, mapping: Record<string, null | number>): Promise<TransactionImportSessionView> {
+    const session = await this.find(scope, id);
+    this.assertReviewable(session);
+    const labels = new Set((session.sourceCategories ?? []).map((source) => source.label));
+    if (Object.keys(mapping).some((label) => !labels.has(label))) throw new BadRequestError('The file has no such category');
+    for (const categoryKey of new Set(Object.values(mapping))) {
+      if (categoryKey !== null && !(await findAssignableCategory(this.em, scope.tenantKey, categoryKey))) throw new NotFoundError('Category not found');
+    }
+    session.categoryMapping = { ...(session.categoryMapping ?? {}), ...mapping };
     await this.em.flush();
     return this.sessionView(session);
   }
@@ -408,6 +447,7 @@ export class TransactionImportService {
       else if (session.format === 'statement' && transactionImport.isGenericCsvTemplate(bytes)) session.format = 'generic-csv';
       else if (session.format === 'statement' && transactionImport.isQifFile(bytes)) session.format = 'qif';
       else if (session.format === 'statement' && transactionImport.isCamt053File(bytes)) session.format = 'camt053';
+      else if (session.format === 'statement' && transactionImport.isYnabFile(bytes)) session.format = 'ynab';
       // A `.xml` upload can be either XML format; the content decides.
       else if (session.format === 'camt053' && transactionImport.isOfxFile(bytes)) session.format = 'ofx';
       const adapter = this.adapters[session.format];
@@ -416,7 +456,7 @@ export class TransactionImportService {
       result = await (adapter as transactionImport.ImportAdapter<typeof options>).parse(bytes, options);
     } catch (error) {
       session.status = SESSION_STATUS.FAILED;
-      session.errorCode = error instanceof StatementUnreadableError || error instanceof transactionImport.QifUnreadableError || error instanceof transactionImport.Camt053UnreadableError ? error.code : 'unreadable';
+      session.errorCode = error instanceof StatementUnreadableError || error instanceof transactionImport.QifUnreadableError || error instanceof transactionImport.Camt053UnreadableError || error instanceof transactionImport.YnabUnreadableError ? error.code : 'unreadable';
       await this.em.flush();
       return;
     }
@@ -424,7 +464,13 @@ export class TransactionImportService {
     // Read again from the start: whatever an earlier read stored goes.
     await this.em.nativeDelete(TransactionImportRow, { transactionImportSessionKey: bySession(session.transactionImportSessionKey) });
     await this.suggestSourceAccounts(keyOf(session.appuserKey, 'appuserKey'), keyOf(session.tenantKey, 'tenantKey'), result.sourceAccounts);
+    const sourceCategories = result.sourceCategories ?? [];
+    await this.suggestSourceCategories(keyOf(session.tenantKey, 'tenantKey'), sourceCategories);
     const mapping = Object.fromEntries(Object.entries(session.accountMapping ?? {}).filter(([label]) => result.sourceAccounts.some((source) => source.label === label)));
+    // The one-step import has no mapping step: a file that names only one account (a YNAB export
+    // of one account) goes to the account it was started on, as a file that names none does.
+    const [onlySource, ...others] = result.sourceAccounts;
+    if (session.autoCommit && onlySource && others.length === 0) mapping[onlySource.label] ??= account.accountKey;
     const targetOf = (row: transactionImport.ParsedImportRow): null | number => {
       if (result.sourceAccounts.length === 0) return account.accountKey;
       const label = row.normalized?.sourceAccountLabel;
@@ -453,6 +499,8 @@ export class TransactionImportService {
     }
     session.accountMapping = mapping;
     session.sourceAccounts = result.sourceAccounts;
+    session.sourceCategories = result.sourceCategories === undefined ? undefined : sourceCategories;
+    session.categoryMapping = Object.fromEntries(Object.entries(session.categoryMapping ?? {}).filter(([label]) => sourceCategories.some((source) => source.label === label)));
     session.warnings = result.warnings;
     session.status = transactionImport.isMappingComplete(result.sourceAccounts, mapping) ? SESSION_STATUS.READY : SESSION_STATUS.NEEDS_MAPPING;
     await this.em.flush();
@@ -476,27 +524,76 @@ export class TransactionImportService {
   /**
    * The account the file's own identifier points at, for the mapping step. A CAMT.053 statement is
    * labelled by its IBAN, so an account of the person's whose `accountNumber` holds that IBAN is
-   * suggested; the person still confirms the mapping. The adapter is pure, so the session matches
-   * the labels against its accounts here.
+   * suggested; a file that labels its accounts by name (YNAB, QIF) suggests the one account of
+   * theirs with that name, case and accents aside. The person still confirms the mapping. The
+   * adapter is pure, so the session matches the labels against its accounts here.
    */
   private async suggestSourceAccounts(appuserId: null | number, tenantId: null | number, sourceAccounts: transactionImport.ImportSourceAccount[]): Promise<void> {
-    if (appuserId === null || tenantId === null) return;
-    const wanted = new Set(sourceAccounts.flatMap((source) => {
-      const iban = transactionImport.normalizeIban(source.label);
-      return iban === undefined ? [] : [iban];
-    }));
-    if (wanted.size === 0) return;
-    const accounts = await this.em.find(Account, { accountOwnerAppuserKey: { appuserKey: appuserId }, deletedAt: null, tenantKey: { tenantKey: tenantId } }, { fields: ['accountKey', 'accountNumber'] });
+    if (appuserId === null || tenantId === null || sourceAccounts.length === 0) return;
+    const accounts = await this.em.find(Account, { accountOwnerAppuserKey: { appuserKey: appuserId }, deletedAt: null, tenantKey: { tenantKey: tenantId } }, { fields: ['accountKey', 'accountName', 'accountNumber'] });
     const byIban = new Map<string, number>();
     for (const account of accounts) {
       const iban = transactionImport.normalizeIban(account.accountNumber);
-      if (iban !== undefined && wanted.has(iban) && !byIban.has(iban)) byIban.set(iban, account.accountKey);
+      if (iban !== undefined && !byIban.has(iban)) byIban.set(iban, account.accountKey);
     }
+    const byName = accounts.map((account) => ({ id: account.accountKey, names: account.accountName ? [account.accountName] : [] }));
     for (const source of sourceAccounts) {
       const iban = transactionImport.normalizeIban(source.label);
-      const accountKey = iban === undefined ? undefined : byIban.get(iban);
+      const accountKey = iban === undefined ? transactionImport.matchByName(source.label, byName) : byIban.get(iban);
       if (accountKey !== undefined) source.suggestedAccountId = accountKey;
     }
+  }
+
+  /**
+   * The household category each of the file's categories names, for the category-mapping step: its
+   * own name (or full label) read as a category's name, case and accents aside, when exactly one
+   * category matches. A system category is matched by its stored name (`RENT_MORTGAGE` reads as
+   * "rent mortgage"); the web review also matches the names the person's language shows.
+   */
+  private async suggestSourceCategories(tenantId: null | number, sourceCategories: transactionImport.ImportSourceCategory[]): Promise<void> {
+    if (tenantId === null || sourceCategories.length === 0) return;
+    const categories = await this.em.find(Category, { $or: [{ isSystemCategory: false, tenantKey: { tenantKey: tenantId } }, { isSystemCategory: true, tenantKey: null }], deletedAt: null }, { fields: ['categoryKey', 'name'], filters: false });
+    const candidates = categories.map((category) => ({ id: category.categoryKey, names: [category.name] }));
+    for (const source of sourceCategories) {
+      const categoryKey = transactionImport.suggestCategory(source, candidates);
+      if (categoryKey !== undefined) source.suggestedCategoryId = categoryKey;
+    }
+  }
+
+  /** A manual account of the person's for each label, named after it, opening at the balance the file ends on for it. */
+  private async createManualAccounts(scope: TransactionImportScope, session: TransactionImportSession, labels: string[]): Promise<Record<string, number>> {
+    const started = await this.em.findOneOrFail(Account, { accountKey: keyOf(session.accountKey, 'accountKey')! }, { populate: ['currencyKey'] });
+    const owner = await this.em.findOneOrFail(Appuser, { appuserKey: scope.appuserKey }, { populate: ['currencyKey'] });
+    const rows = await this.em.find(TransactionImportRow, { normalized: { $ne: null }, transactionImportSessionKey: bySession(session.transactionImportSessionKey) }, { fields: ['normalized'] });
+    const balances = new Map<string, number>();
+    for (const row of rows) {
+      const label = row.normalized?.sourceAccountLabel;
+      const amount = row.normalized?.amount;
+      if (label !== undefined && amount !== undefined && labels.includes(label)) balances.set(label, (balances.get(label) ?? 0) + amount);
+    }
+    const now = this.now;
+    const created: Record<string, number> = {};
+    for (const label of labels) {
+      const balance = Math.round((balances.get(label) ?? 0) * 100) / 100;
+      const account = new Account();
+      account.accountName = label.slice(0, 255);
+      account.accountOwnerAppuserKey = owner;
+      account.balance = balance;
+      account.currencyKey = started.currencyKey;
+      account.holderName = getFullName(owner.firstName, owner.lastName);
+      account.tenantKey = tenantRef(this.em, scope.tenantKey);
+      // Its rows are not written yet: the commit back-derives them from this balance, so the
+      // account opens at zero before the file's first row, as the file's own account did.
+      account.openingBalance = 0;
+      account.openingBalanceDate = now;
+      const converted = await convertWithStatus(this.em, balance, started.currencyKey, owner.currencyKey, now, rateScope(scope.tenantKey));
+      account.appuserCurrencyBalance = converted.amount;
+      account.fxStatus = converted.fxStatus;
+      this.em.persist(account);
+      await this.em.flush();
+      created[label] = account.accountKey;
+    }
+    return created;
   }
 
   /**
@@ -584,7 +681,7 @@ export class TransactionImportService {
       if (locked?.status !== SESSION_STATUS.IMPORTING || locked.correlationId !== correlationId) return 'taken';
       const rows = await tx.find(TransactionImportRow, { decision: TransactionImportRowDecision.IMPORT, status: { $in: WRITABLE_ROW_STATUSES }, transactionImportSessionKey: bySession(sessionKey) }, { limit: chunkSize, orderBy: { sourceRow: 'asc' } });
       if (rows.length === 0) return 'done';
-      await this.writeRows(tx, rows);
+      await this.writeRows(tx, rows, await this.categoriesFor(tx, locked));
       await tx.flush();
       return 'more';
     });
@@ -597,7 +694,7 @@ export class TransactionImportService {
         const locked = await tx.findOne(TransactionImportSession, { transactionImportSessionKey: sessionKey }, { filters: false, lockMode: LockMode.PESSIMISTIC_WRITE });
         if (locked?.status !== SESSION_STATUS.IMPORTING || locked.correlationId !== correlationId) return 'taken' as const;
         const row = await tx.findOne(TransactionImportRow, { status: { $in: WRITABLE_ROW_STATUSES }, transactionImportRowKey });
-        if (row) await this.writeRows(tx, [row]);
+        if (row) await this.writeRows(tx, [row], await this.categoriesFor(tx, locked));
         return 'ok' as const;
       }).catch(async (error: unknown) => {
         if (!(error instanceof DriverException)) throw error;
@@ -615,7 +712,7 @@ export class TransactionImportService {
    * in between) is skipped as the duplicate it now is; one the person chose to import although it
    * repeats a stored id keeps that id as its fingerprint only.
    */
-  private async writeRows(tx: EntityManager, rows: TransactionImportRow[]): Promise<void> {
+  private async writeRows(tx: EntityManager, rows: TransactionImportRow[], categories: ReadonlyMap<string, Category> = new Map()): Promise<void> {
     const contexts = new Map<number, StatementWriteContext>();
     const byAccount = new Map<number, TransactionImportRow[]>();
     for (const row of rows) {
@@ -648,6 +745,8 @@ export class TransactionImportService {
           const trustedId = row.status === ROW_STATUS.NEW && normalized.externalIdTrusted !== false;
           const transaction = await buildStatementTransaction(tx, context, toStatementLine(normalized, row.sourceRow, context.account.currencyKey.code), { trustedId, trustedType: normalized.typeIsUserSet === true });
           tx.persist(transaction);
+          const category = normalized.categoryLabel === undefined ? undefined : categories.get(normalized.categoryLabel);
+          if (category) categorizeAsChosen(tx, transaction, category);
           row.importedTransactionKey = transaction;
           row.status = ROW_STATUS.IMPORTED;
           row.error = null;
@@ -694,8 +793,32 @@ export class TransactionImportService {
 
   // --- internals ---
 
+  /**
+   * The category each of the session's file categories imports as: the person's choice, else the
+   * suggestion, and only while it is still one the household may assign. A label mapped to null,
+   * or with neither, imports uncategorised.
+   */
   private assertReviewable(session: TransactionImportSession): void {
     if (this.isExpired(session) || (session.status !== SESSION_STATUS.READY && session.status !== SESSION_STATUS.NEEDS_MAPPING)) throw new ConflictError('This import is not waiting for review');
+  }
+
+  private async categoriesFor(tx: EntityManager, session: TransactionImportSession): Promise<Map<string, Category>> {
+    const chosen = new Map<string, number>();
+    for (const source of session.sourceCategories ?? []) {
+      const mapped = session.categoryMapping?.[source.label];
+      const categoryKey = mapped === undefined ? source.suggestedCategoryId : mapped;
+      if (categoryKey !== undefined && categoryKey !== null) chosen.set(source.label, categoryKey);
+    }
+    if (chosen.size === 0) return new Map();
+    const tenantKey = keyOf(session.tenantKey, 'tenantKey');
+    const found = await tx.find(Category, { $or: [{ isSystemCategory: false, tenantKey: { tenantKey: tenantKey ?? 0 } }, { isSystemCategory: true, tenantKey: null }], categoryKey: { $in: [...new Set(chosen.values())] }, deletedAt: null }, { filters: false });
+    const byKey = new Map(found.map((category) => [category.categoryKey, category]));
+    const result = new Map<string, Category>();
+    for (const [label, categoryKey] of chosen) {
+      const category = byKey.get(categoryKey);
+      if (category) result.set(label, category);
+    }
+    return result;
   }
 
   /**
@@ -780,6 +903,7 @@ export class TransactionImportService {
       accountMapping: session.accountMapping ?? {},
       canCommit: status === 'ready' && mappingComplete,
       canRetry,
+      categoryMapping: session.categoryMapping ?? {},
       committedAt: session.committedAt?.toISOString() ?? null,
       correlationId: session.correlationId ?? null,
       counts: statuses,
@@ -792,6 +916,7 @@ export class TransactionImportService {
       format: session.format,
       id: session.publicId,
       sourceAccounts: session.sourceAccounts ?? [],
+      sourceCategories: session.sourceCategories ?? [],
       status,
       upload: null,
       warnings: session.warnings ?? [],
@@ -854,4 +979,20 @@ function rowView(row: TransactionImportRow): TransactionImportRowView {
     status: row.status,
     targetAccountId: keyOf(row.targetAccountKey, 'accountKey'),
   };
+}
+
+/**
+ * A row the file put in a category the person mapped: the category is theirs, as if they had set
+ * it (high confidence, so neither learned categorization nor enrichment replaces it; a household
+ * rule still may, as for any new row).
+ */
+function categorizeAsChosen(tx: EntityManager, transaction: Transaction, category: Category): void {
+  if (!transaction.appuserKey) return;
+  const assignment = new AppuserTransactionCategory();
+  assignment.appuserKey = transaction.appuserKey;
+  assignment.categoryKey = category;
+  assignment.source = CategorySource.USER;
+  assignment.transactionKey = transaction;
+  tx.persist(assignment);
+  markUserCategorized(transaction);
 }

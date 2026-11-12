@@ -208,6 +208,28 @@ describe('transfer matching', () => {
     expect(await stored(out, manualIn)).toEqual([{ counterpart: manualIn.transactionKey, type: 'TRANSFER_OUT' }, { counterpart: out.transactionKey, type: 'TRANSFER_IN' }]);
   });
 
+  it('links two transfers a person typed on two accounts, the two sides of one file import, without re-typing either', async () => {
+    const ctx = await household();
+    const manualOut = await row(ctx, { account: ctx.current, amount: -400, date: '2026-07-03', manual: true, type: 'TRANSFER_OUT' });
+    const manualIn = await row(ctx, { account: ctx.savings, amount: 400, date: '2026-07-03', manual: true, type: 'TRANSFER_IN' });
+
+    await reconcile(ctx.household.tenant.tenantKey);
+
+    expect(await stored(manualOut, manualIn)).toEqual([{ counterpart: manualIn.transactionKey, type: 'TRANSFER_OUT' }, { counterpart: manualOut.transactionKey, type: 'TRANSFER_IN' }]);
+  });
+
+  it('prefers no pair to a guess: two typed transfers out equally close to one in stay unlinked', async () => {
+    const ctx = await household();
+    const card = await addAccount(ctx.em, ctx.household, { name: 'Card' });
+    const first = await row(ctx, { account: ctx.current, amount: -400, date: '2026-07-03', manual: true, type: 'TRANSFER_OUT' });
+    const second = await row(ctx, { account: card, amount: -400, date: '2026-07-03', manual: true, type: 'TRANSFER_OUT' });
+    const into = await row(ctx, { account: ctx.savings, amount: 400, date: '2026-07-03', manual: true, type: 'TRANSFER_IN' });
+
+    await reconcile(ctx.household.tenant.tenantKey);
+
+    expect((await stored(first, second, into)).map((r) => r.counterpart)).toEqual([null, null, null]);
+  });
+
   it('never re-types a manual deposit or payment: the user chose that type', async () => {
     const ctx = await household();
     const out = await row(ctx, { account: ctx.current, amount: -250, date: '2026-07-03' });

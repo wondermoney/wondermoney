@@ -207,7 +207,13 @@ test("a file from any bank is read as soon as it is picked, and is staged for re
 
   await waitFor(() => assert.equal(mocks.createImport.mock.calls.length, 1));
   assert.deepEqual(mocks.createImport.mock.calls[0], [
-    { accountId: "3", fileName: "extrato.csv", format: "statement", key: "account-3-upload.csv", mapping: MAPPING },
+    {
+      accountId: "3",
+      fileName: "extrato.csv",
+      format: "statement",
+      key: "account-3-upload.csv",
+      mapping: MAPPING,
+    },
   ]);
   // Nothing is imported yet: the dialog moves on to the review.
   assert.equal((await screen.findByTestId("review")).textContent, "import-1");
@@ -229,7 +235,13 @@ test("a supported bank's own export is staged without columns", async () => {
 
   await waitFor(() => assert.equal(mocks.createImport.mock.calls.length, 1));
   assert.deepEqual(mocks.createImport.mock.calls[0], [
-    { accountId: "3", fileName: "statement.xlsx", format: "statement", key: "account-3-upload.csv", mapping: undefined },
+    {
+      accountId: "3",
+      fileName: "statement.xlsx",
+      format: "statement",
+      key: "account-3-upload.csv",
+      mapping: undefined,
+    },
   ]);
 });
 
@@ -244,8 +256,7 @@ test("an OFX/QFX file skips the column preview and is staged as an OFX import", 
   assert.equal(
     (
       mocks.put.mock.calls[0] as unknown as
-        | [unknown, unknown, { headers?: Record<string, string> }]
-        | undefined
+        [unknown, unknown, { headers?: Record<string, string> }] | undefined
     )?.[2]?.headers?.["Content-Type"],
     "application/x-ofx",
   );
@@ -255,7 +266,13 @@ test("an OFX/QFX file skips the column preview and is staged as an OFX import", 
   );
   await waitFor(() => assert.equal(mocks.createImport.mock.calls.length, 1));
   assert.deepEqual(mocks.createImport.mock.calls[0], [
-    { accountId: "3", fileName: "statement.ofx", format: "ofx", key: "account-3-upload.csv", mapping: undefined },
+    {
+      accountId: "3",
+      fileName: "statement.ofx",
+      format: "ofx",
+      key: "account-3-upload.csv",
+      mapping: undefined,
+    },
   ]);
 });
 
@@ -270,8 +287,7 @@ test("a QIF file skips the column preview and is staged as a QIF import", async 
   assert.equal(
     (
       mocks.put.mock.calls[0] as unknown as
-        | [unknown, unknown, { headers?: Record<string, string> }]
-        | undefined
+        [unknown, unknown, { headers?: Record<string, string> }] | undefined
     )?.[2]?.headers?.["Content-Type"],
     "application/x-qif",
   );
@@ -281,8 +297,63 @@ test("a QIF file skips the column preview and is staged as a QIF import", async 
   );
   await waitFor(() => assert.equal(mocks.createImport.mock.calls.length, 1));
   assert.deepEqual(mocks.createImport.mock.calls[0], [
-    { accountId: "3", fileName: "statement.qif", format: "qif", key: "account-3-upload.csv", mapping: undefined },
+    {
+      accountId: "3",
+      fileName: "statement.qif",
+      format: "qif",
+      key: "account-3-upload.csv",
+      mapping: undefined,
+    },
   ]);
+});
+
+test("Import from YNAB shows how to export the register, and stages the file as a YNAB import with its name", async () => {
+  presignAnswers(false);
+  renderModal(manualAccount);
+  const user = userEvent.setup();
+
+  await user.click(
+    screen.getByRole("button", { name: messages["import-ynab-entry"] }),
+  );
+  const guide = screen.getByTestId("ynab-export-guide");
+  assert.ok(guide.textContent?.includes(messages["import-ynab-guide-unzip"]));
+
+  await pickFile("My Budget as of 2026-02-04 - Register.csv");
+  assert.equal(mocks.preview.mock.calls.length, 0, "no column preview");
+  assert.ok(screen.getByText(messages["import-ynab-ready"]));
+
+  await user.click(
+    screen.getByRole("button", { name: messages["import-review-start"] }),
+  );
+  await waitFor(() => assert.equal(mocks.createImport.mock.calls.length, 1));
+  assert.deepEqual(mocks.createImport.mock.calls[0], [
+    {
+      accountId: "3",
+      fileName: "My Budget as of 2026-02-04 - Register.csv",
+      format: "ynab",
+      key: "account-3-upload.csv",
+      mapping: undefined,
+    },
+  ]);
+});
+
+test("going back from YNAB reads a CSV as a bank statement again", async () => {
+  presignAnswers(false);
+  mocks.preview.mockResolvedValue(previewOf());
+  renderModal(manualAccount);
+  const user = userEvent.setup();
+
+  await user.click(
+    screen.getByRole("button", { name: messages["import-ynab-entry"] }),
+  );
+  await user.click(
+    screen.getByRole("button", { name: messages["import-ynab-back"] }),
+  );
+  assert.equal(screen.queryByTestId("ynab-export-guide"), null);
+
+  await pickFile("extrato.csv");
+  await screen.findByTestId("statement-preview");
+  assert.equal(mocks.preview.mock.calls.length, 1);
 });
 
 test("a file whose columns could not be found cannot be imported until they are picked", async () => {

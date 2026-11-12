@@ -4,7 +4,7 @@ import { DI } from '@app/database/di';
 import { authedContext } from '@middleware/authed-context';
 import { TransactionImportService } from '@service/transaction-import/transaction-import.service';
 import { zParse } from '@validators/parser';
-import { createTransactionImportSchema, decideTransactionImportRowsSchema, getTransactionImportSchema, mapTransactionImportAccountsSchema, parseTransactionImportSchema, transactionImportRequestSchema } from '@validators/transaction-import';
+import { createTransactionImportSchema, decideTransactionImportRowsSchema, getTransactionImportSchema, mapTransactionImportAccountsSchema, mapTransactionImportCategoriesSchema, parseTransactionImportSchema, transactionImportRequestSchema } from '@validators/transaction-import';
 
 /*
  * `/v1/transaction-import-sessions`: staged imports of a transaction file
@@ -48,10 +48,17 @@ export async function decideTransactionImportRows(req: Request, res: Response) {
   return res.json({ session });
 }
 
-/** `PATCH /:importId/account-mapping`: which account each account in the file imports into. */
+/** `PATCH /:importId/account-mapping`: which account each account in the file imports into, or a new manual account. */
 export async function mapTransactionImportAccounts(req: Request, res: Response) {
   const { body, params } = await zParse(mapTransactionImportAccountsSchema, req);
-  const session = await serviceFor(req).setAccountMapping(scopeOf(req), params.importId, body.mapping);
+  const session = await serviceFor(req).setAccountMapping(scopeOf(req), params.importId, body.mapping, { create: body.create });
+  return res.json({ session });
+}
+
+/** `PATCH /:importId/category-mapping`: which category each category in the file imports as, or none. */
+export async function mapTransactionImportCategories(req: Request, res: Response) {
+  const { body, params } = await zParse(mapTransactionImportCategoriesSchema, req);
+  const session = await serviceFor(req).setCategoryMapping(scopeOf(req), params.importId, body.mapping);
   return res.json({ session });
 }
 
