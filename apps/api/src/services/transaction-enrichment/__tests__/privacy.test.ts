@@ -22,6 +22,27 @@ describe('transaction enrichment privacy', () => {
     expect(sanitizeTransactionEnrichmentText('+351 912 345 678')).toBeUndefined();
   });
 
+  it('treats spaced or lowercase IBANs as sensitive, with or without letters in the account part', () => {
+    expect(hasSensitiveBankingPattern('GB29 NWBK 6016 1331 9268 19')).toBe(true);
+    expect(hasSensitiveBankingPattern('pagamento nl91 abna 0417 1643 00')).toBe(true);
+    expect(hasSensitiveBankingPattern('DE89 3704 0044 0532 0130 00')).toBe(true);
+    expect(hasSensitiveBankingPattern('FR14 2004 1010 0505 0001 3M02 606')).toBe(true);
+    expect(sanitizeTransactionEnrichmentText('ES91 2100 0418 4502 0005 1332')).toBeUndefined();
+  });
+
+  // An IBAN always has two check digits after the country code. Without requiring them, any
+  // description with about fifteen letters read as an IBAN and never reached the model.
+  it.each([
+    'Gas bill HeatWell Energy',
+    'SALARY ACME WIDGETS LTD',
+    'Supermercado Pingo Doce Lisboa',
+    'Netflix monthly subscription',
+    'Farmacia Central Porto',
+  ])('keeps an ordinary description: %s', (description) => {
+    expect(hasSensitiveBankingPattern(description)).toBe(false);
+    expect(sanitizeTransactionEnrichmentText(description)).toBe(description);
+  });
+
   it('keeps safe text and detects sensitive patterns', () => {
     expect(sanitizeTransactionEnrichmentText(' Café Lisboa ')).toBe('Café Lisboa');
     expect(hasSensitiveBankingPattern('IBAN PT50 1234 5678 9012 3456 7890 1')).toBe(true);
