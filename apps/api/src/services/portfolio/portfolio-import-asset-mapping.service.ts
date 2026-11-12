@@ -9,7 +9,8 @@ import { BadRequestError, ConflictError, NotFoundError } from '@utils/errors';
 
 import portfolioImportAssetMappingReuseService from './portfolio-import-asset-mapping-reuse.service';
 import { buildPortfolioImportAssetIdentityHash, type PortfolioImportAssetIdentity } from './portfolio-import-asset-resolution.utils';
-import { buildImportSessionSummary, type ImportSessionSummary, recomputeImportSessionStatus } from './portfolio-import-session-state';
+import { applyExistingTradesRule, countExistingTradeRows, isPositionsSession, positionsSessionStatus } from './portfolio-import-positions';
+import { buildImportSessionSummary, canConfirm, type ImportSessionSummary, recomputeImportSessionStatus } from './portfolio-import-session-state';
 import portfolioImportSessionService from './portfolio-import-session.service';
 
 export interface ConfirmPortfolioImportAssetMappingsInput {
@@ -121,9 +122,14 @@ class PortfolioImportAssetMappingService {
         }
       }
 
-      const summary = buildImportSessionSummary(allRows, allGroups);
+      // Positions: a row whose new asset the portfolio already trades is held back again.
+      await applyExistingTradesRule(em, session, affectedRows, { assetChanged: true });
+      const positions = isPositionsSession(session);
+      const summary = { ...buildImportSessionSummary(allRows, allGroups), ...(positions ? countExistingTradeRows(allRows) : {}) };
       session.summaryJson = { ...(session.summaryJson ?? {}), ...summary };
-      session.status = recomputeImportSessionStatus(allRows, allGroups);
+      session.status = positions ? positionsSessionStatus(allRows, allGroups) : recomputeImportSessionStatus(allRows, allGroups);
+      // The summary the clients read must agree with the status the decisions produced.
+      session.summaryJson = { ...session.summaryJson, canConfirm: canConfirm(session) };
 
       await em.persist([session, ...groups, ...affectedRows]).flush();
       return { importSessionId: session.portfolioImportSessionKey, status: session.status, summary: session.summaryJson as unknown as ConfirmPortfolioImportAssetMappingsResult['summary'] };

@@ -12,7 +12,8 @@
       "archive": "Archivar",
       "unarchive": "Recuperar",
       "delete": "Eliminar bien",
-      "back": "Bienes"
+      "back": "Bienes",
+      "import": "Importar CSV"
     },
     "empty": {
       "title": "Cuenta tu vivienda y tu coche en tu patrimonio neto",
@@ -129,6 +130,38 @@
       "deleteTitle": "¿Eliminar este bien?",
       "deleteConfirm": "Sus valoraciones se eliminan con él, y sale del historial de tu patrimonio neto. No se puede deshacer.",
       "ownerOnlyPrivacy": "Solo el titular del bien puede cambiar si es privado."
+    },
+    "import": {
+      "title": "Importar bienes manuales",
+      "description": "Una fila por bien, con su valor en un día. Cada bien se crea con esa valoración, o ninguno si una fila tiene un problema.",
+      "download-template": "Descargar la plantilla",
+      "columns-hint": "Columnas: Name (nombre), Kind (property, vehicle, valuable u other), Value (valor), Valuation date (AAAA-MM-DD, opcional: hoy si está vacía), Currency (código de tres letras) y Private (yes o no, opcional).",
+      "file-problem-title": "Este archivo no se puede importar",
+      "rows-problem-title": "{count, plural, one {# fila necesita corrección} other {# filas necesitan corrección}}",
+      "row-problem": "Línea {line}: {problems}",
+      "issues": {
+        "missing-columns": "El archivo necesita las columnas Name, Kind, Value y Currency.",
+        "empty-file": "El archivo no tiene filas.",
+        "too-many-rows": "Un archivo puede tener como máximo 500 bienes.",
+        "name": "nombre",
+        "kind": "tipo",
+        "value": "valor",
+        "valuation-date": "fecha de valoración",
+        "currency": "moneda",
+        "private": "privado"
+      },
+      "preview-caption": "Los bienes que crea este archivo",
+      "column-name": "Bien",
+      "column-kind": "Tipo",
+      "column-date": "Valorado el",
+      "column-value": "Valor",
+      "private": "Privado",
+      "today": "Hoy",
+      "failed": "No se pudieron importar los bienes y no se creó ninguno. Inténtalo de nuevo.",
+      "action": "{count, plural, =0 {Importar bienes} one {Importar # bien} other {Importar # bienes}}",
+      "close": "Cerrar",
+      "done-title": "Bienes importados",
+      "done-description": "{count, plural, one {# bien se añadió con su valoración.} other {# bienes se añadieron con sus valoraciones.}}"
     }
   }
 }

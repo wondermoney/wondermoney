@@ -63,7 +63,7 @@ describe('portfolio import session preview service', () => {
       rows: { duplicate: [], invalid: [], needsAssetReview: [], ready: [] },
       status: PortfolioImportSessionStatus.NEEDS_COLUMN_MAPPING,
     });
-    expect(result.rows).toEqual({ duplicate: [], failed: [], invalid: [], needsAssetReview: [], ready: [] });
+    expect(result.rows).toEqual({ duplicate: [], existingTrades: [], failed: [], invalid: [], needsAssetReview: [], ready: [] });
     expect(JSON.stringify(result)).not.toContain('portfolio-import-sessions/');
   });
 
@@ -394,7 +394,7 @@ describe('portfolio import session preview service', () => {
 
     const result = await service.getPreview({ appuser, importSessionId: 456, limit: 1, tenant });
 
-    expect(result.rows).toEqual({ duplicate: [], failed: [], invalid: [], needsAssetReview: [], ready: [] });
+    expect(result.rows).toEqual({ duplicate: [], existingTrades: [], failed: [], invalid: [], needsAssetReview: [], ready: [] });
     expect(result.assetGroups).toEqual([]);
   });
 });

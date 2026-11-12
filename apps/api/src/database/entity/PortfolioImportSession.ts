@@ -24,6 +24,15 @@ export enum PortfolioImportSessionStatus {
   WAITING_FOR_UPLOAD = 'waiting_for_upload',
 }
 
+/**
+ * What a file holds. `trades` is a trade history (each row a BUY or SELL). `positions` is what
+ * the person holds today: each row becomes one opening BUY at its average cost.
+ */
+export enum PortfolioImportSessionType {
+  POSITIONS = 'positions',
+  TRADES = 'trades',
+}
+
 @Entity({ tableName: 'portfolio_import_session' })
 @Index({ name: 'portfolio_import_session_owner_status_idx', properties: ['tenantKey', 'appuserKey', 'portfolioKey', 'status'] })
 @Index({ name: 'portfolio_import_session_portfolio_created_idx', properties: ['portfolioKey', 'createdAt'] })
@@ -47,6 +56,9 @@ export class PortfolioImportSession extends Base {
 
   @ManyToOne({ cascade: [], entity: () => FinancialBroker, fieldName: 'financial_broker_key', nullable: true })
   financialBrokerKey?: Rel<FinancialBroker>;
+
+  @Enum({ default: PortfolioImportSessionType.TRADES, items: () => PortfolioImportSessionType })
+  importType: PortfolioImportSessionType = PortfolioImportSessionType.TRADES;
 
   @Property({ length: 255, nullable: true })
   objectEtag?: string;

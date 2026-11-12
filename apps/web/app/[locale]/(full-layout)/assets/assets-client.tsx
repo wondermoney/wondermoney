@@ -1,14 +1,16 @@
 "use client";
 
-import { Plus } from "lucide-react";
+import { Plus, Upload } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 
 import ManualAssetFormDrawer from "@/components/manual-asset/ManualAssetFormDrawer";
+import { ManualAssetImportFlow } from "@/components/manual-asset/ManualAssetImportFlow";
 import ManualAssetsTable from "@/components/manual-asset/ManualAssetsTable";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import DataLoadError from "@/components/ui/DataLoadError";
+import { DrawerDialog } from "@/components/ui/dialog-responsive";
 import {
   PageHeaderSkeleton,
   StatCardsSkeleton,
@@ -26,6 +28,7 @@ export default function AssetsClient() {
   const router = useRouter();
   const { data, isPending, error, refetch } = useManualAssets();
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [importOpen, setImportOpen] = useState(false);
 
   const { active, archived } = useMemo(
     () => splitAssets(data?.assets ?? []),
@@ -50,12 +53,32 @@ export default function AssetsClient() {
   const openAsset = (manualAssetKey: number) =>
     router.push(`/assets/${manualAssetKey}`);
   const drawer = (
-    <ManualAssetFormDrawer
-      open={drawerOpen}
-      onOpenChange={setDrawerOpen}
-      userCurrency={summary.currencyCode}
-      onCreated={(asset) => openAsset(asset.manualAssetKey)}
-    />
+    <>
+      <ManualAssetFormDrawer
+        open={drawerOpen}
+        onOpenChange={setDrawerOpen}
+        userCurrency={summary.currencyCode}
+        onCreated={(asset) => openAsset(asset.manualAssetKey)}
+      />
+      {importOpen ? (
+        <DrawerDialog
+          open
+          onOpenChange={setImportOpen}
+          trigger={null}
+          title={t("import.title")}
+          contentClassName="max-w-3xl"
+          visuallyHiddenHeader
+        >
+          <ManualAssetImportFlow onClose={() => setImportOpen(false)} />
+        </DrawerDialog>
+      ) : null}
+    </>
+  );
+  const importButton = (
+    <Button variant="secondary" onClick={() => setImportOpen(true)}>
+      <Upload className="mr-2 size-4" />
+      {t("actions.import")}
+    </Button>
   );
 
   if (data.assets.length === 0) {
@@ -70,10 +93,13 @@ export default function AssetsClient() {
               {t("empty.description")}
             </p>
           </div>
-          <Button onClick={() => setDrawerOpen(true)}>
-            <Plus className="mr-2 size-4" />
-            {t("actions.add")}
-          </Button>
+          <div className="flex flex-wrap gap-2">
+            <Button onClick={() => setDrawerOpen(true)}>
+              <Plus className="mr-2 size-4" />
+              {t("actions.add")}
+            </Button>
+            {importButton}
+          </div>
         </div>
         {drawer}
       </Card>
@@ -91,10 +117,13 @@ export default function AssetsClient() {
             {t("page.description")}
           </p>
         </div>
-        <Button onClick={() => setDrawerOpen(true)}>
-          <Plus className="mr-2 size-4" />
-          {t("actions.add")}
-        </Button>
+        <div className="flex flex-wrap gap-2">
+          {importButton}
+          <Button onClick={() => setDrawerOpen(true)}>
+            <Plus className="mr-2 size-4" />
+            {t("actions.add")}
+          </Button>
+        </div>
       </div>
 
       <div className="flex flex-col gap-3">

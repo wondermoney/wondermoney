@@ -1,23 +1,15 @@
 ---
 title: Import Portfolio CSV
-description: Import portfolio holdings and transactions from a CSV file.
+description: Import a trade history, the positions you hold today, or your manual assets from a CSV, XLS or XLSX file.
 ---
 
-CSV import is the fastest way to load broker data into WonderMoney.
+Importing a file is the fastest way to load broker data into WonderMoney. The import window asks what the file holds first:
 
-## What you can import
+- **Trade history**: every buy and sale, with its date.
+- **Current positions**: what you hold today, one row per holding, without the trades that led there.
+- **Manual assets**: homes, vehicles and valuables, each with a value on a day.
 
-- Holdings
-- Transactions
-- Current positions, when your export includes them
-
-## How to import
-
-1. Export data from your broker.
-2. Open the portfolio you want to update.
-3. Upload the CSV file.
-4. Wait for the import to process.
-5. Fix any mapping issues or unresolved rows if they are reported.
+Open it from a portfolio with **Import transactions**, then pick the mode.
 
 <DocsImage
   src="/images/docs/portfolio-investments/import-portfolio-csv-import-modal.png"
@@ -27,29 +19,95 @@ CSV import is the fastest way to load broker data into WonderMoney.
   height={900}
 />
 
+## Import a trade history
+
+1. Export your trades from your broker.
+2. Choose **Trade history**, the portfolio and, if you like, the broker.
+3. Upload the file and choose **Analyze file**.
+4. Match the file's columns to the trade fields: date, type (buy or sell), quantity, unit price or total amount, currency and the asset (ISIN, ticker or name). A fee and the broker's own transaction ID are optional.
+5. Resolve any asset WonderMoney could not match (see [Review before anything is saved](#review-before-anything-is-saved)).
+6. Check the summary and choose **Confirm import**.
+
+## Import current positions
+
+Use this when you start from what you hold today rather than years of history. Each row is one holding:
+
+| Column | Required | Notes |
+| --- | --- | --- |
+| Symbol or ISIN | Yes | The asset name also works, but an ISIN matches most reliably. |
+| Quantity | Yes | Greater than zero. |
+| Average unit cost, or total cost | Yes | With both, the average unit cost is used. A total cost is divided by the quantity. |
+| Currency | Yes | A column, or one currency for the whole file. |
+| Acquisition date | No | Rows without one use the as-of date. |
+
+1. Choose **Current positions**, the portfolio and, if you like, the broker. **Download the positions template** gives you a file with these columns, which maps itself.
+2. Upload the file and choose **Analyze file**.
+3. Match the columns, and pick the **as-of date**: the day a row without an acquisition date is bought on. It defaults to today.
+4. Resolve any unmatched asset, then review the rows for assets the portfolio already trades (below).
+5. Choose **Confirm import**.
+
+### What a position becomes
+
+Each row becomes one **opening buy**: a normal buy of that quantity at the average unit cost, on its acquisition date or the as-of date, marked "Opening position" in its notes. Because it is an ordinary buy, the portfolio treats it exactly like one you recorded by hand:
+
+- Under FIFO it is one lot; under average cost it adds to the average. A later sale relieves its cost and reports the realized gain, under either [cost basis method](/en/docs/portfolio-investments/portfolio-metrics-explained#cost-basis-method-fifo-and-average-cost).
+- It counts as money put into the portfolio on its date for the [time-weighted and money-weighted returns](/en/docs/portfolio-investments/portfolio-metrics-explained#time-weighted-and-money-weighted-return). Returns are measured from that day: what happened before it is not part of them.
+- The cost basis is what the file says you paid, so check it: unrealized gain is measured against it.
+
+### Assets that already have trades
+
+If the portfolio already has buys or sales of an asset in the file, an opening buy on top of them would count the holding twice. Those rows are listed with a warning and **skipped by default**. Switch a row on to import it anyway, for example when the existing trades are of a holding you sold before buying again. Rows for assets without trades import as usual.
+
+Importing the same positions file twice is caught as a duplicate.
+
+## Import manual assets
+
+Manual assets are not part of a portfolio: they count in your net worth at a value you set. See [Homes, vehicles and other assets](/en/docs/portfolio-investments/manual-assets).
+
+1. Choose **Manual assets** in the import window, or **Import CSV** on the Assets page.
+2. **Download the template** and fill in one row per asset:
+
+| Column | Required | Notes |
+| --- | --- | --- |
+| Name | Yes | |
+| Kind | Yes | `property`, `vehicle`, `valuable` or `other`. |
+| Value | Yes | In the asset's currency. |
+| Valuation date | No | `YYYY-MM-DD`. Empty means today. |
+| Currency | Yes | A three-letter code, such as `EUR`. |
+| Private | No | `yes` keeps the asset to yourself; empty or `no` shares it with your household. |
+
+3. Upload the file. WonderMoney checks every row and lists the ones that need fixing, by line.
+4. Choose **Import**. Each asset is created with that value as its first valuation, and it is yours, exactly as if you had added it by hand. If any row cannot be imported, none is.
+
+The manual-assets template reads a CSV file of up to 500 assets.
+
+## Review before anything is saved
+
+Nothing is added to a portfolio until you choose **Confirm import**. Before that:
+
+- **Column mapping.** WonderMoney suggests a mapping from the file's headers; check it and fill in what is missing.
+- **Asset review.** A row whose asset could not be matched with confidence goes to asset review. Pick the right security from the suggestions, search for another symbol, or skip the group.
+- **Summary.** Rows that are invalid (a missing quantity, a date that cannot be read) or duplicates of rows already imported are counted and left out.
+
 ## Best results
 
 - Use a fresh export from the broker.
 - Keep one portfolio per broker account when possible.
-- Review tickers, quantities, dates, and currencies in the broker export before uploading.
-- If some rows need asset resolution, follow the reported guidance after import.
-
-## Current behavior
-
-WonderMoney processes uploaded CSV files after upload. There is no pre-save row review step.
+- Prefer ISINs: they match one security, where a ticker can exist on several exchanges.
+- Review quantities, dates, costs and currencies in the file before uploading.
 
 ## Common mistakes
 
-- Uploading the wrong file type.
-- Importing duplicate rows from an older export.
-- Leaving the currency column empty when the broker export includes multiple currencies.
+- Importing a positions file into a portfolio that already holds the same trades: the warning catches it, but only for the assets in the file.
+- Importing a trade history as current positions, or the other way round.
+- Leaving the currency column empty when the file includes several currencies.
 - Assuming every broker uses the same column names.
-
 
 ## Related pages
 
 - [Portfolio investments](/en/docs/portfolio-investments)
 - [Create a portfolio](/en/docs/portfolio-investments/create-portfolio)
 - [Add portfolio transactions](/en/docs/portfolio-investments/add-portfolio-transactions)
-- [Portfolio data lifecycle](/en/docs/portfolio-investments/portfolio-data-lifecycle)
-- [Holdings allocation](/en/docs/portfolio-investments/holdings-allocation)
+- [Portfolio metrics explained](/en/docs/portfolio-investments/portfolio-metrics-explained)
+- [Homes, vehicles and other assets](/en/docs/portfolio-investments/manual-assets)
+- [Troubleshoot portfolio imports](/en/docs/portfolio-investments/troubleshoot-portfolio-imports)

@@ -5,6 +5,7 @@ import type {
   PortfolioImportColumnMappingDerivedValues,
   PortfolioImportColumnMappingFixedValues,
   PortfolioImportSessionPreviewResponse,
+  PortfolioImportType,
 } from "@/lib/api/portfolio/importSessionTypes";
 
 export const PORTFOLIO_IMPORT_COLUMN_NOT_MAPPED_VALUE = "__not_mapped__";
@@ -49,6 +50,7 @@ export function parsePortfolioImportColumnSourceToken(value: string):
 }
 
 export type PortfolioImportColumnMappingValidationIssueKey =
+  | "asOfDate"
   | "transactionDate"
   | "quantity"
   | "currency"
@@ -168,12 +170,19 @@ interface PortfolioImportColumnMappingSatisfaction {
   hasUnitPriceOrTotalAmount: boolean;
 }
 
-function getPortfolioImportColumnMappingSatisfaction(input: {
+interface PortfolioImportColumnMappingInput {
   columnMapping: Partial<PortfolioColumnMapping>;
   fixedValues?: PortfolioImportColumnMappingFixedValues;
   derivedValues?: PortfolioImportColumnMappingDerivedValues;
   transformations?: PortfolioColumnMappingTransformations;
-}): PortfolioImportColumnMappingSatisfaction {
+  /** Positions files need no transaction type, and their acquisition date is optional. */
+  importType?: PortfolioImportType;
+}
+
+function getPortfolioImportColumnMappingSatisfaction(
+  input: PortfolioImportColumnMappingInput,
+): PortfolioImportColumnMappingSatisfaction {
+  const positions = input.importType === "positions";
   return {
     hasAssetIdentity: Boolean(
       input.columnMapping.isin?.trim() ||
@@ -182,9 +191,11 @@ function getPortfolioImportColumnMappingSatisfaction(input: {
     ),
     hasCurrency: Boolean(input.columnMapping.currency?.trim() || input.fixedValues?.currency),
     hasQuantity: Boolean(input.columnMapping.quantity?.trim()),
-    hasTransactionDate: Boolean(input.columnMapping.transactionDate?.trim()),
+    hasTransactionDate:
+      positions || Boolean(input.columnMapping.transactionDate?.trim()),
     hasTypeOrDirectionRule: Boolean(
-      input.columnMapping.transactionType?.trim() ||
+      positions ||
+        input.columnMapping.transactionType?.trim() ||
         input.fixedValues?.transactionType ||
         input.derivedValues?.transactionType ||
         input.transformations?.negativeAmountMeansBuy ||
@@ -196,14 +207,25 @@ function getPortfolioImportColumnMappingSatisfaction(input: {
   };
 }
 
-export function validatePortfolioImportColumnMapping(input: {
-  columnMapping: Partial<PortfolioColumnMapping>;
-  fixedValues?: PortfolioImportColumnMappingFixedValues;
-  derivedValues?: PortfolioImportColumnMappingDerivedValues;
-  transformations?: PortfolioColumnMappingTransformations;
-}) {
+export function validatePortfolioImportColumnMapping(
+  input: PortfolioImportColumnMappingInput & {
+    /** Positions files: the day rows without an acquisition date are bought on. */
+    asOfDate?: string;
+  },
+) {
   const satisfaction = getPortfolioImportColumnMappingSatisfaction(input);
   const missingIssues: PortfolioImportColumnMappingValidationIssue[] = [];
+
+  if (
+    input.importType === "positions" &&
+    !input.columnMapping.transactionDate?.trim() &&
+    !input.asOfDate
+  ) {
+    missingIssues.push({
+      key: "asOfDate",
+      messageKey: "portfolio-import-column-validation-as-of-date",
+    });
+  }
 
   if (!satisfaction.hasTransactionDate) {
     missingIssues.push({
@@ -259,13 +281,11 @@ const PORTFOLIO_IMPORT_STANDALONE_OPTIONAL_COLUMN_FIELDS: (keyof PortfolioColumn
   "externalTransactionId",
 ];
 
-export function getPortfolioImportColumnFieldsNeedingAttention(input: {
-  columnMapping: Partial<PortfolioColumnMapping>;
-  fieldKeys: (keyof PortfolioColumnMapping)[];
-  fixedValues?: PortfolioImportColumnMappingFixedValues;
-  derivedValues?: PortfolioImportColumnMappingDerivedValues;
-  transformations?: PortfolioColumnMappingTransformations;
-}): Set<keyof PortfolioColumnMapping> {
+export function getPortfolioImportColumnFieldsNeedingAttention(
+  input: PortfolioImportColumnMappingInput & {
+    fieldKeys: (keyof PortfolioColumnMapping)[];
+  },
+): Set<keyof PortfolioColumnMapping> {
   const satisfaction = getPortfolioImportColumnMappingSatisfaction(input);
   const needsAttention = new Set<keyof PortfolioColumnMapping>();
 
@@ -305,4 +325,40 @@ export function getPortfolioImportColumnFieldsNeedingAttention(input: {
   }
 
   return needsAttention;
+}
+
+/** The columns of the positions template, in order, and one example row. */
+export const PORTFOLIO_POSITIONS_TEMPLATE_COLUMNS = [
+  "Symbol",
+  "ISIN",
+  "Quantity",
+  "Average cost",
+  "Total cost",
+  "Currency",
+  "Acquisition date",
+] as const;
+
+/** A positions template: the header and one example row, which the person replaces. */
+export function buildPortfolioPositionsTemplateCsv() {
+  return [
+    PORTFOLIO_POSITIONS_TEMPLATE_COLUMNS.join(","),
+    "VWCE.XETRA,IE00BK5BQT80,12,98.50,,EUR,2023-04-17",
+  ].join("\n");
+}
+
+/** The mapping a positions template produces, so a filled-in template needs no manual mapping. */
+export function getPortfolioPositionsTemplateMapping(
+  columns: string[],
+): Partial<PortfolioColumnMapping> | undefined {
+  const has = (column: string) => columns.includes(column);
+  if (!PORTFOLIO_POSITIONS_TEMPLATE_COLUMNS.every(has)) return undefined;
+  return {
+    currency: "Currency",
+    isin: "ISIN",
+    quantity: "Quantity",
+    ticker: "Symbol",
+    totalAmount: "Total cost",
+    transactionDate: "Acquisition date",
+    unitPrice: "Average cost",
+  };
 }

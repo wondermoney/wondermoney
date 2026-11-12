@@ -10,6 +10,7 @@ import { ConflictError, NotFoundError } from '@utils/errors';
 import logger from '@utils/logger';
 
 import type { PortfolioImportAssetResolutionResult } from './portfolio-import-asset-resolution.service';
+import { isPositionsSession } from './portfolio-import-positions';
 import { canConfirm, recomputeImportSessionStatus } from './portfolio-import-session-state';
 
 export interface ParsePreviewDeps {
@@ -150,7 +151,8 @@ export default class PortfolioCsvParsePreviewService {
         ? await this.parseRowsFromText(source, deps)
         : await (csv.parseExcel(source) as Promise<ParsedPreviewRow[]>);
       if (!rows.length) return { status: PortfolioImportSessionStatus.FAILED, summary: { errorCode: 'EMPTY_CSV', totalRows: 0 } };
-      if (!this.hasSupportedShape(rows)) return { status: PortfolioImportSessionStatus.NEEDS_COLUMN_MAPPING, summary: { parserError: 'UNSUPPORTED_SHAPE', totalRows: rows.length } };
+      // A positions file is always mapped: its rows are holdings, never the internal trade layout.
+      if (isPositionsSession(session) || !this.hasSupportedShape(rows)) return { status: PortfolioImportSessionStatus.NEEDS_COLUMN_MAPPING, summary: { parserError: 'UNSUPPORTED_SHAPE', totalRows: rows.length } };
       return { rows };
     } catch (error) {
       const errorCode = this.errorCodeFor(error);

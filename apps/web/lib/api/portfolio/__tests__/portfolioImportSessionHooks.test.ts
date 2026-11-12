@@ -125,3 +125,17 @@ test("builds the final confirm url", () => {
 test("builds the confirm session url for string ids", () => {
   assert.equal(buildConfirmPortfolioImportSessionUrl("456"), "/v1/portfolio-import-sessions/456/confirm");
 });
+
+test("a positions session says what it holds; a trades session keeps the API default", () => {
+  assert.deepEqual(buildCreatePortfolioImportSessionPayload({ importType: "positions" }), {
+    importType: "positions",
+    mode: "review",
+  });
+  assert.deepEqual(buildCreatePortfolioImportSessionPayload({ importType: "trades" }), { mode: "review" });
+});
+
+test("sends the as-of date of a positions mapping, and nothing for a trades mapping", () => {
+  const withAsOf = buildConfirmPortfolioImportColumnMappingPayload({ quantity: "Qty" }, {}, {}, undefined, {}, "2024-12-31");
+  assert.equal(withAsOf.asOfDate, "2024-12-31");
+  assert.equal("asOfDate" in buildConfirmPortfolioImportColumnMappingPayload({ quantity: "Qty" }), false);
+});

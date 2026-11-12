@@ -20190,6 +20190,26 @@
           "enumItems": [],
           "mappedType": "integer"
         },
+        "import_type": {
+          "name": "import_type",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": "'trades'",
+          "comment": null,
+          "collation": null,
+          "enumItems": [
+            "positions",
+            "trades"
+          ],
+          "mappedType": "enum"
+        },
         "object_etag": {
           "name": "object_etag",
           "type": "varchar(255)",
@@ -20415,6 +20435,12 @@
         }
       ],
       "checks": [
+        {
+          "name": "portfolio_import_session_import_type_check",
+          "expression": "\"import_type\" in ('positions', 'trades')",
+          "definition": "check (\"import_type\" in ('positions', 'trades'))",
+          "columnName": "import_type"
+        },
         {
           "name": "portfolio_import_session_status_check",
           "expression": "\"status\" in ('cancelled', 'expired', 'failed', 'importing', 'needs_asset_review', 'needs_column_mapping', 'parsing', 'partial', 'ready_to_import', 'succeeded', 'uploaded', 'waiting_for_upload')",

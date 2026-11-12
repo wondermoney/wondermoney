@@ -43,6 +43,7 @@ import { Currency } from '@entity/Currency';
 import { FinancialBroker } from '@entity/FinancialBroker';
 import { FinancialTransactionType } from '@entity/FinancialTransactionType';
 import { Portfolio } from '@entity/Portfolio';
+import { PortfolioImportSessionType } from '@entity/PortfolioImportSession';
 import { authedContext } from '@middleware/authed-context';
 import eodhd from '@service/market-data/eodhd.service';
 import backgroundOperationService from '@service/operations/background-operation.service';
@@ -91,7 +92,7 @@ export async function createPortfolio(req: Request, res: Response) {
 }
 
 export async function createPortfolioImportSession(req: Request, res: Response) {
-  const { body: { brokerId }, params: { portfolioId } } = await zParse(createPortfolioImportSessionRequestSchema, req);
+  const { body: { brokerId, importType }, params: { portfolioId } } = await zParse(createPortfolioImportSessionRequestSchema, req);
   if (!req.user) throw new BadRequestError('Unauthorized');
   if (!req.tenant) throw new NotFoundError('Tenant not found');
 
@@ -102,6 +103,7 @@ export async function createPortfolioImportSession(req: Request, res: Response) 
     appuser: req.user,
     brokerId,
     correlationId: `portfolio.csv-import-session:${portfolioId}:pending:${token}`,
+    importType: importType === 'positions' ? PortfolioImportSessionType.POSITIONS : PortfolioImportSessionType.TRADES,
     portfolioId,
     s3Bucket: bucket,
     s3Key: preliminaryKey,
@@ -122,6 +124,7 @@ export async function createPortfolioImportSession(req: Request, res: Response) 
     correlationId: session.correlationId,
     expiresAt: session.expiresAt?.toISOString(),
     importSessionId: session.portfolioImportSessionKey,
+    importType: session.importType,
     maxUploadSizeBytes: upload.maxUploadSizeBytes,
     s3Bucket: bucket,
     s3Key: upload.key,

@@ -12,7 +12,8 @@
       "archive": "Archive",
       "unarchive": "Bring back",
       "delete": "Delete asset",
-      "back": "Assets"
+      "back": "Assets",
+      "import": "Import CSV"
     },
     "empty": {
       "title": "Count your home and car in your net worth",
@@ -129,6 +130,38 @@
       "deleteTitle": "Delete this asset?",
       "deleteConfirm": "Its valuations go with it, and it leaves your net worth history. This cannot be undone.",
       "ownerOnlyPrivacy": "Only the asset's owner can change whether it is private."
+    },
+    "import": {
+      "title": "Import manual assets",
+      "description": "One row per asset with its value on a day. Every asset is created with that valuation, or none is when a row has a problem.",
+      "download-template": "Download the template",
+      "columns-hint": "Columns: Name, Kind (property, vehicle, valuable or other), Value, Valuation date (YYYY-MM-DD, optional: today when empty), Currency (a three-letter code) and Private (yes or no, optional).",
+      "file-problem-title": "This file can't be imported",
+      "rows-problem-title": "{count, plural, one {# row needs fixing} other {# rows need fixing}}",
+      "row-problem": "Line {line}: {problems}",
+      "issues": {
+        "missing-columns": "The file needs Name, Kind, Value and Currency columns.",
+        "empty-file": "The file has no rows.",
+        "too-many-rows": "A file can hold at most 500 assets.",
+        "name": "name",
+        "kind": "kind",
+        "value": "value",
+        "valuation-date": "valuation date",
+        "currency": "currency",
+        "private": "private"
+      },
+      "preview-caption": "The assets this file creates",
+      "column-name": "Asset",
+      "column-kind": "Kind",
+      "column-date": "Valued on",
+      "column-value": "Value",
+      "private": "Private",
+      "today": "Today",
+      "failed": "The assets could not be imported, and none was created. Try again.",
+      "action": "{count, plural, =0 {Import assets} one {Import # asset} other {Import # assets}}",
+      "close": "Close",
+      "done-title": "Assets imported",
+      "done-description": "{count, plural, one {# asset was added with its valuation.} other {# assets were added with their valuations.}}"
     }
   }
 }

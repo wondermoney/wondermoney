@@ -89,9 +89,14 @@ const assetMappingDecisionSchema = z.discriminatedUnion('action', [
 ]);
 
 
+/** The as-of day of a positions file: a day that has happened (tomorrow in UTC is still today east of it). */
+const positionsAsOfDay = priceOverrideDay;
+
 export const createPortfolioImportSessionRequestSchema = z.object({
   body: z.object({
     brokerId: positiveIntId.optional(),
+    /** `trades` (the default) is a trade history; `positions` is what is held today, one opening buy per row. */
+    importType: z.enum(['positions', 'trades']).default('trades'),
     mode: z.literal('review'),
   }).strict(),
   params: z.object({
@@ -126,6 +131,8 @@ export const suggestPortfolioImportColumnMappingRequestSchema = z.object({
 
 export const confirmPortfolioImportColumnMappingRequestSchema = z.object({
   body: z.object({
+    /** Positions files only: the day a row without an acquisition date is bought on. */
+    asOfDate: positionsAsOfDay.optional(),
     columnMapping: portfolioColumnMappingRequestSchema,
     derivedValues: portfolioImportDerivedValuesSchema.default({}),
     fixedValues: portfolioImportFixedValuesSchema.default({}),
@@ -138,6 +145,14 @@ export const confirmPortfolioImportColumnMappingRequestSchema = z.object({
 });
 
 export const confirmPortfolioImportSessionRequestSchema = z.object({
+  params: z.object({ importSessionId: positiveIntId }),
+});
+
+/** Positions files: include or skip rows whose asset already has trades in the portfolio. */
+export const updatePortfolioImportRowInclusionRequestSchema = z.object({
+  body: z.object({
+    rows: z.array(z.object({ include: z.boolean(), rowId: positiveIntId }).strict()).min(1).max(500),
+  }).strict(),
   params: z.object({ importSessionId: positiveIntId }),
 });
 

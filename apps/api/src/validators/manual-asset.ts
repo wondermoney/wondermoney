@@ -59,6 +59,24 @@ export const updateManualAssetSchema = z.object({
 
 export const manualAssetParamsSchema = z.object({ params: assetParams });
 
+/** At most this many assets in one file. */
+export const MAX_IMPORTED_MANUAL_ASSETS = 500;
+
+/** A manual-assets file, parsed: one asset and its value on a day per row. */
+export const importManualAssetsSchema = z.object({
+  body: z.object({
+    assets: z.array(z.object({
+      currencyCode: z.string().trim().regex(/^[a-z]{3}$/i, 'Currency must be a three-letter code').transform((value) => value.toUpperCase()),
+      isPrivate: booleanLike.optional(),
+      kind: z.enum(ManualAssetKind),
+      name,
+      notes: z.string().max(10_000).nullish(),
+      valuationDate: pastDay.optional(),
+      value: amount,
+    }).strict()).min(1).max(MAX_IMPORTED_MANUAL_ASSETS),
+  }).strict(),
+});
+
 export const createValuationSchema = z.object({
   body: z.object({ date: pastDay.optional(), note: note.nullish(), value: amount }),
   params: assetParams,

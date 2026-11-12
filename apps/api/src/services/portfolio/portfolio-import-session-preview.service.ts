@@ -3,7 +3,7 @@ import type { Appuser } from '@entity/Appuser';
 import { PortfolioImportAssetCandidate } from '@entity/PortfolioImportAssetCandidate';
 import { PortfolioImportAssetGroup, PortfolioImportAssetGroupStatus } from '@entity/PortfolioImportAssetGroup';
 import { PortfolioImportRow, PortfolioImportRowStatus } from '@entity/PortfolioImportRow';
-import { PortfolioImportSessionStatus } from '@entity/PortfolioImportSession';
+import { PortfolioImportSessionStatus, PortfolioImportSessionType } from '@entity/PortfolioImportSession';
 
 import { AUTOMATIC_COLUMN_MAPPING_UNAVAILABLE_WARNING } from './portfolio-csv-column-mapping-warning';
 import { type TerminalKind, toTerminalKind } from './portfolio-import-session-state';
@@ -66,10 +66,13 @@ export interface PortfolioImportSessionPreviewResponse {
   broker?: { id: number; name: string };
   columnMapping?: { confirmed?: unknown; suggestion?: unknown; warning?: string };
   importSessionId: number;
+  importType: PortfolioImportSessionType;
   limits: { rowsPerBucket: number };
   portfolioId: number;
   rows: {
     duplicate: PortfolioImportPreviewRow[];
+    /** Positions files: rows whose asset already has trades in the portfolio, skipped or included. */
+    existingTrades: PortfolioImportPreviewRow[];
     failed: PortfolioImportPreviewRow[];
     invalid: PortfolioImportPreviewRow[];
     needsAssetReview: PortfolioImportPreviewRow[];
@@ -87,6 +90,10 @@ export interface PortfolioImportSessionPreviewResponse {
     blockingRows: number;
     canConfirm: boolean;
     duplicateRows: number;
+    /** Positions files: rows whose asset already has trades in the portfolio. */
+    existingTradeRows: number;
+    /** Of those, the rows still skipped. */
+    existingTradeSkippedRows: number;
     failedRows: number;
     failureReason?: string;
     importableRows: number;
@@ -102,6 +109,7 @@ export interface PortfolioImportSessionPreviewResponse {
 }
 
 const MAX_PREVIEW_STRING_LENGTH = 500;
+const COLUMN_MAPPING_SETTING_KEYS = ['asOfDate'] as const;
 const MAX_PREVIEW_KEY_LENGTH = 120;
 const MAX_PREVIEW_ENTRIES = 50;
 const COLUMN_MAPPING_KEYS = [
@@ -174,6 +182,19 @@ class PortfolioImportSessionPreviewService {
         { limit: input.limit, orderBy: { rowNumber: 'asc' }, populate: ['assetGroupKey', 'financialAssetKey'] },
       ),
     ]);
+
+    const existingTrades = session.importType === PortfolioImportSessionType.POSITIONS
+      ? await DI.em.find(
+          PortfolioImportRow,
+          {
+            deletedAt: undefined,
+            normalizedJson: { existingTrades: true },
+            portfolioImportSessionKey: session,
+            status: { $in: [PortfolioImportRowStatus.READY, PortfolioImportRowStatus.SKIPPED] },
+          },
+          { limit: input.limit, orderBy: { rowNumber: 'asc' }, populate: ['assetGroupKey', 'financialAssetKey'] },
+        )
+      : [];
 
     const groups = await DI.em.find(
       PortfolioImportAssetGroup,
@@ -254,10 +275,12 @@ class PortfolioImportSessionPreviewService {
         : undefined,
       columnMapping: mapColumnMapping(session.columnMappingJson),
       importSessionId: session.portfolioImportSessionKey,
+      importType: session.importType,
       limits: { rowsPerBucket: input.limit },
       portfolioId: session.portfolioKey.portfolioKey,
       rows: {
         duplicate: duplicate.map(mapRow),
+        existingTrades: existingTrades.map(mapRow),
         failed: failed.map(mapRow),
         invalid: invalid.map(mapRow),
         needsAssetReview: needsAssetReview.map(mapRow),
@@ -382,6 +405,9 @@ function mapColumnMapping(columnMappingJson: Record<string, unknown> | undefined
     }
     const layout = sanitizeLayout(source['layout']);
     if (layout) result['layout'] = layout;
+    for (const key of COLUMN_MAPPING_SETTING_KEYS) {
+      if (sourceHasKey(source, key) && source[key] !== undefined) result[key] = sanitizePreviewValue(source[key]);
+    }
     if (sourceHasKey(source, 'warning') && typeof source['warning'] === 'string') result['warning'] = source['warning'];
     if (sourceHasKey(source, 'confirmedAt')) result['confirmedAt'] = source['confirmedAt'];
     return Object.keys(result).length ? result : undefined;
@@ -427,6 +453,8 @@ function mapSummary(sessionSummary: Record<string, unknown> | undefined) {
     blockingRows: asNumber(sessionSummary?.['blockingRows']),
     canConfirm: Boolean(sessionSummary?.['canConfirm']),
     duplicateRows: asNumber(sessionSummary?.['duplicateRows']),
+    existingTradeRows: asNumber(sessionSummary?.['existingTradeRows']),
+    existingTradeSkippedRows: asNumber(sessionSummary?.['existingTradeSkippedRows']),
     failedRows: asNumber(sessionSummary?.['failedRows']),
     failureReason: getFailureReason(sessionSummary),
     importableRows: asNumber(sessionSummary?.['importableRows']),

@@ -20,7 +20,9 @@ export const buildConfirmPortfolioImportColumnMappingPayload = (
     dataStartRowIndex: 1,
   },
   transformations: PortfolioImportSessionConfirmColumnMappingRequest["transformations"] = {},
+  asOfDate?: string,
 ) => ({
+  ...(asOfDate ? { asOfDate } : {}),
   columnMapping,
   fixedValues,
   derivedValues,
@@ -31,6 +33,7 @@ export const buildConfirmPortfolioImportColumnMappingPayload = (
 export default function useConfirmPortfolioImportColumnMapping() {
   return useMutation({
     mutationFn: ({
+      asOfDate,
       importSessionId,
       columnMapping,
       fixedValues,
@@ -46,6 +49,7 @@ export default function useConfirmPortfolioImportColumnMapping() {
           derivedValues,
           layout,
           transformations,
+          asOfDate,
         ),
       ),
   });

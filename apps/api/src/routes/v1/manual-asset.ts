@@ -6,6 +6,7 @@ import {
   deleteManualAsset,
   deleteManualAssetValuation,
   getManualAsset,
+  importManualAssets,
   listManualAssets,
   listManualAssetValuations,
   updateManualAsset,
@@ -16,6 +17,7 @@ const router = express.Router();
 
 router.get('/', listManualAssets);
 router.post('/', createManualAsset);
+router.post('/import', importManualAssets);
 router.get('/:manualAssetId/valuations', listManualAssetValuations);
 router.post('/:manualAssetId/valuations', createManualAssetValuation);
 router.patch('/:manualAssetId/valuations/:valuationId', updateManualAssetValuation);

@@ -132,3 +132,27 @@ export function useDeleteValuation() {
       invalidateManualAssets(queryClient, manualAssetId),
   });
 }
+
+/** One row of a manual-assets file, as the import endpoint takes it. */
+export interface ImportManualAssetRequestRow {
+  name: string;
+  kind: ManualAsset["kind"];
+  value: number;
+  valuationDate?: string;
+  currencyCode: string;
+  isPrivate?: boolean;
+}
+
+/** Creates every row of a manual-assets file as an asset with its valuation, or none of them. */
+export function useImportManualAssets() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (assets: ImportManualAssetRequestRow[]) => {
+      const { data } = await api.post<{
+        assets: { manualAssetKey: number; name: string }[];
+      }>("/v1/manual-assets/import", { assets });
+      return data.assets;
+    },
+    onSuccess: () => invalidateManualAssets(queryClient),
+  });
+}
