@@ -9,6 +9,7 @@
     "manage-bank-connections",
     "understand-transactions",
     "import-transactions-csv",
+    "import-from-ynab",
     "categorize-transactions",
     "rules",
     "recurring-payments",

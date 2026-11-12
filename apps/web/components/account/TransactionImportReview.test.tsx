@@ -20,6 +20,8 @@ const mocks = vi.hoisted(() => ({
   commit: vi.fn(async () => ({})),
   decide: vi.fn(async () => ({})),
   map: vi.fn(async () => ({})),
+  mapCategories: vi.fn(async () => ({})),
+  categories: { current: [] as unknown[] },
   parse: vi.fn(async () => ({})),
   view: { current: undefined as TransactionImportView | undefined },
   queries: [] as unknown[],
@@ -42,6 +44,7 @@ vi.mock("@/lib/api/transaction-import/useTransactionImport", () => {
     useCommitTransactionImport: mutation(mocks.commit),
     useDecideTransactionImportRows: mutation(mocks.decide),
     useMapTransactionImportAccounts: mutation(mocks.map),
+    useMapTransactionImportCategories: mutation(mocks.mapCategories),
     useParseTransactionImport: mutation(mocks.parse),
     useTransactionImport: (_id: string, query: unknown) => {
       mocks.queries.push(query);
@@ -49,6 +52,9 @@ vi.mock("@/lib/api/transaction-import/useTransactionImport", () => {
     },
   };
 });
+vi.mock("@/lib/api/category/useCategories", () => ({
+  default: () => ({ data: { categories: mocks.categories.current } }),
+}));
 vi.mock("@/lib/api/useRateLimitToast", () => ({
   useRateLimitToast: () => () => false,
 }));
@@ -58,8 +64,16 @@ beforeAll(() => {
   Element.prototype.scrollIntoView ??= () => {};
 });
 beforeEach(() => {
-  for (const fn of [mocks.cancel, mocks.commit, mocks.decide, mocks.map, mocks.parse])
+  for (const fn of [
+    mocks.cancel,
+    mocks.commit,
+    mocks.decide,
+    mocks.map,
+    mocks.mapCategories,
+    mocks.parse,
+  ])
     fn.mockClear();
+  mocks.categories.current = [];
   mocks.queries.length = 0;
 });
 afterEach(() => cleanup());
@@ -72,6 +86,7 @@ function session(
     accountMapping: {},
     canCommit: true,
     canRetry: false,
+    categoryMapping: {},
     committedAt: null,
     correlationId: "op-1",
     counts: {
@@ -92,6 +107,7 @@ function session(
     format: "statement",
     id: "import-1",
     sourceAccounts: [],
+    sourceCategories: [],
     status: "ready",
     upload: null,
     warnings: [],
@@ -281,6 +297,164 @@ test("pre-fills the mapping with the account the file's IBAN matched", () => {
       .hasAttribute("disabled"),
     false,
     "the suggested account completes the mapping",
+  );
+});
+
+test("offers a new manual account for each account of a YNAB export, and saves the choice", async () => {
+  renderReview(
+    {
+      rows,
+      session: session({
+        canCommit: false,
+        format: "ynab",
+        sourceAccounts: [
+          { label: "Checking", rowCount: 4, suggestedAccountId: 7 },
+          { label: "Savings", rowCount: 2 },
+        ],
+        status: "needs_mapping",
+      }),
+    },
+    vi.fn(),
+    [{ accountKey: 7, accountName: "Everyday" } as Account],
+  );
+  const user = userEvent.setup();
+
+  assert.ok(
+    screen.getByText(messages["import-review-mapping-title-ynab"], {
+      selector: "p",
+    }),
+  );
+  await user.click(screen.getByRole("combobox", { name: "Savings" }));
+  await user.click(
+    await screen.findByRole("option", {
+      name: "New manual account “Savings”",
+    }),
+  );
+  await user.click(
+    screen.getByRole("button", {
+      name: messages["import-review-mapping-save"],
+    }),
+  );
+
+  await waitFor(() => assert.equal(mocks.map.mock.calls.length, 1));
+  assert.deepEqual(mocks.map.mock.calls[0], [
+    {
+      id: "import-1",
+      input: { create: ["Savings"], mapping: { Checking: 7 } },
+    },
+  ]);
+});
+
+test("pre-fills each YNAB category with the category of the same name, and saves the choices with the commit", async () => {
+  mocks.categories.current = [
+    {
+      categoryKey: 1,
+      childCategory: [
+        { categoryKey: 2, isSystemCategory: true, name: "RENT_MORTGAGE" },
+      ],
+      isSystemCategory: true,
+      name: "HOUSING",
+    },
+    { categoryKey: 5, isSystemCategory: false, name: "Groceries" },
+    { categoryKey: 6, isSystemCategory: false, name: "Utilities" },
+  ];
+  renderReview({
+    rows,
+    session: session({
+      format: "ynab",
+      sourceCategories: [
+        {
+          group: "Everyday Expenses",
+          label: "Everyday Expenses: Groceries",
+          name: "Groceries",
+          rowCount: 3,
+        },
+        // Matched by the server by the stored name; shown in the person's language.
+        {
+          group: "Bills",
+          label: "Bills: Rent Mortgage",
+          name: "Rent Mortgage",
+          rowCount: 1,
+          suggestedCategoryId: 2,
+        },
+        {
+          group: "Bills",
+          label: "Bills: Electricity",
+          name: "Electricity",
+          rowCount: 2,
+        },
+        {
+          group: "Fun",
+          label: "Fun: Dining Out",
+          name: "Dining Out",
+          rowCount: 1,
+        },
+      ],
+    }),
+  });
+  const user = userEvent.setup();
+
+  assert.ok(
+    screen.getByText(messages["import-review-categories-title"], {
+      selector: "p",
+    }),
+  );
+  assert.equal(
+    screen.getByRole("combobox", { name: "Everyday Expenses: Groceries" })
+      .textContent,
+    "Groceries",
+  );
+  assert.equal(
+    screen.getByRole("combobox", { name: "Fun: Dining Out" }).textContent,
+    messages["import-review-categories-none"],
+  );
+  await user.click(
+    screen.getByRole("combobox", { name: "Bills: Electricity" }),
+  );
+  await user.click(await screen.findByRole("option", { name: "Utilities" }));
+  await user.click(
+    screen.getByRole("button", { name: "Import 2 transactions" }),
+  );
+
+  await waitFor(() => assert.equal(mocks.commit.mock.calls.length, 1));
+  assert.deepEqual(mocks.mapCategories.mock.calls[0], [
+    {
+      id: "import-1",
+      input: {
+        "Bills: Electricity": 6,
+        "Bills: Rent Mortgage": 2,
+        "Everyday Expenses: Groceries": 5,
+        "Fun: Dining Out": null,
+      },
+    },
+  ]);
+});
+
+test("keeps a category the person left uncategorised, even when its name matches", () => {
+  mocks.categories.current = [
+    { categoryKey: 5, isSystemCategory: false, name: "Groceries" },
+  ];
+  renderReview({
+    rows,
+    session: session({
+      categoryMapping: { "Everyday Expenses: Groceries": null },
+      format: "ynab",
+      sourceCategories: [
+        {
+          group: "Everyday Expenses",
+          label: "Everyday Expenses: Groceries",
+          name: "Groceries",
+          rowCount: 3,
+          suggestedCategoryId: 5,
+        },
+      ],
+    }),
+  });
+
+  assert.equal(
+    screen.getByRole("combobox", { name: "Everyday Expenses: Groceries" })
+      .textContent,
+    messages["import-review-categories-none"],
   );
 });
 

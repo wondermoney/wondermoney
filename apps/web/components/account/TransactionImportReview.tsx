@@ -1,7 +1,8 @@
 "use client";
 
+import { suggestCategory } from "@wondermoney/shared/name-match";
 import { useTranslations } from "next-intl";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import { Amount } from "@/components/ui/Amount";
 import { Badge } from "@/components/ui/badge";
@@ -15,20 +16,28 @@ import {
   SelectValue,
 } from "@/components/ui/Select";
 import type { Account } from "@/lib/api/account/useAccounts";
+import useCategories, { type Category } from "@/lib/api/category/useCategories";
 import {
   FINISHED_IMPORT_STATUSES,
   type ImportRowStatus,
   type ImportSessionStatus,
+  type ImportSourceCategory,
+  type TransactionImportAccountMapping,
   type TransactionImportRow,
   type TransactionImportSession,
   useCancelTransactionImport,
   useCommitTransactionImport,
   useDecideTransactionImportRows,
   useMapTransactionImportAccounts,
+  useMapTransactionImportCategories,
   useParseTransactionImport,
   useTransactionImport,
 } from "@/lib/api/transaction-import/useTransactionImport";
 import { useRateLimitToast } from "@/lib/api/useRateLimitToast";
+import {
+  getCategoryDisplayName,
+  getSelectableCategories,
+} from "@/lib/utils/categories";
 import { useFormatShortDate } from "@/lib/utils/useFormatShortDate";
 
 const PAGE_SIZE = 50;
@@ -41,7 +50,12 @@ const DECIDABLE: ReadonlySet<ImportRowStatus> = new Set<ImportRowStatus>([
   "possible_duplicate",
 ]);
 
-/** A QIF file whose dates the reader could not order: it read them day-first and asks. */
+/** The mapping select's value for "import into a new manual account named after it". */
+const NEW_ACCOUNT = "new";
+/** The category select's value for "leave these rows uncategorised". */
+const UNCATEGORISED = "none";
+
+/** A QIF or YNAB file whose dates the reader could not order: it read them day-first and asks. */
 const dateOrderAmbiguous = (session: TransactionImportSession) =>
   session.warnings.some(
     (warning) =>
@@ -68,7 +82,9 @@ interface TransactionImportReviewProps {
 /**
  * The review step of a staged import: the file's rows by status (new, already
  * in the account, unreadable), each included or skipped, in bulk or one by
- * one; an account per source account when the file holds several; then the
+ * one; an account per source account when the file holds several (one of the
+ * person's, or a new manual account); a category per category the file uses
+ * (YNAB), matched by name in the person's language where one matches; then the
  * commit, which runs in the background and can be retried where it stopped.
  * Seven days after a commit only its summary is kept, and the outcome says so;
  * the file's name stays with it.
@@ -91,11 +107,37 @@ export default function TransactionImportReview({
   });
   const decide = useDecideTransactionImportRows();
   const mapAccounts = useMapTransactionImportAccounts();
+  const mapCategories = useMapTransactionImportCategories();
   const parse = useParseTransactionImport();
   const commit = useCommitTransactionImport();
   const cancel = useCancelTransactionImport();
   const session = query.data?.session;
   const rows = query.data?.rows;
+  const sourceCategories = session?.sourceCategories ?? [];
+  const categoriesQuery = useCategories(undefined, {
+    enabled: sourceCategories.length > 0,
+  });
+  // The person's picks in the category step; a category they have not touched shows its suggestion.
+  const [categoryPicks, setCategoryPicks] = useState<Record<string, string>>(
+    {},
+  );
+  const categoryOptions = useMemo(
+    () =>
+      getSelectableCategories(categoriesQuery.data?.categories ?? []).map(
+        (category) => ({
+          category,
+          label: getCategoryDisplayName(t, category.name),
+        }),
+      ),
+    [categoriesQuery.data, t],
+  );
+  const categoryChoice = (source: ImportSourceCategory): string =>
+    categoryPicks[source.label] ??
+    initialCategoryChoice(
+      source,
+      session?.categoryMapping ?? {},
+      categoryOptions,
+    );
 
   const finishedRef = useRef(false);
   useEffect(() => {
@@ -117,6 +159,7 @@ export default function TransactionImportReview({
   const busy =
     decide.isPending ||
     mapAccounts.isPending ||
+    mapCategories.isPending ||
     parse.isPending ||
     commit.isPending ||
     cancel.isPending;
@@ -150,6 +193,25 @@ export default function TransactionImportReview({
   }
 
   const pages = Math.max(1, Math.ceil(rows.total / rows.pageSize));
+
+  /** Commit, with the category step's choices saved first: every file category, picked or as suggested. */
+  const commitWithCategories = async () => {
+    if (sourceCategories.length > 0) {
+      await mapCategories.mutateAsync({
+        id: importId,
+        input: Object.fromEntries(
+          sourceCategories.map((source) => {
+            const choice = categoryChoice(source);
+            return [
+              source.label,
+              choice === UNCATEGORISED ? null : Number(choice),
+            ];
+          }),
+        ),
+      });
+    }
+    await commit.mutateAsync({ id: importId, input: undefined });
+  };
   const reviewable =
     session.status === "ready" || session.status === "needs_mapping";
 
@@ -169,6 +231,18 @@ export default function TransactionImportReview({
           session={session}
           onSave={(mapping) =>
             void run(mapAccounts.mutateAsync({ id: importId, input: mapping }))
+          }
+        />
+      ) : null}
+
+      {sourceCategories.length > 0 ? (
+        <CategoryMapping
+          choiceOf={categoryChoice}
+          disabled={busy}
+          options={categoryOptions}
+          sources={sourceCategories}
+          onChoose={(label, value) =>
+            setCategoryPicks((current) => ({ ...current, [label]: value }))
           }
         />
       ) : null}
@@ -325,9 +399,7 @@ export default function TransactionImportReview({
           size="lg"
           loading={commit.isPending}
           disabled={busy || !session.canCommit}
-          onClick={() =>
-            void run(commit.mutateAsync({ id: importId, input: undefined }))
-          }
+          onClick={() => void run(commitWithCategories())}
         >
           {t("import-review-commit", { count: session.decisions.import })}
         </Button>
@@ -564,13 +636,18 @@ function AccountMapping({
   accounts: Account[];
   disabled: boolean;
   session: TransactionImportSession;
-  onSave: (mapping: Record<string, number>) => void;
+  onSave: (mapping: TransactionImportAccountMapping) => void;
 }) {
   const t = useTranslations();
-  const [mapping, setMapping] = useState<Record<string, number>>(() => {
+  const [mapping, setMapping] = useState<
+    Record<string, number | typeof NEW_ACCOUNT>
+  >(() => {
     // The file's own identifier pre-fills the mapping where the server matched it (a CAMT.053
-    // statement's IBAN against the account's number); the person still confirms it.
-    const initial: Record<string, number> = { ...session.accountMapping };
+    // statement's IBAN against the account's number, an account of the same name); the person
+    // still confirms it.
+    const initial: Record<string, number | typeof NEW_ACCOUNT> = {
+      ...session.accountMapping,
+    };
     for (const source of session.sourceAccounts) {
       if (
         initial[source.label] === undefined &&
@@ -584,10 +661,23 @@ function AccountMapping({
   const complete = session.sourceAccounts.every(
     (source) => mapping[source.label] !== undefined,
   );
+  const title =
+    session.format === "ynab"
+      ? t("import-review-mapping-title-ynab")
+      : t("import-review-mapping-title");
+  const save = () => {
+    const chosen: Record<string, number> = {};
+    const create: string[] = [];
+    for (const [label, value] of Object.entries(mapping)) {
+      if (value === NEW_ACCOUNT) create.push(label);
+      else chosen[label] = value;
+    }
+    onSave({ create, mapping: chosen });
+  };
   return (
     <fieldset className="bg-muted flex flex-col gap-3 rounded-md p-4">
-      <legend className="sr-only">{t("import-review-mapping-title")}</legend>
-      <p className="font-medium">{t("import-review-mapping-title")}</p>
+      <legend className="sr-only">{title}</legend>
+      <p className="font-medium">{title}</p>
       {session.sourceAccounts.map((source) => (
         <label key={source.label} className="flex flex-col gap-1">
           <span>
@@ -605,7 +695,8 @@ function AccountMapping({
             onValueChange={(value) =>
               setMapping((current) => ({
                 ...current,
-                [source.label]: Number(value),
+                [source.label]:
+                  value === NEW_ACCOUNT ? NEW_ACCOUNT : Number(value),
               }))
             }
             disabled={disabled}
@@ -622,6 +713,9 @@ function AccountMapping({
                   {account.accountName ?? t("unknown")}
                 </SelectItem>
               ))}
+              <SelectItem value={NEW_ACCOUNT}>
+                {t("import-review-mapping-new", { label: source.label })}
+              </SelectItem>
             </SelectContent>
           </Select>
         </label>
@@ -631,10 +725,112 @@ function AccountMapping({
         size="sm"
         className="self-start"
         disabled={disabled || !complete}
-        onClick={() => onSave(mapping)}
+        onClick={save}
       >
         {t("import-review-mapping-save")}
       </Button>
+    </fieldset>
+  );
+}
+
+interface CategoryOption {
+  category: Category;
+  /** The name as the person's language shows it. */
+  label: string;
+}
+
+/**
+ * What a file category imports as before the person picks: their saved choice, else the category
+ * whose name matches in their language (or as stored), else the server's match, else uncategorised.
+ */
+function initialCategoryChoice(
+  source: ImportSourceCategory,
+  saved: Record<string, number | null>,
+  options: CategoryOption[],
+): string {
+  const selectable = new Set(
+    options.map((option) => option.category.categoryKey),
+  );
+  if (Object.hasOwn(saved, source.label)) {
+    const chosen = saved[source.label];
+    return chosen === null || !selectable.has(chosen)
+      ? UNCATEGORISED
+      : String(chosen);
+  }
+  const local = suggestCategory(
+    source,
+    options.map((option) => ({
+      id: option.category.categoryKey,
+      names: [option.label, option.category.name],
+    })),
+  );
+  const suggested =
+    local ??
+    (source.suggestedCategoryId !== undefined &&
+    selectable.has(source.suggestedCategoryId)
+      ? source.suggestedCategoryId
+      : undefined);
+  return suggested === undefined ? UNCATEGORISED : String(suggested);
+}
+
+/**
+ * The file's categories (YNAB), each with the category its rows import as. A category whose name
+ * matches one of the household's is pre-filled; the rest stay uncategorised unless the person
+ * picks one. The choices are saved with the commit.
+ */
+function CategoryMapping({
+  choiceOf,
+  disabled,
+  options,
+  sources,
+  onChoose,
+}: {
+  choiceOf: (source: ImportSourceCategory) => string;
+  disabled: boolean;
+  options: CategoryOption[];
+  sources: ImportSourceCategory[];
+  onChoose: (label: string, value: string) => void;
+}) {
+  const t = useTranslations();
+  return (
+    <fieldset className="bg-muted flex flex-col gap-3 rounded-md p-4">
+      <legend className="sr-only">{t("import-review-categories-title")}</legend>
+      <p className="font-medium">{t("import-review-categories-title")}</p>
+      <p className="text-muted-foreground">
+        {t("import-review-categories-hint")}
+      </p>
+      {sources.map((source) => (
+        <label key={source.label} className="flex flex-col gap-1">
+          <span>
+            {t("import-review-mapping-source", {
+              label: source.label,
+              count: source.rowCount,
+            })}
+          </span>
+          <Select
+            value={choiceOf(source)}
+            onValueChange={(value) => onChoose(source.label, value)}
+            disabled={disabled}
+          >
+            <SelectTrigger aria-label={source.label}>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value={UNCATEGORISED}>
+                {t("import-review-categories-none")}
+              </SelectItem>
+              {options.map((option) => (
+                <SelectItem
+                  key={option.category.categoryKey}
+                  value={String(option.category.categoryKey)}
+                >
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </label>
+      ))}
     </fieldset>
   );
 }

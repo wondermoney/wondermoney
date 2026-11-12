@@ -1,0 +1,46 @@
+---
+title: Import from YNAB
+description: Bring your YNAB transaction history into WonderMoney, with each YNAB account and category mapped to yours.
+---
+
+The YNAB import reads the register YNAB exports, with every account of the budget in one file, and imports each account's transactions into an account of yours. Both the current YNAB (web and app) export and the YNAB 4 export work. Budget amounts and goals are not imported.
+
+## Before you start
+
+Export the register from YNAB:
+
+- **YNAB**: open the menu under your budget's name and export the budget. YNAB downloads a zip file; unzip it and keep the file whose name ends in `Register.csv`. The other file in the zip (`Plan.csv`) holds the budget amounts, which are not imported.
+- **YNAB 4**: choose **File**, then **Export**, and keep the register file it writes.
+
+On a self-hosted instance, imports also need [file storage](/en/docs/self-hosting/configure#file-storage).
+
+## Steps
+
+1. Open any account and choose **Import transactions**, then **Import from YNAB**. Accounts you create in the next steps use the currency of the account you start from.
+2. Add the `Register.csv` file (up to 5 MB) and choose **Review transactions**.
+3. Choose where each YNAB account goes. Every account in the file is listed, with how many rows it has, and one of your accounts with the same name is filled in. For an account you don't have yet, choose **New manual account**: WonderMoney creates a manual account with the YNAB account's name, opening at the balance the file ends on for it. Choose **Save accounts**.
+4. Choose a category for each YNAB category. A YNAB category whose name matches one of yours, in your language, is filled in; case and accents don't matter. The rest stay uncategorised unless you choose one.
+5. Check the rows, as for any [import](/en/docs/accounts-transactions/import-transactions-csv): new rows are included, rows already in the account are skipped.
+6. Choose **Import**. The import runs in the background, and the category choices are saved with it.
+
+## How YNAB rows import
+
+- **Amounts.** Each row's amount is its inflow minus its outflow, so money out is negative and money in positive. The currency symbol and the thousands separator are read in the budget's own number format (`$1,234.56`, `1.234,56 €`, `CHF 1'234.50`).
+- **Dates.** YNAB writes dates in the budget's date format. WonderMoney reads every date in the file to tell day first from month first, and when the file cannot say (every day and month is 12 or less) it asks you to choose before importing.
+- **Transfers.** A row whose payee is `Transfer : <Account>` is one side of a transfer. Both sides import as transfers, and when both accounts are imported the two rows are linked as one transfer, which reports leave out of income and spending.
+- **Ready to Assign.** Inflows to Ready to Assign (To be Budgeted in older budgets, Income in YNAB 4) import as income with no category.
+- **Categories.** A category you mapped is set on the row as your choice, so later learned categorization does not replace it. A household rule that matches the row still applies, as for any new transaction.
+- **Duplicates.** YNAB's export has no transaction ids, so each row is recognised by its date and amount within its account. Importing the same export again finds its rows already in the account and skips them.
+
+## Common issues
+
+- The file is the `Plan.csv` from the zip, not `Register.csv`. Only the register holds transactions.
+- The dates could be day first or month first, and the import asks which before it can go on.
+- Two transfers between the same accounts on the same day, for the same amount, both import as transfers, but are not linked to each other: WonderMoney cannot tell which pairs with which.
+
+## Related links
+
+- [Import transactions from CSV, OFX, QIF or CAMT.053](/en/docs/accounts-transactions/import-transactions-csv)
+- [Manual offline account](/en/docs/accounts-transactions/manual-offline-account)
+- [Categorize transactions](/en/docs/accounts-transactions/categorize-transactions)
+- [Transaction import problems](/en/docs/troubleshooting/transaction-import-problems)

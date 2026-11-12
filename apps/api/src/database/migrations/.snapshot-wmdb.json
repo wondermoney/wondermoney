@@ -25677,6 +25677,23 @@
           "enumItems": [],
           "mappedType": "boolean"
         },
+        "category_mapping": {
+          "name": "category_mapping",
+          "type": "jsonb",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "json"
+        },
         "committed_at": {
           "name": "committed_at",
           "type": "timestamptz(6)",
@@ -25917,6 +25934,23 @@
         },
         "source_accounts": {
           "name": "source_accounts",
+          "type": "jsonb",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "json"
+        },
+        "source_categories": {
+          "name": "source_categories",
           "type": "jsonb",
           "unsigned": false,
           "autoincrement": false,

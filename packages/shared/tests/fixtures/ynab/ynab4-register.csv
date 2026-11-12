@@ -1,0 +1,6 @@
+"Account","Flag","Check Number","Date","Payee","Category","Master Category","Sub Category","Memo","Outflow","Inflow","Cleared","Running Balance"
+"Conta à ordem","","","15/01/2026","Mercearia do Bairro","Despesas diárias: Supermercado","Despesas diárias","Supermercado","","42,50 €","0,00 €","R","957,50 €"
+"Conta à ordem","","","31/01/2026","Entidade Patronal","Income: Available this month","Income","Available this month","Salário","0,00 €","1.500,00 €","C","2.457,50 €"
+"Conta à ordem","","101","03/02/2026","Transfer : Poupança","","","","","400,00 €","0,00 €","C","2.057,50 €"
+"Conta à ordem","","","20/02/2026","Café Central","Lazer: Restaurantes","Lazer","Restaurantes","Jantar","1.234,56 €","0,00 €","U","822,94 €"
+"Poupança","","","03/02/2026","Transfer : Conta à ordem","","","","","0,00 €","400,00 €","C","400,00 €"

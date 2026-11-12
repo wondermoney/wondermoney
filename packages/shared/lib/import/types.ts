@@ -10,7 +10,7 @@
  */
 
 /** The file formats a session can read. Each one is an {@link ImportAdapter}. */
-export const IMPORT_FORMATS = ['statement', 'ofx', 'qif', 'generic-csv', 'camt053'] as const;
+export const IMPORT_FORMATS = ['statement', 'ofx', 'qif', 'generic-csv', 'camt053', 'ynab'] as const;
 export type ImportFormat = (typeof IMPORT_FORMATS)[number];
 
 /**
@@ -44,7 +44,10 @@ export type ImportSessionStatus = (typeof IMPORT_SESSION_STATUSES)[number];
 export interface NormalizedImportRow {
   /** Signed: negative is money leaving the account. */
   amount: number;
-  /** The category the source app gave it, for a later category-mapping step. */
+  /**
+   * The category the source app gave it (`Group: Category` for a YNAB export). A file whose
+   * categories the session maps lists them in {@link ImportParseResult.sourceCategories}.
+   */
   categoryLabel?: string;
   /** ISO 4217; absent means the target account's currency. */
   currency?: string;
@@ -107,6 +110,22 @@ export interface ImportSourceAccount {
   suggestedAccountId?: number;
 }
 
+/**
+ * A category the file uses, for the category-mapping step: the person picks a WonderMoney category
+ * for it, or leaves its rows uncategorised.
+ */
+export interface ImportSourceCategory {
+  /** The group the source app files it under (YNAB's category group), when it has one. */
+  group?: string;
+  /** The rows' {@link NormalizedImportRow.categoryLabel}. */
+  label: string;
+  /** The category's own name, without its group. */
+  name: string;
+  rowCount: number;
+  /** A category of the household whose name matches, when the session found exactly one. */
+  suggestedCategoryId?: number;
+}
+
 export interface ImportWarning {
   code: string;
   detail?: string;
@@ -117,6 +136,8 @@ export interface ImportParseResult {
   rows: ParsedImportRow[];
   /** Empty when the file is for one account only (the one the import was started on). */
   sourceAccounts: ImportSourceAccount[];
+  /** The categories to map, for a format whose categories the session maps (YNAB). Absent otherwise. */
+  sourceCategories?: ImportSourceCategory[];
   warnings: ImportWarning[];
 }
 

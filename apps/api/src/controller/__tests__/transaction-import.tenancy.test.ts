@@ -49,6 +49,8 @@ describe('transaction import sessions over HTTP', () => {
       expect((await agent.get(`/v1/transaction-import-sessions/${session.id}`)).status).toBe(404);
       expect((await agent.get(`/v1/transaction-import-sessions/${session.id}?status=new`)).status).toBe(404);
       expect((await agent.patch(`/v1/transaction-import-sessions/${session.id}/rows`).send({ decision: 'skip', status: 'new' })).status).toBe(404);
+      expect((await agent.patch(`/v1/transaction-import-sessions/${session.id}/account-mapping`).send({ create: ['Savings'], mapping: {} })).status).toBe(404);
+      expect((await agent.patch(`/v1/transaction-import-sessions/${session.id}/category-mapping`).send({ mapping: { 'Fun: Dining Out': null } })).status).toBe(404);
       expect((await agent.post(`/v1/transaction-import-sessions/${session.id}/commit`)).status).toBe(404);
       expect((await agent.post(`/v1/transaction-import-sessions/${session.id}/cancel`)).status).toBe(404);
     }

@@ -8,7 +8,7 @@ import { importFileNameInput, positiveIntId } from '@validators/shared';
 const sessionParams = z.object({ importId: z.uuid() });
 const options = z
   .object({
-    /** How a QIF date whose day and month are both 12 or less reads. */
+    /** How a QIF or YNAB date whose day and month are both 12 or less reads. */
     dateOrder: z.enum(['day-first', 'month-first']).optional(),
     mapping: statementMappingSchema.optional(),
   })
@@ -52,8 +52,20 @@ export const decideTransactionImportRowsSchema = z.object({
   params: sessionParams,
 });
 
-/** `PATCH /:importId/account-mapping`: the file's account labels to account ids. */
+/**
+ * `PATCH /:importId/account-mapping`: the file's account labels to account ids, and the labels to
+ * import into a new manual account each (`create`).
+ */
 export const mapTransactionImportAccountsSchema = z.object({
-  body: z.object({ mapping: z.record(z.string().min(1).max(255), positiveIntId) }).strict(),
+  body: z.object({
+    create: z.array(z.string().min(1).max(255)).max(100).optional(),
+    mapping: z.record(z.string().min(1).max(255), positiveIntId),
+  }).strict(),
+  params: sessionParams,
+});
+
+/** `PATCH /:importId/category-mapping`: the file's category labels to category ids, or null for uncategorised. */
+export const mapTransactionImportCategoriesSchema = z.object({
+  body: z.object({ mapping: z.record(z.string().min(1).max(255), positiveIntId.nullable()) }).strict(),
   params: sessionParams,
 });
