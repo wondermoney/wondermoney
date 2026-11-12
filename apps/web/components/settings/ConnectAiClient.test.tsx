@@ -92,6 +92,30 @@ test("creates a token with the mcp:read scope and shows it once", async () => {
   await screen.findByDisplayValue("wm_pat_mcp-value");
 });
 
+test("adds the mcp:propose scope only when the person allows proposals", async () => {
+  state.create.mockResolvedValue({
+    apiToken: { id: 2, name: "AI client", scopes: ["mcp:read", "mcp:propose"] },
+    token: "wm_pat_mcp-propose-value",
+  });
+  const user = userEvent.setup();
+  renderPanel();
+
+  await user.click(
+    screen.getByRole("checkbox", {
+      name: "Let the client propose changes for me to confirm",
+    }),
+  );
+  await user.click(
+    screen.getByRole("button", { name: "Create an AI client token" }),
+  );
+
+  await waitFor(() => assert.equal(state.create.mock.calls.length, 1));
+  assert.deepEqual(state.create.mock.calls[0]?.[0]?.scopes, [
+    "mcp:read",
+    "mcp:propose",
+  ]);
+});
+
 test("lists recent MCP calls by tool name", () => {
   state.calls = [
     { createdAt: "2026-11-11T10:00:00.000Z", toolName: "get_net_worth_summary" },

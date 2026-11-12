@@ -1,16 +1,22 @@
 import type { z } from 'zod';
 
 /**
- * The transport-neutral contract of a read-only finance tool.
+ * The transport-neutral contract of a finance tool: the read-only tools and the `propose_*`
+ * tools, which draft a change for the person to confirm and never write one.
  *
  * The in-app assistant (`services/assistant`) and the MCP server (`services/mcp`) both read
- * from this one definition list: they only differ in how they expose a tool to a model and
+ * from these definition lists: they only differ in how they expose a tool to a model and
  * where they record the audit entry.
  */
 export interface AiToolContext {
   appuserKey: number;
   /** ISO 4217 code of the caller's base currency, used when no viewer row can be read. */
   currency: string;
+  /**
+   * Who is calling, recorded on a proposal a `propose_*` tool drafts: the in-app assistant, or an
+   * MCP client and the token it holds. Absent means the assistant. Read tools ignore it.
+   */
+  origin?: { apiTokenKey?: number; source: 'assistant' | 'mcp' };
   tenantKey: number;
 }
 
@@ -45,6 +51,9 @@ export type AiToolName =
   | 'list_accounts'
   | 'list_budgets'
   | 'list_categories'
+  | 'propose_categorize_transactions'
+  | 'propose_mark_transactions_reviewed'
+  | 'propose_update_transaction_note'
   | 'search_transactions';
 
 export interface AiToolResult<TData> {

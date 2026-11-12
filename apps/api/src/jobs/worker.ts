@@ -41,6 +41,12 @@ import {
   scheduleAssetPriceRefreshJob,
 } from '@app/jobs/asset-price-refresh.queue';
 import {
+  ASSISTANT_PROPOSAL_EXPIRY_CRON,
+  ASSISTANT_PROPOSAL_EXPIRY_QUEUE,
+  ensureAssistantProposalExpiryQueue,
+  scheduleAssistantProposalExpiryJob,
+} from '@app/jobs/assistant-proposal-expiry.queue';
+import {
   BACKGROUND_OPERATION_RECOVERY_CRON,
   BACKGROUND_OPERATION_RECOVERY_QUEUE,
   ensureBackgroundOperationRecoveryQueue,
@@ -344,6 +350,7 @@ export const createWorker = (deps: WorkerDeps = {}) => {
     await ensureCertificadoAforroRateSyncQueue(boss);
     await ensureBudgetYearExtensionQueue(boss);
     await ensureApiTokenExpiryQueue(boss);
+    await ensureAssistantProposalExpiryQueue(boss);
     await ensureWorkerHeartbeatQueue(boss);
     await ensureInstanceHeartbeatQueue(boss);
     // monthlyStory ships unconditionally (no feature flag), so its queues must always exist —
@@ -387,6 +394,7 @@ export const createWorker = (deps: WorkerDeps = {}) => {
       await scheduleCertificadoAforroRateSyncAutoJob(boss);
       await scheduleBudgetYearExtensionJob(boss);
       await scheduleApiTokenExpiryJob(boss);
+      await scheduleAssistantProposalExpiryJob(boss);
       // Unschedule-then-conditionally-schedule keeps the schedule from drifting
       // when the heartbeat URL is added or removed between deploys.
       await unscheduleWorkerHeartbeatJob(boss);
@@ -681,6 +689,18 @@ export const createWorker = (deps: WorkerDeps = {}) => {
         async (job) => {
           const { handleApiTokenExpiryReminderJob } = await import('@app/jobs/api-token-expiry.worker');
           await runInRequestContext(() => handleApiTokenExpiryReminderJob(job, { logger: log }));
+        },
+      ),
+    );
+
+    await boss.work<Record<string, never>>(
+      ASSISTANT_PROPOSAL_EXPIRY_QUEUE,
+      workCronJobs<Job<Record<string, never>>>(
+        ASSISTANT_PROPOSAL_EXPIRY_QUEUE,
+        { checkinMarginMinutes: 30, maxRuntimeMinutes: 10, monitorSlug: ASSISTANT_PROPOSAL_EXPIRY_QUEUE, schedule: ASSISTANT_PROPOSAL_EXPIRY_CRON },
+        async (job) => {
+          const { handleAssistantProposalExpiryJob } = await import('@app/jobs/assistant-proposal-expiry.worker');
+          await runInRequestContext(() => handleAssistantProposalExpiryJob(job, { logger: log }));
         },
       ),
     );

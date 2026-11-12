@@ -24,6 +24,8 @@ function magicByteMatches(buffer: unknown, mimetype: string): boolean {
 export const updateTransactionRequestSchema = z.object({
   body: z.object({
     categoryKey: z.string().optional().transform((val) => (val ? positiveIntId.parse(val) : undefined)),
+    /** The transaction's note; null or an empty string clears it. */
+    notes: z.string().max(1000).nullable().optional(),
     /** "Mark as transfer" and its undo; see `transaction-transfer.service.ts`. */
     transactionType: z.enum(USER_SETTABLE_TYPES).optional(),
     /** Where an outgoing transfer went; null clears it. */

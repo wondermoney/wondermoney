@@ -12,6 +12,7 @@ import { useMcpCalls } from "@/lib/api/user/useMcpCalls";
 import { formatShortDateForLocale } from "@/lib/utils/formatDate";
 
 import { Button } from "../ui/button";
+import { Checkbox } from "../ui/checkbox";
 import { Input } from "../ui/input";
 import { Label } from "../ui/Label";
 import { Heading, Text } from "../ui/Typography";
@@ -25,7 +26,9 @@ export const MCP_TOKEN_EXPIRY_DAYS = 90;
  *
  * An MCP client is a long-lived machine credential, so it gets its own `mcp:read` token rather
  * than the member's `read` token: it reaches only `POST /v1/mcp` and nothing on the ordinary
- * data routes. The panel shows the endpoint, a one-click token, copy-paste client config and
+ * data routes. With proposals allowed it also carries `mcp:propose`: the client may draft
+ * changes, which wait for the member to apply them in Settings › Assistant and which the client
+ * can never apply itself. The panel shows the endpoint, a one-click token, copy-paste client config and
  * the recent calls the server recorded.
  */
 export default function ConnectAiClient() {
@@ -38,6 +41,7 @@ export default function ConnectAiClient() {
   const { data: calls = [], isLoading: callsLoading } = useMcpCalls(mcpEnabled);
 
   const [totpCode, setTotpCode] = useState("");
+  const [allowProposals, setAllowProposals] = useState(false);
   const [createdToken, setCreatedToken] = useState<string | null>(null);
 
   if (!mcpEnabled) return null;
@@ -83,7 +87,7 @@ export default function ConnectAiClient() {
       const result = await create.mutateAsync({
         expiresInDays: MCP_TOKEN_EXPIRY_DAYS,
         name: MCP_TOKEN_NAME,
-        scopes: ["mcp:read"],
+        scopes: allowProposals ? ["mcp:read", "mcp:propose"] : ["mcp:read"],
         ...(totpCode.trim() ? { totpCode: totpCode.trim() } : {}),
       });
       setCreatedToken(result.token);
@@ -133,6 +137,17 @@ export default function ConnectAiClient() {
           </div>
 
           <div className="flex flex-col gap-2">
+            <div className="flex flex-col gap-1">
+              <div className="flex items-center gap-2">
+                <Checkbox
+                  id={`${id}-proposals`}
+                  checked={allowProposals}
+                  onCheckedChange={(checked) => setAllowProposals(checked === true)}
+                />
+                <Label htmlFor={`${id}-proposals`}>{t("allow-proposals")}</Label>
+              </div>
+              <Text variant="mutedText">{t("allow-proposals-hint")}</Text>
+            </div>
             <Button
               type="button"
               variant="default"

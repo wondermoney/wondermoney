@@ -789,19 +789,19 @@
     "panel": {
       "error": "Não foi possível carregar as definições do assistente.",
       "loading": "A carregar definições do assistente…",
-      "subtitle": "Ajuda temporária e só de leitura"
+      "subtitle": "Ajuda temporária; confirma cada alteração"
     },
     "consent": {
       "title": "Ativar o assistente",
       "description": "O Wonder Assistant pode ajudar a rever as suas finanças com acesso só de leitura e ferramentas controladas.",
       "readOnly": "Acesso só de leitura",
-      "readOnlyDetail": "Pode consultar os dados do WonderMoney a que já tem acesso, mas não consegue alterar nada.",
+      "readOnlyDetail": "Pode consultar os dados do WonderMoney a que já tem acesso. Nunca altera nada sozinho: pode propor uma alteração, que aplica ou descarta.",
       "temporary": "Conversas temporárias",
       "temporaryDetail": "As conversas são temporárias e não ficam como memória permanente.",
       "azure": "Corre em Azure GPT",
       "azureDetail": "As respostas são geradas por modelos GPT alojados na Azure.",
       "tools": "Ferramentas controladas",
-      "toolsDetail": "O assistente usa ferramentas aprovadas só de leitura. Não consegue alterar os seus dados.",
+      "toolsDetail": "O assistente usa ferramentas aprovadas. Uma alteração que proponha fica à espera de que a aplique.",
       "enable": "Ativar assistente",
       "notNow": "Agora não"
     },
@@ -844,6 +844,42 @@
       "auditLogConversationId": "ID da conversa",
       "auditLogMetadata": "Metadados sanitizados",
       "auditLogNoMetadata": "Sem metadados"
+    },
+    "proposals": {
+      "title": {
+        "categorize": "Categorizar {count, plural, =1 {# transação} other {# transações}} como {category}",
+        "categorizeGeneric": "Categorizar {count, plural, =1 {# transação} other {# transações}}",
+        "markReviewed": "Marcar {count, plural, =1 {# transação como revista} other {# transações como revistas}}",
+        "updateNote": "Alterar a nota de uma transação"
+      },
+      "sourceAssistant": "Do assistente",
+      "sourceMcp": "De um cliente MCP",
+      "expires": "Expira a {date}",
+      "noDescription": "Sem descrição",
+      "changesTo": "passa a",
+      "uncategorized": "Sem categoria",
+      "reviewed": "Revista",
+      "notReviewed": "Por rever",
+      "noNote": "Sem nota",
+      "showAll": "Mostrar todas ({count})",
+      "unavailable": "{count, plural, =1 {# transação já não está disponível} other {# transações já não estão disponíveis}} para si.",
+      "apply": "Aplicar",
+      "dismiss": "Descartar",
+      "confirmNote": "Nada muda até aplicar.",
+      "outcome": {
+        "applied": "Aplicada",
+        "rejected": "Descartada",
+        "expired": "Expirou. Peça de novo se ainda quiser esta alteração.",
+        "failed": "Não foi possível aplicar: uma transação ou categoria já não está disponível.",
+        "notPending": "Esta alteração já foi decidida."
+      },
+      "error": "Não foi possível guardar a sua escolha. Tente novamente.",
+      "demoReadOnly": "A conta de demonstração é só de leitura.",
+      "pendingTitle": "Alterações pendentes",
+      "pendingDescription": "Alterações propostas pelo assistente ou por um cliente MCP ligado. Nada é gravado até aplicar, e uma alteração que deixe por decidir expira ao fim de 7 dias.",
+      "pendingLoading": "A carregar alterações pendentes…",
+      "pendingError": "Não foi possível carregar as alterações pendentes.",
+      "pendingEmpty": "Sem alterações pendentes."
     }
   },
   "none": "nenhum",

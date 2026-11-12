@@ -5,7 +5,7 @@ description: Permite que Claude Desktop, Cursor u otro cliente MCP pregunte por 
 
 WonderMoney incluye un servidor [Model Context Protocol](https://modelcontextprotocol.io) (MCP) de solo lectura. Un cliente MCP como Claude Desktop, Cursor o VS Code puede preguntarle por tus cuentas, gastos, presupuestos, objetivos, patrimonio neto y cartera, y responder en el propio chat del cliente.
 
-El servidor está en `POST /v1/mcp` de tu API. No es una cuenta aparte y no tiene herramientas de escritura: puede leer, y nada más.
+El servidor está en `POST /v1/mcp` de tu API. No es una cuenta aparte y no tiene herramientas de escritura: puede leer y, si lo permites, proponer un cambio para que lo confirmes. Nunca cambia nada por sí mismo.
 
 ## Qué puede ver el cliente
 
@@ -31,15 +31,19 @@ El cliente puede llamar a estas herramientas de solo lectura:
 
 No puede crear, cambiar ni borrar nada, y no llega al hogar, a las conexiones bancarias, a las exportaciones ni a la gestión de tokens.
 
+## Propuestas
+
+Con el ámbito de propuestas (`mcp:propose`), el cliente también puede llamar a `propose_categorize_transactions`, `propose_mark_transactions_reviewed` y `propose_update_transaction_note`. Cada una comprueba que todas las transacciones son visibles para ti y prepara una propuesta; no cambia la transacción. La propuesta espera en **Ajustes > Asistente > Cambios pendientes** (y en **Más > Cambios pendientes** en el móvil) hasta que la apliques o descartes, y caduca a los siete días. El cliente no puede aplicarla, ni ningún token de API. Consulta [Configuración del asistente](/es/docs/settings-security-privacy/assistant-settings#propuestas-y-cambios-pendientes).
+
 ## Crear un token
 
 1. Abre **Ajustes → Tokens de API**.
 2. En **Conectar un cliente de IA**, selecciona **Crear un token de cliente de IA**.
 3. Copia el token de inmediato. Solo se muestra una vez.
 
-El atajo crea un token llamado "AI client" con el ámbito **Cliente de IA (MCP)** y una caducidad de 90 días. Si usas autenticación de dos factores, introduce antes el código del autenticador. También puedes crear el token a mano en el formulario de arriba, eligiendo el mismo ámbito.
+El atajo crea un token llamado "AI client" con el ámbito **Cliente de IA (MCP)** y una caducidad de 90 días. Si usas autenticación de dos factores, introduce antes el código del autenticador. Para añadir el ámbito de propuestas, marca antes **Dejar que el cliente proponga cambios para que yo los confirme**. También puedes crear el token a mano en el formulario de arriba, eligiendo los mismos ámbitos.
 
-El ámbito `mcp:read` solo llega al endpoint MCP. No da acceso a las rutas de datos normales, y un token `read` no llega al MCP: son credenciales separadas a propósito.
+Los ámbitos `mcp:read` y `mcp:propose` solo llegan al endpoint MCP: `mcp:read` da las herramientas de solo lectura y `mcp:propose` las de propuestas. No dan acceso a las rutas de datos normales, y un token `read` no llega al MCP: son credenciales separadas a propósito.
 
 ## Configuración del cliente
 

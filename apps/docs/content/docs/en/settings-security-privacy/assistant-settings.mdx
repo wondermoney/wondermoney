@@ -20,20 +20,36 @@ Use it when you want to pause the assistant, hide the launcher, or review whethe
 - Enable or disable the assistant.
 - Hide or show the assistant launcher.
 - Review the assistant audit log when the assistant is enabled.
+- Apply or dismiss the changes waiting under **Pending changes**.
 
 If you disable the assistant, the launcher should no longer appear in normal use.
 
 ## What the settings mean
 
-- The assistant is read-only.
+- The assistant reads your data and never changes it by itself. It can propose a change for you to confirm.
 - It uses approved tools only when enabled.
 - Temporary chats do not keep the conversation in the same way as regular chats.
 
 
+## Proposals and pending changes
+
+The assistant, and an AI client you connected over MCP with the proposals scope, can draft three kinds of change:
+
+- Put a category on up to 100 transactions.
+- Mark up to 100 transactions as reviewed.
+- Set or clear the note on one transaction.
+
+A draft is a proposal: nothing changes until you apply it. In the chat it appears as a card with each transaction's current value and the proposed one, and **Apply** and **Dismiss** buttons. **Settings > Assistant > Pending changes** lists every proposal still waiting, including the ones an MCP client made; on mobile it is under **More > Pending changes**, with a count of the proposals waiting.
+
+- Applying makes the same change, with the same entry in the transaction's history, as doing it yourself. Applying twice changes nothing more.
+- A proposal only ever covers transactions you can see. If one has since been deleted or moved to a household member's private account, or the category was deleted, applying it fails and nothing changes.
+- A proposal you do not apply expires after seven days.
+- Only you can apply or dismiss a proposal, signed in to the app. The assistant, an MCP client and an API token cannot.
+- Proposals belong to you: a household member does not see yours.
 
 ## Turn off every AI feature
 
-This page controls the assistant. To turn off every AI feature at once — the assistant, receipt scanning, AI column mapping and the AI-written monthly story text — use **Settings > Privacy > Hide AI features**. It applies to your account only, and turning it off restores the assistant exactly as you had it.
+This page controls the assistant. To turn off every AI feature at once — the assistant, receipt scanning, AI column mapping and the AI-written monthly story text — use **Settings > Privacy > Hide AI features**. Proposals and pending changes are hidden too, and nothing new can be proposed. It applies to your account only, and turning it off restores the assistant exactly as you had it.
 
 ## Related pages
 

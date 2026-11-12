@@ -547,19 +547,19 @@
     "panel": {
       "error": "No se han podido cargar los ajustes del asistente.",
       "loading": "Cargando ajustes del asistente…",
-      "subtitle": "Ayuda temporal y de solo lectura"
+      "subtitle": "Ayuda temporal; confirmas cada cambio"
     },
     "consent": {
       "title": "Activar el asistente",
       "description": "Wonder Assistant puede ayudarte a revisar tus finanzas con acceso de solo lectura y herramientas controladas.",
       "readOnly": "Acceso de solo lectura",
-      "readOnlyDetail": "Puede consultar los datos de WonderMoney a los que ya tienes acceso, pero no puede cambiar nada.",
+      "readOnlyDetail": "Puede consultar los datos de WonderMoney a los que ya tienes acceso. Nunca cambia nada por sí mismo: puede proponer un cambio, que tú aplicas o descartas.",
       "temporary": "Chats temporales",
       "temporaryDetail": "Los chats son temporales y no se guardan como memoria permanente.",
       "azure": "Funciona sobre Azure GPT",
       "azureDetail": "Las respuestas se generan con modelos GPT alojados en Azure.",
       "tools": "Herramientas controladas",
-      "toolsDetail": "El asistente usa herramientas aprobadas de solo lectura. No puede cambiar tus datos.",
+      "toolsDetail": "El asistente usa herramientas aprobadas. Un cambio que proponga espera a que lo apliques.",
       "enable": "Activar asistente",
       "notNow": "Ahora no"
     },
@@ -602,6 +602,42 @@
       "auditLogConversationId": "ID de conversación",
       "auditLogMetadata": "Metadatos sanitizados",
       "auditLogNoMetadata": "Sin metadatos"
+    },
+    "proposals": {
+      "title": {
+        "categorize": "Categorizar {count, plural, =1 {# transacción} other {# transacciones}} como {category}",
+        "categorizeGeneric": "Categorizar {count, plural, =1 {# transacción} other {# transacciones}}",
+        "markReviewed": "Marcar {count, plural, =1 {# transacción como revisada} other {# transacciones como revisadas}}",
+        "updateNote": "Cambiar la nota de una transacción"
+      },
+      "sourceAssistant": "Del asistente",
+      "sourceMcp": "De un cliente MCP",
+      "expires": "Caduca el {date}",
+      "noDescription": "Sin descripción",
+      "changesTo": "pasa a",
+      "uncategorized": "Sin categoría",
+      "reviewed": "Revisada",
+      "notReviewed": "Sin revisar",
+      "noNote": "Sin nota",
+      "showAll": "Mostrar todas ({count})",
+      "unavailable": "{count, plural, =1 {# transacción ya no está disponible} other {# transacciones ya no están disponibles}} para ti.",
+      "apply": "Aplicar",
+      "dismiss": "Descartar",
+      "confirmNote": "Nada cambia hasta que lo apliques.",
+      "outcome": {
+        "applied": "Aplicado",
+        "rejected": "Descartado",
+        "expired": "Caducado. Vuelve a pedirlo si aún quieres este cambio.",
+        "failed": "No se pudo aplicar: una transacción o categoría ya no está disponible.",
+        "notPending": "Este cambio ya se decidió."
+      },
+      "error": "No se pudo guardar tu elección. Inténtalo de nuevo.",
+      "demoReadOnly": "La cuenta de demostración es de solo lectura.",
+      "pendingTitle": "Cambios pendientes",
+      "pendingDescription": "Cambios que propuso el asistente o un cliente MCP conectado. No se guarda nada hasta que lo apliques, y un cambio que dejes sin decidir caduca a los 7 días.",
+      "pendingLoading": "Cargando cambios pendientes…",
+      "pendingError": "No se pudieron cargar los cambios pendientes.",
+      "pendingEmpty": "No hay cambios pendientes."
     }
   },
   "toast-reset-pw-success": "Contraseña restablecida correctamente.",

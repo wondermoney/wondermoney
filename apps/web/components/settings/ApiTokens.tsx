@@ -46,6 +46,8 @@ function scopeLabel(t: ReturnType<typeof useTranslations>, scope: ApiTokenScope)
       return t("scope-calendar-read");
     case "mcp:read":
       return t("scope-mcp-read");
+    case "mcp:propose":
+      return t("scope-mcp-propose");
     case "write":
       return t("scope-write");
     default:
@@ -209,8 +211,17 @@ export default function ApiTokens() {
               />
               <Label htmlFor={`${id}-mcp`}>{t("scope-mcp-read")}</Label>
             </div>
+            <div className="flex items-center gap-2">
+              <Checkbox
+                id={`${id}-mcp-propose`}
+                checked={scopes.includes("mcp:propose")}
+                onCheckedChange={(checked) => toggleScope("mcp:propose", checked === true)}
+              />
+              <Label htmlFor={`${id}-mcp-propose`}>{t("scope-mcp-propose")}</Label>
+            </div>
             <Text variant="mutedText">{t("scope-write-hint")}</Text>
             <Text variant="mutedText">{t("scope-mcp-read-hint")}</Text>
+            <Text variant="mutedText">{t("scope-mcp-propose-hint")}</Text>
           </fieldset>
 
           <div className="flex flex-col gap-1.5">

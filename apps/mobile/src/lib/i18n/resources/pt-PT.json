@@ -1475,7 +1475,10 @@
     },
     "goals": "Objetivos",
     "help": "Ajuda",
-    "whatsNew": "Novidades"
+    "whatsNew": "Novidades",
+    "pendingChanges": "Alterações pendentes",
+    "pendingChangesCount_one": "{{count}} em espera",
+    "pendingChangesCount_other": "{{count}} em espera"
   },
   "preferences": {
     "title": "Aspeto e idioma",
@@ -4659,6 +4662,51 @@
       "demo": "Os perfis de demonstração são só de leitura. As transações existentes não podem ser alteradas.",
       "access": "A sua sessão precisa de atenção antes de aplicar regras.",
       "error": "Não foi possível aplicar a regra neste momento."
+    }
+  },
+  "pendingChanges": {
+    "back": "Voltar a Mais",
+    "description": "Alterações que o assistente ou um cliente MCP propôs. Nada muda até aplicares uma, e cada uma expira ao fim de 7 dias.",
+    "loading": "A carregar alterações pendentes",
+    "errorTitle": "Não foi possível carregar as alterações pendentes",
+    "errorMessage": "Verifica a tua ligação e tenta novamente.",
+    "invalidMessage": "O servidor enviou algo que esta versão da aplicação não consegue ler. Atualiza a aplicação e tenta novamente.",
+    "stale": "Podem estar desatualizadas. Puxa para atualizar.",
+    "empty": "Sem alterações pendentes. Quando o assistente ou um cliente MCP propuser uma alteração, ela fica aqui à tua espera.",
+    "aiHidden": "As funcionalidades de IA estão ocultas na tua conta. Volta a ativá-las em Definições › Aparência para veres as alterações propostas.",
+    "apply": "Aplicar",
+    "dismiss": "Descartar",
+    "applyNamed": "Aplicar: {{title}}",
+    "dismissNamed": "Descartar: {{title}}",
+    "expires": "Expira a {{date}}",
+    "untitledTransaction": "Transação",
+    "unavailable_one": "Não é possível mostrar mais {{count}} transação: já não a consegues ver.",
+    "unavailable_other": "Não é possível mostrar mais {{count}} transações: já não as consegues ver.",
+    "rowAccessibility": "{{label}}: de {{before}} para {{after}}",
+    "source": {
+      "assistant": "Do assistente",
+      "mcp": "De um cliente MCP"
+    },
+    "title": {
+      "page": "Alterações pendentes",
+      "categorize_one": "Categorizar {{count}} transação como {{category}}",
+      "categorize_other": "Categorizar {{count}} transações como {{category}}",
+      "categorizeUnnamed_one": "Categorizar {{count}} transação",
+      "categorizeUnnamed_other": "Categorizar {{count}} transações",
+      "review_one": "Marcar {{count}} transação como revista",
+      "review_other": "Marcar {{count}} transações como revistas",
+      "note": "Atualizar a nota de uma transação"
+    },
+    "value": {
+      "uncategorized": "Sem categoria",
+      "reviewed": "Revista",
+      "notReviewed": "Por rever",
+      "noNote": "Sem nota"
+    },
+    "failure": {
+      "gone": "Essa alteração já não pode ser aplicada: expirou, já foi decidida, ou uma transação ou categoria já não existe. A lista está atualizada.",
+      "demo": "As alterações estão desativadas na demonstração.",
+      "general": "Não foi possível guardar. Tenta novamente."
     }
   }
 }

@@ -17,6 +17,8 @@
     "scope-write-hint": "La escritura también permite leer, y cubre crear y actualizar transacciones, cuentas, categorías, presupuestos y objetivos. Los tokens nunca pueden borrar nada.",
     "scope-mcp-read": "Cliente de IA (MCP)",
     "scope-mcp-read-hint": "El ámbito de cliente de IA solo llega al endpoint MCP de solo lectura. No puede leer las rutas de datos normales, y un token de lectura no llega al MCP.",
+    "scope-mcp-propose": "Propuestas del cliente de IA (MCP)",
+    "scope-mcp-propose-hint": "El ámbito de propuestas deja que un cliente MCP prepare cambios en categorías, la marca de revisada y notas. Esperan en Ajustes › Asistente › Cambios pendientes; el cliente nunca puede aplicarlos, solo tú.",
     "expiry": "Caduca",
     "expiry-days": "{days} días",
     "totp": "Código del autenticador",

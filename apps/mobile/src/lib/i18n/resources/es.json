@@ -1475,7 +1475,10 @@
     },
     "goals": "Objetivos",
     "help": "Ayuda",
-    "whatsNew": "Novedades"
+    "whatsNew": "Novedades",
+    "pendingChanges": "Cambios pendientes",
+    "pendingChangesCount_one": "{{count}} en espera",
+    "pendingChangesCount_other": "{{count}} en espera"
   },
   "preferences": {
     "title": "Apariencia e idioma",
@@ -4659,6 +4662,51 @@
       "demo": "Los perfiles de demostración son de solo lectura. Las transacciones existentes no se pueden cambiar.",
       "access": "Tu sesión necesita atención antes de aplicar reglas.",
       "error": "No se pudo aplicar la regla ahora mismo."
+    }
+  },
+  "pendingChanges": {
+    "back": "Volver a Más",
+    "description": "Cambios que propuso el asistente o un cliente MCP. Nada cambia hasta que aplicas uno, y cada uno caduca a los 7 días.",
+    "loading": "Cargando cambios pendientes",
+    "errorTitle": "No se pudieron cargar los cambios pendientes",
+    "errorMessage": "Revisa tu conexión e inténtalo de nuevo.",
+    "invalidMessage": "El servidor envió algo que esta versión de la aplicación no puede leer. Actualiza la aplicación e inténtalo de nuevo.",
+    "stale": "Puede que no estén actualizados. Desliza hacia abajo para actualizar.",
+    "empty": "No hay cambios pendientes. Cuando el asistente o un cliente MCP proponga un cambio, te esperará aquí.",
+    "aiHidden": "Las funciones de IA están ocultas en tu cuenta. Vuelve a activarlas en Configuración › Apariencia para ver los cambios propuestos.",
+    "apply": "Aplicar",
+    "dismiss": "Descartar",
+    "applyNamed": "Aplicar: {{title}}",
+    "dismissNamed": "Descartar: {{title}}",
+    "expires": "Caduca el {{date}}",
+    "untitledTransaction": "Transacción",
+    "unavailable_one": "No se puede mostrar {{count}} transacción más: ya no puedes verla.",
+    "unavailable_other": "No se pueden mostrar {{count}} transacciones más: ya no puedes verlas.",
+    "rowAccessibility": "{{label}}: de {{before}} a {{after}}",
+    "source": {
+      "assistant": "Del asistente",
+      "mcp": "De un cliente MCP"
+    },
+    "title": {
+      "page": "Cambios pendientes",
+      "categorize_one": "Categorizar {{count}} transacción como {{category}}",
+      "categorize_other": "Categorizar {{count}} transacciones como {{category}}",
+      "categorizeUnnamed_one": "Categorizar {{count}} transacción",
+      "categorizeUnnamed_other": "Categorizar {{count}} transacciones",
+      "review_one": "Marcar {{count}} transacción como revisada",
+      "review_other": "Marcar {{count}} transacciones como revisadas",
+      "note": "Actualizar la nota de una transacción"
+    },
+    "value": {
+      "uncategorized": "Sin categoría",
+      "reviewed": "Revisada",
+      "notReviewed": "Sin revisar",
+      "noNote": "Sin nota"
+    },
+    "failure": {
+      "gone": "Ese cambio ya no se puede aplicar: caducó, ya se decidió, o una transacción o categoría ya no existe. La lista está actualizada.",
+      "demo": "Los cambios están desactivados en la demo.",
+      "general": "No se pudo guardar. Inténtalo de nuevo."
     }
   }
 }

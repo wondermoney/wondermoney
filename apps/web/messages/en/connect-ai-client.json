@@ -1,13 +1,15 @@
 {
   "connectAiClient": {
     "title": "Connect an AI client",
-    "description": "Let Claude Desktop, Cursor or another MCP client ask about your finances. It gets a read-only token of its own: it can read the same data you can see, including your private accounts, and it can never change anything.",
+    "description": "Let Claude Desktop, Cursor or another MCP client ask about your finances. It gets a token of its own: it can read the same data you can see, including your private accounts, and it never changes anything itself.",
     "endpoint": "MCP endpoint",
-    "endpoint-hint": "The client sends a personal API token with the mcp:read scope in an Authorization header. A browser session cookie is never accepted here.",
+    "endpoint-hint": "The client sends a personal API token with the mcp:read scope (and mcp:propose, if you allow proposals) in an Authorization header. A browser session cookie is never accepted here.",
     "copy": "Copy",
     "copied": "Copied",
     "copy-failed": "Could not copy. Select the text and copy it manually.",
     "create-token": "Create an AI client token",
+    "allow-proposals": "Let the client propose changes for me to confirm",
+    "allow-proposals-hint": "The client can suggest categories, mark transactions reviewed or change a note. Each suggestion waits in Settings › Assistant › Pending changes until you apply or dismiss it.",
     "totp": "Authenticator code",
     "totp-hint": "Only needed if you use two-factor authentication.",
     "token-created-title": "Your AI client token",

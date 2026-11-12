@@ -54,6 +54,15 @@ export const ERROR_CODE = {
   MANUAL_ASSET_LAST_VALUATION: 'manual_asset_last_valuation',
   /** The assistant is not enabled for this user. */
   ASSISTANT_NOT_ENABLED: 'assistant_not_enabled',
+  /** Applying an assistant proposal past its seven days (409). It is now `expired`; nothing changed. */
+  ASSISTANT_PROPOSAL_EXPIRED: 'assistant_proposal_expired',
+  /**
+   * Applying an assistant proposal whose transaction or category is gone or no longer visible to
+   * the member (409). It is now `failed`; nothing changed. Refetch the list.
+   */
+  ASSISTANT_PROPOSAL_FAILED: 'assistant_proposal_failed',
+  /** Applying a proposal that was dismissed or failed, or dismissing one already applied or failed (409). */
+  ASSISTANT_PROPOSAL_NOT_PENDING: 'assistant_proposal_not_pending',
   /**
    * The feature needs an integration this server does not have configured (AI, market data,
    * file storage, ...). Self-hosted installs turn these off by leaving the settings unset; hide

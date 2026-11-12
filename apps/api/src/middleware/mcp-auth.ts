@@ -3,6 +3,7 @@ import type { NextFunction, Request, Response } from 'express';
 import { DI } from '@app/app';
 import { setTenantContext } from '@app/database/filters/tenant-filter';
 import { isMcpEnabled } from '@config/mcp';
+import { MCP_SCOPES } from '@middleware/api-token-policy';
 import { getBearerToken } from '@middleware/auth-helpers';
 import { authenticateApiToken, isApiTokenShaped } from '@service/api-token/api-token.service';
 import { ERROR_CODE, ForbiddenError, NotFoundError, UnauthorizedError } from '@utils/errors';
@@ -25,13 +26,14 @@ export function requireMcpEnabled(_req: Request, _res: Response, next: NextFunct
  *
  * This route sits outside `requireAuth` on purpose: a browser session cookie must never reach
  * the MCP server, because an MCP client is a long-lived machine credential. The only accepted
- * credential is `Authorization: Bearer wm_pat_…` carrying the `mcp:read` scope. A cookie sent
- * alongside it is ignored; a cookie sent alone gets 401.
+ * credential is `Authorization: Bearer wm_pat_…` carrying `mcp:read` (the read tools) or
+ * `mcp:propose` (the `propose_*` tools), or both. A cookie sent alongside it is ignored; a
+ * cookie sent alone gets 401.
  */
 export async function requireMcpToken(req: Request, _res: Response, next: NextFunction): Promise<void> {
   const bearer = getBearerToken(req.headers.authorization);
   if (!isApiTokenShaped(bearer)) {
-    next(new UnauthorizedError('An MCP request needs a personal API token with the mcp:read scope.'));
+    next(new UnauthorizedError('An MCP request needs a personal API token with the mcp:read or mcp:propose scope.'));
     return;
   }
 
@@ -49,8 +51,8 @@ export async function requireMcpToken(req: Request, _res: Response, next: NextFu
   }
 
   const { apiToken, appuser, tenant } = authenticated;
-  if (!apiToken.scopes.includes('mcp:read')) {
-    next(new ForbiddenError('This API token does not have the mcp:read scope.', ERROR_CODE.API_TOKEN_SCOPE_REQUIRED));
+  if (!MCP_SCOPES.some((scope) => apiToken.scopes.includes(scope))) {
+    next(new ForbiddenError('This API token has neither the mcp:read nor the mcp:propose scope.', ERROR_CODE.API_TOKEN_SCOPE_REQUIRED));
     return;
   }
 
@@ -70,7 +72,7 @@ export async function requireMcpToken(req: Request, _res: Response, next: NextFu
       twoFactorEnabled: null,
     },
   };
-  req.mcpIdentity = { apiTokenKey: apiToken.apiTokenKey, appuser, tenant };
+  req.mcpIdentity = { apiTokenKey: apiToken.apiTokenKey, appuser, scopes: apiToken.scopes, tenant };
 
   // Arm the tenant filter and its per-account privacy carve-out on the request EM, exactly as
   // `resolveTenantForRequest` does for a session.
