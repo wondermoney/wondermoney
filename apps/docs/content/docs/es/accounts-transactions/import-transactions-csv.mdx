@@ -30,6 +30,7 @@ En una instancia autoalojada, las importaciones también necesitan [almacenamien
 5. Elige **Revisar transacciones**. WonderMoney lee todas las filas del archivo y las muestra, sin importar nada todavía:
    - **Nuevas**: aún no están en la cuenta. Están incluidas.
    - **Ya en la cuenta**: la misma transacción ya se importó, de este archivo o de un extracto que se solapa. Se omiten.
+   - **Posible duplicado**: nada en el archivo la identifica como una transacción que ya está en la cuenta, pero la cuenta tiene una con el mismo importe con pocos días de diferencia. Se omiten a menos que las incluyas. Consulta [Posibles duplicados](#posibles-duplicados).
    - **No se pudieron leer**: una fila cuya fecha o importe no se pudo leer, con el motivo. Nunca se importan.
 6. Revisa la lista. Desmarca una fila para omitirla, o márcala para incluirla. Muestra un tipo de fila y elige **Incluir todas** u **Omitir todas** para decidirlas a la vez.
 7. Elige **Importar**, que muestra cuántas transacciones va a añadir. La importación se ejecuta en segundo plano y muestra su progreso. Si se detiene a mitad (por ejemplo, si el servidor se reinicia), elige **Intentar de nuevo**: sigue donde se quedó, y nada se importa dos veces.
@@ -38,7 +39,7 @@ Un archivo con varias cuentas pregunta a cuál de tus cuentas va cada una antes 
 
 Un archivo QIF cuyas fechas puedan ser día primero o mes primero muestra la elección en la revisión: elige el orden que usa el archivo y las filas se leen otra vez antes de importar.
 
-Una importación que no termines caduca a los siete días. Siete días después de una importación, WonderMoney elimina el archivo que subiste y la lista fila a fila; la importación conserva solo el nombre del archivo y cuántas transacciones se importaron y omitieron, y las transacciones importadas siguen en la cuenta. En la aplicación móvil la importación se hace en un solo paso: las transacciones nuevas se importan y las que ya están en la cuenta se omiten; allí, un archivo QIF con fechas ambiguas se lee con el día primero.
+Una importación que no termines caduca a los siete días. Siete días después de una importación, WonderMoney elimina el archivo que subiste y la lista fila a fila; la importación conserva solo el nombre del archivo y cuántas transacciones se importaron y omitieron, y las transacciones importadas siguen en la cuenta. En la aplicación móvil la importación se hace en un solo paso: las transacciones nuevas se importan, las que ya están en la cuenta se omiten y los posibles duplicados se importan (nadie los ha revisado); allí, un archivo QIF con fechas ambiguas se lee con el día primero.
 
 <DocsImage
   src="/images/docs/accounts-transactions/import-transactions-csv-import-modal.png"
@@ -47,6 +48,16 @@ Una importación que no termines caduca a los siete días. Siete días después 
   width={1440}
   height={900}
 />
+
+## Posibles duplicados
+
+La misma compra suele llegar dos veces: una por la sincronización bancaria y otra por un archivo, con un día de diferencia o con otra descripción. Una fila del archivo que nada identifica como ya importada es un posible duplicado cuando la cuenta a la que va tiene una transacción con el mismo importe, de entrada o de salida, en la misma moneda, con fecha de hasta 3 días antes o después. La revisión muestra la fila junto a esa transacción, con la fecha, la descripción y el importe de cada una, para que puedas compararlas.
+
+- Cuando varias transacciones de la cuenta pueden ser la fila, no se asocia ninguna, y la revisión lo indica. Cuando solo una de ellas tiene el mismo comercio, se asocia esa.
+- Una transacción de la cuenta corresponde a una sola fila. Dos cafés iguales en el archivo y uno en la cuenta dejan una fila como posible duplicado y la otra como nueva.
+- Solo se comprueba la cuenta a la que va la fila, y solo las transacciones que puedes ver en ella. Las transacciones eliminadas no cuentan; las ocultas sí.
+- Un posible duplicado se omite a menos que lo incluyas, y nada se descarta sin tu decisión: márcalo y la importación lo añade como una transacción nueva.
+- En un archivo con varias cuentas, cada fila se comprueba en la cuenta que elegiste para ella, y de nuevo cuando cambias esa elección.
 
 ## Revisión
 

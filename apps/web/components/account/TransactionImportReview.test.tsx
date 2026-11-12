@@ -588,3 +588,65 @@ test("names an import started before file names were kept by the day it was star
   const name = screen.getByTestId("transaction-import-name").textContent ?? "";
   assert.match(name, /^Import of .*14.*2026/u);
 });
+
+test("shows a possible duplicate beside the transaction it likely repeats, and says when several could be it", async () => {
+  const possible = (
+    id: number,
+    matchedTransaction: TransactionImportView["rows"]["items"][number]["matchedTransaction"],
+  ): TransactionImportView["rows"]["items"][number] => ({
+    decision: "skip",
+    error: null,
+    id,
+    matchReason: matchedTransaction ? "likely" : "ambiguous",
+    matchedTransaction,
+    normalized: {
+      amount: -42.5,
+      currency: "EUR",
+      date: "2026-09-02T00:00:00.000Z",
+      description: "CONTINENTE MATOSINHOS",
+      merchant: "CONTINENTE MATOSINHOS",
+    },
+    sourceRow: id,
+    status: "possible_duplicate",
+    targetAccountId: 3,
+  });
+  renderReview({
+    rows: {
+      items: [
+        possible(21, {
+          amount: -42.5,
+          date: "2026-09-01T00:00:00.000Z",
+          description: "Continente",
+          id: 90,
+        }),
+        possible(22, null),
+      ],
+      page: 1,
+      pageSize: 50,
+      total: 2,
+    },
+    session: session({
+      counts: { ...session().counts, possible_duplicate: 2 },
+    }),
+  });
+  const user = userEvent.setup();
+
+  const match = screen.getByTestId("transaction-import-match");
+  for (const text of [
+    messages["import-review-match-file"],
+    messages["import-review-match-account"],
+    "CONTINENTE MATOSINHOS",
+    "Continente",
+  ])
+    assert.ok(match.textContent?.includes(text), text);
+  assert.equal(screen.getAllByTestId("transaction-import-ambiguous").length, 1);
+
+  // Skipped by default; the person can still include it.
+  const include = screen.getByRole("checkbox", { name: "Import row 21" });
+  assert.equal(include.getAttribute("aria-checked"), "false");
+  await user.click(include);
+  await waitFor(() => assert.equal(mocks.decide.mock.calls.length, 1));
+  assert.deepEqual(mocks.decide.mock.calls[0], [
+    { id: "import-1", input: { decision: "import", rowIds: [21] } },
+  ]);
+});

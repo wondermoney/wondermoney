@@ -38,6 +38,8 @@ An unreadable file is rejected with an error message instead of being imported s
 
 WonderMoney identifies duplicates using a transaction fingerprint built from transaction details such as date and amount. Fingerprint tolerance has been strengthened, so two transactions that are similar but legitimate — for example, two purchases of the same amount on the same day — are no longer skipped as duplicates. When a true duplicate is detected, the original entry is kept and the decision is recorded in the audit log, so nothing is silently overwritten.
 
+A file row with the same amount as a transaction already in the account, up to 3 days apart, is listed in the review as a possible duplicate, beside the transaction it resembles. It is skipped unless you include it; see [Possible duplicates](/en/docs/accounts-transactions/import-transactions-csv#possible-duplicates).
+
 For more on how transactions are matched and stored, see [Understand transactions](/en/docs/accounts-transactions/understand-transactions).
 
 ## When to contact support

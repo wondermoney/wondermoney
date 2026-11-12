@@ -30,7 +30,7 @@ Numa instância alojada por ti, as importações também precisam de [armazename
 - **Transferências.** Uma linha cujo beneficiário é `Transfer : <Conta>` é um dos lados de uma transferência. Os dois lados são importados como transferências e, quando as duas contas são importadas, as duas linhas ficam ligadas como uma só transferência, que os relatórios deixam de fora das receitas e despesas.
 - **Ready to Assign.** As entradas em Ready to Assign (To be Budgeted nos orçamentos mais antigos, Income no YNAB 4) são importadas como receita sem categoria.
 - **Categorias.** Uma categoria que associaste fica na linha como escolha tua, por isso a categorização aprendida não a substitui mais tarde. Uma regra da casa que corresponda à linha continua a aplicar-se, como em qualquer transação nova.
-- **Duplicados.** A exportação do YNAB não tem identificadores de transação, por isso cada linha é reconhecida pela data e pelo valor dentro da sua conta. Importar a mesma exportação de novo encontra as linhas já na conta e ignora-as.
+- **Duplicados.** A exportação do YNAB não tem identificadores de transação, por isso cada linha é reconhecida pela data e pelo valor dentro da sua conta. Importar a mesma exportação de novo encontra as linhas já na conta e ignora-as. Uma linha com o mesmo valor de uma transação que já está na sua conta, até 3 dias de diferença (uma que a sincronização bancária trouxe, por exemplo), é um [possível duplicado](/pt/docs/accounts-transactions/import-transactions-csv#possíveis-duplicados): é ignorada, a não ser que a incluas.
 
 ## Problemas comuns
 

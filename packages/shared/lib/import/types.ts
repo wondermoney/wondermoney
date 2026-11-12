@@ -18,12 +18,25 @@ export type ImportFormat = (typeof IMPORT_FORMATS)[number];
  * - `new`: nothing on the target account matches it; imports by default.
  * - `duplicate`: the same transaction is already on the target account, or earlier in the file;
  *   skipped by default.
- * - `possible_duplicate`: a near match (fuzzy detection); skipped by default, the person decides.
+ * - `possible_duplicate`: no id matched, but the target account holds a transaction with the same
+ *   amount and currency a few days either side, so it likely repeats it; skipped by default, the
+ *   person decides.
  * - `invalid`: the file's line could not be read; never imports.
  * - `skipped`, `imported`, `failed`: what the commit did with it.
  */
 export const IMPORT_ROW_STATUSES = ['new', 'duplicate', 'possible_duplicate', 'invalid', 'skipped', 'imported', 'failed'] as const;
 export type ImportRowStatus = (typeof IMPORT_ROW_STATUSES)[number];
+
+/**
+ * Why a row is a duplicate or a possible one, for the review to explain:
+ * - `same_id`: a `duplicate` whose id is on the target account (the matched transaction).
+ * - `earlier_in_file`: a `duplicate` of a row earlier in the same file.
+ * - `likely`: a `possible_duplicate` of one transaction on the account (the matched transaction).
+ * - `ambiguous`: a `possible_duplicate` that several transactions on the account could be, so
+ *   none is matched.
+ */
+export const IMPORT_MATCH_REASONS = ['same_id', 'earlier_in_file', 'likely', 'ambiguous'] as const;
+export type ImportMatchReason = (typeof IMPORT_MATCH_REASONS)[number];
 
 export const IMPORT_DECISIONS = ['import', 'skip'] as const;
 export type ImportDecision = (typeof IMPORT_DECISIONS)[number];
