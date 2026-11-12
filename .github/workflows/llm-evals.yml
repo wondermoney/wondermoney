@@ -1,0 +1,102 @@
+name: LLM evals
+
+# Golden-set evals for transaction categorization and CSV column mapping
+# (apps/api/src/evals, `pnpm --filter @wondermoney/api eval`). They call a real model, so they run
+# only by hand and on release tags, never on pull requests: a pull request, a fork's included,
+# must not reach the model secrets or spend tokens. Without a model configured the run skips
+# with a notice.
+#
+# The model is configured the way the API is (apps/api/src/services/ai/ai-provider.ts):
+#   OpenAI-compatible: secret EVAL_AI_BASE_URL, optional secret EVAL_AI_API_KEY, variable EVAL_AI_MODEL
+#   Anthropic: variable EVAL_AI_PROVIDER=anthropic, secret EVAL_ANTHROPIC_API_KEY, variable EVAL_AI_MODEL
+on:
+  workflow_dispatch:
+    inputs:
+      dataset:
+        description: Golden set to run
+        type: choice
+        options: [all, categorization, csv-mapping]
+        default: all
+      limit:
+        description: Items per golden set (empty for all of them)
+        type: string
+        default: ''
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # Secrets cannot gate a job directly, so this job reports whether a model is configured.
+  model:
+    name: Model configured
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions: {}
+    outputs:
+      configured: ${{ steps.check.outputs.configured }}
+    steps:
+      - id: check
+        env:
+          AI_BASE_URL: ${{ secrets.EVAL_AI_BASE_URL }}
+          AI_MODEL: ${{ vars.EVAL_AI_MODEL }}
+          AI_PROVIDER: ${{ vars.EVAL_AI_PROVIDER }}
+          ANTHROPIC_API_KEY: ${{ secrets.EVAL_ANTHROPIC_API_KEY }}
+        run: |
+          if [ -n "$AI_MODEL" ] && { [ -n "$AI_BASE_URL" ] || { [ "$AI_PROVIDER" = anthropic ] && [ -n "$ANTHROPIC_API_KEY" ]; }; }; then
+            echo "configured=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "configured=false" >> "$GITHUB_OUTPUT"
+            echo "::notice title=LLM evals skipped::No model is configured. Set the EVAL_AI_MODEL variable and the EVAL_AI_BASE_URL secret (or EVAL_AI_PROVIDER=anthropic and EVAL_ANTHROPIC_API_KEY) to run them."
+            echo "LLM evals skipped: no model is configured for this repository." >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+  evals:
+    name: LLM evals
+    needs: model
+    if: needs.model.outputs.configured == 'true'
+    runs-on: ubuntu-latest
+    # A full run is a few hundred small calls; the timeout is there to catch a hung provider.
+    timeout-minutes: 45
+    defaults:
+      run:
+        working-directory: apps/api
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @wondermoney/shared run build:lib
+      - name: Run the evals
+        env:
+          AI_API_KEY: ${{ secrets.EVAL_AI_API_KEY }}
+          AI_BASE_URL: ${{ secrets.EVAL_AI_BASE_URL }}
+          AI_MODEL: ${{ vars.EVAL_AI_MODEL }}
+          AI_PROVIDER: ${{ vars.EVAL_AI_PROVIDER }}
+          ANTHROPIC_API_KEY: ${{ secrets.EVAL_ANTHROPIC_API_KEY }}
+          DATASET: ${{ inputs.dataset || 'all' }}
+          LIMIT: ${{ inputs.limit }}
+        run: |
+          args=(--dataset "$DATASET")
+          if [ -n "$LIMIT" ]; then args+=(--limit "$LIMIT"); fi
+          status=0
+          pnpm run eval "${args[@]}" || status=$?
+          if [ -f evals/reports/llm-evals.md ]; then cat evals/reports/llm-evals.md >> "$GITHUB_STEP_SUMMARY"; fi
+          exit "$status"
+      - if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: llm-evals-report
+          path: apps/api/evals/reports/
+          if-no-files-found: ignore
+          retention-days: 30

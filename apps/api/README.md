@@ -73,6 +73,33 @@ Docker Compose runs the same stack in watch mode: `docker compose up --build`.
 
 A husky `pre-commit` hook runs `eslint --fix` on staged files.
 
+## LLM evals
+
+Unit tests mock the model, so they cannot tell whether a prompt or model change made
+categorization or CSV column mapping worse. `pnpm eval` scores the real thing against synthetic
+golden sets in `evals/data/` (about 300 transactions in English, Portuguese and Spanish, about 40
+statement and broker exports), through the same prompt, model call and parser as production. The
+local Bayes categorizer is scored on the same transactions for comparison.
+
+It reads the model from the environment as the API does (`AI_BASE_URL` and `AI_MODEL`, or
+`AI_PROVIDER=anthropic`, or Azure). To run it locally with [Ollama](https://ollama.com):
+
+```bash
+ollama pull qwen3:8b             # any model that follows a JSON schema
+AI_BASE_URL=http://localhost:11434/v1 AI_MODEL=qwen3:8b pnpm eval --limit 20
+AI_BASE_URL=http://localhost:11434/v1 AI_MODEL=qwen3:8b pnpm eval --dataset csv-mapping
+```
+
+`--dataset` is `categorization`, `csv-mapping` or `all` (the default); `--limit` takes that many
+items spread over each set; `--concurrency` (default 4) caps calls in flight. The summary prints
+to the terminal and `evals/reports/` gets `llm-evals.json` (every item's answer) and
+`llm-evals.md`. The run exits 1 when accuracy, abstain or wrong-on-uncategorisable rates, or the
+CSV exact-match rate fall outside `evals/thresholds.json`; a small local model may miss those
+bars.
+
+`.github/workflows/llm-evals.yml` runs the same command by hand and on release tags, never on
+pull requests, and skips with a notice when no model is configured for the repository.
+
 ## Conventions
 
 - **Migrations are schema only.** Never insert, update or delete data in a migration;

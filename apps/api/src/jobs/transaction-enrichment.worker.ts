@@ -21,6 +21,7 @@ import { isAiHidden } from '@service/ai/ai-availability';
 import { estimateTransactionEnrichmentCostUsd } from '@service/transaction-enrichment/cost';
 import { requestTransactionEnrichmentSuggestion } from '@service/transaction-enrichment/suggestion';
 import { reserveTransactionEnrichmentBudget } from '@service/transaction-enrichment/transaction-enrichment-budget.service';
+import { clearsWriteThreshold, isUninformativeCategory } from '@service/transaction-enrichment/write-guardrail';
 import { getRef } from '@utils/em-helpers';
 import logger from '@utils/logger';
 
@@ -218,12 +219,6 @@ export async function handleTransactionEnrichmentGptJob(
 }
 
 /**
- * The system category the enrichment pipeline is never allowed to write. See
- * `applySuggestionIfEligible` for why.
- */
-const UNINFORMATIVE_CATEGORY_NAME = 'OTHER';
-
-/**
  * Apply a confident AI suggestion to a still-uncategorized transaction (write mode).
  *
  * Guardrails: needs a category suggestion, a confidence at/above the threshold, and a resolvable
@@ -238,19 +233,15 @@ async function applySuggestionIfEligible(
   result: { categorySuggestionKey: null | number; confidence: number },
   threshold: number,
 ): Promise<boolean> {
-  if (result.categorySuggestionKey === null || result.confidence < threshold) return false;
+  if (!clearsWriteThreshold(result, threshold)) return false;
 
   const appuserKey = resolveAccountOwnerKey(transaction);
   if (appuserKey === undefined) return false;
 
-  // Never write `OTHER`, at any confidence. It is the model's most common
-  // suggestion by far. Writing it is worse than writing nothing — it carries no
-  // information *and* it marks the transaction categorised, so it stops being an
-  // enrichment candidate and drops off every needs-attention surface. Matched by
-  // name because the key is seed-order dependent (see CategorySeeder).
+  // Never write `OTHER`, at any confidence (see `isUninformativeCategory`).
   const suggested = await em.findOne(Category, { categoryKey: result.categorySuggestionKey });
   if (!suggested) return false;
-  if (suggested.isSystemCategory && suggested.name === UNINFORMATIVE_CATEGORY_NAME) return false;
+  if (isUninformativeCategory(suggested)) return false;
 
   const existing = await em.findOne(
     AppuserTransactionCategory,

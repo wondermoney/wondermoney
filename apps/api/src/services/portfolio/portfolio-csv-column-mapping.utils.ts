@@ -1,6 +1,7 @@
 import { createHash } from 'node:crypto';
 
-import { type PortfolioColumnMappingTransformations } from './portfolio-csv-column-mapping.schema';
+import type { PortfolioCsvColumnMappingOpenAIInput } from './portfolio-csv-column-mapping-openai';
+import { portfolioColumnMappingFields, type PortfolioColumnMappingSuggestion, type PortfolioColumnMappingTransformations, type PortfolioImportFixedValues } from './portfolio-csv-column-mapping.schema';
 
 export function generatePortfolioImportInternalTransactionId(input: {
   assetIdentity?: { assetName?: string; assetSymbol?: string; isin?: string; ticker?: string };
@@ -97,4 +98,50 @@ function normalizeValue(value: unknown): unknown {
       .sort(([a], [b]) => a.localeCompare(b)));
   }
   return value;
+}
+
+/**
+ * What the column-mapping model is shown for a file: the header names, the shape of the first raw
+ * rows and a count-only profile of the first data rows. No cell value beyond the header row is
+ * sent. `rows` are the file read with its first row as the header.
+ */
+export function buildPortfolioColumnMappingPromptInput(input: { rawRows: string[][]; rows: Record<string, string>[] }): PortfolioCsvColumnMappingOpenAIInput {
+  const headers = input.rows[0] ? Object.keys(input.rows[0]) : [];
+  return {
+    headers,
+    rowShapes: input.rawRows.slice(0, 12).map((row) => ({ cellCount: row.length, emptyCellCount: row.filter((cell) => cell.trim() === '').length, nonEmptyCellCount: row.filter((cell) => cell.trim() !== '').length })),
+    sampleRows: input.rows.slice(0, 5).map((row, rowIndex) => ({ emptyCellCount: Object.values(row).filter((value) => !value.trim()).length, hasNumericCells: Object.values(row).some((value) => /\d/.test(value)), hasTextCells: Object.values(row).some((value) => /[A-Z]/i.test(value)), headerCount: headers.length, nonEmptyCellCount: Object.values(row).filter((value) => value.trim()).length, rowIndex })),
+  };
+}
+
+export function inferEmbeddedCurrency(header: string) {
+  const match = /\b([A-Z]{3})\b/.exec(header.toUpperCase());
+  if (!match) return undefined;
+  if (!['value', 'total', 'price', 'amount'].some((term) => header.toLowerCase().includes(term))) return undefined;
+  return { currencyCode: match[1] };
+}
+
+/**
+ * A suggestion as the import shows it: each mapped column spelled as the file spells it, and a
+ * currency written into a value column's name ("Total EUR") read as a fixed currency.
+ */
+export function normalizePortfolioColumnMappingSuggestion(suggestion: PortfolioColumnMappingSuggestion, headers: string[]) {
+  const normalized = { ...suggestion, columnMapping: { ...suggestion.columnMapping }, derivedValues: { ...suggestion.derivedValues }, fixedValues: { ...suggestion.fixedValues }, warnings: [...suggestion.warnings] };
+  for (const key of portfolioColumnMappingFields) {
+    const mapped = normalized.columnMapping[key];
+    if (!mapped) continue;
+    const exact = headers.find((header) => header.trim().toLowerCase() === mapped.trim().toLowerCase());
+    if (exact) normalized.columnMapping[key] = exact;
+  }
+  const currencyMapping = normalized.columnMapping.currency;
+  if (currencyMapping) {
+    const inferred = inferEmbeddedCurrency(currencyMapping);
+    if (inferred) {
+      normalized.columnMapping.currency = undefined;
+      normalized.fixedValues.currency = inferred.currencyCode as PortfolioImportFixedValues['currency'];
+      normalized.transformations = { ...normalized.transformations };
+      if (!normalized.warnings.some((warning) => warning.includes('currency'))) normalized.warnings.push(`Currency appears embedded in value column; inferred ${inferred.currencyCode}`);
+    }
+  }
+  return normalized;
 }
