@@ -5,10 +5,11 @@ import { useColorScheme } from 'react-native'
 
 import { themeTokens } from '@/theme/tokens'
 
+import { groupsNeedingReview } from './portfolio-import-asset-review-view-model'
 import { PortfolioFailure } from './portfolio-screen-parts'
 import { PortfolioImportScreen } from './portfolio-import-screen'
 import { parsePortfolioId } from './portfolios-contract'
-import { usePortfolioImport } from './use-portfolio-import'
+import { usePortfolioImport, usePortfolioImportExistingAssets } from './use-portfolio-import'
 
 const IMPORT_MIME_TYPES = ['text/csv', 'text/comma-separated-values', 'application/vnd.ms-excel']
 const BLOCKING_PHASES = new Set(['uploading', 'parsing', 'mapping', 'confirming'])
@@ -20,6 +21,8 @@ export function PortfolioImportRoute() {
   const { t } = useTranslation()
   const palette = themeTokens.colors[useColorScheme() === 'dark' ? 'dark' : 'light']
   const importState = usePortfolioImport(portfolioId ?? 1)
+  const reviewing = portfolioId !== null && importState.state.phase === 'review' && groupsNeedingReview(importState.state.preview.assetGroups).length > 0
+  const existingAssets = usePortfolioImportExistingAssets(portfolioId ?? 1, reviewing)
 
   usePreventRemove(BLOCKING_PHASES.has(importState.state.phase) || importState.resolvingAssetGroups)
 
@@ -61,6 +64,7 @@ export function PortfolioImportRoute() {
       onBack={back}
       onResolveAssetGroups={importState.resolveAssetGroups}
       resolvingAssetGroups={importState.resolvingAssetGroups}
+      existingAssets={existingAssets}
       palette={palette}
     />
   )

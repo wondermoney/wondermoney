@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { StyleSheet, Text, View } from 'react-native'
 
@@ -6,37 +6,40 @@ import { themeTokens } from '@/theme/tokens'
 import { textStyles } from '@/theme/typography'
 
 import { PortfolioImportAssetGroupCard } from './portfolio-import-asset-group-card'
-import type { PortfolioImportAssetGroupDto, PortfolioImportAssetGroupResolution } from './portfolio-import-contract'
+import {
+  decisionForChoice,
+  type PortfolioImportAssetChoice,
+  type PortfolioImportExistingAsset,
+  recommendedChoices,
+} from './portfolio-import-asset-review-view-model'
+import type { PortfolioImportAssetGroupDto, PortfolioImportAssetMappingDecision } from './portfolio-import-contract'
 import { PortfolioButton, type PortfolioPalette } from './portfolio-form-parts'
-import type { PortfolioImportAssetGroupMapping } from './use-portfolio-import'
 
 export type PortfolioImportAssetReviewStepProps = Readonly<{
+  /** The groups that need a decision (`groupsNeedingReview`). */
   groups: readonly PortfolioImportAssetGroupDto[]
+  existingAssets: readonly PortfolioImportExistingAsset[]
   palette: PortfolioPalette
   busy: boolean
-  onSubmit: (mappings: readonly PortfolioImportAssetGroupMapping[]) => void | Promise<void>
+  onSubmit: (decisions: readonly PortfolioImportAssetMappingDecision[]) => void | Promise<void>
 }>
 
 /**
- * The asset-matching reconciliation step web calls PortfolioImportAssetReviewStep: one
- * card per ambiguous/unmatched/provider-error group. Resolutions are held locally until every group
- * has one, then submitted as a single "confirm asset mappings" batch — nothing is sent to the
- * server until the user explicitly confirms.
+ * The asset-matching step web calls PortfolioImportAssetReviewStep: one card per ambiguous,
+ * unmatched or provider-error group, with the server's recommended listing pre-selected. Choices
+ * stay on the device until every group has one, then go out as one review; nothing is sent until
+ * the person confirms.
  */
-export function PortfolioImportAssetReviewStep({ groups, palette, busy, onSubmit }: PortfolioImportAssetReviewStepProps) {
+export function PortfolioImportAssetReviewStep({ groups, existingAssets, palette, busy, onSubmit }: PortfolioImportAssetReviewStepProps) {
   const { t } = useTranslation()
-  const [resolutions, setResolutions] = useState<Readonly<Record<number, PortfolioImportAssetGroupResolution>>>({})
+  const [choices, setChoices] = useState<Readonly<Record<number, PortfolioImportAssetChoice>>>(() => recommendedChoices(groups))
 
-  const resolvedCount = useMemo(() => groups.filter((group) => resolutions[group.id] !== undefined).length, [groups, resolutions])
+  const resolvedCount = groups.filter((group) => choices[group.id] !== undefined).length
   const allResolved = groups.length > 0 && resolvedCount === groups.length
 
   const submit = async () => {
     if (!allResolved || busy) return
-    const mappings: readonly PortfolioImportAssetGroupMapping[] = groups.map((group) => ({
-      assetGroupId: group.id,
-      resolution: resolutions[group.id]!,
-    }))
-    await onSubmit(mappings)
+    await onSubmit(groups.map((group) => decisionForChoice(group.id, choices[group.id]!)))
   }
 
   return (
@@ -51,17 +54,14 @@ export function PortfolioImportAssetReviewStep({ groups, palette, busy, onSubmit
         <PortfolioImportAssetGroupCard
           key={group.id}
           group={group}
+          existingAssets={existingAssets}
           palette={palette}
-          resolution={resolutions[group.id] ?? null}
+          choice={choices[group.id] ?? null}
           disabled={busy}
-          // A resolved card's own "Change" button re-submits its current resolution — treat that
-          // as a request to go back to editing rather than a real (identical) re-selection.
-          onResolve={(resolution) => setResolutions((current) => {
-            if (current[group.id] !== undefined) {
-              const { [group.id]: _removed, ...rest } = current
-              return rest
-            }
-            return { ...current, [group.id]: resolution }
+          onChoose={(choice) => setChoices((current) => ({ ...current, [group.id]: choice }))}
+          onClear={() => setChoices((current) => {
+            const { [group.id]: _cleared, ...rest } = current
+            return rest
           })}
         />
       ))}

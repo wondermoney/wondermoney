@@ -1,10 +1,18 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { act, renderHook } from '@testing-library/react-native'
+import { act, renderHook, waitFor } from '@testing-library/react-native'
 import type { ReactNode } from 'react'
 
 import { ApiError } from '@/lib/api/errors'
 
-import { usePortfolioImport } from './use-portfolio-import'
+import {
+  confirmColumnMapping,
+  createSession,
+  previewAfterColumnMapping,
+  previewNeedsColumnMapping,
+  suggestColumnMapping,
+  triggerParse,
+} from './portfolio-import-api-payloads'
+import { usePortfolioImport, usePortfolioImportExistingAssets } from './use-portfolio-import'
 
 const mockRead = jest.fn()
 const mockWrite = jest.fn()
@@ -21,17 +29,16 @@ function setup() {
   return { client, wrapper: ({ children }: { children: ReactNode }) => <QueryClientProvider client={client}>{children}</QueryClientProvider> }
 }
 
-const session = {
-  correlationId: 'c1', importSessionId: 41, maxUploadSizeBytes: 1000, s3Bucket: 'b', s3Key: 'k',
-  status: 'waiting_for_upload', uploadHeaders: { 'Content-Type': 'text/csv' }, uploadMethod: 'PUT', uploadUrl: 'https://s3.example/upload',
-}
-const parseTrigger = { correlationId: 'c2', importSessionId: 41, status: 'parsing' }
-const needsMapping = { rows: { duplicate: [], invalid: [], needsAssetReview: [], ready: [] }, status: 'needs_column_mapping', summary: { blockingRows: 0, canConfirm: false, duplicateRows: 0, failedRows: 0, importableRows: 0, importedRows: 0, invalidRows: 0, needsAssetReviewRows: 0, readyRows: 0, skippedRows: 0, totalRows: 0 }, assetGroups: [], importSessionId: 41, limits: { rowsPerBucket: 25 }, portfolioId: 7 }
-const suggestion = { columnMapping: { transactionDate: 'Date', quantity: 'Shares', unitPrice: 'Price' }, importSessionId: 41, mappingSource: 'llm', status: 'needs_column_mapping' }
+// Real API responses (portfolio-import-api-payloads.ts); the session they belong to is id 1.
+const session = createSession
+const parseTrigger = triggerParse
+const needsMapping = previewNeedsColumnMapping
+const suggestion = suggestColumnMapping
 const readyPreview = { ...needsMapping, status: 'ready_to_import', summary: { ...needsMapping.summary, canConfirm: true, importableRows: 3, readyRows: 3, totalRows: 3 } }
-const confirmMapping = { importSessionId: 41, status: 'ready_to_import', summary: {} }
-const confirmImport = { correlationId: 'c3', importSessionId: 41, status: 'importing' }
+const confirmMapping = confirmColumnMapping
+const confirmImport = { correlationId: 'c3', importSessionId: 1, status: 'importing' }
 const succeededPreview = { ...readyPreview, status: 'succeeded' }
+const needsReview = previewAfterColumnMapping
 
 const file = { uri: 'file:///picked.csv', name: 'picked.csv' }
 const noWait = { wait: async () => undefined }
@@ -57,11 +64,18 @@ describe('usePortfolioImport', () => {
 
     expect(mockWrite.mock.calls[0]?.[0].path).toBe('/v1/portfolio/7/import-sessions')
     expect(mockWrite.mock.calls[0]?.[1].body).toEqual({ mode: 'review' })
-    expect(mockUpload).toHaveBeenCalledWith('file:///picked.csv', 'https://s3.example/upload', { 'Content-Type': 'text/csv' })
-    expect(mockWrite.mock.calls[1]?.[0].path).toBe('/v1/portfolio-import-sessions/41/parse')
-    expect(mockWrite.mock.calls[2]?.[0].path).toBe('/v1/portfolio-import-sessions/41/column-mapping/suggest')
-    expect(mockWrite.mock.calls[3]?.[0].path).toBe('/v1/portfolio-import-sessions/41/column-mapping')
-    expect(mockWrite.mock.calls[3]?.[1].body).toEqual({ columnMapping: suggestion.columnMapping })
+    expect(mockUpload).toHaveBeenCalledWith('file:///picked.csv', 'https://storage.example.test/upload', { 'Content-Type': 'text/csv' })
+    expect(mockWrite.mock.calls[1]?.[0].path).toBe('/v1/portfolio-import-sessions/1/parse')
+    expect(mockWrite.mock.calls[2]?.[0].path).toBe('/v1/portfolio-import-sessions/1/column-mapping/suggest')
+    expect(mockWrite.mock.calls[3]?.[0].path).toBe('/v1/portfolio-import-sessions/1/column-mapping')
+    // The whole suggestion goes back, split into the fields the confirm route takes.
+    expect(mockWrite.mock.calls[3]?.[1].body).toEqual({
+      columnMapping: suggestion.columnMapping.columnMapping,
+      derivedValues: {},
+      fixedValues: {},
+      layout: { dataStartRowIndex: 1, headerRowIndex: 0 },
+      transformations: {},
+    })
     expect(hook.result.current.state).toEqual({ phase: 'review', preview: readyPreview })
     await hook.unmount(); client.clear()
   })
@@ -85,7 +99,7 @@ describe('usePortfolioImport', () => {
     await act(async () => { await hook.result.current.start(file) })
     await act(async () => { await hook.result.current.confirm() })
 
-    expect(mockWrite.mock.calls[4]?.[0].path).toBe('/v1/portfolio-import-sessions/41/confirm')
+    expect(mockWrite.mock.calls[4]?.[0].path).toBe('/v1/portfolio-import-sessions/1/confirm')
     expect(hook.result.current.state).toEqual({ phase: 'succeeded', preview: succeededPreview })
     expect(invalidate).toHaveBeenCalledWith(expect.objectContaining({ predicate: expect.any(Function) }))
     await hook.unmount(); client.clear()
@@ -159,7 +173,7 @@ describe('usePortfolioImport', () => {
     mockWrite
       .mockResolvedValueOnce(session)
       .mockResolvedValueOnce(parseTrigger)
-      .mockResolvedValueOnce({ importSessionId: 41, mappingSource: 'disabled', status: 'needs_column_mapping', warning: 'Automatic column mapping suggestion is unavailable' })
+      .mockResolvedValueOnce({ importSessionId: 1, mappingSource: 'disabled', status: 'needs_column_mapping', warning: 'Automatic column mapping suggestion is unavailable' })
     mockUpload.mockResolvedValue(undefined)
     mockRead.mockResolvedValueOnce(needsMapping)
 
@@ -173,7 +187,6 @@ describe('usePortfolioImport', () => {
   })
 
   it('still reaches review with a disabled confirm when rows need asset review', async () => {
-    const needsReview = { ...readyPreview, status: 'needs_asset_review', summary: { ...readyPreview.summary, canConfirm: false, needsAssetReviewRows: 2 } }
     mockWrite
       .mockResolvedValueOnce(session)
       .mockResolvedValueOnce(parseTrigger)
@@ -202,15 +215,14 @@ describe('usePortfolioImport', () => {
     await hook.unmount(); client.clear()
   })
 
-  it('submits resolved asset-group mappings and refetches the preview into the review phase', async () => {
-    const needsReview = { ...readyPreview, status: 'needs_asset_review', summary: { ...readyPreview.summary, canConfirm: false, needsAssetReviewRows: 2 } }
+  it('sends the asset decisions to the asset-mappings route and refetches the preview into review', async () => {
     const resolvedPreview = { ...readyPreview, summary: { ...readyPreview.summary, canConfirm: true } }
     mockWrite
       .mockResolvedValueOnce(session)
       .mockResolvedValueOnce(parseTrigger)
       .mockResolvedValueOnce(suggestion)
       .mockResolvedValueOnce(confirmMapping)
-      .mockResolvedValueOnce({ importSessionId: 41, status: 'ready_to_import' })
+      .mockResolvedValueOnce({ importSessionId: 1, status: 'ready_to_import' })
     mockUpload.mockResolvedValue(undefined)
     mockRead.mockResolvedValueOnce(needsMapping).mockResolvedValueOnce(needsReview).mockResolvedValueOnce(resolvedPreview)
 
@@ -219,23 +231,82 @@ describe('usePortfolioImport', () => {
     await act(async () => { await hook.result.current.start(file) })
     expect(hook.result.current.state).toEqual({ phase: 'review', preview: needsReview })
 
-    const mappings = [{ assetGroupId: 1, resolution: { type: 'skip' as const } }]
-    await act(async () => { await hook.result.current.resolveAssetGroups(mappings) })
+    const decisions = [
+      { action: 'use_candidate' as const, candidateId: 1, groupId: 1 },
+      { action: 'use_existing_asset' as const, financialAssetId: 9, groupId: 3 },
+      { action: 'skip_group' as const, groupId: 2 },
+    ]
+    await act(async () => { await hook.result.current.resolveAssetGroups(decisions) })
 
-    expect(mockWrite.mock.calls[4]?.[0].path).toBe('/v1/portfolio-import-sessions/41/asset-groups')
-    expect(mockWrite.mock.calls[4]?.[1].body).toEqual({ mappings })
+    expect(mockWrite.mock.calls[4]?.[0]).toMatchObject({ method: 'PATCH', path: '/v1/portfolio-import-sessions/1/asset-mappings' })
+    expect(mockWrite.mock.calls[4]?.[1].body).toEqual({ decisions })
     expect(hook.result.current.state).toEqual({ phase: 'review', preview: resolvedPreview })
     expect(hook.result.current.resolvingAssetGroups).toBe(false)
     await hook.unmount(); client.clear()
   })
 
-  it('never submits an empty asset-group batch and stays a no-op outside the review phase', async () => {
+  it('sends more than 100 decisions as consecutive requests of at most 100', async () => {
+    mockWrite
+      .mockResolvedValueOnce(session)
+      .mockResolvedValueOnce(parseTrigger)
+      .mockResolvedValueOnce(suggestion)
+      .mockResolvedValueOnce(confirmMapping)
+      .mockResolvedValue({ importSessionId: 1, status: 'needs_asset_review' })
+    mockUpload.mockResolvedValue(undefined)
+    mockRead.mockResolvedValueOnce(needsMapping).mockResolvedValueOnce(needsReview).mockResolvedValueOnce(readyPreview)
+
+    const { client, wrapper } = setup()
+    const hook = await renderHook(() => usePortfolioImport(7, noWait), { wrapper })
+    await act(async () => { await hook.result.current.start(file) })
+    const decisions = Array.from({ length: 230 }, (_, index) => ({ action: 'skip_group' as const, groupId: index + 1 }))
+    await act(async () => { await hook.result.current.resolveAssetGroups(decisions) })
+
+    const mappingCalls = mockWrite.mock.calls.slice(4)
+    expect(mappingCalls.map(([endpoint]) => endpoint.path)).toEqual(Array(3).fill('/v1/portfolio-import-sessions/1/asset-mappings'))
+    expect(mappingCalls.map(([, request]) => request.body.decisions.length)).toEqual([100, 100, 30])
+    expect(mappingCalls.flatMap(([, request]) => request.body.decisions)).toEqual(decisions)
+    expect(hook.result.current.state).toEqual({ phase: 'review', preview: readyPreview })
+    await hook.unmount(); client.clear()
+  })
+
+  it('never submits an empty decision list and stays a no-op outside the review phase', async () => {
     const { client, wrapper } = setup()
     const hook = await renderHook(() => usePortfolioImport(7, noWait), { wrapper })
     await act(async () => { await hook.result.current.resolveAssetGroups([]) })
-    await act(async () => { await hook.result.current.resolveAssetGroups([{ assetGroupId: 1, resolution: { type: 'skip' } }]) })
+    await act(async () => { await hook.result.current.resolveAssetGroups([{ action: 'skip_group', groupId: 1 }]) })
     expect(mockWrite).not.toHaveBeenCalled()
     expect(hook.result.current.state).toEqual({ phase: 'idle' })
+    await hook.unmount(); client.clear()
+  })
+
+  it('goes straight to review when the server reads the file without column mapping', async () => {
+    mockWrite.mockResolvedValueOnce(session).mockResolvedValueOnce(parseTrigger)
+    mockUpload.mockResolvedValue(undefined)
+    mockRead.mockResolvedValueOnce(readyPreview)
+
+    const { client, wrapper } = setup()
+    const hook = await renderHook(() => usePortfolioImport(7, noWait), { wrapper })
+    await act(async () => { await hook.result.current.start(file) })
+
+    expect(mockWrite).toHaveBeenCalledTimes(2)
+    expect(hook.result.current.state).toEqual({ phase: 'review', preview: readyPreview })
+    await hook.unmount(); client.clear()
+  })
+
+  it('reports unmapped-columns when the server has no AI provider for the suggest route', async () => {
+    mockWrite
+      .mockResolvedValueOnce(session)
+      .mockResolvedValueOnce(parseTrigger)
+      .mockRejectedValueOnce(new ApiError('http', 501))
+    mockUpload.mockResolvedValue(undefined)
+    mockRead.mockResolvedValueOnce(needsMapping)
+
+    const { client, wrapper } = setup()
+    const hook = await renderHook(() => usePortfolioImport(7, noWait), { wrapper })
+    await act(async () => { await hook.result.current.start(file) })
+
+    expect(hook.result.current.state).toEqual({ phase: 'failed', reason: 'unmapped-columns' })
+    expect(mockWrite).toHaveBeenCalledTimes(3)
     await hook.unmount(); client.clear()
   })
 
@@ -258,6 +329,33 @@ describe('usePortfolioImport', () => {
 
     expect(mockRead).toHaveBeenCalledTimes(4)
     expect(hook.result.current.state).toEqual({ phase: 'review', preview: readyPreview })
+    await hook.unmount(); client.clear()
+  })
+})
+
+describe('usePortfolioImportExistingAssets', () => {
+  beforeEach(() => { mockRead.mockReset() })
+
+  const holding = (financialAssetKey: number, financialAssetSymbol: string, financialAssetName: string) => ({ financialAssetKey, financialAssetName, financialAssetSymbol })
+
+  it('loads nothing until a review needs it', async () => {
+    const { client, wrapper } = setup()
+    const hook = await renderHook(() => usePortfolioImportExistingAssets(7, false), { wrapper })
+    expect(mockRead).not.toHaveBeenCalled()
+    expect(hook.result.current).toEqual([])
+    await hook.unmount(); client.clear()
+  })
+
+  it('offers each held security once, by symbol', async () => {
+    mockRead.mockResolvedValueOnce({ holdings: [holding(2, 'MSFT', 'Microsoft'), holding(1, 'AAPL', 'Apple'), holding(2, 'MSFT', 'Microsoft')] })
+    const { client, wrapper } = setup()
+    const hook = await renderHook(() => usePortfolioImportExistingAssets(7, true), { wrapper })
+    await waitFor(() => expect(hook.result.current).toHaveLength(2))
+    expect(mockRead.mock.calls[0]?.[0].path).toBe('/v1/portfolio/7/holdings')
+    expect(hook.result.current).toEqual([
+      { financialAssetId: 1, name: 'Apple', symbol: 'AAPL' },
+      { financialAssetId: 2, name: 'Microsoft', symbol: 'MSFT' },
+    ])
     await hook.unmount(); client.clear()
   })
 })

@@ -5,8 +5,9 @@ import { Pressable as MockPressable, Text as MockText } from 'react-native'
 import { initMobileI18n } from '@/lib/i18n'
 import { themeTokens } from '@/theme/tokens'
 
+import { previewAfterAssetMappings, previewWithAssetGroups } from './portfolio-import-api-payloads'
+import { portfolioImportPreviewResponseSchema } from './portfolio-import-contract'
 import { PortfolioImportScreen } from './portfolio-import-screen'
-import type { PortfolioImportAssetGroupDto } from './portfolio-import-contract'
 import type { PortfolioImportPhase } from './use-portfolio-import'
 
 const palette = themeTokens.colors.light
@@ -30,13 +31,10 @@ const readyPreview = {
   summary: { blockingRows: 0, canConfirm: true, duplicateRows: 1, failedRows: 0, importableRows: 3, importedRows: 0, invalidRows: 1, needsAssetReviewRows: 0, readyRows: 3, skippedRows: 0, totalRows: 5 },
 }
 
-const ambiguousGroup: PortfolioImportAssetGroupDto = {
-  candidates: [{ financialAssetId: 501, name: 'Apple Inc', exchange: 'NASDAQ', symbol: 'AAPL' }],
-  id: 1, isin: null, rawAssetName: 'Apple', rawSymbol: 'AAPL', rowCount: 2, status: 'ambiguous',
-}
-const unmatchedGroup: PortfolioImportAssetGroupDto = {
-  candidates: [], id: 2, isin: null, rawAssetName: null, rawSymbol: 'ACME', rowCount: 1, status: 'unmatched',
-}
+// Captured API previews: ambiguous (1, recommended EXF.AS), unmatched (2, "ZZZQ") and
+// provider-error (3, "Provider Down Corp") groups need review; group 4 matched on its own.
+const reviewPreview = portfolioImportPreviewResponseSchema.parse(previewWithAssetGroups)
+const holdings = [{ financialAssetId: 1, name: 'Apple', symbol: 'AAPL' }]
 
 async function renderScreen(state: PortfolioImportPhase, overrides: Partial<React.ComponentProps<typeof PortfolioImportScreen>> = {}) {
   const i18n = await initMobileI18n('en')
@@ -119,35 +117,56 @@ describe('PortfolioImportScreen', () => {
     expect(view.getByRole('button', { name: 'Back to portfolio' })).toBeDisabled()
   })
 
-  it('renders the asset review step and lets every group be resolved before submitting the batch', async () => {
+  it('reviews every open group: recommended listing pre-selected, ticker search, holding, then one batch', async () => {
     const onResolveAssetGroups = jest.fn()
-    const preview = {
-      ...readyPreview,
-      assetGroups: [ambiguousGroup, unmatchedGroup],
-      summary: { ...readyPreview.summary, canConfirm: false, needsAssetReviewRows: 3 },
-    }
-    const { view } = await renderScreen({ phase: 'review', preview }, { onResolveAssetGroups })
+    const { view } = await renderScreen({ phase: 'review', preview: reviewPreview }, { onResolveAssetGroups, existingAssets: holdings })
 
     expect(view.getByRole('button', { name: 'Import transactions' })).toBeDisabled()
-    const submit = view.getByRole('button', { name: 'Confirm asset mappings' })
-    expect(submit).toBeDisabled()
-
-    await fireEvent.press(view.getByRole('button', { name: 'AAPL · Apple Inc · NASDAQ' }))
+    expect(view.getByText('Example Fund')).toBeOnTheScreen()
+    expect(view.getByText('EXF · NL0000000001 · XAMS · EUR')).toBeOnTheScreen()
+    expect(view.getByText('ZZZQ')).toBeOnTheScreen()
+    expect(view.getByText('Provider Down Corp')).toBeOnTheScreen()
+    expect(view.queryByText('Apple')).toBeNull()
+    expect(view.getByLabelText('Mapped to EXF.AS')).toBeOnTheScreen()
+    expect(view.getByText('1 of 3 resolved')).toBeOnTheScreen()
     expect(view.getByRole('button', { name: 'Confirm asset mappings' })).toBeDisabled()
 
-    await fireEvent.press(view.getByRole('button', { name: 'Search for a ticker' }))
-    expect(view.getByRole('button', { name: 'Confirm asset mappings' })).not.toBeDisabled()
+    await fireEvent.press(view.getAllByRole('button', { name: 'Search for a ticker' })[0]!)
+    await fireEvent.press(view.getByRole('button', { name: 'Choose a holding in this portfolio' }))
+    await fireEvent.press(view.getByRole('radio', { name: 'AAPL' }))
 
-    await fireEvent.press(view.getByRole('button', { name: 'Confirm asset mappings' }))
+    const submit = view.getByRole('button', { name: 'Confirm asset mappings' })
+    expect(submit).not.toBeDisabled()
+    await fireEvent.press(submit)
     expect(onResolveAssetGroups).toHaveBeenCalledWith([
-      { assetGroupId: 1, resolution: { financialAssetId: 501, type: 'match' } },
-      { assetGroupId: 2, resolution: { symbol: 'XYZ', type: 'external_symbol' } },
+      { action: 'use_candidate', candidateId: 1, groupId: 1 },
+      { action: 'use_external_symbol', groupId: 2, symbol: 'XYZ' },
+      { action: 'use_existing_asset', financialAssetId: 1, groupId: 3 },
     ])
   })
 
-  it('does not block the review UI on groups already matched automatically', async () => {
-    const matchedGroup: PortfolioImportAssetGroupDto = { ...ambiguousGroup, id: 3, status: 'matched' }
-    const preview = { ...readyPreview, assetGroups: [matchedGroup] }
+  it('lets a pre-selected group be changed to another listing or skipped', async () => {
+    const onResolveAssetGroups = jest.fn()
+    const preview = { ...reviewPreview, assetGroups: reviewPreview.assetGroups.filter((group) => group.id === 1) }
+    const { view } = await renderScreen({ phase: 'review', preview }, { onResolveAssetGroups })
+
+    await fireEvent.press(view.getByRole('button', { name: 'Change' }))
+    // The listing without a symbol cannot be chosen, so it is not offered.
+    expect(view.getByRole('button', { name: 'EXF.AS · Example Fund · AS' })).toBeOnTheScreen()
+    expect(view.queryByText(/Nameless listing/)).toBeNull()
+    expect(view.queryByRole('button', { name: 'Choose a holding in this portfolio' })).toBeNull()
+    await fireEvent.press(view.getByRole('button', { name: 'EXF.DE · Example Fund · XETRA' }))
+    expect(view.getByLabelText('Mapped to EXF.DE')).toBeOnTheScreen()
+
+    await fireEvent.press(view.getByRole('button', { name: 'Change' }))
+    await fireEvent.press(view.getByRole('button', { name: 'Skip this group' }))
+    await fireEvent.press(view.getByRole('button', { name: 'Confirm asset mappings' }))
+    expect(onResolveAssetGroups).toHaveBeenCalledWith([{ action: 'skip_group', groupId: 1 }])
+  })
+
+  it('does not ask again about groups the server matched, selected or skipped', async () => {
+    const resolved = portfolioImportPreviewResponseSchema.parse(previewAfterAssetMappings)
+    const preview = { ...resolved, assetGroups: resolved.assetGroups.filter((group) => group.id !== 1), summary: { ...resolved.summary, canConfirm: true } }
     const { view } = await renderScreen({ phase: 'review', preview })
     expect(view.queryByRole('button', { name: 'Confirm asset mappings' })).toBeNull()
     expect(view.getByRole('button', { name: 'Import transactions' })).not.toBeDisabled()
