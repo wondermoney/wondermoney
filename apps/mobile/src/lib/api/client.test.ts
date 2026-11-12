@@ -168,6 +168,28 @@ describe('API client', () => {
     await expectCode(client.read(okEndpoint), expected, 403)
   })
 
+  it('keeps the name of the member who holds a portfolio link, and only that', async () => {
+    const { client } = setup(async () => ({ status: 403, body: { code: 'portfolio_link_held_by_member', message: 'Held.', details: { linkedBy: ' Ana ' } } }))
+    const error = await client.read(okEndpoint).catch((caught: unknown) => caught)
+    expect(error).toMatchObject({ name: 'ApiError', code: 'portfolio-link-held', status: 403, linkedBy: 'Ana' })
+    // Never in the message or the error's enumerable fields, which an error report serializes.
+    expect((error as Error).message).not.toContain('Ana')
+    expect(Object.keys(error as object)).not.toContain('linkedBy')
+    expect(JSON.stringify(error)).not.toContain('Ana')
+  })
+
+  it.each([
+    ['no details', { code: 'portfolio_link_held_by_member' }],
+    ['a blank name', { code: 'portfolio_link_held_by_member', details: { linkedBy: '  ' } }],
+    ['a malformed name', { code: 'portfolio_link_held_by_member', details: { linkedBy: 42 } }],
+    ['malformed details', { code: 'portfolio_link_held_by_member', details: 'Ana' }],
+  ])('maps a held link with %s to the code without a name', async (_label, body) => {
+    const { client } = setup(async () => ({ status: 403, body }))
+    const error = await client.read(okEndpoint).catch((caught: unknown) => caught)
+    expect(error).toMatchObject({ code: 'portfolio-link-held', status: 403 })
+    expect((error as ApiError).linkedBy).toBeUndefined()
+  })
+
   it('uses the coordinator shared refresh promise and replays each concurrent GET once', async () => {
     let resolveRefresh!: (value: ReturnType<typeof token>) => void
     const sharedRefresh = new Promise<ReturnType<typeof token>>((resolve) => { resolveRefresh = resolve })

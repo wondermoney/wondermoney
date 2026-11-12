@@ -48,6 +48,8 @@ import {
 import { balanceSheet, formatMonthName, netWorthChanges, type CashflowView, type NetWorthChange, type ResolvedHistoryPoint } from './home-model'
 import type { NetWorthRowDto } from './net-worth-contract'
 import { NetWorthChart } from './net-worth-chart'
+import { PortfolioLinkSuggestion, type PortfolioLinkSaveResult, type PortfolioLinkSuggestionModel } from './portfolio-link-suggestion'
+import type { PortfolioAccountLinkInput } from '@/features/portfolios/portfolio-account-link'
 import type { LoanDto } from '@/features/loans/loans-contract'
 import type { TransactionDto, TransactionReviewSummaryDto } from '@/features/transactions/transactions-contract'
 
@@ -98,6 +100,8 @@ export type HomeSections = {
   /** Each account's mark for the balance sheet, by account key; absent until the accounts load. */
   accountMarks?: ReadonlyMap<number, EntityMarkSource>
   portfolioMarks?: ReadonlyMap<number, EntityMarkSource>
+  /** "Is this the same money?": what it offers to link, or null/absent when it does not show. */
+  portfolioLink?: PortfolioLinkSuggestionModel | null
 }
 
 export type NetWorthScreenProps = {
@@ -117,6 +121,8 @@ export type NetWorthScreenProps = {
   onRetryLatest: () => void
   onDismissSetup: () => void
   onDismissBankAlert?: () => void
+  onDismissPortfolioLink?: () => void
+  onLinkPortfolio?: (portfolioId: number, accountLink: PortfolioAccountLinkInput) => Promise<PortfolioLinkSaveResult>
   /** Opens "Customize home"; omitted where the affordance should not show. */
   onCustomize?: () => void
 }
@@ -158,7 +164,18 @@ export function NetWorthScreen(props: NetWorthScreenProps) {
   const sectionNodes: Record<Exclude<DashboardSectionId, 'net-worth'>, ReactNode> = {
     insights: <InsightsSection fallbackCurrency={currency} locale={locale} onNavigate={props.onNavigate} state={sections.insights} />,
     'this-month': <ThisMonthSection locale={locale} onNavigate={props.onNavigate} onRetry={props.onRetryBudgets} state={sections.month} today={today} />,
-    'balance-sheet': sheet && hasSheet ? <BalanceSheetSection accountMarks={sections.accountMarks} portfolioMarks={sections.portfolioMarks} currency={currency} locale={locale} sheet={sheet} /> : null,
+    'balance-sheet': sheet && hasSheet ? (
+      <BalanceSheetSection
+        accountMarks={sections.accountMarks}
+        currency={currency}
+        locale={locale}
+        notice={sections.portfolioLink && props.onLinkPortfolio ? (
+          <PortfolioLinkSuggestion model={sections.portfolioLink} onDismiss={() => props.onDismissPortfolioLink?.()} onSave={props.onLinkPortfolio} />
+        ) : null}
+        portfolioMarks={sections.portfolioMarks}
+        sheet={sheet}
+      />
+    ) : null,
     cashflow: <CashflowSection currency={currency} locale={locale} onRetry={props.onRetryCashflow} state={sections.cashflow} today={today} />,
     loans: <LoansSection locale={locale} onNavigate={props.onNavigate} onRetry={props.onRetryLoans} state={sections.loans} />,
     'latest-transactions': <LatestTransactionsSection locale={locale} onNavigate={props.onNavigate} onRetry={props.onRetryLatest} state={sections.latest} />,

@@ -3025,6 +3025,37 @@
       "general": "Could not save portfolio settings"
     }
   },
+  "portfolioAccountLink": {
+    "accountLabel": "Account that holds this portfolio",
+    "notLinked": "Not linked",
+    "selectAccount": "Select an account",
+    "question": "Does this account's balance include your investments?",
+    "includesHoldings": "Yes, it includes them",
+    "includesHoldingsHint": "Net worth counts the account and shows this portfolio without adding it again.",
+    "cashOnly": "No, cash only",
+    "cashOnlyHint": "Net worth counts the account's cash and this portfolio.",
+    "managedByPartner": "This portfolio is linked to an account only the other household member can see, so only they can change the link.",
+    "alreadyLinkedBy": "Already linked by {{name}}",
+    "suggestionTitle": "Is this the same money?",
+    "suggestionBody": "You have an investment account and a portfolio that isn't linked to an account. If the account already holds the portfolio, link them so net worth counts it once.",
+    "suggestionLink": "Link a portfolio",
+    "dismiss": "Dismiss",
+    "dialogTitle": "Link a portfolio to its account",
+    "portfolioLabel": "Portfolio",
+    "selectPortfolio": "Select a portfolio",
+    "save": "Save",
+    "saving": "Saving",
+    "saved": "Link saved",
+    "failures": {
+      "demo": "Linking is unavailable in demo mode",
+      "access": "Your access changed",
+      "mfa": "Additional verification is required",
+      "not-found": "This portfolio or account is no longer available",
+      "unknown": "Could not confirm the link was saved. Try again",
+      "request": "This link was not accepted",
+      "general": "Could not save the link"
+    }
+  },
   "portfolioActivity": {
     "back": "Back",
     "aggregateTitle": "Transactions",

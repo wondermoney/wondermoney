@@ -3,6 +3,8 @@ import { z } from 'zod'
 import { amountsCompletenessSchema } from '@/lib/api/completeness'
 import { readEndpoint, tolerantEnum, writeEndpoint } from '@/lib/api/runtime-schema'
 
+import { PORTFOLIO_ACCOUNT_BALANCE_MODES } from './portfolio-account-link'
+
 const currencyCodeSchema = z.string().regex(/^[A-Z]{3}$/)
 const finite = z.number().finite()
 const finiteNullable = finite.nullable()
@@ -13,7 +15,19 @@ const nullableText = z.string().nullable().optional()
 const nullablePositiveId = z.number().int().positive().nullable().optional()
 const positiveSafeId = z.number().int().positive().max(Number.MAX_SAFE_INTEGER)
 
+/**
+ * The portfolio's link to the account that holds it, as this viewer may see it: null when there is
+ * none or its account is private to the other member. Absent from older APIs; a malformed link
+ * reads as none rather than failing the portfolio.
+ */
+const portfolioAccountLinkSchema = z.object({
+  accountKey: z.number().int().positive(),
+  accountName: z.string().nullable().optional().transform((value) => value ?? null),
+  mode: z.enum(PORTFOLIO_ACCOUNT_BALANCE_MODES),
+}).nullish().catch(null)
+
 const portfolioSummarySchema = z.object({
+  accountLink: portfolioAccountLinkSchema,
   appuserCurrencyCode: currencyCodeSchema,
   balance: finite,
   /** The broker it was last imported from; absent on older servers and hand-kept portfolios. */
@@ -79,6 +93,7 @@ export const aggregateDashboardResponseSchema = z.object({
 })
 
 const portfolioMetadataSchema = z.object({
+  accountLink: portfolioAccountLinkSchema,
   benchmarkSymbol: z.string().nullable().optional(),
   currencyKey: z.object({ code: currencyCodeSchema }),
   description: z.string().nullable().optional(),
@@ -211,7 +226,14 @@ export function portfolioTargetAllocationsEqual(
   return leftKeys.every((key) => right[key] === left[key])
 }
 
+/** Link to an account the viewer can see, or null to unlink. */
+export const portfolioAccountLinkWriteSchema = z.object({
+  accountId: positiveSafeId,
+  mode: z.enum(PORTFOLIO_ACCOUNT_BALANCE_MODES),
+}).strict().nullable()
+
 export const portfolioSettingsWriteSchema = z.object({
+  accountLink: portfolioAccountLinkWriteSchema.optional(),
   name: z.string().trim().min(1).max(255).optional(),
   description: z.string().max(500).nullable().optional(),
   benchmarkSymbol: z.string().trim().max(20).nullable().optional(),
@@ -219,7 +241,8 @@ export const portfolioSettingsWriteSchema = z.object({
   favored: z.boolean().optional(),
   targetAllocation: portfolioTargetAllocationWriteSchema.optional(),
 }).strict().refine((value) => (
-  value.name !== undefined
+  value.accountLink !== undefined
+  || value.name !== undefined
   || value.description !== undefined
   || value.benchmarkSymbol !== undefined
   || value.excluded !== undefined

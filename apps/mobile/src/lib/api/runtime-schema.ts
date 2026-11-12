@@ -23,6 +23,8 @@ export const writeEndpoint = <Value>(endpoint: WriteEndpoint<Value>): WriteEndpo
 export const commonErrorEnvelopeSchema = z.object({
   code: z.string().optional(),
   message: z.string().optional(),
+  /** Values a client words the error with (4xx only); anything malformed reads as absent. */
+  details: z.record(z.string(), z.unknown()).optional().catch(undefined),
 })
 
 export type CommonErrorEnvelope = z.infer<typeof commonErrorEnvelopeSchema>

@@ -47,6 +47,11 @@ export const netWorthDtoSchema = z.object({
   }),
   /** The currencies of the accounts and loans left out, so the note can name them. Optional. */
   unconvertedCurrencies: z.array(z.string().regex(/^[A-Z]{3}$/)).optional().catch(undefined),
+  /**
+   * Ask "Is this the same money?": an investment account this member can see that no portfolio is
+   * linked to (by either member), and a portfolio with no link. Absent from older APIs.
+   */
+  suggestPortfolioLink: z.boolean().optional().catch(undefined),
 })
 
 export type NetWorthRowDto = z.infer<typeof netWorthRowSchema>

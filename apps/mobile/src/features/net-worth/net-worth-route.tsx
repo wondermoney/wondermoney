@@ -11,6 +11,7 @@ import { useBankAlertBanner } from '@/features/banking/use-bank-alerts'
 import { mapBudget } from '@/features/budgets/budgets-view-model'
 import { useBudgets } from '@/features/budgets/use-budgets'
 import { useLoans } from '@/features/loans/use-loans'
+import { classifyPortfolioLinkFailure, useLinkPortfolioAccount } from '@/features/portfolios/use-portfolio-account-link'
 import { useDashboardLayout } from '@/features/preferences/use-dashboard-layout'
 import { useTransactions } from '@/features/transactions/use-transactions'
 import { useTransactionReviewSummary } from '@/features/transactions/use-transaction-review-summary'
@@ -34,6 +35,8 @@ import { useHomeBudgetMonths, useHomeCashflow, useHomeCashflowComparison, useHom
 import { useNetWorth } from './use-net-worth'
 import { useNetWorthHistory } from './use-net-worth-history'
 import { mapNetWorthSummary } from './net-worth-view-model'
+import { showsPortfolioLinkSuggestion, type PortfolioLinkSuggestionModel } from './portfolio-link-suggestion'
+import { usePortfolioLinkSuggestionDismissal } from './use-portfolio-link-suggestion-dismissal'
 import { useSetupChecklistDismissal } from './use-setup-checklist-dismissal'
 
 /** Twelve month-closing points: web's home reads "since the end of December 2025" in November 2026. */
@@ -75,6 +78,8 @@ export function NetWorthRoute() {
   const insight = useTopSpendingCategory()
   const insights = useInsights()
   const setupDismissal = useSetupChecklistDismissal()
+  const linkDismissal = usePortfolioLinkSuggestionDismissal()
+  const linkPortfolio = useLinkPortfolioAccount()
   const bankAlerts = useBankAlertBanner()
   const dashboardLayout = useDashboardLayout()
 
@@ -130,6 +135,16 @@ export function NetWorthRoute() {
     portfolioMark({ name: portfolio.broker?.displayName }),
   ])), [portfolios.data])
 
+  const portfolioLink = useMemo((): PortfolioLinkSuggestionModel | null => {
+    if (!showsPortfolioLinkSuggestion({ suggested: query.data?.suggestPortfolioLink, dismissalLoaded: linkDismissal.loaded, dismissed: linkDismissal.dismissed })) return null
+    return {
+      portfolios: (portfolios.data?.portfolios ?? [])
+        .filter((portfolio) => !portfolio.accountLink)
+        .map((portfolio) => ({ portfolioKey: portfolio.portfolioKey, name: portfolio.name })),
+      accounts: accounts.data?.accounts ?? [],
+    }
+  }, [accounts.data, linkDismissal.dismissed, linkDismissal.loaded, portfolios.data, query.data?.suggestPortfolioLink])
+
   const freshness = accounts.data ? oldestRefresh(accounts.data.accounts, new Date()) : null
 
   const setupReady = accounts.data !== undefined && !setupDismissal.dismissed
@@ -175,11 +190,21 @@ export function NetWorthRoute() {
     insight: insightState,
     accountMarks,
     portfolioMarks,
+    portfolioLink,
   }
 
   return (
     <NetWorthScreen
       onDismissBankAlert={bankAlerts.dismiss}
+      onDismissPortfolioLink={linkDismissal.dismiss}
+      onLinkPortfolio={async (portfolioId, accountLink) => {
+        try {
+          await linkPortfolio.mutateAsync({ portfolioId, accountLink })
+          return { status: 'saved' }
+        } catch (error) {
+          return { status: 'failed', ...classifyPortfolioLinkFailure(error) }
+        }
+      }}
       onDismissSetup={setupDismissal.dismiss}
       onLogout={signOut}
       onNavigate={(href) => router.push(href as Href)}

@@ -1,4 +1,4 @@
-import { fireEvent, render } from '@testing-library/react-native'
+import { fireEvent, render, waitFor, within } from '@testing-library/react-native'
 import { I18nextProvider } from 'react-i18next'
 
 import type { PreferenceStorage } from '@/features/preferences/preference-storage'
@@ -47,8 +47,8 @@ const sections: HomeSections = {
   insight: { status: 'hidden' },
 }
 
-async function renderScreen(overrides: Partial<NetWorthScreenProps> = {}, sectionOverrides: Partial<HomeSections> = {}, privacy?: PreferenceStorage) {
-  const i18n = await initMobileI18n('en')
+async function renderScreen(overrides: Partial<NetWorthScreenProps> = {}, sectionOverrides: Partial<HomeSections> = {}, privacy?: PreferenceStorage, locale: 'en' | 'pt-PT' | 'es' = 'en') {
+  const i18n = await initMobileI18n(locale)
   const props: NetWorthScreenProps = {
     state: { status: 'loaded', data },
     sections: { ...sections, ...sectionOverrides },
@@ -325,6 +325,63 @@ describe('NetWorthScreen (Home)', () => {
         }] } },
       })
       expect(view.getByText('Aug 1, Checking')).toBeOnTheScreen()
+    })
+  })
+
+  describe('"Is this the same money?"', () => {
+    const portfolioLink = {
+      portfolios: [{ portfolioKey: 7, name: 'Long term' }],
+      accounts: [{ accountKey: 21, accountName: 'Brokerage cash', accountType: 'INVESTMENT', source: 'open_banking' }],
+    }
+
+    it('leads the balance sheet, with Link a portfolio and Dismiss', async () => {
+      const onDismissPortfolioLink = jest.fn()
+      const { view } = await renderScreen({ onDismissPortfolioLink, onLinkPortfolio: jest.fn() }, { portfolioLink })
+      const sheet = within(view.getByTestId('home-balance-sheet'))
+      expect(sheet.getByRole('alert', { name: /^Is this the same money\?\. You have an investment account/ })).toBeOnTheScreen()
+      expect(sheet.getByRole('button', { name: 'Link a portfolio' })).toBeOnTheScreen()
+      await fireEvent.press(sheet.getByRole('button', { name: 'Dismiss' }))
+      expect(onDismissPortfolioLink).toHaveBeenCalledTimes(1)
+    })
+
+    it('is absent without a suggestion', async () => {
+      const { view } = await renderScreen({ onLinkPortfolio: jest.fn() }, { portfolioLink: null })
+      expect(view.queryByTestId('home-portfolio-link-suggestion')).toBeNull()
+    })
+
+    it('links from its sheet, preselecting cash only for a synced account, and closes once saved', async () => {
+      const onLinkPortfolio = jest.fn().mockResolvedValue({ status: 'saved' })
+      const { view } = await renderScreen({ onLinkPortfolio }, { portfolioLink })
+      await fireEvent.press(view.getByRole('button', { name: 'Link a portfolio' }))
+      const sheet = within(view.getByTestId('home-portfolio-link-sheet'))
+      expect(sheet.getByRole('header', { name: 'Link a portfolio to its account' })).toBeOnTheScreen()
+      await fireEvent.press(sheet.getByRole('button', { name: 'Portfolio, Select a portfolio' }))
+      await fireEvent.press(view.getByRole('radio', { name: 'Long term' }))
+      await fireEvent.press(sheet.getByRole('button', { name: 'Account that holds this portfolio, Not linked' }))
+      await fireEvent.press(view.getByRole('radio', { name: 'Brokerage cash' }))
+      expect(sheet.getByRole('button', { name: "Does this account's balance include your investments?, No, cash only" })).toBeOnTheScreen()
+      await fireEvent.press(sheet.getByRole('button', { name: 'Save' }))
+      await waitFor(() => expect(onLinkPortfolio).toHaveBeenCalledWith(7, { accountId: 21, mode: 'cash_only' }))
+      await waitFor(() => expect(view.queryByTestId('home-portfolio-link-sheet')).toBeNull())
+    })
+
+    it.each([
+      ['pt-PT', 'É o mesmo dinheiro?', /^Tens uma conta de investimento/, 'Já ligado por Ana'],
+      ['es', '¿Es el mismo dinero?', /^Tienes una cuenta de inversión/, 'Ya vinculada por Ana'],
+    ] as const)('speaks %s, naming who holds a refused link', async (locale, title, body, held) => {
+      const onLinkPortfolio = jest.fn().mockResolvedValue({ status: 'failed', failure: 'link-held', holder: 'Ana' })
+      const { view } = await renderScreen({ onLinkPortfolio }, { portfolioLink }, undefined, locale)
+      expect(view.getByText(title)).toBeOnTheScreen()
+      expect(view.getByText(body)).toBeOnTheScreen()
+      const i18n = await initMobileI18n(locale)
+      await fireEvent.press(view.getByRole('button', { name: i18n.t('portfolioAccountLink.suggestionLink') }))
+      const sheet = within(view.getByTestId('home-portfolio-link-sheet'))
+      await fireEvent.press(sheet.getByRole('button', { name: new RegExp(`^${i18n.t('portfolioAccountLink.portfolioLabel')},`) }))
+      await fireEvent.press(view.getByRole('radio', { name: 'Long term' }))
+      await fireEvent.press(sheet.getByRole('button', { name: new RegExp(`^${i18n.t('portfolioAccountLink.accountLabel')},`) }))
+      await fireEvent.press(view.getByRole('radio', { name: 'Brokerage cash' }))
+      await fireEvent.press(sheet.getByRole('button', { name: i18n.t('portfolioAccountLink.save') }))
+      expect(await sheet.findByText(held)).toBeOnTheScreen()
     })
   })
 

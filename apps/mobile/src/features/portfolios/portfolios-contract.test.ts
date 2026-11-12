@@ -28,6 +28,8 @@ import {
   portfolioCurrenciesEndpoint,
   portfolioCurrenciesResponseSchema,
   portfolioSettingsWriteSchema,
+  portfolioResponseSchema,
+  portfoliosResponseSchema,
   portfolioSettingsResponseSchema,
   portfolioTargetAllocationsEqual,
   portfolioTransactionTypesEndpoint,
@@ -83,6 +85,25 @@ describe('portfolio endpoint contracts', () => {
     expect(portfolioSettingsWriteSchema.parse({ favored: true })).toEqual({ favored: true })
     expect(portfolioSettingsResponseSchema.parse({ portfolio: { portfolioKey: 7, name: 'Renamed', description: null, currencyKey: { code: 'EUR' }, benchmarkSymbol: 'SPY', excluded: false, favored: true, targetAllocation: { STOCK: 80 } } })).toEqual({ portfolio: { portfolioKey: 7, name: 'Renamed', description: null, currencyKey: { code: 'EUR' }, benchmarkSymbol: 'SPY', excluded: false, favored: true, targetAllocation: { STOCK: 80 } } })
     for (const body of [{}, { currencyId: 151 }, { targetAllocation: {} }, { benchmarkSymbol: 'x'.repeat(21) }]) expect(portfolioSettingsWriteSchema.safeParse(body).success).toBe(false)
+  })
+
+  it('reads a portfolio\'s account link as the viewer may see it, and a malformed one as none', () => {
+    const base = { portfolioKey: 7, name: 'Future', currencyKey: { code: 'EUR' } }
+    expect(portfolioResponseSchema.parse({ portfolio: { ...base, accountLink: { accountKey: 3, accountName: 'Broker', mode: 'cash_only' } } }).portfolio.accountLink).toEqual({ accountKey: 3, accountName: 'Broker', mode: 'cash_only' })
+    expect(portfolioResponseSchema.parse({ portfolio: { ...base, accountLink: { accountKey: 3, mode: 'includes_holdings' } } }).portfolio.accountLink).toEqual({ accountKey: 3, accountName: null, mode: 'includes_holdings' })
+    expect(portfolioResponseSchema.parse({ portfolio: { ...base, accountLink: null } }).portfolio.accountLink).toBeNull()
+    expect(portfolioResponseSchema.parse({ portfolio: base }).portfolio.accountLink).toBeUndefined()
+    expect(portfolioResponseSchema.parse({ portfolio: { ...base, accountLink: { accountKey: 3, mode: 'everything' } } }).portfolio.accountLink).toBeNull()
+    const summary = { ...base, appuserCurrencyCode: 'EUR', balance: 10 }
+    expect(portfoliosResponseSchema.parse({ portfolios: [{ ...summary, accountLink: { accountKey: 3, accountName: null, mode: 'cash_only' } }] }).portfolios[0].accountLink).toEqual({ accountKey: 3, accountName: null, mode: 'cash_only' })
+  })
+
+  it('writes a link or an unlink, and nothing looser', () => {
+    expect(portfolioSettingsWriteSchema.parse({ accountLink: { accountId: 3, mode: 'cash_only' } })).toEqual({ accountLink: { accountId: 3, mode: 'cash_only' } })
+    expect(portfolioSettingsWriteSchema.parse({ accountLink: null })).toEqual({ accountLink: null })
+    for (const accountLink of [{ accountId: 3 }, { accountId: 0, mode: 'cash_only' }, { accountId: 3, mode: 'all' }, { accountId: 3, mode: 'cash_only', accountName: 'Broker' }]) {
+      expect(portfolioSettingsWriteSchema.safeParse({ accountLink }).success).toBe(false)
+    }
   })
 
   it('validates target allocation writes against the fixed asset-class set', () => {

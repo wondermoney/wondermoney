@@ -41,6 +41,13 @@ describe('net-worth contract', () => {
     expect(netWorthDtoSchema.safeParse({ ...fixture, currencyCode }).success).toBe(false)
   })
 
+  it('reads whether to ask "Is this the same money?", as no when absent or malformed', () => {
+    expect(netWorthDtoSchema.parse({ ...fixture, suggestPortfolioLink: true }).suggestPortfolioLink).toBe(true)
+    expect(netWorthDtoSchema.parse({ ...fixture, suggestPortfolioLink: false }).suggestPortfolioLink).toBe(false)
+    expect(netWorthDtoSchema.parse(fixture).suggestPortfolioLink).toBeUndefined()
+    expect(netWorthDtoSchema.parse({ ...fixture, suggestPortfolioLink: 'yes' }).suggestPortfolioLink).toBeUndefined()
+  })
+
   it('keeps the account a portfolio row is already counted in', () => {
     const rows = [{ type: 'portfolios', id: 7, name: 'Shares', balance: 8000, countedInAccountId: 5 }]
     expect(netWorthDtoSchema.parse({ ...fixture, rows }).rows).toEqual(rows)
