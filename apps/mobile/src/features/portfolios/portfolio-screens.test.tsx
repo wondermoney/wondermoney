@@ -63,6 +63,37 @@ describe('portfolio screens', () => {
     expect(add).toHaveBeenCalledWith(4)
   })
 
+  it('shows the period\'s time- and money-weighted returns, each explained, with the yearly rate marked', async () => {
+    const i18n = await initMobileI18n('en')
+    const data: PortfolioOverviewViewModel = { ...overview, periodLabel: '1Y', periodReturns: { timeWeighted: 8.5, moneyWeighted: -1.25, moneyWeightedAnnualized: true, missingSnapshotDays: 3 } }
+    const view = await provider(<PortfoliosScreen period="1Y" state={{ status: 'loaded', data }} onRefresh={jest.fn()} onLogout={jest.fn()} onSelectPortfolio={jest.fn()} />)
+    const timeWeighted = view.getByTestId('portfolio-time-weighted')
+    const moneyWeighted = view.getByTestId('portfolio-money-weighted')
+    expect(within(timeWeighted).getByText('+8.50%')).toBeOnTheScreen()
+    expect(within(timeWeighted).getByText(i18n.t('portfolioSections.timeWeightedHelp'))).toBeOnTheScreen()
+    expect(within(timeWeighted).queryByText(i18n.t('portfolioSections.perYear'))).not.toBeOnTheScreen()
+    expect(within(moneyWeighted).getByText('-1.25%')).toBeOnTheScreen()
+    expect(within(moneyWeighted).getByText(i18n.t('portfolioSections.moneyWeightedHelp'))).toBeOnTheScreen()
+    expect(within(moneyWeighted).getByText(i18n.t('portfolioSections.perYear'))).toBeOnTheScreen()
+    expect(view.getByTestId('portfolio-missing-snapshots')).toHaveTextContent(i18n.t('portfolioSections.missingSnapshots', { count: 3 }))
+  })
+
+  it('says why a weighted return is missing, never a zero, and leaves the figures out for older APIs', async () => {
+    const i18n = await initMobileI18n('en')
+    const unmeasured: PortfolioDetailViewModel = { ...detail, periodLabel: 'YTD', periodReturns: { timeWeighted: null, moneyWeighted: null, moneyWeightedAnnualized: false, missingSnapshotDays: 0 } }
+    const view = await provider(<PortfolioDetailScreen state={{ status: 'loaded', data: unmeasured }} performance={performanceProps} onBack={jest.fn()} onOpenActivity={jest.fn()} onRefresh={jest.fn()} onLogout={jest.fn()} />)
+    for (const id of ['portfolio-time-weighted', 'portfolio-money-weighted']) {
+      const cell = view.getByTestId(id)
+      expect(within(cell).getByText(i18n.t('portfolioSections.needsHistory'))).toBeOnTheScreen()
+      expect(within(cell).queryByText(/%/)).not.toBeOnTheScreen()
+    }
+    expect(view.queryByTestId('portfolio-missing-snapshots')).not.toBeOnTheScreen()
+
+    const older = await provider(<PortfoliosScreen state={{ status: 'loaded', data: overview }} onRefresh={jest.fn()} onLogout={jest.fn()} onSelectPortfolio={jest.fn()} />)
+    expect(older.queryByTestId('portfolio-time-weighted')).not.toBeOnTheScreen()
+    expect(older.queryByTestId('portfolio-money-weighted')).not.toBeOnTheScreen()
+  })
+
   it('keeps invalid holdings visible and every valuation unavailable rather than zero', async () => {
     const activity = jest.fn()
     const settings = jest.fn()

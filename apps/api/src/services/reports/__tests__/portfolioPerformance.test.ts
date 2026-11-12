@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { kyselyDouble } from '@app/__tests__/__helpers__/kysely-double';
 import type { InvestmentCashFlow } from '@service/portfolio/portfolio-metrics.utils';
 import type { ReportFilters } from '@validators/reports';
 
@@ -19,6 +20,7 @@ const state = vi.hoisted(() => ({
 /**
  * An in-memory household store: `find` applies the tenant predicate the service builds, and
  * `findOne` answers "latest snapshot before this instant", so the tests assert what comes back.
+ * The daily snapshots query answers with the asked-for portfolios' snapshots from its start date.
  */
 vi.mock('@app/database/di', () => ({
   DI: {
@@ -32,6 +34,14 @@ vi.mock('@app/database/di', () => ({
         // Populated as the service asks: the portfolio's owner, who keeps EUR.
         return Promise.resolve(match ? { ...match, portfolioKey: { portfolioKey: match.portfolioKey, portfolioOwnerAppuserKey: { currencyKey: { code: 'EUR' } } } } : null);
       }),
+      getKysely: vi.fn(() => kyselyDouble((query) => {
+        const keys = query.parameters.find((parameter): parameter is number[] => Array.isArray(parameter)) ?? [];
+        const from = query.parameters.find((parameter): parameter is Date => parameter instanceof Date) ?? new Date(0);
+        return state.snapshots
+          .filter((snapshot) => keys.includes(snapshot.portfolioKey) && snapshot.snapshotDate >= from)
+          .toSorted((a, b) => a.snapshotDate.getTime() - b.snapshotDate.getTime())
+          .map((snapshot) => ({ currency_code: snapshot.appuserCurrencyKey.code, portfolio_key: snapshot.portfolioKey, snapshot_date: snapshot.snapshotDate, value: String(snapshot.appuserCurrencyTotalValue) }));
+      }).db),
     },
   },
 }));
@@ -157,6 +167,42 @@ describe('getPortfolioPerformanceReport', () => {
     expect(rows[0]).toMatchObject({ change: 0, netContributions: 0 });
   });
 
+  it('gives the time-weighted return, unmoved by a deposit, beside the money-weighted one', async () => {
+    // 10 000 held, 10 000 more put in on 1 September at an unchanged price, then a 10% rise.
+    state.snapshots = [snapshot(7, '2026-07-31', 10_000), snapshot(7, '2026-09-01', 20_000), snapshot(7, '2026-10-01', 22_000)];
+    state.flows = [buy(7, '2026-09-01', 10_000)];
+    state.liveValues.set(7, 22_000);
+
+    const [row] = await getPortfolioPerformanceReport(makeInput(), NOW);
+
+    expect(row?.timeWeightedReturn).toBe(10);
+    // The rise came with all 20 000 in, so the investor's money did better than the investments.
+    expect(row?.moneyWeightedReturn).toBeGreaterThan(10);
+    expect(row?.moneyWeightedReturnAnnualized).toBe(false);
+    // Days without a snapshot between the start and today are reported, not read as zero.
+    expect(row?.missingSnapshotDates).toContain('2026-08-15');
+    expect(row?.missingSnapshotDates).not.toContain('2026-09-01');
+  });
+
+  it('closes both returns of a past period at its end snapshot', async () => {
+    state.snapshots = [snapshot(7, '2026-07-31', 1000), snapshot(7, '2026-08-31', 1100), snapshot(7, '2026-09-30', 5000)];
+    state.liveValues.set(7, 99_999);
+
+    const [row] = await getPortfolioPerformanceReport(makeInput({ toDate: '2026-08-31T23:59:59.999Z' }), NOW);
+
+    expect(row?.timeWeightedReturn).toBe(10);
+    expect(row?.moneyWeightedReturn).toBe(10);
+  });
+
+  it('leaves both returns unknown when the start is', async () => {
+    state.flows = [buy(7, '2026-01-01', 2000)];
+    state.liveValues.set(7, 2100);
+
+    const [row] = await getPortfolioPerformanceReport(makeInput(), NOW);
+
+    expect(row).toMatchObject({ moneyWeightedReturn: null, timeWeightedReturn: null });
+  });
+
   it('returns no rows for a household without portfolios', async () => {
     state.portfolios = [];
 
@@ -167,13 +213,13 @@ describe('getPortfolioPerformanceReport', () => {
 describe('buildPortfolioPerformanceCsv', () => {
   it('emits one 2-decimal row per portfolio, with unknown values left blank', () => {
     const csv = buildPortfolioPerformanceCsv([
-      { change: 50, changePercent: 5, currency: 'EUR', dividends: 2, endValue: 1050, name: 'Long-term', netContributions: 0, portfolioKey: '7', startValue: 1000 },
-      { change: null, changePercent: null, currency: 'EUR', dividends: 0, endValue: 300, name: 'Tech picks', netContributions: 10, portfolioKey: '8', startValue: null },
+      { change: 50, changePercent: 5, currency: 'EUR', dividends: 2, endValue: 1050, missingSnapshotDates: [], moneyWeightedReturn: 5.1, moneyWeightedReturnAnnualized: true, name: 'Long-term', netContributions: 0, portfolioKey: '7', startValue: 1000, timeWeightedReturn: 5.2 },
+      { change: null, changePercent: null, currency: 'EUR', dividends: 0, endValue: 300, missingSnapshotDates: ['2026-08-02', '2026-08-03'], moneyWeightedReturn: null, moneyWeightedReturnAnnualized: false, name: 'Tech picks', netContributions: 10, portfolioKey: '8', startValue: null, timeWeightedReturn: null },
     ]);
 
     const [header, first, second] = csv.replace('﻿', '').trim().split('\n');
-    expect(header?.split(',')).toHaveLength(9);
-    expect(first).toBe('7,Long-term,EUR,1000.00,0.00,50.00,5.00,2.00,1050.00');
-    expect(second).toBe('8,Tech picks,EUR,,10.00,,,0.00,300.00');
+    expect(header?.split(',')).toHaveLength(13);
+    expect(first).toBe('7,Long-term,EUR,1000.00,0.00,50.00,5.00,2.00,1050.00,5.20,5.10,true,0');
+    expect(second).toBe('8,Tech picks,EUR,,10.00,,,0.00,300.00,,,false,2');
   });
 });

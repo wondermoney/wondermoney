@@ -19,10 +19,14 @@ const row = {
   currency: 'EUR',
   dividends: 0,
   endValue: 12_535.86,
+  missingSnapshotDates: [],
+  moneyWeightedReturn: 25.36,
+  moneyWeightedReturnAnnualized: false,
   name: 'Long-term',
   netContributions: 0,
   portfolioKey: '7',
   startValue: 10_000,
+  timeWeightedReturn: 25.36,
 };
 
 const makeRequest = (query: Record<string, unknown> = {}) =>
@@ -52,7 +56,7 @@ describe('portfolio performance report controller', () => {
     await getPortfolioPerformanceReportCsv(makeRequest(), res);
 
     const csv = (res.send as ReturnType<typeof vi.fn>).mock.calls[0]?.[0] as string;
-    expect(csv).toContain('7,Long-term,EUR,10000.00,0.00,2535.86,25.36,0.00,12535.86');
+    expect(csv).toContain('7,Long-term,EUR,10000.00,0.00,2535.86,25.36,0.00,12535.86,25.36,25.36,false,0');
     expect((res as unknown as { setHeader: unknown }).setHeader).toHaveBeenCalledWith('Content-Type', 'text/csv; charset=utf-8');
   });
 

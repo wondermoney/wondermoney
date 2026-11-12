@@ -205,4 +205,12 @@ export interface PortfolioPerformanceRow {
   dividends: number | null;
   /** Value when the period closes: live for a current period. */
   endValue: number | null;
+  /** % over the period with cash flows taken out; null when it cannot be measured. */
+  timeWeightedReturn: number | null;
+  /** % XIRR: yearly when `moneyWeightedReturnAnnualized`, else over the period itself. */
+  moneyWeightedReturn: number | null;
+  /** True only for periods of a year or more. */
+  moneyWeightedReturnAnnualized: boolean;
+  /** `YYYY-MM-DD` days with no snapshot; the day before's value was carried over. */
+  missingSnapshotDates: string[];
 }

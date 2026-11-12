@@ -5,6 +5,7 @@ import {
   createMonthComparisonEndpoint,
   createNetWorthHistoryReportEndpoint,
   createPortfolioPerformanceReportEndpoint,
+  portfolioPerformanceReportRowSchema,
   createReportCsvEndpoint,
   createSankeyEndpoint,
   createSpendingByCategoryEndpoint,
@@ -108,6 +109,16 @@ describe('reports contract', () => {
       const query = new URLSearchParams(path.split('?')[1])
       expect([...query.keys()].sort()).toEqual(['fromDate', 'toDate'])
     }
+  })
+
+  it('reads each portfolio\'s time- and money-weighted returns, and still parses rows from APIs that send none', () => {
+    const row = { portfolioKey: '7', name: 'Long-term', currency: 'EUR', startValue: 1000, netContributions: 0, change: 100, changePercent: 10, dividends: 0, endValue: 1100 }
+    const returns = { timeWeightedReturn: 9.87, moneyWeightedReturn: null, moneyWeightedReturnAnnualized: false, missingSnapshotDates: ['2026-06-01'] }
+    expect(portfolioPerformanceReportRowSchema.parse({ ...row, ...returns })).toEqual({ ...row, ...returns })
+    const older = portfolioPerformanceReportRowSchema.parse(row)
+    expect(older).toEqual(row)
+    expect(older.timeWeightedReturn).toBeUndefined()
+    expect(portfolioPerformanceReportRowSchema.safeParse({ ...row, timeWeightedReturn: 'n/a' }).success).toBe(false)
   })
 
   it.each([

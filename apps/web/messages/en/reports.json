@@ -133,6 +133,14 @@
         "total": "Total",
         "unknownValue": "No value recorded",
         "noExchangeRate": "No exchange rate yet",
+        "timeWeighted": "Time-weighted",
+        "moneyWeighted": "Money-weighted",
+        "timeWeightedDescription": "How the investments did, whatever you put in or took out.",
+        "moneyWeightedDescription": "How your money did, counting when you added or withdrew it. A yearly rate for periods of a year or more.",
+        "perYear": "a year",
+        "returnUnavailable": "Not enough history to measure",
+        "notCombined": "Not combined across portfolios",
+        "missingSnapshots": "{count, plural, one {# day without a snapshot, carried over} other {# days without a snapshot, carried over}}",
         "noData": {
           "title": "No portfolios to show",
           "description": "Add a portfolio to see its performance here."

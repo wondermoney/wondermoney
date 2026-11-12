@@ -48,13 +48,27 @@ export type PortfolioPerformanceReportScreenProps = PortfolioPerformanceReportBo
   onBack: () => void
 }
 
-type Figures = Readonly<{ name: string; startValue: number | null; netContributions: number | null; change: number | null; changePercent: number | null; dividends: number | null; endValue: number | null }>
+type Figures = Readonly<{
+  name: string
+  startValue: number | null
+  netContributions: number | null
+  change: number | null
+  changePercent: number | null
+  dividends: number | null
+  endValue: number | null
+  timeWeightedReturn?: number | null
+  moneyWeightedReturn?: number | null
+  moneyWeightedReturnAnnualized?: boolean
+  missingSnapshotDates?: readonly string[]
+}>
 
 /**
  * Web's `PortfolioPerformanceReport`: a six-column table (Portfolio, Start
  * value, Net contributions, Change, Dividends, End value) that scrolls sideways
  * at phone width, biggest movers first, with a Total row when there is more
- * than one portfolio. A value the API has no snapshot for is an em dash.
+ * than one portfolio. A value the API has no snapshot for is an em dash. When the API sends them,
+ * Time-weighted and Money-weighted columns follow Change, explained under the table; the Total
+ * row leaves them out, since neither return adds up across portfolios.
  */
 export function PortfolioPerformanceReportBody({ state, currencyCode, exportState, onExport, onRefresh }: PortfolioPerformanceReportBodyProps) {
   const formatMoney = useFormatMoney()
@@ -70,37 +84,70 @@ export function PortfolioPerformanceReportBody({ state, currencyCode, exportStat
     ? unknown
     : percent === null ? signedMoney(change) : `${signedMoney(change)} (${formatPercentagePoints(percent, locale, { maximumFractionDigits: 2 })})`
 
+  const percent = (value: number) => formatPercentagePoints(value, locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+  const notCombined = t('reports.portfolioPerformance.notCombined')
+  const returnLabel = (value: number | null | undefined, unknownLabel: string, perYear = false) => value === null || value === undefined
+    ? unknownLabel
+    : perYear ? `${percent(value)} ${t('portfolioSections.perYear')}` : percent(value)
+
   if (state.status === 'access-transition') return null
+
+  const returnCell = (value: number | null | undefined, unknownLabel: string, perYear = false) => value === null || value === undefined
+    ? <Text accessibilityLabel={unknownLabel} align="right" tone="muted" variant="amount">—</Text>
+    : (
+      <View style={styles.change}>
+        <Text align="right" variant="amount">{percent(value)}</Text>
+        <ReportTrend value={value} />
+        {perYear ? <Text align="right" tone="muted" variant="label">{t('portfolioSections.perYear')}</Text> : null}
+      </View>
+    )
 
   const amount = (value: number | null, unknownLabel = unknown) => value === null
     ? <Text accessibilityLabel={unknownLabel} align="right" tone="muted" variant="amount">—</Text>
     : <Amount align="right" currency={currencyCode} locale={locale} value={value} />
 
-  const toRow = (key: string, figures: Figures, emphasis?: 'total'): ReportTableRow => ({
-    key,
-    emphasis,
-    accessibilityLabel: [
-      figures.name,
-      `${t('reports.portfolioPerformance.startValue')}, ${optionalMoneyLabel(figures.startValue)}`,
-      `${t('reports.portfolioPerformance.netContributions')}, ${optionalMoneyLabel(figures.netContributions, noRate)}`,
-      `${t('reports.portfolioPerformance.change')}, ${changeLabel(figures.change, figures.changePercent)}`,
-      `${t('reports.portfolioPerformance.dividends')}, ${optionalMoneyLabel(figures.dividends, noRate)}`,
-      `${t('reports.portfolioPerformance.endValue')}, ${optionalMoneyLabel(figures.endValue)}`,
-    ].join(', '),
-    cells: {
-      portfolio: figures.name,
-      startValue: amount(figures.startValue),
-      netContributions: amount(figures.netContributions, noRate),
-      change: figures.change === null ? amount(null) : (
-        <View style={styles.change}>
-          <Text align="right" variant="amount">{signedMoney(figures.change)}</Text>
-          <ReportTrend percentage={figures.changePercent} value={figures.change} />
-        </View>
-      ),
-      dividends: amount(figures.dividends, noRate),
-      endValue: amount(figures.endValue),
-    },
-  })
+  const toRow = (key: string, figures: Figures, withReturns: boolean, emphasis?: 'total'): ReportTableRow => {
+    const total = emphasis === 'total'
+    const returnsUnknown = total ? notCombined : unknown
+    const missingDays = new Set(figures.missingSnapshotDates ?? []).size
+    return {
+      key,
+      emphasis,
+      accessibilityLabel: [
+        figures.name,
+        `${t('reports.portfolioPerformance.startValue')}, ${optionalMoneyLabel(figures.startValue)}`,
+        `${t('reports.portfolioPerformance.netContributions')}, ${optionalMoneyLabel(figures.netContributions, noRate)}`,
+        `${t('reports.portfolioPerformance.change')}, ${changeLabel(figures.change, figures.changePercent)}`,
+        ...(withReturns ? [
+          `${t('portfolioSections.timeWeighted')}, ${returnLabel(figures.timeWeightedReturn, returnsUnknown)}`,
+          `${t('portfolioSections.moneyWeighted')}, ${returnLabel(figures.moneyWeightedReturn, returnsUnknown, figures.moneyWeightedReturnAnnualized)}`,
+        ] : []),
+        `${t('reports.portfolioPerformance.dividends')}, ${optionalMoneyLabel(figures.dividends, noRate)}`,
+        `${t('reports.portfolioPerformance.endValue')}, ${optionalMoneyLabel(figures.endValue)}`,
+        ...(missingDays > 0 ? [t('portfolioSections.missingSnapshots', { count: missingDays })] : []),
+      ].join(', '),
+      cells: {
+        portfolio: missingDays > 0 ? (
+          <View style={styles.name}>
+            <Text variant="meta">{figures.name}</Text>
+            <Text tone="muted" variant="label">{t('reports.portfolioPerformance.daysWithoutSnapshot', { count: missingDays })}</Text>
+          </View>
+        ) : figures.name,
+        startValue: amount(figures.startValue),
+        netContributions: amount(figures.netContributions, noRate),
+        change: figures.change === null ? amount(null) : (
+          <View style={styles.change}>
+            <Text align="right" variant="amount">{signedMoney(figures.change)}</Text>
+            <ReportTrend percentage={figures.changePercent} value={figures.change} />
+          </View>
+        ),
+        timeWeighted: returnCell(figures.timeWeightedReturn, returnsUnknown),
+        moneyWeighted: returnCell(figures.moneyWeightedReturn, returnsUnknown, figures.moneyWeightedReturnAnnualized),
+        dividends: amount(figures.dividends, noRate),
+        endValue: amount(figures.endValue),
+      },
+    }
+  }
 
   let content: React.ReactNode
   if (state.status === 'loading') {
@@ -110,24 +157,36 @@ export function PortfolioPerformanceReportBody({ state, currencyCode, exportStat
   } else if (state.report.rows.length === 0) {
     content = <ReportEmptyState description={t('reports.portfolioPerformance.emptyMessage')} icon="trending-up" title={t('reports.portfolioPerformance.emptyTitle')} />
   } else {
-    const { rows, totals } = state.report
-    const totalFigures: Figures & PortfolioPerformanceTotals = { name: t('reports.portfolioPerformance.total'), ...totals }
+    const { rows, totals, hasPeriodReturns } = state.report
+    const totalFigures: Figures & PortfolioPerformanceTotals = { name: t('reports.portfolioPerformance.total'), ...totals, timeWeightedReturn: null, moneyWeightedReturn: null }
     content = (
-      <ReportTable
-        columns={[
-          { key: 'portfolio', label: t('reports.portfolioPerformance.portfolio'), width: 160 },
-          { key: 'startValue', label: t('reports.portfolioPerformance.startValue'), align: 'right', width: 128 },
-          { key: 'netContributions', label: t('reports.portfolioPerformance.netContributions'), align: 'right', width: 160 },
-          { key: 'change', label: t('reports.portfolioPerformance.change'), align: 'right', width: 144 },
-          { key: 'dividends', label: t('reports.portfolioPerformance.dividends'), align: 'right', width: 112 },
-          { key: 'endValue', label: t('reports.portfolioPerformance.endValue'), align: 'right', width: 128 },
-        ]}
-        rows={[
-          ...rows.map((row) => toRow(row.portfolioKey, row)),
-          ...(rows.length > 1 ? [toRow('__total__', totalFigures, 'total')] : []),
-        ]}
-        scrollable
-      />
+      <View style={styles.stack}>
+        <ReportTable
+          columns={[
+            { key: 'portfolio', label: t('reports.portfolioPerformance.portfolio'), width: 160 },
+            { key: 'startValue', label: t('reports.portfolioPerformance.startValue'), align: 'right', width: 128 },
+            { key: 'netContributions', label: t('reports.portfolioPerformance.netContributions'), align: 'right', width: 160 },
+            { key: 'change', label: t('reports.portfolioPerformance.change'), align: 'right', width: 144 },
+            ...(hasPeriodReturns ? [
+              { key: 'timeWeighted', label: t('portfolioSections.timeWeighted'), align: 'right' as const, width: 144 },
+              { key: 'moneyWeighted', label: t('portfolioSections.moneyWeighted'), align: 'right' as const, width: 144 },
+            ] : []),
+            { key: 'dividends', label: t('reports.portfolioPerformance.dividends'), align: 'right', width: 112 },
+            { key: 'endValue', label: t('reports.portfolioPerformance.endValue'), align: 'right', width: 128 },
+          ]}
+          rows={[
+            ...rows.map((row) => toRow(row.portfolioKey, row, hasPeriodReturns)),
+            ...(rows.length > 1 ? [toRow('__total__', totalFigures, hasPeriodReturns, 'total')] : []),
+          ]}
+          scrollable
+        />
+        {hasPeriodReturns ? (
+          <View style={styles.notes} testID="portfolio-performance-returns-notes">
+            <Text tone="muted" variant="label">{`${t('portfolioSections.timeWeighted')}: ${t('portfolioSections.timeWeightedHelp')}`}</Text>
+            <Text tone="muted" variant="label">{`${t('portfolioSections.moneyWeighted')}: ${t('portfolioSections.moneyWeightedHelp')}`}</Text>
+          </View>
+        ) : null}
+      </View>
     )
   }
 
@@ -159,4 +218,7 @@ export function PortfolioPerformanceReportScreen({ state, preset, currencyCode, 
 
 const styles = StyleSheet.create({
   change: { alignItems: 'flex-end', gap: themeTokens.spacing[1] },
+  name: { gap: 2 },
+  stack: { gap: themeTokens.spacing[3] },
+  notes: { gap: themeTokens.spacing[1] },
 })

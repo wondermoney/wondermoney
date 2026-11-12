@@ -10,6 +10,7 @@ import type { Period } from "@/lib/api/portfolio/usePortfolioDashboard";
 import usePortfolioPerformance, {
   type PortfolioBenchmarkReadinessStatus,
 } from "@/lib/api/portfolio/usePortfolioPerformance";
+import { buildReturnChartData } from "@/lib/portfolio/performance-chart-data";
 import { cn } from "@/lib/utils";
 
 import { PortfolioHistoryCurrencyNotice } from "./PortfolioHistoryCurrencyNotice";
@@ -124,34 +125,17 @@ const PortfolioBenchmarkChart: React.FC<PortfolioBenchmarkChartProps> = ({
     performanceData?.benchmarkStatus ??
     "waiting_for_portfolio_history";
 
-  const chartData = useMemo(() => {
-    if (!performanceData?.normalizedDataPoints?.length) {
-      return [];
-    }
-
-    const portfolioByDate = new Map(
-      performanceData.normalizedDataPoints.map((point) => [
-        point.date,
-        point.value,
-      ]),
-    );
-    const benchmarkByDate = new Map(
-      performanceData.normalizedBenchmarkDataPoints?.map((point) => [
-        point.date,
-        point.value,
-      ]) ?? [],
-    );
-
-    return Array.from(
-      new Set([...portfolioByDate.keys(), ...benchmarkByDate.keys()]),
-    )
-      .toSorted((a, b) => new Date(a).getTime() - new Date(b).getTime())
-      .map((date) => ({
-        x: date,
-        portfolioReturn: portfolioByDate.get(date),
-        benchmarkReturn: benchmarkByDate.get(date),
-      }));
-  }, [performanceData]);
+  // The portfolio line is the time-weighted return, so deposits and
+  // withdrawals do not move it, and it compares with the benchmark's price
+  // change on the same basis.
+  const chartData = useMemo(
+    () =>
+      buildReturnChartData(
+        performanceData?.normalizedDataPoints,
+        performanceData?.normalizedBenchmarkDataPoints,
+      ),
+    [performanceData],
+  );
 
   const hasBenchmark = chartData.some(
     (point) => typeof point.benchmarkReturn === "number",

@@ -6,9 +6,24 @@ import type { SupportedCurrencyCodes } from "@/lib/utils/currencySymbol";
 import api from "../api";
 
 // The API adds opt-in summary fields only when asked, so strict older clients keep parsing.
-const DASHBOARD_INCLUDE = "feeConversion";
+const DASHBOARD_INCLUDE = "feeConversion,periodReturns";
 
 export type Period = "1M" | "3M" | "6M" | "YTD" | "1Y" | "ALL";
+
+/**
+ * Returns over the selected period, as percentages (10 = +10%). Null when the
+ * period has too little to measure.
+ */
+export interface PeriodReturns {
+  /** How the investments did, cash going in and out taken out of the picture. */
+  timeWeighted: number | null;
+  /** XIRR: a yearly rate when `moneyWeightedAnnualized`, else the rate over the period itself. */
+  moneyWeighted: number | null;
+  /** True only for periods of a year or more. */
+  moneyWeightedAnnualized: boolean;
+  /** `YYYY-MM-DD` days in the period with no snapshot; the day before's value was carried over. */
+  missingSnapshotDates: string[];
+}
 
 export interface DashboardSummary {
   totalValue: number;
@@ -28,6 +43,8 @@ export interface DashboardSummary {
    * and non-empty; covers fully sold assets, which have no holding to flag.
    */
   feeConversionIncompleteAssetKeys?: number[];
+  /** Sent only when requested with `include=periodReturns`. */
+  periodReturns?: PeriodReturns;
 }
 
 export interface PortfolioBreakdownItem {

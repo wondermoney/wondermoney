@@ -1,5 +1,5 @@
-import { startOfYear, subDays, subMonths } from 'date-fns';
-import { describe, expect, it, vi } from 'vitest';
+import { format, startOfYear, subDays, subMonths } from 'date-fns';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
 const portfolioHoldingsServiceMock = vi.hoisted(() => ({
   getInvestmentCashFlows: vi.fn().mockResolvedValue([]),
@@ -726,6 +726,153 @@ describe('portfolio dashboard service', () => {
         { date: '2024-01-11', value: 10 },
       ]);
       expect(result.benchmarkStatus).toBe('ready');
+    });
+  });
+
+  describe('performance chart on the time-weighted return', () => {
+    const row = (portfolioKey: number, date: string, value: number) => ({ currency_code: 'EUR', portfolio_key: portfolioKey, snapshot_date: date, value: String(value) });
+    const trade = (kind: 'BUY' | 'SELL', date: string, amount: number) => ({ amount: kind === 'BUY' ? -amount : amount, currencyCode: 'EUR', date: new Date(`${date}T10:00:00.000Z`), kind });
+
+    function setupHistory(rows: ReturnType<typeof row>[], flowsByPortfolio: Record<number, ReturnType<typeof trade>[]>) {
+      setupDashboardMocks();
+      Object.assign(DI.em, {
+        find: vi.fn().mockResolvedValue(Object.keys(flowsByPortfolio).map((key) => ({ portfolioKey: Number(key) }))),
+        findOne: vi.fn().mockResolvedValue({ benchmarkSymbol: 'SPY' }),
+        getKysely: databaseReturning(rows),
+      });
+      portfolioHoldingsServiceMock.getInvestmentCashFlows.mockImplementation((_appuser: Appuser, _tenantKey: number, portfolioKey: number) =>
+        Promise.resolve(flowsByPortfolio[portfolioKey] ?? []));
+    }
+
+    afterEach(() => {
+      portfolioHoldingsServiceMock.getInvestmentCashFlows.mockReset().mockResolvedValue([]);
+    });
+
+    it('stays flat through a large deposit when prices do not move, and marks the deposit day', async () => {
+      setupHistory(
+        [row(1, '2024-01-01', 1000), row(1, '2024-01-02', 1000), row(1, '2024-01-03', 11_000), row(1, '2024-01-04', 11_000)],
+        { 1: [trade('BUY', '2024-01-03', 10_000)] },
+      );
+
+      const result = await service.getPerformanceData(appuser, 1, 'ALL');
+
+      expect(result.normalizedDataPoints?.map((point) => point.value)).toEqual([0, 0, 0, 0]);
+      expect(result.dataPoints.map((point) => point.value)).toEqual([1000, 1000, 11_000, 11_000]);
+      expect(result.dataPoints.map((point) => point.netContribution)).toEqual([undefined, undefined, 10_000, undefined]);
+    });
+
+    it('stays flat through a withdrawal when prices do not move, and marks it as money taken out', async () => {
+      setupHistory(
+        [row(1, '2024-01-01', 10_000), row(1, '2024-01-02', 4000), row(1, '2024-01-03', 4000)],
+        { 1: [trade('SELL', '2024-01-02', 6000)] },
+      );
+
+      const result = await service.getPerformanceData(appuser, 1, 'ALL');
+
+      expect(result.normalizedDataPoints?.map((point) => point.value)).toEqual([0, 0, 0]);
+      expect(result.dataPoints[1]?.netContribution).toBe(-6000);
+    });
+
+    it('is the % change since the first day when nothing was put in or taken out', async () => {
+      const values = [1000, 1100, 1050, 1210.5];
+      setupHistory(values.map((value, day) => row(1, `2024-01-0${day + 1}`, value)), { 1: [] });
+
+      const result = await service.getPerformanceData(appuser, 1, 'ALL');
+
+      const sinceFirst = values.map((value) => ((value - 1000) / 1000) * 100);
+      expect(result.normalizedDataPoints).toHaveLength(values.length);
+      result.normalizedDataPoints?.forEach((point, index) => { expect(point.value).toBeCloseTo(sinceFirst[index] ?? Number.NaN, 10); });
+      expect(result.dataPoints.every((point) => point.netContribution === undefined)).toBe(true);
+    });
+
+    it('measures the household the same way, a second portfolio opened in the period a deposit rather than a gain', async () => {
+      setupHistory(
+        [
+          row(1, '2024-01-01', 1000), row(1, '2024-01-02', 1000), row(1, '2024-01-03', 1000),
+          row(2, '2024-01-02', 5000), row(2, '2024-01-03', 5000),
+        ],
+        { 1: [], 2: [trade('BUY', '2024-01-02', 5000)] },
+      );
+
+      const result = await service.getPerformanceData(appuser, null, 'ALL');
+
+      expect(result.dataPoints.map((point) => point.value)).toEqual([1000, 6000, 6000]);
+      expect(result.normalizedDataPoints?.map((point) => point.value)).toEqual([0, 0, 0]);
+      expect(result.dataPoints[1]?.netContribution).toBe(5000);
+    });
+
+    it('keeps the household flat when a portfolio is sold out and has no more snapshots', async () => {
+      setupHistory(
+        [
+          row(1, '2024-01-01', 1000), row(1, '2024-01-02', 1000), row(1, '2024-01-03', 1000),
+          row(2, '2024-01-01', 3000), row(2, '2024-01-02', 3000),
+        ],
+        { 1: [], 2: [trade('SELL', '2024-01-03', 3000)] },
+      );
+
+      const result = await service.getPerformanceData(appuser, null, 'ALL');
+
+      expect(result.normalizedDataPoints?.map((point) => point.value)).toEqual([0, 0, 0]);
+    });
+  });
+
+  describe('period returns on request', () => {
+    const now = new Date();
+    const dayOffset = (days: number) => format(subDays(now, days), 'yyyy-MM-dd');
+    const startDay = format(subDays(getPeriodStartDate('1Y'), 1), 'yyyy-MM-dd');
+    const startSnapshot = { appuserCurrencyKey: { code: 'EUR' }, appuserCurrencyTotalValue: 10_000, portfolioKey: { portfolioKey: 7, portfolioOwnerAppuserKey: { currencyKey: { code: 'EUR' } } }, snapshotDate: new Date(`${startDay}T00:00:00.000Z`), totalValue: 10_000 };
+    const holdingWorth = (currentValue: number) => [{ allocation: 100, currentValue, financialAssetKey: 1, financialAssetSymbol: 'VWCE', unrealizedGains: 0, unrealizedGainsPercentage: 0 }];
+
+    // €10,000 when the year opened, then €10,000 more 200 days ago, with the price unchanged until
+    // the last 100 days, when it rose 10%: the investments did +10%, the investor's money less.
+    function setupYear() {
+      setupDashboardMocks();
+      portfolioHoldingsServiceMock.getPortfolioHoldings.mockResolvedValue(holdingWorth(22_000));
+      portfolioHoldingsServiceMock.getPortfoliosHoldings.mockResolvedValue(holdingWorth(22_000));
+      portfolioHoldingsServiceMock.getInvestmentCashFlows.mockResolvedValue([
+        { amount: -10_000, currencyCode: 'EUR', date: new Date(`${dayOffset(200)}T10:00:00.000Z`), kind: 'BUY' },
+      ]);
+      const rows = [300, 200, 100, 50].map((days) => ({
+        currency_code: 'EUR',
+        portfolio_key: 7,
+        snapshot_date: dayOffset(days),
+        value: String(days > 200 ? 10_000 : days === 200 ? 20_000 : days === 100 ? 20_000 : 22_000),
+      }));
+      Object.assign(DI.em, {
+        find: vi.fn().mockResolvedValue([{ name: 'Long-term', portfolioKey: 7 }]),
+        findOne: vi.fn((_entity: unknown, where: { portfolioKey?: unknown }) => Promise.resolve(typeof where.portfolioKey === 'number' ? { name: 'Long-term', portfolioKey: 7 } : startSnapshot)),
+        getKysely: databaseReturning(rows),
+      });
+    }
+
+    afterEach(() => {
+      portfolioHoldingsServiceMock.getInvestmentCashFlows.mockReset().mockResolvedValue([]);
+    });
+
+    it('sends both returns for a portfolio and the household only when asked', async () => {
+      setupYear();
+
+      const single = await service.getPortfolioDashboard(appuser, 7, '1Y', undefined, { includePeriodReturns: true });
+      const aggregate = await service.getAggregateDashboard(appuser, '1Y', undefined, { includePeriodReturns: true });
+      const unasked = await service.getPortfolioDashboard(appuser, 7, '1Y');
+
+      for (const { summary } of [single, aggregate]) {
+        expect(summary.periodReturns?.timeWeighted).toBe(10);
+        // The rise came when twice the money was in, so the investor did better than the investments.
+        expect(summary.periodReturns?.moneyWeighted).toBeGreaterThan(10);
+        expect(summary.periodReturns?.missingSnapshotDates.length).toBeGreaterThan(0);
+      }
+      expect(single.summary.periodReturns?.moneyWeightedAnnualized).toBe(true);
+      expect(unasked.summary).not.toHaveProperty('periodReturns');
+    });
+
+    it('has no returns when a holding is invalid', async () => {
+      setupYear();
+      portfolioHoldingsServiceMock.getPortfolioHoldings.mockResolvedValue([{ ...holdingWorth(22_000)[0], isInvalid: true }]);
+
+      const single = await service.getPortfolioDashboard(appuser, 7, '1Y', undefined, { includePeriodReturns: true });
+
+      expect(single.summary.periodReturns).toMatchObject({ moneyWeighted: null, timeWeighted: null });
     });
   });
 

@@ -297,8 +297,20 @@ export const getPortfoliosMetricsRequestSchema = z.object({
 });
 
 const periodSchema = z.enum(['1M', '3M', '6M', 'YTD', '1Y', 'ALL']).default('YTD');
-// Opt-in summary additions; see DashboardOptions in portfolio-dashboard.service.ts.
-const dashboardIncludeSchema = z.enum(['feeConversion']).optional();
+// Opt-in summary additions; see DashboardOptions in portfolio-dashboard.service.ts. One or more,
+// comma-separated: `include=feeConversion,periodReturns`.
+const DASHBOARD_INCLUDES = ['feeConversion', 'periodReturns'] as const;
+const dashboardIncludeSchema = z
+  .string()
+  .regex(new RegExp(`^(${DASHBOARD_INCLUDES.join('|')})(,(${DASHBOARD_INCLUDES.join('|')}))*$`))
+  .optional()
+  .describe('Opt-in summary fields, comma-separated: `feeConversion`, `periodReturns`.');
+
+/** The dashboard options an `include` query value asks for. */
+export function dashboardOptionsFrom(include: string | undefined): { includeFeeConversion: boolean; includePeriodReturns: boolean } {
+  const parts = new Set(include?.split(',') ?? []);
+  return { includeFeeConversion: parts.has('feeConversion'), includePeriodReturns: parts.has('periodReturns') };
+}
 
 export const getAggregateDashboardRequestSchema = z.object({
   query: z.object({

@@ -2,19 +2,38 @@ import { format } from 'date-fns';
 import { sql } from 'kysely';
 
 import { DI } from '@app/app';
-import { anyOf, sqlQuery, toDate } from '@app/database/sql';
+import { anyOf, sqlQuery } from '@app/database/sql';
 import type { Appuser } from '@entity/Appuser';
 import { Portfolio } from '@entity/Portfolio';
 import { FEED_RATES_ONLY, loadRateTable } from '@service/currency/exchange-rate';
-import { sumMoney } from '@utils/money';
+import { roundDisplay, sumMoney } from '@utils/money';
 
 import assetPriceService from './asset-price.service';
 import { type AssetClassDrift, computeAllocationDrift, generateGuidanceText } from './portfolio-allocation-drift';
 import { calculateCostBasis, getPeriodStartDate } from './portfolio-dashboard.utils';
-import { historyInViewerCurrency, historyRatePairs, type PortfolioSnapshotValue } from './portfolio-history-currency';
+import { historyInViewerCurrency, historyRatePairs } from './portfolio-history-currency';
 import portfolioHoldingsService from './portfolio-holdings.service';
 import { filterValidHoldings } from './portfolio-holdings.utils';
-import { combinePeriodMeasures, findSnapshotPointOnOrBefore, loadCashFlowsInViewerCurrency, measurePortfolioPeriod, periodFlowsSince, type PortfolioPeriodMeasure, resolveViewerCurrency } from './portfolio-period-performance';
+import {
+  calculateTimeWeightedReturn,
+  combinePeriodMeasures,
+  combineReturnSeries,
+  findSnapshotPointOnOrBefore,
+  loadCashFlowsInViewerCurrency,
+  loadPortfolioSnapshotValues,
+  measurePortfolioPeriod,
+  type PeriodCashFlow,
+  periodFlowsSince,
+  type PeriodReturns,
+  periodReturnSeries,
+  periodReturnsOf,
+  type PortfolioPeriodMeasure,
+  resolveViewerCurrency,
+  type ReturnSeries,
+  type SnapshotPoint,
+  snapshotSeriesInViewerCurrency,
+  utcDay,
+} from './portfolio-period-performance';
 import { valuePortfolioHoldings } from './portfolio-value';
 
 export type Period = '1M' | '1Y' | '3M' | '6M' | 'ALL' | 'YTD';
@@ -44,6 +63,8 @@ interface AllocationResponse {
  */
 export interface DashboardOptions {
   includeFeeConversion?: boolean;
+  /** `include=periodReturns`: the period's time- and money-weighted returns (`summary.periodReturns`). */
+  includePeriodReturns?: boolean;
 }
 
 type BenchmarkStatus = 'missing_benchmark_data' | 'ready' | 'waiting_for_portfolio_history';
@@ -56,6 +77,8 @@ interface DashboardSummary {
   lastUpdated: string;
   periodLabel: string;
   periodReturn: null | number;
+  /** Only when the client asked for it (`include=periodReturns`). */
+  periodReturns?: PeriodReturns;
   portfolioCount: number;
   realizedGains: number;
   totalGainLoss: number;
@@ -75,6 +98,15 @@ interface PerformanceDataPoint {
 }
 
 /**
+ * A day of the value history. `netContribution` is set only on a day with a buy or a sale: the
+ * money put in (negative when taken out), so a chart can mark a deposit or a withdrawal; null when
+ * a trade that day has no amount in the viewer's currency.
+ */
+interface ValueDataPoint extends PerformanceDataPoint {
+  netContribution?: null | number;
+}
+
+/**
  * Whether every snapshot could be valued in the viewer's currency. A day that left one out
  * (no exchange rate) is listed; its point counts only what could be converted.
  */
@@ -90,9 +122,14 @@ interface PerformanceResponse {
   benchmarkSymbol?: string;
   /** Absent only when the history is empty because a holding is invalid. */
   completeness?: PerformanceCompleteness;
-  dataPoints: PerformanceDataPoint[];
+  dataPoints: ValueDataPoint[];
   minDataPointsForComparison: number;
+  /** The benchmark's price as a % change since the first portfolio day: a return with no flows. */
   normalizedBenchmarkDataPoints?: PerformanceDataPoint[];
+  /**
+   * The cumulative time-weighted return (%) since the first day, so money put in or taken out
+   * does not move it. A day it could not measure (a missing snapshot) has no point.
+   */
   normalizedDataPoints?: PerformanceDataPoint[];
   period: string;
   portfolioHistoryStatus: PortfolioHistoryStatus;
@@ -148,6 +185,16 @@ const MIN_TOP_MOVERS_HOLDINGS = 2;
 function feeConversionSummary(assetKeys: number[] | undefined, options: DashboardOptions): Pick<DashboardSummary, 'feeConversionIncompleteAssetKeys'> {
   return options.includeFeeConversion && assetKeys?.length ? { feeConversionIncompleteAssetKeys: assetKeys } : {};
 }
+
+const UNKNOWN_PERIOD_RETURNS: PeriodReturns = { missingSnapshotDates: [], moneyWeighted: null, moneyWeightedAnnualized: false, timeWeighted: null };
+
+/** What one portfolio's period figures are measured from. */
+interface PeriodInputs {
+  flows: PeriodCashFlow[];
+  liveValue: number;
+  portfolioKey: number;
+  startSnapshot: null | SnapshotPoint;
+}
 const MIN_PERFORMANCE_DATA_POINTS = 2;
 const DEFAULT_BENCHMARK_SYMBOL = 'SPY';
 
@@ -179,6 +226,22 @@ function getPortfolioHistoryStatus(dataPoints: PerformanceDataPoint[]): Portfoli
   return 'ready';
 }
 
+/**
+ * The money put in on each day with a buy or a sale: buys (with fees) less sales (net of fees).
+ * Null for a day with a trade that has no amount in the viewer's currency.
+ */
+function netContributionsByDay(flows: PeriodCashFlow[]): Map<string, null | number> {
+  const byDay = new Map<string, null | number>();
+  for (const flow of flows) {
+    const day = utcDay(flow.date);
+    if (flow.kind === 'DIVIDEND') continue;
+    const sum = byDay.has(day) ? byDay.get(day) : 0;
+    byDay.set(day, sum == null || flow.amount == null ? null : roundDisplay(sum - flow.amount));
+  }
+  return byDay;
+}
+
+/** Prices as a % change since the first: the benchmark has no flows, so this is its return. */
 function normalizeToPercentReturns(dataPoints: PerformanceDataPoint[]): PerformanceDataPoint[] {
   if (!dataPoints.length) return [];
   const firstValue = dataPoints[0]!.value;
@@ -202,14 +265,45 @@ export class PortfolioDashboardService {
    * The live value is in the viewer's currency, so the start snapshot and the trades in the period
    * are read in it too.
    */
-  private async measurePeriod(appuser: Appuser, portfolioKey: number, periodStartDate: Date, liveValue: number, tenantKey?: number): Promise<PortfolioPeriodMeasure> {
+  private async loadPeriodInputs(appuser: Appuser, portfolioKey: number, periodStartDate: Date, liveValue: number, tenantKey?: number): Promise<PeriodInputs> {
     const viewerCurrency = await resolveViewerCurrency(appuser);
     const [recorded, startSnapshot] = await Promise.all([
       portfolioHoldingsService.getInvestmentCashFlows(appuser, tenantKey, portfolioKey),
       findSnapshotPointOnOrBefore(portfolioKey, periodStartDate, viewerCurrency),
     ]);
     const flows = await loadCashFlowsInViewerCurrency(recorded, viewerCurrency, periodFlowsSince(periodStartDate, startSnapshot));
+    return { flows, liveValue, portfolioKey, startSnapshot };
+  }
+
+  private measurePeriod({ flows, liveValue, startSnapshot }: PeriodInputs, periodStartDate: Date): PortfolioPeriodMeasure {
     return measurePortfolioPeriod({ end: { kind: 'live', value: liveValue }, flows, fromDate: periodStartDate, startSnapshot });
+  }
+
+  /**
+   * The period's time- and money-weighted returns of one or more portfolios, from each one's start
+   * snapshot through its daily snapshots to its live value; several are measured as one household
+   * (see `periodReturnsOf`).
+   */
+  private async loadPeriodReturns(appuser: Appuser, inputs: PeriodInputs[], periodStartDate: Date, tenantKey?: number): Promise<PeriodReturns> {
+    if (inputs.length === 0) return UNKNOWN_PERIOD_RETURNS;
+    const viewerCurrency = await resolveViewerCurrency(appuser);
+    const since = new Date(Math.min(...inputs.map((input) => periodFlowsSince(periodStartDate, input.startSnapshot).getTime())));
+    const from = new Date(`${utcDay(since)}T00:00:00.000Z`);
+    const snapshots = await loadPortfolioSnapshotValues(inputs.map((input) => input.portfolioKey), from, tenantKey);
+    const byPortfolio = await snapshotSeriesInViewerCurrency(snapshots, viewerCurrency, { from, to: new Date() });
+    return periodReturnsOf(inputs.map((input) => periodReturnSeries({
+      end: { kind: 'live', value: input.liveValue },
+      flows: input.flows,
+      fromDate: periodStartDate,
+      snapshots: byPortfolio.get(input.portfolioKey) ?? [],
+      startSnapshot: input.startSnapshot,
+    })));
+  }
+
+  /** `summary.periodReturns` when the client asked for it; unknown with an invalid holding (`inputs` null). */
+  private async periodReturnsSummary(appuser: Appuser, inputs: null | PeriodInputs[], periodStartDate: Date, options: DashboardOptions, tenantKey?: number): Promise<Pick<DashboardSummary, 'periodReturns'>> {
+    if (!options.includePeriodReturns) return {};
+    return { periodReturns: inputs ? await this.loadPeriodReturns(appuser, inputs, periodStartDate, tenantKey) : UNKNOWN_PERIOD_RETURNS };
   }
 
   /**
@@ -240,7 +334,7 @@ export class PortfolioDashboardService {
     // value it, and the total is their sum, so every surface shows the same figures.
     const portfolioBreakdown: Omit<PortfolioBreakdownItem, 'weight'>[] = [];
     const periodStartDate = getPeriodStartDate(period);
-    const periodMeasures: PortfolioPeriodMeasure[] = [];
+    const periodInputs: PeriodInputs[] = [];
 
     for (const portfolio of portfolios) {
       const portfolioHoldings = await portfolioHoldingsService.getPortfolioHoldings(appuser, portfolio.portfolioKey, tenantKey);
@@ -250,7 +344,7 @@ export class PortfolioDashboardService {
       const portfolioGain =
         portfolioCostBasis > 0 ? ((portfolioValue - portfolioCostBasis) / portfolioCostBasis) * 100 : 0;
 
-      periodMeasures.push(await this.measurePeriod(appuser, portfolio.portfolioKey, periodStartDate, portfolioValue, tenantKey));
+      periodInputs.push(await this.loadPeriodInputs(appuser, portfolio.portfolioKey, periodStartDate, portfolioValue, tenantKey));
 
       portfolioBreakdown.push({
         currency: appuser.currencyKey.code || 'EUR',
@@ -263,7 +357,8 @@ export class PortfolioDashboardService {
     const totalValue = sumMoney(portfolioBreakdown.map((item) => item.value));
 
     // Net of the money put in during the period, so new contributions are not counted as return.
-    const periodReturn = hasInvalidHoldings ? null : combinePeriodMeasures(periodMeasures).changePercent;
+    const periodReturn = hasInvalidHoldings ? null : combinePeriodMeasures(periodInputs.map((inputs) => this.measurePeriod(inputs, periodStartDate))).changePercent;
+    const periodReturns = await this.periodReturnsSummary(appuser, hasInvalidHoldings ? null : periodInputs, periodStartDate, options, tenantKey);
 
     // Get unique asset count
     const uniqueAssets = new Set(validHoldings.map((h) => h.financialAssetKey));
@@ -279,6 +374,7 @@ export class PortfolioDashboardService {
         lastUpdated: new Date().toISOString(),
         periodLabel: period,
         periodReturn,
+        ...periodReturns,
         portfolioCount: portfolios.length,
         realizedGains: totalRealizedGains,
         totalGainLoss,
@@ -325,9 +421,9 @@ export class PortfolioDashboardService {
 
     // Period return, net of the money put in during the period
     const periodStartDate = getPeriodStartDate(period);
-    const periodReturn = hasInvalidHoldings
-      ? null
-      : (await this.measurePeriod(appuser, portfolioId, periodStartDate, totalValue, tenantKey)).changePercent;
+    const periodInputs = hasInvalidHoldings ? null : await this.loadPeriodInputs(appuser, portfolioId, periodStartDate, totalValue, tenantKey);
+    const periodReturn = periodInputs ? this.measurePeriod(periodInputs, periodStartDate).changePercent : null;
+    const periodReturns = await this.periodReturnsSummary(appuser, periodInputs ? [periodInputs] : null, periodStartDate, options, tenantKey);
 
     // Calculate quick stats
     const sortedByWeight = validHoldings
@@ -370,6 +466,7 @@ export class PortfolioDashboardService {
         lastUpdated: new Date().toISOString(),
         periodLabel: period,
         periodReturn,
+        ...periodReturns,
         realizedGains: totalRealizedGains,
         totalGainLoss,
         totalGainLossPercent,
@@ -459,7 +556,7 @@ export class PortfolioDashboardService {
       this.loadHistoryInViewerCurrency(appuser, portfolioIds, periodStartDate, tenantKey),
       benchmarkPromise,
     ]);
-    const { completeness, dataPoints } = history;
+    const { completeness, dataPoints, normalizedDataPoints } = history;
     const portfolioHistoryStatus = getPortfolioHistoryStatus(dataPoints);
     const filteredBenchmarkPrices = filterBenchmarkToPortfolioRange(benchmarkPrices, dataPoints);
     const benchmarkStatus = getBenchmarkStatus(portfolioHistoryStatus, filteredBenchmarkPrices);
@@ -472,7 +569,7 @@ export class PortfolioDashboardService {
       dataPoints,
       minDataPointsForComparison: MIN_PERFORMANCE_DATA_POINTS,
       normalizedBenchmarkDataPoints: normalizeToPercentReturns(filteredBenchmarkPrices),
-      normalizedDataPoints: normalizeToPercentReturns(dataPoints),
+      normalizedDataPoints,
       period,
       portfolioHistoryStatus,
       readiness: {
@@ -483,44 +580,38 @@ export class PortfolioDashboardService {
   }
 
   /**
-   * The portfolios' daily history in the viewer's currency. Each snapshot is read in the currency
-   * it was stored in (its owner's, or the portfolio's when no owner-currency value was stored) and
-   * converted at its day's rate; see `historyInViewerCurrency`.
+   * The portfolios' daily history in the viewer's currency, and its time-weighted return. Each
+   * snapshot is read in the currency it was stored in (its owner's, or the portfolio's when no
+   * owner-currency value was stored) and converted at its day's rate; see `historyInViewerCurrency`.
+   * The return is measured as the period returns are (`combineReturnSeries`), from the first day,
+   * with each portfolio's own buys and sales as flows; each day with a trade is marked.
    */
-  private async loadHistoryInViewerCurrency(appuser: Appuser, portfolioIds: number[], periodStartDate: Date, tenantKey?: number): Promise<{ completeness: PerformanceCompleteness; dataPoints: PerformanceDataPoint[] }> {
+  private async loadHistoryInViewerCurrency(appuser: Appuser, portfolioIds: number[], periodStartDate: Date, tenantKey?: number): Promise<{ completeness: PerformanceCompleteness; dataPoints: ValueDataPoint[]; normalizedDataPoints: PerformanceDataPoint[] }> {
     const viewerCurrency = await resolveViewerCurrency(appuser);
-    if (portfolioIds.length === 0) return { completeness: { currencyCode: viewerCurrency, incompleteDates: [], isComplete: true }, dataPoints: [] };
+    if (portfolioIds.length === 0) return { completeness: { currencyCode: viewerCurrency, incompleteDates: [], isComplete: true }, dataPoints: [], normalizedDataPoints: [] };
 
-    const rows = await sqlQuery(DI.em)
-      .selectFrom('portfolio_snapshot as ps')
-      .innerJoin('portfolio as p', 'ps.portfolio_key', 'p.portfolio_key')
-      .leftJoin('currency as appuser_c', 'ps.appuser_currency_key', 'appuser_c.currency_key')
-      .leftJoin('appuser as owner', 'p.portfolio_owner_appuser_key', 'owner.appuser_key')
-      .leftJoin('currency as owner_c', 'owner.currency_key', 'owner_c.currency_key')
-      .leftJoin('currency as snapshot_c', 'ps.currency_key', 'snapshot_c.currency_key')
-      .select([
-        'ps.snapshot_date',
-        sql<null | string>`COALESCE(ps.appuser_currency_total_value, ps.total_value)`.as('value'),
-        // A value stored before the owner-currency key was recorded is in the owner's currency.
-        sql<null | string>`CASE WHEN ps.appuser_currency_total_value IS NOT NULL THEN COALESCE(appuser_c.code, owner_c.code) ELSE snapshot_c.code END`.as('currency_code'),
-      ])
-      .where(anyOf('ps.portfolio_key', portfolioIds))
-      .where('ps.snapshot_date', '>=', periodStartDate)
-      .where('ps.deleted_at', 'is', null)
-      .where('p.deleted_at', 'is', null)
-      // Raw SQL bypasses MikroORM's tenant filter; preserve the explicit household scope.
-      .$if(tenantKey != null, (query) => query.where('p.tenant_key', '=', tenantKey))
-      .orderBy('ps.snapshot_date', 'asc')
-      .execute() as { currency_code: null | string; snapshot_date: Date | string; value: null | number | string }[];
-
-    const snapshots: PortfolioSnapshotValue[] = rows.map((row) => ({
-      currencyCode: row.value == null ? null : row.currency_code,
-      date: format(toDate(row.snapshot_date), 'yyyy-MM-dd'),
-      value: row.value == null ? 0 : Number(row.value),
-    }));
-    const rates = await loadRateTable(DI.em, historyRatePairs(snapshots, viewerCurrency), { from: periodStartDate, to: new Date() }, FEED_RATES_ONLY);
+    const window = { from: periodStartDate, to: new Date() };
+    const [snapshots, recordedFlows] = await Promise.all([
+      loadPortfolioSnapshotValues(portfolioIds, periodStartDate, tenantKey),
+      Promise.all(portfolioIds.map((portfolioKey) => portfolioHoldingsService.getInvestmentCashFlows(appuser, tenantKey, portfolioKey))),
+    ]);
+    const rates = await loadRateTable(DI.em, historyRatePairs(snapshots, viewerCurrency), window, FEED_RATES_ONLY);
     const { dataPoints, incompleteDates } = historyInViewerCurrency(snapshots, viewerCurrency, rates);
-    return { completeness: { currencyCode: viewerCurrency, incompleteDates, isComplete: incompleteDates.length === 0 }, dataPoints };
+    const completeness = { currencyCode: viewerCurrency, incompleteDates, isComplete: incompleteDates.length === 0 };
+    const firstDay = dataPoints[0]?.date;
+    if (!firstDay) return { completeness, dataPoints, normalizedDataPoints: [] };
+
+    const flowsByPortfolio = new Map(await Promise.all(portfolioIds.map(async (portfolioKey, index) =>
+      [portfolioKey, await loadCashFlowsInViewerCurrency(recordedFlows[index] ?? [], viewerCurrency, new Date(`${utcDay(periodStartDate)}T00:00:00.000Z`))] as const)));
+    const valuesByPortfolio = await snapshotSeriesInViewerCurrency(snapshots, viewerCurrency, window);
+    const series: ReturnSeries[] = [...valuesByPortfolio].map(([portfolioKey, points]) => ({ flows: flowsByPortfolio.get(portfolioKey) ?? [], snapshots: points }));
+    const combined = combineReturnSeries(series, firstDay);
+    const days = new Set(dataPoints.map((point) => point.date));
+    const normalizedDataPoints = calculateTimeWeightedReturn(combined.snapshots, combined.flows).index.filter((point) => days.has(point.date));
+
+    const contributions = netContributionsByDay([...flowsByPortfolio.values()].flat());
+    const marked = dataPoints.map((point) => (contributions.has(point.date) ? { ...point, netContribution: contributions.get(point.date) ?? null } : point));
+    return { completeness, dataPoints: marked, normalizedDataPoints };
   }
 
   /**

@@ -187,7 +187,7 @@ export function PortfoliosScreen({ state, sections = idleSections, period = 'YTD
 
           {/* The portfolios themselves come first, straight under the figures. */}
           <PortfolioBreakdownSection locale={locale} onSelect={onSelectPortfolio} portfolios={data.portfolios} />
-          <PortfolioPerformanceChart palette={palette} period={period} state={sections.performance} />
+          <PortfolioPerformanceChart currency={data.currency} palette={palette} period={period} state={sections.performance} />
           <PortfolioAllocationSection locale={locale} state={sections.allocation} title={t('portfolioSections.allocation')} />
           <PortfolioMetricsSection locale={locale} state={sections.metrics} />
           <PortfolioTopMoversSection currency={data.currency} locale={locale} state={sections.topMovers} />

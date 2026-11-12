@@ -21,7 +21,7 @@ import { usePalette } from '@/theme/use-palette'
 
 import { FeeConversionNotice } from './fee-conversion-notice'
 import type { PortfolioAllocationDto, PortfolioMetricsDto, PortfolioTopMoversDto } from './portfolios-contract'
-import type { HoldingViewModel, PortfolioRowViewModel } from './portfolios-view-model'
+import type { HoldingViewModel, PeriodReturnsViewModel, PortfolioRowViewModel } from './portfolios-view-model'
 import type { PortfolioResourceState } from './use-portfolio-resource'
 
 /**
@@ -62,6 +62,8 @@ export type SummaryFigures = Readonly<{
   totalGainLossPercent: number
   periodLabel?: string
   periodReturn: number | null
+  /** Time- and money-weighted returns for the same period; absent from older APIs. */
+  periodReturns?: PeriodReturnsViewModel
   assetCount: number
   unrealizedGains?: number
   realizedGains?: number
@@ -74,7 +76,8 @@ export type SummaryFigures = Readonly<{
  * then a two-column grid of compact cells, each with its label and direction (a trend icon,
  * plus the total gain's percentage) on one line and the figure at `amountBase` beneath.
  * Gains are signed money (`+€2,668.01`) in foreground ink. `showRealized={false}` keeps the
- * overview to its four figures.
+ * overview to its four figures. When the API sends them, the period's time- and money-weighted
+ * returns follow the period return as a pair, each with a one-line explanation.
  */
 export function PortfolioSummaryStats({ figures, status, locale, showRealized = true }: { figures: SummaryFigures; status?: string; locale: string; showRealized?: boolean }) {
   const { t } = useTranslation()
@@ -82,6 +85,15 @@ export function PortfolioSummaryStats({ figures, status, locale, showRealized = 
   const periodUnavailable = figures.periodReturn === null
   const gainShare = figures.totalGainLoss === 0 ? null : Math.sign(figures.totalGainLoss) * Math.abs(figures.totalGainLossPercent)
   const realizedShown = showRealized && figures.realizedGains !== undefined
+  const returns = figures.periodReturns
+  // A figure the API could not measure says why, as the period return does.
+  const unavailable = <Text numberOfLines={1} tone="muted" variant="meta">{figures.assetCount > 0 ? t('portfolioSections.needsHistory') : t('portfolioSections.noHoldings')}</Text>
+  const returnFigure = (value: number | null, perYear = false) => value === null ? unavailable : (
+    <View style={styles.inlineValue}>
+      <Text variant="amountBase">{signedPoints(value, locale, 2)}</Text>
+      {perYear ? <Text tone="muted" variant="label">{t('portfolioSections.perYear')}</Text> : null}
+    </View>
+  )
   return (
     <View style={styles.summary} testID="portfolio-summary">
       <HeadlineFigure
@@ -97,10 +109,18 @@ export function PortfolioSummaryStats({ figures, status, locale, showRealized = 
           <SignedMoney currency={figures.currency} locale={locale} signed size="amountBase" value={figures.totalGainLoss} />
         </SummaryCell>
         <SummaryCell label={t('portfolioSections.periodReturn', { period: figures.periodLabel ?? 'YTD' })} trend={trendOf(figures.periodReturn)}>
-          {periodUnavailable
-            ? <Text numberOfLines={1} tone="muted" variant="meta">{figures.assetCount > 0 ? t('portfolioSections.needsHistory') : t('portfolioSections.noHoldings')}</Text>
-            : <Text variant="amountBase">{signedPoints(figures.periodReturn as number, locale, 2)}</Text>}
+          {periodUnavailable ? unavailable : <Text variant="amountBase">{signedPoints(figures.periodReturn as number, locale, 2)}</Text>}
         </SummaryCell>
+        {returns ? (
+          <>
+            <SummaryCell helper={t('portfolioSections.timeWeightedHelp')} label={t('portfolioSections.timeWeighted')} testID="portfolio-time-weighted" trend={trendOf(returns.timeWeighted)}>
+              {returnFigure(returns.timeWeighted)}
+            </SummaryCell>
+            <SummaryCell helper={t('portfolioSections.moneyWeightedHelp')} label={t('portfolioSections.moneyWeighted')} testID="portfolio-money-weighted" trend={trendOf(returns.moneyWeighted)}>
+              {returnFigure(returns.moneyWeighted, returns.moneyWeightedAnnualized)}
+            </SummaryCell>
+          </>
+        ) : null}
         {figures.unrealizedGains !== undefined ? (
           <SummaryCell label={t('portfolioSections.unrealizedGains')} trend={trendOf(figures.unrealizedGains)}>
             <SignedMoney currency={figures.currency} locale={locale} signed size="amountBase" value={figures.unrealizedGains} />
@@ -112,17 +132,23 @@ export function PortfolioSummaryStats({ figures, status, locale, showRealized = 
           </SummaryCell>
         ) : null}
       </View>
+      {returns && returns.missingSnapshotDays > 0 ? (
+        <Text testID="portfolio-missing-snapshots" tone="muted" variant="label">{t('portfolioSections.missingSnapshots', { count: returns.missingSnapshotDays })}</Text>
+      ) : null}
       {figures.feesLeftOut ? <FeeConversionNotice scope="gains" palette={palette} /> : null}
     </View>
   )
 }
 
-/** One summary figure: label and direction on one line, the figure beneath. Half the row wide. */
-function SummaryCell({ label, trend = null, delta = null, children }: { label: string; trend?: 'up' | 'down' | null; delta?: string | null; children: React.ReactNode }) {
+/**
+ * One summary figure: label and direction on one line, the figure beneath, and an optional
+ * muted line explaining it. Half the row wide.
+ */
+function SummaryCell({ label, trend = null, delta = null, helper, testID, children }: { label: string; trend?: 'up' | 'down' | null; delta?: string | null; helper?: string; testID?: string; children: React.ReactNode }) {
   const palette = usePalette()
   const color = trend === 'down' ? palette.destructiveText : palette.successText
   return (
-    <View style={styles.summaryCell}>
+    <View style={styles.summaryCell} testID={testID}>
       <View style={styles.summaryLabelRow}>
         <Text numberOfLines={1} style={styles.shrink} tone="muted" variant="meta">{label}</Text>
         {trend ? (
@@ -133,6 +159,7 @@ function SummaryCell({ label, trend = null, delta = null, children }: { label: s
         ) : null}
       </View>
       {children}
+      {helper ? <Text tone="muted" variant="label">{helper}</Text> : null}
     </View>
   )
 }

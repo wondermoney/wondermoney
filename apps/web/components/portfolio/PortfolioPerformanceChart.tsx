@@ -2,6 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import React, { useMemo } from "react";
+import { ReferenceDot } from "recharts";
 
 import { Amount } from "@/components/ui/Amount";
 import { type ChartConfig, ChartTooltip } from "@/components/ui/chart";
@@ -11,8 +12,17 @@ import type { Period } from "@/lib/api/portfolio/usePortfolioDashboard";
 import usePortfolioPerformance, {
   type PortfolioPerformanceReadinessStatus,
 } from "@/lib/api/portfolio/usePortfolioPerformance";
+import {
+  buildValueChartData,
+  type PortfolioFlowKind,
+} from "@/lib/portfolio/performance-chart-data";
 import { useFormatCurrency } from "@/lib/utils/useFormatCurrency";
 
+import {
+  FlowMarkerLegend,
+  FlowMarkerShape,
+  FlowTooltipRow,
+} from "./PortfolioFlowMarker";
 import { PortfolioHistoryCurrencyNotice } from "./PortfolioHistoryCurrencyNotice";
 
 function getNiceStep(value: number) {
@@ -78,16 +88,24 @@ const PortfolioPerformanceChart: React.FC<PortfolioPerformanceChartProps> = ({
   const status: PortfolioPerformanceReadinessStatus =
     readiness?.status ?? performanceData?.portfolioHistoryStatus ?? "empty";
 
-  const chartData = useMemo(() => {
-    if (!performanceData?.dataPoints?.length) {
-      return [];
-    }
+  const chartData = useMemo(
+    () => buildValueChartData(performanceData?.dataPoints),
+    [performanceData],
+  );
 
-    return performanceData.dataPoints.map((point) => ({
-      x: point.date,
-      portfolio: point.value,
-    }));
-  }, [performanceData]);
+  // Days money went in or out, marked on the line so a jump in value from a
+  // deposit is not read as the market rising.
+  const flowPoints = useMemo(
+    () => chartData.filter((point) => point.flow !== null),
+    [chartData],
+  );
+  const flowKinds = useMemo(
+    () =>
+      Array.from(
+        new Set(flowPoints.map((point) => point.flow as PortfolioFlowKind)),
+      ),
+    [flowPoints],
+  );
 
   const { min, max } = useMemo(() => {
     if (!performanceData?.dataPoints?.length) {
@@ -174,11 +192,13 @@ const PortfolioPerformanceChart: React.FC<PortfolioPerformanceChartProps> = ({
   }) => {
     if (!active || !payload?.length) return null;
 
-    const value = Number(
-      payload.find((item) => String(item.dataKey) === "portfolio")?.value,
-    );
+    const item = payload.find((entry) => String(entry.dataKey) === "portfolio");
+    const value = Number(item?.value);
 
     if (!Number.isFinite(value)) return null;
+
+    const point = item?.payload as
+      { netContribution?: number | null } | undefined;
 
     return (
       <div className="border-border/50 bg-background min-w-[9rem] rounded-lg border px-3 py-2 text-xs shadow-lg">
@@ -191,6 +211,14 @@ const PortfolioPerformanceChart: React.FC<PortfolioPerformanceChartProps> = ({
             <Amount value={value} currency={currency} />
           </span>
         </div>
+        {point && point.netContribution !== undefined ? (
+          <div className="mt-1.5">
+            <FlowTooltipRow
+              netContribution={point.netContribution}
+              currency={currency}
+            />
+          </div>
+        ) : null}
       </div>
     );
   };
@@ -227,8 +255,25 @@ const PortfolioPerformanceChart: React.FC<PortfolioPerformanceChartProps> = ({
               yTicks={yTicks.length ? yTicks : undefined}
               tooltipContent={renderTooltip}
               showLegend={false}
-            />
+            >
+              {flowPoints.map((point) => (
+                <ReferenceDot
+                  key={point.x}
+                  x={point.x}
+                  y={point.portfolio}
+                  ifOverflow="visible"
+                  shape={(props: { cx?: number; cy?: number }) => (
+                    <FlowMarkerShape
+                      kind={point.flow as PortfolioFlowKind}
+                      cx={props.cx}
+                      cy={props.cy}
+                    />
+                  )}
+                />
+              ))}
+            </AreaLineChartBase>
           </div>
+          <FlowMarkerLegend kinds={flowKinds} />
           <PortfolioHistoryCurrencyNotice
             completeness={performanceData?.completeness}
           />

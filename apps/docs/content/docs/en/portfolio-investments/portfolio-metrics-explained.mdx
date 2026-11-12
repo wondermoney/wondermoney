@@ -147,6 +147,38 @@ Price moves, dividends, fees, and currency effects.
 ### Common misunderstanding
 Return percentage is not the same as portfolio value.
 
+## Time-weighted and money-weighted return
+
+### What it means
+Two returns for the selected period answer two different questions.
+
+- **Time-weighted return** says how the investments did. Each day's return is measured net of the money put in or taken out that day, and the days are chained together, so a deposit or a withdrawal does not move it. Dividends paid out count as return.
+- **Money-weighted return** says how your money did. It is the rate at which the value at the start of the period, every buy, sale and dividend in it, and the value at the end balance out: the same calculation as a spreadsheet's `XIRR`. Money that stayed invested longer weighs more.
+
+### Where it appears
+The portfolio summary, for one portfolio or for all of them together, for every period you can pick; the portfolio performance report and its CSV download; and, for the time-weighted return, the percentage view of the performance chart, day by day.
+
+### How to read it
+- When the two are close, the timing of your deposits and withdrawals made little difference.
+- When the money-weighted return is higher, more of your money was invested while prices rose; when it is lower, more was invested while they fell.
+- For a period of a year or more, the money-weighted return is a yearly rate. For a shorter period it is the rate over that period, because stretching a few weeks into a year would exaggerate it.
+- With no deposits or withdrawals in the period, the time-weighted return is the change in value over the starting value.
+
+### Example
+You hold 10,000 at the start of the year. Prices stay flat until you add another 10,000 in June; then they rise 10%, and the portfolio ends the year at 22,000.
+
+- Time-weighted return: +10%. The investments rose 10%; the deposit is not a gain.
+- Money-weighted return: more than +10%, because twice the money was invested during the rise.
+
+### Missing days
+Both returns are measured from the portfolio's daily history. A day with no recorded value (for example while the history is rebuilt, or when no exchange rate converts it into your currency) is never read as zero: the last value is carried over it, and the summary says how many days were missing. Days when the portfolio held nothing, before its first buy or after everything was sold, are not missing.
+
+### What can make it change
+Price moves, dividends, fees, currency effects and the selected period. A buy or a sale changes the money-weighted return; it changes the time-weighted return only through what the money does afterwards.
+
+### Common misunderstanding
+Neither figure is the gain over cost basis. Compare a benchmark with the time-weighted return, because a benchmark has no deposits or withdrawals either.
+
 ## Dividends and income
 
 ### What it means
