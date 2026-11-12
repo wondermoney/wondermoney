@@ -4699,6 +4699,13 @@
       "demo": "Demo profiles are read-only. Existing transactions can't be changed.",
       "access": "Your session needs attention before rules can be applied.",
       "error": "The rule could not be applied right now."
+    },
+    "suggestion": {
+      "title": "Always categorize transactions like this as {{category}}?",
+      "description_one": "You moved {{count}} transaction like this in the last {{days}} days. A rule can do it for you.",
+      "description_other": "You moved {{count}} transactions like this in the last {{days}} days. A rule can do it for you.",
+      "create": "Create rule",
+      "dismiss": "Don't suggest again"
     }
   },
   "pendingChanges": {

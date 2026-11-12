@@ -4699,6 +4699,13 @@
       "demo": "Los perfiles de demostración son de solo lectura. Las transacciones existentes no se pueden cambiar.",
       "access": "Tu sesión necesita atención antes de aplicar reglas.",
       "error": "No se pudo aplicar la regla ahora mismo."
+    },
+    "suggestion": {
+      "title": "¿Categorizar siempre las transacciones de este tipo como {{category}}?",
+      "description_one": "Moviste {{count}} transacción de este tipo en los últimos {{days}} días. Una regla puede hacerlo por ti.",
+      "description_other": "Moviste {{count}} transacciones de este tipo en los últimos {{days}} días. Una regla puede hacerlo por ti.",
+      "create": "Crear regla",
+      "dismiss": "No volver a sugerir"
     }
   },
   "pendingChanges": {

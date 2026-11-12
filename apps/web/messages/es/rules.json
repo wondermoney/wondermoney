@@ -219,6 +219,13 @@
       "failed": "No se pudieron aplicar las reglas. Inténtalo más tarde.",
       "in-progress": "Ya se están aplicando reglas. Espera a que terminen e inténtalo de nuevo.",
       "error": "No se pudieron aplicar las reglas ahora."
+    },
+    "suggestion": {
+      "title": "¿Categorizar siempre las transacciones de este tipo como {category}?",
+      "description": "{count, plural, one {Moviste # transacción de este tipo en los últimos {days} días.} other {Moviste # transacciones de este tipo en los últimos {days} días.}} Una regla puede hacerlo por ti.",
+      "create": "Crear regla",
+      "dismiss": "No volver a sugerir",
+      "dismiss-error": "No se pudo descartar la sugerencia. Inténtalo de nuevo."
     }
   }
 }

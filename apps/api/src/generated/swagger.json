@@ -4035,6 +4035,16 @@
         }
       }
     },
+    "/v1/rule/suggestions/dismiss": {
+      "post": {
+        "description": "",
+        "responses": {
+          "default": {
+            "description": ""
+          }
+        }
+      }
+    },
     "/v1/rule/order": {
       "put": {
         "description": "",

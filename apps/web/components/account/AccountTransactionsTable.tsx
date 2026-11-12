@@ -22,6 +22,7 @@ import React, {
 import type { DateRange } from "react-day-picker";
 import { toast } from "sonner";
 
+import { useRuleSuggestionPrompt } from "@/components/rules/useRuleSuggestionPrompt";
 import DatePickerRange from "@/components/ui/DatePickerRange";
 import { Table } from "@/components/ui/Table";
 import {
@@ -449,12 +450,14 @@ const AccountTransactionsTable: React.FC<AccountTransactionTableProps> =
         isPending: isPendingEditTransaction,
         variables: editTransactionVariables,
       } = useEditTransaction();
+      const offerRuleSuggestion = useRuleSuggestionPrompt();
       const onChangeCategory = useCallback(
         (transactionKey: number, categoryKey: string) => {
           editTransactionMutation(
             { transactionKey, categoryKey },
             {
-              onSuccess: async () => {
+              onSuccess: async (response) => {
+                offerRuleSuggestion(response.data);
                 posthog.capture("transaction_categorized", {
                   category_key: categoryKey,
                   source: "table_inline",
@@ -481,7 +484,14 @@ const AccountTransactionsTable: React.FC<AccountTransactionTableProps> =
             },
           );
         },
-        [editTransactionMutation, notifyIfRateLimited, posthog, queryClient, t],
+        [
+          editTransactionMutation,
+          notifyIfRateLimited,
+          offerRuleSuggestion,
+          posthog,
+          queryClient,
+          t,
+        ],
       );
 
       const TransactionActionsMenu = useCallback(

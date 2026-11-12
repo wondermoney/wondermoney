@@ -1,6 +1,7 @@
 /* eslint perfectionist/sort-interfaces: off, perfectionist/sort-named-imports: off, perfectionist/sort-objects: off */
 import { z } from 'zod';
 
+import { RULE_SUGGESTION_POLICY } from '@service/rules/rule-suggestion-pattern';
 import {
   createOfflineAccountRequestSchema,
   createTransactionRequestSchema,
@@ -145,6 +146,7 @@ import {
   recurringSeriesSchema,
   reportSchema,
   ruleSchema,
+  ruleSuggestionSchema,
   spendingVsNormalCompletenessSchema,
   spendingVsNormalDataSchema,
   tagSchema,
@@ -361,15 +363,16 @@ export const OPERATIONS: Record<string, OperationDefinition> = {
   'PATCH /v1/account/transaction': {
     tag: 'Transactions',
     summary: 'Bulk update transactions',
-    description: 'Categorise, hide or unhide, mark reviewed, or add and remove tags on many transactions in one request. Select them with `transactionIds`, or with `filter`, the filters of `GET /v1/account/transaction` (every matching row, hidden ones only with `includeHidden`). At most 5,000 transactions; a filter matching more is refused with `bulk_selection_too_large`. A filter key the list does not take is an error.',
+    description: 'Categorise, hide or unhide, mark reviewed, or add and remove tags on many transactions in one request. Select them with `transactionIds`, or with `filter`, the filters of `GET /v1/account/transaction` (every matching row, hidden ones only with `includeHidden`). At most 5,000 transactions; a filter matching more is refused with `bulk_selection_too_large`. A filter key the list does not take is an error. A recategorization answers a `ruleSuggestion` as `PATCH /v1/account/transaction/:transactionId` does, counting each row it moved.',
     request: updateTransactionsRequestSchema,
-    noContent: true,
+    response: z.object({ ruleSuggestion: ruleSuggestionSchema.nullable() }).passthrough().openapi('BulkTransactionUpdateResponse'),
   },
   'PATCH /v1/account/transaction/:transactionId': {
     tag: 'Transactions',
     summary: 'Update a transaction',
+    description: `A category change that repeats a pattern of the token owner's own recategorizations (the same merchant or description prefix moved to the same category at least ${RULE_SUGGESTION_POLICY.minMatches} times within ${RULE_SUGGESTION_POLICY.windowDays} days) answers a \`ruleSuggestion\`; otherwise it is null.`,
     request: updateTransactionRequestSchema,
-    response: itemResponse('TransactionResponse', 'transaction', transactionSchema),
+    response: z.object({ ruleSuggestion: ruleSuggestionSchema.nullable(), transaction: transactionSchema }).passthrough().openapi('TransactionUpdateResponse'),
   },
   'POST /v1/account/:accountId/transaction': {
     tag: 'Transactions',

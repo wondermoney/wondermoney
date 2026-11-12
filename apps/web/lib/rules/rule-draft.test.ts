@@ -8,6 +8,7 @@ import type { Rule } from "@/lib/api/rule/useRules";
 import {
   changeConditionField,
   emptyRuleForm,
+  formFromSuggestion,
   formFromTransaction,
   formToRule,
   newAction,
@@ -209,4 +210,49 @@ test("a rule from a transaction without a merchant matches its description and a
   assert.deepEqual(result.ok ? null : Object.values(result.problems.actions), [
     "category-required",
   ]);
+});
+
+test("a rule suggestion becomes a new rule's form that converts back to the suggested rule", () => {
+  const form = formFromSuggestion(
+    {
+      category: { categoryKey: 5, name: "Groceries" },
+      fingerprint: "c".repeat(64),
+      kind: "description",
+      matchCount: 3,
+      rule: {
+        name: "COMPRA 1192 CONTINENTE",
+        match: "all",
+        stopProcessing: false,
+        conditions: [
+          {
+            field: "description",
+            operator: "contains",
+            source: "cleaned",
+            value: "CONTINENTE",
+          },
+        ],
+        actions: [{ type: "set_category", categoryId: 5 }],
+      },
+      windowDays: 90,
+    },
+    "en",
+  );
+
+  assert.equal(form.name, "COMPRA 1192 CONTINENTE");
+  assert.deepEqual(formToRule(form, "en"), {
+    ok: true,
+    name: "COMPRA 1192 CONTINENTE",
+    draft: {
+      match: "all",
+      conditions: [
+        {
+          field: "description",
+          operator: "contains",
+          source: "cleaned",
+          value: "CONTINENTE",
+        },
+      ],
+      actions: [{ type: "set_category", categoryId: 5 }],
+    },
+  });
 });

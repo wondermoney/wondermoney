@@ -1,6 +1,6 @@
 import { initMobileI18n } from '@/lib/i18n'
 
-import { ruleSchema, type RuleDto } from './rules-contract'
+import { parseRuleSuggestion, ruleSchema, type RuleDto } from './rules-contract'
 import {
   emptyRuleForm,
   formToRuleInput,
@@ -8,6 +8,7 @@ import {
   mapRules,
   ruleEditorDraft,
   ruleToEditorForm,
+  seedRuleFromSuggestion,
   seedRuleFromTransaction,
   summarizeRule,
   type RuleSummaryLookups,
@@ -179,5 +180,42 @@ describe('form validation', () => {
       actions: [{ ...base.actions[0], categoryId: '9' }, { ...base.actions[0], id: 'second', categoryId: '10' }],
     }, 'en')
     expect(conversion).toMatchObject({ ok: false, problems: { duplicateActions: true } })
+  })
+})
+
+describe('creating a rule from a suggestion', () => {
+  it('pre-fills the suggested condition and category, ready to preview and save', () => {
+    const suggestion = parseRuleSuggestion({
+      ruleSuggestion: {
+        category: { categoryKey: 9, name: 'Family' },
+        fingerprint: 'e'.repeat(64),
+        kind: 'description',
+        matchCount: 3,
+        rule: {
+          name: 'TRF MB WAY',
+          match: 'all',
+          stopProcessing: false,
+          conditions: [{ field: 'description', operator: 'starts_with', source: 'cleaned', value: 'TRF MB WAY' }],
+          actions: [{ type: 'set_category', categoryId: 9 }],
+        },
+        windowDays: 90,
+      },
+    })
+
+    const seed = seedRuleFromSuggestion(suggestion!)
+
+    expect(seed).toMatchObject({ name: 'TRF MB WAY', match: 'all', conditions: [{ field: 'description', operator: 'starts_with', source: 'cleaned', value: 'TRF MB WAY' }], actions: [{ type: 'set_category', categoryId: '9' }] })
+    expect(ruleEditorDraft(seed!, 'en')).toEqual({
+      match: 'all',
+      conditions: [{ field: 'description', operator: 'starts_with', source: 'cleaned', value: 'TRF MB WAY' }],
+      actions: [{ type: 'set_category', categoryId: 9 }],
+    })
+  })
+
+  it('reads no suggestion from an update without one, or one this build cannot read', () => {
+    expect(parseRuleSuggestion({ ruleSuggestion: null })).toBeNull()
+    expect(parseRuleSuggestion(undefined)).toBeNull()
+    expect(parseRuleSuggestion('OK')).toBeNull()
+    expect(parseRuleSuggestion({ ruleSuggestion: { fingerprint: 'short' } })).toBeNull()
   })
 })

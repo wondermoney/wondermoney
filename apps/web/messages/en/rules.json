@@ -219,6 +219,13 @@
       "failed": "The rules could not be applied. Try again later.",
       "in-progress": "Rules are already being applied. Wait for that to finish, then try again.",
       "error": "The rules could not be applied right now."
+    },
+    "suggestion": {
+      "title": "Always categorize transactions like this as {category}?",
+      "description": "{count, plural, one {You moved # transaction like this in the last {days} days.} other {You moved # transactions like this in the last {days} days.}} A rule can do it for you.",
+      "create": "Create rule",
+      "dismiss": "Don't suggest again",
+      "dismiss-error": "The suggestion could not be dismissed. Try again."
     }
   }
 }

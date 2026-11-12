@@ -113,6 +113,17 @@ class TransactionDeterministicCategorizationService {
   }
 }
 
+/**
+ * Whether learned categorization would recognise a new transaction with this description as this
+ * merchant, and so apply the member's merchant mapping to it: it matches the whole description to
+ * a merchant's name. A description with more in it (a card number, a city) is never matched.
+ */
+export function learnedMappingRecognises(description: null | string | undefined, merchantName: string): boolean {
+  if (!isEnabled(process.env['TRANSACTION_DETERMINISTIC_CATEGORIZATION_ENABLED'])) return false;
+  const text = normalizeText(description);
+  return isSafeText(text) && text === normalizeText(merchantName);
+}
+
 function isEnabled(value: unknown): boolean {
   // On by default: deterministic categorization runs unless explicitly disabled via
   // TRANSACTION_DETERMINISTIC_CATEGORIZATION_ENABLED=false. No env var is needed to turn it on.

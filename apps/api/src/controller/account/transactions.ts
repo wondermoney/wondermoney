@@ -17,12 +17,13 @@ import { TransactionType } from '@entity/TransactionType';
 import { authedContext, authedUser } from '@middleware/authed-context';
 import { convertWithStatus, rateScope } from '@service/currency/exchange-rate';
 import { loadLoanRepaymentLinks, loadViewerCurrencyAmounts, REPORT_CURRENCY_POPULATE } from '@service/reports/report-currency';
+import { type RuleSuggestion, suggestRuleAfterRecategorization } from '@service/rules/rule-suggestion.service';
 import { recalculateChainFromAccountBalance } from '@service/transaction/balance-chain.service';
 import { CATEGORY_LINE_POPULATE, spendingLinesOf } from '@service/transaction/category-lines';
 import { loadCategorySpendingFlags } from '@service/transaction/category-spending';
 import { findAssignableCategory } from '@service/transaction/household-category';
 import { normalizeMerchantName } from '@service/transaction/merchant-normalization';
-import { TransactionAuditService } from '@service/transaction/transaction-audit.service';
+import { MANUAL_CATEGORIZATION_SOURCE, TransactionAuditService } from '@service/transaction/transaction-audit.service';
 import { applyBulkTransactionChange, BULK_CHANGE_POPULATE } from '@service/transaction/transaction-bulk-update.service';
 import { transactionCreationService } from '@service/transaction/transaction-creation.service';
 import { findManualDuplicate } from '@service/transaction/transaction-dedup.service';
@@ -401,6 +402,8 @@ export async function updateTransaction(req: Request, res: Response, next: NextF
       }));
     }
   }
+  // A rule offer when this change repeats a pattern of the member's own recategorizations.
+  let ruleSuggestion: null | RuleSuggestion = null;
   if (categoryKey) {
     const category = await findAssignableCategory(DI.em, tenant, categoryKey);
     if (!category) {
@@ -415,10 +418,13 @@ export async function updateTransaction(req: Request, res: Response, next: NextF
       appuserKey: user.appuserKey,
       changes: { categoryKey: { from: previousCategory?.categoryKey ?? null, to: category.categoryKey } },
       eventType: TransactionAuditEventType.CATEGORIZED,
-      source: 'user-edit',
+      source: MANUAL_CATEGORIZATION_SOURCE.USER_EDIT,
       tenantKey: tenant.tenantKey,
       transactionKey: transaction.transactionKey,
     });
+    if (previousCategory?.categoryKey !== category.categoryKey) {
+      ruleSuggestion = await suggestRuleAfterRecategorization(DI.em, { appuserKey: user.appuserKey, category, tenantKey: tenant.tenantKey, transactionKeys: [transaction.transactionKey] });
+    }
   }
   // `null` (or an empty note) clears it.
   if (notes !== undefined) {
@@ -574,13 +580,14 @@ export async function updateTransaction(req: Request, res: Response, next: NextF
     'appuserTransactionCategories.categoryKey',
   ]);
 
-  return res.json({ transaction: { ...transformedData, transferDestination: transferDestinationOf(transaction, user.appuserKey) } });
+  return res.json({ ruleSuggestion, transaction: { ...transformedData, transferDestination: transferDestinationOf(transaction, user.appuserKey) } });
 }
 
 /**
  * `PATCH /v1/account/transaction`: categorize, mark reviewed, hide or unhide, and add or remove tags
  * on many transactions at once. The rows are `transactionIds`, or every row `filter` (the list's
- * filters) matches, at most 5,000 (`loadTransactionSelection`).
+ * filters) matches, at most 5,000 (`loadTransactionSelection`). Answers `{ ruleSuggestion }`: a
+ * rule to offer after a recategorization that repeats a pattern, or null.
  */
 export async function updateTransactions(req: Request, res: Response, next: NextFunction) {
   const {
@@ -612,9 +619,13 @@ export async function updateTransactions(req: Request, res: Response, next: Next
       return;
     }
   }
-  await applyBulkTransactionChange(DI.em, { appuser: authenticatedUser, tenant }, transactions, { addTagIds, category, hidden, removeTagIds, reviewed });
+  const { recategorizedTransactionKeys } = await applyBulkTransactionChange(DI.em, { appuser: authenticatedUser, tenant }, transactions, { addTagIds, category, hidden, removeTagIds, reviewed });
+  // Each recategorized row counts once toward a rule suggestion, as if changed one at a time.
+  const ruleSuggestion = category
+    ? await suggestRuleAfterRecategorization(DI.em, { appuserKey: authenticatedUser.appuserKey, category, tenantKey: tenant.tenantKey, transactionKeys: recategorizedTransactionKeys })
+    : null;
 
-  return res.sendStatus(200);
+  return res.json({ ruleSuggestion });
 }
 
 /**

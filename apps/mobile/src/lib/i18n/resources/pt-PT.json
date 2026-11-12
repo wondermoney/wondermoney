@@ -4699,6 +4699,13 @@
       "demo": "Os perfis de demonstração são só de leitura. As transações existentes não podem ser alteradas.",
       "access": "A sua sessão precisa de atenção antes de aplicar regras.",
       "error": "Não foi possível aplicar a regra neste momento."
+    },
+    "suggestion": {
+      "title": "Categorizar sempre transações destas como {{category}}?",
+      "description_one": "Moveu {{count}} transação destas nos últimos {{days}} dias. Uma regra pode fazê-lo por si.",
+      "description_other": "Moveu {{count}} transações destas nos últimos {{days}} dias. Uma regra pode fazê-lo por si.",
+      "create": "Criar regra",
+      "dismiss": "Não sugerir de novo"
     }
   },
   "pendingChanges": {

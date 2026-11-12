@@ -896,6 +896,18 @@
         ],
         "additionalProperties": {}
       },
+      "BulkTransactionUpdateResponse": {
+        "type": "object",
+        "properties": {
+          "ruleSuggestion": {
+            "$ref": "#/components/schemas/RuleSuggestion"
+          }
+        },
+        "required": [
+          "ruleSuggestion"
+        ],
+        "additionalProperties": {}
+      },
       "Cashflow": {
         "type": "object",
         "properties": {
@@ -3688,6 +3700,98 @@
         ],
         "additionalProperties": {}
       },
+      "RuleSuggestion": {
+        "type": [
+          "object",
+          "null"
+        ],
+        "properties": {
+          "category": {
+            "type": "object",
+            "properties": {
+              "categoryKey": {
+                "type": "integer"
+              },
+              "name": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "categoryKey",
+              "name"
+            ],
+            "additionalProperties": {}
+          },
+          "fingerprint": {
+            "type": "string",
+            "description": "Identifies the suggestion: its pattern and category."
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "description",
+              "merchant"
+            ],
+            "description": "The pattern: the same merchant, or the same cleaned description prefix."
+          },
+          "matchCount": {
+            "type": "integer",
+            "description": "Transactions the member moved this way within the window, this change included."
+          },
+          "rule": {
+            "type": "object",
+            "properties": {
+              "actions": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": {}
+                }
+              },
+              "conditions": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": {}
+                }
+              },
+              "match": {
+                "type": "string",
+                "enum": [
+                  "all",
+                  "any"
+                ]
+              },
+              "name": {
+                "type": "string"
+              },
+              "stopProcessing": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "actions",
+              "conditions",
+              "match",
+              "name",
+              "stopProcessing"
+            ],
+            "additionalProperties": {}
+          },
+          "windowDays": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "category",
+          "fingerprint",
+          "kind",
+          "matchCount",
+          "rule",
+          "windowDays"
+        ],
+        "additionalProperties": {}
+      },
       "SpendingVsNormalCompleteness": {
         "type": "object",
         "properties": {
@@ -4230,6 +4334,22 @@
         },
         "required": [
           "transactionTypes"
+        ],
+        "additionalProperties": {}
+      },
+      "TransactionUpdateResponse": {
+        "type": "object",
+        "properties": {
+          "ruleSuggestion": {
+            "$ref": "#/components/schemas/RuleSuggestion"
+          },
+          "transaction": {
+            "$ref": "#/components/schemas/Transaction"
+          }
+        },
+        "required": [
+          "ruleSuggestion",
+          "transaction"
         ],
         "additionalProperties": {}
       },
@@ -5490,7 +5610,7 @@
         }
       },
       "patch": {
-        "description": "**Required scope:** `write`.\n\nCategorise, hide or unhide, mark reviewed, or add and remove tags on many transactions in one request. Select them with `transactionIds`, or with `filter`, the filters of `GET /v1/account/transaction` (every matching row, hidden ones only with `includeHidden`). At most 5,000 transactions; a filter matching more is refused with `bulk_selection_too_large`. A filter key the list does not take is an error.",
+        "description": "**Required scope:** `write`.\n\nCategorise, hide or unhide, mark reviewed, or add and remove tags on many transactions in one request. Select them with `transactionIds`, or with `filter`, the filters of `GET /v1/account/transaction` (every matching row, hidden ones only with `includeHidden`). At most 5,000 transactions; a filter matching more is refused with `bulk_selection_too_large`. A filter key the list does not take is an error. A recategorization answers a `ruleSuggestion` as `PATCH /v1/account/transaction/:transactionId` does, counting each row it moved.",
         "security": [
           {
             "bearerAuth": []
@@ -5807,7 +5927,14 @@
         },
         "responses": {
           "200": {
-            "description": "Success. The response has no body."
+            "description": "Successful response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BulkTransactionUpdateResponse"
+                }
+              }
+            }
           },
           "401": {
             "description": "The token is missing, malformed or revoked.",
@@ -6249,7 +6376,7 @@
     },
     "/v1/account/transaction/{transactionId}": {
       "patch": {
-        "description": "**Required scope:** `write`.",
+        "description": "**Required scope:** `write`.\n\nA category change that repeats a pattern of the token owner's own recategorizations (the same merchant or description prefix moved to the same category at least 3 times within 90 days) answers a `ruleSuggestion`; otherwise it is null.",
         "security": [
           {
             "bearerAuth": []
@@ -6376,7 +6503,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/TransactionResponse"
+                  "$ref": "#/components/schemas/TransactionUpdateResponse"
                 }
               }
             }

@@ -23,6 +23,14 @@ export interface TransactionAuditLogInput {
 }
 
 /**
+ * The audit `source` of a category a member chose by hand: editing one transaction, or the bulk
+ * update. Rule suggestions count only these. A confirmed assistant proposal goes through the
+ * same bulk change with its own source (`assistant-proposal`), and an import or a new manual
+ * transaction is logged as `created`, never `categorized`, so neither counts.
+ */
+export const MANUAL_CATEGORIZATION_SOURCE = { BULK_UPDATE: 'bulk-update', USER_EDIT: 'user-edit' } as const;
+
+/**
  * Filters for the ops/monitoring audit-log reads. `limit`/`offset` are always present
  * (the validator defaults them); every other field narrows the result set when supplied.
  */

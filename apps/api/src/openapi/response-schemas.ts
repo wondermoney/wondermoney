@@ -248,6 +248,26 @@ export const ruleSchema = open('Rule', {
   ruleId: id,
 });
 
+/**
+ * A rule offered after the member's own repeated manual recategorization: the transaction update
+ * responses carry it as `ruleSuggestion` (null when there is none). `rule` is ready for the rule
+ * editor in the app; creating it or dismissing the suggestion is only possible signed in.
+ */
+export const ruleSuggestionSchema = open('RuleSuggestion', {
+  category: z.object({ categoryKey: id, name: z.string() }).passthrough(),
+  fingerprint: z.string().describe('Identifies the suggestion: its pattern and category.'),
+  kind: z.enum(['description', 'merchant']).describe('The pattern: the same merchant, or the same cleaned description prefix.'),
+  matchCount: z.number().int().describe('Transactions the member moved this way within the window, this change included.'),
+  rule: z.object({
+    actions: z.array(z.record(z.string(), z.unknown())),
+    conditions: z.array(z.record(z.string(), z.unknown())),
+    match: z.enum(['all', 'any']),
+    name: z.string(),
+    stopProcessing: z.boolean(),
+  }).passthrough(),
+  windowDays: z.number().int(),
+});
+
 /** The household asset a loan finances, as the loan shows it. */
 export const securedAssetSchema = open('LoanSecuredAsset', {
   key: id.describe('The asset\'s manualAssetKey.'),

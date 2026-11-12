@@ -1,4 +1,4 @@
-import { render } from '@testing-library/react-native'
+import { act, render } from '@testing-library/react-native'
 
 import { ApiError } from '@/lib/api/errors'
 
@@ -43,6 +43,11 @@ jest.mock('./use-edit-transaction-amount', () => ({ useEditTransactionAmount: ()
 jest.mock('./use-edit-transaction-transfer', () => ({ useEditTransactionTransfer: () => ({ mutateAsync: mockMutateTransferAsync, isPending: false }) }))
 jest.mock('./use-transaction-splits', () => ({ useSetTransactionSplits: () => ({ mutateAsync: mockSetSplitsAsync, isPending: false }), useRemoveTransactionSplits: () => ({ mutateAsync: mockRemoveSplitsAsync, isPending: false }) }))
 jest.mock('./use-transfer-destinations', () => ({ useTransferDestinations: () => ({ accounts: [], portfolios: [{ key: 3, name: 'ETFs' }], goals: [] }) }))
+type MockPromptProps = { suggestion: { fingerprint: string }; onCreate: (suggestion: unknown) => void }
+const mockRuleSheets: { prompt: MockPromptProps | null; seed: unknown } = { prompt: null, seed: null }
+const resetRuleSheets = () => { mockRuleSheets.prompt = null; mockRuleSheets.seed = null }
+jest.mock('@/features/rules/rule-suggestion-prompt', () => ({ RuleSuggestionPrompt: (props: MockPromptProps) => { mockRuleSheets.prompt = props; return null } }))
+jest.mock('@/features/rules/rule-editor-sheet', () => ({ RuleEditorSheet: (props: { seed: unknown; visible: boolean }) => { mockRuleSheets.seed = props.visible ? props.seed : null; return null } }))
 jest.mock('./transactions-screen', () => ({ TransactionsScreen: (props: { state: { status: string } }) => { mockCapturedProps = props; const Native = jest.requireActual<typeof import('react-native')>('react-native'); return <Native.Text>{props.state.status}</Native.Text> } }))
 
 describe('TransactionsRoute', () => {
@@ -242,6 +247,27 @@ describe('TransactionsRoute', () => {
     await expect(setTransfer(draft)).resolves.toBe('success')
     expect(mockMutateTransferAsync).toHaveBeenCalledWith(draft)
     await expect(setTransfer(draft)).resolves.toBe('demo')
+  })
+
+  it('offers the rule a recategorization suggests, and opens the editor pre-filled with it', async () => {
+    mockUseTransactions.mockReturnValue({ isInvalidAccountId: false, isAccessTransition: false, isLoading: true, refetch: jest.fn() })
+    const ruleSuggestion = {
+      category: { categoryKey: 9, name: 'Family' },
+      fingerprint: 'f'.repeat(64),
+      matchCount: 3,
+      rule: { name: 'TRF MB WAY', match: 'all', conditions: [{ field: 'description', operator: 'starts_with', source: 'cleaned', value: 'TRF MB WAY' }], actions: [{ type: 'set_category', categoryId: 9 }] },
+      windowDays: 90,
+    }
+    mockMutateAsync.mockResolvedValue({ ruleSuggestion })
+    resetRuleSheets()
+    const view = await render(<TransactionsRoute />)
+
+    await act(async () => { await expect((mockCapturedProps.onAssignCategory as (ids: number[], categoryId: number) => Promise<string>)([7, 4], 9)).resolves.toBe('success') })
+    expect(mockRuleSheets.prompt?.suggestion).toEqual(ruleSuggestion)
+
+    await act(async () => { mockRuleSheets.prompt?.onCreate(ruleSuggestion) })
+    expect(mockRuleSheets.seed).toMatchObject({ name: 'TRF MB WAY', conditions: [{ field: 'description', operator: 'starts_with', value: 'TRF MB WAY' }], actions: [{ type: 'set_category', categoryId: '9' }] })
+    view.unmount()
   })
 
   it('maps a saved split and a removed split to their results', async () => {

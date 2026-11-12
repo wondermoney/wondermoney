@@ -12,6 +12,7 @@ import {
   type TextOperator,
   UNCATEGORIZED,
 } from "@/lib/api/rule/useRules";
+import type { RuleSuggestion } from "@/lib/api/rule/useRuleSuggestions";
 import { formatLocaleNumberInput, parseLocaleNumber } from "@/lib/utils/number";
 
 /**
@@ -187,8 +188,14 @@ export function emptyRuleForm(): RuleFormState {
 const formatAmount = (value: number, locale: string) =>
   formatLocaleNumberInput(value, locale);
 
-/** A saved rule, as the editor's form state. */
-export function ruleToForm(rule: Rule, locale: string): RuleFormState {
+/** A saved rule (or any rule-shaped draft), as the editor's form state. */
+export function ruleToForm(
+  rule: Pick<
+    Rule,
+    "name" | "match" | "stopProcessing" | "conditions" | "actions"
+  >,
+  locale: string,
+): RuleFormState {
   return {
     name: rule.name,
     match: rule.match,
@@ -436,4 +443,22 @@ export function formFromTransaction(transaction: Transaction): RuleFormState {
       },
     ],
   };
+}
+
+/**
+ * The rule the API suggested after repeated recategorization, as a new rule's
+ * form: its condition (the merchant, or the description prefix) and the
+ * category it suggests, ready to preview and save.
+ */
+export function formFromSuggestion(
+  suggestion: RuleSuggestion,
+  locale: string,
+): RuleFormState {
+  return ruleToForm(
+    {
+      ...suggestion.rule,
+      name: suggestion.rule.name.slice(0, RULE_NAME_MAX_LENGTH),
+    },
+    locale,
+  );
 }

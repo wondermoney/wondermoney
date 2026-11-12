@@ -1,5 +1,6 @@
 import { z } from 'zod'
 
+import { parseRuleSuggestion } from '@/features/rules/rules-contract'
 import { tagSchema } from '@/features/tags/tags-contract'
 import { fxRateDateSchema, fxStatusSchema } from '@/lib/api/fx-status'
 import { readEndpoint, tolerantEnum, writeEndpoint } from '@/lib/api/runtime-schema'
@@ -217,10 +218,14 @@ export const transactionReviewSummaryEndpoint = readEndpoint({
   schema: transactionReviewSummarySchema,
 })
 
+/**
+ * The bulk update answers `{ ruleSuggestion }`: a rule to offer after a recategorization that
+ * repeats a pattern, or null. Anything else (an older API's empty body) reads as no suggestion.
+ */
 export const updateTransactionsEndpoint = writeEndpoint({
   method: 'PATCH',
   path: '/v1/account/transaction',
-  schema: z.unknown(),
+  schema: z.unknown().transform((body) => ({ ruleSuggestion: parseRuleSuggestion(body) })),
 })
 
 /** The API's cap on one bulk change or delete, by ids or by filter. */

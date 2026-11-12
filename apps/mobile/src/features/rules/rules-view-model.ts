@@ -14,6 +14,7 @@ import {
   type RuleInput,
   type RuleMatch,
   type RulesResponse,
+  type RuleSuggestionDto,
   type TextOperator,
 } from './rules-contract'
 
@@ -206,7 +207,7 @@ export function emptyRuleForm(): RuleEditorForm {
 }
 
 /** A saved rule as the editor's form state; null when the rule is outside the mobile subset. */
-export function ruleToEditorForm(rule: RuleDto): RuleEditorForm | null {
+export function ruleToEditorForm(rule: Pick<RuleDto, 'name' | 'match' | 'conditions' | 'actions'>): RuleEditorForm | null {
   if (!isRuleEditable(rule)) return null
   const conditions: RuleConditionDraft[] = []
   for (const condition of rule.conditions) {
@@ -244,6 +245,15 @@ export function seedRuleFromTransaction(transaction: Readonly<{ merchant: string
     conditions: [condition],
     actions: [createActionDraft('set_category', { categoryId: transaction.categoryId === null ? '' : String(transaction.categoryId) })],
   }
+}
+
+/**
+ * The rule the API suggested after repeated recategorization, as a new rule's form: its condition
+ * (the merchant, or the description prefix) and the suggested category. Null if the suggestion is
+ * outside what this editor can show.
+ */
+export function seedRuleFromSuggestion(suggestion: RuleSuggestionDto): RuleEditorForm | null {
+  return ruleToEditorForm(suggestion.rule)
 }
 
 /* ------------------------------------------------------------------------------------------------

@@ -29,6 +29,17 @@ Uma regra tem:
 
 Um agregado pode ter até 200 regras.
 
+## Sugestões de regras
+
+Quando corrige vezes sem conta o mesmo tipo de transação, a WonderMoney propõe uma regra que o faz por si. Depois de alterar a categoria de uma transação, na web ou na app, se já moveu três transações destas para essa categoria nos últimos 90 dias, pergunta: "Categorizar sempre transações destas como Mercearia?"
+
+- **Destas** quer dizer o mesmo comerciante, ou o mesmo início da descrição, sem referências nem números. "TRF MB WAY 912345678 JOAO" e "TRF MB WAY 913333333 ANA" começam ambas por "TRF MB WAY". Um cabeçalho de cartão como "COMPRA 1192" é ignorado, por isso "COMPRA 1192 CONTINENTE" conta como "CONTINENTE".
+- Alterar várias transações de uma vez conta cada uma delas, e cada transação só conta uma vez.
+- Só contam as alterações que faz. As do outro membro, uma proposta do assistente que confirme e as categorias definidas por uma regra, pela categorização aprendida ou por uma importação não contam. As transações das contas privadas do outro membro nunca contam.
+- Escolha **Criar regra** para abrir o editor de regras já preenchido, com a pré-visualização, e confirme antes de guardar. Escolha **Não sugerir de novo** para deixar de ver essa sugestão. Se não escolher nenhuma, pode voltar a aparecer da próxima vez.
+
+Não aparece nenhuma sugestão quando uma regra ativa já dá essa categoria a essas transações, ou quando a WonderMoney já as reconhece pela categoria que escolheu para o comerciante. Essa categoria aprendida só é reutilizada quando a descrição de uma transação nova é exatamente o nome do comerciante, por isso a regra continua a ser sugerida para descrições com mais texto.
+
 ## Pré-visualizar antes de guardar
 
 Enquanto edita, a pré-visualização ao lado do formulário mostra quantas das suas transações a regra apanha, quantas delas mudaria, e as 50 correspondências mais recentes com a alteração que cada uma receberia. Atualiza-se pouco depois de parar de escrever.
