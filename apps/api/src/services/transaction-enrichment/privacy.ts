@@ -5,7 +5,8 @@ const MIN_TEXT_LENGTH = 2;
 
 const SAFE_DISPLAY = /[^\p{L}\p{N}\p{Zs}.'’&+\-()@,_]/gu;
 const IBAN_COMPACT = /\b[A-Z]{2}\d{2}[A-Z0-9]{11,30}\b/i;
-const IBAN_SPACED = /\b[A-Z]{2}(?:\s*[A-Z0-9]){13,34}\b/i;
+// Country code, the two check digits every IBAN has, then the account part, spaced or not.
+const IBAN_SPACED = /\b[A-Z]{2}\d{2}(?:\s*[A-Z0-9]){11,30}\b/i;
 
 export function hasSensitiveBankingPattern(value: string): boolean {
   return isSensitiveBankingPattern(value.normalize('NFKC'), value.normalize('NFKC'));
