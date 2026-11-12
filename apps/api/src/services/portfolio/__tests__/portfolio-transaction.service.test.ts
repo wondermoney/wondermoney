@@ -620,9 +620,10 @@ describe('portfolio transaction service', () => {
     );
   });
 
-  it('replays snapshots when a DIVIDEND transaction changes into BUY with the same date', async () => {
+  it('replays snapshots when a SELL transaction changes into BUY with the same date', async () => {
     const existingTransaction = transaction({
-      financialTransactionTypeKey: dividendType,
+      financialTransactionTypeKey: sellType,
+      quantity: -10,
       transactionDate: new Date('2026-05-18T00:00:00Z'),
     });
     const { flushMock } = setupEntityManager({ transactionForUpdate: existingTransaction, transactionType: buyType });
@@ -678,12 +679,16 @@ describe('portfolio transaction service', () => {
     expect(portfolioSnapshotServiceMock.backfillSnapshotsForPortfolio).toHaveBeenCalledWith(portfolio.portfolioKey, newDate);
   });
 
-  it('replays snapshots when BUY changes to DIVIDEND with date change', async () => {
-    const existingTransaction = transaction({ transactionDate: new Date('2026-05-18T00:00:00Z') });
-    const { flushMock } = setupEntityManager({ transactionForUpdate: existingTransaction, transactionType: dividendType });
+  it('does not backfill prices when BUY changes to SELL with date change', async () => {
+    const existingTransaction = transaction({ transactionDate: new Date('2026-05-18T00:00:00Z'), transactionKey: 2 });
+    const { flushMock } = setupEntityManager({
+      findRows: [transaction({ quantity: 10, transactionDate: new Date('2026-01-01T00:00:00Z'), transactionKey: 1 }), existingTransaction],
+      transactionForUpdate: existingTransaction,
+      transactionType: sellType,
+    });
 
-    await updateTransaction(appuser, portfolio.portfolioKey, 99, {
-      financialTransactionTypeId: dividendType.financialTransactionTypeKey,
+    await updateTransaction(appuser, portfolio.portfolioKey, 2, {
+      financialTransactionTypeId: sellType.financialTransactionTypeKey,
       transactionDate: new Date('2026-05-20T00:00:00Z'),
     });
 
@@ -872,6 +877,98 @@ describe('portfolio transaction service', () => {
 
     expect(existingTransaction.quantity).toBe(-5);
     expect(existingTransaction.settlementAmount).toBe(-500);
+  });
+
+  describe('keeping the side of an edited trade', () => {
+    const heldBuy = () => transaction({ quantity: 5, transactionDate: new Date('2026-01-01'), transactionKey: 1 });
+    const existingSell = () => transaction({
+      financialTransactionTypeKey: sellType,
+      quantity: -4,
+      settlementAmount: -400,
+      settlementUnitAmount: 100,
+      transactionDate: new Date('2026-01-02'),
+      transactionKey: 2,
+    });
+
+    it('keeps a sell a sell, with a negative quantity, when only its price and date change', async () => {
+      const sell = existingSell();
+      const { flushMock } = setupEntityManager({ findRows: [heldBuy(), sell], transactionForUpdate: sell });
+
+      await updateTransaction(appuser, portfolio.portfolioKey, 2, {
+        transactionDate: new Date('2026-01-03'),
+        unitPrice: 120,
+      });
+
+      expect(flushMock).toHaveBeenCalled();
+      expect(sell.financialTransactionTypeKey).toBe(sellType);
+      expect(sell.quantity).toBe(-4);
+      expect(sell.settlementAmount).toBe(-480);
+    });
+
+    it('keeps a sell a sell when the edit sends a positive quantity', async () => {
+      const sell = existingSell();
+      const { flushMock } = setupEntityManager({ findRows: [heldBuy(), sell], transactionForUpdate: sell });
+
+      await updateTransaction(appuser, portfolio.portfolioKey, 2, { quantity: 3 });
+
+      expect(flushMock).toHaveBeenCalled();
+      expect(sell.financialTransactionTypeKey).toBe(sellType);
+      expect(sell.quantity).toBe(-3);
+      expect(sell.settlementAmount).toBe(-300);
+    });
+
+    it.each([
+      { from: buyType, to: dividendType },
+      { from: dividendType, to: sellType },
+      { from: dividendType, to: buyType },
+      { from: sellType, to: dividendType },
+    ])('rejects changing a $from.name into a $to.name with a 400 and leaves the row alone', async ({ from, to }) => {
+      const row = transaction({ financialTransactionTypeKey: from, quantity: from === sellType ? -4 : 4, transactionKey: 2 });
+      const before = { ...row };
+      const { flushMock } = setupEntityManager({ findRows: [heldBuy(), row], transactionForUpdate: row, transactionType: to });
+
+      const error = await updateTransaction(appuser, portfolio.portfolioKey, 2, {
+        financialTransactionTypeId: to.financialTransactionTypeKey,
+        quantity: 4,
+      }).catch((caught: unknown) => caught);
+
+      expect(error).toBeInstanceOf(BadRequestError);
+      expect(error).toMatchObject({ status: 400 });
+      expect(flushMock).not.toHaveBeenCalled();
+      expect(row).toEqual(before);
+      expect(portfolioSnapshotServiceMock.backfillSnapshotsForPortfolio).not.toHaveBeenCalled();
+    });
+
+    it('accepts an edit that resends the row\'s own dividend type', async () => {
+      const dividend = transaction({ financialTransactionTypeKey: dividendType, quantity: 4, transactionKey: 2 });
+      const { flushMock } = setupEntityManager({ transactionForUpdate: dividend, transactionType: dividendType });
+
+      await updateTransaction(appuser, portfolio.portfolioKey, 2, {
+        financialTransactionTypeId: dividendType.financialTransactionTypeKey,
+        unitPrice: 0.5,
+      });
+
+      expect(flushMock).toHaveBeenCalled();
+      expect(dividend.financialTransactionTypeKey).toBe(dividendType);
+      expect(dividend.settlementAmount).toBe(2);
+    });
+
+    it('rejects turning a buy into a sell that would oversell the holdings', async () => {
+      const buy = transaction({ quantity: 5, transactionDate: new Date('2026-01-02'), transactionKey: 2 });
+      const { flushMock } = setupEntityManager({
+        findRows: [transaction({ quantity: 3, transactionDate: new Date('2026-01-01'), transactionKey: 1 }), buy],
+        transactionForUpdate: buy,
+        transactionType: sellType,
+      });
+
+      const error = await updateTransaction(appuser, portfolio.portfolioKey, 2, {
+        financialTransactionTypeId: sellType.financialTransactionTypeKey,
+      }).catch((caught: unknown) => caught);
+
+      expect(error).toBeInstanceOf(BadRequestError);
+      expect(error).toMatchObject({ message: 'Sell quantity exceeds available holdings for this portfolio', status: 400 });
+      expect(flushMock).not.toHaveBeenCalled();
+    });
   });
 
   it('rejects updating a Savings Certificate transaction to a unitPrice other than 1', async () => {
