@@ -2823,6 +2823,93 @@
         ],
         "additionalProperties": {}
       },
+      "SpendingVsNormalCompleteness": {
+        "type": "object",
+        "properties": {
+          "currencyCode": {
+            "type": "string"
+          },
+          "isComplete": {
+            "type": "boolean"
+          },
+          "unconvertedCurrencies": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "unconvertedTransactions": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "currencyCode",
+          "isComplete",
+          "unconvertedCurrencies",
+          "unconvertedTransactions"
+        ],
+        "additionalProperties": {}
+      },
+      "SpendingVsNormalData": {
+        "type": "object",
+        "properties": {
+          "month": {
+            "type": "string"
+          },
+          "rows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SpendingVsNormalRow"
+            }
+          }
+        },
+        "required": [
+          "month",
+          "rows"
+        ],
+        "additionalProperties": {}
+      },
+      "SpendingVsNormalRow": {
+        "type": "object",
+        "properties": {
+          "categoryKey": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "normal": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "parentKey": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "ratio": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "total": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "categoryKey",
+          "name",
+          "normal",
+          "parentKey",
+          "ratio",
+          "total"
+        ],
+        "additionalProperties": {}
+      },
       "Tag": {
         "type": "object",
         "properties": {
@@ -18150,6 +18237,367 @@
               "text/csv": {
                 "schema": {
                   "$ref": "#/components/schemas/CsvFile"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "The token is missing, malformed or revoked.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The token does not carry a scope this operation accepts.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "The request did not match the endpoint’s validator.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "A rate limit was exceeded. Honour the `Retry-After` header.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/reports/spending-vs-normal": {
+      "get": {
+        "description": "**Required scope:** `read`.\n\nReturns category spending for one month against the same-days average of the previous three months. The `accountKeys`, `categoryKeys`, and `timezone` filters apply; pending transactions are included, transfers and non-spending categories are excluded, and amounts use the viewer’s currency.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Compare this month’s spending with its three-month normal",
+        "tags": [
+          "Reports"
+        ],
+        "x-required-scopes": [
+          "read"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                {
+                  "type": "string"
+                }
+              ]
+            },
+            "required": false,
+            "name": "accountKeys",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                {
+                  "type": "string"
+                }
+              ]
+            },
+            "required": false,
+            "name": "categoryKeys",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string"
+            },
+            "required": false,
+            "name": "currencyKey",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "required": false,
+            "name": "fromDate",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "string",
+                  "enum": [
+                    "0",
+                    "1",
+                    "true",
+                    "false"
+                  ]
+                }
+              ],
+              "default": false
+            },
+            "required": false,
+            "name": "includePending",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "string",
+                  "enum": [
+                    "0",
+                    "1",
+                    "true",
+                    "false"
+                  ]
+                }
+              ],
+              "default": false
+            },
+            "required": false,
+            "name": "includeTransfers",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                {
+                  "type": "string"
+                }
+              ]
+            },
+            "required": false,
+            "name": "merchantKeys",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                {
+                  "type": "string"
+                }
+              ]
+            },
+            "required": false,
+            "name": "tagKeys",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "default": "Europe/Lisbon"
+            },
+            "required": false,
+            "name": "timezone",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "required": false,
+            "name": "toDate",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^\\d{4}-(?:0[1-9]|1[0-2])$"
+            },
+            "required": true,
+            "name": "month",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "completeness": {
+                      "$ref": "#/components/schemas/SpendingVsNormalCompleteness"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/SpendingVsNormalData"
+                    },
+                    "filters": {
+                      "type": "object",
+                      "properties": {
+                        "accountKeys": {
+                          "anyOf": [
+                            {
+                              "type": "array",
+                              "items": {
+                                "type": "string"
+                              }
+                            },
+                            {
+                              "type": "string"
+                            }
+                          ]
+                        },
+                        "categoryKeys": {
+                          "anyOf": [
+                            {
+                              "type": "array",
+                              "items": {
+                                "type": "string"
+                              }
+                            },
+                            {
+                              "type": "string"
+                            }
+                          ]
+                        },
+                        "currencyKey": {
+                          "type": "string"
+                        },
+                        "fromDate": {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        "includePending": {
+                          "anyOf": [
+                            {
+                              "type": "boolean"
+                            },
+                            {
+                              "type": "string",
+                              "enum": [
+                                "0",
+                                "1",
+                                "true",
+                                "false"
+                              ]
+                            }
+                          ],
+                          "default": false
+                        },
+                        "includeTransfers": {
+                          "anyOf": [
+                            {
+                              "type": "boolean"
+                            },
+                            {
+                              "type": "string",
+                              "enum": [
+                                "0",
+                                "1",
+                                "true",
+                                "false"
+                              ]
+                            }
+                          ],
+                          "default": false
+                        },
+                        "merchantKeys": {
+                          "anyOf": [
+                            {
+                              "type": "array",
+                              "items": {
+                                "type": "string"
+                              }
+                            },
+                            {
+                              "type": "string"
+                            }
+                          ]
+                        },
+                        "tagKeys": {
+                          "anyOf": [
+                            {
+                              "type": "array",
+                              "items": {
+                                "type": "string"
+                              }
+                            },
+                            {
+                              "type": "string"
+                            }
+                          ]
+                        },
+                        "timezone": {
+                          "type": "string",
+                          "default": "Europe/Lisbon"
+                        },
+                        "toDate": {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        "month": {
+                          "type": "string",
+                          "pattern": "^\\d{4}-(?:0[1-9]|1[0-2])$"
+                        }
+                      },
+                      "required": [
+                        "month"
+                      ]
+                    },
+                    "generatedAt": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "completeness",
+                    "data",
+                    "filters",
+                    "generatedAt"
+                  ]
                 }
               }
             }

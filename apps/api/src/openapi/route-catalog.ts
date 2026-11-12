@@ -82,7 +82,7 @@ import {
   getPortfolioTransactionRequestSchema,
 } from '@validators/portfolio';
 import { recurringListSchema, recurringOccurrencesQuerySchema } from '@validators/recurring';
-import { monthComparisonQuerySchema, reportsQuerySchema } from '@validators/reports';
+import { monthComparisonQuerySchema, reportsQuerySchema, spendingVsNormalQuerySchema } from '@validators/reports';
 import { setTransactionTagsRequestSchema } from '@validators/tag';
 import { getTransactionImportSchema } from '@validators/transaction-import';
 import { setTransactionSplitsRequestSchema } from '@validators/transaction-split';
@@ -134,6 +134,8 @@ import {
   recurringSeriesSchema,
   reportSchema,
   ruleSchema,
+  spendingVsNormalCompletenessSchema,
+  spendingVsNormalDataSchema,
   tagSchema,
   topMoversSchema,
   transactionHistoryEntrySchema,
@@ -854,6 +856,21 @@ export const OPERATIONS: Record<string, OperationDefinition> = {
     summary: 'Report spending by category',
     request: reportsQuerySchema,
     response: reportSchema,
+  },
+  'GET /v1/reports/spending-vs-normal': {
+    tag: 'Reports',
+    summary: 'Compare this month’s spending with its three-month normal',
+    description:
+      'Returns category spending for one month against the same-days average of the previous three months. ' +
+      'The `accountKeys`, `categoryKeys`, and `timezone` filters apply; pending transactions are included, ' +
+      'transfers and non-spending categories are excluded, and amounts use the viewer’s currency.',
+    request: spendingVsNormalQuerySchema,
+    response: z.object({
+      completeness: spendingVsNormalCompletenessSchema,
+      data: spendingVsNormalDataSchema,
+      filters: spendingVsNormalQuerySchema.shape.query,
+      generatedAt: z.string(),
+    }),
   },
   'GET /v1/reports/spending-by-category.csv': {
     tag: 'Reports',

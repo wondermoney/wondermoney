@@ -371,6 +371,27 @@ export const reportSchema = open('Report', {
   generatedAt: dateTime,
 });
 
+export const spendingVsNormalRowSchema = open('SpendingVsNormalRow', {
+  categoryKey: z.string(),
+  name: z.string(),
+  normal: nullableNumber,
+  parentKey: nullableString,
+  ratio: nullableNumber,
+  total: money,
+});
+
+export const spendingVsNormalDataSchema = open('SpendingVsNormalData', {
+  month: z.string(),
+  rows: z.array(spendingVsNormalRowSchema),
+});
+
+export const spendingVsNormalCompletenessSchema = open('SpendingVsNormalCompleteness', {
+  currencyCode: z.string(),
+  isComplete: z.boolean(),
+  unconvertedCurrencies: z.array(z.string()),
+  unconvertedTransactions: z.number().int(),
+});
+
 export const configSchema = open('Config', {
   brokers: z.array(z.record(z.string(), z.unknown())),
   categories: z.array(categorySchema),
