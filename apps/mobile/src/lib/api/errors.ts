@@ -16,6 +16,8 @@ export type ApiErrorOptions = Readonly<{
   writeDispatchState?: WriteDispatchState
   /** `portfolio-link-held` only: the display name of the member who holds the link. */
   linkedBy?: string
+  /** `http` 4xx only: the API's machine-readable `code` (`reimbursement_amount_exceeded`). */
+  serverCode?: string
 }>
 
 const diagnosticMessages: Record<ApiErrorCode, string> = {
@@ -42,6 +44,13 @@ export class ApiError extends Error {
    * an error report that serializes the error's own fields does not carry a member's name.
    */
   readonly linkedBy?: string
+  /**
+   * `http` 4xx only: the API's stable machine-readable reason (`ERROR_CODE` in the API), for the
+   * screens that word one failure differently from another with the same status. A fixed
+   * vocabulary of snake_case words, never prose or a value from the request. Non-enumerable, like
+   * `linkedBy`, so equality checks and serialized reports see the same error as before.
+   */
+  readonly serverCode?: string
 
   constructor(code: ApiErrorCode, status?: number, options?: ApiErrorOptions) {
     super(diagnosticMessages[code])
@@ -50,6 +59,7 @@ export class ApiError extends Error {
     if (status !== undefined) this.status = status
     if (options?.writeDispatchState !== undefined) this.writeDispatchState = options.writeDispatchState
     if (options?.linkedBy !== undefined) Object.defineProperty(this, 'linkedBy', { value: options.linkedBy, enumerable: false, configurable: true })
+    if (options?.serverCode !== undefined) Object.defineProperty(this, 'serverCode', { value: options.serverCode, enumerable: false, configurable: true })
   }
 }
 

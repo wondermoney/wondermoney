@@ -7,6 +7,8 @@ import { fxRateDateSchema, fxStatusSchema } from '@/lib/api/fx-status'
 import { readEndpoint, tolerantEnum, writeEndpoint } from '@/lib/api/runtime-schema'
 import { deviceTimeZone } from '@/lib/dates/transaction-date'
 
+import { reimbursementLinkSchema } from './reimbursements-contract'
+
 const money = z.number().finite()
 const currency = z.object({ code: z.string().regex(/^[A-Z]{3}$/) })
 const positiveId = z.number().int().positive()
@@ -108,6 +110,10 @@ const transactionBaseShape = {
   // build does not know reads as none rather than failing the list.
   transferDestination: transferDestination.nullable().optional().catch(null),
   installment: transactionInstallment.nullable().optional().catch(null),
+  // Reimbursement links (refund to expense), only those whose other side the reader can see.
+  // Optional: a server from before them omits the field, and the row reads as unlinked. A
+  // malformed list reads as none rather than failing the whole ledger.
+  reimbursements: z.array(reimbursementLinkSchema).optional().catch([]),
 } as const
 
 const accountTransactionSchema = z.object(transactionBaseShape)

@@ -857,6 +857,61 @@
         "remove": "The split could not be removed."
       }
     },
+    "reimbursement": {
+      "action": "Mark as reimbursement",
+      "title": "Mark as reimbursement",
+      "close": "Close",
+      "save": "Link to expense",
+      "amountIn": "Reimbursement",
+      "left": "Left to link",
+      "currencyHint": "Only expenses in {{currency}} can be linked for now.",
+      "reimbursedBy": "Reimbursed by",
+      "reimburses": "Reimburses",
+      "searchLabel": "Search expenses",
+      "searchPlaceholder": "Merchant or description",
+      "suggested": "Suggested expenses",
+      "results": "Matching expenses",
+      "loading": "Loading expenses",
+      "loadError": "The expenses could not be loaded.",
+      "empty": "No expense to suggest. Search by merchant or description.",
+      "emptySearch": "No expense matches “{{search}}”.",
+      "sameMerchant": "Same merchant",
+      "notYetReimbursed": "{{amount}} not yet reimbursed",
+      "chooseFirst": "Choose the expense this pays back.",
+      "fullyLinked": "This reimbursement is fully linked. Unlink an expense to link another.",
+      "amount": "Amount",
+      "amountLabel": "Amount to link",
+      "amountHint": "Up to {{amount}}: what is left of this reimbursement and of the expense.",
+      "amountErrors": {
+        "invalid": "Enter an amount.",
+        "too-precise": "Use at most 4 decimals.",
+        "zero": "The amount can't be zero.",
+        "over": "At most {{amount}} can be linked."
+      },
+      "unlink": "Unlink",
+      "unlinkNamed": "Unlink {{name}}",
+      "unlinkTitle": "Unlink this reimbursement?",
+      "unlinkDescription": "{{amount}} linked with {{name}} counts as spending and income again.",
+      "open": "Open {{name}}",
+      "badges": {
+        "reimbursed": "Reimbursed",
+        "partly-reimbursed": "Partly reimbursed",
+        "reimbursement": "Reimbursement"
+      },
+      "errors": {
+        "currency-mismatch": "Only transactions in the same currency can be linked for now.",
+        "amount-exceeded": "That is more than what is left of the expense or of this reimbursement.",
+        "visibility-mismatch": "Both transactions must be on shared accounts, or on private accounts of the same person.",
+        "invalid": "Only money in can reimburse money out, and neither can be a transfer or a loan repayment.",
+        "exists": "These two are already linked. Unlink them first to change the amount.",
+        "not-found": "That transaction or link is no longer available. Refresh and try again.",
+        "demo": "Demo profiles are read-only. Nothing was changed.",
+        "mfa": "Multi-factor authentication is required. Nothing was changed.",
+        "cancelled": "The change was cancelled because your session changed. Nothing was changed.",
+        "network": "The request had an uncertain network result. Check the transaction before trying again.",
+        "error": "The change could not be saved. Try again."
+      }
+    },
     "transfer": {
       "mark": "Mark as transfer",
       "unmark": "Not a transfer",

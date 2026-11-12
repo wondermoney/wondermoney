@@ -9,6 +9,7 @@ import { ConflictError, ERROR_CODE } from '@utils/errors';
 
 import { isManualAccount, recalculateChainFromAccountBalance, removeFromChain } from './balance-chain.service';
 import { TransactionAuditService } from './transaction-audit.service';
+import { removeReimbursementLinksOf } from './transaction-reimbursement.service';
 import { reconcileTransfers } from './transfer-matching.service';
 
 /**
@@ -39,7 +40,9 @@ import { reconcileTransfers } from './transfer-matching.service';
  *   from it, as sync does;
  * - each row is soft-deleted (`deletedAt`) and gets a `soft_deleted` audit entry with its amount
  *   and balance. The audit log keeps the record; there is no undo;
- * - a loan repayment link on the row is removed, so the loan stops counting a payment that is gone.
+ * - a loan repayment link on the row is removed, so the loan stops counting a payment that is gone;
+ * - a reimbursement link on either side is removed, so the other side counts in full again
+ *   (`transaction-reimbursement.service.ts`).
  *
  * Afterwards transfer matching runs from the earliest deleted date: a pair one of whose rows was
  * deleted is dissolved and the other row gets its own type back.
@@ -140,6 +143,7 @@ export async function deleteTransactions(em: EntityManager, actor: Actor, transa
 
       const links = await tx.find(LoanRepaymentLink, { deletedAt: null, transactionKey: { $in: rows } });
       for (const link of links) link.deletedAt = now;
+      await removeReimbursementLinksOf(tx, actor, rows, now);
       await tx.flush();
 
       if (account && manualTail) {

@@ -93,6 +93,7 @@ import { monthComparisonQuerySchema, reportsQuerySchema, spendingVsNormalQuerySc
 import { listRulePresetsRequestSchema, rulePresetParamsRequestSchema } from '@validators/rule-preset';
 import { setTransactionTagsRequestSchema } from '@validators/tag';
 import { getTransactionImportSchema } from '@validators/transaction-import';
+import { getReimbursementSuggestionsRequestSchema, getTransactionReimbursementsRequestSchema, linkReimbursementRequestSchema } from '@validators/transaction-reimbursement';
 import { setTransactionSplitsRequestSchema } from '@validators/transaction-split';
 
 import {
@@ -153,6 +154,8 @@ import {
   recurringInstallmentSchema,
   recurringOccurrenceSchema,
   recurringSeriesSchema,
+  reimbursementLinkSchema,
+  reimbursementSuggestionSchema,
   reportSchema,
   ruleSchema,
   ruleSuggestionSchema,
@@ -163,6 +166,7 @@ import {
   transactionHistoryEntrySchema,
   transactionMerchantSchema,
   transactionPageSchema,
+  transactionReimbursementsSchema,
   transactionReviewSummarySchema,
   transactionSchema,
   valuationSchema,
@@ -375,6 +379,20 @@ export const OPERATIONS: Record<string, OperationDefinition> = {
     request: listAttachmentsRequestSchema,
     response: listResponse('AttachmentList', 'attachments', attachmentSchema),
   },
+  'GET /v1/account/transaction/:transactionId/reimbursements': {
+    tag: 'Transactions',
+    summary: 'List a transaction’s reimbursement links',
+    description: 'Refunds linked to this expense, or expenses this refund is linked to, and how much is left to link. A linked amount is taken off the expense’s category spending and off income; balances are unchanged.',
+    request: getTransactionReimbursementsRequestSchema,
+    response: transactionReimbursementsSchema,
+  },
+  'GET /v1/account/transaction/:transactionId/reimbursements/suggestions': {
+    tag: 'Transactions',
+    summary: 'Suggest the other side of a reimbursement link',
+    description: 'For a refund: expenses of the 60 days before it, from the same merchant or for at least its amount. For an expense: incoming transactions of the 60 days after it, from the same merchant or for no more than its amount. Same currency only, with something left to link. `search` matches the description or merchant instead.',
+    request: getReimbursementSuggestionsRequestSchema,
+    response: listResponse('ReimbursementSuggestionList', 'suggestions', reimbursementSuggestionSchema),
+  },
   'GET /v1/account/transaction/:transactionId/history': {
     tag: 'Transactions',
     summary: 'List a transaction’s audit history',
@@ -430,6 +448,14 @@ export const OPERATIONS: Record<string, OperationDefinition> = {
     request: createOfflineAccountRequestSchema,
     status: 201,
     response: itemResponse('AccountResponse', 'account', accountSchema),
+  },
+  'POST /v1/account/transaction/:transactionId/reimbursements': {
+    tag: 'Transactions',
+    summary: 'Link a refund to the expense it reimburses',
+    description: 'The path transaction is the refund (money in). Both must be in the same settlement currency (400 `reimbursement_currency_mismatch`), and the links on either side cannot exceed its amount (400 `reimbursement_amount_exceeded`). Unlinking needs a session: a token cannot delete.',
+    request: linkReimbursementRequestSchema,
+    status: 201,
+    response: itemResponse('ReimbursementLinkResponse', 'link', reimbursementLinkSchema),
   },
   'PUT /v1/account/transaction/:transactionId/splits': {
     tag: 'Transactions',

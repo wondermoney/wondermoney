@@ -272,6 +272,7 @@ class HouseholdExport {
       { format: 'json', path: 'data/transactions.json', rows: () => this.transactionJson() },
       { format: 'json', path: 'data/transaction-categories.json', rows: () => this.transactionCategories() },
       { format: 'json', path: 'data/transaction-splits.json', rows: () => this.transactionSplits() },
+      { format: 'json', path: 'data/transaction-reimbursements.json', rows: () => this.transactionReimbursements() },
       { format: 'json', path: 'data/transaction-tags.json', rows: () => this.transactionTags() },
       { format: 'json', path: 'data/rules.json', rows: () => this.rules() },
       { format: 'json', path: 'data/recurring-series.json', rows: () => this.recurringSeries() },
@@ -517,6 +518,22 @@ class HouseholdExport {
     for await (const row of rows) {
       id += 1;
       yield { amount: dec(row['amount']), categoryId: this.categories.get(row['category_key']), id, notes: str(row['notes']), position: int(row['position']), transactionId: this.transactions.get(row['transaction_key']) };
+    }
+  }
+
+  /** Live links whose two sides are both in the export (a link to a row left out is left out too). */
+  private async* transactionReimbursements() {
+    const rows = paged(this.db, (after) => sql`
+      select r.transaction_reimbursement_key as k, r.expense_transaction_key, r.reimbursement_transaction_key, r.amount::text as amount,
+        ${sql.raw(tsx('r.created_at'))} as created_at
+      from transaction_reimbursement r
+      join "transaction" e on e.transaction_key = r.expense_transaction_key
+      join "transaction" t on t.transaction_key = r.reimbursement_transaction_key
+      where r.deleted_at is null and r.tenant_key = ${this.scope.tenantKey} and ${this.visibleTransaction('e')} and ${this.visibleTransaction('t')} ${limit(after, 'r.transaction_reimbursement_key')}`);
+    let id = 0;
+    for await (const row of rows) {
+      id += 1;
+      yield { amount: dec(row['amount']), createdAt: str(row['created_at']), expenseTransactionId: this.transactions.get(row['expense_transaction_key']), id, reimbursementTransactionId: this.transactions.get(row['reimbursement_transaction_key']) };
     }
   }
 

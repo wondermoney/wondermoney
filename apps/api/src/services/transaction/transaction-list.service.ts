@@ -18,6 +18,7 @@ import { compareTags, type TagDto, toTagDto } from '@service/tag/tag.service';
 import { type CategorySpendingFlags, loadCategorySpendingFlags } from '@service/transaction/category-spending';
 import { toMerchantDto } from '@service/transaction/merchant-logo';
 import { isBankSyncedTransaction } from '@service/transaction/transaction-deletion.service';
+import { loadReimbursementLinks } from '@service/transaction/transaction-reimbursement.service';
 import { SPLIT_LINE_POPULATE, type SplitLineDto, toSplitLineDtos } from '@service/transaction/transaction-split.service';
 import { buildTransactionWhere, getTransactionTotal, hasReportScope, type TransactionFilterInput, type TransactionViewer } from '@service/transaction/transaction-total.service';
 import { TRANSFER_DESTINATION_POPULATE, type TransferDestinationDto, transferDestinationOf } from '@service/transaction/transaction-transfer.service';
@@ -111,6 +112,8 @@ export async function listTransactions(request: TransactionListRequest) {
 
   const loanRepayments = await loadLoanRepayments(transactions);
   const attachmentCounts = await loadAttachmentCounts(transactions);
+  // Refunds linked to expenses, either side; only links whose other side the viewer can see.
+  const reimbursements = await loadReimbursementLinks(DI.em, { appuserKey: viewerAppuserKey, tenantKey }, transactions);
   const spendingFlags = await loadCategorySpendingFlags(DI.em, tenantKey);
   const fx = await describeTransactionsFx(transactions, rateScope(tenantKey));
   const rows = transactions.map((transaction, index) => {
@@ -119,6 +122,7 @@ export async function listTransactions(request: TransactionListRequest) {
       ...(fx[index] ?? UNKNOWN_FX),
       // The ledger shows a paperclip only when there is something behind it.
       attachmentCount: attachmentCounts.get(transaction.transactionKey) ?? 0,
+      reimbursements: reimbursements.get(transaction.transactionKey) ?? [],
     };
     const loanRepayment = summarizeLoanRepayments(loanRepayments.get(transaction.transactionKey) ?? []);
     return loanRepayment ? { ...row, loanRepayment } : row;
@@ -425,6 +429,7 @@ async function syntheticOpeningBalanceRows(accounts: Account[], filters: Transac
       description: 'Initial balance',
       descriptionDirty: 'This is a fake transaction to reflect the initial balance of the account',
       hidden: false,
+      reimbursements: [],
       reviewed: true,
       settlementAmount: account.balance,
       settlementCurrencyKey: { code: account.currencyKey.code } as Currency,

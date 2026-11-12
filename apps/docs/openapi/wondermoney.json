@@ -2768,6 +2768,68 @@
         ],
         "additionalProperties": {}
       },
+      "LinkedTransaction": {
+        "type": "object",
+        "properties": {
+          "accountKey": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "accountName": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "currencyCode": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "description": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "merchantName": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "settlementAmount": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "description": "Signed, in `currencyCode`; the user’s edit when there is one."
+          },
+          "transactionDate": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "transactionKey": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "accountKey",
+          "accountName",
+          "currencyCode",
+          "description",
+          "merchantName",
+          "settlementAmount",
+          "transactionDate",
+          "transactionKey"
+        ],
+        "additionalProperties": {}
+      },
       "Loan": {
         "type": "object",
         "properties": {
@@ -4138,6 +4200,97 @@
         ],
         "additionalProperties": {}
       },
+      "ReimbursementLink": {
+        "type": "object",
+        "properties": {
+          "amount": {
+            "type": "number",
+            "description": "Positive, in `currencyCode` (the expense’s settlement currency)."
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "currencyCode": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "expense": {
+            "$ref": "#/components/schemas/LinkedTransaction"
+          },
+          "reimbursement": {
+            "$ref": "#/components/schemas/LinkedTransaction"
+          },
+          "transactionReimbursementKey": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "amount",
+          "createdAt",
+          "currencyCode",
+          "expense",
+          "reimbursement",
+          "transactionReimbursementKey"
+        ],
+        "additionalProperties": {}
+      },
+      "ReimbursementLinkResponse": {
+        "type": "object",
+        "properties": {
+          "link": {
+            "$ref": "#/components/schemas/ReimbursementLink"
+          }
+        },
+        "required": [
+          "link"
+        ],
+        "additionalProperties": {}
+      },
+      "ReimbursementSuggestion": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/LinkedTransaction"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "reason": {
+                "type": "string",
+                "enum": [
+                  "amount",
+                  "merchant",
+                  "search"
+                ]
+              },
+              "remainingAmount": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "reason",
+              "remainingAmount"
+            ],
+            "additionalProperties": {}
+          }
+        ]
+      },
+      "ReimbursementSuggestionList": {
+        "type": "object",
+        "properties": {
+          "suggestions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReimbursementSuggestion"
+            }
+          }
+        },
+        "required": [
+          "suggestions"
+        ],
+        "additionalProperties": {}
+      },
       "Report": {
         "type": "object",
         "properties": {
@@ -4698,6 +4851,12 @@
               "null"
             ]
           },
+          "reimbursements": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReimbursementLink"
+            }
+          },
           "splits": {
             "type": "array",
             "items": {
@@ -4924,6 +5083,50 @@
           "total",
           "totalAmount",
           "transactions"
+        ],
+        "additionalProperties": {}
+      },
+      "TransactionReimbursements": {
+        "type": "object",
+        "properties": {
+          "currencyCode": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "linkedAmount": {
+            "type": "number"
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReimbursementLink"
+            }
+          },
+          "remainingAmount": {
+            "type": "number",
+            "description": "What can still be linked: the absolute amount less `linkedAmount`."
+          },
+          "role": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "expense",
+              "reimbursement",
+              null
+            ],
+            "description": "Money out is an expense, money in a reimbursement."
+          }
+        },
+        "required": [
+          "currencyCode",
+          "linkedAmount",
+          "links",
+          "remainingAmount",
+          "role"
         ],
         "additionalProperties": {}
       },
@@ -7450,6 +7653,331 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/TransactionHistoryList"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "The token is missing, malformed or revoked.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The token does not carry a scope this operation accepts.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "The request did not match the endpoint’s validator.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "A rate limit was exceeded. Honour the `Retry-After` header.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/account/transaction/{transactionId}/reimbursements": {
+      "get": {
+        "description": "**Required scope:** any of `read`, `write`.\n\nRefunds linked to this expense, or expenses this refund is linked to, and how much is left to link. A linked amount is taken off the expense’s category spending and off income; balances are unchanged.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "List a transaction’s reimbursement links",
+        "tags": [
+          "Transactions"
+        ],
+        "x-required-scopes": [
+          "read",
+          "write"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "string",
+                  "pattern": "^[1-9]\\d*$"
+                }
+              ]
+            },
+            "required": true,
+            "name": "transactionId",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TransactionReimbursements"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "The token is missing, malformed or revoked.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The token does not carry a scope this operation accepts.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "The request did not match the endpoint’s validator.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "A rate limit was exceeded. Honour the `Retry-After` header.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "description": "**Required scope:** `write`.\n\nThe path transaction is the refund (money in). Both must be in the same settlement currency (400 `reimbursement_currency_mismatch`), and the links on either side cannot exceed its amount (400 `reimbursement_amount_exceeded`). Unlinking needs a session: a token cannot delete.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Link a refund to the expense it reimburses",
+        "tags": [
+          "Transactions"
+        ],
+        "x-required-scopes": [
+          "write"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "string",
+                  "pattern": "^[1-9]\\d*$"
+                }
+              ]
+            },
+            "required": true,
+            "name": "transactionId",
+            "in": "path"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "amount": {
+                    "anyOf": [
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "string",
+                        "pattern": "^[-+]?(?:\\d+(?:\\.\\d*)?|\\.\\d+)$"
+                      }
+                    ]
+                  },
+                  "expenseTransactionId": {
+                    "anyOf": [
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "string",
+                        "pattern": "^[1-9]\\d*$"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "amount",
+                  "expenseTransactionId"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReimbursementLinkResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "The token is missing, malformed or revoked.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The token does not carry a scope this operation accepts.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "The request did not match the endpoint’s validator.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "A rate limit was exceeded. Honour the `Retry-After` header.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/account/transaction/{transactionId}/reimbursements/suggestions": {
+      "get": {
+        "description": "**Required scope:** any of `read`, `write`.\n\nFor a refund: expenses of the 60 days before it, from the same merchant or for at least its amount. For an expense: incoming transactions of the 60 days after it, from the same merchant or for no more than its amount. Same currency only, with something left to link. `search` matches the description or merchant instead.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Suggest the other side of a reimbursement link",
+        "tags": [
+          "Transactions"
+        ],
+        "x-required-scopes": [
+          "read",
+          "write"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "string",
+                  "pattern": "^[1-9]\\d*$"
+                }
+              ]
+            },
+            "required": true,
+            "name": "transactionId",
+            "in": "path"
+          },
+          {
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "string",
+                  "pattern": "^\\d+$"
+                }
+              ],
+              "default": 10
+            },
+            "required": false,
+            "name": "limit",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "maxLength": 200
+            },
+            "required": false,
+            "name": "search",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReimbursementSuggestionList"
                 }
               }
             }

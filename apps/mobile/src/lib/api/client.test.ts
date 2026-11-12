@@ -190,6 +190,22 @@ describe('API client', () => {
     expect((error as ApiError).linkedBy).toBeUndefined()
   })
 
+  it.each([
+    [400, { code: 'reimbursement_amount_exceeded', message: 'Too much.' }, 'reimbursement_amount_exceeded'],
+    [409, { code: 'reimbursement_link_exists', message: 'Linked.' }, 'reimbursement_link_exists'],
+    [404, { code: 'not_found' }, 'not_found'],
+    // Only a code-shaped word is kept, and nothing from a 5xx.
+    [400, { code: 'Not a code: 12 €' }, undefined],
+    [400, { message: 'No code' }, undefined],
+    [500, { code: 'internal_error' }, undefined],
+  ] as const)('keeps the API code of a %i as serverCode (%p)', async (status, body, expected) => {
+    const { client } = setup(async () => ({ status, body }))
+    const error = await client.read(okEndpoint).catch((caught: unknown) => caught)
+    expect(error).toMatchObject({ code: 'http', status })
+    expect((error as ApiError).serverCode).toBe(expected)
+    expect(Object.keys(error as object)).not.toContain('serverCode')
+  })
+
   it('uses the coordinator shared refresh promise and replays each concurrent GET once', async () => {
     let resolveRefresh!: (value: ReturnType<typeof token>) => void
     const sharedRefresh = new Promise<ReturnType<typeof token>>((resolve) => { resolveRefresh = resolve })

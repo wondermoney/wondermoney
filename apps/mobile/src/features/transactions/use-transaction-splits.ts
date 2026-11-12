@@ -16,7 +16,7 @@ import { isManualTransactionAffectedQuery } from './use-create-manual-transactio
  * A split moves spending between categories, so after one changes the lists, the transaction's
  * history, budgets and reports are all stale.
  */
-const isSplitAffectedQuery = (queryKey: readonly unknown[], epochId: number): boolean => (
+export const isSplitAffectedQuery = (queryKey: readonly unknown[], epochId: number): boolean => (
   isManualTransactionAffectedQuery(queryKey, epochId)
   || (queryKey[0] === 'reports' && queryKey[1] === epochId)
 )

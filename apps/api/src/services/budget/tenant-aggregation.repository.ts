@@ -3,6 +3,7 @@ import Big from 'big.js';
 
 import { DI } from '@app/database/di';
 import { categoryLinesSql } from '@service/transaction/category-lines';
+import { netOfReimbursementsSql, reimbursedAmountsSql } from '@service/transaction/reimbursement-sql';
 import { notExpiredTransactionSql } from '@service/transaction/transaction-status';
 import { buildEffectiveAmountSql } from '@utils/account-amounts';
 
@@ -101,8 +102,9 @@ export class MikroOrmTenantAggregationRepository implements TenantAggregationRep
          tx."appuser_key" as "appuserKey", tx."tenant_key" as "tenantKey",
          transaction_type."name" as "transactionType",
          -- The user-currency amount: an edit writes its converted value here, while
-         -- edited_settlement_amount is in the account's currency.
-         ${buildEffectiveAmountSql('tx')}::text as "effectiveAmount",
+         -- edited_settlement_amount is in the account's currency. Net of reimbursement links,
+         -- as the category lines are (category-lines.ts).
+         ${netOfReimbursementsSql('tx', buildEffectiveAmountSql('tx'), 'reimbursed.reimbursed_amount')}::text as "effectiveAmount",
          account."account_key" as "accountKey", account."tenant_key" as "accountTenantKey",
          account."account_owner_appuser_key" as "accountOwnerAppuserKey", account."closed" as "accountClosed",
          (account."deleted_at" is not null) as "accountDeleted",
@@ -124,6 +126,7 @@ export class MikroOrmTenantAggregationRepository implements TenantAggregationRep
        from "transaction" tx
        join "account" account on account."account_key" = tx."account_key"
        left join "transaction_type" transaction_type on transaction_type."transaction_type_key" = tx."transaction_type_key"
+       left join ${reimbursedAmountsSql(tenantKey)} reimbursed on reimbursed.transaction_key = tx."transaction_key"
        left join ${categoryLinesSql(tenantKey)} line on line."transaction_key" = tx."transaction_key"
        left join "category" category on category."category_key" = line."category_key"
        left join "category" parent on parent."category_key" = category."parent_category_category_key"

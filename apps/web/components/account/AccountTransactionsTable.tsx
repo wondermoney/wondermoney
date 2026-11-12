@@ -99,6 +99,10 @@ import {
 } from "./AccountTransactionEditSheet";
 import { LedgerDateCell, LedgerMonthLabel } from "./LedgerCells";
 import { TransactionAmount } from "./TransactionAmount";
+import {
+  TransactionReimbursementBadge,
+  TransactionReimbursementLinksList,
+} from "./TransactionReimbursementBadge";
 import TransactionReviewControl from "./TransactionReviewControl";
 import {
   TransactionSplitLinesList,
@@ -428,6 +432,24 @@ const AccountTransactionsTable: React.FC<AccountTransactionTableProps> =
       const [inspectedTransaction, setInspectedTransaction] =
         useState<Transaction | null>(null);
 
+      /*
+       * A reimbursement badge opens the transaction at the other end of its link, in the same
+       * inspector. The list holds only the rows it loaded, so one on another page or outside
+       * the filters cannot open; the badge then opens its own row, whose inspector lists the
+       * link.
+       */
+      const loadedTransaction = useCallback(
+        (transactionKey: number) =>
+          transactions.find((tx) => tx.transactionKey === transactionKey) ??
+          null,
+        [transactions],
+      );
+      const openLinkedTransaction = useCallback(
+        (from: Transaction, transactionKey: number) =>
+          setInspectedTransaction(loadedTransaction(transactionKey) ?? from),
+        [loadedTransaction],
+      );
+
       const onDateRangeFilterChange = useCallback(
         (dateRange: DateRange | undefined) => {
           posthog.capture("account_transaction_table_filter", {
@@ -647,6 +669,15 @@ const AccountTransactionsTable: React.FC<AccountTransactionTableProps> =
                         </p>
                       ) : null}
                       <TagChipList tags={transaction.tags} className="mt-1" />
+                      <TransactionReimbursementBadge
+                        transaction={transaction}
+                        // A 20px chip with a 44px hit area, the touch floor.
+                        className="relative mt-1 after:absolute after:-inset-3 after:content-['']"
+                        onOpenLinked={(transactionKey) =>
+                          openLinkedTransaction(transaction, transactionKey)
+                        }
+                        onShowLinks={() => setInspectedTransaction(transaction)}
+                      />
                       {isLedger && transaction.reviewed === false ? (
                         <p className="text-warning-text text-xs font-medium">
                           {t("transaction-review-filter")}
@@ -856,6 +887,19 @@ const AccountTransactionsTable: React.FC<AccountTransactionTableProps> =
                         {/* One installment of a card plan: "3/12", linking to the plan. */}
                         <InstallmentBadge
                           installment={info.row.original.installment}
+                        />
+                        {/* Reimbursed, or a reimbursement: opens the other side. */}
+                        <TransactionReimbursementBadge
+                          transaction={info.row.original}
+                          onOpenLinked={(transactionKey) =>
+                            openLinkedTransaction(
+                              info.row.original,
+                              transactionKey,
+                            )
+                          }
+                          onShowLinks={() =>
+                            setInspectedTransaction(info.row.original)
+                          }
                         />
                         {/* A receipt or invoice is attached: the row says so without opening it. */}
                         {(info.row.original.attachmentCount ?? 0) > 0 ? (
@@ -1139,6 +1183,7 @@ const AccountTransactionsTable: React.FC<AccountTransactionTableProps> =
           isDesktop,
           desktopColumns,
           isLedger,
+          openLinkedTransaction,
         ],
       );
 
@@ -1935,6 +1980,17 @@ const AccountTransactionsTable: React.FC<AccountTransactionTableProps> =
                 </h3>
                 <TransactionSplitLinesList transaction={inspectedTransaction} />
               </section>
+            ) : null}
+            {inspectedTransaction ? (
+              <TransactionReimbursementLinksList
+                transaction={inspectedTransaction}
+                canOpen={(transactionKey) =>
+                  loadedTransaction(transactionKey) !== null
+                }
+                onOpenLinked={(transactionKey) =>
+                  openLinkedTransaction(inspectedTransaction, transactionKey)
+                }
+              />
             ) : null}
             {inspectedTransaction?.transactionMerchantKey ? (
               <MerchantDetails

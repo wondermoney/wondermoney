@@ -6,6 +6,7 @@ import { amountInCurrencySql, completenessFromCounts, loadDailyRates, needsRateS
 import { big, toNumber } from '@utils/money';
 
 import { categoryLinesSql } from './category-lines';
+import { netOfReimbursementsSql, reimbursedAmountsSql } from './reimbursement-sql';
 import type { SqlCondition } from './transaction-scope';
 
 export interface TransactionTotals {
@@ -40,6 +41,9 @@ export interface TransactionMonthTotal {
  * - **Lines.** With `lines`, a row adds only its category lines that pass (`category-lines.ts`):
  *   lines in categories that count as spending, lines in the filtered categories. Only a split
  *   row can have both kinds of line; any other row passes whole or not at all.
+ * - **Reimbursements.** A row adds its amount net of its reimbursement links, as its lines do
+ *   (`category-lines.ts`): a refund linked to an expense is that much less money in, and the
+ *   expense that much less money out.
  * - **In and out.** A row is money in when what it adds (its lines that pass) is positive, money
  *   out when it is negative, as the cash flow report reads income and expenses.
  * - **Months.** With `byMonth`, rows are grouped by the month they fall in on the viewer's
@@ -71,7 +75,7 @@ interface TotalGroup {
 
 export async function getTransactionTotals(em: EntityManager, query: TransactionTotalsQuery): Promise<TransactionTotals> {
   const { currency, lines, rows, tenantKey } = query;
-  const amount = amountInCurrencySql('t', currency.currencyKey);
+  const amount = netOfReimbursementsSql('t', amountInCurrencySql('t', currency.currencyKey), 'reimbursed.reimbursed_amount');
   const needsRate = needsRateSql('t', currency.currencyKey);
   const leftOut = leftOutLinesSql(tenantKey, currency.currencyKey, lines);
   const month = query.byMonth
@@ -88,6 +92,7 @@ export async function getTransactionTotals(em: EntityManager, query: Transaction
        sum(case when kept.amount < 0 then -kept.amount else 0 end) as "amountOut",
        count(*) as transactions
      from "transaction" t
+     left join ${reimbursedAmountsSql(tenantKey)} reimbursed on reimbursed.transaction_key = t.transaction_key
      cross join lateral (select ${amount} - ${leftOut} as amount) kept
      left join "currency" member_currency on member_currency.currency_key = t.appuser_currency_key
      left join "currency" settlement_currency on settlement_currency.currency_key = t.settlement_currency_key

@@ -16,14 +16,20 @@ import { parseAccountId } from '@/features/accounts/accounts-contract'
 import { useAccounts } from '@/features/accounts/use-accounts'
 import { useTranslation } from 'react-i18next'
 
+import { localCalendarDay, localDayRange } from '@/lib/dates/transaction-date'
+
+import type { LinkedTransactionDto } from './reimbursements-contract'
+import { classifyReimbursementFailure } from './reimbursements-view-model'
+import { TransactionReimbursementScreen } from './transaction-reimbursement-screen'
 import type { TransactionFilters, TransactionSplitLineRequest, TransferEditDraft } from './transactions-contract'
 import { DEFAULT_RANGE_DAYS, presetRange } from './transactions-date-range'
-import { type BulkDeleteOutcome, type BulkScope, type DeleteOneResult, TransactionsScreen, type ReviewResult, type TransactionsFreshness, type TransactionsViewState } from './transactions-screen'
+import { type BulkDeleteOutcome, type BulkScope, type DeleteOneResult, TransactionsScreen, type ReviewResult, type TransactionsFreshness, type TransactionsViewState, type UnlinkReimbursementResult } from './transactions-screen'
 import { mapTransactions } from './transactions-view-model'
 import { useEditTransactionAmount } from './use-edit-transaction-amount'
 import { useEditTransactionTransfer } from './use-edit-transaction-transfer'
 import { skippedBankSyncedIds, useDeleteTransactions } from './use-delete-transactions'
 import { useTransactionBulkActions, type TransactionBulkAction, type TransactionBulkSelection } from './use-mark-reviewed'
+import { useUnlinkReimbursement } from './use-transaction-reimbursements'
 import { useRemoveTransactionSplits, useSetTransactionSplits } from './use-transaction-splits'
 import { useTransactions } from './use-transactions'
 import { useTransactionsLead } from './use-transactions-lead'
@@ -41,17 +47,43 @@ function classifyResult(error: unknown, blockAccess: (state: 'mfa-required') => 
 /** The first value of a search param, which expo-router may hand back as an array. */
 const firstParam = (value?: string | string[]) => (Array.isArray(value) ? value[0] : value)
 
+type RouteParams = { accountId?: string | string[]; categoryKeys?: string | string[]; filter?: string | string[]; focus?: string | string[]; fromDate?: string | string[]; toDate?: string | string[] }
+
+/** The row a followed link opens on (`?focus=<id>`), or null. */
+function focusParam(params: RouteParams): number | null {
+  const value = Number(firstParam(params.focus))
+  return Number.isSafeInteger(value) && value > 0 ? value : null
+}
+
+/**
+ * Where the other side of a reimbursement link is shown: its account's ledger (all accounts when
+ * the API did not say which), on its own day, opened on it.
+ */
+export function linkedTransactionHref(linked: LinkedTransactionDto): Href {
+  const params: Record<string, string> = { focus: String(linked.transactionKey) }
+  const day = linked.transactionDate ? localCalendarDay(linked.transactionDate) : null
+  if (day) {
+    try {
+      Object.assign(params, localDayRange(day, day))
+    } catch {
+      // An unreadable date opens the ledger's usual range; the row may then not be in it.
+    }
+  }
+  return linked.accountKey
+    ? { pathname: '/accounts/[accountId]/transactions', params: { ...params, accountId: String(linked.accountKey) } } as Href
+    : { pathname: '/accounts/transactions', params } as Href
+}
+
 /**
  * The list's opening filters. A home insight links here with its own date range and categories,
  * so the ledger opens on exactly the rows the card counted; otherwise the last 60 days.
  */
-function initialFilters(
-  params: { categoryKeys?: string | string[]; filter?: string | string[]; fromDate?: string | string[]; toDate?: string | string[] },
-  reviewOnly: boolean,
-): TransactionFilters {
+function initialFilters(params: RouteParams, reviewOnly: boolean): TransactionFilters {
   if (reviewOnly) return { limit: 100, needsReview: true }
   const fromDate = firstParam(params.fromDate)
   const toDate = firstParam(params.toDate)
+  // A followed link opens on the linked row's day, in both directions, transfers included.
+  if (focusParam(params) !== null) return fromDate && toDate ? { fromDate, toDate, limit: 100 } : presetRange(DEFAULT_RANGE_DAYS)
   const categoryIds = (firstParam(params.categoryKeys) ?? '')
     .split(',')
     .map(Number)
@@ -70,7 +102,7 @@ function initialFilters(
 }
 
 export function TransactionsRoute({ perAccount = false }: { perAccount?: boolean }) {
-  const params = useLocalSearchParams<{ accountId?: string | string[]; categoryKeys?: string | string[]; filter?: string | string[]; fromDate?: string | string[]; toDate?: string | string[] }>()
+  const params = useLocalSearchParams<RouteParams>()
   const accountId = perAccount ? parseAccountId(params.accountId) : null
   // Home's "Review now" opens the ledger already narrowed to the review inbox, with no date
   // range: an unreviewed row from last year must not be hidden by the list's 60-day default.
@@ -87,6 +119,9 @@ export function TransactionsRoute({ perAccount = false }: { perAccount?: boolean
   const transferMutation = useEditTransactionTransfer()
   const setSplits = useSetTransactionSplits()
   const removeSplits = useRemoveTransactionSplits()
+  const unlinkReimbursement = useUnlinkReimbursement()
+  const [reimburseId, setReimburseId] = useState<number | null>(null)
+  const [focusTransactionId] = useState(() => focusParam(params))
   const transferDestinations = useTransferDestinations(accountsQuery.data?.accounts)
   const tagsQuery = useTags()
   const tagsMutation = useSetTransactionTags()
@@ -193,6 +228,15 @@ export function TransactionsRoute({ perAccount = false }: { perAccount?: boolean
     }
   }
 
+  const runUnlinkReimbursement = async (transactionId: number, transactionReimbursementKey: number): Promise<UnlinkReimbursementResult> => {
+    try {
+      await unlinkReimbursement.mutateAsync({ transactionId, transactionReimbursementKey })
+      return 'success'
+    } catch (error) {
+      return classifyReimbursementFailure(error)
+    }
+  }
+
   const runSetTags = async (transactionId: number, tagIds: readonly number[]): Promise<ReviewResult> => {
     try {
       await tagsMutation.mutateAsync({ transactionId, tagIds })
@@ -208,6 +252,9 @@ export function TransactionsRoute({ perAccount = false }: { perAccount?: boolean
       ? { status: 'loading' as const }
       : { status: 'error' as const }
 
+  // Read from the list each render, so the screen follows the row as its links change.
+  const reimburseRow = reimburseId === null || !('transactions' in state) ? null : state.transactions.find((row) => row.id === reimburseId) ?? null
+
   const ruleCategories = categoryState.status === 'loaded'
     ? categoryState.categories.flatMap((category) => [category, ...category.children]).map((category) => ({ id: category.id, name: category.name }))
     : []
@@ -220,7 +267,7 @@ export function TransactionsRoute({ perAccount = false }: { perAccount?: boolean
     hasMore={query.data?.hasMore}
     categories={categoryState}
     accountCount={accountsQuery.data?.accounts.length}
-    pending={mutation.isPending || deletion.bulk.isPending || deletion.single.isPending || amountMutation.isPending || transferMutation.isPending || setSplits.isPending || removeSplits.isPending}
+    pending={mutation.isPending || deletion.bulk.isPending || deletion.single.isPending || amountMutation.isPending || transferMutation.isPending || setSplits.isPending || removeSplits.isPending || unlinkReimbursement.isPending}
     accountName={accountName}
     perAccount={perAccount}
     lead={perAccount ? undefined : lead}
@@ -252,7 +299,18 @@ export function TransactionsRoute({ perAccount = false }: { perAccount?: boolean
     onCreateRule={(row) => setRuleSeed(seedRuleFromTransaction({ merchant: row.merchant, description: row.description, categoryId: row.categoryId }))}
     onSaveSplit={runSaveSplit}
     onRemoveSplit={runRemoveSplit}
+    onMarkReimbursement={(row) => setReimburseId(row.id)}
+    onUnlinkReimbursement={runUnlinkReimbursement}
+    onOpenTransaction={(linked) => router.push(linkedTransactionHref(linked))}
+    focusTransactionId={focusTransactionId}
   />
+  {reimburseRow ? (
+    <TransactionReimbursementScreen
+      locale={i18n.resolvedLanguage ?? i18n.language ?? 'en'}
+      onClose={() => setReimburseId(null)}
+      transaction={reimburseRow}
+    />
+  ) : null}
   <RuleEditorSheet
     categories={ruleCategories}
     onClose={() => setRuleSeed(null)}

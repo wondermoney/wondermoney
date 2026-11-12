@@ -12,10 +12,10 @@ import { isSafeImageUrl, MERCHANT_LOGO_URL_MAX_LENGTH, MERCHANT_WEBSITE_MAX_LENG
  * Versions: a restore reads every 1.x export. Rows are parsed leniently about fields (an unknown
  * field from a newer minor version is dropped), strictly about values. An older minor version is
  * brought up to the current one by {@link MINOR_MIGRATIONS} before the rows are checked. 1.1 to
- * 1.5 only added files (manual assets, loan rate periods), a loan rate type and optional fields
- * (a loan's secured asset, a budget's month start day, which defaults to the 1st, a merchant's website and
- * logo URL), which an older export simply does not have, so there is nothing to migrate yet. Another major
- * version is refused.
+ * 1.6 only added files (manual assets, loan rate periods, reimbursement links), a loan rate type and
+ * optional fields (a loan's secured asset, a budget's month start day, which defaults to the 1st, a
+ * merchant's website and logo URL), which an older export simply does not have, so there is nothing to
+ * migrate yet. Another major version is refused.
  */
 export const RESTORE_MAJOR_VERSION = 1;
 
@@ -141,6 +141,8 @@ const transaction = z.object({
 }).refine((row) => [row.transferDestinationAccountId, row.transferDestinationGoalId, row.transferDestinationPortfolioId].filter((value) => value !== null).length <= 1, { message: 'at most one transfer destination' });
 
 const transactionCategory = z.object({ categoryId: id, memberId: ref, source: z.enum(['deterministic', 'manual', 'openai', 'rule', 'user']), transactionId: id });
+/** A refund linked to the expense it offsets (1.6); `amount` is positive, in the expense's currency. */
+const transactionReimbursement = z.object({ amount: decimal.refine((value) => Number(value) > 0, 'a positive amount'), createdAt: optionalTimestamp, expenseTransactionId: id, id, reimbursementTransactionId: id });
 const transactionSplit = z.object({ amount: decimal, categoryId: ref, id, notes: text(500), position: z.number().int().min(0).max(10_000), transactionId: id });
 const transactionTag = z.object({ tagId: id, transactionId: id });
 
@@ -357,6 +359,7 @@ export const DATA_FILES = {
   'rules': rule,
   'tags': tag,
   'transaction-categories': transactionCategory,
+  'transaction-reimbursements': transactionReimbursement,
   'transaction-splits': transactionSplit,
   'transaction-tags': transactionTag,
   'transactions': transaction,
@@ -390,6 +393,8 @@ export const REFERENCES: readonly { field: string; file: DataFileName; target: D
   { field: 'categoryId', file: 'transaction-categories', target: 'categories' },
   { field: 'memberId', file: 'transaction-categories', target: 'members' },
   { field: 'transactionId', file: 'transaction-categories', target: 'transactions' },
+  { field: 'expenseTransactionId', file: 'transaction-reimbursements', target: 'transactions' },
+  { field: 'reimbursementTransactionId', file: 'transaction-reimbursements', target: 'transactions' },
   { field: 'categoryId', file: 'transaction-splits', target: 'categories' },
   { field: 'transactionId', file: 'transaction-splits', target: 'transactions' },
   { field: 'tagId', file: 'transaction-tags', target: 'tags' },

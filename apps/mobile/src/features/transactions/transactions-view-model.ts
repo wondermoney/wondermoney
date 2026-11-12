@@ -3,6 +3,7 @@ import type { MerchantAvatarSource } from '@/features/merchants/merchant-avatar'
 import type { TagDto } from '@/features/tags/tags-contract'
 import { type FxState, resolveFxState } from '@/lib/api/fx-status'
 
+import type { ReimbursementLinkDto } from './reimbursements-contract'
 import { transactionMark, transactionMerchantAvatar } from './transaction-mark'
 import { isTransferType, type TransactionDto, type TransactionInstallmentDto, type TransactionSplitLineDto } from './transactions-contract'
 
@@ -43,6 +44,8 @@ export type TransactionViewModel = Readonly<{
   isSplit: boolean
   /** The installment of a plan this posted row was linked to ("3/12"), when it is one. */
   installment: TransactionInstallmentDto | null
+  /** Refund-to-expense links on the row, either role; empty when none (or an older server). */
+  reimbursements: readonly ReimbursementLinkDto[]
   reviewed: boolean
   hidden: boolean
   /** The bank sent it: it can be hidden, never deleted. */
@@ -119,6 +122,7 @@ export function mapTransactions(input: { transactions: readonly TransactionDto[]
       splits: transaction.splits ?? [],
       isSplit: (transaction.splits?.length ?? 0) > 0,
       installment: transaction.installment ?? null,
+      reimbursements: transaction.reimbursements ?? [],
       reviewed: transaction.reviewed,
       hidden: transaction.hidden ?? false,
       bankSynced: transaction.bankSynced === true,

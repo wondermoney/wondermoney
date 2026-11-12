@@ -130,6 +130,9 @@ const parseSuccess = <Value>(
   }
 }
 
+/** The shape of the API's `ERROR_CODE` values; anything else is not kept. */
+const SERVER_CODE = /^[a-z][a-z0-9_]{0,63}$/
+
 const mapHttpFailure = (response: HttpResponse): never => {
   if (response.status === 403) {
     const envelope = parseCommonErrorEnvelope(response.body)
@@ -141,7 +144,10 @@ const mapHttpFailure = (response: HttpResponse): never => {
       throw new ApiError('portfolio-link-held', 403, typeof linkedBy === 'string' && linkedBy.trim().length > 0 ? { linkedBy: linkedBy.trim() } : undefined)
     }
   }
-  throw new ApiError('http', response.status)
+  // A 4xx keeps the API's code (a snake_case word from a fixed list), so a screen can tell
+  // "the amount is too large" from "these are already linked" though both are a 400 or 409.
+  const code = response.status >= 400 && response.status < 500 ? parseCommonErrorEnvelope(response.body)?.code : undefined
+  throw new ApiError('http', response.status, code !== undefined && SERVER_CODE.test(code) ? { serverCode: code } : undefined)
 }
 
 export const createApiClient = ({

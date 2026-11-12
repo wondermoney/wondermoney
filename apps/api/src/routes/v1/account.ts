@@ -44,6 +44,7 @@ import {
 } from '@controller/account';
 import { getCreditCardStatementDetailHandler, getCreditCardStatementsHandler, putCreditCardSettings } from '@controller/account/credit-card';
 import { setTransactionTags } from '@controller/tag';
+import { getReimbursementSuggestions, getTransactionReimbursements, linkReimbursement, unlinkReimbursement } from '@controller/transaction-reimbursement';
 import { removeTransactionSplits, setTransactionSplits } from '@controller/transaction-split';
 import { requireAiAllowance } from '@middleware/ai-allowance';
 import { requireAiAllowed } from '@middleware/ai-enabled';
@@ -66,6 +67,10 @@ router.get('/transaction/:transactionId/history', getTransactionHistory);
 router.put('/transaction/:transactionId/tags', setTransactionTags);
 router.put('/transaction/:transactionId/splits', setTransactionSplits);
 router.delete('/transaction/:transactionId/splits', removeTransactionSplits);
+router.get('/transaction/:transactionId/reimbursements/suggestions', getReimbursementSuggestions);
+router.get('/transaction/:transactionId/reimbursements', getTransactionReimbursements);
+router.post('/transaction/:transactionId/reimbursements', linkReimbursement);
+router.delete('/transaction/:transactionId/reimbursements/:reimbursementId', unlinkReimbursement);
 router.get('/transaction', getTransactions);
 router.get('/metrics', getAccountsMetrics);
 router.get('/currencies', cache('1 day'), getCurrencies);

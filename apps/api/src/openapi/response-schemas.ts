@@ -116,6 +116,39 @@ export const transactionMerchantSchema = open('TransactionMerchant', {
   transactionCount: z.number().int().optional(),
 });
 
+export const linkedTransactionSchema = open('LinkedTransaction', {
+  accountKey: nullableNumber,
+  accountName: nullableString,
+  currencyCode: nullableString,
+  description: nullableString,
+  merchantName: nullableString,
+  settlementAmount: nullableNumber.openapi({ description: 'Signed, in `currencyCode`; the user’s edit when there is one.' }),
+  transactionDate: dateTime.nullable(),
+  transactionKey: id,
+});
+
+export const reimbursementLinkSchema = open('ReimbursementLink', {
+  amount: money.openapi({ description: 'Positive, in `currencyCode` (the expense’s settlement currency).' }),
+  createdAt: dateTime,
+  currencyCode: nullableString,
+  expense: linkedTransactionSchema,
+  reimbursement: linkedTransactionSchema,
+  transactionReimbursementKey: id,
+});
+
+export const transactionReimbursementsSchema = open('TransactionReimbursements', {
+  currencyCode: nullableString,
+  linkedAmount: money,
+  links: z.array(reimbursementLinkSchema),
+  remainingAmount: money.openapi({ description: 'What can still be linked: the absolute amount less `linkedAmount`.' }),
+  role: z.enum(['expense', 'reimbursement']).nullable().openapi({ description: 'Money out is an expense, money in a reimbursement.' }),
+});
+
+export const reimbursementSuggestionSchema = linkedTransactionSchema.extend({
+  reason: z.enum(['amount', 'merchant', 'search']),
+  remainingAmount: money,
+}).openapi('ReimbursementSuggestion');
+
 export const transactionSchema = open('Transaction', {
   accountKey: z.union([id, z.object({ accountKey: id })]).optional(),
   amount: money,
@@ -126,6 +159,7 @@ export const transactionSchema = open('Transaction', {
   installment: z.looseObject({ installmentCount: z.number().int(), installmentNumber: z.number().int(), installmentPlanKey: id }).nullable().optional(),
   notes: nullableString,
   settlementAmount: nullableNumber,
+  reimbursements: z.array(reimbursementLinkSchema).optional(),
   splits: z.array(transactionSplitSchema).optional(),
   status: z.string().optional(),
   tags: z.array(tagSchema).optional(),

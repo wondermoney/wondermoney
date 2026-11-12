@@ -1,11 +1,12 @@
 import type { TFunction } from 'i18next'
-import { memo, useCallback, useMemo, useState } from 'react'
+import { memo, useCallback, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { FlatList, Pressable, RefreshControl, ScrollView, StyleSheet, Switch, View } from 'react-native'
+import { Alert, FlatList, Pressable, RefreshControl, ScrollView, StyleSheet, Switch, View } from 'react-native'
 import type { ListRenderItemInfo } from 'react-native'
 
 import { Amount } from '@/components/ui/amount'
 import { BackControl } from '@/components/ui/back-control'
+import { Badge } from '@/components/ui/badge'
 import { Button as UiButton } from '@/components/ui/button'
 import { DateField } from '@/components/ui/date-field'
 import { EntityMark } from '@/components/ui/entity-mark'
@@ -35,6 +36,8 @@ import { themeTokens, type Palette } from '@/theme/tokens'
 import { usePalette } from '@/theme/use-palette'
 
 import { FormNotice, TextField } from './form-field'
+import type { LinkedTransactionDto, ReimbursementLinkDto } from './reimbursements-contract'
+import { canMarkAsReimbursement, linkedSide, linkedTitle, reimbursementBadge, reimbursementRoleOf, type ReimbursementFailure } from './reimbursements-view-model'
 import { SelectField } from './select-field'
 import { TransactionAttachmentsSection } from './transaction-attachments-section'
 import { TransactionSplitScreen } from './transaction-split-screen'
@@ -58,6 +61,8 @@ export type BulkScope = readonly number[] | 'matching'
 export type BulkDeleteOutcome = Readonly<{ result: ReviewResult; deletedCount?: number; skippedIds?: readonly number[] }>
 /** A single delete; `bank-synced` when the bank sent the row, which is never deleted. */
 export type DeleteOneResult = ReviewResult | 'bank-synced'
+/** Removing one reimbursement link: done, or why not (`transactions.reimbursement.errors.*`). */
+export type UnlinkReimbursementResult = 'success' | ReimbursementFailure
 type FrozenBulkAction =
   | Readonly<{ type: 'review'; transactionIds: BulkScope; count: number }>
   | Readonly<{ type: 'category'; transactionIds: BulkScope; count: number; category: CategoryViewModel }>
@@ -131,6 +136,17 @@ type Props = Readonly<{
   onRemoveSplit?: (transactionId: number) => Promise<ReviewResult>
   /** Open the installment plan a row belongs to. Omitted, the action is not offered. */
   onOpenInstallmentPlan?: (transaction: TransactionViewModel) => void
+  /** Open "Mark as reimbursement" for an incoming row. Omitted, the action is not offered. */
+  onMarkReimbursement?: (transaction: TransactionViewModel) => void
+  /** Remove one reimbursement link from a row's detail. Omitted, links show without Unlink. */
+  onUnlinkReimbursement?: (transactionId: number, transactionReimbursementKey: number) => Promise<UnlinkReimbursementResult>
+  /**
+   * Show the other side of a link that is not among the loaded rows (another account, another
+   * date). A loaded one is opened in place. Omitted, only loaded rows open.
+   */
+  onOpenTransaction?: (transaction: LinkedTransactionDto) => void
+  /** A row to open expanded when the list first shows (a link followed from another ledger). */
+  focusTransactionId?: number | null
 }>
 
 export function TransactionsScreen(props: Props) {
@@ -192,13 +208,21 @@ function TransactionsContent({
   onOpenInstallmentPlan,
   onSaveSplit,
   onRemoveSplit,
+  onMarkReimbursement,
+  onUnlinkReimbursement,
+  onOpenTransaction,
+  focusTransactionId = null,
   filtersOpen,
   onFiltersOpenChange: setFiltersOpen,
 }: Props & Readonly<{ filtersOpen: boolean; onFiltersOpenChange: (open: boolean) => void }>) {
   const { t, i18n } = useTranslation()
   const palette = usePalette()
   const locale = i18n.resolvedLanguage ?? i18n.language ?? 'en'
-  const [expandedId, setExpandedId] = useState<number | null>(null)
+  const { hidden: amountsHidden } = usePrivacyMode()
+  const [expandedId, setExpandedId] = useState<number | null>(focusTransactionId)
+  const listRef = useRef<FlatList<TransactionViewModel>>(null)
+  const [unlinkingKey, setUnlinkingKey] = useState<number | null>(null)
+  const [unlinkError, setUnlinkError] = useState<Readonly<{ transactionId: number; message: string }> | null>(null)
   const [reviewingId, setReviewingId] = useState<number | null>(null)
   const [reviewResult, setReviewResult] = useState<ReviewResult | null>(null)
   const [editingAmountId, setEditingAmountId] = useState<number | null>(null)
@@ -327,10 +351,11 @@ function TransactionsContent({
   const bulkAvailable = Boolean(onBulkReview || onAssignCategory || onSetHidden || onBulkTag || onBulkDelete) && loaded.some(isSelectable)
   const resultMessage = reviewResult && reviewResult !== 'success'
     ? t(`transactions.reviewResult.${reviewResult}`) : null
-  const filtered = loaded.filter((row) => (accountFilter === null || row.accountId === accountFilter)
+  const passesLocalFilters = (row: TransactionViewModel) => (accountFilter === null || row.accountId === accountFilter)
     && (categoryFilter === null || row.category === categoryFilter)
     && (typeFilter === null || row.type === typeFilter)
-    && (!merchantFilter.trim() || row.merchant?.toLocaleLowerCase(locale).includes(merchantFilter.trim().toLocaleLowerCase(locale))))
+    && (!merchantFilter.trim() || Boolean(row.merchant?.toLocaleLowerCase(locale).includes(merchantFilter.trim().toLocaleLowerCase(locale))))
+  const filtered = loaded.filter(passesLocalFilters)
   const visible = filtered.slice(0, visibleCount)
   const requestLimit = filters.limit ?? 100
   // Synthetic opening-balance rows ride along with the first page, so 100
@@ -550,6 +575,52 @@ function TransactionsContent({
     }
   }
 
+  // A link's other side: opened in place when it is loaded (the loaded-row filters are cleared if
+  // they hide it), otherwise handed to the route, which opens it in its own ledger.
+  const openLinked = (linked: LinkedTransactionDto) => {
+    const target = loaded.find((row) => row.id === linked.transactionKey)
+    if (!target) { onOpenTransaction?.(linked); return }
+    let index = filtered.indexOf(target)
+    if (index < 0) {
+      setAccountFilter(null)
+      setCategoryFilter(null)
+      setTypeFilter(null)
+      setMerchantFilter('')
+      index = loaded.indexOf(target)
+    }
+    setVisibleCount((count) => Math.max(count, index + 1))
+    setExpandedId(target.id)
+    // After the list has re-rendered with the row in it.
+    setTimeout(() => listRef.current?.scrollToIndex({ index, animated: true, viewPosition: 0 }), 0)
+  }
+  const confirmUnlink = (transaction: TransactionViewModel, link: ReimbursementLinkDto) => {
+    if (!onUnlinkReimbursement) return
+    const name = linkedTitle(linkedSide(link, transaction.id)) ?? t('transactions.unnamed')
+    Alert.alert(
+      t('transactions.reimbursement.unlinkTitle'),
+      t('transactions.reimbursement.unlinkDescription', { amount: formatMoneyForDisplay(link.amount, { locale, currency: link.currencyCode }, amountsHidden), name }),
+      [
+        { text: t('common.cancel'), style: 'cancel' },
+        {
+          text: t('transactions.reimbursement.unlink'),
+          style: 'destructive',
+          onPress: () => {
+            void (async () => {
+              setUnlinkError(null)
+              setUnlinkingKey(link.transactionReimbursementKey)
+              try {
+                const result = await onUnlinkReimbursement(transaction.id, link.transactionReimbursementKey)
+                if (result !== 'success') setUnlinkError({ transactionId: transaction.id, message: t(`transactions.reimbursement.errors.${result}`) })
+              } finally {
+                setUnlinkingKey(null)
+              }
+            })()
+          },
+        },
+      ],
+    )
+  }
+
   const editingBundle: EditingBundle | null = editingAmountId === null ? null : {
     transactionId: editingAmountId,
     amountDraft,
@@ -589,6 +660,11 @@ function TransactionsContent({
       onOpenInstallmentPlan={onOpenInstallmentPlan}
       onSplit={openSplit}
       canSplit={Boolean(onSaveSplit) && categories.status === 'loaded'}
+      onMarkReimbursement={onMarkReimbursement}
+      onUnlinkReimbursement={onUnlinkReimbursement ? confirmUnlink : undefined}
+      onOpenLinked={openLinked}
+      unlinkPending={unlinkingKey !== null}
+      unlinkError={unlinkError?.transactionId === item.id ? unlinkError.message : null}
       palette={palette}
       locale={locale}
     />
@@ -898,7 +974,13 @@ function TransactionsContent({
     <View style={styles.safe}>
     <SafeAreaView style={[styles.safe, { backgroundColor: palette.background }]}>
       <FlatList
+        ref={listRef}
         data={visible}
+        // Rows have no fixed height: a jump to a row not yet measured lands near it, then on it.
+        onScrollToIndexFailed={({ index, averageItemLength }) => {
+          listRef.current?.scrollToOffset({ offset: averageItemLength * index, animated: false })
+          setTimeout(() => listRef.current?.scrollToIndex({ index, animated: true, viewPosition: 0 }), 50)
+        }}
         keyExtractor={(item) => String(item.id)}
         renderItem={renderRow}
         initialNumToRender={50}
@@ -1091,6 +1173,14 @@ type TransactionRowProps = Readonly<{
   onSplit?: (id: number) => void
   /** Whether the Split action is offered at all (the route provides a handler). */
   canSplit: boolean
+  /** Opens "Mark as reimbursement"; offered only on ordinary money in. */
+  onMarkReimbursement?: (item: TransactionViewModel) => void
+  /** Asks to remove one link (the screen confirms first). Omitted, links show without Unlink. */
+  onUnlinkReimbursement?: (item: TransactionViewModel, link: ReimbursementLinkDto) => void
+  onOpenLinked: (linked: LinkedTransactionDto) => void
+  unlinkPending: boolean
+  /** Why the last unlink on this row failed. */
+  unlinkError: string | null
   palette: Palette
   locale: string
 }>
@@ -1127,6 +1217,11 @@ const TransactionRow = memo(function TransactionRow({
   onOpenInstallmentPlan,
   onSplit,
   canSplit,
+  onMarkReimbursement,
+  onUnlinkReimbursement,
+  onOpenLinked,
+  unlinkPending,
+  unlinkError,
   palette,
   locale,
 }: TransactionRowProps) {
@@ -1156,6 +1251,9 @@ const TransactionRow = memo(function TransactionRow({
   const splitLabel = item.isSplit ? t('transactions.split.summary', { count: splitCategoryCount(item.splits) }) : null
   const installment = item.installment ? installmentLabel(item.installment) : null
   const categoryLabel = item.category ? formatCategoryName(item.category) : null
+  const badgeKind = reimbursementBadge(item)
+  const badgeLabel = badgeKind ? t(`transactions.reimbursement.badges.${badgeKind}`) : null
+  const role = reimbursementRoleOf(item)
   const figure = shownValue !== null && shownCurrency !== null
     ? <Amount currency={shownCurrency} locale={locale} size="amountBase" value={shownValue} />
     : <Text variant="amountBase">{amount}</Text>
@@ -1165,8 +1263,13 @@ const TransactionRow = memo(function TransactionRow({
     <View style={[!monthStart && { borderTopWidth: 1, borderTopColor: palette.border }, item.hidden && styles.hiddenRow]}>
       {monthStart ? <ListGroupHeading first={isFirst} title={formatMonth(item.date, locale)} variant="heading" /> : null}
       <ListRow
-        accessibilityLabel={[title, installment, account, signedAmount, direction, fullDate, splitLabel, fxCopy ? `${fxCopy.label}. ${fxCopy.hint}` : null].filter(Boolean).join(', ')}
-        badge={<InstallmentBadge installment={item.installment} />}
+        accessibilityLabel={[title, installment, account, signedAmount, direction, fullDate, splitLabel, badgeLabel, fxCopy ? `${fxCopy.label}. ${fxCopy.hint}` : null].filter(Boolean).join(', ')}
+        badge={(
+          <>
+            <InstallmentBadge installment={item.installment} />
+            {badgeLabel ? <Badge label={badgeLabel} testID="transaction-reimbursement-badge" tone="outline" /> : null}
+          </>
+        )}
         density="comfortable"
         figure={figure}
         leading={selectable ? (
@@ -1232,6 +1335,47 @@ const TransactionRow = memo(function TransactionRow({
               </View>
             </View>
           ) : null}
+          {item.reimbursements.length > 0 ? (
+            <View style={styles.detail} testID="transaction-reimbursements">
+              <Text tone="muted" variant="label">{role === 'expense' ? t('transactions.reimbursement.reimbursedBy') : t('transactions.reimbursement.reimburses')}</Text>
+              <View style={styles.splitLines}>
+                {item.reimbursements.map((link) => {
+                  const other = linkedSide(link, item.id)
+                  const name = linkedTitle(other) ?? t('transactions.unnamed')
+                  const when = other.transactionDate ? formatShortDate(other.transactionDate, locale) : null
+                  return (
+                    <View key={link.transactionReimbursementKey} style={styles.splitLine}>
+                      <Pressable
+                        accessibilityLabel={t('transactions.reimbursement.open', { name })}
+                        accessibilityRole="link"
+                        hitSlop={8}
+                        onPress={() => onOpenLinked(other)}
+                        style={({ pressed }) => [styles.linkTarget, pressed && styles.dimmed]}
+                      >
+                        <View style={styles.flex}>
+                          <Text style={styles.underlined} variant="meta">{name}</Text>
+                          {when || other.accountName ? <Text tone="muted" variant="label">{[when, other.accountName].filter(Boolean).join(' · ')}</Text> : null}
+                        </View>
+                        <Icon color={palette.mutedForeground} name="chevron-right" size={14} />
+                      </Pressable>
+                      <Amount currency={link.currencyCode} locale={locale} size="amountSmall" value={link.amount} />
+                      {editable && onUnlinkReimbursement ? (
+                        <UiButton
+                          accessibilityLabel={t('transactions.reimbursement.unlinkNamed', { name })}
+                          disabled={mutationPending || unlinkPending}
+                          label={t('transactions.reimbursement.unlink')}
+                          onPress={() => onUnlinkReimbursement(item, link)}
+                          size="sm"
+                          variant="ghost"
+                        />
+                      ) : null}
+                    </View>
+                  )
+                })}
+              </View>
+              {unlinkError ? <Text accessibilityRole="alert" tone="destructive" variant="meta">{unlinkError}</Text> : null}
+            </View>
+          ) : null}
           {item.tags.length > 0 ? (
             <View style={styles.detail}>
               <Text tone="muted" variant="label">{t('tags.title')}</Text>
@@ -1293,6 +1437,9 @@ const TransactionRow = memo(function TransactionRow({
               ) : null}
               {editable && canSplit && onSplit && canSplitTransaction(item) ? (
                 <UiButton disabled={mutationPending} icon="split" label={item.isSplit ? t('transactions.split.edit') : t('transactions.split.action')} onPress={() => onSplit(item.id)} size="sm" variant="secondary" />
+              ) : null}
+              {onMarkReimbursement && canMarkAsReimbursement(item) ? (
+                <UiButton disabled={mutationPending} icon="link" label={t('transactions.reimbursement.action')} onPress={() => onMarkReimbursement(item)} size="sm" variant="secondary" />
               ) : null}
             </View>
           )}
@@ -1385,6 +1532,8 @@ const styles = StyleSheet.create({
   detail: { gap: 2 },
   splitLines: { gap: themeTokens.spacing[2] },
   splitLine: { flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between', gap: themeTokens.spacing[3] },
+  linkTarget: { flex: 1, minHeight: themeTokens.touchTarget.minimum - themeTokens.spacing[4], flexDirection: 'row', alignItems: 'center', gap: themeTokens.spacing[2] },
+  underlined: { textDecorationLine: 'underline' },
   amountEdit: { width: '100%', gap: themeTokens.spacing[3] },
   inlineActions: { flexDirection: 'row', flexWrap: 'wrap', gap: themeTokens.spacing[2] },
   empty: { width: '100%', alignItems: 'flex-start', paddingVertical: themeTokens.spacing[6], gap: themeTokens.spacing[2] },

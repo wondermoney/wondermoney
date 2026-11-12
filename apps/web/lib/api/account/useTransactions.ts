@@ -17,6 +17,7 @@ import { transactionDateRangeParams } from "../date-range";
 import type { TransactionInstallment } from "../installment-plans/types";
 import type { Tag } from "../tag/useTags";
 import type { TransactionMerchant } from "./useTransactionMerchants";
+import type { ReimbursementLink } from "./useTransactionReimbursements";
 import type { TransactionSplitLine } from "./useTransactionSplits";
 
 /**
@@ -65,6 +66,12 @@ export interface Transaction extends FxFields {
    * older API does not send it; read it through `isSplitTransaction`.
    */
   splits?: TransactionSplitLine[];
+  /**
+   * Its reimbursement links, in either role (an expense paid back, or money in paying one back),
+   * only those whose other side the viewer can see; empty when none. Optional because an older
+   * API does not send it; read it as `transaction.reimbursements ?? []`.
+   */
+  reimbursements?: ReimbursementLink[];
   loanRepayment?: {
     loanKey: number;
     loanKeys?: number[];

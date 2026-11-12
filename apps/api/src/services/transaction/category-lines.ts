@@ -1,3 +1,4 @@
+import { wrap } from '@mikro-orm/core';
 import { Big } from 'big.js';
 
 import type { Category } from '@entity/Category';
@@ -6,6 +7,7 @@ import { amountInCurrencySql } from '@service/reports/report-currency';
 import { big, toNumber } from '@utils/money';
 
 import { type CategorySpendingFlags, effectiveCountsAsSpendingSql } from './category-spending';
+import { netOfReimbursementsSql, reimbursedAmountsSql } from './reimbursement-sql';
 
 /**
  * "Category lines": the parts of a transaction that count towards a category.
@@ -31,6 +33,21 @@ import { type CategorySpendingFlags, effectiveCountsAsSpendingSql } from './cate
  *
  * The JavaScript and SQL versions compute the same numbers: same rounding, same tie-break (largest
  * absolute amount, then position, then key).
+ *
+ * ## Reimbursements
+ *
+ * A refund linked to the expense it offsets (`TransactionReimbursement`) takes the linked amount
+ * off both: the expense spends that much less in its category (pro rata across its split lines),
+ * and the refund is that much less income. Totals read the transaction's amount net of its
+ * reimbursed amount ({@link netOfReimbursements}, `netOfReimbursementsSql`): the amount scaled by
+ * `max(|settlement| - reimbursed, 0) / |settlement|`, rounded half away from zero to 4 decimals,
+ * so in the settlement currency it is exactly the amount less the linked total, and in any other
+ * currency it follows the transaction's own conversion. The lines then share out the net amount
+ * as above. A fully reimbursed expense still has its lines, for nothing.
+ *
+ * {@link spendingLinesOf} and {@link categoryLinesSql} (every total) read the net amount;
+ * {@link categoryLinesOf} is the plain allocation of whatever amount it is handed (a split's lines
+ * shown on a row).
  */
 
 /** Scale of the money columns (`numeric(18,4)`). */
@@ -77,6 +94,7 @@ export const CATEGORY_LINE_POPULATE = [
   'appuserTransactionCategories.categoryKey.parentCategory',
   'splits.categoryKey',
   'splits.categoryKey.parentCategory',
+  'reimbursedAmount',
 ] as const;
 
 /**
@@ -113,10 +131,31 @@ function liveSplitsOf(transaction: Transaction) {
 /**
  * The category lines of `transaction` that are spending for the household whose `flags` these are
  * (`category-spending.ts`): a line in "Investments and savings", or in any category the household
- * does not count as spending, is left out, and only that line of a split.
+ * does not count as spending, is left out, and only that line of a split. The lines share out
+ * `amount` net of the transaction's reimbursements ({@link netOfReimbursements}).
  */
 export function spendingLinesOf(transaction: Transaction, amount: null | number, flags: CategorySpendingFlags): CategoryLine[] {
-  return categoryLinesOf(transaction, amount).filter((line) => flags.countsAsSpending(line.category));
+  return categoryLinesOf(transaction, netOfReimbursements(transaction, amount)).filter((line) => flags.countsAsSpending(line.category));
+}
+
+/**
+ * `amount` (the transaction's amount in the caller's currency) net of what the reimbursement links
+ * on the transaction take off it; see "Reimbursements" above. A loaded transaction must have
+ * `reimbursedAmount` populated ({@link CATEGORY_LINE_POPULATE}), or it throws: it would count a
+ * refunded expense whole. A plain object without it (a hand-built row) has none.
+ */
+export function netOfReimbursements(transaction: Pick<Transaction, 'editedSettlementAmount' | 'reimbursedAmount' | 'settlementAmount'>, amount: null | number): null | number {
+  const reimbursed = transaction.reimbursedAmount;
+  if (reimbursed === undefined) {
+    if (wrap(transaction, true).__managed) throw new Error('Populate Transaction.reimbursedAmount (CATEGORY_LINE_POPULATE) before reading spending lines');
+    return amount;
+  }
+  const settlement = transaction.editedSettlementAmount ?? transaction.settlementAmount;
+  if (amount === null || big(reimbursed).eq(0) || settlement == null || big(settlement).eq(0)) return amount;
+  const whole = big(settlement).abs();
+  const kept = whole.minus(big(reimbursed));
+  if (kept.lte(0)) return 0;
+  return toNumber(big(amount).times(kept).div(whole).round(SHARE_SCALE, Big.roundHalfUp), SHARE_SCALE);
 }
 
 /** Whether the transaction is split. Populate `splits` first. */
@@ -149,13 +188,18 @@ export function hasLineInCategories(transaction: Transaction, categoryKeys: Iter
  * settlement amount when the transaction was settled in that currency, else the amount in the
  * user's currency. The column keeps its name.
  *
+ * Either way the amount is net of the transaction's reimbursements (`netOfReimbursementsSql`), as
+ * {@link spendingLinesOf} reads it.
+ *
  * Scoped to `tenantKey`, which is inlined (validated as an integer) so the fragment can be used
  * from both Kysely and raw SQL. Callers still apply their own transaction conditions (tenant,
  * privacy, status, dates) through their join to `transaction`.
  */
 export function categoryLinesSql(tenantKey: number, options: { amountInCurrencyKey?: number } = {}): string {
   if (!Number.isSafeInteger(tenantKey)) throw new TypeError('tenantKey must be an integer');
-  const base = options.amountInCurrencyKey === undefined ? 't.appuser_settlement_amount' : amountInCurrencySql('t', options.amountInCurrencyKey);
+  const gross = options.amountInCurrencyKey === undefined ? 't.appuser_settlement_amount' : amountInCurrencySql('t', options.amountInCurrencyKey);
+  const base = netOfReimbursementsSql('t', gross, 'line_reimbursed.reimbursed_amount');
+  const reimbursed = `left join ${reimbursedAmountsSql(tenantKey)} line_reimbursed on line_reimbursed.transaction_key = t.transaction_key`;
   const shares = `
     select ranked.*, sum(ranked.share) over (partition by ranked.transaction_key) as share_total
     from (
@@ -165,6 +209,7 @@ export function categoryLinesSql(tenantKey: number, options: { amountInCurrencyK
         row_number() over (partition by s.transaction_key order by abs(s.amount) desc, s.position asc, s.transaction_split_key asc) as line_rank
       from "transaction_split" s
       join "transaction" t on t.transaction_key = s.transaction_key
+      ${reimbursed}
       where s.deleted_at is null and s.tenant_key = ${tenantKey}
     ) ranked`;
   const lines = `
@@ -177,6 +222,7 @@ export function categoryLinesSql(tenantKey: number, options: { amountInCurrencyK
       null::int as transaction_split_key, a.appuser_transaction_category_key, a.appuser_key
     from "appuser_transaction_category" a
     join "transaction" t on t.transaction_key = a.transaction_key
+    ${reimbursed}
     where a.deleted_at is null and t.tenant_key = ${tenantKey}
       and not exists (select 1 from "transaction_split" s where s.transaction_key = a.transaction_key and s.deleted_at is null)`;
   return `(

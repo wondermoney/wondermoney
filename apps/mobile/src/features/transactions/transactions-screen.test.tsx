@@ -1,4 +1,5 @@
-import { fireEvent, render } from '@testing-library/react-native'
+import { act, fireEvent, render } from '@testing-library/react-native'
+import { Alert } from 'react-native'
 import { I18nextProvider } from 'react-i18next'
 
 import { initMobileI18n } from '@/lib/i18n'
@@ -130,6 +131,84 @@ describe('TransactionsScreen', () => {
     await fireEvent.press(view.getByRole('button', { name: 'Split' }))
     expect(view.getByRole('header', { name: 'Split transaction' })).toBeOnTheScreen()
     expect(view.getByTestId('transaction-split-save')).toBeDisabled()
+  })
+
+  describe('reimbursements', () => {
+    const expenseRow = { ...transactionFixture, transactionKey: 41, settlementAmount: -50, appuserSettlementAmount: -50 }
+    const refundRow = { ...transactionFixture, transactionKey: 90, transactionTypeKey: { name: 'credit' }, transactionMerchantKey: { name: 'Refund desk' }, settlementAmount: 20, appuserSettlementAmount: 20 }
+    const side = (key: number, merchantName: string, amount: number) => ({ transactionKey: key, accountKey: 7, accountName: 'Daily account', description: null, merchantName, transactionDate: '2026-07-18T10:00:00.000Z', settlementAmount: amount, currencyCode: 'EUR' })
+    const link = (amount = 20, key = 5) => ({ transactionReimbursementKey: key, amount, currencyCode: 'EUR', createdAt: '2026-07-20T10:00:00.000Z', expense: side(41, 'Corner shop', -50), reimbursement: side(90, 'Refund desk', 20) })
+
+    it('badges a linked expense as reimbursed (in part until covered) and a linked refund as a reimbursement', async () => {
+      const { view } = await renderLoaded([
+        { ...expenseRow, reimbursements: [link()] },
+        { ...refundRow, reimbursements: [link()] },
+        { ...expenseRow, transactionKey: 43, transactionMerchantKey: { name: 'Shoe shop' }, reimbursements: [{ ...link(50, 6), expense: side(43, 'Shoe shop', -50) }] },
+        { ...expenseRow, transactionKey: 44, transactionMerchantKey: { name: 'Bakery' } },
+      ])
+      expect(view.getByText('Partly reimbursed')).toBeOnTheScreen()
+      expect(view.getByText('Reimbursement')).toBeOnTheScreen()
+      expect(view.getByText('Reimbursed')).toBeOnTheScreen()
+      expect(view.getAllByTestId('transaction-reimbursement-badge')).toHaveLength(3)
+      expect(view.getByRole('button', { name: /^Shoe shop,.*Reimbursed/ })).toBeOnTheScreen()
+    })
+
+    it('reads a row from an older server, with no links field, as unlinked', async () => {
+      const { view } = await renderLoaded([expenseRow])
+      expect(view.queryByTestId('transaction-reimbursement-badge')).not.toBeOnTheScreen()
+    })
+
+    it('offers "Mark as reimbursement" on money in only, never on an expense or a transfer', async () => {
+      const onMarkReimbursement = jest.fn()
+      const { view } = await renderLoaded([refundRow, expenseRow, { ...refundRow, transactionKey: 91, transactionTypeKey: { name: 'TRANSFER_IN' }, transactionMerchantKey: { name: 'Savings' } }], {}, { onMarkReimbursement })
+      await fireEvent.press(view.getByRole('button', { name: row('Corner shop') }))
+      expect(view.queryByRole('button', { name: 'Mark as reimbursement' })).not.toBeOnTheScreen()
+      await fireEvent.press(view.getByRole('button', { name: row('Savings') }))
+      expect(view.queryByRole('button', { name: 'Mark as reimbursement' })).not.toBeOnTheScreen()
+      await fireEvent.press(view.getByRole('button', { name: row('Refund desk') }))
+      await fireEvent.press(view.getByRole('button', { name: 'Mark as reimbursement' }))
+      expect(onMarkReimbursement).toHaveBeenCalledWith(expect.objectContaining({ id: 90 }))
+    })
+
+    it('lists who reimbursed an expense, and opens the other side in place when it is loaded', async () => {
+      const onOpenTransaction = jest.fn()
+      const { view } = await renderLoaded([{ ...expenseRow, reimbursements: [link()] }, { ...refundRow, reimbursements: [link()] }], {}, { onOpenTransaction })
+      await fireEvent.press(view.getByRole('button', { name: row('Corner shop') }))
+      expect(view.getByText('Reimbursed by')).toBeOnTheScreen()
+      await fireEvent.press(view.getByRole('link', { name: 'Open Refund desk' }))
+      // The refund's own detail is open now, naming what it reimburses.
+      expect(view.getByText('Reimburses')).toBeOnTheScreen()
+      expect(view.getByRole('link', { name: 'Open Corner shop' })).toBeOnTheScreen()
+      expect(onOpenTransaction).not.toHaveBeenCalled()
+    })
+
+    it('hands a link to a row that is not loaded to the route', async () => {
+      const onOpenTransaction = jest.fn()
+      const { view } = await renderLoaded([{ ...expenseRow, reimbursements: [link()] }], {}, { onOpenTransaction })
+      await fireEvent.press(view.getByRole('button', { name: row('Corner shop') }))
+      await fireEvent.press(view.getByRole('link', { name: 'Open Refund desk' }))
+      expect(onOpenTransaction).toHaveBeenCalledWith(expect.objectContaining({ transactionKey: 90, accountKey: 7 }))
+    })
+
+    it('unlinks from the detail only after confirmation, and words a failure', async () => {
+      const alert = jest.spyOn(Alert, 'alert').mockImplementation(() => undefined)
+      const onUnlinkReimbursement = jest.fn().mockResolvedValue('not-found')
+      const { view } = await renderLoaded([{ ...expenseRow, reimbursements: [link()] }], {}, { onUnlinkReimbursement })
+      await fireEvent.press(view.getByRole('button', { name: row('Corner shop') }))
+      await fireEvent.press(view.getByRole('button', { name: 'Unlink Refund desk' }))
+      expect(onUnlinkReimbursement).not.toHaveBeenCalled()
+      expect(alert).toHaveBeenCalledWith('Unlink this reimbursement?', expect.stringContaining('Refund desk'), expect.any(Array))
+      const buttons = alert.mock.calls[0]![2] as { text: string; onPress?: () => void }[]
+      await act(async () => { buttons.find((button) => button.text === 'Unlink')?.onPress?.() })
+      expect(onUnlinkReimbursement).toHaveBeenCalledWith(41, 5)
+      expect(await view.findByText('That transaction or link is no longer available. Refresh and try again.')).toBeOnTheScreen()
+      alert.mockRestore()
+    })
+
+    it('opens on the row a followed link points at', async () => {
+      const { view } = await renderLoaded([expenseRow, { ...refundRow, reimbursements: [link()] }], {}, { focusTransactionId: 90 })
+      expect(view.getByText('Reimburses')).toBeOnTheScreen()
+    })
   })
 
   it('offers create, import, and scan-receipt actions when handlers are provided, and omits them when not', async () => {

@@ -301,6 +301,31 @@ describe('split transactions', () => {
     expect(aggregateTransactionsResponseSchema.safeParse({ transactions: [{ ...transactionFixture, splits: [{ ...splitLine, transactionSplitKey: 0 }] }] }).success).toBe(false)
   })
 
+  describe('reimbursement links on a row', () => {
+    const side = (transactionKey: number, settlementAmount: number) => ({ transactionKey, accountKey: 7, accountName: 'Daily account', description: 'Card purchase', merchantName: null, transactionDate: '2026-07-18T10:00:00.000Z', settlementAmount, currencyCode: 'EUR' })
+    const link = { transactionReimbursementKey: 5, amount: 20, currencyCode: 'EUR', createdAt: '2026-07-20T10:00:00.000Z', expense: side(41, -50), reimbursement: side(90, 20) }
+
+    it('reads the links a row carries, and a row from an older server without them as unlinked', () => {
+      const [linked, plain, empty] = accountTransactionsResponseSchema.parse({ transactions: [
+        { ...transactionFixture, reimbursements: [{ ...link, note: 'dropped' }] },
+        transactionFixture,
+        { ...transactionFixture, reimbursements: [] },
+      ] }).transactions
+      expect(linked!.reimbursements).toEqual([link])
+      expect(plain!.reimbursements).toBeUndefined()
+      expect(empty!.reimbursements).toEqual([])
+    })
+
+    it('reads a malformed list of links as none rather than failing the ledger', () => {
+      const result = aggregateTransactionsResponseSchema.safeParse({ transactions: [
+        { ...transactionFixture, reimbursements: [{ ...link, amount: -20 }] },
+        { ...transactionFixture, reimbursements: 'yes' },
+      ] })
+      expect(result.success).toBe(true)
+      expect(result.data?.transactions.map((row) => row.reimbursements)).toEqual([[], []])
+    })
+  })
+
   describe('freezeSetTransactionSplits', () => {
     it('trims notes, keeps nulls, and freezes the payload', () => {
       const frozen = freezeSetTransactionSplits({

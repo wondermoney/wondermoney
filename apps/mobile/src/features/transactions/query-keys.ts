@@ -28,3 +28,11 @@ export const transactionReviewSummaryKey = (epochId: number) => (
 export const transactionAttachmentsKey = (epochId: number, transactionId: number) => (
   [...transactionsRootKey(epochId), 'attachments', transactionId] as const
 )
+
+/** One transaction's reimbursement links; under the transactions root, so a list change refreshes it. */
+export const transactionReimbursementsKey = (epochId: number, transactionId: number) => (
+  [...transactionsRootKey(epochId), 'reimbursements', transactionId] as const
+)
+export const reimbursementSuggestionsKey = (epochId: number, transactionId: number, search: string) => (
+  [...transactionReimbursementsKey(epochId, transactionId), 'suggestions', search] as const
+)

@@ -18,7 +18,7 @@ import portfolioDashboardService from '@service/portfolio/portfolio-dashboard.se
 import portfolioHoldingsService from '@service/portfolio/portfolio-holdings.service';
 import { loadRecurringSchedule } from '@service/recurring/recurring-schedule.service';
 import { loadViewerCurrencyAmounts } from '@service/reports/report-currency';
-import { CATEGORY_LINE_POPULATE, spendingLinesOf } from '@service/transaction/category-lines';
+import { CATEGORY_LINE_POPULATE, netOfReimbursements, spendingLinesOf } from '@service/transaction/category-lines';
 import { loadCategorySpendingFlags } from '@service/transaction/category-spending';
 import { excludeExpired } from '@service/transaction/transaction-status';
 import { getEffectiveAppuserAmount } from '@utils/account-amounts';
@@ -121,7 +121,8 @@ export const AI_TOOL_DEFINITIONS: readonly AiToolDefinition<never>[] = [
       const transactions = (await findScopedTransactions(viewer, resolved)).filter((transaction) => !isTransfer(transaction));
       const totals = transactions.reduce(
         (acc, transaction) => {
-          const amount = getEffectiveAmount(transaction);
+          // Net of reimbursement links, as every total reads it (`category-lines.ts`).
+          const amount = netOfReimbursements(transaction, getEffectiveAmount(transaction)) ?? 0;
           if (amount > 0) acc.inflow += amount;
           if (amount < 0) acc.outflow += Math.abs(amount);
           acc.net += amount;
@@ -448,7 +449,7 @@ async function findScopedTransactions(viewer: AiToolViewer, period: { end: Date;
     deletedAt: undefined,
     tenantKey: tenantRef(viewer),
     transactionDate: { $gte: period.start, $lte: period.end },
-  }), { populate: options.withCategories ? [...CATEGORY_LINE_POPULATE, 'transactionTypeKey'] : ['transactionTypeKey'] });
+  }), { populate: options.withCategories ? [...CATEGORY_LINE_POPULATE, 'transactionTypeKey'] : ['reimbursedAmount', 'transactionTypeKey'] });
 }
 
 /** The member's own money-out rows in the period, with their category lines populated. */
