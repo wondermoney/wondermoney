@@ -4,6 +4,40 @@ import { portfolioCsvLayoutSchema, portfolioImportDerivedValuesSchema, portfolio
 import { tickerSymbolSchema } from '@validators/financial-markets';
 import { boundedLimit, finiteAmount, positiveIntId, validDate } from '@validators/shared';
 
+/** A calendar day, `YYYY-MM-DD` (a real date: no 30 February). */
+const isoCalendarDate = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Date must be YYYY-MM-DD').refine((value) => {
+  const date = new Date(`${value}T00:00:00.000Z`);
+  return !Number.isNaN(date.getTime()) && date.toISOString().slice(0, 10) === value;
+}, 'Date is not a calendar day');
+
+/**
+ * The day a manual price is for: no later than tomorrow in UTC, so a member ahead of UTC can
+ * still set today's price (the same bound as an exchange-rate override).
+ */
+const priceOverrideDay = isoCalendarDate.refine((value) => {
+  const tomorrow = new Date(Date.now() + 86_400_000).toISOString().slice(0, 10);
+  return value <= tomorrow;
+}, 'Date cannot be in the future');
+
+export const getAssetPriceOverrideRequestSchema = z.object({
+  params: z.object({ date: isoCalendarDate, financialAssetKey: positiveIntId }),
+});
+
+export const getAssetPriceHistoryRequestSchema = z.object({
+  params: z.object({ financialAssetKey: positiveIntId }),
+  query: z.object({ from: isoCalendarDate.optional(), to: isoCalendarDate.optional() }).strict(),
+});
+
+export const putAssetPriceOverrideRequestSchema = z.object({
+  body: z.object({
+    /** Must be the security's own currency; checked against the catalogue. */
+    currency: z.string().trim().regex(/^[a-z]{3}$/i, 'Currency must be a three-letter code').transform((value) => value.toUpperCase()),
+    note: z.string().trim().max(500).nullable().optional(),
+    price: z.number().positive('Price must be greater than zero').max(1_000_000_000_000),
+  }).strict(),
+  params: z.object({ date: priceOverrideDay, financialAssetKey: positiveIntId }),
+});
+
 const portfolioColumnMappingRequestSchema = z.object({
   assetName: z.string().min(1).optional(),
   brokerExchange: z.string().min(1).optional(),

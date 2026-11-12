@@ -104,7 +104,7 @@ class PortfolioSnapshotService {
             .filter((assetKey): assetKey is number => assetKey != null),
         ),
       );
-      const pricesByAsset = await this.loadHistoricalPrices(assetKeys, endDate);
+      const pricesByAsset = await this.loadHistoricalPrices(assetKeys, endDate, portfolio.tenantKey.tenantKey);
       const sameCurrency =
         portfolio.currencyKey.currencyKey === portfolio.portfolioOwnerAppuserKey.currencyKey.currencyKey;
       const exchangeRateCache = new Map<string, Map<string, number>>();
@@ -285,7 +285,7 @@ class PortfolioSnapshotService {
     const portfolio = await DI.em.findOne(
       Portfolio,
       { portfolioKey: portfolioId },
-      { populate: ['portfolioOwnerAppuserKey.currencyKey', 'currencyKey'] },
+      { populate: ['portfolioOwnerAppuserKey.currencyKey', 'currencyKey', 'tenantKey'] },
     );
 
     if (!portfolio) throw new Error(`Portfolio ${portfolioId} not found`);
@@ -317,7 +317,7 @@ class PortfolioSnapshotService {
     return new Map(rates.map((rate) => [startOfUtcDay(rate.date).toISOString(), rate.rate]));
   }
 
-  private async loadHistoricalPrices(assetKeys: number[], toDate: Date) {
+  private async loadHistoricalPrices(assetKeys: number[], toDate: Date, tenantKey?: number) {
     if (!assetKeys.length) return new Map<number, { date: Date; price: number }[]>();
 
     const prices = (await sqlQuery(DI.em)
@@ -328,7 +328,20 @@ class PortfolioSnapshotService {
       .orderBy('date', 'asc')
       .execute()) as { date: Date | string; financial_asset_key: number; price: number }[];
 
-    return prices.reduce((map, price) => {
+    // The household's overrides replace the market price on their own day. Raw SQL bypasses the
+    // tenant filter, so the tenant and soft-delete predicates are explicit.
+    const overrides = tenantKey === undefined ? [] : (await sqlQuery(DI.em)
+      .selectFrom('financial_asset_price_override')
+      .select(['financial_asset_key', 'date', 'price'])
+      .where(anyOf('financial_asset_key', assetKeys))
+      .where('tenant_key', '=', tenantKey)
+      .where('deleted_at', 'is', null)
+      .where('date', '<=', toDate)
+      .execute()) as { date: Date | string; financial_asset_key: number; price: number }[];
+    const effective = new Map<string, { date: Date | string; financial_asset_key: number; price: number }>();
+    for (const row of [...prices, ...overrides]) effective.set(`${row.financial_asset_key}:${parseDatabaseDate(row.date).toISOString().slice(0, 10)}`, row);
+
+    return [...effective.values()].sort((a, b) => parseDatabaseDate(a.date).getTime() - parseDatabaseDate(b.date).getTime()).reduce((map, price) => {
       const assetKey = price.financial_asset_key;
       const bucket = map.get(assetKey) ?? [];
       bucket.push({ date: parseDatabaseDate(price.date), price: price.price });
@@ -369,9 +382,11 @@ class PortfolioSnapshotService {
   private async calculatePortfolioMetrics(
     appuser: Appuser,
     portfolioId: number,
+    tenantKey: number,
   ): Promise<{ costBasis: number; totalValue: number }> {
     const { default: portfolioHoldingsService } = await import('./portfolio-holdings.service');
-    const holdings = await portfolioHoldingsService.getPortfolioHoldings(appuser, portfolioId);
+    // Priced with the household's own overrides, like the backfilled days before it.
+    const holdings = await portfolioHoldingsService.getPortfolioHoldings(appuser, portfolioId, undefined, tenantKey);
 
     const totalValue = holdings.reduce((sum, h) => sum + (h.currentValue || 0), 0);
     const costBasis = holdings.reduce((sum, h) => sum + h.averageBuyPrice * h.quantity, 0);
@@ -389,7 +404,7 @@ class PortfolioSnapshotService {
     const portfolio = await DI.em.findOne(
       Portfolio,
       { portfolioKey: portfolioId },
-      { populate: ['portfolioOwnerAppuserKey.currencyKey', 'currencyKey'] },
+      { populate: ['portfolioOwnerAppuserKey.currencyKey', 'currencyKey', 'tenantKey'] },
     );
 
     if (!portfolio) {
@@ -407,6 +422,7 @@ class PortfolioSnapshotService {
     const { costBasis: appuserCurrencyCostBasis, totalValue: appuserCurrencyTotalValue } = await this.calculatePortfolioMetrics(
       portfolio.portfolioOwnerAppuserKey,
       portfolioId,
+      portfolio.tenantKey.tenantKey,
     );
 
     const appuserCurrency = portfolio.portfolioOwnerAppuserKey.currencyKey;

@@ -10,6 +10,7 @@ const portfolioHoldingsServiceMock = vi.hoisted(() => ({
 const assetPriceServiceMock = vi.hoisted(() => ({
   ensureRecentAssetPrice: vi.fn(),
   getBenchmarkHistoricalPrices: vi.fn(),
+  getPricesAsOf: vi.fn(),
 }));
 vi.mock('../financial-asset.service', () => ({ resolveOrCreateFinancialAsset: vi.fn() }));
 const snapshotServiceMock = vi.hoisted(() => ({
@@ -417,13 +418,12 @@ describe('portfolio dashboard service', () => {
           unrealizedGainsPercentage: -20,
         },
       ]);
-      // One batched `DISTINCT ON` query returns the start price for every asset at once,
-      // replacing the previous per-holding `.first()` lookups.
-      const startPriceRows = [
-        { financial_asset_key: 11, price: 100 },
-        { financial_asset_key: 22, price: 100 },
-      ];
-      Object.assign(DI.em, { getKysely: databaseReturning(startPriceRows) });
+      // One batched lookup returns the start price for every asset at once.
+      const startDate = new Date('2023-01-01T00:00:00Z');
+      assetPriceServiceMock.getPricesAsOf.mockResolvedValue(new Map([
+        [11, { date: startDate, price: 100, source: 'market' }],
+        [22, { date: startDate, price: 100, source: 'market' }],
+      ]));
 
       const result = await service.getTopMovers(appuser, 1, '1Y', 5);
 

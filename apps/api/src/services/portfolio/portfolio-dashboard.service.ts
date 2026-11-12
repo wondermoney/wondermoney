@@ -382,33 +382,13 @@ export class PortfolioDashboardService {
 
 
   /**
-   * Start-of-period price for MANY assets in one query.
-   *
-   * One `ORDER BY date DESC LIMIT 1` per holding, issued via `Promise.all`, would mean ~300
-   * concurrent queries for ~300 holdings against a connection pool whose default max is 10.
-   * `DISTINCT ON` asks for exactly the same rows once, and is
-   * served by `financial_asset_price_asset_date_desc_idx`.
+   * Start-of-period price for MANY assets in one query per source (`DISTINCT ON`, served by
+   * `financial_asset_price_asset_date_desc_idx`), rather than one query per holding against a
+   * small connection pool. With `tenantKey`, the household's price overrides count as well.
    */
-  private async getHoldingStartPrices(financialAssetKeys: number[], periodStartDate: Date): Promise<Map<number, number>> {
-    const prices = new Map<number, number>();
-    const uniqueKeys = [...new Set(financialAssetKeys)];
-    if (uniqueKeys.length === 0) return prices;
-
-    const rows = await sqlQuery(DI.em)
-      .selectFrom('financial_asset_price')
-      .distinctOn('financial_asset_key')
-      .select(['financial_asset_key', 'price'])
-      .where(anyOf('financial_asset_key', uniqueKeys))
-      .where('date', '<=', periodStartDate)
-      .orderBy('financial_asset_key')
-      .orderBy('date', 'desc')
-      .execute();
-
-    for (const row of rows as { financial_asset_key: number; price: null | number | string }[]) {
-      if (row.price == null) continue;
-      prices.set(row.financial_asset_key, Number(row.price));
-    }
-    return prices;
+  private async getHoldingStartPrices(financialAssetKeys: number[], periodStartDate: Date, tenantKey?: number): Promise<Map<number, number>> {
+    const prices = await assetPriceService.getPricesAsOf(financialAssetKeys, periodStartDate, tenantKey);
+    return new Map([...prices].filter(([, price]) => Number.isFinite(price.price)).map(([assetKey, price]) => [assetKey, price.price]));
   }
 
 
@@ -695,6 +675,7 @@ export class PortfolioDashboardService {
     const startPrices = await this.getHoldingStartPrices(
       eligibleHoldings.map((holding) => holding.financialAssetKey),
       periodStartDate,
+      tenantKey,
     );
     const movers = eligibleHoldings.map((holding) => {
         const currentValue = holding.currentValue ?? 0;

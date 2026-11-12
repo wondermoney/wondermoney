@@ -328,6 +328,116 @@
           "message"
         ]
       },
+      "AssetPriceHistory": {
+        "type": "object",
+        "properties": {
+          "currency": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "prices": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AssetPricePoint"
+            }
+          }
+        },
+        "required": [
+          "currency",
+          "prices"
+        ],
+        "additionalProperties": {}
+      },
+      "AssetPriceOnDay": {
+        "type": "object",
+        "properties": {
+          "currency": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "date": {
+            "type": "string"
+          },
+          "override": {
+            "$ref": "#/components/schemas/AssetPriceOverride"
+          },
+          "price": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "source": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "manual",
+              "market",
+              null
+            ]
+          }
+        },
+        "required": [
+          "currency",
+          "date",
+          "override",
+          "price",
+          "source"
+        ],
+        "additionalProperties": {}
+      },
+      "AssetPriceOverride": {
+        "type": [
+          "object",
+          "null"
+        ],
+        "properties": {
+          "note": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "price": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "note",
+          "price"
+        ],
+        "additionalProperties": {}
+      },
+      "AssetPricePoint": {
+        "type": "object",
+        "properties": {
+          "date": {
+            "type": "string"
+          },
+          "price": {
+            "type": "number"
+          },
+          "source": {
+            "type": "string",
+            "enum": [
+              "manual",
+              "market"
+            ]
+          }
+        },
+        "required": [
+          "date",
+          "price",
+          "source"
+        ],
+        "additionalProperties": {}
+      },
       "AssistantAuditEvent": {
         "type": "object",
         "properties": {
@@ -13317,6 +13427,207 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/DividendIncome"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "The token is missing, malformed or revoked.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The token does not carry a scope this operation accepts.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "The request did not match the endpoint’s validator.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "A rate limit was exceeded. Honour the `Retry-After` header.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/portfolio/holding/{financialAssetKey}/prices": {
+      "get": {
+        "description": "**Required scope:** `read`.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "List a security’s daily prices, with the household’s manual prices",
+        "tags": [
+          "Portfolio"
+        ],
+        "x-required-scopes": [
+          "read"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "string",
+                  "pattern": "^[1-9]\\d*$"
+                }
+              ]
+            },
+            "required": true,
+            "name": "financialAssetKey",
+            "in": "path"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+            },
+            "required": false,
+            "name": "from",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+            },
+            "required": false,
+            "name": "to",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AssetPriceHistory"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "The token is missing, malformed or revoked.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The token does not carry a scope this operation accepts.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "The request did not match the endpoint’s validator.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "A rate limit was exceeded. Honour the `Retry-After` header.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/portfolio/holding/{financialAssetKey}/prices/{date}": {
+      "get": {
+        "description": "**Required scope:** `read`.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Get a security’s price on a day, and the household’s manual price for it",
+        "tags": [
+          "Portfolio"
+        ],
+        "x-required-scopes": [
+          "read"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+            },
+            "required": true,
+            "name": "date",
+            "in": "path"
+          },
+          {
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "string",
+                  "pattern": "^[1-9]\\d*$"
+                }
+              ]
+            },
+            "required": true,
+            "name": "financialAssetKey",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AssetPriceOnDay"
                 }
               }
             }

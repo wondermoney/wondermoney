@@ -331,6 +331,21 @@ export const holdingSchema = open('Holding', {
   symbol: z.string(),
 });
 
+const priceSource = z.enum(['manual', 'market']);
+
+export const assetPriceHistorySchema = open('AssetPriceHistory', {
+  currency: nullableString,
+  prices: z.array(open('AssetPricePoint', { date, price: z.number(), source: priceSource })),
+});
+
+export const assetPriceOnDaySchema = open('AssetPriceOnDay', {
+  currency: nullableString,
+  date,
+  override: open('AssetPriceOverride', { note: nullableString, price: z.number() }).nullable(),
+  price: nullableNumber,
+  source: priceSource.nullable(),
+});
+
 export const portfolioTransactionSchema = open('PortfolioTransaction', {
   amount: nullableNumber,
   quantity: nullableNumber,
