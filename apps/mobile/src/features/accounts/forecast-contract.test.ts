@@ -28,6 +28,21 @@ describe('account forecast contract', () => {
     expect(parsed.total?.currency).toBe('EUR')
   })
 
+  it('reads the card installments still to come, and a series from an older API without them', () => {
+    const projectedInstallments = [{ accountKey: 7, amount: 25, currency: 'EUR', date: '2026-03-05', installmentCount: 12, installmentNumber: 3, installmentPlanKey: 11, name: 'Laptop' }]
+    const parsed = forecastResponseSchema.parse({
+      accounts: [{ ...series, accountKey: 7, projectedInstallments }, { ...series, accountKey: 8 }, { ...series, accountKey: 9, projectedInstallments: [{ amount: 'x' }] }],
+      days: 30,
+      from: '2026-03-01',
+      total: { ...series, projectedInstallments },
+      totals: [series],
+    })
+    expect(parsed.accounts[0]?.projectedInstallments).toEqual(projectedInstallments)
+    expect(parsed.accounts[1]?.projectedInstallments).toBeUndefined()
+    expect(parsed.accounts[2]?.projectedInstallments).toBeUndefined()
+    expect(parsed.total?.projectedInstallments).toHaveLength(1)
+  })
+
   it('accepts an unavailable series and a mixed-currency response with no single total', () => {
     const parsed = forecastResponseSchema.parse({
       accounts: [{ ...series, accountKey: 7, lowPoint: null, openingBalance: null, points: [] }],

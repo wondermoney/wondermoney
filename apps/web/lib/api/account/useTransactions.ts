@@ -14,6 +14,7 @@ import api from "../api";
 import type { Category } from "../category/useCategories";
 import type { AmountsCompleteness } from "../completeness";
 import { transactionDateRangeParams } from "../date-range";
+import type { TransactionInstallment } from "../installment-plans/types";
 import type { Tag } from "../tag/useTags";
 import type { TransactionSplitLine } from "./useTransactionSplits";
 
@@ -72,6 +73,11 @@ export interface Transaction extends FxFields {
     feeAmount: number;
     spendingAmount: number;
   };
+  /**
+   * The installment of a plan this row is (shown as "3/12"), or null. Optional because an
+   * older API does not send it.
+   */
+  installment?: TransactionInstallment | null;
   transactionMerchantKey?: { name: string };
   description: string;
   descriptionDirty: string;

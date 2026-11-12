@@ -11,6 +11,8 @@ import { useTransactions } from '@/features/transactions/use-transactions'
 import type { RecentTransactionsSectionState } from '@/features/transactions/recent-transactions-section'
 import { mapRecentTransactions } from '@/features/transactions/recent-transactions-view-model'
 import { useRecentTransactions } from '@/features/transactions/use-recent-transactions'
+import type { InstallmentPlansSectionState } from '@/features/installments/installment-plans-section'
+import { useInstallmentCommitments, useInstallmentPlans, useInstallmentSuggestions } from '@/features/installments/use-installment-plans'
 
 import { AccountDetailScreen, type AccountDetailData, type AccountDetailViewState } from './account-detail-screen'
 import { mapAccountDetail } from './account-detail-view-model'
@@ -37,6 +39,11 @@ function creditCardStatementState(
   return { status: 'loading' }
 }
 
+function sectionState<Value, Data>(query: { data?: Value; isLoading: boolean }, read: (value: Value) => Data) {
+  if (query.data !== undefined) return { status: 'loaded' as const, data: read(query.data) }
+  return query.isLoading ? { status: 'loading' as const } : { status: 'error' as const }
+}
+
 export function AccountDetailRoute() {
   const params = useLocalSearchParams<{ accountId?: string | string[] }>()
   const accountId = parseAccountId(params.accountId)
@@ -53,6 +60,10 @@ export function AccountDetailRoute() {
   const recalculation = useAccountRecalculation()
   const creditCard = query.data?.account.creditCard ?? null
   const statements = useCreditCardStatements(accountId, Boolean(creditCard))
+  // Installment purchases belong to cards; another account costs no request.
+  const installmentPlans = useInstallmentPlans(accountId, Boolean(creditCard))
+  const installmentCommitments = useInstallmentCommitments(accountId, Boolean(creditCard))
+  const installmentSuggestions = useInstallmentSuggestions(accountId, Boolean(creditCard))
   const router = useRouter()
   const { signOut } = useProductRuntime()
   let state: AccountDetailViewState
@@ -75,6 +86,11 @@ export function AccountDetailRoute() {
         ? { status: 'loaded', series: forecastSeries }
         : forecast.isLoading ? { status: 'loading' } : forecast.data ? { status: 'unavailable' } : { status: 'error' },
       creditCardStatement: creditCardStatementState(creditCard, statements),
+      installmentPlans: creditCard ? {
+        commitment: sectionState(installmentCommitments, (value) => value.commitments.find((row) => row.accountKey === accountId) ?? null),
+        plans: sectionState(installmentPlans, (value) => value.installmentPlans),
+        suggestions: sectionState(installmentSuggestions, (value) => value.suggestions),
+      } satisfies InstallmentPlansSectionState : undefined,
     }
     state = query.isRefreshFailure ? { status: 'refresh-error', data } : { status: 'loaded', data }
   } else if (query.isNotFound) state = { status: 'not-found' }
@@ -97,7 +113,12 @@ export function AccountDetailRoute() {
       state={state}
       recentTransactions={recentTransactions}
        onBack={() => { if (router.canGoBack()) router.back(); else router.replace('/accounts') }}
-      onRetry={async () => { await Promise.all([query.refetch(), metrics.refetch(), ledger.refetch(), forecast.refetch()]) }}
+      onRetry={async () => {
+        await Promise.all([
+          query.refetch(), metrics.refetch(), ledger.refetch(), forecast.refetch(),
+          ...(creditCard ? [installmentPlans.refetch(), installmentCommitments.refetch(), installmentSuggestions.refetch()] : []),
+        ])
+      }}
       onRetryRecent={async () => { await recent.refetch() }}
       onLogout={signOut}
       onViewTransactions={() => router.push({
@@ -112,6 +133,9 @@ export function AccountDetailRoute() {
       onRecalculate={accountId === null ? undefined : () => { void recalculation.start(accountId) }}
       recalculation={recalculation.state}
       onDismissRecalculation={recalculation.reset}
+      onOpenInstallmentPlan={(planId) => router.push({ pathname: '/accounts/[accountId]/installments/[planId]', params: { accountId: String(accountId), planId: String(planId) } })}
+      onCreateInstallmentPlan={() => router.push({ pathname: '/accounts/[accountId]/installments/create', params: { accountId: String(accountId) } })}
+      onAcceptInstallmentSuggestion={(suggestion) => router.push({ pathname: '/accounts/[accountId]/installments/create', params: { accountId: String(accountId), suggestion } })}
     />
   )
 }

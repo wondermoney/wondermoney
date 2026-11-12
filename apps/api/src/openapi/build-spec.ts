@@ -30,6 +30,7 @@ const TAG_DESCRIPTIONS: Record<string, string> = {
   'Financial markets': 'Quotes, fundamentals and news from the configured market-data provider.',
   Goals: 'Savings goals and the money assigned to them.',
   'Import sessions': 'Read the state of a CSV or portfolio import session.',
+  'Installment plans': 'Card purchases split into monthly installments: the schedule, each card’s remaining commitment and suggested plans. Future installments are projections, not transactions.',
   Loans: 'Loans, repayment schedules and payoff projections.',
   'Manual assets': 'Assets tracked by hand, with their valuations.',
   MCP: 'Model Context Protocol over stateless JSON-RPC HTTP.',

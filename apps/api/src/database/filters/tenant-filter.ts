@@ -108,6 +108,36 @@ export const manualAssetValuationTenantCond = (args?: TenantFilterArgs): Diction
 export const recurringSeriesTenantCond = transactionTenantCond;
 
 /**
+ * An installment plan follows its card: tenant-scoped, and a plan on a private account is visible
+ * only to that account's owner, like the account's transactions.
+ */
+export const installmentPlanTenantCond = (args?: TenantFilterArgs): Dictionary =>
+  hasTenant(args)
+    ? {
+        $and: [
+          { tenantKey: args.tenantKey },
+          { $or: [{ accountKey: { isPrivate: false } }, { accountKey: { accountOwnerAppuserKey: args.appuserKey } }] },
+        ],
+      }
+    : {};
+
+/** One installment of a plan follows the plan's card, the same way. */
+export const installmentTenantCond = (args?: TenantFilterArgs): Dictionary =>
+  hasTenant(args)
+    ? {
+        $and: [
+          { tenantKey: args.tenantKey },
+          {
+            $or: [
+              { installmentPlanKey: { accountKey: { isPrivate: false } } },
+              { installmentPlanKey: { accountKey: { accountOwnerAppuserKey: args.appuserKey } } },
+            ],
+          },
+        ],
+      }
+    : {};
+
+/**
  * User-toggled visibility flag. Unconditional (no tenant/user args, no
  * scope-when-present): a transaction hidden by either household member is hidden
  * for both, everywhere transaction data is aggregated. Applied on Transaction only.

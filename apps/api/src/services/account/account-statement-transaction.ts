@@ -12,6 +12,7 @@ import accountCsvBalanceRecalculationService from '@service/account/account-csv-
 import accountCsvCategorizationService from '@service/account/account-csv-categorization.service';
 import type { StatementRow } from '@service/account/account-statement-reader';
 import { convertWithStatus, rateScope } from '@service/currency/exchange-rate';
+import { linkPostedInstallments } from '@service/installment/installment-plan.service';
 import type { Enqueue } from '@service/queue/enqueue';
 import { triggerRecurringDetectionAfterTransactionIngestion } from '@service/recurring/post-transaction-ingestion-detection.service';
 import { applyRulesToNewTransactions } from '@service/rules/rule-application.service';
@@ -185,6 +186,7 @@ export async function settleStatementImport(em: EM, account: Account, existing: 
  */
 export async function followUpStatementImport(em: EM, account: Account, importedDates: Date[], deps: { enqueue?: Enqueue; transactions?: Transaction[] } = {}): Promise<void> {
   await matchTransfersAfterImport(em, account, importedDates);
+  await linkInstallmentsAfterImport(em, account, importedDates);
   const tenantKey = tenantKeyOf(account);
   if (importedDates.length === 0 || tenantKey === undefined) return;
   // Local and token-free, so it runs before enrichment regardless of AI settings: a row it labels
@@ -220,6 +222,22 @@ export async function matchTransfersAfterImport(em: EM, account: Account, import
     if (matched.rowsChanged > 0) logger.info({ ...matched, tenantKey }, 'Matched own-account transfers');
   } catch (error) {
     logger.warn({ error: error instanceof Error ? error.message : String(error), tenantKey }, 'Transfer matching failed');
+  }
+}
+
+/**
+ * Link imported rows that pay an installment of one of the card's plans ("PARC 03/12"), so the
+ * schedule reads them as paid (`services/installment/installment-plan.service.ts`). Best-effort, like
+ * transfer matching: linking never fails an import, and the next import or sync links again.
+ */
+export async function linkInstallmentsAfterImport(em: EM, account: Account, importedDates: Date[]) {
+  const tenantKey = tenantKeyOf(account);
+  if (tenantKey === undefined || importedDates.length === 0) return;
+  try {
+    const linked = await em.fork().transactional((tx) => linkPostedInstallments(tx, { accountKeys: [account.accountKey], tenantKey }));
+    if (linked > 0) logger.info({ linked, tenantKey }, 'Linked posted installments');
+  } catch (error) {
+    logger.warn({ error: error instanceof Error ? error.message : String(error), tenantKey }, 'Installment linking failed');
   }
 }
 

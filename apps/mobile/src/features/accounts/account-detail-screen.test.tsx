@@ -60,6 +60,28 @@ jest.mock('victory-native', () => ({
 }))
 
 describe('AccountDetailScreen', () => {
+  it('shows a card’s remaining installment commitment and its plans', async () => {
+    const onOpenInstallmentPlan = jest.fn()
+    const plan = { installmentPlanKey: 11, accountKey: 42, currency: 'USD', description: 'Laptop', purchaseDate: '2026-08-20', totalAmount: 100, installmentCount: 4, paidCount: 2, paidAmount: 50, remainingCount: 2, remainingAmount: 50 }
+    const { view } = await renderScreen({ status: 'loaded', data: {
+      ...openBanking,
+      installmentPlans: {
+        commitment: { status: 'loaded', data: { accountKey: 42, currency: 'USD', remainingAmount: 50, remainingCount: 2, activePlanCount: 1, nextInstallment: null } },
+        plans: { status: 'loaded', data: [plan] },
+        suggestions: { status: 'loaded', data: [] },
+      },
+    } }, { onOpenInstallmentPlan, onCreateInstallmentPlan: jest.fn(), onAcceptInstallmentSuggestion: jest.fn() })
+    const remaining = formatCurrency(50, { locale: 'en', currency: 'USD' })
+    expect(view.getByLabelText(`Still to charge, ${remaining}, 2 installments to come · 1 active plan`)).toBeOnTheScreen()
+    await fireEvent.press(view.getByRole('button', { name: new RegExp('^Laptop, Remaining') }))
+    expect(onOpenInstallmentPlan).toHaveBeenCalledWith(11)
+  })
+
+  it('shows no installments section on an account that is not a card', async () => {
+    const { view } = await renderScreen({ status: 'loaded', data: openBanking }, { onOpenInstallmentPlan: jest.fn(), onCreateInstallmentPlan: jest.fn(), onAcceptInstallmentSuggestion: jest.fn() })
+    expect(view.queryByTestId('installment-plans')).not.toBeOnTheScreen()
+  })
+
   it('matches web: back link, name and institution, the balance figure, Edit and Back', async () => {
     const { view, back, edit } = await renderScreen({ status: 'loaded', data: openBanking })
     const converted = formatCurrency(90.25, { locale: 'en', currency: 'EUR' })

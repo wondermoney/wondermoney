@@ -111,4 +111,32 @@ describe("RecurringMonthCalendar", () => {
 
     expect(view.getByText("No recurring payments on this day.")).toBeTruthy();
   });
+
+  test("lists a card installment on its day, marked n/N, and counts it in the day's total", () => {
+    const view = renderCalendar({
+      items: [occurrence({ date: "2026-03-05T00:00:00.000Z", expectedAmount: 20 })],
+      installments: [
+        {
+          amount: 41.66,
+          currency: "EUR",
+          date: "2026-03-05",
+          installmentCount: 12,
+          installmentNumber: 3,
+          installmentPlanKey: 9,
+          name: "Laptop",
+          status: "projected",
+        },
+      ],
+      labels: {
+        ...labels,
+        installment: (number, count) => `Installment ${number} of ${count}`,
+      },
+    });
+
+    expect(view.getByText("Laptop")).toBeTruthy();
+    expect(view.getByText("3/12")).toBeTruthy();
+    expect(view.getByText("Installment 3 of 12")).toBeTruthy();
+    expect(view.getAllByText("Projected").length).toBe(2);
+    expect(view.getAllByText("€61.66").length).toBeGreaterThan(0);
+  });
 });

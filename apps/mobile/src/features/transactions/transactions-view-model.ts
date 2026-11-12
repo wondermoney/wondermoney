@@ -3,7 +3,7 @@ import type { TagDto } from '@/features/tags/tags-contract'
 import { type FxState, resolveFxState } from '@/lib/api/fx-status'
 
 import { transactionMark } from './transaction-mark'
-import { isTransferType, type TransactionDto, type TransactionSplitLineDto } from './transactions-contract'
+import { isTransferType, type TransactionDto, type TransactionInstallmentDto, type TransactionSplitLineDto } from './transactions-contract'
 
 export type TransactionViewModel = Readonly<{
   id: number
@@ -40,6 +40,8 @@ export type TransactionViewModel = Readonly<{
   splits: readonly TransactionSplitLineDto[]
   /** The row's amount is shared over several categories. */
   isSplit: boolean
+  /** The installment of a plan this posted row was linked to ("3/12"), when it is one. */
+  installment: TransactionInstallmentDto | null
   reviewed: boolean
   hidden: boolean
   /** The bank sent it: it can be hidden, never deleted. */
@@ -113,6 +115,7 @@ export function mapTransactions(input: { transactions: readonly TransactionDto[]
       tags: transaction.tags ?? [],
       splits: transaction.splits ?? [],
       isSplit: (transaction.splits?.length ?? 0) > 0,
+      installment: transaction.installment ?? null,
       reviewed: transaction.reviewed,
       hidden: transaction.hidden ?? false,
       bankSynced: transaction.bankSynced === true,

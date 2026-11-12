@@ -10,6 +10,7 @@ import { AppuserTransactionCategory } from './AppuserTransactionCategory';
 import { Base } from './BaseEntity';
 import { Currency } from './Currency';
 import { Goal } from './Goal';
+import { InstallmentPlan } from './InstallmentPlan';
 import { Portfolio } from './Portfolio';
 import { Tenant } from './Tenant';
 import { TransactionMerchant } from './TransactionMerchant';
@@ -47,6 +48,11 @@ export enum FxStatus {
 @Filter({ cond: hiddenTransactionCond, default: true, name: HIDDEN_FILTER })
 @Index({ properties: ['appuserKey', 'transactionDate'] }) // Composite index for user transaction queries
 @Index({ properties: ['accountKey', 'transactionDate'] }) // Composite index for account transaction queries
+@Index({
+  expression:
+    'CREATE UNIQUE INDEX transaction_installment_unique ON "transaction" (installment_plan_key, installment_number) WHERE installment_plan_key IS NOT NULL AND deleted_at IS NULL',
+  name: 'transaction_installment_unique',
+})
 @Unique({ properties: ['transactionKey', 'internalTransactionId'] })
 @Unique({ properties: ['accountKey', 'nordigenInternalTransactionId'] })
 @Unique({ properties: ['accountKey', 'enableBankingTransactionId'] })
@@ -78,6 +84,21 @@ export class Transaction extends Base {
 
   @PrimaryKey()
   transactionKey!: number;
+
+  /**
+   * The installment plan this posted row pays, with `installmentNumber` naming which installment
+   * ("3" of "3/12"). Both are null on every other row, and set together. A live row is the only
+   * thing that makes a schedule row paid: the plan's future installments are projections, never
+   * transactions (`services/installment/`). One installment is paid by at most one live row.
+   *
+   * The tenant filter is off on this relation: a visible row's plan is on the same card, so the
+   * plan's filter adds nothing, and the join it would add to every transaction read breaks row locks.
+   */
+  @Property({ columnType: 'int', nullable: true })
+  installmentNumber?: null | number;
+
+  @ManyToOne({ cascade: [], deleteRule: 'set null', entity: () => InstallmentPlan, fieldName: 'installment_plan_key', filters: { [TENANT_FILTER]: false }, nullable: true })
+  installmentPlanKey?: null | Rel<InstallmentPlan>;
 
   @ManyToOne({ cascade: [], entity: () => TransactionMerchant, fieldName: 'transaction_merchant_key', nullable: true })
   transactionMerchantKey?: Rel<TransactionMerchant>;

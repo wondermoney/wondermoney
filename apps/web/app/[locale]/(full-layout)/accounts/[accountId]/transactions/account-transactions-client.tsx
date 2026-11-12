@@ -311,6 +311,7 @@ export default function AccountTransactionsClient({
         <div className="flex flex-col gap-4">
           <ProjectedTransactions
             occurrences={accountForecast?.projected ?? []}
+            installments={accountForecast?.projectedInstallments ?? []}
           />
           <TransactionsTable
             layout="ledger"

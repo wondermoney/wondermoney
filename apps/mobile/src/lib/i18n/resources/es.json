@@ -571,7 +571,8 @@
     "lowPoint": "Punto más bajo en los próximos {{days}} días",
     "unavailable": "Aún no hay datos suficientes para prever esta cuenta.",
     "next": "Próximos pagos previstos",
-    "notCounted": "No cuenta en los informes"
+    "notCounted": "No cuenta en los informes",
+    "nextInstallments": "Próximas cuotas"
   },
   "accountRecalculate": {
     "action": "Recalcular saldos",
@@ -4556,6 +4557,108 @@
     "transactionsInvalid": "No se pudieron verificar estas transacciones y no se muestran.",
     "transactionsEmpty": "No hay transacciones en este extracto.",
     "transactionUnavailable": "Detalles de la transacción no disponibles"
+  },
+  "installments": {
+    "title": "Cuotas",
+    "badgeLabel": "Cuota {{number}} de {{total}}",
+    "transactionDetail": "Cuota",
+    "viewPlan": "Ver plan de cuotas",
+    "total": "Total",
+    "paid": "Pagado",
+    "remaining": "Pendiente",
+    "paidCount": "{{paid}} de {{total}} pagadas",
+    "remainingCount_one": "{{count}} cuota por venir",
+    "remainingCount_other": "{{count}} cuotas por venir",
+    "unmatchedCount_one": "{{count}} cuota pasada sin emparejar",
+    "unmatchedCount_other": "{{count}} cuotas pasadas sin emparejar",
+    "activePlans_one": "{{count}} plan activo",
+    "activePlans_other": "{{count}} planes activos",
+    "commitment": "Pendiente de cargar",
+    "commitmentError": "No se pudo cargar lo que les queda por cargar a las cuotas.",
+    "next": "Siguiente: {{amount}} el {{date}}, {{name}}",
+    "nextDate": "Siguiente el {{date}}",
+    "finished": "Pagado",
+    "plansError": "No se pudieron cargar los planes de cuotas.",
+    "empty": "Esta tarjeta aún no tiene planes de cuotas.",
+    "projectionNote": "Las cuotas futuras son proyecciones: no son transacciones y no cuentan en los saldos.",
+    "status": {
+      "paid": "Pagada",
+      "upcoming": "Pendiente",
+      "unmatched": "Sin coincidencia"
+    },
+    "detail": {
+      "loading": "Cargando el plan de cuotas…",
+      "descriptor": "Comprado el {{date}} · {{total}} cuotas",
+      "totalMeta": "En {{total}} cuotas",
+      "scheduleTitle": "Calendario",
+      "scheduled": "Prevista el {{date}}",
+      "statementDue": "Extracto vence el {{date}}",
+      "posted": "Cargada el {{date}}",
+      "stale": "No se pudo actualizar este plan, así que puede estar desactualizado.",
+      "notFound": {
+        "title": "Plan no encontrado",
+        "message": "Este plan de cuotas se eliminó o no es visible para ti."
+      },
+      "invalidId": {
+        "title": "Plan no encontrado",
+        "message": "Este enlace no lleva a un plan de cuotas."
+      },
+      "invalidResponse": {
+        "title": "Plan no disponible",
+        "message": "No se pudo verificar el plan, así que no se muestra."
+      },
+      "error": {
+        "title": "No se pudo cargar el plan",
+        "message": "Comprueba tu conexión e inténtalo de nuevo."
+      }
+    },
+    "delete": {
+      "action": "Eliminar plan",
+      "confirmTitle": "¿Eliminar este plan de cuotas?",
+      "confirmMessage": "Se elimina el calendario. Las transacciones registradas se quedan en la tarjeta, ya sin vincular.",
+      "confirm": "Eliminar"
+    },
+    "failures": {
+      "demo": "Esto no está disponible en el modo demo.",
+      "access": "No tienes acceso a los planes de esta tarjeta.",
+      "invalid": "Se rechazó el plan. Revisa los datos e inténtalo de nuevo.",
+      "conflict": "Una de estas transacciones ya está vinculada a otra cuota.",
+      "not-found": "Esta tarjeta o este plan ya no están disponibles.",
+      "network": "No se pudo contactar con el servidor. Revisa los planes de la tarjeta antes de volver a intentarlo.",
+      "general": "Algo salió mal. Inténtalo de nuevo."
+    },
+    "create": {
+      "action": "Añadir plan",
+      "title": "Nuevo plan de cuotas",
+      "fromSuggestionTitle": "Plan a partir de cuotas detectadas",
+      "save": "Crear plan",
+      "saving": "Creando el plan…",
+      "loading": "Cargando…",
+      "description": "Descripción",
+      "purchaseDate": "Fecha de compra",
+      "count": "Cuotas",
+      "links_one": "Al crear el plan, {{count}} transacción registrada se vincula a su cuota.",
+      "links_other": "Al crear el plan, {{count}} transacciones registradas se vinculan a sus cuotas.",
+      "previewTitle": "Vista previa",
+      "each": "Cada una",
+      "remainder": "Lleva el redondeo",
+      "range": "Cuotas {{from}} a {{to}} de {{total}}",
+      "errors": {
+        "total": "Introduce un importe mayor que cero con dos decimales como máximo.",
+        "count": "Introduce un número del {{min}} al {{max}}.",
+        "countLinks": "Una transacción detectada es la cuota {{number}}, así que el plan necesita al menos esas cuotas."
+      }
+    },
+    "suggestions": {
+      "title": "Cuotas detectadas",
+      "helper": "Estas transacciones de la tarjeta parecen cuotas de una compra sin plan. Nada cambia hasta que crees uno.",
+      "schedule": "{{total}} cuotas de {{amount}}",
+      "found_one": "{{count}} encontrada · comprado el {{date}}",
+      "found_other": "{{count}} encontradas · comprado el {{date}}",
+      "accept": "Crear plan",
+      "acceptNamed": "Crear plan para {{name}}",
+      "unavailable": "Esta sugerencia ya no está disponible. Aún puedes crear el plan tú mismo."
+    }
   },
   "rules": {
     "title": "Reglas",

@@ -110,6 +110,19 @@ describe('TransactionsScreen', () => {
     expect(view.getByText('Household')).toBeOnTheScreen()
   })
 
+  it('marks an installment row "3/12" and names it, and leaves an ordinary row unmarked', async () => {
+    const installment = { installmentPlanKey: 11, installmentNumber: 3, installmentCount: 12 }
+    const onOpenInstallmentPlan = jest.fn()
+    const { view } = await renderLoaded([{ ...transactionFixture, installment }, { ...transactionFixture, transactionKey: 42, transactionMerchantKey: { name: 'Bakery' } }], {}, { onOpenInstallmentPlan })
+    expect(view.getByText('3/12')).toBeOnTheScreen()
+    expect(view.getAllByTestId('installment-badge')).toHaveLength(1)
+    expect(view.getByRole('button', { name: /^Corner shop, Installment 3 of 12,/ })).toBeOnTheScreen()
+    expect(view.getByRole('button', { name: row('Bakery') }).props.accessibilityLabel).not.toMatch(/Installment/)
+    await fireEvent.press(view.getByRole('button', { name: /^Corner shop,/ }))
+    await fireEvent.press(view.getByRole('button', { name: 'View installment plan' }))
+    expect(onOpenInstallmentPlan).toHaveBeenCalledWith(expect.objectContaining({ id: 41, installment }))
+  })
+
   it('opens the split editor from a row’s detail', async () => {
     const onSaveSplit = jest.fn().mockResolvedValue('success')
     const { view } = await renderLoaded([transactionFixture], {}, { onSaveSplit })

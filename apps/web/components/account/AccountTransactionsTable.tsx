@@ -58,6 +58,7 @@ import {
 } from "../../lib/utils/categories";
 import CategorySelect, { CategoryCellContent } from "../CategorySelect";
 import FundTransactionFromGoalDialog from "../goals/FundTransactionFromGoalDialog";
+import { InstallmentBadge } from "../installments/InstallmentBadge";
 import { TagChipList } from "../tags/TagChip";
 import { Amount } from "../ui/Amount";
 import { Badge } from "../ui/badge";
@@ -604,12 +605,15 @@ const AccountTransactionsTable: React.FC<AccountTransactionTableProps> =
                       amount does not get: it is a level, not a delta. */}
                   <div className="space-y-1">
                     <div className="flex items-start justify-between gap-3">
-                      <div className="min-w-0 flex-1">
+                      <div className="flex min-w-0 flex-1 items-center gap-2">
                         <p className="text-foreground truncate text-sm font-medium">
                           {transaction.transactionMerchantKey?.name ??
                             transaction.description ??
                             "—"}
                         </p>
+                        <InstallmentBadge
+                          installment={transaction.installment}
+                        />
                       </div>
                       <TransactionAmount
                         transaction={transaction}
@@ -835,6 +839,10 @@ const AccountTransactionsTable: React.FC<AccountTransactionTableProps> =
                           {transferBadge}
                         </Badge>
                       ) : null}
+                      {/* One installment of a card plan: "3/12", linking to the plan. */}
+                      <InstallmentBadge
+                        installment={info.row.original.installment}
+                      />
                       {/* A receipt or invoice is attached: the row says so without opening it. */}
                       {(info.row.original.attachmentCount ?? 0) > 0 ? (
                         <span

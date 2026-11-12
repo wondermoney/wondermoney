@@ -52,6 +52,39 @@ Reminders are on by default. Turn off **Card payment reminders** in **Settings â
 
 On a self-hosted instance, reminders need an email provider (see [Configure your instance](/en/docs/self-hosting/configure#email)). Set `CREDIT_CARD_DUE_REMINDER_DAYS` on the worker to change how many days before the due date they are sent.
 
+## Installment purchases
+
+In Brazil and Portugal a card purchase is often paid in fixed monthly installments: the bank shows `PARC 03/12` or `3/12` on the third of twelve. An installment plan records the purchase once and lays out its installments, one per statement, so you can see what the card still has to charge.
+
+### Create a plan
+
+1. Open the card's account page. The **Installments** section is below the statement summary.
+2. Choose **New installment plan** (on mobile, **Add plan**).
+3. Enter a description, the purchase date, the total and the number of installments (2 to 120). A category is optional.
+4. Save.
+
+The installments are the total divided by their number, rounded down to the cent; the last one takes what is left, so they always add up to the total exactly. 100 in 3 installments is 33.33, 33.33 and 33.34. The first installment is in the statement that contains the purchase date and each next one in the following statement, dated by the card's close and due days. On an account with no statement cycle they fall monthly on the purchase's day of the month.
+
+### Future installments are projections
+
+Installments still to come are projections, like the balance forecast. They are not transactions: they do not change the account balance, net worth, the transaction lists or reports. They appear as upcoming items in the plan, in the card's **Still to be charged** amount, in the balance forecast and on the bills calendar.
+
+When the bank posts an installment, WonderMoney links the posted transaction to its installment, which then reads as **Paid**. Nothing is counted twice, because the projection was never a transaction. A posted row is linked when it is on the plan's card, its description names the installment (`PARC 03/12` on a 12-installment plan), and its amount matches. Transactions in the list show the installment as `3/12`.
+
+A past installment that no posted transaction was linked to shows as **Not matched**. It is no longer counted in what the card still has to charge.
+
+### Budgets
+
+A posted installment counts in the budget month of its own statement: the month its installment is scheduled in. This holds even when the bank dates every installment on the original purchase day, so a purchase in 12 installments never lands in one month's budget. Installments still to come count in no budget until the bank posts them.
+
+### Suggested plans
+
+When posted transactions on a card carry installment markers such as `PARC 01/04` and `PARC 02/04`, the card's page lists them under **Possible installment purchases** (on mobile, **Detected installments**). Choose **Create plan** to open the form filled in from those transactions, check it, and save. The plan is created only when you save it, and the transactions it came from are linked to their installments.
+
+### Change or delete a plan
+
+Open a plan to see each installment with its date, statement due date, amount and status. You can change its description or category, or delete it. Deleting a plan keeps its posted transactions; they are only no longer linked to it.
+
 ## Related links
 
 - [Understand transactions](/en/docs/accounts-transactions/understand-transactions)

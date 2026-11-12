@@ -133,7 +133,7 @@ describe('GET /v1/recurring/occurrences', () => {
       mockRes({ json }),
     );
 
-    expect(json).toHaveBeenCalledWith({ items: [] });
+    expect(json).toHaveBeenCalledWith({ installments: [], items: [] });
   });
 
   it('rejects an inverted or oversized range', async () => {
