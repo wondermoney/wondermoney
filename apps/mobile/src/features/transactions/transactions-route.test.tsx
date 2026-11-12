@@ -11,6 +11,8 @@ const mockMutateAmountAsync = jest.fn()
 const mockMutateTransferAsync = jest.fn()
 const mockSetSplitsAsync = jest.fn()
 const mockRemoveSplitsAsync = jest.fn()
+const mockBulkDeleteAsync = jest.fn()
+const mockDeleteOneAsync = jest.fn()
 let mockParams: { accountId?: string; filter?: string } = {}
 const mockBlockAccess = jest.fn()
 const mockPush = jest.fn()
@@ -33,6 +35,10 @@ jest.mock('@/features/accounts/use-accounts', () => ({ useAccounts: () => mockUs
 jest.mock('./use-transactions', () => ({ useTransactions: (...args: unknown[]) => mockUseTransactions(...args) }))
 jest.mock('./use-transactions-lead', () => ({ useTransactionsLead: () => ({ flows: { status: 'loading' }, reviewCount: { status: 'loading' } }) }))
 jest.mock('./use-mark-reviewed', () => ({ useTransactionBulkActions: () => ({ mutateAsync: mockMutateAsync, isPending: false }) }))
+jest.mock('./use-delete-transactions', () => ({
+  ...jest.requireActual('./use-delete-transactions'),
+  useDeleteTransactions: () => ({ bulk: { mutateAsync: mockBulkDeleteAsync, isPending: false }, single: { mutateAsync: mockDeleteOneAsync, isPending: false } }),
+}))
 jest.mock('./use-edit-transaction-amount', () => ({ useEditTransactionAmount: () => ({ mutateAsync: mockMutateAmountAsync, isPending: false }) }))
 jest.mock('./use-edit-transaction-transfer', () => ({ useEditTransactionTransfer: () => ({ mutateAsync: mockMutateTransferAsync, isPending: false }) }))
 jest.mock('./use-transaction-splits', () => ({ useSetTransactionSplits: () => ({ mutateAsync: mockSetSplitsAsync, isPending: false }), useRemoveTransactionSplits: () => ({ mutateAsync: mockRemoveSplitsAsync, isPending: false }) }))
@@ -171,6 +177,38 @@ describe('TransactionsRoute', () => {
     const result = await (mockCapturedProps.onSetHidden as (ids: number[], hidden: boolean) => Promise<string>)([7, 4], hidden)
     expect(result).toBe('success')
     expect(mockMutateAsync).toHaveBeenCalledWith({ type, transactionIds: [7, 4] })
+  })
+
+  it('sends the list\'s filters, not ids, for every matching row, and a tag change as its own action', async () => {
+    mockUseTransactions.mockReturnValue({ isInvalidAccountId: false, isAccessTransition: false, isLoading: true, refetch: jest.fn() })
+    mockMutateAsync.mockResolvedValue(undefined)
+    await render(<TransactionsRoute />)
+    await (mockCapturedProps.onSetHidden as (scope: 'matching', hidden: boolean) => Promise<string>)('matching', true)
+    // The list's own filters: the date range it opened on.
+    expect(mockMutateAsync).toHaveBeenLastCalledWith({ type: 'hidden', filter: (mockUseTransactions.mock.calls.at(-1) as unknown[])[0], accountId: null })
+    await (mockCapturedProps.onBulkTag as (scope: number[], tagId: number, mode: string) => Promise<string>)([7], 5, 'remove')
+    expect(mockMutateAsync).toHaveBeenLastCalledWith({ type: 'removeTag', tagId: 5, transactionIds: [7] })
+  })
+
+  it('reports what a bulk delete did, with the bank rows it skipped', async () => {
+    mockUseTransactions.mockReturnValue({ isInvalidAccountId: false, isAccessTransition: false, isLoading: true, refetch: jest.fn() })
+    mockBulkDeleteAsync.mockResolvedValue({ deletedTransactionIds: [7], skipped: [{ reason: 'bank_synced', transactionIds: [4] }] })
+    await render(<TransactionsRoute />)
+    const outcome = await (mockCapturedProps.onBulkDelete as (scope: number[]) => Promise<unknown>)([7, 4])
+    expect(mockBulkDeleteAsync).toHaveBeenCalledWith({ transactionIds: [7, 4] })
+    expect(outcome).toEqual({ result: 'success', deletedCount: 1, skippedIds: [4] })
+  })
+
+  it('tells a bank row\'s refused delete apart from other failures', async () => {
+    mockUseTransactions.mockReturnValue({ isInvalidAccountId: false, isAccessTransition: false, isLoading: true, refetch: jest.fn() })
+    await render(<TransactionsRoute />)
+    const deleteOne = mockCapturedProps.onDeleteOne as (id: number) => Promise<string>
+    mockDeleteOneAsync.mockRejectedValueOnce(new ApiError('http', 409))
+    expect(await deleteOne(41)).toBe('bank-synced')
+    mockDeleteOneAsync.mockRejectedValueOnce(new ApiError('http', 500))
+    expect(await deleteOne(41)).toBe('error')
+    mockDeleteOneAsync.mockResolvedValueOnce(undefined)
+    expect(await deleteOne(41)).toBe('success')
   })
 
   it('forwards an edited description alongside the amount', async () => {

@@ -51,6 +51,10 @@ export const API_ERROR_CODE = {
   /** The split's lines do not add up, mix signs, include a zero or are fewer than two (400). */
   SPLIT_INVALID: "split_invalid",
   TAG_NAME_TAKEN: "tag_name_taken",
+  /** Deleting a transaction the bank sent (409); hide it instead. A bulk delete skips such rows. */
+  TRANSACTION_BANK_SYNCED: "transaction_bank_synced",
+  /** A bulk change whose filter matches more than 5,000 transactions (400). */
+  BULK_SELECTION_TOO_LARGE: "bulk_selection_too_large",
   /** A loan repayment already splits principal from interest, so it cannot be split (409). */
   TRANSACTION_HAS_LOAN_REPAYMENT: "transaction_has_loan_repayment",
   /** The loan lacks the principal, rate or term a contract schedule needs (422). */
@@ -150,8 +154,7 @@ export function getPortfolioLinkHolderName(error: unknown): string | undefined {
     return undefined;
   }
   const details = (error as ApiErrorResponse).response?.data?.details as
-    | { linkedBy?: unknown }
-    | undefined;
+    { linkedBy?: unknown } | undefined;
   const name = details?.linkedBy;
   return typeof name === "string" && name.trim().length > 0 ? name : undefined;
 }

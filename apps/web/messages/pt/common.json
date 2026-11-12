@@ -338,7 +338,6 @@
   "edit-transaction": "Editar Transação",
   "delete-transaction": "Eliminar Transação",
   "delete-transaction-confirmation": "Tem a certeza que quer eliminar esta transação?",
-  "delete-transaction-description": "Esta acção não pode ser revertida.",
   "transaction-deleted": "Transação eliminada.",
   "error-deleting-transaction": "Erro ao eliminar a transação.",
   "autofill-transaction": "Preencher automaticamente com fatura",

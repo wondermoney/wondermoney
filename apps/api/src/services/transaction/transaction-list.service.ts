@@ -15,6 +15,7 @@ import { describeFx, type FxDisplay, UNKNOWN_FX } from '@service/currency/fx-dis
 import { completenessFromCounts } from '@service/reports/report-currency';
 import { compareTags, type TagDto, toTagDto } from '@service/tag/tag.service';
 import { type CategorySpendingFlags, loadCategorySpendingFlags } from '@service/transaction/category-spending';
+import { isBankSyncedTransaction } from '@service/transaction/transaction-deletion.service';
 import { SPLIT_LINE_POPULATE, type SplitLineDto, toSplitLineDtos } from '@service/transaction/transaction-split.service';
 import { buildTransactionWhere, getTransactionTotal, hasReportScope, type TransactionFilterInput, type TransactionViewer } from '@service/transaction/transaction-total.service';
 import { TRANSFER_DESTINATION_POPULATE, type TransferDestinationDto, transferDestinationOf } from '@service/transaction/transaction-transfer.service';
@@ -251,8 +252,15 @@ function pickTransactionRow(transaction: Transaction, spendingFlags: CategorySpe
  * `appuserTransactionCategories` is the largest line's category; clients show the lines instead.
  * An outgoing transfer carries where it went, when the user said so.
  */
-function toTransactionRow(transaction: Transaction, viewerAppuserKey: number, spendingFlags: CategorySpendingFlags): Omit<ReturnType<typeof pickTransactionRow>, 'splits'> & { splits: SplitLineDto[]; tags: TagDto[]; transferDestination: null | TransferDestinationDto } {
-  return { ...pickTransactionRow(transaction, spendingFlags), splits: toSplitLineDtos(transaction), tags: rowTags(transaction), transferDestination: transferDestinationOf(transaction, viewerAppuserKey) };
+function toTransactionRow(transaction: Transaction, viewerAppuserKey: number, spendingFlags: CategorySpendingFlags): Omit<ReturnType<typeof pickTransactionRow>, 'splits'> & { bankSynced: boolean; splits: SplitLineDto[]; tags: TagDto[]; transferDestination: null | TransferDestinationDto } {
+  return {
+    ...pickTransactionRow(transaction, spendingFlags),
+    // The bank sent it, so it cannot be deleted (`transaction-deletion.service.ts`): a client says so before asking.
+    bankSynced: isBankSyncedTransaction(transaction),
+    splits: toSplitLineDtos(transaction),
+    tags: rowTags(transaction),
+    transferDestination: transferDestinationOf(transaction, viewerAppuserKey),
+  };
 }
 
 /** The row's tags, by name. The links come through the tenant filter, so only a visible row has any. */
@@ -382,6 +390,7 @@ async function syntheticOpeningBalanceRows(accounts: Account[], filters: Transac
       appuserTransactionCategories: [],
       attachmentCount: 0,
       balance: account.balance,
+      bankSynced: false,
       description: 'Initial balance',
       descriptionDirty: 'This is a fake transaction to reflect the initial balance of the account',
       hidden: false,

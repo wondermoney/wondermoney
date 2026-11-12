@@ -79,6 +79,11 @@ export interface Transaction extends FxFields {
   attachmentCount?: number;
   reviewed: boolean;
   hidden: boolean;
+  /**
+   * The bank sent this row, so it cannot be deleted (only hidden). Optional because an older API
+   * does not send it; read it as `transaction.bankSynced === true`.
+   */
+  bankSynced?: boolean;
   categorizationConfidence?: "high" | "medium" | "low" | "none" | null;
   categorizationReason?: string | null;
 }
@@ -175,16 +180,22 @@ export interface GetTransactionRequest {
  * @param params - Query parameters for filtering transactions
  * @param apiClient - Optional Axios instance. Defaults to client-side API.
  */
-export async function getTransactions(
-  params: GetTransactionRequest = {},
-  apiClient: AxiosInstance = api,
-): Promise<GetTransactionsResponse> {
-  // An empty array means "no filter", not "match nothing", so it is dropped rather than
-  // sent as an empty value the API would have to guess at.
+/** The filters of a transaction list request, without its paging. */
+export type TransactionListFilter = Omit<
+  GetTransactionRequest,
+  "cursor" | "limit" | "includeEmptyAccounts"
+>;
+
+/**
+ * The list's query parameters, as the API reads them. An empty array means "no filter", not
+ * "match nothing", so it is dropped rather than sent as an empty value the API would have to
+ * guess at.
+ */
+export function transactionListParams(params: GetTransactionRequest) {
   const list = (values?: string[]) =>
     values && values.length > 0 ? values.join(",") : undefined;
 
-  const _params = {
+  return {
     ...params,
     ...transactionDateRangeParams(params),
     accountKeys: list(params.accountKeys),
@@ -194,9 +205,33 @@ export async function getTransactions(
     statuses: list(params.statuses),
     merchantKeys: list(params.merchantKeys),
   };
+}
+
+/**
+ * The `filter` a bulk change or delete takes for "every row this list matches": the same
+ * parameters as the list, without paging, and without keys that are unset (the API refuses a key
+ * it does not know, and would read an explicit `undefined` as no key anyway).
+ */
+export function transactionSelectionFilter(
+  filter: TransactionListFilter,
+): Record<string, string | boolean> {
+  const paging = new Set(["cursor", "limit", "includeEmptyAccounts"]);
+  return Object.fromEntries(
+    Object.entries(transactionListParams(filter)).filter(
+      (entry): entry is [string, string | boolean] =>
+        !paging.has(entry[0]) &&
+        (typeof entry[1] === "string" || typeof entry[1] === "boolean"),
+    ),
+  );
+}
+
+export async function getTransactions(
+  params: GetTransactionRequest = {},
+  apiClient: AxiosInstance = api,
+): Promise<GetTransactionsResponse> {
   const { data } = await apiClient.get<GetTransactionsResponse>(
     "/v1/account/transaction",
-    { params: _params },
+    { params: transactionListParams(params) },
   );
   return data;
 }

@@ -34,7 +34,6 @@ export const updateTransactionRequestSchema = z.object({
   }),
   params: z.object({ transactionId: positiveIntId }),
 });
-export const updateTransactionsRequestSchema = z.object({ body: z.object({ categoryId: z.string().optional().transform((val) => (val ? positiveIntId.parse(val) : undefined)), hidden: z.boolean().optional(), reviewed: z.boolean().optional(), transactionIds: z.array(positiveIntId).max(500, 'At most 500 transactions can be updated in one request') }) });
 export const getTransactionHistoryRequestSchema = z.object({ params: z.object({ transactionId: positiveIntId }) });
 
 /**
@@ -45,12 +44,13 @@ export const getTransactionHistoryRequestSchema = z.object({ params: z.object({ 
  * dropped so a cleared filter reads as "no filter" rather than as a filter matching nothing.
  */
 const csvList = z
-  .union([z.string(), z.array(z.string())])
+  .union([z.string(), z.number(), z.array(z.union([z.string(), z.number()]))])
   .optional()
   .transform((val) => {
     if (val === undefined) return undefined;
+    // Numbers arrive only in a JSON body (a bulk request's `filter`); a query string is all text.
     const parts = (Array.isArray(val) ? val : [val])
-      .flatMap((entry) => entry.split(','))
+      .flatMap((entry) => String(entry).split(','))
       .map((entry) => entry.trim())
       .filter((entry) => entry.length > 0);
     return parts.length > 0 ? parts : undefined;
@@ -87,7 +87,63 @@ const transactionScopeQuery = {
   statuses: csvList.pipe(z.array(z.enum(['BOOKED', 'PENDING'])).optional()),
 };
 
-export const getTransactionsRequestSchema = z.object({ query: z.object({ ...transactionScopeQuery, accountKeys: csvIntList, categoryKeys: csvCategoryList, confidence: z.enum(CategorizationConfidence).optional(), cursor: z.string().trim().max(64).regex(/^\d+_\d+$/, 'Malformed cursor').optional(), fromDate: validDate.optional(), includeEmptyAccounts: z.union([z.boolean(), z.string()]).optional().transform((val) => (typeof val === 'undefined' ? undefined : typeof val === 'boolean' ? val : val.toLowerCase() === 'true')), includeHidden: z.union([z.boolean(), z.string()]).optional().transform((val) => (typeof val === 'undefined' ? undefined : typeof val === 'boolean' ? val : val.toLowerCase() === 'true')), limit: boundedLimit({ defaultValue: 100, max: 500 }).optional().default(100), tagKeys: csvIntList, timezone: viewerTimeZone, toDate: validDate.optional(), transactionTypes: csvList, unreviewedOnly: z.union([z.boolean(), z.string()]).optional().transform((val) => (typeof val === 'undefined' ? undefined : typeof val === 'boolean' ? val : val.toLowerCase() === 'true')) }) });
+/**
+ * The filters of `GET /v1/account/transaction`: which rows the list holds, apart from its paging.
+ * A bulk change or delete takes the same object as `filter`, so "select all matching" acts on
+ * exactly the rows the list shows.
+ */
+const transactionListFilterFields = {
+  ...transactionScopeQuery,
+  accountKeys: csvIntList,
+  categoryKeys: csvCategoryList,
+  confidence: z.enum(CategorizationConfidence).optional(),
+  fromDate: validDate.optional(),
+  includeHidden: queryBoolean,
+  tagKeys: csvIntList,
+  timezone: viewerTimeZone,
+  toDate: validDate.optional(),
+  transactionTypes: csvList,
+  unreviewedOnly: queryBoolean,
+};
+
+export const getTransactionsRequestSchema = z.object({ query: z.object({ ...transactionListFilterFields, cursor: z.string().trim().max(64).regex(/^\d+_\d+$/, 'Malformed cursor').optional(), includeEmptyAccounts: queryBoolean, limit: boundedLimit({ defaultValue: 100, max: 500 }).optional().default(100) }) });
+
+/** The most transactions one bulk change or delete may select, by ids or by filter. */
+export const BULK_TRANSACTION_LIMIT = 5000;
+
+/**
+ * Which transactions a bulk request acts on: `transactionIds`, or `filter` (the list's filters,
+ * every matching row). Exactly one. The filter is strict: a key the list does not know is an error,
+ * never ignored, because ignoring it would widen the selection.
+ */
+const bulkSelectionFields = {
+  filter: z.object(transactionListFilterFields).strict().optional(),
+  transactionIds: z.array(positiveIntId).min(1).max(BULK_TRANSACTION_LIMIT, `At most ${BULK_TRANSACTION_LIMIT} transactions in one request`).optional(),
+};
+
+const exactlyOneSelection = (body: { filter?: unknown; transactionIds?: unknown }) => (body.filter === undefined) !== (body.transactionIds === undefined);
+const exactlyOneSelectionMessage = { message: 'Send either transactionIds or filter', path: ['transactionIds'] };
+
+export const updateTransactionsRequestSchema = z.object({
+  body: z
+    .object({
+      ...bulkSelectionFields,
+      /** Tags to put on every selected row that does not carry them yet. */
+      addTagIds: tagIdList.optional(),
+      categoryId: z.string().optional().transform((val) => (val ? positiveIntId.parse(val) : undefined)),
+      hidden: z.boolean().optional(),
+      /** Tags to take off every selected row that carries them. */
+      removeTagIds: tagIdList.optional(),
+      reviewed: z.boolean().optional(),
+    })
+    .refine(exactlyOneSelection, exactlyOneSelectionMessage)
+    .refine((body) => !(body.addTagIds ?? []).some((key) => (body.removeTagIds ?? []).includes(key)), { message: 'A tag cannot be both added and removed', path: ['removeTagIds'] }),
+});
+
+export const deleteTransactionsRequestSchema = z.object({
+  body: z.object(bulkSelectionFields).refine(exactlyOneSelection, exactlyOneSelectionMessage),
+});
+export const deleteTransactionRequestSchema = z.object({ params: z.object({ transactionId: positiveIntId }) });
 export const getAccountTransactionsRequestSchema = z.object({ query: z.object({ ...transactionScopeQuery, accountId: positiveIntId.optional(), categoryKeys: csvCategoryList, confidence: z.enum(CategorizationConfidence).optional(), cursor: z.string().trim().max(64).regex(/^\d+_\d+$/, 'Malformed cursor').optional(), fromDate: validDate.optional(), includeHidden: z.union([z.boolean(), z.string()]).optional().transform((val) => (typeof val === 'undefined' ? undefined : typeof val === 'boolean' ? val : val.toLowerCase() === 'true')), limit: boundedLimit({ defaultValue: 100, max: 500 }).optional().default(100), tagKeys: csvIntList, timezone: viewerTimeZone, toDate: validDate.optional(), transactionTypes: csvList, unreviewedOnly: z.union([z.boolean(), z.string()]).optional().transform((val) => (typeof val === 'undefined' ? undefined : typeof val === 'boolean' ? val : val.toLowerCase() === 'true')) }) });
 export const getTransactionMerchantsRequestSchema = z.object({ query: z.object({ limit: boundedLimit({ defaultValue: 20, max: 50 }).optional().default(20), search: z.string().trim().max(200).optional().default('') }) });
 export const createOfflineAccountRequestSchema = z.object({ body: z.object({ accountTypeId: positiveIntId.optional(), currencyId: positiveIntId, currentBalance: z.preprocess((v) => (typeof v === 'string' ? Number(v) : v), z.number().max(999999999999)), financialInstitutionId: z.number().optional(), name: z.string().min(1).max(100) }) });

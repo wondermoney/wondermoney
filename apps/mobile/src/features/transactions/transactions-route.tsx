@@ -17,11 +17,12 @@ import { useTranslation } from 'react-i18next'
 
 import type { TransactionFilters, TransactionSplitLineRequest, TransferEditDraft } from './transactions-contract'
 import { DEFAULT_RANGE_DAYS, presetRange } from './transactions-date-range'
-import { TransactionsScreen, type ReviewResult, type TransactionsFreshness, type TransactionsViewState } from './transactions-screen'
+import { type BulkDeleteOutcome, type BulkScope, type DeleteOneResult, TransactionsScreen, type ReviewResult, type TransactionsFreshness, type TransactionsViewState } from './transactions-screen'
 import { mapTransactions } from './transactions-view-model'
 import { useEditTransactionAmount } from './use-edit-transaction-amount'
 import { useEditTransactionTransfer } from './use-edit-transaction-transfer'
-import { useTransactionBulkActions, type TransactionBulkAction } from './use-mark-reviewed'
+import { skippedBankSyncedIds, useDeleteTransactions } from './use-delete-transactions'
+import { useTransactionBulkActions, type TransactionBulkAction, type TransactionBulkSelection } from './use-mark-reviewed'
 import { useRemoveTransactionSplits, useSetTransactionSplits } from './use-transaction-splits'
 import { useTransactions } from './use-transactions'
 import { useTransactionsLead } from './use-transactions-lead'
@@ -80,6 +81,7 @@ export function TransactionsRoute({ perAccount = false }: { perAccount?: boolean
   const lead = useTransactionsLead({ fromDate: filters.fromDate, toDate: filters.toDate }, !perAccount)
   const categoriesQuery = useCategories()
   const mutation = useTransactionBulkActions()
+  const deletion = useDeleteTransactions()
   const amountMutation = useEditTransactionAmount()
   const transferMutation = useEditTransactionTransfer()
   const setSplits = useSetTransactionSplits()
@@ -124,6 +126,29 @@ export function TransactionsRoute({ perAccount = false }: { perAccount?: boolean
       await mutation.mutateAsync(action)
       return 'success'
     } catch (error) {
+      return classifyResult(error, blockAccess)
+    }
+  }
+
+  // "Every matching row" is the list's own server filters, and on one account's ledger that account.
+  const selectionOf = (scope: BulkScope): TransactionBulkSelection => (scope === 'matching' ? { filter: filters, accountId: perAccount ? accountId : null } : { transactionIds: scope })
+
+  const runBulkDelete = async (scope: BulkScope): Promise<BulkDeleteOutcome> => {
+    try {
+      const outcome = await deletion.bulk.mutateAsync(selectionOf(scope))
+      return { result: 'success', deletedCount: outcome.deletedTransactionIds.length, skippedIds: skippedBankSyncedIds(outcome) }
+    } catch (error) {
+      return { result: classifyResult(error, blockAccess) }
+    }
+  }
+
+  const runDeleteOne = async (transactionId: number): Promise<DeleteOneResult> => {
+    try {
+      await deletion.single.mutateAsync(transactionId)
+      return 'success'
+    } catch (error) {
+      // 409: the bank sent the row, so it can be hidden but not deleted.
+      if (error instanceof ApiError && error.code === 'http' && error.status === 409) return 'bank-synced'
       return classifyResult(error, blockAccess)
     }
   }
@@ -191,7 +216,7 @@ export function TransactionsRoute({ perAccount = false }: { perAccount?: boolean
     hasMore={query.data?.hasMore}
     categories={categoryState}
     accountCount={accountsQuery.data?.accounts.length}
-    pending={mutation.isPending || amountMutation.isPending || transferMutation.isPending || setSplits.isPending || removeSplits.isPending}
+    pending={mutation.isPending || deletion.bulk.isPending || deletion.single.isPending || amountMutation.isPending || transferMutation.isPending || setSplits.isPending || removeSplits.isPending}
     accountName={accountName}
     perAccount={perAccount}
     lead={perAccount ? undefined : lead}
@@ -204,9 +229,12 @@ export function TransactionsRoute({ perAccount = false }: { perAccount?: boolean
     onFiltersChange={setFilters}
     onRefresh={async () => { await query.refetch() }}
     onMarkReviewed={(transactionId) => runAction({ type: 'review', transactionIds: [transactionId] })}
-    onBulkReview={(transactionIds) => runAction({ type: 'review', transactionIds })}
-    onAssignCategory={(transactionIds, categoryId) => runAction({ type: 'category', transactionIds, categoryId })}
-    onSetHidden={(transactionIds, hidden) => runAction({ type: hidden ? 'hidden' : 'unhidden', transactionIds })}
+    onBulkReview={(scope) => runAction({ type: 'review', ...selectionOf(scope) })}
+    onAssignCategory={(scope, categoryId) => runAction({ type: 'category', categoryId, ...selectionOf(scope) })}
+    onSetHidden={(scope, hidden) => runAction({ type: hidden ? 'hidden' : 'unhidden', ...selectionOf(scope) })}
+    onBulkTag={(scope, tagId, mode) => runAction({ type: mode === 'add' ? 'addTag' : 'removeTag', tagId, ...selectionOf(scope) })}
+    onBulkDelete={runBulkDelete}
+    onDeleteOne={runDeleteOne}
     onEditAmount={runAmountEdit}
     tags={toTagsState(tagsQuery)}
     onSetTags={runSetTags}

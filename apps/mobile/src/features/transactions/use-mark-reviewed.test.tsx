@@ -104,4 +104,13 @@ describe('useMarkTransactionReviewed', () => {
     expect(() => normalizePersistedTransactionIds([4, 0, -2])).toThrow('positive persisted')
     expect(mockWrite).not.toHaveBeenCalled()
   })
+  it('sends the list\'s server filters instead of ids for every matching row, scoped to one account on its ledger', async () => {
+    const client = new QueryClient()
+    mockWrite.mockResolvedValue(undefined)
+    const wrapper = ({ children }: { children: ReactNode }) => <QueryClientProvider client={client}>{children}</QueryClientProvider>
+    const hook = await renderHook(() => useTransactionBulkActions(), { wrapper })
+    await act(async () => { await hook.result.current.mutateAsync({ type: 'addTag', tagId: 5, filter: { needsReview: true, tagIds: [2, 3], limit: 500 }, accountId: 9 }) })
+    expect(mockWrite.mock.calls[0]?.[1].body).toEqual({ filter: { unreviewedOnly: 'true', tagKeys: '2,3', accountKeys: '9' }, addTagIds: [5] })
+    await hook.unmount(); client.clear()
+  })
 })

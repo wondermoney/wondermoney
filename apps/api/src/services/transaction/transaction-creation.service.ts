@@ -349,8 +349,9 @@ class TransactionCreationService {
       Transaction,
       {
         accountKey: account,
-        // Same membership as the rest of the chain — settled rows only, so a PENDING row
-        // with no stored balance can never be picked as a predecessor and read as zero.
+        // Same membership as the rest of the chain — live, settled rows only, so neither a deleted
+        // row nor a PENDING row with no stored balance can be picked as a predecessor.
+        deletedAt: null,
         transactionDate: { $lte: transaction.transactionDate },
         transactionStatusKey: { name: { $in: [...SETTLED_TRANSACTION_STATUSES] } },
       },
@@ -376,6 +377,7 @@ class TransactionCreationService {
       Transaction,
       {
         accountKey: account,
+        deletedAt: null,
         transactionDate: { $gt: transaction.transactionDate },
         transactionStatusKey: { name: { $in: [...SETTLED_TRANSACTION_STATUSES] } },
       },

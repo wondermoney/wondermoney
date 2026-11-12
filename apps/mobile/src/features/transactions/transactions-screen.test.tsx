@@ -666,3 +666,88 @@ describe('TransactionsScreen', () => {
     })
   })
 })
+
+describe('TransactionsScreen bulk tag and delete', () => {
+  const tags = { status: 'loaded' as const, tags: [{ tagKey: 5, name: 'Trip', color: '#ff8800' }, { tagKey: 6, name: 'Work', color: '#0088ff' }] }
+  const shop = (transactionKey: number, name: string, extra: Partial<typeof transactionFixture> = {}) => ({ ...transactionFixture, transactionKey, transactionMerchantKey: { name }, ...extra })
+
+  it('adds a tag to the selected rows', async () => {
+    const onBulkTag = jest.fn().mockResolvedValue('success')
+    const { view } = await renderLoaded([shop(41, 'Corner shop'), shop(42, 'Bakery')], {}, { tags, onBulkTag })
+    await startSelecting(view)
+    await fireEvent.press(view.getByRole('checkbox', { name: 'Select Corner shop' }))
+    await fireEvent.press(view.getByRole('checkbox', { name: 'Select Bakery' }))
+    await fireEvent.press(view.getByRole('button', { name: 'Tag' }))
+    await fireEvent.press(view.getAllByRole('menuitem', { name: 'Work' })[0]!)
+    expect(onBulkTag).toHaveBeenCalledWith([41, 42], 6, 'add')
+  })
+
+  it('confirms a delete with its count and says the bank rows are skipped, then offers to hide them', async () => {
+    const onBulkDelete = jest.fn().mockResolvedValue({ result: 'success', deletedCount: 1, skippedIds: [42] })
+    const { view, setHidden } = await renderLoaded([shop(41, 'Corner shop'), shop(42, 'Bank shop', { bankSynced: true })], {}, { onBulkDelete })
+    await startSelecting(view)
+    await fireEvent.press(view.getByRole('checkbox', { name: 'Select Corner shop' }))
+    await fireEvent.press(view.getByRole('checkbox', { name: 'Select Bank shop' }))
+    await fireEvent.press(view.getByRole('button', { name: 'Delete' }))
+    expect(view.getByText('Delete 1 transaction?')).toBeOnTheScreen()
+    expect(view.getByText(/1 of them came from your bank and will be skipped/)).toBeOnTheScreen()
+    expect(onBulkDelete).not.toHaveBeenCalled()
+    await fireEvent.press(view.getByRole('button', { name: 'Delete 1 transaction' }))
+    expect(onBulkDelete).toHaveBeenCalledWith([41, 42])
+    expect(view.getByText('1 transaction deleted.')).toBeOnTheScreen()
+    expect(view.getByText(/1 bank transaction was not deleted/)).toBeOnTheScreen()
+    await fireEvent.press(view.getByRole('button', { name: 'Hide them' }))
+    expect(setHidden).toHaveBeenCalledWith([42], true)
+  })
+
+  it('offers only hiding when every selected row came from the bank', async () => {
+    const onBulkDelete = jest.fn()
+    const { view, setHidden } = await renderLoaded([shop(41, 'Corner shop', { bankSynced: true })], {}, { onBulkDelete })
+    await startSelecting(view)
+    await fireEvent.press(view.getByRole('checkbox', { name: 'Select Corner shop' }))
+    await fireEvent.press(view.getByRole('button', { name: 'Delete' }))
+    expect(view.getByText('This transaction came from your bank')).toBeOnTheScreen()
+    expect(view.queryByRole('button', { name: /^Delete \d/ })).not.toBeOnTheScreen()
+    await fireEvent.press(view.getByRole('button', { name: 'Hide it instead' }))
+    expect(setHidden).toHaveBeenCalledWith([41], true)
+    expect(onBulkDelete).not.toHaveBeenCalled()
+  })
+
+  it('offers every matching row once every loaded row is selected, and acts on all of them', async () => {
+    const onBulkDelete = jest.fn().mockResolvedValue({ result: 'success', deletedCount: 240, skippedIds: [] })
+    const { view, setHidden } = await renderLoaded([shop(41, 'Corner shop'), shop(42, 'Bakery')], {}, { total: 240, hasMore: true, onBulkDelete })
+    await startSelecting(view)
+    expect(view.queryByRole('button', { name: 'Select all 240 matching transactions' })).not.toBeOnTheScreen()
+    await fireEvent.press(view.getByRole('button', { name: 'Select all 2 loaded transactions' }))
+    await fireEvent.press(view.getByRole('button', { name: 'Select all 240 matching transactions' }))
+    expect(view.getByText('All 240 matching transactions are selected')).toBeOnTheScreen()
+    await fireEvent.press(view.getByRole('button', { name: 'Hide selected' }))
+    expect(view.getByText('Hide 240 selected transactions?')).toBeOnTheScreen()
+    await fireEvent.press(view.getByRole('button', { name: 'Hide transactions' }))
+    expect(setHidden).toHaveBeenCalledWith('matching', true)
+  })
+
+  it('does not offer every matching row while a filter over the loaded rows is on', async () => {
+    const { view } = await renderLoaded([shop(41, 'Corner shop'), shop(42, 'Bakery')], {}, { total: 240, hasMore: true, onBulkDelete: jest.fn() })
+    await openFilters(view)
+    await fireEvent.changeText(view.getByLabelText('Filter loaded results by merchant'), 'Bakery')
+    await fireEvent.press(view.getByRole('button', { name: 'Actions for Bakery' }))
+    await fireEvent.press(view.getByRole('menuitem', { name: 'Select' }))
+    expect(view.queryByRole('button', { name: /matching transactions/ })).not.toBeOnTheScreen()
+  })
+
+  it('deletes one row from its menu, and explains a bank row instead of deleting it', async () => {
+    const onDeleteOne = jest.fn().mockResolvedValue('success')
+    const { view } = await renderLoaded([shop(41, 'Corner shop'), shop(42, 'Bank shop', { bankSynced: true })], {}, { onDeleteOne })
+    await fireEvent.press(view.getByRole('button', { name: 'Actions for Corner shop' }))
+    await fireEvent.press(view.getByRole('menuitem', { name: 'Delete' }))
+    expect(view.getByText('Delete 1 transaction?')).toBeOnTheScreen()
+    await fireEvent.press(view.getByRole('button', { name: 'Delete 1 transaction' }))
+    expect(onDeleteOne).toHaveBeenCalledWith(41)
+
+    await fireEvent.press(view.getByRole('button', { name: 'Actions for Bank shop' }))
+    await fireEvent.press(view.getByRole('menuitem', { name: 'Delete' }))
+    expect(view.getByText('This transaction came from your bank')).toBeOnTheScreen()
+    expect(view.queryByRole('button', { name: 'Delete 1 transaction' })).not.toBeOnTheScreen()
+  })
+})

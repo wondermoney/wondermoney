@@ -110,6 +110,8 @@ describe('account transaction update regressions', () => {
       expect.anything(),
       expect.objectContaining({ transactionKey: { $in: [1, 2] } }),
       { reviewed: true },
+      // Hidden rows among the selected keys are updated too (an unhide must reach them).
+      { filters: { hidden: false } },
     );
     expect(mocked.persist).not.toHaveBeenCalled();
   });
@@ -323,6 +325,7 @@ describe('account transaction update regressions', () => {
       expect.anything(),
       expect.objectContaining({ transactionKey: { $in: [1] } }),
       { hidden: true },
+      { filters: { hidden: false } },
     );
   });
 

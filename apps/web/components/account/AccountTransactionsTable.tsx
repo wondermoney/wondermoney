@@ -1,6 +1,14 @@
 "use client";
 import { useQueryClient } from "@tanstack/react-query";
-import { Filter, Info, MoreHorizontal, Paperclip, Pencil, X } from "lucide-react";
+import {
+  Filter,
+  Info,
+  MoreHorizontal,
+  Paperclip,
+  Pencil,
+  Trash2,
+  X,
+} from "lucide-react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { usePostHog } from "posthog-js/react";
@@ -26,7 +34,11 @@ import { useRouter } from "@/i18n/navigation";
 import { dayBreaks, distinctMerchant, monthBreaks } from "@/lib/account/ledger";
 import { isTransferType } from "@/lib/account/transaction-transfer";
 import useEditTransaction from "@/lib/api/account/useEditTransaction";
-import type { Transaction } from "@/lib/api/account/useTransactions";
+import {
+  type Transaction,
+  type TransactionListFilter,
+  transactionSelectionFilter,
+} from "@/lib/api/account/useTransactions";
 import { isSplitTransaction } from "@/lib/api/account/useTransactionSplits";
 import type { Category } from "@/lib/api/category/useCategories";
 import { isDemoReadOnlyError } from "@/lib/api/errors";
@@ -143,6 +155,12 @@ interface AccountTransactionTableProps {
     tagKeys: string[];
     transactionTypes: string[];
   }) => void;
+  /**
+   * The list request's own filters, when the server applied every one of them
+   * (`onServerFiltersChange`). With it, selecting a whole page offers "Select
+   * all N matching", whose bulk actions send these filters instead of ids.
+   */
+  selectionFilter?: TransactionListFilter;
 }
 
 const AccountTransactionsTable: React.FC<AccountTransactionTableProps> =
@@ -166,6 +184,7 @@ const AccountTransactionsTable: React.FC<AccountTransactionTableProps> =
       layout = "default",
       serverTotal,
       onServerFiltersChange,
+      selectionFilter,
     }) => {
       const t = useTranslations();
       const formatCurrency = useFormatCurrency();
@@ -490,10 +509,22 @@ const AccountTransactionsTable: React.FC<AccountTransactionTableProps> =
               >
                 <Pencil className="text-muted-foreground size-4" /> {t("edit")}
               </DropdownMenuItem>
+              {/* The synthetic "Initial balance" rows (negative keys) are not transactions. */}
+              {transaction.transactionKey > 0 ? (
+                <DropdownMenuItem
+                  className="text-destructive-text flex items-center gap-2"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    openDeleteTransactionModal(transaction);
+                  }}
+                >
+                  <Trash2 className="size-4" /> {t("transactionBulk.delete")}
+                </DropdownMenuItem>
+              ) : null}
             </DropdownMenuContent>
           </DropdownMenu>
         ),
-        [t, openEditTransactionModal],
+        [t, openEditTransactionModal, openDeleteTransactionModal],
       );
 
       // Read lazily: the page of phone rows is computed further down.
@@ -1083,6 +1114,24 @@ const AccountTransactionsTable: React.FC<AccountTransactionTableProps> =
           return [
             columnHelper.display({
               id: "select",
+              header: ({ table }) =>
+                withMultiSelectRow ? (
+                  <div className="px-1">
+                    <Checkbox
+                      aria-label={t("transactionBulk.select-page")}
+                      checked={
+                        table.getIsAllPageRowsSelected()
+                          ? true
+                          : table.getIsSomePageRowsSelected()
+                            ? "indeterminate"
+                            : false
+                      }
+                      onCheckedChange={(value) =>
+                        table.toggleAllPageRowsSelected(value === true)
+                      }
+                    />
+                  </div>
+                ) : null,
               cell: ({ row }) => {
                 return (
                   <div className="px-1">
@@ -1099,7 +1148,7 @@ const AccountTransactionsTable: React.FC<AccountTransactionTableProps> =
           ];
         }
         return columns;
-      }, [columnHelper, withSelectRow, withMultiSelectRow, columns]);
+      }, [columnHelper, withSelectRow, withMultiSelectRow, columns, t]);
 
       const transactionsCategories = useMemo(() => {
         // Extract unique category keys from transactions
@@ -1257,19 +1306,43 @@ const AccountTransactionsTable: React.FC<AccountTransactionTableProps> =
           )
         : filteredTransactions;
 
+      // Every row on the table's page is selected: the moment "Select all N
+      // matching" is offered. Read from the table when it reports a change.
+      const [pageFullySelected, setPageFullySelected] = useState(false);
+      // The selection is every row the filters match, not only the loaded ones.
+      const [allMatchingSelected, setAllMatchingSelected] = useState(false);
+
       const onRowSelect = useCallback(
         (rows: Row<Transaction>[]) => {
           setSelectedTransactions(rows.map((row) => row.original));
+          setPageFullySelected(
+            rows.length > 0 &&
+              tableRef.current?.getIsAllPageRowsSelected() === true,
+          );
+          setAllMatchingSelected(false);
         },
         [setSelectedTransactions],
       );
 
       const resetRowSelection = useCallback(() => {
         setSelectedTransactions([]);
+        setPageFullySelected(false);
+        setAllMatchingSelected(false);
         if (tableRef.current) {
           tableRef.current.resetRowSelection();
         }
       }, []);
+
+      // A selection belongs to the rows it was made over: new filters start again.
+      const selectionFilterKey = JSON.stringify(
+        selectionFilter ? transactionSelectionFilter(selectionFilter) : null,
+      );
+      const lastSelectionFilterKey = useRef(selectionFilterKey);
+      useEffect(() => {
+        if (lastSelectionFilterKey.current === selectionFilterKey) return;
+        lastSelectionFilterKey.current = selectionFilterKey;
+        resetRowSelection();
+      }, [selectionFilterKey, resetRowSelection]);
 
       // Count active filters
       const activeFiltersCount = useMemo(() => {
@@ -1827,6 +1900,21 @@ const AccountTransactionsTable: React.FC<AccountTransactionTableProps> =
             <TransactionReviewControl
               transactions={selectedTransactions}
               onResetSelection={resetRowSelection}
+              selectAllMatching={
+                selectionFilter &&
+                filtersAppliedByServer &&
+                pageFullySelected &&
+                serverTotal != null &&
+                serverTotal > selectedTransactions.length
+                  ? {
+                      total: serverTotal,
+                      filter: transactionSelectionFilter(selectionFilter),
+                      includesHidden: selectionFilter.includeHidden === true,
+                      selected: allMatchingSelected,
+                      onSelect: () => setAllMatchingSelected(true),
+                    }
+                  : undefined
+              }
             />
           )}
           {transactionData && (

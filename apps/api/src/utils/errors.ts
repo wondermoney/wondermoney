@@ -106,6 +106,14 @@ export const ERROR_CODE = {
   AI_ALLOWANCE_EXHAUSTED: 'ai_allowance_exhausted',
   /** The transaction is EXPIRED (the bank retracted it): no money moved, so it cannot be funded. */
   TRANSACTION_EXPIRED: 'transaction_expired',
+  /**
+   * Deleting a transaction the bank sent (409). The next sync would send it again, so it cannot be
+   * deleted; hide it instead. A bulk delete skips such rows and reports them, and answers this only
+   * when every selected row is one.
+   */
+  TRANSACTION_BANK_SYNCED: 'transaction_bank_synced',
+  /** A bulk change or delete whose filter or id list selects more than 5,000 transactions (400). Narrow the filter. */
+  BULK_SELECTION_TOO_LARGE: 'bulk_selection_too_large',
   /** Creating or renaming a tag: the household already has a tag with this name, ignoring case (409). */
   TAG_NAME_TAKEN: 'tag_name_taken',
   /** Adding an exchange-rate override: the household already has one for this pair and day (409). Change that one instead. */

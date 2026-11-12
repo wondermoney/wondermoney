@@ -19,9 +19,11 @@
  * the UI is the number its balance was accumulated from. `transactionKey` is the tie-break because
  * it is the only total order available on same-date rows.
  *
- * MEMBERSHIP. Every *settled* row on the account, hidden rows included (hiding a row from the UI
- * does not mean the money did not move) and soft-deleted rows included (the chain queries filter
- * on nothing but `accountKey` and `transactionDate`). Excluded:
+ * MEMBERSHIP. Every *settled*, live row on the account, hidden rows included (hiding a row from the
+ * UI does not mean the money did not move). Excluded:
+ *   - soft-deleted rows — a member deleted a manual or imported row because the money did not move
+ *     (`transaction-deletion.service.ts`), and no list or total shows them, so a balance that still
+ *     counted one would jump between two visible rows by an amount nobody can see;
  *   - rows with a NULL `transactionDate` — they have no position in the order;
  *   - PENDING and EXPIRED rows — a pending authorisation has not settled and an expired one never
  *     will, so neither moved money. They carry `balance = null` and are not chain members, so
@@ -210,6 +212,7 @@ export async function loadChainRows(
     Transaction,
     {
       accountKey: account,
+      deletedAt: null,
       transactionStatusKey: { name: { $in: [...SETTLED_TRANSACTION_STATUSES] } },
       ...extraWhere,
     },
@@ -320,5 +323,40 @@ export async function recalculateChainFromAccountBalance(
 
   await em.flush();
 
+  return { changed, tail };
+}
+
+/**
+ * Take rows out of an account's chain: rebuild every balance after the first of them as though they
+ * had never been entered, and return the new tail. Call it *before* the rows are soft-deleted (it
+ * reads them to find where the chain changes); the caller then deletes them and assigns the tail
+ * to the account.
+ *
+ * History before the first removed row is fixed, as for an amount edit: the row before it supplies
+ * the opening verbatim, and when the oldest row is removed the opening is what the account held
+ * before it, its stored balance minus its amount. The account's opening balance therefore survives
+ * removing its oldest rows, and removing every row brings the account back to it. Removed rows that
+ * are not chain members (pending, undated) change no balance, and `null` says so.
+ */
+export async function removeFromChain(em: ChainEntityManager, account: Account, removedKeys: ReadonlySet<number>): Promise<null | RecalculateChainResult> {
+  const rows = await loadChainRows(em, account, { transactionDate: { $ne: null } });
+  const firstRemoved = rows.findIndex((row) => removedKeys.has(row.transactionKey));
+  const removed = rows[firstRemoved];
+  if (!removed) return null;
+
+  const prior = firstRemoved > 0 ? rows[firstRemoved - 1] : undefined;
+  const opening: ChainBalance = prior
+    ? { appuserCurrencyBalance: storedAppuserBalance(prior, prior.balance ?? 0), balance: prior.balance ?? 0 }
+    : openingFromTail([removed], { appuserCurrencyBalance: storedAppuserBalance(removed, removed.balance ?? 0), balance: removed.balance ?? 0 });
+
+  const suffix = rows.slice(firstRemoved).filter((row) => !removedKeys.has(row.transactionKey));
+  const before = suffix.map((row) => row.balance);
+  const tail = accumulateChain(suffix, opening);
+  const changed = suffix.reduce((count, row, index) => {
+    const previous = before[index];
+    return previous === undefined || Math.abs(previous - (row.balance ?? 0)) > BALANCE_TOLERANCE ? count + 1 : count;
+  }, 0);
+
+  await em.flush();
   return { changed, tail };
 }

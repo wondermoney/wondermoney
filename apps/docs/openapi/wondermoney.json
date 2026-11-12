@@ -4195,9 +4195,19 @@
                   "type": "string"
                 },
                 {
+                  "type": "number"
+                },
+                {
                   "type": "array",
                   "items": {
-                    "type": "string"
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "number"
+                      }
+                    ]
                   }
                 }
               ]
@@ -4585,9 +4595,19 @@
                   "type": "string"
                 },
                 {
+                  "type": "number"
+                },
+                {
                   "type": "array",
                   "items": {
-                    "type": "string"
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "number"
+                      }
+                    ]
                   }
                 }
               ]
@@ -4603,9 +4623,19 @@
                   "type": "string"
                 },
                 {
+                  "type": "number"
+                },
+                {
                   "type": "array",
                   "items": {
-                    "type": "string"
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "number"
+                      }
+                    ]
                   }
                 }
               ]
@@ -4621,9 +4651,19 @@
                   "type": "string"
                 },
                 {
+                  "type": "number"
+                },
+                {
                   "type": "array",
                   "items": {
-                    "type": "string"
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "number"
+                      }
+                    ]
                   }
                 }
               ]
@@ -4639,9 +4679,19 @@
                   "type": "string"
                 },
                 {
+                  "type": "number"
+                },
+                {
                   "type": "array",
                   "items": {
-                    "type": "string"
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "number"
+                      }
+                    ]
                   }
                 }
               ]
@@ -4662,16 +4712,6 @@
             },
             "required": false,
             "name": "confidence",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "string",
-              "maxLength": 64,
-              "pattern": "^\\d+_\\d+$"
-            },
-            "required": false,
-            "name": "cursor",
             "in": "query"
           },
           {
@@ -4705,21 +4745,6 @@
               ]
             },
             "required": false,
-            "name": "includeEmptyAccounts",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "boolean"
-                },
-                {
-                  "type": "string"
-                }
-              ]
-            },
-            "required": false,
             "name": "includeHidden",
             "in": "query"
           },
@@ -4727,29 +4752,22 @@
             "schema": {
               "anyOf": [
                 {
-                  "type": "number"
+                  "type": "string"
                 },
                 {
-                  "type": "string",
-                  "pattern": "^\\d+$"
-                }
-              ],
-              "default": 100
-            },
-            "required": false,
-            "name": "limit",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
+                  "type": "number"
                 },
                 {
                   "type": "array",
                   "items": {
-                    "type": "string"
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "number"
+                      }
+                    ]
                   }
                 }
               ]
@@ -4792,9 +4810,19 @@
                   "type": "string"
                 },
                 {
+                  "type": "number"
+                },
+                {
                   "type": "array",
                   "items": {
-                    "type": "string"
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "number"
+                      }
+                    ]
                   }
                 }
               ]
@@ -4816,6 +4844,48 @@
             },
             "required": false,
             "name": "unreviewedOnly",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "maxLength": 64,
+              "pattern": "^\\d+_\\d+$"
+            },
+            "required": false,
+            "name": "cursor",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "string"
+                }
+              ]
+            },
+            "required": false,
+            "name": "includeEmptyAccounts",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "string",
+                  "pattern": "^\\d+$"
+                }
+              ],
+              "default": 100
+            },
+            "required": false,
+            "name": "limit",
             "in": "query"
           }
         ],
@@ -4873,7 +4943,7 @@
         }
       },
       "patch": {
-        "description": "**Required scope:** `write`.\n\nCategorise, hide or mark reviewed up to 500 transactions in one request.",
+        "description": "**Required scope:** `write`.\n\nCategorise, hide or unhide, mark reviewed, or add and remove tags on many transactions in one request. Select them with `transactionIds`, or with `filter`, the filters of `GET /v1/account/transaction` (every matching row, hidden ones only with `includeHidden`). At most 5,000 transactions; a filter matching more is refused with `bulk_selection_too_large`. A filter key the list does not take is an error.",
         "security": [
           {
             "bearerAuth": []
@@ -4893,14 +4963,240 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "categoryId": {
-                    "type": "string"
-                  },
-                  "hidden": {
-                    "type": "boolean"
-                  },
-                  "reviewed": {
-                    "type": "boolean"
+                  "filter": {
+                    "type": "object",
+                    "properties": {
+                      "direction": {
+                        "type": "string",
+                        "enum": [
+                          "in",
+                          "out"
+                        ]
+                      },
+                      "excludeNonSpending": {
+                        "anyOf": [
+                          {
+                            "type": "boolean"
+                          },
+                          {
+                            "type": "string"
+                          }
+                        ]
+                      },
+                      "excludeTransfers": {
+                        "anyOf": [
+                          {
+                            "type": "boolean"
+                          },
+                          {
+                            "type": "string"
+                          }
+                        ]
+                      },
+                      "memberCurrency": {
+                        "type": "string",
+                        "pattern": "^[A-Z]{3}$"
+                      },
+                      "merchantKeys": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "number"
+                          },
+                          {
+                            "type": "array",
+                            "items": {
+                              "anyOf": [
+                                {
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "number"
+                                }
+                              ]
+                            }
+                          }
+                        ]
+                      },
+                      "statuses": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "number"
+                          },
+                          {
+                            "type": "array",
+                            "items": {
+                              "anyOf": [
+                                {
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "number"
+                                }
+                              ]
+                            }
+                          }
+                        ]
+                      },
+                      "accountKeys": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "number"
+                          },
+                          {
+                            "type": "array",
+                            "items": {
+                              "anyOf": [
+                                {
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "number"
+                                }
+                              ]
+                            }
+                          }
+                        ]
+                      },
+                      "categoryKeys": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "number"
+                          },
+                          {
+                            "type": "array",
+                            "items": {
+                              "anyOf": [
+                                {
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "number"
+                                }
+                              ]
+                            }
+                          }
+                        ]
+                      },
+                      "confidence": {
+                        "type": "string",
+                        "enum": [
+                          "high",
+                          "low",
+                          "medium",
+                          "none"
+                        ]
+                      },
+                      "fromDate": {
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "format": "date-time"
+                          },
+                          {
+                            "type": "number"
+                          },
+                          {
+                            "type": "string"
+                          }
+                        ]
+                      },
+                      "includeHidden": {
+                        "anyOf": [
+                          {
+                            "type": "boolean"
+                          },
+                          {
+                            "type": "string"
+                          }
+                        ]
+                      },
+                      "tagKeys": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "number"
+                          },
+                          {
+                            "type": "array",
+                            "items": {
+                              "anyOf": [
+                                {
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "number"
+                                }
+                              ]
+                            }
+                          }
+                        ]
+                      },
+                      "timezone": {
+                        "type": "string"
+                      },
+                      "toDate": {
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "format": "date-time"
+                          },
+                          {
+                            "type": "number"
+                          },
+                          {
+                            "type": "string"
+                          }
+                        ]
+                      },
+                      "transactionTypes": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "number"
+                          },
+                          {
+                            "type": "array",
+                            "items": {
+                              "anyOf": [
+                                {
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "number"
+                                }
+                              ]
+                            }
+                          }
+                        ]
+                      },
+                      "unreviewedOnly": {
+                        "anyOf": [
+                          {
+                            "type": "boolean"
+                          },
+                          {
+                            "type": "string"
+                          }
+                        ]
+                      }
+                    },
+                    "additionalProperties": false
                   },
                   "transactionIds": {
                     "type": "array",
@@ -4915,12 +5211,49 @@
                         }
                       ]
                     },
-                    "maxItems": 500
+                    "minItems": 1,
+                    "maxItems": 5000
+                  },
+                  "addTagIds": {
+                    "type": "array",
+                    "items": {
+                      "anyOf": [
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "type": "string",
+                          "pattern": "^[1-9]\\d*$"
+                        }
+                      ]
+                    },
+                    "maxItems": 50
+                  },
+                  "categoryId": {
+                    "type": "string"
+                  },
+                  "hidden": {
+                    "type": "boolean"
+                  },
+                  "removeTagIds": {
+                    "type": "array",
+                    "items": {
+                      "anyOf": [
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "type": "string",
+                          "pattern": "^[1-9]\\d*$"
+                        }
+                      ]
+                    },
+                    "maxItems": 50
+                  },
+                  "reviewed": {
+                    "type": "boolean"
                   }
-                },
-                "required": [
-                  "transactionIds"
-                ]
+                }
               }
             }
           }
@@ -6688,9 +7021,19 @@
                   "type": "string"
                 },
                 {
+                  "type": "number"
+                },
+                {
                   "type": "array",
                   "items": {
-                    "type": "string"
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "number"
+                      }
+                    ]
                   }
                 }
               ]
@@ -6706,9 +7049,19 @@
                   "type": "string"
                 },
                 {
+                  "type": "number"
+                },
+                {
                   "type": "array",
                   "items": {
-                    "type": "string"
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "number"
+                      }
+                    ]
                   }
                 }
               ]
@@ -6740,9 +7093,19 @@
                   "type": "string"
                 },
                 {
+                  "type": "number"
+                },
+                {
                   "type": "array",
                   "items": {
-                    "type": "string"
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "number"
+                      }
+                    ]
                   }
                 }
               ]
@@ -6833,9 +7196,19 @@
                   "type": "string"
                 },
                 {
+                  "type": "number"
+                },
+                {
                   "type": "array",
                   "items": {
-                    "type": "string"
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "number"
+                      }
+                    ]
                   }
                 }
               ]
@@ -6878,9 +7251,19 @@
                   "type": "string"
                 },
                 {
+                  "type": "number"
+                },
+                {
                   "type": "array",
                   "items": {
-                    "type": "string"
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "number"
+                      }
+                    ]
                   }
                 }
               ]

@@ -22,7 +22,10 @@ import { Spinner } from "@/components/ui/Spinner";
 import type { TransactionReportScope } from "@/lib/account/transaction-report-scope";
 import type { GetAccountsResponse } from "@/lib/api/account/useAccounts";
 import useAccounts from "@/lib/api/account/useAccounts";
-import type { GetTransactionsResponse } from "@/lib/api/account/useTransactions";
+import type {
+  GetTransactionsResponse,
+  TransactionListFilter,
+} from "@/lib/api/account/useTransactions";
 import { useInfiniteTransactions } from "@/lib/api/account/useTransactions";
 import type { GetConfigsResponse } from "@/lib/api/configs/useConfigs";
 import useConfigs from "@/lib/api/configs/useConfigs";
@@ -108,12 +111,17 @@ export default function AccountsTransactionsClient({
 
   // Table stuff
   // A report's range counts as a chosen one: an empty scope is a result, not a first visit.
-  const [hasUsedDateFilter, setHasUsedDateFilter] = useState(reportScope !== null);
+  const [hasUsedDateFilter, setHasUsedDateFilter] = useState(
+    reportScope !== null,
+  );
   const [transactionDateRange, setTransactionDateRange] = useState<
     DateRange | undefined
   >(
     reportScope
-      ? { from: new Date(reportScope.fromDate), to: new Date(reportScope.toDate) }
+      ? {
+          from: new Date(reportScope.fromDate),
+          to: new Date(reportScope.toDate),
+        }
       : { from: defaultDateRange.from, to: defaultDateRange.to },
   );
   const handleDateRangeChange = (dateRange?: DateRange) => {
@@ -186,54 +194,63 @@ export default function AccountsTransactionsClient({
     tableFilters.transactionTypes.length > 0 ||
     tableFilters.needsReview;
 
+  // The list's filters: the request below, and "select all matching" in the bulk bar.
+  const listFilter: TransactionListFilter = {
+    fromDate: transactionDateRange?.from,
+    toDate: transactionDateRange?.to,
+    includeHidden: showHiddenTransactions,
+    // The table's own filters narrow a report's; where the table has none, the report's apply.
+    accountKeys:
+      tableFilters.accountKeys.length > 0
+        ? tableFilters.accountKeys
+        : reportScope?.accountKeys,
+    categoryKeys:
+      tableFilters.categoryKeys.length > 0
+        ? tableFilters.categoryKeys
+        : reportScope?.categoryKeys,
+    tagKeys:
+      tableFilters.tagKeys.length > 0
+        ? tableFilters.tagKeys
+        : reportScope?.tagKeys,
+    transactionTypes: tableFilters.transactionTypes,
+    ...(tableFilters.needsReview ? { unreviewedOnly: true } : {}),
+    ...(reportScope
+      ? {
+          statuses: reportScope.statuses,
+          excludeTransfers: reportScope.excludeTransfers,
+          excludeNonSpending: reportScope.excludeNonSpending,
+          direction: reportScope.direction,
+          merchantKeys: reportScope.merchantKeys,
+          memberCurrency: reportScope.memberCurrency,
+        }
+      : {}),
+  };
+
   const {
     data: transactionsData,
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
     isLoading: isLoadingTransactions,
-  } = useInfiniteTransactions(
-    {
-      fromDate: transactionDateRange?.from,
-      toDate: transactionDateRange?.to,
-      includeHidden: showHiddenTransactions,
-      // The table's own filters narrow a report's; where the table has none, the report's apply.
-      accountKeys: tableFilters.accountKeys.length > 0 ? tableFilters.accountKeys : reportScope?.accountKeys,
-      categoryKeys: tableFilters.categoryKeys.length > 0 ? tableFilters.categoryKeys : reportScope?.categoryKeys,
-      tagKeys: tableFilters.tagKeys.length > 0 ? tableFilters.tagKeys : reportScope?.tagKeys,
-      transactionTypes: tableFilters.transactionTypes,
-      ...(tableFilters.needsReview ? { unreviewedOnly: true } : {}),
-      ...(reportScope
-        ? {
-            statuses: reportScope.statuses,
-            excludeTransfers: reportScope.excludeTransfers,
-            excludeNonSpending: reportScope.excludeNonSpending,
-            direction: reportScope.direction,
-            merchantKeys: reportScope.merchantKeys,
-            memberCurrency: reportScope.memberCurrency,
-          }
-        : {}),
-    },
-    {
-      enabled: accountsData?.accounts && accountsData.accounts.length > 0,
-      // Only seed the query key the server actually rendered.
-      //
-      // `initialData` applies to whatever key is current, and changing the
-      // date range makes a *new* key. Passed unconditionally, every range
-      // the user picked was seeded with the server payload for the
-      // **default** range — and because the global `staleTime` is 60s, that
-      // stale seed counted as fresh, so no fetch fired. Changing the date
-      // filter silently did nothing for a minute.
-      // A table filter makes this a different query too, so it must not be seeded
-      // with the server's unfiltered payload — the same trap the date range fell into.
-      ...serverSeed(
-        isServerRenderedQuery && !hasTableFilters
-          ? initialTransactionsData
-          : undefined,
-        serverRenderedAt,
-      ),
-    },
-  );
+  } = useInfiniteTransactions(listFilter, {
+    enabled: accountsData?.accounts && accountsData.accounts.length > 0,
+    // Only seed the query key the server actually rendered.
+    //
+    // `initialData` applies to whatever key is current, and changing the
+    // date range makes a *new* key. Passed unconditionally, every range
+    // the user picked was seeded with the server payload for the
+    // **default** range — and because the global `staleTime` is 60s, that
+    // stale seed counted as fresh, so no fetch fired. Changing the date
+    // filter silently did nothing for a minute.
+    // A table filter makes this a different query too, so it must not be seeded
+    // with the server's unfiltered payload — the same trap the date range fell into.
+    ...serverSeed(
+      isServerRenderedQuery && !hasTableFilters
+        ? initialTransactionsData
+        : undefined,
+      serverRenderedAt,
+    ),
+  });
 
   const { data: configsData, isLoading: isLoadingConfigs } = useConfigs(
     serverSeed(initialConfigsData, serverRenderedAt),
@@ -412,6 +429,7 @@ export default function AccountsTransactionsClient({
           ) : undefined
         }
         onServerFiltersChange={handleTableFiltersChange}
+        selectionFilter={listFilter}
         categories={configsData?.categories ?? []}
         transactionDateRange={transactionDateRange}
         setTransactionDateRange={handleDateRangeChange}
