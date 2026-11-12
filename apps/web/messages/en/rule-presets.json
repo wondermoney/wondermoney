@@ -1,0 +1,37 @@
+{
+  "rulePresets": {
+    "names": {
+      "pt-PT": "Portugal",
+      "es-ES": "Spain",
+      "pt-BR": "Brazil",
+      "en": "the UK and US"
+    },
+    "offer": {
+      "title": "Start with rules for {name}",
+      "description": "{count, plural, one {# rule recognizes} other {# rules recognize}} well-known shops and utilities and give them a category. Nothing changes until you add them.",
+      "preview": "See the rules",
+      "dismiss": "Not now"
+    },
+    "browse": "Presets",
+    "browse-hint": "Ready-made rules for well-known merchants in a country",
+    "dialog": {
+      "title": "Rules for {name}",
+      "description": "Each rule recognizes a merchant in the bank's description of money going out, then sets its category and merchant. Income, transfers and anything you set by hand are never changed. The rules are added after yours, and you can edit or delete them afterwards.",
+      "choose": "Country",
+      "list-label": "Rules for {name}",
+      "loading": "Loading the rules…",
+      "error": "The rules could not be loaded.",
+      "matches": "Description contains “{values}”",
+      "excludes": "but not “{value}”",
+      "merchant": "Merchant: {name}",
+      "nothing": "Every rule here is already in your rules.",
+      "install": "{count, plural, =0 {Nothing to add} one {Add # rule} other {Add # rules}}"
+    },
+    "status": {
+      "installed": "Already added",
+      "unavailable": "Category not available"
+    },
+    "installed": "{count, plural, =0 {No rules added} one {# rule added} other {# rules added}}",
+    "install-error": "The rules could not be added."
+  }
+}

@@ -19,6 +19,10 @@ import { toast } from "sonner";
 import { ApplyRulesDialog } from "@/components/rules/ApplyRulesDialog";
 import { ImportRulesDialog } from "@/components/rules/ImportRulesDialog";
 import { RuleEditorDialog } from "@/components/rules/RuleEditorDialog";
+import {
+  RulePresetOffer,
+  RulePresetsButton,
+} from "@/components/rules/RulePresetOffer";
 import { useRuleLookups } from "@/components/rules/useRuleLookups";
 import {
   AlertDialog,
@@ -134,6 +138,12 @@ export default function Rules() {
     return options.categories.filter((option) => keys.has(option.value));
   }, [options.categories, rules]);
 
+  // After a preset adds rules, offer to run them over the transactions already here.
+  const onPresetInstalled = ({ created }: { created: string[] }) => {
+    if (created.length > 0)
+      setApplying({ key: `preset-${Date.now()}`, offer: true, target: "all" });
+  };
+
   const notifyError = (error: unknown, message: string) => {
     if (isDemoReadOnlyError(error)) {
       toast.error(tRoot("demo-read-only-title"), {
@@ -246,6 +256,9 @@ export default function Rules() {
             <Upload className="size-4" />
             {t("import.action")}
           </Button>
+          {!atLimit ? (
+            <RulePresetsButton onInstalled={onPresetInstalled} />
+          ) : null}
           {rules.some((rule) => rule.active) ? (
             <Button
               variant="secondary"
@@ -276,6 +289,8 @@ export default function Rules() {
           {t("limit-reached", { max: MAX_RULES_PER_HOUSEHOLD })}
         </Text>
       ) : null}
+
+      {!atLimit ? <RulePresetOffer onInstalled={onPresetInstalled} /> : null}
 
       {isError ? (
         <div role="alert" className="flex items-center gap-3">

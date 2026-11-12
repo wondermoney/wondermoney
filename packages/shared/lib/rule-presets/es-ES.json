@@ -1,0 +1,532 @@
+{
+  "format": "wondermoney-rules",
+  "version": 1,
+  "preset": {
+    "code": "es-ES",
+    "countries": [
+      "ES"
+    ],
+    "language": "es",
+    "revision": 1
+  },
+  "rules": [
+    {
+      "name": "Mercadona",
+      "match": "all",
+      "conditions": [
+        {
+          "field": "direction",
+          "operator": "is",
+          "value": "out"
+        },
+        {
+          "field": "description",
+          "operator": "contains",
+          "source": "raw",
+          "value": "Mercadona"
+        }
+      ],
+      "actions": [
+        {
+          "type": "set_category",
+          "category": {
+            "system": "GROCERIES"
+          }
+        },
+        {
+          "type": "set_merchant",
+          "merchant": "Mercadona"
+        }
+      ]
+    },
+    {
+      "name": "Carrefour",
+      "match": "all",
+      "conditions": [
+        {
+          "field": "direction",
+          "operator": "is",
+          "value": "out"
+        },
+        {
+          "field": "description",
+          "operator": "contains",
+          "source": "raw",
+          "value": "Carrefour"
+        }
+      ],
+      "actions": [
+        {
+          "type": "set_category",
+          "category": {
+            "system": "GROCERIES"
+          }
+        },
+        {
+          "type": "set_merchant",
+          "merchant": "Carrefour"
+        }
+      ]
+    },
+    {
+      "name": "Lidl",
+      "match": "all",
+      "conditions": [
+        {
+          "field": "direction",
+          "operator": "is",
+          "value": "out"
+        },
+        {
+          "field": "description",
+          "operator": "contains",
+          "source": "raw",
+          "value": "Lidl"
+        }
+      ],
+      "actions": [
+        {
+          "type": "set_category",
+          "category": {
+            "system": "GROCERIES"
+          }
+        },
+        {
+          "type": "set_merchant",
+          "merchant": "Lidl"
+        }
+      ]
+    },
+    {
+      "name": "Eroski",
+      "match": "all",
+      "conditions": [
+        {
+          "field": "direction",
+          "operator": "is",
+          "value": "out"
+        },
+        {
+          "field": "description",
+          "operator": "contains",
+          "source": "raw",
+          "value": "Eroski"
+        }
+      ],
+      "actions": [
+        {
+          "type": "set_category",
+          "category": {
+            "system": "GROCERIES"
+          }
+        },
+        {
+          "type": "set_merchant",
+          "merchant": "Eroski"
+        }
+      ]
+    },
+    {
+      "name": "Alcampo",
+      "match": "all",
+      "conditions": [
+        {
+          "field": "direction",
+          "operator": "is",
+          "value": "out"
+        },
+        {
+          "field": "description",
+          "operator": "contains",
+          "source": "raw",
+          "value": "Alcampo"
+        }
+      ],
+      "actions": [
+        {
+          "type": "set_category",
+          "category": {
+            "system": "GROCERIES"
+          }
+        },
+        {
+          "type": "set_merchant",
+          "merchant": "Alcampo"
+        }
+      ]
+    },
+    {
+      "name": "Iberdrola",
+      "match": "all",
+      "conditions": [
+        {
+          "field": "direction",
+          "operator": "is",
+          "value": "out"
+        },
+        {
+          "field": "description",
+          "operator": "contains",
+          "source": "raw",
+          "value": "Iberdrola"
+        }
+      ],
+      "actions": [
+        {
+          "type": "set_category",
+          "category": {
+            "system": "ELECTRICITY"
+          }
+        },
+        {
+          "type": "set_merchant",
+          "merchant": "Iberdrola"
+        }
+      ]
+    },
+    {
+      "name": "Endesa",
+      "match": "all",
+      "conditions": [
+        {
+          "field": "direction",
+          "operator": "is",
+          "value": "out"
+        },
+        {
+          "field": "description",
+          "operator": "contains",
+          "source": "raw",
+          "value": "Endesa"
+        }
+      ],
+      "actions": [
+        {
+          "type": "set_category",
+          "category": {
+            "system": "ELECTRICITY"
+          }
+        },
+        {
+          "type": "set_merchant",
+          "merchant": "Endesa"
+        }
+      ]
+    },
+    {
+      "name": "Movistar",
+      "match": "all",
+      "conditions": [
+        {
+          "field": "direction",
+          "operator": "is",
+          "value": "out"
+        },
+        {
+          "field": "description",
+          "operator": "contains",
+          "source": "raw",
+          "value": "Movistar"
+        }
+      ],
+      "actions": [
+        {
+          "type": "set_category",
+          "category": {
+            "system": "TV_PHONE_INTERNET"
+          }
+        },
+        {
+          "type": "set_merchant",
+          "merchant": "Movistar"
+        }
+      ]
+    },
+    {
+      "name": "Vodafone",
+      "match": "all",
+      "conditions": [
+        {
+          "field": "direction",
+          "operator": "is",
+          "value": "out"
+        },
+        {
+          "field": "description",
+          "operator": "contains",
+          "source": "raw",
+          "value": "Vodafone"
+        }
+      ],
+      "actions": [
+        {
+          "type": "set_category",
+          "category": {
+            "system": "TV_PHONE_INTERNET"
+          }
+        },
+        {
+          "type": "set_merchant",
+          "merchant": "Vodafone"
+        }
+      ]
+    },
+    {
+      "name": "Yoigo",
+      "match": "all",
+      "conditions": [
+        {
+          "field": "direction",
+          "operator": "is",
+          "value": "out"
+        },
+        {
+          "field": "description",
+          "operator": "contains",
+          "source": "raw",
+          "value": "Yoigo"
+        }
+      ],
+      "actions": [
+        {
+          "type": "set_category",
+          "category": {
+            "system": "TV_PHONE_INTERNET"
+          }
+        },
+        {
+          "type": "set_merchant",
+          "merchant": "Yoigo"
+        }
+      ]
+    },
+    {
+      "name": "Renfe",
+      "match": "all",
+      "conditions": [
+        {
+          "field": "direction",
+          "operator": "is",
+          "value": "out"
+        },
+        {
+          "field": "description",
+          "operator": "contains",
+          "source": "raw",
+          "value": "Renfe"
+        }
+      ],
+      "actions": [
+        {
+          "type": "set_category",
+          "category": {
+            "system": "PUBLIC_TRANSPORT"
+          }
+        },
+        {
+          "type": "set_merchant",
+          "merchant": "Renfe"
+        }
+      ]
+    },
+    {
+      "name": "Metro de Madrid",
+      "match": "all",
+      "conditions": [
+        {
+          "field": "direction",
+          "operator": "is",
+          "value": "out"
+        },
+        {
+          "field": "description",
+          "operator": "contains",
+          "source": "raw",
+          "value": "Metro de Madrid"
+        }
+      ],
+      "actions": [
+        {
+          "type": "set_category",
+          "category": {
+            "system": "PUBLIC_TRANSPORT"
+          }
+        },
+        {
+          "type": "set_merchant",
+          "merchant": "Metro de Madrid"
+        }
+      ]
+    },
+    {
+      "name": "Glovo",
+      "match": "all",
+      "conditions": [
+        {
+          "field": "direction",
+          "operator": "is",
+          "value": "out"
+        },
+        {
+          "field": "description",
+          "operator": "contains",
+          "source": "raw",
+          "value": "Glovo"
+        }
+      ],
+      "actions": [
+        {
+          "type": "set_category",
+          "category": {
+            "system": "FOOD_DELIVERY"
+          }
+        },
+        {
+          "type": "set_merchant",
+          "merchant": "Glovo"
+        }
+      ]
+    },
+    {
+      "name": "Just Eat",
+      "match": "all",
+      "conditions": [
+        {
+          "field": "direction",
+          "operator": "is",
+          "value": "out"
+        },
+        {
+          "field": "description",
+          "operator": "contains",
+          "source": "raw",
+          "value": "Just Eat"
+        }
+      ],
+      "actions": [
+        {
+          "type": "set_category",
+          "category": {
+            "system": "FOOD_DELIVERY"
+          }
+        },
+        {
+          "type": "set_merchant",
+          "merchant": "Just Eat"
+        }
+      ]
+    },
+    {
+      "name": "Uber Eats",
+      "match": "all",
+      "conditions": [
+        {
+          "field": "direction",
+          "operator": "is",
+          "value": "out"
+        },
+        {
+          "field": "description",
+          "operator": "contains",
+          "source": "raw",
+          "value": "Uber Eats"
+        }
+      ],
+      "actions": [
+        {
+          "type": "set_category",
+          "category": {
+            "system": "FOOD_DELIVERY"
+          }
+        },
+        {
+          "type": "set_merchant",
+          "merchant": "Uber Eats"
+        }
+      ]
+    },
+    {
+      "name": "Netflix",
+      "match": "all",
+      "conditions": [
+        {
+          "field": "direction",
+          "operator": "is",
+          "value": "out"
+        },
+        {
+          "field": "description",
+          "operator": "contains",
+          "source": "raw",
+          "value": "Netflix"
+        }
+      ],
+      "actions": [
+        {
+          "type": "set_category",
+          "category": {
+            "system": "STREAMING_SERVICES"
+          }
+        },
+        {
+          "type": "set_merchant",
+          "merchant": "Netflix"
+        }
+      ]
+    },
+    {
+      "name": "Spotify",
+      "match": "all",
+      "conditions": [
+        {
+          "field": "direction",
+          "operator": "is",
+          "value": "out"
+        },
+        {
+          "field": "description",
+          "operator": "contains",
+          "source": "raw",
+          "value": "Spotify"
+        }
+      ],
+      "actions": [
+        {
+          "type": "set_category",
+          "category": {
+            "system": "STREAMING_SERVICES"
+          }
+        },
+        {
+          "type": "set_merchant",
+          "merchant": "Spotify"
+        }
+      ]
+    },
+    {
+      "name": "Farmacia",
+      "match": "all",
+      "conditions": [
+        {
+          "field": "direction",
+          "operator": "is",
+          "value": "out"
+        },
+        {
+          "field": "description",
+          "operator": "contains",
+          "source": "raw",
+          "value": "Farmacia"
+        }
+      ],
+      "actions": [
+        {
+          "type": "set_category",
+          "category": {
+            "system": "HEALTH"
+          }
+        }
+      ]
+    }
+  ]
+}

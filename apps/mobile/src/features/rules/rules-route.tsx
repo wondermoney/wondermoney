@@ -10,6 +10,7 @@ import { ApiError } from '@/lib/api/errors'
 import type { RuleDto } from './rules-contract'
 import { RuleApplyOffer } from './rule-apply-offer'
 import { RuleEditorSheet } from './rule-editor-sheet'
+import { RulePresetOffer } from './rule-preset-offer'
 import { RulesScreen, type RulesViewState } from './rules-screen'
 import { mapRules, type RuleListItem, type RuleSummaryLookups } from './rules-view-model'
 import { useDeleteRule, useRules, useSetRuleActive } from './use-rules'
@@ -65,6 +66,7 @@ export function RulesRoute() {
         onDelete={(ruleId) => remove.mutate(ruleId, { onError: reportWriteFailure(t('rules.deleteFailedTitle'), t('rules.deleteFailedMessage')) })}
         onOpenRule={openRule}
         onRetry={async () => { await query.refetch() }}
+        offer={<RulePresetOffer disabled={demoLocked} />}
         onToggleActive={(ruleId, active) => setActive.mutate({ ruleId, active }, { onError: reportWriteFailure(t('rules.toggleFailedTitle'), t('rules.toggleFailedMessage')) })}
         pending={setActive.isPending || remove.isPending}
         state={state}

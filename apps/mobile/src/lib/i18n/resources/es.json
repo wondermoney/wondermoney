@@ -4860,5 +4860,41 @@
       "demo": "Los cambios están desactivados en la demo.",
       "general": "No se pudo guardar. Inténtalo de nuevo."
     }
+  },
+  "rulePresets": {
+    "names": {
+      "pt-PT": "Portugal",
+      "es-ES": "España",
+      "pt-BR": "Brasil",
+      "en": "el Reino Unido y EE. UU."
+    },
+    "offer": {
+      "title": "Empieza con reglas para {{name}}",
+      "description_one": "{{count}} regla reconoce tiendas y suministros conocidos y les asigna una categoría. Nada cambia hasta que la añadas.",
+      "description_other": "{{count}} reglas reconocen tiendas y suministros conocidos y les asignan una categoría. Nada cambia hasta que las añadas.",
+      "preview": "Ver las reglas",
+      "dismiss": "Ahora no"
+    },
+    "dialog": {
+      "title": "Reglas para {{name}}",
+      "description": "Cada regla reconoce un comercio en la descripción del banco de un pago y fija su categoría y su comercio. Los ingresos, las transferencias y lo que hayas fijado a mano nunca cambian. Las reglas se añaden después de las tuyas y puedes editarlas o eliminarlas después.",
+      "loading": "Cargando las reglas…",
+      "error": "No se pudieron cargar las reglas.",
+      "matches": "La descripción contiene «{{values}}»",
+      "excludes": "pero no «{{value}}»",
+      "merchant": "Comercio: {{name}}",
+      "nothing": "Todas estas reglas ya están en tus reglas.",
+      "install_zero": "Nada que añadir",
+      "install_one": "Añadir {{count}} regla",
+      "install_other": "Añadir {{count}} reglas"
+    },
+    "status": {
+      "installed": "Ya añadida",
+      "unavailable": "Categoría no disponible"
+    },
+    "installed_zero": "No se añadió ninguna regla",
+    "installed_one": "{{count}} regla añadida",
+    "installed_other": "{{count}} reglas añadidas",
+    "installError": "No se pudieron añadir las reglas."
   }
 }

@@ -90,6 +90,7 @@ import {
 } from '@validators/portfolio';
 import { recurringListSchema, recurringOccurrencesQuerySchema } from '@validators/recurring';
 import { monthComparisonQuerySchema, reportsQuerySchema, spendingVsNormalQuerySchema } from '@validators/reports';
+import { listRulePresetsRequestSchema, rulePresetParamsRequestSchema } from '@validators/rule-preset';
 import { setTransactionTagsRequestSchema } from '@validators/tag';
 import { getTransactionImportSchema } from '@validators/transaction-import';
 import { setTransactionSplitsRequestSchema } from '@validators/transaction-split';
@@ -203,6 +204,31 @@ const ruleExportSchema = z
   .object({ rules: z.array(z.record(z.string(), z.unknown())), version: z.string() })
   .passthrough()
   .openapi('RuleExport');
+const rulePresetSummarySchema = z
+  .object({
+    code: z.string().describe('The preset code, such as pt-PT.'),
+    countries: z.array(z.string()).describe('Countries (ISO 3166-1 alpha-2) whose merchants the preset knows.'),
+    installed: z.boolean().describe('Whether the household already has every rule in the preset.'),
+    installedCount: z.number().int().describe('Preset rules the household already has a rule of the same name for.'),
+    language: z.string(),
+    revision: z.number().int(),
+    ruleCount: z.number().int(),
+  })
+  .openapi('RulePresetSummary');
+const rulePresetListSchema = z
+  .object({
+    presets: z.array(rulePresetSummarySchema),
+    suggested: z.string().nullable().describe('The preset matching the person\'s language and country, if any.'),
+  })
+  .openapi('RulePresetList');
+const rulePresetPreviewSchema = z
+  .object({
+    preset: rulePresetSummarySchema,
+    rules: z
+      .array(z.looseObject({ status: z.enum(['installed', 'new', 'unavailable']) }))
+      .describe('Every rule in the preset, in the rules export format, with what installing would do with it.'),
+  })
+  .openapi('RulePresetPreview');
 const watchlistSchema = z
   .object({
     items: z.array(z.object({ logoUrl: z.string().nullable(), symbol: z.string() })),
@@ -1067,6 +1093,18 @@ export const OPERATIONS: Record<string, OperationDefinition> = {
     tag: 'Rules',
     summary: 'Export rules as a portable JSON file',
     response: ruleExportSchema,
+  },
+  'GET /v1/rule/presets': {
+    tag: 'Rules',
+    summary: 'List locale rule presets',
+    request: listRulePresetsRequestSchema,
+    response: rulePresetListSchema,
+  },
+  'GET /v1/rule/presets/:code': {
+    tag: 'Rules',
+    summary: 'Show what a locale rule preset would add',
+    request: rulePresetParamsRequestSchema,
+    response: rulePresetPreviewSchema,
   },
 
   // ---------------------------------------------------------------------------

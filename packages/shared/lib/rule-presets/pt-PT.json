@@ -1,0 +1,561 @@
+{
+  "format": "wondermoney-rules",
+  "version": 1,
+  "preset": {
+    "code": "pt-PT",
+    "countries": [
+      "PT"
+    ],
+    "language": "pt",
+    "revision": 1
+  },
+  "rules": [
+    {
+      "name": "Continente",
+      "match": "all",
+      "conditions": [
+        {
+          "field": "direction",
+          "operator": "is",
+          "value": "out"
+        },
+        {
+          "field": "description",
+          "operator": "contains",
+          "source": "raw",
+          "value": "Continente"
+        }
+      ],
+      "actions": [
+        {
+          "type": "set_category",
+          "category": {
+            "system": "GROCERIES"
+          }
+        },
+        {
+          "type": "set_merchant",
+          "merchant": "Continente"
+        }
+      ]
+    },
+    {
+      "name": "Pingo Doce",
+      "match": "all",
+      "conditions": [
+        {
+          "field": "direction",
+          "operator": "is",
+          "value": "out"
+        },
+        {
+          "field": "description",
+          "operator": "contains",
+          "source": "raw",
+          "value": "Pingo Doce"
+        }
+      ],
+      "actions": [
+        {
+          "type": "set_category",
+          "category": {
+            "system": "GROCERIES"
+          }
+        },
+        {
+          "type": "set_merchant",
+          "merchant": "Pingo Doce"
+        }
+      ]
+    },
+    {
+      "name": "Lidl",
+      "match": "all",
+      "conditions": [
+        {
+          "field": "direction",
+          "operator": "is",
+          "value": "out"
+        },
+        {
+          "field": "description",
+          "operator": "contains",
+          "source": "raw",
+          "value": "Lidl"
+        }
+      ],
+      "actions": [
+        {
+          "type": "set_category",
+          "category": {
+            "system": "GROCERIES"
+          }
+        },
+        {
+          "type": "set_merchant",
+          "merchant": "Lidl"
+        }
+      ]
+    },
+    {
+      "name": "Auchan",
+      "match": "all",
+      "conditions": [
+        {
+          "field": "direction",
+          "operator": "is",
+          "value": "out"
+        },
+        {
+          "field": "description",
+          "operator": "contains",
+          "source": "raw",
+          "value": "Auchan"
+        }
+      ],
+      "actions": [
+        {
+          "type": "set_category",
+          "category": {
+            "system": "GROCERIES"
+          }
+        },
+        {
+          "type": "set_merchant",
+          "merchant": "Auchan"
+        }
+      ]
+    },
+    {
+      "name": "Intermarché",
+      "match": "all",
+      "conditions": [
+        {
+          "field": "direction",
+          "operator": "is",
+          "value": "out"
+        },
+        {
+          "field": "description",
+          "operator": "contains",
+          "source": "raw",
+          "value": "Intermarché"
+        }
+      ],
+      "actions": [
+        {
+          "type": "set_category",
+          "category": {
+            "system": "GROCERIES"
+          }
+        },
+        {
+          "type": "set_merchant",
+          "merchant": "Intermarché"
+        }
+      ]
+    },
+    {
+      "name": "Minipreço",
+      "match": "all",
+      "conditions": [
+        {
+          "field": "direction",
+          "operator": "is",
+          "value": "out"
+        },
+        {
+          "field": "description",
+          "operator": "contains",
+          "source": "raw",
+          "value": "Minipreço"
+        }
+      ],
+      "actions": [
+        {
+          "type": "set_category",
+          "category": {
+            "system": "GROCERIES"
+          }
+        },
+        {
+          "type": "set_merchant",
+          "merchant": "Minipreço"
+        }
+      ]
+    },
+    {
+      "name": "Mercadona",
+      "match": "all",
+      "conditions": [
+        {
+          "field": "direction",
+          "operator": "is",
+          "value": "out"
+        },
+        {
+          "field": "description",
+          "operator": "contains",
+          "source": "raw",
+          "value": "Mercadona"
+        }
+      ],
+      "actions": [
+        {
+          "type": "set_category",
+          "category": {
+            "system": "GROCERIES"
+          }
+        },
+        {
+          "type": "set_merchant",
+          "merchant": "Mercadona"
+        }
+      ]
+    },
+    {
+      "name": "EDP Comercial",
+      "match": "all",
+      "conditions": [
+        {
+          "field": "direction",
+          "operator": "is",
+          "value": "out"
+        },
+        {
+          "field": "description",
+          "operator": "contains",
+          "source": "raw",
+          "value": "EDP Comercial"
+        }
+      ],
+      "actions": [
+        {
+          "type": "set_category",
+          "category": {
+            "system": "ELECTRICITY"
+          }
+        },
+        {
+          "type": "set_merchant",
+          "merchant": "EDP"
+        }
+      ]
+    },
+    {
+      "name": "Galp Electricidade",
+      "match": "all",
+      "conditions": [
+        {
+          "field": "direction",
+          "operator": "is",
+          "value": "out"
+        },
+        {
+          "field": "description",
+          "operator": "contains",
+          "source": "raw",
+          "value": "Galp Electricidade"
+        }
+      ],
+      "actions": [
+        {
+          "type": "set_category",
+          "category": {
+            "system": "ELECTRICITY"
+          }
+        },
+        {
+          "type": "set_merchant",
+          "merchant": "Galp"
+        }
+      ]
+    },
+    {
+      "name": "Vodafone",
+      "match": "all",
+      "conditions": [
+        {
+          "field": "direction",
+          "operator": "is",
+          "value": "out"
+        },
+        {
+          "field": "description",
+          "operator": "contains",
+          "source": "raw",
+          "value": "Vodafone"
+        }
+      ],
+      "actions": [
+        {
+          "type": "set_category",
+          "category": {
+            "system": "TV_PHONE_INTERNET"
+          }
+        },
+        {
+          "type": "set_merchant",
+          "merchant": "Vodafone"
+        }
+      ]
+    },
+    {
+      "name": "Via Verde",
+      "match": "all",
+      "conditions": [
+        {
+          "field": "direction",
+          "operator": "is",
+          "value": "out"
+        },
+        {
+          "field": "description",
+          "operator": "contains",
+          "source": "raw",
+          "value": "Via Verde"
+        }
+      ],
+      "actions": [
+        {
+          "type": "set_category",
+          "category": {
+            "system": "VEHICLE_MAINTENANCE"
+          }
+        },
+        {
+          "type": "set_merchant",
+          "merchant": "Via Verde"
+        }
+      ]
+    },
+    {
+      "name": "Metropolitano de Lisboa",
+      "match": "all",
+      "conditions": [
+        {
+          "field": "direction",
+          "operator": "is",
+          "value": "out"
+        },
+        {
+          "field": "description",
+          "operator": "contains",
+          "source": "raw",
+          "value": "Metropolitano de Lisboa"
+        }
+      ],
+      "actions": [
+        {
+          "type": "set_category",
+          "category": {
+            "system": "PUBLIC_TRANSPORT"
+          }
+        },
+        {
+          "type": "set_merchant",
+          "merchant": "Metropolitano de Lisboa"
+        }
+      ]
+    },
+    {
+      "name": "Metro do Porto",
+      "match": "all",
+      "conditions": [
+        {
+          "field": "direction",
+          "operator": "is",
+          "value": "out"
+        },
+        {
+          "field": "description",
+          "operator": "contains",
+          "source": "raw",
+          "value": "Metro do Porto"
+        }
+      ],
+      "actions": [
+        {
+          "type": "set_category",
+          "category": {
+            "system": "PUBLIC_TRANSPORT"
+          }
+        },
+        {
+          "type": "set_merchant",
+          "merchant": "Metro do Porto"
+        }
+      ]
+    },
+    {
+      "name": "Comboios de Portugal",
+      "match": "all",
+      "conditions": [
+        {
+          "field": "direction",
+          "operator": "is",
+          "value": "out"
+        },
+        {
+          "field": "description",
+          "operator": "contains",
+          "source": "raw",
+          "value": "Comboios de Portugal"
+        }
+      ],
+      "actions": [
+        {
+          "type": "set_category",
+          "category": {
+            "system": "PUBLIC_TRANSPORT"
+          }
+        },
+        {
+          "type": "set_merchant",
+          "merchant": "CP - Comboios de Portugal"
+        }
+      ]
+    },
+    {
+      "name": "Glovo",
+      "match": "all",
+      "conditions": [
+        {
+          "field": "direction",
+          "operator": "is",
+          "value": "out"
+        },
+        {
+          "field": "description",
+          "operator": "contains",
+          "source": "raw",
+          "value": "Glovo"
+        }
+      ],
+      "actions": [
+        {
+          "type": "set_category",
+          "category": {
+            "system": "FOOD_DELIVERY"
+          }
+        },
+        {
+          "type": "set_merchant",
+          "merchant": "Glovo"
+        }
+      ]
+    },
+    {
+      "name": "Uber Eats",
+      "match": "all",
+      "conditions": [
+        {
+          "field": "direction",
+          "operator": "is",
+          "value": "out"
+        },
+        {
+          "field": "description",
+          "operator": "contains",
+          "source": "raw",
+          "value": "Uber Eats"
+        }
+      ],
+      "actions": [
+        {
+          "type": "set_category",
+          "category": {
+            "system": "FOOD_DELIVERY"
+          }
+        },
+        {
+          "type": "set_merchant",
+          "merchant": "Uber Eats"
+        }
+      ]
+    },
+    {
+      "name": "Netflix",
+      "match": "all",
+      "conditions": [
+        {
+          "field": "direction",
+          "operator": "is",
+          "value": "out"
+        },
+        {
+          "field": "description",
+          "operator": "contains",
+          "source": "raw",
+          "value": "Netflix"
+        }
+      ],
+      "actions": [
+        {
+          "type": "set_category",
+          "category": {
+            "system": "STREAMING_SERVICES"
+          }
+        },
+        {
+          "type": "set_merchant",
+          "merchant": "Netflix"
+        }
+      ]
+    },
+    {
+      "name": "Spotify",
+      "match": "all",
+      "conditions": [
+        {
+          "field": "direction",
+          "operator": "is",
+          "value": "out"
+        },
+        {
+          "field": "description",
+          "operator": "contains",
+          "source": "raw",
+          "value": "Spotify"
+        }
+      ],
+      "actions": [
+        {
+          "type": "set_category",
+          "category": {
+            "system": "STREAMING_SERVICES"
+          }
+        },
+        {
+          "type": "set_merchant",
+          "merchant": "Spotify"
+        }
+      ]
+    },
+    {
+      "name": "Farmácia",
+      "match": "all",
+      "conditions": [
+        {
+          "field": "direction",
+          "operator": "is",
+          "value": "out"
+        },
+        {
+          "field": "description",
+          "operator": "contains",
+          "source": "raw",
+          "value": "Farmácia"
+        }
+      ],
+      "actions": [
+        {
+          "type": "set_category",
+          "category": {
+            "system": "HEALTH"
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -10,9 +10,10 @@
     "type-check": "fumadocs-mdx && next typegen && tsc --noEmit",
     "types:check": "fumadocs-mdx && next typegen && tsc --noEmit",
     "postinstall": "fumadocs-mdx",
-    "lint": "eslint && node scripts/check-sub-processors.mjs && node scripts/check-locale-parity.mjs",
+    "lint": "eslint && node scripts/check-sub-processors.mjs && node scripts/check-locale-parity.mjs && node scripts/rule-presets.mjs --check",
     "check:sub-processors": "node scripts/check-sub-processors.mjs",
-    "check:locale-parity": "node scripts/check-locale-parity.mjs"
+    "check:locale-parity": "node scripts/check-locale-parity.mjs",
+    "rule-presets": "node scripts/rule-presets.mjs"
   },
   "dependencies": {
     "@scalar/api-client-react": "^2.0.64",
