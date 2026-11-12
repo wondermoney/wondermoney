@@ -388,6 +388,13 @@ export const oidcCallbackRateLimit = (): RequestHandler => createRateLimiter({ f
 /** `/v1/household/invites/validate` — public invite-token lookup. */
 export const inviteLookupRateLimit = (): RequestHandler => createRateLimiter({ family: 'inviteLookup' });
 
+/**
+ * `POST /v1/auth/demo` — public, password-less sign-in to the shared demo account. On the
+ * `authExchange` family (IP-keyed, never relaxed) with a store of its own: every call creates a
+ * session, and clicking "Try the demo" must not spend the attempts a password sign-in gets.
+ */
+export const demoSignInRateLimit = (): RequestHandler => createRateLimiter({ family: 'authExchange' });
+
 /** `POST /v1/auth/pair` — public session exchange for a QR pairing code. */
 export const pairingRateLimit = (): RequestHandler => createRateLimiter({ family: 'pairing' });
 

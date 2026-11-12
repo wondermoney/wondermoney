@@ -1028,6 +1028,25 @@
         }
       }
     },
+    "/v1/auth/demo": {
+      "post": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created"
+          }
+        }
+      }
+    },
     "/v1/banking/bank": {
       "get": {
         "description": "",

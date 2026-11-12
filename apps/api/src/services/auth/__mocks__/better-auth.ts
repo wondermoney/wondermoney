@@ -53,6 +53,34 @@ export const createPairedSession = vi
     token: 'paired-token',
   });
 
+export const createDemoSession = vi
+  .fn<(input: { expiresAt: Date; userId: string }) => Promise<{
+    cookieAttributes: { domain?: string; httpOnly: boolean; path: string; sameSite?: 'lax' | 'none' | 'strict'; secure: boolean };
+    cookieName: string;
+    cookieValue: string;
+    expiresAt: Date;
+    sessionId: string;
+    token: string;
+  }>>()
+  .mockImplementation((input) => Promise.resolve({
+    cookieAttributes: { httpOnly: true, path: '/', sameSite: 'lax', secure: false },
+    cookieName: 'better-auth.session_token',
+    cookieValue: 'demo-token.signature',
+    expiresAt: input.expiresAt,
+    sessionId: 'demo-session-id',
+    token: 'demo-token',
+  }));
+
+export const ensureDemoAuthUser = vi
+  .fn<(input: { email: string; name: string }) => Promise<{ created: boolean; id: string }>>()
+  .mockResolvedValue({ created: true, id: 'demo-better-auth-user-id' });
+
+export const findBetterAuthUser = vi
+  .fn<(userId: string) => Promise<null | { email: string; id: string; twoFactorEnabled: boolean | null }>>()
+  .mockResolvedValue(null);
+
+export const deleteExpiredAuthSessions = vi.fn<(userId: string) => Promise<void>>().mockResolvedValue(undefined);
+
 export const listAuthSessions = vi
   .fn<(sessionIds: string[]) => Promise<{
     createdAt: Date;

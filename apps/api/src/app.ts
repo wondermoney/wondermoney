@@ -22,6 +22,7 @@ import { adminAuth, optionalAuth } from '@middleware/auth';
 import { requireCalendarFeedToken } from '@middleware/calendar-feed';
 import { configureClientIp } from '@middleware/client-ip';
 import { csrfOriginProtection } from '@middleware/csrf-origin';
+import { blockDemoAuthAccountChanges } from '@middleware/demo-auth-guard';
 import { errorHandler } from '@middleware/error-handler';
 import { requireInstanceAdmin } from '@middleware/instance-admin';
 import {
@@ -29,6 +30,7 @@ import {
   assistantRateLimit,
   authExchangeRateLimit,
   calendarFeedRateLimit,
+  demoSignInRateLimit,
   feedbackRateLimit,
   globalBackstopRateLimit,
   importSessionRateLimit,
@@ -171,6 +173,9 @@ export default class Application {
       this.host.use('/api/auth/passkey', passkeyRateLimit());
       // The OIDC callback: the same family, its own store.
       this.host.use('/api/auth/callback/oidc', oidcCallbackRateLimit());
+      // The shared demo account cannot change itself through better-auth's account routes
+      // (name, email, password, TOTP, passkeys, sessions); see the middleware.
+      this.host.use('/api/auth', blockDemoAuthAccountChanges);
 
       // better-auth runs embedded in `api`. Mount its handler BEFORE express.json
       // (it reads the raw request body itself — express.json would consume it and
@@ -212,6 +217,9 @@ export default class Application {
       // QR pairing's public exchange. Its own strict, IP-keyed family: the code it accepts is a
       // credential, even though it is single-use and short-lived.
       this.host.use('/v1/auth/pair', pairingRateLimit());
+      // One-click demo sign-in: it creates a session without a credential, so it gets an
+      // IP-keyed `authExchange` budget of its own as well as the `/v1/auth` one below.
+      this.host.use('/v1/auth/demo', demoSignInRateLimit());
       // Credential surface: strict, per-IP, and never relaxed outside production.
       this.host.use('/v1/auth', authExchangeRateLimit(), optionalAuth, getUserOptional, authRoutes);
       this.host.use('/v1/banking', ...authedTenant(), bankingRoutes);

@@ -1,9 +1,10 @@
 import * as Application from 'expo-application'
-import * as SecureStore from 'expo-secure-store'
 import { useCallback, useState } from 'react'
 
 import { useServerSwitch } from '@/components/providers/server-switch-provider'
-import { exchangePairingCode, type PairingOutcome, type PairingPayload, storePairedSession } from '@/lib/auth/pairing'
+import { exchangePairingCode, type PairingOutcome, type PairingPayload, type PairingStorage } from '@/lib/auth/pairing'
+
+import { adoptSession } from './adopt-session'
 
 export type PairingStatus = 'idle' | 'pairing' | 'paired' | Exclude<PairingOutcome['status'], 'paired'>
 
@@ -12,24 +13,12 @@ type PairingDeps = Readonly<{
   fetchImpl?: typeof fetch
   platform?: string
   /** Injected in tests; defaults to the hardened SecureStore write. */
-  storage?: { setItem: (key: string, value: string) => Promise<void> }
+  storage?: PairingStorage
 }>
 
-const secureStoreWriter = {
-  setItem: (key: string, value: string) =>
-    SecureStore.setItemAsync(key, value, {
-      keychainAccessible: SecureStore.WHEN_UNLOCKED_THIS_DEVICE_ONLY,
-      requireAuthentication: false,
-    }),
-}
-
 /**
- * Scans a pairing QR into a signed-in session.
- *
- * Order matters: the session cookie is written to the Expo client's storage *before* the
- * server switch rebuilds the auth client, because the client reads persisted cookies when it
- * is constructed. After the switch the normal session bootstrap finds the session and the app
- * opens signed in, with nothing typed.
+ * Scans a pairing QR into a signed-in session: the code is exchanged for a session, which
+ * `adoptSession` stores and opens the app with, with nothing typed.
  */
 export function usePairing(deps: PairingDeps = {}) {
   const serverSwitch = useServerSwitch()
@@ -57,8 +46,7 @@ export function usePairing(deps: PairingDeps = {}) {
         return outcome.status
       }
 
-      await storePairedSession(payload.server, outcome.session, deps.storage ?? secureStoreWriter)
-      await serverSwitch.switchServer(payload.server)
+      await adoptSession(serverSwitch, payload.server, outcome.session, deps.storage)
       setStatus('paired')
       return 'paired'
     },

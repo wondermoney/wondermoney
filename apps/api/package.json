@@ -13,6 +13,8 @@
     "demo:refresh:dev": "NODE_ENV=development tsx src/database/scripts/refresh-demo-data.ts",
     "demo:reset": "NODE_ENV=production node dist/database/scripts/reset-demo-data.js",
     "demo:reset:dev": "NODE_ENV=development tsx src/database/scripts/reset-demo-data.ts",
+    "demo:seed": "NODE_ENV=production node dist/database/scripts/seed-demo-household.js",
+    "demo:seed:dev": "node scripts/assert-local-db.mjs demo:seed:dev --opt-in && NODE_ENV=development tsx src/database/scripts/seed-demo-household.ts",
     "dev": "tsx watch --clear-screen=false src/server.ts",
     "devi": "infisical run -- pnpm dev",
     "devs": "infisical run --env=staging -- pnpm dev",

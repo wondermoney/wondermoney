@@ -196,6 +196,20 @@ describe('Auth endpoint rate limiting', () => {
     expect((await request(app.host).post('/api/auth/sign-in/email').send({ email: 'a@b.com', password: 'x' })).status).not.toBe(429);
   });
 
+  it('gives the demo sign-in its own auth budget, apart from password sign-in', async () => {
+    const app = await loadApp();
+
+    for (let i = 0; i < AUTH_LIMIT; i += 1) {
+      const res = await request(app.host).post('/v1/auth/demo');
+      expect(res.status).not.toBe(429);
+    }
+
+    const overLimit = await request(app.host).post('/v1/auth/demo');
+    expect(overLimit.status).toBe(429);
+    expect(Number(overLimit.headers['retry-after'])).toBeGreaterThan(0);
+    expect((await request(app.host).post('/api/auth/sign-in/email').send({ email: 'a@b.com', password: 'x' })).status).not.toBe(429);
+  });
+
   it('does not apply the strict auth limit to non-sensitive auth paths', async () => {
     const app = await loadApp();
 

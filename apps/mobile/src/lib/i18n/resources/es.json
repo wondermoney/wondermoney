@@ -191,6 +191,16 @@
         "invalidCode": "Ese código ha caducado o ya se ha usado. Muestra uno nuevo en la web.",
         "unavailable": "No se pudo conectar con ese servidor. Inténtalo de nuevo."
       }
+    },
+    "demo": {
+      "button": "Probar la demo",
+      "signingIn": "Abriendo la demo…",
+      "errors": {
+        "disabled": "Este servidor no ofrece la demo.",
+        "rateLimited": "Demasiados accesos a la demo. Inténtalo de nuevo en unos minutos.",
+        "unavailable": "La demo no está disponible ahora. Inténtalo más tarde.",
+        "unreachable": "No se ha podido contactar con el servidor. Comprueba tu conexión e inténtalo de nuevo."
+      }
     }
   },
   "access": {
@@ -4896,5 +4906,12 @@
     "installed_one": "{{count}} regla añadida",
     "installed_other": "{{count}} reglas añadidas",
     "installError": "No se pudieron añadir las reglas."
+  },
+  "demo": {
+    "banner": {
+      "message": "Estás explorando una demo compartida y de solo lectura. Sus datos se restablecen cada día.",
+      "signUp": "Crea tu cuenta",
+      "selfHost": "Aloja WonderMoney en tu servidor"
+    }
   }
 }

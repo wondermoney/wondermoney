@@ -1,5 +1,6 @@
 import type { Request, Response } from 'express';
 
+import { isDemoSignInEnabled } from '@config/demo';
 import { instanceName } from '@config/instance-name';
 import { isMcpEnabled } from '@config/mcp';
 import { statementImportLimits } from '@config/statement-import';
@@ -38,6 +39,8 @@ export function getInstance(_req: Request, res: Response) {
       /** The providers this instance enabled through `BANK_PROVIDERS`. */
       bankSyncProviders: bankSync.bankSyncProviders,
       contactForm: supportInbox() !== null,
+      // One-click sign-in to the shared read-only demo (`POST /v1/auth/demo`, `DEMO_SIGN_IN_ENABLED`).
+      demo: isDemoSignInEnabled(),
       // False when mail only goes to the log.
       email: resolveEmailDriver() !== 'log',
       // In-app feedback is emailed to SUPPORT_EMAIL, so it needs both an inbox and a real driver.

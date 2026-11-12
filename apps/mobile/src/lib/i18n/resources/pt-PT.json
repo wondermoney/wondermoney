@@ -191,6 +191,16 @@
         "invalidCode": "Esse código expirou ou já foi usado. Mostra um novo na web.",
         "unavailable": "Não foi possível ligar a esse servidor. Tenta novamente."
       }
+    },
+    "demo": {
+      "button": "Experimentar a demonstração",
+      "signingIn": "A abrir a demonstração…",
+      "errors": {
+        "disabled": "Este servidor não disponibiliza a demonstração.",
+        "rateLimited": "Demasiadas entradas na demonstração. Tente novamente dentro de alguns minutos.",
+        "unavailable": "A demonstração não está disponível de momento. Tente mais tarde.",
+        "unreachable": "Não foi possível contactar o servidor. Verifique a ligação e tente novamente."
+      }
     }
   },
   "access": {
@@ -4896,5 +4906,12 @@
     "installed_one": "{{count}} regra adicionada",
     "installed_other": "{{count}} regras adicionadas",
     "installError": "Não foi possível adicionar as regras."
+  },
+  "demo": {
+    "banner": {
+      "message": "Está a explorar uma demonstração partilhada e só de leitura. Os dados são repostos todos os dias.",
+      "signUp": "Criar a sua conta",
+      "selfHost": "Alojar o WonderMoney no seu servidor"
+    }
   }
 }

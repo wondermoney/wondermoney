@@ -152,7 +152,37 @@ Si la aplicación web pasa a otro dominio, las llaves de acceso existentes dejan
 | `NEXT_PUBLIC_TERMS_URL`, `NEXT_PUBLIC_PRIVACY_URL` | Tus páginas legales, enlazadas desde la página de registro cuando ambas están definidas |
 | `PRIVACY_POLICY_URL` | Tu política de privacidad, enlazada desde el pie de los correos. `{lang}` se sustituye por el idioma del destinatario (`en` o `pt`), por ejemplo `https://example.com/{lang}/privacy`. Por defecto, apunta a los ajustes de privacidad de la aplicación |
 | `MCP_ENABLED` | El servidor MCP de solo lectura en `POST /v1/mcp`, que permite a un cliente de IA preguntar por las finanzas del propio usuario con un token de API personal con `mcp:read` (consulta [Conectar un cliente de IA](/es/docs/settings-security-privacy/connect-ai-client)). Activado por defecto; define `false` para responder `404` e informar de `features.mcp: false` en `GET /v1/instance` |
+| `DEMO_SIGN_IN_ENABLED` | `true` activa una demostración pública de solo lectura: un botón **Probar la demo** que inicia la sesión de cualquier persona en una cuenta de demostración compartida. Desactivado por defecto; consulta [Demostración pública](#demostración-pública) |
 | `TRANSFER_MATCH_FX_TOLERANCE` | La diferencia aceptada entre los dos lados de una transferencia entre cuentas en monedas distintas, después de convertir el importe que salió al tipo de cambio de ese día, como fracción del importe que llegó: `0.02` (por defecto) es un 2 por ciento. Súbela si el margen de cambio y las comisiones de tu banco son mayores; como máximo `0.25`. Configúrala en la API y en el worker |
+
+## Demostración pública
+
+Si tu instancia activa la demostración, la gente puede probar WonderMoney sin crear una cuenta. Define `DEMO_SIGN_IN_ENABLED=true` en la API: la página de inicio de sesión, en la web y en la app móvil, muestra entonces **Probar la demo**, que inicia la sesión del visitante en un hogar de demostración compartido, sin contraseña, y `GET /v1/instance` informa de `features.demo: true`. Con el ajuste desactivado, `POST /v1/auth/demo` responde `404` y el botón no aparece.
+
+Todos los visitantes comparten la demostración, así que es de solo lectura:
+
+- Cualquier cambio se rechaza con el mensaje de solo lectura: los datos del hogar y la propia cuenta (nombre, correo, contraseña, autenticador, llaves de acceso y cerrar la sesión de otros visitantes).
+- Una sesión de demostración termina dos horas después de empezar. Los inicios de sesión en la demostración tienen un límite por dirección IP, como los inicios de sesión con contraseña.
+- Una franja en todas las pantallas dice que los datos son una demostración compartida que se restablece cada día, con enlaces para crear una cuenta (solo cuando `SIGNUP_MODE` es `open`) y a estas guías de alojamiento propio.
+- La cuenta de demostración no tiene contraseña ni autenticador. El inicio de sesión en la demostración rechaza una cuenta con autenticador y nunca inicia la sesión en otra cuenta.
+
+Crea la cuenta de demostración y su hogar antes de activar el ajuste:
+
+```sh
+docker compose exec api node dist/database/scripts/seed-demo-household.js
+```
+
+En Kubernetes, ejecuta el mismo comando en el pod de la API. Solo escribe la cuenta de demostración (`demo@wonder.money`) y su hogar, no toca ninguna otra cuenta y se puede ejecutar de nuevo; vuelve a ejecutarlo para dejar la demostración como estaba. Se niega, sin cambiar nada, cuando esa dirección pertenece a una cuenta que no es la de demostración. En un servidor sin datos de mercado, también da un historial de precios a las seis acciones de la demostración, pero solo a una acción que no tenga ningún precio.
+
+Ajustes recomendados para una instancia de demostración:
+
+| Ajuste | Recomendado | Por qué |
+|---|---|---|
+| `NEXT_PUBLIC_GTM_ID`, `NEXT_PUBLIC_POSTHOG_KEY`, `ANALYTICS_OUTBOX_MODE` | Vacíos | Los visitantes son desconocidos: no se debe registrar nada sobre ellos (consulta [Analítica](#analítica)) |
+| IA (`AI_BASE_URL`, `AI_PROVIDER`, `AZURE_OPENAI_*`) | Vacíos, o limitados con `AI_DAILY_LIMIT_*` | La cuenta de demostración no puede usar el asistente, la lectura de recibos ni el mapeo de columnas con IA, porque todos guardan algo. Con la IA desactivada, la app los oculta. Todos los visitantes comparten un hogar, así que los límites diarios también se comparten |
+| `BANK_PROVIDERS` | `none` | Oculta la sincronización bancaria. La cuenta de demostración tampoco puede conectar un banco |
+| `ENABLE_PGBOSS_DEMO_DATA_REFRESH` (worker) | `true` | Adelanta las transacciones de la demostración cada día a las 01:15 UTC, para que sigan siendo recientes |
+| `SIGNUP_MODE` | `closed` en un servidor solo de demostración, `open` para que los visitantes puedan crear una cuenta | La franja solo enlaza a crear una cuenta cuando es `open` |
 
 ## Analítica
 

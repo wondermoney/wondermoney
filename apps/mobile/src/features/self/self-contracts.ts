@@ -7,6 +7,8 @@ export const profileSchema = z.object({
   firstName: z.string().max(255).nullable(),
   lastName: z.string().max(255).nullable(),
   mfaEnabled: z.boolean(),
+  // The server's shared read-only demo account. Absent on an older server: not the demo.
+  demo: z.boolean().optional(),
 })
 
 export const profileResponseSchema = z.object({ profile: profileSchema })

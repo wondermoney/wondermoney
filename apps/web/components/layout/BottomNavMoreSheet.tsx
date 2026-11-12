@@ -1,6 +1,5 @@
 "use client";
 
-import { useQueryClient } from "@tanstack/react-query";
 import {
   BarChart3,
   BookOpen,
@@ -17,14 +16,13 @@ import {
   Target,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { usePostHog } from "posthog-js/react";
 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
-import { useRouter } from "@/i18n/navigation";
 import { useFeature } from "@/lib/api/instance/useInstance";
-import { authClient } from "@/lib/auth/client";
+import { useIsDemoProfile } from "@/lib/api/user/useProfile";
 import { useUser } from "@/lib/auth/user-context";
+import { useSignOut } from "@/lib/auth/useSignOut";
 import { instanceConfig } from "@/lib/instance";
 import { cn } from "@/lib/utils";
 
@@ -43,24 +41,20 @@ type Props = {
 export default function BottomNavMoreSheet({ open, onOpenChange }: Props) {
   const t = useTranslations();
   const user = useUser();
-  const router = useRouter();
-  const queryClient = useQueryClient();
-  const posthog = usePostHog();
+  const signOut = useSignOut();
+  const isDemo =
+    useIsDemoProfile({ fetch: false }) ||
+    (instanceConfig.demoEmail !== null &&
+      user?.email === instanceConfig.demoEmail);
   const marketDataAvailable = useFeature((features) => features.marketData);
 
   const userInitials = user?.email?.split("@")[0].slice(0, 2).toUpperCase();
   const userTrimmedEmail = user?.email?.split("@")[0];
   const close = () => onOpenChange(false);
 
-  const onLogoutClickHandler = async () => {
-    await queryClient.cancelQueries();
-    queryClient.removeQueries();
-    await authClient.signOut().catch((signOutError) => {
-      console.error("Error logging out", signOutError);
-    });
+  const onLogoutClickHandler = () => {
     close();
-    posthog.reset();
-    router.push("/auth/login");
+    return signOut("/auth/login");
   };
 
   const itemClass =
@@ -202,16 +196,15 @@ export default function BottomNavMoreSheet({ open, onOpenChange }: Props) {
         </ul>
 
         {/* Demo mode badge */}
-        {instanceConfig.demoEmail !== null &&
-          user?.email === instanceConfig.demoEmail && (
-            <>
-              <Separator />
-              <div className="bg-primary/10 mx-6 my-3 flex items-center justify-center gap-2 rounded py-2">
-                <FlaskConical className="text-primary size-5" />
-                <Text className="text-primary">{t("demo-mode")}</Text>
-              </div>
-            </>
-          )}
+        {isDemo && (
+          <>
+            <Separator />
+            <div className="bg-primary/10 mx-6 my-3 flex items-center justify-center gap-2 rounded py-2">
+              <FlaskConical className="text-primary size-5" />
+              <Text className="text-primary">{t("demo-mode")}</Text>
+            </div>
+          </>
+        )}
 
         <Separator />
 

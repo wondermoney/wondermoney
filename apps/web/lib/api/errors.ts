@@ -29,6 +29,8 @@ export const API_ERROR_CODE = {
   BANK_CREDENTIAL_INVALID: "bank_credential_invalid",
   CONFLICT: "conflict",
   DEMO_READ_ONLY: "demo_read_only",
+  /** `POST /v1/auth/demo` on a server that has the demo on but no demo account set up (503). */
+  DEMO_UNAVAILABLE: "demo_unavailable",
   EMAIL_VERIFICATION_REQUIRED: "email_verification_required",
   FORBIDDEN: "forbidden",
   HOUSEHOLD_FULL: "household_full",

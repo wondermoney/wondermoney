@@ -38,6 +38,10 @@ are each switched off when not configured, and the features that need them are h
 The seeders create three accounts you can sign in with: an admin, a demo account with
 generated data and an empty one. Their passwords come from `SEED_ADMIN_PASSWORD`,
 `SEED_DEMO_PASSWORD` and `SEED_EMPTY_PASSWORD`, with a fixed development default.
+Set `DEMO_SIGN_IN_ENABLED=true` to try the one-click "Try the demo" sign-in against that demo
+account. `pnpm demo:seed:dev` creates the demo account and household on a database that has
+the reference data but not the development seed; `pnpm demo:seed` does the same from the built
+`dist` for a demo server (see "Public demo" in the self-hosting configuration docs).
 
 ## `.env` decides which database you touch
 

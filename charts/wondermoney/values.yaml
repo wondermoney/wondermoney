@@ -36,6 +36,10 @@ config:
   SIGNUP_MODE: open
   SUPPORT_EMAIL: ""
   SPONSOR_URL: ""
+  # "true": a public read-only demo, with a "Try the demo" button that signs anyone in to one
+  # shared demo account. Create it first in the API pod:
+  # `node dist/database/scripts/seed-demo-household.js`. Empty: off.
+  DEMO_SIGN_IN_ENABLED: ""
   NEXT_PUBLIC_TERMS_URL: ""
   NEXT_PUBLIC_PRIVACY_URL: ""
   PRIVACY_POLICY_URL: ""

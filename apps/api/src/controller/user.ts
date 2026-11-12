@@ -7,7 +7,7 @@ import { sqlQuery } from '@app/database/sql';
 import { zParse } from '@app/validators/parser';
 import { completeOnboardingStepSchema, getRequisitionRequestSchema, updateUserDataRequestSchema } from '@app/validators/user';
 import { AccountFinancialInstitution, AccountFinancialInstitutionProvider } from '@entity/AccountFinancialInstitution';
-import { Appuser } from '@entity/Appuser';
+import { Appuser, AppuserAccountType } from '@entity/Appuser';
 import { EnableBankingConnection } from '@entity/EnableBankingConnection';
 import { NordigenRequisition } from '@entity/NordigenRequisition';
 import { Onboarding } from '@entity/Onboarding';
@@ -58,6 +58,8 @@ export function getCurrentUserProfile(req: Request, res: Response) {
       // null while the feature is off for them. An OpenAI-compatible endpoint is named only by its
       // family: its address may be an internal host.
       aiProviders: { statementImport: effectiveAiCapabilities(req.user).statementImport ? aiProviderLabel('statementImport') : null },
+      // The shared read-only demo account: clients show the demo banner and its links.
+      demo: req.user?.accountType === AppuserAccountType.DEMO,
       // better-auth is the source of truth for MFA state; `getAuthSession` copies
       // `twoFactorEnabled` onto `req.authUser`. The `Appuser` row has no MFA column.
       mfaEnabled: req.authUser?.user.twoFactorEnabled ?? false,

@@ -54,6 +54,16 @@ export function usePasswordSignIn(): boolean {
 }
 
 /**
+ * Whether anyone may create an account on this server (`signupMode: 'open'`). False while the
+ * description loads and for invite-only, closed or unknown modes, so a sign-up link that would
+ * only be refused stays hidden.
+ */
+export function useSignupOpen(): boolean {
+  const { data } = useInstance()
+  return data?.signupMode === 'open'
+}
+
+/**
  * Which build the connected server runs, for the More screen's version line. Null until the
  * description arrives, and on an older server that does not report a version.
  */

@@ -12,6 +12,11 @@ export interface InstanceDescription {
     ai: { assistant: boolean; csvMapping: boolean; enrichment: boolean; monthlyStory: boolean; ocr: boolean; statementImport?: boolean };
     bankSync: boolean;
     contactForm: boolean;
+    /**
+     * One-click sign-in to the shared read-only demo account (`POST /v1/auth/demo`,
+     * `DEMO_SIGN_IN_ENABLED`). Absent on an API older than this field, which reads as off.
+     */
+    demo?: boolean;
     email: boolean;
     /**
      * In-app feedback can be emailed to the support inbox (`POST /v1/feedback`). Absent on an
@@ -138,6 +143,16 @@ export function useStatementImport(): null | StatementImportFeature {
   const hydrated = useHydrated();
   if (!hydrated || !data?.features.ai.statementImport) return null;
   return data.features.statementImport ?? null;
+}
+
+/**
+ * Who may create an account here, or null until the server has said: callers that offer
+ * sign-up show it only for `"open"`.
+ */
+export function useSignupMode(): InstanceDescription["signupMode"] | null {
+  const { data } = useInstance();
+  const hydrated = useHydrated();
+  return hydrated ? (data?.signupMode ?? null) : null;
 }
 
 /** Where users can write for help, or null: no support links are shown then. */

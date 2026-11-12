@@ -48,6 +48,9 @@ const instanceSchema = z.object({
     ai: z.object({ assistant: z.boolean(), csvMapping: z.boolean(), enrichment: z.boolean(), monthlyStory: z.boolean(), ocr: z.boolean() }),
     bankSync: z.boolean(),
     contactForm: z.boolean(),
+    // The public read-only demo ("Try the demo" on the sign-in screen). Optional so an older
+    // server that doesn't report it still parses; missing reads as off.
+    demo: z.boolean().optional(),
     email: z.boolean(),
     fileStorage: z.boolean(),
     // Optional so an older server that doesn't report it still parses; the app reads a

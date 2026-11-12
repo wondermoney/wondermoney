@@ -2599,6 +2599,17 @@
     "q6Title": "Tenho mais dúvidas.",
     "q6Body": "Contacte-nos a qualquer momento em {email}. Lemos tudo o que nos escrevem."
   },
+  "demo": {
+    "sign-in": "Experimentar a demonstração",
+    "sign-in-hint": "Explore um agregado familiar de exemplo sem criar conta.",
+    "sign-in-unavailable": "A demonstração não está disponível neste servidor.",
+    "sign-in-rate-limited": "Demasiadas entradas na demonstração. Aguarde alguns minutos e tente novamente.",
+    "sign-in-failed": "Não foi possível abrir a demonstração. Tente novamente.",
+    "banner-label": "Conta de demonstração",
+    "banner-message": "Esta é uma demonstração partilhada. Os dados são só de leitura e repõem-se todos os dias.",
+    "banner-sign-up": "Criar a sua conta",
+    "banner-self-host": "Alojar a sua própria instância"
+  },
   "pivotBanner": {
     "message": "A WonderMoney é agora gratuita e de código aberto. As ligações bancárias usam a sua própria chave da Enable Banking.",
     "cta": "Ler as perguntas frequentes",

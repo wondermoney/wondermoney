@@ -1,8 +1,9 @@
-import { Link, useLocalSearchParams } from 'expo-router'
+import { Link, useLocalSearchParams, useRouter } from 'expo-router'
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useProductRuntime } from '@/components/providers/product-runtime-provider'
 import { AuthLink, AuthLead } from '@/features/auth/auth-form-styles'
+import { DemoSignIn } from '@/features/auth/demo-sign-in'
 import { ScanPairingQr } from '@/features/auth/scan-pairing-qr'
 import { ServerSwitcher } from '@/features/auth/server-switcher'
 import { SignInScreen } from '@/features/auth/sign-in-screen'
@@ -10,6 +11,7 @@ import { SocialSignIn } from '@/features/auth/social-sign-in'
 import { SsoSignIn } from '@/features/auth/sso-sign-in'
 import { usePairing } from '@/features/auth/use-pairing'
 import { Button } from '@/components/ui/button'
+import { takeSignUpAfterSignOut } from '@/lib/auth/sign-up-after-sign-out'
 import { usePasswordSignIn } from '@/lib/server/use-instance'
 import { captureAnalyticsEvent } from '@/lib/telemetry/analytics'
 
@@ -21,6 +23,13 @@ export default function SignInRoute() {
   const provisionFailed = activationError === 'provision-failed'
   // OIDC_ONLY: the server takes no passwords, so single sign-on is the form.
   const passwordSignIn = usePasswordSignIn()
+
+  // Signing out of the demo to create an account comes back through here (see
+  // sign-up-after-sign-out.ts): carry on to sign-up.
+  const router = useRouter()
+  useEffect(() => {
+    if (takeSignUpAfterSignOut()) router.replace('/sign-up')
+  }, [router])
 
   const pairing = usePairing()
   const [scanning, setScanning] = useState(false)
@@ -94,6 +103,7 @@ export default function SignInRoute() {
           <>
             <SsoSignIn primary={!passwordSignIn} />
             <SocialSignIn />
+            <DemoSignIn />
             <Button
               label={t('auth.pairing.scanButton')}
               onPress={() => setScanning(true)}

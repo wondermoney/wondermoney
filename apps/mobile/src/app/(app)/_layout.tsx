@@ -2,26 +2,51 @@ import { Stack, usePathname } from 'expo-router'
 import { View } from 'react-native'
 
 import { AuthenticatedRouteBoundary } from '@/components/providers/authenticated-route-boundary'
+import { useOptionalProductRuntime } from '@/components/providers/product-runtime-provider'
 import { showsTopBar } from '@/components/shell/navigation'
 import { UnderTopBarProvider } from '@/components/ui/screen-safe-area'
+import { DemoBanner, useIsDemoAccount } from '@/features/navigation/demo-banner'
 import { ShellTopBar } from '@/features/navigation/shell-top-bar'
 import { OnboardingGate } from '@/features/onboarding/onboarding-gate'
 import { AppLockGate } from '@/features/security/app-lock-gate'
 
 export default function AuthenticatedLayout() {
-  const pathname = usePathname()
   return (
     <AuthenticatedRouteBoundary>
       <AppLockGate>
         <OnboardingGate>
-          {/* One top bar for every product page (web TopBar.tsx), above the
-              stack so it stays put while pages change beneath it. It owns the
-              top safe area, so screens' SafeAreaViews (components/ui/screen-safe-area)
-              drop their top edge while it shows. */}
-          <View style={{ flex: 1 }}>
-          <ShellTopBar />
-          <UnderTopBarProvider active={showsTopBar(pathname)}>
-          <Stack screenOptions={{ animation: 'none', headerShown: false }}>
+          <ProductShell />
+        </OnboardingGate>
+      </AppLockGate>
+    </AuthenticatedRouteBoundary>
+  )
+}
+
+/**
+ * The demo strip needs the profile, which exists only with a signed-in runtime (and its query
+ * client). Without one — tests, a transition — the shell renders without it, as the top bar does.
+ */
+function ProductShell() {
+  return useOptionalProductRuntime()?.runtime ? <SignedInShell /> : <Shell demo={false} />
+}
+
+function SignedInShell() {
+  return <Shell demo={useIsDemoAccount()} />
+}
+
+function Shell({ demo }: { demo: boolean }) {
+  const pathname = usePathname()
+  const topBar = showsTopBar(pathname)
+  return (
+    // One top bar for every product page (web TopBar.tsx), above the stack so it stays put
+    // while pages change beneath it. It owns the top safe area, so screens' SafeAreaViews
+    // (components/ui/screen-safe-area) drop their top edge while it shows. The demo strip sits
+    // under it on every page, and takes the top safe area itself where the bar is hidden.
+    <View style={{ flex: 1 }}>
+      <ShellTopBar />
+      {demo ? <DemoBanner ownsTopInset={!topBar} /> : null}
+      <UnderTopBarProvider active={topBar || demo}>
+        <Stack screenOptions={{ animation: 'none', headerShown: false }}>
           <Stack.Screen name="(tabs)" />
           <Stack.Screen name="home/customize" />
           <Stack.Screen name="net-worth/history" />
@@ -60,11 +85,8 @@ export default function AuthenticatedLayout() {
           <Stack.Screen name="settings/rules" />
           <Stack.Screen name="settings/notifications" />
           <Stack.Screen name="settings/security" />
-          </Stack>
-          </UnderTopBarProvider>
-          </View>
-        </OnboardingGate>
-      </AppLockGate>
-    </AuthenticatedRouteBoundary>
+        </Stack>
+      </UnderTopBarProvider>
+    </View>
   )
 }
