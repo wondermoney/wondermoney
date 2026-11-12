@@ -11,6 +11,7 @@ import PortfolioAllocationChart from "@/components/portfolio/PortfolioAllocation
 import PortfolioBenchmarkChart from "@/components/portfolio/PortfolioBenchmarkChart";
 import PortfolioBreakdown from "@/components/portfolio/PortfolioBreakdown";
 import PortfolioCalendar from "@/components/portfolio/PortfolioCalendar";
+import PortfolioClosedPositions from "@/components/portfolio/PortfolioClosedPositions";
 import PortfolioCreateDialog from "@/components/portfolio/PortfolioCreateDialog";
 import PortfolioDashboardSummary from "@/components/portfolio/PortfolioDashboardSummary";
 import PortfolioDividendIncome from "@/components/portfolio/PortfolioDividendIncome";
@@ -18,6 +19,7 @@ import PortfolioEmptyState from "@/components/portfolio/PortfolioEmptyState";
 import PortfolioHoldingsTable from "@/components/portfolio/PortfolioHoldingsTable";
 import PortfolioMetrics from "@/components/portfolio/PortfolioMetrics";
 import PortfolioPerformanceChart from "@/components/portfolio/PortfolioPerformanceChart";
+import PortfolioRealizedGains from "@/components/portfolio/PortfolioRealizedGains";
 import PortfolioTopMovers from "@/components/portfolio/PortfolioTopMovers";
 import PortfolioTransactionAddModal from "@/components/portfolio/PortfolioTransactionAddModal";
 import PortfolioTransactionImportModal from "@/components/portfolio/PortfolioTransactionImportModal";
@@ -348,6 +350,10 @@ const Portfolio = () => {
           </div>
         )}
       </section>
+
+      {/* Each renders nothing until a portfolio has a sale. */}
+      <PortfolioRealizedGains portfolioId={null} />
+      <PortfolioClosedPositions portfolioId={null} />
     </div>
   );
 };

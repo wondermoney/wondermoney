@@ -83,6 +83,7 @@ import {
   getPortfoliosTransactionRequestSchema,
   getPortfolioTopMoversRequestSchema,
   getPortfolioTransactionRequestSchema,
+  getRealizedGainsRequestSchema,
 } from '@validators/portfolio';
 import { recurringListSchema, recurringOccurrencesQuerySchema } from '@validators/recurring';
 import { monthComparisonQuerySchema, reportsQuerySchema, spendingVsNormalQuerySchema } from '@validators/reports';
@@ -138,6 +139,7 @@ import {
   portfolioDashboardSchema,
   portfolioSchema,
   portfolioTransactionSchema,
+  realizedGainsSchema,
   recurringOccurrenceSchema,
   recurringSeriesSchema,
   reportSchema,
@@ -765,6 +767,12 @@ export const OPERATIONS: Record<string, OperationDefinition> = {
     tag: 'Portfolio',
     summary: 'Get aggregate dividend income',
     response: dividendIncomeSchema,
+  },
+  'GET /v1/portfolio/realized-gains': {
+    tag: 'Portfolio',
+    summary: 'Get realized gains per sale, asset and year',
+    request: getRealizedGainsRequestSchema,
+    response: realizedGainsSchema,
   },
   'GET /v1/portfolio/holding/:symbol/analyst': {
     tag: 'Portfolio',

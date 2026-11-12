@@ -99,19 +99,28 @@ Só se torna real quando vende. Até lá, é não realizado.
 ## Ganho ou perda realizado
 
 ### O que significa
-O lucro ou prejuízo fixado quando vendes ou fechas uma posição.
+O lucro ou prejuízo fixado quando vendes ou fechas uma posição. Em cada venda é o valor da venda depois da comissão, menos o custo que o método da carteira abateu (incluindo as comissões de compra das unidades vendidas).
 
 ### Onde aparece
-Resumos de transações e desempenho.
+- No resumo da carteira, como total da carteira ou de todas as carteiras.
+- Na coluna **Realizado** da tabela de posições: tudo o que essa posição já realizou.
+- Na secção **Ganhos realizados**, que lista cada venda com a data, a quantidade, o valor da venda, o custo de aquisição, o ganho realizado e a data da compra mais antiga de que vendeu (detido desde). Filtra-a por ano e descarrega a lista apresentada como ficheiro CSV.
+- Em **Posições fechadas**: ativos que vendeste na totalidade, com o resultado de toda a sua vida, para continuarem visíveis depois de saírem das posições.
 
 ### Como ler
-Usa-o para ver o que já foi concretizado por operações concluídas.
+Usa-o para ver o que já foi concretizado por operações concluídas. As vendas de um ano somam o total desse ano, e todos os anos juntos somam os ganhos realizados da carteira. Um ano é um ano civil em UTC, pela data da venda.
+
+### Exemplo
+Compra 10 unidades a 100 com uma comissão de 10 e vende 4 a 150 com uma comissão de 2. Em FIFO a venda abate 4 × 100 mais 4 dos 10 de comissão de compra, um custo de 404. O valor da venda é 600 menos a comissão de 2, ou seja 598, por isso a venda realizou 194.
 
 ### O que o pode alterar
-Vendas, vendas parciais, comissões e correções de transações.
+Vendas, vendas parciais, comissões, desdobramentos de ações, correções de transações e uma mudança do método de custo.
+
+### Moeda
+Os valores aparecem na tua moeda. Uma venda registada noutra moeda é convertida à taxa de câmbio do dia da venda. Uma venda sem taxa para esse dia aparece na sua própria moeda e fica fora dos totais, com uma nota a indicá-lo.
 
 ### Má interpretação comum
-Ganho ou perda realizado é diferente de ganho ou perda não realizado.
+Ganho ou perda realizado é diferente de ganho ou perda não realizado. O WonderMoney mostra o que cada venda rendeu segundo o método de custo da carteira; não aplica regras fiscais de cada país, como as regras de wash sale, e não é uma declaração fiscal.
 
 ## Percentagem de retorno
 

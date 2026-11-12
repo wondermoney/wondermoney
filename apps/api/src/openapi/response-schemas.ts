@@ -342,6 +342,8 @@ export const holdingSchema = open('Holding', {
   marketValue: nullableNumber,
   name: nullableString,
   quantity: nullableNumber,
+  /** Lifetime realized gain of the asset in scope; null for an oversold holding. */
+  realizedGains: nullableNumber.optional(),
   symbol: z.string(),
 });
 
@@ -391,6 +393,48 @@ export const portfolioCalendarSchema = open('PortfolioCalendar', {
 
 export const dividendIncomeSchema = open('DividendIncome', {
   income: z.record(z.string(), z.unknown()),
+});
+
+const realizedGainsTotalsShape = {
+  costBasis: money,
+  proceeds: money,
+  realizedGain: money,
+  sales: z.number().int(),
+};
+
+export const realizedGainsSchema = open('RealizedGains', {
+  byAsset: z.array(open('RealizedGainsByAsset', { ...realizedGainsTotalsShape, financialAssetKey: id, financialAssetName: z.string(), quantity: z.number(), symbol: z.string() })),
+  byYear: z.array(open('RealizedGainsByYear', { ...realizedGainsTotalsShape, year: z.number().int() })),
+  closedPositions: z.array(open('ClosedPosition', {
+    ...realizedGainsTotalsShape,
+    financialAssetKey: id,
+    financialAssetName: z.string(),
+    holdingPeriodStart: nullableString,
+    lastSaleDate: dateTime,
+    quantity: z.number(),
+    symbol: z.string(),
+  })),
+  completeness: z.record(z.string(), z.unknown()),
+  currencyCode: z.string(),
+  disposals: z.array(open('RealizedDisposal', {
+    costBasis: money,
+    currencyCode: nullableString,
+    date: dateTime,
+    feeConversionIncomplete: z.boolean().optional(),
+    financialAssetKey: id,
+    financialAssetName: z.string(),
+    holdingPeriodStart: nullableString,
+    portfolioKey: id,
+    portfolioName: z.string(),
+    proceeds: money,
+    quantity: z.number(),
+    realizedGain: money,
+    symbol: z.string(),
+    transactionKey: id,
+  })),
+  feeConversionIncompleteAssetKeys: z.array(id).optional(),
+  totals: open('RealizedGainsTotals', realizedGainsTotalsShape),
+  year: z.number().int().nullable(),
 });
 
 export const recurringSeriesSchema = open('RecurringSeries', {

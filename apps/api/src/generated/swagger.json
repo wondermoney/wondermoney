@@ -3085,6 +3085,16 @@
         }
       }
     },
+    "/v1/portfolio/realized-gains": {
+      "get": {
+        "description": "",
+        "responses": {
+          "default": {
+            "description": ""
+          }
+        }
+      }
+    },
     "/v1/portfolio/holding/{symbol}/analyst": {
       "get": {
         "description": "",

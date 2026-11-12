@@ -107,19 +107,28 @@ It only becomes real when you sell. Until then, it is unrealized.
 ## Realized gain or loss
 
 ### What it means
-The profit or loss locked in when you sell or otherwise close a position.
+The profit or loss locked in when you sell or otherwise close a position. For each sale it is the proceeds after the sale's fee, less the cost basis the portfolio's method relieved (including the purchase fees of the units sold).
 
 ### Where it appears
-Transaction and performance summaries.
+- The portfolio summary, as a total for the portfolio or for all portfolios.
+- The **Realized** column of the holdings table: everything that holding has realized so far.
+- The **Realized gains** section, which lists every sale with its date, quantity, proceeds, cost basis, realized gain and the date of the oldest purchase it sold from (held since). Filter it by year and download the list shown as a CSV file.
+- **Closed positions**: assets you have sold in full, with their lifetime result, so they stay visible after they leave the holdings.
 
 ### How to read it
-Use it to see what has already been captured by completed trades.
+Use it to see what has already been captured by completed trades. The sales of a year add up to that year's total, and every year together adds up to the portfolio's realized gains. A year is a calendar year in UTC, by the date of the sale.
+
+### Example
+Buy 10 units at 100 with a fee of 10, then sell 4 at 150 with a fee of 2. Under FIFO the sale relieves 4 × 100 plus 4 of the 10 purchase fee, a cost basis of 404. Its proceeds are 600 less the 2 fee, 598, so the sale realized 194.
 
 ### What can make it change
-Sells, partial sells, fees, and transaction corrections.
+Sells, partial sells, fees, splits, transaction corrections and a change of cost basis method.
+
+### Currency
+Amounts are shown in your currency. A sale recorded in another currency is converted at the exchange rate of the day of the sale. A sale with no rate for that day is listed in its own currency and left out of the totals, with a note saying so.
 
 ### Common misunderstanding
-Realized gain or loss is separate from unrealized gain or loss.
+Realized gain or loss is separate from unrealized gain or loss. WonderMoney reports what each sale made under your portfolio's cost basis method; it does not apply country-specific tax rules such as wash-sale rules, and it is not a tax form.
 
 ## Return percentage
 

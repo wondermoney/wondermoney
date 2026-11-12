@@ -34,6 +34,7 @@ test("portfolio transaction mutations invalidate portfolio detail and net-worth 
     ["portfolio-metrics"],
     ["portfolio-transactions"],
     ["portfolios-transactions"],
+    ["realized-gains"],
     ["portfolio-dashboard", 42],
     ["portfolio-performance", 42],
     ["portfolio-top-movers", 42],

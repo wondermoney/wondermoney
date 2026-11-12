@@ -221,6 +221,14 @@ export const getPortfolioHoldingsRequestSchema = z.object({
   }),
 });
 
+/** Realized gains: one portfolio or all of the household's, one UTC calendar year or every year. */
+export const getRealizedGainsRequestSchema = z.object({
+  query: z.object({
+    portfolioId: positiveIntId.optional(),
+    year: z.string().regex(/^\d{4}$/, 'Year must be YYYY').transform(Number).optional(),
+  }),
+});
+
 export const getPortfolioHoldingLotsRequestSchema = z.object({
   params: z.object({
     financialAssetKey: positiveIntId,

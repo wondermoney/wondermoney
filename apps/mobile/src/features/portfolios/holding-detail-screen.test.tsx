@@ -59,6 +59,26 @@ describe('HoldingDetailScreen', () => {
     expect(view.getByLabelText(/Portfolio weight, \+12.5%/)).toBeOnTheScreen()
   })
 
+  it('shows the realized gain beside the unrealized one, signed, including a gain of zero', async () => {
+    const gained = await renderScreen({ status: 'loaded', holding: { ...holding, realizedGain: 35 }, activity: [], refreshing: false })
+    expect(gained.view.getByLabelText('Realized gain, +€35.00')).toBeOnTheScreen()
+    gained.view.unmount()
+    const lost = await renderScreen({ status: 'loaded', holding: { ...holding, realizedGain: -12.5 }, activity: [], refreshing: false })
+    expect(lost.view.getByLabelText(/^Realized gain, -€12\.50$/)).toBeOnTheScreen()
+    lost.view.unmount()
+    const never = await renderScreen({ status: 'loaded', holding: { ...holding, realizedGain: 0 }, activity: [], refreshing: false })
+    expect(never.view.getByLabelText('Realized gain, €0.00')).toBeOnTheScreen()
+  })
+
+  it('hides the realized gain when there is no figure for it', async () => {
+    for (const realizedGain of [null, undefined]) {
+      const { view } = await renderScreen({ status: 'loaded', holding: { ...holding, realizedGain }, activity: [], refreshing: false })
+      expect(view.getByLabelText(/^Gain or loss, /)).toBeOnTheScreen()
+      expect(view.queryByLabelText(/^Realized gain/)).not.toBeOnTheScreen()
+      view.unmount()
+    }
+  })
+
   it('shows an empty state when the holding has no activity', async () => {
     const { view } = await renderScreen({ status: 'loaded', holding, activity: [], refreshing: false })
     expect(view.getByText('No transactions for this holding yet')).toBeOnTheScreen()

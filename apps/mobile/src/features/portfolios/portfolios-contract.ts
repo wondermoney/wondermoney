@@ -105,6 +105,9 @@ const holdingBase = z.object({
   portfolioKey: z.number().int().positive().optional(),
   portfolioName: z.string().optional(),
   quantity: finite,
+  // Lifetime realized gain of the asset's sales, in the user's currency; 0 when never sold.
+  // Optional so older APIs, which do not send it, still parse.
+  realizedGains: finiteNullable.optional(),
   unrealizedGains: finiteNullable,
   unrealizedGainsPercentage: finiteNullable,
 })
@@ -124,6 +127,7 @@ const invalidHoldingSchema = holdingBase.extend({
   invalidReason: z.string().min(1),
   isInvalid: z.literal(true),
   relatedTransactionKeys: z.array(z.number().int().positive()),
+  realizedGains: z.null().optional(),
   unrealizedGains: z.null(),
   unrealizedGainsPercentage: z.null(),
 })
