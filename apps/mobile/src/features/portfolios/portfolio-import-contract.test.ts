@@ -1,154 +1,174 @@
 import {
-  createConfirmPortfolioImportAssetGroupsEndpoint,
+  confirmAssetMappings,
+  confirmColumnMapping,
+  createSession,
+  previewAfterAssetMappings,
+  previewAfterColumnMapping,
+  previewNeedsColumnMapping,
+  previewWithAssetGroups,
+  suggestColumnMapping,
+  triggerParse,
+} from './portfolio-import-api-payloads'
+import {
+  columnMappingWriteFromSuggestion,
+  createConfirmPortfolioImportAssetMappingsEndpoint,
   createConfirmPortfolioImportColumnMappingEndpoint,
   createConfirmPortfolioImportSessionEndpoint,
   createPortfolioImportPreviewEndpoint,
   createPortfolioImportSessionEndpoint,
   createSuggestPortfolioImportColumnMappingEndpoint,
   createTriggerPortfolioImportParseEndpoint,
-  portfolioImportAssetGroupMappingWriteSchema,
-  portfolioImportAssetGroupResolutionSchema,
+  isBlockingAssetGroup,
+  portfolioImportAssetMappingsWriteSchema,
   portfolioImportColumnMappingWriteSchema,
   portfolioImportPreviewResponseSchema,
   portfolioImportSessionCreateResponseSchema,
 } from './portfolio-import-contract'
 
+// The routes in apps/api/src/routes/v1/portfolio.ts and portfolio-import-session.ts.
 describe('portfolio import session endpoints', () => {
-  it('builds the exact create/parse/mapping/confirm/preview paths', () => {
+  it('builds the exact create/parse/mapping/asset-mapping/confirm/preview paths', () => {
     expect(createPortfolioImportSessionEndpoint(7)).toMatchObject({ method: 'POST', path: '/v1/portfolio/7/import-sessions', successStatuses: [201] })
     expect(() => createPortfolioImportSessionEndpoint(0)).toThrow()
     expect(createTriggerPortfolioImportParseEndpoint(41)).toMatchObject({ method: 'POST', path: '/v1/portfolio-import-sessions/41/parse', successStatuses: [202] })
     expect(createSuggestPortfolioImportColumnMappingEndpoint(41)).toMatchObject({ method: 'POST', path: '/v1/portfolio-import-sessions/41/column-mapping/suggest', successStatuses: [200] })
     expect(createConfirmPortfolioImportColumnMappingEndpoint(41)).toMatchObject({ method: 'PATCH', path: '/v1/portfolio-import-sessions/41/column-mapping', successStatuses: [200] })
+    expect(createConfirmPortfolioImportAssetMappingsEndpoint(41)).toMatchObject({ method: 'PATCH', path: '/v1/portfolio-import-sessions/41/asset-mappings', successStatuses: [200] })
     expect(createConfirmPortfolioImportSessionEndpoint(41)).toMatchObject({ method: 'POST', path: '/v1/portfolio-import-sessions/41/confirm', successStatuses: [202] })
     expect(createPortfolioImportPreviewEndpoint(41)).toMatchObject({ method: 'GET', path: '/v1/portfolio-import-sessions/41?limit=25' })
     expect(() => createTriggerPortfolioImportParseEndpoint(0)).toThrow()
+    expect(() => createConfirmPortfolioImportAssetMappingsEndpoint(0)).toThrow()
   })
+})
 
+describe('captured API responses', () => {
   it('parses the session-create response, requiring a PUT presigned URL with no form fields', () => {
-    const response = {
-      correlationId: 'c1', importSessionId: 41, maxUploadSizeBytes: 26_214_400, s3Bucket: 'b', s3Key: 'k',
-      status: 'waiting_for_upload', uploadHeaders: { 'Content-Type': 'text/csv' }, uploadMethod: 'PUT', uploadUrl: 'https://s3.example/upload',
-    }
-    expect(portfolioImportSessionCreateResponseSchema.parse(response)).toEqual(response)
-    expect(portfolioImportSessionCreateResponseSchema.safeParse({ ...response, uploadMethod: 'POST' }).success).toBe(false)
-    expect(portfolioImportSessionCreateResponseSchema.parse({ ...response, extra: true })).toEqual(response)
+    const parsed = portfolioImportSessionCreateResponseSchema.parse(createSession)
+    expect(parsed).toMatchObject({ importSessionId: 1, status: 'waiting_for_upload', uploadMethod: 'PUT', uploadHeaders: { 'Content-Type': 'text/csv' } })
+    expect(portfolioImportSessionCreateResponseSchema.safeParse({ ...createSession, uploadMethod: 'POST' }).success).toBe(false)
   })
 
-  it('requires a non-empty column mapping to submit', () => {
-    expect(portfolioImportColumnMappingWriteSchema.parse({ columnMapping: { transactionDate: 'Date' } })).toEqual({ columnMapping: { transactionDate: 'Date' } })
-    expect(portfolioImportColumnMappingWriteSchema.safeParse({ columnMapping: { unknownField: 'x' } }).success).toBe(false)
+  it('parses the parse trigger, suggest and confirm-mapping responses', () => {
+    expect(createTriggerPortfolioImportParseEndpoint(1).schema.parse(triggerParse)).toMatchObject({ importSessionId: 1, status: 'parsing' })
+    expect(createSuggestPortfolioImportColumnMappingEndpoint(1).schema.parse(suggestColumnMapping)).toMatchObject({
+      columnMapping: { columnMapping: { ticker: 'Symbol', transactionDate: 'Date' }, layout: { dataStartRowIndex: 1, headerRowIndex: 0 } },
+      mappingSource: 'local_heuristic',
+      status: 'needs_column_mapping',
+    })
+    expect(createConfirmPortfolioImportColumnMappingEndpoint(1).schema.parse(confirmColumnMapping)).toMatchObject({ importSessionId: 1, status: 'needs_asset_review' })
   })
 
-  it('parses a full preview response bucketed by row status', () => {
-    const row = { id: 1, raw: { Date: '2026-07-01' }, rowNumber: 1, status: 'ready' as const }
-    const response = {
-      assetGroups: [],
-      importSessionId: 41,
-      limits: { rowsPerBucket: 25 },
-      portfolioId: 7,
-      rows: { duplicate: [], invalid: [], needsAssetReview: [], ready: [row] },
-      status: 'ready_to_import' as const,
-      summary: {
-        blockingRows: 0, canConfirm: true, duplicateRows: 0, failedRows: 0, importableRows: 1, importedRows: 0,
-        invalidRows: 0, needsAssetReviewRows: 0, readyRows: 1, skippedRows: 0, totalRows: 1,
-      },
+  it('parses every captured preview, nulls from empty columns included', () => {
+    for (const preview of [previewNeedsColumnMapping, previewAfterColumnMapping, previewWithAssetGroups, previewAfterAssetMappings]) {
+      const result = portfolioImportPreviewResponseSchema.safeParse(preview)
+      expect(result.error).toBeUndefined()
     }
-    expect(portfolioImportPreviewResponseSchema.parse(response)).toEqual(response)
-    expect(portfolioImportPreviewResponseSchema.safeParse({ ...response, status: 42 }).success).toBe(false)
+    const parsed = portfolioImportPreviewResponseSchema.parse(previewWithAssetGroups)
+    expect(parsed.rows.invalid[0]).toMatchObject({ failureReason: 'Quantity is required', internalTransactionId: null, skipReason: null })
+  })
+
+  it('reads asset groups as the preview service builds them', () => {
+    const { assetGroups } = portfolioImportPreviewResponseSchema.parse(previewWithAssetGroups)
+    expect(assetGroups.map((group) => [group.id, group.status])).toEqual([[1, 'ambiguous'], [2, 'unmatched'], [3, 'provider_error'], [4, 'matched']])
+    const [ambiguous, unmatched] = assetGroups
+    expect(ambiguous).toMatchObject({
+      identity: { brokerAssetName: 'Example Fund', brokerExchange: 'XAMS', brokerTicker: 'EXF', currency: 'EUR', isin: 'NL0000000001' },
+      recommendedCandidateId: 1,
+    })
+    expect(ambiguous?.candidates.map((candidate) => [candidate.id, candidate.symbol])).toEqual([[1, 'EXF.AS'], [2, 'EXF.DE'], [3, null]])
+    // The API leaves `candidates` out for a group the provider found nothing for.
+    expect(unmatched?.candidates).toEqual([])
+    expect(assetGroups.filter(isBlockingAssetGroup).map((group) => group.id)).toEqual([1, 2, 3])
+  })
+
+  it('reads resolved groups as selected or skipped, so they leave the review', () => {
+    const { assetGroups } = portfolioImportPreviewResponseSchema.parse(previewAfterAssetMappings)
+    expect(assetGroups.map((group) => [group.id, group.status])).toEqual([[1, 'ambiguous'], [4, 'matched'], [3, 'selected'], [2, 'skipped']])
+    expect(assetGroups.filter(isBlockingAssetGroup).map((group) => group.id)).toEqual([1])
+    expect(createConfirmPortfolioImportAssetMappingsEndpoint(1).schema.parse(confirmAssetMappings)).toEqual({ importSessionId: 1, status: 'needs_asset_review' })
   })
 
   it('keeps parsing a preview when the API adds fields or statuses this build does not know', () => {
-    const row = { id: 1, raw: { Date: '2026-07-01' }, rowNumber: 1, status: 'quarantined', extra: true }
     const parsed = portfolioImportPreviewResponseSchema.parse({
-      assetGroups: [{ candidates: [{ financialAssetId: 9, symbol: 'AAPL', score: 3 }], id: 1, rowCount: 1, status: 'pending_provider' }],
-      importSessionId: 41,
-      limits: { rowsPerBucket: 25, maxRows: 1000 },
-      portfolioId: 7,
-      rows: { duplicate: [], invalid: [], needsAssetReview: [], ready: [row], quarantined: [] },
+      ...previewWithAssetGroups,
+      assetGroups: [{ ...previewWithAssetGroups.assetGroups[0], status: 'pending_provider', extra: true }],
+      importType: 'positions',
+      rows: { ...previewWithAssetGroups.rows, quarantined: [] },
       status: 'awaiting_approval',
-      summary: {
-        blockingRows: 0, canConfirm: true, duplicateRows: 0, failedRows: 0, importableRows: 1, importedRows: 0,
-        invalidRows: 0, needsAssetReviewRows: 0, readyRows: 1, skippedRows: 0, totalRows: 1,
-        terminalKind: 'rolled_back', quarantinedRows: 0,
-      },
-      newTopLevel: {},
+      summary: { ...previewWithAssetGroups.summary, terminalKind: 'rolled_back' },
     })
     expect(parsed.status).toBe('unknown')
-    expect(parsed.rows.ready[0]).toEqual({ id: 1, raw: { Date: '2026-07-01' }, rowNumber: 1, status: 'unknown' })
-    expect(parsed.assetGroups[0]).toMatchObject({ status: 'unknown', candidates: [{ financialAssetId: 9, symbol: 'AAPL' }] })
+    expect(parsed.assetGroups[0]?.status).toBe('unknown')
+    expect(parsed.assetGroups.filter(isBlockingAssetGroup)).toEqual([])
     expect(parsed.summary.terminalKind).toBe('unknown')
-    expect(parsed).not.toHaveProperty('newTopLevel')
+    expect(parsed).not.toHaveProperty('importType')
   })
 
-  it('relays a suggested column mapping back unmodified, including columns this build does not know', () => {
-    const suggestion = createSuggestPortfolioImportColumnMappingEndpoint(41).schema.parse({
-      columnMapping: { transactionDate: 'Date', settlementCurrency: 'Ccy' },
-      importSessionId: 41,
-      mappingSource: 'ai',
-      status: 'needs_column_mapping',
-      confidence: 0.9,
+  it('parses a preview from an API without the failed bucket', () => {
+    const { failed: _omitted, ...rowsWithoutFailed } = previewWithAssetGroups.rows
+    expect(portfolioImportPreviewResponseSchema.safeParse({ ...previewWithAssetGroups, rows: rowsWithoutFailed }).success).toBe(true)
+  })
+})
+
+describe('column-mapping confirm body', () => {
+  it('relays the whole suggestion in the shape the confirm route accepts', () => {
+    const { columnMapping } = createSuggestPortfolioImportColumnMappingEndpoint(1).schema.parse(suggestColumnMapping)
+    expect(columnMappingWriteFromSuggestion(columnMapping!)).toEqual({
+      columnMapping: { currency: 'Currency', isin: 'ISIN', quantity: 'Quantity', ticker: 'Symbol', transactionDate: 'Date', transactionType: 'Type', unitPrice: 'Price' },
+      derivedValues: {},
+      fixedValues: {},
+      layout: { dataStartRowIndex: 1, headerRowIndex: 0 },
+      transformations: {},
     })
-    expect(suggestion.columnMapping).toEqual({ transactionDate: 'Date', settlementCurrency: 'Ccy' })
-    expect(suggestion).not.toHaveProperty('confidence')
   })
 
-  it('parses failed rows from a finalized import, and a response from an API without the failed bucket', () => {
-    const failedRow = { failureReason: 'Insufficient quantity to sell', id: 7, raw: { Symbol: 'AMD' }, rowNumber: 7, status: 'failed' as const }
-    const response = {
-      assetGroups: [],
-      importSessionId: 41,
-      limits: { rowsPerBucket: 25 },
-      portfolioId: 7,
-      rows: { duplicate: [], failed: [failedRow], invalid: [], needsAssetReview: [], ready: [] },
-      status: 'partial' as const,
-      summary: {
-        blockingRows: 0, canConfirm: false, duplicateRows: 0, failedRows: 1, importableRows: 0, importedRows: 2,
-        invalidRows: 0, needsAssetReviewRows: 0, readyRows: 0, skippedRows: 0, totalRows: 3,
+  it('carries inferred values and transformations, drops keys this build does not know and nulls', () => {
+    const { columnMapping } = createSuggestPortfolioImportColumnMappingEndpoint(1).schema.parse({
+      ...suggestColumnMapping,
+      columnMapping: {
+        ...suggestColumnMapping.columnMapping,
+        columnMapping: { ...suggestColumnMapping.columnMapping.columnMapping, currency: null, settlementCurrency: 'Ccy' },
+        fixedValues: { currency: 'EUR' },
+        newSection: { anything: true },
+        transformations: { dateFormat: 'dd/MM/yyyy', decimalSeparator: ',', thousandsSeparator: null },
       },
-    }
-    expect(portfolioImportPreviewResponseSchema.parse(response).rows.failed).toEqual([failedRow])
-    const { failed: _omitted, ...rowsWithoutFailed } = response.rows
-    expect(portfolioImportPreviewResponseSchema.safeParse({ ...response, rows: rowsWithoutFailed }).success).toBe(true)
+    })
+    const body = columnMappingWriteFromSuggestion(columnMapping!)
+    expect(body.fixedValues).toEqual({ currency: 'EUR' })
+    expect(body.transformations).toEqual({ dateFormat: 'dd/MM/yyyy', decimalSeparator: ',' })
+    expect(body.columnMapping).not.toHaveProperty('settlementCurrency')
+    expect(body.columnMapping.currency).toBeUndefined()
+    expect(JSON.parse(JSON.stringify(body))).not.toHaveProperty('newSection')
   })
 
-  it('parses a full preview response with structured asset groups', () => {
-    const response = {
-      assetGroups: [
-        { candidates: [{ financialAssetId: 9, symbol: 'AAPL' }], id: 1, rowCount: 2, status: 'ambiguous' as const },
-        { candidates: [], id: 2, rowCount: 1, status: 'unmatched' as const },
-      ],
-      importSessionId: 41,
-      limits: { rowsPerBucket: 25 },
-      portfolioId: 7,
-      rows: { duplicate: [], invalid: [], needsAssetReview: [], ready: [] },
-      status: 'needs_asset_review' as const,
-      summary: {
-        assetGroups: { ambiguousGroups: 1, matchedGroups: 0, providerErrorGroups: 0, totalGroups: 2, unmatchedGroups: 1 },
-        blockingRows: 3, canConfirm: false, duplicateRows: 0, failedRows: 0, importableRows: 0, importedRows: 0,
-        invalidRows: 0, needsAssetReviewRows: 3, readyRows: 0, skippedRows: 0, totalRows: 3,
-      },
-    }
-    expect(portfolioImportPreviewResponseSchema.parse(response).assetGroups).toHaveLength(2)
-    expect(portfolioImportPreviewResponseSchema.safeParse({
-      ...response,
-      assetGroups: [{ id: 1, rowCount: 1, status: 'not-a-real-status' }],
-    }).success).toBe(false)
+  it('rejects keys the confirm route does not accept', () => {
+    expect(portfolioImportColumnMappingWriteSchema.parse({ columnMapping: { transactionDate: 'Date' } })).toEqual({ columnMapping: { transactionDate: 'Date' } })
+    expect(portfolioImportColumnMappingWriteSchema.safeParse({ columnMapping: { unknownField: 'x' } }).success).toBe(false)
+    // What the app used to send: the whole suggestion nested as the column mapping. The API answers 400.
+    expect(portfolioImportColumnMappingWriteSchema.safeParse({ columnMapping: suggestColumnMapping.columnMapping }).success).toBe(false)
+  })
+})
+
+describe('asset-mapping decisions', () => {
+  it('accepts each decision the API accepts', () => {
+    const decisions = [
+      { action: 'use_candidate', candidateId: 1, groupId: 1 },
+      { action: 'use_external_symbol', groupId: 2, symbol: 'EXF.AS' },
+      { action: 'use_existing_asset', financialAssetId: 9, groupId: 3 },
+      { action: 'skip_group', groupId: 4 },
+      { action: 'skip_group', groupId: 5, skipReason: 'Not mine' },
+    ]
+    expect(portfolioImportAssetMappingsWriteSchema.parse({ decisions })).toEqual({ decisions })
   })
 
-  it('accepts each asset-group resolution kind and rejects an unknown one', () => {
-    expect(portfolioImportAssetGroupResolutionSchema.parse({ financialAssetId: 9, type: 'match' })).toEqual({ financialAssetId: 9, type: 'match' })
-    expect(portfolioImportAssetGroupResolutionSchema.parse({ symbol: 'AAPL', type: 'external_symbol' })).toEqual({ symbol: 'AAPL', type: 'external_symbol' })
-    expect(portfolioImportAssetGroupResolutionSchema.parse({ type: 'skip' })).toEqual({ type: 'skip' })
-    expect(portfolioImportAssetGroupResolutionSchema.safeParse({ type: 'delete' }).success).toBe(false)
-  })
-
-  it('requires at least one mapping to confirm asset groups, and builds the exact endpoint path', () => {
-    expect(portfolioImportAssetGroupMappingWriteSchema.safeParse({ mappings: [] }).success).toBe(false)
-    expect(portfolioImportAssetGroupMappingWriteSchema.parse({
-      mappings: [{ assetGroupId: 1, resolution: { type: 'skip' } }],
-    })).toEqual({ mappings: [{ assetGroupId: 1, resolution: { type: 'skip' } }] })
-    expect(createConfirmPortfolioImportAssetGroupsEndpoint(41)).toMatchObject({ method: 'PATCH', path: '/v1/portfolio-import-sessions/41/asset-groups', successStatuses: [200] })
-    expect(() => createConfirmPortfolioImportAssetGroupsEndpoint(0)).toThrow()
+  it('rejects what the API rejects: the old body, empty, over 100, duplicates, bad symbols', () => {
+    const skip = (groupId: number) => ({ action: 'skip_group', groupId })
+    expect(portfolioImportAssetMappingsWriteSchema.safeParse({ mappings: [{ assetGroupId: 1, resolution: { type: 'skip' } }] }).success).toBe(false)
+    expect(portfolioImportAssetMappingsWriteSchema.safeParse({ decisions: [] }).success).toBe(false)
+    expect(portfolioImportAssetMappingsWriteSchema.safeParse({ decisions: Array.from({ length: 100 }, (_, index) => skip(index + 1)) }).success).toBe(true)
+    expect(portfolioImportAssetMappingsWriteSchema.safeParse({ decisions: Array.from({ length: 101 }, (_, index) => skip(index + 1)) }).success).toBe(false)
+    expect(portfolioImportAssetMappingsWriteSchema.safeParse({ decisions: [skip(1), skip(1)] }).success).toBe(false)
+    expect(portfolioImportAssetMappingsWriteSchema.safeParse({ decisions: [{ action: 'use_external_symbol', groupId: 1, symbol: '$$$' }] }).success).toBe(false)
+    expect(portfolioImportAssetMappingsWriteSchema.safeParse({ decisions: [{ action: 'use_candidate', groupId: 1 }] }).success).toBe(false)
   })
 })

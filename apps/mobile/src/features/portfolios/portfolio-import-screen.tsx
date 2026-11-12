@@ -8,9 +8,10 @@ import { themeTokens } from '@/theme/tokens'
 import { textStyles } from '@/theme/typography'
 
 import { PortfolioImportAssetReviewStep } from './portfolio-import-asset-review-step'
+import { groupsNeedingReview, type PortfolioImportExistingAsset } from './portfolio-import-asset-review-view-model'
 import { PortfolioButton, type PortfolioPalette } from './portfolio-form-parts'
-import type { PortfolioImportPreviewDto } from './portfolio-import-contract'
-import type { PortfolioImportAssetGroupMapping, PortfolioImportPhase } from './use-portfolio-import'
+import type { PortfolioImportAssetMappingDecision, PortfolioImportPreviewDto } from './portfolio-import-contract'
+import type { PortfolioImportPhase } from './use-portfolio-import'
 
 export type PortfolioImportScreenProps = Readonly<{
   state: PortfolioImportPhase
@@ -18,17 +19,19 @@ export type PortfolioImportScreenProps = Readonly<{
   onConfirm: () => void | Promise<void>
   onReset: () => void
   onBack: () => void
-  onResolveAssetGroups: (mappings: readonly PortfolioImportAssetGroupMapping[]) => void | Promise<void>
+  onResolveAssetGroups: (decisions: readonly PortfolioImportAssetMappingDecision[]) => void | Promise<void>
   resolvingAssetGroups: boolean
+  /** Holdings already in the portfolio, offered as mapping targets in the asset review. */
+  existingAssets?: readonly PortfolioImportExistingAsset[]
   palette: PortfolioPalette
 }>
 
 const IN_PROGRESS_PHASES: ReadonlySet<PortfolioImportPhase['phase']> = new Set(['uploading', 'parsing', 'mapping', 'confirming'])
 
-export function PortfolioImportScreen({ state, onPickFile, onConfirm, onReset, onBack, onResolveAssetGroups, resolvingAssetGroups, palette }: PortfolioImportScreenProps) {
+export function PortfolioImportScreen({ state, onPickFile, onConfirm, onReset, onBack, onResolveAssetGroups, resolvingAssetGroups, existingAssets = [], palette }: PortfolioImportScreenProps) {
   const { t } = useTranslation()
   const busy = IN_PROGRESS_PHASES.has(state.phase)
-  const reviewGroups = state.phase === 'review' ? state.preview.assetGroups.filter((group) => group.status !== 'matched') : []
+  const reviewGroups = state.phase === 'review' ? groupsNeedingReview(state.preview.assetGroups) : []
 
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: palette.background }]}>
@@ -57,7 +60,10 @@ export function PortfolioImportScreen({ state, onPickFile, onConfirm, onReset, o
               <ImportSummary summary={state.preview.summary} palette={palette} />
               {reviewGroups.length > 0 ? (
                 <PortfolioImportAssetReviewStep
+                  // A new set of open groups (a refetched preview) starts from fresh choices.
+                  key={reviewGroups.map((group) => group.id).join(',')}
                   groups={reviewGroups}
+                  existingAssets={existingAssets}
                   palette={palette}
                   busy={resolvingAssetGroups}
                   onSubmit={onResolveAssetGroups}

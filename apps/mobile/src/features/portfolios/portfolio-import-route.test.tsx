@@ -3,6 +3,8 @@ import { I18nextProvider } from 'react-i18next'
 
 import { initMobileI18n } from '@/lib/i18n'
 
+import { previewWithAssetGroups } from './portfolio-import-api-payloads'
+import { portfolioImportPreviewResponseSchema } from './portfolio-import-contract'
 import { PortfolioImportRoute } from './portfolio-import-route'
 
 const mockReplace = jest.fn()
@@ -11,6 +13,7 @@ const mockGetDocumentAsync = jest.fn()
 const mockStart = jest.fn()
 const mockConfirm = jest.fn()
 const mockReset = jest.fn()
+const mockUseExistingAssets = jest.fn((_portfolioId: number, _enabled: boolean) => [] as readonly { financialAssetId: number; name: string; symbol: string }[])
 let mockParams: Record<string, string | string[] | undefined> = {}
 let mockImportState: { state: { phase: string; preview?: unknown }; start: typeof mockStart; confirm: typeof mockConfirm; reset: typeof mockReset } = {
   state: { phase: 'idle' }, start: mockStart, confirm: mockConfirm, reset: mockReset,
@@ -18,7 +21,12 @@ let mockImportState: { state: { phase: string; preview?: unknown }; start: typeo
 
 jest.mock('expo-router', () => ({ useLocalSearchParams: () => mockParams, useRouter: () => ({ replace: mockReplace }), usePreventRemove: (preventRemove: boolean, onPrevented?: (options: { data: { action: object }; repeat: () => void }) => void) => mockUsePreventRemove(preventRemove, onPrevented) }))
 jest.mock('expo-document-picker', () => ({ getDocumentAsync: (...args: unknown[]) => mockGetDocumentAsync(...args) }))
-jest.mock('./use-portfolio-import', () => ({ usePortfolioImport: () => mockImportState }))
+// The review's ticker search is network-backed and tested on its own (portfolio-ticker-search-field.test.tsx).
+jest.mock('./portfolio-ticker-search-field', () => ({ PortfolioTickerSearchField: () => null }))
+jest.mock('./use-portfolio-import', () => ({
+  usePortfolioImport: () => mockImportState,
+  usePortfolioImportExistingAssets: (portfolioId: number, enabled: boolean) => mockUseExistingAssets(portfolioId, enabled),
+}))
 
 async function renderRoute() {
   const i18n = await initMobileI18n('en')
@@ -29,6 +37,7 @@ describe('PortfolioImportRoute', () => {
   beforeEach(() => {
     mockReplace.mockReset(); mockUsePreventRemove.mockClear()
     mockGetDocumentAsync.mockReset(); mockStart.mockReset(); mockConfirm.mockReset(); mockReset.mockReset()
+    mockUseExistingAssets.mockClear()
     mockParams = { portfolioId: '7' }
     mockImportState = { state: { phase: 'idle' }, start: mockStart, confirm: mockConfirm, reset: mockReset }
   })
@@ -74,5 +83,16 @@ describe('PortfolioImportRoute', () => {
     mockImportState = { state: { phase: 'review', preview }, start: mockStart, confirm: mockConfirm, reset: mockReset }
     await renderRoute()
     expect(mockUsePreventRemove.mock.lastCall?.[0]).toBeFalsy()
+  })
+
+  it('loads the portfolio holdings only while groups need review, and offers them there', async () => {
+    await renderRoute()
+    expect(mockUseExistingAssets.mock.lastCall).toEqual([7, false])
+
+    mockUseExistingAssets.mockReturnValue([{ financialAssetId: 1, name: 'Apple', symbol: 'AAPL' }])
+    mockImportState = { state: { phase: 'review', preview: portfolioImportPreviewResponseSchema.parse(previewWithAssetGroups) }, start: mockStart, confirm: mockConfirm, reset: mockReset }
+    const view = await renderRoute()
+    expect(mockUseExistingAssets.mock.lastCall).toEqual([7, true])
+    expect(view.getAllByRole('button', { name: 'Choose a holding in this portfolio' }).length).toBeGreaterThan(0)
   })
 })
