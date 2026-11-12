@@ -57,7 +57,7 @@ import { statementImportAdapter, StatementUnreadableError, toStatementLine } fro
  *            `needs_mapping` until each has an account.
  *   review   the person pages through the rows by status and includes or skips them, by row or
  *            in bulk (`decide`), and maps the file's accounts (`setAccountMapping`, which can also
- *            create a manual account for one) and, for a file with categories (YNAB), its
+ *            create a manual account for one) and, for a file with categories (YNAB, Actual), its
  *            categories (`setCategoryMapping`; a category left out takes the one its name
  *            matched, or none).
  *   commit   a worker job writes the rows decided `import` in chunks of {@link CHUNK_SIZE}. Each
@@ -66,7 +66,8 @@ import { statementImportAdapter, StatementUnreadableError, toStatementLine } fro
  *            where it stopped and never writes a row twice. A row whose file category maps to a
  *            category is written with it, as the person's choice. After the last chunk it settles the
  *            accounts once (balance chain, rules, learned categories) and sets the outcome; then
- *            transfer matching, recurring detection and enrichment follow.
+ *            transfer matching, recurring detection and enrichment follow. The job heartbeats
+ *            between chunks, and on a timer through the settling and follow-ups.
  *
  * Only `commit` writes transactions. A session is its starter's alone: queries carry the person
  * and the household (and the entity's owner filter does too), so another household, and the
@@ -85,6 +86,8 @@ const DEFAULT_PAGE_SIZE = 50;
 export const MAX_PAGE_SIZE = 200;
 /** A running job whose operation has not been marked alive for this long has stopped. */
 const RUNNING_JOB_SILENCE_MS = 5 * 60 * 1000;
+/** How often a commit step with no chunks (settling the accounts, the follow-ups) marks its operation alive. */
+const KEEP_ALIVE_MS = 20 * 1000;
 /** A queued job no worker has picked up for this long will not be. */
 const QUEUED_JOB_SILENCE_MS = 15 * 60 * 1000;
 
@@ -120,7 +123,7 @@ export interface TransactionImportDeps {
 
 /** The reader options a session keeps and hands to its adapter, beyond the account's currency. */
 export interface TransactionImportOptions {
-  /** How a QIF or YNAB date whose day and month are both 12 or less reads. */
+  /** How a QIF, YNAB or Actual Budget date whose day and month are both 12 or less reads. */
   dateOrder?: transactionImport.DateOrder;
   mapping?: StatementMapping;
 }
@@ -243,7 +246,7 @@ const defaultStorage: TransactionImportStorage = {
 
 export class TransactionImportService {
   private get adapters(): Partial<Record<transactionImport.ImportFormat, transactionImport.ImportAdapter<never>>> {
-    return this.deps.adapters ?? { camt053: transactionImport.camt053ImportAdapter, 'generic-csv': transactionImport.genericCsvImportAdapter, ofx: transactionImport.ofxImportAdapter, qif: transactionImport.qifImportAdapter, statement: statementImportAdapter, ynab: transactionImport.ynabImportAdapter };
+    return this.deps.adapters ?? { actual: transactionImport.actualImportAdapter, camt053: transactionImport.camt053ImportAdapter, 'generic-csv': transactionImport.genericCsvImportAdapter, ofx: transactionImport.ofxImportAdapter, qif: transactionImport.qifImportAdapter, statement: statementImportAdapter, ynab: transactionImport.ynabImportAdapter };
   }
 
   private get now(): Date {
@@ -458,6 +461,7 @@ export class TransactionImportService {
       else if (session.format === 'statement' && transactionImport.isQifFile(bytes)) session.format = 'qif';
       else if (session.format === 'statement' && transactionImport.isCamt053File(bytes)) session.format = 'camt053';
       else if (session.format === 'statement' && transactionImport.isYnabFile(bytes)) session.format = 'ynab';
+      else if (session.format === 'statement' && transactionImport.isActualFile(bytes)) session.format = 'actual';
       // A `.xml` upload can be either XML format; the content decides.
       else if (session.format === 'camt053' && transactionImport.isOfxFile(bytes)) session.format = 'ofx';
       const adapter = this.adapters[session.format];
@@ -466,7 +470,7 @@ export class TransactionImportService {
       result = await (adapter as transactionImport.ImportAdapter<typeof options>).parse(bytes, options);
     } catch (error) {
       session.status = SESSION_STATUS.FAILED;
-      session.errorCode = error instanceof StatementUnreadableError || error instanceof transactionImport.QifUnreadableError || error instanceof transactionImport.Camt053UnreadableError || error instanceof transactionImport.YnabUnreadableError ? error.code : 'unreadable';
+      session.errorCode = error instanceof StatementUnreadableError || error instanceof transactionImport.QifUnreadableError || error instanceof transactionImport.Camt053UnreadableError || error instanceof transactionImport.YnabUnreadableError || error instanceof transactionImport.ActualUnreadableError ? error.code : 'unreadable';
       await this.em.flush();
       return;
     }
@@ -477,8 +481,9 @@ export class TransactionImportService {
     const sourceCategories = result.sourceCategories ?? [];
     await this.suggestSourceCategories(keyOf(session.tenantKey, 'tenantKey'), sourceCategories);
     const mapping = Object.fromEntries(Object.entries(session.accountMapping ?? {}).filter(([label]) => result.sourceAccounts.some((source) => source.label === label)));
-    // The one-step import has no mapping step: a file that names only one account (a YNAB export
-    // of one account) goes to the account it was started on, as a file that names none does.
+    // The one-step import has no mapping step: a file that names only one account (a YNAB or
+    // Actual export of one account) goes to the account it was started on, as a file that names
+    // none does.
     const [onlySource, ...others] = result.sourceAccounts;
     if (session.autoCommit && onlySource && others.length === 0) mapping[onlySource.label] ??= account.accountKey;
     const targetOf = (row: transactionImport.ParsedImportRow): null | number => {
@@ -536,8 +541,8 @@ export class TransactionImportService {
   /**
    * The account the file's own identifier points at, for the mapping step. A CAMT.053 statement is
    * labelled by its IBAN, so an account of the person's whose `accountNumber` holds that IBAN is
-   * suggested; a file that labels its accounts by name (YNAB, QIF) suggests the one account of
-   * theirs with that name, case and accents aside. The person still confirms the mapping. The
+   * suggested; a file that labels its accounts by name (YNAB, Actual, QIF) suggests the one account
+   * of theirs with that name, case and accents aside. The person still confirms the mapping. The
    * adapter is pure, so the session matches the labels against its accounts here.
    */
   private async suggestSourceAccounts(appuserId: null | number, tenantId: null | number, sourceAccounts: transactionImport.ImportSourceAccount[]): Promise<void> {
@@ -703,13 +708,31 @@ export class TransactionImportService {
       if (outcome === 'done') break;
       if (!(await backgroundOperationService.heartbeatJob(correlationId, queueJobId, { stage: `${TRANSACTION_IMPORT_OPERATION}:importing` }))) return null;
     }
-    const settled = await this.settle(sessionKey, correlationId);
-    if (!settled) return null;
-    await this.em.refresh(session);
-    for (const { account, dates } of settled.accounts) {
-      await followUpStatementImport(this.em.fork(), account, dates, { enqueue: this.deps.enqueue }).catch((error: unknown) => { logger.warn({ correlationId, error }, 'Transaction import follow-up failed'); });
+    // Settling and the follow-ups have no chunks to heartbeat between, and grow with the file.
+    return this.keptAlive(correlationId, queueJobId, async () => {
+      const settled = await this.settle(sessionKey, correlationId);
+      if (!settled) return null;
+      await this.em.refresh(session);
+      for (const { account, dates } of settled.accounts) {
+        await followUpStatementImport(this.em.fork(), account, dates, { enqueue: this.deps.enqueue }).catch((error: unknown) => { logger.warn({ correlationId, error }, 'Transaction import follow-up failed'); });
+      }
+      return settled.totals;
+    });
+  }
+
+  /**
+   * Run `work`, marking the job's operation alive every {@link KEEP_ALIVE_MS} until it ends, so a
+   * long step without chunks is not taken for a stopped job. A heartbeat that fails is only logged.
+   */
+  private async keptAlive<T>(correlationId: string, queueJobId: string, work: () => Promise<T>): Promise<T> {
+    const timer = setInterval(() => {
+      backgroundOperationService.heartbeatJob(correlationId, queueJobId, { stage: `${TRANSACTION_IMPORT_OPERATION}:importing` }).catch((error: unknown) => { logger.warn({ correlationId, error }, 'Transaction import heartbeat failed'); });
+    }, KEEP_ALIVE_MS);
+    try {
+      return await work();
+    } finally {
+      clearInterval(timer);
     }
-    return settled.totals;
   }
 
   /** One chunk in one database transaction, under a lock on the session. */

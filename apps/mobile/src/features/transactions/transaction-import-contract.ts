@@ -96,7 +96,7 @@ const sessionSchema = z.object({
   errorCode: nullableString,
   expiresAt: z.string(),
   fileName: nullableString,
-  /** How the session reads the file; `ynab` (a YNAB register export) needs a category step the app does not have. */
+  /** How the session reads the file; `ynab` and `actual` (a YNAB or Actual Budget export) need a category step the app does not have. */
   format: z.string().catch('statement'),
   id: z.string().min(1),
   sourceAccounts: z.array(z.object({
@@ -105,7 +105,7 @@ const sessionSchema = z.object({
     rowCount: count,
     suggestedAccountId: z.number().int().optional(),
   })).catch([]),
-  /** The categories the file uses, for a format whose categories the session maps (YNAB); only their number matters here. */
+  /** The categories the file uses, for a format whose categories the session maps (YNAB, Actual Budget); only their number matters here. */
   sourceCategories: z.array(z.object({ label: z.string() })).catch([]).optional().transform((value) => value ?? []),
   status: tolerantEnum(TRANSACTION_IMPORT_SESSION_STATUSES, 'unknown'),
   warnings: z.array(z.object({ code: z.string(), detail: z.string().optional(), sourceRow: z.number().optional() })).catch([]),

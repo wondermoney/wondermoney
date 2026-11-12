@@ -38,6 +38,8 @@ type EM = typeof DI.em;
 export interface StatementLine {
   descriptionDirty?: string;
   internalTransactionId: string;
+  /** A note stored beside the description (an Actual Budget split's parts). */
+  notes?: string;
   originalAmount?: number | string | { toString: () => string };
   originalCurrency?: string;
   settlementAmount: number | string | { toString: () => string };
@@ -51,6 +53,7 @@ export interface StatementLine {
 export const statementLineSchema = z.object({
   descriptionDirty: z.string().trim().max(500).optional(),
   internalTransactionId: z.string().trim().min(1).max(255),
+  notes: z.string().trim().max(255).optional(),
   settlementAmount: z.preprocess((value) => toFiniteNumber(normalizeNumberInput(value) as number | string | { toString: () => string }), z.number()),
   settlementCurrency: z.string().trim().length(3).transform((value) => value.toUpperCase()),
   transactionDate: z.union([z.string(), z.date()]).transform((value) => toDate(value)),
@@ -124,6 +127,7 @@ export async function buildStatementTransaction(em: EM, context: StatementWriteC
   transaction.descriptionDirty = validated.descriptionDirty;
   transaction.internalTransactionId = validated.internalTransactionId;
   transaction.nordigenInternalTransactionId = options.trustedId === false ? undefined : validated.internalTransactionId;
+  if (validated.notes) transaction.notes = validated.notes;
   transaction.originalAmount = originalAmount;
   transaction.originalCurrencyKey = originalCurrencyKey ?? undefined;
   transaction.settlementAmount = signedAmount;

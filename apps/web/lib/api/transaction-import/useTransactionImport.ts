@@ -38,9 +38,9 @@ export type ImportSessionStatus =
 
 /** The file formats a session reads. */
 export type ImportFormat =
-  "camt053" | "generic-csv" | "ofx" | "qif" | "statement" | "ynab";
+  "actual" | "camt053" | "generic-csv" | "ofx" | "qif" | "statement" | "ynab";
 
-/** A category the file uses (YNAB), for the category-mapping step. */
+/** A category the file uses (YNAB, Actual Budget), for the category-mapping step. */
 export interface ImportSourceCategory {
   /** The group the source app files it under. */
   group?: string;
@@ -193,8 +193,8 @@ export interface CreateTransactionImportRequest {
   accountId: number | string;
   /** The name the file had on the person's device, kept for the import's history. */
   fileName?: string;
-  /** The format the file is read in; `statement` unless the file is OFX/QFX, QIF, CAMT.053 or a YNAB export. */
-  format?: "camt053" | "ofx" | "qif" | "statement" | "ynab";
+  /** The format the file is read in; `statement` unless the file is OFX/QFX, QIF, CAMT.053, a YNAB or an Actual Budget export. */
+  format?: "actual" | "camt053" | "ofx" | "qif" | "statement" | "ynab";
   /** The file, already uploaded for this account. */
   key: string;
   /** The columns confirmed in the preview; absent when the bank's own parser reads the file. */

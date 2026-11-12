@@ -72,6 +72,13 @@ describe('importStage', () => {
     expect(isFinishedStage({ kind: 'needs-web' })).toBe(false)
   })
 
+  it('never commits an Actual Budget export, even one whose rows have no categories: it is imported on the web', () => {
+    expect(importStage(session({ format: 'actual' }))).toEqual({ kind: 'needs-web' })
+    expect(importStage(session({ status: 'needs_mapping', format: 'actual', canCommit: false }))).toEqual({ kind: 'needs-web' })
+    expect(importStage(session({ status: 'parsing', format: 'actual' }))).toEqual({ kind: 'reading', stalled: false })
+    expect(importStage(session({ status: 'importing', format: 'actual' }))).toMatchObject({ kind: 'importing' })
+  })
+
   it('reports commit progress as rows imported of rows to import', () => {
     expect(importStage(session({ status: 'importing', counts: { ...counts, imported: 120 }, decisions: { import: 380, skip: 4 } }))).toEqual({ kind: 'importing', stalled: false, imported: 120, total: 500 })
     expect(importStage(session({ status: 'importing', canRetry: true }))).toEqual({ kind: 'importing', stalled: true, imported: 0, total: 0 })

@@ -347,9 +347,67 @@ test("going back from YNAB reads a CSV as a bank statement again", async () => {
     screen.getByRole("button", { name: messages["import-ynab-entry"] }),
   );
   await user.click(
-    screen.getByRole("button", { name: messages["import-ynab-back"] }),
+    screen.getByRole("button", { name: messages["import-statement-back"] }),
   );
   assert.equal(screen.queryByTestId("ynab-export-guide"), null);
+
+  await pickFile("extrato.csv");
+  await screen.findByTestId("statement-preview");
+  assert.equal(mocks.preview.mock.calls.length, 1);
+});
+
+test("Import from Actual Budget shows how to export the transactions, and stages the file as an Actual import with its name", async () => {
+  presignAnswers(false);
+  renderModal(manualAccount);
+  const user = userEvent.setup();
+
+  await user.click(
+    screen.getByRole("button", { name: messages["import-actual-entry"] }),
+  );
+  assert.ok(
+    screen.getByRole("heading", { name: messages["import-actual-title"] }),
+  );
+  const guide = screen.getByTestId("actual-export-guide");
+  assert.ok(
+    guide.textContent?.includes(messages["import-actual-guide-export"]),
+  );
+  assert.equal(screen.queryByTestId("ynab-export-guide"), null);
+
+  await pickFile("transactions.csv");
+  assert.equal(mocks.preview.mock.calls.length, 0, "no column preview");
+  assert.ok(screen.getByText(messages["import-actual-ready"]));
+
+  await user.click(
+    screen.getByRole("button", { name: messages["import-review-start"] }),
+  );
+  await waitFor(() => assert.equal(mocks.createImport.mock.calls.length, 1));
+  assert.deepEqual(mocks.createImport.mock.calls[0], [
+    {
+      accountId: "3",
+      fileName: "transactions.csv",
+      format: "actual",
+      key: "account-3-upload.csv",
+      mapping: undefined,
+    },
+  ]);
+});
+
+test("going back from Actual Budget reads a CSV as a bank statement again", async () => {
+  presignAnswers(false);
+  mocks.preview.mockResolvedValue(previewOf());
+  renderModal(manualAccount);
+  const user = userEvent.setup();
+
+  await user.click(
+    screen.getByRole("button", { name: messages["import-actual-entry"] }),
+  );
+  await user.click(
+    screen.getByRole("button", { name: messages["import-statement-back"] }),
+  );
+  assert.equal(screen.queryByTestId("actual-export-guide"), null);
+  assert.ok(
+    screen.getByRole("button", { name: messages["import-ynab-entry"] }),
+  );
 
   await pickFile("extrato.csv");
   await screen.findByTestId("statement-preview");
