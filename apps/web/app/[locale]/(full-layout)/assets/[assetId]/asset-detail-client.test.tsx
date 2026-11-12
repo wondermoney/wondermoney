@@ -367,3 +367,106 @@ test("the API refusing to remove the last valuation is explained", async () => {
     ]),
   );
 });
+
+const equityHeading = () =>
+  screen.queryByRole("heading", { name: m.detail.equity.title });
+
+test("an asset with no loans secured against it shows no equity", () => {
+  renderDetail();
+  assert.equal(equityHeading(), null);
+});
+
+test("an asset securing loans shows its value, the debt and the equity, and links each loan", () => {
+  renderDetail({
+    linkedLoans: [
+      {
+        loanKey: 5,
+        name: "Home loan",
+        currency: "EUR",
+        outstandingPrincipal: 150_000,
+        outstandingPrincipalInAssetCurrency: 150_000,
+      },
+      {
+        loanKey: 6,
+        name: "Renovation loan",
+        currency: "USD",
+        outstandingPrincipal: 22_000,
+        outstandingPrincipalInAssetCurrency: 20_000,
+      },
+    ],
+    linkedDebt: 170_000,
+    equity: 80_000,
+  });
+
+  const section = equityHeading()!.closest("section")!;
+  within(section).getByText(m.detail.equity.linkedDebt);
+  within(section).getByText(figure("€170,000.00"));
+  within(section).getByText(figure("€80,000.00"));
+
+  const homeLoan = within(section).getByRole("link", { name: "Home loan" });
+  assert.equal(homeLoan.getAttribute("href"), "/loans/5");
+  within(section).getByText(figure("€150,000.00"));
+  // A loan in another currency shows its own balance, and the converted one beside it.
+  const renovation = within(section).getByRole("link", {
+    name: "Renovation loan",
+  });
+  assert.equal(renovation.getAttribute("href"), "/loans/6");
+  within(section).getByText(figure("$22,000.00"));
+  within(section).getByText(figure("€20,000.00"));
+  assert.equal(within(section).queryByRole("note"), null);
+});
+
+test("with no rate for a loan's currency, it says so and makes up no debt or equity", () => {
+  renderDetail({
+    linkedLoans: [
+      {
+        loanKey: 5,
+        name: "Home loan",
+        currency: "EUR",
+        outstandingPrincipal: 150_000,
+        outstandingPrincipalInAssetCurrency: 150_000,
+      },
+      {
+        loanKey: 6,
+        name: "Naira loan",
+        currency: "NGN",
+        outstandingPrincipal: 9_000_000,
+        outstandingPrincipalInAssetCurrency: null,
+      },
+    ],
+    linkedDebt: null,
+    equity: null,
+    unconvertedLoanCurrencies: ["NGN"],
+  });
+
+  const section = equityHeading()!.closest("section")!;
+  assert.match(within(section).getByRole("note").textContent ?? "", /NGN/);
+  // The value and the euro loan's balance, and nothing that adds them up.
+  const euros = within(section)
+    .getAllByText(figure(/^€[\d,.]+$/))
+    .map((node) => node.textContent?.replace(/\s+/g, ""));
+  assert.deepEqual(euros, ["€250,000.00", "€150,000.00"]);
+  within(section).getByText(figure("NGN 9,000,000.00"));
+});
+
+test("an underwater asset shows the negative equity with a sign and a note, not colour alone", () => {
+  renderDetail({
+    value: 140_000,
+    valueInUserCurrency: 140_000,
+    linkedLoans: [
+      {
+        loanKey: 5,
+        name: "Home loan",
+        currency: "EUR",
+        outstandingPrincipal: 150_000,
+        outstandingPrincipalInAssetCurrency: 150_000,
+      },
+    ],
+    linkedDebt: 150_000,
+    equity: -10_000,
+  });
+
+  const section = equityHeading()!.closest("section")!;
+  within(section).getByText(figure("−€10,000.00"));
+  within(section).getByRole("note");
+});

@@ -2153,6 +2153,9 @@
           },
           "status": {
             "type": "string"
+          },
+          "securedAsset": {
+            "$ref": "#/components/schemas/LoanSecuredAsset"
           }
         },
         "required": [
@@ -2160,7 +2163,8 @@
           "loanKey",
           "name",
           "outstandingBalance",
-          "principal"
+          "principal",
+          "securedAsset"
         ],
         "additionalProperties": {}
       },
@@ -2391,6 +2395,40 @@
         ],
         "additionalProperties": {}
       },
+      "LoanSecuredAsset": {
+        "type": [
+          "object",
+          "null"
+        ],
+        "properties": {
+          "key": {
+            "type": "integer",
+            "description": "The asset's manualAssetKey."
+          },
+          "name": {
+            "type": "string"
+          },
+          "value": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "description": "Today's value in the asset's currency; null when it has none (archived)."
+          },
+          "currency": {
+            "type": "string",
+            "description": "The asset's currency (ISO 4217)."
+          }
+        },
+        "required": [
+          "key",
+          "name",
+          "value",
+          "currency"
+        ],
+        "additionalProperties": {},
+        "description": "The asset the loan is secured against, or null. Presentation only: net worth is unchanged."
+      },
       "LoanSummary": {
         "type": "object",
         "properties": {
@@ -2436,12 +2474,78 @@
           },
           "name": {
             "type": "string"
+          },
+          "linkedLoans": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ManualAssetLinkedLoan"
+            },
+            "description": "The viewer's loans secured against the asset. Loans are personal, so the other member's are not listed."
+          },
+          "linkedDebt": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "description": "Their total outstanding principal in the asset's currency: 0 with none, null when a loan has no exchange rate."
+          },
+          "equity": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "description": "Today's value less linkedDebt, in the asset's currency. Null when the asset has no value today or linkedDebt is null."
+          },
+          "unconvertedLoanCurrencies": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Currencies of linked loans no rate converts into the asset's currency."
           }
         },
         "required": [
           "currentValue",
           "manualAssetKey",
-          "name"
+          "name",
+          "linkedLoans",
+          "linkedDebt",
+          "equity",
+          "unconvertedLoanCurrencies"
+        ],
+        "additionalProperties": {}
+      },
+      "ManualAssetLinkedLoan": {
+        "type": "object",
+        "properties": {
+          "loanKey": {
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string",
+            "description": "The loan's currency (ISO 4217)."
+          },
+          "outstandingPrincipal": {
+            "type": "number",
+            "description": "Today's outstanding principal in the loan's currency."
+          },
+          "outstandingPrincipalInAssetCurrency": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "description": "The same in the asset's currency at the latest rate; null when no rate exists."
+          }
+        },
+        "required": [
+          "loanKey",
+          "name",
+          "currency",
+          "outstandingPrincipal",
+          "outstandingPrincipalInAssetCurrency"
         ],
         "additionalProperties": {}
       },

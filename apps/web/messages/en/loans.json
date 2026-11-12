@@ -41,7 +41,10 @@
       "startDatePlaceholder": "Pick the start date",
       "notesPlaceholder": "Anything worth remembering about this loan",
       "rateType": "Rate type",
-      "rateTypeVariableHelp": "Enter the rate the loan started with. Add each later change under Rate history on the loan page."
+      "rateTypeVariableHelp": "Enter the rate the loan started with. Add each later change under Rate history on the loan page.",
+      "securedAsset": "Secured against",
+      "securedAssetNone": "None",
+      "securedAssetHint": "Optional. The asset this loan is secured against, such as the home bought with a mortgage. Its page then shows the equity: what it is worth less what is still owed."
     },
     "types": {
       "personal": "Personal",

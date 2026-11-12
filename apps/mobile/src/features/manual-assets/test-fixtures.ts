@@ -20,6 +20,10 @@ export const assetFixture: ManualAssetDto = {
   valueInUserCurrency: 250_000,
   userCurrency: 'EUR',
   lastValuation: { manualAssetValuationKey: 101, date: '2026-06-01', value: 250_000, note: 'Agent estimate' },
+  linkedLoans: [],
+  linkedDebt: 0,
+  equity: 250_000,
+  unconvertedLoanCurrencies: [],
 }
 
 export const assetsFixture = (assets: ManualAssetDto[] = [assetFixture], summary: Partial<ManualAssetsResponse['summary']> = {}): ManualAssetsResponse => ({

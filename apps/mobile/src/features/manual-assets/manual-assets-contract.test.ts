@@ -29,6 +29,23 @@ describe('manual assets contract', () => {
     expect(parsed.summary.isComplete).toBe(false)
   })
 
+  it('reads the equity of an asset with loans secured against it, keeping a missing rate as null', () => {
+    const linkedLoans = [
+      { loanKey: 3, name: 'Mortgage', currency: 'EUR', outstandingPrincipal: 150_000, outstandingPrincipalInAssetCurrency: 150_000 },
+      { loanKey: 5, name: 'Naira loan', currency: 'NGN', outstandingPrincipal: 9_000_000, outstandingPrincipalInAssetCurrency: null },
+    ]
+    const parsed = manualAssetResponseSchema.parse(assetDetailFixture({ linkedLoans, linkedDebt: null, equity: null, unconvertedLoanCurrencies: ['NGN'] }))
+    expect(parsed.asset).toMatchObject({ linkedLoans, linkedDebt: null, equity: null, unconvertedLoanCurrencies: ['NGN'] })
+    expect(manualAssetsResponseSchema.safeParse(assetsFixture([{ ...assetFixture, linkedLoans: [{ ...linkedLoans[0], currency: 'euro' }] }])).success).toBe(false)
+  })
+
+  it('reads an asset from an API that predates equity as one with no loans against it', () => {
+    const { linkedLoans: _loans, linkedDebt: _debt, equity: _equity, unconvertedLoanCurrencies: _codes, ...older } = assetFixture
+    const parsed = manualAssetsResponseSchema.parse({ ...assetsFixture(), assets: [older] })
+    expect(parsed.assets[0]).toMatchObject({ linkedLoans: [], linkedDebt: null, equity: null, unconvertedLoanCurrencies: [] })
+    expect(manualAssetResponseSchema.parse({ ...assetDetailFixture(), asset: older }).asset.linkedLoans).toEqual([])
+  })
+
   it('accepts a valuation that replaced the same day (200) as well as a new one (201)', () => {
     expect(createManualAssetValuationEndpoint(7)).toMatchObject({ method: 'POST', path: '/v1/manual-assets/7/valuations', successStatuses: [200, 201] })
   })

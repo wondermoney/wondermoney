@@ -234,11 +234,23 @@ describe('household restore', () => {
       const parsed = await parsedExportOf(scopeOf(owner));
       parsed.rows['manual-assets'] = [];
       parsed.rows['manual-asset-valuations'] = [];
+      for (const loan of parsed.rows.loans) delete loan.securedAssetId;
       const target = await emptyHousehold(db.em());
 
       const { summary } = await restore(scopeOf(target), parsed);
 
-      expect(summary.counts).toEqual(expect.objectContaining({ 'manual-assets': 0, transactions: 6 }));
+      expect(summary.counts).toEqual(expect.objectContaining({ loans: 1, 'manual-assets': 0, transactions: 6 }));
+    });
+
+    it('restores the asset each loan is secured against', async () => {
+      const { owner } = await richHousehold(db.em());
+      const target = await emptyHousehold(db.em());
+
+      await restore(scopeOf(target), await parsedExportOf(scopeOf(owner)));
+
+      const loans = await db.em().getConnection().execute<Record<string, unknown>[]>(
+        'select l.name, a.name as asset, a.tenant_key = l.tenant_key as same_household from loan l left join manual_asset a on a.manual_asset_key = l.secured_asset_key where l.tenant_key = ?', [target.tenant.tenantKey]);
+      expect(loans).toEqual([{ asset: 'Old car', name: 'Car loan', same_household: true }]);
     });
   });
 

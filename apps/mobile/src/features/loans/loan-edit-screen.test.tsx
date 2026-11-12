@@ -58,6 +58,40 @@ describe('loan metadata editor', () => {
     await waitFor(() => expect(save).toHaveBeenCalledWith({ type: 'PERSONAL_LOAN', openingPrincipalBalance: 260_000 }))
   })
 
+  it('diffs the secured asset: a new choice sends its key, clearing sends null, and an unchanged link sends nothing', () => {
+    expect(createLoanMetadataChanges({ ...model, securedAssetKey: null }, { ...currentFromModel, securedAssetKey: 9 })).toEqual({ securedAssetKey: 9 })
+    expect(createLoanMetadataChanges({ ...model, securedAssetKey: 9 }, { ...currentFromModel, securedAssetKey: null })).toEqual({ securedAssetKey: null })
+    expect(createLoanMetadataChanges({ ...model, securedAssetKey: 9 }, { ...currentFromModel, securedAssetKey: 9 })).toBeNull()
+    expect(createLoanMetadataChanges(model, { ...currentFromModel, securedAssetKey: null })).toBeNull()
+  })
+
+  it('lists the assets under Secured against and saves the chosen one', async () => {
+    const save = jest.fn().mockResolvedValue(undefined)
+    const { view } = await renderEditor({ onSaveLoan: save, securedAssets: [{ key: 2, name: 'Car' }, { key: 9, name: 'Family home' }] })
+    await fireEvent.press(view.getByRole('button', { name: 'Secured against, None' }))
+    expect(view.getAllByRole('radio').map((option) => option.props.accessibilityLabel)).toEqual(['None', 'Car', 'Family home'])
+    await fireEvent.press(view.getByRole('radio', { name: 'Family home' }))
+    expect(view.getByRole('button', { name: 'Secured against, Family home' })).toBeOnTheScreen()
+    await fireEvent.press(view.getByRole('button', { name: 'Save details' }))
+    await waitFor(() => expect(save).toHaveBeenCalledWith({ securedAssetKey: 9 }))
+    // Saved: choosing it again is no change.
+    await waitFor(() => expect(view.getByRole('button', { name: 'Save details' })).toBeDisabled())
+  })
+
+  it('unlinks the asset with None, sending null', async () => {
+    const save = jest.fn().mockResolvedValue(undefined)
+    const { view } = await renderEditor({ onSaveLoan: save, state: { status: 'loaded', model: { ...model, securedAssetKey: 9 } }, securedAssets: [{ key: 9, name: 'Family home' }] })
+    await fireEvent.press(view.getByRole('button', { name: 'Secured against, Family home' }))
+    await fireEvent.press(view.getByRole('radio', { name: 'None' }))
+    await fireEvent.press(view.getByRole('button', { name: 'Save details' }))
+    await waitFor(() => expect(save).toHaveBeenCalledWith({ securedAssetKey: null }))
+  })
+
+  it('leaves Secured against out when there is no asset to offer and none linked', async () => {
+    const { view } = await renderEditor()
+    expect(view.queryByRole('button', { name: /^Secured against,/ })).not.toBeOnTheScreen()
+  })
+
   it('pre-fills and reads numbers in the app language', async () => {
     const save = jest.fn().mockResolvedValue(undefined)
     const i18n = await initMobileI18n('pt-PT')

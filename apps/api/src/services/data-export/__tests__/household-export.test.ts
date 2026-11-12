@@ -145,6 +145,8 @@ describe('household export', () => {
     const watch = em.create(ManualAsset, { currencyKey: owner.currency, isPrivate: true, kind: ManualAssetKind.VALUABLE, name: 'SECRET-WATCH', ownerAppuserKey: owner.appuser, tenantKey: owner.tenant }, { partial: true });
     em.create(ManualAssetValuation, { manualAssetKey: watch, note: 'SECRET-APPRAISAL', tenantKey: owner.tenant, valuationDate: new Date('2026-02-01'), value: 4000 }, { partial: true });
     const sold = em.create(ManualAsset, { currencyKey: owner.currency, deletedAt: new Date(), isPrivate: false, kind: ManualAssetKind.VEHICLE, name: 'DELETED-CAR', ownerAppuserKey: owner.appuser, tenantKey: owner.tenant }, { partial: true });
+    // The owner's loan finances the shared home.
+    loan.securedAssetKey = home;
     em.create(ManualAssetValuation, { manualAssetKey: sold, tenantKey: owner.tenant, valuationDate: new Date('2026-02-01'), value: 1 }, { partial: true });
     em.create(ManualAssetValuation, { deletedAt: new Date(), manualAssetKey: home, note: 'DELETED-VALUATION', tenantKey: owner.tenant, valuationDate: new Date('2026-03-01'), value: 2 }, { partial: true });
 
@@ -243,6 +245,14 @@ describe('household export', () => {
       expect(archive.text).not.toContain('DELETED');
     });
 
+    it('names the asset a loan is secured against by its export id', async () => {
+      const { owner } = await households();
+
+      const archive = await exportFor(scopeOf(owner));
+
+      expect(archive.data['loans']).toEqual([expect.objectContaining({ name: 'OWNER-LOAN', securedAssetId: 1 })]);
+    });
+
     it("leaves the other member's private asset and its valuations out", async () => {
       const { owner, partner } = await households();
 
@@ -308,7 +318,7 @@ describe('household export', () => {
 
       const archive = await exportFor(scopeOf(owner));
 
-      expect(archive.manifest.formatVersion).toBe('1.2');
+      expect(archive.manifest.formatVersion).toBe('1.3');
       const paths = Object.keys(archive.entries).filter((path) => path !== 'manifest.json').sort();
       expect(archive.manifest.files.map((file) => file.path).sort()).toEqual(paths);
       for (const file of archive.manifest.files) {

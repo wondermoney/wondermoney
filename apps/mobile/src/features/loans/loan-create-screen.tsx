@@ -15,6 +15,7 @@ import { usePalette } from '@/theme/use-palette'
 
 import { buildLoanCreatePayload, type LoanCreateDraft } from './loan-create-model'
 import { loanNumberErrors } from './loan-form-rows'
+import { NO_SECURED_ASSET, type SecuredAssetOption } from './loan-secured-asset'
 import type { LoanCreateWrite, LoanType } from './loans-contract'
 import type { LoanCreateFailure } from './use-create-loan'
 
@@ -31,6 +32,8 @@ export type LoanCreateScreenProps = Readonly<{
   outcome: LoanCreateFailure | null
   onBack: () => void
   onCreate: (value: LoanCreateWrite) => Promise<void>
+  /** The assets "Secured against" offers (`securedAssetOptions`); the row hides when there are none. */
+  securedAssets?: readonly SecuredAssetOption[]
 }>
 
 const localToday = () => {
@@ -44,7 +47,7 @@ const localToday = () => {
  * until the required fields are valid; an error shows under a row only for
  * what was entered and is wrong.
  */
-export function LoanCreateScreen({ currencies, loading, metadataError, pending, outcome, onBack, onCreate }: LoanCreateScreenProps) {
+export function LoanCreateScreen({ currencies, loading, metadataError, pending, outcome, onBack, onCreate, securedAssets = [] }: LoanCreateScreenProps) {
   const { t, i18n } = useTranslation()
   const palette = usePalette()
   const locale = i18n.resolvedLanguage ?? i18n.language ?? 'en'
@@ -59,6 +62,7 @@ export function LoanCreateScreen({ currencies, loading, metadataError, pending, 
   const [termMonths, setTermMonths] = useState('')
   const [includeInNetWorth, setIncludeInNetWorth] = useState(true)
   const [notes, setNotes] = useState('')
+  const [securedAssetKey, setSecuredAssetKey] = useState<number | null>(null)
   const locked = pending
 
   if (loading) return <StatePage palette={palette} title={t('loanCreate.loading')} onBack={onBack} progress />
@@ -78,6 +82,7 @@ export function LoanCreateScreen({ currencies, loading, metadataError, pending, 
     termMonths,
     includeInNetWorth,
     notes,
+    securedAssetKey,
   }
   const result = buildLoanCreatePayload(draft)
   const invalid = result.success ? new Set<string>() : result.invalidFields
@@ -126,6 +131,18 @@ export function LoanCreateScreen({ currencies, loading, metadataError, pending, 
               <FormTextRow key="installment" accessibilityLabel={t('loanCreate.installmentOptional')} editable={!locked} error={numbers.installment ? t('loanCreate.fieldErrors.installment') : null} keyboardType="decimal-pad" label={t('loanCreate.installment')} onChangeText={setRegularPaymentAmount} placeholder={t('loanCreate.optional')} value={regularPaymentAmount} />
               <FormTextRow key="rate" accessibilityLabel={t('loanCreate.interestRateOptional')} editable={!locked} error={numbers.rate ? t('loanCreate.fieldErrors.interestRate') : null} keyboardType="decimal-pad" label={t('loanCreate.interestRate')} onChangeText={setAnnualInterestRateBps} placeholder={t('loanCreate.optional')} value={annualInterestRateBps} />
               <FormTextRow key="term" accessibilityLabel={t('loanCreate.termMonthsOptional')} editable={!locked} error={numbers.term ? t('loanCreate.fieldErrors.termMonths') : null} keyboardType="number-pad" label={t('loanCreate.termMonths')} onChangeText={setTermMonths} placeholder={t('loanCreate.optional')} value={termMonths} />
+              {securedAssets.length > 0 ? (
+                <FormSelectRow
+                  key="secured-asset"
+                  disabled={locked}
+                  hint={t('loanForm.securedAssetHint')}
+                  label={t('loanForm.securedAsset')}
+                  onChange={(value) => setSecuredAssetKey(value === NO_SECURED_ASSET ? null : value)}
+                  options={[{ value: NO_SECURED_ASSET, label: t('loanForm.securedAssetNone') }, ...securedAssets.map((asset) => ({ value: asset.key, label: asset.name }))]}
+                  placeholder={t('loanForm.securedAssetNone')}
+                  value={securedAssetKey ?? NO_SECURED_ASSET}
+                />
+              ) : null}
               <FormSwitchRow key="net-worth" disabled={locked} label={t('loanCreate.includeInNetWorth')} onValueChange={setIncludeInNetWorth} value={includeInNetWorth} />
               <FormTextRow key="notes" accessibilityLabel={t('loanCreate.notesOptional')} editable={!locked} label={t('loanCreate.notes')} maxLength={10_000} multiline onChangeText={setNotes} placeholder={t('loanCreate.notesPlaceholder')} value={notes} />
             </FormGroup>

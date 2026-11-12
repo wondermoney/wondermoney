@@ -41,7 +41,10 @@
       "startDatePlaceholder": "Escolha a data de início",
       "notesPlaceholder": "Algo que valha a pena lembrar sobre este empréstimo",
       "rateType": "Tipo de taxa",
-      "rateTypeVariableHelp": "Introduza a taxa com que o empréstimo começou. Adicione cada alteração posterior no histórico de taxas, na página do empréstimo."
+      "rateTypeVariableHelp": "Introduza a taxa com que o empréstimo começou. Adicione cada alteração posterior no histórico de taxas, na página do empréstimo.",
+      "securedAsset": "Garantido por",
+      "securedAssetNone": "Nenhum",
+      "securedAssetHint": "Opcional. O bem que garante este empréstimo, como a casa comprada com um crédito habitação. A página do bem passa a mostrar o capital próprio: o que vale menos o que ainda está em dívida."
     },
     "types": {
       "personal": "Pessoal",

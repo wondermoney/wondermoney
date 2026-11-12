@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next'
 import { RefreshControl, ScrollView, StyleSheet, View } from 'react-native'
 
-import { Amount } from '@/components/ui/amount'
+import { Amount, MISSING } from '@/components/ui/amount'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { EntityMark } from '@/components/ui/entity-mark'
@@ -17,7 +17,7 @@ import { themeTokens } from '@/theme/tokens'
 import { usePalette } from '@/theme/use-palette'
 
 import { currencyList, kindGlyph } from './assets-screen'
-import type { ManualAssetResponse } from './manual-assets-contract'
+import type { ManualAssetDto, ManualAssetResponse } from './manual-assets-contract'
 import { changeSincePurchase, formatDay, isEstimated, monthlyChartPoints, shownValue } from './manual-assets-view-model'
 
 export type AssetDetailViewState =
@@ -100,6 +100,8 @@ export function AssetDetailScreen({ state, onBack, onUpdateValue, onRefresh }: {
             ) : null}
           </View>
 
+          {asset.linkedLoans.length > 0 ? <AssetEquity asset={asset} locale={locale} /> : null}
+
           {points.length > 1 ? (
             <Section title={t('manualAssetDetail.historyTitle')} variant="open">
               <NetWorthChart
@@ -164,12 +166,61 @@ export function AssetDetailScreen({ state, onBack, onUpdateValue, onRefresh }: {
   )
 }
 
-function Fact({ label, value, first = false }: { label: string; value: string; first?: boolean }) {
+/**
+ * Web's `AssetEquity`: what the asset is worth less what is still owed on the loans secured
+ * against it, all in the asset's currency, then those loans in their own. A loan the API has no
+ * rate for leaves no total and no equity (`—`), and the note says why rather than adding amounts
+ * in different currencies. A negative equity keeps its minus sign and gets the "Underwater" note,
+ * so it never rests on colour.
+ */
+function AssetEquity({ asset, locale }: { asset: ManualAssetDto; locale: string }) {
+  const { t } = useTranslation()
+  const formatMoney = useFormatMoney()
+  const money = (value: number | null, currency = asset.currency) => value === null ? MISSING : formatMoney(value, { locale, currency })
+  const unconverted = asset.unconvertedLoanCurrencies.length > 0
+    ? asset.unconvertedLoanCurrencies
+    : [...new Set(asset.linkedLoans.filter((loan) => loan.outstandingPrincipalInAssetCurrency === null).map((loan) => loan.currency))].sort()
+  const note = asset.linkedDebt === null
+    ? t('manualAssetDetail.equity.noRate', { currencies: currencyList(unconverted, locale), currency: asset.currency })
+    : asset.value === null
+      ? t('manualAssetDetail.equity.archived')
+      : asset.equity !== null && asset.equity < 0 ? t('manualAssetDetail.equity.underwater') : null
+  return (
+    <Section title={t('manualAssetDetail.equity.title')} variant="open" testID="asset-equity">
+      <View>
+        <Fact first figure label={t('manualAssetDetail.equity.value')} value={money(asset.value)} />
+        <Fact figure label={t('manualAssetDetail.equity.linkedDebt')} value={money(asset.linkedDebt)} />
+        <Fact figure label={t('manualAssetDetail.equity.equity')} value={money(asset.equity)} />
+      </View>
+      {note ? <Text accessibilityRole={asset.linkedDebt === null ? 'alert' : undefined} style={styles.equityNote} tone="muted" variant="meta">{note}</Text> : null}
+      <Text accessibilityRole="header" style={styles.loansHead} variant="action">{t('manualAssetDetail.equity.loans')}</Text>
+      <View testID="asset-equity-loans">
+        {asset.linkedLoans.map((loan, index) => (
+          <Fact
+            key={loan.loanKey}
+            first={index === 0}
+            figure
+            label={loan.name}
+            value={money(loan.outstandingPrincipal, loan.currency)}
+            detail={loan.currency !== asset.currency && loan.outstandingPrincipalInAssetCurrency !== null
+              ? t('manualAssetDetail.equity.converted', { amount: money(loan.outstandingPrincipalInAssetCurrency) })
+              : undefined}
+          />
+        ))}
+      </View>
+    </Section>
+  )
+}
+
+function Fact({ label, value, detail, figure = false, first = false }: { label: string; value: string; detail?: string; figure?: boolean; first?: boolean }) {
   const palette = usePalette()
   return (
-    <View accessible accessibilityLabel={`${label}, ${value}`} style={[styles.fact, { borderBottomColor: palette.border }, first && styles.firstFact]}>
+    <View accessible accessibilityLabel={[label, value, detail].filter(Boolean).join(', ')} style={[styles.fact, { borderBottomColor: palette.border }, first && styles.firstFact]}>
       <Text style={styles.factLabel} tone="muted" variant="meta">{label}</Text>
-      <Text style={styles.factValue} variant="meta">{value}</Text>
+      <View style={styles.factValue}>
+        <Text style={styles.factValueText} variant={figure ? 'amount' : 'meta'}>{value}</Text>
+        {detail ? <Text style={styles.factValueText} tone="muted" variant="label">{detail}</Text> : null}
+      </View>
     </View>
   )
 }
@@ -183,6 +234,9 @@ const styles = StyleSheet.create({
   fact: { flexDirection: 'row', justifyContent: 'space-between', gap: themeTokens.spacing[4], paddingVertical: themeTokens.spacing[3], borderBottomWidth: StyleSheet.hairlineWidth },
   firstFact: { paddingTop: 0 },
   factLabel: { flexShrink: 0 },
-  factValue: { flexShrink: 1, textAlign: 'right' },
+  factValue: { flexShrink: 1, alignItems: 'flex-end' },
+  factValueText: { textAlign: 'right' },
+  equityNote: { marginTop: themeTokens.spacing[3] },
+  loansHead: { marginTop: themeTokens.spacing[6], marginBottom: themeTokens.spacing[1] },
   webNote: { marginTop: themeTokens.spacing[4] },
 })

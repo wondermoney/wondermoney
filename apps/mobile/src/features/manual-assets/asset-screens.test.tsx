@@ -100,6 +100,80 @@ describe('Asset detail', () => {
     expect(view.queryByRole('button', { name: 'Update value' })).not.toBeOnTheScreen()
   })
 
+  it('shows no equity for an asset with no loan against it', async () => {
+    const view = await renderScreen(detail())
+    expect(view.queryByTestId('asset-equity')).not.toBeOnTheScreen()
+  })
+
+  it('shows the equity: value today less what is owed on the secured loans, then each loan', async () => {
+    const view = await renderScreen(detail(assetDetailFixture({
+      linkedLoans: [
+        { loanKey: 3, name: 'Mortgage', currency: 'EUR', outstandingPrincipal: 150_000, outstandingPrincipalInAssetCurrency: 150_000 },
+        { loanKey: 4, name: 'Family loan', currency: 'USD', outstandingPrincipal: 11_000, outstandingPrincipalInAssetCurrency: 10_000 },
+      ],
+      linkedDebt: 160_000,
+      equity: 90_000,
+    })))
+    const equity = within(view.getByTestId('asset-equity'))
+    expect(equity.getByRole('header', { name: 'Equity' })).toBeOnTheScreen()
+    expect(equity.getByLabelText('Value today, €250,000.00')).toBeOnTheScreen()
+    expect(equity.getByLabelText('Owed on secured loans, €160,000.00')).toBeOnTheScreen()
+    expect(equity.getByLabelText('Equity, €90,000.00')).toBeOnTheScreen()
+    expect(equity.getByLabelText('Mortgage, €150,000.00')).toBeOnTheScreen()
+    // A loan in another currency in its own, with the API's conversion beside it.
+    expect(equity.getByLabelText("Family loan, $11,000.00, €10,000.00 at today's rate")).toBeOnTheScreen()
+    expect(equity.queryByText(/Underwater/)).not.toBeOnTheScreen()
+  })
+
+  it('marks negative equity with its minus sign and a note, not colour alone', async () => {
+    const view = await renderScreen(detail(assetDetailFixture({
+      linkedLoans: [{ loanKey: 3, name: 'Mortgage', currency: 'EUR', outstandingPrincipal: 270_000, outstandingPrincipalInAssetCurrency: 270_000 }],
+      linkedDebt: 270_000,
+      equity: -20_000,
+    })))
+    const equity = within(view.getByTestId('asset-equity'))
+    expect(equity.getByLabelText('Equity, -€20,000.00')).toBeOnTheScreen()
+    expect(equity.getByText('Underwater: more is owed on its loans than it is worth.')).toBeOnTheScreen()
+  })
+
+  it('says why there is no equity when a loan has no exchange rate, and shows no total', async () => {
+    const view = await renderScreen(detail(assetDetailFixture({
+      linkedLoans: [
+        { loanKey: 3, name: 'Mortgage', currency: 'EUR', outstandingPrincipal: 150_000, outstandingPrincipalInAssetCurrency: 150_000 },
+        { loanKey: 5, name: 'Naira loan', currency: 'NGN', outstandingPrincipal: 9_000_000, outstandingPrincipalInAssetCurrency: null },
+      ],
+      linkedDebt: null,
+      equity: null,
+      unconvertedLoanCurrencies: ['NGN'],
+    })))
+    const equity = within(view.getByTestId('asset-equity'))
+    expect(equity.getByRole('alert')).toHaveTextContent('Equity cannot be worked out: there is no exchange rate from NGN to EUR yet.')
+    expect(equity.getByLabelText('Owed on secured loans, —')).toBeOnTheScreen()
+    expect(equity.getByLabelText('Equity, —')).toBeOnTheScreen()
+    expect(equity.getByLabelText(/^Naira loan, NGN\s?9,000,000\.00$/)).toBeOnTheScreen()
+  })
+
+  it('reads an archived asset as having no equity', async () => {
+    const view = await renderScreen(detail(assetDetailFixture({
+      archived: true, archivedAt: '2026-07-01T09:00:00.000Z', value: null, valueInUserCurrency: null,
+      linkedLoans: [{ loanKey: 3, name: 'Mortgage', currency: 'EUR', outstandingPrincipal: 150_000, outstandingPrincipalInAssetCurrency: 150_000 }],
+      linkedDebt: 150_000,
+      equity: null,
+    })))
+    const equity = within(view.getByTestId('asset-equity'))
+    expect(equity.getByLabelText('Equity, —')).toBeOnTheScreen()
+    expect(equity.getByText('An archived asset has no value today, so it has no equity.')).toBeOnTheScreen()
+  })
+
+  it('reads the equity in Portuguese', async () => {
+    const view = await renderScreen(detail(assetDetailFixture({
+      linkedLoans: [{ loanKey: 3, name: 'Crédito habitação', currency: 'EUR', outstandingPrincipal: 150_000, outstandingPrincipalInAssetCurrency: 150_000 }],
+      linkedDebt: 150_000,
+      equity: 100_000,
+    })), 'pt-PT')
+    expect(within(view.getByTestId('asset-equity')).getByRole('header', { name: 'Capital próprio' })).toBeOnTheScreen()
+  })
+
   it('says a missing asset may be private to the other member, with no retry', async () => {
     const view = await renderScreen(<AssetDetailScreen state={{ status: 'not-found' }} onBack={jest.fn()} onUpdateValue={jest.fn()} onRefresh={jest.fn()} />)
     expect(view.getByText('It may have been deleted, or it is private to the other member of your household.')).toBeOnTheScreen()

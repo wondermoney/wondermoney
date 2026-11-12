@@ -1900,6 +1900,11 @@
       "invalid-routeMessage": "Return to Loans and choose an available loan."
     }
   },
+  "loanForm": {
+    "securedAsset": "Secured against",
+    "securedAssetNone": "None",
+    "securedAssetHint": "Optional. The asset this loan is secured against, such as the home bought with a mortgage. Its page then shows the equity: what it is worth less what is still owed."
+  },
   "manualAssets": {
     "title": "Assets",
     "description": "Homes, vehicles and other things you own that no bank or market prices. You set what they are worth.",
@@ -1971,6 +1976,17 @@
       "shared": "Shared with your household",
       "owner": "Owner",
       "notes": "Notes"
+    },
+    "equity": {
+      "title": "Equity",
+      "value": "Value today",
+      "linkedDebt": "Owed on secured loans",
+      "equity": "Equity",
+      "loans": "Loans secured against it",
+      "converted": "{{amount}} at today's rate",
+      "noRate": "Equity cannot be worked out: there is no exchange rate from {{currencies}} to {{currency}} yet.",
+      "archived": "An archived asset has no value today, so it has no equity.",
+      "underwater": "Underwater: more is owed on its loans than it is worth."
     }
   },
   "manualAssetCreate": {

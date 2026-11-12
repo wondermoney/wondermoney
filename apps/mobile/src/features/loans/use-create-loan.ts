@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 import { useProductRuntime } from '@/components/providers/product-runtime-provider'
+import { isManualAssetQueryOfEpoch } from '@/features/manual-assets/query-keys'
 import { netWorthKey } from '@/features/net-worth/query-keys'
 import { ApiError } from '@/lib/api/errors'
 
@@ -36,6 +37,8 @@ export function useCreateLoan() {
             queryClient.invalidateQueries({ queryKey: loansKey(runtime.epochId), exact: true }),
             queryClient.invalidateQueries({ queryKey: loanOverviewKey(runtime.epochId), exact: true }),
             queryClient.invalidateQueries({ queryKey: netWorthKey(runtime.epochId), exact: true }),
+            // Linked debt and equity on the assets the loan secures.
+            queryClient.invalidateQueries({ predicate: isManualAssetQueryOfEpoch(runtime.epochId) }),
           ])
         },
       })

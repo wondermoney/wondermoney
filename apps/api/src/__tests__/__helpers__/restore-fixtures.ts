@@ -156,6 +156,8 @@ export async function richHousehold(em: EntityManager) {
   em.create(ManualAssetValuation, { manualAssetKey: house, note: 'Agent estimate', tenantKey: owner.tenant, valuationDate: new Date('2026-05-10'), value: 240_000 }, { partial: true });
   const car = em.create(ManualAsset, { archivedAt: new Date('2026-06-01T09:30:00Z'), currencyKey: eur, isPrivate: true, kind: ManualAssetKind.VEHICLE, name: 'Old car', ownerAppuserKey: owner.appuser, tenantKey: owner.tenant }, { partial: true });
   em.create(ManualAssetValuation, { manualAssetKey: car, tenantKey: owner.tenant, valuationDate: new Date('2025-01-15'), value: 7000 }, { partial: true });
+  // The car loan financed the car.
+  loan.securedAssetKey = car;
 
   em.create(Watchlist, { appuserKey: owner.appuser, symbol: 'MSFT', tenantKey: owner.tenant }, { partial: true });
   em.create(EmailNotificationPreference, { appuserKey: owner.appuser, budgetAlertsEnabled: false, weeklyInsightsEnabled: false }, { partial: true });

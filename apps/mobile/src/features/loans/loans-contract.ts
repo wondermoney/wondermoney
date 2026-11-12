@@ -22,6 +22,18 @@ const loanPaymentFrequencySchema = tolerantEnum(['MONTHLY'], 'UNKNOWN')
 const loanRateTypeSchema = tolerantEnum(['FIXED', 'UNKNOWN', 'VARIABLE'], 'UNKNOWN')
 const loanAllocationSourceSchema = tolerantEnum(['AMORTIZATION_ESTIMATE', 'AUTO_MATCHED', 'MANUAL'], 'UNKNOWN')
 
+/**
+ * The manual asset (a home, a car) the loan is secured against, as the API summarises it on the
+ * loan. `value` is today's value in the asset's own `currency`, null once the asset is archived.
+ * An API from before secured assets sends no field at all; that reads as "not linked".
+ */
+export const loanSecuredAssetSchema = z.object({
+  key: positiveSafeId,
+  name: z.string().min(1),
+  currency: z.string().regex(/^[A-Z]{3}$/),
+  value: finiteMoney.nullable(),
+})
+
 export const loanSchema = z.object({
   annualInterestRateBps: z.number().int().min(0).max(10_000).nullable().optional(),
   loanKey: positiveSafeId,
@@ -46,6 +58,7 @@ export const loanSchema = z.object({
   rateType: loanRateTypeSchema,
   regularPaymentAmount: optionalNullableMoney,
   remainingTermMonthsEstimated: z.number().int().finite().nullable(),
+  securedAsset: loanSecuredAssetSchema.nullable().default(null),
   status: loanStatusSchema,
   termMonths: z.number().int().positive().max(Number.MAX_SAFE_INTEGER).nullable().optional(),
   type: loanTypeResponseSchema,
@@ -70,6 +83,9 @@ const loanEditableFieldsSchema = z.object({
   openingPrincipalBalance: finiteMoney.refine((value) => value > 0).optional(),
   providerName: z.string().max(255).optional(),
   regularPaymentAmount: finiteMoney.refine((value) => value > 0).optional(),
+  // The manual asset the loan is secured against; on PATCH, null unlinks it and leaving it out
+  // keeps the link as it is.
+  securedAssetKey: positiveSafeId.nullable().optional(),
   termMonths: z.number().int().positive().max(Number.MAX_SAFE_INTEGER).optional(),
   type: loanTypeSchema.optional(),
 })
@@ -202,6 +218,7 @@ export const loanRepaymentMutationResponseSchema = z.object({
 
 export type LoanType = z.infer<typeof loanTypeSchema>
 export type LoanDto = z.infer<typeof loanSchema>
+export type LoanSecuredAssetDto = z.infer<typeof loanSecuredAssetSchema>
 export type LoanRepaymentDto = z.infer<typeof loanRepaymentSchema>
 export type LoanRepaymentCandidateDto = z.infer<typeof loanRepaymentCandidateSchema>
 export type LoanRepaymentAllocation = z.infer<typeof loanRepaymentAllocationSchema>

@@ -1,8 +1,10 @@
 import { type Href, useLocalSearchParams, useRouter } from 'expo-router'
 
+import { useManualAssets } from '@/features/manual-assets/use-manual-assets'
 import { ApiError } from '@/lib/api/errors'
 
 import { LoanEditScreen, type LoanEditViewState } from './loan-edit-screen'
+import { securedAssetOptions } from './loan-secured-asset'
 import { parseLoanId, type LoanDto } from './loans-contract'
 import { useLoan } from './use-loan'
 import { useLoanMetadataMutation } from './use-loan-metadata-mutation'
@@ -12,6 +14,8 @@ export function LoanEditRoute() {
   const loanId = parseLoanId(params.loanId)
   const detail = useLoan(loanId)
   const mutation = useLoanMetadataMutation()
+  // The "Secured against" choices. Until (or unless) they load, the form still shows the current link.
+  const assets = useManualAssets()
   const router = useRouter()
   let state: LoanEditViewState
 
@@ -30,6 +34,7 @@ export function LoanEditRoute() {
     regularPaymentAmount: loan.regularPaymentAmount ?? null,
     annualInterestRateBps: loan.annualInterestRateBps ?? null,
     termMonths: loan.termMonths ?? null,
+    securedAssetKey: loan.securedAsset?.key ?? null,
   })
 
   if (detail.isInvalidId) state = { status: 'invalid-route' }
@@ -64,6 +69,7 @@ export function LoanEditRoute() {
     }}
     pending={pending}
     refreshRequired={refreshRequired}
+    securedAssets={securedAssetOptions(assets.data?.assets, detail.data?.loan.securedAsset)}
     onSaveLoan={async (value) => { if (loanId === null) return; await mutation.mutateAsync({ loanId, value }) }}
   />
 }

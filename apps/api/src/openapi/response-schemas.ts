@@ -248,6 +248,14 @@ export const ruleSchema = open('Rule', {
   ruleId: id,
 });
 
+/** The household asset a loan finances, as the loan shows it. */
+export const securedAssetSchema = open('LoanSecuredAsset', {
+  key: id.describe('The asset\'s manualAssetKey.'),
+  name: z.string(),
+  value: nullableNumber.describe('Today\'s value in the asset\'s currency; null when it has none (archived).'),
+  currency: z.string().describe('The asset\'s currency (ISO 4217).'),
+});
+
 export const loanSchema = open('Loan', {
   currencyKey: z.object({ code: z.string() }).optional(),
   interestRate: nullableNumber,
@@ -256,6 +264,7 @@ export const loanSchema = open('Loan', {
   outstandingBalance: nullableNumber,
   principal: nullableNumber,
   status: z.string().optional(),
+  securedAsset: securedAssetSchema.nullable().describe('The asset the loan is secured against, or null. Presentation only: net worth is unchanged.'),
 });
 
 export const loanSummarySchema = open('LoanSummary', {
@@ -296,12 +305,25 @@ export const loanRepaymentSchema = open('LoanRepayment', {
   transactionKey: nullableNumber,
 });
 
+/** One of the viewer's loans secured against an asset. */
+export const assetLinkedLoanSchema = open('ManualAssetLinkedLoan', {
+  loanKey: id,
+  name: z.string(),
+  currency: z.string().describe('The loan\'s currency (ISO 4217).'),
+  outstandingPrincipal: money.describe('Today\'s outstanding principal in the loan\'s currency.'),
+  outstandingPrincipalInAssetCurrency: nullableNumber.describe('The same in the asset\'s currency at the latest rate; null when no rate exists.'),
+});
+
 export const manualAssetSchema = open('ManualAsset', {
   assetType: z.string().optional(),
   currencyKey: z.object({ code: z.string() }).optional(),
   currentValue: nullableNumber,
   manualAssetKey: id,
   name: z.string(),
+  linkedLoans: z.array(assetLinkedLoanSchema).describe('The viewer\'s loans secured against the asset. Loans are personal, so the other member\'s are not listed.'),
+  linkedDebt: nullableNumber.describe('Their total outstanding principal in the asset\'s currency: 0 with none, null when a loan has no exchange rate.'),
+  equity: nullableNumber.describe('Today\'s value less linkedDebt, in the asset\'s currency. Null when the asset has no value today or linkedDebt is null.'),
+  unconvertedLoanCurrencies: z.array(z.string()).describe('Currencies of linked loans no rate converts into the asset\'s currency.'),
 });
 
 export const valuationSchema = open('Valuation', {

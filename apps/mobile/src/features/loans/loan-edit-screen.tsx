@@ -16,6 +16,7 @@ import { themeTokens } from '@/theme/tokens'
 import { usePalette } from '@/theme/use-palette'
 
 import { loanNumberErrors } from './loan-form-rows'
+import { NO_SECURED_ASSET, type SecuredAssetOption } from './loan-secured-asset'
 import { loanWriteSchema, type LoanType, type LoanWrite } from './loans-contract'
 import { classifyLoanWriteFailure, type LoanWriteFailure } from './use-loan-metadata-mutation'
 
@@ -35,6 +36,8 @@ export type LoanEditModel = Readonly<{
   termMonths: number | null
   /** The loan's currency (ISO code), shown on the principal; it can't be changed here. */
   currencyCode?: string | null
+  /** The manual asset the loan is secured against, if any. */
+  securedAssetKey?: number | null
 }>
 
 export type LoanEditViewState =
@@ -50,12 +53,14 @@ type Props = Readonly<{
   onRefreshAuthoritative: () => Promise<LoanEditModel | null>
   pending: boolean
   refreshRequired: boolean
+  /** The assets "Secured against" offers (`securedAssetOptions`); the row hides when there are none. */
+  securedAssets?: readonly SecuredAssetOption[]
 }>
 
 
 export function createLoanMetadataChanges(
-  original: Pick<LoanEditModel, 'name' | 'providerName' | 'notes' | 'type' | 'openingPrincipalBalance' | 'openingBalanceDate' | 'regularPaymentAmount' | 'annualInterestRateBps' | 'termMonths'>,
-  current: { name: string; providerName: string; notes: string; type: LoanType; openingPrincipalBalance: string; openingBalanceDate: string; regularPaymentAmount: string; annualInterestRateBps: string; termMonths: string },
+  original: Pick<LoanEditModel, 'name' | 'providerName' | 'notes' | 'type' | 'openingPrincipalBalance' | 'openingBalanceDate' | 'regularPaymentAmount' | 'annualInterestRateBps' | 'termMonths' | 'securedAssetKey'>,
+  current: { name: string; providerName: string; notes: string; type: LoanType; openingPrincipalBalance: string; openingBalanceDate: string; regularPaymentAmount: string; annualInterestRateBps: string; termMonths: string; securedAssetKey?: number | null },
 ): LoanWrite | null {
   const changes: LoanWrite = {}
   if (current.name !== original.name) changes.name = current.name
@@ -83,6 +88,10 @@ export function createLoanMetadataChanges(
   const originalTerm = original.termMonths === null ? '' : String(original.termMonths)
   if (current.termMonths.trim() !== '' && current.termMonths !== originalTerm) {
     changes.termMonths = Number(current.termMonths)
+  }
+  // Unlike the numbers, the link can be cleared: PATCH takes null to unlink.
+  if (current.securedAssetKey !== undefined && current.securedAssetKey !== (original.securedAssetKey ?? null)) {
+    changes.securedAssetKey = current.securedAssetKey
   }
   return Object.keys(changes).length > 0 ? changes : null
 }
@@ -116,7 +125,7 @@ export function LoanEditScreen(props: Props) {
  * then the net worth switch on its own, which saves through its own
  * confirmation rather than the ✓.
  */
-function LoanEditForm({ model, stale, onBack, onSaveLoan, onRefreshAuthoritative, pending, refreshRequired }: Omit<Props, 'state' | 'onRetry'> & { model: LoanEditModel; stale: boolean }) {
+function LoanEditForm({ model, stale, onBack, onSaveLoan, onRefreshAuthoritative, pending, refreshRequired, securedAssets = [] }: Omit<Props, 'state' | 'onRetry'> & { model: LoanEditModel; stale: boolean }) {
   const { t, i18n } = useTranslation()
   const palette = usePalette()
   const locale = i18n.resolvedLanguage ?? i18n.language ?? 'en'
@@ -132,12 +141,13 @@ function LoanEditForm({ model, stale, onBack, onSaveLoan, onRefreshAuthoritative
   const [regularPaymentAmount, setRegularPaymentAmount] = useState(model.regularPaymentAmount === null ? '' : formatNumberInput(model.regularPaymentAmount, locale))
   const [annualInterestRateBps, setAnnualInterestRateBps] = useState(model.annualInterestRateBps === null ? '' : formatNumberInput(basisPointsToPercent(model.annualInterestRateBps), locale))
   const [termMonths, setTermMonths] = useState(model.termMonths === null ? '' : String(model.termMonths))
+  const [securedAssetKey, setSecuredAssetKey] = useState<number | null>(model.securedAssetKey ?? null)
   const [includeInNetWorth, setIncludeInNetWorth] = useState(model.includeInNetWorth)
   const [confirmationTarget, setConfirmationTarget] = useState<boolean | null>(null)
   const [refreshingAuthoritative, setRefreshingAuthoritative] = useState(false)
   const [failure, setFailure] = useState<LoanWriteFailure | null>(null)
   const typed = { openingPrincipalBalance: decimal(openingPrincipalBalance), regularPaymentAmount: decimal(regularPaymentAmount), annualInterestRateBps: decimal(annualInterestRateBps), termMonths }
-  const changes = createLoanMetadataChanges(saved, { name, providerName, notes, type, openingBalanceDate, ...typed })
+  const changes = createLoanMetadataChanges(saved, { name, providerName, notes, type, openingBalanceDate, securedAssetKey, ...typed })
   const inclusionDirty = includeInNetWorth !== saved.includeInNetWorth
   const dirty = changes !== null || inclusionDirty
   const locked = pending || refreshingAuthoritative
@@ -257,6 +267,18 @@ function LoanEditForm({ model, stale, onBack, onSaveLoan, onRefreshAuthoritative
                 <FormTextRow key="name" accessibilityHint={t('loanEdit.nameHint')} editable={!fieldsLocked} error={nameError} label={t('loanEdit.name')} maxLength={255} onChangeText={setName} returnKeyType="next" value={name} />
                 <FormTextRow key="provider" accessibilityHint={t('loanEdit.providerHint')} editable={!fieldsLocked} label={t('loanEdit.provider')} maxLength={255} onChangeText={setProviderName} placeholder={t('loanCreate.optional')} returnKeyType="next" value={providerName} />
                 <FormSelectRow key="type" disabled={fieldsLocked} label={t('loanEdit.type')} onChange={setType} options={CREDIT_TYPES.map((item) => ({ value: item, label: t(`loans.type.${item}`) }))} placeholder={t('loanCreate.choose')} value={type} />
+                {securedAssets.length > 0 || securedAssetKey !== null ? (
+                  <FormSelectRow
+                    key="secured-asset"
+                    disabled={fieldsLocked}
+                    hint={t('loanForm.securedAssetHint')}
+                    label={t('loanForm.securedAsset')}
+                    onChange={(value) => setSecuredAssetKey(value === NO_SECURED_ASSET ? null : value)}
+                    options={[{ value: NO_SECURED_ASSET, label: t('loanForm.securedAssetNone') }, ...securedAssets.map((asset) => ({ value: asset.key, label: asset.name }))]}
+                    placeholder={t('loanForm.securedAssetNone')}
+                    value={securedAssetKey ?? NO_SECURED_ASSET}
+                  />
+                ) : null}
                 <DateField key="date" appearance="row" disabled={fieldsLocked} error={dateError} label={t('loanEdit.startDate')} onChange={(value) => setOpeningBalanceDate(value ?? '')} value={openingBalanceDate || null} />
                 <FormTextRow key="installment" accessibilityLabel={t('loanEdit.installmentOptional')} editable={!fieldsLocked} error={numbers.installment ? t('loanCreate.fieldErrors.installment') : null} keyboardType="decimal-pad" label={t('loanCreate.installment')} onChangeText={setRegularPaymentAmount} placeholder={t('loanCreate.optional')} value={regularPaymentAmount} />
                 <FormTextRow key="rate" accessibilityLabel={t('loanEdit.interestRateOptional')} editable={!fieldsLocked} error={numbers.rate ? t('loanCreate.fieldErrors.interestRate') : null} keyboardType="decimal-pad" label={t('loanCreate.interestRate')} onChangeText={setAnnualInterestRateBps} placeholder={t('loanCreate.optional')} value={annualInterestRateBps} />
