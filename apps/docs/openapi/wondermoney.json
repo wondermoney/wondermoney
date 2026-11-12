@@ -2283,6 +2283,11 @@
         ],
         "additionalProperties": {}
       },
+      "ImageFile": {
+        "type": "string",
+        "format": "binary",
+        "description": "An image file"
+      },
       "ImportPreview": {
         "type": "object",
         "properties": {
@@ -4617,6 +4622,9 @@
           "transactionKey": {
             "type": "integer"
           },
+          "transactionMerchantKey": {
+            "$ref": "#/components/schemas/TransactionMerchant"
+          },
           "transactionType": {
             "type": "string"
           },
@@ -4701,15 +4709,43 @@
       "TransactionMerchant": {
         "type": "object",
         "properties": {
+          "transactionMerchantKey": {
+            "type": "integer"
+          },
           "name": {
             "type": "string"
+          },
+          "website": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "The merchant’s https website, as the household set it."
+          },
+          "logoUrl": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "An https image the household set for the merchant."
+          },
+          "resolvedLogoUrl": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "The image to show: `logoUrl` when set, else this API’s logo proxy for the website’s domain when the instance configures `MERCHANT_LOGO_URL_TEMPLATE`, else null (show the initial)."
           },
           "transactionCount": {
             "type": "integer"
           }
         },
         "required": [
-          "name"
+          "transactionMerchantKey",
+          "name",
+          "website",
+          "logoUrl",
+          "resolvedLogoUrl"
         ],
         "additionalProperties": {}
       },
@@ -6580,6 +6616,94 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/TransactionMerchantList"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "The token is missing, malformed or revoked.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The token does not carry a scope this operation accepts.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "The request did not match the endpoint’s validator.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "A rate limit was exceeded. Honour the `Retry-After` header.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/account/transaction-merchants/{merchantId}/logo": {
+      "get": {
+        "description": "**Required scope:** any of `read`, `write`.\n\nThe image `MERCHANT_LOGO_URL_TEMPLATE` finds for the merchant’s website, fetched by the server so the logo provider never sees the caller. 404 when the instance sets no template, the merchant has no website or its own `logoUrl`, or the provider has no image.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Get a merchant’s logo",
+        "tags": [
+          "Transactions"
+        ],
+        "x-required-scopes": [
+          "read",
+          "write"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "string",
+                  "pattern": "^[1-9]\\d*$"
+                }
+              ]
+            },
+            "required": true,
+            "name": "merchantId",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "content": {
+              "image/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ImageFile"
                 }
               }
             }

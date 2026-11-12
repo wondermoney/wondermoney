@@ -37,6 +37,24 @@ describe('transaction view model', () => {
     ])
   })
 
+  it("leads an ordinary row that has a merchant with the merchant's avatar; transfers, the opening row and rows without one keep their mark", () => {
+    const logo = 'https://api.example.test/v1/account/transaction-merchants/12/logo'
+    const rows = mapTransactions({ transactions: [
+      { ...transactionFixture, transactionMerchantKey: { transactionMerchantKey: 12, name: 'Starbucks', website: 'https://starbucks.example', logoUrl: null, resolvedLogoUrl: logo } },
+      { ...transactionFixture, transactionMerchantKey: { name: 'Corner shop' } },
+      { ...transactionFixture, transactionTypeKey: { name: 'TRANSFER_OUT' } },
+      { ...transactionFixture, transactionKey: -7 },
+      { ...transactionFixture, transactionMerchantKey: undefined },
+    ] })
+    expect(rows.map((row) => row.merchantAvatar)).toEqual([
+      { name: 'Starbucks', resolvedLogoUrl: logo },
+      { name: 'Corner shop', resolvedLogoUrl: null },
+      null,
+      null,
+      null,
+    ])
+  })
+
   it('marks negative initial-balance rows synthetic', () => {
     expect(mapTransactions({ transactions: [{ ...transactionFixture, transactionKey: -7 }] })[0]?.synthetic).toBe(true)
   })

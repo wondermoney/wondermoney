@@ -1,8 +1,9 @@
 import type { EntityMarkSource } from '@/components/ui/entity-mark'
+import type { MerchantAvatarSource } from '@/features/merchants/merchant-avatar'
 import type { TagDto } from '@/features/tags/tags-contract'
 import { type FxState, resolveFxState } from '@/lib/api/fx-status'
 
-import { transactionMark } from './transaction-mark'
+import { transactionMark, transactionMerchantAvatar } from './transaction-mark'
 import { isTransferType, type TransactionDto, type TransactionInstallmentDto, type TransactionSplitLineDto } from './transactions-contract'
 
 export type TransactionViewModel = Readonly<{
@@ -51,6 +52,8 @@ export type TransactionViewModel = Readonly<{
   synthetic: boolean
   /** The row's lead mark: category, transfer arrows, or the institution on the opening row. */
   mark?: EntityMarkSource
+  /** The merchant's avatar, which leads the row in place of `mark`; null keeps `mark`. */
+  merchantAvatar?: MerchantAvatarSource | null
   /**
    * How `amount` was converted. `missing`: there is no `amount`; show the original (signed) one it
    * carries, marked "Not converted". `provisional`: `amount` is an estimate at an older rate.
@@ -127,6 +130,11 @@ export function mapTransactions(input: { transactions: readonly TransactionDto[]
         type,
         category: categoryOf(transaction.appuserTransactionCategories[0]),
         institutionLogoUrl: transaction.accountKey.accountFinancialInstitutionKey?.logoUrl ?? null,
+      }),
+      merchantAvatar: transactionMerchantAvatar({
+        synthetic: transaction.transactionKey < 0,
+        type,
+        merchant: transaction.transactionMerchantKey,
       }),
       fx,
     }

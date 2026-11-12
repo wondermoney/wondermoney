@@ -21,6 +21,13 @@ export class TransactionMerchant extends Base {
   @Property()
   name!: string;
 
+  /**
+   * An https image the household chose for this merchant. It wins over the instance's logo
+   * template (`services/transaction/merchant-logo.ts`) and is loaded by each viewer's client.
+   */
+  @Property({ fieldName: 'logo_url', length: 2048, nullable: true })
+  logoUrl?: null | string;
+
   @Property({ fieldName: 'normalized_name', nullable: true })
   normalizedName?: string;
 
@@ -29,4 +36,8 @@ export class TransactionMerchant extends Base {
 
   @PrimaryKey()
   transactionMerchantKey!: number;
+
+  /** The merchant's https website. Its domain feeds `MERCHANT_LOGO_URL_TEMPLATE` when that is set. */
+  @Property({ length: 500, nullable: true })
+  website?: null | string;
 }

@@ -4,6 +4,7 @@ import { useTranslations } from "next-intl";
 import { type ReactNode, useMemo } from "react";
 
 import { PageHeader } from "@/components/layout/PageHeader";
+import { MerchantAvatar } from "@/components/merchant/MerchantAvatar";
 import { Button } from "@/components/ui/button";
 import { Heading, Text } from "@/components/ui/Typography";
 import { Link } from "@/i18n/navigation";
@@ -37,6 +38,10 @@ export default function TransactionReviewInbox({
       groupTransactionsByMerchant(buckets.suggestedCategory).map((group) => ({
         ...group,
         key: `${group.label.toLowerCase()}::${group.settlementCurrencyCode.toLowerCase()}`,
+        // The group is named after its merchant when its rows have one.
+        merchant: group.transactions.find((transaction) =>
+          transaction.transactionMerchantKey?.name.trim(),
+        )?.transactionMerchantKey,
       })),
     [buckets.suggestedCategory],
   );
@@ -149,7 +154,10 @@ export default function TransactionReviewInbox({
                 <li key={group.key}>
                   {group.transactions.length > 1 && (
                     <div className="bg-muted flex flex-wrap items-center justify-between gap-x-4 gap-y-2 px-4 py-2">
-                      <div className="flex min-w-0 flex-1 basis-40 items-baseline gap-2">
+                      <div className="flex min-w-0 flex-1 basis-40 items-center gap-2">
+                        {group.merchant ? (
+                          <MerchantAvatar merchant={group.merchant} />
+                        ) : null}
                         <h3 className="text-foreground truncate text-sm font-medium">
                           {group.label}
                         </h3>

@@ -168,5 +168,21 @@
     "too-many-matching": "Narrow the filters to change more than {max, number} transactions at once.",
     "too-large-error": "The filters match more than {max, number} transactions. Narrow them and try again.",
     "clear-selection": "Clear selection"
+  },
+  "transactionMerchant": {
+    "section-title": "Merchant",
+    "website": "Website",
+    "logo-url": "Logo URL",
+    "logo": "Logo",
+    "logo-custom": "Custom",
+    "edit": "Edit merchant details",
+    "website-description": "The merchant's own site, for example https://example.com.",
+    "logo-url-description": "An image at this address is loaded by the browser of everyone in your household who sees this merchant. Leave it empty to show the merchant's initial.",
+    "error-https": "Enter a full address that starts with https://.",
+    "error-too-long": "This address is too long.",
+    "error-rejected": "These addresses were not accepted. Check that each one is a full https:// address.",
+    "error-not-editable": "This merchant can't be edited.",
+    "error-save-failed": "Could not save the merchant details. Try again.",
+    "saved": "Merchant details saved"
   }
 }

@@ -527,7 +527,7 @@ class HouseholdRestore {
     const list = this.rows.merchants;
     const global = await lookup(this.db, sql`select transaction_merchant_key as k, name from transaction_merchant where tenant_key is null and deleted_at is null and name = any(${list.filter((row) => row.global).map((row) => row.name)}) order by transaction_merchant_key`);
     const own = await lookup(this.db, sql`select transaction_merchant_key as k, normalized_name as name from transaction_merchant where tenant_key = ${this.target.tenantKey} and deleted_at is null and normalized_name is not null order by transaction_merchant_key`);
-    const toCreate: { id: number; name: string; normalized: string }[] = [];
+    const toCreate: { id: number; logoUrl: null | string; name: string; normalized: string; website: null | string }[] = [];
     const planned = new Map<string, number[]>();
     for (const row of list) {
       const globalKey = row.global ? global.get(row.name) : undefined;
@@ -545,13 +545,13 @@ class HouseholdRestore {
       if (ids) ids.push(row.id);
       else {
         planned.set(normalized, [row.id]);
-        toCreate.push({ id: row.id, name: row.name, normalized });
+        toCreate.push({ id: row.id, logoUrl: row.logoUrl ?? null, name: row.name, normalized, website: row.website ?? null });
       }
     }
     const keys = await allocateKeys(this.db, 'transaction_merchant', 'transaction_merchant_key', toCreate.length);
     const values = toCreate.map((row, index) => {
       for (const id of planned.get(row.normalized)!) this.merchants.set(id, keys[index]!);
-      return { name: row.name, normalized_name: row.normalized, tenant_key: this.target.tenantKey, transaction_merchant_key: keys[index], ...this.stamp() };
+      return { logo_url: row.logoUrl, name: row.name, normalized_name: row.normalized, tenant_key: this.target.tenantKey, transaction_merchant_key: keys[index], website: row.website, ...this.stamp() };
     });
     await insertRows(this.db, 'transaction_merchant', values);
     this.count('merchants', list.length);

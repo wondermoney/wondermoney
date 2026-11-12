@@ -12,6 +12,7 @@ import {
 
 import type { ApiClient, HttpTransport } from '@/lib/api/client'
 import { createApiClient } from '@/lib/api/client'
+import { createImageAuthorization } from '@/lib/api/image-authorization'
 import { createAuthRecoveryCoordinator } from '@/lib/auth/auth-recovery'
 import { validateHouseholdInviteToken, type ValidateInviteOutcome } from '@/lib/auth/household-invite-validation'
 import { takePendingInviteToken } from '@/lib/auth/invite-token-store'
@@ -48,6 +49,12 @@ export type ProductRuntime = Readonly<{
   epochId: AuthEpochId
   principalId: string
   apiClient: ApiClient
+  /**
+   * The `Authorization` header value for an image the API itself serves (the merchant logo
+   * proxy), or null without a session. Only `lib/api/api-image-source` reads it, and only for a
+   * URL on the API's own origin. Optional so a test runtime can leave it out.
+   */
+  imageAuthorization?: () => Promise<string | null>
 }>
 
 export type ProductRouteState =
@@ -176,6 +183,7 @@ export const createDefaultProductRuntime: NonNullable<ProductRuntimeProviderProp
       authRecovery,
       operationScope: input.operationScope,
     }),
+    imageAuthorization: createImageAuthorization(() => authRecovery.getTokenSnapshot()),
   }
 }
 

@@ -2,6 +2,7 @@ import { z } from 'zod';
 
 import { BUDGET_PERIOD_START_DAY_MAX, BUDGET_PERIOD_START_DAY_MIN } from '@service/budget/budget-period';
 import { EXPORT_FORMAT } from '@service/data-export/export-format';
+import { isSafeImageUrl, MERCHANT_LOGO_URL_MAX_LENGTH, MERCHANT_WEBSITE_MAX_LENGTH } from '@validators/merchant';
 
 /**
  * What a restore accepts: the WonderMoney export format (`data-export/export-format.ts`), file by
@@ -11,9 +12,10 @@ import { EXPORT_FORMAT } from '@service/data-export/export-format';
  * Versions: a restore reads every 1.x export. Rows are parsed leniently about fields (an unknown
  * field from a newer minor version is dropped), strictly about values. An older minor version is
  * brought up to the current one by {@link MINOR_MIGRATIONS} before the rows are checked. 1.1 to
- * 1.4 only added files (manual assets, loan rate periods), a loan rate type and optional fields
- * (a loan's secured asset, a budget's month start day, which defaults to the 1st), which an older
- * export simply does not have, so there is nothing to migrate yet. Another major version is refused.
+ * 1.5 only added files (manual assets, loan rate periods), a loan rate type and optional fields
+ * (a loan's secured asset, a budget's month start day, which defaults to the 1st, a merchant's website and
+ * logo URL), which an older export simply does not have, so there is nothing to migrate yet. Another major
+ * version is refused.
  */
 export const RESTORE_MAJOR_VERSION = 1;
 
@@ -97,7 +99,10 @@ const category = z.object({
 });
 
 const categorySetting = z.object({ categoryId: id, countsAsSpending: z.boolean() });
-const merchant = z.object({ global: z.boolean(), id, name: name(500) });
+/** An https address the clients may render, under the same rule as an edit (`validators/merchant.ts`). */
+const httpsUrl = (max: number) => z.string().max(max).refine(isSafeImageUrl, 'an https address').nullable().optional();
+/** `website` and `logoUrl` arrived in 1.5; absent from older exports. */
+const merchant = z.object({ global: z.boolean(), id, logoUrl: httpsUrl(MERCHANT_LOGO_URL_MAX_LENGTH), name: name(500), website: httpsUrl(MERCHANT_WEBSITE_MAX_LENGTH) });
 const merchantCategory = z.object({ categoryId: id, memberId: ref, merchantId: id, source: z.enum(['manual', 'openai', 'user']) });
 const tag = z.object({ color: z.string().regex(/^#[0-9a-f]{3,6}$/iu), createdByMemberId: ref, id, name: name(64) });
 

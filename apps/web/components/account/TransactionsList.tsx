@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 
 import { TransactionAmount } from "@/components/account/TransactionAmount";
 import { InstallmentBadge } from "@/components/installments/InstallmentBadge";
+import { MerchantAvatar } from "@/components/merchant/MerchantAvatar";
 import CategoryIcon from "@/components/ui/CategoryIcon";
 import { formatTxDate } from "@/lib/account/accounts-formatters";
 import type { Transaction } from "@/lib/api/account/useTransactions";
@@ -24,6 +25,9 @@ export default function TransactionsList({
     <div className="divide-border divide-y">
       {recentTxs.map((tx) => {
         const category = tx.appuserTransactionCategories?.[0];
+        const merchant = tx.transactionMerchantKey?.name.trim()
+          ? tx.transactionMerchantKey
+          : undefined;
 
         return (
           <div
@@ -31,19 +35,28 @@ export default function TransactionsList({
             className="flex items-center justify-between py-3"
           >
             <div className="flex items-center gap-3">
-              <div className="bg-muted flex h-8 w-8 shrink-0 items-center justify-center rounded-lg">
-                {category ? (
-                  <CategoryIcon
-                    icon={category.icon}
-                    category={!category.icon ? category.name : undefined}
-                    width="16px"
-                    height="16px"
-                    className="text-muted-foreground"
-                  />
-                ) : (
-                  <Wallet className="text-muted-foreground h-4 w-4" />
-                )}
-              </div>
+              {/* The merchant's logo or initial when the row has a merchant;
+                  otherwise the category's icon, as before. */}
+              {merchant ? (
+                <MerchantAvatar
+                  merchant={merchant}
+                  className="size-8 text-xs"
+                />
+              ) : (
+                <div className="bg-muted flex h-8 w-8 shrink-0 items-center justify-center rounded-lg">
+                  {category ? (
+                    <CategoryIcon
+                      icon={category.icon}
+                      category={!category.icon ? category.name : undefined}
+                      width="16px"
+                      height="16px"
+                      className="text-muted-foreground"
+                    />
+                  ) : (
+                    <Wallet className="text-muted-foreground h-4 w-4" />
+                  )}
+                </div>
+              )}
               <div className="min-w-0">
                 <div className="flex min-w-0 items-center gap-2">
                   <p className="text-foreground truncate text-sm">

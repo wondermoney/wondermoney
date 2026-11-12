@@ -168,5 +168,21 @@
     "too-many-matching": "Restrinja os filtros para alterar mais de {max, number} transações de uma vez.",
     "too-large-error": "Os filtros abrangem mais de {max, number} transações. Restrinja-os e tente novamente.",
     "clear-selection": "Limpar seleção"
+  },
+  "transactionMerchant": {
+    "section-title": "Comerciante",
+    "website": "Website",
+    "logo-url": "URL do logótipo",
+    "logo": "Logótipo",
+    "logo-custom": "Personalizado",
+    "edit": "Editar detalhes do comerciante",
+    "website-description": "O site do próprio comerciante, por exemplo https://example.com.",
+    "logo-url-description": "A imagem neste endereço é carregada pelo navegador de todas as pessoas do seu agregado que vejam este comerciante. Deixe vazio para mostrar a inicial do comerciante.",
+    "error-https": "Introduza um endereço completo que comece por https://.",
+    "error-too-long": "Este endereço é demasiado longo.",
+    "error-rejected": "Estes endereços não foram aceites. Confirme que cada um é um endereço https:// completo.",
+    "error-not-editable": "Este comerciante não pode ser editado.",
+    "error-save-failed": "Não foi possível guardar os detalhes do comerciante. Tente novamente.",
+    "saved": "Detalhes do comerciante guardados"
   }
 }

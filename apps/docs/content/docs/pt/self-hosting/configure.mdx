@@ -80,6 +80,16 @@ Para limitar o que cada agregado pode gastar no modelo por dia, define `AI_DAILY
 
 Define `EODHD_API_KEY` para ligar a pesquisa de tickers, as cotações em tempo real e o módulo de Mercados Financeiros.
 
+## Logótipos de comerciantes
+
+Os logótipos de comerciantes estão desligados por omissão. Cada comerciante mostra então a primeira letra do nome num círculo de cor, e nada sobre os comerciantes dos teus utilizadores sai do servidor.
+
+Define `MERCHANT_LOGO_URL_TEMPLATE` com o endereço de um serviço de logótipos, com `{domain}` onde entra o domínio do site do comerciante, por exemplo `https://logos.example.com/{domain}.png`. Tem de ser um endereço `https`, e `{domain}` tem de vir depois do anfitrião; outro valor impede a API de arrancar. Define-o na API.
+
+Quando um membro adiciona um site a um comerciante, a API pede ao serviço o logótipo desse domínio, guarda-o durante um dia (um domínio sem logótipo durante uma hora) e serve-o às aplicações web e móvel a partir do teu próprio servidor. O serviço vê o endereço do teu servidor e o domínio do comerciante, como `example.com`. Nunca vê os endereços, os navegadores, as contas nem as transações dos teus utilizadores, e as aplicações nunca o contactam. Escolhe um serviço cujos termos aceites para isso, e indica-o na tua política de privacidade.
+
+Um endereço de logótipo que um membro escreva ele próprio tem prioridade sobre o modelo. As aplicações carregam essa imagem diretamente do endereço escolhido pelo membro, sem referenciador, pelo que esse site vê o endereço de cada membro do agregado que a vê. Só são aceites endereços `https` com um nome de anfitrião.
+
 ## Sincronização bancária
 
 A sincronização bancária não precisa de configuração no servidor. Cada pessoa adiciona a sua própria chave de aplicação Enable Banking nas Definições, por isso as credenciais bancárias nunca são partilhadas entre utilizadores.
@@ -152,6 +162,7 @@ Nada é enviado para o projeto WonderMoney. Cada serviço externo que a tua inst
 | Email (o teu servidor SMTP ou o Resend) | A API e o worker, para enviar redefinições de palavra-passe, convites e notificações | `SMTP_HOST` ou `RESEND_API_KEY` |
 | IA (o teu endpoint compatível com OpenAI ou a Anthropic) | A API e o worker, com o recibo, as colunas do CSV, as páginas do extrato, as transações ou as mensagens de chat de que a funcionalidade precisa | `AI_BASE_URL` e `AI_MODEL`, ou `AI_PROVIDER=anthropic`, `ANTHROPIC_API_KEY` e `AI_MODEL` |
 | Dados de mercado (EODHD) | A API e o worker, com símbolos de cotação, não dados de utilizadores | `EODHD_API_KEY` |
+| Logótipos de comerciantes (o serviço que escolheres) | A API, com o domínio do site de um comerciante, não dados de utilizadores ([Logótipos de comerciantes](#logótipos-de-comerciantes)) | `MERCHANT_LOGO_URL_TEMPLATE` |
 | Armazenamento de ficheiros (o teu armazenamento compatível com S3) | A API e os navegadores, para importações de CSV e cópias de recibos | `S3_ENDPOINT` e `S3_BUCKET` |
 | Cópias de segurança fora do servidor (o teu destino rclone) | O serviço `backup-offsite`, uma vez por dia, com as cópias da base de dados e dos ficheiros | O perfil `backup-offsite` e `BACKUP_DESTINATION` ([Atualizações e cópias de segurança](/pt/docs/self-hosting/upgrade-and-backup#cópias-fora-do-servidor)) |
 | Registo de erros (Sentry) | A API, o worker e a aplicação web, com relatórios de erros | `SENTRY_DSN` (API e worker), `NEXT_PUBLIC_SENTRY_DSN` (aplicação web) |
@@ -161,4 +172,4 @@ Nada é enviado para o projeto WonderMoney. Cada serviço externo que a tua inst
 | O teu fornecedor de identidade (OIDC) | Os navegadores e a API, quando um utilizador escolhe `Iniciar sessão com <nome>`. A API obtém o documento de descoberta e as chaves do fornecedor, e troca o código de início de sessão | `OIDC_ISSUER`, `OIDC_CLIENT_ID` e `OIDC_CLIENT_SECRET` |
 | reCAPTCHA | Os navegadores no formulário de contacto, e a aplicação web para verificar a resposta | `NEXT_PUBLIC_RECAPTCHA_SITE_KEY` e `RECAPTCHA_SECRET_KEY` |
 
-Os navegadores também carregam os logótipos de bancos e bolsas a partir dos endereços guardados no catálogo de bancos e ativos. A aplicação móvel não envia analytics nem relatórios de erros enquanto está ligada ao teu servidor.
+Os navegadores também carregam os logótipos de bancos e bolsas a partir dos endereços guardados no catálogo de bancos e ativos, e o logótipo de um comerciante a partir do endereço que um membro escreveu para ele. A aplicação móvel não envia analytics nem relatórios de erros enquanto está ligada ao teu servidor.

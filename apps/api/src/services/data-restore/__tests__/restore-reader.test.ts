@@ -131,6 +131,31 @@ describe('restore reader', () => {
     });
   });
 
+  describe('merchants', () => {
+    const merchant = { global: false, id: 1, name: 'Corner Shop' };
+
+    it('reads a merchant from before websites and logos as having neither', async () => {
+      const parsed = await readRestoreArchive(await archive({ files: sources({ merchants: [merchant] }), manifest: { formatVersion: '1.3' } as unknown as Partial<ExportManifest> }));
+
+      expect(parsed.rows.merchants[0]?.website ?? null).toBeNull();
+      expect(parsed.rows.merchants[0]?.logoUrl ?? null).toBeNull();
+    });
+
+    it('keeps an https website and logo URL', async () => {
+      const files = sources({ merchants: [{ ...merchant, logoUrl: 'https://cdn.example.com/shop.png', website: 'https://shop.example.com' }] });
+
+      const parsed = await readRestoreArchive(await archive({ files }));
+
+      expect(parsed.rows.merchants[0]).toMatchObject({ logoUrl: 'https://cdn.example.com/shop.png', website: 'https://shop.example.com' });
+    });
+
+    it.each(['javascript:alert(1)', 'data:image/png;base64,AAAA', 'http://shop.example.com/logo.png'])('refuses a logo URL of %s, which other members\' browsers would load', async (logoUrl) => {
+      const files = sources({ merchants: [{ ...merchant, logoUrl }] });
+
+      await expect(readRestoreArchive(await archive({ files }))).rejects.toMatchObject({ code: 'invalid_data', detail: { field: 'logoUrl', file: 'data/merchants.json', row: 1 } });
+    });
+  });
+
   describe('rows', () => {
     it('refuses a row that does not match its schema, saying where', async () => {
       const files = sources({ transactions: [{ ...transaction, settlementAmount: 12.5 }] });

@@ -27355,6 +27355,23 @@
           "enumItems": [],
           "mappedType": "datetime"
         },
+        "logo_url": {
+          "name": "logo_url",
+          "type": "varchar(2048)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "unique": false,
+          "length": 2048,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "string"
+        },
         "name": {
           "name": "name",
           "type": "varchar(255)",
@@ -27439,6 +27456,23 @@
           "collation": null,
           "enumItems": [],
           "mappedType": "datetime"
+        },
+        "website": {
+          "name": "website",
+          "type": "varchar(500)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "unique": false,
+          "length": 500,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "string"
         }
       },
       "indexes": [

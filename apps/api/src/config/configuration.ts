@@ -35,6 +35,7 @@ import dotenv from 'dotenv';
 import { z } from 'zod';
 
 import { defaultBrowserOrigins, resolveAppUrl } from './instance-urls';
+import { isMerchantLogoTemplate } from './merchant-logo-template';
 import { parseTrustProxy, TrustProxyError } from './trust-proxy';
 
 export interface ConfigurationIssue {
@@ -239,6 +240,11 @@ const apiSchema = sharedSchema.extend({
   AI_DAILY_LIMIT_STATEMENT_IMPORT: wholeNumber('Daily PDF statement imports per household').optional(),
   AI_REQUIRES_VERIFIED_EMAIL: boolFlag('AI verified-email requirement').optional(),
   INTERNAL_SERVICE_API_KEY: nonEmpty('Internal service key is required'),
+  // Merchant logo lookup (`services/transaction/merchant-logo.ts`): an https URL with `{domain}`,
+  // fetched by the API (never by clients) for a merchant's website domain. Unset: off.
+  MERCHANT_LOGO_URL_TEMPLATE: z.string().trim()
+    .refine(isMerchantLogoTemplate, 'Merchant logo URL template (must be an https URL whose path or query holds {domain}, such as https://logos.example.com/{domain}.png)')
+    .optional(),
   RECAPTCHA_SECRET_KEY: z.string().trim().optional(),
   SPONSOR_URL: httpUrl('Sponsor page URL').optional(),
 });

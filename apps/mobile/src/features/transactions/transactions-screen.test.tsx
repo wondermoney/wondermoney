@@ -284,11 +284,19 @@ describe('TransactionsScreen', () => {
     })
   })
 
-  it('leads each row with its mark, which the checkbox replaces while selecting', async () => {
-    const { view } = await renderLoaded()
+  it("leads each row with its merchant's avatar, or its mark without a merchant; the checkbox replaces both while selecting", async () => {
+    const { view } = await renderLoaded([
+      transactionFixture,
+      { ...transactionFixture, transactionKey: 42, transactionMerchantKey: undefined, description: 'Cash withdrawal' },
+    ])
     const hidden = { includeHiddenElements: true }
+    // "Corner shop" has a merchant and no logo: its initial, on the merchant's colour.
+    expect(view.getByTestId('transaction-merchant-avatar', hidden)).toBeOnTheScreen()
+    expect(view.getByText('C', hidden)).toBeOnTheScreen()
+    // A row without a merchant keeps today's category mark.
     expect(view.getByTestId('transaction-mark', hidden)).toBeOnTheScreen()
     await startSelecting(view)
+    expect(view.queryByTestId('transaction-merchant-avatar', hidden)).not.toBeOnTheScreen()
     expect(view.queryByTestId('transaction-mark', hidden)).not.toBeOnTheScreen()
     expect(view.getByRole('checkbox', { name: 'Select Corner shop' })).toBeOnTheScreen()
   })
