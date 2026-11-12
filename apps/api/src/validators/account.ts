@@ -7,7 +7,7 @@ import { statementMappingSchema } from '@service/account/account-statement-mappi
 import { isSupportedTimeZone } from '@service/reports/report-months';
 import { TRANSFER_DESTINATION_TYPES, USER_SETTABLE_TYPES } from '@service/transaction/transaction-transfer.service';
 import { bytesMatchContentType } from '@utils/file-signature';
-import { boundedLimit, finiteAmount, positiveIntId, validDate } from '@validators/shared';
+import { boundedLimit, finiteAmount, importFileNameInput, positiveIntId, validDate } from '@validators/shared';
 import { tagIdList } from '@validators/tag';
 
 /**
@@ -185,7 +185,7 @@ export const recalculateAccountRequestSchema = z.object({ params: z.object({ acc
 export const deleteAccountRequestSchema = z.object({ params: z.object({ accountId: positiveIntId }) });
 export const getRecentTransactionsRequestSchema = z.object({ params: z.object({ accountId: positiveIntId }) });
 export const getAccountPresignedUrlForUploadRequestSchema = z.object({ params: z.object({ accountId: positiveIntId }) });
-export const startAccountCsvImportRequestSchema = z.object({ body: z.object({ bankName: z.string().optional(), correlationId: z.string().optional(), key: z.string().min(1), mapping: statementMappingSchema.optional() }), params: z.object({ accountId: positiveIntId }) });
+export const startAccountCsvImportRequestSchema = z.object({ body: z.object({ bankName: z.string().optional(), correlationId: z.string().optional(), fileName: importFileNameInput.optional(), key: z.string().min(1), mapping: statementMappingSchema.optional() }), params: z.object({ accountId: positiveIntId }) });
 export const previewAccountCsvImportRequestSchema = z.object({ body: z.object({ key: z.string().min(1), mapping: statementMappingSchema.optional() }), params: z.object({ accountId: positiveIntId }) });
 export const getCategorySpendingRequestSchema = z.object({ query: z.object({ fromDate: validDate.optional(), limit: boundedLimit({ defaultValue: 100, max: 500 }).optional().default(100), timezone: viewerTimeZone, toDate: validDate.optional() }) });
 export const getAccountRequestSchema = z.object({ params: z.object({ accountId: positiveIntId }) });

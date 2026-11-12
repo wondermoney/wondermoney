@@ -207,7 +207,7 @@ test("a file from any bank is read as soon as it is picked, and is staged for re
 
   await waitFor(() => assert.equal(mocks.createImport.mock.calls.length, 1));
   assert.deepEqual(mocks.createImport.mock.calls[0], [
-    { accountId: "3", format: "statement", key: "account-3-upload.csv", mapping: MAPPING },
+    { accountId: "3", fileName: "extrato.csv", format: "statement", key: "account-3-upload.csv", mapping: MAPPING },
   ]);
   // Nothing is imported yet: the dialog moves on to the review.
   assert.equal((await screen.findByTestId("review")).textContent, "import-1");
@@ -229,7 +229,7 @@ test("a supported bank's own export is staged without columns", async () => {
 
   await waitFor(() => assert.equal(mocks.createImport.mock.calls.length, 1));
   assert.deepEqual(mocks.createImport.mock.calls[0], [
-    { accountId: "3", format: "statement", key: "account-3-upload.csv", mapping: undefined },
+    { accountId: "3", fileName: "statement.xlsx", format: "statement", key: "account-3-upload.csv", mapping: undefined },
   ]);
 });
 
@@ -255,7 +255,7 @@ test("an OFX/QFX file skips the column preview and is staged as an OFX import", 
   );
   await waitFor(() => assert.equal(mocks.createImport.mock.calls.length, 1));
   assert.deepEqual(mocks.createImport.mock.calls[0], [
-    { accountId: "3", format: "ofx", key: "account-3-upload.csv", mapping: undefined },
+    { accountId: "3", fileName: "statement.ofx", format: "ofx", key: "account-3-upload.csv", mapping: undefined },
   ]);
 });
 
@@ -281,7 +281,7 @@ test("a QIF file skips the column preview and is staged as a QIF import", async 
   );
   await waitFor(() => assert.equal(mocks.createImport.mock.calls.length, 1));
   assert.deepEqual(mocks.createImport.mock.calls[0], [
-    { accountId: "3", format: "qif", key: "account-3-upload.csv", mapping: undefined },
+    { accountId: "3", fileName: "statement.qif", format: "qif", key: "account-3-upload.csv", mapping: undefined },
   ]);
 });
 

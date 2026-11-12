@@ -28,8 +28,8 @@ export enum TransactionImportSessionStatus {
  * One staged import of a transaction file (`services/transaction-import/`): the uploaded file, how
  * to read it, which WonderMoney account each of its source accounts goes to, and its rows
  * (`TransactionImportRow`). Nothing reaches `transaction` until it is committed. Seven days after a
- * commit the daily sweep deletes its rows and file and keeps only a summary: the status, the dates
- * and the row counts (`rowCounts`, `detailsDeletedAt`).
+ * commit the daily sweep deletes its rows and file and keeps only a summary: the file's name, the
+ * status, the dates and the row counts (`rowCounts`, `detailsDeletedAt`).
  *
  * Owner-scoped: only the member who started it sees it, not their partner (the filter, and an
  * explicit `appuserKey` in every query the service builds). Its rows carry no tenant of their own
@@ -76,6 +76,14 @@ export class TransactionImportSession extends Base {
   /** An uncommitted session stops being usable then. */
   @Property({ columnType: 'timestamptz' })
   expiresAt!: Date;
+
+  /**
+   * The name the file had on the person's device, cleaned and capped (`import-file-name.ts`); the
+   * sweep keeps it with the summary. Unset on sessions started before it was kept, and from clients
+   * that do not send it.
+   */
+  @Property({ length: 255, nullable: true })
+  fileName?: string;
 
   @Property({ length: 30, type: 'string' })
   format!: transactionImport.ImportFormat;

@@ -13,6 +13,7 @@ import { DI } from '@app/database/di';
 import { Account } from '@entity/Account';
 import { BackgroundOperation, BackgroundOperationStatus } from '@entity/BackgroundOperation';
 import { Transaction } from '@entity/Transaction';
+import { TransactionImportSession } from '@entity/TransactionImportSession';
 import { TransactionType } from '@entity/TransactionType';
 import type { StatementMapping } from '@service/account/account-statement-mapping.schema';
 import type { Enqueue } from '@service/queue/enqueue';
@@ -92,9 +93,9 @@ describe('staged transaction import', () => {
   }
 
   /** Start an import of `text` on the household's account and read it, as the parse job does. */
-  async function staged(ctx: ReturnType<typeof setup>, text: string, options?: { mapping?: StatementMapping }) {
+  async function staged(ctx: ReturnType<typeof setup>, text: string, options?: { mapping?: StatementMapping }, fileName?: string) {
     const key = ctx.upload(household.account, text);
-    const created = await ctx.service().create(ownerScope(), { accountId: household.account.accountKey, format: 'statement', key, ...(options ? { options } : {}) });
+    const created = await ctx.service().create(ownerScope(), { accountId: household.account.accountKey, fileName, format: 'statement', key, ...(options ? { options } : {}) });
     await ctx.runLastJob();
     return ctx.service().get(ownerScope(), created.id, {});
   }
@@ -372,11 +373,11 @@ describe('staged transaction import', () => {
   it('keeps a committed import\'s summary once the daily sweep has deleted its rows, and a later import does not remove it', async () => {
     let clock = new Date('2026-09-20T10:00:00Z');
     const ctx = setup({ now: () => clock });
-    const view = await staged(ctx, statement(lines.slice(0, 3)));
+    const view = await staged(ctx, statement(lines.slice(0, 3)), undefined, 'Extrato de março – Caixa 🏦.csv');
     await ctx.service().decide(ownerScope(), view.session.id, { decision: 'skip', rowIds: view.rows.items.slice(0, 1).map((row) => row.id) });
     await commitAndRun(ctx, view.session.id);
     const committed = await ctx.service().get(ownerScope(), view.session.id, {});
-    expect(committed.session).toMatchObject({ committedAt: clock.toISOString(), detailsDeletedAt: null, status: 'succeeded' });
+    expect(committed.session).toMatchObject({ committedAt: clock.toISOString(), detailsDeletedAt: null, fileName: 'Extrato de março – Caixa 🏦.csv', status: 'succeeded' });
 
     // Eight days on, the person starts another import, and the sweep runs.
     clock = new Date(clock.getTime() + 8 * 24 * 60 * 60 * 1000);
@@ -385,11 +386,24 @@ describe('staged transaction import', () => {
     await sweepTransactionImportSessions({ em: db.em(), now: clock, storage: { deleteObject: () => Promise.resolve() } });
 
     const after = await ctx.service().get(ownerScope(), view.session.id, {});
-    expect(after.session).toMatchObject({ committedAt: committed.session.committedAt, createdAt: committed.session.createdAt, detailsDeletedAt: clock.toISOString(), status: 'succeeded' });
+    expect(after.session).toMatchObject({ committedAt: committed.session.committedAt, createdAt: committed.session.createdAt, detailsDeletedAt: clock.toISOString(), fileName: 'Extrato de março – Caixa 🏦.csv', status: 'succeeded' });
     expect(after.session.counts).toEqual(committed.session.counts);
     expect(after.session.counts).toMatchObject({ imported: 2, skipped: 1 });
     expect(after.rows).toMatchObject({ items: [], total: 0 });
     expect(await storedTransactions()).toHaveLength(2);
+  });
+
+  it('keeps the name the file had on the person\'s device, cleaned and capped, and none when it was not given', async () => {
+    const ctx = setup();
+    const named = await staged(ctx, statement(lines.slice(0, 1)), undefined, `C:\\Downloads\\${'Extrato '.repeat(60)}março.csv`);
+    expect(named.session.fileName).toMatch(/^Extrato Extrato .*…\.csv$/u);
+    expect(Array.from(named.session.fileName ?? '')).toHaveLength(255);
+    const stored = await db.em().findOneOrFail(TransactionImportSession, { publicId: named.session.id }, { filters: false });
+    expect(stored.fileName).toBe(named.session.fileName);
+
+    // Sessions started before the name was kept, or by a client that does not send it.
+    const unnamed = await staged(ctx, statement(lines.slice(1, 2)));
+    expect(unnamed.session.fileName).toBeNull();
   });
 
   it('does not start on a deleted account', async () => {

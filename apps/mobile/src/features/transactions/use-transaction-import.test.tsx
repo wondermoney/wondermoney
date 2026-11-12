@@ -45,7 +45,7 @@ describe('useTransactionImport', () => {
     expect(mockWrite.mock.calls[0]?.[0].path).toBe('/v1/account/7/transaction/upload')
     expect(mockUpload).toHaveBeenCalledWith('file:///picked.csv', 'https://s3.example/upload')
     expect(mockWrite.mock.calls[1]?.[0].path).toBe('/v1/account/7/transaction/import')
-    expect(mockWrite.mock.calls[1]?.[1].body).toEqual({ key: 'k1' })
+    expect(mockWrite.mock.calls[1]?.[1].body).toEqual({ fileName: 'picked.csv', key: 'k1' })
     expect(mockRead).toHaveBeenCalledTimes(2)
     expect(hook.result.current.state).toEqual({ phase: 'done', outcome: 'succeeded', format: 'bank', rows: null })
     expect(invalidate).toHaveBeenCalledWith(expect.objectContaining({ predicate: expect.any(Function) }))

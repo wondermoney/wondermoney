@@ -28,6 +28,7 @@ import { findImportedTransactionIds } from '@service/transaction/transaction-ded
 import { BadRequestError, ConflictError, NotFoundError } from '@utils/errors';
 import logger from '@utils/logger';
 
+import { importFileName } from './import-file-name';
 import { statementImportAdapter, StatementUnreadableError, toStatementLine } from './statement-import-adapter';
 
 /**
@@ -58,7 +59,7 @@ import { statementImportAdapter, StatementUnreadableError, toStatementLine } fro
  * An uncommitted session expires after {@link SESSION_TTL_MS}. A daily sweep, in every household
  * (`transaction-import-sweep.ts`), deletes expired sessions with their rows and uploaded files, and
  * seven days after a commit deletes the committed session's rows and file, keeping its summary
- * (status, dates, row counts) for the person's history.
+ * (the file's name, status, dates, row counts) for the person's history.
  */
 export const TRANSACTION_IMPORT_OPERATION = 'transaction-import';
 const CHUNK_SIZE = 500;
@@ -81,6 +82,8 @@ export interface TransactionImportCreateInput {
   accountId: number;
   /** Commit with the default decisions as soon as the file is read: the one-step import. */
   autoCommit?: boolean;
+  /** The name the file had on the person's device; cleaned and capped before it is kept. */
+  fileName?: string;
   format: transactionImport.ImportFormat;
   /** A file already uploaded for this account; absent, the response carries an upload link. */
   key?: string;
@@ -147,6 +150,8 @@ export interface TransactionImportSessionView {
   detailsDeletedAt: null | string;
   errorCode: null | string;
   expiresAt: string;
+  /** The name the file had on the person's device; null on sessions started before it was kept. */
+  fileName: null | string;
   format: transactionImport.ImportFormat;
   id: string;
   sourceAccounts: transactionImport.ImportSourceAccount[];
@@ -249,6 +254,7 @@ export class TransactionImportService {
       appuserKey: appuserRef(this.em, scope.appuserKey),
       autoCommit: input.autoCommit ?? false,
       expiresAt: new Date(this.now.getTime() + SESSION_TTL_MS),
+      fileName: importFileName(input.fileName),
       format: input.format,
       options: { ...(input.format === 'statement' && format.format === 'bank' ? { bankName: format.bankName } : {}), ...input.options },
       publicId: randomUUID(),
@@ -782,6 +788,7 @@ export class TransactionImportService {
       detailsDeletedAt: session.detailsDeletedAt?.toISOString() ?? null,
       errorCode: session.errorCode ?? null,
       expiresAt: session.expiresAt.toISOString(),
+      fileName: session.fileName ?? null,
       format: session.format,
       id: session.publicId,
       sourceAccounts: session.sourceAccounts ?? [],

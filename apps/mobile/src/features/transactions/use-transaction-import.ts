@@ -103,7 +103,8 @@ export function useTransactionImport(options: UseTransactionImportOptions = {}) 
 
       setState({ phase: 'starting' })
       const started = await runtime.apiClient.write(createStartTransactionImportEndpoint(accountId), {
-        body: { key: upload.key },
+        // The name stays with the import for its history; an older API ignores it.
+        body: { fileName: file.name, key: upload.key },
         commit: () => undefined,
       })
 

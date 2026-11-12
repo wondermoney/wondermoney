@@ -2586,6 +2586,7 @@
   "import-review-stalled": "La importación se detuvo antes de terminar. Vuelve a intentarlo para seguir donde se quedó; nada se importa dos veces.",
   "import-review-read-failed": "No pudimos leer este archivo. Elige una exportación del extracto en CSV o Excel.",
   "import-review-expired": "Esta importación caducó antes de terminar. Empieza de nuevo con el archivo.",
+  "import-review-unnamed": "Importación del {date}",
   "import-review-summary": "No se importa nada hasta que confirmes. Las transacciones nuevas están incluidas; las que ya están en la cuenta se omiten.",
   "import-review-filter": "Mostrar",
   "import-review-filter-all": "Todas ({count})",

@@ -51,6 +51,8 @@ export interface TransactionImportSession {
   detailsDeletedAt: string | null;
   errorCode: string | null;
   expiresAt: string;
+  /** The name the file had on the person's device; null on imports started before it was kept. */
+  fileName: string | null;
   format: "camt053" | "generic-csv" | "ofx" | "qif" | "statement";
   id: string;
   sourceAccounts: {
@@ -158,6 +160,8 @@ export function useTransactionImport(
 
 export interface CreateTransactionImportRequest {
   accountId: number | string;
+  /** The name the file had on the person's device, kept for the import's history. */
+  fileName?: string;
   /** The format the file is read in; `statement` unless the file is OFX/QFX, QIF or CAMT.053. */
   format?: "camt053" | "ofx" | "qif" | "statement";
   /** The file, already uploaded for this account. */
@@ -170,6 +174,7 @@ export function useCreateTransactionImport() {
   return useMutation({
     mutationFn: ({
       accountId,
+      fileName,
       format = "statement",
       key,
       mapping,
@@ -177,6 +182,7 @@ export function useCreateTransactionImport() {
       api
         .post<{ session: TransactionImportSession }>(base, {
           accountId: Number(accountId),
+          ...(fileName ? { fileName } : {}),
           format,
           key,
           ...(mapping ? { options: { mapping } } : {}),

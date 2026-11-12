@@ -88,6 +88,7 @@ function session(
     detailsDeletedAt: null,
     errorCode: null,
     expiresAt: "2026-11-16T10:00:00Z",
+    fileName: "Extrato de março 2026.csv",
     format: "statement",
     id: "import-1",
     sourceAccounts: [],
@@ -376,4 +377,40 @@ test("a recent import does not say its details are gone", () => {
       .textContent?.includes(messages["import-review-details-deleted"]),
     false,
   );
+});
+
+test("names the import by the file it was read from, while it is reviewed and once it is done", () => {
+  renderReview({ rows, session: session() });
+  assert.equal(
+    screen.getByTestId("transaction-import-name").textContent,
+    "Extrato de março 2026.csv",
+  );
+  cleanup();
+
+  renderReview({
+    rows: { items: [], page: 1, pageSize: 50, total: 0 },
+    session: session({
+      detailsDeletedAt: "2026-11-09T03:30:00Z",
+      fileName: "銀行明細_2026年10月.ofx",
+      status: "succeeded",
+    }),
+  });
+  assert.equal(
+    screen.getByTestId("transaction-import-name").textContent,
+    "銀行明細_2026年10月.ofx",
+  );
+});
+
+test("names an import started before file names were kept by the day it was started", () => {
+  renderReview({
+    rows: { items: [], page: 1, pageSize: 50, total: 0 },
+    session: session({
+      createdAt: "2026-03-14T10:00:00Z",
+      detailsDeletedAt: "2026-03-22T03:30:00Z",
+      fileName: null,
+      status: "succeeded",
+    }),
+  });
+  const name = screen.getByTestId("transaction-import-name").textContent ?? "";
+  assert.match(name, /^Import of .*14.*2026/u);
 });
