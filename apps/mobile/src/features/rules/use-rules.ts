@@ -12,6 +12,7 @@ import {
   createRuleEndpoint,
   createRuleOperationEndpoint,
   createRuleUpdateEndpoint,
+  dismissRuleSuggestionEndpoint,
   freezeRuleInput,
   rulePreviewEndpoint,
   rulesEndpoint,
@@ -232,4 +233,19 @@ export function useRuleApply(options: UseRuleApplyOptions = {}) {
   const reset = useCallback(() => setState({ phase: 'idle' }), [])
 
   return { state, start, reset }
+}
+
+/** "Don't suggest again" for a rule suggestion, by its fingerprint. Nothing to refresh after it. */
+export function useDismissRuleSuggestion() {
+  const { runtime, blockAccess } = useProductRuntime()
+  if (!runtime) throw new Error('useDismissRuleSuggestion requires an authenticated runtime')
+  return useMutation({
+    retry: false,
+    mutationFn: async (fingerprint: string): Promise<void> => {
+      await runtime.apiClient.write(dismissRuleSuggestionEndpoint, { body: { fingerprint }, commit: () => undefined })
+    },
+    onError: (error) => {
+      if (error instanceof ApiError && error.code === 'mfa-required') blockAccess('mfa-required')
+    },
+  })
 }

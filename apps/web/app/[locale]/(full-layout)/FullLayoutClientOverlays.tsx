@@ -3,6 +3,7 @@
 import dynamic from "next/dynamic";
 
 import PasskeyOffer from "@/components/auth/PasskeyOffer";
+import { RuleSuggestionEditorHost } from "@/components/rules/RuleSuggestionEditorHost";
 import { useFeature } from "@/lib/api/instance/useInstance";
 
 const AssistantLauncher = dynamic(
@@ -20,6 +21,8 @@ export default function FullLayoutClientOverlays() {
       {assistantAvailable ? <AssistantLauncher /> : null}
       {/* After a password sign-in, the one-time offer to add a passkey. */}
       <PasskeyOffer />
+      {/* The rule editor a "categorize transactions like this" prompt opens. */}
+      <RuleSuggestionEditorHost />
     </>
   );
 }

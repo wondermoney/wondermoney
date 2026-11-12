@@ -7,8 +7,9 @@ import { useCategories } from '@/features/categories/use-categories'
 import { useAiHiddenPreference } from '@/features/preferences/use-ai-hidden'
 import { RuleApplyOffer } from '@/features/rules/rule-apply-offer'
 import { RuleEditorSheet } from '@/features/rules/rule-editor-sheet'
-import type { RuleDto } from '@/features/rules/rules-contract'
-import { seedRuleFromTransaction, type RuleEditorForm } from '@/features/rules/rules-view-model'
+import { RuleSuggestionPrompt } from '@/features/rules/rule-suggestion-prompt'
+import type { RuleDto, RuleSuggestionDto } from '@/features/rules/rules-contract'
+import { seedRuleFromSuggestion, seedRuleFromTransaction, type RuleEditorForm } from '@/features/rules/rules-view-model'
 import { toTagsState, useCreateTagForPicker, useSetTransactionTags, useTags } from '@/features/tags/use-tags'
 import { ApiError } from '@/lib/api/errors'
 import { parseAccountId } from '@/features/accounts/accounts-contract'
@@ -97,6 +98,8 @@ export function TransactionsRoute({ perAccount = false }: { perAccount?: boolean
   // "Create rule" from a row: the pre-filled form, then the saved rule's apply offer.
   const [ruleSeed, setRuleSeed] = useState<RuleEditorForm | null>(null)
   const [savedRule, setSavedRule] = useState<RuleDto | null>(null)
+  // A recategorization that repeats a pattern offers a rule; "Create rule" opens the editor seeded with it.
+  const [ruleSuggestion, setRuleSuggestion] = useState<RuleSuggestionDto | null>(null)
   let state: TransactionsViewState
   if (query.isInvalidAccountId) state = { status: 'invalid-account' }
   else if (query.isAccessTransition) state = { status: 'access-transition' }
@@ -123,7 +126,8 @@ export function TransactionsRoute({ perAccount = false }: { perAccount?: boolean
 
   const runAction = async (action: TransactionBulkAction): Promise<ReviewResult> => {
     try {
-      await mutation.mutateAsync(action)
+      const outcome = await mutation.mutateAsync(action)
+      if (action.type === 'category' && outcome.ruleSuggestion) setRuleSuggestion(outcome.ruleSuggestion)
       return 'success'
     } catch (error) {
       return classifyResult(error, blockAccess)
@@ -254,5 +258,14 @@ export function TransactionsRoute({ perAccount = false }: { perAccount?: boolean
     visible={ruleSeed !== null}
   />
   {savedRule ? <RuleApplyOffer key={savedRule.ruleKey} onApplied={() => { void query.refetch() }} onClose={() => setSavedRule(null)} rule={savedRule} /> : null}
+  {ruleSuggestion && ruleSeed === null ? (
+    <RuleSuggestionPrompt
+      key={ruleSuggestion.fingerprint}
+      categoryName={ruleCategories.find((category) => category.id === ruleSuggestion.category.categoryKey)?.name}
+      onClose={() => setRuleSuggestion(null)}
+      onCreate={(suggestion) => { setRuleSuggestion(null); setRuleSeed(seedRuleFromSuggestion(suggestion)) }}
+      suggestion={ruleSuggestion}
+    />
+  ) : null}
   </>
 }

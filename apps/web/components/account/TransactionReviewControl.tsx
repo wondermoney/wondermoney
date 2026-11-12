@@ -7,6 +7,7 @@ import { usePostHog } from "posthog-js/react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
+import { useRuleSuggestionPrompt } from "@/components/rules/useRuleSuggestionPrompt";
 import { Text } from "@/components/ui/Typography";
 import {
   invalidateAfterTransactionDelete,
@@ -111,6 +112,7 @@ const TransactionReviewControl: React.FC<TransactionReviewControlProps> = ({
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { mutateAsync } = useEditTransactions();
+  const offerRuleSuggestion = useRuleSuggestionPrompt();
   const { mutateAsync: deleteTransactions, isPending: isDeleting } =
     useDeleteTransactions();
   const queryClient = useQueryClient();
@@ -157,10 +159,11 @@ const TransactionReviewControl: React.FC<TransactionReviewControlProps> = ({
       ...change,
     });
     try {
-      await mutateAsync({ ...scope, ...change });
+      const response = await mutateAsync({ ...scope, ...change });
       await refresh();
       onResetSelection();
       toast.success(successMessage);
+      offerRuleSuggestion(response?.data);
       toggle();
     } catch (error) {
       showError(error, t("toast-edit-transaction-error"));

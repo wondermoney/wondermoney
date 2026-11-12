@@ -7,7 +7,7 @@ import type { Tenant } from '@entity/Tenant';
 import { Transaction } from '@entity/Transaction';
 import { TransactionAuditActorType, TransactionAuditEventType } from '@entity/TransactionAuditLog';
 import { changeTransactionTags } from '@service/tag/tag.service';
-import { TransactionAuditService } from '@service/transaction/transaction-audit.service';
+import { MANUAL_CATEGORIZATION_SOURCE, TransactionAuditService } from '@service/transaction/transaction-audit.service';
 import { applyUserCategorization } from '@service/transaction/user-categorization.service';
 import logger from '@utils/logger';
 
@@ -38,6 +38,9 @@ export interface BulkTransactionChange {
  * the caller through the tenant filter (`loadTransactionSelection`) with
  * {@link BULK_CHANGE_POPULATE}. `auditSource` is the audit's `source`: `bulk-update` for the
  * endpoint, `assistant-proposal` for a confirmed proposal.
+ *
+ * Returns the keys of the transactions whose category this change moved (empty without a
+ * category, and leaving out rows that already had it).
  */
 export async function applyBulkTransactionChange(
   em: EntityManager,
@@ -45,7 +48,7 @@ export async function applyBulkTransactionChange(
   transactions: Transaction[],
   change: BulkTransactionChange,
   options: { auditSource?: string } = {},
-): Promise<void> {
+): Promise<{ recategorizedTransactionKeys: number[] }> {
   const { appuser, tenant } = actor;
   const { category = null, hidden, reviewed } = change;
   const selectedKeys = transactions.map((transaction) => transaction.transactionKey);
@@ -108,7 +111,7 @@ export async function applyBulkTransactionChange(
       appuserKey: appuser.appuserKey,
       changes,
       eventType: category ? TransactionAuditEventType.CATEGORIZED : TransactionAuditEventType.USER_EDIT,
-      source: options.auditSource ?? 'bulk-update',
+      source: options.auditSource ?? MANUAL_CATEGORIZATION_SOURCE.BULK_UPDATE,
       tenantKey: tenant.tenantKey,
       transactionKey: transaction.transactionKey,
     }, { flush: false });
@@ -122,4 +125,8 @@ export async function applyBulkTransactionChange(
       logger.warn({ audited, errorMessage: error instanceof Error ? error.message : 'Unknown error' }, 'Bulk update audit log write failed');
     }
   }
+  const recategorizedTransactionKeys = category
+    ? transactions.filter((transaction) => originalCategoryByTransaction.get(transaction.transactionKey)?.categoryKey !== category.categoryKey).map((transaction) => transaction.transactionKey)
+    : [];
+  return { recategorizedTransactionKeys };
 }

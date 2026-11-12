@@ -51,6 +51,11 @@ export const applyAllRulesRequestSchema = z.object({ body: applyRulesBody });
 
 export const deleteRuleRequestSchema = z.object({ params: ruleIdParams });
 
+/** `POST /v1/rule/suggestions/dismiss`: the suggestion's `fingerprint`, as the update response gave it. */
+export const dismissRuleSuggestionRequestSchema = z.object({
+  body: z.object({ fingerprint: z.string().regex(/^[0-9a-f]{64}$/, 'Not a rule suggestion fingerprint') }),
+});
+
 /**
  * `POST /v1/rule/import`: the uploaded file (already parsed, or its JSON text), the mode, and
  * whether this is a dry run. `confirm` acknowledges that replace mode removes the household's

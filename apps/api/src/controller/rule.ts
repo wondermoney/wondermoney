@@ -6,6 +6,7 @@ import { exportRules as exportRulesService } from '@service/rules/rule-export.se
 import { importRules as importRulesService } from '@service/rules/rule-import.service';
 import { previewRule as previewRuleService } from '@service/rules/rule-preview.service';
 import { countRuleRun, type RuleRunScope, startRuleRun } from '@service/rules/rule-run.service';
+import { dismissRuleSuggestion as dismissRuleSuggestionService } from '@service/rules/rule-suggestion.service';
 import {
   createRule as createRuleService,
   deleteRule as deleteRuleService,
@@ -14,7 +15,7 @@ import {
   updateRule as updateRuleService,
 } from '@service/rules/rule.service';
 import { zParse } from '@validators/parser';
-import { applyAllRulesRequestSchema, applyRuleRequestSchema, createRuleRequestSchema, deleteRuleRequestSchema, importRulesRequestSchema, previewRuleRequestSchema, reorderRulesRequestSchema, updateRuleRequestSchema } from '@validators/rule';
+import { applyAllRulesRequestSchema, applyRuleRequestSchema, createRuleRequestSchema, deleteRuleRequestSchema, dismissRuleSuggestionRequestSchema, importRulesRequestSchema, previewRuleRequestSchema, reorderRulesRequestSchema, updateRuleRequestSchema } from '@validators/rule';
 
 import { DI } from '../app';
 
@@ -32,6 +33,19 @@ export async function deleteRule(req: Request, res: Response) {
   } = await zParse(deleteRuleRequestSchema, req);
   await deleteRuleService(DI.em, { appuserKey, tenantKey }, ruleId);
   return res.sendStatus(StatusCodes.OK);
+}
+
+/**
+ * `POST /v1/rule/suggestions/dismiss`: never offer this rule suggestion to the current member
+ * again. 204, also when it was already dismissed.
+ */
+export async function dismissRuleSuggestion(req: Request, res: Response) {
+  const { appuserKey } = authedContext(req);
+  const {
+    body: { fingerprint },
+  } = await zParse(dismissRuleSuggestionRequestSchema, req);
+  await dismissRuleSuggestionService(DI.em, appuserKey, fingerprint);
+  return res.sendStatus(StatusCodes.NO_CONTENT);
 }
 
 export async function getRules(req: Request, res: Response) {

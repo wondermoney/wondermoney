@@ -6,6 +6,7 @@ import { usePostHog } from "posthog-js/react";
 import { useState } from "react";
 import { toast } from "sonner";
 
+import { useRuleSuggestionPrompt } from "@/components/rules/useRuleSuggestionPrompt";
 import useEditTransactions from "@/lib/api/account/useEditTransactions";
 import type { Transaction } from "@/lib/api/account/useTransactions";
 import { isDemoReadOnlyError } from "@/lib/api/errors";
@@ -28,6 +29,7 @@ export function useTransactionReviewActions() {
   const posthog = usePostHog();
   const queryClient = useQueryClient();
   const { mutateAsync } = useEditTransactions();
+  const offerRuleSuggestion = useRuleSuggestionPrompt();
   const [pendingTransactionCounts, setPendingTransactionCounts] = useState<
     Map<number, number>
   >(() => new Map());
@@ -96,7 +98,7 @@ export function useTransactionReviewActions() {
     setPending(transactions, true);
 
     try {
-      await mutateAsync({
+      const response = await mutateAsync({
         transactionIds,
         categoryId,
         reviewed: true,
@@ -115,6 +117,7 @@ export function useTransactionReviewActions() {
           count: transactions.length,
         }),
       );
+      offerRuleSuggestion(response?.data);
     } catch (error) {
       if (isDemoReadOnlyError(error)) {
         toast.error(t("demo-read-only-title"), {

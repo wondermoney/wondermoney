@@ -219,6 +219,13 @@
       "failed": "Não foi possível aplicar as regras. Tente mais tarde.",
       "in-progress": "Já há regras a ser aplicadas. Espere que terminem e tente de novo.",
       "error": "Não foi possível aplicar as regras agora."
+    },
+    "suggestion": {
+      "title": "Categorizar sempre transações destas como {category}?",
+      "description": "{count, plural, one {Moveu # transação destas nos últimos {days} dias.} other {Moveu # transações destas nos últimos {days} dias.}} Uma regra pode fazê-lo por si.",
+      "create": "Criar regra",
+      "dismiss": "Não sugerir de novo",
+      "dismiss-error": "Não foi possível dispensar a sugestão. Tente novamente."
     }
   }
 }

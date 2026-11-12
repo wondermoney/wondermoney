@@ -145,6 +145,44 @@ export type RuleDto = z.infer<typeof ruleSchema>
 export const rulesResponseSchema = z.object({ rules: z.array(ruleSchema) })
 export type RulesResponse = z.infer<typeof rulesResponseSchema>
 
+/**
+ * A rule the API offers after the member's own repeated recategorization, on the transaction
+ * update responses as `ruleSuggestion` (null when there is none). `fingerprint` names it for
+ * "Don't suggest again".
+ */
+export const ruleSuggestionSchema = z.object({
+  category: z.object({ categoryKey: positiveId, name: z.string() }),
+  fingerprint: z.string().regex(/^[0-9a-f]{64}$/),
+  matchCount: z.number().int().positive(),
+  rule: z.object({
+    name: z.string().trim().min(1).max(RULE_NAME_MAX_LENGTH),
+    match: z.enum(RULE_MATCHES).catch('all'),
+    conditions: z.array(ruleConditionSchema).min(1),
+    actions: z.array(ruleActionSchema).min(1),
+  }),
+  windowDays: z.number().int().positive(),
+})
+
+export type RuleSuggestionDto = z.infer<typeof ruleSuggestionSchema>
+
+/**
+ * The suggestion in an update response body, or null: an older API answers the bulk update with
+ * no JSON at all, and a suggestion this build cannot read is no offer, never a failed update.
+ */
+export function parseRuleSuggestion(body: unknown): RuleSuggestionDto | null {
+  if (typeof body !== 'object' || body === null || !('ruleSuggestion' in body)) return null
+  const parsed = ruleSuggestionSchema.safeParse((body as { ruleSuggestion: unknown }).ruleSuggestion)
+  return parsed.success ? parsed.data : null
+}
+
+/** "Don't suggest again": 204, also when it was already dismissed. */
+export const dismissRuleSuggestionEndpoint = writeEndpoint({
+  method: 'POST',
+  path: '/v1/rule/suggestions/dismiss',
+  schema: z.undefined(),
+  successStatuses: [204],
+})
+
 /** The final change a matching transaction would get; empty when it would not change. */
 const rulePreviewChangesSchema = z.object({
   addTagKeys: z.array(positiveId).optional(),
