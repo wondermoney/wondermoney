@@ -55,13 +55,18 @@ const scrubSessionHeaders = (ctx: { context: { responseHeaders?: Headers }; resp
  *
  * Non-2FA users are unaffected (early return). Fails closed. Reaches better-auth
  * internal context APIs, mirroring the plugin's own hook — re-verify on any better-auth bump.
+ *
+ * `trustProviderMfa` names browser-OAuth providers whose own MFA stands in for the local TOTP
+ * code (`OIDC_TRUST_IDP_MFA`): their callback is not gated. Google and Apple never are.
  */
-export const twoFactorOAuthGuard = (): BetterAuthPlugin => ({
+export const twoFactorOAuthGuard = ({ trustProviderMfa = [] }: { trustProviderMfa?: readonly string[] } = {}): BetterAuthPlugin => ({
   hooks: {
     after: [
       {
         handler: createAuthMiddleware(async (ctx) => {
           if (ctx.path !== '/callback/:id' && ctx.path !== '/sign-in/social') return;
+          const providerId = (ctx.params as undefined | { id?: string })?.id;
+          if (ctx.path === '/callback/:id' && providerId && trustProviderMfa.includes(providerId)) return;
           const pendingSession = ctx.context.newSession;
           // No session was created (account-link / error branches) or the user has no 2FA — nothing to gate.
           if (!pendingSession) return;

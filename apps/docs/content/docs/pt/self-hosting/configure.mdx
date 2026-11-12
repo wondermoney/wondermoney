@@ -79,6 +79,25 @@ O worker sincroniza cada ligação bancária no máximo uma vez a cada `BANK_SYN
 
 Define `GOOGLE_CLIENT_ID` e `GOOGLE_CLIENT_SECRET` (de um cliente OAuth no Google Cloud, com `<API_URL>/api/auth/callback/google` como URI de redirecionamento autorizado) para mostrares "Continuar com Google" nas páginas de início de sessão e de registo. Sem os dois, o botão fica escondido.
 
+## Início de sessão único (OIDC)
+
+Inicia sessão através do teu próprio fornecedor de identidade, como o Authentik ou o Keycloak: as páginas de início de sessão e de registo, na web e na aplicação móvel, mostram então `Iniciar sessão com <nome>`. [Início de sessão único](/pt/docs/self-hosting/single-sign-on) explica como configurar o fornecedor.
+
+| Definição | O que faz |
+|---|---|
+| `OIDC_ISSUER`, `OIDC_CLIENT_ID`, `OIDC_CLIENT_SECRET` | O URL do emissor do fornecedor (HTTPS) e o cliente que lá registaste, com `<API_URL>/api/auth/callback/oidc` como URI de redirecionamento. Os três ligam o início de sessão único em conjunto; qualquer outra definição `OIDC_` sem eles impede a API de arrancar |
+| `OIDC_DISPLAY_NAME` | O nome no botão. Por omissão, `SSO` |
+| `OIDC_SCOPES` | Os âmbitos a pedir, separados por espaços; tem de incluir `openid`. Por omissão, `openid email profile` |
+| `OIDC_GROUPS_CLAIM` | A claim que lista os grupos da pessoa. Por omissão, `groups` |
+| `OIDC_ALLOWED_GROUPS` | Grupos separados por vírgulas. Quando definida, só os seus membros (e os membros dos grupos de administração) podem iniciar sessão |
+| `OIDC_ADMIN_GROUPS` | Grupos separados por vírgulas cujos membros são administradores da instância. Verificado em cada início de sessão, por isso sair do grupo retira a administração |
+| `OIDC_AUTO_SIGNUP` | `true` cria a conta no primeiro início de sessão através do fornecedor mesmo quando `SIGNUP_MODE` é `invite` ou `closed`. O registo com palavra-passe continua a seguir `SIGNUP_MODE` |
+| `OIDC_ONLY` | `true` desliga o início de sessão, o registo e a reposição com palavra-passe, e esconde-os nas aplicações. As chaves de acesso continuam a funcionar |
+| `OIDC_TRUST_IDP_MFA` | `true` dispensa o código do autenticador do WonderMoney depois de um início de sessão através do fornecedor. Define-a só quando o próprio fornecedor exige um segundo fator |
+| `OIDC_ALLOW_UNVERIFIED_EMAIL` | `true` aceita um endereço de email que o fornecedor não verificou. Desligada por omissão; uma conta assim nunca é ligada a uma conta existente |
+
+`GET /v1/instance` indica `features.oidc: { "name": "<OIDC_DISPLAY_NAME>" }` e, com `OIDC_ONLY`, `features.passwordSignIn: false`.
+
 ## Chaves de acesso
 
 As chaves de acesso (passkeys) não precisam de nenhuma variável de ambiente. Pertencem ao domínio em `APP_URL`, o endereço da aplicação web, e o navegador só as oferece nesse domínio. Funciona da mesma forma quer a aplicação web e a API partilhem um domínio, quer usem dois, como `money.example.com` e `api.money.example.com`.
@@ -128,6 +147,7 @@ Nada é enviado para o projeto WonderMoney. Cada serviço externo que a tua inst
 | Analytics (Google Tag Manager, PostHog) | Consulta [Analytics](#analytics) | `NEXT_PUBLIC_GTM_ID`, `NEXT_PUBLIC_POSTHOG_KEY`, `ANALYTICS_OUTBOX_MODE=live` |
 | Sincronização bancária (Enable Banking) | A API e o worker, para os utilizadores que ligam um banco | A chave Enable Banking de cada utilizador, adicionada nas Definições |
 | Início de sessão com Google | Os navegadores e a API, quando um utilizador escolhe "Continuar com Google" | `GOOGLE_CLIENT_ID` e `GOOGLE_CLIENT_SECRET` |
+| O teu fornecedor de identidade (OIDC) | Os navegadores e a API, quando um utilizador escolhe `Iniciar sessão com <nome>`. A API obtém o documento de descoberta e as chaves do fornecedor, e troca o código de início de sessão | `OIDC_ISSUER`, `OIDC_CLIENT_ID` e `OIDC_CLIENT_SECRET` |
 | reCAPTCHA | Os navegadores no formulário de contacto, e a aplicação web para verificar a resposta | `NEXT_PUBLIC_RECAPTCHA_SITE_KEY` e `RECAPTCHA_SECRET_KEY` |
 
 Os navegadores também carregam os logótipos de bancos e bolsas a partir dos endereços guardados no catálogo de bancos e ativos. A aplicação móvel não envia analytics nem relatórios de erros enquanto está ligada ao teu servidor.

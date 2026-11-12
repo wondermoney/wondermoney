@@ -24,8 +24,18 @@ export interface InstanceDescription {
     marketData: boolean;
     /** The read-only MCP server at `POST /v1/mcp` (`MCP_ENABLED`). */
     mcp?: boolean;
+    /**
+     * Single sign-on through the operator's OIDC provider ("Sign in with <name>"). Null when
+     * none is configured; absent on an API older than single sign-on.
+     */
+    oidc?: null | { name: string };
     /** Passkey sign-in and passkey management. Absent on an API older than passkeys. */
     passkey?: boolean;
+    /**
+     * False under `OIDC_ONLY`: the server refuses password sign-in, sign-up and reset, so the
+     * forms are hidden. Absent on an older API, which reads as on.
+     */
+    passwordSignIn?: boolean;
   };
   minAppVersion: null | string;
   name: string;
@@ -94,6 +104,13 @@ export function useConfirmedFeature(select: (features: InstanceDescription["feat
   const { data } = useInstance();
   const hydrated = useHydrated();
   return hydrated && data ? select(data.features) : false;
+}
+
+/** The single sign-on provider's button label, once the server has said it has one. */
+export function useOidcProvider(): null | { name: string } {
+  const { data } = useInstance();
+  const hydrated = useHydrated();
+  return hydrated ? (data?.features.oidc ?? null) : null;
 }
 
 /** Where users can write for help, or null: no support links are shown then. */

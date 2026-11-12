@@ -49,6 +49,33 @@ config:
   # GOOGLE_CLIENT_SECRET goes in `secrets`.
   GOOGLE_CLIENT_ID: ""
 
+  # ─── Single sign-on (optional) ───────────────────────────────────────────────
+  # Your own OpenID Connect provider (Authentik, Keycloak, ...), with <API_URL>/api/auth/callback/oidc
+  # as the client's redirect URI. OIDC_ISSUER, OIDC_CLIENT_ID and OIDC_CLIENT_SECRET (in `secrets`)
+  # turn it on together; any other OIDC_ setting without them stops the API from starting.
+  # Guide: https://docs.wonder.money/en/docs/self-hosting/single-sign-on
+  OIDC_ISSUER: ""
+  OIDC_CLIENT_ID: ""
+  # The button reads "Sign in with <name>". Empty: SSO.
+  OIDC_DISPLAY_NAME: ""
+  # Space-separated, with openid. Empty: openid email profile.
+  OIDC_SCOPES: ""
+  # The claim that lists the person's groups. Empty: groups.
+  OIDC_GROUPS_CLAIM: ""
+  # Comma-separated: only members (and admin-group members) may sign in.
+  OIDC_ALLOWED_GROUPS: ""
+  # Comma-separated: members are instance admins, granted and revoked at every sign-in.
+  OIDC_ADMIN_GROUPS: ""
+  # "true": create accounts on first sign-in through the provider even when SIGNUP_MODE is
+  # invite or closed.
+  OIDC_AUTO_SIGNUP: ""
+  # "true": no password sign-in, sign-up or reset. Passkeys keep working.
+  OIDC_ONLY: ""
+  # "true": skip the WonderMoney authenticator code after a sign-in through the provider.
+  OIDC_TRUST_IDP_MFA: ""
+  # "true": accept an email the provider has not verified (never linked to an existing account).
+  OIDC_ALLOW_UNVERIFIED_EMAIL: ""
+
   # ─── Email (optional) ────────────────────────────────────────────────────────
   # Without a provider, emails are written to the API log:
   #   kubectl logs deploy/<release>-api | grep "Email not sent"
@@ -103,6 +130,7 @@ config:
 # ones you use; empty values are left out.
 secrets:
   GOOGLE_CLIENT_SECRET: ""
+  OIDC_CLIENT_SECRET: ""
   SMTP_PASSWORD: ""
   RESEND_API_KEY: ""
   AWS_ACCESS_KEY_ID: ""

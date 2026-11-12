@@ -121,6 +121,13 @@
         "unavailable": "Não foi possível iniciar sessão assim. Tente novamente"
       }
     },
+    "sso": {
+      "signIn": "Iniciar sessão com {{provider}}",
+      "onlyNotice": "Este servidor inicia sessão através de {{provider}}.",
+      "errors": {
+        "unavailable": "O início de sessão com {{provider}} não terminou. Se o teu fornecedor o recusou, mostrou o motivo. Tenta de novo"
+      }
+    },
     "forgotPassword": {
       "title": "Enviar email para repor a palavra-passe",
       "helper": "Introduza o seu email e enviamos-lhe uma ligação de reposição",

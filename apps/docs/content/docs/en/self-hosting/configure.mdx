@@ -79,6 +79,25 @@ The worker syncs each bank connection at most once every `BANK_SYNC_MIN_INTERVAL
 
 Set both `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` (from an OAuth client in Google Cloud, with `<API_URL>/api/auth/callback/google` as its authorised redirect URI) to offer "Continue with Google" on the login and sign-up pages. Without both, the button is hidden.
 
+## Single sign-on (OIDC)
+
+Sign in through your own identity provider, such as Authentik or Keycloak: the login and sign-up pages, on the web and in the mobile app, then offer `Sign in with <name>`. [Single sign-on](/en/docs/self-hosting/single-sign-on) walks through setting up the provider.
+
+| Setting | What it does |
+|---|---|
+| `OIDC_ISSUER`, `OIDC_CLIENT_ID`, `OIDC_CLIENT_SECRET` | The provider's issuer URL (HTTPS) and the client you registered there, with `<API_URL>/api/auth/callback/oidc` as its redirect URI. The three turn single sign-on on together; any other `OIDC_` setting without them stops the API at start-up |
+| `OIDC_DISPLAY_NAME` | The name on the button. Defaults to `SSO` |
+| `OIDC_SCOPES` | Space-separated scopes to ask for; must include `openid`. Defaults to `openid email profile` |
+| `OIDC_GROUPS_CLAIM` | The claim that lists the person's groups. Defaults to `groups` |
+| `OIDC_ALLOWED_GROUPS` | Comma-separated groups. When set, only their members (and members of the admin groups) may sign in |
+| `OIDC_ADMIN_GROUPS` | Comma-separated groups whose members are instance admins. Checked at every sign-in, so leaving the group removes admin |
+| `OIDC_AUTO_SIGNUP` | `true` creates an account on the first sign-in through the provider even when `SIGNUP_MODE` is `invite` or `closed`. Password sign-up still follows `SIGNUP_MODE` |
+| `OIDC_ONLY` | `true` turns off password sign-in, sign-up and password reset, and hides them in the apps. Passkeys keep working |
+| `OIDC_TRUST_IDP_MFA` | `true` skips the WonderMoney authenticator code after a sign-in through the provider. Set it only when the provider requires a second factor itself |
+| `OIDC_ALLOW_UNVERIFIED_EMAIL` | `true` accepts an email address the provider has not verified. Off by default; such an account is never linked to an existing one |
+
+`GET /v1/instance` reports `features.oidc: { "name": "<OIDC_DISPLAY_NAME>" }` and, under `OIDC_ONLY`, `features.passwordSignIn: false`.
+
 ## Passkeys
 
 Passkeys need no environment variable. They belong to the hostname in `APP_URL`, the web app's address, and the browser only offers them on that hostname. This works the same whether the web app and the API share one hostname or use two, such as `money.example.com` and `api.money.example.com`.
@@ -128,6 +147,7 @@ Nothing is sent to the WonderMoney project. Each outside service your instance c
 | Analytics (Google Tag Manager, PostHog) | See [Analytics](#analytics) | `NEXT_PUBLIC_GTM_ID`, `NEXT_PUBLIC_POSTHOG_KEY`, `ANALYTICS_OUTBOX_MODE=live` |
 | Bank sync (Enable Banking) | The API and the worker, for the users who connect a bank | Each user's own Enable Banking key, added in Settings |
 | Google sign-in | Browsers and the API, when a user chooses "Continue with Google" | `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` |
+| Your identity provider (OIDC) | Browsers and the API, when a user chooses `Sign in with <name>`. The API fetches the provider's discovery document and keys, and exchanges the sign-in code | `OIDC_ISSUER`, `OIDC_CLIENT_ID` and `OIDC_CLIENT_SECRET` |
 | reCAPTCHA | Browsers on the contact form, and the web app to check the answer | `NEXT_PUBLIC_RECAPTCHA_SITE_KEY` and `RECAPTCHA_SECRET_KEY` |
 
 Browsers also load bank and exchange logos from the addresses stored in the bank and asset catalogue. The mobile app sends no analytics or error reports while it is connected to your server.

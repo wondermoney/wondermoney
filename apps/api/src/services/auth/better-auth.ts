@@ -4,12 +4,12 @@ import type { IncomingHttpHeaders } from 'http';
 import { expo } from '@better-auth/expo';
 import bcrypt from 'bcryptjs';
 import { betterAuth } from 'better-auth';
-import { APIError } from 'better-auth/api';
 import { hashPassword, makeSignature, verifyPassword } from 'better-auth/crypto';
 import { fromNodeHeaders, toNodeHandler } from 'better-auth/node';
 import { bearer, jwt, twoFactor } from 'better-auth/plugins';
 import { Pool } from 'pg';
 
+import { DI } from '@app/database/di';
 import { ConfigurationError, loadAuthConfiguration } from '@config/configuration';
 import { IS_PROD, IS_PRODUCTION_LIKE } from '@config/env';
 import { instanceName } from '@config/instance-name';
@@ -18,8 +18,10 @@ import { configuredAppleOptions } from '@service/auth/apple-options';
 import { resolveAuthCookieDomain } from '@service/auth/cookie-domain';
 import { resolveAuthCookiePrefix } from '@service/auth/cookie-prefix';
 import { aiRequiresVerifiedEmail, verificationLinkLandingOnApp } from '@service/auth/email-verification-policy';
+import { syncInstanceAdmin } from '@service/auth/instance-admin.service';
+import { OIDC_PROVIDER_ID, oidcPlugins } from '@service/auth/oidc';
 import { passkeyPlugins } from '@service/auth/passkey';
-import { isSignupAllowed, type SignupPolicyDeps } from '@service/auth/signup-policy';
+import { signupPolicy, type SignupPolicyDeps } from '@service/auth/signup-policy';
 import { TWO_FACTOR_COOKIE_MAX_AGE_SECONDS, twoFactorOAuthGuard } from '@service/auth/two-factor-oauth-guard';
 import { sendEmailVerificationEmail, sendPasswordResetEmail } from '@service/email/email';
 import { BACKEND_URL, BETTER_AUTH_TRUSTED_ORIGINS, FRONTEND_URL } from '@utils/constants';
@@ -173,20 +175,6 @@ const auth = betterAuth({
   // Defaults to the API's own address (API_URL): better-auth lives inside the API.
   baseURL: authConfig.betterAuthUrl ?? BACKEND_URL,
   database: betterAuthPool,
-  // Every way of creating an account (email/password, Google, Apple) goes through here, so this
-  // is where SIGNUP_MODE is enforced (services/auth/signup-policy.ts).
-  databaseHooks: {
-    user: {
-      create: {
-        before: async (user) => {
-          if (!(await isSignupAllowed(user.email, signupPolicyDeps))) {
-            throw new APIError('FORBIDDEN', { code: 'SIGNUP_DISABLED', message: 'Sign-up is not open on this server.' });
-          }
-          return { data: user };
-        },
-      },
-    },
-  },
   emailAndPassword: {
     enabled: true,
     // Legacy bcrypt hashes verify through the shim; new and reset passwords use
@@ -211,10 +199,30 @@ const auth = betterAuth({
   // only gates credential sign-ins by default — see that module + the 2FA docs).
   // Passkeys belong to the web app's hostname, and a passkey sign-in is a full session
   // even for a 2FA account (see services/auth/passkey.ts).
+  // A failed OAuth or OIDC sign-in (refused group, unverified email, sign-up closed) lands on the
+  // web app's sign-in error page, which explains the `error` code. Web passes the same page,
+  // localized, as its `errorCallbackURL`; this default covers the mobile app's browser flow,
+  // which shows the page in its sign-in sheet.
+  onAPIError: { errorURL: new URL('auth/auth-code-error', FRONTEND_URL.endsWith('/') ? FRONTEND_URL : `${FRONTEND_URL}/`).toString() },
+  // Plugin order matters for the after-hooks on the OAuth callback: the OIDC policy records the
+  // admin claim before twoFactorOAuthGuard takes the new session away from a 2FA account.
   plugins: [
+    // Every way of creating an account (email/password, Google, Apple, OIDC) goes through here,
+    // so this is where SIGNUP_MODE is enforced (services/auth/signup-policy.ts).
+    signupPolicy({ deps: signupPolicyDeps, oidc: authConfig.oidc }),
+    ...(authConfig.oidc
+      ? oidcPlugins(authConfig.oidc, {
+        // Outside a request's MikroORM context: a fork of its own.
+        onAdminClaim: async (userId, admin) => {
+          if (!DI.orm) throw new Error('The database is not connected');
+          await syncInstanceAdmin(DI.orm.em.fork(), userId, admin);
+        },
+      })
+      : []),
     // The label authenticator apps show next to the code.
     twoFactor({ issuer: instanceName(), twoFactorCookieMaxAge: TWO_FACTOR_COOKIE_MAX_AGE_SECONDS }),
-    twoFactorOAuthGuard(),
+    // OIDC_TRUST_IDP_MFA: the provider's own MFA stands in for the local TOTP code.
+    twoFactorOAuthGuard({ trustProviderMfa: authConfig.oidc?.trustIdpMfa ? [OIDC_PROVIDER_ID] : [] }),
     ...passkeyPlugins({ appName: instanceName(), appUrl: FRONTEND_URL }),
     jwt(),
     bearer(),
@@ -273,6 +281,8 @@ export interface AuthedUser {
   id: string;
   image?: null | string;
   name?: null | string;
+  /** The instance-admin claim from the last OIDC sign-in; null when no admin groups set it. */
+  oidcAdmin?: boolean | null;
   twoFactorEnabled?: boolean | null;
 }
 
@@ -296,6 +306,7 @@ export const getAuthSession = async (headers: IncomingHttpHeaders): Promise<Auth
       id: result.user.id,
       image: result.user.image,
       name: result.user.name,
+      oidcAdmin: (result.user as { oidcAdmin?: boolean | null }).oidcAdmin ?? null,
       twoFactorEnabled: (result.user as { twoFactorEnabled?: boolean | null }).twoFactorEnabled ?? null,
     },
   };

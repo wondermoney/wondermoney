@@ -7,8 +7,10 @@ import { ScanPairingQr } from '@/features/auth/scan-pairing-qr'
 import { ServerSwitcher } from '@/features/auth/server-switcher'
 import { SignInScreen } from '@/features/auth/sign-in-screen'
 import { SocialSignIn } from '@/features/auth/social-sign-in'
+import { SsoSignIn } from '@/features/auth/sso-sign-in'
 import { usePairing } from '@/features/auth/use-pairing'
 import { Button } from '@/components/ui/button'
+import { usePasswordSignIn } from '@/lib/server/use-instance'
 import { captureAnalyticsEvent } from '@/lib/telemetry/analytics'
 
 export default function SignInRoute() {
@@ -17,6 +19,8 @@ export default function SignInRoute() {
   const params = useLocalSearchParams<{ notice?: string; pairCode?: string; pairServer?: string }>()
   const passwordUpdatedNotice = params.notice === 'passwordUpdated' ? t('auth.resetPassword.success') : undefined
   const provisionFailed = activationError === 'provision-failed'
+  // OIDC_ONLY: the server takes no passwords, so single sign-on is the form.
+  const passwordSignIn = usePasswordSignIn()
 
   const pairing = usePairing()
   const [scanning, setScanning] = useState(false)
@@ -70,6 +74,7 @@ export default function SignInRoute() {
           />
         )}
         forgotPasswordLink={<Link asChild href="/forgot-password"><AuthLink label={t('auth.forgotPasswordLink')} /></Link>}
+        passwordSignIn={passwordSignIn}
         onSubmit={async (email, password) => {
           clearActivationError()
           const outcome = await signInWithPassword(email, password)
@@ -87,6 +92,7 @@ export default function SignInRoute() {
         }}
         footer={(
           <>
+            <SsoSignIn primary={!passwordSignIn} />
             <SocialSignIn />
             <Button
               label={t('auth.pairing.scanButton')}

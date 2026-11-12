@@ -38,6 +38,21 @@ export function useConfirmedFeature(select: (features: Features) => boolean | un
   return data ? select(data.features) === true : false
 }
 
+/** The server's single sign-on provider, once it has said it has one. */
+export function useOidcProvider(): { name: string } | null {
+  const { data } = useInstance()
+  return data?.features.oidc ?? null
+}
+
+/**
+ * Whether the server takes passwords. Off only once it has said so (`OIDC_ONLY`): while the
+ * description loads, or on an older server, the password form stays.
+ */
+export function usePasswordSignIn(): boolean {
+  const { data } = useInstance()
+  return data?.features.passwordSignIn !== false
+}
+
 /**
  * Which build the connected server runs, for the More screen's version line. Null until the
  * description arrives, and on an older server that does not report a version.

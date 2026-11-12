@@ -24,19 +24,21 @@ import {
   type SessionOperationScope,
 } from '@/lib/auth/session-operation-scope'
 import type { NativeIdentityProviderId } from '@/lib/auth/native-identity'
-import type {
-  AppAuthAdapter,
-  AuthSession,
-  ChangePasswordOutcome,
-  IdTokenSignInOutcome,
-  MfaChallengeOutcome,
-  MfaListFactorsOutcome,
-  MfaTotpEnrollOutcome,
-  MfaUnenrollOutcome,
-  MfaVerifyOutcome,
-  SendVerificationEmailOutcome,
-  SignInOutcome,
-  SignUpOutcome,
+import {
+  OIDC_PROVIDER_ID,
+  type AppAuthAdapter,
+  type AuthSession,
+  type BrowserSignInOutcome,
+  type ChangePasswordOutcome,
+  type IdTokenSignInOutcome,
+  type MfaChallengeOutcome,
+  type MfaListFactorsOutcome,
+  type MfaTotpEnrollOutcome,
+  type MfaUnenrollOutcome,
+  type MfaVerifyOutcome,
+  type SendVerificationEmailOutcome,
+  type SignInOutcome,
+  type SignUpOutcome,
 } from '@/lib/auth/app-auth'
 
 import { useAppSession } from './app-session-context'
@@ -71,6 +73,8 @@ export type ProductRuntimeContextValue = Readonly<{
     token: string,
     nonce: string,
   ) => Promise<IdTokenSignInOutcome>
+  /** "Sign in with <name>" through the server's identity provider; same admission rules. */
+  signInWithSso: () => Promise<BrowserSignInOutcome>
   signUp: (email: string, password: string) => Promise<SignUpOutcome>
   signOut: () => Promise<void>
   retrySignOut: () => Promise<void>
@@ -365,6 +369,13 @@ export function ProductRuntimeProvider({
     return auth.signInWithIdToken(provider, token, nonce)
   }, [auth])
 
+  const signInWithSso = useCallback(async () => {
+    if (terminalFlight.current) return { status: 'unavailable' as const }
+    terminalLocked.current = false
+    setActivationError(null)
+    return auth.signInWithBrowser(OIDC_PROVIDER_ID)
+  }, [auth])
+
   const signUp = useCallback(async (email: string, password: string) => {
     if (terminalFlight.current) return { status: 'unavailable' as const }
     terminalLocked.current = false
@@ -443,6 +454,7 @@ export function ProductRuntimeProvider({
     runtime,
     signInWithPassword,
     signInWithIdToken,
+    signInWithSso,
     signUp,
     signOut: runSignOut,
     retrySignOut: runSignOut,
@@ -479,6 +491,7 @@ export function ProductRuntimeProvider({
     sendVerificationEmail,
     signInWithIdToken,
     signInWithPassword,
+    signInWithSso,
     signUp,
     validateHouseholdInvite,
   ])

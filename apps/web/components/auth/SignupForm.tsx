@@ -10,7 +10,11 @@ import { type SubmitHandler, useForm } from "react-hook-form";
 import { toast } from "sonner";
 
 import type { RecaptchaVerifyResponse } from "@/app/api/recaptcha/route";
-import { useConfirmedFeature } from "@/lib/api/instance/useInstance";
+import {
+  useConfirmedFeature,
+  useFeature,
+  useOidcProvider,
+} from "@/lib/api/instance/useInstance";
 import { resolveAuthLocale } from "@/lib/auth/auth-error-redirect";
 import { authClient } from "@/lib/auth/client";
 import { completeAuthAndRedirect } from "@/lib/auth/complete-auth";
@@ -65,6 +69,11 @@ export default function SignupForm({
   const hydrated = useHydrated();
   // Without Google credentials on the API the sign-in call fails with PROVIDER_NOT_FOUND.
   const googleSignIn = useConfirmedFeature((features) => features.googleSignIn);
+  const oidc = useOidcProvider();
+  // Off only once the server says so (`OIDC_ONLY`).
+  const passwordSignIn = useFeature(
+    (features) => features.passwordSignIn !== false,
+  );
 
   useEffect(() => {
     captureSignupFunnelEvent(posthog, SIGNUP_FUNNEL_EVENTS.started, {
@@ -199,9 +208,13 @@ export default function SignupForm({
       form={form}
       hideGoogle={Boolean(inviteToken) || !googleSignIn}
       hydrated={hydrated}
+      inviteToken={inviteToken}
+      locale={locale}
       lockedEmail={lockedEmail}
+      oidc={oidc}
       onGoogleSignup={signUpWithGoogle}
       onSubmit={onSubmit}
+      passwordSignIn={passwordSignIn}
     />
   );
 }

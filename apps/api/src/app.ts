@@ -32,6 +32,7 @@ import {
   globalBackstopRateLimit,
   importSessionRateLimit,
   inviteLookupRateLimit,
+  oidcCallbackRateLimit,
   pairingRateLimit,
   passkeyRateLimit,
   publicMarketingRateLimit,
@@ -165,6 +166,8 @@ export default class Application {
       );
       // Passkey sign-in and passkey management: the same family, its own store (see the factory).
       this.host.use('/api/auth/passkey', passkeyRateLimit());
+      // The OIDC callback: the same family, its own store.
+      this.host.use('/api/auth/callback/oidc', oidcCallbackRateLimit());
 
       // better-auth runs embedded in `api`. Mount its handler BEFORE express.json
       // (it reads the raw request body itself — express.json would consume it and

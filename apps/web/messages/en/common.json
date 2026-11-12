@@ -2920,5 +2920,12 @@
   "passkeys-offer-title": "Sign in faster with a passkey",
   "passkeys-offer-description": "Next time, sign in with your fingerprint, face or device PIN instead of typing your password. You can manage passkeys in Settings, Security.",
   "passkeys-offer-add": "Add a passkey",
-  "passkeys-offer-dismiss": "Not now"
+  "passkeys-offer-dismiss": "Not now",
+  "sso-sign-in": "Sign in with {provider}",
+  "sso-sign-in-error": "Couldn't start the sign-in with {provider}. Try again in a moment.",
+  "sso-only-notice": "This server signs in through {provider}.",
+  "auth-code-error-oidc-group-not-allowed": "Your account isn't in a group that may use this server. Ask whoever runs it to add you.",
+  "auth-code-error-oidc-email-not-verified": "Your identity provider hasn't verified your email address. Verify it there, then sign in again.",
+  "auth-code-error-account-not-linked": "An account with this email already exists here. Sign in the way you did before, verify your email address, then try again.",
+  "auth-code-error-signup-disabled": "Sign-up isn't open on this server. Ask whoever runs it for an invite."
 }

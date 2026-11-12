@@ -46,6 +46,19 @@ export type IdTokenSignInOutcome =
   | { status: 'mfa-pending' }
   | { status: 'unavailable' }
 
+/**
+ * Single sign-on through the server's identity provider, in the system browser sheet. The
+ * provider's refusal reasons are shown in that sheet (the web app's sign-in error page); the
+ * app only learns that no session came back, which a cancelled sheet also is.
+ */
+export type BrowserSignInOutcome =
+  | { status: 'accepted' }
+  | { status: 'mfa-pending' }
+  | { status: 'unavailable' }
+
+/** The API's provider id for single sign-on (`/sign-in/social` `provider`). */
+export const OIDC_PROVIDER_ID = 'oidc'
+
 export type SignUpOutcome =
   | { status: 'accepted' }
   | { status: 'email-taken' }
@@ -120,6 +133,12 @@ export type AppAuthAdapter = AuthSessionPort<AuthSession>
       token: string,
       nonce: string,
     ) => Promise<IdTokenSignInOutcome>
+    /**
+     * "Sign in with <name>": better-auth's browser OAuth flow, which the Expo client runs in an
+     * auth session and finishes on the `wondermoney://auth/complete` deep link, storing the
+     * session cookie it carries (or the pending two-factor cookie).
+     */
+    signInWithBrowser: (provider: typeof OIDC_PROVIDER_ID) => Promise<BrowserSignInOutcome>
     signUp: (email: string, password: string) => Promise<SignUpOutcome>
     signOutLocal: () => Promise<{ error: unknown | null }>
     /**

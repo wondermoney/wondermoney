@@ -16,6 +16,7 @@ const mockValidateHouseholdInvite = jest.fn()
 let capturedSignUpProps: Record<string, unknown> | null = null
 let capturedInvalidProps: Record<string, unknown> | null = null
 let capturedSocialProps: Record<string, unknown> | null = null
+let capturedSsoProps: Record<string, unknown> | null = null
 
 jest.mock('expo-router', () => ({
   useRouter: () => ({ replace: mockReplace }),
@@ -36,6 +37,18 @@ jest.mock('@/features/auth/sign-up-screen', () => ({
 jest.mock('@/features/auth/social-sign-in', () => ({
   SocialSignIn: (props: Record<string, unknown>) => {
     capturedSocialProps = props
+    return null
+  },
+}))
+
+const mockServer = { passwordSignIn: true }
+jest.mock('@/lib/server/use-instance', () => ({
+  usePasswordSignIn: () => mockServer.passwordSignIn,
+}))
+
+jest.mock('@/features/auth/sso-sign-in', () => ({
+  SsoSignIn: (props: Record<string, unknown>) => {
+    capturedSsoProps = props
     return null
   },
 }))
@@ -64,6 +77,8 @@ describe('SignUpRoute', () => {
     capturedSignUpProps = null
     capturedInvalidProps = null
     capturedSocialProps = null
+    capturedSsoProps = null
+    mockServer.passwordSignIn = true
     captured.mockClear()
   })
 
@@ -200,5 +215,35 @@ describe('SignUpRoute', () => {
 
     await waitFor(() => expect(capturedSignUpProps).not.toBeNull())
     expect(capturedSignUpProps?.emailLocked).toBe(false)
+  })
+
+  it('drops the password form under OIDC_ONLY and makes single sign-on the way in', async () => {
+    mockServer.passwordSignIn = false
+    await renderRoute()
+    const i18n = await initMobileI18n('en')
+    await render(
+      <I18nextProvider i18n={i18n}>{capturedSignUpProps?.footer as React.ReactElement}</I18nextProvider>,
+    )
+
+    expect(capturedSignUpProps?.passwordSignIn).toBe(false)
+    expect(capturedSsoProps?.primary).toBe(true)
+  })
+
+  it('re-arms the invite token before a single sign-on sign-up too', async () => {
+    setPendingInviteToken('tok-1')
+    mockValidateHouseholdInvite.mockResolvedValue({
+      status: 'valid',
+      invite: { email: 'partner@example.com', expiresAt: '2024-01-08T00:00:00.000Z', inviterName: 'Alex' },
+    })
+
+    const i18n = await initMobileI18n('en')
+    await renderRoute()
+    await waitFor(() => expect(capturedSignUpProps?.emailLocked).toBe(true))
+    await render(
+      <I18nextProvider i18n={i18n}>{capturedSignUpProps?.footer as React.ReactElement}</I18nextProvider>,
+    )
+    await act(async () => (capturedSsoProps?.onBeforeSignIn as () => void)())
+
+    expect(takePendingInviteToken()).toBe('tok-1')
   })
 })
