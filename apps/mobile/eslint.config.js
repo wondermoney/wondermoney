@@ -1,4 +1,5 @@
 // https://docs.expo.dev/guides/using-eslint/
+const { fixupConfigRules } = require('@eslint/compat');
 const { defineConfig } = require('eslint/config');
 const expoConfig = require("eslint-config-expo/flat");
 
@@ -132,7 +133,11 @@ const designSystemConfig = [
 ];
 
 module.exports = defineConfig([
-  expoConfig,
+  // eslint-config-expo loads eslint-plugin-react, which still calls the rule-context methods
+  // ESLint 10 removed (`context.getFilename()`) and crashes without this shim. The shim adds
+  // them back; every rule and its settings stay as Expo configures them. eslint-config-next
+  // wraps the same plugin the same way. Drop it once eslint-config-expo works on ESLint 10.
+  fixupConfigRules(expoConfig),
   {
     ignores: ["dist/*"],
   },

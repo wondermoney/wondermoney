@@ -66,7 +66,7 @@ async function mapAccount(item: AccountCsvItem) {
 /** As `suggestColumnMapping` asks the model, with the suggestion normalized the way the import shows it. */
 async function mapPortfolio(item: PortfolioCsvItem) {
   const rawRows = parseRawCsvRowsForLayout(item.csv);
-  let rows: Record<string, string>[] = [];
+  let rows: Record<string, string>[];
   try { rows = parseCsvRows<Record<string, string>>(item.csv); } catch { rows = []; }
   const headers = rows[0] ? Object.keys(rows[0]) : [];
   const { suggestion, tokens } = await requestPortfolioColumnMappingSuggestion(sanitizePortfolioColumnMappingPromptInput(buildPortfolioColumnMappingPromptInput({ rawRows, rows })));

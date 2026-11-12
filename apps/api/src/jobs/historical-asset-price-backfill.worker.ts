@@ -34,7 +34,7 @@ export const handleHistoricalAssetPriceBackfillJob = async (
     return true;
   } catch (error) {
     const finished = await bg.finishJob(correlationId, job.id, { retryable: false, stage: 'asset-price.historical-backfill:failed', status: BackgroundOperationStatus.FAILED });
-    if (!finished) throw new Error('asset-price.historical-backfill job failed to finish');
+    if (!finished) throw new Error('asset-price.historical-backfill job failed to finish', { cause: error });
     throw error;
   }
 };

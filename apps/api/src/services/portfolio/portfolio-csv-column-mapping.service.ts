@@ -599,13 +599,13 @@ async function parseColumnMappingSuggestionRows(input: { bucket: string; key: st
   try {
     const csvText = await getLimitedCsvObjectText({ bucket: input.bucket, key: input.key }, { getObjectSize: deps.getObjectSize, getObjectText: deps.getObjectText });
     const rawRows = parseRawCsvRowsForLayout(csvText);
-    let rows: Record<string, string>[] = [];
+    let rows: Record<string, string>[];
     try { rows = (deps.parseCsvRows ?? parseCsvRows)<Record<string, string>>(csvText); } catch { rows = []; }
     return { rawRows, rows };
   } catch (textError) {
     if (deps.parseCsvRows || deps.getObjectText && !deps.getObjectBuffer) throw textError;
     const rawRows = await parseSpreadsheetObjectRows(input, deps);
-    let rows: Record<string, string>[] = [];
+    let rows: Record<string, string>[];
     try { rows = csvRowsToRecords(rawRows); } catch { rows = []; }
     return { rawRows, rows };
   }
