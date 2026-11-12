@@ -4,6 +4,7 @@ import type { Request, Response } from 'express';
 
 import { DI } from '@app/app';
 import { AssistantAuditEventType, AssistantAuditSource } from '@entity/AssistantAuditLog';
+import { AI_PROPOSAL_TOOL_DEFINITIONS } from '@service/ai-tools/ai-proposal-tools.service';
 import { type AiToolContext, executeAiTool } from '@service/ai-tools/ai-tool-types';
 import { AI_TOOL_DEFINITIONS } from '@service/ai-tools/ai-tools.service';
 import { AssistantAuditService } from '@service/assistant/assistant-audit.service';
@@ -14,7 +15,9 @@ import { consumeMcpToolCall } from './mcp-rate-limit.service';
 import type { McpRequestIdentity } from './mcp-types';
 
 /**
- * The read-only MCP server.
+ * The MCP server: the read tools for a token with `mcp:read`, the `propose_*` tools for one with
+ * `mcp:propose`. A proposal only waits for the person to apply it in the app; no MCP tool, and
+ * no API token, can apply one.
  *
  * Stateless Streamable HTTP: every POST gets a fresh `McpServer` and transport, so there is no
  * server-side session to leak between callers and no state to expire. The caller is resolved
@@ -28,10 +31,15 @@ export function createMcpServer(identity: McpRequestIdentity): McpServer {
   const context: AiToolContext = {
     appuserKey: identity.appuser.appuserKey,
     currency: identity.appuser.currencyKey.code || 'EUR',
+    origin: { apiTokenKey: identity.apiTokenKey, source: 'mcp' },
     tenantKey: identity.tenant.tenantKey,
   };
 
-  for (const definition of AI_TOOL_DEFINITIONS) {
+  const definitions = [
+    ...(identity.scopes.includes('mcp:read') ? AI_TOOL_DEFINITIONS : []),
+    ...(identity.scopes.includes('mcp:propose') ? AI_PROPOSAL_TOOL_DEFINITIONS : []),
+  ];
+  for (const definition of definitions) {
     server.registerTool(
       definition.name,
       { description: definition.description, inputSchema: definition.inputSchema },

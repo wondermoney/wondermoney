@@ -38,6 +38,7 @@ const { controllerStub } = vi.hoisted(() => {
 vi.mock('@controller/account', controllerStub);
 vi.mock('@controller/api-token', controllerStub);
 vi.mock('@controller/assistant', controllerStub);
+vi.mock('@controller/assistant-proposal', controllerStub);
 vi.mock('@controller/background-operation', controllerStub);
 vi.mock('@controller/banking', controllerStub);
 vi.mock('@controller/banking-alerts', controllerStub);
@@ -183,8 +184,8 @@ describe('API token scope policy', () => {
   });
 
   it('keeps MCP token authority at the upstream-defined POST mount scope', () => {
-    expect(apiTokenScopesForRequest('/v1/mcp', 'POST', '/')).toEqual(['mcp:read']);
-    expect(apiTokenScopesForRequest('/v1/mcp', 'POST', '/other')).toEqual(['mcp:read']);
+    expect(apiTokenScopesForRequest('/v1/mcp', 'POST', '/')).toEqual(['mcp:read', 'mcp:propose']);
+    expect(apiTokenScopesForRequest('/v1/mcp', 'POST', '/other')).toEqual(['mcp:read', 'mcp:propose']);
     expect(apiTokenScopesForRequest('/v1/mcp', 'GET', '/')).toEqual([]);
   });
 
@@ -196,10 +197,17 @@ describe('API token scope policy', () => {
     }
   });
 
-  it('gives mcp:read exactly the MCP endpoint, and keeps it off the data routes', () => {
-    expect(apiTokenScopesForRequest('/v1/mcp', 'POST', '/')).toEqual(['mcp:read']);
+  it('gives mcp:read and mcp:propose exactly the MCP endpoint, and keeps them off the data routes', () => {
+    expect(apiTokenScopesForRequest('/v1/mcp', 'POST', '/')).toEqual(['mcp:read', 'mcp:propose']);
     expect(apiTokenScopesForRequest('/v1/mcp', 'GET', '/')).toEqual([]);
     expect(apiTokenScopesForRequest('/v1/account', 'GET', '/')).not.toContain('mcp:read');
+    expect(apiTokenScopesForRequest('/v1/account', 'GET', '/')).not.toContain('mcp:propose');
+  });
+
+  it('lets no token apply or dismiss an assistant proposal', () => {
+    for (const action of ['apply', 'reject']) {
+      expect(apiTokenScopesForRequest('/v1/assistant', 'POST', `/proposals/12/${action}`)).toEqual([]);
+    }
   });
 
   it('does not allow an unknown mount by accident', () => {

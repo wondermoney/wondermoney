@@ -23,6 +23,10 @@ jest.mock('@/components/providers/product-runtime-provider', () => ({
 jest.mock('@/features/self/use-self-resource', () => ({
   useProfile: () => ({ data: { profile: { emailAddress: 'person@wonder.money' } } }),
 }))
+const mockPendingCount = { available: true, count: 2 }
+jest.mock('@/features/assistant-proposals/use-assistant-proposals', () => ({
+  usePendingProposalCount: () => mockPendingCount,
+}))
 jest.mock('@/lib/server/use-instance', () => ({
   useServerBuildInfo: () => ({ commit: 'abc1234', version: '1.1.0' }),
 }))
@@ -106,5 +110,17 @@ describe('MoreRoute', () => {
     await fireEvent.press(view.getByRole('button', { name: 'Reports, opens in the app' }))
 
     expect(captured).not.toHaveBeenCalled()
+  })
+  it('opens Pending changes from its row, and leaves the row out when proposals are unavailable', async () => {
+    const i18n = await initMobileI18n('en')
+    const view = await render(<I18nextProvider i18n={i18n}><MoreRoute /></I18nextProvider>)
+    await fireEvent.press(view.getByRole('button', { name: 'Pending changes, 2 waiting, opens in the app' }))
+    expect(mockPush).toHaveBeenLastCalledWith('/more/pending-changes')
+    await view.unmount()
+
+    mockPendingCount.available = false
+    const hidden = await render(<I18nextProvider i18n={i18n}><MoreRoute /></I18nextProvider>)
+    expect(hidden.queryByText('Pending changes')).toBeNull()
+    mockPendingCount.available = true
   })
 })

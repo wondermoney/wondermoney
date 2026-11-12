@@ -17,6 +17,8 @@
     "scope-write-hint": "A escrita também permite ler, e abrange criar e atualizar transações, contas, categorias, orçamentos e objetivos. Os tokens nunca podem apagar nada.",
     "scope-mcp-read": "Cliente de IA (MCP)",
     "scope-mcp-read-hint": "O âmbito de cliente de IA chega apenas ao endpoint MCP só de leitura. Não consegue ler as rotas de dados normais, e um token de leitura não chega ao MCP.",
+    "scope-mcp-propose": "Propostas do cliente de IA (MCP)",
+    "scope-mcp-propose-hint": "O âmbito de propostas deixa um cliente MCP preparar alterações a categorias, à marca de revista e a notas. Ficam em Definições › Assistente › Alterações pendentes; o cliente nunca as pode aplicar, só o próprio utilizador.",
     "expiry": "Expira",
     "expiry-days": "{days} dias",
     "totp": "Código do autenticador",

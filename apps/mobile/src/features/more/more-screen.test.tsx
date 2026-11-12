@@ -199,4 +199,25 @@ describe('MoreScreen', () => {
     const { view } = await renderScreen({ serverInfo: null })
     expect(view.queryByText(/^Server /)).not.toBeOnTheScreen()
   })
+  it('shows the pending changes row with its count, and opens it', async () => {
+    const onOpen = jest.fn()
+    const { view } = await renderScreen({ pendingChanges: { count: 3, onOpen } })
+
+    expect(view.getByTestId('more-pending-changes-count')).toHaveTextContent('3')
+    await fireEvent.press(view.getByRole('button', { name: 'Pending changes, 3 waiting, opens in the app' }))
+    expect(onOpen).toHaveBeenCalledTimes(1)
+  })
+
+  it('shows the pending changes row without a badge when nothing is waiting', async () => {
+    const { view } = await renderScreen({ pendingChanges: { count: 0, onOpen: jest.fn() } })
+
+    expect(view.getByRole('button', { name: 'Pending changes, opens in the app' })).toBeOnTheScreen()
+    expect(view.queryByTestId('more-pending-changes-count')).toBeNull()
+  })
+
+  it('has no pending changes row when proposals are unavailable (AI hidden)', async () => {
+    const { view } = await renderScreen()
+
+    expect(view.queryByText('Pending changes')).toBeNull()
+  })
 })

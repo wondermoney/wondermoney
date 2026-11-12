@@ -22,7 +22,7 @@ const HTTP_METHOD_ORDER = ['get', 'post', 'put', 'patch', 'delete', 'head', 'opt
 
 const TAG_DESCRIPTIONS: Record<string, string> = {
   Accounts: 'Bank and manual accounts, balances, account types and cashflow.',
-  Assistant: 'The AI assistant’s consent state and audit log.',
+  Assistant: 'The AI assistant’s consent state, audit log and the proposals waiting for confirmation.',
   Budgets: 'Budgets, their templates and category amounts.',
   Categories: 'Transaction categories.',
   Config: 'Client configuration: brokers, currencies, categories and transaction types.',

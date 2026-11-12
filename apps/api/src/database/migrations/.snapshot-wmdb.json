@@ -3643,6 +3643,374 @@
       "comment": null
     },
     {
+      "name": "assistant_proposal",
+      "schema": "public",
+      "columns": {
+        "api_token_key": {
+          "name": "api_token_key",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "integer"
+        },
+        "appuser_key": {
+          "name": "appuser_key",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "integer"
+        },
+        "assistant_proposal_key": {
+          "name": "assistant_proposal_key",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": true,
+          "primary": true,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "integer"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamptz(6)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": 6,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "datetime"
+        },
+        "decided_at": {
+          "name": "decided_at",
+          "type": "timestamptz(6)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "unique": false,
+          "length": 6,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "datetime"
+        },
+        "deleted_at": {
+          "name": "deleted_at",
+          "type": "timestamptz(6)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "unique": false,
+          "length": 6,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "datetime"
+        },
+        "expires_at": {
+          "name": "expires_at",
+          "type": "timestamptz(6)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": 6,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "datetime"
+        },
+        "failure_reason": {
+          "name": "failure_reason",
+          "type": "varchar(64)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "unique": false,
+          "length": 64,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "string"
+        },
+        "kind": {
+          "name": "kind",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [
+            "categorize_transactions",
+            "mark_transactions_reviewed",
+            "update_transaction_note"
+          ],
+          "mappedType": "enum"
+        },
+        "payload": {
+          "name": "payload",
+          "type": "jsonb",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "json"
+        },
+        "source": {
+          "name": "source",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [
+            "assistant",
+            "mcp"
+          ],
+          "mappedType": "enum"
+        },
+        "status": {
+          "name": "status",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": "'pending'",
+          "comment": null,
+          "collation": null,
+          "enumItems": [
+            "applied",
+            "expired",
+            "failed",
+            "pending",
+            "rejected"
+          ],
+          "mappedType": "enum"
+        },
+        "summary": {
+          "name": "summary",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "text"
+        },
+        "tenant_key": {
+          "name": "tenant_key",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "integer"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamptz(6)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": 6,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "datetime"
+        }
+      },
+      "indexes": [
+        {
+          "columnNames": [
+            "tenant_key",
+            "appuser_key",
+            "status",
+            "created_at"
+          ],
+          "composite": true,
+          "constraint": false,
+          "keyName": "assistant_proposal_owner_status_created_idx",
+          "primary": false,
+          "unique": false
+        },
+        {
+          "columnNames": [
+            "assistant_proposal_key"
+          ],
+          "composite": false,
+          "constraint": true,
+          "keyName": "assistant_proposal_pkey",
+          "primary": true,
+          "unique": true
+        },
+        {
+          "columnNames": [
+            "status",
+            "expires_at"
+          ],
+          "composite": true,
+          "constraint": false,
+          "keyName": "assistant_proposal_status_expires_at_idx",
+          "primary": false,
+          "unique": false
+        }
+      ],
+      "checks": [
+        {
+          "name": "assistant_proposal_kind_check",
+          "expression": "\"kind\" in ('categorize_transactions', 'mark_transactions_reviewed', 'update_transaction_note')",
+          "definition": "check (\"kind\" in ('categorize_transactions', 'mark_transactions_reviewed', 'update_transaction_note'))",
+          "columnName": "kind"
+        },
+        {
+          "name": "assistant_proposal_source_check",
+          "expression": "\"source\" in ('assistant', 'mcp')",
+          "definition": "check (\"source\" in ('assistant', 'mcp'))",
+          "columnName": "source"
+        },
+        {
+          "name": "assistant_proposal_status_check",
+          "expression": "\"status\" in ('applied', 'expired', 'failed', 'pending', 'rejected')",
+          "definition": "check (\"status\" in ('applied', 'expired', 'failed', 'pending', 'rejected'))",
+          "columnName": "status"
+        }
+      ],
+      "triggers": [],
+      "foreignKeys": {
+        "assistant_proposal_api_token_key_foreign": {
+          "columnNames": [
+            "api_token_key"
+          ],
+          "constraintName": "assistant_proposal_api_token_key_foreign",
+          "localTableName": "public.assistant_proposal",
+          "referencedColumnNames": [
+            "api_token_key"
+          ],
+          "referencedTableName": "public.api_token",
+          "deleteRule": "set null"
+        },
+        "assistant_proposal_appuser_key_foreign": {
+          "columnNames": [
+            "appuser_key"
+          ],
+          "constraintName": "assistant_proposal_appuser_key_foreign",
+          "localTableName": "public.assistant_proposal",
+          "referencedColumnNames": [
+            "appuser_key"
+          ],
+          "referencedTableName": "public.appuser"
+        },
+        "assistant_proposal_tenant_key_foreign": {
+          "columnNames": [
+            "tenant_key"
+          ],
+          "constraintName": "assistant_proposal_tenant_key_foreign",
+          "localTableName": "public.assistant_proposal",
+          "referencedColumnNames": [
+            "tenant_key"
+          ],
+          "referencedTableName": "public.tenant"
+        }
+      },
+      "comment": null
+    },
+    {
       "name": "background_operation",
       "schema": "public",
       "columns": {

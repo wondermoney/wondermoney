@@ -544,6 +544,31 @@ export const assistantAuditEventSchema = open('AssistantAuditEvent', {
   metadata: z.record(z.string(), z.unknown()).optional(),
 });
 
+const proposalValue = z.union([z.string(), z.boolean(), z.null()]);
+
+export const assistantProposalChangeSchema = open('AssistantProposalChange', {
+  after: proposalValue.openapi({ description: 'The proposed value: a category name, `true` for reviewed, or the note (null clears it).' }),
+  before: proposalValue.openapi({ description: 'The current value, read when the response is built.' }),
+  description: nullableString,
+  field: z.enum(['category', 'note', 'reviewed']),
+  transactionDate: nullableString,
+  transactionId: id,
+});
+
+export const assistantProposalSchema = open('AssistantProposal', {
+  changes: z.array(assistantProposalChangeSchema),
+  createdAt: dateTime,
+  decidedAt: nullableString,
+  expiresAt: dateTime,
+  failureReason: z.enum(['category_unavailable', 'transaction_unavailable']).nullable(),
+  id,
+  kind: z.enum(['categorize_transactions', 'mark_transactions_reviewed', 'update_transaction_note']),
+  source: z.enum(['assistant', 'mcp']),
+  status: z.enum(['pending', 'applied', 'rejected', 'expired', 'failed']),
+  summary: z.string(),
+  unavailableCount: z.number().int().openapi({ description: 'Transactions in the proposal the caller can no longer see; they are left out of `changes`.' }),
+});
+
 export const importSessionSchema = open('ImportSession', {
   columnMapping: z.record(z.string(), z.unknown()).nullable().optional(),
   importSessionId: z.union([id, z.string()]),

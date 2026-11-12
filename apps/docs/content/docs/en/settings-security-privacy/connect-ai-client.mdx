@@ -5,7 +5,7 @@ description: Let Claude Desktop, Cursor or another MCP client ask about your own
 
 WonderMoney runs a read-only [Model Context Protocol](https://modelcontextprotocol.io) (MCP) server. An MCP client such as Claude Desktop, Cursor or VS Code can ask it about your accounts, spending, budgets, goals, net worth and portfolio, and answer in the client's own chat.
 
-The server is at `POST /v1/mcp` on your API. It is not a separate account and it has no write tools: it can read, and nothing else.
+The server is at `POST /v1/mcp` on your API. It is not a separate account and it has no write tools: it can read and, if you allow it, propose a change for you to confirm. It never changes anything itself.
 
 ## What the client can see
 
@@ -31,15 +31,19 @@ The client can call these read-only tools:
 
 It cannot create, change or delete anything, and it cannot reach the household, bank connections, exports or token management.
 
+## Proposals
+
+With the proposals scope (`mcp:propose`), the client can also call `propose_categorize_transactions`, `propose_mark_transactions_reviewed` and `propose_update_transaction_note`. Each one checks that every transaction is one you can see and drafts a proposal; it does not change the transaction. The proposal waits in **Settings > Assistant > Pending changes** (and **More > Pending changes** on mobile) until you apply or dismiss it, and expires after seven days. The client cannot apply it, and no API token can. See [Assistant settings](/en/docs/settings-security-privacy/assistant-settings#proposals-and-pending-changes).
+
 ## Create a token
 
 1. Open **Settings → API tokens**.
 2. Under **Connect an AI client**, select **Create an AI client token**.
 3. Copy the token immediately. It is shown once.
 
-The shortcut creates a token named "AI client" with the **AI client (MCP)** scope and a 90-day expiry. If you use two-factor authentication, enter your authenticator code first. You can also create the token by hand in the form above, choosing the same scope.
+The shortcut creates a token named "AI client" with the **AI client (MCP)** scope and a 90-day expiry. If you use two-factor authentication, enter your authenticator code first. Tick **Let the client propose changes for me to confirm** first to add the proposals scope. You can also create the token by hand in the form above, choosing the same scopes.
 
-The `mcp:read` scope reaches only the MCP endpoint. It does not grant the ordinary data routes, and a `read` token does not reach MCP: the two are separate credentials on purpose.
+The `mcp:read` and `mcp:propose` scopes reach only the MCP endpoint: `mcp:read` exposes the read-only tools and `mcp:propose` the proposal tools. It does not grant the ordinary data routes, and a `read` token does not reach MCP: the two are separate credentials on purpose.
 
 ## Client configuration
 

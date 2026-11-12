@@ -21,7 +21,7 @@ import {
   updateTransactionRequestSchema,
   updateTransactionsRequestSchema,
 } from '@validators/account';
-import { assistantAuditLogQuerySchema } from '@validators/assistant';
+import { assistantAuditLogQuerySchema, assistantProposalListQuerySchema } from '@validators/assistant';
 import { listAttachmentsRequestSchema } from '@validators/attachment';
 import {
   addBudgetCategoryRequestSchema,
@@ -97,6 +97,7 @@ import {
   allocationSchema,
   assistantAuditEventSchema,
   assistantConsentSchema,
+  assistantProposalSchema,
   attachmentSchema,
   budgetCategorySchema,
   budgetSchema,
@@ -223,7 +224,7 @@ export const OPERATIONS: Record<string, OperationDefinition> = {
   'POST /v1/mcp': {
     tag: 'MCP',
     summary: 'Send a stateless MCP JSON-RPC request',
-    description: 'Uses JSON-RPC over the MCP Streamable HTTP transport. Notifications may return HTTP 202 with no body.',
+    description: 'Uses JSON-RPC over the MCP Streamable HTTP transport. Notifications may return HTTP 202 with no body. `mcp:read` exposes the read-only tools; `mcp:propose` exposes the `propose_*` tools, which draft a change the person applies or dismisses in the app. No tool can apply a change.',
     noContentStatuses: [202],
     request: z.object({ body: jsonRpcRequestSchema }),
     response: jsonRpcResponseSchema,
@@ -1115,5 +1116,12 @@ export const OPERATIONS: Record<string, OperationDefinition> = {
     summary: 'List assistant audit events',
     request: assistantAuditLogQuerySchema,
     response: listResponse('AssistantAuditEventList', 'events', assistantAuditEventSchema),
+  },
+  'GET /v1/assistant/proposals': {
+    tag: 'Assistant',
+    summary: 'List assistant proposals',
+    description: 'Changes the in-app assistant or an MCP client (`mcp:propose`) drafted for the token\'s owner, newest first, each with a live before/after preview. `status` defaults to `pending`; a pending proposal past `expiresAt` (seven days) is not listed as pending. Applying or dismissing one is only possible in the app, signed in: no token scope reaches those routes. Answers 403 `feature_disabled` when the person turned AI off.',
+    request: assistantProposalListQuerySchema,
+    response: listResponse('AssistantProposalList', 'proposals', assistantProposalSchema),
   },
 };

@@ -13,7 +13,7 @@ The hosted API base URL is `https://api.wonder.money`. Use the origin of your ow
 
 In WonderMoney, open **Settings → API tokens** and create a personal API token. Choose only the access needed by your integration. The token is displayed once; copy it then and store it as a secret. Tokens begin with `wm_pat_`.
 
-Every operation in the reference states its required scope. Most operations use `read` or `write`; the MCP endpoint uses `mcp:read`. Some operations accept either `read` or `write`. A token is limited to routes covered by its scopes. Do not put a token in browser code, a URL, source control, or logs.
+Every operation in the reference states its required scope. Most operations use `read` or `write`; the MCP endpoint uses `mcp:read` or `mcp:propose`. No scope can apply an assistant proposal. Some operations accept either `read` or `write`. A token is limited to routes covered by its scopes. Do not put a token in browser code, a URL, source control, or logs.
 
 ## Authenticate
 

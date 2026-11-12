@@ -21,6 +21,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { usePathname, useRouter } from "@/i18n/navigation";
 import { useFeature } from "@/lib/api/instance/useInstance";
+import useAiHidden from "@/lib/api/user-preferences/useAiHidden";
 import { useHydrated } from "@/lib/utils/useHydrated";
 
 const Security = dynamic(() => import("@/components/settings/Security"));
@@ -134,9 +135,11 @@ const SettingsPage = () => {
   const tabParam = searchParams.get("tab");
   const router = useRouter();
   const pathname = usePathname();
-  // The Assistant tab configures something this server may not offer: with no
-  // assistant model (`/v1/instance` features), there is nothing to set up, so
-  // the tab goes and `?tab=assistant` falls back to Profile like any unknown tab.
+  // The Assistant tab holds the assistant's settings and the Pending changes
+  // list. A server with no assistant model can still take proposals from an
+  // MCP client, so the tab stays while MCP is on (and the person has not hidden
+  // AI); with neither there is nothing to show, so the tab goes and
+  // `?tab=assistant` falls back to Profile like any unknown tab.
   //
   // Read only after hydration. The server has no `/v1/instance` answer and
   // renders the tab; the sidebar, hydrated first, has often fetched it by the
@@ -145,7 +148,11 @@ const SettingsPage = () => {
   // mismatch on every hard load of /settings).
   const hydrated = useHydrated();
   const assistantFeature = useFeature((features) => features.ai.assistant);
-  const assistantAvailable = !hydrated || assistantFeature;
+  // An older API that does not report `mcp` reads as on, like every other feature.
+  const mcpFeature = useFeature((features) => features.mcp !== false);
+  const aiHidden = useAiHidden();
+  const assistantAvailable =
+    !hydrated || assistantFeature || (mcpFeature && !aiHidden);
   const visibleTabs = tabs.filter(
     (tab) => tab.name !== "assistant" || assistantAvailable,
   );

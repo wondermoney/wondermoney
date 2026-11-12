@@ -127,7 +127,8 @@ describe('AssistantToolsService integration shape', () => {
 
     const tools = AssistantToolsService.createTools({ appuserKey: 1, consentVersion: 1, conversationId: 'conversation-1', currency: 'EUR', tenantKey: 2 });
 
-    for (const [name, candidate] of Object.entries(tools)) {
+    // The propose_* tools hand back a proposal, never an amount.
+    for (const [name, candidate] of Object.entries(tools).filter(([toolName]) => !toolName.startsWith('propose_'))) {
       const result = await (candidate as unknown as AnyTool).execute({ period: 'current_month' }, {});
       expect({ currency: result.data['currency'], name }).toEqual({ currency: 'EUR', name });
     }

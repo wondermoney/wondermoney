@@ -3,11 +3,13 @@ import express from 'express';
 import request from 'supertest';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { addAccount, addPartner, seedHousehold } from '@app/__tests__/__helpers__/finance-fixtures';
+import { addAccount, addPartner, addTransaction, seedHousehold } from '@app/__tests__/__helpers__/finance-fixtures';
 import { useTestDatabase } from '@app/__tests__/__helpers__/pg-test-db';
 import { DI } from '@app/database/di';
 import { ApiToken } from '@entity/ApiToken';
 import { AssistantAuditLog, AssistantAuditSource } from '@entity/AssistantAuditLog';
+import { AssistantProposal, AssistantProposalSource, AssistantProposalStatus } from '@entity/AssistantProposal';
+import { Transaction } from '@entity/Transaction';
 import { errorHandler } from '@middleware/error-handler';
 import mcpRoutes from '@route/mcp';
 import { createApiToken, hashApiToken } from '@service/api-token/api-token.service';
@@ -45,7 +47,7 @@ describe('POST /v1/mcp', () => {
     vi.unstubAllEnvs();
   });
 
-  async function seedToken(scopes: ('mcp:read' | 'read' | 'write')[] = ['mcp:read']) {
+  async function seedToken(scopes: ('mcp:propose' | 'mcp:read' | 'read' | 'write')[] = ['mcp:read']) {
     const em = db.em();
     const household = await seedHousehold(em);
     const partner = await addPartner(em, household);
@@ -227,5 +229,60 @@ describe('POST /v1/mcp', () => {
     const third = await call();
     expect(third.body.result.isError).toBe(true);
     expect(JSON.stringify(third.body.result)).toMatch(/too many tool calls/i);
+  });
+
+  describe('the mcp:propose scope', () => {
+    const PROPOSE_TOOLS = ['propose_categorize_transactions', 'propose_mark_transactions_reviewed', 'propose_update_transaction_note'];
+    const listTools = async (token: string) =>
+      ((await post(token, { id: 10, jsonrpc: '2.0', method: 'tools/list' })).body.result.tools as { name: string }[]).map((tool) => tool.name);
+    const proposeReviewed = (token: string, transactionIds: number[]) => post(token, {
+      id: 11,
+      jsonrpc: '2.0',
+      method: 'tools/call',
+      params: { arguments: { transactionIds }, name: 'propose_mark_transactions_reviewed' },
+    });
+
+    it('offers the propose tools only to a token that carries it', async () => {
+      const readOnly = await seedToken(['mcp:read']);
+      const proposeOnly = await seedToken(['mcp:propose']);
+      const both = await seedToken(['mcp:read', 'mcp:propose']);
+
+      expect(await listTools(readOnly.token)).not.toEqual(expect.arrayContaining([PROPOSE_TOOLS[0]]));
+      expect((await listTools(proposeOnly.token)).sort()).toEqual(PROPOSE_TOOLS);
+      expect(await listTools(both.token)).toEqual(expect.arrayContaining([...PROPOSE_TOOLS, 'search_transactions']));
+    });
+
+    it('lets an MCP client draft a proposal, recorded against its token, without changing the transaction', async () => {
+      const { apiToken, household, token } = await seedToken(['mcp:read', 'mcp:propose']);
+      const transaction = await addTransaction(db.em(), household, { amount: -12, date: new Date('2026-11-02T12:00:00Z'), status: 'BOOKED' });
+
+      const response = await proposeReviewed(token, [transaction.transactionKey]);
+
+      expect(response.body.result.isError).toBeUndefined();
+      const data = JSON.parse(response.body.result.content[0].text) as { proposal: { id: number; status: string }; status: string };
+      expect(data).toMatchObject({ proposal: { status: 'pending' }, status: 'proposed' });
+      const row = await db.em().findOneOrFail(AssistantProposal, { assistantProposalKey: data.proposal.id }, { filters: false });
+      expect({ source: row.source, status: row.status, token: row.apiTokenKey?.apiTokenKey }).toEqual({ source: AssistantProposalSource.MCP, status: AssistantProposalStatus.PENDING, token: apiToken.apiTokenKey });
+      expect(await db.em().findOneOrFail(Transaction, { transactionKey: transaction.transactionKey }, { filters: false })).toMatchObject({ reviewed: false });
+    });
+
+    it('cannot propose with an mcp:read token', async () => {
+      const { household, token } = await seedToken(['mcp:read']);
+      const transaction = await addTransaction(db.em(), household, { amount: -12, date: new Date('2026-11-02T12:00:00Z'), status: 'BOOKED' });
+
+      const response = await proposeReviewed(token, [transaction.transactionKey]);
+
+      expect(response.body.error ?? response.body.result?.isError).toBeTruthy();
+      expect(await db.em().count(AssistantProposal, {}, { filters: false })).toBe(0);
+    });
+
+    it('refuses a plain read token at the endpoint', async () => {
+      const { token } = await seedToken(['read']);
+
+      const response = await post(token, initialize);
+
+      expect(response.status).toBe(403);
+      expect(await db.em().count(AssistantProposal, {}, { filters: false })).toBe(0);
+    });
   });
 });

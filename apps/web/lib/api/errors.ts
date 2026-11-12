@@ -19,6 +19,12 @@ export const API_ERROR_CODE = {
   ACCOUNT_RECONNECT_EMAIL_UNVERIFIED: "account_reconnect_email_unverified",
   AI_ALLOWANCE_EXHAUSTED: "ai_allowance_exhausted",
   ASSISTANT_NOT_ENABLED: "assistant_not_enabled",
+  /** Applying a proposal past its seven days; it is now expired (409). */
+  ASSISTANT_PROPOSAL_EXPIRED: "assistant_proposal_expired",
+  /** A transaction or the category of a proposal is gone or no longer visible; it is now failed (409). */
+  ASSISTANT_PROPOSAL_FAILED: "assistant_proposal_failed",
+  /** Deciding a proposal that was already decided the other way (409). */
+  ASSISTANT_PROPOSAL_NOT_PENDING: "assistant_proposal_not_pending",
   BAD_REQUEST: "bad_request",
   BANK_CREDENTIAL_INVALID: "bank_credential_invalid",
   CONFLICT: "conflict",

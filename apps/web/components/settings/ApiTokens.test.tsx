@@ -99,3 +99,25 @@ test("shows a revoked token without offering revoke again", () => {
   assert.ok(screen.getByText("Revoked"));
   assert.equal(screen.queryByRole("button", { name: "Revoke" }), null);
 });
+
+test("creates a token with the MCP proposals scope when it is ticked", async () => {
+  state.create.mockResolvedValue({
+    apiToken: { ...dashboard, scopes: ["read", "mcp:propose"] },
+    token: "wm_pat_propose-value",
+  });
+  const user = userEvent.setup();
+  renderTokens();
+
+  await user.type(screen.getByLabelText("Name"), "Claude");
+  await user.click(screen.getByRole("checkbox", { name: "AI client proposals (MCP)" }));
+  await user.click(screen.getByRole("button", { name: "Create token" }));
+
+  await waitFor(() => assert.equal(state.create.mock.calls.length, 1));
+  assert.deepEqual(state.create.mock.calls[0]?.[0]?.scopes, ["read", "mcp:propose"]);
+});
+
+test("labels the MCP proposals scope in the token list", () => {
+  renderTokens([{ ...dashboard, scopes: ["mcp:read", "mcp:propose"] }]);
+
+  assert.ok(screen.getByText("AI client (MCP) · AI client proposals (MCP)"));
+});

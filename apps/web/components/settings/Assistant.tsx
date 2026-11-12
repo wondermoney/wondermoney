@@ -7,10 +7,12 @@ import { useMemo } from "react";
 import useAssistantAuditLog from "@/lib/api/assistant/useAssistantAuditLog";
 import useAssistantConsent from "@/lib/api/assistant/useAssistantConsent";
 import useUpdateAssistantConsent from "@/lib/api/assistant/useUpdateAssistantConsent";
+import { useFeature } from "@/lib/api/instance/useInstance";
 
 import { Label } from "../ui/Label";
 import { Switch } from "../ui/switch";
 import { Heading, Text } from "../ui/Typography";
+import AssistantPendingChanges from "./AssistantPendingChanges";
 
 const SAFE_METADATA_KEYS = new Set([
   "dataCategory",
@@ -47,11 +49,14 @@ export default function Assistant() {
   const t = useTranslations();
   const locale = useLocale();
   const queryClient = useQueryClient();
+  // With no assistant model the tab is here only for Pending changes (proposals
+  // from an MCP client): the chat's own settings have nothing to control.
+  const hasAssistantModel = useFeature((features) => features.ai.assistant);
   const {
     data: consent,
     isError: consentIsError,
     isLoading: consentIsLoading,
-  } = useAssistantConsent();
+  } = useAssistantConsent({ enabled: hasAssistantModel });
   const updateConsent = useUpdateAssistantConsent();
   const {
     data: auditLog,
@@ -117,6 +122,22 @@ export default function Assistant() {
       queryClient.setQueryData(["assistant", "consent"], previousConsent);
     }
   };
+
+  if (!hasAssistantModel) {
+    return (
+      <div className="divide-border divide-y">
+        <div className="grid max-w-7xl grid-cols-1 gap-x-8 gap-y-10 py-10 md:grid-cols-3">
+          <div>
+            <Heading variant="h2">{t("assistant.settings.title")}</Heading>
+          </div>
+
+          <div className="bg-card rounded p-4 md:col-span-2">
+            <AssistantPendingChanges className="border-t-0 pt-0" />
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="divide-border divide-y">
@@ -201,6 +222,8 @@ export default function Assistant() {
               {t("assistant.settings.temporaryChatsDescription")}
             </Text>
           </div>
+
+          <AssistantPendingChanges />
 
           <div className="border-border/60 space-y-4 border-t pt-6">
             <div className="space-y-1">

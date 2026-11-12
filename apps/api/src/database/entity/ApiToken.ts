@@ -21,12 +21,14 @@ import { Tenant } from './Tenant';
  * `mcp:read` reaches only the read-only MCP server (`POST /v1/mcp`), where an MCP client sends
  * the token as a bearer. It grants nothing on the ordinary data routes, and `read` grants
  * nothing on `/v1/mcp`: the two surfaces are separate credentials on purpose.
+ * `mcp:propose` reaches the MCP server's `propose_*` tools, which draft a change (a category, the
+ * reviewed flag, a note) for the person to confirm in the app. It cannot apply one: no token can.
  */
-export const API_TOKEN_SCOPES = ['read', 'write', 'calendar:read', 'mcp:read'] as const;
+export const API_TOKEN_SCOPES = ['read', 'write', 'calendar:read', 'mcp:read', 'mcp:propose'] as const;
 export type ApiTokenScope = (typeof API_TOKEN_SCOPES)[number];
 
 /** The scopes a person may choose when creating a general-purpose token. */
-export const API_TOKEN_CREATABLE_SCOPES = ['read', 'write', 'mcp:read'] as const;
+export const API_TOKEN_CREATABLE_SCOPES = ['read', 'write', 'mcp:read', 'mcp:propose'] as const;
 
 /**
  * A personal access token for scripts, spreadsheets, dashboards and AI tools.

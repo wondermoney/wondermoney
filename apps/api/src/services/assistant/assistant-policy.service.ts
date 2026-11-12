@@ -1,10 +1,12 @@
+import { AI_PROPOSAL_TOOL_NAMES } from '@service/ai-tools/ai-proposal-tools.service';
 import { AI_TOOL_NAMES } from '@service/ai-tools/ai-tools.service';
 
 /**
- * The tools the assistant may call. One list with the shared tool layer, so a tool cannot be
- * added to the MCP server and silently stay unreachable in the chat (or the reverse).
+ * The tools the assistant may call: every read tool and every `propose_*` tool. One list with the
+ * shared tool layer, so a tool cannot be added to the MCP server and silently stay unreachable in
+ * the chat (or the reverse).
  */
-const DEFAULT_ALLOWED_TOOLS = AI_TOOL_NAMES;
+const DEFAULT_ALLOWED_TOOLS = [...AI_TOOL_NAMES, ...AI_PROPOSAL_TOOL_NAMES];
 
 export type AssistantToolName = string;
 

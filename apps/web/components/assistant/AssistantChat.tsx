@@ -9,6 +9,8 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import AiAllowanceNotice from "@/components/assistant/AiAllowanceNotice";
 import { clearAssistantPrompt } from "@/components/assistant/assistant-store";
 import AssistantDataUsedDisclosure from "@/components/assistant/AssistantDataUsedDisclosure";
+import AssistantProposalCard from "@/components/assistant/AssistantProposalCard";
+import { proposalFromPart } from "@/components/assistant/proposal-parts";
 import EmailVerificationNotice from "@/components/auth/EmailVerificationNotice";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -148,42 +150,60 @@ export default function AssistantChat({ initialPrompt, onStopChange }: Props) {
             </div>
           ) : (
             <div className="space-y-3">
-              {messages.map((message) => (
-                <div
-                  key={message.id}
-                  className={cn(
-                    "flex",
-                    message.role === "user" ? "justify-end" : "justify-start",
-                  )}
-                >
-                  <div
-                    className={cn(
-                      "max-w-[90%] rounded-lg border px-4 py-3 text-sm leading-6 md:max-w-[80%]",
-                      message.role === "user"
-                        ? "border-primary/15 bg-primary/8 text-foreground"
-                        : "border-border/70 bg-background",
-                    )}
-                  >
-                    {message.parts.map((part, index) => {
-                      if (part.type !== "text") return null;
+              {messages.map((message) => {
+                // A proposal sits beside the reply, not inside its bubble:
+                // one bordered container never holds another.
+                const proposals = message.parts.flatMap((part) => {
+                  const proposal = proposalFromPart(part);
+                  return proposal ? [proposal] : [];
+                });
+                return (
+                  <div key={message.id} className="space-y-3">
+                    <div
+                      className={cn(
+                        "flex",
+                        message.role === "user"
+                          ? "justify-end"
+                          : "justify-start",
+                      )}
+                    >
+                      <div
+                        className={cn(
+                          "max-w-[90%] rounded-lg border px-4 py-3 text-sm leading-6 md:max-w-[80%]",
+                          message.role === "user"
+                            ? "border-primary/15 bg-primary/8 text-foreground"
+                            : "border-border/70 bg-background",
+                        )}
+                      >
+                        {message.parts.map((part, index) => {
+                          if (part.type !== "text") return null;
 
-                      return (
-                        <div
-                          key={`${message.id}-${index}`}
-                          className="break-words whitespace-pre-wrap"
-                        >
-                          {part.text}
-                        </div>
-                      );
-                    })}
-                    {message.role === "assistant" ? (
-                      <div className="border-border/60 mt-3 border-t pt-3">
-                        <AssistantDataUsedDisclosure className="border-0 bg-transparent p-0" />
+                          return (
+                            <div
+                              key={`${message.id}-${index}`}
+                              className="break-words whitespace-pre-wrap"
+                            >
+                              {part.text}
+                            </div>
+                          );
+                        })}
+                        {message.role === "assistant" ? (
+                          <div className="border-border/60 mt-3 border-t pt-3">
+                            <AssistantDataUsedDisclosure className="border-0 bg-transparent p-0" />
+                          </div>
+                        ) : null}
                       </div>
-                    ) : null}
+                    </div>
+                    {proposals.map((proposal) => (
+                      <AssistantProposalCard
+                        key={proposal.id}
+                        className="max-w-[90%] md:max-w-[80%]"
+                        proposal={proposal}
+                      />
+                    ))}
                   </div>
-                </div>
-              ))}
+                );
+              })}
               <div ref={endRef} />
             </div>
           )}

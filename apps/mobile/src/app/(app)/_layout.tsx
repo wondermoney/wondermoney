@@ -52,6 +52,7 @@ export default function AuthenticatedLayout() {
           <Stack.Screen name="settings/profile" />
           <Stack.Screen name="settings/profile/edit" />
           <Stack.Screen name="more/banking" />
+          <Stack.Screen name="more/pending-changes" />
           <Stack.Screen name="settings/preferences" />
           <Stack.Screen name="settings/categories" />
           <Stack.Screen name="settings/categories/create" />

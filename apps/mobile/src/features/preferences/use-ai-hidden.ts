@@ -35,6 +35,15 @@ export function useAiHidden() {
  * false without an authenticated runtime so a screen can render before sign-in.
  */
 export function useAiHiddenPreference(): boolean {
+  return useAiHiddenPreferenceState().hidden
+}
+
+/**
+ * The boolean plus whether the preference has been read (`known`). A surface that must never
+ * flash for a person who hid AI (pending proposals) waits for `known`; a failed read counts as
+ * known and not hidden, as everywhere else.
+ */
+export function useAiHiddenPreferenceState(): { hidden: boolean; known: boolean } {
   const { runtime } = useProductRuntime()
   const query = useQuery({
     enabled: Boolean(runtime),
@@ -47,5 +56,5 @@ export function useAiHiddenPreference(): boolean {
     refetchOnWindowFocus: false,
     retry: false,
   })
-  return query.data?.aiHidden ?? false
+  return { hidden: query.data?.aiHidden ?? false, known: query.data !== undefined || query.isError }
 }

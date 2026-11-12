@@ -13,7 +13,7 @@ A URL base da API hospedada é `https://api.wonder.money`. Se você hospeda sua 
 
 No WonderMoney, acesse **Configurações → Tokens da API** e crie um token pessoal. Escolha somente o acesso necessário para sua integração. O token é exibido uma única vez: copie-o e guarde-o como segredo. Os tokens começam com `wm_pat_`.
 
-Cada operação na referência informa o escopo necessário. A maioria usa `read` ou `write`; o endpoint MCP usa `mcp:read`. Algumas operações aceitam `read` ou `write`. O token só pode acessar rotas abrangidas por seus escopos. Não inclua o token em código de navegador, URLs, controle de versão ou logs.
+Cada operação na referência informa o escopo necessário. A maioria usa `read` ou `write`; o endpoint MCP usa `mcp:read` ou `mcp:propose`. Nenhum escopo pode aplicar uma proposta do assistente. Algumas operações aceitam `read` ou `write`. O token só pode acessar rotas abrangidas por seus escopos. Não inclua o token em código de navegador, URLs, controle de versão ou logs.
 
 ## Autenticação
 

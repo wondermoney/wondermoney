@@ -17,6 +17,8 @@
     "scope-write-hint": "Write also allows reading, and covers creating and updating transactions, accounts, categories, budgets and goals. Tokens can never delete anything.",
     "scope-mcp-read": "AI client (MCP)",
     "scope-mcp-read-hint": "The AI client scope reaches only the read-only MCP endpoint. It cannot read the ordinary data routes, and a read token cannot reach MCP.",
+    "scope-mcp-propose": "AI client proposals (MCP)",
+    "scope-mcp-propose-hint": "The proposals scope lets an MCP client draft changes to categories, the reviewed mark and notes. They wait in Settings › Assistant › Pending changes; the client can never apply them, only you can.",
     "expiry": "Expires",
     "expiry-days": "{days} days",
     "totp": "Authenticator code",

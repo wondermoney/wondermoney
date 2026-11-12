@@ -12,7 +12,10 @@ import enCommon from "../../../../messages/en/common.json";
 import enNavigation from "../../../../messages/en/navigation.json";
 import SettingsPage from "./page";
 
-const { searchParams } = vi.hoisted(() => ({ searchParams: { current: new URLSearchParams() } }));
+const { searchParams, state } = vi.hoisted(() => ({
+  searchParams: { current: new URLSearchParams() },
+  state: { aiHidden: false },
+}));
 
 vi.mock("next/navigation", () => ({ useSearchParams: () => searchParams.current }));
 vi.mock("@/i18n/navigation", () => ({
@@ -23,6 +26,7 @@ vi.mock("@/i18n/navigation", () => ({
 // panel with its own data hooks.
 vi.mock("next/dynamic", () => ({ default: () => () => <p>tab body</p> }));
 vi.mock("@/components/settings/Profile", () => ({ default: () => <p>profile body</p> }));
+vi.mock("@/lib/api/user-preferences/useAiHidden", () => ({ default: () => state.aiHidden }));
 
 beforeAll(() => {
   globalThis.ResizeObserver ??= class {
@@ -31,7 +35,10 @@ beforeAll(() => {
     disconnect() {}
   } as unknown as typeof ResizeObserver;
 });
-afterEach(cleanup);
+afterEach(() => {
+  cleanup();
+  state.aiHidden = false;
+});
 
 const nav = enNavigation.navigation;
 
@@ -47,7 +54,7 @@ function renderSettings(features = instanceFeatures(), tab?: string) {
 }
 
 const withoutAssistant = () =>
-  instanceFeatures({ ai: { ...instanceFeatures().ai, assistant: false } });
+  instanceFeatures({ ai: { ...instanceFeatures().ai, assistant: false }, mcp: false });
 
 test("a server with an assistant model shows the Assistant settings tab", () => {
   renderSettings();
@@ -55,7 +62,22 @@ test("a server with an assistant model shows the Assistant settings tab", () => 
   screen.getByRole("tab", { name: nav.assistant });
 });
 
-test("a server without an assistant model has no Assistant settings tab", () => {
+test("a server with MCP but no assistant model keeps the tab for pending changes", () => {
+  state.aiHidden = false;
+  renderSettings(instanceFeatures({ ai: { ...instanceFeatures().ai, assistant: false }, mcp: true }), "assistant");
+
+  const selected = screen.getByRole("tab", { selected: true });
+  assert.equal(selected.textContent, nav.assistant);
+});
+
+test("on such a server, a person who hid AI has no Assistant tab", () => {
+  state.aiHidden = true;
+  renderSettings(instanceFeatures({ ai: { ...instanceFeatures().ai, assistant: false }, mcp: true }));
+
+  assert.equal(screen.queryByRole("tab", { name: nav.assistant }), null);
+});
+
+test("a server with neither an assistant model nor MCP has no Assistant settings tab", () => {
   renderSettings(withoutAssistant());
 
   assert.equal(screen.queryByRole("tab", { name: nav.assistant }), null);

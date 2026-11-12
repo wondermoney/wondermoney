@@ -28,7 +28,7 @@ describe('public API OpenAPI contract', () => {
     expect(generated).toEqual(expected);
     expect([...generated].some((key) => key.includes('/v1/calendar'))).toBe(false);
     expect([...generated].some((key) => key.includes('/v1/user'))).toBe(false);
-    expect(routes.find(({ path }) => path === '/v1/mcp')?.scopes).toEqual(['mcp:read']);
+    expect(routes.find(({ path }) => path === '/v1/mcp')?.scopes).toEqual(['mcp:read', 'mcp:propose']);
     expect(Object.keys(paths).length).toBeGreaterThan(0);
   });
 
@@ -66,7 +66,7 @@ describe('public API OpenAPI contract', () => {
     const { document } = await buildPublicSpec();
     const paths = document['paths'] as Record<string, Record<string, Record<string, unknown>>>;
     const operation = paths['/v1/mcp']?.['post'];
-    expect(operation?.['x-required-scopes']).toEqual(['mcp:read']);
+    expect(operation?.['x-required-scopes']).toEqual(['mcp:read', 'mcp:propose']);
     expect(operation?.['description']).toContain('JSON-RPC');
     expect(operation?.['requestBody']).toBeDefined();
   });

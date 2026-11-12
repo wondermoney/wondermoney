@@ -17,6 +17,14 @@ import type { ApiTokenScope } from '@entity/ApiToken';
  */
 
 /**
+ * The scopes that reach the MCP server. `mcp:read` exposes the read tools; `mcp:propose` the
+ * `propose_*` tools, which draft a change the person confirms in the app. No scope can apply a
+ * proposal: `POST /v1/assistant/proposals/:id/apply` is in no allowlist below, so every token
+ * gets 403 there.
+ */
+export const MCP_SCOPES: readonly ApiTokenScope[] = ['mcp:read', 'mcp:propose'];
+
+/**
  * Mounts where `write` also grants reads: exactly the resources a write token can change.
  * Everywhere else a write token is a write token — it cannot read reports, portfolios or
  * the assistant unless it also carries `read`.
@@ -131,10 +139,10 @@ export function apiTokenScopesForRequest(mount: string, method: string, path: st
   /*
    * The MCP endpoint is mounted outside `requireAuth` and resolves its own token
    * (`middleware/mcp-auth.ts`), so this branch is documentation as much as policy: the only
-   * credential that reaches it is a token carrying `mcp:read`, and a plain `read` token does
-   * not. Keeping it here means the scope map stays one place.
+   * credential that reaches it is a token carrying `mcp:read` or `mcp:propose`, and a plain
+   * `read` or `write` token does not. Keeping it here means the scope map stays one place.
    */
-  if (normalisedMount === '/v1/mcp' && normalisedMethod === 'POST') return ['mcp:read'];
+  if (normalisedMount === '/v1/mcp' && normalisedMethod === 'POST') return [...MCP_SCOPES];
 
   if (normalisedMethod === 'GET' || normalisedMethod === 'HEAD') {
     if (!API_TOKEN_READ_MOUNTS.has(normalisedMount)) return [];

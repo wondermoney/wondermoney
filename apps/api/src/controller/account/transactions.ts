@@ -17,17 +17,18 @@ import { TransactionType } from '@entity/TransactionType';
 import { authedContext, authedUser } from '@middleware/authed-context';
 import { convertWithStatus, rateScope } from '@service/currency/exchange-rate';
 import { loadLoanRepaymentLinks, loadViewerCurrencyAmounts, REPORT_CURRENCY_POPULATE } from '@service/reports/report-currency';
-import { changeTransactionTags } from '@service/tag/tag.service';
 import { recalculateChainFromAccountBalance } from '@service/transaction/balance-chain.service';
 import { CATEGORY_LINE_POPULATE, spendingLinesOf } from '@service/transaction/category-lines';
 import { loadCategorySpendingFlags } from '@service/transaction/category-spending';
 import { findAssignableCategory } from '@service/transaction/household-category';
 import { normalizeMerchantName } from '@service/transaction/merchant-normalization';
 import { TransactionAuditService } from '@service/transaction/transaction-audit.service';
+import { applyBulkTransactionChange, BULK_CHANGE_POPULATE } from '@service/transaction/transaction-bulk-update.service';
 import { transactionCreationService } from '@service/transaction/transaction-creation.service';
 import { findManualDuplicate } from '@service/transaction/transaction-dedup.service';
 import { deleteTransactions as deleteTransactionRows } from '@service/transaction/transaction-deletion.service';
 import { listTransactions } from '@service/transaction/transaction-list.service';
+import { updateTransactionNote } from '@service/transaction/transaction-note.service';
 import { getTransactionReviewSummary as getReviewSummary } from '@service/transaction/transaction-review-summary.service';
 import { dashboardScope, transactionScopeWhere } from '@service/transaction/transaction-scope';
 import { loadTransactionSelection } from '@service/transaction/transaction-selection.service';
@@ -36,7 +37,6 @@ import { retypeTransaction, TRANSFER_DESTINATION_POPULATE, transferDestinationOf
 import { reconcileTransfers } from '@service/transaction/transfer-matching.service';
 import { applyUserCategorization } from '@service/transaction/user-categorization.service';
 import { BadRequestError, InternalServerError, NotFoundError, UnauthorizedError } from '@utils/errors';
-import logger from '@utils/logger';
 import { addMoney } from '@utils/money';
 import {
   createTransactionRequestSchema,
@@ -361,7 +361,7 @@ export async function getTransactionTypes(_req: Request, res: Response) {
 
 export async function updateTransaction(req: Request, res: Response, next: NextFunction) {
   const {
-    body: { categoryKey, statementDateOverride, transactionType, transferDestination, updatedAmount },
+    body: { categoryKey, notes, statementDateOverride, transactionType, transferDestination, updatedAmount },
     params: { transactionId },
   } = await zParse(updateTransactionRequestSchema, req);
   // Authorize before any database access — a missing user or unresolved tenant must never
@@ -419,6 +419,10 @@ export async function updateTransaction(req: Request, res: Response, next: NextF
       tenantKey: tenant.tenantKey,
       transactionKey: transaction.transactionKey,
     });
+  }
+  // `null` (or an empty note) clears it.
+  if (notes !== undefined) {
+    await updateTransactionNote(DI.em, { appuser: user, tenant }, transaction, notes);
   }
   // `!== undefined`, not truthiness: an edit to 0 is an edit.
   if (updatedAmount !== undefined) {
@@ -564,6 +568,7 @@ export async function updateTransaction(req: Request, res: Response, next: NextF
     'categories',
     'transactionMerchantKey.name',
     'hidden',
+    'notes',
     'reviewed',
     'appuserTransactionCategories',
     'appuserTransactionCategories.categoryKey',
@@ -593,13 +598,12 @@ export async function updateTransactions(req: Request, res: Response, next: Next
       DI.em,
       { tenant, viewerAppuserKey: authenticatedUser.appuserKey },
       filter ? { filter } : { transactionIds: transactionIds ?? [] },
-      { populate: ['appuserTransactionCategories.categoryKey', 'transactionMerchantKey'] },
+      { populate: BULK_CHANGE_POPULATE },
     );
   } catch (error) {
     next(error);
     return;
   }
-  const selectedKeys = transactions.map((transaction) => transaction.transactionKey);
   let category: Category | null = null;
   if (categoryId) {
     category = await findAssignableCategory(DI.em, tenant, categoryId);
@@ -608,81 +612,7 @@ export async function updateTransactions(req: Request, res: Response, next: Next
       return;
     }
   }
-  // Tags are resolved (404 for a tag that is not the household's) before anything is written.
-  const tagChanges = await changeTransactionTags(DI.em, { appuserKey: authenticatedUser.appuserKey, tenantKey: tenant.tenantKey }, transactions, { add: addTagIds ?? [], remove: removeTagIds ?? [] });
-  if (tagChanges.size > 0) await DI.em.flush();
-  // Bulk categorize persists the assignment and learns the merchant mapping exactly like the
-  // single-transaction path — both go through applyUserCategorization, which also hands back each
-  // transaction's *original* category so the audit `from` recorded below stays correct.
-  const originalCategoryByTransaction = category
-    ? await applyUserCategorization(DI.em, { actor: authenticatedUser, category, transactions })
-    : new Map<number, Category | undefined>();
-
-  // The `reviewed` flag is uniform across every selected transaction, so this is a single bulk UPDATE
-  // rather than one per transaction. The WHERE mirrors the load above exactly (same tenant + soft-delete + id scope), so this does
-  // not widen access beyond the authenticated household's transactions.
-  // nativeUpdate bypasses the tenant filter, so scope explicitly by tenant (the ids were
-  // already validated against the household via the filtered load above).
-  const shouldSetReviewed = !!reviewed || !!category;
-  // Only include the fields the caller actually intends to change. `hidden` is bidirectional
-  // (true/false), unlike `reviewed` which this endpoint only ever sets to true — building this
-  // unconditionally would silently reset `reviewed` to false on a hidden-only call.
-  const transactionUpdate: { hidden?: boolean; reviewed?: boolean } = {};
-  if (shouldSetReviewed) transactionUpdate.reviewed = true;
-  if (hidden !== undefined) transactionUpdate.hidden = hidden;
-  if (Object.keys(transactionUpdate).length > 0 && selectedKeys.length > 0) {
-    await DI.em.nativeUpdate(
-      Transaction,
-      {
-        deletedAt: undefined,
-        tenantKey: tenant,
-        transactionKey: { $in: selectedKeys },
-      },
-      transactionUpdate,
-      // The selected rows may be hidden ones (to unhide them); the keys already scope the update.
-      { filters: { [HIDDEN_FILTER]: false } },
-    );
-  }
-
-  // Best-effort audit of the bulk review/category/hidden/tag change (one row per transaction),
-  // written in one flush rather than one per row: a filter can select thousands.
-  const tenantKeyForAudit = tenant.tenantKey;
-  let audited = 0;
-  for (const transaction of transactions) {
-    const changes: Record<string, { from: unknown; to: unknown }> = {};
-    const tagChange = tagChanges.get(transaction.transactionKey);
-    if (tagChange) changes['tagKeys'] = tagChange;
-    if (shouldSetReviewed && !transaction.reviewed) {
-      changes['reviewed'] = { from: transaction.reviewed, to: true };
-    }
-    if (hidden !== undefined && transaction.hidden !== hidden) {
-      changes['hidden'] = { from: transaction.hidden, to: hidden };
-    }
-    if (category) {
-      const currentCategory = originalCategoryByTransaction.get(transaction.transactionKey);
-      changes['categoryKey'] = { from: currentCategory ? currentCategory.categoryKey : null, to: category.categoryKey };
-    }
-    if (Object.keys(changes).length === 0) continue;
-    const logged = await TransactionAuditService.log(DI.em, {
-      actorAppuserKey: authenticatedUser.appuserKey,
-      actorType: TransactionAuditActorType.USER,
-      appuserKey: authenticatedUser.appuserKey,
-      changes,
-      eventType: category ? TransactionAuditEventType.CATEGORIZED : TransactionAuditEventType.USER_EDIT,
-      source: 'bulk-update',
-      tenantKey: tenantKeyForAudit,
-      transactionKey: transaction.transactionKey,
-    }, { flush: false });
-    if (logged) audited += 1;
-  }
-  if (audited > 0) {
-    // Best-effort, as each entry always was: a failed audit write does not undo or fail the change.
-    try {
-      await DI.em.flush();
-    } catch (error) {
-      logger.warn({ audited, errorMessage: error instanceof Error ? error.message : 'Unknown error' }, 'Bulk update audit log write failed');
-    }
-  }
+  await applyBulkTransactionChange(DI.em, { appuser: authenticatedUser, tenant }, transactions, { addTagIds, category, hidden, removeTagIds, reviewed });
 
   return res.sendStatus(200);
 }

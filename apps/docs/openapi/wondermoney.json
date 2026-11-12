@@ -28,7 +28,7 @@
       "name": "Accounts"
     },
     {
-      "description": "The AI assistant’s consent state and audit log.",
+      "description": "The AI assistant’s consent state, audit log and the proposals waiting for confirmation.",
       "name": "Assistant"
     },
     {
@@ -483,6 +483,169 @@
         },
         "required": [
           "consent"
+        ],
+        "additionalProperties": {}
+      },
+      "AssistantProposal": {
+        "type": "object",
+        "properties": {
+          "changes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AssistantProposalChange"
+            }
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "decidedAt": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "expiresAt": {
+            "type": "string"
+          },
+          "failureReason": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "category_unavailable",
+              "transaction_unavailable",
+              null
+            ]
+          },
+          "id": {
+            "type": "integer"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "categorize_transactions",
+              "mark_transactions_reviewed",
+              "update_transaction_note"
+            ]
+          },
+          "source": {
+            "type": "string",
+            "enum": [
+              "assistant",
+              "mcp"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "applied",
+              "rejected",
+              "expired",
+              "failed"
+            ]
+          },
+          "summary": {
+            "type": "string"
+          },
+          "unavailableCount": {
+            "type": "integer",
+            "description": "Transactions in the proposal the caller can no longer see; they are left out of `changes`."
+          }
+        },
+        "required": [
+          "changes",
+          "createdAt",
+          "decidedAt",
+          "expiresAt",
+          "failureReason",
+          "id",
+          "kind",
+          "source",
+          "status",
+          "summary",
+          "unavailableCount"
+        ],
+        "additionalProperties": {}
+      },
+      "AssistantProposalChange": {
+        "type": "object",
+        "properties": {
+          "after": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The proposed value: a category name, `true` for reviewed, or the note (null clears it)."
+          },
+          "before": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The current value, read when the response is built."
+          },
+          "description": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "field": {
+            "type": "string",
+            "enum": [
+              "category",
+              "note",
+              "reviewed"
+            ]
+          },
+          "transactionDate": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "transactionId": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "after",
+          "before",
+          "description",
+          "field",
+          "transactionDate",
+          "transactionId"
+        ],
+        "additionalProperties": {}
+      },
+      "AssistantProposalList": {
+        "type": "object",
+        "properties": {
+          "proposals": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AssistantProposal"
+            }
+          }
+        },
+        "required": [
+          "proposals"
         ],
         "additionalProperties": {}
       },
@@ -6127,6 +6290,13 @@
                   "categoryKey": {
                     "type": "string"
                   },
+                  "notes": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "maxLength": 1000
+                  },
                   "transactionType": {
                     "type": "string",
                     "enum": [
@@ -8051,6 +8221,104 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/AssistantConsent"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "The token is missing, malformed or revoked.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The token does not carry a scope this operation accepts.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "The request did not match the endpoint’s validator.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "A rate limit was exceeded. Honour the `Retry-After` header.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/assistant/proposals": {
+      "get": {
+        "description": "**Required scope:** `read`.\n\nChanges the in-app assistant or an MCP client (`mcp:propose`) drafted for the token's owner, newest first, each with a live before/after preview. `status` defaults to `pending`; a pending proposal past `expiresAt` (seven days) is not listed as pending. Applying or dismissing one is only possible in the app, signed in: no token scope reaches those routes. Answers 403 `feature_disabled` when the person turned AI off.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "List assistant proposals",
+        "tags": [
+          "Assistant"
+        ],
+        "x-required-scopes": [
+          "read"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 50
+            },
+            "required": false,
+            "name": "limit",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "applied",
+                "expired",
+                "failed",
+                "pending",
+                "rejected"
+              ],
+              "default": "pending"
+            },
+            "required": false,
+            "name": "status",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AssistantProposalList"
                 }
               }
             }
@@ -13523,7 +13791,7 @@
     },
     "/v1/mcp": {
       "post": {
-        "description": "**Required scope:** `mcp:read`.\n\nUses JSON-RPC over the MCP Streamable HTTP transport. Notifications may return HTTP 202 with no body.",
+        "description": "**Required scope:** any of `mcp:read`, `mcp:propose`.\n\nUses JSON-RPC over the MCP Streamable HTTP transport. Notifications may return HTTP 202 with no body. `mcp:read` exposes the read-only tools; `mcp:propose` exposes the `propose_*` tools, which draft a change the person applies or dismisses in the app. No tool can apply a change.",
         "security": [
           {
             "bearerAuth": []
@@ -13534,7 +13802,8 @@
           "MCP"
         ],
         "x-required-scopes": [
-          "mcp:read"
+          "mcp:read",
+          "mcp:propose"
         ],
         "requestBody": {
           "required": true,

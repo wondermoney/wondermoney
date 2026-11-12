@@ -3,6 +3,7 @@ import { type Href, useRouter } from 'expo-router'
 
 import { useProductRuntime } from '@/components/providers/product-runtime-provider'
 import { useServerSwitch } from '@/components/providers/server-switch-provider'
+import { usePendingProposalCount } from '@/features/assistant-proposals/use-assistant-proposals'
 import { useProfile } from '@/features/self/use-self-resource'
 import { useServerBuildInfo } from '@/lib/server/use-instance'
 import { captureAnalyticsEvent } from '@/lib/telemetry/analytics'
@@ -28,6 +29,7 @@ export function MoreRoute() {
   const { signOut } = useProductRuntime()
   const profile = useProfile()
   const serverInfo = useServerBuildInfo()
+  const pendingChanges = usePendingProposalCount()
   // The changelog, legal pages and support inbox are wonder.money's; a self-hosted server's
   // users don't see them.
   const onHostedServer = useServerSwitch()?.usesDefaultServer ?? true
@@ -46,6 +48,9 @@ export function MoreRoute() {
       onOpenAssets={() => router.push('/assets' as unknown as Href)}
       onOpenGoals={() => router.push('/goals' as unknown as Href)}
       onOpenReports={() => router.push('/reports' as unknown as Href)}
+      pendingChanges={pendingChanges.available
+        ? { count: pendingChanges.count, onOpen: () => router.push('/more/pending-changes' as unknown as Href) }
+        : undefined}
       onOpenHelp={() => openApprovedExternal(externalDestinations.help)}
       {...(onHostedServer ? hostedOnlyActions(appInfo) : {})}
     />

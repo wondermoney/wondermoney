@@ -1,13 +1,15 @@
 {
   "connectAiClient": {
     "title": "Conectar un cliente de IA",
-    "description": "Permite que Claude Desktop, Cursor u otro cliente MCP pregunte por tus finanzas. Recibe un token de solo lectura propio: puede leer los mismos datos que ves tú, incluidas tus cuentas privadas, y nunca puede cambiar nada.",
+    "description": "Permite que Claude Desktop, Cursor u otro cliente MCP pregunte por tus finanzas. Recibe un token propio: puede leer los mismos datos que ves tú, incluidas tus cuentas privadas, y nunca cambia nada por sí mismo.",
     "endpoint": "Endpoint MCP",
-    "endpoint-hint": "El cliente envía un token de API personal con el ámbito mcp:read en una cabecera Authorization. Aquí nunca se acepta una cookie de sesión del navegador.",
+    "endpoint-hint": "El cliente envía un token de API personal con el ámbito mcp:read (y mcp:propose, si permites propuestas) en una cabecera Authorization. Aquí nunca se acepta una cookie de sesión del navegador.",
     "copy": "Copiar",
     "copied": "Copiado",
     "copy-failed": "No se pudo copiar. Selecciona el texto y cópialo manualmente.",
     "create-token": "Crear un token de cliente de IA",
+    "allow-proposals": "Dejar que el cliente proponga cambios para que yo los confirme",
+    "allow-proposals-hint": "El cliente puede sugerir categorías, marcar transacciones como revisadas o cambiar una nota. Cada sugerencia espera en Ajustes › Asistente › Cambios pendientes hasta que la apliques o la descartes.",
     "totp": "Código del autenticador",
     "totp-hint": "Solo es necesario si usas autenticación de dos factores.",
     "token-created-title": "Tu token de cliente de IA",

@@ -44,6 +44,11 @@ export type MoreScreenProps = {
   onOpenAssets: () => void
   onOpenGoals: () => void
   onOpenReports: () => void
+  /**
+   * Changes the assistant or an MCP client proposed, waiting for the person. Left out when AI
+   * is hidden or the server has no proposals, and the row is not shown.
+   */
+  pendingChanges?: { count: number; onOpen: () => void }
   onLogout: () => void | Promise<void>
   onSubmitFeedback?: (input: { category: FeedbackCategory; message: string }) => Promise<void>
 }
@@ -74,6 +79,7 @@ export function MoreScreen({
   onOpenAssets,
   onOpenGoals,
   onOpenReports,
+  pendingChanges,
   onLogout,
   onSubmitFeedback,
 }: MoreScreenProps) {
@@ -169,6 +175,16 @@ export function MoreScreen({
           </Group>
 
           <Group>
+            {pendingChanges ? (
+              <MoreRow
+                announcement={pendingChanges.count > 0 ? `${t('more.pendingChangesCount', { count: pendingChanges.count })}, ${inside}` : inside}
+                count={pendingChanges.count}
+                icon="check-circle"
+                label={t('more.pendingChanges')}
+                onPress={pendingChanges.onOpen}
+                testID="more-pending-changes"
+              />
+            ) : null}
             <MoreRow announcement={inside} icon="settings" label={t('navigation.settings')} onPress={onOpenSettings} />
             {external('help', 'circle-help')}
             {onSubmitFeedback ? (
@@ -258,8 +274,10 @@ function Group({ children, label }: { children: React.ReactNode; label?: string 
   return <Section title={label} variant="open">{group}</Section>
 }
 
-function MoreRow({ label, announcement, icon, onPress, external = false, busy = false, trailing = true }: {
+function MoreRow({ label, announcement, icon, onPress, count, testID, external = false, busy = false, trailing = true }: {
   label: string
+  count?: number
+  testID?: string
   announcement: string
   icon: IconName
   onPress: () => void
@@ -271,10 +289,12 @@ function MoreRow({ label, announcement, icon, onPress, external = false, busy = 
     <SettingsNavRow
       accessibilityLabel={`${label}, ${announcement}`}
       busy={busy}
+      count={count}
       external={external}
       icon={icon}
       label={label}
       onPress={onPress}
+      testID={testID}
       trailing={trailing}
     />
   )

@@ -13,7 +13,7 @@ La URL base de la API alojada es `https://api.wonder.money`. Si alojas tu propia
 
 En WonderMoney, abre **Ajustes → Tokens de API** y crea un token personal. Elige solo el acceso que necesite tu integración. El token se muestra una sola vez: cópialo y guárdalo como secreto. Los tokens empiezan por `wm_pat_`.
 
-Cada operación de la referencia indica el alcance que necesita. La mayoría usa `read` o `write`; el endpoint MCP usa `mcp:read`. Algunas operaciones aceptan `read` o `write`. El token solo puede acceder a las rutas cubiertas por sus alcances. No incluyas el token en código del navegador, URL, control de versiones ni registros.
+Cada operación de la referencia indica el alcance que necesita. La mayoría usa `read` o `write`; el endpoint MCP usa `mcp:read` o `mcp:propose`. Ningún alcance puede aplicar una propuesta del asistente. Algunas operaciones aceptan `read` o `write`. El token solo puede acceder a las rutas cubiertas por sus alcances. No incluyas el token en código del navegador, URL, control de versiones ni registros.
 
 ## Autenticación
 

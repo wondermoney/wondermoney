@@ -3,6 +3,7 @@ import type { z } from 'zod';
 
 import { DI } from '@app/app';
 import { AssistantAuditEventType } from '@entity/AssistantAuditLog';
+import { AI_PROPOSAL_TOOL_DEFINITIONS, AI_PROPOSAL_TOOL_NAMES } from '@service/ai-tools/ai-proposal-tools.service';
 import { type AiToolContext, type AiToolDefinition, type AiToolName, executeAiTool } from '@service/ai-tools/ai-tool-types';
 import { AI_TOOL_DEFINITIONS, AI_TOOL_NAMES } from '@service/ai-tools/ai-tools.service';
 import { resolveAiRoute } from '@service/ai/ai-provider';
@@ -13,7 +14,8 @@ import { AssistantRedactionService } from './assistant-redaction.service';
 import type { AssistantToolContext } from './assistant-tool-types';
 
 /**
- * The assistant's view of the shared read-only tool layer (`services/ai-tools`).
+ * The assistant's view of the shared tool layer (`services/ai-tools`): the read-only tools and the
+ * `propose_*` tools, which draft a change for the person to confirm in the chat.
  *
  * The MCP server exposes the same definitions; this class only adds what is specific to the
  * in-app chat: the `ASSISTANT_ALLOWED_TOOLS` policy, the AI SDK `tool()` wrapper and the
@@ -31,10 +33,11 @@ export class AssistantToolsService {
     const toolContext: AiToolContext = {
       appuserKey: context.appuserKey,
       currency: context.currency,
+      origin: { source: 'assistant' },
       tenantKey: context.tenantKey,
     };
     const tools = Object.fromEntries(
-      AI_TOOL_DEFINITIONS.map((definition) => [definition.name, createTool(definition, context, toolContext)]),
+      [...AI_TOOL_DEFINITIONS, ...AI_PROPOSAL_TOOL_DEFINITIONS].map((definition) => [definition.name, createTool(definition, context, toolContext)]),
     );
 
     return Object.fromEntries(
@@ -66,7 +69,7 @@ export class AssistantToolsService {
 
   /** The shared tool names, for callers that only need the catalogue. */
   static get allToolNames() {
-    return [...AI_TOOL_NAMES];
+    return [...AI_TOOL_NAMES, ...AI_PROPOSAL_TOOL_NAMES];
   }
 }
 

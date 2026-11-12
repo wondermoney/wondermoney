@@ -1,5 +1,8 @@
 import { z } from 'zod';
 
+import { AssistantProposalStatus } from '@entity/AssistantProposal';
+import { positiveIntId } from '@validators/shared';
+
 const assistantTextPartSchema = z.object({
   text: z.string().trim().min(1).max(4_000),
   type: z.literal('text'),
@@ -37,4 +40,16 @@ export const assistantAuditLogQuerySchema = z.object({
   query: z.object({
     limit: z.coerce.number().int().min(1).max(100).default(30),
   }).strict(),
+});
+
+export const assistantProposalListQuerySchema = z.object({
+  query: z.object({
+    limit: z.coerce.number().int().min(1).max(100).default(50),
+    /** Which proposals to list; pending by default. A pending one past its expiry is not pending. */
+    status: z.enum(AssistantProposalStatus).default(AssistantProposalStatus.PENDING),
+  }).strict(),
+});
+
+export const assistantProposalParamsSchema = z.object({
+  params: z.object({ proposalId: positiveIntId }),
 });
