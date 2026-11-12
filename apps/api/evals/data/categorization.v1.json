@@ -1,0 +1,2755 @@
+{
+  "version": 1,
+  "description": "Synthetic golden set for transaction categorization. Invented descriptions and merchants; no real person's data. `expected` is a category name from `categories`, or `abstain` when no category can be known from the description.",
+  "categories": [
+    "HOUSING",
+    "UTILITIES",
+    "FOOD",
+    "TRANSPORTATION",
+    "ENTERTAINMENT",
+    "OTHER",
+    "DEPENDENTS",
+    "WELLNESS",
+    "INCOME",
+    "RENT_MORTGAGE",
+    "CONDOMINIUM",
+    "MAINTENANCE",
+    "ELECTRICITY",
+    "WATER",
+    "GAS",
+    "TV_PHONE_INTERNET",
+    "GROCERIES",
+    "CAFE_RESTAURANTS_BARS",
+    "FOOD_DELIVERY",
+    "FUEL",
+    "PUBLIC_TRANSPORT",
+    "VEHICLE_MAINTENANCE",
+    "VEHICLE_INSURANCE",
+    "HOBBIES_AND_LEISURE",
+    "STREAMING_SERVICES",
+    "GIFTS",
+    "TRAVEL",
+    "EDUCATION",
+    "LEISURE",
+    "HEALTH",
+    "GYM_AND_SPORTS",
+    "SALARY",
+    "INVESTMENTS_AND_SAVINGS",
+    "INVESTMENTS",
+    "SAVINGS"
+  ],
+  "items": [
+    {
+      "id": "en-001",
+      "language": "en",
+      "description": "Gas bill HeatWell Energy",
+      "amount": -76.43,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "GAS"
+    },
+    {
+      "id": "en-002",
+      "language": "en",
+      "description": "Online payment",
+      "amount": -25,
+      "currency": "USD",
+      "direction": "debit",
+      "expected": "abstain"
+    },
+    {
+      "id": "en-003",
+      "language": "en",
+      "description": "HOA FEES MAPLE COURT",
+      "amount": -86.68,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "CONDOMINIUM"
+    },
+    {
+      "id": "en-004",
+      "language": "en",
+      "description": "Service charge Harbour View Residents",
+      "amount": -67.95,
+      "currency": "GBP",
+      "direction": "debit",
+      "expected": "CONDOMINIUM"
+    },
+    {
+      "id": "en-005",
+      "language": "en",
+      "description": "SALARY ACME WIDGETS LTD",
+      "amount": 2299.15,
+      "currency": "GBP",
+      "direction": "credit",
+      "expected": "SALARY"
+    },
+    {
+      "id": "en-006",
+      "language": "en",
+      "description": "Pizza delivery Speedy Slice",
+      "amount": -31.02,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "FOOD_DELIVERY"
+    },
+    {
+      "id": "en-007",
+      "language": "en",
+      "description": "HOME GAS DD",
+      "amount": -99.96,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "GAS"
+    },
+    {
+      "id": "en-008",
+      "language": "en",
+      "description": "ESSO FORECOURT",
+      "amount": -62.45,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "FUEL"
+    },
+    {
+      "id": "en-009",
+      "language": "en",
+      "description": "Rent payment Oakwood Property Mgmt",
+      "amount": -846.12,
+      "currency": "GBP",
+      "direction": "debit",
+      "expected": "RENT_MORTGAGE"
+    },
+    {
+      "id": "en-010",
+      "language": "en",
+      "description": "BOOTS PHARMACY",
+      "amount": -15.98,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "HEALTH"
+    },
+    {
+      "id": "en-011",
+      "language": "en",
+      "description": "PAYMENT",
+      "amount": -45,
+      "currency": "GBP",
+      "direction": "debit",
+      "expected": "abstain"
+    },
+    {
+      "id": "en-012",
+      "language": "en",
+      "description": "Tennis club fees",
+      "amount": -30.4,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "GYM_AND_SPORTS"
+    },
+    {
+      "id": "en-013",
+      "language": "en",
+      "description": "Apple Music monthly",
+      "amount": -9.56,
+      "currency": "GBP",
+      "direction": "debit",
+      "expected": "STREAMING_SERVICES"
+    },
+    {
+      "id": "en-014",
+      "language": "en",
+      "description": "Electric utility monthly",
+      "amount": -126.45,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "ELECTRICITY"
+    },
+    {
+      "id": "en-015",
+      "language": "en",
+      "description": "Sushi Garden restaurant",
+      "amount": -44.4,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "CAFE_RESTAURANTS_BARS"
+    },
+    {
+      "id": "en-016",
+      "language": "en",
+      "description": "Natural gas monthly",
+      "amount": -47.08,
+      "currency": "USD",
+      "direction": "debit",
+      "expected": "GAS"
+    },
+    {
+      "id": "en-017",
+      "language": "en",
+      "description": "JUST EAT TAKEAWAY",
+      "amount": -43.27,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "FOOD_DELIVERY"
+    },
+    {
+      "id": "en-018",
+      "language": "en",
+      "description": "SAFEDRIVE CAR INSURANCE",
+      "amount": -47.94,
+      "currency": "GBP",
+      "direction": "debit",
+      "expected": "VEHICLE_INSURANCE"
+    },
+    {
+      "id": "en-019",
+      "language": "en",
+      "description": "Transfer to joint pot",
+      "amount": -500,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "abstain"
+    },
+    {
+      "id": "en-020",
+      "language": "en",
+      "description": "Salary payment employer",
+      "amount": 1603.62,
+      "currency": "EUR",
+      "direction": "credit",
+      "expected": "SALARY"
+    },
+    {
+      "id": "en-021",
+      "language": "en",
+      "description": "ATM WITHDRAWAL AIRPORT",
+      "amount": -100,
+      "currency": "USD",
+      "direction": "debit",
+      "expected": "abstain"
+    },
+    {
+      "id": "en-022",
+      "language": "en",
+      "description": "OPTICIANS EYE CARE",
+      "amount": -110.75,
+      "currency": "USD",
+      "direction": "debit",
+      "expected": "HEALTH"
+    },
+    {
+      "id": "en-023",
+      "language": "en",
+      "description": "THE RED LION PUB",
+      "amount": -28.79,
+      "currency": "GBP",
+      "direction": "debit",
+      "expected": "CAFE_RESTAURANTS_BARS"
+    },
+    {
+      "id": "en-024",
+      "language": "en",
+      "description": "ATM WITHDRAWAL HIGH STREET",
+      "amount": -60,
+      "currency": "USD",
+      "direction": "debit",
+      "expected": "abstain"
+    },
+    {
+      "id": "en-025",
+      "language": "en",
+      "description": "Car service Main Street Garage",
+      "amount": -126.34,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "VEHICLE_MAINTENANCE"
+    },
+    {
+      "id": "en-026",
+      "language": "en",
+      "description": "PAINT AND DIY CENTRE",
+      "amount": -192.54,
+      "currency": "USD",
+      "direction": "debit",
+      "expected": "MAINTENANCE"
+    },
+    {
+      "id": "en-027",
+      "language": "en",
+      "description": "PUREGYM MEMBERSHIP",
+      "amount": -52.38,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "GYM_AND_SPORTS"
+    },
+    {
+      "id": "en-028",
+      "language": "en",
+      "description": "NORTHERN GAS SUPPLY",
+      "amount": -83.14,
+      "currency": "USD",
+      "direction": "debit",
+      "expected": "GAS"
+    },
+    {
+      "id": "en-029",
+      "language": "en",
+      "description": "Language school fees",
+      "amount": -374.22,
+      "currency": "USD",
+      "direction": "debit",
+      "expected": "EDUCATION"
+    },
+    {
+      "id": "en-030",
+      "language": "en",
+      "description": "UNIVERSITY BOOKSHOP TEXTBOOKS",
+      "amount": -434.12,
+      "currency": "USD",
+      "direction": "debit",
+      "expected": "EDUCATION"
+    },
+    {
+      "id": "en-031",
+      "language": "en",
+      "description": "Building service charge Q2",
+      "amount": -46.5,
+      "currency": "USD",
+      "direction": "debit",
+      "expected": "CONDOMINIUM"
+    },
+    {
+      "id": "en-032",
+      "language": "en",
+      "description": "PERMANENT ORDER TO A JONES",
+      "amount": -75,
+      "currency": "GBP",
+      "direction": "debit",
+      "expected": "abstain"
+    },
+    {
+      "id": "en-033",
+      "language": "en",
+      "description": "Miscellaneous",
+      "amount": -7,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "abstain"
+    },
+    {
+      "id": "en-034",
+      "language": "en",
+      "description": "Online course LearnHub",
+      "amount": -240.74,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "EDUCATION"
+    },
+    {
+      "id": "en-035",
+      "language": "en",
+      "description": "Locksmith Quick Keys",
+      "amount": -137.48,
+      "currency": "GBP",
+      "direction": "debit",
+      "expected": "MAINTENANCE"
+    },
+    {
+      "id": "en-036",
+      "language": "en",
+      "description": "Hotel Seaview stay",
+      "amount": -703.67,
+      "currency": "USD",
+      "direction": "debit",
+      "expected": "TRAVEL"
+    },
+    {
+      "id": "en-037",
+      "language": "en",
+      "description": "BP Fuel Motorway Services",
+      "amount": -78.18,
+      "currency": "GBP",
+      "direction": "debit",
+      "expected": "FUEL"
+    },
+    {
+      "id": "en-038",
+      "language": "en",
+      "description": "BOOKSHELF BOOKSTORE",
+      "amount": -38.8,
+      "currency": "GBP",
+      "direction": "debit",
+      "expected": "HOBBIES_AND_LEISURE"
+    },
+    {
+      "id": "en-039",
+      "language": "en",
+      "description": "Refund",
+      "amount": 14,
+      "currency": "USD",
+      "direction": "credit",
+      "expected": "abstain"
+    },
+    {
+      "id": "en-040",
+      "language": "en",
+      "description": "GP private consultation",
+      "amount": -18.24,
+      "currency": "GBP",
+      "direction": "debit",
+      "expected": "HEALTH"
+    },
+    {
+      "id": "en-041",
+      "language": "en",
+      "description": "MOT TEST CENTRE",
+      "amount": -375.02,
+      "currency": "USD",
+      "direction": "debit",
+      "expected": "VEHICLE_MAINTENANCE"
+    },
+    {
+      "id": "en-042",
+      "language": "en",
+      "description": "UBER EATS ORDER",
+      "merchant": "Uber Eats",
+      "amount": -23.61,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "FOOD_DELIVERY"
+    },
+    {
+      "id": "en-043",
+      "language": "en",
+      "description": "WATER BILL QUARTERLY",
+      "amount": -28.36,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "WATER"
+    },
+    {
+      "id": "en-044",
+      "language": "en",
+      "description": "CITY METRO CONTACTLESS",
+      "amount": -21.18,
+      "currency": "USD",
+      "direction": "debit",
+      "expected": "PUBLIC_TRANSPORT"
+    },
+    {
+      "id": "en-045",
+      "language": "en",
+      "description": "Thames Valley Water Co",
+      "amount": -57.15,
+      "currency": "GBP",
+      "direction": "debit",
+      "expected": "WATER"
+    },
+    {
+      "id": "en-046",
+      "language": "en",
+      "description": "Electricity bill Volt Power Co",
+      "amount": -60.07,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "ELECTRICITY"
+    },
+    {
+      "id": "en-047",
+      "language": "en",
+      "description": "Bus fare Metro Buses",
+      "amount": -34.23,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "PUBLIC_TRANSPORT"
+    },
+    {
+      "id": "en-048",
+      "language": "en",
+      "description": "ATM Withdrawal at Station Road",
+      "amount": -20,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "abstain"
+    },
+    {
+      "id": "en-049",
+      "language": "en",
+      "description": "Tram day pass",
+      "amount": -6.68,
+      "currency": "USD",
+      "direction": "debit",
+      "expected": "PUBLIC_TRANSPORT"
+    },
+    {
+      "id": "en-050",
+      "language": "en",
+      "description": "Motor insurance premium",
+      "amount": -65.06,
+      "currency": "USD",
+      "direction": "debit",
+      "expected": "VEHICLE_INSURANCE"
+    },
+    {
+      "id": "en-051",
+      "language": "en",
+      "description": "MONTHLY WAGES",
+      "amount": 2953.51,
+      "currency": "GBP",
+      "direction": "credit",
+      "expected": "SALARY"
+    },
+    {
+      "id": "en-052",
+      "language": "en",
+      "description": "NETFLIX.COM",
+      "merchant": "Netflix",
+      "amount": -10.38,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "STREAMING_SERVICES"
+    },
+    {
+      "id": "en-053",
+      "language": "en",
+      "description": "HOMEFIX HARDWARE STORE",
+      "amount": -190.07,
+      "currency": "USD",
+      "direction": "debit",
+      "expected": "MAINTENANCE"
+    },
+    {
+      "id": "en-054",
+      "language": "en",
+      "description": "Dental check-up Bright Smile",
+      "amount": -66.18,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "HEALTH"
+    },
+    {
+      "id": "en-055",
+      "language": "en",
+      "description": "NATIONAL RAIL TICKET",
+      "amount": -4.66,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "PUBLIC_TRANSPORT"
+    },
+    {
+      "id": "en-056",
+      "language": "en",
+      "description": "POWERGRID HOME ELEC DD",
+      "amount": -82.42,
+      "currency": "GBP",
+      "direction": "debit",
+      "expected": "ELECTRICITY"
+    },
+    {
+      "id": "en-057",
+      "language": "en",
+      "description": "BRIGHTSPARK ENERGY ELECTRICITY",
+      "amount": -67.88,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "ELECTRICITY"
+    },
+    {
+      "id": "en-058",
+      "language": "en",
+      "description": "Diesel top up FuelStop",
+      "amount": -44.02,
+      "currency": "GBP",
+      "direction": "debit",
+      "expected": "FUEL"
+    },
+    {
+      "id": "en-059",
+      "language": "en",
+      "description": "Phone contract monthly",
+      "amount": -72.65,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "TV_PHONE_INTERNET"
+    },
+    {
+      "id": "en-060",
+      "language": "en",
+      "description": "TRF TO FLATMATE",
+      "amount": -320,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "abstain"
+    },
+    {
+      "id": "en-061",
+      "language": "en",
+      "description": "DISNEY PLUS SUBSCRIPTION",
+      "amount": -11.92,
+      "currency": "USD",
+      "direction": "debit",
+      "expected": "STREAMING_SERVICES"
+    },
+    {
+      "id": "en-062",
+      "language": "en",
+      "description": "Corner Grocers",
+      "amount": -30.25,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "GROCERIES"
+    },
+    {
+      "id": "en-063",
+      "language": "en",
+      "description": "LIDL GB 1042",
+      "merchant": "Lidl",
+      "amount": -28.56,
+      "currency": "GBP",
+      "direction": "debit",
+      "expected": "GROCERIES"
+    },
+    {
+      "id": "en-064",
+      "language": "en",
+      "description": "QUICKFIT TYRES AND EXHAUSTS",
+      "amount": -199.75,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "VEHICLE_MAINTENANCE"
+    },
+    {
+      "id": "en-065",
+      "language": "en",
+      "description": "Water rates Aqua Services",
+      "amount": -28.26,
+      "currency": "GBP",
+      "direction": "debit",
+      "expected": "WATER"
+    },
+    {
+      "id": "en-066",
+      "language": "en",
+      "description": "CINEWORLD CINEMA TICKETS",
+      "amount": -29.2,
+      "currency": "GBP",
+      "direction": "debit",
+      "expected": "HOBBIES_AND_LEISURE"
+    },
+    {
+      "id": "en-067",
+      "language": "en",
+      "description": "AUTO COVER INSURANCE DD",
+      "amount": -37.99,
+      "currency": "GBP",
+      "direction": "debit",
+      "expected": "VEHICLE_INSURANCE"
+    },
+    {
+      "id": "en-068",
+      "language": "en",
+      "description": "Homeowners association dues",
+      "amount": -67.46,
+      "currency": "USD",
+      "direction": "debit",
+      "expected": "CONDOMINIUM"
+    },
+    {
+      "id": "en-069",
+      "language": "en",
+      "description": "Transfer from savings pot",
+      "amount": 200,
+      "currency": "EUR",
+      "direction": "credit",
+      "expected": "abstain"
+    },
+    {
+      "id": "en-070",
+      "language": "en",
+      "description": "SHELL PETROL STATION",
+      "merchant": "Shell",
+      "amount": -92.4,
+      "currency": "GBP",
+      "direction": "debit",
+      "expected": "FUEL"
+    },
+    {
+      "id": "en-071",
+      "language": "en",
+      "description": "Payment received",
+      "amount": 80,
+      "currency": "USD",
+      "direction": "credit",
+      "expected": "abstain"
+    },
+    {
+      "id": "en-072",
+      "language": "en",
+      "description": "Airport car hire",
+      "amount": -350.09,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "TRAVEL"
+    },
+    {
+      "id": "en-073",
+      "language": "en",
+      "description": "Car insurance Shield Mutual",
+      "amount": -49.96,
+      "currency": "GBP",
+      "direction": "debit",
+      "expected": "VEHICLE_INSURANCE"
+    },
+    {
+      "id": "en-074",
+      "language": "en",
+      "description": "Weekly shop GreenBasket",
+      "amount": -78.52,
+      "currency": "GBP",
+      "direction": "debit",
+      "expected": "GROCERIES"
+    },
+    {
+      "id": "en-075",
+      "language": "en",
+      "description": "Bean There Coffee",
+      "amount": -34.37,
+      "currency": "GBP",
+      "direction": "debit",
+      "expected": "CAFE_RESTAURANTS_BARS"
+    },
+    {
+      "id": "en-076",
+      "language": "en",
+      "description": "FIBRENET BROADBAND",
+      "amount": -51.21,
+      "currency": "USD",
+      "direction": "debit",
+      "expected": "TV_PHONE_INTERNET"
+    },
+    {
+      "id": "en-077",
+      "language": "en",
+      "description": "SKYLINE TV AND INTERNET",
+      "amount": -23.06,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "TV_PHONE_INTERNET"
+    },
+    {
+      "id": "en-078",
+      "language": "en",
+      "description": "Concert tickets Arena",
+      "amount": -30.67,
+      "currency": "GBP",
+      "direction": "debit",
+      "expected": "HOBBIES_AND_LEISURE"
+    },
+    {
+      "id": "en-079",
+      "language": "en",
+      "description": "Auto parts Wheelhouse",
+      "amount": -85.15,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "VEHICLE_MAINTENANCE"
+    },
+    {
+      "id": "en-080",
+      "language": "en",
+      "description": "POS PURCHASE",
+      "amount": -12.5,
+      "currency": "USD",
+      "direction": "debit",
+      "expected": "abstain"
+    },
+    {
+      "id": "en-081",
+      "language": "en",
+      "description": "Yoga studio class pack",
+      "amount": -39.04,
+      "currency": "GBP",
+      "direction": "debit",
+      "expected": "GYM_AND_SPORTS"
+    },
+    {
+      "id": "en-082",
+      "language": "en",
+      "description": "SKYWAYS AIRLINES BOOKING",
+      "amount": -811.67,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "TRAVEL"
+    },
+    {
+      "id": "en-083",
+      "language": "en",
+      "description": "CLEARWATER UTILITIES WATER",
+      "amount": -17.17,
+      "currency": "GBP",
+      "direction": "debit",
+      "expected": "WATER"
+    },
+    {
+      "id": "en-084",
+      "language": "en",
+      "description": "MORTGAGE REPAYMENT NORTHGATE BUILDING SOC",
+      "amount": -1235.81,
+      "currency": "GBP",
+      "direction": "debit",
+      "expected": "RENT_MORTGAGE"
+    },
+    {
+      "id": "en-085",
+      "language": "en",
+      "description": "Bowling Strike Lanes",
+      "amount": -94.27,
+      "currency": "USD",
+      "direction": "debit",
+      "expected": "HOBBIES_AND_LEISURE"
+    },
+    {
+      "id": "en-086",
+      "language": "en",
+      "description": "CHARGE 0427",
+      "amount": -9.99,
+      "currency": "USD",
+      "direction": "debit",
+      "expected": "abstain"
+    },
+    {
+      "id": "en-087",
+      "language": "en",
+      "description": "FRESHMART SUPERMARKET",
+      "amount": -108.85,
+      "currency": "USD",
+      "direction": "debit",
+      "expected": "GROCERIES"
+    },
+    {
+      "id": "en-088",
+      "language": "en",
+      "description": "SPORTS DIRECT STORE",
+      "amount": -51.96,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "GYM_AND_SPORTS"
+    },
+    {
+      "id": "en-089",
+      "language": "en",
+      "description": "Deliveroo order",
+      "amount": -29.78,
+      "currency": "GBP",
+      "direction": "debit",
+      "expected": "FOOD_DELIVERY"
+    },
+    {
+      "id": "en-090",
+      "language": "en",
+      "description": "SCHOOL TUITION FEES",
+      "amount": -257.61,
+      "currency": "USD",
+      "direction": "debit",
+      "expected": "EDUCATION"
+    },
+    {
+      "id": "en-091",
+      "language": "en",
+      "description": "Spotify Premium",
+      "amount": -6.62,
+      "currency": "GBP",
+      "direction": "debit",
+      "expected": "STREAMING_SERVICES"
+    },
+    {
+      "id": "en-092",
+      "language": "en",
+      "description": "Direct debit",
+      "amount": -30,
+      "currency": "USD",
+      "direction": "debit",
+      "expected": "abstain"
+    },
+    {
+      "id": "en-093",
+      "language": "en",
+      "description": "Mobile phone bill Vodafone",
+      "amount": -85.36,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "TV_PHONE_INTERNET"
+    },
+    {
+      "id": "en-094",
+      "language": "en",
+      "description": "Monthly rent Riverside Lettings",
+      "amount": -1325.09,
+      "currency": "USD",
+      "direction": "debit",
+      "expected": "RENT_MORTGAGE"
+    },
+    {
+      "id": "en-095",
+      "language": "en",
+      "description": "Payroll Northwind Traders",
+      "amount": 2844.88,
+      "currency": "USD",
+      "direction": "credit",
+      "expected": "SALARY"
+    },
+    {
+      "id": "en-096",
+      "language": "en",
+      "description": "BOOKING HOTEL RESERVATION",
+      "amount": -311.42,
+      "currency": "USD",
+      "direction": "debit",
+      "expected": "TRAVEL"
+    },
+    {
+      "id": "en-097",
+      "language": "en",
+      "description": "PIZZERIA NAPOLI HIGH ST",
+      "amount": -67.93,
+      "currency": "GBP",
+      "direction": "debit",
+      "expected": "CAFE_RESTAURANTS_BARS"
+    },
+    {
+      "id": "en-098",
+      "language": "en",
+      "description": "HOME LOAN INSTALMENT",
+      "amount": -919.22,
+      "currency": "USD",
+      "direction": "debit",
+      "expected": "RENT_MORTGAGE"
+    },
+    {
+      "id": "en-099",
+      "language": "en",
+      "description": "TRANSFER TO J SMITH",
+      "amount": -150,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "abstain"
+    },
+    {
+      "id": "en-100",
+      "language": "en",
+      "description": "Plumber call-out Dave's Plumbing",
+      "amount": -69.09,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "MAINTENANCE"
+    },
+    {
+      "id": "pt-001",
+      "language": "pt",
+      "description": "VENCIMENTO EMPRESA EXEMPLO LDA",
+      "amount": 1623.25,
+      "currency": "EUR",
+      "direction": "credit",
+      "expected": "SALARY"
+    },
+    {
+      "id": "pt-002",
+      "language": "pt",
+      "description": "ORDEM PERMANENTE RENDA",
+      "amount": -650,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "abstain"
+    },
+    {
+      "id": "pt-003",
+      "language": "pt",
+      "description": "Spotify subscricao",
+      "amount": -5.95,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "STREAMING_SERVICES"
+    },
+    {
+      "id": "pt-004",
+      "language": "pt",
+      "description": "Renda casa maio",
+      "amount": -874.03,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "RENT_MORTGAGE"
+    },
+    {
+      "id": "pt-005",
+      "language": "pt",
+      "description": "Energia elétrica fatura abril",
+      "amount": -57.21,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "ELECTRICITY"
+    },
+    {
+      "id": "pt-006",
+      "language": "pt",
+      "description": "TAP VOO LISBOA PARIS",
+      "amount": -768.3,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "TRAVEL"
+    },
+    {
+      "id": "pt-007",
+      "language": "pt",
+      "description": "AGUAS MUNICIPAIS FATURA",
+      "amount": -36.54,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "WATER"
+    },
+    {
+      "id": "pt-008",
+      "language": "pt",
+      "description": "Condomínio edifício Atlântico",
+      "amount": -94.07,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "CONDOMINIUM"
+    },
+    {
+      "id": "pt-009",
+      "language": "pt",
+      "description": "Luz casa fatura",
+      "amount": -124.08,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "ELECTRICITY"
+    },
+    {
+      "id": "pt-010",
+      "language": "pt",
+      "description": "RESTAURANTE O PESCADOR",
+      "amount": -7.17,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "CAFE_RESTAURANTS_BARS"
+    },
+    {
+      "id": "pt-011",
+      "language": "pt",
+      "description": "Débito direto",
+      "amount": -27,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "abstain"
+    },
+    {
+      "id": "pt-012",
+      "language": "pt",
+      "description": "ELETRICIDADE DO NORTE",
+      "amount": -111.39,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "ELECTRICITY"
+    },
+    {
+      "id": "pt-013",
+      "language": "pt",
+      "description": "PINGO DOCE AVENIDAS",
+      "amount": -15.87,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "GROCERIES"
+    },
+    {
+      "id": "pt-014",
+      "language": "pt",
+      "description": "Inspeção periódica automóvel",
+      "amount": -386.16,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "VEHICLE_MAINTENANCE"
+    },
+    {
+      "id": "pt-015",
+      "language": "pt",
+      "description": "Internet fibra e TV",
+      "amount": -44.79,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "TV_PHONE_INTERNET"
+    },
+    {
+      "id": "pt-016",
+      "language": "pt",
+      "description": "Transferência recebida",
+      "amount": 300,
+      "currency": "EUR",
+      "direction": "credit",
+      "expected": "abstain"
+    },
+    {
+      "id": "pt-017",
+      "language": "pt",
+      "description": "COMBUSTIVEL GASOLEO",
+      "amount": -64.85,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "FUEL"
+    },
+    {
+      "id": "pt-018",
+      "language": "pt",
+      "description": "Análises clínicas laboratório",
+      "amount": -69.1,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "HEALTH"
+    },
+    {
+      "id": "pt-019",
+      "language": "pt",
+      "description": "GINASIO FITNESS UP",
+      "amount": -54.73,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "GYM_AND_SPORTS"
+    },
+    {
+      "id": "pt-020",
+      "language": "pt",
+      "description": "NETFLIX ASSINATURA",
+      "merchant": "Netflix",
+      "amount": -14.12,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "STREAMING_SERVICES"
+    },
+    {
+      "id": "pt-021",
+      "language": "pt",
+      "description": "LEV ATM 3170 CAIXA LISBOA",
+      "amount": -40,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "abstain"
+    },
+    {
+      "id": "pt-022",
+      "language": "pt",
+      "description": "SEGURO AUTOMOVEL",
+      "amount": -84.93,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "VEHICLE_INSURANCE"
+    },
+    {
+      "id": "pt-023",
+      "language": "pt",
+      "description": "Processamento salarial",
+      "amount": 2834.55,
+      "currency": "EUR",
+      "direction": "credit",
+      "expected": "SALARY"
+    },
+    {
+      "id": "pt-024",
+      "language": "pt",
+      "description": "PRESTACAO CREDITO HABITACAO",
+      "amount": -913.63,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "RENT_MORTGAGE"
+    },
+    {
+      "id": "pt-025",
+      "language": "pt",
+      "description": "Bolt Food pedido",
+      "amount": -17.32,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "FOOD_DELIVERY"
+    },
+    {
+      "id": "pt-026",
+      "language": "pt",
+      "description": "OTICA VISAO CLARA",
+      "amount": -45.16,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "HEALTH"
+    },
+    {
+      "id": "pt-027",
+      "language": "pt",
+      "description": "FATURA MEO",
+      "amount": -59.41,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "TV_PHONE_INTERNET"
+    },
+    {
+      "id": "pt-028",
+      "language": "pt",
+      "description": "ADMIN CONDOMINIO LUZ",
+      "amount": -116.56,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "CONDOMINIUM"
+    },
+    {
+      "id": "pt-029",
+      "language": "pt",
+      "description": "Compra online",
+      "amount": -21,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "abstain"
+    },
+    {
+      "id": "pt-030",
+      "language": "pt",
+      "description": "LEVANTAMENTO MULTIBANCO",
+      "amount": -60,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "abstain"
+    },
+    {
+      "id": "pt-031",
+      "language": "pt",
+      "description": "Pastelaria Estrela",
+      "amount": -22.33,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "CAFE_RESTAURANTS_BARS"
+    },
+    {
+      "id": "pt-032",
+      "language": "pt",
+      "description": "BRICOLAGE CASA E JARDIM",
+      "amount": -234.48,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "MAINTENANCE"
+    },
+    {
+      "id": "pt-033",
+      "language": "pt",
+      "description": "Eletricista Faísca reparação",
+      "amount": -183.38,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "MAINTENANCE"
+    },
+    {
+      "id": "pt-034",
+      "language": "pt",
+      "description": "PAGAMENTO",
+      "amount": -33,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "abstain"
+    },
+    {
+      "id": "pt-035",
+      "language": "pt",
+      "description": "Canalizador reparação esquentador",
+      "amount": -36.28,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "MAINTENANCE"
+    },
+    {
+      "id": "pt-036",
+      "language": "pt",
+      "description": "Mensalidade colégio",
+      "amount": -257.3,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "EDUCATION"
+    },
+    {
+      "id": "pt-037",
+      "language": "pt",
+      "description": "Mensalidade ginásio",
+      "amount": -60.66,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "GYM_AND_SPORTS"
+    },
+    {
+      "id": "pt-038",
+      "language": "pt",
+      "description": "Hotel Miramar estadia",
+      "amount": -191.27,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "TRAVEL"
+    },
+    {
+      "id": "pt-039",
+      "language": "pt",
+      "description": "CAFE CENTRAL",
+      "amount": -46.17,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "CAFE_RESTAURANTS_BARS"
+    },
+    {
+      "id": "pt-040",
+      "language": "pt",
+      "description": "TRF P/ POUPANCA",
+      "amount": -100,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "abstain"
+    },
+    {
+      "id": "pt-041",
+      "language": "pt",
+      "description": "SEGUROS AUTO PROTEGE",
+      "amount": -86.8,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "VEHICLE_INSURANCE"
+    },
+    {
+      "id": "pt-042",
+      "language": "pt",
+      "description": "HBO MAX MENSAL",
+      "amount": -12.07,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "STREAMING_SERVICES"
+    },
+    {
+      "id": "pt-043",
+      "language": "pt",
+      "description": "MB WAY PARA ANA SILVA",
+      "amount": -15,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "abstain"
+    },
+    {
+      "id": "pt-044",
+      "language": "pt",
+      "description": "Seguro viatura anual",
+      "amount": -69.72,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "VEHICLE_INSURANCE"
+    },
+    {
+      "id": "pt-045",
+      "language": "pt",
+      "description": "Revisão automóvel garagem Sul",
+      "amount": -313.02,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "VEHICLE_MAINTENANCE"
+    },
+    {
+      "id": "pt-046",
+      "language": "pt",
+      "description": "PAG SERVICOS",
+      "amount": -44,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "abstain"
+    },
+    {
+      "id": "pt-047",
+      "language": "pt",
+      "description": "Consulta clínica dentária",
+      "amount": -93.33,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "HEALTH"
+    },
+    {
+      "id": "pt-048",
+      "language": "pt",
+      "description": "PROPINAS UNIVERSIDADE",
+      "amount": -207.01,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "EDUCATION"
+    },
+    {
+      "id": "pt-049",
+      "language": "pt",
+      "description": "CONDOMINIO PREDIO RUA DAS FLORES",
+      "amount": -51.13,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "CONDOMINIUM"
+    },
+    {
+      "id": "pt-050",
+      "language": "pt",
+      "description": "CONTINENTE MATOSINHOS",
+      "merchant": "Continente",
+      "amount": -83.67,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "GROCERIES"
+    },
+    {
+      "id": "pt-051",
+      "language": "pt",
+      "description": "BILHETES CONCERTO COLISEU",
+      "amount": -102.08,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "HOBBIES_AND_LEISURE"
+    },
+    {
+      "id": "pt-052",
+      "language": "pt",
+      "description": "LIVROS ESCOLARES",
+      "amount": -449.85,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "EDUCATION"
+    },
+    {
+      "id": "pt-053",
+      "language": "pt",
+      "description": "FATURA ELETRICIDADE LUZBOA",
+      "amount": -82.95,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "ELECTRICITY"
+    },
+    {
+      "id": "pt-054",
+      "language": "pt",
+      "description": "COMPRA",
+      "amount": -18.4,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "abstain"
+    },
+    {
+      "id": "pt-055",
+      "language": "pt",
+      "description": "Viagem agência Mundo Azul",
+      "amount": -736.04,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "TRAVEL"
+    },
+    {
+      "id": "pt-056",
+      "language": "pt",
+      "description": "REPSOL COMBUSTIVEL",
+      "amount": -31.64,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "FUEL"
+    },
+    {
+      "id": "pt-057",
+      "language": "pt",
+      "description": "Telemóvel tarifário mensal",
+      "amount": -44.55,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "TV_PHONE_INTERNET"
+    },
+    {
+      "id": "pt-058",
+      "language": "pt",
+      "description": "RESERVA ALOJAMENTO LOCAL",
+      "amount": -421.74,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "TRAVEL"
+    },
+    {
+      "id": "pt-059",
+      "language": "pt",
+      "description": "Prestação empréstimo habitação",
+      "amount": -1199.67,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "RENT_MORTGAGE"
+    },
+    {
+      "id": "pt-060",
+      "language": "pt",
+      "description": "OFICINA AUTO REPARACOES",
+      "amount": -301.19,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "VEHICLE_MAINTENANCE"
+    },
+    {
+      "id": "pt-061",
+      "language": "pt",
+      "description": "Pagamento recebido",
+      "amount": 120,
+      "currency": "EUR",
+      "direction": "credit",
+      "expected": "abstain"
+    },
+    {
+      "id": "pt-062",
+      "language": "pt",
+      "description": "TRANSFERENCIA PARA JOAO COSTA",
+      "amount": -200,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "abstain"
+    },
+    {
+      "id": "pt-063",
+      "language": "pt",
+      "description": "Entrega comida domicilio",
+      "amount": -11.46,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "FOOD_DELIVERY"
+    },
+    {
+      "id": "pt-064",
+      "language": "pt",
+      "description": "Livraria Bertrand",
+      "amount": -80.6,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "HOBBIES_AND_LEISURE"
+    },
+    {
+      "id": "pt-065",
+      "language": "pt",
+      "description": "Disney Plus assinatura",
+      "amount": -12.16,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "STREAMING_SERVICES"
+    },
+    {
+      "id": "pt-066",
+      "language": "pt",
+      "description": "BOTIJA GAS BUTANO",
+      "amount": -74.87,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "GAS"
+    },
+    {
+      "id": "pt-067",
+      "language": "pt",
+      "description": "DEVOLUCAO",
+      "amount": 9.5,
+      "currency": "EUR",
+      "direction": "credit",
+      "expected": "abstain"
+    },
+    {
+      "id": "pt-068",
+      "language": "pt",
+      "description": "DECATHLON ARTIGOS DESPORTO",
+      "amount": -13.51,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "GYM_AND_SPORTS"
+    },
+    {
+      "id": "pt-069",
+      "language": "pt",
+      "description": "MB WAY DE RUI SANTOS",
+      "amount": 25,
+      "currency": "EUR",
+      "direction": "credit",
+      "expected": "abstain"
+    },
+    {
+      "id": "pt-070",
+      "language": "pt",
+      "description": "CARRIS AUTOCARRO",
+      "amount": -22.09,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "PUBLIC_TRANSPORT"
+    },
+    {
+      "id": "pt-071",
+      "language": "pt",
+      "description": "GALP POSTO ALVERCA",
+      "merchant": "Galp",
+      "amount": -91.94,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "FUEL"
+    },
+    {
+      "id": "pt-072",
+      "language": "pt",
+      "description": "FARMACIA CENTRAL",
+      "amount": -20.11,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "HEALTH"
+    },
+    {
+      "id": "pt-073",
+      "language": "pt",
+      "description": "PNEUS E ALINHAMENTO",
+      "amount": -243.0,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "VEHICLE_MAINTENANCE"
+    },
+    {
+      "id": "pt-074",
+      "language": "pt",
+      "description": "SERVICOS MUNICIPALIZADOS AGUA",
+      "amount": -25.81,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "WATER"
+    },
+    {
+      "id": "pt-075",
+      "language": "pt",
+      "description": "Passe navegante mensal",
+      "amount": -28.72,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "PUBLIC_TRANSPORT"
+    },
+    {
+      "id": "pt-076",
+      "language": "pt",
+      "description": "TASCA DO ZE",
+      "amount": -49.24,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "CAFE_RESTAURANTS_BARS"
+    },
+    {
+      "id": "pt-077",
+      "language": "pt",
+      "description": "ORDENADO MENSAL",
+      "amount": 3163.3,
+      "currency": "EUR",
+      "direction": "credit",
+      "expected": "SALARY"
+    },
+    {
+      "id": "pt-078",
+      "language": "pt",
+      "description": "Mercearia do Bairro",
+      "amount": -109.2,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "GROCERIES"
+    },
+    {
+      "id": "pt-079",
+      "language": "pt",
+      "description": "Curso de inglês escola",
+      "amount": -232.05,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "EDUCATION"
+    },
+    {
+      "id": "pt-080",
+      "language": "pt",
+      "description": "MINIPRECO RUA NOVA",
+      "amount": -29.6,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "GROCERIES"
+    },
+    {
+      "id": "pt-081",
+      "language": "pt",
+      "description": "Museu de arte entrada",
+      "amount": -90.36,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "HOBBIES_AND_LEISURE"
+    },
+    {
+      "id": "pt-082",
+      "language": "pt",
+      "description": "METRO LISBOA BILHETE",
+      "amount": -18.7,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "PUBLIC_TRANSPORT"
+    },
+    {
+      "id": "pt-083",
+      "language": "pt",
+      "description": "CP COMBOIOS PORTUGAL",
+      "amount": -44.86,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "PUBLIC_TRANSPORT"
+    },
+    {
+      "id": "pt-084",
+      "language": "pt",
+      "description": "UBER EATS LISBOA",
+      "amount": -27.1,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "FOOD_DELIVERY"
+    },
+    {
+      "id": "pt-085",
+      "language": "pt",
+      "description": "Aulas de natação piscina",
+      "amount": -45.52,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "GYM_AND_SPORTS"
+    },
+    {
+      "id": "pt-086",
+      "language": "pt",
+      "description": "Quota condomínio trimestre",
+      "amount": -33.21,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "CONDOMINIUM"
+    },
+    {
+      "id": "pt-087",
+      "language": "pt",
+      "description": "GAS NATURAL FATURA",
+      "amount": -34.84,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "GAS"
+    },
+    {
+      "id": "pt-088",
+      "language": "pt",
+      "description": "Salário maio",
+      "amount": 1725.23,
+      "currency": "EUR",
+      "direction": "credit",
+      "expected": "SALARY"
+    },
+    {
+      "id": "pt-089",
+      "language": "pt",
+      "description": "NOS COMUNICACOES FATURA",
+      "amount": -67.23,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "TV_PHONE_INTERNET"
+    },
+    {
+      "id": "pt-090",
+      "language": "pt",
+      "description": "Diversos",
+      "amount": -5,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "abstain"
+    },
+    {
+      "id": "pt-091",
+      "language": "pt",
+      "description": "Seguro carro prémio mensal",
+      "amount": -84.18,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "VEHICLE_INSURANCE"
+    },
+    {
+      "id": "pt-092",
+      "language": "pt",
+      "description": "Fatura água abril",
+      "amount": -30.34,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "WATER"
+    },
+    {
+      "id": "pt-093",
+      "language": "pt",
+      "description": "Água e saneamento",
+      "amount": -52.85,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "WATER"
+    },
+    {
+      "id": "pt-094",
+      "language": "pt",
+      "description": "LOJA FERRAGENS SILVA",
+      "amount": -137.61,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "MAINTENANCE"
+    },
+    {
+      "id": "pt-095",
+      "language": "pt",
+      "description": "Bomba gasolina Prio",
+      "amount": -46.18,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "FUEL"
+    },
+    {
+      "id": "pt-096",
+      "language": "pt",
+      "description": "GLOVO ENTREGA",
+      "merchant": "Glovo",
+      "amount": -16.8,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "FOOD_DELIVERY"
+    },
+    {
+      "id": "pt-097",
+      "language": "pt",
+      "description": "CINEMA NOS BILHETES",
+      "amount": -73.86,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "HOBBIES_AND_LEISURE"
+    },
+    {
+      "id": "pt-098",
+      "language": "pt",
+      "description": "Fatura gás canalizado",
+      "amount": -72.8,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "GAS"
+    },
+    {
+      "id": "pt-099",
+      "language": "pt",
+      "description": "RENDA APARTAMENTO SENHORIO",
+      "amount": -933.4,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "RENT_MORTGAGE"
+    },
+    {
+      "id": "pt-100",
+      "language": "pt",
+      "description": "Gás natural casa",
+      "amount": -45.48,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "GAS"
+    },
+    {
+      "id": "es-001",
+      "language": "es",
+      "description": "Abono recibido",
+      "amount": 70,
+      "currency": "EUR",
+      "direction": "credit",
+      "expected": "abstain"
+    },
+    {
+      "id": "es-002",
+      "language": "es",
+      "description": "FACTURA LUZ ELECTRICA SUR",
+      "amount": -104.28,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "ELECTRICITY"
+    },
+    {
+      "id": "es-003",
+      "language": "es",
+      "description": "Consulta medica privada",
+      "amount": -89.16,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "HEALTH"
+    },
+    {
+      "id": "es-004",
+      "language": "es",
+      "description": "Pago hipoteca mensual",
+      "amount": -659.36,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "RENT_MORTGAGE"
+    },
+    {
+      "id": "es-005",
+      "language": "es",
+      "description": "CEPSA GASOLINERA",
+      "amount": -54.72,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "FUEL"
+    },
+    {
+      "id": "es-006",
+      "language": "es",
+      "description": "Abono transporte mensual",
+      "amount": -8.36,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "PUBLIC_TRANSPORT"
+    },
+    {
+      "id": "es-007",
+      "language": "es",
+      "description": "SEGURO COCHE MENSUAL",
+      "amount": -52.26,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "VEHICLE_INSURANCE"
+    },
+    {
+      "id": "es-008",
+      "language": "es",
+      "description": "NOMINA EMPRESA EJEMPLO SL",
+      "amount": 2913.84,
+      "currency": "EUR",
+      "direction": "credit",
+      "expected": "SALARY"
+    },
+    {
+      "id": "es-009",
+      "language": "es",
+      "description": "Libreria La Pagina",
+      "amount": -84.15,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "HOBBIES_AND_LEISURE"
+    },
+    {
+      "id": "es-010",
+      "language": "es",
+      "description": "ENERGIA LUZ HOGAR",
+      "amount": -37.67,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "ELECTRICITY"
+    },
+    {
+      "id": "es-011",
+      "language": "es",
+      "description": "DECATHLON DEPORTES",
+      "amount": -63.52,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "GYM_AND_SPORTS"
+    },
+    {
+      "id": "es-012",
+      "language": "es",
+      "description": "Alquiler coche aeropuerto",
+      "amount": -607.69,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "TRAVEL"
+    },
+    {
+      "id": "es-013",
+      "language": "es",
+      "description": "LIBROS DE TEXTO",
+      "amount": -367.74,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "EDUCATION"
+    },
+    {
+      "id": "es-014",
+      "language": "es",
+      "description": "COMPRA",
+      "amount": -16.75,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "abstain"
+    },
+    {
+      "id": "es-015",
+      "language": "es",
+      "description": "NETFLIX SUSCRIPCION",
+      "merchant": "Netflix",
+      "amount": -13.07,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "STREAMING_SERVICES"
+    },
+    {
+      "id": "es-016",
+      "language": "es",
+      "description": "ATM WITHDRAWAL CAJERO CENTRO",
+      "amount": -50,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "abstain"
+    },
+    {
+      "id": "es-017",
+      "language": "es",
+      "description": "Salario mensual",
+      "amount": 1241.24,
+      "currency": "EUR",
+      "direction": "credit",
+      "expected": "SALARY"
+    },
+    {
+      "id": "es-018",
+      "language": "es",
+      "description": "AGENCIA VIAJES HORIZONTE",
+      "amount": -126.55,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "TRAVEL"
+    },
+    {
+      "id": "es-019",
+      "language": "es",
+      "description": "TABERNA LOS AMIGOS",
+      "amount": -71.65,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "CAFE_RESTAURANTS_BARS"
+    },
+    {
+      "id": "es-020",
+      "language": "es",
+      "description": "Hotel Playa reserva",
+      "amount": -717.44,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "TRAVEL"
+    },
+    {
+      "id": "es-021",
+      "language": "es",
+      "description": "Suministro agua vivienda",
+      "amount": -45.62,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "WATER"
+    },
+    {
+      "id": "es-022",
+      "language": "es",
+      "description": "BAR LA ESQUINA",
+      "amount": -54.14,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "CAFE_RESTAURANTS_BARS"
+    },
+    {
+      "id": "es-023",
+      "language": "es",
+      "description": "ITV inspección vehículo",
+      "amount": -369.91,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "VEHICLE_MAINTENANCE"
+    },
+    {
+      "id": "es-024",
+      "language": "es",
+      "description": "ENTRADAS CONCIERTO ESTADIO",
+      "amount": -45.76,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "HOBBIES_AND_LEISURE"
+    },
+    {
+      "id": "es-025",
+      "language": "es",
+      "description": "Pago online",
+      "amount": -22,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "abstain"
+    },
+    {
+      "id": "es-026",
+      "language": "es",
+      "description": "GLOVO PEDIDO",
+      "merchant": "Glovo",
+      "amount": -27.57,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "FOOD_DELIVERY"
+    },
+    {
+      "id": "es-027",
+      "language": "es",
+      "description": "SUPERMERCADO EL ARBOL",
+      "amount": -107.31,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "GROCERIES"
+    },
+    {
+      "id": "es-028",
+      "language": "es",
+      "description": "CINES YELMO ENTRADAS",
+      "amount": -18.96,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "HOBBIES_AND_LEISURE"
+    },
+    {
+      "id": "es-029",
+      "language": "es",
+      "description": "CAFETERIA EL SOL",
+      "amount": -33.72,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "CAFE_RESTAURANTS_BARS"
+    },
+    {
+      "id": "es-030",
+      "language": "es",
+      "description": "AGUAS DEL VALLE FACTURA",
+      "amount": -34.61,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "WATER"
+    },
+    {
+      "id": "es-031",
+      "language": "es",
+      "description": "UBER EATS MADRID",
+      "amount": -30.56,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "FOOD_DELIVERY"
+    },
+    {
+      "id": "es-032",
+      "language": "es",
+      "description": "Recibo gas mayo",
+      "amount": -88.47,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "GAS"
+    },
+    {
+      "id": "es-033",
+      "language": "es",
+      "description": "Nómina mayo",
+      "amount": 1249.65,
+      "currency": "EUR",
+      "direction": "credit",
+      "expected": "SALARY"
+    },
+    {
+      "id": "es-034",
+      "language": "es",
+      "description": "Comunidad vecinos calle Mayor",
+      "amount": -77.48,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "CONDOMINIUM"
+    },
+    {
+      "id": "es-035",
+      "language": "es",
+      "description": "Cerrajero Llaves Rápidas",
+      "amount": -205.52,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "MAINTENANCE"
+    },
+    {
+      "id": "es-036",
+      "language": "es",
+      "description": "Fontanero reparacion grifo",
+      "amount": -186.51,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "MAINTENANCE"
+    },
+    {
+      "id": "es-037",
+      "language": "es",
+      "description": "FARMACIA LA SALUD",
+      "amount": -79.3,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "HEALTH"
+    },
+    {
+      "id": "es-038",
+      "language": "es",
+      "description": "TRANSFERENCIA INMEDIATA",
+      "amount": -40,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "abstain"
+    },
+    {
+      "id": "es-039",
+      "language": "es",
+      "description": "RECIBO ALQUILER INMOBILIARIA SOL",
+      "amount": -519.74,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "RENT_MORTGAGE"
+    },
+    {
+      "id": "es-040",
+      "language": "es",
+      "description": "Cuota colegio mensual",
+      "amount": -175.6,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "EDUCATION"
+    },
+    {
+      "id": "es-041",
+      "language": "es",
+      "description": "MATRICULA UNIVERSIDAD",
+      "amount": -248.13,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "EDUCATION"
+    },
+    {
+      "id": "es-042",
+      "language": "es",
+      "description": "GIMNASIO FORMA CUOTA",
+      "amount": -33.24,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "GYM_AND_SPORTS"
+    },
+    {
+      "id": "es-043",
+      "language": "es",
+      "description": "Recibo agua bimestral",
+      "amount": -30.27,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "WATER"
+    },
+    {
+      "id": "es-044",
+      "language": "es",
+      "description": "Fruteria La Huerta",
+      "amount": -68.22,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "GROCERIES"
+    },
+    {
+      "id": "es-045",
+      "language": "es",
+      "description": "Gastos comunidad trimestre",
+      "amount": -105.41,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "CONDOMINIUM"
+    },
+    {
+      "id": "es-046",
+      "language": "es",
+      "description": "Comida a domicilio Pizzeria Roma",
+      "amount": -34.27,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "FOOD_DELIVERY"
+    },
+    {
+      "id": "es-047",
+      "language": "es",
+      "description": "RECIBO COMUNIDAD EDIFICIO PINAR",
+      "amount": -115.18,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "CONDOMINIUM"
+    },
+    {
+      "id": "es-048",
+      "language": "es",
+      "description": "DEVOLUCION",
+      "amount": 11,
+      "currency": "EUR",
+      "direction": "credit",
+      "expected": "abstain"
+    },
+    {
+      "id": "es-049",
+      "language": "es",
+      "description": "TRANSFERENCIA A MARIA LOPEZ",
+      "amount": -120,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "abstain"
+    },
+    {
+      "id": "es-050",
+      "language": "es",
+      "description": "TRANSFER A CUENTA AHORRO",
+      "amount": -300,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "abstain"
+    },
+    {
+      "id": "es-051",
+      "language": "es",
+      "description": "BOMBONA BUTANO REPARTO",
+      "amount": -70.89,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "GAS"
+    },
+    {
+      "id": "es-052",
+      "language": "es",
+      "description": "Póliza seguro vehículo",
+      "amount": -29.46,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "VEHICLE_INSURANCE"
+    },
+    {
+      "id": "es-053",
+      "language": "es",
+      "description": "Just Eat pedido domicilio",
+      "amount": -12.09,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "FOOD_DELIVERY"
+    },
+    {
+      "id": "es-054",
+      "language": "es",
+      "description": "Club de padel cuota",
+      "amount": -65.83,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "GYM_AND_SPORTS"
+    },
+    {
+      "id": "es-055",
+      "language": "es",
+      "description": "TRF RECIBIDA PABLO",
+      "amount": 60,
+      "currency": "EUR",
+      "direction": "credit",
+      "expected": "abstain"
+    },
+    {
+      "id": "es-056",
+      "language": "es",
+      "description": "Disney Plus cuota",
+      "amount": -5.38,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "STREAMING_SERVICES"
+    },
+    {
+      "id": "es-057",
+      "language": "es",
+      "description": "Alquiler piso junio",
+      "amount": -1216.45,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "RENT_MORTGAGE"
+    },
+    {
+      "id": "es-058",
+      "language": "es",
+      "description": "GAS NATURAL HOGAR",
+      "amount": -20.32,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "GAS"
+    },
+    {
+      "id": "es-059",
+      "language": "es",
+      "description": "PRIME VIDEO MENSUAL",
+      "amount": -14.4,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "STREAMING_SERVICES"
+    },
+    {
+      "id": "es-060",
+      "language": "es",
+      "description": "MUTUA AUTOMOVILISTAS",
+      "amount": -35.19,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "VEHICLE_INSURANCE"
+    },
+    {
+      "id": "es-061",
+      "language": "es",
+      "description": "METRO MADRID BILLETE",
+      "amount": -20.83,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "PUBLIC_TRANSPORT"
+    },
+    {
+      "id": "es-062",
+      "language": "es",
+      "description": "Restaurante Casa Pepe",
+      "amount": -28.19,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "CAFE_RESTAURANTS_BARS"
+    },
+    {
+      "id": "es-063",
+      "language": "es",
+      "description": "PAGO",
+      "amount": -29,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "abstain"
+    },
+    {
+      "id": "es-064",
+      "language": "es",
+      "description": "CARREFOUR MARKET CENTRO",
+      "amount": -115.41,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "GROCERIES"
+    },
+    {
+      "id": "es-065",
+      "language": "es",
+      "description": "CANAL AGUAS MUNICIPAL",
+      "amount": -59.38,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "WATER"
+    },
+    {
+      "id": "es-066",
+      "language": "es",
+      "description": "Telefono movil mensual",
+      "amount": -51.53,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "TV_PHONE_INTERNET"
+    },
+    {
+      "id": "es-067",
+      "language": "es",
+      "description": "VUELING BILLETE AVION",
+      "amount": -401.23,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "TRAVEL"
+    },
+    {
+      "id": "es-068",
+      "language": "es",
+      "description": "Spotify suscripción",
+      "amount": -11.88,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "STREAMING_SERVICES"
+    },
+    {
+      "id": "es-069",
+      "language": "es",
+      "description": "OPTICA VISTA CLARA",
+      "amount": -102.66,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "HEALTH"
+    },
+    {
+      "id": "es-070",
+      "language": "es",
+      "description": "Academia de idiomas",
+      "amount": -416.08,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "EDUCATION"
+    },
+    {
+      "id": "es-071",
+      "language": "es",
+      "description": "Suministro eléctrico vivienda",
+      "amount": -85.57,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "ELECTRICITY"
+    },
+    {
+      "id": "es-072",
+      "language": "es",
+      "description": "TALLER MECANICO HERMANOS GIL",
+      "amount": -215.46,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "VEHICLE_MAINTENANCE"
+    },
+    {
+      "id": "es-073",
+      "language": "es",
+      "description": "REPSOL ESTACION SERVICIO",
+      "merchant": "Repsol",
+      "amount": -77.59,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "FUEL"
+    },
+    {
+      "id": "es-074",
+      "language": "es",
+      "description": "AUTOBUSES URBANOS EMT",
+      "amount": -4.75,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "PUBLIC_TRANSPORT"
+    },
+    {
+      "id": "es-075",
+      "language": "es",
+      "description": "INTERNET Y TV HOGAR",
+      "amount": -22.61,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "TV_PHONE_INTERNET"
+    },
+    {
+      "id": "es-076",
+      "language": "es",
+      "description": "LEVANTAMENTO CAJERO",
+      "amount": -80,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "abstain"
+    },
+    {
+      "id": "es-077",
+      "language": "es",
+      "description": "Varios",
+      "amount": -6,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "abstain"
+    },
+    {
+      "id": "es-078",
+      "language": "es",
+      "description": "BRICOLAJE HOGAR NORTE",
+      "amount": -192.37,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "MAINTENANCE"
+    },
+    {
+      "id": "es-079",
+      "language": "es",
+      "description": "Clinica dental Sonrisa",
+      "amount": -6.79,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "HEALTH"
+    },
+    {
+      "id": "es-080",
+      "language": "es",
+      "description": "NEUMATICOS RAPIDOS",
+      "amount": -371.55,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "VEHICLE_MAINTENANCE"
+    },
+    {
+      "id": "es-081",
+      "language": "es",
+      "description": "Recibo fibra óptica",
+      "amount": -68.86,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "TV_PHONE_INTERNET"
+    },
+    {
+      "id": "es-082",
+      "language": "es",
+      "description": "Museo entrada general",
+      "amount": -48.09,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "HOBBIES_AND_LEISURE"
+    },
+    {
+      "id": "es-083",
+      "language": "es",
+      "description": "CUOTA COMUNIDAD PROPIETARIOS",
+      "amount": -93.12,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "CONDOMINIUM"
+    },
+    {
+      "id": "es-084",
+      "language": "es",
+      "description": "MERCADONA VALENCIA",
+      "merchant": "Mercadona",
+      "amount": -73.46,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "GROCERIES"
+    },
+    {
+      "id": "es-085",
+      "language": "es",
+      "description": "FACTURA MOVISTAR FIBRA",
+      "amount": -79.64,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "TV_PHONE_INTERNET"
+    },
+    {
+      "id": "es-086",
+      "language": "es",
+      "description": "Transferencia a compañero de piso",
+      "amount": -275,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "abstain"
+    },
+    {
+      "id": "es-087",
+      "language": "es",
+      "description": "Recibo electricidad mayo",
+      "amount": -98.41,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "ELECTRICITY"
+    },
+    {
+      "id": "es-088",
+      "language": "es",
+      "description": "Clases de yoga estudio",
+      "amount": -64.13,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "GYM_AND_SPORTS"
+    },
+    {
+      "id": "es-089",
+      "language": "es",
+      "description": "Factura gas natural",
+      "amount": -30.42,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "GAS"
+    },
+    {
+      "id": "es-090",
+      "language": "es",
+      "description": "Revision coche concesionario",
+      "amount": -206.84,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "VEHICLE_MAINTENANCE"
+    },
+    {
+      "id": "es-091",
+      "language": "es",
+      "description": "FERRETERIA EL MARTILLO",
+      "amount": -36.7,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "MAINTENANCE"
+    },
+    {
+      "id": "es-092",
+      "language": "es",
+      "description": "Seguro automóvil prima",
+      "amount": -52.02,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "VEHICLE_INSURANCE"
+    },
+    {
+      "id": "es-093",
+      "language": "es",
+      "description": "CARGO",
+      "amount": -13,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "abstain"
+    },
+    {
+      "id": "es-094",
+      "language": "es",
+      "description": "Adeudo domiciliado",
+      "amount": -35,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "abstain"
+    },
+    {
+      "id": "es-095",
+      "language": "es",
+      "description": "ABONO NOMINA",
+      "amount": 2776.89,
+      "currency": "EUR",
+      "direction": "credit",
+      "expected": "SALARY"
+    },
+    {
+      "id": "es-096",
+      "language": "es",
+      "description": "RENFE CERCANIAS",
+      "amount": -27.94,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "PUBLIC_TRANSPORT"
+    },
+    {
+      "id": "es-097",
+      "language": "es",
+      "description": "Gasolinera Ballenoil",
+      "amount": -59.37,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "FUEL"
+    },
+    {
+      "id": "es-098",
+      "language": "es",
+      "description": "CUOTA HIPOTECA VIVIENDA",
+      "amount": -794.97,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "RENT_MORTGAGE"
+    },
+    {
+      "id": "es-099",
+      "language": "es",
+      "description": "Transferencia recibida",
+      "amount": 250,
+      "currency": "EUR",
+      "direction": "credit",
+      "expected": "abstain"
+    },
+    {
+      "id": "es-100",
+      "language": "es",
+      "description": "COMBUSTIBLE GASOLEO A",
+      "amount": -37.79,
+      "currency": "EUR",
+      "direction": "debit",
+      "expected": "FUEL"
+    }
+  ]
+}

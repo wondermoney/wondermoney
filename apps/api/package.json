@@ -16,6 +16,7 @@
     "dev": "tsx watch --clear-screen=false src/server.ts",
     "devi": "infisical run -- pnpm dev",
     "devs": "infisical run --env=staging -- pnpm dev",
+    "eval": "NODE_ENV=development NODE_OPTIONS='--import=tsx' node src/evals/run-evals.ts --out evals/reports",
     "eval:bayes": "NODE_ENV=development NODE_OPTIONS='--import=tsx' node src/database/scripts/eval-bayes.ts",
     "fx:reconvert": "NODE_ENV=production node dist/database/scripts/fx-reconvert.js",
     "fx:reconvert:dev": "NODE_ENV=development tsx src/database/scripts/fx-reconvert.ts",

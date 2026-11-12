@@ -149,3 +149,6 @@ src/database/entity/*.d.ts.map
 
 # Vitest blob reports (CI shards)
 .vitest/
+
+# LLM eval reports (pnpm eval)
+evals/reports/

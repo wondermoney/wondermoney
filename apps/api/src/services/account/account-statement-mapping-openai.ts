@@ -1,7 +1,7 @@
 import { jsonSchema, type JSONSchema7 } from 'ai';
 import { z } from 'zod';
 
-import { completeJson } from '@service/ai/complete-json';
+import { completeJson, type CompleteJsonTokens } from '@service/ai/complete-json';
 
 import type { StatementColumnField, StatementColumns } from './account-statement-mapping.schema';
 import type { StatementColumnProfile } from './account-statement-reader';
@@ -52,8 +52,15 @@ const SYSTEM_PROMPT = [
   'spendingIsPositive: true only when purchases are written as positive amounts and payments as negative, as on some credit-card statements.',
 ].join(' ');
 
-export async function requestStatementMapping(input: StatementMappingPromptInput): Promise<{ columns: Partial<StatementColumns>; headerRowIndex: number; spendingIsPositive: boolean }> {
-  const { object } = await completeJson({
+export interface StatementMappingGuess {
+  columns: Partial<StatementColumns>;
+  headerRowIndex: number;
+  spendingIsPositive: boolean;
+  tokens: CompleteJsonTokens;
+}
+
+export async function requestStatementMapping(input: StatementMappingPromptInput): Promise<StatementMappingGuess> {
+  const { object, tokens } = await completeJson({
     feature: 'csvMapping',
     schema: jsonSchema(STATEMENT_MAPPING_JSON_SCHEMA),
     schemaName: 'statement_column_mapping',
@@ -74,7 +81,7 @@ export async function requestStatementMapping(input: StatementMappingPromptInput
     const index = parsed.columns[field];
     if (index !== null && index < input.columns.length) columns[field] = index;
   }
-  return { columns, headerRowIndex: parsed.headerRowIndex, spendingIsPositive: parsed.spendingIsPositive };
+  return { columns, headerRowIndex: parsed.headerRowIndex, spendingIsPositive: parsed.spendingIsPositive, tokens };
 }
 
 function sanitize(input: StatementMappingPromptInput): StatementMappingPromptInput {

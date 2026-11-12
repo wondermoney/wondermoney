@@ -1,0 +1,16 @@
+{
+  "categorization": {
+    "llm": {
+      "min": { "accuracy": 0.6 },
+      "max": { "errorRate": 0.05, "wrongOnUncategorisableRate": 0.15 }
+    },
+    "bayes": {
+      "min": { "precision": 0.8 },
+      "max": { "wrongOnUncategorisableRate": 0.15 }
+    }
+  },
+  "csvMapping": {
+    "min": { "exactMatchRate": 0.6, "fieldAccuracy": 0.85 },
+    "max": { "errorRate": 0.1 }
+  }
+}

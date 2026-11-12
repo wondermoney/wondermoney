@@ -512,3 +512,11 @@ function readAmount(cell: (column: number | undefined) => string, mapping: State
 export function statementRowShapes(grid: StatementGrid, count = 15): string[] {
   return grid.slice(0, count).map((row) => row.map((cell) => (cell === '' ? '_' : isDateLike(cell) ? 'D' : isNumberLike(cell) ? 'N' : 'T')).join(''));
 }
+
+/**
+ * What the column-mapping model is shown for a file: each column's profile and the shape of the
+ * first rows, never a value from the file (`requestStatementMapping`).
+ */
+export function statementMappingPromptInput(grid: StatementGrid, headerRowIndex: number): { columns: StatementColumnProfile[]; rowShapes: string[] } {
+  return { columns: profileColumns(grid, headerRowIndex), rowShapes: statementRowShapes(grid) };
+}

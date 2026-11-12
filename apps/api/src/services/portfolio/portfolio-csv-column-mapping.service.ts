@@ -14,7 +14,7 @@ import logger from '@utils/logger';
 import { requestPortfolioColumnMappingSuggestion, sanitizePortfolioColumnMappingPromptInput } from './portfolio-csv-column-mapping-openai';
 import { AUTOMATIC_COLUMN_MAPPING_UNAVAILABLE_WARNING } from './portfolio-csv-column-mapping-warning';
 import { type PortfolioColumnMapping, portfolioColumnMappingFields, type PortfolioColumnMappingSuggestion, portfolioColumnMappingSuggestionSchema, type PortfolioColumnMappingTransformations, type PortfolioCsvLayout, type PortfolioImportDerivedValues, type PortfolioImportFixedValues, validateConfirmedPortfolioColumnMapping } from './portfolio-csv-column-mapping.schema';
-import { generatePortfolioImportInternalTransactionId, parseMappedNumber } from './portfolio-csv-column-mapping.utils';
+import { buildPortfolioColumnMappingPromptInput, generatePortfolioImportInternalTransactionId, inferEmbeddedCurrency, normalizePortfolioColumnMappingSuggestion, parseMappedNumber } from './portfolio-csv-column-mapping.utils';
 import { applyPortfolioCsvLayout, normalizeCsvHeader, parseRawCsvRowsForLayout } from './portfolio-csv-layout.utils';
 import type { PortfolioImportAssetResolutionResult } from './portfolio-import-asset-resolution.service';
 import portfolioImportParserSpecService, { buildPortfolioImportParserSpecPayload, hashPortfolioImportParserSpecPayload, parsePortfolioImportParserSpecPayload, resolveSpecColumnMapping } from './portfolio-import-parser-spec.service';
@@ -154,12 +154,11 @@ class PortfolioCsvColumnMappingService {
 
     const { rawRows, rows } = await parseColumnMappingSuggestionRows({ bucket: session.s3Bucket, key: session.s3Key }, deps);
     const headers = rows[0] ? Object.keys(rows[0]) : [];
-    const sampleRows = rows.slice(0, 5);
     for (const candidate of buildCandidateLayouts(rawRows, headers)) {
       const activeSpec = await portfolioImportParserSpecService.findActiveSpecForShape({ appuser: input.appuser, broker: session.financialBrokerKey, headers: candidate.headers, layout: candidate.layout, tenant: input.tenant });
       const specSuggestion = await this.buildValidatedSpecSuggestion({ activeSpec, headers: candidate.headers });
       if (specSuggestion) {
-        const normalizedSuggestion = normalizeMappingSuggestion(specSuggestion.suggestion, candidate.headers);
+        const normalizedSuggestion = normalizePortfolioColumnMappingSuggestion(specSuggestion.suggestion, candidate.headers);
         session.columnMappingJson = { parserSpecContentHash: activeSpec?.contentHash, parserSpecKey: specSuggestion.parserSpecKey, source: 'spec', suggestion: normalizedSuggestion, version: 1 };
         await DI.em.persist(session).flush();
         return { columnMapping: normalizedSuggestion, importSessionId: session.portfolioImportSessionKey, mappingSource: 'saved_spec', status: session.status };
@@ -182,13 +181,9 @@ class PortfolioCsvColumnMappingService {
     if (input.spendModelCall && !(await input.spendModelCall())) return leaveToUser();
 
     try {
-      const promptInput = sanitizePortfolioColumnMappingPromptInput({
-        headers,
-        rowShapes: rawRows.slice(0, 12).map((row) => ({ cellCount: row.length, emptyCellCount: row.filter((cell) => cell.trim() === '').length, nonEmptyCellCount: row.filter((cell) => cell.trim() !== '').length })),
-        sampleRows: sampleRows.map((row, rowIndex) => ({ emptyCellCount: Object.values(row).filter((value) => !value.trim()).length, hasNumericCells: Object.values(row).some((value) => /\d/.test(value)), hasTextCells: Object.values(row).some((value) => /[A-Z]/i.test(value)), headerCount: headers.length, nonEmptyCellCount: Object.values(row).filter((value) => value.trim()).length, rowIndex })),
-      });
+      const promptInput = sanitizePortfolioColumnMappingPromptInput(buildPortfolioColumnMappingPromptInput({ rawRows, rows }));
       const { suggestion } = await requestPortfolioColumnMappingSuggestion(promptInput);
-      const normalizedSuggestion = normalizeMappingSuggestion(suggestion, headers);
+      const normalizedSuggestion = normalizePortfolioColumnMappingSuggestion(suggestion, headers);
       session.columnMappingJson = { source: 'llm', suggestion: normalizedSuggestion, version: 1 };
       await DI.em.persist(session).flush();
       return { columnMapping: normalizedSuggestion, importSessionId: session.portfolioImportSessionKey, mappingSource: 'llm', status: session.status };
@@ -493,36 +488,8 @@ async function defaultResolveImportSessionAssets(input: { importSessionId: numbe
   return service.resolveImportSessionAssets(input);
 }
 
-function inferEmbeddedCurrency(header: string) {
-  const match = /\b([A-Z]{3})\b/.exec(header.toUpperCase());
-  if (!match) return undefined;
-  if (!['value', 'total', 'price', 'amount'].some((term) => header.toLowerCase().includes(term))) return undefined;
-  return { currencyCode: match[1] };
-}
-
 function isPlainDefaultLayout(layout: PortfolioCsvLayout) {
   return layout.headerRowIndex === 0 && layout.dataStartRowIndex === 1 && layout.footerRowCount === undefined && layout.footerMatchers === undefined;
-}
-
-function normalizeMappingSuggestion(suggestion: PortfolioColumnMappingSuggestion, headers: string[]) {
-  const normalized = { ...suggestion, columnMapping: { ...suggestion.columnMapping }, derivedValues: { ...suggestion.derivedValues }, fixedValues: { ...suggestion.fixedValues }, warnings: [...suggestion.warnings] };
-  for (const key of portfolioColumnMappingFields) {
-    const mapped = normalized.columnMapping[key];
-    if (!mapped) continue;
-    const exact = headers.find((header) => header.trim().toLowerCase() === mapped.trim().toLowerCase());
-    if (exact) normalized.columnMapping[key] = exact;
-  }
-  const currencyMapping = normalized.columnMapping.currency;
-  if (currencyMapping) {
-    const inferred = inferEmbeddedCurrency(currencyMapping);
-    if (inferred) {
-      normalized.columnMapping.currency = undefined;
-      normalized.fixedValues.currency = inferred.currencyCode as PortfolioImportFixedValues['currency'];
-      normalized.transformations = { ...normalized.transformations };
-      if (!normalized.warnings.some((warning) => warning.includes('currency'))) normalized.warnings.push(`Currency appears embedded in value column; inferred ${inferred.currencyCode}`);
-    }
-  }
-  return normalized;
 }
 
 function normalizeSpreadsheetRows(rows: unknown[][]): string[][] {
