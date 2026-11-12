@@ -330,6 +330,46 @@
         }
       }
     },
+    "/v1/account/transaction-merchants/{merchantId}": {
+      "patch": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "merchantId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/v1/account/transaction-merchants/{merchantId}/logo": {
+      "get": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "merchantId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": ""
+          }
+        }
+      }
+    },
     "/v1/account/financial-institutions": {
       "get": {
         "description": "",

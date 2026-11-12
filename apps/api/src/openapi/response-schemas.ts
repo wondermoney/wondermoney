@@ -104,6 +104,18 @@ export const transactionSplitSchema = open('TransactionSplit', {
   splitKey: id,
 });
 
+export const transactionMerchantSchema = open('TransactionMerchant', {
+  transactionMerchantKey: id,
+  name: z.string(),
+  website: nullableString.openapi({ description: 'The merchant\u2019s https website, as the household set it.' }),
+  logoUrl: nullableString.openapi({ description: 'An https image the household set for the merchant.' }),
+  resolvedLogoUrl: nullableString.openapi({
+    description:
+      'The image to show: `logoUrl` when set, else this API\u2019s logo proxy for the website\u2019s domain when the instance configures `MERCHANT_LOGO_URL_TEMPLATE`, else null (show the initial).',
+  }),
+  transactionCount: z.number().int().optional(),
+});
+
 export const transactionSchema = open('Transaction', {
   accountKey: z.union([id, z.object({ accountKey: id })]).optional(),
   amount: money,
@@ -119,6 +131,7 @@ export const transactionSchema = open('Transaction', {
   tags: z.array(tagSchema).optional(),
   transactionDate: date,
   transactionKey: id,
+  transactionMerchantKey: transactionMerchantSchema.optional(),
   transactionType: z.string().optional(),
   transferDestination: z.record(z.string(), z.unknown()).nullable().optional(),
 });
@@ -141,11 +154,6 @@ export const transactionHistoryEntrySchema = open('TransactionHistoryEntry', {
   createdAt: dateTime,
   eventType: z.string(),
   source: z.string(),
-});
-
-export const transactionMerchantSchema = open('TransactionMerchant', {
-  name: z.string(),
-  transactionCount: z.number().int().optional(),
 });
 
 export const transactionReviewSummarySchema = open('TransactionReviewSummary', {
@@ -719,6 +727,7 @@ export const installmentSuggestionSchema = open('InstallmentSuggestion', {
     transactionKey: id,
   })),
 });
+export const imageFileSchema = z.string().openapi('ImageFile', { description: 'An image file', format: 'binary' });
 
 /** Response for a list endpoint: `{ [key]: Item[] }` plus any other fields. */
 export function listResponse<T extends z.ZodType>(refId: string, key: string, item: T) {

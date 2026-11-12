@@ -1,6 +1,7 @@
 import { z } from 'zod'
 
 import { parseRuleSuggestion } from '@/features/rules/rules-contract'
+import { transactionRowMerchantSchema } from '@/features/merchants/merchant-contract'
 import { tagSchema } from '@/features/tags/tags-contract'
 import { fxRateDateSchema, fxStatusSchema } from '@/lib/api/fx-status'
 import { readEndpoint, tolerantEnum, writeEndpoint } from '@/lib/api/runtime-schema'
@@ -91,7 +92,8 @@ const transactionBaseShape = {
   // How `appuserSettlementAmount` was converted; optional, an older API doesn't send them.
   fxStatus: fxStatusSchema,
   fxRateDate: fxRateDateSchema,
-  transactionMerchantKey: z.object({ name: z.string().min(1).max(200) }).nullable().optional(),
+  // The merchant with its logo fields (MerchantDto); a server from before logos sends only `{ name }`.
+  transactionMerchantKey: transactionRowMerchantSchema.nullable().optional(),
   reviewed: z.boolean(),
   hidden: z.boolean().optional(),
   // The bank sent the row, so it can be hidden but not deleted. Optional: an older API omits it.

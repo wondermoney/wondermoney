@@ -3,11 +3,13 @@
  * A pair that is not legible looks like a colour choice, not a bug — the dark
  * destructive pair shipped at 2.63:1, unreadable on every destructive button.
  * This measures every pair, the status text tokens, the focus ring and the
- * chart series on both theme halves.
+ * chart series and the merchant avatar fallbacks on both theme halves.
  */
 import assert from "node:assert/strict";
 
 import { test } from "vitest";
+
+import { MERCHANT_AVATAR_PALETTE } from "@/lib/merchant/merchant-avatar";
 
 import globals from "./globals.css?raw";
 
@@ -32,7 +34,9 @@ function oklchToSrgb(L: number, C: number, Hdeg: number): Rgb {
 
   return linear.map((c) => {
     const v = clamp01(c);
-    return clamp01(v <= 0.0031308 ? 12.92 * v : 1.055 * Math.pow(v, 1 / 2.4) - 0.055);
+    return clamp01(
+      v <= 0.0031308 ? 12.92 * v : 1.055 * Math.pow(v, 1 / 2.4) - 0.055,
+    );
   }) as Rgb;
 }
 
@@ -49,7 +53,9 @@ function hueOf(value: string): number {
 }
 
 function luminance(rgb: Rgb): number {
-  const [r, g, b] = rgb.map((c) => (c <= 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4)));
+  const [r, g, b] = rgb.map((c) =>
+    c <= 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4),
+  );
   return 0.2126 * r + 0.7152 * g + 0.0722 * b;
 }
 
@@ -74,7 +80,9 @@ function tokensIn(source: string, selector: string): Map<string, string> {
 
   const tokens = new Map<string, string>();
   for (const line of match[1].split("\n")) {
-    const decl = line.trim().match(/^(--[\w-]+|color-scheme)\s*:\s*([^;]+);\s*$/);
+    const decl = line
+      .trim()
+      .match(/^(--[\w-]+|color-scheme)\s*:\s*([^;]+);\s*$/);
     if (decl) tokens.set(decl[1], decl[2].trim());
   }
   return tokens;
@@ -107,10 +115,30 @@ const HOVER_ALPHA = 0.9;
 
 test("the contrast maths agrees with values measured in a real browser", () => {
   const fixtures: Array<[string, string, string, number]> = [
-    ["--ring light on canvas", "oklch(0.54 0.2 290)", "oklch(0.985 0.006 290)", 5.28],
-    ["--ring dark on canvas", "oklch(0.69 0.17 290)", "oklch(0.145 0.012 290)", 6.76],
-    ["--success-text light", "oklch(0.53 0.145 150)", "oklch(0.985 0.006 290)", 4.71],
-    ["--destructive-text dark", "oklch(0.68 0.19 27.325)", "oklch(0.145 0.012 290)", 6.31],
+    [
+      "--ring light on canvas",
+      "oklch(0.54 0.2 290)",
+      "oklch(0.985 0.006 290)",
+      5.28,
+    ],
+    [
+      "--ring dark on canvas",
+      "oklch(0.69 0.17 290)",
+      "oklch(0.145 0.012 290)",
+      6.76,
+    ],
+    [
+      "--success-text light",
+      "oklch(0.53 0.145 150)",
+      "oklch(0.985 0.006 290)",
+      4.71,
+    ],
+    [
+      "--destructive-text dark",
+      "oklch(0.68 0.19 27.325)",
+      "oklch(0.145 0.012 290)",
+      6.31,
+    ],
   ];
   for (const [label, fg, bg, expected] of fixtures) {
     const actual = contrast(parseOklch(fg), parseOklch(bg));
@@ -155,12 +183,18 @@ for (const [selector, label] of HALVES) {
       const raw = tokens.get(`--${role}-text`);
       assert.ok(raw, `--${role}-text should exist in \`${selector}\``);
       const measured = contrast(parseOklch(raw), canvas);
-      assert.ok(measured >= AA_NORMAL_TEXT, `--${role}-text on the ${label} canvas is ${measured.toFixed(2)}:1`);
+      assert.ok(
+        measured >= AA_NORMAL_TEXT,
+        `--${role}-text on the ${label} canvas is ${measured.toFixed(2)}:1`,
+      );
     }
 
     // A focus indicator needs 3:1 against what it is drawn on (WCAG 2.4.11).
     const ring = contrast(parseOklch(tokens.get("--ring")!), canvas);
-    assert.ok(ring >= 3, `--ring on the ${label} canvas is ${ring.toFixed(2)}:1`);
+    assert.ok(
+      ring >= 3,
+      `--ring on the ${label} canvas is ${ring.toFixed(2)}:1`,
+    );
   });
 }
 
@@ -174,11 +208,76 @@ test("a chart series keeps its hue when the theme changes", () => {
     const darkValue = dark.get(name);
     assert.ok(lightValue && darkValue, `${name} should exist in both halves`);
     const drift = Math.abs(hueOf(lightValue) - hueOf(darkValue));
-    assert.ok(drift <= 2, `${name} is hue ${hueOf(lightValue)} in light and ${hueOf(darkValue)} in dark`);
+    assert.ok(
+      drift <= 2,
+      `${name} is hue ${hueOf(lightValue)} in light and ${hueOf(darkValue)} in dark`,
+    );
   }
 });
 
 test("the modal scrim is the same in both themes", () => {
   // A scrim darkens what is behind it; inverting it paints a white wash over dark UI.
-  assert.equal(tokensIn(globals, ":root").get("--overlay"), tokensIn(globals, ':root[data-theme="dark"]').get("--overlay"));
+  assert.equal(
+    tokensIn(globals, ":root").get("--overlay"),
+    tokensIn(globals, ':root[data-theme="dark"]').get("--overlay"),
+  );
+});
+
+for (const [selector, label] of HALVES) {
+  test(`every merchant avatar initial is legible on its colour (${label})`, () => {
+    const tokens = tokensIn(globals, selector);
+
+    for (const { token } of MERCHANT_AVATAR_PALETTE) {
+      const fillRaw = tokens.get(`--${token}`);
+      const textRaw = tokens.get(`--${token}-foreground`);
+      assert.ok(
+        fillRaw && textRaw,
+        `--${token} and --${token}-foreground should exist in \`${selector}\``,
+      );
+      const measured = contrast(parseOklch(textRaw), parseOklch(fillRaw));
+      assert.ok(
+        measured >= AA_NORMAL_TEXT,
+        `--${token}-foreground on --${token} (${label}) is ${measured.toFixed(2)}:1`,
+      );
+    }
+  });
+}
+
+test("a merchant avatar keeps its hue when the theme changes", () => {
+  const light = tokensIn(globals, ":root");
+  const dark = tokensIn(globals, ':root[data-theme="dark"]');
+
+  for (const { token } of MERCHANT_AVATAR_PALETTE) {
+    for (const name of [`--${token}`, `--${token}-foreground`]) {
+      const lightValue = light.get(name);
+      const darkValue = dark.get(name);
+      assert.ok(lightValue && darkValue, `${name} should exist in both halves`);
+      assert.equal(
+        hueOf(lightValue),
+        hueOf(darkValue),
+        `${name} changes hue between themes`,
+      );
+    }
+  }
+});
+
+test("no merchant avatar borrows a reserved hue", () => {
+  // Green and red mean gain and loss; violet 290 is the brand accent (DESIGN.md).
+  const reserved: Array<[string, number, number]> = [
+    ["red", 0, 40],
+    ["red", 345, 360],
+    ["green", 130, 170],
+    ["violet", 270, 310],
+  ];
+  const light = tokensIn(globals, ":root");
+
+  for (const { token } of MERCHANT_AVATAR_PALETTE) {
+    const hue = hueOf(light.get(`--${token}`)!);
+    for (const [name, from, to] of reserved) {
+      assert.ok(
+        hue < from || hue > to,
+        `--${token} (hue ${hue}) sits in the ${name} band`,
+      );
+    }
+  }
 });

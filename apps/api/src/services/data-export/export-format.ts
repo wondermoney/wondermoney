@@ -60,8 +60,10 @@ export const EXPORT_FORMAT = 'wondermoney-export';
  * `data/loan-rate-periods.json` and the `VARIABLE` loan rate type. 1.3 added `securedAssetId` to
  * `data/loans.json`: the manual asset the loan finances, or null. 1.4 added `periodStartDay` to
  * `data/budgets.json`: the day of the month the budget's months start on, 1 to 28.
+ * 1.5 added `website` and `logoUrl` to `data/merchants.json`: the https addresses the household set for the
+ * merchant, or null.
  */
-export const EXPORT_FORMAT_VERSION = '1.4';
+export const EXPORT_FORMAT_VERSION = '1.5';
 
 export interface ExportManifest {
   appVersion: string;

@@ -16,6 +16,7 @@ import type { AmountsCompleteness } from "../completeness";
 import { transactionDateRangeParams } from "../date-range";
 import type { TransactionInstallment } from "../installment-plans/types";
 import type { Tag } from "../tag/useTags";
+import type { TransactionMerchant } from "./useTransactionMerchants";
 import type { TransactionSplitLine } from "./useTransactionSplits";
 
 /**
@@ -78,7 +79,8 @@ export interface Transaction extends FxFields {
    * older API does not send it.
    */
   installment?: TransactionInstallment | null;
-  transactionMerchantKey?: { name: string };
+  /** The row's merchant; absent when it has none. */
+  transactionMerchantKey?: TransactionMerchant;
   description: string;
   descriptionDirty: string;
   /** How many live attachments the row has; absent on an older API, read as zero. */

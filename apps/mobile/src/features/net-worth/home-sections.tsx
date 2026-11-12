@@ -13,7 +13,8 @@ import { Section } from '@/components/ui/section'
 import { Text } from '@/components/ui/text'
 import type { InsightDto, SpendingVsNormalFactsDto } from '@/features/insights/insights-contract'
 import type { LoanDto } from '@/features/loans/loans-contract'
-import { transactionMark } from '@/features/transactions/transaction-mark'
+import { MerchantAvatar } from '@/features/merchants/merchant-avatar'
+import { transactionMark, transactionMerchantAvatar } from '@/features/transactions/transaction-mark'
 import type { TransactionDto, TransactionReviewSummaryDto } from '@/features/transactions/transactions-contract'
 import { resolveFxState } from '@/lib/api/fx-status'
 import { transactionDisplayDate } from '@/lib/dates/transaction-date'
@@ -627,6 +628,11 @@ export function LatestTransactionsSection({ state, locale, onNavigate, onRetry }
         <List divided>
           {transactions.map((transaction) => {
             const category = transaction.appuserTransactionCategories[0]
+            const merchantAvatar = transactionMerchantAvatar({
+              synthetic: transaction.transactionKey < 0,
+              type: transaction.transactionTypeKey?.name,
+              merchant: transaction.transactionMerchantKey,
+            })
             const fx = resolveFxState({
               fxStatus: transaction.fxStatus,
               fxRateDate: transaction.fxRateDate,
@@ -643,7 +649,7 @@ export function LatestTransactionsSection({ state, locale, onNavigate, onRetry }
                 key={transaction.transactionKey}
                 density="comfortable"
                 figure={<Amount currency={currency} locale={locale} size="amountBase" value={amount} />}
-                leading={<EntityMark {...transactionMark({
+                leading={merchantAvatar ? <MerchantAvatar {...merchantAvatar} testID="home-transaction-merchant-avatar" /> : <EntityMark {...transactionMark({
                   synthetic: transaction.transactionKey < 0,
                   type: transaction.transactionTypeKey?.name,
                   category: category ? { name: category.icon, bgColor: category.bgColor, textColor: category.textColor } : null,

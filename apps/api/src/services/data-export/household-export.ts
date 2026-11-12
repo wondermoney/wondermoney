@@ -229,7 +229,7 @@ class HouseholdExport {
       where ${this.visibleTransaction('t')} ${limit(after, 't.transaction_key')}`)) this.transactions.add(row['k']);
 
     this.merchantRows = await rowsOf(db, sql`
-      select m.transaction_merchant_key, m.name, (m.tenant_key is null) as global
+      select m.transaction_merchant_key, m.name, m.website, m.logo_url, (m.tenant_key is null) as global
       from transaction_merchant m
       where m.deleted_at is null and (m.tenant_key = ${tenantKey} or m.tenant_key is null) and (
         m.transaction_merchant_key in (select t.transaction_merchant_key from "transaction" t where ${this.visibleTransaction('t')})
@@ -398,7 +398,7 @@ class HouseholdExport {
   }
 
   private *merchantJson() {
-    for (const row of this.merchantRows) yield { global: bool(row['global']), id: this.merchants.get(row['transaction_merchant_key']), name: str(row['name']) };
+    for (const row of this.merchantRows) yield { global: bool(row['global']), id: this.merchants.get(row['transaction_merchant_key']), logoUrl: str(row['logo_url']), name: str(row['name']), website: str(row['website']) };
   }
 
   private async* preferences() {

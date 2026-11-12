@@ -64,6 +64,7 @@ import {
 import { getInstallmentPlanRequestSchema, listInstallmentCommitmentsRequestSchema, listInstallmentPlansRequestSchema, listInstallmentSuggestionsRequestSchema } from '@validators/installment-plan';
 import { loanAdjustmentListSchema, loanIdParamSchema, loanProjectionSchema, loanRatePeriodsSchema, repaymentCandidatesSchema } from '@validators/loan';
 import { manualAssetParamsSchema } from '@validators/manual-asset';
+import { getTransactionMerchantLogoRequestSchema } from '@validators/merchant';
 import { netWorthHistoryQuerySchema } from '@validators/net-worth';
 import {
   getAggregateAllocationRequestSchema,
@@ -111,6 +112,7 @@ import {
   creditCardStatementDetailSchema,
   creditCardStatementSchema,
   csvFileSchema,
+  imageFileSchema,
   currencyRatesSchema,
   currencySchema,
   dividendIncomeSchema,
@@ -326,6 +328,15 @@ export const OPERATIONS: Record<string, OperationDefinition> = {
     summary: 'Search transaction merchants',
     request: getTransactionMerchantsRequestSchema,
     response: listResponse('TransactionMerchantList', 'transactionMerchants', transactionMerchantSchema),
+  },
+  'GET /v1/account/transaction-merchants/:merchantId/logo': {
+    tag: 'Transactions',
+    summary: 'Get a merchant’s logo',
+    description:
+      'The image `MERCHANT_LOGO_URL_TEMPLATE` finds for the merchant’s website, fetched by the server so the logo provider never sees the caller. 404 when the instance sets no template, the merchant has no website or its own `logoUrl`, or the provider has no image.',
+    request: getTransactionMerchantLogoRequestSchema,
+    response: imageFileSchema,
+    contentType: 'image/*',
   },
   'GET /v1/account/transaction-types': {
     tag: 'Transactions',

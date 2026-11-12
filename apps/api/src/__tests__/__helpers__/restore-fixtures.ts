@@ -100,6 +100,8 @@ export async function richHousehold(em: EntityManager) {
   em.create(TenantCategorySetting, { categoryKey: groceries, countsAsSpending: false, tenantKey: owner.tenant }, { partial: true });
 
   const shop = await addMerchant(em, owner, 'Corner Shop');
+  shop.website = 'https://corner-shop.example.com';
+  shop.logoUrl = 'https://cdn.example.com/corner-shop.png';
   const globalMerchant = em.create(TransactionMerchant, { name: 'Global Mart', normalizedName: 'global mart' }, { partial: true });
   em.create(AppuserMerchantCategory, { appuserKey: owner.appuser, categoryKey: organic, source: MerchantSource.MANUAL, transactionMerchantKey: shop }, { partial: true });
   const tag = em.create(Tag, { color: '#123456', createdByAppuserKey: owner.appuser, name: 'holiday', tenantKey: owner.tenant }, { partial: true });

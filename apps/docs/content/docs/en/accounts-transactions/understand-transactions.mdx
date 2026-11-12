@@ -49,6 +49,17 @@ WonderMoney asks first and says how many transactions will be deleted. A deleted
 
 Transactions your bank sent cannot be deleted, because the next sync would send them again. When a selection includes some, they are skipped and WonderMoney offers to hide them instead. A hidden transaction is left out of lists and totals; turn on **Show hidden transactions** in the filters to see it again.
 
+## Merchant logos
+
+A transaction with a merchant shows a small circle beside it in the list, the review inbox and the transaction's details. With no logo, the circle holds the merchant's first letter, and its color comes from the name, so the same merchant always has the same color.
+
+To give a merchant a logo on the web, open one of its transactions, and under **Merchant** choose **Edit merchant details**:
+
+- **Website**: the merchant's own site, such as `https://example.com`. If your instance has merchant logos turned on, WonderMoney fetches the logo for that site itself and shows it to you; the logo service never learns who you are. On an instance without them, the website is only stored.
+- **Logo URL**: the address of an image to use instead. It must start with `https://`. Everyone in your household who sees the merchant loads that image from its own address, so only use one from a site you trust.
+
+Leave a field empty to remove it. The merchant's details are shared with your household, and both of you can change them. The mobile app shows the same logos and initials in its lists. When an image cannot be loaded, the first letter is shown instead.
+
 ## Before you start
 
 Make sure the account has finished its first sync or has manual entries available. If you are reviewing a budget month, confirm the date range first.

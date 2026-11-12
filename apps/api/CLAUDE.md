@@ -185,6 +185,12 @@ Every integration is optional and fails closed: unconfigured, its feature report
   pg-boss jobs.
 - **File storage** (`services/storage/s3.ts`): AWS S3 or any S3-compatible store (`S3_ENDPOINT`,
   `S3_PUBLIC_ENDPOINT`, `S3_BUCKET`).
+- **Merchant logos** (`services/transaction/merchant-logo.ts`): off unless
+  `MERCHANT_LOGO_URL_TEMPLATE` (an https URL with `{domain}`) is set; then the API fetches the
+  logo for a merchant's website domain itself and serves it from
+  `GET /v1/account/transaction-merchants/:merchantId/logo`, so the provider never sees a viewer.
+  A household's own `logoUrl` wins and is loaded by the clients directly. Unset, nothing is
+  fetched and no logo URL is built.
 - Sentry and PostHog are optional too. Analytics outbox rows are written and delivered only
   with `ANALYTICS_OUTBOX_MODE=live` (`isAnalyticsOutboxEnabled`); the worker purges undelivered
   rows older than 30 days.

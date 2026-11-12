@@ -116,6 +116,11 @@ config:
   # ─── Market data (optional) ──────────────────────────────────────────────────
   # EODHD_API_KEY goes in `secrets`.
 
+  # ─── Merchant logos (optional, off by default) ───────────────────────────────
+  # An https logo service address with {domain}, such as https://logos.example.com/{domain}.png.
+  # The API fetches the logos itself, so the service never sees your users. Empty: no lookup.
+  MERCHANT_LOGO_URL_TEMPLATE: ""
+
   # ─── Contact form captcha (optional) ─────────────────────────────────────────
   # RECAPTCHA_SECRET_KEY goes in `secrets`; the web app gets it too.
   NEXT_PUBLIC_RECAPTCHA_SITE_KEY: ""

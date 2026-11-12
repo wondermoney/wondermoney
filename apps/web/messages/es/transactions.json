@@ -168,5 +168,21 @@
     "too-many-matching": "Acota los filtros para cambiar más de {max, number} transacciones a la vez.",
     "too-large-error": "Los filtros abarcan más de {max, number} transacciones. Acótalos e inténtalo de nuevo.",
     "clear-selection": "Borrar selección"
+  },
+  "transactionMerchant": {
+    "section-title": "Comercio",
+    "website": "Sitio web",
+    "logo-url": "URL del logotipo",
+    "logo": "Logotipo",
+    "logo-custom": "Personalizado",
+    "edit": "Editar datos del comercio",
+    "website-description": "El sitio del propio comercio, por ejemplo https://example.com.",
+    "logo-url-description": "La imagen de esta dirección la carga el navegador de cada persona de tu hogar que vea este comercio. Déjalo vacío para mostrar la inicial del comercio.",
+    "error-https": "Introduce una dirección completa que empiece por https://.",
+    "error-too-long": "Esta dirección es demasiado larga.",
+    "error-rejected": "No se aceptaron estas direcciones. Comprueba que cada una sea una dirección https:// completa.",
+    "error-not-editable": "Este comercio no se puede editar.",
+    "error-save-failed": "No se pudieron guardar los datos del comercio. Inténtalo de nuevo.",
+    "saved": "Datos del comercio guardados"
   }
 }

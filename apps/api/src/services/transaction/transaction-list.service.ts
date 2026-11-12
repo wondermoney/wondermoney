@@ -16,6 +16,7 @@ import { describeFx, type FxDisplay, UNKNOWN_FX } from '@service/currency/fx-dis
 import { completenessFromCounts } from '@service/reports/report-currency';
 import { compareTags, type TagDto, toTagDto } from '@service/tag/tag.service';
 import { type CategorySpendingFlags, loadCategorySpendingFlags } from '@service/transaction/category-spending';
+import { toMerchantDto } from '@service/transaction/merchant-logo';
 import { isBankSyncedTransaction } from '@service/transaction/transaction-deletion.service';
 import { SPLIT_LINE_POPULATE, type SplitLineDto, toSplitLineDtos } from '@service/transaction/transaction-split.service';
 import { buildTransactionWhere, getTransactionTotal, hasReportScope, type TransactionFilterInput, type TransactionViewer } from '@service/transaction/transaction-total.service';
@@ -228,6 +229,8 @@ function pickTransactionRow(transaction: Transaction, spendingFlags: CategorySpe
         countsAsSpending: spendingFlags.countsAsSpending(assignment.categoryKey),
         parentCategory: assignment.categoryKey.parentCategory?.categoryKey,
       })),
+      // The merchant with its website and the logo to show (`merchant-logo.ts`); absent without one.
+      transactionMerchantKey: transaction.transactionMerchantKey ? toMerchantDto(transaction.transactionMerchantKey) : undefined,
     },
     [
       'transactionKey',
@@ -246,7 +249,7 @@ function pickTransactionRow(transaction: Transaction, spendingFlags: CategorySpe
       'appuserCurrencyKey.code',
       'balance',
       'appuserCurrencyBalance',
-      'transactionMerchantKey.name',
+      'transactionMerchantKey',
       'hidden',
       'reviewed',
       'categorizationConfidence',

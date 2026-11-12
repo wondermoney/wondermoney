@@ -2,6 +2,8 @@ import { strFromU8, unzipSync } from 'fflate';
 import type { Response } from 'supertest';
 import { describe, expect, it, vi } from 'vitest';
 
+import { EXPORT_FORMAT_VERSION } from '@service/data-export/export-format';
+
 vi.hoisted(() => {
   process.env['CREDENTIAL_ENCRYPTION_KEY_V1'] = Buffer.alloc(32, 7).toString('base64');
 });
@@ -48,7 +50,7 @@ describe('/v1/user/me/exports', () => {
     expect(download.headers['content-type']).toBe('application/zip');
     expect(download.headers['content-disposition']).toMatch(/^attachment; filename="wondermoney-export-\d{4}-\d{2}-\d{2}\.zip"$/u);
     const entries = unzipSync(new Uint8Array(download.body as Buffer));
-    expect(JSON.parse(strFromU8(entries['manifest.json']!))).toEqual(expect.objectContaining({ format: 'wondermoney-export', formatVersion: '1.4' }));
+    expect(JSON.parse(strFromU8(entries['manifest.json']!))).toEqual(expect.objectContaining({ format: 'wondermoney-export', formatVersion: EXPORT_FORMAT_VERSION }));
   });
 
   it("hides one member's export from the other", async () => {

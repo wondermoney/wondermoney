@@ -49,6 +49,17 @@ O WonderMoney pede confirmação e diz quantas transações vão ser eliminadas.
 
 As transações que o seu banco enviou não podem ser eliminadas, porque a sincronização seguinte voltaria a enviá-las. Quando uma seleção inclui algumas, essas ficam de fora e o WonderMoney propõe ocultá-las. Uma transação oculta fica fora das listas e dos totais; ative **Mostrar transações ocultas** nos filtros para a voltar a ver.
 
+## Logótipos de comerciantes
+
+Uma transação com comerciante mostra um pequeno círculo ao lado na lista, na caixa de revisão e nos detalhes da transação. Sem logótipo, o círculo tem a primeira letra do comerciante, e a cor vem do nome, por isso o mesmo comerciante tem sempre a mesma cor.
+
+Para dar um logótipo a um comerciante na web, abre uma das transações dele e, em **Comerciante**, escolhe **Editar detalhes do comerciante**:
+
+- **Website**: o site do próprio comerciante, como `https://example.com`. Se a tua instância tiver os logótipos de comerciantes ligados, o WonderMoney obtém ele próprio o logótipo desse site e mostra-to; o serviço de logótipos nunca fica a saber quem és. Numa instância sem eles, o website fica apenas guardado.
+- **URL do logótipo**: o endereço de uma imagem a usar em vez disso. Tem de começar por `https://`. Todas as pessoas do teu agregado que vejam o comerciante carregam essa imagem a partir do endereço dela, por isso usa apenas uma de um site em que confies.
+
+Deixa um campo vazio para o retirar. Os detalhes do comerciante são partilhados com o teu agregado, e ambos os podem alterar. A aplicação móvel mostra os mesmos logótipos e iniciais nas listas. Quando uma imagem não carrega, aparece a primeira letra.
+
 ## Antes de começar
 
 Confirma que a conta terminou a primeira sincronização ou que já tens transações manuais disponíveis. Se estiveres a rever um mês de orçamento, confirma primeiro o intervalo de datas.

@@ -27,6 +27,7 @@ import {
   getS3PresignedUrlForCsvUpload,
   getTransactionAttachments,
   getTransactionHistory,
+  getTransactionMerchantLogo,
   getTransactionMerchants,
   getTransactionReviewSummary,
   getTransactions,
@@ -38,6 +39,7 @@ import {
   startAccountCsvImport,
   updateAccount,
   updateTransaction,
+  updateTransactionMerchant,
   updateTransactions,
 } from '@controller/account';
 import { getCreditCardStatementDetailHandler, getCreditCardStatementsHandler, putCreditCardSettings } from '@controller/account/credit-card';
@@ -69,6 +71,8 @@ router.get('/metrics', getAccountsMetrics);
 router.get('/currencies', cache('1 day'), getCurrencies);
 router.get('/transaction-types', cache('1 day'), getTransactionTypes);
 router.get('/transaction-merchants', getTransactionMerchants);
+router.patch('/transaction-merchants/:merchantId', updateTransactionMerchant);
+router.get('/transaction-merchants/:merchantId/logo', getTransactionMerchantLogo);
 router.get('/financial-institutions', cache('1 day'), getAccountFinancialInstitutions);
 router.get('/account-types', cache('1 day'), getAccountTypes);
 router.post('/transaction/ocr', requireVerifiedEmailForAi, requireAiAllowed('ocr'), requireAiAllowance('ocr'), multerSingleFile, createTransactionOCRImport);

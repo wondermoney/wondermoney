@@ -1,11 +1,9 @@
 import { LockMode, QueryOrder } from '@mikro-orm/core';
 import { startOfMonth } from 'date-fns';
 import type { NextFunction, Request, Response } from 'express';
-import { sql } from 'kysely';
 import { orderBy, pick } from 'lodash-es';
 
 import { HIDDEN_FILTER } from '@app/database/filters/tenant-filter';
-import { sqlQuery } from '@app/database/sql';
 import { Account } from '@entity/Account';
 import { Appuser } from '@entity/Appuser';
 import { Category } from '@entity/Category';
@@ -23,7 +21,9 @@ import { recalculateChainFromAccountBalance } from '@service/transaction/balance
 import { CATEGORY_LINE_POPULATE, spendingLinesOf } from '@service/transaction/category-lines';
 import { loadCategorySpendingFlags } from '@service/transaction/category-spending';
 import { findAssignableCategory } from '@service/transaction/household-category';
+import { toMerchantDto } from '@service/transaction/merchant-logo';
 import { normalizeMerchantName } from '@service/transaction/merchant-normalization';
+import { findMerchantsSeenOnlyOnOthersPrivateAccounts } from '@service/transaction/merchant-visibility';
 import { MANUAL_CATEGORIZATION_SOURCE, TransactionAuditService } from '@service/transaction/transaction-audit.service';
 import { applyBulkTransactionChange, BULK_CHANGE_POPULATE } from '@service/transaction/transaction-bulk-update.service';
 import { transactionCreationService } from '@service/transaction/transaction-creation.service';
@@ -330,8 +330,7 @@ export async function getTransactionMerchants(req: Request, res: Response) {
       orderBy: { name: QueryOrder.ASC },
     },
   );
-  const transformedData = transactionMerchants.map((t) => pick(t, ['transactionMerchantKey', 'name']));
-  return res.json({ transactionMerchants: transformedData });
+  return res.json({ transactionMerchants: transactionMerchants.map(toMerchantDto) });
 }
 
 export async function getTransactions(req: Request, res: Response) {
@@ -388,7 +387,7 @@ export async function updateTransaction(req: Request, res: Response, next: NextF
       // A revealed hidden transaction (already id/tenant-scoped) must be editable — e.g.
       // re-categorizing it — without a false not-found. Disable only the hidden filter.
       filters: { [HIDDEN_FILTER]: false },
-      populate: ['accountKey', 'appuserTransactionCategories.categoryKey', 'settlementCurrencyKey', 'appuserCurrencyKey', 'transactionTypeKey', ...TRANSFER_DESTINATION_POPULATE],
+      populate: ['accountKey', 'appuserTransactionCategories.categoryKey', 'settlementCurrencyKey', 'appuserCurrencyKey', 'transactionTypeKey', 'transactionMerchantKey', ...TRANSFER_DESTINATION_POPULATE],
     },
   );
   if (!transaction) {
@@ -581,7 +580,6 @@ export async function updateTransaction(req: Request, res: Response, next: NextF
     'balance',
     'appuserCurrencyBalance',
     'categories',
-    'transactionMerchantKey.name',
     'hidden',
     'notes',
     'reviewed',
@@ -589,7 +587,8 @@ export async function updateTransaction(req: Request, res: Response, next: NextF
     'appuserTransactionCategories.categoryKey',
   ]);
 
-  return res.json({ ruleSuggestion, transaction: { ...transformedData, transferDestination: transferDestinationOf(transaction, user.appuserKey) } });
+  const merchant = transaction.transactionMerchantKey ? { transactionMerchantKey: toMerchantDto(transaction.transactionMerchantKey) } : {};
+  return res.json({ ruleSuggestion, transaction: { ...transformedData, ...merchant, transferDestination: transferDestinationOf(transaction, user.appuserKey) } });
 }
 
 /**
@@ -666,27 +665,4 @@ function exceedsUneditedAmount(transaction: Pick<Transaction, 'settlementAmount'
   const unedited = transaction.uneditedSettlementAmount ?? transaction.settlementAmount;
   if (unedited == null) return false;
   return (unedited > 0 && updatedAmount > unedited) || (unedited < 0 && updatedAmount < unedited);
-}
-
-/**
- * Merchants the household knows only from transactions on another member's private accounts.
- *
- * Merchants are a household-wide list, but a merchant that appears nowhere except on a private
- * account is part of that account's transactions (the privacy carve-out), so the other member
- * must not see it. A transaction is visible on exactly the terms of the Transaction tenant filter:
- * no account, a shared account, or the viewer's own account. Raw SQL, so it carries the tenant
- * predicate itself.
- */
-async function findMerchantsSeenOnlyOnOthersPrivateAccounts(tenantKey: number, viewerAppuserKey: number): Promise<number[]> {
-  const rows = await sqlQuery(DI.em)
-    .selectFrom('transaction as t')
-    .leftJoin('account as a', 'a.account_key', 't.account_key')
-    .select('t.transaction_merchant_key as merchantKey')
-    .where('t.tenant_key', '=', tenantKey)
-    .where('t.deleted_at', 'is', null)
-    .where('t.transaction_merchant_key', 'is not', null)
-    .groupBy('t.transaction_merchant_key')
-    .having(sql<boolean>`bool_and(coalesce(a.is_private and a.account_owner_appuser_key <> ${viewerAppuserKey}, false))`)
-    .execute();
-  return rows.map((row) => row.merchantKey as number);
 }

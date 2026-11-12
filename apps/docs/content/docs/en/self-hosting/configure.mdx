@@ -80,6 +80,16 @@ To cap what each household can spend on the model per day, set `AI_DAILY_LIMIT_A
 
 Set `EODHD_API_KEY` to turn on ticker search, live prices and the Financial Markets module.
 
+## Merchant logos
+
+Merchant logos are off by default. Each merchant then shows the first letter of its name in a colored circle, and nothing about your users' merchants leaves the server.
+
+Set `MERCHANT_LOGO_URL_TEMPLATE` to the address of a logo service, with `{domain}` where the merchant's website domain goes, for example `https://logos.example.com/{domain}.png`. It must be an `https` address, and `{domain}` must come after the host; anything else stops the API at start-up. Set it on the API.
+
+When a member adds a website to a merchant, the API asks the service for that domain's logo, keeps it for a day (a domain with no logo for an hour), and serves it to the web and mobile apps from your own server. The service sees your server's address and the merchant's domain, such as `example.com`. It never sees your users' addresses, browsers, accounts or transactions, and the apps never contact it. Pick a service whose terms you accept for that, and say so in your privacy policy.
+
+A logo address a member types in themselves wins over the template. The apps load that image directly from the address the member chose, without a referrer, so that site sees the address of each household member who views it. Only `https` addresses on a named host are accepted.
+
 ## Bank sync
 
 Bank sync needs no server configuration. Each person adds their own Enable Banking application key under Settings, so bank credentials are never shared between users.
@@ -152,6 +162,7 @@ Nothing is sent to the WonderMoney project. Each outside service your instance c
 | Email (your SMTP server or Resend) | The API and the worker, to send password resets, invites and notifications | `SMTP_HOST` or `RESEND_API_KEY` |
 | AI (your OpenAI-compatible endpoint or Anthropic) | The API and the worker, with the receipt, CSV columns, statement pages, transactions or chat messages the feature needs | `AI_BASE_URL` and `AI_MODEL`, or `AI_PROVIDER=anthropic`, `ANTHROPIC_API_KEY` and `AI_MODEL` |
 | Market data (EODHD) | The API and the worker, with ticker symbols, not user data | `EODHD_API_KEY` |
+| Merchant logos (the service you choose) | The API, with the domain of a merchant's website, not user data ([Merchant logos](#merchant-logos)) | `MERCHANT_LOGO_URL_TEMPLATE` |
 | File storage (your S3-compatible store) | The API and browsers, for CSV imports and receipt copies | `S3_ENDPOINT` and `S3_BUCKET` |
 | Off-site backups (your rclone remote) | The `backup-offsite` service, once a day, with the database and file backups | The `backup-offsite` profile and `BACKUP_DESTINATION` ([Updates and backups](/en/docs/self-hosting/upgrade-and-backup#off-site-copies)) |
 | Error tracking (Sentry) | The API, the worker and the web app, with error reports | `SENTRY_DSN` (API and worker), `NEXT_PUBLIC_SENTRY_DSN` (web app) |
@@ -161,4 +172,4 @@ Nothing is sent to the WonderMoney project. Each outside service your instance c
 | Your identity provider (OIDC) | Browsers and the API, when a user chooses `Sign in with <name>`. The API fetches the provider's discovery document and keys, and exchanges the sign-in code | `OIDC_ISSUER`, `OIDC_CLIENT_ID` and `OIDC_CLIENT_SECRET` |
 | reCAPTCHA | Browsers on the contact form, and the web app to check the answer | `NEXT_PUBLIC_RECAPTCHA_SITE_KEY` and `RECAPTCHA_SECRET_KEY` |
 
-Browsers also load bank and exchange logos from the addresses stored in the bank and asset catalogue. The mobile app sends no analytics or error reports while it is connected to your server.
+Browsers also load bank and exchange logos from the addresses stored in the bank and asset catalogue, and a merchant logo from the address a member typed in for it. The mobile app sends no analytics or error reports while it is connected to your server.

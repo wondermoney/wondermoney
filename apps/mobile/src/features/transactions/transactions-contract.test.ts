@@ -41,6 +41,22 @@ describe('transactions endpoint contracts', () => {
     expect(result.transactions[1]?.transactionKey).toBe(-42)
   })
 
+  it('reads the merchant with its logo fields, and an older server that sends only its name', () => {
+    const merchant = { transactionMerchantKey: 12, name: 'Starbucks', website: 'https://starbucks.example', logoUrl: null, resolvedLogoUrl: 'https://api.example.test/v1/account/transaction-merchants/12/logo' }
+    const [current, older, malformed, none] = aggregateTransactionsResponseSchema.parse({ transactions: [
+      { ...transactionFixture, transactionMerchantKey: merchant },
+      { ...transactionFixture, transactionMerchantKey: { name: 'Corner shop' } },
+      { ...transactionFixture, transactionMerchantKey: { transactionMerchantKey: 'x', name: 'Odd', website: 42, logoUrl: {}, resolvedLogoUrl: false } },
+      { ...transactionFixture, transactionMerchantKey: undefined },
+    ] }).transactions
+    expect(current!.transactionMerchantKey).toEqual(merchant)
+    expect(older!.transactionMerchantKey).toEqual({ name: 'Corner shop' })
+    // A malformed logo field reads as absent rather than failing the list.
+    expect(malformed!.transactionMerchantKey).toEqual({ transactionMerchantKey: undefined, name: 'Odd', website: null, logoUrl: null, resolvedLogoUrl: null })
+    expect(none!.transactionMerchantKey).toBeUndefined()
+    expect(accountTransactionsResponseSchema.parse({ transactions: [{ ...transactionFixture, transactionMerchantKey: merchant }] }).transactions[0]!.transactionMerchantKey).toEqual(merchant)
+  })
+
   it('keeps the list parsing when the API adds fields or recurring values this build does not know', () => {
     const recurringSeries = { recurringSeriesKey: 4, displayName: 'Gym', type: 'membership', amountType: 'tiered', status: 'snoozed', cadence: 'monthly' }
     const [row] = aggregateTransactionsResponseSchema.parse({ transactions: [{ ...transactionFixture, recurringSeries, sentiment: 'positive' }] }).transactions

@@ -21,6 +21,7 @@ import { OptionSheet, Sheet } from '@/components/ui/sheet'
 import { Text } from '@/components/ui/text'
 import type { CategoryViewModel } from '@/features/categories/categories-view-model'
 import { displayCategoryName } from '@/features/categories/categories-view-model'
+import { MerchantAvatar } from '@/features/merchants/merchant-avatar'
 import { TagChips, TagDot } from '@/features/tags/tag-chip'
 import { TagPickerSheet, type CreateTagOutcome, type TagsState } from '@/features/tags/tag-picker-sheet'
 import { InstallmentBadge, useInstallmentLabel } from '@/features/installments/installment-badge'
@@ -1180,7 +1181,9 @@ const TransactionRow = memo(function TransactionRow({
           >
             {selected ? <Icon color={palette.primaryForeground} name="check" size={14} weight="bold" /> : null}
           </Pressable>
-        ) : <EntityMark {...(item.mark ?? { glyph: 'tag' })} testID="transaction-mark" />}
+        ) : item.merchantAvatar
+          ? <MerchantAvatar {...item.merchantAvatar} testID="transaction-merchant-avatar" />
+          : <EntityMark {...(item.mark ?? { glyph: 'tag' })} testID="transaction-mark" />}
         meta={[`${account} · ${formatShortDate(item.date, locale)}`, splitLabel ?? categoryLabel]}
         moreAccessibilityLabel={t('transactions.rowActions', { name: title })}
         onMorePress={() => onOpenMenu(item.id)}

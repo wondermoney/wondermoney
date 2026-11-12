@@ -75,6 +75,15 @@ describe('loadConfiguration', () => {
     expect(() => loadConfiguration('api', { ...validApi, TRUST_PROXY: '1' })).not.toThrow();
   });
 
+  it('takes a merchant logo template only as an https URL with {domain} after the host', () => {
+    expect(() => loadConfiguration('api', { ...validApi, MERCHANT_LOGO_URL_TEMPLATE: 'https://logos.example.com/{domain}.png' })).not.toThrow();
+    expect(() => loadConfiguration('api', { ...validApi, MERCHANT_LOGO_URL_TEMPLATE: 'https://logos.example.com/img?domain={domain}' })).not.toThrow();
+    expect(() => loadConfiguration('api', { ...validApi, MERCHANT_LOGO_URL_TEMPLATE: 'http://logos.example.com/{domain}.png' })).toThrow(/MERCHANT_LOGO_URL_TEMPLATE/);
+    expect(() => loadConfiguration('api', { ...validApi, MERCHANT_LOGO_URL_TEMPLATE: 'https://logos.example.com/logo.png' })).toThrow(/MERCHANT_LOGO_URL_TEMPLATE/);
+    // The domain may not choose the host the server fetches from.
+    expect(() => loadConfiguration('api', { ...validApi, MERCHANT_LOGO_URL_TEMPLATE: 'https://{domain}/favicon.ico' })).toThrow(/MERCHANT_LOGO_URL_TEMPLATE/);
+  });
+
   it('takes the cross-currency transfer tolerance as a fraction and refuses a percentage', () => {
     expect(() => loadConfiguration('worker', { ...validShared, TRANSFER_MATCH_FX_TOLERANCE: '0.02' })).not.toThrow();
     expect(() => loadConfiguration('api', { ...validApi, TRANSFER_MATCH_FX_TOLERANCE: '0' })).not.toThrow();

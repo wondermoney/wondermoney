@@ -59,6 +59,8 @@ import {
 import CategorySelect, { CategoryCellContent } from "../CategorySelect";
 import FundTransactionFromGoalDialog from "../goals/FundTransactionFromGoalDialog";
 import { InstallmentBadge } from "../installments/InstallmentBadge";
+import { MerchantAvatar } from "../merchant/MerchantAvatar";
+import { MerchantDetails } from "../merchant/MerchantDetails";
 import { TagChipList } from "../tags/TagChip";
 import { Amount } from "../ui/Amount";
 import { Badge } from "../ui/badge";
@@ -606,7 +608,12 @@ const AccountTransactionsTable: React.FC<AccountTransactionTableProps> =
                   <div className="space-y-1">
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex min-w-0 flex-1 items-center gap-2">
-                        <p className="text-foreground truncate text-sm font-medium">
+                        {transaction.transactionMerchantKey?.name.trim() ? (
+                          <MerchantAvatar
+                            merchant={transaction.transactionMerchantKey}
+                          />
+                        ) : null}
+                        <p className="text-foreground min-w-0 truncate text-sm font-medium">
                           {transaction.transactionMerchantKey?.name ??
                             transaction.description ??
                             "—"}
@@ -779,7 +786,8 @@ const AccountTransactionsTable: React.FC<AccountTransactionTableProps> =
               const account = info.row.original.accountKey;
               const logoUrl =
                 account.accountFinancialInstitutionKey?.logoUrl ?? null;
-              const merchant = info.row.original.transactionMerchantKey?.name;
+              const merchantRecord = info.row.original.transactionMerchantKey;
+              const merchant = merchantRecord?.name;
               /*
                * The ledger leads with the merchant, as the mobile list does:
                * who was paid is what the eye looks for. The description
@@ -808,95 +816,102 @@ const AccountTransactionsTable: React.FC<AccountTransactionTableProps> =
                */
               return (
                 <div className="flex min-w-36 items-center justify-between gap-2">
-                  <div className="flex min-w-0 flex-col gap-0.5">
-                    <div className="flex min-w-0 items-center gap-2">
-                      {/* § 9 rule 3: an absent title is an em-dash, not
+                  {/* Who was paid, at a glance: the merchant's logo or initial.
+                      A row with no merchant keeps the plain title. */}
+                  <div className="flex min-w-0 items-center gap-2.5">
+                    {merchantRecord?.name.trim() ? (
+                      <MerchantAvatar merchant={merchantRecord} />
+                    ) : null}
+                    <div className="flex min-w-0 flex-col gap-0.5">
+                      <div className="flex min-w-0 items-center gap-2">
+                        {/* § 9 rule 3: an absent title is an em-dash, not
                           an empty cell. Returning null here would blank the
                           whole row, taking the account and date with it. */}
-                      <span
-                        className={cn(
-                          "truncate text-sm font-medium",
-                          title ? "text-foreground" : "text-muted-foreground",
-                        )}
-                      >
-                        {title || "—"}
-                      </span>
-                      {/* § 9 rule 8: the badge sits inline with the title, not
-                          in a trailing column of its own. */}
-                      {recurringBadge ? (
-                        <Badge
-                          variant="secondary"
-                          className="text-muted-foreground h-5 shrink-0 rounded-full px-2 text-xs font-normal"
-                        >
-                          {recurringBadge}
-                        </Badge>
-                      ) : null}
-                      {transferBadge ? (
-                        <Badge
-                          variant="secondary"
-                          className="text-muted-foreground h-5 shrink-0 rounded-full px-2 text-xs font-normal"
-                        >
-                          {transferBadge}
-                        </Badge>
-                      ) : null}
-                      {/* One installment of a card plan: "3/12", linking to the plan. */}
-                      <InstallmentBadge
-                        installment={info.row.original.installment}
-                      />
-                      {/* A receipt or invoice is attached: the row says so without opening it. */}
-                      {(info.row.original.attachmentCount ?? 0) > 0 ? (
                         <span
-                          aria-label={t("transactionAttachments.count", {
-                            count: info.row.original.attachmentCount ?? 0,
-                          })}
-                          className="text-muted-foreground inline-flex shrink-0 items-center gap-0.5"
-                          role="img"
-                          title={t("transactionAttachments.count", {
-                            count: info.row.original.attachmentCount ?? 0,
-                          })}
+                          className={cn(
+                            "truncate text-sm font-medium",
+                            title ? "text-foreground" : "text-muted-foreground",
+                          )}
                         >
-                          <Paperclip className="size-3" aria-hidden="true" />
-                          <span className="text-xs">
-                            {info.row.original.attachmentCount}
+                          {title || "—"}
+                        </span>
+                        {/* § 9 rule 8: the badge sits inline with the title, not
+                          in a trailing column of its own. */}
+                        {recurringBadge ? (
+                          <Badge
+                            variant="secondary"
+                            className="text-muted-foreground h-5 shrink-0 rounded-full px-2 text-xs font-normal"
+                          >
+                            {recurringBadge}
+                          </Badge>
+                        ) : null}
+                        {transferBadge ? (
+                          <Badge
+                            variant="secondary"
+                            className="text-muted-foreground h-5 shrink-0 rounded-full px-2 text-xs font-normal"
+                          >
+                            {transferBadge}
+                          </Badge>
+                        ) : null}
+                        {/* One installment of a card plan: "3/12", linking to the plan. */}
+                        <InstallmentBadge
+                          installment={info.row.original.installment}
+                        />
+                        {/* A receipt or invoice is attached: the row says so without opening it. */}
+                        {(info.row.original.attachmentCount ?? 0) > 0 ? (
+                          <span
+                            aria-label={t("transactionAttachments.count", {
+                              count: info.row.original.attachmentCount ?? 0,
+                            })}
+                            className="text-muted-foreground inline-flex shrink-0 items-center gap-0.5"
+                            role="img"
+                            title={t("transactionAttachments.count", {
+                              count: info.row.original.attachmentCount ?? 0,
+                            })}
+                          >
+                            <Paperclip className="size-3" aria-hidden="true" />
+                            <span className="text-xs">
+                              {info.row.original.attachmentCount}
+                            </span>
                           </span>
+                        ) : null}
+                      </div>
+                      <div className="text-muted-foreground flex min-w-0 items-center gap-1 text-xs">
+                        {/* The account is supporting context: a small, desaturated
+                          logo so the bank's colours don't outshine the merchant. */}
+                        {logoUrl ? (
+                          <Image
+                            src={logoUrl}
+                            height={12}
+                            width={12}
+                            alt=""
+                            className="shrink-0 rounded-[2px] opacity-70 grayscale"
+                          />
+                        ) : null}
+                        {isLedger ? (
+                          <span className="truncate">{detail}</span>
+                        ) : (
+                          <>
+                            <span className="truncate">
+                              {account.accountName}
+                            </span>
+                            <span aria-hidden>·</span>
+                            <span className="shrink-0">
+                              {formatShortDate(
+                                transactionDisplayDate(
+                                  info.row.original.transactionDate,
+                                ),
+                              )}
+                            </span>
+                          </>
+                        )}
+                      </div>
+                      {isLedger && info.row.original.reviewed === false ? (
+                        <span className="text-warning-text text-xs font-medium">
+                          {t("transaction-review-filter")}
                         </span>
                       ) : null}
                     </div>
-                    <div className="text-muted-foreground flex min-w-0 items-center gap-1 text-xs">
-                      {/* The account is supporting context: a small, desaturated
-                          logo so the bank's colours don't outshine the merchant. */}
-                      {logoUrl ? (
-                        <Image
-                          src={logoUrl}
-                          height={12}
-                          width={12}
-                          alt=""
-                          className="shrink-0 rounded-[2px] opacity-70 grayscale"
-                        />
-                      ) : null}
-                      {isLedger ? (
-                        <span className="truncate">{detail}</span>
-                      ) : (
-                        <>
-                          <span className="truncate">
-                            {account.accountName}
-                          </span>
-                          <span aria-hidden>·</span>
-                          <span className="shrink-0">
-                            {formatShortDate(
-                              transactionDisplayDate(
-                                info.row.original.transactionDate,
-                              ),
-                            )}
-                          </span>
-                        </>
-                      )}
-                    </div>
-                    {isLedger && info.row.original.reviewed === false ? (
-                      <span className="text-warning-text text-xs font-medium">
-                        {t("transaction-review-filter")}
-                      </span>
-                    ) : null}
                   </div>
                   <TooltipProvider>
                     <Tooltip>
@@ -1816,9 +1831,19 @@ const AccountTransactionsTable: React.FC<AccountTransactionTableProps> =
               ) : null
             }
             subtitle={
-              inspectedTransaction?.transactionMerchantKey?.name ??
-              inspectedTransaction?.description ??
-              undefined
+              inspectedTransaction?.transactionMerchantKey?.name.trim() ? (
+                <span className="flex min-w-0 items-center gap-2.5">
+                  <MerchantAvatar
+                    merchant={inspectedTransaction.transactionMerchantKey}
+                    size="md"
+                  />
+                  <span className="text-foreground min-w-0 truncate font-medium">
+                    {inspectedTransaction.transactionMerchantKey.name}
+                  </span>
+                </span>
+              ) : (
+                (inspectedTransaction?.description ?? undefined)
+              )
             }
             actions={
               inspectedTransaction ? (
@@ -1910,6 +1935,25 @@ const AccountTransactionsTable: React.FC<AccountTransactionTableProps> =
                 </h3>
                 <TransactionSplitLinesList transaction={inspectedTransaction} />
               </section>
+            ) : null}
+            {inspectedTransaction?.transactionMerchantKey ? (
+              <MerchantDetails
+                // A fresh form per merchant, never one prefilled from the last row.
+                key={
+                  inspectedTransaction.transactionMerchantKey
+                    .transactionMerchantKey
+                }
+                merchant={inspectedTransaction.transactionMerchantKey}
+                // The drawer holds a snapshot of the row; show the saved merchant
+                // now rather than after the list refetches.
+                onSaved={(merchant) =>
+                  setInspectedTransaction((current) =>
+                    current
+                      ? { ...current, transactionMerchantKey: merchant }
+                      : current,
+                  )
+                }
+              />
             ) : null}
           </InspectorDrawer>
 

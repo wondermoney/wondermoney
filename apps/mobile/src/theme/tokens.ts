@@ -428,3 +428,67 @@ export const colorSources = {
 
 export type ColorScheme = keyof typeof themeTokens.colors
 export type Palette = (typeof themeTokens.colors)[ColorScheme]
+
+/**
+ * The merchant avatar fallback: an initial on a colour picked by hashing the
+ * merchant's normalized name (`features/merchants/merchant-avatar-model.ts`), so a
+ * merchant has the same colour on every screen, on web and on mobile.
+ *
+ * The order is shared with web (`web/theme/globals.css`, `--merchant-*`) and
+ * must not change: 0 blue, 1 teal, 2 amber, 3 fuchsia, 4 sky, 5 orange,
+ * 6 stone, 7 slate. No slot is red or green (those mean money lost and gained)
+ * or brand violet (the accent's seven places only; web `DESIGN.md`).
+ * A pale fill under a dark ink of the same hue in light, a
+ * deep fill under a pale ink in dark. `merchantAvatarSources` holds web's
+ * OKLCH; `merchant-avatar-model.test.ts` reconverts it, checks every pair
+ * clears 4.5:1 in both halves, that a slot keeps its hue, and that no hue falls
+ * in the reserved bands. Change the OKLCH, never the hex.
+ */
+export const merchantAvatarSources = {
+  light: [
+    { hue: 'blue', background: '0.93 0.03 255', foreground: '0.45 0.1 255' },
+    { hue: 'teal', background: '0.93 0.045 195', foreground: '0.45 0.075 195' },
+    { hue: 'amber', background: '0.93 0.045 85', foreground: '0.45 0.09 85' },
+    { hue: 'fuchsia', background: '0.93 0.04 335', foreground: '0.45 0.11 335' },
+    { hue: 'sky', background: '0.93 0.035 230', foreground: '0.45 0.085 230' },
+    { hue: 'orange', background: '0.93 0.035 50', foreground: '0.45 0.1 50' },
+    { hue: 'stone', background: '0.93 0.012 60', foreground: '0.45 0.025 60' },
+    { hue: 'slate', background: '0.93 0.012 260', foreground: '0.45 0.025 260' },
+  ],
+  dark: [
+    { hue: 'blue', background: '0.34 0.06 255', foreground: '0.9 0.045 255' },
+    { hue: 'teal', background: '0.34 0.055 195', foreground: '0.9 0.05 195' },
+    { hue: 'amber', background: '0.34 0.06 85', foreground: '0.9 0.05 85' },
+    { hue: 'fuchsia', background: '0.34 0.06 335', foreground: '0.9 0.05 335' },
+    { hue: 'sky', background: '0.34 0.055 230', foreground: '0.9 0.045 230' },
+    { hue: 'orange', background: '0.34 0.06 50', foreground: '0.9 0.05 50' },
+    { hue: 'stone', background: '0.34 0.015 60', foreground: '0.9 0.012 60' },
+    { hue: 'slate', background: '0.34 0.015 260', foreground: '0.9 0.012 260' },
+  ],
+} as const
+
+export type MerchantAvatarColors = Readonly<{ background: string; foreground: string }>
+
+/** The committed sRGB of `merchantAvatarSources`, slot for slot. */
+export const merchantAvatarColors: Readonly<Record<ColorScheme, readonly MerchantAvatarColors[]>> = {
+  light: [
+    { background: '#dbe9fc', foreground: '#2b568b' },
+    { background: '#c6f2f1', foreground: '#076262' },
+    { background: '#f6e6c7', foreground: '#6c5005' },
+    { background: '#fadef3', foreground: '#793b6d' },
+    { background: '#d1edfb', foreground: '#0e5d7b' },
+    { background: '#fce2d4', foreground: '#80421a' },
+    { background: '#eee6e0', foreground: '#605248' },
+    { background: '#e3e8f0', foreground: '#4d5664' },
+  ],
+  dark: [
+    { background: '#223956', foreground: '#cbe0fc' },
+    { background: '#064141', foreground: '#b8e9e8' },
+    { background: '#46350d', foreground: '#eddcb9' },
+    { background: '#4b2b44', foreground: '#f4d2eb' },
+    { background: '#133d4f', foreground: '#c1e4f7' },
+    { background: '#512e1a', foreground: '#fbd5c1' },
+    { background: '#3e3630', foreground: '#e4dcd6' },
+    { background: '#333840', foreground: '#d9dee6' },
+  ],
+}
