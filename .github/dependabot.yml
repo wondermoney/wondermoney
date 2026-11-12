@@ -57,15 +57,6 @@ updates:
       # by hand together with the runtime.
       - dependency-name: '@types/node'
         update-types: ['version-update:semver-major']
-      # apps/mobile stays on ESLint 9; everything else is on 10. eslint-config-expo loads
-      # eslint-plugin-react, which has no ESLint 10 release and crashes under it
-      # (`contextOrFilename.getFilename is not a function`). eslint-config-next wraps the same
-      # plugin in a context shim, which is why web and docs run on 10. Drop these two ignores once
-      # eslint-config-expo works on 10.
-      - dependency-name: eslint
-        update-types: ['version-update:semver-major']
-      - dependency-name: '@eslint/js'
-        update-types: ['version-update:semver-major']
       # TypeScript 7.0 (the Go port) ships no programmatic API: `require('typescript')` only
       # exports the version. typescript-eslint 8.x throws on load under it (peer range
       # <6.1.0), which breaks lint in every package, and apps/web's i18n check script uses
