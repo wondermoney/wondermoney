@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import { effectiveAiCapabilities, isAiAllowedFor, isAiHidden } from '../ai-availability';
 
-const ALL_ON = { AI_BASE_URL: 'http://localhost:11434/v1', AI_MODEL: 'llama3.1' };
+const ALL_ON = { AI_BASE_URL: 'http://localhost:11434/v1', AI_MODEL: 'llama3.1', AI_MODEL_STATEMENT_IMPORT: 'qwen2.5vl' };
 const ALL_OFF = {};
 
 const owner = (preferences: Record<string, unknown>) => ({ preferences });
@@ -27,11 +27,12 @@ describe('per-user AI availability', () => {
       enrichment: false,
       monthlyStory: false,
       ocr: false,
+      statementImport: false,
     });
   });
 
   it('reports the instance capabilities unchanged when AI is not hidden', () => {
-    expect(effectiveAiCapabilities(owner({}), ALL_ON)).toMatchObject({ assistant: true, ocr: true });
+    expect(effectiveAiCapabilities(owner({}), ALL_ON)).toMatchObject({ assistant: true, ocr: true, statementImport: true });
     expect(effectiveAiCapabilities(owner({}), ALL_OFF)).toMatchObject({ assistant: false, ocr: false });
   });
 });

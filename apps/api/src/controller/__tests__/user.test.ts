@@ -57,7 +57,8 @@ describe('user controller', () => {
 
     expect(json).toHaveBeenCalledWith({
       profile: {
-        ai: { assistant: false, csvMapping: false, enrichment: false, monthlyStory: false, ocr: false },
+        ai: { assistant: false, csvMapping: false, enrichment: false, monthlyStory: false, ocr: false, statementImport: false },
+        aiProviders: { statementImport: null },
         emailAddress: 'person@example.com',
         firstName: 'Ada',
         lastName: 'Lovelace',
@@ -83,7 +84,7 @@ describe('user controller', () => {
 
     expect(json).toHaveBeenCalledWith({
       profile: expect.objectContaining({
-        ai: { assistant: false, csvMapping: false, enrichment: false, monthlyStory: false, ocr: false },
+        ai: { assistant: false, csvMapping: false, enrichment: false, monthlyStory: false, ocr: false, statementImport: false },
       }),
     });
   });
@@ -99,9 +100,29 @@ describe('user controller', () => {
 
     expect(json).toHaveBeenCalledWith({
       profile: expect.objectContaining({
-        ai: { assistant: true, csvMapping: true, enrichment: true, monthlyStory: true, ocr: true },
+        ai: { assistant: true, csvMapping: true, enrichment: true, monthlyStory: true, ocr: true, statementImport: false },
       }),
     });
+  });
+
+  it('names who PDF statement pages go to, by family alone for an OpenAI-compatible endpoint, and nothing once AI is hidden', async () => {
+    vi.stubEnv('AI_BASE_URL', 'http://ollama.lan.internal:11434/v1');
+    vi.stubEnv('AI_MODEL_STATEMENT_IMPORT', 'qwen2.5vl');
+    const { getCurrentUserProfile } = await import('../user');
+    const profileOf = (preferences: Record<string, unknown>) => {
+      const json = vi.fn();
+      getCurrentUserProfile({ user: { appuserKey: 1, emailAddress: 'person@example.com', firstName: 'Ada', lastName: 'Lovelace', preferences } } as unknown as Request, { json } as unknown as Response);
+      return (json.mock.calls[0]?.[0] as { profile: { aiProviders: unknown } }).profile;
+    };
+    expect(profileOf({}).aiProviders).toEqual({ statementImport: { kind: 'openai-compatible', name: null } });
+    expect(JSON.stringify(profileOf({}))).not.toContain('ollama.lan.internal');
+    expect(profileOf({ aiHidden: true }).aiProviders).toEqual({ statementImport: null });
+
+    vi.stubEnv('AI_BASE_URL', '');
+    vi.stubEnv('AI_PROVIDER', 'anthropic');
+    vi.stubEnv('ANTHROPIC_API_KEY', 'sk-ant-test');
+    vi.stubEnv('AI_MODEL', 'claude-sonnet-4-5');
+    expect(profileOf({}).aiProviders).toEqual({ statementImport: { kind: 'anthropic', name: 'Anthropic' } });
   });
 
   it('reports mfaEnabled from req.authUser when two-factor is enabled', async () => {
@@ -121,7 +142,8 @@ describe('user controller', () => {
 
     expect(json).toHaveBeenCalledWith({
       profile: {
-        ai: { assistant: false, csvMapping: false, enrichment: false, monthlyStory: false, ocr: false },
+        ai: { assistant: false, csvMapping: false, enrichment: false, monthlyStory: false, ocr: false, statementImport: false },
+        aiProviders: { statementImport: null },
         emailAddress: 'person@example.com',
         firstName: 'Ada',
         lastName: 'Lovelace',

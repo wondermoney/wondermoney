@@ -42,7 +42,7 @@ The two keys become the store's credentials, and it won't start without them. `S
 
 ## AI features
 
-Receipt scanning, CSV column mapping, transaction categorisation, the monthly story and the assistant work with any OpenAI-compatible endpoint: OpenAI, OpenRouter, or a model running locally with Ollama, LM Studio or vLLM.
+Receipt scanning, CSV column mapping, PDF statement import, transaction categorisation, the monthly story and the assistant work with any OpenAI-compatible endpoint: OpenAI, OpenRouter, or a model running locally with Ollama, LM Studio or vLLM.
 
 ```sh
 AI_BASE_URL=http://host.docker.internal:11434/v1
@@ -61,7 +61,18 @@ AI_MODEL=claude-sonnet-4-5
 
 `AI_MODEL`, or `AI_MODEL_<FEATURE>` for one feature, is required: there is no built-in default model. Receipt scanning needs a model that reads images, so set `AI_MODEL_OCR` if your default does not. Anthropic wins over `AI_BASE_URL`, but a complete Azure setup still takes precedence.
 
-If sign-up is open and you pay for the model, set `AI_REQUIRES_VERIFIED_EMAIL=true`. Accounts that sign up with email and password then get a verification link by email, and need to follow it before they can use the assistant, receipt scanning or AI column mapping. Google and Apple accounts count as verified. It needs email configured.
+[PDF statement import](/en/docs/accounts-transactions/import-pdf-statements) sends each page of a statement to the model as an image, so it needs a model that reads images. On an OpenAI-compatible endpoint it stays off until you name one with `AI_MODEL_STATEMENT_IMPORT`; `AI_MODEL` is not used for it, since a default local model often reads text only. On Anthropic it uses `AI_MODEL_STATEMENT_IMPORT`, or `AI_MODEL` when that is empty. The app names the provider to the person before any page is sent: Anthropic or Azure OpenAI by name, an OpenAI-compatible endpoint as the AI provider the server is set up with. The endpoint's address is never shown, and `GET /v1/instance` reports only the provider's family.
+
+| Setting | What it does |
+|---|---|
+| `AI_MODEL_STATEMENT_IMPORT` | The model that reads PDF statements. Required on an OpenAI-compatible endpoint |
+| `AI_DAILY_LIMIT_STATEMENT_IMPORT` | PDF statements a household can import per day; each statement counts as one, however many pages it has. Empty means no limit |
+| `STATEMENT_IMPORT_MAX_BYTES` | The largest PDF accepted, in bytes. Defaults to `10485760` (10 MB) |
+| `STATEMENT_IMPORT_MAX_PAGES` | The most pages a statement can have. Every page is one request to the model, so this also caps what one statement costs. Defaults to `20` |
+
+Set the two limits on the API and the worker; a value that is not a positive whole number stops them at start-up.
+
+If sign-up is open and you pay for the model, set `AI_REQUIRES_VERIFIED_EMAIL=true`. Accounts that sign up with email and password then get a verification link by email, and need to follow it before they can use the assistant, receipt scanning, AI column mapping or PDF statement import. Google and Apple accounts count as verified. It needs email configured.
 
 To cap what each household can spend on the model per day, set `AI_DAILY_LIMIT_ASSISTANT` (assistant messages), `AI_DAILY_LIMIT_OCR` (receipt scans) and `AI_DAILY_LIMIT_CSV_MAPPING` (CSV imports the model maps). Members of a household share the limit, and it resets at midnight UTC. Leave them empty for no limit. Once a household reaches a limit, the app says so until the next day; CSV imports still work, with the columns mapped by hand.
 
@@ -139,7 +150,7 @@ Nothing is sent to the WonderMoney project. Each outside service your instance c
 |---|---|---|
 | European Central Bank | The worker, once a day, to download euro exchange rates. It sends no data about you or your users | Always on |
 | Email (your SMTP server or Resend) | The API and the worker, to send password resets, invites and notifications | `SMTP_HOST` or `RESEND_API_KEY` |
-| AI (your OpenAI-compatible endpoint or Anthropic) | The API and the worker, with the receipt, CSV columns, transactions or chat messages the feature needs | `AI_BASE_URL` and `AI_MODEL`, or `AI_PROVIDER=anthropic`, `ANTHROPIC_API_KEY` and `AI_MODEL` |
+| AI (your OpenAI-compatible endpoint or Anthropic) | The API and the worker, with the receipt, CSV columns, statement pages, transactions or chat messages the feature needs | `AI_BASE_URL` and `AI_MODEL`, or `AI_PROVIDER=anthropic`, `ANTHROPIC_API_KEY` and `AI_MODEL` |
 | Market data (EODHD) | The API and the worker, with ticker symbols, not user data | `EODHD_API_KEY` |
 | File storage (your S3-compatible store) | The API and browsers, for CSV imports and receipt copies | `S3_ENDPOINT` and `S3_BUCKET` |
 | Off-site backups (your rclone remote) | The `backup-offsite` service, once a day, with the database and file backups | The `backup-offsite` profile and `BACKUP_DESTINATION` ([Updates and backups](/en/docs/self-hosting/upgrade-and-backup#off-site-copies)) |

@@ -26360,6 +26360,23 @@
           "enumItems": [],
           "mappedType": "json"
         },
+        "statement_extraction": {
+          "name": "statement_extraction",
+          "type": "jsonb",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "json"
+        },
         "status": {
           "name": "status",
           "type": "text",

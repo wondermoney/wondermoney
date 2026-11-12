@@ -100,11 +100,18 @@ config:
   AI_MODEL: ""
   AI_MODEL_OCR: ""
   AI_MODEL_ASSISTANT: ""
+  # PDF statement import needs a model that reads images; on an OpenAI-compatible endpoint it is
+  # off until one is named here.
+  AI_MODEL_STATEMENT_IMPORT: ""
   AI_PROVIDER: ""
   AI_REQUIRES_VERIFIED_EMAIL: ""
   AI_DAILY_LIMIT_ASSISTANT: ""
   AI_DAILY_LIMIT_OCR: ""
   AI_DAILY_LIMIT_CSV_MAPPING: ""
+  AI_DAILY_LIMIT_STATEMENT_IMPORT: ""
+  # The largest PDF statement read, in bytes and pages (10485760 and 20 when empty).
+  STATEMENT_IMPORT_MAX_BYTES: ""
+  STATEMENT_IMPORT_MAX_PAGES: ""
 
   # ─── Market data (optional) ──────────────────────────────────────────────────
   # EODHD_API_KEY goes in `secrets`.

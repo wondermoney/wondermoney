@@ -149,7 +149,7 @@ export function TransactionImportReviewScreen(props: TransactionImportReviewScre
 
           {stage?.kind === 'needs-web' ? (
             <View style={styles.block}>
-              <FormNotice>{t('transactionImport.review.needsWeb')}</FormNotice>
+              <FormNotice>{t(stage.reason === 'pdf' ? 'transactionImport.review.needsWebPdf' : 'transactionImport.review.needsWeb')}</FormNotice>
               <Button block disabled={writesOff} label={t('transactionImport.review.cancel')} onPress={props.onCancel} />
             </View>
           ) : null}

@@ -1,0 +1,61 @@
+---
+title: Importar extractos bancarios en PDF
+description: Convierte un extracto bancario en PDF en transacciones con un modelo de IA que lee cada página, y revisa las filas y comprueba los saldos antes de importar nada.
+---
+
+Muchos bancos solo ofrecen los extractos en PDF. La importación de extractos en PDF hace que un modelo de IA lea el extracto página a página y te lista las transacciones que encontró para que las revises. No se importa nada hasta que confirmas.
+
+## Antes de empezar
+
+- La instancia necesita un modelo de IA que lea imágenes, configurado para esta función, y almacenamiento de archivos. En una instancia autoalojada, consulta [Configurar tu instancia](/es/docs/self-hosting/configure#funciones-de-ia). Si falta alguno de los dos, la opción **Importar extracto en PDF** no aparece.
+- Si activaste **Ajustes > Privacidad > Ocultar funciones de IA**, la importación queda oculta y el servidor la rechaza en tu cuenta.
+- El extracto tiene que ser un PDF de hasta 10 MB y 20 páginas, salvo que quien gestiona la instancia haya fijado otros límites; la ventana de importación los muestra. Cada extracto cuenta como una de las importaciones de extractos diarias de tu hogar cuando quien gestiona la instancia ha fijado un límite diario.
+- Está pensada para extractos de cuentas corrientes. Los extractos de inversiones y de tarjetas de crédito con otro formato pueden no leerse bien.
+
+## Qué se envía y qué se guarda
+
+Cada página del extracto se convierte en una imagen y se envía, una página cada vez, al proveedor de IA que usa la instancia. La ventana de importación dice cuál es ese proveedor antes de que subas nada; en un servidor que usa su propio endpoint compatible con OpenAI, dice que las páginas van al proveedor de IA configurado en el servidor. Las páginas son datos tuyos, enviados para que el modelo lea las transacciones: la fecha, la descripción, el importe y, cuando aparecen, la moneda y el saldo de cada fila, y los saldos inicial y final del extracto.
+
+El PDF y las imágenes de las páginas se eliminan en cuanto se lee el extracto, tanto si la lectura funciona como si no. Las imágenes de las páginas nunca se escriben en disco. WonderMoney guarda solo las filas que encontró, para que las revises, y los saldos del extracto para la comprobación de abajo. Una importación que no terminas caduca a los siete días, como cualquier [importación](/es/docs/accounts-transactions/import-transactions-csv).
+
+## Pasos
+
+1. Abre la cuenta y elige **Importar transacciones** y después **Importar extracto en PDF**.
+2. Lee a qué proveedor van las páginas y añade el PDF.
+3. Elige **Revisar transacciones**. El extracto se sube y el modelo lo lee página a página; la revisión muestra cuántas páginas lleva leídas. Elige **Cancelar importación** para detenerla: la importación se detiene después de la página en la que está, y el PDF se elimina.
+4. Mira la comprobación del saldo al principio de la revisión (más abajo).
+5. Compara las filas con el extracto, como en cualquier importación: las filas nuevas se incluyen, las que ya están en la cuenta se omiten y los posibles duplicados se omiten salvo que los incluyas. Una fila que el modelo no pudo leer bien aparece como **No se pudo leer**, con el motivo, y nunca se importa.
+6. Elige **Importar**. La importación se ejecuta en segundo plano.
+
+## La comprobación del saldo
+
+Un extracto trae su propia comprobación: el saldo inicial más todas sus transacciones es el saldo final. WonderMoney suma las filas que leyó el modelo, al céntimo, y muestra el resultado:
+
+- **Los saldos cuadran.** El saldo inicial y las filas leídas suman el saldo final.
+- **Los saldos no cuadran.** La revisión muestra el saldo inicial, las filas leídas, el saldo final y la diferencia. Una diferencia suele significar que una transacción se quedó fuera, se leyó dos veces o se leyó mal. Compara las filas con el extracto: desmarca una fila que esté mal, y añade a mano una que falte después de la importación. El botón de importar queda desactivado hasta que marques **He revisado las filas y quiero importarlas de todos modos**.
+- **Nada que comprobar.** El extracto no muestra un saldo inicial y un saldo final, así que no se pudieron comprobar las filas. Compáralas con el extracto antes de importar.
+
+Las filas que omites no cambian la comprobación: se refiere a lo que dice el extracto, no a lo que importas.
+
+## Duplicados
+
+Un extracto en PDF no tiene identificadores de transacción, así que cada fila se reconoce por su fecha y su importe dentro de la cuenta. Importar de nuevo el mismo extracto encuentra sus filas ya en la cuenta y las omite, aunque el modelo escriba una descripción de otra forma. Una fila con el mismo importe que una transacción que ya está en la cuenta, con hasta 3 días de diferencia (una que trajo la sincronización bancaria, por ejemplo), es un [posible duplicado](/es/docs/accounts-transactions/import-transactions-csv#posibles-duplicados): se omite a menos que la incluyas.
+
+## En la aplicación móvil
+
+La aplicación móvil no inicia importaciones de extractos en PDF. Una importación iniciada en la web se revisa y se importa en la web, donde está la comprobación del saldo.
+
+## Problemas comunes
+
+- El extracto tiene más páginas de las que lee la instancia. Descarga del banco un periodo más corto, o divide el PDF.
+- El PDF está protegido con contraseña. Descarga una copia sin contraseña.
+- No se encontraron transacciones. El PDF puede ser un escaneo demasiado tenue para leerlo, o no ser un extracto bancario.
+- El modelo no pudo leer una página después de varios intentos. No se importa nada y el PDF se elimina; inténtalo más tarde.
+- Algunas filas están en otra moneda distinta de la de la cuenta. La revisión lo indica; comprueba que los importes son los que se cargaron en la cuenta.
+
+## Enlaces relacionados
+
+- [Importar transacciones desde CSV, OFX, QIF o CAMT.053](/es/docs/accounts-transactions/import-transactions-csv)
+- [Privacidad de los datos](/es/docs/settings-security-privacy/data-privacy)
+- [Configurar tu instancia](/es/docs/self-hosting/configure#funciones-de-ia)
+- [Problemas de importación de transacciones](/es/docs/troubleshooting/transaction-import-problems)

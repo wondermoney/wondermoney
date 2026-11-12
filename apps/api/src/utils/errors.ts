@@ -177,6 +177,13 @@ export const ERROR_CODE = {
   DATA_RESTORE_NOT_READY: 'data_restore_not_ready',
   /** A restore file over the size limit (400). */
   DATA_RESTORE_TOO_LARGE: 'data_restore_too_large',
+  /** A PDF statement over `STATEMENT_IMPORT_MAX_BYTES` (400). */
+  STATEMENT_TOO_LARGE: 'statement_too_large',
+  /**
+   * Committing a PDF statement whose balances do not add up (opening balance plus its rows is not
+   * its closing balance) without acknowledging the difference (409). Show the difference and ask.
+   */
+  STATEMENT_RECONCILIATION_UNACKNOWLEDGED: 'statement_reconciliation_unacknowledged',
   /**
    * Changing a portfolio's link to an account only the other household member can see (403).
    * `details.linkedBy` is that member's display name, so the viewer knows who to ask.

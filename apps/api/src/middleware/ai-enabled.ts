@@ -10,6 +10,7 @@ const FEATURE_LABEL: Record<AiFeature, string> = {
   enrichment: 'Transaction enrichment',
   monthlyStory: 'The monthly story',
   ocr: 'Receipt scanning',
+  statementImport: 'PDF statement import',
 };
 
 /**

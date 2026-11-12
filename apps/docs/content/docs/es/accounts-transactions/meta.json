@@ -11,6 +11,7 @@
     "import-transactions-csv",
     "import-from-ynab",
     "import-from-actual-budget",
+    "import-pdf-statements",
     "categorize-transactions",
     "rules",
     "recurring-payments",

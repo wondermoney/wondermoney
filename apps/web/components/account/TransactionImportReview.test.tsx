@@ -718,3 +718,137 @@ test("shows a possible duplicate beside the transaction it likely repeats, and s
     { id: "import-1", input: { decision: "import", rowIds: [21] } },
   ]);
 });
+
+const pdfSession = (overrides: Partial<TransactionImportSession> = {}) =>
+  session({
+    counts: {
+      duplicate: 0,
+      failed: 0,
+      imported: 0,
+      invalid: 0,
+      new: 3,
+      possible_duplicate: 0,
+      skipped: 0,
+    },
+    decisions: { import: 3, skip: 0 },
+    fileName: "September.pdf",
+    format: "pdf",
+    ...overrides,
+  });
+
+const reconciled = (
+  status: "matched" | "mismatch" | "unavailable",
+  difference: number | null,
+) => ({
+  pageCount: 2,
+  pagesRead: 2,
+  reconciliation: {
+    closingBalance: status === "unavailable" ? null : 2429.3,
+    currency: "EUR",
+    difference,
+    openingBalance: status === "unavailable" ? null : 1000,
+    rowsTotal: 1454.3,
+    status,
+  },
+});
+
+test("shows each page of a PDF statement as the model reads it, and lets the person stop it", async () => {
+  renderReview({
+    rows: { ...rows, items: [], total: 0 },
+    session: pdfSession({
+      statementExtraction: { pageCount: 4, pagesRead: 1 },
+      status: "parsing",
+    }),
+  });
+  assert.ok(screen.getByText("Read 1 of 4 pages…"));
+  await userEvent
+    .setup()
+    .click(
+      screen.getByRole("button", { name: messages["import-review-cancel"] }),
+    );
+  await waitFor(() => assert.equal(mocks.cancel.mock.calls.length, 1));
+});
+
+test("a PDF statement whose balances add up commits without asking", async () => {
+  renderReview({
+    rows,
+    session: pdfSession({ statementExtraction: reconciled("matched", 0) }),
+  });
+  const check = screen.getByTestId("statement-balance-check");
+  assert.ok(
+    check.textContent?.includes(messages["import-review-reconcile-matched"]),
+  );
+  await userEvent
+    .setup()
+    .click(screen.getByRole("button", { name: "Import 3 transactions" }));
+  await waitFor(() => assert.equal(mocks.commit.mock.calls.length, 1));
+  assert.deepEqual(mocks.commit.mock.calls[0], [
+    { id: "import-1", input: { acknowledgeMismatch: false } },
+  ]);
+});
+
+test("a PDF statement whose balances do not add up shows the difference, and commits only once the person acknowledges it", async () => {
+  renderReview({
+    rows,
+    session: pdfSession({ statementExtraction: reconciled("mismatch", -25) }),
+  });
+  const user = userEvent.setup();
+  const check = screen.getByTestId("statement-balance-check");
+  assert.equal(check.getAttribute("role"), "alert");
+  assert.ok(
+    check.textContent?.includes(messages["import-review-reconcile-mismatch"]),
+  );
+  assert.match(
+    screen.getByTestId("statement-difference").textContent ?? "",
+    /25\.00/,
+  );
+
+  const commitButton = screen.getByRole("button", {
+    name: "Import 3 transactions",
+  });
+  assert.equal((commitButton as HTMLButtonElement).disabled, true);
+
+  await user.click(
+    screen.getByRole("checkbox", {
+      name: messages["import-review-reconcile-acknowledge"],
+    }),
+  );
+  assert.equal((commitButton as HTMLButtonElement).disabled, false);
+  await user.click(commitButton);
+  await waitFor(() => assert.equal(mocks.commit.mock.calls.length, 1));
+  assert.deepEqual(mocks.commit.mock.calls[0], [
+    { id: "import-1", input: { acknowledgeMismatch: true } },
+  ]);
+});
+
+test("a PDF statement with no balances to check says so, and commits without asking", () => {
+  renderReview({
+    rows,
+    session: pdfSession({
+      statementExtraction: reconciled("unavailable", null),
+    }),
+  });
+  assert.ok(
+    screen
+      .getByTestId("statement-balance-check")
+      .textContent?.includes(messages["import-review-reconcile-unavailable"]),
+  );
+  assert.equal(
+    (
+      screen.getByRole("button", {
+        name: "Import 3 transactions",
+      }) as HTMLButtonElement
+    ).disabled,
+    false,
+  );
+});
+
+test("a PDF statement that could not be read says why", () => {
+  renderReview({
+    rows: { ...rows, items: [], total: 0 },
+    session: pdfSession({ errorCode: "too_many_pages", status: "failed" }),
+  });
+  assert.ok(
+    screen.getByText(messages["import-review-pdf-failed-too_many_pages"]),
+  );
+});

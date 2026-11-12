@@ -1121,6 +1121,7 @@
       "expired": "This import expired before it was finished. Start again with the file.",
       "unsupported": "This version of the app can't show this import. Update the app, or finish it on the web.",
       "needsWeb": "This file has its own categories to match, which the app can't do yet. Nothing was imported: cancel this import and import the file on the web.",
+      "needsWebPdf": "This is a PDF statement, whose balances the app can't check yet. Nothing was imported: cancel this import and review the statement on the web.",
       "loadFailed": "Could not load this import. Check your connection and try again.",
       "unnamed": "Import of {{date}}",
       "summary": "Nothing is imported until you confirm. New transactions are included; ones already in the account are skipped.",

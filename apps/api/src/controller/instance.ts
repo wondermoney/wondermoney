@@ -2,7 +2,8 @@ import type { Request, Response } from 'express';
 
 import { instanceName } from '@config/instance-name';
 import { isMcpEnabled } from '@config/mcp';
-import { aiCapabilities } from '@service/ai/ai-provider';
+import { statementImportLimits } from '@config/statement-import';
+import { aiCapabilities, aiProviderLabel } from '@service/ai/ai-provider';
 import { signInMethods } from '@service/auth/oidc-provider';
 import { resolveSignupMode } from '@service/auth/signup-policy';
 import { isGoogleSignInConfigured } from '@service/auth/social-sign-in';
@@ -25,6 +26,7 @@ export function getInstance(_req: Request, res: Response) {
   const { commit, version } = buildInfo();
   const bankSync = bankSyncFeatures();
   const signIn = signInMethods();
+  const statementProvider = aiProviderLabel('statementImport');
   return res.json({
     apiVersion: 1,
     commit,
@@ -50,6 +52,10 @@ export function getInstance(_req: Request, res: Response) {
       passkey: true,
       // False under OIDC_ONLY: the server refuses password sign-in, sign-up and reset.
       passwordSignIn: signIn.passwordSignIn,
+      // PDF statement import: the largest PDF it takes and the provider's family. Null when no
+      // model for it is configured. This document is public, so it never names the provider's
+      // address; signed-in clients read the provider's name from `GET /v1/user/me/profile`.
+      statementImport: statementProvider ? { ...statementImportLimits(), providerKind: statementProvider.kind } : null,
     },
     minAppVersion: process.env['MIN_APP_VERSION']?.trim() || null,
     name: instanceName(),

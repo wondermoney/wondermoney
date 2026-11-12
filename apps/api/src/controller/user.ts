@@ -14,6 +14,7 @@ import { Onboarding } from '@entity/Onboarding';
 import { authedUser } from '@middleware/authed-context';
 import { deleteWonderMoneyAccount } from '@service/account/account-deletion.service';
 import { effectiveAiCapabilities } from '@service/ai/ai-availability';
+import { aiProviderLabel } from '@service/ai/ai-provider';
 import { enableBankingConsentOf } from '@service/enable-banking/enable-banking-consent';
 import { ERROR } from '@utils/constants';
 import { buildEnableBankingInstitutionRecordId } from '@utils/enable-banking-institution-id';
@@ -53,6 +54,10 @@ export function getCurrentUserProfile(req: Request, res: Response) {
       // The effective per-user AI capabilities: every feature off once this person hid AI, so a
       // client can gate on the profile alone instead of combining it with `/v1/instance`.
       ai: effectiveAiCapabilities(req.user),
+      // Who PDF statement pages go to, for the consent line the person reads before uploading one;
+      // null while the feature is off for them. An OpenAI-compatible endpoint is named only by its
+      // family: its address may be an internal host.
+      aiProviders: { statementImport: effectiveAiCapabilities(req.user).statementImport ? aiProviderLabel('statementImport') : null },
       // better-auth is the source of truth for MFA state; `getAuthSession` copies
       // `twoFactorEnabled` onto `req.authUser`. The `Appuser` row has no MFA column.
       mfaEnabled: req.authUser?.user.twoFactorEnabled ?? false,

@@ -1,0 +1,61 @@
+---
+title: Import PDF bank statements
+description: Turn a PDF bank statement into transactions with an AI model that reads each page, then review the rows and check the balances before anything is imported.
+---
+
+Many banks only offer statements as PDF files. PDF statement import has an AI model read the statement page by page and lists the transactions it found for you to review. Nothing is imported until you confirm.
+
+## Before you start
+
+- The instance needs an AI model that reads images, set up for this feature, and file storage. On a self-hosted instance, see [Configure your instance](/en/docs/self-hosting/configure#ai-features). When either is missing, **Import PDF statement** is not offered.
+- If you turned on **Settings > Privacy > Hide AI features**, the import is hidden and the server refuses it for your account.
+- The statement must be a PDF of up to 10 MB and 20 pages, unless the instance's operator set other limits; the import dialog shows them. Each statement counts as one of your household's daily statement imports when the operator has set a daily limit.
+- It is built for current-account statements. Investment and credit card statements with a different layout may not read well.
+
+## What is sent, and what is kept
+
+Each page of the statement is turned into an image and sent, one page at a time, to the AI provider the instance uses. The import dialog names that provider before you upload anything; for a server that uses its own OpenAI-compatible endpoint, it says the pages go to the AI provider the server is set up with. The pages are your own data, sent so the model can read the transactions: the date, the description, the amount and, when printed, the currency and the running balance of each row, and the statement's opening and closing balances.
+
+The PDF and its page images are deleted as soon as the statement has been read, whether the read worked or not. Page images are never written to disk. WonderMoney keeps only the rows it found, for you to review, and the statement's balances for the check below. An import you don't finish expires after seven days, as for any [import](/en/docs/accounts-transactions/import-transactions-csv).
+
+## Steps
+
+1. Open the account and choose **Import transactions**, then **Import PDF statement**.
+2. Read which provider the pages go to, and add the PDF.
+3. Choose **Review transactions**. The statement uploads and the model reads it page by page; the review shows how many pages are read so far. Choose **Cancel import** to stop it: the import stops after the page it is on, and the PDF is deleted.
+4. Check the balance check at the top of the review (see below).
+5. Check the rows against your statement, as for any import: new rows are included, rows already in the account are skipped, and possible duplicates are skipped unless you include them. A row the model could not read properly is listed as **Couldn't be read**, with the reason, and never imports.
+6. Choose **Import**. The import runs in the background.
+
+## The balance check
+
+A statement carries its own check: the opening balance plus every transaction on it is the closing balance. WonderMoney adds up the rows the model read, to the cent, and shows the result:
+
+- **The balances add up.** The opening balance and the rows read add up to the closing balance.
+- **The balances don't add up.** The review shows the opening balance, the rows read, the closing balance and the difference. A difference usually means a transaction was missed, read twice or misread. Compare the rows with your statement: untick a row that is wrong, and add a missing one by hand after the import. The import button stays off until you tick **I've checked the rows and want to import them anyway**.
+- **Nothing to check.** The statement doesn't show both an opening and a closing balance, so the rows could not be checked against them. Check them against your statement before importing.
+
+Rows you skip don't change the check: it is about what the statement says, not what you import.
+
+## Duplicates
+
+A PDF statement has no transaction ids, so each row is recognised by its date and amount within the account. Importing the same statement again finds its rows already in the account and skips them, even when the model words a description differently. A row with the same amount as a transaction already in the account, up to 3 days apart (one that bank sync brought in, for example), is a [possible duplicate](/en/docs/accounts-transactions/import-transactions-csv#possible-duplicates): it is skipped unless you include it.
+
+## In the mobile app
+
+The mobile app can't start a PDF statement import. An import started on the web is reviewed and imported on the web, where the balance check is.
+
+## Common issues
+
+- The statement has more pages than the instance reads. Download a shorter period from your bank, or split the PDF.
+- The PDF is protected with a password. Download a copy without one.
+- No transactions were found. The PDF may be a scan too faint to read, or not a bank statement.
+- The model could not read a page after a few tries. Nothing is imported and the PDF is deleted; try again later.
+- Some rows are in another currency than the account. The review says so; check that the amounts are the ones the account was charged.
+
+## Related links
+
+- [Import transactions from CSV, OFX, QIF or CAMT.053](/en/docs/accounts-transactions/import-transactions-csv)
+- [Data privacy](/en/docs/settings-security-privacy/data-privacy)
+- [Configure your instance](/en/docs/self-hosting/configure#ai-features)
+- [Transaction import problems](/en/docs/troubleshooting/transaction-import-problems)

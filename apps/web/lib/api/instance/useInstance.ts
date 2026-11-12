@@ -9,7 +9,7 @@ export interface InstanceDescription {
   /** The commit the server was built from; null for a local build. */
   commit?: null | string;
   features: {
-    ai: { assistant: boolean; csvMapping: boolean; enrichment: boolean; monthlyStory: boolean; ocr: boolean };
+    ai: { assistant: boolean; csvMapping: boolean; enrichment: boolean; monthlyStory: boolean; ocr: boolean; statementImport?: boolean };
     bankSync: boolean;
     contactForm: boolean;
     email: boolean;
@@ -36,6 +36,12 @@ export interface InstanceDescription {
      * forms are hidden. Absent on an older API, which reads as on.
      */
     passwordSignIn?: boolean;
+    /**
+     * PDF statement import: the largest statement taken and the provider's family. Null when the
+     * server has no model for it; absent on an older API. The provider's name, for the consent line,
+     * is on the signed-in profile (`useStatementImportProvider`).
+     */
+    statementImport?: null | StatementImportFeature;
   };
   minAppVersion: null | string;
   name: string;
@@ -46,6 +52,12 @@ export interface InstanceDescription {
   supportEmail: null | string;
   /** The release version the server runs (`dev` for a local build); absent on an older API. */
   version?: string;
+}
+
+export interface StatementImportFeature {
+  maxBytes: number;
+  maxPages: number;
+  providerKind: "anthropic" | "azure-openai" | "openai-compatible";
 }
 
 const apiBaseUrl = () => process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
@@ -111,6 +123,17 @@ export function useOidcProvider(): null | { name: string } {
   const { data } = useInstance();
   const hydrated = useHydrated();
   return hydrated ? (data?.features.oidc ?? null) : null;
+}
+
+/**
+ * PDF statement import, once the server has said it has a model for it; null otherwise (and while
+ * the description loads, so the entry never shows on a server without it).
+ */
+export function useStatementImport(): null | StatementImportFeature {
+  const { data } = useInstance();
+  const hydrated = useHydrated();
+  if (!hydrated || !data?.features.ai.statementImport) return null;
+  return data.features.statementImport ?? null;
 }
 
 /** Where users can write for help, or null: no support links are shown then. */

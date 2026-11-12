@@ -109,6 +109,10 @@ const runtimeSchema = z.object({
   PRIVACY_POLICY_URL: z.string().trim().optional(),
   PUBLIC_DIAGNOSTICS_ENABLED: boolFlag('Public diagnostics flag').optional(),
   SIGNUP_MODE: z.enum(['open', 'invite', 'closed']).optional(),
+  // The largest PDF statement, in bytes and pages, an import reads (`config/statement-import.ts`).
+  // Read by the API (the upload link) and the worker (the read).
+  STATEMENT_IMPORT_MAX_BYTES: positiveInt('PDF statement size limit in bytes').optional(),
+  STATEMENT_IMPORT_MAX_PAGES: positiveInt('PDF statement page limit').optional(),
   // The local, token-free categorizer (`services/transaction/bayes-categorizer.ts`). On unless
   // explicitly disabled; it sends nothing to a model, so it also runs for a person who hid AI.
   TRANSACTION_BAYES_CATEGORIZATION_ENABLED: boolFlag('Local Bayes categorization flag').optional(),
@@ -188,6 +192,7 @@ const sharedSchema = z.object({
   AI_MODEL_ENRICHMENT: z.string().trim().optional(),
   AI_MODEL_MONTHLY_STORY: z.string().trim().optional(),
   AI_MODEL_OCR: z.string().trim().optional(),
+  AI_MODEL_STATEMENT_IMPORT: z.string().trim().optional(),
   AI_PROVIDER: z.string().trim().toLowerCase().pipe(z.enum(['anthropic'])).optional(),
   ANTHROPIC_API_KEY: z.string().trim().optional(),
   AZURE_AI_FOUNDRY_API_KEY: z.string().trim().optional(),
@@ -198,6 +203,7 @@ const sharedSchema = z.object({
   AZURE_OPENAI_DEPLOYMENT: z.string().trim().optional(),
   AZURE_OPENAI_ENDPOINT: httpUrl('Azure OpenAI endpoint').optional(),
   AZURE_OPENAI_OCR_DEPLOYMENT: z.string().trim().optional(),
+  AZURE_OPENAI_STATEMENT_IMPORT_DEPLOYMENT: z.string().trim().optional(),
   EODHD_API_KEY: z.string().trim().optional(),
 
   // Defaults live in jobs/pgboss.config.ts.
@@ -230,6 +236,7 @@ const apiSchema = sharedSchema.extend({
   AI_DAILY_LIMIT_ASSISTANT: wholeNumber('Daily assistant messages per household').optional(),
   AI_DAILY_LIMIT_CSV_MAPPING: wholeNumber('Daily AI CSV column mappings per household').optional(),
   AI_DAILY_LIMIT_OCR: wholeNumber('Daily receipt scans per household').optional(),
+  AI_DAILY_LIMIT_STATEMENT_IMPORT: wholeNumber('Daily PDF statement imports per household').optional(),
   AI_REQUIRES_VERIFIED_EMAIL: boolFlag('AI verified-email requirement').optional(),
   INTERNAL_SERVICE_API_KEY: nonEmpty('Internal service key is required'),
   RECAPTCHA_SECRET_KEY: z.string().trim().optional(),

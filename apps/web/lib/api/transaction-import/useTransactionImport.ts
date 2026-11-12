@@ -36,9 +36,37 @@ export type ImportSessionStatus =
   | "succeeded"
   | "waiting_for_upload";
 
-/** The file formats a session reads. */
+/** The file formats a session reads; `pdf` is a PDF statement read by the vision model. */
 export type ImportFormat =
-  "actual" | "camt053" | "generic-csv" | "ofx" | "qif" | "statement" | "ynab";
+  | "actual"
+  | "camt053"
+  | "generic-csv"
+  | "ofx"
+  | "pdf"
+  | "qif"
+  | "statement"
+  | "ynab";
+
+/**
+ * Whether a PDF statement's balances add up: its opening balance plus its rows is its closing
+ * balance (`matched`), or not (`mismatch`, with the `difference` the rows are missing), or it prints
+ * no balances to check (`unavailable`).
+ */
+export interface StatementReconciliation {
+  closingBalance: number | null;
+  currency: string | null;
+  difference: number | null;
+  openingBalance: number | null;
+  rowsTotal: number;
+  status: "matched" | "mismatch" | "unavailable";
+}
+
+/** A PDF statement's read: its pages, how many are read, and once all are, its balance check. */
+export interface StatementExtraction {
+  pageCount: number | null;
+  pagesRead: number;
+  reconciliation?: StatementReconciliation;
+}
 
 /** A category the file uses (YNAB, Actual Budget), for the category-mapping step. */
 export interface ImportSourceCategory {
@@ -82,6 +110,8 @@ export interface TransactionImportSession {
   }[];
   /** The file's categories, for the category-mapping step; empty for a format that maps none. */
   sourceCategories: ImportSourceCategory[];
+  /** A PDF statement's pages and balance check; null for other formats, absent on an older API. */
+  statementExtraction?: StatementExtraction | null;
   status: ImportSessionStatus;
   upload: { key: string; url: string } | null;
   warnings: { code: string; detail?: string; sourceRow?: number }[];
@@ -222,6 +252,44 @@ export function useCreateTransactionImport() {
   });
 }
 
+export interface CreatePdfTransactionImportRequest {
+  accountId: number | string;
+  /** The PDF's size in bytes; the upload link is signed for exactly this. */
+  contentLength: number;
+  fileName?: string;
+}
+
+/**
+ * Start a PDF statement import: the session waits for the PDF, and carries the link to PUT it to.
+ * Spends one of the household's daily statement imports.
+ */
+export function useCreatePdfTransactionImport() {
+  return useMutation({
+    mutationFn: ({
+      accountId,
+      contentLength,
+      fileName,
+    }: CreatePdfTransactionImportRequest) =>
+      api
+        .post<{ session: TransactionImportSession }>(`${base}/pdf`, {
+          accountId: Number(accountId),
+          contentLength,
+          ...(fileName ? { fileName } : {}),
+        })
+        .then((response) => response.data.session),
+  });
+}
+
+/** Read the uploaded file: the first read of a PDF statement, once it is uploaded. */
+export function useStartTransactionImportRead() {
+  return useMutation({
+    mutationFn: (id: string) =>
+      api
+        .post<{ session: TransactionImportSession }>(`${base}/${id}/parse`, {})
+        .then((response) => response.data.session),
+  });
+}
+
 /** A mutation on one session that refreshes every page of it read so far. */
 function useSessionMutation<TInput>(
   request: (id: string, input: TInput) => Promise<unknown>,
@@ -283,9 +351,14 @@ export function useParseTransactionImport() {
   );
 }
 
+/** `acknowledgeMismatch`: the person saw that a PDF statement's balances do not add up, and imports it anyway. */
 export function useCommitTransactionImport() {
-  return useSessionMutation((id: string, _input: undefined) =>
-    api.post(`${base}/${id}/commit`),
+  return useSessionMutation(
+    (id: string, input: { acknowledgeMismatch?: boolean } | undefined) =>
+      api.post(
+        `${base}/${id}/commit`,
+        input?.acknowledgeMismatch ? { acknowledgeMismatch: true } : undefined,
+      ),
   );
 }
 

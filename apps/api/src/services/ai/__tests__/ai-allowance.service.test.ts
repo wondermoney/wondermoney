@@ -16,8 +16,9 @@ describe('aiDailyLimit', () => {
   });
 
   it('reads one limit per feature', () => {
-    const env = { AI_DAILY_LIMIT_ASSISTANT: '40', AI_DAILY_LIMIT_CSV_MAPPING: '0', AI_DAILY_LIMIT_OCR: '10' };
+    const env = { AI_DAILY_LIMIT_ASSISTANT: '40', AI_DAILY_LIMIT_CSV_MAPPING: '0', AI_DAILY_LIMIT_OCR: '10', AI_DAILY_LIMIT_STATEMENT_IMPORT: '3' };
     expect(aiDailyLimit('assistant', env)).toBe(40);
+    expect(aiDailyLimit('statementImport', env)).toBe(3);
     expect(aiDailyLimit('ocr', env)).toBe(10);
     expect(aiDailyLimit('csvMapping', env)).toBe(0);
   });

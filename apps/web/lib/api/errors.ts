@@ -69,6 +69,11 @@ export const API_ERROR_CODE = {
   LOAN_PROJECTION_UNAVAILABLE: "loan_projection_unavailable",
   /** A split transaction cannot be linked as a loan repayment until its split is removed (409). */
   TRANSACTION_IS_SPLIT: "transaction_is_split",
+  /** A PDF statement over the server's size limit (400). */
+  STATEMENT_TOO_LARGE: "statement_too_large",
+  /** Committing a PDF statement whose balances do not add up, without acknowledging it (409). */
+  STATEMENT_RECONCILIATION_UNACKNOWLEDGED:
+    "statement_reconciliation_unacknowledged",
   UNAUTHORIZED: "unauthorized",
   VALIDATION_FAILED: "validation_failed",
 } as const;

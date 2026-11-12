@@ -65,18 +65,25 @@ describe('importStage', () => {
   })
 
   it('never commits a file whose categories need mapping (a YNAB export): it is imported on the web', () => {
-    expect(importStage(session({ format: 'ynab' }))).toEqual({ kind: 'needs-web' })
-    expect(importStage(session({ status: 'needs_mapping', format: 'ynab', canCommit: false }))).toEqual({ kind: 'needs-web' })
-    expect(importStage(session({ sourceCategories: [{ label: 'Bills: Rent' }] }))).toEqual({ kind: 'needs-web' })
+    expect(importStage(session({ format: 'ynab' }))).toEqual({ kind: 'needs-web', reason: 'categories' })
+    expect(importStage(session({ status: 'needs_mapping', format: 'ynab', canCommit: false }))).toEqual({ kind: 'needs-web', reason: 'categories' })
+    expect(importStage(session({ sourceCategories: [{ label: 'Bills: Rent' }] }))).toEqual({ kind: 'needs-web', reason: 'categories' })
     expect(importStage(session({ status: 'parsing', format: 'ynab' }))).toEqual({ kind: 'reading', stalled: false })
-    expect(isFinishedStage({ kind: 'needs-web' })).toBe(false)
+    expect(isFinishedStage({ kind: 'needs-web', reason: 'categories' })).toBe(false)
   })
 
   it('never commits an Actual Budget export, even one whose rows have no categories: it is imported on the web', () => {
-    expect(importStage(session({ format: 'actual' }))).toEqual({ kind: 'needs-web' })
-    expect(importStage(session({ status: 'needs_mapping', format: 'actual', canCommit: false }))).toEqual({ kind: 'needs-web' })
+    expect(importStage(session({ format: 'actual' }))).toEqual({ kind: 'needs-web', reason: 'categories' })
+    expect(importStage(session({ status: 'needs_mapping', format: 'actual', canCommit: false }))).toEqual({ kind: 'needs-web', reason: 'categories' })
     expect(importStage(session({ status: 'parsing', format: 'actual' }))).toEqual({ kind: 'reading', stalled: false })
     expect(importStage(session({ status: 'importing', format: 'actual' }))).toMatchObject({ kind: 'importing' })
+  })
+
+  it('sends a PDF statement to the web once it is read: the app has no balance check to acknowledge', () => {
+    expect(importStage(session({ status: 'parsing', format: 'pdf' }))).toEqual({ kind: 'reading', stalled: false })
+    expect(importStage(session({ status: 'ready', format: 'pdf' }))).toEqual({ kind: 'needs-web', reason: 'pdf' })
+    expect(importStage(session({ status: 'failed', format: 'pdf', errorCode: 'too_many_pages' }))).toEqual({ kind: 'read-failed' })
+    expect(importStage(session({ status: 'succeeded', format: 'pdf' }))).toMatchObject({ kind: 'done', outcome: 'succeeded' })
   })
 
   it('reports commit progress as rows imported of rows to import', () => {

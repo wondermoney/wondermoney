@@ -42,7 +42,7 @@ As duas chaves passam a ser as credenciais do armazenamento, que não arranca se
 
 ## Funcionalidades de IA
 
-A leitura de recibos, o mapeamento de colunas CSV, a categorização de transações, o resumo mensal e o assistente funcionam com qualquer endpoint compatível com OpenAI: OpenAI, OpenRouter, ou um modelo a correr localmente com Ollama, LM Studio ou vLLM.
+A leitura de recibos, o mapeamento de colunas CSV, a importação de extratos em PDF, a categorização de transações, o resumo mensal e o assistente funcionam com qualquer endpoint compatível com OpenAI: OpenAI, OpenRouter, ou um modelo a correr localmente com Ollama, LM Studio ou vLLM.
 
 ```sh
 AI_BASE_URL=http://host.docker.internal:11434/v1
@@ -61,7 +61,18 @@ AI_MODEL=claude-sonnet-4-5
 
 `AI_MODEL`, ou `AI_MODEL_<FUNCIONALIDADE>` para uma funcionalidade, é obrigatório: não há modelo predefinido. A leitura de recibos precisa de um modelo que leia imagens, por isso define `AI_MODEL_OCR` se o teu modelo predefinido não o fizer. A Anthropic tem prioridade sobre `AI_BASE_URL`, mas uma configuração Azure completa continua a ter precedência.
 
-Se o registo estiver aberto e pagares pelo modelo, define `AI_REQUIRES_VERIFIED_EMAIL=true`. As contas criadas com email e palavra-passe recebem então um link de verificação por email, e têm de o seguir antes de poderem usar o assistente, a leitura de recibos ou o mapeamento de colunas com IA. As contas Google e Apple contam como verificadas. É preciso ter o email configurado.
+A [importação de extratos em PDF](/pt/docs/accounts-transactions/import-pdf-statements) envia cada página do extrato ao modelo como imagem, por isso precisa de um modelo que leia imagens. Num endpoint compatível com OpenAI fica desligada até indicares um com `AI_MODEL_STATEMENT_IMPORT`; o `AI_MODEL` não é usado para ela, porque um modelo local predefinido muitas vezes só lê texto. Na Anthropic usa `AI_MODEL_STATEMENT_IMPORT`, ou `AI_MODEL` quando esse estiver vazio. A aplicação diz à pessoa qual é o fornecedor antes de enviar qualquer página: a Anthropic ou o Azure OpenAI pelo nome, um endpoint compatível com OpenAI como o fornecedor de IA configurado no servidor. O endereço do endpoint nunca é mostrado, e `GET /v1/instance` indica apenas o tipo de fornecedor.
+
+| Definição | O que faz |
+|---|---|
+| `AI_MODEL_STATEMENT_IMPORT` | O modelo que lê os extratos em PDF. Obrigatório num endpoint compatível com OpenAI |
+| `AI_DAILY_LIMIT_STATEMENT_IMPORT` | Extratos em PDF que um agregado pode importar por dia; cada extrato conta como um, tenha as páginas que tiver. Vazio significa sem limite |
+| `STATEMENT_IMPORT_MAX_BYTES` | O maior PDF aceite, em bytes. Por omissão `10485760` (10 MB) |
+| `STATEMENT_IMPORT_MAX_PAGES` | O número máximo de páginas de um extrato. Cada página é um pedido ao modelo, por isso também limita quanto custa um extrato. Por omissão `20` |
+
+Define os dois limites na API e no worker; um valor que não seja um número inteiro positivo impede-os de arrancar.
+
+Se o registo estiver aberto e pagares pelo modelo, define `AI_REQUIRES_VERIFIED_EMAIL=true`. As contas criadas com email e palavra-passe recebem então um link de verificação por email, e têm de o seguir antes de poderem usar o assistente, a leitura de recibos, o mapeamento de colunas com IA ou a importação de extratos em PDF. As contas Google e Apple contam como verificadas. É preciso ter o email configurado.
 
 Para limitar o que cada agregado pode gastar no modelo por dia, define `AI_DAILY_LIMIT_ASSISTANT` (mensagens ao assistente), `AI_DAILY_LIMIT_OCR` (leituras de recibos) e `AI_DAILY_LIMIT_CSV_MAPPING` (importações CSV mapeadas pelo modelo). Os membros de um agregado partilham o limite, que é reposto à meia-noite UTC. Deixa-os vazios para não haver limite. Quando um agregado chega a um limite, a aplicação avisa até ao dia seguinte; as importações CSV continuam a funcionar, com as colunas mapeadas à mão.
 
@@ -139,7 +150,7 @@ Nada é enviado para o projeto WonderMoney. Cada serviço externo que a tua inst
 |---|---|---|
 | Banco Central Europeu | O worker, uma vez por dia, para descarregar as taxas de câmbio do euro. Não envia dados sobre ti nem sobre os teus utilizadores | Sempre ligado |
 | Email (o teu servidor SMTP ou o Resend) | A API e o worker, para enviar redefinições de palavra-passe, convites e notificações | `SMTP_HOST` ou `RESEND_API_KEY` |
-| IA (o teu endpoint compatível com OpenAI ou a Anthropic) | A API e o worker, com o recibo, as colunas do CSV, as transações ou as mensagens de chat de que a funcionalidade precisa | `AI_BASE_URL` e `AI_MODEL`, ou `AI_PROVIDER=anthropic`, `ANTHROPIC_API_KEY` e `AI_MODEL` |
+| IA (o teu endpoint compatível com OpenAI ou a Anthropic) | A API e o worker, com o recibo, as colunas do CSV, as páginas do extrato, as transações ou as mensagens de chat de que a funcionalidade precisa | `AI_BASE_URL` e `AI_MODEL`, ou `AI_PROVIDER=anthropic`, `ANTHROPIC_API_KEY` e `AI_MODEL` |
 | Dados de mercado (EODHD) | A API e o worker, com símbolos de cotação, não dados de utilizadores | `EODHD_API_KEY` |
 | Armazenamento de ficheiros (o teu armazenamento compatível com S3) | A API e os navegadores, para importações de CSV e cópias de recibos | `S3_ENDPOINT` e `S3_BUCKET` |
 | Cópias de segurança fora do servidor (o teu destino rclone) | O serviço `backup-offsite`, uma vez por dia, com as cópias da base de dados e dos ficheiros | O perfil `backup-offsite` e `BACKUP_DESTINATION` ([Atualizações e cópias de segurança](/pt/docs/self-hosting/upgrade-and-backup#cópias-fora-do-servidor)) |
