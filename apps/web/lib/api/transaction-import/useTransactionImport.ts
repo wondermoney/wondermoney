@@ -87,10 +87,21 @@ export interface TransactionImportSession {
   warnings: { code: string; detail?: string; sourceRow?: number }[];
 }
 
+/**
+ * Why a row is a duplicate or a possible one: its id is on the account (`same_id`), it repeats an
+ * earlier row of the file (`earlier_in_file`), it likely repeats the matched transaction
+ * (`likely`), or several transactions could be it and none is matched (`ambiguous`).
+ */
+export type ImportMatchReason =
+  "same_id" | "earlier_in_file" | "likely" | "ambiguous";
+
 export interface TransactionImportRow {
   decision: ImportDecision | null;
   error: string | null;
   id: number;
+  /** Absent from an API that predates it. */
+  matchReason?: ImportMatchReason | null;
+  /** The transaction on the account the row repeats, or likely repeats. */
   matchedTransaction: {
     amount: number | null;
     date: string | null;

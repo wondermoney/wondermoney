@@ -30,7 +30,7 @@ En una instancia autoalojada, las importaciones también necesitan [almacenamien
 - **Transferencias.** Una fila cuyo beneficiario es `Transfer : <Cuenta>` es un lado de una transferencia. Los dos lados se importan como transferencias y, cuando se importan las dos cuentas, las dos filas quedan enlazadas como una sola transferencia, que los informes dejan fuera de los ingresos y los gastos.
 - **Ready to Assign.** Las entradas en Ready to Assign (To be Budgeted en presupuestos más antiguos, Income en YNAB 4) se importan como ingresos sin categoría.
 - **Categorías.** Una categoría que asociaste queda en la fila como elección tuya, así que la categorización aprendida no la sustituye más adelante. Una regla del hogar que coincida con la fila se sigue aplicando, como en cualquier transacción nueva.
-- **Duplicados.** La exportación de YNAB no tiene identificadores de transacción, así que cada fila se reconoce por su fecha y su importe dentro de su cuenta. Importar de nuevo la misma exportación encuentra sus filas ya en la cuenta y las omite.
+- **Duplicados.** La exportación de YNAB no tiene identificadores de transacción, así que cada fila se reconoce por su fecha y su importe dentro de su cuenta. Importar de nuevo la misma exportación encuentra sus filas ya en la cuenta y las omite. Una fila con el mismo importe que una transacción que ya está en su cuenta, con hasta 3 días de diferencia (una que trajo la sincronización bancaria, por ejemplo), es un [posible duplicado](/es/docs/accounts-transactions/import-transactions-csv#posibles-duplicados): se omite a menos que la incluyas.
 
 ## Problemas comunes
 

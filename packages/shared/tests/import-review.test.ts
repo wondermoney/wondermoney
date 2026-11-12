@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { canDecide, commitOutcome, countRows, defaultDecision, isMappingComplete, unmappedSourceAccounts } from '../lib/import/review';
+import { canDecide, commitOutcome, countRows, defaultDecision, isMappingComplete, matchReason, unmappedSourceAccounts } from '../lib/import/review';
 import type { ImportRowStatus } from '../lib/import/types';
 
 /*
@@ -24,6 +24,17 @@ describe('import review rules', () => {
     expect(canDecide('invalid')).toBe(false);
     expect(canDecide('imported')).toBe(false);
     expect(canDecide('failed')).toBe(false);
+  });
+
+  it.each<[ImportRowStatus, boolean, ReturnType<typeof matchReason>]>([
+    ['duplicate', true, 'same_id'],
+    ['duplicate', false, 'earlier_in_file'],
+    ['possible_duplicate', true, 'likely'],
+    ['possible_duplicate', false, 'ambiguous'],
+    ['new', false, null],
+    ['skipped', true, null],
+  ])('explains a %s row (matched: %s) as %s', (status, matched, reason) => {
+    expect(matchReason(status, matched)).toBe(reason);
   });
 
   it('counts every status, including the ones with no rows', () => {

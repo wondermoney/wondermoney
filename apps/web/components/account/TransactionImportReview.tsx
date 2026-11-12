@@ -81,8 +81,9 @@ interface TransactionImportReviewProps {
 
 /**
  * The review step of a staged import: the file's rows by status (new, already
- * in the account, unreadable), each included or skipped, in bulk or one by
- * one; an account per source account when the file holds several (one of the
+ * in the account, possible duplicates, unreadable), each included or skipped,
+ * in bulk or one by one, a possible duplicate beside the transaction it likely
+ * repeats; an account per source account when the file holds several (one of the
  * person's, or a new manual account); a category per category the file uses
  * (YNAB), matched by name in the person's language where one matches; then the
  * commit, which runs in the background and can be retried where it stopped.
@@ -484,8 +485,82 @@ function ReviewRow({
           </Badge>
           {row.error ? <span>{row.error}</span> : null}
         </div>
+        {row.status === "possible_duplicate" ? (
+          <PossibleDuplicate row={row} formatDate={formatDate} />
+        ) : null}
       </div>
     </li>
+  );
+}
+
+/**
+ * Why a row may already be in the account: the row beside the transaction it likely repeats, so
+ * the person can compare them before including it, or, when several transactions could be it,
+ * that none was matched.
+ */
+function PossibleDuplicate({
+  row,
+  formatDate,
+}: {
+  row: TransactionImportRow;
+  formatDate: (iso: string) => string;
+}) {
+  const t = useTranslations();
+  const matched = row.matchedTransaction;
+  if (row.matchReason === "ambiguous" || !matched) {
+    return (
+      <p
+        className="text-muted-foreground text-xs"
+        data-testid="transaction-import-ambiguous"
+      >
+        {t("import-review-match-ambiguous")}
+      </p>
+    );
+  }
+  const sides = [
+    {
+      amount: row.normalized?.amount ?? null,
+      date: row.normalized?.date ?? null,
+      description:
+        row.normalized?.merchant ?? row.normalized?.description ?? null,
+      label: t("import-review-match-file"),
+    },
+    {
+      amount: matched.amount,
+      date: matched.date,
+      description: matched.description,
+      label: t("import-review-match-account"),
+    },
+  ];
+  return (
+    <div
+      className="border-border bg-muted/40 mt-1 flex flex-col gap-2 rounded-md border p-2 text-xs"
+      data-testid="transaction-import-match"
+    >
+      <p className="text-muted-foreground">{t("import-review-match-likely")}</p>
+      <dl className="grid grid-cols-2 gap-3">
+        {sides.map((side) => (
+          <div key={side.label} className="flex min-w-0 flex-col gap-0.5">
+            <dt className="text-muted-foreground">{side.label}</dt>
+            <dd className="truncate">{side.description ?? "—"}</dd>
+            <dd className="text-muted-foreground tabular-nums">
+              {side.date ? formatDate(side.date) : "—"}
+            </dd>
+            <dd>
+              {side.amount === null ? (
+                "—"
+              ) : (
+                <Amount
+                  value={side.amount}
+                  currency={row.normalized?.currency}
+                  tone="delta"
+                />
+              )}
+            </dd>
+          </div>
+        ))}
+      </dl>
+    </div>
   );
 }
 

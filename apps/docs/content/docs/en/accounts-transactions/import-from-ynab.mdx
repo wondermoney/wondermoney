@@ -30,7 +30,7 @@ On a self-hosted instance, imports also need [file storage](/en/docs/self-hostin
 - **Transfers.** A row whose payee is `Transfer : <Account>` is one side of a transfer. Both sides import as transfers, and when both accounts are imported the two rows are linked as one transfer, which reports leave out of income and spending.
 - **Ready to Assign.** Inflows to Ready to Assign (To be Budgeted in older budgets, Income in YNAB 4) import as income with no category.
 - **Categories.** A category you mapped is set on the row as your choice, so later learned categorization does not replace it. A household rule that matches the row still applies, as for any new transaction.
-- **Duplicates.** YNAB's export has no transaction ids, so each row is recognised by its date and amount within its account. Importing the same export again finds its rows already in the account and skips them.
+- **Duplicates.** YNAB's export has no transaction ids, so each row is recognised by its date and amount within its account. Importing the same export again finds its rows already in the account and skips them. A row with the same amount as a transaction already in its account, up to 3 days apart (one bank sync brought in, say), is a [possible duplicate](/en/docs/accounts-transactions/import-transactions-csv#possible-duplicates): skipped unless you include it.
 
 ## Common issues
 

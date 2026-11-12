@@ -5,6 +5,7 @@ import type { EntityManager } from '@mikro-orm/postgresql';
 import * as Sentry from '@sentry/node';
 import { transactionImport } from '@wondermoney/shared';
 
+import { HIDDEN_FILTER } from '@app/database/filters/tenant-filter';
 import { enqueueTransactionImportJob, type TransactionImportJobMode } from '@app/jobs/transaction-import.queue';
 import { Account } from '@entity/Account';
 import { Appuser } from '@entity/Appuser';
@@ -35,6 +36,8 @@ import logger from '@utils/logger';
 import { getFullName } from '@utils/misc';
 
 import { importFileName } from './import-file-name';
+import { findLikelyDuplicateCandidates } from './likely-duplicate-candidates';
+import { type LikelyDuplicateRow, matchLikelyDuplicates } from './likely-duplicate-match';
 import { statementImportAdapter, StatementUnreadableError, toStatementLine } from './statement-import-adapter';
 
 /**
@@ -46,9 +49,12 @@ import { statementImportAdapter, StatementUnreadableError, toStatementLine } fro
  *            to upload it to, and `parse` starts it.
  *   parse    a worker job reads the file with its format's adapter, stores every line as a
  *            `TransactionImportRow` in batches, and classifies each against its target account:
- *            `new`, `duplicate` (the same id is already there, or earlier in the file) or
- *            `invalid`. New rows default to import, duplicates to skip. A file with several
- *            accounts waits in `needs_mapping` until each has an account.
+ *            `new`, `duplicate` (the same id is already there, or earlier in the file),
+ *            `possible_duplicate` (no id matched, but a transaction there has the same amount
+ *            within a few days: `likely-duplicate-match.ts`) or `invalid`. New rows default to
+ *            import, duplicates and possible duplicates to skip (in a one-step import, which no one
+ *            reviews, possible duplicates import; duplicates are still skipped). A file with several accounts waits in
+ *            `needs_mapping` until each has an account.
  *   review   the person pages through the rows by status and includes or skips them, by row or
  *            in bulk (`decide`), and maps the file's accounts (`setAccountMapping`, which can also
  *            create a manual account for one) and, for a file with categories (YNAB), its
@@ -129,6 +135,9 @@ export interface TransactionImportRowView {
   decision: null | transactionImport.ImportDecision;
   error: null | string;
   id: number;
+  /** Why the row is a duplicate or a possible one; null for any other row. */
+  matchReason: null | transactionImport.ImportMatchReason;
+  /** The transaction on the target account the row repeats, or likely repeats. */
   matchedTransaction: null | { amount: null | number; date: null | string; description: null | string; id: number };
   normalized: null | Pick<transactionImport.NormalizedImportRow, 'amount' | 'categoryLabel' | 'currency' | 'date' | 'description' | 'merchant' | 'sourceAccountLabel' | 'transferAccountLabel'>;
   raw: Record<string, unknown>;
@@ -287,7 +296,8 @@ export class TransactionImportService {
     const pageSize = Math.min(Math.max(query.pageSize ?? DEFAULT_PAGE_SIZE, 1), MAX_PAGE_SIZE);
     const page = Math.max(query.page ?? 1, 1);
     const where = { transactionImportSessionKey: bySession(session.transactionImportSessionKey), ...(query.status ? { status: ROW_STATUS_OF[query.status] } : {}) };
-    const [rows, total] = await this.em.findAndCount(TransactionImportRow, where, { limit: pageSize, offset: (page - 1) * pageSize, orderBy: { sourceRow: 'asc' }, populate: ['matchedTransactionKey'] });
+    // A matched transaction the person hid is still the one the row repeats: show it.
+    const [rows, total] = await this.em.findAndCount(TransactionImportRow, where, { filters: { [HIDDEN_FILTER]: false }, limit: pageSize, offset: (page - 1) * pageSize, orderBy: { sourceRow: 'asc' }, populate: ['matchedTransactionKey'] });
     return { rows: { items: rows.map((row) => rowView(row)), page, pageSize, total }, session: await this.sessionView(session) };
   }
 
@@ -327,7 +337,7 @@ export class TransactionImportService {
       const label = row.normalized?.sourceAccountLabel;
       if (label !== undefined && session.accountMapping[label] !== undefined) row.targetAccountKey = accountRef(this.em, session.accountMapping[label]);
     }
-    await this.classifyStored(rows);
+    await this.classifyStored(scope, session, rows);
     session.status = transactionImport.isMappingComplete(session.sourceAccounts ?? [], session.accountMapping) ? SESSION_STATUS.READY : SESSION_STATUS.NEEDS_MAPPING;
     await this.em.flush();
     return this.sessionView(session);
@@ -476,14 +486,16 @@ export class TransactionImportService {
       const label = row.normalized?.sourceAccountLabel;
       return label === undefined ? null : (mapping[label] ?? null);
     };
-    const classified = await this.classify(result.rows.map((row) => ({ externalId: row.normalized?.externalId, readable: row.normalized !== undefined && row.error === undefined, sourceRow: row.sourceRow, target: targetOf(row) })));
+    // A session always has both; were one missing, the likely-duplicate lookup would find nothing.
+    const scope = { appuserKey: keyOf(session.appuserKey, 'appuserKey') ?? 0, tenantKey: keyOf(session.tenantKey, 'tenantKey') ?? 0 };
+    const classified = await this.classify(scope, result.rows.map((row) => ({ normalized: row.error === undefined ? row.normalized : undefined, sourceRow: row.sourceRow, target: targetOf(row) })));
     const now = this.now;
     for (let start = 0; start < result.rows.length; start += ROW_BATCH_SIZE) {
       const batch = result.rows.slice(start, start + ROW_BATCH_SIZE).map((row) => {
         const outcome = classified.get(row.sourceRow)!;
         return {
           createdAt: now,
-          decision: decisionOf(transactionImport.defaultDecision(outcome.status)),
+          decision: decisionOf(defaultDecision(session, outcome.status, outcome.matched !== null)),
           error: row.error?.slice(0, 500) ?? null,
           matchedTransactionKey: outcome.matched,
           normalized: row.error === undefined ? (row.normalized ?? null) : null,
@@ -598,13 +610,15 @@ export class TransactionImportService {
 
   /**
    * Each row's status against its target account: `invalid` when it does not read, `duplicate`
-   * when its id is on the account already or earlier in the file, else `new` (also while its
-   * account is not chosen yet).
+   * when its id is on the account already or earlier in the file, `possible_duplicate` when no id
+   * matched but the account holds a transaction it likely repeats (with that transaction, or with
+   * none when several could be it), else `new` (also while its account is not chosen yet). A
+   * transaction an id matched is not a candidate for another row's likely match.
    */
-  private async classify(rows: { externalId?: string; readable: boolean; sourceRow: number; target: null | number }[]): Promise<Map<number, { matched: null | number; status: transactionImport.ImportRowStatus }>> {
+  private async classify(scope: TransactionImportScope, rows: { normalized?: null | transactionImport.NormalizedImportRow; sourceRow: number; target: null | number }[]): Promise<Map<number, { matched: null | number; status: transactionImport.ImportRowStatus }>> {
     const existing = new Map<number, Map<string, number>>();
     const byAccount = new Map<number, string[]>();
-    for (const row of rows) if (row.readable && row.target !== null && row.externalId) byAccount.set(row.target, [...(byAccount.get(row.target) ?? []), row.externalId]);
+    for (const row of rows) if (row.normalized && row.target !== null && row.normalized.externalId) byAccount.set(row.target, [...(byAccount.get(row.target) ?? []), row.normalized.externalId]);
     for (const [accountKey, ids] of byAccount) {
       const found = new Map<string, number>();
       for (let start = 0; start < ids.length; start += ROW_BATCH_SIZE) {
@@ -614,33 +628,57 @@ export class TransactionImportService {
     }
     const seen = new Map<number, Set<string>>();
     const outcome = new Map<number, { matched: null | number; status: transactionImport.ImportRowStatus }>();
+    /** Rows no id matched, by target account: they may still repeat a transaction there. */
+    const unmatched = new Map<number, { normalized: transactionImport.NormalizedImportRow; sourceRow: number }[]>();
+    const claimed = new Map<number, Set<number>>();
     for (const row of [...rows].sort((a, b) => a.sourceRow - b.sourceRow)) {
-      if (!row.readable) {
+      const normalized = row.normalized;
+      if (!normalized) {
         outcome.set(row.sourceRow, { matched: null, status: 'invalid' });
         continue;
       }
-      if (row.target === null || !row.externalId) {
+      if (row.target === null) {
         outcome.set(row.sourceRow, { matched: null, status: 'new' });
         continue;
       }
-      const matched = existing.get(row.target)?.get(row.externalId) ?? null;
+      const externalId = normalized.externalId;
+      const matched = externalId ? (existing.get(row.target)?.get(externalId) ?? null) : null;
       const seenHere = seen.get(row.target) ?? new Set<string>();
       seen.set(row.target, seenHere);
-      const repeated = seenHere.has(row.externalId);
-      seenHere.add(row.externalId);
+      const repeated = Boolean(externalId) && seenHere.has(externalId);
+      if (externalId) seenHere.add(externalId);
+      if (matched !== null) claimed.set(row.target, (claimed.get(row.target) ?? new Set()).add(matched));
       outcome.set(row.sourceRow, { matched, status: matched !== null || repeated ? 'duplicate' : 'new' });
+      if (matched === null && !repeated) unmatched.set(row.target, [...(unmatched.get(row.target) ?? []), { normalized, sourceRow: row.sourceRow }]);
+    }
+    for (const [accountKey, accountRows] of unmatched) {
+      const candidates = await findLikelyDuplicateCandidates(this.em, scope, accountKey, accountRows.map(({ normalized }) => normalized));
+      if (candidates.length === 0) continue;
+      const currency = await this.accountCurrency(accountKey);
+      const likelyRows = accountRows.map(({ normalized, sourceRow }): LikelyDuplicateRow => ({ amount: normalized.amount, currency: normalized.currency ?? currency, date: normalized.date, name: normalized.merchant ?? normalized.description, sourceRow }));
+      const likely = matchLikelyDuplicates(likelyRows, candidates, { claimed: claimed.get(accountKey) });
+      for (const [sourceRow, match] of likely) {
+        if (match.status === 'match') outcome.set(sourceRow, { matched: match.transactionKey, status: 'possible_duplicate' });
+        else if (match.status === 'ambiguous') outcome.set(sourceRow, { matched: null, status: 'possible_duplicate' });
+      }
     }
     return outcome;
   }
 
+  /** The currency code of an account. */
+  private async accountCurrency(accountKey: number): Promise<string> {
+    const account = await this.em.findOneOrFail(Account, { accountKey }, { filters: false, populate: ['currencyKey'] });
+    return account.currencyKey.code;
+  }
+
   /** {@link classify} for stored rows (after a mapping change), resetting decisions to the defaults. */
-  private async classifyStored(rows: TransactionImportRow[]): Promise<void> {
-    const outcome = await this.classify(rows.map((row) => ({ externalId: row.normalized?.externalId, readable: true, sourceRow: row.sourceRow, target: keyOf(row.targetAccountKey, 'accountKey') })));
+  private async classifyStored(scope: TransactionImportScope, session: TransactionImportSession, rows: TransactionImportRow[]): Promise<void> {
+    const outcome = await this.classify(scope, rows.map((row) => ({ normalized: row.normalized, sourceRow: row.sourceRow, target: keyOf(row.targetAccountKey, 'accountKey') })));
     for (const row of rows) {
       const next = outcome.get(row.sourceRow)!;
       row.status = ROW_STATUS_OF[next.status];
       row.matchedTransactionKey = next.matched === null ? null : transactionRef(this.em, next.matched);
-      row.decision = decisionOf(transactionImport.defaultDecision(next.status));
+      row.decision = decisionOf(defaultDecision(session, next.status, next.matched !== null));
     }
   }
 
@@ -708,9 +746,10 @@ export class TransactionImportService {
 
   /**
    * Write `rows` as transactions and flip them to `imported` (or `failed`, with the reason) in the
-   * caller's transaction. A row whose id has reached its account since the review (a bank sync
-   * in between) is skipped as the duplicate it now is; one the person chose to import although it
-   * repeats a stored id keeps that id as its fingerprint only.
+   * caller's transaction. A new or possible-duplicate row whose id has reached its account since
+   * the review (a bank sync in between) is skipped as the duplicate it now is; one the person
+   * chose to import although it repeats a stored id keeps that id as its fingerprint only. A
+   * possible duplicate the person chose to import is written as a new row: no id matched it.
    */
   private async writeRows(tx: EntityManager, rows: TransactionImportRow[], categories: ReadonlyMap<string, Category> = new Map()): Promise<void> {
     const contexts = new Map<number, StatementWriteContext>();
@@ -732,17 +771,18 @@ export class TransactionImportService {
         context = await statementWriteContext(tx, account);
         contexts.set(accountKey, context);
       }
-      const stored = await findImportedTransactionIds(tx, accountKey, accountRows.filter((row) => row.status === ROW_STATUS.NEW).map((row) => row.normalized!.externalId));
+      const unmatched = (row: TransactionImportRow) => row.status === ROW_STATUS.NEW || row.status === ROW_STATUS.POSSIBLE_DUPLICATE;
+      const stored = await findImportedTransactionIds(tx, accountKey, accountRows.filter(unmatched).map((row) => row.normalized!.externalId));
       for (const row of accountRows) {
         const normalized = row.normalized!;
-        const arrived = row.status === ROW_STATUS.NEW ? stored.get(normalized.externalId) : undefined;
+        const arrived = unmatched(row) ? stored.get(normalized.externalId) : undefined;
         if (arrived !== undefined) {
           row.status = ROW_STATUS.SKIPPED;
           row.matchedTransactionKey = transactionRef(tx, arrived);
           continue;
         }
         try {
-          const trustedId = row.status === ROW_STATUS.NEW && normalized.externalIdTrusted !== false;
+          const trustedId = unmatched(row) && normalized.externalIdTrusted !== false;
           const transaction = await buildStatementTransaction(tx, context, toStatementLine(normalized, row.sourceRow, context.account.currencyKey.code), { trustedId, trustedType: normalized.typeIsUserSet === true });
           tx.persist(transaction);
           const category = normalized.categoryLabel === undefined ? undefined : categories.get(normalized.categoryLabel);
@@ -964,6 +1004,21 @@ function operationStatusOf(session: TransactionImportSession, totals: CommitTota
   }
 }
 
+/** The reasons that come from the likely-duplicate match alone: rows that would otherwise be `new`. */
+const LIKELY_MATCH_REASONS: ReadonlySet<transactionImport.ImportMatchReason> = new Set<transactionImport.ImportMatchReason>(['ambiguous', 'likely']);
+
+/**
+ * What a row imports as unless the person says otherwise. A one-step import commits without a
+ * review, so a row flagged only by the likely-duplicate match, which no one has looked at and
+ * which would otherwise be new, imports there, as it did before that match existed. Every other
+ * duplicate (its id on the account, or a repeat of an earlier row of the file) keeps its default
+ * and is skipped.
+ */
+function defaultDecision(session: TransactionImportSession, status: transactionImport.ImportRowStatus, matched: boolean): null | transactionImport.ImportDecision {
+  const reason = transactionImport.matchReason(status, matched);
+  return session.autoCommit && reason !== null && LIKELY_MATCH_REASONS.has(reason) ? 'import' : transactionImport.defaultDecision(status);
+}
+
 function rowView(row: TransactionImportRow): TransactionImportRowView {
   const matched = row.matchedTransactionKey;
   const loaded = typeof matched?.transactionDate !== 'undefined' ? matched : null;
@@ -973,6 +1028,7 @@ function rowView(row: TransactionImportRow): TransactionImportRowView {
     error: row.error ?? null,
     id: row.transactionImportRowKey,
     matchedTransaction: matched ? { amount: loaded?.settlementAmount ?? null, date: loaded?.transactionDate?.toISOString() ?? null, description: loaded?.description ?? loaded?.descriptionDirty ?? null, id: matched.transactionKey } : null,
+    matchReason: transactionImport.matchReason(row.status, matched !== null && matched !== undefined),
     normalized: normalized ? { amount: normalized.amount, categoryLabel: normalized.categoryLabel, currency: normalized.currency, date: normalized.date, description: normalized.description, merchant: normalized.merchant, sourceAccountLabel: normalized.sourceAccountLabel, transferAccountLabel: normalized.transferAccountLabel } : null,
     raw: row.raw,
     sourceRow: row.sourceRow,

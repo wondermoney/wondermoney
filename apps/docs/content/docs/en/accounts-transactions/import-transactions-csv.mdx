@@ -30,6 +30,7 @@ On a self-hosted instance, imports also need [file storage](/en/docs/self-hostin
 5. Choose **Review transactions**. WonderMoney reads every row of the file and lists them, with nothing imported yet:
    - **New**: not in the account yet. These are included.
    - **Already in the account**: the same transaction was imported before, from this file or an overlapping export. These are skipped.
+   - **Possible duplicate**: nothing in the file identifies it as a transaction already in the account, but the account holds one with the same amount within a few days. These are skipped unless you include them. See [Possible duplicates](#possible-duplicates).
    - **Couldn't be read**: a row whose date or amount could not be read, with the reason. These never import.
 6. Check the list. Untick a row to skip it, or tick one to include it. Show one kind of row and choose **Include all** or **Skip all** to decide them together.
 7. Choose **Import**, which shows how many transactions it will add. The import runs in the background and shows its progress. If it stops part way (for example, the server restarts), choose **Try again**: it carries on from where it stopped, and nothing is imported twice.
@@ -38,7 +39,7 @@ A file that holds several accounts asks which of your accounts each one goes to 
 
 A QIF file whose dates could be day first or month first shows the choice in the review: pick the order the file uses and the rows are read again before you import.
 
-An import you don't finish expires after seven days. Seven days after an import, WonderMoney deletes the file you uploaded and its row-by-row list; the import keeps only the file's name and how many transactions were imported and skipped, and the imported transactions stay in the account. In the mobile app the import runs in one step: new transactions are imported and the ones already in the account are skipped, and a QIF file whose dates are ambiguous is read day first.
+An import you don't finish expires after seven days. Seven days after an import, WonderMoney deletes the file you uploaded and its row-by-row list; the import keeps only the file's name and how many transactions were imported and skipped, and the imported transactions stay in the account. In the mobile app the import runs in one step: new transactions are imported and the ones already in the account are skipped, possible duplicates are imported (no one has looked at them), and a QIF file whose dates are ambiguous is read day first.
 
 <DocsImage
   src="/images/docs/accounts-transactions/import-transactions-csv-import-modal.png"
@@ -47,6 +48,16 @@ An import you don't finish expires after seven days. Seven days after an import,
   width={1440}
   height={900}
 />
+
+## Possible duplicates
+
+The same purchase often arrives twice: once from bank sync and once from a file, a day apart or with a different description. A row of the file that nothing identifies as already imported is a possible duplicate when the account it goes to holds a transaction with the same amount, money in or money out, in the same currency, dated up to 3 days before or after it. The review shows the row beside that transaction, with the date, description and amount of each, so you can compare them.
+
+- When several transactions in the account could be the row, none of them is matched, and the review says so. When only one of them names the same merchant, that one is matched.
+- One transaction in the account answers for one row only. Two identical coffees in the file against one in the account leave one row a possible duplicate and the other new.
+- Only the account the row goes to is checked, and only transactions you can see on it. Deleted transactions do not count; hidden ones do.
+- A possible duplicate is skipped unless you include it, and nothing is dropped without your choice: tick it and the import adds it as a new transaction.
+- In a file with several accounts, each row is checked against the account you chose for it, and checked again when you change that choice.
 
 ## Review
 
