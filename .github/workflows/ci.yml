@@ -33,8 +33,9 @@ jobs:
   # Which apps a pull request affects, for the jobs that don't run through turbo (the API, web
   # E2E and mobile extras): every app on a full run, otherwise the ones `turbo ls --affected`
   # lists (an app is affected by its own changes and by those of the packages it depends on).
-  # It also reports whether the self-hosting files changed, for the shellcheck and install jobs:
-  # those build images, so they stay off an unrelated change.
+  # It also reports whether the self-hosting files changed, for the shellcheck and install jobs,
+  # and whether the Helm chart did, for the chart job: those build images, so they stay off an
+  # unrelated change.
   changes:
     name: Affected apps
     runs-on: ubuntu-latest
@@ -44,6 +45,7 @@ jobs:
       web: ${{ steps.apps.outputs.web }}
       mobile: ${{ steps.apps.outputs.mobile }}
       selfhost: ${{ steps.apps.outputs.selfhost }}
+      chart: ${{ steps.apps.outputs.chart }}
     steps:
       - uses: actions/checkout@v7
         with:
@@ -85,6 +87,17 @@ jobs:
             selfhost=true
           fi
           echo "selfhost=$selfhost" >> "$GITHUB_OUTPUT"
+
+          # The Helm chart and its kind test, for the chart job: it builds images too.
+          chart=false
+          if changed=$(git diff --name-only HEAD^1 HEAD 2>/dev/null); then
+            if grep -qE '^(charts/|\.github/scripts/chart-kind-test\.sh$)' <<<"$changed"; then
+              chart=true
+            fi
+          else
+            chart=true
+          fi
+          echo "chart=$chart" >> "$GITHUB_OUTPUT"
 
   # Type-check, lint, the tests of every package but the API, and the builds run as parallel jobs;
   # "Type-check, lint, test and build", further down, gathers them under the one check name they
@@ -353,6 +366,89 @@ jobs:
           if [ -f "$DIR/docker-compose.yml" ]; then
             docker compose -f "$DIR/docker-compose.yml" down -v
           fi
+
+  # The Helm chart (charts/wondermoney): lint, render the one- and two-hostname variants, then
+  # install it into a kind cluster with images built from this checkout, the images a release
+  # publishes alongside the chart. .github/scripts/chart-kind-test.sh checks readiness, routing,
+  # that an upgrade keeps the generated secrets, and that the worker refuses to scale. Gated on
+  # the chart's files: the image build is the expensive part.
+  chart:
+    name: Helm chart
+    needs: changes
+    if: needs.changes.outputs.chart == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      CHART: charts/wondermoney
+      IMAGE_TAG: ci
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: azure/setup-helm@v5
+        with:
+          version: v4.3.1
+      - name: helm lint
+        run: |
+          set -euo pipefail
+          helm lint --strict "$CHART" --set postgresql.enabled=true
+          for values in "$CHART"/ci/*-values.yaml; do
+            helm lint --strict "$CHART" -f "$values"
+          done
+      - name: helm template
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/rendered"
+          helm template wm "$CHART" --set postgresql.enabled=true > "$RUNNER_TEMP/rendered/bundled-postgres.yaml"
+          for values in "$CHART"/ci/*-values.yaml; do
+            helm template wm "$CHART" -f "$values" > "$RUNNER_TEMP/rendered/$(basename "$values")"
+          done
+          # Settings the chart must refuse.
+          if helm template wm "$CHART" --set postgresql.enabled=true --set worker.replicas=2 >/dev/null 2>&1; then
+            echo "::error::helm template accepted worker.replicas=2"
+            exit 1
+          fi
+          if helm template wm "$CHART" >/dev/null 2>&1; then
+            echo "::error::helm template rendered without any database"
+            exit 1
+          fi
+      # The Dockerfiles use `RUN --mount=type=cache`, which the classic builder does not support.
+      - uses: docker/setup-buildx-action@v4
+      - name: Build the images
+        run: |
+          set -euo pipefail
+          for target in api worker; do
+            docker buildx build --load --target "$target" \
+              -f apps/api/Dockerfile \
+              --build-arg WM_VERSION="$IMAGE_TAG" \
+              -t "ghcr.io/wondermoney/wondermoney-$target:$IMAGE_TAG" .
+          done
+          docker buildx build --load --target runner \
+            -f apps/web/Dockerfile \
+            --build-arg WM_VERSION="$IMAGE_TAG" \
+            -t "ghcr.io/wondermoney/wondermoney-web:$IMAGE_TAG" .
+      - uses: helm/kind-action@v1
+        with:
+          version: v0.33.0
+          cluster_name: chart
+      - name: Load the images into kind
+        run: |
+          set -euo pipefail
+          for image in api worker web; do
+            kind load docker-image --name chart "ghcr.io/wondermoney/wondermoney-$image:$IMAGE_TAG"
+          done
+      - name: Validate the rendered manifests against the cluster
+        run: kubectl apply --dry-run=server -f "$RUNNER_TEMP/rendered/"
+      - name: Install, upgrade and check
+        run: .github/scripts/chart-kind-test.sh
+      - name: Cluster state
+        if: failure()
+        run: |
+          kubectl get pods -A
+          kubectl -n wondermoney describe pods
+          for component in api worker web postgresql; do
+            kubectl -n wondermoney logs -l "app.kubernetes.io/component=$component" --all-containers --tail 100 || true
+          done
 
   # Secrets and text that must not be published in this public repository. gitleaks checks a pull
   # request's commits (a push: the whole tree) against the default rules and the allowlist in

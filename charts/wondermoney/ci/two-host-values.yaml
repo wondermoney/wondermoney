@@ -1,0 +1,14 @@
+# Two hostnames, with the shared cookie domain they need, and an external database.
+database:
+  host: postgres.example.com
+  existingSecret: wondermoney-db
+ingress:
+  enabled: true
+  host: money.example.com
+  apiHost: api.money.example.com
+  tls:
+    - secretName: wondermoney-tls
+      hosts: [money.example.com, api.money.example.com]
+config:
+  AUTH_COOKIE_DOMAIN: .example.com
+  NEXT_PUBLIC_AUTH_COOKIE_DOMAIN: .example.com

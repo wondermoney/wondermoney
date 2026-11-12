@@ -1,0 +1,24 @@
+{{- include "wondermoney.validate" . }}
+{{- $url := include "wondermoney.appUrl" . }}
+{{- $apiUrl := include "wondermoney.apiUrl" . }}
+{{- $trustProxy := include "wondermoney.trustProxy" . }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "wondermoney.configName" . }}
+  labels:
+    {{- include "wondermoney.labels" . | nindent 4 }}
+data:
+  {{- range $key, $value := .Values.config }}
+  {{- if and (ne (toString $value) "") (not (has $key (list "APP_URL" "API_URL" "TRUST_PROXY"))) }}
+  {{ $key }}: {{ toString $value | quote }}
+  {{- end }}
+  {{- end }}
+  APP_URL: {{ $url | quote }}
+  API_URL: {{ $apiUrl | quote }}
+  {{- if $trustProxy }}
+  TRUST_PROXY: {{ $trustProxy | quote }}
+  {{- end }}
+  # pg-boss creates and upgrades its own schema; it takes a lock, so the API and the worker can
+  # both do it.
+  PGBOSS_MIGRATE: "true"

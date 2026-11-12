@@ -1,0 +1,107 @@
+{{- $component := dict "root" . "component" "worker" }}
+{{- $api := include "wondermoney.componentName" (dict "root" . "component" "api") }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "wondermoney.componentName" $component }}
+  labels:
+    {{- include "wondermoney.componentLabels" $component | nindent 4 }}
+spec:
+  # Exactly one: the worker runs the schedules. Not a setting (see values.yaml), and Recreate
+  # stops the old pod before the new one starts, so two never run at once.
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      {{- include "wondermoney.componentSelectorLabels" $component | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "wondermoney.componentSelectorLabels" $component | nindent 8 }}
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+        checksum/secrets: {{ include "wondermoney.secretValues" . | sha256sum }}
+        {{- with .Values.worker.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      automountServiceAccountToken: false
+      {{- with .Values.image.pullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      securityContext:
+        {{- include "wondermoney.podSecurityContext" . | nindent 8 }}
+      initContainers:
+        # The API applies the database migrations when it starts; the worker waits for it, as in
+        # the compose install.
+        - name: wait-for-api
+          image: {{ include "wondermoney.image" (dict "root" . "image" .Values.worker.image) }}
+          {{- with .Values.image.pullPolicy }}
+          imagePullPolicy: {{ . }}
+          {{- end }}
+          securityContext:
+            {{- include "wondermoney.containerSecurityContext" . | nindent 12 }}
+          command:
+            - sh
+            - -c
+            - |
+              until curl -fsS -o /dev/null "http://{{ $api }}:3001/v1/health"; do
+                echo "Waiting for the API at {{ $api }}:3001"
+                sleep 3
+              done
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+      containers:
+        - name: worker
+          image: {{ include "wondermoney.image" (dict "root" . "image" .Values.worker.image) }}
+          {{- with .Values.image.pullPolicy }}
+          imagePullPolicy: {{ . }}
+          {{- end }}
+          securityContext:
+            {{- include "wondermoney.containerSecurityContext" . | nindent 12 }}
+          ports:
+            - name: health
+              containerPort: 3002
+          envFrom:
+            {{- include "wondermoney.serverEnvFrom" . | nindent 12 }}
+          env:
+            {{- include "wondermoney.databaseEnv" . | trim | nindent 12 }}
+            - name: PGBOSS_SCHEDULE
+              value: "true"
+            - name: WORKER_HEALTH_PORT
+              value: "3002"
+            {{- with .Values.extraEnv }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+          {{- with .Values.worker.startupProbe }}
+          startupProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.worker.livenessProbe }}
+          livenessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.worker.readinessProbe }}
+          readinessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.worker.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+      {{- with .Values.worker.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.worker.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.worker.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
