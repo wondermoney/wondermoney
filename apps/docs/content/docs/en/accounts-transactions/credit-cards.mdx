@@ -42,6 +42,16 @@ When your bank reports an account as a card, a synced account is marked as a cre
 - A refund counted as a payment reduces the statement balance.
 - A card with no limit set shows no available credit.
 
+## Statement history and reminders
+
+On the web, a card's account page has a **Statements** tab; on mobile the statements are listed under the current statement on the account screen. Select a statement to see the transactions assigned to it. Each statement is marked **Open** until it closes, **Closed** once it has closed with a balance still to pay, **Paid** when payments cover what it charged, or **Overdue** when it is still unpaid after its due date. A payment goes to the oldest statement that still has a balance, and any amount beyond that balance carries forward to the next one.
+
+A closed statement that still has a balance gets one email reminder a few days before it is due: three days by default. If a day is missed, the reminder goes out on the next day, up to the due date itself. A statement that is paid before then gets no reminder. The reminder goes to the person who owns the card, in English or Portuguese.
+
+Reminders are on by default. Turn off **Card payment reminders** in **Settings → Notifications** to stop them; unsubscribing from all emails stops them too. Reminders are sent by email only.
+
+On a self-hosted instance, reminders need an email provider (see [Configure your instance](/en/docs/self-hosting/configure#email)). Set `CREDIT_CARD_DUE_REMINDER_DAYS` on the worker to change how many days before the due date they are sent.
+
 ## Related links
 
 - [Understand transactions](/en/docs/accounts-transactions/understand-transactions)

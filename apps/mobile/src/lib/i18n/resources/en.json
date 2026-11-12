@@ -3274,6 +3274,11 @@
       "description": "Get an email when a bank's access is about to end (7 days and 1 day before), when a bank ends access early, or when a bank has failed to sync for more than 2 days.",
       "detail": "Only the bank connections you set up are included."
     },
+    "creditCardDueReminders": {
+      "title": "Card payment reminders",
+      "description": "Get an email a few days before a closed credit card statement is due, if it still has a balance to pay.",
+      "detail": "Sent by email only. At most one reminder per statement."
+    },
     "marketingOptOut": {
       "title": "Unsubscribe from all marketing emails",
       "description": "Turn off every optional email above at once. You can turn it back on at any time.",
@@ -4369,7 +4374,22 @@
     "dueHelper": "Pay by this day to avoid interest.",
     "availableCredit": "Available credit",
     "limitOf": "Of {{limit}}",
-    "limitNotSet": "No credit limit set"
+    "limitNotSet": "No credit limit set",
+    "historyTitle": "Statement history",
+    "historyDue": "Due {{date}}",
+    "historyRow": "Statement {{start}} to {{end}}, balance {{balance}}, {{status}}",
+    "status": {
+      "open": "Open",
+      "closed": "Closed",
+      "paid": "Paid",
+      "overdue": "Overdue"
+    },
+    "transactionsTitle": "Statement transactions",
+    "transactionsLoading": "Loading statement transactions…",
+    "transactionsError": "Could not load these transactions. Try again.",
+    "transactionsInvalid": "These transactions could not be verified, so they are not shown.",
+    "transactionsEmpty": "No transactions in this statement.",
+    "transactionUnavailable": "Transaction details unavailable"
   },
   "rules": {
     "title": "Rules",

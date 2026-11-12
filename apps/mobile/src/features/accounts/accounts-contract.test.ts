@@ -5,6 +5,8 @@ import {
   accountsEndpoint,
   accountsResponseSchema,
   createAccountDetailEndpoint,
+  createCreditCardStatementDetailEndpoint,
+  createCreditCardStatementsEndpoint,
   createDeleteAccountEndpoint,
   createUpdateAccountEndpoint,
   parseAccountId,
@@ -25,6 +27,17 @@ const account = {
 }
 
 describe('accounts contract', () => {
+  it('builds statement history and selected-detail requests and verifies transaction fields', () => {
+    expect(createCreditCardStatementsEndpoint(12)).toMatchObject({ method: 'GET', path: '/v1/account/12/statements' })
+    expect(createCreditCardStatementsEndpoint(12, { from: '2026-01-01', to: '2026-03-31' }).path).toContain('?from=2026-01-01&to=2026-03-31')
+    expect(createCreditCardStatementDetailEndpoint(12, '2026-03-31')).toMatchObject({ method: 'GET', path: '/v1/account/12/statements/2026-03-31' })
+    expect(() => createCreditCardStatementsEndpoint(0)).toThrow(/account id/i)
+    expect(() => createCreditCardStatementDetailEndpoint(12, '2026-2-1')).toThrow(/statement date/i)
+    const statement = { periodStart: '2026-03-01', periodEnd: '2026-03-31', dueDate: '2026-04-10', charges: 42, payments: 0, balance: 42, availableCredit: 500, isCurrent: false, status: 'closed' }
+    const detail = { statement: { ...statement, transactions: [{ amount: 42, description: 'Coffee', merchantName: 'Cafe', transactionDate: '2026-03-04', transactionKey: 31 }] } }
+    expect(createCreditCardStatementDetailEndpoint(12, '2026-03-31').schema.parse(detail)).toEqual(detail)
+    expect(createCreditCardStatementDetailEndpoint(12, '2026-03-31').schema.safeParse({ statement: { ...statement, transactions: [{ ...detail.statement.transactions[0], transactionKey: 'private' }] } }).success).toBe(false)
+  })
   it('pins the read endpoint, preserves server order, and accepts empty lists', () => {
     expect(accountsEndpoint).toMatchObject({ method: 'GET', path: '/v1/account' })
     expect(accountsResponseSchema.parse({ accounts: [{ ...account, accountKey: 2 }, account] }).accounts.map((row) => row.accountKey)).toEqual([2, 12])

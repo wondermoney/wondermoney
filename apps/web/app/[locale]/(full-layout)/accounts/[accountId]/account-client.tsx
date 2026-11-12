@@ -13,6 +13,7 @@ import AccountForecastCallout from "@/components/account/AccountForecastCallout"
 import AccountTransactionAddModal from "@/components/account/AccountTransactionAddModal";
 import AccountTransactionImportModal from "@/components/account/AccountTransactionImportModal";
 import AccountTransactionsTable from "@/components/account/AccountTransactionsTable";
+import CreditCardStatements from "@/components/account/CreditCardStatements";
 import CreditCardStatementSummary from "@/components/account/CreditCardStatementSummary";
 import MetricsCards from "@/components/account/MetricsCards";
 import ProjectedTransactions from "@/components/account/ProjectedTransactions";
@@ -24,6 +25,7 @@ import { Link } from "@/components/ui/Link";
 import { ObjectHeader } from "@/components/ui/ObjectHeader";
 import { Section } from "@/components/ui/RuledSection";
 import { Spinner } from "@/components/ui/Spinner";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { GetAccountResponse } from "@/lib/api/account/useAccount";
 import useAccount from "@/lib/api/account/useAccount";
 import type { GetAccountForecastResponse } from "@/lib/api/account/useAccountForecast";
@@ -56,6 +58,8 @@ interface AccountClientProps {
   initialConfigsData: GetConfigsResponse;
   initialAccountMetricsData: GetAccountMetricsResponse;
   initialForecastData: GetAccountForecastResponse;
+  /** `?tab=statements` opens a credit card's statements tab (the reminder email links there). */
+  initialTab?: string;
 }
 
 export default function AccountClient({
@@ -67,6 +71,7 @@ export default function AccountClient({
   initialConfigsData,
   initialAccountMetricsData,
   initialForecastData,
+  initialTab,
 }: AccountClientProps) {
   const t = useTranslations();
   const posthog = usePostHog();
@@ -119,14 +124,19 @@ export default function AccountClient({
     },
   );
   const accountForecast =
-    forecastData?.accounts.find(
-      (series) => series.accountKey === accountId,
-    ) ?? null;
+    forecastData?.accounts.find((series) => series.accountKey === accountId) ??
+    null;
 
   // Table stuff
   const [transactionDateRange, setTransactionDateRange] = useState<
     DateRange | undefined
   >({ from: startOfDay(subDays(new Date(), 60)), to: startOfDay(new Date()) });
+
+  // A credit card's page splits into Overview and Statements; the reminder email links straight
+  // to the statements tab.
+  const [activeTab, setActiveTab] = useState(
+    initialTab === "statements" ? "statements" : "overview",
+  );
 
   // Add manual transaction modal
   const [isAddManualTransactionModalOpen, setIsAddManualTransactionOpen] =
@@ -185,96 +195,8 @@ export default function AccountClient({
     ? accountDisplayBalance(account)
     : { value: account.balance, currency: account.currencyKey.code };
 
-  return (
-    <div className="flex flex-col gap-10 lg:gap-12">
-      {/* One header for the object, replacing a name-only header plus a
-          separate "Account balance" card below it — the figure a person opens
-          this page to see was the third thing on it, boxed on its own.
-          § 9 ObjectHeader. */}
-      <ObjectHeader
-        backHref="/accounts"
-        backLabel={t("accounts")}
-        title={accountName}
-        subtitle={institutionName}
-        badges={
-          <>
-            {account.isPrivate && (
-              <span className="text-muted-foreground border-border flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs">
-                <Lock className="size-3" />
-                {t("account-private")}
-              </span>
-            )}
-            {!account.isOwnedByViewer && account.ownerFirstName && (
-              <span className="text-muted-foreground flex items-center gap-1 text-xs">
-                <Users className="size-3" />
-                {t("shared-by", { name: account.ownerFirstName })}
-              </span>
-            )}
-            <FxStatusBadge
-              view={fx}
-              originalCurrency={account.currencyKey.code}
-            />
-          </>
-        }
-        value={primaryBalance}
-        currency={balanceCurrency}
-        valueLabel={t("account-balance")}
-        secondaryValue={isMultiCurrency ? account.balance : undefined}
-        secondaryCurrency={account.currencyKey.code}
-        provenance={
-          <DataProvenance
-            updatedAt={clampSyncedAt(
-              account.syncStatus?.lastSyncedAt ?? account.refreshedAt,
-            )}
-            isStale={
-              account.syncStatus?.staleness === "stale" ||
-              account.syncStatus?.staleness === "very_stale"
-            }
-            label={(time) => t("provenance-balances-updated", { time })}
-          />
-        }
-        actions={
-          transactionAccount ? (
-            <>
-              <AccountTransactionImportModal
-                isOpen={isImportTransactionModalOpen}
-                setOpen={(open) => {
-                  if (!open) {
-                    closeImportTransactionModal();
-                  } else {
-                    openImportTransactionModal();
-                  }
-                }}
-                accounts={[transactionAccount]}
-                trigger={
-                  <Button variant="outline" className="w-full sm:w-auto">
-                    <Upload className="size-4" />
-                    {t("import-transactions")}
-                  </Button>
-                }
-              />
-              <AccountTransactionAddModal
-                isOpen={isAddManualTransactionModalOpen}
-                setOpen={(open) => {
-                  if (!open) {
-                    closeAddManualTransactionModal();
-                  } else {
-                    openAddManualTransactionModal();
-                  }
-                }}
-                accounts={[transactionAccount]}
-                trigger={
-                  <Button className="w-full sm:w-auto">
-                    <Plus className="size-4" />
-                    {t("add-transaction")}
-                  </Button>
-                }
-              />
-            </>
-          ) : null
-        }
-      />
-
+  const overviewSections = (
+    <>
       {/* Metrics */}
       <section>
         {isLoadingAccountMetricsData && !isAccountMetricsPlaceholderData ? (
@@ -393,6 +315,126 @@ export default function AccountClient({
           )}
         </div>
       </Section>
+    </>
+  );
+
+  const isCreditCard = Boolean(account.creditCard);
+
+  return (
+    <div className="flex flex-col gap-10 lg:gap-12">
+      {/* One header for the object, replacing a name-only header plus a
+          separate "Account balance" card below it — the figure a person opens
+          this page to see was the third thing on it, boxed on its own.
+          § 9 ObjectHeader. */}
+      <ObjectHeader
+        backHref="/accounts"
+        backLabel={t("accounts")}
+        title={accountName}
+        subtitle={institutionName}
+        badges={
+          <>
+            {account.isPrivate && (
+              <span className="text-muted-foreground border-border flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs">
+                <Lock className="size-3" />
+                {t("account-private")}
+              </span>
+            )}
+            {!account.isOwnedByViewer && account.ownerFirstName && (
+              <span className="text-muted-foreground flex items-center gap-1 text-xs">
+                <Users className="size-3" />
+                {t("shared-by", { name: account.ownerFirstName })}
+              </span>
+            )}
+            <FxStatusBadge
+              view={fx}
+              originalCurrency={account.currencyKey.code}
+            />
+          </>
+        }
+        value={primaryBalance}
+        currency={balanceCurrency}
+        valueLabel={t("account-balance")}
+        secondaryValue={isMultiCurrency ? account.balance : undefined}
+        secondaryCurrency={account.currencyKey.code}
+        provenance={
+          <DataProvenance
+            updatedAt={clampSyncedAt(
+              account.syncStatus?.lastSyncedAt ?? account.refreshedAt,
+            )}
+            isStale={
+              account.syncStatus?.staleness === "stale" ||
+              account.syncStatus?.staleness === "very_stale"
+            }
+            label={(time) => t("provenance-balances-updated", { time })}
+          />
+        }
+        actions={
+          transactionAccount ? (
+            <>
+              <AccountTransactionImportModal
+                isOpen={isImportTransactionModalOpen}
+                setOpen={(open) => {
+                  if (!open) {
+                    closeImportTransactionModal();
+                  } else {
+                    openImportTransactionModal();
+                  }
+                }}
+                accounts={[transactionAccount]}
+                trigger={
+                  <Button variant="outline" className="w-full sm:w-auto">
+                    <Upload className="size-4" />
+                    {t("import-transactions")}
+                  </Button>
+                }
+              />
+              <AccountTransactionAddModal
+                isOpen={isAddManualTransactionModalOpen}
+                setOpen={(open) => {
+                  if (!open) {
+                    closeAddManualTransactionModal();
+                  } else {
+                    openAddManualTransactionModal();
+                  }
+                }}
+                accounts={[transactionAccount]}
+                trigger={
+                  <Button className="w-full sm:w-auto">
+                    <Plus className="size-4" />
+                    {t("add-transaction")}
+                  </Button>
+                }
+              />
+            </>
+          ) : null
+        }
+      />
+
+      {isCreditCard ? (
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
+          <TabsList className="self-start">
+            <TabsTrigger value="overview">
+              {t("credit-card-overview")}
+            </TabsTrigger>
+            <TabsTrigger value="statements">
+              {t("credit-card-statements")}
+            </TabsTrigger>
+          </TabsList>
+          <TabsContent value="overview">
+            <div className="flex flex-col gap-10 lg:gap-12">
+              {overviewSections}
+            </div>
+          </TabsContent>
+          <TabsContent value="statements">
+            <CreditCardStatements
+              accountKey={account.accountKey}
+              currency={account.currencyKey.code}
+            />
+          </TabsContent>
+        </Tabs>
+      ) : (
+        overviewSections
+      )}
     </div>
   );
 }

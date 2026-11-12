@@ -10,6 +10,7 @@ export enum EmailCategory {
   ACCOUNT_RECOVERY = 'ACCOUNT_RECOVERY',
   BANK_SYNC_ALERTS = 'BANK_SYNC_ALERTS',
   BUDGET_ALERTS = 'BUDGET_ALERTS',
+  CREDIT_CARD_DUE_REMINDERS = 'CREDIT_CARD_DUE_REMINDERS',
   GROWTH = 'GROWTH',
   WEEKLY_INSIGHTS = 'WEEKLY_INSIGHTS',
 }
@@ -19,6 +20,7 @@ export interface EmailCategoryFlags {
   accountRecoveryEnabled: boolean;
   bankSyncAlertsEnabled: boolean;
   budgetAlertsEnabled: boolean;
+  creditCardDueRemindersEnabled: boolean;
   growthEmailsEnabled: boolean;
   weeklyInsightsEnabled: boolean;
 }
@@ -28,6 +30,7 @@ export const EMAIL_CATEGORY_FLAG: Record<EmailCategory, keyof EmailCategoryFlags
   [EmailCategory.ACCOUNT_RECOVERY]: 'accountRecoveryEnabled',
   [EmailCategory.BANK_SYNC_ALERTS]: 'bankSyncAlertsEnabled',
   [EmailCategory.BUDGET_ALERTS]: 'budgetAlertsEnabled',
+  [EmailCategory.CREDIT_CARD_DUE_REMINDERS]: 'creditCardDueRemindersEnabled',
   [EmailCategory.GROWTH]: 'growthEmailsEnabled',
   [EmailCategory.WEEKLY_INSIGHTS]: 'weeklyInsightsEnabled',
 };

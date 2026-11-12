@@ -238,6 +238,16 @@
   "credit-card-limit-of": "De {limit}",
   "credit-card-limit-not-set": "Sem limite de crédito definido",
   "credit-card-no-statement": "Ainda não há extrato para este período.",
+  "credit-card-overview": "Resumo",
+  "credit-card-statements": "Extratos",
+  "credit-card-statement-status-open": "Aberto",
+  "credit-card-statement-status-closed": "Fechado",
+  "credit-card-statement-status-paid": "Pago",
+  "credit-card-statement-status-overdue": "Em atraso",
+  "credit-card-due-date-of": "Vence a {date}",
+  "credit-card-statement-transactions": "Transações do extrato",
+  "credit-card-statement-transactions-empty": "Não há transações neste extrato.",
+  "credit-card-statement-transactions-error": "Não foi possível carregar as transações deste extrato.",
   "private-account": "Conta privada",
   "private-account-description": "Só você vê esta conta e as suas transações — o seu parceiro de agregado não a vê em lado nenhum.",
   "account-private": "Privada",
@@ -2270,6 +2280,11 @@
       "title": "Alertas de ligações bancárias",
       "description": "Um email quando o acesso a um banco está prestes a terminar (7 dias e 1 dia antes), quando o banco termina o acesso mais cedo ou quando um banco não sincroniza há mais de 2 dias.",
       "detail": "No máximo um email por ligação e por evento."
+    },
+    "creditCardDueReminders": {
+      "title": "Lembretes de pagamento do cartão",
+      "description": "Um email alguns dias antes do vencimento de um extrato de cartão de crédito fechado, se ainda tiver saldo por pagar.",
+      "detail": "Enviado apenas por email. No máximo um lembrete por extrato."
     },
     "marketingOptOut": {
       "title": "Cancelar subscrição de todos os emails de marketing",

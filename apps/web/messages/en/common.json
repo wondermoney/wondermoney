@@ -238,6 +238,16 @@
   "credit-card-limit-of": "Of {limit}",
   "credit-card-limit-not-set": "No credit limit set",
   "credit-card-no-statement": "No statement for this period yet.",
+  "credit-card-overview": "Overview",
+  "credit-card-statements": "Statements",
+  "credit-card-statement-status-open": "Open",
+  "credit-card-statement-status-closed": "Closed",
+  "credit-card-statement-status-paid": "Paid",
+  "credit-card-statement-status-overdue": "Overdue",
+  "credit-card-due-date-of": "Due {date}",
+  "credit-card-statement-transactions": "Statement transactions",
+  "credit-card-statement-transactions-empty": "No transactions in this statement.",
+  "credit-card-statement-transactions-error": "This statement’s transactions could not be loaded.",
   "private-account": "Private account",
   "private-account-description": "Only you can see this account and its transactions — your household partner won't see it anywhere.",
   "account-private": "Private",
@@ -2270,6 +2280,11 @@
       "title": "Bank connection alerts",
       "description": "An email when a bank's access is about to end (7 days and 1 day before), when the bank ends access early, or when a bank has failed to sync for more than 2 days.",
       "detail": "At most one email per connection and event."
+    },
+    "creditCardDueReminders": {
+      "title": "Card payment reminders",
+      "description": "An email a few days before a closed credit card statement is due, if it still has a balance to pay.",
+      "detail": "Sent by email only. At most one reminder per statement."
     },
     "marketingOptOut": {
       "title": "Unsubscribe from all marketing emails",

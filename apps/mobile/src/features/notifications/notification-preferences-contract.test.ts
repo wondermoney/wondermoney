@@ -8,6 +8,7 @@ const valid = {
   accountRecovery: { effectiveEnabled: true, storedEnabled: true },
   bankSyncAlerts: { effectiveEnabled: true, storedEnabled: true },
   budgetAlerts: { deliverySupported: true, effectiveEnabled: true, storedEnabled: true },
+  creditCardDueReminders: { effectiveEnabled: true, storedEnabled: true },
   growth: { effectiveEnabled: false, storedEnabled: false },
   marketingOptOut: false,
   weeklyInsights: { deliverySupported: false, effectiveEnabled: false, storedEnabled: true },
@@ -40,6 +41,12 @@ describe('notification preferences contract', () => {
     const { bankSyncAlerts: _omitted, ...older } = valid
     const parsed = notificationPreferencesSchema.parse(older)
     expect(parsed.bankSyncAlerts).toBeUndefined()
+  })
+
+  it('accepts a response from before card reminders existed and validates the new state', () => {
+    const { creditCardDueReminders: _omitted, ...older } = valid
+    expect(notificationPreferencesSchema.parse(older).creditCardDueReminders).toBeUndefined()
+    expect(notificationPreferencesSchema.safeParse({ ...valid, creditCardDueReminders: { storedEnabled: 'yes' } }).success).toBe(false)
   })
 
   it('rejects a malformed bankSyncAlerts category', () => {

@@ -16,7 +16,8 @@ export type NotificationStream =
   | "budgetAlerts"
   | "weeklyInsights"
   | "accountRecovery"
-  | "bankSyncAlerts";
+  | "bankSyncAlerts"
+  | "creditCardDueReminders";
 
 /** `budgetAlerts`/`weeklyInsights` carry `deliverySupported`; the other categories don't gate on deliverability. */
 export type NotificationPreference =
@@ -38,6 +39,7 @@ const STREAM_PATCH_FIELD: Record<
   weeklyInsights: "weeklyInsightsEnabled",
   accountRecovery: "accountRecoveryEnabled",
   bankSyncAlerts: "bankSyncAlertsEnabled",
+  creditCardDueReminders: "creditCardDueRemindersEnabled",
 };
 
 export function getNotificationPreferenceViewState(

@@ -23,6 +23,8 @@ EMAIL_FROM=money@example.com
 
 Or set `RESEND_API_KEY` to use Resend instead. To test without a real provider, use the bundled Mailpit: add `mail` to `COMPOSE_PROFILES`, set `SMTP_HOST=mailpit` and `SMTP_PORT=1025`, run `docker compose up -d`, and read the mail at http://localhost:8025.
 
+With no provider configured, the API writes each message to its log, and the worker sends no background reminders (card payment reminders, API token expiry). Card payment reminders go out a few days before a statement is due: set `CREDIT_CARD_DUE_REMINDER_DAYS` on the worker to change the lead time (3 by default, a whole number of days).
+
 ## File storage
 
 CSV imports and receipt copies need S3-compatible storage. To use the bundled store ([SeaweedFS](https://github.com/seaweedfs/seaweedfs)), set these in `.env` and run `docker compose up -d`:

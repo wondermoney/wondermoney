@@ -181,6 +181,10 @@ export const getCreditCardStatementsRequestSchema = z.object({
   params: z.object({ accountId: positiveIntId }),
   query: z.object({ from: validDate.optional(), to: validDate.optional() }),
 });
+/** `GET /:accountId/statements/:statementDate`: one statement, named by its close day. */
+export const getCreditCardStatementDetailRequestSchema = z.object({
+  params: z.object({ accountId: positiveIntId, statementDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/u) }),
+});
 export const recalculateAccountRequestSchema = z.object({ params: z.object({ accountId: positiveIntId }) });
 export const deleteAccountRequestSchema = z.object({ params: z.object({ accountId: positiveIntId }) });
 export const getRecentTransactionsRequestSchema = z.object({ params: z.object({ accountId: positiveIntId }) });

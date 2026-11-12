@@ -29,7 +29,7 @@ function creditCardStatementState(
     const list = statements.data.statements
     const current = list.find((statement) => statement.isCurrent) ?? list[list.length - 1]
     return current
-      ? { status: 'loaded', statement: current, creditLimit: creditCard.creditLimit ?? null }
+      ? { status: 'loaded', statement: current, statements: list, creditLimit: creditCard.creditLimit ?? null }
       : { status: 'empty' }
   }
   if (statements.error && statements.error instanceof ApiError && statements.error.code === 'invalid-response') return { status: 'invalid-response' }

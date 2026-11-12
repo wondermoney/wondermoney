@@ -13,10 +13,12 @@ import AccountClient from "./account-client";
 
 interface AccountPageProps {
   params: Promise<{ locale: string; accountId: string }>;
+  searchParams: Promise<{ tab?: string | string[] }>;
 }
 
-export default async function AccountPage({ params }: AccountPageProps) {
+export default async function AccountPage({ params, searchParams }: AccountPageProps) {
   const { locale, accountId: accountIdParam } = await params;
+  const { tab } = await searchParams;
   const accountId = Number(accountIdParam);
 
   if (!accountId || Number.isNaN(accountId)) {
@@ -56,6 +58,7 @@ export default async function AccountPage({ params }: AccountPageProps) {
       initialConfigsData={configsData}
       initialAccountMetricsData={accountMetricsData}
       initialForecastData={forecastData}
+      initialTab={Array.isArray(tab) ? tab[0] : tab}
     />
   );
 }

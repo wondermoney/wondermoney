@@ -5,6 +5,7 @@ import {
   renderAccountConnectedEmail,
   renderBankSyncAlertEmail,
   renderBudgetThresholdAlert,
+  renderCreditCardDueReminderEmail,
   renderInternalAlertEmail,
   renderLifecycleNudgeEmail,
   renderMonthlyStory,
@@ -340,6 +341,12 @@ await assert.rejects(
       subjects.add(alert.subject);
     }
   }
+  const spanish = await renderCreditCardDueReminderEmail({
+    language: "es", accountName: "Tarjeta", amountDue: "428,30 €",
+    periodLabel: "1–31 de octubre", dueDate: "25 de noviembre", daysUntilDue: 3,
+    statementUrl: "https://a.test/statements", settingsUrl: "https://a.test/settings",
+  });
+  assert.ok(spanish.text.includes("extracto"), "credit-card-due-reminder must render Spanish copy");
   assert.equal(subjects.size, kinds.length * 2, "each bank-sync-alert kind and language needs its own subject");
   await assert.rejects(
     renderBankSyncAlertEmail({ language: "en", kind: "consent_revoked", bankName: "X", reconnectUrl: "javascript:alert(1)", settingsUrl: "https://app.wonder.money/en/settings" }),
@@ -352,6 +359,46 @@ await assert.rejects(
   await assert.rejects(
     renderBankSyncAlertEmail({ language: "en", kind: "sync_failing", bankName: "X", reconnectUrl: "https://a.test/", settingsUrl: "https://a.test/" }),
     /failingSinceDate is required/,
+  );
+}
+
+// A credit-card payment reminder: the account, the amount and the due date reach both languages,
+// the CTA opens the statements, and no campaign tracking rides along.
+{
+  for (const language of ["en", "pt", "es"] as const) {
+    const reminder = await renderCreditCardDueReminderEmail({
+      language, firstName: "Ada", accountName: "Millennium Card", amountDue: "€428.30",
+      periodLabel: "1 – 31 October", dueDate: "25 November", daysUntilDue: 3,
+      statementUrl: "https://app.wonder.money/en/accounts/12?tab=statements",
+      settingsUrl: "https://app.wonder.money/en/settings?tab=notifications",
+    });
+    assert.ok(reminder.subject.includes("Millennium Card"), `credit-card-due-reminder subject missing account for ${language}`);
+    assert.ok(reminder.text.includes("€428.30"), `credit-card-due-reminder body missing amount for ${language}`);
+    assert.ok(reminder.text.includes("25 November"), `credit-card-due-reminder body missing due date for ${language}`);
+    assert.ok(reminder.html.includes("tab=statements"), `credit-card-due-reminder statement link missing for ${language}`);
+    assert.ok(reminder.html.includes("tab=notifications"), `credit-card-due-reminder settings link missing for ${language}`);
+    assert.ok(!/utm_/i.test(reminder.html), "credit-card-due-reminder must not carry campaign tracking");
+  }
+  const tomorrow = await renderCreditCardDueReminderEmail({
+    language: "en", accountName: "Millennium Card", amountDue: "€10.00",
+    periodLabel: "1 – 31 October", dueDate: "12 November", daysUntilDue: 1,
+    statementUrl: "https://a.test/statements", settingsUrl: "https://a.test/settings",
+  });
+  assert.ok(/tomorrow/i.test(tomorrow.subject), "a reminder due in one day must read as tomorrow");
+  for (const [language, word] of [["en", /today/i], ["pt", /hoje/i], ["es", /hoy/i]] as const) {
+    const today = await renderCreditCardDueReminderEmail({
+      language, accountName: "Millennium Card", amountDue: "€10.00",
+      periodLabel: "1 – 31 October", dueDate: "12 November", daysUntilDue: 0,
+      statementUrl: "https://a.test/statements", settingsUrl: "https://a.test/settings",
+    });
+    assert.ok(word.test(today.subject), `a reminder due today must say so in ${language}`);
+  }
+  await assert.rejects(
+    renderCreditCardDueReminderEmail({
+      language: "en", accountName: "X", amountDue: "€1.00", periodLabel: "p", dueDate: "d", daysUntilDue: 3,
+      statementUrl: "javascript:alert(1)", settingsUrl: "https://a.test/",
+    }),
+    /statementUrl must be an absolute http\(s\) URL/,
   );
 }
 

@@ -17,9 +17,10 @@ import {
 import { BrandFooterLine, BrandHeader, resolveBrandName } from "../../src/components/Brand";
 
 export type TransactionalEmailLanguage = "en" | "pt";
+type TransactionalEmailLayoutLanguage = TransactionalEmailLanguage | "es";
 
 export interface TransactionalEmailLayoutProps {
-  language: TransactionalEmailLanguage;
+  language: TransactionalEmailLayoutLanguage;
   preview: string;
   firstName?: string;
   heading: string;
@@ -33,9 +34,10 @@ export interface TransactionalEmailLayoutProps {
   brandName?: string;
 }
 
-function greetingFor(language: TransactionalEmailLanguage, firstName?: string): string {
+function greetingFor(language: TransactionalEmailLayoutLanguage, firstName?: string): string {
   const name = firstName?.trim();
   if (language === "pt") return name ? `Olá ${name},` : "Olá,";
+  if (language === "es") return name ? `Hola ${name},` : "Hola,";
   return name ? `Hi ${name},` : "Hi there,";
 }
 

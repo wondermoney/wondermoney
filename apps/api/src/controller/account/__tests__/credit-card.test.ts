@@ -12,7 +12,7 @@ import { BadRequestError, NotFoundError } from '@utils/errors';
 vi.mock('@app/app', async () => ({ DI: (await import('@app/database/di')).DI }));
 vi.mock('../../../app.js', async () => ({ DI: (await import('@app/database/di')).DI }));
 
-import { getCreditCardStatementsHandler, putCreditCardSettings } from '../credit-card';
+import { getCreditCardStatementDetailHandler, getCreditCardStatementsHandler, putCreditCardSettings } from '../credit-card';
 import { updateTransaction } from '../transactions';
 
 type Handler = (req: Request, res: Response, next: (error?: unknown) => void) => Promise<unknown>;
@@ -148,6 +148,19 @@ describe('credit card statements', () => {
     expect(list[0]).toMatchObject({ availableCredit: 800, balance: 200, charges: 300, payments: 100 });
   });
 
+  it('counts a payment made after the window against the statement it pays', async () => {
+    const em = db.em();
+    const household = await seedCard();
+    await addTransaction(em, household, { amount: -300, date: utc('2026-01-10'), status: 'BOOKED' });
+    await addTransaction(em, household, { amount: 300, date: utc('2026-02-05'), status: 'BOOKED' });
+
+    const result = await statements(household, { from: '2026-01-01', to: '2026-01-31' });
+
+    const list = (result.body as { statements: Record<string, unknown>[] }).statements;
+    expect(list).toHaveLength(1);
+    expect(list[0]).toMatchObject({ balance: 0, charges: 300, periodEnd: '2026-01-31', status: 'paid' });
+  });
+
   it('moves a transaction to the statement its override names', async () => {
     const em = db.em();
     const household = await seedCard();
@@ -177,6 +190,81 @@ describe('credit card statements', () => {
     await saveSettings(other, { paymentDueDay: 10, statementCloseDay: 31 });
 
     const result = await call(getCreditCardStatementsHandler, request({ params: { accountId: String(household.account.accountKey) }, query: {}, tenant: other.tenant, user: other.appuser }));
+
+    expect(result.error).toBeInstanceOf(NotFoundError);
+  });
+});
+
+describe('credit card statement detail', () => {
+  async function seedCardWithTransactions() {
+    const household = await seedCardHousehold();
+    await saveSettings(household, { creditLimit: 1000, paymentDueDay: 10, statementCloseDay: 31 });
+    const em = db.em();
+    const first = await addTransaction(em, household, { amount: -120, date: utc('2026-01-05'), status: 'BOOKED' });
+    const second = await addTransaction(em, household, { amount: -80, date: utc('2026-01-31'), status: 'BOOKED' });
+    const payment = await addTransaction(em, household, { amount: 200, date: utc('2026-01-20'), status: 'BOOKED' });
+    // Outside the statement, so it must not appear.
+    await addTransaction(em, household, { amount: -999, date: utc('2026-02-01'), status: 'BOOKED' });
+    return { first, household, payment, second };
+  }
+
+  async function detail(household: Household, statementDate: string) {
+    return call(getCreditCardStatementDetailHandler, request({ params: { accountId: String(household.account.accountKey), statementDate }, tenant: household.tenant, user: household.appuser }));
+  }
+
+  it('returns the statement with its status and the transactions it counts, newest first', async () => {
+    const { first, household, payment, second } = await seedCardWithTransactions();
+
+    const result = await detail(household, '2026-01-31');
+
+    expect(result.error).toBeUndefined();
+    const statement = (result.body as { statement: Record<string, unknown> }).statement;
+    expect(statement).toMatchObject({ balance: 0, charges: 200, dueDate: '2026-02-10', periodEnd: '2026-01-31', periodStart: '2026-01-01', status: 'paid' });
+    expect(statement['transactions']).toEqual([
+      { amount: -80, description: expect.any(String), merchantName: null, transactionDate: '2026-01-31', transactionKey: second.transactionKey },
+      { amount: 200, description: expect.any(String), merchantName: null, transactionDate: '2026-01-20', transactionKey: payment.transactionKey },
+      { amount: -120, description: expect.any(String), merchantName: null, transactionDate: '2026-01-05', transactionKey: first.transactionKey },
+    ]);
+  });
+
+  it('reports the balance and rows of an unpaid statement', async () => {
+    const em = db.em();
+    const household = await seedCardHousehold();
+    await saveSettings(household, { paymentDueDay: 10, statementCloseDay: 31 });
+    const charge = await addTransaction(em, household, { amount: -120, date: utc('2026-01-05'), status: 'BOOKED' });
+
+    const result = await detail(household, '2026-01-31');
+
+    const statement = (result.body as { statement: Record<string, unknown> }).statement;
+    expect(statement).toMatchObject({ balance: 120, charges: 120, payments: 0 });
+    expect(statement['transactions']).toEqual([
+      { amount: -120, description: expect.any(String), merchantName: null, transactionDate: '2026-01-05', transactionKey: charge.transactionKey },
+    ]);
+  });
+
+  it('refuses a date that is not one of the card’s close days', async () => {
+    const household = await seedCardHousehold();
+    await saveSettings(household, { paymentDueDay: 10, statementCloseDay: 31 });
+
+    const result = await detail(household, '2026-01-15');
+
+    expect(result.error).toBeInstanceOf(BadRequestError);
+  });
+
+  it('refuses a non-card account', async () => {
+    const household = await seedCardHousehold();
+
+    const result = await detail(household, '2026-01-31');
+
+    expect(result.error).toBeInstanceOf(BadRequestError);
+  });
+
+  it('cannot read another household’s statement', async () => {
+    const household = await seedCardHousehold();
+    await saveSettings(household, { paymentDueDay: 10, statementCloseDay: 31 });
+    const other = await seedHousehold(db.em());
+
+    const result = await call(getCreditCardStatementDetailHandler, request({ params: { accountId: String(household.account.accountKey), statementDate: '2026-01-31' }, tenant: other.tenant, user: other.appuser }));
 
     expect(result.error).toBeInstanceOf(NotFoundError);
   });

@@ -42,6 +42,16 @@ Cuando el banco indica que una cuenta es una tarjeta, la cuenta sincronizada se 
 - Un reembolso contado como pago reduce el saldo del extracto.
 - Una tarjeta sin límite definido no muestra crédito disponible.
 
+## Historial de extractos y recordatorios
+
+En la web, la página de una tarjeta tiene una pestaña **Extractos**; en el móvil, los extractos aparecen debajo del extracto actual, en la pantalla de la cuenta. Selecciona un extracto para ver las transacciones asignadas. Cada extracto aparece como **Abierto** hasta que cierra, **Cerrado** cuando ha cerrado con saldo pendiente, **Pagado** cuando los pagos cubren lo que cargó o **Vencido** cuando sigue sin pagarse después de su fecha de vencimiento. Un pago se asigna al extracto más antiguo que aún tenga saldo, y cualquier importe por encima de ese saldo pasa al siguiente.
+
+Un extracto cerrado que aún tenga saldo recibe un recordatorio por email unos días antes del vencimiento: tres días, de forma predeterminada. Si se pierde un día, el recordatorio sale al día siguiente, hasta el mismo día del vencimiento. Un extracto pagado antes no recibe recordatorio. El recordatorio va a la persona a la que pertenece la tarjeta, en inglés o portugués.
+
+Los recordatorios están activados de forma predeterminada. Desactiva **Recordatorios de pago de la tarjeta** en **Ajustes → Notificaciones** para dejar de recibirlos; darte de baja de todos los emails también los detiene. Los recordatorios solo se envían por email.
+
+En una instancia autoalojada, los recordatorios necesitan un proveedor de email (consulta [Configurar tu instancia](/es/docs/self-hosting/configure#correo)). Define `CREDIT_CARD_DUE_REMINDER_DAYS` en el worker para cambiar cuántos días antes del vencimiento se envían.
+
 ## Enlaces relacionados
 
 - [Entender las transacciones](/es/docs/accounts-transactions/understand-transactions)

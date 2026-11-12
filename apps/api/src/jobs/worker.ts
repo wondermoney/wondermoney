@@ -75,6 +75,12 @@ import {
   ensureCertificadoAforroRateSyncQueue,
   scheduleCertificadoAforroRateSyncAutoJob,
 } from '@app/jobs/certificado-aforro-rate-sync.queue';
+import {
+  CREDIT_CARD_DUE_REMINDER_CRON,
+  CREDIT_CARD_DUE_REMINDER_QUEUE,
+  ensureCreditCardDueReminderQueue,
+  scheduleCreditCardDueReminderJob,
+} from '@app/jobs/credit-card-due-reminder.queue';
 import { type CronMonitorOptions, withCronMonitor } from '@app/jobs/cron-monitor';
 import {
   DATA_EXPORT_CLEANUP_QUEUE,
@@ -348,6 +354,7 @@ export const createWorker = (deps: WorkerDeps = {}) => {
     await ensureFinancialEmailQueues(boss);
     await ensureBankSyncAlertSweepQueue(boss);
     await ensureBankSyncAlertSendQueue(boss);
+    await ensureCreditCardDueReminderQueue(boss);
     await ensureTransactionEnrichmentGptQueue(boss);
     await ensureQueueDepthMonitorQueue(boss);
     if (schedulerEnabled()) {
@@ -388,6 +395,7 @@ export const createWorker = (deps: WorkerDeps = {}) => {
       await scheduleInstanceHeartbeatJob(boss);
       await scheduleBankSyncAlertSweep(boss);
       await scheduleTransactionImportSweep(boss);
+      await scheduleCreditCardDueReminderJob(boss);
       await unscheduleBudgetEmails(boss);
       await unscheduleWeeklyEmails(boss);
       await scheduleBudgetEmails(boss);
@@ -697,6 +705,14 @@ export const createWorker = (deps: WorkerDeps = {}) => {
       const { handleBankSyncAlertSendJob } = await import('@app/jobs/bank-sync-alert.worker');
       await runInRequestContext(() => handleBankSyncAlertSendJob(job, { logger: log }));
     }));
+    await boss.work(CREDIT_CARD_DUE_REMINDER_QUEUE, workCronJobs<Job<unknown>>(
+      CREDIT_CARD_DUE_REMINDER_QUEUE,
+      { checkinMarginMinutes: 120, maxRuntimeMinutes: 30, monitorSlug: CREDIT_CARD_DUE_REMINDER_QUEUE, schedule: CREDIT_CARD_DUE_REMINDER_CRON },
+      async () => {
+        const { handleCreditCardDueReminderJob } = await import('@app/jobs/credit-card-due-reminder.worker');
+        await runInRequestContext(() => handleCreditCardDueReminderJob({ logger: log }));
+      },
+    ));
 
     if (schedulerEnabled()) {
       await boss.work(BUDGET_EMAIL_COORDINATOR_QUEUE, { includeMetadata: true }, workCronJobs<JobWithMetadata<Partial<FinancialEmailCoordinatorPayload>>>(

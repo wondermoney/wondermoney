@@ -254,6 +254,16 @@
   "credit-card-limit-of": "De {limit}",
   "credit-card-limit-not-set": "Sin límite de crédito definido",
   "credit-card-no-statement": "Todavía no hay extracto para este período.",
+  "credit-card-overview": "Resumen",
+  "credit-card-statements": "Extractos",
+  "credit-card-statement-status-open": "Abierto",
+  "credit-card-statement-status-closed": "Cerrado",
+  "credit-card-statement-status-paid": "Pagado",
+  "credit-card-statement-status-overdue": "Vencido",
+  "credit-card-due-date-of": "Vence el {date}",
+  "credit-card-statement-transactions": "Transacciones del extracto",
+  "credit-card-statement-transactions-empty": "No hay transacciones en este extracto.",
+  "credit-card-statement-transactions-error": "No se pudieron cargar las transacciones de este extracto.",
   "private-account": "Cuenta privada",
   "private-account-description": "Solo tú ves esta cuenta y sus transacciones — tu pareja del hogar no la verá en ningún sitio.",
   "account-private": "Privada",
@@ -2270,6 +2280,11 @@
       "title": "Alertas de conexiones bancarias",
       "description": "Un correo cuando el acceso a un banco está a punto de terminar (7 días y 1 día antes), cuando el banco termina el acceso antes de tiempo o cuando un banco lleva más de 2 días sin sincronizarse.",
       "detail": "Como máximo un correo por conexión y evento."
+    },
+    "creditCardDueReminders": {
+      "title": "Recordatorios de pago de la tarjeta",
+      "description": "Un email unos días antes del vencimiento de un extracto de tarjeta de crédito cerrado, si aún tiene saldo pendiente.",
+      "detail": "Solo se envía por email. Como máximo un recordatorio por extracto."
     },
     "marketingOptOut": {
       "title": "Cancelar la suscripción a todos los correos de marketing",

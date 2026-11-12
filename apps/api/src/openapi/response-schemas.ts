@@ -175,13 +175,29 @@ export const forecastSchema = open('Forecast', {
   forecast: z.array(z.record(z.string(), z.unknown())).optional(),
 });
 
-export const creditCardStatementSchema = open('CreditCardStatement', {
-  dueDate: nullableString,
-  minimumPayment: nullableNumber,
-  periodEnd: nullableString,
-  periodStart: nullableString,
-  statementKey: id.optional(),
-  total: nullableNumber,
+const creditCardStatementShape = {
+  availableCredit: nullableNumber,
+  balance: money,
+  charges: money,
+  dueDate: date,
+  isCurrent: z.boolean(),
+  payments: money,
+  periodEnd: date,
+  periodStart: date,
+  status: z.enum(['closed', 'open', 'overdue', 'paid']),
+};
+
+export const creditCardStatementSchema = open('CreditCardStatement', creditCardStatementShape);
+
+export const creditCardStatementDetailSchema = open('CreditCardStatementDetail', {
+  ...creditCardStatementShape,
+  transactions: z.array(open('CreditCardStatementTransaction', {
+    amount: nullableNumber,
+    description: nullableString,
+    merchantName: nullableString,
+    transactionDate: date.nullable(),
+    transactionKey: id,
+  })),
 });
 
 export const budgetSchema = open('Budget', {

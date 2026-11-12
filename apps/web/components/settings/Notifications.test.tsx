@@ -14,6 +14,7 @@ import Notifications from "./Notifications";
 const state = vi.hoisted(() => ({
   query: {} as Record<string, unknown>,
   mutate: vi.fn(),
+  mutation: {} as Record<string, unknown>,
 }));
 
 vi.mock("@/lib/api/email-notification-preferences/useEmailNotificationPreferences", () => ({
@@ -25,10 +26,10 @@ vi.mock(
     default: () => ({
       mutate: state.mutate,
       reset: () => {},
-      variables: undefined,
-      isPending: false,
-      isError: false,
-      isSuccess: false,
+      variables: state.mutation.variables,
+      isPending: state.mutation.isPending ?? false,
+      isError: state.mutation.isError ?? false,
+      isSuccess: state.mutation.isSuccess ?? false,
     }),
   }),
 );
@@ -36,6 +37,7 @@ vi.mock(
 afterEach(() => {
   cleanup();
   state.mutate.mockClear();
+  state.mutation = {};
 });
 
 const t = createTranslator({
@@ -51,10 +53,12 @@ const preferences: EmailNotificationPreferencesResponse = {
   growth: { storedEnabled: true, effectiveEnabled: false },
   accountRecovery: { storedEnabled: true, effectiveEnabled: false },
   bankSyncAlerts: { storedEnabled: true, effectiveEnabled: false },
+  creditCardDueReminders: { storedEnabled: true, effectiveEnabled: false },
   marketingOptOut: true,
 };
 
 function renderPanel(query: Record<string, unknown>) {
+  state.mutation = (query.mutation as Record<string, unknown> | undefined) ?? {};
   state.query = { isPending: false, isError: false, isFetching: false, refetch: () => {}, ...query };
   render(
     <NextIntlClientProvider locale="en" messages={enMessages}>
@@ -86,6 +90,42 @@ test("turning one category off sends only that category", async () => {
   assert.deepEqual(state.mutate.mock.calls, [[{ budgetAlertsEnabled: false }]]);
 });
 
+test("card reminders show their saved value and a toggle sends only that field", async () => {
+  renderPanel({ data: preferences });
+  const reminder = screen.getByRole("switch", { name: t("toggleOffLabel", { name: t("creditCardDueReminders.title") }) });
+  assert.equal(reminder.getAttribute("aria-checked"), "true");
+  await userEvent.click(reminder);
+  assert.deepEqual(state.mutate.mock.calls, [[{ creditCardDueRemindersEnabled: false }]]);
+});
+
+test("card reminders read as paused while the global unsubscribe is on", () => {
+  renderPanel({ data: preferences });
+  const section = screen.getByRole("region", { name: t("creditCardDueReminders.title") });
+  assert.ok(section.textContent?.includes(t("status.paused")));
+});
+
+test("shows no card reminder switch when an older API does not return the preference", () => {
+  const { creditCardDueReminders: _omitted, ...olderPreferences } = preferences;
+  renderPanel({ data: olderPreferences });
+  assert.equal(
+    screen.queryByRole("switch", { name: t("toggleOffLabel", { name: t("creditCardDueReminders.title") }) }),
+    null,
+  );
+  assert.equal(screen.getAllByRole("switch").length, 5);
+});
+
+test("keeps the persisted value and exposes retry after a reminder save fails", () => {
+  renderPanel({
+    data: preferences,
+    variables: { creditCardDueRemindersEnabled: false },
+    mutation: { variables: { creditCardDueRemindersEnabled: false }, isError: true },
+  });
+  const reminder = screen.getByRole("switch", { name: t("toggleOffLabel", { name: t("creditCardDueReminders.title") }) });
+  assert.equal(reminder.getAttribute("aria-checked"), "true");
+  screen.getByRole("alert");
+  screen.getByRole("button", { name: t("retry") });
+});
+
 test("the unsubscribe-from-everything switch sends only the opt-out flag", async () => {
   renderPanel({ data: preferences });
 
@@ -100,7 +140,7 @@ test("a failed refresh keeps the saved controls on screen with a warning", () =>
   renderPanel({ data: preferences, isError: true });
 
   screen.getByText(t("refreshWarning.title"));
-  assert.equal(screen.getAllByRole("switch").length, 5);
+  assert.equal(screen.getAllByRole("switch").length, 6);
 });
 
 test("a first load that fails offers a retry instead of the controls", () => {
