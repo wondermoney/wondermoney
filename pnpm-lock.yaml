@@ -508,7 +508,7 @@ importers:
     dependencies:
       '@scalar/api-client-react':
         specifier: ^2.0.64
-        version: 2.0.65(axios@1.21.0(supports-color@8.1.1))(change-case@5.4.4)(react@19.3.0)(supports-color@8.1.1)(tailwindcss@4.3.5)(typescript@6.0.3)
+        version: 2.0.65(axios@1.21.0(debug@4.4.3(supports-color@8.1.1))(supports-color@8.1.1))(change-case@5.4.4)(react@19.3.0)(supports-color@8.1.1)(tailwindcss@4.3.5)(typescript@6.0.3)
       fumadocs-core:
         specifier: 16.18.1
         version: 16.18.1(@mdx-js/mdx@3.1.1(supports-color@8.1.1))(@types/estree-jsx@1.0.5)(@types/hast@3.0.4)(@types/mdast@4.0.4)(@types/react@19.3.0)(algoliasearch@5.59.0)(lucide-react@1.70.0(@types/react@19.3.0)(react@19.3.0))(next@16.4.5(@babel/core@7.29.7(supports-color@8.1.1))(@opentelemetry/api@1.9.1)(@types/node@26.6.6)(babel-plugin-react-compiler@1.0.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(supports-color@8.1.1)(zod@4.6.7)
@@ -517,7 +517,7 @@ importers:
         version: 15.5.0(@types/mdast@4.0.4)(@types/mdx@2.0.14)(@types/react@19.3.0)(fumadocs-core@16.18.1(@mdx-js/mdx@3.1.1(supports-color@8.1.1))(@types/estree-jsx@1.0.5)(@types/hast@3.0.4)(@types/mdast@4.0.4)(@types/react@19.3.0)(algoliasearch@5.59.0)(lucide-react@1.70.0(@types/react@19.3.0)(react@19.3.0))(next@16.4.5(@babel/core@7.29.7(supports-color@8.1.1))(@opentelemetry/api@1.9.1)(@types/node@26.6.6)(babel-plugin-react-compiler@1.0.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(supports-color@8.1.1)(zod@4.6.7))(next@16.4.5(@babel/core@7.29.7(supports-color@8.1.1))(@opentelemetry/api@1.9.1)(@types/node@26.6.6)(babel-plugin-react-compiler@1.0.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(react@19.3.0)(rolldown@1.2.5)(supports-color@8.1.1)(vite@8.3.7(@types/node@26.6.6)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.51.2)(tsx@4.23.15)(yaml@2.9.1))
       fumadocs-openapi:
         specifier: 12.6.0
-        version: 12.6.0(0719e3a7fffb139584b4c94d2502ad9a)
+        version: 12.6.0(3d1109148e80e25d7eba74ddf87027fd)
       fumadocs-ui:
         specifier: 16.18.1
         version: 16.18.1(@types/mdx@2.0.14)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(fumadocs-core@16.18.1(@mdx-js/mdx@3.1.1(supports-color@8.1.1))(@types/estree-jsx@1.0.5)(@types/hast@3.0.4)(@types/mdast@4.0.4)(@types/react@19.3.0)(algoliasearch@5.59.0)(lucide-react@1.70.0(@types/react@19.3.0)(react@19.3.0))(next@16.4.5(@babel/core@7.29.7(supports-color@8.1.1))(@opentelemetry/api@1.9.1)(@types/node@26.6.6)(babel-plugin-react-compiler@1.0.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(supports-color@8.1.1)(zod@4.6.7))(next@16.4.5(@babel/core@7.29.7(supports-color@8.1.1))(@opentelemetry/api@1.9.1)(@types/node@26.6.6)(babel-plugin-react-compiler@1.0.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(tailwindcss@4.3.5)
@@ -1087,7 +1087,7 @@ importers:
         version: 1.0.16
       geist:
         specifier: ^1.7.0
-        version: 1.9.2(next@16.4.5(@babel/core@7.29.7(supports-color@8.1.1))(@opentelemetry/api@1.9.1)(@types/node@26.6.6)(babel-plugin-react-compiler@1.0.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0))
+        version: 1.9.1(next@16.4.5(@babel/core@7.29.7(supports-color@8.1.1))(@opentelemetry/api@1.9.1)(@types/node@26.6.6)(babel-plugin-react-compiler@1.0.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0))
       i18n-iso-countries:
         specifier: ^7.14.0
         version: 7.14.0
@@ -1104,8 +1104,8 @@ importers:
         specifier: ^1.61.0
         version: 1.70.0(@types/react@19.3.0)(react@19.3.0)
       motion:
-        specifier: ^12.35.1
-        version: 12.40.0(@emotion/is-prop-valid@1.4.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
+        specifier: ^14.9.1
+        version: 14.9.1(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
       next:
         specifier: 16.4.5
         version: 16.4.5(@babel/core@7.29.7(supports-color@8.1.1))(@opentelemetry/api@1.9.1)(@types/node@26.6.6)(babel-plugin-react-compiler@1.0.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
@@ -1622,6 +1622,10 @@ packages:
     resolution: {integrity: sha512-RCzGDlPFT0vH+rTIW+ukSsdeTC4RuFPDDvTracNW40CES6twgv7OXBXR1oVkhO3u7qY4UECbjF/kJmTSNx7eWQ==}
     engines: {node: '>=20.0.0'}
 
+  '@aws-sdk/core@3.980.0':
+    resolution: {integrity: sha512-2RVSP/SsPS8HSPPzIPWNYFnSmlOdxx8VDlt5gDOuMaq9UiIi35pUyo6ZEuJcysjVCu0L8Lv5dJevLLpEkyF0/Q==}
+    engines: {node: '>=20.0.0'}
+
   '@aws-sdk/core@3.980.1':
     resolution: {integrity: sha512-W7jDWUPucezIUjFZpr8MudQQtz/m6yPMyAFrOyyQcHjuF4UrZdcCdP8eV1js06U9sH3dxp0AbhN+s9uHwQyXzQ==}
     engines: {node: '>=20.0.0'}
@@ -1664,6 +1668,10 @@ packages:
 
   '@aws-sdk/middleware-sdk-s3@3.972.87':
     resolution: {integrity: sha512-LO1E63hw8wFLOTWgS2xpMQGGAI5DUbA9OcZC9x4ADDwYwU3oqMl3jumxQq/m/5g4Pri2SN8tLaumHtynA5gU9A==}
+    engines: {node: '>=20.0.0'}
+
+  '@aws-sdk/nested-clients@3.998.0':
+    resolution: {integrity: sha512-aOD1oQVWG6UjOOEdp0MsrWE93vG8pPbvtymmeNtglGxAARplh1wzhHs4npqtY5JN5GBSrTaLbn1hQQ3W2Lk8ow==}
     engines: {node: '>=20.0.0'}
 
   '@aws-sdk/nested-clients@3.998.1':
@@ -11125,8 +11133,8 @@ packages:
       react-dom:
         optional: true
 
-  framer-motion@14.9.0:
-    resolution: {integrity: sha512-g1hZu8WoTwgsoVAaqEEcefhvR03cKGtkmrKaRrWpXhnM3LGR8jl1u2qyJ1PMVlO7LKQHE8TTRQYUlMmnrY4L+g==}
+  framer-motion@14.9.1:
+    resolution: {integrity: sha512-WDWNT2ixHdmpvGg02BZWI/SWwRYzPiMUf4aIkTBgrxxD8RYFdZO3fCM4pnLMo6j8mUpj0+BuJRHQBChI4v3Anw==}
     peerDependencies:
       react: 19.3.0
       react-dom: 19.3.0
@@ -11319,8 +11327,8 @@ packages:
     resolution: {integrity: sha512-sQtrEfA+ez/3G0cCZecF70oqpCRttCexYUG4mUrtWL49ULUzUyxokt5kyqwtKzj1270RaKih+hcP3qLcumccow==}
     engines: {node: '>=10'}
 
-  geist@1.9.2:
-    resolution: {integrity: sha512-UU1x2q5Khob0+i4csFvXk1Ki4DePdu7xISuXyEcj1tzQMg64oN7Kbuy4e5z5QhcUWbbvOMJNs3ZxYQqpsEMV3w==}
+  geist@1.9.1:
+    resolution: {integrity: sha512-mkbyVjMJoNf6xz76NLeKAFwKE19BweHfFefA++wd+M9qiCX2Zncq3M96bdDwOsy4wurDQ594AKwtx+HILX+WBg==}
     peerDependencies:
       next: '>=13.2.0'
 
@@ -13026,8 +13034,8 @@ packages:
   motion-dom@12.40.0:
     resolution: {integrity: sha512-HxU3ZaBwNPVQUBQf1xxgq+7JrPNZvjLVxgbpEZL7RrWJnsxOf0/OM+yrHG9ogLQ31Do/r57Oz2gQWPK+6q62mg==}
 
-  motion-dom@14.9.0:
-    resolution: {integrity: sha512-wGjKbNDMHd75aLStkxLCKZ+T8/wusZHklmNLK1Ak68UrdBt2X8I4yweYR/0WonxGnBsw6oloDTIV8pN+UTvzzA==}
+  motion-dom@14.9.1:
+    resolution: {integrity: sha512-2eCCGXH2Yv09lM8GHK3TdfChrcvHxzVY19LD9VraoHEaQl5+PuGnTNnmJaBAR+5MdxUVdsLFXygFJjR9RwRSxw==}
 
   motion-utils@12.39.0:
     resolution: {integrity: sha512-8nadJAJjTtqRkmRF36FoJTrywK9nnFmnPwnSMyxaOCU7GDjN9RTMJIxx9De8ErM+vpPhMccr/6fo5WciyQLnMQ==}
@@ -13035,22 +13043,8 @@ packages:
   motion-utils@14.7.0:
     resolution: {integrity: sha512-woO0/Nb7ys75f94fjvQi/6leiHGvZUYkeHUPEZ3vxsV+9OpEVhkxp01x8MlRwX0zt31EqgXsKDAoBoJLC148Tw==}
 
-  motion@12.40.0:
-    resolution: {integrity: sha512-yjrHUrBFW6kQvjJwRsoiPSAhC5tRwRqNGJWmiJ4CrGnbKp0V88AdzkhBmDoqIsIPfarOe0Uddd37Xq43/gIocA==}
-    peerDependencies:
-      '@emotion/is-prop-valid': '*'
-      react: 19.3.0
-      react-dom: 19.3.0
-    peerDependenciesMeta:
-      '@emotion/is-prop-valid':
-        optional: true
-      react:
-        optional: true
-      react-dom:
-        optional: true
-
-  motion@14.9.0:
-    resolution: {integrity: sha512-Oc+jjq/AyhwsnEUaAq2xEu/SsfKTphgsXqoxddTSLzgTdXZc6FwHcp9RLGSECccTykN1/p3gWUN4kMJAamm+1g==}
+  motion@14.9.1:
+    resolution: {integrity: sha512-u58zTNOs6vefAwvPncTJ8vkQm+P08V4+mhNgap8p/mFZjl8+gWp7SG4cMTamebVSgpX6PcDtqzWpZngqKcfd7A==}
     peerDependencies:
       react: 19.3.0
       react-dom: 19.3.0
@@ -16948,6 +16942,18 @@ snapshots:
       '@smithy/types': 4.19.0
       tslib: 2.8.1
 
+  '@aws-sdk/core@3.980.0':
+    dependencies:
+      '@aws-sdk/types': 3.975.0
+      '@aws-sdk/xml-builder': 3.972.42
+      '@aws/lambda-invoke-store': 0.3.0
+      '@smithy/core': 3.39.0
+      '@smithy/signature-v4': 5.7.5
+      '@smithy/types': 4.20.0
+      bowser: 2.13.1
+      tslib: 2.8.1
+    optional: true
+
   '@aws-sdk/core@3.980.1':
     dependencies:
       '@aws-sdk/types': 3.975.0
@@ -17036,8 +17042,8 @@ snapshots:
 
   '@aws-sdk/credential-provider-web-identity@3.972.81':
     dependencies:
-      '@aws-sdk/core': 3.980.1
-      '@aws-sdk/nested-clients': 3.998.1
+      '@aws-sdk/core': 3.980.0
+      '@aws-sdk/nested-clients': 3.998.0
       '@aws-sdk/types': 3.975.0
       '@smithy/core': 3.39.0
       '@smithy/types': 4.20.0
@@ -17061,6 +17067,18 @@ snapshots:
       '@smithy/core': 3.39.0
       '@smithy/types': 4.19.0
       tslib: 2.8.1
+
+  '@aws-sdk/nested-clients@3.998.0':
+    dependencies:
+      '@aws-sdk/core': 3.980.0
+      '@aws-sdk/signature-v4-multi-region': 3.996.51
+      '@aws-sdk/types': 3.975.0
+      '@smithy/core': 3.39.0
+      '@smithy/fetch-http-handler': 5.8.0
+      '@smithy/node-http-handler': 4.14.2
+      '@smithy/types': 4.20.0
+      tslib: 2.8.1
+    optional: true
 
   '@aws-sdk/nested-clients@3.998.1':
     dependencies:
@@ -21700,7 +21718,7 @@ snapshots:
       '@sanity/icons': 5.3.0(react@19.3.0)
       clsx: 2.1.1
       csstype: 3.2.3
-      motion: 14.9.0(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
+      motion: 14.9.1(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
       react: 19.3.0
       react-dom: 19.3.0(react@19.3.0)
       react-is: 19.3.1
@@ -21758,9 +21776,9 @@ snapshots:
       - typescript
       - vitest
 
-  '@scalar/api-client-react@2.0.65(axios@1.21.0(supports-color@8.1.1))(change-case@5.4.4)(react@19.3.0)(supports-color@8.1.1)(tailwindcss@4.3.5)(typescript@6.0.3)':
+  '@scalar/api-client-react@2.0.65(axios@1.21.0(debug@4.4.3(supports-color@8.1.1))(supports-color@8.1.1))(change-case@5.4.4)(react@19.3.0)(supports-color@8.1.1)(tailwindcss@4.3.5)(typescript@6.0.3)':
     dependencies:
-      '@scalar/api-client': 3.25.0(axios@1.21.0(supports-color@8.1.1))(change-case@5.4.4)(supports-color@8.1.1)(tailwindcss@4.3.5)(typescript@6.0.3)
+      '@scalar/api-client': 3.25.0(axios@1.21.0(debug@4.4.3(supports-color@8.1.1))(supports-color@8.1.1))(change-case@5.4.4)(supports-color@8.1.1)(tailwindcss@4.3.5)(typescript@6.0.3)
       '@scalar/blocks': 0.7.0(supports-color@8.1.1)(tailwindcss@4.3.5)(typescript@6.0.3)
       '@scalar/helpers': 0.17.1
       '@scalar/workspace-store': 0.71.0(typescript@6.0.3)
@@ -21784,7 +21802,7 @@ snapshots:
       - typescript
       - universal-cookie
 
-  '@scalar/api-client@3.25.0(axios@1.21.0(supports-color@8.1.1))(change-case@5.4.4)(supports-color@8.1.1)(tailwindcss@4.3.5)(typescript@6.0.3)':
+  '@scalar/api-client@3.25.0(axios@1.21.0(debug@4.4.3(supports-color@8.1.1))(supports-color@8.1.1))(change-case@5.4.4)(supports-color@8.1.1)(tailwindcss@4.3.5)(typescript@6.0.3)':
     dependencies:
       '@headlessui/tailwindcss': 0.2.2(tailwindcss@4.3.5)
       '@headlessui/vue': 1.7.23(vue@3.5.45(typescript@6.0.3))
@@ -21805,7 +21823,7 @@ snapshots:
       '@scalar/use-toasts': 0.10.6(typescript@6.0.3)
       '@scalar/workspace-store': 0.71.0(typescript@6.0.3)
       '@vueuse/core': 15.0.0(vue@3.5.45(typescript@6.0.3))
-      '@vueuse/integrations': 15.0.0(axios@1.21.0(supports-color@8.1.1))(change-case@5.4.4)(focus-trap@8.2.4)(fuse.js@7.5.0)(vue@3.5.45(typescript@6.0.3))
+      '@vueuse/integrations': 15.0.0(axios@1.21.0(debug@4.4.3(supports-color@8.1.1))(supports-color@8.1.1))(change-case@5.4.4)(focus-trap@8.2.4)(fuse.js@7.5.0)(vue@3.5.45(typescript@6.0.3))
       focus-trap: 8.2.4
       fuse.js: 7.5.0
       js-base64: 3.9.6
@@ -23349,8 +23367,8 @@ snapshots:
 
   '@typescript-eslint/project-service@8.71.2(supports-color@8.1.1)(typescript@6.0.3)':
     dependencies:
-      '@typescript-eslint/tsconfig-utils': 8.72.2(typescript@6.0.3)
-      '@typescript-eslint/types': 8.72.2
+      '@typescript-eslint/tsconfig-utils': 8.72.1(typescript@6.0.3)
+      '@typescript-eslint/types': 8.72.1
       debug: 4.4.3(supports-color@8.1.1)
       typescript: 6.0.3
     transitivePeerDependencies:
@@ -23531,7 +23549,7 @@ snapshots:
       '@typescript-eslint/types': 8.72.1
       '@typescript-eslint/visitor-keys': 8.72.1
       debug: 4.4.3(supports-color@8.1.1)
-      minimatch: 10.2.5
+      minimatch: 10.2.6
       semver: 7.8.5
       tinyglobby: 0.2.17
       ts-api-utils: 2.5.0(typescript@6.0.3)
@@ -24046,7 +24064,7 @@ snapshots:
       '@vueuse/shared': 15.0.0(vue@3.5.45(typescript@6.0.3))
       vue: 3.5.45(typescript@6.0.3)
 
-  '@vueuse/integrations@15.0.0(axios@1.21.0(supports-color@8.1.1))(change-case@5.4.4)(focus-trap@8.2.4)(fuse.js@7.5.0)(vue@3.5.45(typescript@6.0.3))':
+  '@vueuse/integrations@15.0.0(axios@1.21.0(debug@4.4.3(supports-color@8.1.1))(supports-color@8.1.1))(change-case@5.4.4)(focus-trap@8.2.4)(fuse.js@7.5.0)(vue@3.5.45(typescript@6.0.3))':
     dependencies:
       '@vueuse/core': 15.0.0(vue@3.5.45(typescript@6.0.3))
       '@vueuse/shared': 15.0.0(vue@3.5.45(typescript@6.0.3))
@@ -27177,9 +27195,9 @@ snapshots:
       react: 19.3.0
       react-dom: 19.3.0(react@19.3.0)
 
-  framer-motion@14.9.0(react-dom@19.3.0(react@19.3.0))(react@19.3.0):
+  framer-motion@14.9.1(react-dom@19.3.0(react@19.3.0))(react@19.3.0):
     dependencies:
-      motion-dom: 14.9.0
+      motion-dom: 14.9.1
       motion-utils: 14.7.0
       tslib: 2.8.1
     optionalDependencies:
@@ -27270,7 +27288,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  fumadocs-openapi@12.6.0(0719e3a7fffb139584b4c94d2502ad9a):
+  fumadocs-openapi@12.6.0(3d1109148e80e25d7eba74ddf87027fd):
     dependencies:
       '@base-ui/react': 1.9.0(@date-fns/tz@1.5.0)(@types/react@19.3.0)(date-fns@4.4.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
       '@fuma-translate/react': 1.0.2(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
@@ -27294,7 +27312,7 @@ snapshots:
       undici: 8.12.4
       yaml: 2.9.1
     optionalDependencies:
-      '@scalar/api-client-react': 2.0.65(axios@1.21.0(supports-color@8.1.1))(change-case@5.4.4)(react@19.3.0)(supports-color@8.1.1)(tailwindcss@4.3.5)(typescript@6.0.3)
+      '@scalar/api-client-react': 2.0.65(axios@1.21.0(debug@4.4.3(supports-color@8.1.1))(supports-color@8.1.1))(change-case@5.4.4)(react@19.3.0)(supports-color@8.1.1)(tailwindcss@4.3.5)(typescript@6.0.3)
       '@types/react': 19.3.0
       json-schema-typed: 9.0.0
     transitivePeerDependencies:
@@ -27320,7 +27338,7 @@ snapshots:
       cn: 0.5.1
       fumadocs-core: 16.18.1(@mdx-js/mdx@3.1.1(supports-color@8.1.1))(@types/estree-jsx@1.0.5)(@types/hast@3.0.4)(@types/mdast@4.0.4)(@types/react@19.3.0)(algoliasearch@5.59.0)(lucide-react@1.70.0(@types/react@19.3.0)(react@19.3.0))(next@16.4.5(@babel/core@7.29.7(supports-color@8.1.1))(@opentelemetry/api@1.9.1)(@types/node@26.6.6)(babel-plugin-react-compiler@1.0.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(supports-color@8.1.1)(zod@4.6.7)
       lucide-react: 1.70.0(@types/react@19.3.0)(react@19.3.0)
-      motion: 14.9.0(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
+      motion: 14.9.1(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
       next-themes: 0.4.6(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
       react: 19.3.0
       react-dom: 19.3.0(react@19.3.0)
@@ -27351,7 +27369,7 @@ snapshots:
 
   fuse.js@7.5.0: {}
 
-  geist@1.9.2(next@16.4.5(@babel/core@7.29.7(supports-color@8.1.1))(@opentelemetry/api@1.9.1)(@types/node@26.6.6)(babel-plugin-react-compiler@1.0.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)):
+  geist@1.9.1(next@16.4.5(@babel/core@7.29.7(supports-color@8.1.1))(@opentelemetry/api@1.9.1)(@types/node@26.6.6)(babel-plugin-react-compiler@1.0.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)):
     dependencies:
       next: 16.4.5(@babel/core@7.29.7(supports-color@8.1.1))(@opentelemetry/api@1.9.1)(@types/node@26.6.6)(babel-plugin-react-compiler@1.0.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
 
@@ -29793,7 +29811,7 @@ snapshots:
     dependencies:
       motion-utils: 12.39.0
 
-  motion-dom@14.9.0:
+  motion-dom@14.9.1:
     dependencies:
       motion-utils: 14.7.0
 
@@ -29801,18 +29819,9 @@ snapshots:
 
   motion-utils@14.7.0: {}
 
-  motion@12.40.0(@emotion/is-prop-valid@1.4.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0):
+  motion@14.9.1(react-dom@19.3.0(react@19.3.0))(react@19.3.0):
     dependencies:
-      framer-motion: 12.40.0(@emotion/is-prop-valid@1.4.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
-      tslib: 2.8.1
-    optionalDependencies:
-      '@emotion/is-prop-valid': 1.4.0
-      react: 19.3.0
-      react-dom: 19.3.0(react@19.3.0)
-
-  motion@14.9.0(react-dom@19.3.0(react@19.3.0))(react@19.3.0):
-    dependencies:
-      framer-motion: 14.9.0(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
+      framer-motion: 14.9.1(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
       tslib: 2.8.1
     optionalDependencies:
       react: 19.3.0
