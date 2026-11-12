@@ -77,6 +77,7 @@ export const invalidatePortfolios = (qc: QueryClient) => {
   qc.invalidateQueries({ queryKey: ["portfolio-metrics"] });
   qc.invalidateQueries({ queryKey: ["portfolio-calendar"] });
   qc.invalidateQueries({ queryKey: ["dividend-income"] });
+  qc.invalidateQueries({ queryKey: ["realized-gains"] });
 };
 
 export const invalidatePortfolioDetail = (

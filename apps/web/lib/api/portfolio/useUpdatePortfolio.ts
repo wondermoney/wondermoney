@@ -33,6 +33,7 @@ const useUpdatePortfolio = () => {
       queryClient.invalidateQueries({ queryKey: ["portfolio-holdings"] });
       queryClient.invalidateQueries({ queryKey: ["portfolios-holdings"] });
       queryClient.invalidateQueries({ queryKey: ["portfolio-holding-lots"] });
+      queryClient.invalidateQueries({ queryKey: ["realized-gains"] });
       queryClient.invalidateQueries({ queryKey: ["portfolio-metrics"] });
       queryClient.invalidateQueries({ queryKey: ["portfolio-performance"] });
       // A link changes what net worth counts.

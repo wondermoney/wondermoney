@@ -19,6 +19,7 @@ export const getPortfolioTransactionMutationInvalidationKeys = (
   ["portfolio-metrics"],
   ["portfolio-transactions"],
   ["portfolios-transactions"],
+  ["realized-gains"],
   ...(portfolioId === undefined
     ? []
     : [

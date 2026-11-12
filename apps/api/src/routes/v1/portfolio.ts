@@ -31,6 +31,7 @@ import {
   getPortfoliosTransactions,
   getPortfolioTopMovers,
   getPortfolioTransactions,
+  getRealizedGains,
   getTopMovers,
   getTransactionTypes,
   putAssetPriceOverride,
@@ -64,6 +65,9 @@ router.get('/calendar', marketDataLimiter, getPortfolioCalendar);
 
 // Dividend income (aggregate)
 router.get('/dividend-income', getDividendIncome);
+
+// Realized gains per sale, asset and year (aggregate, or one portfolio via ?portfolioId)
+router.get('/realized-gains', getRealizedGains);
 
 // Holding-level market-data endpoints (analyst/valuation stubbed — not covered by the EODHD plan)
 router.get('/holding/:symbol/analyst', marketDataLimiter, getHoldingAnalystData);

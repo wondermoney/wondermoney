@@ -182,6 +182,7 @@ describe('route ordering', () => {
       ['get', '/metrics', 'getPortfoliosMetrics'],
       ['get', '/calendar', 'getPortfolioCalendar'],
       ['get', '/dividend-income', 'getDividendIncome'],
+      ['get', '/realized-gains', 'getRealizedGains'],
     ];
 
     it.each(cases)('%s %s is not swallowed by /:portfolioId', async (method, path, handler) => {

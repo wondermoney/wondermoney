@@ -18,6 +18,12 @@ export interface PortfolioHolding {
   currency: string;
   unrealizedGains: number | null;
   unrealizedGainsPercentage: number | null;
+  /**
+   * Lifetime realized gain of the asset (its sales' proceeds less the cost
+   * they relieved), in `currency`. Null for an invalid holding; absent from
+   * older API versions.
+   */
+  realizedGains?: number | null;
   isInvalid?: boolean;
   invalidReason?: string | null;
   /** Present (true) only when a fee of this asset had no usable exchange rate and was counted as zero. */

@@ -53,8 +53,14 @@ export function HoldingDetailScreen({ state, onBack, onRefresh, onLogout }: Hold
 
   const value = (text: string, available: boolean) => <StatValue tone={available ? 'default' : 'muted'}>{text}</StatValue>
   const gainText = holding.gain === null ? t('holdingDetail.unavailable') : `${holding.gain > 0 ? '+' : ''}${money(holding.gain)} · ${percent(holding.gainPercent)}`
+  const realizedGain = holding.realizedGain ?? null
+  const realizedCell = realizedGain === null
+    ? []
+    : [{ key: 'realized', label: t('holdingDetail.realizedGain'), text: `${realizedGain > 0 ? '+' : ''}${money(realizedGain)}`, available: true }]
   const cells = [
     { key: 'gain', label: t('holdingDetail.gainLoss'), text: gainText, available: holding.gain !== null },
+    // Lifetime, so shown even at 0; hidden only when the server has no figure for it.
+    ...realizedCell,
     { key: 'weight', label: t('holdingDetail.portfolioWeight'), text: percent(holding.allocation), available: holding.allocation !== null },
     { key: 'quantity', label: t('holdingDetail.quantity'), text: formatQuantity(holding.quantity, { locale, maximumFractionDigits: 6 }), available: true },
     { key: 'price', label: t('holdingDetail.currentPrice'), text: money(holding.currentPrice), available: holding.currentPrice !== null },

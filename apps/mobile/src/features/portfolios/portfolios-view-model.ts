@@ -90,6 +90,8 @@ export type HoldingViewModel = Readonly<{
   /** Set on the household-wide list, where a row opens its own portfolio's holding. */
   portfolioId?: number | null
   quantity: number
+  /** Lifetime realized gain of the asset's sales; null when unknown (invalid holding, older API). */
+  realizedGain?: number | null
   symbol: string
   type: string
   /** The asset's logo, its mark; letters stand in without one. */
@@ -161,6 +163,7 @@ export function mapHoldings(holdings: PortfolioHoldingsResponseDto): HoldingView
       name: holding.financialAssetName,
       portfolioId: holding.portfolioKey ?? null,
       quantity: holding.quantity,
+      realizedGain: invalid ? null : holding.realizedGains ?? null,
       symbol: holding.financialAssetSymbol,
       type: holding.financialAssetType,
       logoUrl: holding.financialAssetLogoUrl ?? null,

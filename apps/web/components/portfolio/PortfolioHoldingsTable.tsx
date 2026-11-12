@@ -286,6 +286,23 @@ const PortfolioHoldingsTable: React.FC<PortfolioHoldingsTableProps> =
             );
           },
         }),
+        columnHelper.accessor("realizedGains", {
+          header: () => (
+            <div className="min-w-[8rem] text-right whitespace-nowrap">
+              {t("holdings-realized-gains")}
+            </div>
+          ),
+          cell: (info) => (
+            <CellNumeric className="min-w-[8rem] text-right whitespace-nowrap">
+              <Amount
+                value={info.getValue()}
+                currency={info.row.original.currency}
+                tone="delta"
+                signed
+              />
+            </CellNumeric>
+          ),
+        }),
       ],
       [
         columnHelper,

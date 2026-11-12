@@ -45,6 +45,20 @@ describe('portfolio view models', () => {
       { quickStats: { bestPerformer: null, biggestPosition: null, holdingsCount: 0, worstPerformer: null }, summary },
       { holdings: [{ allocation: null, averageBuyPrice: 0, currency: 'EUR', currentPrice: null, currentValue: null, financialAssetKey: 8, financialAssetName: 'Example', financialAssetSymbol: 'EXM', financialAssetType: 'Stock', invalidReason: 'NEGATIVE_UNITS', isInvalid: true, quantity: -2, relatedTransactionKeys: [4], unrealizedGains: null, unrealizedGainsPercentage: null }] },
     )
-    expect(result.holdings[0]).toMatchObject({ isInvalid: true, averageBuyPrice: null, currentPrice: null, currentValue: null, gain: null, gainPercent: null })
+    expect(result.holdings[0]).toMatchObject({ isInvalid: true, averageBuyPrice: null, currentPrice: null, currentValue: null, gain: null, gainPercent: null, realizedGain: null })
+  })
+
+  it('carries each holding\'s realized gain, keeping 0 and reading a missing figure as null', () => {
+    const base = { allocation: 50, averageBuyPrice: 90, currency: 'EUR', currentPrice: 110, currentValue: 1100, financialAssetName: 'Example', financialAssetType: 'Stock', quantity: 10, unrealizedGains: 200, unrealizedGainsPercentage: 22.2 }
+    const result = mapPortfolioDetail(
+      { portfolio: { currencyKey: { code: 'EUR' }, name: 'Broker', portfolioKey: 1 } },
+      { quickStats: { bestPerformer: null, biggestPosition: null, holdingsCount: 3, worstPerformer: null }, summary },
+      { holdings: [
+        { ...base, financialAssetKey: 1, financialAssetSymbol: 'AAA', realizedGains: 42.5 },
+        { ...base, financialAssetKey: 2, financialAssetSymbol: 'BBB', realizedGains: 0 },
+        { ...base, financialAssetKey: 3, financialAssetSymbol: 'CCC' },
+      ] },
+    )
+    expect(result.holdings.map((holding) => holding.realizedGain)).toEqual([42.5, 0, null])
   })
 })

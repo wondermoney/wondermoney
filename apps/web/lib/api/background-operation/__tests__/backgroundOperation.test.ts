@@ -58,6 +58,7 @@ test("invalidates portfolio aggregate queries", async () => {
     ["portfolio-metrics"],
     ["portfolio-calendar"],
     ["dividend-income"],
+    ["realized-gains"],
   ]);
 });
 

@@ -132,6 +132,15 @@ describe('portfolio endpoint contracts', () => {
     expect(portfolioHoldingsResponseSchema.safeParse({ holdings: [{ ...invalidHolding, unrealizedGains: 0 }] }).success).toBe(false)
   })
 
+  it('reads a holding\'s realized gain, and a server that sends none as no figure', () => {
+    const valid = { allocation: 100, averageBuyPrice: 90, currency: 'EUR', currentPrice: 110, currentValue: 1100, financialAssetKey: 9, financialAssetName: 'Example fund', financialAssetSymbol: 'EXF', financialAssetType: 'Fund', quantity: 10, unrealizedGains: 200, unrealizedGainsPercentage: 22.2 }
+    expect(portfolioHoldingsResponseSchema.parse({ holdings: [{ ...valid, realizedGains: -12.5 }] }).holdings[0]?.realizedGains).toBe(-12.5)
+    expect(portfolioHoldingsResponseSchema.parse({ holdings: [{ ...valid, realizedGains: 0 }] }).holdings[0]?.realizedGains).toBe(0)
+    expect(portfolioHoldingsResponseSchema.parse({ holdings: [valid] }).holdings[0]?.realizedGains).toBeUndefined()
+    expect(portfolioHoldingsResponseSchema.parse({ holdings: [{ ...invalidHolding, realizedGains: null }] }).holdings[0]?.realizedGains).toBeNull()
+    expect(portfolioHoldingsResponseSchema.safeParse({ holdings: [{ ...invalidHolding, realizedGains: 5 }] }).success).toBe(false)
+  })
+
   it('keeps parsing holdings when the API adds fields or an invalid reason this build does not know', () => {
     const parsed = portfolioHoldingsResponseSchema.parse({ holdings: [{ ...invalidHolding, invalidReason: 'MISSING_PRICE', sector: 'Tech' }] }).holdings[0]
     expect(parsed).toMatchObject({ isInvalid: true, invalidReason: 'MISSING_PRICE' })

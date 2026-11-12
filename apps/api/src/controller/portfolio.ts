@@ -31,6 +31,7 @@ import {
   getPortfoliosTransactionRequestSchema,
   getPortfolioTopMoversRequestSchema,
   getPortfolioTransactionRequestSchema,
+  getRealizedGainsRequestSchema,
   putAssetPriceOverrideRequestSchema,
   updatePortfolioRequestSchema,
   updatePortfolioTransactionRequestSchema,
@@ -314,6 +315,10 @@ export async function getPortfolioHoldings(req: Request, res: Response) {
   return res.json({ holdings });
 }
 
+/**
+ * Realized gains per sale, per asset and per year, for one of the household's portfolios or all
+ * of them. Another household's portfolio is a 404, as everywhere on this router.
+ */
 export async function getPortfolios(req: Request, res: Response) {
   const { tenant, user } = authedContext(req);
   const portfolios = await DI.em.find(
@@ -378,6 +383,22 @@ export async function getPortfolioTransactions(req: Request, res: Response) {
     limit,
   );
   return res.json({ transactions });
+}
+
+export async function getRealizedGains(req: Request, res: Response) {
+  const { tenant, user } = authedContext(req);
+  const {
+    query: { portfolioId, year },
+  } = await zParse(getRealizedGainsRequestSchema, req);
+  if (portfolioId != null) {
+    const portfolio = await DI.em.findOne(Portfolio, {
+      deletedAt: undefined,
+      portfolioKey: portfolioId,
+      tenantKey: { tenantKey: tenant.tenantKey },
+    });
+    if (!portfolio) throw new NotFoundError('Portfolio not found');
+  }
+  return res.json(await portfolioHoldingsService.getRealizedGainsReport(user, { portfolioId, tenantKey: tenant.tenantKey, year }));
 }
 
 export async function getTransactionTypes(_req: Request, res: Response) {

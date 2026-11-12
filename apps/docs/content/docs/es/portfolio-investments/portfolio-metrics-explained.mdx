@@ -99,19 +99,28 @@ Solo se hace realidad cuando vendes. Hasta entonces, no está realizada.
 ## Ganancias o pérdidas realizadas
 
 ### Qué significa
-El beneficio o la pérdida que se fija cuando vendes o cierras de otro modo una posición.
+El beneficio o la pérdida que se fija cuando vendes o cierras de otro modo una posición. En cada venta es el importe de la venta después de su comisión, menos el coste que liberó el método de la cartera (incluidas las comisiones de compra de las unidades vendidas).
 
 ### Dónde aparece
-En los resúmenes de transacciones y de rentabilidad.
+- En el resumen de la cartera, como total de la cartera o de todas las carteras.
+- En la columna **Realizado** de la tabla de posiciones: todo lo que esa posición ha realizado hasta ahora.
+- En la sección **Ganancias realizadas**, que lista cada venta con su fecha, cantidad, importe de la venta, coste de adquisición, ganancia realizada y la fecha de la compra más antigua de la que vendió (en cartera desde). Fíltrala por año y descarga la lista que ves como archivo CSV.
+- En **Posiciones cerradas**: activos que has vendido por completo, con el resultado de toda su vida, para que sigan visibles cuando salen de las posiciones.
 
 ### Cómo interpretarlo
-Úsalo para ver qué se ha fijado ya con las operaciones completadas.
+Úsalo para ver qué se ha fijado ya con las operaciones completadas. Las ventas de un año suman el total de ese año, y todos los años juntos suman las ganancias realizadas de la cartera. Un año es un año natural en UTC, según la fecha de la venta.
+
+### Ejemplo
+Compras 10 unidades a 100 con una comisión de 10 y vendes 4 a 150 con una comisión de 2. Con FIFO la venta libera 4 × 100 más 4 de los 10 de comisión de compra, un coste de 404. El importe de la venta es 600 menos la comisión de 2, es decir 598, así que la venta realizó 194.
 
 ### Qué puede hacer que cambie
-Las ventas, las ventas parciales, las comisiones y las correcciones de transacciones.
+Las ventas, las ventas parciales, las comisiones, los desdoblamientos de acciones, las correcciones de transacciones y un cambio del método de coste.
+
+### Moneda
+Los importes se muestran en tu moneda. Una venta registrada en otra moneda se convierte al tipo de cambio del día de la venta. Una venta sin tipo para ese día aparece en su propia moneda y queda fuera de los totales, con una nota que lo indica.
 
 ### Malentendido habitual
-Las ganancias o pérdidas realizadas son independientes de las no realizadas.
+Las ganancias o pérdidas realizadas son independientes de las no realizadas. WonderMoney muestra lo que ganó cada venta según el método de coste de la cartera; no aplica normas fiscales de cada país, como las de *wash sale*, y no es una declaración de impuestos.
 
 ## Porcentaje de rentabilidad
 

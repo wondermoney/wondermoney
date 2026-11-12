@@ -3918,6 +3918,7 @@
     "unavailable": "Unavailable",
     "currentValue": "Current value",
     "gainLoss": "Gain or loss",
+    "realizedGain": "Realized gain",
     "portfolioWeight": "Portfolio weight",
     "quantity": "Quantity",
     "currentPrice": "Current price",

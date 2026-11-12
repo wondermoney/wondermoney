@@ -9,17 +9,18 @@ import type { Appuser } from '@entity/Appuser';
 import { FEED_RATES_ONLY } from '@service/currency/exchange-rate';
 import { completenessFromCounts, currencyKeySql, loadDailyRates, type ReportCompleteness, type UnconvertedCount } from '@service/reports/report-currency';
 import logger from '@utils/logger';
-import { big, roundDisplay, sumMoney } from '@utils/money';
+import { addMoney, big, convertMoney, roundDisplay, roundMoney, subtractMoney, sumMoney } from '@utils/money';
 
 import assetPriceService from './asset-price.service';
 import { enrichSavingsCertificateHoldings, isSavingsCertificateBatch } from './certificado-aforro-holdings.service';
 import { resolveHoldingCurrentMetrics } from './portfolio-currency.utils';
 import {
   aggregateBatchesIntoAssets,
-  buildSplitAdjustedHoldingBatches,
   type CostBasisMethodResolver,
   getPortfolioAssetInvalidKey,
   type HoldingBatch,
+  type HoldingDisposal,
+  type HoldingReplayResult,
   type HoldingTimelineItem,
   type PortfolioAsset,
   type PortfolioHolding,
@@ -38,6 +39,79 @@ export interface RealizedGains {
   feeConversionIncompleteAssetKeys?: number[];
   totalCostBasisOfSold: number;
   totalRealizedGains: number;
+}
+
+/** Totals of a set of sales, in the report's currency. */
+export interface RealizedGainsTotals {
+  costBasis: number;
+  proceeds: number;
+  realizedGain: number;
+  sales: number;
+}
+
+/** One sale. Amounts are in `currencyCode`: the viewer's, unless no rate converts the sale. */
+export interface RealizedDisposal {
+  costBasis: number;
+  currencyCode: null | string;
+  /** The sale's date, ISO 8601. */
+  date: string;
+  /** Set when a fee feeding this sale's figures could not be converted and counted as zero. */
+  feeConversionIncomplete?: true;
+  financialAssetKey: number;
+  financialAssetName: string;
+  /** The purchase date of the oldest lot the sale consumed, ISO 8601; null when it consumed none. */
+  holdingPeriodStart: null | string;
+  portfolioKey: number;
+  portfolioName: string;
+  /** Proceeds less the sale's fee. */
+  proceeds: number;
+  quantity: number;
+  realizedGain: number;
+  symbol: string;
+  transactionKey: number;
+}
+
+export interface RealizedGainsByAsset extends RealizedGainsTotals {
+  financialAssetKey: number;
+  financialAssetName: string;
+  quantity: number;
+  symbol: string;
+}
+
+export interface RealizedGainsByYear extends RealizedGainsTotals {
+  year: number;
+}
+
+/** An asset sold out of every portfolio in scope, with its lifetime result. */
+export interface ClosedPosition extends RealizedGainsTotals {
+  financialAssetKey: number;
+  financialAssetLogoUrl: null | string;
+  financialAssetName: string;
+  financialAssetType: string;
+  /** The oldest lot any of its sales consumed, ISO 8601. */
+  holdingPeriodStart: null | string;
+  lastSaleDate: string;
+  quantity: number;
+  symbol: string;
+}
+
+/**
+ * Realized gains per sale, per asset and per UTC year, in the viewer's currency. `disposals`,
+ * `byAsset` and `totals` cover the requested year (every year when none is given); `byYear` and
+ * `closedPositions` always cover the whole history. A sale no rate converts is listed in its own
+ * currency, left out of every total and counted in `completeness`.
+ */
+export interface RealizedGainsReport {
+  byAsset: RealizedGainsByAsset[];
+  byYear: RealizedGainsByYear[];
+  closedPositions: ClosedPosition[];
+  completeness: ReportCompleteness;
+  currencyCode: string;
+  disposals: RealizedDisposal[];
+  /** Assets with a fee that was counted as zero, as on the realized total. Present only when non-empty. */
+  feeConversionIncompleteAssetKeys?: number[];
+  totals: RealizedGainsTotals;
+  year: null | number;
 }
 
 /** Dividend income in the viewer's currency (`completeness.currencyCode`). */
@@ -191,24 +265,19 @@ class PortfolioHoldingsService {
   }
 
   /**
-   * Get financial transaction batches with FIFO remaining quantities.
+   * Replays the rows under each portfolio's cost basis method: the open lots the holdings are
+   * built from and one disposal per sale (see `replayHoldingTimeline`).
    *
-   * Algorithm:
-   * 1. For each asset, assign row numbers to BUY transactions (in_row) ordered by date
-   * 2. Calculate total quantity sold (total_quantity_out) per asset
-   * 3. Self-join to compute running cumulative buys (running_in_quantity) for each lot
-   * 4. Determine remaining quantity per lot by comparing cumulative buys vs total sells
-   *
-   * Example: Buy 100, Buy 50, Sell 120
-   * - Lot 1: running_in=100, total_out=120 → remaining = 0 (fully sold)
-   * - Lot 2: running_in=150, total_out=120 → remaining = 150-120 = 30
+   * Example under FIFO: Buy 100, Buy 50, Sell 120
+   * - Lot 1: fully sold; Lot 2: 30 remain
+   * - One disposal of 120 relieving all of lot 1 and 20 of lot 2
    */
-  private getFinancialTransactionBatchesFromRows(
+  private replayRows(
     transactionRows: Record<string, unknown>[],
     splitRows: Record<string, unknown>[],
     costBasisMethod: CostBasisMethodResolver,
-  ): HoldingBatch[] {
-    return buildSplitAdjustedHoldingBatches(this.buildTimelineFromRows(transactionRows, splitRows), costBasisMethod);
+  ): HoldingReplayResult {
+    return replayHoldingTimeline(this.buildTimelineFromRows(transactionRows, splitRows), costBasisMethod);
   }
 
   /** The replay timeline for a set of transaction and split rows. */
@@ -229,6 +298,10 @@ class PortfolioHoldingsService {
         financial_transaction_type_key: Number(row['financial_transaction_type_key']),
         itemType: 'TRANSACTION' as const,
         portfolio_key: Number(row['portfolio_key']),
+        ...(Number(row['financial_transaction_type_key']) === FINANCIAL_TRANSACTION_TYPES.SELL
+          ? { proceeds_amount: saleProceedsAmount(row) }
+          : {}),
+        ...(row['fee_conversion_incomplete'] === true ? { fee_conversion_incomplete: true } : {}),
         quantity: Number(row['quantity']),
         transaction_date: new Date(String(row['transaction_date'])),
         transaction_key: Number(row['transaction_key']),
@@ -459,12 +532,13 @@ class PortfolioHoldingsService {
     const { splitRows, transactionRows } = await this.getPortfolioTransactionRows(appuser.appuserKey, portfolioId, tenantKey);
     const currency = appuser.currencyKey.code || 'EUR';
     const costBasisMethod = this.costBasisMethodFromRows(transactionRows);
-    const batches = this.getFinancialTransactionBatchesFromRows(transactionRows, splitRows, costBasisMethod);
+    const replay = this.replayRows(transactionRows, splitRows, costBasisMethod);
     const invalidHoldings = this.getInvalidHoldingsFromRows(transactionRows, splitRows, currency, costBasisMethod);
     const invalidKeys = new Set(
       invalidHoldings.map((holding) => getPortfolioAssetInvalidKey(holding.portfolioKey!, holding.financialAssetKey)),
     );
-    return flagIncompleteFeeConversions(await this.buildHoldingsFromOpenBatches(batches, invalidHoldings, invalidKeys, currency, priceTenantKey), transactionRows);
+    const holdings = await this.buildHoldingsFromOpenBatches(replay.openBatches, invalidHoldings, invalidKeys, currency, priceTenantKey);
+    return flagIncompleteFeeConversions(attachRealizedGains(holdings, replay.disposals, invalidKeys), transactionRows);
   }
 
   private async getInvalidHoldings(appuserKey: number, currency: string, portfolioId?: number): Promise<PortfolioHolding[]> {
@@ -480,12 +554,13 @@ class PortfolioHoldingsService {
     const { splitRows, transactionRows } = await this.getPortfolioTransactionRows(appuser.appuserKey, undefined, tenantKey);
     const currency = appuser.currencyKey.code || 'EUR';
     const costBasisMethod = this.costBasisMethodFromRows(transactionRows);
-    const batches = this.getFinancialTransactionBatchesFromRows(transactionRows, splitRows, costBasisMethod);
+    const replay = this.replayRows(transactionRows, splitRows, costBasisMethod);
     const invalidHoldings = this.getInvalidHoldingsFromRows(transactionRows, splitRows, currency, costBasisMethod);
     const invalidKeys = new Set(
       invalidHoldings.map((holding) => getPortfolioAssetInvalidKey(holding.portfolioKey!, holding.financialAssetKey)),
     );
-    return flagIncompleteFeeConversions(await this.buildHoldingsFromOpenBatches(batches, invalidHoldings, invalidKeys, currency, tenantKey), transactionRows);
+    const holdings = await this.buildHoldingsFromOpenBatches(replay.openBatches, invalidHoldings, invalidKeys, currency, tenantKey);
+    return flagIncompleteFeeConversions(attachRealizedGains(holdings, replay.disposals, invalidKeys), transactionRows);
   }
 
   /**
@@ -728,40 +803,9 @@ class PortfolioHoldingsService {
     const totalSellProceeds = transactionRows
       .filter((row) => Number(row['financial_transaction_type_key']) === FINANCIAL_TRANSACTION_TYPES.SELL)
       .filter((row) => !invalidKeys.has(getPortfolioAssetInvalidKey(Number(row['portfolio_key']), Number(row['financial_asset_key']))))
-      .reduce((sum, row) => {
-        const settlementAmount = row['appuser_settlement_amount'] ?? row['settlement_amount'] ?? 0;
-        return sum + Math.abs(Number(settlementAmount)) - Number(row['fee_accounting_amount'] ?? 0);
-      }, 0);
+      .reduce((sum, row) => sum + Math.abs(saleProceedsAmount(row)) - Number(row['fee_accounting_amount'] ?? 0), 0);
 
-    const timeline: HoldingTimelineItem[] = [
-      ...transactionRows.map((row) => ({
-        fee_amount: Number(row['fee_accounting_amount'] ?? 0),
-        financial_asset_currency_code: row['financial_asset_currency_code'] as string | undefined,
-        financial_asset_esg_score: row['financial_asset_esg_score'] as number | string | undefined,
-        financial_asset_key: Number(row['financial_asset_key']),
-        financial_asset_logo_url: row['financial_asset_logo_url'] as string | undefined,
-        financial_asset_name: String(row['financial_asset_name']),
-        financial_asset_symbol: String(row['financial_asset_symbol']),
-        financial_asset_type_name: String(row['financial_asset_type_name']),
-        financial_transaction_type_key: Number(row['financial_transaction_type_key']),
-        itemType: 'TRANSACTION' as const,
-        portfolio_key: Number(row['portfolio_key']),
-        quantity: Number(row['quantity']),
-        transaction_date: new Date(String(row['transaction_date'])),
-        transaction_key: Number(row['transaction_key']),
-        unit_appuser_amount: row['appuser_unit_amount'] == null ? row['appuser_unit_amount'] : Number(row['appuser_unit_amount']),
-        unit_settlement_amount: Number(row['settlement_unit_amount']),
-      })),
-      ...splitRows.map((row) => ({
-        date: new Date(String(row['date'])),
-        denominator: row['denominator'] == null ? Number.NaN : Number(row['denominator']),
-        financial_asset_key: Number(row['financial_asset_key']),
-        itemType: 'SPLIT' as const,
-        numerator: row['numerator'] == null ? Number.NaN : Number(row['numerator']),
-        split_ratio: row['split_ratio'] == null ? undefined : Number(row['split_ratio']),
-      })),
-    ];
-    const costBasisOfSold = [...replayHoldingTimeline(timeline, costBasisMethod).realizedCostBasisByPortfolioAsset.entries()]
+    const costBasisOfSold = [...this.replayRows(transactionRows, splitRows, costBasisMethod).realizedCostBasisByPortfolioAsset.entries()]
       .filter(([key]) => !invalidKeys.has(key))
       .reduce((sum, [, value]) => sum + value, 0);
 
@@ -775,6 +819,176 @@ class PortfolioHoldingsService {
       totalRealizedGains: totalSellProceeds - costBasisOfSold,
     };
   }
+
+  /**
+   * Every sale as a disposal (see {@link RealizedGainsReport}), from the replay that prices the
+   * holdings and the realized total, so the per-sale figures add up to `getRealizedGains`. A sale
+   * is converted from the currency its gains are counted in (the recording member's, else its
+   * settlement currency) into the viewer's at the rate of its UTC day; the cost it relieved is
+   * converted with it. An oversold asset is left out, as from the realized total. `tenantKey`
+   * scopes the trades to the household, as for the holdings.
+   */
+  async getRealizedGainsReport(
+    viewer: Appuser,
+    options: { portfolioId?: number; tenantKey?: number; year?: number } = {},
+  ): Promise<RealizedGainsReport> {
+    if (!viewer.currencyKey.code) await DI.em.populate(viewer, ['currencyKey']);
+    const viewerCurrency = viewer.currencyKey.code;
+    const { portfolioId, tenantKey, year } = options;
+    const { splitRows, transactionRows } = await this.getPortfolioTransactionRows(viewer.appuserKey, portfolioId, tenantKey);
+    const costBasisMethod = this.costBasisMethodFromRows(transactionRows);
+    const invalidKeys = new Set(
+      this.getInvalidHoldingsFromRows(transactionRows, splitRows, viewerCurrency, costBasisMethod)
+        // Invalid holdings are built per portfolio, so they always carry their portfolio key.
+        .map((holding) => getPortfolioAssetInvalidKey(holding.portfolioKey ?? 0, holding.financialAssetKey)),
+    );
+    const replay = this.replayRows(transactionRows, splitRows, costBasisMethod);
+    const rowByTransactionKey = new Map(transactionRows.map((row) => [Number(row['transaction_key']), row]));
+    const validDisposals = replay.disposals.filter(
+      (disposal) => !invalidKeys.has(getPortfolioAssetInvalidKey(disposal.portfolioKey, disposal.financialAssetKey)),
+    );
+
+    const dayOf = (date: Date) => date.toISOString().slice(0, 10);
+    const sourceCurrencyOf = (row: Record<string, unknown> | undefined) => {
+      const code = row?.['appuser_settlement_amount'] == null ? row?.['settlement_currency_code'] : row['appuser_currency_code'];
+      return typeof code === 'string' ? code : null;
+    };
+    const rateFor = await loadDailyRates(
+      DI.em,
+      viewerCurrency,
+      validDisposals.map((disposal) => ({ currencyCode: sourceCurrencyOf(rowByTransactionKey.get(disposal.transactionKey)), day: dayOf(disposal.transactionDate) })),
+      FEED_RATES_ONLY,
+    );
+
+    const converted = validDisposals.map((disposal) => {
+      const row = rowByTransactionKey.get(disposal.transactionKey);
+      const sourceCurrency = sourceCurrencyOf(row);
+      // A sale that records no currency is read in the viewer's, as reports read such rows.
+      const rate = sourceCurrency == null ? 1 : rateFor({ currencyCode: sourceCurrency, day: dayOf(disposal.transactionDate) });
+      const amount = (value: number) => (rate == null ? roundMoney(value) : convertMoney(value, rate));
+      const proceeds = amount(disposal.proceeds);
+      const costBasis = amount(disposal.costBasis);
+      const entry: RealizedDisposal = {
+        costBasis,
+        currencyCode: rate == null ? sourceCurrency : viewerCurrency,
+        date: disposal.transactionDate.toISOString(),
+        ...(disposal.feeConversionIncomplete ? { feeConversionIncomplete: true as const } : {}),
+        financialAssetKey: disposal.financialAssetKey,
+        financialAssetName: String(row?.['financial_asset_name'] ?? ''),
+        holdingPeriodStart: disposal.holdingPeriodStart?.toISOString() ?? null,
+        portfolioKey: disposal.portfolioKey,
+        portfolioName: String(row?.['portfolio_name'] ?? ''),
+        proceeds,
+        quantity: disposal.quantity,
+        realizedGain: subtractMoney(proceeds, costBasis),
+        symbol: String(row?.['financial_asset_symbol'] ?? ''),
+        transactionKey: disposal.transactionKey,
+      };
+      return { entry, isConverted: rate != null, row, year: disposal.transactionDate.getUTCFullYear() };
+    });
+
+    const inYear = converted.filter((item) => year == null || item.year === year);
+    const counted = (items: typeof converted) => items.filter((item) => item.isConverted).map((item) => item.entry);
+
+    const byAsset = new Map<number, RealizedGainsByAsset>();
+    for (const disposal of counted(inYear)) {
+      const asset = byAsset.get(disposal.financialAssetKey) ?? { ...emptyTotals(), financialAssetKey: disposal.financialAssetKey, financialAssetName: disposal.financialAssetName, quantity: 0, symbol: disposal.symbol };
+      addToTotals(asset, disposal);
+      asset.quantity = addMoney(asset.quantity, disposal.quantity, 8);
+      byAsset.set(disposal.financialAssetKey, asset);
+    }
+
+    const byYear = new Map<number, RealizedGainsByYear>();
+    for (const item of converted) {
+      if (!item.isConverted) continue;
+      const entry = byYear.get(item.year) ?? { ...emptyTotals(), year: item.year };
+      addToTotals(entry, item.entry);
+      byYear.set(item.year, entry);
+    }
+
+    // Closed: no open quantity left in any portfolio in scope (the holdings merge per asset too).
+    const openAssetKeys = new Set(replay.openBatches.map((batch) => batch.financial_asset_key));
+    const closed = new Map<number, ClosedPosition>();
+    for (const item of converted) {
+      if (!item.isConverted || openAssetKeys.has(item.entry.financialAssetKey)) continue;
+      const { entry, row } = item;
+      const position = closed.get(entry.financialAssetKey) ?? {
+        ...emptyTotals(),
+        financialAssetKey: entry.financialAssetKey,
+        financialAssetLogoUrl: typeof row?.['financial_asset_logo_url'] === 'string' ? row['financial_asset_logo_url'] : null,
+        financialAssetName: entry.financialAssetName,
+        financialAssetType: String(row?.['financial_asset_type_name'] ?? ''),
+        holdingPeriodStart: null,
+        lastSaleDate: entry.date,
+        quantity: 0,
+        symbol: entry.symbol,
+      };
+      addToTotals(position, entry);
+      position.quantity = addMoney(position.quantity, entry.quantity, 8);
+      if (entry.date > position.lastSaleDate) position.lastSaleDate = entry.date;
+      if (entry.holdingPeriodStart && (!position.holdingPeriodStart || entry.holdingPeriodStart < position.holdingPeriodStart)) {
+        position.holdingPeriodStart = entry.holdingPeriodStart;
+      }
+      closed.set(entry.financialAssetKey, position);
+    }
+
+    const totals = emptyTotals();
+    for (const disposal of counted(inYear)) addToTotals(totals, disposal);
+
+    const unconverted = new Map<null | string, number>();
+    for (const item of inYear) {
+      if (!item.isConverted) unconverted.set(item.entry.currencyCode, (unconverted.get(item.entry.currencyCode) ?? 0) + 1);
+    }
+    const feeConversionIncompleteAssetKeys = getFeeConversionIncompleteAssetKeys(
+      transactionRows.filter((row) => !invalidKeys.has(getPortfolioAssetInvalidKey(Number(row['portfolio_key']), Number(row['financial_asset_key'])))),
+    );
+
+    return {
+      byAsset: [...byAsset.values()].toSorted((a, b) => a.symbol.localeCompare(b.symbol) || a.financialAssetKey - b.financialAssetKey),
+      byYear: [...byYear.values()].toSorted((a, b) => a.year - b.year),
+      closedPositions: [...closed.values()].toSorted((a, b) => b.lastSaleDate.localeCompare(a.lastSaleDate) || a.financialAssetKey - b.financialAssetKey),
+      completeness: completenessFromCounts(viewerCurrency, [...unconverted].map(([currencyCode, transactions]) => ({ currencyCode, transactions }))),
+      currencyCode: viewerCurrency,
+      // Newest first, as the transactions list reads.
+      disposals: inYear.map((item) => item.entry).toReversed(),
+      ...(feeConversionIncompleteAssetKeys.length > 0 ? { feeConversionIncompleteAssetKeys } : {}),
+      totals,
+      year: year ?? null,
+    };
+  }
+}
+
+function addToTotals(totals: RealizedGainsTotals, disposal: Pick<RealizedDisposal, 'costBasis' | 'proceeds' | 'realizedGain'>): void {
+  totals.costBasis = addMoney(totals.costBasis, disposal.costBasis);
+  totals.proceeds = addMoney(totals.proceeds, disposal.proceeds);
+  totals.realizedGain = addMoney(totals.realizedGain, disposal.realizedGain);
+  totals.sales += 1;
+}
+
+function emptyTotals(): RealizedGainsTotals {
+  return { costBasis: 0, proceeds: 0, realizedGain: 0, sales: 0 };
+}
+
+/**
+ * Each holding's lifetime realized gain: its sales' gains, in the same accounting amounts as its
+ * unrealized gain. Holdings merge per asset across portfolios, so the gains do too. An oversold
+ * holding has none.
+ */
+function attachRealizedGains(holdings: PortfolioHolding[], disposals: HoldingDisposal[], invalidKeys: Set<string>): PortfolioHolding[] {
+  const byAsset = new Map<number, Big>();
+  for (const disposal of disposals) {
+    if (invalidKeys.has(getPortfolioAssetInvalidKey(disposal.portfolioKey, disposal.financialAssetKey))) continue;
+    byAsset.set(disposal.financialAssetKey, (byAsset.get(disposal.financialAssetKey) ?? big(0)).plus(big(disposal.realizedGain)));
+  }
+  return holdings.map((holding) => ({
+    ...holding,
+    realizedGains: holding.isInvalid ? null : roundDisplay(byAsset.get(holding.financialAssetKey) ?? 0),
+  }));
+}
+
+/** A sale's gross proceeds in the currency its gains are counted in, as recorded. */
+function saleProceedsAmount(row: Record<string, unknown>): number {
+  return Number(row['appuser_settlement_amount'] ?? row['settlement_amount'] ?? 0);
 }
 
 /**
