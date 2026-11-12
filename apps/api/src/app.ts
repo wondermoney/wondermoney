@@ -23,6 +23,7 @@ import { requireCalendarFeedToken } from '@middleware/calendar-feed';
 import { configureClientIp } from '@middleware/client-ip';
 import { csrfOriginProtection } from '@middleware/csrf-origin';
 import { errorHandler } from '@middleware/error-handler';
+import { requireInstanceAdmin } from '@middleware/instance-admin';
 import {
   adminApiRateLimit,
   assistantRateLimit,
@@ -44,6 +45,7 @@ import { authedTenant, readOnlyTenantGated } from '@middleware/stacks';
 import { getUserOptional } from '@middleware/user';
 import accountRoutes from '@route/account';
 import adminRoutes from '@route/admin';
+import adminBankSyncRoutes from '@route/admin-bank-sync';
 import assistantRoutes from '@route/assistant';
 import authRoutes from '@route/auth';
 import backgroundOperationRoutes from '@route/background-operation';
@@ -200,6 +202,10 @@ export default class Application {
       this.host.get('/v1/household/invites/validate', inviteLookupRateLimit(), validateInviteController);
 
       this.host.use('/v1/account', ...authedTenant(), accountRoutes);
+      // Read from the web app's admin page as well as by scripts, so it takes an instance admin
+      // session or the admin API key, and answers 404 to everyone else. Ahead of `/v1/admin`,
+      // whose API-key-only gate would otherwise answer first.
+      this.host.use('/v1/admin/bank-sync', adminApiRateLimit(), requireInstanceAdmin, adminBankSyncRoutes);
       this.host.use('/v1/admin', adminApiRateLimit(), adminAuth, adminRoutes);
       this.host.use('/v1/health', healthRoutes);
       // QR pairing's public exchange. Its own strict, IP-keyed family: the code it accepts is a

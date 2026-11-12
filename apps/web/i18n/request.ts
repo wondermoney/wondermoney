@@ -28,6 +28,7 @@ export default getRequestConfig(async ({ requestLocale }) => {
     ...(await import(`../messages/${locale}/api-tokens.json`)).default,
     ...(await import(`../messages/${locale}/calendar-feed.json`)).default,
     ...(await import(`../messages/${locale}/connect-ai-client.json`)).default,
+    ...(await import(`../messages/${locale}/admin.json`)).default,
   };
 
   return { locale, messages };

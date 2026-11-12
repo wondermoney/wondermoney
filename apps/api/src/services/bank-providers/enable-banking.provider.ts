@@ -1,5 +1,7 @@
 import { randomUUID } from 'node:crypto';
 
+import type { EntityManager } from '@mikro-orm/postgresql';
+
 import { DI } from '@app/database/di';
 import { EnableBankingReturnTo } from '@app/types/enable-banking-return-to';
 import { AccountFinancialInstitutionProvider } from '@entity/AccountFinancialInstitution';
@@ -12,7 +14,7 @@ import { enableBankingCredentialService } from '@service/enable-banking/enable-b
 import { createInitialEnableBankingAccounts } from '@service/enable-banking/enable-banking-initial-accounts.service';
 import { createEnableBankingSyncAdapter } from '@service/enable-banking/enable-banking-sync-adapter';
 import { getRef } from '@utils/em-helpers';
-import { decodeEnableBankingInstitutionId, encodeEnableBankingInstitutionId } from '@utils/enable-banking-institution-id';
+import { buildEnableBankingInstitutionRecordId, decodeEnableBankingInstitutionId, encodeEnableBankingInstitutionId } from '@utils/enable-banking-institution-id';
 import { BadRequestError, InternalServerError, NotFoundError } from '@utils/errors';
 
 import { ConsentExpiredError, RateLimitedError, UnavailableError, UserActionRequiredError } from './errors';
@@ -20,6 +22,7 @@ import type {
   BankAccountsResult,
   BankCompleteConnectionInput,
   BankCompleteConnectionResult,
+  BankConnectionInstitution,
   BankConnectionRef,
   BankInstitution,
   BankProvider,
@@ -70,6 +73,27 @@ class EnableBankingProvider implements BankProvider {
       bankConnectionKey: bankConnectionKeyOf(connection),
       returnTo: connection.returnTo ?? null,
     };
+  }
+
+  /** The ASPSP name and country stored on each Enable Banking row; its id is the one the sync records. */
+  async describeInstitutions(em: EntityManager, bankConnectionKeys: number[]): Promise<Map<number, BankConnectionInstitution>> {
+    const institutions = new Map<number, BankConnectionInstitution>();
+    if (bankConnectionKeys.length === 0) return institutions;
+    const rows = await em.find(
+      EnableBankingConnection,
+      { bankConnectionKey: { bankConnectionKey: { $in: bankConnectionKeys } } },
+      { fields: ['aspspCountry', 'aspspName', 'bankConnectionKey'] },
+    );
+    for (const row of rows) {
+      const key = (row.bankConnectionKey as unknown as undefined | { bankConnectionKey?: number })?.bankConnectionKey;
+      if (!key) continue;
+      institutions.set(key, {
+        country: row.aspspCountry,
+        id: buildEnableBankingInstitutionRecordId({ country: row.aspspCountry, name: row.aspspName }),
+        name: row.aspspName,
+      });
+    }
+    return institutions;
   }
 
   async getBalances(connection: BankConnectionRef, accountId: string): Promise<BankProviderBalance[]> {

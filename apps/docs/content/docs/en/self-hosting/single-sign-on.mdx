@@ -81,6 +81,8 @@ New accounts follow `SIGNUP_MODE` like any other sign-up: with `invite` only inv
 
 With `OIDC_ADMIN_GROUPS=wondermoney-admins`, members of that group are instance admins. WonderMoney reads the groups at every sign-in through the provider and grants or removes admin to match, so taking someone out of the group removes admin at their next sign-in. Only that yes-or-no answer is kept; WonderMoney does not store the provider's tokens or the list of groups. Without `OIDC_ADMIN_GROUPS`, sign-in leaves the admin flag alone.
 
+Admins can open the [bank sync health](/en/docs/self-hosting/bank-sync-health) page. That page also shows how to make someone an admin without single sign-on.
+
 ## Email addresses and existing accounts
 
 The ID token must say the address is verified (`email_verified: true`); otherwise the sign-in is refused. If your provider does not verify addresses, `OIDC_ALLOW_UNVERIFIED_EMAIL=true` lets such people in, as new accounts with an unverified address.

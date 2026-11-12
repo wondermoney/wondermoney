@@ -788,6 +788,26 @@
         }
       }
     },
+    "/v1/admin/bank-sync/health": {
+      "get": {
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/v1/admin/bank-sync/failing": {
+      "get": {
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/v1/admin/performance": {
       "get": {
         "description": "",

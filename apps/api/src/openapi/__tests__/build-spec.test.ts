@@ -28,6 +28,7 @@ describe('public API OpenAPI contract', () => {
     expect(generated).toEqual(expected);
     expect([...generated].some((key) => key.includes('/v1/calendar'))).toBe(false);
     expect([...generated].some((key) => key.includes('/v1/user'))).toBe(false);
+    expect([...generated].some((key) => key.includes('/v1/admin'))).toBe(false);
     expect(routes.find(({ path }) => path === '/v1/mcp')?.scopes).toEqual(['mcp:read', 'mcp:propose']);
     expect(Object.keys(paths).length).toBeGreaterThan(0);
   });
