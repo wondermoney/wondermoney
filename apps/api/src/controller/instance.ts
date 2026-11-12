@@ -3,6 +3,7 @@ import type { Request, Response } from 'express';
 import { instanceName } from '@config/instance-name';
 import { isMcpEnabled } from '@config/mcp';
 import { aiCapabilities } from '@service/ai/ai-provider';
+import { signInMethods } from '@service/auth/oidc-provider';
 import { resolveSignupMode } from '@service/auth/signup-policy';
 import { isGoogleSignInConfigured } from '@service/auth/social-sign-in';
 import { bankSyncFeatures } from '@service/bank-providers/registry';
@@ -23,6 +24,7 @@ import { buildInfo } from '@utils/constants';
 export function getInstance(_req: Request, res: Response) {
   const { commit, version } = buildInfo();
   const bankSync = bankSyncFeatures();
+  const signIn = signInMethods();
   return res.json({
     apiVersion: 1,
     commit,
@@ -42,8 +44,12 @@ export function getInstance(_req: Request, res: Response) {
       marketData: isMarketDataEnabled(),
       // The read-only MCP server at `POST /v1/mcp` (`MCP_ENABLED`, on by default).
       mcp: isMcpEnabled(),
-      // Passkey sign-in on the web app (better-auth's passkey plugin, always on).
+      // Single sign-on through the operator's OIDC provider: "Sign in with <name>". Null when off.
+      oidc: signIn.oidc,
+      // Passkey sign-in on the web app (better-auth's passkey plugin, always on, OIDC_ONLY too).
       passkey: true,
+      // False under OIDC_ONLY: the server refuses password sign-in, sign-up and reset.
+      passwordSignIn: signIn.passwordSignIn,
     },
     minAppVersion: process.env['MIN_APP_VERSION']?.trim() || null,
     name: instanceName(),

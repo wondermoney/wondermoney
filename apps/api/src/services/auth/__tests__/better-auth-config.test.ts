@@ -13,6 +13,7 @@ const emptyAuth = {
   cookieDomain: null,
   googleClientId: null,
   googleClientSecret: null,
+  oidc: null,
 };
 
 describe('loadAuthConfiguration', () => {
@@ -37,6 +38,7 @@ describe('loadAuthConfiguration', () => {
       cookieDomain: '.wonder.money',
       googleClientId: 'google-client',
       googleClientSecret: 'google-secret',
+      oidc: null,
     });
     expect(Object.isFrozen(auth)).toBe(true);
   });

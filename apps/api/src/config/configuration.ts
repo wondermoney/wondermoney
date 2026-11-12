@@ -142,6 +142,20 @@ const authSchema = z.object({
   BETTER_AUTH_URL: httpUrl('Better Auth base URL').optional(),
   GOOGLE_CLIENT_ID: z.string().trim().optional(),
   GOOGLE_CLIENT_SECRET: z.string().trim().optional(),
+  // Single sign-on through an OpenID Connect provider (`services/auth/oidc.ts`). The issuer,
+  // client id and secret turn it on together; every other OIDC_* key needs them (`oidcIssues`).
+  OIDC_ADMIN_GROUPS: z.string().trim().optional(),
+  OIDC_ALLOW_UNVERIFIED_EMAIL: boolFlag('OIDC unverified-email flag').optional(),
+  OIDC_ALLOWED_GROUPS: z.string().trim().optional(),
+  OIDC_AUTO_SIGNUP: boolFlag('OIDC automatic sign-up flag').optional(),
+  OIDC_CLIENT_ID: z.string().trim().optional(),
+  OIDC_CLIENT_SECRET: z.string().trim().optional(),
+  OIDC_DISPLAY_NAME: z.string().trim().max(60, 'OIDC_DISPLAY_NAME must be at most 60 characters').optional(),
+  OIDC_GROUPS_CLAIM: z.string().trim().optional(),
+  OIDC_ISSUER: z.string().trim().refine(isSecureIssuer, 'OIDC_ISSUER must be an https URL (http only on localhost or 127.0.0.1)').optional(),
+  OIDC_ONLY: boolFlag('OIDC-only sign-in flag').optional(),
+  OIDC_SCOPES: z.string().trim().refine((value) => splitList(value, /\s+/u).includes('openid'), 'OIDC_SCOPES must include openid').optional(),
+  OIDC_TRUST_IDP_MFA: boolFlag('OIDC trust-provider-MFA flag').optional(),
 });
 
 // Third-party integrations are all optional: a self-hosted install boots with Postgres and its own
@@ -265,6 +279,30 @@ function bool(value: string | undefined): boolean {
   return value === '1' || value === 'true' || value === 'on' || value === 'yes';
 }
 
+function splitList(value: string, separator: RegExp): string[] {
+  return value.split(separator).map((item) => item.trim()).filter((item) => item !== '');
+}
+
+/** https, or plain http on the machine itself (a provider run beside the API for testing). */
+function isSecureIssuer(value: string): boolean {
+  let url: URL;
+  try {
+    url = new URL(value);
+  } catch {
+    return false;
+  }
+  if (url.protocol === 'https:') return true;
+  return url.protocol === 'http:' && ['127.0.0.1', '[::1]', 'localhost'].includes(url.hostname);
+}
+
+const OIDC_REQUIRED = ['OIDC_ISSUER', 'OIDC_CLIENT_ID', 'OIDC_CLIENT_SECRET'] as const;
+
+/**
+ * A half-configured OIDC provider fails the boot instead of quietly turning sign-in off: an
+ * operator who set `OIDC_ONLY` or `OIDC_ADMIN_GROUPS` expects single sign-on to be on.
+ */
+export type OidcConfiguration = NonNullable<ReturnType<typeof buildOidc>>;
+
 function buildAuth(parsed: z.infer<typeof authSchema>) {
   return {
     appleClientId: parsed.APPLE_CLIENT_ID ?? null,
@@ -275,6 +313,7 @@ function buildAuth(parsed: z.infer<typeof authSchema>) {
     cookieDomain: parsed.AUTH_COOKIE_DOMAIN ?? null,
     googleClientId: parsed.GOOGLE_CLIENT_ID ?? null,
     googleClientSecret: parsed.GOOGLE_CLIENT_SECRET ?? null,
+    oidc: buildOidc(parsed),
   };
 }
 
@@ -336,6 +375,28 @@ function buildIntegrations(parsed: z.infer<typeof sharedSchema>) {
   };
 }
 
+function buildOidc(parsed: z.infer<typeof authSchema>) {
+  const { OIDC_CLIENT_ID: clientId, OIDC_CLIENT_SECRET: clientSecret, OIDC_ISSUER: issuer } = parsed;
+  if (!issuer || !clientId || !clientSecret) return null;
+  return {
+    /** Members of any of these groups are instance admins; empty leaves the admin flag alone. */
+    adminGroups: splitList(parsed.OIDC_ADMIN_GROUPS ?? '', /,/u),
+    allowUnverifiedEmail: bool(parsed.OIDC_ALLOW_UNVERIFIED_EMAIL),
+    /** Only members of these groups (or of `adminGroups`) may sign in; empty allows everyone. */
+    allowedGroups: splitList(parsed.OIDC_ALLOWED_GROUPS ?? '', /,/u),
+    autoSignup: bool(parsed.OIDC_AUTO_SIGNUP),
+    clientId,
+    clientSecret,
+    discoveryUrl: `${issuer.replace(/\/+$/u, '')}/.well-known/openid-configuration`,
+    displayName: parsed.OIDC_DISPLAY_NAME ?? 'SSO',
+    groupsClaim: parsed.OIDC_GROUPS_CLAIM ?? 'groups',
+    issuer,
+    only: bool(parsed.OIDC_ONLY),
+    scopes: splitList(parsed.OIDC_SCOPES ?? 'openid email profile', /\s+/u),
+    trustIdpMfa: bool(parsed.OIDC_TRUST_IDP_MFA),
+  };
+}
+
 function buildPgBoss(parsed: z.infer<typeof sharedSchema>) {
   return {
     connectionString: parsed.DATABASE_URL ?? null,
@@ -375,6 +436,16 @@ function freeze<T>(value: T): T {
     return Object.freeze(next) as unknown as T;
   }
   return value;
+}
+
+function oidcIssues(parsed: z.infer<typeof authSchema>): ConfigurationIssue[] {
+  // An absent optional key is not in the parsed object at all.
+  if (!Object.keys(parsed).some((key) => key.startsWith('OIDC_'))) return [];
+  return OIDC_REQUIRED.filter((key) => !parsed[key]).map((key) => ({
+    code: 'missing' as const,
+    message: `${key} is required when any OIDC_* variable is set (OIDC_ISSUER, OIDC_CLIENT_ID and OIDC_CLIENT_SECRET turn single sign-on on together)`,
+    path: key,
+  }));
 }
 
 function parseAppEnvironment(value: string | undefined): 'development' | 'production' | 'staging' | 'test' {
@@ -516,7 +587,7 @@ function parseRole<R extends ConfigurationRole>(role: R, source: ConfigurationSo
     const parsed = apiSchema.safeParse(source);
     if (!parsed.success) throw new ConfigurationError(role, parseIssues(parsed.error, source));
     const db = buildDatabase(parsed.data);
-    const issues = requireDbOrThrow(db, role);
+    const issues = [...requireDbOrThrow(db, role), ...oidcIssues(parsed.data)];
     if (issues.length > 0) throw new ConfigurationError(role, issues);
     const config: ApiConfiguration = {
       auth: buildAuth(parsed.data),
@@ -665,6 +736,8 @@ export function loadAuthConfiguration(source: ConfigurationSource): ReturnType<t
   const cleaned = withoutEmptyValues(source);
   const parsed = authSchema.safeParse(cleaned);
   if (!parsed.success) throw new ConfigurationError('api', parseIssues(parsed.error, cleaned));
+  const issues = oidcIssues(parsed.data);
+  if (issues.length > 0) throw new ConfigurationError('api', issues);
   return freeze(buildAuth(parsed.data));
 }
 

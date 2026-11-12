@@ -104,7 +104,10 @@ Coverage thresholds in `vitest.config.ts` are enforced in CI (`pnpm test:coverag
 ## Auth, users and tenancy
 
 - **better-auth** is mounted at `/api/auth` (before `express.json()`), with its tables in the
-  `better_auth` schema and the twoFactor/jwt/bearer/passkey plugins. `getAuthSession()` reads the
+  `better_auth` schema and the twoFactor/jwt/bearer/passkey plugins, plus generic OAuth for
+  single sign-on when `OIDC_*` is set (`services/auth/oidc.ts`: provider `oidc`, allowed and admin
+  groups, `OIDC_ONLY`; the admin claim is kept as `user.oidcAdmin` and mirrored onto
+  `Appuser.accountType`). `getAuthSession()` reads the
   session cookie or `Authorization: Bearer` and sets `req.authUser`. MFA is implicit: no full
   session exists until 2FA completes; a passkey sign-in (user verification required) counts as
   both factors. better-auth tables have no MikroORM entities: change them with hand-written DDL

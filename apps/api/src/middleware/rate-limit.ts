@@ -378,6 +378,13 @@ export const authExchangeRateLimit = (): RequestHandler => createRateLimiter({ f
 export const passkeyRateLimit = (): RequestHandler =>
   createRateLimiter({ family: 'authExchange', skip: (req) => req.method === 'GET' && req.path === '/list-user-passkeys' });
 
+/**
+ * `/api/auth/callback/oidc` — the single sign-on callback, where an authorization code is traded
+ * for the provider's tokens. On the `authExchange` family with a store of its own, so one sign-in
+ * spends one attempt of each budget: `POST /sign-in/social` counts against the sign-in one.
+ */
+export const oidcCallbackRateLimit = (): RequestHandler => createRateLimiter({ family: 'authExchange' });
+
 /** `/v1/household/invites/validate` — public invite-token lookup. */
 export const inviteLookupRateLimit = (): RequestHandler => createRateLimiter({ family: 'inviteLookup' });
 

@@ -182,6 +182,20 @@ describe('Auth endpoint rate limiting', () => {
     }
   });
 
+  it('rate-limits the OIDC callback on the auth budget, apart from password sign-in', async () => {
+    const app = await loadApp();
+
+    for (let i = 0; i < AUTH_LIMIT; i += 1) {
+      const res = await request(app.host).get('/api/auth/callback/oidc?code=code&state=state');
+      expect(res.status).not.toBe(429);
+    }
+
+    expect((await request(app.host).get('/api/auth/callback/oidc?code=code&state=state')).status).toBe(429);
+    // The provider may post the code back (response_mode=form_post).
+    expect((await request(app.host).post('/api/auth/callback/oidc').send({ code: 'code', state: 'state' })).status).toBe(429);
+    expect((await request(app.host).post('/api/auth/sign-in/email').send({ email: 'a@b.com', password: 'x' })).status).not.toBe(429);
+  });
+
   it('does not apply the strict auth limit to non-sensitive auth paths', async () => {
     const app = await loadApp();
 

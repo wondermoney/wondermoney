@@ -35,7 +35,9 @@ describe('GET /v1/instance', () => {
         googleSignIn: false,
         marketData: false,
         mcp: true,
+        oidc: null,
         passkey: true,
+        passwordSignIn: true,
       },
       minAppVersion: null,
       name: 'WonderMoney',
@@ -94,6 +96,26 @@ describe('GET /v1/instance', () => {
     vi.stubEnv('GOOGLE_CLIENT_ID', 'client-id');
 
     expect(describeInstance()).toMatchObject({ features: { googleSignIn: false } });
+  });
+
+  it('offers single sign-on by its display name once the OIDC provider is configured', () => {
+    vi.stubEnv('OIDC_ISSUER', 'https://sso.example.com/realms/home');
+    vi.stubEnv('OIDC_CLIENT_ID', 'wondermoney');
+    vi.stubEnv('OIDC_CLIENT_SECRET', 'client-secret');
+    vi.stubEnv('OIDC_DISPLAY_NAME', 'Home SSO');
+
+    expect(describeInstance()).toMatchObject({ features: { oidc: { name: 'Home SSO' }, passwordSignIn: true } });
+    // The client secret and the issuer are the server's business.
+    expect(JSON.stringify(describeInstance())).not.toContain('client-secret');
+  });
+
+  it('turns password sign-in off under OIDC_ONLY', () => {
+    vi.stubEnv('OIDC_ISSUER', 'https://sso.example.com/realms/home');
+    vi.stubEnv('OIDC_CLIENT_ID', 'wondermoney');
+    vi.stubEnv('OIDC_CLIENT_SECRET', 'client-secret');
+    vi.stubEnv('OIDC_ONLY', 'true');
+
+    expect(describeInstance()).toMatchObject({ features: { oidc: { name: 'SSO' }, passwordSignIn: false } });
   });
 
   it('offers feedback only when it can be emailed to a support inbox', () => {

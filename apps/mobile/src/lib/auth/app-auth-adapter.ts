@@ -3,6 +3,7 @@ import {
   type AppAuthAdapter,
   type AppAuthState,
   type AuthSession,
+  type BrowserSignInOutcome,
   type ChangePasswordOutcome,
   type IdTokenSignInOutcome,
   type MfaChallengeOutcome,
@@ -43,6 +44,10 @@ export type BetterAuthClientPort = Readonly<{
       provider: NativeIdentityProviderId
       idToken: { token: string; nonce?: string }
       disableRedirect: boolean
+    } | {
+      provider: string
+      /** An app path; the Expo client turns it into the `wondermoney://` deep link. */
+      callbackURL: string
     }) => Promise<AuthResult<Record<string, unknown>>>
   }>
   signUp: Readonly<{
@@ -297,6 +302,30 @@ export function createAppAuthAdapter(client: BetterAuthClientPort): AppAuthAdapt
         }
         mfaPending = false
         return { status: 'accepted' }
+      } catch {
+        return { status: 'unavailable' }
+      }
+    },
+
+    signInWithBrowser: async (provider): Promise<BrowserSignInOutcome> => {
+      try {
+        // Resolves once the browser sheet closes: on the deep link back, on a refusal page the
+        // person dismissed, or on cancel. The Expo client has stored whatever cookie came back.
+        const { error } = await client.signIn.social({ provider, callbackURL: '/auth/complete' })
+        if (error) return { status: 'unavailable' }
+        const { data } = await client.getSession({ query: { disableCookieCache: true } })
+        if (data) {
+          mfaPending = false
+          return { status: 'accepted' }
+        }
+        // A two-factor account: twoFactorOAuthGuard swapped the session for the pending
+        // two-factor cookie, which `twoFactor.verifyTotp` completes.
+        const cookie = client.getCookie ? await client.getCookie() : ''
+        if (/(?:^|[;\s.])two_factor=/.test(cookie)) {
+          mfaPending = true
+          return { status: 'mfa-pending' }
+        }
+        return { status: 'unavailable' }
       } catch {
         return { status: 'unavailable' }
       }

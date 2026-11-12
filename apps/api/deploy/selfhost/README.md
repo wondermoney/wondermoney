@@ -85,6 +85,7 @@ Everything lives in `.env`; it is commented section by section. After editing it
 | A contact form and a support address in the app | `SUPPORT_EMAIL` (and optionally reCAPTCHA keys) |
 | The in-app "Share Feedback" form, emailed to you | `SUPPORT_EMAIL` plus email (SMTP or Resend) |
 | "Continue with Google" | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` |
+| "Sign in with <name>" through your own identity provider (OIDC) | `OIDC_ISSUER`, `OIDC_CLIENT_ID`, `OIDC_CLIENT_SECRET` (see the single sign-on guide) |
 | Bank sync | nothing on the server: each user adds their own Enable Banking key in Settings |
 | Analytics for your own instance (off by default) | `NEXT_PUBLIC_GTM_ID`, `NEXT_PUBLIC_POSTHOG_KEY`, or `ANALYTICS_OUTBOX_MODE=live` with `POSTHOG_API_KEY` |
 

@@ -106,6 +106,18 @@ describe('auth callback signup', () => {
     expect(response.json).toHaveBeenCalledWith({ appuserKey: 42, method: 'email', outcome: 'signup' });
   });
 
+  it.each([[true, true], [false, false], [null, false], [undefined, false]])(
+    'creates the app user as an admin only when the identity provider granted it (oidcAdmin=%s)',
+    async (oidcAdmin, admin) => {
+      await authCallback(
+        { authUser: { session: { id: 'session-signup' }, user: { email: appuser.emailAddress, id: externalUserId, oidcAdmin } } } as Parameters<typeof authCallback>[0],
+        makeResponse(),
+      );
+
+      expect(mocked.recordSignup).toHaveBeenCalledWith(expect.objectContaining({ admin }));
+    },
+  );
+
   it('reports provisioning failures separately after canonical signup commits', async () => {
     const provisioningError = new Error('tenant unavailable');
     provisioningError.name = externalUserId;

@@ -2,7 +2,7 @@ import type { Loaded } from '@mikro-orm/core';
 
 import { Onboarding } from '@entity/Onboarding';
 
-import { Appuser, SupportedLanguages } from '../entity/Appuser';
+import { Appuser, AppuserAccountType, SupportedLanguages } from '../entity/Appuser';
 import { Currency } from '../entity/Currency';
 
 import { ExtendedEntityRepository } from './_ExtendedEntityRepository';
@@ -15,6 +15,7 @@ export class AppuserRepository extends ExtendedEntityRepository<Appuser> {
     return this.persist(appUser).flush();
   };
   public createUser = async ({
+    accountType = AppuserAccountType.REGULAR,
     email,
     externalUserId,
     firstName,
@@ -22,6 +23,7 @@ export class AppuserRepository extends ExtendedEntityRepository<Appuser> {
     lastName,
     receiveUpdates,
   }: {
+    accountType?: AppuserAccountType.ADMIN | AppuserAccountType.REGULAR;
     email: Appuser['emailAddress'];
     externalUserId: Appuser['externalUserId'];
     firstName?: Appuser['firstName'];
@@ -35,6 +37,7 @@ export class AppuserRepository extends ExtendedEntityRepository<Appuser> {
     const user = new Appuser();
     user.emailAddress = normalizedEmail;
     user.externalUserId = externalUserId;
+    user.accountType = accountType;
     user.firstName = firstNameActual;
     const defaultCurrency = await this.em.findOneOrFail(Currency, { code: 'EUR' });
     user.currencyKey = defaultCurrency;

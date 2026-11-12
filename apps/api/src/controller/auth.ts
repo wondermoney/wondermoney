@@ -115,6 +115,9 @@ export async function authCallback(req: Request, res: Response) {
 
     const [firstName, lastName] = fullName ? fullName.split(' ') : [undefined, undefined];
     const { appuser: appUser, created: signupCreated } = await recordSignup({
+      // Set from the identity provider's admin groups at sign-in (services/auth/oidc.ts); every
+      // later OIDC sign-in keeps it in step (instance-admin.service.ts).
+      admin: authUser.user.oidcAdmin === true,
       email,
       externalUserId,
       firstName: firstName ?? email.split('@')[0],

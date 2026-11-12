@@ -121,6 +121,13 @@
         "unavailable": "That sign-in didn't work. Try again"
       }
     },
+    "sso": {
+      "signIn": "Sign in with {{provider}}",
+      "onlyNotice": "This server signs in through {{provider}}.",
+      "errors": {
+        "unavailable": "Sign-in with {{provider}} didn't finish. If your provider refused it, it showed why. Try again"
+      }
+    },
     "forgotPassword": {
       "title": "Send reset email",
       "helper": "Enter your email and we'll send you a reset link",

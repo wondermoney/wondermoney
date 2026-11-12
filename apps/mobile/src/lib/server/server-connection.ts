@@ -54,6 +54,11 @@ const instanceSchema = z.object({
     // missing value as "not offered" (see use-instance.ts).
     googleSignIn: z.boolean().optional(),
     marketData: z.boolean(),
+    // Single sign-on through the operator's OIDC provider ("Sign in with <name>"); null when
+    // off, absent on a server older than it.
+    oidc: z.object({ name: z.string().min(1) }).nullable().optional(),
+    // False under OIDC_ONLY: no password sign-in or sign-up. Absent on an older server (on).
+    passwordSignIn: z.boolean().optional(),
   }),
   minAppVersion: z.string().nullable(),
   name: z.string().min(1),

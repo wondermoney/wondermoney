@@ -2920,5 +2920,12 @@
   "passkeys-offer-title": "Inicie sessão mais depressa com uma chave de acesso",
   "passkeys-offer-description": "Da próxima vez, inicie sessão com a impressão digital, o rosto ou o PIN do dispositivo em vez de escrever a palavra-passe. Pode gerir as chaves de acesso em Definições, Segurança.",
   "passkeys-offer-add": "Adicionar uma chave de acesso",
-  "passkeys-offer-dismiss": "Agora não"
+  "passkeys-offer-dismiss": "Agora não",
+  "sso-sign-in": "Iniciar sessão com {provider}",
+  "sso-sign-in-error": "Não foi possível iniciar sessão com {provider}. Tenta de novo daqui a pouco.",
+  "sso-only-notice": "Este servidor inicia sessão através de {provider}.",
+  "auth-code-error-oidc-group-not-allowed": "A tua conta não está num grupo que pode usar este servidor. Pede a quem o gere que te acrescente.",
+  "auth-code-error-oidc-email-not-verified": "O teu fornecedor de identidade ainda não verificou o teu endereço de email. Verifica-o lá e inicia sessão de novo.",
+  "auth-code-error-account-not-linked": "Já existe uma conta com este email aqui. Inicia sessão como fazias antes, verifica o teu endereço de email e tenta de novo.",
+  "auth-code-error-signup-disabled": "O registo não está aberto neste servidor. Pede um convite a quem o gere."
 }

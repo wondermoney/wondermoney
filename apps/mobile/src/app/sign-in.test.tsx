@@ -10,6 +10,9 @@ const mockSignInWithPassword = jest.fn()
 const mockClearActivationError = jest.fn()
 const mockParams: { notice?: string; pairCode?: string; pairServer?: string } = {}
 const mockPair = jest.fn()
+const mockSignInWithSso = jest.fn()
+const mockBlockAccess = jest.fn()
+const mockServer: { oidc: { name: string } | null; passwordSignIn: boolean } = { oidc: null, passwordSignIn: true }
 jest.mock('@/lib/telemetry/analytics', () => ({ captureAnalyticsEvent: jest.fn() }))
 const captured = jest.mocked(captureAnalyticsEvent)
 
@@ -25,9 +28,16 @@ jest.mock('@/features/auth/use-pairing', () => ({
 jest.mock('@/components/providers/product-runtime-provider', () => ({
   useProductRuntime: () => ({
     signInWithPassword: mockSignInWithPassword,
+    signInWithSso: mockSignInWithSso,
+    blockAccess: mockBlockAccess,
     activationError: null,
     clearActivationError: mockClearActivationError,
   }),
+}))
+
+jest.mock('@/lib/server/use-instance', () => ({
+  useOidcProvider: () => mockServer.oidc,
+  usePasswordSignIn: () => mockServer.passwordSignIn,
 }))
 
 jest.mock('@/features/auth/social-sign-in', () => {
@@ -57,6 +67,10 @@ describe('SignInRoute', () => {
     delete mockParams.notice
     delete mockParams.pairCode
     delete mockParams.pairServer
+    mockServer.oidc = null
+    mockServer.passwordSignIn = true
+    mockSignInWithSso.mockReset()
+    mockBlockAccess.mockReset()
   })
 
   it('captures sign_in_completed with the channel only once the session is accepted', async () => {
@@ -107,5 +121,55 @@ describe('SignInRoute', () => {
 
     await waitFor(() => expect(mockPair).toHaveBeenCalledTimes(1))
     expect(mockPair).toHaveBeenCalledWith({ code: 'abcdefghijklmnop', server: 'https://api.example.test' })
+  })
+
+  describe('single sign-on', () => {
+    it('offers "Sign in with <name>" next to the password form when the server has it', async () => {
+      mockServer.oidc = { name: 'Home SSO' }
+      const view = await renderRoute()
+
+      expect(view.getByRole('button', { name: 'Sign in with Home SSO' })).toBeOnTheScreen()
+      expect(view.getByLabelText('Password')).toBeOnTheScreen()
+    })
+
+    it('has no single sign-on button on a server without it', async () => {
+      const view = await renderRoute()
+
+      expect(view.queryByRole('button', { name: /Sign in with/ })).toBeNull()
+    })
+
+    it('leaves out the password form under OIDC_ONLY', async () => {
+      mockServer.oidc = { name: 'Home SSO' }
+      mockServer.passwordSignIn = false
+      const view = await renderRoute()
+
+      expect(view.queryByLabelText('Email')).toBeNull()
+      expect(view.queryByLabelText('Password')).toBeNull()
+      expect(view.queryByRole('link', { name: 'Forgot your password?' })).toBeNull()
+      expect(view.getByText('This server signs in through Home SSO.')).toBeOnTheScreen()
+      expect(view.getByRole('button', { name: 'Sign in with Home SSO' })).toBeOnTheScreen()
+    })
+
+    it('hands a two-factor account to the TOTP challenge', async () => {
+      mockServer.oidc = { name: 'Home SSO' }
+      mockSignInWithSso.mockResolvedValue({ status: 'mfa-pending' })
+      const view = await renderRoute()
+
+      await fireEvent.press(view.getByRole('button', { name: 'Sign in with Home SSO' }))
+
+      await waitFor(() => expect(mockBlockAccess).toHaveBeenCalledWith('mfa-required'))
+    })
+
+    it('says so when the sign-in did not finish', async () => {
+      mockServer.oidc = { name: 'Home SSO' }
+      mockSignInWithSso.mockResolvedValue({ status: 'unavailable' })
+      const view = await renderRoute()
+
+      await fireEvent.press(view.getByRole('button', { name: 'Sign in with Home SSO' }))
+
+      expect(await view.findByRole('alert')).toHaveTextContent(/Sign-in with Home SSO didn't finish/)
+      expect(mockBlockAccess).not.toHaveBeenCalled()
+      expect(captured).not.toHaveBeenCalled()
+    })
   })
 })

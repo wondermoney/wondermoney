@@ -151,6 +151,41 @@ describe('app auth adapter — native ID token', () => {
   })
 })
 
+describe('app auth adapter — single sign-on in the browser', () => {
+  const browserRedirect = () => jest.fn().mockResolvedValue({ data: { redirect: true, url: 'https://sso.example.com/authorize' }, error: null })
+
+  it('runs the provider\'s browser flow back to the app and accepts the session it brought', async () => {
+    const signInSocial = browserRedirect()
+    const getSession = jest.fn().mockResolvedValue({ data: sessionData('u1'), error: null })
+    const adapter = createAppAuthAdapter(createPort({ getSession, signInSocial }))
+
+    await expect(adapter.signInWithBrowser('oidc')).resolves.toEqual({ status: 'accepted' })
+    expect(signInSocial).toHaveBeenCalledWith({ provider: 'oidc', callbackURL: '/auth/complete' })
+    await expect(adapter.getState()).resolves.toMatchObject({ status: 'authenticated' })
+  })
+
+  it('reports a two-factor account as mfa-pending from the pending cookie, with no session', async () => {
+    const adapter = createAppAuthAdapter(createPort({
+      getCookie: jest.fn().mockResolvedValue('better-auth.two_factor=pending.signature'),
+      signInSocial: browserRedirect(),
+    }))
+
+    await expect(adapter.signInWithBrowser('oidc')).resolves.toEqual({ status: 'mfa-pending' })
+    await expect(adapter.getState()).resolves.toEqual({ status: 'mfa-pending' })
+  })
+
+  it('reports a refused, cancelled or failed sign-in as unavailable', async () => {
+    const refused = createAppAuthAdapter(createPort({ signInSocial: browserRedirect() }))
+    await expect(refused.signInWithBrowser('oidc')).resolves.toEqual({ status: 'unavailable' })
+
+    const failed = createAppAuthAdapter(createPort({ signInSocial: jest.fn().mockResolvedValue({ data: null, error: errorLike(404, 'PROVIDER_NOT_FOUND') }) }))
+    await expect(failed.signInWithBrowser('oidc')).resolves.toEqual({ status: 'unavailable' })
+
+    const thrown = createAppAuthAdapter(createPort({ signInSocial: jest.fn().mockRejectedValue(new Error('browser unavailable')) }))
+    await expect(thrown.signInWithBrowser('oidc')).resolves.toEqual({ status: 'unavailable' })
+  })
+})
+
 describe('app auth adapter — TOTP lifecycle', () => {
   it('enrolls a TOTP factor, extracting the manual-entry secret from the otpauth URI', async () => {
     const twoFactorEnable = jest.fn().mockResolvedValue({

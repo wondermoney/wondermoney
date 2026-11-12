@@ -2,7 +2,7 @@ import { z } from 'zod';
 
 import { DI } from '@app/database/di';
 import { AnalyticsOutbox } from '@entity/AnalyticsOutbox';
-import { Appuser, SupportedLanguages } from '@entity/Appuser';
+import { Appuser, AppuserAccountType, SupportedLanguages } from '@entity/Appuser';
 import { isAnalyticsOutboxEnabled } from '@service/analytics/analytics-outbox.service';
 import { ERROR } from '@utils/constants';
 
@@ -10,6 +10,8 @@ const SIGNUP_EVENT_ID_PREFIX = 'signup.v1:';
 const externalUserIdSchema = z.guid().brand<'ExternalUserId'>();
 
 export type SignupRecordInput = Readonly<{
+  /** The identity provider put this person in an admin group (`OIDC_ADMIN_GROUPS`). */
+  admin?: boolean;
   email: string;
   externalUserId: string;
   firstName?: string;
@@ -43,6 +45,7 @@ export async function recordSignup(input: SignupRecordInput): Promise<SignupReco
       if (existingAppuser) return { appuser: existingAppuser, created: false };
 
       const appuser = await appuserRepository.createUser({
+        accountType: input.admin ? AppuserAccountType.ADMIN : AppuserAccountType.REGULAR,
         email: input.email,
         externalUserId,
         firstName: input.firstName,
