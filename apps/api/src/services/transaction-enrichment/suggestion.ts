@@ -52,8 +52,9 @@ export async function requestTransactionEnrichmentSuggestion(input: TransactionE
     if (error instanceof FeatureDisabledError) throw error;
     // A transport failure keeps its status: the worker retries 429/5xx through pg-boss.
     if (error instanceof AiCompletionError && error.status !== undefined) throw error;
-    if (error instanceof AiCompletionError && error.empty) throw new Error('transaction enrichment response missing');
-    throw new Error('transaction enrichment invalid response');
+    const empty = error instanceof AiCompletionError && error.empty;
+    // eslint-disable-next-line preserve-caught-error -- deliberately dropped: the provider error carries the model's raw output, which may echo the transaction text, and the logger serializes `cause`.
+    throw new Error(empty ? 'transaction enrichment response missing' : 'transaction enrichment invalid response');
   }
 
   let result: TransactionEnrichmentResponse;

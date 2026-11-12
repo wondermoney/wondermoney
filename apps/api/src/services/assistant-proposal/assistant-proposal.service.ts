@@ -215,7 +215,7 @@ export async function toProposalDtos(em: EntityManager, viewer: ProposalViewer, 
   const transactionIds = new Set<number>();
   const categoryIds = new Set<number>();
   for (const proposal of proposals) {
-    let parsed: null | ProposalPayload = null;
+    let parsed: null | ProposalPayload;
     try {
       parsed = parseProposalPayload(proposal.kind, proposal.payload);
     } catch {

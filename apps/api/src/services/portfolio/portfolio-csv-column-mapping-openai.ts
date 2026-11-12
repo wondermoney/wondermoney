@@ -39,8 +39,9 @@ export async function requestPortfolioColumnMappingSuggestion(input: PortfolioCs
     tokens = completion.tokens;
   } catch (error) {
     if (error instanceof FeatureDisabledError) throw error;
-    if (error instanceof AiCompletionError && error.empty) throw new Error('portfolio column mapping response missing');
-    throw new Error('portfolio column mapping invalid response');
+    const empty = error instanceof AiCompletionError && error.empty;
+    // eslint-disable-next-line preserve-caught-error -- deliberately dropped: the provider error carries the model's raw output, which may echo the user's CSV rows, and the logger serializes `cause`.
+    throw new Error(empty ? 'portfolio column mapping response missing' : 'portfolio column mapping invalid response');
   }
 
   let suggestion: PortfolioColumnMappingSuggestion;

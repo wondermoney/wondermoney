@@ -360,7 +360,7 @@ export class DataExportService {
     const createdAt = operation.createdAt;
     const now = this.now.getTime();
     let status: DataExportStatus;
-    let expiresAt: Date | null = null;
+    let expiresAt: Date | null;
     let downloadUrl: null | string = null;
 
     if (progress.delivery === 'stream') {

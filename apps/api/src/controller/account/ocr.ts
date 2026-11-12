@@ -171,7 +171,7 @@ export async function createTransactionOCRImport(req: Request, res: Response, ne
   transactionOCRImport.fileKey = fileKey;
 
   // Convert PDF to images if necessary
-  let images = [];
+  let images: string[];
   let mimetype = file.mimetype;
   if (file.mimetype === 'application/pdf') {
     try {
