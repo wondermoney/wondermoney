@@ -43,6 +43,25 @@ describe('LoanCreateScreen', () => {
     }))
   })
 
+  it('secures the new loan against a chosen asset, and leaves the field out for None', async () => {
+    const onCreate = jest.fn().mockResolvedValue(undefined)
+    const { view } = await renderScreen({ onCreate, securedAssets: [{ key: 9, name: 'Family home' }, { key: 2, name: 'Car' }] })
+    await fillRequiredFields(view)
+    expect(view.getByRole('button', { name: 'Secured against, None' })).toBeOnTheScreen()
+    await choose(view, 'Secured against', 'Family home')
+    await fireEvent.press(view.getByRole('button', { name: 'Add loan' }))
+    await waitFor(() => expect(onCreate).toHaveBeenLastCalledWith(expect.objectContaining({ securedAssetKey: 9 })))
+    await choose(view, 'Secured against', 'None')
+    await fireEvent.press(view.getByRole('button', { name: 'Add loan' }))
+    await waitFor(() => expect(onCreate).toHaveBeenCalledTimes(2))
+    expect(onCreate.mock.calls[1][0]).not.toHaveProperty('securedAssetKey')
+  })
+
+  it('leaves Secured against out when the household has no asset to offer', async () => {
+    const { view } = await renderScreen()
+    expect(view.queryByRole('button', { name: /^Secured against,/ })).not.toBeOnTheScreen()
+  })
+
   it('includes trimmed optional fields only when filled', async () => {
     const onCreate = jest.fn().mockResolvedValue(undefined)
     const { view } = await renderScreen({ onCreate })

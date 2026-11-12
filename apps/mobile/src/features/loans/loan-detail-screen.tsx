@@ -147,6 +147,7 @@ export function LoanDetailScreen({ state, onBack, onEdit = () => {}, onRefresh, 
               <DetailRow label={t('loanDetail.loanType')} value={t(`loans.type.${loan.type}`)} />
               <DetailRow label={t('loanDetail.statusLabel')} value={t(`loans.status.${loan.status}`)} />
               <DetailRow label={t('loanDetail.description')} value={loan.notes ?? '—'} />
+              {loan.securedAssetName !== null ? <DetailRow label={t('loanForm.securedAsset')} value={loan.securedAssetName} /> : null}
               {/* Mobile-only terms web keeps in its edit drawer, listed after web's four. */}
               <DetailRow label={t('loanDetail.openingBalance')} value={money(loan.openingBalance)} figure />
               {loan.originalPrincipal !== null ? <DetailRow label={t('loanDetail.originalPrincipal')} value={money(loan.originalPrincipal)} figure /> : null}

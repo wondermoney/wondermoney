@@ -113,6 +113,17 @@
         "owner": "Owner",
         "notes": "Notes"
       },
+      "equity": {
+        "title": "Equity",
+        "value": "Value today",
+        "linkedDebt": "Owed on secured loans",
+        "equity": "Equity",
+        "loans": "Loans secured against it",
+        "converted": "<amount></amount> at today's rate",
+        "noRate": "Equity cannot be worked out: there is no exchange rate from {currencies} to {currency} yet.",
+        "archived": "An archived asset has no value today, so it has no equity.",
+        "underwater": "Underwater: more is owed on its loans than it is worth."
+      },
       "archiveTitle": "Archive this asset?",
       "archiveConfirm": "It stops counting in net worth from today. Its history stays.",
       "deleteTitle": "Delete this asset?",

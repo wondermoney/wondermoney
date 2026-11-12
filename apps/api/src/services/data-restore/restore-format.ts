@@ -9,10 +9,10 @@ import { EXPORT_FORMAT } from '@service/data-export/export-format';
  *
  * Versions: a restore reads every 1.x export. Rows are parsed leniently about fields (an unknown
  * field from a newer minor version is dropped), strictly about values. An older minor version is
- * brought up to the current one by {@link MINOR_MIGRATIONS} before the rows are checked. 1.1 and
- * 1.2 only added files (manual assets, loan rate periods) and a loan rate type, which an older
- * export simply does not have, so there is nothing to migrate yet. Another major version is
- * refused.
+ * brought up to the current one by {@link MINOR_MIGRATIONS} before the rows are checked. 1.1 to
+ * 1.3 only added files (manual assets, loan rate periods), a loan rate type and an optional field
+ * (a loan's secured asset), which an older export simply does not have, so there is nothing to
+ * migrate yet. Another major version is refused.
  */
 export const RESTORE_MAJOR_VERSION = 1;
 
@@ -239,6 +239,8 @@ const loan = z.object({
   providerName: text(255),
   rateType: z.enum(['FIXED', 'UNKNOWN', 'VARIABLE']),
   regularPaymentAmount: optionalDecimal,
+  /** The manual asset the loan finances (1.3); absent from older exports. */
+  securedAssetId: ref.optional(),
   status: z.enum(['ACTIVE', 'CLOSED', 'PAID_OFF']),
   termMonths: z.number().int().min(0).max(2000).nullable(),
   type: z.enum(['AUTO_LOAN', 'MORTGAGE', 'OTHER', 'PERSONAL_LOAN', 'STUDENT_LOAN']),
@@ -405,6 +407,7 @@ export const REFERENCES: readonly { field: string; file: DataFileName; target: D
   { field: 'goalId', file: 'goal-transaction-fundings', target: 'goals' },
   { field: 'transactionId', file: 'goal-transaction-fundings', target: 'transactions' },
   { field: 'ownerMemberId', file: 'loans', target: 'members' },
+  { field: 'securedAssetId', file: 'loans', target: 'manual-assets' },
   { field: 'loanId', file: 'loan-adjustments', target: 'loans' },
   { field: 'loanId', file: 'loan-rate-periods', target: 'loans' },
   { field: 'loanId', file: 'loan-repayments', target: 'loans' },

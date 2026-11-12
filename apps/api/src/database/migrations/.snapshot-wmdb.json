@@ -14847,6 +14847,23 @@
           "enumItems": [],
           "mappedType": "decimal"
         },
+        "secured_asset_key": {
+          "name": "secured_asset_key",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "integer"
+        },
         "status": {
           "name": "status",
           "type": "text",
@@ -14956,6 +14973,16 @@
         },
         {
           "columnNames": [
+            "secured_asset_key"
+          ],
+          "composite": false,
+          "constraint": false,
+          "keyName": "loan_secured_asset_key_idx",
+          "primary": false,
+          "unique": false
+        },
+        {
+          "columnNames": [
             "status"
           ],
           "composite": false,
@@ -15042,6 +15069,18 @@
             "appuser_key"
           ],
           "referencedTableName": "public.appuser"
+        },
+        "loan_secured_asset_key_foreign": {
+          "columnNames": [
+            "secured_asset_key"
+          ],
+          "constraintName": "loan_secured_asset_key_foreign",
+          "localTableName": "public.loan",
+          "referencedColumnNames": [
+            "manual_asset_key"
+          ],
+          "referencedTableName": "public.manual_asset",
+          "deleteRule": "set null"
         },
         "loan_tenant_key_foreign": {
           "columnNames": [

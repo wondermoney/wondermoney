@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { AxiosInstance } from "axios";
 
 import api from "../api";
+import { invalidateSecuredAssets } from "./secured-assets";
 import type {
   LoanAdjustment,
   LoanAdjustmentRequest,
@@ -61,12 +62,14 @@ function useLoanHistoryMutations<Body>(
   resource: "adjustments" | "rate-periods",
 ) {
   const queryClient = useQueryClient();
-  // `["loan", id]` covers the loan, its schedule, projection and this list.
+  // `["loan", id]` covers the loan, its schedule, projection and this list; the
+  // asset it is secured against shows its balance as debt.
   const onSuccess = () =>
     Promise.all([
       queryClient.invalidateQueries({ queryKey: ["loan", loanId] }),
       queryClient.invalidateQueries({ queryKey: ["loans"] }),
       queryClient.invalidateQueries({ queryKey: ["net-worth"] }),
+      invalidateSecuredAssets(queryClient),
     ]);
   const path = `/v1/loan/${loanId}/${resource}`;
 

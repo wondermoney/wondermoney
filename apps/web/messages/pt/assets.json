@@ -113,6 +113,17 @@
         "owner": "Titular",
         "notes": "Notas"
       },
+      "equity": {
+        "title": "Capital próprio",
+        "value": "Valor hoje",
+        "linkedDebt": "Em dívida nos empréstimos garantidos",
+        "equity": "Capital próprio",
+        "loans": "Empréstimos garantidos por este bem",
+        "converted": "<amount></amount> à taxa de hoje",
+        "noRate": "Não é possível calcular o capital próprio: ainda não há taxa de câmbio de {currencies} para {currency}.",
+        "archived": "Um bem arquivado não tem valor hoje, por isso não tem capital próprio.",
+        "underwater": "Em negativo: deve-se mais nos empréstimos do que o bem vale."
+      },
       "archiveTitle": "Arquivar este bem?",
       "archiveConfirm": "Deixa de contar para o património a partir de hoje. O histórico mantém-se.",
       "deleteTitle": "Eliminar este bem?",

@@ -24,6 +24,7 @@ import {
 } from '@service/loan/loan-calculation.service';
 import { buildLoanProjection } from '@service/loan/loan-projection.service';
 import { scoreLoanRepaymentCandidate } from '@service/loan/loan-repayment-matching.service';
+import { findSecurableAsset, type LoanViewer, type SecuredAssetDto, securedAssetsOf } from '@service/loan/loan-secured-asset';
 import { LoanAdjustmentType, LoanAllocationSource, LoanAmortizationMethod, LoanPaymentFrequency, LoanRateType, LoanStatus } from '@service/loan/loan-types';
 import { type LoanRatePeriodInput, resolveLoanRate } from '@service/loan/rate-resolver';
 import { isSplit } from '@service/transaction/transaction-split.service';
@@ -102,6 +103,7 @@ export async function createLoan(req: Request, res: Response) {
   const { appuser, tenant } = await getLoanRequestContext(req);
   const currency = await DI.em.findOne(Currency, { currencyKey: body.currencyKey });
   if (!currency) throw new BadRequestError('Currency not found');
+  const securedAsset = body.securedAssetKey == null ? null : await findSecurableAsset(DI.em, loanViewer(appuser, tenant), body.securedAssetKey);
   const loan = DI.em.create(Loan, {
     amortizationMethod: body.amortizationMethod ?? LoanAmortizationMethod.FRENCH,
     annualInterestRateBps: body.annualInterestRateBps,
@@ -120,13 +122,14 @@ export async function createLoan(req: Request, res: Response) {
     providerName: body.providerName,
     rateType: body.rateType ?? LoanRateType.UNKNOWN,
     regularPaymentAmount: body.regularPaymentAmount,
+    securedAssetKey: securedAsset,
     status: body.status ?? LoanStatus.ACTIVE,
     tenantKey: tenant,
     termMonths: body.termMonths,
     type: body.type,
   } as RequiredEntityData<Loan>);
   await DI.em.persist(loan).flush();
-  return res.status(201).json({ loan: await enrichLoan(loan) });
+  return res.status(201).json({ loan: await describeLoan(loan, appuser, tenant) });
 }
 
 export async function createLoanAdjustment(req: Request, res: Response) {
@@ -206,7 +209,7 @@ export async function getLoan(req: Request, res: Response) {
   const { appuser, tenant } = await getLoanRequestContext(req);
   const loan = await DI.em.findOne(Loan, { deletedAt: undefined, loanKey: loanId, ownerAppuserKey: appuser, tenantKey: tenant }, { populate: ['currencyKey'] });
   if (!loan) return res.sendStatus(404);
-  return res.json({ loan: await enrichLoan(loan) });
+  return res.json({ loan: await describeLoan(loan, appuser, tenant) });
 }
 
 export async function getLoanOverview(req: Request, res: Response) {
@@ -214,7 +217,7 @@ export async function getLoanOverview(req: Request, res: Response) {
   const loans = await DI.em.find(Loan, { deletedAt: undefined, ownerAppuserKey: appuser, tenantKey: tenant }, { populate: ['currencyKey'] });
   await DI.em.populate(appuser, ['currencyKey']);
   const userCurrency = appuser.currencyKey;
-  const enriched = await Promise.all(loans.map(enrichLoan));
+  const enriched = await Promise.all(loans.map((loan) => enrichLoan(loan)));
   // Totals are in the user's currency. A loan in another currency is converted at the latest
   // rate on or before today; one with no such rate is left out of every total and counted.
   const today = new Date();
@@ -343,7 +346,7 @@ export async function getLoanSummary(req: Request, res: Response) {
   const { appuser, tenant } = await getLoanRequestContext(req);
   const loan = await DI.em.findOne(Loan, { deletedAt: undefined, loanKey: loanId, ownerAppuserKey: appuser, tenantKey: tenant }, { populate: ['currencyKey'] });
   if (!loan) return res.sendStatus(404);
-  return res.json({ loan: await enrichLoan(loan) });
+  return res.json({ loan: await describeLoan(loan, appuser, tenant) });
 }
 
 export async function linkLoanRepayment(req: Request, res: Response) {
@@ -468,7 +471,8 @@ export async function listLoanRepayments(req: Request, res: Response) {
 export async function listLoans(req: Request, res: Response) {
   const { appuser, tenant } = await getLoanRequestContext(req);
   const loans = await DI.em.find(Loan, { deletedAt: undefined, ownerAppuserKey: appuser, tenantKey: tenant }, { orderBy: { createdAt: QueryOrder.DESC }, populate: ['currencyKey'] });
-  return res.json({ loans: await Promise.all(loans.map(enrichLoan)) });
+  const securedAssets = await securedAssetsOf(DI.em, loanViewer(appuser, tenant), loans, new Date());
+  return res.json({ loans: await Promise.all(loans.map((loan) => enrichLoan(loan, securedAssets))) });
 }
 
 export async function updateLoan(req: Request, res: Response) {
@@ -483,9 +487,13 @@ export async function updateLoan(req: Request, res: Response) {
     if (!currency) throw new BadRequestError('Currency not found');
     patch['currencyKey'] = currency;
   }
+  // Checked before anything is assigned, so a refused asset leaves the loan as it was.
+  if (body.securedAssetKey !== undefined) {
+    patch['securedAssetKey'] = body.securedAssetKey === null ? null : await findSecurableAsset(DI.em, loanViewer(appuser, tenant), body.securedAssetKey);
+  }
   DI.em.assign(loan, patch, { ignoreUndefined: true });
   await DI.em.persist(loan).flush();
-  return res.json({ loan: await enrichLoan(loan) });
+  return res.json({ loan: await describeLoan(loan, appuser, tenant) });
 }
 
 export async function updateLoanAdjustment(req: Request, res: Response) {
@@ -633,7 +641,13 @@ async function currentOutstandingPrincipal(loan: Loan, asOfDate: Date, except?: 
   });
 }
 
-async function enrichLoan(loan: Loan) {
+/** One loan's DTO, with the asset it is secured against. */
+async function describeLoan(loan: Loan, appuser: Appuser, tenant: Tenant) {
+  return enrichLoan(loan, await securedAssetsOf(DI.em, loanViewer(appuser, tenant), [loan], new Date()));
+}
+
+/** `securedAssets`: the visible assets the loans are secured against (`securedAssetsOf`); a loan whose asset is absent shows none. */
+async function enrichLoan(loan: Loan, securedAssets: ReadonlyMap<number, SecuredAssetDto> = new Map()) {
   const now = new Date();
   const outstandingPrincipal = await currentOutstandingPrincipal(loan, now);
   const currentRate = await currentLoanRate(loan, now);
@@ -664,6 +678,7 @@ async function enrichLoan(loan: Loan) {
     progressBasis: progress.progressBasis,
     progressPercentage: progress.progressPercentage,
     remainingTermMonthsEstimated,
+    securedAsset: (loan.securedAssetKey && securedAssets.get(loan.securedAssetKey.manualAssetKey)) ?? null,
   });
 }
 
@@ -685,6 +700,10 @@ async function loadOwnedLoan(loanId: number, appuser: Appuser, tenant: Tenant) {
 async function loadOwnedOutflowTransaction(transactionKey: number, tenant: Tenant) {
   // An EXPIRED payment never happened, so it cannot be linked as a repayment.
   return DI.em.findOne(Transaction, excludeExpired({ deletedAt: undefined, settlementAmount: { $lt: 0 }, tenantKey: tenant, transactionKey }), { populate: ['transactionMerchantKey'] });
+}
+
+function loanViewer(appuser: Appuser, tenant: Tenant): LoanViewer {
+  return { appuserKey: appuser.appuserKey, tenantKey: tenant.tenantKey };
 }
 
 function serializeRepayment(repayment: LoanRepaymentLink, transaction: Transaction) {

@@ -113,6 +113,17 @@
         "owner": "Titular",
         "notes": "Notas"
       },
+      "equity": {
+        "title": "Capital propio",
+        "value": "Valor hoy",
+        "linkedDebt": "Pendiente en préstamos garantizados",
+        "equity": "Capital propio",
+        "loans": "Préstamos garantizados con este bien",
+        "converted": "<amount></amount> al tipo de hoy",
+        "noRate": "No se puede calcular el capital propio: todavía no hay tipo de cambio de {currencies} a {currency}.",
+        "archived": "Un bien archivado no tiene valor hoy, así que no tiene capital propio.",
+        "underwater": "En negativo: se debe más en sus préstamos de lo que vale el bien."
+      },
       "archiveTitle": "¿Archivar este bien?",
       "archiveConfirm": "Deja de contar en el patrimonio neto desde hoy. Su historial se conserva.",
       "deleteTitle": "¿Eliminar este bien?",

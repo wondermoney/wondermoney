@@ -13,6 +13,8 @@ export type LoanCreateDraft = Readonly<{
   termMonths?: string
   includeInNetWorth: boolean
   notes?: string
+  /** The manual asset the loan is secured against; null or absent for none. */
+  securedAssetKey?: number | null
 }>
 
 /** UI field names, used to key per-field error state — not the same set as
@@ -62,6 +64,7 @@ export function buildLoanCreatePayload(draft: LoanCreateDraft): LoanCreateResult
   if (termMonths) payload.termMonths = Number(termMonths)
   const notes = draft.notes?.trim()
   if (notes) payload.notes = notes
+  if (draft.securedAssetKey != null) payload.securedAssetKey = draft.securedAssetKey
 
   const parsed = loanCreateWriteSchema.safeParse(payload)
   if (!parsed.success) {

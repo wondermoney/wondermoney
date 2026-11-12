@@ -60,6 +60,7 @@ const loan: LoanDetail = {
   openingPrincipalBalance: 1_000,
   originalPrincipal: 1_000,
   outstandingPrincipal: 1_000,
+  securedAsset: null,
   status: "ACTIVE",
   type: "AUTO_LOAN",
 };

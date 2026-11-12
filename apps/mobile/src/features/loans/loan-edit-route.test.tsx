@@ -7,15 +7,17 @@ import { LoanEditRoute } from './loan-edit-route'
 let mockParams: { loanId?: string | string[] } = { loanId: '7' }
 const mockReplace = jest.fn()
 const mockUseLoan = jest.fn()
+const mockUseManualAssets = jest.fn()
 const mockMutation = { isPending: false, mutateAsync: jest.fn(), isLoanPending: jest.fn(() => false), requiresAuthoritativeRefresh: jest.fn(() => false), markAuthoritativeRefresh: jest.fn() }
 
 jest.mock('expo-router', () => ({ useLocalSearchParams: () => mockParams, useRouter: () => ({ replace: mockReplace }) }))
 jest.mock('./use-loan', () => ({ useLoan: (...args: unknown[]) => mockUseLoan(...args) }))
+jest.mock('@/features/manual-assets/use-manual-assets', () => ({ useManualAssets: () => mockUseManualAssets() }))
 jest.mock('./use-loan-metadata-mutation', () => ({ useLoanMetadataMutation: () => mockMutation }))
 jest.mock('./loan-edit-screen', () => ({
-  LoanEditScreen: ({ state, onSaveLoan, onRefreshAuthoritative }: { state: { status: string; model?: { name: string; providerName: string | null; includeInNetWorth: boolean; type?: string; openingPrincipalBalance?: number; openingBalanceDate?: string; currencyCode?: string | null } }; onSaveLoan: (value: { notes?: string; includeInNetWorth?: boolean }) => Promise<void>; onRefreshAuthoritative: () => Promise<unknown> }) => {
+  LoanEditScreen: ({ state, onSaveLoan, onRefreshAuthoritative, securedAssets }: { state: { status: string; model?: { name: string; providerName: string | null; includeInNetWorth: boolean; type?: string; openingPrincipalBalance?: number; openingBalanceDate?: string; currencyCode?: string | null; securedAssetKey?: number | null } }; onSaveLoan: (value: { notes?: string; includeInNetWorth?: boolean }) => Promise<void>; onRefreshAuthoritative: () => Promise<unknown>; securedAssets?: { key: number; name: string }[] }) => {
     const Native = jest.requireActual<typeof import('react-native')>('react-native')
-    return <><Native.Text>{`${state.status}:${state.model?.name ?? '-'}:${String(state.model?.providerName)}:${String(state.model?.includeInNetWorth)}:${state.model?.type ?? '-'}:${state.model?.openingPrincipalBalance ?? '-'}`}</Native.Text><Native.Text>{`date:${state.model?.openingBalanceDate ?? '-'}:${state.model?.currencyCode ?? '-'}`}</Native.Text><Native.Pressable accessibilityRole="button" accessibilityLabel="Save loan metadata route" onPress={() => void onSaveLoan({ notes: '' })} /><Native.Pressable accessibilityRole="button" accessibilityLabel="Save loan inclusion route" onPress={() => void onSaveLoan({ includeInNetWorth: false })} /><Native.Pressable accessibilityRole="button" accessibilityLabel="Refresh authoritative loan route" onPress={() => void onRefreshAuthoritative()} /></>
+    return <><Native.Text>{`${state.status}:${state.model?.name ?? '-'}:${String(state.model?.providerName)}:${String(state.model?.includeInNetWorth)}:${state.model?.type ?? '-'}:${state.model?.openingPrincipalBalance ?? '-'}`}</Native.Text><Native.Text>{`date:${state.model?.openingBalanceDate ?? '-'}:${state.model?.currencyCode ?? '-'}`}</Native.Text><Native.Text>{`secured:${String(state.model?.securedAssetKey)}:${(securedAssets ?? []).map((asset) => `${asset.key}=${asset.name}`).join(',')}`}</Native.Text><Native.Pressable accessibilityRole="button" accessibilityLabel="Save loan metadata route" onPress={() => void onSaveLoan({ notes: '' })} /><Native.Pressable accessibilityRole="button" accessibilityLabel="Save loan inclusion route" onPress={() => void onSaveLoan({ includeInNetWorth: false })} /><Native.Pressable accessibilityRole="button" accessibilityLabel="Refresh authoritative loan route" onPress={() => void onRefreshAuthoritative()} /></>
   },
 }))
 
@@ -27,6 +29,7 @@ describe('loan edit route', () => {
     mockMutation.markAuthoritativeRefresh.mockReset()
     mockMutation.isLoanPending.mockReset().mockReturnValue(false)
     mockMutation.requiresAuthoritativeRefresh.mockReset().mockReturnValue(false)
+    mockUseManualAssets.mockReset().mockReturnValue({ data: undefined })
     mockUseLoan.mockReset().mockReturnValue({ data: { loan: { loanKey: 7, name: 'Authoritative loan', providerName: null, notes: 'Note', includeInNetWorth: true, type: 'MORTGAGE', openingPrincipalBalance: 250_000, openingBalanceDate: '2026-01-01', currency: { code: 'EUR', currencyKey: 1 } } }, isInvalidId: false, isLoading: false, isAccessTransition: false, isRefreshFailure: false, refetch: jest.fn() })
   })
 
@@ -57,6 +60,27 @@ describe('loan edit route', () => {
     mockUseLoan.mockReturnValue({ data: { loan: { loanKey: 7, name: 'Mortgage', providerName: null, notes: null, includeInNetWorth: true, type: 'MORTGAGE', openingPrincipalBalance: 171_400, openingBalanceDate: '2021-03-15T00:00:00.000Z', currency: { code: 'EUR', currencyKey: 1 } } }, isInvalidId: false, isLoading: false, isAccessTransition: false, isRefreshFailure: false, refetch: jest.fn() })
     const view = await render(<LoanEditRoute />)
     expect(view.getByText('date:2021-03-15:EUR')).toBeOnTheScreen()
+  })
+
+  it('offers the household\'s current assets plus the linked one, archived or not, as the secured-against choices', async () => {
+    mockUseLoan.mockReturnValue({ data: { loan: { loanKey: 7, name: 'Mortgage', providerName: null, notes: null, includeInNetWorth: true, type: 'MORTGAGE', openingPrincipalBalance: 171_400, openingBalanceDate: '2021-03-15', currency: { code: 'EUR', currencyKey: 1 }, securedAsset: { key: 4, name: 'Old flat', currency: 'EUR', value: null } } }, isInvalidId: false, isLoading: false, isAccessTransition: false, isRefreshFailure: false, refetch: jest.fn() })
+    mockUseManualAssets.mockReturnValue({ data: { assets: [
+      { manualAssetKey: 9, name: 'Family home', archived: false },
+      { manualAssetKey: 4, name: 'Old flat', archived: true },
+      { manualAssetKey: 5, name: 'Sold car', archived: true },
+      { manualAssetKey: 2, name: 'Car', archived: false },
+    ] } })
+    const view = await render(<LoanEditRoute />)
+    expect(view.getByText('secured:4:2=Car,9=Family home,4=Old flat')).toBeOnTheScreen()
+  })
+
+  it('keeps the linked asset as a choice while the asset list is unavailable, and maps no link as null', async () => {
+    mockUseLoan.mockReturnValue({ data: { loan: { loanKey: 7, name: 'Mortgage', providerName: null, notes: null, includeInNetWorth: true, type: 'MORTGAGE', openingPrincipalBalance: 171_400, openingBalanceDate: '2021-03-15', currency: { code: 'EUR', currencyKey: 1 }, securedAsset: { key: 4, name: 'Family home', currency: 'EUR', value: 250_000 } } }, isInvalidId: false, isLoading: false, isAccessTransition: false, isRefreshFailure: false, refetch: jest.fn() })
+    const view = await render(<LoanEditRoute />)
+    expect(view.getByText('secured:4:4=Family home')).toBeOnTheScreen()
+    mockUseLoan.mockReturnValue({ data: { loan: { loanKey: 7, name: 'Mortgage', providerName: null, notes: null, includeInNetWorth: true, type: 'MORTGAGE', openingPrincipalBalance: 171_400, openingBalanceDate: '2021-03-15', currency: { code: 'EUR', currencyKey: 1 }, securedAsset: null } }, isInvalidId: false, isLoading: false, isAccessTransition: false, isRefreshFailure: false, refetch: jest.fn() })
+    await view.rerender(<LoanEditRoute />)
+    expect(view.getByText('secured:null:')).toBeOnTheScreen()
   })
 
   it.each([

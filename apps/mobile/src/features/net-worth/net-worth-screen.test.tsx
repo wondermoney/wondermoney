@@ -216,7 +216,7 @@ describe('NetWorthScreen (Home)', () => {
         loanKey: 3, name: 'Mortgage', currency: { code: 'EUR', currencyKey: 1 }, includeInNetWorth: true, nextPaymentDate: '2026-11-20T00:00:00.000Z',
         openingBalanceDate: '2020-01-01', openingPrincipalBalance: 200000, outstandingPrincipal: 150000, paymentFrequency: 'MONTHLY',
         progressBasis: 'OPENING_BALANCE', progressPercentage: 25, rateType: 'FIXED', regularPaymentAmount: 900, remainingTermMonthsEstimated: 200,
-        status: 'ACTIVE', type: 'MORTGAGE', annualInterestRateBps: 350, providerName: 'Bank',
+        securedAsset: null, status: 'ACTIVE', type: 'MORTGAGE', annualInterestRateBps: 350, providerName: 'Bank',
       }] } },
       latest: { status: 'loaded', data: { review: { count: 3, currency: 'EUR', totalAbs: 1240 }, transactions: [{
         transactionKey: 1, transactionDate: '2026-11-03T10:00:00.000Z', accountKey: { accountKey: 1, accountName: 'Checking', currencyKey: { code: 'EUR' } },

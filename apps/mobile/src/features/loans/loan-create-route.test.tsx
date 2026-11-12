@@ -6,19 +6,22 @@ import { LoanCreateRoute } from './loan-create-route'
 
 const mockReplace = jest.fn()
 const mockUseLoanCurrencies = jest.fn()
+const mockUseManualAssets = jest.fn()
 const mockMutation = { isPending: false, mutateAsync: jest.fn() }
 
 jest.mock('expo-router', () => ({ useRouter: () => ({ replace: mockReplace }) }))
 jest.mock('./use-loan-currencies', () => ({ useLoanCurrencies: () => mockUseLoanCurrencies() }))
+jest.mock('@/features/manual-assets/use-manual-assets', () => ({ useManualAssets: () => mockUseManualAssets() }))
 jest.mock('./use-create-loan', () => ({
   useCreateLoan: () => mockMutation,
   classifyLoanCreateFailure: (error: unknown) => (error as { code?: string } | undefined)?.code ?? 'general',
 }))
 jest.mock('./loan-create-screen', () => ({
-  LoanCreateScreen: ({ currencies, loading, metadataError, outcome, onCreate }: { currencies: { code: string }[]; loading: boolean; metadataError: boolean; outcome: string | null; onCreate: (value: unknown) => Promise<void> }) => {
+  LoanCreateScreen: ({ currencies, loading, metadataError, outcome, onCreate, securedAssets }: { currencies: { code: string }[]; loading: boolean; metadataError: boolean; outcome: string | null; onCreate: (value: unknown) => Promise<void>; securedAssets?: { key: number; name: string }[] }) => {
     const Native = jest.requireActual<typeof import('react-native')>('react-native')
     return <>
       <Native.Text>{`${loading}:${metadataError}:${currencies.map((c) => c.code).join(',')}:${outcome ?? '-'}`}</Native.Text>
+      <Native.Text>{`assets:${(securedAssets ?? []).map((asset) => asset.name).join(',')}`}</Native.Text>
       <Native.Pressable accessibilityRole="button" accessibilityLabel="Create route" onPress={() => void onCreate({ name: 'Home loan' })} />
     </>
   },
@@ -29,6 +32,16 @@ describe('loan create route', () => {
     mockReplace.mockReset()
     mockMutation.mutateAsync.mockReset().mockResolvedValue(undefined)
     mockUseLoanCurrencies.mockReset().mockReturnValue({ data: { currencies: [{ currencyKey: 1, code: 'EUR', description: 'Euro' }] }, isLoading: false })
+    mockUseManualAssets.mockReset().mockReturnValue({ data: undefined, isLoading: true })
+  })
+
+  it('offers the household\'s current assets to secure the loan against, without waiting for them', async () => {
+    const view = await render(<LoanCreateRoute />)
+    expect(view.getByText('false:false:EUR:-')).toBeOnTheScreen()
+    expect(view.getByText('assets:')).toBeOnTheScreen()
+    mockUseManualAssets.mockReturnValue({ data: { assets: [{ manualAssetKey: 9, name: 'Family home', archived: false }, { manualAssetKey: 5, name: 'Sold car', archived: true }] }, isLoading: false })
+    await view.rerender(<LoanCreateRoute />)
+    expect(view.getByText('assets:Family home')).toBeOnTheScreen()
   })
 
   it('passes the loaded currency list through to the screen', async () => {

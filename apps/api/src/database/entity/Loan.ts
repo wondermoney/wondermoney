@@ -6,6 +6,7 @@ import { LoanAmortizationMethod, LoanPaymentFrequency, LoanRateType, LoanStatus,
 import { Appuser } from './Appuser';
 import { Base } from './BaseEntity';
 import { Currency } from './Currency';
+import { ManualAsset } from './ManualAsset';
 import { Tenant } from './Tenant';
 
 @Entity()
@@ -69,6 +70,14 @@ export class Loan extends Base {
 
   @Property({ columnType: 'numeric(18, 4)', nullable: true })
   regularPaymentAmount?: number;
+
+  /**
+   * The household asset this loan finances (a mortgage on the home), if any. Presentation only:
+   * the asset shows its equity against it, and net worth is unchanged. Deleting the asset clears it.
+   */
+  @Index({ name: 'loan_secured_asset_key_idx' })
+  @ManyToOne({ cascade: [], deleteRule: 'set null', entity: () => ManualAsset, fieldName: 'secured_asset_key', nullable: true })
+  securedAssetKey?: null | Rel<ManualAsset>;
 
   @Enum(() => LoanStatus)
   @Index({ name: 'loan_status_idx' })

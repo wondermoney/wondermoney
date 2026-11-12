@@ -93,11 +93,17 @@ it("sends adjustments and rate changes to the loan's routes", async () => {
   );
 });
 
-it("refreshes the loan (with its schedule, projection and lists), the loan totals and net worth", async () => {
+it("refreshes the loan (with its schedule, projection and lists), the loan totals, net worth and the assets loans secure", async () => {
   apiMock.post.mockResolvedValue({});
   const invalidated = setup();
   fireEvent.click(screen.getByRole("button", { name: "Add adjustment" }));
 
-  await waitFor(() => expect(invalidated).toHaveLength(3));
-  expect(invalidated).toEqual([["loan", 5], ["loans"], ["net-worth"]]);
+  await waitFor(() => expect(invalidated).toHaveLength(5));
+  expect(invalidated).toEqual([
+    ["loan", 5],
+    ["loans"],
+    ["net-worth"],
+    ["manual-assets"],
+    ["manual-asset"],
+  ]);
 });

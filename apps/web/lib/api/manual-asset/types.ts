@@ -21,6 +21,18 @@ export interface ManualAssetGrowthRule {
   startDate: string | null;
 }
 
+/** A loan secured against an asset: only the viewer's own loans are listed. */
+export interface ManualAssetLinkedLoan {
+  loanKey: number;
+  name: string;
+  /** The loan's currency, which `outstandingPrincipal` is in. */
+  currency: string;
+  /** Today's balance, after repayments and lender adjustments. */
+  outstandingPrincipal: number;
+  /** `outstandingPrincipal` in the asset's currency. Null when there is no exchange rate. */
+  outstandingPrincipalInAssetCurrency: number | null;
+}
+
 export interface ManualAsset {
   manualAssetKey: number;
   name: string;
@@ -46,6 +58,17 @@ export interface ManualAsset {
   userCurrency: string;
   /** The latest valuation recorded, before any growth rule. */
   lastValuation: ManualAssetValuation | null;
+  /** The viewer's loans secured against this asset. */
+  linkedLoans: ManualAssetLinkedLoan[];
+  /**
+   * The linked loans' outstanding principal in `currency`: 0 with none, null when a loan's
+   * currency has no exchange rate to it (see `unconvertedLoanCurrencies`).
+   */
+  linkedDebt: number | null;
+  /** `value` less `linkedDebt`; negative when underwater. Null when either is null. */
+  equity: number | null;
+  /** The linked loans' currencies with no rate to `currency`, sorted. */
+  unconvertedLoanCurrencies: string[];
   createdAt: string;
   updatedAt: string;
 }

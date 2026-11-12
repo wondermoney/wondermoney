@@ -41,7 +41,10 @@
       "startDatePlaceholder": "Elige la fecha de inicio",
       "notesPlaceholder": "Algo que convenga recordar sobre este préstamo",
       "rateType": "Tipo de interés",
-      "rateTypeVariableHelp": "Introduce el tipo con el que empezó el préstamo. Añade cada cambio posterior en el historial de tasas, en la página del préstamo."
+      "rateTypeVariableHelp": "Introduce el tipo con el que empezó el préstamo. Añade cada cambio posterior en el historial de tasas, en la página del préstamo.",
+      "securedAsset": "Garantizado con",
+      "securedAssetNone": "Ninguno",
+      "securedAssetHint": "Opcional. El bien que garantiza este préstamo, como la casa comprada con una hipoteca. Su página muestra entonces el capital propio: lo que vale menos lo que aún se debe."
     },
     "types": {
       "personal": "Personal",

@@ -42,6 +42,8 @@ import type {
 } from "@/lib/api/loan/types";
 import useCreateLoan from "@/lib/api/loan/useCreateLoan";
 import useUpdateLoan from "@/lib/api/loan/useUpdateLoan";
+import type { ManualAsset } from "@/lib/api/manual-asset/types";
+import useManualAssets from "@/lib/api/manual-asset/useManualAssets";
 import {
   formatDateInputValue,
   parseDateInputValue,
@@ -61,6 +63,26 @@ function initialRateBps(
   return loan.initialAnnualInterestRateBps !== undefined
     ? loan.initialAnnualInterestRateBps
     : loan.annualInterestRateBps;
+}
+
+/** The secured-asset picker's value for "not secured": a Select item cannot be empty. */
+const NO_SECURED_ASSET = "none";
+
+/**
+ * The assets a loan can be secured against: every asset still held, plus the one it
+ * is secured against now even when that is archived (or no longer in the list), so
+ * opening the form never silently drops the link.
+ */
+function securedAssetOptions(
+  assets: ManualAsset[],
+  current: LoanListItem["securedAsset"] | undefined,
+): Array<{ key: number; name: string }> {
+  const options = assets
+    .filter((asset) => !asset.archived || asset.manualAssetKey === current?.key)
+    .map((asset) => ({ key: asset.manualAssetKey, name: asset.name }));
+  if (current && !options.some((option) => option.key === current.key))
+    options.push({ key: current.key, name: current.name });
+  return options;
 }
 
 /**
@@ -127,6 +149,8 @@ function buildBaseSchema(
     paymentDayOfMonth: z.coerce.number<number>().min(1).max(31).optional(),
     termMonths: z.coerce.number<number>().int().positive().optional(),
     includeInNetWorth: z.boolean(),
+    // An asset's key, or NO_SECURED_ASSET.
+    securedAssetKey: z.string(),
     notes: z.string().optional(),
   });
 }
@@ -148,6 +172,12 @@ export default function LoanFormDrawer({
   const updateMutation = useUpdateLoan();
   const { data: currenciesData } = useCurrencies({ enabled: open });
   const currencies = currenciesData?.currencies ?? [];
+  const { data: assetsData } = useManualAssets({ enabled: open });
+  const currentSecuredAsset = loan?.securedAsset ?? null;
+  const assetOptions = securedAssetOptions(
+    assetsData?.assets ?? [],
+    currentSecuredAsset,
+  );
   const defaultValues = useMemo<FormInput>(() => {
     const initialRate = initialRateBps(loan);
     return {
@@ -177,6 +207,9 @@ export default function LoanFormDrawer({
       paymentDayOfMonth: loan?.paymentDayOfMonth ?? 1,
       termMonths: loan?.termMonths ?? undefined,
       includeInNetWorth: loan?.includeInNetWorth ?? true,
+      securedAssetKey: loan?.securedAsset
+        ? String(loan.securedAsset.key)
+        : NO_SECURED_ASSET,
       notes: loan?.notes ?? "",
     };
   }, [loan]);
@@ -215,6 +248,10 @@ export default function LoanFormDrawer({
   }));
   const optionalNumber = (value: string) => (value === "" ? undefined : value);
   const submit = async (values: FormValues) => {
+    const securedAssetKey =
+      values.securedAssetKey === NO_SECURED_ASSET
+        ? null
+        : Number(values.securedAssetKey);
     const payload: CreateLoanRequest = {
       name: values.name,
       type: values.type,
@@ -243,6 +280,12 @@ export default function LoanFormDrawer({
       ),
       includeInNetWorth: values.includeInNetWorth,
       notes: values.notes || undefined,
+      // Sent only when it changes: a new loan sends the asset it is secured
+      // against, an edit the new one or `null` to unlink. Leaving it out keeps
+      // the link, which an edit that did not touch it must not resend.
+      ...(securedAssetKey !== (currentSecuredAsset?.key ?? null)
+        ? { securedAssetKey }
+        : {}),
     };
     try {
       if (loan)
@@ -520,6 +563,36 @@ export default function LoanFormDrawer({
                   }
                   placeholder={t("fields.startDatePlaceholder")}
                 />
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="securedAssetKey"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>{t("fields.securedAsset")}</FormLabel>
+                <Select onValueChange={field.onChange} value={field.value}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value={NO_SECURED_ASSET}>
+                      {t("fields.securedAssetNone")}
+                    </SelectItem>
+                    {assetOptions.map((asset) => (
+                      <SelectItem key={asset.key} value={String(asset.key)}>
+                        {asset.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormDescription>
+                  {t("fields.securedAssetHint")}
+                </FormDescription>
                 <FormMessage />
               </FormItem>
             )}

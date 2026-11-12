@@ -105,6 +105,23 @@ describe('loan contracts', () => {
     expect(loanCreateWriteSchema.safeParse({ ...full, unknownField: true }).success).toBe(false)
   })
 
+  it('reads the asset a loan is secured against, and none from an API that predates the link', () => {
+    const securedAsset = { key: 9, name: 'Family home', currency: 'EUR', value: 250_000 }
+    expect(loanResponseSchema.parse({ loan: { ...loanFixture, securedAsset } }).loan.securedAsset).toEqual(securedAsset)
+    expect(loanResponseSchema.parse({ loan: { ...loanFixture, securedAsset: { ...securedAsset, value: null } } }).loan.securedAsset?.value).toBeNull()
+    const { securedAsset: _omit, ...older } = loanFixture
+    expect(loansResponseSchema.parse({ loans: [older] }).loans[0].securedAsset).toBeNull()
+    expect(loanResponseSchema.safeParse({ loan: { ...loanFixture, securedAsset: { ...securedAsset, key: 0 } } }).success).toBe(false)
+  })
+
+  it('links a loan to an asset on create and edit, and unlinks it with null on edit', () => {
+    expect(loanWriteSchema.parse({ securedAssetKey: 9 })).toEqual({ securedAssetKey: 9 })
+    expect(loanWriteSchema.parse({ securedAssetKey: null })).toEqual({ securedAssetKey: null })
+    const full = { name: 'Home loan', type: 'MORTGAGE' as const, currencyKey: 1, openingPrincipalBalance: 250_000, openingBalanceDate: '2026-01-01', includeInNetWorth: true }
+    expect(loanCreateWriteSchema.parse({ ...full, securedAssetKey: 9 })).toEqual({ ...full, securedAssetKey: 9 })
+    for (const value of [0, -1, 1.5, '9']) expect(loanWriteSchema.safeParse({ securedAssetKey: value }).success).toBe(false)
+  })
+
   it('accepts actual nullable and omitted loan fields', () => {
     const parsed = loansResponseSchema.parse({ loans: [{ ...loanFixture, annualInterestRateBps: null, maturityDate: null, notes: undefined, originalPrincipal: null, paymentDayOfMonth: undefined, providerName: null, regularPaymentAmount: null, termMonths: null }] })
     expect(parsed.loans[0]).toMatchObject({ annualInterestRateBps: null, originalPrincipal: null, regularPaymentAmount: null })

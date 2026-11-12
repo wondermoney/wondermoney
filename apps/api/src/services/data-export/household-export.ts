@@ -786,7 +786,7 @@ class HouseholdExport {
       select l.loan_key, l.name, l.type, l.status, l.rate_type, l.payment_frequency, l.provider_name, l.notes, l.include_in_net_worth,
         l.opening_principal_balance::text as opening_principal_balance, ${sql.raw(dx('l.opening_balance_date'))} as opening_balance_date,
         l.original_principal::text as original_principal, l.annual_interest_rate_bps, l.regular_payment_amount::text as regular_payment_amount,
-        l.payment_day_of_month, l.term_months, ${sql.raw(dx('l.maturity_date'))} as maturity_date, c.code as currency
+        l.payment_day_of_month, l.term_months, ${sql.raw(dx('l.maturity_date'))} as maturity_date, l.secured_asset_key, c.code as currency
       from loan l left join currency c on c.currency_key = l.currency_key
       where l.loan_key = any(${this.loans.keys()}) order by l.loan_key`);
     for (const row of rows) {
@@ -807,6 +807,8 @@ class HouseholdExport {
         providerName: str(row['provider_name']),
         rateType: str(row['rate_type']),
         regularPaymentAmount: dec(row['regular_payment_amount']),
+        // Null when the asset is not in this export (the other member's private one).
+        securedAssetId: this.manualAssets.get(row['secured_asset_key']),
         status: str(row['status']),
         termMonths: int(row['term_months']),
         type: str(row['type']),

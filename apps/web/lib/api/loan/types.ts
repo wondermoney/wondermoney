@@ -49,6 +49,17 @@ export interface LoanCurrencyDto {
   code: string;
 }
 
+/** The asset a loan is secured against, as the loan endpoints return it. */
+export interface LoanSecuredAsset {
+  /** The asset's `manualAssetKey`. */
+  key: number;
+  name: string;
+  /** The asset's currency, which `value` is in. */
+  currency: string;
+  /** Today's value. Null for an archived asset. */
+  value: number | null;
+}
+
 export interface LoanListItem {
   loanKey: number;
   name: string;
@@ -76,6 +87,8 @@ export interface LoanListItem {
   progressBasis?: string;
   progressPercentage?: number;
   nextPaymentDate?: string | null;
+  /** The asset the loan is secured against, if any. */
+  securedAsset: LoanSecuredAsset | null;
 }
 
 export interface LoanDetail extends LoanListItem {
@@ -213,6 +226,11 @@ export interface CreateLoanRequest {
   providerName?: string | null;
   notes?: string | null;
   status?: LoanStatus;
+  /**
+   * The manual asset the loan is secured against. On an update `null` unlinks it and
+   * leaving it out keeps the current one.
+   */
+  securedAssetKey?: number | null;
 }
 
 export type UpdateLoanRequest = Partial<CreateLoanRequest>;

@@ -250,6 +250,7 @@ class HouseholdRestore {
   private currencies = new Map<string, number>();
   private readonly goals = new Keys();
   private readonly loans = new Keys();
+  private readonly manualAssets = new Keys();
   private memberCurrency: null | string = null;
   private readonly merchants = new Keys();
   private readonly now: Date;
@@ -281,8 +282,8 @@ class HouseholdRestore {
     await this.merchantRows();
     await this.merchantCategories();
     await this.tagRows();
-    await this.loanRows();
     await this.manualAssetRows();
+    await this.loanRows();
     await this.goalRows();
     await this.portfolioRows();
     await this.transactionRows();
@@ -639,6 +640,7 @@ class HouseholdRestore {
         provider_name: row.providerName,
         rate_type: row.rateType,
         regular_payment_amount: row.regularPaymentAmount,
+        secured_asset_key: this.manualAssets.get(row.securedAssetId),
         status: row.status,
         tenant_key: this.target.tenantKey,
         term_months: row.termMonths,
@@ -653,9 +655,8 @@ class HouseholdRestore {
   private async manualAssetRows(): Promise<void> {
     const list = this.rows['manual-assets'];
     const keys = await allocateKeys(this.db, 'manual_asset', 'manual_asset_key', list.length);
-    const assets = new Keys();
     await insertRows(this.db, 'manual_asset', list.map((row, index) => {
-      assets.set(row.id, keys[index]!);
+      this.manualAssets.set(row.id, keys[index]!);
       return {
         archived_at: row.archivedAt,
         currency_key: this.currency(row.currency),
@@ -676,7 +677,7 @@ class HouseholdRestore {
     this.count('manual-assets', list.length);
 
     const valuations = this.rows['manual-asset-valuations'].map((row) => ({
-      manual_asset_key: assets.get(row.manualAssetId),
+      manual_asset_key: this.manualAssets.get(row.manualAssetId),
       note: row.note,
       tenant_key: this.target.tenantKey,
       valuation_date: row.date,

@@ -40,6 +40,7 @@ const loan: LoanDetail = {
   name: "Home loan",
   openingPrincipalBalance: 1000,
   outstandingPrincipal: 1000,
+  securedAsset: null,
   status: "ACTIVE",
   type: "MORTGAGE",
 };

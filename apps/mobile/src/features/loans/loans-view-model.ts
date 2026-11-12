@@ -35,6 +35,8 @@ export type LoanViewModel = Readonly<{
   openingBalanceDate: string
   providerName: string | null
   notes: string | null
+  /** The name of the manual asset the loan is secured against, or null. */
+  securedAssetName: string | null
 }>
 
 export type LoanProjectionViewModel = Readonly<{
@@ -109,6 +111,7 @@ export const mapLoan = (dto: LoanDto, now: Date = new Date()): LoanViewModel => 
   openingBalanceDate: dto.openingBalanceDate,
   providerName: dto.providerName ?? null,
   notes: dto.notes ?? null,
+  securedAssetName: dto.securedAsset?.name ?? null,
 })
 
 export const mapLoans = (response: { loans: LoanDto[] }): LoanViewModel[] => response.loans.map((dto) => mapLoan(dto))

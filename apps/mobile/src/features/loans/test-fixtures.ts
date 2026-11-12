@@ -21,6 +21,7 @@ export const loanFixture: LoanDto = {
   rateType: 'FIXED',
   regularPaymentAmount: 950,
   remainingTermMonthsEstimated: 240,
+  securedAsset: null,
   status: 'ACTIVE',
   termMonths: 360,
   type: 'MORTGAGE',

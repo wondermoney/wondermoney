@@ -16,7 +16,9 @@ import type {
 
 /**
  * An asset's value is part of net worth, today and in its history, so every
- * change to an asset or a valuation refreshes those along with the asset.
+ * change to an asset or a valuation refreshes those along with the asset. A
+ * loan shows the asset it is secured against by name and value, so the loans
+ * refresh too.
  */
 export function invalidateManualAssets(
   queryClient: QueryClient,
@@ -33,6 +35,8 @@ export function invalidateManualAssets(
   queryClient.invalidateQueries({
     queryKey: [...reportsKeys.all, "net-worth-history"],
   });
+  queryClient.invalidateQueries({ queryKey: ["loans"] });
+  queryClient.invalidateQueries({ queryKey: ["loan"] });
 }
 
 export function useCreateManualAsset() {

@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import api from "../api";
+import { invalidateSecuredAssets } from "./secured-assets";
 import type { LinkLoanRepaymentRequest } from "./types";
 
 export interface LinkLoanRepaymentMutationRequest {
@@ -25,6 +26,7 @@ const useLinkLoanRepayment = () => {
         queryKey: ["loan", variables.loanId, "repayment-candidates"],
       });
       queryClient.invalidateQueries({ queryKey: ["net-worth"] });
+      void invalidateSecuredAssets(queryClient);
     },
   });
 };

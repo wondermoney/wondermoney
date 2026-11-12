@@ -1900,6 +1900,11 @@
       "invalid-routeMessage": "Volte a Empréstimos e escolha um empréstimo disponível."
     }
   },
+  "loanForm": {
+    "securedAsset": "Garantido por",
+    "securedAssetNone": "Nenhum",
+    "securedAssetHint": "Opcional. O bem que garante este empréstimo, como a casa comprada com um crédito habitação. A página do bem passa a mostrar o capital próprio: o que vale menos o que ainda está em dívida."
+  },
   "manualAssets": {
     "title": "Bens",
     "description": "Casas, veículos e outras coisas tuas a que nenhum banco ou mercado dá preço. És tu que dizes quanto valem.",
@@ -1971,6 +1976,17 @@
       "shared": "Partilhado com o teu agregado",
       "owner": "Titular",
       "notes": "Notas"
+    },
+    "equity": {
+      "title": "Capital próprio",
+      "value": "Valor hoje",
+      "linkedDebt": "Em dívida nos empréstimos garantidos",
+      "equity": "Capital próprio",
+      "loans": "Empréstimos garantidos por este bem",
+      "converted": "{{amount}} à taxa de hoje",
+      "noRate": "Não é possível calcular o capital próprio: ainda não há taxa de câmbio de {{currencies}} para {{currency}}.",
+      "archived": "Um bem arquivado não tem valor hoje, por isso não tem capital próprio.",
+      "underwater": "Em negativo: deve-se mais nos empréstimos do que o bem vale."
     }
   },
   "manualAssetCreate": {

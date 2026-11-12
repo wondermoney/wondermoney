@@ -98,6 +98,15 @@ describe('loan screens', () => {
     expect(view.getByTestId('loan-payoff-beyond-contract')).toHaveTextContent(/382 months/)
   })
 
+  it('names the asset the loan is secured against among its assumptions, and nothing when there is none', async () => {
+    const linked = mapLoan({ ...loanFixture, securedAsset: { key: 9, name: 'Family home', currency: 'EUR', value: 250_000 } })
+    const view = await renderScreen(<LoanDetailScreen state={{ status: 'loaded', loan: linked, history: { status: 'loaded', repayments: [] } }} onBack={jest.fn()} onRefresh={jest.fn()} />)
+    expect(view.getByLabelText('Secured against, Family home')).toBeOnTheScreen()
+    await view.unmount()
+    const unlinked = await renderScreen(<LoanDetailScreen state={{ status: 'loaded', loan: mapLoan(loanFixture), history: { status: 'loaded', repayments: [] } }} onBack={jest.fn()} onRefresh={jest.fn()} />)
+    expect(unlinked.queryByLabelText(/^Secured against,/)).not.toBeOnTheScreen()
+  })
+
   it('shows the projected payoff, months saved and interest saved', async () => {
     const loan = mapLoan(loanFixture)
     const view = await renderScreen(

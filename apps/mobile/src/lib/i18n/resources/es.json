@@ -1900,6 +1900,11 @@
       "invalid-routeMessage": "Vuelve a Préstamos y elige un préstamo disponible."
     }
   },
+  "loanForm": {
+    "securedAsset": "Garantizado con",
+    "securedAssetNone": "Ninguno",
+    "securedAssetHint": "Opcional. El bien que garantiza este préstamo, como la casa comprada con una hipoteca. Su página muestra entonces el capital propio: lo que vale menos lo que aún se debe."
+  },
   "manualAssets": {
     "title": "Bienes",
     "description": "Viviendas, vehículos y otras cosas tuyas a las que ningún banco ni mercado pone precio. Tú decides cuánto valen.",
@@ -1971,6 +1976,17 @@
       "shared": "Compartido con tu hogar",
       "owner": "Titular",
       "notes": "Notas"
+    },
+    "equity": {
+      "title": "Capital propio",
+      "value": "Valor hoy",
+      "linkedDebt": "Pendiente en préstamos garantizados",
+      "equity": "Capital propio",
+      "loans": "Préstamos garantizados con este bien",
+      "converted": "{{amount}} al tipo de hoy",
+      "noRate": "No se puede calcular el capital propio: todavía no hay tipo de cambio de {{currencies}} a {{currency}}.",
+      "archived": "Un bien archivado no tiene valor hoy, así que no tiene capital propio.",
+      "underwater": "En negativo: se debe más en sus préstamos de lo que vale el bien."
     }
   },
   "manualAssetCreate": {

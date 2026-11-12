@@ -26,6 +26,19 @@ export const manualAssetValuationSchema = z.object({
   note: z.string().nullable(),
 })
 
+/**
+ * A loan secured against the asset. `outstandingPrincipal` is in the loan's own `currency`;
+ * `outstandingPrincipalInAssetCurrency` is the API's conversion into the asset's currency, null
+ * when there is no exchange rate for the pair.
+ */
+export const manualAssetLinkedLoanSchema = z.object({
+  loanKey: positiveSafeId,
+  name: z.string().min(1),
+  currency: currencyCode,
+  outstandingPrincipal: money,
+  outstandingPrincipalInAssetCurrency: money.nullable(),
+})
+
 export const manualAssetSchema = z.object({
   manualAssetKey: positiveSafeId,
   name: z.string().min(1),
@@ -48,6 +61,15 @@ export const manualAssetSchema = z.object({
   valueInUserCurrency: money.nullable(),
   userCurrency: currencyCode,
   lastValuation: manualAssetValuationSchema.nullable(),
+  // Equity. An API from before loans could secure an asset sends none of these four, which reads
+  // as an asset with no loans against it.
+  linkedLoans: z.array(manualAssetLinkedLoanSchema).default([]),
+  /** The linked loans' outstanding principal in `currency`: 0 with none, null when any has no exchange rate. */
+  linkedDebt: money.nullable().default(null),
+  /** `value` less `linkedDebt`, in `currency`; null when either is null. */
+  equity: money.nullable().default(null),
+  /** Sorted codes of linked loans whose principal could not be converted into `currency`. */
+  unconvertedLoanCurrencies: z.array(currencyCode).default([]),
 })
 
 export const manualAssetsResponseSchema = z.object({
@@ -89,6 +111,7 @@ export const manualAssetValuationWriteSchema = z.object({
 }).strict()
 
 export type ManualAssetDto = z.infer<typeof manualAssetSchema>
+export type ManualAssetLinkedLoanDto = z.infer<typeof manualAssetLinkedLoanSchema>
 export type ManualAssetValuationDto = z.infer<typeof manualAssetValuationSchema>
 export type ManualAssetsResponse = z.infer<typeof manualAssetsResponseSchema>
 export type ManualAssetResponse = z.infer<typeof manualAssetResponseSchema>

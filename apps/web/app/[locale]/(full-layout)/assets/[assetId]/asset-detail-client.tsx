@@ -15,14 +15,17 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ObjectHeader } from "@/components/ui/ObjectHeader";
 import { Section } from "@/components/ui/RuledSection";
-import { useRouter } from "@/i18n/navigation";
+import { Link, useRouter } from "@/i18n/navigation";
 import {
   API_ERROR_CODE,
   getApiErrorCode,
   getApiErrorMessage,
   isDemoReadOnlyError,
 } from "@/lib/api/errors";
-import type { ManualAssetValuation } from "@/lib/api/manual-asset/types";
+import type {
+  ManualAsset,
+  ManualAssetValuation,
+} from "@/lib/api/manual-asset/types";
 import useManualAsset from "@/lib/api/manual-asset/useManualAsset";
 import {
   useDeleteManualAsset,
@@ -37,12 +40,111 @@ import {
 import { useFormatPercentage } from "@/lib/utils/useFormatPercentage";
 import { useFormatShortDate } from "@/lib/utils/useFormatShortDate";
 
-function Fact({ label, children }: { label: string; children: ReactNode }) {
+function Fact({ label, children }: { label: ReactNode; children: ReactNode }) {
   return (
     <div className="border-border flex justify-between gap-6 border-b py-2 text-sm">
       <dt className="text-muted-foreground shrink-0">{label}</dt>
       <dd className="text-right">{children}</dd>
     </div>
+  );
+}
+
+/**
+ * What the asset is worth less what is still owed on the reader's loans secured
+ * against it. Debt in another currency counts only once converted: with a loan the
+ * API has no rate for, there is no total and no equity, and the page says why
+ * rather than adding amounts in different currencies.
+ */
+function AssetEquity({ asset }: { asset: ManualAsset }) {
+  const t = useTranslations("assets");
+  const { linkedDebt, equity } = asset;
+
+  return (
+    <Section id="asset-equity-heading" title={t("detail.equity.title")}>
+      <dl>
+        <Fact label={t("detail.equity.value")}>
+          <Amount
+            value={asset.value}
+            currency={asset.currency}
+            className="font-mono"
+          />
+        </Fact>
+        <Fact label={t("detail.equity.linkedDebt")}>
+          <Amount
+            value={linkedDebt}
+            currency={asset.currency}
+            className="font-mono"
+          />
+        </Fact>
+        <Fact label={t("detail.equity.equity")}>
+          {/* Only a negative equity is exceptional; its minus sign and the
+              note below carry it as well as the colour. */}
+          <Amount
+            value={equity}
+            currency={asset.currency}
+            tone="threshold"
+            className="font-mono font-semibold"
+          />
+        </Fact>
+      </dl>
+      {linkedDebt === null ? (
+        <p role="note" className="text-muted-foreground mt-3 text-sm">
+          {t("detail.equity.noRate", {
+            currencies: asset.unconvertedLoanCurrencies.join(", "),
+            currency: asset.currency,
+          })}
+        </p>
+      ) : asset.value === null ? (
+        <p role="note" className="text-muted-foreground mt-3 text-sm">
+          {t("detail.equity.archived")}
+        </p>
+      ) : equity !== null && equity < 0 ? (
+        <p role="note" className="text-muted-foreground mt-3 text-sm">
+          {t("detail.equity.underwater")}
+        </p>
+      ) : null}
+
+      <h3 className="text-foreground mt-6 text-sm font-medium">
+        {t("detail.equity.loans")}
+      </h3>
+      <dl>
+        {asset.linkedLoans.map((loan) => (
+          <Fact
+            key={loan.loanKey}
+            label={
+              <Link
+                href={`/loans/${loan.loanKey}`}
+                className="text-primary font-medium underline-offset-4 hover:underline focus-visible:underline"
+              >
+                {loan.name}
+              </Link>
+            }
+          >
+            <span className="flex flex-col items-end">
+              <Amount
+                value={loan.outstandingPrincipal}
+                currency={loan.currency}
+                className="font-mono"
+              />
+              {loan.currency !== asset.currency &&
+              loan.outstandingPrincipalInAssetCurrency !== null ? (
+                <span className="text-muted-foreground text-xs">
+                  {t.rich("detail.equity.converted", {
+                    amount: () => (
+                      <Amount
+                        value={loan.outstandingPrincipalInAssetCurrency}
+                        currency={asset.currency}
+                        className="font-mono"
+                      />
+                    ),
+                  })}
+                </span>
+              ) : null}
+            </span>
+          </Fact>
+        ))}
+      </dl>
+    </Section>
   );
 }
 
@@ -230,6 +332,8 @@ export default function AssetDetailClient({ assetId }: { assetId: string }) {
           </p>
         ) : null}
       </ObjectHeader>
+
+      {asset.linkedLoans.length > 0 && <AssetEquity asset={asset} />}
 
       {history.length > 1 && (
         <Section id="asset-history-heading" title={t("detail.history.title")}>

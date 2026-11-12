@@ -71,6 +71,7 @@ const loan: LoanDetail = {
   openingPrincipalBalance: 1000,
   outstandingPrincipal: 1000,
   rateType: "VARIABLE",
+  securedAsset: null,
   status: "ACTIVE",
   type: "MORTGAGE",
 };

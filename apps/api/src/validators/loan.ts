@@ -34,6 +34,8 @@ const baseLoanSchema = z.object({
   providerName: z.string().max(255).optional(),
   rateType: z.enum(LoanRateType).optional(),
   regularPaymentAmount: finiteAmount.refine((value) => value > 0).optional(),
+  /** The household asset the loan finances; null unlinks it. */
+  securedAssetKey: positiveIntId.nullable().optional(),
   status: z.enum(LoanStatus).optional(),
   termMonths: z.coerce.number().int().positive().refine(Number.isSafeInteger).optional(),
   type: z.enum(LoanType),
