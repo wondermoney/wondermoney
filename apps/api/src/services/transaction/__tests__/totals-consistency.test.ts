@@ -305,6 +305,7 @@ describe('report and dashboard totals equal the transaction list total', () => {
       accountKeys: scenario.budgetAccounts.map((account) => account.accountKey),
       currency: { code: 'EUR', currencyKey: scenario.household.currency.currencyKey },
       period: 'monthly',
+      periodStartDay: 1,
       templateKeys: scenario.templateKeys,
       tenantKey: scenario.household.tenant.tenantKey,
       viewerAppuserKey: scenario.viewer.appuserKey,

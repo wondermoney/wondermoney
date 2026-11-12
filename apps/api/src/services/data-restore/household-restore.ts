@@ -890,7 +890,7 @@ class HouseholdRestore {
     const keys = await allocateKeys(this.db, 'budget', 'budget_key', list.length);
     await insertRows(this.db, 'budget', list.map((row, index) => {
       this.budgets.set(row.id, keys[index]!);
-      return { appuser_key: this.target.appuserKey, budget_key: keys[index], currency_key: this.currency(row.currency), description: row.description, name: row.name, num_adults: row.numAdults, num_dependents: row.numDependents, tenant_key: this.target.tenantKey, ...this.stamp() };
+      return { appuser_key: this.target.appuserKey, budget_key: keys[index], currency_key: this.currency(row.currency), description: row.description, name: row.name, num_adults: row.numAdults, num_dependents: row.numDependents, period_start_day: row.periodStartDay, tenant_key: this.target.tenantKey, ...this.stamp() };
     }));
     this.count('budgets', list.length);
 

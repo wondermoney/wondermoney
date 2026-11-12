@@ -12,6 +12,7 @@ import { loadCategorySpendingFlags } from '@service/transaction/category-spendin
 import { convertMoney, sumMoney } from '@utils/money';
 
 import { computeForecast, type ForecastMonth, type ForecastMonthInput, type ForecastRowInput, projectOccurrences } from './budget-forecast';
+import { budgetMonthOf, budgetPeriodRange, shiftBudgetMonth } from './budget-period';
 import { monthIndex } from './budget-rollover';
 import { getMonthRollover, monthlyPlan, rolloverRowsOf } from './budget-rollover.service';
 import { getBudgetSpending } from './spending';
@@ -71,14 +72,13 @@ export async function getBudgetForecast(em: EntityManager, input: BudgetForecast
   const currency = budget.currencyKey;
   const today = new Date(Date.UTC(input.now.getUTCFullYear(), input.now.getUTCMonth(), input.now.getUTCDate()));
   const asOf = isoDay(today);
-  const window = Array.from({ length: input.months }, (_, offset) => {
-    const date = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth() + offset, 1));
-    return { month: date.getUTCMonth() + 1, year: date.getUTCFullYear() };
-  });
+  // Budget months, with the days the budget's start day gives them: the current one is the one today is in.
+  const window = Array.from({ length: input.months }, (_, offset) => shiftBudgetMonth(budgetMonthOf(budget, today), offset));
   const current = window[0];
   const last = window.at(-1);
   if (!current || !last) throw new RangeError('A forecast covers at least one month');
-  const windowEnd = new Date(Date.UTC(last.year, last.month, 0));
+  const lastDayOf = (month: { month: number; year: number }) => new Date(budgetPeriodRange(budget, month.year, month.month).end.getTime() - 86_400_000);
+  const windowEnd = lastDayOf(last);
 
   const allRows = budget.budgetTemplatesCategory.getItems();
   const rowsByMonth = new Map<number, BudgetTemplateCategory[]>();
@@ -98,11 +98,12 @@ export async function getBudgetForecast(em: EntityManager, input: BudgetForecast
           accountKeys: [...accountsOf(currentRows)],
           currency,
           period: 'monthly',
+          periodStartDay: budget.periodStartDay,
           templateKeys: currentRows.map((row) => row.budgetTemplateCategoryKey),
           tenantKey,
           viewerAppuserKey,
         }),
-    getMonthRollover({ carryOverspend: budget.rolloverCarriesOverspend, currency, month: current.month, rows: rolloverRowsOf(allRows), tenantKey, viewerAppuserKey, year: current.year }),
+    getMonthRollover({ carryOverspend: budget.rolloverCarriesOverspend, currency, month: current.month, periodStartDay: budget.periodStartDay, rows: rolloverRowsOf(allRows), tenantKey, viewerAppuserKey, year: current.year }),
     windowRows.length === 0 ? [] : loadSeries(em, tenantKey, windowRows, accountsOf(windowRows), windowEnd),
     loadCategorySpendingFlags(em, tenantKey),
   ]);
@@ -135,8 +136,8 @@ export async function getBudgetForecast(em: EntityManager, input: BudgetForecast
     const rows = rowsByMonth.get(monthIndex(month)) ?? [];
     const accounts = accountsOf(rows);
     const categories = new Set(rows.map((row) => row.categoryKey.categoryKey));
-    const monthStart = new Date(Date.UTC(month.year, month.month - 1, 1));
-    const monthEnd = new Date(Date.UTC(month.year, month.month, 0));
+    const monthStart = budgetPeriodRange(budget, month.year, month.month).start;
+    const monthEnd = lastDayOf(month);
     const from = monthStart < today ? today : monthStart;
 
     const projected = new Map<number, number[]>();

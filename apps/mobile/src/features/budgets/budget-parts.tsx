@@ -116,8 +116,10 @@ export function BudgetDetailHeader({
 }
 
 /** "‹ November 2026 ›": compact 36pt chevron buttons either side of the month. */
-export function MonthNavigator({ period, onPrevious, onNext, previousDisabled, nextDisabled }: {
+export function MonthNavigator({ period, range, onPrevious, onNext, previousDisabled, nextDisabled }: {
   period: string
+  /** The days the month covers, under its name; absent for a calendar month. */
+  range?: string | null
   onPrevious: () => void
   onNext: () => void
   previousDisabled: boolean
@@ -142,17 +144,18 @@ export function MonthNavigator({ period, onPrevious, onNext, previousDisabled, n
   return (
     <View style={styles.navigator}>
       {arrow('chevron-left', t('budgetMonth.previousMonth'), previousDisabled, onPrevious)}
-      <Text
-        accessibilityLabel={t('budgetMonth.periodNavigation', { period })}
-        accessibilityRole="header"
-        adjustsFontSizeToFit
-        minimumFontScale={0.8}
-        numberOfLines={1}
-        style={styles.period}
-        variant="bodyStrong"
-      >
-        {period}
-      </Text>
+      <View accessible accessibilityLabel={range ? t('budgetMonth.periodWithRange', { period, range }) : t('budgetMonth.periodNavigation', { period })} accessibilityRole="header" style={styles.periodBlock}>
+        <Text
+          adjustsFontSizeToFit
+          minimumFontScale={0.8}
+          numberOfLines={1}
+          style={styles.period}
+          variant="bodyStrong"
+        >
+          {period}
+        </Text>
+        {range ? <Text numberOfLines={1} style={styles.range} tone="muted" variant="meta">{range}</Text> : null}
+      </View>
       {arrow('chevron-right', t('budgetMonth.nextMonth'), nextDisabled, onNext)}
     </View>
   )
@@ -345,7 +348,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  periodBlock: { flexShrink: 1 },
   period: { flexShrink: 1, textTransform: 'capitalize', paddingHorizontal: themeTokens.spacing[1] },
+  range: { paddingHorizontal: themeTokens.spacing[1] },
   disabled: { opacity: 0.5 },
   measure: { height: 6, minWidth: 64, justifyContent: 'center' },
   measurePart: { position: 'absolute', top: 0, bottom: 0, left: 0, borderRadius: themeTokens.radius.sm },

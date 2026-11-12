@@ -135,7 +135,7 @@ describe('a split transaction counts like separate transactions', () => {
 
   it('in budget spending', async () => {
     const { separate, split } = await both(async (scenario) => {
-      const { categories: rows } = await getBudgetSpending({ accountKeys: scenario.accountKeys, currency: EUR(scenario), period: 'monthly', templateKeys: scenario.templateKeys, tenantKey: scenario.household.tenant.tenantKey, viewerAppuserKey: scenario.household.appuser.appuserKey });
+      const { categories: rows } = await getBudgetSpending({ accountKeys: scenario.accountKeys, currency: EUR(scenario), period: 'monthly', periodStartDay: 1, templateKeys: scenario.templateKeys, tenantKey: scenario.household.tenant.tenantKey, viewerAppuserKey: scenario.household.appuser.appuserKey });
       return Object.fromEntries(rows.map((row) => [row.child_category_name ?? `parent:${row.parent_category_name}`, row.category_amount]));
     });
 
@@ -249,7 +249,7 @@ describe('a split transaction counts like separate transactions', () => {
     await setTransactionSplits(db.em(), actor, secret.transactionKey, [{ amount: -70, categoryKey: groceries.categoryKey }, { amount: -30, categoryKey: homeware.categoryKey }]);
     await setTransactionSplits(db.em(), actor, expired.transactionKey, [{ amount: -20, categoryKey: groceries.categoryKey }, { amount: -20, categoryKey: homeware.categoryKey }]);
     const templateKeys = await budgetFor(household, [groceries, homeware]);
-    const spending = async (viewer: number, accountKeys: number[]) => (await getBudgetSpending({ accountKeys, currency: { code: 'EUR', currencyKey: household.currency.currencyKey }, period: 'monthly', templateKeys, tenantKey: household.tenant.tenantKey, viewerAppuserKey: viewer })).categories
+    const spending = async (viewer: number, accountKeys: number[]) => (await getBudgetSpending({ accountKeys, currency: { code: 'EUR', currencyKey: household.currency.currencyKey }, period: 'monthly', periodStartDay: 1, templateKeys, tenantKey: household.tenant.tenantKey, viewerAppuserKey: viewer })).categories
       .filter((row) => row.child_category_name)
       .map((row) => [row.child_category_name, row.category_amount])
       .sort();
@@ -275,7 +275,7 @@ describe('a split transaction counts like separate transactions', () => {
 
     it('leaves every line out and counts the transaction once as unconverted', async () => {
       const scenario = await unconvertedSplit();
-      const input = { accountKeys: scenario.accountKeys, currency: EUR(scenario), period: 'monthly' as const, templateKeys: scenario.templateKeys, tenantKey: scenario.household.tenant.tenantKey, viewerAppuserKey: scenario.household.appuser.appuserKey };
+      const input = { accountKeys: scenario.accountKeys, currency: EUR(scenario), period: 'monthly' as const, periodStartDay: 1, templateKeys: scenario.templateKeys, tenantKey: scenario.household.tenant.tenantKey, viewerAppuserKey: scenario.household.appuser.appuserKey };
 
       const { categories: budget, completeness: budgetCompleteness } = await getBudgetSpending(input);
       const report = await getCashflowReport(reportInput(scenario, { categoryKeys: [String(scenario.groceries.categoryKey), String(scenario.homeware.categoryKey)] }));

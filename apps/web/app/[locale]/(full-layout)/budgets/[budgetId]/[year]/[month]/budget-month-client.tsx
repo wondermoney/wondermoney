@@ -16,6 +16,7 @@ import { UnconvertedAmountsNotice } from "@/components/ui/UnconvertedAmountsNoti
 import { useRouter } from "@/i18n/navigation";
 import type { GetBudgetTemplateByYearResponse } from "@/lib/api/budget/useBudgetTemplateByYear";
 import type { GetBudgetTemplateByYearAndMonthResponse } from "@/lib/api/budget/useBudgetTemplateByYearAndMonth";
+import { budgetPeriodLabel } from "@/lib/budget/period";
 import { overPlanLines } from "@/lib/home/month-overview";
 import {
   calculatePlannedAndSpentValue,
@@ -172,6 +173,11 @@ export default function BudgetMonthClient({
               ? `${format(budgetDate, "LLLL", { locale: getDateFnsLocale(locale) })} ${budgetDate.getFullYear()}`
               : null
           }
+          periodLabel={budgetPeriodLabel(
+            budgetCategoriesData.budget.period,
+            budgetCategoriesData.budget.periodStartDay,
+            locale,
+          )}
           hasPreviousMonth={hasPreviousMonth}
           hasNextMonth={hasNextMonth}
           onPreviousMonth={navigateToPreviousMonth}

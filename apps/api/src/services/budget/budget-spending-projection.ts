@@ -15,7 +15,8 @@ export type BudgetPressure = 'near' | 'over' | 'within_plan';
 /**
  * Spend attributed to a single Budget allocation: the signed sum of the classified transactions
  * that share the allocation's category and one of the accounts linked to the allocation's
- * `budgetTemplateCategoryKey`, floored at zero so a net refund never produces a negative spend.
+ * `budgetTemplateCategoryKey`, on a day of its budget month (`allocation.period`), floored at zero
+ * so a net refund never produces a negative spend.
  *
  * `allAllocations` must carry every row for the allocation (one per linked account), not just the
  * row being measured — `accountKeysForAllocation` reads the account links from it.
@@ -29,7 +30,8 @@ export function spendForAllocation(
   return floorMoney(
     transactions
       .filter(
-        (transaction) => transaction.categoryKey === allocation.categoryKey && accountKeys.has(transaction.accountKey),
+        (transaction) => transaction.categoryKey === allocation.categoryKey && accountKeys.has(transaction.accountKey)
+          && transaction.transactionDate >= allocation.period.start && transaction.transactionDate < allocation.period.end,
       )
       .reduce((sum, transaction) => sum.plus(transaction.amount), new Big(0)),
   );

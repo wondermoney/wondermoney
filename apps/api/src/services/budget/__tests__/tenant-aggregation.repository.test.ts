@@ -20,10 +20,10 @@ describe('MikroOrmTenantAggregationRepository', () => {
   });
 
   it('keeps budget account rows visible for whole-budget tenant and ownership validation', async () => {
-    execute.mockResolvedValue([]);
-    await repository.loadBudgetAllocations(7, 7, 2026);
-    const [sql, parameters] = execute.mock.calls[0] as [string, unknown[]];
-    expect(parameters).toEqual([7, 2026, 7, 7, 7]);
+    execute.mockResolvedValueOnce([{ budgetKey: 3, periodStartDay: 1 }]).mockResolvedValue([]);
+    await repository.loadBudgetAllocations(7, { month: 7, year: 2026 });
+    const [sql, parameters] = execute.mock.calls[1] as [string, unknown[]];
+    expect(parameters).toEqual([7, 3, 2026, 7, 7, 7]);
     expect(sql).toContain('left join "account"');
     expect(sql).toContain('template."amount_budgeted" > 0');
     expect(sql).toContain('category."parent_category_category_key" is not null');

@@ -48,7 +48,7 @@ describe('/v1/user/me/exports', () => {
     expect(download.headers['content-type']).toBe('application/zip');
     expect(download.headers['content-disposition']).toMatch(/^attachment; filename="wondermoney-export-\d{4}-\d{2}-\d{2}\.zip"$/u);
     const entries = unzipSync(new Uint8Array(download.body as Buffer));
-    expect(JSON.parse(strFromU8(entries['manifest.json']!))).toEqual(expect.objectContaining({ format: 'wondermoney-export', formatVersion: '1.3' }));
+    expect(JSON.parse(strFromU8(entries['manifest.json']!))).toEqual(expect.objectContaining({ format: 'wondermoney-export', formatVersion: '1.4' }));
   });
 
   it("hides one member's export from the other", async () => {

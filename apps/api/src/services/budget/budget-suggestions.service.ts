@@ -33,7 +33,8 @@ export interface SuggestBudgetAmountsInput {
 
 /**
  * Suggested monthly limits from the household's own spending. The window is the `months` complete
- * calendar months before `targetMonth`, so a partial current month never counts. Spending is the
+ * budget months before `targetMonth` (each with the days its start day gives it), so a partial
+ * current month never counts. Spending is the
  * budget's spending in the budget's currency: transfers, loan principal and goal funding are left
  * out, refunds net against their month, and a partner's private accounts stay hidden.
  */
@@ -73,6 +74,7 @@ export async function suggestBudgetAmounts(
       accountKeys,
       currency,
       period: 'monthly',
+      periodStartDay: budget.periodStartDay,
       templateKeys: rows.map((row) => row.budgetTemplateCategoryKey),
       tenantKey: input.tenantKey,
       viewerAppuserKey: input.viewerAppuserKey,

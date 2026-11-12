@@ -8,7 +8,8 @@ import { buildEffectiveAmountSql } from '@utils/account-amounts';
 
 import { money } from './aggregation-classifier';
 import type { InstantRange } from './aggregation-periods';
-import type { BudgetAllocationRow, TenantAggregationRepository, TransactionAggregationRow } from './aggregation-types';
+import type { BudgetAllocationRow, BudgetMonthSelector, TenantAggregationRepository, TransactionAggregationRow } from './aggregation-types';
+import { budgetMonthOf, budgetPeriodRange } from './budget-period';
 import { loadAvailableAmounts } from './budget-rollover.service';
 
 export class MikroOrmTenantAggregationRepository implements TenantAggregationRepository {
@@ -33,12 +34,26 @@ export class MikroOrmTenantAggregationRepository implements TenantAggregationRep
     return (row as undefined | { present: number })?.present === 1;
   }
 
-  /** Each row with rollover on carries `amountAvailable`: its budget plus last month's rollover. */
-  async loadBudgetAllocations(appuserKey: number, month: number, year: number): Promise<BudgetAllocationRow[]> {
-    const rows = await this.em.getConnection().execute<BudgetAllocationRow[]>(
+  /**
+   * The member's budget rows of one budget month per budget (`selector`), each with the days that
+   * month covers. Each row with rollover on carries `amountAvailable`: its budget plus last month's
+   * rollover.
+   */
+  async loadBudgetAllocations(appuserKey: number, selector: BudgetMonthSelector): Promise<BudgetAllocationRow[]> {
+    const budgets = await this.em.getConnection().execute<{ budgetKey: number; periodStartDay: number }[]>(
+      `select budget."budget_key" as "budgetKey", budget."period_start_day" as "periodStartDay"
+       from "budget" budget where budget."appuser_key" = ? and budget."deleted_at" is null
+       order by budget."budget_key"`,
+      [appuserKey],
+    );
+    const months = budgets.map((budget) => ({ ...budget, ...('day' in selector ? budgetMonthOf(budget, selector.day) : selector) }));
+    if (months.length === 0) return [];
+
+    const rows = await this.em.getConnection().execute<Omit<BudgetAllocationRow, 'period'>[]>(
       `select
          budget."budget_key" as "budgetKey", budget."name" as "budgetName",
          template."budget_template_category_key" as "budgetTemplateCategoryKey",
+         template."year" as "year", template."month" as "month",
          template."amount_budgeted"::text as "amountBudgeted",
          category."category_key" as "categoryKey", category."name" as "categoryName",
          category."owner_appuser_key" as "categoryOwnerAppuserKey", category."is_system_category" as "categorySystem",
@@ -57,18 +72,25 @@ export class MikroOrmTenantAggregationRepository implements TenantAggregationRep
          on pivot."budget_template_category_budget_template_category_key" = template."budget_template_category_key"
        left join "account" account on account."account_key" = pivot."account_account_key"
        where budget."appuser_key" = ? and budget."deleted_at" is null
-         and template."year" = ? and template."month" = ? and template."amount_budgeted" > 0
+         and (budget."budget_key", template."year", template."month") in (${months.map(() => '(?, ?, ?)').join(', ')})
+         and template."amount_budgeted" > 0
          and category."deleted_at" is null and category."parent_category_category_key" is not null and parent."deleted_at" is null
          and not exists (select 1 from "category" child where child."parent_category_category_key" = category."category_key" and child."deleted_at" is null)
          and (category."is_system_category" = true or category."owner_appuser_key" = ?)
          and (parent."is_system_category" = true or parent."owner_appuser_key" = ?)
        order by budget."budget_key", template."budget_template_category_key", account."account_key"`,
-      [appuserKey, year, month, appuserKey, appuserKey],
+      [appuserKey, ...months.flatMap((budget) => [budget.budgetKey, budget.year, budget.month]), appuserKey, appuserKey],
     );
-    const available = await loadAvailableAmounts(this.em, { budgetKeys: [...new Set(rows.map((row) => row.budgetKey))], month, viewerAppuserKey: appuserKey, year });
+    const available = new Map<number, number>();
+    for (const budget of months) {
+      if (!rows.some((row) => row.budgetKey === budget.budgetKey)) continue;
+      for (const [key, amount] of await loadAvailableAmounts(this.em, { budgetKeys: [budget.budgetKey], month: budget.month, viewerAppuserKey: appuserKey, year: budget.year })) available.set(key, amount);
+    }
+    const periods = new Map(months.map((budget) => [budget.budgetKey, budgetPeriodRange(budget, budget.year, budget.month)]));
     return rows.map((row) => {
       const amount = available.get(row.budgetTemplateCategoryKey);
-      return amount === undefined ? row : { ...row, amountAvailable: money(new Big(amount)) };
+      const allocation = { ...row, period: periods.get(row.budgetKey)! };
+      return amount === undefined ? allocation : { ...allocation, amountAvailable: money(new Big(amount)) };
     });
   }
 

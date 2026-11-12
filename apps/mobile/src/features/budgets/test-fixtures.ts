@@ -44,6 +44,8 @@ export const budgetFixture: BudgetDto = {
   incomes: [{ amount: 2000, budgetTemplateIncomeKey: 2, name: 'Salary', recurrency: 'MONTHLY' }],
   month: 7,
   name: 'Household plan',
+  period: { firstDay: '2026-07-01', lastDay: '2026-07-31' },
+  periodStartDay: 1,
   rolloverCarriesOverspend: true,
   year: 2026,
 }

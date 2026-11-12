@@ -23,11 +23,12 @@ export const CASHFLOW_MONTHS = 6
  * month screen uses, so Home and that screen share one cache entry and agree
  * to the cent. One query per budget: one failed month costs one row.
  */
-export function useHomeBudgetMonths(budgetIds: readonly number[], year: number, month: number) {
+/** Each budget's month, in the month the budget list puts it in (its current one, which its start day decides). */
+export function useHomeBudgetMonths(months: readonly Readonly<{ budgetId: number; year: number; month: number }>[]) {
   const { runtime, blockAccess } = useProductRuntime()
   if (!runtime) throw new Error('useHomeBudgetMonths requires an authenticated runtime')
   const queries = useQueries({
-    queries: budgetIds.map((budgetId) => ({
+    queries: months.map(({ budgetId, year, month }) => ({
       queryKey: budgetMonthKey(runtime.epochId, budgetId, year, month),
       queryFn: () => runtime.apiClient.read(createBudgetMonthEndpoint(budgetId, year, month)),
       retry: false,

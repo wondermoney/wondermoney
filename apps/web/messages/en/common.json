@@ -2559,7 +2559,7 @@
   "of-assets": "of assets",
   "of-debts": "of debts",
   "delete-budget-description": "The categories and planned amounts in this budget are removed. Your transactions are not affected.",
-  "edit-budget-description": "Rename this budget. Its categories and amounts stay as they are.",
+  "edit-budget-description": "Rename this budget or change its settings. Its categories and amounts stay as they are.",
   "budget-name": "e.g. Household budget",
   "provenance-balances-updated": "Balances updated {time}",
   "provenance-balances-stale": "Some connections need attention",
@@ -2792,6 +2792,9 @@
   "budget-rollover-toggle-help": "What's left this month is added to next month's amount for this category.",
   "budget-rollover-carries-overspend": "Carry overspending into next month",
   "budget-rollover-carries-overspend-help": "When off, only unspent money rolls over",
+  "budget-period-start-day": "Month starts on day",
+  "budget-period-start-day-help": "Day 1 follows the calendar. A later day, such as payday, starts each budget month on it: with 25, November runs from 25 October to 24 November.",
+  "budget-period-start-day-option": "Day {day}",
   "accountRecalculate": {
     "menu-item": "Recalculate balances",
     "title": "Recalculate balances for {name}?",

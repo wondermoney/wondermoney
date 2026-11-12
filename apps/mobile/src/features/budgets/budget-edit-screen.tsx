@@ -4,7 +4,7 @@ import { Alert, BackHandler, ScrollView, StyleSheet, View } from 'react-native'
 
 import { Button } from '@/components/ui/button'
 import { FormBar } from '@/components/ui/form-bar'
-import { FormGroup, FormSwitchRow, FormTextRow } from '@/components/ui/form-row'
+import { FormGroup, FormSelectRow, FormSwitchRow, FormTextRow } from '@/components/ui/form-row'
 import { Notice } from '@/components/ui/notice'
 import { SafeAreaView } from '@/components/ui/screen-safe-area'
 import { Text } from '@/components/ui/text'
@@ -21,7 +21,12 @@ export type BudgetEditModel = Readonly<{
   description: string | null
   /** Null when the server has no rollover: the setting is then not shown or sent. */
   rolloverCarriesOverspend: boolean | null
+  /** The day the budget's months start on; null when the server has no such setting, which is then not shown or sent. */
+  periodStartDay: number | null
 }>
+
+/** A budget month starts on a day every month has: 1 (the calendar month) to 28. */
+const PERIOD_START_DAYS = Array.from({ length: 28 }, (_, index) => index + 1)
 
 export type BudgetEditViewState =
   | { status: 'loading' | 'access-transition' }
@@ -32,7 +37,7 @@ type Props = Readonly<{
   state: BudgetEditViewState
   onBack: () => void
   onRetry: () => void | Promise<void>
-  onSaveMetadata: (value: { name: string; description: string; rolloverCarriesOverspend?: boolean }) => Promise<void>
+  onSaveMetadata: (value: { name: string; description: string; periodStartDay?: number; rolloverCarriesOverspend?: boolean }) => Promise<void>
   onDeleteBudget?: () => Promise<void>
   deletePending?: boolean
   pending: boolean
@@ -63,9 +68,11 @@ function BudgetEditForm({ model, stale, onBack, onSaveMetadata, onDeleteBudget, 
   const [description, setDescription] = useState(model.description ?? '')
   const [savedCarryOverspend, setSavedCarryOverspend] = useState(model.rolloverCarriesOverspend)
   const [carryOverspend, setCarryOverspend] = useState(model.rolloverCarriesOverspend)
+  const [savedStartDay, setSavedStartDay] = useState(model.periodStartDay)
+  const [startDay, setStartDay] = useState(model.periodStartDay)
   const [failure, setFailure] = useState<BudgetWriteFailure | null>(null)
   const [deleteFailure, setDeleteFailure] = useState<BudgetDeleteFailure | null>(null)
-  const dirty = name !== savedName || description !== savedDescription || carryOverspend !== savedCarryOverspend
+  const dirty = name !== savedName || description !== savedDescription || carryOverspend !== savedCarryOverspend || startDay !== savedStartDay
   const locked = pending || deletePending
 
   const deleteBudget = async () => {
@@ -94,7 +101,13 @@ function BudgetEditForm({ model, stale, onBack, onSaveMetadata, onDeleteBudget, 
 
   const saveMetadata = async () => {
     if (!dirty || pending) return
-    const candidate = { name, description, ...(carryOverspend !== null && carryOverspend !== savedCarryOverspend ? { rolloverCarriesOverspend: carryOverspend } : {}) }
+    // Only a changed setting is sent, so a rename stays a rename.
+    const candidate = {
+      name,
+      description,
+      ...(startDay !== null && startDay !== savedStartDay ? { periodStartDay: startDay } : {}),
+      ...(carryOverspend !== null && carryOverspend !== savedCarryOverspend ? { rolloverCarriesOverspend: carryOverspend } : {}),
+    }
     if (!budgetMetadataWriteSchema.safeParse(candidate).success) { setFailure('invalid'); return }
     setFailure(null)
     try {
@@ -102,6 +115,7 @@ function BudgetEditForm({ model, stale, onBack, onSaveMetadata, onDeleteBudget, 
       setSavedName(name)
       setSavedDescription(description)
       setSavedCarryOverspend(carryOverspend)
+      setSavedStartDay(startDay)
     } catch (error) {
       setFailure(classifyBudgetWriteFailure(error))
     }
@@ -151,6 +165,21 @@ function BudgetEditForm({ model, stale, onBack, onSaveMetadata, onDeleteBudget, 
               value={description}
             />
           </FormGroup>
+          {startDay !== null ? (
+            <FormGroup>
+              <FormSelectRow
+                key="period-start-day"
+                disabled={locked}
+                hint={t('budgetEdit.periodStartDayHint')}
+                label={t('budgetEdit.periodStartDay')}
+                onChange={setStartDay}
+                options={PERIOD_START_DAYS.map((day) => ({ value: day, label: t('budgetEdit.periodStartDayOption', { day }) }))}
+                placeholder={t('budgetEdit.periodStartDayOption', { day: 1 })}
+                testID="budget-period-start-day"
+                value={startDay}
+              />
+            </FormGroup>
+          ) : null}
           {carryOverspend !== null ? (
             <FormGroup>
               <FormSwitchRow

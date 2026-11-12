@@ -1,6 +1,7 @@
 import { useQuery, type UseQueryOptions } from "@tanstack/react-query";
 import type { AxiosInstance } from "axios";
 
+import type { BudgetPeriod } from "@/lib/budget/period";
 import type { SupportedCurrencyCodes } from "@/lib/utils/currencySymbol";
 
 import api from "../api";
@@ -22,6 +23,10 @@ export interface BudgetFull {
   }[];
   categories: BudgetCategory[];
   incomes: BudgetIncome[];
+  /** The days of the budget month shown (`month`/`year`: the one today is in). */
+  period: BudgetPeriod;
+  /** The day of the month a budget month starts on, 1 to 28 (1: the calendar month). */
+  periodStartDay: number;
   /** Overspending carries into the next month (off: only unspent money does). */
   rolloverCarriesOverspend: boolean;
   /** False when a carried amount rests on spending that could not be converted. */

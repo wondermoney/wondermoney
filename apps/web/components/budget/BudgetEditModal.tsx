@@ -16,10 +16,18 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/Form";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/Select";
 import { Switch } from "@/components/ui/switch";
 import { useRouter } from "@/i18n/navigation";
 import { Budget } from "@/lib/api/budget/useBudgets";
 import useEditBudget from "@/lib/api/budget/useEditBudget";
+import { BUDGET_PERIOD_START_DAYS } from "@/lib/budget/period";
 import { invalidateBudgets } from "@/lib/utils/queryInvalidation";
 
 import { Button } from "../ui/button";
@@ -40,10 +48,13 @@ interface BudgetEditModalProps {
   budgetKey: Budget["budgetKey"];
   /** The budget's current setting; the API's default (on) when unknown. */
   rolloverCarriesOverspend?: boolean;
+  /** The day its months start on; the API's default (1, the calendar month) when unknown. */
+  periodStartDay?: number;
 }
 
 const formSchema = z.object({
   name: z.string().min(1, "Name is required"),
+  periodStartDay: z.number().int().min(1).max(28),
   rolloverCarriesOverspend: z.boolean(),
 });
 
@@ -55,6 +66,7 @@ const BudgetEditModal: React.FC<BudgetEditModalProps> = ({
   budgetName,
   budgetKey,
   rolloverCarriesOverspend = true,
+  periodStartDay = 1,
 }) => {
   const t = useTranslations();
   const posthog = usePostHog();
@@ -62,6 +74,7 @@ const BudgetEditModal: React.FC<BudgetEditModalProps> = ({
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: budgetName,
+      periodStartDay,
       rolloverCarriesOverspend,
     },
   });
@@ -79,6 +92,9 @@ const BudgetEditModal: React.FC<BudgetEditModalProps> = ({
         budgetKey,
         name: data.name,
         // Only a changed setting is sent, so a rename stays a rename.
+        ...(data.periodStartDay !== periodStartDay
+          ? { periodStartDay: data.periodStartDay }
+          : {}),
         ...(data.rolloverCarriesOverspend !== rolloverCarriesOverspend
           ? { rolloverCarriesOverspend: data.rolloverCarriesOverspend }
           : {}),
@@ -118,6 +134,35 @@ const BudgetEditModal: React.FC<BudgetEditModalProps> = ({
                     <Input placeholder={t("budget-name")} {...field} />
                   </FormControl>
                   <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={methods.control}
+              name="periodStartDay"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>{t("budget-period-start-day")}</FormLabel>
+                  <Select
+                    value={String(field.value)}
+                    onValueChange={(value) => field.onChange(Number(value))}
+                  >
+                    <FormControl>
+                      <SelectTrigger className="w-40">
+                        <SelectValue />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {BUDGET_PERIOD_START_DAYS.map((day) => (
+                        <SelectItem key={day} value={String(day)}>
+                          {t("budget-period-start-day-option", { day })}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormDescription>
+                    {t("budget-period-start-day-help")}
+                  </FormDescription>
                 </FormItem>
               )}
             />

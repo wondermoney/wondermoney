@@ -48,7 +48,7 @@ describe('getBudgetVsActualReport', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mocks.find.mockImplementation((entity: unknown) => {
-      if (entity === Budget) return Promise.resolve([{ budgetKey: 1, currencyKey: { code: 'EUR' } }]);
+      if (entity === Budget) return Promise.resolve([{ budgetKey: 1, currencyKey: { code: 'EUR' }, periodStartDay: 1 }]);
       if (entity === BudgetTemplateCategory) return Promise.resolve(foodTemplates);
       if (entity === Transaction) return Promise.resolve([]);
       if (entity === LoanRepaymentLink) return Promise.resolve([]);
@@ -61,7 +61,7 @@ describe('getBudgetVsActualReport', () => {
       makeTemplate({ amountBudgeted: 50, categoryKey: { bgColor: '#eeeeee', categoryKey: 20, name: 'Transport' }, month }),
     );
     mocks.find.mockImplementation((entity: unknown) => {
-      if (entity === Budget) return Promise.resolve([{ budgetKey: 1, currencyKey: { code: 'EUR' } }]);
+      if (entity === Budget) return Promise.resolve([{ budgetKey: 1, currencyKey: { code: 'EUR' }, periodStartDay: 1 }]);
       if (entity === BudgetTemplateCategory) return Promise.resolve([...foodTemplates, ...transportTemplates]);
       if (entity === Transaction) {
         return Promise.resolve([
@@ -123,7 +123,7 @@ describe('getBudgetVsActualReport', () => {
 
   it('returns an empty dataset when no budget template rows overlap the period', async () => {
     mocks.find.mockImplementation((entity: unknown) => {
-      if (entity === Budget) return Promise.resolve([{ budgetKey: 1, currencyKey: { code: 'EUR' } }]);
+      if (entity === Budget) return Promise.resolve([{ budgetKey: 1, currencyKey: { code: 'EUR' }, periodStartDay: 1 }]);
       if (entity === BudgetTemplateCategory) return Promise.resolve(foodTemplates);
       return Promise.resolve([]);
     });

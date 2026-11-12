@@ -34,10 +34,13 @@ const allocation = (overrides: Partial<BudgetAllocationRow> = {}): BudgetAllocat
   categoryOwnerAppuserKey: 7,
   categorySystem: false,
   currencyCode: 'EUR',
+  month: 11,
   parentCategoryKey: 9,
   parentCategoryName: 'Food',
   parentCategoryOwnerAppuserKey: 7,
   parentCategorySystem: false,
+  period: { end: new Date('2026-12-01T00:00:00Z'), start: new Date('2026-11-01T00:00:00Z') },
+  year: 2026,
   ...overrides,
 });
 
@@ -249,14 +252,14 @@ describe('budgetPaceInsights', () => {
 describe('generateInsights', () => {
   it('orders critical, then warning, then info', () => {
     const insights = generateInsights({
-      budget: {
+      budgets: [{
         allocations: [allocation({ amountBudgeted: '50' })],
         currentTransactions: [transaction({ amount: new Big(100) })],
         daysElapsed: 10,
         daysInMonth: 30,
         month: 11,
         year: 2026,
-      },
+      }],
       spending: spendingInput({ currentTransactions: [transaction({ amount: new Big(50) })] }),
     });
     expect(insights.map((insight) => insight.severity)).toEqual(['critical', 'info']);

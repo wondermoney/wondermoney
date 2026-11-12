@@ -683,11 +683,11 @@ class HouseholdExport {
 
   private async* budgetJson() {
     const rows = await rowsOf(this.db, sql`
-      select b.budget_key, b.name, b.description, b.num_adults, b.num_dependents, b.appuser_key, c.code as currency
+      select b.budget_key, b.name, b.description, b.num_adults, b.num_dependents, b.period_start_day, b.appuser_key, c.code as currency
       from budget b left join currency c on c.currency_key = b.currency_key
       where b.budget_key = any(${this.budgets.keys()}) order by b.budget_key`);
     for (const row of rows) {
-      yield { currency: str(row['currency']), description: str(row['description']), id: this.budgets.get(row['budget_key']), memberId: this.members.get(row['appuser_key']), name: str(row['name']), numAdults: int(row['num_adults']), numDependents: int(row['num_dependents']) };
+      yield { currency: str(row['currency']), description: str(row['description']), id: this.budgets.get(row['budget_key']), memberId: this.members.get(row['appuser_key']), name: str(row['name']), numAdults: int(row['num_adults']), numDependents: int(row['num_dependents']), periodStartDay: int(row['period_start_day']) };
     }
   }
 

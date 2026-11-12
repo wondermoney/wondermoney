@@ -3,13 +3,13 @@ import { formatInTimeZone } from 'date-fns-tz';
 import { classifyTransactions, createDiagnostics } from '@service/budget/aggregation-classifier';
 import { getLisbonBudgetPeriod } from '@service/budget/aggregation-periods';
 import type { InstantRange, LisbonBudgetPeriod } from '@service/budget/aggregation-periods';
-import type { TenantAggregationRepository, TransactionAggregationRow } from '@service/budget/aggregation-types';
+import type { BudgetAllocationRow, TenantAggregationRepository, TransactionAggregationRow } from '@service/budget/aggregation-types';
 import { MikroOrmTenantAggregationRepository } from '@service/budget/tenant-aggregation.repository';
 import { partitionByEligibility } from '@service/budget/tenant-budget-eligibility';
 
 import { INSIGHTS } from './insights.constants';
 import { generateInsights } from './insights.generators';
-import type { Insight } from './insights.types';
+import type { BudgetPaceInput, Insight } from './insights.types';
 
 const LISBON_TIME_ZONE = 'Europe/Lisbon';
 
@@ -32,6 +32,8 @@ interface ResolvedInsightsPeriod {
   asOf: Date;
   daysElapsed: number;
   daysInMonth: number;
+  /** The month is the one `now` is in. */
+  isCurrent: boolean;
   month: number;
   monthRange: InstantRange;
   year: number;
@@ -77,19 +79,18 @@ export class InsightsService {
       baselinePeriods.length === INSIGHTS.SPENDING_VS_NORMAL.BASELINE_MONTHS &&
       baselinePeriods.every((baseline) => hasRows(rows, baseline.monthRange));
 
-    const allocationRows = await this.repository.loadBudgetAllocations(input.appuserKey, period.month, period.year);
+    // Budget pace reads each budget's own month: the one today is in for the current month (which
+    // a start day after the 1st can move on), else the budget month named like the one asked for.
+    const allocationRows = await this.repository.loadBudgetAllocations(
+      input.appuserKey,
+      period.isCurrent ? { day: lisbonDay(period.asOf) } : { month: period.month, year: period.year },
+    );
     const allocations = partitionByEligibility(allocationRows, { appuserKey: input.appuserKey, tenantKey: input.tenantKey });
+    const spentSoFar = transactions.filter((transaction) => transaction.transactionDate < period.asOf);
 
     return {
       insights: generateInsights({
-        budget: {
-          allocations: allocations.rows,
-          currentTransactions,
-          daysElapsed: period.daysElapsed,
-          daysInMonth: period.daysInMonth,
-          month: period.month,
-          year: period.year,
-        },
+        budgets: budgetPaceInputs(allocations.rows, spentSoFar, period.asOf),
         spending: {
           baselineComplete,
           baselineMonths,
@@ -122,7 +123,23 @@ export function resolveInsightsPeriod(month: string | undefined, now: Date): Res
   const daysInMonth = Math.round((monthEnd.getTime() - period.monthRange.start.getTime()) / 86_400_000);
   const daysElapsed = asOf >= monthEnd ? daysInMonth : Number(formatInTimeZone(asOf, LISBON_TIME_ZONE, 'd'));
 
-  return { asOf, daysElapsed, daysInMonth, month: monthNumber, monthRange: period.monthRange, year };
+  return { asOf, daysElapsed, daysInMonth, isCurrent: year === current.year && monthNumber === current.month, month: monthNumber, monthRange: period.monthRange, year };
+}
+
+/**
+ * One budget-pace input per budget: its rows, and how many days of its budget month (the days its
+ * start day gives it) have passed by `asOf`'s Lisbon day. Spending is the transactions on those days.
+ */
+function budgetPaceInputs(allocations: readonly BudgetAllocationRow[], transactions: BudgetPaceInput['currentTransactions'], asOf: Date): BudgetPaceInput[] {
+  const byBudget = new Map<number, BudgetAllocationRow[]>();
+  for (const allocation of allocations) byBudget.set(allocation.budgetKey, [...(byBudget.get(allocation.budgetKey) ?? []), allocation]);
+  return [...byBudget.values()].map((rows) => {
+    const { month, period, year } = rows[0]!;
+    const daysInMonth = Math.round((period.end.getTime() - period.start.getTime()) / 86_400_000);
+    const today = lisbonDay(asOf);
+    const daysElapsed = today >= period.end ? daysInMonth : today < period.start ? 0 : Math.floor((today.getTime() - period.start.getTime()) / 86_400_000) + 1;
+    return { allocations: rows, currentTransactions: transactions, daysElapsed, daysInMonth, month, year };
+  });
 }
 
 function hasRows(rows: readonly TransactionAggregationRow[], range: InstantRange): boolean {
@@ -131,6 +148,11 @@ function hasRows(rows: readonly TransactionAggregationRow[], range: InstantRange
 
 function inRange(date: Date, range: InstantRange): boolean {
   return date >= range.start && date < range.end;
+}
+
+/** UTC midnight of the Lisbon calendar day `instant` is on: the day budget months are looked up by. */
+function lisbonDay(instant: Date): Date {
+  return new Date(`${formatInTimeZone(instant, LISBON_TIME_ZONE, 'yyyy-MM-dd')}T00:00:00.000Z`);
 }
 
 function priorMonthPeriod(period: { month: number; year: number }, monthsBack: number): LisbonBudgetPeriod {

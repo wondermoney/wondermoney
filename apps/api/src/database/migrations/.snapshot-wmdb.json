@@ -6825,6 +6825,23 @@
           "enumItems": [],
           "mappedType": "integer"
         },
+        "period_start_day": {
+          "name": "period_start_day",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": "1",
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "integer"
+        },
         "rollover_carries_overspend": {
           "name": "rollover_carries_overspend",
           "type": "boolean",
@@ -6889,7 +6906,13 @@
           "unique": true
         }
       ],
-      "checks": [],
+      "checks": [
+        {
+          "name": "budget_period_start_day_check",
+          "expression": "\"period_start_day\" between 1 and 28",
+          "definition": "check (\"period_start_day\" between 1 and 28)"
+        }
+      ],
       "triggers": [],
       "foreignKeys": {
         "budget_appuser_key_foreign": {
