@@ -1,3 +1,4 @@
+import type { TFunction } from 'i18next'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { BackHandler, ScrollView, StyleSheet, View } from 'react-native'
@@ -13,6 +14,16 @@ import { formatNumberInput, parseNumberInput } from '@/lib/formatters/decimal-in
 import { themeTokens } from '@/theme/tokens'
 import { usePalette } from '@/theme/use-palette'
 
+import { linkRefusalMessage, linkSummary, PortfolioAccountLinkFields } from './portfolio-account-link-fields'
+import {
+  draftFromLink,
+  linkChanged,
+  linkInputFromDraft,
+  NOT_LINKED_DRAFT,
+  type LinkableAccount,
+  type PortfolioAccountLink,
+  type PortfolioAccountLinkDraft,
+} from './portfolio-account-link'
 import { PortfolioReviewList, PortfolioReviewRow } from './portfolio-form-parts'
 import type { PortfolioSettingsReconciliation } from './portfolio-settings-reconciliation'
 import {
@@ -26,7 +37,12 @@ import {
 } from './portfolios-contract'
 import type { PortfolioSettingsFailure } from './use-portfolio-settings'
 
-export type PortfolioSettingsModel = Readonly<{ id: number; name: string; description: string | null; currency: string; benchmarkSymbol: string | null; excluded: boolean; favored: boolean; targetAllocation: Readonly<Record<string, number>> | null }>
+export type PortfolioSettingsModel = Readonly<{ id: number; name: string; description: string | null; currency: string; benchmarkSymbol: string | null; excluded: boolean; favored: boolean; targetAllocation: Readonly<Record<string, number>> | null; accountLink: PortfolioAccountLink | null }>
+
+/** The words for a failed save; a refused link names the member who holds it and nothing else. */
+export function portfolioSettingsFailureMessage(t: TFunction, failure: PortfolioSettingsFailure, linkHolder: string | null): string {
+  return linkRefusalMessage(t, failure, linkHolder) ?? t(`portfolioSettings.failures.${failure}`)
+}
 
 function allocationInputsFrom(source: Readonly<Record<string, number>> | null | undefined, locale: string): Record<PortfolioTargetAssetClass, string> {
   return Object.fromEntries(
@@ -38,6 +54,10 @@ type PortfolioSettingsScreenProps = {
   model: PortfolioSettingsModel
   pending: boolean
   failure: PortfolioSettingsFailure | null
+  /** Who holds the link, when the save was refused because the other member does. */
+  linkHolder?: string | null
+  /** The accounts this member can see, for the link picker; empty while they load. */
+  accounts?: readonly LinkableAccount[]
   unknownPayload: Readonly<PortfolioSettingsWrite> | null
   reconciling: boolean
   reconciliation: PortfolioSettingsReconciliation | null
@@ -52,6 +72,8 @@ export function PortfolioSettingsScreen({
   model,
   pending,
   failure,
+  linkHolder = null,
+  accounts = [],
   unknownPayload,
   reconciling,
   reconciliation,
@@ -72,6 +94,11 @@ export function PortfolioSettingsScreen({
   const [favored, setFavored] = useState(unknownPayload?.favored ?? model.favored)
   const [allocationInputs, setAllocationInputs] = useState<Record<PortfolioTargetAssetClass, string>>(() => (
     allocationInputsFrom(unknownPayload && 'targetAllocation' in unknownPayload ? unknownPayload.targetAllocation : model.targetAllocation, locale)
+  ))
+  const [link, setLink] = useState<PortfolioAccountLinkDraft>(() => (
+    unknownPayload && unknownPayload.accountLink !== undefined
+      ? unknownPayload.accountLink ?? NOT_LINKED_DRAFT
+      : draftFromLink(model.accountLink)
   ))
   const [reviewed, setReviewed] = useState<Readonly<PortfolioSettingsWrite> | null>(null)
   const blocked = unknownPayload !== null
@@ -113,6 +140,8 @@ export function PortfolioSettingsScreen({
     ...(excluded !== model.excluded ? { excluded } : {}),
     ...(favored !== model.favored ? { favored } : {}),
     ...(!portfolioTargetAllocationsEqual(nextAllocation, model.targetAllocation) ? { targetAllocation: nextAllocation } : {}),
+    // Sent only when changed: a link this member cannot see is never touched.
+    ...(linkChanged(model.accountLink, link) ? { accountLink: linkInputFromDraft(link) } : {}),
   }
   const parsed = portfolioSettingsWriteSchema.safeParse(candidate)
   const invalidAllocation = (key: PortfolioTargetAssetClass) => {
@@ -135,8 +164,10 @@ export function PortfolioSettingsScreen({
     setExcluded(model.excluded)
     setFavored(model.favored)
     setAllocationInputs(allocationInputsFrom(model.targetAllocation, locale))
+    setLink(draftFromLink(model.accountLink))
     setReviewed(null)
   }
+  const failureMessage = failure ? portfolioSettingsFailureMessage(t, failure, linkHolder) : null
 
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: palette.background }]}>
@@ -171,7 +202,7 @@ export function PortfolioSettingsScreen({
           {blocked ? (
             <View style={styles.form}>
               <Notice message={t('portfolioSettings.unknownMessage')} title={t('portfolioSettings.unknownTitle')} tone="destructive" />
-              <ReviewChanges payload={unknownPayload} />
+              <ReviewChanges accounts={accounts} linkedAccountName={model.accountLink?.accountName} payload={unknownPayload} />
               <Text tone="muted" variant="meta">
                 {reconciling
                   ? t('portfolioSettings.reconciling')
@@ -194,8 +225,8 @@ export function PortfolioSettingsScreen({
                 <Text accessibilityRole="header" variant="heading">{t('portfolioSettings.reviewTitle')}</Text>
                 <Text tone="muted" variant="meta">{t('portfolioSettings.reviewHelper')}</Text>
               </View>
-              <ReviewChanges payload={reviewed} />
-              {failure ? <Notice message={t(`portfolioSettings.failures.${failure}`)} tone="destructive" /> : null}
+              <ReviewChanges accounts={accounts} linkedAccountName={model.accountLink?.accountName} payload={reviewed} />
+              {failureMessage ? <Notice message={failureMessage} tone="destructive" /> : null}
               <View style={styles.actions}>
                 <Button disabled={pending} label={t('portfolioSettings.cancelReview')} onPress={cancelReview} variant="secondary" />
                 <Button disabled={pending} label={t('portfolioSettings.edit')} onPress={editReview} variant="secondary" />
@@ -210,6 +241,8 @@ export function PortfolioSettingsScreen({
                 <FormSwitchRow key="excluded" disabled={pending} hint={t('portfolioSettings.excludedHelper')} label={t('portfolioSettings.excluded')} onValueChange={setExcluded} value={excluded} />
                 <FormSwitchRow key="favored" disabled={pending} hint={t('portfolioSettings.favoredHelper')} label={t('portfolioSettings.favored')} onValueChange={setFavored} value={favored} />
               </FormGroup>
+
+              <PortfolioAccountLinkFields accounts={accounts} disabled={pending} linkedAccountName={model.accountLink?.accountName} onChange={setLink} testID="portfolio-settings-account-link" value={link} />
 
               <View style={styles.section}>
                 <View style={styles.head}>
@@ -240,7 +273,7 @@ export function PortfolioSettingsScreen({
                 <Text tone="muted" variant="meta">{t('portfolioSettings.allocation.total', { total: allocationTotal })}</Text>
               </View>
 
-              {failure ? <Notice message={t(`portfolioSettings.failures.${failure}`)} tone="destructive" /> : null}
+              {failureMessage ? <Notice message={failureMessage} tone="destructive" /> : null}
             </View>
           )}
         </View>
@@ -249,7 +282,7 @@ export function PortfolioSettingsScreen({
   )
 }
 
-function ReviewChanges({ payload }: { payload: Readonly<PortfolioSettingsWrite> }) {
+function ReviewChanges({ payload, accounts, linkedAccountName }: { payload: Readonly<PortfolioSettingsWrite>; accounts: readonly LinkableAccount[]; linkedAccountName?: string | null }) {
   const { t } = useTranslation()
   return (
     <PortfolioReviewList>
@@ -258,6 +291,7 @@ function ReviewChanges({ payload }: { payload: Readonly<PortfolioSettingsWrite> 
       {payload.benchmarkSymbol !== undefined ? <PortfolioReviewRow key="benchmark" label={t('portfolioSettings.benchmarkSymbol')} value={payload.benchmarkSymbol === null ? t('portfolioSettings.benchmarkCleared') : payload.benchmarkSymbol} /> : null}
       {payload.excluded !== undefined ? <PortfolioReviewRow key="excluded" label={t('portfolioSettings.excluded')} value={t(payload.excluded ? 'portfolioSettings.on' : 'portfolioSettings.off')} /> : null}
       {payload.favored !== undefined ? <PortfolioReviewRow key="favored" label={t('portfolioSettings.favored')} value={t(payload.favored ? 'portfolioSettings.on' : 'portfolioSettings.off')} /> : null}
+      {payload.accountLink !== undefined ? <PortfolioReviewRow key="account-link" label={t('portfolioAccountLink.accountLabel')} value={linkSummary(t, payload.accountLink, accounts, linkedAccountName)} /> : null}
       {payload.targetAllocation !== undefined ? (
         payload.targetAllocation === null
           ? <PortfolioReviewRow key="allocation" label={t('portfolioSettings.allocation.heading')} value={t('portfolioSettings.allocation.cleared')} />

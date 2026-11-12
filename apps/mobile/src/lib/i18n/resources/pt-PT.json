@@ -3025,6 +3025,37 @@
       "general": "Não foi possível guardar"
     }
   },
+  "portfolioAccountLink": {
+    "accountLabel": "Conta onde está este portefólio",
+    "notLinked": "Sem ligação",
+    "selectAccount": "Escolhe uma conta",
+    "question": "O saldo desta conta inclui os teus investimentos?",
+    "includesHoldings": "Sim, inclui-os",
+    "includesHoldingsHint": "O património conta a conta e mostra este portefólio sem o somar outra vez.",
+    "cashOnly": "Não, só o dinheiro",
+    "cashOnlyHint": "O património conta o dinheiro da conta e também este portefólio.",
+    "managedByPartner": "Este portefólio está ligado a uma conta que só o outro membro do teu agregado vê, por isso só esse membro pode alterar a ligação.",
+    "alreadyLinkedBy": "Já ligado por {{name}}",
+    "suggestionTitle": "É o mesmo dinheiro?",
+    "suggestionBody": "Tens uma conta de investimento e um portefólio sem conta ligada. Se a conta já inclui o portefólio, liga-os para que o património o conte uma só vez.",
+    "suggestionLink": "Ligar um portefólio",
+    "dismiss": "Dispensar",
+    "dialogTitle": "Ligar um portefólio à sua conta",
+    "portfolioLabel": "Portefólio",
+    "selectPortfolio": "Escolhe um portefólio",
+    "save": "Guardar",
+    "saving": "A guardar",
+    "saved": "Ligação guardada",
+    "failures": {
+      "demo": "As ligações não estão disponíveis no modo de demonstração",
+      "access": "O teu acesso mudou",
+      "mfa": "É necessária verificação adicional",
+      "not-found": "Este portefólio ou conta já não está disponível",
+      "unknown": "Não foi possível confirmar que a ligação foi guardada. Tenta novamente",
+      "request": "Esta ligação não foi aceite",
+      "general": "Não foi possível guardar a ligação"
+    }
+  },
   "portfolioActivity": {
     "back": "Voltar",
     "aggregateTitle": "Transações",

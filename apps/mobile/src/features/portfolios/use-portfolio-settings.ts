@@ -4,16 +4,24 @@ import { useEffect } from 'react'
 import { useProductRuntime } from '@/components/providers/product-runtime-provider'
 import { ApiError, isPostDispatchCancellation } from '@/lib/api/errors'
 
+import { netWorthKey } from '@/features/net-worth/query-keys'
+
 import { createPortfolioSettingsEndpoint, portfolioSettingsWriteSchema, type PortfolioSettingsWrite } from './portfolios-contract'
 import { aggregatePortfolioDashboardPrefix, portfolioKey, portfolioSettingsUnknownKey, portfoliosKey } from './query-keys'
 
-export type PortfolioSettingsFailure = 'validation' | 'demo' | 'access' | 'mfa' | 'not-found' | 'cancelled' | 'unknown' | 'request' | 'general'
+export type PortfolioSettingsFailure = 'validation' | 'demo' | 'access' | 'mfa' | 'not-found' | 'cancelled' | 'unknown' | 'request' | 'general' | 'link-held' | 'link-managed'
 export type PortfolioSettingsUnknown = Readonly<{ payload: Readonly<PortfolioSettingsWrite> }>
 const activeSettings = new WeakMap<object, Set<string>>()
 const locksFor = (client: object) => { let value = activeSettings.get(client); if (!value) { value = new Set(); activeSettings.set(client, value) }; return value }
 
-export function classifyPortfolioSettingsFailure(error: unknown): PortfolioSettingsFailure {
+/**
+ * `payload` is what was sent: a 403 to a save that changed the link is the other member's hold on
+ * it (an older API sends it without their name), not lost access.
+ */
+export function classifyPortfolioSettingsFailure(error: unknown, payload?: Readonly<PortfolioSettingsWrite>): PortfolioSettingsFailure {
   if (!(error instanceof ApiError)) return error instanceof Error && error.name === 'ZodError' ? 'validation' : 'general'
+  if (error.code === 'portfolio-link-held') return error.linkedBy ? 'link-held' : 'link-managed'
+  if (payload?.accountLink !== undefined && error.code === 'http' && error.status === 403) return 'link-managed'
   if (error.code === 'demo-forbidden') return 'demo'
   if (error.code === 'mfa-required') return 'mfa'
   if (error.code === 'auth-session' || (error.code === 'http' && (error.status === 401 || error.status === 403))) return 'access'
@@ -52,12 +60,14 @@ export function usePortfolioSettings(portfolioId: number) {
               queryClient.invalidateQueries({ queryKey: portfoliosKey(runtime.epochId), exact: true }),
               queryClient.invalidateQueries({ queryKey: portfolioKey(runtime.epochId, portfolioId), exact: true }),
               queryClient.invalidateQueries({ queryKey: aggregatePortfolioDashboardPrefix(runtime.epochId) }),
+              // A link changes what net worth counts, today and in its history.
+              ...(payload.accountLink !== undefined ? [queryClient.invalidateQueries({ queryKey: netWorthKey(runtime.epochId) })] : []),
             ]) },
           })
           if (response.portfolio.portfolioKey !== portfolioId) throw new ApiError('invalid-response')
           return response
         } catch (error) {
-          if (classifyPortfolioSettingsFailure(error) === 'unknown') queryClient.setQueryData(unknownKey, Object.freeze({ payload }))
+          if (classifyPortfolioSettingsFailure(error, payload) === 'unknown') queryClient.setQueryData(unknownKey, Object.freeze({ payload }))
           throw error
         }
       } finally { locks.delete(lockKey) }
@@ -72,6 +82,8 @@ export function usePortfolioSettings(portfolioId: number) {
     unknownOutcome: unknown.data ?? null,
     acknowledgeReconciliation: (outcome: 'applied' | 'not-applied') => {
       if (outcome !== 'applied' && outcome !== 'not-applied') throw new Error('Only a definitive reconciliation can be acknowledged.')
+      // A link that did apply changed net worth without the write's commit having run.
+      if (outcome === 'applied' && unknown.data?.payload.accountLink !== undefined) void queryClient.invalidateQueries({ queryKey: netWorthKey(runtime.epochId) })
       queryClient.setQueryData(unknownKey, null)
     },
   }

@@ -3025,6 +3025,37 @@
       "general": "No se pudieron guardar los ajustes"
     }
   },
+  "portfolioAccountLink": {
+    "accountLabel": "Cuenta que contiene esta cartera",
+    "notLinked": "Sin vincular",
+    "selectAccount": "Elige una cuenta",
+    "question": "¿El saldo de esta cuenta incluye tus inversiones?",
+    "includesHoldings": "Sí, las incluye",
+    "includesHoldingsHint": "El patrimonio neto cuenta la cuenta y muestra esta cartera sin sumarla otra vez.",
+    "cashOnly": "No, solo el efectivo",
+    "cashOnlyHint": "El patrimonio neto cuenta el efectivo de la cuenta y también esta cartera.",
+    "managedByPartner": "Esta cartera está vinculada a una cuenta que solo ve el otro miembro del hogar, así que solo esa persona puede cambiar el vínculo.",
+    "alreadyLinkedBy": "Ya vinculada por {{name}}",
+    "suggestionTitle": "¿Es el mismo dinero?",
+    "suggestionBody": "Tienes una cuenta de inversión y una cartera sin cuenta vinculada. Si la cuenta ya contiene la cartera, vincúlalas para que el patrimonio neto la cuente una sola vez.",
+    "suggestionLink": "Vincular una cartera",
+    "dismiss": "Descartar",
+    "dialogTitle": "Vincular una cartera a su cuenta",
+    "portfolioLabel": "Cartera",
+    "selectPortfolio": "Elige una cartera",
+    "save": "Guardar",
+    "saving": "Guardando",
+    "saved": "Vínculo guardado",
+    "failures": {
+      "demo": "Los vínculos no están disponibles en modo de demostración",
+      "access": "Tu acceso ha cambiado",
+      "mfa": "Se requiere verificación adicional",
+      "not-found": "Esta cartera o cuenta ya no está disponible",
+      "unknown": "No se pudo confirmar que el vínculo se guardó. Inténtalo de nuevo",
+      "request": "No se aceptó este vínculo",
+      "general": "No se pudo guardar el vínculo"
+    }
+  },
   "portfolioActivity": {
     "back": "Volver",
     "aggregateTitle": "Transacciones",

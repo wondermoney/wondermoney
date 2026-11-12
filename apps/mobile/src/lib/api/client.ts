@@ -136,6 +136,10 @@ const mapHttpFailure = (response: HttpResponse): never => {
     if (envelope?.code === 'demo_read_only') throw new ApiError('demo-forbidden', 403)
     if (envelope?.code === 'email_verification_required') throw new ApiError('email-verification-required', 403)
     if (envelope?.code === 'ai_allowance_exhausted') throw new ApiError('ai-allowance-exhausted', 403)
+    if (envelope?.code === 'portfolio_link_held_by_member') {
+      const linkedBy = envelope.details?.linkedBy
+      throw new ApiError('portfolio-link-held', 403, typeof linkedBy === 'string' && linkedBy.trim().length > 0 ? { linkedBy: linkedBy.trim() } : undefined)
+    }
   }
   throw new ApiError('http', response.status)
 }

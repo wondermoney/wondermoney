@@ -24,6 +24,15 @@ describe('portfolio settings reconciliation', () => {
     expect(reconcilePortfolioSettings(7, { targetAllocation: { 'Equities': 100 } }, detail({ targetAllocation: null }))).toBe('not-applied')
   })
 
+  it('confirms a link or an unlink against the link the viewer can see', () => {
+    const link = { accountKey: 3, accountName: 'Broker', mode: 'cash_only' }
+    expect(reconcilePortfolioSettings(7, { accountLink: { accountId: 3, mode: 'cash_only' } }, detail({ accountLink: link }))).toBe('applied')
+    expect(reconcilePortfolioSettings(7, { accountLink: null }, detail({ accountLink: null }))).toBe('applied')
+    expect(reconcilePortfolioSettings(7, { accountLink: { accountId: 3, mode: 'includes_holdings' } }, detail({ accountLink: link }))).toBe('not-applied')
+    expect(reconcilePortfolioSettings(7, { accountLink: null }, detail({ accountLink: link }))).toBe('not-applied')
+    expect(reconcilePortfolioSettings(7, { name: 'Normalized', accountLink: null }, detail({ accountLink: link }))).toBe('uncertain')
+  })
+
   it('keeps mixed, malformed, and mismatched-id reads uncertain', () => {
     expect(reconcilePortfolioSettings(7, { name: 'Normalized', description: 'Other' }, detail())).toBe('uncertain')
     expect(reconcilePortfolioSettings(7, { name: 'Normalized' }, detail({ portfolioKey: 8 }))).toBe('uncertain')

@@ -1,3 +1,4 @@
+import { linkMatches } from './portfolio-account-link'
 import { portfolioResponseSchema, portfolioSettingsWriteSchema, portfolioTargetAllocationsEqual, type PortfolioSettingsWrite } from './portfolios-contract'
 
 export type PortfolioSettingsReconciliation = 'applied' | 'not-applied' | 'uncertain'
@@ -27,6 +28,10 @@ export function reconcilePortfolioSettings(
   if (payload.data.favored !== undefined) matches.push(response.data.portfolio.favored === payload.data.favored)
   if (payload.data.targetAllocation !== undefined) {
     matches.push(portfolioTargetAllocationsEqual(payload.data.targetAllocation, response.data.portfolio.targetAllocation))
+  }
+  if (payload.data.accountLink !== undefined) {
+    // Reads as no link when the account is private to the other member: the link is not this viewer's to confirm.
+    matches.push(linkMatches(response.data.portfolio.accountLink, payload.data.accountLink))
   }
   if (matches.length === 0) return 'uncertain'
   if (matches.every(Boolean)) return 'applied'

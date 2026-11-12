@@ -4,12 +4,14 @@ import { useTranslation } from 'react-i18next'
 import { useColorScheme } from 'react-native'
 
 import { useProductRuntime } from '@/components/providers/product-runtime-provider'
+import { useAccounts } from '@/features/accounts/use-accounts'
 import { themeTokens } from '@/theme/tokens'
 
 import { PortfolioFailure, PortfolioLoading } from './portfolio-screen-parts'
 import { reconcilePortfolioSettings, type PortfolioSettingsReconciliation } from './portfolio-settings-reconciliation'
 import { PortfolioSettingsScreen } from './portfolio-settings-screen'
 import { parsePortfolioId, type PortfolioResponseDto, type PortfolioSettingsWrite } from './portfolios-contract'
+import { classifyPortfolioLinkFailure } from './use-portfolio-account-link'
 import { classifyPortfolioSettingsFailure, usePortfolioSettings, type PortfolioSettingsFailure } from './use-portfolio-settings'
 import { usePortfolioMetadata } from './use-portfolio-metadata'
 
@@ -18,6 +20,8 @@ export function PortfolioSettingsRoute() {
   const portfolioId = parsePortfolioId(params.portfolioId)
   const detail = usePortfolioMetadata(portfolioId)
   const mutation = usePortfolioSettings(portfolioId ?? 1)
+  // The accounts this member can see, for the link picker. The form opens without them.
+  const accounts = useAccounts()
   const router = useRouter()
   const { signOut } = useProductRuntime()
   const { t } = useTranslation()
@@ -26,6 +30,7 @@ export function PortfolioSettingsRoute() {
   const autoReconciledPayload = useRef<Readonly<PortfolioSettingsWrite> | null>(null)
   const [fallbackPortfolio, setFallbackPortfolio] = useState<PortfolioResponseDto['portfolio'] | null>(() => detail.data?.portfolio.portfolioKey === portfolioId ? detail.data.portfolio : null)
   const [failure, setFailure] = useState<PortfolioSettingsFailure | null>(null)
+  const [linkHolder, setLinkHolder] = useState<string | null>(null)
   const [reconciling, setReconciling] = useState(false)
   const [reconciliation, setReconciliation] = useState<PortfolioSettingsReconciliation | null>(null)
 
@@ -83,10 +88,12 @@ export function PortfolioSettingsRoute() {
 
   return (
     <PortfolioSettingsScreen
-      key={`${portfolio.name}:${portfolio.description ?? ''}:${portfolio.benchmarkSymbol ?? ''}:${portfolio.excluded ?? false}:${portfolio.favored ?? false}:${JSON.stringify(portfolio.targetAllocation ?? null)}:${mutation.unknownOutcome ? 'unknown' : 'authoritative'}`}
-      model={{ id: portfolio.portfolioKey, name: portfolio.name, description: portfolio.description ?? null, currency: portfolio.currencyKey.code, benchmarkSymbol: portfolio.benchmarkSymbol ?? null, excluded: portfolio.excluded ?? false, favored: portfolio.favored ?? false, targetAllocation: portfolio.targetAllocation ?? null }}
+      key={`${portfolio.name}:${portfolio.description ?? ''}:${portfolio.benchmarkSymbol ?? ''}:${portfolio.excluded ?? false}:${portfolio.favored ?? false}:${JSON.stringify(portfolio.targetAllocation ?? null)}:${JSON.stringify(portfolio.accountLink ?? null)}:${mutation.unknownOutcome ? 'unknown' : 'authoritative'}`}
+      model={{ id: portfolio.portfolioKey, name: portfolio.name, description: portfolio.description ?? null, currency: portfolio.currencyKey.code, benchmarkSymbol: portfolio.benchmarkSymbol ?? null, excluded: portfolio.excluded ?? false, favored: portfolio.favored ?? false, targetAllocation: portfolio.targetAllocation ?? null, accountLink: portfolio.accountLink ?? null }}
+      accounts={accounts.data?.accounts ?? []}
       pending={mutation.isPending}
       failure={failure}
+      linkHolder={linkHolder}
       unknownPayload={mutation.unknownOutcome?.payload ?? null}
       reconciling={reconciling}
       reconciliation={reconciliation}
@@ -102,6 +109,7 @@ export function PortfolioSettingsRoute() {
       onSave={async (value: PortfolioSettingsWrite) => {
         setFallbackPortfolio(portfolio)
         setFailure(null)
+        setLinkHolder(null)
         setReconciliation(null)
         try {
           const response = await mutation.mutateAsync(value)
@@ -109,7 +117,8 @@ export function PortfolioSettingsRoute() {
           unlockNavigation()
           router.replace({ pathname: '/portfolio/[portfolioId]', params: { portfolioId: String(portfolio.portfolioKey) } } as Href)
         } catch (error) {
-          setFailure(classifyPortfolioSettingsFailure(error))
+          setFailure(classifyPortfolioSettingsFailure(error, value))
+          setLinkHolder(classifyPortfolioLinkFailure(error).holder)
         }
       }}
     />

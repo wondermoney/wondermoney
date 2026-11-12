@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Pressable, StyleSheet, View } from 'react-native'
 
@@ -286,7 +286,7 @@ function BudgetMonthItem({ row, first, locale, onNavigate }: { row: BudgetMonthR
 
 // ── Balance sheet (web BalanceSheetSection) ───────────────────────────────
 
-export function BalanceSheetSection({ sheet, currency, locale, accountMarks, portfolioMarks }: {
+export function BalanceSheetSection({ sheet, currency, locale, accountMarks, portfolioMarks, notice }: {
   sheet: BalanceSheet
   currency: string
   locale: string
@@ -294,6 +294,8 @@ export function BalanceSheetSection({ sheet, currency, locale, accountMarks, por
   accountMarks?: ReadonlyMap<number, EntityMarkSource>
   /** Each portfolio's mark (its broker's letters), by portfolio key. */
   portfolioMarks?: ReadonlyMap<number, EntityMarkSource>
+  /** Shown above the sheet, as web shows "Is this the same money?" there. */
+  notice?: ReactNode
 }) {
   const { t } = useTranslation()
   if (sheet.own.length === 0 && sheet.owe.length === 0) return null
@@ -303,6 +305,7 @@ export function BalanceSheetSection({ sheet, currency, locale, accountMarks, por
     .flatMap((group) => group.rows.flatMap((row) => (row.id === undefined ? [] : [[row.id, row.label] as const]))))
   return (
     <Section title={t('home.sheet.title')} variant="open" testID="home-balance-sheet">
+      {notice ? <View style={styles.sheetNotice}>{notice}</View> : null}
       <View>
         <SheetSide accountMarks={accountMarks} accountNames={accountNames} portfolioMarks={portfolioMarks} currency={currency} groups={sheet.own} locale={locale} title={t('home.sheet.own')} total={sheet.ownTotal} />
         <View style={styles.sheetSplit}>
@@ -823,6 +826,7 @@ const styles = StyleSheet.create({
 
   // The owed side starts after space, not a rule.
   sheetSplit: { marginTop: themeTokens.spacing[8] },
+  sheetNotice: { marginBottom: themeTokens.spacing[6] },
   sideTitle: { fontWeight: '600', marginBottom: themeTokens.spacing[2] },
   sideEmpty: { paddingVertical: themeTokens.spacing[2] },
   groupHeading: { marginTop: themeTokens.spacing[4], marginBottom: themeTokens.spacing[1] },
