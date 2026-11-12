@@ -11,6 +11,7 @@ import {
   createPortfolioImportSessionRequestSchema,
   createPortfolioRequestSchema,
   createPortfolioTransactionRequestSchema,
+  dashboardOptionsFrom,
   deletePortfolioRequestSchema,
   deletePortfolioTransactionRequestSchema,
   getAggregateAllocationRequestSchema,
@@ -536,9 +537,7 @@ export async function getAggregateDashboard(req: Request, res: Response) {
   const {
     query: { include, period },
   } = await zParse(getAggregateDashboardRequestSchema, req);
-  const dashboard = await portfolioDashboardService.getAggregateDashboard(user, period || 'YTD', tenant.tenantKey, {
-    includeFeeConversion: include === 'feeConversion',
-  });
+  const dashboard = await portfolioDashboardService.getAggregateDashboard(user, period || 'YTD', tenant.tenantKey, dashboardOptionsFrom(include));
   return res.json(dashboard);
 }
 
@@ -644,9 +643,7 @@ export async function getPortfolioDashboard(req: Request, res: Response) {
     params: { portfolioId },
     query: { include, period },
   } = await zParse(getPortfolioDashboardRequestSchema, req);
-  const dashboard = await portfolioDashboardService.getPortfolioDashboard(user, portfolioId, period || 'YTD', tenant.tenantKey, {
-    includeFeeConversion: include === 'feeConversion',
-  });
+  const dashboard = await portfolioDashboardService.getPortfolioDashboard(user, portfolioId, period || 'YTD', tenant.tenantKey, dashboardOptionsFrom(include));
   return res.json(dashboard);
 }
 

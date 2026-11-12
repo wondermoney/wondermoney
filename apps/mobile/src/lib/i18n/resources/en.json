@@ -4066,7 +4066,10 @@
       "emptyTitle": "No portfolios to show",
       "emptyMessage": "Add a portfolio to see its performance here",
       "portfolio": "Portfolio",
-      "total": "Total"
+      "total": "Total",
+      "notCombined": "Measured per portfolio",
+      "daysWithoutSnapshot_one": "{{count}} day without a snapshot",
+      "daysWithoutSnapshot_other": "{{count}} days without a snapshot"
     },
     "netWorthHistory": {
       "title": "Net worth over time",
@@ -4264,6 +4267,13 @@
     "realizedGains": "Realized Gains",
     "needsHistory": "Needs more history",
     "periodReturnUnavailable": "We need a period baseline before this can be shown.",
+    "timeWeighted": "Time-weighted",
+    "timeWeightedHelp": "How the investments did, whatever you put in or took out.",
+    "moneyWeighted": "Money-weighted",
+    "moneyWeightedHelp": "How your money did, counting when you added or withdrew it.",
+    "perYear": "per year",
+    "missingSnapshots_one": "{{count}} day without a snapshot; its value was carried over.",
+    "missingSnapshots_other": "{{count}} days without a snapshot; their value was carried over.",
     "noHoldings": "No holdings",
     "emptyTitle": "No transactions yet",
     "emptyDescription": "Add your first transaction to start tracking performance, allocation, and gains.",

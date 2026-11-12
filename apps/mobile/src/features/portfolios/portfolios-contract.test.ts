@@ -1,5 +1,8 @@
 import {
   aggregateDashboardResponseSchema,
+  aggregatePortfolioDashboardEndpoint,
+  createAggregatePortfolioDashboardEndpoint,
+  individualDashboardResponseSchema,
   createCreatePortfolioTransactionEndpoint,
   createDeletePortfolioTransactionEndpoint,
   createEditPortfolioTransactionEndpoint,
@@ -55,7 +58,7 @@ const invalidHolding = {
 describe('portfolio endpoint contracts', () => {
   it('uses the five exact read paths and fixed YTD query', () => {
     expect(createPortfolioEndpoint(7).path).toBe('/v1/portfolio/7')
-    expect(createPortfolioDashboardEndpoint(7).path).toBe('/v1/portfolio/7/dashboard?period=YTD&include=feeConversion')
+    expect(createPortfolioDashboardEndpoint(7).path).toBe('/v1/portfolio/7/dashboard?period=YTD&include=feeConversion,periodReturns')
     expect(createPortfolioHoldingsEndpoint(7).path).toBe('/v1/portfolio/7/holdings')
     expect(createPortfolioDividendIncomeEndpoint(7).path).toBe('/v1/portfolio/7/dividend-income')
     expect(() => createPortfolioDividendIncomeEndpoint(0)).toThrow()
@@ -166,6 +169,29 @@ describe('portfolio endpoint contracts', () => {
     // The label echoes the requested period ('1M' … 'ALL'); only a missing one is rejected.
     expect(aggregateDashboardResponseSchema.safeParse({ portfolios: [], summary: { ...summary, periodLabel: 'ALL' } }).success).toBe(true)
     expect(aggregateDashboardResponseSchema.safeParse({ portfolios: [], summary: { ...summary, periodLabel: '' } }).success).toBe(false)
+  })
+
+  it('asks both dashboards for the opt-in fee and period-return fields, for whichever period is shown', () => {
+    for (const path of [aggregatePortfolioDashboardEndpoint.path, createAggregatePortfolioDashboardEndpoint('1Y').path, createPortfolioDashboardEndpoint(7).path]) {
+      const include = new URLSearchParams(path.split('?')[1]).get('include')?.split(',')
+      expect(include).toEqual(expect.arrayContaining(['feeConversion', 'periodReturns']))
+    }
+    expect(new URLSearchParams(createAggregatePortfolioDashboardEndpoint('1Y').path.split('?')[1]).get('period')).toBe('1Y')
+  })
+
+  it('reads the period\'s time- and money-weighted returns, and still parses a summary without them', () => {
+    const summary = { assetCount: 1, currency: 'EUR', lastUpdated: '2026-07-19T10:00:00.000Z', periodLabel: '1Y', periodReturn: 12.4, realizedGains: 0, totalGainLoss: 4, totalGainLossPercent: 2, totalValue: 204, unrealizedGains: 4 }
+    const periodReturns = { timeWeighted: 10.25, moneyWeighted: null, moneyWeightedAnnualized: true, missingSnapshotDates: ['2026-03-02'] }
+    const quickStats = { bestPerformer: null, biggestPosition: null, holdingsCount: 1, worstPerformer: null }
+    expect(aggregateDashboardResponseSchema.parse({ portfolios: [], summary: { ...summary, portfolioCount: 1, periodReturns } }).summary.periodReturns).toEqual(periodReturns)
+    expect(individualDashboardResponseSchema.parse({ quickStats, summary: { ...summary, periodReturns: { ...periodReturns, extra: 1 } } }).summary.periodReturns).toEqual(periodReturns)
+    // Older APIs send no block at all.
+    expect(aggregateDashboardResponseSchema.parse({ portfolios: [], summary: { ...summary, portfolioCount: 1 } }).summary.periodReturns).toBeUndefined()
+    expect(individualDashboardResponseSchema.parse({ quickStats, summary }).summary.periodReturns).toBeUndefined()
+    // A malformed block drops the figures, never the whole dashboard.
+    const malformed = individualDashboardResponseSchema.safeParse({ quickStats, summary: { ...summary, periodReturns: { timeWeighted: 'high' } } })
+    expect(malformed.success).toBe(true)
+    expect(malformed.data?.summary.periodReturns).toBeUndefined()
   })
 
   it('normalizes normal transaction numbers and decimal strings without inventing missing values', () => {

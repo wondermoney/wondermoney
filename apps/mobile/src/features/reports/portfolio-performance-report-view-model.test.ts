@@ -59,6 +59,17 @@ describe('portfolio-performance report view model', () => {
       generatedAt: '2026-08-11T00:00:00.000Z',
       aggregateChange: 0,
       totals: { startValue: 0, netContributions: 0, change: 0, changePercent: null, dividends: 0, endValue: 0 },
+      hasPeriodReturns: false,
     })
+  })
+
+  it('shows the weighted returns only when the API sends them, keeping each row\'s own figures', () => {
+    const withReturns = mapPortfolioPerformanceReport({
+      data: [row({ portfolioKey: 'a', timeWeightedReturn: 4.5, moneyWeightedReturn: null, moneyWeightedReturnAnnualized: false, missingSnapshotDates: [] })],
+      generatedAt: '2026-08-11T00:00:00.000Z',
+    })
+    expect(withReturns.hasPeriodReturns).toBe(true)
+    expect(withReturns.rows[0]).toMatchObject({ timeWeightedReturn: 4.5, moneyWeightedReturn: null })
+    expect(mapPortfolioPerformanceReport({ data: [row()], generatedAt: '2026-08-11T00:00:00.000Z' }).hasPeriodReturns).toBe(false)
   })
 })

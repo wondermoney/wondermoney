@@ -61,4 +61,20 @@ describe('portfolio view models', () => {
     )
     expect(result.holdings.map((holding) => holding.realizedGain)).toEqual([42.5, 0, null])
   })
+
+  it('carries the period\'s time- and money-weighted returns on both screens, and none from an older API', () => {
+    const list = { portfolios: [{ appuserCurrencyCode: 'EUR', balance: 220, currencyKey: { code: 'EUR' }, name: 'Long-term', portfolioKey: 7 }] }
+    const quickStats = { bestPerformer: null, biggestPosition: null, holdingsCount: 1, worstPerformer: null }
+    const metadata = { portfolio: { currencyKey: { code: 'EUR' }, name: 'Long-term', portfolioKey: 7 } }
+    const periodReturns = { timeWeighted: 8.5, moneyWeighted: -1.25, moneyWeightedAnnualized: true, missingSnapshotDates: ['2026-03-01', '2026-03-02', '2026-03-02'] }
+    const overview = mapPortfolioOverview(list, { portfolios: [], summary: { ...summary, portfolioCount: 1, periodReturns } })
+    const detail = mapPortfolioDetail(metadata, { quickStats, summary: { ...summary, periodReturns } }, { holdings: [] })
+    for (const result of [overview, detail]) {
+      expect(result.periodReturns).toEqual({ timeWeighted: 8.5, moneyWeighted: -1.25, moneyWeightedAnnualized: true, missingSnapshotDays: 2 })
+    }
+    const unmeasured = mapPortfolioDetail(metadata, { quickStats, summary: { ...summary, periodReturns: { timeWeighted: null, moneyWeighted: null, moneyWeightedAnnualized: false, missingSnapshotDates: [] } } }, { holdings: [] })
+    expect(unmeasured.periodReturns).toEqual({ timeWeighted: null, moneyWeighted: null, moneyWeightedAnnualized: false, missingSnapshotDays: 0 })
+    expect(mapPortfolioOverview(list, { portfolios: [], summary: { ...summary, portfolioCount: 1 } }).periodReturns).toBeUndefined()
+    expect(mapPortfolioDetail(metadata, { quickStats, summary }, { holdings: [] }).periodReturns).toBeUndefined()
+  })
 })

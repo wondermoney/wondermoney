@@ -133,6 +133,14 @@
         "total": "Total",
         "unknownValue": "Sin valor registrado",
         "noExchangeRate": "Aún no hay tipo de cambio",
+        "timeWeighted": "Ponderada por tiempo",
+        "moneyWeighted": "Ponderada por dinero",
+        "timeWeightedDescription": "Cómo les fue a las inversiones, al margen de lo que aportaste o retiraste.",
+        "moneyWeightedDescription": "Cómo le fue a tu dinero, teniendo en cuenta cuándo aportaste o retiraste. Una tasa al año en periodos de un año o más.",
+        "perYear": "al año",
+        "returnUnavailable": "No hay historial suficiente para medirla",
+        "notCombined": "No se combina entre carteras",
+        "missingSnapshots": "{count, plural, one {# día sin instantánea, valor mantenido} other {# días sin instantánea, valor mantenido}}",
         "noData": {
           "title": "Sin carteras para mostrar",
           "description": "Añade una cartera para ver su rendimiento aquí."

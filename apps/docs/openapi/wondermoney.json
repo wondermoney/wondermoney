@@ -14355,11 +14355,11 @@
           {
             "schema": {
               "type": "string",
-              "enum": [
-                "feeConversion"
-              ]
+              "pattern": "^(feeConversion|periodReturns)(,(feeConversion|periodReturns))*$",
+              "description": "Opt-in summary fields, comma-separated: `feeConversion`, `periodReturns`."
             },
             "required": false,
+            "description": "Opt-in summary fields, comma-separated: `feeConversion`, `periodReturns`.",
             "name": "include",
             "in": "query"
           },
@@ -15714,11 +15714,11 @@
           {
             "schema": {
               "type": "string",
-              "enum": [
-                "feeConversion"
-              ]
+              "pattern": "^(feeConversion|periodReturns)(,(feeConversion|periodReturns))*$",
+              "description": "Opt-in summary fields, comma-separated: `feeConversion`, `periodReturns`."
             },
             "required": false,
+            "description": "Opt-in summary fields, comma-separated: `feeConversion`, `periodReturns`.",
             "name": "include",
             "in": "query"
           },

@@ -28,6 +28,20 @@ export const portfoliosResponseSchema = z.object({
   portfolios: z.array(portfolioSummarySchema),
 })
 
+/**
+ * Time- and money-weighted returns over the requested period, in percentage points (10 = +10%).
+ * Sent only when the request asks with include=periodReturns. A null figure cannot be measured;
+ * `moneyWeighted` is yearly when `moneyWeightedAnnualized` (periods of a year or more), otherwise the
+ * rate over the period itself. `missingSnapshotDates` are days whose value was carried over from
+ * the day before.
+ */
+const periodReturnsSchema = z.object({
+  missingSnapshotDates: z.array(z.string()),
+  moneyWeighted: finiteNullable,
+  moneyWeightedAnnualized: z.boolean(),
+  timeWeighted: finiteNullable,
+})
+
 const dashboardSummarySchema = z.object({
   assetCount: z.number().int().nonnegative(),
   currency: currencyCodeSchema,
@@ -38,6 +52,8 @@ const dashboardSummarySchema = z.object({
   // The period the figures cover ('YTD', '1M', … 'ALL'); the API echoes the requested period.
   periodLabel: z.string().min(1),
   periodReturn: finiteNullable,
+  // Optional (older APIs do not send it); a malformed block hides the figures, not the dashboard.
+  periodReturns: periodReturnsSchema.optional().catch(undefined),
   portfolioCount: z.number().int().nonnegative().optional(),
   realizedGains: finite,
   totalGainLoss: finite,
@@ -352,7 +368,7 @@ export const createPortfolioWriteEndpoint = writeEndpoint({
 })
 // The API sends opt-in dashboard fields only when asked. Older builds shipped strict schemas
 // that rejected unknown fields, so this keeps them parsing the summary.
-const DASHBOARD_INCLUDE = 'include=feeConversion'
+const DASHBOARD_INCLUDE = 'include=feeConversion,periodReturns'
 export const createAggregatePortfolioDashboardEndpoint = (period: PortfolioPerformancePeriod = 'YTD') => readEndpoint({
   method: 'GET' as const, path: `/v1/portfolio/dashboard?period=${period}&${DASHBOARD_INCLUDE}`, schema: aggregateDashboardResponseSchema,
 })

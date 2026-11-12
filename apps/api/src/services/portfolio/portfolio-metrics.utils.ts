@@ -70,11 +70,6 @@ export function calculateMoneyWeightedAnnualYield(
   return rate === null ? null : rate * 100;
 }
 
-/**
- * The annual rate r at which the flows' present value is zero: sum(amount / (1 + r)^years) = 0.
- * Newton's method from 10%, as spreadsheets do, falling back to bisection when it leaves (-100%, inf)
- * or stalls. Null without both an outflow and an inflow, since then no rate solves it.
- */
 export function calculateTotalReturn(currentValue: number, costBasis: number): number {
   if (costBasis === 0) {
     return 0;
@@ -82,7 +77,12 @@ export function calculateTotalReturn(currentValue: number, costBasis: number): n
   return ((currentValue - costBasis) / costBasis) * 100;
 }
 
-function solveXirr(flows: { amount: number; years: number }[]): null | number {
+/**
+ * The annual rate r at which the flows' present value is zero: sum(amount / (1 + r)^years) = 0.
+ * Newton's method from 10%, as spreadsheets do, falling back to bisection when it leaves (-100%, inf)
+ * or stalls. Null without both an outflow and an inflow, since then no rate solves it.
+ */
+export function solveXirr(flows: { amount: number; years: number }[]): null | number {
   if (!flows.some((flow) => flow.amount < 0) || !flows.some((flow) => flow.amount > 0)) return null;
 
   const presentValue = (rate: number) => flows.reduce((sum, flow) => sum + flow.amount / Math.pow(1 + rate, flow.years), 0);

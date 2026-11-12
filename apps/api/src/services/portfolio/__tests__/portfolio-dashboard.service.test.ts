@@ -1,5 +1,5 @@
-import { startOfYear, subDays, subMonths } from 'date-fns';
-import { describe, expect, it, vi } from 'vitest';
+import { format, startOfYear, subDays, subMonths } from 'date-fns';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
 const portfolioHoldingsServiceMock = vi.hoisted(() => ({
   getInvestmentCashFlows: vi.fn().mockResolvedValue([]),
@@ -726,6 +726,66 @@ describe('portfolio dashboard service', () => {
         { date: '2024-01-11', value: 10 },
       ]);
       expect(result.benchmarkStatus).toBe('ready');
+    });
+  });
+
+  describe('period returns on request', () => {
+    const now = new Date();
+    const dayOffset = (days: number) => format(subDays(now, days), 'yyyy-MM-dd');
+    const startDay = format(subDays(getPeriodStartDate('1Y'), 1), 'yyyy-MM-dd');
+    const startSnapshot = { appuserCurrencyKey: { code: 'EUR' }, appuserCurrencyTotalValue: 10_000, portfolioKey: { portfolioKey: 7, portfolioOwnerAppuserKey: { currencyKey: { code: 'EUR' } } }, snapshotDate: new Date(`${startDay}T00:00:00.000Z`), totalValue: 10_000 };
+    const holdingWorth = (currentValue: number) => [{ allocation: 100, currentValue, financialAssetKey: 1, financialAssetSymbol: 'VWCE', unrealizedGains: 0, unrealizedGainsPercentage: 0 }];
+
+    // €10,000 when the year opened, then €10,000 more 200 days ago, with the price unchanged until
+    // the last 100 days, when it rose 10%: the investments did +10%, the investor's money less.
+    function setupYear() {
+      setupDashboardMocks();
+      portfolioHoldingsServiceMock.getPortfolioHoldings.mockResolvedValue(holdingWorth(22_000));
+      portfolioHoldingsServiceMock.getPortfoliosHoldings.mockResolvedValue(holdingWorth(22_000));
+      portfolioHoldingsServiceMock.getInvestmentCashFlows.mockResolvedValue([
+        { amount: -10_000, currencyCode: 'EUR', date: new Date(`${dayOffset(200)}T10:00:00.000Z`), kind: 'BUY' },
+      ]);
+      const rows = [300, 200, 100, 50].map((days) => ({
+        currency_code: 'EUR',
+        portfolio_key: 7,
+        snapshot_date: dayOffset(days),
+        value: String(days > 200 ? 10_000 : days === 200 ? 20_000 : days === 100 ? 20_000 : 22_000),
+      }));
+      Object.assign(DI.em, {
+        find: vi.fn().mockResolvedValue([{ name: 'Long-term', portfolioKey: 7 }]),
+        findOne: vi.fn((_entity: unknown, where: { portfolioKey?: unknown }) => Promise.resolve(typeof where.portfolioKey === 'number' ? { name: 'Long-term', portfolioKey: 7 } : startSnapshot)),
+        getKysely: databaseReturning(rows),
+      });
+    }
+
+    afterEach(() => {
+      portfolioHoldingsServiceMock.getInvestmentCashFlows.mockReset().mockResolvedValue([]);
+    });
+
+    it('sends both returns for a portfolio and the household only when asked', async () => {
+      setupYear();
+
+      const single = await service.getPortfolioDashboard(appuser, 7, '1Y', undefined, { includePeriodReturns: true });
+      const aggregate = await service.getAggregateDashboard(appuser, '1Y', undefined, { includePeriodReturns: true });
+      const unasked = await service.getPortfolioDashboard(appuser, 7, '1Y');
+
+      for (const { summary } of [single, aggregate]) {
+        expect(summary.periodReturns?.timeWeighted).toBe(10);
+        // The rise came when twice the money was in, so the investor did better than the investments.
+        expect(summary.periodReturns?.moneyWeighted).toBeGreaterThan(10);
+        expect(summary.periodReturns?.missingSnapshotDates.length).toBeGreaterThan(0);
+      }
+      expect(single.summary.periodReturns?.moneyWeightedAnnualized).toBe(true);
+      expect(unasked.summary).not.toHaveProperty('periodReturns');
+    });
+
+    it('has no returns when a holding is invalid', async () => {
+      setupYear();
+      portfolioHoldingsServiceMock.getPortfolioHoldings.mockResolvedValue([{ ...holdingWorth(22_000)[0], isInvalid: true }]);
+
+      const single = await service.getPortfolioDashboard(appuser, 7, '1Y', undefined, { includePeriodReturns: true });
+
+      expect(single.summary.periodReturns).toMatchObject({ moneyWeighted: null, timeWeighted: null });
     });
   });
 

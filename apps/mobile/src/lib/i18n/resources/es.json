@@ -4066,7 +4066,10 @@
       "emptyTitle": "Sin carteras que mostrar",
       "emptyMessage": "Añade una cartera para ver aquí su rendimiento",
       "portfolio": "Cartera",
-      "total": "Total"
+      "total": "Total",
+      "notCombined": "Se mide por cartera",
+      "daysWithoutSnapshot_one": "{{count}} día sin snapshot",
+      "daysWithoutSnapshot_other": "{{count}} días sin snapshot"
     },
     "netWorthHistory": {
       "title": "Patrimonio neto en el tiempo",
@@ -4264,6 +4267,13 @@
     "realizedGains": "Ganancias realizadas",
     "needsHistory": "Necesita más historial",
     "periodReturnUnavailable": "Necesitamos una referencia del periodo para mostrar esto.",
+    "timeWeighted": "Ponderada por tiempo",
+    "timeWeightedHelp": "Cómo rindieron las inversiones, sin contar lo que aportaste o retiraste.",
+    "moneyWeighted": "Ponderada por dinero",
+    "moneyWeightedHelp": "Cómo rindió tu dinero, según cuándo lo aportaste o retiraste.",
+    "perYear": "al año",
+    "missingSnapshots_one": "{{count}} día sin snapshot; se mantuvo el valor del día anterior.",
+    "missingSnapshots_other": "{{count}} días sin snapshot; se mantuvo el valor del día anterior.",
     "noHoldings": "No hay posiciones",
     "emptyTitle": "Aún sin transacciones",
     "emptyDescription": "Añade tu primera transacción para empezar a seguir el rendimiento, la asignación y las ganancias.",

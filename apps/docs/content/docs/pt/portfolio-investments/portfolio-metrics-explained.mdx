@@ -139,6 +139,38 @@ Movimentos de preço, dividendos, comissões e efeitos cambiais.
 ### Má interpretação comum
 A percentagem de retorno não é o mesmo que o valor da carteira.
 
+## Retorno ponderado pelo tempo e pelo dinheiro
+
+### O que significa
+Dois retornos para o período escolhido respondem a duas perguntas diferentes.
+
+- **Retorno ponderado pelo tempo** diz como correram os investimentos. O retorno de cada dia é medido sem o dinheiro que entrou ou saiu nesse dia, e os dias são encadeados, por isso um depósito ou um levantamento não o altera. Os dividendos pagos contam como retorno.
+- **Retorno ponderado pelo dinheiro** diz como correu o teu dinheiro. É a taxa a que o valor no início do período, cada compra, venda e dividendo nele, e o valor no fim se equilibram: o mesmo cálculo que a função `XIRR` (`XTIR` em português) de uma folha de cálculo. O dinheiro investido durante mais tempo pesa mais.
+
+### Onde aparece
+No resumo da carteira, para uma carteira ou para todas em conjunto, em cada período que podes escolher; e no relatório de desempenho da carteira e na sua exportação CSV.
+
+### Como ler
+- Quando os dois são próximos, o momento dos teus depósitos e levantamentos fez pouca diferença.
+- Quando o retorno ponderado pelo dinheiro é maior, mais do teu dinheiro estava investido enquanto os preços subiam; quando é menor, mais estava investido enquanto desciam.
+- Para um período de um ano ou mais, o retorno ponderado pelo dinheiro é uma taxa anual. Para um período mais curto é a taxa nesse período, porque esticar umas semanas até um ano exageraria o valor.
+- Sem depósitos nem levantamentos no período, o retorno ponderado pelo tempo é a variação do valor sobre o valor inicial.
+
+### Exemplo
+Tens 10 000 no início do ano. Os preços ficam estáveis até juntares mais 10 000 em junho; depois sobem 10% e a carteira acaba o ano com 22 000.
+
+- Retorno ponderado pelo tempo: +10%. Os investimentos subiram 10%; o depósito não é um ganho.
+- Retorno ponderado pelo dinheiro: mais de +10%, porque o dobro do dinheiro estava investido durante a subida.
+
+### Dias em falta
+Os dois retornos são medidos a partir do histórico diário da carteira. Um dia sem valor registado (por exemplo enquanto o histórico é reconstruído, ou quando nenhuma taxa de câmbio o converte para a tua moeda) nunca é lido como zero: o último valor é mantido nesse dia, e o resumo indica quantos dias faltaram. Os dias em que a carteira não tinha nada, antes da primeira compra ou depois de vender tudo, não contam como em falta.
+
+### O que o pode alterar
+Movimentos de preço, dividendos, comissões, efeitos cambiais e o período escolhido. Uma compra ou venda altera o retorno ponderado pelo dinheiro; só altera o retorno ponderado pelo tempo através do que o dinheiro faz depois.
+
+### Má interpretação comum
+Nenhum dos dois é o ganho sobre o preço de custo. Compara um benchmark com o retorno ponderado pelo tempo, porque um benchmark também não tem depósitos nem levantamentos.
+
 ## Dividendos e rendimento
 
 ### O que significa

@@ -1,7 +1,13 @@
 "use client";
 
 import { format } from "date-fns";
-import { AlertCircle, TrendingUp } from "lucide-react";
+import {
+  AlertCircle,
+  ChevronDown,
+  ChevronUp,
+  Minus,
+  TrendingUp,
+} from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useMemo } from "react";
 
@@ -27,6 +33,8 @@ import {
 import usePortfolioPerformance, {
   getPortfolioPerformance,
 } from "@/lib/api/reports/portfolioPerformance";
+import { cn } from "@/lib/utils";
+import { useFormatPercentage } from "@/lib/utils/useFormatPercentage";
 
 import {
   portfolioPerformanceFilters,
@@ -89,6 +97,54 @@ function ChangeCell({
   );
 }
 
+/**
+ * A period return in percent. The sign and the chevron say which way it went,
+ * the colour only whether that is good; a yearly rate says so underneath.
+ */
+function ReturnCell({
+  value,
+  annualized = false,
+  unknownLabel,
+}: {
+  value: number | null;
+  annualized?: boolean;
+  unknownLabel: string;
+}) {
+  const t = useTranslations("reports.reports.portfolioPerformance");
+  const formatPercentage = useFormatPercentage();
+  if (value === null) {
+    return (
+      <span className="text-muted-foreground" aria-label={unknownLabel}>
+        —
+      </span>
+    );
+  }
+  const Icon = value === 0 ? Minus : value > 0 ? ChevronUp : ChevronDown;
+  return (
+    <div className="flex flex-col items-end gap-0.5">
+      <span
+        className={cn(
+          "inline-flex items-center gap-1 font-mono whitespace-nowrap tabular-nums",
+          value === 0
+            ? "text-muted-foreground"
+            : value > 0
+              ? "text-success-text"
+              : "text-destructive-text",
+        )}
+      >
+        <Icon className="size-4 shrink-0" aria-hidden="true" />
+        {formatPercentage(value / 100, {
+          maximumFractionDigits: 2,
+          signDisplay: "exceptZero",
+        })}
+      </span>
+      {annualized ? (
+        <span className="text-muted-foreground text-xs">{t("perYear")}</span>
+      ) : null}
+    </div>
+  );
+}
+
 export function PortfolioPerformanceReport() {
   const t = useTranslations("reports.reports.portfolioPerformance");
   const tCommon = useTranslations("reports.common");
@@ -106,6 +162,7 @@ export function PortfolioPerformanceReport() {
   const unknownLabel = t("unknownValue");
   // Contributions and dividends are unknown only when a trade or payout has no exchange rate.
   const noRateLabel = t("noExchangeRate");
+  const returnUnavailableLabel = t("returnUnavailable");
   const csvFilename = `reports/portfolio-performance-${format(new Date(), "yyyy-MM-dd")}`;
 
   const requestCsv = useMemo(
@@ -188,12 +245,25 @@ export function PortfolioPerformanceReport() {
               <TableHead className="text-right">{t("change")}</TableHead>
               <TableHead className="text-right">{t("dividends")}</TableHead>
               <TableHead className="text-right">{t("endValue")}</TableHead>
+              <TableHead className="text-right">{t("timeWeighted")}</TableHead>
+              <TableHead className="text-right">{t("moneyWeighted")}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {sortedRows.map((row) => (
               <TableRow key={row.portfolioKey}>
-                <TableCell>{row.name}</TableCell>
+                <TableCell>
+                  <div className="flex flex-col gap-0.5">
+                    <span>{row.name}</span>
+                    {row.missingSnapshotDates.length > 0 ? (
+                      <span className="text-muted-foreground text-xs">
+                        {t("missingSnapshots", {
+                          count: row.missingSnapshotDates.length,
+                        })}
+                      </span>
+                    ) : null}
+                  </div>
+                </TableCell>
                 <TableCell className="text-right font-mono">
                   <OptionalAmount
                     value={row.startValue}
@@ -228,6 +298,19 @@ export function PortfolioPerformanceReport() {
                     value={row.endValue}
                     currencyKey={currencyKey}
                     unknownLabel={unknownLabel}
+                  />
+                </TableCell>
+                <TableCell className="text-right">
+                  <ReturnCell
+                    value={row.timeWeightedReturn}
+                    unknownLabel={returnUnavailableLabel}
+                  />
+                </TableCell>
+                <TableCell className="text-right">
+                  <ReturnCell
+                    value={row.moneyWeightedReturn}
+                    annualized={row.moneyWeightedReturnAnnualized}
+                    unknownLabel={returnUnavailableLabel}
                   />
                 </TableCell>
               </TableRow>
@@ -271,11 +354,33 @@ export function PortfolioPerformanceReport() {
                     unknownLabel={unknownLabel}
                   />
                 </TableCell>
+                {/* A household rate needs every portfolio's cash flows, not
+                    their rates: averaging rows would state a figure nobody earned. */}
+                <TableCell className="text-right">
+                  <ReturnCell value={null} unknownLabel={t("notCombined")} />
+                </TableCell>
+                <TableCell className="text-right">
+                  <ReturnCell value={null} unknownLabel={t("notCombined")} />
+                </TableCell>
               </TableRow>
             )}
           </TableBody>
         </SimpleTable>
       </div>
+      <dl className="text-muted-foreground mt-4 flex flex-col gap-1 text-xs">
+        <div>
+          <dt className="text-foreground inline font-medium">
+            {t("timeWeighted")}:
+          </dt>{" "}
+          <dd className="inline">{t("timeWeightedDescription")}</dd>
+        </div>
+        <div>
+          <dt className="text-foreground inline font-medium">
+            {t("moneyWeighted")}:
+          </dt>{" "}
+          <dd className="inline">{t("moneyWeightedDescription")}</dd>
+        </div>
+      </dl>
     </ReportCard>
   );
 }

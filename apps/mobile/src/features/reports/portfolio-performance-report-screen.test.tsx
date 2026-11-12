@@ -58,8 +58,38 @@ describe('PortfolioPerformanceReportScreen', () => {
     expect(view.getByLabelText(/Net contributions, No exchange rate yet, .*Dividends, No exchange rate yet,/)).toBeTruthy()
   })
 
+  it('shows each portfolio\'s time- and money-weighted returns, the yearly rate marked, and leaves them out of the Total', async () => {
+    const i18n = await initMobileI18n('en')
+    const t = i18n.t.bind(i18n)
+    const withReturns = mapPortfolioPerformanceReport({
+      data: [
+        { portfolioKey: '7', name: 'Long-term', currency: 'EUR', startValue: 10000, netContributions: 500, change: 2035.86, changePercent: 19.39, dividends: 12.5, endValue: 12535.86, timeWeightedReturn: 18.25, moneyWeightedReturn: 17.5, moneyWeightedReturnAnnualized: true, missingSnapshotDates: ['2026-06-01', '2026-06-02'] },
+        { portfolioKey: '8', name: 'Tech picks', currency: 'EUR', startValue: 2000, netContributions: 0, change: -100, changePercent: -5, dividends: 0, endValue: 1900, timeWeightedReturn: -5, moneyWeightedReturn: null, moneyWeightedReturnAnnualized: false, missingSnapshotDates: [] },
+      ],
+      generatedAt: '2026-08-11T00:00:00.000Z',
+    })
+    const view = await renderWithI18n({ ...baseProps, state: { status: 'loaded', report: withReturns } })
+    const tw = t('portfolioSections.timeWeighted')
+    const mw = t('portfolioSections.moneyWeighted')
+    expect(view.getByText(tw)).toBeOnTheScreen()
+    expect(view.getByText(mw)).toBeOnTheScreen()
+    expect(view.getByText('+18.25%')).toBeOnTheScreen()
+    expect(view.getByLabelText(new RegExp(`^Long-term, .*${tw}, \\+18\\.25%, ${mw}, \\+17\\.50% ${t('portfolioSections.perYear')}, `))).toBeTruthy()
+    expect(view.getByLabelText(new RegExp(`^Tech picks, .*${tw}, -5\\.00%, ${mw}, ${t('reports.portfolioPerformance.unknownValue')}, `))).toBeTruthy()
+    expect(view.getByLabelText(new RegExp(`^Total, .*${tw}, ${t('reports.portfolioPerformance.notCombined')}, ${mw}, ${t('reports.portfolioPerformance.notCombined')}, `))).toBeTruthy()
+    expect(view.getByText(t('reports.portfolioPerformance.daysWithoutSnapshot', { count: 2 }))).toBeOnTheScreen()
+    expect(view.getByTestId('portfolio-performance-returns-notes')).toHaveTextContent(new RegExp(t('portfolioSections.timeWeightedHelp')))
+  })
+
+  it('shows no weighted-return columns for an API that sends none', async () => {
+    const i18n = await initMobileI18n('en')
+    const view = await renderWithI18n({ ...baseProps, state: { status: 'loaded', report } })
+    expect(view.queryByText(i18n.t('portfolioSections.timeWeighted'))).not.toBeOnTheScreen()
+    expect(view.queryByTestId('portfolio-performance-returns-notes')).not.toBeOnTheScreen()
+  })
+
   it('shows an honest empty state with no portfolios', async () => {
-    const empty = await renderWithI18n({ ...baseProps, state: { status: 'loaded', report: { rows: [], generatedAt: '2026-08-11T00:00:00.000Z', aggregateChange: 0, totals: { startValue: 0, netContributions: 0, change: 0, changePercent: null, dividends: 0, endValue: 0 } } } })
+    const empty = await renderWithI18n({ ...baseProps, state: { status: 'loaded', report: { rows: [], generatedAt: '2026-08-11T00:00:00.000Z', aggregateChange: 0, totals: { startValue: 0, netContributions: 0, change: 0, changePercent: null, dividends: 0, endValue: 0 }, hasPeriodReturns: false } } })
     expect(empty.getByText('No portfolios to show')).toBeOnTheScreen()
   })
 

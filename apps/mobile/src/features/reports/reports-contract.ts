@@ -144,6 +144,10 @@ export type BudgetVsActualRow = z.infer<typeof budgetVsActualRowSchema>
  * One household portfolio over the period, every amount in the appuser currency. A value the API
  * cannot know (no snapshot, or a trade or dividend with no exchange rate) is null, and so is anything
  * derived from it: change = endValue - startValue - netContributions.
+ *
+ * The time- and money-weighted returns are percentage points (10 = +10%); null when they cannot be
+ * measured. The money-weighted one is yearly when `moneyWeightedReturnAnnualized`, otherwise over
+ * the period itself. All four are optional: older APIs do not send them.
  */
 export const portfolioPerformanceReportRowSchema = z.object({
   portfolioKey: z.string(),
@@ -155,6 +159,11 @@ export const portfolioPerformanceReportRowSchema = z.object({
   changePercent: z.number().finite().nullable(),
   dividends: z.number().finite().nullable(),
   endValue: z.number().finite().nullable(),
+  timeWeightedReturn: z.number().finite().nullable().optional(),
+  moneyWeightedReturn: z.number().finite().nullable().optional(),
+  moneyWeightedReturnAnnualized: z.boolean().optional(),
+  /** Days in the period with no snapshot, whose value was carried over from the day before. */
+  missingSnapshotDates: z.array(z.string()).optional(),
 })
 
 const portfolioPerformanceReportResponseSchema = reportResponseSchema(z.array(portfolioPerformanceReportRowSchema))

@@ -138,7 +138,7 @@ test("no fee notice when every fee converted", () => {
   assert.equal(screen.queryByRole("note"), null);
 });
 
-test("the dashboard requests the fee-conversion list, which the API only sends when asked", async () => {
+test("the dashboard requests the fee-conversion list and period returns, which the API only sends when asked", async () => {
   const get = vi.fn(async () => ({ data: { summary } }));
   const apiClient = { get } as unknown as Parameters<
     typeof getAggregateDashboard
@@ -153,8 +153,8 @@ test("the dashboard requests the fee-conversion list, which the API only sends w
         .params,
   );
   assert.deepEqual(params, [
-    { include: "feeConversion", period: "YTD" },
-    { include: "feeConversion", period: "1M" },
+    { include: "feeConversion,periodReturns", period: "YTD" },
+    { include: "feeConversion,periodReturns", period: "1M" },
   ]);
 });
 
