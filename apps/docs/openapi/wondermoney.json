@@ -60,6 +60,10 @@
       "name": "Import sessions"
     },
     {
+      "description": "Card purchases split into monthly installments: the schedule, each card’s remaining commitment and suggested plans. Future installments are projections, not transactions.",
+      "name": "Installment plans"
+    },
+    {
       "description": "Loans, repayment schedules and payoff projections.",
       "name": "Loans"
     },
@@ -2336,6 +2340,429 @@
         ],
         "additionalProperties": {}
       },
+      "Installment": {
+        "type": [
+          "object",
+          "null"
+        ],
+        "properties": {
+          "amount": {
+            "type": "number"
+          },
+          "dueDate": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "installmentNumber": {
+            "type": "integer"
+          },
+          "postedAmount": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "postedDate": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "scheduledDate": {
+            "type": "string"
+          },
+          "statementDate": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "paid",
+              "unmatched",
+              "upcoming"
+            ]
+          },
+          "transactionKey": {
+            "type": [
+              "number",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "amount",
+          "dueDate",
+          "installmentNumber",
+          "postedAmount",
+          "postedDate",
+          "scheduledDate",
+          "statementDate",
+          "status",
+          "transactionKey"
+        ],
+        "additionalProperties": {}
+      },
+      "InstallmentCommitment": {
+        "type": "object",
+        "properties": {
+          "accountKey": {
+            "type": "integer"
+          },
+          "accountName": {
+            "type": "string"
+          },
+          "activePlanCount": {
+            "type": "integer"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "nextInstallment": {
+            "$ref": "#/components/schemas/InstallmentCommitmentNext"
+          },
+          "remainingAmount": {
+            "type": "number"
+          },
+          "remainingCount": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "accountKey",
+          "accountName",
+          "activePlanCount",
+          "currency",
+          "nextInstallment",
+          "remainingAmount",
+          "remainingCount"
+        ],
+        "additionalProperties": {}
+      },
+      "InstallmentCommitmentList": {
+        "type": "object",
+        "properties": {
+          "commitments": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/InstallmentCommitment"
+            }
+          }
+        },
+        "required": [
+          "commitments"
+        ],
+        "additionalProperties": {}
+      },
+      "InstallmentCommitmentNext": {
+        "type": [
+          "object",
+          "null"
+        ],
+        "properties": {
+          "amount": {
+            "type": "number"
+          },
+          "date": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "installmentCount": {
+            "type": "integer"
+          },
+          "installmentNumber": {
+            "type": "integer"
+          },
+          "installmentPlanKey": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "amount",
+          "date",
+          "description",
+          "installmentCount",
+          "installmentNumber",
+          "installmentPlanKey"
+        ],
+        "additionalProperties": {}
+      },
+      "InstallmentPlan": {
+        "type": "object",
+        "properties": {
+          "accountKey": {
+            "type": "integer"
+          },
+          "accountName": {
+            "type": "string"
+          },
+          "categoryKey": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "currency": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "installmentCount": {
+            "type": "integer"
+          },
+          "installmentPlanKey": {
+            "type": "integer"
+          },
+          "nextInstallment": {
+            "$ref": "#/components/schemas/Installment"
+          },
+          "paidAmount": {
+            "type": "number"
+          },
+          "paidCount": {
+            "type": "integer"
+          },
+          "purchaseDate": {
+            "type": "string"
+          },
+          "remainingAmount": {
+            "type": "number"
+          },
+          "remainingCount": {
+            "type": "integer"
+          },
+          "totalAmount": {
+            "type": "number"
+          },
+          "unmatchedCount": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "accountKey",
+          "accountName",
+          "categoryKey",
+          "currency",
+          "description",
+          "installmentCount",
+          "installmentPlanKey",
+          "nextInstallment",
+          "paidAmount",
+          "paidCount",
+          "purchaseDate",
+          "remainingAmount",
+          "remainingCount",
+          "totalAmount",
+          "unmatchedCount"
+        ],
+        "additionalProperties": {}
+      },
+      "InstallmentPlanDetail": {
+        "type": "object",
+        "properties": {
+          "accountKey": {
+            "type": "integer"
+          },
+          "accountName": {
+            "type": "string"
+          },
+          "categoryKey": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "currency": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "installmentCount": {
+            "type": "integer"
+          },
+          "installmentPlanKey": {
+            "type": "integer"
+          },
+          "nextInstallment": {
+            "$ref": "#/components/schemas/Installment"
+          },
+          "paidAmount": {
+            "type": "number"
+          },
+          "paidCount": {
+            "type": "integer"
+          },
+          "purchaseDate": {
+            "type": "string"
+          },
+          "remainingAmount": {
+            "type": "number"
+          },
+          "remainingCount": {
+            "type": "integer"
+          },
+          "totalAmount": {
+            "type": "number"
+          },
+          "unmatchedCount": {
+            "type": "integer"
+          },
+          "installments": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Installment"
+            }
+          }
+        },
+        "required": [
+          "accountKey",
+          "accountName",
+          "categoryKey",
+          "currency",
+          "description",
+          "installmentCount",
+          "installmentPlanKey",
+          "nextInstallment",
+          "paidAmount",
+          "paidCount",
+          "purchaseDate",
+          "remainingAmount",
+          "remainingCount",
+          "totalAmount",
+          "unmatchedCount",
+          "installments"
+        ],
+        "additionalProperties": {}
+      },
+      "InstallmentPlanList": {
+        "type": "object",
+        "properties": {
+          "installmentPlans": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/InstallmentPlan"
+            }
+          }
+        },
+        "required": [
+          "installmentPlans"
+        ],
+        "additionalProperties": {}
+      },
+      "InstallmentPlanResponse": {
+        "type": "object",
+        "properties": {
+          "installmentPlan": {
+            "$ref": "#/components/schemas/InstallmentPlanDetail"
+          }
+        },
+        "required": [
+          "installmentPlan"
+        ],
+        "additionalProperties": {}
+      },
+      "InstallmentSuggestion": {
+        "type": "object",
+        "properties": {
+          "accountKey": {
+            "type": "integer"
+          },
+          "accountName": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "installmentAmount": {
+            "type": "number"
+          },
+          "installmentCount": {
+            "type": "integer"
+          },
+          "key": {
+            "type": "string"
+          },
+          "purchaseDate": {
+            "type": "string"
+          },
+          "totalAmount": {
+            "type": "number"
+          },
+          "transactions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/InstallmentSuggestionTransaction"
+            }
+          }
+        },
+        "required": [
+          "accountKey",
+          "accountName",
+          "currency",
+          "description",
+          "installmentAmount",
+          "installmentCount",
+          "key",
+          "purchaseDate",
+          "totalAmount",
+          "transactions"
+        ],
+        "additionalProperties": {}
+      },
+      "InstallmentSuggestionList": {
+        "type": "object",
+        "properties": {
+          "suggestions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/InstallmentSuggestion"
+            }
+          }
+        },
+        "required": [
+          "suggestions"
+        ],
+        "additionalProperties": {}
+      },
+      "InstallmentSuggestionTransaction": {
+        "type": "object",
+        "properties": {
+          "amount": {
+            "type": "number"
+          },
+          "description": {
+            "type": "string"
+          },
+          "installmentNumber": {
+            "type": "integer"
+          },
+          "transactionDate": {
+            "type": "string"
+          },
+          "transactionKey": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "amount",
+          "description",
+          "installmentNumber",
+          "transactionDate",
+          "transactionKey"
+        ],
+        "additionalProperties": {}
+      },
       "Loan": {
         "type": "object",
         "properties": {
@@ -3562,6 +3989,50 @@
         ],
         "additionalProperties": {}
       },
+      "RecurringInstallment": {
+        "type": "object",
+        "properties": {
+          "amount": {
+            "type": "number"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "date": {
+            "type": "string"
+          },
+          "installmentCount": {
+            "type": "integer"
+          },
+          "installmentNumber": {
+            "type": "integer"
+          },
+          "installmentPlanKey": {
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "paid",
+              "projected"
+            ]
+          }
+        },
+        "required": [
+          "amount",
+          "currency",
+          "date",
+          "installmentCount",
+          "installmentNumber",
+          "installmentPlanKey",
+          "name",
+          "status"
+        ],
+        "additionalProperties": {}
+      },
       "RecurringOccurrence": {
         "type": "object",
         "properties": {
@@ -3592,7 +4063,13 @@
       "RecurringOccurrenceList": {
         "type": "object",
         "properties": {
-          "occurrences": {
+          "installments": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RecurringInstallment"
+            }
+          },
+          "items": {
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/RecurringOccurrence"
@@ -3600,7 +4077,8 @@
           }
         },
         "required": [
-          "occurrences"
+          "installments",
+          "items"
         ],
         "additionalProperties": {}
       },
@@ -4082,6 +4560,29 @@
               "string",
               "null"
             ]
+          },
+          "installment": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "properties": {
+              "installmentCount": {
+                "type": "integer"
+              },
+              "installmentNumber": {
+                "type": "integer"
+              },
+              "installmentPlanKey": {
+                "type": "integer"
+              }
+            },
+            "required": [
+              "installmentCount",
+              "installmentNumber",
+              "installmentPlanKey"
+            ],
+            "additionalProperties": {}
           },
           "notes": {
             "type": [
@@ -12722,6 +13223,354 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/GoalResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "The token is missing, malformed or revoked.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The token does not carry a scope this operation accepts.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "The request did not match the endpoint’s validator.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "A rate limit was exceeded. Honour the `Retry-After` header.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/installment-plans": {
+      "get": {
+        "description": "**Required scope:** `read`.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "List installment plans",
+        "tags": [
+          "Installment plans"
+        ],
+        "x-required-scopes": [
+          "read"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "string",
+                  "pattern": "^[1-9]\\d*$"
+                }
+              ]
+            },
+            "required": false,
+            "name": "accountId",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InstallmentPlanList"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "The token is missing, malformed or revoked.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The token does not carry a scope this operation accepts.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "The request did not match the endpoint’s validator.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "A rate limit was exceeded. Honour the `Retry-After` header.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/installment-plans/commitments": {
+      "get": {
+        "description": "**Required scope:** `read`.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Get each card’s remaining installment commitment",
+        "tags": [
+          "Installment plans"
+        ],
+        "x-required-scopes": [
+          "read"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "string",
+                  "pattern": "^[1-9]\\d*$"
+                }
+              ]
+            },
+            "required": false,
+            "name": "accountId",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InstallmentCommitmentList"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "The token is missing, malformed or revoked.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The token does not carry a scope this operation accepts.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "The request did not match the endpoint’s validator.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "A rate limit was exceeded. Honour the `Retry-After` header.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/installment-plans/suggestions": {
+      "get": {
+        "description": "**Required scope:** `read`.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "List suggested installment plans from posted transactions",
+        "tags": [
+          "Installment plans"
+        ],
+        "x-required-scopes": [
+          "read"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "string",
+                  "pattern": "^[1-9]\\d*$"
+                }
+              ]
+            },
+            "required": false,
+            "name": "accountId",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InstallmentSuggestionList"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "The token is missing, malformed or revoked.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The token does not carry a scope this operation accepts.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "The request did not match the endpoint’s validator.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "A rate limit was exceeded. Honour the `Retry-After` header.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/installment-plans/{installmentPlanId}": {
+      "get": {
+        "description": "**Required scope:** `read`.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Get one installment plan and its installments",
+        "tags": [
+          "Installment plans"
+        ],
+        "x-required-scopes": [
+          "read"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "string",
+                  "pattern": "^[1-9]\\d*$"
+                }
+              ]
+            },
+            "required": true,
+            "name": "installmentPlanId",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InstallmentPlanResponse"
                 }
               }
             }

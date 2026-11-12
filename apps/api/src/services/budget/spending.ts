@@ -245,18 +245,35 @@ export function budgetScope(input: Pick<BudgetRowsInput, 'tenantKey' | 'viewerAp
  * line in the row's category that counts as spending, on one of the budget's accounts, in the
  * row's budget month. Joins `transaction` to `category_line` and `budget_template_category`.
  *
- * The month's days are the budget's (`budgetPeriodRange`, from its start day), of the UTC
+* The month's days are the budget's (`budgetPeriodRange`, from its start day), of the UTC
  * calendar, stated rather than left to the session's time zone, so a bank booking (stored at UTC
- * midnight of its date, `transaction-date-range.ts`) is in the month of its own date.
+ * midnight of its date, `transaction-date-range.ts`) is in the month of its own date. A posted
+ * installment is dated by its schedule ({@link budgetDateSql}).
  */
 function budgetTransactionMatch(input: BudgetRowsInput): Expression<SqlBool> {
   const range = budgetPeriodRangeSql('"budget_template_category"."year"', '"budget_template_category"."month"', input.periodStartDay);
+  const budgetDate = sql.raw(budgetDateSql('"transaction"'));
   return sql<SqlBool>`"category_line"."transaction_key" = "transaction"."transaction_key"
     and "category_line"."counts_as_spending"
     and ${anyOf('transaction.account_key', input.accountKeys)}
-    and "transaction"."transaction_date" >= ${sql.raw(range.start)}
-    and "transaction"."transaction_date" < ${sql.raw(range.end)}
+    and ${budgetDate} >= ${sql.raw(range.start)}
+    and ${budgetDate} < ${sql.raw(range.end)}
     and ${transactionScopeExpression('transaction', budgetScope(input))}`;
+}
+
+/**
+ * The instant a budget dates a transaction by, as a `timestamptz` SQL expression: its own date,
+ * except for a posted installment of a plan (`services/installment/`), which counts in the month
+ * of its schedule row's date, the day its statement charges it. A bank that dates every
+ * installment on the original purchase day would otherwise put the whole purchase in one month.
+ * Future installments are projections with no transaction, so no budget counts them.
+ */
+export function budgetDateSql(transactionAlias: string): string {
+  return `(CASE WHEN ${transactionAlias}."installment_plan_key" IS NULL THEN ${transactionAlias}."transaction_date"
+    ELSE COALESCE((select installment_row."scheduled_date"::timestamp AT TIME ZONE 'UTC' from "installment" installment_row
+      where installment_row."installment_plan_key" = ${transactionAlias}."installment_plan_key"
+        and installment_row."installment_number" = ${transactionAlias}."installment_number"
+        and installment_row."deleted_at" is null), ${transactionAlias}."transaction_date") END)`;
 }
 
 /**

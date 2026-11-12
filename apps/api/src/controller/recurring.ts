@@ -6,6 +6,9 @@ import { Appuser } from '@entity/Appuser';
 import { AppuserTenant } from '@entity/AppuserTenant';
 import { RecurringSeries } from '@entity/RecurringSeries';
 import { Tenant } from '@entity/Tenant';
+import { toCalendarDate } from '@service/account/credit-card-cycle';
+import { loadUpcomingInstallments } from '@service/installment/installment-plan.service';
+import { startOfUtcDay } from '@service/installment/installment-schedule';
 import { detectRecurringCandidatesForTenant } from '@service/recurring/recurring-detection.service';
 import { isExpectedRecurring } from '@service/recurring/recurring-expectation';
 import { loadRecurringSchedule } from '@service/recurring/recurring-schedule.service';
@@ -86,7 +89,24 @@ export async function getRecurringOccurrences(req: AuthedRequest, res: Response)
   } = await zParse(recurringOccurrencesQuerySchema, req);
   const tenantKey = await resolveTenantKey(req);
   const entries = await loadRecurringSchedule({ from, tenantKey, to });
+  // Card installments on their scheduled day: paid once posted, otherwise a projection. A past one
+  // that was never matched to a posted row is left out; the plan's own page shows it. The plans are
+  // read through the tenant filter, so the other member's private card contributes none.
+  const today = startOfUtcDay(new Date());
+  const installments = (await loadUpcomingInstallments(DI.em, { from, tenantKey, to }))
+    .filter((installment) => installment.paid || installment.date.getTime() >= today.getTime())
+    .map((installment) => ({
+      amount: installment.amount,
+      currency: installment.currency,
+      date: toCalendarDate(installment.date),
+      installmentCount: installment.installmentCount,
+      installmentNumber: installment.installmentNumber,
+      installmentPlanKey: installment.installmentPlanKey,
+      name: installment.name,
+      status: installment.paid ? 'paid' as const : 'projected' as const,
+    }));
   return res.json({
+    installments,
     items: entries.map((entry) => ({
       currency: entry.currency,
       date: entry.date,

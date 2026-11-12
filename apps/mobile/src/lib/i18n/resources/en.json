@@ -571,7 +571,8 @@
     "lowPoint": "Low point in the next {{days}} days",
     "unavailable": "Not enough data to project this account yet.",
     "next": "Next expected payments",
-    "notCounted": "Not counted in reports"
+    "notCounted": "Not counted in reports",
+    "nextInstallments": "Next installments"
   },
   "accountRecalculate": {
     "action": "Recalculate balances",
@@ -4556,6 +4557,108 @@
     "transactionsInvalid": "These transactions could not be verified, so they are not shown.",
     "transactionsEmpty": "No transactions in this statement.",
     "transactionUnavailable": "Transaction details unavailable"
+  },
+  "installments": {
+    "title": "Installments",
+    "badgeLabel": "Installment {{number}} of {{total}}",
+    "transactionDetail": "Installment",
+    "viewPlan": "View installment plan",
+    "total": "Total",
+    "paid": "Paid",
+    "remaining": "Remaining",
+    "paidCount": "{{paid}} of {{total}} paid",
+    "remainingCount_one": "{{count}} installment to come",
+    "remainingCount_other": "{{count}} installments to come",
+    "unmatchedCount_one": "{{count}} past installment not matched",
+    "unmatchedCount_other": "{{count}} past installments not matched",
+    "activePlans_one": "{{count}} active plan",
+    "activePlans_other": "{{count}} active plans",
+    "commitment": "Still to charge",
+    "commitmentError": "Could not load what the installments still have to charge.",
+    "next": "Next: {{amount}} on {{date}}, {{name}}",
+    "nextDate": "Next on {{date}}",
+    "finished": "Paid off",
+    "plansError": "Could not load the installment plans.",
+    "empty": "No installment plans on this card yet.",
+    "projectionNote": "Upcoming installments are projections: they are not transactions and are not counted in balances.",
+    "status": {
+      "paid": "Paid",
+      "upcoming": "Upcoming",
+      "unmatched": "Not matched"
+    },
+    "detail": {
+      "loading": "Loading installment plan…",
+      "descriptor": "Purchased {{date}} · {{total}} installments",
+      "totalMeta": "In {{total}} installments",
+      "scheduleTitle": "Schedule",
+      "scheduled": "Scheduled {{date}}",
+      "statementDue": "Statement due {{date}}",
+      "posted": "Posted {{date}}",
+      "stale": "Could not refresh this plan, so it may be out of date.",
+      "notFound": {
+        "title": "Plan not found",
+        "message": "This installment plan was deleted or is not visible to you."
+      },
+      "invalidId": {
+        "title": "Plan not found",
+        "message": "This link does not point to an installment plan."
+      },
+      "invalidResponse": {
+        "title": "Plan unavailable",
+        "message": "The plan could not be verified, so it is not shown."
+      },
+      "error": {
+        "title": "Could not load the plan",
+        "message": "Check your connection and try again."
+      }
+    },
+    "delete": {
+      "action": "Delete plan",
+      "confirmTitle": "Delete this installment plan?",
+      "confirmMessage": "The schedule is removed. Posted transactions stay on the card, no longer linked to it.",
+      "confirm": "Delete"
+    },
+    "failures": {
+      "demo": "This is not available in demo mode.",
+      "access": "You do not have access to this card’s plans.",
+      "invalid": "The plan was refused. Check the details and try again.",
+      "conflict": "One of these transactions is already linked to another installment.",
+      "not-found": "This card or plan is no longer available.",
+      "network": "Could not reach the server. Check the card’s plans before trying again.",
+      "general": "Something went wrong. Try again."
+    },
+    "create": {
+      "action": "Add plan",
+      "title": "New installment plan",
+      "fromSuggestionTitle": "Plan from detected installments",
+      "save": "Create plan",
+      "saving": "Creating plan…",
+      "loading": "Loading…",
+      "description": "Description",
+      "purchaseDate": "Purchase date",
+      "count": "Installments",
+      "links_one": "Creating the plan links {{count}} posted transaction to its installment.",
+      "links_other": "Creating the plan links {{count}} posted transactions to their installments.",
+      "previewTitle": "Preview",
+      "each": "Each",
+      "remainder": "Takes the rounding",
+      "range": "Installments {{from}} to {{to}} of {{total}}",
+      "errors": {
+        "total": "Enter an amount above zero with at most two decimals.",
+        "count": "Enter a number from {{min}} to {{max}}.",
+        "countLinks": "A detected transaction is installment {{number}}, so the plan needs at least that many."
+      }
+    },
+    "suggestions": {
+      "title": "Detected installments",
+      "helper": "These card transactions look like installments of a purchase with no plan. Nothing changes until you create one.",
+      "schedule": "{{total}} installments of {{amount}}",
+      "found_one": "{{count}} found · purchased {{date}}",
+      "found_other": "{{count}} found · purchased {{date}}",
+      "accept": "Create plan",
+      "acceptNamed": "Create plan for {{name}}",
+      "unavailable": "This suggestion is no longer available. You can still create the plan yourself."
+    }
   },
   "rules": {
     "title": "Rules",

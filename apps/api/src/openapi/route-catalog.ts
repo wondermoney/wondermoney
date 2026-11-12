@@ -61,6 +61,7 @@ import {
   moveGoalMoneyOutRequestSchema,
   updateGoalRequestSchema,
 } from '@validators/goal';
+import { getInstallmentPlanRequestSchema, listInstallmentCommitmentsRequestSchema, listInstallmentPlansRequestSchema, listInstallmentSuggestionsRequestSchema } from '@validators/installment-plan';
 import { loanAdjustmentListSchema, loanIdParamSchema, loanProjectionSchema, loanRatePeriodsSchema, repaymentCandidatesSchema } from '@validators/loan';
 import { manualAssetParamsSchema } from '@validators/manual-asset';
 import { netWorthHistoryQuerySchema } from '@validators/net-worth';
@@ -122,6 +123,10 @@ import {
   holdingSchema,
   importPreviewSchema,
   importSessionSchema,
+  installmentCommitmentSchema,
+  installmentPlanDetailSchema,
+  installmentPlanSchema,
+  installmentSuggestionSchema,
   itemResponse,
   listResponse,
   loanAdjustmentSchema,
@@ -142,6 +147,7 @@ import {
   portfolioSchema,
   portfolioTransactionSchema,
   realizedGainsSchema,
+  recurringInstallmentSchema,
   recurringOccurrenceSchema,
   recurringSeriesSchema,
   reportSchema,
@@ -897,7 +903,35 @@ export const OPERATIONS: Record<string, OperationDefinition> = {
     tag: 'Recurring',
     summary: 'List recurring occurrences',
     request: recurringOccurrencesQuerySchema,
-    response: listResponse('RecurringOccurrenceList', 'occurrences', recurringOccurrenceSchema),
+    response: z.looseObject({ installments: z.array(recurringInstallmentSchema), items: z.array(recurringOccurrenceSchema) }).openapi('RecurringOccurrenceList'),
+  },
+
+  // ---------------------------------------------------------------------------
+  // Installment plans
+  // ---------------------------------------------------------------------------
+  'GET /v1/installment-plans': {
+    tag: 'Installment plans',
+    summary: 'List installment plans',
+    request: listInstallmentPlansRequestSchema,
+    response: listResponse('InstallmentPlanList', 'installmentPlans', installmentPlanSchema),
+  },
+  'GET /v1/installment-plans/commitments': {
+    tag: 'Installment plans',
+    summary: 'Get each card’s remaining installment commitment',
+    request: listInstallmentCommitmentsRequestSchema,
+    response: listResponse('InstallmentCommitmentList', 'commitments', installmentCommitmentSchema),
+  },
+  'GET /v1/installment-plans/suggestions': {
+    tag: 'Installment plans',
+    summary: 'List suggested installment plans from posted transactions',
+    request: listInstallmentSuggestionsRequestSchema,
+    response: listResponse('InstallmentSuggestionList', 'suggestions', installmentSuggestionSchema),
+  },
+  'GET /v1/installment-plans/:installmentPlanId': {
+    tag: 'Installment plans',
+    summary: 'Get one installment plan and its installments',
+    request: getInstallmentPlanRequestSchema,
+    response: itemResponse('InstallmentPlanResponse', 'installmentPlan', installmentPlanDetailSchema),
   },
 
   // ---------------------------------------------------------------------------

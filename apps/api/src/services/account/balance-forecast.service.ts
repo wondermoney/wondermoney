@@ -3,6 +3,7 @@ import type { EntityManager } from '@mikro-orm/postgresql';
 import { Account } from '@entity/Account';
 import { RecurringOccurrence } from '@entity/RecurringOccurrence';
 import { RecurringSeries } from '@entity/RecurringSeries';
+import { loadUpcomingInstallments } from '@service/installment/installment-plan.service';
 import { buildRecurringSchedule, type RecurringScheduleSeries } from '@service/recurring/recurring-schedule';
 import { RecurringAmountType, RecurringSeriesStatus } from '@service/recurring/recurring-types';
 import { big, roundDisplay } from '@utils/money';
@@ -37,6 +38,22 @@ export interface BalanceForecastOccurrence {
   date: string;
   name: string;
   seriesKey: number;
+}
+
+/**
+ * An upcoming installment of a card purchase the forecast applied: a projection from the plan's
+ * schedule (`services/installment/`), never a transaction. A positive magnitude, charged to its card.
+ */
+export interface BalanceForecastInstallment {
+  accountKey: number;
+  amount: number;
+  currency: string;
+  /** `YYYY-MM-DD`, UTC. */
+  date: string;
+  installmentCount: number;
+  installmentNumber: number;
+  installmentPlanKey: number;
+  name: string;
 }
 
 /** A daily balance series and its lowest point. */
@@ -78,12 +95,25 @@ export interface BalanceForecastSeries {
   openingBalance: null | number;
   points: BalanceForecastPoint[];
   projected: BalanceForecastOccurrence[];
+  /** Upcoming card installments the series applied, next to the recurring `projected` ones. */
+  projectedInstallments: BalanceForecastInstallment[];
 }
 
 export interface ForecastAccountInput {
   accountKey: number;
   balance: null | number;
   currency: string;
+}
+
+export interface ForecastInstallmentInput {
+  accountKey: number;
+  amount: number;
+  currency: string;
+  date: Date;
+  installmentCount: number;
+  installmentNumber: number;
+  installmentPlanKey: number;
+  name: string;
 }
 
 export interface ForecastOccurrenceInput {
@@ -99,6 +129,8 @@ export interface ProjectBalanceForecastInput {
   accounts: ForecastAccountInput[];
   days: number;
   from: Date;
+  /** Upcoming installments of card purchases, each on its card. */
+  installments?: ForecastInstallmentInput[];
   occurrences: ForecastOccurrenceInput[];
 }
 
@@ -106,7 +138,8 @@ export interface ProjectBalanceForecastInput {
  * The projected balance of the household's accounts for the next `days` days.
  *
  * Starts from each account's current balance and applies the expected recurring occurrences from
- * today on. An occurrence already matched to a real transaction is dropped by
+ * today on, and the upcoming installments of card purchases (a paid installment is a posted
+ * transaction, already in the balance). An occurrence already matched to a real transaction is dropped by
  * `buildRecurringSchedule`, so a bill paid early never counts twice. A variable bill uses its
  * average amount and a fixed one its expected amount. Each account's series stays in the account's
  * own currency; the household total is reported per currency and only collapsed to one figure when
@@ -187,6 +220,12 @@ export async function forecastBalances(em: EntityManager, request: BalanceForeca
       };
     });
 
+  // A card's upcoming installments, on the accounts just read (the same privacy predicate).
+  const installments = accounts.length === 0
+    ? []
+    : (await loadUpcomingInstallments(em, { accountKeys: accounts.map((account) => account.accountKey), from, tenantKey: request.tenantKey, to }))
+        .filter((installment) => !installment.paid);
+
   return projectBalanceForecast({
     accounts: accounts.map((account) => ({
       accountKey: account.accountKey,
@@ -195,6 +234,7 @@ export async function forecastBalances(em: EntityManager, request: BalanceForeca
     })),
     days: request.days,
     from,
+    installments,
     occurrences: projected,
   });
 }
@@ -235,6 +275,10 @@ export function projectBalanceForecast(input: ProjectBalanceForecastInput): Bala
     seriesKey: number;
   }
 
+  // An installment is on its card, in the card's currency; one on an account outside the forecast, or
+  // in another currency, cannot be placed honestly and is left out.
+  const installments = (input.installments ?? []).filter((installment) => accountByKey.get(installment.accountKey)?.currency === installment.currency && Number.isFinite(installment.amount));
+
   const resolved: ResolvedOccurrence[] = [];
   for (const occurrence of input.occurrences) {
     const account = occurrence.accountKey == null ? undefined : accountByKey.get(occurrence.accountKey);
@@ -264,6 +308,7 @@ export function projectBalanceForecast(input: ProjectBalanceForecastInput): Bala
       currency: account.currency,
       dayIndex,
       dayKeys,
+      installments: installments.filter((installment) => installment.accountKey === account.accountKey),
       occurrences: own,
       openingBalance: account.balance,
       windowStart,
@@ -287,7 +332,8 @@ export function projectBalanceForecast(input: ProjectBalanceForecastInput): Bala
       && !skippedAccounts.has(null)
       && !accountsInCurrency.some((account) => skippedAccounts.has(account.accountKey));
     const relevant = resolved.filter((occurrence) => occurrence.currency === currency);
-    return buildSeries({ complete, currency, dayIndex, dayKeys, occurrences: relevant, openingBalance, windowStart });
+    const relevantInstallments = installments.filter((installment) => installment.currency === currency);
+    return buildSeries({ complete, currency, dayIndex, dayKeys, installments: relevantInstallments, occurrences: relevant, openingBalance, windowStart });
   });
 
   return {
@@ -310,6 +356,7 @@ function buildSeries(input: {
   currency: string;
   dayIndex: Map<string, number>;
   dayKeys: string[];
+  installments: ForecastInstallmentInput[];
   occurrences: { accountKey: null | number; amount: number; currency: string; date: Date; name: string; seriesKey: number }[];
   openingBalance: null | number;
   windowStart: number;
@@ -322,6 +369,7 @@ function buildSeries(input: {
       openingBalance: null,
       points: [],
       projected: [],
+      projectedInstallments: [],
     };
   }
 
@@ -342,6 +390,24 @@ function buildSeries(input: {
     });
   }
 
+  const projectedInstallments: BalanceForecastInstallment[] = [];
+  for (const installment of input.installments) {
+    const key = isoDay(installment.date);
+    const index = input.dayIndex.get(key);
+    if (index === undefined) continue;
+    amountsByDay.set(index, (amountsByDay.get(index) ?? 0) + installment.amount);
+    projectedInstallments.push({
+      accountKey: installment.accountKey,
+      amount: roundDisplay(installment.amount),
+      currency: installment.currency,
+      date: key,
+      installmentCount: installment.installmentCount,
+      installmentNumber: installment.installmentNumber,
+      installmentPlanKey: installment.installmentPlanKey,
+      name: installment.name,
+    });
+  }
+
   let balance = big(input.openingBalance);
   const points = input.dayKeys.map((date, index) => {
     balance = balance.minus(big(amountsByDay.get(index) ?? 0));
@@ -353,6 +419,7 @@ function buildSeries(input: {
   );
 
   projected.sort((left, right) => left.date.localeCompare(right.date) || left.name.localeCompare(right.name) || left.seriesKey - right.seriesKey);
+  projectedInstallments.sort((left, right) => left.date.localeCompare(right.date) || left.installmentPlanKey - right.installmentPlanKey || left.installmentNumber - right.installmentNumber);
   return {
     complete: input.complete,
     currency: input.currency,
@@ -360,6 +427,7 @@ function buildSeries(input: {
     openingBalance: roundDisplay(input.openingBalance),
     points,
     projected,
+    projectedInstallments,
   };
 }
 

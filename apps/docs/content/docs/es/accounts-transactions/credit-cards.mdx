@@ -52,6 +52,39 @@ Los recordatorios están activados de forma predeterminada. Desactiva **Recordat
 
 En una instancia autoalojada, los recordatorios necesitan un proveedor de email (consulta [Configurar tu instancia](/es/docs/self-hosting/configure#correo)). Define `CREDIT_CARD_DUE_REMINDER_DAYS` en el worker para cambiar cuántos días antes del vencimiento se envían.
 
+## Compras en cuotas
+
+En Brasil y Portugal una compra con tarjeta se paga a menudo en cuotas mensuales fijas: el banco muestra `PARC 03/12` o `3/12` en la tercera de doce. Un plan de cuotas registra la compra una vez y reparte sus cuotas, una por extracto, para que veas lo que la tarjeta aún tiene que cargar.
+
+### Crear un plan
+
+1. Abre la página de la cuenta de la tarjeta. La sección **Cuotas** está debajo del resumen del extracto.
+2. Elige **Nuevo plan de cuotas** (en el móvil, **Añadir plan**).
+3. Introduce una descripción, la fecha de compra, el total y el número de cuotas (de 2 a 120). La categoría es opcional.
+4. Guarda.
+
+Cada cuota es el total dividido por el número de cuotas, redondeado hacia abajo al céntimo; la última se queda con lo que sobra, así que siempre suman exactamente el total. 100 en 3 cuotas son 33,33, 33,33 y 33,34. La primera cuota está en el extracto que contiene la fecha de compra y cada una de las siguientes en el extracto siguiente, fechadas por los días de cierre y de vencimiento de la tarjeta. En una cuenta sin ciclo de extracto, caen cada mes en el día del mes de la compra.
+
+### Las cuotas futuras son proyecciones
+
+Las cuotas que aún faltan son proyecciones, como la previsión del saldo. No son transacciones: no cambian el saldo de la cuenta, el patrimonio neto, las listas de transacciones ni los informes. Aparecen como elementos previstos en el plan, en el importe **Pendiente de cargo** de la tarjeta, en la previsión del saldo y en el calendario de facturas.
+
+Cuando el banco registra una cuota, WonderMoney vincula la transacción registrada con su cuota, que pasa a mostrarse como **Pagada**. Nada se cuenta dos veces, porque la proyección nunca fue una transacción. Una transacción registrada se vincula cuando está en la tarjeta del plan, su descripción indica la cuota (`PARC 03/12` en un plan de 12 cuotas) y el importe coincide. En las listas, la transacción muestra la cuota como `3/12`.
+
+Una cuota pasada sin ninguna transacción registrada vinculada aparece como **Sin coincidencia**. Deja de contar en lo que la tarjeta aún tiene que cargar.
+
+### Presupuestos
+
+Una cuota registrada cuenta en el mes de presupuesto de su propio extracto: el mes en que está prevista la cuota. Esto se cumple aunque el banco feche todas las cuotas el día de la compra original, así que una compra en 12 cuotas nunca cae entera en el presupuesto de un solo mes. Las cuotas que aún faltan no cuentan en ningún presupuesto hasta que el banco las registra.
+
+### Planes sugeridos
+
+Cuando las transacciones registradas en una tarjeta llevan marcas de cuota como `PARC 01/04` y `PARC 02/04`, la página de la tarjeta las muestra en **Posibles compras en cuotas** (en el móvil, **Cuotas detectadas**). Elige **Crear plan** para abrir el formulario rellenado a partir de esas transacciones, revísalo y guarda. El plan solo se crea al guardar, y las transacciones de las que salió quedan vinculadas a sus cuotas.
+
+### Cambiar o eliminar un plan
+
+Abre un plan para ver cada cuota con su fecha, la fecha de vencimiento del extracto, el importe y el estado. Puedes cambiar su descripción o su categoría, o eliminarlo. Eliminar un plan conserva sus transacciones registradas; solo dejan de estar vinculadas a él.
+
 ## Enlaces relacionados
 
 - [Entender las transacciones](/es/docs/accounts-transactions/understand-transactions)

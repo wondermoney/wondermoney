@@ -48,6 +48,21 @@ describe('transactions endpoint contracts', () => {
     expect(row).not.toHaveProperty('sentiment')
   })
 
+  it('reads the installment a row was linked to, and a row from an older API as none', () => {
+    const installment = { installmentPlanKey: 11, installmentNumber: 3, installmentCount: 12 }
+    const [linked, ordinary, older, malformed] = aggregateTransactionsResponseSchema.parse({ transactions: [
+      { ...transactionFixture, installment },
+      { ...transactionFixture, installment: null },
+      transactionFixture,
+      { ...transactionFixture, installment: { installmentNumber: '3' } },
+    ] }).transactions
+    expect(linked?.installment).toEqual(installment)
+    expect(ordinary?.installment).toBeNull()
+    expect(older?.installment).toBeUndefined()
+    expect(malformed?.installment).toBeNull()
+    expect(accountTransactionsResponseSchema.parse({ transactions: [{ ...transactionFixture, installment }] }).transactions[0]?.installment).toEqual(installment)
+  })
+
   it('reads how each row was converted, an unknown status or malformed rate date as unknown', () => {
     const [missing, estimated, unknown] = aggregateTransactionsResponseSchema.parse({ transactions: [
       { ...transactionFixture, appuserSettlementAmount: null, fxStatus: 'missing', fxRateDate: null },

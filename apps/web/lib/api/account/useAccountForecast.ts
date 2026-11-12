@@ -20,6 +20,22 @@ export interface ForecastOccurrence {
   seriesKey: number;
 }
 
+/**
+ * One upcoming installment of a card plan. A projection, like a recurring occurrence: the series
+ * points already include it, but it is never a transaction.
+ */
+export interface ForecastInstallment {
+  accountKey: number;
+  /** A positive magnitude: what the card will be charged. */
+  amount: number;
+  currency: string;
+  date: string;
+  installmentCount: number;
+  installmentNumber: number;
+  installmentPlanKey: number;
+  name: string;
+}
+
 export interface ForecastSeries {
   complete: boolean;
   currency: string;
@@ -27,6 +43,8 @@ export interface ForecastSeries {
   openingBalance: number | null;
   points: ForecastPoint[];
   projected: ForecastOccurrence[];
+  /** Optional because an older API does not send it; read it as `?? []`. */
+  projectedInstallments?: ForecastInstallment[];
 }
 
 export interface ForecastAccountSeries extends ForecastSeries {

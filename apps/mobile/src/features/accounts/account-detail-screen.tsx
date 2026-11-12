@@ -27,6 +27,7 @@ import { BalanceGrowthChart } from '@/features/account-insights/balance-growth-c
 import { MetricsStats, type MetricsSectionState } from '@/features/account-insights/metrics-stats'
 import type { RecentTransactionsSectionState } from '@/features/transactions/recent-transactions-section'
 import type { RecentTransactionRow } from '@/features/transactions/recent-transactions-view-model'
+import { InstallmentPlansSection, type InstallmentPlansSectionState } from '@/features/installments/installment-plans-section'
 
 import { accountFreshness } from './account-freshness'
 import type { AccountDetailViewModel } from './account-detail-view-model'
@@ -45,6 +46,8 @@ export type AccountDetailData = AccountDetailViewModel & {
   forecast?: AccountForecastState
   /** The current credit-card statement, when the account is a card. */
   creditCardStatement?: CreditCardStatementState
+  /** The card's installment plans, their remaining commitment and detected suggestions. */
+  installmentPlans?: InstallmentPlansSectionState
 }
 export type AccountDetailViewState =
   | { status: 'loading' }
@@ -71,6 +74,10 @@ export type AccountDetailScreenProps = {
   onRecalculate?: () => void
   recalculation?: AccountRecalculationState
   onDismissRecalculation?: () => void
+  /** Installment plans on a card: open one, add one, or accept a detected suggestion. */
+  onOpenInstallmentPlan?: (planId: number) => void
+  onCreateInstallmentPlan?: () => void
+  onAcceptInstallmentSuggestion?: (suggestionKey: string) => void
 }
 
 const LAST_TRANSACTIONS = 5
@@ -83,7 +90,7 @@ const LAST_TRANSACTIONS = 5
  * Outflow / Savings rate, then Balance growth and Last transactions as open
  * sections. Adding a transaction is the floating "+".
  */
-export function AccountDetailScreen({ state, recentTransactions, onBack, onRetry, onRetryRecent, onLogout, onViewTransactions, onCreateTransaction, onImportTransactions, onEdit, onRecalculate, recalculation, onDismissRecalculation }: AccountDetailScreenProps) {
+export function AccountDetailScreen({ state, recentTransactions, onBack, onRetry, onRetryRecent, onLogout, onViewTransactions, onCreateTransaction, onImportTransactions, onEdit, onRecalculate, recalculation, onDismissRecalculation, onOpenInstallmentPlan, onCreateInstallmentPlan, onAcceptInstallmentSuggestion }: AccountDetailScreenProps) {
   const formatMoney = useFormatMoney()
   const { t, i18n } = useTranslation()
   const palette = usePalette()
@@ -189,6 +196,16 @@ export function AccountDetailScreen({ state, recentTransactions, onBack, onRetry
 
           {data.creditCardStatement ? (
             <CreditCardStatementSection accountId={data.accountId} currency={data.originalCurrencyCode} locale={locale} state={data.creditCardStatement} />
+          ) : null}
+
+          {data.installmentPlans && onOpenInstallmentPlan && onCreateInstallmentPlan && onAcceptInstallmentSuggestion ? (
+            <InstallmentPlansSection
+              locale={locale}
+              onAcceptSuggestion={onAcceptInstallmentSuggestion}
+              onCreatePlan={onCreateInstallmentPlan}
+              onOpenPlan={onOpenInstallmentPlan}
+              state={data.installmentPlans}
+            />
           ) : null}
 
           {data.balance ? (

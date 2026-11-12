@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import type {
+  InstallmentOccurrence,
   RecurringOccurrence,
   RecurringOccurrenceStatus,
 } from "@/lib/api/recurring/useRecurringOccurrences";
@@ -29,6 +30,8 @@ export interface RecurringMonthCalendarLabels {
   loading: ReactNode;
   status: Record<RecurringOccurrenceStatus, string>;
   paymentCount: (count: number) => string;
+  /** Names an installment's "n/N" for assistive tech, e.g. "Installment 3 of 12". */
+  installment?: (installmentNumber: number, installmentCount: number) => string;
 }
 
 export interface RecurringMonthCalendarProps {
@@ -39,6 +42,8 @@ export interface RecurringMonthCalendarProps {
   /** Today as `YYYY-MM-DD`, so the grid can mark it without reading the clock. */
   today: string;
   items: readonly RecurringOccurrence[];
+  /** Card installments scheduled in the visible range, shown beside the bills as "n/N". */
+  installments?: readonly InstallmentOccurrence[];
   isLoading?: boolean;
   locale?: string;
   labels: RecurringMonthCalendarLabels;
@@ -63,11 +68,54 @@ const isCurrencyCode = (value: unknown): value is string =>
 
 const dayNumber = (day: string) => Number(day.slice(8, 10));
 
+interface CalendarItem {
+  key: string;
+  name: string;
+  /** An ISO timestamp, as `groupOccurrencesByDay` reads it. */
+  date: string;
+  expectedAmount: number | null;
+  currency: string | null;
+  status: RecurringOccurrenceStatus;
+  installment: { number: number; count: number } | null;
+}
+
+/** Bills and card installments as one kind of calendar entry. */
+export function calendarItems(
+  items: readonly RecurringOccurrence[],
+  installments: readonly InstallmentOccurrence[] = [],
+): CalendarItem[] {
+  return [
+    ...items.map((item) => ({
+      key: `${item.seriesKey}-${item.date}`,
+      name: item.name,
+      date: item.date,
+      expectedAmount: item.expectedAmount,
+      currency: item.currency,
+      status: item.status,
+      installment: null,
+    })),
+    ...installments.map((installment) => ({
+      key: `installment-${installment.installmentPlanKey}-${installment.installmentNumber}`,
+      name: installment.name,
+      // A calendar day: UTC midnight reads as date-only, so it lands on that day for everyone.
+      date: `${installment.date}T00:00:00.000Z`,
+      expectedAmount: installment.amount,
+      currency: installment.currency,
+      status: installment.status,
+      installment: {
+        number: installment.installmentNumber,
+        count: installment.installmentCount,
+      },
+    })),
+  ];
+}
+
 export function RecurringMonthCalendar({
   month,
   selectedDay,
   today,
   items,
+  installments,
   isLoading = false,
   locale,
   labels,
@@ -78,7 +126,7 @@ export function RecurringMonthCalendar({
 }: RecurringMonthCalendarProps) {
   const formatMoney = useFormatCurrency();
   const days = calendarDays(month);
-  const grouped = groupOccurrencesByDay(items);
+  const grouped = groupOccurrencesByDay(calendarItems(items, installments));
   const selectedItems = grouped.get(selectedDay) ?? [];
   const formatDay = (day: string, options: Intl.DateTimeFormatOptions) =>
     new Intl.DateTimeFormat(locale, options).format(new Date(`${day}T00:00:00`));
@@ -204,11 +252,26 @@ export function RecurringMonthCalendar({
             <ul className="mt-2">
               {selectedItems.map((item) => (
                 <li
-                  key={`${item.seriesKey}-${item.date}`}
+                  key={item.key}
                   className="flex items-center justify-between gap-3 border-b py-2 last:border-b-0"
                 >
                   <div className="flex min-w-0 items-center gap-2">
                     <span className="truncate text-sm">{item.name}</span>
+                    {item.installment ? (
+                      <span className="text-muted-foreground shrink-0 font-mono text-xs tabular-nums">
+                        <span aria-hidden={labels.installment ? true : undefined}>
+                          {item.installment.number}/{item.installment.count}
+                        </span>
+                        {labels.installment ? (
+                          <span className="sr-only">
+                            {labels.installment(
+                              item.installment.number,
+                              item.installment.count,
+                            )}
+                          </span>
+                        ) : null}
+                      </span>
+                    ) : null}
                     <Badge variant={badgeVariants[item.status]}>
                       {labels.status[item.status]}
                     </Badge>

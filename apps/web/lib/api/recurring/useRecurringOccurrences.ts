@@ -19,8 +19,23 @@ export interface RecurringOccurrence {
   currency: string | null;
 }
 
+/** A card installment scheduled inside the range: `paid` once linked, `projected` before. */
+export interface InstallmentOccurrence {
+  amount: number;
+  currency: string;
+  /** `YYYY-MM-DD`. */
+  date: string;
+  installmentCount: number;
+  installmentNumber: number;
+  installmentPlanKey: number;
+  name: string;
+  status: "paid" | "projected";
+}
+
 export interface GetRecurringOccurrencesResponse {
   items: RecurringOccurrence[];
+  /** Optional because an older API does not send it; read it as `?? []`. */
+  installments?: InstallmentOccurrence[];
 }
 
 export async function getRecurringOccurrences(

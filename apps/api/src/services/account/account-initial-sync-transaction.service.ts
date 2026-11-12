@@ -25,6 +25,7 @@ import type {
 } from '@service/bank-providers/types';
 import { isProviderRejection, type ProviderRateLimit, providerRateLimitOf } from '@service/bank-sync-run/provider-failure';
 import { rateScope, resolveExchangeRate } from '@service/currency/exchange-rate';
+import { linkPostedInstallments } from '@service/installment/installment-plan.service';
 import backgroundOperationService from '@service/operations/background-operation.service';
 import type { Enqueue } from '@service/queue/enqueue';
 import { triggerRecurringDetectionAfterTransactionIngestion } from '@service/recurring/post-transaction-ingestion-detection.service';
@@ -208,6 +209,14 @@ class AccountInitialSyncTransactionService {
         if (matched.rowsChanged > 0) log.info({ ...matched, tenantKey: tenant.tenantKey.tenantKey }, 'Matched own-account transfers');
       } catch (error) {
         log.warn({ error: sanitizeError(error) }, 'Transfer matching failed');
+      }
+      // Link posted rows that pay an installment of a card's plan ("PARC 03/12"), so the plan reads
+      // them as paid instead of projecting them again. Best-effort, like transfer matching.
+      try {
+        const linked = await em.fork().transactional((tx) => linkPostedInstallments(tx, { tenantKey: tenant.tenantKey.tenantKey }));
+        if (linked > 0) log.info({ linked, tenantKey: tenant.tenantKey.tenantKey }, 'Linked posted installments');
+      } catch (error) {
+        log.warn({ error: sanitizeError(error) }, 'Installment linking failed');
       }
     }
 

@@ -4,6 +4,7 @@ import { Wallet } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import { TransactionAmount } from "@/components/account/TransactionAmount";
+import { InstallmentBadge } from "@/components/installments/InstallmentBadge";
 import CategoryIcon from "@/components/ui/CategoryIcon";
 import { formatTxDate } from "@/lib/account/accounts-formatters";
 import type { Transaction } from "@/lib/api/account/useTransactions";
@@ -44,9 +45,12 @@ export default function TransactionsList({
                 )}
               </div>
               <div className="min-w-0">
-                <p className="text-foreground truncate text-sm">
-                  {tx.transactionMerchantKey?.name || tx.description}
-                </p>
+                <div className="flex min-w-0 items-center gap-2">
+                  <p className="text-foreground truncate text-sm">
+                    {tx.transactionMerchantKey?.name || tx.description}
+                  </p>
+                  <InstallmentBadge installment={tx.installment} />
+                </div>
                 <div className="text-muted-foreground flex min-w-0 items-center gap-1.5 text-xs">
                   <span>{formatTxDate(tx.transactionDate)}</span>
                   {category && (

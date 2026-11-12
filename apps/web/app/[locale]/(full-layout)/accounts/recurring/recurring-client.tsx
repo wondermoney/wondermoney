@@ -457,6 +457,7 @@ export default function RecurringClient({
                 selectedDay={selectedDay}
                 today={todayDay}
                 items={occurrencesData?.items ?? []}
+                installments={occurrencesData?.installments ?? []}
                 isLoading={occurrencesLoading}
                 locale={financialLocale}
                 onSelectDay={setSelectedDay}
@@ -472,6 +473,8 @@ export default function RecurringClient({
                   emptyDay: t("calendarEmptyDay"),
                   loading: t("calendarLoading"),
                   paymentCount: (count) => t("paymentCount", { count }),
+                  installment: (number, count) =>
+                    tCommon("installments.badge-label", { number, count }),
                   status: {
                     due: t("calendarStatusDue"),
                     overdue: t("calendarStatusOverdue"),

@@ -6,6 +6,7 @@ import { HIDDEN_FILTER } from '@app/database/filters/tenant-filter';
 import { Account } from '@entity/Account';
 import { Appuser } from '@entity/Appuser';
 import type { Currency } from '@entity/Currency';
+import { InstallmentPlan } from '@entity/InstallmentPlan';
 import { LoanRepaymentLink } from '@entity/LoanRepaymentLink';
 import { RecurringOccurrence } from '@entity/RecurringOccurrence';
 import { Transaction } from '@entity/Transaction';
@@ -31,6 +32,13 @@ export interface TransactionListRequest {
   scope: 'all-accounts' | { accountKey: number };
   tenantKey: number;
   viewerAppuserKey: number;
+}
+
+/** The installment a posted row pays, shown as "n/N" in the lists. */
+export interface TransactionInstallmentDto {
+  installmentCount: number;
+  installmentNumber: number;
+  installmentPlanKey: number;
 }
 
 export interface TransactionRecurringSeriesDto {
@@ -124,9 +132,10 @@ export async function listTransactions(request: TransactionListRequest) {
   const pageSyntheticRows = syntheticRows.filter((row) => onThisPage(row.transactionDate, cursorTime(cursor), nextCursor ? lastRow?.transactionDate : undefined));
 
   const recurringSeries = await loadRecurringSeries(transactions, tenantKey);
+  const installments = await loadInstallments(transactions);
   // Newest first, an opening row after any real row of the same instant: it came before them.
   const page = orderBy([...rows, ...pageSyntheticRows], [(row) => row.transactionDate?.getTime() ?? 0, (row) => ((row.transactionKey ?? 0) < 0 ? 0 : 1)], ['desc', 'desc']).map(
-    (row) => ({ ...row, recurringSeries: recurringSeries.get(row.transactionKey) ?? null }),
+    (row) => ({ ...row, installment: installments.get(row.transactionKey) ?? null, recurringSeries: recurringSeries.get(row.transactionKey) ?? null }),
   );
 
   const listTotal = isFirstPage ? await getTransactionTotal(filters, transactionViewer) : null;
@@ -320,6 +329,25 @@ function summarizeLoanRepayments(links: LoanRepaymentLink[]) {
  * Each page emits only the rows whose date falls within it (`onThisPage`), and the key is the
  * account's, negated, so a client that sees one twice can de-duplicate it.
  */
+/**
+ * The installment each posted row pays ("3/12"), for the list's badge. The plan is read through the
+ * tenant filter, so only a plan the viewer can see names one; a row of a deleted plan has none.
+ */
+async function loadInstallments(transactions: Transaction[]): Promise<Map<number | undefined, TransactionInstallmentDto>> {
+  const byTransaction = new Map<number | undefined, TransactionInstallmentDto>();
+  const linked = transactions.filter((transaction) => transaction.installmentPlanKey && transaction.installmentNumber != null);
+  if (linked.length === 0) return byTransaction;
+  const plans = await DI.em.find(InstallmentPlan, { deletedAt: null, installmentPlanKey: { $in: [...new Set(linked.map((transaction) => transaction.installmentPlanKey?.installmentPlanKey ?? 0))] } });
+  const countByPlan = new Map(plans.map((plan) => [plan.installmentPlanKey, plan.installmentCount]));
+  for (const transaction of linked) {
+    const planKey = transaction.installmentPlanKey?.installmentPlanKey;
+    const count = planKey === undefined ? undefined : countByPlan.get(planKey);
+    if (planKey === undefined || count === undefined || transaction.installmentNumber == null) continue;
+    byTransaction.set(transaction.transactionKey, { installmentCount: count, installmentNumber: transaction.installmentNumber, installmentPlanKey: planKey });
+  }
+  return byTransaction;
+}
+
 async function loadRecurringSeries(transactions: Transaction[], tenantKey: number): Promise<Map<number | undefined, TransactionRecurringSeriesDto>> {
   const bySeries = new Map<number | undefined, TransactionRecurringSeriesDto>();
   if (transactions.length === 0) return bySeries;

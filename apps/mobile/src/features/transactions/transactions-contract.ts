@@ -58,6 +58,17 @@ const recurringSeries = z.object({
   status: tolerantEnum(['candidate', 'confirmed', 'dismissed', 'ended', 'paused'], 'unknown'),
 })
 
+/**
+ * The installment a posted row was linked to ("3/12"). Optional: a server from before installment
+ * plans omits it, and the row reads as an ordinary one. A malformed value reads as none.
+ */
+const transactionInstallment = z.object({
+  installmentPlanKey: positiveId,
+  installmentNumber: positiveId,
+  installmentCount: positiveId,
+})
+export type TransactionInstallmentDto = z.infer<typeof transactionInstallment>
+
 const transactionBaseShape = {
   transactionKey: transactionId,
   transactionDate: z.iso.datetime(),
@@ -94,6 +105,7 @@ const transactionBaseShape = {
   // Optional: a server from before transfer destinations omits it. A destination of a type this
   // build does not know reads as none rather than failing the list.
   transferDestination: transferDestination.nullable().optional().catch(null),
+  installment: transactionInstallment.nullable().optional().catch(null),
 } as const
 
 const accountTransactionSchema = z.object(transactionBaseShape)

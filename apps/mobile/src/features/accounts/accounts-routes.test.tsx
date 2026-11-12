@@ -30,6 +30,12 @@ jest.mock('./use-credit-card-statements', () => ({ useCreditCardStatements: () =
 jest.mock('@/features/account-insights/use-account-insights', () => ({ useAccountInsights: () => mockUseInsights() }))
 jest.mock('@/features/account-insights/use-account-metrics', () => ({ useAccountMetrics: (...args: unknown[]) => mockUseAccountMetrics(...args) }))
 jest.mock('@/features/transactions/use-recent-transactions', () => ({ useRecentTransactions: (...args: unknown[]) => mockUseRecentTransactions(...args) }))
+const installmentQuery = (data: unknown) => () => ({ data, error: null, isAccessTransition: false, isLoading: false, refetch: jest.fn() })
+jest.mock('@/features/installments/use-installment-plans', () => ({
+  useInstallmentPlans: installmentQuery({ installmentPlans: [] }),
+  useInstallmentCommitments: installmentQuery({ commitments: [{ accountKey: 42, accountName: 'Card', currency: 'EUR', remainingAmount: 90, remainingCount: 9, activePlanCount: 1, nextInstallment: null }] }),
+  useInstallmentSuggestions: installmentQuery({ suggestions: [] }),
+}))
 jest.mock('@/features/transactions/use-transactions', () => ({ useTransactions: () => ({ data: { transactions: [] }, isAccessTransition: false, isLoading: false, isRefreshing: false, isRefreshFailure: false, error: null, refetch: jest.fn() }) }))
 jest.mock('./accounts-screen', () => ({
   AccountsScreen: ({ onSelectAccount, onCreateAccount, onViewTransactions, onConnectBank, onCreateTransaction, onEditAccount }: { onSelectAccount: (id: number) => void; onCreateAccount: () => void; onViewTransactions: () => void; onConnectBank: () => void; onCreateTransaction: () => void; onEditAccount: (id: number) => void }) => {
@@ -39,9 +45,13 @@ jest.mock('./accounts-screen', () => ({
   },
 }))
 jest.mock('./account-detail-screen', () => ({
-  AccountDetailScreen: ({ state, onBack, onViewTransactions }: { state: { status: string }; onBack: () => void; onViewTransactions: () => void }) => {
+  AccountDetailScreen: ({ state, onBack, onViewTransactions, onOpenInstallmentPlan, onAcceptInstallmentSuggestion }: { state: { status: string; data?: { installmentPlans?: { commitment: { status: string; data?: { remainingAmount: number } | null } } } }; onBack: () => void; onViewTransactions: () => void; onOpenInstallmentPlan?: (planId: number) => void; onAcceptInstallmentSuggestion?: (key: string) => void }) => {
     const Native = jest.requireActual<typeof import('react-native')>('react-native')
-    return <><Native.Text>{state.status}</Native.Text><Native.Pressable accessibilityRole="button" accessibilityLabel="Back" onPress={onBack}><Native.Text>Back</Native.Text></Native.Pressable><Native.Pressable accessibilityRole="button" accessibilityLabel="Account transactions" onPress={onViewTransactions}><Native.Text>Account transactions</Native.Text></Native.Pressable></>
+    const commitment = state.data?.installmentPlans?.commitment
+    return <><Native.Text>{state.status}</Native.Text>
+      {commitment ? <Native.Text>{`commitment ${commitment.status} ${commitment.data?.remainingAmount ?? 'none'}`}</Native.Text> : null}
+      <Native.Pressable accessibilityRole="button" accessibilityLabel="Open plan" onPress={() => onOpenInstallmentPlan?.(5)}><Native.Text>Open plan</Native.Text></Native.Pressable>
+      <Native.Pressable accessibilityRole="button" accessibilityLabel="Accept suggestion" onPress={() => onAcceptInstallmentSuggestion?.('s-1')}><Native.Text>Accept suggestion</Native.Text></Native.Pressable><Native.Pressable accessibilityRole="button" accessibilityLabel="Back" onPress={onBack}><Native.Text>Back</Native.Text></Native.Pressable><Native.Pressable accessibilityRole="button" accessibilityLabel="Account transactions" onPress={onViewTransactions}><Native.Text>Account transactions</Native.Text></Native.Pressable></>
   },
 }))
 
@@ -126,6 +136,20 @@ describe('accounts route adapters', () => {
     const view = await render(<AccountDetailRoute />)
     await fireEvent.press(view.getByRole('button', { name: 'Back' }))
     expect(mockReplace).toHaveBeenCalledWith('/accounts')
+  })
+
+  it('gives a card its installment commitment and opens plans and suggestions under the account', async () => {
+    mockParams = { accountId: '42' }
+    mockUseAccount.mockReturnValue({
+      isInvalidId: false, isAccessTransition: false, isLoading: false, isRefreshFailure: false, refetch: jest.fn(),
+      data: { account: { accountFinancialInstitutionKey: null, accountKey: 42, accountName: 'Card', accountOwnerAppuserKey: { currencyKey: { code: 'EUR' } }, appuserCurrencyBalance: -100, balance: -100, currencyKey: { code: 'EUR' }, isOwnedByViewer: true, isPrivate: false, refreshedAt: null, source: 'manual', creditCard: { statementCloseDay: 5, paymentDueDay: 20, creditLimit: 1000 } } },
+    })
+    const view = await render(<AccountDetailRoute />)
+    expect(view.getByText('commitment loaded 90')).toBeOnTheScreen()
+    await fireEvent.press(view.getByRole('button', { name: 'Open plan' }))
+    expect(mockPush).toHaveBeenCalledWith({ pathname: '/accounts/[accountId]/installments/[planId]', params: { accountId: '42', planId: '5' } })
+    await fireEvent.press(view.getByRole('button', { name: 'Accept suggestion' }))
+    expect(mockPush).toHaveBeenCalledWith({ pathname: '/accounts/[accountId]/installments/create', params: { accountId: '42', suggestion: 's-1' } })
   })
 
   it('uses router history when Back has a previous route', async () => {

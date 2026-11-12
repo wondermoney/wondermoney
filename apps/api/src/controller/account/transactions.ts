@@ -16,6 +16,7 @@ import { TransactionMerchant } from '@entity/TransactionMerchant';
 import { TransactionType } from '@entity/TransactionType';
 import { authedContext, authedUser } from '@middleware/authed-context';
 import { convertWithStatus, rateScope } from '@service/currency/exchange-rate';
+import { linkPostedInstallments } from '@service/installment/installment-plan.service';
 import { loadLoanRepaymentLinks, loadViewerCurrencyAmounts, REPORT_CURRENCY_POPULATE } from '@service/reports/report-currency';
 import { type RuleSuggestion, suggestRuleAfterRecategorization } from '@service/rules/rule-suggestion.service';
 import { recalculateChainFromAccountBalance } from '@service/transaction/balance-chain.service';
@@ -38,6 +39,7 @@ import { retypeTransaction, TRANSFER_DESTINATION_POPULATE, transferDestinationOf
 import { reconcileTransfers } from '@service/transaction/transfer-matching.service';
 import { applyUserCategorization } from '@service/transaction/user-categorization.service';
 import { BadRequestError, InternalServerError, NotFoundError, UnauthorizedError } from '@utils/errors';
+import logger from '@utils/logger';
 import { addMoney } from '@utils/money';
 import {
   createTransactionRequestSchema,
@@ -146,6 +148,13 @@ export async function createTransaction(req: Request, res: Response, next: NextF
         source: 'manual-transaction',
         tenantKey: created.tenantKey!.tenantKey,
         transactionKey: created.transactionKey,
+      });
+    }
+    // A hand-entered row that names an installment of one of the card's plans ("PARC 03/12") pays
+    // it, as a synced one does. Best-effort: the row is already stored.
+    if (created.tenantKey) {
+      await linkPostedInstallments(DI.em, { accountKeys: [accountId], tenantKey: created.tenantKey.tenantKey }).catch((error: unknown) => {
+        logger.warn({ error: error instanceof Error ? error.message : String(error) }, 'Installment linking failed');
       });
     }
     return res.status(201).json({ possibleDuplicate: duplicateMatch !== null });

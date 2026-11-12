@@ -571,7 +571,8 @@
     "lowPoint": "Ponto mais baixo nos próximos {{days}} dias",
     "unavailable": "Ainda não há dados suficientes para prever esta conta.",
     "next": "Próximos pagamentos previstos",
-    "notCounted": "Não conta nos relatórios"
+    "notCounted": "Não conta nos relatórios",
+    "nextInstallments": "Próximas prestações"
   },
   "accountRecalculate": {
     "action": "Recalcular saldos",
@@ -4556,6 +4557,108 @@
     "transactionsInvalid": "Estas transações não puderam ser verificadas e não são apresentadas.",
     "transactionsEmpty": "Não há transações neste extrato.",
     "transactionUnavailable": "Detalhes da transação indisponíveis"
+  },
+  "installments": {
+    "title": "Prestações",
+    "badgeLabel": "Prestação {{number}} de {{total}}",
+    "transactionDetail": "Prestação",
+    "viewPlan": "Ver plano de prestações",
+    "total": "Total",
+    "paid": "Pago",
+    "remaining": "Em falta",
+    "paidCount": "{{paid}} de {{total}} pagas",
+    "remainingCount_one": "{{count}} prestação por vir",
+    "remainingCount_other": "{{count}} prestações por vir",
+    "unmatchedCount_one": "{{count}} prestação passada sem correspondência",
+    "unmatchedCount_other": "{{count}} prestações passadas sem correspondência",
+    "activePlans_one": "{{count}} plano ativo",
+    "activePlans_other": "{{count}} planos ativos",
+    "commitment": "Ainda por cobrar",
+    "commitmentError": "Não foi possível carregar o que as prestações ainda têm por cobrar.",
+    "next": "Seguinte: {{amount}} a {{date}}, {{name}}",
+    "nextDate": "Seguinte a {{date}}",
+    "finished": "Liquidado",
+    "plansError": "Não foi possível carregar os planos de prestações.",
+    "empty": "Este cartão ainda não tem planos de prestações.",
+    "projectionNote": "As prestações futuras são projeções: não são transações e não contam nos saldos.",
+    "status": {
+      "paid": "Paga",
+      "upcoming": "Por cobrar",
+      "unmatched": "Sem correspondência"
+    },
+    "detail": {
+      "loading": "A carregar o plano de prestações…",
+      "descriptor": "Comprado a {{date}} · {{total}} prestações",
+      "totalMeta": "Em {{total}} prestações",
+      "scheduleTitle": "Calendário",
+      "scheduled": "Prevista a {{date}}",
+      "statementDue": "Extrato vence a {{date}}",
+      "posted": "Lançada a {{date}}",
+      "stale": "Não foi possível atualizar este plano, por isso pode estar desatualizado.",
+      "notFound": {
+        "title": "Plano não encontrado",
+        "message": "Este plano de prestações foi eliminado ou não está visível para si."
+      },
+      "invalidId": {
+        "title": "Plano não encontrado",
+        "message": "Esta ligação não aponta para um plano de prestações."
+      },
+      "invalidResponse": {
+        "title": "Plano indisponível",
+        "message": "Não foi possível verificar o plano, por isso não é mostrado."
+      },
+      "error": {
+        "title": "Não foi possível carregar o plano",
+        "message": "Verifique a ligação e tente novamente."
+      }
+    },
+    "delete": {
+      "action": "Eliminar plano",
+      "confirmTitle": "Eliminar este plano de prestações?",
+      "confirmMessage": "O calendário é removido. As transações lançadas ficam no cartão, já sem ligação ao plano.",
+      "confirm": "Eliminar"
+    },
+    "failures": {
+      "demo": "Isto não está disponível no modo de demonstração.",
+      "access": "Não tem acesso aos planos deste cartão.",
+      "invalid": "O plano foi recusado. Verifique os dados e tente novamente.",
+      "conflict": "Uma destas transações já está ligada a outra prestação.",
+      "not-found": "Este cartão ou plano já não está disponível.",
+      "network": "Não foi possível contactar o servidor. Verifique os planos do cartão antes de tentar novamente.",
+      "general": "Algo correu mal. Tente novamente."
+    },
+    "create": {
+      "action": "Adicionar plano",
+      "title": "Novo plano de prestações",
+      "fromSuggestionTitle": "Plano a partir de prestações detetadas",
+      "save": "Criar plano",
+      "saving": "A criar o plano…",
+      "loading": "A carregar…",
+      "description": "Descrição",
+      "purchaseDate": "Data da compra",
+      "count": "Prestações",
+      "links_one": "Ao criar o plano, {{count}} transação lançada fica ligada à sua prestação.",
+      "links_other": "Ao criar o plano, {{count}} transações lançadas ficam ligadas às suas prestações.",
+      "previewTitle": "Pré-visualização",
+      "each": "Cada uma",
+      "remainder": "Fica com o arredondamento",
+      "range": "Prestações {{from}} a {{to}} de {{total}}",
+      "errors": {
+        "total": "Introduza um valor acima de zero com duas casas decimais no máximo.",
+        "count": "Introduza um número de {{min}} a {{max}}.",
+        "countLinks": "Uma transação detetada é a prestação {{number}}, por isso o plano precisa de pelo menos essas prestações."
+      }
+    },
+    "suggestions": {
+      "title": "Prestações detetadas",
+      "helper": "Estas transações do cartão parecem prestações de uma compra sem plano. Nada muda até criar um.",
+      "schedule": "{{total}} prestações de {{amount}}",
+      "found_one": "{{count}} encontrada · comprado a {{date}}",
+      "found_other": "{{count}} encontradas · comprado a {{date}}",
+      "accept": "Criar plano",
+      "acceptNamed": "Criar plano para {{name}}",
+      "unavailable": "Esta sugestão já não está disponível. Pode ainda criar o plano manualmente."
+    }
   },
   "rules": {
     "title": "Regras",

@@ -52,6 +52,39 @@ Os lembretes estão ativados por omissão. Desativa **Lembretes de pagamento do 
 
 Numa instância alojada por ti, os lembretes precisam de um fornecedor de email (vê [Configurar a tua instância](/pt/docs/self-hosting/configure#email)). Define `CREDIT_CARD_DUE_REMINDER_DAYS` no worker para mudar quantos dias antes do vencimento são enviados.
 
+## Compras a prestações
+
+Em Portugal e no Brasil uma compra com cartão é muitas vezes paga em prestações mensais fixas: o banco mostra `PARC 03/12` ou `3/12` na terceira de doze. Um plano de prestações regista a compra uma vez e distribui as prestações, uma por extrato, para veres o que o cartão ainda tem para cobrar.
+
+### Criar um plano
+
+1. Abre a página da conta do cartão. A secção **Prestações** está por baixo do resumo do extrato.
+2. Escolhe **Novo plano de prestações** (no telemóvel, **Adicionar plano**).
+3. Indica uma descrição, a data da compra, o total e o número de prestações (de 2 a 120). A categoria é opcional.
+4. Guarda.
+
+Cada prestação é o total dividido pelo número de prestações, arredondado para baixo ao cêntimo; a última fica com o que sobra, por isso somam sempre exatamente o total. 100 em 3 prestações são 33,33, 33,33 e 33,34. A primeira prestação fica no extrato que contém a data da compra e cada uma das seguintes no extrato seguinte, datadas pelos dias de fecho e de vencimento do cartão. Numa conta sem ciclo de extrato, caem todos os meses no dia do mês da compra.
+
+### As prestações futuras são projeções
+
+As prestações que ainda faltam são projeções, como a previsão do saldo. Não são transações: não mudam o saldo da conta, o património líquido, as listas de transações nem os relatórios. Aparecem como itens previstos no plano, no valor **Ainda por cobrar** do cartão, na previsão do saldo e no calendário de contas.
+
+Quando o banco lança uma prestação, o WonderMoney liga a transação lançada à sua prestação, que passa a aparecer como **Paga**. Nada é contado duas vezes, porque a projeção nunca foi uma transação. Uma transação lançada é ligada quando está no cartão do plano, a descrição indica a prestação (`PARC 03/12` num plano de 12 prestações) e o valor coincide. Nas listas, a transação mostra a prestação como `3/12`.
+
+Uma prestação passada sem nenhuma transação lançada ligada aparece como **Sem correspondência**. Deixa de contar para o que o cartão ainda tem para cobrar.
+
+### Orçamentos
+
+Uma prestação lançada conta no mês de orçamento do seu próprio extrato: o mês em que a prestação está prevista. Isto vale mesmo quando o banco data todas as prestações no dia da compra original, por isso uma compra em 12 prestações nunca cai inteira no orçamento de um só mês. As prestações que ainda faltam não contam em nenhum orçamento até o banco as lançar.
+
+### Planos sugeridos
+
+Quando as transações lançadas num cartão têm marcas de prestação como `PARC 01/04` e `PARC 02/04`, a página do cartão mostra-as em **Possíveis compras a prestações** (no telemóvel, **Prestações detetadas**). Escolhe **Criar plano** para abrir o formulário preenchido a partir dessas transações, confirma e guarda. O plano só é criado quando guardas, e as transações de onde veio ficam ligadas às suas prestações.
+
+### Alterar ou apagar um plano
+
+Abre um plano para veres cada prestação com a data, a data de vencimento do extrato, o valor e o estado. Podes alterar a descrição ou a categoria, ou apagá-lo. Apagar um plano mantém as transações lançadas; apenas deixam de estar ligadas a ele.
+
 ## Ligações relacionadas
 
 - [Compreender transações](/pt/docs/accounts-transactions/understand-transactions)

@@ -110,6 +110,8 @@ export const transactionSchema = open('Transaction', {
   categoryKey: nullableNumber,
   currencyKey: z.object({ code: z.string() }).optional(),
   description: nullableString,
+  /** The installment a posted transaction pays: `installmentNumber` of `installmentCount`, shown as "3/12". */
+  installment: z.looseObject({ installmentCount: z.number().int(), installmentNumber: z.number().int(), installmentPlanKey: id }).nullable().optional(),
   notes: nullableString,
   settlementAmount: nullableNumber,
   splits: z.array(transactionSplitSchema).optional(),
@@ -622,6 +624,101 @@ export const uploadUrlSchema = open('UploadUrl', {
 });
 
 export const csvFileSchema = z.string().openapi('CsvFile', { description: 'A CSV file' });
+
+/** A card installment on the bills calendar, on its scheduled day: paid once posted, otherwise projected. */
+export const recurringInstallmentSchema = open('RecurringInstallment', {
+  amount: money,
+  currency: z.string(),
+  date,
+  installmentCount: z.number().int(),
+  installmentNumber: z.number().int(),
+  installmentPlanKey: id,
+  name: z.string(),
+  status: z.enum(['paid', 'projected']),
+});
+
+const installmentShape = {
+  amount: money,
+  dueDate: date.nullable(),
+  installmentNumber: z.number().int(),
+  postedAmount: nullableNumber,
+  postedDate: date.nullable(),
+  scheduledDate: date,
+  statementDate: date.nullable(),
+  status: z.enum(['paid', 'unmatched', 'upcoming']),
+  transactionKey: nullableNumber,
+};
+
+/**
+ * One scheduled installment of a plan. A projection, never a transaction: `paid` once a posted
+ * transaction is linked to it, `upcoming` from its scheduled day on, `unmatched` when that day passed
+ * with no posted transaction linked.
+ */
+export const installmentSchema = open('Installment', installmentShape);
+
+const installmentPlanShape = {
+  accountKey: id,
+  accountName: z.string(),
+  categoryKey: nullableNumber,
+  currency: z.string(),
+  description: z.string(),
+  installmentCount: z.number().int(),
+  installmentPlanKey: id,
+  nextInstallment: installmentSchema.nullable(),
+  paidAmount: money,
+  paidCount: z.number().int(),
+  purchaseDate: date,
+  remainingAmount: money,
+  remainingCount: z.number().int(),
+  totalAmount: money,
+  unmatchedCount: z.number().int(),
+};
+
+/** A card purchase in monthly installments. Amounts are positive, in the account's currency. */
+export const installmentPlanSchema = open('InstallmentPlan', installmentPlanShape);
+
+export const installmentPlanDetailSchema = open('InstallmentPlanDetail', {
+  ...installmentPlanShape,
+  installments: z.array(installmentSchema),
+});
+
+/** What is still to come on a card: the sum of its plans' upcoming installments. */
+export const installmentCommitmentSchema = open('InstallmentCommitment', {
+  accountKey: id,
+  accountName: z.string(),
+  activePlanCount: z.number().int(),
+  currency: z.string(),
+  nextInstallment: open('InstallmentCommitmentNext', {
+    amount: money,
+    date,
+    description: z.string(),
+    installmentCount: z.number().int(),
+    installmentNumber: z.number().int(),
+    installmentPlanKey: id,
+  }).nullable(),
+  remainingAmount: money,
+  remainingCount: z.number().int(),
+});
+
+/** Posted transactions that look like one purchase's installments. Only a suggestion: nothing is created until it is accepted. */
+export const installmentSuggestionSchema = open('InstallmentSuggestion', {
+  accountKey: id,
+  accountName: z.string(),
+  currency: z.string(),
+  description: z.string(),
+  installmentAmount: money,
+  installmentCount: z.number().int(),
+  key: z.string(),
+  purchaseDate: date,
+  totalAmount: money,
+  transactions: z.array(open('InstallmentSuggestionTransaction', {
+    amount: money,
+    description: z.string(),
+    installmentNumber: z.number().int(),
+    transactionDate: date,
+    transactionKey: id,
+  })),
+});
 
 /** Response for a list endpoint: `{ [key]: Item[] }` plus any other fields. */
 export function listResponse<T extends z.ZodType>(refId: string, key: string, item: T) {

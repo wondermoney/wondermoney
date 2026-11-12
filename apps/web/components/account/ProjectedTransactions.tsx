@@ -2,9 +2,13 @@
 
 import { useTranslations } from "next-intl";
 
+import { InstallmentBadge } from "@/components/installments/InstallmentBadge";
 import { Amount } from "@/components/ui/Amount";
 import { Badge } from "@/components/ui/badge";
-import type { ForecastOccurrence } from "@/lib/api/account/useAccountForecast";
+import type {
+  ForecastInstallment,
+  ForecastOccurrence,
+} from "@/lib/api/account/useAccountForecast";
 import { cn } from "@/lib/utils";
 import { transactionDisplayDate } from "@/lib/utils/transaction-date";
 import { useFormatShortDate } from "@/lib/utils/useFormatShortDate";
@@ -12,10 +16,47 @@ import { useFormatShortDate } from "@/lib/utils/useFormatShortDate";
 interface ProjectedTransactionsProps {
   className?: string;
   occurrences: ForecastOccurrence[];
+  /** Upcoming card installments, projections too; listed with the recurring ones by date. */
+  installments?: ForecastInstallment[];
+}
+
+interface ProjectedRow {
+  key: string;
+  name: string;
+  date: string;
+  amount: number;
+  currency: string;
+  installment: ForecastInstallment | null;
+}
+
+/** Recurring occurrences and upcoming installments as one date-ordered list. */
+export function projectedRows(
+  occurrences: readonly ForecastOccurrence[],
+  installments: readonly ForecastInstallment[] = [],
+): ProjectedRow[] {
+  return [
+    ...occurrences.map((occurrence) => ({
+      key: `${occurrence.seriesKey}-${occurrence.date}`,
+      name: occurrence.name,
+      date: occurrence.date,
+      amount: occurrence.amount,
+      currency: occurrence.currency,
+      installment: null,
+    })),
+    ...installments.map((installment) => ({
+      key: `installment-${installment.installmentPlanKey}-${installment.installmentNumber}`,
+      name: installment.name,
+      date: installment.date,
+      amount: installment.amount,
+      currency: installment.currency,
+      installment,
+    })),
+  ].sort((left, right) => left.date.localeCompare(right.date));
 }
 
 /**
- * The recurring payments still to come, above an account's transaction list.
+ * The recurring payments and card installments still to come, above an account's transaction
+ * list.
  *
  * These are projections, not transactions: they are rendered outside the ledger (so no filter,
  * selection, edit or total sees them), with a dashed edge and a "Projected" badge. Nothing is
@@ -24,11 +65,13 @@ interface ProjectedTransactionsProps {
 export default function ProjectedTransactions({
   className,
   occurrences,
+  installments,
 }: ProjectedTransactionsProps) {
   const t = useTranslations();
   const formatShortDate = useFormatShortDate();
+  const rows = projectedRows(occurrences, installments);
 
-  if (occurrences.length === 0) return null;
+  if (rows.length === 0) return null;
 
   return (
     <section
@@ -47,15 +90,18 @@ export default function ProjectedTransactions({
         </p>
       </div>
       <ul className="divide-border divide-y divide-dashed">
-        {occurrences.map((occurrence) => (
+        {rows.map((occurrence) => (
           <li
-            key={`${occurrence.seriesKey}-${occurrence.date}`}
+            key={occurrence.key}
             className="flex items-center justify-between gap-3 px-4 py-3"
           >
             <div className="min-w-0">
-              <p className="text-foreground truncate text-sm font-medium">
-                {occurrence.name}
-              </p>
+              <div className="flex min-w-0 items-center gap-2">
+                <p className="text-foreground truncate text-sm font-medium">
+                  {occurrence.name}
+                </p>
+                <InstallmentBadge installment={occurrence.installment} />
+              </div>
               <p className="text-muted-foreground text-xs">
                 {formatShortDate(
                   transactionDisplayDate(`${occurrence.date}T00:00:00.000Z`),

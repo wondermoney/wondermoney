@@ -91,6 +91,7 @@ const AUTHED_MOUNTS: Record<string, () => Promise<Router>> = {
   '/v1/financial-markets': async () => (await import('@route/financial-markets')).default,
   '/v1/goals': async () => (await import('@route/goal')).default,
   '/v1/household': async () => (await import('@route/household')).default,
+  '/v1/installment-plans': async () => (await import('@route/installment-plan')).default,
   '/v1/loan': async () => (await import('@route/loan')).default,
   '/v1/manual-assets': async () => (await import('@route/manual-asset')).default,
   '/v1/net-worth': async () => (await import('@route/net-worth')).default,

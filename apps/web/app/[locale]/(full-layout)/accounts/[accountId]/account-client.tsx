@@ -18,6 +18,7 @@ import CreditCardStatementSummary from "@/components/account/CreditCardStatement
 import MetricsCards from "@/components/account/MetricsCards";
 import ProjectedTransactions from "@/components/account/ProjectedTransactions";
 import { clampSyncedAt } from "@/components/account/sync-time";
+import CardInstallments from "@/components/installments/CardInstallments";
 import { Button } from "@/components/ui/button";
 import { DataProvenance } from "@/components/ui/DataProvenance";
 import { FxStatusBadge } from "@/components/ui/FxStatusBadge";
@@ -223,6 +224,16 @@ export default function AccountClient({
         />
       ) : null}
 
+      {/* A card's purchases in installments: what is still to be charged, its plans and the
+          rows that look like one. */}
+      {account.creditCard ? (
+        <CardInstallments
+          accountKey={account.accountKey}
+          currency={account.currencyKey.code}
+          categories={configsData?.categories ?? []}
+        />
+      ) : null}
+
       {/* Balance chart */}
       <Section id="balance-growth-heading" title={t("balance-growth")}>
         <div>
@@ -287,6 +298,7 @@ export default function AccountClient({
             <div className="flex flex-col gap-4">
               <ProjectedTransactions
                 occurrences={accountForecast?.projected ?? []}
+                installments={accountForecast?.projectedInstallments ?? []}
               />
               <AccountTransactionsTable
                 layout="ledger"

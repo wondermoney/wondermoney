@@ -23,6 +23,7 @@ import type { CategoryViewModel } from '@/features/categories/categories-view-mo
 import { displayCategoryName } from '@/features/categories/categories-view-model'
 import { TagChips, TagDot } from '@/features/tags/tag-chip'
 import { TagPickerSheet, type CreateTagOutcome, type TagsState } from '@/features/tags/tag-picker-sheet'
+import { InstallmentBadge, useInstallmentLabel } from '@/features/installments/installment-badge'
 import { formatTransactionDate, localCalendarDay, localDayRange } from '@/lib/dates/transaction-date'
 import { formatCategoryName } from '@/lib/formatters/category-name'
 import { amountExpressionResult, formatNumberInput, parseAmountInput } from '@/lib/formatters/decimal-input'
@@ -127,6 +128,8 @@ type Props = Readonly<{
   onSaveSplit?: (transactionId: number, lines: readonly TransactionSplitLineRequest[]) => Promise<ReviewResult>
   /** Remove a transaction's split. Omitted, the editor hides Remove split. */
   onRemoveSplit?: (transactionId: number) => Promise<ReviewResult>
+  /** Open the installment plan a row belongs to. Omitted, the action is not offered. */
+  onOpenInstallmentPlan?: (transaction: TransactionViewModel) => void
 }>
 
 export function TransactionsScreen(props: Props) {
@@ -185,6 +188,7 @@ function TransactionsContent({
   onSetTransfer,
   transferDestinations = { accounts: [], portfolios: [], goals: [] },
   onCreateRule,
+  onOpenInstallmentPlan,
   onSaveSplit,
   onRemoveSplit,
   filtersOpen,
@@ -581,6 +585,7 @@ function TransactionsContent({
       onStartEditAmount={startEditAmount}
       onOpenMenu={openRowMenu}
       onCreateRule={onCreateRule}
+      onOpenInstallmentPlan={onOpenInstallmentPlan}
       onSplit={openSplit}
       canSplit={Boolean(onSaveSplit) && categories.status === 'loaded'}
       palette={palette}
@@ -1080,6 +1085,7 @@ type TransactionRowProps = Readonly<{
   onStartEditAmount: (item: TransactionViewModel) => void
   onOpenMenu: (id: number) => void
   onCreateRule?: (item: TransactionViewModel) => void
+  onOpenInstallmentPlan?: (item: TransactionViewModel) => void
   /** Opens the full-screen split editor for this row. */
   onSplit?: (id: number) => void
   /** Whether the Split action is offered at all (the route provides a handler). */
@@ -1117,6 +1123,7 @@ const TransactionRow = memo(function TransactionRow({
   onStartEditAmount,
   onOpenMenu,
   onCreateRule,
+  onOpenInstallmentPlan,
   onSplit,
   canSplit,
   palette,
@@ -1124,6 +1131,7 @@ const TransactionRow = memo(function TransactionRow({
 }: TransactionRowProps) {
   const { hidden: amountsHidden } = usePrivacyMode()
   const { t } = useTranslation()
+  const installmentLabel = useInstallmentLabel()
   // With no exchange rate there is no amount in the user's currency: the row shows its original one.
   const shownValue = item.fx.status === 'missing' ? item.fx.amount : item.amount
   const shownCurrency = item.fx.status === 'missing' ? item.fx.currency : item.currency
@@ -1145,6 +1153,7 @@ const TransactionRow = memo(function TransactionRow({
   const editable = isSelectable(item)
   // A split row shows its count in place of the one category, as web's ledger does.
   const splitLabel = item.isSplit ? t('transactions.split.summary', { count: splitCategoryCount(item.splits) }) : null
+  const installment = item.installment ? installmentLabel(item.installment) : null
   const categoryLabel = item.category ? formatCategoryName(item.category) : null
   const figure = shownValue !== null && shownCurrency !== null
     ? <Amount currency={shownCurrency} locale={locale} size="amountBase" value={shownValue} />
@@ -1155,7 +1164,8 @@ const TransactionRow = memo(function TransactionRow({
     <View style={[!monthStart && { borderTopWidth: 1, borderTopColor: palette.border }, item.hidden && styles.hiddenRow]}>
       {monthStart ? <ListGroupHeading first={isFirst} title={formatMonth(item.date, locale)} variant="heading" /> : null}
       <ListRow
-        accessibilityLabel={[title, account, signedAmount, direction, fullDate, splitLabel, fxCopy ? `${fxCopy.label}. ${fxCopy.hint}` : null].filter(Boolean).join(', ')}
+        accessibilityLabel={[title, installment, account, signedAmount, direction, fullDate, splitLabel, fxCopy ? `${fxCopy.label}. ${fxCopy.hint}` : null].filter(Boolean).join(', ')}
+        badge={<InstallmentBadge installment={item.installment} />}
         density="comfortable"
         figure={figure}
         leading={selectable ? (
@@ -1196,6 +1206,7 @@ const TransactionRow = memo(function TransactionRow({
           <Detail label={t('transactions.convertedBalanceAfter')} value={formatAvailableMoney(item.convertedBalance, item.convertedBalanceCurrency, locale, t, amountsHidden)} data />
           {item.isTransfer ? <Detail label={t('transactions.transfer.label')} value={transferDetail(item, t)} /> : null}
           {!item.isTransfer && !item.categoryCountsAsSpending ? <Detail label={t('transactions.transfer.spendingLabel')} value={t('transactions.transfer.notSpending')} /> : null}
+          {item.installment ? <Detail label={t('installments.transactionDetail')} value={installment ?? ''} /> : null}
           {item.recurring ? <Detail label={t('transactions.recurring')} value={`${item.recurring.displayName} · ${t(`transactions.recurringType.${item.recurring.type}`)}`} /> : null}
           {item.isSplit ? (
             <View style={styles.detail}>
@@ -1270,6 +1281,9 @@ const TransactionRow = memo(function TransactionRow({
               ) : null}
               {editable && canEditTags ? (
                 <UiButton disabled={mutationPending} icon="tag" label={t('tags.edit')} onPress={() => onEditTags(item.id)} size="sm" variant="secondary" />
+              ) : null}
+              {editable && item.installment && onOpenInstallmentPlan ? (
+                <UiButton disabled={mutationPending} icon="calendar" label={t('installments.viewPlan')} onPress={() => onOpenInstallmentPlan(item)} size="sm" variant="secondary" />
               ) : null}
               {editable && onCreateRule ? (
                 <UiButton disabled={mutationPending} icon="sliders-horizontal" label={t('rules.createFromTransaction')} onPress={() => onCreateRule(item)} size="sm" variant="secondary" />

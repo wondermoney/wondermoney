@@ -245,6 +245,10 @@ export function TransactionsRoute({ perAccount = false }: { perAccount?: boolean
     onCreateTag={createTag}
     onSetTransfer={runSetTransfer}
     transferDestinations={transferDestinations}
+    onOpenInstallmentPlan={(row) => {
+      if (!row.installment) return
+      router.push({ pathname: '/accounts/[accountId]/installments/[planId]', params: { accountId: String(row.accountId), planId: String(row.installment.installmentPlanKey) } })
+    }}
     onCreateRule={(row) => setRuleSeed(seedRuleFromTransaction({ merchant: row.merchant, description: row.description, categoryId: row.categoryId }))}
     onSaveSplit={runSaveSplit}
     onRemoveSplit={runRemoveSplit}
