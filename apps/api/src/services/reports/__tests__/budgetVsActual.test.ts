@@ -47,16 +47,20 @@ describe('getBudgetVsActualReport covered months', () => {
     }) as unknown as ReportServiceInput;
 
   /** One budget, one template per `[year, month]`, and no transactions. */
-  const givenTemplatesFor = (...months: [number, number][]) => {
-    const templates = months.map(([year, month]) => ({
+  const givenTemplatesFor = (...months: ([number, number, number] | [number, number])[]) => {
+    givenBudget(1, ...months);
+  };
+  /** As {@link givenTemplatesFor}, for a budget whose months start on `periodStartDay`; a third number is that month's amount. */
+  const givenBudget = (periodStartDay: number, ...months: ([number, number, number] | [number, number])[]) => {
+    const templates = months.map(([year, month, amount]) => ({
       accounts: { getItems: () => [] },
-      amountBudgeted: 100,
+      amountBudgeted: amount ?? 100,
       categoryKey: CATEGORY,
       month,
       year,
     }));
     mocks.find
-      .mockResolvedValueOnce([{ budgetKey: 1, currencyKey: { code: 'EUR' } }]) // budgets
+      .mockResolvedValueOnce([{ budgetKey: 1, currencyKey: { code: 'EUR' }, periodStartDay }]) // budgets
       .mockResolvedValueOnce(templates) // templates
       .mockResolvedValueOnce([]); // transactions
   };
@@ -105,6 +109,27 @@ describe('getBudgetVsActualReport covered months', () => {
 
     const { data: rows } = await getBudgetVsActualReport(
       makeInput({ fromDate: '2026-07-31T23:00:00.000Z', timezone: 'Middle/Earth', toDate: '2026-08-31T22:59:59.999Z' }),
+    );
+
+    expect(rows).toEqual([expect.objectContaining({ budgeted: 100 })]);
+  });
+
+  it('budgets the budget months the period touches, which a start day after the 1st moves', async () => {
+    // With start day 25, 26 to 30 November is in December's budget month (25 November to 24 December).
+    givenBudget(25, [2026, 11, 100], [2026, 12, 200]);
+
+    const { data: rows } = await getBudgetVsActualReport(
+      makeInput({ fromDate: '2026-11-26T00:00:00.000Z', timezone: 'UTC', toDate: '2026-11-30T23:59:59.999Z' }),
+    );
+
+    expect(rows).toEqual([expect.objectContaining({ budgeted: 200 })]);
+  });
+
+  it('with start day 25 keeps 24 November in November\'s budget month', async () => {
+    givenBudget(25, [2026, 11, 100], [2026, 12, 200]);
+
+    const { data: rows } = await getBudgetVsActualReport(
+      makeInput({ fromDate: '2026-11-01T00:00:00.000Z', timezone: 'UTC', toDate: '2026-11-24T23:59:59.999Z' }),
     );
 
     expect(rows).toEqual([expect.objectContaining({ budgeted: 100 })]);

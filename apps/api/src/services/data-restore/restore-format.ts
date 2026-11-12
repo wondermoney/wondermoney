@@ -1,5 +1,6 @@
 import { z } from 'zod';
 
+import { BUDGET_PERIOD_START_DAY_MAX, BUDGET_PERIOD_START_DAY_MIN } from '@service/budget/budget-period';
 import { EXPORT_FORMAT } from '@service/data-export/export-format';
 
 /**
@@ -10,9 +11,9 @@ import { EXPORT_FORMAT } from '@service/data-export/export-format';
  * Versions: a restore reads every 1.x export. Rows are parsed leniently about fields (an unknown
  * field from a newer minor version is dropped), strictly about values. An older minor version is
  * brought up to the current one by {@link MINOR_MIGRATIONS} before the rows are checked. 1.1 to
- * 1.3 only added files (manual assets, loan rate periods), a loan rate type and an optional field
- * (a loan's secured asset), which an older export simply does not have, so there is nothing to
- * migrate yet. Another major version is refused.
+ * 1.4 only added files (manual assets, loan rate periods), a loan rate type and optional fields
+ * (a loan's secured asset, a budget's month start day, which defaults to the 1st), which an older
+ * export simply does not have, so there is nothing to migrate yet. Another major version is refused.
  */
 export const RESTORE_MAJOR_VERSION = 1;
 
@@ -178,7 +179,11 @@ const recurringSeries = z.object({
 
 const recurringOccurrence = z.object({ amount: optionalDecimal, currency: currency.nullable(), date: timestamp, matchStatus: z.enum(['manual_added', 'manual_removed', 'matched', 'missed', 'predicted']), seriesId: id, transactionId: ref });
 
-const budget = z.object({ currency, description: text(10_000), id, memberId: ref, name: name(255), numAdults: z.number().int().min(0).max(1000), numDependents: z.number().int().min(0).max(1000) });
+const budget = z.object({
+  currency, description: text(10_000), id, memberId: ref, name: name(255), numAdults: z.number().int().min(0).max(1000), numDependents: z.number().int().min(0).max(1000),
+  /** The day the budget's months start on (1.4); an older export's budgets start on the 1st. */
+  periodStartDay: z.number().int().min(BUDGET_PERIOD_START_DAY_MIN).max(BUDGET_PERIOD_START_DAY_MAX).default(1),
+});
 const budgetCategory = z.object({ accountIds: z.array(id).max(1000), amount: optionalDecimal, budgetId: id, categoryId: id, month: z.number().int().min(0).max(12), recurrency: z.enum(RECURRENCY).nullable(), year: z.number().int().min(1900).max(9999) });
 const budgetIncome = z.object({ amount: optionalDecimal, budgetId: id, name: name(255), recurrency: z.enum(RECURRENCY).nullable() });
 

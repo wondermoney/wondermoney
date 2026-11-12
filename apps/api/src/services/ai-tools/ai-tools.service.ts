@@ -8,6 +8,7 @@ import { BudgetTemplateCategory } from '@entity/BudgetTemplateCategory';
 import { Category } from '@entity/Category';
 import { Tenant } from '@entity/Tenant';
 import { Transaction } from '@entity/Transaction';
+import { type BudgetMonth, budgetMonthOf, budgetPeriodRange, type BudgetPeriodSettings, shiftBudgetMonth } from '@service/budget/budget-period';
 import { MikroOrmTenantAggregationRepository } from '@service/budget/tenant-aggregation.repository';
 import { rateScope } from '@service/currency/exchange-rate';
 import { GoalService } from '@service/goal/goal.service';
@@ -320,6 +321,7 @@ export const AI_TOOL_DEFINITIONS: readonly AiToolDefinition<never>[] = [
         name: budget.name,
         numAdults: budget.numAdults,
         numDependents: budget.numDependents,
+        periodStartDay: budget.periodStartDay,
         rolloverCarriesOverspend: budget.rolloverCarriesOverspend,
       }));
       return result(
@@ -410,21 +412,23 @@ interface BudgetStatus {
 }
 
 async function budgetStatusFor(viewer: AiToolViewer, period: PeriodInput): Promise<BudgetStatus> {
-  const resolved = AiToolPeriodService.resolve(period);
+  const now = new Date();
+  const resolved = AiToolPeriodService.resolve(period, now);
   const currency = viewer.appuser.currencyKey.code || 'EUR';
   const budget = await DI.em.findOne(Budget, { deletedAt: undefined }, { populate: ['currencyKey'] });
   if (!budget) {
     return { budgeted: 0, currency, period: resolved.key, recordCount: 0, remaining: 0, spent: 0, status: 'no_budget' };
   }
+  const window = budgetWindow(budget, resolved, now);
   const budgetRows = await DI.em.find(BudgetTemplateCategory, {
-    $or: getPeriodMonths(resolved),
+    $or: window.months,
     budgetKey: budget,
     categoryKey: { deletedAt: undefined },
   }, { populate: ['categoryKey'] });
   const budgeted = budgetRows.reduce((sum, row) => sum + toNumber(row.amountBudgeted), 0);
   const budgetCategories = budgetRows.map((row) => row.categoryKey);
   const budgetCategoryKeys = new Set(budgetCategories.map((category) => category.categoryKey));
-  const spendingLines = budgetCategories.length ? await findOwnSpendingLines(viewer, resolved) : [];
+  const spendingLines = budgetCategories.length ? await findOwnSpendingLines(viewer, window) : [];
   const spent = spendingLines.reduce((sum, line) => (line.category && budgetCategoryKeys.has(line.category.categoryKey) ? sum + Math.abs(line.amount ?? 0) : sum), 0);
   return {
     budgeted,
@@ -486,17 +490,30 @@ function getEffectiveAmount(transaction: TransactionLike): number {
   return toNumber(getEffectiveAppuserAmount(transaction));
 }
 
-function getPeriodMonths(period: ReturnType<typeof AiToolPeriodService.resolve>) {
-  const months: { month: number; year: number }[] = [];
-  const cursor = new Date(period.start.getFullYear(), period.start.getMonth(), 1);
-  const end = new Date(period.end.getFullYear(), period.end.getMonth(), 1);
-
-  while (cursor <= end) {
-    months.push({ month: cursor.getMonth() + 1, year: cursor.getFullYear() });
-    cursor.setMonth(cursor.getMonth() + 1);
-  }
-
-  return months;
+/**
+ * The budget months a period reads and the instants their spending is counted between (`end`
+ * inclusive), in the budget's own months (`budget-period.ts`): "this month" is the budget month
+ * today is in, which a start day after the 1st can move; a run of months ends with it. A period of
+ * days keeps its days and reads the budget months they touch.
+ */
+function budgetWindow(budget: BudgetPeriodSettings, period: ReturnType<typeof AiToolPeriodService.resolve>, now: Date): { end: Date; months: BudgetMonth[]; start: Date } {
+  const current = budgetMonthOf(budget, now);
+  const span = (first: BudgetMonth, last: BudgetMonth) => {
+    const months: BudgetMonth[] = [];
+    for (let month = first; month.year * 12 + month.month <= last.year * 12 + last.month; month = shiftBudgetMonth(month, 1)) months.push(month);
+    return months;
+  };
+  if (period.granularity === 'day') return { end: period.end, months: span(budgetMonthOf(budget, period.start), budgetMonthOf(budget, period.end)), start: period.start };
+  const months = period.key === 'previous_month' ? [shiftBudgetMonth(current, -1)]
+    : period.key === 'last_12_months' ? span(shiftBudgetMonth(current, -11), current)
+      : period.key === 'year_to_date' ? span({ month: 1, year: current.year }, current)
+        : [current];
+  const first = months[0]!;
+  const last = months.at(-1)!;
+  const lastEnd = new Date(budgetPeriodRange(budget, last.year, last.month).end.getTime() - 1);
+  // Year to date stops today, as the period does; a whole month runs to its last day.
+  const end = period.key === 'year_to_date' && period.end < lastEnd ? period.end : lastEnd;
+  return { end, months, start: budgetPeriodRange(budget, first.year, first.month).start };
 }
 
 function hasCategory(transaction: Transaction, categoryKey: number): boolean {

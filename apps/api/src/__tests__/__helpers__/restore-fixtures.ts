@@ -134,7 +134,7 @@ export async function richHousehold(em: EntityManager) {
   const series = em.create(RecurringSeries, { accountKey: current, categoryKey: rent, currencyKey: eur, displayName: 'Rent', expectedAmount: -800, normalizedMerchantKey: 'landlord', tenantKey: owner.tenant }, { partial: true });
   em.create(RecurringOccurrence, { amount: -42.5, currencyKey: eur, occurrenceDate: new Date('2026-02-03T18:30:00Z'), recurringSeriesKey: series, transactionKey: groceryRun }, { partial: true });
 
-  const budget = em.create(Budget, { appuserKey: owner.appuser, currencyKey: eur, description: 'Monthly', name: 'Home', numAdults: 2, numDependents: 1, tenantKey: owner.tenant }, { partial: true });
+  const budget = em.create(Budget, { appuserKey: owner.appuser, currencyKey: eur, description: 'Monthly', name: 'Home', numAdults: 2, numDependents: 1, periodStartDay: 25, tenantKey: owner.tenant }, { partial: true });
   const line = em.create(BudgetTemplateCategory, { amountBudgeted: 300, budgetKey: budget, categoryKey: organic, month: 2, year: 2026 }, { partial: true });
   line.accounts.add([current, savings]);
   em.create(BudgetTemplateIncome, { amount: 2000, budgetKey: budget, name: 'Salary' }, { partial: true });

@@ -199,8 +199,9 @@ export function budgetPaceInsights(input: BudgetPaceInput): Insight[] {
   return insights.sort((left, right) => left.id.localeCompare(right.id));
 }
 
-export function generateInsights(input: { budget: BudgetPaceInput; spending: SpendingVsNormalInput }): Insight[] {
-  return [...budgetPaceInsights(input.budget), ...spendingVsNormalInsights(input.spending)].sort(
+/** Every insight: budget pace for each budget (each over its own budget month), and spending against normal. */
+export function generateInsights(input: { budgets: readonly BudgetPaceInput[]; spending: SpendingVsNormalInput }): Insight[] {
+  return [...input.budgets.flatMap(budgetPaceInsights), ...spendingVsNormalInsights(input.spending)].sort(
     (left, right) => severityRank(left.severity) - severityRank(right.severity) || left.id.localeCompare(right.id),
   );
 }

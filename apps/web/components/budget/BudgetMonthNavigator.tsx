@@ -8,6 +8,8 @@ import { Heading } from "@/components/ui/Typography";
 
 interface BudgetMonthNavigatorProps {
   label: string | null;
+  /** The days the month covers, under its name; absent for a calendar month. */
+  periodLabel?: string | null;
   hasPreviousMonth: boolean;
   hasNextMonth: boolean;
   onPreviousMonth: () => void;
@@ -24,6 +26,7 @@ const arrowButtonClass =
  */
 export function BudgetMonthNavigator({
   label,
+  periodLabel,
   hasPreviousMonth,
   hasNextMonth,
   onPreviousMonth,
@@ -44,13 +47,18 @@ export function BudgetMonthNavigator({
       >
         <ArrowLeft className="size-6" aria-hidden="true" />
       </Button>
-      <Heading
-        variant="h4"
-        as="h2"
-        className="text-xl font-semibold lg:text-2xl"
-      >
-        {label}
-      </Heading>
+      <div className="flex flex-col">
+        <Heading
+          variant="h4"
+          as="h2"
+          className="text-xl font-semibold lg:text-2xl"
+        >
+          {label}
+        </Heading>
+        {periodLabel ? (
+          <p className="text-muted-foreground text-sm">{periodLabel}</p>
+        ) : null}
+      </div>
       <Button
         type="button"
         variant="ghost"

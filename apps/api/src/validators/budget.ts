@@ -1,5 +1,6 @@
 import { z } from 'zod';
 
+import { BUDGET_PERIOD_START_DAY_MAX, BUDGET_PERIOD_START_DAY_MIN } from '@service/budget/budget-period';
 import { Recurrency } from '@utils/budget';
 
 // Matches the existing income-amount ceiling below (createBudgetRequestSchema.incomes[].amount) so
@@ -14,8 +15,10 @@ export const updateBudgetRequestSchema = z.object({
     description: z.string().max(500).optional(),
     // Optional so a settings toggle can be saved alone; with a name, the description is replaced too.
     name: z.string().min(1).max(100).optional(),
+    /** The day of the month a budget month starts on: 1 (the calendar month) to 28, a day every month has. */
+    periodStartDay: z.number().int().min(BUDGET_PERIOD_START_DAY_MIN).max(BUDGET_PERIOD_START_DAY_MAX).optional(),
     rolloverCarriesOverspend: z.boolean().optional(),
-  }).refine((body) => body.name !== undefined || body.rolloverCarriesOverspend !== undefined, { message: 'Nothing to update' }),
+  }).refine((body) => body.name !== undefined || body.periodStartDay !== undefined || body.rolloverCarriesOverspend !== undefined, { message: 'Nothing to update' }),
   params: z.object({
     budgetKey: z.coerce.number().positive(),
   }),

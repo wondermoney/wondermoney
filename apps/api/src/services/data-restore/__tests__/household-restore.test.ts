@@ -11,7 +11,7 @@ import { Goal } from '@entity/Goal';
 import portfolioHoldingsService from '@service/portfolio/portfolio-holdings.service';
 
 import { restoreHousehold } from '../household-restore';
-import { REFERENCES } from '../restore-format';
+import { DATA_FILES, REFERENCES } from '../restore-format';
 import { type ParsedExport, readRestoreArchive } from '../restore-reader';
 
 /*
@@ -240,6 +240,17 @@ describe('household restore', () => {
       const { summary } = await restore(scopeOf(target), parsed);
 
       expect(summary.counts).toEqual(expect.objectContaining({ loans: 1, 'manual-assets': 0, transactions: 6 }));
+    });
+
+    it('restores the day each budget\'s months start on, and the 1st for an export made before it existed', async () => {
+      expect(DATA_FILES.budgets.parse({ currency: 'EUR', description: null, id: 1, memberId: 1, name: 'Old', numAdults: 1, numDependents: 0 })).toMatchObject({ periodStartDay: 1 });
+
+      const { owner } = await richHousehold(db.em());
+      const target = await emptyHousehold(db.em());
+      await restore(scopeOf(target), await parsedExportOf(scopeOf(owner)));
+
+      const budgets = await db.em().getConnection().execute<{ period_start_day: number }[]>('select period_start_day from budget where tenant_key = ?', [target.tenant.tenantKey]);
+      expect(budgets).toEqual([{ period_start_day: 25 }]);
     });
 
     it('restores the asset each loan is secured against', async () => {

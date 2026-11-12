@@ -13,6 +13,8 @@ export interface MonthRolloverInput {
   carryOverspend: boolean;
   currency: { code: string; currencyKey: number };
   month: number;
+  /** The budget's start day: which days each month covers (`budget-period.ts`). */
+  periodStartDay: number;
   /** Every stored row of the budget (any year): the months before `month` are walked from these. */
   rows: RolloverBudgetRow[];
   tenantKey: number;
@@ -95,6 +97,7 @@ async function measureMonths(input: MonthRolloverInput, rows: RolloverBudgetRow[
   const results = await Promise.all([...groups.values()].map((group) => getBudgetRowSpending({
     accountKeys: group.accountKeys,
     currency: input.currency,
+    periodStartDay: input.periodStartDay,
     templateKeys: group.templateKeys,
     tenantKey: input.tenantKey,
     viewerAppuserKey: input.viewerAppuserKey,
@@ -144,6 +147,7 @@ export async function loadAvailableAmounts(
       carryOverspend: budget.rolloverCarriesOverspend,
       currency: budget.currencyKey,
       month: input.month,
+      periodStartDay: budget.periodStartDay,
       rows,
       tenantKey: budget.tenantKey.tenantKey,
       viewerAppuserKey: input.viewerAppuserKey,

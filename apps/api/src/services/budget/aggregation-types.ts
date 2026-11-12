@@ -1,4 +1,5 @@
 import type { InstantRange, LisbonBudgetPeriod, LisbonWeeklyPeriod } from './aggregation-periods';
+import type { BudgetMonth } from './budget-period';
 
 export interface AggregationDiagnostics {
   ambiguousCategoryAssignments: number;
@@ -58,7 +59,21 @@ export interface BudgetAllocationRow {
   parentCategoryName: null | string;
   parentCategoryOwnerAppuserKey: null | number;
   parentCategorySystem: boolean | null;
+  /** The row's budget month: named as its budget names it, which its start day decides. */
+  month: number;
+  year: number;
+  /**
+   * The days of the row's budget month (`budgetPeriodRange`, from its budget's start day): only
+   * transactions in it count towards the row.
+   */
+  period: InstantRange;
 }
+
+/**
+ * Which budget month to read: the one named, for every budget; or, with `day` (UTC midnight of a
+ * calendar day), each budget's month that holds that day, which its start day decides.
+ */
+export type BudgetMonthSelector = BudgetMonth | { day: Date };
 
 export interface BudgetRemainingFacts {
   remaining: string;
@@ -180,7 +195,7 @@ export interface TenantAggregationInput {
 
 export interface TenantAggregationRepository {
   hasActiveMembership(appuserKey: number, tenantKey: number): Promise<boolean>;
-  loadBudgetAllocations(appuserKey: number, month: number, year: number): Promise<BudgetAllocationRow[]>;
+  loadBudgetAllocations(appuserKey: number, month: BudgetMonthSelector): Promise<BudgetAllocationRow[]>;
   loadTransactions(appuserKey: number, tenantKey: number, range: InstantRange): Promise<TransactionAggregationRow[]>;
 }
 

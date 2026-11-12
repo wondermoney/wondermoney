@@ -1,6 +1,6 @@
 import { parseSafeCategoryColor } from '@/features/categories/categories-view-model'
 import { formatCategoryName } from '@/lib/formatters/category-name'
-import type { BudgetCategoryRowDto, BudgetDto, BudgetRecurrence, BudgetYearDto } from './budgets-contract'
+import type { BudgetCategoryRowDto, BudgetDto, BudgetPeriodDto, BudgetRecurrence, BudgetYearDto } from './budgets-contract'
 
 export type BudgetTotals = Readonly<{
   planned: number
@@ -58,6 +58,10 @@ export type BudgetViewModel = Readonly<{
   categories: readonly BudgetCategoryGroupViewModel[]
   accounts: readonly Readonly<{ id: number; name: string | null }>[]
   incomes: readonly Readonly<{ name: string; amount: number }>[]
+  /** The day of the month the budget's months start on (1: the calendar month). */
+  periodStartDay: number
+  /** The days this month covers; null when the server does not say. */
+  period: BudgetPeriodDto | null
   /** Off: only unspent money rolls over, an overspend is dropped. */
   rolloverCarriesOverspend: boolean
 }>
@@ -181,6 +185,8 @@ export function mapBudget(dto: BudgetDto, authoritativePeriod?: { year: number; 
     categories,
     accounts: mapBudgetAccounts(dto.accounts),
     incomes: dto.incomes.map((income) => ({ name: income.name, amount: income.amount })),
+    periodStartDay: dto.periodStartDay,
+    period: dto.period ?? null,
     rolloverCarriesOverspend: dto.rolloverCarriesOverspend,
   }
 }
@@ -279,4 +285,20 @@ export function measureGeometry(spent: number, planned: number, scaleMax: number
   const fill = clampPercent((Math.min(safeSpent, safePlanned) / scaleMax) * 100)
   const over = Math.min(100 - plan, clampPercent((Math.max(0, safeSpent - safePlanned) / scaleMax) * 100))
   return { plan, fill, over }
+}
+
+/**
+ * The days a budget month covers, for under its name ("Oct 25 – Nov 24"), or null when it is its
+ * calendar month (start day 1) and the name says it all. The year shows only when the month spans
+ * two. The days are calendar days, read in UTC so no time zone moves them.
+ */
+export function budgetPeriodLabel(budget: Pick<BudgetViewModel, 'period' | 'periodStartDay'>, locale: string): string | null {
+  if (budget.periodStartDay === 1 || !budget.period) return null
+  const first = new Date(`${budget.period.firstDay}T00:00:00Z`)
+  const last = new Date(`${budget.period.lastDay}T00:00:00Z`)
+  if (Number.isNaN(first.getTime()) || Number.isNaN(last.getTime())) return null
+  const spansYears = first.getUTCFullYear() !== last.getUTCFullYear()
+  // Each day on its own: Hermes's Intl has no formatRange.
+  const format = new Intl.DateTimeFormat(locale, { day: 'numeric', month: 'short', ...(spansYears ? { year: 'numeric' } : {}), timeZone: 'UTC' })
+  return `${format.format(first)} – ${format.format(last)}`
 }

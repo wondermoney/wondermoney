@@ -15,7 +15,7 @@ import { usePalette } from '@/theme/use-palette'
 import { BudgetCategoryEditor } from './budget-category-editor'
 import { BudgetDetailHeader, BudgetLine, BudgetOverviewTable, MeasureKey, MonthNavigator, type BudgetView } from './budget-parts'
 import type { BudgetCategoryWrite, BudgetRecurrence, BudgetSuggestionDto } from './budgets-contract'
-import { budgetMeasureScale, overPlanLineCount, type BudgetCategoryChildViewModel, type BudgetCategoryGroupViewModel, type BudgetTotals, type BudgetViewModel } from './budgets-view-model'
+import { budgetMeasureScale, budgetPeriodLabel, overPlanLineCount, type BudgetCategoryChildViewModel, type BudgetCategoryGroupViewModel, type BudgetTotals, type BudgetViewModel } from './budgets-view-model'
 import { BudgetFailure, BudgetLoading, StaleBanner } from './budgets-screen'
 import { classifyBudgetCategoryDeleteFailure, type BudgetCategoryDeleteFailure, type BudgetCategoryRemovalScope } from './use-budget-category-delete-mutation'
 
@@ -85,7 +85,7 @@ export function BudgetMonthScreen({ state, onBack, onRetry, onPrevious, onNext, 
               </>
             )}
             helpText={t('budgetMonth.help')}
-            lead={<MonthNavigator period={period} onPrevious={onPrevious} onNext={onNext} previousDisabled={categoryPending || !state.hasPrevious} nextDisabled={categoryPending || !state.hasNext} />}
+            lead={<MonthNavigator period={period} range={budgetPeriodLabel(budget, locale)} onPrevious={onPrevious} onNext={onNext} previousDisabled={categoryPending || !state.hasPrevious} nextDisabled={categoryPending || !state.hasNext} />}
             name={budget.name}
             onBack={onBack}
             onChangeView={onChangeView}

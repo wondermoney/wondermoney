@@ -13,6 +13,7 @@ import { Category } from '@entity/Category';
 import type { Currency } from '@entity/Currency';
 import { authedContext } from '@middleware/authed-context';
 import { getBudgetForecast as forecastBudget } from '@service/budget/budget-forecast.service';
+import { budgetMonthOf, budgetPeriodDays, budgetPeriodRange, shiftBudgetMonth } from '@service/budget/budget-period';
 import { getMonthRollover, rolloverRowsOf, withRollover } from '@service/budget/budget-rollover.service';
 import { suggestBudgetAmounts } from '@service/budget/budget-suggestions.service';
 import { ensureBudgetYear } from '@service/budget/budget-year.service';
@@ -224,7 +225,7 @@ export async function deleteBudgetCategory(req: Request, res: Response, next: Ne
 
 export async function editBudget(req: Request, res: Response) {
   const {
-    body: { description, name, rolloverCarriesOverspend },
+    body: { description, name, periodStartDay, rolloverCarriesOverspend },
     params: { budgetKey },
   } = await zParse(updateBudgetRequestSchema, req);
   // A budget of another household is filtered out, so it reads as missing: 404, not a 500.
@@ -237,6 +238,7 @@ export async function editBudget(req: Request, res: Response) {
     budget.name = name;
     budget.description = description;
   }
+  if (periodStartDay !== undefined) budget.periodStartDay = periodStartDay;
   if (rolloverCarriesOverspend !== undefined) budget.rolloverCarriesOverspend = rolloverCarriesOverspend;
   await DI.em.persist(budget).flush();
   return res.sendStatus(StatusCodes.OK);
@@ -263,6 +265,7 @@ export async function getBudget(req: Request, res: Response, next: NextFunction)
     budgetKey: budget.budgetKey,
     description: budget.description,
     name: budget.name,
+    periodStartDay: budget.periodStartDay,
     rolloverCarriesOverspend: budget.rolloverCarriesOverspend,
   };
   return res.json({ budget: transformedData });
@@ -319,9 +322,14 @@ export async function getBudgetForecast(req: Request, res: Response, next: NextF
     query: { months },
   } = await zParse(getBudgetForecastRequestSchema, req);
   const now = new Date();
+  // The window starts at the budget month today is in, which the budget's start day decides.
+  const settings = await DI.em.findOne(Budget, { budgetKey, deletedAt: null });
+  if (!settings) {
+    next(new NotFoundError('Budget not found')); return;
+  }
   // A window that reaches into next year needs next year's rows, copied from December.
-  const lastMonth = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + months - 1, 1));
-  if (lastMonth.getUTCFullYear() > now.getUTCFullYear()) await extendBudgetIntoYear(budgetKey, tenant.tenantKey, lastMonth.getUTCFullYear());
+  const lastMonth = shiftBudgetMonth(budgetMonthOf(settings, now), months - 1);
+  if (lastMonth.year > now.getUTCFullYear()) await extendBudgetIntoYear(budgetKey, tenant.tenantKey, lastMonth.year);
 
   const budget = await DI.em.findOne(
     Budget,
@@ -359,16 +367,15 @@ export async function getBudgets(_req: Request, res: Response) {
     })),
     description: b.description,
     name: b.name,
+    periodStartDay: b.periodStartDay,
   }));
   return res.json({ budgets: transformedData });
 }
 
 export async function getBudgetsFull(req: Request, res: Response) {
   const { tenant, user } = authedContext(req);
-  // Get current year and month
+  // Each budget is shown in the budget month today is in, which its start day decides.
   const now = new Date();
-  const year = now.getFullYear();
-  const month = now.getMonth() + 1;
 
   // Fetch all budgets for the user
   const findBudgets = (refresh: boolean) =>
@@ -385,10 +392,11 @@ export async function getBudgetsFull(req: Request, res: Response) {
     );
   let budgets = await findBudgets(false);
 
-  // A budget with no rows for this year yet (the yearly extension has not reached it) starts the
-  // year from last December.
+  // A budget with no rows for its current month's year yet (the yearly extension has not reached
+  // it) starts the year from last December.
   let extended = 0;
   for (const budget of budgets) {
+    const { year } = budgetMonthOf(budget, now);
     if (!budget.budgetTemplatesCategory.getItems().some((bt) => bt.year === year)) {
       extended += await ensureBudgetYear(DI.em, { budgetKey: budget.budgetKey, tenantKey: tenant.tenantKey, year });
     }
@@ -420,6 +428,7 @@ export async function getBudgetsFull(req: Request, res: Response) {
     const budgetIncomes = budgetIncomesByBudgetKey.get(budget.budgetKey) ?? [];
 
     const budgetTemplates = budget.budgetTemplatesCategory.getItems();
+    const { month, year } = budgetMonthOf(budget, now);
 
     // Filter for current month and year
     const currentMonthBudgetTemplates = budgetTemplates.filter((bt) => bt.year === year && bt.month === month);
@@ -435,6 +444,7 @@ export async function getBudgetsFull(req: Request, res: Response) {
       accountKeys: accounts.map((account) => account.accountKey),
       currency: budget.currencyKey,
       period: 'monthly',
+      periodStartDay: budget.periodStartDay,
       templateKeys: currentMonthBudgetTemplates.map((template) => template.budgetTemplateCategoryKey),
       tenantKey: tenant.tenantKey,
       viewerAppuserKey: user.appuserKey,
@@ -454,6 +464,8 @@ export async function getBudgetsFull(req: Request, res: Response) {
       incomes: budgetIncomes,
       month: currentMonthBudgetTemplates[0]!.month,
       name: budget.name,
+      period: budgetPeriodDays(budgetPeriodRange(budget, year, month)),
+      periodStartDay: budget.periodStartDay,
       rolloverCarriesOverspend: budget.rolloverCarriesOverspend,
       rolloverComplete,
       year: currentMonthBudgetTemplates[0]!.year,
@@ -526,7 +538,7 @@ export async function getBudgetTemplateByYear(req: Request, res: Response, next:
   }
   const accounts = budgetTemplates.flatMap((template) => template.accounts.getItems());
 
-  const { budgetAmount, completeness } = await getCategoriesDataForBudget(accounts, budgetTemplates, tenant.tenantKey, user.appuserKey, budget.currencyKey);
+  const { budgetAmount, completeness } = await getCategoriesDataForBudget(accounts, budgetTemplates, tenant.tenantKey, user.appuserKey, budget);
   return res.json({
     budget: {
       accounts: budget.budgetTemplatesCategory[0]!.accounts.getItems().map((account) => ({
@@ -586,6 +598,7 @@ export async function getBudgetTemplateByYearAndMonth(req: Request, res: Respons
     accountKeys: accounts.map((account) => account.accountKey),
     currency: budget.currencyKey,
     period: 'monthly' as const,
+    periodStartDay: budget.periodStartDay,
     templateKeys: currentMonthBudgetTemplates.map((template) => template.budgetTemplateCategoryKey),
     tenantKey: tenant.tenantKey,
     viewerAppuserKey: user.appuserKey,
@@ -613,6 +626,9 @@ export async function getBudgetTemplateByYearAndMonth(req: Request, res: Respons
       incomes: budgetIncomes,
       month: monthTemplate.month,
       name: budget.name,
+      // The days the month covers, which its start day decides: clients show them under its name.
+      period: budgetPeriodDays(budgetPeriodRange(budget, year, month)),
+      periodStartDay: budget.periodStartDay,
       rolloverCarriesOverspend: budget.rolloverCarriesOverspend,
       year: monthTemplate.year,
     },
@@ -667,7 +683,7 @@ export async function getBudgetTemplateByYearUntilMonth(req: Request, res: Respo
   }
   const accounts = budgetTemplates.flatMap((template) => template.accounts.getItems());
 
-  const { budgetAmount, completeness } = await getCategoriesDataForBudget(accounts, budgetTemplates, tenant.tenantKey, user.appuserKey, budget.currencyKey);
+  const { budgetAmount, completeness } = await getCategoriesDataForBudget(accounts, budgetTemplates, tenant.tenantKey, user.appuserKey, budget);
 
   return res.json({
     budget: {
@@ -720,10 +736,8 @@ export async function removeCategoryFromBudget(req: Request, res: Response, next
   // Collect all category keys to delete (parent + children)
   const categoryKeysToDelete = [categoryKey, ...childCategories.map((c) => c.categoryKey)];
 
-  // Build filter for deletion
-  const currentDate = new Date();
-  const currentYear = currentDate.getFullYear();
-  const currentMonth = currentDate.getMonth() + 1;
+  // Build filter for deletion: the budget month today is in, which the budget's start day decides.
+  const { month: currentMonth, year: currentYear } = budgetMonthOf(budget, new Date());
 
   // If not deleting previous months, only delete from current month onwards (safer default)
   const deleteFilter = !deletePreviousMonths
@@ -910,12 +924,13 @@ async function getCategoriesDataForBudget(
   budgetTemplates: BudgetTemplateCategory[],
   tenantKey: number,
   viewerAppuserKey: number,
-  currency: Currency,
+  budget: Budget & { currencyKey: Currency },
 ) {
   const { categories: budgetAmount, completeness } = await getBudgetSpending({
     accountKeys: accounts.map((account) => account.accountKey),
-    currency,
+    currency: budget.currencyKey,
     period: 'annual',
+    periodStartDay: budget.periodStartDay,
     templateKeys: budgetTemplates.map((template) => template.budgetTemplateCategoryKey),
     tenantKey,
     viewerAppuserKey,
@@ -934,7 +949,7 @@ async function monthWithRollover(
   scope: { month: number; tenantKey: number; viewerAppuserKey: number; year: number },
 ) {
   const rows = rolloverRowsOf(budget.budgetTemplatesCategory.getItems());
-  const rollover = await getMonthRollover({ ...scope, carryOverspend: budget.rolloverCarriesOverspend, currency: budget.currencyKey, rows });
+  const rollover = await getMonthRollover({ ...scope, carryOverspend: budget.rolloverCarriesOverspend, currency: budget.currencyKey, periodStartDay: budget.periodStartDay, rows });
   return {
     categories: withRollover(categories, rollover),
     rolloverComplete: [...rollover.values()].every((category) => !category.rolledOverIncomplete),

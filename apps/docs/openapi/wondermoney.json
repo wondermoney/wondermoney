@@ -749,6 +749,30 @@
           },
           "name": {
             "type": "string"
+          },
+          "period": {
+            "type": "object",
+            "properties": {
+              "firstDay": {
+                "type": "string",
+                "description": "The month's first day, `YYYY-MM-DD`."
+              },
+              "lastDay": {
+                "type": "string",
+                "description": "The month's last day, `YYYY-MM-DD`."
+              }
+            },
+            "required": [
+              "firstDay",
+              "lastDay"
+            ],
+            "description": "The days the budget month covers: with start day 25, month 11 runs from 25 October to 24 November."
+          },
+          "periodStartDay": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 28,
+            "description": "The day of the month a budget month starts on, 1 to 28. With 1 a budget month is its calendar month; with a later day it is named after the month it ends in."
           }
         },
         "required": [
@@ -883,6 +907,30 @@
               "integer",
               "null"
             ]
+          },
+          "period": {
+            "type": "object",
+            "properties": {
+              "firstDay": {
+                "type": "string",
+                "description": "The month's first day, `YYYY-MM-DD`."
+              },
+              "lastDay": {
+                "type": "string",
+                "description": "The month's last day, `YYYY-MM-DD`."
+              }
+            },
+            "required": [
+              "firstDay",
+              "lastDay"
+            ],
+            "description": "The days the budget month covers: with start day 25, month 11 runs from 25 October to 24 November."
+          },
+          "periodStartDay": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 28,
+            "description": "The day of the month a budget month starts on, 1 to 28. With 1 a budget month is its calendar month; with a later day it is named after the month it ends in."
           },
           "year": {
             "type": "integer"
@@ -8880,6 +8928,11 @@
                     "type": "string",
                     "minLength": 1,
                     "maxLength": 100
+                  },
+                  "periodStartDay": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 28
                   },
                   "rolloverCarriesOverspend": {
                     "type": "boolean"

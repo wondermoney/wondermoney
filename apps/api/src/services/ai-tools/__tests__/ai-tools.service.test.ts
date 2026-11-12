@@ -150,6 +150,31 @@ describe('shared read-only tools', () => {
     ]);
   });
 
+  it('reads the budget month today is in when the budget\'s month starts on a later day', async () => {
+    vi.useFakeTimers({ toFake: ['Date'] });
+    vi.setSystemTime(new Date('2026-11-26T12:00:00Z'));
+    try {
+      const em = db.em();
+      const household = await seedHousehold(em);
+      const groceries = await addCategory(em, household, 'Groceries');
+      const budget = em.create(Budget, { appuserKey: household.appuser, currencyKey: household.currency, name: 'Payday', periodStartDay: 25, tenantKey: household.tenant }, { partial: true });
+      em.create(BudgetTemplateCategory, { amountBudgeted: 100, budgetKey: budget, categoryKey: groceries, month: 11, year: 2026 }, { partial: true });
+      em.create(BudgetTemplateCategory, { amountBudgeted: 300, budgetKey: budget, categoryKey: groceries, month: 12, year: 2026 }, { partial: true });
+      await em.flush();
+      // November's budget month ends on 24 November; December's starts on the 25th.
+      await addTransaction(em, household, { amount: -10, category: groceries, date: new Date('2026-11-24T00:00:00Z'), status: 'BOOKED' });
+      await addTransaction(em, household, { amount: -40, category: groceries, date: new Date('2026-11-25T00:00:00Z'), status: 'BOOKED' });
+
+      const current = await runTool('get_budget_status', { period: 'current_month' }, contextFor(household));
+      const previous = await runTool('get_budget_status', { period: 'previous_month' }, contextFor(household));
+
+      expect(current.data).toMatchObject({ budgeted: 300, spent: 40 });
+      expect(previous.data).toMatchObject({ budgeted: 100, spent: 10 });
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
   it('lists only the household\'s budgets and categories', async () => {
     const { a } = await seedTwoHouseholds();
 

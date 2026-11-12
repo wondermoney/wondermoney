@@ -20,10 +20,13 @@ const allocation = (overrides: Partial<BudgetAllocationRow> = {}): BudgetAllocat
   categoryOwnerAppuserKey: 7,
   categorySystem: false,
   currencyCode: 'EUR',
+  month: 7,
   parentCategoryKey: 9,
   parentCategoryName: 'Food',
   parentCategoryOwnerAppuserKey: 7,
   parentCategorySystem: false,
+  period: { end: new Date('2026-08-01T00:00:00Z'), start: new Date('2026-07-01T00:00:00Z') },
+  year: 2026,
   ...overrides,
 });
 

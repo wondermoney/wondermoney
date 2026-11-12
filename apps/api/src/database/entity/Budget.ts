@@ -1,6 +1,6 @@
 import { Collection } from '@mikro-orm/core';
 import type { Rel } from '@mikro-orm/core';
-import { Entity, Filter, ManyToOne, OneToMany, PrimaryKey, Property } from '@mikro-orm/decorators/legacy';
+import { Check, Entity, Filter, ManyToOne, OneToMany, PrimaryKey, Property } from '@mikro-orm/decorators/legacy';
 
 import { TENANT_FILTER, tenantScopedCond } from '../filters/tenant-filter';
 
@@ -11,6 +11,7 @@ import { BudgetTemplateIncome } from './BudgetTemplateIncome';
 import { Currency } from './Currency';
 import { Tenant } from './Tenant';
 
+@Check({ expression: `"period_start_day" between 1 and 28`, name: 'budget_period_start_day_check' })
 @Entity()
 @Filter({ args: false, cond: tenantScopedCond, default: true, name: TENANT_FILTER })
 export class Budget extends Base {
@@ -40,6 +41,14 @@ export class Budget extends Base {
 
   @Property({ default: 0 })
   numDependents!: number;
+
+  /**
+   * The day of the month a budget month starts on, 1 to 28 (every month has it). With 1 a budget
+   * month is its calendar month; with 25, month "2026-11" runs from 25 October to 24 November.
+   * Every budget surface reads a month's days from `budgetPeriodRange` (`services/budget/budget-period.ts`).
+   */
+  @Property({ default: 1 })
+  periodStartDay = 1;
 
   /** Rollover carries an overspend into the next month as well as a surplus. False drops overspend. */
   @Property({ default: true })

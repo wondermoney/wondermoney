@@ -1,5 +1,5 @@
-import type { BudgetRecurrence } from './budgets-contract'
-import { adjacentBudgetPeriod, budgetYearToDateMonth, mapBudget, mapBudgetYear, normalizePlannedMonthly } from './budgets-view-model'
+import { budgetsResponseSchema, type BudgetRecurrence } from './budgets-contract'
+import { adjacentBudgetPeriod, budgetPeriodLabel, budgetYearToDateMonth, mapBudget, mapBudgetYear, normalizePlannedMonthly } from './budgets-view-model'
 import { budgetFixture, budgetYearFixture, childRow, parentRow, rolloverChildRow } from './test-fixtures'
 
 const child = (
@@ -163,5 +163,31 @@ describe('budgetYearToDateMonth', () => {
 
   it('has no year to date for a year that has not started', () => {
     expect(budgetYearToDateMonth(2027, november2026)).toBeNull()
+  })
+})
+
+describe('budget period label', () => {
+  // Intl puts thin and narrow spaces in some locales; compare the words.
+  const label = (...args: Parameters<typeof budgetPeriodLabel>) => budgetPeriodLabel(...args)?.replace(/\s/gu, ' ') ?? null
+
+  it('shows the days of a month that starts on payday', () => {
+    expect(label({ period: { firstDay: '2026-10-25', lastDay: '2026-11-24' }, periodStartDay: 25 }, 'en')).toBe('Oct 25 – Nov 24')
+    // Each locale writes the days its own way (ICU versions differ too); the two days are there.
+    expect(label({ period: { firstDay: '2026-10-25', lastDay: '2026-11-24' }, periodStartDay: 25 }, 'pt-PT')).toMatch(/^25\D.* – 24\D/u)
+  })
+
+  it('names both years for a month across the new year', () => {
+    expect(label({ period: { firstDay: '2026-12-25', lastDay: '2027-01-24' }, periodStartDay: 25 }, 'es')).toBe('25 dic 2026 – 24 ene 2027')
+  })
+
+  it('says nothing for a calendar month, or when the server does not send the days', () => {
+    expect(label({ period: { firstDay: '2026-11-01', lastDay: '2026-11-30' }, periodStartDay: 1 }, 'en')).toBeNull()
+    expect(label({ period: null, periodStartDay: 25 }, 'en')).toBeNull()
+  })
+
+  it('maps the start day and days from the API, the calendar month when a server sends neither', () => {
+    expect(mapBudget({ ...budgetFixture, period: { firstDay: '2026-06-25', lastDay: '2026-07-24' }, periodStartDay: 25 })).toMatchObject({ period: { firstDay: '2026-06-25', lastDay: '2026-07-24' }, periodStartDay: 25 })
+    const { period: _period, ...older } = budgetFixture
+    expect(mapBudget(budgetsResponseSchema.parse({ budgets: [{ ...older, periodStartDay: undefined }] }).budgets[0]!)).toMatchObject({ period: null, periodStartDay: 1 })
   })
 })

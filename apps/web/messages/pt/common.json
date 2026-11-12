@@ -2559,7 +2559,7 @@
   "of-assets": "do ativo",
   "of-debts": "da dívida",
   "delete-budget-description": "As categorias e os valores planeados deste orçamento são eliminados. As suas transações não são afetadas.",
-  "edit-budget-description": "Mude o nome deste orçamento. As categorias e os valores mantêm-se.",
+  "edit-budget-description": "Mude o nome ou as definições deste orçamento. As categorias e os valores mantêm-se.",
   "budget-name": "ex.: Orçamento da casa",
   "provenance-balances-updated": "Saldos atualizados {time}",
   "provenance-balances-stale": "Algumas ligações precisam de atenção",
@@ -2817,6 +2817,9 @@
   "budget-rollover-toggle-help": "O que sobrar este mês é somado ao valor do mês seguinte desta categoria.",
   "budget-rollover-carries-overspend": "Transitar gastos a mais para o mês seguinte",
   "budget-rollover-carries-overspend-help": "Se estiver desligado, só transita o dinheiro não gasto",
+  "budget-period-start-day": "O mês começa no dia",
+  "budget-period-start-day-help": "O dia 1 segue o calendário. Um dia mais tarde, como o dia do salário, passa a ser o início de cada mês do orçamento: com 25, novembro vai de 25 de outubro a 24 de novembro.",
+  "budget-period-start-day-option": "Dia {day}",
   "accountRecalculate": {
     "menu-item": "Recalcular saldos",
     "title": "Recalcular os saldos de {name}?",

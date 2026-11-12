@@ -28,7 +28,7 @@ describe('budget spending signs', () => {
     const template = em.create(BudgetTemplateCategory, { amountBudgeted: 1000, budgetKey: budget, categoryKey: housing, month: 7, year: 2026 }, { partial: true });
     await em.flush();
     const spending = async () => {
-      const { categories: rows } = await getBudgetSpending({ accountKeys: [household.account.accountKey], currency: household.currency, period: 'monthly', templateKeys: [template.budgetTemplateCategoryKey], tenantKey: household.tenant.tenantKey, viewerAppuserKey: household.appuser.appuserKey });
+      const { categories: rows } = await getBudgetSpending({ accountKeys: [household.account.accountKey], currency: household.currency, period: 'monthly', periodStartDay: 1, templateKeys: [template.budgetTemplateCategoryKey], tenantKey: household.tenant.tenantKey, viewerAppuserKey: household.appuser.appuserKey });
       return rows.find((row) => row.child_category_name === 'Mortgage')?.category_amount;
     };
     return { em, household, housing, spending };

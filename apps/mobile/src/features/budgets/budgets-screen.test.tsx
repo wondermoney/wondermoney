@@ -126,6 +126,19 @@ describe('budget screens', () => {
     expect(view.queryByText(/from last month/)).toBeNull()
   })
 
+  it('shows the days under the month name when the budget month starts on a later day', async () => {
+    const payday = mapBudget({ ...budgetFixture, period: { firstDay: '2026-06-25', lastDay: '2026-07-24' }, periodStartDay: 25 })
+    const view = await renderWithI18n(<BudgetMonthScreen state={{ status: 'loaded', budget: payday, hasPrevious: false, hasNext: false }} onBack={jest.fn()} onRetry={jest.fn()} onPrevious={jest.fn()} onNext={jest.fn()} />)
+    expect(view.getByText(/^Jun 25\s–\sJul 24$/u)).toBeOnTheScreen()
+    expect(view.getByRole('header', { name: /^Budget period, July 2026, Jun 25\s–\sJul 24$/u })).toBeOnTheScreen()
+  })
+
+  it('shows only the month name for a calendar month', async () => {
+    const view = await renderWithI18n(<BudgetMonthScreen state={{ status: 'loaded', budget: mapBudget(budgetFixture), hasPrevious: false, hasNext: false }} onBack={jest.fn()} onRetry={jest.fn()} onPrevious={jest.fn()} onNext={jest.fn()} />)
+    expect(view.queryByText(/Jul 1\s–\sJul 31/u)).toBeNull()
+    expect(view.getByRole('header', { name: 'Budget period, July 2026' })).toBeOnTheScreen()
+  })
+
   it('offers category editing only on child rows, never parent aggregate ids', async () => {
     const save = jest.fn().mockResolvedValue(undefined)
     const value = mapBudget(budgetFixture, { year: 2028, month: 4 })

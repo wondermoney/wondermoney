@@ -56,13 +56,25 @@ export const budgetAddCategoryWriteSchema = z.object({
 }).strict()
 export type BudgetAddCategoryWrite = z.input<typeof budgetAddCategoryWriteSchema>
 
-// `name` (with `description`, which is replaced along with it) and `rolloverCarriesOverspend` can
-// each be sent alone; the API needs at least one of them.
+/** The day of the month a budget month starts on: 1 (the calendar month) to 28, a day every month has. */
+export const budgetPeriodStartDaySchema = z.number().int().min(1).max(28)
+
+/** The days a budget month covers (`YYYY-MM-DD`, both inclusive), which its start day decides. */
+export const budgetPeriodSchema = z.object({
+  firstDay: z.string().regex(/^\d{4}-\d{2}-\d{2}$/u),
+  lastDay: z.string().regex(/^\d{4}-\d{2}-\d{2}$/u),
+})
+
+export type BudgetPeriodDto = z.infer<typeof budgetPeriodSchema>
+
+// `name` (with `description`, which is replaced along with it), `periodStartDay` and
+// `rolloverCarriesOverspend` can each be sent alone; the API needs at least one of them.
 export const budgetMetadataWriteSchema = z.object({
   name: z.string().min(1).max(100).optional(),
   description: z.string().max(500).optional(),
+  periodStartDay: budgetPeriodStartDaySchema.optional(),
   rolloverCarriesOverspend: z.boolean().optional(),
-}).strict().refine((value) => value.name !== undefined || value.rolloverCarriesOverspend !== undefined, { path: ['name'] })
+}).strict().refine((value) => value.name !== undefined || value.periodStartDay !== undefined || value.rolloverCarriesOverspend !== undefined, { path: ['name'] })
 
 export type BudgetMetadataWrite = z.input<typeof budgetMetadataWriteSchema>
 
@@ -99,6 +111,8 @@ const budgetDetailSchema = z.object({
   budgetKey: positiveSafeIdSchema,
   description: z.string().max(500).nullable().optional(),
   name: z.string().min(1).max(100),
+  /** Absent from servers without month start days: the setting is then not offered. */
+  periodStartDay: budgetPeriodStartDaySchema.optional(),
   /** Absent from servers without rollover: the setting is then not offered. */
   rolloverCarriesOverspend: z.boolean().optional(),
 })
@@ -186,6 +200,10 @@ export const budgetSchema = z.object({
   incomes: z.array(budgetIncomeSchema),
   month: monthSchema,
   name: z.string(),
+  /** The days `month` covers; absent from servers without month start days. */
+  period: budgetPeriodSchema.optional(),
+  /** The API's default, and what a server without the setting means, is 1: the calendar month. */
+  periodStartDay: budgetPeriodStartDaySchema.default(1),
   /** Off: only unspent money rolls over, an overspend is dropped. The API's default is on. */
   rolloverCarriesOverspend: z.boolean().default(true),
   /** `/v1/budget/full` only; the month endpoint reports it at the top level. */

@@ -8,7 +8,7 @@ import { initMobileI18n } from '@/lib/i18n'
 import { BudgetEditScreen, type BudgetEditModel } from './budget-edit-screen'
 import { classifyBudgetWriteFailure } from './use-budget-metadata-mutation'
 
-const model: BudgetEditModel = { id: 7, name: 'Household plan', description: 'Shared spending', rolloverCarriesOverspend: true }
+const model: BudgetEditModel = { id: 7, name: 'Household plan', description: 'Shared spending', rolloverCarriesOverspend: true, periodStartDay: 1 }
 
 const renderEditor = async (overrides: Partial<React.ComponentProps<typeof BudgetEditScreen>> = {}) => {
   const i18n = await initMobileI18n('en')
@@ -40,6 +40,24 @@ describe('budget metadata editor', () => {
     await fireEvent.press(view.getByRole('button', { name: 'Save details' }))
     await waitFor(() => expect(save).toHaveBeenCalledWith({ name: 'Household plan', description: 'Shared spending', rolloverCarriesOverspend: false }))
     await waitFor(() => expect(view.getByRole('button', { name: 'Save details' }).props.accessibilityState.disabled).toBe(true))
+  })
+
+  it('saves the day the budget month starts on, from days every month has, only when it changed', async () => {
+    const save = jest.fn().mockResolvedValue(undefined)
+    const { view } = await renderEditor({ onSaveMetadata: save })
+    await fireEvent.press(view.getByRole('button', { name: 'Month starts on, Day 1' }))
+    const days = view.getAllByRole('radio')
+    expect(days).toHaveLength(28)
+    expect(days.at(-1)?.props.accessibilityLabel).toBe('Day 28')
+    await fireEvent.press(view.getByRole('radio', { name: 'Day 25' }))
+    await fireEvent.press(view.getByRole('button', { name: 'Save details' }))
+    await waitFor(() => expect(save).toHaveBeenCalledWith({ name: 'Household plan', description: 'Shared spending', periodStartDay: 25 }))
+    await waitFor(() => expect(view.getByRole('button', { name: 'Save details' }).props.accessibilityState.disabled).toBe(true))
+  })
+
+  it('does not offer the start day when the server has no such setting', async () => {
+    const { view } = await renderEditor({ state: { status: 'loaded', model: { ...model, periodStartDay: null } } })
+    expect(view.queryByRole('button', { name: /Month starts on/ })).toBeNull()
   })
 
   it('does not offer the carry-overspending switch when the server has no rollover', async () => {

@@ -59,15 +59,14 @@ export function NetWorthRoute() {
   const { signOut } = useProductRuntime()
   // One "today" per mount, so the month windows and keys stay stable.
   const today = useMemo(() => new Date(), [])
-  const year = today.getFullYear()
-  const month = today.getMonth() + 1
 
   const query = useNetWorth()
   const history = useNetWorthHistory(HOME_HISTORY_MONTHS)
   const accounts = useAccounts()
   const budgets = useBudgets()
   const budgetList = useMemo(() => budgets.data?.budgets ?? [], [budgets.data])
-  const budgetMonths = useHomeBudgetMonths(budgetList.map((budget) => budget.budgetKey), year, month)
+  // Each budget in its own current month, which its start day decides: the budget list says which.
+  const budgetMonths = useHomeBudgetMonths(budgetList.map((budget) => ({ budgetId: budget.budgetKey, year: budget.year, month: budget.month })))
   const cashflow = useHomeCashflow(today)
   const cashflowComparison = useHomeCashflowComparison(today)
   const comparisonRange = useMemo(() => monthComparisonRange(today), [today])
@@ -114,10 +113,10 @@ export function NetWorthRoute() {
     return {
       id: budget.budgetKey,
       name: budget.name,
-      href: `/budgets/${budget.budgetKey}/${year}/${month}`,
+      href: `/budgets/${budget.budgetKey}/${budget.year}/${budget.month}`,
       onRetry: () => void monthQuery?.refetch(),
       state: sectionOf(monthQuery ?? { isLoading: true }, (data) => {
-        const mapped = mapBudget(data.budget, { year, month })
+        const mapped = mapBudget(data.budget, { year: budget.year, month: budget.month })
         return { summary: monthSummary(mapped), currency: mapped.currencyCode }
       }),
     }

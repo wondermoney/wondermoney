@@ -146,7 +146,7 @@ describe('AssistantToolsService integration shape', () => {
   });
 
   it('reports budget status in the budget\'s own currency', async () => {
-    mocked.em.findOne.mockResolvedValueOnce({ currencyKey: { code: 'GBP' } });
+    mocked.em.findOne.mockResolvedValueOnce({ currencyKey: { code: 'GBP' }, periodStartDay: 1 });
     mocked.em.find.mockResolvedValueOnce([]);
 
     const tools = AssistantToolsService.createTools({ appuserKey: 1, consentVersion: 1, conversationId: 'conversation-1', currency: 'EUR', tenantKey: 2 });

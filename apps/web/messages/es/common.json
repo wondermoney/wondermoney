@@ -2559,7 +2559,7 @@
   "of-assets": "del activo",
   "of-debts": "de la deuda",
   "delete-budget-description": "Se eliminan las categorías y los importes planificados de este presupuesto. Tus transacciones no se ven afectadas.",
-  "edit-budget-description": "Cambia el nombre de este presupuesto. Sus categorías e importes se mantienen.",
+  "edit-budget-description": "Cambia el nombre o los ajustes de este presupuesto. Sus categorías e importes se mantienen.",
   "budget-name": "p. ej., Presupuesto del hogar",
   "provenance-balances-updated": "Saldos actualizados {time}",
   "provenance-balances-stale": "Algunas conexiones necesitan atención",
@@ -2817,6 +2817,9 @@
   "budget-rollover-toggle-help": "Lo que sobre este mes se suma al importe del mes siguiente de esta categoría.",
   "budget-rollover-carries-overspend": "Traspasar el gasto de más al mes siguiente",
   "budget-rollover-carries-overspend-help": "Si está desactivado, solo se traspasa el dinero no gastado",
+  "budget-period-start-day": "El mes empieza el día",
+  "budget-period-start-day-help": "El día 1 sigue el calendario. Un día posterior, como el día de cobro, pasa a ser el inicio de cada mes del presupuesto: con 25, noviembre va del 25 de octubre al 24 de noviembre.",
+  "budget-period-start-day-option": "Día {day}",
   "accountRecalculate": {
     "menu-item": "Recalcular saldos",
     "title": "¿Recalcular los saldos de {name}?",

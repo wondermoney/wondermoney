@@ -83,6 +83,7 @@ describe('budget spending: loan repayments in another currency', () => {
         accountKeys: [household.account.accountKey, partnerAccount.accountKey],
         currency: { code: 'EUR', currencyKey: eur.currencyKey },
         period: 'monthly',
+        periodStartDay: 1,
         templateKeys: [template.budgetTemplateCategoryKey],
         tenantKey: household.tenant.tenantKey,
         viewerAppuserKey: household.appuser.appuserKey,
@@ -198,6 +199,7 @@ describe('budget rollover: loan repayments in another currency', () => {
       carryOverspend: true,
       currency: { code: 'EUR', currencyKey: eur.currencyKey },
       month: 7,
+      periodStartDay: 1,
       rows: rows.map((row) => ({
         accountKeys: [household.account.accountKey, partnerAccount.accountKey],
         amountBudgeted: 500,

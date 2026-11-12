@@ -8,6 +8,8 @@ import { categoryLinesSql } from '@service/transaction/category-lines';
 import { type TransactionScope, transactionScopeExpression } from '@service/transaction/transaction-scope';
 import { buildEffectiveSpendingAmountSql } from '@utils/account-amounts';
 
+import { budgetPeriodRangeSql } from './budget-period';
+
 export interface BudgetSpendingCategory {
   category_amount: number;
   category_bg_color: string;
@@ -29,6 +31,8 @@ export interface BudgetSpendingInput {
   /** The budget's currency: what its budgeted amounts are in, and what its spending is shown in. */
   currency: { code: string; currencyKey: number };
   period: 'annual' | 'monthly';
+  /** The budget's `periodStartDay`: which days each row's month covers (`budget-period.ts`). */
+  periodStartDay: number;
   templateKeys: number[];
   tenantKey: number;
   viewerAppuserKey: number;
@@ -239,17 +243,19 @@ export function budgetScope(input: Pick<BudgetRowsInput, 'tenantKey' | 'viewerAp
 /**
  * The transactions a budget row counts: in the budget's scope ({@link budgetScope}), with a category
  * line in the row's category that counts as spending, on one of the budget's accounts, in the
- * row's month. Joins `transaction` to `category_line` and `budget_template_category`.
+ * row's budget month. Joins `transaction` to `category_line` and `budget_template_category`.
  *
- * The month is of the UTC calendar, stated rather than left to the session's time zone, so a bank
- * booking (stored at UTC midnight of its date, `transaction-date-range.ts`) is in its own month.
+ * The month's days are the budget's (`budgetPeriodRange`, from its start day), of the UTC
+ * calendar, stated rather than left to the session's time zone, so a bank booking (stored at UTC
+ * midnight of its date, `transaction-date-range.ts`) is in the month of its own date.
  */
 function budgetTransactionMatch(input: BudgetRowsInput): Expression<SqlBool> {
+  const range = budgetPeriodRangeSql('"budget_template_category"."year"', '"budget_template_category"."month"', input.periodStartDay);
   return sql<SqlBool>`"category_line"."transaction_key" = "transaction"."transaction_key"
     and "category_line"."counts_as_spending"
     and ${anyOf('transaction.account_key', input.accountKeys)}
-    and date_part('year', "transaction"."transaction_date" at time zone 'UTC') = "budget_template_category"."year"
-    and date_part('month', "transaction"."transaction_date" at time zone 'UTC') = "budget_template_category"."month"
+    and "transaction"."transaction_date" >= ${sql.raw(range.start)}
+    and "transaction"."transaction_date" < ${sql.raw(range.end)}
     and ${transactionScopeExpression('transaction', budgetScope(input))}`;
 }
 

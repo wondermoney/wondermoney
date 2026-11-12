@@ -200,17 +200,30 @@ export const creditCardStatementDetailSchema = open('CreditCardStatementDetail',
   })),
 });
 
+/** The days a budget month covers, which the budget's start day decides. */
+const budgetPeriod = z.object({
+  firstDay: z.string().describe('The month\'s first day, `YYYY-MM-DD`.'),
+  lastDay: z.string().describe('The month\'s last day, `YYYY-MM-DD`.'),
+}).describe('The days the budget month covers: with start day 25, month 11 runs from 25 October to 24 November.');
+
+const periodStartDay = z.number().int().min(1).max(28)
+  .describe('The day of the month a budget month starts on, 1 to 28. With 1 a budget month is its calendar month; with a later day it is named after the month it ends in.');
+
 export const budgetSchema = open('Budget', {
   budgetKey: id,
   categories: z.array(z.record(z.string(), z.unknown())).optional(),
   currencyKey: z.object({ code: z.string() }).optional(),
   name: z.string(),
+  period: budgetPeriod.optional(),
+  periodStartDay: periodStartDay.optional(),
 });
 
 export const budgetTemplateSchema = open('BudgetTemplate', {
   budgetKey: id,
   categories: z.array(z.record(z.string(), z.unknown())),
   month: z.number().int().nullable(),
+  period: budgetPeriod.optional(),
+  periodStartDay: periodStartDay.optional(),
   year: z.number().int(),
 });
 
