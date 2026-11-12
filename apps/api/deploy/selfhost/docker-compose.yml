@@ -8,6 +8,8 @@
 #             everything else to the web app (README.md, "HTTPS")
 #   storage   SeaweedFS, an S3-compatible store for file uploads (CSV imports, receipt copies)
 #   mail      Mailpit, to read outgoing mail at http://localhost:8025
+#   backup    a daily database dump and copy of the storage volume in ./backups (README.md,
+#             "Back up"); backup-offsite copies them to any rclone remote
 #
 # Set BIND_ADDRESS=127.0.0.1 in .env to publish the ports on this machine only, e.g. behind a
 # reverse proxy on the same host.
@@ -221,6 +223,58 @@ services:
     restart: unless-stopped
     ports:
       - '${BIND_ADDRESS:+${BIND_ADDRESS}:}${MAILPIT_PORT:-8025}:8025'
+
+  # Scheduled backups: on BACKUP_SCHEDULE, a pg_dump of the database and a copy of the
+  # storage-data volume into BACKUP_DIR/<timestamp>, kept BACKUP_KEEP_DAYS days. Also runs one-off:
+  #   docker compose run --rm backup now | list | restore <folder|latest>
+  # It gets the database login, never the rest of .env. README.md, "Back up".
+  backup:
+    profiles: [backup]
+    image: postgres:16-alpine
+    restart: unless-stopped
+    # A real PID 1, so `docker compose stop` ends the scheduler at once.
+    init: true
+    depends_on:
+      postgres:
+        condition: service_healthy
+    entrypoint: ['/bin/sh', '/usr/local/bin/wondermoney-backup']
+    command: ['schedule']
+    environment:
+      BACKUP_ROLE: local
+      BACKUP_SCHEDULE: ${BACKUP_SCHEDULE:-0 2 * * *}
+      BACKUP_KEEP_DAYS: ${BACKUP_KEEP_DAYS:-7}
+      TZ: ${BACKUP_TZ:-UTC}
+      PGHOST: postgres
+      PGDATABASE: ${POSTGRES_DB:-wondermoney}
+      PGUSER: ${POSTGRES_USER:-wondermoney}
+      PGPASSWORD: ${POSTGRES_PASSWORD:?run ./generate-env.sh first}
+    volumes:
+      - ./backup/backup.sh:/usr/local/bin/wondermoney-backup:ro
+      - ${BACKUP_DIR:-./backups}:/backups
+      - storage-data:/storage
+
+  # Off-site copies: on BACKUP_OFFSITE_SCHEDULE, copies the finished backups in BACKUP_DIR to
+  # BACKUP_DESTINATION (any rclone remote, set up with `docker compose run --rm backup-offsite
+  # config`) and deletes the copies there older than BACKUP_OFFSITE_KEEP_DAYS. It sees only
+  # BACKUP_DIR and ./rclone: .env is never copied.
+  backup-offsite:
+    profiles: [backup-offsite]
+    image: rclone/rclone:1.76
+    restart: unless-stopped
+    # A real PID 1, so `docker compose stop` ends the scheduler at once.
+    init: true
+    entrypoint: ['/bin/sh', '/usr/local/bin/wondermoney-backup']
+    command: ['schedule']
+    environment:
+      BACKUP_ROLE: offsite
+      BACKUP_DESTINATION: ${BACKUP_DESTINATION:-}
+      BACKUP_OFFSITE_SCHEDULE: ${BACKUP_OFFSITE_SCHEDULE:-30 2 * * *}
+      BACKUP_OFFSITE_KEEP_DAYS: ${BACKUP_OFFSITE_KEEP_DAYS:-30}
+      TZ: ${BACKUP_TZ:-UTC}
+    volumes:
+      - ./backup/backup.sh:/usr/local/bin/wondermoney-backup:ro
+      - ${BACKUP_DIR:-./backups}:/backups
+      - ./rclone:/config/rclone
 
 volumes:
   caddy-config:

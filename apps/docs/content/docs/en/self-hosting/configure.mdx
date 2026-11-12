@@ -115,6 +115,7 @@ Nothing is sent to the WonderMoney project. Each outside service your instance c
 | AI (your OpenAI-compatible endpoint or Anthropic) | The API and the worker, with the receipt, CSV columns, transactions or chat messages the feature needs | `AI_BASE_URL` and `AI_MODEL`, or `AI_PROVIDER=anthropic`, `ANTHROPIC_API_KEY` and `AI_MODEL` |
 | Market data (EODHD) | The API and the worker, with ticker symbols, not user data | `EODHD_API_KEY` |
 | File storage (your S3-compatible store) | The API and browsers, for CSV imports and receipt copies | `S3_ENDPOINT` and `S3_BUCKET` |
+| Off-site backups (your rclone remote) | The `backup-offsite` service, once a day, with the database and file backups | The `backup-offsite` profile and `BACKUP_DESTINATION` ([Updates and backups](/en/docs/self-hosting/upgrade-and-backup#off-site-copies)) |
 | Error tracking (Sentry) | The API, the worker and the web app, with error reports | `SENTRY_DSN` (API and worker), `NEXT_PUBLIC_SENTRY_DSN` (web app) |
 | Analytics (Google Tag Manager, PostHog) | See [Analytics](#analytics) | `NEXT_PUBLIC_GTM_ID`, `NEXT_PUBLIC_POSTHOG_KEY`, `ANALYTICS_OUTBOX_MODE=live` |
 | Bank sync (Enable Banking) | The API and the worker, for the users who connect a bank | Each user's own Enable Banking key, added in Settings |

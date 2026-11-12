@@ -18,17 +18,86 @@ To check which version an instance runs, open the account menu in the web app (o
 
 Everything that matters is in the Postgres database, plus the `storage-data` volume if you use the bundled storage.
 
-```sh
-docker compose exec -T postgres pg_dump -U wondermoney -Fc wondermoney > wondermoney-$(date +%F).dump
+Keep a copy of `.env` somewhere other than the server, such as a password manager. `CREDENTIAL_ENCRYPTION_KEY_V1` encrypts the bank credentials people store, and a restored database can't use them without it. The backups below never include `.env`.
+
+### Scheduled backups
+
+Add `backup` to `COMPOSE_PROFILES` in `.env` (for example `COMPOSE_PROFILES=proxy,backup`) and run `docker compose up -d`. Every day at 02:00 the `backup` service writes a folder to `./backups`:
+
+```text
+backups/2026-11-12T020000Z/
+  wondermoney.dump    pg_dump -Fc of the database
+  storage.tar.gz      the storage-data volume (empty unless you use the bundled storage)
+  SHA256SUMS
 ```
 
-Keep a copy of `.env` with your backups. `CREDENTIAL_ENCRYPTION_KEY_V1` encrypts the bank credentials people store, and a restored database can't use them without it. Store the backups somewhere other than the server itself.
+After each successful backup, folders older than seven days are deleted. A backup is written to a hidden `.tmp-` folder and renamed only once it is complete, so an interrupted run never leaves a folder that looks finished; the next run removes what it left.
+
+| Setting | Default | |
+|---|---|---|
+| `BACKUP_DIR` | `./backups` | Where the folders go on the server |
+| `BACKUP_SCHEDULE` | `0 2 * * *` | A cron expression: minute, hour, day, month, weekday |
+| `BACKUP_KEEP_DAYS` | `7` | Days to keep; `0` keeps every backup |
+| `BACKUP_TZ` | `UTC` | Time zone of the schedules, for example `Europe/Lisbon` (folder names stay in UTC) |
+
+The same service runs one-off commands, with or without the profile:
+
+```sh
+docker compose run --rm backup now     # take a backup now
+docker compose run --rm backup list    # the backups in BACKUP_DIR
+docker compose logs backup             # what the scheduled runs did
+```
+
+Files kept in an outside S3 service (R2, B2, AWS) are not part of these backups: use the provider's versioning or replication for the bucket.
+
+### Off-site copies
+
+A backup on the same disk doesn't survive the disk. The `backup-offsite` service copies the finished backup folders to any [rclone](https://rclone.org/overview/) remote (S3, Backblaze B2, SFTP, Google Drive and many more) every day at 02:30. Set up the remote first; it is saved in `./rclone/rclone.conf`:
+
+```sh
+docker compose run --rm backup-offsite config
+```
+
+Then set the profile and the destination in `.env`, and run `docker compose up -d`:
+
+```text
+COMPOSE_PROFILES=backup,backup-offsite
+BACKUP_DESTINATION=b2:my-bucket/wondermoney
+```
+
+`docker compose run --rm backup-offsite now` copies at once, and `list` shows what is at the destination. It copies and never mirrors deletions, so a backup deleted on the server stays off-site until it is older than `BACKUP_OFFSITE_KEEP_DAYS` (30 days by default, `0` keeps everything). `BACKUP_OFFSITE_SCHEDULE` (`30 2 * * *`) sets when it runs. Only the timestamped folders are copied: nothing else in `BACKUP_DIR`, and never `.env`, which the service can't see.
 
 ## Restore
 
-Stop the app, recreate the database, load the dump and start again:
+Restoring stops if the API, the worker or the bundled storage is running, so stop them first:
 
 ```sh
+docker compose stop proxy web worker api storage
+docker compose run --rm backup restore 2026-11-12T020000Z    # or: restore latest
+docker compose up -d
+```
+
+It checks the files against `SHA256SUMS`, asks you to confirm (`--yes` skips the question), loads the dump into a new database and swaps it in only once it has loaded completely, then replaces the contents of `storage-data` with `storage.tar.gz`. Restore with the same release or a newer one: the API applies newer database changes when it starts, but can't undo them.
+
+Restoring replaces everything that is in the database now. If you might want it back, run `docker compose run --rm backup now` first, then restore the folder by name rather than `latest`.
+
+To restore from the off-site copy, for example on a new server, put `.env` and `./rclone/rclone.conf` back in place and fetch the folder into `BACKUP_DIR` first:
+
+```sh
+docker compose run --rm backup-offsite fetch latest    # or a folder name from list
+```
+
+This restores the whole server. To move one person's data (for example from the hosted service to your own server), have them export it and restore it into a new, empty household instead: see [Restore from an export](/en/docs/settings-security-privacy/data-privacy#restore-from-an-export). That needs file storage on the receiving server.
+
+## Back up and restore by hand
+
+Without the `backup` profile, `pg_dump` and `pg_restore` in the postgres container do the same for the database:
+
+```sh
+# Back up
+docker compose exec -T postgres pg_dump -U wondermoney -Fc wondermoney > wondermoney-$(date +%F).dump
+
+# Restore: stop the app, recreate the database, load the dump, start again
 docker compose stop api worker web
 docker compose exec -T postgres dropdb -U wondermoney wondermoney
 docker compose exec -T postgres createdb -U wondermoney wondermoney
@@ -37,5 +106,3 @@ docker compose up -d
 ```
 
 If you changed `POSTGRES_USER` or `POSTGRES_DB` in `.env`, use those values instead of `wondermoney`.
-
-This restores the whole server. To move one person's data (for example from the hosted service to your own server), have them export it and restore it into a new, empty household instead: see [Restore from an export](/en/docs/settings-security-privacy/data-privacy#restore-from-an-export). That needs file storage on the receiving server.

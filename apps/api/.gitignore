@@ -74,6 +74,10 @@ typings/
 !.env.sample
 !.env.example
 
+# What the self-hosting backup services write beside the compose file
+deploy/selfhost/backups/
+deploy/selfhost/rclone/
+
 # parcel-bundler cache (https://parceljs.org/)
 .cache
 
