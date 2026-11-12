@@ -3,6 +3,7 @@
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 
+import { useConfirmedFeature } from "@/lib/api/instance/useInstance";
 import { authClient } from "@/lib/auth/client";
 import { useUser } from "@/lib/auth/user-context";
 
@@ -10,10 +11,13 @@ import { Heading, Text } from "../ui/Typography";
 import TwoFactorAuth from "./Security/2FA";
 import ChangePasswordForm from "./Security/ChangePasswordForm";
 import MobilePairing from "./Security/MobilePairing";
+import Passkeys from "./Security/Passkeys";
 
 export default function Security() {
   const t = useTranslations();
   const user = useUser();
+  // An API older than passkeys has no passkey endpoints to list.
+  const passkeys = useConfirmedFeature((features) => features.passkey === true);
 
   // Whether the change-password section makes sense is gated by "does this user have a credential (email +
   // password) account", not by whether Google happens to be linked too — a
@@ -66,6 +70,8 @@ export default function Security() {
 
         <TwoFactorAuth />
       </div>
+
+      {passkeys && <Passkeys />}
 
       <MobilePairing />
 

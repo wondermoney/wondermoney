@@ -24,6 +24,8 @@ export interface InstanceDescription {
     marketData: boolean;
     /** The read-only MCP server at `POST /v1/mcp` (`MCP_ENABLED`). */
     mcp?: boolean;
+    /** Passkey sign-in and passkey management. Absent on an API older than passkeys. */
+    passkey?: boolean;
   };
   minAppVersion: null | string;
   name: string;

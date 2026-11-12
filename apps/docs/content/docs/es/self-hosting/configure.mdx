@@ -79,6 +79,14 @@ El worker sincroniza cada conexión bancaria como máximo una vez cada `BANK_SYN
 
 Define `GOOGLE_CLIENT_ID` y `GOOGLE_CLIENT_SECRET` (de un cliente OAuth en Google Cloud, con `<API_URL>/api/auth/callback/google` como URI de redirección autorizado) para mostrar "Continuar con Google" en las páginas de inicio de sesión y de registro. Sin ambos, el botón queda oculto.
 
+## Llaves de acceso
+
+Las llaves de acceso (passkeys) no necesitan ninguna variable de entorno. Pertenecen al dominio de `APP_URL`, la dirección de la aplicación web, y el navegador solo las ofrece en ese dominio. Funciona igual tanto si la aplicación web y la API comparten un dominio como si usan dos, como `money.example.com` y `api.money.example.com`.
+
+Los navegadores solo permiten llaves de acceso por HTTPS, o en `http://localhost`. Una dirección IP como `http://192.168.1.10:3000` no funciona: da a la aplicación web un dominio con HTTPS (consulta [HTTPS y dominios](/es/docs/self-hosting/https-and-domains)).
+
+Si la aplicación web pasa a otro dominio, las llaves de acceso existentes dejan de funcionar y tus usuarios tienen que volver a añadirlas. Sus contraseñas siguen funcionando. `GET /v1/instance` informa de `features.passkey: true`.
+
 ## Tu instancia
 
 | Ajuste | Qué hace |
